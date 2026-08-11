@@ -1,0 +1,287 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { X } from "lucide-react";
+import { formatVnd } from "./productData";
+
+export interface AccountDetail {
+  code: string;
+  rank: string;
+  lastRank: string | null;
+  weaponSkins: number;
+  buddies: number;
+  agents: number;
+  cards: number;
+  sprays: number;
+  level: number;
+  vp: number;
+  rp: number;
+  kc: number;
+  tag: string | null;
+  mailType: string;
+  oldPrice: number;
+  price: number;
+  depositFrom: number;
+  categoryName: string;
+  categorySlug: string;
+  viewers: number;
+}
+
+export interface AccountBuyPanelProps {
+  account: AccountDetail;
+}
+
+const STAT_ROW_CLASS = "flex items-center justify-between py-2.5 border-b border-white/5";
+const STAT_LABEL_CLASS = "text-[11px] font-black uppercase tracking-widest text-neutral-500";
+const STAT_VALUE_CLASS = "text-sm font-bold text-white";
+
+const SECONDARY_BUTTON_CLASS =
+  "w-full rounded-2xl border border-white/10 bg-white/5 hover:bg-white/10 text-white font-bold py-3.5 text-xs uppercase tracking-widest transition-colors";
+
+/**
+ * Right-hand purchase panel on the account-detail page: stat rows, price
+ * block, action buttons, and a self-contained confirmation modal. The site
+ * pays out of a wallet balance rather than taking card details at checkout,
+ * so the modal only ever offers a "top up" link for now — there is no real
+ * purchase flow wired up yet.
+ */
+export function AccountBuyPanel({ account }: AccountBuyPanelProps) {
+  const [open, setOpen] = useState(false);
+  const [voucher, setVoucher] = useState("");
+
+  useEffect(() => {
+    if (!open) return;
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") setOpen(false);
+    }
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [open]);
+
+  const pct = Math.round((1 - account.price / account.oldPrice) * 100);
+
+  // Hard-coded until a real `balance` prop arrives from the API — the live
+  // dialog always shows "Cần nạp thêm" (never a confirm button) whenever the
+  // wallet balance is short, so a permanent 0 balance reproduces that state.
+  const balance = 0;
+  const amountToTopUp = Math.max(account.price - balance, 0);
+
+  const numericStats: { label: string; value: string }[] = [
+    { label: "Level", value: String(account.level) },
+    { label: "VP", value: String(account.vp) },
+    { label: "RP", value: String(account.rp) },
+    { label: "KC", value: formatVnd(account.kc) },
+  ];
+
+  return (
+    <div className="flex flex-col">
+      <div className={STAT_ROW_CLASS}>
+        <span className={STAT_LABEL_CLASS}>Rank</span>
+        <div className="flex flex-col items-end gap-1.5">
+          <span className={STAT_VALUE_CLASS}>{account.rank}</span>
+          {account.lastRank !== null && (
+            <span className="text-[10px] text-neutral-500 font-bold uppercase tracking-wider">
+              LAST: {account.lastRank}
+            </span>
+          )}
+          <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg border border-white/10 bg-white/5">
+            <span className="text-[9px] font-black uppercase tracking-wider text-neutral-400">
+              TRACKER.GG
+            </span>
+            <a
+              href="#"
+              className="text-[9px] font-bold text-indigo-400 hover:text-indigo-300 transition-colors"
+            >
+              xem profile
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div className={STAT_ROW_CLASS}>
+        <span className={STAT_LABEL_CLASS}>Skins</span>
+        <span className={STAT_VALUE_CLASS}>{account.weaponSkins} Skins</span>
+      </div>
+
+      {numericStats.map((stat) => (
+        <div key={stat.label} className={STAT_ROW_CLASS}>
+          <span className={STAT_LABEL_CLASS}>{stat.label}</span>
+          <span className={STAT_VALUE_CLASS}>{stat.value}</span>
+        </div>
+      ))}
+
+      {account.tag !== null && (
+        <div className={STAT_ROW_CLASS}>
+          <div className="flex items-center gap-2">
+            <span className="px-2 py-1 rounded-lg border border-orange-500/30 bg-orange-500/10 text-orange-400 text-[10px] font-bold">
+              {account.tag}
+            </span>
+            <span className="text-[10px] text-neutral-400">{account.mailType}</span>
+          </div>
+          <a
+            href="#"
+            className="text-[10px] font-black text-[#7C3AED] uppercase tracking-wider"
+          >
+            TÌM HIỂU
+          </a>
+        </div>
+      )}
+
+      <div className="py-5">
+        <div className="flex items-center gap-2 mb-1.5">
+          <span className="px-2 py-1 rounded-lg bg-red-500/15 border border-red-500/30 text-red-400 text-[11px] font-black">
+            -{pct}%
+          </span>
+          <span className="text-sm text-neutral-500 line-through">
+            {formatVnd(account.oldPrice)}₫
+          </span>
+        </div>
+        <div className="flex items-baseline">
+          <span className="text-3xl font-black text-white">{formatVnd(account.price)}</span>
+          <span className="text-sm font-bold text-neutral-400 ml-1">VND</span>
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-3">
+        <button
+          type="button"
+          className={`${SECONDARY_BUTTON_CLASS} flex flex-col items-center justify-center gap-0.5`}
+        >
+          <span>Cọc / Góp</span>
+          <span className="text-[10px] normal-case font-medium tracking-normal text-neutral-400">
+            từ {formatVnd(account.depositFrom)}đ
+          </span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          className="w-full rounded-2xl bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-black py-4 uppercase tracking-widest text-sm transition-colors"
+        >
+          Mua Ngay
+        </button>
+
+        <button type="button" className={SECONDARY_BUTTON_CLASS}>
+          Thu cũ đổi mới
+        </button>
+
+        <button type="button" className={SECONDARY_BUTTON_CLASS}>
+          Tiêu trước trả sau
+        </button>
+      </div>
+
+      {open && (
+        <div
+          className="fixed inset-0 z-[9999] bg-black/60 flex items-center justify-center p-4"
+          onClick={() => setOpen(false)}
+        >
+          <div
+            className="bg-[#111111] border border-white/10 rounded-[28px] w-full sm:max-w-md max-h-[90vh] overflow-hidden relative shadow-none flex flex-col"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <button
+              type="button"
+              onClick={() => setOpen(false)}
+              aria-label="Đóng"
+              className="absolute top-4 right-4 bg-white/5 hover:bg-white/10 text-neutral-400 hover:text-white p-2 rounded-full transition-all"
+            >
+              <X size={16} />
+            </button>
+
+            <div className="flex flex-col items-center pt-4 pb-2 relative px-6">
+              <h3 className="text-lg font-bold text-white mb-2">Xác Nhận Mua Tài Khoản</h3>
+              <div className="flex items-center gap-1.5">
+                <span className="text-xs text-neutral-400 font-medium">Mã số</span>
+                <span className="text-xs font-bold text-yellow-500">#{account.code}</span>
+              </div>
+              <div className="flex items-center gap-1.5 mt-1">
+                <span className="text-neutral-500">≡ Danh Mục:</span>
+                <span className="text-violet-400 font-bold uppercase">
+                  {account.categoryName}
+                </span>
+              </div>
+            </div>
+
+            <div className="px-5 py-1.5 overflow-y-auto flex-1 min-h-0 space-y-2.5">
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-neutral-400">Giá Gốc</span>
+                <span className="text-xs font-bold text-white">
+                  {formatVnd(account.oldPrice)} ₫
+                </span>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-neutral-400">Giảm Giá</span>
+                <span className="text-xs font-bold text-white">{pct}%</span>
+              </div>
+
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-xs text-neutral-400 shrink-0">Mã Giảm Giá / Voucher</span>
+                <div className="flex items-center gap-1.5">
+                  <input
+                    type="text"
+                    value={voucher}
+                    onChange={(event) => setVoucher(event.target.value)}
+                    placeholder="Nhập mã voucher..."
+                    className="w-28 min-w-0 rounded-lg border border-white/10 bg-white/5 px-2.5 py-1.5 text-xs text-white outline-none focus:border-[#7C3AED]/60 placeholder-neutral-600 transition-colors"
+                  />
+                  <button
+                    type="button"
+                    className="shrink-0 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 px-3 py-1.5 text-xs font-bold text-white transition-colors"
+                  >
+                    Áp dụng
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-neutral-400">Tổng tiền</span>
+                <span className="text-xs font-bold text-white">
+                  {formatVnd(account.price)} ₫
+                </span>
+              </div>
+
+              <div className="h-px bg-white/10" />
+
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-black uppercase text-white">TỔNG THANH TOÁN</span>
+                <span className="text-base font-black text-[#7C3AED]">
+                  {formatVnd(account.price)} ₫
+                </span>
+              </div>
+
+              <div className="pt-2">
+                <h4 className="text-xs font-black uppercase tracking-wider text-neutral-300">
+                  Quyền Lợi & Bảo Hành
+                </h4>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-neutral-400">Số dư ví hiện tại:</span>
+                <span className="text-xs font-bold text-white">{formatVnd(balance)} ₫</span>
+              </div>
+
+              <div className="flex items-center justify-between pb-2">
+                <span className="text-xs text-neutral-400">Cần nạp thêm:</span>
+                <span className="text-xs font-bold text-red-400">
+                  {formatVnd(amountToTopUp)} ₫
+                </span>
+              </div>
+            </div>
+
+            <div className="px-5 pb-5 pt-2">
+              <a
+                href="/wallet"
+                className="w-full rounded-2xl bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-black py-4 uppercase tracking-widest text-sm transition-colors flex items-center justify-center"
+              >
+                Nạp tiền
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
