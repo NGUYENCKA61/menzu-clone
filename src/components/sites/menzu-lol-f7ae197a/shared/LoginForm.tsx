@@ -30,10 +30,11 @@ function DiscordGlyph() {
 
 /**
  * Split login card: brand panel on the left, credential form on the right.
- * Both text inputs are controlled locally and the password field can be
- * toggled between masked and plain text. Submitting only prevents the
- * native page reload — real authentication is wired up once a backend
- * exists.
+ *
+ * Submits to /api/auth/login, surfaces the server's error message, and honours
+ * ?next= so the purchase gate returns you to the product you were looking at.
+ * The redirect target is required to start with "/" so it cannot be pointed at
+ * another origin.
  */
 export function LoginForm() {
   const [username, setUsername] = useState("");
@@ -237,7 +238,7 @@ export function LoginForm() {
                 <p className="mt-8 text-center text-xs text-neutral-500">
                   Chưa có tài khoản?
                   <a
-                    href="#"
+                    href="/register"
                     className="text-[#7C3AED] hover:text-[#6D28D9] font-black transition-colors ml-1"
                   >
                     Tạo mới ngay
