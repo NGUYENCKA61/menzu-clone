@@ -45,6 +45,7 @@ async function categoryRow(slugs: string[]): Promise<ProductCard[]> {
     .map((c) => ({
       image: c.imageUrl ?? "",
       title: c.name,
+      href: `/category/${c.slug}`,
       // The first row uses "Đã Bán"; TFT rows the live site labels "Loại SP"
       // when stock is what varies. Both map to tones in ProductRow.
       stats: [
@@ -61,6 +62,7 @@ async function serviceRow(inGameSet: boolean): Promise<ProductCard[]> {
     .map((s) => ({
       image: s.imageUrl ?? "",
       title: s.name,
+      href: `/services/${s.slug}`,
       stats: [
         {
           label: s.priceLabel === "Liên hệ" ? "Báo giá" : "Giá từ",

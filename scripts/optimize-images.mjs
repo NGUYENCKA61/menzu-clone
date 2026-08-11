@@ -22,15 +22,24 @@ const REPLACE = process.argv.includes("--replace");
 /**
  * Max width per directory, from the largest box each image renders in.
  * Doubled for high-DPI screens, then left to `sizes` to pick from there.
+ *
+ * Matched most-specific-first, which matters: valorant-api holds both 40px
+ * agent avatars and full-bleed bundle art. Capping the whole folder at icon
+ * width once crushed the login hero to 256px and it rendered visibly blocky
+ * at 50vw. Judge a folder by what its images render at, not by its name.
  */
 const MAX_WIDTH = {
+  "valorant-api/bundles": 1600, // login and register hero, ~50vw
+  "valorant-api": 256, // tier and agent icons
   account: 1280, // detail hero ~600px
   upload: 1600, // hero banner is full-bleed
   behance: 1920, // page backdrop
   site: 1280,
   external: 1280,
   feedback: 160, // 40px avatars
-  "valorant-api": 256, // tier and agent icons
+  app: 1280,
+  bio: 512,
+  docs: 1280,
 };
 
 const SKIP_EXT = new Set([".webp", ".gif", ".svg", ".ttf", ".woff", ".woff2"]);
@@ -44,8 +53,11 @@ async function* walk(dir) {
 }
 
 function widthFor(path) {
+  // Normalised so a multi-segment key like "valorant-api/bundles" matches on
+  // Windows too, where the walker hands back backslash-separated paths.
+  const normalised = path.replace(/\\/g, "/");
   for (const [dir, width] of Object.entries(MAX_WIDTH)) {
-    if (path.includes(`${dir}/`) || path.includes(`${dir}\\`)) return width;
+    if (normalised.includes(`${dir}/`)) return width;
   }
   return 1280;
 }

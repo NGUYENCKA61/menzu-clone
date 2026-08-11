@@ -42,10 +42,27 @@ export default async function Home() {
               <QuickActionsBar />
               <FlashSaleSection items={flashSaleItems} />
               <FeaturedCategories />
-              <ProductRow heading="SẢN PHẨM NỔI BẬT" cards={rows.featured} className="mb-12" />
-              <ProductRow heading="ĐẤU TRƯỜNG CHÂN LÝ" cards={rows.tft} />
-              <ProductRow heading="Dịch Vụ Game" cards={rows.gameServices} />
-              <ProductRow heading="Dịch Vụ Khác" cards={rows.otherServices} />
+              <ProductRow
+                heading="SẢN PHẨM NỔI BẬT"
+                cards={rows.featured}
+                viewAllHref="/categories"
+                className="mb-12"
+              />
+              <ProductRow
+                heading="ĐẤU TRƯỜNG CHÂN LÝ"
+                cards={rows.tft}
+                viewAllHref="/categories"
+              />
+              <ProductRow
+                heading="Dịch Vụ Game"
+                cards={rows.gameServices}
+                viewAllHref="/services"
+              />
+              <ProductRow
+                heading="Dịch Vụ Khác"
+                cards={rows.otherServices}
+                viewAllHref="/services"
+              />
               <ReviewsSection reviews={reviews.map((r) => ({
                 name: r.name,
                 date: r.createdAt.toLocaleDateString("vi-VN"),

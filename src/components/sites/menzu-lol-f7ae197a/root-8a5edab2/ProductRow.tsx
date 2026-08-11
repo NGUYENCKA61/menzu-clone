@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import {
   ArrowRight,
   Boxes,
@@ -16,6 +17,8 @@ import type { ProductCard } from "./productRowData";
 export interface ProductRowProps {
   heading: string;
   cards: ProductCard[];
+  /** Destination of the row's "Xem tất cả" link — the matching index page. */
+  viewAllHref: string;
   className?: string;
 }
 
@@ -79,7 +82,7 @@ function getStatTone(label: string): StatTone {
   return STAT_TONES[label] ?? DEFAULT_STAT_TONE;
 }
 
-export function ProductRow({ heading, cards, className }: ProductRowProps) {
+export function ProductRow({ heading, cards, viewAllHref, className }: ProductRowProps) {
   return (
     <section className={cn("w-full", className)}>
       <div className="flex flex-row items-center justify-between mb-8">
@@ -89,21 +92,21 @@ export function ProductRow({ heading, cards, className }: ProductRowProps) {
             {heading}
           </h2>
         </div>
-        <a
-          href="#"
+        <Link
+          href={viewAllHref}
           className="group flex items-center gap-1 text-[10px] sm:text-xs font-bold text-neutral-400 hover:text-white transition-colors uppercase tracking-widest border-b border-neutral-700 hover:border-[#7C3AED]"
         >
           <span className="hidden sm:inline">XEM TẤT CẢ</span>
           <span className="sm:hidden">XEM THÊM</span>
           <ArrowRight size={14} />
-        </a>
+        </Link>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
         {cards.map((card) => (
-          <a
-            key={card.image}
-            href="#"
+          <Link
+            key={card.href}
+            href={card.href}
             className="group flex flex-col bg-[#12141c] rounded-xl overflow-hidden border border-indigo-500/20 hover:border-indigo-500/50 transition-all duration-300 p-3 sm:p-4"
           >
             <div className="relative w-full aspect-[16/9] rounded-lg overflow-hidden mb-4 border border-indigo-500/10 group-hover:border-indigo-500/30 transition-colors">
@@ -168,7 +171,7 @@ export function ProductRow({ heading, cards, className }: ProductRowProps) {
                 </div>
               </div>
             </div>
-          </a>
+          </Link>
         ))}
       </div>
     </section>
