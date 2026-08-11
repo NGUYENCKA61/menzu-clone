@@ -150,6 +150,42 @@ The `next` query param must be honoured by the cloned `/login`. The purchase mod
 (`@keyframes dialogIn`) only renders for an authenticated session, so it is still uncaptured —
 capturing it needs a logged-in session **and** a click.
 
+### Purchase modal — CAPTURED (authenticated)
+
+Overlay `fixed inset-0 z-[9999] bg-black/60 flex items-center justify-center p-4 overlay-enter`
+Dialog `bg-[#111111] border border-white/10 rounded-[28px] w-full sm:max-w-md max-h-[90vh] overflow-hidden relative shadow-none flex flex-col dialog-enter` (448×604)
+
+Sections: mobile drag handle (`flex justify-center pt-3 pb-1 sm:hidden`) · close button
+(`absolute top-4 right-4 bg-white/5 hover:bg-white/10 text-neutral-400 hover:text-white p-2 rounded-full`) ·
+header (`flex flex-col items-center pt-4 pb-2 relative px-6`) ·
+scroll body (`px-5 py-1.5 overflow-y-auto flex-1 min-h-0 space-y-2.5`).
+
+Content, verbatim:
+
+| Row | Value |
+|---|---|
+| title `text-lg font-bold text-white mb-2` | `Xác Nhận Mua Tài Khoản` |
+| `Mã số` | `#VLR2030` (`text-xs font-bold text-yellow-500`) |
+| `≡ Danh Mục:` | `ACCOUNT VALORANT TỰ CHỌN` (`text-violet-400 font-bold uppercase`) |
+| `Giá Gốc` | `4.800.000 ₫` |
+| `Giảm Giá` | `38%` |
+| `Mã Giảm Giá / Voucher` | input `Nhập mã voucher...` + button `Áp dụng` |
+| `Tổng tiền` | `2.990.000 ₫` |
+| `TỔNG THANH TOÁN` | `2.990.000 ₫` |
+| `Quyền Lợi & Bảo Hành` | (section) |
+| `Số dư ví hiện tại:` | `0 ₫` |
+| `Cần nạp thêm:` | `2.990.000 ₫` |
+
+**This settles the payment model: purchases are paid from a wallet balance, not a
+card at checkout.** The flow is `top-up → wallet → purchase`. When the balance is
+short the dialog shows `Cần nạp thêm` instead of a confirm button.
+
+Backend consequences:
+- `users.balance` is the payment source; every purchase is a debit against it
+- `topups` is a separate flow that credits the wallet
+- `vouchers` exist and apply at checkout, so `orders` needs a discount/voucher column
+- an order must record: product, list price, discount %, voucher, final total
+
 ### Skin inventory tabs — VERIFIED
 
 Tab bar `flex items-center gap-3 sm:gap-6 lg:gap-0 lg:justify-between overflow-x-auto hide-scrollbar whitespace-nowrap`,
