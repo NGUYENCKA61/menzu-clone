@@ -7,9 +7,11 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: "Geist", "Geist Fallback", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "Geist Mono", "Geist Mono Fallback", ui-monospace, monospace;
+  --font-sans: var(--font-inter), "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    "Liberation Mono", "Courier New", monospace;
   --font-heading: var(--font-sans);
+  --font-headingnow: var(--font-headingnow);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -127,4 +129,120 @@
   html {
     @apply font-sans;
   }
+}
+
+/* ---------------------------------------------------------------------------
+ * menzu.lol (site-key menzu-lol-f7ae197a) — design tokens + keyframes
+ * Extracted verbatim from the live site. Dark-only palette.
+ * ------------------------------------------------------------------------ */
+
+.dark {
+  /* body/page surface — live value lab(2.75381 0 0) */
+  --background: #050508;
+  --foreground: #ffffff;
+}
+
+:root {
+  --menzu-bg: #050508;
+  --menzu-nav: #1a1a1a;
+  --menzu-rail: #0c0d12;
+  --menzu-backdrop-dim: rgb(10 10 13 / 0.7);
+  --menzu-container: 1320px;
+}
+
+@keyframes fadeUpIn {
+  0% {
+    opacity: 0;
+    transform: translateY(40px) scale(0.98);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes smoothSlideUp {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(0);
+  }
+}
+
+@keyframes shimmer-sweep {
+  0% {
+    transform: translate(-100%);
+  }
+  60%,
+  100% {
+    transform: translate(100%);
+  }
+}
+
+@keyframes heroFloat {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes bounceSubtle {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes spin-slow {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes vip-text-glow {
+  0%,
+  100% {
+    text-shadow:
+      rgb(252 186 3 / 0.5) 0 0 6px,
+      rgb(239 68 68 / 0.2) 0 0 14px;
+  }
+  50% {
+    text-shadow:
+      rgb(252 186 3 / 0.9) 0 0 14px,
+      rgb(239 68 68 / 0.5) 0 0 30px;
+  }
+}
+
+@keyframes ticker-scroll {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(calc(-1 * var(--ticker-width, 50%)), 0, 0);
+  }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 4s linear infinite;
+}
+
+/* Horizontal product rows hide their scrollbar but stay scrollable */
+.menzu-scroll-x {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.menzu-scroll-x::-webkit-scrollbar {
+  display: none;
 }
