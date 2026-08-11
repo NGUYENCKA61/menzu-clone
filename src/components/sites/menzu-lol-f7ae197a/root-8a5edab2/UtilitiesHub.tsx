@@ -54,6 +54,7 @@ export function UtilitiesHub() {
                 src={MAIN_ART_SRC}
                 alt=""
                 fill
+                sizes="(min-width: 1024px) 50vw, 100vw"
                 className="object-cover opacity-[0.07]"
               />
             </div>
@@ -118,6 +119,7 @@ export function UtilitiesHub() {
                 src={TRADE_ART_SRC}
                 alt=""
                 fill
+                sizes="(min-width: 1024px) 50vw, 100vw"
                 className="object-cover opacity-[0.07]"
               />
             </div>

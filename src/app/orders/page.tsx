@@ -51,6 +51,7 @@ export default async function OrdersPage() {
                     src={o.imageUrl}
                     alt={o.productCode}
                     fill
+                    sizes="96px"
                     className="object-cover object-[85%_center]"
                   />
                 ) : null}

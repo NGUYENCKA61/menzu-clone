@@ -53,7 +53,13 @@ export function FeaturedCategories() {
 
               {/* [2] Octagon inner fill */}
               <div className="absolute inset-[1.5px] overflow-hidden [clip-path:polygon(15px_0,calc(100%-15px)_0,100%_15px,100%_calc(100%-15px),calc(100%-15px)_100%,15px_100%,0_calc(100%-15px),0_15px)] bg-[#0d0d12]">
-                <Image src={BACKCARD_SRC} alt="" fill className="object-cover" />
+                <Image
+                  src={BACKCARD_SRC}
+                  alt=""
+                  fill
+                  sizes="(min-width: 1024px) 25vw, 50vw"
+                  className="object-cover"
+                />
                 <div className="absolute inset-0 bg-black/20" />
               </div>
 
@@ -64,6 +70,7 @@ export function FeaturedCategories() {
                     src={`${ART_BASE}/${card.art}`}
                     alt=""
                     fill
+                    sizes="(min-width: 1024px) 25vw, 50vw"
                     className="object-contain object-bottom"
                   />
                 </div>
@@ -72,6 +79,7 @@ export function FeaturedCategories() {
                     src={`${ART_BASE}/${card.art}`}
                     alt=""
                     fill
+                    sizes="(min-width: 1024px) 25vw, 50vw"
                     className="object-contain object-bottom"
                   />
                 </div>

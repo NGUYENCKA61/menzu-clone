@@ -14,6 +14,7 @@ export function PageBackdrop() {
         alt="Home Background"
         fill
         priority
+        sizes="100vw"
         className="object-cover object-center transition-all duration-700"
       />
       <div className="absolute inset-0 bg-[#0a0a0d]/70" />
