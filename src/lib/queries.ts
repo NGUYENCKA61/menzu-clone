@@ -431,3 +431,8 @@ export async function getService(slug: string): Promise<ServiceRow | null> {
     doneCount: s.doneCount,
   };
 }
+
+/** The build advertised on /app/download. Null before the first seed. */
+export async function getAppRelease() {
+  return db.appRelease.findFirst({ orderBy: { buildNumber: "desc" } });
+}

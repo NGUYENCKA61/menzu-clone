@@ -71,6 +71,27 @@ model Session {
   @@map("sessions")
 }
 
+/// The mobile app build advertised on /app/download.
+///
+/// Version, size and date change with every release, so they are data rather
+/// than markup. The two download URLs are nullable on purpose: this clone
+/// ships no binaries, and a button pointing at a file that does not exist is
+/// worse than one that says so.
+model AppRelease {
+  id           String   @id @default(cuid())
+  version      String
+  buildNumber  Int
+  sizeLabel    String
+  releasedAt   DateTime
+  minAndroid   String
+  minIos       String
+  androidUrl   String?
+  iosUrl       String?
+  updatedAt    DateTime @updatedAt @default(now())
+
+  @@map("app_releases")
+}
+
 enum AuthAttemptKind {
   LOGIN
   REGISTER

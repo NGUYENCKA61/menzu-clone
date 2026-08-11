@@ -298,6 +298,24 @@ async function main() {
   }
   console.log(`  feedback: ${FEEDBACK.length}`);
 
+  // Download URLs stay null: this clone ships no binaries, and the page
+  // renders an explicit "not available" state rather than a button that 404s.
+  // Set them once real builds are hosted under public/downloads/.
+  const releaseCount = await db.appRelease.count();
+  if (releaseCount === 0) {
+    await db.appRelease.create({
+      data: {
+        version: "1.2.2",
+        buildNumber: 122,
+        sizeLabel: "~5.2 MB",
+        releasedAt: new Date("2026-07-03"),
+        minAndroid: "Android 8.0+",
+        minIos: "iOS 14.0+",
+      },
+    });
+  }
+  console.log("  app release: 1");
+
   console.log("Done.");
 }
 
