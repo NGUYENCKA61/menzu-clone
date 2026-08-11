@@ -1,0 +1,86 @@
+import { NextResponse } from "next/server";
+
+import { db } from "@/lib/db";
+import { getCurrentUser } from "@/lib/session";
+
+const MIN_TOPUP = 10_000n; // "Nạp từ 10.000đ trở lên"
+
+function makeCode(prefix: string): string {
+  return `${prefix}${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
+}
+
+/**
+ * Creates a top-up invoice and credits the wallet.
+ *
+ * A real deployment settles this against a payment provider webhook; there is
+ * no provider here, so the invoice completes immediately. The ledger entry and
+ * the balance change are written together so they can never disagree.
+ */
+export async function POST(request: Request) {
+  const user = await getCurrentUser();
+  if (!user) {
+    return NextResponse.json({ error: "Bạn cần đăng nhập" }, { status: 401 });
+  }
+
+  const body = (await request.json().catch(() => null)) as {
+    amount?: number;
+    method?: string;
+    carrier?: string;
+  } | null;
+
+  const raw = Number(body?.amount ?? 0);
+  if (!Number.isFinite(raw) || raw <= 0) {
+    return NextResponse.json({ error: "Số tiền không hợp lệ" }, { status: 400 });
+  }
+  const amount = BigInt(Math.floor(raw));
+  if (amount < MIN_TOPUP) {
+    return NextResponse.json(
+      { error: "Nạp từ 10.000đ trở lên" },
+      { status: 400 },
+    );
+  }
+
+  const method = body?.method === "CARD" ? "CARD" : "BANK";
+
+  const result = await db.$transaction(async (tx) => {
+    const current = await tx.user.findUniqueOrThrow({ where: { id: user.id } });
+    const balanceAfter = current.balance + amount;
+
+    await tx.user.update({
+      where: { id: user.id },
+      data: { balance: balanceAfter },
+    });
+
+    const topUp = await tx.topUp.create({
+      data: {
+        code: makeCode("NT"),
+        userId: user.id,
+        method,
+        amount,
+        status: "COMPLETED",
+        carrier: method === "CARD" ? (body?.carrier ?? null) : null,
+      },
+    });
+
+    await tx.transaction.create({
+      data: {
+        code: makeCode("GD"),
+        userId: user.id,
+        kind: "TOPUP",
+        status: "SUCCESS",
+        delta: amount,
+        balanceAfter,
+        description: "Nạp tiền vào ví",
+        method: method === "CARD" ? "Thẻ Cào" : "Ngân Hàng",
+      },
+    });
+
+    return { topUp, balanceAfter };
+  });
+
+  return NextResponse.json({
+    invoiceCode: result.topUp.code,
+    amount: Number(amount),
+    balance: Number(result.balanceAfter),
+  });
+}
