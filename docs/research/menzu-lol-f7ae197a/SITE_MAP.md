@@ -268,6 +268,48 @@ interface User {
 }
 ```
 
+## Account routes — NOT tabs, separate routes (auth-only)
+
+The `/profile` sidebar looks like a tab bar but every entry is its own route.
+None of these appear in the homepage link scan because they only exist for a
+logged-in session:
+
+| Sidebar label | Route | `<title>` |
+|---|---|---|
+| Tổng quan | `/profile` | `Menzu Valorant \| Profile` |
+| Nạp tiền | `/wallet` | `Nạp tiền` |
+| Lịch sử giao dịch | `/transactions` | `Lịch sử giao dịch` |
+| Lịch sử mua | `/orders` | `Lịch sử mua hàng` |
+| Đơn dịch vụ | `/service-orders` | — |
+| Bảo mật | `/security` | — |
+
+The header user dropdown repeats the same six links plus `ĐĂNG XUẤT`.
+Dropdown: `absolute right-0 top-[calc(100%+4px)] w-[280px] bg-[#111111] rounded-xl shadow-none border border-white/10 z-[100] overflow-hidden animate-in fade-in zoom-in-95`,
+header block `p-4` showing `abcxyz123` · `MEMBER` · `UID: 10049` · `Số dư 0đ`,
+items `flex items-center gap-3 py-2.5 px-2 rounded-lg text-neutral-300 hover:text-white hover:bg-white/5`.
+
+### `/wallet` — top-up
+Two methods: **`Ngân Hàng`** and **`Thẻ Cào`**.
+- copy: `Tiền sẽ được hệ thống tự động cộng…`, `Nạp từ 10.000đ trở lên. Miễn phí…`
+- amount field `Số tiền nạp` in `VNĐ`, presets
+  `50.000` · `200.000` · `500.000` · `1.000.000` · `2.000.000` · `5.000.000`
+- action `Tạo hóa đơn` (creates a payment invoice)
+- card path starts at `1. Chọn nhà mạng` (pick carrier); empty state
+  `Chưa có lịch sử nạp thẻ nào.`
+
+### `/transactions` — ledger table
+Columns, verbatim: `Mã GD & Thời gian` · `Chi tiết & Phương thức` ·
+`Biến động & Số dư` · `Trạng thái`. Paginated. Empty:
+`Không tìm thấy giao dịch nào phù hợp`.
+
+→ schema: `id, createdAt, description, method, delta, balanceAfter, status`.
+`Biến động & Số dư` confirms the ledger stores a running balance per row, not
+just the delta.
+
+### `/orders` — purchase history
+Empty state: `Chưa có đơn hàng nào` / `Bạn chưa mua tài khoản nào trên hệ thống`
+with a `Mua Ngay` CTA. Subtitle `Danh sách các tài khoản bạn đã tha[nh toán]`.
+
 ## Backend surface implied by the UI
 
 | Domain | Needed for |
