@@ -223,10 +223,15 @@ export function AccountBuyPanel({ account }: AccountBuyPanelProps) {
           onClick={() => setAltNotice("Cọc / Góp")}
           className={`${SECONDARY_BUTTON_CLASS} flex flex-col items-center justify-center gap-0.5`}
         >
-          <span>Cọc / Góp</span>
-          <span className="text-[10px] normal-case font-medium tracking-normal text-neutral-400">
-            từ {formatVnd(account.depositFrom)}đ
-          </span>
+          <span>Cọc / Trả Góp</span>
+          {/* The live pages only quote a figure on the few accounts that carry
+              one; the rest show the bare label. Printing "từ 0đ" would read as
+              a free deposit rather than as an unset one. */}
+          {account.depositFrom > 0 ? (
+            <span className="text-[10px] normal-case font-medium tracking-normal text-neutral-400">
+              từ {formatVnd(account.depositFrom)}đ
+            </span>
+          ) : null}
         </button>
 
         <button

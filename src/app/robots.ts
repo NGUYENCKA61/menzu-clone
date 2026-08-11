@@ -18,7 +18,7 @@ const PRIVATE_PREFIXES = [
   "/service-orders",
   "/voucher",
   "/login",
-  "/register",
+  "/signup",
 ];
 
 export default function robots(): MetadataRoute.Robots {

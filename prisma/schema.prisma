@@ -255,6 +255,19 @@ model Product {
   imageUrl   String?
   viewers    Int           @default(0)
 
+  /// Totals for the four inventory tabs that carry no per-item data.
+  ///
+  /// Weapon skins get one ProductSkin row each, because the card needs their
+  /// individual tiers for the colour chips. Buddies, agents, cards and sprays
+  /// are only ever shown as a count, and the source exposes nothing else about
+  /// them — storing hundreds of empty rows per product to be counted back up
+  /// would buy nothing. Null means "not scraped yet", and the detail page
+  /// falls back to counting rows.
+  buddyCount Int?
+  agentCount Int?
+  cardCount  Int?
+  sprayCount Int?
+
   soldCount  Int           @default(0)
   createdAt  DateTime      @default(now())
   updatedAt  DateTime      @updatedAt @default(now())
@@ -449,6 +462,10 @@ model Service {
   priceLabel  String?
   imageUrl    String?
   doneCount   Int            @default(0)
+  /// Splits the two sections the live /services page renders: "Dịch Vụ Game"
+  /// and "Dịch Vụ Khác". A column rather than a hard-coded slug list, so a new
+  /// service lands in the right section without a deploy.
+  isGameService Boolean      @default(false)
   updatedAt   DateTime       @updatedAt @default(now())
   orders      ServiceOrder[]
 

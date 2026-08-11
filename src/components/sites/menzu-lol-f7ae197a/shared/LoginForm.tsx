@@ -238,7 +238,7 @@ export function LoginForm() {
                 <p className="mt-8 text-center text-xs text-neutral-500">
                   Chưa có tài khoản?
                   <a
-                    href="/register"
+                    href="/signup"
                     className="text-[#7C3AED] hover:text-[#6D28D9] font-black transition-colors ml-1"
                   >
                     Tạo mới ngay

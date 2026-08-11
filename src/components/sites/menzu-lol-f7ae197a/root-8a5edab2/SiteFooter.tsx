@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 
 const IMG = "/sites/menzu-lol-f7ae197a/root-8a5edab2/images/site";
 
@@ -27,9 +28,12 @@ interface FooterColumn {
  * from the clone, so pointing at them would produce 404s.
  */
 const LINK_HREFS: Record<string, string> = {
+  // The live footer links "Tin tức" at a route that 404s on its own site.
+  // Kept pointing there so the clone behaves identically.
   "Tin tức & Sự kiện": "/news",
   "Liên hệ": "/feedback",
   "Góp ý & Khiếu nại": "/feedback",
+  "Cộng đồng": "/bio",
   "Thu cũ đổi mới": "/trade",
   "Acc Valorant": "/category/account-valorant-tu-chon",
   "Check Thư Welcome": "/checkwc",
@@ -182,7 +186,10 @@ export function SiteFooter() {
               <SocialIcons />
             </div>
 
-            <div className="w-full max-w-[320px] h-[90px] rounded-xl border border-indigo-500/20 pl-16 pr-4 py-4 flex items-center justify-between shadow-lg relative overflow-hidden bg-[#0d0d12]">
+            <Link
+              href="/app/download"
+              className="w-full max-w-[320px] h-[90px] rounded-xl border border-indigo-500/20 hover:border-indigo-500/50 transition-colors pl-16 pr-4 py-4 flex items-center justify-between shadow-lg relative overflow-hidden bg-[#0d0d12]"
+            >
               <Image
                 src={`${IMG}/logos/menzu-logo.webp`}
                 alt="Menzu"
@@ -198,7 +205,7 @@ export function SiteFooter() {
                   Hãy tải ứng dụng ngay bây giờ!
                 </span>
               </div>
-            </div>
+            </Link>
           </div>
         </div>
 

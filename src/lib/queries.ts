@@ -32,6 +32,7 @@ const TIER_COLOR: Record<ContentTier, TierColor> = {
 /** Order the card renders its tier counters in. */
 const TIER_ORDER: TierColor[] = ["yellow", "orange", "pink", "cyan", "blue"];
 
+
 interface SkinRow {
   kind: string;
   tier: ContentTier | null;
@@ -136,10 +137,12 @@ export async function getAccountDetail(
     rank: p.rank,
     lastRank: p.lastRank,
     weaponSkins: countKind(p.skins, "WEAPON_SKIN"),
-    buddies: countKind(p.skins, "BUDDY"),
-    agents: countKind(p.skins, "AGENT"),
-    cards: countKind(p.skins, "CARD"),
-    sprays: countKind(p.skins, "SPRAY"),
+    // Scraped totals win; counting rows is the fallback for products that
+    // scripts/scrape-inventory.mjs has not reached yet.
+    buddies: p.buddyCount ?? countKind(p.skins, "BUDDY"),
+    agents: p.agentCount ?? countKind(p.skins, "AGENT"),
+    cards: p.cardCount ?? countKind(p.skins, "CARD"),
+    sprays: p.sprayCount ?? countKind(p.skins, "SPRAY"),
     level: p.level,
     vp: p.vp,
     rp: p.rp,
@@ -148,6 +151,11 @@ export async function getAccountDetail(
     mailType: p.mailType ?? "",
     oldPrice: Number(p.oldPrice),
     price: Number(p.price),
+    // 0 means the shop set no deposit for this account, which is the common
+    // case: the live pages show a bare "Cọc / Trả Góp" button and only quote
+    // an amount on the few products that carry one. It is per-product data,
+    // not a percentage of the price — two products checked across the range
+    // quote nothing at all.
     depositFrom: p.depositFrom ? Number(p.depositFrom) : 0,
     categoryName: p.category.name,
     categorySlug: p.category.slug,
@@ -407,6 +415,8 @@ export interface ServiceRow {
   priceLabel: string | null;
   imageUrl: string | null;
   doneCount: number;
+  /** Drives the "Dịch Vụ Game" / "Dịch Vụ Khác" split on /services. */
+  isGameService: boolean;
 }
 
 export async function listServices(): Promise<ServiceRow[]> {
@@ -417,6 +427,7 @@ export async function listServices(): Promise<ServiceRow[]> {
     priceLabel: s.priceLabel,
     imageUrl: s.imageUrl,
     doneCount: s.doneCount,
+    isGameService: s.isGameService,
   }));
 }
 
@@ -429,6 +440,7 @@ export async function getService(slug: string): Promise<ServiceRow | null> {
     priceLabel: s.priceLabel,
     imageUrl: s.imageUrl,
     doneCount: s.doneCount,
+    isGameService: s.isGameService,
   };
 }
 

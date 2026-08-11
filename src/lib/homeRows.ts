@@ -28,8 +28,6 @@ const TFT_SLUGS = [
   "acc-tft-hang-hieu",
 ];
 
-/** Services shown under "Dịch Vụ Game" vs "Dịch Vụ Khác". */
-const GAME_SERVICE_SLUGS = ["riotgames", "valorantpoint-vn", "valorantpoint-ph"];
 
 function formatVndString(n: number): string {
   return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
@@ -56,9 +54,11 @@ async function categoryRow(slugs: string[]): Promise<ProductCard[]> {
 }
 
 async function serviceRow(inGameSet: boolean): Promise<ProductCard[]> {
-  const rows = await db.service.findMany({ orderBy: { doneCount: "desc" } });
+  const rows = await db.service.findMany({
+    where: { isGameService: inGameSet },
+    orderBy: { doneCount: "desc" },
+  });
   return rows
-    .filter((s) => GAME_SERVICE_SLUGS.includes(s.slug) === inGameSet)
     .map((s) => ({
       image: s.imageUrl ?? "",
       title: s.name,
