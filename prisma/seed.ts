@@ -9,6 +9,8 @@
  *   npx prisma migrate dev     # runs this afterwards
  *   npx tsx prisma/seed.ts     # or run it directly
  */
+import "dotenv/config";
+
 import { PrismaPg } from "@prisma/adapter-pg";
 import {
   ContentTier,
@@ -104,6 +106,30 @@ const VLR2030_DETAIL = {
   viewers: 6,
 };
 
+/**
+ * The four non-weapon inventory tabs for VLR2030, read off the live detail
+ * page: Buddies 40, Agents 26, Cards 51, Sprays 49. The listing only ever
+ * exposes weapon-skin tier counts, so without these the other four tabs would
+ * render as empty for the one account whose real numbers we do know.
+ * Tier is null — the site does not break these down by content tier.
+ */
+const VLR2030_EXTRA_INVENTORY: { kind: SkinKind; count: number }[] = [
+  { kind: SkinKind.BUDDY, count: 40 },
+  { kind: SkinKind.AGENT, count: 26 },
+  { kind: SkinKind.CARD, count: 51 },
+  { kind: SkinKind.SPRAY, count: 49 },
+];
+
+function extraInventoryRows(): Prisma.ProductSkinCreateWithoutProductInput[] {
+  const rows: Prisma.ProductSkinCreateWithoutProductInput[] = [];
+  for (const { kind, count } of VLR2030_EXTRA_INVENTORY) {
+    for (let i = 1; i <= count; i += 1) {
+      rows.push({ kind, tier: null, name: `${kind} #${i}` });
+    }
+  }
+  return rows;
+}
+
 /** Flash-sale prices are formatted strings ("3.300.000 VND") — parse to VND. */
 function parseVnd(value: string | null): bigint | null {
   if (!value) return null;
@@ -150,7 +176,12 @@ async function main() {
         price: BigInt(p.price),
         imageUrl: `${IMAGES}/account/${p.code}.png`,
         tags: p.tag ? { create: [{ label: p.tag }] } : undefined,
-        skins: { create: skinRowsFor(p.tiers) },
+        skins: {
+          create: [
+            ...skinRowsFor(p.tiers),
+            ...(detail ? extraInventoryRows() : []),
+          ],
+        },
       },
     });
     productCount += 1;
