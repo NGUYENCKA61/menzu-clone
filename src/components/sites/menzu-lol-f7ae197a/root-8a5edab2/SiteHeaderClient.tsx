@@ -1,6 +1,7 @@
 "use client"
 
 import Image from "next/image"
+import Link from "next/link"
 import {
   ChevronDown,
   Crosshair,
@@ -24,6 +25,26 @@ import { MobileDrawer, type DrawerGroup } from "./MobileDrawer"
 interface DropdownItem {
   label: string
   icon: LucideIcon
+}
+
+/**
+ * Destinations that exist in this clone. Anything absent keeps href="#":
+ * /build, /checkskin and the /hub pages were excluded from the clone, so
+ * linking to them would 404.
+ */
+const LINK_HREFS: Record<string, string> = {
+  "TIN TỨC": "/news",
+  "LIÊN HỆ": "/feedback",
+  "WIKI & HƯỚNG DẪN": "/docs",
+  "GÓP Ý": "/feedback",
+  "Check Thư Welcome": "/checkwc",
+  "Trình Tạo Mã 2FA": "/2fa",
+  "Thu Cũ Đổi Mới": "/trade",
+  "Mua Account": "/categories",
+}
+
+function hrefFor(label: string): string {
+  return LINK_HREFS[label] ?? "#"
 }
 
 const QUICK_LINKS = ["TIN TỨC", "LIÊN HỆ", "WIKI & HƯỚNG DẪN", "GÓP Ý", "CỘNG ĐỒNG"]
@@ -72,7 +93,7 @@ function NavDropdown({ label, items }: { label: string; items: DropdownItem[] })
             return (
               <a
                 key={item.label}
-                href="#"
+                href={hrefFor(item.label)}
                 className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-white/5 transition-colors group/item"
               >
                 <Icon size={14} className="text-neutral-500 shrink-0" />
@@ -96,14 +117,14 @@ export function SiteHeaderClient({ user }: { user: HeaderUser | null }) {
       <div className="flex w-full h-[40px] border-b border-white/5 bg-[#1a1a1a]">
         <div className="max-w-[1320px] w-full mx-auto px-4 lg:px-6 h-full flex items-center justify-between">
           <div className="lg:hidden flex items-center h-full relative">
-            <a href="#" className={QUICK_LINK_CLASS}>
+            <a href={hrefFor(QUICK_LINKS[0])} className={QUICK_LINK_CLASS}>
               {QUICK_LINKS[0]}
             </a>
           </div>
 
           <div className="hidden lg:flex items-center gap-5 h-full">
             {QUICK_LINKS.map((link) => (
-              <a key={link} href="#" className={QUICK_LINK_CLASS}>
+              <a key={link} href={hrefFor(link)} className={QUICK_LINK_CLASS}>
                 {link}
               </a>
             ))}
@@ -134,7 +155,7 @@ export function SiteHeaderClient({ user }: { user: HeaderUser | null }) {
               <Menu size={18} />
             </button>
 
-            <a href="#" className="flex items-center gap-3 group">
+            <Link href="/" className="flex items-center gap-3 group">
               <div className="relative">
                 <Image
                   src="/sites/menzu-lol-f7ae197a/root-8a5edab2/images/site/logos/menzu-logo.png"
@@ -150,7 +171,7 @@ export function SiteHeaderClient({ user }: { user: HeaderUser | null }) {
                 <span className="text-xl font-black italic tracking-tighter text-white">MENZU</span>
                 <span className="text-[9px] font-bold tracking-[0.2em] text-red-500 uppercase">Valorant</span>
               </div>
-            </a>
+            </Link>
           </div>
 
           <div className="hidden lg:flex items-center gap-5 h-full">

@@ -21,6 +21,21 @@ interface FooterColumn {
   links: string[];
 }
 
+/**
+ * Labels whose destination exists in this clone. Anything not listed keeps
+ * href="#" — /build, /checkskin and the /hub pages were explicitly excluded
+ * from the clone, so pointing at them would produce 404s.
+ */
+const LINK_HREFS: Record<string, string> = {
+  "Tin tức & Sự kiện": "/news",
+  "Liên hệ": "/feedback",
+  "Góp ý & Khiếu nại": "/feedback",
+  "Thu cũ đổi mới": "/trade",
+  "Acc Valorant": "/category/account-valorant-tu-chon",
+  "Check Thư Welcome": "/checkwc",
+  "Trình Tạo Mã 2FA": "/2fa",
+};
+
 const COLUMNS: FooterColumn[] = [
   {
     heading: "Về chúng tôi",
@@ -147,7 +162,10 @@ export function SiteFooter() {
               <ul className="flex flex-col gap-3 text-xs font-semibold text-neutral-400">
                 {col.links.map((link) => (
                   <li key={link}>
-                    <a href="#" className="hover:text-white transition-colors">
+                    <a
+                      href={LINK_HREFS[link] ?? "#"}
+                      className="hover:text-white transition-colors"
+                    >
                       {link}
                     </a>
                   </li>
