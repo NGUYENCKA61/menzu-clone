@@ -11,6 +11,8 @@
  */
 import "dotenv/config";
 
+import { DOC_BODIES } from "./docs-content";
+
 import { PrismaPg } from "@prisma/adapter-pg";
 import {
   ContentTier,
@@ -396,10 +398,18 @@ async function main() {
         sortOrder,
         publishedAt: new Date(date),
         thumbnailUrl: `${IMAGES}/docs/${image}.webp`,
+        body: DOC_BODIES[slug] ?? null,
       })),
     });
+  } else {
+    // Re-runs refresh the prose without touching view counts or dates, so
+    // editing prisma/docs-content.ts and re-seeding is a safe way to publish.
+    for (const [slug, body] of Object.entries(DOC_BODIES)) {
+      await db.docArticle.updateMany({ where: { slug }, data: { body } });
+    }
   }
-  console.log(`  doc articles: ${DOCS.length}`);
+  const written = await db.docArticle.count({ where: { body: { not: null } } });
+  console.log(`  doc articles: ${DOCS.length} (${written} có nội dung)`);
 
   console.log("Done.");
 }
