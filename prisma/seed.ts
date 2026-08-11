@@ -316,6 +316,61 @@ async function main() {
   }
   console.log("  app release: 1");
 
+  const bioCount = await db.bioProfile.count();
+  if (bioCount === 0) {
+    await db.bioProfile.create({
+      data: {
+        name: "LÊ MINH VŨ",
+        avatarUrl: `${IMAGES}/bio/z8004625502850_8f0294a3fd871e212694b647dd23af54.webp`,
+        links: {
+          create: [
+            {
+              label: "Facebook hỗ trợ",
+              sublabel: "Đang bị khóa",
+              url: "https://www.facebook.com/menhzu0906",
+              iconUrl: `${IMAGES}/bio/fb-logo.webp`,
+              page: 1,
+              sortOrder: 0,
+            },
+            {
+              label: "Zalo hỗ trợ",
+              sublabel: "Main",
+              url: "https://zalo.me/0793025545",
+              iconUrl: `${IMAGES}/bio/zalo-logo.webp`,
+              page: 1,
+              sortOrder: 1,
+            },
+            {
+              label: "Cộng đồng Discord",
+              sublabel: "Menzu Valorant",
+              url: "https://discord.com/invite/ZjrcnK5Reb",
+              iconUrl: `${IMAGES}/bio/discord-logo.webp`,
+              page: 1,
+              sortOrder: 2,
+            },
+            {
+              label: "Cộng đồng Zalo",
+              sublabel: "Box #1",
+              url: "https://zalo.me/0793025545",
+              iconUrl: `${IMAGES}/bio/zalo-logo.webp`,
+              page: 2,
+              sortOrder: 0,
+            },
+            {
+              label: "Cộng đồng Zalo",
+              sublabel: "Box #2",
+              url: "https://zalo.me/0793025545",
+              iconUrl: `${IMAGES}/bio/zalo-logo.webp`,
+              page: 2,
+              sortOrder: 1,
+            },
+          ],
+        },
+      },
+    });
+  }
+  console.log("  bio profile: 1");
+
   console.log("Done.");
 }
 

@@ -71,6 +71,38 @@ model Session {
   @@map("sessions")
 }
 
+/// Owner card shown at the top of /bio. One row.
+model BioProfile {
+  id        String     @id @default(cuid())
+  name      String
+  tagline   String?
+  avatarUrl String
+  updatedAt DateTime   @updatedAt @default(now())
+  links     BioLink[]
+
+  @@map("bio_profiles")
+}
+
+/// A contact button on /bio.
+///
+/// These are data, not markup: they carry a real person's name, phone number
+/// and social handles, and they change without a deploy. `page` drives the
+/// two-panel carousel the live card slides between.
+model BioLink {
+  id         String     @id @default(cuid())
+  profileId  String
+  profile    BioProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  label      String
+  sublabel   String?
+  url        String
+  iconUrl    String
+  page       Int        @default(1)
+  sortOrder  Int        @default(0)
+
+  @@index([profileId, page, sortOrder])
+  @@map("bio_links")
+}
+
 /// The mobile app build advertised on /app/download.
 ///
 /// Version, size and date change with every release, so they are data rather

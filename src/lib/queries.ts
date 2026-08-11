@@ -436,3 +436,10 @@ export async function getService(slug: string): Promise<ServiceRow | null> {
 export async function getAppRelease() {
   return db.appRelease.findFirst({ orderBy: { buildNumber: "desc" } });
 }
+
+/** Owner card and contact buttons for /bio. */
+export async function getBioProfile() {
+  return db.bioProfile.findFirst({
+    include: { links: { orderBy: [{ page: "asc" }, { sortOrder: "asc" }] } },
+  });
+}
