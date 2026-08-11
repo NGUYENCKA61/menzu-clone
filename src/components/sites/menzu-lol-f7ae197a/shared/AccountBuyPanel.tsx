@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { X } from "lucide-react";
 import { formatVnd } from "./productData";
@@ -40,12 +41,15 @@ const SECONDARY_BUTTON_CLASS =
 
 /**
  * Right-hand purchase panel on the account-detail page: stat rows, price
- * block, action buttons, and a self-contained confirmation modal. The site
- * pays out of a wallet balance rather than taking card details at checkout,
- * so the modal only ever offers a "top up" link for now — there is no real
- * purchase flow wired up yet.
+ * block, action buttons, and a self-contained confirmation modal.
+ *
+ * Payment comes out of the wallet balance — the live checkout never asks for
+ * card details. The dialog therefore branches: enough balance shows a confirm
+ * button that posts to /api/orders, a short balance shows "Cần nạp thêm" and a
+ * link to /wallet with no confirm button at all, exactly as the live one does.
  */
 export function AccountBuyPanel({ account }: AccountBuyPanelProps) {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [voucher, setVoucher] = useState("");
 
@@ -106,7 +110,7 @@ export function AccountBuyPanel({ account }: AccountBuyPanelProps) {
       };
 
       if (response.status === 401) {
-        window.location.href = `/login?next=/account/${account.code}`;
+        router.push(`/login?next=/account/${account.code}`);
         return;
       }
       if (!response.ok) {
@@ -117,7 +121,9 @@ export function AccountBuyPanel({ account }: AccountBuyPanelProps) {
       setOrderCode(data.orderCode ?? "");
       setBalanceState(data.balance ?? 0);
       window.setTimeout(() => {
-        window.location.href = "/orders";
+        // refresh() so the catalogue and header re-render without the sold item.
+        router.refresh();
+        router.push("/orders");
       }, 1400);
     } catch {
       setBuyError("Không kết nối được máy chủ");
@@ -126,9 +132,8 @@ export function AccountBuyPanel({ account }: AccountBuyPanelProps) {
     }
   }
 
-  // Hard-coded until a real `balance` prop arrives from the API — the live
-  // dialog always shows "Cần nạp thêm" (never a confirm button) whenever the
-  // wallet balance is short, so a permanent 0 balance reproduces that state.
+  // null until /api/auth/me answers; treat that (and guests) as 0 so the
+  // dialog opens on the "top up" branch rather than flashing a confirm button.
   const balance = balanceState ?? 0;
   const amountToTopUp = Math.max(account.price - balance, 0);
   const canAfford = balance >= account.price;
