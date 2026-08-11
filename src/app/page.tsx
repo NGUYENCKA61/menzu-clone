@@ -16,9 +16,18 @@ import { SiteHeader } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/
 import { MobileBottomNav } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/MobileBottomNav";
 import { ToolsRail } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/ToolsRail";
 import { TransactionTicker } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/TransactionTicker";
+import { formatVnd } from "@/components/sites/menzu-lol-f7ae197a/shared/productData";
+import { getFeedback, getFlashSaleItems } from "@/lib/queries";
 import { UtilitiesHub } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/UtilitiesHub";
 
-export default function Home() {
+export const dynamic = "force-dynamic";
+
+export default async function Home() {
+  const [flashSaleItems, reviews] = await Promise.all([
+    getFlashSaleItems(),
+    getFeedback(),
+  ]);
+
   return (
     <div className="min-h-screen flex flex-col text-white overflow-x-clip selection:bg-indigo-500/30 transition-colors duration-300">
       {/* spacer reserving the fixed header's 104px */}
@@ -32,13 +41,19 @@ export default function Home() {
             <div className="w-full flex flex-col space-y-6 sm:space-y-12">
               <HeroBanners />
               <QuickActionsBar />
-              <FlashSaleSection />
+              <FlashSaleSection items={flashSaleItems} />
               <FeaturedCategories />
               <ProductRow heading="SẢN PHẨM NỔI BẬT" cards={FEATURED_CARDS} className="mb-12" />
               <ProductRow heading="ĐẤU TRƯỜNG CHÂN LÝ" cards={TFT_CARDS} />
               <ProductRow heading="Dịch Vụ Game" cards={GAME_SERVICE_CARDS} />
               <ProductRow heading="Dịch Vụ Khác" cards={OTHER_SERVICE_CARDS} />
-              <ReviewsSection />
+              <ReviewsSection reviews={reviews.map((r) => ({
+                name: r.name,
+                date: r.createdAt.toLocaleDateString("vi-VN"),
+                body: r.body,
+                amount: formatVnd(r.amount) + "đ",
+                avatar: r.avatarUrl ?? "",
+              }))} />
               <TransactionTicker />
               <UtilitiesHub />
             </div>

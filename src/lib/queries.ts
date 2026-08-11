@@ -6,6 +6,7 @@ import type {
   Product,
   TierColor,
 } from "@/components/sites/menzu-lol-f7ae197a/shared/productData";
+import type { FlashSaleItem } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/flashSaleData";
 import type { ContentTier } from "@prisma/client";
 
 /**
@@ -270,4 +271,106 @@ export async function getServiceOrders(
     serviceName: s.service.name,
     createdAt: s.createdAt,
   }));
+}
+
+// ---------------------------------------------------------------------------
+// Homepage
+// ---------------------------------------------------------------------------
+
+/**
+ * Discounted products for the flash-sale carousel, biggest saving first.
+ * Returns the shape FlashSaleCard already speaks — prices as formatted
+ * strings — so the component does not have to change.
+ */
+export async function getFlashSaleItems(take = 20): Promise<FlashSaleItem[]> {
+  const rows = await db.product.findMany({
+    where: { status: "AVAILABLE", oldPrice: { gt: 0 } },
+    include: { skins: { select: { kind: true, tier: true } } },
+  });
+
+  const discountOf = (price: bigint, oldPrice: bigint) =>
+    1 - Number(price) / Number(oldPrice);
+
+  return rows
+    .filter((p) => p.price < p.oldPrice)
+    .sort(
+      (a, b) =>
+        discountOf(b.price, b.oldPrice) - discountOf(a.price, a.oldPrice),
+    )
+    .slice(0, take)
+    .map((p) => {
+      const pct = Math.round(
+        (1 - Number(p.price) / Number(p.oldPrice)) * 100,
+      );
+      return {
+        code: p.code,
+        discount: pct > 0 ? `-${pct}%` : null,
+        oldPrice: `${formatVndString(Number(p.oldPrice))} VND`,
+        newPrice: `${formatVndString(Number(p.price))} VND`,
+        skins: countKind(p.skins, "WEAPON_SKIN"),
+        tiers: toTiers(p.skins).map((t) => ({ color: t.color, count: t.count })),
+      };
+    });
+}
+
+function formatVndString(n: number): string {
+  return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+}
+
+export interface ReviewRow {
+  name: string;
+  body: string;
+  avatarUrl: string | null;
+  amount: number;
+  createdAt: Date;
+}
+
+export async function getFeedback(take = 20): Promise<ReviewRow[]> {
+  const rows = await db.feedback.findMany({
+    orderBy: { createdAt: "desc" },
+    take,
+  });
+  return rows.map((f) => ({
+    name: f.name,
+    body: f.body,
+    avatarUrl: f.avatarUrl,
+    amount: Number(f.amount),
+    createdAt: f.createdAt,
+  }));
+}
+
+export interface TickerRow {
+  user: string;
+  amount: number;
+  code: string;
+  createdAt: Date;
+}
+
+/**
+ * Recent purchases for the homepage ticker. Usernames are masked the way the
+ * live feed does it — "user 4***", "Ke***" — so the strip never exposes who
+ * bought what.
+ */
+export async function getRecentPurchases(take = 20): Promise<TickerRow[]> {
+  const rows = await db.order.findMany({
+    where: { status: "PAID" },
+    orderBy: { createdAt: "desc" },
+    take,
+    include: {
+      user: { select: { username: true } },
+      product: { select: { code: true } },
+    },
+  });
+
+  return rows.map((o) => ({
+    user: maskUsername(o.user.username),
+    amount: Number(o.total),
+    code: `#${o.product.code.toLowerCase()}`,
+    createdAt: o.createdAt,
+  }));
+}
+
+function maskUsername(name: string): string {
+  if (name.length <= 2) return `${name}***`;
+  return `${name.slice(0, 2)}***`;
 }

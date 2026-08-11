@@ -1,7 +1,7 @@
 import Image from "next/image";
 import { ArrowRight, BadgeCheck, Star } from "lucide-react";
 
-interface Review {
+export interface Review {
   name: string;
   date: string;
   body: string;
@@ -51,7 +51,7 @@ const REVIEWS: Review[] = [
   },
 ];
 
-export function ReviewsSection() {
+export function ReviewsSection({ reviews = REVIEWS }: { reviews?: Review[] } = {}) {
   return (
     <div className="mb-12 lg:mb-16">
       <div className="mb-14 w-full border-t border-[#1b1c28] pt-12">
@@ -90,7 +90,7 @@ export function ReviewsSection() {
 
           <div className="lg:col-span-9 relative min-w-0">
             <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory hide-scrollbar menzu-scroll-x overscroll-x-contain cursor-grab active:cursor-grabbing select-none">
-              {REVIEWS.map((review) => (
+              {reviews.map((review) => (
                 <div
                   key={review.avatar}
                   className="w-[280px] sm:w-[320px] lg:w-[calc((100%-32px)/3)] border border-[#25283b] p-5 rounded-2xl snap-start shrink-0 flex flex-col group relative overflow-hidden cursor-pointer hover:border-[#3a3e5a] transition-colors bg-[#0d0d12]"

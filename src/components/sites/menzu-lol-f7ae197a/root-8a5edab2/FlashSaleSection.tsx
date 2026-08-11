@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight, Zap } from "lucide-react";
-import { FLASH_SALE_BACKGROUND_IMAGE, FLASH_SALE_ITEMS } from "./flashSaleData";
+import { FLASH_SALE_BACKGROUND_IMAGE, FLASH_SALE_ITEMS, type FlashSaleItem } from "./flashSaleData";
 import { FlashSaleCard } from "./FlashSaleCard";
 
 // Verbatim section-scoped CSS from the live site's <style> block.
@@ -52,7 +52,7 @@ function padTwoDigits(value: number): string {
   return value.toString().padStart(2, "0");
 }
 
-export function FlashSaleSection() {
+export function FlashSaleSection({ items = FLASH_SALE_ITEMS }: { items?: FlashSaleItem[] } = {}) {
   const trackRef = useRef<HTMLDivElement>(null);
   const [countdown, setCountdown] = useState<CountdownParts | null>(null);
 
@@ -81,7 +81,7 @@ export function FlashSaleSection() {
       if (!first) return;
       const step = first.getBoundingClientRect().width + 24; // card + gap-6
       const visible = Math.max(1, Math.round(track.clientWidth / step));
-      setDotCount(Math.max(1, FLASH_SALE_ITEMS.length - visible + 1));
+      setDotCount(Math.max(1, items.length - visible + 1));
       setActiveDot(Math.round(track.scrollLeft / step));
     };
 
@@ -92,7 +92,7 @@ export function FlashSaleSection() {
       track.removeEventListener("scroll", measure);
       window.removeEventListener("resize", measure);
     };
-  }, []);
+  }, [items.length]);
 
   const scrollToDot = (index: number) => {
     const track = trackRef.current;
@@ -181,7 +181,7 @@ export function FlashSaleSection() {
                 ref={trackRef}
                 className="flex overflow-x-auto gap-4 sm:gap-6 pb-2 hide-scrollbar relative z-10 -mx-4 sm:mx-0 px-4 sm:px-0 scroll-px-4 sm:scroll-px-0 snap-x snap-mandatory cursor-grab"
               >
-                {FLASH_SALE_ITEMS.map((item) => (
+                {items.map((item) => (
                   <FlashSaleCard key={item.code} item={item} />
                 ))}
               </div>
