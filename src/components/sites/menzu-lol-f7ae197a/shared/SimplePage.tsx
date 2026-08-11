@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { ReactNode } from "react";
 
 import { MobileBottomNav } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/MobileBottomNav";
@@ -63,12 +64,12 @@ export function NotCapturedYet({ note }: { note?: string }) {
         {note ??
           "Nội dung của trang này chưa được sao chép từ bản gốc. Vui lòng quay lại sau."}
       </p>
-      <a
+      <Link
         href="/"
         className="mt-5 inline-flex items-center gap-2 h-10 px-5 rounded-xl bg-[#7C3AED] hover:bg-[#6D28D9] transition-colors text-[11px] font-black uppercase tracking-widest text-white"
       >
         Về trang chủ
-      </a>
+      </Link>
     </div>
   );
 }
