@@ -71,6 +71,35 @@ model Session {
   @@map("sessions")
 }
 
+enum DocCategory {
+  FAQ
+  WARRANTY
+  GUIDE
+}
+
+/// A wiki article listed on /docs and rendered at /docs/[slug].
+///
+/// `body` is nullable because only the index was captured: the listing carries
+/// each article's title, date and view count, but the prose lives on its own
+/// page. An article without a body renders an explicit empty state instead of
+/// invented copy.
+model DocArticle {
+  id           String      @id @default(cuid())
+  slug         String      @unique
+  title        String
+  category     DocCategory
+  excerpt      String?
+  body         String?
+  thumbnailUrl String
+  views        Int         @default(0)
+  publishedAt  DateTime
+  sortOrder    Int         @default(0)
+  updatedAt    DateTime    @updatedAt @default(now())
+
+  @@index([category, sortOrder])
+  @@map("doc_articles")
+}
+
 /// Owner card shown at the top of /bio. One row.
 model BioProfile {
   id        String     @id @default(cuid())

@@ -443,3 +443,14 @@ export async function getBioProfile() {
     include: { links: { orderBy: [{ page: "asc" }, { sortOrder: "asc" }] } },
   });
 }
+
+/** Wiki articles for /docs, grouped by section in display order. */
+export async function listDocArticles() {
+  return db.docArticle.findMany({
+    orderBy: [{ category: "asc" }, { sortOrder: "asc" }],
+  });
+}
+
+export async function getDocArticle(slug: string) {
+  return db.docArticle.findUnique({ where: { slug } });
+}

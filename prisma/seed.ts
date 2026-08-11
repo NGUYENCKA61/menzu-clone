@@ -371,6 +371,36 @@ async function main() {
   }
   console.log("  bio profile: 1");
 
+  // Titles, dates, view counts and thumbnails come from the captured index.
+  // Bodies are left null on purpose: the article prose is the shop owner's own
+  // writing and was never captured, so each page shows an empty state until
+  // someone writes it rather than inventing policy text nobody agreed to.
+  const DOCS = [
+    ["menzu-mail-la-gi", "Menzu Mail Là Gì ?", "FAQ", "menzumail", 1805, "2026-06-27", 0],
+    ["drop-mail-la-gi", "Drop Mail Là Gì ?", "FAQ", "dropmail", 1434, "2026-06-27", 1],
+    ["acc-full-access-fa-la-gi", "Acc Full Access - FA Là Gì ?", "FAQ", "fa", 343, "2026-06-27", 2],
+    ["acc-non-full-access-nfa-la-gi", "Acc Non Full Access - NFA Là Gì ?", "FAQ", "nfa", 143, "2026-06-27", 3],
+    ["chinh-sach-bao-hanh-drop-mail", "Chính Sách Bảo Hành Drop Mail", "WARRANTY", "CSBHDROP", 639, "2026-06-28", 0],
+    ["chinh-sach-bao-hanh-menzu-mail", "Chính Sách Bảo Hành Menzu Mail", "WARRANTY", "CSBHMENZU", 685, "2026-06-29", 1],
+    ["huong-dan-check-thu-welcome", "Hướng Dẫn Check Thư Welcome", "GUIDE", "checkwc", 1049, "2026-06-29", 0],
+  ] as const;
+
+  const docCount = await db.docArticle.count();
+  if (docCount === 0) {
+    await db.docArticle.createMany({
+      data: DOCS.map(([slug, title, category, image, views, date, sortOrder]) => ({
+        slug,
+        title,
+        category,
+        views,
+        sortOrder,
+        publishedAt: new Date(date),
+        thumbnailUrl: `${IMAGES}/docs/${image}.webp`,
+      })),
+    });
+  }
+  console.log(`  doc articles: ${DOCS.length}`);
+
   console.log("Done.");
 }
 

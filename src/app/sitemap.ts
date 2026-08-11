@@ -33,10 +33,16 @@ type Frequency = "daily" | "weekly" | "monthly" | "yearly";
 export const revalidate = 3600;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [products, categories, services] = await Promise.all([
+  const [products, categories, services, docs] = await Promise.all([
     db.product.findMany({ select: { code: true, updatedAt: true } }),
     db.category.findMany({ select: { slug: true, updatedAt: true } }),
     db.service.findMany({ select: { slug: true, updatedAt: true } }),
+    // Only articles that have been written: the empty ones are noindex, and
+    // listing a noindex page here sends crawlers two contradictory signals.
+    db.docArticle.findMany({
+      where: { body: { not: null } },
+      select: { slug: true, updatedAt: true },
+    }),
   ]);
 
   const now = new Date();
@@ -65,6 +71,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: service.updatedAt,
       changeFrequency: "weekly" as const,
       priority: 0.6,
+    })),
+    ...docs.map((doc) => ({
+      url: `${SITE_URL}/docs/${doc.slug}`,
+      lastModified: doc.updatedAt,
+      changeFrequency: "monthly" as const,
+      priority: 0.5,
     })),
   ];
 }
