@@ -234,8 +234,27 @@
   }
 }
 
+@keyframes slideUpFade {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .animate-spin-slow {
   animation: spin-slow 4s linear infinite;
+}
+
+/* Inner pages enter with these — /login uses slideUpFade, /categories fade-up */
+.animate-slideUpFade {
+  animation: slideUpFade 0.5s ease-out;
+}
+.animate-fade-up {
+  animation: fadeUpIn 0.5s ease-out;
 }
 
 /* Horizontal product rows hide their scrollbar but stay scrollable */

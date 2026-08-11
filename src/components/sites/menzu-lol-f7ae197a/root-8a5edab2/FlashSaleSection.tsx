@@ -66,6 +66,42 @@ export function FlashSaleSection() {
     };
   }, []);
 
+  // Dot pagination: the live site renders one dot per scroll STOP, not per page —
+  // 20 cards with 4 visible gives 17 dots. Both numbers are breakpoint-dependent,
+  // so they are measured from the track rather than hard-coded.
+  const [dotCount, setDotCount] = useState(1);
+  const [activeDot, setActiveDot] = useState(0);
+
+  useEffect(() => {
+    const track = trackRef.current;
+    if (!track) return;
+
+    const measure = () => {
+      const first = track.firstElementChild as HTMLElement | null;
+      if (!first) return;
+      const step = first.getBoundingClientRect().width + 24; // card + gap-6
+      const visible = Math.max(1, Math.round(track.clientWidth / step));
+      setDotCount(Math.max(1, FLASH_SALE_ITEMS.length - visible + 1));
+      setActiveDot(Math.round(track.scrollLeft / step));
+    };
+
+    measure();
+    track.addEventListener("scroll", measure, { passive: true });
+    window.addEventListener("resize", measure);
+    return () => {
+      track.removeEventListener("scroll", measure);
+      window.removeEventListener("resize", measure);
+    };
+  }, []);
+
+  const scrollToDot = (index: number) => {
+    const track = trackRef.current;
+    const first = track?.firstElementChild as HTMLElement | null;
+    if (!track || !first) return;
+    const step = first.getBoundingClientRect().width + 24;
+    track.scrollTo({ left: index * step, behavior: "smooth" });
+  };
+
   const handlePrev = () => {
     const track = trackRef.current;
     if (!track) return;
@@ -158,6 +194,22 @@ export function FlashSaleSection() {
               >
                 <ChevronRight size={20} />
               </button>
+            </div>
+
+            <div className="flex justify-center items-center gap-2 h-8 mt-6 mb-2">
+              {Array.from({ length: dotCount }, (_, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  aria-label={`Tới nhóm ${i + 1}`}
+                  onClick={() => scrollToDot(i)}
+                  className={
+                    i === activeDot
+                      ? "transition-all duration-300 rounded-full w-8 h-2 bg-indigo-500"
+                      : "transition-all duration-300 rounded-full w-2 h-2 bg-neutral-600 hover:bg-neutral-500"
+                  }
+                />
+              ))}
             </div>
           </div>
         </div>
