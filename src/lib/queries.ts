@@ -184,3 +184,90 @@ export async function getRelatedProducts(
     price: Number(p.price),
   }));
 }
+
+// ---------------------------------------------------------------------------
+// Account area
+// ---------------------------------------------------------------------------
+
+export interface LedgerRow {
+  code: string;
+  kind: string;
+  status: string;
+  delta: number;
+  balanceAfter: number;
+  description: string;
+  method: string | null;
+  createdAt: Date;
+}
+
+export async function getTransactions(userId: string): Promise<LedgerRow[]> {
+  const rows = await db.transaction.findMany({
+    where: { userId },
+    orderBy: { createdAt: "desc" },
+    take: 50,
+  });
+  return rows.map((t) => ({
+    code: t.code,
+    kind: t.kind,
+    status: t.status,
+    delta: Number(t.delta),
+    balanceAfter: Number(t.balanceAfter),
+    description: t.description,
+    method: t.method,
+    createdAt: t.createdAt,
+  }));
+}
+
+export interface OrderRow {
+  code: string;
+  status: string;
+  total: number;
+  createdAt: Date;
+  productCode: string;
+  productRank: string;
+  imageUrl: string | null;
+}
+
+export async function getOrders(userId: string): Promise<OrderRow[]> {
+  const rows = await db.order.findMany({
+    where: { userId },
+    orderBy: { createdAt: "desc" },
+    include: {
+      product: { select: { code: true, rank: true, imageUrl: true } },
+    },
+  });
+  return rows.map((o) => ({
+    code: o.code,
+    status: o.status,
+    total: Number(o.total),
+    createdAt: o.createdAt,
+    productCode: o.product.code,
+    productRank: o.product.rank,
+    imageUrl: o.product.imageUrl,
+  }));
+}
+
+export interface ServiceOrderRow {
+  code: string;
+  status: string;
+  amount: number;
+  serviceName: string;
+  createdAt: Date;
+}
+
+export async function getServiceOrders(
+  userId: string,
+): Promise<ServiceOrderRow[]> {
+  const rows = await db.serviceOrder.findMany({
+    where: { userId },
+    orderBy: { createdAt: "desc" },
+    include: { service: { select: { name: true } } },
+  });
+  return rows.map((s) => ({
+    code: s.code,
+    status: s.status,
+    amount: Number(s.amount),
+    serviceName: s.service.name,
+    createdAt: s.createdAt,
+  }));
+}

@@ -1,26 +1,32 @@
 import type { Metadata } from "next";
 
+import { redirect } from "next/navigation";
+
+import { getCurrentUser } from "@/lib/session";
+import { formatVnd } from "@/components/sites/menzu-lol-f7ae197a/shared/productData";
 import { AccountPageFrame } from "@/components/sites/menzu-lol-f7ae197a/shared/AccountPageFrame";
 
 export const metadata: Metadata = { title: "Menzu Valorant | Profile" };
+export const dynamic = "force-dynamic";
 
-/**
- * Values below are the live shape of the account overview. They are static for
- * now and will be served by the API once the backend exists — the layout is
- * what is being cloned here, not the numbers.
- */
-const STATS = [
-  { label: "Số dư khả dụng", value: "0", unit: "đ", tone: "text-emerald-400" },
-  { label: "Điểm thưởng", value: "0", unit: "Pts", tone: "text-amber-400" },
-  { label: "Cấp bậc thành viên", value: "Bronze", unit: "", tone: "text-orange-300" },
-] as const;
+/** The three summary tiles, filled from the signed-in user's own row. */
+function buildStats(balance: number, points: number, tier: string) {
+  return [
+    { label: "Số dư khả dụng", value: formatVnd(balance), unit: "đ", tone: "text-emerald-400" },
+    { label: "Điểm thưởng", value: String(points), unit: "Pts", tone: "text-amber-400" },
+    { label: "Cấp bậc thành viên", value: tier, unit: "", tone: "text-orange-300" },
+  ];
+}
 
 const LINKED = [
   { provider: "Discord", bonus: "Thưởng 1.000 Pts" },
   { provider: "Google", bonus: "" },
 ] as const;
 
-export default function ProfilePage() {
+export default async function ProfilePage() {
+  const user = await getCurrentUser();
+  if (!user) redirect("/login?next=%2Fprofile");
+
   return (
     <AccountPageFrame
       title="Tổng quan tài khoản"
@@ -41,20 +47,25 @@ export default function ProfilePage() {
 
           <div className="flex flex-col gap-1.5 min-w-0">
             <div className="flex items-center gap-2.5 flex-wrap">
-              <span className="text-xl font-black text-white">abcxyz123</span>
+              <span className="text-xl font-black text-white">{user.username}</span>
               <span className="px-2 py-0.5 rounded-md bg-white/10 border border-white/15 text-[10px] font-black uppercase tracking-widest text-neutral-300">
-                MEMBER
+                {user.role}
               </span>
             </div>
-            <span className="text-xs text-neutral-500 font-semibold">UID: 10049</span>
+            <span className="text-xs text-neutral-500 font-semibold">UID: {user.uid}</span>
             <span className="text-xs text-neutral-500 font-semibold">
-              Đã tham gia: 11/08/2026
+              Đã tham gia:{" "}
+              {user.createdAt.toLocaleDateString("vi-VN", {
+                day: "2-digit",
+                month: "2-digit",
+                year: "numeric",
+              })}
             </span>
           </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {STATS.map((s) => (
+          {buildStats(user.balance, user.points, user.tier).map((s) => (
             <div
               key={s.label}
               className="rounded-2xl border border-white/10 bg-neutral-900/50 p-5 flex flex-col gap-2"
