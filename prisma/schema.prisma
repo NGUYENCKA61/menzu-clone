@@ -97,6 +97,9 @@ model Category {
   imageUrl  String?
   soldCount Int       @default(0)
   stockCount Int      @default(0)
+  /// Feeds sitemap.xml's <lastmod>. Stamping every entry with "now" instead
+  /// teaches crawlers the field is noise and they stop honouring it.
+  updatedAt DateTime  @updatedAt @default(now())
   products  Product[]
 
   @@map("categories")
@@ -142,6 +145,7 @@ model Product {
 
   soldCount  Int           @default(0)
   createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt @default(now())
 
   tags       ProductTag[]
   skins      ProductSkin[]
@@ -333,6 +337,7 @@ model Service {
   priceLabel  String?
   imageUrl    String?
   doneCount   Int            @default(0)
+  updatedAt   DateTime       @updatedAt @default(now())
   orders      ServiceOrder[]
 
   @@map("services")

@@ -13,6 +13,7 @@ import { ToolsRail } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/T
 import { TransactionTicker } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/TransactionTicker";
 import { formatVnd } from "@/components/sites/menzu-lol-f7ae197a/shared/productData";
 import { getFeedback, getFlashSaleItems, getRecentPurchases } from "@/lib/queries";
+import { JsonLd, organizationJsonLd } from "@/lib/seo";
 import { UtilitiesHub } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/UtilitiesHub";
 
 export const dynamic = "force-dynamic";
@@ -27,6 +28,7 @@ export default async function Home() {
 
   return (
     <div className="min-h-screen flex flex-col text-white overflow-x-clip selection:bg-indigo-500/30 transition-colors duration-300">
+      <JsonLd data={organizationJsonLd()} />
       {/* spacer reserving the fixed header's 104px */}
       <div className="w-full shrink-0 h-[104px]" />
       <SiteHeader />

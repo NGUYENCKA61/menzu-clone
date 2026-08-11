@@ -29,11 +29,11 @@ const TIER_ICON_BASE_PATH =
 // Tailwind can't see dynamically-built class names, so every tier color's
 // icon path is spelled out here as a literal record, keyed by tier color.
 export const TIER_ICON_PATHS: Record<TierColor, string> = {
-  yellow: `${TIER_ICON_BASE_PATH}/e046854e-406c-37f4-6607-19a9ba8426fc.png`,
-  orange: `${TIER_ICON_BASE_PATH}/411e4a55-4e59-7757-41f0-86a53f101bb5.png`,
-  pink: `${TIER_ICON_BASE_PATH}/60bca009-4182-7998-dee7-b8a2558dc369.png`,
-  cyan: `${TIER_ICON_BASE_PATH}/0cebb8be-46d7-c12a-d306-e9907bfc5a25.png`,
-  blue: `${TIER_ICON_BASE_PATH}/12683d76-48d7-84a3-4e09-6985794f0445.png`,
+  yellow: `${TIER_ICON_BASE_PATH}/e046854e-406c-37f4-6607-19a9ba8426fc.webp`,
+  orange: `${TIER_ICON_BASE_PATH}/411e4a55-4e59-7757-41f0-86a53f101bb5.webp`,
+  pink: `${TIER_ICON_BASE_PATH}/60bca009-4182-7998-dee7-b8a2558dc369.webp`,
+  cyan: `${TIER_ICON_BASE_PATH}/0cebb8be-46d7-c12a-d306-e9907bfc5a25.webp`,
+  blue: `${TIER_ICON_BASE_PATH}/12683d76-48d7-84a3-4e09-6985794f0445.webp`,
 };
 
 export const CATEGORY_PRODUCTS: Product[] = [
@@ -224,7 +224,7 @@ export const CATEGORY_PRODUCTS: Product[] = [
 ];
 
 export function productImage(code: string): string {
-  return `${ACCOUNT_IMAGE_BASE_PATH}/${code}.png`;
+  return `${ACCOUNT_IMAGE_BASE_PATH}/${code}.webp`;
 }
 
 export function discountPct(p: Product): number {

@@ -152,6 +152,7 @@ export async function getAccountDetail(
     categoryName: p.category.name,
     categorySlug: p.category.slug,
     viewers: p.viewers,
+    sold: p.status !== "AVAILABLE",
   };
 }
 

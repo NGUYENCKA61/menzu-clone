@@ -13,6 +13,7 @@ import { Breadcrumb } from "@/components/sites/menzu-lol-f7ae197a/shared/Breadcr
 import { ProductCard } from "@/components/sites/menzu-lol-f7ae197a/shared/ProductCard";
 import { formatVnd } from "@/components/sites/menzu-lol-f7ae197a/shared/productData";
 import { getAccountDetail, getRelatedProducts } from "@/lib/queries";
+import { breadcrumbJsonLd, JsonLd, productJsonLd } from "@/lib/seo";
 
 interface PageProps {
   params: Promise<{ code: string }>;
@@ -21,12 +22,31 @@ interface PageProps {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { code } = await params;
   const account = await getAccountDetail(code);
-  if (!account) return { title: "Menzu Valorant" };
+  if (!account) return { title: "Không tìm thấy tài khoản" };
+
+  // The live site puts the price in the <title>; kept as-is because it is the
+  // single strongest click signal on a shop listing in search results.
+  const title = `Mã ${code} - ${code.replace(/^([A-Z]+)/, "$1#")} | Giá bán: ${formatVnd(
+    account.price,
+  )}đ`;
+  const description =
+    `Account Valorant mã ${code} — rank ${account.rank}, ${account.weaponSkins} skin súng, ` +
+    `${account.agents} agent, level ${account.level}. Giá ${formatVnd(account.price)}đ. ` +
+    `Bàn giao ngay sau khi thanh toán.`;
+  const image = `/sites/menzu-lol-f7ae197a/root-8a5edab2/images/account/${code}.webp`;
+
   return {
-    title: `Menzu Valorant | Mã ${code} - ${code.replace(
-      /^([A-Z]+)/,
-      "$1#",
-    )} | Giá bán: ${formatVnd(account.price)}đ`,
+    title,
+    description,
+    alternates: { canonical: `/account/${code}` },
+    openGraph: {
+      type: "website",
+      title,
+      description,
+      url: `/account/${code}`,
+      images: [{ url: image, alt: `Kho đồ tài khoản ${code}` }],
+    },
+    twitter: { card: "summary_large_image", title, description, images: [image] },
   };
 }
 
@@ -40,6 +60,25 @@ export default async function AccountDetailPage({ params }: PageProps) {
 
   return (
     <div className="min-h-screen flex flex-col text-white overflow-x-clip selection:bg-indigo-500/30">
+      <JsonLd
+        data={productJsonLd({
+          code: account.code,
+          price: account.price,
+          oldPrice: account.oldPrice,
+          imageUrl: `/sites/menzu-lol-f7ae197a/root-8a5edab2/images/account/${account.code}.webp`,
+          categoryName: account.categoryName,
+          rank: account.rank,
+          weaponSkins: account.weaponSkins,
+          available: !account.sold,
+        })}
+      />
+      <JsonLd
+        data={breadcrumbJsonLd([
+          { name: "Trang chủ", path: "/" },
+          { name: account.categoryName, path: `/category/${account.categorySlug}` },
+          { name: `Mã ${account.code}` },
+        ])}
+      />
       <div className="w-full shrink-0 h-[104px]" />
       <SiteHeader />
 

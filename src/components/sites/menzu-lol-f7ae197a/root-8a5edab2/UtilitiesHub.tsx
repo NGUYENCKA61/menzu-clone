@@ -3,9 +3,9 @@ import type { LucideIcon } from "lucide-react";
 import { ArrowRight, Crosshair, Gift, Target } from "lucide-react";
 
 const MAIN_ART_SRC =
-  "/sites/menzu-lol-f7ae197a/root-8a5edab2/images/site/images/valorant-hero.png";
+  "/sites/menzu-lol-f7ae197a/root-8a5edab2/images/site/images/valorant-hero.webp";
 const TRADE_ART_SRC =
-  "/sites/menzu-lol-f7ae197a/root-8a5edab2/images/external/cmsassets-rgpub-io/0c67438c8b3a418b5ca28f9f234506745493ae42-854x484.png";
+  "/sites/menzu-lol-f7ae197a/root-8a5edab2/images/external/cmsassets-rgpub-io/0c67438c8b3a418b5ca28f9f234506745493ae42-854x484.webp";
 
 const MAIN_EYEBROW = "VALORANT UTILITIES HUB";
 const MAIN_PARAGRAPH =

@@ -54,7 +54,7 @@ export function MobileDrawer({ open, onClose, groups }: MobileDrawerProps) {
             <div className="relative w-9 h-9 flex items-center justify-center">
               <span className="navbar-spin-ring absolute inset-[-2px] rounded-full border border-transparent border-t-red-500 animate-spin-slow" />
               <Image
-                src="/sites/menzu-lol-f7ae197a/root-8a5edab2/images/site/logos/menzu-logo.png"
+                src="/sites/menzu-lol-f7ae197a/root-8a5edab2/images/site/logos/menzu-logo.webp"
                 alt="Menzu"
                 width={24}
                 height={24}

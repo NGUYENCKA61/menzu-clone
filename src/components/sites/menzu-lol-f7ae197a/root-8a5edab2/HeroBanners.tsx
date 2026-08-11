@@ -7,13 +7,13 @@ interface SubBanner {
 
 const IMAGE_BASE = "/sites/menzu-lol-f7ae197a/root-8a5edab2/images/upload";
 
-const MAIN_BANNER_SRC = `${IMAGE_BASE}/bannermung9-7-26.png`;
+const MAIN_BANNER_SRC = `${IMAGE_BASE}/bannermung9-7-26.webp`;
 
 const SUB_BANNERS: SubBanner[] = [
-  { src: `${IMAGE_BASE}/subbanner3.png`, alt: "Sub Banner" },
-  { src: `${IMAGE_BASE}/subbanner4.png`, alt: "Sub Banner" },
-  { src: `${IMAGE_BASE}/subbanner2.png`, alt: "Sub Banner" },
-  { src: `${IMAGE_BASE}/subbanner1.png`, alt: "Sub Banner" },
+  { src: `${IMAGE_BASE}/subbanner3.webp`, alt: "Sub Banner" },
+  { src: `${IMAGE_BASE}/subbanner4.webp`, alt: "Sub Banner" },
+  { src: `${IMAGE_BASE}/subbanner2.webp`, alt: "Sub Banner" },
+  { src: `${IMAGE_BASE}/subbanner1.webp`, alt: "Sub Banner" },
 ];
 
 export function HeroBanners() {

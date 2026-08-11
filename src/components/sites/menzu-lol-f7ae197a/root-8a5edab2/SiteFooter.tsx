@@ -8,12 +8,12 @@ interface PaymentChip {
 }
 
 const PAYMENTS: PaymentChip[] = [
-  { src: `${IMG}/images/acb.png`, alt: "ACB" },
-  { src: `${IMG}/images/momo.png`, alt: "MoMo" },
-  { src: `${IMG}/images/zalopay.png`, alt: "ZaloPay" },
-  { src: `${IMG}/images/vnpay.png`, alt: "VNPay" },
-  { src: `${IMG}/images/paypal.png`, alt: "PayPal" },
-  { src: `${IMG}/images/crypto.png`, alt: "Crypto" },
+  { src: `${IMG}/images/acb.webp`, alt: "ACB" },
+  { src: `${IMG}/images/momo.webp`, alt: "MoMo" },
+  { src: `${IMG}/images/zalopay.webp`, alt: "ZaloPay" },
+  { src: `${IMG}/images/vnpay.webp`, alt: "VNPay" },
+  { src: `${IMG}/images/paypal.webp`, alt: "PayPal" },
+  { src: `${IMG}/images/crypto.webp`, alt: "Crypto" },
 ];
 
 interface FooterColumn {
@@ -184,7 +184,7 @@ export function SiteFooter() {
 
             <div className="w-full max-w-[320px] h-[90px] rounded-xl border border-indigo-500/20 pl-16 pr-4 py-4 flex items-center justify-between shadow-lg relative overflow-hidden bg-[#0d0d12]">
               <Image
-                src={`${IMG}/logos/menzu-logo.png`}
+                src={`${IMG}/logos/menzu-logo.webp`}
                 alt="Menzu"
                 width={34}
                 height={34}
@@ -205,7 +205,7 @@ export function SiteFooter() {
         {/* Row 3 — copyright */}
         <div className="pt-8 flex flex-col md:flex-row items-center justify-center md:justify-start gap-3">
           <Image
-            src={`${IMG}/logos/menzu-logo.png`}
+            src={`${IMG}/logos/menzu-logo.webp`}
             alt="Menzu"
             width={28}
             height={28}

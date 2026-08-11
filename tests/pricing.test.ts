@@ -83,7 +83,7 @@ describe("seeded catalogue data", () => {
 
   it("builds image paths under the site's own asset namespace", () => {
     expect(productImage("VLR2030")).toBe(
-      "/sites/menzu-lol-f7ae197a/root-8a5edab2/images/account/VLR2030.png",
+      "/sites/menzu-lol-f7ae197a/root-8a5edab2/images/account/VLR2030.webp",
     );
   });
 });

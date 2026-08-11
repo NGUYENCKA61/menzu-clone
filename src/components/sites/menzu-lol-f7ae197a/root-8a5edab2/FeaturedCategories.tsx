@@ -10,7 +10,7 @@ interface CategoryCard {
 
 const ART_BASE = "/sites/menzu-lol-f7ae197a/root-8a5edab2/images/upload";
 const BACKCARD_SRC =
-  "/sites/menzu-lol-f7ae197a/root-8a5edab2/images/site/images/backcard.png";
+  "/sites/menzu-lol-f7ae197a/root-8a5edab2/images/site/images/backcard.webp";
 
 /**
  * A fixed promotional row, not catalogue data — two of the four tiles point at
@@ -21,12 +21,12 @@ const CATEGORY_CARDS: CategoryCard[] = [
   {
     line1: "ACC TỰ CHỌN",
     line2: "VALORANT",
-    art: "clove.png",
+    art: "clove.webp",
     href: "/category/account-valorant-tu-chon",
   },
-  { line1: "CHECK SKIN KHO ĐỒ", line2: "VALORANT", art: "omen.png", href: "#" },
-  { line1: "BUILD KHO ĐỒ", line2: "VIP", art: "jett.png", href: "#" },
-  { line1: "DỊCH VỤ", line2: "VALORANT", art: "neon.png", href: "/services" },
+  { line1: "CHECK SKIN KHO ĐỒ", line2: "VALORANT", art: "omen.webp", href: "#" },
+  { line1: "BUILD KHO ĐỒ", line2: "VIP", art: "jett.webp", href: "#" },
+  { line1: "DỊCH VỤ", line2: "VALORANT", art: "neon.webp", href: "/services" },
 ];
 
 const CARD_THEME = {

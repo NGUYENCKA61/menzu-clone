@@ -62,7 +62,7 @@ function TickerItem({ entry, ariaHidden }: { entry: TickerEntry; ariaHidden?: bo
     >
       <div className="w-8 h-8 rounded-lg overflow-hidden shrink-0 bg-white/5 border border-white/10">
         <Image
-          src={`${AVATAR_BASE}/${entry.agentId}.png`}
+          src={`${AVATAR_BASE}/${entry.agentId}.webp`}
           alt={entry.user}
           width={32}
           height={32}

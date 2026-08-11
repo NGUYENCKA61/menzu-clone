@@ -25,7 +25,7 @@ export const FEATURED_CARDS: ProductCard[] = [
     ],
   },
   {
-    image: `${IMAGE_BASE_PATH}/upload/0-5.png`,
+    image: `${IMAGE_BASE_PATH}/upload/0-5.webp`,
     title: "RANDOM VALORANT 20K | ĐỔI THÔNG TIN",
     stats: [
       { label: "Đã Bán", value: "1600" },
@@ -33,7 +33,7 @@ export const FEATURED_CARDS: ProductCard[] = [
     ],
   },
   {
-    image: `${IMAGE_BASE_PATH}/upload/prerankthumb.png`,
+    image: `${IMAGE_BASE_PATH}/upload/prerankthumb.webp`,
     title: "RANDOM SMUFT BẮN RANK | ĐỔI THÔNG TIN",
     stats: [
       { label: "Đã Bán", value: "208" },
@@ -41,7 +41,7 @@ export const FEATURED_CARDS: ProductCard[] = [
     ],
   },
   {
-    image: `${IMAGE_BASE_PATH}/upload/rdlv20.png`,
+    image: `${IMAGE_BASE_PATH}/upload/rdlv20.webp`,
     title: "RANDOM VALORANT TRÊN LV 20 | ĐỔI THÔNG TIN",
     stats: [
       { label: "Đã Bán", value: "113" },
@@ -49,7 +49,7 @@ export const FEATURED_CARDS: ProductCard[] = [
     ],
   },
   {
-    image: `${IMAGE_BASE_PATH}/upload/nfarank.png`,
+    image: `${IMAGE_BASE_PATH}/upload/nfarank.webp`,
     title: "RANDOM VALORANT TRÊN LV 20 | NFA",
     stats: [
       { label: "Đã Bán", value: "199" },
@@ -60,7 +60,7 @@ export const FEATURED_CARDS: ProductCard[] = [
 
 export const TFT_CARDS: ProductCard[] = [
   {
-    image: `${IMAGE_BASE_PATH}/account/TFT/pettim.png`,
+    image: `${IMAGE_BASE_PATH}/account/TFT/pettim.webp`,
     title: "RANDOM ACC TFT",
     stats: [
       { label: "Loại SP", value: "5" },
@@ -68,7 +68,7 @@ export const TFT_CARDS: ProductCard[] = [
     ],
   },
   {
-    image: `${IMAGE_BASE_PATH}/upload/petim.png`,
+    image: `${IMAGE_BASE_PATH}/upload/petim.webp`,
     title: "ACC TFT PET TÍM",
     stats: [
       { label: "Loại SP", value: "61" },
@@ -76,7 +76,7 @@ export const TFT_CARDS: ProductCard[] = [
     ],
   },
   {
-    image: `${IMAGE_BASE_PATH}/upload/SANTFTTUCHON.png`,
+    image: `${IMAGE_BASE_PATH}/upload/SANTFTTUCHON.webp`,
     title: "ACC TFT SÀN TÍM",
     stats: [
       { label: "Đã Bán", value: "0" },
@@ -84,7 +84,7 @@ export const TFT_CARDS: ProductCard[] = [
     ],
   },
   {
-    image: `${IMAGE_BASE_PATH}/upload/tfttuchon.png`,
+    image: `${IMAGE_BASE_PATH}/upload/tfttuchon.webp`,
     title: "ACC TFT HÀNG HIỆU",
     stats: [
       { label: "Đã Bán", value: "0" },
@@ -95,7 +95,7 @@ export const TFT_CARDS: ProductCard[] = [
 
 export const GAME_SERVICE_CARDS: ProductCard[] = [
   {
-    image: `${IMAGE_BASE_PATH}/external/www-riotgames-com/riotpr-mar2023-social-twitch-1920x1080-03-17-2023.png`,
+    image: `${IMAGE_BASE_PATH}/external/www-riotgames-com/riotpr-mar2023-social-twitch-1920x1080-03-17-2023.webp`,
     title: "Dịch Vụ Riot Games",
     stats: [
       { label: "Giá từ", value: "200K ~ 800K" },
@@ -103,7 +103,7 @@ export const GAME_SERVICE_CARDS: ProductCard[] = [
     ],
   },
   {
-    image: `${IMAGE_BASE_PATH}/upload/packvn.png`,
+    image: `${IMAGE_BASE_PATH}/upload/packvn.webp`,
     title: "Nạp Valorant Point VN",
     stats: [
       { label: "Giá từ", value: "109K ~ 2.2M" },
@@ -111,7 +111,7 @@ export const GAME_SERVICE_CARDS: ProductCard[] = [
     ],
   },
   {
-    image: `${IMAGE_BASE_PATH}/upload/phthumb.png`,
+    image: `${IMAGE_BASE_PATH}/upload/phthumb.webp`,
     title: "Nạp Valorant Point PH",
     stats: [
       { label: "Giá từ", value: "199K ~ 1.9M" },
@@ -130,7 +130,7 @@ export const OTHER_SERVICE_CARDS: ProductCard[] = [
     ],
   },
   {
-    image: `${IMAGE_BASE_PATH}/external/cdn-tgdd-vn/2-110423-103232-800-resize.jpg`,
+    image: `${IMAGE_BASE_PATH}/external/cdn-tgdd-vn/2-110423-103232-800-resize.webp`,
     title: "Youtube Premium Cá Nhân",
     stats: [
       { label: "Giá từ", value: "50K ~ 550K" },
@@ -138,7 +138,7 @@ export const OTHER_SERVICE_CARDS: ProductCard[] = [
     ],
   },
   {
-    image: `${IMAGE_BASE_PATH}/upload/mokhoafb.png`,
+    image: `${IMAGE_BASE_PATH}/upload/mokhoafb.webp`,
     title: "Dịch Vụ Mở Khóa Facebook",
     stats: [
       { label: "Báo giá", value: "Liên hệ" },

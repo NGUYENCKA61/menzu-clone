@@ -5,7 +5,7 @@ import Image from "next/image";
 import { ArrowLeft, Eye, EyeOff, Lock, User } from "lucide-react";
 
 const HERO_IMAGE_SRC =
-  "/sites/menzu-lol-f7ae197a/root-8a5edab2/images/valorant-api/bundles/cb572643-4ce2-b10a-bb56-7c90cc09b19c.png";
+  "/sites/menzu-lol-f7ae197a/root-8a5edab2/images/valorant-api/bundles/cb572643-4ce2-b10a-bb56-7c90cc09b19c.webp";
 
 /* lucide-react no longer ships brand marks, so the two OAuth buttons get
  * small hand-drawn single-color glyphs instead. */

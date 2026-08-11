@@ -10,7 +10,7 @@ export function PageBackdrop() {
   return (
     <div className="fixed top-0 left-0 w-full h-[100vh] z-[-1] overflow-hidden pointer-events-none">
       <Image
-        src="/sites/menzu-lol-f7ae197a/root-8a5edab2/images/behance/e4307d166239615.6418bdb0084a4.png"
+        src="/sites/menzu-lol-f7ae197a/root-8a5edab2/images/behance/e4307d166239615.6418bdb0084a4.webp"
         alt="Home Background"
         fill
         priority

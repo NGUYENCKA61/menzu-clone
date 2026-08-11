@@ -39,14 +39,14 @@ const CATEGORIES: {
   stock: number;
 }[] = [
   { slug: 'account-valorant-tu-chon', name: 'ACCOUNT VALORANT TỰ CHỌN', image: 'upload/acctuchon.gif', sold: 6202, stock: 165 },
-  { slug: 'random-valorant-20k-oi-thong-tin', name: 'RANDOM VALORANT 20K | ĐỔI THÔNG TIN', image: 'upload/0-5.png', sold: 1600, stock: 8 },
-  { slug: 'random-smuft-ban-rank-oi-thong-tin', name: 'RANDOM SMUFT BẮN RANK | ĐỔI THÔNG TIN', image: 'upload/prerankthumb.png', sold: 208, stock: 3 },
-  { slug: 'random-valorant-tren-lv-20-oi-thong-tin', name: 'RANDOM VALORANT TRÊN LV 20 | ĐỔI THÔNG TIN', image: 'upload/rdlv20.png', sold: 113, stock: 0 },
-  { slug: 'random-valorant-tren-lv-20-nfa', name: 'RANDOM VALORANT TRÊN LV 20 | NFA', image: 'upload/nfarank.png', sold: 199, stock: 0 },
-  { slug: 'random-acc-tft', name: 'RANDOM ACC TFT', image: 'account/TFT/pettim.png', sold: 5, stock: 840 },
-  { slug: 'acc-tft-pet-tim', name: 'ACC TFT PET TÍM', image: 'upload/petim.png', sold: 61, stock: 200 },
-  { slug: 'acc-tft-san-tim', name: 'ACC TFT SÀN TÍM', image: 'upload/SANTFTTUCHON.png', sold: 0, stock: 0 },
-  { slug: 'acc-tft-hang-hieu', name: 'ACC TFT HÀNG HIỆU', image: 'upload/tfttuchon.png', sold: 0, stock: 0 },
+  { slug: 'random-valorant-20k-oi-thong-tin', name: 'RANDOM VALORANT 20K | ĐỔI THÔNG TIN', image: 'upload/0-5.webp', sold: 1600, stock: 8 },
+  { slug: 'random-smuft-ban-rank-oi-thong-tin', name: 'RANDOM SMUFT BẮN RANK | ĐỔI THÔNG TIN', image: 'upload/prerankthumb.webp', sold: 208, stock: 3 },
+  { slug: 'random-valorant-tren-lv-20-oi-thong-tin', name: 'RANDOM VALORANT TRÊN LV 20 | ĐỔI THÔNG TIN', image: 'upload/rdlv20.webp', sold: 113, stock: 0 },
+  { slug: 'random-valorant-tren-lv-20-nfa', name: 'RANDOM VALORANT TRÊN LV 20 | NFA', image: 'upload/nfarank.webp', sold: 199, stock: 0 },
+  { slug: 'random-acc-tft', name: 'RANDOM ACC TFT', image: 'account/TFT/pettim.webp', sold: 5, stock: 840 },
+  { slug: 'acc-tft-pet-tim', name: 'ACC TFT PET TÍM', image: 'upload/petim.webp', sold: 61, stock: 200 },
+  { slug: 'acc-tft-san-tim', name: 'ACC TFT SÀN TÍM', image: 'upload/SANTFTTUCHON.webp', sold: 0, stock: 0 },
+  { slug: 'acc-tft-hang-hieu', name: 'ACC TFT HÀNG HIỆU', image: 'upload/tfttuchon.webp', sold: 0, stock: 0 },
 ];
 
 /**
@@ -66,21 +66,21 @@ const SERVICES: {
     priceLabel: "200K ~ 800K",
     doneCount: 96,
     image:
-      "external/www-riotgames-com/riotpr-mar2023-social-twitch-1920x1080-03-17-2023.png",
+      "external/www-riotgames-com/riotpr-mar2023-social-twitch-1920x1080-03-17-2023.webp",
   },
   {
     slug: "valorantpoint-vn",
     name: "Nạp Valorant Point VN",
     priceLabel: "109K ~ 2.2M",
     doneCount: 213,
-    image: "upload/packvn.png",
+    image: "upload/packvn.webp",
   },
   {
     slug: "valorantpoint-ph",
     name: "Nạp Valorant Point PH",
     priceLabel: "199K ~ 1.9M",
     doneCount: 64,
-    image: "upload/phthumb.png",
+    image: "upload/phthumb.webp",
   },
   {
     slug: "rutvts",
@@ -95,14 +95,14 @@ const SERVICES: {
     name: "Youtube Premium Cá Nhân",
     priceLabel: "50K ~ 550K",
     doneCount: 8,
-    image: "external/cdn-tgdd-vn/2-110423-103232-800-resize.jpg",
+    image: "external/cdn-tgdd-vn/2-110423-103232-800-resize.webp",
   },
   {
     slug: "dvfb",
     name: "Dịch Vụ Mở Khóa Facebook",
     priceLabel: "Liên hệ",
     doneCount: 43,
-    image: "upload/mokhoafb.png",
+    image: "upload/mokhoafb.webp",
   },
 ];
 
@@ -234,7 +234,7 @@ async function main() {
         viewers: detail?.viewers ?? 0,
         oldPrice: BigInt(p.oldPrice),
         price: BigInt(p.price),
-        imageUrl: `${IMAGES}/account/${p.code}.png`,
+        imageUrl: `${IMAGES}/account/${p.code}.webp`,
         tags: p.tag ? { create: [{ label: p.tag }] } : undefined,
         skins: {
           create: [
@@ -260,7 +260,7 @@ async function main() {
         rank: "Unranked",
         oldPrice: parseVnd(item.oldPrice) ?? price,
         price,
-        imageUrl: `${IMAGES}/account/${item.code}.png`,
+        imageUrl: `${IMAGES}/account/${item.code}.webp`,
         skins: { create: skinRowsFor(item.tiers) },
       },
     });

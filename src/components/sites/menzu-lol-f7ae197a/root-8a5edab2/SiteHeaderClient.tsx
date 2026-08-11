@@ -158,7 +158,7 @@ export function SiteHeaderClient({ user }: { user: HeaderUser | null }) {
             <Link href="/" className="flex items-center gap-3 group">
               <div className="relative">
                 <Image
-                  src="/sites/menzu-lol-f7ae197a/root-8a5edab2/images/site/logos/menzu-logo.png"
+                  src="/sites/menzu-lol-f7ae197a/root-8a5edab2/images/site/logos/menzu-logo.webp"
                   alt="Menzu"
                   width={28}
                   height={28}

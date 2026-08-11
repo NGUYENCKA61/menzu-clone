@@ -57,7 +57,7 @@ export async function POST(request: Request) {
       oldPrice: BigInt(Math.floor(oldPrice)),
       imageUrl:
         body?.imageUrl?.trim() ||
-        `/sites/menzu-lol-f7ae197a/root-8a5edab2/images/account/${code}.png`,
+        `/sites/menzu-lol-f7ae197a/root-8a5edab2/images/account/${code}.webp`,
     },
   });
 

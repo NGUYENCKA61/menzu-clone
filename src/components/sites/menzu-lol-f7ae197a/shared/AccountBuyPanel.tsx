@@ -26,6 +26,8 @@ export interface AccountDetail {
   categoryName: string;
   categorySlug: string;
   viewers: number;
+  /** Sold accounts keep their page so crawled links stay valid. */
+  sold: boolean;
 }
 
 export interface AccountBuyPanelProps {
