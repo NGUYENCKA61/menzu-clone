@@ -31,16 +31,22 @@ if (!connectionString) {
 const db = new PrismaClient({ adapter: new PrismaPg({ connectionString }) });
 
 /** Category slugs and display names, taken from the live nav + listing links. */
-const CATEGORIES: { slug: string; name: string }[] = [
-  { slug: "account-valorant-tu-chon", name: "ACCOUNT VALORANT TỰ CHỌN" },
-  { slug: "random-valorant-20k-oi-thong-tin", name: "RANDOM VALORANT 20K | ĐỔI THÔNG TIN" },
-  { slug: "random-smuft-ban-rank-oi-thong-tin", name: "RANDOM SMUFT BẮN RANK | ĐỔI THÔNG TIN" },
-  { slug: "random-valorant-tren-lv-20-oi-thong-tin", name: "RANDOM VALORANT TRÊN LV 20 | ĐỔI THÔNG TIN" },
-  { slug: "random-valorant-tren-lv-20-nfa", name: "RANDOM VALORANT TRÊN LV 20 | NFA" },
-  { slug: "random-acc-tft", name: "RANDOM ACC TFT" },
-  { slug: "acc-tft-pet-tim", name: "ACC TFT PET TÍM" },
-  { slug: "acc-tft-san-tim", name: "ACC TFT SÀN TÍM" },
-  { slug: "acc-tft-hang-hieu", name: "ACC TFT HÀNG HIỆU" },
+const CATEGORIES: {
+  slug: string;
+  name: string;
+  image: string;
+  sold: number;
+  stock: number;
+}[] = [
+  { slug: 'account-valorant-tu-chon', name: 'ACCOUNT VALORANT TỰ CHỌN', image: 'upload/acctuchon.gif', sold: 6202, stock: 165 },
+  { slug: 'random-valorant-20k-oi-thong-tin', name: 'RANDOM VALORANT 20K | ĐỔI THÔNG TIN', image: 'upload/0-5.png', sold: 1600, stock: 8 },
+  { slug: 'random-smuft-ban-rank-oi-thong-tin', name: 'RANDOM SMUFT BẮN RANK | ĐỔI THÔNG TIN', image: 'upload/prerankthumb.png', sold: 208, stock: 3 },
+  { slug: 'random-valorant-tren-lv-20-oi-thong-tin', name: 'RANDOM VALORANT TRÊN LV 20 | ĐỔI THÔNG TIN', image: 'upload/rdlv20.png', sold: 113, stock: 0 },
+  { slug: 'random-valorant-tren-lv-20-nfa', name: 'RANDOM VALORANT TRÊN LV 20 | NFA', image: 'upload/nfarank.png', sold: 199, stock: 0 },
+  { slug: 'random-acc-tft', name: 'RANDOM ACC TFT', image: 'account/TFT/pettim.png', sold: 5, stock: 840 },
+  { slug: 'acc-tft-pet-tim', name: 'ACC TFT PET TÍM', image: 'upload/petim.png', sold: 61, stock: 200 },
+  { slug: 'acc-tft-san-tim', name: 'ACC TFT SÀN TÍM', image: 'upload/SANTFTTUCHON.png', sold: 0, stock: 0 },
+  { slug: 'acc-tft-hang-hieu', name: 'ACC TFT HÀNG HIỆU', image: 'upload/tfttuchon.png', sold: 0, stock: 0 },
 ];
 
 /**
@@ -189,10 +195,17 @@ async function main() {
 
   // Categories -------------------------------------------------------------
   for (const [i, c] of CATEGORIES.entries()) {
+    const data = {
+      name: c.name,
+      sortOrder: i,
+      imageUrl: `${IMAGES}/${c.image}`,
+      soldCount: c.sold,
+      stockCount: c.stock,
+    };
     await db.category.upsert({
       where: { slug: c.slug },
-      update: { name: c.name, sortOrder: i },
-      create: { slug: c.slug, name: c.name, sortOrder: i },
+      update: data,
+      create: { slug: c.slug, ...data },
     });
   }
   const mainCategory = await db.category.findUniqueOrThrow({

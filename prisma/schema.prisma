@@ -94,6 +94,9 @@ model Category {
   slug      String    @unique
   name      String
   sortOrder Int       @default(0)
+  imageUrl  String?
+  soldCount Int       @default(0)
+  stockCount Int      @default(0)
   products  Product[]
 
   @@map("categories")

@@ -3,12 +3,7 @@ import { FlashSaleSection } from "@/components/sites/menzu-lol-f7ae197a/root-8a5
 import { HeroBanners } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/HeroBanners";
 import { PageBackdrop } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/PageBackdrop";
 import { ProductRow } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/ProductRow";
-import {
-  FEATURED_CARDS,
-  GAME_SERVICE_CARDS,
-  OTHER_SERVICE_CARDS,
-  TFT_CARDS,
-} from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/productRowData";
+import { getHomeRows } from "@/lib/homeRows";
 import { QuickActionsBar } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/QuickActionsBar";
 import { ReviewsSection } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/ReviewsSection";
 import { SiteFooter } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/SiteFooter";
@@ -28,6 +23,7 @@ export default async function Home() {
     getFeedback(),
     getRecentPurchases(),
   ]);
+  const rows = await getHomeRows();
 
   return (
     <div className="min-h-screen flex flex-col text-white overflow-x-clip selection:bg-indigo-500/30 transition-colors duration-300">
@@ -44,10 +40,10 @@ export default async function Home() {
               <QuickActionsBar />
               <FlashSaleSection items={flashSaleItems} />
               <FeaturedCategories />
-              <ProductRow heading="SẢN PHẨM NỔI BẬT" cards={FEATURED_CARDS} className="mb-12" />
-              <ProductRow heading="ĐẤU TRƯỜNG CHÂN LÝ" cards={TFT_CARDS} />
-              <ProductRow heading="Dịch Vụ Game" cards={GAME_SERVICE_CARDS} />
-              <ProductRow heading="Dịch Vụ Khác" cards={OTHER_SERVICE_CARDS} />
+              <ProductRow heading="SẢN PHẨM NỔI BẬT" cards={rows.featured} className="mb-12" />
+              <ProductRow heading="ĐẤU TRƯỜNG CHÂN LÝ" cards={rows.tft} />
+              <ProductRow heading="Dịch Vụ Game" cards={rows.gameServices} />
+              <ProductRow heading="Dịch Vụ Khác" cards={rows.otherServices} />
               <ReviewsSection reviews={reviews.map((r) => ({
                 name: r.name,
                 date: r.createdAt.toLocaleDateString("vi-VN"),
