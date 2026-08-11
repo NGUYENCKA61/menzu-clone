@@ -24,6 +24,19 @@ Bỏ qua theo yêu cầu: **Build kho đồ, Valorant Hub, Check Skin**.
 | Nút cọc | "Cọc / Trả Góp" | "Cọc / Góp — từ 0đ" |
 | Thẻ trang chủ | link tới danh mục/dịch vụ | `href="#"`, không bấm được |
 | Ảnh hero login | nét | vỡ (mã hoá ở 256px) |
+| Lưới kho đồ | ảnh + tên từng món | ô xám trống |
+| Lọc theo vũ khí | All Skin / Vandal / Phantom / … | không có |
+| Nút "Xem thêm N skin" | có | không có |
+
+Kho đồ thật lấy từ JSON nhúng sẵn trong trang account — uuid, tên và ảnh của
+từng skin, bùa, agent, spray, thẻ bài. Loại vũ khí tra theo uuid qua danh sách
+chính thức của valorant-api, **không** suy từ tên: dao găm như "Equilibrium"
+hay "Heart Splitter" không mang tên vũ khí nào, đối chiếu theo tên sẽ âm thầm
+bỏ sót toàn bộ dao.
+
+Đã quét 31/32 sản phẩm, 1250 skin tra được vũ khí. `VLR2135` không quét được vì
+đã bán trên bản gốc. Chạy `node scripts/scrape-skins.mjs` để tiếp tục,
+`npx tsx prisma/skin-status.ts` để xem tiến độ.
 
 `/register` giữ lại dưới dạng chuyển hướng vĩnh viễn, không xoá — link đã phát
 hành từ bản clone này vẫn chạy.
@@ -31,16 +44,6 @@ hành từ bản clone này vẫn chạy.
 ---
 
 ## Chưa sửa được — cần thêm dữ liệu hoặc quyết định
-
-### Bộ lọc vũ khí trong kho đồ
-
-Bản gốc có hàng lọc: All Skin, Melee, Vandal, Phantom, Operator, Ghost,
-Sheriff, Spectre, Ares, Bulldog, Frenzy, Classic, Bucky, Guardian, Judge,
-Marshal, Odin, Shorty, Stinger — kèm nút "Xem thêm N skin".
-
-**Không dựng được với dữ liệu hiện có.** `ProductSkin.name` chứa nhãn tier
-(`ULTRA #1`, `EXCLUSIVE #2`) chứ không phải tên skin thật, nên lọc theo tên sẽ
-không lọc được gì. Cần scrape lại tên và ảnh từng skin.
 
 ### Widget "Chăm sóc khách hàng"
 
