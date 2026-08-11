@@ -1,6 +1,6 @@
 import Image from "next/image";
 
-interface TickerEntry {
+export interface TickerEntry {
   agentId: string;
   user: string;
   amount: string;
@@ -91,7 +91,7 @@ function TickerItem({ entry, ariaHidden }: { entry: TickerEntry; ariaHidden?: bo
   );
 }
 
-export function TransactionTicker() {
+export function TransactionTicker({ entries = TICKER_ENTRIES }: { entries?: TickerEntry[] } = {}) {
   return (
     <div className="w-full overflow-hidden mb-8 relative">
       <style dangerouslySetInnerHTML={{ __html: TICKER_STYLES }} />
@@ -106,10 +106,10 @@ export function TransactionTicker() {
       </div>
       <div className="relative overflow-hidden py-1">
         <div className="ticker-animate flex gap-3">
-          {TICKER_ENTRIES.map((entry) => (
+          {entries.map((entry) => (
             <TickerItem key={`${entry.code}-0`} entry={entry} />
           ))}
-          {TICKER_ENTRIES.map((entry) => (
+          {entries.map((entry) => (
             <TickerItem key={`${entry.code}-1`} entry={entry} ariaHidden />
           ))}
         </div>

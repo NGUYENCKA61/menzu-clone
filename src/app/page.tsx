@@ -17,15 +17,16 @@ import { MobileBottomNav } from "@/components/sites/menzu-lol-f7ae197a/root-8a5e
 import { ToolsRail } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/ToolsRail";
 import { TransactionTicker } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/TransactionTicker";
 import { formatVnd } from "@/components/sites/menzu-lol-f7ae197a/shared/productData";
-import { getFeedback, getFlashSaleItems } from "@/lib/queries";
+import { getFeedback, getFlashSaleItems, getRecentPurchases } from "@/lib/queries";
 import { UtilitiesHub } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/UtilitiesHub";
 
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
-  const [flashSaleItems, reviews] = await Promise.all([
+  const [flashSaleItems, reviews, recentPurchases] = await Promise.all([
     getFlashSaleItems(),
     getFeedback(),
+    getRecentPurchases(),
   ]);
 
   return (
@@ -54,7 +55,12 @@ export default async function Home() {
                 amount: formatVnd(r.amount) + "đ",
                 avatar: r.avatarUrl ?? "",
               }))} />
-              <TransactionTicker />
+              {/* Falls back to the captured sample until real purchases exist — an
+                  empty strip would look broken, and seeding fake orders would put
+                  invented rows in the ledger. */}
+              <TransactionTicker
+                entries={recentPurchases.length > 0 ? recentPurchases : undefined}
+              />
               <UtilitiesHub />
             </div>
           </div>
