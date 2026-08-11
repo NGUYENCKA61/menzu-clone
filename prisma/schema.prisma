@@ -321,6 +321,13 @@ model ProductSkin {
   tier      ContentTier?
   name      String
   iconUrl   String?
+  /// Weapon the skin belongs to — "Vandal", "Phantom", "Melee" — driving the
+  /// filter row above the inventory grid.
+  ///
+  /// Resolved from valorant-api.com's weapon list rather than parsed out of
+  /// the skin name: melee skins like "Equilibrium" and "Heart Splitter" carry
+  /// no weapon word at all, so name-matching would silently drop them.
+  weapon    String?
 
   @@index([productId, kind])
   @@map("product_skins")

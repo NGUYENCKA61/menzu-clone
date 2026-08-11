@@ -12,7 +12,7 @@ import { AccountInventory } from "@/components/sites/menzu-lol-f7ae197a/shared/A
 import { Breadcrumb } from "@/components/sites/menzu-lol-f7ae197a/shared/Breadcrumb";
 import { ProductCard } from "@/components/sites/menzu-lol-f7ae197a/shared/ProductCard";
 import { formatVnd } from "@/components/sites/menzu-lol-f7ae197a/shared/productData";
-import { getAccountDetail, getRelatedProducts } from "@/lib/queries";
+import { getAccountDetail, getInventory, getRelatedProducts } from "@/lib/queries";
 import { breadcrumbJsonLd, JsonLd, productJsonLd } from "@/lib/seo";
 
 interface PageProps {
@@ -56,7 +56,10 @@ export default async function AccountDetailPage({ params }: PageProps) {
   const account = await getAccountDetail(code);
   if (!account) notFound();
 
-  const related = await getRelatedProducts(account.code, account.categorySlug);
+  const [related, inventory] = await Promise.all([
+    getRelatedProducts(account.code, account.categorySlug),
+    getInventory(account.code),
+  ]);
 
   return (
     <div className="min-h-screen flex flex-col text-white overflow-x-clip selection:bg-indigo-500/30">
@@ -103,7 +106,7 @@ export default async function AccountDetailPage({ params }: PageProps) {
                 <AccountBuyPanel account={account} />
               </div>
 
-              <AccountInventory account={account} />
+              <AccountInventory account={account} items={inventory} />
             </div>
 
             {related.length > 0 ? (

@@ -466,3 +466,26 @@ export async function listDocArticles() {
 export async function getDocArticle(slug: string) {
   return db.docArticle.findUnique({ where: { slug } });
 }
+
+export interface InventoryItem {
+  id: string;
+  kind: string;
+  name: string;
+  iconUrl: string | null;
+  weapon: string | null;
+}
+
+/**
+ * Every item on an account, for the five inventory tabs.
+ *
+ * Ordered by weapon so the grid stays stable as the filter changes, then by
+ * name so repeat runs of the scraper cannot reshuffle it.
+ */
+export async function getInventory(code: string): Promise<InventoryItem[]> {
+  const rows = await db.productSkin.findMany({
+    where: { product: { code } },
+    orderBy: [{ weapon: "asc" }, { name: "asc" }],
+    select: { id: true, kind: true, name: true, iconUrl: true, weapon: true },
+  });
+  return rows;
+}
