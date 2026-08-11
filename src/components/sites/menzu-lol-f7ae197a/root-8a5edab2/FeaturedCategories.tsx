@@ -2,6 +2,7 @@ import type { CSSProperties } from "react";
 import Image from "next/image";
 
 interface CategoryCard {
+  href: string;
   line1: string;
   line2: string;
   art: string;
@@ -11,11 +12,21 @@ const ART_BASE = "/sites/menzu-lol-f7ae197a/root-8a5edab2/images/upload";
 const BACKCARD_SRC =
   "/sites/menzu-lol-f7ae197a/root-8a5edab2/images/site/images/backcard.png";
 
+/**
+ * A fixed promotional row, not catalogue data — two of the four tiles point at
+ * features rather than categories, and Check Skin / Build Kho Đồ were excluded
+ * from this clone, so those keep "#" instead of linking to pages that 404.
+ */
 const CATEGORY_CARDS: CategoryCard[] = [
-  { line1: "ACC TỰ CHỌN", line2: "VALORANT", art: "clove.png" },
-  { line1: "CHECK SKIN KHO ĐỒ", line2: "VALORANT", art: "omen.png" },
-  { line1: "BUILD KHO ĐỒ", line2: "VIP", art: "jett.png" },
-  { line1: "DỊCH VỤ", line2: "VALORANT", art: "neon.png" },
+  {
+    line1: "ACC TỰ CHỌN",
+    line2: "VALORANT",
+    art: "clove.png",
+    href: "/category/account-valorant-tu-chon",
+  },
+  { line1: "CHECK SKIN KHO ĐỒ", line2: "VALORANT", art: "omen.png", href: "#" },
+  { line1: "BUILD KHO ĐỒ", line2: "VIP", art: "jett.png", href: "#" },
+  { line1: "DỊCH VỤ", line2: "VALORANT", art: "neon.png", href: "/services" },
 ];
 
 const CARD_THEME = {
@@ -41,7 +52,7 @@ export function FeaturedCategories() {
         {CATEGORY_CARDS.map((card) => (
           <a
             key={card.art}
-            href="#"
+            href={card.href}
             className="group relative w-full pt-16 flex flex-col items-center"
           >
             <div
