@@ -66,6 +66,7 @@ export function AccountBuyPanel({ account }: AccountBuyPanelProps) {
 
   const pct = Math.round((1 - account.price / account.oldPrice) * 100);
 
+  const [altNotice, setAltNotice] = useState<string | null>(null);
   const [balanceState, setBalanceState] = useState<number | null>(null);
   const [buying, setBuying] = useState(false);
   const [buyError, setBuyError] = useState<string | null>(null);
@@ -217,6 +218,7 @@ export function AccountBuyPanel({ account }: AccountBuyPanelProps) {
       <div className="flex flex-col gap-3">
         <button
           type="button"
+          onClick={() => setAltNotice("Cọc / Góp")}
           className={`${SECONDARY_BUTTON_CLASS} flex flex-col items-center justify-center gap-0.5`}
         >
           <span>Cọc / Góp</span>
@@ -233,13 +235,34 @@ export function AccountBuyPanel({ account }: AccountBuyPanelProps) {
           Mua Ngay
         </button>
 
-        <button type="button" className={SECONDARY_BUTTON_CLASS}>
+        <button
+          type="button"
+          onClick={() => setAltNotice("Thu cũ đổi mới")}
+          className={SECONDARY_BUTTON_CLASS}
+        >
           Thu cũ đổi mới
         </button>
 
-        <button type="button" className={SECONDARY_BUTTON_CLASS}>
+        <button
+          type="button"
+          onClick={() => setAltNotice("Tiêu trước trả sau")}
+          className={SECONDARY_BUTTON_CLASS}
+        >
           Tiêu trước trả sau
         </button>
+
+        {/* The live site's terms for these three were never captured, and
+            inventing deposit amounts or instalment rules would be inventing
+            financial terms. Say so rather than leaving a dead button. */}
+        {altNotice ? (
+          <p
+            role="status"
+            className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-2.5 text-[12px] font-semibold text-amber-400"
+          >
+            {altNotice}: vui lòng liên hệ Zalo để được tư vấn. Hình thức này chưa
+            hỗ trợ thanh toán trực tiếp trên web.
+          </p>
+        ) : null}
       </div>
 
       {open && (
