@@ -137,6 +137,56 @@ interface AccountDetail {
 }
 ```
 
+### Auth gate on purchase — VERIFIED
+
+Clicking `Mua Ngay` while logged **out** does not open a modal. It navigates to:
+
+```
+/login?next=%2Faccount%2FVLR2030
+```
+
+So the purchase flow is `product → (guest) /login?next=<return path> → back to product`.
+The `next` query param must be honoured by the cloned `/login`. The purchase modal
+(`@keyframes dialogIn`) only renders for an authenticated session, so it is still uncaptured —
+capturing it needs a logged-in session **and** a click.
+
+### Skin inventory tabs — VERIFIED
+
+Tab bar `flex items-center gap-3 sm:gap-6 lg:gap-0 lg:justify-between overflow-x-auto hide-scrollbar whitespace-nowrap`,
+tab button `flex-shrink-0 flex items-center justify-center gap-2 sm:gap-3 text-sm sm:text-base px-4 sm:px-6 py-2.5 rounded-2xl font-black uppercase …`
+
+Five tabs for `VLR2030` — the counts are per-account data:
+
+| Tab | Count |
+|---|---|
+| `Weapon Skins` | 42 |
+| `Buddies` | 40 |
+| `Agents` | 26 |
+| `Cards` | 51 |
+| `Sprays` | 49 |
+
+Note the card's "42 Skins" headline equals the **Weapon Skins** tab only — the other
+four inventory types are not counted in it.
+
+Panel: `flex flex-col min-h-[400px]`, with a `.valorant-scrollbar` webkit scrollbar style.
+
+Section-scoped CSS (verbatim):
+```css
+@keyframes skin-tab-enter { from { opacity: 0; } to { opacity: 1; } }
+@keyframes card-appear {
+  0%   { opacity: .2; transform: translateY(20px) scale(.95); filter: blur(1px); }
+  100% { opacity: 1;  transform: translateY(0) scale(1);      filter: blur(0);   }
+}
+.skin-tab-enter  { animation: skin-tab-enter 0.38s cubic-bezier(.22,1,.36,1) both; will-change: opacity; }
+.card-item-appear{ animation: card-appear    0.5s  cubic-bezier(.22,1,.36,1) both; }
+```
+
+```ts
+interface AccountInventory {
+  weaponSkins: number; buddies: number; agents: number; cards: number; sprays: number
+}
+```
+
 ## Header — authenticated variant
 
 Replaces the `Đăng nhập` button in `nav > [1] > [1]` (`flex items-center gap-4`):
@@ -198,9 +248,21 @@ interface User {
 | `feedback` | `/feedback`, homepage reviews |
 | `transactions_feed` | homepage ticker |
 
-## Open blockers
+## Blockers — RESOLVED
 
-- User dropdown menu, accordion sub-items, and any click-revealed UI cannot be
-  captured: **every `.click()` through CDP freezes the renderer for 45s**.
-  Workaround used elsewhere: build it, then verify by defaulting the state open.
-- Viewport is locked at 800px; breakpoints are read from Tailwind variants instead.
+Both environment problems cleared once Chrome was reopened in a normal window:
+
+- ~~`.click()` through CDP freezes the renderer for 45s~~ → **fixed**. Clicks now
+  return in ~1ms, so click-revealed UI is capturable again.
+- ~~Viewport locked at 800px~~ → **fixed**, now 1912px. The homepage clone was
+  finally diffed 1:1 against the live site at desktop width; that is how the
+  missing flash-sale dot row was caught.
+
+## Still uncaptured
+
+- **Purchase modal** — needs an authenticated session *and* a click. Blocked only
+  because the test account is currently logged out (it was logged out so `/login`
+  could be captured at all).
+- **Header user dropdown** — same reason.
+- **Per-skin icons** in the listing card — not present in the listing markup at all;
+  they must come from the API. The clone uses generic tiles rather than invented paths.
