@@ -71,6 +71,36 @@ model Session {
   @@map("sessions")
 }
 
+enum AuthAttemptKind {
+  LOGIN
+  REGISTER
+}
+
+/// Throttling ledger for the credential endpoints, kept only long enough to
+/// enforce a window.
+///
+/// This lives in the database rather than in process memory because serverless
+/// deployments spread requests across instances that share no state — an
+/// in-memory counter there caps nothing.
+///
+/// LOGIN rows are written only on failure, so a healthy sign-in costs no extra
+/// write. REGISTER rows are written on every success, because the thing being
+/// limited there is account creation itself.
+model AuthAttempt {
+  id         String          @id @default(cuid())
+  kind       AuthAttemptKind
+  /// The username or email that was tried, lowercased. Never the password.
+  identifier String
+  /// Best-effort client address; spoofable unless a trusted proxy sets it,
+  /// which is why the per-identifier limit is the real protection.
+  ip         String
+  createdAt  DateTime        @default(now())
+
+  @@index([kind, identifier, createdAt])
+  @@index([kind, ip, createdAt])
+  @@map("auth_attempts")
+}
+
 /// "Liên kết nền tảng" on /profile — Discord carries a "Thưởng 1.000 Pts" bonus.
 model LinkedAccount {
   id         String   @id @default(cuid())

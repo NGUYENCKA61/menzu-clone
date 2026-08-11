@@ -7,6 +7,13 @@ import {
   verifyPassword,
 } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { clientIp } from "@/lib/clientIp";
+import {
+  RETRY_AFTER_SECONDS,
+  checkLoginRate,
+  clearLoginAttempts,
+  recordAttempt,
+} from "@/lib/rateLimit";
 
 export async function POST(request: Request) {
   const body = (await request.json().catch(() => null)) as {
@@ -24,6 +31,17 @@ export async function POST(request: Request) {
     );
   }
 
+  // Checked before touching the password so a locked-out caller cannot use
+  // response timing to probe whether an account exists.
+  const ip = clientIp(request);
+  const rate = await checkLoginRate(identifier, ip);
+  if (rate.blocked) {
+    return NextResponse.json(
+      { error: "Bạn đã thử sai quá nhiều lần. Vui lòng đợi 15 phút rồi thử lại." },
+      { status: 429, headers: { "retry-after": String(RETRY_AFTER_SECONDS) } },
+    );
+  }
+
   // The live form accepts "Email hoặc Tên đăng nhập" in one field.
   const user = await db.user.findFirst({
     where: { OR: [{ username: identifier }, { email: identifier }] },
@@ -32,11 +50,17 @@ export async function POST(request: Request) {
   // Same message and same work either way — do not leak which accounts exist.
   const ok = await verifyPassword(password, user?.passwordHash ?? null);
   if (!user || !ok) {
+    await recordAttempt("LOGIN", identifier, ip);
     return NextResponse.json(
-      { error: "Tên đăng nhập hoặc mật khẩu không đúng" },
+      {
+        error: "Tên đăng nhập hoặc mật khẩu không đúng",
+        remaining: Math.max(0, rate.remaining - 1),
+      },
       { status: 401 },
     );
   }
+
+  await clearLoginAttempts(identifier);
 
   const session = await db.session.create({
     data: { id: newSessionToken(), userId: user.id, expiresAt: sessionExpiry() },

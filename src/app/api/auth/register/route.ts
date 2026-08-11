@@ -8,6 +8,12 @@ import {
   validateCredentials,
 } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { clientIp } from "@/lib/clientIp";
+import {
+  REGISTER_RETRY_AFTER_SECONDS,
+  checkRegisterRate,
+  recordAttempt,
+} from "@/lib/rateLimit";
 
 export async function POST(request: Request) {
   const body = (await request.json().catch(() => null)) as {
@@ -22,6 +28,14 @@ export async function POST(request: Request) {
 
   const invalid = validateCredentials(username, password);
   if (invalid) return NextResponse.json({ error: invalid }, { status: 400 });
+
+  const ip = clientIp(request);
+  if ((await checkRegisterRate(ip)).blocked) {
+    return NextResponse.json(
+      { error: "Đã tạo quá nhiều tài khoản từ thiết bị này. Vui lòng thử lại sau." },
+      { status: 429, headers: { "retry-after": String(REGISTER_RETRY_AFTER_SECONDS) } },
+    );
+  }
 
   const clash = await db.user.findFirst({
     where: { OR: [{ username }, ...(email ? [{ email }] : [])] },
@@ -42,6 +56,8 @@ export async function POST(request: Request) {
   const user = await db.user.create({
     data: { username, email, passwordHash: await hashPassword(password) },
   });
+
+  await recordAttempt("REGISTER", username, ip);
 
   const session = await db.session.create({
     data: { id: newSessionToken(), userId: user.id, expiresAt: sessionExpiry() },
