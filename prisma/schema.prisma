@@ -1,0 +1,375 @@
+// Data model for the menzu.lol clone.
+//
+// Every table below is shaped by something observed on the live site, not by
+// convention. The notes say which observation forced which decision, because
+// several of them are not what you would guess from the UI alone.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Prisma 7 no longer accepts `url` here — the connection string lives in
+// prisma.config.ts for migrations, and the client gets a driver adapter.
+datasource db {
+  provider = "postgresql"
+}
+
+// ---------------------------------------------------------------------------
+// Users & auth
+// ---------------------------------------------------------------------------
+
+enum UserRole {
+  MEMBER
+  ADMIN
+}
+
+enum MemberTier {
+  BRONZE
+  SILVER
+  GOLD
+  PLATINUM
+  DIAMOND
+}
+
+model User {
+  id           String     @id @default(cuid())
+  /// Shown as "UID: 10049" on /profile — a short public number, not the PK.
+  uid          Int        @unique @default(autoincrement())
+  username     String     @unique
+  email        String?    @unique
+  passwordHash String?
+  avatarUrl    String?
+  role         UserRole   @default(MEMBER)
+  tier         MemberTier @default(BRONZE)
+
+  /// Purchases are debited from this balance — the checkout dialog has no card
+  /// entry, only "Số dư ví hiện tại" and "Cần nạp thêm".
+  balance      BigInt     @default(0)
+  /// "Điểm thưởng … Pts" on /profile.
+  points       Int        @default(0)
+
+  createdAt    DateTime   @default(now())
+
+  sessions      Session[]
+  linkedAccounts LinkedAccount[]
+  orders        Order[]
+  transactions  Transaction[]
+  topUps        TopUp[]
+  serviceOrders ServiceOrder[]
+
+  @@map("users")
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@map("sessions")
+}
+
+/// "Liên kết nền tảng" on /profile — Discord carries a "Thưởng 1.000 Pts" bonus.
+model LinkedAccount {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  provider   String
+  providerId String
+  createdAt  DateTime @default(now())
+
+  @@unique([provider, providerId])
+  @@index([userId])
+  @@map("linked_accounts")
+}
+
+// ---------------------------------------------------------------------------
+// Catalogue
+// ---------------------------------------------------------------------------
+
+model Category {
+  id        String    @id @default(cuid())
+  slug      String    @unique
+  name      String
+  sortOrder Int       @default(0)
+  products  Product[]
+
+  @@map("categories")
+}
+
+enum ProductStatus {
+  AVAILABLE
+  RESERVED
+  SOLD
+  HIDDEN
+}
+
+/// One purchasable game account. `code` is the public identifier shown as
+/// "#VLR2030" and used in the /account/[code] URL.
+model Product {
+  id         String        @id @default(cuid())
+  code       String        @unique
+  categoryId String
+  category   Category      @relation(fields: [categoryId], references: [id])
+
+  rank       String
+  /// "LAST: DIAMOND 1 (V26 // ACT III)" — shown under the current rank.
+  lastRank   String?
+  trackerUrl String?
+
+  level      Int           @default(0)
+  vp         Int           @default(0)
+  rp         Int           @default(0)
+  kc         Int           @default(0)
+
+  /// "Mail gốc"
+  mailType   String?
+
+  /// Prices are whole VND — never floats.
+  oldPrice   BigInt
+  price      BigInt
+  /// "Cọc / Góp — từ 299.000đ"
+  depositFrom BigInt?
+
+  status     ProductStatus @default(AVAILABLE)
+  imageUrl   String?
+  viewers    Int           @default(0)
+
+  soldCount  Int           @default(0)
+  createdAt  DateTime      @default(now())
+
+  tags       ProductTag[]
+  skins      ProductSkin[]
+  orders     Order[]
+
+  @@index([categoryId, status])
+  @@index([price])
+  @@map("products")
+}
+
+/// "DROP MAIL" and friends — free-form pills on the card.
+model ProductTag {
+  id        String  @id @default(cuid())
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  label     String
+
+  @@index([productId])
+  @@map("product_tags")
+}
+
+/// The five inventory tabs on /account/[code].
+/// IMPORTANT: the card's "42 Skins" headline counts WEAPON_SKIN only — buddies,
+/// agents, cards and sprays are separate totals. A single `skins` column on
+/// Product would have been wrong.
+enum SkinKind {
+  WEAPON_SKIN
+  BUDDY
+  AGENT
+  CARD
+  SPRAY
+}
+
+/// Valorant content tiers, matching the five coloured counters on every card.
+enum ContentTier {
+  ULTRA // yellow
+  EXCLUSIVE // orange
+  PREMIUM // pink
+  DELUXE // cyan
+  SELECT // blue
+}
+
+model ProductSkin {
+  id        String       @id @default(cuid())
+  productId String
+  product   Product      @relation(fields: [productId], references: [id], onDelete: Cascade)
+  kind      SkinKind
+  tier      ContentTier?
+  name      String
+  iconUrl   String?
+
+  @@index([productId, kind])
+  @@map("product_skins")
+}
+
+// ---------------------------------------------------------------------------
+// Money
+// ---------------------------------------------------------------------------
+
+enum OrderStatus {
+  PENDING
+  PAID
+  CANCELLED
+  REFUNDED
+}
+
+/// The four buttons on the buy panel.
+enum PurchaseMethod {
+  BUY_NOW // Mua Ngay
+  DEPOSIT // Cọc / Góp
+  TRADE_IN // Thu cũ đổi mới
+  PAY_LATER // Tiêu trước trả sau
+}
+
+model Order {
+  id          String         @id @default(cuid())
+  /// Human-facing order code, shown in "Lịch sử mua".
+  code        String         @unique
+  userId      String
+  user        User           @relation(fields: [userId], references: [id])
+  productId   String
+  product     Product        @relation(fields: [productId], references: [id])
+
+  method      PurchaseMethod @default(BUY_NOW)
+  status      OrderStatus    @default(PENDING)
+
+  /// The checkout dialog itemises all of these, so all of them are stored —
+  /// recomputing a historical total from the current product price would drift.
+  listPrice   BigInt
+  discountPct Int            @default(0)
+  voucherId   String?
+  voucher     Voucher?       @relation(fields: [voucherId], references: [id])
+  voucherCut  BigInt         @default(0)
+  total       BigInt
+
+  createdAt   DateTime       @default(now())
+
+  @@index([userId, createdAt])
+  @@map("orders")
+}
+
+model Voucher {
+  id          String    @id @default(cuid())
+  code        String    @unique
+  percentOff  Int?
+  amountOff   BigInt?
+  maxUses     Int?
+  usedCount   Int       @default(0)
+  expiresAt   DateTime?
+  active      Boolean   @default(true)
+  orders      Order[]
+
+  @@map("vouchers")
+}
+
+enum TransactionKind {
+  TOPUP
+  PURCHASE
+  REFUND
+  REWARD
+  ADJUSTMENT
+}
+
+enum TransactionStatus {
+  PENDING
+  SUCCESS
+  FAILED
+}
+
+/// /transactions renders "Biến động & Số dư" in one column, so each row carries
+/// both the delta and the resulting balance. Storing only the delta would make
+/// that column impossible to render without replaying the whole ledger.
+model Transaction {
+  id            String            @id @default(cuid())
+  code          String            @unique
+  userId        String
+  user          User              @relation(fields: [userId], references: [id])
+
+  kind          TransactionKind
+  status        TransactionStatus @default(SUCCESS)
+  /// Signed: negative for spend, positive for credit.
+  delta         BigInt
+  balanceAfter  BigInt
+  description   String
+  method        String?
+
+  createdAt     DateTime          @default(now())
+
+  @@index([userId, createdAt])
+  @@map("transactions")
+}
+
+/// /wallet offers exactly two paths.
+enum TopUpMethod {
+  BANK // Ngân Hàng
+  CARD // Thẻ Cào
+}
+
+enum TopUpStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}
+
+model TopUp {
+  id        String      @id @default(cuid())
+  code      String      @unique
+  userId    String
+  user      User        @relation(fields: [userId], references: [id])
+  method    TopUpMethod
+  amount    BigInt
+  status    TopUpStatus @default(PENDING)
+  /// Carrier for CARD top-ups ("1. Chọn nhà mạng").
+  carrier   String?
+  createdAt DateTime    @default(now())
+
+  @@index([userId, createdAt])
+  @@map("topups")
+}
+
+// ---------------------------------------------------------------------------
+// Services (/services/*, "Đơn dịch vụ")
+// ---------------------------------------------------------------------------
+
+model Service {
+  id          String         @id @default(cuid())
+  slug        String         @unique
+  name        String
+  priceLabel  String?
+  imageUrl    String?
+  doneCount   Int            @default(0)
+  orders      ServiceOrder[]
+
+  @@map("services")
+}
+
+enum ServiceOrderStatus {
+  PENDING
+  IN_PROGRESS
+  DONE
+  CANCELLED
+}
+
+model ServiceOrder {
+  id        String             @id @default(cuid())
+  code      String             @unique
+  userId    String
+  user      User               @relation(fields: [userId], references: [id])
+  serviceId String
+  service   Service            @relation(fields: [serviceId], references: [id])
+  status    ServiceOrderStatus @default(PENDING)
+  amount    BigInt             @default(0)
+  note      String?
+  createdAt DateTime           @default(now())
+
+  @@index([userId, createdAt])
+  @@map("service_orders")
+}
+
+// ---------------------------------------------------------------------------
+// Social proof (homepage)
+// ---------------------------------------------------------------------------
+
+model Feedback {
+  id        String   @id @default(cuid())
+  name      String
+  avatarUrl String?
+  body      String
+  amount    BigInt   @default(0)
+  verified  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  @@map("feedback")
+}
