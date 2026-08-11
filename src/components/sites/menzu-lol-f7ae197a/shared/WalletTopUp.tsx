@@ -25,6 +25,47 @@ const PRESET_INACTIVE =
 export function WalletTopUp() {
   const [method, setMethod] = useState<Method>("bank");
   const [amount, setAmount] = useState("");
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [done, setDone] = useState<{ code: string; balance: number } | null>(null);
+
+  async function handleSubmit(event: React.FormEvent) {
+    event.preventDefault();
+    if (pending) return;
+    setPending(true);
+    setError(null);
+    setDone(null);
+
+    try {
+      const response = await fetch("/api/wallet/topup", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          amount: Number(amount.replace(/\D/g, "")),
+          method: "BANK",
+        }),
+      });
+      const data = (await response.json().catch(() => ({}))) as {
+        error?: string;
+        invoiceCode?: string;
+        balance?: number;
+      };
+
+      if (!response.ok) {
+        setError(data.error ?? "Không tạo được hóa đơn");
+        return;
+      }
+
+      setDone({ code: data.invoiceCode ?? "", balance: data.balance ?? 0 });
+      setAmount("");
+      // The header shows the balance, so pull fresh server state.
+      window.setTimeout(() => window.location.reload(), 1200);
+    } catch {
+      setError("Không kết nối được máy chủ");
+    } finally {
+      setPending(false);
+    }
+  }
 
   return (
     <div className="flex flex-col gap-5">
@@ -53,7 +94,7 @@ export function WalletTopUp() {
 
       {method === "bank" ? (
         <form
-          onSubmit={(event) => event.preventDefault()}
+          onSubmit={handleSubmit}
           className="rounded-2xl border border-white/10 bg-neutral-900/50 p-5 flex flex-col gap-4"
         >
           <div className="flex flex-col gap-2">
@@ -90,11 +131,27 @@ export function WalletTopUp() {
             ))}
           </div>
 
+          {error ? (
+            <p
+              role="alert"
+              className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-2.5 text-[12px] font-semibold text-red-400"
+            >
+              {error}
+            </p>
+          ) : null}
+
+          {done ? (
+            <p className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-2.5 text-[12px] font-semibold text-emerald-400">
+              Nạp thành công · Hóa đơn {done.code} · Số dư {formatVnd(done.balance)}đ
+            </p>
+          ) : null}
+
           <button
             type="submit"
-            className="w-full rounded-2xl bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-black py-3.5 uppercase tracking-widest text-xs transition-colors"
+            disabled={pending}
+            className="w-full rounded-2xl bg-[#7C3AED] hover:bg-[#6D28D9] disabled:opacity-70 disabled:cursor-wait text-white font-black py-3.5 uppercase tracking-widest text-xs transition-colors"
           >
-            Tạo hóa đơn
+            {pending ? "Đang xử lý…" : "Tạo hóa đơn"}
           </button>
         </form>
       ) : (

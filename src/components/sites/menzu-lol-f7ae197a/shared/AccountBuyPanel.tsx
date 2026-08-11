@@ -62,11 +62,76 @@ export function AccountBuyPanel({ account }: AccountBuyPanelProps) {
 
   const pct = Math.round((1 - account.price / account.oldPrice) * 100);
 
+  const [balanceState, setBalanceState] = useState<number | null>(null);
+  const [buying, setBuying] = useState(false);
+  const [buyError, setBuyError] = useState<string | null>(null);
+  const [orderCode, setOrderCode] = useState<string | null>(null);
+
+  // Fetch the signed-in user's wallet when the dialog opens; guests get null
+  // and see the same "top up" path the live site shows a short balance.
+  useEffect(() => {
+    if (!open) return;
+    let cancelled = false;
+    fetch("/api/auth/me")
+      .then((r) => r.json())
+      .then((d: { user?: { balance?: number } | null }) => {
+        if (!cancelled) setBalanceState(d.user?.balance ?? 0);
+      })
+      .catch(() => {
+        if (!cancelled) setBalanceState(0);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [open]);
+
+  async function handleBuy() {
+    if (buying) return;
+    setBuying(true);
+    setBuyError(null);
+
+    try {
+      const response = await fetch("/api/orders", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          code: account.code,
+          voucher: voucher.trim() || undefined,
+        }),
+      });
+      const data = (await response.json().catch(() => ({}))) as {
+        error?: string;
+        orderCode?: string;
+        balance?: number;
+      };
+
+      if (response.status === 401) {
+        window.location.href = `/login?next=/account/${account.code}`;
+        return;
+      }
+      if (!response.ok) {
+        setBuyError(data.error ?? "Không thể tạo đơn hàng");
+        return;
+      }
+
+      setOrderCode(data.orderCode ?? "");
+      setBalanceState(data.balance ?? 0);
+      window.setTimeout(() => {
+        window.location.href = "/orders";
+      }, 1400);
+    } catch {
+      setBuyError("Không kết nối được máy chủ");
+    } finally {
+      setBuying(false);
+    }
+  }
+
   // Hard-coded until a real `balance` prop arrives from the API — the live
   // dialog always shows "Cần nạp thêm" (never a confirm button) whenever the
   // wallet balance is short, so a permanent 0 balance reproduces that state.
-  const balance = 0;
+  const balance = balanceState ?? 0;
   const amountToTopUp = Math.max(account.price - balance, 0);
+  const canAfford = balance >= account.price;
 
   const numericStats: { label: string; value: string }[] = [
     { label: "Level", value: String(account.level) },
@@ -263,21 +328,51 @@ export function AccountBuyPanel({ account }: AccountBuyPanelProps) {
                 <span className="text-xs font-bold text-white">{formatVnd(balance)} ₫</span>
               </div>
 
-              <div className="flex items-center justify-between pb-2">
-                <span className="text-xs text-neutral-400">Cần nạp thêm:</span>
-                <span className="text-xs font-bold text-red-400">
-                  {formatVnd(amountToTopUp)} ₫
-                </span>
-              </div>
+              {!canAfford ? (
+                <div className="flex items-center justify-between pb-2">
+                  <span className="text-xs text-neutral-400">Cần nạp thêm:</span>
+                  <span className="text-xs font-bold text-red-400">
+                    {formatVnd(amountToTopUp)} ₫
+                  </span>
+                </div>
+              ) : null}
             </div>
 
-            <div className="px-5 pb-5 pt-2">
-              <a
-                href="/wallet"
-                className="w-full rounded-2xl bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-black py-4 uppercase tracking-widest text-sm transition-colors flex items-center justify-center"
-              >
-                Nạp tiền
-              </a>
+            <div className="px-5 pb-5 pt-2 flex flex-col gap-2.5">
+              {buyError ? (
+                <p
+                  role="alert"
+                  className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-2.5 text-[12px] font-semibold text-red-400"
+                >
+                  {buyError}
+                </p>
+              ) : null}
+
+              {orderCode ? (
+                <p className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-2.5 text-[12px] font-semibold text-emerald-400">
+                  Mua thành công · Đơn {orderCode}
+                </p>
+              ) : null}
+
+              {/* The live dialog offers no confirm button when the wallet is
+                  short — it sends you to top up instead. */}
+              {canAfford ? (
+                <button
+                  type="button"
+                  onClick={handleBuy}
+                  disabled={buying || orderCode !== null}
+                  className="w-full rounded-2xl bg-[#7C3AED] hover:bg-[#6D28D9] disabled:opacity-70 disabled:cursor-wait text-white font-black py-4 uppercase tracking-widest text-sm transition-colors flex items-center justify-center"
+                >
+                  {buying ? "Đang xử lý…" : "Xác nhận mua"}
+                </button>
+              ) : (
+                <a
+                  href="/wallet"
+                  className="w-full rounded-2xl bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-black py-4 uppercase tracking-widest text-sm transition-colors flex items-center justify-center"
+                >
+                  Nạp tiền
+                </a>
+              )}
             </div>
           </div>
         </div>

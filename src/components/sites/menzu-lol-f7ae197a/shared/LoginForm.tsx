@@ -39,6 +39,39 @@ export function LoginForm() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function handleSubmit(event: React.FormEvent) {
+    event.preventDefault();
+    if (pending) return;
+    setPending(true);
+    setError(null);
+
+    try {
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ identifier: username, password }),
+      });
+      const data = (await response.json().catch(() => ({}))) as {
+        error?: string;
+      };
+
+      if (!response.ok) {
+        setError(data.error ?? "Đăng nhập thất bại");
+        setPending(false);
+        return;
+      }
+
+      // Honour ?next= so the "Mua Ngay" gate returns you to the product.
+      const next = new URLSearchParams(window.location.search).get("next");
+      window.location.href = next && next.startsWith("/") ? next : "/";
+    } catch {
+      setError("Không kết nối được máy chủ");
+      setPending(false);
+    }
+  }
 
   return (
     <main className="min-h-[calc(100vh-100px)] flex items-center justify-center">
@@ -90,7 +123,7 @@ export function LoginForm() {
                   </p>
                 </div>
 
-                <form onSubmit={(event) => event.preventDefault()}>
+                <form onSubmit={handleSubmit}>
                   <div>
                     <label
                       htmlFor="login-username"
@@ -155,11 +188,21 @@ export function LoginForm() {
                     </div>
                   </div>
 
+                  {error ? (
+                    <p
+                      role="alert"
+                      className="mt-4 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-2.5 text-[12px] font-semibold text-red-400"
+                    >
+                      {error}
+                    </p>
+                  ) : null}
+
                   <button
                     type="submit"
+                    disabled={pending}
                     className="w-full rounded-2xl bg-[#7C3AED] hover:bg-[#6D28D9] disabled:opacity-70 disabled:cursor-wait text-white font-black py-4 uppercase tracking-widest text-sm transition-colors mt-7"
                   >
-                    ĐĂNG NHẬP
+                    {pending ? "ĐANG XỬ LÝ…" : "ĐĂNG NHẬP"}
                   </button>
                 </form>
 
