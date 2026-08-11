@@ -43,14 +43,61 @@ const CATEGORIES: { slug: string; name: string }[] = [
   { slug: "acc-tft-hang-hieu", name: "ACC TFT HÀNG HIỆU" },
 ];
 
-/** Services behind /services/* — names, price labels and completed counts are live values. */
-const SERVICES: { slug: string; name: string; priceLabel: string; doneCount: number }[] = [
-  { slug: "riotgames", name: "Dịch Vụ Riot Games", priceLabel: "200K ~ 800K", doneCount: 96 },
-  { slug: "valorantpoint-vn", name: "Nạp Valorant Point VN", priceLabel: "109K ~ 2.2M", doneCount: 213 },
-  { slug: "valorantpoint-ph", name: "Nạp Valorant Point PH", priceLabel: "199K ~ 1.9M", doneCount: 64 },
-  { slug: "rutvts", name: "Rút Ví Trả Sau", priceLabel: "Liên hệ", doneCount: 300 },
-  { slug: "ytb", name: "Youtube Premium Cá Nhân", priceLabel: "50K ~ 550K", doneCount: 8 },
-  { slug: "dvfb", name: "Dịch Vụ Mở Khóa Facebook", priceLabel: "Liên hệ", doneCount: 43 },
+/**
+ * Services behind /services/* — names, price labels, completed counts and
+ * thumbnails are all live values read off the homepage service rows.
+ */
+const SERVICES: {
+  slug: string;
+  name: string;
+  priceLabel: string;
+  doneCount: number;
+  image: string;
+}[] = [
+  {
+    slug: "riotgames",
+    name: "Dịch Vụ Riot Games",
+    priceLabel: "200K ~ 800K",
+    doneCount: 96,
+    image:
+      "external/www-riotgames-com/riotpr-mar2023-social-twitch-1920x1080-03-17-2023.png",
+  },
+  {
+    slug: "valorantpoint-vn",
+    name: "Nạp Valorant Point VN",
+    priceLabel: "109K ~ 2.2M",
+    doneCount: 213,
+    image: "upload/packvn.png",
+  },
+  {
+    slug: "valorantpoint-ph",
+    name: "Nạp Valorant Point PH",
+    priceLabel: "199K ~ 1.9M",
+    doneCount: 64,
+    image: "upload/phthumb.png",
+  },
+  {
+    slug: "rutvts",
+    name: "Rút Ví Trả Sau",
+    priceLabel: "Liên hệ",
+    doneCount: 300,
+    image:
+      "external/cdn-prod-website-files-com/66daca61a92f146aa75284f7_66daca5bce3c8eca87e46731_vi-tra-sau-va-the-tin-dung.webp",
+  },
+  {
+    slug: "ytb",
+    name: "Youtube Premium Cá Nhân",
+    priceLabel: "50K ~ 550K",
+    doneCount: 8,
+    image: "external/cdn-tgdd-vn/2-110423-103232-800-resize.jpg",
+  },
+  {
+    slug: "dvfb",
+    name: "Dịch Vụ Mở Khóa Facebook",
+    priceLabel: "Liên hệ",
+    doneCount: 43,
+    image: "upload/mokhoafb.png",
+  },
 ];
 
 /** The five reviews shown on the homepage, verbatim. */
@@ -210,10 +257,16 @@ async function main() {
 
   // Services ---------------------------------------------------------------
   for (const s of SERVICES) {
+    const data = {
+      name: s.name,
+      priceLabel: s.priceLabel,
+      doneCount: s.doneCount,
+      imageUrl: `${IMAGES}/${s.image}`,
+    };
     await db.service.upsert({
       where: { slug: s.slug },
-      update: { name: s.name, priceLabel: s.priceLabel, doneCount: s.doneCount },
-      create: s,
+      update: data,
+      create: { slug: s.slug, ...data },
     });
   }
   console.log(`  services: ${SERVICES.length}`);

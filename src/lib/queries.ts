@@ -374,3 +374,38 @@ function maskUsername(name: string): string {
   if (name.length <= 2) return `${name}***`;
   return `${name.slice(0, 2)}***`;
 }
+
+// ---------------------------------------------------------------------------
+// Services
+// ---------------------------------------------------------------------------
+
+export interface ServiceRow {
+  slug: string;
+  name: string;
+  priceLabel: string | null;
+  imageUrl: string | null;
+  doneCount: number;
+}
+
+export async function listServices(): Promise<ServiceRow[]> {
+  const rows = await db.service.findMany({ orderBy: { doneCount: "desc" } });
+  return rows.map((s) => ({
+    slug: s.slug,
+    name: s.name,
+    priceLabel: s.priceLabel,
+    imageUrl: s.imageUrl,
+    doneCount: s.doneCount,
+  }));
+}
+
+export async function getService(slug: string): Promise<ServiceRow | null> {
+  const s = await db.service.findUnique({ where: { slug } });
+  if (!s) return null;
+  return {
+    slug: s.slug,
+    name: s.name,
+    priceLabel: s.priceLabel,
+    imageUrl: s.imageUrl,
+    doneCount: s.doneCount,
+  };
+}
