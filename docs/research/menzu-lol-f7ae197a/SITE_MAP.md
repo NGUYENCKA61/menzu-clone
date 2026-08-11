@@ -86,6 +86,57 @@ interface ProductCard {
 }
 ```
 
+## `/account/[code]` — product detail
+
+Sampled `/account/VLR2030`. docHeight 3246.
+`<title>` = `Menzu Valorant | Mã VLR2030 - VLR#2030 | Giá bán: 2.990.000đ`
+Container `max-w-[1320px] mx-auto px-4 lg:px-6`.
+
+1. Breadcrumb (both variants) → `Trang chủ / ACCOUNT VALORANT TỰ CHỌN / Mã VLR2030`
+2. `w-full max-w-[1320px] mx-auto flex flex-col`
+   - `grid grid-cols-1 lg:grid-cols-2 gap-12` — gallery (`space-y-4`) | buy panel (`flex flex-col`)
+   - `w-full mt-12 bg-neutral-900/50 border border-neutral-800/80 rounded-3xl p-6` — skin
+     inventory, tabbed, has its own `@keyframes skin-tab-enter { from { opacity: 0 } … }`
+3. `mt-20 border-t border-white/5 pt-12` — `Tài Khoản Tương Tự` (related accounts)
+
+Gallery shows `Phóng to chi tiết` and a live viewer count (`6 người đang xem` /
+`8 người đang xem` — it changes between loads, so it is server- or socket-driven).
+Also links `Chính Sách Bảo Hành`.
+
+### Buy panel — stat rows (verbatim labels)
+| Label | Value seen |
+|---|---|
+| `Rank` | `Unranked`, sub `LAST: DIAMOND 1 (V26 // ACT III)` |
+| `TRACKER.GG` | link `xem profile` |
+| `Skins` | `42 Skins` |
+| `Level` | `91` |
+| `VP` | `301` |
+| `RP` | `0` |
+| `KC` | `1.833` |
+| tag | `DROP MAIL` / `Mail gốc` + `TÌM HIỂU` link |
+| price | `-38%`, old `4.800.000₫`, sale `2.990.000 VND` |
+
+### Purchase actions (the checkout entry points)
+- `Cọc / Góp` — sub-label `từ 299.000đ` (deposit / instalment)
+- `Mua Ngay` (buy now)
+- `Thu cũ đổi mới` (trade-in)
+- `Tiêu trước trả sau` (buy now, pay later)
+
+The buy panel embeds `@keyframes dialogIn` — the purchase flow opens a modal.
+That modal is **click-revealed and therefore not yet captured** (CDP click freeze).
+
+```ts
+interface AccountDetail {
+  code: string; rank: string; lastRank: string | null; trackerUrl: string | null
+  skins: number; level: number; vp: number; rp: number; kc: number
+  tags: string[]; mailType: string            // "Mail gốc"
+  oldPrice: number; price: number; discountPct: number
+  depositFrom: number                          // 299000
+  viewersNow: number                           // live
+  gallery: string[]; skinInventory: Skin[]
+}
+```
+
 ## Header — authenticated variant
 
 Replaces the `Đăng nhập` button in `nav > [1] > [1]` (`flex items-center gap-4`):
