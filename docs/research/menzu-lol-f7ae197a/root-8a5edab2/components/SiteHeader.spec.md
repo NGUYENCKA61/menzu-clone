@@ -95,12 +95,25 @@ N/A — verified unchanged at every scroll position.
 ### Domain switcher (verbatim)
 `menzu.lol` ⇄ `menzuvalorant.com`
 
-### Main nav
-1. **`VALORANT HUB`** (dropdown) → `Crosshair Library`, `Lineups & Callouts`,
-   `Tìm Bạn Leo Rank`, `Check Skin Valorant`, `Valorant Build`, `Check Thư Welcome`,
-   `Trình Tạo Mã 2FA`
-2. **`GIAO DỊCH`** (dropdown) → `Thu Cũ Đổi Mới`, `Mua Account`
-3. **`NHẬN ACC FREE`** (plain link) — `flex items-center gap-1.5 px-3 py-2 rounded-lg text-[11px] font-extrabold uppercase tracking-widest`
+### Main nav — THREE dropdowns, not two
+
+> CORRECTED. An earlier revision of this spec lumped all 7 tool links into
+> `VALORANT HUB` because they were read in document order without grouping by
+> their parent trigger. The live site has a separate **`CÔNG CỤ`** dropdown.
+> Re-verified by walking each trigger's own container.
+
+1. **`VALORANT HUB`** (dropdown) → `Crosshair Library`, `Lineups & Callouts`, `Tìm Bạn Leo Rank`
+2. **`CÔNG CỤ`** (dropdown) → `Check Skin Valorant`, `Valorant Build`, `Check Thư Welcome`, `Trình Tạo Mã 2FA`
+3. **`GIAO DỊCH`** (dropdown) → `Thu Cũ Đổi Mới`, `Mua Account`
+4. **`NHẬN ACC FREE`** (plain link) — `flex items-center gap-1.5 px-3 py-2 rounded-lg text-[11px] font-extrabold uppercase tracking-widest`
+
+### Hamburger → MobileDrawer
+
+The hamburger is not decorative — it opens an off-canvas drawer. `SiteHeader`
+owns the `drawerOpen` state and renders `<MobileDrawer>`; see
+`components/MobileDrawer.spec.md`. The real hamburger class is
+`lg:hidden p-1.5 text-neutral-200 hover:text-white transition-colors flex items-center justify-center`
+(no `rounded-md`, no `hover:bg-white/5`).
 
 ### Logo / login
 - Logo: `MENZU` + `Valorant`
