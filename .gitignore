@@ -50,3 +50,9 @@ temp/
 
 # transient agent worktrees
 .claude/worktrees/
+
+# Chrome profile used by scripts/capture-page.mjs
+.chrome-capture/
+
+# Raw page captures — regenerable with scripts/capture-page.mjs
+docs/research/**/captures/*.html

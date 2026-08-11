@@ -12,6 +12,10 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Raw browser captures from scripts/capture-page.mjs — third-party markup
+    // with minified inline scripts, read as research input and never built.
+    "docs/research/**/captures/**",
+    ".chrome-capture/**",
   ]),
 ]);
 
