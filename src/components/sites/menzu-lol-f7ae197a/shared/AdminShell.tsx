@@ -17,7 +17,7 @@ const NAV: { label: string; href: string; icon: LucideIcon }[] = [
   { label: "Tổng quan", href: "/admin", icon: LayoutDashboard },
   { label: "Sản phẩm", href: "/admin/products", icon: Boxes },
   { label: "Đơn hàng", href: "/admin/orders", icon: ShoppingBag },
-  { label: "Voucher", href: "/admin/vouchers", icon: Ticket },
+  { label: "Marketing", href: "/admin/marketing", icon: Ticket },
   { label: "Thu cũ đổi mới", href: "/admin/trade", icon: Repeat },
   { label: "Người dùng", href: "/admin/users", icon: Users },
 ];

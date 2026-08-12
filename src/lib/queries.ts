@@ -663,16 +663,26 @@ export interface AdminFlashSaleRow {
   startsAt: Date;
   endsAt: Date;
   active: boolean;
+  /** Whether the window is open right now. */
+  running: boolean;
 }
 
-/** Every scheduled sale, running or not, for the marketing screen. */
+/**
+ * Every scheduled sale, running or not, for the marketing screen.
+ *
+ * `running` is decided here rather than in the page: reading the clock during
+ * render is an impure call, and deciding it in the browser would let the badge
+ * disagree with the price shoppers are actually charged.
+ */
 export async function listFlashSales(take = 100): Promise<AdminFlashSaleRow[]> {
+  const now = Date.now();
   const rows = await db.flashSale.findMany({
     orderBy: { startsAt: "desc" },
     take,
     include: { product: { select: { code: true, rank: true, price: true } } },
   });
   return rows.map((r) => ({
+    running: r.active && r.startsAt.getTime() <= now && r.endsAt.getTime() >= now,
     id: r.id,
     productCode: r.product.code,
     productRank: r.product.rank,

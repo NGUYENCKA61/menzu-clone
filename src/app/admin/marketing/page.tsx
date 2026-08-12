@@ -1,0 +1,55 @@
+import type { Metadata } from "next";
+import { redirect } from "next/navigation";
+
+import { AdminMarketing } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminMarketing";
+import { AdminShell } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminShell";
+import { getAdmin } from "@/lib/admin";
+import { listFlashSales, listVouchers } from "@/lib/queries";
+
+export const metadata: Metadata = { title: "Marketing | Quản trị" };
+export const dynamic = "force-dynamic";
+
+function formatWhen(date: Date | null): string | null {
+  if (!date) return null;
+  return date.toLocaleString("vi-VN", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+export default async function AdminMarketingPage() {
+  const admin = await getAdmin();
+  if (!admin) redirect("/login?next=%2Fadmin%2Fmarketing");
+
+  const [vouchers, sales] = await Promise.all([listVouchers(), listFlashSales()]);
+
+  return (
+    <AdminShell
+      title="Marketing"
+      subtitle="Voucher giảm giá và lịch flash sale"
+      username={admin.username}
+    >
+      <AdminMarketing
+        vouchers={vouchers.map((v) => ({
+          ...v,
+          startsAt: formatWhen(v.startsAt),
+          expiresAt: formatWhen(v.expiresAt),
+        }))}
+        sales={sales.map((s) => ({
+          id: s.id,
+          productCode: s.productCode,
+          productRank: s.productRank,
+          price: s.price,
+          salePrice: s.salePrice,
+          startsAt: formatWhen(s.startsAt) ?? "",
+          endsAt: formatWhen(s.endsAt) ?? "",
+          active: s.active,
+          running: s.running,
+        }))}
+      />
+    </AdminShell>
+  );
+}
