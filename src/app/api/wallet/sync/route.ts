@@ -14,6 +14,19 @@ function sameSecret(given: string, expected: string): boolean {
 }
 
 /**
+ * Shortest gap between two calls out to the provider.
+ *
+ * Every customer sitting on the transfer screen polls this route, so without a
+ * floor the provider gets one request per waiting customer per tick — twenty
+ * people waiting would be two hundred calls a minute at somebody else's
+ * service, for a statement that has not changed. One caller does the fetch and
+ * everyone arriving inside the window is told what it found.
+ */
+const PROVIDER_COOLDOWN_MS = 8_000;
+
+let lastPollAt = 0;
+
+/**
  * Pulls recent transfers from a polled provider and credits whatever matches.
  *
  * Services like api.sieuthicode.vn do not push: they expose a URL that returns
@@ -51,6 +64,24 @@ async function runSync(request: Request) {
   if (!settings.autoTopUpEnabled || feeds.length === 0) {
     return NextResponse.json({ matched: 0, skipped: 0, expired, details: [], polled: false });
   }
+
+  // Somebody asked the provider a moment ago; a bank statement does not change
+  // between two callers eight seconds apart.
+  // Reports zero rather than replaying what the last caller found: a client
+  // that reloads on somebody else's match would reload again on the next tick,
+  // and again, for as long as the window lasts. Each client watches its own
+  // request through /api/wallet/status instead.
+  if (Date.now() - lastPollAt < PROVIDER_COOLDOWN_MS) {
+    return NextResponse.json({
+      polled: false,
+      cooling: true,
+      expired,
+      matched: 0,
+      skipped: 0,
+      details: [],
+    });
+  }
+  lastPollAt = Date.now();
 
   // Every account is read, not just the one the customer picked: people
   // transfer from whichever app is already open, and a payment that landed in

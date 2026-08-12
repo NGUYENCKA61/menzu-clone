@@ -31,7 +31,7 @@ export function extractTopUpCode(description: string): string | null {
 }
 
 /**
- * Whether any of these requests is still waiting on money.
+ * The first request here still waiting on money, or null.
  *
  * Drives the wallet page's polling. It used to key off "did this page session
  * create a request", which meant a reload stopped the page watching a request
@@ -39,8 +39,8 @@ export function extractTopUpCode(description: string): string | null {
  * somebody else loaded the page. EXPIRED counts: those still credit if the
  * money turns up.
  */
-export function hasWaitingTopUp(rows: { status: string }[]): boolean {
-  return rows.some((row) => row.status === "PENDING" || row.status === "EXPIRED");
+export function firstWaitingTopUp<T extends { status: string }>(rows: T[]): T | null {
+  return rows.find((row) => row.status === "PENDING" || row.status === "EXPIRED") ?? null;
 }
 
 /** How many characters follow the "NT" prefix. */

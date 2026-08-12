@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   extractTopUpCode,
-  hasWaitingTopUp,
+  firstWaitingTopUp,
   makeTopUpCode,
   readTransfers,
 } from "@/lib/topup";
@@ -30,17 +30,26 @@ describe("extractTopUpCode", () => {
   });
 });
 
-describe("hasWaitingTopUp", () => {
-  it("keeps watching while something is unpaid", () => {
-    expect(hasWaitingTopUp([{ status: "PENDING" }])).toBe(true);
-    // Expired requests still credit, so the page must keep polling for them.
-    expect(hasWaitingTopUp([{ status: "EXPIRED" }])).toBe(true);
-    expect(hasWaitingTopUp([{ status: "COMPLETED" }, { status: "PENDING" }])).toBe(true);
+describe("firstWaitingTopUp", () => {
+  it("picks the request still waiting on money", () => {
+    expect(firstWaitingTopUp([{ status: "PENDING", code: "NTAAAAAA" }])?.code).toBe("NTAAAAAA");
+    // Expired requests still credit, so the page must keep watching them.
+    expect(firstWaitingTopUp([{ status: "EXPIRED", code: "NTBBBBBB" }])?.code).toBe("NTBBBBBB");
+  });
+
+  it("skips past everything already settled", () => {
+    expect(
+      firstWaitingTopUp([
+        { status: "COMPLETED", code: "NT111111" },
+        { status: "FAILED", code: "NT222222" },
+        { status: "PENDING", code: "NT333333" },
+      ])?.code,
+    ).toBe("NT333333");
   });
 
   it("stops once nothing is outstanding", () => {
-    expect(hasWaitingTopUp([])).toBe(false);
-    expect(hasWaitingTopUp([{ status: "COMPLETED" }, { status: "FAILED" }])).toBe(false);
+    expect(firstWaitingTopUp([])).toBeNull();
+    expect(firstWaitingTopUp([{ status: "COMPLETED", code: "NT111111" }])).toBeNull();
   });
 });
 

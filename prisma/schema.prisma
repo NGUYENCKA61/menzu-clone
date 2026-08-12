@@ -528,6 +528,10 @@ model TopUp {
   createdAt DateTime    @default(now())
 
   @@index([userId, createdAt])
+  /// The retirement sweep asks for pending rows older than a cutoff, and it
+  /// now runs on every reconciliation pass rather than once a day. Without
+  /// this it is a sequential scan of every top-up the shop has ever taken.
+  @@index([status, createdAt])
   @@map("topups")
 }
 

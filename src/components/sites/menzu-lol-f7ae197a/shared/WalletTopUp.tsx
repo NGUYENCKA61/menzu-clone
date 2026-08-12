@@ -2,7 +2,7 @@
 
 import { Banknote, CreditCard } from "lucide-react";
 
-import { hasWaitingTopUp } from "@/lib/topup";
+import { firstWaitingTopUp } from "@/lib/topup";
 import { useEffect, useState } from "react";
 
 type Method = "bank" | "card";
@@ -161,12 +161,13 @@ export function WalletTopUp({
   const [copied, setCopied] = useState<string | null>(null);
   const [credited, setCredited] = useState(false);
 
-  // Anything of this customer's still waiting, whether or not it was opened in
-  // this page session. Keying the poll on `done` alone was a bug: a customer
-  // who reloaded, or came back later to finish paying, had a request the page
-  // silently stopped watching, so their transfer sat matched-but-uncredited
-  // until somebody else happened to load this page.
-  const hasWaitingRequest = hasWaitingTopUp(history);
+  // The request this page watches: the one just opened, or failing that the
+  // customer's newest unpaid one. Keying on `done` alone was a bug — somebody
+  // who reloaded had a request the page silently stopped watching, so their
+  // transfer sat matched but uncredited. Watching one specific code, rather
+  // than the shop's overall match count, also means a poll that was rate
+  // limited or that credited somebody else cannot make this page act.
+  const waitingCode = done?.code ?? firstWaitingTopUp(history)?.code ?? null;
 
   /**
    * While the customer has something outstanding, ask the shop to check its
@@ -175,27 +176,18 @@ export function WalletTopUp({
    * nothing, so this costs a request every ten seconds and no more.
    */
   useEffect(() => {
-    if (!autoEnabled || credited) return;
-    if (!done && !hasWaitingRequest) return;
+    if (!autoEnabled || credited || !waitingCode) return;
     let stopped = false;
 
     const tick = async () => {
       try {
-        const response = await fetch("/api/wallet/sync", { method: "POST" });
-        const report = (await response.json().catch(() => ({}))) as { matched?: number };
+        // Ask the shop to read its statement. The answer is ignored: it covers
+        // every customer, and may have been served from the rate-limit window.
+        await fetch("/api/wallet/sync", { method: "POST" });
 
-        // Something was credited — which may be this customer's, and the
-        // balance in the header is now stale either way.
-        if (!stopped && (report.matched ?? 0) > 0) {
-          setCredited(true);
-          window.setTimeout(() => window.location.reload(), 1600);
-          return;
-        }
-
-        // The request may also have been settled by an admin or the scheduler
-        // between two ticks, in which case this poll matched nothing.
-        if (!done || stopped) return;
-        const status = await fetch("/api/wallet/status?code=" + done.code);
+        // Then ask about this request specifically, which also catches one
+        // settled by an admin or the scheduler between two ticks.
+        const status = await fetch("/api/wallet/status?code=" + waitingCode);
         const data = (await status.json()) as { status?: string };
         if (!stopped && data.status === "COMPLETED") {
           setCredited(true);
@@ -213,7 +205,7 @@ export function WalletTopUp({
       stopped = true;
       window.clearInterval(timer);
     };
-  }, [done, hasWaitingRequest, autoEnabled, credited]);
+  }, [waitingCode, autoEnabled, credited]);
 
   async function copy(label: string, value: string) {
     try {

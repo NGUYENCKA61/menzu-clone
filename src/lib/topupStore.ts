@@ -8,10 +8,12 @@ function makeCode(prefix: string): string {
 /**
  * How long a request waits before it stops cluttering the queue.
  *
- * Long enough to cover somebody who starts a transfer at night and finishes in
- * the morning, short enough that the admin screen shows today's work.
+ * Half an hour: long enough to open a banking app, fail the OTP, and try
+ * again; short enough that the queue shows what is actually happening now.
+ * Nobody is punished for being slower — an expired request still credits when
+ * the transfer arrives.
  */
-export const TOPUP_EXPIRY_HOURS = 24;
+export const TOPUP_EXPIRY_MINUTES = 30;
 
 /**
  * Retires requests nobody paid.
@@ -22,7 +24,7 @@ export const TOPUP_EXPIRY_HOURS = 24;
  * punished for arriving late.
  */
 export async function expireStaleTopUps(): Promise<number> {
-  const cutoff = new Date(Date.now() - TOPUP_EXPIRY_HOURS * 60 * 60 * 1000);
+  const cutoff = new Date(Date.now() - TOPUP_EXPIRY_MINUTES * 60 * 1000);
   const result = await db.topUp.updateMany({
     where: { status: "PENDING", createdAt: { lt: cutoff } },
     data: { status: "EXPIRED" },
