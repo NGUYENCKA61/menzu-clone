@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 
 import { AccountPageFrame } from "@/components/sites/menzu-lol-f7ae197a/shared/AccountPageFrame";
 import { AccountEmpty } from "@/components/sites/menzu-lol-f7ae197a/shared/AccountShell";
+import { ListSearch } from "@/components/sites/menzu-lol-f7ae197a/shared/ListSearch";
 import { formatVnd } from "@/components/sites/menzu-lol-f7ae197a/shared/productData";
 import { getOrders } from "@/lib/queries";
 import { getCurrentUser } from "@/lib/session";
@@ -30,19 +31,25 @@ export default async function OrdersPage() {
       subtitle="Danh sách các tài khoản bạn đã thanh toán"
       crumb="Lịch sử mua"
     >
-      {orders.length === 0 ? (
-        <AccountEmpty
-          title="Chưa có đơn hàng nào"
-          body="Bạn chưa mua tài khoản nào trên hệ thống"
-          ctaLabel="Mua Ngay"
-          ctaHref="/category/account-valorant-tu-chon"
-        />
-      ) : (
-        <div className="flex flex-col gap-3">
-          {orders.map((o) => (
-            <a
-              key={o.code}
-              href={`/account/${o.productCode}`}
+      {(
+        <ListSearch
+          emptyState={
+            <AccountEmpty
+              title="Chưa có đơn hàng nào"
+              body="Bạn chưa mua tài khoản nào trên hệ thống"
+              ctaLabel="Mua Ngay"
+              ctaHref="/category/account-valorant-tu-chon"
+            />
+          }
+          placeholder="Tìm theo mã đơn hoặc tên account..."
+          rows={orders.map((o) => ({
+            key: o.code,
+            // Searched by order code, product code and rank — the three things
+            // a buyer actually has to hand when hunting for a past purchase.
+            haystack: [o.code, o.productCode, o.productRank],
+            node: (
+              <a
+                href={`/account/${o.productCode}`}
               className="group flex items-center gap-4 rounded-2xl border border-white/10 bg-neutral-900/50 p-4 hover:border-indigo-500/40 transition-colors"
             >
               <div className="relative w-24 h-16 rounded-xl overflow-hidden bg-neutral-950 shrink-0 border border-white/10">
@@ -84,9 +91,11 @@ export default async function OrdersPage() {
                   {STATUS_LABEL[o.status] ?? o.status}
                 </span>
               </div>
-            </a>
-          ))}
-        </div>
+              </a>
+            ),
+          }))}
+          emptyLabel="Không tìm thấy đơn hàng nào khớp."
+        />
       )}
     </AccountPageFrame>
   );

@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 
 import { AccountPageFrame } from "@/components/sites/menzu-lol-f7ae197a/shared/AccountPageFrame";
 import { AccountEmpty } from "@/components/sites/menzu-lol-f7ae197a/shared/AccountShell";
+import { ListSearch } from "@/components/sites/menzu-lol-f7ae197a/shared/ListSearch";
 import { formatVnd } from "@/components/sites/menzu-lol-f7ae197a/shared/productData";
 import { getServiceOrders } from "@/lib/queries";
 import { getCurrentUser } from "@/lib/session";
@@ -36,18 +37,22 @@ export default async function ServiceOrdersPage() {
       subtitle="Theo dõi tiến độ các dịch vụ số bạn đã đặt"
       crumb="Đơn dịch vụ"
     >
-      {orders.length === 0 ? (
-        <AccountEmpty
-          title="Không tìm thấy đơn dịch vụ nào phù hợp"
-          body="Bạn chưa đặt dịch vụ nào trên hệ thống"
-          ctaLabel="Khám phá các dịch vụ ngay"
-          ctaHref="/services"
-        />
-      ) : (
-        <div className="flex flex-col gap-3">
-          {orders.map((o) => (
+      {(
+        <ListSearch
+          emptyState={
+            <AccountEmpty
+              title="Chưa có đơn dịch vụ nào"
+              body="Bạn chưa đặt dịch vụ nào trên hệ thống"
+              ctaLabel="Khám phá các dịch vụ ngay"
+              ctaHref="/services"
+            />
+          }
+          placeholder="Tìm kiếm mã đơn, tên dịch vụ..."
+          rows={orders.map((o) => ({
+            key: o.code,
+            haystack: [o.code, o.serviceName],
+            node: (
             <div
-              key={o.code}
               className="flex items-center justify-between gap-4 rounded-2xl border border-white/10 bg-neutral-900/50 p-4"
             >
               <div className="flex flex-col min-w-0 gap-1">
@@ -78,8 +83,10 @@ export default async function ServiceOrdersPage() {
                 </span>
               </div>
             </div>
-          ))}
-        </div>
+            ),
+          }))}
+          emptyLabel="Không tìm thấy đơn dịch vụ nào khớp."
+        />
       )}
     </AccountPageFrame>
   );

@@ -215,7 +215,7 @@ export function TradeForm() {
             required
             value={zalo}
             onChange={(event) => setZalo(event.target.value)}
-            placeholder="0xxxxxxxxx"
+            placeholder="Nhập số điện thoại Zalo của bạn..."
             className="w-full rounded-2xl border border-white/5 bg-white/5 px-4 py-3.5 text-sm text-white outline-none focus:border-[#7C3AED]/60 transition-colors placeholder-neutral-600"
           />
         </div>
