@@ -98,6 +98,38 @@ export function AdminSettings({
   const [origin, setOrigin] = useState("");
   useEffect(() => setOrigin(window.location.origin), []);
 
+  const [testing, setTesting] = useState(false);
+  const [testResult, setTestResult] = useState<{ ok: boolean; text: string } | null>(null);
+
+  /**
+   * Calls the provider once and reports what came back. Saves nothing and
+   * shows no transaction — the point is only "can this shop read that feed".
+   */
+  async function handleTestConnection() {
+    setTesting(true);
+    setTestResult(null);
+    try {
+      const response = await fetch("/api/admin/topups/test", { method: "POST" });
+      const data = (await response.json().catch(() => ({}))) as {
+        error?: string;
+        hint?: string;
+        shape?: { listKey: string | null; itemKeys: string[] };
+      };
+      if (!response.ok) {
+        setTestResult({ ok: false, text: data.error ?? "Không kiểm tra được" });
+        return;
+      }
+      const keys = data.shape?.itemKeys?.length
+        ? ` Các trường đọc được: ${data.shape.itemKeys.join(", ")}.`
+        : "";
+      setTestResult({ ok: true, text: `${data.hint ?? ""}${keys}` });
+    } catch {
+      setTestResult({ ok: false, text: "Không kết nối được máy chủ" });
+    } finally {
+      setTesting(false);
+    }
+  }
+
   const [brandName, setBrandName] = useState(settings.brandName);
   const [brandLogo, setBrandLogo] = useState(settings.brandLogo);
   const [brandColor, setBrandColor] = useState(settings.brandColor);
@@ -386,8 +418,37 @@ export function AdminSettings({
               />
               <p className={HINT}>
                 Dành cho dịch vụ kiểu hỏi–đáp như sieuthicode: web tự gọi sang lấy danh
-                sách giao dịch mới trong lúc khách đang chờ ở màn chuyển khoản.
+                sách giao dịch mới trong lúc khách đang chờ ở màn chuyển khoản. Token nằm
+                ngay trong đường dẫn thì cứ dán nguyên cả URL.
               </p>
+
+              <div className="mt-2.5 flex flex-wrap items-center gap-3">
+                <button
+                  type="button"
+                  disabled={testing}
+                  onClick={handleTestConnection}
+                  className="h-8 px-3 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 disabled:opacity-50 text-[10px] font-black uppercase tracking-widest text-neutral-300 transition-colors"
+                >
+                  {testing ? "Đang gọi…" : "Kiểm tra kết nối"}
+                </button>
+                <span className="text-[11px] text-neutral-500">
+                  Lưu cấu hình trước rồi bấm — máy chủ gọi thử và cho biết có đọc được
+                  giao dịch không.
+                </span>
+              </div>
+
+              {testResult ? (
+                <p
+                  role="status"
+                  className={`mt-2.5 rounded-xl border px-4 py-2.5 text-[11px] font-semibold ${
+                    testResult.ok
+                      ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
+                      : "border-red-500/30 bg-red-500/10 text-red-400"
+                  }`}
+                >
+                  {testResult.text}
+                </p>
+              ) : null}
             </div>
 
             <div className="rounded-xl border border-white/5 bg-neutral-950/40 px-4 py-3">
@@ -402,9 +463,10 @@ export function AdminSettings({
               </p>
             </div>
 
-            {auto && !apiKey ? (
+            {auto && !apiKey && !apiUrl ? (
               <p className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-2.5 text-[11px] font-semibold text-amber-400">
-                Bật nạp tự động thì bắt buộc phải có API key — lưu sẽ bị từ chối.
+                Bật nạp tự động thì cần địa chỉ API đối soát hoặc API key — lưu sẽ bị từ
+                chối.
               </p>
             ) : null}
 

@@ -417,10 +417,13 @@ export function validateSettings(settings: ShopSettings): string | null {
   if (!settings.closedMessage.trim()) {
     return "Cần nhập thông báo hiển thị khi khóa mua hàng";
   }
-  // Auto top-up credits wallets with no human in the loop, so it may not run
-  // on an unauthenticated endpoint or against a provider nobody named.
-  if (settings.autoTopUpEnabled && !settings.topUpApiKey) {
-    return "Bật nạp tự động thì phải có API key, nếu không ai cũng gọi được webhook";
+  // Auto top-up credits wallets with no human in the loop, so it needs a way
+  // to hear about a transfer: either an address to poll — providers like
+  // sieuthicode put the credentials in the URL itself — or a key that a
+  // pushing provider must present. The webhook stays shut without a key
+  // regardless, so it can never be an open endpoint.
+  if (settings.autoTopUpEnabled && !settings.topUpApiKey && !settings.topUpApiUrl) {
+    return "Bật nạp tự động thì cần địa chỉ API đối soát hoặc API key cho webhook";
   }
   if (settings.topUpApiUrl && !/^https:\/\//.test(settings.topUpApiUrl)) {
     return "Địa chỉ API phải bắt đầu bằng https://";

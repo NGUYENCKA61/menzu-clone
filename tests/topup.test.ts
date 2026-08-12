@@ -63,6 +63,64 @@ describe("readTransfers", () => {
     expect(readTransfers({ data: [{ description: "NAP NT8F3K2Q", amount: -200000 }] })).toEqual([]);
   });
 
+  it("reads the sieuthicode VCB v3 shape the shop actually uses", () => {
+    // Copied from the provider's documented response. The description is one
+    // long machine string with no spaces, which is what VCB hands over.
+    const transfers = readTransfers({
+      status: "success",
+      message: "Thành công",
+      transactions: [
+        {
+          transactionID: "5388 - 71420",
+          amount: 99000,
+          description: "020097040501312143182024IXIY051998",
+          transactionDate: "31/01/2024",
+          type: "IN",
+        },
+      ],
+    });
+
+    expect(transfers).toEqual([
+      {
+        description: "020097040501312143182024IXIY051998",
+        amount: 99000,
+        reference: "5388 - 71420",
+      },
+    ]);
+  });
+
+  it("finds the note inside a VCB description blob", () => {
+    // The customer's note is appended to that machine string rather than
+    // arriving on its own.
+    const [transfer] = readTransfers({
+      status: "success",
+      transactions: [
+        {
+          transactionID: "1",
+          amount: 200000,
+          description: "020097040501312143182024IXIY051998 NAPNT8F3K2Q",
+          type: "IN",
+        },
+      ],
+    });
+    expect(extractTopUpCode(transfer.description)).toBe("NT8F3K2Q");
+  });
+
+  it("refuses an outgoing VCB row", () => {
+    expect(
+      readTransfers({
+        transactions: [{ transactionID: "2", amount: 99000, description: "x", type: "OUT" }],
+      }),
+    ).toEqual([]);
+  });
+
+  it("reads an amount that arrives as a formatted string", () => {
+    const [transfer] = readTransfers({
+      transactions: [{ id: "3", amount: "200,000", description: "NAP NT8F3K2Q", type: "IN" }],
+    });
+    expect(transfer.amount).toBe(200000);
+  });
+
   it("ignores payloads it does not understand rather than guessing", () => {
     expect(readTransfers(null)).toEqual([]);
     expect(readTransfers("chuoi")).toEqual([]);
