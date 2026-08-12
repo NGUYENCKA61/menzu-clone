@@ -30,6 +30,19 @@ export function extractTopUpCode(description: string): string | null {
   return match ? match[1].toUpperCase() : null;
 }
 
+/**
+ * Whether any of these requests is still waiting on money.
+ *
+ * Drives the wallet page's polling. It used to key off "did this page session
+ * create a request", which meant a reload stopped the page watching a request
+ * that was still open — the transfer then sat matched but uncredited until
+ * somebody else loaded the page. EXPIRED counts: those still credit if the
+ * money turns up.
+ */
+export function hasWaitingTopUp(rows: { status: string }[]): boolean {
+  return rows.some((row) => row.status === "PENDING" || row.status === "EXPIRED");
+}
+
 /** How many characters follow the "NT" prefix. */
 const CODE_BODY_LENGTH = 6;
 

@@ -1,6 +1,8 @@
 "use client";
 
 import { Banknote, CreditCard } from "lucide-react";
+
+import { hasWaitingTopUp } from "@/lib/topup";
 import { useEffect, useState } from "react";
 
 type Method = "bank" | "card";
@@ -159,21 +161,42 @@ export function WalletTopUp({
   const [copied, setCopied] = useState<string | null>(null);
   const [credited, setCredited] = useState(false);
 
+  // Anything of this customer's still waiting, whether or not it was opened in
+  // this page session. Keying the poll on `done` alone was a bug: a customer
+  // who reloaded, or came back later to finish paying, had a request the page
+  // silently stopped watching, so their transfer sat matched-but-uncredited
+  // until somebody else happened to load this page.
+  const hasWaitingRequest = hasWaitingTopUp(history);
+
   /**
-   * While the customer sits on the transfer screen, ask the shop to check its
+   * While the customer has something outstanding, ask the shop to check its
    * statement. That is what makes an automatic top-up land in seconds without
    * a cron server — and when auto is off the endpoint answers immediately with
    * nothing, so this costs a request every ten seconds and no more.
    */
   useEffect(() => {
-    if (!done || !autoEnabled || credited) return;
+    if (!autoEnabled || credited) return;
+    if (!done && !hasWaitingRequest) return;
     let stopped = false;
 
     const tick = async () => {
       try {
-        await fetch("/api/wallet/sync", { method: "POST" });
-        const response = await fetch("/api/wallet/status?code=" + done.code);
-        const data = (await response.json()) as { status?: string };
+        const response = await fetch("/api/wallet/sync", { method: "POST" });
+        const report = (await response.json().catch(() => ({}))) as { matched?: number };
+
+        // Something was credited — which may be this customer's, and the
+        // balance in the header is now stale either way.
+        if (!stopped && (report.matched ?? 0) > 0) {
+          setCredited(true);
+          window.setTimeout(() => window.location.reload(), 1600);
+          return;
+        }
+
+        // The request may also have been settled by an admin or the scheduler
+        // between two ticks, in which case this poll matched nothing.
+        if (!done || stopped) return;
+        const status = await fetch("/api/wallet/status?code=" + done.code);
+        const data = (await status.json()) as { status?: string };
         if (!stopped && data.status === "COMPLETED") {
           setCredited(true);
           window.setTimeout(() => window.location.reload(), 1600);
@@ -190,7 +213,7 @@ export function WalletTopUp({
       stopped = true;
       window.clearInterval(timer);
     };
-  }, [done, autoEnabled, credited]);
+  }, [done, hasWaitingRequest, autoEnabled, credited]);
 
   async function copy(label: string, value: string) {
     try {

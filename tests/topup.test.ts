@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { extractTopUpCode, makeTopUpCode, readTransfers } from "@/lib/topup";
+import {
+  extractTopUpCode,
+  hasWaitingTopUp,
+  makeTopUpCode,
+  readTransfers,
+} from "@/lib/topup";
 
 describe("extractTopUpCode", () => {
   it("reads the code out of a clean description", () => {
@@ -22,6 +27,20 @@ describe("extractTopUpCode", () => {
     // "NAP" alone is not a code, and a short tail must not be accepted.
     expect(extractTopUpCode("NAP")).toBeNull();
     expect(extractTopUpCode("NAP NT123")).toBeNull();
+  });
+});
+
+describe("hasWaitingTopUp", () => {
+  it("keeps watching while something is unpaid", () => {
+    expect(hasWaitingTopUp([{ status: "PENDING" }])).toBe(true);
+    // Expired requests still credit, so the page must keep polling for them.
+    expect(hasWaitingTopUp([{ status: "EXPIRED" }])).toBe(true);
+    expect(hasWaitingTopUp([{ status: "COMPLETED" }, { status: "PENDING" }])).toBe(true);
+  });
+
+  it("stops once nothing is outstanding", () => {
+    expect(hasWaitingTopUp([])).toBe(false);
+    expect(hasWaitingTopUp([{ status: "COMPLETED" }, { status: "FAILED" }])).toBe(false);
   });
 });
 
