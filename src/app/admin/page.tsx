@@ -1,14 +1,28 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
+import { AdminDashboard } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminDashboard";
 import { AdminShell } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminShell";
 import { formatVnd } from "@/components/sites/menzu-lol-f7ae197a/shared/productData";
 import { getAdmin } from "@/lib/admin";
+import { relativeTime } from "@/lib/announcements";
+import { lastDays, percentChange, formatPercent, txState } from "@/lib/dashboard";
 import { db } from "@/lib/db";
 import { startOfDayVn } from "@/lib/time";
 
 export const metadata: Metadata = { title: "Menzu Admin" };
 export const dynamic = "force-dynamic";
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+/** "14:42" in the shop's timezone, decided here so both renders agree. */
+function clockVn(date: Date): string {
+  return date.toLocaleTimeString("vi-VN", {
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZone: "Asia/Ho_Chi_Minh",
+  });
+}
 
 export default async function AdminHome() {
   const admin = await getAdmin();
@@ -17,92 +31,153 @@ export default async function AdminHome() {
 
   const since = startOfDayVn();
   const today = { createdAt: { gte: since } };
+  const days = lastDays(since, 7);
+  const weekStart = days[0]!.start;
+  const prevWeekStart = new Date(weekStart.getTime() - 7 * DAY_MS);
 
   const [
-    available,
     users,
+    newUsersToday,
     cardToday,
     bankToday,
     incomeToday,
     revenueAllTime,
     cardAllTime,
     bankAllTime,
-  ] =
-    await Promise.all([
-      db.product.count({ where: { status: "AVAILABLE" } }),
-      db.user.count(),
-      db.topUp.aggregate({
-        _sum: { amount: true },
-        _count: true,
-        where: { ...today, method: "CARD", status: "COMPLETED" },
-      }),
-      db.topUp.aggregate({
-        _sum: { amount: true },
-        _count: true,
-        where: { ...today, method: "BANK", status: "COMPLETED" },
-      }),
-      // Income is what customers actually paid for accounts today. Top-ups are
-      // not income — money moving into a wallet is still the customer's until
-      // they spend it.
-      db.order.aggregate({
-        _sum: { total: true },
-        _count: true,
-        where: { ...today, status: "PAID" },
-      }),
-      db.order.aggregate({ _sum: { total: true }, where: { status: "PAID" } }),
-      db.topUp.aggregate({
-        _sum: { amount: true },
-        _count: true,
-        where: { method: "CARD", status: "COMPLETED" },
-      }),
-      db.topUp.aggregate({
-        _sum: { amount: true },
-        _count: true,
-        where: { method: "BANK", status: "COMPLETED" },
-      }),
-    ]);
+    thisWeek,
+    lastWeek,
+    dailyRevenue,
+    recentTopUps,
+    recentOrders,
+    recentSignUps,
+  ] = await Promise.all([
+    db.user.count(),
+    db.user.count({ where: today }),
+    db.topUp.aggregate({
+      _sum: { amount: true },
+      _count: true,
+      where: { ...today, method: "CARD", status: "COMPLETED" },
+    }),
+    db.topUp.aggregate({
+      _sum: { amount: true },
+      _count: true,
+      where: { ...today, method: "BANK", status: "COMPLETED" },
+    }),
+    // Income is what customers actually paid for accounts today. Top-ups are
+    // not income — money moving into a wallet is still the customer's until
+    // they spend it.
+    db.order.aggregate({
+      _sum: { total: true },
+      _count: true,
+      where: { ...today, status: "PAID" },
+    }),
+    db.order.aggregate({ _sum: { total: true }, where: { status: "PAID" } }),
+    db.topUp.aggregate({
+      _sum: { amount: true },
+      _count: true,
+      where: { method: "CARD", status: "COMPLETED" },
+    }),
+    db.topUp.aggregate({
+      _sum: { amount: true },
+      _count: true,
+      where: { method: "BANK", status: "COMPLETED" },
+    }),
+    db.order.aggregate({
+      _sum: { total: true },
+      where: { status: "PAID", createdAt: { gte: weekStart } },
+    }),
+    db.order.aggregate({
+      _sum: { total: true },
+      where: { status: "PAID", createdAt: { gte: prevWeekStart, lt: weekStart } },
+    }),
+    // One aggregate per day rather than a groupBy: the buckets are Vietnam
+    // days, and grouping in SQL would group by UTC ones and file every sale
+    // between midnight and 7am under the day before.
+    Promise.all(
+      days.map((day) =>
+        db.order.aggregate({
+          _sum: { total: true },
+          where: { status: "PAID", createdAt: { gte: day.start, lt: day.end } },
+        }),
+      ),
+    ),
+    db.topUp.findMany({
+      orderBy: { createdAt: "desc" },
+      take: 12,
+      include: { user: { select: { username: true } } },
+    }),
+    db.order.findMany({
+      orderBy: { createdAt: "desc" },
+      take: 12,
+      include: { user: { select: { username: true } } },
+    }),
+    db.user.findMany({
+      orderBy: { createdAt: "desc" },
+      take: 5,
+      select: { id: true, username: true, createdAt: true },
+    }),
+  ]);
 
-  const todayStats = [
-    {
-      label: "Thẻ đã nạp hôm nay",
-      value: `${formatVnd(Number(cardToday._sum.amount ?? 0))}đ`,
-      sub: `${cardToday._count} lượt nạp thẻ cào`,
-    },
-    {
-      label: "Nạp bank hôm nay",
-      value: `${formatVnd(Number(bankToday._sum.amount ?? 0))}đ`,
-      sub: `${bankToday._count} lượt chuyển khoản`,
-    },
-    {
-      label: "Thu nhập hôm nay",
-      value: `${formatVnd(Number(incomeToday._sum.total ?? 0))}đ`,
-      sub: `${incomeToday._count} đơn đã bán`,
-    },
-    {
-      label: "Sản phẩm còn bán",
-      value: String(available),
-      sub: "đang mở bán trên web",
-    },
-  ];
+  const weekChange = percentChange(
+    Number(thisWeek._sum.total ?? 0),
+    Number(lastWeek._sum.total ?? 0),
+  );
 
-  const totals = [
-    { label: "Tổng thành viên", value: String(users), sub: "tài khoản đã đăng ký" },
-    {
-      label: "Tổng doanh thu",
-      value: `${formatVnd(Number(revenueAllTime._sum.total ?? 0))}đ`,
-      sub: "toàn bộ đơn đã thanh toán từ trước tới nay",
-    },
-    {
-      label: "Tổng thẻ nạp",
-      value: `${formatVnd(Number(cardAllTime._sum.amount ?? 0))}đ`,
-      sub: `${cardAllTime._count} lượt nạp thẻ cào`,
-    },
-    {
-      label: "Tổng nạp bank",
-      value: `${formatVnd(Number(bankAllTime._sum.amount ?? 0))}đ`,
-      sub: `${bankAllTime._count} lượt chuyển khoản`,
-    },
-  ];
+  // Both ledgers on one timeline. Merged here rather than in the browser so
+  // the list is already the shop's, not something assembled from two lists a
+  // reader could see out of order.
+  const transactions = [
+    ...recentTopUps.map((row) => ({
+      code: row.code,
+      username: row.user.username,
+      kind: row.method === "CARD" ? "Nạp thẻ" : "Nạp bank",
+      amount: `+${formatVnd(Number(row.amount))}đ`,
+      credit: true,
+      at: row.createdAt,
+      state: txState("topup", row.status),
+    })),
+    ...recentOrders.map((row) => ({
+      code: row.code,
+      username: row.user.username,
+      kind: "Đơn hàng",
+      amount: `${formatVnd(Number(row.total))}đ`,
+      credit: false,
+      at: row.createdAt,
+      state: txState("order", row.status),
+    })),
+  ]
+    .sort((a, b) => b.at.getTime() - a.at.getTime())
+    .slice(0, 8);
+
+  // The activity feed is the same events plus registrations, which have no
+  // amount — a new account is something that happened, not money that moved.
+  const now = new Date();
+  const activity = [
+    ...transactions.slice(0, 6).map((row) => ({
+      id: `tx-${row.code}`,
+      username: row.username,
+      what: row.kind,
+      amount: row.amount as string | null,
+      credit: row.credit,
+      state: row.state,
+      at: row.at,
+    })),
+    ...recentSignUps.map((row) => ({
+      id: `user-${row.id}`,
+      username: row.username,
+      what: "Đăng ký tài khoản",
+      amount: null,
+      credit: false,
+      state: "SUCCESS" as const,
+      at: row.createdAt,
+    })),
+  ]
+    .sort((a, b) => b.at.getTime() - a.at.getTime())
+    .slice(0, 5)
+    // "2 phút" is measured here, against the server's clock. The page is
+    // force-dynamic and never hydrates this, so there is no second render to
+    // disagree with.
+    .map(({ at, ...rest }) => ({ ...rest, ago: relativeTime(at, now) }));
 
   return (
     <AdminShell
@@ -110,48 +185,62 @@ export default async function AdminHome() {
       subtitle="Số liệu hệ thống, đọc trực tiếp từ cơ sở dữ liệu"
       username={admin.username}
     >
-      <div className="flex flex-col gap-8">
-        <section className="flex flex-col gap-4">
-          <div className="flex items-center gap-3">
-            <h2 className="text-sm font-black uppercase tracking-widest text-white">Hôm nay</h2>
-            <div className="flex-1 h-px bg-gradient-to-r from-indigo-500/30 to-transparent" />
-            <span className="text-[11px] text-neutral-500">
-              từ 00:00 giờ Việt Nam
-            </span>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-            {todayStats.map((stat) => (
-              <StatCard key={stat.label} {...stat} />
-            ))}
-          </div>
-        </section>
-
-        <section className="flex flex-col gap-4">
-          <div className="flex items-center gap-3">
-            <h2 className="text-sm font-black uppercase tracking-widest text-white">Thống kê</h2>
-            <div className="flex-1 h-px bg-gradient-to-r from-indigo-500/30 to-transparent" />
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-            {totals.map((stat) => (
-              <StatCard key={stat.label} {...stat} />
-            ))}
-          </div>
-        </section>
-      </div>
+      <AdminDashboard
+        todayStats={[
+          {
+            label: "Doanh thu hôm nay",
+            value: `${formatVnd(Number(incomeToday._sum.total ?? 0))}đ`,
+            sub: `${incomeToday._count} đơn đã thanh toán`,
+          },
+          {
+            label: "Nạp bank hôm nay",
+            value: `${formatVnd(Number(bankToday._sum.amount ?? 0))}đ`,
+            sub: `${bankToday._count} lượt chuyển khoản`,
+          },
+          {
+            label: "Nạp thẻ hôm nay",
+            value: `${formatVnd(Number(cardToday._sum.amount ?? 0))}đ`,
+            sub: `${cardToday._count} lượt nạp thẻ cào`,
+          },
+          {
+            label: "Người dùng mới",
+            value: String(newUsersToday),
+            sub: "tài khoản đăng ký hôm nay",
+          },
+        ]}
+        totals={[
+          { label: "Tổng thành viên", value: String(users), sub: "tài khoản đã đăng ký" },
+          {
+            label: "Tổng doanh thu",
+            value: `${formatVnd(Number(revenueAllTime._sum.total ?? 0))}đ`,
+            // Only shown when last week had something to compare against.
+            sub:
+              weekChange === null
+                ? "toàn bộ đơn đã thanh toán"
+                : `${formatPercent(weekChange)} so với tuần trước`,
+            tone: weekChange === null ? undefined : weekChange >= 0 ? "up" : "down",
+          },
+          {
+            label: "Tổng nạp thẻ",
+            value: `${formatVnd(Number(cardAllTime._sum.amount ?? 0))}đ`,
+            sub: `${cardAllTime._count} lượt nạp thẻ`,
+          },
+          {
+            label: "Tổng nạp bank",
+            value: `${formatVnd(Number(bankAllTime._sum.amount ?? 0))}đ`,
+            sub: `${bankAllTime._count} lượt chuyển khoản`,
+          },
+        ]}
+        chart={days.map((day, index) => ({
+          label: day.label,
+          value: Number(dailyRevenue[index]?._sum.total ?? 0),
+        }))}
+        activity={activity}
+        transactions={transactions.map(({ at, ...row }) => ({
+          ...row,
+          time: clockVn(at),
+        }))}
+      />
     </AdminShell>
-  );
-}
-
-function StatCard({ label, value, sub }: { label: string; value: string; sub: string }) {
-  return (
-    <div className="rounded-2xl border border-white/10 bg-neutral-900/50 p-5 flex flex-col gap-2">
-      <span className="text-[10px] font-black uppercase tracking-widest text-neutral-500">
-        {label}
-      </span>
-      <span className="text-2xl font-black text-white tabular-nums">{value}</span>
-      <span className="text-[11px] text-neutral-500">{sub}</span>
-    </div>
   );
 }
