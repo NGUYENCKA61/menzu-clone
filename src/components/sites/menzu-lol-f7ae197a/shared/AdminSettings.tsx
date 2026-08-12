@@ -488,6 +488,19 @@ export function AdminSettings({
             </div>
 
             <div className="rounded-xl border border-white/5 bg-neutral-950/40 px-4 py-3">
+              <span className={LABEL}>Địa chỉ chạy nền 24/7 (khuyến nghị)</span>
+              <p className="font-mono text-xs text-neutral-300 break-all">
+                {origin}/api/wallet/sync?key=&lt;API-KEY&gt;
+              </p>
+              <p className="mt-1.5 text-[11px] text-neutral-500">
+                Dán vào một dịch vụ hẹn giờ miễn phí (cron-job.org…) và cho chạy mỗi phút,
+                thay <span className="font-mono">&lt;API-KEY&gt;</span> bằng key ở trên.
+                Không có cái này thì web chỉ đối soát lúc có khách đang mở màn hình chờ —
+                khách chuyển tiền xong tắt trang là phải đợi rất lâu.
+              </p>
+            </div>
+
+            <div className="rounded-xl border border-white/5 bg-neutral-950/40 px-4 py-3">
               <span className={LABEL}>Địa chỉ để dán vào bên trung gian</span>
               <p className="font-mono text-xs text-neutral-300 break-all">
                 {origin}/api/wallet/webhook

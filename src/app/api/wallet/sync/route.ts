@@ -1,3 +1,5 @@
+import { timingSafeEqual } from "node:crypto";
+
 import { NextResponse } from "next/server";
 
 import { getCurrentUser } from "@/lib/session";
@@ -5,23 +7,42 @@ import { getShopSettings } from "@/lib/settingsStore";
 import { readTransfers } from "@/lib/topup";
 import { applyTransfers } from "@/lib/topupStore";
 
+function sameSecret(given: string, expected: string): boolean {
+  const a = Buffer.from(given);
+  const b = Buffer.from(expected);
+  return a.length === b.length && timingSafeEqual(a, b);
+}
+
 /**
  * Pulls recent transfers from a polled provider and credits whatever matches.
  *
  * Services like api.sieuthicode.vn do not push: they expose a URL that returns
- * the last N transactions, and the shop asks. The wallet page calls this while
- * the customer waits on the transfer screen, which is what makes a top-up land
- * in seconds without anybody clicking — and without a cron server to run.
+ * the last N transactions, and the shop asks.
  *
- * Signed in, and rate limited by the provider call itself: this reads the
- * shop's own statement and credits only requests that already exist, so the
- * worst a signed-in caller can do is make the shop fetch its own data.
+ * Two callers. The wallet page calls it while a customer waits on the transfer
+ * screen, which settles a top-up in seconds for somebody sitting there. A
+ * scheduler calls it with the shop's key, which is what covers everybody else:
+ * a customer who opens their banking app and never comes back would otherwise
+ * wait until the next person happened to load the page — measured at twenty
+ * minutes on this shop before the scheduled route existed.
+ *
+ * Either way it reads the shop's own statement and credits only requests that
+ * already exist, so the worst any caller can do is make the shop fetch its own
+ * data.
  */
-export async function POST() {
-  const user = await getCurrentUser();
-  if (!user) return NextResponse.json({ error: "Bạn cần đăng nhập" }, { status: 401 });
-
+async function runSync(request: Request) {
   const settings = await getShopSettings();
+
+  const header =
+    request.headers.get("authorization")?.replace(/^(Apikey|Bearer)\s+/i, "") ??
+    request.headers.get("x-webhook-secret") ??
+    new URL(request.url).searchParams.get("key") ??
+    "";
+  const byKey = Boolean(settings.topUpApiKey) && sameSecret(header, settings.topUpApiKey);
+
+  if (!byKey && !(await getCurrentUser())) {
+    return NextResponse.json({ error: "Bạn cần đăng nhập" }, { status: 401 });
+  }
   const feeds = settings.bankAccounts.filter((account) => account.apiUrl);
   if (!settings.autoTopUpEnabled || feeds.length === 0) {
     return NextResponse.json({ matched: 0, skipped: 0, details: [], polled: false });
@@ -60,4 +81,17 @@ export async function POST() {
     received: transfers.length,
     ...report,
   });
+}
+
+export async function POST(request: Request) {
+  return runSync(request);
+}
+
+/**
+ * Same work under GET, because that is all a free cron service can send.
+ * Safe to expose that way: it changes nothing a POST would not, and it needs
+ * the shop's key or a signed-in session either way.
+ */
+export async function GET(request: Request) {
+  return runSync(request);
 }
