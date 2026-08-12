@@ -2,6 +2,7 @@
 
 import {
   Boxes,
+  FileText,
   LayoutDashboard,
   ShoppingBag,
   Repeat,
@@ -20,6 +21,7 @@ const NAV: { label: string; href: string; icon: LucideIcon }[] = [
   { label: "Marketing", href: "/admin/marketing", icon: Ticket },
   { label: "Thu cũ đổi mới", href: "/admin/trade", icon: Repeat },
   { label: "Người dùng", href: "/admin/users", icon: Users },
+  { label: "Bài viết", href: "/admin/docs", icon: FileText },
 ];
 
 const ACTIVE = "flex items-center gap-3 py-2.5 px-3 rounded-lg text-sm font-bold transition-colors bg-[#7C3AED]/15 text-[#a78bfa]";
