@@ -86,6 +86,11 @@ export function AdminSettings({
   const [purchases, setPurchases] = useState(settings.purchasesEnabled);
   const [closedMessage, setClosedMessage] = useState(settings.closedMessage);
 
+  const [bankCode, setBankCode] = useState(settings.bankCode);
+  const [bankName, setBankName] = useState(settings.bankName);
+  const [bankAccount, setBankAccount] = useState(settings.bankAccount);
+  const [bankHolder, setBankHolder] = useState(settings.bankHolder);
+
   const [brandName, setBrandName] = useState(settings.brandName);
   const [brandLogo, setBrandLogo] = useState(settings.brandLogo);
   const [brandColor, setBrandColor] = useState(settings.brandColor);
@@ -134,6 +139,10 @@ export function AdminSettings({
             .filter((value) => value > 0),
           bankTopUpEnabled: bank,
           cardTopUpEnabled: card,
+          bankCode,
+          bankName,
+          bankAccount,
+          bankHolder,
           purchasesEnabled: purchases,
           closedMessage,
           brandName,
@@ -248,6 +257,80 @@ export function AdminSettings({
                 </p>
               ) : null}
             </div>
+          </section>
+
+          <section className={CARD}>
+            <span className={HEADING}>Tài khoản nhận chuyển khoản</span>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label htmlFor="bank-code" className={LABEL}>
+                  Mã ngân hàng
+                </label>
+                <input
+                  id="bank-code"
+                  value={bankCode}
+                  onChange={(event) => setBankCode(event.target.value.toUpperCase())}
+                  placeholder="VCB"
+                  className={`${FIELD} font-mono uppercase`}
+                />
+                <p className={HINT}>
+                  Mã VietQR: VCB, TCB, MB, ACB, VPB… hoặc số BIN dạng 970436. Đây là thứ
+                  sinh ra mã QR cho khách quét.
+                </p>
+              </div>
+              <div>
+                <label htmlFor="bank-name" className={LABEL}>
+                  Tên ngân hàng
+                </label>
+                <input
+                  id="bank-name"
+                  value={bankName}
+                  onChange={(event) => setBankName(event.target.value)}
+                  placeholder="Vietcombank"
+                  className={FIELD}
+                />
+              </div>
+              <div>
+                <label htmlFor="bank-account" className={LABEL}>
+                  Số tài khoản
+                </label>
+                <input
+                  id="bank-account"
+                  inputMode="numeric"
+                  value={bankAccount}
+                  onChange={(event) => setBankAccount(event.target.value)}
+                  placeholder="1234567890"
+                  className={`${FIELD} tabular-nums`}
+                />
+              </div>
+              <div>
+                <label htmlFor="bank-holder" className={LABEL}>
+                  Chủ tài khoản
+                </label>
+                <input
+                  id="bank-holder"
+                  value={bankHolder}
+                  onChange={(event) => setBankHolder(event.target.value.toUpperCase())}
+                  placeholder="NGUYEN VAN A"
+                  className={`${FIELD} uppercase`}
+                />
+              </div>
+            </div>
+
+            {bankCode && bankAccount && bankHolder ? (
+              <p className="text-[11px] text-neutral-500">
+                Khách sẽ thấy mã QR kèm số tiền và nội dung chuyển khoản
+                <span className="font-mono text-neutral-400"> NAP &lt;mã lệnh&gt;</span>.
+                Tiền chỉ vào ví sau khi bạn bấm Xác nhận ở mục Vận hành → Nạp tiền.
+              </p>
+            ) : (
+              <p className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-2.5 text-[11px] font-semibold text-amber-400">
+                Chưa điền đủ mã ngân hàng, số tài khoản và chủ tài khoản — tab Ngân Hàng
+                của khách sẽ báo tạm chưa nhận chuyển khoản, và máy chủ từ chối tạo lệnh
+                nạp qua ngân hàng.
+              </p>
+            )}
           </section>
 
           <section className={CARD}>

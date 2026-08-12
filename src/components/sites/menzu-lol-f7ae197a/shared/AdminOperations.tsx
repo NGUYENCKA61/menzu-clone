@@ -43,6 +43,12 @@ const SERVICE_STATUS: Record<string, { text: string; className: string }> = {
 
 const NEXT_STATUS = ["PENDING", "IN_PROGRESS", "DONE", "CANCELLED"];
 
+const TOPUP_STATUS: Record<string, { text: string; className: string }> = {
+  PENDING: { text: "Chờ xác nhận", className: "border-amber-500/30 bg-amber-500/10 text-amber-400" },
+  COMPLETED: { text: "Đã cộng tiền", className: "border-emerald-500/30 bg-emerald-500/10 text-emerald-400" },
+  FAILED: { text: "Đã từ chối", className: "border-red-500/30 bg-red-500/10 text-red-400" },
+};
+
 const TAB_ON =
   "px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest bg-[var(--brand)] text-white transition-colors";
 const TAB_OFF =
@@ -73,6 +79,7 @@ export function AdminOperations({
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
   const [removing, setRemoving] = useState<FeedbackView | null>(null);
+  const [confirming, setConfirming] = useState<TopUpView | null>(null);
 
   async function call(url: string, body: Record<string, unknown>) {
     setPending(true);
@@ -212,7 +219,7 @@ export function AdminOperations({
           <table className="w-full min-w-[720px] text-left">
             <thead>
               <tr className="border-b border-white/10">
-                {["Mã", "Tài khoản", "Hình thức", "Số tiền", "Trạng thái", "Thời gian"].map((c) => (
+                {["Mã", "Tài khoản", "Hình thức", "Số tiền", "Trạng thái", "Thời gian", ""].map((c) => (
                   <th key={c} scope="col" className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-neutral-500 whitespace-nowrap">
                     {c}
                   </th>
@@ -227,17 +234,75 @@ export function AdminOperations({
                   <td className="px-4 py-3 text-[11px] text-neutral-400">
                     {row.method === "CARD" ? (row.carrier ?? "Thẻ cào") : "Ngân hàng"}
                   </td>
-                  <td className="px-4 py-3 text-xs font-black text-emerald-400 tabular-nums">
-                    +{formatVnd(row.amount)}đ
+                  <td
+                    className={`px-4 py-3 text-xs font-black tabular-nums ${
+                      row.status === "COMPLETED" ? "text-emerald-400" : "text-neutral-400"
+                    }`}
+                  >
+                    {row.status === "COMPLETED" ? "+" : ""}
+                    {formatVnd(row.amount)}đ
                   </td>
-                  <td className="px-4 py-3 text-[11px] text-neutral-400">{row.status}</td>
+                  <td className="px-4 py-3">
+                    {(() => {
+                      const status = TOPUP_STATUS[row.status] ?? TOPUP_STATUS.PENDING!;
+                      return (
+                        <span
+                          className={`text-[10px] font-black uppercase tracking-wider px-2 py-1 rounded-md border whitespace-nowrap ${status.className}`}
+                        >
+                          {status.text}
+                        </span>
+                      );
+                    })()}
+                  </td>
                   <td className="px-4 py-3 text-[11px] text-neutral-500">{row.createdAt}</td>
+                  <td className="px-4 py-3">
+                    {/* Confirming is what actually credits the wallet, so it
+                        asks first — the customer's balance is real money. */}
+                    {row.status === "PENDING" ? (
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          type="button"
+                          disabled={pending}
+                          onClick={() => setConfirming(row)}
+                          className="h-8 px-3 rounded-lg border border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 disabled:opacity-50 text-[10px] font-black uppercase tracking-widest text-emerald-400 transition-colors whitespace-nowrap"
+                        >
+                          Xác nhận
+                        </button>
+                        <button
+                          type="button"
+                          disabled={pending}
+                          onClick={() => call("/api/admin/topups", { code: row.code, action: "reject" })}
+                          className="h-8 px-3 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 disabled:opacity-50 text-[10px] font-black uppercase tracking-widest text-neutral-400 transition-colors whitespace-nowrap"
+                        >
+                          Từ chối
+                        </button>
+                      </div>
+                    ) : null}
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
       )}
+
+      <ConfirmDialog
+        open={confirming !== null}
+        pending={pending}
+        title="Xác nhận đã nhận được tiền?"
+        body={
+          confirming
+            ? `Ví của ${confirming.username} sẽ được cộng ${formatVnd(confirming.amount)}đ ngay lập tức và ghi một dòng vào lịch sử giao dịch. Chỉ bấm khi bạn đã nhìn thấy tiền về tài khoản với nội dung NAP ${confirming.code}.`
+            : ""
+        }
+        confirmLabel="Cộng tiền vào ví"
+        onCancel={() => setConfirming(null)}
+        onConfirm={async () => {
+          if (!confirming) return;
+          await call("/api/admin/topups", { code: confirming.code, action: "confirm" });
+          setConfirming(null);
+        }}
+      />
 
       <ConfirmDialog
         open={removing !== null}

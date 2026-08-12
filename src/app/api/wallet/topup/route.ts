@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/session";
+import { bankReady } from "@/lib/settings";
 import { getShopSettings } from "@/lib/settingsStore";
 
 function makeCode(prefix: string): string {
@@ -9,11 +10,15 @@ function makeCode(prefix: string): string {
 }
 
 /**
- * Creates a top-up invoice and credits the wallet.
+ * Opens a top-up request. It does not add money.
  *
- * A real deployment settles this against a payment provider webhook; there is
- * no provider here, so the invoice completes immediately. The ledger entry and
- * the balance change are written together so they can never disagree.
+ * The wallet is credited when an admin confirms the transfer on the Vận hành
+ * screen. Crediting here — which is what this did — meant anyone with an
+ * account could type an amount and print themselves money; there is no payment
+ * provider behind this endpoint to make that safe.
+ *
+ * The customer gets a code to put in the transfer description, which is how
+ * the shop matches an incoming transfer to a pending request.
  */
 export async function POST(request: Request) {
   const user = await getCurrentUser();
@@ -58,46 +63,51 @@ export async function POST(request: Request) {
       { status: 400 },
     );
   }
+  if (method === "BANK" && !bankReady(settings)) {
+    return NextResponse.json(
+      { error: "Shop chưa cấu hình tài khoản nhận chuyển khoản" },
+      { status: 503 },
+    );
+  }
 
-  const result = await db.$transaction(async (tx) => {
-    const current = await tx.user.findUniqueOrThrow({ where: { id: user.id } });
-    const balanceAfter = current.balance + amount;
+  // One open request at a time per method: two pending transfers for the same
+  // amount are indistinguishable to whoever reads the bank statement.
+  const pending = await db.topUp.count({
+    where: { userId: user.id, status: "PENDING" },
+  });
+  if (pending >= 3) {
+    return NextResponse.json(
+      { error: "Bạn đang có 3 lệnh nạp chờ xác nhận. Hãy đợi shop duyệt xong." },
+      { status: 429 },
+    );
+  }
 
-    await tx.user.update({
-      where: { id: user.id },
-      data: { balance: balanceAfter },
-    });
-
-    const topUp = await tx.topUp.create({
-      data: {
-        code: makeCode("NT"),
-        userId: user.id,
-        method,
-        amount,
-        status: "COMPLETED",
-        carrier: method === "CARD" ? (body?.carrier ?? null) : null,
-      },
-    });
-
-    await tx.transaction.create({
-      data: {
-        code: makeCode("GD"),
-        userId: user.id,
-        kind: "TOPUP",
-        status: "SUCCESS",
-        delta: amount,
-        balanceAfter,
-        description: "Nạp tiền vào ví",
-        method: method === "CARD" ? "Thẻ Cào" : "Ngân Hàng",
-      },
-    });
-
-    return { topUp, balanceAfter };
+  const topUp = await db.topUp.create({
+    data: {
+      code: makeCode("NT"),
+      userId: user.id,
+      method,
+      amount,
+      status: "PENDING",
+      carrier: method === "CARD" ? (body?.carrier ?? null) : null,
+    },
   });
 
   return NextResponse.json({
-    invoiceCode: result.topUp.code,
+    invoiceCode: topUp.code,
     amount: Number(amount),
-    balance: Number(result.balanceAfter),
+    status: "PENDING",
+    // What the customer types into the transfer description.
+    transferNote: `NAP ${topUp.code}`,
+    ...(method === "BANK"
+      ? {
+          bank: {
+            code: settings.bankCode,
+            name: settings.bankName,
+            account: settings.bankAccount,
+            holder: settings.bankHolder,
+          },
+        }
+      : {}),
   });
 }

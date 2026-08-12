@@ -25,6 +25,7 @@ export interface TopUpHistoryRow {
   method: string;
   carrier: string | null;
   amount: number;
+  status: string;
   /** Pre-formatted on the server so the two renders cannot disagree. */
   createdAt: string;
 }
@@ -51,7 +52,79 @@ export interface WalletTopUpProps {
   presets: number[];
   bankEnabled: boolean;
   cardEnabled: boolean;
+  /** Null when the shop has not filled in an account to receive transfers. */
+  bank: BankAccount | null;
 }
+
+export interface BankAccount {
+  code: string;
+  name: string;
+  account: string;
+  holder: string;
+}
+
+interface Invoice {
+  code: string;
+  amount: number;
+  transferNote: string;
+  method: Method;
+}
+
+/** One transfer detail with a copy button — every value here gets retyped. */
+function CopyRow({
+  label,
+  value,
+  display,
+  highlight = false,
+  onCopy,
+  copied,
+}: {
+  label: string;
+  value: string;
+  display?: string;
+  highlight?: boolean;
+  onCopy: (label: string, value: string) => void;
+  copied: string | null;
+}) {
+  return (
+    <div className="flex items-center justify-between gap-3">
+      <span className="text-[10px] font-black uppercase tracking-widest text-neutral-500 shrink-0">
+        {label}
+      </span>
+      <div className="flex items-center gap-2 min-w-0">
+        <span
+          className={`truncate text-sm font-bold ${
+            highlight ? "text-amber-300 font-mono" : "text-white"
+          }`}
+        >
+          {display ?? value}
+        </span>
+        <button
+          type="button"
+          onClick={() => onCopy(label, value)}
+          className="shrink-0 rounded-md border border-white/10 bg-white/5 hover:bg-white/10 px-2 py-1 text-[10px] font-black uppercase tracking-widest text-neutral-300 transition-colors"
+        >
+          {copied === label ? "Đã chép" : "Chép"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+const HISTORY_STATUS: Record<string, { text: string; className: string }> = {
+  PENDING: {
+    text: "Đang chờ",
+    className: "border-amber-500/30 bg-amber-500/10 text-amber-400",
+  },
+  COMPLETED: {
+    text: "Đã cộng",
+    className: "border-emerald-500/30 bg-emerald-500/10 text-emerald-400",
+  },
+  FAILED: {
+    text: "Từ chối",
+    className: "border-red-500/30 bg-red-500/10 text-red-400",
+  },
+};
 
 export function WalletTopUp({
   history = [],
@@ -59,6 +132,7 @@ export function WalletTopUp({
   presets,
   bankEnabled,
   cardEnabled,
+  bank,
 }: WalletTopUpProps) {
   // Card is the default the live site opens on, but never a tab that is
   // switched off — that would show a form the server is going to refuse.
@@ -67,7 +141,19 @@ export function WalletTopUp({
   const [amount, setAmount] = useState("");
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [done, setDone] = useState<{ code: string; balance: number } | null>(null);
+  const [done, setDone] = useState<Invoice | null>(null);
+  const [copied, setCopied] = useState<string | null>(null);
+
+  async function copy(label: string, value: string) {
+    try {
+      await navigator.clipboard.writeText(value);
+      setCopied(label);
+      window.setTimeout(() => setCopied(null), 1500);
+    } catch {
+      // Clipboard is blocked on insecure origins; the value is on screen to
+      // read anyway, so this is not worth an error message.
+    }
+  }
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
@@ -91,7 +177,8 @@ export function WalletTopUp({
       const data = (await response.json().catch(() => ({}))) as {
         error?: string;
         invoiceCode?: string;
-        balance?: number;
+        amount?: number;
+        transferNote?: string;
       };
 
       if (!response.ok) {
@@ -99,10 +186,15 @@ export function WalletTopUp({
         return;
       }
 
-      setDone({ code: data.invoiceCode ?? "", balance: data.balance ?? 0 });
-      setAmount("");
-      // The header shows the balance, so pull fresh server state.
-      window.setTimeout(() => window.location.reload(), 1200);
+      // No reload: the balance has not moved yet and will not until the shop
+      // confirms, and reloading would throw away the transfer instructions the
+      // customer is about to use.
+      setDone({
+        code: data.invoiceCode ?? "",
+        amount: data.amount ?? 0,
+        transferNote: data.transferNote ?? "",
+        method,
+      });
     } catch {
       setError("Không kết nối được máy chủ");
     } finally {
@@ -113,7 +205,7 @@ export function WalletTopUp({
   return (
     <div className="flex flex-col gap-5">
       <p className="text-sm text-neutral-400">
-        Tiền sẽ được hệ thống tự động cộng
+        Tiền vào ví sau khi shop xác nhận đã nhận được chuyển khoản
       </p>
 
       <div className="flex items-center gap-3">
@@ -139,12 +231,83 @@ export function WalletTopUp({
         ) : null}
       </div>
 
+      {/* The transfer instructions. Shown after the request is opened and kept
+          on screen — this is the only place the customer can read the code the
+          shop matches their transfer by. */}
+      {done ? (
+        <div className="rounded-2xl border border-[var(--brand)]/40 bg-[var(--brand)]/[0.07] p-5 flex flex-col gap-4">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+            <span className="text-sm font-black uppercase tracking-widest text-white">
+              Lệnh nạp {done.code}
+            </span>
+            <span className="text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-md border border-amber-500/30 bg-amber-500/10 text-amber-400">
+              Đang chờ xác nhận
+            </span>
+          </div>
+
+          {done.method === "bank" && bank ? (
+            <div className="flex flex-col sm:flex-row gap-5">
+              {/* VietQR renders the bank, account, amount and description into
+                  one scan. Plain <img>: it is a third-party URL and adding it
+                  to next/image's allow-list would be config for one picture. */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={`https://img.vietqr.io/image/${encodeURIComponent(bank.code)}-${encodeURIComponent(bank.account)}-compact2.png?amount=${done.amount}&addInfo=${encodeURIComponent(done.transferNote)}&accountName=${encodeURIComponent(bank.holder)}`}
+                alt={`Mã QR chuyển khoản ${formatVnd(done.amount)}đ`}
+                width={220}
+                height={310}
+                className="w-[220px] h-auto shrink-0 rounded-xl bg-white"
+              />
+
+              <div className="flex-1 min-w-0 flex flex-col gap-2.5">
+                <CopyRow label="Ngân hàng" value={bank.name || bank.code} onCopy={copy} copied={copied} />
+                <CopyRow label="Số tài khoản" value={bank.account} onCopy={copy} copied={copied} />
+                <CopyRow label="Chủ tài khoản" value={bank.holder} onCopy={copy} copied={copied} />
+                <CopyRow
+                  label="Số tiền"
+                  value={String(done.amount)}
+                  display={`${formatVnd(done.amount)}đ`}
+                  onCopy={copy}
+                  copied={copied}
+                />
+                <CopyRow
+                  label="Nội dung"
+                  value={done.transferNote}
+                  highlight
+                  onCopy={copy}
+                  copied={copied}
+                />
+                <p className="text-[11px] text-neutral-400 leading-relaxed">
+                  Ghi <span className="font-bold text-white">đúng nội dung</span> ở trên khi
+                  chuyển khoản — shop dựa vào đó để biết tiền là của bạn. Chuyển xong cứ
+                  đóng trang, tiền vào ví ngay khi shop đối soát xong.
+                </p>
+              </div>
+            </div>
+          ) : (
+            <p className="text-[13px] text-neutral-300 leading-relaxed">
+              Gửi ảnh thẻ cào ({done.amount.toLocaleString("vi-VN")}đ) kèm mã{" "}
+              <span className="font-mono font-bold text-white">{done.code}</span> cho shop
+              qua Zalo để được đối soát. Tiền vào ví ngay khi shop xác nhận.
+            </p>
+          )}
+        </div>
+      ) : null}
+
       {!bankEnabled && !cardEnabled ? (
         <div className="rounded-2xl border border-white/10 bg-neutral-900/50 px-5 py-10 text-center">
           <p className="text-sm font-bold text-white">Tạm ngưng nhận nạp tiền</p>
           <p className="mt-1.5 text-[13px] text-neutral-400">
             Shop đang tạm dừng cả nạp ngân hàng và thẻ cào. Số dư sẵn có trong ví vẫn
             dùng để mua hàng bình thường.
+          </p>
+        </div>
+      ) : method === "bank" && !bank ? (
+        <div className="rounded-2xl border border-white/10 bg-neutral-900/50 px-5 py-10 text-center">
+          <p className="text-sm font-bold text-white">Chưa nhận được chuyển khoản</p>
+          <p className="mt-1.5 text-[13px] text-neutral-400">
+            Shop chưa khai báo tài khoản ngân hàng nhận tiền. Vui lòng dùng thẻ cào hoặc
+            liên hệ shop qua Zalo.
           </p>
         </div>
       ) : method === "bank" ? (
@@ -197,7 +360,7 @@ export function WalletTopUp({
 
           {done ? (
             <p className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-2.5 text-[12px] font-semibold text-emerald-400">
-              Nạp thành công · Hóa đơn {done.code} · Số dư {formatVnd(done.balance)}đ
+              Đã tạo lệnh nạp {done.code}. Xem hướng dẫn chuyển khoản bên dưới.
             </p>
           ) : null}
 
@@ -270,7 +433,7 @@ export function WalletTopUp({
 
           {done ? (
             <p className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-2.5 text-[12px] font-semibold text-emerald-400">
-              Nạp thành công · Hóa đơn {done.code} · Số dư {formatVnd(done.balance)}đ
+              Đã tạo lệnh nạp {done.code}. Xem hướng dẫn chuyển khoản bên dưới.
             </p>
           ) : null}
 
@@ -303,8 +466,25 @@ export function WalletTopUp({
                 <span className="text-[11px] text-neutral-400">
                   {row.method === "CARD" ? (row.carrier ?? "Thẻ cào") : "Ngân hàng"}
                 </span>
-                <span className="text-xs font-black text-emerald-400 ml-auto">
-                  +{formatVnd(row.amount)}đ
+                {(() => {
+                  const status = HISTORY_STATUS[row.status] ?? HISTORY_STATUS.PENDING!;
+                  return (
+                    <span
+                      className={`text-[10px] font-black uppercase tracking-wider px-2 py-1 rounded-md border ${status.className}`}
+                    >
+                      {status.text}
+                    </span>
+                  );
+                })()}
+                {/* Only a confirmed top-up has actually moved money, so only it
+                    gets the green "+" that reads as credited. */}
+                <span
+                  className={`text-xs font-black ml-auto ${
+                    row.status === "COMPLETED" ? "text-emerald-400" : "text-neutral-400"
+                  }`}
+                >
+                  {row.status === "COMPLETED" ? "+" : ""}
+                  {formatVnd(row.amount)}đ
                 </span>
                 <span className="text-[11px] text-neutral-500 w-full sm:w-auto">
                   {row.createdAt}

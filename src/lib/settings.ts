@@ -17,6 +17,13 @@ export interface ShopSettings {
   topUpPresets: number[];
   bankTopUpEnabled: boolean;
   cardTopUpEnabled: boolean;
+
+  // --- Tài khoản nhận chuyển khoản ------------------------------------------
+  /** VietQR bank code, e.g. "VCB" or the 970xxx BIN. Drives the QR image. */
+  bankCode: string;
+  bankName: string;
+  bankAccount: string;
+  bankHolder: string;
   /** When false, the buy endpoint refuses with `closedMessage`. */
   purchasesEnabled: boolean;
   closedMessage: string;
@@ -66,6 +73,13 @@ export const DEFAULT_SETTINGS: ShopSettings = {
   topUpPresets: [50_000, 200_000, 500_000, 1_000_000, 2_000_000, 5_000_000],
   bankTopUpEnabled: true,
   cardTopUpEnabled: true,
+  // Blank on purpose: an account number is the shop's own, and a placeholder
+  // here would be a stranger's account printed under a QR code. Until these
+  // are filled in, the bank tab says so and the endpoint refuses.
+  bankCode: "",
+  bankName: "",
+  bankAccount: "",
+  bankHolder: "",
   purchasesEnabled: true,
   closedMessage: "Shop đang tạm ngưng bán hàng, vui lòng quay lại sau ít phút.",
 
@@ -99,6 +113,10 @@ export const SETTING_KEYS: Record<keyof ShopSettings, string> = {
   topUpPresets: "topup.presets",
   bankTopUpEnabled: "topup.bank",
   cardTopUpEnabled: "topup.card",
+  bankCode: "bank.code",
+  bankName: "bank.name",
+  bankAccount: "bank.account",
+  bankHolder: "bank.holder",
   purchasesEnabled: "shop.purchases",
   closedMessage: "shop.closedMessage",
 
@@ -174,6 +192,17 @@ function toBlockList(raw: string | undefined, fallback: string[]): string[] {
   return [...stored, ...missing];
 }
 
+/**
+ * Whether the shop can actually receive a transfer.
+ *
+ * Bank top-ups stay switched on by default, but a shop that has not filled in
+ * its account cannot take one — showing a QR with nobody's account behind it
+ * would take money nowhere.
+ */
+export function bankReady(settings: ShopSettings): boolean {
+  return Boolean(settings.bankCode && settings.bankAccount && settings.bankHolder);
+}
+
 /** The blocks to render, in order, with the hidden ones dropped. */
 export function visibleBlocks(settings: ShopSettings): string[] {
   return settings.homeBlocks.filter((id) => !id.startsWith("-"));
@@ -200,6 +229,16 @@ export function parseSettings(rows: Iterable<{ key: string; value: string }>): S
     cardTopUpEnabled: toBoolean(
       stored.get(SETTING_KEYS.cardTopUpEnabled),
       DEFAULT_SETTINGS.cardTopUpEnabled,
+    ),
+    bankCode: toOptionalText(stored.get(SETTING_KEYS.bankCode), DEFAULT_SETTINGS.bankCode),
+    bankName: toOptionalText(stored.get(SETTING_KEYS.bankName), DEFAULT_SETTINGS.bankName),
+    bankAccount: toOptionalText(
+      stored.get(SETTING_KEYS.bankAccount),
+      DEFAULT_SETTINGS.bankAccount,
+    ),
+    bankHolder: toOptionalText(
+      stored.get(SETTING_KEYS.bankHolder),
+      DEFAULT_SETTINGS.bankHolder,
     ),
     purchasesEnabled: toBoolean(
       stored.get(SETTING_KEYS.purchasesEnabled),
@@ -244,6 +283,10 @@ export function serializeSettings(settings: ShopSettings): { key: string; value:
     topUpPresets: settings.topUpPresets.map((preset) => Math.floor(preset)).join(","),
     bankTopUpEnabled: String(settings.bankTopUpEnabled),
     cardTopUpEnabled: String(settings.cardTopUpEnabled),
+    bankCode: settings.bankCode.trim(),
+    bankName: settings.bankName.trim(),
+    bankAccount: settings.bankAccount.trim(),
+    bankHolder: settings.bankHolder.trim(),
     purchasesEnabled: String(settings.purchasesEnabled),
     closedMessage: settings.closedMessage.trim(),
 
@@ -289,6 +332,12 @@ export function normalizeSettings(raw: Partial<ShopSettings> | null): ShopSettin
     topUpPresets: [...new Set(presets)].sort((a, b) => a - b),
     bankTopUpEnabled: Boolean(raw?.bankTopUpEnabled),
     cardTopUpEnabled: Boolean(raw?.cardTopUpEnabled),
+    // Digits and letters only: these end up inside a VietQR URL, and the
+    // account number is printed for a customer to copy.
+    bankCode: String(raw?.bankCode ?? "").trim().toUpperCase(),
+    bankName: String(raw?.bankName ?? "").trim(),
+    bankAccount: String(raw?.bankAccount ?? "").replace(/[^0-9]/g, ""),
+    bankHolder: String(raw?.bankHolder ?? "").trim(),
     purchasesEnabled: Boolean(raw?.purchasesEnabled),
     closedMessage: String(raw?.closedMessage ?? "").trim(),
 
@@ -341,6 +390,13 @@ export function validateSettings(settings: ShopSettings): string | null {
   }
   if (!settings.closedMessage.trim()) {
     return "Cần nhập thông báo hiển thị khi khóa mua hàng";
+  }
+  // Goes into a VietQR URL, so it has to be the plain code the service uses.
+  if (settings.bankCode && !/^[A-Z0-9]{3,10}$/.test(settings.bankCode)) {
+    return "Mã ngân hàng chỉ gồm chữ và số, ví dụ VCB hoặc 970436";
+  }
+  if (settings.bankAccount && settings.bankAccount.length < 6) {
+    return "Số tài khoản trông quá ngắn, kiểm tra lại giúp mình";
   }
   // The colour is written straight into a CSS custom property, so anything
   // that is not a plain hex would either do nothing or let arbitrary CSS in.

@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   DEFAULT_SETTINGS,
   HOME_BLOCKS,
+  bankReady,
   SETTING_KEYS,
   normalizeSettings,
   parseSettings,
@@ -153,6 +154,52 @@ describe("validateSettings", () => {
         settings({ brandLogo: "https://cdn.example/x.webp", heroBanner: "/x.webp" }),
       ),
     ).toBeNull();
+  });
+});
+
+describe("tài khoản nhận chuyển khoản", () => {
+  it("chưa điền thì coi như chưa nhận được chuyển khoản", () => {
+    expect(bankReady(DEFAULT_SETTINGS)).toBe(false);
+    expect(bankReady(settings({ bankCode: "VCB" }))).toBe(false);
+    expect(bankReady(settings({ bankCode: "VCB", bankAccount: "1234567890" }))).toBe(false);
+    expect(
+      bankReady(
+        settings({ bankCode: "VCB", bankAccount: "1234567890", bankHolder: "NGUYEN VAN A" }),
+      ),
+    ).toBe(true);
+  });
+
+  it("mã ngân hàng phải là mã VietQR, không phải câu chữ", () => {
+    expect(validateSettings(settings({ bankCode: "Ngân hàng ngoại thương" }))).toMatch(
+      /Mã ngân hàng/,
+    );
+    expect(validateSettings(settings({ bankCode: "VCB" }))).toBeNull();
+    expect(validateSettings(settings({ bankCode: "970436" }))).toBeNull();
+  });
+
+  it("số tài khoản chỉ giữ lại chữ số", () => {
+    const result = normalizeSettings({
+      ...DEFAULT_SETTINGS,
+      bankAccount: "1234 5678 90",
+      bankCode: "vcb",
+    });
+    expect(result.bankAccount).toBe("1234567890");
+    // Mã ngân hàng luôn viết hoa vì nó đi thẳng vào URL của VietQR.
+    expect(result.bankCode).toBe("VCB");
+  });
+
+  it("số tài khoản quá ngắn bị chặn", () => {
+    expect(validateSettings(settings({ bankAccount: "123" }))).toMatch(/quá ngắn/);
+  });
+
+  it("giữ nguyên qua một vòng lưu rồi đọc lại", () => {
+    const original = settings({
+      bankCode: "TCB",
+      bankName: "Techcombank",
+      bankAccount: "19001234567",
+      bankHolder: "NGUYEN VAN A",
+    });
+    expect(parseSettings(serializeSettings(original))).toEqual(original);
   });
 });
 

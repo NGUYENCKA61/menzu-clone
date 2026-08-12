@@ -5,6 +5,7 @@ import { AccountPageFrame } from "@/components/sites/menzu-lol-f7ae197a/shared/A
 import { WalletTopUp } from "@/components/sites/menzu-lol-f7ae197a/shared/WalletTopUp";
 import { getTopUps } from "@/lib/queries";
 import { getCurrentUser } from "@/lib/session";
+import { bankReady } from "@/lib/settings";
 import { getShopSettings } from "@/lib/settingsStore";
 
 export const metadata: Metadata = { title: "Nạp tiền" };
@@ -32,7 +33,7 @@ export default async function WalletPage() {
   return (
     <AccountPageFrame
       title="Nạp tiền vào tài khoản"
-      subtitle="Nạp qua ngân hàng hoặc thẻ cào, tiền vào ví ngay"
+      subtitle="Nạp qua ngân hàng hoặc thẻ cào, shop đối soát rồi cộng vào ví"
       crumb="Nạp tiền ví"
     >
       <WalletTopUp
@@ -40,6 +41,16 @@ export default async function WalletPage() {
         presets={settings.topUpPresets}
         bankEnabled={settings.bankTopUpEnabled}
         cardEnabled={settings.cardTopUpEnabled}
+        bank={
+          bankReady(settings)
+            ? {
+                code: settings.bankCode,
+                name: settings.bankName,
+                account: settings.bankAccount,
+                holder: settings.bankHolder,
+              }
+            : null
+        }
         // Dates are formatted here, where the locale and timezone are fixed.
         // Formatting inside the client component would run once per timezone
         // and React would report the mismatch as a hydration error.
@@ -48,6 +59,7 @@ export default async function WalletPage() {
           method: row.method,
           carrier: row.carrier,
           amount: row.amount,
+          status: row.status,
           createdAt: formatWhen(row.createdAt),
         }))}
       />
