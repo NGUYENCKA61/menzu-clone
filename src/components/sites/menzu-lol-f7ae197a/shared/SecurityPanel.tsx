@@ -148,8 +148,17 @@ export function SecurityPanel({ email }: { email?: string | null }) {
             onSubmit={submitEmail}
             className="rounded-2xl border border-white/10 bg-neutral-900/50 p-5 flex flex-col gap-3"
           >
-            <label htmlFor="sec-email" className={LABEL}>
-              Địa chỉ Email
+            {/* A heading, not a label: it titles the whole form. Used as a
+                label it would have announced the input as "Địa chỉ Email"
+                while saying nothing about what to type. */}
+            {/* The live site verifies an email change with an OTP it mails
+                out. No mail delivery is configured here, so the change is
+                applied directly rather than shipping a "Gửi mã OTP" button
+                that sends nothing. Wire up a mailer before trusting this
+                field to prove ownership of an address. */}
+            <h3 className={LABEL}>Địa chỉ Email</h3>
+            <label htmlFor="sec-email" className="sr-only">
+              Email mới
             </label>
             <input
               id="sec-email"
@@ -170,8 +179,14 @@ export function SecurityPanel({ email }: { email?: string | null }) {
             onSubmit={submitPassword}
             className="rounded-2xl border border-white/10 bg-neutral-900/50 p-5 flex flex-col gap-3"
           >
-            <label htmlFor="sec-current" className={LABEL}>
-              Đổi Mật Khẩu
+            <h3 className={LABEL}>Đổi Mật Khẩu</h3>
+
+            {/* Every field carries its own label. The design shows only
+                placeholders, so they are visually hidden — a placeholder is
+                not a label: it disappears the moment you start typing, and a
+                screen reader may never announce it at all. */}
+            <label htmlFor="sec-current" className="sr-only">
+              Mật khẩu hiện tại
             </label>
             <input
               id="sec-current"
@@ -182,7 +197,12 @@ export function SecurityPanel({ email }: { email?: string | null }) {
               placeholder="Nhập mật khẩu hiện tại"
               className={FIELD}
             />
+
+            <label htmlFor="sec-next" className="sr-only">
+              Mật khẩu mới
+            </label>
             <input
+              id="sec-next"
               type="password"
               autoComplete="new-password"
               value={next}
@@ -190,7 +210,12 @@ export function SecurityPanel({ email }: { email?: string | null }) {
               placeholder="Nhập mật khẩu mới"
               className={FIELD}
             />
+
+            <label htmlFor="sec-confirm" className="sr-only">
+              Xác nhận mật khẩu mới
+            </label>
             <input
+              id="sec-confirm"
               type="password"
               autoComplete="new-password"
               value={confirm}

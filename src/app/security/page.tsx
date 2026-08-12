@@ -14,7 +14,7 @@ export default async function SecurityPage() {
 
   return (
     <AccountPageFrame
-      title="Bảo mật"
+      title="Bảo mật tài khoản"
       subtitle="Cập nhật thông tin đăng nhập và quản lý thiết bị"
       crumb="Bảo mật"
     >
