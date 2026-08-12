@@ -41,6 +41,14 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
     return null;
   }
 
+  // Blocking has to bite here, not only at sign-in: someone already holding a
+  // valid session would otherwise keep spending and buying until it expired.
+  // Their sessions are dropped so the block survives a page reload.
+  if (session.user.blockedAt) {
+    await db.session.deleteMany({ where: { userId: session.userId } }).catch(() => {});
+    return null;
+  }
+
   const u = session.user;
   return {
     id: u.id,

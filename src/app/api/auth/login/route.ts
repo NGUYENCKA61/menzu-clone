@@ -60,6 +60,15 @@ export async function POST(request: Request) {
     );
   }
 
+  // Checked after the password, deliberately: refusing a blocked account
+  // before verifying would tell an attacker which usernames exist.
+  if (user.blockedAt) {
+    return NextResponse.json(
+      { error: "Tài khoản đã bị khóa. Vui lòng liên hệ hỗ trợ." },
+      { status: 403 },
+    );
+  }
+
   await clearLoginAttempts(identifier);
 
   const session = await db.session.create({

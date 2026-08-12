@@ -579,3 +579,64 @@ export async function listTradeRequests(take = 100): Promise<AdminTradeRow[]> {
     createdAt: r.createdAt,
   }));
 }
+
+export interface AdminUserRow {
+  id: string;
+  uid: number;
+  username: string;
+  email: string | null;
+  role: string;
+  tier: string;
+  balance: number;
+  points: number;
+  orderCount: number;
+  totalSpent: number;
+  lastOrderAt: Date | null;
+  blockedAt: Date | null;
+  createdAt: Date;
+}
+
+/**
+ * The admin user list.
+ *
+ * Order count and spend are aggregated in the query rather than by loading
+ * every order — a customer with hundreds of purchases would otherwise pull
+ * all of them across just to produce two numbers.
+ */
+export async function listUsers(take = 200): Promise<AdminUserRow[]> {
+  const users = await db.user.findMany({
+    orderBy: { createdAt: "desc" },
+    take,
+    include: {
+      _count: { select: { orders: true } },
+      orders: {
+        orderBy: { createdAt: "desc" },
+        take: 1,
+        select: { createdAt: true },
+      },
+    },
+  });
+
+  const spend = await db.order.groupBy({
+    by: ["userId"],
+    _sum: { total: true },
+    where: { status: "PAID" },
+  });
+  const spentByUser = new Map(spend.map((row) => [row.userId, Number(row._sum.total ?? 0)]));
+
+  return users.map((u) => ({
+    id: u.id,
+    uid: u.uid,
+    username: u.username,
+    email: u.email,
+    role: u.role,
+    tier: u.tier,
+    balance: Number(u.balance),
+    points: u.points,
+    orderCount: u._count.orders,
+    totalSpent: spentByUser.get(u.id) ?? 0,
+    lastOrderAt: u.orders[0]?.createdAt ?? null,
+    blockedAt: u.blockedAt,
+    createdAt: u.createdAt,
+  }));
+}

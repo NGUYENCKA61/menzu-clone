@@ -40,6 +40,12 @@ model User {
   passwordHash String?
   avatarUrl    String?
   role         UserRole   @default(MEMBER)
+  /// When set, the account is blocked: it cannot sign in and any live
+  /// session stops resolving. A timestamp rather than a boolean so the
+  /// admin list can say when it happened without a second table.
+  blockedAt    DateTime?
+  /// Shown to the admin who blocked it, and to nobody else.
+  blockedReason String?
   tier         MemberTier @default(BRONZE)
 
   /// Purchases are debited from this balance — the checkout dialog has no card
