@@ -31,11 +31,31 @@ export function extractTopUpCode(description: string): string | null {
 }
 
 /**
+ * How long a request waits before it stops cluttering the queue.
+ *
+ * Half an hour: long enough to open a banking app, fail the OTP, and try
+ * again; short enough that the queue shows what is actually happening now.
+ * Nobody is punished for being slower — an expired request still credits when
+ * the transfer arrives, which is why the countdown running out is worded as a
+ * warning rather than a refusal.
+ *
+ * Lives in this module rather than next to the query that applies it, because
+ * the countdown on the transfer screen has to agree with it and a client
+ * component cannot import anything that reaches for the database.
+ */
+export const TOPUP_EXPIRY_MINUTES = 30;
+
+/** When a request opened at `createdAt` stops being held for its payer. */
+export function topUpExpiresAt(createdAt: Date): Date {
+  return new Date(createdAt.getTime() + TOPUP_EXPIRY_MINUTES * 60 * 1000);
+}
+
+/**
  * How long after opening a request the wallet page keeps watching for payment.
  *
- * Generous next to the 30-minute expiry, because watching costs the shop
- * nothing beyond a rate-limited poll and somebody may still be fighting their
- * banking app. It exists to have an end at all.
+ * Generous next to the expiry above, because watching costs the shop nothing
+ * beyond a rate-limited poll and somebody may still be fighting their banking
+ * app. It exists to have an end at all.
  */
 export const TOPUP_WATCH_MINUTES = 120;
 
@@ -52,17 +72,31 @@ export const TOPUP_WATCH_MINUTES = 120;
  * So: unsettled, and recent. EXPIRED counts while it is recent, because those
  * still credit if the money turns up.
  */
-export function watchableTopUpCode(
+export function watchableTopUp(
   rows: { code: string; status: string; createdAt: Date }[],
   now: Date = new Date(),
-): string | null {
+): { code: string; expiresAt: Date } | null {
   const cutoff = now.getTime() - TOPUP_WATCH_MINUTES * 60 * 1000;
   const row = rows.find(
     (r) =>
       (r.status === "PENDING" || r.status === "EXPIRED") &&
       r.createdAt.getTime() >= cutoff,
   );
-  return row?.code ?? null;
+  return row ? { code: row.code, expiresAt: topUpExpiresAt(row.createdAt) } : null;
+}
+
+/**
+ * Milliseconds as the mm:ss a customer is counting down.
+ *
+ * Clamped at zero: a deadline that has passed reads "00:00" rather than
+ * counting up into negative numbers, and the screen says what an expired
+ * request means separately.
+ */
+export function formatCountdown(ms: number): string {
+  const total = Math.max(0, Math.ceil(ms / 1000));
+  const minutes = Math.floor(total / 60);
+  const seconds = total % 60;
+  return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
 }
 
 /** How many characters follow the "NT" prefix. */

@@ -1,19 +1,13 @@
 import { db } from "@/lib/db";
-import { extractTopUpCode, type IncomingTransfer } from "@/lib/topup";
+import {
+  extractTopUpCode,
+  TOPUP_EXPIRY_MINUTES,
+  type IncomingTransfer,
+} from "@/lib/topup";
 
 function makeCode(prefix: string): string {
   return `${prefix}${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
 }
-
-/**
- * How long a request waits before it stops cluttering the queue.
- *
- * Half an hour: long enough to open a banking app, fail the OTP, and try
- * again; short enough that the queue shows what is actually happening now.
- * Nobody is punished for being slower — an expired request still credits when
- * the transfer arrives.
- */
-export const TOPUP_EXPIRY_MINUTES = 30;
 
 /**
  * Retires requests nobody paid.

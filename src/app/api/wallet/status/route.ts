@@ -28,5 +28,9 @@ export async function GET(request: Request) {
     code: topUp.code,
     status: topUp.status,
     amount: Number(topUp.amount),
+    // Read after the reconciliation pass that precedes this call, so the
+    // success dialog can show what the wallet holds now rather than making the
+    // customer reload to find out.
+    balance: user.balance,
   });
 }

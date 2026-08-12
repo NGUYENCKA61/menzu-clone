@@ -2,7 +2,10 @@
 
 import { Banknote, CreditCard } from "lucide-react";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+
+import { TopUpCountdown, useTimeLeft } from "./TopUpCountdown";
+import { TopUpSuccessDialog } from "./TopUpSuccessDialog";
 
 type Method = "bank" | "card";
 
@@ -29,6 +32,8 @@ export interface TopUpHistoryRow {
   status: string;
   /** Pre-formatted on the server so the two renders cannot disagree. */
   createdAt: string;
+  /** ISO deadline while the request is still waiting; null once it is not. */
+  expiresAt: string | null;
 }
 
 function formatVnd(n: number): string {
@@ -62,7 +67,7 @@ export interface WalletTopUpProps {
    * server, where a top-up's timestamp is still a date rather than the display
    * string these history rows carry.
    */
-  watchCode: string | null;
+  watch: { code: string; expiresAt: string } | null;
 }
 
 export interface BankAccount {
@@ -77,6 +82,15 @@ interface Invoice {
   amount: number;
   transferNote: string;
   method: Method;
+  /** ISO, from the server's clock rather than this browser's. */
+  expiresAt: string | null;
+}
+
+/** What the success dialog needs, once a request has actually been paid. */
+interface Credited {
+  code: string;
+  amount: number;
+  balance: number;
 }
 
 /** One transfer detail with a copy button — every value here gets retyped. */
@@ -149,7 +163,7 @@ export function WalletTopUp({
   cardEnabled,
   banks,
   autoEnabled,
-  watchCode,
+  watch,
 }: WalletTopUpProps) {
   // Which account the customer says they will transfer to. It only decides
   // which QR is drawn — reconciliation reads every account, so paying the
@@ -165,13 +179,14 @@ export function WalletTopUp({
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState<Invoice | null>(null);
   const [copied, setCopied] = useState<string | null>(null);
-  const [credited, setCredited] = useState(false);
+  const [credited, setCredited] = useState<Credited | null>(null);
 
   // The request this page watches: the one just opened, or whatever the server
   // says is still unpaid and recent. Watching one specific code, rather than
   // the shop's overall match count, means a poll that was rate limited or that
   // credited somebody else cannot make this page act.
-  const waitingCode = done?.code ?? watchCode;
+  const waitingCode = done?.code ?? watch?.code ?? null;
+  const deadline = done?.expiresAt ?? watch?.expiresAt ?? null;
 
   /**
    * While the customer has something outstanding, ask the shop to check its
@@ -192,10 +207,17 @@ export function WalletTopUp({
         // Then ask about this request specifically, which also catches one
         // settled by an admin or the scheduler between two ticks.
         const status = await fetch("/api/wallet/status?code=" + waitingCode);
-        const data = (await status.json()) as { status?: string };
+        const data = (await status.json()) as {
+          status?: string;
+          amount?: number;
+          balance?: number;
+        };
         if (!stopped && data.status === "COMPLETED") {
-          setCredited(true);
-          window.setTimeout(() => window.location.reload(), 1600);
+          setCredited({
+            code: waitingCode,
+            amount: data.amount ?? 0,
+            balance: data.balance ?? 0,
+          });
         }
       } catch {
         // A failed poll is not worth telling the customer about; the next one
@@ -210,6 +232,22 @@ export function WalletTopUp({
       window.clearInterval(timer);
     };
   }, [waitingCode, autoEnabled, credited]);
+
+  // Whether the request on screen has run past the window the shop holds it
+  // for. Not a refusal: a late transfer still credits, so this only changes
+  // what the screen says, never what it does.
+  const timeLeft = useTimeLeft(credited ? null : deadline);
+  const overdue = timeLeft !== null && timeLeft <= 0;
+
+  /**
+   * Reload once the customer has read the receipt.
+   *
+   * Everything around this component was rendered before the money arrived:
+   * the balance in the header, and the history row still reading "Đang chờ".
+   */
+  const dismissCredited = useCallback(() => {
+    window.location.reload();
+  }, []);
 
   async function copy(label: string, value: string) {
     try {
@@ -246,6 +284,7 @@ export function WalletTopUp({
         invoiceCode?: string;
         amount?: number;
         transferNote?: string;
+        expiresAt?: string;
       };
 
       if (!response.ok) {
@@ -261,6 +300,7 @@ export function WalletTopUp({
         amount: data.amount ?? 0,
         transferNote: data.transferNote ?? "",
         method,
+        expiresAt: data.expiresAt ?? null,
       });
     } catch {
       setError("Không kết nối được máy chủ");
@@ -316,7 +356,22 @@ export function WalletTopUp({
                 {autoEnabled ? "Đang chờ tiền về" : "Đang chờ xác nhận"}
               </span>
             )}
+            {/* Placed next to the status, because it qualifies it: the request
+                is waiting, and this is how much longer it waits for. */}
+            {!credited && done.expiresAt ? (
+              <span className="text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-md border border-white/10 bg-white/5 text-neutral-400">
+                Còn <TopUpCountdown deadline={done.expiresAt} />
+              </span>
+            ) : null}
           </div>
+
+          {overdue && !credited ? (
+            <p className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2.5 text-[12px] leading-relaxed text-neutral-300">
+              Hết thời gian giữ lệnh. Nếu bạn{" "}
+              <span className="font-bold text-white">đã chuyển khoản</span>, tiền vẫn được
+              cộng khi shop nhận được — đừng tạo lệnh mới, và cũng đừng chuyển lại lần nữa.
+            </p>
+          ) : null}
 
           {done.method === "bank" && bank ? (
             <div className="flex flex-col sm:flex-row gap-5">
@@ -545,11 +600,11 @@ export function WalletTopUp({
 
       <section className="flex flex-col gap-3">
         <h3 className="text-[10px] font-black uppercase tracking-widest text-neutral-500">
-          Thẻ nạp gần đây
+          Lịch sử nạp gần đây
         </h3>
         {history.length === 0 ? (
           <div className="rounded-xl border border-dashed border-white/10 bg-white/[0.02] py-10 text-center text-sm text-neutral-400">
-            Chưa có lịch sử nạp thẻ nào.
+            Chưa có lệnh nạp nào.
           </div>
         ) : (
           <div className="flex flex-col gap-2">
@@ -572,6 +627,14 @@ export function WalletTopUp({
                     </span>
                   );
                 })()}
+                {/* The transfer panel above is gone after a reload, so without
+                    this a customer coming back has no way to tell how long
+                    their request has left. */}
+                {row.status === "PENDING" && row.expiresAt ? (
+                  <span className="text-[11px] text-neutral-500">
+                    còn <TopUpCountdown deadline={row.expiresAt} />
+                  </span>
+                ) : null}
                 {/* Only a confirmed top-up has actually moved money, so only it
                     gets the green "+" that reads as credited. */}
                 <span
@@ -590,6 +653,15 @@ export function WalletTopUp({
           </div>
         )}
       </section>
+
+      {credited ? (
+        <TopUpSuccessDialog
+          code={credited.code}
+          amount={credited.amount}
+          balance={credited.balance}
+          onClose={dismissCredited}
+        />
+      ) : null}
     </div>
   );
 }

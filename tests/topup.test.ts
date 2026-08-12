@@ -2,9 +2,12 @@ import { describe, expect, it } from "vitest";
 
 import {
   extractTopUpCode,
-  watchableTopUpCode,
+  formatCountdown,
   makeTopUpCode,
   readTransfers,
+  topUpExpiresAt,
+  TOPUP_EXPIRY_MINUTES,
+  watchableTopUp,
 } from "@/lib/topup";
 
 describe("extractTopUpCode", () => {
@@ -37,32 +40,73 @@ function row(status: string, code: string, minutesAgo: number) {
   return { status, code, createdAt: new Date(NOW.getTime() - minutesAgo * MINUTE) };
 }
 
-describe("watchableTopUpCode", () => {
+describe("watchableTopUp", () => {
   it("watches a request that is unpaid and recent", () => {
-    expect(watchableTopUpCode([row("PENDING", "NTAAAAAA", 5)], NOW)).toBe("NTAAAAAA");
+    expect(watchableTopUp([row("PENDING", "NTAAAAAA", 5)], NOW)?.code).toBe("NTAAAAAA");
     // Expired still credits if the money turns up, so it stays watched.
-    expect(watchableTopUpCode([row("EXPIRED", "NTBBBBBB", 40)], NOW)).toBe("NTBBBBBB");
+    expect(watchableTopUp([row("EXPIRED", "NTBBBBBB", 40)], NOW)?.code).toBe("NTBBBBBB");
   });
 
   it("stops watching one abandoned long ago", () => {
     // Left polling every ten seconds forever, on every later visit, for money
     // nobody was going to send.
-    expect(watchableTopUpCode([row("EXPIRED", "NTOLD001", 7 * 24 * 60)], NOW)).toBeNull();
-    expect(watchableTopUpCode([row("PENDING", "NTOLD002", 5 * 60)], NOW)).toBeNull();
+    expect(watchableTopUp([row("EXPIRED", "NTOLD001", 7 * 24 * 60)], NOW)).toBeNull();
+    expect(watchableTopUp([row("PENDING", "NTOLD002", 5 * 60)], NOW)).toBeNull();
   });
 
   it("skips past everything already settled", () => {
     expect(
-      watchableTopUpCode(
-        [row("COMPLETED", "NT111111", 1), row("FAILED", "NT222222", 2), row("PENDING", "NT333333", 3)],
+      watchableTopUp(
+        [
+          row("COMPLETED", "NT111111", 1),
+          row("FAILED", "NT222222", 2),
+          row("PENDING", "NT333333", 3),
+        ],
         NOW,
-      ),
+      )?.code,
     ).toBe("NT333333");
   });
 
   it("returns nothing when there is nothing outstanding", () => {
-    expect(watchableTopUpCode([], NOW)).toBeNull();
-    expect(watchableTopUpCode([row("COMPLETED", "NT111111", 1)], NOW)).toBeNull();
+    expect(watchableTopUp([], NOW)).toBeNull();
+    expect(watchableTopUp([row("COMPLETED", "NT111111", 1)], NOW)).toBeNull();
+  });
+
+  it("carries the deadline the countdown runs to", () => {
+    // The screen counts down to this, so it has to be the same instant the
+    // sweep uses — a countdown reaching zero minutes before or after the
+    // request actually expires is the screen lying about the shop's rules.
+    const opened = row("PENDING", "NTCCCCCC", 10);
+    expect(watchableTopUp([opened], NOW)?.expiresAt).toEqual(
+      new Date(opened.createdAt.getTime() + TOPUP_EXPIRY_MINUTES * MINUTE),
+    );
+  });
+});
+
+describe("topUpExpiresAt", () => {
+  it("holds a request for the expiry window", () => {
+    expect(topUpExpiresAt(NOW).getTime() - NOW.getTime()).toBe(
+      TOPUP_EXPIRY_MINUTES * MINUTE,
+    );
+  });
+});
+
+describe("formatCountdown", () => {
+  it("reads as mm:ss", () => {
+    expect(formatCountdown(30 * MINUTE)).toBe("30:00");
+    expect(formatCountdown(9 * MINUTE + 5 * 1000)).toBe("09:05");
+    expect(formatCountdown(1000)).toBe("00:01");
+  });
+
+  it("stops at zero rather than counting into negatives", () => {
+    expect(formatCountdown(0)).toBe("00:00");
+    expect(formatCountdown(-90 * 1000)).toBe("00:00");
+  });
+
+  it("rounds up, so the last second is shown rather than skipped", () => {
+    // Ticking once a second lands mid-second; flooring would show 00:00 for a
+    // whole second while the request was still open.
+    expect(formatCountdown(1500)).toBe("00:02");
   });
 });
 

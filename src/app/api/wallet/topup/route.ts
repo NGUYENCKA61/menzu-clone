@@ -4,7 +4,7 @@ import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/session";
 import { bankReady } from "@/lib/settings";
 import { getShopSettings } from "@/lib/settingsStore";
-import { makeTopUpCode } from "@/lib/topup";
+import { makeTopUpCode, topUpExpiresAt } from "@/lib/topup";
 
 /**
  * Opens a top-up request. It does not add money.
@@ -89,6 +89,9 @@ export async function POST(request: Request) {
     status: "PENDING",
     // What the customer types into the transfer description.
     transferNote: `NAP ${topUp.code}`,
+    // Derived from the stored timestamp rather than the browser's clock, so
+    // the countdown ends when the request actually stops being held.
+    expiresAt: topUpExpiresAt(topUp.createdAt).toISOString(),
     ...(method === "BANK"
       ? {
           // Details only, never the reconciliation URL: that carries the

@@ -6,7 +6,7 @@ import { WalletTopUp } from "@/components/sites/menzu-lol-f7ae197a/shared/Wallet
 import { getTopUps } from "@/lib/queries";
 import { getCurrentUser } from "@/lib/session";
 import { getShopSettings } from "@/lib/settingsStore";
-import { watchableTopUpCode } from "@/lib/topup";
+import { topUpExpiresAt, watchableTopUp } from "@/lib/topup";
 
 export const metadata: Metadata = { title: "Nạp tiền" };
 export const dynamic = "force-dynamic";
@@ -44,7 +44,10 @@ export default async function WalletPage() {
         autoEnabled={settings.autoTopUpEnabled}
         // Decided here, where createdAt is still a real date rather than the
         // display string the history rows carry.
-        watchCode={watchableTopUpCode(history)}
+        watch={(() => {
+          const row = watchableTopUp(history);
+          return row ? { code: row.code, expiresAt: row.expiresAt.toISOString() } : null;
+        })()}
         // Only what a customer needs to make the transfer. The reconciliation
         // URL stays on the server — it carries the account's token.
         banks={settings.bankAccounts.map((account) => ({
@@ -63,6 +66,11 @@ export default async function WalletPage() {
           amount: row.amount,
           status: row.status,
           createdAt: formatWhen(row.createdAt),
+          // Only a request still waiting has time left to count down. An ISO
+          // string rather than a number of seconds, because the page may sit
+          // in a cache for a while before anyone reads it.
+          expiresAt:
+            row.status === "PENDING" ? topUpExpiresAt(row.createdAt).toISOString() : null,
         }))}
       />
     </AccountPageFrame>
