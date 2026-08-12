@@ -4,6 +4,7 @@ import {
   Boxes,
   LayoutDashboard,
   ShoppingBag,
+  Repeat,
   Ticket,
   type LucideIcon,
 } from "lucide-react";
@@ -16,6 +17,7 @@ const NAV: { label: string; href: string; icon: LucideIcon }[] = [
   { label: "Sản phẩm", href: "/admin/products", icon: Boxes },
   { label: "Đơn hàng", href: "/admin/orders", icon: ShoppingBag },
   { label: "Voucher", href: "/admin/vouchers", icon: Ticket },
+  { label: "Thu cũ đổi mới", href: "/admin/trade", icon: Repeat },
 ];
 
 const ACTIVE = "flex items-center gap-3 py-2.5 px-3 rounded-lg text-sm font-bold transition-colors bg-[#7C3AED]/15 text-[#a78bfa]";

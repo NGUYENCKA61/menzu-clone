@@ -543,3 +543,39 @@ export async function getTopUps(userId: string, take = 10): Promise<TopUpRow[]> 
     createdAt: t.createdAt,
   }));
 }
+
+export interface AdminTradeRow {
+  code: string;
+  username: string;
+  mode: string;
+  mailType: string;
+  hasWelcomeMail: boolean;
+  screenshotUrl: string | null;
+  zalo: string;
+  note: string | null;
+  status: string;
+  quotedAmount: number | null;
+  createdAt: Date;
+}
+
+/** Every trade-in request, newest first, for the admin queue. */
+export async function listTradeRequests(take = 100): Promise<AdminTradeRow[]> {
+  const rows = await db.tradeRequest.findMany({
+    orderBy: [{ status: "asc" }, { createdAt: "desc" }],
+    take,
+    include: { user: { select: { username: true } } },
+  });
+  return rows.map((r) => ({
+    code: r.code,
+    username: r.user.username,
+    mode: r.mode,
+    mailType: r.mailType,
+    hasWelcomeMail: r.hasWelcomeMail,
+    screenshotUrl: r.screenshotUrl,
+    zalo: r.zalo,
+    note: r.note,
+    status: r.status,
+    quotedAmount: r.quotedAmount === null ? null : Number(r.quotedAmount),
+    createdAt: r.createdAt,
+  }));
+}
