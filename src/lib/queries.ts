@@ -607,6 +607,9 @@ export interface AdminUserRow {
   lastOrderAt: Date | null;
   blockedAt: Date | null;
   createdAt: Date;
+  lastIp: string | null;
+  lastLoginAt: Date | null;
+  totalToppedUp: number;
 }
 
 /**
@@ -630,6 +633,13 @@ export async function listUsers(take = 200): Promise<AdminUserRow[]> {
     },
   });
 
+  const topped = await db.topUp.groupBy({
+    by: ["userId"],
+    _sum: { amount: true },
+    where: { status: "COMPLETED" },
+  });
+  const toppedByUser = new Map(topped.map((row) => [row.userId, Number(row._sum.amount ?? 0)]));
+
   const spend = await db.order.groupBy({
     by: ["userId"],
     _sum: { total: true },
@@ -651,6 +661,9 @@ export async function listUsers(take = 200): Promise<AdminUserRow[]> {
     lastOrderAt: u.orders[0]?.createdAt ?? null,
     blockedAt: u.blockedAt,
     createdAt: u.createdAt,
+    lastIp: u.lastIp,
+    lastLoginAt: u.lastLoginAt,
+    totalToppedUp: toppedByUser.get(u.id) ?? 0,
   }));
 }
 

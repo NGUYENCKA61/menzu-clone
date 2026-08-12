@@ -71,6 +71,13 @@ export async function POST(request: Request) {
 
   await clearLoginAttempts(identifier);
 
+  // Recorded for support lookups. Best-effort by nature — it comes from a
+  // proxy header a client can set — so it is a hint, never an identity check.
+  await db.user.update({
+    where: { id: user.id },
+    data: { lastIp: ip, lastLoginAt: new Date() },
+  });
+
   const session = await db.session.create({
     data: { id: newSessionToken(), userId: user.id, expiresAt: sessionExpiry() },
   });

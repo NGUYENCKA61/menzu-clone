@@ -43,6 +43,11 @@ model User {
   /// When set, the account is blocked: it cannot sign in and any live
   /// session stops resolving. A timestamp rather than a boolean so the
   /// admin list can say when it happened without a second table.
+  /// Address seen at the last successful sign-in, for support lookups.
+  /// Best-effort: it comes from a proxy header, so treat it as a hint.
+  lastIp       String?
+  lastLoginAt  DateTime?
+
   blockedAt    DateTime?
   /// Shown to the admin who blocked it, and to nobody else.
   blockedReason String?

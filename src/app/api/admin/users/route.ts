@@ -3,6 +3,7 @@ import { randomBytes } from "node:crypto";
 import { NextResponse } from "next/server";
 
 import { FORBIDDEN, getAdmin } from "@/lib/admin";
+import { hashPassword, validateCredentials } from "@/lib/auth";
 import { db } from "@/lib/db";
 
 function makeCode(prefix: string): string {
@@ -31,6 +32,8 @@ export async function PATCH(request: Request) {
     /** Signed: negative subtracts. */
     delta?: number;
     note?: string;
+    email?: string;
+    password?: string;
   } | null;
 
   const username = body?.username?.trim();
@@ -62,6 +65,39 @@ export async function PATCH(request: Request) {
       data: { role },
     });
     return NextResponse.json({ username: updated.username, role: updated.role });
+  }
+
+  // --- edit profile: email -------------------------------------------------
+  if (action === "email") {
+    const email = body?.email?.trim() || null;
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return NextResponse.json({ error: "Email không hợp lệ" }, { status: 400 });
+    }
+    if (email) {
+      const clash = await db.user.findFirst({ where: { email, NOT: { id: target.id } } });
+      if (clash) {
+        return NextResponse.json({ error: "Email đã được tài khoản khác dùng" }, { status: 409 });
+      }
+    }
+    const updated = await db.user.update({ where: { id: target.id }, data: { email } });
+    return NextResponse.json({ username: updated.username, email: updated.email });
+  }
+
+  // --- reset password ------------------------------------------------------
+  if (action === "password") {
+    const password = body?.password ?? "";
+    const invalid = validateCredentials(target.username, password);
+    if (invalid) return NextResponse.json({ error: invalid }, { status: 400 });
+
+    await db.user.update({
+      where: { id: target.id },
+      data: { passwordHash: await hashPassword(password) },
+    });
+    // Every session dies with the old password. Leaving them alive would
+    // mean a reset prompted by a suspected takeover changes nothing for
+    // whoever is already signed in.
+    await db.session.deleteMany({ where: { userId: target.id } });
+    return NextResponse.json({ username: target.username, passwordReset: true });
   }
 
   // --- adjust balance ------------------------------------------------------

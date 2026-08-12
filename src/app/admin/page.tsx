@@ -18,7 +18,16 @@ export default async function AdminHome() {
   const since = startOfDayVn();
   const today = { createdAt: { gte: since } };
 
-  const [available, users, cardToday, bankToday, incomeToday, revenueAllTime] =
+  const [
+    available,
+    users,
+    cardToday,
+    bankToday,
+    incomeToday,
+    revenueAllTime,
+    cardAllTime,
+    bankAllTime,
+  ] =
     await Promise.all([
       db.product.count({ where: { status: "AVAILABLE" } }),
       db.user.count(),
@@ -41,6 +50,16 @@ export default async function AdminHome() {
         where: { ...today, status: "PAID" },
       }),
       db.order.aggregate({ _sum: { total: true }, where: { status: "PAID" } }),
+      db.topUp.aggregate({
+        _sum: { amount: true },
+        _count: true,
+        where: { method: "CARD", status: "COMPLETED" },
+      }),
+      db.topUp.aggregate({
+        _sum: { amount: true },
+        _count: true,
+        where: { method: "BANK", status: "COMPLETED" },
+      }),
     ]);
 
   const todayStats = [
@@ -73,6 +92,16 @@ export default async function AdminHome() {
       value: `${formatVnd(Number(revenueAllTime._sum.total ?? 0))}đ`,
       sub: "toàn bộ đơn đã thanh toán từ trước tới nay",
     },
+    {
+      label: "Tổng thẻ nạp",
+      value: `${formatVnd(Number(cardAllTime._sum.amount ?? 0))}đ`,
+      sub: `${cardAllTime._count} lượt nạp thẻ cào`,
+    },
+    {
+      label: "Tổng nạp bank",
+      value: `${formatVnd(Number(bankAllTime._sum.amount ?? 0))}đ`,
+      sub: `${bankAllTime._count} lượt chuyển khoản`,
+    },
   ];
 
   return (
@@ -104,7 +133,7 @@ export default async function AdminHome() {
             <div className="flex-1 h-px bg-gradient-to-r from-indigo-500/30 to-transparent" />
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
             {totals.map((stat) => (
               <StatCard key={stat.label} {...stat} />
             ))}
