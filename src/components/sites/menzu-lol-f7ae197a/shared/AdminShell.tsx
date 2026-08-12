@@ -43,6 +43,8 @@ interface AdminShellProps {
   title: string;
   subtitle: string;
   username: string;
+  /** Optional note on the far side of the heading — a count, a timeframe. */
+  aside?: ReactNode;
   children: ReactNode;
 }
 
@@ -51,7 +53,13 @@ interface AdminShellProps {
  * this area does not exist on menzu.lol, so dressing it up in the site's
  * styling would blur the line between what was cloned and what was added.
  */
-export function AdminShell({ title, subtitle, username, children }: AdminShellProps) {
+export function AdminShell({
+  title,
+  subtitle,
+  username,
+  aside,
+  children,
+}: AdminShellProps) {
   const pathname = usePathname();
 
   return (
@@ -98,11 +106,14 @@ export function AdminShell({ title, subtitle, username, children }: AdminShellPr
       </aside>
 
       <main className="flex-1 min-w-0 px-5 lg:px-8 py-7">
-        <div className="mb-6">
-          <h1 className="text-[26px] font-black uppercase tracking-wide text-white">
-            {title}
-          </h1>
-          <p className="mt-1 text-[13px] text-neutral-500">{subtitle}</p>
+        <div className="mb-6 flex flex-wrap items-end justify-between gap-x-6 gap-y-2">
+          <div>
+            <h1 className="text-[26px] font-black uppercase tracking-wide text-white">
+              {title}
+            </h1>
+            <p className="mt-1 text-[13px] text-neutral-500">{subtitle}</p>
+          </div>
+          {aside}
         </div>
         {children}
       </main>
