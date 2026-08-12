@@ -13,7 +13,25 @@ import { getCategoryPage, listCategories } from "@/lib/queries";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ page?: string }>;
+  searchParams: Promise<{
+    page?: string;
+    min?: string;
+    max?: string;
+    sort?: string;
+    skin?: string;
+    phukien?: string;
+    nguon?: string;
+  }>;
+}
+
+const SORTS = new Set(["newest", "price-asc", "price-desc"]);
+const SOURCES = new Set(["all", "drop", "menzu"]);
+
+/** A blank or junk parameter means "no filter", never an error page. */
+function toAmount(raw: string | undefined): number | undefined {
+  if (!raw) return undefined;
+  const value = Number(raw.replace(/\D/g, ""));
+  return Number.isFinite(value) && value > 0 ? value : undefined;
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
@@ -24,10 +42,21 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function CategoryPage({ params, searchParams }: PageProps) {
   const { slug } = await params;
-  const { page: pageParam } = await searchParams;
-  const page = Math.max(1, Number(pageParam ?? 1) || 1);
+  const query = await searchParams;
+  const page = Math.max(1, Number(query.page ?? 1) || 1);
 
-  const data = await getCategoryPage(slug, page);
+  const data = await getCategoryPage(slug, page, {
+    min: toAmount(query.min),
+    max: toAmount(query.max),
+    sort: SORTS.has(query.sort ?? "")
+      ? (query.sort as "newest" | "price-asc" | "price-desc")
+      : undefined,
+    skin: query.skin?.trim() || undefined,
+    accessory: query.phukien?.trim() || undefined,
+    source: SOURCES.has(query.nguon ?? "")
+      ? (query.nguon as "all" | "drop" | "menzu")
+      : undefined,
+  });
   if (!data) notFound();
 
   const others = (await listCategories())

@@ -64,20 +64,122 @@ export interface CategoryPageData {
   page: number;
 }
 
+/**
+ * Sale prices for whichever of these products has a flash sale running now.
+ *
+ * A scheduled sale used to pick which products appeared in the home-page row
+ * and nothing else — the price it carried was shown to the admin and then
+ * ignored everywhere a customer could see it. This is the one place that
+ * answers "what does this cost right now", and the buy endpoint asks the same
+ * question again inside its transaction.
+ *
+ * Overlapping windows are legal; the cheapest wins, because that is the price
+ * the shop has advertised at least once.
+ */
+export async function runningSalePrices(
+  productIds: string[],
+): Promise<Map<string, bigint>> {
+  if (productIds.length === 0) return new Map();
+
+  const now = new Date();
+  const sales = await db.flashSale.findMany({
+    where: {
+      active: true,
+      startsAt: { lte: now },
+      endsAt: { gte: now },
+      productId: { in: productIds },
+    },
+    select: { productId: true, salePrice: true },
+    orderBy: { salePrice: "asc" },
+  });
+
+  const prices = new Map<string, bigint>();
+  for (const sale of sales) {
+    if (!prices.has(sale.productId)) prices.set(sale.productId, sale.salePrice);
+  }
+  return prices;
+}
+
+export interface CategoryFilters {
+  min?: number;
+  max?: number;
+  sort?: "newest" | "price-asc" | "price-desc";
+  /** Matches a weapon skin by name. */
+  skin?: string;
+  /** Matches a buddy, card, spray or agent by name. */
+  accessory?: string;
+  source?: "all" | "drop" | "menzu";
+}
+
+const ACCESSORY_KINDS = ["BUDDY", "CARD", "SPRAY", "AGENT"] as const;
+
+/**
+ * Turns the filter panel's choices into a query.
+ *
+ * Price compares against the product's own price rather than a running flash
+ * sale: the sale price is a temporary override and folding it in would need a
+ * join the listing does not otherwise pay for. Sales are short and rare, so a
+ * card can briefly show less than the band it was filtered into.
+ */
+function categoryWhere(categoryId: string, filters: CategoryFilters) {
+  const price: { gte?: bigint; lte?: bigint } = {};
+  if (filters.min !== undefined) price.gte = BigInt(Math.floor(filters.min));
+  if (filters.max !== undefined) price.lte = BigInt(Math.floor(filters.max));
+
+  const dropTag = { some: { label: { contains: "DROP", mode: "insensitive" as const } } };
+
+  return {
+    categoryId,
+    status: "AVAILABLE" as const,
+    ...(price.gte !== undefined || price.lte !== undefined ? { price } : {}),
+    ...(filters.skin
+      ? {
+          skins: {
+            some: {
+              kind: "WEAPON_SKIN" as const,
+              name: { contains: filters.skin, mode: "insensitive" as const },
+            },
+          },
+        }
+      : {}),
+    ...(filters.accessory
+      ? {
+          skins: {
+            some: {
+              kind: { in: [...ACCESSORY_KINDS] },
+              name: { contains: filters.accessory, mode: "insensitive" as const },
+            },
+          },
+        }
+      : {}),
+    // Only "DROP MAIL" is recorded as a tag, so "Menzu" reads as "everything
+    // that is not drop mail" — the split the shop's own tagging supports.
+    ...(filters.source === "drop" ? { tags: dropTag } : {}),
+    ...(filters.source === "menzu" ? { NOT: { tags: dropTag } } : {}),
+  };
+}
+
+function categoryOrder(sort: CategoryFilters["sort"]) {
+  if (sort === "price-asc") return { price: "asc" as const };
+  if (sort === "price-desc") return { price: "desc" as const };
+  return { createdAt: "desc" as const };
+}
+
 export async function getCategoryPage(
   slug: string,
   page = 1,
+  filters: CategoryFilters = {},
 ): Promise<CategoryPageData | null> {
   const category = await db.category.findUnique({ where: { slug } });
   if (!category) return null;
 
-  const where = { categoryId: category.id, status: "AVAILABLE" as const };
+  const where = categoryWhere(category.id, filters);
 
   const [total, rows] = await Promise.all([
     db.product.count({ where }),
     db.product.findMany({
       where,
-      orderBy: { createdAt: "desc" },
+      orderBy: categoryOrder(filters.sort),
       skip: (page - 1) * PAGE_SIZE,
       take: PAGE_SIZE,
       include: {
@@ -86,6 +188,8 @@ export async function getCategoryPage(
       },
     }),
   ]);
+
+  const sale = await runningSalePrices(rows.map((p) => p.id));
 
   return {
     name: category.name,
@@ -102,7 +206,7 @@ export async function getCategoryPage(
       // The live card shows a "+N" chip for skins beyond the visible strip.
       extraSkins: Math.max(0, countKind(p.skins, "WEAPON_SKIN") - 8),
       oldPrice: Number(p.oldPrice),
-      price: Number(p.price),
+      price: Number(sale.get(p.id) ?? p.price),
     })),
   };
 }
@@ -132,6 +236,8 @@ export async function getAccountDetail(
   });
   if (!p) return null;
 
+  const sale = await runningSalePrices([p.id]);
+
   return {
     code: p.code,
     rank: p.rank,
@@ -150,7 +256,7 @@ export async function getAccountDetail(
     tag: p.tags[0]?.label ?? null,
     mailType: p.mailType ?? "",
     oldPrice: Number(p.oldPrice),
-    price: Number(p.price),
+    price: Number(sale.get(p.id) ?? p.price),
     // 0 means the shop set no deposit for this account, which is the common
     // case: the live pages show a bare "Cọc / Trả Góp" button and only quote
     // an amount on the few products that carry one. It is per-product data,
@@ -311,25 +417,30 @@ export async function getFlashSaleItems(take = 20): Promise<FlashSaleItem[]> {
     include: { skins: { select: { kind: true, tier: true } } },
   });
 
+  // The scheduled price is what the card must print. Reading p.price here was
+  // the bug: an admin could set a sale price, watch the row pick the product
+  // up, and still see the ordinary price on every card.
+  const sale = await runningSalePrices(rows.map((p) => p.id));
+  const priceOf = (p: { id: string; price: bigint }) => sale.get(p.id) ?? p.price;
+
   const discountOf = (price: bigint, oldPrice: bigint) =>
     1 - Number(price) / Number(oldPrice);
 
   return rows
-    .filter((p) => p.price < p.oldPrice)
+    .filter((p) => priceOf(p) < p.oldPrice)
     .sort(
       (a, b) =>
-        discountOf(b.price, b.oldPrice) - discountOf(a.price, a.oldPrice),
+        discountOf(priceOf(b), b.oldPrice) - discountOf(priceOf(a), a.oldPrice),
     )
     .slice(0, take)
     .map((p) => {
-      const pct = Math.round(
-        (1 - Number(p.price) / Number(p.oldPrice)) * 100,
-      );
+      const price = priceOf(p);
+      const pct = Math.round((1 - Number(price) / Number(p.oldPrice)) * 100);
       return {
         code: p.code,
         discount: pct > 0 ? `-${pct}%` : null,
         oldPrice: `${formatVndString(Number(p.oldPrice))} VND`,
-        newPrice: `${formatVndString(Number(p.price))} VND`,
+        newPrice: `${formatVndString(Number(price))} VND`,
         skins: countKind(p.skins, "WEAPON_SKIN"),
         tiers: toTiers(p.skins).map((t) => ({ color: t.color, count: t.count })),
       };

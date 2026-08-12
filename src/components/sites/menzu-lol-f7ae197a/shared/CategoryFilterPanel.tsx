@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Package, Search } from "lucide-react";
 
 interface PricePreset {
@@ -41,6 +42,11 @@ const CHIP_INACTIVE =
 const CHIP_ACTIVE =
   "px-3 py-1.5 rounded-lg text-[11px] font-bold border border-[var(--brand)]/50 bg-[var(--brand)]/15 text-[#a78bfa] transition-colors whitespace-nowrap";
 
+const CHIP_DISABLED =
+  "px-3 py-1.5 rounded-lg text-[11px] font-bold border border-neutral-800/60 bg-neutral-950/40 text-neutral-600 cursor-not-allowed whitespace-nowrap";
+
+const NO_DATA = "Shop chưa có dữ liệu cho bộ lọc này";
+
 const GROUP_LABEL_CLASS =
   "text-[10px] font-black uppercase tracking-widest text-neutral-500 mb-1.5 block";
 
@@ -50,26 +56,61 @@ const PRICE_INPUT_CLASS =
   "bg-transparent outline-none text-white text-sm w-full min-w-0 font-bold tabular-nums placeholder-neutral-600";
 
 /**
- * Self-contained search + filter panel shown above category/listing grids.
- * Holds all filter state locally; wiring to real search/query params comes
- * later, so submit just prevents the default page reload for now.
+ * Search + filter panel above the category listing.
+ *
+ * Every control that has data behind it writes to the URL and the listing
+ * queries from there. The two chips under "Khác" and the rank chip are left
+ * disabled: nothing in the schema records a free-account flag or a rank band
+ * to filter on, and a live-looking control that changes nothing is what this
+ * panel was before.
  */
 export function CategoryFilterPanel() {
-  const [skinQuery, setSkinQuery] = useState("");
-  const [accessoryQuery, setAccessoryQuery] = useState("");
-  const [priceMin, setPriceMin] = useState("");
-  const [priceMax, setPriceMax] = useState("");
-  const [pricePreset, setPricePreset] = useState<number | null>(null);
-  const [sort, setSort] = useState<SortValue>("newest");
-  const [source, setSource] = useState<SourceValue>("all");
-  const [lolFree, setLolFree] = useState(false);
-  const [tftFree, setTftFree] = useState(false);
+  const router = useRouter();
+  const pathname = usePathname();
+  const params = useSearchParams();
+
+  const [skinQuery, setSkinQuery] = useState(params.get("skin") ?? "");
+  const [accessoryQuery, setAccessoryQuery] = useState(params.get("phukien") ?? "");
+  const [priceMin, setPriceMin] = useState(params.get("min") ?? "");
+  const [priceMax, setPriceMax] = useState(params.get("max") ?? "");
+  const [pricePreset, setPricePreset] = useState<number | null>(() => {
+    const index = PRICE_PRESETS.findIndex(
+      (preset) =>
+        preset.min === (params.get("min") ?? "") &&
+        preset.max === (params.get("max") ?? ""),
+    );
+    return index === -1 ? null : index;
+  });
+  const sort = (params.get("sort") as SortValue) ?? "newest";
+  const source = (params.get("nguon") as SourceValue) ?? "all";
+
+  /**
+   * Rewrites the URL, which is what the listing actually reads.
+   *
+   * The panel used to keep every choice in local state and prevent the submit,
+   * so a shopper could click "Dưới 500K" and watch nothing happen. Going
+   * through the URL also makes a filtered listing shareable and survives a
+   * reload.
+   */
+  function apply(changes: Record<string, string>) {
+    const next = new URLSearchParams(params.toString());
+    for (const [key, value] of Object.entries(changes)) {
+      if (value) next.set(key, value);
+      else next.delete(key);
+    }
+    // Any change re-opens the listing at page one; page 4 of the old filter is
+    // rarely page 4 of the new one.
+    next.delete("page");
+    const query = next.toString();
+    router.push(query ? `${pathname}?${query}` : pathname);
+  }
 
   function handlePricePresetClick(index: number) {
     const preset = PRICE_PRESETS[index];
     setPricePreset(index);
     setPriceMin(preset.min);
     setPriceMax(preset.max);
+    apply({ min: preset.min, max: preset.max });
   }
 
   function handlePriceMinChange(value: string) {
@@ -82,12 +123,19 @@ export function CategoryFilterPanel() {
     setPricePreset(null);
   }
 
+  function handleSubmit(event: React.FormEvent) {
+    event.preventDefault();
+    apply({
+      skin: skinQuery.trim(),
+      phukien: accessoryQuery.trim(),
+      min: priceMin.replace(/\D/g, ""),
+      max: priceMax.replace(/\D/g, ""),
+    });
+  }
+
   return (
     <div className="mb-10">
-      <form
-        onSubmit={(event) => event.preventDefault()}
-        className="flex flex-col gap-3 w-full"
-      >
+      <form onSubmit={handleSubmit} className="flex flex-col gap-3 w-full">
         <div className="flex flex-col md:flex-row gap-2.5">
           <div className="flex-[6] relative min-w-0">
             <div className="flex items-center gap-2 h-[50px] px-4 rounded-xl bg-neutral-900/60 border border-neutral-800/60 focus-within:border-[var(--brand)]/60 transition-colors">
@@ -177,7 +225,7 @@ export function CategoryFilterPanel() {
                   <button
                     key={option.value}
                     type="button"
-                    onClick={() => setSort(option.value)}
+                    onClick={() => apply({ sort: option.value === "newest" ? "" : option.value })}
                     className={sort === option.value ? CHIP_ACTIVE : CHIP_INACTIVE}
                   >
                     {option.label}
@@ -193,7 +241,7 @@ export function CategoryFilterPanel() {
                   <button
                     key={option.value}
                     type="button"
-                    onClick={() => setSource(option.value)}
+                    onClick={() => apply({ nguon: option.value === "all" ? "" : option.value })}
                     className={source === option.value ? CHIP_ACTIVE : CHIP_INACTIVE}
                   >
                     {option.label}
@@ -205,7 +253,7 @@ export function CategoryFilterPanel() {
             <div>
               <span className={GROUP_LABEL_CLASS}>Rank</span>
               <div className="flex flex-wrap gap-2">
-                <button type="button" className={CHIP_INACTIVE}>
+                <button type="button" disabled title={NO_DATA} className={CHIP_DISABLED}>
                   Rank: Bất kỳ
                 </button>
               </div>
@@ -214,18 +262,10 @@ export function CategoryFilterPanel() {
             <div>
               <span className={GROUP_LABEL_CLASS}>Khác</span>
               <div className="flex flex-wrap gap-2">
-                <button
-                  type="button"
-                  onClick={() => setLolFree((previous) => !previous)}
-                  className={lolFree ? CHIP_ACTIVE : CHIP_INACTIVE}
-                >
+                <button type="button" disabled title={NO_DATA} className={CHIP_DISABLED}>
                   LOL Free
                 </button>
-                <button
-                  type="button"
-                  onClick={() => setTftFree((previous) => !previous)}
-                  className={tftFree ? CHIP_ACTIVE : CHIP_INACTIVE}
-                >
+                <button type="button" disabled title={NO_DATA} className={CHIP_DISABLED}>
                   TFT Free
                 </button>
               </div>

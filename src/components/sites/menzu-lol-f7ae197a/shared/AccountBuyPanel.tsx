@@ -74,6 +74,41 @@ export function AccountBuyPanel({ account }: AccountBuyPanelProps) {
   const [buyError, setBuyError] = useState<string | null>(null);
   const [orderCode, setOrderCode] = useState<string | null>(null);
 
+  const [applied, setApplied] = useState<{ cut: number; total: number } | null>(null);
+  const [voucherError, setVoucherError] = useState<string | null>(null);
+  const [checking, setChecking] = useState(false);
+
+  // What the wallet will actually be debited, so the dialog and the server
+  // agree before the customer commits.
+  const payable = applied?.total ?? account.price;
+
+  async function handleApplyVoucher() {
+    setChecking(true);
+    setVoucherError(null);
+    setApplied(null);
+    try {
+      const response = await fetch("/api/vouchers/check", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ code: voucher.trim(), productCode: account.code }),
+      });
+      const data = (await response.json().catch(() => ({}))) as {
+        error?: string;
+        cut?: number;
+        total?: number;
+      };
+      if (!response.ok || data.cut === undefined || data.total === undefined) {
+        setVoucherError(data.error ?? "Không kiểm tra được mã");
+        return;
+      }
+      setApplied({ cut: data.cut, total: data.total });
+    } catch {
+      setVoucherError("Không kết nối được máy chủ");
+    } finally {
+      setChecking(false);
+    }
+  }
+
   // Fetch the signed-in user's wallet when the dialog opens; guests get null
   // and see the same "top up" path the live site shows a short balance.
   useEffect(() => {
@@ -138,8 +173,10 @@ export function AccountBuyPanel({ account }: AccountBuyPanelProps) {
   // null until /api/auth/me answers; treat that (and guests) as 0 so the
   // dialog opens on the "top up" branch rather than flashing a confirm button.
   const balance = balanceState ?? 0;
-  const amountToTopUp = Math.max(account.price - balance, 0);
-  const canAfford = balance >= account.price;
+  // Measured against what will actually be charged, so a voucher that brings
+  // the price under the wallet balance unlocks the confirm button.
+  const amountToTopUp = Math.max(payable - balance, 0);
+  const canAfford = balance >= payable;
 
   const numericStats: { label: string; value: string }[] = [
     { label: "Level", value: String(account.level) },
@@ -292,18 +329,43 @@ export function AccountBuyPanel({ account }: AccountBuyPanelProps) {
                   <input
                     type="text"
                     value={voucher}
-                    onChange={(event) => setVoucher(event.target.value)}
+                    onChange={(event) => {
+                      setVoucher(event.target.value);
+                      // A quote belongs to the code it was fetched for.
+                      setApplied(null);
+                      setVoucherError(null);
+                    }}
                     placeholder="Nhập mã voucher..."
                     className="w-28 min-w-0 rounded-lg border border-white/10 bg-white/5 px-2.5 py-1.5 text-xs text-white outline-none focus:border-[var(--brand)]/60 placeholder-neutral-600 transition-colors"
                   />
                   <button
                     type="button"
-                    className="shrink-0 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 px-3 py-1.5 text-xs font-bold text-white transition-colors"
+                    disabled={checking || voucher.trim().length === 0}
+                    onClick={handleApplyVoucher}
+                    className="shrink-0 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 disabled:opacity-40 disabled:hover:bg-white/5 px-3 py-1.5 text-xs font-bold text-white transition-colors"
                   >
-                    Áp dụng
+                    {checking ? "Đang kiểm…" : "Áp dụng"}
                   </button>
                 </div>
               </div>
+
+              {/* The button used to do nothing at all: the code was posted with
+                  the purchase and the customer only learned it worked after
+                  paying. */}
+              {voucherError ? (
+                <p role="alert" className="text-[11px] font-semibold text-red-400 text-right">
+                  {voucherError}
+                </p>
+              ) : null}
+
+              {applied ? (
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-emerald-400">Voucher đã áp dụng</span>
+                  <span className="text-xs font-bold text-emerald-400">
+                    −{formatVnd(applied.cut)} ₫
+                  </span>
+                </div>
+              ) : null}
 
               <div className="flex items-center justify-between">
                 <span className="text-xs text-neutral-400">Tổng tiền</span>
@@ -317,7 +379,7 @@ export function AccountBuyPanel({ account }: AccountBuyPanelProps) {
               <div className="flex items-center justify-between">
                 <span className="text-sm font-black uppercase text-white">TỔNG THANH TOÁN</span>
                 <span className="text-base font-black text-[var(--brand)]">
-                  {formatVnd(account.price)} ₫
+                  {formatVnd(payable)} ₫
                 </span>
               </div>
 

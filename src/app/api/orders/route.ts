@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/session";
 import { getShopSettings } from "@/lib/settingsStore";
+import { evaluateVoucher } from "@/lib/voucher";
 
 /** Short human-facing code, e.g. DH8F3K2Q. */
 function makeCode(prefix: string): string {
@@ -57,23 +58,35 @@ export async function POST(request: Request) {
 
       const product = await tx.product.findUniqueOrThrow({ where: { code } });
 
-      // Voucher, if supplied and still usable.
+      // What it costs right now. Asked again inside the transaction rather
+      // than trusted from the page, so a sale that ended while the dialog sat
+      // open cannot be bought at the old price — and, before this, a sale that
+      // was running charged the ordinary price no matter what the shop had
+      // scheduled.
+      const now = new Date();
+      const sale = await tx.flashSale.findFirst({
+        where: {
+          productId: product.id,
+          active: true,
+          startsAt: { lte: now },
+          endsAt: { gte: now },
+        },
+        orderBy: { salePrice: "asc" },
+        select: { salePrice: true },
+      });
+      const unitPrice = sale?.salePrice ?? product.price;
+
+      // Voucher, if supplied and still usable. The same rules back the
+      // "Áp dụng" preview, so what the dialog quoted is what is charged.
       let voucherId: string | null = null;
       let voucherCut = 0n;
       if (voucherCode) {
         const v = await tx.voucher.findUnique({ where: { code: voucherCode } });
-        const usable =
-          v &&
-          v.active &&
-          (v.expiresAt === null || v.expiresAt.getTime() > Date.now()) &&
-          (v.maxUses === null || v.usedCount < v.maxUses);
-        if (!usable) throw new Error("BAD_VOUCHER");
+        const applied = evaluateVoucher(v, unitPrice, now);
+        if (!v || !applied.ok) throw new Error("BAD_VOUCHER");
 
         voucherId = v.id;
-        voucherCut = v.percentOff
-          ? (product.price * BigInt(v.percentOff)) / 100n
-          : (v.amountOff ?? 0n);
-        if (voucherCut > product.price) voucherCut = product.price;
+        voucherCut = applied.cut;
 
         await tx.voucher.update({
           where: { id: v.id },
@@ -81,7 +94,7 @@ export async function POST(request: Request) {
         });
       }
 
-      const total = product.price - voucherCut;
+      const total = unitPrice - voucherCut;
 
       // Re-read the balance inside the transaction — the value on the session
       // object was loaded earlier and may be stale.
@@ -104,7 +117,7 @@ export async function POST(request: Request) {
 
       const discountPct =
         product.oldPrice > 0n
-          ? Number(((product.oldPrice - product.price) * 100n) / product.oldPrice)
+          ? Number(((product.oldPrice - unitPrice) * 100n) / product.oldPrice)
           : 0;
 
       const order = await tx.order.create({
