@@ -156,12 +156,14 @@
   --brand: #7c3aed;
   --brand-dark: #6d28d9;
 
-  /* Scrollbar. Faint enough to disappear while reading, solid enough to grab.
-     One pink, carried through the three states by opacity alone — a thumb that
-     changed hue as you grabbed it would read as a different control. */
-  --menzu-scroll-thumb: rgb(249 168 212 / 0.34);
-  --menzu-scroll-thumb-hover: rgb(249 168 212 / 0.58);
-  --menzu-scroll-thumb-active: rgb(249 168 212 / 0.85);
+  /* Scrollbar. One pink, carried through the three states by opacity alone —
+     a thumb that changed hue as you grabbed it would read as a different
+     control. Deeper than the page wants for a scrollbar, on purpose: over a
+     near-black gutter a pale pink turns to grey, and the whole point of
+     colouring it was to be able to see it. */
+  --menzu-scroll-thumb: rgb(236 72 153 / 0.62);
+  --menzu-scroll-thumb-hover: rgb(236 72 153 / 0.84);
+  --menzu-scroll-thumb-active: rgb(236 72 153 / 1);
 }
 
 /*
