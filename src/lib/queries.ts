@@ -720,3 +720,79 @@ export async function listVouchers(take = 100): Promise<AdminVoucherRow[]> {
     active: v.active,
   }));
 }
+
+export interface AdminFeedbackRow {
+  id: string;
+  name: string;
+  body: string;
+  amount: number;
+  verified: boolean;
+  createdAt: Date;
+}
+
+export async function listFeedback(take = 200): Promise<AdminFeedbackRow[]> {
+  const rows = await db.feedback.findMany({ orderBy: { createdAt: "desc" }, take });
+  return rows.map((f) => ({
+    id: f.id,
+    name: f.name,
+    body: f.body,
+    amount: Number(f.amount),
+    verified: f.verified,
+    createdAt: f.createdAt,
+  }));
+}
+
+export interface AdminServiceOrderRow {
+  code: string;
+  username: string;
+  serviceName: string;
+  amount: number;
+  status: string;
+  createdAt: Date;
+}
+
+export async function listServiceOrders(take = 200): Promise<AdminServiceOrderRow[]> {
+  const rows = await db.serviceOrder.findMany({
+    orderBy: [{ status: "asc" }, { createdAt: "desc" }],
+    take,
+    include: {
+      user: { select: { username: true } },
+      service: { select: { name: true } },
+    },
+  });
+  return rows.map((s) => ({
+    code: s.code,
+    username: s.user.username,
+    serviceName: s.service.name,
+    amount: Number(s.amount),
+    status: s.status,
+    createdAt: s.createdAt,
+  }));
+}
+
+export interface AdminTopUpRow {
+  code: string;
+  username: string;
+  method: string;
+  carrier: string | null;
+  amount: number;
+  status: string;
+  createdAt: Date;
+}
+
+export async function listTopUps(take = 200): Promise<AdminTopUpRow[]> {
+  const rows = await db.topUp.findMany({
+    orderBy: { createdAt: "desc" },
+    take,
+    include: { user: { select: { username: true } } },
+  });
+  return rows.map((t) => ({
+    code: t.code,
+    username: t.user.username,
+    method: t.method,
+    carrier: t.carrier,
+    amount: Number(t.amount),
+    status: t.status,
+    createdAt: t.createdAt,
+  }));
+}

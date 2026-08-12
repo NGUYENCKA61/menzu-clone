@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 
 import { AdminShell } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminShell";
 import { AdminTrade } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminTrade";
@@ -21,7 +21,9 @@ function formatWhen(date: Date): string {
 
 export default async function AdminTradePage() {
   const admin = await getAdmin();
-  if (!admin) redirect("/login?next=%2Fadmin%2Ftrade");
+  // notFound, not a redirect to /login: a 404 does not tell an unauthenticated
+  // visitor that an admin area exists here at all.
+  if (!admin) notFound();
 
   const rows = await listTradeRequests();
 

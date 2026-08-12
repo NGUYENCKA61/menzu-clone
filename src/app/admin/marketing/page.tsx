@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 
 import { AdminMarketing } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminMarketing";
 import { AdminShell } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminShell";
@@ -22,7 +22,9 @@ function formatWhen(date: Date | null): string | null {
 
 export default async function AdminMarketingPage() {
   const admin = await getAdmin();
-  if (!admin) redirect("/login?next=%2Fadmin%2Fmarketing");
+  // notFound, not a redirect to /login: a 404 does not tell an unauthenticated
+  // visitor that an admin area exists here at all.
+  if (!admin) notFound();
 
   const [vouchers, sales] = await Promise.all([listVouchers(), listFlashSales()]);
 

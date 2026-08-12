@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 
 import { AdminShell } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminShell";
 import { AdminUsers } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminUsers";
@@ -20,7 +20,9 @@ function formatDate(date: Date | null): string | null {
 
 export default async function AdminUsersPage() {
   const admin = await getAdmin();
-  if (!admin) redirect("/login?next=%2Fadmin%2Fusers");
+  // notFound, not a redirect to /login: a 404 does not tell an unauthenticated
+  // visitor that an admin area exists here at all.
+  if (!admin) notFound();
 
   const users = await listUsers();
 

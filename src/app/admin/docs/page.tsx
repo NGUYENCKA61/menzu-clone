@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 
 import { AdminDocs } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminDocs";
 import { AdminShell } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminShell";
@@ -11,7 +11,9 @@ export const dynamic = "force-dynamic";
 
 export default async function AdminDocsPage() {
   const admin = await getAdmin();
-  if (!admin) redirect("/login?next=%2Fadmin%2Fdocs");
+  // notFound, not a redirect to /login: a 404 does not tell an unauthenticated
+  // visitor that an admin area exists here at all.
+  if (!admin) notFound();
 
   const docs = await listDocArticles();
 
