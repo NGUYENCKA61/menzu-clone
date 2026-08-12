@@ -293,8 +293,21 @@ export async function getServiceOrders(
  * strings — so the component does not have to change.
  */
 export async function getFlashSaleItems(take = 20): Promise<FlashSaleItem[]> {
+  const now = new Date();
+
+  // A scheduled sale wins when one is running. Falling back to "anything
+  // discounted" keeps the row populated for a shop that has not scheduled
+  // anything yet, which is how this worked before scheduling existed.
+  const scheduled = await db.flashSale.findMany({
+    where: { active: true, startsAt: { lte: now }, endsAt: { gte: now } },
+    select: { productId: true },
+  });
+
   const rows = await db.product.findMany({
-    where: { status: "AVAILABLE", oldPrice: { gt: 0 } },
+    where:
+      scheduled.length > 0
+        ? { status: "AVAILABLE", id: { in: scheduled.map((s) => s.productId) } }
+        : { status: "AVAILABLE", oldPrice: { gt: 0 } },
     include: { skins: { select: { kind: true, tier: true } } },
   });
 
@@ -638,5 +651,62 @@ export async function listUsers(take = 200): Promise<AdminUserRow[]> {
     lastOrderAt: u.orders[0]?.createdAt ?? null,
     blockedAt: u.blockedAt,
     createdAt: u.createdAt,
+  }));
+}
+
+export interface AdminFlashSaleRow {
+  id: string;
+  productCode: string;
+  productRank: string;
+  price: number;
+  salePrice: number;
+  startsAt: Date;
+  endsAt: Date;
+  active: boolean;
+}
+
+/** Every scheduled sale, running or not, for the marketing screen. */
+export async function listFlashSales(take = 100): Promise<AdminFlashSaleRow[]> {
+  const rows = await db.flashSale.findMany({
+    orderBy: { startsAt: "desc" },
+    take,
+    include: { product: { select: { code: true, rank: true, price: true } } },
+  });
+  return rows.map((r) => ({
+    id: r.id,
+    productCode: r.product.code,
+    productRank: r.product.rank,
+    price: Number(r.product.price),
+    salePrice: Number(r.salePrice),
+    startsAt: r.startsAt,
+    endsAt: r.endsAt,
+    active: r.active,
+  }));
+}
+
+export interface AdminVoucherRow {
+  code: string;
+  percentOff: number | null;
+  amountOff: number | null;
+  minOrder: number | null;
+  maxUses: number | null;
+  usedCount: number;
+  startsAt: Date | null;
+  expiresAt: Date | null;
+  active: boolean;
+}
+
+export async function listVouchers(take = 100): Promise<AdminVoucherRow[]> {
+  const rows = await db.voucher.findMany({ orderBy: { code: "asc" }, take });
+  return rows.map((v) => ({
+    code: v.code,
+    percentOff: v.percentOff,
+    amountOff: v.amountOff === null ? null : Number(v.amountOff),
+    minOrder: v.minOrder === null ? null : Number(v.minOrder),
+    maxUses: v.maxUses,
+    usedCount: v.usedCount,
+    startsAt: v.startsAt,
+    expiresAt: v.expiresAt,
+    active: v.active,
   }));
 }

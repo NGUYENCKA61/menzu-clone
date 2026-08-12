@@ -333,6 +333,7 @@ model Product {
   tags       ProductTag[]
   skins      ProductSkin[]
   orders     Order[]
+  flashSales FlashSale[]
 
   @@index([categoryId, status])
   @@index([price])
@@ -442,6 +443,10 @@ model Voucher {
   code        String    @unique
   percentOff  Int?
   amountOff   BigInt?
+  /// Order subtotal a cart must reach before the code applies.
+  minOrder    BigInt?
+  /// Codes can be created ahead of a campaign; null means live now.
+  startsAt    DateTime?
   maxUses     Int?
   usedCount   Int       @default(0)
   expiresAt   DateTime?
@@ -574,4 +579,24 @@ model Feedback {
   createdAt DateTime @default(now())
 
   @@map("feedback")
+}
+
+/// A scheduled discount on one product.
+///
+/// The homepage flash-sale row used to be derived from oldPrice > 0, which
+/// meant every discounted product was on sale forever and nothing could be
+/// scheduled or switched off. A row here has a window and an active flag.
+model FlashSale {
+  id         String   @id @default(cuid())
+  productId  String
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  /// Price during the sale. The product keeps its own price for afterwards.
+  salePrice  BigInt
+  startsAt   DateTime
+  endsAt     DateTime
+  active     Boolean  @default(true)
+  createdAt  DateTime @default(now())
+
+  @@index([active, startsAt, endsAt])
+  @@map("flash_sales")
 }

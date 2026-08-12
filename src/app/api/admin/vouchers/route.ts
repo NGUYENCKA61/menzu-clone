@@ -13,6 +13,8 @@ export async function POST(request: Request) {
     percentOff?: number;
     amountOff?: number;
     maxUses?: number;
+    minOrder?: number;
+    startsAt?: string;
     expiresAt?: string;
   } | null;
 
@@ -49,6 +51,27 @@ export async function POST(request: Request) {
     expiresAt = parsed;
   }
 
+  let startsAt: Date | null = null;
+  if (body?.startsAt) {
+    const parsed = new Date(body.startsAt);
+    if (Number.isNaN(parsed.getTime())) {
+      return NextResponse.json({ error: "Ngày bắt đầu không hợp lệ" }, { status: 400 });
+    }
+    startsAt = parsed;
+  }
+  // A code whose window closes before it opens can never be used, and nothing
+  // downstream would report why.
+  if (startsAt && expiresAt && expiresAt <= startsAt) {
+    return NextResponse.json(
+      { error: "Ngày hết hạn phải sau ngày bắt đầu" },
+      { status: 400 },
+    );
+  }
+
+  const minOrderRaw = Number(body?.minOrder ?? 0);
+  const minOrder =
+    Number.isFinite(minOrderRaw) && minOrderRaw > 0 ? BigInt(Math.floor(minOrderRaw)) : null;
+
   const maxUsesRaw = Number(body?.maxUses ?? 0);
   const maxUses = Number.isFinite(maxUsesRaw) && maxUsesRaw > 0 ? Math.floor(maxUsesRaw) : null;
 
@@ -58,6 +81,8 @@ export async function POST(request: Request) {
       percentOff: percentOff > 0 ? Math.floor(percentOff) : null,
       amountOff: amountOff > 0 ? BigInt(Math.floor(amountOff)) : null,
       maxUses,
+      minOrder,
+      startsAt,
       expiresAt,
     },
   });
