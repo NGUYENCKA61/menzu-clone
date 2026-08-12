@@ -49,8 +49,12 @@ function hrefFor(label: string): string {
 
 const QUICK_LINKS = ["TIN TỨC", "LIÊN HỆ", "WIKI & HƯỚNG DẪN", "GÓP Ý", "CỘNG ĐỒNG"]
 
+// Nav text sits at neutral-200 rather than the captured neutral-400: at 10-11px
+// and letter-spaced, the darker grey on the near-black bar was closer to
+// disabled than to a link. Hover still lands on pure white, so the two states
+// stay distinguishable.
 const QUICK_LINK_CLASS =
-  "text-[10px] font-bold uppercase tracking-widest text-neutral-400 hover:text-white transition-colors"
+  "text-[10px] font-bold uppercase tracking-widest text-neutral-300 hover:text-white transition-colors"
 
 const VALORANT_HUB_ITEMS: DropdownItem[] = [
   { label: "Crosshair Library", icon: Crosshair },
@@ -81,7 +85,7 @@ function NavDropdown({ label, items }: { label: string; items: DropdownItem[] })
     <div className="relative group h-full flex items-center">
       <button
         type="button"
-        className="flex items-center gap-2 px-3 py-2 rounded-lg text-[11px] font-extrabold uppercase tracking-widest transition-all text-neutral-400 hover:text-white"
+        className="flex items-center gap-2 px-3 py-2 rounded-lg text-[11px] font-extrabold uppercase tracking-widest transition-all text-neutral-200 hover:text-white"
       >
         {label}
         <ChevronDown size={14} />
@@ -96,8 +100,8 @@ function NavDropdown({ label, items }: { label: string; items: DropdownItem[] })
                 href={hrefFor(item.label)}
                 className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-white/5 transition-colors group/item"
               >
-                <Icon size={14} className="text-neutral-500 shrink-0" />
-                <span className="text-[10px] font-bold text-neutral-300 group-hover/item:text-white uppercase tracking-wider">
+                <Icon size={14} className="text-neutral-400 shrink-0" />
+                <span className="text-[10px] font-bold text-neutral-200 group-hover/item:text-white uppercase tracking-wider">
                   {item.label}
                 </span>
               </a>
@@ -202,7 +206,7 @@ export function SiteHeaderClient({
             <NavDropdown label="GIAO DỊCH" items={GIAO_DICH_ITEMS} />
             <a
               href="#"
-              className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-[11px] font-extrabold uppercase tracking-widest text-neutral-400 hover:text-white transition-all"
+              className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-[11px] font-extrabold uppercase tracking-widest text-neutral-200 hover:text-white transition-all"
             >
               <Gift size={14} />
               NHẬN ACC FREE
