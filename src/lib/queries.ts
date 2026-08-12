@@ -517,3 +517,29 @@ export async function getTradeRequests(userId: string): Promise<TradeRequestRow[
     quotedAmount: r.quotedAmount === null ? null : Number(r.quotedAmount),
   }));
 }
+
+export interface TopUpRow {
+  code: string;
+  method: string;
+  carrier: string | null;
+  amount: number;
+  status: string;
+  createdAt: Date;
+}
+
+/** "Thẻ nạp gần đây" on /wallet. */
+export async function getTopUps(userId: string, take = 10): Promise<TopUpRow[]> {
+  const rows = await db.topUp.findMany({
+    where: { userId },
+    orderBy: { createdAt: "desc" },
+    take,
+  });
+  return rows.map((t) => ({
+    code: t.code,
+    method: t.method,
+    carrier: t.carrier,
+    amount: Number(t.amount),
+    status: t.status,
+    createdAt: t.createdAt,
+  }));
+}
