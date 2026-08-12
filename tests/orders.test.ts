@@ -8,7 +8,7 @@ import {
   QUERY_MAX,
   toCsv,
 } from "@/lib/orders";
-import { pageRange, pageWindow, parsePage } from "@/lib/paging";
+import { GAP, pageRange, pageStrip, pageWindow, parsePage } from "@/lib/paging";
 import { dayRangeVn } from "@/lib/time";
 
 describe("parseOrderFilters", () => {
@@ -164,5 +164,41 @@ describe("exportFilename", () => {
     expect(exportFilename(new Date("2026-08-12T18:30:00Z"))).toBe(
       "don-hang-20260813-0130.csv",
     );
+  });
+});
+
+describe("pageStrip", () => {
+  it("keeps the first and last page reachable", () => {
+    // Without them, page 30 of 65 has no way to reach 65 except by clicking
+    // through, and "go to the end" is one of the two jumps anybody wants.
+    expect(pageStrip(30, 65)).toEqual([1, GAP, 28, 29, 30, 31, 32, GAP, 65]);
+  });
+
+  it("draws a gap only where it hides something", () => {
+    // A strip reading "1 … 2" lies about what is between them.
+    expect(pageStrip(1, 65)).toEqual([1, 2, 3, 4, 5, GAP, 65]);
+    // The window starts at 2 here, so 1 sits right beside it — a gap between
+    // them would claim to hide a page that does not exist.
+    expect(pageStrip(4, 8)).toEqual([1, 2, 3, 4, 5, 6, GAP, 8]);
+    expect(pageStrip(65, 65)).toEqual([1, GAP, 61, 62, 63, 64, 65]);
+    // …and the same at the far end: 7 beside 8, no gap.
+    expect(pageStrip(5, 8)).toEqual([1, GAP, 3, 4, 5, 6, 7, 8]);
+  });
+
+  it("is just the pages on a short list", () => {
+    expect(pageStrip(1, 3)).toEqual([1, 2, 3]);
+    expect(pageStrip(1, 1)).toEqual([1]);
+  });
+
+  it("never repeats a page", () => {
+    // The ends are pinned separately from the window, so an off-by-one there
+    // draws "1 1 2 3" or two buttons both going to the last page.
+    for (let total = 1; total <= 30; total += 1) {
+      for (let page = 1; page <= total; page += 1) {
+        const nums = pageStrip(page, total).filter((n): n is number => n !== GAP);
+        expect(new Set(nums).size).toBe(nums.length);
+        expect([...nums].sort((a, b) => a - b)).toEqual(nums);
+      }
+    }
   });
 });

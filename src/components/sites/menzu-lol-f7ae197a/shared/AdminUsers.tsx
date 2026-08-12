@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import {
   Ban,
   ChevronDown,
@@ -204,7 +204,30 @@ export function AdminUsers({
       {visible.length === 0 ? (
         <AdminEmpty title={emptyNote} />
       ) : (
-        <div className="flex flex-col gap-2">
+        <div className="w-full overflow-x-auto rounded-xl border border-white/[0.08] bg-[#0e0e11]">
+          <table className="w-full min-w-[1100px] text-left">
+            <thead>
+              <tr className="border-b border-white/[0.06]">
+                {[
+                  "Người dùng",
+                  "Email",
+                  "Số dư",
+                  "Rank",
+                  "Đơn hàng",
+                  "Đơn gần nhất",
+                  "Trạng thái",
+                  "Thao tác",
+                ].map((head) => (
+                  <th
+                    key={head}
+                    className="px-5 py-3.5 text-[10px] font-black uppercase tracking-widest text-neutral-500 whitespace-nowrap"
+                  >
+                    {head}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
           {visible.map((user) => {
             const expanded = open === user.username;
             // The server refuses every action on the caller's own account, so
@@ -212,98 +235,118 @@ export function AdminUsers({
             const isSelf = user.username === selfUsername;
 
             return (
-              <div
-                key={user.username}
-                className="rounded-2xl border border-white/10 bg-neutral-900/50 p-4 flex flex-col gap-3"
-              >
-                <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-                  <span className="text-xs font-black text-white">
-                    {user.username}
-                    {user.role === "ADMIN" ? (
-                      <span className="ml-2 text-[9px] font-black uppercase tracking-wider text-indigo-400">
-                        Admin
-                      </span>
-                    ) : null}
-                  </span>
-                  <span className="text-[11px] text-neutral-500">
-                    UID {user.uid} · {user.email ?? "chưa có email"}
-                  </span>
-                  <span className="text-xs font-bold text-emerald-400 tabular-nums">
+              <Fragment key={user.username}>
+                <tr className="border-b border-white/[0.04] last:border-0">
+                  <td className="px-5 py-3">
+                    <p className="text-[13px] font-bold text-white">{user.username}</p>
+                    <p className="mt-0.5 text-[11px] text-neutral-500">UID {user.uid}</p>
+                  </td>
+
+                  <td className="px-5 py-3 max-w-[220px]">
+                    <span
+                      className={`block truncate text-[13px] ${
+                        user.email ? "text-neutral-300" : "text-neutral-600 italic"
+                      }`}
+                    >
+                      {user.email ?? "Chưa có email"}
+                    </span>
+                  </td>
+
+                  <td className="px-5 py-3 text-[13px] font-bold text-emerald-400 tabular-nums whitespace-nowrap">
                     {formatVnd(user.balance)}đ
-                  </span>
-                  <span className="text-[11px] text-neutral-500">
-                    {user.points} Pts · {user.tier}
-                  </span>
-                  <span className="text-[11px] text-neutral-500">
+                  </td>
+
+                  <td className="px-5 py-3 text-[12px] font-semibold text-neutral-300 whitespace-nowrap">
+                    {user.tier}
+                  </td>
+
+                  <td className="px-5 py-3 text-[12px] text-neutral-400 tabular-nums whitespace-nowrap">
                     {user.orderCount} đơn · {formatVnd(user.totalSpent)}đ
-                  </span>
-                  {user.blockedAt ? (
-                    <span className="text-[10px] font-black uppercase tracking-wider px-2 py-1 rounded-md border border-red-500/30 bg-red-500/10 text-red-400">
-                      Khóa {user.blockedAt}
+                  </td>
+
+                  <td className="px-5 py-3 text-[12px] text-neutral-500 tabular-nums whitespace-nowrap">
+                    {user.lastOrderAt ?? "—"}
+                  </td>
+
+                  <td className="px-5 py-3">
+                    {/* Blocked outranks the role badge: an admin who has been
+                        locked out is locked out, and reading "Quản trị" on
+                        that row would say the opposite. */}
+                    <span
+                      className={`inline-block rounded-md border px-2 py-1 text-[10px] font-black uppercase tracking-wider whitespace-nowrap ${
+                        user.blockedAt
+                          ? "border-red-500/30 bg-red-500/10 text-red-400"
+                          : user.role === "ADMIN"
+                            ? "border-violet-500/30 bg-violet-500/10 text-violet-400"
+                            : "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
+                      }`}
+                    >
+                      {user.blockedAt
+                        ? "Đã khóa"
+                        : user.role === "ADMIN"
+                          ? "Quản trị"
+                          : "Hoạt động"}
                     </span>
-                  ) : (
-                    <span className="text-[10px] font-black uppercase tracking-wider px-2 py-1 rounded-md border border-emerald-500/30 bg-emerald-500/10 text-emerald-400">
-                      Hoạt động
-                    </span>
-                  )}
-                  <span className="text-[11px] text-neutral-500 ml-auto">
-                    Đơn gần nhất: {user.lastOrderAt ?? "—"}
-                  </span>
-                </div>
+                  </td>
 
-                <div className="flex flex-wrap items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => toggle(user)}
-                    aria-expanded={expanded}
-                    className="h-8 px-3 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 text-[10px] font-black uppercase tracking-widest text-neutral-300 transition-colors inline-flex items-center gap-1.5"
-                  >
-                    <ChevronDown
-                      size={12}
-                      className={`transition-transform ${expanded ? "rotate-180" : ""}`}
-                    />
-                    {expanded ? "Đóng" : "Chỉnh thông tin"}
-                  </button>
+                  <td className="px-5 py-3">
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      <button
+                        type="button"
+                        onClick={() => toggle(user)}
+                        aria-expanded={expanded}
+                        className="h-8 px-2.5 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 text-[10px] font-black uppercase tracking-widest text-neutral-300 transition-colors inline-flex items-center gap-1.5 whitespace-nowrap"
+                      >
+                        <ChevronDown
+                          size={12}
+                          className={`transition-transform ${expanded ? "rotate-180" : ""}`}
+                        />
+                        Thông tin
+                      </button>
 
-                  <button
-                    type="button"
-                    disabled={busy || isSelf}
-                    title={isSelf ? "Không thể tự đổi quyền của mình" : undefined}
-                    onClick={() => setConfirming({ kind: "role", user })}
-                    className="h-8 px-3 rounded-lg border border-rose-500/30 bg-rose-500/10 hover:bg-rose-500/20 disabled:opacity-40 disabled:hover:bg-rose-500/10 text-[10px] font-black uppercase tracking-widest text-rose-400 transition-colors inline-flex items-center gap-1.5"
-                  >
-                    <Shield size={12} />
-                    {user.role === "ADMIN" ? "Thu hồi admin" : "Cấp admin"}
-                  </button>
+                      <button
+                        type="button"
+                        disabled={busy || isSelf}
+                        title={isSelf ? "Không thể tự đổi quyền của mình" : undefined}
+                        onClick={() => setConfirming({ kind: "role", user })}
+                        className="h-8 px-2.5 rounded-lg border border-rose-500/30 bg-rose-500/10 hover:bg-rose-500/20 disabled:opacity-40 disabled:hover:bg-rose-500/10 text-[10px] font-black uppercase tracking-widest text-rose-400 transition-colors inline-flex items-center gap-1.5 whitespace-nowrap"
+                      >
+                        <Shield size={12} />
+                        {user.role === "ADMIN" ? "Thu hồi" : "Cấp admin"}
+                      </button>
 
-                  <button
-                    type="button"
-                    disabled={busy || isSelf}
-                    title={isSelf ? "Không thể tự khóa tài khoản của mình" : undefined}
-                    onClick={() => setConfirming({ kind: "block", user })}
-                    className={`h-8 px-3 rounded-lg disabled:opacity-40 text-[10px] font-black uppercase tracking-widest transition-colors inline-flex items-center gap-1.5 ${
-                      user.blockedAt
-                        ? "border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20"
-                        : "border border-amber-500/30 bg-amber-500/10 text-amber-400 hover:bg-amber-500/20"
-                    }`}
-                  >
-                    {user.blockedAt ? <ShieldCheck size={12} /> : <Ban size={12} />}
-                    {user.blockedAt ? "Mở khóa" : "Khóa"}
-                  </button>
+                      <button
+                        type="button"
+                        disabled={busy || isSelf}
+                        title={isSelf ? "Không thể tự khóa tài khoản của mình" : undefined}
+                        onClick={() => setConfirming({ kind: "block", user })}
+                        className={`h-8 px-2.5 rounded-lg disabled:opacity-40 text-[10px] font-black uppercase tracking-widest transition-colors inline-flex items-center gap-1.5 whitespace-nowrap ${
+                          user.blockedAt
+                            ? "border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20"
+                            : "border border-amber-500/30 bg-amber-500/10 text-amber-400 hover:bg-amber-500/20"
+                        }`}
+                      >
+                        {user.blockedAt ? <ShieldCheck size={12} /> : <Ban size={12} />}
+                        {user.blockedAt ? "Mở khóa" : "Khóa"}
+                      </button>
 
-                  <button
-                    type="button"
-                    disabled={busy || isSelf}
-                    onClick={() => setConfirming({ kind: "delete", user })}
-                    aria-label={`Xóa tài khoản ${user.username}`}
-                    title={isSelf ? "Không thể tự xóa tài khoản của mình" : "Xóa tài khoản"}
-                    className="h-8 w-8 rounded-lg border border-red-500/30 bg-red-500/10 hover:bg-red-500/20 disabled:opacity-40 disabled:hover:bg-red-500/10 text-red-400 transition-colors inline-flex items-center justify-center"
-                  >
-                    <Trash2 size={13} />
-                  </button>
-                </div>
+                      <button
+                        type="button"
+                        disabled={busy || isSelf}
+                        onClick={() => setConfirming({ kind: "delete", user })}
+                        aria-label={`Xóa tài khoản ${user.username}`}
+                        title={isSelf ? "Không thể tự xóa tài khoản của mình" : "Xóa tài khoản"}
+                        className="h-8 w-8 rounded-lg border border-red-500/30 bg-red-500/10 hover:bg-red-500/20 disabled:opacity-40 disabled:hover:bg-red-500/10 text-red-400 transition-colors inline-flex items-center justify-center"
+                      >
+                        <Trash2 size={13} />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
 
                 {expanded ? (
+                  <tr className="border-b border-white/[0.04]">
+                    <td colSpan={8} className="px-5 pb-5 bg-white/[0.015]">
                   <div className="flex flex-col gap-5 pt-4 border-t border-white/5">
                     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-4">
                       <Stat label="Tài khoản" value={user.username} />
@@ -490,10 +533,14 @@ export function AdminUsers({
                       </>
                     )}
                   </div>
+                    </td>
+                  </tr>
                 ) : null}
-              </div>
+              </Fragment>
             );
           })}
+            </tbody>
+          </table>
         </div>
       )}
 

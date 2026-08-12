@@ -6,8 +6,6 @@ import { useEffect, useState } from "react";
 
 import {
   USER_QUERY_MAX,
-  USER_ROLE_LABELS,
-  USER_STATE_LABELS,
   USER_TIER_LABELS,
   type UserFilters,
 } from "@/lib/users";
@@ -16,13 +14,20 @@ const FIELD =
   "h-10 rounded-lg border border-white/[0.08] bg-[#0e0e11] px-3 text-[13px] text-white outline-none focus:border-rose-500/50 transition-colors";
 
 /**
- * The user screen's toolbar.
+ * The four views, as one control.
  *
- * Filtering happens in the database, not here. The table shows one page of
- * customers, so narrowing the rows already on screen would search twenty out
- * of however many the shop has and confidently report nothing found — and a
- * shop looking up one customer by name is exactly the case that has to work.
+ * Role and status are separate columns but they are not separate questions:
+ * an admin looking at this screen wants "everyone", "the working accounts",
+ * "the locked ones" or "my staff", and two dropdowns to express that turns one
+ * decision into two.
  */
+const VIEWS = [
+  { label: "Tất cả", role: "", state: "" },
+  { label: "Đang hoạt động", role: "", state: "ACTIVE" },
+  { label: "Đã khóa", role: "", state: "BLOCKED" },
+  { label: "Quản trị", role: "ADMIN", state: "" },
+] as const;
+
 export function AdminUserFilters({ filters }: { filters: UserFilters }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -46,16 +51,23 @@ export function AdminUserFilters({ filters }: { filters: UserFilters }) {
     return () => window.clearTimeout(timer);
   }, [q, params, pathname, router]);
 
-  function set(key: string, value: string) {
+  function go(patch: Record<string, string>) {
     const next = new URLSearchParams(params.toString());
-    if (value) next.set(key, value);
-    else next.delete(key);
+    for (const [key, value] of Object.entries(patch)) {
+      if (value) next.set(key, value);
+      else next.delete(key);
+    }
     next.delete("page");
     router.replace(`${pathname}?${next}`, { scroll: false });
   }
 
+  const active =
+    VIEWS.find(
+      (view) => view.role === (filters.role ?? "") && view.state === (filters.state ?? ""),
+    ) ?? VIEWS[0];
+
   return (
-    <div className="flex flex-col lg:flex-row gap-2.5">
+    <div className="flex flex-col xl:flex-row gap-2.5">
       <div className="relative flex-1 min-w-0">
         <Search
           size={15}
@@ -71,46 +83,38 @@ export function AdminUserFilters({ filters }: { filters: UserFilters }) {
         />
       </div>
 
-      <select
-        value={filters.state ?? ""}
-        onChange={(event) => set("state", event.target.value)}
-        aria-label="Lọc theo trạng thái"
-        className={FIELD}
-      >
-        <option value="" className="bg-neutral-900">
-          Tất cả trạng thái
-        </option>
-        {Object.entries(USER_STATE_LABELS).map(([value, label]) => (
-          <option key={value} value={value} className="bg-neutral-900">
-            {label}
-          </option>
-        ))}
-      </select>
+      <div className="flex gap-2 overflow-x-auto">
+        {VIEWS.map((view) => {
+          const on = view.label === active.label;
+          return (
+            <button
+              key={view.label}
+              type="button"
+              aria-pressed={on}
+              onClick={() => go({ role: view.role, state: view.state })}
+              className={`h-10 shrink-0 rounded-lg border px-4 text-[11px] font-black uppercase tracking-widest transition-colors ${
+                on
+                  ? "border-rose-500/60 bg-rose-500/15 text-rose-400"
+                  : "border-white/[0.08] bg-[#0e0e11] text-neutral-400 hover:text-white hover:bg-white/[0.05]"
+              }`}
+            >
+              {view.label}
+            </button>
+          );
+        })}
+      </div>
 
-      <select
-        value={filters.role ?? ""}
-        onChange={(event) => set("role", event.target.value)}
-        aria-label="Lọc theo quyền"
-        className={FIELD}
-      >
-        <option value="" className="bg-neutral-900">
-          Tất cả quyền
-        </option>
-        {Object.entries(USER_ROLE_LABELS).map(([value, label]) => (
-          <option key={value} value={value} className="bg-neutral-900">
-            {label}
-          </option>
-        ))}
-      </select>
-
+      {/* Not in the layout brief, kept because losing them would cost the shop
+          a working feature: tier is the only way to find the platinum
+          customers, and the export is where the list leaves for a spreadsheet. */}
       <select
         value={filters.tier ?? ""}
-        onChange={(event) => set("tier", event.target.value)}
+        onChange={(event) => go({ tier: event.target.value })}
         aria-label="Lọc theo hạng"
-        className={FIELD}
+        className={`${FIELD} shrink-0`}
       >
         <option value="" className="bg-neutral-900">
-          Tất cả hạng
+          Mọi hạng
         </option>
         {Object.entries(USER_TIER_LABELS).map(([value, label]) => (
           <option key={value} value={value} className="bg-neutral-900">
@@ -119,14 +123,13 @@ export function AdminUserFilters({ filters }: { filters: UserFilters }) {
         ))}
       </select>
 
-      {/* A plain link, not a fetch: the browser's own download handling gives
-          the file its name and puts it where the admin expects. */}
       <a
         href={`/api/admin/users/export?${params.toString()}`}
-        className="flex h-10 shrink-0 items-center justify-center gap-2 rounded-lg bg-rose-500 px-4 text-[13px] font-semibold text-white transition-colors hover:bg-rose-600"
+        title="Tải danh sách đang xem về dạng CSV"
+        className="flex h-10 shrink-0 items-center justify-center gap-2 rounded-lg border border-white/[0.08] bg-[#0e0e11] px-4 text-[13px] font-semibold text-neutral-300 transition-colors hover:bg-white/[0.05] hover:text-white"
       >
         <Download size={15} />
-        Xuất dữ liệu
+        Xuất
       </a>
     </div>
   );
