@@ -1,10 +1,8 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { useState } from "react";
 import {
   ArrowLeftRight,
-  ChevronDown,
   ClipboardList,
   LayoutDashboard,
   Shield,
@@ -19,18 +17,6 @@ interface AccountNavItem {
   href: string;
   icon: LucideIcon;
 }
-
-/** Admin destinations, mirroring AdminShell's sidebar. */
-const ADMIN_ITEMS: { label: string; href: string }[] = [
-  { label: "Tổng quan hệ thống", href: "/admin" },
-  { label: "Sản phẩm", href: "/admin/products" },
-  { label: "Đơn hàng", href: "/admin/orders" },
-  { label: "Marketing", href: "/admin/marketing" },
-  { label: "Thu cũ đổi mới", href: "/admin/trade" },
-  { label: "Người dùng", href: "/admin/users" },
-  { label: "Bài viết", href: "/admin/docs" },
-  { label: "Vận hành", href: "/admin/operations" },
-];
 
 const NAV_ITEMS: AccountNavItem[] = [
   { label: "Tổng quan", href: "/profile", icon: LayoutDashboard },
@@ -55,50 +41,24 @@ const LINK_INACTIVE =
  */
 export function AccountSidebar({ isAdmin = false }: { isAdmin?: boolean }) {
   const pathname = usePathname();
-  const [adminOpen, setAdminOpen] = useState(false);
 
   return (
     <div className="hidden lg:block w-full lg:w-[280px] shrink-0 sticky top-[88px]">
       <nav className="bg-neutral-900/60 border border-white/10 rounded-2xl p-3">
-        {/* Above the account links, and collapsed by default: it is a place to
-            go on purpose, not something to hit while reaching for Tổng quan. */}
+        {/* A single link above the account items. The admin area has its own
+            sidebar once you are inside it, so listing all eight screens here
+            duplicated a menu two clicks away. */}
         {isAdmin ? (
           <div className="mb-2 pb-2 border-b border-white/5">
-            <button
-              type="button"
-              onClick={() => setAdminOpen((value) => !value)}
-              aria-expanded={adminOpen}
-              className="w-full flex items-center gap-3 py-2.5 px-3 rounded-lg text-indigo-300 hover:text-white hover:bg-indigo-500/10 transition-colors"
+            <a
+              href="/admin"
+              className="flex items-center gap-3 py-2.5 px-3 rounded-lg text-indigo-300 hover:text-white hover:bg-indigo-500/10 transition-colors"
             >
               <Shield size={16} className="shrink-0" />
               <span className="text-sm font-black uppercase tracking-wider">
                 Dashboard quản lý
               </span>
-              <ChevronDown
-                size={14}
-                className={`ml-auto transition-transform ${adminOpen ? "rotate-180" : ""}`}
-              />
-            </button>
-
-            {adminOpen ? (
-              <div className="pl-4 mt-1">
-                {ADMIN_ITEMS.map(({ label, href }) => (
-                  <a
-                    key={href}
-                    href={href}
-                    aria-current={pathname === href ? "page" : undefined}
-                    className={`flex items-center gap-3 py-2 px-3 rounded-lg text-sm font-bold transition-colors ${
-                      pathname === href
-                        ? "bg-[#7C3AED]/15 text-[#a78bfa]"
-                        : "text-neutral-400 hover:text-white hover:bg-white/5"
-                    }`}
-                  >
-                    <span className="w-1 h-1 rounded-full bg-indigo-400/60 shrink-0" />
-                    {label}
-                  </a>
-                ))}
-              </div>
-            ) : null}
+            </a>
           </div>
         ) : null}
 
