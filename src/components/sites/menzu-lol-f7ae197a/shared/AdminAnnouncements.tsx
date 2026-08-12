@@ -4,11 +4,16 @@ import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 
 import {
+  AUDIENCE_LABELS,
   BODY_MAX,
+  BULLETS_MAX,
+  parseBullets,
+  parseUsernames,
   PRIORITY_LABELS,
   STATE_LABELS,
   TITLE_MAX,
   TYPE_LABELS,
+  type AnnouncementAudience,
   type AnnouncementPriority,
   type AnnouncementState,
   type AnnouncementStatus,
@@ -22,6 +27,12 @@ export interface AdminAnnouncementRow {
   type: AnnouncementType;
   priority: AnnouncementPriority;
   status: AnnouncementStatus;
+  audience: AnnouncementAudience;
+  /** Usernames a targeted notice is addressed to; empty for a broadcast. */
+  recipients: string[];
+  bullets: string[];
+  noticeTitle: string | null;
+  noticeBody: string | null;
   /** What the shop decided, crossed with the clock — computed on the server. */
   state: AnnouncementState;
   /** Pre-formatted for the datetime-local inputs. */
@@ -46,8 +57,13 @@ const STATE_TINT: Record<AnnouncementState, string> = {
 const EMPTY = {
   title: "",
   body: "",
+  bullets: "",
+  noticeTitle: "",
+  noticeBody: "",
   type: "INFO" as AnnouncementType,
   priority: "NORMAL" as AnnouncementPriority,
+  audience: "ALL" as AnnouncementAudience,
+  usernames: "",
   startAt: "",
   endAt: "",
 };
@@ -132,8 +148,15 @@ export function AdminAnnouncements({
       ...(editing ? { id: editing } : {}),
       title: form.title,
       body: form.body,
+      bullets: parseBullets(form.bullets),
+      noticeTitle: form.noticeTitle,
+      noticeBody: form.noticeBody,
       type: form.type,
       priority: form.priority,
+      audience: form.audience,
+      // Only meaningful for a targeted notice; the API ignores it otherwise
+      // rather than storing recipients for something addressed to everyone.
+      usernames: form.audience === "USERS" ? parseUsernames(form.usernames) : [],
       // An empty field means "no bound", which the API reads as null. Sent as
       // an empty string rather than omitted, so clearing an end date on an
       // existing notice actually clears it.
@@ -153,8 +176,13 @@ export function AdminAnnouncements({
     setForm({
       title: row.title,
       body: row.body,
+      bullets: row.bullets.join("\n"),
+      noticeTitle: row.noticeTitle ?? "",
+      noticeBody: row.noticeBody ?? "",
       type: row.type,
       priority: row.priority,
+      audience: row.audience,
+      usernames: row.recipients.join(", "),
       startAt: row.startAtInput,
       endAt: row.endAtInput,
     });
@@ -211,6 +239,86 @@ export function AdminAnnouncements({
             placeholder="Shop bảo trì từ 2h đến 4h sáng mai. Trong thời gian này không nạp tiền được."
             className={`${FIELD} resize-y`}
           />
+        </div>
+
+        <div>
+          <label className={LABEL}>
+            Lưu ý — mỗi dòng một gạch đầu dòng
+            <span className="ml-2 font-bold normal-case tracking-normal text-neutral-600">
+              tối đa {BULLETS_MAX} dòng · để trống thì bỏ qua mục này
+            </span>
+          </label>
+          <textarea
+            rows={3}
+            value={form.bullets}
+            onChange={(e) => setForm({ ...form, bullets: e.target.value })}
+            placeholder={"Vui lòng nhập đúng nội dung chuyển khoản được cung cấp.\nKhông chỉnh sửa nội dung chuyển khoản khi thực hiện thanh toán."}
+            className={`${FIELD} resize-y`}
+          />
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label className={LABEL}>Ô lưu ý quan trọng — tiêu đề</label>
+            <input
+              value={form.noticeTitle}
+              onChange={(e) => setForm({ ...form, noticeTitle: e.target.value })}
+              placeholder="Lưu ý quan trọng"
+              className={FIELD}
+            />
+          </div>
+          <div>
+            <label className={LABEL}>Ô lưu ý quan trọng — nội dung</label>
+            <input
+              value={form.noticeBody}
+              onChange={(e) => setForm({ ...form, noticeBody: e.target.value })}
+              placeholder="Không thực hiện nhiều giao dịch cùng lúc với cùng một mã nạp."
+              className={FIELD}
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label className={LABEL}>Gửi cho ai</label>
+            <select
+              value={form.audience}
+              onChange={(e) =>
+                setForm({ ...form, audience: e.target.value as AnnouncementAudience })
+              }
+              className={FIELD}
+            >
+              {Object.entries(AUDIENCE_LABELS).map(([value, label]) => (
+                <option key={value} value={value} className="bg-neutral-900">
+                  {label}
+                </option>
+              ))}
+            </select>
+          </div>
+          {form.audience === "USERS" ? (
+            <div>
+              <label className={LABEL}>
+                Tên tài khoản
+                <span className="ml-2 font-bold normal-case tracking-normal text-neutral-600">
+                  {parseUsernames(form.usernames).length} người · cách nhau bằng dấu phẩy
+                  hoặc xuống dòng
+                </span>
+              </label>
+              <textarea
+                rows={2}
+                value={form.usernames}
+                onChange={(e) => setForm({ ...form, usernames: e.target.value })}
+                placeholder="nguyenvana, tranthib"
+                className={`${FIELD} resize-y`}
+              />
+            </div>
+          ) : (
+            <div className="flex items-end">
+              <p className="pb-2.5 text-[11px] text-neutral-500">
+                Hiện cho tất cả khách vào web, kể cả người chưa đăng nhập.
+              </p>
+            </div>
+          )}
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
@@ -348,7 +456,7 @@ export function AdminAnnouncements({
         <table className="w-full min-w-[860px] text-left">
           <thead>
             <tr className="border-b border-white/10">
-              {["Tiêu đề", "Loại", "Ưu tiên", "Lịch chạy", "Trạng thái", "Thao tác"].map((h) => (
+              {["Tiêu đề", "Gửi cho", "Loại", "Ưu tiên", "Lịch chạy", "Trạng thái", "Thao tác"].map((h) => (
                 <th
                   key={h}
                   className="px-5 py-3.5 text-[10px] font-black uppercase tracking-widest text-neutral-500 whitespace-nowrap"
@@ -361,7 +469,7 @@ export function AdminAnnouncements({
           <tbody>
             {visible.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-5 py-12 text-center text-neutral-400">
+                <td colSpan={7} className="px-5 py-12 text-center text-neutral-400">
                   {announcements.length === 0
                     ? "Chưa có thông báo nào"
                     : "Không có thông báo nào khớp bộ lọc"}
@@ -375,6 +483,18 @@ export function AdminAnnouncements({
                     <p className="mt-1 text-[11px] text-neutral-500 line-clamp-2">
                       {row.body}
                     </p>
+                  </td>
+                  <td className="px-5 py-3 max-w-[200px]">
+                    <p className="text-xs text-neutral-300 whitespace-nowrap">
+                      {row.audience === "ALL"
+                        ? "Tất cả"
+                        : `${row.recipients.length} người`}
+                    </p>
+                    {row.audience === "USERS" ? (
+                      <p className="mt-1 text-[11px] text-neutral-500 truncate">
+                        {row.recipients.join(", ")}
+                      </p>
+                    ) : null}
                   </td>
                   <td className="px-5 py-3 text-xs text-neutral-300 whitespace-nowrap">
                     {TYPE_LABELS[row.type]}

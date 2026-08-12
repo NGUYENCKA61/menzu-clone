@@ -68,6 +68,7 @@ model User {
   tradeRequests TradeRequest[]
   topUps        TopUp[]
   serviceOrders ServiceOrder[]
+  announcements AnnouncementRecipient[]
 
   @@map("users")
 }
@@ -663,6 +664,16 @@ enum AnnouncementStatus {
   DISABLED
 }
 
+/// Who a notice is addressed to.
+///
+/// ALL reaches signed-out visitors too, which is what a maintenance warning
+/// wants. USERS cannot: it is delivered by matching the reader's account
+/// against the recipient rows, and a guest has none.
+enum AnnouncementAudience {
+  ALL
+  USERS
+}
+
 /// One notice shown to visitors in a modal and listed under the header bell.
 ///
 /// `body` is plain text and is rendered as text. Storing rich HTML here would
@@ -676,6 +687,17 @@ model Announcement {
   type     AnnouncementType     @default(INFO)
   priority AnnouncementPriority @default(NORMAL)
   status   AnnouncementStatus   @default(DRAFT)
+  audience AnnouncementAudience @default(ALL)
+
+  /// The "Lưu ý" list under the body. Separate from `body` rather than parsed
+  /// out of it: a convention like "lines starting with a dash are bullets"
+  /// turns a customer's hyphen into markup, and the shop cannot see why.
+  bullets String[]
+
+  /// The callout box at the foot of the notice. Both or neither — a box with
+  /// a heading and no text is a rendering accident, not a notice.
+  noticeTitle String?
+  noticeBody  String?
 
   /// The window. `startAt <= now <= endAt` is the whole activeness test, so
   /// nothing has to run on a schedule to switch a notice on or off at the
@@ -691,7 +713,30 @@ model Announcement {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  recipients AnnouncementRecipient[]
+
   /// Every visitor read filters on exactly these three.
   @@index([status, startAt, endAt])
   @@map("announcements")
+}
+
+/// One person a targeted notice is addressed to.
+///
+/// A join table rather than a list of ids on the announcement: this is what
+/// makes "does this notice belong to the reader" an indexed lookup instead of
+/// loading every targeted notice on the site and filtering in application
+/// code. The composite key also makes naming somebody twice a no-op.
+model AnnouncementRecipient {
+  announcementId String
+  userId         String
+
+  announcement Announcement @relation(fields: [announcementId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@id([announcementId, userId])
+  /// The direction the visitor query travels: given a reader, which notices.
+  @@index([userId])
+  @@map("announcement_recipients")
 }

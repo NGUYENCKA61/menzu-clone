@@ -1,6 +1,6 @@
 "use client";
 
-import { Bell, Megaphone, X } from "lucide-react";
+import { Bell, X } from "lucide-react";
 
 import {
   useCallback,
@@ -13,8 +13,9 @@ import {
 
 import {
   dismissalKey,
+  isSnoozed,
   relativeTime,
-  TYPE_LABELS,
+  SNOOZE_MS,
   type AnnouncementPriority,
   type AnnouncementType,
 } from "@/lib/announcements";
@@ -26,20 +27,19 @@ export interface AnnouncementItem {
   title: string;
   /** Plain text. Rendered as text — see the note on the model. */
   body: string;
+  /** The "Lưu ý" list. Empty when the shop wrote none. */
+  bullets: string[];
+  /** The callout box at the foot. Both or neither. */
+  noticeTitle: string | null;
+  noticeBody: string | null;
   type: AnnouncementType;
   priority: AnnouncementPriority;
   revision: number;
   /** ISO; turned into "5 phút trước" in the browser, where the clock is. */
   startAt: string;
+  /** Formatted on the server, where the timezone is fixed. */
+  updatedLabel: string;
 }
-
-/** Restrained tints — a notice is read, and colour here is a label, not decor. */
-const TYPE_TINT: Record<AnnouncementType, string> = {
-  UPDATE: "border-sky-500/25 bg-sky-500/10 text-sky-300",
-  MAINTENANCE: "border-amber-500/25 bg-amber-500/10 text-amber-300",
-  PROMO: "border-emerald-500/25 bg-emerald-500/10 text-emerald-300",
-  INFO: "border-white/10 bg-white/5 text-neutral-300",
-};
 
 /**
  * What this browser has already closed.
@@ -90,6 +90,67 @@ function writeSeen(keys: Set<string>) {
   for (const notify of seenListeners) notify();
 }
 
+/**
+ * "Not now", per notice, with an expiry.
+ *
+ * Per notice rather than one blanket quiet period: a shop that posts an urgent
+ * maintenance warning while somebody is snoozing a promotion should still
+ * reach them. Kept in its own key so clearing it never disturbs what has
+ * actually been read.
+ */
+const SNOOZE_KEY = "menzu.announcement.snooze";
+
+function readSnoozeRaw(): string {
+  try {
+    return window.localStorage.getItem(SNOOZE_KEY) ?? "";
+  } catch {
+    return "";
+  }
+}
+
+function subscribeSnooze(listener: () => void): () => void {
+  seenListeners.add(listener);
+  const onStorage = (event: StorageEvent) => {
+    if (event.key === SNOOZE_KEY) listener();
+  };
+  window.addEventListener("storage", onStorage);
+  return () => {
+    seenListeners.delete(listener);
+    window.removeEventListener("storage", onStorage);
+  };
+}
+
+function useSnoozes(): Record<string, number> | null {
+  const raw = useSyncExternalStore(subscribeSnooze, readSnoozeRaw, () => null);
+  return useMemo(() => {
+    if (raw === null) return null;
+    try {
+      const parsed = raw ? (JSON.parse(raw) as unknown) : {};
+      return parsed && typeof parsed === "object" && !Array.isArray(parsed)
+        ? (parsed as Record<string, number>)
+        : {};
+    } catch {
+      return {};
+    }
+  }, [raw]);
+}
+
+function writeSnooze(current: Record<string, number>, key: string, until: number) {
+  // Expired entries are dropped on the way past, so this cannot grow without
+  // bound on a shop that posts often.
+  const now = Date.now();
+  const next: Record<string, number> = { [key]: until };
+  for (const [k, v] of Object.entries(current)) {
+    if (typeof v === "number" && v > now) next[k] = v;
+  }
+  try {
+    window.localStorage.setItem(SNOOZE_KEY, JSON.stringify(next));
+  } catch {
+    // The notice simply reappears, which is the harmless direction to fail.
+  }
+  for (const notify of seenListeners) notify();
+}
+
 /** Null until the browser has read the store; the server cannot know this. */
 function useSeen(): Set<string> | null {
   const raw = useSyncExternalStore(subscribeSeen, readSeenRaw, () => null);
@@ -119,6 +180,7 @@ export function AnnouncementCenter({
 }) {
   const now = useClientNow();
   const seen = useSeen();
+  const snoozes = useSnoozes();
   const [openList, setOpenList] = useState(false);
   // What the visitor opened from the list, which outranks the automatic one.
   const [picked, setPicked] = useState<AnnouncementItem | null>(null);
@@ -135,18 +197,45 @@ export function AnnouncementCenter({
     [announcements, seen],
   );
 
+  // Snoozed notices stay unread — they keep their place in the bell and their
+  // dot in the list. All that is held back is the modal opening by itself.
+  const autoTarget = useMemo(() => {
+    if (seen === null || snoozes === null || now === null) return null;
+    return (
+      unread.find(
+        (a) => !isSnoozed(snoozes[dismissalKey(a.id, a.revision)] ?? null, now),
+      ) ?? null
+    );
+  }, [unread, snoozes, seen, now]);
+
   // Derived rather than stored: the first unread notice is showing precisely
   // because it is unread, so closing it — which marks it read — closes it. No
   // effect has to notice and no second copy of the truth can drift from it.
-  const reading = picked ?? (autoDone || seen === null ? null : unread[0] ?? null);
+  const reading = picked ?? (autoDone ? null : autoTarget);
 
-  const dismiss = useCallback((item: AnnouncementItem) => {
-    const next = new Set(seen ?? []);
-    next.add(dismissalKey(item.id, item.revision));
-    writeSeen(next);
-    setPicked(null);
-    setAutoDone(true);
-  }, [seen]);
+  const dismiss = useCallback(
+    (item: AnnouncementItem) => {
+      const next = new Set(seen ?? []);
+      next.add(dismissalKey(item.id, item.revision));
+      writeSeen(next);
+      setPicked(null);
+      setAutoDone(true);
+    },
+    [seen],
+  );
+
+  const snooze = useCallback(
+    (item: AnnouncementItem) => {
+      writeSnooze(
+        snoozes ?? {},
+        dismissalKey(item.id, item.revision),
+        Date.now() + SNOOZE_MS,
+      );
+      setPicked(null);
+      setAutoDone(true);
+    },
+    [snoozes],
+  );
 
   // Clicking away closes the list. Pointerdown rather than click, so it fires
   // before a link inside the list would navigate.
@@ -233,8 +322,8 @@ export function AnnouncementCenter({
       {reading ? (
         <AnnouncementModal
           item={reading}
-          now={now}
           onClose={() => dismiss(reading)}
+          onSnooze={() => snooze(reading)}
         />
       ) : null}
     </>
@@ -242,18 +331,25 @@ export function AnnouncementCenter({
 }
 
 /**
- * The notice itself, built to the same rules as the payment confirmation:
- * three bands separated by hairlines, one action, nothing decorative
- * competing with the words the shop is trying to get read.
+ * The notice itself.
+ *
+ * Three bands separated by hairlines, as the payment confirmation is: a header
+ * naming what this is, the notice, and the two ways out of it. Everything in
+ * the middle band is optional except the body, so a one-line "shop nghỉ Tết"
+ * renders as a short card rather than an outline with empty slots in it.
+ *
+ * The two actions carry different weight because they do not mean the same
+ * thing. Closing settles the notice; snoozing only quiets it, and the label
+ * says for how long rather than leaving the reader to guess.
  */
-function AnnouncementModal({
+export function AnnouncementModal({
   item,
-  now,
   onClose,
+  onSnooze,
 }: {
   item: AnnouncementItem;
-  now: number | null;
   onClose: () => void;
+  onSnooze: () => void;
 }) {
   const panel = useRef<HTMLDivElement>(null);
 
@@ -267,6 +363,8 @@ function AnnouncementModal({
       }
       if (event.key !== "Tab") return;
 
+      // Keep Tab inside the sheet; behind it is the page the reader was on,
+      // and reaching it without seeing it is disorienting.
       const stops = panel.current?.querySelectorAll<HTMLElement>("button");
       if (!stops?.length) return;
       const first = stops[0]!;
@@ -292,7 +390,7 @@ function AnnouncementModal({
 
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/70" onClick={onClose} />
+      <div className="absolute inset-0 bg-black/75" onClick={onClose} />
 
       <div
         ref={panel}
@@ -300,61 +398,95 @@ function AnnouncementModal({
         aria-modal="true"
         aria-labelledby="announcement-title"
         tabIndex={-1}
-        className="relative w-full max-w-[440px] rounded-xl border border-white/10 bg-[#12141c] shadow-2xl outline-none"
+        className="relative flex max-h-[86vh] w-full max-w-[560px] flex-col overflow-hidden rounded-xl border border-white/10 bg-[#0e0e11] shadow-2xl outline-none"
       >
-        <button
-          type="button"
-          onClick={onClose}
-          aria-label="Đóng"
-          className="absolute right-4 top-4 text-neutral-600 hover:text-neutral-300 transition-colors"
-        >
-          <X size={15} />
-        </button>
+        {/* A single accent rule along the top edge — the one piece of colour
+            the frame gets, so the eye lands on the sheet before the words. */}
+        <span aria-hidden className="absolute inset-x-0 top-0 h-px bg-rose-500/70" />
 
-        <header className="flex items-center gap-3 border-b border-white/[0.07] px-5 py-4">
-          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/5 text-neutral-300">
-            <Megaphone size={16} />
+        <header className="flex shrink-0 items-center gap-3 border-b border-white/[0.07] px-5 py-4">
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-rose-500/30 bg-rose-500/10 text-[15px] font-bold leading-none text-rose-400">
+            !
           </span>
-          <h2
-            id="announcement-title"
-            className="text-[14px] font-semibold text-white leading-tight"
-          >
-            Thông báo hệ thống
-          </h2>
-        </header>
-
-        <div className="px-5 py-5">
-          <div className="flex flex-wrap items-center gap-2">
-            <span
-              className={`rounded-md border px-2 py-0.5 text-[11px] font-medium ${TYPE_TINT[item.type]}`}
-            >
-              {TYPE_LABELS[item.type]}
-            </span>
-            <span className="text-[11px] text-neutral-500">
-              {now === null ? "" : relativeTime(new Date(item.startAt), new Date(now))}
-            </span>
-          </div>
-
-          <h3 className="mt-3 text-[15px] font-semibold leading-snug text-white">
-            {item.title}
-          </h3>
-          {/* whitespace-pre-line keeps the shop's line breaks. It is still
-              text: React escapes it, and nothing here renders HTML. */}
-          <p className="mt-2 whitespace-pre-line text-[13px] leading-relaxed text-neutral-300">
-            {item.body}
-          </p>
-        </div>
-
-        <footer className="border-t border-white/[0.07] px-5 py-4">
+          <h2 className="text-[15px] font-semibold text-white">Thông báo hệ thống</h2>
           <button
             type="button"
             onClick={onClose}
-            className="w-full h-10 rounded-lg bg-[var(--brand)] hover:bg-[var(--brand-dark)] text-[13px] font-semibold text-white transition-colors"
+            aria-label="Đóng"
+            className="ml-auto text-neutral-600 transition-colors hover:text-neutral-300"
           >
-            Đã hiểu
+            <X size={16} />
+          </button>
+        </header>
+
+        {/* Scrolls on its own so a long notice never pushes the buttons off
+            the bottom of a laptop screen. */}
+        <div className="min-h-0 flex-1 overflow-y-auto px-6 py-5">
+          <h3
+            id="announcement-title"
+            className="text-[20px] font-bold leading-snug text-white"
+          >
+            {item.title}
+          </h3>
+          <p className="mt-1.5 text-[12px] text-neutral-500">
+            Cập nhật: {item.updatedLabel}
+          </p>
+
+          {/* whitespace-pre-line keeps the shop's line breaks. It is still
+              text: React escapes it, and nothing here renders HTML. */}
+          <p className="mt-4 whitespace-pre-line text-[13.5px] leading-relaxed text-neutral-300">
+            {item.body}
+          </p>
+
+          {item.bullets.length > 0 ? (
+            <>
+              <p className="mt-5 text-[13px] font-semibold text-white">Lưu ý:</p>
+              <ul className="mt-2.5 flex flex-col gap-2">
+                {item.bullets.map((line, index) => (
+                  <li key={index} className="flex gap-2.5">
+                    <span
+                      aria-hidden
+                      className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-rose-500"
+                    />
+                    <span className="text-[13.5px] leading-relaxed text-neutral-300">
+                      {line}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </>
+          ) : null}
+
+          {item.noticeTitle && item.noticeBody ? (
+            // A left rule rather than a full border: it marks the passage as
+            // set apart without drawing a second box inside the sheet.
+            <div className="mt-5 rounded-r-lg border-l-2 border-rose-500 bg-rose-500/[0.06] px-4 py-3">
+              <p className="text-[13px] font-semibold text-rose-400">{item.noticeTitle}</p>
+              <p className="mt-1 whitespace-pre-line text-[13px] leading-relaxed text-neutral-300">
+                {item.noticeBody}
+              </p>
+            </div>
+          ) : null}
+        </div>
+
+        <footer className="flex shrink-0 flex-wrap justify-end gap-2.5 border-t border-white/[0.07] px-5 py-4">
+          <button
+            type="button"
+            onClick={onSnooze}
+            className="h-10 rounded-lg border border-white/10 bg-white/[0.03] px-4 text-[13px] font-medium text-neutral-300 transition-colors hover:bg-white/[0.07] hover:text-white"
+          >
+            Không hiện lại trong 2 giờ
+          </button>
+          <button
+            type="button"
+            onClick={onClose}
+            className="h-10 rounded-lg bg-rose-500 px-6 text-[13px] font-semibold text-white transition-colors hover:bg-rose-600"
+          >
+            Đóng
           </button>
         </footer>
       </div>
     </div>
   );
 }
+

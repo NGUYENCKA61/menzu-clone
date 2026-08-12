@@ -12,25 +12,33 @@ import { SiteHeaderClient } from "./SiteHeaderClient";
  * Pages import this; the interactive parts live in SiteHeaderClient.
  */
 export async function SiteHeader() {
-  const [user, settings, announcements] = await Promise.all([
-    getCurrentUser(),
-    getShopSettings(),
-    currentAnnouncements(),
-  ]);
+  // The reader has to be known before the notices can be: a targeted notice is
+  // fetched by matching their account, so this cannot be one Promise.all.
+  const [user, settings] = await Promise.all([getCurrentUser(), getShopSettings()]);
+  const announcements = await currentAnnouncements(user?.id ?? null);
 
   return (
     <SiteHeaderClient
       brand={{ name: settings.brandName, logo: settings.brandLogo }}
-      // Dates go over as ISO, not formatted: "5 phút trước" has to be measured
-      // against the reader's clock, in the browser.
+      // "5 phút trước" goes over as ISO, because it has to be measured against
+      // the reader's clock; the update date is formatted here, where the
+      // timezone is fixed and the two renders cannot disagree.
       announcements={announcements.map((a) => ({
         id: a.id,
         title: a.title,
         body: a.body,
+        bullets: a.bullets,
+        noticeTitle: a.noticeTitle,
+        noticeBody: a.noticeBody,
         type: a.type,
         priority: a.priority,
         revision: a.revision,
         startAt: a.startAt.toISOString(),
+        updatedLabel: a.updatedAt.toLocaleDateString("vi-VN", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+        }),
       }))}
       user={
         user

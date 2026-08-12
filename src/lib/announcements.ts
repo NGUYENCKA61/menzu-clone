@@ -10,6 +10,7 @@
 export type AnnouncementType = "UPDATE" | "MAINTENANCE" | "PROMO" | "INFO";
 export type AnnouncementPriority = "LOW" | "NORMAL" | "HIGH";
 export type AnnouncementStatus = "DRAFT" | "PUBLISHED" | "DISABLED";
+export type AnnouncementAudience = "ALL" | "USERS";
 
 /** What the shop decided, crossed with where the clock is. */
 export type AnnouncementState =
@@ -76,6 +77,21 @@ const HOUR = 60 * MINUTE;
 const DAY = 24 * HOUR;
 
 /**
+ * How long "Không hiện lại trong 2 giờ" holds a notice back.
+ *
+ * Different from closing it, which settles the notice for good. This is the
+ * answer to "not now": the notice stays unread in the bell and comes back on
+ * its own, which is what a maintenance warning wants and what closing it
+ * would defeat.
+ */
+export const SNOOZE_MS = 2 * HOUR;
+
+/** Whether an earlier "not now" is still holding. */
+export function isSnoozed(until: number | null, now: number): boolean {
+  return until !== null && Number.isFinite(until) && now < until;
+}
+
+/**
  * "5 phút trước" for the bell list.
  *
  * Stops being relative after a week: "37 ngày trước" is arithmetic the reader
@@ -109,6 +125,11 @@ export const PRIORITY_LABELS: Record<AnnouncementPriority, string> = {
   HIGH: "Cao",
 };
 
+export const AUDIENCE_LABELS: Record<AnnouncementAudience, string> = {
+  ALL: "Tất cả mọi người",
+  USERS: "Người dùng cụ thể",
+};
+
 export const STATE_LABELS: Record<AnnouncementState, string> = {
   DRAFT: "Nháp",
   SCHEDULED: "Đã lên lịch",
@@ -136,6 +157,38 @@ export function readStatus(value: unknown): AnnouncementStatus | null {
     : null;
 }
 
+export function readAudience(value: unknown): AnnouncementAudience | null {
+  return value === "ALL" || value === "USERS" ? value : null;
+}
+
+/** Most people a single notice may be addressed to in one go. */
+export const RECIPIENTS_MAX = 500;
+
+/**
+ * Turns whatever an admin pasted into a list of usernames.
+ *
+ * Commas, newlines, semicolons and spaces all separate, because the list is
+ * going to arrive pasted out of a spreadsheet or typed by hand and being
+ * strict about which of those is "correct" only produces a name with a comma
+ * stuck to it. Duplicates collapse and case is preserved — the lookup that
+ * follows decides whether a name exists.
+ */
+export function parseUsernames(input: string): string[] {
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const piece of input.split(/[\s,;]+/)) {
+    const name = piece.trim();
+    if (!name) continue;
+    // Case-insensitively unique, so pasting a name twice in different case
+    // does not look like two recipients in the admin's own count.
+    const key = name.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(name);
+  }
+  return out;
+}
+
 /**
  * A date from a form field, or null.
  *
@@ -153,3 +206,20 @@ export function readDate(value: unknown): Date | null | undefined {
 /** Longest a title and a body may be, so one notice cannot fill the table. */
 export const TITLE_MAX = 120;
 export const BODY_MAX = 2000;
+export const BULLETS_MAX = 12;
+export const BULLET_MAX = 300;
+
+/**
+ * One bullet per line, blanks dropped.
+ *
+ * Newlines only — unlike the recipient list, which is pasted from anywhere.
+ * A bullet is a sentence and sentences contain commas.
+ */
+export function parseBullets(input: string): string[] {
+  return input
+    .split(/\r?\n/)
+    .map((line) => line.replace(/^\s*[-•*]\s*/, "").trim())
+    .filter(Boolean)
+    .slice(0, BULLETS_MAX)
+    .map((line) => line.slice(0, BULLET_MAX));
+}

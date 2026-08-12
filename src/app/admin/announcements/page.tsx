@@ -53,6 +53,11 @@ export default async function AdminAnnouncementsPage() {
           type: row.type,
           priority: row.priority,
           status: row.status,
+          audience: row.audience,
+          recipients: row.recipients,
+          bullets: row.bullets,
+          noticeTitle: row.noticeTitle,
+          noticeBody: row.noticeBody,
           // Derived here rather than in the browser, so a stale tab cannot
           // report a notice as running after its window closed.
           state: announcementState(row, now),

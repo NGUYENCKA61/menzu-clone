@@ -2,13 +2,19 @@ import { describe, expect, it } from "vitest";
 
 import {
   announcementState,
+  BULLETS_MAX,
   dismissalKey,
   isAnnouncementActive,
+  isSnoozed,
+  parseBullets,
+  parseUsernames,
+  readAudience,
   readDate,
   readPriority,
   readStatus,
   readType,
   relativeTime,
+  SNOOZE_MS,
 } from "@/lib/announcements";
 
 const MINUTE = 60 * 1000;
@@ -97,6 +103,72 @@ describe("relativeTime", () => {
   });
 });
 
+describe("parseUsernames", () => {
+  it("accepts whatever separator the admin pasted", () => {
+    // The list arrives out of a spreadsheet or typed by hand, and being strict
+    // about which separator is correct only yields a name with a comma on it.
+    expect(parseUsernames("an, binh; cuong\ndung  em")).toEqual([
+      "an",
+      "binh",
+      "cuong",
+      "dung",
+      "em",
+    ]);
+  });
+
+  it("collapses a name pasted twice", () => {
+    // Including in a different case, or the admin's own count is wrong.
+    expect(parseUsernames("an, AN, An")).toEqual(["an"]);
+  });
+
+  it("is empty for nothing usable", () => {
+    expect(parseUsernames("")).toEqual([]);
+    expect(parseUsernames("  ,  ;  ")).toEqual([]);
+  });
+});
+
+describe("parseBullets", () => {
+  it("takes one bullet per line", () => {
+    expect(parseBullets("dong mot\ndong hai")).toEqual(["dong mot", "dong hai"]);
+  });
+
+  it("keeps commas inside a bullet", () => {
+    // Unlike the recipient list: a bullet is a sentence, and sentences have
+    // commas in them.
+    expect(parseBullets("nhap dung noi dung, khong sua gi")).toEqual([
+      "nhap dung noi dung, khong sua gi",
+    ]);
+  });
+
+  it("strips a marker the admin typed by hand", () => {
+    expect(parseBullets("- mot\n• hai\n* ba")).toEqual(["mot", "hai", "ba"]);
+  });
+
+  it("drops blank lines and caps the list", () => {
+    expect(parseBullets("mot\n\n\nhai")).toEqual(["mot", "hai"]);
+    expect(
+      parseBullets(Array.from({ length: 40 }, (_, i) => `d${i}`).join("\n")),
+    ).toHaveLength(BULLETS_MAX);
+  });
+});
+
+describe("isSnoozed", () => {
+  const at = 1_000_000;
+
+  it("holds until the deadline passes", () => {
+    expect(isSnoozed(at + SNOOZE_MS, at)).toBe(true);
+    expect(isSnoozed(at - 1, at)).toBe(false);
+    expect(isSnoozed(at, at)).toBe(false);
+  });
+
+  it("treats nothing stored as not snoozed", () => {
+    // A notice nobody has snoozed must still be able to open, so a missing or
+    // corrupted entry has to fail towards showing it.
+    expect(isSnoozed(null, at)).toBe(false);
+    expect(isSnoozed(Number.NaN, at)).toBe(false);
+  });
+});
+
 describe("input guards", () => {
   it("refuses anything not in the enum", () => {
     // These reach a Postgres enum column; an admin session is still a session
@@ -110,6 +182,13 @@ describe("input guards", () => {
 
     expect(readStatus("PUBLISHED")).toBe("PUBLISHED");
     expect(readStatus("ACTIVE")).toBeNull();
+  });
+
+  it("refuses an audience it does not know", () => {
+    expect(readAudience("ALL")).toBe("ALL");
+    expect(readAudience("USERS")).toBe("USERS");
+    expect(readAudience("EVERYONE")).toBeNull();
+    expect(readAudience(null)).toBeNull();
   });
 
   it("tells 'not mentioned' apart from 'cleared'", () => {
