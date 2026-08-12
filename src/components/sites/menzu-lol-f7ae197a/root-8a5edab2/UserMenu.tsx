@@ -2,10 +2,12 @@
 
 import {
   ArrowLeftRight,
+  ChevronDown,
   Bell,
   ClipboardList,
   LayoutDashboard,
   LogOut,
+  Shield,
   ShieldCheck,
   ShoppingBag,
   Wallet,
@@ -19,7 +21,21 @@ export interface HeaderUser {
   balance: number;
   avatarUrl: string | null;
   uid?: number;
+  /** "ADMIN" swaps the badge and reveals the admin group in the menu. */
+  role?: string;
 }
+
+/** Admin destinations, mirroring AdminShell's sidebar. */
+const ADMIN_ITEMS: { label: string; href: string }[] = [
+  { label: "Tổng quan hệ thống", href: "/admin" },
+  { label: "Sản phẩm", href: "/admin/products" },
+  { label: "Đơn hàng", href: "/admin/orders" },
+  { label: "Marketing", href: "/admin/marketing" },
+  { label: "Thu cũ đổi mới", href: "/admin/trade" },
+  { label: "Người dùng", href: "/admin/users" },
+  { label: "Bài viết", href: "/admin/docs" },
+  { label: "Vận hành", href: "/admin/operations" },
+];
 
 const ITEMS: { label: string; href: string; icon: LucideIcon }[] = [
   { label: "Tổng quan", href: "/profile", icon: LayoutDashboard },
@@ -43,6 +59,8 @@ export function UserMenu({ user }: { user: HeaderUser }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const wrapper = useRef<HTMLDivElement>(null);
+  const isAdmin = user.role === "ADMIN";
+  const [adminOpen, setAdminOpen] = useState(false);
 
   useEffect(() => {
     if (!open) return;
@@ -102,8 +120,14 @@ export function UserMenu({ user }: { user: HeaderUser }) {
             <div className="p-4 border-b border-white/5 flex flex-col gap-1">
               <div className="flex items-center gap-2">
                 <span className="text-sm font-black text-white">{user.username}</span>
-                <span className="px-1.5 py-0.5 rounded bg-white/10 border border-white/15 text-[9px] font-black uppercase tracking-widest text-neutral-300">
-                  MEMBER
+                <span
+                  className={`px-1.5 py-0.5 rounded text-[9px] font-black uppercase tracking-widest ${
+                    isAdmin
+                      ? "bg-indigo-500/15 border border-indigo-500/40 text-indigo-300"
+                      : "bg-white/10 border border-white/15 text-neutral-300"
+                  }`}
+                >
+                  {isAdmin ? "ADMIN" : "MEMBER"}
                 </span>
               </div>
               {user.uid !== undefined ? (
@@ -120,6 +144,43 @@ export function UserMenu({ user }: { user: HeaderUser }) {
             </div>
 
             <div className="p-2">
+              {/* Admins only. Collapsed by default so the menu stays the same
+                  height it is for everyone else until it is asked for. */}
+              {isAdmin ? (
+                <div className="mb-1 pb-1 border-b border-white/5">
+                  <button
+                    type="button"
+                    onClick={() => setAdminOpen((v) => !v)}
+                    aria-expanded={adminOpen}
+                    className="w-full flex items-center gap-3 py-2.5 px-2 rounded-lg text-indigo-300 hover:text-white hover:bg-indigo-500/10 transition-colors"
+                  >
+                    <Shield size={14} className="shrink-0" />
+                    <span className="text-[11px] font-black uppercase tracking-widest">
+                      Dashboard quản lý
+                    </span>
+                    <ChevronDown
+                      size={13}
+                      className={`ml-auto transition-transform ${adminOpen ? "rotate-180" : ""}`}
+                    />
+                  </button>
+
+                  {adminOpen ? (
+                    <div className="pl-3">
+                      {ADMIN_ITEMS.map(({ label, href }) => (
+                        <a
+                          key={href}
+                          href={href}
+                          className="flex items-center gap-3 py-2 px-2 rounded-lg text-neutral-400 hover:text-white hover:bg-white/5 transition-colors"
+                        >
+                          <span className="w-1 h-1 rounded-full bg-indigo-400/60 shrink-0" />
+                          <span className="text-[11px] font-bold">{label}</span>
+                        </a>
+                      ))}
+                    </div>
+                  ) : null}
+                </div>
+              ) : null}
+
               {ITEMS.map(({ label, href, icon: Icon }) => (
                 <a
                   key={href}

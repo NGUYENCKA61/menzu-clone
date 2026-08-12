@@ -5,6 +5,7 @@ export interface AccountShellProps {
   title: string;
   subtitle: string;
   crumb: string;
+  isAdmin?: boolean;
   children: React.ReactNode;
 }
 
@@ -14,7 +15,7 @@ export interface AccountShellProps {
  * renders through this shell: breadcrumb trail, sidebar nav (desktop only),
  * and a title/subtitle header ahead of the page's own content.
  */
-export function AccountShell({ title, subtitle, crumb, children }: AccountShellProps) {
+export function AccountShell({ title, subtitle, crumb, isAdmin = false, children }: AccountShellProps) {
   return (
     <div className="w-full max-w-[1320px] mx-auto px-4 lg:px-6 py-8 flex flex-col min-h-screen">
       <div className="mb-6">
@@ -22,7 +23,7 @@ export function AccountShell({ title, subtitle, crumb, children }: AccountShellP
       </div>
 
       <div className="flex flex-col lg:flex-row gap-6 items-start">
-        <AccountSidebar />
+        <AccountSidebar isAdmin={isAdmin} />
 
         <div className="flex-1 w-full min-w-0">
           <div className="mb-6">

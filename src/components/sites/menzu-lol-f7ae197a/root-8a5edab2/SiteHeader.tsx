@@ -21,6 +21,7 @@ export async function SiteHeader() {
               balance: user.balance,
               avatarUrl: user.avatarUrl,
               uid: user.uid,
+              role: user.role,
             }
           : null
       }
