@@ -54,6 +54,7 @@ model User {
   linkedAccounts LinkedAccount[]
   orders        Order[]
   transactions  Transaction[]
+  tradeRequests TradeRequest[]
   topUps        TopUp[]
   serviceOrders ServiceOrder[]
 
@@ -69,6 +70,57 @@ model Session {
 
   @@index([userId])
   @@map("sessions")
+}
+
+enum TradeMode {
+  /// "Thanh lý thu tiền" — sell the account for cash.
+  SELL
+  /// "Thu cũ đổi mới" — trade it against another account on the shop.
+  EXCHANGE
+}
+
+enum TradeMailType {
+  /// Original mailbox still attached and handed over.
+  DROP
+  /// Original mailbox lost, but the linked email can still be changed.
+  DEAD
+}
+
+enum TradeStatus {
+  PENDING
+  QUOTED
+  ACCEPTED
+  REJECTED
+  DONE
+}
+
+/// A "Thu cũ đổi mới" request: the visitor offers an account and asks for a
+/// quote, which an admin answers over Zalo.
+///
+/// The quote itself is not modelled as money yet — pricing a second-hand
+/// account is a judgement call the shop makes per request, and inventing a
+/// formula would be worse than leaving the field for a human.
+model TradeRequest {
+  id            String        @id @default(cuid())
+  /// Short public reference the visitor quotes to support.
+  code          String        @unique
+  userId        String
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  mode          TradeMode
+  mailType      TradeMailType
+  hasWelcomeMail Boolean      @default(false)
+  /// Screenshot of the Riot welcome mail, if one was attached.
+  screenshotUrl String?
+  zalo          String
+  note          String?
+  status        TradeStatus   @default(PENDING)
+  /// Filled in by an admin once the account has been valued.
+  quotedAmount  BigInt?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt @default(now())
+
+  @@index([userId, createdAt])
+  @@map("trade_requests")
 }
 
 enum DocCategory {

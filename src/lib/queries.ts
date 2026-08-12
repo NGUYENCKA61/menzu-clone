@@ -489,3 +489,31 @@ export async function getInventory(code: string): Promise<InventoryItem[]> {
   });
   return rows;
 }
+
+export interface TradeRequestRow {
+  code: string;
+  mode: string;
+  mailType: string;
+  status: string;
+  zalo: string;
+  createdAt: Date;
+  quotedAmount: number | null;
+}
+
+/** "Lịch sử giao dịch" on /trade — the visitor's own quote requests. */
+export async function getTradeRequests(userId: string): Promise<TradeRequestRow[]> {
+  const rows = await db.tradeRequest.findMany({
+    where: { userId },
+    orderBy: { createdAt: "desc" },
+    take: 50,
+  });
+  return rows.map((r) => ({
+    code: r.code,
+    mode: r.mode,
+    mailType: r.mailType,
+    status: r.status,
+    zalo: r.zalo,
+    createdAt: r.createdAt,
+    quotedAmount: r.quotedAmount === null ? null : Number(r.quotedAmount),
+  }));
+}
