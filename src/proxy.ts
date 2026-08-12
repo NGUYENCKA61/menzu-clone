@@ -13,6 +13,10 @@ const PROTECTED = [
 const SESSION_COOKIE = "menzu_session";
 
 /**
+ * Runs before routes render — the file convention Next renamed from
+ * `middleware`, because it can be deployed ahead of the app rather than
+ * inside it.
+ *
  * Guards the account area and mirrors the live site's two redirects:
  *
  *   guest  -> /login?next=<path>   (same shape as the real "Mua Ngay" gate)
@@ -23,7 +27,7 @@ const SESSION_COOKIE = "menzu_session";
  * against the database, so a forged cookie gets past the redirect and then
  * fails properly at the data layer.
  */
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
   const hasSession = Boolean(request.cookies.get(SESSION_COOKIE)?.value);
 
