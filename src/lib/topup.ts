@@ -31,16 +31,38 @@ export function extractTopUpCode(description: string): string | null {
 }
 
 /**
- * The first request here still waiting on money, or null.
+ * How long after opening a request the wallet page keeps watching for payment.
  *
- * Drives the wallet page's polling. It used to key off "did this page session
- * create a request", which meant a reload stopped the page watching a request
- * that was still open — the transfer then sat matched but uncredited until
- * somebody else loaded the page. EXPIRED counts: those still credit if the
- * money turns up.
+ * Generous next to the 30-minute expiry, because watching costs the shop
+ * nothing beyond a rate-limited poll and somebody may still be fighting their
+ * banking app. It exists to have an end at all.
  */
-export function firstWaitingTopUp<T extends { status: string }>(rows: T[]): T | null {
-  return rows.find((row) => row.status === "PENDING" || row.status === "EXPIRED") ?? null;
+export const TOPUP_WATCH_MINUTES = 120;
+
+/**
+ * The request the wallet page should watch, or null to stop polling.
+ *
+ * Two bugs shaped this. Keying on "did this page session open a request" meant
+ * a reload stopped the page watching something still unpaid, and the transfer
+ * sat matched but uncredited. Then matching on status alone meant a request
+ * abandoned last week — still sitting in recent history as EXPIRED — had every
+ * later visit to /wallet polling every ten seconds, forever, for money nobody
+ * was ever going to send.
+ *
+ * So: unsettled, and recent. EXPIRED counts while it is recent, because those
+ * still credit if the money turns up.
+ */
+export function watchableTopUpCode(
+  rows: { code: string; status: string; createdAt: Date }[],
+  now: Date = new Date(),
+): string | null {
+  const cutoff = now.getTime() - TOPUP_WATCH_MINUTES * 60 * 1000;
+  const row = rows.find(
+    (r) =>
+      (r.status === "PENDING" || r.status === "EXPIRED") &&
+      r.createdAt.getTime() >= cutoff,
+  );
+  return row?.code ?? null;
 }
 
 /** How many characters follow the "NT" prefix. */

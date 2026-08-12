@@ -6,6 +6,7 @@ import { WalletTopUp } from "@/components/sites/menzu-lol-f7ae197a/shared/Wallet
 import { getTopUps } from "@/lib/queries";
 import { getCurrentUser } from "@/lib/session";
 import { getShopSettings } from "@/lib/settingsStore";
+import { watchableTopUpCode } from "@/lib/topup";
 
 export const metadata: Metadata = { title: "Nạp tiền" };
 export const dynamic = "force-dynamic";
@@ -41,6 +42,9 @@ export default async function WalletPage() {
         bankEnabled={settings.bankTopUpEnabled}
         cardEnabled={settings.cardTopUpEnabled}
         autoEnabled={settings.autoTopUpEnabled}
+        // Decided here, where createdAt is still a real date rather than the
+        // display string the history rows carry.
+        watchCode={watchableTopUpCode(history)}
         // Only what a customer needs to make the transfer. The reconciliation
         // URL stays on the server — it carries the account's token.
         banks={settings.bankAccounts.map((account) => ({

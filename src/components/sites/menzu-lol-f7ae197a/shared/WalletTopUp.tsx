@@ -2,7 +2,6 @@
 
 import { Banknote, CreditCard } from "lucide-react";
 
-import { firstWaitingTopUp } from "@/lib/topup";
 import { useEffect, useState } from "react";
 
 type Method = "bank" | "card";
@@ -58,6 +57,12 @@ export interface WalletTopUpProps {
   banks: BankAccount[];
   /** Whether a matched transfer credits the wallet without an admin. */
   autoEnabled: boolean;
+  /**
+   * Request to poll for, or null when nothing recent is unpaid. Chosen on the
+   * server, where a top-up's timestamp is still a date rather than the display
+   * string these history rows carry.
+   */
+  watchCode: string | null;
 }
 
 export interface BankAccount {
@@ -144,6 +149,7 @@ export function WalletTopUp({
   cardEnabled,
   banks,
   autoEnabled,
+  watchCode,
 }: WalletTopUpProps) {
   // Which account the customer says they will transfer to. It only decides
   // which QR is drawn — reconciliation reads every account, so paying the
@@ -161,13 +167,11 @@ export function WalletTopUp({
   const [copied, setCopied] = useState<string | null>(null);
   const [credited, setCredited] = useState(false);
 
-  // The request this page watches: the one just opened, or failing that the
-  // customer's newest unpaid one. Keying on `done` alone was a bug — somebody
-  // who reloaded had a request the page silently stopped watching, so their
-  // transfer sat matched but uncredited. Watching one specific code, rather
-  // than the shop's overall match count, also means a poll that was rate
-  // limited or that credited somebody else cannot make this page act.
-  const waitingCode = done?.code ?? firstWaitingTopUp(history)?.code ?? null;
+  // The request this page watches: the one just opened, or whatever the server
+  // says is still unpaid and recent. Watching one specific code, rather than
+  // the shop's overall match count, means a poll that was rate limited or that
+  // credited somebody else cannot make this page act.
+  const waitingCode = done?.code ?? watchCode;
 
   /**
    * While the customer has something outstanding, ask the shop to check its

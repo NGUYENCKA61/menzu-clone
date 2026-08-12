@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   extractTopUpCode,
-  firstWaitingTopUp,
+  watchableTopUpCode,
   makeTopUpCode,
   readTransfers,
 } from "@/lib/topup";
@@ -30,26 +30,39 @@ describe("extractTopUpCode", () => {
   });
 });
 
-describe("firstWaitingTopUp", () => {
-  it("picks the request still waiting on money", () => {
-    expect(firstWaitingTopUp([{ status: "PENDING", code: "NTAAAAAA" }])?.code).toBe("NTAAAAAA");
-    // Expired requests still credit, so the page must keep watching them.
-    expect(firstWaitingTopUp([{ status: "EXPIRED", code: "NTBBBBBB" }])?.code).toBe("NTBBBBBB");
+const MINUTE = 60 * 1000;
+const NOW = new Date("2026-08-13T10:00:00Z");
+
+function row(status: string, code: string, minutesAgo: number) {
+  return { status, code, createdAt: new Date(NOW.getTime() - minutesAgo * MINUTE) };
+}
+
+describe("watchableTopUpCode", () => {
+  it("watches a request that is unpaid and recent", () => {
+    expect(watchableTopUpCode([row("PENDING", "NTAAAAAA", 5)], NOW)).toBe("NTAAAAAA");
+    // Expired still credits if the money turns up, so it stays watched.
+    expect(watchableTopUpCode([row("EXPIRED", "NTBBBBBB", 40)], NOW)).toBe("NTBBBBBB");
+  });
+
+  it("stops watching one abandoned long ago", () => {
+    // Left polling every ten seconds forever, on every later visit, for money
+    // nobody was going to send.
+    expect(watchableTopUpCode([row("EXPIRED", "NTOLD001", 7 * 24 * 60)], NOW)).toBeNull();
+    expect(watchableTopUpCode([row("PENDING", "NTOLD002", 5 * 60)], NOW)).toBeNull();
   });
 
   it("skips past everything already settled", () => {
     expect(
-      firstWaitingTopUp([
-        { status: "COMPLETED", code: "NT111111" },
-        { status: "FAILED", code: "NT222222" },
-        { status: "PENDING", code: "NT333333" },
-      ])?.code,
+      watchableTopUpCode(
+        [row("COMPLETED", "NT111111", 1), row("FAILED", "NT222222", 2), row("PENDING", "NT333333", 3)],
+        NOW,
+      ),
     ).toBe("NT333333");
   });
 
-  it("stops once nothing is outstanding", () => {
-    expect(firstWaitingTopUp([])).toBeNull();
-    expect(firstWaitingTopUp([{ status: "COMPLETED", code: "NT111111" }])).toBeNull();
+  it("returns nothing when there is nothing outstanding", () => {
+    expect(watchableTopUpCode([], NOW)).toBeNull();
+    expect(watchableTopUpCode([row("COMPLETED", "NT111111", 1)], NOW)).toBeNull();
   });
 });
 
