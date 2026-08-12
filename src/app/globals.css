@@ -155,6 +155,58 @@
      touches the setting renders exactly as the captured site does. */
   --brand: #7c3aed;
   --brand-dark: #6d28d9;
+
+  /* Scrollbar. Faint enough to disappear while reading, solid enough to grab. */
+  --menzu-scroll-thumb: rgb(255 255 255 / 0.14);
+  --menzu-scroll-thumb-hover: rgb(255 255 255 / 0.26);
+}
+
+/*
+ * Scrollbars, dark to match the page.
+ *
+ * The platform default is a light grey column, which on a #050508 page reads
+ * as a bright stripe glued to the edge. Firefox takes the two-property form;
+ * everything else takes the ::-webkit pseudo-elements, and the two are kept in
+ * step by the same custom properties.
+ *
+ * Deliberately not `overlay` or zero-width: this shop has long catalogue pages
+ * and wide admin tables, and a scrollbar you cannot see is a scrollbar nobody
+ * knows to drag.
+ */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--menzu-scroll-thumb) transparent;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--menzu-scroll-thumb);
+  border-radius: 999px;
+  /* Transparent border plus background-clip insets the thumb, so it reads as a
+     pill floating in the gutter rather than a bar wedged against the edge. */
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--menzu-scroll-thumb-hover);
+}
+
+::-webkit-scrollbar-thumb:active {
+  background-color: var(--brand);
+}
+
+/* Where a horizontal and a vertical bar meet, the default is a grey square. */
+::-webkit-scrollbar-corner {
+  background: transparent;
 }
 
 @keyframes fadeUpIn {
