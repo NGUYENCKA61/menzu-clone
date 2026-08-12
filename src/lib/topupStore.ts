@@ -5,6 +5,31 @@ function makeCode(prefix: string): string {
   return `${prefix}${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
 }
 
+/**
+ * How long a request waits before it stops cluttering the queue.
+ *
+ * Long enough to cover somebody who starts a transfer at night and finishes in
+ * the morning, short enough that the admin screen shows today's work.
+ */
+export const TOPUP_EXPIRY_HOURS = 24;
+
+/**
+ * Retires requests nobody paid.
+ *
+ * Cheap enough to run on every reconciliation pass: one indexed UPDATE that
+ * usually touches no rows. Expiring is only about the queue being readable —
+ * `creditTopUp` still honours an expired request, so a late transfer is not
+ * punished for arriving late.
+ */
+export async function expireStaleTopUps(): Promise<number> {
+  const cutoff = new Date(Date.now() - TOPUP_EXPIRY_HOURS * 60 * 60 * 1000);
+  const result = await db.topUp.updateMany({
+    where: { status: "PENDING", createdAt: { lt: cutoff } },
+    data: { status: "EXPIRED" },
+  });
+  return result.count;
+}
+
 export type CreditResult =
   | { ok: true; code: string; username: string; amount: number; balance: number }
   | { ok: false; reason: "NOT_FOUND" | "ALREADY_HANDLED" | "AMOUNT_MISMATCH"; detail?: string };
@@ -30,7 +55,12 @@ export async function creditTopUp(
     include: { user: { select: { username: true } } },
   });
   if (!topUp) return { ok: false, reason: "NOT_FOUND" };
-  if (topUp.status !== "PENDING") return { ok: false, reason: "ALREADY_HANDLED" };
+  // EXPIRED counts as claimable: the request left the queue because nobody had
+  // paid it yet, not because the shop refused it. A transfer arriving late is
+  // still that customer's money.
+  if (topUp.status !== "PENDING" && topUp.status !== "EXPIRED") {
+    return { ok: false, reason: "ALREADY_HANDLED" };
+  }
 
   if (
     options.expectAmount !== undefined &&
@@ -46,7 +76,7 @@ export async function creditTopUp(
   const balance = await db
     .$transaction(async (tx) => {
       const claimed = await tx.topUp.updateMany({
-        where: { id: topUp.id, status: "PENDING" },
+        where: { id: topUp.id, status: { in: ["PENDING", "EXPIRED"] } },
         data: { status: "COMPLETED" },
       });
       if (claimed.count === 0) throw new Error("ALREADY_HANDLED");

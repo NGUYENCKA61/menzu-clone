@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { extractTopUpCode, readTransfers } from "@/lib/topup";
+import { extractTopUpCode, makeTopUpCode, readTransfers } from "@/lib/topup";
 
 describe("extractTopUpCode", () => {
   it("reads the code out of a clean description", () => {
@@ -22,6 +22,25 @@ describe("extractTopUpCode", () => {
     // "NAP" alone is not a code, and a short tail must not be accepted.
     expect(extractTopUpCode("NAP")).toBeNull();
     expect(extractTopUpCode("NAP NT123")).toBeNull();
+  });
+});
+
+describe("makeTopUpCode", () => {
+  it("mints a code the matcher can read back", () => {
+    // The two halves used to live in different files and nothing tied them
+    // together; a code one character too long is silently truncated and the
+    // transfer looks like it belongs to nobody.
+    for (let i = 0; i < 200; i += 1) {
+      const code = makeTopUpCode();
+      expect(extractTopUpCode(`NAP ${code}`)).toBe(code);
+      expect(extractTopUpCode(`CT DEN:0123 NAP${code}`)).toBe(code);
+      expect(extractTopUpCode(`MBVCB.99.NAP${code}.CT tu 0123`)).toBe(code);
+    }
+  });
+
+  it("mints codes that differ", () => {
+    const codes = new Set(Array.from({ length: 500 }, () => makeTopUpCode()));
+    expect(codes.size).toBeGreaterThan(490);
   });
 });
 

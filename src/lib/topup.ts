@@ -26,8 +26,28 @@ export interface IncomingTransfer {
  */
 export function extractTopUpCode(description: string): string | null {
   if (!description) return null;
-  const match = /NAP\s*(NT[A-Z0-9]{6})/i.exec(description);
+  const match = new RegExp(`NAP\\s*(NT[A-Z0-9]{${CODE_BODY_LENGTH}})`, "i").exec(description);
   return match ? match[1].toUpperCase() : null;
+}
+
+/** How many characters follow the "NT" prefix. */
+const CODE_BODY_LENGTH = 6;
+
+/**
+ * Mints the code that goes in the transfer description.
+ *
+ * Lives next to the matcher on purpose: these two have to agree on the shape
+ * exactly, and when they lived in different files nothing said so. A code one
+ * character too long is silently truncated by the matcher and the transfer
+ * looks like it belongs to nobody.
+ */
+export function makeTopUpCode(): string {
+  const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  let body = "";
+  for (let i = 0; i < CODE_BODY_LENGTH; i += 1) {
+    body += alphabet[Math.floor(Math.random() * alphabet.length)];
+  }
+  return `NT${body}`;
 }
 
 /**

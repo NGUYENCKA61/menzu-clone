@@ -4,10 +4,7 @@ import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/session";
 import { bankReady } from "@/lib/settings";
 import { getShopSettings } from "@/lib/settingsStore";
-
-function makeCode(prefix: string): string {
-  return `${prefix}${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
-}
+import { makeTopUpCode } from "@/lib/topup";
 
 /**
  * Opens a top-up request. It does not add money.
@@ -77,7 +74,7 @@ export async function POST(request: Request) {
   // the code, not by being rationed.
   const topUp = await db.topUp.create({
     data: {
-      code: makeCode("NT"),
+      code: makeTopUpCode(),
       userId: user.id,
       method,
       amount,

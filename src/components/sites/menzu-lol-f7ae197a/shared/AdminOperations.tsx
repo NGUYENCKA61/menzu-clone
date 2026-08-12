@@ -47,6 +47,9 @@ const TOPUP_STATUS: Record<string, { text: string; className: string }> = {
   PENDING: { text: "Chờ xác nhận", className: "border-amber-500/30 bg-amber-500/10 text-amber-400" },
   COMPLETED: { text: "Đã cộng tiền", className: "border-emerald-500/30 bg-emerald-500/10 text-emerald-400" },
   FAILED: { text: "Đã từ chối", className: "border-red-500/30 bg-red-500/10 text-red-400" },
+  // Grey rather than red: nobody did anything wrong, the request simply aged
+  // out of the queue — and it still credits if the money turns up.
+  EXPIRED: { text: "Quá hạn", className: "border-white/10 bg-white/5 text-neutral-500" },
 };
 
 const TAB_ON =

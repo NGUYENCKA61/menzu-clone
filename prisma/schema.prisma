@@ -507,7 +507,12 @@ enum TopUpMethod {
 enum TopUpStatus {
   PENDING
   COMPLETED
+  /// Turned down by an admin.
   FAILED
+  /// Nobody paid it within the window, so it left the queue on its own. Still
+  /// creditable: a customer who transfers a day late is paying, not cheating,
+  /// and the code in their description still identifies the request.
+  EXPIRED
 }
 
 model TopUp {

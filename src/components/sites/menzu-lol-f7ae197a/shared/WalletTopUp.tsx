@@ -126,6 +126,12 @@ const HISTORY_STATUS: Record<string, { text: string; className: string }> = {
     text: "Từ chối",
     className: "border-red-500/30 bg-red-500/10 text-red-400",
   },
+  // Still honoured if the transfer shows up later, so it does not read as a
+  // refusal.
+  EXPIRED: {
+    text: "Quá hạn",
+    className: "border-white/10 bg-white/5 text-neutral-500",
+  },
 };
 
 export function WalletTopUp({

@@ -5,7 +5,7 @@ import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/session";
 import { getShopSettings } from "@/lib/settingsStore";
 import { readTransfers } from "@/lib/topup";
-import { applyTransfers } from "@/lib/topupStore";
+import { applyTransfers, expireStaleTopUps } from "@/lib/topupStore";
 
 function sameSecret(given: string, expected: string): boolean {
   const a = Buffer.from(given);
@@ -43,9 +43,13 @@ async function runSync(request: Request) {
   if (!byKey && !(await getCurrentUser())) {
     return NextResponse.json({ error: "Bạn cần đăng nhập" }, { status: 401 });
   }
+  // Before anything else, and regardless of whether auto is on: a queue full
+  // of week-old requests nobody paid is the thing an admin has to read past.
+  const expired = await expireStaleTopUps();
+
   const feeds = settings.bankAccounts.filter((account) => account.apiUrl);
   if (!settings.autoTopUpEnabled || feeds.length === 0) {
-    return NextResponse.json({ matched: 0, skipped: 0, details: [], polled: false });
+    return NextResponse.json({ matched: 0, skipped: 0, expired, details: [], polled: false });
   }
 
   // Every account is read, not just the one the customer picked: people
@@ -79,6 +83,7 @@ async function runSync(request: Request) {
     polled: true,
     feeds: feeds.length,
     received: transfers.length,
+    expired,
     ...report,
   });
 }

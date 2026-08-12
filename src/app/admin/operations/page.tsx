@@ -5,6 +5,7 @@ import { AdminOperations } from "@/components/sites/menzu-lol-f7ae197a/shared/Ad
 import { AdminShell } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminShell";
 import { getAdmin } from "@/lib/admin";
 import { listFeedback, listServiceOrders, listTopUps } from "@/lib/queries";
+import { expireStaleTopUps } from "@/lib/topupStore";
 
 export const metadata: Metadata = { title: "Vận hành | Quản trị" };
 export const dynamic = "force-dynamic";
@@ -24,6 +25,10 @@ export default async function AdminOperationsPage() {
   // notFound, not a redirect to /login: a 404 does not tell an unauthenticated
   // visitor that an admin area exists here at all.
   if (!admin) notFound();
+
+  // Retire stale requests before reading the list, so opening this screen is
+  // itself enough to keep the queue current on a shop with no scheduler.
+  await expireStaleTopUps();
 
   const [feedback, serviceOrders, topUps] = await Promise.all([
     listFeedback(),
