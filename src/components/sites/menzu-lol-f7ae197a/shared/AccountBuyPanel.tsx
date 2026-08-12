@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { X } from "lucide-react";
@@ -68,7 +69,6 @@ export function AccountBuyPanel({ account }: AccountBuyPanelProps) {
 
   const pct = Math.round((1 - account.price / account.oldPrice) * 100);
 
-  const [altNotice, setAltNotice] = useState<string | null>(null);
   const [balanceState, setBalanceState] = useState<number | null>(null);
   const [buying, setBuying] = useState(false);
   const [buyError, setBuyError] = useState<string | null>(null);
@@ -217,23 +217,12 @@ export function AccountBuyPanel({ account }: AccountBuyPanelProps) {
         </div>
       </div>
 
+      {/* "Cọc / Trả Góp" and "Tiêu trước trả sau" are deliberately absent.
+          Both are credit products whose terms — deposit share, instalment
+          count, interest, credit limit — nobody has decided, and a button that
+          opens nothing is worse than no button. Product.depositFrom stays in
+          the schema so putting them back is a UI change, not a migration. */}
       <div className="flex flex-col gap-3">
-        <button
-          type="button"
-          onClick={() => setAltNotice("Cọc / Góp")}
-          className={`${SECONDARY_BUTTON_CLASS} flex flex-col items-center justify-center gap-0.5`}
-        >
-          <span>Cọc / Trả Góp</span>
-          {/* The live pages only quote a figure on the few accounts that carry
-              one; the rest show the bare label. Printing "từ 0đ" would read as
-              a free deposit rather than as an unset one. */}
-          {account.depositFrom > 0 ? (
-            <span className="text-[10px] normal-case font-medium tracking-normal text-neutral-400">
-              từ {formatVnd(account.depositFrom)}đ
-            </span>
-          ) : null}
-        </button>
-
         <button
           type="button"
           onClick={() => setOpen(true)}
@@ -242,34 +231,14 @@ export function AccountBuyPanel({ account }: AccountBuyPanelProps) {
           Mua Ngay
         </button>
 
-        <button
-          type="button"
-          onClick={() => setAltNotice("Thu cũ đổi mới")}
-          className={SECONDARY_BUTTON_CLASS}
+        {/* A real destination now — /trade takes the request and an admin
+            quotes it, so this no longer needs a "contact us" notice. */}
+        <Link
+          href="/trade"
+          className={`${SECONDARY_BUTTON_CLASS} flex items-center justify-center`}
         >
           Thu cũ đổi mới
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setAltNotice("Tiêu trước trả sau")}
-          className={SECONDARY_BUTTON_CLASS}
-        >
-          Tiêu trước trả sau
-        </button>
-
-        {/* The live site's terms for these three were never captured, and
-            inventing deposit amounts or instalment rules would be inventing
-            financial terms. Say so rather than leaving a dead button. */}
-        {altNotice ? (
-          <p
-            role="status"
-            className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-2.5 text-[12px] font-semibold text-amber-400"
-          >
-            {altNotice}: vui lòng liên hệ Zalo để được tư vấn. Hình thức này chưa
-            hỗ trợ thanh toán trực tiếp trên web.
-          </p>
-        ) : null}
+        </Link>
       </div>
 
       {open && (
