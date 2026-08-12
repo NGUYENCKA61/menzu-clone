@@ -142,10 +142,12 @@ export function TopUpSuccessDialog({
         </div>
 
         <footer className="border-t border-white/[0.07] px-5 py-4">
+          {/* Red on the brand purple sits at about 1.9:1 and cannot be read,
+              so the fill is a tint of the same red the label carries. */}
           <button
             type="button"
             onClick={onClose}
-            className="w-full h-10 rounded-lg bg-[var(--brand)] hover:bg-[var(--brand-dark)] text-[13px] font-semibold text-white transition-colors"
+            className="w-full h-10 rounded-lg border border-red-500/30 bg-red-500/10 hover:bg-red-500/15 text-[13px] font-semibold text-red-400 transition-colors"
           >
             Xong
           </button>
