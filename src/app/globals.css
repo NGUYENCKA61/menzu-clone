@@ -156,9 +156,12 @@
   --brand: #7c3aed;
   --brand-dark: #6d28d9;
 
-  /* Scrollbar. Faint enough to disappear while reading, solid enough to grab. */
-  --menzu-scroll-thumb: rgb(255 255 255 / 0.14);
-  --menzu-scroll-thumb-hover: rgb(255 255 255 / 0.26);
+  /* Scrollbar. Faint enough to disappear while reading, solid enough to grab.
+     One pink, carried through the three states by opacity alone — a thumb that
+     changed hue as you grabbed it would read as a different control. */
+  --menzu-scroll-thumb: rgb(249 168 212 / 0.34);
+  --menzu-scroll-thumb-hover: rgb(249 168 212 / 0.58);
+  --menzu-scroll-thumb-active: rgb(249 168 212 / 0.85);
 }
 
 /*
@@ -201,7 +204,7 @@
 }
 
 ::-webkit-scrollbar-thumb:active {
-  background-color: var(--brand);
+  background-color: var(--menzu-scroll-thumb-active);
 }
 
 /* Where a horizontal and a vertical bar meet, the default is a grey square. */
