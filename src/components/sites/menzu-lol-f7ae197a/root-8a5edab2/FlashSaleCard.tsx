@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { ShoppingCart, Sparkles } from "lucide-react";
 import {
   getAccountImagePath,
@@ -32,8 +33,8 @@ const TIER_LABELS: Record<TierColor, string> = {
 export function FlashSaleCard({ item }: FlashSaleCardProps) {
   return (
     <div className="w-[calc(50%-6px)] sm:w-[calc(50%-12px)] md:w-[calc(33.333%-16px)] lg:w-[calc(33.333%-16px)] xl:w-[calc(25%-18px)] shrink-0 snap-start">
-      <a
-        href="#"
+      <Link
+        href={`/account/${item.code}`}
         className="group relative w-full h-full flex flex-col bg-neutral-900 border rounded-[14px] p-2 transition-[border-color,background-color] duration-200 shadow-md border-neutral-800 hover:border-neutral-700"
       >
         {item.discount !== null && (
@@ -103,7 +104,7 @@ export function FlashSaleCard({ item }: FlashSaleCardProps) {
             </span>
           </div>
         </div>
-      </a>
+      </Link>
     </div>
   );
 }
