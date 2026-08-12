@@ -158,12 +158,14 @@
 
   /* Scrollbar. One pink, carried through the three states by opacity alone —
      a thumb that changed hue as you grabbed it would read as a different
-     control. Deeper than the page wants for a scrollbar, on purpose: over a
-     near-black gutter a pale pink turns to grey, and the whole point of
-     colouring it was to be able to see it. */
-  --menzu-scroll-thumb: rgb(236 72 153 / 0.62);
-  --menzu-scroll-thumb-hover: rgb(236 72 153 / 0.84);
-  --menzu-scroll-thumb-active: rgb(236 72 153 / 1);
+     control.
+     The pale pink, kept nearly opaque. Over a near-black gutter a light tint
+     loses its hue before it loses its brightness, so thinning this one to make
+     it discreet is what turned it grey the first time. Brightness comes from
+     the alpha here, not from a heavier colour. */
+  --menzu-scroll-thumb: rgb(249 168 212 / 0.86);
+  --menzu-scroll-thumb-hover: rgb(249 168 212 / 0.95);
+  --menzu-scroll-thumb-active: rgb(249 168 212 / 1);
 }
 
 /*
