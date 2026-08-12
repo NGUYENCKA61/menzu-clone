@@ -1,12 +1,11 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import {
   Ban,
   ChevronDown,
   KeyRound,
-  Search,
   Shield,
   ShieldCheck,
   Trash2,
@@ -41,8 +40,6 @@ type Pending =
   | { kind: "delete"; user: AdminUserView }
   | { kind: "password"; user: AdminUserView }
   | null;
-
-const FILTERS = ["Tất cả", "Đang hoạt động", "Đã khóa", "Quản trị"] as const;
 
 const TIERS = ["BRONZE", "SILVER", "GOLD", "PLATINUM", "DIAMOND"] as const;
 
@@ -80,14 +77,15 @@ function Stat({ label, value }: { label: string; value: string }) {
 export function AdminUsers({
   users,
   selfUsername,
+  emptyNote,
 }: {
   users: AdminUserView[];
   /** The signed-in admin. The server refuses every action on their own row. */
   selfUsername: string;
+  /** What to say when the page is empty — filtered out, or genuinely none. */
+  emptyNote: string;
 }) {
   const router = useRouter();
-  const [query, setQuery] = useState("");
-  const [filter, setFilter] = useState<(typeof FILTERS)[number]>("Tất cả");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [confirming, setConfirming] = useState<Pending>(null);
@@ -100,18 +98,10 @@ export function AdminUsers({
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const visible = useMemo(() => {
-    const needle = query.trim().toLowerCase();
-    return users.filter((user) => {
-      if (filter === "Đã khóa" && !user.blockedAt) return false;
-      if (filter === "Đang hoạt động" && user.blockedAt) return false;
-      if (filter === "Quản trị" && user.role !== "ADMIN") return false;
-      if (!needle) return true;
-      return [user.username, user.email ?? "", String(user.uid)].some((value) =>
-        value.toLowerCase().includes(needle),
-      );
-    });
-  }, [users, query, filter]);
+  // Searching and filtering moved to the server. Doing it here meant looking
+  // through one page of customers and reporting "not found" for somebody who
+  // was on page three — which is the exact case a customer lookup is for.
+  const visible = users;
 
   function toggle(user: AdminUserView) {
     if (open === user.username) {
@@ -209,41 +199,10 @@ export function AdminUsers({
 
   return (
     <div className="flex flex-col gap-5">
-      <div className="flex flex-col sm:flex-row gap-3">
-        <div className="relative flex-1">
-          <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-500" />
-          <input
-            type="search"
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            placeholder="Tìm tên đăng nhập, email hoặc UID..."
-            aria-label="Tìm người dùng"
-            className="w-full rounded-xl border border-white/5 bg-[#111111] pl-11 pr-4 py-2.5 text-sm text-white outline-none focus:border-[var(--brand)]/60 transition-colors placeholder-neutral-600"
-          />
-        </div>
-        <div className="flex gap-1.5 overflow-x-auto">
-          {FILTERS.map((option) => (
-            <button
-              key={option}
-              type="button"
-              onClick={() => setFilter(option)}
-              aria-pressed={filter === option}
-              className={`shrink-0 px-3 py-2 rounded-lg text-[10px] font-black uppercase tracking-wider border transition-colors ${
-                filter === option
-                  ? "border-[var(--brand)] bg-[var(--brand)]/15 text-white"
-                  : "border-white/10 bg-white/[0.02] text-neutral-400 hover:text-white"
-              }`}
-            >
-              {option}
-            </button>
-          ))}
-        </div>
-      </div>
-
       {error ? <AdminError message={error} onRetry={() => setError(null)} /> : null}
 
       {visible.length === 0 ? (
-        <AdminEmpty title="Không có người dùng nào khớp" />
+        <AdminEmpty title={emptyNote} />
       ) : (
         <div className="flex flex-col gap-2">
           {visible.map((user) => {
@@ -311,7 +270,7 @@ export function AdminUsers({
                     disabled={busy || isSelf}
                     title={isSelf ? "Không thể tự đổi quyền của mình" : undefined}
                     onClick={() => setConfirming({ kind: "role", user })}
-                    className="h-8 px-3 rounded-lg border border-indigo-500/30 bg-indigo-500/10 hover:bg-indigo-500/20 disabled:opacity-40 disabled:hover:bg-indigo-500/10 text-[10px] font-black uppercase tracking-widest text-indigo-400 transition-colors inline-flex items-center gap-1.5"
+                    className="h-8 px-3 rounded-lg border border-rose-500/30 bg-rose-500/10 hover:bg-rose-500/20 disabled:opacity-40 disabled:hover:bg-rose-500/10 text-[10px] font-black uppercase tracking-widest text-rose-400 transition-colors inline-flex items-center gap-1.5"
                   >
                     <Shield size={12} />
                     {user.role === "ADMIN" ? "Thu hồi admin" : "Cấp admin"}

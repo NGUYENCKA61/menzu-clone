@@ -6,6 +6,11 @@
  * to be checked without a database.
  */
 
+import { PER_PAGE } from "@/lib/paging";
+
+/** Orders shown per page. */
+export const ORDERS_PER_PAGE = PER_PAGE;
+
 export const ORDER_STATUSES = ["PAID", "PENDING", "CANCELLED", "REFUNDED"] as const;
 export const ORDER_METHODS = ["BUY_NOW", "DEPOSIT", "TRADE_IN", "PAY_LATER"] as const;
 
@@ -83,42 +88,6 @@ export function csvCell(value: unknown): string {
 /** Rows to CSV, header first. */
 export function toCsv(headers: string[], rows: unknown[][]): string {
   return [headers, ...rows].map((row) => row.map(csvCell).join(",")).join("\r\n");
-}
-
-/** Orders shown per page. */
-export const ORDERS_PER_PAGE = 20;
-
-/** Reads `?page=`, clamped to something that exists. */
-export function parsePage(raw: string | undefined, totalPages: number): number {
-  const n = Number(raw ?? 1);
-  if (!Number.isFinite(n)) return 1;
-  return Math.min(Math.max(1, Math.floor(n)), Math.max(1, totalPages));
-}
-
-/**
- * Which page numbers to draw, centred on the current one.
- *
- * A shop with sixty pages cannot have sixty buttons, and dropping to "‹ ›"
- * alone costs the admin the ability to jump. This keeps a fixed-width window
- * that slides, and stays anchored at either end rather than shrinking there.
- */
-export function pageWindow(current: number, totalPages: number, span = 5): number[] {
-  const total = Math.max(1, totalPages);
-  const size = Math.min(span, total);
-  let start = current - Math.floor(size / 2);
-  start = Math.max(1, Math.min(start, total - size + 1));
-  return Array.from({ length: size }, (_, i) => start + i);
-}
-
-/** "Hiển thị 1–20 / 356 đơn hàng" — the numbers, not the sentence. */
-export function pageRange(
-  page: number,
-  perPage: number,
-  matching: number,
-): { from: number; to: number } {
-  if (matching === 0) return { from: 0, to: 0 };
-  const from = (page - 1) * perPage + 1;
-  return { from, to: Math.min(page * perPage, matching) };
 }
 
 /**

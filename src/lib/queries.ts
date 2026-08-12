@@ -1,5 +1,7 @@
 import "server-only";
 
+import type { Prisma } from "@prisma/client";
+
 import { db } from "@/lib/db";
 import type { AccountDetail } from "@/components/sites/menzu-lol-f7ae197a/shared/AccountBuyPanel";
 import type {
@@ -731,10 +733,14 @@ export interface AdminUserRow {
  * every order — a customer with hundreds of purchases would otherwise pull
  * all of them across just to produce two numbers.
  */
-export async function listUsers(take = 200): Promise<AdminUserRow[]> {
+export async function listUsers(
+  options: { where?: Prisma.UserWhereInput; skip?: number; take?: number } = {},
+): Promise<AdminUserRow[]> {
   const users = await db.user.findMany({
+    where: options.where,
     orderBy: { createdAt: "desc" },
-    take,
+    skip: options.skip,
+    take: options.take ?? 200,
     include: {
       _count: { select: { orders: true } },
       orders: {

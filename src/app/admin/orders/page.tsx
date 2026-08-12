@@ -12,13 +12,11 @@ import {
   ORDER_METHOD_LABELS,
   ORDER_STATUS_LABELS,
   ORDERS_PER_PAGE,
-  pageRange,
-  pageWindow,
   parseOrderFilters,
-  parsePage,
   type OrderMethod,
   type OrderStatus,
 } from "@/lib/orders";
+import { pageCount, pageRange, pageWindow, parsePage } from "@/lib/paging";
 import { orderWhere } from "@/lib/orderStore";
 
 export const metadata: Metadata = { title: "Menzu Admin | Đơn hàng" };
@@ -53,7 +51,7 @@ export default async function AdminOrdersPage({
   // something that exists: ?page=999 on a three-page list should land on the
   // last page, not on an empty table that reads as "no orders".
   const matching = await db.order.count({ where });
-  const totalPages = Math.max(1, Math.ceil(matching / ORDERS_PER_PAGE));
+  const totalPages = pageCount(matching, ORDERS_PER_PAGE);
   const page = parsePage(typeof raw.page === "string" ? raw.page : undefined, totalPages);
   const range = pageRange(page, ORDERS_PER_PAGE, matching);
 
@@ -223,7 +221,7 @@ export default async function AdminOrdersPage({
               ‹
             </PageLink>
 
-            {pageWindow(page, totalPages).map((n) => (
+            {pageWindow(page, totalPages).map((n: number) => (
               <PageLink key={n} href={pageHref(n)} current={n === page} label={`Trang ${n}`}>
                 {n}
               </PageLink>

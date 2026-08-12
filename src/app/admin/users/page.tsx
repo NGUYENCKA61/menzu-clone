@@ -1,10 +1,16 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { AdminShell } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminShell";
+import { AdminUserFilters } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminUserFilters";
 import { AdminUsers } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminUsers";
 import { getAdmin } from "@/lib/admin";
+import { db } from "@/lib/db";
+import { pageCount, pageRange, pageWindow, parsePage } from "@/lib/paging";
 import { listUsers } from "@/lib/queries";
+import { hasUserFilters, parseUserFilters, USERS_PER_PAGE } from "@/lib/users";
+import { userWhere } from "@/lib/userStore";
 
 export const metadata: Metadata = { title: "Người dùng | Quản trị" };
 export const dynamic = "force-dynamic";
@@ -30,22 +36,74 @@ function formatDateTime(date: Date | null): string | null {
   });
 }
 
-export default async function AdminUsersPage() {
+export default async function AdminUsersPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const admin = await getAdmin();
   // notFound, not a redirect to /login: a 404 does not tell an unauthenticated
   // visitor that an admin area exists here at all.
   if (!admin) notFound();
 
-  const users = await listUsers();
+  const raw = await searchParams;
+  const pick = (key: string) => (typeof raw[key] === "string" ? raw[key] : undefined);
+  const filters = parseUserFilters({
+    q: pick("q"),
+    role: pick("role"),
+    state: pick("state"),
+    tier: pick("tier"),
+  });
+  const where = userWhere(filters);
+  const filtered = hasUserFilters(filters);
+
+  // Counted first, because the page number has to be clamped against something
+  // that exists: ?page=99 on a two-page list should land on the last page, not
+  // on an empty table that reads as "no customers".
+  const matching = await db.user.count({ where });
+  const totalPages = pageCount(matching, USERS_PER_PAGE);
+  const page = parsePage(pick("page"), totalPages);
+  const range = pageRange(page, USERS_PER_PAGE, matching);
+
+  const users = await listUsers({
+    where,
+    skip: (page - 1) * USERS_PER_PAGE,
+    take: USERS_PER_PAGE,
+  });
+
+  /** A link to another page, carrying whatever filters are on. */
+  function pageHref(target: number): string {
+    const next = new URLSearchParams();
+    if (filters.q) next.set("q", filters.q);
+    if (filters.role) next.set("role", filters.role);
+    if (filters.state) next.set("state", filters.state);
+    if (filters.tier) next.set("tier", filters.tier);
+    if (target > 1) next.set("page", String(target));
+    const query = next.toString();
+    return query ? `/admin/users?${query}` : "/admin/users";
+  }
 
   return (
     <AdminShell
       title="Người dùng"
       subtitle="Tra cứu khách hàng, lịch sử mua và khóa tài khoản"
       username={admin.username}
+      aside={
+        <span className="text-[13px] text-neutral-500 tabular-nums">
+          {matching.toLocaleString("vi-VN")} người dùng
+          {filtered ? " khớp bộ lọc" : ""}
+        </span>
+      }
     >
+      <div className="mb-5">
+        <AdminUserFilters filters={filters} />
+      </div>
+
       <AdminUsers
         selfUsername={admin.username}
+        emptyNote={
+          filtered ? "Không có người dùng nào khớp bộ lọc" : "Chưa có người dùng nào"
+        }
         // Dates formatted here, where the timezone is fixed — doing it in the
         // client component would render differently on each side and React
         // would report the mismatch as a hydration error.
@@ -68,6 +126,79 @@ export default async function AdminUsersPage() {
           createdAt: formatDate(user.createdAt) ?? "",
         }))}
       />
+
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-4">
+        <p className="text-[12px] text-neutral-500 tabular-nums">
+          {matching === 0
+            ? "Không có người dùng nào"
+            : `Hiển thị ${range.from}–${range.to} / ${matching.toLocaleString("vi-VN")} người dùng`}
+        </p>
+
+        {totalPages > 1 ? (
+          <nav aria-label="Phân trang người dùng" className="flex items-center gap-1.5">
+            <PageLink href={pageHref(page - 1)} disabled={page === 1} label="Trang trước">
+              ‹
+            </PageLink>
+            {pageWindow(page, totalPages).map((n) => (
+              <PageLink key={n} href={pageHref(n)} current={n === page} label={`Trang ${n}`}>
+                {n}
+              </PageLink>
+            ))}
+            <PageLink
+              href={pageHref(page + 1)}
+              disabled={page === totalPages}
+              label="Trang sau"
+            >
+              ›
+            </PageLink>
+          </nav>
+        ) : null}
+      </div>
     </AdminShell>
+  );
+}
+
+function PageLink({
+  href,
+  children,
+  label,
+  current = false,
+  disabled = false,
+}: {
+  href: string;
+  children: React.ReactNode;
+  label: string;
+  current?: boolean;
+  disabled?: boolean;
+}) {
+  const shape =
+    "flex h-8 min-w-8 items-center justify-center rounded-lg border px-2 text-[12px] font-semibold transition-colors";
+
+  // Rendered as a span rather than a disabled link, so the arrow at either end
+  // is not something a keyboard can tab onto and press to no effect.
+  if (disabled) {
+    return (
+      <span
+        aria-hidden
+        className={`${shape} border-white/[0.06] text-neutral-700 cursor-default`}
+      >
+        {children}
+      </span>
+    );
+  }
+
+  return (
+    <Link
+      href={href}
+      aria-label={label}
+      aria-current={current ? "page" : undefined}
+      className={`${shape} ${
+        current
+          ? "border-rose-500/60 bg-rose-500/15 text-rose-400"
+          : "border-white/[0.08] bg-white/[0.03] text-neutral-300 hover:bg-white/[0.08] hover:text-white"
+      }`}
+    >
+      {children}
+    </Link>
   );
 }

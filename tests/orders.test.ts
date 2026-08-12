@@ -4,13 +4,11 @@ import {
   csvCell,
   exportFilename,
   hasOrderFilters,
-  pageRange,
-  pageWindow,
   parseOrderFilters,
-  parsePage,
   QUERY_MAX,
   toCsv,
 } from "@/lib/orders";
+import { pageRange, pageWindow, parsePage } from "@/lib/paging";
 import { dayRangeVn } from "@/lib/time";
 
 describe("parseOrderFilters", () => {
