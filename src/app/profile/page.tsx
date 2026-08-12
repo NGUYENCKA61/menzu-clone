@@ -79,6 +79,20 @@ export default async function ProfilePage() {
                   <span className="text-sm font-bold text-neutral-400 ml-1">{s.unit}</span>
                 ) : null}
               </span>
+
+              {/* The live tile carries a redeem button. What a point is worth
+                  is a rule the shop sets and none exists here yet, so the
+                  control is present but disabled rather than opening a dialog
+                  that would have to invent an exchange rate. */}
+              {s.label === "Điểm thưởng" ? (
+                <span
+                  aria-disabled="true"
+                  title="Chưa mở đổi điểm"
+                  className="mt-1 self-start h-8 px-3 rounded-lg border border-white/10 bg-white/[0.03] text-[10px] font-black uppercase tracking-widest text-neutral-500 inline-flex items-center cursor-not-allowed"
+                >
+                  Đổi điểm
+                </span>
+              ) : null}
             </div>
           ))}
         </div>
