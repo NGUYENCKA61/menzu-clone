@@ -13,7 +13,8 @@ export const USERS_PER_PAGE = PER_PAGE;
 
 export const USER_ROLES = ["ADMIN", "MEMBER"] as const;
 export const USER_STATES = ["ACTIVE", "BLOCKED"] as const;
-export const USER_TIERS = ["BRONZE", "SILVER", "GOLD", "DIAMOND"] as const;
+/** Every value of MemberTier, in the order the schema declares them. */
+export const USER_TIERS = ["BRONZE", "SILVER", "GOLD", "PLATINUM", "DIAMOND"] as const;
 
 export type UserRole = (typeof USER_ROLES)[number];
 export type UserState = (typeof USER_STATES)[number];
@@ -33,6 +34,7 @@ export const USER_TIER_LABELS: Record<UserTier, string> = {
   BRONZE: "Đồng",
   SILVER: "Bạc",
   GOLD: "Vàng",
+  PLATINUM: "Bạch kim",
   DIAMOND: "Kim cương",
 };
 

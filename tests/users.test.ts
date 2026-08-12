@@ -20,11 +20,21 @@ describe("parseUserFilters", () => {
     const filters = parseUserFilters({
       role: "SUPERADMIN",
       state: "DELETED",
-      tier: "PLATINUM",
+      tier: "MYTHIC",
     });
     expect(filters.role).toBeNull();
     expect(filters.state).toBeNull();
     expect(filters.tier).toBeNull();
+  });
+
+  it("accepts every tier the schema declares", () => {
+    // This test previously asserted PLATINUM was invalid, which is how the
+    // filter came to be missing it: MemberTier has five values and the list
+    // had four, so a shop's platinum customers could not be filtered for and
+    // their tier rendered as the raw enum name.
+    for (const tier of ["BRONZE", "SILVER", "GOLD", "PLATINUM", "DIAMOND"]) {
+      expect(parseUserFilters({ tier }).tier).toBe(tier);
+    }
   });
 
   it("caps the search term", () => {
