@@ -47,10 +47,10 @@ const FILTERS = ["Tất cả", "Đang hoạt động", "Đã khóa", "Quản tr�
 const TIERS = ["BRONZE", "SILVER", "GOLD", "PLATINUM", "DIAMOND"] as const;
 
 const FIELD =
-  "w-full rounded-lg border border-white/10 bg-neutral-950/60 px-3 py-2 text-xs text-white outline-none focus:border-[#7C3AED]/60 transition-colors placeholder-neutral-600";
+  "w-full rounded-lg border border-white/10 bg-neutral-950/60 px-3 py-2 text-xs text-white outline-none focus:border-[var(--brand)]/60 transition-colors placeholder-neutral-600";
 const LABEL = "block text-[10px] font-black uppercase tracking-widest text-neutral-500 mb-1.5";
 const ACTION =
-  "h-[34px] px-4 rounded-lg bg-[#7C3AED] hover:bg-[#6D28D9] disabled:opacity-60 text-[10px] font-black uppercase tracking-widest text-white transition-colors";
+  "h-[34px] px-4 rounded-lg bg-[var(--brand)] hover:bg-[var(--brand-dark)] disabled:opacity-60 text-[10px] font-black uppercase tracking-widest text-white transition-colors";
 
 function formatVnd(n: number): string {
   return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
@@ -218,7 +218,7 @@ export function AdminUsers({
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Tìm tên đăng nhập, email hoặc UID..."
             aria-label="Tìm người dùng"
-            className="w-full rounded-xl border border-white/5 bg-[#111111] pl-11 pr-4 py-2.5 text-sm text-white outline-none focus:border-[#7C3AED]/60 transition-colors placeholder-neutral-600"
+            className="w-full rounded-xl border border-white/5 bg-[#111111] pl-11 pr-4 py-2.5 text-sm text-white outline-none focus:border-[var(--brand)]/60 transition-colors placeholder-neutral-600"
           />
         </div>
         <div className="flex gap-1.5 overflow-x-auto">
@@ -230,7 +230,7 @@ export function AdminUsers({
               aria-pressed={filter === option}
               className={`shrink-0 px-3 py-2 rounded-lg text-[10px] font-black uppercase tracking-wider border transition-colors ${
                 filter === option
-                  ? "border-[#7C3AED] bg-[#7C3AED]/15 text-white"
+                  ? "border-[var(--brand)] bg-[var(--brand)]/15 text-white"
                   : "border-white/10 bg-white/[0.02] text-neutral-400 hover:text-white"
               }`}
             >
@@ -303,7 +303,7 @@ export function AdminUsers({
                       size={12}
                       className={`transition-transform ${expanded ? "rotate-180" : ""}`}
                     />
-                    {expanded ? "Đóng" : "Chi tiết"}
+                    {expanded ? "Đóng" : "Chỉnh thông tin"}
                   </button>
 
                   <button
@@ -347,14 +347,14 @@ export function AdminUsers({
                 {expanded ? (
                   <div className="flex flex-col gap-5 pt-4 border-t border-white/5">
                     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-4">
+                      <Stat label="Tài khoản" value={user.username} />
                       <Stat label="UID" value={String(user.uid)} />
-                      <Stat label="Ngày tạo" value={user.createdAt} />
+                      <Stat label="Ngày tham gia" value={user.createdAt} />
                       <Stat label="Hạng" value={user.tier} />
                       <Stat label="Điểm thưởng" value={`${user.points} Pts`} />
                       <Stat label="Số dư" value={`${formatVnd(user.balance)}đ`} />
                       <Stat label="Tổng đã nạp" value={`${formatVnd(user.totalToppedUp)}đ`} />
                       <Stat label="Tổng đã mua" value={`${formatVnd(user.totalSpent)}đ`} />
-                      <Stat label="Số đơn" value={String(user.orderCount)} />
                     </div>
 
                     <div className="rounded-xl border border-white/5 bg-neutral-950/40 px-4 py-3">

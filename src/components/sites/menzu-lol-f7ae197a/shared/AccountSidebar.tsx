@@ -30,7 +30,7 @@ const NAV_ITEMS: AccountNavItem[] = [
 // Tailwind can't see dynamically-composed class names, so the link's active
 // and inactive states are always emitted as complete literal strings.
 const LINK_ACTIVE =
-  "flex items-center gap-3 py-2.5 px-3 rounded-lg text-sm font-bold transition-colors bg-[#7C3AED]/15 text-[#a78bfa]";
+  "flex items-center gap-3 py-2.5 px-3 rounded-lg text-sm font-bold transition-colors bg-[var(--brand)]/15 text-[#a78bfa]";
 const LINK_INACTIVE =
   "flex items-center gap-3 py-2.5 px-3 rounded-lg text-sm font-bold transition-colors text-neutral-300 hover:text-white hover:bg-white/5";
 

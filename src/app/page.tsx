@@ -14,17 +14,87 @@ import { TransactionTicker } from "@/components/sites/menzu-lol-f7ae197a/root-8a
 import { formatVnd } from "@/components/sites/menzu-lol-f7ae197a/shared/productData";
 import { getFeedback, getFlashSaleItems, getRecentPurchases } from "@/lib/queries";
 import { JsonLd, organizationJsonLd } from "@/lib/seo";
+import { visibleBlocks } from "@/lib/settings";
+import { getShopSettings } from "@/lib/settingsStore";
 import { UtilitiesHub } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/UtilitiesHub";
 
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
+  const settings = await getShopSettings();
   const [flashSaleItems, reviews, recentPurchases] = await Promise.all([
     getFlashSaleItems(),
     getFeedback(),
     getRecentPurchases(),
   ]);
-  const rows = await getHomeRows();
+  const rows = await getHomeRows({
+    valorantSlugs: settings.homeValorantSlugs,
+    tftSlugs: settings.homeTftSlugs,
+  });
+
+  // Each block is built once and picked out by id below, so the order on the
+  // page is the order the admin arranged and nothing renders twice.
+  const blocks: Record<string, React.ReactNode> = {
+    hero: <HeroBanners key="hero" banner={settings.heroBanner} />,
+    quick: <QuickActionsBar key="quick" />,
+    flash: <FlashSaleSection key="flash" items={flashSaleItems} />,
+    featured: <FeaturedCategories key="featured" />,
+    valorant: (
+      <ProductRow
+        key="valorant"
+        heading="SẢN PHẨM NỔI BẬT"
+        cards={rows.featured}
+        viewAllHref="/categories"
+        className="mb-12"
+      />
+    ),
+    tft: (
+      <ProductRow
+        key="tft"
+        heading="ĐẤU TRƯỜNG CHÂN LÝ"
+        cards={rows.tft}
+        viewAllHref="/categories"
+      />
+    ),
+    gameServices: (
+      <ProductRow
+        key="gameServices"
+        heading="Dịch Vụ Game"
+        cards={rows.gameServices}
+        viewAllHref="/services"
+      />
+    ),
+    otherServices: (
+      <ProductRow
+        key="otherServices"
+        heading="Dịch Vụ Khác"
+        cards={rows.otherServices}
+        viewAllHref="/services"
+      />
+    ),
+    reviews: (
+      <ReviewsSection
+        key="reviews"
+        reviews={reviews.map((r) => ({
+          name: r.name,
+          date: r.createdAt.toLocaleDateString("vi-VN"),
+          body: r.body,
+          amount: formatVnd(r.amount) + "đ",
+          avatar: r.avatarUrl ?? "",
+        }))}
+      />
+    ),
+    // Falls back to the captured sample until real purchases exist — an empty
+    // strip would look broken, and seeding fake orders would put invented rows
+    // in the ledger.
+    ticker: (
+      <TransactionTicker
+        key="ticker"
+        entries={recentPurchases.length > 0 ? recentPurchases : undefined}
+      />
+    ),
+    utilities: <UtilitiesHub key="utilities" />,
+  };
 
   return (
     <div className="min-h-screen flex flex-col text-white overflow-x-clip selection:bg-indigo-500/30 transition-colors duration-300">
@@ -38,45 +108,7 @@ export default async function Home() {
           <PageBackdrop />
           <div className="w-full max-w-[1320px] mx-auto px-4 lg:px-6 py-6 lg:py-10 space-y-12">
             <div className="w-full flex flex-col space-y-6 sm:space-y-12">
-              <HeroBanners />
-              <QuickActionsBar />
-              <FlashSaleSection items={flashSaleItems} />
-              <FeaturedCategories />
-              <ProductRow
-                heading="SẢN PHẨM NỔI BẬT"
-                cards={rows.featured}
-                viewAllHref="/categories"
-                className="mb-12"
-              />
-              <ProductRow
-                heading="ĐẤU TRƯỜNG CHÂN LÝ"
-                cards={rows.tft}
-                viewAllHref="/categories"
-              />
-              <ProductRow
-                heading="Dịch Vụ Game"
-                cards={rows.gameServices}
-                viewAllHref="/services"
-              />
-              <ProductRow
-                heading="Dịch Vụ Khác"
-                cards={rows.otherServices}
-                viewAllHref="/services"
-              />
-              <ReviewsSection reviews={reviews.map((r) => ({
-                name: r.name,
-                date: r.createdAt.toLocaleDateString("vi-VN"),
-                body: r.body,
-                amount: formatVnd(r.amount) + "đ",
-                avatar: r.avatarUrl ?? "",
-              }))} />
-              {/* Falls back to the captured sample until real purchases exist — an
-                  empty strip would look broken, and seeding fake orders would put
-                  invented rows in the ledger. */}
-              <TransactionTicker
-                entries={recentPurchases.length > 0 ? recentPurchases : undefined}
-              />
-              <UtilitiesHub />
+              {visibleBlocks(settings).map((id) => blocks[id])}
             </div>
           </div>
         </div>

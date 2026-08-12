@@ -1,6 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
 
+import { getShopSettings } from "@/lib/settingsStore";
+
 const IMG = "/sites/menzu-lol-f7ae197a/root-8a5edab2/images/site";
 
 interface PaymentChip {
@@ -105,13 +107,28 @@ function ZaloGlyph() {
 
 const SOCIALS = [FacebookGlyph, YoutubeGlyph, MessengerGlyph, ZaloGlyph];
 
-function SocialIcons() {
+export interface FooterContact {
+  zalo: string;
+  facebook: string;
+  hotline: string;
+}
+
+/**
+ * The capture ships these as inert "#" links. A shop that fills in Cấu hình →
+ * Nhận diện gets real destinations; anything left blank stays inert rather
+ * than pointing somewhere invented.
+ */
+function SocialIcons({ contact }: { contact: FooterContact }) {
+  const zalo = contact.zalo ? `https://zalo.me/${contact.zalo.replace(/\D/g, "")}` : "#";
+  const hrefs = [contact.facebook || "#", "#", contact.facebook || "#", zalo];
+
   return (
     <div className="flex items-center gap-4">
       {SOCIALS.map((Glyph, i) => (
         <a
           key={i}
-          href="#"
+          href={hrefs[i]}
+          {...(hrefs[i] !== "#" ? { target: "_blank", rel: "noopener noreferrer" } : {})}
           className="block select-none hover:opacity-80 transition-opacity text-neutral-300"
         >
           <Glyph />
@@ -123,7 +140,19 @@ function SocialIcons() {
 
 const SOCIAL_LABEL = "THEO DÕI & KẾT NỐI";
 
-export function SiteFooter() {
+/**
+ * Reads the shop identity itself rather than taking props: a dozen pages
+ * render this footer, and threading the same two values through all of them
+ * would be churn with no reader.
+ */
+export async function SiteFooter() {
+  const settings = await getShopSettings();
+  const brandName = settings.brandName;
+  const contact: FooterContact = {
+    zalo: settings.contactZalo,
+    facebook: settings.contactFacebook,
+    hotline: settings.contactHotline,
+  };
   return (
     <footer className="relative z-10 w-full bg-[#050508] border-t border-white/10 mt-auto">
       <div className="max-w-[1320px] mx-auto px-4 lg:px-6 pt-12 pb-28 sm:py-12 flex flex-col">
@@ -152,7 +181,7 @@ export function SiteFooter() {
             <span className="text-[10px] text-neutral-400 font-bold uppercase tracking-widest select-none">
               {SOCIAL_LABEL}
             </span>
-            <SocialIcons />
+            <SocialIcons contact={contact} />
           </div>
         </div>
 
@@ -183,7 +212,7 @@ export function SiteFooter() {
               <span className="text-[10px] text-neutral-400 font-bold uppercase tracking-widest select-none">
                 {SOCIAL_LABEL}
               </span>
-              <SocialIcons />
+              <SocialIcons contact={contact} />
             </div>
 
             <Link
@@ -219,7 +248,7 @@ export function SiteFooter() {
             className="hidden md:block w-7 h-7 object-contain"
           />
           <div className="flex flex-col md:flex-row items-center gap-1.5 md:gap-2 text-[10px] sm:text-xs font-bold uppercase tracking-widest">
-            <span className="text-neutral-400">© 2026 MENZU VALORANT</span>
+            <span className="text-neutral-400">© 2026 {brandName.toUpperCase()}</span>
             <span className="mx-2 text-white/10 select-none">•</span>
             <span className="text-neutral-400/70">ALL RIGHTS RESERVED</span>
             <span className="hidden md:inline mx-2 text-white/10 select-none">•</span>

@@ -2,15 +2,27 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { ArrowDown, ArrowUp } from "lucide-react";
 
-import type { ShopSettings } from "@/lib/settings";
+import { HOME_BLOCKS, type ShopSettings } from "@/lib/settings";
 import { AdminError } from "./AdminStates";
 
 const FIELD =
-  "w-full rounded-lg border border-white/10 bg-neutral-950/60 px-3 py-2 text-xs text-white outline-none focus:border-[#7C3AED]/60 transition-colors placeholder-neutral-600";
+  "w-full rounded-lg border border-white/10 bg-neutral-950/60 px-3 py-2 text-xs text-white outline-none focus:border-[var(--brand)]/60 transition-colors placeholder-neutral-600";
 const LABEL = "block text-[10px] font-black uppercase tracking-widest text-neutral-500 mb-1.5";
 const CARD = "rounded-2xl border border-white/10 bg-neutral-900/50 p-5 flex flex-col gap-4";
 const HEADING = "text-[10px] font-black uppercase tracking-widest text-neutral-500";
+const HINT = "mt-1.5 text-[11px] text-neutral-500";
+const ICON_BUTTON =
+  "h-7 w-7 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-white/5 text-neutral-300 transition-colors inline-flex items-center justify-center";
+
+const TABS = ["Bán hàng & nạp tiền", "Nhận diện", "Bố cục trang chủ"] as const;
+type Tab = (typeof TABS)[number];
+
+export interface SettingsCategory {
+  slug: string;
+  name: string;
+}
 
 function formatVnd(n: number): string {
   return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
@@ -26,7 +38,7 @@ function Toggle({
   checked: boolean;
   onChange: (next: boolean) => void;
   label: string;
-  hint: string;
+  hint?: string;
 }) {
   return (
     <label className="flex items-start gap-3 cursor-pointer">
@@ -34,25 +46,35 @@ function Toggle({
         type="checkbox"
         checked={checked}
         onChange={(event) => onChange(event.target.checked)}
-        className="mt-0.5 h-4 w-4 shrink-0 accent-[#7C3AED]"
+        className="mt-0.5 h-4 w-4 shrink-0 accent-[var(--brand)]"
       />
       <span>
         <span className="block text-xs font-bold text-white">{label}</span>
-        <span className="block text-[11px] text-neutral-500 mt-0.5">{hint}</span>
+        {hint ? (
+          <span className="block text-[11px] text-neutral-500 mt-0.5">{hint}</span>
+        ) : null}
       </span>
     </label>
   );
 }
 
 /**
- * Shop configuration.
+ * Shop configuration: what it sells for, what it looks like, and what the home
+ * page shows.
  *
- * Everything on this screen was a constant in the source until now, so each
- * field says what it actually moves on the storefront — a number here with no
- * stated effect is a number nobody will dare change.
+ * Everything here was a constant in the source until now, so each field says
+ * what it actually moves on the storefront — a value with no stated effect is
+ * a value nobody will dare change.
  */
-export function AdminSettings({ settings }: { settings: ShopSettings }) {
+export function AdminSettings({
+  settings,
+  categories,
+}: {
+  settings: ShopSettings;
+  categories: SettingsCategory[];
+}) {
   const router = useRouter();
+  const [tab, setTab] = useState<Tab>(TABS[0]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
@@ -63,6 +85,36 @@ export function AdminSettings({ settings }: { settings: ShopSettings }) {
   const [card, setCard] = useState(settings.cardTopUpEnabled);
   const [purchases, setPurchases] = useState(settings.purchasesEnabled);
   const [closedMessage, setClosedMessage] = useState(settings.closedMessage);
+
+  const [brandName, setBrandName] = useState(settings.brandName);
+  const [brandLogo, setBrandLogo] = useState(settings.brandLogo);
+  const [brandColor, setBrandColor] = useState(settings.brandColor);
+  const [heroBanner, setHeroBanner] = useState(settings.heroBanner);
+  const [zalo, setZalo] = useState(settings.contactZalo);
+  const [facebook, setFacebook] = useState(settings.contactFacebook);
+  const [hotline, setHotline] = useState(settings.contactHotline);
+
+  const [blocks, setBlocks] = useState(settings.homeBlocks);
+  const [valorantSlugs, setValorantSlugs] = useState(settings.homeValorantSlugs);
+  const [tftSlugs, setTftSlugs] = useState(settings.homeTftSlugs);
+
+  function moveBlock(index: number, delta: number) {
+    const next = [...blocks];
+    const target = index + delta;
+    if (target < 0 || target >= next.length) return;
+    [next[index], next[target]] = [next[target], next[index]];
+    setBlocks(next);
+  }
+
+  function toggleBlock(index: number) {
+    const next = [...blocks];
+    next[index] = next[index].startsWith("-") ? next[index].slice(1) : `-${next[index]}`;
+    setBlocks(next);
+  }
+
+  function toggleSlug(list: string[], set: (next: string[]) => void, slug: string) {
+    set(list.includes(slug) ? list.filter((s) => s !== slug) : [...list, slug]);
+  }
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
@@ -84,6 +136,16 @@ export function AdminSettings({ settings }: { settings: ShopSettings }) {
           cardTopUpEnabled: card,
           purchasesEnabled: purchases,
           closedMessage,
+          brandName,
+          brandLogo,
+          brandColor,
+          heroBanner,
+          contactZalo: zalo,
+          contactFacebook: facebook,
+          contactHotline: hotline,
+          homeBlocks: blocks,
+          homeValorantSlugs: valorantSlugs,
+          homeTftSlugs: tftSlugs,
         }),
       });
       const data = (await response.json().catch(() => ({}))) as {
@@ -108,92 +170,347 @@ export function AdminSettings({ settings }: { settings: ShopSettings }) {
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-5 max-w-[820px]">
-      <section className={CARD}>
-        <span className={HEADING}>Nạp tiền</span>
+      <div className="flex flex-wrap gap-1.5">
+        {TABS.map((option) => (
+          <button
+            key={option}
+            type="button"
+            onClick={() => setTab(option)}
+            aria-pressed={tab === option}
+            className={`px-3 py-2 rounded-lg text-[10px] font-black uppercase tracking-wider border transition-colors ${
+              tab === option
+                ? "border-[var(--brand)] bg-[var(--brand)]/15 text-white"
+                : "border-white/10 bg-white/[0.02] text-neutral-400 hover:text-white"
+            }`}
+          >
+            {option}
+          </button>
+        ))}
+      </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div>
-            <label htmlFor="topup-min" className={LABEL}>
-              Nạp tối thiểu (đ)
-            </label>
-            <input
-              id="topup-min"
-              inputMode="numeric"
-              value={topUpMin}
-              onChange={(event) => setTopUpMin(event.target.value)}
-              className={`${FIELD} tabular-nums`}
+      {tab === "Bán hàng & nạp tiền" ? (
+        <>
+          <section className={CARD}>
+            <span className={HEADING}>Nạp tiền</span>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label htmlFor="topup-min" className={LABEL}>
+                  Nạp tối thiểu (đ)
+                </label>
+                <input
+                  id="topup-min"
+                  inputMode="numeric"
+                  value={topUpMin}
+                  onChange={(event) => setTopUpMin(event.target.value)}
+                  className={`${FIELD} tabular-nums`}
+                />
+                <p className={HINT}>
+                  Hiện tại: nạp từ {formatVnd(Number(topUpMin.replace(/\D/g, "")) || 0)}đ trở
+                  lên. Máy chủ từ chối mọi hóa đơn thấp hơn mức này.
+                </p>
+              </div>
+              <div>
+                <label htmlFor="topup-presets" className={LABEL}>
+                  Mệnh giá gợi ý
+                </label>
+                <input
+                  id="topup-presets"
+                  value={presets}
+                  onChange={(event) => setPresets(event.target.value)}
+                  placeholder="50000, 200000, 500000"
+                  className={`${FIELD} tabular-nums`}
+                />
+                <p className={HINT}>
+                  Các nút số tiền ở trang Nạp thẻ, cách nhau bằng dấu phẩy. Mệnh giá thấp
+                  hơn mức tối thiểu sẽ bị từ chối khi lưu.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-3 pt-1">
+              <Toggle
+                checked={bank}
+                onChange={setBank}
+                label="Nhận nạp qua ngân hàng"
+                hint="Tắt sẽ ẩn tab Ngân Hàng và máy chủ từ chối hóa đơn loại này."
+              />
+              <Toggle
+                checked={card}
+                onChange={setCard}
+                label="Nhận nạp bằng thẻ cào"
+                hint="Tắt sẽ ẩn tab Thẻ Cào cùng danh sách nhà mạng."
+              />
+              {!bank && !card ? (
+                <p className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-2.5 text-[11px] font-semibold text-amber-400">
+                  Tắt cả hai nghĩa là khách không nạp được tiền vào ví bằng cách nào —
+                  trang Nạp thẻ sẽ chỉ còn thông báo tạm ngưng.
+                </p>
+              ) : null}
+            </div>
+          </section>
+
+          <section className={CARD}>
+            <span className={HEADING}>Bán hàng</span>
+
+            <Toggle
+              checked={purchases}
+              onChange={setPurchases}
+              label="Cho phép mua tài khoản"
+              hint="Tắt khi cần tạm dừng bán: nút mua vẫn hiện nhưng máy chủ từ chối, nên không ai bị trừ tiền giữa chừng."
             />
-            <p className="mt-1.5 text-[11px] text-neutral-500">
-              Hiện tại: nạp từ {formatVnd(Number(topUpMin.replace(/\D/g, "")) || 0)}đ trở
-              lên. Máy chủ từ chối mọi hóa đơn thấp hơn mức này.
+
+            <div>
+              <label htmlFor="closed-message" className={LABEL}>
+                Thông báo khi tạm dừng bán
+              </label>
+              <input
+                id="closed-message"
+                value={closedMessage}
+                onChange={(event) => setClosedMessage(event.target.value)}
+                className={FIELD}
+              />
+              <p className={HINT}>
+                Câu này hiện ra ngay chỗ khách bấm mua. Nói rõ khi nào bán lại thì khách
+                còn quay lại, còn im lặng thì khách nghĩ shop hỏng.
+              </p>
+            </div>
+          </section>
+        </>
+      ) : null}
+
+      {tab === "Nhận diện" ? (
+        <>
+          <section className={CARD}>
+            <span className={HEADING}>Tên và hình ảnh</span>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label htmlFor="brand-name" className={LABEL}>
+                  Tên shop
+                </label>
+                <input
+                  id="brand-name"
+                  value={brandName}
+                  onChange={(event) => setBrandName(event.target.value)}
+                  className={FIELD}
+                />
+                <p className={HINT}>
+                  Hiện ở logo góc trái, chân trang và tiêu đề tab trình duyệt. Từ đầu
+                  tiên là dòng chữ lớn, phần còn lại là dòng nhỏ màu đỏ bên dưới.
+                </p>
+              </div>
+              <div>
+                <label htmlFor="brand-color" className={LABEL}>
+                  Màu chủ đạo
+                </label>
+                <div className="flex items-center gap-2">
+                  <input
+                    id="brand-color"
+                    value={brandColor}
+                    onChange={(event) => setBrandColor(event.target.value)}
+                    placeholder="#7C3AED"
+                    className={`${FIELD} font-mono uppercase`}
+                  />
+                  <input
+                    type="color"
+                    aria-label="Chọn màu chủ đạo"
+                    value={/^#[0-9a-fA-F]{6}$/.test(brandColor) ? brandColor : "#7C3AED"}
+                    onChange={(event) => setBrandColor(event.target.value.toUpperCase())}
+                    className="h-9 w-10 shrink-0 rounded-lg border border-white/10 bg-neutral-950/60 cursor-pointer"
+                  />
+                </div>
+                <p className={HINT}>
+                  Màu của mọi nút bấm, viền đang chọn và nhãn nổi bật trên toàn site.
+                  Sắc đậm hơn khi rê chuột được tính tự động từ màu này.
+                </p>
+              </div>
+            </div>
+
+            <div>
+              <label htmlFor="brand-logo" className={LABEL}>
+                Logo
+              </label>
+              <input
+                id="brand-logo"
+                value={brandLogo}
+                onChange={(event) => setBrandLogo(event.target.value)}
+                className={`${FIELD} font-mono`}
+              />
+              <p className={HINT}>
+                Đường dẫn ảnh, bắt đầu bằng / nếu nằm trong thư mục public. Dùng cho
+                logo header, chân trang và icon khi khách thêm shop vào màn hình chính.
+              </p>
+            </div>
+
+            <div>
+              <label htmlFor="hero-banner" className={LABEL}>
+                Ảnh banner đầu trang
+              </label>
+              <input
+                id="hero-banner"
+                value={heroBanner}
+                onChange={(event) => setHeroBanner(event.target.value)}
+                className={`${FIELD} font-mono`}
+              />
+              <p className={HINT}>
+                Ảnh lớn trên cùng trang chủ, cũng là ảnh hiện ra khi ai đó chia sẻ link
+                shop lên Facebook hay Zalo.
+              </p>
+            </div>
+          </section>
+
+          <section className={CARD}>
+            <span className={HEADING}>Liên hệ ở chân trang</span>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div>
+                <label htmlFor="contact-zalo" className={LABEL}>
+                  Số Zalo
+                </label>
+                <input
+                  id="contact-zalo"
+                  value={zalo}
+                  onChange={(event) => setZalo(event.target.value)}
+                  placeholder="0900000000"
+                  className={FIELD}
+                />
+              </div>
+              <div>
+                <label htmlFor="contact-facebook" className={LABEL}>
+                  Link Facebook
+                </label>
+                <input
+                  id="contact-facebook"
+                  value={facebook}
+                  onChange={(event) => setFacebook(event.target.value)}
+                  placeholder="https://facebook.com/..."
+                  className={FIELD}
+                />
+              </div>
+              <div>
+                <label htmlFor="contact-hotline" className={LABEL}>
+                  Hotline
+                </label>
+                <input
+                  id="contact-hotline"
+                  value={hotline}
+                  onChange={(event) => setHotline(event.target.value)}
+                  placeholder="1900 xxxx"
+                  className={FIELD}
+                />
+              </div>
+            </div>
+
+            <p className={HINT}>
+              Để trống thì icon ở chân trang vẫn hiện nhưng không dẫn đi đâu — giống hệt
+              bản gốc. Điền vào thì icon Facebook và Zalo mở đúng địa chỉ của shop.
             </p>
-          </div>
-          <div>
-            <label htmlFor="topup-presets" className={LABEL}>
-              Mệnh giá gợi ý
-            </label>
-            <input
-              id="topup-presets"
-              value={presets}
-              onChange={(event) => setPresets(event.target.value)}
-              placeholder="50000, 200000, 500000"
-              className={`${FIELD} tabular-nums`}
-            />
-            <p className="mt-1.5 text-[11px] text-neutral-500">
-              Các nút số tiền ở trang Nạp thẻ, cách nhau bằng dấu phẩy. Mệnh giá thấp
-              hơn mức tối thiểu sẽ bị từ chối khi lưu.
+          </section>
+        </>
+      ) : null}
+
+      {tab === "Bố cục trang chủ" ? (
+        <>
+          <section className={CARD}>
+            <span className={HEADING}>Các khối trên trang chủ</span>
+            <p className="text-[11px] text-neutral-500">
+              Bỏ tick để ẩn một khối, mũi tên để đổi thứ tự. Trang chủ hiển thị đúng
+              theo thứ tự trong danh sách này.
             </p>
-          </div>
-        </div>
 
-        <div className="flex flex-col gap-3 pt-1">
-          <Toggle
-            checked={bank}
-            onChange={setBank}
-            label="Nhận nạp qua ngân hàng"
-            hint="Tắt sẽ ẩn tab Ngân Hàng và máy chủ từ chối hóa đơn loại này."
-          />
-          <Toggle
-            checked={card}
-            onChange={setCard}
-            label="Nhận nạp bằng thẻ cào"
-            hint="Tắt sẽ ẩn tab Thẻ Cào cùng danh sách nhà mạng."
-          />
-          {!bank && !card ? (
-            <p className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-2.5 text-[11px] font-semibold text-amber-400">
-              Tắt cả hai nghĩa là khách không nạp được tiền vào ví bằng cách nào —
-              trang Nạp thẻ sẽ chỉ còn thông báo tạm ngưng.
+            <div className="flex flex-col gap-1.5">
+              {blocks.map((entry, index) => {
+                const id = entry.replace(/^-/, "");
+                const enabled = !entry.startsWith("-");
+                const label = HOME_BLOCKS.find((b) => b.id === id)?.label ?? id;
+
+                return (
+                  <div
+                    key={id}
+                    className="flex items-center gap-3 rounded-xl border border-white/5 bg-neutral-950/40 px-3 py-2"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={enabled}
+                      onChange={() => toggleBlock(index)}
+                      aria-label={`Hiện khối ${label}`}
+                      className="h-4 w-4 shrink-0 accent-[var(--brand)]"
+                    />
+                    <span
+                      className={`flex-1 text-xs font-bold ${
+                        enabled ? "text-white" : "text-neutral-600 line-through"
+                      }`}
+                    >
+                      {label}
+                    </span>
+                    <span className="text-[10px] font-black uppercase tracking-widest text-neutral-600">
+                      {index + 1}
+                    </span>
+                    <button
+                      type="button"
+                      disabled={index === 0}
+                      onClick={() => moveBlock(index, -1)}
+                      aria-label={`Đưa ${label} lên trên`}
+                      className={ICON_BUTTON}
+                    >
+                      <ArrowUp size={12} />
+                    </button>
+                    <button
+                      type="button"
+                      disabled={index === blocks.length - 1}
+                      onClick={() => moveBlock(index, 1)}
+                      aria-label={`Đưa ${label} xuống dưới`}
+                      className={ICON_BUTTON}
+                    >
+                      <ArrowDown size={12} />
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+
+          <section className={CARD}>
+            <span className={HEADING}>Danh mục trong từng hàng</span>
+            <p className="text-[11px] text-neutral-500">
+              Chọn danh mục nào xuất hiện ở hai hàng thẻ trên trang chủ. Bỏ chọn hết thì
+              hàng đó biến mất.
             </p>
-          ) : null}
-        </div>
-      </section>
 
-      <section className={CARD}>
-        <span className={HEADING}>Bán hàng</span>
-
-        <Toggle
-          checked={purchases}
-          onChange={setPurchases}
-          label="Cho phép mua tài khoản"
-          hint="Tắt khi cần tạm dừng bán: nút mua vẫn hiện nhưng máy chủ từ chối, nên không ai bị trừ tiền giữa chừng."
-        />
-
-        <div>
-          <label htmlFor="closed-message" className={LABEL}>
-            Thông báo khi tạm dừng bán
-          </label>
-          <input
-            id="closed-message"
-            value={closedMessage}
-            onChange={(event) => setClosedMessage(event.target.value)}
-            className={FIELD}
-          />
-          <p className="mt-1.5 text-[11px] text-neutral-500">
-            Câu này hiện ra ngay chỗ khách bấm mua. Nói rõ khi nào bán lại thì khách
-            còn quay lại, còn im lặng thì khách nghĩ shop hỏng.
-          </p>
-        </div>
-      </section>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              <div>
+                <span className={LABEL}>Hàng &ldquo;Sản phẩm nổi bật&rdquo;</span>
+                <div className="flex flex-col gap-1.5">
+                  {categories.map((category) => (
+                    <Toggle
+                      key={`v-${category.slug}`}
+                      checked={valorantSlugs.includes(category.slug)}
+                      onChange={() =>
+                        toggleSlug(valorantSlugs, setValorantSlugs, category.slug)
+                      }
+                      label={category.name}
+                    />
+                  ))}
+                </div>
+              </div>
+              <div>
+                <span className={LABEL}>Hàng &ldquo;Đấu trường chân lý&rdquo;</span>
+                <div className="flex flex-col gap-1.5">
+                  {categories.map((category) => (
+                    <Toggle
+                      key={`t-${category.slug}`}
+                      checked={tftSlugs.includes(category.slug)}
+                      onChange={() => toggleSlug(tftSlugs, setTftSlugs, category.slug)}
+                      label={category.name}
+                    />
+                  ))}
+                </div>
+              </div>
+            </div>
+          </section>
+        </>
+      ) : null}
 
       {error ? <AdminError message={error} onRetry={() => setError(null)} /> : null}
 
@@ -206,13 +523,18 @@ export function AdminSettings({ settings }: { settings: ShopSettings }) {
         </p>
       ) : null}
 
-      <button
-        type="submit"
-        disabled={busy}
-        className="self-start h-10 px-5 rounded-xl bg-[#7C3AED] hover:bg-[#6D28D9] disabled:opacity-60 transition-colors text-[11px] font-black uppercase tracking-widest text-white"
-      >
-        {busy ? "Đang lưu…" : "Lưu cấu hình"}
-      </button>
+      <div className="flex flex-wrap items-center gap-3">
+        <button
+          type="submit"
+          disabled={busy}
+          className="h-10 px-5 rounded-xl bg-[var(--brand)] hover:bg-[var(--brand-dark)] disabled:opacity-60 transition-colors text-[11px] font-black uppercase tracking-widest text-white"
+        >
+          {busy ? "Đang lưu…" : "Lưu cấu hình"}
+        </button>
+        <span className="text-[11px] text-neutral-500">
+          Lưu cả ba thẻ cùng lúc, kể cả thẻ bạn chưa mở.
+        </span>
+      </div>
     </form>
   );
 }

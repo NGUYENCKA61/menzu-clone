@@ -17,7 +17,7 @@ export interface AdminCategoryView {
 }
 
 const FIELD =
-  "w-full rounded-lg border border-white/10 bg-neutral-950/60 px-3 py-2 text-xs text-white outline-none focus:border-[#7C3AED]/60 transition-colors placeholder-neutral-600";
+  "w-full rounded-lg border border-white/10 bg-neutral-950/60 px-3 py-2 text-xs text-white outline-none focus:border-[var(--brand)]/60 transition-colors placeholder-neutral-600";
 const LABEL = "block text-[10px] font-black uppercase tracking-widest text-neutral-500 mb-1.5";
 const ICON_BUTTON =
   "h-8 w-8 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-white/5 text-neutral-300 transition-colors inline-flex items-center justify-center";
@@ -172,7 +172,7 @@ export function AdminCategories({ categories }: { categories: AdminCategoryView[
         <button
           type="submit"
           disabled={busy || !newName.trim()}
-          className="self-start h-10 px-5 rounded-xl bg-[#7C3AED] hover:bg-[#6D28D9] disabled:opacity-50 transition-colors text-[11px] font-black uppercase tracking-widest text-white"
+          className="self-start h-10 px-5 rounded-xl bg-[var(--brand)] hover:bg-[var(--brand-dark)] disabled:opacity-50 transition-colors text-[11px] font-black uppercase tracking-widest text-white"
         >
           {busy ? "Đang xử lý…" : "Thêm danh mục"}
         </button>
@@ -348,7 +348,7 @@ export function AdminCategories({ categories }: { categories: AdminCategoryView[
                       type="button"
                       disabled={busy || !draft.name.trim() || !draft.slug.trim()}
                       onClick={() => handleSave(category)}
-                      className="self-start h-[34px] px-4 rounded-lg bg-[#7C3AED] hover:bg-[#6D28D9] disabled:opacity-50 text-[10px] font-black uppercase tracking-widest text-white transition-colors"
+                      className="self-start h-[34px] px-4 rounded-lg bg-[var(--brand)] hover:bg-[var(--brand-dark)] disabled:opacity-50 text-[10px] font-black uppercase tracking-widest text-white transition-colors"
                     >
                       Lưu thay đổi
                     </button>

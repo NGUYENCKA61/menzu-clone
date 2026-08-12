@@ -33,7 +33,7 @@ export default function CartPage() {
 
         <Link
           href="/categories"
-          className="mt-6 inline-flex items-center gap-2 h-10 px-5 rounded-xl bg-[#7C3AED] hover:bg-[#6D28D9] transition-colors text-[11px] font-black uppercase tracking-widest text-white"
+          className="mt-6 inline-flex items-center gap-2 h-10 px-5 rounded-xl bg-[var(--brand)] hover:bg-[var(--brand-dark)] transition-colors text-[11px] font-black uppercase tracking-widest text-white"
         >
           Quay lại cửa hàng
           <ArrowRight size={14} />

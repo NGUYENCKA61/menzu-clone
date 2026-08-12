@@ -2,11 +2,13 @@ import { describe, expect, it } from "vitest";
 
 import {
   DEFAULT_SETTINGS,
+  HOME_BLOCKS,
   SETTING_KEYS,
   normalizeSettings,
   parseSettings,
   serializeSettings,
   validateSettings,
+  visibleBlocks,
   type ShopSettings,
 } from "@/lib/settings";
 
@@ -132,5 +134,76 @@ describe("validateSettings", () => {
     expect(
       validateSettings(settings({ bankTopUpEnabled: false, cardTopUpEnabled: false })),
     ).toBeNull();
+  });
+
+  it("rejects a brand colour that is not a plain hex", () => {
+    // It is written straight into a CSS custom property, so anything else
+    // either does nothing or smuggles CSS into the page.
+    for (const bad of ["red", "#FFF", "#12345", "var(--x)", "#7C3AED; }"]) {
+      expect(validateSettings(settings({ brandColor: bad }))).toMatch(/Màu chủ đạo/);
+    }
+    expect(validateSettings(settings({ brandColor: "#00ff88" }))).toBeNull();
+  });
+
+  it("rejects a logo or banner that is not a usable path", () => {
+    expect(validateSettings(settings({ brandLogo: "logo.webp" }))).toMatch(/Logo/);
+    expect(validateSettings(settings({ heroBanner: "banner.webp" }))).toMatch(/banner/);
+    expect(
+      validateSettings(
+        settings({ brandLogo: "https://cdn.example/x.webp", heroBanner: "/x.webp" }),
+      ),
+    ).toBeNull();
+  });
+});
+
+describe("bố cục trang chủ", () => {
+  it("keeps the stored order and marks hidden blocks with a dash", () => {
+    const parsed = parseSettings([
+      { key: SETTING_KEYS.homeBlocks, value: "flash,hero,-ticker" },
+    ]);
+    expect(parsed.homeBlocks.slice(0, 3)).toEqual(["flash", "hero", "-ticker"]);
+    expect(visibleBlocks(parsed)).not.toContain("-ticker");
+    expect(visibleBlocks(parsed).slice(0, 2)).toEqual(["flash", "hero"]);
+  });
+
+  it("appends blocks the stored layout has never heard of", () => {
+    // A block added to the site later must not vanish for shops that already
+    // saved a layout.
+    const parsed = parseSettings([{ key: SETTING_KEYS.homeBlocks, value: "flash" }]);
+    expect(parsed.homeBlocks).toHaveLength(HOME_BLOCKS.length);
+    expect(parsed.homeBlocks[0]).toBe("flash");
+    for (const block of HOME_BLOCKS) {
+      expect(parsed.homeBlocks.some((id) => id.replace(/^-/, "") === block.id)).toBe(true);
+    }
+  });
+
+  it("drops ids that no longer exist", () => {
+    const parsed = parseSettings([
+      { key: SETTING_KEYS.homeBlocks, value: "flash,khong-co-that" },
+    ]);
+    expect(parsed.homeBlocks).not.toContain("khong-co-that");
+  });
+
+  it("lets a row be emptied, which hides it", () => {
+    const parsed = parseSettings([{ key: SETTING_KEYS.homeTftSlugs, value: "" }]);
+    expect(parsed.homeTftSlugs).toEqual([]);
+    // Unwritten is different from emptied: it still gets the defaults.
+    expect(parseSettings([]).homeTftSlugs).toEqual(DEFAULT_SETTINGS.homeTftSlugs);
+  });
+
+  it("survives a round trip with a rearranged layout", () => {
+    const original = settings({
+      homeBlocks: [
+        "flash",
+        "-hero",
+        ...HOME_BLOCKS.map((b) => b.id).filter((id) => id !== "flash" && id !== "hero"),
+      ],
+      homeValorantSlugs: ["mot-danh-muc"],
+      homeTftSlugs: [],
+      brandName: "Shop Của Tôi",
+      brandColor: "#00FF88",
+      contactZalo: "0900000000",
+    });
+    expect(parseSettings(serializeSettings(original))).toEqual(original);
   });
 });

@@ -23,7 +23,7 @@ const CATEGORY_LABEL: Record<string, string> = {
 };
 
 const FIELD =
-  "w-full rounded-xl border border-white/10 bg-neutral-950/60 px-3 py-2.5 text-sm text-white outline-none focus:border-[#7C3AED]/60 transition-colors placeholder-neutral-600";
+  "w-full rounded-xl border border-white/10 bg-neutral-950/60 px-3 py-2.5 text-sm text-white outline-none focus:border-[var(--brand)]/60 transition-colors placeholder-neutral-600";
 
 /**
  * Wiki editor.
@@ -157,7 +157,7 @@ export function AdminDocs({ docs }: { docs: DocView[] }) {
                 type="button"
                 onClick={() => save(doc.slug)}
                 disabled={pending}
-                className="self-start h-10 px-5 rounded-xl bg-[#7C3AED] hover:bg-[#6D28D9] disabled:opacity-60 text-[11px] font-black uppercase tracking-widest text-white transition-colors inline-flex items-center gap-2"
+                className="self-start h-10 px-5 rounded-xl bg-[var(--brand)] hover:bg-[var(--brand-dark)] disabled:opacity-60 text-[11px] font-black uppercase tracking-widest text-white transition-colors inline-flex items-center gap-2"
               >
                 <FileText size={14} />
                 {pending ? "Đang lưu…" : "Lưu bài viết"}

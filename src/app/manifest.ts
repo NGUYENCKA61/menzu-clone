@@ -1,8 +1,6 @@
 import type { MetadataRoute } from "next";
 
-import { SITE_NAME } from "@/lib/seo";
-
-const LOGO = "/sites/menzu-lol-f7ae197a/root-8a5edab2/images/site/logos/menzu-logo.webp";
+import { getShopSettings } from "@/lib/settingsStore";
 
 /**
  * Web app manifest — what Android and Chrome read when a visitor adds the shop
@@ -11,21 +9,24 @@ const LOGO = "/sites/menzu-lol-f7ae197a/root-8a5edab2/images/site/logos/menzu-lo
  * `purpose: "any"` only: the logo is a full-bleed mark, and declaring it
  * "maskable" would let launchers crop into it.
  */
-export default function manifest(): MetadataRoute.Manifest {
+export default async function manifest(): Promise<MetadataRoute.Manifest> {
+  const { brandName, brandLogo, brandColor } = await getShopSettings();
+
   return {
-    name: `${SITE_NAME} — Shop Account Valorant`,
-    short_name: "Menzu",
+    name: `${brandName} — Shop Account Valorant`,
+    // The home-screen label has room for one word, so the first one wins.
+    short_name: brandName.trim().split(/\s+/)[0],
     description:
       "Shop account Valorant uy tín — acc tự chọn, dịch vụ cày thuê và nạp VP.",
     start_url: "/",
     display: "standalone",
     background_color: "#0d0d12",
-    theme_color: "#7C3AED",
+    theme_color: brandColor,
     lang: "vi",
     categories: ["games", "shopping"],
     icons: [
-      { src: LOGO, sizes: "192x192", type: "image/webp", purpose: "any" },
-      { src: LOGO, sizes: "512x512", type: "image/webp", purpose: "any" },
+      { src: brandLogo, sizes: "192x192", type: "image/webp", purpose: "any" },
+      { src: brandLogo, sizes: "512x512", type: "image/webp", purpose: "any" },
     ],
   };
 }

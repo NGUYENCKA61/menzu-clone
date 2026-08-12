@@ -4,6 +4,8 @@ import localFont from "next/font/local";
 import "./globals.css";
 import { SITE_NAME, SITE_URL } from "@/lib/seo";
 import { SupportWidgetHost } from "@/components/sites/menzu-lol-f7ae197a/shared/SupportWidgetHost";
+import { DEFAULT_SETTINGS } from "@/lib/settings";
+import { getShopSettings } from "@/lib/settingsStore";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -21,15 +23,23 @@ const headingNow = localFont({
 const DESCRIPTION =
   "Menzu Valorant — shop account Valorant uy tín, giá tốt. Acc tự chọn, check skin kho đồ, build kho đồ, thu acc và dịch vụ game.";
 
-export const metadata: Metadata = {
+/**
+ * Built per request so the shop name set in Cấu hình → Nhận diện reaches the
+ * browser tab and the share cards, not just the header.
+ */
+export async function generateMetadata(): Promise<Metadata> {
+  const { brandName, heroBanner } = await getShopSettings();
+  const headline = `${brandName} | Shop Account Valorant Uy Tín`;
+
+  return {
   // Required for Open Graph and canonical tags: Next resolves every relative
   // URL below against this, and without it they are emitted as-is and ignored.
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "Menzu Valorant | Shop Account Valorant Uy Tín",
+    default: headline,
     // Child routes set a bare title; the brand is appended here so no page has
     // to repeat it.
-    template: "%s | Menzu Valorant",
+    template: `%s | ${brandName}`,
   },
   description: DESCRIPTION,
   applicationName: SITE_NAME,
@@ -47,42 +57,54 @@ export const metadata: Metadata = {
     type: "website",
     locale: "vi_VN",
     url: SITE_URL,
-    siteName: SITE_NAME,
-    title: "Menzu Valorant | Shop Account Valorant Uy Tín",
+    siteName: brandName,
+    title: headline,
     description: DESCRIPTION,
     images: [
       {
-        url: "/sites/menzu-lol-f7ae197a/root-8a5edab2/images/upload/bannermung9-7-26.webp",
+        url: heroBanner,
         width: 1200,
         height: 630,
-        alt: "Menzu Valorant — shop account Valorant",
+        alt: `${brandName} — shop account Valorant`,
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Menzu Valorant | Shop Account Valorant Uy Tín",
+    title: headline,
     description: DESCRIPTION,
-    images: ["/sites/menzu-lol-f7ae197a/root-8a5edab2/images/upload/bannermung9-7-26.webp"],
+    images: [heroBanner],
   },
   robots: {
     index: true,
     follow: true,
     googleBot: { index: true, follow: true, "max-image-preview": "large" },
   },
-};
+  };
+}
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const { brandColor } = await getShopSettings();
+  // Emitted only when the shop has actually picked a colour, so an install
+  // that never opens the Nhận diện tab renders byte-identical markup to the
+  // capture. The value is validated as a plain hex before it is ever stored,
+  // so nothing else can reach this stylesheet.
+  const brandOverride =
+    brandColor.toLowerCase() === DEFAULT_SETTINGS.brandColor.toLowerCase()
+      ? null
+      : `:root{--brand:${brandColor};--brand-dark:color-mix(in oklab, ${brandColor} 85%, black)}`;
+
   return (
     <html
       lang="vi"
       className={`${inter.variable} ${headingNow.variable} h-full antialiased overflow-y-scroll dark`}
     >
       <body className="min-h-full flex flex-col">
+        {brandOverride ? <style>{brandOverride}</style> : null}
         {children}
         {/* Site-wide, as on the live site — outside {children} so it survives
             navigation without remounting and losing its open state. */}

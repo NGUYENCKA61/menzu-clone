@@ -100,7 +100,7 @@ export function LoginForm() {
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
               <div className="relative z-10 p-12 text-center w-full">
-                <span className="text-[#7C3AED] font-black uppercase tracking-[0.5em] text-xs mb-2 drop-shadow-md block">
+                <span className="text-[var(--brand)] font-black uppercase tracking-[0.5em] text-xs mb-2 drop-shadow-md block">
                   Menzu Valorant
                 </span>
                 <h2 className="text-5xl font-black text-white uppercase leading-none drop-shadow-lg">
@@ -113,7 +113,7 @@ export function LoginForm() {
             <div className="flex-1 flex flex-col justify-center items-center p-6 sm:p-8 lg:py-14 lg:px-16 bg-neutral-950/60">
               <div className="w-full max-w-[420px]">
                 <div className="mb-8">
-                  <p className="text-[10px] uppercase tracking-[0.3em] text-[#7C3AED] mb-2 font-black lg:hidden">
+                  <p className="text-[10px] uppercase tracking-[0.3em] text-[var(--brand)] mb-2 font-black lg:hidden">
                     Menzu Shop
                   </p>
                   <h1 className="text-4xl font-black text-white uppercase tracking-tight">
@@ -144,7 +144,7 @@ export function LoginForm() {
                         value={username}
                         onChange={(event) => setUsername(event.target.value)}
                         placeholder="Email hoặc Tên đăng nhập"
-                        className="w-full rounded-2xl border border-white/5 bg-white/5 pl-12 pr-4 py-4 text-sm text-white outline-none focus:border-[#7C3AED]/60 transition-colors placeholder-neutral-600"
+                        className="w-full rounded-2xl border border-white/5 bg-white/5 pl-12 pr-4 py-4 text-sm text-white outline-none focus:border-[var(--brand)]/60 transition-colors placeholder-neutral-600"
                       />
                     </div>
                   </div>
@@ -159,7 +159,7 @@ export function LoginForm() {
                       </label>
                       <a
                         href="#"
-                        className="text-[10px] font-bold text-[#7C3AED] hover:text-[#6D28D9] cursor-pointer transition-colors uppercase tracking-wider mr-1"
+                        className="text-[10px] font-bold text-[var(--brand)] hover:text-[var(--brand-dark)] cursor-pointer transition-colors uppercase tracking-wider mr-1"
                       >
                         Quên mật khẩu?
                       </a>
@@ -176,7 +176,7 @@ export function LoginForm() {
                         value={password}
                         onChange={(event) => setPassword(event.target.value)}
                         placeholder="••••••••"
-                        className="w-full rounded-2xl border border-white/5 bg-white/5 pl-12 pr-12 py-4 text-sm text-white outline-none focus:border-[#7C3AED]/60 transition-colors placeholder-neutral-600"
+                        className="w-full rounded-2xl border border-white/5 bg-white/5 pl-12 pr-12 py-4 text-sm text-white outline-none focus:border-[var(--brand)]/60 transition-colors placeholder-neutral-600"
                       />
                       <button
                         type="button"
@@ -201,7 +201,7 @@ export function LoginForm() {
                   <button
                     type="submit"
                     disabled={pending}
-                    className="w-full rounded-2xl bg-[#7C3AED] hover:bg-[#6D28D9] disabled:opacity-70 disabled:cursor-wait text-white font-black py-4 uppercase tracking-widest text-sm transition-colors mt-7"
+                    className="w-full rounded-2xl bg-[var(--brand)] hover:bg-[var(--brand-dark)] disabled:opacity-70 disabled:cursor-wait text-white font-black py-4 uppercase tracking-widest text-sm transition-colors mt-7"
                   >
                     {pending ? "ĐANG XỬ LÝ…" : "ĐĂNG NHẬP"}
                   </button>
@@ -239,7 +239,7 @@ export function LoginForm() {
                   Chưa có tài khoản?
                   <a
                     href="/signup"
-                    className="text-[#7C3AED] hover:text-[#6D28D9] font-black transition-colors ml-1"
+                    className="text-[var(--brand)] hover:text-[var(--brand-dark)] font-black transition-colors ml-1"
                   >
                     Tạo mới ngay
                   </a>

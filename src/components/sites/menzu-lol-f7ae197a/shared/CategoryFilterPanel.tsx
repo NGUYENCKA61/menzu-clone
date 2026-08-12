@@ -39,7 +39,7 @@ type SourceValue = (typeof SOURCE_OPTIONS)[number]["value"];
 const CHIP_INACTIVE =
   "px-3 py-1.5 rounded-lg text-[11px] font-bold border border-neutral-800/60 bg-neutral-950/40 text-neutral-400 hover:text-white hover:border-neutral-700 transition-colors whitespace-nowrap";
 const CHIP_ACTIVE =
-  "px-3 py-1.5 rounded-lg text-[11px] font-bold border border-[#7C3AED]/50 bg-[#7C3AED]/15 text-[#a78bfa] transition-colors whitespace-nowrap";
+  "px-3 py-1.5 rounded-lg text-[11px] font-bold border border-[var(--brand)]/50 bg-[var(--brand)]/15 text-[#a78bfa] transition-colors whitespace-nowrap";
 
 const GROUP_LABEL_CLASS =
   "text-[10px] font-black uppercase tracking-widest text-neutral-500 mb-1.5 block";
@@ -90,7 +90,7 @@ export function CategoryFilterPanel() {
       >
         <div className="flex flex-col md:flex-row gap-2.5">
           <div className="flex-[6] relative min-w-0">
-            <div className="flex items-center gap-2 h-[50px] px-4 rounded-xl bg-neutral-900/60 border border-neutral-800/60 focus-within:border-[#7C3AED]/60 transition-colors">
+            <div className="flex items-center gap-2 h-[50px] px-4 rounded-xl bg-neutral-900/60 border border-neutral-800/60 focus-within:border-[var(--brand)]/60 transition-colors">
               <Search size={15} className="text-neutral-500 shrink-0" />
               <input
                 type="text"
@@ -103,7 +103,7 @@ export function CategoryFilterPanel() {
           </div>
 
           <div className="flex-[4] relative min-w-0">
-            <div className="flex items-center gap-2 h-[50px] px-4 rounded-xl bg-neutral-900/60 border border-neutral-800/60 focus-within:border-[#7C3AED]/60 transition-colors">
+            <div className="flex items-center gap-2 h-[50px] px-4 rounded-xl bg-neutral-900/60 border border-neutral-800/60 focus-within:border-[var(--brand)]/60 transition-colors">
               <Package size={15} className="text-neutral-500 shrink-0" />
               <input
                 type="text"
@@ -117,7 +117,7 @@ export function CategoryFilterPanel() {
 
           <button
             type="submit"
-            className="hidden md:flex bg-[#7C3AED] hover:bg-[#6D28D9] active:scale-95 text-white font-black rounded-xl px-6 transition items-center gap-2 shrink-0"
+            className="hidden md:flex bg-[var(--brand)] hover:bg-[var(--brand-dark)] active:scale-95 text-white font-black rounded-xl px-6 transition items-center gap-2 shrink-0"
           >
             <Search size={16} />
             Tìm kiếm
@@ -235,7 +235,7 @@ export function CategoryFilterPanel() {
 
         <button
           type="submit"
-          className="md:hidden w-full bg-[#7C3AED] hover:bg-[#6D28D9] active:scale-95 text-white font-black rounded-xl py-3.5 transition flex items-center justify-center gap-2"
+          className="md:hidden w-full bg-[var(--brand)] hover:bg-[var(--brand-dark)] active:scale-95 text-white font-black rounded-xl py-3.5 transition flex items-center justify-center gap-2"
         >
           <Search size={16} />
           Tìm kiếm

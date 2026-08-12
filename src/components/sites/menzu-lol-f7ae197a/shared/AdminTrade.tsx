@@ -102,7 +102,7 @@ export function AdminTrade({ rows }: { rows: TradeRow[] }) {
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Tìm mã đơn, tài khoản, số Zalo..."
             aria-label="Tìm đơn thu cũ"
-            className="w-full rounded-xl border border-white/5 bg-[#111111] pl-11 pr-4 py-2.5 text-sm text-white outline-none focus:border-[#7C3AED]/60 transition-colors placeholder-neutral-600"
+            className="w-full rounded-xl border border-white/5 bg-[#111111] pl-11 pr-4 py-2.5 text-sm text-white outline-none focus:border-[var(--brand)]/60 transition-colors placeholder-neutral-600"
           />
         </div>
         <div className="flex gap-1.5 overflow-x-auto">
@@ -114,7 +114,7 @@ export function AdminTrade({ rows }: { rows: TradeRow[] }) {
               aria-pressed={filter === option}
               className={`shrink-0 px-3 py-2 rounded-lg text-[10px] font-black uppercase tracking-wider border transition-colors ${
                 filter === option
-                  ? "border-[#7C3AED] bg-[#7C3AED]/15 text-white"
+                  ? "border-[var(--brand)] bg-[var(--brand)]/15 text-white"
                   : "border-white/10 bg-white/[0.02] text-neutral-400 hover:text-white"
               }`}
             >
@@ -166,7 +166,7 @@ export function AdminTrade({ rows }: { rows: TradeRow[] }) {
                     href={`https://zalo.me/${row.zalo}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-[11px] font-bold text-[#7C3AED] hover:underline"
+                    className="text-[11px] font-bold text-[var(--brand)] hover:underline"
                   >
                     Zalo {row.zalo}
                   </a>
@@ -200,7 +200,7 @@ export function AdminTrade({ rows }: { rows: TradeRow[] }) {
                         setQuotes((previous) => ({ ...previous, [row.code]: event.target.value }))
                       }
                       placeholder="Giá báo"
-                      className="w-28 rounded-lg border border-white/10 bg-neutral-950/60 px-3 py-2 text-xs text-white tabular-nums outline-none focus:border-[#7C3AED]/60 transition-colors placeholder-neutral-600"
+                      className="w-28 rounded-lg border border-white/10 bg-neutral-950/60 px-3 py-2 text-xs text-white tabular-nums outline-none focus:border-[var(--brand)]/60 transition-colors placeholder-neutral-600"
                     />
                     <button
                       type="button"
@@ -213,7 +213,7 @@ export function AdminTrade({ rows }: { rows: TradeRow[] }) {
                           ),
                         })
                       }
-                      className="h-9 px-3 rounded-lg bg-[#7C3AED] hover:bg-[#6D28D9] disabled:opacity-60 text-[10px] font-black uppercase tracking-widest text-white transition-colors inline-flex items-center gap-1.5"
+                      className="h-9 px-3 rounded-lg bg-[var(--brand)] hover:bg-[var(--brand-dark)] disabled:opacity-60 text-[10px] font-black uppercase tracking-widest text-white transition-colors inline-flex items-center gap-1.5"
                     >
                       <Check size={13} />
                       Báo giá

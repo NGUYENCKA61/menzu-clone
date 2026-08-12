@@ -16,7 +16,12 @@ const SUB_BANNERS: SubBanner[] = [
   { src: `${IMAGE_BASE}/subbanner1.webp`, alt: "Sub Banner" },
 ];
 
-export function HeroBanners() {
+/**
+ * `banner` is the wide image at the very top, set in Cấu hình → Nhận diện.
+ * The four sub-banners below it stay as captured — they are a fixed promo
+ * strip rather than something a shop swaps per campaign.
+ */
+export function HeroBanners({ banner = MAIN_BANNER_SRC }: { banner?: string }) {
   return (
     <div className="w-full space-y-8">
       {/* Desktop (>=768px) */}
@@ -26,7 +31,7 @@ export function HeroBanners() {
             <div className="w-full h-full flex">
               <div className="w-full h-full flex-shrink-0 relative overflow-hidden">
                 <Image
-                  src={MAIN_BANNER_SRC}
+                  src={banner}
                   alt="banner"
                   width={1920}
                   height={600}
@@ -60,7 +65,7 @@ export function HeroBanners() {
       <div className="md:hidden w-full">
         <div className="relative h-[180px] w-full rounded-2xl overflow-hidden group">
           <Image
-            src={MAIN_BANNER_SRC}
+            src={banner}
             alt="banner"
             width={1920}
             height={600}

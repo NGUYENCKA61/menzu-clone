@@ -195,7 +195,7 @@ export function AccountBuyPanel({ account }: AccountBuyPanelProps) {
           </div>
           <a
             href="#"
-            className="text-[10px] font-black text-[#7C3AED] uppercase tracking-wider"
+            className="text-[10px] font-black text-[var(--brand)] uppercase tracking-wider"
           >
             TÌM HIỂU
           </a>
@@ -226,7 +226,7 @@ export function AccountBuyPanel({ account }: AccountBuyPanelProps) {
         <button
           type="button"
           onClick={() => setOpen(true)}
-          className="w-full rounded-2xl bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-black py-4 uppercase tracking-widest text-sm transition-colors"
+          className="w-full rounded-2xl bg-[var(--brand)] hover:bg-[var(--brand-dark)] text-white font-black py-4 uppercase tracking-widest text-sm transition-colors"
         >
           Mua Ngay
         </button>
@@ -294,7 +294,7 @@ export function AccountBuyPanel({ account }: AccountBuyPanelProps) {
                     value={voucher}
                     onChange={(event) => setVoucher(event.target.value)}
                     placeholder="Nhập mã voucher..."
-                    className="w-28 min-w-0 rounded-lg border border-white/10 bg-white/5 px-2.5 py-1.5 text-xs text-white outline-none focus:border-[#7C3AED]/60 placeholder-neutral-600 transition-colors"
+                    className="w-28 min-w-0 rounded-lg border border-white/10 bg-white/5 px-2.5 py-1.5 text-xs text-white outline-none focus:border-[var(--brand)]/60 placeholder-neutral-600 transition-colors"
                   />
                   <button
                     type="button"
@@ -316,7 +316,7 @@ export function AccountBuyPanel({ account }: AccountBuyPanelProps) {
 
               <div className="flex items-center justify-between">
                 <span className="text-sm font-black uppercase text-white">TỔNG THANH TOÁN</span>
-                <span className="text-base font-black text-[#7C3AED]">
+                <span className="text-base font-black text-[var(--brand)]">
                   {formatVnd(account.price)} ₫
                 </span>
               </div>
@@ -365,14 +365,14 @@ export function AccountBuyPanel({ account }: AccountBuyPanelProps) {
                   type="button"
                   onClick={handleBuy}
                   disabled={buying || orderCode !== null}
-                  className="w-full rounded-2xl bg-[#7C3AED] hover:bg-[#6D28D9] disabled:opacity-70 disabled:cursor-wait text-white font-black py-4 uppercase tracking-widest text-sm transition-colors flex items-center justify-center"
+                  className="w-full rounded-2xl bg-[var(--brand)] hover:bg-[var(--brand-dark)] disabled:opacity-70 disabled:cursor-wait text-white font-black py-4 uppercase tracking-widest text-sm transition-colors flex items-center justify-center"
                 >
                   {buying ? "Đang xử lý…" : "Xác nhận mua"}
                 </button>
               ) : (
                 <a
                   href="/wallet"
-                  className="w-full rounded-2xl bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-black py-4 uppercase tracking-widest text-sm transition-colors flex items-center justify-center"
+                  className="w-full rounded-2xl bg-[var(--brand)] hover:bg-[var(--brand-dark)] text-white font-black py-4 uppercase tracking-widest text-sm transition-colors flex items-center justify-center"
                 >
                   Nạp tiền
                 </a>

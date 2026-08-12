@@ -109,8 +109,24 @@ function NavDropdown({ label, items }: { label: string; items: DropdownItem[] })
   )
 }
 
-export function SiteHeaderClient({ user }: { user: HeaderUser | null }) {
+export interface HeaderBrand {
+  name: string;
+  logo: string;
+}
+
+export function SiteHeaderClient({
+  user,
+  brand,
+}: {
+  user: HeaderUser | null;
+  brand: HeaderBrand;
+}) {
   const [drawerOpen, setDrawerOpen] = useState(false)
+
+  // The captured logotype is two lines: a big first word and a small tail.
+  // "Menzu Valorant" splits the same way any two-part shop name would.
+  const [brandWord, ...brandRest] = brand.name.trim().split(/\s+/);
+  const brandTail = brandRest.join(" ");
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-[100] transition-all duration-300 flex flex-col bg-[#1a1a1a]">
@@ -158,8 +174,8 @@ export function SiteHeaderClient({ user }: { user: HeaderUser | null }) {
             <Link href="/" className="flex items-center gap-3 group">
               <div className="relative">
                 <Image
-                  src="/sites/menzu-lol-f7ae197a/root-8a5edab2/images/site/logos/menzu-logo.webp"
-                  alt="Menzu"
+                  src={brand.logo}
+                  alt={brandWord}
                   width={28}
                   height={28}
                   priority
@@ -168,8 +184,14 @@ export function SiteHeaderClient({ user }: { user: HeaderUser | null }) {
                 <span className="navbar-spin-ring absolute inset-[-2px] rounded-full border border-transparent border-t-red-500 transition-transform duration-1000 group-hover:scale-110 animate-spin-slow" />
               </div>
               <div className="flex flex-col leading-none">
-                <span className="text-xl font-black italic tracking-tighter text-white">MENZU</span>
-                <span className="text-[9px] font-bold tracking-[0.2em] text-red-500 uppercase">Valorant</span>
+                <span className="text-xl font-black italic tracking-tighter text-white">
+                  {brandWord}
+                </span>
+                {brandTail ? (
+                  <span className="text-[9px] font-bold tracking-[0.2em] text-red-500 uppercase">
+                    {brandTail}
+                  </span>
+                ) : null}
               </div>
             </Link>
           </div>
@@ -194,7 +216,7 @@ export function SiteHeaderClient({ user }: { user: HeaderUser | null }) {
           ) : (
             <a
               href="/login"
-              className="flex items-center gap-2 h-9 px-3.5 sm:px-4 rounded-xl bg-[#7C3AED] hover:bg-[#6D28D9] transition-colors duration-200 border border-purple-500/30 shrink-0"
+              className="flex items-center gap-2 h-9 px-3.5 sm:px-4 rounded-xl bg-[var(--brand)] hover:bg-[var(--brand-dark)] transition-colors duration-200 border border-purple-500/30 shrink-0"
             >
               <User size={16} />
               <span className="text-[10px] sm:text-[11px] font-black uppercase tracking-widest text-white whitespace-nowrap">

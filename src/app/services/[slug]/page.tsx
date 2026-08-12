@@ -91,7 +91,7 @@ export default async function ServiceDetailPage({ params }: PageProps) {
                       not exist. */}
                   <a
                     href="#"
-                    className="w-full rounded-2xl bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-black py-4 uppercase tracking-widest text-sm transition-colors flex items-center justify-center"
+                    className="w-full rounded-2xl bg-[var(--brand)] hover:bg-[var(--brand-dark)] text-white font-black py-4 uppercase tracking-widest text-sm transition-colors flex items-center justify-center"
                   >
                     Liên hệ đặt dịch vụ
                   </a>

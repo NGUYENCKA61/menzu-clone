@@ -82,7 +82,7 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
                         href={`/category/${slug}?page=${n}`}
                         className={
                           n === data.page
-                            ? "w-9 h-9 flex items-center justify-center rounded-lg text-[13px] font-black bg-[#7C3AED] text-white"
+                            ? "w-9 h-9 flex items-center justify-center rounded-lg text-[13px] font-black bg-[var(--brand)] text-white"
                             : "w-9 h-9 flex items-center justify-center rounded-lg text-[13px] font-bold bg-neutral-900 border border-neutral-800 text-neutral-400 hover:text-white transition-colors"
                         }
                       >

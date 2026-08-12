@@ -25,7 +25,7 @@ export default function GlobalError({
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center text-white px-4 text-center">
-      <p className="text-6xl sm:text-7xl font-black tracking-tighter text-[#7C3AED] mb-3">
+      <p className="text-6xl sm:text-7xl font-black tracking-tighter text-[var(--brand)] mb-3">
         500
       </p>
       <p className="text-xl font-bold text-white mb-2">ĐÃ CÓ LỖI XẢY RA</p>
@@ -46,7 +46,7 @@ export default function GlobalError({
         <button
           type="button"
           onClick={reset}
-          className="inline-flex items-center h-10 px-5 rounded-xl bg-[#7C3AED] hover:bg-[#6D28D9] transition-colors text-[11px] font-black uppercase tracking-widest text-white"
+          className="inline-flex items-center h-10 px-5 rounded-xl bg-[var(--brand)] hover:bg-[var(--brand-dark)] transition-colors text-[11px] font-black uppercase tracking-widest text-white"
         >
           Thử lại
         </button>

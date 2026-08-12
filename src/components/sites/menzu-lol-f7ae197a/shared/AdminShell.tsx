@@ -8,7 +8,6 @@ import {
   Settings,
   ShoppingBag,
   Repeat,
-  Tags,
   Ticket,
   Users,
   type LucideIcon,
@@ -19,8 +18,9 @@ import type { ReactNode } from "react";
 
 const NAV: { label: string; href: string; icon: LucideIcon }[] = [
   { label: "Tổng quan", href: "/admin", icon: LayoutDashboard },
+  // Categories live inside the products screen — they are the first step of
+  // adding a product, not a separate errand.
   { label: "Sản phẩm", href: "/admin/products", icon: Boxes },
-  { label: "Danh mục", href: "/admin/categories", icon: Tags },
   { label: "Đơn hàng", href: "/admin/orders", icon: ShoppingBag },
   { label: "Marketing", href: "/admin/marketing", icon: Ticket },
   { label: "Thu cũ đổi mới", href: "/admin/trade", icon: Repeat },
@@ -30,7 +30,7 @@ const NAV: { label: string; href: string; icon: LucideIcon }[] = [
   { label: "Cấu hình", href: "/admin/settings", icon: Settings },
 ];
 
-const ACTIVE = "flex items-center gap-3 py-2.5 px-3 rounded-lg text-sm font-bold transition-colors bg-[#7C3AED]/15 text-[#a78bfa]";
+const ACTIVE = "flex items-center gap-3 py-2.5 px-3 rounded-lg text-sm font-bold transition-colors bg-[var(--brand)]/15 text-[#a78bfa]";
 const INACTIVE = "flex items-center gap-3 py-2.5 px-3 rounded-lg text-sm font-bold transition-colors text-neutral-300 hover:text-white hover:bg-white/5";
 
 interface AdminShellProps {
@@ -56,7 +56,7 @@ export function AdminShell({ title, subtitle, username, children }: AdminShellPr
             <span className="text-sm font-black uppercase tracking-widest text-white">
               Menzu Admin
             </span>
-            <span className="px-2 py-0.5 rounded-md bg-[#7C3AED]/20 border border-[#7C3AED]/40 text-[9px] font-black uppercase tracking-widest text-[#a78bfa]">
+            <span className="px-2 py-0.5 rounded-md bg-[var(--brand)]/20 border border-[var(--brand)]/40 text-[9px] font-black uppercase tracking-widest text-[#a78bfa]">
               {username}
             </span>
           </div>

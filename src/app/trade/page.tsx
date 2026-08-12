@@ -71,7 +71,7 @@ export default async function TradePage() {
             </span>
             <Link
               href="/bio"
-              className="inline-flex items-center gap-2 h-9 px-4 rounded-xl bg-[#7C3AED] hover:bg-[#6D28D9] transition-colors text-[11px] font-black uppercase tracking-widest text-white"
+              className="inline-flex items-center gap-2 h-9 px-4 rounded-xl bg-[var(--brand)] hover:bg-[var(--brand-dark)] transition-colors text-[11px] font-black uppercase tracking-widest text-white"
             >
               <MessageCircle size={13} />
               Nhắn Zalo cho admin

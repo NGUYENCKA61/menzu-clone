@@ -75,7 +75,7 @@ export function TransactionsTable({ rows }: { rows: LedgerView[] }) {
           onChange={(event) => setQuery(event.target.value)}
           placeholder="Tìm kiếm mã GD, nội dung..."
           aria-label="Tìm kiếm giao dịch"
-          className="w-full appearance-none rounded-2xl border border-white/5 bg-[#111111] pl-11 pr-10 py-3 text-sm text-white outline-none focus:border-[#7C3AED]/60 transition-colors placeholder-neutral-600"
+          className="w-full appearance-none rounded-2xl border border-white/5 bg-[#111111] pl-11 pr-10 py-3 text-sm text-white outline-none focus:border-[var(--brand)]/60 transition-colors placeholder-neutral-600"
         />
         {query ? (
           <button

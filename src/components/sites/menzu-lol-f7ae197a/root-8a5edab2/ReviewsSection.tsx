@@ -62,7 +62,7 @@ export function ReviewsSection({ reviews = REVIEWS }: { reviews?: Review[] } = {
             </div>
 
             <div className="flex items-center gap-2.5">
-              <div className="w-[3px] h-5 bg-[#7C3AED] rounded-full shrink-0" />
+              <div className="w-[3px] h-5 bg-[var(--brand)] rounded-full shrink-0" />
               <h2 className="text-xl sm:text-2xl font-black uppercase tracking-wider text-white">
                 ĐÁNH GIÁ KHÁCH HÀNG
               </h2>
@@ -80,7 +80,7 @@ export function ReviewsSection({ reviews = REVIEWS }: { reviews?: Review[] } = {
 
               <a
                 href="#"
-                className="group flex items-center gap-1 text-[10px] sm:text-xs font-bold text-neutral-400 hover:text-white transition-colors uppercase tracking-widest border-b border-neutral-700 hover:border-[#7C3AED]"
+                className="group flex items-center gap-1 text-[10px] sm:text-xs font-bold text-neutral-400 hover:text-white transition-colors uppercase tracking-widest border-b border-neutral-700 hover:border-[var(--brand)]"
               >
                 Xem tất cả
                 <ArrowRight size={14} />

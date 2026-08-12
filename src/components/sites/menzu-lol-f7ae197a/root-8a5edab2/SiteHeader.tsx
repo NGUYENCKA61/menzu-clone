@@ -1,4 +1,5 @@
 import { getCurrentUser } from "@/lib/session";
+import { getShopSettings } from "@/lib/settingsStore";
 
 import { SiteHeaderClient } from "./SiteHeaderClient";
 
@@ -10,10 +11,11 @@ import { SiteHeaderClient } from "./SiteHeaderClient";
  * Pages import this; the interactive parts live in SiteHeaderClient.
  */
 export async function SiteHeader() {
-  const user = await getCurrentUser();
+  const [user, settings] = await Promise.all([getCurrentUser(), getShopSettings()]);
 
   return (
     <SiteHeaderClient
+      brand={{ name: settings.brandName, logo: settings.brandLogo }}
       user={
         user
           ? {

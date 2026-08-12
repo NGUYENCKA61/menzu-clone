@@ -118,7 +118,7 @@ export default async function ProfilePage() {
                 ) : null}
                 <button
                   type="button"
-                  className="h-9 px-4 rounded-xl bg-[#7C3AED] hover:bg-[#6D28D9] transition-colors text-[10px] font-black uppercase tracking-widest text-white whitespace-nowrap"
+                  className="h-9 px-4 rounded-xl bg-[var(--brand)] hover:bg-[var(--brand-dark)] transition-colors text-[10px] font-black uppercase tracking-widest text-white whitespace-nowrap"
                 >
                   Liên kết ngay
                 </button>

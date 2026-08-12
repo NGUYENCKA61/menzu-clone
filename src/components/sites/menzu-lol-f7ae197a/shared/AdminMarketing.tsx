@@ -36,10 +36,10 @@ function formatVnd(n: number): string {
 }
 
 const FIELD =
-  "w-full rounded-xl border border-white/10 bg-neutral-950/60 px-3 py-2.5 text-sm text-white outline-none focus:border-[#7C3AED]/60 transition-colors placeholder-neutral-600";
+  "w-full rounded-xl border border-white/10 bg-neutral-950/60 px-3 py-2.5 text-sm text-white outline-none focus:border-[var(--brand)]/60 transition-colors placeholder-neutral-600";
 const LABEL = "block text-[10px] font-black uppercase tracking-widest text-neutral-500 mb-1.5";
 const TAB_ON =
-  "px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest bg-[#7C3AED] text-white transition-colors";
+  "px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest bg-[var(--brand)] text-white transition-colors";
 const TAB_OFF =
   "px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest border border-white/10 bg-white/[0.03] text-neutral-400 hover:text-white transition-colors";
 
@@ -167,7 +167,7 @@ export function AdminMarketing({
               <input id="v-max" inputMode="numeric" value={maxUses} onChange={(e) => setMaxUses(e.target.value)} placeholder="Không giới hạn" className={FIELD} />
             </div>
             <div className="flex items-end">
-              <button type="submit" disabled={pending} className="w-full h-[42px] rounded-xl bg-[#7C3AED] hover:bg-[#6D28D9] disabled:opacity-60 text-[11px] font-black uppercase tracking-widest text-white transition-colors inline-flex items-center justify-center gap-1.5">
+              <button type="submit" disabled={pending} className="w-full h-[42px] rounded-xl bg-[var(--brand)] hover:bg-[var(--brand-dark)] disabled:opacity-60 text-[11px] font-black uppercase tracking-widest text-white transition-colors inline-flex items-center justify-center gap-1.5">
                 <Plus size={14} />
                 Tạo mã
               </button>
@@ -257,7 +257,7 @@ export function AdminMarketing({
               <input id="s-end" type="datetime-local" required value={sEnd} onChange={(e) => setSEnd(e.target.value)} className={FIELD} />
             </div>
             <div className="flex items-end">
-              <button type="submit" disabled={pending} className="w-full h-[42px] rounded-xl bg-[#7C3AED] hover:bg-[#6D28D9] disabled:opacity-60 text-[11px] font-black uppercase tracking-widest text-white transition-colors inline-flex items-center justify-center gap-1.5">
+              <button type="submit" disabled={pending} className="w-full h-[42px] rounded-xl bg-[var(--brand)] hover:bg-[var(--brand-dark)] disabled:opacity-60 text-[11px] font-black uppercase tracking-widest text-white transition-colors inline-flex items-center justify-center gap-1.5">
                 <Plus size={14} />
                 Lên lịch
               </button>

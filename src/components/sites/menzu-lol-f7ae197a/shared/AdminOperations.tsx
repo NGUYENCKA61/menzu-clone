@@ -44,7 +44,7 @@ const SERVICE_STATUS: Record<string, { text: string; className: string }> = {
 const NEXT_STATUS = ["PENDING", "IN_PROGRESS", "DONE", "CANCELLED"];
 
 const TAB_ON =
-  "px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest bg-[#7C3AED] text-white transition-colors";
+  "px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest bg-[var(--brand)] text-white transition-colors";
 const TAB_OFF =
   "px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest border border-white/10 bg-white/[0.03] text-neutral-400 hover:text-white transition-colors";
 
@@ -191,7 +191,7 @@ export function AdminOperations({
                       onChange={(event) =>
                         call("/api/admin/service-orders", { code: row.code, status: event.target.value })
                       }
-                      className="h-8 rounded-lg border border-white/10 bg-neutral-950/60 px-2 text-[11px] font-bold text-neutral-200 outline-none focus:border-[#7C3AED]/60 disabled:opacity-50 transition-colors"
+                      className="h-8 rounded-lg border border-white/10 bg-neutral-950/60 px-2 text-[11px] font-bold text-neutral-200 outline-none focus:border-[var(--brand)]/60 disabled:opacity-50 transition-colors"
                     >
                       {NEXT_STATUS.map((value) => (
                         <option key={value} value={value}>

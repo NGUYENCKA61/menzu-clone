@@ -73,10 +73,18 @@ async function serviceRow(inGameSet: boolean): Promise<ProductCard[]> {
     }));
 }
 
-export async function getHomeRows() {
+/**
+ * The two category rows take their slugs from the shop settings, so an admin
+ * can put a different category in a row without a deploy. The constants above
+ * remain the defaults, which is what an unconfigured shop still renders.
+ */
+export async function getHomeRows(rows?: {
+  valorantSlugs: string[];
+  tftSlugs: string[];
+}) {
   const [featured, tft, gameServices, otherServices] = await Promise.all([
-    categoryRow(VALORANT_SLUGS),
-    categoryRow(TFT_SLUGS),
+    categoryRow(rows?.valorantSlugs ?? VALORANT_SLUGS),
+    categoryRow(rows?.tftSlugs ?? TFT_SLUGS),
     serviceRow(true),
     serviceRow(false),
   ]);

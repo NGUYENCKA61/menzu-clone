@@ -143,7 +143,7 @@ export function ConfirmDialog({
             onClick={onConfirm}
             disabled={pending}
             className={`flex-1 h-10 rounded-xl text-[11px] font-black uppercase tracking-widest text-white transition-colors disabled:opacity-60 disabled:cursor-wait ${
-              danger ? "bg-red-600 hover:bg-red-500" : "bg-[#7C3AED] hover:bg-[#6D28D9]"
+              danger ? "bg-red-600 hover:bg-red-500" : "bg-[var(--brand)] hover:bg-[var(--brand-dark)]"
             }`}
           >
             {pending ? "Đang xử lý…" : confirmLabel}

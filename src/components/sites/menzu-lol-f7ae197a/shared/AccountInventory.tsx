@@ -52,11 +52,11 @@ const PAGE_SIZE = 20;
 // Tailwind can't see dynamically-composed class names, so the tab's active
 // and inactive states are always emitted as complete literal strings.
 const TAB_BUTTON_ACTIVE =
-  "flex-shrink-0 flex items-center justify-center gap-2 sm:gap-3 text-sm sm:text-base px-4 sm:px-6 py-2.5 rounded-2xl font-black uppercase transition-colors bg-[#7C3AED] text-white";
+  "flex-shrink-0 flex items-center justify-center gap-2 sm:gap-3 text-sm sm:text-base px-4 sm:px-6 py-2.5 rounded-2xl font-black uppercase transition-colors bg-[var(--brand)] text-white";
 const TAB_BUTTON_INACTIVE =
   "flex-shrink-0 flex items-center justify-center gap-2 sm:gap-3 text-sm sm:text-base px-4 sm:px-6 py-2.5 rounded-2xl font-black uppercase transition-colors text-neutral-400 hover:text-white";
 const FILTER_ACTIVE =
-  "shrink-0 px-5 py-2 text-sm rounded-full font-bold transition-colors border bg-[#7C3AED] border-[#7C3AED] text-white";
+  "shrink-0 px-5 py-2 text-sm rounded-full font-bold transition-colors border bg-[var(--brand)] border-[var(--brand)] text-white";
 const FILTER_INACTIVE =
   "shrink-0 px-5 py-2 text-sm rounded-full font-bold transition-colors border bg-neutral-900 border-neutral-700 text-neutral-400 hover:border-neutral-500 hover:text-white";
 
@@ -150,7 +150,7 @@ export function AccountInventory({ account, items }: AccountInventoryProps) {
             ? visible.map((item) => (
                 <div
                   key={item.id}
-                  className="group aspect-[4/3] rounded-xl bg-neutral-950 border border-neutral-800 hover:border-[#7C3AED]/50 transition-colors flex flex-col items-center justify-center p-2 gap-1.5 card-item-appear overflow-hidden"
+                  className="group aspect-[4/3] rounded-xl bg-neutral-950 border border-neutral-800 hover:border-[var(--brand)]/50 transition-colors flex flex-col items-center justify-center p-2 gap-1.5 card-item-appear overflow-hidden"
                 >
                   {item.iconUrl ? (
                     <div className="relative w-full flex-1">
@@ -186,7 +186,7 @@ export function AccountInventory({ account, items }: AccountInventoryProps) {
           <button
             type="button"
             onClick={() => setShown((count) => count + PAGE_SIZE)}
-            className="mt-6 mx-auto px-6 py-2.5 rounded-full border border-neutral-700 bg-neutral-900 text-sm font-bold text-neutral-300 hover:border-[#7C3AED] hover:text-white transition-colors"
+            className="mt-6 mx-auto px-6 py-2.5 rounded-full border border-neutral-700 bg-neutral-900 text-sm font-bold text-neutral-300 hover:border-[var(--brand)] hover:text-white transition-colors"
           >
             Xem thêm {remaining} {tab.key === "weaponSkins" ? "skin" : "món"}
           </button>

@@ -31,7 +31,7 @@ const MAIL_TYPES = [
 ] as const;
 
 const CARD = "rounded-2xl border p-4 text-left transition-colors";
-const CARD_ON = `${CARD} border-[#7C3AED] bg-[#7C3AED]/10`;
+const CARD_ON = `${CARD} border-[var(--brand)] bg-[var(--brand)]/10`;
 const CARD_OFF = `${CARD} border-white/10 bg-white/[0.02] hover:border-white/25`;
 
 /**
@@ -146,7 +146,7 @@ export function TradeForm() {
             type="checkbox"
             checked={hasWelcomeMail}
             onChange={(event) => setHasWelcomeMail(event.target.checked)}
-            className="mt-0.5 w-4 h-4 accent-[#7C3AED]"
+            className="mt-0.5 w-4 h-4 accent-[var(--brand)]"
           />
           <span>
             <span className="block text-sm font-bold text-white">Có thư Welcome</span>
@@ -169,7 +169,7 @@ export function TradeForm() {
             />
             <label
               htmlFor="trade-screenshot"
-              className="flex items-center gap-3 rounded-2xl border border-dashed border-white/15 bg-white/[0.02] px-4 py-4 cursor-pointer hover:border-[#7C3AED]/60 transition-colors"
+              className="flex items-center gap-3 rounded-2xl border border-dashed border-white/15 bg-white/[0.02] px-4 py-4 cursor-pointer hover:border-[var(--brand)]/60 transition-colors"
             >
               <Upload size={18} className="text-neutral-500 shrink-0" />
               <span className="text-[12px] text-neutral-400 truncate flex-1">
@@ -192,7 +192,7 @@ export function TradeForm() {
             </label>
             <a
               href="/checkwc"
-              className="inline-block mt-2 text-[11px] font-bold text-[#7C3AED] hover:underline"
+              className="inline-block mt-2 text-[11px] font-bold text-[var(--brand)] hover:underline"
             >
               Hướng dẫn check thư Welcome
             </a>
@@ -216,7 +216,7 @@ export function TradeForm() {
             value={zalo}
             onChange={(event) => setZalo(event.target.value)}
             placeholder="Nhập số điện thoại Zalo của bạn..."
-            className="w-full rounded-2xl border border-white/5 bg-white/5 px-4 py-3.5 text-sm text-white outline-none focus:border-[#7C3AED]/60 transition-colors placeholder-neutral-600"
+            className="w-full rounded-2xl border border-white/5 bg-white/5 px-4 py-3.5 text-sm text-white outline-none focus:border-[var(--brand)]/60 transition-colors placeholder-neutral-600"
           />
         </div>
         <div>
@@ -232,7 +232,7 @@ export function TradeForm() {
             value={note}
             onChange={(event) => setNote(event.target.value)}
             placeholder="Rank, số skin, mong muốn…"
-            className="w-full rounded-2xl border border-white/5 bg-white/5 px-4 py-3.5 text-sm text-white outline-none focus:border-[#7C3AED]/60 transition-colors placeholder-neutral-600"
+            className="w-full rounded-2xl border border-white/5 bg-white/5 px-4 py-3.5 text-sm text-white outline-none focus:border-[var(--brand)]/60 transition-colors placeholder-neutral-600"
           />
         </div>
       </div>
@@ -259,7 +259,7 @@ export function TradeForm() {
       <button
         type="submit"
         disabled={pending}
-        className="w-full rounded-2xl bg-[#7C3AED] hover:bg-[#6D28D9] disabled:opacity-70 disabled:cursor-wait text-white font-black py-4 uppercase tracking-widest text-sm transition-colors"
+        className="w-full rounded-2xl bg-[var(--brand)] hover:bg-[var(--brand-dark)] disabled:opacity-70 disabled:cursor-wait text-white font-black py-4 uppercase tracking-widest text-sm transition-colors"
       >
         {pending ? "Đang gửi…" : "Gửi yêu cầu báo giá"}
       </button>

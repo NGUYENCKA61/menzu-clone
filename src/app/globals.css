@@ -148,6 +148,13 @@
   --menzu-rail: #0c0d12;
   --menzu-backdrop-dim: rgb(10 10 13 / 0.7);
   --menzu-container: 1320px;
+
+  /* The shop's accent, used by every button, badge and active state. These
+     are the values menzu.lol ships; the admin's Cấu hình → Nhận diện screen
+     overrides them per-request from the root layout, so a shop that never
+     touches the setting renders exactly as the captured site does. */
+  --brand: #7c3aed;
+  --brand-dark: #6d28d9;
 }
 
 @keyframes fadeUpIn {
