@@ -34,6 +34,7 @@ export async function PATCH(request: Request) {
     note?: string;
     email?: string;
     password?: string;
+    tier?: string;
   } | null;
 
   const username = body?.username?.trim();
@@ -65,6 +66,22 @@ export async function PATCH(request: Request) {
       data: { role },
     });
     return NextResponse.json({ username: updated.username, role: updated.role });
+  }
+
+  // --- member tier ---------------------------------------------------------
+  if (action === "tier") {
+    const allowed = ["BRONZE", "SILVER", "GOLD", "PLATINUM", "DIAMOND"] as const;
+    type Tier = (typeof allowed)[number];
+    if (!allowed.includes(body?.tier as Tier)) {
+      return NextResponse.json({ error: "Hạng không hợp lệ" }, { status: 400 });
+    }
+    // Set by hand. What earns a tier is the shop's own rule and has not been
+    // stated, so nothing here promotes anyone automatically.
+    const updated = await db.user.update({
+      where: { id: target.id },
+      data: { tier: body?.tier as Tier },
+    });
+    return NextResponse.json({ username: updated.username, tier: updated.tier });
   }
 
   // --- edit profile: email -------------------------------------------------

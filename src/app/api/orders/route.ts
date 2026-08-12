@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/session";
+import { getShopSettings } from "@/lib/settingsStore";
 
 /** Short human-facing code, e.g. DH8F3K2Q. */
 function makeCode(prefix: string): string {
@@ -34,6 +35,13 @@ export async function POST(request: Request) {
   const code = body?.code?.trim();
   if (!code) {
     return NextResponse.json({ error: "Thiếu mã tài khoản" }, { status: 400 });
+  }
+
+  // Checked before the transaction opens: a sale that is switched off should
+  // cost the database nothing, and refusing here means no row is ever locked.
+  const settings = await getShopSettings();
+  if (!settings.purchasesEnabled) {
+    return NextResponse.json({ error: settings.closedMessage }, { status: 503 });
   }
   const voucherCode = body?.voucher?.trim() || null;
 

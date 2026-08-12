@@ -40,14 +40,14 @@ model User {
   passwordHash String?
   avatarUrl    String?
   role         UserRole   @default(MEMBER)
-  /// When set, the account is blocked: it cannot sign in and any live
-  /// session stops resolving. A timestamp rather than a boolean so the
-  /// admin list can say when it happened without a second table.
   /// Address seen at the last successful sign-in, for support lookups.
   /// Best-effort: it comes from a proxy header, so treat it as a hint.
   lastIp       String?
   lastLoginAt  DateTime?
 
+  /// When set, the account is blocked: it cannot sign in and any live
+  /// session stops resolving. A timestamp rather than a boolean so the
+  /// admin list can say when it happened without a second table.
   blockedAt    DateTime?
   /// Shown to the admin who blocked it, and to nobody else.
   blockedReason String?
@@ -604,4 +604,24 @@ model FlashSale {
 
   @@index([active, startsAt, endsAt])
   @@map("flash_sales")
+}
+
+// ---------------------------------------------------------------------------
+// Shop configuration
+// ---------------------------------------------------------------------------
+
+/// One shop setting, addressed by a dotted key such as "topup.min".
+///
+/// A key-value row rather than a one-row settings table: a setting the shop
+/// adds later is an insert, not a migration, and a key that has never been
+/// written falls back to the default declared in src/lib/settings.ts. Values
+/// are stored as text and parsed there, so the shape of a setting lives in
+/// one place instead of being split between a column type and the code that
+/// reads it.
+model Setting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt @default(now())
+
+  @@map("settings")
 }

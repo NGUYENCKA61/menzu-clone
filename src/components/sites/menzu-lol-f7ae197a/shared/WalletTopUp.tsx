@@ -5,9 +5,6 @@ import { useState } from "react";
 
 type Method = "bank" | "card";
 
-/** Preset amounts offered by the live /wallet page. */
-const PRESETS = [50_000, 200_000, 500_000, 1_000_000, 2_000_000, 5_000_000];
-
 /**
  * Carriers whose prepaid cards the shop accepts.
  *
@@ -46,8 +43,26 @@ const PRESET_ACTIVE =
 const PRESET_INACTIVE =
   "px-4 py-2 rounded-lg text-[11px] font-bold border border-neutral-800/60 bg-neutral-950/40 text-neutral-400 hover:text-white hover:border-neutral-700 transition-colors whitespace-nowrap";
 
-export function WalletTopUp({ history = [] }: { history?: TopUpHistoryRow[] }) {
-  const [method, setMethod] = useState<Method>("card");
+export interface WalletTopUpProps {
+  history?: TopUpHistoryRow[];
+  /** Smallest accepted amount, from the shop settings. */
+  minAmount: number;
+  /** The amount buttons, already sorted low to high by the server. */
+  presets: number[];
+  bankEnabled: boolean;
+  cardEnabled: boolean;
+}
+
+export function WalletTopUp({
+  history = [],
+  minAmount,
+  presets,
+  bankEnabled,
+  cardEnabled,
+}: WalletTopUpProps) {
+  // Card is the default the live site opens on, but never a tab that is
+  // switched off — that would show a form the server is going to refuse.
+  const [method, setMethod] = useState<Method>(cardEnabled ? "card" : "bank");
   const [carrier, setCarrier] = useState<string>("");
   const [amount, setAmount] = useState("");
   const [pending, setPending] = useState(false);
@@ -102,25 +117,37 @@ export function WalletTopUp({ history = [] }: { history?: TopUpHistoryRow[] }) {
       </p>
 
       <div className="flex items-center gap-3">
-        <button
-          type="button"
-          onClick={() => setMethod("bank")}
-          className={method === "bank" ? TAB_ACTIVE : TAB_INACTIVE}
-        >
-          <Banknote size={15} />
-          Ngân Hàng
-        </button>
-        <button
-          type="button"
-          onClick={() => setMethod("card")}
-          className={method === "card" ? TAB_ACTIVE : TAB_INACTIVE}
-        >
-          <CreditCard size={15} />
-          Thẻ Cào
-        </button>
+        {bankEnabled ? (
+          <button
+            type="button"
+            onClick={() => setMethod("bank")}
+            className={method === "bank" ? TAB_ACTIVE : TAB_INACTIVE}
+          >
+            <Banknote size={15} />
+            Ngân Hàng
+          </button>
+        ) : null}
+        {cardEnabled ? (
+          <button
+            type="button"
+            onClick={() => setMethod("card")}
+            className={method === "card" ? TAB_ACTIVE : TAB_INACTIVE}
+          >
+            <CreditCard size={15} />
+            Thẻ Cào
+          </button>
+        ) : null}
       </div>
 
-      {method === "bank" ? (
+      {!bankEnabled && !cardEnabled ? (
+        <div className="rounded-2xl border border-white/10 bg-neutral-900/50 px-5 py-10 text-center">
+          <p className="text-sm font-bold text-white">Tạm ngưng nhận nạp tiền</p>
+          <p className="mt-1.5 text-[13px] text-neutral-400">
+            Shop đang tạm dừng cả nạp ngân hàng và thẻ cào. Số dư sẵn có trong ví vẫn
+            dùng để mua hàng bình thường.
+          </p>
+        </div>
+      ) : method === "bank" ? (
         <form
           onSubmit={handleSubmit}
           className="rounded-2xl border border-white/10 bg-neutral-900/50 p-5 flex flex-col gap-4"
@@ -142,12 +169,12 @@ export function WalletTopUp({ history = [] }: { history?: TopUpHistoryRow[] }) {
               </span>
             </div>
             <span className="text-[11px] text-neutral-500">
-              Nạp từ 10.000đ trở lên. Miễn phí giao dịch.
+              Nạp từ {formatVnd(minAmount)}đ trở lên. Miễn phí giao dịch.
             </span>
           </div>
 
           <div className="flex flex-wrap gap-2">
-            {PRESETS.map((p) => (
+            {presets.map((p) => (
               <button
                 key={p}
                 type="button"
@@ -216,7 +243,7 @@ export function WalletTopUp({ history = [] }: { history?: TopUpHistoryRow[] }) {
               Số tiền nạp
             </h3>
             <div className="flex flex-wrap gap-2">
-              {PRESETS.map((preset) => (
+              {presets.map((preset) => (
                 <button
                   key={preset}
                   type="button"

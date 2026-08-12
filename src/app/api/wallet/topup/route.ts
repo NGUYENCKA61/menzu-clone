@@ -2,8 +2,7 @@ import { NextResponse } from "next/server";
 
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/session";
-
-const MIN_TOPUP = 10_000n; // "Nạp từ 10.000đ trở lên"
+import { getShopSettings } from "@/lib/settingsStore";
 
 function makeCode(prefix: string): string {
   return `${prefix}${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
@@ -28,19 +27,37 @@ export async function POST(request: Request) {
     carrier?: string;
   } | null;
 
+  const settings = await getShopSettings();
+
   const raw = Number(body?.amount ?? 0);
   if (!Number.isFinite(raw) || raw <= 0) {
     return NextResponse.json({ error: "Số tiền không hợp lệ" }, { status: 400 });
   }
   const amount = BigInt(Math.floor(raw));
-  if (amount < MIN_TOPUP) {
+  if (amount < BigInt(settings.topUpMin)) {
     return NextResponse.json(
-      { error: "Nạp từ 10.000đ trở lên" },
+      { error: `Nạp từ ${settings.topUpMin.toLocaleString("vi-VN")}đ trở lên` },
       { status: 400 },
     );
   }
 
   const method = body?.method === "CARD" ? "CARD" : "BANK";
+
+  // Checked on the server as well as hidden in the UI: a disabled method is a
+  // business decision, and a form posted from a stale tab must not slip past
+  // it.
+  if (method === "CARD" && !settings.cardTopUpEnabled) {
+    return NextResponse.json(
+      { error: "Shop đang tạm ngưng nhận nạp bằng thẻ cào" },
+      { status: 400 },
+    );
+  }
+  if (method === "BANK" && !settings.bankTopUpEnabled) {
+    return NextResponse.json(
+      { error: "Shop đang tạm ngưng nhận nạp qua ngân hàng" },
+      { status: 400 },
+    );
+  }
 
   const result = await db.$transaction(async (tx) => {
     const current = await tx.user.findUniqueOrThrow({ where: { id: user.id } });

@@ -5,8 +5,10 @@ import {
   FileText,
   LayoutDashboard,
   MessageSquare,
+  Settings,
   ShoppingBag,
   Repeat,
+  Tags,
   Ticket,
   Users,
   type LucideIcon,
@@ -18,12 +20,14 @@ import type { ReactNode } from "react";
 const NAV: { label: string; href: string; icon: LucideIcon }[] = [
   { label: "Tổng quan", href: "/admin", icon: LayoutDashboard },
   { label: "Sản phẩm", href: "/admin/products", icon: Boxes },
+  { label: "Danh mục", href: "/admin/categories", icon: Tags },
   { label: "Đơn hàng", href: "/admin/orders", icon: ShoppingBag },
   { label: "Marketing", href: "/admin/marketing", icon: Ticket },
   { label: "Thu cũ đổi mới", href: "/admin/trade", icon: Repeat },
   { label: "Người dùng", href: "/admin/users", icon: Users },
   { label: "Bài viết", href: "/admin/docs", icon: FileText },
   { label: "Vận hành", href: "/admin/operations", icon: MessageSquare },
+  { label: "Cấu hình", href: "/admin/settings", icon: Settings },
 ];
 
 const ACTIVE = "flex items-center gap-3 py-2.5 px-3 rounded-lg text-sm font-bold transition-colors bg-[#7C3AED]/15 text-[#a78bfa]";

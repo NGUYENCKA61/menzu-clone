@@ -606,6 +606,7 @@ export interface AdminUserRow {
   totalSpent: number;
   lastOrderAt: Date | null;
   blockedAt: Date | null;
+  blockedReason: string | null;
   createdAt: Date;
   lastIp: string | null;
   lastLoginAt: Date | null;
@@ -660,6 +661,7 @@ export async function listUsers(take = 200): Promise<AdminUserRow[]> {
     totalSpent: spentByUser.get(u.id) ?? 0,
     lastOrderAt: u.orders[0]?.createdAt ?? null,
     blockedAt: u.blockedAt,
+    blockedReason: u.blockedReason,
     createdAt: u.createdAt,
     lastIp: u.lastIp,
     lastLoginAt: u.lastLoginAt,
@@ -791,6 +793,37 @@ export interface AdminTopUpRow {
   amount: number;
   status: string;
   createdAt: Date;
+}
+
+export interface AdminCategoryRow {
+  id: string;
+  slug: string;
+  name: string;
+  imageUrl: string | null;
+  sortOrder: number;
+  /** Printed on the home page card as "Đã Bán" / "Đang Bán". */
+  soldCount: number;
+  stockCount: number;
+  /** The real number of products, which the two counters above are not. */
+  productCount: number;
+}
+
+/** The admin category list, in the order the storefront renders them. */
+export async function listAdminCategories(): Promise<AdminCategoryRow[]> {
+  const rows = await db.category.findMany({
+    orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
+    include: { _count: { select: { products: true } } },
+  });
+  return rows.map((c) => ({
+    id: c.id,
+    slug: c.slug,
+    name: c.name,
+    imageUrl: c.imageUrl,
+    sortOrder: c.sortOrder,
+    soldCount: c.soldCount,
+    stockCount: c.stockCount,
+    productCount: c._count.products,
+  }));
 }
 
 export async function listTopUps(take = 200): Promise<AdminTopUpRow[]> {

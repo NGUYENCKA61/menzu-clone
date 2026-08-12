@@ -5,6 +5,7 @@ import { AccountPageFrame } from "@/components/sites/menzu-lol-f7ae197a/shared/A
 import { WalletTopUp } from "@/components/sites/menzu-lol-f7ae197a/shared/WalletTopUp";
 import { getTopUps } from "@/lib/queries";
 import { getCurrentUser } from "@/lib/session";
+import { getShopSettings } from "@/lib/settingsStore";
 
 export const metadata: Metadata = { title: "Nạp tiền" };
 export const dynamic = "force-dynamic";
@@ -23,7 +24,10 @@ export default async function WalletPage() {
   const user = await getCurrentUser();
   if (!user) redirect("/login?next=%2Fwallet");
 
-  const history = await getTopUps(user.id);
+  const [history, settings] = await Promise.all([
+    getTopUps(user.id),
+    getShopSettings(),
+  ]);
 
   return (
     <AccountPageFrame
@@ -32,6 +36,10 @@ export default async function WalletPage() {
       crumb="Nạp tiền ví"
     >
       <WalletTopUp
+        minAmount={settings.topUpMin}
+        presets={settings.topUpPresets}
+        bankEnabled={settings.bankTopUpEnabled}
+        cardEnabled={settings.cardTopUpEnabled}
         // Dates are formatted here, where the locale and timezone are fixed.
         // Formatting inside the client component would run once per timezone
         // and React would report the mismatch as a hydration error.
