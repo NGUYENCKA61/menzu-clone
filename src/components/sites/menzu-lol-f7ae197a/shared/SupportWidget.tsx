@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { ChevronRight, Headset, KeyRound, X } from "lucide-react";
 import { useState } from "react";
 
@@ -21,6 +22,11 @@ export interface SupportChannel {
  */
 export function SupportWidget({ channels }: { channels: SupportChannel[] }) {
   const [open, setOpen] = useState(false);
+  const pathname = usePathname();
+
+  // /bio is a standalone link-in-bio card with no site chrome — the live page
+  // carries no widget, and these same channels are already its whole content.
+  if (pathname === "/bio") return null;
 
   return (
     <div className="fixed bottom-0 right-4 z-[101] hidden sm:flex flex-col items-end">

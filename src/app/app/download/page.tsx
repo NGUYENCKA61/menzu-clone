@@ -267,7 +267,7 @@ export default async function AppDownloadPage() {
                           {index + 1}
                         </span>
                         <div className="space-y-1">
-                          <p className="text-xs font-bold text-white">{step.title}</p>
+                          <h4 className="text-xs font-bold text-white">{step.title}</h4>
                           <p className="text-[11px] text-neutral-400 leading-relaxed">{step.body}</p>
                         </div>
                       </li>
@@ -287,7 +287,7 @@ export default async function AppDownloadPage() {
                   <div className="space-y-4">
                     {IOS_METHODS.map((method) => (
                       <div key={method.title} className="space-y-1">
-                        <p className="text-xs font-bold text-white">{method.title}</p>
+                        <h4 className="text-xs font-bold text-white">{method.title}</h4>
                         <p className="text-[11px] text-neutral-400 leading-relaxed">{method.body}</p>
                       </div>
                     ))}

@@ -100,7 +100,10 @@ export function ReviewsSection({ reviews = REVIEWS }: { reviews?: Review[] } = {
                       <Image src={review.avatar} alt={review.name} fill className="object-cover" />
                     </div>
                     <div className="flex flex-col min-w-0">
-                      <span className="text-sm font-bold text-white truncate">{review.name}</span>
+                      {/* h3, as the live cards use — a reviewer's name heads
+                          their card, and a screen reader should be able to
+                          jump between reviews by heading. */}
+                      <h3 className="text-sm font-bold text-white truncate">{review.name}</h3>
                       <div className="flex items-center gap-1">
                         <BadgeCheck size={11} className="text-indigo-400 shrink-0" />
                         <span className="text-[9px] text-neutral-500 font-semibold truncate">

@@ -12,7 +12,7 @@ export default async function FeedbackPage() {
   const reviews = await getFeedback(50);
 
   return (
-    <SimplePage title="Đánh Giá Khách Hàng" crumb="Góp ý & Khiếu nại">
+    <SimplePage title="Đánh Giá" crumb="Góp ý & Khiếu nại">
       <div className="flex items-center gap-4 mb-8">
         <span className="text-4xl sm:text-5xl font-black text-white tracking-tighter leading-none">
           5.0
@@ -41,7 +41,9 @@ export default async function FeedbackPage() {
                   ) : null}
                 </div>
                 <div className="flex flex-col min-w-0">
-                  <span className="text-sm font-bold text-white truncate">{r.name}</span>
+                  {/* h3, as the live cards use — the reviewer's name heads
+                      their card, so a screen reader can jump between reviews. */}
+                  <h3 className="text-sm font-bold text-white truncate">{r.name}</h3>
                   <span className="text-[9px] text-neutral-500 font-semibold">
                     Tài khoản đã xác minh
                   </span>
