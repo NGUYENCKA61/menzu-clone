@@ -70,18 +70,11 @@ export async function POST(request: Request) {
     );
   }
 
-  // One open request at a time per method: two pending transfers for the same
-  // amount are indistinguishable to whoever reads the bank statement.
-  const pending = await db.topUp.count({
-    where: { userId: user.id, status: "PENDING" },
-  });
-  if (pending >= 3) {
-    return NextResponse.json(
-      { error: "Bạn đang có 3 lệnh nạp chờ xác nhận. Hãy đợi shop duyệt xong." },
-      { status: 429 },
-    );
-  }
-
+  // No cap on how many requests can be open at once. There used to be one,
+  // back when every request needed an admin to read the bank statement and two
+  // pending transfers of the same amount were hard to tell apart. Each request
+  // carries its own code in the transfer description, so they are told apart by
+  // the code, not by being rationed.
   const topUp = await db.topUp.create({
     data: {
       code: makeCode("NT"),
