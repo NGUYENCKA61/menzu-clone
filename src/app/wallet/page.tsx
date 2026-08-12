@@ -41,6 +41,7 @@ export default async function WalletPage() {
         presets={settings.topUpPresets}
         bankEnabled={settings.bankTopUpEnabled}
         cardEnabled={settings.cardTopUpEnabled}
+        autoEnabled={settings.autoTopUpEnabled}
         bank={
           bankReady(settings)
             ? {

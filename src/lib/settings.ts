@@ -24,6 +24,14 @@ export interface ShopSettings {
   bankName: string;
   bankAccount: string;
   bankHolder: string;
+
+  // --- Nạp tự động ----------------------------------------------------------
+  /** When on, a matched transfer credits the wallet without an admin. */
+  autoTopUpEnabled: boolean;
+  /** Shared secret a provider must present, or the token for a polled API. */
+  topUpApiKey: string;
+  /** Polled providers only: the URL that returns recent transactions. */
+  topUpApiUrl: string;
   /** When false, the buy endpoint refuses with `closedMessage`. */
   purchasesEnabled: boolean;
   closedMessage: string;
@@ -80,6 +88,9 @@ export const DEFAULT_SETTINGS: ShopSettings = {
   bankName: "",
   bankAccount: "",
   bankHolder: "",
+  autoTopUpEnabled: false,
+  topUpApiKey: "",
+  topUpApiUrl: "",
   purchasesEnabled: true,
   closedMessage: "Shop đang tạm ngưng bán hàng, vui lòng quay lại sau ít phút.",
 
@@ -117,6 +128,9 @@ export const SETTING_KEYS: Record<keyof ShopSettings, string> = {
   bankName: "bank.name",
   bankAccount: "bank.account",
   bankHolder: "bank.holder",
+  autoTopUpEnabled: "topup.auto",
+  topUpApiKey: "topup.apiKey",
+  topUpApiUrl: "topup.apiUrl",
   purchasesEnabled: "shop.purchases",
   closedMessage: "shop.closedMessage",
 
@@ -240,6 +254,12 @@ export function parseSettings(rows: Iterable<{ key: string; value: string }>): S
       stored.get(SETTING_KEYS.bankHolder),
       DEFAULT_SETTINGS.bankHolder,
     ),
+    autoTopUpEnabled: toBoolean(
+      stored.get(SETTING_KEYS.autoTopUpEnabled),
+      DEFAULT_SETTINGS.autoTopUpEnabled,
+    ),
+    topUpApiKey: toOptionalText(stored.get(SETTING_KEYS.topUpApiKey), DEFAULT_SETTINGS.topUpApiKey),
+    topUpApiUrl: toOptionalText(stored.get(SETTING_KEYS.topUpApiUrl), DEFAULT_SETTINGS.topUpApiUrl),
     purchasesEnabled: toBoolean(
       stored.get(SETTING_KEYS.purchasesEnabled),
       DEFAULT_SETTINGS.purchasesEnabled,
@@ -287,6 +307,9 @@ export function serializeSettings(settings: ShopSettings): { key: string; value:
     bankName: settings.bankName.trim(),
     bankAccount: settings.bankAccount.trim(),
     bankHolder: settings.bankHolder.trim(),
+    autoTopUpEnabled: String(settings.autoTopUpEnabled),
+    topUpApiKey: settings.topUpApiKey.trim(),
+    topUpApiUrl: settings.topUpApiUrl.trim(),
     purchasesEnabled: String(settings.purchasesEnabled),
     closedMessage: settings.closedMessage.trim(),
 
@@ -338,6 +361,9 @@ export function normalizeSettings(raw: Partial<ShopSettings> | null): ShopSettin
     bankName: String(raw?.bankName ?? "").trim(),
     bankAccount: String(raw?.bankAccount ?? "").replace(/[^0-9]/g, ""),
     bankHolder: String(raw?.bankHolder ?? "").trim(),
+    autoTopUpEnabled: Boolean(raw?.autoTopUpEnabled),
+    topUpApiKey: String(raw?.topUpApiKey ?? "").trim(),
+    topUpApiUrl: String(raw?.topUpApiUrl ?? "").trim(),
     purchasesEnabled: Boolean(raw?.purchasesEnabled),
     closedMessage: String(raw?.closedMessage ?? "").trim(),
 
@@ -390,6 +416,14 @@ export function validateSettings(settings: ShopSettings): string | null {
   }
   if (!settings.closedMessage.trim()) {
     return "Cần nhập thông báo hiển thị khi khóa mua hàng";
+  }
+  // Auto top-up credits wallets with no human in the loop, so it may not run
+  // on an unauthenticated endpoint or against a provider nobody named.
+  if (settings.autoTopUpEnabled && !settings.topUpApiKey) {
+    return "Bật nạp tự động thì phải có API key, nếu không ai cũng gọi được webhook";
+  }
+  if (settings.topUpApiUrl && !/^https:\/\//.test(settings.topUpApiUrl)) {
+    return "Địa chỉ API phải bắt đầu bằng https://";
   }
   // Goes into a VietQR URL, so it has to be the plain code the service uses.
   if (settings.bankCode && !/^[A-Z0-9]{3,10}$/.test(settings.bankCode)) {

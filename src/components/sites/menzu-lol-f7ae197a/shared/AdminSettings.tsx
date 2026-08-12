@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ArrowDown, ArrowUp } from "lucide-react";
 
 import { HOME_BLOCKS, type ShopSettings } from "@/lib/settings";
@@ -91,6 +91,13 @@ export function AdminSettings({
   const [bankAccount, setBankAccount] = useState(settings.bankAccount);
   const [bankHolder, setBankHolder] = useState(settings.bankHolder);
 
+  const [auto, setAuto] = useState(settings.autoTopUpEnabled);
+  const [apiKey, setApiKey] = useState(settings.topUpApiKey);
+  const [apiUrl, setApiUrl] = useState(settings.topUpApiUrl);
+  // Rendered after mount so the copied URL is the host the admin is actually on.
+  const [origin, setOrigin] = useState("");
+  useEffect(() => setOrigin(window.location.origin), []);
+
   const [brandName, setBrandName] = useState(settings.brandName);
   const [brandLogo, setBrandLogo] = useState(settings.brandLogo);
   const [brandColor, setBrandColor] = useState(settings.brandColor);
@@ -143,6 +150,9 @@ export function AdminSettings({
           bankName,
           bankAccount,
           bankHolder,
+          autoTopUpEnabled: auto,
+          topUpApiKey: apiKey,
+          topUpApiUrl: apiUrl,
           purchasesEnabled: purchases,
           closedMessage,
           brandName,
@@ -331,6 +341,78 @@ export function AdminSettings({
                 nạp qua ngân hàng.
               </p>
             )}
+          </section>
+
+          <section className={CARD}>
+            <span className={HEADING}>Nạp tự động</span>
+
+            <Toggle
+              checked={auto}
+              onChange={setAuto}
+              label="Tự động cộng tiền khi nhận được chuyển khoản"
+              hint="Bật thì không phải bấm Xác nhận nữa: hệ thống đọc nội dung chuyển khoản, khớp đúng mã và số tiền là cộng ví ngay."
+            />
+
+            <div>
+              <label htmlFor="topup-key" className={LABEL}>
+                API key
+              </label>
+              <input
+                id="topup-key"
+                type="password"
+                autoComplete="off"
+                value={apiKey}
+                onChange={(event) => setApiKey(event.target.value)}
+                placeholder="Dán key từ sieuthicode / Casso / SePay"
+                className={`${FIELD} font-mono`}
+              />
+              <p className={HINT}>
+                Vừa là chìa khóa để gọi API đối soát, vừa là mật khẩu mà bên trung gian
+                phải gửi kèm khi bắn dữ liệu sang. Không có key thì nạp tự động không bật
+                được — nếu không ai cũng gọi được vào và tự cộng tiền.
+              </p>
+            </div>
+
+            <div>
+              <label htmlFor="topup-url" className={LABEL}>
+                Địa chỉ API đối soát <span className="text-neutral-600">(nếu bên đó không tự bắn sang)</span>
+              </label>
+              <input
+                id="topup-url"
+                value={apiUrl}
+                onChange={(event) => setApiUrl(event.target.value)}
+                placeholder="https://api.sieuthicode.vn/..."
+                className={`${FIELD} font-mono`}
+              />
+              <p className={HINT}>
+                Dành cho dịch vụ kiểu hỏi–đáp như sieuthicode: web tự gọi sang lấy danh
+                sách giao dịch mới trong lúc khách đang chờ ở màn chuyển khoản.
+              </p>
+            </div>
+
+            <div className="rounded-xl border border-white/5 bg-neutral-950/40 px-4 py-3">
+              <span className={LABEL}>Địa chỉ để dán vào bên trung gian</span>
+              <p className="font-mono text-xs text-neutral-300 break-all">
+                {origin}/api/wallet/webhook
+              </p>
+              <p className="mt-1.5 text-[11px] text-neutral-500">
+                Dành cho dịch vụ tự bắn dữ liệu sang (Casso, SePay). Chúng gửi kèm header{" "}
+                <span className="font-mono">Authorization: Apikey &lt;key&gt;</span> — đúng
+                key ở trên là chạy.
+              </p>
+            </div>
+
+            {auto && !apiKey ? (
+              <p className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-2.5 text-[11px] font-semibold text-amber-400">
+                Bật nạp tự động thì bắt buộc phải có API key — lưu sẽ bị từ chối.
+              </p>
+            ) : null}
+
+            <p className="text-[11px] text-neutral-500">
+              Nút Xác nhận / Từ chối ở mục Vận hành vẫn còn để xử lý các ca lệch: khách
+              quên ghi nội dung, ghi sai, hoặc chuyển thiếu tiền. Bật auto rồi thì bình
+              thường bạn không phải đụng tới nó.
+            </p>
           </section>
 
           <section className={CARD}>

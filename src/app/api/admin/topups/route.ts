@@ -2,10 +2,7 @@ import { NextResponse } from "next/server";
 
 import { FORBIDDEN, getAdmin } from "@/lib/admin";
 import { db } from "@/lib/db";
-
-function makeCode(prefix: string): string {
-  return `${prefix}${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
-}
+import { creditTopUp } from "@/lib/topupStore";
 
 /**
  * Confirms or rejects a pending top-up.
@@ -49,44 +46,14 @@ export async function PATCH(request: Request) {
   }
 
   // --- confirm -------------------------------------------------------------
-  const result = await db
-    .$transaction(async (tx) => {
-      // Claim the row first. `count: 0` means somebody else got there.
-      const claimed = await tx.topUp.updateMany({
-        where: { id: topUp.id, status: "PENDING" },
-        data: { status: "COMPLETED" },
-      });
-      if (claimed.count === 0) throw new Error("ALREADY_HANDLED");
+  // No expected amount: an admin looking at the bank statement has already
+  // decided this transfer is the one, which is exactly the judgement the
+  // automatic path is not allowed to make.
+  const result = await creditTopUp(code, {
+    note: `Ngân Hàng · duyệt bởi ${admin.username}`,
+  });
 
-      const current = await tx.user.findUniqueOrThrow({ where: { id: topUp.userId } });
-      const balanceAfter = current.balance + topUp.amount;
-
-      await tx.user.update({
-        where: { id: topUp.userId },
-        data: { balance: balanceAfter },
-      });
-
-      await tx.transaction.create({
-        data: {
-          code: makeCode("GD"),
-          userId: topUp.userId,
-          kind: "TOPUP",
-          status: "SUCCESS",
-          delta: topUp.amount,
-          balanceAfter,
-          description: `Nạp tiền vào ví · ${topUp.code}`,
-          method: topUp.method === "CARD" ? "Thẻ Cào" : "Ngân Hàng",
-        },
-      });
-
-      return balanceAfter;
-    })
-    .catch((error: unknown) => {
-      if (error instanceof Error && error.message === "ALREADY_HANDLED") return null;
-      throw error;
-    });
-
-  if (result === null) {
+  if (!result.ok) {
     return NextResponse.json(
       { error: "Lệnh nạp vừa được người khác xử lý" },
       { status: 409 },
@@ -94,9 +61,9 @@ export async function PATCH(request: Request) {
   }
 
   return NextResponse.json({
-    code: topUp.code,
+    code: result.code,
     status: "COMPLETED",
-    username: topUp.user.username,
-    balance: Number(result),
+    username: result.username,
+    balance: result.balance,
   });
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { Banknote, CreditCard } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 type Method = "bank" | "card";
 
@@ -54,6 +54,8 @@ export interface WalletTopUpProps {
   cardEnabled: boolean;
   /** Null when the shop has not filled in an account to receive transfers. */
   bank: BankAccount | null;
+  /** Whether a matched transfer credits the wallet without an admin. */
+  autoEnabled: boolean;
 }
 
 export interface BankAccount {
@@ -133,6 +135,7 @@ export function WalletTopUp({
   bankEnabled,
   cardEnabled,
   bank,
+  autoEnabled,
 }: WalletTopUpProps) {
   // Card is the default the live site opens on, but never a tab that is
   // switched off — that would show a form the server is going to refuse.
@@ -143,6 +146,40 @@ export function WalletTopUp({
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState<Invoice | null>(null);
   const [copied, setCopied] = useState<string | null>(null);
+  const [credited, setCredited] = useState(false);
+
+  /**
+   * While the customer sits on the transfer screen, ask the shop to check its
+   * statement. That is what makes an automatic top-up land in seconds without
+   * a cron server — and when auto is off the endpoint answers immediately with
+   * nothing, so this costs a request every ten seconds and no more.
+   */
+  useEffect(() => {
+    if (!done || !autoEnabled || credited) return;
+    let stopped = false;
+
+    const tick = async () => {
+      try {
+        await fetch("/api/wallet/sync", { method: "POST" });
+        const response = await fetch("/api/wallet/status?code=" + done.code);
+        const data = (await response.json()) as { status?: string };
+        if (!stopped && data.status === "COMPLETED") {
+          setCredited(true);
+          window.setTimeout(() => window.location.reload(), 1600);
+        }
+      } catch {
+        // A failed poll is not worth telling the customer about; the next one
+        // is ten seconds away and the shop can still confirm by hand.
+      }
+    };
+
+    const timer = window.setInterval(tick, 10_000);
+    void tick();
+    return () => {
+      stopped = true;
+      window.clearInterval(timer);
+    };
+  }, [done, autoEnabled, credited]);
 
   async function copy(label: string, value: string) {
     try {
@@ -240,9 +277,15 @@ export function WalletTopUp({
             <span className="text-sm font-black uppercase tracking-widest text-white">
               Lệnh nạp {done.code}
             </span>
-            <span className="text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-md border border-amber-500/30 bg-amber-500/10 text-amber-400">
-              Đang chờ xác nhận
-            </span>
+            {credited ? (
+              <span className="text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-md border border-emerald-500/30 bg-emerald-500/10 text-emerald-400">
+                Đã nhận được tiền · đang cập nhật ví
+              </span>
+            ) : (
+              <span className="text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-md border border-amber-500/30 bg-amber-500/10 text-amber-400">
+                {autoEnabled ? "Đang chờ tiền về" : "Đang chờ xác nhận"}
+              </span>
+            )}
           </div>
 
           {done.method === "bank" && bank ? (
@@ -279,8 +322,10 @@ export function WalletTopUp({
                 />
                 <p className="text-[11px] text-neutral-400 leading-relaxed">
                   Ghi <span className="font-bold text-white">đúng nội dung</span> ở trên khi
-                  chuyển khoản — shop dựa vào đó để biết tiền là của bạn. Chuyển xong cứ
-                  đóng trang, tiền vào ví ngay khi shop đối soát xong.
+                  chuyển khoản — hệ thống dựa vào đó để biết tiền là của bạn.{" "}
+                  {autoEnabled
+                    ? "Cứ để trang này mở, tiền về là ví tự cộng trong vài giây."
+                    : "Chuyển xong cứ đóng trang, tiền vào ví ngay khi shop đối soát xong."}
                 </p>
               </div>
             </div>
