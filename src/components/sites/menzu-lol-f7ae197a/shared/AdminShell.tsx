@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  Bell,
   Boxes,
   FileText,
   LayoutDashboard,
@@ -27,6 +28,7 @@ const NAV: { label: string; href: string; icon: LucideIcon }[] = [
   { label: "Người dùng", href: "/admin/users", icon: Users },
   { label: "Bài viết", href: "/admin/docs", icon: FileText },
   { label: "Vận hành", href: "/admin/operations", icon: MessageSquare },
+  { label: "Thông báo", href: "/admin/announcements", icon: Bell },
   { label: "Cấu hình", href: "/admin/settings", icon: Settings },
 ];
 

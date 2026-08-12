@@ -1,3 +1,4 @@
+import { currentAnnouncements } from "@/lib/announcementStore";
 import { getCurrentUser } from "@/lib/session";
 import { getShopSettings } from "@/lib/settingsStore";
 
@@ -11,11 +12,26 @@ import { SiteHeaderClient } from "./SiteHeaderClient";
  * Pages import this; the interactive parts live in SiteHeaderClient.
  */
 export async function SiteHeader() {
-  const [user, settings] = await Promise.all([getCurrentUser(), getShopSettings()]);
+  const [user, settings, announcements] = await Promise.all([
+    getCurrentUser(),
+    getShopSettings(),
+    currentAnnouncements(),
+  ]);
 
   return (
     <SiteHeaderClient
       brand={{ name: settings.brandName, logo: settings.brandLogo }}
+      // Dates go over as ISO, not formatted: "5 phút trước" has to be measured
+      // against the reader's clock, in the browser.
+      announcements={announcements.map((a) => ({
+        id: a.id,
+        title: a.title,
+        body: a.body,
+        type: a.type,
+        priority: a.priority,
+        revision: a.revision,
+        startAt: a.startAt.toISOString(),
+      }))}
       user={
         user
           ? {

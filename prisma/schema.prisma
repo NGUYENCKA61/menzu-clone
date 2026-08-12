@@ -634,3 +634,64 @@ model Setting {
 
   @@map("settings")
 }
+
+// ---------------------------------------------------------------------------
+// System announcements
+// ---------------------------------------------------------------------------
+
+enum AnnouncementType {
+  UPDATE
+  MAINTENANCE
+  PROMO
+  INFO
+}
+
+/// Declaration order is load-bearing: `activeAnnouncements` sorts descending
+/// on this column to put HIGH first, and Postgres sorts an enum by the order
+/// its values were declared. Reordering these reverses that list.
+enum AnnouncementPriority {
+  LOW
+  NORMAL
+  HIGH
+}
+
+/// What the shop has decided about a notice, which is not the same as whether
+/// a visitor sees it — that also depends on the window below.
+enum AnnouncementStatus {
+  DRAFT
+  PUBLISHED
+  DISABLED
+}
+
+/// One notice shown to visitors in a modal and listed under the header bell.
+///
+/// `body` is plain text and is rendered as text. Storing rich HTML here would
+/// mean an admin account — or anything that reached one — could put a script
+/// on every page of the site, and the notices this exists for ("bảo trì lúc
+/// 2h", "đã sửa lỗi nạp tiền") need no markup to say.
+model Announcement {
+  id       String               @id @default(cuid())
+  title    String
+  body     String
+  type     AnnouncementType     @default(INFO)
+  priority AnnouncementPriority @default(NORMAL)
+  status   AnnouncementStatus   @default(DRAFT)
+
+  /// The window. `startAt <= now <= endAt` is the whole activeness test, so
+  /// nothing has to run on a schedule to switch a notice on or off at the
+  /// right moment. A null `endAt` means it runs until someone turns it off.
+  startAt DateTime  @default(now())
+  endAt   DateTime?
+
+  /// Bumped whenever the wording changes, and part of the key a browser
+  /// remembers a dismissal under. Without it, editing a notice everyone has
+  /// already closed would reach nobody.
+  revision Int @default(1)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  /// Every visitor read filters on exactly these three.
+  @@index([status, startAt, endAt])
+  @@map("announcements")
+}

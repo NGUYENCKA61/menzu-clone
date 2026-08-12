@@ -18,6 +18,10 @@ import {
   Wrench,
   type LucideIcon,
 } from "lucide-react"
+import {
+  AnnouncementCenter,
+  type AnnouncementItem,
+} from "../shared/AnnouncementCenter";
 import { UserMenu, type HeaderUser } from "./UserMenu";
 import { useState } from "react"
 import { MobileDrawer, type DrawerGroup } from "./MobileDrawer"
@@ -121,9 +125,11 @@ export interface HeaderBrand {
 export function SiteHeaderClient({
   user,
   brand,
+  announcements,
 }: {
   user: HeaderUser | null;
   brand: HeaderBrand;
+  announcements: AnnouncementItem[];
 }) {
   const [drawerOpen, setDrawerOpen] = useState(false)
 
@@ -214,7 +220,11 @@ export function SiteHeaderClient({
           </div>
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3 sm:gap-4">
+          {/* Renders nothing at all when the shop has no live notice, so a
+              header with an empty bell is not the resting state. */}
+          <AnnouncementCenter announcements={announcements} />
+
           {user ? (
             <UserMenu user={user} />
           ) : (
