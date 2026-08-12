@@ -170,9 +170,10 @@ export function WalletTopUp({
   // other one still settles the request.
   const [bankIndex, setBankIndex] = useState(0);
   const bank = banks[bankIndex] ?? null;
-  // Card is the default the live site opens on, but never a tab that is
-  // switched off — that would show a form the server is going to refuse.
-  const [method, setMethod] = useState<Method>(cardEnabled ? "card" : "bank");
+  // Bank first: it is the path that settles by itself, and the one the shop
+  // wants people on. Never a tab that is switched off, though — that would
+  // open on a form the server is going to refuse.
+  const [method, setMethod] = useState<Method>(bankEnabled ? "bank" : "card");
   const [carrier, setCarrier] = useState<string>("");
   const [amount, setAmount] = useState("");
   const [pending, setPending] = useState(false);
