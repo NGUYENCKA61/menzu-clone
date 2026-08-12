@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
 import { SITE_NAME, SITE_URL } from "@/lib/seo";
+import { SupportWidgetHost } from "@/components/sites/menzu-lol-f7ae197a/shared/SupportWidgetHost";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -81,7 +82,12 @@ export default function RootLayout({
       lang="vi"
       className={`${inter.variable} ${headingNow.variable} h-full antialiased overflow-y-scroll dark`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        {children}
+        {/* Site-wide, as on the live site — outside {children} so it survives
+            navigation without remounting and losing its open state. */}
+        <SupportWidgetHost />
+      </body>
     </html>
   );
 }
