@@ -22,37 +22,42 @@ export async function POST() {
   if (!user) return NextResponse.json({ error: "Bạn cần đăng nhập" }, { status: 401 });
 
   const settings = await getShopSettings();
-  if (!settings.autoTopUpEnabled || !settings.topUpApiUrl) {
+  const feeds = settings.bankAccounts.filter((account) => account.apiUrl);
+  if (!settings.autoTopUpEnabled || feeds.length === 0) {
     return NextResponse.json({ matched: 0, skipped: 0, details: [], polled: false });
   }
 
-  let payload: unknown = null;
-  try {
-    const response = await fetch(settings.topUpApiUrl, {
-      headers: settings.topUpApiKey
-        ? { Authorization: `Apikey ${settings.topUpApiKey}` }
-        : {},
-      cache: "no-store",
-      // The customer is watching a spinner; a provider having a slow day must
-      // not hold the request open indefinitely.
-      signal: AbortSignal.timeout(8000),
-    });
-    if (!response.ok) {
-      return NextResponse.json(
-        { error: `Nhà cung cấp trả về ${response.status}`, matched: 0 },
-        { status: 502 },
-      );
-    }
-    payload = await response.json();
-  } catch {
-    return NextResponse.json(
-      { error: "Không gọi được API đối soát", matched: 0 },
-      { status: 502 },
-    );
-  }
+  // Every account is read, not just the one the customer picked: people
+  // transfer from whichever app is already open, and a payment that landed in
+  // the other bank is still a payment.
+  const transfers = (
+    await Promise.all(
+      feeds.map(async (account) => {
+        try {
+          const response = await fetch(account.apiUrl, {
+            headers: settings.topUpApiKey
+              ? { Authorization: `Apikey ${settings.topUpApiKey}` }
+              : {},
+            cache: "no-store",
+            // The customer is watching a spinner; one slow provider must not
+            // hold the request open, nor stop the other bank being read.
+            signal: AbortSignal.timeout(8000),
+          });
+          if (!response.ok) return [];
+          return readTransfers(await response.json());
+        } catch {
+          return [];
+        }
+      }),
+    )
+  ).flat();
 
-  const transfers = readTransfers(payload);
   const report = await applyTransfers(transfers, "Ngân Hàng · tự động");
 
-  return NextResponse.json({ polled: true, received: transfers.length, ...report });
+  return NextResponse.json({
+    polled: true,
+    feeds: feeds.length,
+    received: transfers.length,
+    ...report,
+  });
 }

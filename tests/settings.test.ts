@@ -10,6 +10,7 @@ import {
   serializeSettings,
   validateSettings,
   visibleBlocks,
+  type BankAccountConfig,
   type ShopSettings,
 } from "@/lib/settings";
 
@@ -157,49 +158,121 @@ describe("validateSettings", () => {
   });
 });
 
+function account(overrides: Partial<BankAccountConfig> = {}): BankAccountConfig {
+  return {
+    code: "VCB",
+    name: "Vietcombank",
+    account: "1234567890",
+    holder: "NGUYEN VAN A",
+    apiUrl: "",
+    ...overrides,
+  };
+}
+
 describe("tài khoản nhận chuyển khoản", () => {
-  it("chưa điền thì coi như chưa nhận được chuyển khoản", () => {
+  it("chưa khai tài khoản nào thì coi như chưa nhận được chuyển khoản", () => {
     expect(bankReady(DEFAULT_SETTINGS)).toBe(false);
-    expect(bankReady(settings({ bankCode: "VCB" }))).toBe(false);
-    expect(bankReady(settings({ bankCode: "VCB", bankAccount: "1234567890" }))).toBe(false);
-    expect(
-      bankReady(
-        settings({ bankCode: "VCB", bankAccount: "1234567890", bankHolder: "NGUYEN VAN A" }),
-      ),
-    ).toBe(true);
+    expect(bankReady(settings({ bankAccounts: [account()] }))).toBe(true);
+  });
+
+  it("nhận nhiều ngân hàng cùng lúc", () => {
+    const two = settings({
+      bankAccounts: [
+        account(),
+        account({ code: "OCB", name: "OCB", account: "0040100036036009" }),
+      ],
+    });
+    expect(validateSettings(two)).toBeNull();
+    expect(bankReady(two)).toBe(true);
   });
 
   it("mã ngân hàng phải là mã VietQR, không phải câu chữ", () => {
-    expect(validateSettings(settings({ bankCode: "Ngân hàng ngoại thương" }))).toMatch(
-      /Mã ngân hàng/,
-    );
-    expect(validateSettings(settings({ bankCode: "VCB" }))).toBeNull();
-    expect(validateSettings(settings({ bankCode: "970436" }))).toBeNull();
+    expect(
+      validateSettings(settings({ bankAccounts: [account({ code: "Ngân hàng ngoại thương" })] })),
+    ).toMatch(/mã ngân hàng/i);
+    expect(validateSettings(settings({ bankAccounts: [account({ code: "OCB" })] }))).toBeNull();
+    expect(validateSettings(settings({ bankAccounts: [account({ code: "970436" })] }))).toBeNull();
   });
 
-  it("số tài khoản chỉ giữ lại chữ số", () => {
+  it("số tài khoản chỉ giữ lại chữ số và mã viết hoa", () => {
     const result = normalizeSettings({
       ...DEFAULT_SETTINGS,
-      bankAccount: "1234 5678 90",
-      bankCode: "vcb",
+      bankAccounts: [account({ account: "0040 1000 3603 6009", code: "ocb" })],
     });
-    expect(result.bankAccount).toBe("1234567890");
+    expect(result.bankAccounts[0].account).toBe("0040100036036009");
     // Mã ngân hàng luôn viết hoa vì nó đi thẳng vào URL của VietQR.
-    expect(result.bankCode).toBe("VCB");
+    expect(result.bankAccounts[0].code).toBe("OCB");
+  });
+
+  it("bỏ dòng khai dở dang thay vì lưu tài khoản không nhận được tiền", () => {
+    const result = normalizeSettings({
+      ...DEFAULT_SETTINGS,
+      bankAccounts: [account(), { code: "OCB", name: "OCB", account: "", holder: "", apiUrl: "" }],
+    });
+    expect(result.bankAccounts).toHaveLength(1);
   });
 
   it("số tài khoản quá ngắn bị chặn", () => {
-    expect(validateSettings(settings({ bankAccount: "123" }))).toMatch(/quá ngắn/);
+    expect(validateSettings(settings({ bankAccounts: [account({ account: "123" })] }))).toMatch(
+      /quá ngắn/,
+    );
+  });
+
+  it("chặn khai trùng một tài khoản hai lần", () => {
+    expect(
+      validateSettings(settings({ bankAccounts: [account(), account()] })),
+    ).toMatch(/hai lần/);
+  });
+
+  it("địa chỉ API phải là https vì token nằm trong đó", () => {
+    expect(
+      validateSettings(
+        settings({ bankAccounts: [account({ apiUrl: "http://api.sieuthicode.vn/x" })] }),
+      ),
+    ).toMatch(/https/);
+  });
+
+  it("bật auto cần API key hoặc ít nhất một địa chỉ đối soát", () => {
+    expect(
+      validateSettings(settings({ autoTopUpEnabled: true, bankAccounts: [account()] })),
+    ).toMatch(/API key/);
+    expect(
+      validateSettings(
+        settings({
+          autoTopUpEnabled: true,
+          bankAccounts: [account({ apiUrl: "https://api.sieuthicode.vn/x" })],
+        }),
+      ),
+    ).toBeNull();
   });
 
   it("giữ nguyên qua một vòng lưu rồi đọc lại", () => {
     const original = settings({
-      bankCode: "TCB",
-      bankName: "Techcombank",
-      bankAccount: "19001234567",
-      bankHolder: "NGUYEN VAN A",
+      bankAccounts: [
+        account({ apiUrl: "https://api.sieuthicode.vn/historyapivcbv3/a/b/c" }),
+        account({
+          code: "OCB",
+          name: "OCB",
+          account: "0040100036036009",
+          apiUrl: "https://api.sieuthicode.vn/historyapiocbv2/token",
+        }),
+      ],
     });
     expect(parseSettings(serializeSettings(original))).toEqual(original);
+  });
+
+  it("đọc được cấu hình một tài khoản kiểu cũ", () => {
+    // Shop nào đã khai trước khi có danh sách thì không phải gõ lại.
+    const parsed = parseSettings([
+      { key: "bank.code", value: "VCB" },
+      { key: "bank.name", value: "Vietcombank" },
+      { key: "bank.account", value: "1234567890" },
+      { key: "bank.holder", value: "NGUYEN VAN A" },
+      { key: "topup.apiUrl", value: "https://api.sieuthicode.vn/x" },
+    ]);
+    expect(parsed.bankAccounts).toEqual([
+      account({ apiUrl: "https://api.sieuthicode.vn/x" }),
+    ]);
   });
 });
 

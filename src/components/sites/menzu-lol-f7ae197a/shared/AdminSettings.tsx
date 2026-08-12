@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { ArrowDown, ArrowUp } from "lucide-react";
 
-import { HOME_BLOCKS, type ShopSettings } from "@/lib/settings";
+import { HOME_BLOCKS, type BankAccountConfig, type ShopSettings } from "@/lib/settings";
 import { AdminError } from "./AdminStates";
 
 const FIELD =
@@ -86,14 +86,14 @@ export function AdminSettings({
   const [purchases, setPurchases] = useState(settings.purchasesEnabled);
   const [closedMessage, setClosedMessage] = useState(settings.closedMessage);
 
-  const [bankCode, setBankCode] = useState(settings.bankCode);
-  const [bankName, setBankName] = useState(settings.bankName);
-  const [bankAccount, setBankAccount] = useState(settings.bankAccount);
-  const [bankHolder, setBankHolder] = useState(settings.bankHolder);
+  const [accounts, setAccounts] = useState<BankAccountConfig[]>(settings.bankAccounts);
+
+  function updateAccount(index: number, patch: Partial<BankAccountConfig>) {
+    setAccounts(accounts.map((row, i) => (i === index ? { ...row, ...patch } : row)));
+  }
 
   const [auto, setAuto] = useState(settings.autoTopUpEnabled);
   const [apiKey, setApiKey] = useState(settings.topUpApiKey);
-  const [apiUrl, setApiUrl] = useState(settings.topUpApiUrl);
   // Rendered after mount so the copied URL is the host the admin is actually on.
   const [origin, setOrigin] = useState("");
   useEffect(() => setOrigin(window.location.origin), []);
@@ -112,17 +112,19 @@ export function AdminSettings({
       const response = await fetch("/api/admin/topups/test", { method: "POST" });
       const data = (await response.json().catch(() => ({}))) as {
         error?: string;
+        ok?: boolean;
         hint?: string;
-        shape?: { listKey: string | null; itemKeys: string[] };
+        results?: { bank: string; ok: boolean; itemKeys?: string[] }[];
       };
       if (!response.ok) {
         setTestResult({ ok: false, text: data.error ?? "Không kiểm tra được" });
         return;
       }
-      const keys = data.shape?.itemKeys?.length
-        ? ` Các trường đọc được: ${data.shape.itemKeys.join(", ")}.`
-        : "";
-      setTestResult({ ok: true, text: `${data.hint ?? ""}${keys}` });
+      const keys = data.results?.find((row) => row.itemKeys?.length)?.itemKeys;
+      setTestResult({
+        ok: Boolean(data.ok),
+        text: `${data.hint ?? ""}${keys ? ` · Trường đọc được: ${keys.join(", ")}` : ""}`,
+      });
     } catch {
       setTestResult({ ok: false, text: "Không kết nối được máy chủ" });
     } finally {
@@ -178,13 +180,9 @@ export function AdminSettings({
             .filter((value) => value > 0),
           bankTopUpEnabled: bank,
           cardTopUpEnabled: card,
-          bankCode,
-          bankName,
-          bankAccount,
-          bankHolder,
+          bankAccounts: accounts,
           autoTopUpEnabled: auto,
           topUpApiKey: apiKey,
-          topUpApiUrl: apiUrl,
           purchasesEnabled: purchases,
           closedMessage,
           brandName,
@@ -303,76 +301,125 @@ export function AdminSettings({
 
           <section className={CARD}>
             <span className={HEADING}>Tài khoản nhận chuyển khoản</span>
+            <p className="text-[11px] text-neutral-500">
+              Khai bao nhiêu ngân hàng cũng được. Khách chọn một bên để chuyển, còn hệ
+              thống đối soát tất cả — tiền về bên nào cũng khớp được lệnh nạp.
+            </p>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <label htmlFor="bank-code" className={LABEL}>
-                  Mã ngân hàng
-                </label>
-                <input
-                  id="bank-code"
-                  value={bankCode}
-                  onChange={(event) => setBankCode(event.target.value.toUpperCase())}
-                  placeholder="VCB"
-                  className={`${FIELD} font-mono uppercase`}
-                />
-                <p className={HINT}>
-                  Mã VietQR: VCB, TCB, MB, ACB, VPB… hoặc số BIN dạng 970436. Đây là thứ
-                  sinh ra mã QR cho khách quét.
-                </p>
-              </div>
-              <div>
-                <label htmlFor="bank-name" className={LABEL}>
-                  Tên ngân hàng
-                </label>
-                <input
-                  id="bank-name"
-                  value={bankName}
-                  onChange={(event) => setBankName(event.target.value)}
-                  placeholder="Vietcombank"
-                  className={FIELD}
-                />
-              </div>
-              <div>
-                <label htmlFor="bank-account" className={LABEL}>
-                  Số tài khoản
-                </label>
-                <input
-                  id="bank-account"
-                  inputMode="numeric"
-                  value={bankAccount}
-                  onChange={(event) => setBankAccount(event.target.value)}
-                  placeholder="1234567890"
-                  className={`${FIELD} tabular-nums`}
-                />
-              </div>
-              <div>
-                <label htmlFor="bank-holder" className={LABEL}>
-                  Chủ tài khoản
-                </label>
-                <input
-                  id="bank-holder"
-                  value={bankHolder}
-                  onChange={(event) => setBankHolder(event.target.value.toUpperCase())}
-                  placeholder="NGUYEN VAN A"
-                  className={`${FIELD} uppercase`}
-                />
-              </div>
-            </div>
-
-            {bankCode && bankAccount && bankHolder ? (
-              <p className="text-[11px] text-neutral-500">
-                Khách sẽ thấy mã QR kèm số tiền và nội dung chuyển khoản
-                <span className="font-mono text-neutral-400"> NAP &lt;mã lệnh&gt;</span>.
-                Tiền chỉ vào ví sau khi bạn bấm Xác nhận ở mục Vận hành → Nạp tiền.
-              </p>
-            ) : (
+            {accounts.length === 0 ? (
               <p className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-2.5 text-[11px] font-semibold text-amber-400">
-                Chưa điền đủ mã ngân hàng, số tài khoản và chủ tài khoản — tab Ngân Hàng
-                của khách sẽ báo tạm chưa nhận chuyển khoản, và máy chủ từ chối tạo lệnh
-                nạp qua ngân hàng.
+                Chưa có tài khoản nào — tab Ngân Hàng của khách sẽ báo tạm chưa nhận
+                chuyển khoản, và máy chủ từ chối tạo lệnh nạp qua ngân hàng.
               </p>
-            )}
+            ) : null}
+
+            {accounts.map((account, index) => (
+              <div
+                key={index}
+                className="rounded-xl border border-white/5 bg-neutral-950/40 p-4 flex flex-col gap-3"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-black uppercase tracking-widest text-neutral-500">
+                    Tài khoản {index + 1}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setAccounts(accounts.filter((_, i) => i !== index))}
+                    className="h-7 px-3 rounded-lg border border-red-500/30 bg-red-500/10 hover:bg-red-500/20 text-[10px] font-black uppercase tracking-widest text-red-400 transition-colors"
+                  >
+                    Xóa
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label htmlFor={`bank-code-${index}`} className={LABEL}>
+                      Mã ngân hàng
+                    </label>
+                    <input
+                      id={`bank-code-${index}`}
+                      value={account.code}
+                      onChange={(event) =>
+                        updateAccount(index, { code: event.target.value.toUpperCase() })
+                      }
+                      placeholder="VCB / OCB"
+                      className={`${FIELD} font-mono uppercase`}
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor={`bank-name-${index}`} className={LABEL}>
+                      Tên ngân hàng
+                    </label>
+                    <input
+                      id={`bank-name-${index}`}
+                      value={account.name}
+                      onChange={(event) => updateAccount(index, { name: event.target.value })}
+                      placeholder="Vietcombank"
+                      className={FIELD}
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor={`bank-number-${index}`} className={LABEL}>
+                      Số tài khoản
+                    </label>
+                    <input
+                      id={`bank-number-${index}`}
+                      inputMode="numeric"
+                      value={account.account}
+                      onChange={(event) =>
+                        updateAccount(index, { account: event.target.value })
+                      }
+                      placeholder="0040100036036009"
+                      className={`${FIELD} tabular-nums`}
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor={`bank-holder-${index}`} className={LABEL}>
+                      Chủ tài khoản
+                    </label>
+                    <input
+                      id={`bank-holder-${index}`}
+                      value={account.holder}
+                      onChange={(event) =>
+                        updateAccount(index, { holder: event.target.value.toUpperCase() })
+                      }
+                      placeholder="NGUYEN VAN A"
+                      className={`${FIELD} uppercase`}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label htmlFor={`bank-api-${index}`} className={LABEL}>
+                    Địa chỉ API đối soát của tài khoản này
+                  </label>
+                  <input
+                    id={`bank-api-${index}`}
+                    value={account.apiUrl}
+                    onChange={(event) => updateAccount(index, { apiUrl: event.target.value })}
+                    placeholder="https://api.sieuthicode.vn/..."
+                    className={`${FIELD} font-mono`}
+                  />
+                  <p className={HINT}>
+                    Mỗi ngân hàng một đường riêng — token trong đó chỉ đọc được đúng tài
+                    khoản này. Dán nguyên cả URL kèm token.
+                  </p>
+                </div>
+              </div>
+            ))}
+
+            <button
+              type="button"
+              onClick={() =>
+                setAccounts([
+                  ...accounts,
+                  { code: "", name: "", account: "", holder: "", apiUrl: "" },
+                ])
+              }
+              className="self-start h-8 px-3 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 text-[10px] font-black uppercase tracking-widest text-neutral-300 transition-colors"
+            >
+              + Thêm ngân hàng
+            </button>
           </section>
 
           <section className={CARD}>
@@ -406,20 +453,9 @@ export function AdminSettings({
             </div>
 
             <div>
-              <label htmlFor="topup-url" className={LABEL}>
-                Địa chỉ API đối soát <span className="text-neutral-600">(nếu bên đó không tự bắn sang)</span>
-              </label>
-              <input
-                id="topup-url"
-                value={apiUrl}
-                onChange={(event) => setApiUrl(event.target.value)}
-                placeholder="https://api.sieuthicode.vn/..."
-                className={`${FIELD} font-mono`}
-              />
-              <p className={HINT}>
-                Dành cho dịch vụ kiểu hỏi–đáp như sieuthicode: web tự gọi sang lấy danh
-                sách giao dịch mới trong lúc khách đang chờ ở màn chuyển khoản. Token nằm
-                ngay trong đường dẫn thì cứ dán nguyên cả URL.
+              <p className="text-[11px] text-neutral-500">
+                Địa chỉ đối soát khai riêng ở từng ngân hàng phía trên. Nút dưới đây gọi
+                thử tất cả và cho biết đọc được giao dịch hay không.
               </p>
 
               <div className="mt-2.5 flex flex-wrap items-center gap-3">
@@ -463,10 +499,10 @@ export function AdminSettings({
               </p>
             </div>
 
-            {auto && !apiKey && !apiUrl ? (
+            {auto && !apiKey && !accounts.some((account) => account.apiUrl) ? (
               <p className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-2.5 text-[11px] font-semibold text-amber-400">
-                Bật nạp tự động thì cần địa chỉ API đối soát hoặc API key — lưu sẽ bị từ
-                chối.
+                Bật nạp tự động thì cần địa chỉ API đối soát ở ít nhất một ngân hàng,
+                hoặc API key cho webhook — lưu sẽ bị từ chối.
               </p>
             ) : null}
 

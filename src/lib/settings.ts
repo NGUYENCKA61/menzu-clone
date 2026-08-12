@@ -19,19 +19,18 @@ export interface ShopSettings {
   cardTopUpEnabled: boolean;
 
   // --- Tài khoản nhận chuyển khoản ------------------------------------------
-  /** VietQR bank code, e.g. "VCB" or the 970xxx BIN. Drives the QR image. */
-  bankCode: string;
-  bankName: string;
-  bankAccount: string;
-  bankHolder: string;
+  /**
+   * Every account the shop can be paid into. The customer picks one on the
+   * wallet page; reconciliation reads all of them, so a transfer settles the
+   * request whichever bank it arrived at.
+   */
+  bankAccounts: BankAccountConfig[];
 
   // --- Nạp tự động ----------------------------------------------------------
   /** When on, a matched transfer credits the wallet without an admin. */
   autoTopUpEnabled: boolean;
-  /** Shared secret a provider must present, or the token for a polled API. */
+  /** Shared secret a provider must present when it pushes to the webhook. */
   topUpApiKey: string;
-  /** Polled providers only: the URL that returns recent transactions. */
-  topUpApiUrl: string;
   /** When false, the buy endpoint refuses with `closedMessage`. */
   purchasesEnabled: boolean;
   closedMessage: string;
@@ -58,6 +57,21 @@ export interface ShopSettings {
   homeTftSlugs: string[];
 }
 
+/** One account the shop can be paid into. */
+export interface BankAccountConfig {
+  /** VietQR bank code — "VCB", "OCB", or the 970xxx BIN. Drives the QR. */
+  code: string;
+  name: string;
+  account: string;
+  holder: string;
+  /**
+   * Where to read this account's statement, if the provider answers rather
+   * than pushes. Each bank gets its own: sieuthicode hands out one endpoint
+   * per account, and the token in it belongs to that account alone.
+   */
+  apiUrl: string;
+}
+
 /** Every home-page block, in the order the captured site renders them. */
 export const HOME_BLOCKS: { id: string; label: string }[] = [
   { id: "hero", label: "Banner đầu trang" },
@@ -81,16 +95,12 @@ export const DEFAULT_SETTINGS: ShopSettings = {
   topUpPresets: [50_000, 200_000, 500_000, 1_000_000, 2_000_000, 5_000_000],
   bankTopUpEnabled: true,
   cardTopUpEnabled: true,
-  // Blank on purpose: an account number is the shop's own, and a placeholder
-  // here would be a stranger's account printed under a QR code. Until these
-  // are filled in, the bank tab says so and the endpoint refuses.
-  bankCode: "",
-  bankName: "",
-  bankAccount: "",
-  bankHolder: "",
+  // Empty on purpose: an account number is the shop's own, and a placeholder
+  // here would be a stranger's account printed under a QR code. Until one is
+  // added, the bank tab says so and the endpoint refuses.
+  bankAccounts: [],
   autoTopUpEnabled: false,
   topUpApiKey: "",
-  topUpApiUrl: "",
   purchasesEnabled: true,
   closedMessage: "Shop đang tạm ngưng bán hàng, vui lòng quay lại sau ít phút.",
 
@@ -124,13 +134,9 @@ export const SETTING_KEYS: Record<keyof ShopSettings, string> = {
   topUpPresets: "topup.presets",
   bankTopUpEnabled: "topup.bank",
   cardTopUpEnabled: "topup.card",
-  bankCode: "bank.code",
-  bankName: "bank.name",
-  bankAccount: "bank.account",
-  bankHolder: "bank.holder",
+  bankAccounts: "bank.accounts",
   autoTopUpEnabled: "topup.auto",
   topUpApiKey: "topup.apiKey",
-  topUpApiUrl: "topup.apiUrl",
   purchasesEnabled: "shop.purchases",
   closedMessage: "shop.closedMessage",
 
@@ -214,7 +220,57 @@ function toBlockList(raw: string | undefined, fallback: string[]): string[] {
  * would take money nowhere.
  */
 export function bankReady(settings: ShopSettings): boolean {
-  return Boolean(settings.bankCode && settings.bankAccount && settings.bankHolder);
+  return settings.bankAccounts.length > 0;
+}
+
+/** Trims one account and drops it if the essentials are missing. */
+function toAccount(raw: unknown): BankAccountConfig | null {
+  if (!raw || typeof raw !== "object") return null;
+  const row = raw as Record<string, unknown>;
+
+  const account: BankAccountConfig = {
+    code: String(row.code ?? "").trim().toUpperCase(),
+    name: String(row.name ?? "").trim(),
+    account: String(row.account ?? "").replace(/[^0-9]/g, ""),
+    holder: String(row.holder ?? "").trim(),
+    apiUrl: String(row.apiUrl ?? "").trim(),
+  };
+
+  // A row without these three cannot receive anything, so it is a half-typed
+  // draft rather than an account.
+  if (!account.code || !account.account || !account.holder) return null;
+  return account;
+}
+
+/**
+ * Reads the account list, falling back to the single-account keys this used to
+ * store. A shop that configured one account before the list existed keeps
+ * working without anybody re-typing their bank details.
+ */
+function toAccounts(
+  stored: Map<string, string>,
+  fallback: BankAccountConfig[],
+): BankAccountConfig[] {
+  const raw = stored.get(SETTING_KEYS.bankAccounts);
+  if (raw !== undefined) {
+    try {
+      const parsed = JSON.parse(raw) as unknown;
+      if (Array.isArray(parsed)) {
+        return parsed.map(toAccount).filter((a): a is BankAccountConfig => a !== null);
+      }
+    } catch {
+      // Corrupt JSON falls through to the legacy keys, then to the default.
+    }
+  }
+
+  const legacy = toAccount({
+    code: stored.get("bank.code"),
+    name: stored.get("bank.name"),
+    account: stored.get("bank.account"),
+    holder: stored.get("bank.holder"),
+    apiUrl: stored.get("topup.apiUrl"),
+  });
+  return legacy ? [legacy] : fallback;
 }
 
 /** The blocks to render, in order, with the hidden ones dropped. */
@@ -244,22 +300,12 @@ export function parseSettings(rows: Iterable<{ key: string; value: string }>): S
       stored.get(SETTING_KEYS.cardTopUpEnabled),
       DEFAULT_SETTINGS.cardTopUpEnabled,
     ),
-    bankCode: toOptionalText(stored.get(SETTING_KEYS.bankCode), DEFAULT_SETTINGS.bankCode),
-    bankName: toOptionalText(stored.get(SETTING_KEYS.bankName), DEFAULT_SETTINGS.bankName),
-    bankAccount: toOptionalText(
-      stored.get(SETTING_KEYS.bankAccount),
-      DEFAULT_SETTINGS.bankAccount,
-    ),
-    bankHolder: toOptionalText(
-      stored.get(SETTING_KEYS.bankHolder),
-      DEFAULT_SETTINGS.bankHolder,
-    ),
+    bankAccounts: toAccounts(stored, DEFAULT_SETTINGS.bankAccounts),
     autoTopUpEnabled: toBoolean(
       stored.get(SETTING_KEYS.autoTopUpEnabled),
       DEFAULT_SETTINGS.autoTopUpEnabled,
     ),
     topUpApiKey: toOptionalText(stored.get(SETTING_KEYS.topUpApiKey), DEFAULT_SETTINGS.topUpApiKey),
-    topUpApiUrl: toOptionalText(stored.get(SETTING_KEYS.topUpApiUrl), DEFAULT_SETTINGS.topUpApiUrl),
     purchasesEnabled: toBoolean(
       stored.get(SETTING_KEYS.purchasesEnabled),
       DEFAULT_SETTINGS.purchasesEnabled,
@@ -303,13 +349,9 @@ export function serializeSettings(settings: ShopSettings): { key: string; value:
     topUpPresets: settings.topUpPresets.map((preset) => Math.floor(preset)).join(","),
     bankTopUpEnabled: String(settings.bankTopUpEnabled),
     cardTopUpEnabled: String(settings.cardTopUpEnabled),
-    bankCode: settings.bankCode.trim(),
-    bankName: settings.bankName.trim(),
-    bankAccount: settings.bankAccount.trim(),
-    bankHolder: settings.bankHolder.trim(),
+    bankAccounts: JSON.stringify(settings.bankAccounts),
     autoTopUpEnabled: String(settings.autoTopUpEnabled),
     topUpApiKey: settings.topUpApiKey.trim(),
-    topUpApiUrl: settings.topUpApiUrl.trim(),
     purchasesEnabled: String(settings.purchasesEnabled),
     closedMessage: settings.closedMessage.trim(),
 
@@ -355,15 +397,14 @@ export function normalizeSettings(raw: Partial<ShopSettings> | null): ShopSettin
     topUpPresets: [...new Set(presets)].sort((a, b) => a - b),
     bankTopUpEnabled: Boolean(raw?.bankTopUpEnabled),
     cardTopUpEnabled: Boolean(raw?.cardTopUpEnabled),
-    // Digits and letters only: these end up inside a VietQR URL, and the
-    // account number is printed for a customer to copy.
-    bankCode: String(raw?.bankCode ?? "").trim().toUpperCase(),
-    bankName: String(raw?.bankName ?? "").trim(),
-    bankAccount: String(raw?.bankAccount ?? "").replace(/[^0-9]/g, ""),
-    bankHolder: String(raw?.bankHolder ?? "").trim(),
+    // Half-typed rows are dropped rather than saved: an account without a
+    // number cannot receive anything, and printing one under a QR would be
+    // worse than showing nothing.
+    bankAccounts: Array.isArray(raw?.bankAccounts)
+      ? raw.bankAccounts.map(toAccount).filter((a): a is BankAccountConfig => a !== null)
+      : DEFAULT_SETTINGS.bankAccounts,
     autoTopUpEnabled: Boolean(raw?.autoTopUpEnabled),
     topUpApiKey: String(raw?.topUpApiKey ?? "").trim(),
-    topUpApiUrl: String(raw?.topUpApiUrl ?? "").trim(),
     purchasesEnabled: Boolean(raw?.purchasesEnabled),
     closedMessage: String(raw?.closedMessage ?? "").trim(),
 
@@ -422,18 +463,34 @@ export function validateSettings(settings: ShopSettings): string | null {
   // sieuthicode put the credentials in the URL itself — or a key that a
   // pushing provider must present. The webhook stays shut without a key
   // regardless, so it can never be an open endpoint.
-  if (settings.autoTopUpEnabled && !settings.topUpApiKey && !settings.topUpApiUrl) {
-    return "Bật nạp tự động thì cần địa chỉ API đối soát hoặc API key cho webhook";
+  const polled = settings.bankAccounts.filter((account) => account.apiUrl);
+  if (settings.autoTopUpEnabled && !settings.topUpApiKey && polled.length === 0) {
+    return "Bật nạp tự động thì cần địa chỉ API đối soát ở ít nhất một tài khoản, hoặc API key cho webhook";
   }
-  if (settings.topUpApiUrl && !/^https:\/\//.test(settings.topUpApiUrl)) {
-    return "Địa chỉ API phải bắt đầu bằng https://";
+
+  for (const account of settings.bankAccounts) {
+    const label = account.name || account.code;
+    // Goes into a VietQR URL, so it has to be the plain code the service uses.
+    if (!/^[A-Z0-9]{3,10}$/.test(account.code)) {
+      return `${label}: mã ngân hàng chỉ gồm chữ và số, ví dụ VCB hoặc OCB`;
+    }
+    if (account.account.length < 6) {
+      return `${label}: số tài khoản trông quá ngắn, kiểm tra lại giúp mình`;
+    }
+    // The token usually rides in this URL, so it may not travel in the clear.
+    if (account.apiUrl && !/^https:\/\//.test(account.apiUrl)) {
+      return `${label}: địa chỉ API phải bắt đầu bằng https://`;
+    }
   }
-  // Goes into a VietQR URL, so it has to be the plain code the service uses.
-  if (settings.bankCode && !/^[A-Z0-9]{3,10}$/.test(settings.bankCode)) {
-    return "Mã ngân hàng chỉ gồm chữ và số, ví dụ VCB hoặc 970436";
-  }
-  if (settings.bankAccount && settings.bankAccount.length < 6) {
-    return "Số tài khoản trông quá ngắn, kiểm tra lại giúp mình";
+
+  const duplicate = settings.bankAccounts.find(
+    (account, index) =>
+      settings.bankAccounts.findIndex(
+        (other) => other.code === account.code && other.account === account.account,
+      ) !== index,
+  );
+  if (duplicate) {
+    return `Tài khoản ${duplicate.account} bị khai hai lần`;
   }
   // The colour is written straight into a CSS custom property, so anything
   // that is not a plain hex would either do nothing or let arbitrary CSS in.

@@ -52,8 +52,8 @@ export interface WalletTopUpProps {
   presets: number[];
   bankEnabled: boolean;
   cardEnabled: boolean;
-  /** Null when the shop has not filled in an account to receive transfers. */
-  bank: BankAccount | null;
+  /** Every account the shop can be paid into; empty means none configured. */
+  banks: BankAccount[];
   /** Whether a matched transfer credits the wallet without an admin. */
   autoEnabled: boolean;
 }
@@ -134,9 +134,14 @@ export function WalletTopUp({
   presets,
   bankEnabled,
   cardEnabled,
-  bank,
+  banks,
   autoEnabled,
 }: WalletTopUpProps) {
+  // Which account the customer says they will transfer to. It only decides
+  // which QR is drawn — reconciliation reads every account, so paying the
+  // other one still settles the request.
+  const [bankIndex, setBankIndex] = useState(0);
+  const bank = banks[bankIndex] ?? null;
   // Card is the default the live site opens on, but never a tab that is
   // switched off — that would show a form the server is going to refuse.
   const [method, setMethod] = useState<Method>(cardEnabled ? "card" : "bank");
@@ -347,7 +352,7 @@ export function WalletTopUp({
             dùng để mua hàng bình thường.
           </p>
         </div>
-      ) : method === "bank" && !bank ? (
+      ) : method === "bank" && banks.length === 0 ? (
         <div className="rounded-2xl border border-white/10 bg-neutral-900/50 px-5 py-10 text-center">
           <p className="text-sm font-bold text-white">Chưa nhận được chuyển khoản</p>
           <p className="mt-1.5 text-[13px] text-neutral-400">
@@ -360,6 +365,27 @@ export function WalletTopUp({
           onSubmit={handleSubmit}
           className="rounded-2xl border border-white/10 bg-neutral-900/50 p-5 flex flex-col gap-4"
         >
+          {banks.length > 1 ? (
+            <div className="flex flex-col gap-2">
+              <span className="text-[10px] font-black uppercase tracking-widest text-neutral-500">
+                Chọn ngân hàng
+              </span>
+              <div className="flex flex-wrap gap-2">
+                {banks.map((option, index) => (
+                  <button
+                    key={`${option.code}-${option.account}`}
+                    type="button"
+                    onClick={() => setBankIndex(index)}
+                    aria-pressed={index === bankIndex}
+                    className={index === bankIndex ? PRESET_ACTIVE : PRESET_INACTIVE}
+                  >
+                    {option.name || option.code}
+                  </button>
+                ))}
+              </div>
+            </div>
+          ) : null}
+
           <div className="flex flex-col gap-2">
             <label className="text-[10px] font-black uppercase tracking-widest text-neutral-500">
               Số tiền nạp

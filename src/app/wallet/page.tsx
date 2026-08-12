@@ -5,7 +5,6 @@ import { AccountPageFrame } from "@/components/sites/menzu-lol-f7ae197a/shared/A
 import { WalletTopUp } from "@/components/sites/menzu-lol-f7ae197a/shared/WalletTopUp";
 import { getTopUps } from "@/lib/queries";
 import { getCurrentUser } from "@/lib/session";
-import { bankReady } from "@/lib/settings";
 import { getShopSettings } from "@/lib/settingsStore";
 
 export const metadata: Metadata = { title: "Nạp tiền" };
@@ -42,16 +41,14 @@ export default async function WalletPage() {
         bankEnabled={settings.bankTopUpEnabled}
         cardEnabled={settings.cardTopUpEnabled}
         autoEnabled={settings.autoTopUpEnabled}
-        bank={
-          bankReady(settings)
-            ? {
-                code: settings.bankCode,
-                name: settings.bankName,
-                account: settings.bankAccount,
-                holder: settings.bankHolder,
-              }
-            : null
-        }
+        // Only what a customer needs to make the transfer. The reconciliation
+        // URL stays on the server — it carries the account's token.
+        banks={settings.bankAccounts.map((account) => ({
+          code: account.code,
+          name: account.name,
+          account: account.account,
+          holder: account.holder,
+        }))}
         // Dates are formatted here, where the locale and timezone are fixed.
         // Formatting inside the client component would run once per timezone
         // and React would report the mismatch as a hydration error.

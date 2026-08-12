@@ -101,12 +101,14 @@ export async function POST(request: Request) {
     transferNote: `NAP ${topUp.code}`,
     ...(method === "BANK"
       ? {
-          bank: {
-            code: settings.bankCode,
-            name: settings.bankName,
-            account: settings.bankAccount,
-            holder: settings.bankHolder,
-          },
+          // Details only, never the reconciliation URL: that carries the
+          // account's token and belongs on the server.
+          banks: settings.bankAccounts.map((account) => ({
+            code: account.code,
+            name: account.name,
+            account: account.account,
+            holder: account.holder,
+          })),
         }
       : {}),
   });
