@@ -76,6 +76,44 @@ export interface ShopSettings {
   homeValorantSlugs: string[];
   /** Category slugs feeding the "Đấu trường chân lý" row. */
   homeTftSlugs: string[];
+
+  // --- Hero -----------------------------------------------------------------
+  /** The small pill above the heading. */
+  heroBadge: string;
+  /** Newlines are line breaks: the heading is written to sit on two rows. */
+  heroTitle: string;
+  heroSubtitle: string;
+  heroPrimaryLabel: string;
+  heroPrimaryHref: string;
+  heroSecondaryLabel: string;
+  heroSecondaryHref: string;
+  /** The claims under the buttons. Four is the design; fewer simply show. */
+  heroUsps: string[];
+  /**
+   * Plays in the artwork frame instead of `heroBanner` when set. Empty means
+   * the still image, which is what every shop starts with.
+   */
+  heroVideo: string;
+
+  /** Category slugs shown as the "Danh mục sản phẩm" tiles. */
+  homeCategorySlugs: string[];
+  /** Article slugs shown in the "Xem hướng dẫn" section. */
+  homeDocSlugs: string[];
+  /** Service slugs shown in "Dịch vụ nổi bật". Empty means every service. */
+  homeServiceSlugs: string[];
+  /** Cards per product row, so a row of twelve can be trimmed to four. */
+  homeRowCount: number;
+
+  // --- SEO Content ----------------------------------------------------------
+  seoHeading: string;
+  seoBody: string;
+  seoFaq: FaqEntry[];
+}
+
+/** One question and its answer in the SEO block at the foot of the home page. */
+export interface FaqEntry {
+  q: string;
+  a: string;
 }
 
 /** One account the shop can be paid into. */
@@ -93,19 +131,28 @@ export interface BankAccountConfig {
   apiUrl: string;
 }
 
-/** Every home-page block, in the order the captured site renders them. */
+/**
+ * Every home-page block, in the order a fresh install renders them.
+ *
+ * The seven the layout is built around — hero, danh mục, hướng dẫn, sản phẩm
+ * nổi bật, đấu trường chân lý, dịch vụ, SEO — run in that order. The rest are
+ * older blocks kept where they were and switchable, rather than deleted out
+ * from under a shop that is using them.
+ */
 export const HOME_BLOCKS: { id: string; label: string }[] = [
-  { id: "hero", label: "Banner đầu trang" },
+  { id: "hero", label: "Hero (2 cột)" },
   { id: "quick", label: "Thanh truy cập nhanh" },
   { id: "flash", label: "Flash sale hôm nay" },
-  { id: "featured", label: "Danh mục nổi bật" },
-  { id: "valorant", label: "Hàng sản phẩm nổi bật" },
-  { id: "tft", label: "Hàng Đấu Trường Chân Lý" },
-  { id: "gameServices", label: "Hàng dịch vụ game" },
-  { id: "otherServices", label: "Hàng dịch vụ khác" },
+  { id: "featured", label: "Danh mục sản phẩm" },
+  { id: "docs", label: "Xem hướng dẫn" },
+  { id: "valorant", label: "Sản phẩm nổi bật" },
+  { id: "tft", label: "Đấu trường chân lý" },
+  { id: "gameServices", label: "Dịch vụ nổi bật" },
+  { id: "otherServices", label: "Dịch vụ khác" },
   { id: "reviews", label: "Đánh giá khách hàng" },
   { id: "ticker", label: "Ticker giao dịch gần đây" },
   { id: "utilities", label: "Khối tiện ích cuối trang" },
+  { id: "seo", label: "SEO Content" },
 ];
 
 const LOGO = "/sites/menzu-lol-f7ae197a/root-8a5edab2/images/site/logos/menzu-logo.webp";
@@ -158,7 +205,42 @@ export const DEFAULT_SETTINGS: ShopSettings = {
     "acc-tft-san-tim",
     "acc-tft-hang-hieu",
   ],
+
+  // The words the hero shipped with, so moving them into settings changes
+  // nothing on screen until somebody edits one.
+  heroBadge: "Đại lý Valorant & dịch vụ gaming",
+  heroTitle: "Mua acc Valorant\n& dịch vụ gaming",
+  heroSubtitle:
+    "Kho tài khoản Valorant, phần mềm và dịch vụ gaming. Giao dịch nhanh chóng, " +
+    "hỗ trợ tận tâm và cập nhật sản phẩm mỗi ngày.",
+  heroPrimaryLabel: "Xem sản phẩm",
+  heroPrimaryHref: "/categories",
+  heroSecondaryLabel: "Xem hướng dẫn",
+  heroSecondaryHref: "/docs",
+  heroUsps: [
+    "Giao dịch nhanh chóng",
+    "Hỗ trợ khách hàng",
+    "Sản phẩm đa dạng",
+    "Hệ thống tự động",
+  ],
+  heroVideo: "",
+
+  // Empty means "whatever the section already showed": the captured tiles for
+  // categories, every service for the service rows, the newest guides for the
+  // docs section. A shop that never opens this screen sees no change.
+  homeCategorySlugs: [],
+  homeDocSlugs: [],
+  homeServiceSlugs: [],
+  homeRowCount: 8,
+
+  seoHeading: "",
+  seoBody: "",
+  seoFaq: [],
 };
+
+/** Most cards a single home-page row may show. */
+export const ROW_COUNT_MIN = 1;
+export const ROW_COUNT_MAX = 24;
 
 /** Dotted storage keys. Renaming one silently resets it, so they are fixed. */
 export const SETTING_KEYS: Record<keyof ShopSettings, string> = {
@@ -191,6 +273,25 @@ export const SETTING_KEYS: Record<keyof ShopSettings, string> = {
   homeBlocks: "home.blocks",
   homeValorantSlugs: "home.row.valorant",
   homeTftSlugs: "home.row.tft",
+
+  heroBadge: "home.hero.badge",
+  heroTitle: "home.hero.title",
+  heroSubtitle: "home.hero.subtitle",
+  heroPrimaryLabel: "home.hero.ctaLabel",
+  heroPrimaryHref: "home.hero.ctaHref",
+  heroSecondaryLabel: "home.hero.altLabel",
+  heroSecondaryHref: "home.hero.altHref",
+  heroUsps: "home.hero.usps",
+  heroVideo: "home.hero.video",
+
+  homeCategorySlugs: "home.row.categories",
+  homeDocSlugs: "home.row.docs",
+  homeServiceSlugs: "home.row.services",
+  homeRowCount: "home.row.count",
+
+  seoHeading: "home.seo.heading",
+  seoBody: "home.seo.body",
+  seoFaq: "home.seo.faq",
 };
 
 function toNumber(raw: string | undefined, fallback: number): number {
@@ -282,6 +383,18 @@ function toImageList(raw: string | undefined, legacy: string | undefined): strin
   }
 }
 
+/**
+ * Reads the saved block order, then appends any block the stored list has
+ * never heard of. Without that, a block added to the site later would be
+ * invisible on every shop that had already saved a layout.
+ *
+ * Appended, not slotted into place. Inserting each new block beside its
+ * default-order neighbour reads better on paper and misbehaves in practice:
+ * a shop that has genuinely rearranged its page has no position that means
+ * what the default order meant, and a new block lands in front of something
+ * deliberately put first. The end of the list is always somewhere the admin
+ * can see it and move it, and it disturbs nothing on the way.
+ */
 function toBlockList(raw: string | undefined, fallback: string[]): string[] {
   if (raw === undefined) return fallback;
   const known = new Set(HOME_BLOCKS.map((block) => block.id));
@@ -293,6 +406,45 @@ function toBlockList(raw: string | undefined, fallback: string[]): string[] {
   const seen = new Set(stored.map((id) => id.replace(/^-/, "")));
   const missing = HOME_BLOCKS.filter((block) => !seen.has(block.id)).map((b) => b.id);
   return [...stored, ...missing];
+}
+
+function toFaq(raw: unknown): FaqEntry[] {
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .map((row) => {
+      const entry = (row ?? {}) as Record<string, unknown>;
+      return { q: String(entry.q ?? "").trim(), a: String(entry.a ?? "").trim() };
+    })
+    // A question with no answer is a half-typed row, not an FAQ entry.
+    .filter((entry) => entry.q && entry.a);
+}
+
+function toFaqStored(raw: string | undefined): FaqEntry[] {
+  if (raw === undefined) return DEFAULT_SETTINGS.seoFaq;
+  try {
+    return toFaq(JSON.parse(raw));
+  } catch {
+    return DEFAULT_SETTINGS.seoFaq;
+  }
+}
+
+function toTextList(raw: unknown): string[] {
+  if (!Array.isArray(raw)) return [];
+  return raw.map((item) => String(item).trim()).filter(Boolean);
+}
+
+function toTextListStored(raw: string | undefined, fallback: string[]): string[] {
+  if (raw === undefined) return fallback;
+  try {
+    return toTextList(JSON.parse(raw));
+  } catch {
+    return fallback;
+  }
+}
+
+export function clampRowCount(value: number): number {
+  if (!Number.isFinite(value)) return DEFAULT_SETTINGS.homeRowCount;
+  return Math.min(ROW_COUNT_MAX, Math.max(ROW_COUNT_MIN, Math.round(value)));
 }
 
 /**
@@ -454,6 +606,49 @@ export function parseSettings(rows: Iterable<{ key: string; value: string }>): S
       stored.get(SETTING_KEYS.homeTftSlugs),
       DEFAULT_SETTINGS.homeTftSlugs,
     ),
+
+    heroBadge: toOptionalText(stored.get(SETTING_KEYS.heroBadge), DEFAULT_SETTINGS.heroBadge),
+    heroTitle: toText(stored.get(SETTING_KEYS.heroTitle), DEFAULT_SETTINGS.heroTitle),
+    heroSubtitle: toOptionalText(
+      stored.get(SETTING_KEYS.heroSubtitle),
+      DEFAULT_SETTINGS.heroSubtitle,
+    ),
+    heroPrimaryLabel: toText(
+      stored.get(SETTING_KEYS.heroPrimaryLabel),
+      DEFAULT_SETTINGS.heroPrimaryLabel,
+    ),
+    heroPrimaryHref: toText(
+      stored.get(SETTING_KEYS.heroPrimaryHref),
+      DEFAULT_SETTINGS.heroPrimaryHref,
+    ),
+    heroSecondaryLabel: toOptionalText(
+      stored.get(SETTING_KEYS.heroSecondaryLabel),
+      DEFAULT_SETTINGS.heroSecondaryLabel,
+    ),
+    heroSecondaryHref: toOptionalText(
+      stored.get(SETTING_KEYS.heroSecondaryHref),
+      DEFAULT_SETTINGS.heroSecondaryHref,
+    ),
+    heroUsps: toTextListStored(stored.get(SETTING_KEYS.heroUsps), DEFAULT_SETTINGS.heroUsps),
+    heroVideo: toOptionalText(stored.get(SETTING_KEYS.heroVideo), DEFAULT_SETTINGS.heroVideo),
+
+    homeCategorySlugs: toSlugList(
+      stored.get(SETTING_KEYS.homeCategorySlugs),
+      DEFAULT_SETTINGS.homeCategorySlugs,
+    ),
+    homeDocSlugs: toSlugList(stored.get(SETTING_KEYS.homeDocSlugs), DEFAULT_SETTINGS.homeDocSlugs),
+    homeServiceSlugs: toSlugList(
+      stored.get(SETTING_KEYS.homeServiceSlugs),
+      DEFAULT_SETTINGS.homeServiceSlugs,
+    ),
+    homeRowCount:
+      stored.get(SETTING_KEYS.homeRowCount) === undefined
+        ? DEFAULT_SETTINGS.homeRowCount
+        : clampRowCount(Number(stored.get(SETTING_KEYS.homeRowCount))),
+
+    seoHeading: toOptionalText(stored.get(SETTING_KEYS.seoHeading), DEFAULT_SETTINGS.seoHeading),
+    seoBody: toOptionalText(stored.get(SETTING_KEYS.seoBody), DEFAULT_SETTINGS.seoBody),
+    seoFaq: toFaqStored(stored.get(SETTING_KEYS.seoFaq)),
   };
 }
 
@@ -489,6 +684,26 @@ export function serializeSettings(settings: ShopSettings): { key: string; value:
     homeBlocks: settings.homeBlocks.join(","),
     homeValorantSlugs: settings.homeValorantSlugs.join(","),
     homeTftSlugs: settings.homeTftSlugs.join(","),
+
+    heroBadge: settings.heroBadge.trim(),
+    // Not trimmed per line: the newline between the two rows is the layout.
+    heroTitle: settings.heroTitle.trim(),
+    heroSubtitle: settings.heroSubtitle.trim(),
+    heroPrimaryLabel: settings.heroPrimaryLabel.trim(),
+    heroPrimaryHref: settings.heroPrimaryHref.trim(),
+    heroSecondaryLabel: settings.heroSecondaryLabel.trim(),
+    heroSecondaryHref: settings.heroSecondaryHref.trim(),
+    heroUsps: JSON.stringify(settings.heroUsps),
+    heroVideo: settings.heroVideo.trim(),
+
+    homeCategorySlugs: settings.homeCategorySlugs.join(","),
+    homeDocSlugs: settings.homeDocSlugs.join(","),
+    homeServiceSlugs: settings.homeServiceSlugs.join(","),
+    homeRowCount: String(settings.homeRowCount),
+
+    seoHeading: settings.seoHeading.trim(),
+    seoBody: settings.seoBody.trim(),
+    seoFaq: JSON.stringify(settings.seoFaq),
   };
 
   return (Object.keys(SETTING_KEYS) as (keyof ShopSettings)[]).map((field) => ({
@@ -562,6 +777,29 @@ export function normalizeSettings(raw: Partial<ShopSettings> | null): ShopSettin
     homeTftSlugs: Array.isArray(raw?.homeTftSlugs)
       ? raw.homeTftSlugs.map((slug) => String(slug).trim()).filter(Boolean)
       : DEFAULT_SETTINGS.homeTftSlugs,
+
+    // The heading and the first button fall back when blank — a hero with no
+    // words and a button with no label are broken, never a choice. The rest
+    // may be emptied on purpose: no badge, no second button, no claims.
+    heroBadge: String(raw?.heroBadge ?? "").trim(),
+    heroTitle: String(raw?.heroTitle ?? "").trim() || DEFAULT_SETTINGS.heroTitle,
+    heroSubtitle: String(raw?.heroSubtitle ?? "").trim(),
+    heroPrimaryLabel:
+      String(raw?.heroPrimaryLabel ?? "").trim() || DEFAULT_SETTINGS.heroPrimaryLabel,
+    heroPrimaryHref: String(raw?.heroPrimaryHref ?? "").trim() || DEFAULT_SETTINGS.heroPrimaryHref,
+    heroSecondaryLabel: String(raw?.heroSecondaryLabel ?? "").trim(),
+    heroSecondaryHref: String(raw?.heroSecondaryHref ?? "").trim(),
+    heroUsps: toTextList(raw?.heroUsps),
+    heroVideo: String(raw?.heroVideo ?? "").trim(),
+
+    homeCategorySlugs: toTextList(raw?.homeCategorySlugs),
+    homeDocSlugs: toTextList(raw?.homeDocSlugs),
+    homeServiceSlugs: toTextList(raw?.homeServiceSlugs),
+    homeRowCount: clampRowCount(Number(raw?.homeRowCount)),
+
+    seoHeading: String(raw?.seoHeading ?? "").trim(),
+    seoBody: String(raw?.seoBody ?? "").trim(),
+    seoFaq: toFaq(raw?.seoFaq),
   };
 }
 
@@ -637,6 +875,27 @@ export function validateSettings(settings: ShopSettings): string | null {
     if (!path.startsWith("/") && !/^https?:\/\//.test(path)) {
       return `${label} phải là đường dẫn bắt đầu bằng / hoặc http`;
     }
+  }
+  if (settings.heroVideo && !settings.heroVideo.startsWith("/") &&
+      !/^https?:\/\//.test(settings.heroVideo)) {
+    return "Video hero phải là đường dẫn bắt đầu bằng / hoặc http";
+  }
+  // Written straight into href. A link that is neither a path nor a URL goes
+  // nowhere, and "javascript:" would go somewhere worse.
+  for (const [label, href] of [
+    ["Nút chính", settings.heroPrimaryHref],
+    ["Nút phụ", settings.heroSecondaryHref],
+  ] as const) {
+    if (href && !href.startsWith("/") && !/^https?:\/\//.test(href)) {
+      return `${label} của hero phải là đường dẫn bắt đầu bằng / hoặc http`;
+    }
+  }
+  // The grid under the buttons is two columns of two.
+  if (settings.heroUsps.length > 4) {
+    return "Hero chỉ hiển thị tối đa 4 USP";
+  }
+  if (settings.seoFaq.length > 20) {
+    return "Tối đa 20 câu hỏi trong phần SEO Content";
   }
   return null;
 }

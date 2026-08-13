@@ -3,7 +3,9 @@ import { FlashSaleSection } from "@/components/sites/menzu-lol-f7ae197a/root-8a5
 import { HeroBanners } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/HeroBanners";
 import { PageBackdrop } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/PageBackdrop";
 import { ProductRow } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/ProductRow";
-import { getHomeRows } from "@/lib/homeRows";
+import { DocsSection } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/DocsSection";
+import { SeoContent } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/SeoContent";
+import { getHomeCategoryCards, getHomeDocCards, getHomeRows } from "@/lib/homeRows";
 import { QuickActionsBar } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/QuickActionsBar";
 import { ReviewsSection } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/ReviewsSection";
 import { SiteFooter } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/SiteFooter";
@@ -27,18 +29,39 @@ export default async function Home() {
     getFeedback(),
     getRecentPurchases(),
   ]);
-  const rows = await getHomeRows({
-    valorantSlugs: settings.homeValorantSlugs,
-    tftSlugs: settings.homeTftSlugs,
-  });
+  const [rows, categoryCards, docCards] = await Promise.all([
+    getHomeRows({
+      valorantSlugs: settings.homeValorantSlugs,
+      tftSlugs: settings.homeTftSlugs,
+      serviceSlugs: settings.homeServiceSlugs,
+      count: settings.homeRowCount,
+    }),
+    getHomeCategoryCards(settings.homeCategorySlugs),
+    getHomeDocCards(settings.homeDocSlugs),
+  ]);
 
   // Each block is built once and picked out by id below, so the order on the
   // page is the order the admin arranged and nothing renders twice.
   const blocks: Record<string, React.ReactNode> = {
-    hero: <HeroBanners key="hero" banner={settings.heroBanner} />,
+    hero: (
+      <HeroBanners
+        key="hero"
+        banner={settings.heroBanner}
+        video={settings.heroVideo}
+        badge={settings.heroBadge}
+        title={settings.heroTitle}
+        subtitle={settings.heroSubtitle}
+        primaryLabel={settings.heroPrimaryLabel}
+        primaryHref={settings.heroPrimaryHref}
+        secondaryLabel={settings.heroSecondaryLabel}
+        secondaryHref={settings.heroSecondaryHref}
+        usps={settings.heroUsps}
+      />
+    ),
     quick: <QuickActionsBar key="quick" />,
     flash: <FlashSaleSection key="flash" items={flashSaleItems} />,
-    featured: <FeaturedCategories key="featured" />,
+    featured: <FeaturedCategories key="featured" cards={categoryCards} />,
+    docs: <DocsSection key="docs" articles={docCards} />,
     valorant: (
       <ProductRow
         key="valorant"
@@ -94,6 +117,14 @@ export default async function Home() {
       />
     ),
     utilities: <UtilitiesHub key="utilities" />,
+    seo: (
+      <SeoContent
+        key="seo"
+        heading={settings.seoHeading}
+        body={settings.seoBody}
+        faq={settings.seoFaq}
+      />
+    ),
   };
 
   return (

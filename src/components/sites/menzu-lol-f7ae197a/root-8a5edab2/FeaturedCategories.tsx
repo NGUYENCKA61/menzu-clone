@@ -1,7 +1,7 @@
 import type { CSSProperties } from "react";
 import Image from "next/image";
 
-interface CategoryCard {
+export interface CategoryCard {
   href: string;
   line1: string;
   line2: string;
@@ -13,20 +13,24 @@ const BACKCARD_SRC =
   "/sites/menzu-lol-f7ae197a/root-8a5edab2/images/site/images/backcard.webp";
 
 /**
- * A fixed promotional row, not catalogue data — two of the four tiles point at
- * features rather than categories, and Check Skin / Build Kho Đồ were excluded
- * from this clone, so those keep "#" instead of linking to pages that 404.
+ * The row as captured: a promotional strip rather than catalogue data. Two of
+ * the four tiles point at features rather than categories, and Check Skin /
+ * Build Kho Đồ were excluded from this clone, so those keep "#" instead of
+ * linking to pages that 404.
+ *
+ * Shown when no categories are pinned in Cấu hình → Cấu hình trang chủ, which
+ * is every shop that has not opened that screen.
  */
-const CATEGORY_CARDS: CategoryCard[] = [
+const CAPTURED_CARDS: CategoryCard[] = [
   {
     line1: "ACC TỰ CHỌN",
     line2: "VALORANT",
-    art: "clove.webp",
+    art: `${ART_BASE}/clove.webp`,
     href: "/category/account-valorant-tu-chon",
   },
-  { line1: "CHECK SKIN KHO ĐỒ", line2: "VALORANT", art: "omen.webp", href: "#" },
-  { line1: "BUILD KHO ĐỒ", line2: "VIP", art: "jett.webp", href: "#" },
-  { line1: "DỊCH VỤ", line2: "VALORANT", art: "neon.webp", href: "/services" },
+  { line1: "CHECK SKIN KHO ĐỒ", line2: "VALORANT", art: `${ART_BASE}/omen.webp`, href: "#" },
+  { line1: "BUILD KHO ĐỒ", line2: "VIP", art: `${ART_BASE}/jett.webp`, href: "#" },
+  { line1: "DỊCH VỤ", line2: "VALORANT", art: `${ART_BASE}/neon.webp`, href: "/services" },
 ];
 
 const CARD_THEME = {
@@ -34,7 +38,9 @@ const CARD_THEME = {
   "--theme-border": "#4748af",
 } as CSSProperties;
 
-export function FeaturedCategories() {
+export function FeaturedCategories({ cards }: { cards?: CategoryCard[] }) {
+  const tiles = cards && cards.length > 0 ? cards : CAPTURED_CARDS;
+
   return (
     <section className="w-full mb-12">
       <div className="flex flex-col items-center justify-center mb-10 text-center">
@@ -49,9 +55,9 @@ export function FeaturedCategories() {
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
-        {CATEGORY_CARDS.map((card) => (
+        {tiles.map((card) => (
           <a
-            key={card.art}
+            key={card.href + card.line2}
             href={card.href}
             className="group relative w-full pt-16 flex flex-col items-center"
           >
@@ -78,7 +84,7 @@ export function FeaturedCategories() {
               <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[140%] h-[130%] pointer-events-none z-20 group-hover:scale-105 transition-transform duration-500 origin-bottom flex items-end justify-center">
                 <div className="relative w-full h-full sm:hidden block">
                   <Image
-                    src={`${ART_BASE}/${card.art}`}
+                    src={card.art}
                     alt=""
                     fill
                     sizes="(min-width: 1024px) 25vw, 50vw"
@@ -87,7 +93,7 @@ export function FeaturedCategories() {
                 </div>
                 <div className="relative w-full h-full hidden sm:block">
                   <Image
-                    src={`${ART_BASE}/${card.art}`}
+                    src={card.art}
                     alt=""
                     fill
                     sizes="(min-width: 1024px) 25vw, 50vw"

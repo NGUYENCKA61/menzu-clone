@@ -81,6 +81,28 @@ export function breadcrumbJsonLd(trail: { name: string; path?: string }[]) {
   };
 }
 
+/**
+ * schema.org/FAQPage for the questions in the home page's SEO block.
+ *
+ * The same questions the reader sees, marked up so a search engine can show
+ * them as answers. Google drops a FAQPage whose questions are not visible on
+ * the page, so this is built from the rendered list rather than a separate
+ * one — and returns null when there is nothing to describe, since an empty
+ * FAQPage is an invalid one.
+ */
+export function faqJsonLd(entries: { q: string; a: string }[]) {
+  if (entries.length === 0) return null;
+  return {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: entries.map((entry) => ({
+      "@type": "Question",
+      name: entry.q,
+      acceptedAnswer: { "@type": "Answer", text: entry.a },
+    })),
+  };
+}
+
 /** schema.org/Organization for the homepage. */
 export function organizationJsonLd() {
   return {

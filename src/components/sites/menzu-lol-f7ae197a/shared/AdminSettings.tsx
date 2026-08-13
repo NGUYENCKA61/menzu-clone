@@ -7,7 +7,10 @@ import { ArrowDown, ArrowUp, Trash2 } from "lucide-react";
 import {
   DEFAULT_SETTINGS,
   HOME_BLOCKS,
+  ROW_COUNT_MAX,
+  ROW_COUNT_MIN,
   type BankAccountConfig,
+  type FaqEntry,
   type ShopSettings,
 } from "@/lib/settings";
 import { AdminError } from "./AdminStates";
@@ -27,6 +30,105 @@ type Tab = (typeof TABS)[number];
 export interface SettingsCategory {
   slug: string;
   name: string;
+}
+
+/**
+ * Picks rows by slug and keeps the order, because the order is the setting:
+ * the home page renders these in the sequence they appear here.
+ *
+ * Chosen rows sit at the top with arrows and a remove button; everything else
+ * is listed below to be added. A plain checkbox list cannot express order, and
+ * a drag handle needs a library and a keyboard fallback to be usable at all.
+ */
+function SlugPicker({
+  options,
+  selected,
+  onChange,
+  empty,
+}: {
+  options: SettingsCategory[];
+  selected: string[];
+  onChange: (next: string[]) => void;
+  /** What the home page does when nothing is picked. */
+  empty: string;
+}) {
+  const bySlug = new Map(options.map((option) => [option.slug, option.name]));
+  const rest = options.filter((option) => !selected.includes(option.slug));
+
+  function move(index: number, delta: number) {
+    const target = index + delta;
+    if (target < 0 || target >= selected.length) return;
+    const next = [...selected];
+    [next[index], next[target]] = [next[target]!, next[index]!];
+    onChange(next);
+  }
+
+  return (
+    <div className="flex flex-col gap-3">
+      {selected.length === 0 ? (
+        <p className="rounded-xl border border-dashed border-white/10 px-3 py-3 text-[11px] text-neutral-500">
+          {empty}
+        </p>
+      ) : (
+        <div className="flex flex-col gap-1.5">
+          {selected.map((slug, index) => (
+            <div
+              key={slug}
+              className="flex items-center gap-2 rounded-xl border border-white/5 bg-neutral-950/40 px-3 py-2"
+            >
+              <span className="w-5 shrink-0 text-[10px] font-black uppercase tracking-widest text-neutral-600">
+                {index + 1}
+              </span>
+              <span className="flex-1 truncate text-xs font-bold text-white">
+                {bySlug.get(slug) ?? slug}
+              </span>
+              <button
+                type="button"
+                disabled={index === 0}
+                onClick={() => move(index, -1)}
+                aria-label={`Đưa ${bySlug.get(slug) ?? slug} lên trên`}
+                className={ICON_BUTTON}
+              >
+                <ArrowUp size={12} />
+              </button>
+              <button
+                type="button"
+                disabled={index === selected.length - 1}
+                onClick={() => move(index, 1)}
+                aria-label={`Đưa ${bySlug.get(slug) ?? slug} xuống dưới`}
+                className={ICON_BUTTON}
+              >
+                <ArrowDown size={12} />
+              </button>
+              <button
+                type="button"
+                onClick={() => onChange(selected.filter((entry) => entry !== slug))}
+                aria-label={`Bỏ ${bySlug.get(slug) ?? slug}`}
+                className={ICON_BUTTON}
+              >
+                <Trash2 size={12} />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {rest.length > 0 ? (
+        <div className="flex flex-wrap gap-1.5">
+          {rest.map((option) => (
+            <button
+              key={option.slug}
+              type="button"
+              onClick={() => onChange([...selected, option.slug])}
+              className="rounded-lg border border-white/10 bg-white/5 px-2.5 py-1.5 text-[11px] font-semibold text-neutral-300 transition-colors hover:border-white/20 hover:bg-white/10 hover:text-white"
+            >
+              + {option.name}
+            </button>
+          ))}
+        </div>
+      ) : null}
+    </div>
+  );
 }
 
 function formatVnd(n: number): string {
@@ -74,9 +176,13 @@ function Toggle({
 export function AdminSettings({
   settings,
   categories,
+  docs,
+  services,
 }: {
   settings: ShopSettings;
   categories: SettingsCategory[];
+  docs: SettingsCategory[];
+  services: SettingsCategory[];
 }) {
   const router = useRouter();
   const [tab, setTab] = useState<Tab>(TABS[0]);
@@ -160,6 +266,32 @@ export function AdminSettings({
   const [blocks, setBlocks] = useState(settings.homeBlocks);
   const [valorantSlugs, setValorantSlugs] = useState(settings.homeValorantSlugs);
   const [tftSlugs, setTftSlugs] = useState(settings.homeTftSlugs);
+  const [categorySlugs, setCategorySlugs] = useState(settings.homeCategorySlugs);
+  const [docSlugs, setDocSlugs] = useState(settings.homeDocSlugs);
+  const [serviceSlugs, setServiceSlugs] = useState(settings.homeServiceSlugs);
+  const [rowCount, setRowCount] = useState(String(settings.homeRowCount));
+
+  const [heroBadge, setHeroBadge] = useState(settings.heroBadge);
+  const [heroTitle, setHeroTitle] = useState(settings.heroTitle);
+  const [heroSubtitle, setHeroSubtitle] = useState(settings.heroSubtitle);
+  const [heroCtaLabel, setHeroCtaLabel] = useState(settings.heroPrimaryLabel);
+  const [heroCtaHref, setHeroCtaHref] = useState(settings.heroPrimaryHref);
+  const [heroAltLabel, setHeroAltLabel] = useState(settings.heroSecondaryLabel);
+  const [heroAltHref, setHeroAltHref] = useState(settings.heroSecondaryHref);
+  const [heroVideo, setHeroVideo] = useState(settings.heroVideo);
+  // Four boxes, always. An array that grows and shrinks would need add and
+  // remove buttons for a list the hero draws exactly four of.
+  const [usps, setUsps] = useState<string[]>(() =>
+    [0, 1, 2, 3].map((index) => settings.heroUsps[index] ?? ""),
+  );
+
+  const [seoHeading, setSeoHeading] = useState(settings.seoHeading);
+  const [seoBody, setSeoBody] = useState(settings.seoBody);
+  const [faq, setFaq] = useState<FaqEntry[]>(settings.seoFaq);
+
+  function updateFaq(index: number, patch: Partial<FaqEntry>) {
+    setFaq(faq.map((row, i) => (i === index ? { ...row, ...patch } : row)));
+  }
 
   function moveBlock(index: number, delta: number) {
     const next = [...blocks];
@@ -175,8 +307,32 @@ export function AdminSettings({
     setBlocks(next);
   }
 
-  function toggleSlug(list: string[], set: (next: string[]) => void, slug: string) {
-    set(list.includes(slug) ? list.filter((s) => s !== slug) : [...list, slug]);
+  // The per-section switches and the ordering list below them read and write
+  // the same array, so a section switched off in one place is off in both.
+  function blockOn(id: string): boolean {
+    return blocks.includes(id);
+  }
+
+  function setBlockOn(id: string, on: boolean) {
+    setBlocks(
+      blocks.map((entry) => (entry.replace(/^-/, "") === id ? (on ? id : `-${id}`) : entry)),
+    );
+  }
+
+  /**
+   * The on/off switch a section card carries. A function returning markup
+   * rather than a component declared here: a component defined during render
+   * is a new type every render, and React throws its state away each time.
+   */
+  function sectionSwitch(id: string, hint: string) {
+    return (
+      <Toggle
+        checked={blockOn(id)}
+        onChange={(next) => setBlockOn(id, next)}
+        label="Hiện khối này trên trang chủ"
+        hint={hint}
+      />
+    );
   }
 
   async function handleSubmit(event: React.FormEvent) {
@@ -220,6 +376,23 @@ export function AdminSettings({
           homeBlocks: blocks,
           homeValorantSlugs: valorantSlugs,
           homeTftSlugs: tftSlugs,
+          homeCategorySlugs: categorySlugs,
+          homeDocSlugs: docSlugs,
+          homeServiceSlugs: serviceSlugs,
+          homeRowCount: Number(rowCount) || DEFAULT_SETTINGS.homeRowCount,
+          heroBadge,
+          heroTitle,
+          heroSubtitle,
+          heroPrimaryLabel: heroCtaLabel,
+          heroPrimaryHref: heroCtaHref,
+          heroSecondaryLabel: heroAltLabel,
+          heroSecondaryHref: heroAltHref,
+          heroVideo,
+          // Blank boxes are not empty claims, they are boxes nobody filled in.
+          heroUsps: usps.map((usp) => usp.trim()).filter(Boolean),
+          seoHeading,
+          seoBody,
+          seoFaq: faq,
         }),
       });
       const data = (await response.json().catch(() => ({}))) as {
@@ -1081,41 +1254,277 @@ export function AdminSettings({
           </section>
 
           <section className={CARD}>
-            <span className={HEADING}>Danh mục trong từng hàng</span>
-            <p className="text-[11px] text-neutral-500">
-              Chọn danh mục nào xuất hiện ở hai hàng thẻ trên trang chủ. Bỏ chọn hết thì
-              hàng đó biến mất.
-            </p>
+            <span className={HEADING}>Hero</span>
+            {sectionSwitch("hero", "Tắt thì trang chủ bắt đầu thẳng từ khối kế tiếp.")}
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <div>
+              <span className={LABEL}>Nhãn nhỏ phía trên tiêu đề</span>
+              <input
+                value={heroBadge}
+                onChange={(event) => setHeroBadge(event.target.value)}
+                className={FIELD}
+                placeholder="Để trống thì ẩn nhãn"
+              />
+            </div>
+
+            <div>
+              <span className={LABEL}>Tiêu đề H1</span>
+              <textarea
+                value={heroTitle}
+                onChange={(event) => setHeroTitle(event.target.value)}
+                rows={2}
+                className={`${FIELD} resize-y`}
+              />
+              <p className={HINT}>
+                Mỗi dòng ở đây là một dòng trên trang chủ. Thiết kế dựng cho hai dòng.
+              </p>
+            </div>
+
+            <div>
+              <span className={LABEL}>Mô tả</span>
+              <textarea
+                value={heroSubtitle}
+                onChange={(event) => setHeroSubtitle(event.target.value)}
+                rows={3}
+                className={`${FIELD} resize-y`}
+              />
+            </div>
+
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
-                <span className={LABEL}>Hàng &ldquo;Sản phẩm nổi bật&rdquo;</span>
-                <div className="flex flex-col gap-1.5">
-                  {categories.map((category) => (
-                    <Toggle
-                      key={`v-${category.slug}`}
-                      checked={valorantSlugs.includes(category.slug)}
-                      onChange={() =>
-                        toggleSlug(valorantSlugs, setValorantSlugs, category.slug)
-                      }
-                      label={category.name}
-                    />
-                  ))}
-                </div>
+                <span className={LABEL}>Nút chính — chữ</span>
+                <input
+                  value={heroCtaLabel}
+                  onChange={(event) => setHeroCtaLabel(event.target.value)}
+                  className={FIELD}
+                />
               </div>
               <div>
-                <span className={LABEL}>Hàng &ldquo;Đấu trường chân lý&rdquo;</span>
-                <div className="flex flex-col gap-1.5">
-                  {categories.map((category) => (
-                    <Toggle
-                      key={`t-${category.slug}`}
-                      checked={tftSlugs.includes(category.slug)}
-                      onChange={() => toggleSlug(tftSlugs, setTftSlugs, category.slug)}
-                      label={category.name}
-                    />
-                  ))}
-                </div>
+                <span className={LABEL}>Nút chính — link</span>
+                <input
+                  value={heroCtaHref}
+                  onChange={(event) => setHeroCtaHref(event.target.value)}
+                  className={FIELD}
+                  placeholder="/categories"
+                />
               </div>
+              <div>
+                <span className={LABEL}>Nút phụ — chữ</span>
+                <input
+                  value={heroAltLabel}
+                  onChange={(event) => setHeroAltLabel(event.target.value)}
+                  className={FIELD}
+                  placeholder="Để trống thì ẩn nút phụ"
+                />
+              </div>
+              <div>
+                <span className={LABEL}>Nút phụ — link</span>
+                <input
+                  value={heroAltHref}
+                  onChange={(event) => setHeroAltHref(event.target.value)}
+                  className={FIELD}
+                  placeholder="/docs"
+                />
+              </div>
+            </div>
+
+            <div>
+              <span className={LABEL}>4 USP</span>
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                {usps.map((usp, index) => (
+                  <input
+                    key={index}
+                    value={usp}
+                    onChange={(event) =>
+                      setUsps(usps.map((row, i) => (i === index ? event.target.value : row)))
+                    }
+                    aria-label={`USP ${index + 1}`}
+                    className={FIELD}
+                    placeholder={`USP ${index + 1}`}
+                  />
+                ))}
+              </div>
+              <p className={HINT}>Ô để trống sẽ không hiện. Bỏ trống cả bốn thì ẩn hẳn cụm.</p>
+            </div>
+
+            <div>
+              <span className={LABEL}>Video hero</span>
+              <input
+                value={heroVideo}
+                onChange={(event) => setHeroVideo(event.target.value)}
+                className={FIELD}
+                placeholder="/videos/hero.mp4 — để trống thì dùng ảnh"
+              />
+              <p className={HINT}>
+                Có video thì video thay chỗ ảnh, ảnh banner ở thẻ Nhận diện thành khung
+                chờ trong lúc video tải. Video chạy tự động, lặp lại và luôn tắt tiếng.
+              </p>
+            </div>
+          </section>
+
+          <section className={CARD}>
+            <span className={HEADING}>Danh mục sản phẩm</span>
+            {sectionSwitch("featured", "Cụm 4 thẻ lớn ngay dưới hero.")}
+            <SlugPicker
+              options={categories}
+              selected={categorySlugs}
+              onChange={setCategorySlugs}
+              empty="Chưa chọn danh mục nào — trang chủ giữ 4 thẻ mặc định như hiện tại."
+            />
+            <p className={HINT}>
+              Thẻ lấy ảnh và tên từ chính danh mục. Danh mục chưa có ảnh sẽ bị bỏ qua vì
+              thẻ gần như toàn là ảnh.
+            </p>
+          </section>
+
+          <section className={CARD}>
+            <span className={HEADING}>Xem hướng dẫn</span>
+            {sectionSwitch("docs", "Các bài trong mục Wiki & hướng dẫn.")}
+            <SlugPicker
+              options={docs}
+              selected={docSlugs}
+              onChange={setDocSlugs}
+              empty="Chưa chọn bài nào — trang chủ lấy 4 bài đầu trong nhóm Hướng dẫn."
+            />
+          </section>
+
+          <section className={CARD}>
+            <span className={HEADING}>Hàng sản phẩm</span>
+
+            <div className="max-w-[200px]">
+              <span className={LABEL}>Số thẻ mỗi hàng</span>
+              <input
+                type="number"
+                min={ROW_COUNT_MIN}
+                max={ROW_COUNT_MAX}
+                value={rowCount}
+                onChange={(event) => setRowCount(event.target.value)}
+                className={FIELD}
+              />
+              <p className={HINT}>
+                Áp dụng cho cả bốn hàng thẻ. Cắt bớt chứ không bỏ chọn, nên tăng lại là
+                các mục cũ quay về.
+              </p>
+            </div>
+
+            <div className="border-t border-white/[0.07] pt-4">
+              <span className={LABEL}>Sản phẩm nổi bật</span>
+              {sectionSwitch("valorant", "Hàng thẻ danh mục thứ nhất.")}
+              <div className="mt-3">
+                <SlugPicker
+                  options={categories}
+                  selected={valorantSlugs}
+                  onChange={setValorantSlugs}
+                  empty="Chưa chọn danh mục nào — hàng này sẽ trống."
+                />
+              </div>
+            </div>
+
+            <div className="border-t border-white/[0.07] pt-4">
+              <span className={LABEL}>Đấu trường chân lý</span>
+              {sectionSwitch("tft", "Hàng thẻ danh mục thứ hai.")}
+              <div className="mt-3">
+                <SlugPicker
+                  options={categories}
+                  selected={tftSlugs}
+                  onChange={setTftSlugs}
+                  empty="Chưa chọn danh mục nào — hàng này sẽ trống."
+                />
+              </div>
+            </div>
+          </section>
+
+          <section className={CARD}>
+            <span className={HEADING}>Dịch vụ nổi bật</span>
+            {sectionSwitch("gameServices", "Hàng “Dịch Vụ Game”.")}
+            {sectionSwitch("otherServices", "Hàng “Dịch Vụ Khác”.")}
+            <SlugPicker
+              options={services}
+              selected={serviceSlugs}
+              onChange={setServiceSlugs}
+              empty="Chưa chọn dịch vụ nào — mỗi hàng hiện toàn bộ dịch vụ của nó, nhiều đơn nhất trước."
+            />
+            <p className={HINT}>
+              Dịch vụ vẫn về đúng hàng của nó theo phân loại game / khác; danh sách này
+              chỉ quyết định hiện cái nào và theo thứ tự nào.
+            </p>
+          </section>
+
+          <section className={CARD}>
+            <span className={HEADING}>SEO Content</span>
+            {sectionSwitch("seo", "Đoạn chữ và FAQ ở cuối trang chủ.")}
+
+            <div>
+              <span className={LABEL}>Tiêu đề</span>
+              <input
+                value={seoHeading}
+                onChange={(event) => setSeoHeading(event.target.value)}
+                className={FIELD}
+                placeholder="Ví dụ: Mua acc Valorant giá rẻ, uy tín"
+              />
+            </div>
+
+            <div>
+              <span className={LABEL}>Nội dung</span>
+              <textarea
+                value={seoBody}
+                onChange={(event) => setSeoBody(event.target.value)}
+                rows={6}
+                className={`${FIELD} resize-y`}
+              />
+              <p className={HINT}>
+                Cách một dòng trống để sang đoạn mới. Nội dung hiện ra đúng như chữ bạn
+                gõ, thẻ HTML sẽ không chạy.
+              </p>
+            </div>
+
+            <div>
+              <span className={LABEL}>FAQ</span>
+              <div className="flex flex-col gap-2">
+                {faq.map((entry, index) => (
+                  <div
+                    key={index}
+                    className="flex flex-col gap-2 rounded-xl border border-white/5 bg-neutral-950/40 p-3"
+                  >
+                    <div className="flex items-center gap-2">
+                      <input
+                        value={entry.q}
+                        onChange={(event) => updateFaq(index, { q: event.target.value })}
+                        aria-label={`Câu hỏi ${index + 1}`}
+                        className={FIELD}
+                        placeholder="Câu hỏi"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setFaq(faq.filter((_, i) => i !== index))}
+                        aria-label={`Xóa câu hỏi ${index + 1}`}
+                        className={ICON_BUTTON}
+                      >
+                        <Trash2 size={12} />
+                      </button>
+                    </div>
+                    <textarea
+                      value={entry.a}
+                      onChange={(event) => updateFaq(index, { a: event.target.value })}
+                      aria-label={`Trả lời ${index + 1}`}
+                      rows={2}
+                      className={`${FIELD} resize-y`}
+                      placeholder="Câu trả lời"
+                    />
+                  </div>
+                ))}
+              </div>
+              <button
+                type="button"
+                onClick={() => setFaq([...faq, { q: "", a: "" }])}
+                className="mt-2 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-[11px] font-black uppercase tracking-widest text-neutral-300 transition-colors hover:bg-white/10 hover:text-white"
+              >
+                + Thêm câu hỏi
+              </button>
+              <p className={HINT}>
+                Câu hỏi thiếu phần trả lời sẽ bị bỏ khi lưu. Danh sách này cũng được gắn
+                dữ liệu FAQ cho Google đọc.
+              </p>
             </div>
           </section>
         </>

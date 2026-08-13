@@ -13,6 +13,7 @@ import {
   type BankAccountConfig,
   type ShopSettings,
 } from "@/lib/settings";
+import { orderBySlugs, splitTileName } from "@/lib/homeSections";
 
 function settings(overrides: Partial<ShopSettings> = {}): ShopSettings {
   return { ...DEFAULT_SETTINGS, ...overrides };
@@ -325,5 +326,122 @@ describe("bố cục trang chủ", () => {
       contactZalo: "0900000000",
     });
     expect(parseSettings(serializeSettings(original))).toEqual(original);
+  });
+});
+
+describe("home layout migration", () => {
+  it("gives a pre-upgrade layout the new blocks without losing its own", () => {
+    // A shop that arranged its home page before "docs" and "seo" existed.
+    const saved =
+      "hero,quick,-flash,featured,valorant,tft,gameServices," +
+      "otherServices,reviews,ticker,utilities";
+    const parsed = parseSettings([{ key: SETTING_KEYS.homeBlocks, value: saved }]);
+
+    // Both new blocks arrive, switched on, and every earlier choice survives —
+    // including the one the shop had hidden.
+    expect(parsed.homeBlocks).toContain("docs");
+    expect(parsed.homeBlocks).toContain("seo");
+    expect(parsed.homeBlocks).toContain("-flash");
+    expect(parsed.homeBlocks).toHaveLength(HOME_BLOCKS.length);
+    expect(parsed.homeBlocks.slice(0, 2)).toEqual(["hero", "quick"]);
+  });
+
+  it("keeps an order the admin rearranged", () => {
+    const parsed = parseSettings([
+      { key: SETTING_KEYS.homeBlocks, value: "tft,hero,featured" },
+    ]);
+    const order = parsed.homeBlocks.map((id) => id.replace(/^-/, ""));
+    expect(order.indexOf("tft")).toBeLessThan(order.indexOf("hero"));
+  });
+
+  it("drops a block id the site no longer has", () => {
+    const parsed = parseSettings([
+      { key: SETTING_KEYS.homeBlocks, value: "hero,somethingRemoved,featured" },
+    ]);
+    expect(parsed.homeBlocks).not.toContain("somethingRemoved");
+  });
+});
+
+describe("hero and SEO settings", () => {
+  it("round-trips through serialize and parse", () => {
+    const before = settings({
+      heroTitle: "Dòng một\nDòng hai",
+      heroUsps: ["Nhanh", "Rẻ"],
+      heroVideo: "/videos/hero.mp4",
+      seoFaq: [{ q: "Bao lâu?", a: "Vài phút." }],
+      homeRowCount: 4,
+    });
+    expect(parseSettings(serializeSettings(before))).toEqual(before);
+  });
+
+  it("keeps the newline that splits the heading", () => {
+    const parsed = parseSettings([
+      { key: SETTING_KEYS.heroTitle, value: "Mua acc\n& dịch vụ" },
+    ]);
+    expect(parsed.heroTitle.split("\n")).toHaveLength(2);
+  });
+
+  it("falls back rather than leaving the hero wordless", () => {
+    const normalized = normalizeSettings({ heroTitle: "  ", heroPrimaryLabel: "" });
+    expect(normalized.heroTitle).toBe(DEFAULT_SETTINGS.heroTitle);
+    expect(normalized.heroPrimaryLabel).toBe(DEFAULT_SETTINGS.heroPrimaryLabel);
+  });
+
+  it("lets the optional parts be emptied on purpose", () => {
+    const normalized = normalizeSettings({ heroBadge: "", heroSecondaryLabel: "" });
+    expect(normalized.heroBadge).toBe("");
+    expect(normalized.heroSecondaryLabel).toBe("");
+  });
+
+  it("drops a question with no answer", () => {
+    const normalized = normalizeSettings({
+      seoFaq: [
+        { q: "Có bảo hành không?", a: "" },
+        { q: "Nạp thế nào?", a: "Qua ngân hàng." },
+      ],
+    });
+    expect(normalized.seoFaq).toEqual([{ q: "Nạp thế nào?", a: "Qua ngân hàng." }]);
+  });
+
+  it("clamps the row count into range", () => {
+    expect(normalizeSettings({ homeRowCount: 0 }).homeRowCount).toBe(1);
+    expect(normalizeSettings({ homeRowCount: 999 }).homeRowCount).toBe(24);
+    expect(normalizeSettings({ homeRowCount: Number.NaN }).homeRowCount).toBe(
+      DEFAULT_SETTINGS.homeRowCount,
+    );
+  });
+
+  it("refuses a hero link that is neither a path nor a URL", () => {
+    expect(validateSettings(settings({ heroPrimaryHref: "javascript:alert(1)" }))).toMatch(
+      /Nút chính/,
+    );
+    expect(validateSettings(settings({ heroPrimaryHref: "/categories" }))).toBeNull();
+  });
+
+  it("refuses more USPs than the grid draws", () => {
+    expect(validateSettings(settings({ heroUsps: ["a", "b", "c", "d", "e"] }))).toMatch(/4 USP/);
+  });
+});
+
+describe("homeSections", () => {
+  it("puts the last word on the tile's big line", () => {
+    expect(splitTileName("Acc tự chọn Valorant")).toEqual({
+      line1: "Acc tự chọn",
+      line2: "Valorant",
+    });
+  });
+
+  it("keeps a single word whole", () => {
+    expect(splitTileName("Valorant")).toEqual({ line1: "", line2: "Valorant" });
+  });
+
+  it("never drops a word, however long the name", () => {
+    const split = splitTileName("Acc siêu cấp vôdịchvũtrụbaola");
+    expect(`${split.line1} ${split.line2}`).toBe("Acc siêu cấp vôdịchvũtrụbaola");
+  });
+
+  it("orders rows by the slug list and skips what is gone", () => {
+    const rows = [{ slug: "b" }, { slug: "a" }, { slug: "c" }];
+    expect(orderBySlugs(rows, ["a", "missing", "b"])).toEqual([{ slug: "a" }, { slug: "b" }]);
   });
 });

@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { AdminSettings } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminSettings";
 import { AdminShell } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminShell";
 import { getAdmin } from "@/lib/admin";
-import { listAdminCategories } from "@/lib/queries";
+import { listAdminCategories, listDocArticles, listServices } from "@/lib/queries";
 import { getShopSettings } from "@/lib/settingsStore";
 
 export const metadata: Metadata = { title: "Cấu hình | Quản trị" };
@@ -16,9 +16,13 @@ export default async function AdminSettingsPage() {
   // visitor that an admin area exists here at all.
   if (!admin) notFound();
 
-  const [settings, categories] = await Promise.all([
+  // The home-page tab pins categories, guides and services by slug, so it
+  // needs the three lists to pick from rather than a free-text box.
+  const [settings, categories, docs, services] = await Promise.all([
     getShopSettings(),
     listAdminCategories(),
+    listDocArticles(),
+    listServices(),
   ]);
 
   return (
@@ -30,6 +34,8 @@ export default async function AdminSettingsPage() {
       <AdminSettings
         settings={settings}
         categories={categories.map((c) => ({ slug: c.slug, name: c.name }))}
+        docs={docs.map((d) => ({ slug: d.slug, name: d.title }))}
+        services={services.map((s) => ({ slug: s.slug, name: s.name }))}
       />
     </AdminShell>
   );
