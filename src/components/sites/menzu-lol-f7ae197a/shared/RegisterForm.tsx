@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft, Eye, EyeOff, Lock, Mail, User } from "lucide-react";
 import { useState } from "react";
 
+import { AuthPanelSlider } from "./AuthPanelSlider";
 import { TurnstileBox } from "./TurnstileBox";
 
 const FIELD_CLASS =
@@ -23,13 +24,17 @@ const LABEL_CLASS =
  */
 export function RegisterForm({
   turnstileSiteKey,
-  panelImage,
+  panelImages,
+  slideEnabled,
+  slideSeconds,
   panelSubtitle,
   panelTitle,
 }: {
   turnstileSiteKey: string | null;
   /** Artwork behind the card. Comes from Cấu hình → Giao diện. */
-  panelImage: string;
+  panelImages: string[];
+  slideEnabled: boolean;
+  slideSeconds: number;
   panelSubtitle: string;
   /** Newlines are line breaks, which is how the two-row overlay is written. */
   panelTitle: string;
@@ -102,13 +107,10 @@ export function RegisterForm({
         <div className="flex-1 w-full bg-neutral-900/80 border border-white/10 rounded-[2rem] sm:rounded-[2.5rem] shadow-2xl relative overflow-hidden transform-gpu flex flex-col">
           <div className="flex flex-col lg:flex-row flex-1 relative z-10">
             <div className="hidden lg:flex w-1/2 relative bg-[#111111] overflow-hidden transform-gpu items-end justify-center border-r border-white/5">
-              <Image
-                src={panelImage}
-                alt=""
-                fill
-                priority
-                sizes="50vw"
-                className="object-cover object-center"
+              <AuthPanelSlider
+                images={panelImages}
+                autoPlay={slideEnabled}
+                seconds={slideSeconds}
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
               <div className="relative z-10 p-12 text-center w-full">

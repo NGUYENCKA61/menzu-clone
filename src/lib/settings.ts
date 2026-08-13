@@ -52,8 +52,14 @@ export interface ShopSettings {
   /** The wide image at the top of the home page. */
   heroBanner: string;
 
-  /** The picture behind the sign-in and sign-up cards, and its overlay. */
-  authPanelImage: string;
+  /**
+   * The pictures behind the sign-in and sign-up cards. One means a still
+   * panel; several become a slideshow when the switch below is on.
+   */
+  authPanelImages: string[];
+  authSlideEnabled: boolean;
+  /** Seconds each picture holds before the next slides in. */
+  authSlideSeconds: number;
   authPanelSubtitle: string;
   /** Newlines are line breaks — the overlay is two short words on two rows. */
   authLoginTitle: string;
@@ -128,7 +134,9 @@ export const DEFAULT_SETTINGS: ShopSettings = {
   brandLogo: LOGO,
   brandColor: "#7C3AED",
   heroBanner: BANNER,
-  authPanelImage: AUTH_PANEL,
+  authPanelImages: [AUTH_PANEL],
+  authSlideEnabled: true,
+  authSlideSeconds: 5,
   authPanelSubtitle: "Menzu Valorant",
   authLoginTitle: "Welcome\nBack",
   authSignupTitle: "Join\nUs",
@@ -170,7 +178,9 @@ export const SETTING_KEYS: Record<keyof ShopSettings, string> = {
   brandLogo: "brand.logo",
   brandColor: "brand.color",
   heroBanner: "brand.heroBanner",
-  authPanelImage: "auth.panelImage",
+  authPanelImages: "auth.panelImages",
+  authSlideEnabled: "auth.slide",
+  authSlideSeconds: "auth.slideSeconds",
   authPanelSubtitle: "auth.panelSubtitle",
   authLoginTitle: "auth.loginTitle",
   authSignupTitle: "auth.signupTitle",
@@ -229,6 +239,49 @@ function toSlugList(raw: string | undefined, fallback: string[]): string[] {
  * heard of. Without that, a block added to the site later would be invisible
  * on every shop that had already saved a layout.
  */
+/** Where the single panel image lived before the slideshow replaced it. */
+const LEGACY_PANEL_IMAGE_KEY = "auth.panelImage";
+
+/** Slowest and fastest the slideshow may be set to, in seconds. */
+export const SLIDE_SECONDS_MIN = 2;
+export const SLIDE_SECONDS_MAX = 60;
+
+export function clampSlideSeconds(value: number): number {
+  if (!Number.isFinite(value)) return DEFAULT_SETTINGS.authSlideSeconds;
+  return Math.min(SLIDE_SECONDS_MAX, Math.max(SLIDE_SECONDS_MIN, Math.round(value)));
+}
+
+function toSlideSeconds(raw: string | undefined): number {
+  if (raw === undefined) return DEFAULT_SETTINGS.authSlideSeconds;
+  return clampSlideSeconds(Number(raw));
+}
+
+/**
+ * The panel's pictures, from whatever is stored.
+ *
+ * Never empty: an empty list would render a panel with no <Image src>, which
+ * throws at render and takes the whole sign-in page down. Falling back to the
+ * captured artwork keeps the page up whatever the row says.
+ */
+export function readImageList(value: unknown): string[] {
+  const list = Array.isArray(value)
+    ? value.filter((item): item is string => typeof item === "string")
+    : [];
+  const cleaned = list.map((item) => item.trim()).filter(Boolean);
+  return cleaned.length > 0 ? cleaned : [DEFAULT_SETTINGS.authPanelImages[0]!];
+}
+
+function toImageList(raw: string | undefined, legacy: string | undefined): string[] {
+  if (raw === undefined) {
+    return legacy?.trim() ? [legacy.trim()] : DEFAULT_SETTINGS.authPanelImages;
+  }
+  try {
+    return readImageList(JSON.parse(raw));
+  } catch {
+    return DEFAULT_SETTINGS.authPanelImages;
+  }
+}
+
 function toBlockList(raw: string | undefined, fallback: string[]): string[] {
   if (raw === undefined) return fallback;
   const known = new Set(HOME_BLOCKS.map((block) => block.id));
@@ -355,10 +408,18 @@ export function parseSettings(rows: Iterable<{ key: string; value: string }>): S
     brandLogo: toText(stored.get(SETTING_KEYS.brandLogo), DEFAULT_SETTINGS.brandLogo),
     brandColor: toText(stored.get(SETTING_KEYS.brandColor), DEFAULT_SETTINGS.brandColor),
     heroBanner: toText(stored.get(SETTING_KEYS.heroBanner), DEFAULT_SETTINGS.heroBanner),
-    authPanelImage: toText(
-      stored.get(SETTING_KEYS.authPanelImage),
-      DEFAULT_SETTINGS.authPanelImage,
+    // The old single-image key is read when the list has never been written,
+    // so a shop that picked a picture before the slideshow existed keeps it
+    // rather than silently reverting to the captured default.
+    authPanelImages: toImageList(
+      stored.get(SETTING_KEYS.authPanelImages),
+      stored.get(LEGACY_PANEL_IMAGE_KEY),
     ),
+    authSlideEnabled: toBoolean(
+      stored.get(SETTING_KEYS.authSlideEnabled),
+      DEFAULT_SETTINGS.authSlideEnabled,
+    ),
+    authSlideSeconds: toSlideSeconds(stored.get(SETTING_KEYS.authSlideSeconds)),
     authPanelSubtitle: toText(
       stored.get(SETTING_KEYS.authPanelSubtitle),
       DEFAULT_SETTINGS.authPanelSubtitle,
@@ -415,7 +476,9 @@ export function serializeSettings(settings: ShopSettings): { key: string; value:
     brandLogo: settings.brandLogo.trim(),
     brandColor: settings.brandColor.trim(),
     heroBanner: settings.heroBanner.trim(),
-    authPanelImage: settings.authPanelImage.trim(),
+    authPanelImages: JSON.stringify(settings.authPanelImages),
+    authSlideEnabled: String(settings.authSlideEnabled),
+    authSlideSeconds: String(settings.authSlideSeconds),
     authPanelSubtitle: settings.authPanelSubtitle.trim(),
     authLoginTitle: settings.authLoginTitle.trim(),
     authSignupTitle: settings.authSignupTitle.trim(),
@@ -478,7 +541,9 @@ export function normalizeSettings(raw: Partial<ShopSettings> | null): ShopSettin
     heroBanner: String(raw?.heroBanner ?? "").trim() || DEFAULT_SETTINGS.heroBanner,
     // Blank falls back to the default rather than leaving an empty <Image src>,
     // which throws at render and takes the whole sign-in page with it.
-    authPanelImage: String(raw?.authPanelImage ?? "").trim() || DEFAULT_SETTINGS.authPanelImage,
+    authPanelImages: readImageList(raw?.authPanelImages),
+    authSlideEnabled: Boolean(raw?.authSlideEnabled),
+    authSlideSeconds: clampSlideSeconds(Number(raw?.authSlideSeconds)),
     authPanelSubtitle: String(raw?.authPanelSubtitle ?? "").trim(),
     authLoginTitle: String(raw?.authLoginTitle ?? "").trim(),
     authSignupTitle: String(raw?.authSignupTitle ?? "").trim(),

@@ -7,6 +7,7 @@ import {
   extensionFor,
   readImageSize,
 } from "@/lib/authPanel";
+import { clampSlideSeconds, readImageList, DEFAULT_SETTINGS } from "@/lib/settings";
 
 /** A PNG header: signature, IHDR length and tag, then width and height. */
 function png(width: number, height: number): Uint8Array {
@@ -120,5 +121,42 @@ describe("extensionFor", () => {
     expect(extensionFor("image/png")).toBe(".png");
     expect(extensionFor("image/webp")).toBe(".webp");
     expect(extensionFor("image/jpeg")).toBe(".jpg");
+  });
+});
+
+describe("readImageList", () => {
+  it("keeps the order it was given", () => {
+    expect(readImageList(["/a.png", "/b.png"])).toEqual(["/a.png", "/b.png"]);
+  });
+
+  it("never returns an empty list", () => {
+    // An empty list renders a panel with no image source, which throws at
+    // render and takes the whole sign-in page down with it.
+    const fallback = DEFAULT_SETTINGS.authPanelImages;
+    expect(readImageList([])).toEqual(fallback);
+    expect(readImageList(null)).toEqual(fallback);
+    expect(readImageList("/a.png")).toEqual(fallback);
+    expect(readImageList(["", "  "])).toEqual(fallback);
+  });
+
+  it("drops entries that are not paths", () => {
+    expect(readImageList(["/a.png", 42, null, "  /b.png  "])).toEqual(["/a.png", "/b.png"]);
+  });
+});
+
+describe("clampSlideSeconds", () => {
+  it("holds the interval inside its range", () => {
+    expect(clampSlideSeconds(5)).toBe(5);
+    expect(clampSlideSeconds(1)).toBe(2);
+    expect(clampSlideSeconds(900)).toBe(60);
+    expect(clampSlideSeconds(4.6)).toBe(5);
+  });
+
+  it("falls back rather than producing a zero interval", () => {
+    // A zero or NaN would become setInterval(fn, 0) — a picture changing
+    // every tick, which is a seizure risk, not a slideshow.
+    expect(clampSlideSeconds(Number.NaN)).toBe(DEFAULT_SETTINGS.authSlideSeconds);
+    expect(clampSlideSeconds(0)).toBe(2);
+    expect(clampSlideSeconds(-5)).toBe(2);
   });
 });

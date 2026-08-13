@@ -26,7 +26,9 @@ export default async function LoginPage() {
           turnstileSiteKey={
             turnstileEnabled(settings) ? settings.turnstileSiteKey : null
           }
-          panelImage={settings.authPanelImage}
+          panelImages={settings.authPanelImages}
+          slideEnabled={settings.authSlideEnabled}
+          slideSeconds={settings.authSlideSeconds}
           panelSubtitle={settings.authPanelSubtitle}
           panelTitle={settings.authLoginTitle}
         />

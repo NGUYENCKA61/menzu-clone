@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { ArrowDown, ArrowUp } from "lucide-react";
+import { ArrowDown, ArrowUp, Trash2 } from "lucide-react";
 
 import {
   DEFAULT_SETTINGS,
@@ -143,7 +143,11 @@ export function AdminSettings({
   const [brandLogo, setBrandLogo] = useState(settings.brandLogo);
   const [brandColor, setBrandColor] = useState(settings.brandColor);
   const [heroBanner, setHeroBanner] = useState(settings.heroBanner);
-  const [panelImage, setPanelImage] = useState(settings.authPanelImage);
+  const [panelImages, setPanelImages] = useState<string[]>(settings.authPanelImages);
+  const [slideOn, setSlideOn] = useState(settings.authSlideEnabled);
+  const [slideSeconds, setSlideSeconds] = useState(String(settings.authSlideSeconds));
+  // Which picture the preview is showing. Also what the reorder buttons act on.
+  const [picked, setPicked] = useState(0);
   const [panelSubtitle, setPanelSubtitle] = useState(settings.authPanelSubtitle);
   const [loginTitle, setLoginTitle] = useState(settings.authLoginTitle);
   const [signupTitle, setSignupTitle] = useState(settings.authSignupTitle);
@@ -204,7 +208,9 @@ export function AdminSettings({
           brandLogo,
           brandColor,
           heroBanner,
-          authPanelImage: panelImage,
+          authPanelImages: panelImages,
+          authSlideEnabled: slideOn,
+          authSlideSeconds: Number(slideSeconds) || 5,
           authPanelSubtitle: panelSubtitle,
           authLoginTitle: loginTitle,
           authSignupTitle: signupTitle,
@@ -715,12 +721,12 @@ export function AdminSettings({
                   what is judged here is what the visitor will see, not a
                   square thumbnail of the same file. */}
               <div className="relative w-full sm:w-[150px] shrink-0 aspect-[3/4] overflow-hidden rounded-xl border border-white/10 bg-[#111111]">
-                {panelImage ? (
+                {panelImages[Math.min(picked, panelImages.length - 1)] ? (
                   // A plain img: the value can be any path the shop typed, and
                   // next/image would need each one in its allow-list.
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
-                    src={panelImage}
+                    src={panelImages[Math.min(picked, panelImages.length - 1)]}
                     alt="Xem trước ảnh nền trang đăng nhập"
                     className="absolute inset-0 h-full w-full object-cover"
                   />
@@ -742,18 +748,82 @@ export function AdminSettings({
 
               <div className="flex-1 min-w-0 flex flex-col gap-3">
                 <div>
-                  <label htmlFor="auth-image" className={LABEL}>
-                    Đường dẫn ảnh
-                  </label>
-                  <input
-                    id="auth-image"
-                    value={panelImage}
-                    onChange={(event) => setPanelImage(event.target.value)}
-                    className={`${FIELD} font-mono`}
-                  />
+                  <span className={LABEL}>
+                    Danh sách ảnh ({panelImages.length})
+                  </span>
+                  <div className="flex flex-col gap-1.5">
+                    {panelImages.map((src, index) => (
+                      <div
+                        key={`${src}-${index}`}
+                        className={`flex items-center gap-2 rounded-lg border px-2 py-1.5 transition-colors ${
+                          index === picked
+                            ? "border-[var(--login-accent)]/50 bg-[var(--login-accent)]/10"
+                            : "border-white/10 bg-neutral-950/60"
+                        }`}
+                      >
+                        <button
+                          type="button"
+                          onClick={() => setPicked(index)}
+                          title="Xem trước ảnh này"
+                          className="flex-1 min-w-0 truncate text-left font-mono text-[11px] text-neutral-300"
+                        >
+                          {index + 1}. {src}
+                        </button>
+                        <button
+                          type="button"
+                          className={ICON_BUTTON}
+                          disabled={index === 0}
+                          aria-label="Đưa lên trên"
+                          onClick={() => {
+                            const next = [...panelImages];
+                            [next[index - 1], next[index]] = [next[index]!, next[index - 1]!];
+                            setPanelImages(next);
+                            setPicked(index - 1);
+                          }}
+                        >
+                          <ArrowUp size={13} />
+                        </button>
+                        <button
+                          type="button"
+                          className={ICON_BUTTON}
+                          disabled={index === panelImages.length - 1}
+                          aria-label="Đưa xuống dưới"
+                          onClick={() => {
+                            const next = [...panelImages];
+                            [next[index], next[index + 1]] = [next[index + 1]!, next[index]!];
+                            setPanelImages(next);
+                            setPicked(index + 1);
+                          }}
+                        >
+                          <ArrowDown size={13} />
+                        </button>
+                        <button
+                          type="button"
+                          // The last one cannot go: an empty list renders a
+                          // panel with no image source, which throws and takes
+                          // the sign-in page with it.
+                          disabled={panelImages.length === 1}
+                          title={
+                            panelImages.length === 1
+                              ? "Phải còn ít nhất một ảnh"
+                              : "Xóa ảnh này"
+                          }
+                          aria-label="Xóa ảnh"
+                          onClick={() => {
+                            setPanelImages(panelImages.filter((_, i) => i !== index));
+                            setPicked(0);
+                          }}
+                          className="h-7 w-7 rounded-lg border border-red-500/30 bg-red-500/10 text-red-400 transition-colors hover:bg-red-500/20 disabled:opacity-30 disabled:hover:bg-red-500/10 inline-flex items-center justify-center"
+                        >
+                          <Trash2 size={13} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
                   <p className={HINT}>
                     JPG, PNG hoặc WebP · tối thiểu 600×600px · tối đa 5MB. Ảnh dọc hợp
-                    hơn vì khung bên trái cao gấp đôi chiều ngang.
+                    hơn vì khung bên trái cao gấp đôi chiều ngang. Thứ tự ở đây là thứ
+                    tự chạy.
                   </p>
                 </div>
 
@@ -763,7 +833,7 @@ export function AdminSettings({
                       uploading ? "opacity-70 cursor-wait" : ""
                     }`}
                   >
-                    {uploading ? "Đang tải…" : "Tải ảnh lên"}
+                    {uploading ? "Đang tải…" : "Thêm ảnh"}
                     <input
                       type="file"
                       accept="image/png,image/jpeg,image/webp"
@@ -793,10 +863,11 @@ export function AdminSettings({
                             setUploadError(data.error ?? "Không tải được ảnh lên");
                             return;
                           }
-                          // The file is on disk now; the setting only moves
-                          // when the form below is saved, same as every other
-                          // field on this screen.
-                          setPanelImage(data.url);
+                          // Appended rather than replacing: adding a second
+                          // picture is what this button is for, and the list
+                          // is what gets saved.
+                          setPanelImages((current) => [...current, data.url!]);
+                          setPicked(panelImages.length);
                         } catch {
                           setUploadError("Không kết nối được máy chủ");
                         } finally {
@@ -809,14 +880,39 @@ export function AdminSettings({
                   <button
                     type="button"
                     onClick={() => {
-                      setPanelImage(DEFAULT_SETTINGS.authPanelImage);
+                      setPanelImages(DEFAULT_SETTINGS.authPanelImages);
+                      setPicked(0);
                       setUploadError(null);
                     }}
-                    disabled={panelImage === DEFAULT_SETTINGS.authPanelImage}
-                    className="h-9 rounded-lg border border-white/10 bg-white/5 px-4 text-[11px] font-black uppercase tracking-widest text-neutral-300 transition-colors hover:bg-white/10 disabled:opacity-40 disabled:hover:bg-white/5"
+                    className="h-9 rounded-lg border border-white/10 bg-white/5 px-4 text-[11px] font-black uppercase tracking-widest text-neutral-300 transition-colors hover:bg-white/10"
                   >
                     Khôi phục ảnh mặc định
                   </button>
+                </div>
+
+                <div className="rounded-lg border border-white/10 bg-neutral-950/40 px-3 py-3 flex flex-col gap-3">
+                  <Toggle
+                    checked={slideOn}
+                    onChange={setSlideOn}
+                    label="Tự động chuyển ảnh"
+                    hint="Chỉ chạy khi có từ 2 ảnh trở lên. Một ảnh thì panel đứng yên."
+                  />
+                  <div className="flex items-center gap-2">
+                    <label htmlFor="slide-seconds" className="text-[11px] text-neutral-400">
+                      Mỗi ảnh giữ
+                    </label>
+                    <input
+                      id="slide-seconds"
+                      type="number"
+                      min={2}
+                      max={60}
+                      value={slideSeconds}
+                      onChange={(event) => setSlideSeconds(event.target.value)}
+                      disabled={!slideOn}
+                      className={`${FIELD} w-20 disabled:opacity-40`}
+                    />
+                    <span className="text-[11px] text-neutral-400">giây (2–60)</span>
+                  </div>
                 </div>
 
                 {uploadError ? (
