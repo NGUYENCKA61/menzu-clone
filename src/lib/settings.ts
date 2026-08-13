@@ -144,7 +144,7 @@ export const HOME_BLOCKS: { id: string; label: string }[] = [
   { id: "flash", label: "Flash sale hôm nay" },
   { id: "featured", label: "Danh mục sản phẩm" },
   { id: "docs", label: "Xem hướng dẫn" },
-  { id: "valorant", label: "Sản phẩm nổi bật" },
+  { id: "valorant", label: "Hot trending tháng này" },
   { id: "tft", label: "Đấu trường chân lý" },
   { id: "gameServices", label: "Dịch vụ nổi bật" },
   { id: "otherServices", label: "Dịch vụ khác" },

@@ -63,7 +63,7 @@ export default async function Home() {
     valorant: (
       <ProductRow
         key="valorant"
-        heading="SẢN PHẨM NỔI BẬT"
+        heading="HOT TRENDING THÁNG NÀY"
         cards={rows.featured}
         viewAllHref="/categories"
         className="mb-12"

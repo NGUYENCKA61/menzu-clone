@@ -1408,7 +1408,7 @@ export function AdminSettings({
             </div>
 
             <div className="border-t border-white/[0.07] pt-4">
-              <span className={LABEL}>Sản phẩm nổi bật</span>
+              <span className={LABEL}>Hot trending tháng này</span>
               {sectionSwitch("valorant", "Hàng thẻ danh mục thứ nhất.")}
               <div className="mt-3">
                 <SlugPicker
