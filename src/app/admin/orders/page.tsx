@@ -16,7 +16,7 @@ import {
   type OrderMethod,
   type OrderStatus,
 } from "@/lib/orders";
-import { pageCount, pageRange, pageWindow, parsePage } from "@/lib/paging";
+import { GAP, pageCount, pageRange, pageStrip, parsePage } from "@/lib/paging";
 import { orderWhere } from "@/lib/orderStore";
 
 export const metadata: Metadata = { title: "Menzu Admin | Đơn hàng" };
@@ -221,11 +221,21 @@ export default async function AdminOrdersPage({
               ‹
             </PageLink>
 
-            {pageWindow(page, totalPages).map((n: number) => (
-              <PageLink key={n} href={pageHref(n)} current={n === page} label={`Trang ${n}`}>
-                {n}
-              </PageLink>
-            ))}
+            {pageStrip(page, totalPages).map((n, index) =>
+              n === GAP ? (
+                <span
+                  key={`gap-${index}`}
+                  aria-hidden
+                  className="px-1 text-[12px] text-neutral-700"
+                >
+                  {GAP}
+                </span>
+              ) : (
+                <PageLink key={n} href={pageHref(n)} current={n === page} label={`Trang ${n}`}>
+                  {n}
+                </PageLink>
+              ),
+            )}
 
             <PageLink
               href={pageHref(page + 1)}

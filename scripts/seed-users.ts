@@ -67,6 +67,10 @@ async function clean() {
   await db.announcementRecipient.deleteMany({ where: { userId: { in: ids } } });
   await db.topUp.deleteMany({ where: { userId: { in: ids } } });
   await db.transaction.deleteMany({ where: { userId: { in: ids } } });
+  // Orders hold a user without a cascade — deliberately, so a customer's
+  // purchase history cannot vanish. Anything seed-orders.ts attached to these
+  // accounts has to go first or the delete below is refused.
+  await db.order.deleteMany({ where: { userId: { in: ids } } });
   const removed = await db.user.deleteMany({ where: { id: { in: ids } } });
 
   console.log(`Đã xóa ${removed.count} tài khoản thử.`);
