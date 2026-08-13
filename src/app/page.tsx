@@ -72,7 +72,7 @@ export default async function Home() {
     tft: (
       <ProductRow
         key="tft"
-        heading="ĐẤU TRƯỜNG CHÂN LÝ"
+        heading="DANH SÁCH GAME"
         cards={rows.tft}
         viewAllHref="/categories"
       />
@@ -80,7 +80,7 @@ export default async function Home() {
     gameServices: (
       <ProductRow
         key="gameServices"
-        heading="Dịch Vụ Game"
+        heading="DANH MỤC ACC GAME"
         cards={rows.gameServices}
         viewAllHref="/services"
       />

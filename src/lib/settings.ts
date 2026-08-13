@@ -74,7 +74,11 @@ export interface ShopSettings {
   homeBlocks: string[];
   /** Category slugs feeding the "Sản phẩm nổi bật" row. */
   homeValorantSlugs: string[];
-  /** Category slugs feeding the "Đấu trường chân lý" row. */
+  /**
+   * Category slugs feeding the second row, "Danh sách game". The field and
+   * its storage key still say tft, from when the row was Đấu Trường Chân Lý;
+   * renaming the key would reset every shop that had configured it.
+   */
   homeTftSlugs: string[];
 
   // --- Hero -----------------------------------------------------------------
@@ -134,10 +138,15 @@ export interface BankAccountConfig {
 /**
  * Every home-page block, in the order a fresh install renders them.
  *
- * The seven the layout is built around — hero, danh mục, hướng dẫn, sản phẩm
- * nổi bật, đấu trường chân lý, dịch vụ, SEO — run in that order. The rest are
+ * The seven the layout is built around — hero, danh mục, hướng dẫn, hot
+ * trending, danh sách game, dịch vụ, SEO — run in that order. The rest are
  * older blocks kept where they were and switchable, rather than deleted out
  * from under a shop that is using them.
+ *
+ * Ids outlive labels here. "valorant", "tft" and "gameServices" are what the
+ * rows were called when they were written, and a shop's saved layout is a
+ * list of those ids: renaming one would drop that block from every layout
+ * already stored.
  */
 export const HOME_BLOCKS: { id: string; label: string }[] = [
   { id: "hero", label: "Hero (2 cột)" },
@@ -145,8 +154,8 @@ export const HOME_BLOCKS: { id: string; label: string }[] = [
   { id: "featured", label: "Danh mục sản phẩm" },
   { id: "docs", label: "Xem hướng dẫn" },
   { id: "valorant", label: "Hot trending tháng này" },
-  { id: "tft", label: "Đấu trường chân lý" },
-  { id: "gameServices", label: "Dịch vụ nổi bật" },
+  { id: "tft", label: "Danh sách game" },
+  { id: "gameServices", label: "Danh mục acc game" },
   { id: "otherServices", label: "Dịch vụ khác" },
   { id: "reviews", label: "Đánh giá khách hàng" },
   { id: "ticker", label: "Ticker giao dịch gần đây" },

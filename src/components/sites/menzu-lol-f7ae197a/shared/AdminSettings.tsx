@@ -1421,7 +1421,7 @@ export function AdminSettings({
             </div>
 
             <div className="border-t border-white/[0.07] pt-4">
-              <span className={LABEL}>Đấu trường chân lý</span>
+              <span className={LABEL}>Danh sách game</span>
               {sectionSwitch("tft", "Hàng thẻ danh mục thứ hai.")}
               <div className="mt-3">
                 <SlugPicker
@@ -1436,7 +1436,7 @@ export function AdminSettings({
 
           <section className={CARD}>
             <span className={HEADING}>Dịch vụ nổi bật</span>
-            {sectionSwitch("gameServices", "Hàng “Dịch Vụ Game”.")}
+            {sectionSwitch("gameServices", "Hàng “Danh mục acc game”.")}
             {sectionSwitch("otherServices", "Hàng “Dịch Vụ Khác”.")}
             <SlugPicker
               options={services}
