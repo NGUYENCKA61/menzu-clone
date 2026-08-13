@@ -8,8 +8,16 @@
 
 import { PER_PAGE } from "@/lib/paging";
 
-/** Customers shown per page. */
-export const USERS_PER_PAGE = PER_PAGE;
+/**
+ * Customers shown per page — two fewer than the other lists.
+ *
+ * This screen carries four summary cards above its table that the orders
+ * screen does not, and they stand about two table rows tall. Paging at the
+ * shared ten would push this list's paging row that much further down the
+ * window than the one next door, so the two never line up when an admin moves
+ * between them. Two rows come off to pay for the cards.
+ */
+export const USERS_PER_PAGE = PER_PAGE - 2;
 
 export const USER_ROLES = ["ADMIN", "MEMBER"] as const;
 export const USER_STATES = ["ACTIVE", "BLOCKED"] as const;
