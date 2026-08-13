@@ -188,10 +188,18 @@ export function AdminUsers({
         },
       };
     }
+    // The counts are on the row already, so the warning names them rather than
+    // describing the loss in the abstract — "3 đơn · 5.905.000đ" is the thing
+    // about to stop existing.
     return {
       danger: true,
       title: "Xóa tài khoản vĩnh viễn?",
-      body: `${user.username} sẽ bị xóa hẳn và không khôi phục được. Nếu tài khoản đã từng mua hàng hoặc nạp tiền, hệ thống sẽ từ chối để giữ lịch sử bán hàng — khi đó hãy khóa thay vì xóa.`,
+      body:
+        `${user.username} sẽ bị xóa hẳn và không khôi phục được. ` +
+        `Toàn bộ lịch sử của tài khoản này bị xóa theo: ${user.orderCount} đơn hàng ` +
+        `(${formatVnd(user.totalSpent)}đ), ${formatVnd(user.totalToppedUp)}đ đã nạp, ` +
+        `cùng mọi giao dịch và đơn dịch vụ. Doanh thu và thống kê của shop sẽ giảm ` +
+        `đúng bằng phần đó. Muốn giữ số liệu thì khóa tài khoản thay vì xóa.`,
       confirmLabel: "Xóa vĩnh viễn",
       run: () => call({ username: user.username, action: "delete" }),
     };

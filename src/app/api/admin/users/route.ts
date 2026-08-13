@@ -162,35 +162,44 @@ export async function PATCH(request: Request) {
 
   // --- delete --------------------------------------------------------------
   if (action === "delete") {
-    // Orders, transactions, top-ups and service orders do not cascade, and
-    // that is deliberate: they are the shop's own sales records. Deleting the
-    // customer would take the history of what was sold with them.
-    const [orders, transactions, topUps, serviceOrders] = await Promise.all([
-      db.order.count({ where: { userId: target.id } }),
-      db.transaction.count({ where: { userId: target.id } }),
-      db.topUp.count({ where: { userId: target.id } }),
-      db.serviceOrder.count({ where: { userId: target.id } }),
-    ]);
-    const history = orders + transactions + topUps + serviceOrders;
-
-    if (history > 0) {
-      return NextResponse.json(
-        {
-          error:
-            `Tài khoản có ${orders} đơn hàng, ${transactions} giao dịch, ` +
-            `${topUps} lượt nạp và ${serviceOrders} đơn dịch vụ. Xóa sẽ mất lịch sử ` +
-            `bán hàng của shop — hãy khóa tài khoản thay vì xóa.`,
-        },
-        { status: 409 },
-      );
-    }
-
     if (target.role === "ADMIN") {
       return NextResponse.json({ error: "Không thể xóa tài khoản quản trị" }, { status: 400 });
     }
 
-    await db.user.delete({ where: { id: target.id } });
-    return NextResponse.json({ deleted: target.username });
+    // Orders, transactions, top-ups and service orders hold a user without a
+    // cascade, which used to make this refuse outright: they are the shop's
+    // own sales records, and taking the customer takes the record of what was
+    // sold. The shop has asked for the delete to go through anyway, so they
+    // are removed explicitly rather than by loosening the schema — the
+    // constraint still stops anything else in the codebase from destroying
+    // sales history by accident, and this one route says so out loud.
+    //
+    // Counted first so the answer can report what went, and counted inside the
+    // same transaction as the deletes so the figures cannot be a snapshot of a
+    // moment that no longer exists by the time the rows are gone.
+    const removed = await db.$transaction(async (tx) => {
+      const [orders, transactions, topUps, serviceOrders] = await Promise.all([
+        tx.order.count({ where: { userId: target.id } }),
+        tx.transaction.count({ where: { userId: target.id } }),
+        tx.topUp.count({ where: { userId: target.id } }),
+        tx.serviceOrder.count({ where: { userId: target.id } }),
+      ]);
+
+      await tx.serviceOrder.deleteMany({ where: { userId: target.id } });
+      await tx.topUp.deleteMany({ where: { userId: target.id } });
+      await tx.transaction.deleteMany({ where: { userId: target.id } });
+      await tx.order.deleteMany({ where: { userId: target.id } });
+      // Sessions, linked accounts, trade requests and announcement targeting
+      // all cascade, so the account itself takes them.
+      await tx.user.delete({ where: { id: target.id } });
+
+      return { orders, transactions, topUps, serviceOrders };
+    });
+
+    // Products the deleted orders sold keep their SOLD status. They were sold;
+    // what is gone is who bought them. Flipping them back to AVAILABLE would
+    // put an account somebody already owns back on the shop front.
+    return NextResponse.json({ deleted: target.username, removed });
   }
 
   // --- block / unblock (default) -------------------------------------------
