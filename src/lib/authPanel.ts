@@ -8,8 +8,16 @@
 /** What the panel accepts. Matches the trade-screenshot uploader already here. */
 export const AUTH_IMAGE_TYPES = new Set(["image/png", "image/jpeg", "image/webp"]);
 
-/** Five megabytes, same ceiling as the other uploader on this site. */
-export const AUTH_IMAGE_MAX_BYTES = 5 * 1024 * 1024;
+/**
+ * Twelve megabytes — higher than the five the screenshot uploader allows.
+ *
+ * The file is stored byte for byte: nothing here resizes or re-encodes it, so
+ * whatever is uploaded is what Next optimises from, and a sharper source is a
+ * sharper panel. Five megabytes is enough for a screenshot and not for a
+ * full-resolution photograph, and a cap that forces the shop to compress
+ * before uploading defeats the point of asking for quality.
+ */
+export const AUTH_IMAGE_MAX_BYTES = 12 * 1024 * 1024;
 
 /**
  * The panel is half a card and roughly twice as tall as it is wide, drawn with

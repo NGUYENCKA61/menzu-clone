@@ -78,6 +78,13 @@ export function AuthPanelSlider({
                 // arrive long before their turn comes round.
                 priority={i === 0}
                 sizes="50vw"
+                // Above the site's default 75. This is one large picture
+                // filling half the card, held still for seconds at a time and
+                // looked straight at — the one place on the site where the
+                // usual compression is visible. Must appear in the qualities
+                // allowlist in next.config, or Next quietly serves the nearest
+                // value that does and the setting looks like it did nothing.
+                quality={95}
                 className="object-cover object-center"
               />
             ) : null}

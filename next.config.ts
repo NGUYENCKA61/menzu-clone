@@ -26,9 +26,19 @@ const nextConfig: NextConfig = {
   output: "standalone",
 
   images: {
-    // The catalogue art is wide-but-short; serving AVIF first saves roughly a
-    // third over WebP again on the browsers that take it.
-    formats: ["image/avif", "image/webp"],
+    // WebP only, and first in the list, which is what decides the format —
+    // Next takes the first entry the browser's Accept header matches. AVIF
+    // does encode smaller at the same quality, and it was preferred here for
+    // that reason; the sign-in artwork is judged on sharpness rather than
+    // bytes, and its encoder is gentler with fine detail at high quality.
+    formats: ["image/webp"],
+
+    // Required from Next 16: only qualities on this list may be requested, so
+    // that a stranger cannot make the server re-encode the catalogue at every
+    // value from 1 to 100. 75 is the default the storefront uses; 95 is for
+    // the sign-in panel, which is a single large picture behind a form and the
+    // one place where softness would be visible.
+    qualities: [75, 95],
     // A year — asset filenames carry the account code and are replaced, not
     // edited, so a stale cache entry cannot show the wrong image.
     minimumCacheTTL: 31536000,
