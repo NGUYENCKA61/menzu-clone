@@ -255,7 +255,11 @@ export function AnnouncementCenter({
     };
   }, [openList]);
 
-  if (announcements.length === 0) return null;
+  // The bell is drawn whether or not the shop has anything to say. It used to
+  // hide itself when the list was empty, back when the header carried a second
+  // decorative bell that was always there; that one is gone, and a header
+  // whose notification icon appears and disappears reads as broken rather than
+  // as quiet.
 
   return (
     <>
@@ -284,6 +288,12 @@ export function AnnouncementCenter({
             </div>
 
             <div className="max-h-[320px] overflow-y-auto">
+              {announcements.length === 0 ? (
+                <p className="px-4 py-8 text-center text-[12px] text-neutral-500">
+                  Chưa có thông báo nào.
+                </p>
+              ) : null}
+
               {announcements.map((item) => {
                 const isUnread = unread.some((a) => a.id === item.id);
                 return (

@@ -2,7 +2,6 @@
 
 import {
   ArrowLeftRight,
-  Bell,
   ClipboardList,
   LayoutDashboard,
   LogOut,
@@ -72,17 +71,11 @@ export function UserMenu({ user }: { user: HeaderUser }) {
 
   return (
     <>
-      <a
-        href="#"
-        className="relative w-9 h-9 flex items-center justify-center rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors text-neutral-400 hover:text-white"
-        aria-label="Thông báo"
-      >
-        <Bell size={16} />
-        <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-red-500 text-white rounded-full text-[9px] font-bold flex items-center justify-center border border-[#0a0a0d]">
-          0
-        </span>
-      </a>
-
+      {/* A second bell used to sit here, from the captured markup: an anchor
+          to "#" with a badge hard-coded to 0. It went nowhere and counted
+          nothing. The one in the header beside it is the real one — it lists
+          the shop's announcements — and two bells side by side asked the
+          visitor to guess which. */}
       <div className="relative" ref={wrapper}>
         <button
           type="button"
