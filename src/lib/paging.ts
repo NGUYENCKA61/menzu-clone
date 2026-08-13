@@ -6,8 +6,14 @@
  * two copies of this would drift into disagreeing about what the last page is.
  */
 
-/** Rows per page across the admin lists. */
-export const PER_PAGE = 20;
+/**
+ * Rows per page across the admin lists.
+ *
+ * One number for every list on purpose: an admin who has learned that a page
+ * holds ten should not have to relearn it on the next screen. Split it into
+ * per-screen constants only when a screen genuinely needs a different answer.
+ */
+export const PER_PAGE = 10;
 
 /** Reads `?page=`, clamped to something that exists. */
 export function parsePage(raw: string | undefined, totalPages: number): number {

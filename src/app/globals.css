@@ -156,16 +156,19 @@
   --brand: #7c3aed;
   --brand-dark: #6d28d9;
 
-  /* Scrollbar. One pink, carried through the three states by opacity alone —
-     a thumb that changed hue as you grabbed it would read as a different
-     control.
-     The pale pink, kept nearly opaque. Over a near-black gutter a light tint
-     loses its hue before it loses its brightness, so thinning this one to make
-     it discreet is what turned it grey the first time. Brightness comes from
-     the alpha here, not from a heavier colour. */
-  --menzu-scroll-thumb: rgb(249 168 212 / 0.86);
-  --menzu-scroll-thumb-hover: rgb(249 168 212 / 0.95);
-  --menzu-scroll-thumb-active: rgb(249 168 212 / 1);
+  /* Scrollbar. The same red the admin screens use for their accent — buttons,
+     badges, the active sidebar row, the revenue line — so the bar reads as
+     part of the same set rather than a stray colour.
+     One hue through the three states, varied by opacity alone: a thumb that
+     changed colour as you grabbed it would read as a different control. Kept
+     nearly opaque, because over a near-black gutter a thinned tint loses its
+     hue before it loses its brightness and comes out grey. */
+  /* Taken from the palette token rather than copied as a hex, so it stays the
+     same red as bg-rose-500 renders — the two differ, because Tailwind emits
+     these through a wider gamut than a hand-written sRGB triple. */
+  --menzu-scroll-thumb: color-mix(in oklab, var(--color-rose-500) 85%, transparent);
+  --menzu-scroll-thumb-hover: color-mix(in oklab, var(--color-rose-500) 95%, transparent);
+  --menzu-scroll-thumb-active: var(--color-rose-500);
 }
 
 /*
