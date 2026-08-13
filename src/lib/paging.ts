@@ -89,6 +89,24 @@ export function pageStrip(
   return out;
 }
 
+/**
+ * Whether a debounced search box has anything to push into the URL.
+ *
+ * This exists because of a bug worth naming. The debounce effect re-runs
+ * whenever the query string changes — including when the admin clicks a page
+ * link — and it cleared `page` every time it ran, on the reasoning that a new
+ * search invalidates where you were in the list. It does. But clicking page 2
+ * is not a new search: the effect fired, stripped the page, and pushed the
+ * admin back to page 1 a third of a second after they arrived. The table
+ * looked frozen on page 1 no matter which number was pressed.
+ *
+ * So the effect now asks first, and does nothing at all when the box already
+ * matches the URL.
+ */
+export function searchNeedsSync(typed: string, inUrl: string | null): boolean {
+  return typed !== (inUrl ?? "");
+}
+
 /** Total pages for a count, never fewer than one. */
 export function pageCount(matching: number, perPage: number = PER_PAGE): number {
   return Math.max(1, Math.ceil(matching / perPage));

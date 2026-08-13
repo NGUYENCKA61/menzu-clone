@@ -4,6 +4,7 @@ import { Download, Search } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
+import { searchNeedsSync } from "@/lib/paging";
 import {
   USER_QUERY_MAX,
   USER_TIER_LABELS,
@@ -38,15 +39,18 @@ export function AdminUserFilters({ filters }: { filters: UserFilters }) {
   // Typing should not be a request per keystroke, nor fill the back button
   // with every prefix of the word.
   useEffect(() => {
+    // Nothing typed since the URL was last written — which is the case on
+    // every page click. Without this guard the timer below fires anyway and
+    // strips the page the admin just asked for.
+    if (!searchNeedsSync(q, params.get("q"))) return;
+
     const timer = window.setTimeout(() => {
       const next = new URLSearchParams(params.toString());
       if (q) next.set("q", q);
       else next.delete("q");
-      // Narrowing the list invalidates where you were in it.
+      // A new search invalidates where you were in the list.
       next.delete("page");
-      if (next.toString() !== params.toString()) {
-        router.replace(`${pathname}?${next}`, { scroll: false });
-      }
+      router.replace(`${pathname}?${next}`, { scroll: false });
     }, 350);
     return () => window.clearTimeout(timer);
   }, [q, params, pathname, router]);

@@ -10,6 +10,7 @@ import {
   QUERY_MAX,
   type OrderFilters,
 } from "@/lib/orders";
+import { searchNeedsSync } from "@/lib/paging";
 
 const FIELD =
   "h-10 rounded-lg border border-white/[0.08] bg-[#0e0e11] px-3 text-[13px] text-white outline-none focus:border-rose-500/50 transition-colors";
@@ -33,17 +34,20 @@ export function AdminOrderFilters({ filters }: { filters: OrderFilters }) {
   // Typing should not be a request per keystroke, and the URL should not fill
   // the back button with every prefix of the word.
   useEffect(() => {
+    // Nothing typed since the URL was last written — which is the case on
+    // every page click. Without this guard the timer below fires anyway and
+    // strips the page the admin just asked for.
+    if (!searchNeedsSync(q, params.get("q"))) return;
+
     const timer = window.setTimeout(() => {
       const next = new URLSearchParams(params.toString());
       if (q) next.set("q", q);
       else next.delete("q");
-      // Narrowing the list invalidates where you were in it: staying on page 5
-      // of a result that now has one page shows a table the admin has to
-      // page back out of to see what they searched for.
+      // A new search invalidates where you were in the list: staying on page 5
+      // of a result that now has one page shows a table the admin has to page
+      // back out of to see what they searched for.
       next.delete("page");
-      if (next.toString() !== params.toString()) {
-        router.replace(`${pathname}?${next}`, { scroll: false });
-      }
+      router.replace(`${pathname}?${next}`, { scroll: false });
     }, 350);
     return () => window.clearTimeout(timer);
   }, [q, params, pathname, router]);

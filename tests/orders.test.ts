@@ -8,7 +8,7 @@ import {
   QUERY_MAX,
   toCsv,
 } from "@/lib/orders";
-import { GAP, pageRange, pageStrip, pageWindow, parsePage } from "@/lib/paging";
+import { GAP, pageRange, pageStrip, pageWindow, parsePage, searchNeedsSync } from "@/lib/paging";
 import { dayRangeVn } from "@/lib/time";
 
 describe("parseOrderFilters", () => {
@@ -164,6 +164,52 @@ describe("exportFilename", () => {
     expect(exportFilename(new Date("2026-08-12T18:30:00Z"))).toBe(
       "don-hang-20260813-0130.csv",
     );
+  });
+});
+
+describe("searchNeedsSync", () => {
+  it("does nothing when the box already matches the URL", () => {
+    // This is the state on every page click, and the case that broke paging:
+    // the debounce fired anyway and stripped ?page, bouncing the admin back to
+    // page 1 a third of a second after they arrived.
+    expect(searchNeedsSync("", null)).toBe(false);
+    expect(searchNeedsSync("", "")).toBe(false);
+    expect(searchNeedsSync("minh", "minh")).toBe(false);
+  });
+
+  it("syncs once the term actually changes", () => {
+    expect(searchNeedsSync("minh", null)).toBe(true);
+    expect(searchNeedsSync("minh", "min")).toBe(true);
+    // Clearing the box is a change too, or the old term sticks in the URL.
+    expect(searchNeedsSync("", "minh")).toBe(true);
+  });
+
+  it("walks the sequence that broke", () => {
+    // What the toolbar does, step by step, with the search box untouched.
+    const apply = (typed: string, url: URLSearchParams) => {
+      if (!searchNeedsSync(typed, url.get("q"))) return url;
+      const next = new URLSearchParams(url.toString());
+      if (typed) next.set("q", typed);
+      else next.delete("q");
+      next.delete("page");
+      return next;
+    };
+
+    // Land on the list, click page 4. The debounce fires because the query
+    // string changed — and must leave the page alone.
+    let url = new URLSearchParams("page=4");
+    expect(apply("", url).get("page")).toBe("4");
+
+    // Same while a search is already active: paging through results must not
+    // throw away the page either.
+    url = new URLSearchParams("q=minh&page=3");
+    expect(apply("minh", url).get("page")).toBe("3");
+
+    // Now actually type. The page goes, which is the point of clearing it.
+    url = new URLSearchParams("q=minh&page=3");
+    const searched = apply("minhh", url);
+    expect(searched.get("q")).toBe("minhh");
+    expect(searched.get("page")).toBeNull();
   });
 });
 
