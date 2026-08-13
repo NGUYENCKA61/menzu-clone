@@ -331,19 +331,21 @@ describe("bố cục trang chủ", () => {
 
 describe("home layout migration", () => {
   it("gives a pre-upgrade layout the new blocks without losing its own", () => {
-    // A shop that arranged its home page before "docs" and "seo" existed.
+    // A shop that arranged its home page before "docs" and "seo" existed, and
+    // back when the quick-actions bar was still a block.
     const saved =
       "hero,quick,-flash,featured,valorant,tft,gameServices," +
       "otherServices,reviews,ticker,utilities";
     const parsed = parseSettings([{ key: SETTING_KEYS.homeBlocks, value: saved }]);
 
     // Both new blocks arrive, switched on, and every earlier choice survives —
-    // including the one the shop had hidden.
+    // including the one the shop had hidden. The retired bar is dropped.
     expect(parsed.homeBlocks).toContain("docs");
     expect(parsed.homeBlocks).toContain("seo");
     expect(parsed.homeBlocks).toContain("-flash");
+    expect(parsed.homeBlocks).not.toContain("quick");
     expect(parsed.homeBlocks).toHaveLength(HOME_BLOCKS.length);
-    expect(parsed.homeBlocks.slice(0, 2)).toEqual(["hero", "quick"]);
+    expect(parsed.homeBlocks.slice(0, 2)).toEqual(["hero", "-flash"]);
   });
 
   it("keeps an order the admin rearranged", () => {

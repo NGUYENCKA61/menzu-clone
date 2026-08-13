@@ -6,7 +6,6 @@ import { ProductRow } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/
 import { DocsSection } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/DocsSection";
 import { SeoContent } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/SeoContent";
 import { getHomeCategoryCards, getHomeDocCards, getHomeRows } from "@/lib/homeRows";
-import { QuickActionsBar } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/QuickActionsBar";
 import { ReviewsSection } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/ReviewsSection";
 import { SiteFooter } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/SiteFooter";
 import { SiteHeader } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/SiteHeader";
@@ -58,7 +57,6 @@ export default async function Home() {
         usps={settings.heroUsps}
       />
     ),
-    quick: <QuickActionsBar key="quick" />,
     flash: <FlashSaleSection key="flash" items={flashSaleItems} />,
     featured: <FeaturedCategories key="featured" cards={categoryCards} />,
     docs: <DocsSection key="docs" articles={docCards} />,

@@ -141,7 +141,6 @@ export interface BankAccountConfig {
  */
 export const HOME_BLOCKS: { id: string; label: string }[] = [
   { id: "hero", label: "Hero (2 cột)" },
-  { id: "quick", label: "Thanh truy cập nhanh" },
   { id: "flash", label: "Flash sale hôm nay" },
   { id: "featured", label: "Danh mục sản phẩm" },
   { id: "docs", label: "Xem hướng dẫn" },
