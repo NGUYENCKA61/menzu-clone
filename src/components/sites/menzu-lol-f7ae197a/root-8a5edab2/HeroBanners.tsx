@@ -3,6 +3,13 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { DEFAULT_SETTINGS } from "@/lib/settings";
+import { ScrollCta } from "./ScrollCta";
+
+/**
+ * Where the hero's scroll cue lands, and the id the categories section wears.
+ * Shared so the two cannot drift apart into a link that scrolls nowhere.
+ */
+export const SCROLL_TARGET_ID = "danh-muc-san-pham";
 
 /** #b9a0ff. Written out rather than made a token: it is spent here and
  *  nowhere else, and a variable used once hides where the colour lives. */
@@ -58,7 +65,15 @@ export function HeroBanners({
     // No card around this. The hero sits on the page's own dark ground, which
     // also puts its heading on the same left edge as every row below it —
     // a card's inner padding would have indented it away from them.
-    <section className="w-full py-6 sm:py-10 lg:py-14">
+    //
+    // A screen tall, less what stands above it: the 104px header spacer and
+    // the page container's own top padding, 24px and 40px at lg. That lands
+    // the section's bottom edge on the fold, which is what puts the scroll cue
+    // at the bottom of the screen rather than somewhere below it. svh, not vh,
+    // because vh on a phone measures the screen without the browser's own bars
+    // and pushes the cue out of sight. pb-20 is the cue's own room, so it
+    // never sits over the copy or the artwork.
+    <section className="relative flex w-full flex-col justify-center min-h-[calc(100svh-128px)] pt-6 pb-20 sm:pt-10 lg:min-h-[calc(100svh-144px)] lg:pt-14">
       {/* One column until there is room for two. items-center keeps the
           artwork level with the copy rather than pinned to the top of a
           taller cell. */}
@@ -151,6 +166,8 @@ export function HeroBanners({
           )}
         </div>
       </div>
+
+      <ScrollCta targetId={SCROLL_TARGET_ID} label="Khám phá sản phẩm" />
     </section>
   );
 }

@@ -1,6 +1,8 @@
 import type { CSSProperties } from "react";
 import Image from "next/image";
 
+import { SCROLL_TARGET_ID } from "./HeroBanners";
+
 export interface CategoryCard {
   href: string;
   line1: string;
@@ -42,7 +44,9 @@ export function FeaturedCategories({ cards }: { cards?: CategoryCard[] }) {
   const tiles = cards && cards.length > 0 ? cards : CAPTURED_CARDS;
 
   return (
-    <section className="w-full mb-12">
+    // scroll-mt clears the fixed header, so arriving from the hero's cue puts
+    // the heading below it rather than behind it.
+    <section id={SCROLL_TARGET_ID} className="w-full mb-12 scroll-mt-[120px]">
       <div className="flex flex-col items-center justify-center mb-10 text-center">
         <h2 className="text-xl sm:text-2xl md:text-3xl font-black uppercase tracking-wider md:tracking-widest text-white whitespace-nowrap px-2">
           SẢN PHẨM NỔI BẬT
