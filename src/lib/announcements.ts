@@ -7,7 +7,12 @@
  * visitor query agree on, testable without a database.
  */
 
-export type AnnouncementType = "UPDATE" | "MAINTENANCE" | "PROMO" | "INFO";
+export type AnnouncementType =
+  | "UPDATE"
+  | "MAINTENANCE"
+  | "PROMO"
+  | "INFO"
+  | "GIFT";
 export type AnnouncementPriority = "LOW" | "NORMAL" | "HIGH";
 export type AnnouncementStatus = "DRAFT" | "PUBLISHED" | "DISABLED";
 export type AnnouncementAudience = "ALL" | "USERS";
@@ -117,6 +122,22 @@ export const TYPE_LABELS: Record<AnnouncementType, string> = {
   MAINTENANCE: "Bảo trì",
   PROMO: "Khuyến mãi",
   INFO: "Thông tin",
+  GIFT: "Quà tặng",
+};
+
+/**
+ * What the modal calls itself, per kind.
+ *
+ * A gift and a maintenance window are not the same announcement, and heading
+ * both "Thông báo hệ thống" makes the shop sound like it is filing paperwork
+ * when it is handing somebody a present.
+ */
+export const TYPE_HEADINGS: Record<AnnouncementType, string> = {
+  UPDATE: "Thông báo hệ thống",
+  MAINTENANCE: "Thông báo hệ thống",
+  PROMO: "Thông báo khuyến mãi",
+  INFO: "Thông báo hệ thống",
+  GIFT: "Thông báo quà tặng",
 };
 
 export const PRIORITY_LABELS: Record<AnnouncementPriority, string> = {

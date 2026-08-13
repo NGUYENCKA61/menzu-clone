@@ -645,6 +645,7 @@ enum AnnouncementType {
   MAINTENANCE
   PROMO
   INFO
+  GIFT
 }
 
 /// Declaration order is load-bearing: `activeAnnouncements` sorts descending

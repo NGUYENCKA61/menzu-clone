@@ -20,6 +20,8 @@ import {
   type AnnouncementType,
 } from "@/lib/announcements";
 
+import { TYPE_ICONS, TYPE_TILE } from "./announcementIcons";
+
 export interface AdminAnnouncementRow {
   id: string;
   title: string;
@@ -324,17 +326,31 @@ export function AdminAnnouncements({
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
           <div>
             <label className={LABEL}>Loại</label>
-            <select
-              value={form.type}
-              onChange={(e) => setForm({ ...form, type: e.target.value as AnnouncementType })}
-              className={FIELD}
-            >
-              {Object.entries(TYPE_LABELS).map(([value, label]) => (
-                <option key={value} value={value} className="bg-neutral-900">
-                  {label}
-                </option>
-              ))}
-            </select>
+            {/* Buttons rather than a <select>, so the glyph the customer will
+                see is on screen while the kind is being chosen — a dropdown
+                cannot show one. */}
+            <div className="flex flex-wrap gap-1.5">
+              {(Object.keys(TYPE_LABELS) as AnnouncementType[]).map((value) => {
+                const Icon = TYPE_ICONS[value];
+                const on = form.type === value;
+                return (
+                  <button
+                    key={value}
+                    type="button"
+                    aria-pressed={on}
+                    onClick={() => setForm({ ...form, type: value })}
+                    className={`inline-flex h-9 items-center gap-1.5 rounded-lg border px-2.5 text-[11px] font-bold transition-colors ${
+                      on
+                        ? "border-[var(--menzu-accent)]/60 bg-[var(--menzu-accent)]/15 text-[var(--menzu-accent)]"
+                        : "border-white/10 bg-white/[0.03] text-neutral-400 hover:text-white"
+                    }`}
+                  >
+                    <Icon size={13} />
+                    {TYPE_LABELS[value]}
+                  </button>
+                );
+              })}
+            </div>
           </div>
           <div>
             <label className={LABEL}>Ưu tiên</label>
@@ -496,8 +512,17 @@ export function AdminAnnouncements({
                       </p>
                     ) : null}
                   </td>
-                  <td className="px-5 py-3 text-xs text-neutral-300 whitespace-nowrap">
-                    {TYPE_LABELS[row.type]}
+                  <td className="px-5 py-3 whitespace-nowrap">
+                    {/* The same glyph the customer sees on the notice itself. */}
+                    <span className="inline-flex items-center gap-2 text-xs text-neutral-300">
+                      <span className={`flex h-6 w-6 items-center justify-center rounded-md border ${TYPE_TILE}`}>
+                        {(() => {
+                          const Icon = TYPE_ICONS[row.type];
+                          return <Icon size={12} />;
+                        })()}
+                      </span>
+                      {TYPE_LABELS[row.type]}
+                    </span>
                   </td>
                   <td className="px-5 py-3 text-xs text-neutral-400 whitespace-nowrap">
                     {PRIORITY_LABELS[row.priority]}

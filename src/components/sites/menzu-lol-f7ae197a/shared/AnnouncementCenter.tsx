@@ -1,6 +1,6 @@
 "use client";
 
-import { Bell, BellOff, Gift, Info, Megaphone, Wrench, X } from "lucide-react";
+import { Bell, BellOff, X } from "lucide-react";
 import Link from "next/link";
 
 import {
@@ -17,10 +17,13 @@ import {
   isSnoozed,
   relativeTime,
   SNOOZE_MS,
+  TYPE_HEADINGS,
+  TYPE_LABELS,
   type AnnouncementPriority,
   type AnnouncementType,
 } from "@/lib/announcements";
 
+import { TYPE_ICONS, TYPE_TILE } from "./announcementIcons";
 import { useClientNow } from "./useClientClock";
 
 export interface AnnouncementItem {
@@ -41,22 +44,6 @@ export interface AnnouncementItem {
   /** Formatted on the server, where the timezone is fixed. */
   updatedLabel: string;
 }
-
-/** A glyph per kind, so a row is recognisable before it is read. */
-const TYPE_ICONS: Record<AnnouncementType, typeof Bell> = {
-  PROMO: Gift,
-  UPDATE: Info,
-  MAINTENANCE: Wrench,
-  INFO: Megaphone,
-};
-
-/** Tinted tiles, restrained enough that four in a column still read as a list. */
-const TYPE_TINT: Record<AnnouncementType, string> = {
-  PROMO: "border-amber-500/25 bg-amber-500/10 text-amber-400",
-  UPDATE: "border-sky-500/25 bg-sky-500/10 text-sky-400",
-  MAINTENANCE: "border-orange-500/25 bg-orange-500/10 text-orange-400",
-  INFO: "border-white/10 bg-white/5 text-neutral-400",
-};
 
 /**
  * What this browser has already closed.
@@ -366,14 +353,20 @@ export function AnnouncementCenter({
                     }`}
                   >
                     <span
-                      className={`mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border ${TYPE_TINT[item.type]}`}
+                      className={`mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border ${TYPE_TILE}`}
                     >
                       <Icon size={16} />
                     </span>
 
                     <span className="min-w-0 flex-1">
+                      {/* The kind, then the headline. Naming the kind in the
+                          accent above the title is what makes a column of five
+                          notices scannable without reading any of them. */}
+                      <span className="block text-[10px] font-black uppercase tracking-widest text-[var(--menzu-accent)]">
+                        {TYPE_LABELS[item.type]}
+                      </span>
                       <span
-                        className={`block truncate text-[12px] font-black uppercase tracking-wide ${
+                        className={`mt-0.5 block truncate text-[13px] font-bold ${
                           isUnread ? "text-white" : "text-neutral-300"
                         }`}
                       >
@@ -442,6 +435,7 @@ export function AnnouncementModal({
   onSnooze: () => void;
 }) {
   const panel = useRef<HTMLDivElement>(null);
+  const HeaderIcon = TYPE_ICONS[item.type];
 
   useEffect(() => {
     panel.current?.focus();
@@ -495,10 +489,17 @@ export function AnnouncementModal({
         <span aria-hidden className="absolute inset-x-0 top-0 h-px bg-rose-500/70" />
 
         <header className="flex shrink-0 items-center gap-3 border-b border-white/[0.07] px-5 py-4">
-          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-rose-500/30 bg-rose-500/10 text-[15px] font-bold leading-none text-rose-400">
-            !
+          {/* The kind's own glyph, the same one the bell list and the admin
+              table use. It replaced a fixed "!", which read as a warning on a
+              notice that was handing somebody a present. */}
+          <span
+            className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border ${TYPE_TILE}`}
+          >
+            <HeaderIcon size={16} />
           </span>
-          <h2 className="text-[15px] font-semibold text-white">Thông báo hệ thống</h2>
+          <h2 className="text-[15px] font-semibold text-white">
+            {TYPE_HEADINGS[item.type]}
+          </h2>
           <button
             type="button"
             onClick={onClose}
@@ -567,12 +568,16 @@ export function AnnouncementModal({
           >
             Không hiện lại trong 2 giờ
           </button>
+          {/* A gift notice says "Nhận quà" per the reference. It does what
+              "Đóng" does — closes and marks read. The claiming itself is
+              whatever the shop wrote in the body, because nothing in the
+              codebase grants anything. */}
           <button
             type="button"
             onClick={onClose}
             className="h-10 rounded-lg bg-rose-500 px-6 text-[13px] font-semibold text-white transition-colors hover:bg-rose-600"
           >
-            Đóng
+            {item.type === "GIFT" ? "Nhận quà" : "Đóng"}
           </button>
         </footer>
       </div>
