@@ -96,10 +96,10 @@ export function UserMenu({ user }: { user: HeaderUser }) {
         </button>
 
         {open ? (
-          <div className="absolute right-0 top-[calc(100%+4px)] w-[280px] bg-[#111111] rounded-xl shadow-none border border-white/10 z-[100] overflow-hidden">
-            <div className="p-4 border-b border-white/5 flex flex-col gap-1">
+          <div className="absolute right-0 top-[calc(100%+8px)] z-[100] w-[280px] overflow-hidden rounded-xl border border-white/10 bg-[#12141c] shadow-2xl">
+            <div className="flex flex-col gap-1 border-b border-white/[0.07] px-4 py-3">
               <div className="flex items-center gap-2">
-                <span className="text-sm font-black text-white">{user.username}</span>
+                <span className="text-[14px] font-bold text-white">{user.username}</span>
                 <span
                   className={`px-1.5 py-0.5 rounded text-[9px] font-black uppercase tracking-widest ${
                     isAdmin
@@ -128,7 +128,7 @@ export function UserMenu({ user }: { user: HeaderUser }) {
                   own sidebar, so listing every screen here duplicated a menu
                   one click away. */}
               {isAdmin ? (
-                <div className="mb-1 pb-1 border-b border-white/5">
+                <div className="mb-1 pb-1 border-b border-white/[0.07]">
                   <a
                     href="/admin"
                     className="flex items-center gap-3 py-2.5 px-2 rounded-lg text-[var(--menzu-accent)] hover:text-white hover:bg-[var(--menzu-accent)]/10 transition-colors"
@@ -169,7 +169,7 @@ export function UserMenu({ user }: { user: HeaderUser }) {
               <button
                 type="button"
                 onClick={handleLogout}
-                className="w-full flex items-center gap-3 py-2.5 px-2 mt-1 rounded-lg text-[var(--menzu-accent)] hover:bg-[var(--menzu-accent)]/10 transition-colors border-t border-white/5"
+                className="w-full flex items-center gap-3 py-2.5 px-2 mt-1 rounded-lg text-[var(--menzu-accent)] hover:bg-[var(--menzu-accent)]/10 transition-colors border-t border-white/[0.07]"
               >
                 <LogOut size={14} className="shrink-0" />
                 <span className="text-[11px] font-black uppercase tracking-widest">
