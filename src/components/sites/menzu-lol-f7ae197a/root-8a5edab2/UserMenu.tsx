@@ -1,16 +1,18 @@
 "use client";
 
 import {
-  ArrowLeftRight,
-  ClipboardList,
-  LayoutDashboard,
+  CreditCard,
+  History,
+  LayoutGrid,
   LogOut,
   Shield,
   ShieldCheck,
   ShoppingBag,
+  Sparkles,
   Wallet,
   type LucideIcon,
 } from "lucide-react";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
@@ -23,14 +25,57 @@ export interface HeaderUser {
   role?: string;
 }
 
-const ITEMS: { label: string; href: string; icon: LucideIcon }[] = [
-  { label: "Tổng quan", href: "/profile", icon: LayoutDashboard },
-  { label: "Nạp tiền", href: "/wallet", icon: Wallet },
-  { label: "Lịch sử giao dịch", href: "/transactions", icon: ArrowLeftRight },
-  { label: "Lịch sử mua", href: "/orders", icon: ShoppingBag },
-  { label: "Đơn dịch vụ", href: "/service-orders", icon: ClipboardList },
-  { label: "Bảo mật", href: "/security", icon: ShieldCheck },
+/**
+ * The live menu rules its links into three groups rather than listing six in a
+ * row: where you are, what touches money, and the account itself.
+ */
+const GROUPS: { label: string; href: string; icon: LucideIcon }[][] = [
+  [{ label: "Tổng quan", href: "/profile", icon: LayoutGrid }],
+  [
+    { label: "Nạp tiền", href: "/wallet", icon: Wallet },
+    { label: "Lịch sử giao dịch", href: "/transactions", icon: History },
+    { label: "Lịch sử mua", href: "/orders", icon: ShoppingBag },
+    { label: "Đơn dịch vụ", href: "/service-orders", icon: Sparkles },
+  ],
+  [{ label: "Bảo mật", href: "/security", icon: ShieldCheck }],
 ];
+
+/** A group of links and the rule above it. */
+const GROUP = "border-t border-white/[0.07] py-1.5";
+const ROW = "relative flex w-full items-center gap-3.5 rounded-lg px-3 py-3 transition-colors";
+/** ĐĂNG XUẤT and the admin link: same row, shouted. */
+const SHOUT = "text-[13px] font-black uppercase tracking-[0.12em]";
+
+const AVATARS = {
+  sm: { px: 28, frame: "h-7 w-7 rounded-[9px]", letter: "text-[11px]" },
+  lg: { px: 44, frame: "h-11 w-11 rounded-full", letter: "text-[16px]" },
+} as const;
+
+/** The picture where there is one, the initial where there is not. */
+function Avatar({ user, size }: { user: HeaderUser; size: keyof typeof AVATARS }) {
+  const { px, frame, letter } = AVATARS[size];
+  const shell = `${frame} shrink-0 overflow-hidden border border-white/10 bg-black/40`;
+
+  if (user.avatarUrl) {
+    return (
+      <Image
+        src={user.avatarUrl}
+        alt=""
+        width={px}
+        height={px}
+        className={`${shell} object-cover`}
+      />
+    );
+  }
+  return (
+    <span
+      aria-hidden
+      className={`${shell} flex items-center justify-center ${letter} font-black uppercase text-neutral-400`}
+    >
+      {user.username.slice(0, 1)}
+    </span>
+  );
+}
 
 function formatVnd(n: number): string {
   return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
@@ -84,7 +129,9 @@ export function UserMenu({ user }: { user: HeaderUser }) {
           aria-expanded={open}
           className="flex items-center gap-2 sm:gap-2.5 p-1 sm:px-2 sm:py-1.5 rounded-xl bg-white/10 border border-white/10 hover:bg-white/15 hover:border-white/20 transition-colors"
         >
-          <span className="h-7 w-7 rounded-[9px] overflow-hidden bg-black/50 shrink-0 relative z-10 border border-white/10 block" />
+          {/* The captured markup left this box empty, so the trigger showed a
+              black square where every signed-in header shows a face. */}
+          <Avatar user={user} size="sm" />
           <span className="hidden sm:flex flex-col justify-center relative z-10 text-left">
             <span className="text-[11px] font-bold text-white leading-none truncate mb-[4px]">
               {user.username}
@@ -96,86 +143,105 @@ export function UserMenu({ user }: { user: HeaderUser }) {
         </button>
 
         {open ? (
-          <div className="absolute right-0 top-[calc(100%+8px)] z-[100] w-[280px] overflow-hidden rounded-xl border border-white/10 bg-[#12141c] shadow-2xl">
-            <div className="flex flex-col gap-1 border-b border-white/[0.07] px-4 py-3">
-              <div className="flex items-center gap-2">
-                <span className="text-[14px] font-bold text-white">{user.username}</span>
-                <span
-                  className={`px-1.5 py-0.5 rounded text-[9px] font-black uppercase tracking-widest ${
-                    isAdmin
-                      ? "bg-[var(--menzu-accent)]/15 border border-[var(--menzu-accent)]/40 text-[var(--menzu-accent)]"
-                      : "bg-white/10 border border-white/15 text-neutral-300"
-                  }`}
-                >
-                  {isAdmin ? "ADMIN" : "MEMBER"}
+          <div className="absolute right-0 top-[calc(100%+8px)] z-[100] w-[288px] overflow-hidden rounded-xl border border-white/10 bg-[#12141c] shadow-2xl">
+            {/* Who you are: the face, the name, and the two pills the live
+                menu sets under it rather than beside it — the name gets the
+                full width that way, however long it runs. */}
+            <div className="flex items-center gap-3 px-4 pt-4">
+              <Avatar user={user} size="lg" />
+              <div className="flex min-w-0 flex-col gap-1.5">
+                <span className="truncate text-[15px] font-bold leading-none text-white">
+                  {user.username}
                 </span>
+                <div className="flex items-center gap-1.5">
+                  <span
+                    className={`rounded px-1.5 py-1 text-[10px] font-black uppercase leading-none tracking-widest ${
+                      isAdmin
+                        ? "bg-[var(--menzu-accent)] text-white"
+                        : "bg-gradient-to-r from-[#7b3fe4] to-[#9354ff] text-white"
+                    }`}
+                  >
+                    {isAdmin ? "ADMIN" : "MEMBER"}
+                  </span>
+                  {user.uid !== undefined ? (
+                    <span className="rounded bg-white/[0.07] px-1.5 py-1 text-[10px] font-bold leading-none text-neutral-400">
+                      UID: {user.uid}
+                    </span>
+                  ) : null}
+                </div>
               </div>
-              {user.uid !== undefined ? (
-                <span className="text-[10px] text-neutral-500 font-semibold">
-                  UID: {user.uid}
-                </span>
-              ) : null}
-              <span className="text-[10px] font-semibold text-neutral-500">
-                Số dư{" "}
-                <span className="text-emerald-400 font-black">
-                  {formatVnd(user.balance)}đ
-                </span>
-              </span>
             </div>
 
-            <div className="p-2">
+            {/* The balance, in a frame of its own. It is the one number anyone
+                opens this menu to check, and a line of small print under the
+                username is not where a reader looks for it. */}
+            <div className="px-4 py-3">
+              <div className="flex items-center justify-between gap-3 rounded-xl border border-white/10 bg-white/[0.02] px-3.5 py-3">
+                <span className="flex items-center gap-2.5 text-[10px] font-black uppercase tracking-[0.18em] text-neutral-400">
+                  <CreditCard size={15} className="shrink-0 text-neutral-500" />
+                  Số dư
+                </span>
+                <span className="text-[13px] font-black uppercase tracking-wider text-emerald-400">
+                  {formatVnd(user.balance)}đ
+                </span>
+              </div>
+            </div>
+
+            <div className="px-3 pb-2">
               {/* Admins only, and a single link: the admin area carries its
                   own sidebar, so listing every screen here duplicated a menu
                   one click away. */}
               {isAdmin ? (
-                <div className="mb-1 pb-1 border-b border-white/[0.07]">
+                <div className={GROUP}>
                   <a
                     href="/admin"
-                    className="flex items-center gap-3 py-2.5 px-2 rounded-lg text-[var(--menzu-accent)] hover:text-white hover:bg-[var(--menzu-accent)]/10 transition-colors"
+                    className={`${ROW} text-[var(--menzu-accent)] hover:bg-[var(--menzu-accent)]/10`}
                   >
-                    <Shield size={14} className="shrink-0" />
-                    <span className="text-[11px] font-black uppercase tracking-widest">
-                      Dashboard quản lý
-                    </span>
+                    <Shield size={18} className="shrink-0" />
+                    <span className={SHOUT}>Dashboard quản lý</span>
                   </a>
                 </div>
               ) : null}
 
-              {ITEMS.map(({ label, href, icon: Icon }) => {
-                // The page the reader is already on. Marked rather than left
-                // looking like every other row, which is the one thing a menu
-                // of six links can tell you for free.
-                const active = pathname === href;
-                return (
-                  <a
-                    key={href}
-                    href={href}
-                    aria-current={active ? "page" : undefined}
-                    className={`relative flex items-center gap-3 py-2.5 pl-3 pr-2 rounded-lg transition-colors ${
-                      active
-                        ? "bg-[var(--menzu-accent)]/[0.08] text-white before:absolute before:left-0 before:top-2 before:bottom-2 before:w-[2px] before:rounded-full before:bg-[var(--menzu-accent)]"
-                        : "text-neutral-300 hover:text-white hover:bg-white/5"
-                    }`}
-                  >
-                    <Icon
-                      size={14}
-                      className={`shrink-0 ${active ? "text-[var(--menzu-accent)]" : "text-neutral-500"}`}
-                    />
-                    <span className="text-[11px] font-bold">{label}</span>
-                  </a>
-                );
-              })}
+              {GROUPS.map((group) => (
+                <div key={group[0]!.href} className={GROUP}>
+                  {group.map(({ label, href, icon: Icon }) => {
+                    // The page the reader is already on. Marked rather than
+                    // left looking like every other row, which is the one
+                    // thing a menu of six links can tell you for free.
+                    const active = pathname === href;
+                    return (
+                      <a
+                        key={href}
+                        href={href}
+                        aria-current={active ? "page" : undefined}
+                        className={`${ROW} ${
+                          active
+                            ? "bg-[var(--menzu-accent)]/[0.08] text-white before:absolute before:left-0 before:top-2.5 before:bottom-2.5 before:w-[2px] before:rounded-full before:bg-[var(--menzu-accent)]"
+                            : "text-neutral-200 hover:bg-white/5 hover:text-white"
+                        }`}
+                      >
+                        <Icon
+                          size={18}
+                          className={`shrink-0 ${active ? "text-[var(--menzu-accent)]" : "text-neutral-400"}`}
+                        />
+                        <span className="text-[14px] font-medium">{label}</span>
+                      </a>
+                    );
+                  })}
+                </div>
+              ))}
 
-              <button
-                type="button"
-                onClick={handleLogout}
-                className="w-full flex items-center gap-3 py-2.5 px-2 mt-1 rounded-lg text-[var(--menzu-accent)] hover:bg-[var(--menzu-accent)]/10 transition-colors border-t border-white/[0.07]"
-              >
-                <LogOut size={14} className="shrink-0" />
-                <span className="text-[11px] font-black uppercase tracking-widest">
-                  ĐĂNG XUẤT
-                </span>
-              </button>
+              <div className={GROUP}>
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className={`${ROW} text-[var(--menzu-accent)] hover:bg-[var(--menzu-accent)]/10`}
+                >
+                  <LogOut size={18} className="shrink-0" />
+                  <span className={SHOUT}>Đăng xuất</span>
+                </button>
+              </div>
             </div>
           </div>
         ) : null}
