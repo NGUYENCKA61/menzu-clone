@@ -41,7 +41,9 @@ const GROUPS: { label: string; href: string; icon: LucideIcon }[][] = [
 
 /** A group of links and the rule above it. */
 const GROUP = "border-t border-white/[0.07] py-1.5";
-const ROW = "relative flex w-full items-center gap-3.5 rounded-lg px-3 py-3 transition-colors";
+/** px-2 inside a px-2 list: content starts 16px in, level with the avatar
+ *  above it and with the rows of the notification panel. */
+const ROW = "relative flex w-full items-center gap-3.5 rounded-lg px-2 py-3 transition-colors";
 /** ĐĂNG XUẤT and the admin link: same row, shouted. */
 const SHOUT = "text-[13px] font-black uppercase tracking-[0.12em]";
 
@@ -126,7 +128,10 @@ export function UserMenu({ user }: { user: HeaderUser }) {
           type="button"
           onClick={() => setOpen((v) => !v)}
           aria-expanded={open}
-          className="flex items-center gap-2 sm:gap-2.5 p-1 sm:px-2 sm:py-1.5 rounded-xl bg-white/10 border border-white/10 hover:bg-white/15 hover:border-white/20 transition-colors"
+          // h-9, which is the bell beside it and the Đăng nhập button this
+          // replaces when signed out. It stood 6px taller than both, and a
+          // taller trigger drops its panel 6px lower than the bell's.
+          className="flex h-9 items-center gap-2 sm:gap-2.5 px-1 sm:px-2 rounded-xl bg-white/10 border border-white/10 hover:bg-white/15 hover:border-white/20 transition-colors"
         >
           {/* The captured markup left this box empty, so the trigger showed a
               black square where every signed-in header shows a face. */}
@@ -142,7 +147,9 @@ export function UserMenu({ user }: { user: HeaderUser }) {
         </button>
 
         {open ? (
-          <div className="absolute right-0 top-[calc(100%+8px)] z-[100] w-[288px] overflow-hidden rounded-xl border border-white/10 bg-[#12141c] shadow-2xl">
+          // Same width and same top edge as the notification panel, so the
+          // two line up rather than stepping when both are open.
+          <div className="absolute right-0 top-11 z-[100] w-[340px] overflow-hidden rounded-xl border border-white/10 bg-[#12141c] shadow-2xl">
             {/* Who you are: the face, the name, and the two pills the live
                 menu sets under it rather than beside it — the name gets the
                 full width that way, however long it runs. */}
@@ -174,7 +181,7 @@ export function UserMenu({ user }: { user: HeaderUser }) {
             {/* No balance card here: the trigger just above already carries
                 the figure in green, and repeating it two lines lower said the
                 same thing twice. */}
-            <div className="px-3 pb-2 pt-4">
+            <div className="px-2 pb-2 pt-4">
               {/* Admins only, and a single link: the admin area carries its
                   own sidebar, so listing every screen here duplicated a menu
                   one click away. */}
@@ -185,7 +192,7 @@ export function UserMenu({ user }: { user: HeaderUser }) {
                     className={`${ROW} text-[var(--menzu-accent)] hover:bg-[var(--menzu-accent)]/10`}
                   >
                     <Shield size={18} className="shrink-0" />
-                    <span className={SHOUT}>Dashboard quản lý</span>
+                    <span className={SHOUT}>Dashboard</span>
                   </a>
                 </div>
               ) : null}
