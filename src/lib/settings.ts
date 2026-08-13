@@ -216,12 +216,11 @@ export const DEFAULT_SETTINGS: ShopSettings = {
   heroPrimaryHref: "/categories",
   heroSecondaryLabel: "Xem hướng dẫn",
   heroSecondaryHref: "/docs",
-  heroUsps: [
-    "Giao dịch nhanh chóng",
-    "Hỗ trợ khách hàng",
-    "Sản phẩm đa dạng",
-    "Hệ thống tự động",
-  ],
+  // None by default. The four the hero shipped with — nhanh chóng, đa dạng,
+  // hỗ trợ, tự động — are what every shop in this trade claims, so they read
+  // as filler rather than as reasons. The four boxes are still in Cấu hình
+  // for a shop with something specific to say.
+  heroUsps: [],
   heroVideo: "",
 
   // Empty means "whatever the section already showed": the captured tiles for
