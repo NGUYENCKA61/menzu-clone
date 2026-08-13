@@ -1,8 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { ArrowLeft, Eye, EyeOff, Lock, User } from "lucide-react";
+
+import { canGoBack } from "@/lib/navigation";
 
 import { AuthPanelSlider } from "./AuthPanelSlider";
 import { TurnstileBox } from "./TurnstileBox";
@@ -26,6 +28,21 @@ function DiscordGlyph() {
       <path d="M19.27 5.33A18.3 18.3 0 0 0 14.9 4c-.2.36-.42.83-.58 1.2a17 17 0 0 0-4.64 0A8 8 0 0 0 9.1 4a18.2 18.2 0 0 0-4.38 1.33C2.1 9 1.4 12.6 1.73 16.14a18.4 18.4 0 0 0 5.54 2.8c.45-.6.84-1.25 1.18-1.93-.65-.24-1.27-.54-1.86-.9.16-.11.31-.23.46-.35a13 13 0 0 0 11.02 0c.15.12.3.24.46.35-.59.36-1.21.66-1.86.9.34.68.73 1.32 1.18 1.93a18.3 18.3 0 0 0 5.54-2.8c.4-4.1-.66-7.66-2.79-10.81ZM8.68 13.93c-.83 0-1.5-.76-1.5-1.7 0-.93.66-1.7 1.5-1.7s1.52.77 1.5 1.7c0 .94-.66 1.7-1.5 1.7Zm6.64 0c-.83 0-1.5-.76-1.5-1.7 0-.93.67-1.7 1.5-1.7.84 0 1.52.77 1.5 1.7 0 .94-.66 1.7-1.5 1.7Z" />
     </svg>
   );
+}
+
+/**
+ * Back to wherever they came from, or the shop front if that was elsewhere.
+ *
+ * The fallback goes through the router rather than window.location so it stays
+ * a client navigation — a full reload here would throw away the app shell to
+ * reach a page the browser already holds.
+ */
+function goBack(push: (href: string) => void) {
+  if (canGoBack(window.history.length, document.referrer, window.location.origin)) {
+    window.history.back();
+  } else {
+    push("/");
+  }
 }
 
 /**
@@ -53,6 +70,7 @@ export function LoginForm({
   /** Newlines are line breaks, which is how the two-row overlay is written. */
   panelTitle: string;
 }) {
+  const router = useRouter();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -103,6 +121,8 @@ export function LoginForm({
         <div className="mb-6">
           <button
             type="button"
+            // It had no handler at all, so it did nothing when pressed.
+            onClick={() => goBack((href) => router.push(href))}
             className="inline-flex items-center gap-2 text-neutral-300 hover:text-white transition-colors duration-200 text-xs font-black uppercase tracking-widest px-4 py-2"
           >
             <ArrowLeft size={14} />

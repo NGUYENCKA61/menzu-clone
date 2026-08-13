@@ -1,10 +1,11 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Eye, EyeOff, Lock, Mail, User } from "lucide-react";
 import { useState } from "react";
+
+import { canGoBack } from "@/lib/navigation";
 
 import { AuthPanelSlider } from "./AuthPanelSlider";
 import { TurnstileBox } from "./TurnstileBox";
@@ -13,6 +14,21 @@ const FIELD_CLASS =
   "w-full rounded-2xl border border-white/5 bg-white/5 pl-12 pr-4 py-4 text-sm text-white outline-none focus:border-[var(--login-accent)]/60 transition-colors placeholder-neutral-600";
 const LABEL_CLASS =
   "block text-[11px] font-black uppercase tracking-widest text-neutral-400 mb-2.5 ml-1";
+
+/**
+ * Back to wherever they came from, or the shop front if that was elsewhere.
+ *
+ * The fallback goes through the router rather than window.location so it stays
+ * a client navigation — a full reload here would throw away the app shell to
+ * reach a page the browser already holds.
+ */
+function goBack(push: (href: string) => void) {
+  if (canGoBack(window.history.length, document.referrer, window.location.origin)) {
+    window.history.back();
+  } else {
+    push("/");
+  }
+}
 
 /**
  * Sign-up counterpart to LoginForm, reusing its split-card layout.
@@ -95,13 +111,16 @@ export function RegisterForm({
     <main className="min-h-[calc(100vh-100px)] flex items-center justify-center">
       <div className="w-full max-w-[1320px] mx-auto px-4 lg:px-6 lg:py-10 py-4 sm:py-8 flex flex-col flex-1 min-h-[700px] animate-[slideUpFade_0.5s_ease-out]">
         <div className="mb-6">
-          <a
-            href="/login"
+          {/* Was a link that always went to /login, whatever the visitor had
+              been looking at. Back means back. */}
+          <button
+            type="button"
+            onClick={() => goBack((href) => router.push(href))}
             className="inline-flex items-center gap-2 text-neutral-300 hover:text-white transition-colors duration-200 text-xs font-black uppercase tracking-widest px-4 py-2"
           >
             <ArrowLeft size={14} />
             Quay lại
-          </a>
+          </button>
         </div>
 
         <div className="flex-1 w-full bg-neutral-900/80 border border-white/10 rounded-[2rem] sm:rounded-[2.5rem] shadow-2xl relative overflow-hidden transform-gpu flex flex-col">
