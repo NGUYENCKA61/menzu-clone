@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, X } from "lucide-react";
+import { Check } from "lucide-react";
 
 import { useEffect, useRef } from "react";
 
@@ -24,9 +24,9 @@ export interface TopUpSuccessDialogProps {
  * screen worth stopping for: somebody who looked away came back to a reloaded
  * page and no statement that anything had happened.
  *
- * Built as a receipt rather than a celebration — header, figures, one action,
- * separated by hairlines. A payment confirmation is read, not admired, and
- * anything decorative here competes with the two numbers that matter.
+ * Centred and short on purpose — it carries one fact and two figures, and a
+ * customer reads it once. There is no close cross: the one button is the way
+ * out, and Escape and the backdrop do the same thing.
  *
  * Dismissing it reloads, because the balance in the header was rendered before
  * any of this and is now wrong.
@@ -37,38 +37,25 @@ export function TopUpSuccessDialog({
   balance,
   onClose,
 }: TopUpSuccessDialogProps) {
-  const panel = useRef<HTMLDivElement>(null);
+  const confirm = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
-    // The panel rather than the button, so a screen reader announces the
-    // dialog and its title before offering the way out of it.
-    panel.current?.focus();
+    confirm.current?.focus();
 
     const onKey = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         onClose();
         return;
       }
-      if (event.key !== "Tab") return;
-
-      // Keep Tab inside the sheet; behind it is a form the customer has
-      // finished with, and reaching it without seeing it is disorienting.
-      const stops = panel.current?.querySelectorAll<HTMLElement>("button");
-      if (!stops?.length) return;
-      const first = stops[0]!;
-      const last = stops[stops.length - 1]!;
-
-      if (event.shiftKey && document.activeElement === first) {
+      // One control, so trapping Tab is just keeping it here — enough to stop
+      // it wandering into the page behind the sheet.
+      if (event.key === "Tab") {
         event.preventDefault();
-        last.focus();
-      } else if (!event.shiftKey && document.activeElement === last) {
-        event.preventDefault();
-        first.focus();
+        confirm.current?.focus();
       }
     };
     window.addEventListener("keydown", onKey);
 
-    // Letting the page scroll under the sheet reads as the dialog drifting.
     const previous = document.body.style.overflow;
     document.body.style.overflow = "hidden";
 
@@ -80,76 +67,60 @@ export function TopUpSuccessDialog({
 
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
-      {/* A click anywhere outside dismisses, which is what people try first.
-          Its own element rather than a handler on the wrapper, so selecting
-          the code to copy it does not close the sheet. */}
-      <div className="absolute inset-0 bg-black/70" onClick={onClose} />
+      {/* Its own element rather than a handler on the wrapper, so selecting the
+          code to copy it does not close the sheet. */}
+      <div className="absolute inset-0 bg-black/75" onClick={onClose} />
 
       <div
-        ref={panel}
         role="dialog"
         aria-modal="true"
         aria-labelledby="topup-success-title"
-        tabIndex={-1}
-        className="relative w-full max-w-[400px] rounded-xl border border-white/10 bg-[#12141c] shadow-2xl outline-none"
+        className="relative w-full max-w-[380px] rounded-xl border border-white/10 bg-[#131316] px-7 py-8 text-center shadow-2xl"
       >
+        <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border-2 border-rose-500 bg-rose-500/15 text-rose-500">
+          <Check size={30} strokeWidth={3} />
+        </span>
+
+        <h2
+          id="topup-success-title"
+          className="mt-5 text-[17px] font-black uppercase tracking-wide text-white"
+        >
+          Nạp tiền thành công
+        </h2>
+
+        <p className="mt-2 text-[25px] font-black leading-none text-rose-500 tabular-nums">
+          +{formatVnd(amount)}đ
+        </p>
+
+        <dl className="mt-6 flex flex-col gap-3 rounded-lg bg-white/[0.04] px-4 py-3.5 text-left">
+          <div className="flex items-center justify-between gap-3">
+            <dt className="text-[10px] font-black uppercase tracking-widest text-neutral-500">
+              Mã lệnh nạp
+            </dt>
+            <dd className="text-[13px] font-semibold text-neutral-200">{code}</dd>
+          </div>
+          <div className="flex items-center justify-between gap-3">
+            <dt className="text-[10px] font-black uppercase tracking-widest text-neutral-500">
+              Số dư ví
+            </dt>
+            <dd className="text-[13px] font-bold text-white tabular-nums">
+              {formatVnd(balance)}đ
+            </dd>
+          </div>
+        </dl>
+
+        <p className="mt-4 text-[11px] text-neutral-500">
+          Số dư đã được cập nhật vào tài khoản của bạn.
+        </p>
+
         <button
+          ref={confirm}
           type="button"
           onClick={onClose}
-          aria-label="Đóng"
-          className="absolute right-4 top-4 text-neutral-600 hover:text-neutral-300 transition-colors"
+          className="mt-5 h-11 w-full rounded-lg bg-rose-500 text-[13px] font-black uppercase tracking-widest text-white transition-colors hover:bg-rose-600"
         >
-          <X size={15} />
+          Xong
         </button>
-
-        <header className="flex items-center gap-3 border-b border-white/[0.07] px-5 py-4">
-          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-400">
-            <Check size={16} strokeWidth={2.5} />
-          </span>
-          <div className="min-w-0">
-            <h2
-              id="topup-success-title"
-              className="text-[14px] font-semibold text-white leading-tight"
-            >
-              Nạp tiền thành công
-            </h2>
-            <p className="mt-0.5 text-[12px] text-neutral-500 leading-tight">
-              Số dư ví đã được cập nhật
-            </p>
-          </div>
-        </header>
-
-        <div className="px-5 py-5">
-          <p className="text-[11px] text-neutral-500">Số tiền đã nạp</p>
-          <p className="mt-1 text-[28px] font-semibold leading-none tracking-tight text-emerald-400 tabular-nums">
-            +{formatVnd(amount)}đ
-          </p>
-
-          {/* Hairlines instead of a boxed panel: one fewer border to read, and
-              the labels stay aligned with the figure above them. */}
-          <dl className="mt-5 divide-y divide-white/[0.07] border-t border-white/[0.07]">
-            <div className="flex items-center justify-between gap-4 py-2.5">
-              <dt className="text-[13px] text-neutral-500">Mã lệnh nạp</dt>
-              <dd className="font-mono text-[13px] text-neutral-200">{code}</dd>
-            </div>
-            <div className="flex items-center justify-between gap-4 py-2.5">
-              <dt className="text-[13px] text-neutral-500">Số dư ví</dt>
-              <dd className="text-[13px] font-semibold text-white tabular-nums">
-                {formatVnd(balance)}đ
-              </dd>
-            </div>
-          </dl>
-        </div>
-
-        <footer className="border-t border-white/[0.07] px-5 py-4">
-          <button
-            type="button"
-            onClick={onClose}
-            className="w-full h-10 rounded-lg bg-red-600 hover:bg-red-700 text-[13px] font-semibold text-white transition-colors"
-          >
-            Xong
-          </button>
-        </footer>
       </div>
     </div>
   );
