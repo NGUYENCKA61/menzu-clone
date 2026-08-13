@@ -1,6 +1,7 @@
 "use client";
 
-import { Bell, X } from "lucide-react";
+import { Bell, BellOff, Gift, Info, Megaphone, Wrench, X } from "lucide-react";
+import Link from "next/link";
 
 import {
   useCallback,
@@ -40,6 +41,22 @@ export interface AnnouncementItem {
   /** Formatted on the server, where the timezone is fixed. */
   updatedLabel: string;
 }
+
+/** A glyph per kind, so a row is recognisable before it is read. */
+const TYPE_ICONS: Record<AnnouncementType, typeof Bell> = {
+  PROMO: Gift,
+  UPDATE: Info,
+  MAINTENANCE: Wrench,
+  INFO: Megaphone,
+};
+
+/** Tinted tiles, restrained enough that four in a column still read as a list. */
+const TYPE_TINT: Record<AnnouncementType, string> = {
+  PROMO: "border-amber-500/25 bg-amber-500/10 text-amber-400",
+  UPDATE: "border-sky-500/25 bg-sky-500/10 text-sky-400",
+  MAINTENANCE: "border-orange-500/25 bg-orange-500/10 text-orange-400",
+  INFO: "border-white/10 bg-white/5 text-neutral-400",
+};
 
 /**
  * What this browser has already closed.
@@ -224,6 +241,21 @@ export function AnnouncementCenter({
     [seen],
   );
 
+  /**
+   * Clears the badge without opening anything.
+   *
+   * Marks every notice currently on the list, not only the unread ones — the
+   * set is keyed by id and revision, so re-adding one already there changes
+   * nothing, and listing them all means a notice that arrives between two
+   * renders is not quietly marked read without ever being shown.
+   */
+  const markAllRead = useCallback(() => {
+    const next = new Set(seen ?? []);
+    for (const item of announcements) next.add(dismissalKey(item.id, item.revision));
+    writeSeen(next);
+    setAutoDone(true);
+  }, [announcements, seen]);
+
   const snooze = useCallback(
     (item: AnnouncementItem) => {
       writeSnooze(
@@ -282,20 +314,40 @@ export function AnnouncementCenter({
         </button>
 
         {openList ? (
-          <div className="absolute right-0 top-11 z-50 w-[300px] overflow-hidden rounded-xl border border-white/10 bg-[#12141c] shadow-2xl">
-            <div className="border-b border-white/[0.07] px-4 py-3">
-              <span className="text-[13px] font-semibold text-white">Thông báo</span>
+          <div className="absolute right-0 top-11 z-50 w-[340px] overflow-hidden rounded-xl border border-white/10 bg-[#12141c] shadow-2xl">
+            <div className="flex items-center justify-between gap-3 border-b border-white/[0.07] px-4 py-3">
+              <span className="text-[14px] font-bold text-white">Thông báo</span>
+              {/* Only offered when it would do something. A control that is
+                  always there and usually inert teaches people to ignore it. */}
+              {unread.length > 0 ? (
+                <button
+                  type="button"
+                  onClick={markAllRead}
+                  className="text-[10px] font-black uppercase tracking-widest text-[var(--menzu-accent)] transition-opacity hover:opacity-80"
+                >
+                  Đánh dấu đã đọc
+                </button>
+              ) : null}
             </div>
 
-            <div className="max-h-[320px] overflow-y-auto">
+            <div className="max-h-[340px] overflow-y-auto">
               {announcements.length === 0 ? (
-                <p className="px-4 py-8 text-center text-[12px] text-neutral-500">
-                  Chưa có thông báo nào.
-                </p>
+                <div className="px-4 py-10 text-center">
+                  <span className="mx-auto flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/5 text-neutral-600">
+                    <BellOff size={18} />
+                  </span>
+                  <p className="mt-3 text-[13px] font-semibold text-neutral-300">
+                    Chưa có thông báo nào
+                  </p>
+                  <p className="mt-1 text-[11px] text-neutral-500">
+                    Thông báo từ shop sẽ hiện ở đây.
+                  </p>
+                </div>
               ) : null}
 
               {announcements.map((item) => {
                 const isUnread = unread.some((a) => a.id === item.id);
+                const Icon = TYPE_ICONS[item.type];
                 return (
                   <button
                     key={item.id}
@@ -304,27 +356,55 @@ export function AnnouncementCenter({
                       setPicked(item);
                       setOpenList(false);
                     }}
-                    className="flex w-full flex-col items-start gap-1 border-b border-white/[0.07] px-4 py-3 text-left last:border-0 hover:bg-white/[0.03] transition-colors"
+                    // The unread wash is deliberately faint. It marks a row
+                    // without competing with the dot, and a list where every
+                    // row glows is a list nobody scans.
+                    className={`flex w-full items-start gap-3 border-b border-white/[0.07] px-4 py-3 text-left transition-colors last:border-0 ${
+                      isUnread
+                        ? "bg-[var(--menzu-accent)]/[0.06] hover:bg-[var(--menzu-accent)]/[0.1]"
+                        : "hover:bg-white/[0.03]"
+                    }`}
                   >
-                    <span className="flex w-full items-center gap-2">
-                      {isUnread ? (
-                        <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-red-500" />
-                      ) : null}
+                    <span
+                      className={`mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border ${TYPE_TINT[item.type]}`}
+                    >
+                      <Icon size={16} />
+                    </span>
+
+                    <span className="min-w-0 flex-1">
                       <span
-                        className={`truncate text-[13px] ${
-                          isUnread ? "font-semibold text-white" : "text-neutral-300"
+                        className={`block truncate text-[12px] font-black uppercase tracking-wide ${
+                          isUnread ? "text-white" : "text-neutral-300"
                         }`}
                       >
                         {item.title}
                       </span>
+                      <span className="mt-0.5 block truncate text-[11px] text-neutral-400">
+                        {item.body}
+                      </span>
+                      <span className="mt-1 block text-[10px] text-neutral-600">
+                        {now === null ? "" : relativeTime(new Date(item.startAt), new Date(now))}
+                      </span>
                     </span>
-                    <span className="text-[11px] text-neutral-500">
-                      {now === null ? "" : relativeTime(new Date(item.startAt), new Date(now))}
-                    </span>
+
+                    {isUnread ? (
+                      <span
+                        aria-label="Chưa đọc"
+                        className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-[var(--menzu-accent)]"
+                      />
+                    ) : null}
                   </button>
                 );
               })}
             </div>
+
+            <Link
+              href="/thong-bao"
+              onClick={() => setOpenList(false)}
+              className="block border-t border-white/[0.07] px-4 py-3 text-center text-[11px] font-black uppercase tracking-widest text-[var(--menzu-accent)] transition-colors hover:bg-white/[0.03]"
+            >
+              Xem tất cả thông báo →
+            </Link>
           </div>
         ) : null}
       </div>

@@ -140,7 +140,7 @@ export function LoginForm({
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
               <div className="relative z-10 p-12 text-center w-full">
-                <span className="text-[var(--login-accent)] font-black uppercase tracking-[0.5em] text-xs mb-2 drop-shadow-md block">
+                <span className="text-[var(--menzu-accent)] font-black uppercase tracking-[0.5em] text-xs mb-2 drop-shadow-md block">
                   {panelSubtitle}
                 </span>
                 <h2 className="text-5xl font-black text-white uppercase leading-none drop-shadow-lg">
@@ -158,7 +158,7 @@ export function LoginForm({
             <div className="flex-1 flex flex-col justify-center items-center p-6 sm:p-8 lg:py-14 lg:px-16 bg-neutral-950/60">
               <div className="w-full max-w-[420px]">
                 <div className="mb-8">
-                  <p className="text-[10px] uppercase tracking-[0.3em] text-[var(--login-accent)] mb-2 font-black lg:hidden">
+                  <p className="text-[10px] uppercase tracking-[0.3em] text-[var(--menzu-accent)] mb-2 font-black lg:hidden">
                     Menzu Shop
                   </p>
                   <h1 className="text-4xl font-black text-white uppercase tracking-tight">
@@ -189,7 +189,7 @@ export function LoginForm({
                         value={username}
                         onChange={(event) => setUsername(event.target.value)}
                         placeholder="Email hoặc Tên đăng nhập"
-                        className="w-full rounded-2xl border border-white/5 bg-white/5 pl-12 pr-4 py-4 text-sm text-white outline-none focus:border-[var(--login-accent)]/60 transition-colors placeholder-neutral-600"
+                        className="w-full rounded-2xl border border-white/5 bg-white/5 pl-12 pr-4 py-4 text-sm text-white outline-none focus:border-[var(--menzu-accent)]/60 transition-colors placeholder-neutral-600"
                       />
                     </div>
                   </div>
@@ -204,7 +204,7 @@ export function LoginForm({
                       </label>
                       <a
                         href="#"
-                        className="text-[10px] font-bold text-[var(--login-accent)] hover:text-[var(--login-accent-dark)] cursor-pointer transition-colors uppercase tracking-wider mr-1"
+                        className="text-[10px] font-bold text-[var(--menzu-accent)] hover:text-[var(--menzu-accent-dark)] cursor-pointer transition-colors uppercase tracking-wider mr-1"
                       >
                         Quên mật khẩu?
                       </a>
@@ -221,7 +221,7 @@ export function LoginForm({
                         value={password}
                         onChange={(event) => setPassword(event.target.value)}
                         placeholder="••••••••"
-                        className="w-full rounded-2xl border border-white/5 bg-white/5 pl-12 pr-12 py-4 text-sm text-white outline-none focus:border-[var(--login-accent)]/60 transition-colors placeholder-neutral-600"
+                        className="w-full rounded-2xl border border-white/5 bg-white/5 pl-12 pr-12 py-4 text-sm text-white outline-none focus:border-[var(--menzu-accent)]/60 transition-colors placeholder-neutral-600"
                       />
                       <button
                         type="button"
@@ -256,7 +256,7 @@ export function LoginForm({
                     // refuses without one anyway — this only saves the visitor
                     // a round trip and an error they cannot act on.
                     disabled={pending || (Boolean(turnstileSiteKey) && !captcha)}
-                    className={`w-full rounded-2xl bg-[var(--login-accent)] hover:bg-[var(--login-accent-dark)] disabled:opacity-70 disabled:cursor-wait text-white font-black py-4 uppercase tracking-widest text-sm transition-colors ${
+                    className={`w-full rounded-2xl bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] disabled:opacity-70 disabled:cursor-wait text-white font-black py-4 uppercase tracking-widest text-sm transition-colors ${
                       turnstileSiteKey ? "mt-5" : "mt-7"
                     }`}
                   >
@@ -293,7 +293,7 @@ export function LoginForm({
                   Chưa có tài khoản?
                   <a
                     href="/signup"
-                    className="text-[var(--login-accent)] hover:text-[var(--login-accent-dark)] font-black transition-colors ml-1"
+                    className="text-[var(--menzu-accent)] hover:text-[var(--menzu-accent-dark)] font-black transition-colors ml-1"
                   >
                     Tạo mới ngay
                   </a>

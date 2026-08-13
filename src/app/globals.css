@@ -171,8 +171,8 @@
   /* The sign-in card's accent, the exact red the brief named. Its own token
      rather than a change to --brand: red was asked for on that page, and
      --brand paints every button on the storefront. */
-  --login-accent: #ff3158;
-  --login-accent-dark: #e01e43;
+  --menzu-accent: #ff3158;
+  --menzu-accent-dark: #e01e43;
   --menzu-scroll-thumb-hover: color-mix(in oklab, var(--color-rose-500) 95%, transparent);
   --menzu-scroll-thumb-active: var(--color-rose-500);
 }

@@ -11,7 +11,7 @@ import { AuthPanelSlider } from "./AuthPanelSlider";
 import { TurnstileBox } from "./TurnstileBox";
 
 const FIELD_CLASS =
-  "w-full rounded-2xl border border-white/5 bg-white/5 pl-12 pr-4 py-4 text-sm text-white outline-none focus:border-[var(--login-accent)]/60 transition-colors placeholder-neutral-600";
+  "w-full rounded-2xl border border-white/5 bg-white/5 pl-12 pr-4 py-4 text-sm text-white outline-none focus:border-[var(--menzu-accent)]/60 transition-colors placeholder-neutral-600";
 const LABEL_CLASS =
   "block text-[11px] font-black uppercase tracking-widest text-neutral-400 mb-2.5 ml-1";
 
@@ -133,7 +133,7 @@ export function RegisterForm({
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
               <div className="relative z-10 p-12 text-center w-full">
-                <span className="text-[var(--login-accent)] font-black uppercase tracking-[0.5em] text-xs mb-2 drop-shadow-md block">
+                <span className="text-[var(--menzu-accent)] font-black uppercase tracking-[0.5em] text-xs mb-2 drop-shadow-md block">
                   {panelSubtitle}
                 </span>
                 <h2 className="text-5xl font-black text-white uppercase leading-none drop-shadow-lg">
@@ -151,7 +151,7 @@ export function RegisterForm({
             <div className="flex-1 flex flex-col justify-center items-center p-6 sm:p-8 lg:py-14 lg:px-16 bg-neutral-950/60">
               <div className="w-full max-w-[420px]">
                 <div className="mb-8">
-                  <p className="text-[10px] uppercase tracking-[0.3em] text-[var(--login-accent)] mb-2 font-black lg:hidden">
+                  <p className="text-[10px] uppercase tracking-[0.3em] text-[var(--menzu-accent)] mb-2 font-black lg:hidden">
                     Menzu Shop
                   </p>
                   <h1 className="text-4xl font-black text-white uppercase tracking-tight">
@@ -276,7 +276,7 @@ export function RegisterForm({
                       type="checkbox"
                       checked={agreed}
                       onChange={(event) => setAgreed(event.target.checked)}
-                      className="mt-0.5 h-4 w-4 shrink-0 cursor-pointer accent-[var(--login-accent)]"
+                      className="mt-0.5 h-4 w-4 shrink-0 cursor-pointer accent-[var(--menzu-accent)]"
                     />
                     {/* Both point at the article index rather than at slugs
                         that do not exist yet — the shop has no terms or
@@ -287,14 +287,14 @@ export function RegisterForm({
                       Tôi đồng ý với{" "}
                       <Link
                         href="/docs"
-                        className="font-bold text-[var(--login-accent)] hover:underline"
+                        className="font-bold text-[var(--menzu-accent)] hover:underline"
                       >
                         Điều khoản sử dụng
                       </Link>{" "}
                       và{" "}
                       <Link
                         href="/docs"
-                        className="font-bold text-[var(--login-accent)] hover:underline"
+                        className="font-bold text-[var(--menzu-accent)] hover:underline"
                       >
                         Chính sách bảo mật
                       </Link>{" "}
@@ -310,7 +310,7 @@ export function RegisterForm({
                     // the server checks because the browser's word is worth
                     // nothing there.
                     disabled={pending || !agreed || (Boolean(turnstileSiteKey) && !captcha)}
-                    className="w-full rounded-2xl bg-[var(--login-accent)] hover:bg-[var(--login-accent-dark)] disabled:opacity-70 disabled:cursor-wait text-white font-black py-4 uppercase tracking-widest text-sm transition-colors mt-5"
+                    className="w-full rounded-2xl bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] disabled:opacity-70 disabled:cursor-wait text-white font-black py-4 uppercase tracking-widest text-sm transition-colors mt-5"
                   >
                     {pending ? "ĐANG XỬ LÝ…" : "ĐĂNG KÝ"}
                   </button>
@@ -320,7 +320,7 @@ export function RegisterForm({
                   Đã có tài khoản?
                   <a
                     href="/login"
-                    className="text-[var(--login-accent)] hover:text-[var(--login-accent-dark)] font-black transition-colors ml-1"
+                    className="text-[var(--menzu-accent)] hover:text-[var(--menzu-accent-dark)] font-black transition-colors ml-1"
                   >
                     Đăng nhập ngay
                   </a>

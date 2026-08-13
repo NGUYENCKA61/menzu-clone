@@ -733,7 +733,7 @@ export function AdminSettings({
                 ) : null}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
                 <div className="absolute inset-x-0 bottom-0 p-3 text-center">
-                  <span className="block text-[7px] font-black uppercase tracking-[0.4em] text-[var(--login-accent)]">
+                  <span className="block text-[7px] font-black uppercase tracking-[0.4em] text-[var(--menzu-accent)]">
                     {panelSubtitle}
                   </span>
                   <span className="mt-0.5 block text-[15px] font-black uppercase leading-none text-white">
@@ -757,7 +757,7 @@ export function AdminSettings({
                         key={`${src}-${index}`}
                         className={`flex items-center gap-2 rounded-lg border px-2 py-1.5 transition-colors ${
                           index === picked
-                            ? "border-[var(--login-accent)]/50 bg-[var(--login-accent)]/10"
+                            ? "border-[var(--menzu-accent)]/50 bg-[var(--menzu-accent)]/10"
                             : "border-white/10 bg-neutral-950/60"
                         }`}
                       >
@@ -829,7 +829,7 @@ export function AdminSettings({
 
                 <div className="flex flex-wrap items-center gap-2">
                   <label
-                    className={`inline-flex h-9 cursor-pointer items-center rounded-lg bg-[var(--login-accent)] px-4 text-[11px] font-black uppercase tracking-widest text-white transition-colors hover:bg-[var(--login-accent-dark)] ${
+                    className={`inline-flex h-9 cursor-pointer items-center rounded-lg bg-[var(--menzu-accent)] px-4 text-[11px] font-black uppercase tracking-widest text-white transition-colors hover:bg-[var(--menzu-accent-dark)] ${
                       uploading ? "opacity-70 cursor-wait" : ""
                     }`}
                   >
