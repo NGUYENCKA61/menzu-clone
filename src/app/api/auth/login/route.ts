@@ -14,11 +14,15 @@ import {
   clearLoginAttempts,
   recordAttempt,
 } from "@/lib/rateLimit";
+import { getShopSettings } from "@/lib/settingsStore";
+import { TURNSTILE_FAILED, turnstileEnabled } from "@/lib/turnstile";
+import { verifyTurnstile } from "@/lib/turnstileVerify";
 
 export async function POST(request: Request) {
   const body = (await request.json().catch(() => null)) as {
     identifier?: string;
     password?: string;
+    turnstileToken?: string;
   } | null;
 
   const identifier = body?.identifier?.trim() ?? "";
@@ -34,6 +38,31 @@ export async function POST(request: Request) {
   // Checked before touching the password so a locked-out caller cannot use
   // response timing to probe whether an account exists.
   const ip = clientIp(request);
+
+  /**
+   * The CAPTCHA is checked here, on the server, before any password work.
+   *
+   * The widget in the browser proves nothing on its own — anyone can post this
+   * endpoint directly and never load the page. What the token is worth is
+   * decided by asking Cloudflare, and only a shop that has filled in both keys
+   * is asking at all: with the settings empty this is skipped entirely, so
+   * adding the feature cannot lock a shop out of its own site before it has
+   * been configured.
+   */
+  const settings = await getShopSettings();
+  if (turnstileEnabled(settings)) {
+    const outcome = await verifyTurnstile(
+      body?.turnstileToken ?? "",
+      settings.turnstileSecretKey,
+      ip,
+    );
+    if (!outcome.ok) {
+      // Counted as a failed attempt: an endpoint that refuses without
+      // recording anything is one somebody can hammer for free.
+      await recordAttempt("LOGIN", identifier, ip);
+      return NextResponse.json({ error: TURNSTILE_FAILED }, { status: 400 });
+    }
+  }
   const rate = await checkLoginRate(identifier, ip);
   if (rate.blocked) {
     return NextResponse.json(

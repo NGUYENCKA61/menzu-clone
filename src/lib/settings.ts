@@ -31,6 +31,14 @@ export interface ShopSettings {
   autoTopUpEnabled: boolean;
   /** Shared secret a provider must present when it pushes to the webhook. */
   topUpApiKey: string;
+
+  /**
+   * Cloudflare Turnstile. Both halves or neither: the widget cannot be drawn
+   * without the site key, and a token cannot be checked without the secret,
+   * so half a pair would either show a broken box or accept anything.
+   */
+  turnstileSiteKey: string;
+  turnstileSecretKey: string;
   /** When false, the buy endpoint refuses with `closedMessage`. */
   purchasesEnabled: boolean;
   closedMessage: string;
@@ -101,6 +109,8 @@ export const DEFAULT_SETTINGS: ShopSettings = {
   bankAccounts: [],
   autoTopUpEnabled: false,
   topUpApiKey: "",
+  turnstileSiteKey: "",
+  turnstileSecretKey: "",
   purchasesEnabled: true,
   closedMessage: "Shop đang tạm ngưng bán hàng, vui lòng quay lại sau ít phút.",
 
@@ -137,6 +147,8 @@ export const SETTING_KEYS: Record<keyof ShopSettings, string> = {
   bankAccounts: "bank.accounts",
   autoTopUpEnabled: "topup.auto",
   topUpApiKey: "topup.apiKey",
+  turnstileSiteKey: "turnstile.siteKey",
+  turnstileSecretKey: "turnstile.secretKey",
   purchasesEnabled: "shop.purchases",
   closedMessage: "shop.closedMessage",
 
@@ -306,6 +318,14 @@ export function parseSettings(rows: Iterable<{ key: string; value: string }>): S
       DEFAULT_SETTINGS.autoTopUpEnabled,
     ),
     topUpApiKey: toOptionalText(stored.get(SETTING_KEYS.topUpApiKey), DEFAULT_SETTINGS.topUpApiKey),
+    turnstileSiteKey: toOptionalText(
+      stored.get(SETTING_KEYS.turnstileSiteKey),
+      DEFAULT_SETTINGS.turnstileSiteKey,
+    ),
+    turnstileSecretKey: toOptionalText(
+      stored.get(SETTING_KEYS.turnstileSecretKey),
+      DEFAULT_SETTINGS.turnstileSecretKey,
+    ),
     purchasesEnabled: toBoolean(
       stored.get(SETTING_KEYS.purchasesEnabled),
       DEFAULT_SETTINGS.purchasesEnabled,
@@ -352,6 +372,8 @@ export function serializeSettings(settings: ShopSettings): { key: string; value:
     bankAccounts: JSON.stringify(settings.bankAccounts),
     autoTopUpEnabled: String(settings.autoTopUpEnabled),
     topUpApiKey: settings.topUpApiKey.trim(),
+    turnstileSiteKey: settings.turnstileSiteKey.trim(),
+    turnstileSecretKey: settings.turnstileSecretKey.trim(),
     purchasesEnabled: String(settings.purchasesEnabled),
     closedMessage: settings.closedMessage.trim(),
 
@@ -405,6 +427,8 @@ export function normalizeSettings(raw: Partial<ShopSettings> | null): ShopSettin
       : DEFAULT_SETTINGS.bankAccounts,
     autoTopUpEnabled: Boolean(raw?.autoTopUpEnabled),
     topUpApiKey: String(raw?.topUpApiKey ?? "").trim(),
+    turnstileSiteKey: String(raw?.turnstileSiteKey ?? "").trim(),
+    turnstileSecretKey: String(raw?.turnstileSecretKey ?? "").trim(),
     purchasesEnabled: Boolean(raw?.purchasesEnabled),
     closedMessage: String(raw?.closedMessage ?? "").trim(),
 

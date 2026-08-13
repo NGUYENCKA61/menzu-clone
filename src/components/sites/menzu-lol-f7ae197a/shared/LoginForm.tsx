@@ -4,6 +4,8 @@ import { useState } from "react";
 import Image from "next/image";
 import { ArrowLeft, Eye, EyeOff, Lock, User } from "lucide-react";
 
+import { TurnstileBox } from "./TurnstileBox";
+
 const HERO_IMAGE_SRC =
   "/sites/menzu-lol-f7ae197a/root-8a5edab2/images/valorant-api/bundles/cb572643-4ce2-b10a-bb56-7c90cc09b19c.webp";
 
@@ -36,12 +38,15 @@ function DiscordGlyph() {
  * The redirect target is required to start with "/" so it cannot be pointed at
  * another origin.
  */
-export function LoginForm() {
+export function LoginForm({ turnstileSiteKey }: { turnstileSiteKey: string | null }) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Null until the visitor solves the widget, and null again once the token
+  // lapses. Only meaningful when the shop has configured Turnstile at all.
+  const [captcha, setCaptcha] = useState<string | null>(null);
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
@@ -53,7 +58,11 @@ export function LoginForm() {
       const response = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ identifier: username, password }),
+        body: JSON.stringify({
+          identifier: username,
+          password,
+          ...(turnstileSiteKey ? { turnstileToken: captcha } : {}),
+        }),
       });
       const data = (await response.json().catch(() => ({}))) as {
         error?: string;
@@ -100,7 +109,7 @@ export function LoginForm() {
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
               <div className="relative z-10 p-12 text-center w-full">
-                <span className="text-[var(--brand)] font-black uppercase tracking-[0.5em] text-xs mb-2 drop-shadow-md block">
+                <span className="text-[var(--login-accent)] font-black uppercase tracking-[0.5em] text-xs mb-2 drop-shadow-md block">
                   Menzu Valorant
                 </span>
                 <h2 className="text-5xl font-black text-white uppercase leading-none drop-shadow-lg">
@@ -113,7 +122,7 @@ export function LoginForm() {
             <div className="flex-1 flex flex-col justify-center items-center p-6 sm:p-8 lg:py-14 lg:px-16 bg-neutral-950/60">
               <div className="w-full max-w-[420px]">
                 <div className="mb-8">
-                  <p className="text-[10px] uppercase tracking-[0.3em] text-[var(--brand)] mb-2 font-black lg:hidden">
+                  <p className="text-[10px] uppercase tracking-[0.3em] text-[var(--login-accent)] mb-2 font-black lg:hidden">
                     Menzu Shop
                   </p>
                   <h1 className="text-4xl font-black text-white uppercase tracking-tight">
@@ -144,7 +153,7 @@ export function LoginForm() {
                         value={username}
                         onChange={(event) => setUsername(event.target.value)}
                         placeholder="Email hoặc Tên đăng nhập"
-                        className="w-full rounded-2xl border border-white/5 bg-white/5 pl-12 pr-4 py-4 text-sm text-white outline-none focus:border-[var(--brand)]/60 transition-colors placeholder-neutral-600"
+                        className="w-full rounded-2xl border border-white/5 bg-white/5 pl-12 pr-4 py-4 text-sm text-white outline-none focus:border-[var(--login-accent)]/60 transition-colors placeholder-neutral-600"
                       />
                     </div>
                   </div>
@@ -159,7 +168,7 @@ export function LoginForm() {
                       </label>
                       <a
                         href="#"
-                        className="text-[10px] font-bold text-[var(--brand)] hover:text-[var(--brand-dark)] cursor-pointer transition-colors uppercase tracking-wider mr-1"
+                        className="text-[10px] font-bold text-[var(--login-accent)] hover:text-[var(--login-accent-dark)] cursor-pointer transition-colors uppercase tracking-wider mr-1"
                       >
                         Quên mật khẩu?
                       </a>
@@ -176,7 +185,7 @@ export function LoginForm() {
                         value={password}
                         onChange={(event) => setPassword(event.target.value)}
                         placeholder="••••••••"
-                        className="w-full rounded-2xl border border-white/5 bg-white/5 pl-12 pr-12 py-4 text-sm text-white outline-none focus:border-[var(--brand)]/60 transition-colors placeholder-neutral-600"
+                        className="w-full rounded-2xl border border-white/5 bg-white/5 pl-12 pr-12 py-4 text-sm text-white outline-none focus:border-[var(--login-accent)]/60 transition-colors placeholder-neutral-600"
                       />
                       <button
                         type="button"
@@ -198,10 +207,22 @@ export function LoginForm() {
                     </p>
                   ) : null}
 
+                  {/* Between the password and the button, as the layout has
+                      it. Absent entirely until the shop configures Turnstile,
+                      so an empty frame never sits here waiting for keys. */}
+                  {turnstileSiteKey ? (
+                    <TurnstileBox siteKey={turnstileSiteKey} onToken={setCaptcha} />
+                  ) : null}
+
                   <button
                     type="submit"
-                    disabled={pending}
-                    className="w-full rounded-2xl bg-[var(--brand)] hover:bg-[var(--brand-dark)] disabled:opacity-70 disabled:cursor-wait text-white font-black py-4 uppercase tracking-widest text-sm transition-colors mt-7"
+                    // Disabled until the widget hands over a token. The server
+                    // refuses without one anyway — this only saves the visitor
+                    // a round trip and an error they cannot act on.
+                    disabled={pending || (Boolean(turnstileSiteKey) && !captcha)}
+                    className={`w-full rounded-2xl bg-[var(--login-accent)] hover:bg-[var(--login-accent-dark)] disabled:opacity-70 disabled:cursor-wait text-white font-black py-4 uppercase tracking-widest text-sm transition-colors ${
+                      turnstileSiteKey ? "mt-5" : "mt-7"
+                    }`}
                   >
                     {pending ? "ĐANG XỬ LÝ…" : "ĐĂNG NHẬP"}
                   </button>
@@ -239,7 +260,7 @@ export function LoginForm() {
                   Chưa có tài khoản?
                   <a
                     href="/signup"
-                    className="text-[var(--brand)] hover:text-[var(--brand-dark)] font-black transition-colors ml-1"
+                    className="text-[var(--login-accent)] hover:text-[var(--login-accent-dark)] font-black transition-colors ml-1"
                   >
                     Tạo mới ngay
                   </a>

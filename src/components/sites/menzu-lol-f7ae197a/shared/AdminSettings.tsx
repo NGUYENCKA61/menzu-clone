@@ -94,6 +94,8 @@ export function AdminSettings({
 
   const [auto, setAuto] = useState(settings.autoTopUpEnabled);
   const [apiKey, setApiKey] = useState(settings.topUpApiKey);
+  const [tsSite, setTsSite] = useState(settings.turnstileSiteKey);
+  const [tsSecret, setTsSecret] = useState(settings.turnstileSecretKey);
   // Rendered after mount so the copied URL is the host the admin is actually on.
   const [origin, setOrigin] = useState("");
   useEffect(() => setOrigin(window.location.origin), []);
@@ -183,6 +185,8 @@ export function AdminSettings({
           bankAccounts: accounts,
           autoTopUpEnabled: auto,
           topUpApiKey: apiKey,
+          turnstileSiteKey: tsSite,
+          turnstileSecretKey: tsSecret,
           purchasesEnabled: purchases,
           closedMessage,
           brandName,
@@ -518,6 +522,55 @@ export function AdminSettings({
                 hoặc API key cho webhook — lưu sẽ bị từ chối.
               </p>
             ) : null}
+
+            <div className="border-t border-white/5 pt-5">
+              <span className={LABEL}>CAPTCHA đăng nhập (Cloudflare Turnstile)</span>
+              <p className={HINT}>
+                Lấy hai khóa ở dash.cloudflare.com → Turnstile → Add site. Phải điền
+                <span className="font-bold text-neutral-300"> cả hai</span> thì CAPTCHA
+                mới bật; để trống một ô là coi như tắt, trang đăng nhập giữ nguyên như cũ.
+              </p>
+
+              <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label htmlFor="ts-site" className={LABEL}>
+                    Site key
+                  </label>
+                  <input
+                    id="ts-site"
+                    autoComplete="off"
+                    value={tsSite}
+                    onChange={(event) => setTsSite(event.target.value)}
+                    placeholder="0x4AAAAAAA…"
+                    className={`${FIELD} font-mono`}
+                  />
+                  <p className={HINT}>Công khai — nằm trong mã nguồn trang đăng nhập.</p>
+                </div>
+                <div>
+                  <label htmlFor="ts-secret" className={LABEL}>
+                    Secret key
+                  </label>
+                  <input
+                    id="ts-secret"
+                    type="password"
+                    autoComplete="off"
+                    value={tsSecret}
+                    onChange={(event) => setTsSecret(event.target.value)}
+                    placeholder="0x4AAAAAAA…"
+                    className={`${FIELD} font-mono`}
+                  />
+                  <p className={HINT}>
+                    Bí mật — chỉ máy chủ dùng để hỏi Cloudflare. Đừng dán ra ngoài.
+                  </p>
+                </div>
+              </div>
+
+              {Boolean(tsSite) !== Boolean(tsSecret) ? (
+                <p className="mt-3 rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-2.5 text-[11px] font-semibold text-amber-400">
+                  Mới có một khóa. CAPTCHA vẫn đang tắt cho tới khi điền đủ cả hai.
+                </p>
+              ) : null}
+            </div>
 
             <p className="text-[11px] text-neutral-500">
               Nút Xác nhận / Từ chối ở mục Vận hành vẫn còn để xử lý các ca lệch: khách
