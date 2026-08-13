@@ -926,6 +926,32 @@ export interface AdminCategoryRow {
 }
 
 /** The admin category list, in the order the storefront renders them. */
+/**
+ * Every group and the ids of the categories it shows, in display order.
+ *
+ * Ids rather than whole categories: the screen already has the full list to
+ * pick from, and sending each category again inside every group it belongs to
+ * would put the same row on the wire several times — which is the duplication
+ * this table exists to avoid, repeated in the payload.
+ */
+export async function listAdminGroups() {
+  const rows = await db.group.findMany({
+    orderBy: { sortOrder: "asc" },
+    include: {
+      categories: { orderBy: { sortOrder: "asc" }, select: { categoryId: true } },
+    },
+  });
+  return rows.map((group) => ({
+    id: group.id,
+    slug: group.slug,
+    name: group.name,
+    icon: group.icon,
+    isActive: group.isActive,
+    sortOrder: group.sortOrder,
+    categoryIds: group.categories.map((link) => link.categoryId),
+  }));
+}
+
 export async function listAdminCategories(): Promise<AdminCategoryRow[]> {
   const rows = await db.category.findMany({
     orderBy: [{ sortOrder: "asc" }, { name: "asc" }],

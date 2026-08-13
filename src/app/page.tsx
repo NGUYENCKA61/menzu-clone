@@ -5,7 +5,12 @@ import { PageBackdrop } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab
 import { ProductRow } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/ProductRow";
 import { DocsSection } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/DocsSection";
 import { SeoContent } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/SeoContent";
-import { getHomeCategoryCards, getHomeDocCards, getHomeRows } from "@/lib/homeRows";
+import {
+  getHomeCategoryCards,
+  getHomeDocCards,
+  getHomeGroups,
+  getHomeRows,
+} from "@/lib/homeRows";
 import { ReviewsSection } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/ReviewsSection";
 import { SiteFooter } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/SiteFooter";
 import { SiteHeader } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/SiteHeader";
@@ -28,13 +33,14 @@ export default async function Home() {
     getFeedback(),
     getRecentPurchases(),
   ]);
-  const [rows, categoryCards, docCards] = await Promise.all([
+  const [rows, homeGroups, categoryCards, docCards] = await Promise.all([
     getHomeRows({
       valorantSlugs: settings.homeValorantSlugs,
       tftSlugs: settings.homeTftSlugs,
       serviceSlugs: settings.homeServiceSlugs,
       count: settings.homeRowCount,
     }),
+    getHomeGroups(settings.homeRowCount),
     getHomeCategoryCards(settings.homeCategorySlugs),
     getHomeDocCards(settings.homeDocSlugs),
   ]);
@@ -60,22 +66,20 @@ export default async function Home() {
     flash: <FlashSaleSection key="flash" items={flashSaleItems} />,
     featured: <FeaturedCategories key="featured" cards={categoryCards} />,
     docs: <DocsSection key="docs" articles={docCards} />,
-    valorant: (
-      <ProductRow
-        key="valorant"
-        heading="HOT TRENDING THÁNG NÀY"
-        cards={rows.featured}
-        viewAllHref="/categories"
-        className="mb-12"
-      />
-    ),
-    tft: (
-      <ProductRow
-        key="tft"
-        heading="DANH SÁCH GAME"
-        cards={rows.tft}
-        viewAllHref="/categories"
-      />
+    // One row per group, in the order the admin arranged them. Headings and
+    // membership come from the groups table, so this file no longer knows
+    // what any row is called.
+    groups: (
+      <div key="groups" className="flex w-full flex-col space-y-6 sm:space-y-12">
+        {homeGroups.map((group) => (
+          <ProductRow
+            key={group.id}
+            heading={group.icon ? `${group.icon} ${group.name}` : group.name}
+            cards={group.cards}
+            viewAllHref="/categories"
+          />
+        ))}
+      </div>
     ),
     gameServices: (
       <ProductRow

@@ -153,8 +153,10 @@ export const HOME_BLOCKS: { id: string; label: string }[] = [
   { id: "flash", label: "Flash sale hôm nay" },
   { id: "featured", label: "Danh mục sản phẩm" },
   { id: "docs", label: "Xem hướng dẫn" },
-  { id: "valorant", label: "Hot trending tháng này" },
-  { id: "tft", label: "Danh sách game" },
+  // Every group row, in group order. One block for all of them because a shop
+  // can make as many groups as it likes, and a block list cannot grow a new
+  // entry each time somebody adds one.
+  { id: "groups", label: "Các nhóm danh mục" },
   { id: "gameServices", label: "Danh mục acc game" },
   { id: "otherServices", label: "Dịch vụ khác" },
   { id: "reviews", label: "Đánh giá khách hàng" },

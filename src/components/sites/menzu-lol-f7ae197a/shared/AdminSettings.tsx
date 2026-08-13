@@ -264,8 +264,9 @@ export function AdminSettings({
   const [hotline, setHotline] = useState(settings.contactHotline);
 
   const [blocks, setBlocks] = useState(settings.homeBlocks);
-  const [valorantSlugs, setValorantSlugs] = useState(settings.homeValorantSlugs);
-  const [tftSlugs, setTftSlugs] = useState(settings.homeTftSlugs);
+  // No longer edited here — the groups table replaced these two rows. They are
+  // still sent back untouched so saving this form does not wipe the lists that
+  // the group migration reads if it ever has to be run again.
   const [categorySlugs, setCategorySlugs] = useState(settings.homeCategorySlugs);
   const [docSlugs, setDocSlugs] = useState(settings.homeDocSlugs);
   const [serviceSlugs, setServiceSlugs] = useState(settings.homeServiceSlugs);
@@ -374,8 +375,8 @@ export function AdminSettings({
           contactFacebook: facebook,
           contactHotline: hotline,
           homeBlocks: blocks,
-          homeValorantSlugs: valorantSlugs,
-          homeTftSlugs: tftSlugs,
+          homeValorantSlugs: settings.homeValorantSlugs,
+          homeTftSlugs: settings.homeTftSlugs,
           homeCategorySlugs: categorySlugs,
           homeDocSlugs: docSlugs,
           homeServiceSlugs: serviceSlugs,
@@ -1408,29 +1409,16 @@ export function AdminSettings({
             </div>
 
             <div className="border-t border-white/[0.07] pt-4">
-              <span className={LABEL}>Hot trending tháng này</span>
-              {sectionSwitch("valorant", "Hàng thẻ danh mục thứ nhất.")}
-              <div className="mt-3">
-                <SlugPicker
-                  options={categories}
-                  selected={valorantSlugs}
-                  onChange={setValorantSlugs}
-                  empty="Chưa chọn danh mục nào — hàng này sẽ trống."
-                />
-              </div>
-            </div>
-
-            <div className="border-t border-white/[0.07] pt-4">
-              <span className={LABEL}>Danh sách game</span>
-              {sectionSwitch("tft", "Hàng thẻ danh mục thứ hai.")}
-              <div className="mt-3">
-                <SlugPicker
-                  options={categories}
-                  selected={tftSlugs}
-                  onChange={setTftSlugs}
-                  empty="Chưa chọn danh mục nào — hàng này sẽ trống."
-                />
-              </div>
+              <span className={LABEL}>Các nhóm danh mục</span>
+              {sectionSwitch("groups", "Toàn bộ hàng nhóm, theo thứ tự đã sắp.")}
+              <p className={HINT}>
+                Tên nhóm và danh mục trong từng nhóm nằm ở{" "}
+                <a href="/admin/groups" className="font-bold text-[var(--menzu-accent)] underline">
+                  Nhóm danh mục
+                </a>
+                . Một danh mục nằm được trong nhiều nhóm mà vẫn chỉ là một bản ghi, nên sửa
+                tên hay ảnh một lần là mọi nhóm cùng đổi.
+              </p>
             </div>
           </section>
 

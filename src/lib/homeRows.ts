@@ -36,24 +36,71 @@ function formatVndString(n: number): string {
   return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 }
 
+/** One category as a tile. The single place a category becomes a card, so a
+ *  category shown in three groups is described identically in all three. */
+function toCard(c: {
+  imageUrl: string | null;
+  name: string;
+  slug: string;
+  soldCount: number;
+  stockCount: number;
+}): ProductCard {
+  return {
+    image: c.imageUrl ?? "",
+    title: c.name,
+    href: `/category/${c.slug}`,
+    // Both stat labels drive colour in ProductRow's tone lookup, so they stay
+    // exactly as the live site words them.
+    stats: [
+      { label: "Đã Bán", value: String(c.soldCount) },
+      { label: "Đang Bán", value: String(c.stockCount) },
+    ] as [{ label: string; value: string }, { label: string; value: string }],
+  };
+}
+
 async function categoryRow(slugs: string[]): Promise<ProductCard[]> {
   const rows = await db.category.findMany({ where: { slug: { in: slugs } } });
-  const bySlug = new Map(rows.map((c) => [c.slug, c]));
+  return orderBySlugs(rows, slugs).map(toCard);
+}
 
-  return slugs
-    .map((slug) => bySlug.get(slug))
-    .filter((c): c is NonNullable<typeof c> => Boolean(c))
-    .map((c) => ({
-      image: c.imageUrl ?? "",
-      title: c.name,
-      href: `/category/${c.slug}`,
-      // The first row uses "Đã Bán"; TFT rows the live site labels "Loại SP"
-      // when stock is what varies. Both map to tones in ProductRow.
-      stats: [
-        { label: "Đã Bán", value: String(c.soldCount) },
-        { label: "Đang Bán", value: String(c.stockCount) },
-      ] as [{ label: string; value: string }, { label: string; value: string }],
-    }));
+/** A group and the tiles it shows, ready to render. */
+export interface HomeGroup {
+  id: string;
+  slug: string;
+  name: string;
+  icon: string;
+  cards: ProductCard[];
+}
+
+/**
+ * The home page's category rows, read from the groups table.
+ *
+ * One query for every row on the page, however many rows the shop has made.
+ * A category listed in three groups is fetched as three links to one row —
+ * it is never copied, so its name, picture and counts cannot disagree between
+ * one row and the next.
+ *
+ * A group with nothing in it is dropped rather than drawn as a heading over
+ * an empty grid.
+ */
+export async function getHomeGroups(count: number): Promise<HomeGroup[]> {
+  const groups = await db.group.findMany({
+    where: { isActive: true },
+    orderBy: { sortOrder: "asc" },
+    include: {
+      categories: { orderBy: { sortOrder: "asc" }, include: { category: true } },
+    },
+  });
+
+  return groups
+    .map((group) => ({
+      id: group.id,
+      slug: group.slug,
+      name: group.name,
+      icon: group.icon,
+      cards: group.categories.slice(0, count).map((link) => toCard(link.category)),
+    }))
+    .filter((group) => group.cards.length > 0);
 }
 
 async function serviceRow(inGameSet: boolean, pinned: string[]): Promise<ProductCard[]> {

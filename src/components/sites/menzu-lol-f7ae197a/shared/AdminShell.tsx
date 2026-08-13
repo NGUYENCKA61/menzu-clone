@@ -5,6 +5,7 @@ import {
   Boxes,
   FileText,
   LayoutDashboard,
+  LayoutGrid,
   MessageSquare,
   Settings,
   ShoppingBag,
@@ -22,6 +23,7 @@ const NAV: { label: string; href: string; icon: LucideIcon }[] = [
   // Categories live inside the products screen — they are the first step of
   // adding a product, not a separate errand.
   { label: "Sản phẩm", href: "/admin/products", icon: Boxes },
+  { label: "Nhóm danh mục", href: "/admin/groups", icon: LayoutGrid },
   { label: "Đơn hàng", href: "/admin/orders", icon: ShoppingBag },
   { label: "Marketing", href: "/admin/marketing", icon: Ticket },
   { label: "Thu cũ đổi mới", href: "/admin/trade", icon: Repeat },

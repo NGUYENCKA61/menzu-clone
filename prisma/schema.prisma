@@ -265,6 +265,53 @@ model LinkedAccount {
 // Catalogue
 // ---------------------------------------------------------------------------
 
+/// A row of category tiles on the home page: "Hot trending tháng này",
+/// "Danh sách game", and whatever else the shop wants to build.
+///
+/// A group owns no categories of its own. It points at the ones that already
+/// exist, which is the whole reason this table is here: a category belongs to
+/// as many groups as the shop likes and stays one row with one product list,
+/// one stock count and one URL. Putting a game in a second group adds a line
+/// to group_categories and nothing else.
+///
+/// This used to be a comma-separated string of slugs in the settings table,
+/// one key per row, with the rows themselves hard-coded. That could not add a
+/// group without a deploy, and nothing stopped a slug in it from naming a
+/// category that had been deleted.
+model Group {
+  id        String          @id @default(cuid())
+  slug      String          @unique
+  /// The heading, as it appears on the home page.
+  name      String
+  /// One emoji shown before the heading. Empty means none.
+  icon      String          @default("")
+  sortOrder Int             @default(0)
+  /// Off keeps the group and its links but stops rendering the row.
+  isActive  Boolean         @default(true)
+  updatedAt DateTime        @updatedAt @default(now())
+  categories GroupCategory[]
+
+  @@map("groups")
+}
+
+/// The N:N between a group and the categories it shows.
+///
+/// `sortOrder` is per group, so the same category can lead one row and come
+/// last in another. The unique pair is what stops a category being added to
+/// the same group twice.
+model GroupCategory {
+  id         String   @id @default(cuid())
+  groupId    String
+  group      Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  sortOrder  Int      @default(0)
+
+  @@unique([groupId, categoryId])
+  @@index([groupId, sortOrder])
+  @@map("group_categories")
+}
+
 model Category {
   id        String    @id @default(cuid())
   slug      String    @unique
@@ -277,6 +324,9 @@ model Category {
   /// teaches crawlers the field is noise and they stop honouring it.
   updatedAt DateTime  @updatedAt @default(now())
   products  Product[]
+  /// Which rows show this category. Deleting the category takes its links
+  /// with it; it never takes the group.
+  groups    GroupCategory[]
 
   @@map("categories")
 }
