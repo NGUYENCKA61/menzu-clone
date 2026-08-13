@@ -248,9 +248,6 @@ export function LoginForm({ turnstileSiteKey }: { turnstileSiteKey: string | nul
                     type="button"
                     className="relative overflow-hidden transform-gpu flex items-center justify-center gap-3 rounded-2xl border border-white/10 bg-black/40 hover:bg-black/60 hover:border-white/20 py-3.5 transition-colors"
                   >
-                    <span className="absolute -top-px right-2 text-[8px] font-black uppercase tracking-wider text-emerald-400 bg-emerald-500/15 border border-emerald-500/30 rounded-b-md px-1.5 py-0.5 z-20">
-                      +1000 PTS
-                    </span>
                     <DiscordGlyph />
                     <span className="relative z-10">Discord</span>
                   </button>
