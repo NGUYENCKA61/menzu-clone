@@ -29,7 +29,13 @@ export function SupportWidget({ channels }: { channels: SupportChannel[] }) {
   if (pathname === "/bio") return null;
 
   return (
-    <div className="fixed bottom-0 right-4 z-[101] hidden sm:flex flex-col items-end">
+    // pointer-events-none on the frame, restored on each real control below.
+    // The frame is as tall as the collapsed panel plus the tab — roughly
+    // 300×400 at the bottom right of every page — and the panel inside it
+    // passes clicks through rather than swallowing them, which means they land
+    // on the frame instead. Anything the page puts in that corner became
+    // unclickable: the paging buttons on the admin lists sit exactly there.
+    <div className="fixed bottom-0 right-4 z-[101] hidden sm:flex flex-col items-end pointer-events-none">
       <div
         className={`w-[300px] mb-0 origin-bottom transition-all duration-300 ${
           open
@@ -38,7 +44,9 @@ export function SupportWidget({ channels }: { channels: SupportChannel[] }) {
         }`}
         // Hidden from the tree when collapsed so Tab does not land inside it.
         aria-hidden={!open}
-        {...(open ? {} : { inert: "" as unknown as boolean })}
+        // A boolean, not "": React 19 reads an empty string as false, so the
+        // panel was never actually inert while collapsed.
+        inert={!open}
       >
         <div className="rounded-2xl border border-white/10 bg-[#12141c] shadow-2xl overflow-hidden mb-2">
           <div className="flex items-start justify-between gap-3 p-4 border-b border-white/5">
@@ -103,7 +111,7 @@ export function SupportWidget({ channels }: { channels: SupportChannel[] }) {
         </div>
       </div>
 
-      <div className="bg-[#24282f] px-[6px] pt-[6px] pb-0 rounded-t-[14px]">
+      <div className="bg-[#24282f] px-[6px] pt-[6px] pb-0 rounded-t-[14px] pointer-events-auto">
         <button
           type="button"
           onClick={() => setOpen((value) => !value)}

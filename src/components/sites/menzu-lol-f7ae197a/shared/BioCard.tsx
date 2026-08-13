@@ -66,9 +66,11 @@ export function BioCard({ name, tagline, avatarUrl, links }: BioCardProps) {
               <div
                 key={index}
                 className={`w-1/2 shrink-0 flex flex-col space-y-3 ${index === 0 ? "pr-1.5" : "pl-1.5"}`}
-                // Panels off-screen must not be reachable by Tab.
+                // Panels off-screen must not be reachable by Tab. A boolean,
+                // not "": React 19 reads an empty string as false, so the
+                // off-screen panel was never actually inert.
                 aria-hidden={panel !== index}
-                {...(panel !== index ? { inert: "" as unknown as boolean } : {})}
+                inert={panel !== index}
               >
                 {pageLinks.map((link) => (
                   <a
