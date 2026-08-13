@@ -21,6 +21,9 @@ export default async function RegisterPage() {
           turnstileSiteKey={
             turnstileEnabled(settings) ? settings.turnstileSiteKey : null
           }
+          panelImage={settings.authPanelImage}
+          panelSubtitle={settings.authPanelSubtitle}
+          panelTitle={settings.authSignupTitle}
         />
         <SiteFooter />
       </main>

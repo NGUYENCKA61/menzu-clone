@@ -4,7 +4,12 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { ArrowDown, ArrowUp } from "lucide-react";
 
-import { HOME_BLOCKS, type BankAccountConfig, type ShopSettings } from "@/lib/settings";
+import {
+  DEFAULT_SETTINGS,
+  HOME_BLOCKS,
+  type BankAccountConfig,
+  type ShopSettings,
+} from "@/lib/settings";
 import { AdminError } from "./AdminStates";
 
 const FIELD =
@@ -138,6 +143,12 @@ export function AdminSettings({
   const [brandLogo, setBrandLogo] = useState(settings.brandLogo);
   const [brandColor, setBrandColor] = useState(settings.brandColor);
   const [heroBanner, setHeroBanner] = useState(settings.heroBanner);
+  const [panelImage, setPanelImage] = useState(settings.authPanelImage);
+  const [panelSubtitle, setPanelSubtitle] = useState(settings.authPanelSubtitle);
+  const [loginTitle, setLoginTitle] = useState(settings.authLoginTitle);
+  const [signupTitle, setSignupTitle] = useState(settings.authSignupTitle);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
   const [zalo, setZalo] = useState(settings.contactZalo);
   const [facebook, setFacebook] = useState(settings.contactFacebook);
   const [hotline, setHotline] = useState(settings.contactHotline);
@@ -193,6 +204,10 @@ export function AdminSettings({
           brandLogo,
           brandColor,
           heroBanner,
+          authPanelImage: panelImage,
+          authPanelSubtitle: panelSubtitle,
+          authLoginTitle: loginTitle,
+          authSignupTitle: signupTitle,
           contactZalo: zalo,
           contactFacebook: facebook,
           contactHotline: hotline,
@@ -686,6 +701,175 @@ export function AdminSettings({
                 Ảnh lớn trên cùng trang chủ, cũng là ảnh hiện ra khi ai đó chia sẻ link
                 shop lên Facebook hay Zalo.
               </p>
+            </div>
+          </section>
+
+          <section className={CARD}>
+            <span className={HEADING}>Bố cục trang đăng nhập / đăng ký</span>
+            <p className="text-[11px] text-neutral-500 -mt-2">
+              Ảnh lớn bên trái hai trang đó, và dòng chữ đè lên nó.
+            </p>
+
+            <div className="flex flex-col sm:flex-row gap-4">
+              {/* Preview at the panel's own shape — tall and half a card — so
+                  what is judged here is what the visitor will see, not a
+                  square thumbnail of the same file. */}
+              <div className="relative w-full sm:w-[150px] shrink-0 aspect-[3/4] overflow-hidden rounded-xl border border-white/10 bg-[#111111]">
+                {panelImage ? (
+                  // A plain img: the value can be any path the shop typed, and
+                  // next/image would need each one in its allow-list.
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={panelImage}
+                    alt="Xem trước ảnh nền trang đăng nhập"
+                    className="absolute inset-0 h-full w-full object-cover"
+                  />
+                ) : null}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
+                <div className="absolute inset-x-0 bottom-0 p-3 text-center">
+                  <span className="block text-[7px] font-black uppercase tracking-[0.4em] text-[var(--login-accent)]">
+                    {panelSubtitle}
+                  </span>
+                  <span className="mt-0.5 block text-[15px] font-black uppercase leading-none text-white">
+                    {loginTitle.split("\n").map((line, index) => (
+                      <span key={index} className="block">
+                        {line}
+                      </span>
+                    ))}
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex-1 min-w-0 flex flex-col gap-3">
+                <div>
+                  <label htmlFor="auth-image" className={LABEL}>
+                    Đường dẫn ảnh
+                  </label>
+                  <input
+                    id="auth-image"
+                    value={panelImage}
+                    onChange={(event) => setPanelImage(event.target.value)}
+                    className={`${FIELD} font-mono`}
+                  />
+                  <p className={HINT}>
+                    JPG, PNG hoặc WebP · tối thiểu 600×600px · tối đa 5MB. Ảnh dọc hợp
+                    hơn vì khung bên trái cao gấp đôi chiều ngang.
+                  </p>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-2">
+                  <label
+                    className={`inline-flex h-9 cursor-pointer items-center rounded-lg bg-[var(--login-accent)] px-4 text-[11px] font-black uppercase tracking-widest text-white transition-colors hover:bg-[var(--login-accent-dark)] ${
+                      uploading ? "opacity-70 cursor-wait" : ""
+                    }`}
+                  >
+                    {uploading ? "Đang tải…" : "Tải ảnh lên"}
+                    <input
+                      type="file"
+                      accept="image/png,image/jpeg,image/webp"
+                      className="hidden"
+                      disabled={uploading}
+                      onChange={async (event) => {
+                        const file = event.target.files?.[0];
+                        // Cleared straight away so picking the same file twice
+                        // after a failure still fires a change event.
+                        event.target.value = "";
+                        if (!file) return;
+
+                        setUploading(true);
+                        setUploadError(null);
+                        try {
+                          const body = new FormData();
+                          body.append("file", file);
+                          const response = await fetch("/api/admin/auth-panel", {
+                            method: "POST",
+                            body,
+                          });
+                          const data = (await response.json().catch(() => ({}))) as {
+                            url?: string;
+                            error?: string;
+                          };
+                          if (!response.ok || !data.url) {
+                            setUploadError(data.error ?? "Không tải được ảnh lên");
+                            return;
+                          }
+                          // The file is on disk now; the setting only moves
+                          // when the form below is saved, same as every other
+                          // field on this screen.
+                          setPanelImage(data.url);
+                        } catch {
+                          setUploadError("Không kết nối được máy chủ");
+                        } finally {
+                          setUploading(false);
+                        }
+                      }}
+                    />
+                  </label>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setPanelImage(DEFAULT_SETTINGS.authPanelImage);
+                      setUploadError(null);
+                    }}
+                    disabled={panelImage === DEFAULT_SETTINGS.authPanelImage}
+                    className="h-9 rounded-lg border border-white/10 bg-white/5 px-4 text-[11px] font-black uppercase tracking-widest text-neutral-300 transition-colors hover:bg-white/10 disabled:opacity-40 disabled:hover:bg-white/5"
+                  >
+                    Khôi phục ảnh mặc định
+                  </button>
+                </div>
+
+                {uploadError ? (
+                  <p
+                    role="alert"
+                    className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-2.5 text-[11px] font-semibold text-red-400"
+                  >
+                    {uploadError}
+                  </p>
+                ) : null}
+              </div>
+            </div>
+
+            <div>
+              <label htmlFor="auth-subtitle" className={LABEL}>
+                Dòng nhỏ phía trên
+              </label>
+              <input
+                id="auth-subtitle"
+                value={panelSubtitle}
+                onChange={(event) => setPanelSubtitle(event.target.value)}
+                className={FIELD}
+              />
+              <p className={HINT}>Hiện trên cả hai trang, chữ nhỏ màu đỏ.</p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label htmlFor="auth-login-title" className={LABEL}>
+                  Tiêu đề lớn — trang đăng nhập
+                </label>
+                <textarea
+                  id="auth-login-title"
+                  rows={2}
+                  value={loginTitle}
+                  onChange={(event) => setLoginTitle(event.target.value)}
+                  className={`${FIELD} resize-y`}
+                />
+                <p className={HINT}>Mỗi dòng xuống hàng là một dòng chữ trên ảnh.</p>
+              </div>
+              <div>
+                <label htmlFor="auth-signup-title" className={LABEL}>
+                  Tiêu đề lớn — trang đăng ký
+                </label>
+                <textarea
+                  id="auth-signup-title"
+                  rows={2}
+                  value={signupTitle}
+                  onChange={(event) => setSignupTitle(event.target.value)}
+                  className={`${FIELD} resize-y`}
+                />
+                <p className={HINT}>Ví dụ: Join / Us.</p>
+              </div>
             </div>
           </section>
 

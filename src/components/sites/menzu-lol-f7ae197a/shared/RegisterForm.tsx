@@ -8,9 +8,6 @@ import { useState } from "react";
 
 import { TurnstileBox } from "./TurnstileBox";
 
-const HERO_IMAGE_SRC =
-  "/sites/menzu-lol-f7ae197a/root-8a5edab2/images/valorant-api/bundles/cb572643-4ce2-b10a-bb56-7c90cc09b19c.webp";
-
 const FIELD_CLASS =
   "w-full rounded-2xl border border-white/5 bg-white/5 pl-12 pr-4 py-4 text-sm text-white outline-none focus:border-[var(--login-accent)]/60 transition-colors placeholder-neutral-600";
 const LABEL_CLASS =
@@ -24,7 +21,19 @@ const LABEL_CLASS =
  * opened. The layout here is deliberately the login card's, so it stays
  * consistent with what was measured rather than inventing a new design.
  */
-export function RegisterForm({ turnstileSiteKey }: { turnstileSiteKey: string | null }) {
+export function RegisterForm({
+  turnstileSiteKey,
+  panelImage,
+  panelSubtitle,
+  panelTitle,
+}: {
+  turnstileSiteKey: string | null;
+  /** Artwork behind the card. Comes from Cấu hình → Giao diện. */
+  panelImage: string;
+  panelSubtitle: string;
+  /** Newlines are line breaks, which is how the two-row overlay is written. */
+  panelTitle: string;
+}) {
   const router = useRouter();
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
@@ -94,7 +103,7 @@ export function RegisterForm({ turnstileSiteKey }: { turnstileSiteKey: string | 
           <div className="flex flex-col lg:flex-row flex-1 relative z-10">
             <div className="hidden lg:flex w-1/2 relative bg-[#111111] overflow-hidden transform-gpu items-end justify-center border-r border-white/5">
               <Image
-                src={HERO_IMAGE_SRC}
+                src={panelImage}
                 alt=""
                 fill
                 priority
@@ -104,11 +113,16 @@ export function RegisterForm({ turnstileSiteKey }: { turnstileSiteKey: string | 
               <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
               <div className="relative z-10 p-12 text-center w-full">
                 <span className="text-[var(--login-accent)] font-black uppercase tracking-[0.5em] text-xs mb-2 drop-shadow-md block">
-                  Menzu Valorant
+                  {panelSubtitle}
                 </span>
                 <h2 className="text-5xl font-black text-white uppercase leading-none drop-shadow-lg">
-                  <span className="block">Join</span>
-                  <span className="block">Us</span>
+                  {/* One row per line the shop typed, so a one-word or
+                      three-word title renders as written. */}
+                  {panelTitle.split("\n").map((line, index) => (
+                    <span key={index} className="block">
+                      {line}
+                    </span>
+                  ))}
                 </h2>
               </div>
             </div>

@@ -51,6 +51,13 @@ export interface ShopSettings {
   brandColor: string;
   /** The wide image at the top of the home page. */
   heroBanner: string;
+
+  /** The picture behind the sign-in and sign-up cards, and its overlay. */
+  authPanelImage: string;
+  authPanelSubtitle: string;
+  /** Newlines are line breaks — the overlay is two short words on two rows. */
+  authLoginTitle: string;
+  authSignupTitle: string;
   /** Empty means "leave the link inert", which is how the capture shipped. */
   contactZalo: string;
   contactFacebook: string;
@@ -97,6 +104,9 @@ export const HOME_BLOCKS: { id: string; label: string }[] = [
 
 const LOGO = "/sites/menzu-lol-f7ae197a/root-8a5edab2/images/site/logos/menzu-logo.webp";
 const BANNER = "/sites/menzu-lol-f7ae197a/root-8a5edab2/images/upload/bannermung9-7-26.webp";
+/** The captured artwork behind the sign-in card, and what "khôi phục" returns to. */
+export const AUTH_PANEL =
+  "/sites/menzu-lol-f7ae197a/root-8a5edab2/images/valorant-api/bundles/cb572643-4ce2-b10a-bb56-7c90cc09b19c.webp";
 
 export const DEFAULT_SETTINGS: ShopSettings = {
   topUpMin: 10_000,
@@ -118,6 +128,10 @@ export const DEFAULT_SETTINGS: ShopSettings = {
   brandLogo: LOGO,
   brandColor: "#7C3AED",
   heroBanner: BANNER,
+  authPanelImage: AUTH_PANEL,
+  authPanelSubtitle: "Menzu Valorant",
+  authLoginTitle: "Welcome\nBack",
+  authSignupTitle: "Join\nUs",
   contactZalo: "",
   contactFacebook: "",
   contactHotline: "",
@@ -156,6 +170,10 @@ export const SETTING_KEYS: Record<keyof ShopSettings, string> = {
   brandLogo: "brand.logo",
   brandColor: "brand.color",
   heroBanner: "brand.heroBanner",
+  authPanelImage: "auth.panelImage",
+  authPanelSubtitle: "auth.panelSubtitle",
+  authLoginTitle: "auth.loginTitle",
+  authSignupTitle: "auth.signupTitle",
   contactZalo: "contact.zalo",
   contactFacebook: "contact.facebook",
   contactHotline: "contact.hotline",
@@ -337,6 +355,22 @@ export function parseSettings(rows: Iterable<{ key: string; value: string }>): S
     brandLogo: toText(stored.get(SETTING_KEYS.brandLogo), DEFAULT_SETTINGS.brandLogo),
     brandColor: toText(stored.get(SETTING_KEYS.brandColor), DEFAULT_SETTINGS.brandColor),
     heroBanner: toText(stored.get(SETTING_KEYS.heroBanner), DEFAULT_SETTINGS.heroBanner),
+    authPanelImage: toText(
+      stored.get(SETTING_KEYS.authPanelImage),
+      DEFAULT_SETTINGS.authPanelImage,
+    ),
+    authPanelSubtitle: toText(
+      stored.get(SETTING_KEYS.authPanelSubtitle),
+      DEFAULT_SETTINGS.authPanelSubtitle,
+    ),
+    authLoginTitle: toText(
+      stored.get(SETTING_KEYS.authLoginTitle),
+      DEFAULT_SETTINGS.authLoginTitle,
+    ),
+    authSignupTitle: toText(
+      stored.get(SETTING_KEYS.authSignupTitle),
+      DEFAULT_SETTINGS.authSignupTitle,
+    ),
     contactZalo: toOptionalText(
       stored.get(SETTING_KEYS.contactZalo),
       DEFAULT_SETTINGS.contactZalo,
@@ -381,6 +415,10 @@ export function serializeSettings(settings: ShopSettings): { key: string; value:
     brandLogo: settings.brandLogo.trim(),
     brandColor: settings.brandColor.trim(),
     heroBanner: settings.heroBanner.trim(),
+    authPanelImage: settings.authPanelImage.trim(),
+    authPanelSubtitle: settings.authPanelSubtitle.trim(),
+    authLoginTitle: settings.authLoginTitle.trim(),
+    authSignupTitle: settings.authSignupTitle.trim(),
     contactZalo: settings.contactZalo.trim(),
     contactFacebook: settings.contactFacebook.trim(),
     contactHotline: settings.contactHotline.trim(),
@@ -438,6 +476,12 @@ export function normalizeSettings(raw: Partial<ShopSettings> | null): ShopSettin
     brandLogo: String(raw?.brandLogo ?? "").trim() || DEFAULT_SETTINGS.brandLogo,
     brandColor: String(raw?.brandColor ?? "").trim() || DEFAULT_SETTINGS.brandColor,
     heroBanner: String(raw?.heroBanner ?? "").trim() || DEFAULT_SETTINGS.heroBanner,
+    // Blank falls back to the default rather than leaving an empty <Image src>,
+    // which throws at render and takes the whole sign-in page with it.
+    authPanelImage: String(raw?.authPanelImage ?? "").trim() || DEFAULT_SETTINGS.authPanelImage,
+    authPanelSubtitle: String(raw?.authPanelSubtitle ?? "").trim(),
+    authLoginTitle: String(raw?.authLoginTitle ?? "").trim(),
+    authSignupTitle: String(raw?.authSignupTitle ?? "").trim(),
     // Contact details are optional — blank leaves the link inert, as captured.
     contactZalo: String(raw?.contactZalo ?? "").trim(),
     contactFacebook: String(raw?.contactFacebook ?? "").trim(),

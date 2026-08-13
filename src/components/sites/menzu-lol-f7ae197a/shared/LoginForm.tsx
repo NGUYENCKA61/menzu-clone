@@ -6,9 +6,6 @@ import { ArrowLeft, Eye, EyeOff, Lock, User } from "lucide-react";
 
 import { TurnstileBox } from "./TurnstileBox";
 
-const HERO_IMAGE_SRC =
-  "/sites/menzu-lol-f7ae197a/root-8a5edab2/images/valorant-api/bundles/cb572643-4ce2-b10a-bb56-7c90cc09b19c.webp";
-
 /* lucide-react no longer ships brand marks, so the two OAuth buttons get
  * small hand-drawn single-color glyphs instead. */
 function GoogleGlyph() {
@@ -38,7 +35,19 @@ function DiscordGlyph() {
  * The redirect target is required to start with "/" so it cannot be pointed at
  * another origin.
  */
-export function LoginForm({ turnstileSiteKey }: { turnstileSiteKey: string | null }) {
+export function LoginForm({
+  turnstileSiteKey,
+  panelImage,
+  panelSubtitle,
+  panelTitle,
+}: {
+  turnstileSiteKey: string | null;
+  /** Artwork behind the card. Comes from Cấu hình → Giao diện. */
+  panelImage: string;
+  panelSubtitle: string;
+  /** Newlines are line breaks, which is how the two-row overlay is written. */
+  panelTitle: string;
+}) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -100,7 +109,7 @@ export function LoginForm({ turnstileSiteKey }: { turnstileSiteKey: string | nul
           <div className="flex flex-col lg:flex-row flex-1 relative z-10">
             <div className="hidden lg:flex w-1/2 relative bg-[#111111] overflow-hidden transform-gpu items-end justify-center border-r border-white/5">
               <Image
-                src={HERO_IMAGE_SRC}
+                src={panelImage}
                 alt=""
                 fill
                 priority
@@ -110,11 +119,16 @@ export function LoginForm({ turnstileSiteKey }: { turnstileSiteKey: string | nul
               <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
               <div className="relative z-10 p-12 text-center w-full">
                 <span className="text-[var(--login-accent)] font-black uppercase tracking-[0.5em] text-xs mb-2 drop-shadow-md block">
-                  Menzu Valorant
+                  {panelSubtitle}
                 </span>
                 <h2 className="text-5xl font-black text-white uppercase leading-none drop-shadow-lg">
-                  <span className="block">Welcome</span>
-                  <span className="block">Back</span>
+                  {/* One row per line the shop typed, so a one-word or
+                      three-word title renders as written. */}
+                  {panelTitle.split("\n").map((line, index) => (
+                    <span key={index} className="block">
+                      {line}
+                    </span>
+                  ))}
                 </h2>
               </div>
             </div>
