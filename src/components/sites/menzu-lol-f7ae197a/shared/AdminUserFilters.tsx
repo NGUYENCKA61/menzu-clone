@@ -127,13 +127,16 @@ export function AdminUserFilters({ filters }: { filters: UserFilters }) {
         ))}
       </select>
 
+      {/* Same button as the orders screen's, down to the label: they do the
+          same job, and an admin who has found one should recognise the other
+          rather than hunt for a quieter version of it. */}
       <a
         href={`/api/admin/users/export?${params.toString()}`}
         title="Tải danh sách đang xem về dạng CSV"
-        className="flex h-10 shrink-0 items-center justify-center gap-2 rounded-lg border border-white/[0.08] bg-[#0e0e11] px-4 text-[13px] font-semibold text-neutral-300 transition-colors hover:bg-white/[0.05] hover:text-white"
+        className="flex h-10 shrink-0 items-center justify-center gap-2 rounded-lg bg-rose-500 px-4 text-[13px] font-semibold text-white transition-colors hover:bg-rose-600"
       >
         <Download size={15} />
-        Xuất
+        Xuất dữ liệu
       </a>
     </div>
   );
