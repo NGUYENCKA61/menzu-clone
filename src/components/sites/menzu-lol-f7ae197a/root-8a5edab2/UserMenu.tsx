@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  CreditCard,
   History,
   LayoutGrid,
   LogOut,
@@ -172,22 +171,10 @@ export function UserMenu({ user }: { user: HeaderUser }) {
               </div>
             </div>
 
-            {/* The balance, in a frame of its own. It is the one number anyone
-                opens this menu to check, and a line of small print under the
-                username is not where a reader looks for it. */}
-            <div className="px-4 py-3">
-              <div className="flex items-center justify-between gap-3 rounded-xl border border-white/10 bg-white/[0.02] px-3.5 py-3">
-                <span className="flex items-center gap-2.5 text-[10px] font-black uppercase tracking-[0.18em] text-neutral-400">
-                  <CreditCard size={15} className="shrink-0 text-neutral-500" />
-                  Số dư
-                </span>
-                <span className="text-[13px] font-black uppercase tracking-wider text-emerald-400">
-                  {formatVnd(user.balance)}đ
-                </span>
-              </div>
-            </div>
-
-            <div className="px-3 pb-2">
+            {/* No balance card here: the trigger just above already carries
+                the figure in green, and repeating it two lines lower said the
+                same thing twice. */}
+            <div className="px-3 pb-2 pt-4">
               {/* Admins only, and a single link: the admin area carries its
                   own sidebar, so listing every screen here duplicated a menu
                   one click away. */}
