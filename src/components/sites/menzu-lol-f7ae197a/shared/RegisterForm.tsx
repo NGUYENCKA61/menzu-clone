@@ -1,15 +1,18 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Eye, EyeOff, Lock, Mail, User } from "lucide-react";
 import { useState } from "react";
+
+import { TurnstileBox } from "./TurnstileBox";
 
 const HERO_IMAGE_SRC =
   "/sites/menzu-lol-f7ae197a/root-8a5edab2/images/valorant-api/bundles/cb572643-4ce2-b10a-bb56-7c90cc09b19c.webp";
 
 const FIELD_CLASS =
-  "w-full rounded-2xl border border-white/5 bg-white/5 pl-12 pr-4 py-4 text-sm text-white outline-none focus:border-[var(--brand)]/60 transition-colors placeholder-neutral-600";
+  "w-full rounded-2xl border border-white/5 bg-white/5 pl-12 pr-4 py-4 text-sm text-white outline-none focus:border-[var(--login-accent)]/60 transition-colors placeholder-neutral-600";
 const LABEL_CLASS =
   "block text-[11px] font-black uppercase tracking-widest text-neutral-400 mb-2.5 ml-1";
 
@@ -21,7 +24,7 @@ const LABEL_CLASS =
  * opened. The layout here is deliberately the login card's, so it stays
  * consistent with what was measured rather than inventing a new design.
  */
-export function RegisterForm() {
+export function RegisterForm({ turnstileSiteKey }: { turnstileSiteKey: string | null }) {
   const router = useRouter();
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
@@ -30,6 +33,10 @@ export function RegisterForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [captcha, setCaptcha] = useState<string | null>(null);
+  // Ticked by hand every time. Not remembered and not pre-checked: consent
+  // that arrives already given is not consent.
+  const [agreed, setAgreed] = useState(false);
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
@@ -47,7 +54,12 @@ export function RegisterForm() {
       const response = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ username, password, email: email || undefined }),
+        body: JSON.stringify({
+          username,
+          password,
+          email: email || undefined,
+          ...(turnstileSiteKey ? { turnstileToken: captcha } : {}),
+        }),
       });
       const data = (await response.json().catch(() => ({}))) as { error?: string };
 
@@ -91,7 +103,7 @@ export function RegisterForm() {
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
               <div className="relative z-10 p-12 text-center w-full">
-                <span className="text-[var(--brand)] font-black uppercase tracking-[0.5em] text-xs mb-2 drop-shadow-md block">
+                <span className="text-[var(--login-accent)] font-black uppercase tracking-[0.5em] text-xs mb-2 drop-shadow-md block">
                   Menzu Valorant
                 </span>
                 <h2 className="text-5xl font-black text-white uppercase leading-none drop-shadow-lg">
@@ -104,7 +116,7 @@ export function RegisterForm() {
             <div className="flex-1 flex flex-col justify-center items-center p-6 sm:p-8 lg:py-14 lg:px-16 bg-neutral-950/60">
               <div className="w-full max-w-[420px]">
                 <div className="mb-8">
-                  <p className="text-[10px] uppercase tracking-[0.3em] text-[var(--brand)] mb-2 font-black lg:hidden">
+                  <p className="text-[10px] uppercase tracking-[0.3em] text-[var(--login-accent)] mb-2 font-black lg:hidden">
                     Menzu Shop
                   </p>
                   <h1 className="text-4xl font-black text-white uppercase tracking-tight">
@@ -220,10 +232,50 @@ export function RegisterForm() {
                     </p>
                   ) : null}
 
+                  {turnstileSiteKey ? (
+                    <TurnstileBox siteKey={turnstileSiteKey} onToken={setCaptcha} />
+                  ) : null}
+
+                  <label className="mt-4 flex items-start gap-2.5 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={agreed}
+                      onChange={(event) => setAgreed(event.target.checked)}
+                      className="mt-0.5 h-4 w-4 shrink-0 cursor-pointer accent-[var(--login-accent)]"
+                    />
+                    {/* Both point at the article index rather than at slugs
+                        that do not exist yet — the shop has no terms or
+                        privacy article written. A consent line whose links
+                        404 is worse than one that lands somewhere real; give
+                        them their own articles and these get the slugs. */}
+                    <span className="text-[11px] leading-relaxed text-neutral-400">
+                      Tôi đồng ý với{" "}
+                      <Link
+                        href="/docs"
+                        className="font-bold text-[var(--login-accent)] hover:underline"
+                      >
+                        Điều khoản sử dụng
+                      </Link>{" "}
+                      và{" "}
+                      <Link
+                        href="/docs"
+                        className="font-bold text-[var(--login-accent)] hover:underline"
+                      >
+                        Chính sách bảo mật
+                      </Link>{" "}
+                      của Menzu.
+                    </span>
+                  </label>
+
                   <button
                     type="submit"
-                    disabled={pending}
-                    className="w-full rounded-2xl bg-[var(--brand)] hover:bg-[var(--brand-dark)] disabled:opacity-70 disabled:cursor-wait text-white font-black py-4 uppercase tracking-widest text-sm transition-colors mt-7"
+                    // The consent box is enforced here only. It is a promise
+                    // between the shop and the customer, not something the
+                    // server can verify was read — unlike the CAPTCHA, which
+                    // the server checks because the browser's word is worth
+                    // nothing there.
+                    disabled={pending || !agreed || (Boolean(turnstileSiteKey) && !captcha)}
+                    className="w-full rounded-2xl bg-[var(--login-accent)] hover:bg-[var(--login-accent-dark)] disabled:opacity-70 disabled:cursor-wait text-white font-black py-4 uppercase tracking-widest text-sm transition-colors mt-5"
                   >
                     {pending ? "ĐANG XỬ LÝ…" : "ĐĂNG KÝ"}
                   </button>
@@ -233,7 +285,7 @@ export function RegisterForm() {
                   Đã có tài khoản?
                   <a
                     href="/login"
-                    className="text-[var(--brand)] hover:text-[var(--brand-dark)] font-black transition-colors ml-1"
+                    className="text-[var(--login-accent)] hover:text-[var(--login-accent-dark)] font-black transition-colors ml-1"
                   >
                     Đăng nhập ngay
                   </a>
