@@ -42,12 +42,14 @@ function toCard(c: {
   imageUrl: string | null;
   name: string;
   slug: string;
+  description: string | null;
   soldCount: number;
   stockCount: number;
 }): ProductCard {
   return {
     image: c.imageUrl ?? "",
     title: c.name,
+    description: c.description,
     href: `/category/${c.slug}`,
     // Both stat labels drive colour in ProductRow's tone lookup, so they stay
     // exactly as the live site words them.

@@ -72,6 +72,7 @@ export async function PATCH(request: Request) {
     direction?: string;
     name?: string;
     slug?: string;
+    description?: string;
     imageUrl?: string;
     soldCount?: number;
     stockCount?: number;
@@ -144,6 +145,10 @@ export async function PATCH(request: Request) {
       ...(slug ? { slug } : {}),
       ...(body?.imageUrl !== undefined
         ? { imageUrl: body.imageUrl.trim() || null }
+        : {}),
+      // Sent as "" to clear it, which takes the line off the home page tile.
+      ...(body?.description !== undefined
+        ? { description: body.description.trim() || null }
         : {}),
       ...(body?.soldCount !== undefined
         ? { soldCount: count(body.soldCount, category.soldCount) }

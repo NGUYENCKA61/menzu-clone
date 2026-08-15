@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { ArrowDown, ArrowUp, ChevronDown, Trash2 } from "lucide-react";
+import { ArrowDown, ArrowUp, ChevronDown, ImagePlus, Trash2 } from "lucide-react";
 
 import { AdminEmpty, AdminError, ConfirmDialog } from "./AdminStates";
 
@@ -10,6 +10,7 @@ export interface AdminCategoryView {
   id: string;
   slug: string;
   name: string;
+  description: string | null;
   imageUrl: string | null;
   soldCount: number;
   stockCount: number;
@@ -25,6 +26,7 @@ const ICON_BUTTON =
 interface Draft {
   name: string;
   slug: string;
+  description: string;
   imageUrl: string;
   soldCount: string;
   stockCount: string;
@@ -34,10 +36,75 @@ function draftOf(category: AdminCategoryView): Draft {
   return {
     name: category.name,
     slug: category.slug,
+    description: category.description ?? "",
     imageUrl: category.imageUrl ?? "",
     soldCount: String(category.soldCount),
     stockCount: String(category.stockCount),
   };
+}
+
+/**
+ * File picker and preview for one cover image.
+ *
+ * A label wrapping a hidden input rather than a styled `<input type="file">`:
+ * the native control cannot be restyled to match this screen, and a label is
+ * what makes clicking the button open the picker without any script.
+ *
+ * The preview reads the text field, not the file — so it also shows a path
+ * typed by hand, and it shows the picture that is actually about to be saved
+ * rather than whichever one was uploaded last.
+ */
+function ImagePicker({
+  uploading,
+  value,
+  onPick,
+}: {
+  uploading: boolean;
+  value: string;
+  onPick: (file: File) => void | Promise<void>;
+}) {
+  return (
+    <div className="mt-2 flex flex-wrap items-center gap-3">
+      <div className="relative h-12 w-[68px] shrink-0 overflow-hidden rounded-lg border border-white/10 bg-neutral-950">
+        {value ? (
+          // A plain img: the path is typed by hand or just uploaded, so it may
+          // not be a host next/image is configured for — and this is a 68px
+          // thumbnail on an admin screen, which is not worth an optimiser pass.
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={value} alt="" className="h-full w-full object-cover" />
+        ) : (
+          <span className="flex h-full w-full items-center justify-center text-[9px] font-bold uppercase tracking-widest text-neutral-700">
+            Trống
+          </span>
+        )}
+      </div>
+
+      <label
+        className={`inline-flex h-9 cursor-pointer items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 text-[10px] font-black uppercase tracking-widest text-neutral-200 transition-colors hover:bg-white/10 ${
+          uploading ? "pointer-events-none opacity-60" : ""
+        }`}
+      >
+        <ImagePlus size={13} />
+        {uploading ? "Đang tải…" : "Chọn ảnh từ máy"}
+        <input
+          type="file"
+          accept="image/png,image/jpeg,image/webp"
+          className="hidden"
+          onChange={(event) => {
+            const file = event.target.files?.[0];
+            // Cleared so picking the same file twice fires change again —
+            // otherwise a failed upload could not be retried with that file.
+            event.target.value = "";
+            if (file) void onPick(file);
+          }}
+        />
+      </label>
+
+      <span className="text-[10px] text-neutral-600">
+        PNG / JPG / WebP · tối thiểu 320×180 · tối đa 8MB
+      </span>
+    </div>
+  );
 }
 
 /**
@@ -58,6 +125,48 @@ export function AdminCategories({ categories }: { categories: AdminCategoryView[
 
   const [newName, setNewName] = useState("");
   const [newImage, setNewImage] = useState("");
+  // Which picker is mid-upload, so only that one shows "Đang tải…" instead of
+  // every field on the screen going busy at once.
+  const [uploading, setUploading] = useState<string | null>(null);
+
+  /**
+   * Sends one file and answers with the stored path, or null.
+   *
+   * The upload is not the save: it hands back a path that goes into the text
+   * field, and nothing is written to the category until the admin presses Lưu.
+   * That keeps the picker behaving like every other field here — changeable
+   * right up to the moment it is saved.
+   */
+  async function uploadImage(file: File, slot: string): Promise<string | null> {
+    setUploading(slot);
+    setError(null);
+    setOk(null);
+    try {
+      const form = new FormData();
+      form.append("file", file);
+      const res = await fetch("/api/admin/categories/image", {
+        method: "POST",
+        body: form,
+      });
+      const data = (await res.json().catch(() => ({}))) as {
+        url?: string;
+        error?: string;
+        width?: number;
+        height?: number;
+      };
+      if (!res.ok || !data.url) {
+        setError(data.error ?? "Tải ảnh thất bại");
+        return null;
+      }
+      setOk(`Đã tải ảnh ${data.width}×${data.height}px — nhớ bấm Lưu`);
+      return data.url;
+    } catch {
+      setError("Không kết nối được máy chủ");
+      return null;
+    } finally {
+      setUploading(null);
+    }
+  }
 
   async function call(
     method: "POST" | "PATCH" | "DELETE",
@@ -118,6 +227,7 @@ export function AdminCategories({ categories }: { categories: AdminCategoryView[
       id: category.id,
       name: draft.name,
       slug: draft.slug,
+      description: draft.description,
       imageUrl: draft.imageUrl,
       soldCount: Number(draft.soldCount.replace(/\D/g, "")),
       stockCount: Number(draft.stockCount.replace(/\D/g, "")),
@@ -159,6 +269,14 @@ export function AdminCategories({ categories }: { categories: AdminCategoryView[
               onChange={(event) => setNewImage(event.target.value)}
               placeholder="/sites/…/images/category/random.webp"
               className={FIELD}
+            />
+            <ImagePicker
+              uploading={uploading === "new"}
+              value={newImage}
+              onPick={async (file) => {
+                const url = await uploadImage(file, "new");
+                if (url) setNewImage(url);
+              }}
             />
           </div>
         </div>
@@ -297,6 +415,22 @@ export function AdminCategories({ categories }: { categories: AdminCategoryView[
                     </div>
 
                     <div>
+                      <label htmlFor={`d-${category.id}`} className={LABEL}>
+                        Mô tả ngắn (1–2 dòng trên thẻ trang chủ)
+                      </label>
+                      <textarea
+                        id={`d-${category.id}`}
+                        rows={2}
+                        value={draft.description}
+                        onChange={(event) =>
+                          setDraft({ ...draft, description: event.target.value })
+                        }
+                        placeholder="Trống thì thẻ không hiện dòng nào."
+                        className={FIELD}
+                      />
+                    </div>
+
+                    <div>
                       <label htmlFor={`i-${category.id}`} className={LABEL}>
                         Ảnh bìa
                       </label>
@@ -306,6 +440,14 @@ export function AdminCategories({ categories }: { categories: AdminCategoryView[
                         onChange={(event) => setDraft({ ...draft, imageUrl: event.target.value })}
                         placeholder="/sites/…/images/category/random.webp"
                         className={FIELD}
+                      />
+                      <ImagePicker
+                        uploading={uploading === category.id}
+                        value={draft.imageUrl}
+                        onPick={async (file) => {
+                          const url = await uploadImage(file, category.id);
+                          if (url) setDraft({ ...draft, imageUrl: url });
+                        }}
                       />
                     </div>
 

@@ -14,13 +14,57 @@ import {
 import { cn } from "@/lib/utils";
 import type { ProductCard } from "./productRowData";
 
+/**
+ * Which accent the tiles wear. The service rows keep the indigo the captured
+ * site used; the category rows are the shop's own red.
+ */
+export type RowTone = "indigo" | "menzu";
+
 export interface ProductRowProps {
   heading: string;
   cards: ProductCard[];
   /** Destination of the row's "Xem tất cả" link — the matching index page. */
   viewAllHref: string;
+  tone?: RowTone;
   className?: string;
 }
+
+/**
+ * Full class strings per tone, never composed — Tailwind reads source text and
+ * cannot see a class name that only exists once the template has run.
+ */
+const TONES: Record<RowTone, {
+  card: string;
+  frame: string;
+  /** How the cover art meets the frame — cover crops, contain letterboxes. */
+  image: string;
+  title: string;
+  buttonEdge: string;
+  buttonFace: string;
+}> = {
+  indigo: {
+    card: "border-indigo-500/20 hover:border-indigo-500/50",
+    frame: "border-indigo-500/10 group-hover:border-indigo-500/30",
+    image: "object-cover",
+    title: "group-hover:text-indigo-400",
+    buttonEdge: "bg-indigo-500/50 group-hover:bg-indigo-500",
+    buttonFace: "bg-[#12141c] group-hover:bg-indigo-500",
+  },
+  // A faint red ring at rest — enough to trace the tile without competing
+  // with the always-lit XEM NGAY button — brightening under the pointer. The
+  // image frame stays borderless in both states; the picture carries its own
+  // rounding instead.
+  menzu: {
+    card: "border-[var(--menzu-accent)]/25 hover:border-[var(--menzu-accent)]/70",
+    frame: "border-transparent",
+    // Whole picture, no crop — a 16/9 cover in the 7/5 frame sits centered
+    // with the card background showing above and below it.
+    image: "object-contain",
+    title: "group-hover:text-[var(--menzu-accent)]",
+    buttonEdge: "bg-[var(--menzu-accent)] group-hover:bg-[var(--menzu-accent-dark)]",
+    buttonFace: "bg-[var(--menzu-accent)] group-hover:bg-[var(--menzu-accent-dark)]",
+  },
+};
 
 interface StatTone {
   bg: string;
@@ -82,7 +126,30 @@ function getStatTone(label: string): StatTone {
   return STAT_TONES[label] ?? DEFAULT_STAT_TONE;
 }
 
-export function ProductRow({ heading, cards, viewAllHref, className }: ProductRowProps) {
+/**
+ * Stats the card no longer prints.
+ *
+ * A display filter, deliberately, and not a change upstream: `soldCount` and
+ * `stockCount` are still queried, still carried in the row data, and still
+ * editable on the admin's category screen — they are shop-facing marketing
+ * figures somebody may want back. Removing them from `homeRows` instead would
+ * have deleted the numbers along with the tiles.
+ *
+ * The service rows share this component and keep their own stats ("Giá từ",
+ * "Đã xong"), which is why this names two labels rather than dropping the
+ * block outright.
+ */
+const HIDDEN_STATS = new Set(["Đã Bán", "Đang Bán"]);
+
+export function ProductRow({
+  heading,
+  cards,
+  viewAllHref,
+  tone = "indigo",
+  className,
+}: ProductRowProps) {
+  const t = TONES[tone];
+
   return (
     <section className={cn("w-full", className)}>
       <div className="flex flex-row items-center justify-between mb-8">
@@ -103,28 +170,84 @@ export function ProductRow({ heading, cards, viewAllHref, className }: ProductRo
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
-        {cards.map((card) => (
+        {cards.map((card) => {
+          const stats = card.stats.filter((s) => !HIDDEN_STATS.has(s.label));
+
+          return (
           <Link
             key={card.href}
             href={card.href}
-            className="group flex flex-col bg-[#12141c] rounded-xl overflow-hidden border border-indigo-500/20 hover:border-indigo-500/50 transition-all duration-300 p-3 sm:p-4"
+            className={cn(
+              "group flex flex-col bg-[#12141c] rounded-xl overflow-hidden border transition-all duration-300 p-3 sm:p-4",
+              t.card,
+            )}
           >
-            <div className="relative w-full aspect-[16/9] rounded-lg overflow-hidden mb-4 border border-indigo-500/10 group-hover:border-indigo-500/30 transition-colors">
-              <Image
-                src={card.image}
-                alt={card.title}
-                fill
-                sizes="(min-width: 1024px) 25vw, (min-width: 768px) 33vw, 50vw"
-                className="object-cover transition-transform duration-500 group-hover:scale-110"
-              />
+            {/* Taller than the 16/9 it was, at the same width — the frame keeps
+                the card's padding on both sides and only grows downward. */}
+            <div
+              className={cn(
+                "relative w-full aspect-[7/5] rounded-lg overflow-hidden mb-4 border transition-colors",
+                t.frame,
+              )}
+            >
+              {t.image === "object-contain" ? (
+                /* Letterboxed, so the picture is smaller than the frame and
+                   the frame's rounding never reaches it. A fill image cannot
+                   round its own painted area — the radius clips the element
+                   box, which spans the whole frame — so the image is laid out
+                   at its natural ratio inside a centering box and carries the
+                   radius itself. width/height only reserve space before load;
+                   w-auto/h-auto hand sizing back to the file's real ratio. */
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <Image
+                    src={card.image}
+                    alt={card.title}
+                    width={700}
+                    height={500}
+                    sizes="(min-width: 1024px) 25vw, (min-width: 768px) 33vw, 50vw"
+                    className="h-auto w-auto max-h-full max-w-full rounded-lg transition-transform duration-500 group-hover:scale-110"
+                  />
+                </div>
+              ) : (
+                <Image
+                  src={card.image}
+                  alt={card.title}
+                  fill
+                  sizes="(min-width: 1024px) 25vw, (min-width: 768px) 33vw, 50vw"
+                  className={cn(
+                    "transition-transform duration-500 group-hover:scale-110",
+                    t.image,
+                  )}
+                />
+              )}
             </div>
 
-            <h3 className="text-center text-sm sm:text-base font-black uppercase text-white mb-4 group-hover:text-indigo-400 transition-colors tracking-widest drop-shadow-md">
+            <h3
+              className={cn(
+                "text-center text-sm sm:text-base font-black uppercase text-white mb-2 transition-colors tracking-widest drop-shadow-md",
+                t.title,
+              )}
+            >
               {card.title}
             </h3>
 
+            {/* Clamped at two lines rather than trusted to be short: the text
+                is typed into an admin field, and one long entry would
+                otherwise stretch its tile taller than the three beside it and
+                pull the whole row's buttons out of line. */}
+            {card.description ? (
+              <p className="text-center text-[11px] sm:text-xs leading-relaxed text-neutral-400 mb-4 line-clamp-2">
+                {card.description}
+              </p>
+            ) : (
+              <div className="mb-2" />
+            )}
+
+            {/* Dropped entirely when nothing is left, so a card with no stats
+                does not carry the block's bottom margin as a stray gap. */}
+            {stats.length > 0 ? (
             <div className="grid grid-cols-2 gap-1.5 sm:gap-3 mb-3 sm:mb-4">
-              {card.stats.map((stat) => {
+              {stats.map((stat) => {
                 const tone = getStatTone(stat.label);
                 const StatIcon = tone.icon;
 
@@ -159,10 +282,21 @@ export function ProductRow({ heading, cards, viewAllHref, className }: ProductRo
                 );
               })}
             </div>
+            ) : null}
 
             <div className="w-full mt-auto relative">
-              <div className="relative w-full p-[1.5px] transition-all duration-300 [clip-path:polygon(8px_0,100%_0,100%_calc(100%-8px),calc(100%-8px)_100%,0_100%,0_8px)] bg-indigo-500/50 group-hover:bg-indigo-500">
-                <div className="relative w-full bg-[#12141c] group-hover:bg-indigo-500 transition-colors duration-300 flex items-center justify-center gap-1.5 py-2.5 sm:py-3 [clip-path:polygon(7px_0,100%_0,100%_calc(100%-7px),calc(100%-7px)_100%,0_100%,0_7px)]">
+              <div
+                className={cn(
+                  "relative w-full p-[1.5px] transition-all duration-300 [clip-path:polygon(8px_0,100%_0,100%_calc(100%-8px),calc(100%-8px)_100%,0_100%,0_8px)]",
+                  t.buttonEdge,
+                )}
+              >
+                <div
+                  className={cn(
+                    "relative w-full transition-colors duration-300 flex items-center justify-center gap-1.5 py-2.5 sm:py-3 [clip-path:polygon(7px_0,100%_0,100%_calc(100%-7px),calc(100%-7px)_100%,0_100%,0_7px)]",
+                    t.buttonFace,
+                  )}
+                >
                   <Eye size={12} />
                   <span className="text-white font-black text-[10px] sm:text-xs uppercase tracking-widest">
                     XEM NGAY
@@ -172,7 +306,8 @@ export function ProductRow({ heading, cards, viewAllHref, className }: ProductRo
               </div>
             </div>
           </Link>
-        ))}
+          );
+        })}
       </div>
     </section>
   );

@@ -77,6 +77,7 @@ export default async function Home() {
             heading={group.icon ? `${group.icon} ${group.name}` : group.name}
             cards={group.cards}
             viewAllHref="/categories"
+            tone="menzu"
           />
         ))}
       </div>

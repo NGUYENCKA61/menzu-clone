@@ -13,6 +13,12 @@ export interface ProductStat {
 export interface ProductCard {
   image: string;
   title: string;
+  /**
+   * One or two lines under the title. Optional because the service rows share
+   * this shape and carry no such line — a tile without one closes up rather
+   * than reserving the space.
+   */
+  description?: string | null;
   stats: [ProductStat, ProductStat];
   /** Where the tile leads — a category or a service page. */
   href: string;
