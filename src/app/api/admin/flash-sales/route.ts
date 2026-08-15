@@ -18,7 +18,9 @@ export async function POST(request: Request) {
   const code = body?.productCode?.trim().toUpperCase();
   if (!code) return NextResponse.json({ error: "Thiếu mã sản phẩm" }, { status: 400 });
 
-  const product = await db.product.findUnique({ where: { code } });
+  // A removed product cannot be put on sale — the storefront would not show
+  // the sale anyway, so accepting it here would only look like it worked.
+  const product = await db.product.findFirst({ where: { code, deletedAt: null } });
   if (!product) return NextResponse.json({ error: "Không tìm thấy sản phẩm" }, { status: 404 });
 
   const salePrice = Number(body?.salePrice ?? 0);

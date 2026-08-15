@@ -1,6 +1,6 @@
 "use client";
 
-import { Trash2 } from "lucide-react";
+import { RotateCcw, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -12,6 +12,15 @@ export interface AdminProductRow {
   oldPrice: number;
   categoryName: string;
   orderCount: number;
+}
+
+/** A product the shop has removed — kept only so it can be put back. */
+export interface AdminRemovedProductRow {
+  code: string;
+  rank: string;
+  categoryName: string;
+  orderCount: number;
+  deletedLabel: string;
 }
 
 export interface AdminCategoryOption {
@@ -36,14 +45,20 @@ function formatVnd(n: number): string {
 
 export function AdminProducts({
   products,
+  removed,
   categories,
 }: {
   products: AdminProductRow[];
+  removed: AdminRemovedProductRow[];
   categories: AdminCategoryOption[];
 }) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<{ tone: "ok" | "err"; text: string } | null>(null);
+  // The row whose delete is armed. Deleting is one click away and the button
+  // is a bare icon, so it asks once — inline rather than through confirm(),
+  // which would freeze the page behind a browser dialog.
+  const [arming, setArming] = useState<string | null>(null);
 
   const [code, setCode] = useState("");
   const [categorySlug, setCategorySlug] = useState(categories[0]?.slug ?? "");
@@ -51,11 +66,12 @@ export function AdminProducts({
   const [price, setPrice] = useState("");
   const [oldPrice, setOldPrice] = useState("");
 
+  /** Returns the parsed body on success, null on failure. */
   async function call(
-    method: "POST" | "PATCH" | "DELETE",
+    method: "POST" | "PATCH" | "PUT" | "DELETE",
     payload: Record<string, unknown> | null,
     query = "",
-  ) {
+  ): Promise<Record<string, unknown> | null> {
     setBusy(true);
     setMsg(null);
     try {
@@ -68,32 +84,61 @@ export function AdminProducts({
             }
           : {}),
       });
-      const data = (await res.json().catch(() => ({}))) as { error?: string };
+      const data = (await res.json().catch(() => ({}))) as Record<string, unknown>;
       if (!res.ok) {
-        setMsg({ tone: "err", text: data.error ?? "Thao tác thất bại" });
-        return false;
+        setMsg({ tone: "err", text: (data.error as string) ?? "Thao tác thất bại" });
+        return null;
       }
       router.refresh();
-      return true;
+      return data;
     } catch {
       setMsg({ tone: "err", text: "Không kết nối được máy chủ" });
-      return false;
+      return null;
     } finally {
       setBusy(false);
     }
   }
 
+  /**
+   * The message says which of the two removals happened, because they differ
+   * in the only way the admin cares about: whether it can be undone.
+   */
+  async function handleDelete(row: AdminProductRow) {
+    setArming(null);
+    const data = await call("DELETE", null, `?code=${encodeURIComponent(row.code)}`);
+    if (!data) return;
+    setMsg({
+      tone: "ok",
+      text:
+        data.mode === "hard"
+          ? `Đã xoá hẳn ${row.code} — chưa có đơn nào nên không còn gì để giữ lại`
+          : `Đã xoá ${row.code} khỏi cửa hàng. ${row.orderCount} đơn cũ vẫn nguyên, khôi phục được ở mục dưới`,
+    });
+  }
+
+  async function handleRestore(row: AdminRemovedProductRow) {
+    const data = await call("PUT", null, `?code=${encodeURIComponent(row.code)}`);
+    if (data) setMsg({ tone: "ok", text: `Đã khôi phục ${row.code}` });
+  }
+
   async function handleCreate(event: React.FormEvent) {
     event.preventDefault();
-    const ok = await call("POST", {
+    const data = await call("POST", {
       code,
       categorySlug,
       rank,
       price: Number(price.replace(/\D/g, "")),
       oldPrice: Number((oldPrice || price).replace(/\D/g, "")),
     });
-    if (ok) {
-      setMsg({ tone: "ok", text: `Đã thêm ${code.toUpperCase()}` });
+    if (data) {
+      setMsg({
+        tone: "ok",
+        // Saying so matters: the account comes back with its old order history
+        // attached, which is not what "thêm mới" would lead anyone to expect.
+        text: data.revived
+          ? `Đã khôi phục ${code.toUpperCase()} — mã này thuộc một tài khoản đã xoá, nay dùng lại với giá vừa nhập`
+          : `Đã thêm ${code.toUpperCase()}`,
+      });
       setCode("");
       setRank("");
       setPrice("");
@@ -230,25 +275,94 @@ export function AdminProducts({
                   </select>
                 </td>
                 <td className="px-5 py-3 text-right">
-                  <button
-                    type="button"
-                    disabled={busy || p.orderCount > 0}
-                    title={
-                      p.orderCount > 0
-                        ? "Đã có đơn hàng — hãy ẩn thay vì xoá"
-                        : "Xoá sản phẩm"
-                    }
-                    onClick={() => call("DELETE", null, `?code=${p.code}`)}
-                    className="p-2 rounded-lg text-neutral-500 hover:text-red-400 hover:bg-red-500/10 disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-neutral-500 transition-colors"
-                  >
-                    <Trash2 size={14} />
-                  </button>
+                  {arming === p.code ? (
+                    // The armed state spells out what will happen to this
+                    // particular row, because the two outcomes differ and the
+                    // admin cannot tell them apart from the table alone.
+                    <div className="flex items-center justify-end gap-2">
+                      <span className="text-[10px] font-bold text-neutral-400 whitespace-nowrap">
+                        {p.orderCount > 0
+                          ? `Giữ ${p.orderCount} đơn cũ?`
+                          : "Xoá hẳn?"}
+                      </span>
+                      <button
+                        type="button"
+                        disabled={busy}
+                        onClick={() => handleDelete(p)}
+                        className="h-7 px-2.5 rounded-lg bg-red-500/90 hover:bg-red-500 disabled:opacity-60 transition-colors text-[10px] font-black uppercase tracking-widest text-white"
+                      >
+                        Xoá
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setArming(null)}
+                        className="h-7 px-2.5 rounded-lg border border-white/10 hover:bg-white/5 transition-colors text-[10px] font-black uppercase tracking-widest text-neutral-300"
+                      >
+                        Huỷ
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      disabled={busy}
+                      title={
+                        p.orderCount > 0
+                          ? `Xoá khỏi cửa hàng — ${p.orderCount} đơn cũ được giữ lại`
+                          : "Xoá sản phẩm"
+                      }
+                      onClick={() => setArming(p.code)}
+                      className="p-2 rounded-lg text-neutral-500 hover:text-red-400 hover:bg-red-500/10 disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-neutral-500 transition-colors"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  )}
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
+
+      {/* Only drawn when there is something in it. A permanently visible
+          "Đã xoá (0)" would be one more thing to read past on a screen whose
+          job is the table above. */}
+      {removed.length > 0 ? (
+        <div className="rounded-2xl border border-white/10 bg-neutral-900/40 overflow-hidden">
+          <div className="px-5 py-3.5 border-b border-white/10">
+            <span className="text-[10px] font-black uppercase tracking-widest text-neutral-500">
+              Đã xoá ({removed.length})
+            </span>
+            <p className="text-[11px] text-neutral-500 mt-1">
+              Không hiện ngoài cửa hàng. Đơn hàng cũ vẫn xem được, và khôi phục
+              lại thì tài khoản trở về đúng trạng thái trước khi xoá.
+            </p>
+          </div>
+          <ul>
+            {removed.map((p) => (
+              <li
+                key={p.code}
+                className="flex flex-wrap items-center gap-x-4 gap-y-2 px-5 py-3 border-b border-white/5 last:border-0"
+              >
+                <span className="text-xs font-black text-neutral-300">#{p.code}</span>
+                <span className="text-xs text-neutral-500">{p.categoryName}</span>
+                <span className="text-xs text-neutral-500">{p.rank}</span>
+                <span className="text-[11px] text-neutral-600">
+                  Xoá ngày {p.deletedLabel} · {p.orderCount} đơn
+                </span>
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() => handleRestore(p)}
+                  className="ml-auto inline-flex items-center gap-1.5 h-8 px-3 rounded-lg border border-white/10 hover:bg-white/5 disabled:opacity-50 transition-colors text-[10px] font-black uppercase tracking-widest text-neutral-200"
+                >
+                  <RotateCcw size={12} />
+                  Khôi phục
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
     </div>
   );
 }

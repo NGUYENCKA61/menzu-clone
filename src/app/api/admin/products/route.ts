@@ -43,8 +43,26 @@ export async function POST(request: Request) {
   }
 
   const clash = await db.product.findUnique({ where: { code } });
-  if (clash) {
+  if (clash && !clash.deletedAt) {
     return NextResponse.json({ error: "Mã tài khoản đã tồn tại" }, { status: 409 });
+  }
+  if (clash?.deletedAt) {
+    // The code is held by a removed product the admin cannot see, so refusing
+    // here would be a dead end: the screen shows no such account, yet the code
+    // is refused as taken. Re-adding it brings that row back carrying the
+    // values just typed, which keeps its order history attached.
+    const revived = await db.product.update({
+      where: { code },
+      data: {
+        deletedAt: null,
+        categoryId: category.id,
+        rank: body?.rank?.trim() || "Unranked",
+        price: BigInt(Math.floor(price)),
+        oldPrice: BigInt(Math.floor(oldPrice)),
+        status: "AVAILABLE",
+      },
+    });
+    return NextResponse.json({ code: revived.code, revived: true });
   }
 
   const product = await db.product.create({
@@ -64,7 +82,23 @@ export async function POST(request: Request) {
   return NextResponse.json({ code: product.code });
 }
 
-/** Delete a product. Refuses if it has been ordered — that would orphan history. */
+/**
+ * Remove a product.
+ *
+ * Two removals, and which one runs is decided by the data rather than offered
+ * as a choice — an admin should not have to know the shape of the schema to
+ * take an account off the shelf.
+ *
+ * Nothing has ordered it: the row goes, which also frees its code for reuse.
+ * Something has: the row is marked removed instead. `Order.productId` is
+ * required and the relation restricts, so the database refuses a real delete
+ * the moment an account has sold once; and forcing it past that would strip
+ * the code, rank and picture off every past order, because the order row keeps
+ * only the money and reads the rest back through this join.
+ *
+ * Either way the product leaves every listing. The difference is only whether
+ * it can be brought back.
+ */
 export async function DELETE(request: Request) {
   const admin = await getAdmin();
   if (!admin) return NextResponse.json(FORBIDDEN, { status: 403 });
@@ -79,14 +113,36 @@ export async function DELETE(request: Request) {
   if (!product) {
     return NextResponse.json({ error: "Không tìm thấy" }, { status: 404 });
   }
-  if (product._count.orders > 0) {
-    return NextResponse.json(
-      { error: "Sản phẩm đã có đơn hàng, hãy ẩn thay vì xoá" },
-      { status: 409 },
-    );
+  if (product.deletedAt) {
+    return NextResponse.json({ error: "Sản phẩm đã bị xoá rồi" }, { status: 409 });
   }
 
-  await db.product.delete({ where: { code } });
+  if (product._count.orders === 0) {
+    await db.product.delete({ where: { code } });
+    return NextResponse.json({ ok: true, mode: "hard" });
+  }
+
+  await db.product.update({ where: { code }, data: { deletedAt: new Date() } });
+  return NextResponse.json({ ok: true, mode: "soft", orders: product._count.orders });
+}
+
+/** Undo a soft delete, putting the product back exactly as it was. */
+export async function PUT(request: Request) {
+  const admin = await getAdmin();
+  if (!admin) return NextResponse.json(FORBIDDEN, { status: 403 });
+
+  const code = new URL(request.url).searchParams.get("code");
+  if (!code) return NextResponse.json({ error: "Thiếu mã" }, { status: 400 });
+
+  const product = await db.product.findUnique({ where: { code } });
+  if (!product) return NextResponse.json({ error: "Không tìm thấy" }, { status: 404 });
+  if (!product.deletedAt) {
+    return NextResponse.json({ error: "Sản phẩm đang hiển thị" }, { status: 409 });
+  }
+
+  // Status is left alone: it is restored to whatever it was when removed, so
+  // an account that was hidden comes back hidden rather than back on sale.
+  await db.product.update({ where: { code }, data: { deletedAt: null } });
   return NextResponse.json({ ok: true });
 }
 

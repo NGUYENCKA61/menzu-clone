@@ -4,6 +4,8 @@ import type { Prisma } from "@prisma/client";
 
 import { db } from "@/lib/db";
 import type { AccountDetail } from "@/components/sites/menzu-lol-f7ae197a/shared/AccountBuyPanel";
+import type { SoftwareDetail } from "@/components/sites/menzu-lol-f7ae197a/shared/SoftwareBuyPanel";
+import type { SoftwareCardView } from "@/components/sites/menzu-lol-f7ae197a/shared/SoftwareCard";
 import type {
   Product,
   TierColor,
@@ -60,7 +62,14 @@ function countKind(skins: SkinRow[], kind: string): number {
 export interface CategoryPageData {
   name: string;
   slug: string;
+  /** Accounts. Paged, filtered and sorted by the panel above the grid. */
   products: Product[];
+  /**
+   * Software in the same category, listed whole rather than paged: a game
+   * carries a handful of tools, not hundreds, and the filter panel above the
+   * account grid — rank, skin, price band — describes none of them.
+   */
+  software: SoftwareCardView[];
   total: number;
   totalPages: number;
   page: number;
@@ -133,6 +142,15 @@ function categoryWhere(categoryId: string, filters: CategoryFilters) {
   return {
     categoryId,
     status: "AVAILABLE" as const,
+    // Accounts only. Software lives in the same table and the same category,
+    // but every filter and every column of the grid below describes an
+    // account — a tool has no rank to match and no skins to count, so left in
+    // it would render as an empty card that no filter could reach.
+    productType: "ACCOUNT_GAME" as const,
+    // Removed products never reach a shopper. This is the listing every
+    // category page and its paging count run through, so one clause here
+    // covers the grid, the total and the page count together.
+    deletedAt: null,
     ...(price.gte !== undefined || price.lte !== undefined ? { price } : {}),
     ...(filters.skin
       ? {
@@ -177,7 +195,7 @@ export async function getCategoryPage(
 
   const where = categoryWhere(category.id, filters);
 
-  const [total, rows] = await Promise.all([
+  const [total, rows, softwareRows] = await Promise.all([
     db.product.count({ where }),
     db.product.findMany({
       where,
@@ -187,6 +205,21 @@ export async function getCategoryPage(
       include: {
         tags: { select: { label: true } },
         skins: { select: { kind: true, tier: true } },
+      },
+    }),
+    db.product.findMany({
+      where: {
+        categoryId: category.id,
+        productType: "SOFTWARE_GAME",
+        status: "AVAILABLE",
+        deletedAt: null,
+      },
+      orderBy: { createdAt: "desc" },
+      include: {
+        packages: {
+          orderBy: { price: "asc" },
+          select: { id: true, label: true, price: true },
+        },
       },
     }),
   ]);
@@ -199,6 +232,21 @@ export async function getCategoryPage(
     total,
     page,
     totalPages: Math.max(1, Math.ceil(total / PAGE_SIZE)),
+    // Cheapest tier first, which is the order the card's dropdown reads in.
+    // No separate "from" price: the card prints the tiers themselves, so a
+    // second figure above them would only be the first one again.
+    software: softwareRows.map((s) => ({
+      code: s.code,
+      name: s.name ?? s.code,
+      imageUrl: s.imageUrl,
+      status: s.softwareStatus,
+      packages: s.packages.map((p) => ({
+        id: p.id,
+        label: p.label,
+        price: Number(p.price),
+      })),
+      downloadUrl: s.downloadUrl,
+    })),
     products: rows.map((p) => ({
       code: p.code,
       rank: p.rank,
@@ -216,7 +264,11 @@ export async function getCategoryPage(
 export async function listCategories() {
   const rows = await db.category.findMany({
     orderBy: { sortOrder: "asc" },
-    include: { _count: { select: { products: true } } },
+    // The count is filtered, not raw: it is printed on the category tiles as
+    // how much is in there, and a removed account is not.
+    include: {
+      _count: { select: { products: { where: { deletedAt: null } } } },
+    },
   });
   return rows.map((c) => ({
     slug: c.slug,
@@ -228,8 +280,13 @@ export async function listCategories() {
 export async function getAccountDetail(
   code: string,
 ): Promise<AccountDetail | null> {
-  const p = await db.product.findUnique({
-    where: { code },
+  // findFirst, not findUnique: `deletedAt` is not part of a unique key, and a
+  // removed account has to read as gone from here — the caller turns null into
+  // a 404, which is what a stale link or a search engine should meet.
+  // Typed as well as coded: a software code typed into an /account URL would
+  // otherwise render a page of blank stat rows instead of a 404.
+  const p = await db.product.findFirst({
+    where: { code, deletedAt: null, productType: "ACCOUNT_GAME" },
     include: {
       category: { select: { slug: true, name: true } },
       tags: { select: { label: true } },
@@ -272,6 +329,48 @@ export async function getAccountDetail(
   };
 }
 
+/**
+ * A software product and everything its page prints.
+ *
+ * Filtered on the type as well as the code, so an account code typed into a
+ * /software URL answers 404 rather than rendering a page whose every field
+ * would be blank.
+ */
+export async function getSoftwareDetail(code: string): Promise<SoftwareDetail | null> {
+  const p = await db.product.findFirst({
+    where: { code, deletedAt: null, productType: "SOFTWARE_GAME" },
+    include: {
+      category: { select: { slug: true, name: true } },
+      packages: { orderBy: { sortOrder: "asc" } },
+      images: { orderBy: { sortOrder: "asc" } },
+    },
+  });
+  if (!p) return null;
+
+  return {
+    code: p.code,
+    // A shop that has not named the tool yet falls back to its code, which is
+    // at least unique, rather than rendering an empty heading.
+    name: p.name ?? p.code,
+    description: p.description ?? "",
+    softwareStatus: p.softwareStatus,
+    images: p.images.length > 0 ? p.images.map((i) => i.url) : p.imageUrl ? [p.imageUrl] : [],
+    videoUrl: p.videoUrl,
+    version: p.version,
+    platform: p.platform,
+    packages: p.packages.map((pk) => ({
+      id: pk.id,
+      label: pk.label,
+      price: Number(pk.price),
+      durationDays: pk.durationDays,
+    })),
+    categoryName: p.category.name,
+    categorySlug: p.category.slug,
+    inStock: p.status === "AVAILABLE",
+    price: Number(p.price),
+  };
+}
+
 /** "Tài Khoản Tương Tự" — same category, excluding the one being viewed. */
 export async function getRelatedProducts(
   code: string,
@@ -282,6 +381,9 @@ export async function getRelatedProducts(
     where: {
       code: { not: code },
       status: "AVAILABLE",
+      deletedAt: null,
+      // "Tài khoản tương tự" — a tool is not one.
+      productType: "ACCOUNT_GAME",
       category: { slug: categorySlug },
     },
     orderBy: { createdAt: "desc" },
@@ -411,11 +513,25 @@ export async function getFlashSaleItems(take = 20): Promise<FlashSaleItem[]> {
     select: { productId: true },
   });
 
+  // Both branches exclude removed products: a sale scheduled before the shop
+  // took the account down must not resurrect it on the home page.
   const rows = await db.product.findMany({
     where:
       scheduled.length > 0
-        ? { status: "AVAILABLE", id: { in: scheduled.map((s) => s.productId) } }
-        : { status: "AVAILABLE", oldPrice: { gt: 0 } },
+        ? {
+            status: "AVAILABLE",
+            deletedAt: null,
+            productType: "ACCOUNT_GAME",
+            id: { in: scheduled.map((s) => s.productId) },
+          }
+        : {
+            status: "AVAILABLE",
+            deletedAt: null,
+            // The flash-sale card prints a skin count and tier chips, so it
+            // only ever describes an account.
+            productType: "ACCOUNT_GAME",
+            oldPrice: { gt: 0 },
+          },
     include: { skins: { select: { kind: true, tier: true } } },
   });
 
@@ -916,6 +1032,8 @@ export interface AdminCategoryRow {
   id: string;
   slug: string;
   name: string;
+  /** The line under the name on the home page tile. */
+  description: string | null;
   imageUrl: string | null;
   sortOrder: number;
   /** Printed on the home page card as "Đã Bán" / "Đang Bán". */
@@ -961,6 +1079,7 @@ export async function listAdminCategories(): Promise<AdminCategoryRow[]> {
     id: c.id,
     slug: c.slug,
     name: c.name,
+    description: c.description,
     imageUrl: c.imageUrl,
     sortOrder: c.sortOrder,
     soldCount: c.soldCount,

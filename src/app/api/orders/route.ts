@@ -31,6 +31,10 @@ export async function POST(request: Request) {
   const body = (await request.json().catch(() => null)) as {
     code?: string;
     voucher?: string;
+    /** Software only — which duration was chosen. */
+    packageId?: string;
+    /** Software only. Accounts are one of a kind and ignore it. */
+    quantity?: number;
   } | null;
 
   const code = body?.code?.trim();
@@ -50,8 +54,14 @@ export async function POST(request: Request) {
     const result = await db.$transaction(async (tx) => {
       // Lock this product row for the duration of the transaction. Without
       // this, two buyers can both read AVAILABLE and both be charged.
+      // The removed check rides on this same locked read rather than sitting
+      // in a query of its own: a product taken down between the page render
+      // and this transaction has to read as gone, and any second look would be
+      // outside the lock. Quoted because Prisma leaves the column camelCased.
       const locked = await tx.$queryRaw<{ id: string; status: string }[]>`
-        SELECT id, status FROM products WHERE code = ${code} FOR UPDATE
+        SELECT id, status FROM products
+        WHERE code = ${code} AND "deletedAt" IS NULL
+        FOR UPDATE
       `;
       if (locked.length === 0) throw new Error("NOT_FOUND");
       if (locked[0].status !== "AVAILABLE") throw new Error("ALREADY_SOLD");
@@ -74,7 +84,37 @@ export async function POST(request: Request) {
         orderBy: { salePrice: "asc" },
         select: { salePrice: true },
       });
-      const unitPrice = sale?.salePrice ?? product.price;
+
+      // Software is priced by the tier the buyer picked and sold in multiples;
+      // an account has neither. Both are resolved inside the transaction for
+      // the same reason the price is: the tier could have been retired, or its
+      // price changed, while the page sat open.
+      const isSoftware = product.productType === "SOFTWARE_GAME";
+
+      let chosenPackage: { id: string; price: bigint; label: string } | null = null;
+      if (isSoftware) {
+        const wanted = body?.packageId?.trim();
+        if (!wanted) throw new Error("PACKAGE_REQUIRED");
+        // Scoped to this product, so a package id copied from another listing
+        // cannot be used to buy this one at that one's price.
+        const found = await tx.productPackage.findFirst({
+          where: { id: wanted, productId: product.id },
+          select: { id: true, price: true, label: true },
+        });
+        if (!found) throw new Error("BAD_PACKAGE");
+        chosenPackage = found;
+      }
+
+      const quantity = isSoftware
+        ? Math.min(99, Math.max(1, Math.floor(Number(body?.quantity ?? 1)) || 1))
+        : 1;
+
+      // A flash sale discounts the account's own price. It has no meaning
+      // against a tier list, so software takes the tier price as it stands.
+      const unitPrice = chosenPackage
+        ? chosenPackage.price
+        : (sale?.salePrice ?? product.price);
+      const lineTotal = unitPrice * BigInt(quantity);
 
       // Voucher, if supplied and still usable. The same rules back the
       // "Áp dụng" preview, so what the dialog quoted is what is charged.
@@ -82,7 +122,10 @@ export async function POST(request: Request) {
       let voucherCut = 0n;
       if (voucherCode) {
         const v = await tx.voucher.findUnique({ where: { code: voucherCode } });
-        const applied = evaluateVoucher(v, unitPrice, now);
+        // Judged against the line total, not the unit price: a minimum-spend
+        // voucher should be met by buying three keys, and a percentage one
+        // should come off all three.
+        const applied = evaluateVoucher(v, lineTotal, now);
         if (!v || !applied.ok) throw new Error("BAD_VOUCHER");
 
         voucherId = v.id;
@@ -94,7 +137,7 @@ export async function POST(request: Request) {
         });
       }
 
-      const total = unitPrice - voucherCut;
+      const total = lineTotal - voucherCut;
 
       // Re-read the balance inside the transaction — the value on the session
       // object was loaded earlier and may be stale.
@@ -110,13 +153,22 @@ export async function POST(request: Request) {
         data: { balance: balanceAfter },
       });
 
+      // An account is gone once it is bought; software is a licence and the
+      // listing stays up for the next buyer. Marking a tool SOLD would take it
+      // off the shop the first time anybody bought a one-day key.
       await tx.product.update({
         where: { id: product.id },
-        data: { status: "SOLD", soldCount: { increment: 1 } },
+        data: {
+          ...(isSoftware ? {} : { status: "SOLD" as const }),
+          soldCount: { increment: quantity },
+        },
       });
 
+      // Software has no crossed-out price to discount from, so the tier price
+      // is both the list price and what was charged.
+      const listPrice = isSoftware ? lineTotal : product.oldPrice;
       const discountPct =
-        product.oldPrice > 0n
+        !isSoftware && product.oldPrice > 0n
           ? Number(((product.oldPrice - unitPrice) * 100n) / product.oldPrice)
           : 0;
 
@@ -125,9 +177,11 @@ export async function POST(request: Request) {
           code: makeCode("DH"),
           userId: user.id,
           productId: product.id,
+          packageId: chosenPackage?.id ?? null,
+          quantity,
           method: "BUY_NOW",
           status: "PAID",
-          listPrice: product.oldPrice,
+          listPrice,
           discountPct,
           voucherId,
           voucherCut,
@@ -143,7 +197,11 @@ export async function POST(request: Request) {
           status: "SUCCESS",
           delta: -total,
           balanceAfter,
-          description: `Mua tài khoản #${product.code}`,
+          description: chosenPackage
+            ? `Mua ${product.name ?? product.code} — ${chosenPackage.label}${
+                quantity > 1 ? ` ×${quantity}` : ""
+              }`
+            : `Mua tài khoản #${product.code}`,
           method: "Ví Menzu",
         },
       });
@@ -164,6 +222,17 @@ export async function POST(request: Request) {
     }
     if (message === "ALREADY_SOLD") {
       return NextResponse.json({ error: "Tài khoản đã được bán" }, { status: 409 });
+    }
+    if (message === "PACKAGE_REQUIRED") {
+      return NextResponse.json({ error: "Hãy chọn gói trước khi mua" }, { status: 400 });
+    }
+    if (message === "BAD_PACKAGE") {
+      // Also the answer when a tier was retired while the page sat open, which
+      // is why it does not say the id was wrong.
+      return NextResponse.json(
+        { error: "Gói này không còn bán, hãy chọn lại" },
+        { status: 409 },
+      );
     }
     if (message === "BAD_VOUCHER") {
       return NextResponse.json(

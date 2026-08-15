@@ -34,7 +34,12 @@ export const revalidate = 3600;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const [products, categories, services, docs] = await Promise.all([
-    db.product.findMany({ select: { code: true, updatedAt: true } }),
+    // Removed accounts are left out: their pages 404, and offering a crawler a
+    // URL that answers 404 is the one thing a sitemap must not do.
+    db.product.findMany({
+      where: { deletedAt: null },
+      select: { code: true, updatedAt: true, productType: true },
+    }),
     db.category.findMany({ select: { slug: true, updatedAt: true } }),
     db.service.findMany({ select: { slug: true, updatedAt: true } }),
     // Only articles that have been written: the empty ones are noindex, and
@@ -60,8 +65,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "daily" as const,
       priority: 0.8,
     })),
+    // The two types live under different routes, and the wrong one 404s. The
+    // discriminator picks the prefix rather than a second query, so a type
+    // added later cannot quietly inherit the account URL.
     ...products.map((product) => ({
-      url: `${SITE_URL}/account/${product.code}`,
+      url: `${SITE_URL}/${
+        product.productType === "SOFTWARE_GAME" ? "software" : "account"
+      }/${product.code}`,
       lastModified: product.updatedAt,
       changeFrequency: "weekly" as const,
       priority: 0.7,

@@ -54,7 +54,13 @@ export async function GET(request: Request) {
   const source = params.get("source");
   const q = params.get("q")?.trim();
 
-  const where: Prisma.ProductWhereInput = { status: "AVAILABLE" };
+  // Accounts only — every filter this route accepts (rank, skin name, source
+  // prefix) describes an account, and software has its own listing.
+  const where: Prisma.ProductWhereInput = {
+    status: "AVAILABLE",
+    deletedAt: null,
+    productType: "ACCOUNT_GAME",
+  };
 
   if (category) where.category = { slug: category };
   if (rank && rank !== "any") where.rank = { contains: rank, mode: "insensitive" };

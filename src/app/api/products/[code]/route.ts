@@ -9,8 +9,10 @@ export async function GET(
 ) {
   const { code } = await params;
 
-  const product = await db.product.findUnique({
-    where: { code },
+  // findFirst so `deletedAt` can join the filter: a removed account answers
+  // 404 here exactly as it does on the page it backs.
+  const product = await db.product.findFirst({
+    where: { code, deletedAt: null, productType: "ACCOUNT_GAME" },
     include: {
       tags: true,
       category: { select: { slug: true, name: true } },

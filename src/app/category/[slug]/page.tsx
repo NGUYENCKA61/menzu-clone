@@ -9,6 +9,7 @@ import { ToolsRail } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/T
 import { Breadcrumb } from "@/components/sites/menzu-lol-f7ae197a/shared/Breadcrumb";
 import { CategoryFilterPanel } from "@/components/sites/menzu-lol-f7ae197a/shared/CategoryFilterPanel";
 import { ProductCard } from "@/components/sites/menzu-lol-f7ae197a/shared/ProductCard";
+import { SoftwareCard } from "@/components/sites/menzu-lol-f7ae197a/shared/SoftwareCard";
 import { getCategoryPage, listCategories } from "@/lib/queries";
 
 interface PageProps {
@@ -77,6 +78,28 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
             <Breadcrumb
               items={[{ label: "Trang chủ", href: "/" }, { label: data.name }]}
             />
+
+            {/* Software first, and outside the filter panel: the panel filters
+                on rank, skin and price band, none of which apply to a tool, so
+                a grid that sat under it would look filtered and never be. */}
+            {data.software.length > 0 ? (
+              <div className="flex flex-col gap-5 mb-12">
+                <h2 className="text-lg sm:text-xl font-black uppercase tracking-wider text-white">
+                  Phần mềm
+                </h2>
+                <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:gap-8">
+                  {data.software.map((s) => (
+                    <SoftwareCard key={s.code} software={s} />
+                  ))}
+                </div>
+              </div>
+            ) : null}
+
+            {data.software.length > 0 ? (
+              <h2 className="text-lg sm:text-xl font-black uppercase tracking-wider text-white mb-5">
+                Tài khoản game
+              </h2>
+            ) : null}
 
             <CategoryFilterPanel />
 

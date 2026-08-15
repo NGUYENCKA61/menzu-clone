@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { AdminCategories } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminCategories";
 import { AdminProducts } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminProducts";
 import { AdminShell } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminShell";
+import { AdminSoftware } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminSoftware";
 import { getAdmin } from "@/lib/admin";
 import { db } from "@/lib/db";
 import { listAdminCategories } from "@/lib/queries";
@@ -18,13 +19,38 @@ export default async function AdminProductsPage() {
   const admin = await getAdmin();
   if (!admin) notFound();
 
-  const [rows, categories] = await Promise.all([
+  const [rows, removed, softwareRows, categories] = await Promise.all([
     db.product.findMany({
+      where: { deletedAt: null, productType: "ACCOUNT_GAME" },
       orderBy: { createdAt: "desc" },
       take: 100,
       include: {
         category: { select: { name: true } },
         _count: { select: { orders: true } },
+      },
+    }),
+    // Removed products, newest removal first. Fetched separately rather than
+    // filtered out of the list above, because they are shown in their own
+    // section: mixing them into the table would put rows there that most of
+    // its controls do not apply to.
+    db.product.findMany({
+      where: { deletedAt: { not: null } },
+      orderBy: { deletedAt: "desc" },
+      take: 50,
+      include: {
+        category: { select: { name: true } },
+        _count: { select: { orders: true } },
+      },
+    }),
+    db.product.findMany({
+      where: { deletedAt: null, productType: "SOFTWARE_GAME" },
+      orderBy: { createdAt: "desc" },
+      include: {
+        category: { select: { name: true } },
+        packages: {
+          orderBy: { price: "asc" },
+          include: { _count: { select: { orders: true } } },
+        },
       },
     }),
     listAdminCategories(),
@@ -54,7 +80,8 @@ export default async function AdminProductsPage() {
           <div>
             <h2 className={SECTION_TITLE}>2 · Sản phẩm</h2>
             <p className={SECTION_NOTE}>
-              Thêm tài khoản mới, đổi giá, đổi trạng thái hoặc xoá.
+              Thêm tài khoản mới, đổi giá, đổi trạng thái hoặc xoá. Tài khoản đã
+              bán được giữ lại để lịch sử đơn hàng không mất, và khôi phục được.
             </p>
           </div>
           <AdminProducts
@@ -66,6 +93,50 @@ export default async function AdminProductsPage() {
               oldPrice: Number(p.oldPrice),
               categoryName: p.category.name,
               orderCount: p._count.orders,
+            }))}
+            removed={removed.map((p) => ({
+              code: p.code,
+              rank: p.rank,
+              categoryName: p.category.name,
+              orderCount: p._count.orders,
+              // Formatted here, where the timezone is fixed — the same reason
+              // every other admin screen formats its dates on the server.
+              deletedLabel: p.deletedAt!.toLocaleDateString("vi-VN", {
+                timeZone: "Asia/Ho_Chi_Minh",
+              }),
+            }))}
+            categories={categories.map((c) => ({ slug: c.slug, name: c.name }))}
+          />
+        </section>
+
+        <section className="flex flex-col gap-4">
+          <div>
+            <h2 className={SECTION_TITLE}>3 · Phần mềm</h2>
+            <p className={SECTION_NOTE}>
+              Cùng bảng sản phẩm với tài khoản, chỉ khác loại. Mỗi phần mềm bán
+              theo gói thời hạn — thêm gói ở ngay dưới từng sản phẩm.
+            </p>
+          </div>
+          <AdminSoftware
+            software={softwareRows.map((s) => ({
+              code: s.code,
+              name: s.name ?? s.code,
+              categoryName: s.category.name,
+              softwareStatus: s.softwareStatus,
+              status: s.status,
+              price: Number(s.price),
+              description: s.description ?? "",
+              downloadUrl: s.downloadUrl ?? "",
+              videoUrl: s.videoUrl ?? "",
+              version: s.version ?? "",
+              platform: s.platform ?? "",
+              packages: s.packages.map((p) => ({
+                id: p.id,
+                label: p.label,
+                price: Number(p.price),
+                durationDays: p.durationDays,
+                orderCount: p._count.orders,
+              })),
             }))}
             categories={categories.map((c) => ({ slug: c.slug, name: c.name }))}
           />

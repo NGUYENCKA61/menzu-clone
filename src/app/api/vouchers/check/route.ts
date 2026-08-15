@@ -32,7 +32,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Thiếu mã giảm giá" }, { status: 400 });
   }
 
-  const product = await db.product.findUnique({ where: { code: productCode } });
+  const product = await db.product.findFirst({
+    where: { code: productCode, deletedAt: null },
+  });
   if (!product) {
     return NextResponse.json({ error: "Không tìm thấy tài khoản" }, { status: 404 });
   }
