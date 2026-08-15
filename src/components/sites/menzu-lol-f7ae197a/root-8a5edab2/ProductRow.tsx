@@ -52,14 +52,11 @@ const TONES: Record<RowTone, {
   },
   // A faint red ring at rest — enough to trace the tile without competing
   // with the always-lit XEM NGAY button — brightening under the pointer. The
-  // image frame stays borderless in both states; the picture carries its own
-  // rounding instead.
+  // image frame stays borderless; the art bleeds to the frame's own rounding.
   menzu: {
     card: "border-[var(--menzu-accent)]/25 hover:border-[var(--menzu-accent)]/70",
     frame: "border-transparent",
-    // Whole picture, no crop — a 16/9 cover in the 7/5 frame sits centered
-    // with the card background showing above and below it.
-    image: "object-contain",
+    image: "object-cover",
     title: "group-hover:text-[var(--menzu-accent)]",
     buttonEdge: "bg-[var(--menzu-accent)] group-hover:bg-[var(--menzu-accent-dark)]",
     buttonFace: "bg-[var(--menzu-accent)] group-hover:bg-[var(--menzu-accent-dark)]",
@@ -182,44 +179,25 @@ export function ProductRow({
               t.card,
             )}
           >
-            {/* Taller than the 16/9 it was, at the same width — the frame keeps
-                the card's padding on both sides and only grows downward. */}
+            {/* 16/9 — the ratio the shop exports its covers at, so a standard
+                cover fills the frame edge to edge with nothing cropped and
+                nothing letterboxed. */}
             <div
               className={cn(
-                "relative w-full aspect-[7/5] rounded-lg overflow-hidden mb-4 border transition-colors",
+                "relative w-full aspect-[16/9] rounded-lg overflow-hidden mb-4 border transition-colors",
                 t.frame,
               )}
             >
-              {t.image === "object-contain" ? (
-                /* Letterboxed, so the picture is smaller than the frame and
-                   the frame's rounding never reaches it. A fill image cannot
-                   round its own painted area — the radius clips the element
-                   box, which spans the whole frame — so the image is laid out
-                   at its natural ratio inside a centering box and carries the
-                   radius itself. width/height only reserve space before load;
-                   w-auto/h-auto hand sizing back to the file's real ratio. */
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <Image
-                    src={card.image}
-                    alt={card.title}
-                    width={700}
-                    height={500}
-                    sizes="(min-width: 1024px) 25vw, (min-width: 768px) 33vw, 50vw"
-                    className="h-auto w-auto max-h-full max-w-full rounded-lg transition-transform duration-500 group-hover:scale-110"
-                  />
-                </div>
-              ) : (
-                <Image
-                  src={card.image}
-                  alt={card.title}
-                  fill
-                  sizes="(min-width: 1024px) 25vw, (min-width: 768px) 33vw, 50vw"
-                  className={cn(
-                    "transition-transform duration-500 group-hover:scale-110",
-                    t.image,
-                  )}
-                />
-              )}
+              <Image
+                src={card.image}
+                alt={card.title}
+                fill
+                sizes="(min-width: 1024px) 25vw, (min-width: 768px) 33vw, 50vw"
+                className={cn(
+                  "transition-transform duration-500 group-hover:scale-110",
+                  t.image,
+                )}
+              />
             </div>
 
             <h3
