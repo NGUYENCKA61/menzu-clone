@@ -437,12 +437,28 @@ export function AnnouncementModal({
   const panel = useRef<HTMLDivElement>(null);
   const HeaderIcon = TYPE_ICONS[item.type];
 
+  /**
+   * The latest onClose, reachable from an effect that does not depend on it.
+   *
+   * The parent re-renders every second — a shared clock drives the "5 phút
+   * trước" labels in the bell list — and onClose is a fresh closure each time.
+   * Naming it as a dependency below therefore tore the effect down and set it
+   * up again every second, and its first act is to focus the panel: whatever
+   * button the reader had just tabbed to lost focus within the second.
+   */
+  const closeRef = useRef(onClose);
+  useEffect(() => {
+    closeRef.current = onClose;
+  });
+
+  // Keyed to the notice, not to the callback: a different notice deserves the
+  // focus and the scroll lock afresh, a re-render of the same one does not.
   useEffect(() => {
     panel.current?.focus();
 
     const onKey = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
-        onClose();
+        closeRef.current();
         return;
       }
       if (event.key !== "Tab") return;
@@ -470,7 +486,7 @@ export function AnnouncementModal({
       window.removeEventListener("keydown", onKey);
       document.body.style.overflow = previous;
     };
-  }, [onClose]);
+  }, [item.id, item.revision]);
 
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
