@@ -25,6 +25,22 @@ const SECURITY_HEADERS = [
 const nextConfig: NextConfig = {
   output: "standalone",
 
+  /**
+   * Hosts allowed to load `next dev`'s JavaScript.
+   *
+   * Next blocks `/_next/static/*` for any origin but localhost, so opening the
+   * site from a phone or a second machine on the LAN served the server-rendered
+   * HTML and then silently refused every chunk: the page looked right and no
+   * button worked, because React never hydrated. The block is logged only in
+   * this terminal, so from the other device there is nothing at all to read.
+   *
+   * The whole 192.168.1.x range rather than one address, because the machine's
+   * own IP comes from DHCP and changes on its own. This affects `next dev`
+   * only — a production build never reads it — and it grants nothing beyond
+   * fetching dev assets to devices already inside the home network.
+   */
+  allowedDevOrigins: ["192.168.1.154", "192.168.1.*"],
+
   images: {
     // WebP only, and first in the list, which is what decides the format —
     // Next takes the first entry the browser's Accept header matches. AVIF
