@@ -87,9 +87,18 @@ const DRAWER_GROUPS: DrawerGroup[] = [
 function NavDropdown({ label, items }: { label: string; items: DropdownItem[] }) {
   return (
     <div className="relative group h-full flex items-center">
+      {/* Hover is a colour change and nothing else — no glow, no background,
+          no scale. The chevron is drawn with currentColor, so it inherits the
+          animated colour and turns with the label rather than needing its own
+          rule.
+
+          Keyed to group-hover, not hover: the panel below opens on exactly the
+          same condition, so the trigger stays red for as long as the panel is
+          open — including once the pointer has left the button and moved down
+          into the panel, which is where it spends most of the interaction. */}
       <button
         type="button"
-        className="flex items-center gap-2 px-3 py-2 rounded-lg text-[11px] font-extrabold uppercase tracking-widest transition-all text-neutral-200 hover:text-white"
+        className="flex items-center gap-2 px-3 py-2 rounded-lg text-[11px] font-extrabold uppercase tracking-widest text-neutral-200 group-hover:text-[var(--menzu-accent)] transition-colors duration-200 ease-[ease]"
       >
         {label}
         <ChevronDown size={14} />
@@ -99,13 +108,19 @@ function NavDropdown({ label, items }: { label: string; items: DropdownItem[] })
           {items.map((item) => {
             const Icon = item.icon
             return (
+              // Icon and label rest at different greys, so they cannot share
+              // one inherited colour the way the trigger's chevron does — each
+              // carries its own rule to arrive at the same red together.
               <a
                 key={item.label}
                 href={hrefFor(item.label)}
                 className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-white/5 transition-colors group/item"
               >
-                <Icon size={14} className="text-neutral-400 shrink-0" />
-                <span className="text-[10px] font-bold text-neutral-200 group-hover/item:text-white uppercase tracking-wider">
+                <Icon
+                  size={14}
+                  className="text-neutral-400 group-hover/item:text-[var(--menzu-accent)] shrink-0 transition-colors duration-200 ease-[ease]"
+                />
+                <span className="text-[10px] font-bold text-neutral-200 group-hover/item:text-[var(--menzu-accent)] uppercase tracking-wider transition-colors duration-200 ease-[ease]">
                   {item.label}
                 </span>
               </a>
@@ -212,7 +227,7 @@ export function SiteHeaderClient({
             <NavDropdown label="GIAO DỊCH" items={GIAO_DICH_ITEMS} />
             <a
               href="#"
-              className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-[11px] font-extrabold uppercase tracking-widest text-neutral-200 hover:text-white transition-all"
+              className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-[11px] font-extrabold uppercase tracking-widest text-neutral-200 hover:text-[var(--menzu-accent)] transition-colors duration-200 ease-[ease]"
             >
               <Gift size={14} />
               NHẬN ACC FREE
