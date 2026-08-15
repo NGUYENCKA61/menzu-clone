@@ -69,6 +69,7 @@ model User {
   topUps        TopUp[]
   serviceOrders ServiceOrder[]
   announcements AnnouncementRecipient[]
+  cartItems     CartItem[]
 
   @@map("users")
 }
@@ -316,6 +317,10 @@ model Category {
   id        String    @id @default(cuid())
   slug      String    @unique
   name      String
+  /// One or two lines under the name on the home page tile — what this
+  /// category actually sells, in the shop's own words. Null draws the tile
+  /// without the line rather than leaving a blank gap where it would be.
+  description String?
   sortOrder Int       @default(0)
   imageUrl  String?
   soldCount Int       @default(0)
@@ -338,6 +343,30 @@ enum ProductStatus {
   HIDDEN
 }
 
+/// Which of the two things a product row describes.
+///
+/// One table rather than two. A category, a group, an order, a voucher, a
+/// flash sale and every admin screen already point at "a product"; splitting
+/// the row in two would have meant duplicating all of those relations and
+/// then teaching each caller which of the two to look in. The discriminator
+/// decides which of the two field sets below carries meaning — the other is
+/// left null, and nothing reads it.
+enum ProductType {
+  ACCOUNT_GAME
+  SOFTWARE_GAME
+}
+
+/// The detection state a tool advertises, shown as the pill above its title.
+///
+/// It is the first thing a buyer looks for and the reason they leave, so it is
+/// a field rather than a line of description text: it has to be filterable and
+/// changeable in one edit when a game patch lands.
+enum SoftwareStatus {
+  UNDETECTED
+  DETECTED
+  UPDATING
+}
+
 /// One purchasable game account. `code` is the public identifier shown as
 /// "#VLR2030" and used in the /account/[code] URL.
 model Product {
@@ -346,6 +375,44 @@ model Product {
   categoryId String
   category   Category      @relation(fields: [categoryId], references: [id])
 
+  /// Decides which of the two field blocks below applies. Defaulted so every
+  /// row that existed before this column keeps meaning exactly what it did.
+  productType ProductType  @default(ACCOUNT_GAME)
+
+  /// Shown as the product's title. Accounts are known by their `code` and
+  /// leave this null; software carries a real name — "Valorant Tool Premium".
+  name       String?
+  /// The paragraph under the title. Software only, in practice.
+  description String?
+
+  // --- SOFTWARE_GAME ---------------------------------------------------
+  /// Null on accounts, where the idea does not apply.
+  softwareStatus SoftwareStatus?
+  /// Where "Tải tool và hướng dẫn sử dụng" points — an installer, a Drive
+  /// folder, a guide, whatever the shop hands out. Null hides the button
+  /// rather than rendering one that goes nowhere.
+  downloadUrl    String?
+  /// A YouTube link for the detail page's main frame. Stored as the shop
+  /// pasted it — a watch URL, a share link, a bare id — and turned into an
+  /// embed at render time, so nobody has to know what an embed URL looks like.
+  /// Null falls the frame back to the picture.
+  videoUrl       String?
+
+  /// Two facts the description block states as facts — "Premium 2.4.1",
+  /// "Windows 10 / 11". Per product and therefore columns rather than copy in
+  /// the template: a build number printed on every tool in the shop because it
+  /// was true of one of them is worse than not printing it. Null hides its own
+  /// card, so a shop that has not filled them in shows a shorter row instead
+  /// of empty boxes.
+  version        String?
+  platform       String?
+
+  // --- ACCOUNT_GAME ----------------------------------------------------
+  /// Software rows leave these at their empty or zero values. `rank` stays
+  /// required rather than becoming nullable: it is read in a dozen places as
+  /// a plain string, and widening the type there would spread null handling
+  /// across the storefront to describe a case none of those screens can
+  /// reach — a software product never renders an account's stat rows.
   rank       String
   /// "LAST: DIAMOND 1 (V26 // ACT III)" — shown under the current rank.
   lastRank   String?
@@ -386,13 +453,34 @@ model Product {
   createdAt  DateTime      @default(now())
   updatedAt  DateTime      @updatedAt @default(now())
 
+  /// When the shop removed this product. Null means it is live.
+  ///
+  /// Soft rather than a row delete because orders point at it: `Order.productId`
+  /// is required and the relation restricts, so a real delete is refused by the
+  /// database the moment an account has been sold once — and forcing it would
+  /// strip the code, rank and picture off every past order, since the order row
+  /// stores only the money and reads the rest back through this join.
+  ///
+  /// Every listing filters on `deletedAt: null`; order history deliberately
+  /// does not, which is what lets a customer still see what they bought.
+  deletedAt  DateTime?
+
   tags       ProductTag[]
   skins      ProductSkin[]
   orders     Order[]
   flashSales FlashSale[]
+  packages   ProductPackage[]
+  images     ProductImage[]
+  cartItems  CartItem[]
 
   @@index([categoryId, status])
   @@index([price])
+  // Listings ask for one type at a time — a category page splits accounts from
+  // software before it renders either.
+  @@index([categoryId, productType])
+  // Every storefront listing carries `deletedAt: null`, so the common lookups
+  // stay on an index rather than filtering the removed rows out afterwards.
+  @@index([deletedAt])
   @@map("products")
 }
 
@@ -448,6 +536,75 @@ model ProductSkin {
   @@map("product_skins")
 }
 
+/// One purchasable duration of a software product — the "1 ngày / 7 ngày /
+/// 30 ngày / Vĩnh viễn" row on its page.
+///
+/// Rows rather than four columns on Product: shops add tiers and retire them,
+/// and a fixed set of columns would need a migration every time one changed.
+/// The price lives here because the tier is what it prices; `Product.price`
+/// stays the figure a listing card shows before any tier has been chosen.
+model ProductPackage {
+  id           String  @id @default(cuid())
+  productId    String
+  product      Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  /// Shown verbatim — "1 ngày", "Vĩnh viễn". Written by the shop, because the
+  /// wording is part of the offer and deriving it from a day count would lose
+  /// the distinction between "30 ngày" and "1 tháng".
+  label        String
+  /// Null means it never expires. Drives when a delivered key stops working;
+  /// the label is what the buyer reads.
+  durationDays Int?
+  price        BigInt
+  sortOrder    Int     @default(0)
+  orders       Order[]
+  cartItems    CartItem[]
+
+  @@index([productId, sortOrder])
+  @@map("product_packages")
+}
+
+/// A software line a shopper has staged but not paid for.
+///
+/// Only software reaches this table. An account is one of a kind, so holding
+/// one in a basket would either reserve it — starving every other shopper for
+/// as long as the tab stayed open — or promise something that could be sold
+/// out from under them at checkout. Those still buy straight from their page.
+///
+/// The unique triple is what makes "add" idempotent: choosing the same tier of
+/// the same tool twice raises the quantity instead of stacking a second line.
+model CartItem {
+  id        String         @id @default(cuid())
+  userId    String
+  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product        @relation(fields: [productId], references: [id], onDelete: Cascade)
+  packageId String
+  package   ProductPackage @relation(fields: [packageId], references: [id], onDelete: Cascade)
+  quantity  Int            @default(1)
+  createdAt DateTime       @default(now())
+
+  @@unique([userId, productId, packageId])
+  @@index([userId])
+  @@map("cart_items")
+}
+
+/// Extra screenshots behind the thumbnail strip on a detail page.
+///
+/// Accounts get one generated asset each and use `Product.imageUrl`; software
+/// is sold on what it looks like in use, so it needs several. Kept as its own
+/// table rather than a string array so the order is a column that can be
+/// changed without rewriting the whole list.
+model ProductImage {
+  id        String  @id @default(cuid())
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  url       String
+  sortOrder Int     @default(0)
+
+  @@index([productId, sortOrder])
+  @@map("product_images")
+}
+
 // ---------------------------------------------------------------------------
 // Money
 // ---------------------------------------------------------------------------
@@ -475,6 +632,15 @@ model Order {
   user        User           @relation(fields: [userId], references: [id])
   productId   String
   product     Product        @relation(fields: [productId], references: [id])
+
+  /// Which tier was bought. Null on accounts, which have no tiers — an
+  /// account is the whole thing or nothing.
+  packageId   String?
+  package     ProductPackage? @relation(fields: [packageId], references: [id])
+  /// Accounts are one of a kind and always 1. Software sells in multiples, so
+  /// the count is stored rather than inferred from the total, which would stop
+  /// being recoverable the moment a voucher touched the figure.
+  quantity    Int            @default(1)
 
   method      PurchaseMethod @default(BUY_NOW)
   status      OrderStatus    @default(PENDING)
