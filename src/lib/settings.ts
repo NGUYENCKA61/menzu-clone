@@ -84,8 +84,6 @@ export interface ShopSettings {
   homeTftSlugs: string[];
 
   // --- Hero -----------------------------------------------------------------
-  /** The small pill above the heading. */
-  heroBadge: string;
   /** Newlines are line breaks: the heading is written to sit on two rows. */
   heroTitle: string;
   heroSubtitle: string;
@@ -93,13 +91,13 @@ export interface ShopSettings {
   heroPrimaryHref: string;
   heroSecondaryLabel: string;
   heroSecondaryHref: string;
-  /** The claims under the buttons. Four is the design; fewer simply show. */
-  heroUsps: string[];
   /**
    * Plays in the artwork frame instead of `heroBanner` when set. Empty means
    * the still image, which is what every shop starts with.
    */
   heroVideo: string;
+  /** Whether the hero draws the shooting-star streaks over the starfield. */
+  heroShootingStars: boolean;
 
   /** Category slugs shown as the "Danh mục sản phẩm" tiles. */
   homeCategorySlugs: string[];
@@ -224,7 +222,6 @@ export const DEFAULT_SETTINGS: ShopSettings = {
 
   // The words the hero shipped with, so moving them into settings changes
   // nothing on screen until somebody edits one.
-  heroBadge: "Đại lý Valorant & dịch vụ gaming",
   heroTitle: "THICHTHIHACK.COM",
   heroSubtitle:
     "Kho tài khoản Valorant, phần mềm và dịch vụ gaming. Giao dịch nhanh chóng, " +
@@ -233,12 +230,8 @@ export const DEFAULT_SETTINGS: ShopSettings = {
   heroPrimaryHref: "/categories",
   heroSecondaryLabel: "Xem hướng dẫn",
   heroSecondaryHref: "/docs",
-  // None by default. The four the hero shipped with — nhanh chóng, đa dạng,
-  // hỗ trợ, tự động — are what every shop in this trade claims, so they read
-  // as filler rather than as reasons. The four boxes are still in Cấu hình
-  // for a shop with something specific to say.
-  heroUsps: [],
   heroVideo: "",
+  heroShootingStars: true,
 
   // Empty means "whatever the section already showed": the captured tiles for
   // categories, every service for the service rows, the newest guides for the
@@ -289,15 +282,14 @@ export const SETTING_KEYS: Record<keyof ShopSettings, string> = {
   homeValorantSlugs: "home.row.valorant",
   homeTftSlugs: "home.row.tft",
 
-  heroBadge: "home.hero.badge",
   heroTitle: "home.hero.title",
   heroSubtitle: "home.hero.subtitle",
   heroPrimaryLabel: "home.hero.ctaLabel",
   heroPrimaryHref: "home.hero.ctaHref",
   heroSecondaryLabel: "home.hero.altLabel",
   heroSecondaryHref: "home.hero.altHref",
-  heroUsps: "home.hero.usps",
   heroVideo: "home.hero.video",
+  heroShootingStars: "home.hero.shootingStars",
 
   homeCategorySlugs: "home.row.categories",
   homeDocSlugs: "home.row.docs",
@@ -445,15 +437,6 @@ function toFaqStored(raw: string | undefined): FaqEntry[] {
 function toTextList(raw: unknown): string[] {
   if (!Array.isArray(raw)) return [];
   return raw.map((item) => String(item).trim()).filter(Boolean);
-}
-
-function toTextListStored(raw: string | undefined, fallback: string[]): string[] {
-  if (raw === undefined) return fallback;
-  try {
-    return toTextList(JSON.parse(raw));
-  } catch {
-    return fallback;
-  }
 }
 
 export function clampRowCount(value: number): number {
@@ -625,7 +608,6 @@ export function parseSettings(rows: Iterable<{ key: string; value: string }>): S
       DEFAULT_SETTINGS.homeTftSlugs,
     ),
 
-    heroBadge: toOptionalText(stored.get(SETTING_KEYS.heroBadge), DEFAULT_SETTINGS.heroBadge),
     heroTitle: toText(stored.get(SETTING_KEYS.heroTitle), DEFAULT_SETTINGS.heroTitle),
     heroSubtitle: toOptionalText(
       stored.get(SETTING_KEYS.heroSubtitle),
@@ -647,8 +629,11 @@ export function parseSettings(rows: Iterable<{ key: string; value: string }>): S
       stored.get(SETTING_KEYS.heroSecondaryHref),
       DEFAULT_SETTINGS.heroSecondaryHref,
     ),
-    heroUsps: toTextListStored(stored.get(SETTING_KEYS.heroUsps), DEFAULT_SETTINGS.heroUsps),
     heroVideo: toOptionalText(stored.get(SETTING_KEYS.heroVideo), DEFAULT_SETTINGS.heroVideo),
+    heroShootingStars: toBoolean(
+      stored.get(SETTING_KEYS.heroShootingStars),
+      DEFAULT_SETTINGS.heroShootingStars,
+    ),
 
     homeCategorySlugs: toSlugList(
       stored.get(SETTING_KEYS.homeCategorySlugs),
@@ -700,7 +685,6 @@ export function serializeSettings(settings: ShopSettings): { key: string; value:
     homeValorantSlugs: settings.homeValorantSlugs.join(","),
     homeTftSlugs: settings.homeTftSlugs.join(","),
 
-    heroBadge: settings.heroBadge.trim(),
     // Not trimmed per line: the newline between the two rows is the layout.
     heroTitle: settings.heroTitle.trim(),
     heroSubtitle: settings.heroSubtitle.trim(),
@@ -708,8 +692,8 @@ export function serializeSettings(settings: ShopSettings): { key: string; value:
     heroPrimaryHref: settings.heroPrimaryHref.trim(),
     heroSecondaryLabel: settings.heroSecondaryLabel.trim(),
     heroSecondaryHref: settings.heroSecondaryHref.trim(),
-    heroUsps: JSON.stringify(settings.heroUsps),
     heroVideo: settings.heroVideo.trim(),
+    heroShootingStars: String(settings.heroShootingStars),
 
     homeCategorySlugs: settings.homeCategorySlugs.join(","),
     homeDocSlugs: settings.homeDocSlugs.join(","),
@@ -795,8 +779,7 @@ export function normalizeSettings(raw: Partial<ShopSettings> | null): ShopSettin
 
     // The heading and the first button fall back when blank — a hero with no
     // words and a button with no label are broken, never a choice. The rest
-    // may be emptied on purpose: no badge, no second button, no claims.
-    heroBadge: String(raw?.heroBadge ?? "").trim(),
+    // may be emptied on purpose: no second button.
     heroTitle: String(raw?.heroTitle ?? "").trim() || DEFAULT_SETTINGS.heroTitle,
     heroSubtitle: String(raw?.heroSubtitle ?? "").trim(),
     heroPrimaryLabel:
@@ -804,8 +787,8 @@ export function normalizeSettings(raw: Partial<ShopSettings> | null): ShopSettin
     heroPrimaryHref: String(raw?.heroPrimaryHref ?? "").trim() || DEFAULT_SETTINGS.heroPrimaryHref,
     heroSecondaryLabel: String(raw?.heroSecondaryLabel ?? "").trim(),
     heroSecondaryHref: String(raw?.heroSecondaryHref ?? "").trim(),
-    heroUsps: toTextList(raw?.heroUsps),
     heroVideo: String(raw?.heroVideo ?? "").trim(),
+    heroShootingStars: Boolean(raw?.heroShootingStars),
 
     homeCategorySlugs: toTextList(raw?.homeCategorySlugs),
     homeDocSlugs: toTextList(raw?.homeDocSlugs),
@@ -903,10 +886,6 @@ export function validateSettings(settings: ShopSettings): string | null {
     if (href && !href.startsWith("/") && !/^https?:\/\//.test(href)) {
       return `${label} của hero phải là đường dẫn bắt đầu bằng / hoặc http`;
     }
-  }
-  // The grid under the buttons is two columns of two.
-  if (settings.heroUsps.length > 4) {
-    return "Hero chỉ hiển thị tối đa 4 USP";
   }
   if (settings.seoFaq.length > 20) {
     return "Tối đa 20 câu hỏi trong phần SEO Content";

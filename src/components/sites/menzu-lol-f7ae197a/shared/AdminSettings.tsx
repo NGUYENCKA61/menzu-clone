@@ -299,13 +299,13 @@ export function AdminSettings({
   const [docSlugs, setDocSlugs] = useState(settings.homeDocSlugs);
   const [rowCount, setRowCount] = useState(String(settings.homeRowCount));
 
-  const [heroBadge, setHeroBadge] = useState(settings.heroBadge);
   const [heroTitle, setHeroTitle] = useState(settings.heroTitle);
   const [heroSubtitle, setHeroSubtitle] = useState(settings.heroSubtitle);
   const [heroCtaLabel, setHeroCtaLabel] = useState(settings.heroPrimaryLabel);
   const [heroCtaHref, setHeroCtaHref] = useState(settings.heroPrimaryHref);
   const [heroAltLabel, setHeroAltLabel] = useState(settings.heroSecondaryLabel);
   const [heroAltHref, setHeroAltHref] = useState(settings.heroSecondaryHref);
+  const [shootingStars, setShootingStars] = useState(settings.heroShootingStars);
   const [heroVideo, setHeroVideo] = useState(settings.heroVideo);
   const [heroVideoUploading, setHeroVideoUploading] = useState(false);
   const [heroVideoMsg, setHeroVideoMsg] = useState<{
@@ -354,11 +354,6 @@ export function AdminSettings({
       setHeroVideoUploading(false);
     }
   }
-  // Four boxes, always. An array that grows and shrinks would need add and
-  // remove buttons for a list the hero draws exactly four of.
-  const [usps, setUsps] = useState<string[]>(() =>
-    [0, 1, 2, 3].map((index) => settings.heroUsps[index] ?? ""),
-  );
 
   const [seoHeading, setSeoHeading] = useState(settings.seoHeading);
   const [seoBody, setSeoBody] = useState(settings.seoBody);
@@ -455,7 +450,6 @@ export function AdminSettings({
           homeCategorySlugs: categorySlugs,
           homeDocSlugs: docSlugs,
           homeRowCount: Number(rowCount) || DEFAULT_SETTINGS.homeRowCount,
-          heroBadge,
           heroTitle,
           heroSubtitle,
           heroPrimaryLabel: heroCtaLabel,
@@ -463,8 +457,8 @@ export function AdminSettings({
           heroSecondaryLabel: heroAltLabel,
           heroSecondaryHref: heroAltHref,
           heroVideo,
+          heroShootingStars: shootingStars,
           // Blank boxes are not empty claims, they are boxes nobody filled in.
-          heroUsps: usps.map((usp) => usp.trim()).filter(Boolean),
           seoHeading,
           seoBody,
           seoFaq: faq,
@@ -1402,16 +1396,6 @@ export function AdminSettings({
             {sectionSwitch("hero", "Tắt thì trang chủ bắt đầu thẳng từ khối kế tiếp.")}
 
             <div>
-              <span className={LABEL}>Nhãn nhỏ phía trên tiêu đề</span>
-              <input
-                value={heroBadge}
-                onChange={(event) => setHeroBadge(event.target.value)}
-                className={FIELD}
-                placeholder="Để trống thì ẩn nhãn"
-              />
-            </div>
-
-            <div>
               <span className={LABEL}>Tiêu đề H1</span>
               <textarea
                 value={heroTitle}
@@ -1473,25 +1457,6 @@ export function AdminSettings({
             </div>
 
             <div>
-              <span className={LABEL}>4 USP</span>
-              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                {usps.map((usp, index) => (
-                  <input
-                    key={index}
-                    value={usp}
-                    onChange={(event) =>
-                      setUsps(usps.map((row, i) => (i === index ? event.target.value : row)))
-                    }
-                    aria-label={`USP ${index + 1}`}
-                    className={FIELD}
-                    placeholder={`USP ${index + 1}`}
-                  />
-                ))}
-              </div>
-              <p className={HINT}>Ô để trống sẽ không hiện. Bỏ trống cả bốn thì ẩn hẳn cụm.</p>
-            </div>
-
-            <div>
               <span className={LABEL}>Video hero</span>
               <input
                 value={heroVideo}
@@ -1546,6 +1511,13 @@ export function AdminSettings({
                 chờ trong lúc video tải. Video chạy tự động, lặp lại và luôn tắt tiếng.
               </p>
             </div>
+
+            <Toggle
+              checked={shootingStars}
+              onChange={setShootingStars}
+              label="Hiệu ứng sao băng"
+              hint="Vài vệt sao băng chạy chéo phía sau hero. Tắt thì chỉ còn nền sao tĩnh lấp lánh."
+            />
           </section>
 
           <section className={CARD}>

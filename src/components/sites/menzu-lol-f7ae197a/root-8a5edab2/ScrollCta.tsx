@@ -26,30 +26,43 @@ export function ScrollCta({
   targetId,
   label,
   placement = HERO_PLACEMENT,
+  animated = false,
 }: {
   targetId: string;
   label: string;
   placement?: string;
+  /** Brighten the pill and bounce it in step with the arrow. The home hero
+   *  wants that extra pull; the software page keeps the quiet default. */
+  animated?: boolean;
 }) {
+  const tone = animated
+    ? "border-white/20 text-neutral-200 hover:border-white/40 hover:text-white"
+    : "border-white/10 text-neutral-400 hover:border-white/20 hover:text-white";
+
   return (
-    <a
-      href={`#${targetId}`}
-      onClick={(event) => {
-        const target = document.getElementById(targetId);
-        if (!target) return;
-        event.preventDefault();
-        // Honoured explicitly: "smooth" ignores the reader's motion setting.
-        const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-        target.scrollIntoView({ behavior: still ? "auto" : "smooth", block: "start" });
-      }}
-      className={`${placement} inline-flex items-center gap-2 whitespace-nowrap rounded-full border border-white/10 bg-[#0d0d12]/80 px-4 py-2 text-[10px] font-black uppercase tracking-[0.14em] text-neutral-400 backdrop-blur-md transition-colors hover:border-white/20 hover:text-white`}
-    >
-      {label}
-      <ArrowDown
-        size={13}
-        aria-hidden
-        className="animate-bounce-subtle shrink-0 text-[var(--menzu-accent)]"
-      />
-    </a>
+    // Placement on the wrapper, motion on the link inside it: the hero's
+    // placement centres the pill with -translate-x-1/2, and a bounce transform
+    // on the same element would overwrite that and shove it off-centre.
+    <div className={placement}>
+      <a
+        href={`#${targetId}`}
+        onClick={(event) => {
+          const target = document.getElementById(targetId);
+          if (!target) return;
+          event.preventDefault();
+          // Honoured explicitly: "smooth" ignores the reader's motion setting.
+          const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+          target.scrollIntoView({ behavior: still ? "auto" : "smooth", block: "start" });
+        }}
+        className={`${animated ? "animate-bounce-subtle " : ""}${tone} inline-flex items-center gap-2 whitespace-nowrap rounded-full border bg-[#0d0d12]/85 px-4 py-2 text-[10px] font-black uppercase tracking-[0.14em] backdrop-blur-md transition-colors`}
+      >
+        {label}
+        <ArrowDown
+          size={13}
+          aria-hidden
+          className="animate-bounce-subtle shrink-0 text-[var(--menzu-accent)]"
+        />
+      </a>
+    </div>
   );
 }

@@ -1,4 +1,3 @@
-import { Check, Sparkles } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -11,19 +10,20 @@ import { ScrollCta } from "./ScrollCta";
  */
 export const SCROLL_TARGET_ID = "danh-muc-san-pham";
 
-/** #b9a0ff. Written out rather than made a token: it is spent here and
- *  nowhere else, and a variable used once hides where the colour lives. */
-const USP_PURPLE = "text-[#b9a0ff]";
-
 const CTA =
   "inline-flex items-center justify-center gap-2 rounded-[10px] px-6 py-3.5 text-[11px] font-black uppercase tracking-[0.14em] transition-colors";
+
+/** Seconds between characters as the heading types itself in. */
+const TYPE_STEP = 0.07;
+
+/** Seconds the heading waits before typing, so the "We are" line fades up first. */
+const HEADING_DELAY = 0.5;
 
 interface HeroBannersProps {
   /** The still artwork, and the poster frame when a video is set. */
   banner?: string;
   /** Plays in place of the still when set. */
   video?: string;
-  badge?: string;
   /** Newlines are line breaks — the heading is written to sit on two rows. */
   title?: string;
   subtitle?: string;
@@ -31,7 +31,8 @@ interface HeroBannersProps {
   primaryHref?: string;
   secondaryLabel?: string;
   secondaryHref?: string;
-  usps?: string[];
+  /** Draw the shooting-star streaks. Off hides them; the starfield stays. */
+  shootingStars?: boolean;
 }
 
 /**
@@ -42,24 +43,22 @@ interface HeroBannersProps {
  * sentence anywhere saying what this place is. Every word here now comes from
  * Cấu hình → Cấu hình trang chủ, and each prop falls back to what the section
  * shipped with, so a shop that never opens that screen sees what it always saw.
- *
- * The four claims carry a light purple of their own rather than the shop's
- * red: red on this page means "press me", and four reassurances that look
- * like four buttons send the eye to the wrong place.
  */
 export function HeroBanners({
   banner = DEFAULT_SETTINGS.heroBanner,
   video = DEFAULT_SETTINGS.heroVideo,
-  badge = DEFAULT_SETTINGS.heroBadge,
   title = DEFAULT_SETTINGS.heroTitle,
   subtitle = DEFAULT_SETTINGS.heroSubtitle,
   primaryLabel = DEFAULT_SETTINGS.heroPrimaryLabel,
   primaryHref = DEFAULT_SETTINGS.heroPrimaryHref,
   secondaryLabel = DEFAULT_SETTINGS.heroSecondaryLabel,
   secondaryHref = DEFAULT_SETTINGS.heroSecondaryHref,
-  usps = DEFAULT_SETTINGS.heroUsps,
+  shootingStars = true,
 }: HeroBannersProps) {
   const lines = title.split("\n").filter((line) => line.trim());
+  const totalChars = lines.reduce((sum, line) => sum + Array.from(line).length, 0);
+  // Runs across every line so the stagger does not restart on the second row.
+  let charCursor = 0;
 
   return (
     // No card around this. The hero sits on the page's own dark ground, which
@@ -78,9 +77,18 @@ export function HeroBanners({
     // spilling past the fold.
     <section className="relative isolate flex w-full flex-col justify-center overflow-hidden min-h-[calc(100svh-128px)] pt-6 pb-20 sm:pt-10 lg:min-h-[calc(100svh-144px)] lg:pt-14">
       {/* A field of faint, slowly twinkling stars over the page's own black,
-          behind the copy. Decoration only — aria-hidden, no pointer target. */}
+          plus three shooting stars on long offset timers so one crosses now
+          and then rather than all at once. Decoration only — aria-hidden, no
+          pointer target. */}
       <div aria-hidden className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
         <div className="hero-starfield" />
+        {shootingStars ? (
+          <>
+            <span className="hero-shooting" style={{ top: "8%", left: "58%", animationDelay: "0s", animationDuration: "7s" }} />
+            <span className="hero-shooting" style={{ top: "2%", left: "82%", animationDelay: "3.5s", animationDuration: "8.5s" }} />
+            <span className="hero-shooting" style={{ top: "22%", left: "44%", animationDelay: "6s", animationDuration: "9.5s" }} />
+          </>
+        ) : null}
       </div>
 
       {/* Stacked on phones; on desktop the copy and the artwork are pushed to
@@ -90,23 +98,42 @@ export function HeroBanners({
           have room for their full width, and they close up on a narrow laptop
           instead of overflowing. z-10 lifts them clear of the sky layer. */}
       <div className="relative z-10 flex flex-col gap-10 lg:flex-row lg:items-center lg:justify-between lg:gap-8">
-        <div className="flex w-full flex-col items-start lg:w-auto lg:min-w-0 lg:max-w-[440px] lg:flex-1 lg:-translate-y-8">
-          {badge ? (
-            <span className="inline-flex items-center gap-2 rounded-full border border-[var(--menzu-accent)]/25 bg-[var(--menzu-accent)]/[0.08] px-3.5 py-2 text-[10px] font-black uppercase tracking-[0.14em] text-[var(--menzu-accent)]">
-              <Sparkles size={12} className={`shrink-0 ${USP_PURPLE}`} />
-              {badge}
-            </span>
-          ) : null}
+        <div className="flex w-full flex-col items-start lg:w-auto lg:min-w-0 lg:max-w-[440px] lg:flex-1 lg:-translate-y-4">
+          {/* Eyebrow line: fades up first, then the heading types itself in
+              after it (HEADING_DELAY). */}
+          <span className="animate-fade-up block text-[13px] font-bold uppercase tracking-[0.3em] text-white sm:text-sm">
+            We are
+          </span>
 
-          {/* The page had no h1 at all while the hero was pure imagery. */}
+          {/* The heading types itself in — each character a span that pops on a
+              staggered delay after the eyebrow, then a caret blinks at the end.
+              aria-label carries the whole title so a screen reader reads it
+              once, not letter by letter. */}
           <h1
-            className={`text-[28px] font-black uppercase leading-[1.06] tracking-tight text-white sm:text-[36px] lg:text-[46px] ${
-              badge ? "mt-6" : ""
-            }`}
+            aria-label={title.replace(/\n/g, " ")}
+            className="mt-2 text-[28px] font-black uppercase leading-[1.06] tracking-tight text-white sm:text-[36px] lg:text-[46px]"
           >
-            {lines.map((line) => (
-              <span key={line} className="block">
-                {line}
+            {lines.map((line, li) => (
+              <span key={li} className="block whitespace-nowrap" aria-hidden>
+                {Array.from(line).map((ch, ci) => (
+                  <span
+                    key={ci}
+                    className="typewriter-char"
+                    style={{
+                      animationDelay: `${(HEADING_DELAY + charCursor++ * TYPE_STEP).toFixed(2)}s`,
+                    }}
+                  >
+                    {ch === " " ? " " : ch}
+                  </span>
+                ))}
+                {li === lines.length - 1 ? (
+                  <span
+                    className="typewriter-caret"
+                    style={{
+                      animationDelay: `${(HEADING_DELAY + totalChars * TYPE_STEP).toFixed(2)}s`,
+                    }}
+                  />
+                ) : null}
               </span>
             ))}
           </h1>
@@ -133,20 +160,6 @@ export function HeroBanners({
               </Link>
             ) : null}
           </div>
-
-          {usps.length > 0 ? (
-            <ul className="mt-7 grid w-full max-w-[460px] grid-cols-1 gap-3 sm:grid-cols-2">
-              {usps.map((usp) => (
-                <li
-                  key={usp}
-                  className={`flex items-center gap-2 rounded-lg border border-white/[0.07] bg-white/[0.02] px-3.5 py-2.5 text-[11px] font-bold ${USP_PURPLE}`}
-                >
-                  <Check size={13} className="shrink-0" />
-                  {usp}
-                </li>
-              ))}
-            </ul>
-          ) : null}
         </div>
 
         {/* The artwork in a wide 16/9 frame, the shape the shop's covers and
@@ -180,7 +193,7 @@ export function HeroBanners({
         </div>
       </div>
 
-      <ScrollCta targetId={SCROLL_TARGET_ID} label="Khám phá sản phẩm" />
+      <ScrollCta targetId={SCROLL_TARGET_ID} label="Khám phá sản phẩm" animated />
     </section>
   );
 }

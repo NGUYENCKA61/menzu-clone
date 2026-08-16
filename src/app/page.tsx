@@ -69,14 +69,13 @@ export default async function Home() {
         key="hero"
         banner={settings.heroBanner}
         video={settings.heroVideo}
-        badge={settings.heroBadge}
         title={settings.heroTitle}
         subtitle={settings.heroSubtitle}
         primaryLabel={settings.heroPrimaryLabel}
         primaryHref={settings.heroPrimaryHref}
         secondaryLabel={settings.heroSecondaryLabel}
         secondaryHref={settings.heroSecondaryHref}
-        usps={settings.heroUsps}
+        shootingStars={settings.heroShootingStars}
       />
     ),
     flash: <FlashSaleSection key="flash" items={flashSaleItems} />,

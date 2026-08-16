@@ -378,7 +378,6 @@ describe("hero and SEO settings", () => {
   it("round-trips through serialize and parse", () => {
     const before = settings({
       heroTitle: "Dòng một\nDòng hai",
-      heroUsps: ["Nhanh", "Rẻ"],
       heroVideo: "/videos/hero.mp4",
       seoFaq: [{ q: "Bao lâu?", a: "Vài phút." }],
       homeRowCount: 4,
@@ -400,8 +399,7 @@ describe("hero and SEO settings", () => {
   });
 
   it("lets the optional parts be emptied on purpose", () => {
-    const normalized = normalizeSettings({ heroBadge: "", heroSecondaryLabel: "" });
-    expect(normalized.heroBadge).toBe("");
+    const normalized = normalizeSettings({ heroSecondaryLabel: "" });
     expect(normalized.heroSecondaryLabel).toBe("");
   });
 
@@ -430,9 +428,6 @@ describe("hero and SEO settings", () => {
     expect(validateSettings(settings({ heroPrimaryHref: "/categories" }))).toBeNull();
   });
 
-  it("refuses more USPs than the grid draws", () => {
-    expect(validateSettings(settings({ heroUsps: ["a", "b", "c", "d", "e"] }))).toMatch(/4 USP/);
-  });
 });
 
 describe("homeSections", () => {
