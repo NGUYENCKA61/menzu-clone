@@ -121,7 +121,11 @@ export function PartnersSection({ partners }: { partners: PartnerView[] }) {
           className="partners-marquee flex gap-4"
           style={{
             ["--ticker-width" as string]: `${100 / COPIES}%`,
-            ["--partners-duration" as string]: `${Math.max(24, partners.length * 6)}s`,
+            // 4s per partner: one loop in 24s for the six starters — ~49px/s,
+            // brisk enough to read as motion at a glance, still slow enough
+            // that a logo is recognised mid-glide. Scales with the roster, so
+            // a longer strip keeps the same feel instead of speeding up.
+            ["--partners-duration" as string]: `${Math.max(16, partners.length * 4)}s`,
           }}
         >
           {Array.from({ length: COPIES }, (_, copy) =>
