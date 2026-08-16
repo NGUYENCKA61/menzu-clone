@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { ArrowDown, ArrowUp, Trash2 } from "lucide-react";
+import { ArrowDown, ArrowUp, Trash2, Upload } from "lucide-react";
 
 import {
   DEFAULT_SETTINGS,
@@ -277,6 +277,53 @@ export function AdminSettings({
   const [heroAltLabel, setHeroAltLabel] = useState(settings.heroSecondaryLabel);
   const [heroAltHref, setHeroAltHref] = useState(settings.heroSecondaryHref);
   const [heroVideo, setHeroVideo] = useState(settings.heroVideo);
+  const [heroVideoUploading, setHeroVideoUploading] = useState(false);
+  const [heroVideoMsg, setHeroVideoMsg] = useState<{
+    tone: "ok" | "err";
+    text: string;
+  } | null>(null);
+
+  /**
+   * Sends the picked file and drops the stored path into the text field.
+   * Uploading is not saving: nothing reaches the settings until Lưu, the
+   * same contract as every other picker on this screen.
+   */
+  async function uploadHeroVideo(file: File) {
+    setHeroVideoUploading(true);
+    setHeroVideoMsg(null);
+    try {
+      const form = new FormData();
+      form.append("file", file);
+      const res = await fetch("/api/admin/hero/video", { method: "POST", body: form });
+      const data = (await res.json().catch(() => ({}))) as {
+        url?: string;
+        error?: string;
+        mode?: "encoded" | "remuxed" | "stored";
+        inBytes?: number;
+        outBytes?: number;
+      };
+      if (!res.ok || !data.url) {
+        setHeroVideoMsg({ tone: "err", text: data.error ?? "Tải video thất bại" });
+        return;
+      }
+      setHeroVideo(data.url);
+      const mb = (n?: number) =>
+        typeof n === "number" ? `${(n / 1048576).toFixed(1)}MB` : "?";
+      const text =
+        data.mode === "encoded"
+          ? `Đã nén ${mb(data.inBytes)} → ${mb(data.outBytes)} — nhớ bấm Lưu để áp dụng`
+          : data.mode === "remuxed"
+            ? `Video đã nhẹ sẵn (${mb(data.outBytes)}), giữ nguyên chất lượng — nhớ bấm Lưu để áp dụng`
+            : data.mode === "stored"
+              ? `Đã tải video ${mb(data.outBytes)} nhưng server chưa nén được file này — nhớ bấm Lưu để áp dụng`
+              : "Đã tải video — nhớ bấm Lưu để áp dụng";
+      setHeroVideoMsg({ tone: "ok", text });
+    } catch {
+      setHeroVideoMsg({ tone: "err", text: "Không kết nối được máy chủ" });
+    } finally {
+      setHeroVideoUploading(false);
+    }
+  }
   // Four boxes, always. An array that grows and shrinks would need add and
   // remove buttons for a list the hero draws exactly four of.
   const [usps, setUsps] = useState<string[]>(() =>
@@ -1352,6 +1399,48 @@ export function AdminSettings({
                 className={FIELD}
                 placeholder="/videos/hero.mp4 — để trống thì dùng ảnh"
               />
+
+              <div className="mt-2 flex flex-wrap items-center gap-3">
+                <label
+                  className={`inline-flex h-9 cursor-pointer items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 text-[10px] font-black uppercase tracking-widest text-neutral-200 transition-colors hover:bg-white/10 ${
+                    heroVideoUploading ? "pointer-events-none opacity-60" : ""
+                  }`}
+                >
+                  <Upload size={13} />
+                  {heroVideoUploading ? "Đang tải & nén video…" : "Chọn video từ máy"}
+                  <input
+                    type="file"
+                    accept="video/mp4,video/webm"
+                    className="hidden"
+                    onChange={(event) => {
+                      const file = event.target.files?.[0];
+                      // Cleared so picking the same file twice fires change
+                      // again — otherwise a failed upload could not be retried
+                      // with that file.
+                      event.target.value = "";
+                      if (file) void uploadHeroVideo(file);
+                    }}
+                  />
+                </label>
+                <span className="text-[10px] text-neutral-600">
+                  MP4 / WebM · tối đa 200MB · server tự nén sau khi tải lên, file nặng
+                  chờ 1–3 phút
+                </span>
+              </div>
+
+              {heroVideoMsg ? (
+                <p
+                  role="alert"
+                  className={
+                    heroVideoMsg.tone === "ok"
+                      ? "mt-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-[11px] font-semibold text-emerald-400"
+                      : "mt-2 rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-[11px] font-semibold text-red-400"
+                  }
+                >
+                  {heroVideoMsg.text}
+                </p>
+              ) : null}
+
               <p className={HINT}>
                 Có video thì video thay chỗ ảnh, ảnh banner ở thẻ Nhận diện thành khung
                 chờ trong lúc video tải. Video chạy tự động, lặp lại và luôn tắt tiếng.
