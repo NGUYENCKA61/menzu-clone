@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
 import { SITE_NAME, SITE_URL } from "@/lib/seo";
+import { Preloader } from "@/components/sites/menzu-lol-f7ae197a/shared/Preloader";
 import { SupportWidgetHost } from "@/components/sites/menzu-lol-f7ae197a/shared/SupportWidgetHost";
 import { DEFAULT_SETTINGS } from "@/lib/settings";
 import { getShopSettings } from "@/lib/settingsStore";
@@ -88,7 +89,7 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const { brandColor } = await getShopSettings();
+  const { brandColor, brandName } = await getShopSettings();
   // Emitted only when the shop has actually picked a colour, so an install
   // that never opens the Nhận diện tab renders byte-identical markup to the
   // capture. The value is validated as a plain hex before it is ever stored,
@@ -105,6 +106,10 @@ export default async function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         {brandOverride ? <style>{brandOverride}</style> : null}
+        {/* First in the stream so the cover paints before anything under it.
+            Lives outside {children} like the widget below: client navigation
+            must not remount it, or it would flash on every route change. */}
+        <Preloader brand={{ name: brandName }} />
         {children}
         {/* Site-wide, as on the live site — outside {children} so it survives
             navigation without remounting and losing its open state. */}
