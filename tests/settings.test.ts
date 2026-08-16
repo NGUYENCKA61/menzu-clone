@@ -280,11 +280,21 @@ describe("tài khoản nhận chuyển khoản", () => {
 describe("bố cục trang chủ", () => {
   it("keeps the stored order and marks hidden blocks with a dash", () => {
     const parsed = parseSettings([
-      { key: SETTING_KEYS.homeBlocks, value: "flash,hero,-ticker" },
+      { key: SETTING_KEYS.homeBlocks, value: "flash,hero,-reviews" },
     ]);
-    expect(parsed.homeBlocks.slice(0, 3)).toEqual(["flash", "hero", "-ticker"]);
-    expect(visibleBlocks(parsed)).not.toContain("-ticker");
+    expect(parsed.homeBlocks.slice(0, 3)).toEqual(["flash", "hero", "-reviews"]);
+    expect(visibleBlocks(parsed)).not.toContain("-reviews");
     expect(visibleBlocks(parsed).slice(0, 2)).toEqual(["flash", "hero"]);
+  });
+
+  it("drops retired block ids a stored layout still carries", () => {
+    // "ticker" shipped once and was later removed; a layout that saved it must
+    // neither render it nor keep it in the way.
+    const parsed = parseSettings([
+      { key: SETTING_KEYS.homeBlocks, value: "flash,ticker,hero" },
+    ]);
+    expect(parsed.homeBlocks).not.toContain("ticker");
+    expect(parsed.homeBlocks.slice(0, 2)).toEqual(["flash", "hero"]);
   });
 
   it("appends blocks the stored layout has never heard of", () => {

@@ -16,9 +16,9 @@ import { SiteFooter } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/
 import { SiteHeader } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/SiteHeader";
 import { MobileBottomNav } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/MobileBottomNav";
 import { ToolsRail } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/ToolsRail";
-import { TransactionTicker } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/TransactionTicker";
+import { PartnersSection } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/PartnersSection";
 import { formatVnd } from "@/components/sites/menzu-lol-f7ae197a/shared/productData";
-import { getFeedback, getFlashSaleItems, getRecentPurchases } from "@/lib/queries";
+import { getFeedback, getFlashSaleItems, getPartners } from "@/lib/queries";
 import { JsonLd, organizationJsonLd } from "@/lib/seo";
 import { visibleBlocks } from "@/lib/settings";
 import { getShopSettings } from "@/lib/settingsStore";
@@ -28,10 +28,10 @@ export const dynamic = "force-dynamic";
 
 export default async function Home() {
   const settings = await getShopSettings();
-  const [flashSaleItems, reviews, recentPurchases] = await Promise.all([
+  const [flashSaleItems, reviews, partners] = await Promise.all([
     getFlashSaleItems(),
     getFeedback(),
-    getRecentPurchases(),
+    getPartners(),
   ]);
   const [rows, homeGroups, categoryCards, docCards] = await Promise.all([
     getHomeRows({
@@ -110,15 +110,7 @@ export default async function Home() {
         }))}
       />
     ),
-    // Falls back to the captured sample until real purchases exist — an empty
-    // strip would look broken, and seeding fake orders would put invented rows
-    // in the ledger.
-    ticker: (
-      <TransactionTicker
-        key="ticker"
-        entries={recentPurchases.length > 0 ? recentPurchases : undefined}
-      />
-    ),
+    partners: <PartnersSection key="partners" partners={partners} />,
     utilities: <UtilitiesHub key="utilities" />,
     seo: (
       <SeoContent

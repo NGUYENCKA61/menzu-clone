@@ -160,7 +160,10 @@ export const HOME_BLOCKS: { id: string; label: string }[] = [
   { id: "gameServices", label: "Danh mục acc game" },
   { id: "otherServices", label: "Dịch vụ khác" },
   { id: "reviews", label: "Đánh giá khách hàng" },
-  { id: "ticker", label: "Ticker giao dịch gần đây" },
+  // Sits under the reviews by default — social proof, then who stands behind
+  // it. "ticker" (recent purchases) used to live here; layouts that still
+  // store that id simply have it filtered out on read.
+  { id: "partners", label: "Đối tác uy tín" },
   { id: "utilities", label: "Khối tiện ích cuối trang" },
   { id: "seo", label: "SEO Content" },
 ];

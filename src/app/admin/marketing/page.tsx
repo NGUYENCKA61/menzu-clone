@@ -2,9 +2,10 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { AdminMarketing } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminMarketing";
+import { AdminPartners } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminPartners";
 import { AdminShell } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminShell";
 import { getAdmin } from "@/lib/admin";
-import { listFlashSales, listVouchers } from "@/lib/queries";
+import { getPartners, listFlashSales, listVouchers } from "@/lib/queries";
 
 export const metadata: Metadata = { title: "Marketing | Quản trị" };
 export const dynamic = "force-dynamic";
@@ -26,12 +27,16 @@ export default async function AdminMarketingPage() {
   // visitor that an admin area exists here at all.
   if (!admin) notFound();
 
-  const [vouchers, sales] = await Promise.all([listVouchers(), listFlashSales()]);
+  const [vouchers, sales, partners] = await Promise.all([
+    listVouchers(),
+    listFlashSales(),
+    getPartners(),
+  ]);
 
   return (
     <AdminShell
       title="Marketing"
-      subtitle="Voucher giảm giá và lịch flash sale"
+      subtitle="Voucher, flash sale và dải đối tác trang chủ"
       username={admin.username}
     >
       <AdminMarketing
@@ -52,6 +57,19 @@ export default async function AdminMarketingPage() {
           running: s.running,
         }))}
       />
+
+      <section className="mt-10 flex flex-col gap-4">
+        <div>
+          <h2 className="text-sm font-black uppercase tracking-widest text-white">
+            Đối tác uy tín
+          </h2>
+          <p className="mt-1 text-[12px] text-neutral-500">
+            Dải logo chạy dưới phần đánh giá khách hàng trên trang chủ. Trống
+            thì mục tự ẩn.
+          </p>
+        </div>
+        <AdminPartners partners={partners} />
+      </section>
     </AdminShell>
   );
 }

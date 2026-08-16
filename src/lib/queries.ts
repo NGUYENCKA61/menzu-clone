@@ -10,7 +10,7 @@ import type {
   Product,
   TierColor,
 } from "@/components/sites/menzu-lol-f7ae197a/shared/productData";
-import type { TickerEntry } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/TransactionTicker";
+import type { PartnerView } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/PartnersSection";
 import type { FlashSaleItem } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/flashSaleData";
 import type { ContentTier } from "@prisma/client";
 
@@ -592,59 +592,25 @@ export async function getFeedback(take = 20): Promise<ReviewRow[]> {
 }
 
 
+// ---------------------------------------------------------------------------
+// Partners
+// ---------------------------------------------------------------------------
+
 /**
- * Recent purchases for the homepage ticker. Usernames are masked the way the
- * live feed does it — "user 4***", "Ke***" — so the strip never exposes who
- * bought what.
+ * The "Đối tác uy tín" strip, in display order. Empty until the shop adds
+ * partners in the admin, and the section hides itself while it is.
  */
-/**
- * Recent purchases for the homepage ticker, in the shape TransactionTicker
- * already speaks. Usernames are masked the way the live feed does it, so the
- * strip never exposes who bought what.
- *
- * Returns an empty array when there are no paid orders yet — the homepage then
- * falls back to the captured sample rather than showing an empty strip.
- */
-export async function getRecentPurchases(take = 20): Promise<TickerEntry[]> {
-  const rows = await db.order.findMany({
-    where: { status: "PAID" },
-    orderBy: { createdAt: "desc" },
-    take,
-    include: {
-      user: { select: { username: true } },
-      product: { select: { code: true } },
-    },
+export async function getPartners(): Promise<PartnerView[]> {
+  const rows = await db.partner.findMany({
+    orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
   });
-
-  return rows.map((o, i) => ({
-    agentId: TICKER_AVATARS[i % TICKER_AVATARS.length],
-    user: maskUsername(o.user.username),
-    amount: `${formatVndString(Number(o.total))}đ`,
-    code: `#${o.product.code.toLowerCase()}`,
-    time: relativeTime(o.createdAt),
+  return rows.map((p) => ({
+    id: p.id,
+    name: p.name,
+    tagline: p.tagline,
+    logoUrl: p.logoUrl,
+    url: p.url,
   }));
-}
-
-/** Agent portraits the live ticker cycles through. */
-const TICKER_AVATARS = [
-  "e370fa57-4757-3604-3648-499e1f642d3f",
-  "dade69b4-4f5a-8528-247b-219e5a1facd6",
-  "5f8d3a7f-467b-97f3-062c-13acf203c006",
-  "cc8b64c8-4b25-4ff9-6e7f-37b4da43d235",
-  "b444168c-4e35-8076-db47-ef9bf368f384",
-];
-
-function relativeTime(date: Date): string {
-  const mins = Math.max(1, Math.floor((Date.now() - date.getTime()) / 60000));
-  if (mins < 60) return `${mins} phút trước`;
-  const hours = Math.floor(mins / 60);
-  const rest = mins % 60;
-  return rest > 0 ? `${hours} giờ ${rest} phút trước` : `${hours} giờ trước`;
-}
-
-function maskUsername(name: string): string {
-  if (name.length <= 2) return `${name}***`;
-  return `${name.slice(0, 2)}***`;
 }
 
 // ---------------------------------------------------------------------------

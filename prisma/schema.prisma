@@ -313,6 +313,28 @@ model GroupCategory {
   @@map("group_categories")
 }
 
+/// One logo in the "Đối tác uy tín" strip on the home page.
+///
+/// A table rather than a settings blob: partners are added and retired one at
+/// a time from the admin, and each carries its own artwork upload — the same
+/// reasons categories are rows. The strip hides itself while this is empty,
+/// so nothing here is seeded with invented names.
+model Partner {
+  id        String   @id @default(cuid())
+  name      String
+  /// The small grey line under the logo — "Ví điện tử", "Ngân hàng". Null
+  /// draws the tile without it.
+  tagline   String?
+  /// Null renders the name as text in place of artwork.
+  logoUrl   String?
+  /// Where clicking the logo goes. Null renders a plain tile.
+  url       String?
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@map("partners")
+}
+
 model Category {
   id        String    @id @default(cuid())
   slug      String    @unique
