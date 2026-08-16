@@ -247,6 +247,36 @@ export function AdminSettings({
   const [brandLogo, setBrandLogo] = useState(settings.brandLogo);
   const [brandColor, setBrandColor] = useState(settings.brandColor);
   const [heroBanner, setHeroBanner] = useState(settings.heroBanner);
+  const [siteBackground, setSiteBackground] = useState(settings.siteBackground);
+  const [siteBgUploading, setSiteBgUploading] = useState(false);
+  const [siteBgMsg, setSiteBgMsg] = useState<{ tone: "ok" | "err"; text: string } | null>(null);
+
+  /**
+   * Uploads the picked file and drops the stored path into the field. Upload
+   * is not save — the picture applies only when the admin presses Lưu, like
+   * every other picker on this screen.
+   */
+  async function uploadSiteBackground(file: File) {
+    setSiteBgUploading(true);
+    setSiteBgMsg(null);
+    try {
+      const form = new FormData();
+      form.append("file", file);
+      const res = await fetch("/api/admin/site/background", { method: "POST", body: form });
+      const data = (await res.json().catch(() => ({}))) as { url?: string; error?: string };
+      if (!res.ok || !data.url) {
+        setSiteBgMsg({ tone: "err", text: data.error ?? "Tải ảnh thất bại" });
+        return;
+      }
+      setSiteBackground(data.url);
+      setSiteBgMsg({ tone: "ok", text: "Đã tải ảnh — nhớ bấm Lưu để áp dụng" });
+    } catch {
+      setSiteBgMsg({ tone: "err", text: "Không kết nối được máy chủ" });
+    } finally {
+      setSiteBgUploading(false);
+    }
+  }
+
   const [panelImages, setPanelImages] = useState<string[]>(settings.authPanelImages);
   const [slideOn, setSlideOn] = useState(settings.authSlideEnabled);
   const [slideSeconds, setSlideSeconds] = useState(String(settings.authSlideSeconds));
@@ -409,6 +439,7 @@ export function AdminSettings({
           brandLogo,
           brandColor,
           heroBanner,
+          siteBackground,
           authPanelImages: panelImages,
           authSlideEnabled: slideOn,
           authSlideSeconds: Number(slideSeconds) || 5,
@@ -923,6 +954,75 @@ export function AdminSettings({
               <p className={HINT}>
                 Ảnh lớn trên cùng trang chủ, cũng là ảnh hiện ra khi ai đó chia sẻ link
                 shop lên Facebook hay Zalo.
+              </p>
+            </div>
+
+            <div>
+              <span className={LABEL}>Ảnh nền toàn web</span>
+              <div className="flex flex-col gap-3 sm:flex-row">
+                {/* Preview at the backdrop's own wide shape, under the same 70%
+                    dim it gets on the page, so this shows what visitors see. */}
+                <div className="relative aspect-[16/9] w-full shrink-0 overflow-hidden rounded-xl border border-white/10 bg-[#111111] sm:w-[200px]">
+                  {siteBackground ? (
+                    // A plain img: the value can be any path the shop typed, and
+                    // next/image would need each one in its allow-list.
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={siteBackground}
+                      alt="Xem trước ảnh nền toàn web"
+                      className="absolute inset-0 h-full w-full object-cover"
+                    />
+                  ) : null}
+                  <div className="absolute inset-0 bg-[#0a0a0d]/70" />
+                </div>
+
+                <div className="flex min-w-0 flex-1 flex-col gap-2">
+                  <input
+                    value={siteBackground}
+                    onChange={(event) => setSiteBackground(event.target.value)}
+                    className={`${FIELD} font-mono`}
+                    placeholder="/uploads/site/… hoặc đường dẫn ảnh"
+                  />
+                  <div className="flex flex-wrap items-center gap-3">
+                    <label
+                      className={`inline-flex h-9 cursor-pointer items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 text-[10px] font-black uppercase tracking-widest text-neutral-200 transition-colors hover:bg-white/10 ${
+                        siteBgUploading ? "pointer-events-none opacity-60" : ""
+                      }`}
+                    >
+                      <Upload size={13} />
+                      {siteBgUploading ? "Đang tải lên…" : "Chọn ảnh từ máy"}
+                      <input
+                        type="file"
+                        accept="image/png,image/jpeg,image/webp"
+                        className="hidden"
+                        onChange={(event) => {
+                          const file = event.target.files?.[0];
+                          event.target.value = "";
+                          if (file) void uploadSiteBackground(file);
+                        }}
+                      />
+                    </label>
+                    <span className="text-[10px] text-neutral-600">
+                      PNG / JPG / WebP · tối thiểu 960×540
+                    </span>
+                  </div>
+                  {siteBgMsg ? (
+                    <p
+                      role="alert"
+                      className={
+                        siteBgMsg.tone === "ok"
+                          ? "rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-[11px] font-semibold text-emerald-400"
+                          : "rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-[11px] font-semibold text-red-400"
+                      }
+                    >
+                      {siteBgMsg.text}
+                    </p>
+                  ) : null}
+                </div>
+              </div>
+              <p className={HINT}>
+                Ảnh cố định phía sau mọi trang, đã phủ tối 70% để chữ dễ đọc. Để trống thì
+                dùng lại ảnh mặc định.
               </p>
             </div>
           </section>

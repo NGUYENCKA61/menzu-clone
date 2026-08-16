@@ -3,7 +3,6 @@ import type { Metadata } from "next";
 import { listCategories } from "@/lib/queries";
 import { Breadcrumb } from "@/components/sites/menzu-lol-f7ae197a/shared/Breadcrumb";
 import { MobileBottomNav } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/MobileBottomNav";
-import { PageBackdrop } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/PageBackdrop";
 import { SiteFooter } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/SiteFooter";
 import { SiteHeader } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/SiteHeader";
 import { ToolsRail } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/ToolsRail";
@@ -28,7 +27,6 @@ export default async function CategoriesPage() {
 
       <main className="flex-1 relative z-20 w-full flex flex-col">
         <div className="w-full">
-          <PageBackdrop />
           <div className="w-full max-w-[1320px] mx-auto px-4 lg:px-6 py-6 lg:py-10 space-y-8">
             <Breadcrumb
               items={[

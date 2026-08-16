@@ -3,7 +3,6 @@ import { Flame } from "lucide-react";
 import { FeaturedCategories } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/FeaturedCategories";
 import { FlashSaleSection } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/FlashSaleSection";
 import { HeroBanners } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/HeroBanners";
-import { PageBackdrop } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/PageBackdrop";
 import { ProductRow } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/ProductRow";
 import { DocsSection } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/DocsSection";
 import { SeoContent } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/SeoContent";
@@ -133,7 +132,6 @@ export default async function Home() {
 
       <main className="flex-1 relative z-20 w-full flex flex-col">
         <div className="w-full">
-          <PageBackdrop />
           <div className="w-full max-w-[1320px] mx-auto px-4 lg:px-6 py-6 lg:py-10 space-y-12">
             <div className="w-full flex flex-col space-y-6 sm:space-y-12">
               {visibleBlocks(settings).map((id) => blocks[id])}

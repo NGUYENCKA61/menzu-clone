@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { MobileBottomNav } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/MobileBottomNav";
-import { PageBackdrop } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/PageBackdrop";
 import { SiteFooter } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/SiteFooter";
 import { SiteHeader } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/SiteHeader";
 import { ToolsRail } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/ToolsRail";
@@ -72,7 +71,6 @@ export default async function SoftwarePage({ params, searchParams }: PageProps) 
 
       <main className="flex-1 relative z-20 w-full flex flex-col">
         <div className="w-full">
-          <PageBackdrop />
           {/* The breadcrumb otherwise starts on the exact pixel the fixed
               header ends, with nothing between them. The gap goes on the
               container rather than on Breadcrumb itself, which is shared with

@@ -51,6 +51,8 @@ export interface ShopSettings {
   brandColor: string;
   /** The wide image at the top of the home page. */
   heroBanner: string;
+  /** Fixed artwork behind every page, sitting under a dimming overlay. */
+  siteBackground: string;
 
   /**
    * The pictures behind the sign-in and sign-up cards. One means a still
@@ -170,6 +172,9 @@ const BANNER = "/sites/menzu-lol-f7ae197a/root-8a5edab2/images/upload/bannermung
 /** The captured artwork behind the sign-in card, and what "khôi phục" returns to. */
 export const AUTH_PANEL =
   "/sites/menzu-lol-f7ae197a/root-8a5edab2/images/valorant-api/bundles/cb572643-4ce2-b10a-bb56-7c90cc09b19c.webp";
+/** The fixed artwork behind every page, and what "khôi phục" returns to. */
+export const BACKDROP =
+  "/sites/menzu-lol-f7ae197a/root-8a5edab2/images/behance/e4307d166239615.6418bdb0084a4.webp";
 
 export const DEFAULT_SETTINGS: ShopSettings = {
   topUpMin: 10_000,
@@ -191,6 +196,7 @@ export const DEFAULT_SETTINGS: ShopSettings = {
   brandLogo: LOGO,
   brandColor: "#7C3AED",
   heroBanner: BANNER,
+  siteBackground: BACKDROP,
   authPanelImages: [AUTH_PANEL],
   authSlideEnabled: true,
   authSlideSeconds: 5,
@@ -268,6 +274,7 @@ export const SETTING_KEYS: Record<keyof ShopSettings, string> = {
   brandLogo: "brand.logo",
   brandColor: "brand.color",
   heroBanner: "brand.heroBanner",
+  siteBackground: "brand.background",
   authPanelImages: "auth.panelImages",
   authSlideEnabled: "auth.slide",
   authSlideSeconds: "auth.slideSeconds",
@@ -567,6 +574,10 @@ export function parseSettings(rows: Iterable<{ key: string; value: string }>): S
     brandLogo: toText(stored.get(SETTING_KEYS.brandLogo), DEFAULT_SETTINGS.brandLogo),
     brandColor: toText(stored.get(SETTING_KEYS.brandColor), DEFAULT_SETTINGS.brandColor),
     heroBanner: toText(stored.get(SETTING_KEYS.heroBanner), DEFAULT_SETTINGS.heroBanner),
+    siteBackground: toText(
+      stored.get(SETTING_KEYS.siteBackground),
+      DEFAULT_SETTINGS.siteBackground,
+    ),
     // The old single-image key is read when the list has never been written,
     // so a shop that picked a picture before the slideshow existed keeps it
     // rather than silently reverting to the captured default.
@@ -674,6 +685,7 @@ export function serializeSettings(settings: ShopSettings): { key: string; value:
     brandLogo: settings.brandLogo.trim(),
     brandColor: settings.brandColor.trim(),
     heroBanner: settings.heroBanner.trim(),
+    siteBackground: settings.siteBackground.trim(),
     authPanelImages: JSON.stringify(settings.authPanelImages),
     authSlideEnabled: String(settings.authSlideEnabled),
     authSlideSeconds: String(settings.authSlideSeconds),
@@ -756,6 +768,7 @@ export function normalizeSettings(raw: Partial<ShopSettings> | null): ShopSettin
     brandLogo: String(raw?.brandLogo ?? "").trim() || DEFAULT_SETTINGS.brandLogo,
     brandColor: String(raw?.brandColor ?? "").trim() || DEFAULT_SETTINGS.brandColor,
     heroBanner: String(raw?.heroBanner ?? "").trim() || DEFAULT_SETTINGS.heroBanner,
+    siteBackground: String(raw?.siteBackground ?? "").trim() || DEFAULT_SETTINGS.siteBackground,
     // Blank falls back to the default rather than leaving an empty <Image src>,
     // which throws at render and takes the whole sign-in page with it.
     authPanelImages: readImageList(raw?.authPanelImages),

@@ -1,7 +1,6 @@
 import type { ReactNode } from "react";
 
 import { MobileBottomNav } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/MobileBottomNav";
-import { PageBackdrop } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/PageBackdrop";
 import { SiteFooter } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/SiteFooter";
 import { SiteHeader } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/SiteHeader";
 import { ToolsRail } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/ToolsRail";
@@ -38,7 +37,6 @@ export async function AccountPageFrame({
 
       <main className="flex-1 relative z-20 w-full flex flex-col">
         <div className="w-full">
-          <PageBackdrop />
           <AccountShell title={title} subtitle={subtitle} crumb={crumb} isAdmin={isAdmin}>
             {children}
           </AccountShell>
