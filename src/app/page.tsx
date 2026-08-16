@@ -41,7 +41,11 @@ export const dynamic = "force-dynamic";
 // featured row out, and a glyph on every heading would dilute exactly that.
 const GROUP_ICONS: Record<string, React.ReactNode> = {
   "hot-trending": (
-    <Flame size={24} aria-hidden className="-ml-1.5 shrink-0 text-[var(--menzu-accent)]" />
+    <Flame
+      size={24}
+      aria-hidden
+      className="animate-flame-glow -ml-1.5 shrink-0 text-[var(--menzu-accent)]"
+    />
   ),
 };
 
