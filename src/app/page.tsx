@@ -27,6 +27,24 @@ import { UtilitiesHub } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab
 
 export const dynamic = "force-dynamic";
 
+/**
+ * Lucide icons drawn after a group row's heading, keyed by the group's slug.
+ *
+ * The Group table used to carry an admin-typed emoji; the shop retired that
+ * in favour of Lucide glyphs, and those are components, so the assignment
+ * lives here rather than in a column. A group without an entry simply has no
+ * icon. Pulled in with -ml-1.5 against the row's 10px gap: with the glyph's
+ * own internal whitespace it sits about one word-space off the title, reading
+ * as its last word rather than an element floating after it.
+ */
+// One icon on the whole page, deliberately: the flame is what marks the
+// featured row out, and a glyph on every heading would dilute exactly that.
+const GROUP_ICONS: Record<string, React.ReactNode> = {
+  "hot-trending": (
+    <Flame size={24} aria-hidden className="-ml-1.5 shrink-0 text-[var(--menzu-accent)]" />
+  ),
+};
+
 export default async function Home() {
   const settings = await getShopSettings();
   const [flashSaleItems, reviews, partners] = await Promise.all([
@@ -66,36 +84,16 @@ export default async function Home() {
     // what any row is called.
     groups: (
       <div key="groups" className="flex w-full flex-col space-y-6 sm:space-y-12">
-        {homeGroups.map((group) => {
-          // The admin still types an emoji on the group; a 🔥 renders as the
-          // Lucide flame after the heading instead of the raw glyph before
-          // it. Any other emoji keeps the old prefix treatment.
-          const flame = group.icon.trim() === "🔥";
-          return (
-            <ProductRow
-              key={group.id}
-              heading={
-                !flame && group.icon ? `${group.icon} ${group.name}` : group.name
-              }
-              headingSuffix={
-                flame ? (
-                  <Flame
-                    size={22}
-                    aria-hidden
-                    // Pulled in against the row's 10px gap: with the glyph's
-                    // own ~3px of internal whitespace this lands at roughly
-                    // one word-space from the title, so the flame reads as its
-                    // last word rather than a separate element floating after.
-                    className="-ml-1.5 shrink-0 text-[var(--menzu-accent)]"
-                  />
-                ) : undefined
-              }
-              cards={group.cards}
-              viewAllHref="/categories"
-              tone="menzu"
-            />
-          );
-        })}
+        {homeGroups.map((group) => (
+          <ProductRow
+            key={group.id}
+            heading={group.name}
+            headingSuffix={GROUP_ICONS[group.slug]}
+            cards={group.cards}
+            viewAllHref="/categories"
+            tone="menzu"
+          />
+        ))}
       </div>
     ),
     reviews: (

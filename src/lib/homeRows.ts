@@ -43,7 +43,6 @@ export interface HomeGroup {
   id: string;
   slug: string;
   name: string;
-  icon: string;
   cards: ProductCard[];
 }
 
@@ -72,7 +71,6 @@ export async function getHomeGroups(count: number): Promise<HomeGroup[]> {
       id: group.id,
       slug: group.slug,
       name: group.name,
-      icon: group.icon,
       cards: group.categories.slice(0, count).map((link) => toCard(link.category)),
     }))
     .filter((group) => group.cards.length > 0);

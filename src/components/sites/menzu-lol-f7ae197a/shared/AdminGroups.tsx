@@ -16,7 +16,6 @@ export interface AdminGroupRow {
   id: string;
   slug: string;
   name: string;
-  icon: string;
   isActive: boolean;
   sortOrder: number;
   categoryIds: string[];
@@ -50,7 +49,6 @@ export function AdminGroups({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [newName, setNewName] = useState("");
-  const [newIcon, setNewIcon] = useState("");
 
   async function send(method: "POST" | "PUT" | "DELETE", body: unknown) {
     setBusy(true);
@@ -108,15 +106,6 @@ export function AdminGroups({
           Thêm nhóm
         </span>
         <div className="flex flex-wrap items-end gap-3">
-          <div className="w-20">
-            <span className={LABEL}>Icon</span>
-            <input
-              value={newIcon}
-              onChange={(event) => setNewIcon(event.target.value)}
-              className={FIELD}
-              placeholder="🔥"
-            />
-          </div>
           <div className="min-w-[200px] flex-1">
             <span className={LABEL}>Tên nhóm</span>
             <input
@@ -130,9 +119,8 @@ export function AdminGroups({
             type="button"
             disabled={busy || !newName.trim()}
             onClick={async () => {
-              if (await send("POST", { name: newName, icon: newIcon })) {
+              if (await send("POST", { name: newName })) {
                 setNewName("");
-                setNewIcon("");
               }
             }}
             className="inline-flex h-[38px] items-center gap-1.5 rounded-xl bg-[var(--menzu-accent)] px-4 text-[11px] font-black uppercase tracking-widest text-white transition-colors hover:bg-[var(--menzu-accent-dark)] disabled:opacity-50"
@@ -154,19 +142,6 @@ export function AdminGroups({
       {groups.map((group, index) => (
         <section key={group.id} className={CARD}>
           <div className="flex flex-wrap items-end gap-3">
-            <div className="w-20">
-              <span className={LABEL}>Icon</span>
-              <input
-                defaultValue={group.icon}
-                onBlur={(event) => {
-                  if (event.target.value !== group.icon) {
-                    void send("PUT", { id: group.id, icon: event.target.value });
-                  }
-                }}
-                aria-label={`Icon của ${group.name}`}
-                className={FIELD}
-              />
-            </div>
             <div className="min-w-[200px] flex-1">
               <span className={LABEL}>Tên nhóm</span>
               <input

@@ -282,10 +282,10 @@ model LinkedAccount {
 model Group {
   id        String          @id @default(cuid())
   slug      String          @unique
-  /// The heading, as it appears on the home page.
+  /// The heading, as it appears on the home page. Any icon beside it is a
+  /// Lucide glyph mapped by slug in code — the admin-typed emoji column this
+  /// model used to carry is gone by the shop's decision.
   name      String
-  /// One emoji shown before the heading. Empty means none.
-  icon      String          @default("")
   sortOrder Int             @default(0)
   /// Off keeps the group and its links but stops rendering the row.
   isActive  Boolean         @default(true)

@@ -965,7 +965,6 @@ export async function listAdminGroups() {
     id: group.id,
     slug: group.slug,
     name: group.name,
-    icon: group.icon,
     isActive: group.isActive,
     sortOrder: group.sortOrder,
     categoryIds: group.categories.map((link) => link.categoryId),

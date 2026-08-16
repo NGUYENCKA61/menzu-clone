@@ -25,16 +25,15 @@ import { getShopSettings } from "@/lib/settingsStore";
 interface Seed {
   slug: string;
   name: string;
-  icon: string;
   sortOrder: number;
   /** Where the membership comes from; empty means the shop fills it in. */
   from: "valorant" | "tft" | null;
 }
 
 const GROUPS: Seed[] = [
-  { slug: "hot-trending", name: "Hot trending tháng này", icon: "🔥", sortOrder: 0, from: "valorant" },
-  { slug: "danh-sach-game", name: "Danh sách game", icon: "🎮", sortOrder: 1, from: "tft" },
-  { slug: "danh-muc-acc-game", name: "Danh mục acc game", icon: "🔐", sortOrder: 2, from: null },
+  { slug: "hot-trending", name: "Hot trending tháng này", sortOrder: 0, from: "valorant" },
+  { slug: "danh-sach-game", name: "Danh sách game", sortOrder: 1, from: "tft" },
+  { slug: "danh-muc-acc-game", name: "Danh mục acc game", sortOrder: 2, from: null },
 ];
 
 /**
@@ -89,7 +88,6 @@ async function main() {
       create: {
         slug: seed.slug,
         name: seed.name,
-        icon: seed.icon,
         sortOrder: seed.sortOrder,
       },
       update: {},
@@ -97,7 +95,7 @@ async function main() {
 
     const slugs = seed.from ? source[seed.from] : [];
     if (slugs.length === 0) {
-      console.log(`${seed.icon} ${group.name}: chưa có danh mục nào.`);
+      console.log(`${group.name}: chưa có danh mục nào.`);
       continue;
     }
 
@@ -122,7 +120,7 @@ async function main() {
       linked += 1;
     }
 
-    console.log(`${seed.icon} ${group.name}: ${linked} danh mục.`);
+    console.log(`${group.name}: ${linked} danh mục.`);
     if (missing.length > 0) {
       console.log(`   bỏ qua ${missing.length} slug không còn danh mục: ${missing.join(", ")}`);
     }

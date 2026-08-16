@@ -20,7 +20,6 @@ export async function POST(request: Request) {
 
   const body = (await request.json().catch(() => null)) as {
     name?: string;
-    icon?: string;
   } | null;
 
   const name = body?.name?.trim();
@@ -46,7 +45,6 @@ export async function POST(request: Request) {
     data: {
       slug,
       name,
-      icon: (body?.icon ?? "").trim().slice(0, 8),
       sortOrder: (last?.sortOrder ?? -1) + 1,
     },
   });
@@ -62,7 +60,6 @@ export async function PUT(request: Request) {
   const body = (await request.json().catch(() => null)) as {
     id?: string;
     name?: string;
-    icon?: string;
     isActive?: boolean;
     sortOrder?: number;
     categoryIds?: string[];
@@ -83,7 +80,6 @@ export async function PUT(request: Request) {
     where: { id },
     data: {
       ...(name ? { name } : {}),
-      ...(body?.icon !== undefined ? { icon: body.icon.trim().slice(0, 8) } : {}),
       ...(typeof body?.isActive === "boolean" ? { isActive: body.isActive } : {}),
       ...(Number.isFinite(body?.sortOrder) ? { sortOrder: Math.floor(body!.sortOrder!) } : {}),
     },
