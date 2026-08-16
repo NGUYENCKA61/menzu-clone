@@ -219,7 +219,7 @@ export const DEFAULT_SETTINGS: ShopSettings = {
   // The words the hero shipped with, so moving them into settings changes
   // nothing on screen until somebody edits one.
   heroBadge: "Đại lý Valorant & dịch vụ gaming",
-  heroTitle: "Mua acc Valorant\n& dịch vụ gaming",
+  heroTitle: "THICHTHIHACK.COM",
   heroSubtitle:
     "Kho tài khoản Valorant, phần mềm và dịch vụ gaming. Giao dịch nhanh chóng, " +
     "hỗ trợ tận tâm và cập nhật sản phẩm mỗi ngày.",

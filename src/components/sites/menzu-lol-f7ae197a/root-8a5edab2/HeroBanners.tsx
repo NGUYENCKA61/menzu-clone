@@ -73,14 +73,26 @@ export function HeroBanners({
     // because vh on a phone measures the screen without the browser's own bars
     // and pushes the cue out of sight. pb-20 is the cue's own room, so it
     // never sits over the copy or the artwork.
-    <section className="relative flex w-full flex-col justify-center min-h-[calc(100svh-128px)] pt-6 pb-20 sm:pt-10 lg:min-h-[calc(100svh-144px)] lg:pt-14">
-      {/* One column until there is room for two. items-center keeps the
-          artwork level with the copy rather than pinned to the top of a
-          taller cell. */}
-      <div className="grid items-center gap-8 lg:grid-cols-2 lg:gap-12">
-        <div className="flex flex-col items-start">
+    // isolate so the -z background layer stacks against this section, not the
+    // page; overflow-hidden keeps the shooting stars and the wide glows from
+    // spilling past the fold.
+    <section className="relative isolate flex w-full flex-col justify-center overflow-hidden min-h-[calc(100svh-128px)] pt-6 pb-20 sm:pt-10 lg:min-h-[calc(100svh-144px)] lg:pt-14">
+      {/* A field of faint, slowly twinkling stars over the page's own black,
+          behind the copy. Decoration only — aria-hidden, no pointer target. */}
+      <div aria-hidden className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
+        <div className="hero-starfield" />
+      </div>
+
+      {/* Stacked on phones; on desktop the copy and the artwork are pushed to
+          the container's two edges with a wide empty gap between them, the way
+          the reference spaces its hero. Each side is capped and allowed to
+          shrink (flex-1 + max-w + min-w-0), so the gap only opens once both
+          have room for their full width, and they close up on a narrow laptop
+          instead of overflowing. z-10 lifts them clear of the sky layer. */}
+      <div className="relative z-10 flex flex-col gap-10 lg:flex-row lg:items-center lg:justify-between lg:gap-8">
+        <div className="flex w-full flex-col items-start lg:w-auto lg:min-w-0 lg:max-w-[440px] lg:flex-1 lg:-translate-y-8">
           {badge ? (
-            <span className="inline-flex items-center gap-2 rounded-lg border border-[var(--menzu-accent)]/25 bg-[var(--menzu-accent)]/[0.08] px-3.5 py-2 text-[10px] font-black uppercase tracking-[0.14em] text-[var(--menzu-accent)]">
+            <span className="inline-flex items-center gap-2 rounded-full border border-[var(--menzu-accent)]/25 bg-[var(--menzu-accent)]/[0.08] px-3.5 py-2 text-[10px] font-black uppercase tracking-[0.14em] text-[var(--menzu-accent)]">
               <Sparkles size={12} className={`shrink-0 ${USP_PURPLE}`} />
               {badge}
             </span>
@@ -137,10 +149,11 @@ export function HeroBanners({
           ) : null}
         </div>
 
-        {/* The artwork, uncoloured and uncropped by anything but its frame.
-            A wide banner in a frame this tall loses its edges to object-cover,
-            so a squarer image reads better here. */}
-        <div className="relative aspect-[16/10] w-full overflow-hidden rounded-2xl border border-white/[0.07] bg-[#0a0a0c]">
+        {/* The artwork in a wide 16/9 frame, the shape the shop's covers and
+            banner already come in, so object-cover crops almost nothing. The
+            rounder corners and the ring match the media card in the
+            reference. */}
+        <div className="relative aspect-[16/9] w-full overflow-hidden rounded-3xl border border-white/[0.07] bg-[#0a0a0c] shadow-[0_30px_80px_-30px_rgba(0,0,0,0.8)] lg:w-auto lg:min-w-0 lg:max-w-[650px] lg:flex-1">
           {video ? (
             // Muted and inline, because a hero that makes noise or takes over
             // the screen on a phone is a hero people leave. The still stays as
