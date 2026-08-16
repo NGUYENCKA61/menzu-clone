@@ -44,7 +44,7 @@ const GROUP_ICONS: Record<string, React.ReactNode> = {
     <Flame
       size={24}
       aria-hidden
-      className="animate-flame-glow -ml-1.5 shrink-0 text-[var(--menzu-accent)]"
+      className="animate-bounce-subtle -ml-1.5 shrink-0 text-[var(--menzu-accent)]"
     />
   ),
 };

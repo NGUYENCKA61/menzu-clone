@@ -335,27 +335,6 @@
   }
 }
 
-/* The flame beside the featured row's heading: the glyph holds perfectly
-   still and only its glow breathes, slow as a resting pulse. Chosen over
-   flicker/heartbeat/sway variants tried in session — nothing moves, so it can
-   sit beside running text forever without tiring the eye. */
-@keyframes flame-glow {
-  0%,
-  100% {
-    filter: drop-shadow(0 0 2px color-mix(in oklab, var(--menzu-accent) 45%, transparent));
-  }
-  50% {
-    filter: drop-shadow(0 0 9px color-mix(in oklab, var(--menzu-accent) 90%, transparent));
-  }
-}
-.animate-flame-glow {
-  animation: flame-glow 2.2s ease-in-out infinite;
-}
-@media (prefers-reduced-motion: reduce) {
-  .animate-flame-glow {
-    animation: none;
-  }
-}
 
 
 /* Inner pages enter with these — /login uses slideUpFade, /categories fade-up */
