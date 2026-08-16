@@ -32,7 +32,9 @@ const CAPTURED_CARDS: CategoryCard[] = [
   },
   { line1: "CHECK SKIN KHO ĐỒ", line2: "VALORANT", art: `${ART_BASE}/omen.webp`, href: "#" },
   { line1: "BUILD KHO ĐỒ", line2: "VIP", art: `${ART_BASE}/jett.webp`, href: "#" },
-  { line1: "DỊCH VỤ", line2: "VALORANT", art: `${ART_BASE}/neon.webp`, href: "/services" },
+  // Back by request after the services section came out — as a dead tile like
+  // its two siblings above, not a door to a page that no longer exists.
+  { line1: "DỊCH VỤ", line2: "VALORANT", art: `${ART_BASE}/neon.webp`, href: "#" },
 ];
 
 const CARD_THEME = {

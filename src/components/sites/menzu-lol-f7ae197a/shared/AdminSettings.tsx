@@ -177,12 +177,10 @@ export function AdminSettings({
   settings,
   categories,
   docs,
-  services,
 }: {
   settings: ShopSettings;
   categories: SettingsCategory[];
   docs: SettingsCategory[];
-  services: SettingsCategory[];
 }) {
   const router = useRouter();
   const [tab, setTab] = useState<Tab>(TABS[0]);
@@ -269,7 +267,6 @@ export function AdminSettings({
   // the group migration reads if it ever has to be run again.
   const [categorySlugs, setCategorySlugs] = useState(settings.homeCategorySlugs);
   const [docSlugs, setDocSlugs] = useState(settings.homeDocSlugs);
-  const [serviceSlugs, setServiceSlugs] = useState(settings.homeServiceSlugs);
   const [rowCount, setRowCount] = useState(String(settings.homeRowCount));
 
   const [heroBadge, setHeroBadge] = useState(settings.heroBadge);
@@ -379,7 +376,6 @@ export function AdminSettings({
           homeTftSlugs: settings.homeTftSlugs,
           homeCategorySlugs: categorySlugs,
           homeDocSlugs: docSlugs,
-          homeServiceSlugs: serviceSlugs,
           homeRowCount: Number(rowCount) || DEFAULT_SETTINGS.homeRowCount,
           heroBadge,
           heroTitle,
@@ -1422,21 +1418,6 @@ export function AdminSettings({
             </div>
           </section>
 
-          <section className={CARD}>
-            <span className={HEADING}>Dịch vụ nổi bật</span>
-            {sectionSwitch("gameServices", "Hàng “Danh mục acc game”.")}
-            {sectionSwitch("otherServices", "Hàng “Dịch Vụ Khác”.")}
-            <SlugPicker
-              options={services}
-              selected={serviceSlugs}
-              onChange={setServiceSlugs}
-              empty="Chưa chọn dịch vụ nào — mỗi hàng hiện toàn bộ dịch vụ của nó, nhiều đơn nhất trước."
-            />
-            <p className={HINT}>
-              Dịch vụ vẫn về đúng hàng của nó theo phân loại game / khác; danh sách này
-              chỉ quyết định hiện cái nào và theo thứ tự nào.
-            </p>
-          </section>
 
           <section className={CARD}>
             <span className={HEADING}>SEO Content</span>

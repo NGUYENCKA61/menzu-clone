@@ -1,3 +1,5 @@
+import { Flame } from "lucide-react";
+
 import { FeaturedCategories } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/FeaturedCategories";
 import { FlashSaleSection } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/FlashSaleSection";
 import { HeroBanners } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/HeroBanners";
@@ -9,7 +11,6 @@ import {
   getHomeCategoryCards,
   getHomeDocCards,
   getHomeGroups,
-  getHomeRows,
 } from "@/lib/homeRows";
 import { ReviewsSection } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/ReviewsSection";
 import { SiteFooter } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/SiteFooter";
@@ -33,13 +34,7 @@ export default async function Home() {
     getFeedback(),
     getPartners(),
   ]);
-  const [rows, homeGroups, categoryCards, docCards] = await Promise.all([
-    getHomeRows({
-      valorantSlugs: settings.homeValorantSlugs,
-      tftSlugs: settings.homeTftSlugs,
-      serviceSlugs: settings.homeServiceSlugs,
-      count: settings.homeRowCount,
-    }),
+  const [homeGroups, categoryCards, docCards] = await Promise.all([
     getHomeGroups(settings.homeRowCount),
     getHomeCategoryCards(settings.homeCategorySlugs),
     getHomeDocCards(settings.homeDocSlugs),
@@ -71,32 +66,37 @@ export default async function Home() {
     // what any row is called.
     groups: (
       <div key="groups" className="flex w-full flex-col space-y-6 sm:space-y-12">
-        {homeGroups.map((group) => (
-          <ProductRow
-            key={group.id}
-            heading={group.icon ? `${group.icon} ${group.name}` : group.name}
-            cards={group.cards}
-            viewAllHref="/categories"
-            tone="menzu"
-          />
-        ))}
+        {homeGroups.map((group) => {
+          // The admin still types an emoji on the group; a 🔥 renders as the
+          // Lucide flame after the heading instead of the raw glyph before
+          // it. Any other emoji keeps the old prefix treatment.
+          const flame = group.icon.trim() === "🔥";
+          return (
+            <ProductRow
+              key={group.id}
+              heading={
+                !flame && group.icon ? `${group.icon} ${group.name}` : group.name
+              }
+              headingSuffix={
+                flame ? (
+                  <Flame
+                    size={22}
+                    aria-hidden
+                    // Pulled in against the row's 10px gap: with the glyph's
+                    // own ~3px of internal whitespace this lands at roughly
+                    // one word-space from the title, so the flame reads as its
+                    // last word rather than a separate element floating after.
+                    className="-ml-1.5 shrink-0 text-[var(--menzu-accent)]"
+                  />
+                ) : undefined
+              }
+              cards={group.cards}
+              viewAllHref="/categories"
+              tone="menzu"
+            />
+          );
+        })}
       </div>
-    ),
-    gameServices: (
-      <ProductRow
-        key="gameServices"
-        heading="DANH MỤC ACC GAME"
-        cards={rows.gameServices}
-        viewAllHref="/services"
-      />
-    ),
-    otherServices: (
-      <ProductRow
-        key="otherServices"
-        heading="Dịch Vụ Khác"
-        cards={rows.otherServices}
-        viewAllHref="/services"
-      />
     ),
     reviews: (
       <ReviewsSection

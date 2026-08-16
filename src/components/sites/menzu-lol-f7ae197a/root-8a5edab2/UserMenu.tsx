@@ -7,7 +7,6 @@ import {
   Shield,
   ShieldCheck,
   ShoppingBag,
-  Sparkles,
   Wallet,
   type LucideIcon,
 } from "lucide-react";
@@ -34,7 +33,6 @@ const GROUPS: { label: string; href: string; icon: LucideIcon }[][] = [
     { label: "Nạp tiền", href: "/wallet", icon: Wallet },
     { label: "Lịch sử giao dịch", href: "/transactions", icon: History },
     { label: "Lịch sử mua", href: "/orders", icon: ShoppingBag },
-    { label: "Đơn dịch vụ", href: "/service-orders", icon: Sparkles },
   ],
   [{ label: "Bảo mật", href: "/security", icon: ShieldCheck }],
 ];

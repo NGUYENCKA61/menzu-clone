@@ -15,7 +15,6 @@ const PRIVATE_PREFIXES = [
   "/orders",
   "/transactions",
   "/topup",
-  "/service-orders",
   "/voucher",
   "/login",
   "/signup",

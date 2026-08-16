@@ -3,7 +3,6 @@
 import { usePathname } from "next/navigation";
 import {
   ArrowLeftRight,
-  ClipboardList,
   LayoutDashboard,
   Shield,
   ShieldCheck,
@@ -23,7 +22,6 @@ const NAV_ITEMS: AccountNavItem[] = [
   { label: "Nạp tiền", href: "/wallet", icon: Wallet },
   { label: "Lịch sử giao dịch", href: "/transactions", icon: ArrowLeftRight },
   { label: "Lịch sử mua", href: "/orders", icon: ShoppingBag },
-  { label: "Đơn dịch vụ", href: "/service-orders", icon: ClipboardList },
   { label: "Bảo mật", href: "/security", icon: ShieldCheck },
 ];
 

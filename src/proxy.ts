@@ -6,7 +6,6 @@ const PROTECTED = [
   "/wallet",
   "/transactions",
   "/orders",
-  "/service-orders",
   "/security",
 ];
 
@@ -55,7 +54,6 @@ export const config = {
     "/wallet/:path*",
     "/transactions/:path*",
     "/orders/:path*",
-    "/service-orders/:path*",
     "/security/:path*",
   ],
 };

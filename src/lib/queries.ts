@@ -468,31 +468,6 @@ export async function getOrders(userId: string): Promise<OrderRow[]> {
   }));
 }
 
-export interface ServiceOrderRow {
-  code: string;
-  status: string;
-  amount: number;
-  serviceName: string;
-  createdAt: Date;
-}
-
-export async function getServiceOrders(
-  userId: string,
-): Promise<ServiceOrderRow[]> {
-  const rows = await db.serviceOrder.findMany({
-    where: { userId },
-    orderBy: { createdAt: "desc" },
-    include: { service: { select: { name: true } } },
-  });
-  return rows.map((s) => ({
-    code: s.code,
-    status: s.status,
-    amount: Number(s.amount),
-    serviceName: s.service.name,
-    createdAt: s.createdAt,
-  }));
-}
-
 // ---------------------------------------------------------------------------
 // Homepage
 // ---------------------------------------------------------------------------
@@ -611,45 +586,6 @@ export async function getPartners(): Promise<PartnerView[]> {
     logoUrl: p.logoUrl,
     url: p.url,
   }));
-}
-
-// ---------------------------------------------------------------------------
-// Services
-// ---------------------------------------------------------------------------
-
-export interface ServiceRow {
-  slug: string;
-  name: string;
-  priceLabel: string | null;
-  imageUrl: string | null;
-  doneCount: number;
-  /** Drives the "Dịch Vụ Game" / "Dịch Vụ Khác" split on /services. */
-  isGameService: boolean;
-}
-
-export async function listServices(): Promise<ServiceRow[]> {
-  const rows = await db.service.findMany({ orderBy: { doneCount: "desc" } });
-  return rows.map((s) => ({
-    slug: s.slug,
-    name: s.name,
-    priceLabel: s.priceLabel,
-    imageUrl: s.imageUrl,
-    doneCount: s.doneCount,
-    isGameService: s.isGameService,
-  }));
-}
-
-export async function getService(slug: string): Promise<ServiceRow | null> {
-  const s = await db.service.findUnique({ where: { slug } });
-  if (!s) return null;
-  return {
-    slug: s.slug,
-    name: s.name,
-    priceLabel: s.priceLabel,
-    imageUrl: s.imageUrl,
-    doneCount: s.doneCount,
-    isGameService: s.isGameService,
-  };
 }
 
 /** The build advertised on /app/download. Null before the first seed. */

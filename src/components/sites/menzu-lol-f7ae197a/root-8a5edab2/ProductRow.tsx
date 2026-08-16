@@ -22,6 +22,12 @@ export type RowTone = "indigo" | "menzu";
 
 export interface ProductRowProps {
   heading: string;
+  /**
+   * Drawn after the heading text, vertically centered with it — a Lucide
+   * icon standing in for an emoji the heading would otherwise carry.
+   * Decorative: pass it aria-hidden.
+   */
+  headingSuffix?: React.ReactNode;
   cards: ProductCard[];
   /** Destination of the row's "Xem tất cả" link — the matching index page. */
   viewAllHref: string;
@@ -140,6 +146,7 @@ const HIDDEN_STATS = new Set(["Đã Bán", "Đang Bán"]);
 
 export function ProductRow({
   heading,
+  headingSuffix,
   cards,
   viewAllHref,
   tone = "indigo",
@@ -151,10 +158,11 @@ export function ProductRow({
     <section className={cn("w-full", className)}>
       <div className="flex flex-row items-center justify-between mb-8">
         <div className="flex items-center gap-2.5">
-          <div className="w-[3px] h-5 bg-[var(--brand)] rounded-full shrink-0" />
+          <div className="w-[3px] h-5 bg-[var(--menzu-accent)] rounded-full shrink-0" />
           <h2 className="text-xl sm:text-2xl font-black uppercase tracking-wider text-white">
             {heading}
           </h2>
+          {headingSuffix}
         </div>
         <Link
           href={viewAllHref}

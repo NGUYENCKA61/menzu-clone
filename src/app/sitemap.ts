@@ -15,7 +15,6 @@ import { SITE_URL } from "@/lib/seo";
 const STATIC_ROUTES: [path: string, priority: number, freq: Frequency][] = [
   ["/", 1, "daily"],
   ["/categories", 0.9, "daily"],
-  ["/services", 0.8, "weekly"],
   ["/feedback", 0.5, "weekly"],
   // No /news: the live site links "TIN TỨC" from its header but the route
   // 404s there, so this clone 404s too rather than inventing a section.
@@ -33,7 +32,7 @@ type Frequency = "daily" | "weekly" | "monthly" | "yearly";
 export const revalidate = 3600;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [products, categories, services, docs] = await Promise.all([
+  const [products, categories, docs] = await Promise.all([
     // Removed accounts are left out: their pages 404, and offering a crawler a
     // URL that answers 404 is the one thing a sitemap must not do.
     db.product.findMany({
@@ -41,7 +40,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       select: { code: true, updatedAt: true, productType: true },
     }),
     db.category.findMany({ select: { slug: true, updatedAt: true } }),
-    db.service.findMany({ select: { slug: true, updatedAt: true } }),
     // Only articles that have been written: the empty ones are noindex, and
     // listing a noindex page here sends crawlers two contradictory signals.
     db.docArticle.findMany({
@@ -75,12 +73,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: product.updatedAt,
       changeFrequency: "weekly" as const,
       priority: 0.7,
-    })),
-    ...services.map((service) => ({
-      url: `${SITE_URL}/services/${service.slug}`,
-      lastModified: service.updatedAt,
-      changeFrequency: "weekly" as const,
-      priority: 0.6,
     })),
     ...docs.map((doc) => ({
       url: `${SITE_URL}/docs/${doc.slug}`,

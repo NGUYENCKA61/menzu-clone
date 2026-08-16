@@ -104,7 +104,6 @@ export interface ShopSettings {
   /** Article slugs shown in the "Xem hướng dẫn" section. */
   homeDocSlugs: string[];
   /** Service slugs shown in "Dịch vụ nổi bật". Empty means every service. */
-  homeServiceSlugs: string[];
   /** Cards per product row, so a row of twelve can be trimmed to four. */
   homeRowCount: number;
 
@@ -157,8 +156,6 @@ export const HOME_BLOCKS: { id: string; label: string }[] = [
   // can make as many groups as it likes, and a block list cannot grow a new
   // entry each time somebody adds one.
   { id: "groups", label: "Các nhóm danh mục" },
-  { id: "gameServices", label: "Danh mục acc game" },
-  { id: "otherServices", label: "Dịch vụ khác" },
   { id: "reviews", label: "Đánh giá khách hàng" },
   // Sits under the reviews by default — social proof, then who stands behind
   // it. "ticker" (recent purchases) used to live here; layouts that still
@@ -242,7 +239,6 @@ export const DEFAULT_SETTINGS: ShopSettings = {
   // docs section. A shop that never opens this screen sees no change.
   homeCategorySlugs: [],
   homeDocSlugs: [],
-  homeServiceSlugs: [],
   homeRowCount: 8,
 
   seoHeading: "",
@@ -298,7 +294,6 @@ export const SETTING_KEYS: Record<keyof ShopSettings, string> = {
 
   homeCategorySlugs: "home.row.categories",
   homeDocSlugs: "home.row.docs",
-  homeServiceSlugs: "home.row.services",
   homeRowCount: "home.row.count",
 
   seoHeading: "home.seo.heading",
@@ -649,10 +644,6 @@ export function parseSettings(rows: Iterable<{ key: string; value: string }>): S
       DEFAULT_SETTINGS.homeCategorySlugs,
     ),
     homeDocSlugs: toSlugList(stored.get(SETTING_KEYS.homeDocSlugs), DEFAULT_SETTINGS.homeDocSlugs),
-    homeServiceSlugs: toSlugList(
-      stored.get(SETTING_KEYS.homeServiceSlugs),
-      DEFAULT_SETTINGS.homeServiceSlugs,
-    ),
     homeRowCount:
       stored.get(SETTING_KEYS.homeRowCount) === undefined
         ? DEFAULT_SETTINGS.homeRowCount
@@ -710,7 +701,6 @@ export function serializeSettings(settings: ShopSettings): { key: string; value:
 
     homeCategorySlugs: settings.homeCategorySlugs.join(","),
     homeDocSlugs: settings.homeDocSlugs.join(","),
-    homeServiceSlugs: settings.homeServiceSlugs.join(","),
     homeRowCount: String(settings.homeRowCount),
 
     seoHeading: settings.seoHeading.trim(),
@@ -806,7 +796,6 @@ export function normalizeSettings(raw: Partial<ShopSettings> | null): ShopSettin
 
     homeCategorySlugs: toTextList(raw?.homeCategorySlugs),
     homeDocSlugs: toTextList(raw?.homeDocSlugs),
-    homeServiceSlugs: toTextList(raw?.homeServiceSlugs),
     homeRowCount: clampRowCount(Number(raw?.homeRowCount)),
 
     seoHeading: String(raw?.seoHeading ?? "").trim(),
