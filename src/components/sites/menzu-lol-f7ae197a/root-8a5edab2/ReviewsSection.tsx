@@ -61,20 +61,27 @@ export function ReviewsSection({ reviews = REVIEWS }: { reviews?: Review[] } = {
               TRUST
             </div>
 
-            <div className="flex items-center gap-2.5">
-              <div className="w-[3px] h-5 bg-[var(--brand)] rounded-full shrink-0" />
-              <h2 className="text-xl sm:text-2xl font-black uppercase tracking-wider text-white">
-                ĐÁNH GIÁ KHÁCH HÀNG
-              </h2>
-            </div>
+            {/* Two stacked lines, the second in the shop's red — the accent
+                sits in the words themselves now, so the side bar came off. */}
+            <h2 className="text-2xl sm:text-3xl font-black uppercase tracking-wider leading-tight">
+              <span className="block text-white">Đánh giá</span>
+              <span className="block text-[var(--menzu-accent)]">Khách hàng</span>
+            </h2>
 
             <div className="flex flex-row items-end justify-between lg:flex-col lg:items-start lg:gap-4 w-full mt-1 lg:mt-0">
-              <div>
+              <div className="flex items-center gap-3">
                 <div className="text-4xl sm:text-5xl font-black text-white tracking-tighter leading-none">
                   5.0
                 </div>
-                <div className="text-[9px] text-neutral-400 font-extrabold uppercase tracking-widest whitespace-nowrap leading-none">
-                  600 ĐÁNH GIÁ THỰC
+                <div className="flex flex-col gap-1.5">
+                  <div className="flex items-center gap-0.5">
+                    {[0, 1, 2, 3, 4].map((star) => (
+                      <Star key={star} size={13} className="fill-amber-400 text-amber-400" />
+                    ))}
+                  </div>
+                  <div className="text-[9px] text-neutral-400 font-extrabold uppercase tracking-widest whitespace-nowrap leading-none">
+                    600 ĐÁNH GIÁ THỰC
+                  </div>
                 </div>
               </div>
 
@@ -99,18 +106,22 @@ export function ReviewsSection({ reviews = REVIEWS }: { reviews?: Review[] } = {
                     <div className="relative w-10 h-10 rounded-full overflow-hidden shrink-0 border border-white/10">
                       <Image src={review.avatar} alt={review.name} fill className="object-cover" />
                     </div>
-                    <div className="flex flex-col min-w-0">
+                    <div className="flex min-w-0 flex-1 items-center gap-1.5">
                       {/* h3, as the live cards use — a reviewer's name heads
                           their card, and a screen reader should be able to
-                          jump between reviews by heading. */}
+                          jump between reviews by heading. The check alone now
+                          carries the verified claim, so it keeps a label for
+                          readers who cannot see it. */}
                       <h3 className="text-sm font-bold text-white truncate">{review.name}</h3>
-                      <div className="flex items-center gap-1">
-                        <BadgeCheck size={11} className="text-indigo-400 shrink-0" />
-                        <span className="text-[9px] text-neutral-500 font-semibold truncate">
-                          {VERIFIED_BADGE_TEXT}
-                        </span>
-                      </div>
+                      <BadgeCheck
+                        size={13}
+                        aria-label={VERIFIED_BADGE_TEXT}
+                        className="text-indigo-400 shrink-0"
+                      />
                     </div>
+                    <span className="shrink-0 text-[10px] text-neutral-500 font-semibold">
+                      {review.date}
+                    </span>
                   </div>
 
                   <div className="flex items-center gap-0.5 mb-2">
@@ -121,12 +132,11 @@ export function ReviewsSection({ reviews = REVIEWS }: { reviews?: Review[] } = {
 
                   <p className="text-[13px] text-neutral-300 leading-relaxed mb-4 flex-1">{review.body}</p>
 
+                  {/* The date moved up beside the name, so the foot line is
+                      the transaction alone, spread to both edges. */}
                   <div className="flex items-center justify-between pt-3 border-t border-white/5 mt-auto">
-                    <span className="text-[10px] text-neutral-500 font-semibold">{review.date}</span>
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-[10px] text-neutral-500 font-semibold">Giao dịch:</span>
-                      <span className="text-[11px] font-black text-emerald-400">{review.amount}</span>
-                    </div>
+                    <span className="text-[10px] text-neutral-500 font-semibold">Giao dịch:</span>
+                    <span className="text-[11px] font-black text-emerald-400">{review.amount}</span>
                   </div>
                 </div>
               ))}
