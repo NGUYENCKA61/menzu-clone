@@ -27,6 +27,15 @@ export default async function AdminProductsPage() {
       include: {
         category: { select: { name: true } },
         _count: { select: { orders: true } },
+        // Ordered by id, which rises with insertion, so the editor hands the
+        // list back in the order it was saved — the storefront card reads the
+        // same order, and a shop that put its best weapon first should see that
+        // choice survive a round trip.
+        skins: {
+          where: { kind: "WEAPON_SKIN" },
+          select: { name: true },
+          orderBy: { id: "asc" },
+        },
       },
     }),
     // Removed products, newest removal first. Fetched separately rather than
@@ -93,6 +102,7 @@ export default async function AdminProductsPage() {
               oldPrice: Number(p.oldPrice),
               categoryName: p.category.name,
               orderCount: p._count.orders,
+              skinNames: p.skins.map((s) => s.name),
             }))}
             removed={removed.map((p) => ({
               code: p.code,

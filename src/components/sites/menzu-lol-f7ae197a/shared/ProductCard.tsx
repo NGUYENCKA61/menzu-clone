@@ -1,12 +1,10 @@
-"use client";
-
-import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
-import { Sparkles, Swords, Trophy } from "lucide-react";
+import { Sparkles, Trophy } from "lucide-react";
 import {
   discountPct,
   formatVnd,
   productImage,
+  SKIN_CHIP_COUNT,
   TIER_ICON_PATHS,
   type Product,
   type TierColor,
@@ -34,33 +32,8 @@ const TIER_LABELS: Record<TierColor, string> = {
   blue: "Select",
 };
 
-const MAX_CAROUSEL_TILES = 8;
-const CAROUSEL_STEP_PX = 72; // 64px tile + 8px gap
-const CAROUSEL_INTERVAL_MS = 2500;
-
 export function ProductCard({ product }: ProductCardProps) {
-  const trackRef = useRef<HTMLDivElement>(null);
-  const [offset, setOffset] = useState(0);
-
-  useEffect(() => {
-    const intervalId = setInterval(() => {
-      const track = trackRef.current;
-      const viewport = track?.parentElement;
-      if (!track || !viewport) return;
-
-      const maxOffset = Math.max(0, track.scrollWidth - viewport.clientWidth);
-      setOffset((prev) =>
-        prev + CAROUSEL_STEP_PX > maxOffset ? 0 : prev + CAROUSEL_STEP_PX,
-      );
-    }, CAROUSEL_INTERVAL_MS);
-
-    return () => clearInterval(intervalId);
-  }, []);
-
-  const tileCount = Math.max(
-    0,
-    Math.min(product.skins - product.extraSkins, MAX_CAROUSEL_TILES),
-  );
+  const skinNames = (product.skinNames ?? []).slice(0, SKIN_CHIP_COUNT);
 
   return (
     <a
@@ -129,25 +102,29 @@ export function ProductCard({ product }: ProductCardProps) {
           </div>
         </div>
 
-        <div className="flex items-center gap-2 mb-6 h-12 overflow-hidden relative w-full">
-          <div
-            ref={trackRef}
-            className="flex gap-2 transition-transform duration-700 ease-in-out"
-            style={{ transform: `translateX(-${offset}px)` }}
-          >
-            {Array.from({ length: tileCount }, (_, index) => (
-              <div
-                key={index}
-                className="w-16 h-12 rounded-lg bg-neutral-950 border border-neutral-800 flex items-center justify-center shrink-0 p-1"
+        {/* The skins, named. This replaced a strip of identical empty boxes:
+            eight sword icons only said "this account has skins", which the
+            counter above already says — the names are what a buyer is choosing
+            between. Nothing is drawn until the shop has listed them, rather
+            than holding blank space for something that may never arrive. */}
+        {skinNames.length > 0 ? (
+          <div className="mb-6 flex w-full flex-wrap content-start gap-1.5">
+            {skinNames.map((name) => (
+              <span
+                key={name}
+                title={name}
+                className="max-w-full truncate rounded-lg border border-neutral-800 bg-neutral-950 px-2 py-1 text-[11px] font-bold text-neutral-300"
               >
-                <Swords size={16} className="text-neutral-600" />
-              </div>
+                {name}
+              </span>
             ))}
-            <div className="w-12 h-12 rounded-lg bg-neutral-800 border border-neutral-700/50 flex items-center justify-center shrink-0 text-[11px] font-black text-neutral-300">
-              +{product.extraSkins}
-            </div>
+            {product.extraSkins > 0 ? (
+              <span className="rounded-lg border border-neutral-700/50 bg-neutral-800 px-2 py-1 text-[11px] font-black text-neutral-300">
+                +{product.extraSkins}
+              </span>
+            ) : null}
           </div>
-        </div>
+        ) : null}
 
         <div className="mt-auto flex items-end justify-between gap-2">
           <div className="flex flex-col">

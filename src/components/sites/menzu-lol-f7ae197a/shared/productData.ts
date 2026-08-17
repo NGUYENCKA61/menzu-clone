@@ -15,10 +15,27 @@ export interface Product {
   skins: number; // 61
   tiers: ProductTier[]; // omits tiers with no count
   tag: string | null; // "DROP MAIL" or null
-  extraSkins: number; // 11 -> "+11" chip
+  /**
+   * The first few weapon-skin names, drawn as chips — "M200 Dominator".
+   *
+   * Optional because the fixture below was scraped before names were kept, and
+   * an account whose skins have not been listed yet simply shows no chips
+   * rather than a row of empty boxes.
+   */
+  skinNames?: string[];
+  extraSkins: number; // skins past the chips shown -> "+11" chip
   oldPrice: number; // 7200000
   price: number; // 3960000
 }
+
+/**
+ * How many skin names a card prints before the rest collapse into "+N".
+ *
+ * Shared with the queries that build the card view so the count and the chips
+ * cannot disagree — a "+N" computed against a different number than was drawn
+ * is how a card ends up claiming 57 skins while showing 61.
+ */
+export const SKIN_CHIP_COUNT = 4;
 
 const ACCOUNT_IMAGE_BASE_PATH =
   "/sites/menzu-lol-f7ae197a/root-8a5edab2/images/account";

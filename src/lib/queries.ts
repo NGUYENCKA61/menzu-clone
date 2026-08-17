@@ -6,9 +6,10 @@ import { db } from "@/lib/db";
 import type { AccountDetail } from "@/components/sites/menzu-lol-f7ae197a/shared/AccountBuyPanel";
 import type { SoftwareDetail } from "@/components/sites/menzu-lol-f7ae197a/shared/SoftwareBuyPanel";
 import type { SoftwareCardView } from "@/components/sites/menzu-lol-f7ae197a/shared/SoftwareCard";
-import type {
-  Product,
-  TierColor,
+import {
+  SKIN_CHIP_COUNT,
+  type Product,
+  type TierColor,
 } from "@/components/sites/menzu-lol-f7ae197a/shared/productData";
 import type { PartnerView } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/PartnersSection";
 import type { FlashSaleItem } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/flashSaleData";
@@ -58,6 +59,59 @@ function toTiers(skins: SkinRow[]) {
 function countKind(skins: SkinRow[], kind: string): number {
   return skins.filter((s) => s.kind === kind).length;
 }
+
+/**
+ * The listing card's whole view of an account.
+ *
+ * Shared by the two places that build it — the category grid and "tài khoản
+ * tương tự" — because they had drifted into near-copies of each other, and the
+ * "+N" chip only reads correctly if it is counted against the same names that
+ * were drawn.
+ *
+ * `price` is passed in rather than read off the row: a running flash sale
+ * replaces it on the category grid, and a card that printed the ordinary price
+ * during a sale would be advertising the wrong figure.
+ */
+function toProductCard(
+  row: {
+    code: string;
+    rank: string;
+    oldPrice: bigint;
+    tags: { label: string }[];
+    skins: (SkinRow & { name: string })[];
+  },
+  price: bigint | number,
+): Product {
+  const total = countKind(row.skins, "WEAPON_SKIN");
+  const skinNames = row.skins
+    .filter((s) => s.kind === "WEAPON_SKIN")
+    .slice(0, SKIN_CHIP_COUNT)
+    .map((s) => s.name);
+
+  return {
+    code: row.code,
+    rank: row.rank,
+    skins: total,
+    tiers: toTiers(row.skins),
+    tag: row.tags[0]?.label ?? null,
+    skinNames,
+    extraSkins: Math.max(0, total - skinNames.length),
+    oldPrice: Number(row.oldPrice),
+    price: Number(price),
+  };
+}
+
+/**
+ * What a card needs from the skin rows, in the order the shop listed them.
+ *
+ * Ordered by id, which is a cuid and so rises with insertion: a shop that put
+ * its best weapon at the top of the list sees that one on the card, instead of
+ * whichever row Postgres happened to hand back first.
+ */
+const CARD_SKINS = {
+  select: { kind: true, tier: true, name: true },
+  orderBy: { id: "asc" },
+} as const;
 
 export interface CategoryPageData {
   name: string;
@@ -204,7 +258,7 @@ export async function getCategoryPage(
       take: PAGE_SIZE,
       include: {
         tags: { select: { label: true } },
-        skins: { select: { kind: true, tier: true } },
+        skins: CARD_SKINS,
       },
     }),
     db.product.findMany({
@@ -247,17 +301,7 @@ export async function getCategoryPage(
       })),
       downloadUrl: s.downloadUrl,
     })),
-    products: rows.map((p) => ({
-      code: p.code,
-      rank: p.rank,
-      skins: countKind(p.skins, "WEAPON_SKIN"),
-      tiers: toTiers(p.skins),
-      tag: p.tags[0]?.label ?? null,
-      // The live card shows a "+N" chip for skins beyond the visible strip.
-      extraSkins: Math.max(0, countKind(p.skins, "WEAPON_SKIN") - 8),
-      oldPrice: Number(p.oldPrice),
-      price: Number(sale.get(p.id) ?? p.price),
-    })),
+    products: rows.map((p) => toProductCard(p, sale.get(p.id) ?? p.price)),
   };
 }
 
@@ -390,20 +434,11 @@ export async function getRelatedProducts(
     take,
     include: {
       tags: { select: { label: true } },
-      skins: { select: { kind: true, tier: true } },
+      skins: CARD_SKINS,
     },
   });
 
-  return rows.map((p) => ({
-    code: p.code,
-    rank: p.rank,
-    skins: countKind(p.skins, "WEAPON_SKIN"),
-    tiers: toTiers(p.skins),
-    tag: p.tags[0]?.label ?? null,
-    extraSkins: Math.max(0, countKind(p.skins, "WEAPON_SKIN") - 8),
-    oldPrice: Number(p.oldPrice),
-    price: Number(p.price),
-  }));
+  return rows.map((p) => toProductCard(p, p.price));
 }
 
 // ---------------------------------------------------------------------------

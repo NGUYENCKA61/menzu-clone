@@ -1,8 +1,10 @@
 "use client";
 
-import { RotateCcw, Trash2 } from "lucide-react";
+import { RotateCcw, Swords, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { Fragment, useState } from "react";
+
+import { SKIN_CHIP_COUNT } from "./productData";
 
 export interface AdminProductRow {
   code: string;
@@ -12,6 +14,8 @@ export interface AdminProductRow {
   oldPrice: number;
   categoryName: string;
   orderCount: number;
+  /** Weapon skins, in the order the shop listed them. */
+  skinNames: string[];
 }
 
 /** A product the shop has removed — kept only so it can be put back. */
@@ -66,16 +70,23 @@ export function AdminProducts({
   const [price, setPrice] = useState("");
   const [oldPrice, setOldPrice] = useState("");
 
+  // The account whose skin list is open, and the text being edited. One at a
+  // time: the editor is a tall block inside the table, and two of them open at
+  // once would push the row being worked on off the screen.
+  const [editingSkins, setEditingSkins] = useState<string | null>(null);
+  const [skinText, setSkinText] = useState("");
+
   /** Returns the parsed body on success, null on failure. */
   async function call(
     method: "POST" | "PATCH" | "PUT" | "DELETE",
     payload: Record<string, unknown> | null,
     query = "",
+    sub = "",
   ): Promise<Record<string, unknown> | null> {
     setBusy(true);
     setMsg(null);
     try {
-      const res = await fetch(`/api/admin/products${query}`, {
+      const res = await fetch(`/api/admin/products${sub}${query}`, {
         method,
         ...(payload
           ? {
@@ -119,6 +130,39 @@ export function AdminProducts({
   async function handleRestore(row: AdminRemovedProductRow) {
     const data = await call("PUT", null, `?code=${encodeURIComponent(row.code)}`);
     if (data) setMsg({ tone: "ok", text: `Đã khôi phục ${row.code}` });
+  }
+
+  /**
+   * Opens the skin editor on the saved list, or closes it if this row's is
+   * already open. Prefilling from the row rather than fetching keeps the text
+   * area showing exactly what the storefront is showing.
+   */
+  function toggleSkins(row: AdminProductRow) {
+    if (editingSkins === row.code) {
+      setEditingSkins(null);
+      return;
+    }
+    setEditingSkins(row.code);
+    setSkinText(row.skinNames.join("\n"));
+    setMsg(null);
+  }
+
+  async function handleSaveSkins(row: AdminProductRow) {
+    const names = skinText
+      .split("\n")
+      .map((line) => line.trim())
+      .filter(Boolean);
+
+    const data = await call("PUT", { code: row.code, names }, "", "/skins");
+    if (!data) return;
+    setEditingSkins(null);
+    setMsg({
+      tone: "ok",
+      text:
+        names.length > 0
+          ? `Đã lưu ${data.count as number} súng cho ${row.code}`
+          : `Đã xoá danh sách súng của ${row.code} — card sẽ không in tên nào`,
+    });
   }
 
   async function handleCreate(event: React.FormEvent) {
@@ -236,10 +280,10 @@ export function AdminProducts({
       </form>
 
       <div className="w-full overflow-x-auto rounded-2xl border border-white/10 bg-neutral-900/40">
-        <table className="w-full min-w-[760px] text-left">
+        <table className="w-full min-w-[860px] text-left">
           <thead>
             <tr className="border-b border-white/10">
-              {["Mã", "Danh mục", "Rank", "Giá", "Trạng thái", ""].map((h) => (
+              {["Mã", "Danh mục", "Rank", "Súng", "Giá", "Trạng thái", ""].map((h) => (
                 <th
                   key={h}
                   className="px-5 py-3.5 text-[10px] font-black uppercase tracking-widest text-neutral-500 whitespace-nowrap"
@@ -251,73 +295,140 @@ export function AdminProducts({
           </thead>
           <tbody>
             {products.map((p) => (
-              <tr key={p.code} className="border-b border-white/5 last:border-0">
-                <td className="px-5 py-3 text-xs font-black text-white">#{p.code}</td>
-                <td className="px-5 py-3 text-xs text-neutral-400">{p.categoryName}</td>
-                <td className="px-5 py-3 text-xs text-neutral-300">{p.rank}</td>
-                <td className="px-5 py-3 text-xs font-bold text-white">
-                  {formatVnd(p.price)}đ
-                </td>
-                <td className="px-5 py-3">
-                  <select
-                    value={p.status}
-                    disabled={busy}
-                    onChange={(e) =>
-                      call("PATCH", { code: p.code, status: e.target.value })
-                    }
-                    className="rounded-lg border border-white/10 bg-neutral-950 px-2 py-1 text-[11px] font-bold text-neutral-200"
-                  >
-                    {Object.entries(STATUS_LABEL).map(([value, label]) => (
-                      <option key={value} value={value} className="bg-neutral-900">
-                        {label}
-                      </option>
-                    ))}
-                  </select>
-                </td>
-                <td className="px-5 py-3 text-right">
-                  {arming === p.code ? (
-                    // The armed state spells out what will happen to this
-                    // particular row, because the two outcomes differ and the
-                    // admin cannot tell them apart from the table alone.
-                    <div className="flex items-center justify-end gap-2">
-                      <span className="text-[10px] font-bold text-neutral-400 whitespace-nowrap">
-                        {p.orderCount > 0
-                          ? `Giữ ${p.orderCount} đơn cũ?`
-                          : "Xoá hẳn?"}
-                      </span>
+              <Fragment key={p.code}>
+                <tr className="border-b border-white/5 last:border-0">
+                  <td className="px-5 py-3 text-xs font-black text-white">#{p.code}</td>
+                  <td className="px-5 py-3 text-xs text-neutral-400">{p.categoryName}</td>
+                  <td className="px-5 py-3 text-xs text-neutral-300">{p.rank}</td>
+                  <td className="px-5 py-3">
+                    <button
+                      type="button"
+                      onClick={() => toggleSkins(p)}
+                      title="Sửa danh sách súng của tài khoản này"
+                      className={`inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-[11px] font-bold whitespace-nowrap transition-colors ${
+                        editingSkins === p.code
+                          ? "border-[var(--brand)]/60 bg-[var(--brand)]/10 text-white"
+                          : "border-white/10 text-neutral-300 hover:border-white/25 hover:text-white"
+                      }`}
+                    >
+                      <Swords size={12} />
+                      {/* The count is the useful figure at a glance; "Thêm" is
+                          what the button does when there is nothing to count. */}
+                      {p.skinNames.length > 0 ? `${p.skinNames.length} súng` : "Thêm"}
+                    </button>
+                  </td>
+                  <td className="px-5 py-3 text-xs font-bold text-white">
+                    {formatVnd(p.price)}đ
+                  </td>
+                  <td className="px-5 py-3">
+                    <select
+                      value={p.status}
+                      disabled={busy}
+                      onChange={(e) =>
+                        call("PATCH", { code: p.code, status: e.target.value })
+                      }
+                      className="rounded-lg border border-white/10 bg-neutral-950 px-2 py-1 text-[11px] font-bold text-neutral-200"
+                    >
+                      {Object.entries(STATUS_LABEL).map(([value, label]) => (
+                        <option key={value} value={value} className="bg-neutral-900">
+                          {label}
+                        </option>
+                      ))}
+                    </select>
+                  </td>
+                  <td className="px-5 py-3 text-right">
+                    {arming === p.code ? (
+                      // The armed state spells out what will happen to this
+                      // particular row, because the two outcomes differ and the
+                      // admin cannot tell them apart from the table alone.
+                      <div className="flex items-center justify-end gap-2">
+                        <span className="text-[10px] font-bold text-neutral-400 whitespace-nowrap">
+                          {p.orderCount > 0
+                            ? `Giữ ${p.orderCount} đơn cũ?`
+                            : "Xoá hẳn?"}
+                        </span>
+                        <button
+                          type="button"
+                          disabled={busy}
+                          onClick={() => handleDelete(p)}
+                          className="h-7 px-2.5 rounded-lg bg-red-500/90 hover:bg-red-500 disabled:opacity-60 transition-colors text-[10px] font-black uppercase tracking-widest text-white"
+                        >
+                          Xoá
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setArming(null)}
+                          className="h-7 px-2.5 rounded-lg border border-white/10 hover:bg-white/5 transition-colors text-[10px] font-black uppercase tracking-widest text-neutral-300"
+                        >
+                          Huỷ
+                        </button>
+                      </div>
+                    ) : (
                       <button
                         type="button"
                         disabled={busy}
-                        onClick={() => handleDelete(p)}
-                        className="h-7 px-2.5 rounded-lg bg-red-500/90 hover:bg-red-500 disabled:opacity-60 transition-colors text-[10px] font-black uppercase tracking-widest text-white"
+                        title={
+                          p.orderCount > 0
+                            ? `Xoá khỏi cửa hàng — ${p.orderCount} đơn cũ được giữ lại`
+                            : "Xoá sản phẩm"
+                        }
+                        onClick={() => setArming(p.code)}
+                        className="p-2 rounded-lg text-neutral-500 hover:text-red-400 hover:bg-red-500/10 disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-neutral-500 transition-colors"
                       >
-                        Xoá
+                        <Trash2 size={14} />
                       </button>
-                      <button
-                        type="button"
-                        onClick={() => setArming(null)}
-                        className="h-7 px-2.5 rounded-lg border border-white/10 hover:bg-white/5 transition-colors text-[10px] font-black uppercase tracking-widest text-neutral-300"
-                      >
-                        Huỷ
-                      </button>
-                    </div>
-                  ) : (
-                    <button
-                      type="button"
-                      disabled={busy}
-                      title={
-                        p.orderCount > 0
-                          ? `Xoá khỏi cửa hàng — ${p.orderCount} đơn cũ được giữ lại`
-                          : "Xoá sản phẩm"
-                      }
-                      onClick={() => setArming(p.code)}
-                      className="p-2 rounded-lg text-neutral-500 hover:text-red-400 hover:bg-red-500/10 disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-neutral-500 transition-colors"
-                    >
-                      <Trash2 size={14} />
-                    </button>
-                  )}
-                </td>
-              </tr>
+                    )}
+                  </td>
+                </tr>
+
+                {/* The skin list, edited as plain text under its own row. A
+                    line per weapon rather than a field per weapon: the shop
+                    reads them off an inventory screen and types them straight
+                    down, and pasting the lot at once has to work. */}
+                {editingSkins === p.code ? (
+                  <tr className="border-b border-white/5 bg-neutral-950/60">
+                    <td colSpan={7} className="px-5 py-4">
+                      <div className="flex flex-col gap-3">
+                        <div>
+                          <label className={LABEL}>
+                            Súng của #{p.code} — mỗi dòng một cây
+                          </label>
+                          <textarea
+                            value={skinText}
+                            onChange={(e) => setSkinText(e.target.value)}
+                            rows={6}
+                            spellCheck={false}
+                            placeholder={"M200 Dominator\nM4A1-S Prism Beast\nAK12-Knife Iron Spider"}
+                            className={`${FIELD} resize-y leading-relaxed`}
+                          />
+                        </div>
+                        <p className="text-[11px] text-neutral-500">
+                          Card ngoài cửa hàng in {SKIN_CHIP_COUNT} tên đầu tiên, phần
+                          còn lại gộp thành “+N” — nên xếp cây đắt giá nhất lên trên.
+                          Để trống rồi lưu là xoá hết tên.
+                        </p>
+                        <div className="flex gap-2">
+                          <button
+                            type="button"
+                            disabled={busy}
+                            onClick={() => handleSaveSkins(p)}
+                            className="h-9 px-4 rounded-xl bg-[var(--brand)] hover:bg-[var(--brand-dark)] disabled:opacity-70 transition-colors text-[10px] font-black uppercase tracking-widest text-white"
+                          >
+                            {busy ? "Đang lưu…" : "Lưu danh sách"}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setEditingSkins(null)}
+                            className="h-9 px-4 rounded-xl border border-white/10 hover:bg-white/5 transition-colors text-[10px] font-black uppercase tracking-widest text-neutral-300"
+                          >
+                            Huỷ
+                          </button>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                ) : null}
+              </Fragment>
             ))}
           </tbody>
         </table>
