@@ -1,6 +1,6 @@
 "use client";
 
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, Upload } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -23,6 +23,7 @@ export interface AdminSoftwareRow {
   price: number;
   description: string;
   downloadUrl: string;
+  imageUrl: string;
   videoUrl: string;
   version: string;
   platform: string;
@@ -110,6 +111,35 @@ export function AdminSoftware({
     } finally {
       setBusy(false);
     }
+  }
+
+  /**
+   * Uploads a product picture, then patches its URL onto the product. Upload
+   * and save stay separate everywhere else on this screen; here the two run
+   * back to back because a picture with nowhere to belong is just a stray file.
+   */
+  async function uploadImage(code: string, file: File) {
+    setBusy(true);
+    setMsg(null);
+    let url = "";
+    try {
+      const form = new FormData();
+      form.append("file", file);
+      const res = await fetch("/api/admin/software/image", { method: "POST", body: form });
+      const data = (await res.json().catch(() => ({}))) as { url?: string; error?: string };
+      if (!res.ok || !data.url) {
+        setMsg({ tone: "err", text: data.error ?? "Tải ảnh thất bại" });
+        return;
+      }
+      url = data.url;
+    } catch {
+      setMsg({ tone: "err", text: "Không kết nối được máy chủ" });
+      return;
+    } finally {
+      setBusy(false);
+    }
+    const done = await call("/api/admin/software", "PATCH", { code, imageUrl: url });
+    if (done) setMsg({ tone: "ok", text: "Đã cập nhật ảnh sản phẩm." });
   }
 
   async function handleCreate(event: React.FormEvent) {
@@ -360,6 +390,55 @@ export function AdminSoftware({
                   className={FIELD}
                 />
               </div>
+            </div>
+
+            <label className={LABEL}>Ảnh sản phẩm (hiện trên card)</label>
+            <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center">
+              {s.imageUrl ? (
+                // A plain img: the value is whatever path the shop set, which
+                // next/image would need spelled out in its allow-list.
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={s.imageUrl}
+                  alt=""
+                  className="h-16 w-[86px] shrink-0 rounded-lg border border-white/10 object-cover"
+                />
+              ) : (
+                <div className="flex h-16 w-[86px] shrink-0 items-center justify-center rounded-lg border border-dashed border-white/15 text-[9px] font-bold uppercase tracking-widest text-neutral-600">
+                  Chưa có
+                </div>
+              )}
+              <input
+                defaultValue={s.imageUrl}
+                disabled={busy}
+                placeholder="Dán URL ảnh, hoặc chọn từ máy ở nút bên phải"
+                onBlur={(e) => {
+                  if (e.target.value.trim() === s.imageUrl) return;
+                  call("/api/admin/software", "PATCH", {
+                    code: s.code,
+                    imageUrl: e.target.value,
+                  });
+                }}
+                className={FIELD}
+              />
+              <label
+                className={`inline-flex h-10 shrink-0 cursor-pointer items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 text-[10px] font-black uppercase tracking-widest text-neutral-200 transition-colors hover:bg-white/10 ${
+                  busy ? "pointer-events-none opacity-60" : ""
+                }`}
+              >
+                <Upload size={13} />
+                Chọn từ máy
+                <input
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    e.target.value = "";
+                    if (file) void uploadImage(s.code, file);
+                  }}
+                />
+              </label>
             </div>
 
             <label className={LABEL}>Video YouTube (khung ảnh trang sản phẩm)</label>

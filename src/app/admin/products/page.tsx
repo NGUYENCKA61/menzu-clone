@@ -178,6 +178,7 @@ export default async function AdminProductsPage() {
               price: Number(s.price),
               description: s.description ?? "",
               downloadUrl: s.downloadUrl ?? "",
+              imageUrl: s.imageUrl ?? "",
               videoUrl: s.videoUrl ?? "",
               version: s.version ?? "",
               platform: s.platform ?? "",

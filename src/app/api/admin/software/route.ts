@@ -97,6 +97,7 @@ export async function PATCH(request: Request) {
     status?: string;
     price?: number;
     downloadUrl?: string;
+    imageUrl?: string;
     videoUrl?: string;
     version?: string;
     platform?: string;
@@ -135,6 +136,8 @@ export async function PATCH(request: Request) {
       ...(body?.downloadUrl !== undefined
         ? { downloadUrl: body.downloadUrl.trim() || null }
         : {}),
+      // "" clears the picture, dropping the card back to its empty frame.
+      ...(body?.imageUrl !== undefined ? { imageUrl: body.imageUrl.trim() || null } : {}),
       // Stored as pasted. Validation happens where it renders, so a link that
       // is not YouTube falls the frame back to the picture rather than being
       // silently dropped here and leaving the admin wondering what they typed.

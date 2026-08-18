@@ -338,6 +338,7 @@ export async function getCategoryPage(
       code: s.code,
       name: s.name ?? s.code,
       imageUrl: s.imageUrl,
+      description: s.description ?? "",
       status: s.softwareStatus,
       packages: s.packages.map((p) => ({
         id: p.id,
