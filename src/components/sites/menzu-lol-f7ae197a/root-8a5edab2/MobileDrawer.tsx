@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { ChevronDown, Gift, X, type LucideIcon } from "lucide-react";
+import { ChevronDown, X, type LucideIcon } from "lucide-react";
 import { useState } from "react";
 
 export interface DrawerItem {
@@ -126,8 +126,7 @@ export function MobileDrawer({ open, onClose, groups }: MobileDrawerProps) {
               href="#"
               className="w-full flex items-center gap-2 py-3 px-6 text-neutral-200 hover:text-white hover:bg-white/[0.02] active:bg-white/[0.05] transition-all text-left text-xs font-bold uppercase tracking-wider"
             >
-              <Gift size={14} className="shrink-0" />
-              NHẬN ACC FREE
+              TRẠNG THÁI HACK
             </a>
           </div>
         </div>

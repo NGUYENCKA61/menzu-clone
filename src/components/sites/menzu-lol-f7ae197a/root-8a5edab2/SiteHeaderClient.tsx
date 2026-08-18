@@ -4,18 +4,15 @@ import Image from "next/image"
 import Link from "next/link"
 import {
   ChevronDown,
+  CreditCard,
   Crosshair,
-  Gem,
   Gift,
   KeyRound,
-  Mail,
   Menu,
-  Repeat,
   Route,
-  ShoppingCart,
+  Smartphone,
   User,
   Users,
-  Wrench,
   type LucideIcon,
 } from "lucide-react"
 import {
@@ -37,21 +34,19 @@ interface DropdownItem {
  * linking to them would 404.
  */
 const LINK_HREFS: Record<string, string> = {
-  "TIN TỨC": "/news",
-  "LIÊN HỆ": "/feedback",
+  "ĐÁNH GIÁ KHÁCH HÀNG": "/feedback",
+  "HỖ TRỢ KHÁCH HÀNG": "/feedback",
   "WIKI & HƯỚNG DẪN": "/docs",
   "GÓP Ý": "/feedback",
-  "Check Thư Welcome": "/checkwc",
-  "Trình Tạo Mã 2FA": "/2fa",
-  "Thu Cũ Đổi Mới": "/trade",
-  "Mua Account": "/categories",
+  "Nạp Qua ATM + Momo": "/wallet",
+  "Nạp Thẻ Điện Thoại": "/wallet",
 }
 
 function hrefFor(label: string): string {
   return LINK_HREFS[label] ?? "#"
 }
 
-const QUICK_LINKS = ["TIN TỨC", "LIÊN HỆ", "WIKI & HƯỚNG DẪN", "GÓP Ý", "CỘNG ĐỒNG"]
+const QUICK_LINKS = ["ĐÁNH GIÁ KHÁCH HÀNG", "HỖ TRỢ KHÁCH HÀNG", "WIKI & HƯỚNG DẪN", "GÓP Ý", "CỘNG ĐỒNG"]
 
 // Nav text sits at neutral-200 rather than the captured neutral-400: at 10-11px
 // and letter-spaced, the darker grey on the near-black bar was closer to
@@ -66,22 +61,22 @@ const VALORANT_HUB_ITEMS: DropdownItem[] = [
   { label: "Tìm Bạn Leo Rank", icon: Users },
 ]
 
-const CONG_CU_ITEMS: DropdownItem[] = [
-  { label: "Check Skin Valorant", icon: Gem },
-  { label: "Valorant Build", icon: Wrench },
-  { label: "Check Thư Welcome", icon: Mail },
-  { label: "Trình Tạo Mã 2FA", icon: KeyRound },
+const NAP_TIEN_ITEMS: DropdownItem[] = [
+  { label: "Nạp Qua ATM + Momo", icon: CreditCard },
+  { label: "Nạp Thẻ Điện Thoại", icon: Smartphone },
 ]
 
-const GIAO_DICH_ITEMS: DropdownItem[] = [
-  { label: "Thu Cũ Đổi Mới", icon: Repeat },
-  { label: "Mua Account", icon: ShoppingCart },
+// Placeholder labels until the shop names the two free offers; both fall to
+// "#" through hrefFor until their pages exist.
+const HACK_FREE_ITEMS: DropdownItem[] = [
+  { label: "Nhận Key Miễn Phí", icon: KeyRound },
+  { label: "Sự Kiện Tặng Hack", icon: Gift },
 ]
 
 const DRAWER_GROUPS: DrawerGroup[] = [
-  { label: "VALORANT HUB", items: VALORANT_HUB_ITEMS },
-  { label: "CÔNG CỤ", items: CONG_CU_ITEMS },
-  { label: "GIAO DỊCH", items: GIAO_DICH_ITEMS },
+  { label: "HƯỚNG DẪN", items: VALORANT_HUB_ITEMS },
+  { label: "NẠP TIỀN", items: NAP_TIEN_ITEMS },
+  { label: "HACK FREE MIỄN PHÍ", items: HACK_FREE_ITEMS },
 ]
 
 function NavDropdown({ label, items }: { label: string; items: DropdownItem[] }) {
@@ -160,10 +155,12 @@ export function SiteHeaderClient({
     return () => window.removeEventListener("scroll", onScroll)
   }, [])
 
-  // The captured logotype is two lines: a big first word and a small tail.
-  // "Menzu Valorant" splits the same way any two-part shop name would.
-  const [brandWord, ...brandRest] = brand.name.trim().split(/\s+/);
-  const brandTail = brandRest.join(" ");
+  // The logotype's big line is the name's first word; the small line is the
+  // shop's tagline, fixed here rather than derived from the rest of the name —
+  // the preloader and metadata read brand.name whole, so restyling this tail
+  // must never reword them.
+  const [brandWord] = brand.name.trim().split(/\s+/);
+  const brandTail = "hack là thích";
 
   return (
     <nav
@@ -253,16 +250,17 @@ export function SiteHeaderClient({
           </div>
 
           <div className="hidden lg:flex items-center gap-5 h-full">
-            <NavDropdown label="VALORANT HUB" items={VALORANT_HUB_ITEMS} />
-            <NavDropdown label="CÔNG CỤ" items={CONG_CU_ITEMS} />
-            <NavDropdown label="GIAO DỊCH" items={GIAO_DICH_ITEMS} />
+            <NavDropdown label="HƯỚNG DẪN" items={VALORANT_HUB_ITEMS} />
+            <NavDropdown label="NẠP TIỀN" items={NAP_TIEN_ITEMS} />
+            {/* A plain link, per the shop — the status board is one page.
+                "#" until that page exists. */}
             <a
               href="#"
               className="relative flex items-center gap-1.5 px-3 py-2 rounded-lg text-[11px] font-extrabold uppercase tracking-widest text-neutral-200 hover:text-[var(--menzu-accent)] transition-colors duration-200 ease-[ease] after:absolute after:bottom-1.5 after:inset-x-3 after:h-[2px] after:origin-left after:scale-x-0 after:rounded-full after:bg-[var(--menzu-accent)] after:transition-transform after:duration-200 hover:after:scale-x-100"
             >
-              <Gift size={14} />
-              NHẬN ACC FREE
+              TRẠNG THÁI HACK
             </a>
+            <NavDropdown label="HACK FREE MIỄN PHÍ" items={HACK_FREE_ITEMS} />
           </div>
         </div>
 
