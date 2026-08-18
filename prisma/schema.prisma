@@ -558,6 +558,41 @@ model ProductSkin {
   @@map("product_skins")
 }
 
+/// One picture per weapon, shared by every account that lists it.
+///
+/// A library rather than a column on ProductSkin, because the same weapon shows
+/// up on dozens of accounts and sourcing its picture once is the whole point:
+/// filling it in per row would mean finding the same M200 image again for every
+/// account that happens to carry one.
+///
+/// Joined by text, not by a foreign key. Skin names are typed by hand — there
+/// is no weapon table for them to point at — so the name itself is the only
+/// thing tying an account's line to a picture.
+model WeaponImage {
+  id        String   @id @default(cuid())
+  /// The lookup key: `name` lowercased with runs of whitespace collapsed, so a
+  /// list typed "m200  dominator" still finds the picture saved as "M200
+  /// Dominator". Unique, which is what makes saving the same weapon twice an
+  /// update rather than a second copy.
+  key       String   @unique
+  /// As the shop typed it — what the library list shows.
+  name      String
+  /// Path under /public. Remote pictures are downloaded rather than hotlinked:
+  /// a card loading from someone else's CDN is slower, breaks the day they move
+  /// the file, and cannot be served by next/image at all without allowing that
+  /// host to put anything on the page.
+  url       String
+  width     Int
+  height    Int
+  /// Where it was fetched from, kept so an image pasted from a wiki can be told
+  /// apart from one uploaded off a disk — and re-fetched if it ever needs to be.
+  sourceUrl String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt @default(now())
+
+  @@map("weapon_images")
+}
+
 /// One purchasable duration of a software product — the "1 ngày / 7 ngày /
 /// 30 ngày / Vĩnh viễn" row on its page.
 ///
