@@ -72,7 +72,8 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
 
       <main className="flex-1 relative z-20 w-full flex flex-col">
         <div className="w-full">
-          <div className="max-w-[1320px] mx-auto px-4 lg:px-6 py-12">
+          {/* pb-24 matches the account page's resting gap before the footer. */}
+          <div className="max-w-[1320px] mx-auto px-4 lg:px-6 pt-12 pb-24">
             <Breadcrumb
               items={[{ label: "Trang chủ", href: "/" }, { label: data.name }]}
             />

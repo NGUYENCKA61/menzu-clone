@@ -58,7 +58,8 @@ export default async function AccountDetailPage({ params }: PageProps) {
   if (!account) notFound();
 
   const [related, inventory] = await Promise.all([
-    getRelatedProducts(account.code, account.categorySlug),
+    // Three, matching the grid's columns — a fourth would sit alone on row two.
+    getRelatedProducts(account.code, account.categorySlug, 3),
     getInventory(account.code),
   ]);
 
@@ -91,8 +92,11 @@ export default async function AccountDetailPage({ params }: PageProps) {
       <main className="flex-1 relative z-20 w-full flex flex-col">
         <div className="w-full">
           {/* Same 32px of air under the fixed header as the software page —
-              the two detail pages should hang their breadcrumbs at one height. */}
-          <div className="max-w-[1320px] mx-auto px-4 lg:px-6 pt-8">
+              the two detail pages should hang their breadcrumbs at one height.
+              pb-24 is the resting gap before the footer's payment strip, on
+              the container so it holds whether or not "Tài Khoản Tương Tự"
+              rendered. */}
+          <div className="max-w-[1320px] mx-auto px-4 lg:px-6 pt-8 pb-24">
             <Breadcrumb
               items={[
                 { label: "Trang chủ", href: "/" },
@@ -123,7 +127,10 @@ export default async function AccountDetailPage({ params }: PageProps) {
                 <h2 className="text-xl sm:text-2xl font-black uppercase tracking-wider text-white mb-8">
                   Tài Khoản Tương Tự
                 </h2>
-                <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+                {/* The category page's grid, so a card here is the same size
+                    as the one the customer just came from — four columns made
+                    them read as thumbnails of themselves. */}
+                <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:gap-8">
                   {related.map((p) => (
                     <ProductCard key={p.code} product={p} />
                   ))}
