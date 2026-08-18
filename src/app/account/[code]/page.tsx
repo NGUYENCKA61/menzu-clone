@@ -32,7 +32,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     `Account Valorant mã ${code} — rank ${account.rank}, ${account.weaponSkins} skin súng, ` +
     `${account.agents} agent, level ${account.level}. Giá ${formatVnd(account.price)}đ. ` +
     `Bàn giao ngay sau khi thanh toán.`;
-  const image = `/sites/menzu-lol-f7ae197a/root-8a5edab2/images/account/${code}.webp`;
+  const image =
+    account.imageUrl ??
+    `/sites/menzu-lol-f7ae197a/root-8a5edab2/images/account/${code}.webp`;
 
   return {
     title,
@@ -67,7 +69,9 @@ export default async function AccountDetailPage({ params }: PageProps) {
           code: account.code,
           price: account.price,
           oldPrice: account.oldPrice,
-          imageUrl: `/sites/menzu-lol-f7ae197a/root-8a5edab2/images/account/${account.code}.webp`,
+          imageUrl:
+            account.imageUrl ??
+            `/sites/menzu-lol-f7ae197a/root-8a5edab2/images/account/${account.code}.webp`,
           categoryName: account.categoryName,
           rank: account.rank,
           weaponSkins: account.weaponSkins,
@@ -86,7 +90,9 @@ export default async function AccountDetailPage({ params }: PageProps) {
 
       <main className="flex-1 relative z-20 w-full flex flex-col">
         <div className="w-full">
-          <div className="max-w-[1320px] mx-auto px-4 lg:px-6">
+          {/* Same 32px of air under the fixed header as the software page —
+              the two detail pages should hang their breadcrumbs at one height. */}
+          <div className="max-w-[1320px] mx-auto px-4 lg:px-6 pt-8">
             <Breadcrumb
               items={[
                 { label: "Trang chủ", href: "/" },
@@ -100,7 +106,12 @@ export default async function AccountDetailPage({ params }: PageProps) {
 
             <div className="w-full max-w-[1320px] mx-auto flex flex-col">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-                <AccountGallery code={account.code} viewers={account.viewers} />
+                <AccountGallery
+                  code={account.code}
+                  imageUrl={account.imageUrl}
+                  images={account.images}
+                  viewers={account.viewers}
+                />
                 <AccountBuyPanel account={account} />
               </div>
 

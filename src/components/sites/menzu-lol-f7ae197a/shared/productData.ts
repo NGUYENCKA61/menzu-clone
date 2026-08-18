@@ -9,33 +9,62 @@ export interface ProductTier {
   count: number;
 }
 
+/**
+ * One weapon on a listing card.
+ *
+ * The picture is optional on purpose: sourcing one is manual work, and a card
+ * that refused to list a weapon until someone had found its picture would make
+ * the shop's inventory hostage to an errand. Named now, illustrated later.
+ */
+export interface ProductSkinChip {
+  name: string;
+  imageUrl: string | null;
+}
+
 export interface Product {
   code: string; // "VLR2077"
+  /**
+   * The shop's own picture for this account, when one has been uploaded.
+   * Absent or null, the card falls back to the by-code path under
+   * /images/account/ — which is also why the scraped fixture below never
+   * needed the field.
+   */
+  imageUrl?: string | null;
   rank: string; // "GOLD 1" | "Unranked"
+  /**
+   * The two labelled numbers on the card's stat strip — "VIP: 7",
+   * "VIP INGAME: 9". Zero (or absent, as in the fixture below) hides its
+   * entry rather than printing a meaningless "VIP: 0".
+   */
+  vip?: number;
+  vipIngame?: number;
   skins: number; // 61
   tiers: ProductTier[]; // omits tiers with no count
   tag: string | null; // "DROP MAIL" or null
   /**
-   * The first few weapon-skin names, drawn as chips — "M200 Dominator".
+   * The first few weapon skins, drawn as picture tiles where the library has a
+   * picture and as name pills where it does not.
    *
    * Optional because the fixture below was scraped before names were kept, and
-   * an account whose skins have not been listed yet simply shows no chips
-   * rather than a row of empty boxes.
+   * an account whose skins have not been listed yet simply shows nothing rather
+   * than a row of empty boxes.
    */
-  skinNames?: string[];
+  skinChips?: ProductSkinChip[];
   extraSkins: number; // skins past the chips shown -> "+11" chip
   oldPrice: number; // 7200000
   price: number; // 3960000
 }
 
 /**
- * How many skin names a card prints before the rest collapse into "+N".
+ * How many skin tiles a card carries before the rest collapse into "+N".
+ * Eight, as on the original menzu card — the strip steps sideways on a timer,
+ * so it holds more tiles than fit and the motion is what reveals them.
  *
  * Shared with the queries that build the card view so the count and the chips
  * cannot disagree — a "+N" computed against a different number than was drawn
  * is how a card ends up claiming 57 skins while showing 61.
  */
-export const SKIN_CHIP_COUNT = 4;
+export const SKIN_CHIP_COUNT = 8;
 
 const ACCOUNT_IMAGE_BASE_PATH =
   "/sites/menzu-lol-f7ae197a/root-8a5edab2/images/account";

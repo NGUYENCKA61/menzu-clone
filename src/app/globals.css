@@ -472,3 +472,11 @@
     animation: none;
   }
 }
+
+/* While an image lightbox is up, the fixed header steps aside — at 90% black
+   the backdrop still lets it glow through above the picture. The nav's own
+   transition animates the hand-off both ways. */
+body.lightbox-open .site-nav {
+  opacity: 0;
+  pointer-events: none;
+}

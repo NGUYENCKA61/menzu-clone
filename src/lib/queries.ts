@@ -3,6 +3,7 @@ import "server-only";
 import type { Prisma } from "@prisma/client";
 
 import { db } from "@/lib/db";
+import { weaponKey } from "@/lib/weaponImages";
 import type { AccountDetail } from "@/components/sites/menzu-lol-f7ae197a/shared/AccountBuyPanel";
 import type { SoftwareDetail } from "@/components/sites/menzu-lol-f7ae197a/shared/SoftwareBuyPanel";
 import type { SoftwareCardView } from "@/components/sites/menzu-lol-f7ae197a/shared/SoftwareCard";
@@ -75,30 +76,71 @@ function countKind(skins: SkinRow[], kind: string): number {
 function toProductCard(
   row: {
     code: string;
+    imageUrl: string | null;
     rank: string;
+    vp: number;
+    rp: number;
     oldPrice: bigint;
     tags: { label: string }[];
     skins: (SkinRow & { name: string })[];
   },
   price: bigint | number,
+  images: Map<string, string>,
 ): Product {
   const total = countKind(row.skins, "WEAPON_SKIN");
-  const skinNames = row.skins
-    .filter((s) => s.kind === "WEAPON_SKIN")
-    .slice(0, SKIN_CHIP_COUNT)
-    .map((s) => s.name);
+  const names = cardSkinNames(row.skins);
 
   return {
     code: row.code,
+    imageUrl: row.imageUrl,
     rank: row.rank,
+    // The vp/rp columns were Valorant currencies; on this shop's accounts they
+    // carry the card's two labelled numbers — VIP and VIP INGAME. Zero means
+    // "not filled in" and the card hides the entry.
+    vip: row.vp,
+    vipIngame: row.rp,
     skins: total,
     tiers: toTiers(row.skins),
     tag: row.tags[0]?.label ?? null,
-    skinNames,
-    extraSkins: Math.max(0, total - skinNames.length),
+    skinChips: names.map((name) => ({
+      name,
+      imageUrl: images.get(weaponKey(name)) ?? null,
+    })),
+    extraSkins: Math.max(0, total - SKIN_CHIP_COUNT),
     oldPrice: Number(row.oldPrice),
     price: Number(price),
   };
+}
+
+/** The weapon names a card actually draws — the rest are only counted. */
+function cardSkinNames(skins: (SkinRow & { name: string })[]): string[] {
+  return skins
+    .filter((s) => s.kind === "WEAPON_SKIN")
+    .slice(0, SKIN_CHIP_COUNT)
+    .map((s) => s.name);
+}
+
+/**
+ * Pictures for a page of cards, keyed by weapon, in one query.
+ *
+ * Only the names a card will draw are asked for. An account can list hundreds
+ * of skins and a grid holds twelve of them, so looking up every name on the
+ * page would fetch thousands of rows to use forty-eight of them.
+ */
+async function weaponImages(
+  rows: { skins: (SkinRow & { name: string })[] }[],
+): Promise<Map<string, string>> {
+  const keys = new Set<string>();
+  for (const row of rows) {
+    for (const name of cardSkinNames(row.skins)) keys.add(weaponKey(name));
+  }
+  if (keys.size === 0) return new Map();
+
+  const found = await db.weaponImage.findMany({
+    where: { key: { in: [...keys] } },
+    select: { key: true, url: true },
+  });
+  return new Map(found.map((i) => [i.key, i.url]));
 }
 
 /**
@@ -278,7 +320,10 @@ export async function getCategoryPage(
     }),
   ]);
 
-  const sale = await runningSalePrices(rows.map((p) => p.id));
+  const [sale, images] = await Promise.all([
+    runningSalePrices(rows.map((p) => p.id)),
+    weaponImages(rows),
+  ]);
 
   return {
     name: category.name,
@@ -301,7 +346,7 @@ export async function getCategoryPage(
       })),
       downloadUrl: s.downloadUrl,
     })),
-    products: rows.map((p) => toProductCard(p, sale.get(p.id) ?? p.price)),
+    products: rows.map((p) => toProductCard(p, sale.get(p.id) ?? p.price, images)),
   };
 }
 
@@ -335,6 +380,7 @@ export async function getAccountDetail(
       category: { select: { slug: true, name: true } },
       tags: { select: { label: true } },
       skins: { select: { kind: true, tier: true } },
+      images: { select: { url: true }, orderBy: { sortOrder: "asc" } },
     },
   });
   if (!p) return null;
@@ -343,6 +389,8 @@ export async function getAccountDetail(
 
   return {
     code: p.code,
+    imageUrl: p.imageUrl,
+    images: p.images.map((i) => i.url),
     rank: p.rank,
     lastRank: p.lastRank,
     weaponSkins: countKind(p.skins, "WEAPON_SKIN"),
@@ -438,7 +486,8 @@ export async function getRelatedProducts(
     },
   });
 
-  return rows.map((p) => toProductCard(p, p.price));
+  const images = await weaponImages(rows);
+  return rows.map((p) => toProductCard(p, p.price, images));
 }
 
 // ---------------------------------------------------------------------------

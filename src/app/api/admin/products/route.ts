@@ -155,6 +155,10 @@ export async function PATCH(request: Request) {
     code?: string;
     status?: string;
     price?: number;
+    imageUrl?: string;
+    tag?: string;
+    vip?: number;
+    vipIngame?: number;
   } | null;
 
   const code = body?.code;
@@ -171,7 +175,39 @@ export async function PATCH(request: Request) {
       ? BigInt(Math.floor(Number(body.price)))
       : undefined;
 
-  if (!status && price === undefined) {
+  // Empty string means "back to the default picture": the storefront falls
+  // back to the by-code path when this is null, so clearing is a real state
+  // and not an error.
+  const imageUrl =
+    body?.imageUrl !== undefined ? body.imageUrl.trim() || null : undefined;
+
+  // Same shape for the card's corner pill — "DROP MAIL". Empty clears it.
+  const tag = body?.tag !== undefined ? body.tag.trim() || null : undefined;
+  if (tag && tag.length > 30) {
+    return NextResponse.json({ error: "Tag tối đa 30 ký tự" }, { status: 400 });
+  }
+
+  // The strip's two labelled numbers, stored in the vp/rp columns. Zero is a
+  // real value — it is how the shop takes an entry off the card.
+  const readCount = (value: number | undefined) => {
+    if (value === undefined) return undefined;
+    const n = Math.floor(Number(value));
+    return Number.isFinite(n) && n >= 0 && n <= 1_000_000 ? n : null;
+  };
+  const vip = readCount(body?.vip);
+  const vipIngame = readCount(body?.vipIngame);
+  if (vip === null || vipIngame === null) {
+    return NextResponse.json({ error: "Chỉ số VIP không hợp lệ" }, { status: 400 });
+  }
+
+  if (
+    !status &&
+    price === undefined &&
+    imageUrl === undefined &&
+    tag === undefined &&
+    vip === undefined &&
+    vipIngame === undefined
+  ) {
     return NextResponse.json({ error: "Không có thay đổi" }, { status: 400 });
   }
 
@@ -180,8 +216,27 @@ export async function PATCH(request: Request) {
 
   await db.product.update({
     where: { code },
-    data: { ...(status ? { status } : {}), ...(price !== undefined ? { price } : {}) },
+    data: {
+      ...(status ? { status } : {}),
+      ...(price !== undefined ? { price } : {}),
+      ...(imageUrl !== undefined ? { imageUrl } : {}),
+      ...(vip !== undefined ? { vp: vip } : {}),
+      ...(vipIngame !== undefined ? { rp: vipIngame } : {}),
+    },
   });
+
+  // Tags are rows, not a column, and the card only reads the first — so
+  // "set the tag" is spelled replace-all: clear what is there, write the one
+  // given. Kept outside the update above because a tag-only PATCH is the
+  // common call and must not trip the "no change" guard on products.
+  if (tag !== undefined) {
+    await db.$transaction([
+      db.productTag.deleteMany({ where: { productId: product.id } }),
+      ...(tag
+        ? [db.productTag.create({ data: { productId: product.id, label: tag } })]
+        : []),
+    ]);
+  }
 
   return NextResponse.json({ ok: true });
 }

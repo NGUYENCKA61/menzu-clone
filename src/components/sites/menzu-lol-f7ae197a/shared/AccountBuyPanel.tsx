@@ -3,11 +3,15 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { X } from "lucide-react";
+import { Headphones, RefreshCw, ShieldCheck, X, Zap } from "lucide-react";
 import { formatVnd } from "./productData";
 
 export interface AccountDetail {
   code: string;
+  /** The shop's uploaded picture, or null to fall back to the by-code path. */
+  imageUrl: string | null;
+  /** Extra screenshots after the main picture; the gallery arrows page through. */
+  images: string[];
   rank: string;
   lastRank: string | null;
   weaponSkins: number;
@@ -39,8 +43,13 @@ const STAT_ROW_CLASS = "flex items-center justify-between py-2.5 border-b border
 const STAT_LABEL_CLASS = "text-[11px] font-black uppercase tracking-widest text-neutral-500";
 const STAT_VALUE_CLASS = "text-sm font-bold text-white";
 
-const SECONDARY_BUTTON_CLASS =
-  "w-full rounded-2xl border border-white/10 bg-white/5 hover:bg-white/10 text-white font-bold py-3.5 text-xs uppercase tracking-widest transition-colors";
+/** The software panel's four reassurances, with the delivery line made ours. */
+const TRUST = [
+  { icon: Zap, label: "Giao acc tự động" },
+  { icon: ShieldCheck, label: "Thanh toán an toàn" },
+  { icon: RefreshCw, label: "Bảo hành tài khoản" },
+  { icon: Headphones, label: "Hỗ trợ 24/7" },
+];
 
 /**
  * Right-hand purchase panel on the account-detail page: stat rows, price
@@ -178,80 +187,94 @@ export function AccountBuyPanel({ account }: AccountBuyPanelProps) {
   const amountToTopUp = Math.max(payable - balance, 0);
   const canAfford = balance >= payable;
 
-  const numericStats: { label: string; value: string }[] = [
-    { label: "Level", value: String(account.level) },
-    { label: "VP", value: String(account.vp) },
-    { label: "RP", value: String(account.rp) },
-    { label: "KC", value: formatVnd(account.kc) },
-  ];
+  // Rows with nothing to say stay off the page: a fresh account showing
+  // "VIP 0 / KC 0" would be noise dressed as facts. Labels follow the card's
+  // strip — the vp/rp columns carry VIP and VIP INGAME on this shop.
+  const numericStats = [
+    { label: "Level", value: String(account.level), show: account.level > 0 },
+    { label: "VIP", value: String(account.vp), show: account.vp > 0 },
+    { label: "VIP Ingame", value: String(account.rp), show: account.rp > 0 },
+    { label: "KC", value: formatVnd(account.kc), show: account.kc > 0 },
+  ].filter((s) => s.show);
 
   return (
-    <div className="flex flex-col">
-      <div className={STAT_ROW_CLASS}>
-        <span className={STAT_LABEL_CLASS}>Rank</span>
-        <div className="flex flex-col items-end gap-1.5">
-          <span className={STAT_VALUE_CLASS}>{account.rank}</span>
-          {account.lastRank !== null && (
-            <span className="text-[10px] text-neutral-500 font-bold uppercase tracking-wider">
-              LAST: {account.lastRank}
-            </span>
-          )}
-          <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg border border-white/10 bg-white/5">
-            <span className="text-[9px] font-black uppercase tracking-wider text-neutral-400">
-              TRACKER.GG
-            </span>
-            <a
-              href="#"
-              className="text-[9px] font-bold text-indigo-400 hover:text-indigo-300 transition-colors"
-            >
-              xem profile
-            </a>
-          </div>
-        </div>
-      </div>
-
-      <div className={STAT_ROW_CLASS}>
-        <span className={STAT_LABEL_CLASS}>Skins</span>
-        <span className={STAT_VALUE_CLASS}>{account.weaponSkins} Skins</span>
-      </div>
-
-      {numericStats.map((stat) => (
-        <div key={stat.label} className={STAT_ROW_CLASS}>
-          <span className={STAT_LABEL_CLASS}>{stat.label}</span>
-          <span className={STAT_VALUE_CLASS}>{stat.value}</span>
-        </div>
-      ))}
-
+    <div className="flex flex-col gap-6">
+      {/* The corner pill from the listing card, leading the panel the way the
+          software page leads with its status pill. */}
       {account.tag !== null && (
-        <div className={STAT_ROW_CLASS}>
-          <div className="flex items-center gap-2">
-            <span className="px-2 py-1 rounded-lg border border-orange-500/30 bg-orange-500/10 text-orange-400 text-[10px] font-bold">
-              {account.tag}
+        <span className="self-start inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-3 py-1.5">
+          <span className="text-[10px] font-black uppercase tracking-widest text-[#ff6c88]">
+            ✉ {account.tag}
+          </span>
+          {account.mailType ? (
+            <span className="text-[10px] font-bold text-neutral-400">
+              {account.mailType}
             </span>
-            <span className="text-[10px] text-neutral-400">{account.mailType}</span>
-          </div>
-          <a
-            href="#"
-            className="text-[10px] font-black text-[var(--brand)] uppercase tracking-wider"
-          >
-            TÌM HIỂU
-          </a>
-        </div>
+          ) : null}
+        </span>
       )}
 
-      <div className="py-5">
-        <div className="flex items-center gap-2 mb-1.5">
-          <span className="px-2 py-1 rounded-lg bg-red-500/15 border border-red-500/30 text-red-400 text-[11px] font-black">
-            -{pct}%
-          </span>
-          <span className="text-sm text-neutral-500 line-through">
-            {formatVnd(account.oldPrice)}₫
-          </span>
+      <div className="space-y-3">
+        <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-white">
+          Mã #{account.code}
+        </h1>
+        <p className="text-sm leading-relaxed text-neutral-400 max-w-[560px]">
+          Tài khoản game nhiều vật phẩm, inventory đẹp và sẵn sàng giao ngay.
+          Thông tin tài khoản được kiểm tra trước khi bàn giao.
+        </p>
+      </div>
+
+      <div className="flex flex-col">
+        <span className="pb-1 text-[10px] font-black uppercase tracking-widest text-neutral-500">
+          Thông tin tài khoản:
+        </span>
+        <div className={STAT_ROW_CLASS}>
+          <span className={STAT_LABEL_CLASS}>Rank</span>
+          <div className="flex flex-col items-end gap-1">
+            <span className={STAT_VALUE_CLASS}>{account.rank}</span>
+            {account.lastRank !== null && (
+              <span className="text-[10px] text-neutral-500 font-bold uppercase tracking-wider">
+                LAST: {account.lastRank}
+              </span>
+            )}
+          </div>
         </div>
-        <div className="flex items-baseline">
-          <span className="text-3xl font-black text-white">{formatVnd(account.price)}</span>
-          <span className="text-sm font-bold text-neutral-400 ml-1">VND</span>
+
+        <div className={STAT_ROW_CLASS}>
+          <span className={STAT_LABEL_CLASS}>Skins</span>
+          <span className={STAT_VALUE_CLASS}>{account.weaponSkins} Skins</span>
         </div>
+
+        {numericStats.map((stat) => (
+          <div key={stat.label} className={STAT_ROW_CLASS}>
+            <span className={STAT_LABEL_CLASS}>{stat.label}</span>
+            <span className={STAT_VALUE_CLASS}>{stat.value}</span>
+          </div>
+        ))}
+      </div>
+
+      <div className="space-y-2">
+        {pct > 0 ? (
+          <div className="flex items-center gap-2">
+            <span className="px-2 py-1 rounded-lg bg-red-500/15 border border-red-500/30 text-red-400 text-[11px] font-black">
+              -{pct}%
+            </span>
+            <span className="text-sm text-neutral-500 line-through">
+              {formatVnd(account.oldPrice)}đ
+            </span>
+          </div>
+        ) : null}
+        <p className="text-4xl font-black text-white">{formatVnd(account.price)}đ</p>
+        <p className="flex items-center gap-2 text-[13px] font-semibold">
+          <span
+            className={`h-1.5 w-1.5 rounded-full ${
+              account.sold ? "bg-neutral-600" : "bg-emerald-500"
+            }`}
+          />
+          <span className={account.sold ? "text-neutral-500" : "text-emerald-400"}>
+            {account.sold ? "Đã bán" : "Còn hàng"}
+          </span>
+        </p>
       </div>
 
       {/* "Cọc / Trả Góp" and "Tiêu trước trả sau" are deliberately absent.
@@ -259,23 +282,43 @@ export function AccountBuyPanel({ account }: AccountBuyPanelProps) {
           count, interest, credit limit — nobody has decided, and a button that
           opens nothing is worse than no button. Product.depositFrom stays in
           the schema so putting them back is a UI change, not a migration. */}
-      <div className="flex flex-col gap-3">
+      <div className="space-y-3">
         <button
           type="button"
+          disabled={account.sold}
           onClick={() => setOpen(true)}
-          className="w-full rounded-2xl bg-[var(--brand)] hover:bg-[var(--brand-dark)] text-white font-black py-4 uppercase tracking-widest text-sm transition-colors"
+          className="w-full h-14 rounded-2xl bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] disabled:opacity-50 transition-colors text-[13px] font-black uppercase tracking-widest text-white"
         >
-          Mua Ngay
+          Mua ngay
         </button>
 
         {/* A real destination now — /trade takes the request and an admin
             quotes it, so this no longer needs a "contact us" notice. */}
         <Link
           href="/trade"
-          className={`${SECONDARY_BUTTON_CLASS} flex items-center justify-center`}
+          className="flex w-full h-14 items-center justify-center rounded-2xl border border-[var(--menzu-accent)]/70 bg-white/[0.02] hover:bg-white/[0.06] transition-colors text-[13px] font-black uppercase tracking-widest text-white"
         >
           Thu cũ đổi mới
         </Link>
+      </div>
+
+      <div className="grid grid-cols-2 sm:grid-cols-4 rounded-2xl border border-white/10 bg-white/[0.02] overflow-hidden">
+        {TRUST.map((t, index) => {
+          const Icon = t.icon;
+          return (
+            <div
+              key={t.label}
+              className={`flex flex-col items-center gap-2 px-3 py-5 text-center ${
+                index < TRUST.length - 1 ? "sm:border-r border-white/[0.07]" : ""
+              }`}
+            >
+              <Icon size={18} className="text-[var(--menzu-accent)]" />
+              <span className="text-[11px] font-semibold text-neutral-400 leading-tight">
+                {t.label}
+              </span>
+            </div>
+          );
+        })}
       </div>
 
       {open && (

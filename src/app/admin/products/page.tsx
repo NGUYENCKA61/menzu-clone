@@ -5,9 +5,23 @@ import { AdminCategories } from "@/components/sites/menzu-lol-f7ae197a/shared/Ad
 import { AdminProducts } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminProducts";
 import { AdminShell } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminShell";
 import { AdminSoftware } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminSoftware";
+import { AdminWeaponImages } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminWeaponImages";
 import { getAdmin } from "@/lib/admin";
 import { db } from "@/lib/db";
 import { listAdminCategories } from "@/lib/queries";
+import { weaponKey } from "@/lib/weaponImages";
+
+/** How many of the un-illustrated weapons the worklist offers at a time. */
+const MISSING_SHOWN = 24;
+
+/**
+ * Rows the scrape wrote when it could read a skin's tier but not its name —
+ * "EXCLUSIVE #1", "PREMIUM #2". They are placeholders, not weapons, and they
+ * repeat across every scraped account, so by frequency alone they would fill the
+ * whole "needs a picture" list with the only entries on it that can never have
+ * one. Hidden from that list only; the cards still print whatever is stored.
+ */
+const PLACEHOLDER_SKIN = /^(ULTRA|EXCLUSIVE|PREMIUM|DELUXE|SELECT) #\d+$/i;
 
 export const metadata: Metadata = { title: "Menzu Admin | Sản phẩm" };
 export const dynamic = "force-dynamic";
@@ -27,6 +41,8 @@ export default async function AdminProductsPage() {
       include: {
         category: { select: { name: true } },
         _count: { select: { orders: true } },
+        tags: { select: { label: true } },
+        images: { select: { id: true, url: true }, orderBy: { sortOrder: "asc" } },
         // Ordered by id, which rises with insertion, so the editor hands the
         // list back in the order it was saved — the storefront card reads the
         // same order, and a shop that put its best weapon first should see that
@@ -65,6 +81,26 @@ export default async function AdminProductsPage() {
     listAdminCategories(),
   ]);
 
+  // The picture library, and how often each weapon is listed across the shop.
+  // A second round trip rather than a sixth entry above, because the worklist is
+  // a tally over the skin table rather than anything the queries above return.
+  const [weaponImages, skinNameCounts] = await Promise.all([
+    db.weaponImage.findMany({ orderBy: { updatedAt: "desc" }, take: 200 }),
+    // Most-listed weapons first: with hundreds of names in the shop, the ones
+    // worth finding a picture for are the ones the most accounts carry.
+    db.productSkin.groupBy({
+      by: ["name"],
+      where: { kind: "WEAPON_SKIN", product: { deletedAt: null } },
+      _count: { name: true },
+      orderBy: { _count: { name: "desc" } },
+    }),
+  ]);
+
+  const illustrated = new Set(weaponImages.map((w) => w.key));
+  const missing = skinNameCounts.filter(
+    (s) => !illustrated.has(weaponKey(s.name)) && !PLACEHOLDER_SKIN.test(s.name),
+  );
+
   return (
     <AdminShell
       title="Sản phẩm"
@@ -102,6 +138,11 @@ export default async function AdminProductsPage() {
               oldPrice: Number(p.oldPrice),
               categoryName: p.category.name,
               orderCount: p._count.orders,
+              imageUrl: p.imageUrl ?? "",
+              gallery: p.images,
+              tag: p.tags[0]?.label ?? "",
+              vip: p.vp,
+              vipIngame: p.rp,
               skinNames: p.skins.map((s) => s.name),
             }))}
             removed={removed.map((p) => ({
@@ -149,6 +190,31 @@ export default async function AdminProductsPage() {
               })),
             }))}
             categories={categories.map((c) => ({ slug: c.slug, name: c.name }))}
+          />
+        </section>
+
+        {/* Last, because it is the only section that is not about putting
+            something on sale — an account lists its weapons and sells whether
+            or not their pictures have been found yet. */}
+        <section className="flex flex-col gap-4">
+          <div>
+            <h2 className={SECTION_TITLE}>4 · Kho ảnh súng</h2>
+            <p className={SECTION_NOTE}>
+              Mỗi cây súng một ảnh, dùng chung cho mọi tài khoản có cây đó — tìm
+              ảnh một lần, không phải làm lại theo từng acc. Card nào chưa có ảnh
+              thì hiện tên súng, vẫn bán bình thường.
+            </p>
+          </div>
+          <AdminWeaponImages
+            images={weaponImages.map((w) => ({
+              name: w.name,
+              url: w.url,
+              width: w.width,
+              height: w.height,
+              sourceUrl: w.sourceUrl,
+            }))}
+            missing={missing.slice(0, MISSING_SHOWN).map((s) => s.name)}
+            missingTotal={missing.length}
           />
         </section>
       </div>

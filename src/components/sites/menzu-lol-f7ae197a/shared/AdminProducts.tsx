@@ -1,8 +1,9 @@
 "use client";
 
-import { RotateCcw, Swords, Trash2 } from "lucide-react";
+import { ImageIcon, Plus, RotateCcw, Swords, Trash2, Upload } from "lucide-react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { Fragment, useState } from "react";
+import { Fragment, useRef, useState } from "react";
 
 import { SKIN_CHIP_COUNT } from "./productData";
 
@@ -14,6 +15,15 @@ export interface AdminProductRow {
   oldPrice: number;
   categoryName: string;
   orderCount: number;
+  /** The uploaded picture path, or "" for the by-code default. */
+  imageUrl: string;
+  /** Extra screenshots the detail gallery pages through with its arrows. */
+  gallery: { id: string; url: string }[];
+  /** The card's corner pill — "DROP MAIL" — or "" for none. */
+  tag: string;
+  /** The stat strip's labelled numbers; 0 hides the entry on the card. */
+  vip: number;
+  vipIngame: number;
   /** Weapon skins, in the order the shop listed them. */
   skinNames: string[];
 }
@@ -75,6 +85,21 @@ export function AdminProducts({
   // once would push the row being worked on off the screen.
   const [editingSkins, setEditingSkins] = useState<string | null>(null);
   const [skinText, setSkinText] = useState("");
+
+  // The account whose picture editor is open, and the path being edited.
+  // Opening one editor closes the other for the same reason there is only one
+  // of each: the table is the screen's spine and blocks must not stack.
+  const [editingImage, setEditingImage] = useState<string | null>(null);
+  const [imageDraft, setImageDraft] = useState("");
+  const imageFileRef = useRef<HTMLInputElement>(null);
+  const galleryFileRef = useRef<HTMLInputElement>(null);
+
+  // The card's corner pill and stat numbers, edited together — they are the
+  // card-face metadata and share one save.
+  const [editingTag, setEditingTag] = useState<string | null>(null);
+  const [tagDraft, setTagDraft] = useState("");
+  const [vipDraft, setVipDraft] = useState("");
+  const [vipIngameDraft, setVipIngameDraft] = useState("");
 
   /** Returns the parsed body on success, null on failure. */
   async function call(
@@ -143,8 +168,148 @@ export function AdminProducts({
       return;
     }
     setEditingSkins(row.code);
+    setEditingImage(null);
+    setEditingTag(null);
     setSkinText(row.skinNames.join("\n"));
     setMsg(null);
+  }
+
+  /** Opens the picture editor prefilled with what the storefront is using. */
+  function toggleImage(row: AdminProductRow) {
+    if (editingImage === row.code) {
+      setEditingImage(null);
+      return;
+    }
+    setEditingImage(row.code);
+    setEditingSkins(null);
+    setEditingTag(null);
+    setImageDraft(row.imageUrl);
+    setMsg(null);
+  }
+
+  function toggleTag(row: AdminProductRow) {
+    if (editingTag === row.code) {
+      setEditingTag(null);
+      return;
+    }
+    setEditingTag(row.code);
+    setEditingSkins(null);
+    setEditingImage(null);
+    setTagDraft(row.tag);
+    // Zero renders as an empty field: it means "not on the card", and making
+    // the admin stare at literal zeros would invite leaving them there.
+    setVipDraft(row.vip > 0 ? String(row.vip) : "");
+    setVipIngameDraft(row.vipIngame > 0 ? String(row.vipIngame) : "");
+    setMsg(null);
+  }
+
+  async function handleSaveTag(row: AdminProductRow) {
+    const value = tagDraft.trim();
+    const data = await call("PATCH", {
+      code: row.code,
+      tag: value,
+      // An emptied field goes back to zero, which takes the entry off the card.
+      vip: Number(vipDraft.replace(/\D/g, "")) || 0,
+      vipIngame: Number(vipIngameDraft.replace(/\D/g, "")) || 0,
+    });
+    if (!data) return;
+    setEditingTag(null);
+    setMsg({ tone: "ok", text: `Đã lưu tag & chỉ số cho ${row.code}` });
+  }
+
+  /**
+   * Add one extra screenshot: through the shared uploader for the file, then
+   * the gallery route for the row — one motion for the admin either way.
+   */
+  async function handleGalleryFile(row: AdminProductRow, file: File) {
+    setBusy(true);
+    setMsg(null);
+    try {
+      const form = new FormData();
+      form.set("file", file);
+      const up = await fetch("/api/admin/products/image", { method: "POST", body: form });
+      const uploaded = (await up.json().catch(() => ({}))) as Record<string, unknown>;
+      if (!up.ok) {
+        setMsg({ tone: "err", text: (uploaded.error as string) ?? "Tải ảnh thất bại" });
+        return;
+      }
+      const res = await fetch("/api/admin/products/gallery", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ code: row.code, url: uploaded.url }),
+      });
+      const data = (await res.json().catch(() => ({}))) as Record<string, unknown>;
+      if (!res.ok) {
+        setMsg({ tone: "err", text: (data.error as string) ?? "Không thêm được ảnh phụ" });
+        return;
+      }
+      setMsg({ tone: "ok", text: `Đã thêm ảnh phụ cho ${row.code}` });
+      router.refresh();
+    } catch {
+      setMsg({ tone: "err", text: "Không kết nối được máy chủ" });
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function handleGalleryDelete(row: AdminProductRow, id: string) {
+    setBusy(true);
+    setMsg(null);
+    try {
+      const res = await fetch(`/api/admin/products/gallery?id=${encodeURIComponent(id)}`, {
+        method: "DELETE",
+      });
+      const data = (await res.json().catch(() => ({}))) as Record<string, unknown>;
+      if (!res.ok) {
+        setMsg({ tone: "err", text: (data.error as string) ?? "Không xoá được ảnh phụ" });
+        return;
+      }
+      setMsg({ tone: "ok", text: `Đã bỏ một ảnh phụ khỏi ${row.code}` });
+      router.refresh();
+    } catch {
+      setMsg({ tone: "err", text: "Không kết nối được máy chủ" });
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function handleSaveImage(row: AdminProductRow, value: string) {
+    const data = await call("PATCH", { code: row.code, imageUrl: value });
+    if (!data) return;
+    setEditingImage(null);
+    setMsg({
+      tone: "ok",
+      text: value.trim()
+        ? `Đã đổi ảnh cho ${row.code}`
+        : `${row.code} dùng lại ảnh mặc định theo mã`,
+    });
+  }
+
+  /**
+   * Upload straight off the disk, then save in the same motion — picking a
+   * file is already the decision, and a second "Lưu" after it would only be
+   * a chance to forget.
+   */
+  async function handleImageFile(row: AdminProductRow, file: File) {
+    setBusy(true);
+    setMsg(null);
+    try {
+      const form = new FormData();
+      form.set("file", file);
+      const res = await fetch("/api/admin/products/image", { method: "POST", body: form });
+      const data = (await res.json().catch(() => ({}))) as Record<string, unknown>;
+      if (!res.ok) {
+        setMsg({ tone: "err", text: (data.error as string) ?? "Tải ảnh thất bại" });
+        return;
+      }
+      setImageDraft(data.url as string);
+      setBusy(false);
+      await handleSaveImage(row, data.url as string);
+    } catch {
+      setMsg({ tone: "err", text: "Không kết nối được máy chủ" });
+    } finally {
+      setBusy(false);
+    }
   }
 
   async function handleSaveSkins(row: AdminProductRow) {
@@ -280,10 +445,10 @@ export function AdminProducts({
       </form>
 
       <div className="w-full overflow-x-auto rounded-2xl border border-white/10 bg-neutral-900/40">
-        <table className="w-full min-w-[860px] text-left">
+        <table className="w-full min-w-[980px] text-left">
           <thead>
             <tr className="border-b border-white/10">
-              {["Mã", "Danh mục", "Rank", "Súng", "Giá", "Trạng thái", ""].map((h) => (
+              {["Mã", "Ảnh", "Danh mục", "Rank", "Tag", "Súng", "Giá", "Trạng thái", ""].map((h) => (
                 <th
                   key={h}
                   className="px-5 py-3.5 text-[10px] font-black uppercase tracking-widest text-neutral-500 whitespace-nowrap"
@@ -298,8 +463,53 @@ export function AdminProducts({
               <Fragment key={p.code}>
                 <tr className="border-b border-white/5 last:border-0">
                   <td className="px-5 py-3 text-xs font-black text-white">#{p.code}</td>
+                  <td className="px-5 py-3">
+                    <button
+                      type="button"
+                      onClick={() => toggleImage(p)}
+                      title="Sửa ảnh của tài khoản này"
+                      className={`relative block h-9 w-14 overflow-hidden rounded-lg border transition-colors ${
+                        editingImage === p.code
+                          ? "border-[var(--brand)]/60"
+                          : "border-white/10 hover:border-white/30"
+                      }`}
+                    >
+                      {p.imageUrl ? (
+                        <Image
+                          src={p.imageUrl}
+                          alt={p.code}
+                          fill
+                          sizes="56px"
+                          className="object-cover"
+                        />
+                      ) : (
+                        // No upload yet: the storefront is showing the by-code
+                        // default, so an icon says "nothing chosen" better than
+                        // previewing a file that may not exist.
+                        <span className="grid h-full w-full place-items-center bg-neutral-950 text-neutral-600">
+                          <ImageIcon size={14} />
+                        </span>
+                      )}
+                    </button>
+                  </td>
                   <td className="px-5 py-3 text-xs text-neutral-400">{p.categoryName}</td>
                   <td className="px-5 py-3 text-xs text-neutral-300">{p.rank}</td>
+                  <td className="px-5 py-3">
+                    <button
+                      type="button"
+                      onClick={() => toggleTag(p)}
+                      title="Sửa tag góc phải của card"
+                      className={`inline-flex items-center rounded-lg border px-2.5 py-1 text-[11px] font-bold whitespace-nowrap transition-colors ${
+                        editingTag === p.code
+                          ? "border-[var(--brand)]/60 bg-[var(--brand)]/10 text-white"
+                          : p.tag
+                            ? "border-[var(--brand)]/40 bg-[var(--brand)]/10 text-[#ff6c88] hover:border-[var(--brand)]/60"
+                            : "border-white/10 text-neutral-500 hover:border-white/25 hover:text-white"
+                      }`}
+                    >
+                      {p.tag || "Thêm"}
+                    </button>
+                  </td>
                   <td className="px-5 py-3">
                     <button
                       type="button"
@@ -387,7 +597,7 @@ export function AdminProducts({
                     down, and pasting the lot at once has to work. */}
                 {editingSkins === p.code ? (
                   <tr className="border-b border-white/5 bg-neutral-950/60">
-                    <td colSpan={7} className="px-5 py-4">
+                    <td colSpan={9} className="px-5 py-4">
                       <div className="flex flex-col gap-3">
                         <div>
                           <label className={LABEL}>
@@ -422,6 +632,219 @@ export function AdminProducts({
                             className="h-9 px-4 rounded-xl border border-white/10 hover:bg-white/5 transition-colors text-[10px] font-black uppercase tracking-widest text-neutral-300"
                           >
                             Huỷ
+                          </button>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                ) : null}
+
+                {/* The picture editor. Choosing a file uploads and saves in one
+                    motion; the path field is for pasting a link by hand, and
+                    saving it empty goes back to the by-code default. */}
+                {editingImage === p.code ? (
+                  <tr className="border-b border-white/5 bg-neutral-950/60">
+                    <td colSpan={9} className="px-5 py-4">
+                      <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
+                        <div className="relative aspect-[16/10] w-full max-w-[240px] shrink-0 overflow-hidden rounded-xl border border-white/10 bg-neutral-950">
+                          {imageDraft ? (
+                            <Image
+                              src={imageDraft}
+                              alt={p.code}
+                              fill
+                              sizes="240px"
+                              className="object-cover"
+                            />
+                          ) : (
+                            <span className="grid h-full w-full place-items-center text-[11px] font-bold text-neutral-600">
+                              Ảnh mặc định theo mã
+                            </span>
+                          )}
+                        </div>
+
+                        <div className="flex w-full flex-col gap-3">
+                          <div>
+                            <label className={LABEL}>Ảnh của #{p.code}</label>
+                            <input
+                              value={imageDraft}
+                              onChange={(e) => setImageDraft(e.target.value)}
+                              placeholder="/uploads/accounts/… hoặc để trống dùng ảnh mặc định"
+                              className={FIELD}
+                            />
+                          </div>
+                          <div className="flex flex-wrap gap-2">
+                            <button
+                              type="button"
+                              disabled={busy}
+                              onClick={() => imageFileRef.current?.click()}
+                              className="inline-flex items-center gap-1.5 h-9 px-4 rounded-xl bg-[var(--brand)] hover:bg-[var(--brand-dark)] disabled:opacity-70 transition-colors text-[10px] font-black uppercase tracking-widest text-white"
+                            >
+                              <Upload size={12} />
+                              Chọn từ máy
+                            </button>
+                            <button
+                              type="button"
+                              disabled={busy}
+                              onClick={() => handleSaveImage(p, imageDraft)}
+                              className="h-9 px-4 rounded-xl border border-white/10 hover:bg-white/5 disabled:opacity-50 transition-colors text-[10px] font-black uppercase tracking-widest text-neutral-200"
+                            >
+                              Lưu đường dẫn
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setEditingImage(null)}
+                              className="h-9 px-4 rounded-xl border border-white/10 hover:bg-white/5 transition-colors text-[10px] font-black uppercase tracking-widest text-neutral-300"
+                            >
+                              Huỷ
+                            </button>
+                          </div>
+                          <p className="text-[11px] text-neutral-500">
+                            Chọn ảnh từ máy là lưu luôn. Ảnh hiện ở card ngoài cửa
+                            hàng, trang chi tiết và ảnh chia sẻ SEO.
+                          </p>
+
+                          {/* Extra screenshots: what the detail gallery's
+                              arrows page through. Separate from the main
+                              picture on purpose — that one is the card face,
+                              these are the tour behind it. */}
+                          <div className="border-t border-white/5 pt-3">
+                            <label className={LABEL}>
+                              Ảnh phụ ({p.gallery.length}/12) — khách lướt bằng mũi
+                              tên trên trang chi tiết
+                            </label>
+                            <div className="flex flex-wrap items-center gap-2">
+                              {p.gallery.map((g) => (
+                                <span
+                                  key={g.id}
+                                  className="group/thumb relative block h-12 w-[76px] overflow-hidden rounded-lg border border-white/10"
+                                >
+                                  <Image
+                                    src={g.url}
+                                    alt=""
+                                    fill
+                                    sizes="76px"
+                                    className="object-cover"
+                                  />
+                                  <button
+                                    type="button"
+                                    disabled={busy}
+                                    title="Bỏ ảnh này"
+                                    onClick={() => handleGalleryDelete(p, g.id)}
+                                    className="absolute inset-0 grid place-items-center bg-black/70 text-red-400 opacity-0 transition-opacity group-hover/thumb:opacity-100"
+                                  >
+                                    <Trash2 size={14} />
+                                  </button>
+                                </span>
+                              ))}
+                              <button
+                                type="button"
+                                disabled={busy || p.gallery.length >= 12}
+                                onClick={() => galleryFileRef.current?.click()}
+                                className="grid h-12 w-[76px] place-items-center rounded-lg border border-dashed border-white/20 text-neutral-500 transition-colors hover:border-white/40 hover:text-white disabled:opacity-40"
+                              >
+                                <Plus size={16} />
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+
+                        <input
+                          ref={imageFileRef}
+                          type="file"
+                          accept="image/png,image/jpeg,image/webp"
+                          hidden
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            e.target.value = "";
+                            if (file) void handleImageFile(p, file);
+                          }}
+                        />
+                        <input
+                          ref={galleryFileRef}
+                          type="file"
+                          accept="image/png,image/jpeg,image/webp"
+                          hidden
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            e.target.value = "";
+                            if (file) void handleGalleryFile(p, file);
+                          }}
+                        />
+                      </div>
+                    </td>
+                  </tr>
+                ) : null}
+
+                {/* The tag & stats editor: the pieces of card-face metadata
+                    that are typed rather than uploaded — the corner pill and
+                    the strip's two labelled numbers. Saved empty, each comes
+                    off the card. */}
+                {editingTag === p.code ? (
+                  <tr className="border-b border-white/5 bg-neutral-950/60">
+                    <td colSpan={9} className="px-5 py-4">
+                      <div className="flex flex-col gap-3">
+                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-[minmax(0,320px)_120px_120px]">
+                          <div>
+                            <label className={LABEL}>
+                              Tag góc phải card #{p.code}
+                            </label>
+                            <input
+                              value={tagDraft}
+                              onChange={(e) => setTagDraft(e.target.value)}
+                              maxLength={30}
+                              placeholder="DROP MAIL — trống là gỡ"
+                              className={FIELD}
+                            />
+                          </div>
+                          <div>
+                            <label className={LABEL}>VIP</label>
+                            <input
+                              inputMode="numeric"
+                              value={vipDraft}
+                              onChange={(e) => setVipDraft(e.target.value)}
+                              placeholder="7"
+                              className={FIELD}
+                            />
+                          </div>
+                          <div>
+                            <label className={LABEL}>VIP Ingame</label>
+                            <input
+                              inputMode="numeric"
+                              value={vipIngameDraft}
+                              onChange={(e) => setVipIngameDraft(e.target.value)}
+                              placeholder="9"
+                              className={FIELD}
+                            />
+                          </div>
+                        </div>
+                        <p className="text-[11px] text-neutral-500">
+                          VIP và VIP Ingame hiện trên dải chỉ số của card, cạnh
+                          Rank. Để trống ô nào thì card giấu chỉ số đó.
+                        </p>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <button
+                            type="button"
+                            disabled={busy}
+                            onClick={() => handleSaveTag(p)}
+                            className="h-9 px-4 rounded-xl bg-[var(--brand)] hover:bg-[var(--brand-dark)] disabled:opacity-70 transition-colors text-[10px] font-black uppercase tracking-widest text-white"
+                          >
+                            {busy ? "Đang lưu…" : "Lưu tag"}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setEditingTag(null)}
+                            className="h-9 px-4 rounded-xl border border-white/10 hover:bg-white/5 transition-colors text-[10px] font-black uppercase tracking-widest text-neutral-300"
+                          >
+                            Huỷ
+                          </button>
+                          {/* The one value this shop actually uses, one click
+                              away instead of retyped each time. */}
+                          <button
+                            type="button"
+                            onClick={() => setTagDraft("DROP MAIL")}
+                            className="h-9 px-3 rounded-xl border border-[var(--brand)]/40 bg-[var(--brand)]/10 hover:bg-[var(--brand)]/20 transition-colors text-[10px] font-black uppercase tracking-widest text-[#ff6c88]"
+                          >
+                            ✉ Drop Mail
                           </button>
                         </div>
                       </div>
