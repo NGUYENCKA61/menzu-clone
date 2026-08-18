@@ -23,7 +23,7 @@ import {
   type AnnouncementItem,
 } from "../shared/AnnouncementCenter";
 import { UserMenu, type HeaderUser } from "./UserMenu";
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { MobileDrawer, type DrawerGroup } from "./MobileDrawer"
 
 interface DropdownItem {
@@ -98,7 +98,7 @@ function NavDropdown({ label, items }: { label: string; items: DropdownItem[] })
           into the panel, which is where it spends most of the interaction. */}
       <button
         type="button"
-        className="flex items-center gap-2 px-3 py-2 rounded-lg text-[11px] font-extrabold uppercase tracking-widest text-neutral-200 group-hover:text-[var(--menzu-accent)] transition-colors duration-200 ease-[ease]"
+        className="relative flex items-center gap-2 px-3 py-2 rounded-lg text-[11px] font-extrabold uppercase tracking-widest text-neutral-200 group-hover:text-[var(--menzu-accent)] transition-colors duration-200 ease-[ease] after:absolute after:bottom-1.5 after:inset-x-3 after:h-[2px] after:origin-left after:scale-x-0 after:rounded-full after:bg-[var(--menzu-accent)] after:transition-transform after:duration-200 group-hover:after:scale-x-100"
       >
         {label}
         <ChevronDown size={14} />
@@ -148,14 +148,36 @@ export function SiteHeaderClient({
 }) {
   const [drawerOpen, setDrawerOpen] = useState(false)
 
+  // True once the page has scrolled past the top bar. Drives the condensed
+  // header: top bar hidden, main row shorter, translucent + blurred, logo
+  // nudged down a touch. The header is already position:fixed with a 104px
+  // spacer under it, so shrinking it never shifts the page below.
+  const [scrolled, setScrolled] = useState(false)
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 60)
+    onScroll()
+    window.addEventListener("scroll", onScroll, { passive: true })
+    return () => window.removeEventListener("scroll", onScroll)
+  }, [])
+
   // The captured logotype is two lines: a big first word and a small tail.
   // "Menzu Valorant" splits the same way any two-part shop name would.
   const [brandWord, ...brandRest] = brand.name.trim().split(/\s+/);
   const brandTail = brandRest.join(" ");
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-[100] transition-all duration-300 flex flex-col bg-[#1a1a1a]">
-      <div className="flex w-full h-[40px] border-b border-white/5 bg-[#1a1a1a]">
+    <nav
+      className={`site-nav fixed top-0 left-0 right-0 z-[100] transition-all duration-300 flex flex-col ${
+        scrolled
+          ? "bg-[#1a1a1a]/80 backdrop-blur-xl shadow-lg shadow-black/30"
+          : "bg-[#1a1a1a]"
+      }`}
+    >
+      <div
+        className={`flex w-full overflow-hidden border-b bg-[#1a1a1a] transition-all duration-300 ${
+          scrolled ? "h-0 opacity-0 border-transparent" : "h-[40px] opacity-100 border-white/5"
+        }`}
+      >
         <div className="max-w-[1320px] w-full mx-auto px-4 lg:px-6 h-full flex items-center justify-between">
           <div className="lg:hidden flex items-center h-full relative">
             <a href={hrefFor(QUICK_LINKS[0])} className={QUICK_LINK_CLASS}>
@@ -183,7 +205,11 @@ export function SiteHeaderClient({
         </div>
       </div>
 
-      <div className="max-w-[1320px] w-full mx-auto px-4 lg:px-6 h-16 flex items-center justify-between">
+      <div
+        className={`max-w-[1320px] w-full mx-auto px-4 lg:px-6 flex items-center justify-between transition-all duration-300 ${
+          scrolled ? "h-[58px]" : "h-16"
+        }`}
+      >
         <div className="flex items-center gap-8 h-full">
           <div className="flex items-center w-auto">
             <button
@@ -196,7 +222,12 @@ export function SiteHeaderClient({
               <Menu size={18} />
             </button>
 
-            <Link href="/" className="flex items-center gap-3 group">
+            <Link
+              href="/"
+              className={`flex items-center gap-3 group origin-left transition-transform duration-300 ${
+                scrolled ? "scale-[0.94]" : "scale-100"
+              }`}
+            >
               <div className="relative">
                 <Image
                   src={brand.logo}
@@ -227,7 +258,7 @@ export function SiteHeaderClient({
             <NavDropdown label="GIAO DỊCH" items={GIAO_DICH_ITEMS} />
             <a
               href="#"
-              className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-[11px] font-extrabold uppercase tracking-widest text-neutral-200 hover:text-[var(--menzu-accent)] transition-colors duration-200 ease-[ease]"
+              className="relative flex items-center gap-1.5 px-3 py-2 rounded-lg text-[11px] font-extrabold uppercase tracking-widest text-neutral-200 hover:text-[var(--menzu-accent)] transition-colors duration-200 ease-[ease] after:absolute after:bottom-1.5 after:inset-x-3 after:h-[2px] after:origin-left after:scale-x-0 after:rounded-full after:bg-[var(--menzu-accent)] after:transition-transform after:duration-200 hover:after:scale-x-100"
             >
               <Gift size={14} />
               NHẬN ACC FREE
