@@ -10,6 +10,15 @@ export interface FlashSaleTier {
 
 export interface FlashSaleItem {
   code: string;
+  /** The shop's uploaded picture; absent, the by-code path below is shown. */
+  imageUrl?: string | null;
+  /**
+   * The labelled stat strip, as on the listing card. Optional because the
+   * scraped fixture below predates them; the strip hides what it lacks.
+   */
+  rank?: string;
+  vip?: number;
+  vipIngame?: number;
   discount: string | null;
   oldPrice: string | null;
   newPrice: string;

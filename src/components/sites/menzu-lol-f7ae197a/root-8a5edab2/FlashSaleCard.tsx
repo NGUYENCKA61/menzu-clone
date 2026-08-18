@@ -1,34 +1,11 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ShoppingCart, Sparkles } from "lucide-react";
-import {
-  getAccountImagePath,
-  TIER_ICON_PATHS,
-  type FlashSaleItem,
-  type TierColor,
-} from "./flashSaleData";
+import { ShoppingCart } from "lucide-react";
+import { getAccountImagePath, type FlashSaleItem } from "./flashSaleData";
 
 export interface FlashSaleCardProps {
   item: FlashSaleItem;
 }
-
-// Tailwind can't see dynamically-built class names, so every tier color
-// needs its full class string spelled out here.
-const TIER_TEXT_COLOR_CLASSES: Record<TierColor, string> = {
-  yellow: "text-yellow-400",
-  orange: "text-orange-400",
-  pink: "text-pink-400",
-  cyan: "text-cyan-400",
-  blue: "text-blue-400",
-};
-
-const TIER_LABELS: Record<TierColor, string> = {
-  yellow: "Ultra",
-  orange: "Exclusive",
-  pink: "Premium",
-  cyan: "Deluxe",
-  blue: "Select",
-};
 
 export function FlashSaleCard({ item }: FlashSaleCardProps) {
   return (
@@ -51,8 +28,8 @@ export function FlashSaleCard({ item }: FlashSaleCardProps) {
 
         <div className="relative aspect-[4/3] w-full overflow-hidden bg-neutral-900 rounded-[10px]">
           <Image
-            src={getAccountImagePath(item.code)}
-            alt={`Tài khoản Valorant ${item.code}`}
+            src={item.imageUrl ?? getAccountImagePath(item.code)}
+            alt={`Tài khoản #${item.code}`}
             fill
             sizes="(min-width: 1280px) 25vw, (min-width: 768px) 33vw, 50vw"
             className="absolute inset-0 w-full h-full object-cover object-[85%_center] md:group-hover:scale-105 transition-transform duration-500"
@@ -64,29 +41,35 @@ export function FlashSaleCard({ item }: FlashSaleCardProps) {
         </div>
 
         <div className="mt-auto pt-2.5 flex flex-col gap-2">
-          <div className="flex w-full items-stretch bg-neutral-900/60 border border-neutral-700/50 rounded-lg overflow-hidden shadow-sm shrink-0">
-            <div className="flex items-center justify-center min-w-[28px] sm:min-w-[40px] gap-0.5 sm:gap-1 px-1 sm:px-2 py-1 bg-neutral-800 text-white font-black text-[9px] sm:text-[11px]">
-              <Sparkles size={10} />
-              {item.skins}
+          {/* The listing card's labelled strip, compacted for this tile:
+              glyphs and numbers in the section's indigo, RANK white,
+              entries split by pipes. Hidden per entry when unset. */}
+          {item.rank ? (
+            <div className="flex w-full items-center justify-between gap-1 overflow-hidden rounded-lg border border-[#292a30] bg-[#111216] px-2 py-1 uppercase">
+              <span className="flex min-w-0 items-center gap-1 whitespace-nowrap text-[8px] sm:text-[10px] font-extrabold text-[#c7c8cd]">
+                <span aria-hidden className="text-indigo-400">▲</span> Rank:
+                <span className="truncate text-white">{item.rank}</span>
+              </span>
+              {(item.vip ?? 0) > 0 ? (
+                <>
+                  <span aria-hidden className="text-[8px] sm:text-[10px] text-[#3a3b42]">|</span>
+                  <span className="flex items-center gap-1 whitespace-nowrap text-[8px] sm:text-[10px] font-extrabold text-[#c7c8cd]">
+                    <span aria-hidden className="text-indigo-400">◆</span> VIP:
+                    <span className="text-indigo-400">{item.vip}</span>
+                  </span>
+                </>
+              ) : null}
+              {(item.vipIngame ?? 0) > 0 ? (
+                <>
+                  <span aria-hidden className="text-[8px] sm:text-[10px] text-[#3a3b42]">|</span>
+                  <span className="hidden min-[400px]:flex items-center gap-1 whitespace-nowrap text-[8px] sm:text-[10px] font-extrabold text-[#c7c8cd]">
+                    <span aria-hidden className="text-indigo-400">◇</span> VIP Ingame:
+                    <span className="text-indigo-400">{item.vipIngame}</span>
+                  </span>
+                </>
+              ) : null}
             </div>
-            <div className="flex-1 flex flex-wrap items-center justify-center gap-x-1.5 gap-y-0.5 sm:gap-4 px-1 py-1 sm:px-2 overflow-hidden">
-              {item.tiers.map((tier, index) => (
-                <div
-                  key={tier.color}
-                  className={`flex items-center gap-0.5 text-[8px] sm:text-[11px] font-bold ${TIER_TEXT_COLOR_CLASSES[tier.color]}${index >= 3 ? " hidden sm:flex" : ""}`}
-                >
-                  <Image
-                    src={TIER_ICON_PATHS[tier.color]}
-                    alt={TIER_LABELS[tier.color]}
-                    width={14}
-                    height={14}
-                    className="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 object-contain shrink-0"
-                  />
-                  {tier.count}
-                </div>
-              ))}
-            </div>
-          </div>
+          ) : null}
 
           <div className="relative w-full bg-gradient-to-b from-indigo-500 to-indigo-600 border border-indigo-500/30 text-[#FFE5A0] rounded-lg flex items-center px-1 sm:px-2 hover:from-indigo-600 hover:to-indigo-700 transition-colors duration-150 group h-[38px] sm:h-[44px]">
             <span className="absolute left-2 sm:left-3 shrink-0 hidden sm:flex items-center justify-center">

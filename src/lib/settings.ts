@@ -53,6 +53,8 @@ export interface ShopSettings {
   heroBanner: string;
   /** Fixed artwork behind every page, sitting under a dimming overlay. */
   siteBackground: string;
+  /** Backdrop inside the homepage flash-sale frame, shown at 10% opacity. */
+  flashSaleBackground: string;
 
   /**
    * The pictures behind the sign-in and sign-up cards. One means a still
@@ -195,6 +197,8 @@ export const DEFAULT_SETTINGS: ShopSettings = {
   brandColor: "#7C3AED",
   heroBanner: BANNER,
   siteBackground: BACKDROP,
+  flashSaleBackground:
+    "/sites/menzu-lol-f7ae197a/root-8a5edab2/images/behance/f945cb242281183.696998e170840.webp",
   authPanelImages: [AUTH_PANEL],
   authSlideEnabled: true,
   authSlideSeconds: 5,
@@ -268,6 +272,7 @@ export const SETTING_KEYS: Record<keyof ShopSettings, string> = {
   brandColor: "brand.color",
   heroBanner: "brand.heroBanner",
   siteBackground: "brand.background",
+  flashSaleBackground: "home.flashSale.background",
   authPanelImages: "auth.panelImages",
   authSlideEnabled: "auth.slide",
   authSlideSeconds: "auth.slideSeconds",
@@ -561,6 +566,10 @@ export function parseSettings(rows: Iterable<{ key: string; value: string }>): S
       stored.get(SETTING_KEYS.siteBackground),
       DEFAULT_SETTINGS.siteBackground,
     ),
+    flashSaleBackground: toText(
+      stored.get(SETTING_KEYS.flashSaleBackground),
+      DEFAULT_SETTINGS.flashSaleBackground,
+    ),
     // The old single-image key is read when the list has never been written,
     // so a shop that picked a picture before the slideshow existed keeps it
     // rather than silently reverting to the captured default.
@@ -671,6 +680,7 @@ export function serializeSettings(settings: ShopSettings): { key: string; value:
     brandColor: settings.brandColor.trim(),
     heroBanner: settings.heroBanner.trim(),
     siteBackground: settings.siteBackground.trim(),
+    flashSaleBackground: settings.flashSaleBackground.trim(),
     authPanelImages: JSON.stringify(settings.authPanelImages),
     authSlideEnabled: String(settings.authSlideEnabled),
     authSlideSeconds: String(settings.authSlideSeconds),
@@ -753,6 +763,8 @@ export function normalizeSettings(raw: Partial<ShopSettings> | null): ShopSettin
     brandColor: String(raw?.brandColor ?? "").trim() || DEFAULT_SETTINGS.brandColor,
     heroBanner: String(raw?.heroBanner ?? "").trim() || DEFAULT_SETTINGS.heroBanner,
     siteBackground: String(raw?.siteBackground ?? "").trim() || DEFAULT_SETTINGS.siteBackground,
+    flashSaleBackground:
+      String(raw?.flashSaleBackground ?? "").trim() || DEFAULT_SETTINGS.flashSaleBackground,
     // Blank falls back to the default rather than leaving an empty <Image src>,
     // which throws at render and takes the whole sign-in page with it.
     authPanelImages: readImageList(raw?.authPanelImages),

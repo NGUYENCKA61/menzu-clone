@@ -616,6 +616,11 @@ export async function getFlashSaleItems(take = 20): Promise<FlashSaleItem[]> {
       const pct = Math.round((1 - Number(price) / Number(p.oldPrice)) * 100);
       return {
         code: p.code,
+        imageUrl: p.imageUrl,
+        rank: p.rank,
+        // vp/rp carry VIP and VIP INGAME on this shop; see toProductCard.
+        vip: p.vp,
+        vipIngame: p.rp,
         discount: pct > 0 ? `-${pct}%` : null,
         oldPrice: `${formatVndString(Number(p.oldPrice))} VND`,
         newPrice: `${formatVndString(Number(price))} VND`,

@@ -248,6 +248,9 @@ export function AdminSettings({
   const [brandColor, setBrandColor] = useState(settings.brandColor);
   const [heroBanner, setHeroBanner] = useState(settings.heroBanner);
   const [siteBackground, setSiteBackground] = useState(settings.siteBackground);
+  const [flashSaleBackground, setFlashSaleBackground] = useState(settings.flashSaleBackground);
+  const [flashBgUploading, setFlashBgUploading] = useState(false);
+  const [flashBgMsg, setFlashBgMsg] = useState<{ tone: "ok" | "err"; text: string } | null>(null);
   const [siteBgUploading, setSiteBgUploading] = useState(false);
   const [siteBgMsg, setSiteBgMsg] = useState<{ tone: "ok" | "err"; text: string } | null>(null);
 
@@ -256,6 +259,27 @@ export function AdminSettings({
    * is not save — the picture applies only when the admin presses Lưu, like
    * every other picker on this screen.
    */
+  async function uploadFlashSaleBackground(file: File) {
+    setFlashBgUploading(true);
+    setFlashBgMsg(null);
+    try {
+      const form = new FormData();
+      form.append("file", file);
+      const res = await fetch("/api/admin/site/background", { method: "POST", body: form });
+      const data = (await res.json().catch(() => ({}))) as { url?: string; error?: string };
+      if (!res.ok || !data.url) {
+        setFlashBgMsg({ tone: "err", text: data.error ?? "Tải ảnh thất bại" });
+        return;
+      }
+      setFlashSaleBackground(data.url);
+      setFlashBgMsg({ tone: "ok", text: "Đã tải ảnh — nhớ bấm Lưu để áp dụng" });
+    } catch {
+      setFlashBgMsg({ tone: "err", text: "Không kết nối được máy chủ" });
+    } finally {
+      setFlashBgUploading(false);
+    }
+  }
+
   async function uploadSiteBackground(file: File) {
     setSiteBgUploading(true);
     setSiteBgMsg(null);
@@ -435,6 +459,7 @@ export function AdminSettings({
           brandColor,
           heroBanner,
           siteBackground,
+          flashSaleBackground,
           authPanelImages: panelImages,
           authSlideEnabled: slideOn,
           authSlideSeconds: Number(slideSeconds) || 5,
@@ -1017,6 +1042,72 @@ export function AdminSettings({
               <p className={HINT}>
                 Ảnh cố định phía sau mọi trang, đã phủ tối 70% để chữ dễ đọc. Để trống thì
                 dùng lại ảnh mặc định.
+              </p>
+            </div>
+
+            <div>
+              <span className={LABEL}>Ảnh nền khối khuyến mãi</span>
+              <div className="flex flex-col gap-3 sm:flex-row">
+                {/* Previewed at the strength it shows on the page — the block
+                    draws it at 10%, so full-strength here would oversell it. */}
+                <div className="relative aspect-[16/9] w-full shrink-0 overflow-hidden rounded-xl border border-white/10 bg-[#0f1111] sm:w-[200px]">
+                  {flashSaleBackground ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={flashSaleBackground}
+                      alt="Xem trước ảnh nền khối khuyến mãi"
+                      className="absolute inset-0 h-full w-full object-cover opacity-20"
+                    />
+                  ) : null}
+                </div>
+
+                <div className="flex min-w-0 flex-1 flex-col gap-2">
+                  <input
+                    value={flashSaleBackground}
+                    onChange={(event) => setFlashSaleBackground(event.target.value)}
+                    className={`${FIELD} font-mono`}
+                    placeholder="/uploads/site/… hoặc đường dẫn ảnh"
+                  />
+                  <div className="flex flex-wrap items-center gap-3">
+                    <label
+                      className={`inline-flex h-9 cursor-pointer items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 text-[10px] font-black uppercase tracking-widest text-neutral-200 transition-colors hover:bg-white/10 ${
+                        flashBgUploading ? "pointer-events-none opacity-60" : ""
+                      }`}
+                    >
+                      <Upload size={13} />
+                      {flashBgUploading ? "Đang tải lên…" : "Chọn ảnh từ máy"}
+                      <input
+                        type="file"
+                        accept="image/png,image/jpeg,image/webp"
+                        className="hidden"
+                        onChange={(event) => {
+                          const file = event.target.files?.[0];
+                          event.target.value = "";
+                          if (file) void uploadFlashSaleBackground(file);
+                        }}
+                      />
+                    </label>
+                    <span className="text-[10px] text-neutral-600">
+                      PNG / JPG / WebP · tối thiểu 960×540
+                    </span>
+                  </div>
+                  {flashBgMsg ? (
+                    <p
+                      role="alert"
+                      className={
+                        flashBgMsg.tone === "ok"
+                          ? "rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-[11px] font-semibold text-emerald-400"
+                          : "rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-[11px] font-semibold text-red-400"
+                      }
+                    >
+                      {flashBgMsg.text}
+                    </p>
+                  ) : null}
+                </div>
+              </div>
+              <p className={HINT}>
+                Vân nền mờ bên trong khung “Khuyến mãi hôm nay” ở trang chủ (hiện ở mức
+                10%). Nên chọn ảnh có hoạ tiết rõ; để trống thì dùng lại ảnh mặc định.
               </p>
             </div>
           </section>

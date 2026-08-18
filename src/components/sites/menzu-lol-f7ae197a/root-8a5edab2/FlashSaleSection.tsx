@@ -52,7 +52,14 @@ function padTwoDigits(value: number): string {
   return value.toString().padStart(2, "0");
 }
 
-export function FlashSaleSection({ items = FLASH_SALE_ITEMS }: { items?: FlashSaleItem[] } = {}) {
+export function FlashSaleSection({
+  items = FLASH_SALE_ITEMS,
+  backgroundImage = FLASH_SALE_BACKGROUND_IMAGE,
+}: {
+  items?: FlashSaleItem[];
+  /** Set in Cấu hình → "Ảnh nền khối khuyến mãi"; drawn at 10% opacity. */
+  backgroundImage?: string;
+} = {}) {
   const trackRef = useRef<HTMLDivElement>(null);
   const [countdown, setCountdown] = useState<CountdownParts | null>(null);
 
@@ -118,6 +125,15 @@ export function FlashSaleSection({ items = FLASH_SALE_ITEMS }: { items?: FlashSa
   const minutesLabel = countdown ? padTwoDigits(countdown.minutes) : "--";
   const secondsLabel = countdown ? padTwoDigits(countdown.seconds) : "--";
 
+  // The last hour turns the digits — and only the digits — red. The boxes and
+  // the unit letters keep their calm face. Client-only, like the countdown
+  // itself: the server renders "--" and search engines never see either.
+  const urgent = countdown !== null && countdown.hours < 1;
+  const clockBoxClass = `flex items-baseline gap-0.5 px-2 py-1 rounded-lg bg-neutral-900/80 border border-white/10 font-black text-sm sm:text-base tabular-nums ${
+    urgent ? "text-red-500" : "text-white"
+  }`;
+  const clockUnitClass = "text-[9px] font-bold text-neutral-500";
+
   return (
     <>
       <div className="mb-12 lg:mb-16">
@@ -125,7 +141,7 @@ export function FlashSaleSection({ items = FLASH_SALE_ITEMS }: { items?: FlashSa
         <div className="fs-realism-container p-4 sm:p-6 sm:py-8">
           <div className="absolute inset-0 z-0 pointer-events-none opacity-10">
             <Image
-              src={FLASH_SALE_BACKGROUND_IMAGE}
+              src={backgroundImage}
               alt=""
               fill
               sizes="100vw"
@@ -140,7 +156,7 @@ export function FlashSaleSection({ items = FLASH_SALE_ITEMS }: { items?: FlashSa
                   <Zap className="w-5 h-5 sm:w-6 sm:h-6" />
                 </div>
                 <h2 className="text-lg min-[360px]:text-xl sm:text-2xl md:text-3xl font-black text-white uppercase drop-shadow-md text-center whitespace-nowrap">
-                  FLASHSALE HÔM NAY
+                  KHUYẾN MÃI HÔM NAY
                 </h2>
               </div>
 
@@ -149,19 +165,19 @@ export function FlashSaleSection({ items = FLASH_SALE_ITEMS }: { items?: FlashSa
                   Kết thúc trong
                 </span>
                 <div className="flex items-center gap-1">
-                  <div className="flex items-baseline gap-0.5 px-2 py-1 rounded-lg bg-neutral-900/80 border border-white/10 font-black text-sm sm:text-base text-white tabular-nums">
+                  <div className={clockBoxClass}>
                     {hoursLabel}
-                    <span className="text-[9px] font-bold text-neutral-500">h</span>
+                    <span className={clockUnitClass}>h</span>
                   </div>
                   <span className="font-black text-neutral-600">.</span>
-                  <div className="flex items-baseline gap-0.5 px-2 py-1 rounded-lg bg-neutral-900/80 border border-white/10 font-black text-sm sm:text-base text-white tabular-nums">
+                  <div className={clockBoxClass}>
                     {minutesLabel}
-                    <span className="text-[9px] font-bold text-neutral-500">m</span>
+                    <span className={clockUnitClass}>m</span>
                   </div>
                   <span className="font-black text-neutral-600">.</span>
-                  <div className="flex items-baseline gap-0.5 px-2 py-1 rounded-lg bg-neutral-900/80 border border-white/10 font-black text-sm sm:text-base text-white tabular-nums">
+                  <div className={clockBoxClass}>
                     {secondsLabel}
-                    <span className="text-[9px] font-bold text-neutral-500">s</span>
+                    <span className={clockUnitClass}>s</span>
                   </div>
                 </div>
               </div>

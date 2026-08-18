@@ -78,7 +78,13 @@ export default async function Home() {
         shootingStars={settings.heroShootingStars}
       />
     ),
-    flash: <FlashSaleSection key="flash" items={flashSaleItems} />,
+    flash: (
+      <FlashSaleSection
+        key="flash"
+        items={flashSaleItems}
+        backgroundImage={settings.flashSaleBackground}
+      />
+    ),
     featured: <FeaturedCategories key="featured" cards={categoryCards} />,
     docs: <DocsSection key="docs" articles={docCards} />,
     // One row per group, in the order the admin arranged them. Headings and
