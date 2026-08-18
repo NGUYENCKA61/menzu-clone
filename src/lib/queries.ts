@@ -716,7 +716,27 @@ export async function getInventory(code: string): Promise<InventoryItem[]> {
     orderBy: [{ weapon: "asc" }, { name: "asc" }],
     select: { id: true, kind: true, name: true, iconUrl: true, weapon: true },
   });
-  return rows;
+
+  // Rows the shop typed by hand carry no icon of their own; the shared
+  // picture library fills them in by name — weapons, characters and gear
+  // alike, the same lookup the listing card uses, so an item illustrated
+  // once is illustrated everywhere.
+  const missing = [
+    ...new Set(rows.filter((r) => !r.iconUrl).map((r) => weaponKey(r.name))),
+  ];
+  if (missing.length === 0) return rows;
+
+  const library = await db.weaponImage.findMany({
+    where: { key: { in: missing } },
+    select: { key: true, url: true },
+  });
+  const byKey = new Map(library.map((i) => [i.key, i.url]));
+
+  return rows.map((r) =>
+    r.iconUrl !== null
+      ? r
+      : { ...r, iconUrl: byKey.get(weaponKey(r.name)) ?? null },
+  );
 }
 
 export interface TradeRequestRow {

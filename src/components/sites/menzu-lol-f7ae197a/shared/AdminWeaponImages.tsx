@@ -85,7 +85,7 @@ export function AdminWeaponImages({
   /** Upload straight off the disk, using whatever is in the name field. */
   async function handleFile(file: File) {
     if (!name.trim()) {
-      setMsg({ tone: "err", text: "Điền tên súng trước khi chọn ảnh" });
+      setMsg({ tone: "err", text: "Điền tên vật phẩm trước khi chọn ảnh" });
       return;
     }
     const form = new FormData();
@@ -120,12 +120,12 @@ export function AdminWeaponImages({
         className="rounded-2xl border border-white/10 bg-neutral-900/50 p-5 flex flex-col gap-4"
       >
         <span className="text-[10px] font-black uppercase tracking-widest text-neutral-500">
-          Thêm ảnh súng
+          Thêm ảnh vật phẩm
         </span>
 
         <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,260px)_minmax(0,1fr)] gap-3">
           <div>
-            <label className={LABEL}>Tên súng</label>
+            <label className={LABEL}>Tên vật phẩm</label>
             <input
               required
               value={name}
@@ -148,7 +148,7 @@ export function AdminWeaponImages({
         <p className="text-[11px] leading-relaxed text-neutral-500">
           Mở trang súng trên wiki → chuột phải vào ảnh → <em>Copy image address</em> →
           dán vào đây. Máy chủ tự tải ảnh về, card đọc ảnh từ web mình chứ không
-          mượn của người ta. Tên phải khớp tên gõ trong danh sách súng của tài
+          mượn của người ta. Tên phải khớp tên gõ trong danh sách vật phẩm của tài
           khoản (không phân biệt hoa thường).
         </p>
 
@@ -208,7 +208,7 @@ export function AdminWeaponImages({
             Chưa có ảnh ({missingTotal})
           </span>
           <p className="mt-1 text-[11px] text-neutral-500">
-            Súng đang được liệt kê trên tài khoản mà kho chưa có ảnh. Card hiện
+            Vật phẩm đang được liệt kê trên tài khoản mà kho chưa có ảnh. Card hiện
             tên thay cho ảnh, vẫn bán được bình thường.
           </p>
           <div className="mt-3 flex flex-wrap gap-1.5">

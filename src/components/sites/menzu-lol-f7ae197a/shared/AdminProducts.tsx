@@ -26,6 +26,9 @@ export interface AdminProductRow {
   vipIngame: number;
   /** Weapon skins, in the order the shop listed them. */
   skinNames: string[];
+  /** Characters (AGENT rows) and gear (BUDDY rows), same ordering rule. */
+  characterNames: string[];
+  gearNames: string[];
 }
 
 /** A product the shop has removed — kept only so it can be put back. */
@@ -85,6 +88,8 @@ export function AdminProducts({
   // once would push the row being worked on off the screen.
   const [editingSkins, setEditingSkins] = useState<string | null>(null);
   const [skinText, setSkinText] = useState("");
+  const [characterText, setCharacterText] = useState("");
+  const [gearText, setGearText] = useState("");
 
   // The account whose picture editor is open, and the path being edited.
   // Opening one editor closes the other for the same reason there is only one
@@ -171,6 +176,8 @@ export function AdminProducts({
     setEditingImage(null);
     setEditingTag(null);
     setSkinText(row.skinNames.join("\n"));
+    setCharacterText(row.characterNames.join("\n"));
+    setGearText(row.gearNames.join("\n"));
     setMsg(null);
   }
 
@@ -312,22 +319,36 @@ export function AdminProducts({
     }
   }
 
+  /** All three lists in one save — each kind replaces only its own rows. */
   async function handleSaveSkins(row: AdminProductRow) {
-    const names = skinText
-      .split("\n")
-      .map((line) => line.trim())
-      .filter(Boolean);
+    const toNames = (text: string) =>
+      text
+        .split("\n")
+        .map((line) => line.trim())
+        .filter(Boolean);
 
-    const data = await call("PUT", { code: row.code, names }, "", "/skins");
-    if (!data) return;
+    const lists = [
+      { kind: "WEAPON_SKIN", names: toNames(skinText), label: "súng" },
+      { kind: "AGENT", names: toNames(characterText), label: "nhân vật" },
+      { kind: "BUDDY", names: toNames(gearText), label: "trang bị" },
+    ];
+
+    const saved: string[] = [];
+    for (const list of lists) {
+      const data = await call(
+        "PUT",
+        { code: row.code, names: list.names, kind: list.kind },
+        "",
+        "/skins",
+      );
+      // The failed list's error is already on screen; stopping here leaves
+      // the editor open so nothing saved before it is misreported.
+      if (!data) return;
+      saved.push(`${data.count as number} ${list.label}`);
+    }
+
     setEditingSkins(null);
-    setMsg({
-      tone: "ok",
-      text:
-        names.length > 0
-          ? `Đã lưu ${data.count as number} súng cho ${row.code}`
-          : `Đã xoá danh sách súng của ${row.code} — card sẽ không in tên nào`,
-    });
+    setMsg({ tone: "ok", text: `Đã lưu ${saved.join(", ")} cho ${row.code}` });
   }
 
   async function handleCreate(event: React.FormEvent) {
@@ -599,23 +620,50 @@ export function AdminProducts({
                   <tr className="border-b border-white/5 bg-neutral-950/60">
                     <td colSpan={9} className="px-5 py-4">
                       <div className="flex flex-col gap-3">
-                        <div>
-                          <label className={LABEL}>
-                            Súng của #{p.code} — mỗi dòng một cây
-                          </label>
-                          <textarea
-                            value={skinText}
-                            onChange={(e) => setSkinText(e.target.value)}
-                            rows={6}
-                            spellCheck={false}
-                            placeholder={"M200 Dominator\nM4A1-S Prism Beast\nAK12-Knife Iron Spider"}
-                            className={`${FIELD} resize-y leading-relaxed`}
-                          />
+                        {/* Three lists, one per inventory tab. Typed the same
+                            way — a line per item — and saved together. */}
+                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                          <div>
+                            <label className={LABEL}>
+                              Súng của #{p.code} — mỗi dòng một cây
+                            </label>
+                            <textarea
+                              value={skinText}
+                              onChange={(e) => setSkinText(e.target.value)}
+                              rows={6}
+                              spellCheck={false}
+                              placeholder={"M200 Dominator\nM4A1-S Prism Beast\nAK12-Knife Iron Spider"}
+                              className={`${FIELD} resize-y leading-relaxed`}
+                            />
+                          </div>
+                          <div>
+                            <label className={LABEL}>Nhân vật</label>
+                            <textarea
+                              value={characterText}
+                              onChange={(e) => setCharacterText(e.target.value)}
+                              rows={6}
+                              spellCheck={false}
+                              placeholder={"Nikita\nSFG"}
+                              className={`${FIELD} resize-y leading-relaxed`}
+                            />
+                          </div>
+                          <div>
+                            <label className={LABEL}>Trang bị</label>
+                            <textarea
+                              value={gearText}
+                              onChange={(e) => setGearText(e.target.value)}
+                              rows={6}
+                              spellCheck={false}
+                              placeholder={"C4 Vàng\nBăng đạn mở rộng"}
+                              className={`${FIELD} resize-y leading-relaxed`}
+                            />
+                          </div>
                         </div>
                         <p className="text-[11px] text-neutral-500">
-                          Card ngoài cửa hàng in {SKIN_CHIP_COUNT} tên đầu tiên, phần
-                          còn lại gộp thành “+N” — nên xếp cây đắt giá nhất lên trên.
-                          Để trống rồi lưu là xoá hết tên.
+                          Card ngoài cửa hàng chỉ in súng — {SKIN_CHIP_COUNT} tên đầu,
+                          phần còn lại gộp thành “+N” — nên xếp cây đắt giá nhất lên
+                          trên. Nhân vật và Trang bị chỉ hiện trong kho đồ ở trang chi
+                          tiết. Để trống danh sách nào rồi lưu là xoá danh sách đó.
                         </p>
                         <div className="flex gap-2">
                           <button

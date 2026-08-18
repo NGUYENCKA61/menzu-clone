@@ -43,13 +43,13 @@ export default async function AdminProductsPage() {
         _count: { select: { orders: true } },
         tags: { select: { label: true } },
         images: { select: { id: true, url: true }, orderBy: { sortOrder: "asc" } },
-        // Ordered by id, which rises with insertion, so the editor hands the
+        // Ordered by id, which rises with insertion, so the editor hands each
         // list back in the order it was saved — the storefront card reads the
         // same order, and a shop that put its best weapon first should see that
         // choice survive a round trip.
         skins: {
-          where: { kind: "WEAPON_SKIN" },
-          select: { name: true },
+          where: { kind: { in: ["WEAPON_SKIN", "AGENT", "BUDDY"] } },
+          select: { kind: true, name: true },
           orderBy: { id: "asc" },
         },
       },
@@ -86,11 +86,15 @@ export default async function AdminProductsPage() {
   // a tally over the skin table rather than anything the queries above return.
   const [weaponImages, skinNameCounts] = await Promise.all([
     db.weaponImage.findMany({ orderBy: { updatedAt: "desc" }, take: 200 }),
-    // Most-listed weapons first: with hundreds of names in the shop, the ones
-    // worth finding a picture for are the ones the most accounts carry.
+    // Most-listed items first: with hundreds of names in the shop, the ones
+    // worth finding a picture for are the ones the most accounts carry. All
+    // three typed categories — weapons, characters, gear — share the library.
     db.productSkin.groupBy({
       by: ["name"],
-      where: { kind: "WEAPON_SKIN", product: { deletedAt: null } },
+      where: {
+        kind: { in: ["WEAPON_SKIN", "AGENT", "BUDDY"] },
+        product: { deletedAt: null },
+      },
       _count: { name: true },
       orderBy: { _count: { name: "desc" } },
     }),
@@ -143,7 +147,9 @@ export default async function AdminProductsPage() {
               tag: p.tags[0]?.label ?? "",
               vip: p.vp,
               vipIngame: p.rp,
-              skinNames: p.skins.map((s) => s.name),
+              skinNames: p.skins.filter((s) => s.kind === "WEAPON_SKIN").map((s) => s.name),
+              characterNames: p.skins.filter((s) => s.kind === "AGENT").map((s) => s.name),
+              gearNames: p.skins.filter((s) => s.kind === "BUDDY").map((s) => s.name),
             }))}
             removed={removed.map((p) => ({
               code: p.code,
@@ -199,9 +205,9 @@ export default async function AdminProductsPage() {
             or not their pictures have been found yet. */}
         <section className="flex flex-col gap-4">
           <div>
-            <h2 className={SECTION_TITLE}>4 · Kho ảnh súng</h2>
+            <h2 className={SECTION_TITLE}>4 · Kho ảnh vật phẩm</h2>
             <p className={SECTION_NOTE}>
-              Mỗi cây súng một ảnh, dùng chung cho mọi tài khoản có cây đó — tìm
+              Mỗi vật phẩm (súng, nhân vật, trang bị) một ảnh, dùng chung cho mọi tài khoản có nó — tìm
               ảnh một lần, không phải làm lại theo từng acc. Card nào chưa có ảnh
               thì hiện tên súng, vẫn bán bình thường.
             </p>

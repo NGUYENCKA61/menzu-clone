@@ -38,13 +38,24 @@ export async function PUT(request: Request) {
   const body = (await request.json().catch(() => null)) as {
     code?: string;
     names?: unknown;
+    kind?: string;
   } | null;
 
   const code = body?.code?.trim();
   if (!code) return NextResponse.json({ error: "Thiếu mã tài khoản" }, { status: 400 });
   if (!Array.isArray(body?.names)) {
-    return NextResponse.json({ error: "Danh sách súng không hợp lệ" }, { status: 400 });
+    return NextResponse.json({ error: "Danh sách không hợp lệ" }, { status: 400 });
   }
+
+  // Which of the account's lists this write replaces. The kinds are the
+  // shop's three item categories — weapons, characters (AGENT rows) and gear
+  // (BUDDY rows); each save touches only its own kind, so editing the
+  // characters can never blank the guns.
+  const KINDS = ["WEAPON_SKIN", "AGENT", "BUDDY"] as const;
+  type Kind = (typeof KINDS)[number];
+  const kind: Kind = KINDS.includes(body?.kind as Kind)
+    ? (body?.kind as Kind)
+    : "WEAPON_SKIN";
 
   // Blank lines and stray whitespace come with typing a list by hand, and a
   // name repeated twice is a slip rather than two skins — none of the three is
@@ -69,7 +80,7 @@ export async function PUT(request: Request) {
 
   if (names.length > MAX_NAMES) {
     return NextResponse.json(
-      { error: `Tối đa ${MAX_NAMES} súng một tài khoản. Danh sách này ${names.length}.` },
+      { error: `Tối đa ${MAX_NAMES} mục một danh sách. Danh sách này ${names.length}.` },
       { status: 400 },
     );
   }
@@ -85,29 +96,29 @@ export async function PUT(request: Request) {
     // Software has no inventory to list; saying so is more use than silently
     // writing rows nothing will ever read.
     return NextResponse.json(
-      { error: "Chỉ tài khoản game mới có danh sách súng" },
+      { error: "Chỉ tài khoản game mới có danh sách vật phẩm" },
       { status: 400 },
     );
   }
 
   const existing = await db.productSkin.findMany({
-    where: { productId: product.id, kind: "WEAPON_SKIN" },
+    where: { productId: product.id, kind },
     select: { name: true, tier: true, iconUrl: true, weapon: true },
   });
   const known = new Map(existing.map((s) => [s.name.toLowerCase(), s]));
 
   await db.$transaction([
     db.productSkin.deleteMany({
-      // Only the weapons. Buddies, agents, cards and sprays live in this table
-      // too and this screen knows nothing about them.
-      where: { productId: product.id, kind: "WEAPON_SKIN" },
+      // Only this list's kind. The other categories live in this table too,
+      // and saving one must never blank another.
+      where: { productId: product.id, kind },
     }),
     db.productSkin.createMany({
       data: names.map((name) => {
         const old = known.get(name.toLowerCase());
         return {
           productId: product.id,
-          kind: "WEAPON_SKIN" as const,
+          kind,
           name,
           tier: old?.tier ?? null,
           iconUrl: old?.iconUrl ?? null,
