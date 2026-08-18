@@ -63,7 +63,9 @@ export function FeaturedCategories({ cards }: { cards?: CategoryCard[] }) {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
         {tiles.map((card) => (
           <a
-            key={card.href + card.line2}
+            // Both name lines: two tiles can share a last word and a dead "#"
+            // href — "DỊCH VỤ VALORANT" and "ACC VALORANT" collided here.
+            key={`${card.href}|${card.line1}|${card.line2}`}
             href={card.href}
             className="group relative w-full pt-16 flex flex-col items-center"
           >
