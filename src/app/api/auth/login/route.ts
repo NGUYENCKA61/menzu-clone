@@ -8,6 +8,7 @@ import {
 } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { clientIp } from "@/lib/clientIp";
+import { resolveSessionLocation } from "@/lib/device";
 import {
   CAPTCHA_AFTER_FAILURES,
   RETRY_AFTER_SECONDS,
@@ -121,8 +122,16 @@ export async function POST(request: Request) {
   });
 
   const session = await db.session.create({
-    data: { id: newSessionToken(), userId: user.id, expiresAt: sessionExpiry() },
+    data: {
+      id: newSessionToken(),
+      userId: user.id,
+      expiresAt: sessionExpiry(),
+      ip,
+      userAgent: request.headers.get("user-agent")?.slice(0, 300) ?? null,
+    },
   });
+  // Un-awaited on purpose: the town name can arrive after the response does.
+  void resolveSessionLocation(session.id, ip);
 
   const response = NextResponse.json({
     user: {

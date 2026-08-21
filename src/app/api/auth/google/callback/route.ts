@@ -1,8 +1,11 @@
 import { NextResponse } from "next/server";
 
 import { SESSION_COOKIE, newSessionToken, sessionExpiry } from "@/lib/auth";
+import { clientIp } from "@/lib/clientIp";
 import { db } from "@/lib/db";
+import { resolveSessionLocation } from "@/lib/device";
 import { OAUTH_STATE_COOKIE, decodeState, findOrCreateOauthUser } from "@/lib/oauth";
+import { getCurrentUser } from "@/lib/session";
 import { googleOauthEnabled } from "@/lib/settings";
 import { getShopSettings } from "@/lib/settingsStore";
 
@@ -58,6 +61,34 @@ export async function GET(request: Request) {
   } | null;
   if (!profile?.sub) return fail("profile");
 
+  // A visitor who is already signed in is linking, not signing in: the
+  // identity is attached to the account they hold and their session stays
+  // theirs. Without this branch, the "Liên kết" button on /profile would
+  // quietly switch them into whichever account the identity resolves to.
+  const current = await getCurrentUser();
+  if (current) {
+    const owned = await db.linkedAccount.findUnique({
+      where: {
+        provider_providerId: { provider: "google", providerId: profile.sub },
+      },
+    });
+    if (!owned) {
+      await db.linkedAccount.create({
+        data: { userId: current.id, provider: "google", providerId: profile.sub },
+      });
+    }
+    // Back to whichever page offered the button — /profile and /security
+    // both do — with the outcome riding as a query it knows how to show.
+    const target = new URL(stored.next, url.origin);
+    target.searchParams.set(
+      owned && owned.userId !== current.id ? "linkError" : "linked",
+      "google",
+    );
+    const response = NextResponse.redirect(target);
+    response.cookies.delete(OAUTH_STATE_COOKIE);
+    return response;
+  }
+
   const user = await findOrCreateOauthUser({
     provider: "google",
     providerId: profile.sub,
@@ -72,9 +103,18 @@ export async function GET(request: Request) {
     where: { id: user.id },
     data: { lastLoginAt: new Date() },
   });
+  const ip = clientIp(request);
   const session = await db.session.create({
-    data: { id: newSessionToken(), userId: user.id, expiresAt: sessionExpiry() },
+    data: {
+      id: newSessionToken(),
+      userId: user.id,
+      expiresAt: sessionExpiry(),
+      ip,
+      userAgent: request.headers.get("user-agent")?.slice(0, 300) ?? null,
+    },
   });
+  // Un-awaited on purpose: the town name can arrive after the redirect does.
+  void resolveSessionLocation(session.id, ip);
 
   const response = NextResponse.redirect(new URL(stored.next, url.origin));
   response.cookies.set(SESSION_COOKIE, session.id, {

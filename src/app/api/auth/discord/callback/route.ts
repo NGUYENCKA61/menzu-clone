@@ -1,8 +1,11 @@
 import { NextResponse } from "next/server";
 
 import { SESSION_COOKIE, newSessionToken, sessionExpiry } from "@/lib/auth";
+import { clientIp } from "@/lib/clientIp";
 import { db } from "@/lib/db";
+import { resolveSessionLocation } from "@/lib/device";
 import { OAUTH_STATE_COOKIE, decodeState, findOrCreateOauthUser } from "@/lib/oauth";
+import { getCurrentUser } from "@/lib/session";
 import { discordOauthEnabled } from "@/lib/settings";
 import { getShopSettings } from "@/lib/settingsStore";
 
@@ -52,6 +55,30 @@ export async function GET(request: Request) {
   } | null;
   if (!profile?.id) return fail("profile");
 
+  // Signed-in visitors are linking, not signing in — see the Google callback.
+  const current = await getCurrentUser();
+  if (current) {
+    const owned = await db.linkedAccount.findUnique({
+      where: {
+        provider_providerId: { provider: "discord", providerId: profile.id },
+      },
+    });
+    if (!owned) {
+      await db.linkedAccount.create({
+        data: { userId: current.id, provider: "discord", providerId: profile.id },
+      });
+    }
+    // Back to whichever page offered the button — see the Google callback.
+    const target = new URL(stored.next, url.origin);
+    target.searchParams.set(
+      owned && owned.userId !== current.id ? "linkError" : "linked",
+      "discord",
+    );
+    const response = NextResponse.redirect(target);
+    response.cookies.delete(OAUTH_STATE_COOKIE);
+    return response;
+  }
+
   const user = await findOrCreateOauthUser({
     provider: "discord",
     providerId: profile.id,
@@ -64,9 +91,18 @@ export async function GET(request: Request) {
     where: { id: user.id },
     data: { lastLoginAt: new Date() },
   });
+  const ip = clientIp(request);
   const session = await db.session.create({
-    data: { id: newSessionToken(), userId: user.id, expiresAt: sessionExpiry() },
+    data: {
+      id: newSessionToken(),
+      userId: user.id,
+      expiresAt: sessionExpiry(),
+      ip,
+      userAgent: request.headers.get("user-agent")?.slice(0, 300) ?? null,
+    },
   });
+  // Un-awaited on purpose: the town name can arrive after the redirect does.
+  void resolveSessionLocation(session.id, ip);
 
   const response = NextResponse.redirect(new URL(stored.next, url.origin));
   response.cookies.set(SESSION_COOKIE, session.id, {
