@@ -46,6 +46,7 @@ export function RegisterForm({
   slideSeconds,
   panelSubtitle,
   panelTitle,
+  refCode = null,
 }: {
   turnstileSiteKey: string | null;
   /** Artwork behind the card. Comes from Cấu hình → Giao diện. */
@@ -55,6 +56,8 @@ export function RegisterForm({
   panelSubtitle: string;
   /** Newlines are line breaks, which is how the two-row overlay is written. */
   panelTitle: string;
+  /** The ?ref= a referral link arrived with; rides along on submit. */
+  refCode?: string | null;
 }) {
   const router = useRouter();
   const [username, setUsername] = useState("");
@@ -113,6 +116,7 @@ export function RegisterForm({
           username,
           password,
           email: email || undefined,
+          ...(refCode ? { ref: refCode } : {}),
           ...(turnstileSiteKey && captchaNeeded
             ? { turnstileToken: captcha }
             : {}),

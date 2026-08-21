@@ -9,6 +9,7 @@ import {
 } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { clientIp } from "@/lib/clientIp";
+import { resolveSessionLocation } from "@/lib/device";
 import {
   CAPTCHA_AFTER_REGISTRATIONS,
   REGISTER_RETRY_AFTER_SECONDS,
@@ -25,6 +26,7 @@ export async function POST(request: Request) {
     password?: string;
     email?: string;
     turnstileToken?: string;
+    ref?: string;
   } | null;
 
   const username = body?.username?.trim() ?? "";
@@ -89,11 +91,35 @@ export async function POST(request: Request) {
     data: { username, email, passwordHash: await hashPassword(password) },
   });
 
+  // The referral handshake: /register?ref=<uid> rode along in the body.
+  // Best-effort — a bad code just means no referrer, never a failed signup.
+  const refUid = Number(body?.ref ?? "");
+  if (Number.isInteger(refUid) && refUid > 0) {
+    const referrer = await db.user.findUnique({
+      where: { uid: refUid },
+      select: { id: true },
+    });
+    if (referrer && referrer.id !== user.id) {
+      await db.user.update({
+        where: { id: user.id },
+        data: { referredById: referrer.id },
+      });
+    }
+  }
+
   await recordAttempt("REGISTER", username, ip);
 
   const session = await db.session.create({
-    data: { id: newSessionToken(), userId: user.id, expiresAt: sessionExpiry() },
+    data: {
+      id: newSessionToken(),
+      userId: user.id,
+      expiresAt: sessionExpiry(),
+      ip,
+      userAgent: request.headers.get("user-agent")?.slice(0, 300) ?? null,
+    },
   });
+  // Un-awaited on purpose: the town name can arrive after the response does.
+  void resolveSessionLocation(session.id, ip);
 
   const response = NextResponse.json({
     user: { uid: user.uid, username: user.username, balance: 0, points: 0 },

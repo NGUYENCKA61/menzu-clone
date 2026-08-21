@@ -15,6 +15,8 @@ export interface CurrentUser {
   tier: string;
   balance: number;
   points: number;
+  /** Referral earnings waiting to be moved into `balance`. */
+  commissionBalance: number;
   createdAt: Date;
 }
 
@@ -60,6 +62,7 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
     tier: u.tier,
     balance: Number(u.balance),
     points: u.points,
+    commissionBalance: Number(u.commissionBalance),
     createdAt: u.createdAt,
   };
 }

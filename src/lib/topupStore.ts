@@ -1,11 +1,13 @@
 import { db } from "@/lib/db";
+import { commissionFor } from "@/lib/referral";
 import {
   extractTopUpCode,
   TOPUP_EXPIRY_MINUTES,
   type IncomingTransfer,
 } from "@/lib/topup";
 
-function makeCode(prefix: string): string {
+/** Ledger codes ("GD…"); exported for the commission-withdraw route. */
+export function makeCode(prefix: string): string {
   return `${prefix}${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
 }
 
@@ -97,6 +99,29 @@ export async function creditTopUp(
           method: options.note ?? (topUp.method === "CARD" ? "Thẻ Cào" : "Ngân Hàng"),
         },
       });
+
+      // The referral programme's whole payout path: whoever shared the link
+      // this customer registered through earns their percent, inside the same
+      // transaction that credits the top-up. The claimed-count guard above
+      // already makes this once-only; the unique topUpId on the earning makes
+      // double-pay structurally impossible on top of that.
+      if (current.referredById) {
+        const commission = commissionFor(topUp.amount);
+        if (commission > 0n) {
+          await tx.referralEarning.create({
+            data: {
+              userId: current.referredById,
+              fromUserId: topUp.userId,
+              topUpId: topUp.id,
+              amount: commission,
+            },
+          });
+          await tx.user.update({
+            where: { id: current.referredById },
+            data: { commissionBalance: { increment: commission } },
+          });
+        }
+      }
 
       return balanceAfter;
     })

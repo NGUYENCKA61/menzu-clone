@@ -9,8 +9,12 @@ export const metadata: Metadata = {
   title: "Menzu Valorant | Đăng ký",
 };
 
-export default async function RegisterPage() {
-  const settings = await getShopSettings();
+export default async function RegisterPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ ref?: string }>;
+}) {
+  const [settings, { ref }] = await Promise.all([getShopSettings(), searchParams]);
 
   return (
     <div className="min-h-screen flex flex-col text-white overflow-x-clip selection:bg-indigo-500/30">
@@ -26,6 +30,7 @@ export default async function RegisterPage() {
           slideSeconds={settings.authSlideSeconds}
           panelSubtitle={settings.authPanelSubtitle}
           panelTitle={settings.authSignupTitle}
+          refCode={ref ?? null}
         />
         <SiteFooter />
       </main>
