@@ -9,6 +9,7 @@ import {
 import { db } from "@/lib/db";
 import { clientIp } from "@/lib/clientIp";
 import {
+  CAPTCHA_AFTER_FAILURES,
   RETRY_AFTER_SECONDS,
   checkLoginRate,
   clearLoginAttempts,
@@ -39,18 +40,29 @@ export async function POST(request: Request) {
   // response timing to probe whether an account exists.
   const ip = clientIp(request);
 
-  /**
-   * The CAPTCHA is checked here, on the server, before any password work.
-   *
-   * The widget in the browser proves nothing on its own — anyone can post this
-   * endpoint directly and never load the page. What the token is worth is
-   * decided by asking Cloudflare, and only a shop that has filled in both keys
-   * is asking at all: with the settings empty this is skipped entirely, so
-   * adding the feature cannot lock a shop out of its own site before it has
-   * been configured.
-   */
   const settings = await getShopSettings();
-  if (turnstileEnabled(settings)) {
+  const rate = await checkLoginRate(identifier, ip);
+  if (rate.blocked) {
+    return NextResponse.json(
+      { error: "Bạn đã thử sai quá nhiều lần. Vui lòng đợi 5 phút rồi thử lại." },
+      { status: 429, headers: { "retry-after": String(RETRY_AFTER_SECONDS) } },
+    );
+  }
+
+  /**
+   * The CAPTCHA earns its place instead of standing at the door: it is only
+   * demanded once this identifier has a few failures on the clock, so an
+   * honest customer signing in never sees it and a guessing script meets it
+   * on try four. Verified here on the server, before any password work — the
+   * widget in the browser proves nothing on its own, and only a shop that has
+   * filled in both keys is asking Cloudflare at all.
+   *
+   * `captchaRequired` rides every refusal so the form knows to reveal the
+   * widget for the next attempt the moment it becomes necessary.
+   */
+  const captchaNow =
+    turnstileEnabled(settings) && rate.failures >= CAPTCHA_AFTER_FAILURES;
+  if (captchaNow) {
     const outcome = await verifyTurnstile(
       body?.turnstileToken ?? "",
       settings.turnstileSecretKey,
@@ -60,15 +72,11 @@ export async function POST(request: Request) {
       // Counted as a failed attempt: an endpoint that refuses without
       // recording anything is one somebody can hammer for free.
       await recordAttempt("LOGIN", identifier, ip);
-      return NextResponse.json({ error: TURNSTILE_FAILED }, { status: 400 });
+      return NextResponse.json(
+        { error: TURNSTILE_FAILED, captchaRequired: true },
+        { status: 400 },
+      );
     }
-  }
-  const rate = await checkLoginRate(identifier, ip);
-  if (rate.blocked) {
-    return NextResponse.json(
-      { error: "Bạn đã thử sai quá nhiều lần. Vui lòng đợi 15 phút rồi thử lại." },
-      { status: 429, headers: { "retry-after": String(RETRY_AFTER_SECONDS) } },
-    );
   }
 
   // The live form accepts "Email hoặc Tên đăng nhập" in one field.
@@ -84,6 +92,11 @@ export async function POST(request: Request) {
       {
         error: "Tên đăng nhập hoặc mật khẩu không đúng",
         remaining: Math.max(0, rate.remaining - 1),
+        // This failure just went on the clock, so the next try is judged
+        // against failures + 1 — tell the form now, not one refusal late.
+        captchaRequired:
+          turnstileEnabled(settings) &&
+          rate.failures + 1 >= CAPTCHA_AFTER_FAILURES,
       },
       { status: 401 },
     );

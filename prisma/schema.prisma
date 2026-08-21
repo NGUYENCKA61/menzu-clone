@@ -70,6 +70,7 @@ model User {
   serviceOrders ServiceOrder[]
   announcements AnnouncementRecipient[]
   cartItems     CartItem[]
+  passwordResets PasswordReset[]
 
   @@map("users")
 }
@@ -221,6 +222,7 @@ model AppRelease {
 enum AuthAttemptKind {
   LOGIN
   REGISTER
+  RESET
 }
 
 /// Throttling ledger for the credential endpoints, kept only long enough to
@@ -249,6 +251,22 @@ model AuthAttempt {
 }
 
 /// "Liên kết nền tảng" on /profile — Discord carries a "Thưởng 1.000 Pts" bonus.
+/// One outstanding "quên mật khẩu" link. The token itself never lands here —
+/// only its SHA-256 — so a database read cannot mint a working link.
+model PasswordReset {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String    @unique
+  expiresAt DateTime
+  /// Set the moment the link is spent; a used link never works twice.
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+  @@map("password_resets")
+}
+
 model LinkedAccount {
   id         String   @id @default(cuid())
   userId     String

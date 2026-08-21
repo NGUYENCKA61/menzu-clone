@@ -39,6 +39,30 @@ export interface ShopSettings {
    */
   turnstileSiteKey: string;
   turnstileSecretKey: string;
+
+  // --- Đăng nhập Google / Discord -------------------------------------------
+  /**
+   * OAuth credentials, a pair per provider and the same rule as Turnstile:
+   * both halves or neither. With a pair missing that provider's button stays
+   * the inert shell it is today rather than a link into a half-built flow.
+   */
+  googleClientId: string;
+  googleClientSecret: string;
+  discordClientId: string;
+  discordClientSecret: string;
+
+  // --- Gửi email (quên mật khẩu) --------------------------------------------
+  /**
+   * Plain SMTP, because it is the one door every provider opens — a Gmail app
+   * password, Brevo, Mailgun and a future self-hosted relay all speak it.
+   * mailEnabled() below decides whether enough is filled in to send at all.
+   */
+  smtpHost: string;
+  smtpPort: number;
+  smtpUser: string;
+  smtpPass: string;
+  /** The From header — 'THICHTHIHACK <shop@gmail.com>'. */
+  mailFrom: string;
   /** When false, the buy endpoint refuses with `closedMessage`. */
   purchasesEnabled: boolean;
   closedMessage: string;
@@ -55,6 +79,16 @@ export interface ShopSettings {
   siteBackground: string;
   /** Backdrop inside the homepage flash-sale frame, shown at 10% opacity. */
   flashSaleBackground: string;
+  /**
+   * The item pinned to the front of the "HOT PICK" chip's rotation, inside the
+   * category page's skin search. The chip cycles through the picture library on
+   * its own; a name here leads that run. Blank means no pin — the chip only
+   * disappears when the library is empty too.
+   *
+   * Stored as the item's name so it stays pointed at whatever the picture
+   * library has under that name, rather than at a file that could be replaced.
+   */
+  hotPickSkin: string;
 
   /**
    * The pictures behind the sign-in and sign-up cards. One means a still
@@ -189,6 +223,15 @@ export const DEFAULT_SETTINGS: ShopSettings = {
   topUpApiKey: "",
   turnstileSiteKey: "",
   turnstileSecretKey: "",
+  googleClientId: "",
+  googleClientSecret: "",
+  discordClientId: "",
+  discordClientSecret: "",
+  smtpHost: "",
+  smtpPort: 587,
+  smtpUser: "",
+  smtpPass: "",
+  mailFrom: "",
   purchasesEnabled: true,
   closedMessage: "Shop đang tạm ngưng bán hàng, vui lòng quay lại sau ít phút.",
 
@@ -199,6 +242,8 @@ export const DEFAULT_SETTINGS: ShopSettings = {
   siteBackground: BACKDROP,
   flashSaleBackground:
     "/sites/menzu-lol-f7ae197a/root-8a5edab2/images/behance/f945cb242281183.696998e170840.webp",
+  // Off until a shop picks something. See the field's note above.
+  hotPickSkin: "",
   authPanelImages: [AUTH_PANEL],
   authSlideEnabled: true,
   authSlideSeconds: 5,
@@ -264,6 +309,15 @@ export const SETTING_KEYS: Record<keyof ShopSettings, string> = {
   topUpApiKey: "topup.apiKey",
   turnstileSiteKey: "turnstile.siteKey",
   turnstileSecretKey: "turnstile.secretKey",
+  googleClientId: "oauth.google.clientId",
+  googleClientSecret: "oauth.google.clientSecret",
+  discordClientId: "oauth.discord.clientId",
+  discordClientSecret: "oauth.discord.clientSecret",
+  smtpHost: "mail.smtp.host",
+  smtpPort: "mail.smtp.port",
+  smtpUser: "mail.smtp.user",
+  smtpPass: "mail.smtp.pass",
+  mailFrom: "mail.from",
   purchasesEnabled: "shop.purchases",
   closedMessage: "shop.closedMessage",
 
@@ -273,6 +327,7 @@ export const SETTING_KEYS: Record<keyof ShopSettings, string> = {
   heroBanner: "brand.heroBanner",
   siteBackground: "brand.background",
   flashSaleBackground: "home.flashSale.background",
+  hotPickSkin: "category.hotPickSkin",
   authPanelImages: "auth.panelImages",
   authSlideEnabled: "auth.slide",
   authSlideSeconds: "auth.slideSeconds",
@@ -460,6 +515,26 @@ export function bankReady(settings: ShopSettings): boolean {
   return settings.bankAccounts.length > 0;
 }
 
+/** Both halves present — the Google button may become a real door. */
+export function googleOauthEnabled(settings: ShopSettings): boolean {
+  return Boolean(settings.googleClientId.trim() && settings.googleClientSecret.trim());
+}
+
+/** Both halves present — the Discord button may become a real door. */
+export function discordOauthEnabled(settings: ShopSettings): boolean {
+  return Boolean(settings.discordClientId.trim() && settings.discordClientSecret.trim());
+}
+
+/** Enough SMTP to actually hand a message to a relay. */
+export function mailEnabled(settings: ShopSettings): boolean {
+  return Boolean(
+    settings.smtpHost.trim() &&
+      settings.smtpUser.trim() &&
+      settings.smtpPass &&
+      settings.mailFrom.trim(),
+  );
+}
+
 /** Trims one account and drops it if the essentials are missing. */
 function toAccount(raw: unknown): BankAccountConfig | null {
   if (!raw || typeof raw !== "object") return null;
@@ -551,6 +626,27 @@ export function parseSettings(rows: Iterable<{ key: string; value: string }>): S
       stored.get(SETTING_KEYS.turnstileSecretKey),
       DEFAULT_SETTINGS.turnstileSecretKey,
     ),
+    googleClientId: toOptionalText(
+      stored.get(SETTING_KEYS.googleClientId),
+      DEFAULT_SETTINGS.googleClientId,
+    ),
+    googleClientSecret: toOptionalText(
+      stored.get(SETTING_KEYS.googleClientSecret),
+      DEFAULT_SETTINGS.googleClientSecret,
+    ),
+    discordClientId: toOptionalText(
+      stored.get(SETTING_KEYS.discordClientId),
+      DEFAULT_SETTINGS.discordClientId,
+    ),
+    discordClientSecret: toOptionalText(
+      stored.get(SETTING_KEYS.discordClientSecret),
+      DEFAULT_SETTINGS.discordClientSecret,
+    ),
+    smtpHost: toOptionalText(stored.get(SETTING_KEYS.smtpHost), DEFAULT_SETTINGS.smtpHost),
+    smtpPort: toNumber(stored.get(SETTING_KEYS.smtpPort), DEFAULT_SETTINGS.smtpPort),
+    smtpUser: toOptionalText(stored.get(SETTING_KEYS.smtpUser), DEFAULT_SETTINGS.smtpUser),
+    smtpPass: toOptionalText(stored.get(SETTING_KEYS.smtpPass), DEFAULT_SETTINGS.smtpPass),
+    mailFrom: toOptionalText(stored.get(SETTING_KEYS.mailFrom), DEFAULT_SETTINGS.mailFrom),
     purchasesEnabled: toBoolean(
       stored.get(SETTING_KEYS.purchasesEnabled),
       DEFAULT_SETTINGS.purchasesEnabled,
@@ -569,6 +665,10 @@ export function parseSettings(rows: Iterable<{ key: string; value: string }>): S
     flashSaleBackground: toText(
       stored.get(SETTING_KEYS.flashSaleBackground),
       DEFAULT_SETTINGS.flashSaleBackground,
+    ),
+    hotPickSkin: toText(
+      stored.get(SETTING_KEYS.hotPickSkin),
+      DEFAULT_SETTINGS.hotPickSkin,
     ),
     // The old single-image key is read when the list has never been written,
     // so a shop that picked a picture before the slideshow existed keeps it
@@ -672,6 +772,15 @@ export function serializeSettings(settings: ShopSettings): { key: string; value:
     topUpApiKey: settings.topUpApiKey.trim(),
     turnstileSiteKey: settings.turnstileSiteKey.trim(),
     turnstileSecretKey: settings.turnstileSecretKey.trim(),
+    googleClientId: settings.googleClientId.trim(),
+    googleClientSecret: settings.googleClientSecret.trim(),
+    discordClientId: settings.discordClientId.trim(),
+    discordClientSecret: settings.discordClientSecret.trim(),
+    smtpHost: settings.smtpHost.trim(),
+    smtpPort: String(settings.smtpPort),
+    smtpUser: settings.smtpUser.trim(),
+    smtpPass: settings.smtpPass,
+    mailFrom: settings.mailFrom.trim(),
     purchasesEnabled: String(settings.purchasesEnabled),
     closedMessage: settings.closedMessage.trim(),
 
@@ -681,6 +790,7 @@ export function serializeSettings(settings: ShopSettings): { key: string; value:
     heroBanner: settings.heroBanner.trim(),
     siteBackground: settings.siteBackground.trim(),
     flashSaleBackground: settings.flashSaleBackground.trim(),
+    hotPickSkin: settings.hotPickSkin.trim(),
     authPanelImages: JSON.stringify(settings.authPanelImages),
     authSlideEnabled: String(settings.authSlideEnabled),
     authSlideSeconds: String(settings.authSlideSeconds),
@@ -753,6 +863,19 @@ export function normalizeSettings(raw: Partial<ShopSettings> | null): ShopSettin
     topUpApiKey: String(raw?.topUpApiKey ?? "").trim(),
     turnstileSiteKey: String(raw?.turnstileSiteKey ?? "").trim(),
     turnstileSecretKey: String(raw?.turnstileSecretKey ?? "").trim(),
+    googleClientId: String(raw?.googleClientId ?? "").trim(),
+    googleClientSecret: String(raw?.googleClientSecret ?? "").trim(),
+    discordClientId: String(raw?.discordClientId ?? "").trim(),
+    discordClientSecret: String(raw?.discordClientSecret ?? "").trim(),
+    smtpHost: String(raw?.smtpHost ?? "").trim(),
+    // Junk falls back to 587, the port the world's SMTP defaults to.
+    smtpPort:
+      Number.isFinite(Number(raw?.smtpPort)) && Number(raw?.smtpPort) > 0
+        ? Math.floor(Number(raw?.smtpPort))
+        : DEFAULT_SETTINGS.smtpPort,
+    smtpUser: String(raw?.smtpUser ?? "").trim(),
+    smtpPass: String(raw?.smtpPass ?? ""),
+    mailFrom: String(raw?.mailFrom ?? "").trim(),
     purchasesEnabled: Boolean(raw?.purchasesEnabled),
     closedMessage: String(raw?.closedMessage ?? "").trim(),
 
@@ -765,6 +888,9 @@ export function normalizeSettings(raw: Partial<ShopSettings> | null): ShopSettin
     siteBackground: String(raw?.siteBackground ?? "").trim() || DEFAULT_SETTINGS.siteBackground,
     flashSaleBackground:
       String(raw?.flashSaleBackground ?? "").trim() || DEFAULT_SETTINGS.flashSaleBackground,
+    // No `||` fallback: blank is a real choice here — it means "no chip" —
+    // where for the pictures above it would leave an empty <Image src>.
+    hotPickSkin: String(raw?.hotPickSkin ?? "").trim(),
     // Blank falls back to the default rather than leaving an empty <Image src>,
     // which throws at render and takes the whole sign-in page with it.
     authPanelImages: readImageList(raw?.authPanelImages),

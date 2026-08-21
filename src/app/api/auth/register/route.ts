@@ -10,6 +10,7 @@ import {
 import { db } from "@/lib/db";
 import { clientIp } from "@/lib/clientIp";
 import {
+  CAPTCHA_AFTER_REGISTRATIONS,
   REGISTER_RETRY_AFTER_SECONDS,
   checkRegisterRate,
   recordAttempt,
@@ -35,19 +36,25 @@ export async function POST(request: Request) {
 
   const ip = clientIp(request);
 
-  /**
-   * Same gate as sign-in, and this is the side that needs it more: sign-in
-   * only lets somebody in, registration creates rows. Checked before the
-   * account is written, and skipped entirely when the shop has not configured
-   * Turnstile.
-   *
-   * The consent checkbox on the form is not re-checked here. It is a promise
-   * between shop and customer, and the browser saying "they ticked it" is the
-   * only evidence that could ever exist — unlike the token, whose worth
-   * Cloudflare decides.
-   */
   const settings = await getShopSettings();
-  if (turnstileEnabled(settings)) {
+  const rate = await checkRegisterRate(ip);
+  if (rate.blocked) {
+    return NextResponse.json(
+      { error: "Đã tạo quá nhiều tài khoản từ thiết bị này. Vui lòng thử lại sau." },
+      { status: 429, headers: { "retry-after": String(REGISTER_RETRY_AFTER_SECONDS) } },
+    );
+  }
+
+  /**
+   * As on sign-in, the CAPTCHA earns its place: the first accounts from an
+   * address sign up without it, and only a device that keeps creating more
+   * within the hour is asked to prove a human is present. Verified on the
+   * server — the widget alone proves nothing — and skipped entirely while
+   * the shop has no keys configured.
+   */
+  const captchaNow =
+    turnstileEnabled(settings) && rate.failures >= CAPTCHA_AFTER_REGISTRATIONS;
+  if (captchaNow) {
     const outcome = await verifyTurnstile(
       body?.turnstileToken ?? "",
       settings.turnstileSecretKey,
@@ -55,14 +62,11 @@ export async function POST(request: Request) {
     );
     if (!outcome.ok) {
       await recordAttempt("REGISTER", username, ip);
-      return NextResponse.json({ error: TURNSTILE_FAILED }, { status: 400 });
+      return NextResponse.json(
+        { error: TURNSTILE_FAILED, captchaRequired: true },
+        { status: 400 },
+      );
     }
-  }
-  if ((await checkRegisterRate(ip)).blocked) {
-    return NextResponse.json(
-      { error: "Đã tạo quá nhiều tài khoản từ thiết bị này. Vui lòng thử lại sau." },
-      { status: 429, headers: { "retry-after": String(REGISTER_RETRY_AFTER_SECONDS) } },
-    );
   }
 
   const clash = await db.user.findFirst({
