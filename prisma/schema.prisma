@@ -20,6 +20,9 @@ datasource db {
 
 enum UserRole {
   MEMBER
+  /// Đại lý — granted by an admin, never self-served. Buys software keys at
+  /// their own negotiated `agencyPercent` through /agency/dashboard.
+  AGENCY
   ADMIN
 }
 
@@ -59,6 +62,25 @@ model User {
   /// "Điểm thưởng … Pts" on /profile.
   points       Int        @default(0)
 
+  /// The đại lý's negotiated wholesale percent, typed by the admin when the
+  /// role is granted and zeroed when it is revoked. Per account and shown to
+  /// nobody else — the shop deliberately publishes no flat rate.
+  agencyPercent Int @default(0)
+
+  /// "Số tiền hoa hồng khả dụng": referral earnings waiting to be moved into
+  /// `balance`. Kept apart from balance so the shop can see referral money
+  /// as its own stream before it is spent.
+  commissionBalance BigInt @default(0)
+  /// Who shared the /register?ref= link this account signed up through.
+  /// Set once at registration and never rewritten.
+  referredById String?
+  referredBy   User?   @relation("Referrals", fields: [referredById], references: [id], onDelete: SetNull)
+  referrals    User[]  @relation("Referrals")
+  /// Commission this user earned from their referrals' top-ups…
+  referralEarnings ReferralEarning[] @relation("EarnedBy")
+  /// …and the earnings this user's own top-ups generated for their referrer.
+  referralSources  ReferralEarning[] @relation("EarnedFrom")
+
   createdAt    DateTime   @default(now())
 
   sessions      Session[]
@@ -75,12 +97,38 @@ model User {
   @@map("users")
 }
 
+/// One referred top-up's commission (REFERRAL_PERCENT in lib/referral.ts) —
+/// written in the same transaction that credits the top-up itself. `topUpId`
+/// is unique so a replayed settle can never pay the same commission twice.
+model ReferralEarning {
+  id         String   @id @default(cuid())
+  /// The referrer the money went to.
+  userId     String
+  user       User     @relation("EarnedBy", fields: [userId], references: [id], onDelete: Cascade)
+  /// The referred customer whose top-up paid it.
+  fromUserId String
+  fromUser   User     @relation("EarnedFrom", fields: [fromUserId], references: [id], onDelete: Cascade)
+  topUpId    String   @unique
+  topUp      TopUp    @relation(fields: [topUpId], references: [id], onDelete: Cascade)
+  amount     BigInt
+  createdAt  DateTime @default(now())
+
+  @@index([userId, createdAt])
+  @@map("referral_earnings")
+}
+
 model Session {
   id        String   @id @default(cuid())
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   expiresAt DateTime
   createdAt DateTime @default(now())
+  /// What and where signed in — the "Quản lý thiết bị" list. All nullable:
+  /// rows predate these columns, and a proxyless request may carry no IP.
+  ip        String?
+  userAgent String?
+  /// "Thốt Nốt, Vietnam" — resolved once after sign-in, fire-and-forget.
+  location  String?
 
   @@index([userId])
   @@map("sessions")
@@ -805,6 +853,10 @@ enum TopUpStatus {
   /// creditable: a customer who transfers a day late is paying, not cheating,
   /// and the code in their description still identifies the request.
   EXPIRED
+  /// Withdrawn by the customer before paying ("Hủy hóa đơn này"). Unlike
+  /// EXPIRED it is never credited later — the settle path only takes
+  /// PENDING and EXPIRED rows.
+  CANCELLED
 }
 
 model TopUp {
@@ -817,6 +869,8 @@ model TopUp {
   status    TopUpStatus @default(PENDING)
   /// Carrier for CARD top-ups ("1. Chọn nhà mạng").
   carrier   String?
+  /// The 1% its referrer earned when this was credited, if any.
+  earning   ReferralEarning?
   createdAt DateTime    @default(now())
 
   @@index([userId, createdAt])
