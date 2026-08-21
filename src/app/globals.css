@@ -480,3 +480,311 @@ body.lightbox-open .site-nav {
   opacity: 0;
   pointer-events: none;
 }
+
+/* The scanning search field from the original menzu category page, kept
+   verbatim from its captured markup: a pale band sweeping the box left to
+   right every few seconds, over a reticle whose dashed ring breathes and whose
+   centre dot blinks.
+   Two of these tween `r` on an SVG circle — a geometry attribute Tailwind has
+   no utility for — which is why the set lives here rather than in classes on
+   the element. Decoration only: the field searches exactly the same with every
+   animation stilled, which is what readers who asked for less motion get. */
+@keyframes val-scan {
+  0% {
+    left: -15%;
+    opacity: 0;
+  }
+  6% {
+    opacity: 1;
+  }
+  94% {
+    opacity: 0.7;
+  }
+  100% {
+    left: 110%;
+    opacity: 0;
+  }
+}
+@keyframes val-cross-pulse {
+  0%,
+  100% {
+    opacity: 0.45;
+    r: 7;
+  }
+  50% {
+    opacity: 0.85;
+    r: 8.5;
+  }
+}
+@keyframes val-dot-blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+.val-scan-line {
+  animation: val-scan 3.2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+.val-cross-ring {
+  animation: val-cross-pulse 1.8s ease-in-out infinite;
+  will-change: opacity;
+}
+.val-dot-blink {
+  animation: val-dot-blink 1.2s ease-in-out infinite;
+  will-change: opacity;
+}
+@media (prefers-reduced-motion: reduce) {
+  /* The sweep goes entirely — a band frozen mid-field reads as a rendering
+     fault. The reticle only stops moving; it is part of the icon. */
+  .val-scan-line {
+    display: none;
+  }
+  .val-cross-ring,
+  .val-dot-blink {
+    animation: none;
+  }
+}
+
+/* The gold badge that floats over the original menzu skin search, and the
+   glow the field answers it with. Taken verbatim from the captured page: the
+   badge bobs 3px, its border is a seven-stop gradient sliding across a track
+   four times its own width, a shimmer bar crosses the pill every 2.8s, and the
+   field beneath pulses from a red outline to a gold one and back.
+   `vip-text-glow`'s keyframes already lived above — this adds the class that
+   drives them. */
+@keyframes vip-badge-float {
+  0%,
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  50% {
+    transform: translateY(-3px);
+    opacity: 0.9;
+  }
+}
+@keyframes vip-shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(380%);
+  }
+}
+@keyframes badge-border-flow {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+@keyframes search-glow {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 1px rgb(239 68 68 / 0.25),
+      0 0 10px rgb(239 68 68 / 0.1);
+  }
+  50% {
+    box-shadow:
+      0 0 0 2px rgb(252 186 3 / 0.45),
+      0 0 22px rgb(252 186 3 / 0.22),
+      0 0 40px rgb(239 68 68 / 0.1);
+  }
+}
+.vip-badge-float {
+  animation: vip-badge-float 2.2s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+.vip-shimmer-bar {
+  animation: vip-shimmer 2.8s ease-in-out infinite;
+  will-change: transform;
+}
+.badge-border-flow {
+  background: linear-gradient(
+    90deg,
+    #fcba03,
+    #e8880a,
+    #ef4444,
+    #e8880a,
+    #fcba03,
+    #f5a623,
+    #fcba03
+  );
+  background-size: 400% 100%;
+  animation: badge-border-flow 3s ease-in-out infinite;
+}
+.search-glow {
+  animation: search-glow 2.4s ease-in-out infinite;
+}
+.vip-text-glow {
+  animation: vip-text-glow 2s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  /* Everything stills, but nothing disappears: the badge keeps its gold
+     border at whatever position the gradient rests on, and the field keeps a
+     steady outline instead of a breathing one. */
+  .vip-badge-float,
+  .vip-shimmer-bar,
+  .badge-border-flow,
+  .search-glow,
+  .search-glow-brand,
+  .hotpick-swap,
+  .vip-text-glow {
+    animation: none;
+  }
+}
+
+/* The software search's breathing border: the account field's rhythm and
+   weights, run between the shop's two loudest colours — resting on --brand's
+   purple (#7c3aed) and peaking in the effects' red (#ef4444), the same red the
+   reticle and the scan band inside the field already carry. The peak keeps a
+   wide trace of the purple, exactly as the account glow keeps a trace of its
+   red under the gold. Hardcoded like every colour in these keyframes. */
+@keyframes search-glow-brand {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 1px rgb(124 58 237 / 0.3),
+      0 0 10px rgb(124 58 237 / 0.12);
+  }
+  50% {
+    box-shadow:
+      0 0 0 2px rgb(239 68 68 / 0.5),
+      0 0 22px rgb(239 68 68 / 0.25),
+      0 0 40px rgb(124 58 237 / 0.12);
+  }
+}
+.search-glow-brand {
+  animation: search-glow-brand 2.4s ease-in-out infinite;
+}
+
+/* The HOT PICK chip's turn: each weapon rolls up into place as the one before
+   it leaves. Applied to a span that is remounted per rotation step, so the
+   animation runs exactly once per change — no infinite loop to still, though
+   the reduced-motion block covers the mount-time run too, and the rotation
+   itself never starts for those readers. */
+@keyframes hotpick-swap {
+  from {
+    opacity: 0;
+    transform: translateY(55%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.hotpick-swap {
+  animation: hotpick-swap 320ms ease-out;
+}
+
+/* The error modal's arrival: the backdrop fades up while the card pops in,
+   then gives one quick head-shake — the oldest "wrong password" gesture
+   there is, starting a beat after the pop so the two transforms never fight
+   over the element. Both settle to the element's natural state, so a reader with reduced
+   motion on simply sees the finished modal. */
+@keyframes error-backdrop-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes error-card-in {
+  from {
+    opacity: 0;
+    transform: scale(0.92) translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+.error-modal-backdrop {
+  animation: error-backdrop-in 0.2s ease-out;
+}
+@keyframes error-card-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  15% {
+    transform: translateX(-9px);
+  }
+  30% {
+    transform: translateX(8px);
+  }
+  45% {
+    transform: translateX(-6px);
+  }
+  60% {
+    transform: translateX(5px);
+  }
+  75% {
+    transform: translateX(-3px);
+  }
+  90% {
+    transform: translateX(2px);
+  }
+}
+.error-modal-card {
+  animation:
+    error-card-in 0.22s ease-out,
+    error-card-shake 0.45s ease-in-out 0.26s;
+}
+@media (prefers-reduced-motion: reduce) {
+  .error-modal-backdrop,
+  .error-modal-card {
+    animation: none;
+  }
+}
+
+/* The status toast — sign-in's good and bad news alike: slides in from the right edge, and the red bar along its
+   foot is the clock — the component closes itself when the bar's drain
+   animation ends, so CSS is the single source of how long a toast lives.
+   Hovering pauses the clock (you are reading it; it should wait), and under
+   reduced motion the bar never runs — the toast then simply stays until the
+   close button dismisses it, which for a reader who dislikes moving UI is
+   the better deal anyway. */
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateX(calc(100% + 24px));
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+@keyframes toast-clock {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
+}
+.status-toast {
+  animation: toast-in 0.3s ease-out;
+}
+.status-toast-clock {
+  transform-origin: left;
+  animation: toast-clock 5s linear 0.3s forwards;
+}
+.status-toast:hover .status-toast-clock {
+  animation-play-state: paused;
+}
+@media (prefers-reduced-motion: reduce) {
+  .status-toast,
+  .status-toast-clock {
+    animation: none;
+  }
+}

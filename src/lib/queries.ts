@@ -166,6 +166,19 @@ export interface CategoryPageData {
    * account grid — rank, skin, price band — describes none of them.
    */
   software: SoftwareCardView[];
+  /**
+   * How many sellable accounts the category holds before any filter runs.
+   * Zero means the category does not deal in accounts at all, which is a
+   * different thing from a filter matching none of the ones it has: the
+   * page drops the whole account section for the first, and keeps it — with
+   * the panel that got you there — for the second.
+   */
+  accountTotal: number;
+  /**
+   * The same count for tools, and for the same reason: it separates a category
+   * that sells no software from one whose software the search just excluded.
+   */
+  softwareTotal: number;
   total: number;
   totalPages: number;
   page: number;
@@ -216,6 +229,47 @@ export interface CategoryFilters {
   /** Matches a buddy, card, spray or agent by name. */
   accessory?: string;
   source?: "all" | "drop" | "menzu";
+  /** Matches a tool by name, or by the code the card falls back to. */
+  software?: string;
+  /** Matches a tool by the feature line under its name. */
+  softwareFeature?: string;
+  softwareStatus?: "UNDETECTED" | "DETECTED" | "UPDATING";
+  softwareSort?: "newest" | "price-asc" | "price-desc";
+}
+
+/**
+ * The software half of a category listing.
+ *
+ * Name, features and status are columns, so they narrow the query here. Price
+ * is not: a tool costs whatever its cheapest package costs, which no column
+ * holds, so the price sort runs over the mapped rows further down.
+ *
+ * The name search takes the code too, because `name` is nullable and the card
+ * prints the code in its place — whatever is on the tile should be findable by
+ * typing it. The two searches are separate keys and so are ANDed: a name and a
+ * feature together narrow, rather than widening into everything matching one.
+ */
+function softwareWhere(categoryId: string, filters: CategoryFilters) {
+  const name = filters.software?.trim();
+  const feature = filters.softwareFeature?.trim();
+  return {
+    categoryId,
+    productType: "SOFTWARE_GAME" as const,
+    status: "AVAILABLE" as const,
+    deletedAt: null,
+    ...(name
+      ? {
+          OR: [
+            { name: { contains: name, mode: "insensitive" as const } },
+            { code: { contains: name, mode: "insensitive" as const } },
+          ],
+        }
+      : {}),
+    ...(feature
+      ? { description: { contains: feature, mode: "insensitive" as const } }
+      : {}),
+    ...(filters.softwareStatus ? { softwareStatus: filters.softwareStatus } : {}),
+  };
 }
 
 const ACCESSORY_KINDS = ["BUDDY", "CARD", "SPRAY", "AGENT"] as const;
@@ -291,7 +345,7 @@ export async function getCategoryPage(
 
   const where = categoryWhere(category.id, filters);
 
-  const [total, rows, softwareRows] = await Promise.all([
+  const [total, rows, softwareRows, accountTotal, softwareTotal] = await Promise.all([
     db.product.count({ where }),
     db.product.findMany({
       where,
@@ -304,12 +358,7 @@ export async function getCategoryPage(
       },
     }),
     db.product.findMany({
-      where: {
-        categoryId: category.id,
-        productType: "SOFTWARE_GAME",
-        status: "AVAILABLE",
-        deletedAt: null,
-      },
+      where: softwareWhere(category.id, filters),
       orderBy: { createdAt: "desc" },
       include: {
         packages: {
@@ -318,6 +367,11 @@ export async function getCategoryPage(
         },
       },
     }),
+    // Both listings with every filter dropped: what the category holds, rather
+    // than what this request matched. Built by the same two helpers, so a count
+    // and its listing cannot drift over what "sellable" means.
+    db.product.count({ where: categoryWhere(category.id, {}) }),
+    db.product.count({ where: softwareWhere(category.id, {}) }),
   ]);
 
   const [sale, images] = await Promise.all([
@@ -325,28 +379,49 @@ export async function getCategoryPage(
     weaponImages(rows),
   ]);
 
+  // Cheapest tier first, which is the order the card's dropdown reads in. No
+  // separate "from" price: the card prints the tiers themselves, so a second
+  // figure above them would only be the first one again.
+  const software: SoftwareCardView[] = softwareRows.map((s) => ({
+    code: s.code,
+    name: s.name ?? s.code,
+    imageUrl: s.imageUrl,
+    description: s.description ?? "",
+    status: s.softwareStatus,
+    packages: s.packages.map((p) => ({
+      id: p.id,
+      label: p.label,
+      price: Number(p.price),
+    })),
+    downloadUrl: s.downloadUrl,
+  }));
+
+  // Sorted here rather than in SQL: what a tool costs is the cheapest of its
+  // packages, and no column holds that. A category carries a handful of tools,
+  // so reading them in memory is cheaper than the join and the window function
+  // ordering by a related minimum would need. Tools priced at nothing — none
+  // yet, but a tool can exist before its packages do — go last either way,
+  // rather than leading the ascending list at zero.
+  if (filters.softwareSort === "price-asc" || filters.softwareSort === "price-desc") {
+    const direction = filters.softwareSort === "price-asc" ? 1 : -1;
+    software.sort((a, b) => {
+      const left = a.packages[0]?.price;
+      const right = b.packages[0]?.price;
+      if (left === undefined) return right === undefined ? 0 : 1;
+      if (right === undefined) return -1;
+      return direction * (left - right);
+    });
+  }
+
   return {
     name: category.name,
     slug: category.slug,
     total,
+    accountTotal,
+    softwareTotal,
     page,
     totalPages: Math.max(1, Math.ceil(total / PAGE_SIZE)),
-    // Cheapest tier first, which is the order the card's dropdown reads in.
-    // No separate "from" price: the card prints the tiers themselves, so a
-    // second figure above them would only be the first one again.
-    software: softwareRows.map((s) => ({
-      code: s.code,
-      name: s.name ?? s.code,
-      imageUrl: s.imageUrl,
-      description: s.description ?? "",
-      status: s.softwareStatus,
-      packages: s.packages.map((p) => ({
-        id: p.id,
-        label: p.label,
-        price: Number(p.price),
-      })),
-      downloadUrl: s.downloadUrl,
-    })),
+    software,
     products: rows.map((p) => toProductCard(p, sale.get(p.id) ?? p.price, images)),
   };
 }

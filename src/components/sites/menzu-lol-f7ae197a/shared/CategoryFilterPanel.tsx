@@ -4,6 +4,16 @@ import { useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Package, Search } from "lucide-react";
 
+import {
+  CHIP_ACTIVE,
+  CHIP_DISABLED,
+  CHIP_INACTIVE,
+  GROUP_LABEL_CLASS,
+  PANEL_CLASS,
+  SEARCH_SHELL_CLASS,
+} from "./filterChrome";
+import { ScopeSearchField } from "./ScopeSearchField";
+
 interface PricePreset {
   label: string;
   min: string;
@@ -35,25 +45,21 @@ const SOURCE_OPTIONS = [
 
 type SourceValue = (typeof SOURCE_OPTIONS)[number]["value"];
 
-// Tailwind can't see dynamically-composed class names, so the chip's active
-// and inactive states are always emitted as complete literal strings.
-const CHIP_INACTIVE =
-  "px-3 py-1.5 rounded-lg text-[11px] font-bold border border-neutral-800/60 bg-neutral-950/40 text-neutral-400 hover:text-white hover:border-neutral-700 transition-colors whitespace-nowrap";
-const CHIP_ACTIVE =
-  "px-3 py-1.5 rounded-lg text-[11px] font-bold border border-[var(--brand)]/50 bg-[var(--brand)]/15 text-[#a78bfa] transition-colors whitespace-nowrap";
-
-const CHIP_DISABLED =
-  "px-3 py-1.5 rounded-lg text-[11px] font-bold border border-neutral-800/60 bg-neutral-950/40 text-neutral-600 cursor-not-allowed whitespace-nowrap";
-
 const NO_DATA = "Shop chưa có dữ liệu cho bộ lọc này";
-
-const GROUP_LABEL_CLASS =
-  "text-[10px] font-black uppercase tracking-widest text-neutral-500 mb-1.5 block";
 
 const PRICE_INPUT_SHELL_CLASS =
   "flex items-center gap-1.5 h-10 px-3 rounded-lg bg-neutral-950/60 border border-neutral-800/60 flex-1 min-w-0";
 const PRICE_INPUT_CLASS =
   "bg-transparent outline-none text-white text-sm w-full min-w-0 font-bold tabular-nums placeholder-neutral-600";
+
+export interface CategoryFilterPanelProps {
+  /**
+   * The rotating cast for the HOT PICK chip, already resolved against the
+   * picture library — the pinned item first when Cấu hình names one, then the
+   * library's newest. Empty or absent leaves the chip out entirely.
+   */
+  hotPicks?: { name: string; imageUrl: string | null }[];
+}
 
 /**
  * Search + filter panel above the category listing.
@@ -64,7 +70,7 @@ const PRICE_INPUT_CLASS =
  * to filter on, and a live-looking control that changes nothing is what this
  * panel was before.
  */
-export function CategoryFilterPanel() {
+export function CategoryFilterPanel({ hotPicks }: CategoryFilterPanelProps) {
   const router = useRouter();
   const pathname = usePathname();
   const params = useSearchParams();
@@ -134,24 +140,40 @@ export function CategoryFilterPanel() {
   }
 
   return (
-    <div className="mb-10">
+    // mt-14 is the room the gold badge needs. It floats 3.2rem clear of the
+    // field and takes no space of its own, so without this it would sit on top
+    // of whatever heading the page put above the panel.
+    <div className="mt-14 mb-10">
       <form onSubmit={handleSubmit} className="flex flex-col gap-3 w-full">
         <div className="flex flex-col md:flex-row gap-2.5">
           <div className="flex-[6] relative min-w-0">
-            <div className="flex items-center gap-2 h-[50px] px-4 rounded-xl bg-neutral-900/60 border border-neutral-800/60 focus-within:border-[var(--brand)]/60 transition-colors">
-              <Search size={15} className="text-neutral-500 shrink-0" />
-              <input
-                type="text"
-                value={skinQuery}
-                onChange={(event) => setSkinQuery(event.target.value)}
-                placeholder="Tìm: ORA by OneTap, Forsaken, Bubblegum Deathwish......"
-                className="flex-1 bg-transparent outline-none text-white placeholder-neutral-400 text-sm transition-colors"
-              />
-            </div>
+            <ScopeSearchField
+              value={skinQuery}
+              onChange={setSkinQuery}
+              placeholder="Tìm: ORA by OneTap, Forsaken, Bubblegum Deathwish......"
+              // A real non-breaking space, not the "&nbsp;" the capture
+              // shows: a JSX string attribute is text, not markup, and the
+              // entity would print itself.
+              badge={"✦ Tìm skin yêu thích của bạn"}
+              hotPick={
+                hotPicks && hotPicks.length > 0
+                  ? {
+                      items: hotPicks,
+                      // The box is filled as well as the URL, so the field
+                      // shows what it just searched for and the shopper can
+                      // correct it rather than retype the whole name.
+                      onPick: (name) => {
+                        setSkinQuery(name);
+                        apply({ skin: name });
+                      },
+                    }
+                  : undefined
+              }
+            />
           </div>
 
           <div className="flex-[4] relative min-w-0">
-            <div className="flex items-center gap-2 h-[50px] px-4 rounded-xl bg-neutral-900/60 border border-neutral-800/60 focus-within:border-[var(--brand)]/60 transition-colors">
+            <div className={SEARCH_SHELL_CLASS}>
               <Package size={15} className="text-neutral-500 shrink-0" />
               <input
                 type="text"
@@ -172,7 +194,7 @@ export function CategoryFilterPanel() {
           </button>
         </div>
 
-        <div className="bg-neutral-900/35 border border-neutral-800/40 rounded-2xl p-3.5 md:p-4 flex flex-col gap-4">
+        <div className={PANEL_CLASS}>
           <div className="flex flex-col xl:flex-row xl:items-end gap-4">
             <div>
               <span className={GROUP_LABEL_CLASS}>Khoảng giá</span>

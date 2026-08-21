@@ -1,3 +1,4 @@
+import { PackageOpen } from "lucide-react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
@@ -9,7 +10,11 @@ import { Breadcrumb } from "@/components/sites/menzu-lol-f7ae197a/shared/Breadcr
 import { CategoryFilterPanel } from "@/components/sites/menzu-lol-f7ae197a/shared/CategoryFilterPanel";
 import { ProductCard } from "@/components/sites/menzu-lol-f7ae197a/shared/ProductCard";
 import { SoftwareCard } from "@/components/sites/menzu-lol-f7ae197a/shared/SoftwareCard";
-import { getCategoryPage, listCategories } from "@/lib/queries";
+import { SoftwareFilterPanel } from "@/components/sites/menzu-lol-f7ae197a/shared/SoftwareFilterPanel";
+import { db } from "@/lib/db";
+import { getCategoryPage } from "@/lib/queries";
+import { getShopSettings } from "@/lib/settingsStore";
+import { weaponKey } from "@/lib/weaponImages";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -21,11 +26,26 @@ interface PageProps {
     skin?: string;
     phukien?: string;
     nguon?: string;
+    /** The software panel's own keys, kept apart from the account panel's. */
+    pm?: string;
+    cn?: string;
+    tt?: string;
+    pmsort?: string;
   }>;
 }
 
 const SORTS = new Set(["newest", "price-asc", "price-desc"]);
 const SOURCES = new Set(["all", "drop", "menzu"]);
+
+/** How many library items the HOT PICK chip rotates through, besides the pin. */
+const HOT_PICK_ROTATION = 8;
+
+/** The status chips' URL values, and the column values they stand for. */
+const SOFTWARE_STATUSES = {
+  undetected: "UNDETECTED",
+  updating: "UPDATING",
+  detected: "DETECTED",
+} as const;
 
 /** A blank or junk parameter means "no filter", never an error page. */
 function toAmount(raw: string | undefined): number | undefined {
@@ -56,14 +76,57 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
     source: SOURCES.has(query.nguon ?? "")
       ? (query.nguon as "all" | "drop" | "menzu")
       : undefined,
+    software: query.pm?.trim() || undefined,
+    softwareFeature: query.cn?.trim() || undefined,
+    softwareStatus:
+      SOFTWARE_STATUSES[query.tt as keyof typeof SOFTWARE_STATUSES] ?? undefined,
+    softwareSort: SORTS.has(query.pmsort ?? "")
+      ? (query.pmsort as "newest" | "price-asc" | "price-desc")
+      : undefined,
   });
   if (!data) notFound();
 
-  const others = (await listCategories())
-    .filter((c) => c.slug !== slug)
-    .slice(0, 4);
+  // The HOT PICK chip's rotating cast: the picture library's newest items,
+  // led by whatever name Cấu hình pins. The pin joins even with no picture
+  // yet — the shop named it on purpose — and looks its picture up directly
+  // rather than hoping to find itself among the newest few. A blank pin just
+  // means the library rotates on its own.
+  const settings = await getShopSettings();
+  const pinnedName = settings.hotPickSkin.trim();
+  const pinnedKey = pinnedName ? weaponKey(pinnedName) : null;
+  const [pinnedImage, libraryPicks] = await Promise.all([
+    pinnedKey
+      ? db.weaponImage.findUnique({ where: { key: pinnedKey }, select: { url: true } })
+      : Promise.resolve(null),
+    db.weaponImage.findMany({
+      orderBy: { updatedAt: "desc" },
+      take: HOT_PICK_ROTATION,
+      select: { name: true, url: true },
+    }),
+  ]);
+  const hotPickList: { name: string; imageUrl: string | null }[] = [
+    ...(pinnedName ? [{ name: pinnedName, imageUrl: pinnedImage?.url ?? null }] : []),
+    ...libraryPicks
+      .filter((w) => weaponKey(w.name) !== pinnedKey)
+      .map((w) => ({ name: w.name, imageUrl: w.url })),
+  ];
+  const hotPicks = hotPickList.length > 0 ? hotPickList : undefined;
 
   const pageNumbers = buildPageList(data.page, data.totalPages);
+
+  // Three shapes for the account half, decided by what the category holds.
+  //   accounts on sale         the whole section: heading, panel, grid, pager
+  //   software but no accounts nothing at all. The panel filters on rank,
+  //     skins and price band, and a notice that there are no accounts, on a
+  //     page that never offered any, answers a question nobody asked.
+  //   neither                  the box by itself. There is nothing to filter
+  //     and no filter to undo, so the panel would be furniture round a blank.
+  //
+  // Both read the unfiltered totals, never the lists: with a search running,
+  // an empty list means "nothing matched", which is the opposite of "nothing
+  // here" and gets the opposite treatment.
+  const hasAccounts = data.accountTotal > 0;
+  const sellsNothing = !hasAccounts && data.softwareTotal === 0;
 
   return (
     <div className="min-h-screen flex flex-col text-white overflow-x-clip selection:bg-indigo-500/30 transition-colors duration-300">
@@ -78,91 +141,92 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
               items={[{ label: "Trang chủ", href: "/" }, { label: data.name }]}
             />
 
-            {/* Software first, and outside the filter panel: the panel filters
-                on rank, skin and price band, none of which apply to a tool, so
+            {/* Software first, with its own search: the panel below filters on
+                rank, skins and a price band, none of which describe a tool, so
                 a grid that sat under it would look filtered and never be. */}
-            {data.software.length > 0 ? (
+            {data.softwareTotal > 0 ? (
               <div className="flex flex-col gap-5 mb-12">
                 <h2 className="text-lg sm:text-xl font-black uppercase tracking-wider text-white">
                   Phần mềm
                 </h2>
-                <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:gap-8">
-                  {data.software.map((s) => (
-                    <SoftwareCard key={s.code} software={s} />
-                  ))}
-                </div>
+                <SoftwareFilterPanel />
+                {data.software.length > 0 ? (
+                  <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:gap-8">
+                    {data.software.map((s) => (
+                      <SoftwareCard key={s.code} software={s} />
+                    ))}
+                  </div>
+                ) : (
+                  // Only reachable through the search above — the section as a
+                  // whole is hidden when the category stocks no tools — so the
+                  // copy points at the search rather than at the shelf.
+                  <EmptyPanel
+                    title="Không tìm thấy phần mềm nào"
+                    note="Không có phần mềm nào khớp với từ khoá hoặc bộ lọc hiện tại. Thử bỏ bớt điều kiện xem sao."
+                  />
+                )}
               </div>
             ) : null}
 
-            {data.software.length > 0 ? (
-              <h2 className="text-lg sm:text-xl font-black uppercase tracking-wider text-white mb-5">
-                Tài khoản game
-              </h2>
-            ) : null}
+            {hasAccounts ? (
+              <>
+                {data.softwareTotal > 0 ? (
+                  <h2 className="text-lg sm:text-xl font-black uppercase tracking-wider text-white mb-5">
+                    Tài khoản game
+                  </h2>
+                ) : null}
 
-            <CategoryFilterPanel />
+                <CategoryFilterPanel hotPicks={hotPicks} />
 
-            <div className="flex flex-col gap-10">
-              {data.products.length > 0 ? (
-                <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:gap-8">
-                  {data.products.map((product) => (
-                    <ProductCard key={product.code} product={product} />
-                  ))}
-                </div>
-              ) : (
-                <div className="w-full flex flex-col items-center justify-center py-20 text-center border border-dashed border-white/10 rounded-2xl bg-white/[0.02]">
-                  <p className="text-xl font-bold text-white mb-2">
-                    CHƯA CÓ SẢN PHẨM NÀO
-                  </p>
-                  <p className="text-neutral-400">
-                    Danh mục này đang trống. Vui lòng quay lại sau.
-                  </p>
-                </div>
-              )}
-
-              {data.totalPages > 1 ? (
-                <div className="mt-10 mb-8 flex items-center justify-center gap-2">
-                  {pageNumbers.map((n, i) =>
-                    n === null ? (
-                      <span key={`gap-${i}`} className="px-1 text-neutral-600">
-                        …
-                      </span>
-                    ) : (
-                      <a
-                        key={n}
-                        href={`/category/${slug}?page=${n}`}
-                        className={
-                          n === data.page
-                            ? "w-9 h-9 flex items-center justify-center rounded-lg text-[13px] font-black bg-[var(--brand)] text-white"
-                            : "w-9 h-9 flex items-center justify-center rounded-lg text-[13px] font-bold bg-neutral-900 border border-neutral-800 text-neutral-400 hover:text-white transition-colors"
-                        }
-                      >
-                        {n}
-                      </a>
-                    ),
+                <div className="flex flex-col gap-10">
+                  {data.products.length > 0 ? (
+                    <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:gap-8">
+                      {data.products.map((product) => (
+                        <ProductCard key={product.code} product={product} />
+                      ))}
+                    </div>
+                  ) : (
+                    <EmptyPanel
+                      title="Chưa có tài khoản nào"
+                      note="Hiện tại danh mục này đang trống hoặc đã bán hết. Vui lòng quay lại sau!"
+                    />
                   )}
-                </div>
-              ) : null}
-            </div>
 
-            <div className="mt-16 border-t border-white/5 pt-12">
-              <h2 className="text-xl sm:text-2xl font-black uppercase tracking-wider text-white mb-8">
-                DANH MỤC KHÁC
-              </h2>
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
-                {others.map((c) => (
-                  <a
-                    key={c.slug}
-                    href={`/category/${c.slug}`}
-                    className="group flex flex-col bg-[#12141c] rounded-xl overflow-hidden border border-indigo-500/20 hover:border-indigo-500/50 transition-all duration-300 p-4"
-                  >
-                    <span className="text-center text-sm font-black uppercase text-white group-hover:text-indigo-400 transition-colors tracking-widest">
-                      {c.name}
-                    </span>
-                  </a>
-                ))}
-              </div>
-            </div>
+                  {data.totalPages > 1 ? (
+                    <div className="mt-10 mb-8 flex items-center justify-center gap-2">
+                      {pageNumbers.map((n, i) =>
+                        n === null ? (
+                          <span key={`gap-${i}`} className="px-1 text-neutral-600">
+                            …
+                          </span>
+                        ) : (
+                          <a
+                            key={n}
+                            href={`/category/${slug}?page=${n}`}
+                            className={
+                              n === data.page
+                                ? "w-9 h-9 flex items-center justify-center rounded-lg text-[13px] font-black bg-[var(--brand)] text-white"
+                                : "w-9 h-9 flex items-center justify-center rounded-lg text-[13px] font-bold bg-neutral-900 border border-neutral-800 text-neutral-400 hover:text-white transition-colors"
+                            }
+                          >
+                            {n}
+                          </a>
+                        ),
+                      )}
+                    </div>
+                  ) : null}
+                </div>
+              </>
+            ) : sellsNothing ? (
+              // Nothing on sale here at all, so the page is this box. "No
+              // products" rather than "no accounts": with no software grid
+              // above it either, the narrower wording would leave a reader
+              // unable to tell a bare category from a filtered one.
+              <EmptyPanel
+                title="Chưa có sản phẩm nào"
+                note="Hiện tại danh mục này đang trống hoặc đã bán hết. Vui lòng quay lại sau!"
+              />
+            ) : null}
           </div>
         </div>
         <SiteFooter />
@@ -170,6 +234,32 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
 
       <ToolsRail />
       <MobileBottomNav />
+    </div>
+  );
+}
+
+/**
+ * The dashed box a grid falls back to when it has nothing to draw.
+ *
+ * Three callers, three different sentences: a category that stocks nothing, a
+ * software search that matched nothing, and an account filter that matched
+ * nothing. Only the words differ, so only the words are passed in — the box
+ * itself has to look the same each time, or the page reads as though something
+ * different went wrong.
+ */
+function EmptyPanel({ title, note }: { title: string; note: string }) {
+  return (
+    <div className="w-full flex flex-col items-center justify-center px-6 py-20 text-center border border-dashed border-white/10 rounded-3xl bg-white/[0.02]">
+      <PackageOpen
+        size={56}
+        strokeWidth={1.5}
+        aria-hidden
+        className="mb-5 text-neutral-600"
+      />
+      <p className="text-[17px] font-black uppercase tracking-wide text-white">
+        {title}
+      </p>
+      <p className="mt-2.5 max-w-[520px] text-[15px] text-neutral-400">{note}</p>
     </div>
   );
 }
