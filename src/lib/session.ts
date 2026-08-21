@@ -17,6 +17,8 @@ export interface CurrentUser {
   points: number;
   /** Referral earnings waiting to be moved into `balance`. */
   commissionBalance: number;
+  /** The đại lý's own negotiated percent; 0 for everyone else. */
+  agencyPercent: number;
   createdAt: Date;
 }
 
@@ -63,6 +65,7 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
     balance: Number(u.balance),
     points: u.points,
     commissionBalance: Number(u.commissionBalance),
+    agencyPercent: u.agencyPercent,
     createdAt: u.createdAt,
   };
 }

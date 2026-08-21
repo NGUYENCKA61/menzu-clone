@@ -6,6 +6,7 @@ import {
   ArrowLeftRight,
   ChevronsUp,
   Handshake,
+  KeyRound,
   LayoutDashboard,
   Shield,
   ShieldCheck,
@@ -95,7 +96,11 @@ export function AccountSidebar({
                 {user.username}
               </span>
               <span className="text-[9px] font-black uppercase tracking-widest leading-none text-neutral-500">
-                {user.role === "ADMIN" ? "Admin" : "Member"}
+                {user.role === "ADMIN"
+                  ? "Admin"
+                  : user.role === "AGENCY"
+                    ? "Đại lý"
+                    : "Member"}
               </span>
             </span>
           </div>
@@ -113,6 +118,21 @@ export function AccountSidebar({
               <Shield size={16} className="shrink-0" />
               <span className="text-sm font-black uppercase tracking-wider">
                 Dashboard quản lý
+              </span>
+            </a>
+          </div>
+        ) : null}
+
+        {/* The đại lý's own door — same privileged slot as the admin's. */}
+        {user?.role === "AGENCY" ? (
+          <div className="mb-2 pb-2 border-b border-white/5">
+            <a
+              href="/agency/dashboard"
+              className="flex items-center gap-3 py-2.5 px-3 rounded-lg text-amber-400 hover:text-white hover:bg-amber-500/10 transition-colors"
+            >
+              <KeyRound size={16} className="shrink-0" />
+              <span className="text-sm font-black uppercase tracking-wider">
+                Bàn đại lý
               </span>
             </a>
           </div>

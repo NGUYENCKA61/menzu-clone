@@ -148,6 +148,7 @@ export default async function AdminUsersPage({
           username: user.username,
           email: user.email,
           role: user.role,
+          agencyPercent: user.agencyPercent,
           tier: user.tier,
           balance: user.balance,
           points: user.points,

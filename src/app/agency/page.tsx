@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 import { redirect } from "next/navigation";
-import { BadgePercent, Handshake, PackageCheck, Store } from "lucide-react";
+import { ArrowRight, BadgePercent, Handshake, KeyRound, PackageCheck, Store } from "lucide-react";
 
 import { AccountPageFrame } from "@/components/sites/menzu-lol-f7ae197a/shared/AccountPageFrame";
 import { REFERRAL_PERCENT } from "@/lib/referral";
@@ -20,18 +20,18 @@ export const dynamic = "force-dynamic";
 const PERKS = [
   {
     icon: BadgePercent,
-    title: "Chiết khấu sâu nhất",
-    body: "Nhập key theo lô với mức giá thỏa thuận riêng cùng admin.",
+    title: "Chiết khấu mọi gói key",
+    body: "Mua key phần mềm thấp hơn giá niêm yết theo mức thỏa thuận riêng với admin — không công khai.",
   },
   {
-    icon: PackageCheck,
-    title: "Ưu tiên hàng mới",
-    body: "Key và tài khoản đợt mới về được giữ phần cho đại lý trước.",
+    icon: KeyRound,
+    title: "Dashboard mua sỉ riêng",
+    body: "Bàn đại lý riêng trên web: chọn gói, chọn số lượng, trả bằng số dư ví.",
   },
   {
     icon: Handshake,
     title: "Đối tác trực tiếp",
-    body: "Làm việc thẳng với admin, đối soát công nợ theo kỳ.",
+    body: "Làm việc thẳng với admin, đơn đại lý được ưu tiên giao key trước.",
   },
 ] as const;
 
@@ -45,6 +45,8 @@ export default async function AgencyPage() {
   const [user, settings] = await Promise.all([getCurrentUser(), getShopSettings()]);
   if (!user) redirect("/login?next=%2Fagency");
 
+  const isAgency = user.role === "AGENCY" || user.role === "ADMIN";
+
   const channels = [
     { label: "Nhắn Zalo cho shop", href: settings.contactZalo },
     { label: "Nhắn Facebook cho shop", href: settings.contactFacebook },
@@ -53,10 +55,32 @@ export default async function AgencyPage() {
   return (
     <AccountPageFrame
       title="Nâng cấp đại lý"
-      subtitle="Nhập số lượng lớn với chính sách giá tốt nhất"
+      subtitle="Mua key giá sỉ ngay trên web — mức chiết khấu thỏa thuận riêng khi được cấp quyền"
       crumb="Nâng cấp đại lý"
     >
       <div className="flex flex-col gap-6">
+        {isAgency ? (
+          <a
+            href="/agency/dashboard"
+            className="flex items-center gap-4 rounded-2xl border border-amber-500/30 bg-amber-500/[0.06] p-5 transition-colors hover:border-amber-500/50 hover:bg-amber-500/10"
+          >
+            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-amber-500/25 bg-amber-500/10">
+              <KeyRound size={18} className="text-amber-400" />
+            </span>
+            <span className="flex min-w-0 flex-col gap-1">
+              <span className="text-sm font-black uppercase tracking-wider text-white">
+                Tài khoản của bạn là Đại lý
+              </span>
+              <span className="text-xs text-neutral-400">
+                Vào bàn mua key với mức chiết khấu riêng của bạn
+              </span>
+            </span>
+            <span className="ml-auto inline-flex shrink-0 items-center gap-1.5 text-[11px] font-black uppercase tracking-widest text-amber-400">
+              Vào bàn đại lý <ArrowRight size={13} />
+            </span>
+          </a>
+        ) : null}
+
         <div className="rounded-2xl border border-white/10 bg-neutral-900/50 p-6 flex items-start gap-5">
           <div className="w-12 h-12 shrink-0 rounded-2xl bg-[var(--brand)]/15 border border-[var(--brand)]/30 flex items-center justify-center">
             <Store size={22} className="text-[#a78bfa]" />
@@ -64,9 +88,9 @@ export default async function AgencyPage() {
           <div className="flex flex-col gap-1.5 min-w-0">
             <span className="text-xl font-black text-white">Trở thành Đại lý</span>
             <p className="text-sm text-neutral-400 leading-relaxed">
-              Cấp cao hơn Cộng tác viên, dành cho người bán có đầu ra ổn định:
-              nhập key và tài khoản theo lô, hưởng mức chiết khấu sâu nhất của
-              shop và luôn được ưu tiên khi hàng mới về.
+              Dành cho người bán có đầu ra ổn định: được admin cấp quyền là mở
+              được dashboard mua key riêng — chọn gói, chọn số lượng, trả bằng
+              số dư ví với mức chiết khấu thỏa thuận riêng.
             </p>
           </div>
         </div>
@@ -125,6 +149,14 @@ export default async function AgencyPage() {
               Shop chưa khai kênh liên hệ trong Cấu hình — quay lại sau nhé.
             </p>
           )}
+        </div>
+
+        <div className="flex items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.03] px-4 py-3">
+          <PackageCheck size={16} className="shrink-0 text-neutral-500" />
+          <p className="text-xs leading-relaxed text-neutral-400">
+            Đơn đại lý vẫn vào Lịch sử mua như đơn thường; admin giao key sau
+            khi đơn được tạo.
+          </p>
         </div>
 
         <p className="text-xs text-neutral-500">

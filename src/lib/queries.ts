@@ -927,6 +927,8 @@ export interface AdminUserRow {
   lastIp: string | null;
   lastLoginAt: Date | null;
   totalToppedUp: number;
+  /** The đại lý's negotiated percent; 0 unless role is AGENCY. */
+  agencyPercent: number;
 }
 
 /**
@@ -986,6 +988,7 @@ export async function listUsers(
     lastIp: u.lastIp,
     lastLoginAt: u.lastLoginAt,
     totalToppedUp: toppedByUser.get(u.id) ?? 0,
+    agencyPercent: u.agencyPercent,
   }));
 }
 

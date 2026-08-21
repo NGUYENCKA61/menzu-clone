@@ -3,6 +3,7 @@ import { randomBytes } from "node:crypto";
 import { NextResponse } from "next/server";
 
 import { FORBIDDEN, getAdmin } from "@/lib/admin";
+import { AGENCY_PERCENT_MAX, AGENCY_PERCENT_MIN } from "@/lib/agency";
 import { hashPassword, validateCredentials } from "@/lib/auth";
 import { db } from "@/lib/db";
 
@@ -29,6 +30,8 @@ export async function PATCH(request: Request) {
     blocked?: boolean;
     reason?: string;
     role?: string;
+    /** Đại lý grants only: the negotiated wholesale percent. */
+    percent?: number;
     /** Signed: negative subtracts. */
     delta?: number;
     note?: string;
@@ -52,20 +55,51 @@ export async function PATCH(request: Request) {
 
   const action = body?.action ?? "block";
 
-  // --- grant / revoke admin ------------------------------------------------
+  // --- grant / revoke a role (admin or đại lý) -----------------------------
   if (action === "role") {
-    const role = body?.role === "ADMIN" ? "ADMIN" : "MEMBER";
-    if (role === "ADMIN" && target.blockedAt) {
+    const role =
+      body?.role === "ADMIN"
+        ? "ADMIN"
+        : body?.role === "AGENCY"
+          ? "AGENCY"
+          : "MEMBER";
+    if (role !== "MEMBER" && target.blockedAt) {
       return NextResponse.json(
-        { error: "Mở khóa tài khoản trước khi cấp quyền quản trị" },
+        { error: "Mở khóa tài khoản trước khi cấp quyền" },
         { status: 400 },
       );
     }
+
+    // The đại lý's percent is part of the grant — typed by the admin, per
+    // partner, never a published flat rate. Any other role zeroes it so a
+    // revoked agency cannot keep wholesale pricing through a stale column.
+    let agencyPercent = 0;
+    if (role === "AGENCY") {
+      const raw = Number(body?.percent);
+      if (
+        !Number.isInteger(raw) ||
+        raw < AGENCY_PERCENT_MIN ||
+        raw > AGENCY_PERCENT_MAX
+      ) {
+        return NextResponse.json(
+          {
+            error: `Mức chiết khấu phải là số nguyên ${AGENCY_PERCENT_MIN}–${AGENCY_PERCENT_MAX}`,
+          },
+          { status: 400 },
+        );
+      }
+      agencyPercent = raw;
+    }
+
     const updated = await db.user.update({
       where: { id: target.id },
-      data: { role },
+      data: { role, agencyPercent },
     });
-    return NextResponse.json({ username: updated.username, role: updated.role });
+    return NextResponse.json({
+      username: updated.username,
+      role: updated.role,
+      agencyPercent: updated.agencyPercent,
+    });
   }
 
   // --- member tier ---------------------------------------------------------

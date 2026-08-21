@@ -164,10 +164,12 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                     className={
                       isAdmin
                         ? "bg-[var(--menzu-accent)] text-white"
-                        : "bg-gradient-to-r from-[#7b3fe4] to-[#9354ff] text-white"
+                        : user.role === "AGENCY"
+                          ? "bg-gradient-to-r from-[#b45309] to-[#d97706] text-white"
+                          : "bg-gradient-to-r from-[#7b3fe4] to-[#9354ff] text-white"
                     }
                   >
-                    {isAdmin ? "Admin" : "Member"}
+                    {isAdmin ? "Admin" : user.role === "AGENCY" ? "Đại lý" : "Member"}
                   </SkewPlate>
                   <SkewPlate className="border border-white/10 bg-white/[0.07] text-neutral-300">
                     UID: {user.uid}

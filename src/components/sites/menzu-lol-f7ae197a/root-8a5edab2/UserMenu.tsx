@@ -4,6 +4,7 @@ import {
   ChevronsUp,
   Handshake,
   History,
+  KeyRound,
   LayoutGrid,
   LogOut,
   Shield,
@@ -175,11 +176,13 @@ export function UserMenu({ user }: { user: HeaderUser }) {
                     className={`inline-flex -skew-x-12 rounded-[4px] px-2 py-1 ${
                       isAdmin
                         ? "bg-[var(--menzu-accent)]"
-                        : "bg-gradient-to-r from-[#7b3fe4] to-[#9354ff]"
+                        : user.role === "AGENCY"
+                          ? "bg-gradient-to-r from-[#b45309] to-[#d97706]"
+                          : "bg-gradient-to-r from-[#7b3fe4] to-[#9354ff]"
                     }`}
                   >
                     <span className="skew-x-12 text-[10px] font-black uppercase leading-none tracking-widest text-white">
-                      {isAdmin ? "Admin" : "Member"}
+                      {isAdmin ? "Admin" : user.role === "AGENCY" ? "Đại lý" : "Member"}
                     </span>
                   </span>
                   {user.uid !== undefined ? (
@@ -208,6 +211,20 @@ export function UserMenu({ user }: { user: HeaderUser }) {
                   >
                     <Shield size={18} className="shrink-0" />
                     <span className={SHOUT}>Dashboard</span>
+                  </a>
+                </div>
+              ) : null}
+
+              {/* The đại lý's own door, in the same slot the admin's is —
+                  one privileged link above the everyday groups. */}
+              {user.role === "AGENCY" ? (
+                <div className={GROUP}>
+                  <a
+                    href="/agency/dashboard"
+                    className={`${ROW} text-amber-400 hover:bg-amber-500/10`}
+                  >
+                    <KeyRound size={18} className="shrink-0" />
+                    <span className={SHOUT}>Bàn đại lý</span>
                   </a>
                 </div>
               ) : null}

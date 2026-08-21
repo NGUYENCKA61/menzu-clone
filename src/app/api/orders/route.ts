@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { agencyCutFor, clampAgencyPercent } from "@/lib/agency";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/session";
 import { getShopSettings } from "@/lib/settingsStore";
@@ -116,11 +117,26 @@ export async function POST(request: Request) {
         : (sale?.salePrice ?? product.price);
       const lineTotal = unitPrice * BigInt(quantity);
 
+      // Re-read the buyer inside the transaction — for the balance below,
+      // and for the role: the wholesale price must follow what the row says
+      // now, not what the session cached.
+      const buyer = await tx.user.findUniqueOrThrow({ where: { id: user.id } });
+
+      // Đại lý pricing: software only, at this account's own negotiated
+      // percent, recorded on the order as discountPct so history says what
+      // was honoured. Vouchers do not stack on top — wholesale is already
+      // the deal, so a supplied code is quietly ignored rather than refused.
+      const agencyPct =
+        buyer.role === "AGENCY" && isSoftware
+          ? clampAgencyPercent(buyer.agencyPercent)
+          : 0;
+      const agencyCut = agencyPct > 0 ? agencyCutFor(lineTotal, agencyPct) : 0n;
+
       // Voucher, if supplied and still usable. The same rules back the
       // "Áp dụng" preview, so what the dialog quoted is what is charged.
       let voucherId: string | null = null;
       let voucherCut = 0n;
-      if (voucherCode) {
+      if (voucherCode && agencyPct === 0) {
         const v = await tx.voucher.findUnique({ where: { code: voucherCode } });
         // Judged against the line total, not the unit price: a minimum-spend
         // voucher should be met by buying three keys, and a percentage one
@@ -137,11 +153,8 @@ export async function POST(request: Request) {
         });
       }
 
-      const total = lineTotal - voucherCut;
+      const total = lineTotal - agencyCut - voucherCut;
 
-      // Re-read the balance inside the transaction — the value on the session
-      // object was loaded earlier and may be stale.
-      const buyer = await tx.user.findUniqueOrThrow({ where: { id: user.id } });
       if (buyer.balance < total) {
         throw new Error(`INSUFFICIENT:${total - buyer.balance}`);
       }
@@ -165,12 +178,15 @@ export async function POST(request: Request) {
       });
 
       // Software has no crossed-out price to discount from, so the tier price
-      // is both the list price and what was charged.
+      // is both the list price and what was charged — unless the buyer is an
+      // agency, whose percent IS the discount.
       const listPrice = isSoftware ? lineTotal : product.oldPrice;
       const discountPct =
-        !isSoftware && product.oldPrice > 0n
-          ? Number(((product.oldPrice - unitPrice) * 100n) / product.oldPrice)
-          : 0;
+        agencyPct > 0
+          ? agencyPct
+          : !isSoftware && product.oldPrice > 0n
+            ? Number(((product.oldPrice - unitPrice) * 100n) / product.oldPrice)
+            : 0;
 
       const order = await tx.order.create({
         data: {
@@ -200,7 +216,7 @@ export async function POST(request: Request) {
           description: chosenPackage
             ? `Mua ${product.name ?? product.code} — ${chosenPackage.label}${
                 quantity > 1 ? ` ×${quantity}` : ""
-              }`
+              }${agencyPct > 0 ? " · giá đại lý" : ""}`
             : `Mua tài khoản #${product.code}`,
           method: "Ví Menzu",
         },

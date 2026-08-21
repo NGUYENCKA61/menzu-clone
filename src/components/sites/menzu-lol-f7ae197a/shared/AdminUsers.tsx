@@ -29,6 +29,8 @@ export interface AdminUserView {
   lastOrderAt: string | null;
   lastLoginAt: string | null;
   lastIp: string | null;
+  /** The đại lý's negotiated percent; 0 unless role is AGENCY. */
+  agencyPercent: number;
   blockedAt: string | null;
   blockedReason: string | null;
   createdAt: string;
@@ -37,6 +39,8 @@ export interface AdminUserView {
 type Pending =
   | { kind: "block"; user: AdminUserView }
   | { kind: "role"; user: AdminUserView }
+  | { kind: "agency"; user: AdminUserView }
+  | { kind: "agencyRevoke"; user: AdminUserView }
   | { kind: "delete"; user: AdminUserView }
   | { kind: "password"; user: AdminUserView }
   | null;
@@ -97,6 +101,8 @@ export function AdminUsers({
   const [note, setNote] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  // The đại lý grant's percent — typed per partner, never a published rate.
+  const [agencyPct, setAgencyPct] = useState("");
 
   // Searching and filtering moved to the server. Doing it here meant looking
   // through one page of customers and reporting "not found" for somebody who
@@ -169,6 +175,38 @@ export function AdminUsers({
             username: user.username,
             action: "role",
             role: promoting ? "ADMIN" : "MEMBER",
+          }),
+      };
+    }
+    if (kind === "agency") {
+      const granting = user.role !== "AGENCY";
+      return {
+        danger: false,
+        title: granting ? "Cấp quyền đại lý?" : "Cập nhật % đại lý?",
+        body: `${user.username} sẽ mua key phần mềm với chiết khấu ${agencyPct}% qua bàn đại lý riêng. Mức % là thỏa thuận riêng — không hiển thị công khai và không kèm quyền quản trị nào.`,
+        confirmLabel: granting ? "Cấp quyền đại lý" : `Chốt ${agencyPct}%`,
+        run: async () => {
+          const ok = await call({
+            username: user.username,
+            action: "role",
+            role: "AGENCY",
+            percent: Number(agencyPct),
+          });
+          if (ok) setAgencyPct("");
+        },
+      };
+    }
+    if (kind === "agencyRevoke") {
+      return {
+        danger: false,
+        title: "Gỡ quyền đại lý?",
+        body: `${user.username} quay về thành viên thường, mua theo giá niêm yết. Mức chiết khấu riêng bị xóa; tài khoản và số dư giữ nguyên.`,
+        confirmLabel: "Gỡ quyền",
+        run: () =>
+          call({
+            username: user.username,
+            action: "role",
+            role: "MEMBER",
           }),
       };
     }
@@ -286,14 +324,18 @@ export function AdminUsers({
                           ? "border-red-500/30 bg-red-500/10 text-red-400"
                           : user.role === "ADMIN"
                             ? "border-violet-500/30 bg-violet-500/10 text-violet-400"
-                            : "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
+                            : user.role === "AGENCY"
+                              ? "border-amber-500/30 bg-amber-500/10 text-amber-400"
+                              : "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
                       }`}
                     >
                       {user.blockedAt
                         ? "Đã khóa"
                         : user.role === "ADMIN"
                           ? "Quản trị"
-                          : "Hoạt động"}
+                          : user.role === "AGENCY"
+                            ? `Đại lý · ${user.agencyPercent}%`
+                            : "Hoạt động"}
                     </span>
                   </td>
 
@@ -454,6 +496,65 @@ export function AdminUsers({
                           <p className="w-full text-[11px] text-neutral-500">
                             Mật khẩu hiển thị dạng chữ thường vì bạn phải đọc lại cho
                             khách — không ai xem được mật khẩu cũ, kể cả quản trị viên.
+                          </p>
+                        </div>
+
+                        <div className="flex flex-wrap items-end gap-3">
+                          <div>
+                            <label htmlFor={`ag-${user.username}`} className={LABEL}>
+                              % chiết khấu đại lý{" "}
+                              <span className="text-neutral-600">(1–90, thỏa thuận riêng)</span>
+                            </label>
+                            <input
+                              id={`ag-${user.username}`}
+                              value={agencyPct}
+                              onChange={(event) =>
+                                setAgencyPct(
+                                  event.target.value.replace(/\D/g, "").slice(0, 2),
+                                )
+                              }
+                              inputMode="numeric"
+                              placeholder={
+                                user.role === "AGENCY"
+                                  ? `Đang: ${user.agencyPercent}%`
+                                  : "VD: 15"
+                              }
+                              className={`${FIELD} w-40 tabular-nums`}
+                            />
+                          </div>
+                          <button
+                            type="button"
+                            disabled={
+                              busy ||
+                              isSelf ||
+                              user.role === "ADMIN" ||
+                              !(Number(agencyPct) >= 1 && Number(agencyPct) <= 90)
+                            }
+                            title={
+                              user.role === "ADMIN"
+                                ? "Thu hồi quyền quản trị trước"
+                                : undefined
+                            }
+                            onClick={() => setConfirming({ kind: "agency", user })}
+                            className="h-[34px] px-4 rounded-lg border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 disabled:opacity-40 disabled:hover:bg-amber-500/10 text-[10px] font-black uppercase tracking-widest text-amber-400 transition-colors inline-flex items-center gap-1.5"
+                          >
+                            {user.role === "AGENCY" ? "Đổi %" : "Cấp đại lý"}
+                          </button>
+                          {user.role === "AGENCY" ? (
+                            <button
+                              type="button"
+                              disabled={busy}
+                              onClick={() =>
+                                setConfirming({ kind: "agencyRevoke", user })
+                              }
+                              className="h-[34px] px-4 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 disabled:opacity-40 text-[10px] font-black uppercase tracking-widest text-neutral-300 transition-colors"
+                            >
+                              Gỡ đại lý
+                            </button>
+                          ) : null}
+                          <p className="w-full text-[11px] text-neutral-500">
+                            Mức % là thỏa thuận riêng từng đại lý — không hiển thị công
+                            khai ở bất kỳ đâu ngoài bàn đại lý của chính họ.
                           </p>
                         </div>
 
