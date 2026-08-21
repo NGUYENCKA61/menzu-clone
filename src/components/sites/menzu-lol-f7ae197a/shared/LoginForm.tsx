@@ -1,34 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Eye, EyeOff, Lock, User } from "lucide-react";
 
 import { canGoBack } from "@/lib/navigation";
 
 import { AuthPanelSlider } from "./AuthPanelSlider";
+import { StatusToast } from "./StatusToast";
+import { OAuthButtons } from "./OAuthButtons";
 import { TurnstileBox } from "./TurnstileBox";
-
-/* lucide-react no longer ships brand marks, so the two OAuth buttons get
- * small hand-drawn single-color glyphs instead. */
-function GoogleGlyph() {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4" aria-hidden="true">
-      <path d="M21.6 12.23c0-.71-.06-1.42-.19-2.11H12v4h5.4a4.6 4.6 0 0 1-2 3.02v2.5h3.24c1.9-1.75 2.96-4.34 2.96-7.41Z" />
-      <path d="M12 22c2.7 0 4.97-.89 6.63-2.42l-3.24-2.5c-.9.6-2.06.95-3.39.95-2.6 0-4.8-1.76-5.59-4.12H3.06v2.58A10 10 0 0 0 12 22Z" />
-      <path d="M6.41 13.91A6 6 0 0 1 6.09 12c0-.66.11-1.31.32-1.91V7.51H3.06A10 10 0 0 0 2 12c0 1.61.39 3.14 1.06 4.49l3.35-2.58Z" />
-      <path d="M12 5.98c1.47 0 2.79.5 3.82 1.5l2.87-2.87C16.96 2.99 14.7 2 12 2A10 10 0 0 0 3.06 7.51l3.35 2.58C7.2 7.74 9.4 5.98 12 5.98Z" />
-    </svg>
-  );
-}
-
-function DiscordGlyph() {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4" aria-hidden="true">
-      <path d="M19.27 5.33A18.3 18.3 0 0 0 14.9 4c-.2.36-.42.83-.58 1.2a17 17 0 0 0-4.64 0A8 8 0 0 0 9.1 4a18.2 18.2 0 0 0-4.38 1.33C2.1 9 1.4 12.6 1.73 16.14a18.4 18.4 0 0 0 5.54 2.8c.45-.6.84-1.25 1.18-1.93-.65-.24-1.27-.54-1.86-.9.16-.11.31-.23.46-.35a13 13 0 0 0 11.02 0c.15.12.3.24.46.35-.59.36-1.21.66-1.86.9.34.68.73 1.32 1.18 1.93a18.3 18.3 0 0 0 5.54-2.8c.4-4.1-.66-7.66-2.79-10.81ZM8.68 13.93c-.83 0-1.5-.76-1.5-1.7 0-.93.66-1.7 1.5-1.7s1.52.77 1.5 1.7c0 .94-.66 1.7-1.5 1.7Zm6.64 0c-.83 0-1.5-.76-1.5-1.7 0-.93.67-1.7 1.5-1.7.84 0 1.52.77 1.5 1.7 0 .94-.66 1.7-1.5 1.7Z" />
-    </svg>
-  );
-}
 
 /**
  * Back to wherever they came from, or the shop front if that was elsewhere.
@@ -55,6 +36,8 @@ function goBack(push: (href: string) => void) {
  */
 export function LoginForm({
   turnstileSiteKey,
+  googleEnabled,
+  discordEnabled,
   panelImages,
   slideEnabled,
   slideSeconds,
@@ -62,6 +45,9 @@ export function LoginForm({
   panelTitle,
 }: {
   turnstileSiteKey: string | null;
+  /** True once that provider's keys are in Cấu hình — the button becomes a door. */
+  googleEnabled?: boolean;
+  discordEnabled?: boolean;
   /** Artwork behind the card. Comes from Cấu hình → Giao diện. */
   panelImages: string[];
   slideEnabled: boolean;
@@ -79,6 +65,48 @@ export function LoginForm({
   // Null until the visitor solves the widget, and null again once the token
   // lapses. Only meaningful when the shop has configured Turnstile at all.
   const [captcha, setCaptcha] = useState<string | null>(null);
+  // The widget stays hidden until the server asks for it — a few failures on
+  // this name within the window. Flipped by the captchaRequired flag that
+  // rides every refusal, and never flipped back: once suspicion is raised it
+  // does not lower until the page is left.
+  const [captchaNeeded, setCaptchaNeeded] = useState(false);
+
+  // OAuth failures come back as ?oauthError=<code> — the callback endpoints
+  // have no page of their own to explain on. Read once, toast, then scrub the
+  // parameter so a refresh does not re-accuse.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get("oauthError");
+    if (!code) return;
+    const messages: Record<string, string> = {
+      off: "Đăng nhập mạng xã hội chưa được bật trên shop này.",
+      state: "Phiên đăng nhập đã hết hạn. Vui lòng thử lại.",
+      exchange: "Không xác thực được với nhà cung cấp. Vui lòng thử lại.",
+      profile: "Không đọc được thông tin tài khoản. Vui lòng thử lại.",
+      blocked: "Tài khoản đã bị khóa. Vui lòng liên hệ hỗ trợ.",
+    };
+    // Deferred a tick: the point of this effect is reacting to an external
+    // input (the URL), and updating state synchronously inside an effect is
+    // the double-render React's lint rule exists to stop.
+    const timer = window.setTimeout(
+      () => setError(messages[code] ?? "Đăng nhập mạng xã hội không thành công."),
+      0,
+    );
+    params.delete("oauthError");
+    const query = params.toString();
+    window.history.replaceState(
+      null,
+      "",
+      query ? `${window.location.pathname}?${query}` : window.location.pathname,
+    );
+    return () => window.clearTimeout(timer);
+  }, []);
+
+  /** Honour ?next= so the "Mua Ngay" gate returns you to the product. */
+  function redirectAfterLogin() {
+    const next = new URLSearchParams(window.location.search).get("next");
+    window.location.href = next && next.startsWith("/") ? next : "/";
+  }
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
@@ -93,22 +121,24 @@ export function LoginForm({
         body: JSON.stringify({
           identifier: username,
           password,
-          ...(turnstileSiteKey ? { turnstileToken: captcha } : {}),
+          ...(turnstileSiteKey && captchaNeeded
+            ? { turnstileToken: captcha }
+            : {}),
         }),
       });
       const data = (await response.json().catch(() => ({}))) as {
         error?: string;
+        captchaRequired?: boolean;
       };
 
       if (!response.ok) {
-        setError(data.error ?? "Đăng nhập thất bại");
+        if (data.captchaRequired) setCaptchaNeeded(true);
+        setError(data.error ?? "Có lỗi xảy ra, vui lòng thử lại.");
         setPending(false);
         return;
       }
 
-      // Honour ?next= so the "Mua Ngay" gate returns you to the product.
-      const next = new URLSearchParams(window.location.search).get("next");
-      window.location.href = next && next.startsWith("/") ? next : "/";
+      redirectAfterLogin();
     } catch {
       setError("Không kết nối được máy chủ");
       setPending(false);
@@ -117,7 +147,12 @@ export function LoginForm({
 
   return (
     <main className="min-h-[calc(100vh-100px)] flex items-center justify-center">
-      <div className="w-full max-w-[1320px] mx-auto px-4 lg:px-6 lg:py-10 py-4 sm:py-8 flex flex-col flex-1 min-h-[700px] animate-[slideUpFade_0.5s_ease-out]">
+      {/* Padding runs heavier below than above on purpose. The QUAY LAI row
+          (32px button + 24px margin) sits between the top padding and the
+          card, so a symmetric py left the card 56px closer to the footer
+          than to the top of the page. Each bottom value is its top plus
+          those 56px, which is what makes the card sit evenly. */}
+      <div className="w-full max-w-[1320px] mx-auto px-4 lg:px-6 pt-4 pb-[4.5rem] sm:pt-8 sm:pb-[5.5rem] lg:pt-10 lg:pb-24 flex flex-col flex-1 min-h-[700px] animate-[slideUpFade_0.5s_ease-out]">
         <div className="mb-6">
           <button
             type="button"
@@ -203,7 +238,7 @@ export function LoginForm({
                         Mật khẩu
                       </label>
                       <a
-                        href="#"
+                        href="/forgot-password"
                         className="text-[10px] font-bold text-[var(--menzu-accent)] hover:text-[var(--menzu-accent-dark)] cursor-pointer transition-colors uppercase tracking-wider mr-1"
                       >
                         Quên mật khẩu?
@@ -235,18 +270,17 @@ export function LoginForm({
                   </div>
 
                   {error ? (
-                    <p
-                      role="alert"
-                      className="mt-4 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-2.5 text-[12px] font-semibold text-red-400"
-                    >
-                      {error}
-                    </p>
+                    <StatusToast
+                      title="Đăng nhập thất bại"
+                      message={error}
+                      onClose={() => setError(null)}
+                    />
                   ) : null}
 
                   {/* Between the password and the button, as the layout has
                       it. Absent entirely until the shop configures Turnstile,
                       so an empty frame never sits here waiting for keys. */}
-                  {turnstileSiteKey ? (
+                  {turnstileSiteKey && captchaNeeded ? (
                     <TurnstileBox siteKey={turnstileSiteKey} onToken={setCaptcha} />
                   ) : null}
 
@@ -255,9 +289,12 @@ export function LoginForm({
                     // Disabled until the widget hands over a token. The server
                     // refuses without one anyway — this only saves the visitor
                     // a round trip and an error they cannot act on.
-                    disabled={pending || (Boolean(turnstileSiteKey) && !captcha)}
+                    disabled={
+                      pending ||
+                      (Boolean(turnstileSiteKey) && captchaNeeded && !captcha)
+                    }
                     className={`w-full rounded-2xl bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] disabled:opacity-70 disabled:cursor-wait text-white font-black py-4 uppercase tracking-widest text-sm transition-colors ${
-                      turnstileSiteKey ? "mt-5" : "mt-7"
+                      turnstileSiteKey && captchaNeeded ? "mt-5" : "mt-7"
                     }`}
                   >
                     {pending ? "ĐANG XỬ LÝ…" : "ĐĂNG NHẬP"}
@@ -272,22 +309,10 @@ export function LoginForm({
                   <div className="flex-1 h-px bg-white/10" />
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
-                  <button
-                    type="button"
-                    className="relative overflow-hidden transform-gpu flex items-center justify-center gap-3 rounded-2xl border border-white/10 bg-black/40 hover:bg-black/60 hover:border-white/20 py-3.5 transition-colors"
-                  >
-                    <GoogleGlyph />
-                    <span className="relative z-10">Google</span>
-                  </button>
-                  <button
-                    type="button"
-                    className="relative overflow-hidden transform-gpu flex items-center justify-center gap-3 rounded-2xl border border-white/10 bg-black/40 hover:bg-black/60 hover:border-white/20 py-3.5 transition-colors"
-                  >
-                    <DiscordGlyph />
-                    <span className="relative z-10">Discord</span>
-                  </button>
-                </div>
+                <OAuthButtons
+                  googleEnabled={googleEnabled}
+                  discordEnabled={discordEnabled}
+                />
 
                 <p className="mt-8 text-center text-xs text-neutral-500">
                   Chưa có tài khoản?

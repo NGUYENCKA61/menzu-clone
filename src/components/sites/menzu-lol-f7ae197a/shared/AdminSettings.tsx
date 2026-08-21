@@ -205,6 +205,15 @@ export function AdminSettings({
   const [apiKey, setApiKey] = useState(settings.topUpApiKey);
   const [tsSite, setTsSite] = useState(settings.turnstileSiteKey);
   const [tsSecret, setTsSecret] = useState(settings.turnstileSecretKey);
+  const [ggId, setGgId] = useState(settings.googleClientId);
+  const [ggSecret, setGgSecret] = useState(settings.googleClientSecret);
+  const [dcId, setDcId] = useState(settings.discordClientId);
+  const [dcSecret, setDcSecret] = useState(settings.discordClientSecret);
+  const [smtpHost, setSmtpHost] = useState(settings.smtpHost);
+  const [smtpPort, setSmtpPort] = useState(String(settings.smtpPort));
+  const [smtpUser, setSmtpUser] = useState(settings.smtpUser);
+  const [smtpPass, setSmtpPass] = useState(settings.smtpPass);
+  const [mailFrom, setMailFrom] = useState(settings.mailFrom);
   // Rendered after mount so the copied URL is the host the admin is actually on.
   const [origin, setOrigin] = useState("");
   useEffect(() => setOrigin(window.location.origin), []);
@@ -249,6 +258,7 @@ export function AdminSettings({
   const [heroBanner, setHeroBanner] = useState(settings.heroBanner);
   const [siteBackground, setSiteBackground] = useState(settings.siteBackground);
   const [flashSaleBackground, setFlashSaleBackground] = useState(settings.flashSaleBackground);
+  const [hotPickSkin, setHotPickSkin] = useState(settings.hotPickSkin);
   const [flashBgUploading, setFlashBgUploading] = useState(false);
   const [flashBgMsg, setFlashBgMsg] = useState<{ tone: "ok" | "err"; text: string } | null>(null);
   const [siteBgUploading, setSiteBgUploading] = useState(false);
@@ -452,6 +462,15 @@ export function AdminSettings({
           topUpApiKey: apiKey,
           turnstileSiteKey: tsSite,
           turnstileSecretKey: tsSecret,
+          googleClientId: ggId,
+          googleClientSecret: ggSecret,
+          discordClientId: dcId,
+          discordClientSecret: dcSecret,
+          smtpHost,
+          smtpPort,
+          smtpUser,
+          smtpPass,
+          mailFrom,
           purchasesEnabled: purchases,
           closedMessage,
           brandName,
@@ -460,6 +479,7 @@ export function AdminSettings({
           heroBanner,
           siteBackground,
           flashSaleBackground,
+          hotPickSkin,
           authPanelImages: panelImages,
           authSlideEnabled: slideOn,
           authSlideSeconds: Number(slideSeconds) || 5,
@@ -860,6 +880,156 @@ export function AdminSettings({
               ) : null}
             </div>
 
+            <div className="border-t border-white/5 pt-5">
+              <span className={LABEL}>Đăng nhập Google / Discord (OAuth)</span>
+              <p className={HINT}>
+                Google: console.cloud.google.com → APIs &amp; Services → Credentials →
+                OAuth client ID (Web) — khai Redirect URI
+                <span className="font-mono text-neutral-300"> /api/auth/google/callback</span>.
+                Discord: discord.com/developers → New Application → OAuth2 — khai
+                <span className="font-mono text-neutral-300"> /api/auth/discord/callback</span>.
+                Mỗi bên phải đủ cả hai ô thì nút mới bật.
+              </p>
+
+              <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label htmlFor="gg-id" className={LABEL}>
+                    Google Client ID
+                  </label>
+                  <input
+                    id="gg-id"
+                    autoComplete="off"
+                    value={ggId}
+                    onChange={(event) => setGgId(event.target.value)}
+                    placeholder="…apps.googleusercontent.com"
+                    className={`${FIELD} font-mono`}
+                  />
+                </div>
+                <div>
+                  <label htmlFor="gg-secret" className={LABEL}>
+                    Google Client Secret
+                  </label>
+                  <input
+                    id="gg-secret"
+                    type="password"
+                    autoComplete="off"
+                    value={ggSecret}
+                    onChange={(event) => setGgSecret(event.target.value)}
+                    placeholder="GOCSPX-…"
+                    className={`${FIELD} font-mono`}
+                  />
+                </div>
+                <div>
+                  <label htmlFor="dc-id" className={LABEL}>
+                    Discord Client ID
+                  </label>
+                  <input
+                    id="dc-id"
+                    autoComplete="off"
+                    value={dcId}
+                    onChange={(event) => setDcId(event.target.value)}
+                    placeholder="1234567890…"
+                    className={`${FIELD} font-mono`}
+                  />
+                </div>
+                <div>
+                  <label htmlFor="dc-secret" className={LABEL}>
+                    Discord Client Secret
+                  </label>
+                  <input
+                    id="dc-secret"
+                    type="password"
+                    autoComplete="off"
+                    value={dcSecret}
+                    onChange={(event) => setDcSecret(event.target.value)}
+                    placeholder="•••"
+                    className={`${FIELD} font-mono`}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="border-t border-white/5 pt-5">
+              <span className={LABEL}>Gửi email — quên mật khẩu (SMTP)</span>
+              <p className={HINT}>
+                Dùng Gmail: host <span className="font-mono text-neutral-300">smtp.gmail.com</span>,
+                port 587, user là địa chỉ Gmail, pass là
+                <span className="font-bold text-neutral-300"> App Password</span> (tạo ở
+                myaccount.google.com → Security → 2-Step Verification → App passwords).
+                Thiếu ô nào thì trang quên mật khẩu tự chuyển sang hướng dẫn liên hệ admin.
+              </p>
+
+              <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label htmlFor="smtp-host" className={LABEL}>
+                    SMTP host
+                  </label>
+                  <input
+                    id="smtp-host"
+                    autoComplete="off"
+                    value={smtpHost}
+                    onChange={(event) => setSmtpHost(event.target.value)}
+                    placeholder="smtp.gmail.com"
+                    className={`${FIELD} font-mono`}
+                  />
+                </div>
+                <div>
+                  <label htmlFor="smtp-port" className={LABEL}>
+                    SMTP port
+                  </label>
+                  <input
+                    id="smtp-port"
+                    inputMode="numeric"
+                    autoComplete="off"
+                    value={smtpPort}
+                    onChange={(event) => setSmtpPort(event.target.value)}
+                    placeholder="587"
+                    className={`${FIELD} font-mono`}
+                  />
+                </div>
+                <div>
+                  <label htmlFor="smtp-user" className={LABEL}>
+                    SMTP user
+                  </label>
+                  <input
+                    id="smtp-user"
+                    autoComplete="off"
+                    value={smtpUser}
+                    onChange={(event) => setSmtpUser(event.target.value)}
+                    placeholder="shop@gmail.com"
+                    className={`${FIELD} font-mono`}
+                  />
+                </div>
+                <div>
+                  <label htmlFor="smtp-pass" className={LABEL}>
+                    SMTP password
+                  </label>
+                  <input
+                    id="smtp-pass"
+                    type="password"
+                    autoComplete="off"
+                    value={smtpPass}
+                    onChange={(event) => setSmtpPass(event.target.value)}
+                    placeholder="App password 16 ký tự"
+                    className={`${FIELD} font-mono`}
+                  />
+                </div>
+                <div className="sm:col-span-2">
+                  <label htmlFor="mail-from" className={LABEL}>
+                    Người gửi (From)
+                  </label>
+                  <input
+                    id="mail-from"
+                    autoComplete="off"
+                    value={mailFrom}
+                    onChange={(event) => setMailFrom(event.target.value)}
+                    placeholder="THICHTHIHACK <shop@gmail.com>"
+                    className={`${FIELD} font-mono`}
+                  />
+                </div>
+              </div>
+            </div>
+
             <p className="text-[11px] text-neutral-500">
               Nút Xác nhận / Từ chối ở mục Vận hành vẫn còn để xử lý các ca lệch: khách
               quên ghi nội dung, ghi sai, hoặc chuyển thiếu tiền. Bật auto rồi thì bình
@@ -1108,6 +1278,25 @@ export function AdminSettings({
               <p className={HINT}>
                 Vân nền mờ bên trong khung “Khuyến mãi hôm nay” ở trang chủ (hiện ở mức
                 10%). Nên chọn ảnh có hoạ tiết rõ; để trống thì dùng lại ảnh mặc định.
+              </p>
+            </div>
+
+            {/* A name, not a picture: the chip draws whatever the item picture
+                library holds under this name, so replacing that one picture
+                updates the chip without anyone coming back here. */}
+            <div>
+              <span className={LABEL}>Vật phẩm “HOT PICK”</span>
+              <input
+                value={hotPickSkin}
+                onChange={(event) => setHotPickSkin(event.target.value)}
+                className={FIELD}
+                placeholder="VD: M4A1-S Transformers"
+              />
+              <p className={HINT}>
+                Chip nhỏ trong ô tìm skin ở trang danh mục, tự xoay vòng các vật phẩm có
+                ảnh trong <strong>Kho ảnh vật phẩm</strong> — bấm vào là lọc theo cây
+                đang hiện. Điền tên vào đây để ghim một cây đứng đầu vòng xoay; để trống
+                thì xoay toàn kho. Kho trống thì chip ẩn.
               </p>
             </div>
           </section>

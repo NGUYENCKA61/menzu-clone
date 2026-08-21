@@ -8,6 +8,7 @@ import { useState } from "react";
 import { canGoBack } from "@/lib/navigation";
 
 import { AuthPanelSlider } from "./AuthPanelSlider";
+import { StatusToast } from "./StatusToast";
 import { TurnstileBox } from "./TurnstileBox";
 
 const FIELD_CLASS =
@@ -64,6 +65,10 @@ export function RegisterForm({
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [captcha, setCaptcha] = useState<string | null>(null);
+  // Hidden until the server asks: a refusal carrying captchaRequired means
+  // this address has been creating accounts, and the widget appears for the
+  // next try. Never lowered again while the page lives.
+  const [captchaNeeded, setCaptchaNeeded] = useState(false);
   // Ticked by hand every time. Not remembered and not pre-checked: consent
   // that arrives already given is not consent.
   const [agreed, setAgreed] = useState(false);
@@ -72,6 +77,26 @@ export function RegisterForm({
     event.preventDefault();
     if (pending) return;
 
+    // An untouched form gets one sentence, not a lecture about its first
+    // field - "phải có ít nhất 3 ký tự" reads wrong aimed at somebody who
+    // has not typed anything yet. Email is not counted: it is optional,
+    // so a form with only an email in it is still an empty form.
+    if (!username.trim() && !password && !confirm) {
+      setError("Vui lòng nhập đủ thông tin");
+      return;
+    }
+    if (username.trim().length < 3) {
+      setError("Tên đăng nhập phải có ít nhất 3 ký tự");
+      return;
+    }
+    if (email.trim() && !/^\S+@\S+\.\S+$/.test(email.trim())) {
+      setError("Email không hợp lệ");
+      return;
+    }
+    if (password.length < 6) {
+      setError("Mật khẩu phải có ít nhất 6 ký tự");
+      return;
+    }
     if (password !== confirm) {
       setError("Mật khẩu xác nhận không khớp");
       return;
@@ -88,12 +113,18 @@ export function RegisterForm({
           username,
           password,
           email: email || undefined,
-          ...(turnstileSiteKey ? { turnstileToken: captcha } : {}),
+          ...(turnstileSiteKey && captchaNeeded
+            ? { turnstileToken: captcha }
+            : {}),
         }),
       });
-      const data = (await response.json().catch(() => ({}))) as { error?: string };
+      const data = (await response.json().catch(() => ({}))) as {
+        error?: string;
+        captchaRequired?: boolean;
+      };
 
       if (!response.ok) {
+        if (data.captchaRequired) setCaptchaNeeded(true);
         setError(data.error ?? "Không tạo được tài khoản");
         setPending(false);
         return;
@@ -109,7 +140,12 @@ export function RegisterForm({
 
   return (
     <main className="min-h-[calc(100vh-100px)] flex items-center justify-center">
-      <div className="w-full max-w-[1320px] mx-auto px-4 lg:px-6 lg:py-10 py-4 sm:py-8 flex flex-col flex-1 min-h-[700px] animate-[slideUpFade_0.5s_ease-out]">
+      {/* Padding runs heavier below than above on purpose. The QUAY LAI row
+          (32px button + 24px margin) sits between the top padding and the
+          card, so a symmetric py left the card 56px closer to the footer
+          than to the top of the page. Each bottom value is its top plus
+          those 56px, which is what makes the card sit evenly. */}
+      <div className="w-full max-w-[1320px] mx-auto px-4 lg:px-6 pt-4 pb-[4.5rem] sm:pt-8 sm:pb-[5.5rem] lg:pt-10 lg:pb-24 flex flex-col flex-1 min-h-[700px] animate-[slideUpFade_0.5s_ease-out]">
         <div className="mb-6">
           {/* Was a link that always went to /login, whatever the visitor had
               been looking at. Back means back. */}
@@ -162,7 +198,7 @@ export function RegisterForm({
                   </p>
                 </div>
 
-                <form onSubmit={handleSubmit}>
+                <form onSubmit={handleSubmit} noValidate>
                   <div>
                     <label htmlFor="reg-username" className={LABEL_CLASS}>
                       Tên đăng nhập
@@ -259,15 +295,14 @@ export function RegisterForm({
                   </div>
 
                   {error ? (
-                    <p
-                      role="alert"
-                      className="mt-4 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-2.5 text-[12px] font-semibold text-red-400"
-                    >
-                      {error}
-                    </p>
+                    <StatusToast
+                      title="Đăng ký thất bại"
+                      message={error}
+                      onClose={() => setError(null)}
+                    />
                   ) : null}
 
-                  {turnstileSiteKey ? (
+                  {turnstileSiteKey && captchaNeeded ? (
                     <TurnstileBox siteKey={turnstileSiteKey} onToken={setCaptcha} />
                   ) : null}
 
@@ -309,7 +344,11 @@ export function RegisterForm({
                     // server can verify was read — unlike the CAPTCHA, which
                     // the server checks because the browser's word is worth
                     // nothing there.
-                    disabled={pending || !agreed || (Boolean(turnstileSiteKey) && !captcha)}
+                    disabled={
+                      pending ||
+                      !agreed ||
+                      (Boolean(turnstileSiteKey) && captchaNeeded && !captcha)
+                    }
                     className="w-full rounded-2xl bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] disabled:opacity-70 disabled:cursor-wait text-white font-black py-4 uppercase tracking-widest text-sm transition-colors mt-5"
                   >
                     {pending ? "ĐANG XỬ LÝ…" : "ĐĂNG KÝ"}

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 
 import { SiteFooter } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/SiteFooter";
 import { LoginForm } from "@/components/sites/menzu-lol-f7ae197a/shared/LoginForm";
+import { discordOauthEnabled, googleOauthEnabled } from "@/lib/settings";
 import { getShopSettings } from "@/lib/settingsStore";
 import { turnstileEnabled } from "@/lib/turnstile";
 
@@ -26,6 +27,8 @@ export default async function LoginPage() {
           turnstileSiteKey={
             turnstileEnabled(settings) ? settings.turnstileSiteKey : null
           }
+          googleEnabled={googleOauthEnabled(settings)}
+          discordEnabled={discordOauthEnabled(settings)}
           panelImages={settings.authPanelImages}
           slideEnabled={settings.authSlideEnabled}
           slideSeconds={settings.authSlideSeconds}
