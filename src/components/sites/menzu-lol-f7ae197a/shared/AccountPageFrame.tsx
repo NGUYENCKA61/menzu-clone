@@ -11,6 +11,8 @@ interface AccountPageFrameProps {
   title: string;
   subtitle: string;
   crumb: string;
+  /** Optional control rendered to the right of the title, header-level. */
+  action?: ReactNode;
   children: ReactNode;
 }
 
@@ -23,6 +25,7 @@ export async function AccountPageFrame({
   title,
   subtitle,
   crumb,
+  action,
   children,
 }: AccountPageFrameProps) {
   // Read here rather than in AccountSidebar: that is a client component, and
@@ -31,13 +34,31 @@ export async function AccountPageFrame({
   const isAdmin = user?.role === "ADMIN";
 
   return (
-    <div className="min-h-screen flex flex-col text-white overflow-x-clip selection:bg-indigo-500/30">
+    // Opaque site-black on the page root: it paints over the fixed z-[-1]
+    // PageBackdrop artwork, because the original shows its account screens
+    // on plain black, not over the storefront picture.
+    <div className="min-h-screen flex flex-col text-white overflow-x-clip selection:bg-indigo-500/30 bg-[#050508]">
       <div className="w-full shrink-0 h-[104px]" />
       <SiteHeader />
 
       <main className="flex-1 relative z-20 w-full flex flex-col">
         <div className="w-full">
-          <AccountShell title={title} subtitle={subtitle} crumb={crumb} isAdmin={isAdmin}>
+          <AccountShell
+            title={title}
+            subtitle={subtitle}
+            crumb={crumb}
+            isAdmin={isAdmin}
+            action={action}
+            user={
+              user
+                ? {
+                    username: user.username,
+                    avatarUrl: user.avatarUrl,
+                    role: user.role,
+                  }
+                : null
+            }
+          >
             {children}
           </AccountShell>
         </div>

@@ -1,8 +1,11 @@
 "use client";
 
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import {
   ArrowLeftRight,
+  ChevronsUp,
+  Handshake,
   LayoutDashboard,
   Shield,
   ShieldCheck,
@@ -17,12 +20,28 @@ interface AccountNavItem {
   icon: LucideIcon;
 }
 
-const NAV_ITEMS: AccountNavItem[] = [
-  { label: "Tổng quan", href: "/profile", icon: LayoutDashboard },
-  { label: "Nạp tiền", href: "/wallet", icon: Wallet },
-  { label: "Lịch sử giao dịch", href: "/transactions", icon: ArrowLeftRight },
-  { label: "Lịch sử mua", href: "/orders", icon: ShoppingBag },
-  { label: "Bảo mật", href: "/security", icon: ShieldCheck },
+/** What the header block needs to draw the signed-in visitor. */
+export interface SidebarUser {
+  username: string;
+  avatarUrl: string | null;
+  role: string;
+}
+
+// Grouped the way the captured menzu sidebar rules its rows: the everyday
+// screens together, Bảo mật alone under a hairline. The partner pair is this
+// shop's own addition, kept below Bảo mật on the user's instruction.
+const NAV_GROUPS: AccountNavItem[][] = [
+  [
+    { label: "Tổng quan", href: "/profile", icon: LayoutDashboard },
+    { label: "Nạp tiền", href: "/wallet", icon: Wallet },
+    { label: "Lịch sử giao dịch", href: "/transactions", icon: ArrowLeftRight },
+    { label: "Lịch sử mua", href: "/orders", icon: ShoppingBag },
+  ],
+  [{ label: "Bảo mật", href: "/security", icon: ShieldCheck }],
+  [
+    { label: "Cộng tác viên", href: "/affiliate", icon: Handshake },
+    { label: "Nâng cấp đại lý", href: "/agency", icon: ChevronsUp },
+  ],
 ];
 
 // Tailwind can't see dynamically-composed class names, so the link's active
@@ -34,15 +53,54 @@ const LINK_INACTIVE =
 
 /**
  * Authenticated account sidebar navigation. The live /profile "tab bar" is
- * actually six separate routes rather than client-side tabs, so this renders
+ * actually separate routes rather than client-side tabs, so this renders
  * plain links and highlights whichever one matches the current pathname.
  */
-export function AccountSidebar({ isAdmin = false }: { isAdmin?: boolean }) {
+export function AccountSidebar({
+  isAdmin = false,
+  user = null,
+}: {
+  isAdmin?: boolean;
+  user?: SidebarUser | null;
+}) {
   const pathname = usePathname();
 
   return (
     <div className="hidden lg:block w-full lg:w-[280px] shrink-0 sticky top-[88px]">
       <nav className="bg-neutral-900/60 border border-white/10 rounded-2xl p-3">
+        {/* The face on top, as the captured sidebar has it: avatar, name, and
+            the role in a whisper underneath. */}
+        {user ? (
+          <div className="mb-2 flex items-center gap-3 border-b border-white/5 px-3 pb-4 pt-2">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full border border-white/10 bg-black/40">
+              {user.avatarUrl ? (
+                <Image
+                  src={user.avatarUrl}
+                  alt=""
+                  width={40}
+                  height={40}
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <span
+                  aria-hidden
+                  className="text-sm font-black uppercase text-neutral-400"
+                >
+                  {user.username.slice(0, 1)}
+                </span>
+              )}
+            </span>
+            <span className="flex min-w-0 flex-col gap-1.5">
+              <span className="truncate text-sm font-bold leading-none text-white">
+                {user.username}
+              </span>
+              <span className="text-[9px] font-black uppercase tracking-widest leading-none text-neutral-500">
+                {user.role === "ADMIN" ? "Admin" : "Member"}
+              </span>
+            </span>
+          </div>
+        ) : null}
+
         {/* A single link above the account items. The admin area has its own
             sidebar once you are inside it, so listing all eight screens here
             duplicated a menu two clicks away. */}
@@ -60,21 +118,28 @@ export function AccountSidebar({ isAdmin = false }: { isAdmin?: boolean }) {
           </div>
         ) : null}
 
-        {NAV_ITEMS.map(({ label, href, icon: Icon }) => {
-          const isActive = pathname === href;
+        {NAV_GROUPS.map((group, index) => (
+          <div
+            key={group[0]!.href}
+            className={index > 0 ? "mt-2 border-t border-white/5 pt-2" : undefined}
+          >
+            {group.map(({ label, href, icon: Icon }) => {
+              const isActive = pathname === href;
 
-          return (
-            <a
-              key={href}
-              href={href}
-              aria-current={isActive ? "page" : undefined}
-              className={isActive ? LINK_ACTIVE : LINK_INACTIVE}
-            >
-              <Icon size={16} />
-              {label}
-            </a>
-          );
-        })}
+              return (
+                <a
+                  key={href}
+                  href={href}
+                  aria-current={isActive ? "page" : undefined}
+                  className={isActive ? LINK_ACTIVE : LINK_INACTIVE}
+                >
+                  <Icon size={16} />
+                  {label}
+                </a>
+              );
+            })}
+          </div>
+        ))}
       </nav>
     </div>
   );

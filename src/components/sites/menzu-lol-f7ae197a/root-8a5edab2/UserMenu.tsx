@@ -1,6 +1,8 @@
 "use client";
 
 import {
+  ChevronsUp,
+  Handshake,
   History,
   LayoutGrid,
   LogOut,
@@ -24,8 +26,9 @@ export interface HeaderUser {
 }
 
 /**
- * The live menu rules its links into three groups rather than listing six in a
- * row: where you are, what touches money, and the account itself.
+ * The live menu rules its links into groups rather than listing them in a
+ * row: where you are, what touches money, the account itself — and, this
+ * shop's own addition, the two partner programmes below Bảo mật.
  */
 const GROUPS: { label: string; href: string; icon: LucideIcon }[][] = [
   [{ label: "Tổng quan", href: "/profile", icon: LayoutGrid }],
@@ -35,6 +38,10 @@ const GROUPS: { label: string; href: string; icon: LucideIcon }[][] = [
     { label: "Lịch sử mua", href: "/orders", icon: ShoppingBag },
   ],
   [{ label: "Bảo mật", href: "/security", icon: ShieldCheck }],
+  [
+    { label: "Cộng tác viên", href: "/affiliate", icon: Handshake },
+    { label: "Nâng cấp đại lý", href: "/agency", icon: ChevronsUp },
+  ],
 ];
 
 /** A group of links and the rule above it. */
@@ -161,19 +168,25 @@ export function UserMenu({ user }: { user: HeaderUser }) {
                 <span className="truncate text-[15px] font-bold leading-none text-white">
                   {user.username}
                 </span>
-                <div className="flex items-center gap-1.5">
+                {/* The same skewed plates the profile card wears — one badge
+                    language everywhere the account shows its papers. */}
+                <div className="flex items-center gap-2">
                   <span
-                    className={`rounded px-1.5 py-1 text-[10px] font-black uppercase leading-none tracking-widest ${
+                    className={`inline-flex -skew-x-12 rounded-[4px] px-2 py-1 ${
                       isAdmin
-                        ? "bg-[var(--menzu-accent)] text-white"
-                        : "bg-gradient-to-r from-[#7b3fe4] to-[#9354ff] text-white"
+                        ? "bg-[var(--menzu-accent)]"
+                        : "bg-gradient-to-r from-[#7b3fe4] to-[#9354ff]"
                     }`}
                   >
-                    {isAdmin ? "ADMIN" : "MEMBER"}
+                    <span className="skew-x-12 text-[10px] font-black uppercase leading-none tracking-widest text-white">
+                      {isAdmin ? "Admin" : "Member"}
+                    </span>
                   </span>
                   {user.uid !== undefined ? (
-                    <span className="rounded bg-white/[0.07] px-1.5 py-1 text-[10px] font-bold leading-none text-neutral-400">
-                      UID: {user.uid}
+                    <span className="inline-flex -skew-x-12 rounded-[4px] border border-white/10 bg-white/[0.07] px-2 py-1">
+                      <span className="skew-x-12 text-[10px] font-black uppercase leading-none tracking-widest text-neutral-300">
+                        UID: {user.uid}
+                      </span>
                     </span>
                   ) : null}
                 </div>

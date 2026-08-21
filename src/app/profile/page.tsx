@@ -1,130 +1,341 @@
 import type { Metadata } from "next";
 
 import { redirect } from "next/navigation";
+import {
+  BadgeCheck,
+  Check,
+  Gem,
+  Settings,
+  ShieldCheck,
+  ShoppingBag,
+  Wallet,
+} from "lucide-react";
 
-import { getCurrentUser } from "@/lib/session";
-import { formatVnd } from "@/components/sites/menzu-lol-f7ae197a/shared/productData";
 import { AccountPageFrame } from "@/components/sites/menzu-lol-f7ae197a/shared/AccountPageFrame";
+import { AvatarUploader } from "@/components/sites/menzu-lol-f7ae197a/shared/AvatarUploader";
+import { WithdrawCommission } from "@/components/sites/menzu-lol-f7ae197a/shared/WithdrawCommission";
+import {
+  DiscordMark,
+  GoogleMark,
+} from "@/components/sites/menzu-lol-f7ae197a/shared/OAuthButtons";
+import { formatVnd } from "@/components/sites/menzu-lol-f7ae197a/shared/productData";
+import { db } from "@/lib/db";
+import { getCurrentUser } from "@/lib/session";
+import { discordOauthEnabled, googleOauthEnabled } from "@/lib/settings";
+import { getShopSettings } from "@/lib/settingsStore";
 
 export const metadata: Metadata = { title: "Menzu Valorant | Profile" };
 export const dynamic = "force-dynamic";
 
-/** The three summary tiles, filled from the signed-in user's own row. */
-function buildStats(balance: number, points: number, tier: string) {
-  return [
-    { label: "Số dư khả dụng", value: formatVnd(balance), unit: "đ", tone: "text-emerald-400" },
-    { label: "Điểm thưởng", value: String(points), unit: "Pts", tone: "text-amber-400" },
-    { label: "Cấp bậc thành viên", value: tier, unit: "", tone: "text-orange-300" },
-  ];
-}
+/**
+ * Laid out to the user's mockup, dressed in this site's own components: a
+ * two-column grid — the identity-and-tier card on the left; balance, the
+ * commission card, and quick actions on the right — with the account-link
+ * rows full-width underneath and an edit button at header level.
+ *
+ * The commission figure is a fixed 0: no commission field exists yet, so the
+ * card shows the truthful nothing and keeps Rút tiền locked until the CTV
+ * programme has real numbers to pay out.
+ */
 
-const LINKED = [
-  { provider: "Discord", bonus: "Thưởng 1.000 Pts" },
-  { provider: "Google", bonus: "" },
+/** Progress ceiling the tier bar counts toward. */
+const XP_CAP = 1000;
+
+/** Each MemberTier's colour kit; unknown values wear bronze. */
+const TIERS: Record<string, { text: string; bar: string }> = {
+  BRONZE: { text: "text-orange-300", bar: "bg-orange-400" },
+  SILVER: { text: "text-neutral-300", bar: "bg-neutral-300" },
+  GOLD: { text: "text-amber-300", bar: "bg-amber-400" },
+  PLATINUM: { text: "text-cyan-300", bar: "bg-cyan-400" },
+  DIAMOND: { text: "text-violet-300", bar: "bg-violet-400" },
+};
+
+const PROVIDER_NAMES: Record<string, string> = {
+  google: "Google",
+  discord: "Discord",
+};
+
+const QUICK_ACTIONS = [
+  { label: "Nạp tiền", href: "/wallet", icon: Wallet },
+  { label: "Lịch sử mua", href: "/orders", icon: ShoppingBag },
+  { label: "Bảo mật", href: "/security", icon: ShieldCheck },
 ] as const;
 
-export default async function ProfilePage() {
+/** The parallelogram role plate carried over from the previous pass. */
+function SkewPlate({
+  className,
+  children,
+}: {
+  className: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <span className={`inline-flex -skew-x-12 rounded-[4px] px-2.5 py-1.5 ${className}`}>
+      <span className="skew-x-12 text-[10px] font-black uppercase tracking-widest leading-none">
+        {children}
+      </span>
+    </span>
+  );
+}
+
+interface ProfilePageProps {
+  searchParams: Promise<{ linked?: string; linkError?: string }>;
+}
+
+export default async function ProfilePage({ searchParams }: ProfilePageProps) {
   const user = await getCurrentUser();
   if (!user) redirect("/login?next=%2Fprofile");
+
+  const [settings, linkedRows, query] = await Promise.all([
+    getShopSettings(),
+    db.linkedAccount.findMany({
+      where: { userId: user.id },
+      select: { provider: true },
+    }),
+    searchParams,
+  ]);
+  const linkedSet = new Set(linkedRows.map((row) => row.provider));
+  const isAdmin = user.role === "ADMIN";
+
+  const tier = TIERS[user.tier] ?? TIERS.BRONZE!;
+  const xpPercent = Math.min(100, (user.points / XP_CAP) * 100);
+
+  const providers = [
+    {
+      key: "discord",
+      name: "Discord",
+      perk: "Nhận thông báo đơn hàng",
+      enabled: discordOauthEnabled(settings),
+      mark: <DiscordMark className="w-5 h-5 text-[#5865F2]" />,
+    },
+    {
+      key: "google",
+      name: "Google",
+      perk: "Đăng nhập nhanh hơn",
+      enabled: googleOauthEnabled(settings),
+      mark: <GoogleMark className="w-5 h-5" />,
+    },
+  ] as const;
 
   return (
     <AccountPageFrame
       title="Tổng quan tài khoản"
-      subtitle="Xem thông tin và hoạt động gần đây"
+      subtitle="Quản lý tài khoản, số dư và các dịch vụ của bạn."
       crumb="Tổng quan tài khoản"
+      action={
+        // Profile editing does not exist yet; the control holds the mockup's
+        // place inert, like the avatar pencil before it.
+        <button
+          type="button"
+          title="Chỉnh sửa hồ sơ — sắp có"
+          className="inline-flex h-10 items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 text-[11px] font-black uppercase tracking-widest text-neutral-300 transition-colors hover:bg-white/10 hover:text-white"
+        >
+          <Settings size={14} />
+          Chỉnh sửa hồ sơ
+        </button>
+      }
     >
-      <div className="flex flex-col gap-6">
-        <div className="rounded-2xl border border-white/10 bg-neutral-900/50 p-6 flex flex-col sm:flex-row sm:items-center gap-5">
-          <div className="relative shrink-0">
-            <div className="w-20 h-20 rounded-2xl bg-black/50 border border-white/10 overflow-hidden" />
-            <button
-              type="button"
-              className="mt-2 w-full text-[10px] font-black uppercase tracking-widest text-neutral-400 hover:text-white transition-colors"
-            >
-              Sửa ảnh
-            </button>
+      <div className="flex flex-col gap-4">
+        {query.linked && PROVIDER_NAMES[query.linked] ? (
+          <div className="rounded-xl border border-emerald-500/25 bg-emerald-500/10 px-4 py-3 text-sm font-bold text-emerald-300">
+            Đã liên kết {PROVIDER_NAMES[query.linked]} vào tài khoản của bạn.
+          </div>
+        ) : null}
+        {query.linkError && PROVIDER_NAMES[query.linkError] ? (
+          <div className="rounded-xl border border-red-500/25 bg-red-500/10 px-4 py-3 text-sm font-bold text-red-300">
+            Tài khoản {PROVIDER_NAMES[query.linkError]} này đang liên kết với một
+            người dùng khác.
+          </div>
+        ) : null}
+
+        <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
+          <div className="flex flex-col gap-5 rounded-2xl border border-white/10 bg-neutral-900/50 p-6">
+            <div className="flex items-center gap-4">
+              <AvatarUploader avatarUrl={user.avatarUrl} username={user.username} />
+              <div className="flex min-w-0 flex-col gap-2">
+                <div className="flex min-w-0 items-center gap-2">
+                  <span className="truncate text-xl font-black uppercase tracking-wide leading-none text-white">
+                    {user.username}
+                  </span>
+                  <BadgeCheck size={18} className="shrink-0 fill-[#7c3aed] text-white" />
+                </div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <SkewPlate
+                    className={
+                      isAdmin
+                        ? "bg-[var(--menzu-accent)] text-white"
+                        : "bg-gradient-to-r from-[#7b3fe4] to-[#9354ff] text-white"
+                    }
+                  >
+                    {isAdmin ? "Admin" : "Member"}
+                  </SkewPlate>
+                  <SkewPlate className="border border-white/10 bg-white/[0.07] text-neutral-300">
+                    UID: {user.uid}
+                  </SkewPlate>
+                </div>
+                <span className="text-[10px] font-black uppercase tracking-widest text-neutral-500">
+                  Đã tham gia:{" "}
+                  {user.createdAt.toLocaleDateString("vi-VN", {
+                    day: "2-digit",
+                    month: "2-digit",
+                    year: "numeric",
+                  })}
+                </span>
+              </div>
+            </div>
+
+            <div className="border-t border-white/5" />
+
+            <div className="flex flex-col gap-2">
+              <span className="text-[10px] font-black uppercase tracking-widest text-neutral-500">
+                Cấp bậc hiện tại
+              </span>
+              <div className="flex items-center justify-between gap-3">
+                <span
+                  className={`text-2xl font-black uppercase tracking-wider leading-none ${tier.text}`}
+                >
+                  {user.tier}
+                </span>
+                <Gem size={20} className="shrink-0 text-neutral-500" />
+              </div>
+              <div className="mt-2 flex items-center justify-between gap-3">
+                <span className="text-[10px] font-black uppercase tracking-widest text-neutral-500">
+                  Tiến độ cấp bậc
+                </span>
+                {/* XP is Điểm thưởng counted against the mockup's 1.000
+                    ceiling — no separate experience number exists yet. */}
+                <span className="text-[10px] font-bold tracking-wider text-neutral-500">
+                  {formatVnd(user.points)} / {formatVnd(XP_CAP)} XP
+                </span>
+              </div>
+              <div className="h-2 overflow-hidden rounded-full border border-white/5 bg-black/60">
+                <div
+                  className={`h-full rounded-full ${tier.bar}`}
+                  style={{ width: `${xpPercent}%` }}
+                />
+              </div>
+            </div>
+
+            <div className="mt-auto rounded-xl border border-white/[0.06] bg-white/[0.03] px-4 py-3 text-xs leading-relaxed text-neutral-400">
+              Tích lũy để thừa hưởng thêm đặc quyền và ưu đãi dành riêng cho
+              thành viên
+            </div>
           </div>
 
-          <div className="flex flex-col gap-1.5 min-w-0">
-            <div className="flex items-center gap-2.5 flex-wrap">
-              <span className="text-xl font-black text-white">{user.username}</span>
-              <span className="px-2 py-0.5 rounded-md bg-white/10 border border-white/15 text-[10px] font-black uppercase tracking-widest text-neutral-300">
-                {user.role}
-              </span>
+          <div className="flex flex-col gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="flex flex-col gap-3 rounded-2xl border border-emerald-500/15 bg-emerald-500/[0.04] p-5">
+                <span className="text-[10px] font-black uppercase tracking-widest text-neutral-300">
+                  Số dư khả dụng
+                </span>
+                <span className="text-3xl font-black leading-none text-emerald-400">
+                  {formatVnd(user.balance)}{" "}
+                  <span className="text-sm font-bold text-emerald-400/80">đ</span>
+                </span>
+                <span className="mt-auto text-xs text-neutral-500">
+                  Sẵn sàng để sử dụng
+                </span>
+              </div>
+
+              <div className="flex flex-col gap-3 rounded-2xl border border-rose-500/15 bg-rose-500/[0.04] p-5">
+                <span className="text-[10px] font-black uppercase tracking-widest text-neutral-300">
+                  Số tiền hoa hồng khả dụng
+                </span>
+                <span className="text-3xl font-black leading-none text-rose-400">
+                  {formatVnd(user.commissionBalance)}{" "}
+                  <span className="text-sm font-bold text-rose-400/80">đ</span>
+                </span>
+                <div className="mt-auto flex items-center justify-between gap-3">
+                  <span className="text-xs text-neutral-500">
+                    Hoa hồng sẵn sàng rút
+                  </span>
+                  <WithdrawCommission amount={user.commissionBalance} />
+                </div>
+              </div>
             </div>
-            <span className="text-xs text-neutral-500 font-semibold">UID: {user.uid}</span>
-            <span className="text-xs text-neutral-500 font-semibold">
-              Đã tham gia:{" "}
-              {user.createdAt.toLocaleDateString("vi-VN", {
-                day: "2-digit",
-                month: "2-digit",
-                year: "numeric",
-              })}
+
+            <div className="flex flex-1 flex-col gap-4 rounded-2xl border border-white/10 bg-neutral-900/50 p-5">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <span className="text-sm font-black uppercase tracking-wider text-white">
+                  Thao tác nhanh
+                </span>
+                <span className="text-xs text-neutral-500">
+                  Truy cập nhanh các chức năng
+                </span>
+              </div>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                {QUICK_ACTIONS.map(({ label, href, icon: Icon }) => (
+                  <a
+                    key={href}
+                    href={href}
+                    className="flex items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] p-4 transition-colors hover:border-white/15 hover:bg-white/[0.05]"
+                  >
+                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-[var(--brand)]/25 bg-[var(--brand)]/15">
+                      <Icon size={16} className="text-[#a78bfa]" />
+                    </span>
+                    <span className="truncate text-sm font-bold leading-none text-white">
+                      {label}
+                    </span>
+                  </a>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-4 rounded-2xl border border-white/10 bg-neutral-900/50 p-5">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <span className="text-sm font-black uppercase tracking-wider text-white">
+              Liên kết tài khoản
+            </span>
+            <span className="text-xs text-neutral-500">
+              Kết nối để sử dụng thêm tiện ích
             </span>
           </div>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {buildStats(user.balance, user.points, user.tier).map((s) => (
-            <div
-              key={s.label}
-              className="rounded-2xl border border-white/10 bg-neutral-900/50 p-5 flex flex-col gap-2"
-            >
-              <span className="text-[10px] font-black uppercase tracking-widest text-neutral-500">
-                {s.label}
-              </span>
-              <span className={`text-2xl font-black ${s.tone}`}>
-                {s.value}
-                {s.unit ? (
-                  <span className="text-sm font-bold text-neutral-400 ml-1">{s.unit}</span>
-                ) : null}
-              </span>
-
-              {/* The live tile carries a redeem button. What a point is worth
-                  is a rule the shop sets and none exists here yet, so the
-                  control is present but disabled rather than opening a dialog
-                  that would have to invent an exchange rate. */}
-              {s.label === "Điểm thưởng" ? (
-                <span
-                  aria-disabled="true"
-                  title="Chưa mở đổi điểm"
-                  className="mt-1 self-start h-8 px-3 rounded-lg border border-white/10 bg-white/[0.03] text-[10px] font-black uppercase tracking-widest text-neutral-500 inline-flex items-center cursor-not-allowed"
+          <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+            {providers.map((provider) => {
+              const isLinked = linkedSet.has(provider.key);
+              return (
+                <div
+                  key={provider.key}
+                  className="flex items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] p-4"
                 >
-                  Đổi điểm
-                </span>
-              ) : null}
-            </div>
-          ))}
-        </div>
-
-        <div className="rounded-2xl border border-white/10 bg-neutral-900/50 p-5 flex flex-col gap-3">
-          <span className="text-[10px] font-black uppercase tracking-widest text-neutral-500">
-            Liên kết nền tảng
-          </span>
-          {LINKED.map((l) => (
-            <div
-              key={l.provider}
-              className="flex items-center justify-between gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3"
-            >
-              <div className="flex flex-col">
-                <span className="text-sm font-bold text-white">{l.provider}</span>
-                <span className="text-[11px] text-neutral-500">Chưa liên kết</span>
-              </div>
-              <div className="flex items-center gap-3">
-                {l.bonus ? (
-                  <span className="text-[10px] font-black uppercase tracking-wider text-emerald-400">
-                    {l.bonus}
+                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-black/50">
+                    {provider.mark}
                   </span>
-                ) : null}
-                <button
-                  type="button"
-                  className="h-9 px-4 rounded-xl bg-[var(--brand)] hover:bg-[var(--brand-dark)] transition-colors text-[10px] font-black uppercase tracking-widest text-white whitespace-nowrap"
-                >
-                  Liên kết ngay
-                </button>
-              </div>
-            </div>
-          ))}
+                  <span className="flex min-w-0 flex-col gap-1">
+                    <span className="text-sm font-bold leading-none text-white">
+                      {provider.name}
+                    </span>
+                    <span className="truncate text-[11px] leading-none text-neutral-500">
+                      {isLinked ? "Đã liên kết" : "Chưa liên kết"} · {provider.perk}
+                    </span>
+                  </span>
+                  {isLinked ? (
+                    <span className="ml-auto inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3.5 text-[10px] font-black uppercase tracking-widest text-emerald-300">
+                      <Check size={12} /> Đã liên kết
+                    </span>
+                  ) : provider.enabled ? (
+                    <a
+                      href={`/api/auth/${provider.key}?next=%2Fprofile`}
+                      className="ml-auto inline-flex h-9 shrink-0 items-center rounded-lg bg-[var(--brand)] px-4 text-[10px] font-black uppercase tracking-widest text-white transition-colors hover:bg-[var(--brand-dark)]"
+                    >
+                      Liên kết
+                    </a>
+                  ) : (
+                    // Same rule as the login buttons: a real door only once
+                    // the provider's keys sit in Cấu hình.
+                    <button
+                      type="button"
+                      className="ml-auto inline-flex h-9 shrink-0 items-center rounded-lg bg-[var(--brand)] px-4 text-[10px] font-black uppercase tracking-widest text-white"
+                    >
+                      Liên kết
+                    </button>
+                  )}
+                </div>
+              );
+            })}
+          </div>
         </div>
       </div>
     </AccountPageFrame>

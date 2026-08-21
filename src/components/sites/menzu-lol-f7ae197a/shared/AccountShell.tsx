@@ -1,4 +1,4 @@
-import { AccountSidebar } from "./AccountSidebar";
+import { AccountSidebar, type SidebarUser } from "./AccountSidebar";
 import { Breadcrumb } from "./Breadcrumb";
 
 export interface AccountShellProps {
@@ -6,6 +6,9 @@ export interface AccountShellProps {
   subtitle: string;
   crumb: string;
   isAdmin?: boolean;
+  user?: SidebarUser | null;
+  /** Optional control rendered to the right of the title, header-level. */
+  action?: React.ReactNode;
   children: React.ReactNode;
 }
 
@@ -15,7 +18,15 @@ export interface AccountShellProps {
  * renders through this shell: breadcrumb trail, sidebar nav (desktop only),
  * and a title/subtitle header ahead of the page's own content.
  */
-export function AccountShell({ title, subtitle, crumb, isAdmin = false, children }: AccountShellProps) {
+export function AccountShell({
+  title,
+  subtitle,
+  crumb,
+  isAdmin = false,
+  user = null,
+  action = null,
+  children,
+}: AccountShellProps) {
   return (
     <div className="w-full max-w-[1320px] mx-auto px-4 lg:px-6 py-8 flex flex-col min-h-screen">
       <div className="mb-6">
@@ -23,14 +34,17 @@ export function AccountShell({ title, subtitle, crumb, isAdmin = false, children
       </div>
 
       <div className="flex flex-col lg:flex-row gap-6 items-start">
-        <AccountSidebar isAdmin={isAdmin} />
+        <AccountSidebar isAdmin={isAdmin} user={user} />
 
         <div className="flex-1 w-full min-w-0">
-          <div className="mb-6">
-            <h1 className="text-2xl sm:text-3xl font-black uppercase tracking-wider text-white">
-              {title}
-            </h1>
-            <p className="text-sm text-neutral-400 mt-1.5">{subtitle}</p>
+          <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-black uppercase tracking-wider text-white">
+                {title}
+              </h1>
+              <p className="text-sm text-neutral-400 mt-1.5">{subtitle}</p>
+            </div>
+            {action ? <div className="shrink-0">{action}</div> : null}
           </div>
 
           {children}

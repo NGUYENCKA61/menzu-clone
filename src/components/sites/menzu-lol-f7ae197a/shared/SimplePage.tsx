@@ -13,10 +13,12 @@ interface SimplePageProps {
   children: ReactNode;
 }
 
-/** Standard inner-page chrome: header, backdrop, breadcrumb, heading, footer. */
+/** Standard inner-page chrome: header, breadcrumb, heading, footer. */
 export function SimplePage({ title, crumb, children }: SimplePageProps) {
   return (
-    <div className="min-h-screen flex flex-col text-white overflow-x-clip selection:bg-indigo-500/30">
+    // Opaque site-black, covering the fixed PageBackdrop artwork — the
+    // original keeps its utility pages (wiki, cart, trade…) on plain black.
+    <div className="min-h-screen flex flex-col text-white overflow-x-clip selection:bg-indigo-500/30 bg-[#050508]">
       <div className="w-full shrink-0 h-[104px]" />
       <SiteHeader />
 
