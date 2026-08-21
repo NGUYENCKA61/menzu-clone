@@ -6,7 +6,7 @@ import { WalletTopUp } from "@/components/sites/menzu-lol-f7ae197a/shared/Wallet
 import { getTopUps } from "@/lib/queries";
 import { getCurrentUser } from "@/lib/session";
 import { getShopSettings } from "@/lib/settingsStore";
-import { topUpExpiresAt, watchableTopUp } from "@/lib/topup";
+import { topUpExpiresAt, transferNoteFor, watchableTopUp } from "@/lib/topup";
 
 export const metadata: Metadata = { title: "Nạp tiền" };
 export const dynamic = "force-dynamic";
@@ -26,14 +26,16 @@ export default async function WalletPage() {
   if (!user) redirect("/login?next=%2Fwallet");
 
   const [history, settings] = await Promise.all([
-    getTopUps(user.id),
+    // 50 rather than the default 10: the client pages through these locally,
+    // five to a screen.
+    getTopUps(user.id, 50),
     getShopSettings(),
   ]);
 
   return (
     <AccountPageFrame
       title="Nạp tiền vào tài khoản"
-      subtitle="Nạp qua ngân hàng hoặc thẻ cào, shop đối soát rồi cộng vào ví"
+      subtitle="Hệ thống nạp tiền tự động 24/7"
       crumb="Nạp tiền ví"
     >
       <WalletTopUp
@@ -66,6 +68,9 @@ export default async function WalletPage() {
           amount: row.amount,
           status: row.status,
           createdAt: formatWhen(row.createdAt),
+          // Rebuilt with the same helper the create route uses, so a pending
+          // row can reopen as the full invoice after a reload.
+          transferNote: transferNoteFor(row.code),
           // Only a request still waiting has time left to count down. An ISO
           // string rather than a number of seconds, because the page may sit
           // in a cache for a while before anyone reads it.

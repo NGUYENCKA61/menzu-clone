@@ -788,3 +788,48 @@ body.lightbox-open .site-nav {
     animation: none;
   }
 }
+
+/* The invoice card breathing while it waits for money: the red border and its
+   glow swell and settle on the search fields' 2.4s tempo. The static border
+   and shadow on the element are the reduced-motion look, and the card goes
+   still the moment the transfer lands. */
+@keyframes invoice-breathe {
+  0%,
+  100% {
+    border-color: rgb(239 68 68 / 0.25);
+    box-shadow: 0 0 30px rgb(239 68 68 / 0.05);
+  }
+  50% {
+    border-color: rgb(239 68 68 / 0.6);
+    box-shadow: 0 0 48px rgb(239 68 68 / 0.18);
+  }
+}
+.invoice-breathe {
+  animation: invoice-breathe 2.4s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .invoice-breathe {
+    animation: none;
+  }
+}
+
+/* Option two for the invoice's top edge: instead of the whole border
+   breathing, a short bright thread runs back and forth along the hairline —
+   the menzu scanner made two pixels tall. 35% wide band: -100% parks it off
+   the left edge, 286% (100/35 of its own width) off the right. */
+@keyframes invoice-scan {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(286%);
+  }
+}
+.invoice-scan {
+  animation: invoice-scan 2.6s ease-in-out infinite alternate;
+}
+@media (prefers-reduced-motion: reduce) {
+  .invoice-scan {
+    animation: none;
+  }
+}

@@ -3,6 +3,7 @@
 import { Search, X } from "lucide-react";
 import { useMemo, useState } from "react";
 
+import { Pager } from "./Pager";
 import { formatVnd } from "./productData";
 
 export interface LedgerView {
@@ -34,6 +35,9 @@ const STATUS_CLASS: Record<string, string> = {
   FAILED: "text-red-400 bg-red-500/10 border-red-500/30",
 };
 
+/** Same paging rhythm as the wallet's ledger. */
+const PAGE_SIZE = 10;
+
 /** Diacritic-insensitive, so "giao dich" finds "giao dịch". */
 function normalise(value: string): string {
   return value
@@ -54,6 +58,7 @@ function normalise(value: string): string {
  */
 export function TransactionsTable({ rows }: { rows: LedgerView[] }) {
   const [query, setQuery] = useState("");
+  const [page, setPage] = useState(0);
 
   const filtered = useMemo(() => {
     const needle = normalise(query.trim());
@@ -65,6 +70,12 @@ export function TransactionsTable({ rows }: { rows: LedgerView[] }) {
     );
   }, [rows, query]);
 
+  const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  // Clamped rather than reset by effect: a narrowing search shrinks pageCount
+  // and the view just follows.
+  const current = Math.min(page, pageCount - 1);
+  const visible = filtered.slice(current * PAGE_SIZE, current * PAGE_SIZE + PAGE_SIZE);
+
   return (
     <div className="space-y-4">
       <div className="relative">
@@ -72,10 +83,14 @@ export function TransactionsTable({ rows }: { rows: LedgerView[] }) {
         <input
           type="search"
           value={query}
-          onChange={(event) => setQuery(event.target.value)}
+          onChange={(event) => {
+            setQuery(event.target.value);
+            // A new search starts reading from its first page.
+            setPage(0);
+          }}
           placeholder="Tìm kiếm mã GD, nội dung..."
           aria-label="Tìm kiếm giao dịch"
-          className="w-full appearance-none rounded-2xl border border-white/5 bg-[#111111] pl-11 pr-10 py-3 text-sm text-white outline-none focus:border-[var(--brand)]/60 transition-colors placeholder-neutral-600"
+          className="w-full appearance-none rounded-2xl border-[1.5px] border-red-500/20 bg-[#111] pl-11 pr-10 py-3 text-sm text-white outline-none focus:border-red-500/60 transition-colors placeholder-neutral-600"
         />
         {query ? (
           <button
@@ -89,7 +104,19 @@ export function TransactionsTable({ rows }: { rows: LedgerView[] }) {
         ) : null}
       </div>
 
-      <div className="w-full overflow-x-auto rounded-2xl border border-white/10 bg-neutral-900/40">
+      {/* The overview page's card language: shell, white header, muted note
+          on the right — the table itself sits inside as an inner tile. */}
+      <section className="flex flex-col gap-4 rounded-2xl border border-white/10 bg-neutral-900/50 p-5">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h3 className="text-sm font-black uppercase tracking-wider text-white">
+            Biến động số dư
+          </h3>
+          <span className="text-xs text-neutral-500">
+            {filtered.length} giao dịch gần nhất
+          </span>
+        </div>
+
+        <div className="w-full overflow-x-auto rounded-xl border border-white/[0.06] bg-white/[0.02]">
         <table className="w-full min-w-[720px] text-left">
           <thead>
             <tr className="border-b border-white/10">
@@ -112,7 +139,7 @@ export function TransactionsTable({ rows }: { rows: LedgerView[] }) {
                 </td>
               </tr>
             ) : (
-              filtered.map((row) => (
+              visible.map((row) => (
                 <tr key={row.code} className="border-b border-white/5 last:border-0">
                   <td className="px-5 py-4">
                     <div className="flex flex-col">
@@ -159,7 +186,17 @@ export function TransactionsTable({ rows }: { rows: LedgerView[] }) {
             )}
           </tbody>
         </table>
-      </div>
+        </div>
+
+        <Pager
+          page={current}
+          pageCount={pageCount}
+          onSelect={setPage}
+          total={filtered.length}
+          pageSize={PAGE_SIZE}
+          unit="giao dịch"
+        />
+      </section>
     </div>
   );
 }

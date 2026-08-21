@@ -19,6 +19,15 @@ const STATUS_LABEL: Record<string, string> = {
   REFUNDED: "Đã hoàn tiền",
 };
 
+// Every status used to wear the PAID green, which read as "fine" on a
+// cancelled order. Colour now follows meaning, same palette as the ledgers.
+const STATUS_CLASS: Record<string, string> = {
+  PAID: "border-emerald-500/30 bg-emerald-500/10 text-emerald-400",
+  PENDING: "border-amber-500/30 bg-amber-500/10 text-amber-400",
+  CANCELLED: "border-white/10 bg-white/5 text-neutral-500",
+  REFUNDED: "border-rose-500/30 bg-rose-500/10 text-rose-400",
+};
+
 export default async function OrdersPage() {
   const user = await getCurrentUser();
   if (!user) redirect("/login?next=%2Forders");
@@ -28,7 +37,7 @@ export default async function OrdersPage() {
   return (
     <AccountPageFrame
       title="Lịch sử mua hàng"
-      subtitle="Danh sách các tài khoản bạn đã thanh toán"
+      subtitle="Danh sách các đơn hàng mà bạn đã thanh toán"
       crumb="Lịch sử mua"
     >
       {(
@@ -42,6 +51,9 @@ export default async function OrdersPage() {
             />
           }
           placeholder="Tìm theo mã đơn hoặc tên account..."
+          unit="đơn hàng"
+          frameTitle="Đơn hàng của bạn"
+          frameHint="Bấm vào đơn để mở lại tài khoản"
           rows={orders.map((o) => ({
             key: o.code,
             // Searched by order code, product code and rank — the three things
@@ -50,7 +62,7 @@ export default async function OrdersPage() {
             node: (
               <a
                 href={`/account/${o.productCode}`}
-              className="group flex items-center gap-4 rounded-2xl border border-white/10 bg-neutral-900/50 p-4 hover:border-indigo-500/40 transition-colors"
+              className="group flex items-center gap-4 rounded-xl border border-white/[0.06] bg-white/[0.02] p-4 transition-colors hover:border-red-500/40 hover:bg-white/[0.05]"
             >
               <div className="relative w-24 h-16 rounded-xl overflow-hidden bg-neutral-950 shrink-0 border border-white/10">
                 {o.imageUrl ? (
@@ -66,7 +78,7 @@ export default async function OrdersPage() {
 
               <div className="flex flex-col min-w-0 flex-1 gap-1">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-sm font-black text-white group-hover:text-indigo-400 transition-colors">
+                  <span className="text-sm font-black text-white group-hover:text-red-400 transition-colors">
                     #{o.productCode}
                   </span>
                   <span className="px-2 py-0.5 rounded-md bg-white/10 border border-white/15 text-[9px] font-black uppercase tracking-widest text-neutral-300">
@@ -87,7 +99,11 @@ export default async function OrdersPage() {
                 <span className="text-sm font-black text-white">
                   {formatVnd(o.total)}đ
                 </span>
-                <span className="px-2 py-1 rounded-lg border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 text-[10px] font-black uppercase tracking-wider">
+                <span
+                  className={`px-2 py-1 rounded-lg border text-[10px] font-black uppercase tracking-wider ${
+                    STATUS_CLASS[o.status] ?? "border-white/10 bg-white/5 text-neutral-400"
+                  }`}
+                >
                   {STATUS_LABEL[o.status] ?? o.status}
                 </span>
               </div>

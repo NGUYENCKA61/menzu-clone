@@ -31,6 +31,15 @@ export function extractTopUpCode(description: string): string | null {
 }
 
 /**
+ * The description a customer is told to write. Lives beside the matcher for
+ * the same reason makeTopUpCode does: extractTopUpCode anchors on this "NAP"
+ * marker, and the two must never drift apart.
+ */
+export function transferNoteFor(code: string): string {
+  return `NAP ${code}`;
+}
+
+/**
  * How long a request waits before it stops cluttering the queue.
  *
  * Half an hour: long enough to open a banking app, fail the OTP, and try

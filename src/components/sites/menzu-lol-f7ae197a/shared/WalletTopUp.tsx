@@ -1,9 +1,20 @@
 "use client";
 
-import { Banknote, CreditCard } from "lucide-react";
+import {
+  Ban,
+  Banknote,
+  Check,
+  Clock,
+  CreditCard,
+  Hourglass,
+  X,
+  type LucideIcon,
+} from "lucide-react";
+import { useRouter } from "next/navigation";
 
 import { useCallback, useEffect, useState } from "react";
 
+import { Pager } from "./Pager";
 import { TopUpCountdown, useTimeLeft } from "./TopUpCountdown";
 import { TopUpSuccessDialog } from "./TopUpSuccessDialog";
 
@@ -34,6 +45,9 @@ export interface TopUpHistoryRow {
   createdAt: string;
   /** ISO deadline while the request is still waiting; null once it is not. */
   expiresAt: string | null;
+  /** The description the customer was told to write — lets a pending row
+   *  reopen as the full invoice after a reload. */
+  transferNote: string;
 }
 
 function formatVnd(n: number): string {
@@ -134,26 +148,155 @@ function CopyRow({
   );
 }
 
-const HISTORY_STATUS: Record<string, { text: string; className: string }> = {
+const HISTORY_STATUS: Record<
+  string,
+  { text: string; className: string; icon: LucideIcon; box: string }
+> = {
   PENDING: {
     text: "Đang chờ",
     className: "border-amber-500/30 bg-amber-500/10 text-amber-400",
+    icon: Clock,
+    box: "border-amber-500/25 bg-amber-500/10 text-amber-400",
   },
   COMPLETED: {
     text: "Đã cộng",
     className: "border-emerald-500/30 bg-emerald-500/10 text-emerald-400",
+    icon: Check,
+    box: "border-emerald-500/25 bg-emerald-500/10 text-emerald-400",
   },
   FAILED: {
     text: "Từ chối",
     className: "border-red-500/30 bg-red-500/10 text-red-400",
+    icon: X,
+    box: "border-red-500/25 bg-red-500/10 text-red-400",
   },
   // Still honoured if the transfer shows up later, so it does not read as a
   // refusal.
   EXPIRED: {
     text: "Quá hạn",
     className: "border-white/10 bg-white/5 text-neutral-500",
+    icon: Hourglass,
+    box: "border-white/10 bg-white/5 text-neutral-500",
+  },
+  CANCELLED: {
+    text: "Đã hủy",
+    className: "border-white/10 bg-white/5 text-neutral-500",
+    icon: Ban,
+    box: "border-white/10 bg-white/5 text-neutral-500",
   },
 };
+
+/** Rows per page of history. */
+const PAGE_SIZE = 10;
+
+/**
+ * One method's ledger, paged. A pending row is a live thing: clicking it
+ * reopens its invoice above, where the cancel link lives. Rows wear the
+ * inner-tile chrome of the overview page's cards.
+ */
+function HistoryList({
+  rows,
+  empty,
+  onOpen,
+}: {
+  rows: TopUpHistoryRow[];
+  empty: string;
+  onOpen: (row: TopUpHistoryRow) => void;
+}) {
+  const [page, setPage] = useState(0);
+  const pageCount = Math.max(1, Math.ceil(rows.length / PAGE_SIZE));
+  // Clamped rather than reset by effect: cancelling the last row of the last
+  // page shrinks pageCount and the view just follows.
+  const current = Math.min(page, pageCount - 1);
+  const visible = rows.slice(current * PAGE_SIZE, current * PAGE_SIZE + PAGE_SIZE);
+
+  if (rows.length === 0) {
+    return (
+      <div className="rounded-xl border border-dashed border-white/10 bg-white/[0.02] py-10 text-center text-sm text-neutral-400">
+        {empty}
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col gap-2">
+      {visible.map((row) => {
+        const isPending = row.status === "PENDING";
+        const status = HISTORY_STATUS[row.status] ?? HISTORY_STATUS.PENDING!;
+        const StatusIcon = status.icon;
+        return (
+          <div
+            key={row.code}
+            onClick={isPending ? () => onOpen(row) : undefined}
+            className={`flex items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3 ${
+              isPending
+                ? "cursor-pointer transition-colors hover:border-red-500/40 hover:bg-white/[0.05]"
+                : ""
+            }`}
+          >
+            {/* The state as a coloured seal, readable before any word is. */}
+            <span
+              className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border ${status.box}`}
+            >
+              <StatusIcon size={15} />
+            </span>
+
+            <div className="flex min-w-0 flex-1 flex-col gap-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="font-mono text-xs font-bold text-white">
+                  {row.code}
+                </span>
+                <span
+                  className={`text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md border ${status.className}`}
+                >
+                  {status.text}
+                </span>
+              </div>
+              {/* Carrier only on card rows — the section heading already
+                  names the method. The countdown rides here because after a
+                  reload this line is the only place it can live. */}
+              <span className="truncate text-[11px] text-neutral-500">
+                {row.method === "CARD" ? `${row.carrier ?? "Thẻ cào"} · ` : ""}
+                {row.createdAt}
+                {isPending && row.expiresAt ? (
+                  <>
+                    {" "}
+                    · còn <TopUpCountdown deadline={row.expiresAt} />
+                  </>
+                ) : null}
+              </span>
+            </div>
+
+            {/* Money talks in colour: green and signed once credited, struck
+                through once the request can no longer credit, plain while
+                everything is still open. */}
+            <span
+              className={`shrink-0 text-sm font-black ${
+                row.status === "COMPLETED"
+                  ? "text-emerald-400"
+                  : row.status === "FAILED" || row.status === "CANCELLED"
+                    ? "text-neutral-600 line-through"
+                    : "text-neutral-200"
+              }`}
+            >
+              {row.status === "COMPLETED" ? "+" : ""}
+              {formatVnd(row.amount)}đ
+            </span>
+          </div>
+        );
+      })}
+
+      <Pager
+        page={current}
+        pageCount={pageCount}
+        onSelect={setPage}
+        total={rows.length}
+        pageSize={PAGE_SIZE}
+        unit="lệnh"
+      />
+    </div>
+  );
+}
 
 export function WalletTopUp({
   history = [],
@@ -175,6 +318,10 @@ export function WalletTopUp({
   // open on a form the server is going to refuse.
   const [method, setMethod] = useState<Method>(bankEnabled ? "bank" : "card");
   const [carrier, setCarrier] = useState<string>("");
+  const router = useRouter();
+  // Which code "Hủy" is working on — one flag serves the invoice card's link
+  // and every history-row chip without them sharing a spinner.
+  const [cancelingCode, setCancelingCode] = useState<string | null>(null);
   const [amount, setAmount] = useState("");
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -310,11 +457,65 @@ export function WalletTopUp({
     }
   }
 
+  /**
+   * Withdraws a request — from the invoice card or straight off a history
+   * row. The server refuses anything already settled, so a transfer that
+   * landed a moment ago is safe: the refusal simply shows as the error strip.
+   */
+  async function cancelByCode(code: string) {
+    if (cancelingCode) return;
+    setCancelingCode(code);
+    setError(null);
+    try {
+      const response = await fetch("/api/wallet/cancel", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ code }),
+      });
+      const data = (await response.json().catch(() => null)) as {
+        error?: string;
+      } | null;
+      if (!response.ok) {
+        setError(data?.error ?? "Không hủy được lệnh, thử lại sau");
+        return;
+      }
+      if (done?.code === code) setDone(null);
+      // The history below is server-rendered; refresh so the row shows Đã hủy.
+      router.refresh();
+    } catch {
+      setError("Không kết nối được máy chủ");
+    } finally {
+      setCancelingCode(null);
+    }
+  }
+
+  /**
+   * A pending history row reopens as the live invoice — same panel, same
+   * QR — for the customer who closed the tab mid-transfer and came back.
+   */
+  function openRow(row: TopUpHistoryRow) {
+    setDone({
+      code: row.code,
+      amount: row.amount,
+      transferNote: row.transferNote,
+      method: row.method === "CARD" ? "card" : "bank",
+      expiresAt: row.expiresAt,
+    });
+    setError(null);
+    // The panel mounts at the top of the block, likely off-screen from a
+    // click halfway down the ledger.
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
   return (
     <div className="flex flex-col gap-5">
-      <p className="text-sm text-neutral-400">
-        Tiền vào ví sau khi shop xác nhận đã nhận được chuyển khoản
-      </p>
+      <div className="rounded-xl border border-red-500/25 bg-red-500/[0.06] px-4 py-3 text-xs leading-relaxed text-neutral-300">
+        <span className="font-black uppercase tracking-wider text-red-400">
+          Lưu ý:
+        </span>{" "}
+        Tiền vào tài khoản trong 30–60s. Nếu sau thời gian trên chưa được cộng
+        tiền, vui lòng liên hệ admin.
+      </div>
 
       <div className="flex items-center gap-3">
         {bankEnabled ? (
@@ -343,17 +544,28 @@ export function WalletTopUp({
           on screen — this is the only place the customer can read the code the
           shop matches their transfer by. */}
       {done ? (
-        <div className="rounded-2xl border border-[var(--brand)]/40 bg-[var(--brand)]/[0.07] p-5 flex flex-col gap-4">
+        // The menzu red dress: near-black shell, 1.5px red border with a soft
+        // glow, and the hairline scan along the top edge — the same signature
+        // the storefront's search fields wear.
+        <div
+          className={`relative overflow-hidden rounded-2xl border-[1.5px] border-red-500/30 bg-[#111] shadow-[0_0_40px_rgba(239,68,68,0.07)] p-5 flex flex-col gap-4 ${
+            credited ? "" : "invoice-breathe"
+          }`}
+        >
+          <span
+            aria-hidden
+            className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-red-500/70 to-transparent"
+          />
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
             <span className="text-sm font-black uppercase tracking-widest text-white">
-              Lệnh nạp {done.code}
+              Lệnh nạp <span className="font-mono text-red-400">{done.code}</span>
             </span>
             {credited ? (
               <span className="text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-md border border-emerald-500/30 bg-emerald-500/10 text-emerald-400">
                 Đã nhận được tiền · đang cập nhật ví
               </span>
             ) : (
-              <span className="text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-md border border-amber-500/30 bg-amber-500/10 text-amber-400">
+              <span className="text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-md border border-red-500/30 bg-red-500/10 text-red-400">
                 {autoEnabled ? "Đang chờ tiền về" : "Đang chờ xác nhận"}
               </span>
             )}
@@ -422,6 +634,20 @@ export function WalletTopUp({
               qua Zalo để được đối soát. Tiền vào ví ngay khi shop xác nhận.
             </p>
           )}
+
+          {/* Bottom-right on purpose: the exit door of the card, past every
+              transfer detail. Gone once money has arrived — a credited
+              request has nothing left to cancel. */}
+          {!credited ? (
+            <button
+              type="button"
+              onClick={() => cancelByCode(done.code)}
+              disabled={cancelingCode !== null}
+              className="self-end text-[11px] font-black uppercase tracking-widest text-red-400/80 transition-colors hover:text-red-300 disabled:cursor-wait disabled:opacity-60"
+            >
+              {cancelingCode === done.code ? "Đang hủy…" : "Hủy hóa đơn này"}
+            </button>
+          ) : null}
         </div>
       ) : null}
 
@@ -468,13 +694,18 @@ export function WalletTopUp({
           ) : null}
 
           <div className="flex flex-col gap-2">
-            <label className="text-[10px] font-black uppercase tracking-widest text-neutral-500">
+            <label className="text-[10px] font-black uppercase tracking-widest text-neutral-300">
               Số tiền nạp
             </label>
             <div className="flex items-center gap-2 h-12 px-4 rounded-xl bg-neutral-950/60 border border-neutral-800/60 focus-within:border-[var(--brand)]/60 transition-colors">
+              {/* State keeps bare digits (presets and submit read it as a
+                  number); only the field shows them grouped — 50000 reads
+                  as 50.000 the moment it is typed. */}
               <input
-                value={amount}
-                onChange={(event) => setAmount(event.target.value)}
+                value={amount ? formatVnd(Number(amount)) : ""}
+                onChange={(event) =>
+                  setAmount(event.target.value.replace(/\D/g, "").slice(0, 12))
+                }
                 inputMode="numeric"
                 placeholder="0"
                 className="flex-1 bg-transparent outline-none text-white text-sm font-bold tabular-nums placeholder-neutral-600"
@@ -554,7 +785,7 @@ export function WalletTopUp({
           </fieldset>
 
           <div className="flex flex-col gap-2">
-            <h3 className="text-[10px] font-black uppercase tracking-widest text-neutral-500">
+            <h3 className="text-[10px] font-black uppercase tracking-widest text-neutral-300">
               Số tiền nạp
             </h3>
             <div className="flex flex-wrap gap-2">
@@ -599,60 +830,31 @@ export function WalletTopUp({
         </form>
       )}
 
-      <section className="flex flex-col gap-3">
-        <h3 className="text-[10px] font-black uppercase tracking-widest text-neutral-500">
-          Lịch sử nạp gần đây
-        </h3>
-        {history.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-white/10 bg-white/[0.02] py-10 text-center text-sm text-neutral-400">
-            Chưa có lệnh nạp nào.
-          </div>
-        ) : (
-          <div className="flex flex-col gap-2">
-            {history.map((row) => (
-              <div
-                key={row.code}
-                className="flex flex-wrap items-center gap-x-4 gap-y-1 rounded-xl border border-white/10 bg-neutral-900/50 px-4 py-3"
-              >
-                <span className="font-mono text-xs font-bold text-white">{row.code}</span>
-                <span className="text-[11px] text-neutral-400">
-                  {row.method === "CARD" ? (row.carrier ?? "Thẻ cào") : "Ngân hàng"}
-                </span>
-                {(() => {
-                  const status = HISTORY_STATUS[row.status] ?? HISTORY_STATUS.PENDING!;
-                  return (
-                    <span
-                      className={`text-[10px] font-black uppercase tracking-wider px-2 py-1 rounded-md border ${status.className}`}
-                    >
-                      {status.text}
-                    </span>
-                  );
-                })()}
-                {/* The transfer panel above is gone after a reload, so without
-                    this a customer coming back has no way to tell how long
-                    their request has left. */}
-                {row.status === "PENDING" && row.expiresAt ? (
-                  <span className="text-[11px] text-neutral-500">
-                    còn <TopUpCountdown deadline={row.expiresAt} />
-                  </span>
-                ) : null}
-                {/* Only a confirmed top-up has actually moved money, so only it
-                    gets the green "+" that reads as credited. */}
-                <span
-                  className={`text-xs font-black ml-auto ${
-                    row.status === "COMPLETED" ? "text-emerald-400" : "text-neutral-400"
-                  }`}
-                >
-                  {row.status === "COMPLETED" ? "+" : ""}
-                  {formatVnd(row.amount)}đ
-                </span>
-                <span className="text-[11px] text-neutral-500 w-full sm:w-auto">
-                  {row.createdAt}
-                </span>
-              </div>
-            ))}
-          </div>
-        )}
+      {/* The ledger follows the tab above it: on Ngân Hàng only bank rows,
+          on Thẻ Cào only card rows — each method reads as its own desk. The
+          card chrome and header row match the overview page's sections.
+          Keyed by method so switching tabs starts back at page one. */}
+      <section className="flex flex-col gap-4 rounded-2xl border border-white/10 bg-neutral-900/50 p-5">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h3 className="text-sm font-black uppercase tracking-wider text-white">
+            {method === "card" ? "Lịch sử nạp thẻ cào" : "Lịch sử nạp ngân hàng"}
+          </h3>
+          <span className="text-xs text-neutral-500">
+            Bấm vào lệnh đang chờ để mở lại hóa đơn
+          </span>
+        </div>
+        <HistoryList
+          key={method}
+          rows={history.filter((row) =>
+            method === "card" ? row.method === "CARD" : row.method !== "CARD",
+          )}
+          empty={
+            method === "card"
+              ? "Chưa có lệnh nạp thẻ cào nào."
+              : "Chưa có lệnh nạp ngân hàng nào."
+          }
+          onOpen={openRow}
+        />
       </section>
 
       {credited ? (
