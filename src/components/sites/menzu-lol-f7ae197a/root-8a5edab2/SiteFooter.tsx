@@ -36,7 +36,6 @@ const LINK_HREFS: Record<string, string> = {
   "Liên hệ": "/feedback",
   "Góp ý & Khiếu nại": "/feedback",
   "Cộng đồng": "/bio",
-  "Thu cũ đổi mới": "/trade",
   "Acc Valorant": "/category/account-valorant-tu-chon",
   "Check Thư Welcome": "/checkwc",
   "Trình Tạo Mã 2FA": "/2fa",
@@ -49,7 +48,7 @@ const COLUMNS: FooterColumn[] = [
   },
   {
     heading: "Mua sắm",
-    links: ["Thu cũ đổi mới", "Acc Valorant"],
+    links: ["Acc Valorant"],
   },
   {
     heading: "Công cụ",

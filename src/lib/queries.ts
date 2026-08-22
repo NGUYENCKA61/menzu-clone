@@ -714,19 +714,33 @@ export interface ReviewRow {
   body: string;
   avatarUrl: string | null;
   amount: number;
+  rating: number;
+  service: string;
+  imageUrl: string | null;
+  anonymous: boolean;
+  verified: boolean;
   createdAt: Date;
 }
 
+/** Public reviews only — visitor submissions stay hidden until an admin
+ *  approves them, so this is the one place the filter lives. Anonymous rows
+ *  are masked here rather than in every component that renders one. */
 export async function getFeedback(take = 20): Promise<ReviewRow[]> {
   const rows = await db.feedback.findMany({
+    where: { approved: true },
     orderBy: { createdAt: "desc" },
     take,
   });
   return rows.map((f) => ({
-    name: f.name,
+    name: f.anonymous ? "Khách hàng ẩn danh" : f.name,
     body: f.body,
-    avatarUrl: f.avatarUrl,
+    avatarUrl: f.anonymous ? null : f.avatarUrl,
     amount: Number(f.amount),
+    rating: f.rating,
+    service: f.service,
+    imageUrl: f.imageUrl,
+    anonymous: f.anonymous,
+    verified: f.verified,
     createdAt: f.createdAt,
   }));
 }
@@ -819,34 +833,6 @@ export async function getInventory(code: string): Promise<InventoryItem[]> {
   );
 }
 
-export interface TradeRequestRow {
-  code: string;
-  mode: string;
-  mailType: string;
-  status: string;
-  zalo: string;
-  createdAt: Date;
-  quotedAmount: number | null;
-}
-
-/** "Lịch sử giao dịch" on /trade — the visitor's own quote requests. */
-export async function getTradeRequests(userId: string): Promise<TradeRequestRow[]> {
-  const rows = await db.tradeRequest.findMany({
-    where: { userId },
-    orderBy: { createdAt: "desc" },
-    take: 50,
-  });
-  return rows.map((r) => ({
-    code: r.code,
-    mode: r.mode,
-    mailType: r.mailType,
-    status: r.status,
-    zalo: r.zalo,
-    createdAt: r.createdAt,
-    quotedAmount: r.quotedAmount === null ? null : Number(r.quotedAmount),
-  }));
-}
-
 export interface TopUpRow {
   code: string;
   method: string;
@@ -873,47 +859,12 @@ export async function getTopUps(userId: string, take = 10): Promise<TopUpRow[]> 
   }));
 }
 
-export interface AdminTradeRow {
-  code: string;
-  username: string;
-  mode: string;
-  mailType: string;
-  hasWelcomeMail: boolean;
-  screenshotUrl: string | null;
-  zalo: string;
-  note: string | null;
-  status: string;
-  quotedAmount: number | null;
-  createdAt: Date;
-}
-
-/** Every trade-in request, newest first, for the admin queue. */
-export async function listTradeRequests(take = 100): Promise<AdminTradeRow[]> {
-  const rows = await db.tradeRequest.findMany({
-    orderBy: [{ status: "asc" }, { createdAt: "desc" }],
-    take,
-    include: { user: { select: { username: true } } },
-  });
-  return rows.map((r) => ({
-    code: r.code,
-    username: r.user.username,
-    mode: r.mode,
-    mailType: r.mailType,
-    hasWelcomeMail: r.hasWelcomeMail,
-    screenshotUrl: r.screenshotUrl,
-    zalo: r.zalo,
-    note: r.note,
-    status: r.status,
-    quotedAmount: r.quotedAmount === null ? null : Number(r.quotedAmount),
-    createdAt: r.createdAt,
-  }));
-}
-
 export interface AdminUserRow {
   id: string;
   uid: number;
   username: string;
   email: string | null;
+  avatarUrl: string | null;
   role: string;
   tier: string;
   balance: number;
@@ -975,6 +926,7 @@ export async function listUsers(
     uid: u.uid,
     username: u.username,
     email: u.email,
+    avatarUrl: u.avatarUrl,
     role: u.role,
     tier: u.tier,
     balance: Number(u.balance),
@@ -1062,55 +1014,49 @@ export async function listVouchers(take = 100): Promise<AdminVoucherRow[]> {
 export interface AdminFeedbackRow {
   id: string;
   name: string;
+  avatarUrl: string | null;
   body: string;
   amount: number;
   verified: boolean;
+  rating: number;
+  service: string;
+  imageUrl: string | null;
+  anonymous: boolean;
+  approved: boolean;
+  /** Account that submitted it, when known — visitor rows carry one, seeds don't. */
+  username: string | null;
   createdAt: Date;
 }
 
+/** The admin sees everything unmasked: pending rows first (they need action),
+ *  real names on anonymous reviews, and which account submitted. */
 export async function listFeedback(take = 200): Promise<AdminFeedbackRow[]> {
-  const rows = await db.feedback.findMany({ orderBy: { createdAt: "desc" }, take });
+  const rows = await db.feedback.findMany({
+    orderBy: [{ approved: "asc" }, { createdAt: "desc" }],
+    take,
+    include: { user: { select: { username: true } } },
+  });
   return rows.map((f) => ({
     id: f.id,
     name: f.name,
+    avatarUrl: f.avatarUrl,
     body: f.body,
     amount: Number(f.amount),
+    rating: f.rating,
+    service: f.service,
+    imageUrl: f.imageUrl,
+    anonymous: f.anonymous,
+    approved: f.approved,
+    username: f.user?.username ?? null,
     verified: f.verified,
     createdAt: f.createdAt,
-  }));
-}
-
-export interface AdminServiceOrderRow {
-  code: string;
-  username: string;
-  serviceName: string;
-  amount: number;
-  status: string;
-  createdAt: Date;
-}
-
-export async function listServiceOrders(take = 200): Promise<AdminServiceOrderRow[]> {
-  const rows = await db.serviceOrder.findMany({
-    orderBy: [{ status: "asc" }, { createdAt: "desc" }],
-    take,
-    include: {
-      user: { select: { username: true } },
-      service: { select: { name: true } },
-    },
-  });
-  return rows.map((s) => ({
-    code: s.code,
-    username: s.user.username,
-    serviceName: s.service.name,
-    amount: Number(s.amount),
-    status: s.status,
-    createdAt: s.createdAt,
   }));
 }
 
 export interface AdminTopUpRow {
   code: string;
   username: string;
+  avatarUrl: string | null;
   method: string;
   carrier: string | null;
   amount: number;
@@ -1181,11 +1127,12 @@ export async function listTopUps(take = 200): Promise<AdminTopUpRow[]> {
   const rows = await db.topUp.findMany({
     orderBy: { createdAt: "desc" },
     take,
-    include: { user: { select: { username: true } } },
+    include: { user: { select: { username: true, avatarUrl: true } } },
   });
   return rows.map((t) => ({
     code: t.code,
     username: t.user.username,
+    avatarUrl: t.user.avatarUrl,
     method: t.method,
     carrier: t.carrier,
     amount: Number(t.amount),

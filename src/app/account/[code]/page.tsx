@@ -18,8 +18,19 @@ interface PageProps {
   params: Promise<{ code: string }>;
 }
 
+/** Route params arrive percent-encoded — "ĐÂS" reads as "%C4%90%C3%82S" —
+ *  so codes with Vietnamese letters never matched the database until decoded.
+ *  Malformed sequences fall back to the raw value instead of throwing. */
+function decodeCode(raw: string): string {
+  try {
+    return decodeURIComponent(raw);
+  } catch {
+    return raw;
+  }
+}
+
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const { code } = await params;
+  const code = decodeCode((await params).code);
   const account = await getAccountDetail(code);
   if (!account) return { title: "Không tìm thấy tài khoản" };
 
@@ -52,7 +63,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 }
 
 export default async function AccountDetailPage({ params }: PageProps) {
-  const { code } = await params;
+  const code = decodeCode((await params).code);
 
   const account = await getAccountDetail(code);
   if (!account) notFound();

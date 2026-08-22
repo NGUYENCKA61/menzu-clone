@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { AdminOperations } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminOperations";
 import { AdminShell } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminShell";
 import { getAdmin } from "@/lib/admin";
-import { listFeedback, listServiceOrders, listTopUps } from "@/lib/queries";
+import { listFeedback, listTopUps } from "@/lib/queries";
 import { expireStaleTopUps } from "@/lib/topupStore";
 
 export const metadata: Metadata = { title: "Vận hành | Quản trị" };
@@ -30,24 +30,19 @@ export default async function AdminOperationsPage() {
   // itself enough to keep the queue current on a shop with no scheduler.
   await expireStaleTopUps();
 
-  const [feedback, serviceOrders, topUps] = await Promise.all([
-    listFeedback(),
-    listServiceOrders(),
-    listTopUps(),
-  ]);
+  const [feedback, topUps] = await Promise.all([listFeedback(), listTopUps()]);
 
   return (
     <AdminShell
       title="Vận hành"
-      subtitle="Đánh giá khách hàng, đơn dịch vụ và lịch sử nạp tiền"
+      subtitle="Đánh giá khách hàng và lịch sử nạp tiền"
       username={admin.username}
     >
       <AdminOperations
-        // All three lists format their dates here, where the timezone is
-        // fixed — doing it inside the client component would render one value
-        // on the server and another in the browser.
+        // Both lists format their dates here, where the timezone is fixed —
+        // doing it inside the client component would render one value on the
+        // server and another in the browser.
         feedback={feedback.map((f) => ({ ...f, createdAt: formatWhen(f.createdAt) }))}
-        serviceOrders={serviceOrders.map((s) => ({ ...s, createdAt: formatWhen(s.createdAt) }))}
         topUps={topUps.map((t) => ({ ...t, createdAt: formatWhen(t.createdAt) }))}
       />
     </AdminShell>

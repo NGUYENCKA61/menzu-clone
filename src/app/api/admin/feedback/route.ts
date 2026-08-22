@@ -17,6 +17,7 @@ export async function PATCH(request: Request) {
   const body = (await request.json().catch(() => null)) as {
     id?: string;
     verified?: boolean;
+    approved?: boolean;
     remove?: boolean;
   } | null;
 
@@ -29,6 +30,16 @@ export async function PATCH(request: Request) {
   if (body?.remove) {
     await db.feedback.delete({ where: { id } });
     return NextResponse.json({ removed: true });
+  }
+
+  // Approval publishes a visitor submission to /feedback and the homepage;
+  // rejecting is the delete above, so there is no "unapprove" limbo state.
+  if (typeof body?.approved === "boolean") {
+    const updated = await db.feedback.update({
+      where: { id },
+      data: { approved: body.approved },
+    });
+    return NextResponse.json({ id: updated.id, approved: updated.approved });
   }
 
   const updated = await db.feedback.update({

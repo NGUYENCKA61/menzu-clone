@@ -19,7 +19,6 @@ const STATIC_ROUTES: [path: string, priority: number, freq: Frequency][] = [
   // No /news: the live site links "TIN TỨC" from its header but the route
   // 404s there, so this clone 404s too rather than inventing a section.
   ["/docs", 0.4, "monthly"],
-  ["/trade", 0.4, "monthly"],
   ["/security", 0.3, "yearly"],
   ["/bio", 0.3, "yearly"],
   ["/app/download", 0.3, "monthly"],

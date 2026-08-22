@@ -13,6 +13,7 @@ import {
   type FaqEntry,
   type ShopSettings,
 } from "@/lib/settings";
+import { AdminPartners, type AdminPartnerRow } from "./AdminPartners";
 import { AdminError } from "./AdminStates";
 
 const FIELD =
@@ -177,10 +178,12 @@ export function AdminSettings({
   settings,
   categories,
   docs,
+  partners,
 }: {
   settings: ShopSettings;
   categories: SettingsCategory[];
   docs: SettingsCategory[];
+  partners: AdminPartnerRow[];
 }) {
   const router = useRouter();
   const [tab, setTab] = useState<Tab>(TABS[0]);
@@ -1559,6 +1562,20 @@ export function AdminSettings({
               </div>
             </div>
           </section>
+
+          {/* Moved here from Marketing: the partner strip is part of how the
+              shop presents itself, not a campaign. AdminPartners brings its
+              own cards, so no CARD wrapper. */}
+          <div className="flex flex-col gap-4">
+            <div>
+              <span className={HEADING}>Đối tác uy tín</span>
+              <p className="mt-1 text-[11px] text-neutral-500">
+                Dải logo chạy dưới phần đánh giá khách hàng trên trang chủ. Trống thì
+                mục tự ẩn.
+              </p>
+            </div>
+            <AdminPartners partners={partners} />
+          </div>
 
           <section className={CARD}>
             <span className={HEADING}>Liên hệ ở chân trang</span>

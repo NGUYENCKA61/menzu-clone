@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { AdminSettings } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminSettings";
 import { AdminShell } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminShell";
 import { getAdmin } from "@/lib/admin";
-import { listAdminCategories, listDocArticles } from "@/lib/queries";
+import { getPartners, listAdminCategories, listDocArticles } from "@/lib/queries";
 import { getShopSettings } from "@/lib/settingsStore";
 
 export const metadata: Metadata = { title: "Cấu hình | Quản trị" };
@@ -18,10 +18,11 @@ export default async function AdminSettingsPage() {
 
   // The home-page tab pins categories and guides by slug, so it needs the
   // lists to pick from rather than a free-text box.
-  const [settings, categories, docs] = await Promise.all([
+  const [settings, categories, docs, partners] = await Promise.all([
     getShopSettings(),
     listAdminCategories(),
     listDocArticles(),
+    getPartners(),
   ]);
 
   return (
@@ -34,6 +35,7 @@ export default async function AdminSettingsPage() {
         settings={settings}
         categories={categories.map((c) => ({ slug: c.slug, name: c.name }))}
         docs={docs.map((d) => ({ slug: d.slug, name: d.title }))}
+        partners={partners}
       />
     </AdminShell>
   );

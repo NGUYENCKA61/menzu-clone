@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { ArrowRight, BadgeCheck, Star } from "lucide-react";
 
 export interface Review {
@@ -85,13 +86,13 @@ export function ReviewsSection({ reviews = REVIEWS }: { reviews?: Review[] } = {
                 </div>
               </div>
 
-              <a
-                href="#"
+              <Link
+                href="/feedback"
                 className="group flex items-center gap-1 text-[10px] sm:text-xs font-bold text-neutral-400 hover:text-white transition-colors uppercase tracking-widest border-b border-neutral-700 hover:border-[var(--brand)]"
               >
                 Xem tất cả
                 <ArrowRight size={14} />
-              </a>
+              </Link>
             </div>
           </div>
 

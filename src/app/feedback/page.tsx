@@ -1,76 +1,105 @@
 import type { Metadata } from "next";
-import Image from "next/image";
+import Link from "next/link";
+import { ShieldCheck, Star } from "lucide-react";
 
-import { formatVnd } from "@/components/sites/menzu-lol-f7ae197a/shared/productData";
-import { SimplePage } from "@/components/sites/menzu-lol-f7ae197a/shared/SimplePage";
+import { MobileBottomNav } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/MobileBottomNav";
+import { SiteFooter } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/SiteFooter";
+import { SiteHeader } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/SiteHeader";
+import { ToolsRail } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/ToolsRail";
+import { Breadcrumb } from "@/components/sites/menzu-lol-f7ae197a/shared/Breadcrumb";
+import {
+  FeedbackBoard,
+  type FeedbackItem,
+} from "@/components/sites/menzu-lol-f7ae197a/shared/FeedbackBoard";
 import { getFeedback } from "@/lib/queries";
 
-export const metadata: Metadata = { title: "Menzu Valorant | Góp Ý & Đánh Giá" };
+export const metadata: Metadata = { title: "Đánh giá khách hàng" };
 export const dynamic = "force-dynamic";
 
+/** "17:56 18/08/2026" — built by hand so server and client can never disagree
+ *  about locale quirks. */
+function formatWhen(date: Date): string {
+  const p = (n: number) => String(n).padStart(2, "0");
+  return `${p(date.getHours())}:${p(date.getMinutes())} ${p(date.getDate())}/${p(
+    date.getMonth() + 1,
+  )}/${date.getFullYear()}`;
+}
+
+/**
+ * The customer-reviews wall, rebuilt from the original: emerald header with
+ * the review count and the write button, the "100% từ khách đã giao dịch"
+ * pledge, then the filterable list. This page runs emerald where the rest of
+ * the shop runs purple — the original paints its trust surfaces green.
+ */
 export default async function FeedbackPage() {
-  const reviews = await getFeedback(50);
+  const reviews = await getFeedback(500);
+
+  const items: FeedbackItem[] = reviews.map((r) => ({
+    name: r.name,
+    avatarUrl: r.avatarUrl,
+    body: r.body,
+    amount: r.amount,
+    rating: r.rating,
+    service: r.service,
+    imageUrl: r.imageUrl,
+    anonymous: r.anonymous,
+    verified: r.verified,
+    when: formatWhen(r.createdAt),
+    ts: r.createdAt.getTime(),
+  }));
 
   return (
-    <SimplePage title="Đánh Giá" crumb="Góp ý & Khiếu nại">
-      <div className="flex items-center gap-4 mb-8">
-        <span className="text-4xl sm:text-5xl font-black text-white tracking-tighter leading-none">
-          5.0
-        </span>
-        <span className="text-[9px] text-neutral-400 font-extrabold uppercase tracking-widest leading-none">
-          {reviews.length} đánh giá thực
-        </span>
-      </div>
+    <div className="min-h-screen flex flex-col text-white overflow-x-clip selection:bg-indigo-500/30 bg-[#050508]">
+      <div className="w-full shrink-0 h-[104px]" />
+      <SiteHeader />
 
-      {reviews.length === 0 ? (
-        <div className="w-full flex flex-col items-center justify-center py-20 text-center border border-dashed border-white/10 rounded-2xl bg-white/[0.02]">
-          <p className="text-xl font-bold text-white mb-2">CHƯA CÓ ĐÁNH GIÁ NÀO</p>
-          <p className="text-neutral-400">Hãy là người đầu tiên để lại đánh giá.</p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {reviews.map((r, i) => (
-            <div
-              key={`${r.name}-${i}`}
-              className="border border-[#25283b] p-5 rounded-2xl flex flex-col bg-[#0d0d12]"
-            >
-              <div className="flex items-center gap-3 mb-3">
-                <div className="relative w-10 h-10 rounded-full overflow-hidden shrink-0 border border-white/10 bg-black/40">
-                  {r.avatarUrl ? (
-                    <Image src={r.avatarUrl} alt={r.name} fill className="object-cover" />
-                  ) : null}
+      <main className="flex-1 relative z-20 w-full flex flex-col">
+        <div className="w-full">
+          <div className="max-w-[1320px] mx-auto px-4 lg:px-6 py-12">
+            <Breadcrumb
+              items={[{ label: "Trang chủ", href: "/" }, { label: "Đánh giá khách hàng" }]}
+            />
+
+            <div className="flex items-start justify-between gap-3 mb-6">
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20 shrink-0 mt-0.5">
+                  <Star className="w-5 h-5 text-emerald-400 fill-emerald-400" />
                 </div>
-                <div className="flex flex-col min-w-0">
-                  {/* h3, as the live cards use — the reviewer's name heads
-                      their card, so a screen reader can jump between reviews. */}
-                  <h3 className="text-sm font-bold text-white truncate">{r.name}</h3>
-                  <span className="text-[9px] text-neutral-500 font-semibold">
-                    Tài khoản đã xác minh
-                  </span>
+                <div>
+                  <h1 className="text-2xl sm:text-3xl font-black uppercase tracking-wider text-white">
+                    Đánh Giá
+                  </h1>
+                  <p className="text-neutral-500 text-[10px] mt-1">
+                    {items.length} lượt đánh giá từ khách hàng
+                  </p>
                 </div>
               </div>
-
-              <p className="text-[13px] text-neutral-300 leading-relaxed mb-4 flex-1">
-                {r.body}
-              </p>
-
-              <div className="flex items-center justify-between pt-3 border-t border-white/5 mt-auto">
-                <span className="text-[10px] text-neutral-500 font-semibold">
-                  {r.createdAt.toLocaleDateString("vi-VN")}
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <span className="text-[10px] text-neutral-500 font-semibold">
-                    Giao dịch:
-                  </span>
-                  <span className="text-[11px] font-black text-emerald-400">
-                    {formatVnd(r.amount)}đ
-                  </span>
-                </span>
-              </div>
+              <Link
+                href="/feedback/submit"
+                className="inline-flex items-center gap-1.5 sm:gap-2 bg-emerald-500 hover:bg-emerald-400 text-black font-black px-3.5 py-2 sm:px-5 sm:py-2.5 rounded-xl whitespace-nowrap text-[10px] sm:text-xs uppercase tracking-wider w-fit mt-0.5 transition-colors"
+              >
+                <Star size={13} className="fill-black sm:w-3.5 sm:h-3.5" />
+                Viết đánh giá
+              </Link>
             </div>
-          ))}
+
+            <div className="flex items-center gap-2 sm:gap-2.5 bg-emerald-500/5 border border-emerald-500/20 rounded-2xl px-3 py-2.5 sm:px-4 sm:py-3 mb-6">
+              <ShieldCheck size={16} className="text-emerald-500 shrink-0" />
+              <p className="text-[11px] sm:text-sm text-neutral-300 leading-normal">
+                <span className="font-black text-emerald-400">100% đánh giá</span> được tổng
+                hợp từ khách đã giao dịch. Có thể yêu cầu đối chiếu lịch sử giao dịch để xác
+                minh.
+              </p>
+            </div>
+
+            <FeedbackBoard items={items} />
+          </div>
         </div>
-      )}
-    </SimplePage>
+        <SiteFooter />
+      </main>
+
+      <ToolsRail />
+      <MobileBottomNav />
+    </div>
   );
 }

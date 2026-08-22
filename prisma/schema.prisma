@@ -93,6 +93,7 @@ model User {
   announcements AnnouncementRecipient[]
   cartItems     CartItem[]
   passwordResets PasswordReset[]
+  feedbacks     Feedback[]
 
   @@map("users")
 }
@@ -936,6 +937,20 @@ model Feedback {
   body      String
   amount    BigInt   @default(0)
   verified  Boolean  @default(true)
+  /// 1–5 stars. Seeded rows predate the field and were all praise, hence 5.
+  rating    Int      @default(5)
+  /// Chip text on the review card ("MUA KEY", "MUA ACC", "NẠP TIỀN", "KHÁC").
+  service   String   @default("MUA KEY")
+  /// Optional photo attached by the reviewer (a transfer bill, usually).
+  imageUrl  String?
+  /// The reviewer chose to hide their identity; display layers mask name and
+  /// avatar, the stored values stay real so the admin can still see them.
+  anonymous Boolean  @default(false)
+  /// Visitor submissions start false and only an admin flips them on —
+  /// seeded/legacy rows default true so they never vanish from the page.
+  approved  Boolean  @default(true)
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
   createdAt DateTime @default(now())
 
   @@map("feedback")

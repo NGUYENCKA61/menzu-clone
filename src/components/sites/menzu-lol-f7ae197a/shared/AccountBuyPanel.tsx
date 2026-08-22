@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Headphones, RefreshCw, ShieldCheck, X, Zap } from "lucide-react";
@@ -292,14 +291,15 @@ export function AccountBuyPanel({ account }: AccountBuyPanelProps) {
           Mua ngay
         </button>
 
-        {/* A real destination now — /trade takes the request and an admin
-            quotes it, so this no longer needs a "contact us" notice. */}
-        <Link
-          href="/trade"
+        {/* Decorative on purpose — the trade-in programme was retired, but the
+            page keeps the button for the look of the original. It goes
+            nowhere by design. */}
+        <button
+          type="button"
           className="flex w-full h-14 items-center justify-center rounded-2xl border border-[var(--menzu-accent)]/70 bg-white/[0.02] hover:bg-white/[0.06] transition-colors text-[13px] font-black uppercase tracking-widest text-white"
         >
           Thu cũ đổi mới
-        </Link>
+        </button>
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-4 rounded-2xl border border-white/10 bg-white/[0.02] overflow-hidden">
