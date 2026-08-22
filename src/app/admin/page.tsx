@@ -1,5 +1,13 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import {
+  CircleDollarSign,
+  CreditCard,
+  Landmark,
+  TrendingUp,
+  UserRoundPlus,
+  Users,
+} from "lucide-react";
 
 import { AdminDashboard } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminDashboard";
 import { AdminShell } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminShell";
@@ -104,17 +112,17 @@ export default async function AdminHome() {
     db.topUp.findMany({
       orderBy: { createdAt: "desc" },
       take: 12,
-      include: { user: { select: { username: true } } },
+      include: { user: { select: { username: true, avatarUrl: true } } },
     }),
     db.order.findMany({
       orderBy: { createdAt: "desc" },
       take: 12,
-      include: { user: { select: { username: true } } },
+      include: { user: { select: { username: true, avatarUrl: true } } },
     }),
     db.user.findMany({
       orderBy: { createdAt: "desc" },
       take: 5,
-      select: { id: true, username: true, createdAt: true },
+      select: { id: true, username: true, avatarUrl: true, createdAt: true },
     }),
   ]);
 
@@ -130,6 +138,7 @@ export default async function AdminHome() {
     ...recentTopUps.map((row) => ({
       code: row.code,
       username: row.user.username,
+      avatarUrl: row.user.avatarUrl,
       kind: row.method === "CARD" ? "Nạp thẻ" : "Nạp bank",
       amount: `+${formatVnd(Number(row.amount))}đ`,
       credit: true,
@@ -139,6 +148,7 @@ export default async function AdminHome() {
     ...recentOrders.map((row) => ({
       code: row.code,
       username: row.user.username,
+      avatarUrl: row.user.avatarUrl,
       kind: "Đơn hàng",
       amount: `${formatVnd(Number(row.total))}đ`,
       credit: false,
@@ -156,6 +166,7 @@ export default async function AdminHome() {
     ...transactions.slice(0, 6).map((row) => ({
       id: `tx-${row.code}`,
       username: row.username,
+      avatarUrl: row.avatarUrl,
       what: row.kind,
       amount: row.amount as string | null,
       credit: row.credit,
@@ -165,6 +176,7 @@ export default async function AdminHome() {
     ...recentSignUps.map((row) => ({
       id: `user-${row.id}`,
       username: row.username,
+      avatarUrl: row.avatarUrl,
       what: "Đăng ký tài khoản",
       amount: null,
       credit: false,
@@ -191,25 +203,39 @@ export default async function AdminHome() {
             label: "Doanh thu hôm nay",
             value: `${formatVnd(Number(incomeToday._sum.total ?? 0))}đ`,
             sub: `${incomeToday._count} đơn đã thanh toán`,
+            icon: CircleDollarSign,
+            tint: "border-emerald-500/25 bg-emerald-500/10 text-emerald-400",
           },
           {
             label: "Nạp bank hôm nay",
             value: `${formatVnd(Number(bankToday._sum.amount ?? 0))}đ`,
             sub: `${bankToday._count} lượt chuyển khoản`,
+            icon: Landmark,
+            tint: "border-sky-500/25 bg-sky-500/10 text-sky-400",
           },
           {
             label: "Nạp thẻ hôm nay",
             value: `${formatVnd(Number(cardToday._sum.amount ?? 0))}đ`,
             sub: `${cardToday._count} lượt nạp thẻ cào`,
+            icon: CreditCard,
+            tint: "border-violet-500/25 bg-violet-500/10 text-violet-400",
           },
           {
             label: "Người dùng mới",
             value: String(newUsersToday),
             sub: "tài khoản đăng ký hôm nay",
+            icon: UserRoundPlus,
+            tint: "border-amber-500/25 bg-amber-500/10 text-amber-400",
           },
         ]}
         totals={[
-          { label: "Tổng thành viên", value: String(users), sub: "tài khoản đã đăng ký" },
+          {
+            label: "Tổng thành viên",
+            value: String(users),
+            sub: "tài khoản đã đăng ký",
+            icon: Users,
+            tint: "border-indigo-500/25 bg-indigo-500/10 text-indigo-400",
+          },
           {
             label: "Tổng doanh thu",
             value: `${formatVnd(Number(revenueAllTime._sum.total ?? 0))}đ`,
@@ -219,16 +245,22 @@ export default async function AdminHome() {
                 ? "toàn bộ đơn đã thanh toán"
                 : `${formatPercent(weekChange)} so với tuần trước`,
             tone: weekChange === null ? undefined : weekChange >= 0 ? "up" : "down",
+            icon: TrendingUp,
+            tint: "border-emerald-500/25 bg-emerald-500/10 text-emerald-400",
           },
           {
             label: "Tổng nạp thẻ",
             value: `${formatVnd(Number(cardAllTime._sum.amount ?? 0))}đ`,
             sub: `${cardAllTime._count} lượt nạp thẻ`,
+            icon: CreditCard,
+            tint: "border-violet-500/25 bg-violet-500/10 text-violet-400",
           },
           {
             label: "Tổng nạp bank",
             value: `${formatVnd(Number(bankAllTime._sum.amount ?? 0))}đ`,
             sub: `${bankAllTime._count} lượt chuyển khoản`,
+            icon: Landmark,
+            tint: "border-sky-500/25 bg-sky-500/10 text-sky-400",
           },
         ]}
         chart={days.map((day, index) => ({

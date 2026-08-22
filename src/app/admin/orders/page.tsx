@@ -1,6 +1,18 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import {
+  CalendarDays,
+  CircleDollarSign,
+  Clock,
+  Eye,
+  Repeat,
+  ShoppingBag,
+  Wallet,
+  Zap,
+  type LucideIcon,
+} from "lucide-react";
 
 import { AdminOrderFilters } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminOrderFilters";
 import { AdminShell } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminShell";
@@ -18,6 +30,7 @@ import {
 } from "@/lib/orders";
 import { GAP, pageCount, pageRange, pageStrip, parsePage } from "@/lib/paging";
 import { orderWhere } from "@/lib/orderStore";
+import { startOfDayVn } from "@/lib/time";
 
 export const metadata: Metadata = { title: "Menzu Admin | Đơn hàng" };
 export const dynamic = "force-dynamic";
@@ -27,6 +40,14 @@ const STATUS_CLASS: Record<string, string> = {
   PENDING: "text-amber-400 bg-amber-500/10 border-amber-500/30",
   CANCELLED: "text-red-400 bg-red-500/10 border-red-500/30",
   REFUNDED: "text-indigo-400 bg-indigo-500/10 border-indigo-500/30",
+};
+
+/** The little glyph beside each payment method. */
+const METHOD_ICON: Record<string, LucideIcon> = {
+  BUY_NOW: Zap,
+  DEPOSIT: Wallet,
+  TRADE_IN: Repeat,
+  PAY_LATER: Clock,
 };
 
 export default async function AdminOrdersPage({
@@ -50,7 +71,20 @@ export default async function AdminOrdersPage({
   // Counted first, because the page number has to be clamped against
   // something that exists: ?page=999 on a three-page list should land on the
   // last page, not on an empty table that reads as "no orders".
-  const matching = await db.order.count({ where });
+  // The four cards across the top always describe the whole shop, never the
+  // filtered view — a total that changes when you search is not a total.
+  const since = startOfDayVn();
+  const [matching, totalOrders, paidAgg, pendingCount, todayAgg] = await Promise.all([
+    db.order.count({ where }),
+    db.order.count(),
+    db.order.aggregate({ _count: true, _sum: { total: true }, where: { status: "PAID" } }),
+    db.order.count({ where: { status: "PENDING" } }),
+    db.order.aggregate({
+      _count: true,
+      _sum: { total: true },
+      where: { status: "PAID", createdAt: { gte: since } },
+    }),
+  ]);
   const totalPages = pageCount(matching, ORDERS_PER_PAGE);
   const page = parsePage(typeof raw.page === "string" ? raw.page : undefined, totalPages);
   const range = pageRange(page, ORDERS_PER_PAGE, matching);
@@ -61,7 +95,7 @@ export default async function AdminOrdersPage({
     skip: (page - 1) * ORDERS_PER_PAGE,
     take: ORDERS_PER_PAGE,
     include: {
-      user: { select: { username: true, uid: true } },
+      user: { select: { username: true, uid: true, avatarUrl: true } },
       product: { select: { code: true } },
       voucher: { select: { code: true } },
     },
@@ -91,6 +125,37 @@ export default async function AdminOrdersPage({
         </span>
       }
     >
+      <div className="mb-5 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+        <StatCard
+          label="Tổng đơn hàng"
+          value={totalOrders.toLocaleString("vi-VN")}
+          sub="toàn bộ đơn đã tạo"
+          icon={ShoppingBag}
+          tint="border-indigo-500/25 bg-indigo-500/10 text-indigo-400"
+        />
+        <StatCard
+          label="Đã thanh toán"
+          value={String(paidAgg._count)}
+          sub={`${formatVnd(Number(paidAgg._sum.total ?? 0))}đ doanh thu`}
+          icon={CircleDollarSign}
+          tint="border-emerald-500/25 bg-emerald-500/10 text-emerald-400"
+        />
+        <StatCard
+          label="Chờ xử lý"
+          value={String(pendingCount)}
+          sub="đơn chưa thanh toán xong"
+          icon={Clock}
+          tint="border-amber-500/25 bg-amber-500/10 text-amber-400"
+        />
+        <StatCard
+          label="Hôm nay"
+          value={String(todayAgg._count)}
+          sub={`${formatVnd(Number(todayAgg._sum.total ?? 0))}đ đã thanh toán`}
+          icon={CalendarDays}
+          tint="border-violet-500/25 bg-violet-500/10 text-violet-400"
+        />
+      </div>
+
       <div className="mb-5">
         <AdminOrderFilters filters={filters} />
       </div>
@@ -128,12 +193,18 @@ export default async function AdminOrdersPage({
                 </td>
               </tr>
             ) : (
-              orders.map((o) => (
-                <tr key={o.code} className="border-b border-white/5 last:border-0">
+              orders.map((o) => {
+                const MethodIcon = METHOD_ICON[o.method];
+                const discounted = o.discountPct > 0 || o.voucher !== null;
+                return (
+                <tr
+                  key={o.code}
+                  className="border-b border-white/5 last:border-0 transition-colors hover:bg-white/[0.015]"
+                >
                   <td className="px-5 py-3">
                     <div className="flex flex-col">
-                      <span className="text-xs font-black text-white">{o.code}</span>
-                      <span className="text-[11px] text-neutral-500">
+                      <span className="font-mono text-xs font-black text-white">{o.code}</span>
+                      <span className="mt-0.5 text-[11px] text-neutral-500 tabular-nums">
                         {o.createdAt.toLocaleString("vi-VN", {
                           day: "2-digit",
                           month: "2-digit",
@@ -145,31 +216,67 @@ export default async function AdminOrdersPage({
                     </div>
                   </td>
                   <td className="px-5 py-3">
-                    <div className="flex flex-col">
-                      <span className="text-xs font-bold text-neutral-200">
-                        {o.user.username}
+                    {/* Straight to the customer's own page — the moderation
+                        trail an order question usually needs next. */}
+                    <Link
+                      href={`/admin/users/${o.user.uid}`}
+                      className="group flex items-center gap-2.5"
+                    >
+                      <span className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full border border-white/10 bg-neutral-900">
+                        {o.user.avatarUrl ? (
+                          <Image
+                            src={o.user.avatarUrl}
+                            alt=""
+                            width={32}
+                            height={32}
+                            className="h-full w-full object-cover"
+                          />
+                        ) : (
+                          <span
+                            aria-hidden
+                            className="text-[11px] font-black uppercase text-neutral-500"
+                          >
+                            {o.user.username.slice(0, 1)}
+                          </span>
+                        )}
                       </span>
-                      <span className="text-[11px] text-neutral-500">
-                        UID {o.user.uid}
+                      <span className="flex min-w-0 flex-col">
+                        <span className="truncate text-xs font-bold text-neutral-200 group-hover:text-rose-400 transition-colors">
+                          {o.user.username}
+                        </span>
+                        <span className="text-[11px] text-neutral-500 tabular-nums">
+                          UID {o.user.uid}
+                        </span>
                       </span>
-                    </div>
+                    </Link>
                   </td>
-                  <td className="px-5 py-3 text-xs font-bold text-white">
+                  <td className="px-5 py-3 font-mono text-xs font-bold text-white whitespace-nowrap">
                     #{o.product.code}
                   </td>
-                  <td className="px-5 py-3 text-xs text-neutral-400">
-                    {ORDER_METHOD_LABELS[o.method as OrderMethod] ?? o.method}
+                  <td className="px-5 py-3 whitespace-nowrap">
+                    <span className="flex items-center gap-1.5 text-xs text-neutral-400">
+                      {MethodIcon ? <MethodIcon size={13} className="shrink-0 text-neutral-500" /> : null}
+                      {ORDER_METHOD_LABELS[o.method as OrderMethod] ?? o.method}
+                    </span>
                   </td>
                   <td className="px-5 py-3">
-                    <div className="flex flex-col">
-                      <span className="text-[11px] text-neutral-500 line-through">
-                        {formatVnd(Number(o.listPrice))}đ
-                      </span>
-                      <span className="text-[11px] text-neutral-400">
-                        −{o.discountPct}%
-                        {o.voucher ? ` · ${o.voucher.code}` : ""}
-                      </span>
-                    </div>
+                    {discounted ? (
+                      <div className="flex flex-col">
+                        <span className="text-[11px] text-neutral-500 line-through tabular-nums">
+                          {formatVnd(Number(o.listPrice))}đ
+                        </span>
+                        <span className="mt-0.5 flex items-center gap-1.5 text-[11px] font-bold text-amber-400">
+                          −{o.discountPct}%
+                          {o.voucher ? (
+                            <span className="rounded border border-indigo-500/25 bg-indigo-500/10 px-1.5 py-0.5 font-mono text-[10px] font-bold text-indigo-400">
+                              {o.voucher.code}
+                            </span>
+                          ) : null}
+                        </span>
+                      </div>
+                    ) : (
+                      <span className="text-[11px] text-neutral-700">—</span>
+                    )}
                   </td>
                   <td className="px-5 py-3 text-sm font-black text-rose-500 tabular-nums whitespace-nowrap">
                     {formatVnd(Number(o.total))}đ
@@ -192,13 +299,15 @@ export default async function AdminOrdersPage({
                     <Link
                       href={`/account/${o.product.code}`}
                       title={`Xem sản phẩm #${o.product.code}`}
-                      className="inline-flex h-8 items-center rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 text-[11px] font-semibold text-neutral-300 transition-colors hover:bg-white/[0.08] hover:text-white"
+                      aria-label={`Xem sản phẩm #${o.product.code}`}
+                      className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-white/[0.07] bg-white/[0.03] text-neutral-400 transition-colors hover:border-rose-500/30 hover:bg-rose-500/10 hover:text-rose-400"
                     >
-                      Xem
+                      <Eye size={14} />
                     </Link>
                   </td>
                 </tr>
-              ))
+                );
+              })
             )}
           </tbody>
         </table>
@@ -248,6 +357,42 @@ export default async function AdminOrdersPage({
         ) : null}
       </div>
     </AdminShell>
+  );
+}
+
+function StatCard({
+  label,
+  value,
+  sub,
+  icon: Icon,
+  tint,
+}: {
+  label: string;
+  value: string;
+  sub: string;
+  icon: LucideIcon;
+  tint: string;
+}) {
+  const idle = value === "0" || value === "0đ";
+  return (
+    <div className="rounded-xl border border-white/[0.08] bg-[#0e0e11] p-5 flex flex-col gap-3">
+      <div className="flex items-center justify-between gap-3">
+        <span className="text-[10px] font-black uppercase tracking-widest text-neutral-500">
+          {label}
+        </span>
+        <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border ${tint}`}>
+          <Icon size={15} />
+        </span>
+      </div>
+      <span
+        className={`text-[26px] font-black leading-none tabular-nums ${
+          idle ? "text-neutral-600" : "text-white"
+        }`}
+      >
+        {value}
+      </span>
+      <span className="text-[11px] text-neutral-500">{sub}</span>
+    </div>
   );
 }
 

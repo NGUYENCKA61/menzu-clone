@@ -8,8 +8,10 @@
 
 import { PER_PAGE } from "@/lib/paging";
 
-/** Orders shown per page. */
-export const ORDERS_PER_PAGE = PER_PAGE;
+/** Orders shown per page. Two rows come off the shared figure to pay for the
+ *  stat cards above the table — the same trade the users screen makes, so the
+ *  two pages fit one screen the same way. */
+export const ORDERS_PER_PAGE = PER_PAGE - 2;
 
 export const ORDER_STATUSES = ["PAID", "PENDING", "CANCELLED", "REFUNDED"] as const;
 export const ORDER_METHODS = ["BUY_NOW", "DEPOSIT", "TRADE_IN", "PAY_LATER"] as const;

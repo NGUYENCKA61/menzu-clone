@@ -1,16 +1,10 @@
 "use client";
 
+import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Fragment, useState } from "react";
-import {
-  Ban,
-  ChevronDown,
-  KeyRound,
-  Shield,
-  ShieldCheck,
-  Trash2,
-  Wallet,
-} from "lucide-react";
+import { useState } from "react";
+import { Ban, Eye, Shield, Trash2, Unlock } from "lucide-react";
 
 import { AdminEmpty, AdminError, ConfirmDialog } from "./AdminStates";
 
@@ -18,6 +12,7 @@ export interface AdminUserView {
   uid: number;
   username: string;
   email: string | null;
+  avatarUrl: string | null;
   role: string;
   tier: string;
   balance: number;
@@ -36,39 +31,32 @@ export interface AdminUserView {
   createdAt: string;
 }
 
+/** Quick moderation from the row. Anything with a form lives on the user's
+ *  own page — /admin/users/[uid] — where it has room. */
 type Pending =
   | { kind: "block"; user: AdminUserView }
   | { kind: "role"; user: AdminUserView }
-  | { kind: "agency"; user: AdminUserView }
-  | { kind: "agencyRevoke"; user: AdminUserView }
   | { kind: "delete"; user: AdminUserView }
-  | { kind: "password"; user: AdminUserView }
   | null;
 
-const TIERS = ["BRONZE", "SILVER", "GOLD", "PLATINUM", "DIAMOND"] as const;
+/** Each tier keeps its metal: the dot and the word share one color. */
+const TIER_COLOR: Record<string, string> = {
+  BRONZE: "text-amber-600",
+  SILVER: "text-neutral-300",
+  GOLD: "text-yellow-400",
+  PLATINUM: "text-cyan-300",
+  DIAMOND: "text-violet-300",
+};
 
-const FIELD =
-  "w-full rounded-lg border border-white/10 bg-neutral-950/60 px-3 py-2 text-xs text-white outline-none focus:border-[var(--brand)]/60 transition-colors placeholder-neutral-600";
-const LABEL = "block text-[10px] font-black uppercase tracking-widest text-neutral-500 mb-1.5";
-const ACTION =
-  "h-[34px] px-4 rounded-lg bg-[var(--brand)] hover:bg-[var(--brand-dark)] disabled:opacity-60 text-[10px] font-black uppercase tracking-widest text-white transition-colors";
+/**
+ * Quiet by default, colored on hover — four of these per row used to be four
+ * loud pills, and eight rows of pills read as a wall of alarms.
+ */
+const ICON_BTN =
+  "h-8 w-8 rounded-lg border border-white/[0.07] bg-white/[0.03] inline-flex items-center justify-center transition-colors disabled:opacity-30 disabled:cursor-not-allowed";
 
 function formatVnd(n: number): string {
   return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-}
-
-/** One read-only stat inside the detail panel. */
-function Stat({ label, value }: { label: string; value: string }) {
-  return (
-    <div>
-      <span className="block text-[10px] font-black uppercase tracking-widest text-neutral-500">
-        {label}
-      </span>
-      <span className="block mt-1 text-xs font-bold text-neutral-200 tabular-nums">
-        {value}
-      </span>
-    </div>
-  );
 }
 
 /**
@@ -93,34 +81,11 @@ export function AdminUsers({
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [confirming, setConfirming] = useState<Pending>(null);
-  const [open, setOpen] = useState<string | null>(null);
-
-  // Drafts belong to whichever panel is open — only one is ever expanded, so
-  // they are cleared on open rather than kept per user.
-  const [delta, setDelta] = useState("");
-  const [note, setNote] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  // The đại lý grant's percent — typed per partner, never a published rate.
-  const [agencyPct, setAgencyPct] = useState("");
 
   // Searching and filtering moved to the server. Doing it here meant looking
   // through one page of customers and reporting "not found" for somebody who
   // was on page three — which is the exact case a customer lookup is for.
   const visible = users;
-
-  function toggle(user: AdminUserView) {
-    if (open === user.username) {
-      setOpen(null);
-      return;
-    }
-    setOpen(user.username);
-    setEmail(user.email ?? "");
-    setDelta("");
-    setNote("");
-    setPassword("");
-    setError(null);
-  }
 
   async function call(body: Record<string, unknown>) {
     setBusy(true);
@@ -178,54 +143,6 @@ export function AdminUsers({
           }),
       };
     }
-    if (kind === "agency") {
-      const granting = user.role !== "AGENCY";
-      return {
-        danger: false,
-        title: granting ? "Cấp quyền đại lý?" : "Cập nhật % đại lý?",
-        body: `${user.username} sẽ mua key phần mềm với chiết khấu ${agencyPct}% qua bàn đại lý riêng. Mức % là thỏa thuận riêng — không hiển thị công khai và không kèm quyền quản trị nào.`,
-        confirmLabel: granting ? "Cấp quyền đại lý" : `Chốt ${agencyPct}%`,
-        run: async () => {
-          const ok = await call({
-            username: user.username,
-            action: "role",
-            role: "AGENCY",
-            percent: Number(agencyPct),
-          });
-          if (ok) setAgencyPct("");
-        },
-      };
-    }
-    if (kind === "agencyRevoke") {
-      return {
-        danger: false,
-        title: "Gỡ quyền đại lý?",
-        body: `${user.username} quay về thành viên thường, mua theo giá niêm yết. Mức chiết khấu riêng bị xóa; tài khoản và số dư giữ nguyên.`,
-        confirmLabel: "Gỡ quyền",
-        run: () =>
-          call({
-            username: user.username,
-            action: "role",
-            role: "MEMBER",
-          }),
-      };
-    }
-    if (kind === "password") {
-      return {
-        danger: true,
-        title: "Đặt lại mật khẩu?",
-        body: `${user.username} sẽ bị đăng xuất khỏi mọi thiết bị và chỉ đăng nhập lại được bằng mật khẩu mới. Hãy gửi mật khẩu này cho khách qua kênh bạn đã xác minh là của họ, và nhắc khách đổi lại ngay.`,
-        confirmLabel: "Đặt lại mật khẩu",
-        run: async () => {
-          const ok = await call({
-            username: user.username,
-            action: "password",
-            password,
-          });
-          if (ok) setPassword("");
-        },
-      };
-    }
     // The counts are on the row already, so the warning names them rather than
     // describing the loss in the abstract — "3 đơn · 5.905.000đ" is the thing
     // about to stop existing.
@@ -251,7 +168,7 @@ export function AdminUsers({
         <AdminEmpty title={emptyNote} />
       ) : (
         <div className="w-full overflow-x-auto rounded-xl border border-white/[0.08] bg-[#0e0e11]">
-          <table className="w-full min-w-[1100px] text-left">
+          <table className="w-full min-w-[1000px] text-left">
             <thead>
               <tr className="border-b border-white/[0.06]">
                 {[
@@ -266,7 +183,7 @@ export function AdminUsers({
                 ].map((head) => (
                   <th
                     key={head}
-                    className="px-5 py-3.5 text-[10px] font-black uppercase tracking-widest text-neutral-500 whitespace-nowrap"
+                    className="px-4 py-3.5 text-[10px] font-black uppercase tracking-widest text-neutral-500 whitespace-nowrap"
                   >
                     {head}
                   </th>
@@ -275,46 +192,109 @@ export function AdminUsers({
             </thead>
             <tbody>
           {visible.map((user) => {
-            const expanded = open === user.username;
             // The server refuses every action on the caller's own account, so
             // the buttons say why up front instead of failing after the click.
             const isSelf = user.username === selfUsername;
 
             return (
-              <Fragment key={user.username}>
-                <tr className="border-b border-white/[0.04] last:border-0">
-                  <td className="px-5 py-3">
-                    <p className="text-[13px] font-bold text-white">{user.username}</p>
-                    <p className="mt-0.5 text-[11px] text-neutral-500">UID {user.uid}</p>
+                <tr
+                  key={user.username}
+                  className="border-b border-white/[0.04] last:border-0 transition-colors hover:bg-white/[0.015]"
+                >
+                  <td className="px-4 py-3">
+                    <Link
+                      href={`/admin/users/${user.uid}`}
+                      className="group flex items-center gap-3"
+                    >
+                      {/* The face makes the list read as customers instead of
+                          rows; the ring repeats the status chip's color so a
+                          blocked or privileged account is visible at a glance. */}
+                      <span
+                        className={`flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 bg-neutral-900 ${
+                          user.blockedAt
+                            ? "border-red-500/40"
+                            : user.role === "ADMIN"
+                              ? "border-violet-500/50"
+                              : user.role === "AGENCY"
+                                ? "border-amber-500/50"
+                                : "border-white/10"
+                        }`}
+                      >
+                        {user.avatarUrl ? (
+                          <Image
+                            src={user.avatarUrl}
+                            alt=""
+                            width={36}
+                            height={36}
+                            className={`h-full w-full object-cover ${
+                              user.blockedAt ? "opacity-50 grayscale" : ""
+                            }`}
+                          />
+                        ) : (
+                          <span
+                            aria-hidden
+                            className="text-[13px] font-black uppercase text-neutral-500"
+                          >
+                            {user.username.slice(0, 1)}
+                          </span>
+                        )}
+                      </span>
+                      <div className="min-w-0">
+                        <p className="truncate text-[13px] font-bold text-white group-hover:text-rose-400 transition-colors">
+                          {user.username}
+                        </p>
+                        <p className="mt-0.5 text-[11px] text-neutral-500 tabular-nums">
+                          UID {user.uid}
+                        </p>
+                      </div>
+                    </Link>
                   </td>
 
-                  <td className="px-5 py-3 max-w-[220px]">
+                  <td className="px-4 py-3 max-w-[190px]">
                     <span
                       className={`block truncate text-[13px] ${
-                        user.email ? "text-neutral-300" : "text-neutral-600 italic"
+                        user.email ? "text-neutral-300" : "text-neutral-700"
                       }`}
                     >
-                      {user.email ?? "Chưa có email"}
+                      {user.email ?? "—"}
                     </span>
                   </td>
 
-                  <td className="px-5 py-3 text-[13px] font-bold text-emerald-400 tabular-nums whitespace-nowrap">
+                  <td
+                    className={`px-4 py-3 text-[13px] font-bold tabular-nums whitespace-nowrap ${
+                      user.balance > 0 ? "text-emerald-400" : "text-neutral-600"
+                    }`}
+                  >
                     {formatVnd(user.balance)}đ
                   </td>
 
-                  <td className="px-5 py-3 text-[12px] font-semibold text-neutral-300 whitespace-nowrap">
-                    {user.tier}
+                  <td className="px-4 py-3 whitespace-nowrap">
+                    <span
+                      className={`inline-flex items-center gap-1.5 text-[11px] font-black uppercase tracking-wider ${
+                        TIER_COLOR[user.tier] ?? "text-neutral-300"
+                      }`}
+                    >
+                      <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-current" />
+                      {user.tier}
+                    </span>
                   </td>
 
-                  <td className="px-5 py-3 text-[12px] text-neutral-400 tabular-nums whitespace-nowrap">
-                    {user.orderCount} đơn · {formatVnd(user.totalSpent)}đ
+                  <td className="px-4 py-3 text-[12px] tabular-nums whitespace-nowrap">
+                    {user.orderCount > 0 ? (
+                      <span className="text-neutral-300">
+                        <span className="font-bold text-white">{user.orderCount}</span> đơn ·{" "}
+                        {formatVnd(user.totalSpent)}đ
+                      </span>
+                    ) : (
+                      <span className="text-neutral-700">—</span>
+                    )}
                   </td>
 
-                  <td className="px-5 py-3 text-[12px] text-neutral-500 tabular-nums whitespace-nowrap">
+                  <td className="px-4 py-3 text-[12px] text-neutral-500 tabular-nums whitespace-nowrap">
                     {user.lastOrderAt ?? "—"}
                   </td>
 
-                  <td className="px-5 py-3">
+                  <td className="px-4 py-3">
                     {/* Blocked outranks the role badge: an admin who has been
                         locked out is locked out, and reading "Quản trị" on
                         that row would say the opposite. */}
@@ -339,45 +319,65 @@ export function AdminUsers({
                     </span>
                   </td>
 
-                  <td className="px-5 py-3">
-                    <div className="flex flex-wrap items-center gap-1.5">
-                      <button
-                        type="button"
-                        onClick={() => toggle(user)}
-                        aria-expanded={expanded}
-                        className="h-8 px-2.5 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 text-[10px] font-black uppercase tracking-widest text-neutral-300 transition-colors inline-flex items-center gap-1.5 whitespace-nowrap"
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-1.5">
+                      <Link
+                        href={`/admin/users/${user.uid}`}
+                        aria-label={`Hồ sơ chi tiết của ${user.username}`}
+                        title="Mở hồ sơ chi tiết"
+                        className={`${ICON_BTN} text-neutral-400 hover:border-rose-500/30 hover:bg-rose-500/10 hover:text-rose-400`}
                       >
-                        <ChevronDown
-                          size={12}
-                          className={`transition-transform ${expanded ? "rotate-180" : ""}`}
-                        />
-                        Thông tin
-                      </button>
+                        <Eye size={14} />
+                      </Link>
 
                       <button
                         type="button"
                         disabled={busy || isSelf}
-                        title={isSelf ? "Không thể tự đổi quyền của mình" : undefined}
+                        aria-label={
+                          user.role === "ADMIN"
+                            ? `Thu hồi quyền quản trị của ${user.username}`
+                            : `Cấp quyền quản trị cho ${user.username}`
+                        }
+                        title={
+                          isSelf
+                            ? "Không thể tự đổi quyền của mình"
+                            : user.role === "ADMIN"
+                              ? "Thu hồi quyền quản trị"
+                              : "Cấp quyền quản trị"
+                        }
                         onClick={() => setConfirming({ kind: "role", user })}
-                        className="h-8 px-2.5 rounded-lg border border-rose-500/30 bg-rose-500/10 hover:bg-rose-500/20 disabled:opacity-40 disabled:hover:bg-rose-500/10 text-[10px] font-black uppercase tracking-widest text-rose-400 transition-colors inline-flex items-center gap-1.5 whitespace-nowrap"
-                      >
-                        <Shield size={12} />
-                        {user.role === "ADMIN" ? "Thu hồi" : "Cấp admin"}
-                      </button>
-
-                      <button
-                        type="button"
-                        disabled={busy || isSelf}
-                        title={isSelf ? "Không thể tự khóa tài khoản của mình" : undefined}
-                        onClick={() => setConfirming({ kind: "block", user })}
-                        className={`h-8 px-2.5 rounded-lg disabled:opacity-40 text-[10px] font-black uppercase tracking-widest transition-colors inline-flex items-center gap-1.5 whitespace-nowrap ${
-                          user.blockedAt
-                            ? "border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20"
-                            : "border border-amber-500/30 bg-amber-500/10 text-amber-400 hover:bg-amber-500/20"
+                        className={`${ICON_BTN} ${
+                          user.role === "ADMIN"
+                            ? "text-violet-400 hover:border-violet-500/30 hover:bg-violet-500/10"
+                            : "text-neutral-500 hover:border-rose-500/30 hover:bg-rose-500/10 hover:text-rose-400"
                         }`}
                       >
-                        {user.blockedAt ? <ShieldCheck size={12} /> : <Ban size={12} />}
-                        {user.blockedAt ? "Mở khóa" : "Khóa"}
+                        <Shield size={13} />
+                      </button>
+
+                      <button
+                        type="button"
+                        disabled={busy || isSelf}
+                        aria-label={
+                          user.blockedAt
+                            ? `Mở khóa ${user.username}`
+                            : `Khóa ${user.username}`
+                        }
+                        title={
+                          isSelf
+                            ? "Không thể tự khóa tài khoản của mình"
+                            : user.blockedAt
+                              ? "Mở khóa tài khoản"
+                              : "Khóa tài khoản"
+                        }
+                        onClick={() => setConfirming({ kind: "block", user })}
+                        className={`${ICON_BTN} ${
+                          user.blockedAt
+                            ? "text-emerald-400 hover:border-emerald-500/30 hover:bg-emerald-500/10"
+                            : "text-neutral-500 hover:border-amber-500/30 hover:bg-amber-500/10 hover:text-amber-400"
+                        }`}
+                      >
+                        {user.blockedAt ? <Unlock size={13} /> : <Ban size={13} />}
                       </button>
 
                       <button
@@ -386,266 +386,13 @@ export function AdminUsers({
                         onClick={() => setConfirming({ kind: "delete", user })}
                         aria-label={`Xóa tài khoản ${user.username}`}
                         title={isSelf ? "Không thể tự xóa tài khoản của mình" : "Xóa tài khoản"}
-                        className="h-8 w-8 rounded-lg border border-red-500/30 bg-red-500/10 hover:bg-red-500/20 disabled:opacity-40 disabled:hover:bg-red-500/10 text-red-400 transition-colors inline-flex items-center justify-center"
+                        className={`${ICON_BTN} text-neutral-500 hover:border-red-500/30 hover:bg-red-500/10 hover:text-red-400`}
                       >
                         <Trash2 size={13} />
                       </button>
                     </div>
                   </td>
                 </tr>
-
-                {expanded ? (
-                  <tr className="border-b border-white/[0.04]">
-                    <td colSpan={8} className="px-5 pb-5 bg-white/[0.015]">
-                  <div className="flex flex-col gap-5 pt-4 border-t border-white/5">
-                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-4">
-                      <Stat label="Tài khoản" value={user.username} />
-                      <Stat label="UID" value={String(user.uid)} />
-                      <Stat label="Ngày tham gia" value={user.createdAt} />
-                      <Stat label="Hạng" value={user.tier} />
-                      <Stat label="Điểm thưởng" value={`${user.points} Pts`} />
-                      <Stat label="Số dư" value={`${formatVnd(user.balance)}đ`} />
-                      <Stat label="Tổng đã nạp" value={`${formatVnd(user.totalToppedUp)}đ`} />
-                      <Stat label="Tổng đã mua" value={`${formatVnd(user.totalSpent)}đ`} />
-                    </div>
-
-                    <div className="rounded-xl border border-white/5 bg-neutral-950/40 px-4 py-3">
-                      <span className={LABEL}>Đăng nhập gần nhất</span>
-                      <p className="text-xs font-bold text-neutral-200">
-                        {user.lastLoginAt ?? "Chưa đăng nhập lần nào"}
-                        {user.lastIp ? (
-                          <span className="ml-2 font-mono font-normal text-neutral-400">
-                            {user.lastIp}
-                          </span>
-                        ) : null}
-                      </p>
-                      <p className="mt-1.5 text-[11px] text-neutral-500">
-                        Địa chỉ IP lấy từ header của proxy nên chỉ là gợi ý hỗ trợ —
-                        đừng dùng nó để xác minh danh tính khách.
-                      </p>
-                    </div>
-
-                    {user.blockedAt ? (
-                      <div className="rounded-xl border border-red-500/20 bg-red-500/[0.06] px-4 py-3">
-                        <span className={LABEL}>Lý do khóa</span>
-                        <p className="text-xs text-neutral-200">
-                          {user.blockedReason ?? "Không ghi lý do"}
-                        </p>
-                      </div>
-                    ) : null}
-
-                    {isSelf ? (
-                      <p className="rounded-xl border border-white/10 bg-white/[0.02] px-4 py-3 text-[11px] text-neutral-400">
-                        Đây là tài khoản bạn đang đăng nhập. Máy chủ từ chối mọi thao
-                        tác quản trị lên chính nó, để một admin không thể tự khóa hoặc
-                        tự hạ quyền rồi khóa cả shop ở ngoài khu quản trị.
-                      </p>
-                    ) : (
-                      <>
-                        <div className="flex flex-wrap items-end gap-3">
-                          <div className="flex-1 min-w-[220px]">
-                            <label htmlFor={`e-${user.username}`} className={LABEL}>
-                              Email
-                            </label>
-                            <input
-                              id={`e-${user.username}`}
-                              type="email"
-                              value={email}
-                              onChange={(event) => setEmail(event.target.value)}
-                              placeholder="chưa có email"
-                              className={FIELD}
-                            />
-                          </div>
-                          <button
-                            type="button"
-                            disabled={busy || email === (user.email ?? "")}
-                            onClick={() =>
-                              call({ username: user.username, action: "email", email })
-                            }
-                            className={ACTION}
-                          >
-                            Lưu email
-                          </button>
-                        </div>
-
-                        <div className="flex flex-wrap items-end gap-3">
-                          <div className="flex-1 min-w-[220px]">
-                            <label htmlFor={`p-${user.username}`} className={LABEL}>
-                              Mật khẩu mới{" "}
-                              <span className="text-neutral-600">(ít nhất 6 ký tự)</span>
-                            </label>
-                            <input
-                              id={`p-${user.username}`}
-                              type="text"
-                              value={password}
-                              onChange={(event) => setPassword(event.target.value)}
-                              placeholder="Đặt lại khi khách mất quyền truy cập"
-                              autoComplete="off"
-                              className={FIELD}
-                            />
-                          </div>
-                          <button
-                            type="button"
-                            disabled={busy || password.length < 6}
-                            onClick={() => setConfirming({ kind: "password", user })}
-                            className="h-[34px] px-4 rounded-lg border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 disabled:opacity-40 disabled:hover:bg-amber-500/10 text-[10px] font-black uppercase tracking-widest text-amber-400 transition-colors inline-flex items-center gap-1.5"
-                          >
-                            <KeyRound size={12} />
-                            Đặt lại
-                          </button>
-                          <p className="w-full text-[11px] text-neutral-500">
-                            Mật khẩu hiển thị dạng chữ thường vì bạn phải đọc lại cho
-                            khách — không ai xem được mật khẩu cũ, kể cả quản trị viên.
-                          </p>
-                        </div>
-
-                        <div className="flex flex-wrap items-end gap-3">
-                          <div>
-                            <label htmlFor={`ag-${user.username}`} className={LABEL}>
-                              % chiết khấu đại lý{" "}
-                              <span className="text-neutral-600">(1–90, thỏa thuận riêng)</span>
-                            </label>
-                            <input
-                              id={`ag-${user.username}`}
-                              value={agencyPct}
-                              onChange={(event) =>
-                                setAgencyPct(
-                                  event.target.value.replace(/\D/g, "").slice(0, 2),
-                                )
-                              }
-                              inputMode="numeric"
-                              placeholder={
-                                user.role === "AGENCY"
-                                  ? `Đang: ${user.agencyPercent}%`
-                                  : "VD: 15"
-                              }
-                              className={`${FIELD} w-40 tabular-nums`}
-                            />
-                          </div>
-                          <button
-                            type="button"
-                            disabled={
-                              busy ||
-                              isSelf ||
-                              user.role === "ADMIN" ||
-                              !(Number(agencyPct) >= 1 && Number(agencyPct) <= 90)
-                            }
-                            title={
-                              user.role === "ADMIN"
-                                ? "Thu hồi quyền quản trị trước"
-                                : undefined
-                            }
-                            onClick={() => setConfirming({ kind: "agency", user })}
-                            className="h-[34px] px-4 rounded-lg border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 disabled:opacity-40 disabled:hover:bg-amber-500/10 text-[10px] font-black uppercase tracking-widest text-amber-400 transition-colors inline-flex items-center gap-1.5"
-                          >
-                            {user.role === "AGENCY" ? "Đổi %" : "Cấp đại lý"}
-                          </button>
-                          {user.role === "AGENCY" ? (
-                            <button
-                              type="button"
-                              disabled={busy}
-                              onClick={() =>
-                                setConfirming({ kind: "agencyRevoke", user })
-                              }
-                              className="h-[34px] px-4 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 disabled:opacity-40 text-[10px] font-black uppercase tracking-widest text-neutral-300 transition-colors"
-                            >
-                              Gỡ đại lý
-                            </button>
-                          ) : null}
-                          <p className="w-full text-[11px] text-neutral-500">
-                            Mức % là thỏa thuận riêng từng đại lý — không hiển thị công
-                            khai ở bất kỳ đâu ngoài bàn đại lý của chính họ.
-                          </p>
-                        </div>
-
-                        <div className="flex flex-wrap items-end gap-3">
-                          <div>
-                            <label htmlFor={`d-${user.username}`} className={LABEL}>
-                              Cộng / trừ số dư (âm để trừ)
-                            </label>
-                            <input
-                              id={`d-${user.username}`}
-                              value={delta}
-                              onChange={(event) => setDelta(event.target.value)}
-                              placeholder="100000 hoặc -50000"
-                              className={`${FIELD} w-40 tabular-nums`}
-                            />
-                          </div>
-                          <div className="flex-1 min-w-[180px]">
-                            <label htmlFor={`n-${user.username}`} className={LABEL}>
-                              Lý do <span className="text-neutral-600">(khách sẽ thấy)</span>
-                            </label>
-                            <input
-                              id={`n-${user.username}`}
-                              value={note}
-                              onChange={(event) => setNote(event.target.value)}
-                              placeholder="Hoàn tiền đơn VLR2079"
-                              className={FIELD}
-                            />
-                          </div>
-                          <button
-                            type="button"
-                            disabled={busy}
-                            onClick={async () => {
-                              const ok = await call({
-                                username: user.username,
-                                action: "balance",
-                                delta: Number(delta.replace(/[^\d-]/g, "")),
-                                note,
-                              });
-                              if (ok) {
-                                setDelta("");
-                                setNote("");
-                              }
-                            }}
-                            className={`${ACTION} inline-flex items-center gap-1.5`}
-                          >
-                            <Wallet size={12} />
-                            Áp dụng
-                          </button>
-                          <p className="w-full text-[11px] text-neutral-500">
-                            Mọi thay đổi số dư đều ghi một dòng vào lịch sử giao dịch của
-                            khách, kèm tên quản trị viên thực hiện.
-                          </p>
-                        </div>
-
-                        <div className="flex flex-wrap items-end gap-3">
-                          <div>
-                            <label htmlFor={`t-${user.username}`} className={LABEL}>
-                              Hạng thành viên
-                            </label>
-                            <select
-                              id={`t-${user.username}`}
-                              value={user.tier}
-                              disabled={busy}
-                              onChange={(event) =>
-                                call({
-                                  username: user.username,
-                                  action: "tier",
-                                  tier: event.target.value,
-                                })
-                              }
-                              className={`${FIELD} w-44`}
-                            >
-                              {TIERS.map((tier) => (
-                                <option key={tier} value={tier} className="bg-neutral-900">
-                                  {tier}
-                                </option>
-                              ))}
-                            </select>
-                          </div>
-                          <p className="flex-1 min-w-[220px] text-[11px] text-neutral-500">
-                            Đặt tay. Mốc lên hạng là quy định riêng của shop và chưa
-                            được khai báo, nên hệ thống không tự nâng hạng cho ai.
-                          </p>
-                        </div>
-                      </>
-                    )}
-                  </div>
-                    </td>
-                  </tr>
-                ) : null}
-              </Fragment>
             );
           })}
             </tbody>

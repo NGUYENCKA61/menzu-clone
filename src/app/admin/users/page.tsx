@@ -147,6 +147,7 @@ export default async function AdminUsersPage({
           uid: user.uid,
           username: user.username,
           email: user.email,
+          avatarUrl: user.avatarUrl,
           role: user.role,
           agencyPercent: user.agencyPercent,
           tier: user.tier,

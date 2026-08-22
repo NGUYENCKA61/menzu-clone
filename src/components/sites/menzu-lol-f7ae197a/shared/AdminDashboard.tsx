@@ -1,3 +1,12 @@
+import Image from "next/image";
+import {
+  CreditCard,
+  Landmark,
+  ShoppingBag,
+  UserRoundPlus,
+  type LucideIcon,
+} from "lucide-react";
+
 import { formatVnd } from "./productData";
 
 import { linePoints, TX_STATE_LABELS, type TxState } from "@/lib/dashboard";
@@ -8,6 +17,10 @@ export interface StatItem {
   sub: string;
   /** Tints the sub-line when it is a comparison rather than a description. */
   tone?: "up" | "down";
+  /** The little badge in the card's corner; page picks it per figure. */
+  icon: LucideIcon;
+  /** Chip classes for the badge — border, background and text share a hue. */
+  tint: string;
 }
 
 export interface ChartPoint {
@@ -18,6 +31,7 @@ export interface ChartPoint {
 export interface ActivityItem {
   id: string;
   username: string;
+  avatarUrl: string | null;
   what: string;
   /** Null for something that happened without money moving. */
   amount: string | null;
@@ -29,6 +43,7 @@ export interface ActivityItem {
 export interface TransactionRow {
   code: string;
   username: string;
+  avatarUrl: string | null;
   kind: string;
   amount: string;
   credit: boolean;
@@ -50,6 +65,47 @@ const STATE_TEXT: Record<TxState, string> = {
   PENDING: "text-amber-400",
   FAILED: "text-rose-400",
 };
+
+/** The icon a ledger row wears, keyed on the label the page already builds. */
+const KIND_ICON: Record<string, LucideIcon> = {
+  "Nạp thẻ": CreditCard,
+  "Nạp bank": Landmark,
+  "Đơn hàng": ShoppingBag,
+  "Đăng ký tài khoản": UserRoundPlus,
+};
+
+/** 32px face with the site's initial fallback — the same face language as the
+ *  users table, so the two screens read as one product. */
+function Avatar({
+  username,
+  avatarUrl,
+  size = 32,
+}: {
+  username: string;
+  avatarUrl: string | null;
+  size?: number;
+}) {
+  return (
+    <span
+      className="flex shrink-0 items-center justify-center overflow-hidden rounded-full border border-white/10 bg-neutral-900"
+      style={{ width: size, height: size }}
+    >
+      {avatarUrl ? (
+        <Image
+          src={avatarUrl}
+          alt=""
+          width={size}
+          height={size}
+          className="h-full w-full object-cover"
+        />
+      ) : (
+        <span aria-hidden className="text-[11px] font-black uppercase text-neutral-500">
+          {username.slice(0, 1)}
+        </span>
+      )}
+    </span>
+  );
+}
 
 /**
  * The admin overview.
@@ -122,11 +178,25 @@ function Section({
   );
 }
 
-function StatCard({ label, value, sub, tone }: StatItem) {
+function StatCard({ label, value, sub, tone, icon: Icon, tint }: StatItem) {
+  // A quiet day should look quiet: zeros step back so real figures stand out.
+  const idle = value === "0" || value === "0đ";
+
   return (
-    <div className={`${CARD} p-5 flex flex-col gap-2`}>
-      <span className={CAP}>{label}</span>
-      <span className="text-[26px] font-black leading-none text-white tabular-nums">
+    <div className={`${CARD} p-5 flex flex-col gap-3`}>
+      <div className="flex items-center justify-between gap-3">
+        <span className={CAP}>{label}</span>
+        <span
+          className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border ${tint}`}
+        >
+          <Icon size={15} />
+        </span>
+      </div>
+      <span
+        className={`text-[26px] font-black leading-none tabular-nums ${
+          idle ? "text-neutral-600" : "text-white"
+        }`}
+      >
         {value}
       </span>
       <span
@@ -153,16 +223,20 @@ function RevenueChart({ points }: { points: ChartPoint[] }) {
   const values = points.map((p) => p.value);
   const peak = Math.max(0, ...values);
   const line = linePoints(values, CHART_W, CHART_H);
-  // The marker on the most recent day, which is the one the shop is watching.
-  const last = line.split(" ").at(-1)?.split(",") ?? null;
+  const coords = line
+    .split(" ")
+    .map((pair) => pair.split(",").map(Number) as [number, number]);
+  const last = coords.at(-1) ?? null;
 
   return (
     <div className={`${CARD} p-5 flex flex-col`}>
       <div className="flex items-center justify-between gap-3">
         <h3 className={CAP}>Doanh thu 7 ngày</h3>
-        <span className="text-[10px] font-bold uppercase tracking-widest text-neutral-600">
-          VNĐ
-        </span>
+        {peak > 0 ? (
+          <span className="text-[11px] font-bold text-neutral-500 tabular-nums">
+            Cao nhất <span className="text-rose-400">{formatVnd(peak)}đ</span>
+          </span>
+        ) : null}
       </div>
 
       {peak === 0 ? (
@@ -179,6 +253,14 @@ function RevenueChart({ points }: { points: ChartPoint[] }) {
             aria-label={`Doanh thu 7 ngày, cao nhất ${formatVnd(peak)}đ`}
             className="mt-4 w-full h-[220px]"
           >
+            <defs>
+              {/* The wash under the line — what turns a wire into a chart. */}
+              <linearGradient id="rev-fill" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#f43f5e" stopOpacity="0.22" />
+                <stop offset="100%" stopColor="#f43f5e" stopOpacity="0" />
+              </linearGradient>
+            </defs>
+
             {Array.from({ length: GRID_LINES + 1 }, (_, i) => {
               const y = (CHART_H / GRID_LINES) * i;
               return (
@@ -193,6 +275,12 @@ function RevenueChart({ points }: { points: ChartPoint[] }) {
                 />
               );
             })}
+
+            <polygon
+              points={`0,${CHART_H} ${line} ${CHART_W},${CHART_H}`}
+              fill="url(#rev-fill)"
+            />
+
             <polyline
               points={line}
               fill="none"
@@ -205,9 +293,21 @@ function RevenueChart({ points }: { points: ChartPoint[] }) {
               // axis than the other.
               vectorEffect="non-scaling-stroke"
             />
-            {last ? (
-              <circle cx={last[0]} cy={last[1]} r="4" fill="#f43f5e" />
-            ) : null}
+
+            {/* One dot per day, so a reader can count the week off the line. */}
+            {coords.map(([x, y], index) => (
+              <circle
+                key={index}
+                cx={x}
+                cy={y}
+                r={3}
+                fill="#0e0e11"
+                stroke="#f43f5e"
+                strokeWidth="2"
+                vectorEffect="non-scaling-stroke"
+              />
+            ))}
+            {last ? <circle cx={last[0]} cy={last[1]} r="4.5" fill="#f43f5e" /> : null}
           </svg>
 
           <div className="mt-2 flex justify-between">
@@ -239,35 +339,44 @@ function ActivityFeed({ items }: { items: ActivityItem[] }) {
         </p>
       ) : (
         <ul className="mt-3 divide-y divide-white/[0.06]">
-          {items.map((item) => (
-            <li key={item.id} className="flex items-start justify-between gap-4 py-3">
-              <div className="min-w-0">
-                <p className="truncate text-[13px] font-semibold text-white">
-                  {item.username}
-                </p>
-                <p className="mt-0.5 text-[11px] text-neutral-500">{item.what}</p>
-              </div>
-              <div className="shrink-0 text-right">
-                <p
-                  className={`text-[13px] font-bold tabular-nums ${
-                    item.amount === null
-                      ? "text-neutral-600"
-                      : item.credit
-                        ? "text-emerald-400"
-                        : "text-white"
-                  }`}
-                >
-                  {item.amount ?? "—"}
-                </p>
-                <p className="mt-0.5 text-[11px]">
-                  <span className={STATE_TEXT[item.state]}>
-                    {TX_STATE_LABELS[item.state]}
-                  </span>
-                  <span className="text-neutral-600"> · {item.ago}</span>
-                </p>
-              </div>
-            </li>
-          ))}
+          {items.map((item) => {
+            const KindIcon = KIND_ICON[item.what];
+            return (
+              <li key={item.id} className="flex items-center justify-between gap-4 py-3">
+                <div className="flex min-w-0 items-center gap-3">
+                  <Avatar username={item.username} avatarUrl={item.avatarUrl} />
+                  <div className="min-w-0">
+                    <p className="truncate text-[13px] font-semibold text-white">
+                      {item.username}
+                    </p>
+                    <p className="mt-0.5 flex items-center gap-1.5 text-[11px] text-neutral-500">
+                      {KindIcon ? <KindIcon size={11} className="shrink-0" /> : null}
+                      {item.what}
+                    </p>
+                  </div>
+                </div>
+                <div className="shrink-0 text-right">
+                  <p
+                    className={`text-[13px] font-bold tabular-nums ${
+                      item.amount === null
+                        ? "text-neutral-600"
+                        : item.credit
+                          ? "text-emerald-400"
+                          : "text-white"
+                    }`}
+                  >
+                    {item.amount ?? "—"}
+                  </p>
+                  <p className="mt-0.5 text-[11px]">
+                    <span className={STATE_TEXT[item.state]}>
+                      {TX_STATE_LABELS[item.state]}
+                    </span>
+                    <span className="text-neutral-600"> · {item.ago}</span>
+                  </p>
+                </div>
+              </li>
+            );
+          })}
         </ul>
       )}
     </div>
@@ -308,36 +417,48 @@ function TransactionTable({ rows }: { rows: TransactionRow[] }) {
                 </td>
               </tr>
             ) : (
-              rows.map((row) => (
-                <tr key={row.code} className="border-b border-white/[0.04] last:border-0">
-                  <td className="px-5 py-3 font-mono text-xs text-neutral-300 whitespace-nowrap">
-                    #{row.code}
-                  </td>
-                  <td className="px-5 py-3 text-[13px] text-white whitespace-nowrap">
-                    {row.username}
-                  </td>
-                  <td className="px-5 py-3 text-[13px] text-neutral-400 whitespace-nowrap">
-                    {row.kind}
-                  </td>
-                  <td
-                    className={`px-5 py-3 text-[13px] font-bold tabular-nums whitespace-nowrap ${
-                      row.credit ? "text-emerald-400" : "text-white"
-                    }`}
+              rows.map((row) => {
+                const KindIcon = KIND_ICON[row.kind];
+                return (
+                  <tr
+                    key={row.code}
+                    className="border-b border-white/[0.04] last:border-0 transition-colors hover:bg-white/[0.015]"
                   >
-                    {row.amount}
-                  </td>
-                  <td className="px-5 py-3 text-[13px] text-neutral-500 tabular-nums whitespace-nowrap">
-                    {row.time}
-                  </td>
-                  <td className="px-5 py-3">
-                    <span
-                      className={`inline-block rounded-md border px-2 py-1 text-[10px] font-black uppercase tracking-wider whitespace-nowrap ${STATE_TINT[row.state]}`}
+                    <td className="px-5 py-3 font-mono text-xs text-neutral-300 whitespace-nowrap">
+                      #{row.code}
+                    </td>
+                    <td className="px-5 py-3 whitespace-nowrap">
+                      <span className="flex items-center gap-2.5">
+                        <Avatar username={row.username} avatarUrl={row.avatarUrl} size={24} />
+                        <span className="text-[13px] text-white">{row.username}</span>
+                      </span>
+                    </td>
+                    <td className="px-5 py-3 whitespace-nowrap">
+                      <span className="flex items-center gap-1.5 text-[13px] text-neutral-400">
+                        {KindIcon ? <KindIcon size={13} className="shrink-0" /> : null}
+                        {row.kind}
+                      </span>
+                    </td>
+                    <td
+                      className={`px-5 py-3 text-[13px] font-bold tabular-nums whitespace-nowrap ${
+                        row.credit ? "text-emerald-400" : "text-white"
+                      }`}
                     >
-                      {TX_STATE_LABELS[row.state]}
-                    </span>
-                  </td>
-                </tr>
-              ))
+                      {row.amount}
+                    </td>
+                    <td className="px-5 py-3 text-[13px] text-neutral-500 tabular-nums whitespace-nowrap">
+                      {row.time}
+                    </td>
+                    <td className="px-5 py-3">
+                      <span
+                        className={`inline-block rounded-md border px-2 py-1 text-[10px] font-black uppercase tracking-wider whitespace-nowrap ${STATE_TINT[row.state]}`}
+                      >
+                        {TX_STATE_LABELS[row.state]}
+                      </span>
+                    </td>
+                  </tr>
+                );
+              })
             )}
           </tbody>
         </table>

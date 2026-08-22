@@ -28,6 +28,11 @@ export function SupportWidget({ channels }: { channels: SupportChannel[] }) {
   // carries no widget, and these same channels are already its whole content.
   if (pathname === "/bio") return null;
 
+  // The admin area is staff-side: nobody in there needs customer care, and the
+  // bubble floats exactly over the bottom-right corner every admin table puts
+  // its paging controls in.
+  if (pathname.startsWith("/admin")) return null;
+
   return (
     // pointer-events-none on the frame, restored on each real control below.
     // The frame is as tall as the collapsed panel plus the tab — roughly
