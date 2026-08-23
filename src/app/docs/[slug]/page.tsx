@@ -5,6 +5,8 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, CalendarDays, Eye, FileText } from "lucide-react";
 
 import { SimplePage } from "@/components/sites/menzu-lol-f7ae197a/shared/SimplePage";
+import { DocBody, DocHtml } from "@/lib/docFormat";
+import { isHtmlBody } from "@/lib/docHtml";
 import { getDocArticle } from "@/lib/queries";
 
 interface PageProps {
@@ -78,15 +80,13 @@ export default async function DocArticlePage({ params }: PageProps) {
         </div>
 
         {article.body ? (
-          // Stored as plain text: paragraphs are split on blank lines rather
-          // than rendered as HTML, so nothing in the database can inject markup.
-          <div className="space-y-4">
-            {article.body.split(/\n{2,}/).map((paragraph, index) => (
-              <p key={index} className="text-sm text-neutral-300 leading-relaxed">
-                {paragraph}
-              </p>
-            ))}
-          </div>
+          // Editor-era bodies are HTML, sanitized inside DocHtml before they
+          // reach the reader; legacy plain-text bodies keep the old renderer.
+          isHtmlBody(article.body) ? (
+            <DocHtml body={article.body} />
+          ) : (
+            <DocBody body={article.body} />
+          )
         ) : (
           <div className="rounded-2xl border border-dashed border-white/10 bg-white/[0.02] p-8 text-center space-y-3">
             <FileText size={24} className="mx-auto text-neutral-600" />
