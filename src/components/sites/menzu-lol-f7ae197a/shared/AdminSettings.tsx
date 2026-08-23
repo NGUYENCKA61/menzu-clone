@@ -2,7 +2,16 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { ArrowDown, ArrowUp, Trash2, Upload } from "lucide-react";
+import {
+  ArrowDown,
+  ArrowUp,
+  LayoutGrid,
+  Palette,
+  Trash2,
+  Upload,
+  Wallet,
+  type LucideIcon,
+} from "lucide-react";
 
 import {
   DEFAULT_SETTINGS,
@@ -19,7 +28,7 @@ import { AdminError } from "./AdminStates";
 const FIELD =
   "w-full rounded-lg border border-white/10 bg-neutral-950/60 px-3 py-2 text-xs text-white outline-none focus:border-[var(--brand)]/60 transition-colors placeholder-neutral-600";
 const LABEL = "block text-[10px] font-black uppercase tracking-widest text-neutral-500 mb-1.5";
-const CARD = "rounded-2xl border border-white/10 bg-neutral-900/50 p-5 flex flex-col gap-4";
+const CARD = "rounded-xl border border-white/[0.08] bg-[#0e0e11] p-5 flex flex-col gap-4";
 const HEADING = "text-[10px] font-black uppercase tracking-widest text-neutral-500";
 const HINT = "mt-1.5 text-[11px] text-neutral-500";
 const ICON_BUTTON =
@@ -27,6 +36,13 @@ const ICON_BUTTON =
 
 const TABS = ["Bán hàng & nạp tiền", "Nhận diện", "Bố cục trang chủ"] as const;
 type Tab = (typeof TABS)[number];
+
+/** Purely decorative — the strings above stay the state values. */
+const TAB_ICONS: Record<Tab, LucideIcon> = {
+  "Bán hàng & nạp tiền": Wallet,
+  "Nhận diện": Palette,
+  "Bố cục trang chủ": LayoutGrid,
+};
 
 export interface SettingsCategory {
   slug: string;
@@ -534,22 +550,26 @@ export function AdminSettings({
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-5 max-w-[820px]">
-      <div className="flex flex-wrap gap-1.5">
-        {TABS.map((option) => (
-          <button
-            key={option}
-            type="button"
-            onClick={() => setTab(option)}
-            aria-pressed={tab === option}
-            className={`px-3 py-2 rounded-lg text-[10px] font-black uppercase tracking-wider border transition-colors ${
-              tab === option
-                ? "border-[var(--brand)] bg-[var(--brand)]/15 text-white"
-                : "border-white/10 bg-white/[0.02] text-neutral-400 hover:text-white"
-            }`}
-          >
-            {option}
-          </button>
-        ))}
+      <div className="flex flex-wrap gap-2">
+        {TABS.map((option) => {
+          const Icon = TAB_ICONS[option];
+          return (
+            <button
+              key={option}
+              type="button"
+              onClick={() => setTab(option)}
+              aria-pressed={tab === option}
+              className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-colors ${
+                tab === option
+                  ? "bg-[var(--brand)] text-white"
+                  : "border border-white/10 bg-white/[0.03] text-neutral-400 hover:text-white"
+              }`}
+            >
+              <Icon size={13} />
+              {option}
+            </button>
+          );
+        })}
       </div>
 
       {tab === "Bán hàng & nạp tiền" ? (
@@ -1968,7 +1988,9 @@ export function AdminSettings({
         </p>
       ) : null}
 
-      <div className="flex flex-wrap items-center gap-3">
+      {/* Sticky so Lưu never scrolls out of reach on this long form —
+          cosmetic wrapper only, the submit itself is unchanged. */}
+      <div className="sticky bottom-0 z-10 -mx-1 flex flex-wrap items-center gap-3 border-t border-white/[0.06] bg-[#0a0a0c]/95 px-1 py-3 backdrop-blur-sm">
         <button
           type="submit"
           disabled={busy}

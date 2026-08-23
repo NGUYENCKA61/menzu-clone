@@ -1,7 +1,8 @@
 "use client";
 
-import { ImageIcon, Plus, RotateCcw, Swords, Trash2, Upload } from "lucide-react";
+import { Eye, ImageIcon, Plus, RotateCcw, Swords, Trash2, Upload } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Fragment, useRef, useState } from "react";
 
@@ -483,7 +484,16 @@ export function AdminProducts({
             {products.map((p) => (
               <Fragment key={p.code}>
                 <tr className="border-b border-white/5 last:border-0">
-                  <td className="px-5 py-3 text-xs font-black text-white">#{p.code}</td>
+                  <td className="px-5 py-3 text-xs font-black">
+                    {/* Straight to the account's own desk — every editor on
+                        one page instead of one-at-a-time strips in the table. */}
+                    <Link
+                      href={`/admin/products/${encodeURIComponent(p.code)}`}
+                      className="text-white hover:text-rose-400 transition-colors"
+                    >
+                      #{p.code}
+                    </Link>
+                  </td>
                   <td className="px-5 py-3">
                     <button
                       type="button"
@@ -595,19 +605,29 @@ export function AdminProducts({
                         </button>
                       </div>
                     ) : (
-                      <button
-                        type="button"
-                        disabled={busy}
-                        title={
-                          p.orderCount > 0
-                            ? `Xoá khỏi cửa hàng — ${p.orderCount} đơn cũ được giữ lại`
-                            : "Xoá sản phẩm"
-                        }
-                        onClick={() => setArming(p.code)}
-                        className="p-2 rounded-lg text-neutral-500 hover:text-red-400 hover:bg-red-500/10 disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-neutral-500 transition-colors"
-                      >
-                        <Trash2 size={14} />
-                      </button>
+                      <span className="inline-flex items-center gap-1">
+                        <Link
+                          href={`/admin/products/${encodeURIComponent(p.code)}`}
+                          title="Mở trang chi tiết"
+                          aria-label={`Chi tiết tài khoản ${p.code}`}
+                          className="p-2 rounded-lg text-neutral-500 hover:text-rose-400 hover:bg-rose-500/10 transition-colors inline-flex"
+                        >
+                          <Eye size={14} />
+                        </Link>
+                        <button
+                          type="button"
+                          disabled={busy}
+                          title={
+                            p.orderCount > 0
+                              ? `Xoá khỏi cửa hàng — ${p.orderCount} đơn cũ được giữ lại`
+                              : "Xoá sản phẩm"
+                          }
+                          onClick={() => setArming(p.code)}
+                          className="p-2 rounded-lg text-neutral-500 hover:text-red-400 hover:bg-red-500/10 disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-neutral-500 transition-colors"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </span>
                     )}
                   </td>
                 </tr>

@@ -59,3 +59,6 @@ docs/research/**/captures/*.html
 
 # User uploads written by /api/trade
 /public/uploads/
+
+# Local Netlify folder
+.netlify

@@ -1,8 +1,16 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import {
+  Boxes,
+  ImageIcon,
+  KeyRound,
+  LayoutGrid,
+  type LucideIcon,
+} from "lucide-react";
 
 import { AdminCategories } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminCategories";
 import { AdminProducts } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminProducts";
+import { AdminProductTabs } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminProductTabs";
 import { AdminShell } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminShell";
 import { AdminSoftware } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminSoftware";
 import { AdminWeaponImages } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminWeaponImages";
@@ -23,11 +31,46 @@ const MISSING_SHOWN = 24;
  */
 const PLACEHOLDER_SKIN = /^(ULTRA|EXCLUSIVE|PREMIUM|DELUXE|SELECT) #\d+$/i;
 
-export const metadata: Metadata = { title: "Menzu Admin | Sản phẩm" };
+export const metadata: Metadata = { title: "Sản phẩm | Quản trị" };
 export const dynamic = "force-dynamic";
 
-const SECTION_TITLE = "text-sm font-black uppercase tracking-widest text-white";
-const SECTION_NOTE = "text-xs text-neutral-400 mt-1";
+const SECTION_NOTE = "text-xs text-neutral-400";
+
+function StatCard({
+  label,
+  value,
+  sub,
+  icon: Icon,
+  tint,
+}: {
+  label: string;
+  value: string;
+  sub: string;
+  icon: LucideIcon;
+  tint: string;
+}) {
+  const idle = value === "0";
+  return (
+    <div className="rounded-xl border border-white/[0.08] bg-[#0e0e11] p-5 flex flex-col gap-3">
+      <div className="flex items-center justify-between gap-3">
+        <span className="text-[10px] font-black uppercase tracking-widest text-neutral-500">
+          {label}
+        </span>
+        <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border ${tint}`}>
+          <Icon size={15} />
+        </span>
+      </div>
+      <span
+        className={`text-[26px] font-black leading-none tabular-nums ${
+          idle ? "text-neutral-600" : "text-white"
+        }`}
+      >
+        {value}
+      </span>
+      <span className="text-[11px] text-neutral-500">{sub}</span>
+    </div>
+  );
+}
 
 export default async function AdminProductsPage() {
   const admin = await getAdmin();
@@ -105,34 +148,75 @@ export default async function AdminProductsPage() {
     (s) => !illustrated.has(weaponKey(s.name)) && !PLACEHOLDER_SKIN.test(s.name),
   );
 
+  const softwarePackages = softwareRows.reduce((sum, s) => sum + s.packages.length, 0);
+
   return (
     <AdminShell
       title="Sản phẩm"
-      subtitle="Danh mục và tài khoản đang bán, quản lý trên cùng một trang"
+      subtitle="Danh mục, tài khoản, phần mềm và kho ảnh — mỗi thứ một thẻ"
       username={admin.username}
     >
-      <div className="flex flex-col gap-10">
-        {/* Categories come first: a product cannot exist without one, so the
-            screen reads in the order the work actually happens. */}
+      <div className="mb-5 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+        <StatCard
+          label="Danh mục"
+          value={String(categories.length)}
+          sub="nhóm hàng ngoài trang chủ"
+          icon={LayoutGrid}
+          tint="border-indigo-500/25 bg-indigo-500/10 text-indigo-400"
+        />
+        <StatCard
+          label="Tài khoản game"
+          value={String(rows.length)}
+          sub={`${rows.filter((p) => p.status === "AVAILABLE").length} đang bán · ${removed.length} đã gỡ`}
+          icon={Boxes}
+          tint="border-emerald-500/25 bg-emerald-500/10 text-emerald-400"
+        />
+        <StatCard
+          label="Phần mềm"
+          value={String(softwareRows.length)}
+          sub={`${softwarePackages} gói thời hạn`}
+          icon={KeyRound}
+          tint="border-violet-500/25 bg-violet-500/10 text-violet-400"
+        />
+        <StatCard
+          label="Kho ảnh vật phẩm"
+          value={String(weaponImages.length)}
+          sub={
+            missing.length > 0
+              ? `${missing.length} vật phẩm chưa có ảnh`
+              : "đủ ảnh cho mọi vật phẩm"
+          }
+          icon={ImageIcon}
+          tint={
+            missing.length > 0
+              ? "border-amber-500/25 bg-amber-500/10 text-amber-400"
+              : "border-sky-500/25 bg-sky-500/10 text-sky-400"
+          }
+        />
+      </div>
+
+      <AdminProductTabs
+        tabs={[
+          { label: "Danh mục", count: categories.length },
+          { label: "Tài khoản", count: rows.length },
+          { label: "Phần mềm", count: softwareRows.length },
+          { label: "Kho ảnh", count: weaponImages.length, alert: missing.length > 0 },
+        ]}
+      >
         <section className="flex flex-col gap-4">
-          <div>
-            <h2 className={SECTION_TITLE}>1 · Danh mục</h2>
-            <p className={SECTION_NOTE}>
-              Thêm danh mục mới, sửa tên và đường dẫn, đổi thứ tự hiển thị ngoài
-              trang chủ, hoặc xóa danh mục không còn dùng.
-            </p>
-          </div>
+          <p className={SECTION_NOTE}>
+            Thêm danh mục mới, sửa tên và đường dẫn, đổi thứ tự hiển thị ngoài
+            trang chủ, hoặc xóa danh mục không còn dùng. Danh mục có trước, sản
+            phẩm treo vào sau.
+          </p>
           <AdminCategories categories={categories} />
         </section>
 
         <section className="flex flex-col gap-4">
-          <div>
-            <h2 className={SECTION_TITLE}>2 · Sản phẩm</h2>
-            <p className={SECTION_NOTE}>
-              Thêm tài khoản mới, đổi giá, đổi trạng thái hoặc xoá. Tài khoản đã
-              bán được giữ lại để lịch sử đơn hàng không mất, và khôi phục được.
-            </p>
-          </div>
+          <p className={SECTION_NOTE}>
+            Thêm tài khoản mới, đổi giá, đổi trạng thái hoặc xoá. Tài khoản đã
+            bán được giữ lại để lịch sử đơn hàng không mất, và khôi phục được.
+          </p>
           <AdminProducts
             products={rows.map((p) => ({
               code: p.code,
@@ -167,13 +251,10 @@ export default async function AdminProductsPage() {
         </section>
 
         <section className="flex flex-col gap-4">
-          <div>
-            <h2 className={SECTION_TITLE}>3 · Phần mềm</h2>
-            <p className={SECTION_NOTE}>
-              Cùng bảng sản phẩm với tài khoản, chỉ khác loại. Mỗi phần mềm bán
-              theo gói thời hạn — thêm gói ở ngay dưới từng sản phẩm.
-            </p>
-          </div>
+          <p className={SECTION_NOTE}>
+            Cùng bảng sản phẩm với tài khoản, chỉ khác loại. Mỗi phần mềm bán
+            theo gói thời hạn — thêm gói ở ngay dưới từng sản phẩm.
+          </p>
           <AdminSoftware
             software={softwareRows.map((s) => ({
               code: s.code,
@@ -200,18 +281,12 @@ export default async function AdminProductsPage() {
           />
         </section>
 
-        {/* Last, because it is the only section that is not about putting
-            something on sale — an account lists its weapons and sells whether
-            or not their pictures have been found yet. */}
         <section className="flex flex-col gap-4">
-          <div>
-            <h2 className={SECTION_TITLE}>4 · Kho ảnh vật phẩm</h2>
-            <p className={SECTION_NOTE}>
-              Mỗi vật phẩm (súng, nhân vật, trang bị) một ảnh, dùng chung cho mọi tài khoản có nó — tìm
-              ảnh một lần, không phải làm lại theo từng acc. Card nào chưa có ảnh
-              thì hiện tên súng, vẫn bán bình thường.
-            </p>
-          </div>
+          <p className={SECTION_NOTE}>
+            Mỗi vật phẩm (súng, nhân vật, trang bị) một ảnh, dùng chung cho mọi
+            tài khoản có nó — tìm ảnh một lần, không phải làm lại theo từng acc.
+            Card nào chưa có ảnh thì hiện tên súng, vẫn bán bình thường.
+          </p>
           <AdminWeaponImages
             images={weaponImages.map((w) => ({
               name: w.name,
@@ -224,7 +299,7 @@ export default async function AdminProductsPage() {
             missingTotal={missing.length}
           />
         </section>
-      </div>
+      </AdminProductTabs>
     </AdminShell>
   );
 }

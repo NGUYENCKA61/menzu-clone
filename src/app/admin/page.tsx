@@ -18,7 +18,7 @@ import { lastDays, percentChange, formatPercent, txState } from "@/lib/dashboard
 import { db } from "@/lib/db";
 import { startOfDayVn } from "@/lib/time";
 
-export const metadata: Metadata = { title: "Menzu Admin" };
+export const metadata: Metadata = { title: "Tổng quan | Quản trị" };
 export const dynamic = "force-dynamic";
 
 const DAY_MS = 24 * 60 * 60 * 1000;

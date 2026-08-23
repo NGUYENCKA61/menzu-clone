@@ -2,7 +2,15 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { Plus, Power, Trash2 } from "lucide-react";
+import {
+  CalendarClock,
+  Plus,
+  Power,
+  TicketPercent,
+  Trash2,
+  Zap,
+  type LucideIcon,
+} from "lucide-react";
 
 import { AdminEmpty, AdminError, ConfirmDialog } from "./AdminStates";
 
@@ -42,6 +50,44 @@ const TAB_ON =
   "px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest bg-[var(--brand)] text-white transition-colors";
 const TAB_OFF =
   "px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest border border-white/10 bg-white/[0.03] text-neutral-400 hover:text-white transition-colors";
+
+/** Bật = go, Tắt = warn: the button's color says what pressing it does. */
+const BTN_ON =
+  "h-8 px-3 rounded-lg border border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 disabled:opacity-60 text-[10px] font-black uppercase tracking-widest text-emerald-400 transition-colors inline-flex items-center gap-1.5";
+const BTN_OFF =
+  "h-8 px-3 rounded-lg border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 disabled:opacity-60 text-[10px] font-black uppercase tracking-widest text-amber-400 transition-colors inline-flex items-center gap-1.5";
+
+function StatMini({
+  label,
+  value,
+  icon: Icon,
+  tint,
+}: {
+  label: string;
+  value: number;
+  icon: LucideIcon;
+  tint: string;
+}) {
+  return (
+    <div className="rounded-xl border border-white/[0.08] bg-[#0e0e11] p-5 flex flex-col gap-3">
+      <div className="flex items-center justify-between gap-3">
+        <span className="text-[10px] font-black uppercase tracking-widest text-neutral-500">
+          {label}
+        </span>
+        <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border ${tint}`}>
+          <Icon size={15} />
+        </span>
+      </div>
+      <span
+        className={`text-[26px] font-black leading-none tabular-nums ${
+          value === 0 ? "text-neutral-600" : "text-white"
+        }`}
+      >
+        {value}
+      </span>
+    </div>
+  );
+}
 
 /**
  * Vouchers and scheduled flash sales on one screen.
@@ -106,6 +152,33 @@ export function AdminMarketing({
 
   return (
     <div className="flex flex-col gap-5">
+      <div className="grid grid-cols-2 xl:grid-cols-4 gap-4">
+        <StatMini
+          label="Voucher đang bật"
+          value={vouchers.filter((v) => v.active).length}
+          icon={TicketPercent}
+          tint="border-emerald-500/25 bg-emerald-500/10 text-emerald-400"
+        />
+        <StatMini
+          label="Tổng lượt dùng mã"
+          value={vouchers.reduce((sum, v) => sum + v.usedCount, 0)}
+          icon={TicketPercent}
+          tint="border-violet-500/25 bg-violet-500/10 text-violet-400"
+        />
+        <StatMini
+          label="Sale đang chạy"
+          value={sales.filter((s) => s.running).length}
+          icon={Zap}
+          tint="border-rose-500/25 bg-rose-500/10 text-rose-400"
+        />
+        <StatMini
+          label="Sale chờ tới giờ"
+          value={sales.filter((s) => s.active && !s.running).length}
+          icon={CalendarClock}
+          tint="border-amber-500/25 bg-amber-500/10 text-amber-400"
+        />
+      </div>
+
       <div className="flex gap-2">
         <button type="button" onClick={() => setTab("voucher")} className={tab === "voucher" ? TAB_ON : TAB_OFF}>
           Voucher
@@ -136,8 +209,12 @@ export function AdminMarketing({
                 setMinOrder(""); setVStart(""); setVEnd(""); setMaxUses("");
               }
             }}
-            className="rounded-2xl border border-white/10 bg-neutral-900/50 p-5 grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-4"
+            className="rounded-xl border border-white/[0.08] bg-[#0e0e11] p-5 grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-4"
           >
+            <div className="sm:col-span-3 lg:col-span-4 -mb-1 flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-neutral-500">
+              <TicketPercent size={13} className="text-neutral-400" />
+              Tạo voucher
+            </div>
             <div>
               <label htmlFor="v-code" className={LABEL}>Mã voucher</label>
               <input id="v-code" required value={code} onChange={(e) => setCode(e.target.value)} placeholder="SALE50" className={FIELD} />
@@ -177,42 +254,53 @@ export function AdminMarketing({
           {vouchers.length === 0 ? (
             <AdminEmpty title="Chưa có voucher nào" body="Tạo mã đầu tiên bằng biểu mẫu bên trên." />
           ) : (
-            <div className="w-full overflow-x-auto rounded-2xl border border-white/10 bg-neutral-900/40">
+            <div className="w-full overflow-x-auto rounded-xl border border-white/[0.08] bg-[#0e0e11]">
               <table className="w-full min-w-[820px] text-left">
                 <thead>
                   <tr className="border-b border-white/10">
                     {["Mã", "Giảm", "Đơn tối thiểu", "Đã dùng", "Hiệu lực", "Trạng thái", ""].map((c) => (
-                      <th key={c} scope="col" className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-neutral-500 whitespace-nowrap">{c}</th>
+                      <th key={c} scope="col" className="px-5 py-3.5 text-[10px] font-black uppercase tracking-widest text-neutral-500 whitespace-nowrap">{c}</th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
                   {vouchers.map((v) => (
-                    <tr key={v.code} className="border-b border-white/5 last:border-0">
-                      <td className="px-4 py-3 font-mono text-xs font-black text-white">{v.code}</td>
-                      <td className="px-4 py-3 text-xs text-neutral-200">
-                        {v.percentOff ? `${v.percentOff}%` : v.amountOff ? `${formatVnd(v.amountOff)}đ` : "—"}
+                    <tr key={v.code} className="border-b border-white/5 last:border-0 transition-colors hover:bg-white/[0.015]">
+                      <td className="px-5 py-3 font-mono text-xs font-black text-white">{v.code}</td>
+                      <td className="px-5 py-3 whitespace-nowrap">
+                        {v.percentOff || v.amountOff ? (
+                          <span className="inline-flex rounded-lg border border-emerald-500/25 bg-emerald-500/10 px-2 py-1 text-[11px] font-black tabular-nums text-emerald-400">
+                            −{v.percentOff ? `${v.percentOff}%` : `${formatVnd(v.amountOff ?? 0)}đ`}
+                          </span>
+                        ) : (
+                          <span className="text-[11px] text-neutral-700">—</span>
+                        )}
                       </td>
-                      <td className="px-4 py-3 text-xs text-neutral-400 tabular-nums">
+                      <td className="px-5 py-3 text-xs text-neutral-400 tabular-nums">
                         {v.minOrder ? `${formatVnd(v.minOrder)}đ` : "—"}
                       </td>
-                      <td className="px-4 py-3 text-xs text-neutral-400 tabular-nums">
-                        {v.usedCount}{v.maxUses ? ` / ${v.maxUses}` : ""}
+                      <td className="px-5 py-3 text-xs tabular-nums whitespace-nowrap">
+                        <span className={v.usedCount > 0 ? "font-bold text-white" : "text-neutral-600"}>
+                          {v.usedCount}
+                        </span>
+                        <span className="text-neutral-600">
+                          {v.maxUses ? ` / ${v.maxUses}` : " / ∞"}
+                        </span>
                       </td>
-                      <td className="px-4 py-3 text-[11px] text-neutral-500">
+                      <td className="px-5 py-3 text-[11px] text-neutral-500 tabular-nums">
                         {v.startsAt ?? "ngay"} → {v.expiresAt ?? "không hạn"}
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="px-5 py-3">
                         <span className={`inline-flex px-2 py-1 rounded-lg border text-[10px] font-black uppercase tracking-wider ${v.active ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400" : "border-white/10 bg-white/5 text-neutral-500"}`}>
                           {v.active ? "Bật" : "Tắt"}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-right">
+                      <td className="px-5 py-3 text-right">
                         <button
                           type="button"
                           disabled={pending}
                           onClick={() => call("/api/admin/vouchers", "PATCH", { code: v.code, active: !v.active })}
-                          className="h-8 px-3 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 disabled:opacity-60 text-[10px] font-black uppercase tracking-widest text-neutral-300 transition-colors inline-flex items-center gap-1.5"
+                          className={v.active ? BTN_OFF : BTN_ON}
                         >
                           <Power size={12} />
                           {v.active ? "Tắt" : "Bật"}
@@ -238,8 +326,12 @@ export function AdminMarketing({
               });
               if (ok) { setProductCode(""); setSalePrice(""); setSStart(""); setSEnd(""); }
             }}
-            className="rounded-2xl border border-white/10 bg-neutral-900/50 p-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4"
+            className="rounded-xl border border-white/[0.08] bg-[#0e0e11] p-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4"
           >
+            <div className="sm:col-span-2 lg:col-span-5 -mb-1 flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-neutral-500">
+              <Zap size={13} className="text-neutral-400" />
+              Lên lịch flash sale
+            </div>
             <div>
               <label htmlFor="s-code" className={LABEL}>Mã sản phẩm</label>
               <input id="s-code" required value={productCode} onChange={(e) => setProductCode(e.target.value)} placeholder="VLR2079" className={FIELD} />
@@ -270,30 +362,53 @@ export function AdminMarketing({
               body="Khi chưa có lịch, khu Flash Sale ngoài trang chủ vẫn hiển thị mọi sản phẩm đang giảm giá."
             />
           ) : (
-            <div className="flex flex-col gap-2">
-              {sales.map((s) => (
-                <div key={s.id} className="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-2xl border border-white/10 bg-neutral-900/50 px-4 py-3">
-                  <span className="font-mono text-xs font-black text-white">{s.productCode}</span>
-                  <span className="text-[11px] text-neutral-500">{s.productRank}</span>
-                  <span className="text-xs text-neutral-400 tabular-nums">
+            <div className="flex flex-col gap-2.5">
+              {sales.map((s) => {
+                const cut = s.price > 0 ? Math.round((1 - s.salePrice / s.price) * 100) : 0;
+                return (
+                <div
+                  key={s.id}
+                  className="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-xl border border-white/[0.08] bg-[#0e0e11] px-5 py-3.5 transition-colors hover:bg-white/[0.015]"
+                >
+                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-rose-500/25 bg-rose-500/10 text-rose-400">
+                    <Zap size={14} />
+                  </span>
+                  <span className="flex min-w-0 flex-col">
+                    <span className="font-mono text-xs font-black text-white">{s.productCode}</span>
+                    <span className="text-[11px] text-neutral-500">{s.productRank}</span>
+                  </span>
+                  <span className="text-xs tabular-nums">
                     <span className="line-through text-neutral-600">{formatVnd(s.price)}đ</span>{" "}
                     <span className="text-emerald-400 font-bold">{formatVnd(s.salePrice)}đ</span>
                   </span>
-                  <span className="text-[11px] text-neutral-500">{s.startsAt} → {s.endsAt}</span>
-                  <span className={`text-[10px] font-black uppercase tracking-wider px-2 py-1 rounded-md border ${s.running ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400" : s.active ? "border-amber-500/30 bg-amber-500/10 text-amber-400" : "border-white/10 bg-white/5 text-neutral-500"}`}>
+                  {cut > 0 ? (
+                    <span className="inline-flex rounded-lg border border-rose-500/25 bg-rose-500/10 px-2 py-1 text-[11px] font-black tabular-nums text-rose-400">
+                      −{cut}%
+                    </span>
+                  ) : null}
+                  <span className="text-[11px] text-neutral-500 tabular-nums">
+                    {s.startsAt} → {s.endsAt}
+                  </span>
+                  <span className={`text-[10px] font-black uppercase tracking-wider px-2 py-1 rounded-lg border ${s.running ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400" : s.active ? "border-amber-500/30 bg-amber-500/10 text-amber-400" : "border-white/10 bg-white/5 text-neutral-500"}`}>
                     {s.running ? "Đang chạy" : s.active ? "Chờ tới giờ" : "Tắt"}
                   </span>
                   <div className="flex items-center gap-2 ml-auto">
-                    <button type="button" disabled={pending} onClick={() => call("/api/admin/flash-sales", "PATCH", { id: s.id, active: !s.active })} className="h-8 px-3 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 disabled:opacity-60 text-[10px] font-black uppercase tracking-widest text-neutral-300 transition-colors inline-flex items-center gap-1.5">
+                    <button
+                      type="button"
+                      disabled={pending}
+                      onClick={() => call("/api/admin/flash-sales", "PATCH", { id: s.id, active: !s.active })}
+                      className={s.active ? BTN_OFF : BTN_ON}
+                    >
                       <Power size={12} />
                       {s.active ? "Tắt" : "Bật"}
                     </button>
-                    <button type="button" disabled={pending} onClick={() => setRemoving(s)} aria-label={`Xoá đợt sale ${s.productCode}`} className="h-8 w-8 rounded-lg border border-red-500/30 bg-red-500/10 hover:bg-red-500/20 disabled:opacity-60 text-red-400 transition-colors inline-flex items-center justify-center">
+                    <button type="button" disabled={pending} onClick={() => setRemoving(s)} aria-label={`Xoá đợt sale ${s.productCode}`} className="h-8 w-8 rounded-lg border border-white/[0.07] bg-white/[0.03] hover:border-red-500/30 hover:bg-red-500/10 disabled:opacity-60 text-neutral-500 hover:text-red-400 transition-colors inline-flex items-center justify-center">
                       <Trash2 size={13} />
                     </button>
                   </div>
                 </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </>

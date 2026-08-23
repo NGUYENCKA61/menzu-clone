@@ -1,6 +1,7 @@
 "use client";
 
-import { Plus, Trash2, Upload } from "lucide-react";
+import { Eye, Plus, Trash2, Upload } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -283,7 +284,19 @@ export function AdminSoftware({
         >
           <div className="flex flex-wrap items-center gap-3 px-5 py-4 border-b border-white/10">
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-black text-white truncate">{s.name}</p>
+              {/* Straight to the tool's own desk — every editor on one page. */}
+              <Link
+                href={`/admin/products/${encodeURIComponent(s.code)}`}
+                className="group inline-flex items-center gap-1.5"
+              >
+                <p className="text-sm font-black text-white truncate transition-colors group-hover:text-rose-400">
+                  {s.name}
+                </p>
+                <Eye
+                  size={13}
+                  className="shrink-0 text-neutral-600 transition-colors group-hover:text-rose-400"
+                />
+              </Link>
               <p className="text-[11px] text-neutral-500 mt-0.5">
                 #{s.code} · {s.categoryName}
               </p>

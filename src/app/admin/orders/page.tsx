@@ -32,7 +32,7 @@ import { GAP, pageCount, pageRange, pageStrip, parsePage } from "@/lib/paging";
 import { orderWhere } from "@/lib/orderStore";
 import { startOfDayVn } from "@/lib/time";
 
-export const metadata: Metadata = { title: "Menzu Admin | Đơn hàng" };
+export const metadata: Metadata = { title: "Đơn hàng | Quản trị" };
 export const dynamic = "force-dynamic";
 
 const STATUS_CLASS: Record<string, string> = {

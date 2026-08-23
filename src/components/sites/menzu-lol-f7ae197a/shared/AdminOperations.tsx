@@ -240,7 +240,7 @@ export function AdminOperations({
                     setFbPage(1);
                   }}
                   placeholder="Tìm tên, @tài khoản hoặc nội dung..."
-                  className="w-full h-10 rounded-xl border border-white/10 bg-neutral-950/60 pl-9 pr-3 text-xs text-white outline-none focus:border-[var(--brand)]/60 transition-colors placeholder-neutral-600"
+                  className="w-full h-10 rounded-lg border border-white/[0.08] bg-[#0e0e11] pl-9 pr-3 text-[13px] text-white outline-none focus:border-rose-500/50 transition-colors"
                 />
               </label>
               {/* The queue at a glance, before any scrolling. */}
@@ -423,10 +423,10 @@ export function AdminOperations({
       ) : (
         <div className="flex flex-col gap-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <label className="relative flex-1 min-w-[240px] max-w-[360px]">
+            <label className="relative flex-1 min-w-[240px]">
               <Search
-                size={14}
-                className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-500 pointer-events-none"
+                size={15}
+                className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-neutral-600"
               />
               <input
                 value={topUpQuery}
@@ -435,7 +435,7 @@ export function AdminOperations({
                   setTopUpPage(1);
                 }}
                 placeholder="Tìm mã lệnh hoặc tên đăng nhập..."
-                className="w-full h-10 rounded-xl border border-white/10 bg-neutral-950/60 pl-9 pr-3 text-xs text-white outline-none focus:border-[var(--brand)]/60 transition-colors placeholder-neutral-600"
+                className="w-full h-10 rounded-lg border border-white/[0.08] bg-[#0e0e11] pl-9 pr-3 text-[13px] text-white outline-none focus:border-rose-500/50 transition-colors"
               />
             </label>
             <span className="text-[12px] text-neutral-500 tabular-nums">
