@@ -1,259 +1,321 @@
-import Image from "next/image";
 import Link from "next/link";
+import { Phone } from "lucide-react";
 
+import { listCategories, listDocArticles } from "@/lib/queries";
 import { getShopSettings } from "@/lib/settingsStore";
 
-const IMG = "/sites/menzu-lol-f7ae197a/root-8a5edab2/images/site";
+/**
+ * How many rows each shelf shows before deferring to its index page; "Xem tất
+ * cả" carries the rest. The two counts are separate because the shelves answer
+ * different questions: what the shop sells is worth listing in full, while the
+ * wiki is a library nobody reads from a footer — four of its most-read pages
+ * is a sample, and a longer list would just push the columns apart.
+ */
+const CATEGORY_SHELF = 5;
+const WIKI_SHELF = 4;
 
-interface PaymentChip {
-  src: string;
-  alt: string;
+interface FooterLink {
+  label: string;
+  href: string;
 }
 
-const PAYMENTS: PaymentChip[] = [
-  { src: `${IMG}/images/acb.webp`, alt: "ACB" },
-  { src: `${IMG}/images/momo.webp`, alt: "MoMo" },
-  { src: `${IMG}/images/zalopay.webp`, alt: "ZaloPay" },
-  { src: `${IMG}/images/vnpay.webp`, alt: "VNPay" },
-  { src: `${IMG}/images/paypal.webp`, alt: "PayPal" },
-  { src: `${IMG}/images/crypto.webp`, alt: "Crypto" },
+/** The bar under the rule: the four places a reader might still be looking for. */
+const BOTTOM_LINKS: FooterLink[] = [
+  { label: "Trang chủ", href: "/" },
+  { label: "Sản phẩm", href: "/categories" },
+  { label: "Wiki", href: "/docs" },
+  { label: "Sitemap", href: "/sitemap.xml" },
 ];
-
-interface FooterColumn {
-  heading: string;
-  links: string[];
-}
 
 /**
- * Labels whose destination exists in this clone. Anything not listed keeps
- * href="#" — /build, /checkskin and the /hub pages were explicitly excluded
- * from the clone, so pointing at them would produce 404s.
+ * Three tiers, told apart by weight, case and colour rather than by size:
+ * wordmark, heading, row. Carrying the hierarchy that way lets the type sit a
+ * step smaller than a footer usually does and still read at a glance.
  */
-const LINK_HREFS: Record<string, string> = {
-  // The live footer links "Tin tức" at a route that 404s on its own site.
-  // Kept pointing there so the clone behaves identically.
-  "Tin tức & Sự kiện": "/news",
-  "Liên hệ": "/feedback",
-  "Góp ý & Khiếu nại": "/feedback",
-  "Cộng đồng": "/bio",
-  "Acc Valorant": "/category/account-valorant-tu-chon",
-  "Check Thư Welcome": "/checkwc",
-  "Trình Tạo Mã 2FA": "/2fa",
-};
+const HEADING = "text-[11px] font-black uppercase tracking-[0.16em] text-white";
+const ROW = "text-[13px] leading-[1.45] text-neutral-400 hover:text-white transition-colors";
+const SEE_ALL =
+  "group inline-flex items-center gap-1.5 text-[12px] font-bold uppercase tracking-wider text-[var(--brand)] hover:text-white transition-colors";
 
-const COLUMNS: FooterColumn[] = [
-  {
-    heading: "Về chúng tôi",
-    links: ["Tin tức & Sự kiện", "Liên hệ", "Góp ý & Khiếu nại", "Cộng đồng"],
-  },
-  {
-    heading: "Mua sắm",
-    links: ["Acc Valorant"],
-  },
-  {
-    heading: "Công cụ",
-    links: [
-      "Check Skin Valorant",
-      "Valorant Build",
-      "Check Thư Welcome",
-      "Trình Tạo Mã 2FA",
-    ],
-  },
-  {
-    heading: "Valorant Hub",
-    links: [
-      "Crosshair Library",
-      "Lineups & Callouts",
-      "Tìm Bạn Leo Rank",
-      "Nhận Acc Free",
-    ],
-  },
-];
-
-/* The live site serves these four social glyphs from icons8 with signed query
- * strings that cannot be re-hosted; inline brand paths stand in at the same 20px box. */
+/* The live site serves its social glyphs from icons8 with signed query strings
+ * that cannot be re-hosted; inline brand paths stand in, sized to the tile. */
 function FacebookGlyph() {
   return (
-    <svg viewBox="0 0 24 24" fill="currentColor" className="w-[20px] h-[20px]">
+    <svg viewBox="0 0 24 24" fill="currentColor" className="w-[17px] h-[17px]">
       <path d="M22 12a10 10 0 1 0-11.56 9.88v-6.99H7.9V12h2.54V9.8c0-2.5 1.49-3.89 3.77-3.89 1.1 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.77-1.63 1.56V12h2.78l-.45 2.89h-2.33v6.99A10 10 0 0 0 22 12Z" />
-    </svg>
-  );
-}
-
-function YoutubeGlyph() {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor" className="w-[20px] h-[20px]">
-      <path d="M21.58 7.19a2.5 2.5 0 0 0-1.77-1.77C18.25 5 12 5 12 5s-6.25 0-7.81.42a2.5 2.5 0 0 0-1.77 1.77A26.1 26.1 0 0 0 2 12a26.1 26.1 0 0 0 .42 4.81 2.5 2.5 0 0 0 1.77 1.77C5.75 19 12 19 12 19s6.25 0 7.81-.42a2.5 2.5 0 0 0 1.77-1.77A26.1 26.1 0 0 0 22 12a26.1 26.1 0 0 0-.42-4.81ZM10 15.02V8.98L15.2 12 10 15.02Z" />
-    </svg>
-  );
-}
-
-function MessengerGlyph() {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor" className="w-[20px] h-[20px]">
-      <path d="M12 2C6.3 2 2 6.2 2 11.7c0 2.9 1.2 5.4 3.2 7.2.2.2.3.4.3.6l.1 1.8c0 .6.6 1 1.1.7l2-.9c.2-.1.4-.1.6-.1 1 .3 2 .4 3 .4 5.7 0 10-4.2 10-9.7S17.7 2 12 2Zm6 7.5-2.9 4.6c-.5.7-1.4.9-2.1.4l-2.3-1.7a.6.6 0 0 0-.7 0l-3.1 2.4c-.4.3-.9-.2-.7-.7l2.9-4.6c.5-.7 1.4-.9 2.1-.4l2.3 1.7c.2.2.5.2.7 0l3.1-2.4c.4-.3.9.2.7.7Z" />
     </svg>
   );
 }
 
 function ZaloGlyph() {
   return (
-    <svg viewBox="0 0 24 24" fill="currentColor" className="w-[20px] h-[20px]">
+    <svg viewBox="0 0 24 24" fill="currentColor" className="w-[17px] h-[17px]">
       <path d="M12 2C6.5 2 2 5.9 2 10.7c0 2.7 1.4 5.1 3.6 6.7-.1.9-.5 2.2-1.3 3.2-.2.3.1.7.4.6 1.9-.5 3.3-1.3 4.1-1.9.9.2 1.9.3 2.9.3 5.5 0 10-3.9 10-8.7S17.5 2 12 2Zm-4.6 6.1h3.4v.9L8.5 12.5h2.4v1H7.2v-.9l2.3-3.6H7.4v-.9Zm4.6 0h1v5.4h-1V8.1Zm3.6 1.4c1.2 0 2.1.9 2.1 2s-.9 2-2.1 2-2.1-.9-2.1-2 .9-2 2.1-2Zm0 .9c-.6 0-1.1.5-1.1 1.1s.5 1.1 1.1 1.1 1.1-.5 1.1-1.1-.5-1.1-1.1-1.1Z" />
     </svg>
   );
 }
 
-const SOCIALS = [FacebookGlyph, YoutubeGlyph, MessengerGlyph, ZaloGlyph];
+function TiktokGlyph() {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" className="w-[17px] h-[17px]">
+      <path d="M16.6 5.82A4.28 4.28 0 0 1 15.54 3h-3.09v12.4a2.59 2.59 0 0 1-2.59 2.5 2.59 2.59 0 0 1 0-5.18c.27 0 .52.04.76.12v-3.2a5.79 5.79 0 0 0-.76-.05 5.78 5.78 0 1 0 5.78 5.78V9.01a7.35 7.35 0 0 0 4.29 1.38V7.3a4.29 4.29 0 0 1-3.33-1.48Z" />
+    </svg>
+  );
+}
 
-export interface FooterContact {
+function DiscordGlyph() {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" className="w-[17px] h-[17px]">
+      <path d="M20.32 4.57A19.79 19.79 0 0 0 15.43 3c-.21.38-.46.9-.63 1.31a18.27 18.27 0 0 0-5.6 0C9.03 3.9 8.77 3.38 8.56 3a19.74 19.74 0 0 0-4.89 1.57C.56 9.09-.28 13.5.14 17.84a19.9 19.9 0 0 0 6.07 3.08c.49-.67.93-1.39 1.3-2.14-.71-.27-1.4-.6-2.04-.99.17-.13.34-.26.5-.4a14.2 14.2 0 0 0 12.06 0c.16.14.33.27.5.4-.65.39-1.33.72-2.05.99.38.75.81 1.47 1.3 2.14a19.87 19.87 0 0 0 6.08-3.08c.5-5.03-.84-9.4-3.54-13.27ZM8.02 15.2c-1.18 0-2.15-1.08-2.15-2.4 0-1.32.95-2.4 2.15-2.4 1.21 0 2.18 1.09 2.16 2.4 0 1.32-.95 2.4-2.16 2.4Zm7.96 0c-1.18 0-2.15-1.08-2.15-2.4 0-1.32.95-2.4 2.15-2.4 1.21 0 2.18 1.09 2.16 2.4 0 1.32-.95 2.4-2.16 2.4Z" />
+    </svg>
+  );
+}
+
+interface FooterContact {
   zalo: string;
   facebook: string;
   hotline: string;
+  tiktok: string;
+  discord: string;
 }
 
 /**
- * The capture ships these as inert "#" links. A shop that fills in Cấu hình →
- * Nhận diện gets real destinations; anything left blank stays inert rather
- * than pointing somewhere invented.
+ * One icon per way of actually reaching the shop.
+ *
+ * A blank field means that channel does not exist yet, so its icon does not
+ * either — the capture shipped four of these as inert "#" links, two of them
+ * pointing at the same page. Fill Cấu hình → Liên hệ and they appear.
  */
-function SocialIcons({ contact }: { contact: FooterContact }) {
-  const zalo = contact.zalo ? `https://zalo.me/${contact.zalo.replace(/\D/g, "")}` : "#";
-  const hrefs = [contact.facebook || "#", "#", contact.facebook || "#", zalo];
+function socialLinks(contact: FooterContact) {
+  const digits = contact.zalo.replace(/\D/g, "");
+  return [
+    contact.facebook
+      ? { key: "facebook", href: contact.facebook, label: "Facebook", Glyph: FacebookGlyph }
+      : null,
+    digits
+      ? { key: "zalo", href: `https://zalo.me/${digits}`, label: "Zalo", Glyph: ZaloGlyph }
+      : null,
+    contact.tiktok
+      ? { key: "tiktok", href: contact.tiktok, label: "TikTok", Glyph: TiktokGlyph }
+      : null,
+    contact.discord
+      ? { key: "discord", href: contact.discord, label: "Discord", Glyph: DiscordGlyph }
+      : null,
+    contact.hotline
+      ? {
+          key: "hotline",
+          href: `tel:${contact.hotline.replace(/[^\d+]/g, "")}`,
+          label: `Hotline ${contact.hotline}`,
+          Glyph: () => <Phone className="w-[17px] h-[17px]" strokeWidth={2} />,
+        }
+      : null,
+  ].filter((entry) => entry !== null);
+}
 
+/** A shelf of links under a heading, optionally closed by a "see all" line. */
+function Column({
+  heading,
+  links,
+  seeAll,
+}: {
+  heading: string;
+  links: FooterLink[];
+  seeAll?: FooterLink;
+}) {
   return (
-    <div className="flex items-center gap-4">
-      {SOCIALS.map((Glyph, i) => (
-        <a
-          key={i}
-          href={hrefs[i]}
-          {...(hrefs[i] !== "#" ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-          className="block select-none hover:opacity-80 transition-opacity text-neutral-300"
-        >
-          <Glyph />
-        </a>
-      ))}
+    <div className="flex flex-col gap-3.5">
+      <h4 className={HEADING}>{heading}</h4>
+      <ul className="flex flex-col gap-2.5">
+        {links.map((link) => (
+          <li key={`${link.href}-${link.label}`}>
+            <Link href={link.href} className={ROW}>
+              {link.label}
+            </Link>
+          </li>
+        ))}
+        {seeAll ? (
+          <li className="pt-1.5">
+            <Link href={seeAll.href} className={SEE_ALL}>
+              {seeAll.label}
+              {/* The same nudge the wiki cards' "Chi tiết →" gives. */}
+              <span aria-hidden className="transition-transform group-hover:translate-x-0.5">
+                →
+              </span>
+            </Link>
+          </li>
+        ) : null}
+      </ul>
     </div>
   );
 }
 
-const SOCIAL_LABEL = "THEO DÕI & KẾT NỐI";
-
 /**
  * Reads the shop identity itself rather than taking props: a dozen pages
- * render this footer, and threading the same two values through all of them
- * would be churn with no reader.
+ * render this footer, and threading the same values through all of them would
+ * be churn with no reader.
+ *
+ * Two of the four columns are read from the database rather than written here,
+ * where they would go stale the first time a category is renamed or an article
+ * published. Every destination is a page this site serves — the captured
+ * footer carried a whole "Valorant Hub" column sitting on href="#", and a dead
+ * link in a footer is worse than a missing one: the reader spends a click
+ * finding out.
  */
 export async function SiteFooter() {
-  const settings = await getShopSettings();
-  const brandName = settings.brandName;
+  const [settings, categories, articles] = await Promise.all([
+    getShopSettings(),
+    listCategories(),
+    listDocArticles(),
+  ]);
+
   const contact: FooterContact = {
     zalo: settings.contactZalo,
     facebook: settings.contactFacebook,
     hotline: settings.contactHotline,
+    tiktok: settings.contactTiktok,
+    discord: settings.contactDiscord,
   };
+  const socials = socialLinks(contact);
+
+  // The wordmark reads as one word with the domain in the accent, so the shop
+  // name loses its spaces here rather than in Cấu hình, where the spaced form
+  // is what page titles and the header want.
+  const wordmark = settings.brandName.toUpperCase().replace(/\s+/g, "");
+
+  // What is on sale leads; a shelf the shop has opened but not stocked yet
+  // still earns a line, because "we sell PUBG too" is worth saying and the
+  // page it lands on says plainly that the shelf is empty. The index below
+  // picks up whatever did not fit.
+  const shopLinks = [
+    ...categories.filter((c) => c.productCount > 0),
+    ...categories.filter((c) => c.productCount === 0),
+  ]
+    .slice(0, CATEGORY_SHELF)
+    .map((c) => ({ label: c.name, href: `/category/${c.slug}` }));
+
+  // "Nổi bật" measured rather than chosen: the most-read guides, which also
+  // keeps half-written drafts with no readers out of the footer. Warranty
+  // articles are left to the support column so neither shelf repeats the other.
+  const guideLinks = [...articles]
+    .filter((a) => a.category !== "WARRANTY")
+    .sort((a, b) => b.views - a.views)
+    .slice(0, WIKI_SHELF)
+    .map((a) => ({ label: a.title, href: `/docs/${a.slug}` }));
+
+  /** A policy gets its own page once the shop writes one; until then the wiki
+   *  index is the honest destination — never a 404. */
+  const policyHref = (pattern: RegExp): string => {
+    const hit = articles.find((a) => pattern.test(a.title) || pattern.test(a.slug));
+    return hit ? `/docs/${hit.slug}` : "/docs";
+  };
+
+  const supportLinks: FooterLink[] = [
+    { label: "Câu hỏi thường gặp", href: "/docs#FAQ" },
+    { label: "Chính sách bảo hành", href: "/docs#WARRANTY" },
+    { label: "Điều khoản sử dụng", href: policyHref(/điều khoản|dieu-khoan|terms/i) },
+    { label: "Chính sách bảo mật", href: policyHref(/bảo mật|bao-mat|privacy/i) },
+    { label: "DMCA & Bản quyền", href: policyHref(/dmca|bản quyền|ban-quyen|copyright/i) },
+    { label: "Liên hệ hỗ trợ", href: "/feedback" },
+  ];
+
   return (
-    <footer className="relative z-10 w-full bg-[#050508] border-t border-white/10 mt-auto">
-      <div className="max-w-[1320px] mx-auto px-4 lg:px-6 pt-12 pb-28 sm:py-12 flex flex-col">
-        {/* Row 1 — payment chips + (desktop) socials */}
-        <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between pb-8 border-b border-white/5 gap-6">
-          <div className="flex flex-wrap items-center gap-2">
-            {PAYMENTS.map((p, i) => (
-              <div
-                key={p.alt}
-                className={`bg-white px-2.5 py-1 rounded-[4px] h-[26px] ${
-                  i === 0 ? "flex" : "hidden sm:flex"
-                } items-center justify-center select-none shadow-sm`}
-              >
-                <Image
-                  src={p.src}
-                  alt={p.alt}
-                  width={40}
-                  height={14}
-                  className="h-3.5 w-auto object-contain"
-                />
-              </div>
-            ))}
-          </div>
+    <footer className="relative z-10 w-full bg-[#0a0a0e] border-t border-white/[0.07] mt-auto">
+      {/* The accent hairline the wiki and category headings draw under their
+          titles, run across the seam instead — it ties the footer to the page
+          above without another solid rule. */}
+      <div
+        aria-hidden
+        className="h-px w-full bg-gradient-to-r from-transparent via-[var(--brand)]/40 to-transparent"
+      />
 
-          <div className="hidden lg:flex flex-col sm:flex-row items-start sm:items-center gap-5">
-            <span className="text-[10px] text-neutral-400 font-bold uppercase tracking-widest select-none">
-              {SOCIAL_LABEL}
-            </span>
-            <SocialIcons contact={contact} />
-          </div>
-        </div>
-
-        {/* Row 2 — 4 link columns + 2-col promo block */}
-        <div className="grid grid-cols-2 md:grid-cols-6 gap-8 py-10 border-b border-white/5">
-          {COLUMNS.map((col) => (
-            <div key={col.heading} className="flex flex-col gap-3">
-              <h4 className="text-white font-bold uppercase tracking-wider text-xs select-none">
-                {col.heading}
-              </h4>
-              <ul className="flex flex-col gap-3 text-xs font-semibold text-neutral-400">
-                {col.links.map((link) => (
-                  <li key={link}>
-                    <a
-                      href={LINK_HREFS[link] ?? "#"}
-                      className="hover:text-white transition-colors"
-                    >
-                      {link}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-
-          <div className="col-span-2 flex flex-col items-start lg:items-end justify-start">
-            <div className="lg:hidden flex items-center gap-5 mb-6">
-              <span className="text-[10px] text-neutral-400 font-bold uppercase tracking-widest select-none">
-                {SOCIAL_LABEL}
-              </span>
-              <SocialIcons contact={contact} />
-            </div>
-
+      {/* pb-28 on the narrow layout clears the fixed bottom navigation, which
+          would otherwise sit on top of the copyright line. */}
+      <div className="max-w-[1320px] mx-auto px-4 lg:px-6 pt-10 pb-24 sm:py-11">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[1.5fr_1fr_1fr_1fr] gap-8 lg:gap-10">
+          <div className="flex flex-col gap-4">
             <Link
-              href="/app/download"
-              className="w-full max-w-[320px] h-[90px] rounded-xl border border-indigo-500/20 hover:border-indigo-500/50 transition-colors pl-16 pr-4 py-4 flex items-center justify-between shadow-lg relative overflow-hidden bg-[#0d0d12]"
+              href="/"
+              className="text-[22px] sm:text-[24px] font-black tracking-tight leading-none text-white"
             >
-              <Image
-                src={`${IMG}/logos/menzu-logo.webp`}
-                alt="Menzu"
-                width={34}
-                height={34}
-                className="absolute left-4 top-1/2 -translate-y-1/2 w-[34px] h-[34px] object-contain"
-              />
-              <div className="flex flex-col">
-                <span className="text-[11px] font-black uppercase tracking-wide text-white leading-tight">
-                  SĂN VOUCHER GIẢM TỚI 90%
-                </span>
-                <span className="text-[10px] text-neutral-400 leading-tight">
-                  Hãy tải ứng dụng ngay bây giờ!
-                </span>
-              </div>
+              {wordmark}
+              <span className="text-[var(--brand)]">.COM</span>
             </Link>
+
+            {/* 13px over 1.6 rather than 14 over 1.625: the line count is the
+                same at this width, so the paragraph loses height without
+                losing a line — and Vietnamese dấu still clear the line above. */}
+            <p className="max-w-[290px] text-[13px] leading-[1.6] text-neutral-400">
+              Cung cấp các sản phẩm kỹ thuật số và tài khoản game. Hỗ trợ nhanh chóng,
+              thông tin rõ ràng và cập nhật hướng dẫn sử dụng chi tiết.
+            </p>
+
+            {/* The channels close the column the wordmark opens: who the shop
+                is, what it sells, and how to reach it. */}
+            {socials.length > 0 ? (
+              <div className="flex flex-col gap-2.5">
+                <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-neutral-500 select-none">
+                  Theo dõi &amp; kết nối
+                </span>
+                <div className="flex flex-wrap items-center gap-2">
+                  {socials.map(({ key, href, label, Glyph }) => (
+                    <a
+                      key={key}
+                      href={href}
+                      aria-label={label}
+                      title={label}
+                      // tel: opens the dialer in this tab; only the web ones leave.
+                      {...(href.startsWith("tel:")
+                        ? {}
+                        : { target: "_blank", rel: "noopener noreferrer" })}
+                      // The same tile the quantity stepper and the tool rail use,
+                      // so a channel reads as something to press rather than as
+                      // decoration floating on the background.
+                      className="grid h-9 w-9 place-items-center rounded-lg border border-white/10 bg-white/[0.03] text-neutral-300 hover:border-[var(--brand)]/50 hover:bg-[var(--brand)]/10 hover:text-white transition-colors"
+                    >
+                      <Glyph />
+                    </a>
+                  ))}
+                </div>
+              </div>
+            ) : null}
           </div>
+
+          <Column
+            heading="Danh mục"
+            links={shopLinks}
+            seeAll={{ label: "Xem tất cả danh mục", href: "/categories" }}
+          />
+
+          <Column
+            heading="Wiki hướng dẫn"
+            links={guideLinks}
+            seeAll={{ label: "Xem tất cả hướng dẫn", href: "/docs" }}
+          />
+
+          <Column heading="Hỗ trợ" links={supportLinks} />
         </div>
 
-        {/* Row 3 — copyright */}
-        <div className="pt-8 flex flex-col md:flex-row items-center justify-center md:justify-start gap-3">
-          <Image
-            src={`${IMG}/logos/menzu-logo.webp`}
-            alt="Menzu"
-            width={28}
-            height={28}
-            className="hidden md:block w-7 h-7 object-contain"
-          />
-          <div className="flex flex-col md:flex-row items-center gap-1.5 md:gap-2 text-[10px] sm:text-xs font-bold uppercase tracking-widest">
-            <span className="text-neutral-400">© 2026 {brandName.toUpperCase()}</span>
-            <span className="mx-2 text-white/10 select-none">•</span>
-            <span className="text-neutral-400/70">ALL RIGHTS RESERVED</span>
-            <span className="hidden md:inline mx-2 text-white/10 select-none">•</span>
-            <span className="text-neutral-400/50">DESIGNED &amp; DEVELOPED BY</span>
-            <span className="text-neutral-300">MENZU</span>
-          </div>
+        <div className="mt-9 pt-5 border-t border-white/[0.06] flex flex-col md:flex-row items-center justify-between gap-3">
+          <p className="text-[12px] text-neutral-500 text-center md:text-left">
+            © {new Date().getFullYear()}{" "}
+            <span className="font-bold text-neutral-300">
+              {wordmark}
+              <span className="text-neutral-400">.COM</span>
+            </span>
+            . All rights reserved.
+          </p>
+
+          <nav className="flex flex-wrap items-center justify-center gap-x-6 gap-y-1.5">
+            {BOTTOM_LINKS.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="text-[12px] text-neutral-500 hover:text-white transition-colors"
+              >
+                {link.label}
+              </Link>
+            ))}
+          </nav>
         </div>
       </div>
     </footer>

@@ -102,10 +102,13 @@ export interface ShopSettings {
   /** Newlines are line breaks — the overlay is two short words on two rows. */
   authLoginTitle: string;
   authSignupTitle: string;
-  /** Empty means "leave the link inert", which is how the capture shipped. */
+  /** Empty means the channel does not exist yet, so the footer leaves its icon
+   *  out rather than shipping the inert "#" link the capture came with. */
   contactZalo: string;
   contactFacebook: string;
   contactHotline: string;
+  contactTiktok: string;
+  contactDiscord: string;
 
   // --- Bố cục trang chủ -----------------------------------------------------
   /** Ordered block ids; a leading "-" marks the block as hidden. */
@@ -253,6 +256,8 @@ export const DEFAULT_SETTINGS: ShopSettings = {
   contactZalo: "",
   contactFacebook: "",
   contactHotline: "",
+  contactTiktok: "",
+  contactDiscord: "",
 
   homeBlocks: HOME_BLOCKS.map((block) => block.id),
   homeValorantSlugs: [
@@ -337,6 +342,8 @@ export const SETTING_KEYS: Record<keyof ShopSettings, string> = {
   contactZalo: "contact.zalo",
   contactFacebook: "contact.facebook",
   contactHotline: "contact.hotline",
+  contactTiktok: "contact.tiktok",
+  contactDiscord: "contact.discord",
 
   homeBlocks: "home.blocks",
   homeValorantSlugs: "home.row.valorant",
@@ -706,6 +713,14 @@ export function parseSettings(rows: Iterable<{ key: string; value: string }>): S
       stored.get(SETTING_KEYS.contactHotline),
       DEFAULT_SETTINGS.contactHotline,
     ),
+    contactTiktok: toOptionalText(
+      stored.get(SETTING_KEYS.contactTiktok),
+      DEFAULT_SETTINGS.contactTiktok,
+    ),
+    contactDiscord: toOptionalText(
+      stored.get(SETTING_KEYS.contactDiscord),
+      DEFAULT_SETTINGS.contactDiscord,
+    ),
 
     homeBlocks: toBlockList(stored.get(SETTING_KEYS.homeBlocks), DEFAULT_SETTINGS.homeBlocks),
     homeValorantSlugs: toSlugList(
@@ -800,6 +815,8 @@ export function serializeSettings(settings: ShopSettings): { key: string; value:
     contactZalo: settings.contactZalo.trim(),
     contactFacebook: settings.contactFacebook.trim(),
     contactHotline: settings.contactHotline.trim(),
+    contactTiktok: settings.contactTiktok.trim(),
+    contactDiscord: settings.contactDiscord.trim(),
 
     homeBlocks: settings.homeBlocks.join(","),
     homeValorantSlugs: settings.homeValorantSlugs.join(","),
@@ -903,6 +920,8 @@ export function normalizeSettings(raw: Partial<ShopSettings> | null): ShopSettin
     contactZalo: String(raw?.contactZalo ?? "").trim(),
     contactFacebook: String(raw?.contactFacebook ?? "").trim(),
     contactHotline: String(raw?.contactHotline ?? "").trim(),
+    contactTiktok: String(raw?.contactTiktok ?? "").trim(),
+    contactDiscord: String(raw?.contactDiscord ?? "").trim(),
 
     homeBlocks: toBlockList(
       Array.isArray(raw?.homeBlocks) ? raw.homeBlocks.join(",") : undefined,

@@ -43,7 +43,14 @@ export default async function DocsPage() {
           if (items.length === 0) return null;
 
           return (
-            <section key={section.key} className="space-y-5">
+            // The id is what the footer's "Câu hỏi thường gặp" and "Chính sách
+            // bảo hành" links aim at; scroll-mt keeps the heading clear of the
+            // fixed header when one of them lands here.
+            <section
+              key={section.key}
+              id={section.key}
+              className="space-y-5 scroll-mt-[120px]"
+            >
               <div className="flex items-center gap-3">
                 <h2 className="text-sm font-black uppercase tracking-widest text-white">
                   {section.label}

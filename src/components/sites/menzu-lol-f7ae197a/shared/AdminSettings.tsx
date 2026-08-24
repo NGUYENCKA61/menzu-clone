@@ -343,6 +343,8 @@ export function AdminSettings({
   const [zalo, setZalo] = useState(settings.contactZalo);
   const [facebook, setFacebook] = useState(settings.contactFacebook);
   const [hotline, setHotline] = useState(settings.contactHotline);
+  const [tiktok, setTiktok] = useState(settings.contactTiktok);
+  const [discord, setDiscord] = useState(settings.contactDiscord);
 
   const [blocks, setBlocks] = useState(settings.homeBlocks);
   // No longer edited here — the groups table replaced these two rows. They are
@@ -508,6 +510,8 @@ export function AdminSettings({
           contactZalo: zalo,
           contactFacebook: facebook,
           contactHotline: hotline,
+          contactTiktok: tiktok,
+          contactDiscord: discord,
           homeBlocks: blocks,
           homeValorantSlugs: settings.homeValorantSlugs,
           homeTftSlugs: settings.homeTftSlugs,
@@ -1637,11 +1641,36 @@ export function AdminSettings({
                   className={FIELD}
                 />
               </div>
+              <div>
+                <label htmlFor="contact-tiktok" className={LABEL}>
+                  Link TikTok
+                </label>
+                <input
+                  id="contact-tiktok"
+                  value={tiktok}
+                  onChange={(event) => setTiktok(event.target.value)}
+                  placeholder="https://tiktok.com/@..."
+                  className={FIELD}
+                />
+              </div>
+              <div>
+                <label htmlFor="contact-discord" className={LABEL}>
+                  Link Discord
+                </label>
+                <input
+                  id="contact-discord"
+                  value={discord}
+                  onChange={(event) => setDiscord(event.target.value)}
+                  placeholder="https://discord.gg/..."
+                  className={FIELD}
+                />
+              </div>
             </div>
 
             <p className={HINT}>
-              Để trống thì icon ở chân trang vẫn hiện nhưng không dẫn đi đâu — giống hệt
-              bản gốc. Điền vào thì icon Facebook và Zalo mở đúng địa chỉ của shop.
+              Điền kênh nào thì icon kênh đó hiện ở dải “Theo dõi &amp; kết nối” dưới
+              chân trang; để trống thì icon không hiện, chứ không còn kiểu icon bấm vào
+              không đi đâu như bản gốc.
             </p>
           </section>
         </>
