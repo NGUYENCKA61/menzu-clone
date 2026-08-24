@@ -1,3 +1,5 @@
+import { DocHtml } from "@/lib/docFormat";
+
 /**
  * Where the "Xem chi tiết" cue lands, and the id this section wears. Shared so
  * the two cannot drift apart into a button that scrolls nowhere.
@@ -7,6 +9,10 @@ export const DESCRIPTION_SECTION_ID = "mo-ta-san-pham";
 export interface SoftwareDescriptionProps {
   name: string;
   description: string;
+  /** A per-product write-up from the admin's rich editor. When present it
+   *  replaces the stock feature/guide/warranty blocks below; the facts grid
+   *  stays either way, because it prints data, not copy. */
+  richHtml?: string | null;
   /** Tier labels, cheapest first — printed as the "Thời hạn" fact. */
   packageLabels: string[];
   version: string | null;
@@ -51,6 +57,7 @@ const FEATURES = [
 export function SoftwareDescription({
   name,
   description,
+  richHtml,
   packageLabels,
   version,
   platform,
@@ -65,6 +72,43 @@ export function SoftwareDescription({
       : []),
     { label: "Cấp key", value: "Tự động sau thanh toán" },
   ];
+
+  const factsGrid = (
+    <dl className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+      {facts.map((f) => (
+        <div
+          key={f.label}
+          className="rounded-lg border border-white/10 bg-white/[0.02] px-4 py-3.5"
+        >
+          <dt className="text-[9px] font-black uppercase tracking-widest text-neutral-500">
+            {f.label}
+          </dt>
+          <dd className="mt-1.5 text-[13px] font-semibold text-white">{f.value}</dd>
+        </div>
+      ))}
+    </dl>
+  );
+
+  // The admin wrote this product its own story — print it in full and skip
+  // the boilerplate written for tools that have none.
+  if (richHtml) {
+    return (
+      <section
+        id={DESCRIPTION_SECTION_ID}
+        className="mt-14 scroll-mt-[120px] border-t border-white/10 pt-12"
+      >
+        <h2 className="text-[26px] sm:text-3xl font-black uppercase tracking-wider text-white">
+          Mô tả sản phẩm
+        </h2>
+        <div className="mt-5">
+          <DocHtml body={richHtml} />
+        </div>
+
+        <h3 className={SUB_HEADING}>Thông tin phần mềm</h3>
+        {factsGrid}
+      </section>
+    );
+  }
 
   return (
     // scroll-mt keeps the heading clear of the fixed header when the cue above
@@ -87,6 +131,9 @@ export function SoftwareDescription({
         {description ? ` — ${description}` : ""}
       </p>
 
+      <h3 className={SUB_HEADING}>Thông tin phần mềm</h3>
+      {factsGrid}
+
       <h3 className={SUB_HEADING}>Tính năng nổi bật</h3>
       <ul className="mt-4 flex flex-col gap-4">
         {FEATURES.map((f) => (
@@ -101,21 +148,6 @@ export function SoftwareDescription({
           </li>
         ))}
       </ul>
-
-      <h3 className={SUB_HEADING}>Thông tin phần mềm</h3>
-      <dl className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-        {facts.map((f) => (
-          <div
-            key={f.label}
-            className="rounded-lg border border-white/10 bg-white/[0.02] px-4 py-3.5"
-          >
-            <dt className="text-[9px] font-black uppercase tracking-widest text-neutral-500">
-              {f.label}
-            </dt>
-            <dd className="mt-1.5 text-[13px] font-semibold text-white">{f.value}</dd>
-          </div>
-        ))}
-      </dl>
 
       <h3 className={SUB_HEADING}>Hướng dẫn sử dụng</h3>
       <p className={`mt-4 ${BODY}`}>

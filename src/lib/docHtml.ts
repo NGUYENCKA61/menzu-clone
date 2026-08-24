@@ -100,3 +100,31 @@ export function plainToDocHtml(plain: string): string {
     .map((block) => `<p>${escape(block).replace(/\n/g, "<br />")}</p>`)
     .join("");
 }
+
+/** The HTML body reduced to running text — for the places that print a
+ *  sentence, not a page: meta descriptions, the buy panel's blurb, list
+ *  cards. Tags go, entities come back as characters, whitespace collapses;
+ *  `maxLength` trims with an ellipsis when the prose runs long. */
+export function docHtmlToPlainText(html: string, maxLength?: number): string {
+  // A block boundary is a word boundary. Dropping the tags without leaving a
+  // space behind runs a heading straight into the paragraph under it —
+  // "Tính năng nổi bậtAimbot mượt" — and that string is what a search result,
+  // an OG card and a product tile all print.
+  const spaced = html.replace(
+    /<br\s*\/?>|<\/(?:p|h[1-6]|li|ul|ol|blockquote|div|figure|figcaption|pre|tr|td|th)>/gi,
+    " ",
+  );
+  const text = sanitizeHtml(spaced, { allowedTags: [], allowedAttributes: {} })
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;|&apos;/g, "'")
+    .replace(/&nbsp;/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+  if (maxLength && text.length > maxLength) {
+    return `${text.slice(0, maxLength - 1).trimEnd()}…`;
+  }
+  return text;
+}

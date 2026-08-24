@@ -675,9 +675,11 @@ model ProductPackage {
   /// wording is part of the offer and deriving it from a day count would lose
   /// the distinction between "30 ngày" and "1 tháng".
   label        String
+  /// How long the key lasts, counted in hours because tools sell by the hour
+  /// as readily as by the month — a day column could not hold "3 giờ" at all.
   /// Null means it never expires. Drives when a delivered key stops working;
   /// the label is what the buyer reads.
-  durationDays Int?
+  durationHours Int?
   price        BigInt
   sortOrder    Int     @default(0)
   orders       Order[]

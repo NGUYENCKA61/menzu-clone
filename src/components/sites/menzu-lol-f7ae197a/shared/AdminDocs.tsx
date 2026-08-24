@@ -14,11 +14,12 @@ import {
   Plus,
   Search,
   ShieldCheck,
+  Trash2,
   X,
   type LucideIcon,
 } from "lucide-react";
 
-import { AdminEmpty, AdminError } from "./AdminStates";
+import { AdminEmpty, AdminError, ConfirmDialog } from "./AdminStates";
 
 export interface DocView {
   slug: string;
@@ -108,6 +109,7 @@ export function AdminDocs({ docs }: { docs: DocView[] }) {
   const [newCategory, setNewCategory] = useState<string>("FAQ");
   /** "" = every shelf; otherwise only that category's shelf renders. */
   const [catFilter, setCatFilter] = useState("");
+  const [removing, setRemoving] = useState<DocView | null>(null);
 
   // The cards always describe the whole wiki; only the shelves filter.
   const written = docs.filter((d) => d.body).length;
@@ -154,6 +156,29 @@ export function AdminDocs({ docs }: { docs: DocView[] }) {
         router.push(`/admin/docs/${data.slug}`);
         return;
       }
+      router.refresh();
+    } catch {
+      setError("Không kết nối được máy chủ");
+    } finally {
+      setPending(false);
+    }
+  }
+
+  async function remove() {
+    if (!removing) return;
+    setPending(true);
+    setError(null);
+    try {
+      const response = await fetch(
+        `/api/admin/docs?slug=${encodeURIComponent(removing.slug)}`,
+        { method: "DELETE" },
+      );
+      const data = (await response.json().catch(() => ({}))) as { error?: string };
+      if (!response.ok) {
+        setError(data.error ?? "Xóa bài viết thất bại");
+        return;
+      }
+      setRemoving(null);
       router.refresh();
     } catch {
       setError("Không kết nối được máy chủ");
@@ -220,6 +245,16 @@ export function AdminDocs({ docs }: { docs: DocView[] }) {
               <PencilLine size={12} />
               Sửa
             </Link>
+            <button
+              type="button"
+              disabled={pending}
+              onClick={() => setRemoving(doc)}
+              title="Xóa bài viết"
+              aria-label={`Xóa bài ${doc.title}`}
+              className="h-8 w-8 rounded-lg border border-white/[0.07] bg-white/[0.03] hover:border-red-500/30 hover:bg-red-500/10 disabled:opacity-30 text-neutral-500 hover:text-red-400 transition-colors inline-flex items-center justify-center"
+            >
+              <Trash2 size={13} />
+            </button>
           </div>
         </div>
       </div>
@@ -444,6 +479,21 @@ export function AdminDocs({ docs }: { docs: DocView[] }) {
       {strays.map((doc) => (
         <DocCard key={doc.slug} doc={doc} />
       ))}
+
+      <ConfirmDialog
+        open={removing !== null}
+        danger
+        pending={pending}
+        title="Xóa bài viết?"
+        body={
+          removing
+            ? `Bài "${removing.title}" (/${removing.slug}) biến mất ngay và không khôi phục được — khách đã lưu link sẽ thấy 404.${removing.views > 0 ? ` ${removing.views.toLocaleString("vi-VN")} lượt xem mất theo luôn.` : ""}`
+            : ""
+        }
+        confirmLabel="Xóa bài"
+        onCancel={() => setRemoving(null)}
+        onConfirm={remove}
+      />
     </div>
   );
 }

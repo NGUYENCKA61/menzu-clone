@@ -5,9 +5,11 @@ import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import {
   ExternalLink,
+  FileText,
   ImagePlus,
   KeyRound,
   Package,
+  Pencil,
   Plus,
   Save,
   ShieldAlert,
@@ -15,13 +17,22 @@ import {
   Wallet,
 } from "lucide-react";
 
+import {
+  formatDuration,
+  formatDurationInline,
+  splitDuration,
+  toHours,
+  type DurationUnit,
+} from "@/lib/duration";
+
 import { AdminError, ConfirmDialog } from "./AdminStates";
+import { RichTextEditor } from "./RichTextEditor";
 
 export interface SoftwarePackageView {
   id: string;
   label: string;
   price: number;
-  durationDays: number | null;
+  durationHours: number | null;
   orderCount: number;
 }
 
@@ -32,7 +43,9 @@ export interface SoftwareDetailView {
   softwareStatus: string | null;
   status: string;
   price: number;
-  description: string;
+  /** The stored description lifted to editor HTML on the server — legacy
+   *  plain text arrives already converted. */
+  descriptionHtml: string;
   downloadUrl: string;
   imageUrl: string;
   videoUrl: string;
@@ -82,7 +95,9 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
   const [name, setName] = useState(software.name);
   const [version, setVersion] = useState(software.version);
   const [platform, setPlatform] = useState(software.platform);
-  const [description, setDescription] = useState(software.description);
+  const [descHtml, setDescHtml] = useState(software.descriptionHtml);
+  /** What the database holds; advanced on every successful save. */
+  const [descBaseline, setDescBaseline] = useState(software.descriptionHtml);
   const [downloadUrl, setDownloadUrl] = useState(software.downloadUrl);
   const [videoUrl, setVideoUrl] = useState(software.videoUrl);
   const [price, setPrice] = useState(String(software.price));
@@ -93,7 +108,15 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
 
   const [pkgLabel, setPkgLabel] = useState("");
   const [pkgPrice, setPkgPrice] = useState("");
-  const [pkgDays, setPkgDays] = useState("");
+  const [pkgLength, setPkgLength] = useState("");
+  const [pkgUnit, setPkgUnit] = useState<DurationUnit>("day");
+
+  /** Which tier the shelf has opened for editing, and the draft it holds. */
+  const [editingPkg, setEditingPkg] = useState<string | null>(null);
+  const [editLabel, setEditLabel] = useState("");
+  const [editPrice, setEditPrice] = useState("");
+  const [editLength, setEditLength] = useState("");
+  const [editUnit, setEditUnit] = useState<DurationUnit>("day");
 
   const coverRef = useRef<HTMLInputElement>(null);
 
@@ -135,11 +158,21 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
       name,
       version,
       platform,
-      description,
       downloadUrl,
       videoUrl,
     });
     if (data) setMsg({ tone: "ok", text: "Đã lưu thông tin phần mềm" });
+  }
+
+  async function saveDescription() {
+    const data = await api("/api/admin/software", "PATCH", {
+      code: software.code,
+      description: descHtml,
+    });
+    if (data) {
+      setDescBaseline(descHtml);
+      setMsg({ tone: "ok", text: "Đã lưu mô tả sản phẩm" });
+    }
   }
 
   async function savePricing() {
@@ -176,17 +209,41 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
     }
   }
 
+  function startEditPackage(pkg: SoftwarePackageView) {
+    setMsg(null);
+    setEditingPkg(pkg.id);
+    setEditLabel(pkg.label);
+    setEditPrice(String(pkg.price));
+    const { value, unit } = splitDuration(pkg.durationHours);
+    setEditLength(value);
+    setEditUnit(unit);
+  }
+
+  async function savePackage() {
+    if (!editingPkg) return;
+    const data = await api("/api/admin/software/packages", "PATCH", {
+      id: editingPkg,
+      label: editLabel.trim(),
+      price: Number(editPrice.replace(/\D/g, "")),
+      durationHours: toHours(editLength, editUnit),
+    });
+    if (data) {
+      setEditingPkg(null);
+      setMsg({ tone: "ok", text: "Đã lưu gói" });
+    }
+  }
+
   async function addPackage() {
     const data = await api("/api/admin/software/packages", "POST", {
       code: software.code,
       label: pkgLabel,
       price: Number(pkgPrice.replace(/\D/g, "")),
-      durationDays: pkgDays ? Number(pkgDays.replace(/\D/g, "")) : null,
+      durationHours: toHours(pkgLength, pkgUnit),
     });
     if (data) {
       setPkgLabel("");
       setPkgPrice("");
-      setPkgDays("");
+      setPkgLength("");
       setMsg({ tone: "ok", text: "Đã thêm gói" });
     }
   }
@@ -245,7 +302,9 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
           </p>
         </div>
         <a
-          href={`/${encodeURIComponent(software.code)}`}
+          // /{code} serves accounts only — a tool lives under /software/{code},
+          // so this button used to open a 404 every single time.
+          href={`/software/${encodeURIComponent(software.code)}`}
           target="_blank"
           rel="noreferrer"
           className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-white/[0.08] bg-white/[0.03] px-3.5 text-[10px] font-black uppercase tracking-widest text-neutral-300 transition-colors hover:bg-white/[0.08] hover:text-white"
@@ -296,18 +355,6 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
                   onChange={(event) => setPlatform(event.target.value)}
                   placeholder="Windows 10/11"
                   className={FIELD}
-                />
-              </div>
-              <div className="sm:col-span-2">
-                <label htmlFor="sw-desc" className={LABEL}>
-                  Mô tả
-                </label>
-                <textarea
-                  id="sw-desc"
-                  rows={5}
-                  value={description}
-                  onChange={(event) => setDescription(event.target.value)}
-                  className={`${FIELD} resize-y leading-relaxed`}
                 />
               </div>
               <div>
@@ -463,39 +510,151 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
               </p>
             ) : (
               <div className="flex flex-col gap-1.5">
-                {software.packages.map((pkg) => (
-                  <div
-                    key={pkg.id}
-                    className="flex items-center gap-2.5 rounded-lg border border-white/[0.06] bg-neutral-950/50 px-3 py-2 transition-colors hover:border-white/[0.12]"
-                  >
-                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md border border-violet-500/25 bg-violet-500/10 text-violet-400">
-                      <KeyRound size={11} />
-                    </span>
-                    <span className="flex-1 truncate text-xs font-bold text-white">
-                      {pkg.label}
-                    </span>
-                    <span className="shrink-0 text-[11px] text-neutral-500 tabular-nums">
-                      {pkg.durationDays ? `${pkg.durationDays} ngày` : "Vĩnh viễn"}
-                    </span>
-                    <span className="shrink-0 rounded border border-white/[0.07] bg-white/[0.04] px-1.5 py-0.5 text-[10px] tabular-nums text-neutral-400">
-                      {pkg.orderCount} đơn
-                    </span>
-                    <span className="shrink-0 text-xs font-black tabular-nums text-rose-400">
-                      {formatVnd(pkg.price)}đ
-                    </span>
-                    <button
-                      type="button"
-                      disabled={busy}
-                      onClick={() => setRemovingPkg(pkg)}
-                      aria-label={`Xóa gói ${pkg.label}`}
-                      className="h-7 w-7 rounded-lg border border-white/[0.07] bg-white/[0.03] hover:border-red-500/30 hover:bg-red-500/10 disabled:opacity-30 text-neutral-500 hover:text-red-400 transition-colors inline-flex items-center justify-center"
+                {software.packages.map((pkg) =>
+                  editingPkg === pkg.id ? (
+                    // The row opens where it stands rather than in a dialog:
+                    // the three things being changed are the three things the
+                    // row was already showing, and the tiers around it are the
+                    // context for whether a price is right.
+                    <div
+                      key={pkg.id}
+                      className="flex flex-wrap items-end gap-2 rounded-lg border border-[var(--brand)]/40 bg-neutral-950/50 px-3 py-2.5"
                     >
-                      <Trash2 size={12} />
-                    </button>
-                  </div>
-                ))}
+                      <div className="flex-1 min-w-[130px]">
+                        <label htmlFor={`edit-label-${pkg.id}`} className={LABEL}>
+                          Tên gói
+                        </label>
+                        <input
+                          id={`edit-label-${pkg.id}`}
+                          value={editLabel}
+                          onChange={(event) => setEditLabel(event.target.value)}
+                          className={FIELD}
+                        />
+                      </div>
+                      <div>
+                        <label htmlFor={`edit-price-${pkg.id}`} className={LABEL}>
+                          Giá (đ)
+                        </label>
+                        <input
+                          id={`edit-price-${pkg.id}`}
+                          inputMode="numeric"
+                          value={
+                            editPrice
+                              ? formatVnd(Number(editPrice.replace(/\D/g, "") || "0"))
+                              : ""
+                          }
+                          onChange={(event) =>
+                            setEditPrice(event.target.value.replace(/\D/g, "").slice(0, 10))
+                          }
+                          className={`${FIELD} w-28 tabular-nums`}
+                        />
+                      </div>
+                      <div>
+                        <label htmlFor={`edit-length-${pkg.id}`} className={LABEL}>
+                          Thời hạn
+                        </label>
+                        <div className="flex items-center gap-1.5">
+                          <input
+                            id={`edit-length-${pkg.id}`}
+                            inputMode="numeric"
+                            value={editLength}
+                            onChange={(event) =>
+                              setEditLength(event.target.value.replace(/\D/g, "").slice(0, 4))
+                            }
+                            className={`${FIELD} w-16 tabular-nums`}
+                          />
+                          <select
+                            aria-label="Đơn vị thời hạn"
+                            value={editUnit}
+                            onChange={(event) =>
+                              setEditUnit(event.target.value as DurationUnit)
+                            }
+                            className={`${FIELD} w-[72px]`}
+                          >
+                            <option value="hour" className="bg-neutral-900">
+                              giờ
+                            </option>
+                            <option value="day" className="bg-neutral-900">
+                              ngày
+                            </option>
+                          </select>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        disabled={busy || !editLabel.trim() || !editPrice}
+                        onClick={savePackage}
+                        className={ACTION}
+                      >
+                        <Save size={12} />
+                        Lưu
+                      </button>
+                      <button
+                        type="button"
+                        disabled={busy}
+                        onClick={() => setEditingPkg(null)}
+                        className="h-[34px] px-3 rounded-lg border border-white/10 bg-white/[0.03] hover:bg-white/[0.08] disabled:opacity-40 text-[10px] font-black uppercase tracking-widest text-neutral-400 hover:text-white transition-colors"
+                      >
+                        Hủy
+                      </button>
+                    </div>
+                  ) : (
+                    <div
+                      key={pkg.id}
+                      className="flex items-center gap-2.5 rounded-lg border border-white/[0.06] bg-neutral-950/50 px-3 py-2 transition-colors hover:border-white/[0.12]"
+                    >
+                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md border border-violet-500/25 bg-violet-500/10 text-violet-400">
+                        <KeyRound size={11} />
+                      </span>
+                      <span className="flex-1 truncate text-xs font-bold text-white">
+                        {pkg.label}
+                      </span>
+                      <span className="shrink-0 text-[11px] text-neutral-500 tabular-nums">
+                        {formatDuration(pkg.durationHours)}
+                      </span>
+                      <span className="shrink-0 rounded border border-white/[0.07] bg-white/[0.04] px-1.5 py-0.5 text-[10px] tabular-nums text-neutral-400">
+                        {pkg.orderCount} đơn
+                      </span>
+                      <span className="shrink-0 text-xs font-black tabular-nums text-rose-400">
+                        {formatVnd(pkg.price)}đ
+                      </span>
+                      <button
+                        type="button"
+                        disabled={busy}
+                        onClick={() => startEditPackage(pkg)}
+                        aria-label={`Sửa gói ${pkg.label}`}
+                        className="h-7 w-7 shrink-0 rounded-lg border border-white/[0.07] bg-white/[0.03] hover:border-[var(--brand)]/40 hover:bg-[var(--brand)]/10 disabled:opacity-30 text-neutral-500 hover:text-white transition-colors inline-flex items-center justify-center"
+                      >
+                        <Pencil size={12} />
+                      </button>
+                      {/* A sold tier cannot be deleted — orders point at the
+                          row — so the button says so instead of opening a
+                          dialog that would only come back with an error. */}
+                      <button
+                        type="button"
+                        disabled={busy || pkg.orderCount > 0}
+                        title={
+                          pkg.orderCount > 0
+                            ? "Gói đã có đơn — sửa được nhưng không xóa được"
+                            : undefined
+                        }
+                        onClick={() => setRemovingPkg(pkg)}
+                        aria-label={`Xóa gói ${pkg.label}`}
+                        className="h-7 w-7 shrink-0 rounded-lg border border-white/[0.07] bg-white/[0.03] hover:border-red-500/30 hover:bg-red-500/10 disabled:opacity-30 disabled:hover:border-white/[0.07] disabled:hover:bg-white/[0.03] text-neutral-500 hover:text-red-400 disabled:hover:text-neutral-500 transition-colors inline-flex items-center justify-center"
+                      >
+                        <Trash2 size={12} />
+                      </button>
+                    </div>
+                  ),
+                )}
               </div>
             )}
+            <p className="text-[11px] text-neutral-500">
+              Thời hạn để trống là gói vĩnh viễn; chọn giờ hay ngày tùy gói.
+              {software.packages.length > 0
+                ? " Gói đã bán không xóa được vì đơn cũ trỏ vào nó — nhưng sửa tên, giá, thời hạn thì thoải mái. Đơn cũ giữ nguyên giá lúc mua."
+                : ""}
+            </p>
             <div className="flex flex-wrap items-end gap-2 border-t border-white/[0.06] pt-3">
               <div className="flex-1 min-w-[140px]">
                 <label htmlFor="pkg-label" className={LABEL}>
@@ -524,19 +683,33 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
                 />
               </div>
               <div>
-                <label htmlFor="pkg-days" className={LABEL}>
-                  Số ngày
+                <label htmlFor="pkg-length" className={LABEL}>
+                  Thời hạn
                 </label>
-                <input
-                  id="pkg-days"
-                  inputMode="numeric"
-                  value={pkgDays}
-                  onChange={(event) =>
-                    setPkgDays(event.target.value.replace(/\D/g, "").slice(0, 4))
-                  }
-                  placeholder="trống = vĩnh viễn"
-                  className={`${FIELD} w-20 tabular-nums`}
-                />
+                <div className="flex items-center gap-1.5">
+                  <input
+                    id="pkg-length"
+                    inputMode="numeric"
+                    value={pkgLength}
+                    onChange={(event) =>
+                      setPkgLength(event.target.value.replace(/\D/g, "").slice(0, 4))
+                    }
+                    className={`${FIELD} w-16 tabular-nums`}
+                  />
+                  <select
+                    aria-label="Đơn vị thời hạn"
+                    value={pkgUnit}
+                    onChange={(event) => setPkgUnit(event.target.value as DurationUnit)}
+                    className={`${FIELD} w-[72px]`}
+                  >
+                    <option value="hour" className="bg-neutral-900">
+                      giờ
+                    </option>
+                    <option value="day" className="bg-neutral-900">
+                      ngày
+                    </option>
+                  </select>
+                </div>
               </div>
               <button
                 type="button"
@@ -575,6 +748,35 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
         </div>
       </div>
 
+      {/* Full width below the grid — prose wants room the columns don't have. */}
+      <section className={CARD}>
+        <span className={CARD_HEAD}>
+          <FileText size={13} className="text-neutral-400" />
+          Mô tả sản phẩm
+        </span>
+        <RichTextEditor initialHtml={software.descriptionHtml} onUpdate={setDescHtml} />
+        <p className="text-[11px] text-neutral-500">
+          Có nội dung ở đây thì khu &ldquo;Mô tả sản phẩm&rdquo; trên trang khách hiện
+          đúng bài này — đậm, màu, ảnh y như trong khung. Để trống rồi lưu thì trang
+          khách quay về bố cục mặc định (tính năng nổi bật, hướng dẫn, bảo hành viết
+          sẵn).
+        </p>
+        <div className="flex flex-wrap items-center gap-3">
+          <button
+            type="button"
+            disabled={busy || descHtml === descBaseline}
+            onClick={saveDescription}
+            className={ACTION}
+          >
+            <Save size={12} />
+            Lưu mô tả
+          </button>
+          {descHtml !== descBaseline ? (
+            <span className="text-[11px] text-neutral-500">Có thay đổi chưa lưu</span>
+          ) : null}
+        </div>
+      </section>
+
       <ConfirmDialog
         open={removingPkg !== null}
         danger
@@ -582,7 +784,7 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
         title="Xóa gói thời hạn?"
         body={
           removingPkg
-            ? `Gói "${removingPkg.label}" (${formatVnd(removingPkg.price)}đ / ${removingPkg.durationDays ? `${removingPkg.durationDays} ngày` : "vĩnh viễn"}) rời kệ ngay. ${removingPkg.orderCount > 0 ? `${removingPkg.orderCount} đơn cũ đã mua gói này vẫn giữ nguyên.` : "Gói chưa có đơn nào."}`
+            ? `Gói "${removingPkg.label}" (${formatVnd(removingPkg.price)}đ / ${formatDurationInline(removingPkg.durationHours)}) rời kệ ngay. Gói chưa có đơn nào nên xóa hẳn, không khôi phục được.`
             : ""
         }
         confirmLabel="Xóa gói"

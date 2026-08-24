@@ -14,6 +14,7 @@ import {
 } from "@/components/sites/menzu-lol-f7ae197a/shared/SoftwareDescription";
 import { SoftwareGallery } from "@/components/sites/menzu-lol-f7ae197a/shared/SoftwareGallery";
 import { formatVnd } from "@/components/sites/menzu-lol-f7ae197a/shared/productData";
+import { docHtmlToPlainText, isHtmlBody } from "@/lib/docHtml";
 import { getSoftwareDetail } from "@/lib/queries";
 import { breadcrumbJsonLd, JsonLd } from "@/lib/seo";
 
@@ -37,15 +38,21 @@ export async function generateMetadata({
     null as number | null,
   );
 
+  // A rich-editor description is HTML — search results get its prose, not
+  // its tags, and never more than a sentence or two of it.
+  const plainDescription = isHtmlBody(software.description)
+    ? docHtmlToPlainText(software.description, 160)
+    : software.description;
+
   return {
     title: from === null ? software.name : `${software.name} — Từ ${formatVnd(from)}đ`,
     description:
-      software.description ||
+      plainDescription ||
       `${software.name} — phần mềm hỗ trợ gaming, giao key tự động, bảo hành trong suốt thời gian sử dụng.`,
     alternates: { canonical: `/software/${software.code}` },
     openGraph: {
       title: software.name,
-      description: software.description,
+      description: plainDescription,
       images: software.images.slice(0, 1),
     },
   };
@@ -56,6 +63,14 @@ export default async function SoftwarePage({ params, searchParams }: PageProps) 
   const { pkg } = await searchParams;
   const software = await getSoftwareDetail(code);
   if (!software) notFound();
+
+  // One stored field, two voices: the rich HTML (if the admin wrote one) goes
+  // to the description section in full; every place that prints a sentence —
+  // the buy panel's blurb — gets the prose stripped back out of it.
+  const richDescription = isHtmlBody(software.description) ? software.description : null;
+  const plainDescription = richDescription
+    ? docHtmlToPlainText(richDescription, 220)
+    : software.description;
 
   return (
     <div className="min-h-screen flex flex-col text-white overflow-x-clip selection:bg-indigo-500/30">
@@ -94,7 +109,10 @@ export default async function SoftwarePage({ params, searchParams }: PageProps) 
                 images={software.images}
                 videoUrl={software.videoUrl}
               />
-              <SoftwareBuyPanel software={software} initialPackageId={pkg} />
+              <SoftwareBuyPanel
+                software={{ ...software, description: plainDescription }}
+                initialPackageId={pkg}
+              />
             </div>
 
             {/* The same cue the home page's hero carries, in normal flow here
@@ -105,7 +123,8 @@ export default async function SoftwarePage({ params, searchParams }: PageProps) 
 
             <SoftwareDescription
               name={software.name}
-              description={software.description}
+              description={plainDescription}
+              richHtml={richDescription}
               packageLabels={software.packages.map((p) => p.label)}
               version={software.version}
               platform={software.platform}

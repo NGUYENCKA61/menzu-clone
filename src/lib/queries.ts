@@ -530,7 +530,7 @@ export async function getSoftwareDetail(code: string): Promise<SoftwareDetail | 
       id: pk.id,
       label: pk.label,
       price: Number(pk.price),
-      durationDays: pk.durationDays,
+      durationHours: pk.durationHours,
     })),
     categoryName: p.category.name,
     categorySlug: p.category.slug,

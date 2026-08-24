@@ -12,6 +12,7 @@ import { ProductCard } from "@/components/sites/menzu-lol-f7ae197a/shared/Produc
 import { SoftwareCard } from "@/components/sites/menzu-lol-f7ae197a/shared/SoftwareCard";
 import { SoftwareFilterPanel } from "@/components/sites/menzu-lol-f7ae197a/shared/SoftwareFilterPanel";
 import { db } from "@/lib/db";
+import { docHtmlToPlainText, isHtmlBody } from "@/lib/docHtml";
 import { getCategoryPage } from "@/lib/queries";
 import { getShopSettings } from "@/lib/settingsStore";
 import { weaponKey } from "@/lib/weaponImages";
@@ -153,7 +154,16 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
                 {data.software.length > 0 ? (
                   <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:gap-8">
                     {data.software.map((s) => (
-                      <SoftwareCard key={s.code} software={s} />
+                      <SoftwareCard
+                        key={s.code}
+                        // A rich-editor description is HTML; the card prints a
+                        // sentence, so it gets the prose without the tags.
+                        software={
+                          isHtmlBody(s.description)
+                            ? { ...s, description: docHtmlToPlainText(s.description, 180) }
+                            : s
+                        }
+                      />
                     ))}
                   </div>
                 ) : (

@@ -14,9 +14,9 @@
 import { db } from "@/lib/db";
 
 const TIERS = [
-  { label: "1 ngày", durationDays: 1, price: 29_000 },
-  { label: "7 ngày", durationDays: 7, price: 99_000 },
-  { label: "30 ngày", durationDays: 30, price: 249_000 },
+  { label: "1 ngày", durationHours: 24, price: 29_000 },
+  { label: "7 ngày", durationHours: 168, price: 99_000 },
+  { label: "30 ngày", durationHours: 720, price: 249_000 },
 ];
 
 const IMAGES = "/sites/menzu-lol-f7ae197a/root-8a5edab2/images";
@@ -118,7 +118,7 @@ async function main() {
         data: {
           productId: product.id,
           label: tier.label,
-          durationDays: tier.durationDays,
+          durationHours: tier.durationHours,
           price: BigInt(tier.price),
           sortOrder: tier.price,
         },

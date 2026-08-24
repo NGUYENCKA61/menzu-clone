@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { FORBIDDEN, getAdmin } from "@/lib/admin";
 import { db } from "@/lib/db";
+import { docHtmlIsEmpty, isHtmlBody, sanitizeDocHtml } from "@/lib/docHtml";
 
 const STATUSES = ["UNDETECTED", "DETECTED", "UPDATING"] as const;
 type SoftwareStatusValue = (typeof STATUSES)[number];
@@ -10,6 +11,17 @@ function readStatus(value: unknown): SoftwareStatusValue | undefined {
   return STATUSES.includes(value as SoftwareStatusValue)
     ? (value as SoftwareStatusValue)
     : undefined;
+}
+
+/** Descriptions from the rich editor arrive as HTML — caged to the sanctioned
+ *  tags before they land, exactly as article bodies are. Plain text passes
+ *  through untouched; an empty document stores as null, not as a blank page. */
+function cleanDescription(raw: string): string | null {
+  const value = raw.trim();
+  if (!value) return null;
+  if (!isHtmlBody(value)) return value;
+  const clean = sanitizeDocHtml(value);
+  return docHtmlIsEmpty(clean) ? null : clean;
 }
 
 /**
@@ -61,7 +73,7 @@ export async function POST(request: Request) {
     categoryId: category.id,
     productType: "SOFTWARE_GAME" as const,
     name,
-    description: body?.description?.trim() || null,
+    description: body?.description ? cleanDescription(body.description) : null,
     softwareStatus: readStatus(body?.status) ?? "UNDETECTED",
     price: BigInt(Math.floor(price)),
     oldPrice: BigInt(Math.floor(price)),
@@ -124,7 +136,7 @@ export async function PATCH(request: Request) {
     data: {
       ...(body?.name?.trim() ? { name: body.name.trim() } : {}),
       ...(body?.description !== undefined
-        ? { description: body.description.trim() || null }
+        ? { description: cleanDescription(body.description) }
         : {}),
       ...(readStatus(body?.softwareStatus)
         ? { softwareStatus: readStatus(body?.softwareStatus) }

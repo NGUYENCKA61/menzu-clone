@@ -135,3 +135,24 @@ export async function PATCH(request: Request) {
     hasBody: updated.body !== null,
   });
 }
+
+/**
+ * Removes a wiki article outright. Nothing else in the schema points at an
+ * article, so there is no wastebasket: the row goes, and its published URL
+ * starts returning 404 the moment this responds.
+ */
+export async function DELETE(request: Request) {
+  const admin = await getAdmin();
+  if (!admin) return NextResponse.json(FORBIDDEN, { status: 403 });
+
+  const slug = new URL(request.url).searchParams.get("slug")?.trim();
+  if (!slug) return NextResponse.json({ error: "Thiếu slug bài viết" }, { status: 400 });
+
+  const existing = await db.docArticle.findUnique({ where: { slug } });
+  if (!existing) {
+    return NextResponse.json({ error: "Không tìm thấy bài viết" }, { status: 404 });
+  }
+
+  await db.docArticle.delete({ where: { slug } });
+  return NextResponse.json({ ok: true });
+}

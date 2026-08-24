@@ -5,13 +5,15 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { toHours, type DurationUnit } from "@/lib/duration";
+
 import type { AdminCategoryOption } from "./AdminProducts";
 
 export interface AdminSoftwarePackage {
   id: string;
   label: string;
   price: number;
-  durationDays: number | null;
+  durationHours: number | null;
   orderCount: number;
 }
 
@@ -81,6 +83,7 @@ export function AdminSoftware({
   const [pkgLabel, setPkgLabel] = useState("");
   const [pkgPrice, setPkgPrice] = useState("");
   const [pkgDays, setPkgDays] = useState("");
+  const [pkgUnit, setPkgUnit] = useState<DurationUnit>("day");
 
   async function call(
     path: string,
@@ -170,7 +173,7 @@ export function AdminSoftware({
       code: productCode,
       label: pkgLabel,
       price: Number(pkgPrice.replace(/\D/g, "")),
-      durationDays: pkgDays ? Number(pkgDays.replace(/\D/g, "")) : null,
+      durationHours: toHours(pkgDays, pkgUnit),
     });
     if (!data) return;
     setMsg({ tone: "ok", text: `Đã thêm gói ${pkgLabel}` });
@@ -534,15 +537,30 @@ export function AdminSoftware({
                     className={FIELD}
                   />
                 </div>
-                <div className="w-32">
-                  <label className={LABEL}>Số ngày</label>
-                  <input
-                    inputMode="numeric"
-                    value={pkgDays}
-                    onChange={(e) => setPkgDays(e.target.value)}
-                    placeholder="trống = vĩnh viễn"
-                    className={FIELD}
-                  />
+                <div className="w-44">
+                  <label className={LABEL}>Thời hạn</label>
+                  <div className="flex items-center gap-1.5">
+                    <input
+                      inputMode="numeric"
+                      value={pkgDays}
+                      onChange={(e) => setPkgDays(e.target.value)}
+                      placeholder="trống = VV"
+                      className={`${FIELD} min-w-0 flex-1`}
+                    />
+                    <select
+                      aria-label="Đơn vị thời hạn"
+                      value={pkgUnit}
+                      onChange={(e) => setPkgUnit(e.target.value as DurationUnit)}
+                      className={`${FIELD} w-[74px]`}
+                    >
+                      <option value="hour" className="bg-neutral-900">
+                        giờ
+                      </option>
+                      <option value="day" className="bg-neutral-900">
+                        ngày
+                      </option>
+                    </select>
+                  </div>
                 </div>
                 <button
                   type="button"

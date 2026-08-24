@@ -12,7 +12,7 @@ export interface SoftwarePackageView {
   /** Shown verbatim — "1 ngày", "Vĩnh viễn". */
   label: string;
   price: number;
-  durationDays: number | null;
+  durationHours: number | null;
 }
 
 export interface SoftwareDetail {
@@ -86,8 +86,14 @@ export function SoftwareBuyPanel({
 
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<{ tone: "ok" | "err"; text: string } | null>(null);
-  const [shortfall, setShortfall] = useState<number | null>(null);
   const [confirming, setConfirming] = useState(false);
+  /** Refusals from the buy call. Kept apart from `msg`: the dialog covers the
+   *  panel, so anything printed out there while it is open is unreadable. */
+  const [dialogError, setDialogError] = useState<string | null>(null);
+  /** The wallet, read when the dialog opens; null until it answers. */
+  const [balance, setBalance] = useState<number | null>(null);
+  /** Set on success so the panel can offer the way to the order. */
+  const [orderCode, setOrderCode] = useState<string | null>(null);
 
   const chosen = useMemo(
     () => software.packages.find((p) => p.id === packageId) ?? null,
@@ -95,6 +101,10 @@ export function SoftwareBuyPanel({
   );
 
   const total = (chosen?.price ?? 0) * quantity;
+  // Unknown until the wallet answers, and unknown counts as affordable: a slow
+  // reply must not stand between a buyer with money and the confirm button.
+  // The server checks the balance again anyway, inside the transaction.
+  const canAfford = balance === null || balance >= total;
 
   useEffect(() => {
     if (!confirming) return;
@@ -105,19 +115,39 @@ export function SoftwareBuyPanel({
     return () => window.removeEventListener("keydown", onKey);
   }, [confirming]);
 
+  // The wallet is read when the dialog opens rather than on page load: it is
+  // the one moment the figure matters, and it can have changed in another tab
+  // since the page was drawn. A guest has no wallet to show and stays null, so
+  // they still get the confirm button — pressing it is what sends them to the
+  // login page with this product waiting on the other side.
+  useEffect(() => {
+    if (!confirming) return;
+    let cancelled = false;
+    fetch("/api/auth/me")
+      .then((r) => r.json())
+      .then((d: { user?: { balance?: number } | null }) => {
+        if (!cancelled) setBalance(d.user ? (d.user.balance ?? 0) : null);
+      })
+      .catch(() => {
+        if (!cancelled) setBalance(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [confirming]);
+
   // Changing the tier invalidates any quoted shortfall, and leaving the old
   // one on screen would have it argue with the price above it.
   function pickPackage(id: string) {
     setPackageId(id);
     setMsg(null);
-    setShortfall(null);
+    setDialogError(null);
   }
 
   async function addToCart() {
     if (!chosen) return;
     setBusy(true);
     setMsg(null);
-    setShortfall(null);
     try {
       const res = await fetch("/api/cart", {
         method: "POST",
@@ -149,7 +179,7 @@ export function SoftwareBuyPanel({
     if (!chosen) return;
     setBusy(true);
     setMsg(null);
-    setShortfall(null);
+    setDialogError(null);
     try {
       const res = await fetch("/api/orders", {
         method: "POST",
@@ -166,15 +196,21 @@ export function SoftwareBuyPanel({
         shortfall?: number;
       };
       if (!res.ok) {
-        setMsg({ tone: "err", text: data.error ?? "Không thể tạo đơn hàng" });
-        if (typeof data.shortfall === "number") setShortfall(data.shortfall);
+        // Stays in the dialog, which is still open and covering the panel.
+        setDialogError(data.error ?? "Không thể tạo đơn hàng");
+        // The server knows the exact gap; trust it over the figure the wallet
+        // read a moment ago, which a purchase in another tab may have moved.
+        if (typeof data.shortfall === "number" && chosen) {
+          setBalance(Math.max(0, total - data.shortfall));
+        }
         return;
       }
       setConfirming(false);
+      setOrderCode(data.orderCode ?? null);
       setMsg({ tone: "ok", text: `Đã mua — mã đơn ${data.orderCode}` });
       router.refresh();
     } catch {
-      setMsg({ tone: "err", text: "Không kết nối được máy chủ" });
+      setDialogError("Không kết nối được máy chủ");
     } finally {
       setBusy(false);
     }
@@ -296,12 +332,13 @@ export function SoftwareBuyPanel({
           }
         >
           {msg.text}
-          {shortfall !== null ? (
+          {/* A paid order is only half the errand — the key and the download
+              live on the order, so the way there goes with the receipt. */}
+          {msg.tone === "ok" && orderCode ? (
             <>
-              {" "}
-              — thiếu {formatVnd(shortfall)}đ.{" "}
-              <Link href="/wallet" className="underline hover:text-white">
-                Nạp thêm
+              {" · "}
+              <Link href="/orders" className="underline hover:text-white">
+                Xem đơn hàng
               </Link>
             </>
           ) : null}
@@ -384,7 +421,36 @@ export function SoftwareBuyPanel({
                   {formatVnd(total)}đ
                 </span>
               </div>
+
+              {/* The figure the decision actually turns on. Withheld until the
+                  wallet answers rather than flashing a zero that would read as
+                  an empty account. */}
+              {balance !== null ? (
+                <>
+                  <div className="flex justify-between gap-4">
+                    <span className="text-neutral-500">Số dư ví</span>
+                    <span className="font-semibold text-white">{formatVnd(balance)}đ</span>
+                  </div>
+                  {!canAfford ? (
+                    <div className="flex justify-between gap-4">
+                      <span className="text-neutral-500">Cần nạp thêm</span>
+                      <span className="font-bold text-red-400">
+                        {formatVnd(total - balance)}đ
+                      </span>
+                    </div>
+                  ) : null}
+                </>
+              ) : null}
             </div>
+
+            {dialogError ? (
+              <p
+                role="alert"
+                className="mt-4 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-2.5 text-[12px] font-semibold text-red-400"
+              >
+                {dialogError}
+              </p>
+            ) : null}
 
             <div className="mt-6 flex gap-2.5">
               <button
@@ -394,14 +460,26 @@ export function SoftwareBuyPanel({
               >
                 Huỷ
               </button>
-              <button
-                type="button"
-                disabled={busy}
-                onClick={buyNow}
-                className="flex-1 h-11 rounded-xl bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] disabled:opacity-60 transition-colors text-[11px] font-black uppercase tracking-widest text-white"
-              >
-                {busy ? "Đang xử lý…" : "Xác nhận"}
-              </button>
+              {/* A wallet that cannot cover this offers no confirm button —
+                  pressing it would only fetch the same refusal — and sends the
+                  buyer to top up instead. */}
+              {canAfford ? (
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={buyNow}
+                  className="flex-1 h-11 rounded-xl bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] disabled:opacity-60 transition-colors text-[11px] font-black uppercase tracking-widest text-white"
+                >
+                  {busy ? "Đang xử lý…" : "Xác nhận"}
+                </button>
+              ) : (
+                <Link
+                  href="/wallet"
+                  className="flex-1 h-11 rounded-xl bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] transition-colors text-[11px] font-black uppercase tracking-widest text-white inline-flex items-center justify-center"
+                >
+                  Nạp tiền
+                </Link>
+              )}
             </div>
           </div>
         </div>

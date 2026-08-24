@@ -273,7 +273,7 @@ export default async function AdminProductsPage() {
                 id: p.id,
                 label: p.label,
                 price: Number(p.price),
-                durationDays: p.durationDays,
+                durationHours: p.durationHours,
                 orderCount: p._count.orders,
               })),
             }))}

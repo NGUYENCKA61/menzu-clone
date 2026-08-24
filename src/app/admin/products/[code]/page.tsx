@@ -8,6 +8,7 @@ import { AdminShell } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminSh
 import { AdminSoftwareDetail } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminSoftwareDetail";
 import { getAdmin } from "@/lib/admin";
 import { db } from "@/lib/db";
+import { isHtmlBody, plainToDocHtml } from "@/lib/docHtml";
 
 export const metadata: Metadata = { title: "Chi tiết sản phẩm | Quản trị" };
 export const dynamic = "force-dynamic";
@@ -86,7 +87,13 @@ export default async function AdminAccountDetailPage({
             softwareStatus: software.softwareStatus,
             status: software.status,
             price: Number(software.price),
-            description: software.description ?? "",
+            // Lifted to editor HTML here so the client bundle never needs the
+            // converter — same treatment article bodies get.
+            descriptionHtml: software.description
+              ? isHtmlBody(software.description)
+                ? software.description
+                : plainToDocHtml(software.description)
+              : "",
             downloadUrl: software.downloadUrl ?? "",
             imageUrl: software.imageUrl ?? "",
             videoUrl: software.videoUrl ?? "",
@@ -96,7 +103,7 @@ export default async function AdminAccountDetailPage({
               id: p.id,
               label: p.label,
               price: Number(p.price),
-              durationDays: p.durationDays,
+              durationHours: p.durationHours,
               orderCount: p._count.orders,
             })),
           }}
