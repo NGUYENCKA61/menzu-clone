@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Phone } from "lucide-react";
+import { ArrowRight, Phone } from "lucide-react";
 
 import { listCategories, listDocArticles } from "@/lib/queries";
 import { getShopSettings } from "@/lib/settingsStore";
@@ -137,10 +137,14 @@ function Column({
           <li className="pt-1.5">
             <Link href={seeAll.href} className={SEE_ALL}>
               {seeAll.label}
-              {/* The same nudge the wiki cards' "Chi tiết →" gives. */}
-              <span aria-hidden className="transition-transform group-hover:translate-x-0.5">
-                →
-              </span>
+              {/* The same icon and the same nudge the wiki cards' "Chi tiết"
+                  link gives — a drawn arrow keeps its weight next to the label,
+                  where the "→" character was whatever the system font had. */}
+              <ArrowRight
+                size={13}
+                aria-hidden
+                className="transition-transform group-hover:translate-x-0.5"
+              />
             </Link>
           </li>
         ) : null}
@@ -219,15 +223,11 @@ export async function SiteFooter() {
   ];
 
   return (
-    <footer className="relative z-10 w-full bg-[#0a0a0e] border-t border-white/[0.07] mt-auto">
-      {/* The accent hairline the wiki and category headings draw under their
-          titles, run across the seam instead — it ties the footer to the page
-          above without another solid rule. */}
-      <div
-        aria-hidden
-        className="h-px w-full bg-gradient-to-r from-transparent via-[var(--brand)]/40 to-transparent"
-      />
-
+    // The page's own black and the page's own border weight, from the tokens
+    // rather than a hex of this component's choosing: a footer a shade lighter
+    // than everything above it reads as a slab bolted on, which is exactly how
+    // #0a0a0e looked against --menzu-bg.
+    <footer className="relative z-10 w-full bg-[var(--menzu-bg)] border-t border-white/10 mt-auto">
       {/* pb-28 on the narrow layout clears the fixed bottom navigation, which
           would otherwise sit on top of the copyright line. */}
       <div className="max-w-[1320px] mx-auto px-4 lg:px-6 pt-10 pb-24 sm:py-11">
@@ -295,7 +295,9 @@ export async function SiteFooter() {
           <Column heading="Hỗ trợ" links={supportLinks} />
         </div>
 
-        <div className="mt-9 pt-5 border-t border-white/[0.06] flex flex-col md:flex-row items-center justify-between gap-3">
+        {/* border-white/5 is what the storefront uses for a rule inside a
+            panel, as against the /10 that marks the panel's own edge. */}
+        <div className="mt-9 pt-5 border-t border-white/5 flex flex-col md:flex-row items-center justify-between gap-3">
           <p className="text-[12px] text-neutral-500 text-center md:text-left">
             © {new Date().getFullYear()}{" "}
             <span className="font-bold text-neutral-300">
