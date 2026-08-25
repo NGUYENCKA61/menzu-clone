@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import {
   BadgeCheck,
   Check,
   Gem,
-  Settings,
   ShieldCheck,
   ShoppingBag,
   Wallet,
@@ -24,7 +24,7 @@ import { getCurrentUser } from "@/lib/session";
 import { discordOauthEnabled, googleOauthEnabled } from "@/lib/settings";
 import { getShopSettings } from "@/lib/settingsStore";
 
-export const metadata: Metadata = { title: "Menzu Valorant | Profile" };
+export const metadata: Metadata = { title: "Tổng quan tài khoản" };
 export const dynamic = "force-dynamic";
 
 /**
@@ -33,9 +33,8 @@ export const dynamic = "force-dynamic";
  * commission card, and quick actions on the right — with the account-link
  * rows full-width underneath and an edit button at header level.
  *
- * The commission figure is a fixed 0: no commission field exists yet, so the
- * card shows the truthful nothing and keeps Rút tiền locked until the CTV
- * programme has real numbers to pay out.
+ * The commission card reads the wallet's own commission balance, so a referrer
+ * with nothing earned sees a truthful zero and Rút tiền stays locked.
  */
 
 /** Progress ceiling the tier bar counts toward. */
@@ -122,18 +121,6 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
       title="Tổng quan tài khoản"
       subtitle="Quản lý tài khoản, số dư và các dịch vụ của bạn."
       crumb="Tổng quan tài khoản"
-      action={
-        // Profile editing does not exist yet; the control holds the mockup's
-        // place inert, like the avatar pencil before it.
-        <button
-          type="button"
-          title="Chỉnh sửa hồ sơ — sắp có"
-          className="inline-flex h-10 items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 text-[11px] font-black uppercase tracking-widest text-neutral-300 transition-colors hover:bg-white/10 hover:text-white"
-        >
-          <Settings size={14} />
-          Chỉnh sửa hồ sơ
-        </button>
-      }
     >
       <div className="flex flex-col gap-4">
         {query.linked && PROVIDER_NAMES[query.linked] ? (
@@ -267,7 +254,10 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
               </div>
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                 {QUICK_ACTIONS.map(({ label, href, icon: Icon }) => (
-                  <a
+                  // Link, not a bare anchor: these three go to pages this app
+                  // serves, and a full reload here throws away the session's
+                  // warm client for no reason.
+                  <Link
                     key={href}
                     href={href}
                     className="flex items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] p-4 transition-colors hover:border-white/15 hover:bg-white/[0.05]"
@@ -278,7 +268,7 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                     <span className="truncate text-sm font-bold leading-none text-white">
                       {label}
                     </span>
-                  </a>
+                  </Link>
                 ))}
               </div>
             </div>
@@ -325,14 +315,16 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                       Liên kết
                     </a>
                   ) : (
-                    // Same rule as the login buttons: a real door only once
-                    // the provider's keys sit in Cấu hình.
-                    <button
-                      type="button"
-                      className="ml-auto inline-flex h-9 shrink-0 items-center rounded-lg bg-[var(--brand)] px-4 text-[10px] font-black uppercase tracking-widest text-white"
+                    // No keys in Cấu hình means no door. It says so instead of
+                    // wearing the same accent as the button that works — a
+                    // control that looks live and does nothing costs the reader
+                    // a click to find out.
+                    <span
+                      title={`Chưa bật — điền khóa ${provider.name} ở Cấu hình để mở`}
+                      className="ml-auto inline-flex h-9 shrink-0 items-center rounded-lg border border-white/10 bg-white/[0.04] px-4 text-[10px] font-black uppercase tracking-widest text-neutral-500"
                     >
-                      Liên kết
-                    </button>
+                      Chưa mở
+                    </span>
                   )}
                 </div>
               );
