@@ -87,6 +87,7 @@ model User {
   linkedAccounts LinkedAccount[]
   orders        Order[]
   transactions  Transaction[]
+  spinWins      SpinWin[]
   tradeRequests TradeRequest[]
   topUps        TopUp[]
   serviceOrders ServiceOrder[]
@@ -804,6 +805,16 @@ model Voucher {
   @@map("vouchers")
 }
 
+/// What still has to happen after a spin resolves.
+enum SpinWinStatus {
+  /// Nothing: points and money settled themselves inside the same transaction.
+  NONE
+  /// A prize the shop hands over by hand, waiting to be sent.
+  PENDING
+  /// Sent. Kept rather than deleted so a customer can be answered later.
+  SENT
+}
+
 enum TransactionKind {
   TOPUP
   PURCHASE
@@ -816,6 +827,32 @@ enum TransactionStatus {
   PENDING
   SUCCESS
   FAILED
+}
+
+/// Every spin the wheel has resolved.
+///
+/// Money and points are already in the user's row by the time this is written,
+/// so for those this row is only a receipt. A physical prize is the reason the
+/// table exists: nothing in the account can pay it out, so the row is what
+/// tells the shop there is a parcel to send — and what stops "tôi trúng pad
+/// chuột" from being an argument nobody can settle.
+model SpinWin {
+  id        String        @id @default(cuid())
+  userId    String
+  user      User          @relation(fields: [userId], references: [id])
+  /// The prize's stable id from the table the draw reads; the label is copied
+  /// beside it because the table is code and can be retuned, while what this
+  /// customer was promised cannot change afterwards.
+  prizeId   String
+  label     String
+  kind      String
+  amount    Int           @default(0)
+  status    SpinWinStatus @default(NONE)
+  createdAt DateTime      @default(now())
+
+  @@index([status, createdAt])
+  @@index([userId, createdAt])
+  @@map("spin_wins")
 }
 
 /// /transactions renders "Biến động & Số dư" in one column, so each row carries

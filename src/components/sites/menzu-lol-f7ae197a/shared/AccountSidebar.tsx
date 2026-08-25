@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import {
   ArrowLeftRight,
   ChevronsUp,
+  Gift,
   Handshake,
   KeyRound,
   LayoutDashboard,
@@ -37,6 +38,7 @@ const NAV_GROUPS: AccountNavItem[][] = [
     { label: "Nạp tiền", href: "/wallet", icon: Wallet },
     { label: "Lịch sử giao dịch", href: "/transactions", icon: ArrowLeftRight },
     { label: "Lịch sử mua", href: "/orders", icon: ShoppingBag },
+    { label: "Vòng quay đổi thưởng", href: "/vong-quay", icon: Gift },
   ],
   [{ label: "Bảo mật", href: "/security", icon: ShieldCheck }],
   [

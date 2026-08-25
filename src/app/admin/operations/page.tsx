@@ -3,7 +3,9 @@ import { notFound } from "next/navigation";
 
 import { AdminOperations } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminOperations";
 import { AdminShell } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminShell";
+import { AdminSpinWins } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminSpinWins";
 import { getAdmin } from "@/lib/admin";
+import { db } from "@/lib/db";
 import { listFeedback, listTopUps } from "@/lib/queries";
 import { expireStaleTopUps } from "@/lib/topupStore";
 
@@ -30,14 +32,42 @@ export default async function AdminOperationsPage() {
   // itself enough to keep the queue current on a shop with no scheduler.
   await expireStaleTopUps();
 
-  const [feedback, topUps] = await Promise.all([listFeedback(), listTopUps()]);
+  const [feedback, topUps, spinWins] = await Promise.all([
+    listFeedback(),
+    listTopUps(),
+    // Only the prizes somebody has to post: money and points carry NONE and
+    // are nobody's errand.
+    db.spinWin.findMany({
+      where: { status: { in: ["PENDING", "SENT"] } },
+      orderBy: { createdAt: "desc" },
+      take: 50,
+      select: {
+        id: true,
+        label: true,
+        status: true,
+        createdAt: true,
+        user: { select: { username: true, uid: true } },
+      },
+    }),
+  ]);
 
   return (
     <AdminShell
       title="Vận hành"
-      subtitle="Đánh giá khách hàng và lịch sử nạp tiền"
+      subtitle="Đánh giá khách hàng, quà vòng quay và lịch sử nạp tiền"
       username={admin.username}
     >
+      <AdminSpinWins
+        wins={spinWins.map((win) => ({
+          id: win.id,
+          label: win.label,
+          username: win.user.username,
+          uid: win.user.uid,
+          createdAt: formatWhen(win.createdAt),
+          sent: win.status === "SENT",
+        }))}
+      />
+
       <AdminOperations
         // Both lists format their dates here, where the timezone is fixed —
         // doing it inside the client component would render one value on the
