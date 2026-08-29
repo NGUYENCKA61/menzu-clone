@@ -105,8 +105,8 @@ export default async function AgencyDashboardPage() {
       label: "Tổng key đã mua",
       value: String(keysBought),
       unit: "key",
-      tone: "text-[#a78bfa]",
-      box: "border-[var(--brand)]/25 bg-[var(--brand)]/15 text-[#a78bfa]",
+      tone: "text-[var(--menzu-accent)]",
+      box: "border-[var(--menzu-accent)]/25 bg-[var(--menzu-accent)]/15 text-[var(--menzu-accent)]",
       shell: "border-white/10 bg-neutral-900/50",
     },
     {
@@ -132,7 +132,7 @@ export default async function AgencyDashboardPage() {
       action={
         <a
           href="/wallet"
-          className="inline-flex h-10 items-center gap-2 rounded-xl bg-[var(--brand)] px-4 text-[11px] font-black uppercase tracking-widest text-white transition-colors hover:bg-[var(--brand-dark)]"
+          className="inline-flex h-10 items-center gap-2 rounded-xl bg-[var(--menzu-accent)] px-4 text-[11px] font-black uppercase tracking-widest text-white transition-colors hover:bg-[var(--menzu-accent-dark)]"
         >
           <Wallet size={14} />
           Nạp tiền

@@ -3,16 +3,15 @@
 import Image from "next/image"
 import Link from "next/link"
 import {
+  AppWindow,
   ChevronDown,
+  Cpu,
   CreditCard,
-  Crosshair,
   Gift,
   KeyRound,
   Menu,
-  Route,
   Smartphone,
   User,
-  Users,
   type LucideIcon,
 } from "lucide-react"
 import {
@@ -34,8 +33,10 @@ interface DropdownItem {
  * linking to them would 404.
  */
 const LINK_HREFS: Record<string, string> = {
-  "ĐÁNH GIÁ KHÁCH HÀNG": "/feedback",
-  "HỖ TRỢ KHÁCH HÀNG": "/feedback",
+  "ĐÁNH GIÁ": "/feedback",
+  // Read by the main bar rather than the strip above, which now says
+  // "XEM TRẠNG THÁI" instead.
+  "HỖ TRỢ": "/feedback",
   "WIKI & HƯỚNG DẪN": "/docs",
   "GÓP Ý": "/feedback",
   "Nạp Qua ATM + Momo": "/wallet",
@@ -46,7 +47,7 @@ function hrefFor(label: string): string {
   return LINK_HREFS[label] ?? "#"
 }
 
-const QUICK_LINKS = ["ĐÁNH GIÁ KHÁCH HÀNG", "HỖ TRỢ KHÁCH HÀNG", "WIKI & HƯỚNG DẪN", "GÓP Ý", "CỘNG ĐỒNG"]
+const QUICK_LINKS = ["ĐÁNH GIÁ", "XEM TRẠNG THÁI", "WIKI & HƯỚNG DẪN", "GÓP Ý", "CỘNG ĐỒNG"]
 
 // Nav text sits at neutral-200 rather than the captured neutral-400: at 10-11px
 // and letter-spaced, the darker grey on the near-black bar was closer to
@@ -55,10 +56,18 @@ const QUICK_LINKS = ["ĐÁNH GIÁ KHÁCH HÀNG", "HỖ TRỢ KHÁCH HÀNG", "WIK
 const QUICK_LINK_CLASS =
   "text-[10px] font-bold uppercase tracking-widest text-neutral-300 hover:text-white transition-colors"
 
-const VALORANT_HUB_ITEMS: DropdownItem[] = [
-  { label: "Crosshair Library", icon: Crosshair },
-  { label: "Lineups & Callouts", icon: Route },
-  { label: "Tìm Bạn Leo Rank", icon: Users },
+// A rung of the main bar that opens a page rather than a panel. Written once
+// because there are two of them now, and a nav where one rung underlines on
+// hover and its neighbour does not reads as a bug rather than as a variant.
+const NAV_LINK_CLASS =
+  "relative flex items-center gap-1.5 px-3 py-2 rounded-lg text-[11px] font-extrabold uppercase tracking-widest text-neutral-200 hover:text-[var(--menzu-accent)] transition-colors duration-200 ease-[ease] after:absolute after:bottom-1.5 after:inset-x-3 after:h-[2px] after:origin-left after:scale-x-0 after:rounded-full after:bg-[var(--menzu-accent)] after:transition-transform after:duration-200 hover:after:scale-x-100"
+
+// The two ways the shop sells a hack: a board you plug in, and a file you run.
+// Labels only for now — neither has a page in this clone, so both fall to "#"
+// through hrefFor, the same as the SHOP ACC pair.
+const HACK_CATEGORY_ITEMS: DropdownItem[] = [
+  { label: "HACK DMA & MẠCH CỨNG", icon: Cpu },
+  { label: "HACK PHẦN MỀM", icon: AppWindow },
 ]
 
 const NAP_TIEN_ITEMS: DropdownItem[] = [
@@ -66,17 +75,19 @@ const NAP_TIEN_ITEMS: DropdownItem[] = [
   { label: "Nạp Thẻ Điện Thoại", icon: Smartphone },
 ]
 
-// Placeholder labels until the shop names the two free offers; both fall to
-// "#" through hrefFor until their pages exist.
-const HACK_FREE_ITEMS: DropdownItem[] = [
+// Placeholder labels, left from when this menu was "HACK FREE MIỄN PHÍ": the
+// shop has not said what hangs under SHOP ACC yet, and there is no account
+// category with anything in it to hang there. Both fall to "#" through
+// hrefFor until their pages exist.
+const SHOP_ACC_ITEMS: DropdownItem[] = [
   { label: "Nhận Key Miễn Phí", icon: KeyRound },
   { label: "Sự Kiện Tặng Hack", icon: Gift },
 ]
 
 const DRAWER_GROUPS: DrawerGroup[] = [
-  { label: "HƯỚNG DẪN", items: VALORANT_HUB_ITEMS },
+  { label: "CÁC LOẠI HACK", items: HACK_CATEGORY_ITEMS },
   { label: "NẠP TIỀN", items: NAP_TIEN_ITEMS },
-  { label: "HACK FREE MIỄN PHÍ", items: HACK_FREE_ITEMS },
+  { label: "SHOP ACC", items: SHOP_ACC_ITEMS },
 ]
 
 function NavDropdown({ label, items }: { label: string; items: DropdownItem[] }) {
@@ -190,15 +201,10 @@ export function SiteHeaderClient({
             ))}
           </div>
 
-          <div className="flex items-center text-[9px] tracking-wider select-none h-full text-neutral-500">
-            <a href="#" className="hover:text-white/95 transition-colors duration-200 lowercase">
-              menzu.lol
-            </a>
-            <span className="mx-1.5">⇄</span>
-            <a href="#" className="hover:text-white/95 transition-colors duration-200 lowercase">
-              menzuvalorant.com
-            </a>
-          </div>
+          {/* The strip's right end used to advertise menzu.lol ⇄
+              menzuvalorant.com — the captured shop's two domains, both on
+              href="#" here. Gone: this shop has one address, and it is in the
+              logo. */}
         </div>
       </div>
 
@@ -250,17 +256,29 @@ export function SiteHeaderClient({
           </div>
 
           <div className="hidden lg:flex items-center gap-5 h-full">
-            <NavDropdown label="HƯỚNG DẪN" items={VALORANT_HUB_ITEMS} />
+            <NavDropdown label="CÁC LOẠI HACK" items={HACK_CATEGORY_ITEMS} />
             <NavDropdown label="NẠP TIỀN" items={NAP_TIEN_ITEMS} />
-            {/* A plain link, per the shop — the status board is one page.
-                "#" until that page exists. */}
-            <a
-              href="#"
-              className="relative flex items-center gap-1.5 px-3 py-2 rounded-lg text-[11px] font-extrabold uppercase tracking-widest text-neutral-200 hover:text-[var(--menzu-accent)] transition-colors duration-200 ease-[ease] after:absolute after:bottom-1.5 after:inset-x-3 after:h-[2px] after:origin-left after:scale-x-0 after:rounded-full after:bg-[var(--menzu-accent)] after:transition-transform after:duration-200 hover:after:scale-x-100"
-            >
-              TRẠNG THÁI HACK
-            </a>
-            <NavDropdown label="HACK FREE MIỄN PHÍ" items={HACK_FREE_ITEMS} />
+            {/* A plain link, per the shop — support is one page, not a menu.
+                Addressed through hrefFor like the strip above, so the shop's
+                two "HỖ TRỢ" rungs cannot drift to different pages. */}
+            <Link href={hrefFor("HỖ TRỢ")} className={NAV_LINK_CLASS}>
+              HỖ TRỢ
+            </Link>
+            <NavDropdown label="SHOP ACC" items={SHOP_ACC_ITEMS} />
+
+            {/* Signed in only: the wheel spends the points an account has, and
+                /vong-quay bounces a signed-out visitor to the login page. A rung
+                that always ends in a redirect is a rung that lies about what it
+                does, so it is drawn only once it leads somewhere.
+
+                Last in the row on purpose — appearing here leaves the four
+                rungs the shop knows exactly where they were before signing in,
+                rather than shuffling them along by one. */}
+            {user ? (
+              <Link href="/vong-quay" className={NAV_LINK_CLASS}>
+                ĐỔI THƯỞNG
+              </Link>
+            ) : null}
           </div>
         </div>
 
@@ -272,15 +290,15 @@ export function SiteHeaderClient({
           {user ? (
             <UserMenu user={user} />
           ) : (
-            <a
+            <Link
               href="/login"
-              className="flex items-center gap-2 h-9 px-3.5 sm:px-4 rounded-xl bg-[var(--brand)] hover:bg-[var(--brand-dark)] transition-colors duration-200 border border-purple-500/30 shrink-0"
+              className="flex items-center gap-2 h-9 px-3.5 sm:px-4 rounded-[10px] bg-[var(--brand)] hover:bg-[var(--brand-dark)] transition-colors duration-200 border border-white/10 shrink-0"
             >
               <User size={16} />
               <span className="text-[10px] sm:text-[11px] font-black uppercase tracking-widest text-white whitespace-nowrap">
                 Đăng nhập
               </span>
-            </a>
+            </Link>
           )}
         </div>
       </div>

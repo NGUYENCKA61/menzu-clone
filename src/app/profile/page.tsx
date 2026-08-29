@@ -144,7 +144,7 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                   <span className="truncate text-xl font-black uppercase tracking-wide leading-none text-white">
                     {user.username}
                   </span>
-                  <BadgeCheck size={18} className="shrink-0 fill-[#7c3aed] text-white" />
+                  <BadgeCheck size={18} className="shrink-0 fill-emerald-500 text-white" />
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
                   <SkewPlate
@@ -153,7 +153,7 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                         ? "bg-[var(--menzu-accent)] text-white"
                         : user.role === "AGENCY"
                           ? "bg-gradient-to-r from-[#b45309] to-[#d97706] text-white"
-                          : "bg-gradient-to-r from-[#7b3fe4] to-[#9354ff] text-white"
+                          : "bg-gradient-to-r from-neutral-600 to-neutral-700 text-white"
                     }
                   >
                     {isAdmin ? "Admin" : user.role === "AGENCY" ? "Đại lý" : "Member"}
@@ -162,7 +162,7 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                     UID: {user.uid}
                   </SkewPlate>
                 </div>
-                <span className="text-[10px] font-black uppercase tracking-widest text-neutral-500">
+                <span className="text-[10px] font-black uppercase tracking-widest text-neutral-400">
                   Đã tham gia:{" "}
                   {user.createdAt.toLocaleDateString("vi-VN", {
                     day: "2-digit",
@@ -176,7 +176,7 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
             <div className="border-t border-white/5" />
 
             <div className="flex flex-col gap-2">
-              <span className="text-[10px] font-black uppercase tracking-widest text-neutral-500">
+              <span className="text-[10px] font-black uppercase tracking-widest text-neutral-400">
                 Cấp bậc hiện tại
               </span>
               <div className="flex items-center justify-between gap-3">
@@ -188,7 +188,7 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                 <Gem size={20} className="shrink-0 text-neutral-500" />
               </div>
               <div className="mt-2 flex items-center justify-between gap-3">
-                <span className="text-[10px] font-black uppercase tracking-widest text-neutral-500">
+                <span className="text-[10px] font-black uppercase tracking-widest text-neutral-400">
                   Tiến độ cấp bậc
                 </span>
                 {/* XP is Điểm thưởng counted against the mockup's 1.000
@@ -226,13 +226,16 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                 </span>
               </div>
 
-              <div className="flex flex-col gap-3 rounded-2xl border border-rose-500/15 bg-rose-500/[0.04] p-5">
+              {/* Amber, the ledger's "waiting" colour, as on the affiliate page:
+                  money that is yours but not in the wallet yet — and a figure
+                  that no longer sits red on a red tint. */}
+              <div className="flex flex-col gap-3 rounded-2xl border border-amber-500/15 bg-amber-500/[0.04] p-5">
                 <span className="text-[10px] font-black uppercase tracking-widest text-neutral-300">
                   Số tiền hoa hồng khả dụng
                 </span>
-                <span className="text-3xl font-black leading-none text-rose-400">
+                <span className="text-3xl font-black leading-none text-amber-400">
                   {formatVnd(user.commissionBalance)}{" "}
-                  <span className="text-sm font-bold text-rose-400/80">đ</span>
+                  <span className="text-sm font-bold text-amber-400/80">đ</span>
                 </span>
                 <div className="mt-auto flex items-center justify-between gap-3">
                   <span className="text-xs text-neutral-500">
@@ -262,8 +265,8 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                     href={href}
                     className="flex items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] p-4 transition-colors hover:border-white/15 hover:bg-white/[0.05]"
                   >
-                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-[var(--brand)]/25 bg-[var(--brand)]/15">
-                      <Icon size={16} className="text-[#a78bfa]" />
+                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/[0.06]">
+                      <Icon size={16} className="text-[var(--menzu-accent)]" />
                     </span>
                     <span className="truncate text-sm font-bold leading-none text-white">
                       {label}
@@ -310,7 +313,7 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                   ) : provider.enabled ? (
                     <a
                       href={`/api/auth/${provider.key}?next=%2Fprofile`}
-                      className="ml-auto inline-flex h-9 shrink-0 items-center rounded-lg bg-[var(--brand)] px-4 text-[10px] font-black uppercase tracking-widest text-white transition-colors hover:bg-[var(--brand-dark)]"
+                      className="ml-auto inline-flex h-9 shrink-0 items-center rounded-lg bg-[var(--menzu-accent)] px-4 text-[10px] font-black uppercase tracking-widest text-white transition-colors hover:bg-[var(--menzu-accent-dark)]"
                     >
                       Liên kết
                     </a>
@@ -321,7 +324,7 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                     // a click to find out.
                     <span
                       title={`Chưa bật — điền khóa ${provider.name} ở Cấu hình để mở`}
-                      className="ml-auto inline-flex h-9 shrink-0 items-center rounded-lg border border-white/10 bg-white/[0.04] px-4 text-[10px] font-black uppercase tracking-widest text-neutral-500"
+                      className="ml-auto inline-flex h-9 shrink-0 items-center rounded-lg border border-white/10 bg-white/[0.04] px-4 text-[10px] font-black uppercase tracking-widest text-neutral-400"
                     >
                       Chưa mở
                     </span>

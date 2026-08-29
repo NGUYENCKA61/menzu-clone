@@ -149,12 +149,20 @@
   --menzu-backdrop-dim: rgb(10 10 13 / 0.7);
   --menzu-container: 1320px;
 
-  /* The shop's accent, used by every button, badge and active state. These
-     are the values menzu.lol ships; the admin's Cấu hình → Nhận diện screen
-     overrides them per-request from the root layout, so a shop that never
-     touches the setting renders exactly as the captured site does. */
-  --brand: #7c3aed;
-  --brand-dark: #6d28d9;
+  /* The shop's accent, used by every button, badge and active state. The
+     admin's Cấu hình → Nhận diện screen overrides them per-request from the
+     root layout. menzu.lol shipped purple here; this shop chose its red, the
+     same value as --menzu-accent below, so the storefront carries ONE accent
+     — a purple button beside a red heading read as two shops on one page. */
+  --brand: #ff3158;
+  --brand-dark: #e01e43;
+
+  /* The purple the whole site used to wear, kept for the reward wheel: when
+     the storefront and the account pages moved to red the shop asked for the
+     wheel (/vong-quay) to stay as it was, so it reads this pair rather than
+     --brand and stays purple whatever Nhận diện sets. */
+  --menzu-violet: #7c3aed;
+  --menzu-violet-dark: #6d28d9;
 
   /* Scrollbar. The same red the admin screens use for their accent — buttons,
      badges, the active sidebar row, the revenue line — so the bar reads as
@@ -236,6 +244,19 @@
   }
 }
 
+/* fadeUpIn run backwards: what "Thu gọn" plays on the tiles it is about to
+   take away, so they leave the way they came. */
+@keyframes fadeDownOut {
+  0% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(24px) scale(0.98);
+  }
+}
+
 @keyframes smoothSlideUp {
   0% {
     opacity: 0;
@@ -276,6 +297,7 @@
     transform: translateY(-4px);
   }
 }
+
 
 @keyframes spin-slow {
   0% {
@@ -337,12 +359,16 @@
 
 
 
+
 /* Inner pages enter with these — /login uses slideUpFade, /categories fade-up */
 .animate-slideUpFade {
   animation: slideUpFade 0.5s ease-out;
 }
 .animate-fade-up {
   animation: fadeUpIn 0.5s ease-out;
+}
+.animate-fade-down {
+  animation: fadeDownOut 0.26s ease-in;
 }
 
 /* Horizontal product rows hide their scrollbar but stay scrollable */
@@ -643,23 +669,23 @@ body.lightbox-open .site-nav {
 }
 
 /* The software search's breathing border: the account field's rhythm and
-   weights, run between the shop's two loudest colours — resting on --brand's
-   purple (#7c3aed) and peaking in the effects' red (#ef4444), the same red the
-   reticle and the scan band inside the field already carry. The peak keeps a
-   wide trace of the purple, exactly as the account glow keeps a trace of its
-   red under the gold. Hardcoded like every colour in these keyframes. */
+   weights, run in the shop's one accent — resting on the accent red
+   (#ff3158) and peaking in the effects' brighter red (#ef4444), the same red
+   the reticle and the scan band inside the field already carry. It used to
+   rest on purple when the site still had a purple; hardcoded like every
+   colour in these keyframes. */
 @keyframes search-glow-brand {
   0%,
   100% {
     box-shadow:
-      0 0 0 1px rgb(124 58 237 / 0.3),
-      0 0 10px rgb(124 58 237 / 0.12);
+      0 0 0 1px rgb(255 49 88 / 0.3),
+      0 0 10px rgb(255 49 88 / 0.12);
   }
   50% {
     box-shadow:
       0 0 0 2px rgb(239 68 68 / 0.5),
       0 0 22px rgb(239 68 68 / 0.25),
-      0 0 40px rgb(124 58 237 / 0.12);
+      0 0 40px rgb(255 49 88 / 0.12);
   }
 }
 .search-glow-brand {
@@ -876,7 +902,10 @@ body.lightbox-open .site-nav {
   color: #737373;
 }
 .doc-prose a {
-  color: #a78bfa;
+  /* The lighter red the storefront's FULL THÔNG TIN tag wears — legible as a
+     link on the dark ground where the full accent is a touch too hot for
+     running text. */
+  color: #ff6c88;
   text-decoration: underline;
   text-underline-offset: 2px;
 }
@@ -902,7 +931,7 @@ body.lightbox-open .site-nav {
   min-height: 420px;
 }
 .doc-prose.ProseMirror img.ProseMirror-selectednode {
-  outline: 2px solid #7b3fe4;
+  outline: 2px solid var(--menzu-accent);
   outline-offset: 2px;
 }
 
@@ -921,7 +950,7 @@ body.lightbox-open .site-nav {
   border: 1px solid rgb(255 255 255 / 0.08);
   border-radius: 0.375rem;
   padding: 0.1rem 0.35rem;
-  color: #c4b5fd;
+  color: #e5e5e5;
 }
 .doc-prose pre {
   background: rgb(0 0 0 / 0.45);
@@ -955,4 +984,69 @@ body.lightbox-open .site-nav {
   font-size: 0.75rem;
   font-style: italic;
   color: #a3a3a3;
+}
+
+/* A home-page row with more than four tiles slides (RowSlider): one tile
+   left on a beat, then a glide back to the start, with arrows at either
+   edge and dots below for driving it by hand. The current dot fills over
+   one beat, from the left, and pauses with the strip while the pointer
+   holds it. Under reduced motion the row never steps on its own — RowSlider
+   does not start its clock — the arrows and dots move it without the
+   easing, and the fill is not drawn, since nothing is counting down. */
+@keyframes row-slider-progress {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+.row-slider-progress {
+  transform-origin: left;
+  animation: row-slider-progress var(--row-slider-step, 3s) linear forwards;
+}
+.row-slider-held .row-slider-progress {
+  animation-play-state: paused;
+}
+@media (prefers-reduced-motion: reduce) {
+  .row-slider-track {
+    transition: none;
+  }
+  .row-slider-progress {
+    display: none;
+  }
+}
+
+/* The order-detail card's arrival on /orders: a short rise-and-settle, the
+   same gesture the reference sketch draws (modalShow). The backdrop simply
+   appears; under reduced motion the card does too. */
+@keyframes order-modal-in {
+  from {
+    opacity: 0;
+    transform: translateY(15px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+.order-modal-card {
+  animation: order-modal-in 0.25s ease;
+}
+@keyframes order-backdrop-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.order-modal-backdrop {
+  animation: order-backdrop-in 0.2s ease;
+}
+@media (prefers-reduced-motion: reduce) {
+  .order-modal-card,
+  .order-modal-backdrop {
+    animation: none;
+  }
 }

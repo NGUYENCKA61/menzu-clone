@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 import { MobileBottomNav } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/MobileBottomNav";
 import { SiteFooter } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/SiteFooter";
 import { SiteHeader } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/SiteHeader";
-import { ToolsRail } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/ToolsRail";
+import { ConnectRailSection } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/ConnectRailSection";
 import { Breadcrumb } from "./Breadcrumb";
 
 interface SimplePageProps {
@@ -18,7 +18,7 @@ export function SimplePage({ title, crumb, children }: SimplePageProps) {
   return (
     // Opaque site-black, covering the fixed PageBackdrop artwork — the
     // original keeps its utility pages (wiki, cart, trade…) on plain black.
-    <div className="min-h-screen flex flex-col text-white overflow-x-clip selection:bg-indigo-500/30 bg-[#050508]">
+    <div className="min-h-screen flex flex-col text-white overflow-x-clip selection:bg-[var(--menzu-accent)]/30 bg-[#050508]">
       <div className="w-full shrink-0 h-[104px]" />
       <SiteHeader />
 
@@ -29,10 +29,15 @@ export function SimplePage({ title, crumb, children }: SimplePageProps) {
               items={[{ label: "Trang chủ", href: "/" }, { label: crumb }]}
             />
 
-            <div className="flex items-center justify-between mb-8 pb-3 border-b border-indigo-500/20">
-              <h1 className="text-2xl sm:text-3xl font-black uppercase tracking-wider text-white">
-                {title}
-              </h1>
+            {/* The row headings' red mark in front of the title, and a neutral
+                rule under it — the same opening every home-page row makes. */}
+            <div className="flex items-center justify-between mb-8 pb-4 border-b border-white/10">
+              <div className="flex items-center gap-3">
+                <span aria-hidden className="h-6 w-[3px] shrink-0 rounded-full bg-[var(--menzu-accent)]" />
+                <h1 className="text-2xl sm:text-3xl font-black uppercase tracking-wider text-white">
+                  {title}
+                </h1>
+              </div>
             </div>
 
             {children}
@@ -41,7 +46,7 @@ export function SimplePage({ title, crumb, children }: SimplePageProps) {
         <SiteFooter />
       </main>
 
-      <ToolsRail />
+      <ConnectRailSection />
       <MobileBottomNav />
     </div>
   );

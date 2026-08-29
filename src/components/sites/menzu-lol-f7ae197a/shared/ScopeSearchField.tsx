@@ -186,7 +186,7 @@ export function ScopeSearchField({
             padding or the icon's size changes. */}
         <span
           aria-hidden
-          className="h-4 w-px shrink-0 bg-gradient-to-b from-transparent via-[rgba(124,58,237,0.4)] to-transparent"
+          className="h-4 w-px shrink-0 bg-gradient-to-b from-transparent via-[rgba(255,49,88,0.4)] to-transparent"
         />
 
         <input

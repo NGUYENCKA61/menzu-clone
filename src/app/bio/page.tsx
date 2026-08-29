@@ -29,7 +29,7 @@ export default async function BioPage() {
         <div className="absolute inset-0 opacity-[0.06] scale-105">
           <Image src={BACKDROP} alt="" fill sizes="100vw" className="object-cover object-center" />
         </div>
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[28rem] h-[28rem] rounded-full bg-indigo-500/5 blur-[140px]" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[28rem] h-[28rem] rounded-full bg-[var(--menzu-accent)]/5 blur-[140px]" />
       </div>
 
       <BioCard

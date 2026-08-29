@@ -44,11 +44,11 @@ export function NotFoundContent() {
             className="object-cover object-center"
           />
         </div>
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full bg-indigo-500/5 blur-[120px]" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full bg-[var(--menzu-accent)]/5 blur-[120px]" />
       </div>
 
       <div className="mx-auto px-4 lg:px-6 py-8 lg:py-10 relative z-10 max-w-md w-full text-center space-y-8">
-        <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 mb-2">
+        <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-white/[0.04] border border-white/[0.08] text-[var(--menzu-accent)] mb-2">
           <TriangleAlert className="w-10 h-10" />
         </div>
 
@@ -72,21 +72,21 @@ export function NotFoundContent() {
           aria-live="off"
         >
           Tự động điều hướng về trang chủ sau
-          <span className="text-indigo-400 font-extrabold text-sm mx-1">{remaining}</span>
+          <span className="text-[var(--menzu-accent)] font-extrabold text-sm mx-1">{remaining}</span>
           giây...
         </div>
 
         <div className="max-w-xs mx-auto">
           <Link
             href="/"
-            className="group block relative w-full p-[1.5px] transition-all duration-300 [clip-path:polygon(8px_0,100%_0,100%_calc(100%-8px),calc(100%-8px)_100%,0_100%,0_8px)] bg-indigo-500/50 hover:bg-indigo-500"
+            className="group block relative w-full p-[1.5px] transition-all duration-300 [clip-path:polygon(8px_0,100%_0,100%_calc(100%-8px),calc(100%-8px)_100%,0_100%,0_8px)] bg-[var(--menzu-accent)]/50 hover:bg-[var(--menzu-accent)]"
           >
-            <div className="relative w-full bg-[#12141c] group-hover:bg-indigo-500 transition-colors duration-300 flex items-center justify-center py-3 [clip-path:polygon(7px_0,100%_0,100%_calc(100%-7px),calc(100%-7px)_100%,0_100%,0_7px)] overflow-hidden">
-              <House className="w-4 h-4 text-indigo-400 group-hover:text-white mr-2 transition-colors duration-300" />
+            <div className="relative w-full bg-[#101114] group-hover:bg-[var(--menzu-accent)] transition-colors duration-300 flex items-center justify-center py-3 [clip-path:polygon(7px_0,100%_0,100%_calc(100%-7px),calc(100%-7px)_100%,0_100%,0_7px)] overflow-hidden">
+              <House className="w-4 h-4 text-[var(--menzu-accent)] group-hover:text-white mr-2 transition-colors duration-300" />
               <span className="text-white font-black text-xs uppercase tracking-widest">
                 Quay lại trang chủ
               </span>
-              <ArrowRight className="w-4 h-4 text-indigo-400 group-hover:text-white ml-2 group-hover:translate-x-1 transition-all duration-300" />
+              <ArrowRight className="w-4 h-4 text-[var(--menzu-accent)] group-hover:text-white ml-2 group-hover:translate-x-1 transition-all duration-300" />
             </div>
           </Link>
         </div>

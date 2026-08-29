@@ -14,7 +14,7 @@ export const CHIP_INACTIVE =
   "px-3 py-1.5 rounded-lg text-[11px] font-bold border border-neutral-800/60 bg-neutral-950/40 text-neutral-400 hover:text-white hover:border-neutral-700 transition-colors whitespace-nowrap";
 
 export const CHIP_ACTIVE =
-  "px-3 py-1.5 rounded-lg text-[11px] font-bold border border-[var(--brand)]/50 bg-[var(--brand)]/15 text-[#a78bfa] transition-colors whitespace-nowrap";
+  "px-3 py-1.5 rounded-lg text-[11px] font-bold border border-[var(--menzu-accent)]/40 bg-[var(--menzu-accent)]/10 text-[var(--menzu-accent)] transition-colors whitespace-nowrap";
 
 export const CHIP_DISABLED =
   "px-3 py-1.5 rounded-lg text-[11px] font-bold border border-neutral-800/60 bg-neutral-950/40 text-neutral-600 cursor-not-allowed whitespace-nowrap";
@@ -34,7 +34,7 @@ export const PANEL_CLASS =
  * pills they are meant to be.
  */
 export const SEARCH_SHELL_CLASS =
-  "flex items-center gap-2 h-[50px] px-4 rounded-3xl bg-neutral-900/60 border border-neutral-800/60 focus-within:border-[var(--brand)]/60 transition-colors";
+  "flex items-center gap-2 h-[50px] px-4 rounded-3xl bg-neutral-900/60 border border-neutral-800/60 focus-within:border-[var(--menzu-accent)]/60 transition-colors";
 
 /**
  * The primary field's shell — same size and radius, different skin. The

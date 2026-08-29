@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { ChevronDown, X, type LucideIcon } from "lucide-react";
 import { useState } from "react";
 
@@ -121,13 +122,21 @@ export function MobileDrawer({ open, onClose, groups }: MobileDrawerProps) {
             );
           })}
 
+          {/* The main bar's plain rung, mirrored for the drawer. Renamed with
+              it, and pointed at the same page: a rung that says HỖ TRỢ on a
+              phone and opens nothing is worse than no rung.
+
+              onClose because the drawer is not unmounted by a client-side
+              navigation — without it the panel stays open over the page it
+              just opened. */}
           <div className="flex flex-col">
-            <a
-              href="#"
+            <Link
+              href="/feedback"
+              onClick={onClose}
               className="w-full flex items-center gap-2 py-3 px-6 text-neutral-200 hover:text-white hover:bg-white/[0.02] active:bg-white/[0.05] transition-all text-left text-xs font-bold uppercase tracking-wider"
             >
-              TRẠNG THÁI HACK
-            </a>
+              HỖ TRỢ
+            </Link>
           </div>
         </div>
       </div>

@@ -55,12 +55,12 @@ function formatVnd(n: number): string {
 }
 
 const TAB_ACTIVE =
-  "flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest bg-[var(--brand)] text-white transition-colors";
+  "flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest bg-[var(--menzu-accent)] text-white transition-colors";
 const TAB_INACTIVE =
   "flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest border border-white/10 bg-white/[0.03] text-neutral-400 hover:text-white transition-colors";
 
 const PRESET_ACTIVE =
-  "px-4 py-2 rounded-lg text-[11px] font-bold border border-[var(--brand)]/50 bg-[var(--brand)]/15 text-[#a78bfa] transition-colors whitespace-nowrap";
+  "px-4 py-2 rounded-lg text-[11px] font-bold border border-[var(--menzu-accent)]/50 bg-[var(--menzu-accent)]/15 text-[var(--menzu-accent)] transition-colors whitespace-nowrap";
 const PRESET_INACTIVE =
   "px-4 py-2 rounded-lg text-[11px] font-bold border border-neutral-800/60 bg-neutral-950/40 text-neutral-400 hover:text-white hover:border-neutral-700 transition-colors whitespace-nowrap";
 
@@ -697,7 +697,7 @@ export function WalletTopUp({
             <label className="text-[10px] font-black uppercase tracking-widest text-neutral-300">
               Số tiền nạp
             </label>
-            <div className="flex items-center gap-2 h-12 px-4 rounded-xl bg-neutral-950/60 border border-neutral-800/60 focus-within:border-[var(--brand)]/60 transition-colors">
+            <div className="flex items-center gap-2 h-12 px-4 rounded-xl bg-neutral-950/60 border border-neutral-800/60 focus-within:border-[var(--menzu-accent)]/60 transition-colors">
               {/* State keeps bare digits (presets and submit read it as a
                   number); only the field shows them grouped — 50000 reads
                   as 50.000 the moment it is typed. */}
@@ -750,7 +750,7 @@ export function WalletTopUp({
           <button
             type="submit"
             disabled={pending}
-            className="w-full rounded-2xl bg-[var(--brand)] hover:bg-[var(--brand-dark)] disabled:opacity-70 disabled:cursor-wait text-white font-black py-3.5 uppercase tracking-widest text-xs transition-colors"
+            className="w-full rounded-2xl bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] disabled:opacity-70 disabled:cursor-wait text-white font-black py-3.5 uppercase tracking-widest text-xs transition-colors"
           >
             {pending ? "Đang xử lý…" : "Tạo hóa đơn"}
           </button>
@@ -773,7 +773,7 @@ export function WalletTopUp({
                   aria-pressed={carrier === option.value}
                   className={`h-14 rounded-xl border text-[11px] font-black uppercase tracking-wider transition-colors ${
                     carrier === option.value
-                      ? "border-[var(--brand)] bg-[var(--brand)]/10 text-white"
+                      ? "border-[var(--menzu-accent)] bg-[var(--menzu-accent)]/10 text-white"
                       : "border-neutral-800 bg-neutral-950/60 text-neutral-400 hover:border-neutral-600 hover:text-white"
                   }`}
                   style={carrier === option.value ? undefined : { color: option.tint }}
@@ -823,7 +823,7 @@ export function WalletTopUp({
           <button
             type="submit"
             disabled={pending || !carrier}
-            className="w-full rounded-2xl bg-[var(--brand)] hover:bg-[var(--brand-dark)] disabled:opacity-50 disabled:cursor-not-allowed text-white font-black py-3.5 uppercase tracking-widest text-xs transition-colors"
+            className="w-full rounded-2xl bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] disabled:opacity-50 disabled:cursor-not-allowed text-white font-black py-3.5 uppercase tracking-widest text-xs transition-colors"
           >
             {pending ? "Đang xử lý…" : "Tạo hóa đơn"}
           </button>

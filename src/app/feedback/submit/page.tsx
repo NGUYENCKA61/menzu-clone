@@ -5,7 +5,7 @@ import { Star } from "lucide-react";
 import { MobileBottomNav } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/MobileBottomNav";
 import { SiteFooter } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/SiteFooter";
 import { SiteHeader } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/SiteHeader";
-import { ToolsRail } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/ToolsRail";
+import { ConnectRailSection } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/ConnectRailSection";
 import { Breadcrumb } from "@/components/sites/menzu-lol-f7ae197a/shared/Breadcrumb";
 import { FeedbackComposer } from "@/components/sites/menzu-lol-f7ae197a/shared/FeedbackComposer";
 import { getCurrentUser } from "@/lib/session";
@@ -28,7 +28,7 @@ export default async function FeedbackSubmitPage() {
   const today = `${now.getDate()}/${now.getMonth() + 1}/${now.getFullYear()}`;
 
   return (
-    <div className="min-h-screen flex flex-col text-white overflow-x-clip selection:bg-indigo-500/30 bg-[#050508]">
+    <div className="min-h-screen flex flex-col text-white overflow-x-clip selection:bg-[var(--menzu-accent)]/30 bg-[#050508]">
       <div className="w-full shrink-0 h-[104px]" />
       <SiteHeader />
 
@@ -67,7 +67,7 @@ export default async function FeedbackSubmitPage() {
         <SiteFooter />
       </main>
 
-      <ToolsRail />
+      <ConnectRailSection />
       <MobileBottomNav />
     </div>
   );

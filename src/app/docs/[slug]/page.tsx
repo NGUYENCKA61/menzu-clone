@@ -93,9 +93,9 @@ export default async function DocArticlePage({ params }: PageProps) {
             <p className="text-sm font-bold text-white">Nội dung đang được biên soạn</p>
             <p className="text-xs text-neutral-400 max-w-md mx-auto leading-relaxed">
               Bài viết này chưa có nội dung. Thêm nội dung vào trường{" "}
-              <code className="text-indigo-400 font-mono">body</code> của bài{" "}
-              <code className="text-indigo-400 font-mono">{article.slug}</code> trong bảng{" "}
-              <code className="text-indigo-400 font-mono">doc_articles</code>.
+              <code className="text-[var(--menzu-accent)] font-mono">body</code> của bài{" "}
+              <code className="text-[var(--menzu-accent)] font-mono">{article.slug}</code> trong bảng{" "}
+              <code className="text-[var(--menzu-accent)] font-mono">doc_articles</code>.
             </p>
           </div>
         )}

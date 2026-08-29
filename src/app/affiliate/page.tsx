@@ -93,8 +93,10 @@ export default async function AffiliatePage() {
       label: "Người đã giới thiệu",
       value: String(referredCount),
       unit: "người",
-      tone: "text-[#a78bfa]",
-      box: "border-[var(--brand)]/25 bg-[var(--brand)]/15 text-[#a78bfa]",
+      // White figure on a neutral tile: the count is a fact, not a warning,
+      // and red type on a red tint was the hardest thing on the page to read.
+      tone: "text-white",
+      box: "border-white/10 bg-white/[0.06] text-[var(--menzu-accent)]",
       shell: "border-white/10 bg-neutral-900/50",
     },
     {
@@ -102,9 +104,12 @@ export default async function AffiliatePage() {
       label: "Hoa hồng khả dụng",
       value: formatVnd(user.commissionBalance),
       unit: "đ",
-      tone: "text-rose-400",
-      box: "border-rose-500/25 bg-rose-500/10 text-rose-400",
-      shell: "border-rose-500/15 bg-rose-500/[0.04]",
+      // Amber — money waiting to be moved, the ledger's "pending" colour —
+      // so the three cards read as count / waiting / done rather than as
+      // two shades of red beside a green.
+      tone: "text-amber-400",
+      box: "border-amber-500/25 bg-amber-500/10 text-amber-400",
+      shell: "border-amber-500/15 bg-amber-500/[0.04]",
     },
     {
       icon: Handshake,
@@ -175,11 +180,11 @@ export default async function AffiliatePage() {
                 key={text}
                 className="flex items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] p-4"
               >
-                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-[var(--brand)]/25 bg-[var(--brand)]/15">
-                  <Icon size={16} className="text-[#a78bfa]" />
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/[0.06]">
+                  <Icon size={16} className="text-[var(--menzu-accent)]" />
                 </span>
                 <span className="text-sm font-semibold leading-snug text-neutral-200">
-                  <span className="mr-1.5 font-black text-[#a78bfa]">{index + 1}.</span>
+                  <span className="mr-1.5 font-black text-white">{index + 1}.</span>
                   {text}
                 </span>
               </li>
@@ -223,9 +228,9 @@ export default async function AffiliatePage() {
                       className="border-b border-white/5 transition-colors last:border-0 hover:bg-white/[0.03]"
                     >
                       <td className="px-5 py-4">
-                        {/* Member purple, the badge colour every MEMBER plate
-                            wears. */}
-                        <span className="inline-flex rounded-md border border-[var(--brand)]/25 bg-[var(--brand)]/10 px-2 py-1 text-[11px] font-bold leading-none text-[#a78bfa]">
+                        {/* The shop accent: the name is the row's subject, and it
+                            reads as one. */}
+                        <span className="inline-flex rounded-md border border-white/10 bg-white/[0.06] px-2 py-1 text-[11px] font-bold leading-none text-neutral-200">
                           {maskName(earning.fromUser.username)}
                         </span>
                       </td>
@@ -256,7 +261,7 @@ export default async function AffiliatePage() {
           Có đầu ra ổn định và muốn nhập theo lô?{" "}
           <a
             href="/agency"
-            className="font-black uppercase tracking-wider text-[#a78bfa] transition-colors hover:text-white"
+            className="font-black uppercase tracking-wider text-[var(--menzu-accent)] transition-colors hover:text-white"
           >
             Nâng cấp đại lý
           </a>{" "}

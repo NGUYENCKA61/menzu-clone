@@ -70,14 +70,14 @@ export function WelcomeMailChecker() {
     <div className="w-full max-w-[720px] mx-auto space-y-6">
       <div className="rounded-3xl border border-white/10 bg-[#121216] p-6 sm:p-8 space-y-5">
         <div className="flex items-center gap-3">
-          <div className="w-11 h-11 rounded-xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 flex items-center justify-center shrink-0">
+          <div className="w-11 h-11 rounded-xl bg-white/[0.04] border border-white/[0.08] text-[var(--menzu-accent)] flex items-center justify-center shrink-0">
             <Mail size={20} />
           </div>
           <div>
             <h1 className="text-lg font-black uppercase tracking-wider text-white">
               Check Thư Welcome
             </h1>
-            <p className="text-[10px] font-bold uppercase tracking-widest text-indigo-400">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--menzu-accent)]">
               Riot Mail Checker
             </p>
           </div>
@@ -97,11 +97,11 @@ export function WelcomeMailChecker() {
             rows={9}
             spellCheck={false}
             placeholder="Delivered-To: ...&#10;Authentication-Results: ...&#10;From: Riot Games <noreply@riotgames.com>"
-            className="w-full rounded-2xl border border-white/5 bg-white/5 px-4 py-3.5 text-[12px] font-mono text-white outline-none focus:border-indigo-500/60 transition-colors placeholder-neutral-600 resize-y"
+            className="w-full rounded-2xl border border-white/5 bg-white/5 px-4 py-3.5 text-[12px] font-mono text-white outline-none focus:border-[var(--menzu-accent)]/60 transition-colors placeholder-neutral-600 resize-y"
           />
           <button
             type="submit"
-            className="w-full rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-black py-3.5 uppercase tracking-widest text-xs transition-colors"
+            className="w-full rounded-2xl bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] text-white font-black py-3.5 uppercase tracking-widest text-xs transition-colors"
           >
             Kiểm tra ngay
           </button>
@@ -169,13 +169,13 @@ export function WelcomeMailChecker() {
           {GUIDES.map(({ icon: Icon, title, steps }) => (
             <div key={title} className="rounded-2xl border border-zinc-800/80 bg-[#121216] p-5 space-y-3">
               <div className="flex items-center gap-2.5">
-                <Icon size={16} className="text-indigo-400" />
+                <Icon size={16} className="text-[var(--menzu-accent)]" />
                 <h3 className="text-xs font-black uppercase tracking-wider text-white">{title}</h3>
               </div>
               <ol className="space-y-2">
                 {steps.map((step, index) => (
                   <li key={step} className="flex gap-2.5">
-                    <span className="w-5 h-5 shrink-0 rounded-md bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 text-[10px] font-black flex items-center justify-center">
+                    <span className="w-5 h-5 shrink-0 rounded-md bg-white/[0.04] border border-white/[0.08] text-[var(--menzu-accent)] text-[10px] font-black flex items-center justify-center">
                       {index + 1}
                     </span>
                     <span className="text-[11px] text-neutral-400 leading-relaxed">{step}</span>

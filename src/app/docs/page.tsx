@@ -55,7 +55,7 @@ export default async function DocsPage() {
                 <h2 className="text-sm font-black uppercase tracking-widest text-white">
                   {section.label}
                 </h2>
-                <div className="flex-1 h-px bg-gradient-to-r from-indigo-500/30 to-transparent" />
+                <div className="flex-1 h-px bg-gradient-to-r from-[var(--menzu-accent)]/30 to-transparent" />
                 <span className="text-[10px] font-bold text-neutral-500">{items.length} bài</span>
               </div>
 
@@ -64,7 +64,7 @@ export default async function DocsPage() {
                   <Link
                     key={article.slug}
                     href={`/docs/${article.slug}`}
-                    className="group rounded-2xl border border-zinc-800/80 bg-[#121216] overflow-hidden hover:border-indigo-500/40 transition-colors flex flex-col"
+                    className="group rounded-2xl border border-zinc-800/80 bg-[#121216] overflow-hidden hover:border-[var(--menzu-accent)]/50 transition-colors flex flex-col"
                   >
                     <div className="relative aspect-[16/9] bg-black/40">
                       <Image
@@ -77,7 +77,7 @@ export default async function DocsPage() {
                     </div>
 
                     <div className="p-4 flex flex-col gap-2 flex-1">
-                      <h3 className="text-[13px] font-bold text-white leading-snug group-hover:text-indigo-400 transition-colors">
+                      <h3 className="text-[13px] font-bold text-white leading-snug group-hover:text-[var(--menzu-accent)] transition-colors">
                         {article.title}
                       </h3>
 
@@ -89,7 +89,7 @@ export default async function DocsPage() {
                         </span>
                       </div>
 
-                      <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-widest text-indigo-400">
+                      <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-widest text-[var(--menzu-accent)]">
                         Chi tiết
                         <ArrowRight size={11} className="group-hover:translate-x-0.5 transition-transform" />
                       </span>

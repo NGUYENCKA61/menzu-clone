@@ -8,8 +8,11 @@ export interface Crumb {
 
 const CRUMB_LINK_CLASS =
   "hover:text-white transition-colors flex items-center gap-1.5 shrink-0";
+// The page you are on reads in white, the way a current tab does; the trail
+// behind it stays grey. It used to be indigo, the one place that colour was
+// left on the storefront.
 const CRUMB_CURRENT_CLASS =
-  "text-indigo-400 hover:text-indigo-300 transition-colors font-black max-w-[300px] md:max-w-[400px] truncate";
+  "text-white transition-colors font-black max-w-[300px] md:max-w-[400px] truncate";
 
 function BreadcrumbTrail({ items }: { items: Crumb[] }) {
   return (

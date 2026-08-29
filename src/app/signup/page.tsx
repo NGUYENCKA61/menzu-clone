@@ -17,7 +17,7 @@ export default async function RegisterPage({
   const [settings, { ref }] = await Promise.all([getShopSettings(), searchParams]);
 
   return (
-    <div className="min-h-screen flex flex-col text-white overflow-x-clip selection:bg-indigo-500/30">
+    <div className="min-h-screen flex flex-col text-white overflow-x-clip selection:bg-[var(--menzu-accent)]/30">
       <main className="flex-1 relative z-20 w-full flex flex-col">
         <RegisterForm
           // Public half only. The secret stays server-side, where the token is

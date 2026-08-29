@@ -41,7 +41,7 @@ export function FaqAccordion({ entries }: { entries: FaqEntry[] }) {
               </span>
               <ChevronDown
                 size={18}
-                className={`shrink-0 text-indigo-400 transition-transform duration-300 ${
+                className={`shrink-0 text-[var(--menzu-accent)] transition-transform duration-300 ${
                   open ? "rotate-180" : ""
                 }`}
               />

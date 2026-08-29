@@ -59,7 +59,7 @@ export default async function SpinPage() {
         </div>
 
         <aside className="flex flex-col gap-4">
-          <div className="flex flex-col gap-3 rounded-2xl border border-[var(--brand)]/20 bg-[var(--brand)]/[0.05] p-5">
+          <div className="flex flex-col gap-3 rounded-2xl border border-[var(--menzu-violet)]/20 bg-[var(--menzu-violet)]/[0.05] p-5">
             <span className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-neutral-300">
               <Coins size={13} className="text-[#a78bfa]" />
               Điểm thưởng của bạn

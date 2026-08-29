@@ -18,7 +18,7 @@ export default async function LoginPage() {
   const settings = await getShopSettings();
 
   return (
-    <div className="min-h-screen flex flex-col text-white overflow-x-clip selection:bg-indigo-500/30">
+    <div className="min-h-screen flex flex-col text-white overflow-x-clip selection:bg-[var(--menzu-accent)]/30">
       <main className="flex-1 relative z-20 w-full flex flex-col">
         <LoginForm
           // Only the public half crosses to the browser. The secret stays on

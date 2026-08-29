@@ -73,12 +73,12 @@ export function TotpTool() {
     <div className="w-full max-w-[520px] mx-auto space-y-5">
       <div className="rounded-3xl border border-white/10 bg-[#121216] p-6 sm:p-8 space-y-6">
         <div className="flex items-center gap-3">
-          <div className="w-11 h-11 rounded-xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 flex items-center justify-center shrink-0">
+          <div className="w-11 h-11 rounded-xl bg-white/[0.04] border border-white/[0.08] text-neutral-400 flex items-center justify-center shrink-0">
             <ShieldCheck size={20} />
           </div>
           <div>
             <h1 className="text-lg font-black uppercase tracking-wider text-white">Menzu 2FA</h1>
-            <p className="text-[10px] font-bold uppercase tracking-widest text-indigo-400">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--menzu-accent)]">
               Valorant · Auto 2FA
             </p>
           </div>
@@ -105,13 +105,13 @@ export function TotpTool() {
               autoComplete="off"
               spellCheck={false}
               placeholder="VD: GEZDGNBVGY3TQOJQ..."
-              className="w-full rounded-2xl border border-white/5 bg-white/5 pl-12 pr-4 py-4 text-sm font-mono text-white outline-none focus:border-indigo-500/60 transition-colors placeholder-neutral-600"
+              className="w-full rounded-2xl border border-white/5 bg-white/5 pl-12 pr-4 py-4 text-sm font-mono text-white outline-none focus:border-[var(--menzu-accent)]/60 transition-colors placeholder-neutral-600"
             />
           </div>
 
           <button
             type="submit"
-            className="w-full rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-black py-3.5 uppercase tracking-widest text-xs transition-colors"
+            className="w-full rounded-2xl bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] text-white font-black py-3.5 uppercase tracking-widest text-xs transition-colors"
           >
             Get OTP
           </button>
@@ -149,7 +149,7 @@ export function TotpTool() {
               <div className="h-1.5 w-full rounded-full bg-white/5 overflow-hidden">
                 <div
                   className={`h-full rounded-full transition-[width] duration-1000 ease-linear ${
-                    remaining <= 5 ? "bg-red-500" : "bg-indigo-500"
+                    remaining <= 5 ? "bg-red-500" : "bg-emerald-500"
                   }`}
                   style={{ width: `${(remaining / TOTP_PERIOD) * 100}%` }}
                 />

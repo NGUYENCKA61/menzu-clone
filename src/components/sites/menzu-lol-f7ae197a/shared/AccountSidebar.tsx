@@ -50,7 +50,7 @@ const NAV_GROUPS: AccountNavItem[][] = [
 // Tailwind can't see dynamically-composed class names, so the link's active
 // and inactive states are always emitted as complete literal strings.
 const LINK_ACTIVE =
-  "flex items-center gap-3 py-2.5 px-3 rounded-lg text-sm font-bold transition-colors bg-[var(--brand)]/15 text-[#a78bfa]";
+  "flex items-center gap-3 py-2.5 px-3 rounded-lg text-sm font-bold transition-colors bg-[var(--menzu-accent)]/10 text-white";
 const LINK_INACTIVE =
   "flex items-center gap-3 py-2.5 px-3 rounded-lg text-sm font-bold transition-colors text-neutral-300 hover:text-white hover:bg-white/5";
 
@@ -115,7 +115,7 @@ export function AccountSidebar({
           <div className="mb-2 pb-2 border-b border-white/5">
             <a
               href="/admin"
-              className="flex items-center gap-3 py-2.5 px-3 rounded-lg text-indigo-300 hover:text-white hover:bg-indigo-500/10 transition-colors"
+              className="flex items-center gap-3 py-2.5 px-3 rounded-lg text-[var(--menzu-accent)] hover:text-white hover:bg-[var(--menzu-accent)]/10 transition-colors"
             >
               <Shield size={16} className="shrink-0" />
               <span className="text-sm font-black uppercase tracking-wider">

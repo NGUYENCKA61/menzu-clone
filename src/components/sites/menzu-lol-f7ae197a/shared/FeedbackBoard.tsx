@@ -53,13 +53,13 @@ export function VerifiedBadge({ size = "w-3.5 h-3.5" }: { size?: string }) {
   );
 }
 
-/** The service chip beside the name — blue whatever the service, as captured. */
+/** The service chip beside the name — the shop's accent whatever the service. */
 export function ServiceChip({ service, small = false }: { service: string; small?: boolean }) {
   return (
     <span
       className={`${
         small ? "text-[9px] px-1.5" : "text-[10px] px-2"
-      } font-bold py-0.5 rounded border whitespace-nowrap shrink-0 text-blue-400 bg-blue-500/10 border-blue-500/20`}
+      } font-bold py-0.5 rounded border whitespace-nowrap shrink-0 text-[var(--menzu-accent)] bg-[var(--menzu-accent)]/10 border-[var(--menzu-accent)]/20`}
     >
       {service}
     </span>
@@ -87,7 +87,7 @@ export function StarRow({ rating, size = 13 }: { rating: number; size?: number }
 }
 
 /**
- * The avatar in its blue ring. Anonymous reviews get the original's light-grey
+ * The avatar in its accent ring. Anonymous reviews get the original's light-grey
  * incognito disc; a signed reviewer without a picture gets their initial.
  */
 export function ReviewAvatar({
@@ -100,7 +100,7 @@ export function ReviewAvatar({
   anonymous: boolean;
 }) {
   return (
-    <div className="relative inline-block shrink-0 rounded-full p-[2px] border-[2.5px] border-[#0866FF]">
+    <div className="relative inline-block shrink-0 rounded-full p-[2px] border-[2.5px] border-[var(--menzu-accent)]">
       <div className="w-11 h-11 sm:w-[50px] sm:h-[50px] rounded-full overflow-hidden flex items-center justify-center bg-neutral-800">
         {anonymous ? (
           <div className="w-full h-full bg-[#D1D5DB] flex items-center justify-center">

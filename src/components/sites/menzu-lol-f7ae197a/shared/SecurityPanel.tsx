@@ -15,19 +15,19 @@ const TABS: { id: Tab; label: string; icon: typeof ShieldCheck }[] = [
 ];
 
 const TAB_ACTIVE =
-  "flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest bg-[var(--brand)] text-white transition-colors";
+  "flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest bg-[var(--menzu-accent)] text-white transition-colors";
 const TAB_INACTIVE =
   "flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest border border-white/10 bg-white/[0.03] text-neutral-400 hover:text-white transition-colors";
 
 // Quiet shells on purpose: four stacked form fields in red outlines read as
 // four warnings. The red treatment stays on the single search boxes only.
 const FIELD =
-  "w-full rounded-xl border border-white/5 bg-white/5 px-4 py-3 text-sm text-white outline-none focus:border-[var(--brand)]/60 transition-colors placeholder-neutral-600";
+  "w-full rounded-xl border border-white/5 bg-white/5 px-4 py-3 text-sm text-white outline-none focus:border-[var(--menzu-accent)]/60 transition-colors placeholder-neutral-600";
 /** The overview page's card header pair. */
 const CARD_TITLE = "text-sm font-black uppercase tracking-wider text-white";
 const CARD_HINT = "text-xs text-neutral-500";
 const SUBMIT =
-  "self-start h-10 px-5 rounded-xl bg-[var(--brand)] hover:bg-[var(--brand-dark)] disabled:opacity-70 disabled:cursor-wait transition-colors text-[11px] font-black uppercase tracking-widest text-white";
+  "self-start h-10 px-5 rounded-xl bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] disabled:opacity-70 disabled:cursor-wait transition-colors text-[11px] font-black uppercase tracking-widest text-white";
 
 function Notice({ tone, children }: { tone: "ok" | "err"; children: string }) {
   return (
@@ -355,7 +355,7 @@ export function SecurityPanel({
                 ) : provider.enabled ? (
                   <a
                     href={`/api/auth/${provider.key}?next=%2Fsecurity`}
-                    className="ml-auto inline-flex h-9 shrink-0 items-center rounded-lg bg-[var(--brand)] px-4 text-[10px] font-black uppercase tracking-widest text-white transition-colors hover:bg-[var(--brand-dark)]"
+                    className="ml-auto inline-flex h-9 shrink-0 items-center rounded-lg bg-[var(--menzu-accent)] px-4 text-[10px] font-black uppercase tracking-widest text-white transition-colors hover:bg-[var(--menzu-accent-dark)]"
                   >
                     Liên kết
                   </a>
@@ -364,7 +364,7 @@ export function SecurityPanel({
                   // provider's keys sit in Cấu hình.
                   <button
                     type="button"
-                    className="ml-auto inline-flex h-9 shrink-0 items-center rounded-lg bg-[var(--brand)] px-4 text-[10px] font-black uppercase tracking-widest text-white"
+                    className="ml-auto inline-flex h-9 shrink-0 items-center rounded-lg bg-[var(--menzu-accent)] px-4 text-[10px] font-black uppercase tracking-widest text-white"
                   >
                     Liên kết
                   </button>
@@ -388,7 +388,7 @@ export function SecurityPanel({
                 key={session.key}
                 className="flex items-center gap-3.5 rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3"
               >
-                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-[var(--brand)]/25 bg-[var(--brand)]/15 text-[#a78bfa]">
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-[var(--menzu-accent)]/25 bg-[var(--menzu-accent)]/15 text-[var(--menzu-accent)]">
                   <Laptop size={17} />
                 </span>
                 <div className="flex min-w-0 flex-1 flex-col gap-1.5">
@@ -397,7 +397,7 @@ export function SecurityPanel({
                       {session.device}
                     </span>
                     {session.current ? (
-                      <span className="rounded-md border border-[var(--brand)]/50 bg-[var(--brand)]/10 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-[#a78bfa]">
+                      <span className="rounded-md border border-[var(--menzu-accent)]/50 bg-[var(--menzu-accent)]/10 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-[var(--menzu-accent)]">
                         Thiết bị hiện tại
                       </span>
                     ) : null}

@@ -153,7 +153,7 @@ export function SpinWheel({
       <div className="relative w-full max-w-[520px] aspect-square">
         {/* The pointer, outside the rotating group so it stays at twelve. */}
         <div className="absolute left-1/2 top-[-6px] z-10 -translate-x-1/2">
-          <div className="h-0 w-0 border-x-[10px] border-t-[18px] border-x-transparent border-t-[var(--brand)]" />
+          <div className="h-0 w-0 border-x-[10px] border-t-[18px] border-x-transparent border-t-[var(--menzu-violet)]" />
         </div>
 
         <svg
@@ -235,7 +235,7 @@ export function SpinWheel({
           type="button"
           disabled={spinning || !affordable || !canSpin}
           onClick={spin}
-          className="absolute left-1/2 top-1/2 z-10 grid h-[27%] w-[27%] -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border-4 border-[#0b0b10] bg-[var(--brand)] text-white shadow-[0_0_30px_-4px_rgb(124_58_237_/_0.8)] transition-colors hover:bg-[var(--brand-dark)] disabled:bg-neutral-700 disabled:text-neutral-400 disabled:shadow-none"
+          className="absolute left-1/2 top-1/2 z-10 grid h-[27%] w-[27%] -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border-4 border-[#0b0b10] bg-[var(--menzu-violet)] text-white shadow-[0_0_30px_-4px_rgb(124_58_237_/_0.8)] transition-colors hover:bg-[var(--menzu-violet-dark)] disabled:bg-neutral-700 disabled:text-neutral-400 disabled:shadow-none"
         >
           <span className="text-[13px] font-black uppercase tracking-widest leading-none sm:text-[15px]">
             {spinning ? "…" : affordable ? "Quay" : "Hết lượt"}
@@ -261,7 +261,7 @@ export function SpinWheel({
         {!affordable && !spinning ? (
           <Link
             href="/categories"
-            className="text-[11px] font-bold text-[var(--brand)] hover:text-white transition-colors"
+            className="text-[11px] font-bold text-[var(--menzu-violet)] hover:text-white transition-colors"
           >
             Mua sắm để tích thêm điểm
           </Link>
@@ -293,7 +293,7 @@ export function SpinWheel({
             aria-label="Kết quả vòng quay"
             onClick={(e) => e.stopPropagation()}
             className={`relative w-full max-w-[380px] overflow-hidden rounded-2xl border bg-[#0e0e11] p-7 text-center shadow-2xl ${
-              won ? "border-[var(--brand)]/40" : "border-white/10"
+              won ? "border-[var(--menzu-violet)]/40" : "border-white/10"
             }`}
           >
             {/* A wash behind the icon, only when there is something to celebrate. */}
@@ -316,7 +316,7 @@ export function SpinWheel({
             {/* The prize's own picture when it has one — a mousepad says more
                 as a mousepad than as a gift icon. */}
             {result.prize.image ? (
-              <span className="relative mx-auto block h-28 w-28 overflow-hidden rounded-xl border border-[var(--brand)]/30 bg-black/40">
+              <span className="relative mx-auto block h-28 w-28 overflow-hidden rounded-xl border border-[var(--menzu-violet)]/30 bg-black/40">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={result.prize.image}
@@ -328,7 +328,7 @@ export function SpinWheel({
               <span
                 className={`relative mx-auto flex h-16 w-16 items-center justify-center rounded-full border ${
                   won
-                    ? "border-[var(--brand)]/40 bg-[var(--brand)]/15"
+                    ? "border-[var(--menzu-violet)]/40 bg-[var(--menzu-violet)]/15"
                     : "border-white/10 bg-white/[0.04]"
                 }`}
               >
@@ -337,7 +337,7 @@ export function SpinWheel({
                   <Sparkles
                     size={14}
                     aria-hidden
-                    className="absolute -right-1 -top-1 text-[var(--brand)]"
+                    className="absolute -right-1 -top-1 text-[var(--menzu-violet)]"
                   />
                 ) : null}
               </span>
@@ -385,7 +385,7 @@ export function SpinWheel({
                   setResult(null);
                   void spin();
                 }}
-                className="inline-flex h-11 flex-1 items-center justify-center gap-1.5 rounded-xl bg-[var(--brand)] text-[11px] font-black uppercase tracking-widest text-white transition-colors hover:bg-[var(--brand-dark)] disabled:opacity-50"
+                className="inline-flex h-11 flex-1 items-center justify-center gap-1.5 rounded-xl bg-[var(--menzu-violet)] text-[11px] font-black uppercase tracking-widest text-white transition-colors hover:bg-[var(--menzu-violet-dark)] disabled:opacity-50"
               >
                 <RotateCw size={13} />
                 Quay tiếp

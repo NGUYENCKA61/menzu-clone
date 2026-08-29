@@ -3,6 +3,13 @@ import { ArrowRight, Phone } from "lucide-react";
 
 import { listCategories, listDocArticles } from "@/lib/queries";
 import { getShopSettings } from "@/lib/settingsStore";
+import { categoryHref } from "@/lib/routes";
+import {
+  DiscordGlyph,
+  FacebookGlyph,
+  TiktokGlyph,
+  ZaloGlyph,
+} from "@/components/sites/menzu-lol-f7ae197a/shared/BrandGlyphs";
 
 /**
  * How many rows each shelf shows before deferring to its index page; "Xem tất
@@ -34,42 +41,11 @@ const BOTTOM_LINKS: FooterLink[] = [
  */
 const HEADING = "text-[11px] font-black uppercase tracking-[0.16em] text-white";
 const ROW = "text-[13px] leading-[1.45] text-neutral-400 hover:text-white transition-colors";
+// The footer's one colour is the storefront's red accent, the same one the
+// section headings above it use — the shop tried the brand purple and plain
+// white in these three spots and came back to this.
 const SEE_ALL =
-  "group inline-flex items-center gap-1.5 text-[12px] font-bold uppercase tracking-wider text-[var(--brand)] hover:text-white transition-colors";
-
-/* The live site serves its social glyphs from icons8 with signed query strings
- * that cannot be re-hosted; inline brand paths stand in, sized to the tile. */
-function FacebookGlyph() {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor" className="w-[17px] h-[17px]">
-      <path d="M22 12a10 10 0 1 0-11.56 9.88v-6.99H7.9V12h2.54V9.8c0-2.5 1.49-3.89 3.77-3.89 1.1 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.77-1.63 1.56V12h2.78l-.45 2.89h-2.33v6.99A10 10 0 0 0 22 12Z" />
-    </svg>
-  );
-}
-
-function ZaloGlyph() {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor" className="w-[17px] h-[17px]">
-      <path d="M12 2C6.5 2 2 5.9 2 10.7c0 2.7 1.4 5.1 3.6 6.7-.1.9-.5 2.2-1.3 3.2-.2.3.1.7.4.6 1.9-.5 3.3-1.3 4.1-1.9.9.2 1.9.3 2.9.3 5.5 0 10-3.9 10-8.7S17.5 2 12 2Zm-4.6 6.1h3.4v.9L8.5 12.5h2.4v1H7.2v-.9l2.3-3.6H7.4v-.9Zm4.6 0h1v5.4h-1V8.1Zm3.6 1.4c1.2 0 2.1.9 2.1 2s-.9 2-2.1 2-2.1-.9-2.1-2 .9-2 2.1-2Zm0 .9c-.6 0-1.1.5-1.1 1.1s.5 1.1 1.1 1.1 1.1-.5 1.1-1.1-.5-1.1-1.1-1.1Z" />
-    </svg>
-  );
-}
-
-function TiktokGlyph() {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor" className="w-[17px] h-[17px]">
-      <path d="M16.6 5.82A4.28 4.28 0 0 1 15.54 3h-3.09v12.4a2.59 2.59 0 0 1-2.59 2.5 2.59 2.59 0 0 1 0-5.18c.27 0 .52.04.76.12v-3.2a5.79 5.79 0 0 0-.76-.05 5.78 5.78 0 1 0 5.78 5.78V9.01a7.35 7.35 0 0 0 4.29 1.38V7.3a4.29 4.29 0 0 1-3.33-1.48Z" />
-    </svg>
-  );
-}
-
-function DiscordGlyph() {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor" className="w-[17px] h-[17px]">
-      <path d="M20.32 4.57A19.79 19.79 0 0 0 15.43 3c-.21.38-.46.9-.63 1.31a18.27 18.27 0 0 0-5.6 0C9.03 3.9 8.77 3.38 8.56 3a19.74 19.74 0 0 0-4.89 1.57C.56 9.09-.28 13.5.14 17.84a19.9 19.9 0 0 0 6.07 3.08c.49-.67.93-1.39 1.3-2.14-.71-.27-1.4-.6-2.04-.99.17-.13.34-.26.5-.4a14.2 14.2 0 0 0 12.06 0c.16.14.33.27.5.4-.65.39-1.33.72-2.05.99.38.75.81 1.47 1.3 2.14a19.87 19.87 0 0 0 6.08-3.08c.5-5.03-.84-9.4-3.54-13.27ZM8.02 15.2c-1.18 0-2.15-1.08-2.15-2.4 0-1.32.95-2.4 2.15-2.4 1.21 0 2.18 1.09 2.16 2.4 0 1.32-.95 2.4-2.16 2.4Zm7.96 0c-1.18 0-2.15-1.08-2.15-2.4 0-1.32.95-2.4 2.15-2.4 1.21 0 2.18 1.09 2.16 2.4 0 1.32-.95 2.4-2.16 2.4Z" />
-    </svg>
-  );
-}
+  "group inline-flex items-center gap-1.5 text-[12px] font-bold uppercase tracking-wider text-[var(--menzu-accent)] hover:text-white transition-colors";
 
 interface FooterContact {
   zalo: string;
@@ -195,7 +171,7 @@ export async function SiteFooter() {
     ...categories.filter((c) => c.productCount === 0),
   ]
     .slice(0, CATEGORY_SHELF)
-    .map((c) => ({ label: c.name, href: `/category/${c.slug}` }));
+    .map((c) => ({ label: c.name, href: categoryHref(c.slug) }));
 
   // "Nổi bật" measured rather than chosen: the most-read guides, which also
   // keeps half-written drafts with no readers out of the footer. Warranty
@@ -238,7 +214,7 @@ export async function SiteFooter() {
               className="text-[22px] sm:text-[24px] font-black tracking-tight leading-none text-white"
             >
               {wordmark}
-              <span className="text-[var(--brand)]">.COM</span>
+              <span className="text-[var(--menzu-accent)]">.COM</span>
             </Link>
 
             {/* 13px over 1.6 rather than 14 over 1.625: the line count is the
@@ -270,7 +246,7 @@ export async function SiteFooter() {
                       // The same tile the quantity stepper and the tool rail use,
                       // so a channel reads as something to press rather than as
                       // decoration floating on the background.
-                      className="grid h-9 w-9 place-items-center rounded-lg border border-white/10 bg-white/[0.03] text-neutral-300 hover:border-[var(--brand)]/50 hover:bg-[var(--brand)]/10 hover:text-white transition-colors"
+                      className="grid h-9 w-9 place-items-center rounded-lg border border-white/10 bg-white/[0.03] text-neutral-300 hover:border-[var(--menzu-accent)]/50 hover:bg-[var(--menzu-accent)]/10 hover:text-white transition-colors"
                     >
                       <Glyph />
                     </a>

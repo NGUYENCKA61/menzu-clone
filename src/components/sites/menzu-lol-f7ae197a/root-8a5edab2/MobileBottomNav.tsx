@@ -30,8 +30,8 @@ export function MobileBottomNav() {
             href="#"
             className={
               index === 0
-                ? "flex flex-col items-center justify-center gap-1 text-indigo-400 hover:text-indigo-400 transition-colors"
-                : "flex flex-col items-center justify-center gap-1 text-neutral-500 hover:text-indigo-400 transition-colors"
+                ? "flex flex-col items-center justify-center gap-1 text-[var(--menzu-accent)] transition-colors"
+                : "flex flex-col items-center justify-center gap-1 text-neutral-500 hover:text-[var(--menzu-accent)] transition-colors"
             }
           >
             <Icon size={18} />

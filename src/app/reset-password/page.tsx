@@ -20,7 +20,7 @@ export default async function ResetPasswordPage({
   const { token } = await searchParams;
 
   return (
-    <div className="min-h-screen flex flex-col text-white overflow-x-clip selection:bg-indigo-500/30">
+    <div className="min-h-screen flex flex-col text-white overflow-x-clip selection:bg-[var(--menzu-accent)]/30">
       <main className="flex-1 relative z-20 w-full flex flex-col">
         <div className="min-h-[calc(100vh-100px)] flex items-center justify-center px-4 py-16">
           <div className="w-full max-w-[440px] rounded-[2rem] border border-white/10 bg-neutral-900/80 p-8 sm:p-10 shadow-2xl animate-[slideUpFade_0.5s_ease-out]">

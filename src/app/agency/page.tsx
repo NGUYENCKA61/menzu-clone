@@ -82,8 +82,8 @@ export default async function AgencyPage() {
         ) : null}
 
         <div className="rounded-2xl border border-white/10 bg-neutral-900/50 p-6 flex items-start gap-5">
-          <div className="w-12 h-12 shrink-0 rounded-2xl bg-[var(--brand)]/15 border border-[var(--brand)]/30 flex items-center justify-center">
-            <Store size={22} className="text-[#a78bfa]" />
+          <div className="w-12 h-12 shrink-0 rounded-2xl bg-white/[0.06] border border-white/10 flex items-center justify-center">
+            <Store size={22} className="text-[var(--menzu-accent)]" />
           </div>
           <div className="flex flex-col gap-1.5 min-w-0">
             <span className="text-xl font-black text-white">Trở thành Đại lý</span>
@@ -101,8 +101,8 @@ export default async function AgencyPage() {
               key={title}
               className="rounded-2xl border border-white/10 bg-neutral-900/50 p-5 flex flex-col gap-2.5"
             >
-              <Icon size={18} className="text-[#a78bfa]" />
-              <span className="text-[10px] font-black uppercase tracking-widest text-neutral-500">
+              <Icon size={18} className="text-[var(--menzu-accent)]" />
+              <span className="text-[10px] font-black uppercase tracking-widest text-neutral-400">
                 {title}
               </span>
               <p className="text-sm text-neutral-300 leading-relaxed">{body}</p>
@@ -117,7 +117,7 @@ export default async function AgencyPage() {
           <ol className="flex flex-col gap-3">
             {STEPS.map((step, index) => (
               <li key={step} className="flex items-center gap-3">
-                <span className="w-7 h-7 shrink-0 rounded-full border border-[var(--brand)]/40 bg-[var(--brand)]/10 text-[#a78bfa] text-xs font-black flex items-center justify-center">
+                <span className="w-7 h-7 shrink-0 rounded-full border border-white/15 bg-white/[0.06] text-white text-xs font-black flex items-center justify-center">
                   {index + 1}
                 </span>
                 <span className="text-sm font-semibold text-neutral-200">{step}</span>
@@ -138,7 +138,7 @@ export default async function AgencyPage() {
                   href={channel.href}
                   target="_blank"
                   rel="noreferrer"
-                  className="h-10 px-5 rounded-xl bg-[var(--brand)] hover:bg-[var(--brand-dark)] transition-colors text-[10px] font-black uppercase tracking-widest text-white inline-flex items-center justify-center"
+                  className="h-10 px-5 rounded-xl bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] transition-colors text-[10px] font-black uppercase tracking-widest text-white inline-flex items-center justify-center"
                 >
                   {channel.label}
                 </a>
@@ -163,7 +163,7 @@ export default async function AgencyPage() {
           Muốn kiếm nhẹ nhàng hơn?{" "}
           <a
             href="/affiliate"
-            className="font-black uppercase tracking-wider text-[#a78bfa] hover:text-white transition-colors"
+            className="font-black uppercase tracking-wider text-[var(--menzu-accent)] hover:text-white transition-colors"
           >
             Cộng tác viên
           </a>{" "}
