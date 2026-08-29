@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
@@ -277,7 +278,6 @@ export function AdminSettings({
   const [heroBanner, setHeroBanner] = useState(settings.heroBanner);
   const [siteBackground, setSiteBackground] = useState(settings.siteBackground);
   const [flashSaleBackground, setFlashSaleBackground] = useState(settings.flashSaleBackground);
-  const [hotPickSkin, setHotPickSkin] = useState(settings.hotPickSkin);
   const [flashBgUploading, setFlashBgUploading] = useState(false);
   const [flashBgMsg, setFlashBgMsg] = useState<{ tone: "ok" | "err"; text: string } | null>(null);
   const [siteBgUploading, setSiteBgUploading] = useState(false);
@@ -345,6 +345,9 @@ export function AdminSettings({
   const [hotline, setHotline] = useState(settings.contactHotline);
   const [tiktok, setTiktok] = useState(settings.contactTiktok);
   const [discord, setDiscord] = useState(settings.contactDiscord);
+  const [fbGroup, setFbGroup] = useState(settings.contactFacebookGroup);
+  const [zaloGroup, setZaloGroup] = useState(settings.contactZaloGroup);
+  const [telegram, setTelegram] = useState(settings.contactTelegram);
 
   const [blocks, setBlocks] = useState(settings.homeBlocks);
   // No longer edited here — the groups table replaced these two rows. They are
@@ -354,6 +357,7 @@ export function AdminSettings({
   const [docSlugs, setDocSlugs] = useState(settings.homeDocSlugs);
   const [rowCount, setRowCount] = useState(String(settings.homeRowCount));
 
+  const [heroBadge, setHeroBadge] = useState(settings.heroBadge);
   const [heroTitle, setHeroTitle] = useState(settings.heroTitle);
   const [heroSubtitle, setHeroSubtitle] = useState(settings.heroSubtitle);
   const [heroCtaLabel, setHeroCtaLabel] = useState(settings.heroPrimaryLabel);
@@ -500,7 +504,6 @@ export function AdminSettings({
           heroBanner,
           siteBackground,
           flashSaleBackground,
-          hotPickSkin,
           authPanelImages: panelImages,
           authSlideEnabled: slideOn,
           authSlideSeconds: Number(slideSeconds) || 5,
@@ -512,12 +515,16 @@ export function AdminSettings({
           contactHotline: hotline,
           contactTiktok: tiktok,
           contactDiscord: discord,
+          contactFacebookGroup: fbGroup,
+          contactZaloGroup: zaloGroup,
+          contactTelegram: telegram,
           homeBlocks: blocks,
           homeValorantSlugs: settings.homeValorantSlugs,
           homeTftSlugs: settings.homeTftSlugs,
           homeCategorySlugs: categorySlugs,
           homeDocSlugs: docSlugs,
           homeRowCount: Number(rowCount) || DEFAULT_SETTINGS.homeRowCount,
+          heroBadge,
           heroTitle,
           heroSubtitle,
           heroPrimaryLabel: heroCtaLabel,
@@ -1308,24 +1315,6 @@ export function AdminSettings({
               </p>
             </div>
 
-            {/* A name, not a picture: the chip draws whatever the item picture
-                library holds under this name, so replacing that one picture
-                updates the chip without anyone coming back here. */}
-            <div>
-              <span className={LABEL}>Vật phẩm “HOT PICK”</span>
-              <input
-                value={hotPickSkin}
-                onChange={(event) => setHotPickSkin(event.target.value)}
-                className={FIELD}
-                placeholder="VD: M4A1-S Transformers"
-              />
-              <p className={HINT}>
-                Chip nhỏ trong ô tìm skin ở trang danh mục, tự xoay vòng các vật phẩm có
-                ảnh trong <strong>Kho ảnh vật phẩm</strong> — bấm vào là lọc theo cây
-                đang hiện. Điền tên vào đây để ghim một cây đứng đầu vòng xoay; để trống
-                thì xoay toàn kho. Kho trống thì chip ẩn.
-              </p>
-            </div>
           </section>
 
           <section className={CARD}>
@@ -1602,7 +1591,7 @@ export function AdminSettings({
           </div>
 
           <section className={CARD}>
-            <span className={HEADING}>Liên hệ ở chân trang</span>
+            <span className={HEADING}>Liên hệ &amp; kết nối</span>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div>
@@ -1665,12 +1654,49 @@ export function AdminSettings({
                   className={FIELD}
                 />
               </div>
+              <div>
+                <label htmlFor="contact-fb-group" className={LABEL}>
+                  Nhóm Facebook
+                </label>
+                <input
+                  id="contact-fb-group"
+                  value={fbGroup}
+                  onChange={(event) => setFbGroup(event.target.value)}
+                  placeholder="https://facebook.com/groups/..."
+                  className={FIELD}
+                />
+              </div>
+              <div>
+                <label htmlFor="contact-zalo-group" className={LABEL}>
+                  Nhóm Zalo
+                </label>
+                <input
+                  id="contact-zalo-group"
+                  value={zaloGroup}
+                  onChange={(event) => setZaloGroup(event.target.value)}
+                  placeholder="https://zalo.me/g/..."
+                  className={FIELD}
+                />
+              </div>
+              <div>
+                <label htmlFor="contact-telegram" className={LABEL}>
+                  Nhóm Telegram
+                </label>
+                <input
+                  id="contact-telegram"
+                  value={telegram}
+                  onChange={(event) => setTelegram(event.target.value)}
+                  placeholder="https://t.me/..."
+                  className={FIELD}
+                />
+              </div>
             </div>
 
             <p className={HINT}>
-              Điền kênh nào thì icon kênh đó hiện ở dải “Theo dõi &amp; kết nối” dưới
-              chân trang; để trống thì icon không hiện, chứ không còn kiểu icon bấm vào
-              không đi đâu như bản gốc.
+              Năm ô trên cùng nuôi dải “Theo dõi &amp; kết nối” dưới chân trang; ba ô
+              nhóm nuôi thanh “KẾT NỐI” dán ở mép trái mọi trang. Để trống ô nào thì
+              dòng đó không hiện — không còn kiểu icon bấm vào không đi đâu như bản
+              gốc. Trống hết thì thanh KẾT NỐI biến mất luôn.
             </p>
           </section>
         </>
@@ -1740,6 +1766,21 @@ export function AdminSettings({
           <section className={CARD}>
             <span className={HEADING}>Hero</span>
             {sectionSwitch("hero", "Tắt thì trang chủ bắt đầu thẳng từ khối kế tiếp.")}
+
+            <div>
+              <span className={LABEL}>
+                Thẻ trên tiêu đề <span className="text-neutral-600">(trống = ẩn)</span>
+              </span>
+              <input
+                value={heroBadge}
+                onChange={(event) => setHeroBadge(event.target.value)}
+                placeholder="Official OBV Hax Reseller"
+                className={FIELD}
+              />
+              <p className={HINT}>
+                Viên thuốc nhỏ có dấu tick đỏ, nằm trên dòng &ldquo;We are&rdquo;.
+              </p>
+            </div>
 
             <div>
               <span className={LABEL}>Tiêu đề H1</span>
@@ -1916,9 +1957,9 @@ export function AdminSettings({
               {sectionSwitch("groups", "Toàn bộ hàng nhóm, theo thứ tự đã sắp.")}
               <p className={HINT}>
                 Tên nhóm và danh mục trong từng nhóm nằm ở{" "}
-                <a href="/admin/groups" className="font-bold text-[var(--menzu-accent)] underline">
+                <Link href="/admin/groups" className="font-bold text-[var(--menzu-accent)] underline">
                   Nhóm danh mục
-                </a>
+                </Link>
                 . Một danh mục nằm được trong nhiều nhóm mà vẫn chỉ là một bản ghi, nên sửa
                 tên hay ảnh một lần là mọi nhóm cùng đổi.
               </p>

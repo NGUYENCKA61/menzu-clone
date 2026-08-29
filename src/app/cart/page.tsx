@@ -5,6 +5,7 @@ import { ArrowRight, ShoppingCart } from "lucide-react";
 import { CartView } from "@/components/sites/menzu-lol-f7ae197a/shared/CartView";
 import { SimplePage } from "@/components/sites/menzu-lol-f7ae197a/shared/SimplePage";
 import { db } from "@/lib/db";
+import { productHref } from "@/lib/routes";
 import { getCurrentUser } from "@/lib/session";
 
 export const metadata: Metadata = {
@@ -30,7 +31,15 @@ export default async function CartPage() {
         where: { userId: user.id },
         orderBy: { createdAt: "asc" },
         include: {
-          product: { select: { code: true, name: true, imageUrl: true } },
+          product: {
+            select: {
+              code: true,
+              slug: true,
+              name: true,
+              imageUrl: true,
+              category: { select: { slug: true } },
+            },
+          },
           package: { select: { label: true, price: true } },
         },
       })
@@ -69,6 +78,7 @@ export default async function CartPage() {
         lines={items.map((i) => ({
           id: i.id,
           code: i.product.code,
+          href: productHref(i.product.category.slug, i.product.slug),
           name: i.product.name ?? i.product.code,
           packageLabel: i.package.label,
           unitPrice: Number(i.package.price),

@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { Lock } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import {
   discountPct,
@@ -112,7 +113,7 @@ export function ProductCard({ product }: ProductCardProps) {
 
   return (
     <a
-      href={`/account/${product.code}`}
+      href={product.href}
       onMouseEnter={() => setHovering(true)}
       onMouseLeave={() => {
         setHovering(false);
@@ -144,10 +145,21 @@ export function ProductCard({ product }: ProductCardProps) {
           </span>
           {product.tag !== null && (
             /* Dressed as the software card's status pill — same dark glass,
-               same type — minus the coloured dot; the red text carries the
-               meaning here. */
-            <span className="inline-flex items-center rounded-full border border-white/10 bg-[#0d0d12]/80 px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-[#ff6c88] backdrop-blur-md">
-              ✉ {product.tag}
+               same type — minus the coloured dot; the text colour carries the
+               meaning: NFA green, FULL THÔNG TIN (and anything else) red. */
+            <span
+              className={`inline-flex items-center gap-1 rounded-full border border-white/10 bg-[#0d0d12]/80 px-2.5 py-1 text-[10px] font-black uppercase tracking-wide backdrop-blur-md ${
+                product.tag.toUpperCase() === "NFA"
+                  ? "text-emerald-400"
+                  : "text-[#ff6c88]"
+              }`}
+            >
+              {product.tag.toUpperCase() === "NFA" ? (
+                <Lock size={11} strokeWidth={2.75} aria-hidden />
+              ) : (
+                <span aria-hidden>✉</span>
+              )}
+              {product.tag}
             </span>
           )}
         </div>
@@ -158,47 +170,54 @@ export function ProductCard({ product }: ProductCardProps) {
         <div className="flex items-center gap-2.5">
           <span aria-hidden className="h-4 w-[3px] shrink-0 rounded-full bg-[var(--menzu-accent)]" />
           <h3 className="truncate text-[17px] font-black uppercase tracking-wide text-white">
-            {product.rank}
-            {product.skins > 0 ? ` — ${product.skins} Skins` : null}
+            {product.name ||
+              [product.rank, product.skins > 0 ? `${product.skins} Skins` : ""]
+                .filter(Boolean)
+                .join(" — ") ||
+              `#${product.code}`}
           </h3>
         </div>
 
-        <p className="mb-[14px] mt-2 line-clamp-2 min-h-[37px] text-[12px] leading-[1.55] text-[#9b9da5]">
-          Tài khoản game nhiều vật phẩm, inventory đẹp và sẵn sàng giao ngay.
-          <br />
-          Thông tin tài khoản được kiểm tra trước khi bàn giao.
-        </p>
+        {/* This account's own words when the shop wrote some; the stock two
+            lines otherwise, so no card ever shows a blank where prose goes. */}
+        {product.description ? (
+          <p className="mb-[14px] mt-2 line-clamp-2 min-h-[37px] text-[12px] leading-[1.55] text-[#9b9da5]">
+            {product.description}
+          </p>
+        ) : (
+          <p className="mb-[14px] mt-2 line-clamp-2 min-h-[37px] text-[12px] leading-[1.55] text-[#9b9da5]">
+            Tài khoản game nhiều vật phẩm, inventory đẹp và sẵn sàng giao ngay.
+            <br />
+            Thông tin tài khoản được kiểm tra trước khi bàn giao.
+          </p>
+        )}
 
-        {/* The labelled stat strip above the weapons: RANK, then VIP and
-            VIP INGAME when the shop has filled them in, then any tier
-            counters the account carries. Per the reference: the glyphs sit in
-            the accent red, labels grey, RANK's value white — the headline
-            stat — and the VIP numbers red; the entries spread across the
-            card's full width. The skin total is not repeated here — the title
-            already says it. */}
+        {/* The labelled stat strip above the weapons: RANK, VIP and VIP
+            INGAME always print their labels — an unfilled one simply has
+            nothing after the colon. Then any tier counters the account
+            carries. Per the reference: the glyphs sit in the accent red,
+            labels grey, RANK's value white — the headline stat — and the VIP
+            numbers red; the entries spread across the card's full width. The
+            skin total is not repeated here — the title already says it. */}
         <div className="mb-3.5 flex w-full items-center justify-between gap-2 overflow-hidden rounded-[9px] border border-[#292a30] bg-[#111216] px-3 py-1.5 uppercase">
           <span className="flex min-w-0 items-center gap-[5px] whitespace-nowrap text-[11px] font-extrabold text-[#c7c8cd]">
             <span aria-hidden className="text-[var(--menzu-accent)]">▲</span> Rank:
             <span className="truncate text-white">{product.rank}</span>
           </span>
-          {(product.vip ?? 0) > 0 ? (
-            <>
-              <span aria-hidden className="text-[11px] text-[#3a3b42]">|</span>
-              <span className="flex items-center gap-[5px] whitespace-nowrap text-[11px] font-extrabold text-[#c7c8cd]">
-                <span aria-hidden className="text-[var(--menzu-accent)]">◆</span> VIP:
-                <span className="text-[var(--menzu-accent)]">{product.vip}</span>
-              </span>
-            </>
-          ) : null}
-          {(product.vipIngame ?? 0) > 0 ? (
-            <>
-              <span aria-hidden className="text-[11px] text-[#3a3b42]">|</span>
-              <span className="flex items-center gap-[5px] whitespace-nowrap text-[11px] font-extrabold text-[#c7c8cd]">
-                <span aria-hidden className="text-[var(--menzu-accent)]">◇</span> VIP Ingame:
-                <span className="text-[var(--menzu-accent)]">{product.vipIngame}</span>
-              </span>
-            </>
-          ) : null}
+          <span aria-hidden className="text-[11px] text-[#3a3b42]">|</span>
+          <span className="flex items-center gap-[5px] whitespace-nowrap text-[11px] font-extrabold text-[#c7c8cd]">
+            <span aria-hidden className="text-[var(--menzu-accent)]">◆</span> VIP:
+            <span className="text-[var(--menzu-accent)]">
+              {(product.vip ?? 0) > 0 ? product.vip : ""}
+            </span>
+          </span>
+          <span aria-hidden className="text-[11px] text-[#3a3b42]">|</span>
+          <span className="flex items-center gap-[5px] whitespace-nowrap text-[11px] font-extrabold text-[#c7c8cd]">
+            <span aria-hidden className="text-[var(--menzu-accent)]">◇</span> VIP Ingame:
+            <span className="text-[var(--menzu-accent)]">
+              {(product.vipIngame ?? 0) > 0 ? product.vipIngame : ""}
+            </span>
+          </span>
           {product.tiers.map((tier) => (
             <span
               key={tier.color}

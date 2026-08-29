@@ -152,7 +152,7 @@ export function FlashSaleSection({
           <div className="relative z-20">
             <div className="flex flex-col lg:flex-row items-center justify-between mb-8 gap-4 border-b border-white/10 pb-4">
               <div className="flex items-center gap-3 w-full lg:w-auto justify-center lg:justify-start">
-                <div className="flex items-center justify-center w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-indigo-500 text-white shrink-0">
+                <div className="flex items-center justify-center w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-[var(--menzu-accent)] text-white shrink-0">
                   <Zap className="w-5 h-5 sm:w-6 sm:h-6" />
                 </div>
                 <h2 className="text-lg min-[360px]:text-xl sm:text-2xl md:text-3xl font-black text-white uppercase drop-shadow-md text-center whitespace-nowrap">
@@ -188,7 +188,7 @@ export function FlashSaleSection({
                 type="button"
                 aria-label="Trước"
                 onClick={handlePrev}
-                className="hidden sm:flex absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 w-11 h-11 bg-neutral-800 text-indigo-400 border-2 border-neutral-700 rounded-full items-center justify-center z-20 hover:bg-neutral-700 transition-colors"
+                className="hidden sm:flex absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 w-11 h-11 bg-neutral-800 text-[var(--menzu-accent)] border-2 border-neutral-700 rounded-full items-center justify-center z-20 hover:bg-neutral-700 transition-colors"
               >
                 <ChevronLeft size={20} />
               </button>
@@ -206,7 +206,7 @@ export function FlashSaleSection({
                 type="button"
                 aria-label="Sau"
                 onClick={handleNext}
-                className="hidden sm:flex absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 w-11 h-11 bg-neutral-800 text-indigo-400 border-2 border-neutral-700 rounded-full items-center justify-center z-20 hover:bg-neutral-700 transition-colors"
+                className="hidden sm:flex absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 w-11 h-11 bg-neutral-800 text-[var(--menzu-accent)] border-2 border-neutral-700 rounded-full items-center justify-center z-20 hover:bg-neutral-700 transition-colors"
               >
                 <ChevronRight size={20} />
               </button>
@@ -221,7 +221,7 @@ export function FlashSaleSection({
                   onClick={() => scrollToDot(i)}
                   className={
                     i === activeDot
-                      ? "transition-all duration-300 rounded-full w-8 h-2 bg-indigo-500"
+                      ? "transition-all duration-300 rounded-full w-8 h-2 bg-[var(--menzu-accent)]"
                       : "transition-all duration-300 rounded-full w-2 h-2 bg-neutral-600 hover:bg-neutral-500"
                   }
                 />

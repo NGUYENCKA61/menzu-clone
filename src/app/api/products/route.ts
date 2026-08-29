@@ -18,7 +18,7 @@ import type { Prisma } from "@prisma/client";
  *   rank       "Rank: Bất kỳ"
  *   lolFree    "LOL Free" toggle
  *   tftFree    "TFT Free" toggle
- *   category   the /category/[slug] segment
+ *   category   the category slug segment of the product URL
  *   page       pagination, 12 per page (matches the live grid)
  */
 const PAGE_SIZE = 12;

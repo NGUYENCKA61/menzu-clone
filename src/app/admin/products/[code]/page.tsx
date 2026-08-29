@@ -9,6 +9,10 @@ import { AdminSoftwareDetail } from "@/components/sites/menzu-lol-f7ae197a/share
 import { getAdmin } from "@/lib/admin";
 import { db } from "@/lib/db";
 import { isHtmlBody, plainToDocHtml } from "@/lib/docHtml";
+import { readKeyStore } from "@/lib/packageKeyStore";
+import { noteToEditorHtml, parseFeatures } from "@/lib/productFeatures";
+import { guideToEditorHtml } from "@/lib/productGuide";
+import { productHref } from "@/lib/routes";
 
 export const metadata: Metadata = { title: "Chi tiết sản phẩm | Quản trị" };
 export const dynamic = "force-dynamic";
@@ -37,7 +41,7 @@ export default async function AdminAccountDetailPage({
   const product = await db.product.findFirst({
     where: { code, deletedAt: null, productType: "ACCOUNT_GAME" },
     include: {
-      category: { select: { name: true } },
+      category: { select: { name: true, slug: true } },
       _count: { select: { orders: true } },
       tags: { select: { label: true } },
       images: { select: { id: true, url: true }, orderBy: { sortOrder: "asc" } },
@@ -45,6 +49,16 @@ export default async function AdminAccountDetailPage({
         where: { kind: { in: ["WEAPON_SKIN", "AGENT", "BUDDY"] } },
         select: { kind: true, name: true },
         orderBy: { id: "asc" },
+      },
+      // Who holds this account now, if anyone: the sign-in card says whether
+      // what is typed there has already reached a buyer. The latest paid
+      // order is the one that counts — the account was re-listed and sold
+      // again, or it would not have a second one.
+      orders: {
+        where: { status: "PAID" },
+        orderBy: { createdAt: "desc" },
+        take: 1,
+        select: { code: true, user: { select: { username: true } } },
       },
     },
   });
@@ -55,7 +69,7 @@ export default async function AdminAccountDetailPage({
     const software = await db.product.findFirst({
       where: { code, deletedAt: null, productType: "SOFTWARE_GAME" },
       include: {
-        category: { select: { name: true } },
+        category: { select: { name: true, slug: true } },
         packages: {
           orderBy: { price: "asc" },
           include: { _count: { select: { orders: true } } },
@@ -63,6 +77,13 @@ export default async function AdminAccountDetailPage({
       },
     });
     if (!software) notFound();
+
+    // One read per tier. Tiers are few — three or four — and each store is a
+    // handful of small queries, so this stays cheaper than one join that would
+    // have to carry every key row through the page.
+    const keyStores = await Promise.all(
+      software.packages.map((p) => readKeyStore(p.id)),
+    );
 
     return (
       <AdminShell
@@ -81,6 +102,14 @@ export default async function AdminAccountDetailPage({
       >
         <AdminSoftwareDetail
           software={{
+            publicHref: productHref(software.category.slug, software.slug),
+            features: parseFeatures(software.features),
+            // Lifted to editor HTML here so the client bundle never needs the
+            // converter — same treatment the description gets.
+            featuresNoteHtml: noteToEditorHtml(software.featuresNote),
+            guideHtml: guideToEditorHtml(software.guide),
+            slug: software.slug,
+            categorySlug: software.category.slug,
             code: software.code,
             name: software.name ?? software.code,
             categoryName: software.category.name,
@@ -97,14 +126,13 @@ export default async function AdminAccountDetailPage({
             downloadUrl: software.downloadUrl ?? "",
             imageUrl: software.imageUrl ?? "",
             videoUrl: software.videoUrl ?? "",
-            version: software.version ?? "",
-            platform: software.platform ?? "",
-            packages: software.packages.map((p) => ({
+            packages: software.packages.map((p, index) => ({
               id: p.id,
               label: p.label,
               price: Number(p.price),
               durationHours: p.durationHours,
               orderCount: p._count.orders,
+              keys: keyStores[index]!,
             })),
           }}
         />
@@ -114,7 +142,7 @@ export default async function AdminAccountDetailPage({
 
   return (
     <AdminShell
-      title={`#${product.code}`}
+      title={product.name || `#${product.code}`}
       subtitle="Chi tiết tài khoản — giá, ảnh, vật phẩm và trạng thái"
       username={admin.username}
       aside={
@@ -129,7 +157,16 @@ export default async function AdminAccountDetailPage({
     >
       <AdminAccountDetail
         account={{
+          publicHref: productHref(product.category.slug, product.slug),
+          // Lifted to editor HTML here so the client bundle never needs the
+          // converter — same treatment the software description gets.
+          descriptionHtml: product.description
+            ? isHtmlBody(product.description)
+              ? product.description
+              : plainToDocHtml(product.description)
+            : "",
           code: product.code,
+          name: product.name ?? "",
           rank: product.rank,
           status: product.status,
           price: Number(product.price),
@@ -139,8 +176,8 @@ export default async function AdminAccountDetailPage({
           imageUrl: product.imageUrl ?? "",
           gallery: product.images,
           tag: product.tags[0]?.label ?? "",
-          vip: product.vp,
-          vipIngame: product.rp,
+          vip: product.vip,
+          vipIngame: product.vipIngame,
           skinNames: product.skins
             .filter((s) => s.kind === "WEAPON_SKIN")
             .map((s) => s.name),
@@ -148,6 +185,12 @@ export default async function AdminAccountDetailPage({
             .filter((s) => s.kind === "AGENT")
             .map((s) => s.name),
           gearNames: product.skins.filter((s) => s.kind === "BUDDY").map((s) => s.name),
+          loginUsername: product.loginUsername ?? "",
+          loginPassword: product.loginPassword ?? "",
+          loginNote: product.loginNote ?? "",
+          buyer: product.orders[0]
+            ? { username: product.orders[0].user.username, orderCode: product.orders[0].code }
+            : null,
         }}
       />
     </AdminShell>

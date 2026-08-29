@@ -1,0 +1,11 @@
+-- What an order is owed in licence keys, decided at the sale.
+--
+-- Without this the entitlement would have to be read off `quantity`, and then
+-- every software order the shop ever took — all of them from before there was
+-- a key to hand out — would count as waiting for one. The first paste into a
+-- tier would drain straight into history instead of reaching the buyer who
+-- had just paid.
+--
+-- The default of 0 is exactly right for every existing row: none of them was
+-- sold on the promise of a key from this table.
+ALTER TABLE "orders" ADD COLUMN "keysOwed" INTEGER NOT NULL DEFAULT 0;

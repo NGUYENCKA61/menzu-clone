@@ -1,0 +1,104 @@
+import { MobileBottomNav } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/MobileBottomNav";
+import { SiteFooter } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/SiteFooter";
+import { SiteHeader } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/SiteHeader";
+import { ConnectRailSection } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/ConnectRailSection";
+import { ScrollCta } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/ScrollCta";
+import { docHtmlToPlainText, isHtmlBody } from "@/lib/docHtml";
+import { breadcrumbJsonLd, JsonLd } from "@/lib/seo";
+import { categoryHref } from "@/lib/routes";
+
+import { Breadcrumb } from "./Breadcrumb";
+import { SoftwareBuyPanel, type SoftwareDetail } from "./SoftwareBuyPanel";
+import { DESCRIPTION_SECTION_ID, SoftwareDescription } from "./SoftwareDescription";
+import { SoftwareGallery } from "./SoftwareGallery";
+
+/**
+ * One tool's page, whole.
+ *
+ * Lifted out of the route so that the address — /{category}/{product} — and
+ * what is drawn at it are separate concerns: the route resolves a slug to a
+ * product and decides between the two shapes a product can take, and this
+ * draws the one it picked.
+ */
+export function SoftwareDetailView({
+  software,
+  initialPackageId,
+}: {
+  software: SoftwareDetail;
+  initialPackageId?: string;
+}) {
+  // One stored field, two voices: the rich HTML (if the admin wrote one) goes
+  // to the description section in full; every place that prints a sentence —
+  // the buy panel's blurb — gets the prose stripped back out of it.
+  const richDescription = isHtmlBody(software.description) ? software.description : null;
+  const plainDescription = richDescription
+    ? docHtmlToPlainText(richDescription, 220)
+    : software.description;
+
+  return (
+    <div className="min-h-screen flex flex-col text-white overflow-x-clip selection:bg-[var(--menzu-accent)]/30">
+      <JsonLd
+        data={breadcrumbJsonLd([
+          { name: "Trang chủ", path: "/" },
+          { name: software.categoryName, path: categoryHref(software.categorySlug) },
+          { name: software.name },
+        ])}
+      />
+      <div className="w-full shrink-0 h-[104px]" />
+      <SiteHeader />
+
+      <main className="flex-1 relative z-20 w-full flex flex-col">
+        <div className="w-full">
+          {/* The breadcrumb otherwise starts on the exact pixel the fixed
+              header ends, with nothing between them. The gap goes on the
+              container rather than on Breadcrumb itself, which is shared with
+              every other page and should not gain a margin because this one
+              wanted air. */}
+          <div className="max-w-[1320px] mx-auto px-4 lg:px-6 pt-8">
+            <Breadcrumb
+              items={[
+                { label: "Trang chủ", href: "/" },
+                {
+                  label: software.categoryName,
+                  href: categoryHref(software.categorySlug),
+                },
+                { label: software.name },
+              ]}
+            />
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-14">
+              <SoftwareGallery
+                name={software.name}
+                images={software.images}
+                videoUrl={software.videoUrl}
+              />
+              <SoftwareBuyPanel
+                software={{ ...software, description: plainDescription }}
+                initialPackageId={initialPackageId}
+              />
+            </div>
+
+            {/* The same cue the home page's hero carries, in normal flow here
+                rather than pinned to a corner. */}
+            <div className="mt-12 flex justify-center">
+              <ScrollCta targetId={DESCRIPTION_SECTION_ID} label="Xem chi tiết" placement="" />
+            </div>
+
+            <SoftwareDescription
+              name={software.name}
+              description={plainDescription}
+              richHtml={richDescription}
+              features={software.features}
+              featuresNote={software.featuresNote}
+              guideHtml={software.guideHtml}
+            />
+          </div>
+        </div>
+        <SiteFooter />
+      </main>
+
+      <ConnectRailSection />
+      <MobileBottomNav />
+    </div>
+  );
+}

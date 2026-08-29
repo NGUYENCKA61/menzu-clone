@@ -22,7 +22,19 @@ export interface ProductSkinChip {
 }
 
 export interface Product {
-  code: string; // "VLR2077"
+  code: string;
+  /** The shop's own title, or null - the card then titles itself by rank
+   *  and skin count, or the bare code when both are blank. */
+  name?: string | null; // "VLR2077"
+  /**
+   * Where the card goes: /{category-slug}/{product-slug}, built by the query
+   * layer because that is where both halves of the address are known.
+   *
+   * Carried on the card rather than assembled in it, so a product has one
+   * address decided in one place — the card cannot invent a second one, and a
+   * product that moves category cannot leave a card pointing at the old shelf.
+   */
+  href: string;
   /**
    * The shop's own picture for this account, when one has been uploaded.
    * Absent or null, the card falls back to the by-code path under
@@ -30,6 +42,8 @@ export interface Product {
    * needed the field.
    */
   imageUrl?: string | null;
+  /** The account's own blurb as plain text; "" falls back to the stock line. */
+  description?: string;
   rank: string; // "GOLD 1" | "Unranked"
   /**
    * The two labelled numbers on the card's stat strip — "VIP: 7",
@@ -82,7 +96,14 @@ export const TIER_ICON_PATHS: Record<TierColor, string> = {
   blue: `${TIER_ICON_BASE_PATH}/12683d76-48d7-84a3-4e09-6985794f0445.webp`,
 };
 
-export const CATEGORY_PRODUCTS: Product[] = [
+/**
+ * Scraped sample accounts, kept for the pricing tests.
+ *
+ * Written without an address and given one below: these were captured before
+ * products had slugs, and hand-writing fourteen URLs that nothing renders
+ * would be fourteen chances to write one that no longer resolves.
+ */
+const SCRAPED_PRODUCTS: Omit<Product, "href">[] = [
   {
     code: "VLR2077",
     rank: "GOLD 1",
@@ -268,6 +289,12 @@ export const CATEGORY_PRODUCTS: Product[] = [
     price: 3575000,
   },
 ];
+
+/** The sample above, addressed the way the shop addresses accounts today. */
+export const CATEGORY_PRODUCTS: Product[] = SCRAPED_PRODUCTS.map((product) => ({
+  ...product,
+  href: `/account-valorant-tu-chon/${product.code.toLowerCase()}`,
+}));
 
 export function productImage(code: string): string {
   return `${ACCOUNT_IMAGE_BASE_PATH}/${code}.webp`;

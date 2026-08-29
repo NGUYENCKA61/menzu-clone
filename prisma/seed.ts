@@ -153,8 +153,8 @@ const VLR2030_DETAIL = {
   rank: "Unranked",
   lastRank: "DIAMOND 1 (V26 // ACT III)",
   level: 91,
-  vp: 301,
-  rp: 0,
+  vip: 301,
+  vipIngame: 0,
   kc: 1833,
   mailType: "Mail gốc",
   depositFrom: BigInt(299_000),
@@ -224,12 +224,14 @@ async function main() {
       update: {},
       create: {
         code: p.code,
+        // Accounts are known by their code, so the code is their address.
+        slug: p.code.toLowerCase(),
         categoryId: mainCategory.id,
         rank: detail?.rank ?? p.rank,
         lastRank: detail?.lastRank ?? null,
         level: detail?.level ?? 0,
-        vp: detail?.vp ?? 0,
-        rp: detail?.rp ?? 0,
+        vip: detail?.vip ?? 0,
+        vipIngame: detail?.vipIngame ?? 0,
         kc: detail?.kc ?? 0,
         mailType: detail?.mailType ?? null,
         depositFrom: detail?.depositFrom ?? null,
@@ -258,6 +260,7 @@ async function main() {
     await db.product.create({
       data: {
         code: item.code,
+        slug: item.code.toLowerCase(),
         categoryId: mainCategory.id,
         rank: "Unranked",
         oldPrice: parseVnd(item.oldPrice) ?? price,

@@ -7,6 +7,7 @@ import {
   CircleDollarSign,
   Clock,
   Eye,
+  KeyRound,
   Repeat,
   ShoppingBag,
   Wallet,
@@ -17,6 +18,7 @@ import {
 import { AdminOrderFilters } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminOrderFilters";
 import { AdminShell } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminShell";
 import { formatVnd } from "@/components/sites/menzu-lol-f7ae197a/shared/productData";
+import { currentOrderIdOf, loginHandover, tagOf } from "@/lib/accountLogin";
 import { getAdmin } from "@/lib/admin";
 import { db } from "@/lib/db";
 import {
@@ -28,6 +30,7 @@ import {
   type OrderMethod,
   type OrderStatus,
 } from "@/lib/orders";
+import { productHref } from "@/lib/routes";
 import { GAP, pageCount, pageRange, pageStrip, parsePage } from "@/lib/paging";
 import { orderWhere } from "@/lib/orderStore";
 import { startOfDayVn } from "@/lib/time";
@@ -96,7 +99,28 @@ export default async function AdminOrdersPage({
     take: ORDERS_PER_PAGE,
     include: {
       user: { select: { username: true, uid: true, avatarUrl: true } },
-      product: { select: { code: true } },
+      product: {
+        select: {
+          code: true,
+          slug: true,
+          productType: true,
+          category: { select: { slug: true } },
+          // Only to say whether a sign-in went out with the order; the values
+          // themselves are not printed on this list.
+          loginUsername: true,
+          loginPassword: true,
+          loginNote: true,
+          // The latest sale of the account — an earlier order of a re-listed
+          // account wears no badge, since the row is somebody else's now.
+          orders: {
+            where: { status: "PAID" },
+            orderBy: { createdAt: "desc" },
+            take: 1,
+            select: { id: true },
+          },
+          tags: { select: { label: true }, take: 1 },
+        },
+      },
       voucher: { select: { code: true } },
     },
   });
@@ -196,6 +220,11 @@ export default async function AdminOrdersPage({
               orders.map((o) => {
                 const MethodIcon = METHOD_ICON[o.method];
                 const discounted = o.discountPct > 0 || o.voucher !== null;
+                const login = loginHandover(o, {
+                  ...o.product,
+                  currentOrderId: currentOrderIdOf(o.product),
+                  tag: tagOf(o.product),
+                });
                 return (
                 <tr
                   key={o.code}
@@ -250,8 +279,26 @@ export default async function AdminOrdersPage({
                       </span>
                     </Link>
                   </td>
-                  <td className="px-5 py-3 font-mono text-xs font-bold text-white whitespace-nowrap">
-                    #{o.product.code}
+                  <td className="px-5 py-3 whitespace-nowrap">
+                    <div className="flex flex-col items-start gap-1">
+                      <span className="font-mono text-xs font-bold text-white">
+                        #{o.product.code}
+                      </span>
+                      {/* How the account reached its buyer: by itself (NFA
+                          with a sign-in on the row) or by the shop's hand.
+                          Neither is a to-do — the buyer gets in touch. */}
+                      {login.state === "ready" ? (
+                        <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-400">
+                          <KeyRound size={10} />
+                          Đã giao TK tự động
+                        </span>
+                      ) : login.state === "manual" ? (
+                        <span className="inline-flex items-center gap-1 text-[10px] font-bold text-indigo-400">
+                          <KeyRound size={10} />
+                          Bàn giao tay
+                        </span>
+                      ) : null}
+                    </div>
                   </td>
                   <td className="px-5 py-3 whitespace-nowrap">
                     <span className="flex items-center gap-1.5 text-xs text-neutral-400">
@@ -297,7 +344,7 @@ export default async function AdminOrdersPage({
                         already on this row — what the admin cannot see from
                         here is the product itself. */}
                     <Link
-                      href={`/account/${o.product.code}`}
+                      href={productHref(o.product.category.slug, o.product.slug)}
                       title={`Xem sản phẩm #${o.product.code}`}
                       aria-label={`Xem sản phẩm #${o.product.code}`}
                       className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-white/[0.07] bg-white/[0.03] text-neutral-400 transition-colors hover:border-rose-500/30 hover:bg-rose-500/10 hover:text-rose-400"

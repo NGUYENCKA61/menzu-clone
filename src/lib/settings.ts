@@ -109,6 +109,13 @@ export interface ShopSettings {
   contactHotline: string;
   contactTiktok: string;
   contactDiscord: string;
+  /// The three group links the "KẾT NỐI" rail offers alongside the two above.
+  /// Separate from contactFacebook and contactZalo on purpose: the shop's page
+  /// and the shop's phone number are where a buyer talks to the desk, and a
+  /// group is where buyers talk to each other. Blank hides that row.
+  contactFacebookGroup: string;
+  contactZaloGroup: string;
+  contactTelegram: string;
 
   // --- Bố cục trang chủ -----------------------------------------------------
   /** Ordered block ids; a leading "-" marks the block as hidden. */
@@ -123,6 +130,8 @@ export interface ShopSettings {
   homeTftSlugs: string[];
 
   // --- Hero -----------------------------------------------------------------
+  /** The pill above the eyebrow — "Official OBV Hax Reseller". Blank hides it. */
+  heroBadge: string;
   /** Newlines are line breaks: the heading is written to sit on two rows. */
   heroTitle: string;
   heroSubtitle: string;
@@ -196,11 +205,12 @@ export const HOME_BLOCKS: { id: string; label: string }[] = [
   // entry each time somebody adds one.
   { id: "groups", label: "Các nhóm danh mục" },
   { id: "reviews", label: "Đánh giá khách hàng" },
-  // Sits under the reviews by default — social proof, then who stands behind
-  // it. "ticker" (recent purchases) used to live here; layouts that still
-  // store that id simply have it filtered out on read.
+  // Sits under the reviews — social proof, then who stands behind it. The
+  // shop tried it the other way round and came back. "ticker" (recent
+  // purchases) used to sit here, and "utilities" (the Valorant tools hub with
+  // its trade-in panel) after it; layouts that still store either id simply
+  // have it filtered out on read.
   { id: "partners", label: "Đối tác uy tín" },
-  { id: "utilities", label: "Khối tiện ích cuối trang" },
   { id: "seo", label: "SEO Content" },
 ];
 
@@ -240,7 +250,10 @@ export const DEFAULT_SETTINGS: ShopSettings = {
 
   brandName: "Menzu Valorant",
   brandLogo: LOGO,
-  brandColor: "#7C3AED",
+  // The shop's red — the same value globals.css gives --brand and
+  // --menzu-accent, so the storefront has one accent until Nhận diện says
+  // otherwise. Was menzu's purple.
+  brandColor: "#FF3158",
   heroBanner: BANNER,
   siteBackground: BACKDROP,
   flashSaleBackground:
@@ -258,6 +271,9 @@ export const DEFAULT_SETTINGS: ShopSettings = {
   contactHotline: "",
   contactTiktok: "",
   contactDiscord: "",
+  contactFacebookGroup: "",
+  contactZaloGroup: "",
+  contactTelegram: "",
 
   homeBlocks: HOME_BLOCKS.map((block) => block.id),
   homeValorantSlugs: [
@@ -276,6 +292,7 @@ export const DEFAULT_SETTINGS: ShopSettings = {
 
   // The words the hero shipped with, so moving them into settings changes
   // nothing on screen until somebody edits one.
+  heroBadge: "Official OBV Hax Reseller",
   heroTitle: "THICHTHIHACK.COM",
   heroSubtitle:
     "Kho tài khoản Valorant, phần mềm và dịch vụ gaming. Giao dịch nhanh chóng, " +
@@ -344,11 +361,15 @@ export const SETTING_KEYS: Record<keyof ShopSettings, string> = {
   contactHotline: "contact.hotline",
   contactTiktok: "contact.tiktok",
   contactDiscord: "contact.discord",
+  contactFacebookGroup: "contact.facebookGroup",
+  contactZaloGroup: "contact.zaloGroup",
+  contactTelegram: "contact.telegram",
 
   homeBlocks: "home.blocks",
   homeValorantSlugs: "home.row.valorant",
   homeTftSlugs: "home.row.tft",
 
+  heroBadge: "home.hero.badge",
   heroTitle: "home.hero.title",
   heroSubtitle: "home.hero.subtitle",
   heroPrimaryLabel: "home.hero.ctaLabel",
@@ -721,6 +742,18 @@ export function parseSettings(rows: Iterable<{ key: string; value: string }>): S
       stored.get(SETTING_KEYS.contactDiscord),
       DEFAULT_SETTINGS.contactDiscord,
     ),
+    contactFacebookGroup: toOptionalText(
+      stored.get(SETTING_KEYS.contactFacebookGroup),
+      DEFAULT_SETTINGS.contactFacebookGroup,
+    ),
+    contactZaloGroup: toOptionalText(
+      stored.get(SETTING_KEYS.contactZaloGroup),
+      DEFAULT_SETTINGS.contactZaloGroup,
+    ),
+    contactTelegram: toOptionalText(
+      stored.get(SETTING_KEYS.contactTelegram),
+      DEFAULT_SETTINGS.contactTelegram,
+    ),
 
     homeBlocks: toBlockList(stored.get(SETTING_KEYS.homeBlocks), DEFAULT_SETTINGS.homeBlocks),
     homeValorantSlugs: toSlugList(
@@ -732,6 +765,7 @@ export function parseSettings(rows: Iterable<{ key: string; value: string }>): S
       DEFAULT_SETTINGS.homeTftSlugs,
     ),
 
+    heroBadge: toOptionalText(stored.get(SETTING_KEYS.heroBadge), DEFAULT_SETTINGS.heroBadge),
     heroTitle: toText(stored.get(SETTING_KEYS.heroTitle), DEFAULT_SETTINGS.heroTitle),
     heroSubtitle: toOptionalText(
       stored.get(SETTING_KEYS.heroSubtitle),
@@ -817,12 +851,16 @@ export function serializeSettings(settings: ShopSettings): { key: string; value:
     contactHotline: settings.contactHotline.trim(),
     contactTiktok: settings.contactTiktok.trim(),
     contactDiscord: settings.contactDiscord.trim(),
+    contactFacebookGroup: settings.contactFacebookGroup.trim(),
+    contactZaloGroup: settings.contactZaloGroup.trim(),
+    contactTelegram: settings.contactTelegram.trim(),
 
     homeBlocks: settings.homeBlocks.join(","),
     homeValorantSlugs: settings.homeValorantSlugs.join(","),
     homeTftSlugs: settings.homeTftSlugs.join(","),
 
     // Not trimmed per line: the newline between the two rows is the layout.
+    heroBadge: settings.heroBadge.trim(),
     heroTitle: settings.heroTitle.trim(),
     heroSubtitle: settings.heroSubtitle.trim(),
     heroPrimaryLabel: settings.heroPrimaryLabel.trim(),
@@ -922,6 +960,9 @@ export function normalizeSettings(raw: Partial<ShopSettings> | null): ShopSettin
     contactHotline: String(raw?.contactHotline ?? "").trim(),
     contactTiktok: String(raw?.contactTiktok ?? "").trim(),
     contactDiscord: String(raw?.contactDiscord ?? "").trim(),
+    contactFacebookGroup: String(raw?.contactFacebookGroup ?? "").trim(),
+    contactZaloGroup: String(raw?.contactZaloGroup ?? "").trim(),
+    contactTelegram: String(raw?.contactTelegram ?? "").trim(),
 
     homeBlocks: toBlockList(
       Array.isArray(raw?.homeBlocks) ? raw.homeBlocks.join(",") : undefined,
@@ -937,6 +978,7 @@ export function normalizeSettings(raw: Partial<ShopSettings> | null): ShopSettin
     // The heading and the first button fall back when blank — a hero with no
     // words and a button with no label are broken, never a choice. The rest
     // may be emptied on purpose: no second button.
+    heroBadge: String(raw?.heroBadge ?? "").trim(),
     heroTitle: String(raw?.heroTitle ?? "").trim() || DEFAULT_SETTINGS.heroTitle,
     heroSubtitle: String(raw?.heroSubtitle ?? "").trim(),
     heroPrimaryLabel:

@@ -13,8 +13,12 @@ export interface AdminWeaponImageRow {
   sourceUrl: string | null;
 }
 
+// The shop-wide admin field: same border, ground, radius and size as Cấu
+// hình, Nhóm, and the two product detail screens. This page used to be the
+// only one on a lighter, rounder, larger variant, so moving between it and a
+// detail screen changed the shape of every box on the way.
 const FIELD =
-  "w-full rounded-xl border border-white/5 bg-white/5 px-3 py-2.5 text-sm text-white outline-none focus:border-[var(--brand)]/60 transition-colors placeholder-neutral-600";
+  "w-full rounded-lg border border-white/10 bg-neutral-950/60 px-3 py-2 text-xs text-white outline-none focus:border-[var(--brand)]/60 transition-colors placeholder-neutral-600";
 const LABEL = "block text-[10px] font-black uppercase tracking-widest text-neutral-500 mb-1.5";
 
 /**
@@ -33,11 +37,14 @@ export function AdminWeaponImages({
   images,
   missing,
   missingTotal,
+  hotPickSkin,
 }: {
   images: AdminWeaponImageRow[];
   /** Weapon names listed on accounts that have no picture yet. */
   missing: string[];
   missingTotal: number;
+  /** The name pinned to lead the HOT PICK rotation, or "" for free rotation. */
+  hotPickSkin: string;
 }) {
   const router = useRouter();
   const fileRef = useRef<HTMLInputElement>(null);
@@ -47,6 +54,34 @@ export function AdminWeaponImages({
 
   const [name, setName] = useState("");
   const [link, setLink] = useState("");
+  const [pick, setPick] = useState(hotPickSkin);
+
+  /** Pin (or unpin) the HOT PICK — one settings field, the rest untouched. */
+  async function saveHotPick() {
+    setBusy(true);
+    setMsg(null);
+    try {
+      const res = await fetch("/api/admin/settings", {
+        method: "PUT",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ hotPickSkin: pick }),
+      });
+      const data = (await res.json().catch(() => ({}))) as Record<string, unknown>;
+      if (!res.ok) {
+        setMsg({ tone: "err", text: (data.error as string) ?? "Lưu thất bại" });
+        return;
+      }
+      setMsg({
+        tone: "ok",
+        text: pick ? `Đã ghim "${pick}" đứng đầu HOT PICK` : "HOT PICK tự xoay toàn kho",
+      });
+      router.refresh();
+    } catch {
+      setMsg({ tone: "err", text: "Không kết nối được máy chủ" });
+    } finally {
+      setBusy(false);
+    }
+  }
 
   async function send(init: RequestInit, query = ""): Promise<boolean> {
     setBusy(true);
@@ -231,6 +266,49 @@ export function AdminWeaponImages({
           </div>
         </div>
       ) : null}
+
+      {/* The HOT PICK pin lives beside the pictures it rotates through: the
+          chip on the category page draws from this library, so the shop pins
+          a tree where it can see the trees. Moved here from Cấu hình. */}
+      <div className="rounded-2xl border border-white/10 bg-neutral-900/40 p-5">
+        <span className={LABEL}>Vật phẩm &ldquo;HOT PICK&rdquo;</span>
+        <div className="flex flex-wrap items-center gap-3">
+          <select
+            value={pick}
+            disabled={busy}
+            onChange={(event) => setPick(event.target.value)}
+            className={`${FIELD} max-w-xs`}
+          >
+            <option value="" className="bg-neutral-900">
+              — tự xoay toàn kho —
+            </option>
+            {hotPickSkin &&
+            !images.some((w) => w.name.toLowerCase() === hotPickSkin.toLowerCase()) ? (
+              <option value={hotPickSkin} className="bg-neutral-900">
+                {hotPickSkin} (chưa có ảnh trong kho)
+              </option>
+            ) : null}
+            {images.map((w) => (
+              <option key={w.name} value={w.name} className="bg-neutral-900">
+                {w.name}
+              </option>
+            ))}
+          </select>
+          <button
+            type="button"
+            disabled={busy || pick === hotPickSkin}
+            onClick={saveHotPick}
+            className="h-[34px] px-4 rounded-lg bg-[var(--brand)] hover:bg-[var(--brand-dark)] disabled:opacity-40 text-[10px] font-black uppercase tracking-widest text-white transition-colors"
+          >
+            Lưu
+          </button>
+        </div>
+        <p className="mt-2 text-[11px] text-neutral-500">
+          Chip nhỏ trong ô tìm skin ở trang danh mục, tự xoay vòng các vật phẩm trong
+          kho này — bấm vào là lọc theo cây đang hiện. Chọn một cây để ghim nó đứng
+          đầu vòng xoay; chọn &ldquo;tự xoay&rdquo; để thả. Kho trống thì chip ẩn.
+        </p>
+      </div>
 
       {images.length > 0 ? (
         <div className="rounded-2xl border border-white/10 bg-neutral-900/40 overflow-hidden">

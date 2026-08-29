@@ -1,4 +1,6 @@
 import { DocHtml } from "@/lib/docFormat";
+import { featuresOrDefault, type ProductFeature } from "@/lib/productFeatures";
+import { DEFAULT_GUIDE } from "@/lib/productGuide";
 
 /**
  * Where the "Xem chi tiết" cue lands, and the id this section wears. Shared so
@@ -10,42 +12,51 @@ export interface SoftwareDescriptionProps {
   name: string;
   description: string;
   /** A per-product write-up from the admin's rich editor. When present it
-   *  replaces the stock feature/guide/warranty blocks below; the facts grid
-   *  stays either way, because it prints data, not copy. */
+   *  replaces the stock guide and warranty copy below; the requirements panel
+   *  and the feature list stay either way, because both are this product's own
+   *  data rather than boilerplate the write-up would be repeating. */
   richHtml?: string | null;
-  /** Tier labels, cheapest first — printed as the "Thời hạn" fact. */
-  packageLabels: string[];
-  version: string | null;
-  platform: string | null;
+  /** The product's own "Tính năng nổi bật"; empty falls back to the default. */
+  features: ProductFeature[];
+  /** The write-up under that list, as editor HTML. "" draws nothing. */
+  featuresNote: string;
+  /** "Hướng dẫn sử dụng" as editor HTML; "" prints the default sentence. */
+  guideHtml: string;
 }
 
-const SUB_HEADING = "mt-10 text-[17px] font-black uppercase tracking-wider text-white";
-const BODY = "text-[13.5px] leading-relaxed text-neutral-400";
-
 /**
- * Written once and shown on every tool, because it is true of every tool the
- * shop sells: these describe how the product is delivered and supported, not
- * what any one of them does. Anything that differs per product is a column —
- * see `version` and `platform`.
+ * What a machine has to be for these tools to run.
+ *
+ * Written here rather than read from the product, like FEATURES below and for
+ * the same reason: it is the same answer for every tool the shop sells today.
+ * Written verbatim as the shop worded it — the spacing and the "!" are theirs.
+ * The moment one tool needs a different answer, these become columns and this
+ * list becomes their default.
  */
-const FEATURES = [
+const REQUIREMENTS: { label: string; value: string }[] = [
+  { label: "Hỗ trợ", value: "Windows 10, 11 Net nhà" },
   {
-    title: "Giao diện dễ sử dụng",
-    body: "thiết kế trực quan, thao tác nhanh và dễ làm quen.",
+    label: "Yêu cầu thêm",
+    value: "UEFI bios,enable virtualization,disable secure boot",
   },
-  {
-    title: "Cập nhật thường xuyên",
-    body: "phiên bản được cập nhật để tương thích với các thay đổi mới.",
-  },
-  {
-    title: "Nhiều tùy chọn",
-    body: "lựa chọn các tính năng phù hợp với gói đã mua.",
-  },
-  {
-    title: "Ổn định",
-    body: "tối ưu hiệu suất để mang lại trải nghiệm mượt mà.",
-  },
+  { label: "CPU hỗ trợ", value: "Intel and AMD with AVX" },
+  { label: "Thiết lập màn hình", value: "Không viền !" },
+  { label: "Nền tảng", value: "Steam" },
 ];
+
+const SUB_HEADING = "mt-10 text-[17px] font-black uppercase tracking-wider text-white";
+/**
+ * Body text in this section, set to the same values `.doc-prose` gives the
+ * rich editor's output: neutral-300 is #d4d4d4, text-sm is its 0.875rem, and
+ * 1.65 is its line height.
+ *
+ * They are written to match on purpose. Half of what this section prints is
+ * typed by the shop and half is the shop's default, and the two sit directly
+ * against each other — a written guide above a warranty notice, a written
+ * note under default bullets. Two greys there read as one of them being less
+ * important rather than as one of them being editable.
+ */
+const BODY = "text-sm leading-[1.65] text-neutral-300";
 
 /**
  * The long-form block under the buy panel.
@@ -58,44 +69,142 @@ export function SoftwareDescription({
   name,
   description,
   richHtml,
-  packageLabels,
-  version,
-  platform,
+  features,
+  featuresNote,
+  guideHtml,
 }: SoftwareDescriptionProps) {
-  // Built from what the product actually has, so a card is only drawn when
-  // there is a fact behind it.
-  const facts: { label: string; value: string }[] = [
-    ...(version ? [{ label: "Phiên bản", value: version }] : []),
-    ...(platform ? [{ label: "Nền tảng", value: platform }] : []),
-    ...(packageLabels.length > 0
-      ? [{ label: "Thời hạn", value: packageLabels.join(" / ") }]
-      : []),
-    { label: "Cấp key", value: "Tự động sau thanh toán" },
-  ];
+  /**
+   * The product's own highlights, or the shop's default list where it has none.
+   *
+   * Drawn in both branches, like the requirements panel: a write-up in the rich
+   * editor is prose, and dropping a structured list because somebody wrote a
+   * paragraph would lose the half a skimming reader actually reads.
+   */
+  const featuresBlock = (
+    <>
+      <h3 className={SUB_HEADING}>Tính năng nổi bật</h3>
+      <ul className="mt-4 flex flex-col gap-4">
+        {featuresOrDefault(features).map((f) => (
+          <li key={f.title} className="flex gap-3">
+            <span
+              aria-hidden
+              className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--menzu-accent)]"
+            />
+            <span className={BODY}>
+              {/* The colon belongs to the sentence, so it only appears when
+                  there is a sentence: "Aimbot" on its own is a feature. */}
+              <span className="font-bold text-white">{f.title}</span>
+              {f.body ? `: ${f.body}` : ""}
+            </span>
+          </li>
+        ))}
+      </ul>
 
-  const factsGrid = (
-    <dl className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-      {facts.map((f) => (
-        <div
-          key={f.label}
-          className="rounded-lg border border-white/10 bg-white/[0.02] px-4 py-3.5"
-        >
-          <dt className="text-[9px] font-black uppercase tracking-widest text-neutral-500">
-            {f.label}
-          </dt>
-          <dd className="mt-1.5 text-[13px] font-semibold text-white">{f.value}</dd>
+      {/* The write-up under the list, where there is one. Printed through the
+          same renderer the description uses, so a heading, a bold line or a
+          screenshot typed into the editor arrives caged to one allowlist. */}
+      {featuresNote ? (
+        <div className="mt-5">
+          <DocHtml body={featuresNote} />
         </div>
-      ))}
-    </dl>
+      ) : null}
+    </>
   );
 
-  // The admin wrote this product its own story — print it in full and skip
-  // the boilerplate written for tools that have none.
+  /**
+   * How to use it, as the shop wrote it — or the one sentence every tool
+   * printed before this could be written.
+   *
+   * Drawn in both branches now, like the requirements and the features: it is
+   * this product's own answer, and a shop that wrote a guide should not lose
+   * it by also writing a description.
+   */
+  const guideBlock = (
+    <>
+      <h3 className={SUB_HEADING}>Hướng dẫn sử dụng</h3>
+      {guideHtml ? (
+        <div className="mt-4">
+          <DocHtml body={guideHtml} />
+        </div>
+      ) : (
+        <p className={`mt-4 ${BODY}`}>{DEFAULT_GUIDE}</p>
+      )}
+    </>
+  );
+
+  /**
+   * One panel with the requirements ruled off inside it, rather than a tile
+   * per line: they are one list, and a list is what it reads as — label on the
+   * left, answer on the right, each on its own row. It grows downwards as
+   * lines are added instead of breaking a grid into an orphan tile.
+   *
+   * Capped at 720px rather than run to the container's full 1272: nothing here
+   * wraps at that width, so the extra room buys no lines — it only pushes the
+   * answers three or four hundred pixels from the labels they belong to, which
+   * is where the eye starts reading across the wrong row. The prose above and
+   * below still uses the whole width.
+   *
+   * The heading stays outside, in the same 17px black caps as "Tính năng nổi
+   * bật" and the rest, so this section reads as one run of headings rather
+   * than as a box that titles itself.
+   */
+  const factsCard = (
+    <div className="mt-4 max-w-[720px] rounded-2xl border border-white/10 bg-white/[0.02] px-5 py-1.5 sm:px-6 sm:py-2">
+      <dl>
+        {REQUIREMENTS.map((f, index) => (
+          <div
+            key={f.label}
+            className={`grid grid-cols-1 gap-x-6 gap-y-1 py-3.5 sm:grid-cols-[minmax(140px,30%)_1fr] ${
+              // A rule between rows, never under the last one: the panel's own
+              // edge already closes the list.
+              index > 0 ? "border-t border-white/[0.07]" : ""
+            }`}
+          >
+            <dt className={BODY}>{f.label}</dt>
+            <dd className="text-sm font-bold leading-[1.65] text-white">
+              {f.value}
+            </dd>
+          </div>
+        ))}
+      </dl>
+    </div>
+  );
+
+  /**
+   * The warranty note that closes the section.
+   *
+   * Drawn in both branches. It used to sit only in the default one, so writing
+   * a description for a product silently took the shop's warranty notice off
+   * its page — the one block on here that is a promise to the buyer, and the
+   * one that must not disappear because somebody edited something else.
+   *
+   * mb-4 keeps it off the footer: this is the last thing in the section, and
+   * the page's own bottom padding was measured when the section ended in a
+   * paragraph rather than in a bordered box sitting flush against the rule.
+   */
+  const warrantyBlock = (
+    <>
+      <h3 className={SUB_HEADING}>Chính sách bảo hành &amp; hoàn tiền</h3>
+      {/* A left rule rather than a full border — the same treatment the notice
+          box in the announcement sheet uses, so the two read as one idea. */}
+      <div className="mt-4 mb-4 rounded-r-lg border-l-2 border-[var(--menzu-accent)] bg-white/[0.02] px-5 py-4">
+        <p className={BODY}>
+          <span className="font-bold text-white">Lưu ý:</span> Chính sách bảo hành
+          và hoàn tiền được áp dụng theo từng sản phẩm và gói dịch vụ. Vui lòng
+          xem đầy đủ chính sách trước khi mua.
+        </p>
+      </div>
+    </>
+  );
+
+  // The admin wrote this product its own story — print it in full, in place of
+  // the stock opening paragraph. Everything below it is this product's own
+  // data or the shop's promise, so all of it stays either way.
   if (richHtml) {
     return (
       <section
         id={DESCRIPTION_SECTION_ID}
-        className="mt-14 scroll-mt-[120px] border-t border-white/10 pt-12"
+        className="mt-14 scroll-mt-[120px] border-t border-white/10 pt-12 pb-14"
       >
         <h2 className="text-[26px] sm:text-3xl font-black uppercase tracking-wider text-white">
           Mô tả sản phẩm
@@ -104,8 +213,14 @@ export function SoftwareDescription({
           <DocHtml body={richHtml} />
         </div>
 
-        <h3 className={SUB_HEADING}>Thông tin phần mềm</h3>
-        {factsGrid}
+        <h3 className={SUB_HEADING}>Yêu cầu hệ thống</h3>
+        {factsCard}
+
+        {featuresBlock}
+
+        {guideBlock}
+
+        {warrantyBlock}
       </section>
     );
   }
@@ -116,7 +231,7 @@ export function SoftwareDescription({
     // underneath the navigation bar.
     <section
       id={DESCRIPTION_SECTION_ID}
-      className="mt-14 scroll-mt-[120px] border-t border-white/10 pt-12"
+      className="mt-14 scroll-mt-[120px] border-t border-white/10 pt-12 pb-14"
     >
       <h2 className="text-[26px] sm:text-3xl font-black uppercase tracking-wider text-white">
         Mô tả sản phẩm
@@ -131,41 +246,14 @@ export function SoftwareDescription({
         {description ? ` — ${description}` : ""}
       </p>
 
-      <h3 className={SUB_HEADING}>Thông tin phần mềm</h3>
-      {factsGrid}
+      <h3 className={SUB_HEADING}>Yêu cầu hệ thống</h3>
+      {factsCard}
 
-      <h3 className={SUB_HEADING}>Tính năng nổi bật</h3>
-      <ul className="mt-4 flex flex-col gap-4">
-        {FEATURES.map((f) => (
-          <li key={f.title} className="flex gap-3">
-            <span
-              aria-hidden
-              className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--menzu-accent)]"
-            />
-            <span className={BODY}>
-              <span className="font-bold text-white">{f.title}:</span> {f.body}
-            </span>
-          </li>
-        ))}
-      </ul>
+      {featuresBlock}
 
-      <h3 className={SUB_HEADING}>Hướng dẫn sử dụng</h3>
-      <p className={`mt-4 ${BODY}`}>
-        Sau khi thanh toán thành công, hệ thống sẽ cung cấp sản phẩm theo phương
-        thức giao hàng được cấu hình. Vui lòng đọc hướng dẫn sử dụng và kiểm tra
-        yêu cầu hệ thống trước khi cài đặt.
-      </p>
+      {guideBlock}
 
-      <h3 className={SUB_HEADING}>Chính sách bảo hành &amp; hoàn tiền</h3>
-      {/* A left rule rather than a full border — the same treatment the notice
-          box in the announcement sheet uses, so the two read as one idea. */}
-      <div className="mt-4 rounded-r-lg border-l-2 border-[var(--menzu-accent)] bg-white/[0.02] px-5 py-4">
-        <p className={BODY}>
-          <span className="font-bold text-white">Lưu ý:</span> Chính sách bảo hành
-          và hoàn tiền được áp dụng theo từng sản phẩm và gói dịch vụ. Vui lòng
-          xem đầy đủ chính sách trước khi mua.
-        </p>
-      </div>
+      {warrantyBlock}
     </section>
   );
 }

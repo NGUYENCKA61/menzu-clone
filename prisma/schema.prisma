@@ -95,6 +95,7 @@ model User {
   cartItems     CartItem[]
   passwordResets PasswordReset[]
   feedbacks     Feedback[]
+  licenseKeys   LicenseKey[]
 
   @@map("users")
 }
@@ -300,6 +301,27 @@ model AuthAttempt {
   @@map("auth_attempts")
 }
 
+/// One question put to the AI assistant, kept as a counter and nothing else.
+///
+/// No message text: the ledger exists to cap how many questions one visitor
+/// can ask in an hour — the shop pays per answer — and storing what customers
+/// typed would be keeping their words for a job that only needs a count.
+///
+/// Pruned opportunistically on write, like the auth ledger, so no cron job is
+/// needed to keep it from growing forever.
+model AssistantHit {
+  id     String @id @default(cuid())
+  /// Best-effort client address; spoofable, which is why a signed-in visitor
+  /// is also capped by account.
+  ip     String
+  userId String?
+  createdAt DateTime @default(now())
+
+  @@index([ip, createdAt])
+  @@index([userId, createdAt])
+  @@map("assistant_hits")
+}
+
 /// "Liên kết nền tảng" on /profile — Discord carries a "Thưởng 1.000 Pts" bonus.
 /// One outstanding "quên mật khẩu" link. The token itself never lands here —
 /// only its SHA-256 — so a database read cannot mint a working link.
@@ -411,6 +433,11 @@ model Category {
   /// category actually sells, in the shop's own words. Null draws the tile
   /// without the line rather than leaving a blank gap where it would be.
   description String?
+  /// "PC", "MOBILE" or "SPOOFER" — the chip the home page's game list can be
+  /// narrowed by. Text checked against src/lib/categoryPlatform.ts rather
+  /// than an enum, so a fourth kind is a one-line change and not a
+  /// migration. Null sits under "Tất cả" only.
+  platform  String?
   sortOrder Int       @default(0)
   imageUrl  String?
   soldCount Int       @default(0)
@@ -462,6 +489,13 @@ enum SoftwareStatus {
 model Product {
   id         String        @id @default(cuid())
   code       String        @unique
+  /// The product's half of its public address: /{category.slug}/{slug}.
+  ///
+  /// Unique across the shop, not merely within a category, so a product has
+  /// exactly one canonical URL and can still be found by slug alone when an
+  /// old address has to be redirected to it. The code stays what the shop and
+  /// its orders call the row; this is what a customer sees.
+  slug       String        @unique
   categoryId String
   category   Category      @relation(fields: [categoryId], references: [id])
 
@@ -474,6 +508,27 @@ model Product {
   name       String?
   /// The paragraph under the title. Software only, in practice.
   description String?
+  /// "Tính năng nổi bật", as a JSON array of {title, body}.
+  ///
+  /// One column rather than a child table because the list is written and read
+  /// whole — nothing counts it, joins it or asks for one row of it, which is
+  /// what earns `packages` and `skins` their own tables. Null means this
+  /// product has none of its own and the page prints the shop's default list.
+  /// See src/lib/productFeatures.ts.
+  features   String?
+  /// The write-up under that list, as sanitized editor HTML.
+  ///
+  /// Its own column rather than more rows in `features`: the list answers
+  /// "what does it do", in one line each, and this answers "how", at whatever
+  /// length and with whatever pictures the shop wants. Null simply draws
+  /// nothing after the bullets.
+  featuresNote String?
+  /// "Hướng dẫn sử dụng", as sanitized editor HTML.
+  ///
+  /// Null prints the sentence every tool printed before this column existed —
+  /// a shop that has written no guide for a product still tells the buyer
+  /// something rather than showing an empty heading.
+  guide      String?
 
   // --- SOFTWARE_GAME ---------------------------------------------------
   /// Null on accounts, where the idea does not apply.
@@ -488,15 +543,6 @@ model Product {
   /// Null falls the frame back to the picture.
   videoUrl       String?
 
-  /// Two facts the description block states as facts — "Premium 2.4.1",
-  /// "Windows 10 / 11". Per product and therefore columns rather than copy in
-  /// the template: a build number printed on every tool in the shop because it
-  /// was true of one of them is worse than not printing it. Null hides its own
-  /// card, so a shop that has not filled them in shows a shorter row instead
-  /// of empty boxes.
-  version        String?
-  platform       String?
-
   // --- ACCOUNT_GAME ----------------------------------------------------
   /// Software rows leave these at their empty or zero values. `rank` stays
   /// required rather than becoming nullable: it is read in a dozen places as
@@ -509,12 +555,33 @@ model Product {
   trackerUrl String?
 
   level      Int           @default(0)
-  vp         Int           @default(0)
-  rp         Int           @default(0)
+  vip        Int           @default(0)
+  vipIngame  Int           @default(0)
   kc         Int           @default(0)
 
   /// "Mail gốc"
   mailType   String?
+
+  /// The account's own sign-in. On an NFA-tagged account it is handed to the
+  /// buyer, untouched by anyone, the moment the sale goes through; on any
+  /// other tag the shop hands the account over in person and this is only
+  /// its own record. Typed by the shop when listing.
+  ///
+  /// On the product rather than the order because the product IS the account:
+  /// there is one sign-in per row, and an order reads it through its join the
+  /// way it reads the code and the picture. An account listed without one
+  /// sells all the same and hands over nothing — the shop's decision: whatever
+  /// else a buyer needs, they ask for. Stored verbatim, like a licence key:
+  /// the buyer has to read it back. Both or neither — half a sign-in is
+  /// nothing to hand over, and the admin route refuses to store one.
+  ///
+  /// Never selected by a storefront query. The buyer's own order page and the
+  /// admin desk are the two readers, and the first checks the order's status.
+  loginUsername String?
+  loginPassword String?
+  /// Whatever else the buyer needs to take the account over — mail khôi phục,
+  /// mã 2FA, "đổi mật khẩu ngay". Plain text, rendered as text.
+  loginNote     String?
 
   /// Prices are whole VND — never floats.
   oldPrice   BigInt
@@ -685,6 +752,10 @@ model ProductPackage {
   sortOrder    Int     @default(0)
   orders       Order[]
   cartItems    CartItem[]
+  /// The tier's own stock of licence keys. Per tier rather than per product:
+  /// a one-day key and a lifetime key are different goods, and the shop hands
+  /// out whichever one was paid for.
+  licenseKeys  LicenseKey[]
 
   @@index([productId, sortOrder])
   @@map("product_packages")
@@ -783,8 +854,64 @@ model Order {
 
   createdAt   DateTime       @default(now())
 
+  /// How many licence keys this order is entitled to, fixed at the sale.
+  ///
+  /// Not the same fact as `quantity`, which is what was bought: an account
+  /// order and every software order placed before the shop kept keys owe
+  /// nothing, and deriving the entitlement from quantity would put all of
+  /// them in the queue the first time a tier was stocked.
+  keysOwed    Int            @default(0)
+  /// The keys handed over. Fewer than `keysOwed` while the tier is out of
+  /// stock — that shortfall IS the shop's to-do list.
+  licenseKeys LicenseKey[]
+
   @@index([userId, createdAt])
   @@map("orders")
+}
+
+/// Who a key is allowed to be: on the shelf, handed to a buyer, or withdrawn
+/// by the shop without being sold (leaked, revoked upstream, typed wrong).
+enum LicenseKeyStatus {
+  AVAILABLE
+  SOLD
+  DISABLED
+}
+
+/// One licence key, in stock or delivered.
+///
+/// The shop pastes keys in per tier; a paid order takes them off the shelf in
+/// the same transaction that charges for them. A sold key is never deleted —
+/// it is the receipt for what a buyer was given, and the row is what says when
+/// their access runs out.
+model LicenseKey {
+  id          String           @id @default(cuid())
+  packageId   String
+  package     ProductPackage   @relation(fields: [packageId], references: [id], onDelete: Cascade)
+  /// The key itself, verbatim.
+  value       String
+  status      LicenseKeyStatus @default(AVAILABLE)
+  /// The shop's own note — which batch it came from, who supplied it.
+  note        String?
+
+  /// Set together, at the moment of delivery.
+  orderId     String?
+  order       Order?           @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  userId      String?
+  user        User?            @relation(fields: [userId], references: [id], onDelete: SetNull)
+  deliveredAt DateTime?
+  /// Delivery plus the tier's duration. Null on a lifetime tier — and null
+  /// while the key is still on the shelf, because a key nobody holds is not
+  /// counting down.
+  expiresAt   DateTime?
+
+  createdAt   DateTime         @default(now())
+
+  /// The same key twice in one tier is a paste that ran twice, not two goods.
+  @@unique([packageId, value])
+  /// How the shelf is read: this tier's stock, oldest first.
+  @@index([packageId, status, createdAt])
+  @@index([orderId])
+  @@map("license_keys")
 }
 
 model Voucher {

@@ -16,6 +16,8 @@ export interface SoftwareCardPackage {
 
 export interface SoftwareCardView {
   code: string;
+  /** /{category-slug}/{product-slug}, built by the query layer. */
+  href: string;
   name: string;
   imageUrl: string | null;
   /** The feature line under the title, e.g. "Aimbot · ESP · No Recoil". */
@@ -77,7 +79,7 @@ export function SoftwareCard({ software }: { software: SoftwareCardView }) {
   const status = software.status ? STATUS[software.status] : null;
   const chosen = software.packages.find((p) => p.id === packageId) ?? null;
   const hasPackages = software.packages.length > 0;
-  const detailHref = `/software/${software.code}`;
+  const detailHref = software.href;
 
   // One dropdown row. Same 11px/Inter as the trigger and the buttons, so the
   // open list matches the card exactly (the whole reason for a custom picker

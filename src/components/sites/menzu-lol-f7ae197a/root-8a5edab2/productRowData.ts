@@ -22,4 +22,10 @@ export interface ProductCard {
   stats: [ProductStat, ProductStat];
   /** Where the tile leads — a category or a service page. */
   href: string;
+  /**
+   * "PC" / "MOBILE" / "SPOOFER" for a category the shop has tagged, so the
+   * game-list row can filter its tiles by chip. Absent on service tiles and
+   * on categories nobody has tagged yet.
+   */
+  platform?: string | null;
 }

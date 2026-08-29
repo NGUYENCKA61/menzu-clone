@@ -1,14 +1,16 @@
 import type { Metadata } from "next";
 
+import { categoryHref } from "@/lib/routes";
 import { listCategories } from "@/lib/queries";
 import { Breadcrumb } from "@/components/sites/menzu-lol-f7ae197a/shared/Breadcrumb";
 import { MobileBottomNav } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/MobileBottomNav";
 import { SiteFooter } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/SiteFooter";
 import { SiteHeader } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/SiteHeader";
-import { ToolsRail } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/ToolsRail";
+import { ConnectRailSection } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/ConnectRailSection";
 
+// The layout's template appends the shop's name.
 export const metadata: Metadata = {
-  title: "Menzu Valorant | Danh sách danh mục",
+  title: "Danh sách danh mục",
 };
 
 /**
@@ -21,7 +23,7 @@ export default async function CategoriesPage() {
   const categories = await listCategories();
 
   return (
-    <div className="min-h-screen flex flex-col text-white overflow-x-clip selection:bg-indigo-500/30 transition-colors duration-300">
+    <div className="min-h-screen flex flex-col text-white overflow-x-clip selection:bg-[var(--menzu-accent)]/30 transition-colors duration-300">
       <div className="w-full shrink-0 h-[104px]" />
       <SiteHeader />
 
@@ -35,10 +37,13 @@ export default async function CategoriesPage() {
               ]}
             />
 
-            <div className="flex items-center justify-between mb-8 pb-3 border-b border-indigo-500/20">
-              <h1 className="text-2xl sm:text-3xl font-black uppercase tracking-wider text-white">
-                DANH SÁCH DANH MỤC
-              </h1>
+            <div className="flex items-center justify-between mb-8 pb-4 border-b border-white/10">
+              <div className="flex items-center gap-3">
+                <span aria-hidden className="h-6 w-[3px] shrink-0 rounded-full bg-[var(--menzu-accent)]" />
+                <h1 className="text-2xl sm:text-3xl font-black uppercase tracking-wider text-white">
+                  DANH SÁCH DANH MỤC
+                </h1>
+              </div>
             </div>
 
             {categories.length > 0 ? (
@@ -46,10 +51,10 @@ export default async function CategoriesPage() {
                 {categories.map((c) => (
                   <a
                     key={c.slug}
-                    href={`/category/${c.slug}`}
-                    className="group flex flex-col justify-between gap-3 bg-[#12141c] rounded-xl overflow-hidden border border-indigo-500/20 hover:border-indigo-500/50 transition-all duration-300 p-5 min-h-[120px]"
+                    href={categoryHref(c.slug)}
+                    className="group flex flex-col justify-between gap-3 bg-[#101114] rounded-[15px] overflow-hidden border border-white/[0.08] hover:border-[var(--menzu-accent)]/50 hover:-translate-y-1 hover:shadow-[0_15px_40px_#00000088] transition-all duration-[250ms] p-5 min-h-[120px]"
                   >
-                    <span className="text-sm font-black uppercase text-white group-hover:text-indigo-400 transition-colors tracking-widest leading-snug">
+                    <span className="text-sm font-black uppercase text-white group-hover:text-[var(--menzu-accent)] transition-colors tracking-widest leading-snug">
                       {c.name}
                     </span>
                     <span className="text-[11px] font-bold uppercase tracking-widest text-neutral-500">
@@ -75,7 +80,7 @@ export default async function CategoriesPage() {
         <SiteFooter />
       </main>
 
-      <ToolsRail />
+      <ConnectRailSection />
       <MobileBottomNav />
     </div>
   );

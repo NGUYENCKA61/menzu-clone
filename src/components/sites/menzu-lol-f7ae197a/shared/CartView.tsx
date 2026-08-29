@@ -11,6 +11,8 @@ import { formatVnd } from "./productData";
 export interface CartLine {
   id: string;
   code: string;
+  /** /{category-slug}/{product-slug} — where the line's product lives. */
+  href: string;
   name: string;
   packageLabel: string;
   unitPrice: number;
@@ -136,7 +138,7 @@ export function CartView({ lines }: { lines: CartLine[] }) {
 
             <div className="min-w-0 flex-1">
               <Link
-                href={`/software/${line.code}`}
+                href={line.href}
                 className="block text-sm font-bold text-white hover:text-[var(--menzu-accent)] transition-colors truncate"
               >
                 {line.name}

@@ -53,9 +53,9 @@ const ALL_WEAPONS = "All Skin";
 // Three rows of the desktop grid (5 columns); "Xem thêm" pages the rest in.
 const PAGE_SIZE = 15;
 
-// Each tab wears its own colour when open — đỏ, cam, hồng in tab order — and
-// the block's small accents (filter chips, tile hover, "Xem thêm") follow the
-// open tab's colour. Everything is a complete literal string per colour,
+// The skins and characters tabs wear the shop's red when open, the gear tab
+// orange, and the block's small accents (filter chips, tile hover, "Xem thêm")
+// follow the open tab's colour. Everything is a complete literal string per colour,
 // because Tailwind cannot see a composed class name. Type per the buy panel's
 // "Mua ngay" button.
 const TAB_BASE =
@@ -81,12 +81,6 @@ const RED_ACCENT: TabAccent = {
   tileHover: "hover:border-[var(--menzu-accent)]/50",
   searchFocus: "focus-within:border-[var(--menzu-accent)]/60",
 };
-const PURPLE_ACCENT: TabAccent = {
-  tabActive: "border-[#7c3aed] bg-[#7c3aed] hover:bg-[#6d28d9] text-white",
-  filterActive: "bg-[#7c3aed] border-[#7c3aed] text-white",
-  tileHover: "hover:border-[#7c3aed]/50",
-  searchFocus: "focus-within:border-[#7c3aed]/60",
-};
 const ORANGE_ACCENT: TabAccent = {
   tabActive: "border-[#f97316] bg-[#f97316] hover:bg-[#ea580c] text-white",
   filterActive: "bg-[#f97316] border-[#f97316] text-white",
@@ -96,7 +90,7 @@ const ORANGE_ACCENT: TabAccent = {
 
 const TAB_ACCENTS: Record<InventoryTabKey, TabAccent> = {
   weaponSkins: RED_ACCENT,
-  agents: PURPLE_ACCENT,
+  agents: RED_ACCENT,
   buddies: ORANGE_ACCENT,
   // Legacy scraped kinds; never shown for typed accounts.
   cards: RED_ACCENT,

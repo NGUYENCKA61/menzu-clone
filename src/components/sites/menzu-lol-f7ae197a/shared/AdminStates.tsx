@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertTriangle, Inbox, Loader2, X } from "lucide-react";
+import { AlertTriangle, Inbox, Loader2, Search, X } from "lucide-react";
 import { useEffect, useRef, type ReactNode } from "react";
 
 /** Spinner for a panel that is fetching. */
@@ -151,5 +151,51 @@ export function ConfirmDialog({
         </div>
       </div>
     </div>
+  );
+}
+
+/**
+ * The admin's search box.
+ *
+ * Four screens — người dùng, đơn hàng, tài liệu, thông báo — had already
+ * settled on the same markup for this, copied between them: a 40px field on
+ * #0e0e11 with the magnifier inset on the left and a rose focus ring. This is
+ * that markup, written once, so the fifth screen is the same shape as the four
+ * rather than a sixth variant of it.
+ *
+ * The wrapper is a label, so a click anywhere on the field — the icon
+ * included — puts the cursor in the input.
+ */
+export function AdminSearch({
+  value,
+  onChange,
+  placeholder,
+  label,
+  className = "",
+  maxLength = 80,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  placeholder: string;
+  /** Read out instead of the placeholder, which disappears once typing starts. */
+  label: string;
+  className?: string;
+  maxLength?: number;
+}) {
+  return (
+    <label className={`relative block ${className}`}>
+      <Search
+        size={15}
+        className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-neutral-600"
+      />
+      <input
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        placeholder={placeholder}
+        aria-label={label}
+        maxLength={maxLength}
+        className="w-full h-10 rounded-lg border border-white/[0.08] bg-[#0e0e11] pl-9 pr-3 text-[13px] text-white outline-none focus:border-rose-500/50 transition-colors"
+      />
+    </label>
   );
 }

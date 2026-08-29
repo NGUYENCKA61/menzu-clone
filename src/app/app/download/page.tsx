@@ -14,7 +14,7 @@ import QRCode from "qrcode";
 import { MobileBottomNav } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/MobileBottomNav";
 import { SiteFooter } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/SiteFooter";
 import { SiteHeader } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/SiteHeader";
-import { ToolsRail } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/ToolsRail";
+import { ConnectRailSection } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/ConnectRailSection";
 import { FaqAccordion, type FaqEntry } from "@/components/sites/menzu-lol-f7ae197a/shared/FaqAccordion";
 import { getAppRelease } from "@/lib/queries";
 import { SITE_URL } from "@/lib/seo";
@@ -122,7 +122,7 @@ export default async function AppDownloadPage() {
     : "—";
 
   return (
-    <div className="min-h-screen flex flex-col text-white overflow-x-clip selection:bg-indigo-500/30">
+    <div className="min-h-screen flex flex-col text-white overflow-x-clip selection:bg-[var(--menzu-accent)]/30">
       <div className="w-full shrink-0 h-[104px]" />
       <SiteHeader />
 
@@ -230,9 +230,9 @@ export default async function AppDownloadPage() {
                 {FEATURES.map(({ icon: Icon, title, body }) => (
                   <div
                     key={title}
-                    className="p-6 rounded-2xl border border-zinc-800/80 bg-[#121216] space-y-3 hover:border-indigo-500/30 transition-colors"
+                    className="p-6 rounded-2xl border border-zinc-800/80 bg-[#121216] space-y-3 hover:border-[var(--menzu-accent)]/50 transition-colors"
                   >
-                    <div className="w-11 h-11 rounded-xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 flex items-center justify-center">
+                    <div className="w-11 h-11 rounded-xl bg-white/[0.04] border border-white/[0.08] text-[var(--menzu-accent)] flex items-center justify-center">
                       <Icon size={20} />
                     </div>
                     <h3 className="text-sm font-black uppercase tracking-wider text-white">{title}</h3>
@@ -316,7 +316,7 @@ export default async function AppDownloadPage() {
         <SiteFooter />
       </main>
 
-      <ToolsRail />
+      <ConnectRailSection />
       <MobileBottomNav />
     </div>
   );

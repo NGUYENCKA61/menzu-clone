@@ -5,6 +5,9 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { Headphones, Minus, Plus, RefreshCw, ShieldCheck, Zap } from "lucide-react";
 
+import type { ProductFeature } from "@/lib/productFeatures";
+import { productHref } from "@/lib/routes";
+
 import { formatVnd } from "./productData";
 
 export interface SoftwarePackageView {
@@ -17,15 +20,20 @@ export interface SoftwarePackageView {
 
 export interface SoftwareDetail {
   code: string;
+  /** The product half of its address: /{category-slug}/{slug}. */
+  slug: string;
   name: string;
   description: string;
+  /** The product's own "Tính năng nổi bật"; empty means use the default. */
+  features: ProductFeature[];
+  /** The write-up under that list, as editor HTML. "" draws nothing. */
+  featuresNote: string;
+  /** "Hướng dẫn sử dụng" as editor HTML; "" prints the default sentence. */
+  guideHtml: string;
   softwareStatus: "UNDETECTED" | "DETECTED" | "UPDATING" | null;
   images: string[];
   /** Raw YouTube link as the shop pasted it; the gallery parses it. */
   videoUrl: string | null;
-  /** Facts the description block prints. Null hides its own card. */
-  version: string | null;
-  platform: string | null;
   packages: SoftwarePackageView[];
   categoryName: string;
   categorySlug: string;
@@ -155,7 +163,7 @@ export function SoftwareBuyPanel({
         body: JSON.stringify({ code: software.code, packageId: chosen.id, quantity }),
       });
       if (res.status === 401) {
-        router.push(`/login?next=/software/${software.code}`);
+        router.push(`/login?next=${encodeURIComponent(productHref(software.categorySlug, software.slug))}`);
         return;
       }
       const data = (await res.json().catch(() => ({}))) as { error?: string; count?: number };
@@ -187,7 +195,7 @@ export function SoftwareBuyPanel({
         body: JSON.stringify({ code: software.code, packageId: chosen.id, quantity }),
       });
       if (res.status === 401) {
-        router.push(`/login?next=/software/${software.code}`);
+        router.push(`/login?next=${encodeURIComponent(productHref(software.categorySlug, software.slug))}`);
         return;
       }
       const data = (await res.json().catch(() => ({}))) as {

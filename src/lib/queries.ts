@@ -2,7 +2,16 @@ import "server-only";
 
 import type { Prisma } from "@prisma/client";
 
+import {
+  currentOrderIdOf,
+  loginHandover,
+  tagOf,
+  type LoginHandover,
+} from "@/lib/accountLogin";
 import { db } from "@/lib/db";
+import { docHtmlToPlainText } from "@/lib/docHtml";
+import { parseFeatures } from "@/lib/productFeatures";
+import { productHref } from "@/lib/routes";
 import { weaponKey } from "@/lib/weaponImages";
 import type { AccountDetail } from "@/components/sites/menzu-lol-f7ae197a/shared/AccountBuyPanel";
 import type { SoftwareDetail } from "@/components/sites/menzu-lol-f7ae197a/shared/SoftwareBuyPanel";
@@ -76,13 +85,17 @@ function countKind(skins: SkinRow[], kind: string): number {
 function toProductCard(
   row: {
     code: string;
+    name: string | null;
+    slug: string;
+    description: string | null;
     imageUrl: string | null;
     rank: string;
-    vp: number;
-    rp: number;
+    vip: number;
+    vipIngame: number;
     oldPrice: bigint;
     tags: { label: string }[];
     skins: (SkinRow & { name: string })[];
+    category: { slug: string };
   },
   price: bigint | number,
   images: Map<string, string>,
@@ -92,13 +105,19 @@ function toProductCard(
 
   return {
     code: row.code,
+    // The shop's own title when it typed one; the card otherwise falls back
+    // to rank/skins, and to the bare code when both are blank.
+    name: row.name,
+    href: productHref(row.category.slug, row.slug),
     imageUrl: row.imageUrl,
+    // The card's two-line blurb: this account's own words when the shop wrote
+    // some, reduced to running text — the card clamps to two lines either way.
+    description: row.description ? docHtmlToPlainText(row.description, 200) : "",
     rank: row.rank,
-    // The vp/rp columns were Valorant currencies; on this shop's accounts they
-    // carry the card's two labelled numbers — VIP and VIP INGAME. Zero means
-    // "not filled in" and the card hides the entry.
-    vip: row.vp,
-    vipIngame: row.rp,
+    // The card's two labelled numbers. Zero means "not filled in" and the
+    // card hides the entry.
+    vip: row.vip,
+    vipIngame: row.vipIngame,
     skins: total,
     tiers: toTiers(row.skins),
     tag: row.tags[0]?.label ?? null,
@@ -355,6 +374,10 @@ export async function getCategoryPage(
       include: {
         tags: { select: { label: true } },
         skins: CARD_SKINS,
+        // Every card carries its own address, and half of it is the
+        // category's — read here rather than closed over from the page, so a
+        // product listed on a category it does not belong to is impossible.
+        category: { select: { slug: true } },
       },
     }),
     db.product.findMany({
@@ -384,6 +407,9 @@ export async function getCategoryPage(
   // figure above them would only be the first one again.
   const software: SoftwareCardView[] = softwareRows.map((s) => ({
     code: s.code,
+    // Every tool on this page belongs to this category by definition of the
+    // query, so its address is this category's slug and the tool's own.
+    href: productHref(category.slug, s.slug),
     name: s.name ?? s.code,
     imageUrl: s.imageUrl,
     description: s.description ?? "",
@@ -442,16 +468,51 @@ export async function listCategories() {
   }));
 }
 
+/**
+ * What an address means, whichever half of it is known.
+ *
+ * The product routes answer with a redirect rather than a 404 when the
+ * category in the URL is not the one the product sits in today, so both the
+ * legacy /software/<mã> addresses and a stale /old-category/<sản-phẩm> land on
+ * the one canonical page instead of dying.
+ */
+export async function resolveProduct(where: {
+  slug?: string;
+  code?: string;
+}): Promise<{ slug: string; code: string; categorySlug: string; isSoftware: boolean } | null> {
+  if (!where.slug && !where.code) return null;
+  const p = await db.product.findFirst({
+    where: {
+      deletedAt: null,
+      ...(where.slug ? { slug: where.slug } : {}),
+      ...(where.code ? { code: where.code } : {}),
+    },
+    select: {
+      slug: true,
+      code: true,
+      productType: true,
+      category: { select: { slug: true } },
+    },
+  });
+  if (!p) return null;
+  return {
+    slug: p.slug,
+    code: p.code,
+    categorySlug: p.category.slug,
+    isSoftware: p.productType === "SOFTWARE_GAME",
+  };
+}
+
 export async function getAccountDetail(
-  code: string,
+  slug: string,
 ): Promise<AccountDetail | null> {
   // findFirst, not findUnique: `deletedAt` is not part of a unique key, and a
   // removed account has to read as gone from here — the caller turns null into
   // a 404, which is what a stale link or a search engine should meet.
-  // Typed as well as coded: a software code typed into an /account URL would
-  // otherwise render a page of blank stat rows instead of a 404.
+  // Typed as well as addressed: a tool's slug would otherwise render a page of
+  // blank stat rows instead of a 404.
   const p = await db.product.findFirst({
-    where: { code, deletedAt: null, productType: "ACCOUNT_GAME" },
+    where: { slug, deletedAt: null, productType: "ACCOUNT_GAME" },
     include: {
       category: { select: { slug: true, name: true } },
       tags: { select: { label: true } },
@@ -465,6 +526,10 @@ export async function getAccountDetail(
 
   return {
     code: p.code,
+    name: p.name ?? "",
+    // The write-up, as running text, for the buy panel's blurb.
+    descriptionText: p.description ? docHtmlToPlainText(p.description, 260) : "",
+    slug: p.slug,
     imageUrl: p.imageUrl,
     images: p.images.map((i) => i.url),
     rank: p.rank,
@@ -477,8 +542,8 @@ export async function getAccountDetail(
     cards: p.cardCount ?? countKind(p.skins, "CARD"),
     sprays: p.sprayCount ?? countKind(p.skins, "SPRAY"),
     level: p.level,
-    vp: p.vp,
-    rp: p.rp,
+    vip: p.vip,
+    vipIngame: p.vipIngame,
     kc: p.kc,
     tag: p.tags[0]?.label ?? null,
     mailType: p.mailType ?? "",
@@ -500,13 +565,14 @@ export async function getAccountDetail(
 /**
  * A software product and everything its page prints.
  *
- * Filtered on the type as well as the code, so an account code typed into a
- * /software URL answers 404 rather than rendering a page whose every field
- * would be blank.
+ * Found by slug, which is what the address carries: the code is what the shop
+ * and its orders call the row, and is deliberately not in the URL. Filtered on
+ * the type as well, so an account's slug answers null here rather than
+ * rendering a tool page whose every field would be blank.
  */
-export async function getSoftwareDetail(code: string): Promise<SoftwareDetail | null> {
+export async function getSoftwareDetail(slug: string): Promise<SoftwareDetail | null> {
   const p = await db.product.findFirst({
-    where: { code, deletedAt: null, productType: "SOFTWARE_GAME" },
+    where: { slug, deletedAt: null, productType: "SOFTWARE_GAME" },
     include: {
       category: { select: { slug: true, name: true } },
       packages: { orderBy: { sortOrder: "asc" } },
@@ -517,15 +583,21 @@ export async function getSoftwareDetail(code: string): Promise<SoftwareDetail | 
 
   return {
     code: p.code,
+    slug: p.slug,
     // A shop that has not named the tool yet falls back to its code, which is
     // at least unique, rather than rendering an empty heading.
     name: p.name ?? p.code,
     description: p.description ?? "",
+    // Empty when the product has none of its own; the page prints the shop's
+    // default list in that case rather than nothing.
+    features: parseFeatures(p.features),
+    // The write-up under the list; "" simply draws nothing after the bullets.
+    featuresNote: p.featuresNote ?? "",
+    // The how-to block; "" prints the default sentence.
+    guideHtml: p.guide ?? "",
     softwareStatus: p.softwareStatus,
     images: p.images.length > 0 ? p.images.map((i) => i.url) : p.imageUrl ? [p.imageUrl] : [],
     videoUrl: p.videoUrl,
-    version: p.version,
-    platform: p.platform,
     packages: p.packages.map((pk) => ({
       id: pk.id,
       label: pk.label,
@@ -559,6 +631,8 @@ export async function getRelatedProducts(
     include: {
       tags: { select: { label: true } },
       skins: CARD_SKINS,
+      // The card builds its own address, and half of it is the category's.
+      category: { select: { slug: true } },
     },
   });
 
@@ -599,22 +673,82 @@ export async function getTransactions(userId: string): Promise<LedgerRow[]> {
   }));
 }
 
+/** One licence handed to this buyer, as their own order page shows it. */
+export interface OrderKeyRow {
+  value: string;
+  expiresAt: Date | null;
+  expired: boolean;
+}
+
 export interface OrderRow {
   code: string;
   status: string;
   total: number;
   createdAt: Date;
   productCode: string;
+  productName: string;
+  /** The product's canonical address, so the row opens the page it names. */
+  productHref: string;
+  isSoftware: boolean;
   productRank: string;
   imageUrl: string | null;
+  /** The shelf the product sits on today — "Danh mục Hack PUBG" on the receipt. */
+  categoryName: string;
+  /** What the line cost before any discount, for the unit price column. */
+  listPrice: number;
+  /** Software only: the tier bought, and how many of it. */
+  packageLabel: string | null;
+  quantity: number;
+  /** The keys themselves, and how many are still owed. */
+  keys: OrderKeyRow[];
+  keysPending: number;
+  /**
+   * Accounts only: the sign-in the buyer was handed, or that they are still
+   * waiting on. "none" for software and for orders that were never paid.
+   */
+  login: LoginHandover;
 }
 
 export async function getOrders(userId: string): Promise<OrderRow[]> {
+  const now = new Date();
   const rows = await db.order.findMany({
     where: { userId },
     orderBy: { createdAt: "desc" },
     include: {
-      product: { select: { code: true, rank: true, imageUrl: true } },
+      product: {
+        select: {
+          code: true,
+          slug: true,
+          name: true,
+          rank: true,
+          imageUrl: true,
+          productType: true,
+          category: { select: { slug: true, name: true } },
+          // The one storefront read of these three columns, and it is scoped
+          // by the `userId` above: only the buyer's own orders reach here, and
+          // loginHandover shows nothing unless the order is PAID.
+          loginUsername: true,
+          loginPassword: true,
+          loginNote: true,
+          // Whose the row is now. An account re-listed and sold again keeps
+          // its first order PAID; only the latest paid order reads the row.
+          orders: {
+            where: { status: "PAID" },
+            orderBy: { createdAt: "desc" },
+            take: 1,
+            select: { id: true },
+          },
+          // NFA goes out by itself; anything else is handed over in person.
+          tags: { select: { label: true }, take: 1 },
+        },
+      },
+      package: { select: { label: true } },
+      // The buyer's copy of what they were given. Ordered so a multi-key order
+      // reads in the sequence it was delivered.
+      licenseKeys: {
+        orderBy: { deliveredAt: "asc" },
+        select: { value: true, expiresAt: true },
+      },
     },
   });
   return rows.map((o) => ({
@@ -623,8 +757,32 @@ export async function getOrders(userId: string): Promise<OrderRow[]> {
     total: Number(o.total),
     createdAt: o.createdAt,
     productCode: o.product.code,
+    productName: o.product.name ?? o.product.code,
+    // Built from the product's category as it stands now: an order is history,
+    // but the link on it has to lead somewhere that exists today.
+    productHref: productHref(o.product.category.slug, o.product.slug),
+    isSoftware: o.product.productType === "SOFTWARE_GAME",
     productRank: o.product.rank,
     imageUrl: o.product.imageUrl,
+    categoryName: o.product.category.name,
+    listPrice: Number(o.listPrice),
+    packageLabel: o.package?.label ?? null,
+    quantity: o.quantity,
+    keys: o.licenseKeys.map((k) => ({
+      value: k.value,
+      expiresAt: k.expiresAt,
+      expired: k.expiresAt !== null && k.expiresAt < now,
+    })),
+    // What the sale promised, less what it handed over. An account order and
+    // every software order from before the shop kept keys carry keysOwed 0,
+    // so neither ever reads as waiting.
+    keysPending:
+      o.status === "PAID" ? Math.max(0, o.keysOwed - o.licenseKeys.length) : 0,
+    login: loginHandover(o, {
+      ...o.product,
+      currentOrderId: currentOrderIdOf(o.product),
+      tag: tagOf(o.product),
+    }),
   }));
 }
 
@@ -667,7 +825,10 @@ export async function getFlashSaleItems(take = 20): Promise<FlashSaleItem[]> {
             productType: "ACCOUNT_GAME",
             oldPrice: { gt: 0 },
           },
-    include: { skins: { select: { kind: true, tier: true } } },
+    include: {
+      skins: { select: { kind: true, tier: true } },
+      category: { select: { slug: true } },
+    },
   });
 
   // The scheduled price is what the card must print. Reading p.price here was
@@ -691,11 +852,11 @@ export async function getFlashSaleItems(take = 20): Promise<FlashSaleItem[]> {
       const pct = Math.round((1 - Number(price) / Number(p.oldPrice)) * 100);
       return {
         code: p.code,
+        href: productHref(p.category.slug, p.slug),
         imageUrl: p.imageUrl,
         rank: p.rank,
-        // vp/rp carry VIP and VIP INGAME on this shop; see toProductCard.
-        vip: p.vp,
-        vipIngame: p.rp,
+        vip: p.vip,
+        vipIngame: p.vipIngame,
         discount: pct > 0 ? `-${pct}%` : null,
         oldPrice: `${formatVndString(Number(p.oldPrice))} VND`,
         newPrice: `${formatVndString(Number(price))} VND`,

@@ -1,10 +1,12 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { ArrowDown, ArrowUp, ChevronDown, ImagePlus, Trash2 } from "lucide-react";
+import { ArrowDown, ArrowUp, ImagePlus, Trash2 } from "lucide-react";
 
-import { AdminEmpty, AdminError, ConfirmDialog } from "./AdminStates";
+import { AdminImagePicker } from "./AdminImagePicker";
+import { AdminEmpty, AdminError, AdminSearch, ConfirmDialog } from "./AdminStates";
 
 export interface AdminCategoryView {
   id: string;
@@ -23,89 +25,6 @@ const LABEL = "block text-[10px] font-black uppercase tracking-widest text-neutr
 const ICON_BUTTON =
   "h-8 w-8 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-white/5 text-neutral-300 transition-colors inline-flex items-center justify-center";
 
-interface Draft {
-  name: string;
-  slug: string;
-  description: string;
-  imageUrl: string;
-  soldCount: string;
-  stockCount: string;
-}
-
-function draftOf(category: AdminCategoryView): Draft {
-  return {
-    name: category.name,
-    slug: category.slug,
-    description: category.description ?? "",
-    imageUrl: category.imageUrl ?? "",
-    soldCount: String(category.soldCount),
-    stockCount: String(category.stockCount),
-  };
-}
-
-/**
- * File picker and preview for one cover image.
- *
- * A label wrapping a hidden input rather than a styled `<input type="file">`:
- * the native control cannot be restyled to match this screen, and a label is
- * what makes clicking the button open the picker without any script.
- *
- * The preview reads the text field, not the file — so it also shows a path
- * typed by hand, and it shows the picture that is actually about to be saved
- * rather than whichever one was uploaded last.
- */
-function ImagePicker({
-  uploading,
-  value,
-  onPick,
-}: {
-  uploading: boolean;
-  value: string;
-  onPick: (file: File) => void | Promise<void>;
-}) {
-  return (
-    <div className="mt-2 flex flex-wrap items-center gap-3">
-      <div className="relative h-12 w-[68px] shrink-0 overflow-hidden rounded-lg border border-white/10 bg-neutral-950">
-        {value ? (
-          // A plain img: the path is typed by hand or just uploaded, so it may
-          // not be a host next/image is configured for — and this is a 68px
-          // thumbnail on an admin screen, which is not worth an optimiser pass.
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={value} alt="" className="h-full w-full object-cover" />
-        ) : (
-          <span className="flex h-full w-full items-center justify-center text-[9px] font-bold uppercase tracking-widest text-neutral-700">
-            Trống
-          </span>
-        )}
-      </div>
-
-      <label
-        className={`inline-flex h-9 cursor-pointer items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 text-[10px] font-black uppercase tracking-widest text-neutral-200 transition-colors hover:bg-white/10 ${
-          uploading ? "pointer-events-none opacity-60" : ""
-        }`}
-      >
-        <ImagePlus size={13} />
-        {uploading ? "Đang tải…" : "Chọn ảnh từ máy"}
-        <input
-          type="file"
-          accept="image/png,image/jpeg,image/webp"
-          className="hidden"
-          onChange={(event) => {
-            const file = event.target.files?.[0];
-            // Cleared so picking the same file twice fires change again —
-            // otherwise a failed upload could not be retried with that file.
-            event.target.value = "";
-            if (file) void onPick(file);
-          }}
-        />
-      </label>
-
-      <span className="text-[10px] text-neutral-600">
-        PNG / JPG / WebP · tối thiểu 320×180 · tối đa 8MB
-      </span>
-    </div>
-  );
-}
 
 /**
  * Category management: create, rename, reorder, retire.
@@ -119,11 +38,11 @@ export function AdminCategories({ categories }: { categories: AdminCategoryView[
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [ok, setOk] = useState<string | null>(null);
-  const [open, setOpen] = useState<string | null>(null);
-  const [draft, setDraft] = useState<Draft | null>(null);
   const [deleting, setDeleting] = useState<AdminCategoryView | null>(null);
 
   const [newName, setNewName] = useState("");
+  const [query, setQuery] = useState("");
+  const [newDescription, setNewDescription] = useState("");
   const [newImage, setNewImage] = useState("");
   // Which picker is mid-upload, so only that one shows "Đang tải…" instead of
   // every field on the screen going busy at once.
@@ -199,40 +118,32 @@ export function AdminCategories({ categories }: { categories: AdminCategoryView[
     }
   }
 
-  function toggle(category: AdminCategoryView) {
-    if (open === category.id) {
-      setOpen(null);
-      setDraft(null);
-      return;
-    }
-    setOpen(category.id);
-    setDraft(draftOf(category));
-    setError(null);
-    setOk(null);
-  }
+  /**
+   * Name or address, case- and accent-insensitively: the shop types "pubg"
+   * and means "HACK PUBG", and types "hack-" when it is hunting a URL.
+   */
+  const needle = query.trim().toLowerCase();
+  const shown = needle
+    ? categories.filter(
+        (category) =>
+          category.name.toLowerCase().includes(needle) ||
+          category.slug.toLowerCase().includes(needle),
+      )
+    : categories;
 
   async function handleCreate(event: React.FormEvent) {
     event.preventDefault();
-    const created = await call("POST", { name: newName, imageUrl: newImage });
+    const created = await call("POST", {
+      name: newName,
+      description: newDescription,
+      imageUrl: newImage,
+    });
     if (created) {
       setOk(`Đã thêm danh mục ${newName.trim()}`);
       setNewName("");
+      setNewDescription("");
       setNewImage("");
     }
-  }
-
-  async function handleSave(category: AdminCategoryView) {
-    if (!draft) return;
-    const saved = await call("PATCH", {
-      id: category.id,
-      name: draft.name,
-      slug: draft.slug,
-      description: draft.description,
-      imageUrl: draft.imageUrl,
-      soldCount: Number(draft.soldCount.replace(/\D/g, "")),
-      stockCount: Number(draft.stockCount.replace(/\D/g, "")),
-    });
-    if (saved) setOk(`Đã lưu ${draft.name.trim()}`);
   }
 
   return (
@@ -245,6 +156,10 @@ export function AdminCategories({ categories }: { categories: AdminCategoryView[
           Thêm danh mục
         </span>
 
+        {/* The words first, the picture last — the same order the software
+            form asks in, so the two create forms on this page read as one
+            habit. Name and blurb share the row because they are the two lines
+            the home page tile prints together. */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label htmlFor="cat-name" className={LABEL}>
@@ -260,30 +175,42 @@ export function AdminCategories({ categories }: { categories: AdminCategoryView[
             />
           </div>
           <div>
-            <label htmlFor="cat-image" className={LABEL}>
-              Ảnh bìa <span className="text-neutral-600">(không bắt buộc)</span>
+            <label htmlFor="cat-description" className={LABEL}>
+              Mô tả ngắn <span className="text-neutral-600">(không bắt buộc)</span>
             </label>
             <input
-              id="cat-image"
-              value={newImage}
-              onChange={(event) => setNewImage(event.target.value)}
-              placeholder="/sites/…/images/category/random.webp"
+              id="cat-description"
+              value={newDescription}
+              onChange={(event) => setNewDescription(event.target.value)}
+              placeholder="Tài khoản random giá rẻ, giao ngay"
               className={FIELD}
-            />
-            <ImagePicker
-              uploading={uploading === "new"}
-              value={newImage}
-              onPick={async (file) => {
-                const url = await uploadImage(file, "new");
-                if (url) setNewImage(url);
-              }}
             />
           </div>
         </div>
 
+        <div>
+          <label htmlFor="cat-image" className={LABEL}>
+            Ảnh bìa <span className="text-neutral-600">(không bắt buộc)</span>
+          </label>
+          <input
+            id="cat-image"
+            value={newImage}
+            onChange={(event) => setNewImage(event.target.value)}
+            placeholder="/sites/…/images/category/random.webp"
+            className={FIELD}
+          />
+          <AdminImagePicker
+            uploading={uploading === "new"}
+            value={newImage}
+            onPick={async (file) => {
+              const url = await uploadImage(file, "new");
+              if (url) setNewImage(url);
+            }}
+          />
+        </div>
         <p className="text-[11px] text-neutral-500">
           Đường dẫn được tạo tự động từ tên — &ldquo;Tài Khoản Đặc Biệt&rdquo; thành{" "}
-          <span className="font-mono text-neutral-400">/category/tai-khoan-dac-biet</span>.
+          <span className="font-mono text-neutral-400">/tai-khoan-dac-biet</span>.
           Danh mục mới xếp cuối danh sách, không xáo trộn thứ tự trang chủ đang có.
         </p>
 
@@ -307,16 +234,29 @@ export function AdminCategories({ categories }: { categories: AdminCategoryView[
         </p>
       ) : null}
 
+      {/* Only worth drawing once the list is long enough to hunt through. */}
+      {categories.length > 3 ? (
+        <AdminSearch
+          value={query}
+          onChange={setQuery}
+          placeholder="Tìm tên danh mục hoặc đường dẫn…"
+          label="Tìm danh mục"
+        />
+      ) : null}
+
       {categories.length === 0 ? (
         <AdminEmpty
           title="Chưa có danh mục nào"
           body="Sản phẩm bắt buộc thuộc về một danh mục, nên hãy tạo danh mục đầu tiên trước khi thêm tài khoản."
         />
+      ) : shown.length === 0 ? (
+        <AdminEmpty
+          title={`Không có danh mục nào khớp "${query.trim()}"`}
+          body="Thử một phần của tên, hoặc một phần của đường dẫn."
+        />
       ) : (
         <div className="flex flex-col gap-2">
-          {categories.map((category, index) => {
-            const expanded = open === category.id;
-
+          {shown.map((category, index) => {
             return (
               <div
                 key={category.id}
@@ -326,10 +266,33 @@ export function AdminCategories({ categories }: { categories: AdminCategoryView[
                     not push the actions onto their own line and leave the rows
                     at different heights. */}
                 <div className="flex items-start gap-3">
+                  {/* The cover, at the size the row can carry. Every other list
+                      on this page leads with a picture — accounts and software
+                      both do — and the category rows were the one place the
+                      shop had to open a panel to find out which image it had
+                      set. A plain img rather than next/image for the same
+                      reason the software table uses one: the value is whatever
+                      path or URL the shop typed, and next/image would need every
+                      host of it spelled out in an allow-list. */}
+                  <span className="relative h-10 w-16 shrink-0 overflow-hidden rounded-lg border border-white/10 bg-neutral-950">
+                    {category.imageUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={category.imageUrl}
+                        alt=""
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <span className="grid h-full w-full place-items-center text-neutral-600">
+                        <ImagePlus size={14} />
+                      </span>
+                    )}
+                  </span>
+
                   <div className="flex-1 min-w-0 flex flex-wrap items-center gap-x-4 gap-y-2">
                     <span className="text-xs font-black text-white">{category.name}</span>
                     <span className="font-mono text-[11px] text-neutral-500">
-                      /category/{category.slug}
+                      /{category.slug}
                     </span>
                     <span className="text-[11px] text-neutral-400">
                       {category.productCount} sản phẩm
@@ -340,9 +303,14 @@ export function AdminCategories({ categories }: { categories: AdminCategoryView[
                   </div>
 
                   <div className="flex items-center gap-1.5 shrink-0">
+                    {/* Order is a property of the whole list, and while a search
+                        is on, the row above this one on screen is not the row
+                        above it in the list. Moving then would swap it with
+                        something the shop cannot see. */}
                     <button
                       type="button"
-                      disabled={busy || index === 0}
+                      disabled={busy || Boolean(needle) || index === 0}
+                      title={needle ? "Xoá ô tìm kiếm để sắp xếp lại" : "Đưa lên trên"}
                       onClick={() => call("PATCH", { id: category.id, action: "move", direction: "up" })}
                       aria-label={`Đưa ${category.name} lên trên`}
                       className={ICON_BUTTON}
@@ -351,25 +319,23 @@ export function AdminCategories({ categories }: { categories: AdminCategoryView[
                     </button>
                     <button
                       type="button"
-                      disabled={busy || index === categories.length - 1}
+                      disabled={busy || Boolean(needle) || index === shown.length - 1}
+                      title={needle ? "Xoá ô tìm kiếm để sắp xếp lại" : "Đưa xuống dưới"}
                       onClick={() => call("PATCH", { id: category.id, action: "move", direction: "down" })}
                       aria-label={`Đưa ${category.name} xuống dưới`}
                       className={ICON_BUTTON}
                     >
                       <ArrowDown size={13} />
                     </button>
-                    <button
-                      type="button"
-                      onClick={() => toggle(category)}
-                      aria-expanded={expanded}
+{/* Its own page, like a product: the editor grew past what a
+                        fold-out under the row can hold without shoving every
+                        row below it down the screen. */}
+                    <Link
+                      href={`/admin/categories/${encodeURIComponent(category.slug)}`}
                       className="h-8 px-3 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 text-[10px] font-black uppercase tracking-widest text-neutral-300 transition-colors inline-flex items-center gap-1.5"
                     >
-                      <ChevronDown
-                        size={12}
-                        className={`transition-transform ${expanded ? "rotate-180" : ""}`}
-                      />
-                      {expanded ? "Đóng" : "Sửa"}
-                    </button>
+                      Sửa
+                    </Link>
                     <button
                       type="button"
                       disabled={busy || category.productCount > 0}
@@ -387,115 +353,6 @@ export function AdminCategories({ categories }: { categories: AdminCategoryView[
                   </div>
                 </div>
 
-                {expanded && draft ? (
-                  <div className="flex flex-col gap-4 pt-4 border-t border-white/5">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      <div>
-                        <label htmlFor={`n-${category.id}`} className={LABEL}>
-                          Tên danh mục
-                        </label>
-                        <input
-                          id={`n-${category.id}`}
-                          value={draft.name}
-                          onChange={(event) => setDraft({ ...draft, name: event.target.value })}
-                          className={FIELD}
-                        />
-                      </div>
-                      <div>
-                        <label htmlFor={`s-${category.id}`} className={LABEL}>
-                          Đường dẫn
-                        </label>
-                        <input
-                          id={`s-${category.id}`}
-                          value={draft.slug}
-                          onChange={(event) => setDraft({ ...draft, slug: event.target.value })}
-                          className={`${FIELD} font-mono`}
-                        />
-                      </div>
-                    </div>
-
-                    <div>
-                      <label htmlFor={`d-${category.id}`} className={LABEL}>
-                        Mô tả ngắn (1–2 dòng trên thẻ trang chủ)
-                      </label>
-                      <textarea
-                        id={`d-${category.id}`}
-                        rows={2}
-                        value={draft.description}
-                        onChange={(event) =>
-                          setDraft({ ...draft, description: event.target.value })
-                        }
-                        placeholder="Trống thì thẻ không hiện dòng nào."
-                        className={FIELD}
-                      />
-                    </div>
-
-                    <div>
-                      <label htmlFor={`i-${category.id}`} className={LABEL}>
-                        Ảnh bìa
-                      </label>
-                      <input
-                        id={`i-${category.id}`}
-                        value={draft.imageUrl}
-                        onChange={(event) => setDraft({ ...draft, imageUrl: event.target.value })}
-                        placeholder="/sites/…/images/category/random.webp"
-                        className={FIELD}
-                      />
-                      <ImagePicker
-                        uploading={uploading === category.id}
-                        value={draft.imageUrl}
-                        onPick={async (file) => {
-                          const url = await uploadImage(file, category.id);
-                          if (url) setDraft({ ...draft, imageUrl: url });
-                        }}
-                      />
-                    </div>
-
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                      <div>
-                        <label htmlFor={`sold-${category.id}`} className={LABEL}>
-                          Số &ldquo;Đã bán&rdquo;
-                        </label>
-                        <input
-                          id={`sold-${category.id}`}
-                          inputMode="numeric"
-                          value={draft.soldCount}
-                          onChange={(event) => setDraft({ ...draft, soldCount: event.target.value })}
-                          className={`${FIELD} tabular-nums`}
-                        />
-                      </div>
-                      <div>
-                        <label htmlFor={`stock-${category.id}`} className={LABEL}>
-                          Số &ldquo;Đang bán&rdquo;
-                        </label>
-                        <input
-                          id={`stock-${category.id}`}
-                          inputMode="numeric"
-                          value={draft.stockCount}
-                          onChange={(event) => setDraft({ ...draft, stockCount: event.target.value })}
-                          className={`${FIELD} tabular-nums`}
-                        />
-                      </div>
-                    </div>
-
-                    <p className="text-[11px] text-neutral-500">
-                      Hai số trên là con số in ở thẻ danh mục ngoài trang chủ, do shop tự
-                      đặt — không phải số sản phẩm thật trong kho ({category.productCount}).
-                      Đổi đường dẫn sẽ làm mọi link cũ tới{" "}
-                      <span className="font-mono text-neutral-400">/category/{category.slug}</span>{" "}
-                      trả về 404.
-                    </p>
-
-                    <button
-                      type="button"
-                      disabled={busy || !draft.name.trim() || !draft.slug.trim()}
-                      onClick={() => handleSave(category)}
-                      className="self-start h-[34px] px-4 rounded-lg bg-[var(--brand)] hover:bg-[var(--brand-dark)] disabled:opacity-50 text-[10px] font-black uppercase tracking-widest text-white transition-colors"
-                    >
-                      Lưu thay đổi
-                    </button>
-                  </div>
-                ) : null}
               </div>
             );
           })}

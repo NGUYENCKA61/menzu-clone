@@ -2,30 +2,28 @@
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import {
+  BookOpen,
   ExternalLink,
   FileText,
   ImagePlus,
   KeyRound,
-  Package,
-  Pencil,
-  Plus,
   Save,
-  ShieldAlert,
-  Trash2,
+  Sparkles,
   Wallet,
 } from "lucide-react";
 
 import {
-  formatDuration,
-  formatDurationInline,
-  splitDuration,
-  toHours,
-  type DurationUnit,
-} from "@/lib/duration";
+  FEATURE_MAX,
+  featuresToLines,
+  parseFeatureLines,
+} from "@/lib/productFeatures";
 
-import { AdminError, ConfirmDialog } from "./AdminStates";
+import { AdminError } from "./AdminStates";
+import { AdminImagePicker } from "./AdminImagePicker";
+import { AdminSoftwarePackages } from "./AdminSoftwarePackages";
+import type { PackageKeysView } from "./AdminPackageKeys";
 import { RichTextEditor } from "./RichTextEditor";
 
 export interface SoftwarePackageView {
@@ -34,10 +32,29 @@ export interface SoftwarePackageView {
   price: number;
   durationHours: number | null;
   orderCount: number;
+  /** This tier's own key store — stock, deliveries and what is owed. */
+  keys: PackageKeysView;
+}
+
+/** One "Tính năng nổi bật" row, as the desk edits it. */
+export interface FeatureDraft {
+  title: string;
+  body: string;
 }
 
 export interface SoftwareDetailView {
   code: string;
+  /** This product's own feature list. Empty means it uses the shop default. */
+  features: FeatureDraft[];
+  /** The write-up under that list, lifted to editor HTML on the server. */
+  featuresNoteHtml: string;
+  /** "Hướng dẫn sử dụng", lifted to editor HTML on the server. */
+  guideHtml: string;
+  /** The product half of its address; the desk lets the shop edit it. */
+  slug: string;
+  categorySlug: string;
+  /** Where "Xem trang khách" goes — the product's one public address. */
+  publicHref: string;
   name: string;
   categoryName: string;
   softwareStatus: string | null;
@@ -49,8 +66,6 @@ export interface SoftwareDetailView {
   downloadUrl: string;
   imageUrl: string;
   videoUrl: string;
-  version: string;
-  platform: string;
   packages: SoftwarePackageView[];
 }
 
@@ -77,10 +92,6 @@ const SOFTWARE_STATUS: Record<string, { label: string; tint: string }> = {
   },
 };
 
-function formatVnd(n: number): string {
-  return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-}
-
 /**
  * One software product, full page — same /api/admin/software routes the list
  * tab uses, laid out with room: info, pricing, cover, and the package shelf.
@@ -89,38 +100,34 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
   const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<{ tone: "ok" | "err"; text: string } | null>(null);
-  const [removing, setRemoving] = useState(false);
-  const [removingPkg, setRemovingPkg] = useState<SoftwarePackageView | null>(null);
 
   const [name, setName] = useState(software.name);
-  const [version, setVersion] = useState(software.version);
-  const [platform, setPlatform] = useState(software.platform);
+  const [slug, setSlug] = useState(software.slug);
+  const [featureText, setFeatureText] = useState(featuresToLines(software.features));
+  /** What the database holds; advanced on every successful save. */
+  const [featureBaseline, setFeatureBaseline] = useState(
+    featuresToLines(software.features),
+  );
+  const [noteHtml, setNoteHtml] = useState(software.featuresNoteHtml);
+  /** What the database holds; advanced on every successful save. */
+  const [noteBaseline, setNoteBaseline] = useState(software.featuresNoteHtml);
+  const [guideHtml, setGuideHtml] = useState(software.guideHtml);
+  /** What the database holds; advanced on every successful save. */
+  const [guideBaseline, setGuideBaseline] = useState(software.guideHtml);
   const [descHtml, setDescHtml] = useState(software.descriptionHtml);
   /** What the database holds; advanced on every successful save. */
   const [descBaseline, setDescBaseline] = useState(software.descriptionHtml);
   const [downloadUrl, setDownloadUrl] = useState(software.downloadUrl);
   const [videoUrl, setVideoUrl] = useState(software.videoUrl);
-  const [price, setPrice] = useState(String(software.price));
   const [status, setStatus] = useState(software.status);
   const [softwareStatus, setSoftwareStatus] = useState(
     software.softwareStatus ?? "UNDETECTED",
   );
 
-  const [pkgLabel, setPkgLabel] = useState("");
-  const [pkgPrice, setPkgPrice] = useState("");
-  const [pkgLength, setPkgLength] = useState("");
-  const [pkgUnit, setPkgUnit] = useState<DurationUnit>("day");
-
-  /** Which tier the shelf has opened for editing, and the draft it holds. */
-  const [editingPkg, setEditingPkg] = useState<string | null>(null);
-  const [editLabel, setEditLabel] = useState("");
-  const [editPrice, setEditPrice] = useState("");
-  const [editLength, setEditLength] = useState("");
-  const [editUnit, setEditUnit] = useState<DurationUnit>("day");
-
-  const coverRef = useRef<HTMLInputElement>(null);
-
   const detectMeta = SOFTWARE_STATUS[softwareStatus] ?? SOFTWARE_STATUS.UNDETECTED!;
+  // Counted from what is typed, not from what is saved: the figure beside the
+  // button has to answer "am I about to go over the limit".
+  const featureCount = parseFeatureLines(featureText).length;
   const totalOrders = software.packages.reduce((sum, p) => sum + p.orderCount, 0);
 
   async function api(
@@ -156,12 +163,63 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
     const data = await api("/api/admin/software", "PATCH", {
       code: software.code,
       name,
-      version,
-      platform,
+      slug,
       downloadUrl,
       videoUrl,
     });
     if (data) setMsg({ tone: "ok", text: "Đã lưu thông tin phần mềm" });
+  }
+
+  async function saveFeatures() {
+    const list = parseFeatureLines(featureText);
+    const data = await api("/api/admin/software", "PATCH", {
+      code: software.code,
+      features: list,
+    });
+    if (data) {
+      // Written back from the parsed list rather than left as typed: blank
+      // lines and stray spacing are gone from the database, and the box should
+      // show what was actually stored.
+      const normalised = featuresToLines(list);
+      setFeatureText(normalised);
+      setFeatureBaseline(normalised);
+      setMsg({
+        tone: "ok",
+        text: list.length
+          ? `Đã lưu ${list.length} tính năng`
+          : "Đã xoá — trang khách dùng lại danh sách mặc định",
+      });
+    }
+  }
+
+  async function saveFeaturesNote() {
+    const data = await api("/api/admin/software", "PATCH", {
+      code: software.code,
+      featuresNote: noteHtml,
+    });
+    if (data) {
+      setNoteBaseline(noteHtml);
+      setMsg({
+        tone: "ok",
+        text: noteHtml ? "Đã lưu mô tả tính năng" : "Đã xoá mô tả tính năng",
+      });
+    }
+  }
+
+  async function saveGuide() {
+    const data = await api("/api/admin/software", "PATCH", {
+      code: software.code,
+      guide: guideHtml,
+    });
+    if (data) {
+      setGuideBaseline(guideHtml);
+      setMsg({
+        tone: "ok",
+        text: guideHtml
+          ? "Đã lưu hướng dẫn sử dụng"
+          : "Đã xoá — trang khách dùng lại câu mặc định",
+      });
+    }
   }
 
   async function saveDescription() {
@@ -176,13 +234,14 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
   }
 
   async function savePricing() {
+    // No price here any more: the flat column is the cheapest tier's figure,
+    // written by the packages route whenever a tier changes.
     const data = await api("/api/admin/software", "PATCH", {
       code: software.code,
-      price: Number(price.replace(/\D/g, "")),
       status,
       softwareStatus,
     });
-    if (data) setMsg({ tone: "ok", text: "Đã lưu giá và trạng thái" });
+    if (data) setMsg({ tone: "ok", text: "Đã lưu trạng thái" });
   }
 
   async function changeCover(file: File) {
@@ -208,46 +267,6 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
       setBusy(false);
     }
   }
-
-  function startEditPackage(pkg: SoftwarePackageView) {
-    setMsg(null);
-    setEditingPkg(pkg.id);
-    setEditLabel(pkg.label);
-    setEditPrice(String(pkg.price));
-    const { value, unit } = splitDuration(pkg.durationHours);
-    setEditLength(value);
-    setEditUnit(unit);
-  }
-
-  async function savePackage() {
-    if (!editingPkg) return;
-    const data = await api("/api/admin/software/packages", "PATCH", {
-      id: editingPkg,
-      label: editLabel.trim(),
-      price: Number(editPrice.replace(/\D/g, "")),
-      durationHours: toHours(editLength, editUnit),
-    });
-    if (data) {
-      setEditingPkg(null);
-      setMsg({ tone: "ok", text: "Đã lưu gói" });
-    }
-  }
-
-  async function addPackage() {
-    const data = await api("/api/admin/software/packages", "POST", {
-      code: software.code,
-      label: pkgLabel,
-      price: Number(pkgPrice.replace(/\D/g, "")),
-      durationHours: toHours(pkgLength, pkgUnit),
-    });
-    if (data) {
-      setPkgLabel("");
-      setPkgPrice("");
-      setPkgLength("");
-      setMsg({ tone: "ok", text: "Đã thêm gói" });
-    }
-  }
-
   return (
     <div className="flex flex-col gap-5">
       {msg ? (
@@ -295,8 +314,6 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
           </div>
           <p className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[11px] text-neutral-500">
             <span>{software.categoryName}</span>
-            {software.version ? <span>v{software.version}</span> : null}
-            {software.platform ? <span>{software.platform}</span> : null}
             <span className="tabular-nums">{software.packages.length} gói</span>
             <span className="tabular-nums">{totalOrders} đơn</span>
           </p>
@@ -304,7 +321,7 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
         <a
           // /{code} serves accounts only — a tool lives under /software/{code},
           // so this button used to open a 404 every single time.
-          href={`/software/${encodeURIComponent(software.code)}`}
+          href={software.publicHref}
           target="_blank"
           rel="noreferrer"
           className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-white/[0.08] bg-white/[0.03] px-3.5 text-[10px] font-black uppercase tracking-widest text-neutral-300 transition-colors hover:bg-white/[0.08] hover:text-white"
@@ -333,29 +350,30 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
                   className={FIELD}
                 />
               </div>
-              <div>
-                <label htmlFor="sw-version" className={LABEL}>
-                  Phiên bản
+              {/* The address, spelled out with the category it hangs from —
+                  the shop should see the whole URL it is about to publish,
+                  not the tail of one. Changing it does not leave a redirect
+                  behind, which is why the note says so. */}
+              <div className="sm:col-span-2">
+                <label htmlFor="sw-slug" className={LABEL}>
+                  Đường dẫn
                 </label>
-                <input
-                  id="sw-version"
-                  value={version}
-                  onChange={(event) => setVersion(event.target.value)}
-                  placeholder="1.0.4"
-                  className={FIELD}
-                />
-              </div>
-              <div>
-                <label htmlFor="sw-platform" className={LABEL}>
-                  Nền tảng
-                </label>
-                <input
-                  id="sw-platform"
-                  value={platform}
-                  onChange={(event) => setPlatform(event.target.value)}
-                  placeholder="Windows 10/11"
-                  className={FIELD}
-                />
+                <div className="flex items-center gap-1.5">
+                  <span className="shrink-0 font-mono text-[11px] text-neutral-500">
+                    /{software.categorySlug}/
+                  </span>
+                  <input
+                    id="sw-slug"
+                    value={slug}
+                    onChange={(event) => setSlug(event.target.value)}
+                    placeholder="hack-pubg-ban-desync"
+                    className={`${FIELD} font-mono`}
+                  />
+                </div>
+                <p className="mt-1.5 text-[11px] text-neutral-500">
+                  Đổi đường dẫn là link cũ hỏng — chỉ sửa khi sản phẩm chưa được
+                  chia sẻ đi đâu.
+                </p>
               </div>
               <div>
                 <label htmlFor="sw-download" className={LABEL}>
@@ -391,23 +409,11 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
           <section className={CARD}>
             <span className={CARD_HEAD}>
               <Wallet size={13} className="text-neutral-400" />
-              Giá & trạng thái
+              Trạng thái bán & phát hiện
             </span>
+            {/* No price field: the listing figure is the cheapest tier's, and
+                the tiers are edited in the panel below. */}
             <div className="flex flex-wrap items-end gap-3">
-              <div>
-                <label htmlFor="sw-price" className={LABEL}>
-                  Giá niêm yết (đ)
-                </label>
-                <input
-                  id="sw-price"
-                  inputMode="numeric"
-                  value={price ? formatVnd(Number(price.replace(/\D/g, "") || "0")) : ""}
-                  onChange={(event) =>
-                    setPrice(event.target.value.replace(/\D/g, "").slice(0, 10))
-                  }
-                  className={`${FIELD} w-36 tabular-nums`}
-                />
-              </div>
               <div>
                 <label htmlFor="sw-status" className={LABEL}>
                   Trên kệ
@@ -461,290 +467,35 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
               <ImagePlus size={13} className="text-neutral-400" />
               Ảnh bìa
             </span>
-            <div className="relative aspect-[16/9] w-full overflow-hidden rounded-lg border border-white/[0.06] bg-neutral-950">
-              {software.imageUrl ? (
-                <Image
-                  src={software.imageUrl}
-                  alt=""
-                  fill
-                  sizes="(min-width: 1024px) 480px, 100vw"
-                  className="object-cover"
-                />
-              ) : (
-                <span className="flex h-full w-full flex-col items-center justify-center gap-2 text-neutral-600">
-                  <KeyRound size={22} />
-                  <span className="text-[11px]">Chưa có ảnh bìa</span>
-                </span>
-              )}
-            </div>
-            <button
-              type="button"
-              disabled={busy}
-              onClick={() => coverRef.current?.click()}
-              className={`${ACTION} self-start`}
-            >
-              <ImagePlus size={12} />
-              Đổi ảnh bìa
-            </button>
-            <input
-              ref={coverRef}
-              type="file"
-              accept="image/png,image/jpeg,image/webp"
-              className="hidden"
-              onChange={(event) => {
-                const file = event.target.files?.[0];
-                event.target.value = "";
-                if (file) void changeCover(file);
-              }}
+            {/* The same compact picker the category desk uses — a 68px preview
+                beside the button, not a full-width 16/9 pane. The card used to
+                spend ~270px of column on a picture the storefront shows at
+                card size anyway; how it looks in place is checked on the
+                storefront, not here. Uploading still saves immediately. */}
+            <AdminImagePicker
+              uploading={busy}
+              value={software.imageUrl}
+              onPick={(file) => changeCover(file)}
             />
           </section>
 
-          <section className={CARD}>
-            <span className={CARD_HEAD}>
-              <Package size={13} className="text-neutral-400" />
-              Gói thời hạn ({software.packages.length})
-            </span>
-            {software.packages.length === 0 ? (
-              <p className="rounded-lg border border-dashed border-white/10 px-3 py-4 text-center text-[11px] text-neutral-500">
-                Chưa có gói nào — khách không có gì để mua cho tới khi gói đầu tiên lên kệ.
-              </p>
-            ) : (
-              <div className="flex flex-col gap-1.5">
-                {software.packages.map((pkg) =>
-                  editingPkg === pkg.id ? (
-                    // The row opens where it stands rather than in a dialog:
-                    // the three things being changed are the three things the
-                    // row was already showing, and the tiers around it are the
-                    // context for whether a price is right.
-                    <div
-                      key={pkg.id}
-                      className="flex flex-wrap items-end gap-2 rounded-lg border border-[var(--brand)]/40 bg-neutral-950/50 px-3 py-2.5"
-                    >
-                      <div className="flex-1 min-w-[130px]">
-                        <label htmlFor={`edit-label-${pkg.id}`} className={LABEL}>
-                          Tên gói
-                        </label>
-                        <input
-                          id={`edit-label-${pkg.id}`}
-                          value={editLabel}
-                          onChange={(event) => setEditLabel(event.target.value)}
-                          className={FIELD}
-                        />
-                      </div>
-                      <div>
-                        <label htmlFor={`edit-price-${pkg.id}`} className={LABEL}>
-                          Giá (đ)
-                        </label>
-                        <input
-                          id={`edit-price-${pkg.id}`}
-                          inputMode="numeric"
-                          value={
-                            editPrice
-                              ? formatVnd(Number(editPrice.replace(/\D/g, "") || "0"))
-                              : ""
-                          }
-                          onChange={(event) =>
-                            setEditPrice(event.target.value.replace(/\D/g, "").slice(0, 10))
-                          }
-                          className={`${FIELD} w-28 tabular-nums`}
-                        />
-                      </div>
-                      <div>
-                        <label htmlFor={`edit-length-${pkg.id}`} className={LABEL}>
-                          Thời hạn
-                        </label>
-                        <div className="flex items-center gap-1.5">
-                          <input
-                            id={`edit-length-${pkg.id}`}
-                            inputMode="numeric"
-                            value={editLength}
-                            onChange={(event) =>
-                              setEditLength(event.target.value.replace(/\D/g, "").slice(0, 4))
-                            }
-                            className={`${FIELD} w-16 tabular-nums`}
-                          />
-                          <select
-                            aria-label="Đơn vị thời hạn"
-                            value={editUnit}
-                            onChange={(event) =>
-                              setEditUnit(event.target.value as DurationUnit)
-                            }
-                            className={`${FIELD} w-[72px]`}
-                          >
-                            <option value="hour" className="bg-neutral-900">
-                              giờ
-                            </option>
-                            <option value="day" className="bg-neutral-900">
-                              ngày
-                            </option>
-                          </select>
-                        </div>
-                      </div>
-                      <button
-                        type="button"
-                        disabled={busy || !editLabel.trim() || !editPrice}
-                        onClick={savePackage}
-                        className={ACTION}
-                      >
-                        <Save size={12} />
-                        Lưu
-                      </button>
-                      <button
-                        type="button"
-                        disabled={busy}
-                        onClick={() => setEditingPkg(null)}
-                        className="h-[34px] px-3 rounded-lg border border-white/10 bg-white/[0.03] hover:bg-white/[0.08] disabled:opacity-40 text-[10px] font-black uppercase tracking-widest text-neutral-400 hover:text-white transition-colors"
-                      >
-                        Hủy
-                      </button>
-                    </div>
-                  ) : (
-                    <div
-                      key={pkg.id}
-                      className="flex items-center gap-2.5 rounded-lg border border-white/[0.06] bg-neutral-950/50 px-3 py-2 transition-colors hover:border-white/[0.12]"
-                    >
-                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md border border-violet-500/25 bg-violet-500/10 text-violet-400">
-                        <KeyRound size={11} />
-                      </span>
-                      <span className="flex-1 truncate text-xs font-bold text-white">
-                        {pkg.label}
-                      </span>
-                      <span className="shrink-0 text-[11px] text-neutral-500 tabular-nums">
-                        {formatDuration(pkg.durationHours)}
-                      </span>
-                      <span className="shrink-0 rounded border border-white/[0.07] bg-white/[0.04] px-1.5 py-0.5 text-[10px] tabular-nums text-neutral-400">
-                        {pkg.orderCount} đơn
-                      </span>
-                      <span className="shrink-0 text-xs font-black tabular-nums text-rose-400">
-                        {formatVnd(pkg.price)}đ
-                      </span>
-                      <button
-                        type="button"
-                        disabled={busy}
-                        onClick={() => startEditPackage(pkg)}
-                        aria-label={`Sửa gói ${pkg.label}`}
-                        className="h-7 w-7 shrink-0 rounded-lg border border-white/[0.07] bg-white/[0.03] hover:border-[var(--brand)]/40 hover:bg-[var(--brand)]/10 disabled:opacity-30 text-neutral-500 hover:text-white transition-colors inline-flex items-center justify-center"
-                      >
-                        <Pencil size={12} />
-                      </button>
-                      {/* A sold tier cannot be deleted — orders point at the
-                          row — so the button says so instead of opening a
-                          dialog that would only come back with an error. */}
-                      <button
-                        type="button"
-                        disabled={busy || pkg.orderCount > 0}
-                        title={
-                          pkg.orderCount > 0
-                            ? "Gói đã có đơn — sửa được nhưng không xóa được"
-                            : undefined
-                        }
-                        onClick={() => setRemovingPkg(pkg)}
-                        aria-label={`Xóa gói ${pkg.label}`}
-                        className="h-7 w-7 shrink-0 rounded-lg border border-white/[0.07] bg-white/[0.03] hover:border-red-500/30 hover:bg-red-500/10 disabled:opacity-30 disabled:hover:border-white/[0.07] disabled:hover:bg-white/[0.03] text-neutral-500 hover:text-red-400 disabled:hover:text-neutral-500 transition-colors inline-flex items-center justify-center"
-                      >
-                        <Trash2 size={12} />
-                      </button>
-                    </div>
-                  ),
-                )}
-              </div>
-            )}
-            <p className="text-[11px] text-neutral-500">
-              Thời hạn để trống là gói vĩnh viễn; chọn giờ hay ngày tùy gói.
-              {software.packages.length > 0
-                ? " Gói đã bán không xóa được vì đơn cũ trỏ vào nó — nhưng sửa tên, giá, thời hạn thì thoải mái. Đơn cũ giữ nguyên giá lúc mua."
-                : ""}
-            </p>
-            <div className="flex flex-wrap items-end gap-2 border-t border-white/[0.06] pt-3">
-              <div className="flex-1 min-w-[140px]">
-                <label htmlFor="pkg-label" className={LABEL}>
-                  Tên gói
-                </label>
-                <input
-                  id="pkg-label"
-                  value={pkgLabel}
-                  onChange={(event) => setPkgLabel(event.target.value)}
-                  placeholder="1 tháng"
-                  className={FIELD}
-                />
-              </div>
-              <div>
-                <label htmlFor="pkg-price" className={LABEL}>
-                  Giá (đ)
-                </label>
-                <input
-                  id="pkg-price"
-                  inputMode="numeric"
-                  value={pkgPrice ? formatVnd(Number(pkgPrice.replace(/\D/g, "") || "0")) : ""}
-                  onChange={(event) =>
-                    setPkgPrice(event.target.value.replace(/\D/g, "").slice(0, 10))
-                  }
-                  className={`${FIELD} w-28 tabular-nums`}
-                />
-              </div>
-              <div>
-                <label htmlFor="pkg-length" className={LABEL}>
-                  Thời hạn
-                </label>
-                <div className="flex items-center gap-1.5">
-                  <input
-                    id="pkg-length"
-                    inputMode="numeric"
-                    value={pkgLength}
-                    onChange={(event) =>
-                      setPkgLength(event.target.value.replace(/\D/g, "").slice(0, 4))
-                    }
-                    className={`${FIELD} w-16 tabular-nums`}
-                  />
-                  <select
-                    aria-label="Đơn vị thời hạn"
-                    value={pkgUnit}
-                    onChange={(event) => setPkgUnit(event.target.value as DurationUnit)}
-                    className={`${FIELD} w-[72px]`}
-                  >
-                    <option value="hour" className="bg-neutral-900">
-                      giờ
-                    </option>
-                    <option value="day" className="bg-neutral-900">
-                      ngày
-                    </option>
-                  </select>
-                </div>
-              </div>
-              <button
-                type="button"
-                disabled={busy || !pkgLabel.trim() || !pkgPrice}
-                onClick={addPackage}
-                className={ACTION}
-              >
-                <Plus size={12} />
-                Thêm gói
-              </button>
-            </div>
-          </section>
+          {/* The same shelf the "Quản lý gói" page draws — literally the same
+              component, so the two screens cannot drift: one add form, the
+              same two-line rows, the same three verbs per tier. What it needs
+              of each tier's key store is the two counts its chips print. */}
+          <AdminSoftwarePackages
+            code={software.code}
+            packages={software.packages.map((pkg) => ({
+              id: pkg.id,
+              label: pkg.label,
+              price: pkg.price,
+              durationHours: pkg.durationHours,
+              orderCount: pkg.orderCount,
+              keysAvailable: pkg.keys.available,
+              keysPending: pkg.keys.pending,
+            }))}
+          />
 
-          <section className="rounded-xl border border-red-500/20 bg-red-500/[0.03] p-5 flex flex-col gap-3">
-            <span className={CARD_HEAD}>
-              <ShieldAlert size={13} className="text-red-400" />
-              Vùng nguy hiểm
-            </span>
-            <div className="flex flex-wrap items-center gap-3">
-              <button
-                type="button"
-                disabled={busy}
-                onClick={() => setRemoving(true)}
-                className="h-[34px] px-4 rounded-lg border border-red-500/30 bg-red-500/10 hover:bg-red-500/20 disabled:opacity-40 text-[10px] font-black uppercase tracking-widest text-red-400 transition-colors inline-flex items-center gap-1.5"
-              >
-                <Trash2 size={12} />
-                Gỡ khỏi cửa hàng
-              </button>
-              <span className="text-[11px] text-neutral-500">
-                {totalOrders > 0
-                  ? `${totalOrders} đơn cũ giữ nguyên — khôi phục được ở tab Tài khoản.`
-                  : "Chưa có đơn nào nên sẽ xóa hẳn, không khôi phục được."}
-              </span>
-            </div>
-          </section>
         </div>
       </div>
 
@@ -758,8 +509,8 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
         <p className="text-[11px] text-neutral-500">
           Có nội dung ở đây thì khu &ldquo;Mô tả sản phẩm&rdquo; trên trang khách hiện
           đúng bài này — đậm, màu, ảnh y như trong khung. Để trống rồi lưu thì trang
-          khách quay về bố cục mặc định (tính năng nổi bật, hướng dẫn, bảo hành viết
-          sẵn).
+          khách quay về đoạn hướng dẫn và bảo hành viết sẵn. Khu &ldquo;Tính năng nổi
+          bật&rdquo; và &ldquo;Yêu cầu hệ thống&rdquo; luôn hiện, dù có bài này hay không.
         </p>
         <div className="flex flex-wrap items-center gap-3">
           <button
@@ -777,52 +528,104 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
         </div>
       </section>
 
-      <ConfirmDialog
-        open={removingPkg !== null}
-        danger
-        pending={busy}
-        title="Xóa gói thời hạn?"
-        body={
-          removingPkg
-            ? `Gói "${removingPkg.label}" (${formatVnd(removingPkg.price)}đ / ${formatDurationInline(removingPkg.durationHours)}) rời kệ ngay. Gói chưa có đơn nào nên xóa hẳn, không khôi phục được.`
-            : ""
-        }
-        confirmLabel="Xóa gói"
-        onCancel={() => setRemovingPkg(null)}
-        onConfirm={async () => {
-          if (!removingPkg) return;
-          const data = await api(
-            `/api/admin/software/packages?id=${encodeURIComponent(removingPkg.id)}`,
-            "DELETE",
-            null,
-          );
-          setRemovingPkg(null);
-          if (data) setMsg({ tone: "ok", text: "Đã xóa gói" });
-        }}
-      />
+      <section className={CARD}>
+        <span className={CARD_HEAD}>
+          <Sparkles size={13} className="text-neutral-400" />
+          Tính năng nổi bật
+        </span>
+        <textarea
+          aria-label="Tính năng nổi bật"
+          rows={6}
+          value={featureText}
+          onChange={(event) => setFeatureText(event.target.value)}
+          placeholder={
+            "Aimbot: ngắm mượt, tuỳ chỉnh độ nhạy.\nESP: nhìn xuyên tường, hiện tên và máu.\nNo recoil"
+          }
+          className={`${FIELD} resize-y leading-relaxed`}
+        />
+        <p className="text-[11px] text-neutral-500">
+          Mỗi dòng một tính năng, dạng <span className="font-mono text-neutral-400">Tên: mô tả</span>.
+          Phần trước dấu hai chấm đầu tiên được in đậm trên trang khách, phần sau viết
+          thường. Không có dấu hai chấm thì cả dòng là tên — &ldquo;No recoil&rdquo; cũng là
+          một tính năng. Xoá hết thì trang khách in lại danh sách mặc định chung của shop
+          chứ không trống.
+        </p>
+        <div className="flex flex-wrap items-center gap-3">
+          <button
+            type="button"
+            disabled={busy || featureText === featureBaseline}
+            onClick={saveFeatures}
+            className={ACTION}
+          >
+            <Save size={12} />
+            Lưu tính năng
+          </button>
+          <span className="text-[11px] text-neutral-500">
+            {featureCount}/{FEATURE_MAX} dòng
+            {featureText !== featureBaseline ? " · có thay đổi chưa lưu" : ""}
+          </span>
+        </div>
 
-      <ConfirmDialog
-        open={removing}
-        danger
-        pending={busy}
-        title="Gỡ phần mềm khỏi cửa hàng?"
-        body={
-          totalOrders > 0
-            ? `${software.name} rời kệ ngay. ${totalOrders} đơn cũ vẫn nguyên, khôi phục được từ mục "đã gỡ".`
-            : `${software.name} chưa có đơn nào nên sẽ bị xóa hẳn và không khôi phục được.`
-        }
-        confirmLabel="Gỡ khỏi cửa hàng"
-        onCancel={() => setRemoving(false)}
-        onConfirm={async () => {
-          const data = await api(
-            `/api/admin/products?code=${encodeURIComponent(software.code)}`,
-            "DELETE",
-            null,
-          );
-          setRemoving(false);
-          if (data) router.push("/admin/products");
-        }}
-      />
+        {/* The write-up, in the same editor the description uses. Inside this
+            card rather than one of its own: it is the second half of the same
+            block on the customer's page, and two cards would suggest two
+            places on the page rather than one. */}
+        <div className="flex flex-col gap-4 border-t border-white/[0.06] pt-4">
+          <span className={CARD_HEAD}>
+            <FileText size={13} className="text-neutral-400" />
+            Mô tả tính năng
+          </span>
+          <RichTextEditor initialHtml={software.featuresNoteHtml} onUpdate={setNoteHtml} />
+          <p className="text-[11px] text-neutral-500">
+            Đoạn viết nằm ngay dưới danh sách gạch đầu dòng ở trên. Soạn y như ô mô tả
+            sản phẩm — đậm, màu, tiêu đề, ảnh. Để trống thì trang khách không hiện gì
+            thêm sau danh sách.
+          </p>
+          <div className="flex flex-wrap items-center gap-3">
+            <button
+              type="button"
+              disabled={busy || noteHtml === noteBaseline}
+              onClick={saveFeaturesNote}
+              className={ACTION}
+            >
+              <Save size={12} />
+              Lưu mô tả tính năng
+            </button>
+            {noteHtml !== noteBaseline ? (
+              <span className="text-[11px] text-neutral-500">Có thay đổi chưa lưu</span>
+            ) : null}
+          </div>
+        </div>
+      </section>
+
+      <section className={CARD}>
+        <span className={CARD_HEAD}>
+          <BookOpen size={13} className="text-neutral-400" />
+          Hướng dẫn sử dụng
+        </span>
+        <RichTextEditor initialHtml={software.guideHtml} onUpdate={setGuideHtml} />
+        <p className="text-[11px] text-neutral-500">
+          Khu &ldquo;Hướng dẫn sử dụng&rdquo; trên trang khách — cách tải, cách bật,
+          cách nhập key. Soạn y như ô mô tả: đậm, màu, đánh số, chèn ảnh chụp màn hình.
+          Để trống thì trang khách in lại câu mặc định chung của shop chứ không trống.
+        </p>
+        <div className="flex flex-wrap items-center gap-3">
+          <button
+            type="button"
+            disabled={busy || guideHtml === guideBaseline}
+            onClick={saveGuide}
+            className={ACTION}
+          >
+            <Save size={12} />
+            Lưu hướng dẫn
+          </button>
+          {guideHtml !== guideBaseline ? (
+            <span className="text-[11px] text-neutral-500">Có thay đổi chưa lưu</span>
+          ) : null}
+        </div>
+      </section>
+
+
     </div>
   );
 }

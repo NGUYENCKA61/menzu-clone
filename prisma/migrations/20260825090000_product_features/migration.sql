@@ -1,0 +1,11 @@
+-- "Tính năng nổi bật", per product instead of one list written into the page.
+--
+-- A JSON array of {title, body} in one column, not a child table: the list is
+-- written and read whole, and nothing counts it, joins it, or asks for a single
+-- row of it — which is what earns packages and skins their own tables.
+--
+-- Nullable with no backfill on purpose. NULL means "this product has none of
+-- its own", and the page prints the same default list every tool printed before
+-- this column existed, so nothing on the storefront changes until a shop edits
+-- a product.
+ALTER TABLE "products" ADD COLUMN "features" TEXT;

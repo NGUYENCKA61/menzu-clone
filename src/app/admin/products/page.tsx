@@ -14,9 +14,11 @@ import { AdminProductTabs } from "@/components/sites/menzu-lol-f7ae197a/shared/A
 import { AdminShell } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminShell";
 import { AdminSoftware } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminSoftware";
 import { AdminWeaponImages } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminWeaponImages";
+import { deliversAutomatically, readLogin, tagOf } from "@/lib/accountLogin";
 import { getAdmin } from "@/lib/admin";
 import { db } from "@/lib/db";
 import { listAdminCategories } from "@/lib/queries";
+import { getShopSettings } from "@/lib/settingsStore";
 import { weaponKey } from "@/lib/weaponImages";
 
 /** How many of the un-illustrated weapons the worklist offers at a time. */
@@ -76,40 +78,22 @@ export default async function AdminProductsPage() {
   const admin = await getAdmin();
   if (!admin) notFound();
 
-  const [rows, removed, softwareRows, categories] = await Promise.all([
+  const [rows, removedCount, softwareRows, categories, settings] = await Promise.all([
     db.product.findMany({
       where: { deletedAt: null, productType: "ACCOUNT_GAME" },
       orderBy: { createdAt: "desc" },
       take: 100,
+      // Only what a shelf row prints - every editor lives on the detail page
+      // now, with its own query.
       include: {
         category: { select: { name: true } },
         _count: { select: { orders: true } },
         tags: { select: { label: true } },
-        images: { select: { id: true, url: true }, orderBy: { sortOrder: "asc" } },
-        // Ordered by id, which rises with insertion, so the editor hands each
-        // list back in the order it was saved — the storefront card reads the
-        // same order, and a shop that put its best weapon first should see that
-        // choice survive a round trip.
-        skins: {
-          where: { kind: { in: ["WEAPON_SKIN", "AGENT", "BUDDY"] } },
-          select: { kind: true, name: true },
-          orderBy: { id: "asc" },
-        },
       },
     }),
-    // Removed products, newest removal first. Fetched separately rather than
-    // filtered out of the list above, because they are shown in their own
-    // section: mixing them into the table would put rows there that most of
-    // its controls do not apply to.
-    db.product.findMany({
-      where: { deletedAt: { not: null } },
-      orderBy: { deletedAt: "desc" },
-      take: 50,
-      include: {
-        category: { select: { name: true } },
-        _count: { select: { orders: true } },
-      },
-    }),
+    // Only counted now: the restore section left this screen, so all the
+    // header needs of the removed products is how many there are.
+    db.product.count({ where: { deletedAt: { not: null } } }),
     db.product.findMany({
       where: { deletedAt: null, productType: "SOFTWARE_GAME" },
       orderBy: { createdAt: "desc" },
@@ -122,6 +106,7 @@ export default async function AdminProductsPage() {
       },
     }),
     listAdminCategories(),
+    getShopSettings(),
   ]);
 
   // The picture library, and how often each weapon is listed across the shop.
@@ -150,6 +135,14 @@ export default async function AdminProductsPage() {
 
   const softwarePackages = softwareRows.reduce((sum, s) => sum + s.packages.length, 0);
 
+  // NFA accounts on the shelf that would sell with nothing to hand over by
+  // themselves. Other tags are handed over in person and need no sign-in on
+  // the row; this is the list to fix before the next sale, not after it.
+  const forSale = rows.filter((p) => p.status === "AVAILABLE");
+  const unlistedLogins = forSale.filter(
+    (p) => deliversAutomatically(tagOf(p)) && readLogin(p) === null,
+  ).length;
+
   return (
     <AdminShell
       title="Sản phẩm"
@@ -167,9 +160,15 @@ export default async function AdminProductsPage() {
         <StatCard
           label="Tài khoản game"
           value={String(rows.length)}
-          sub={`${rows.filter((p) => p.status === "AVAILABLE").length} đang bán · ${removed.length} đã gỡ`}
+          sub={`${forSale.length} đang bán · ${removedCount} đã gỡ${
+            unlistedLogins > 0 ? ` · ${unlistedLogins} NFA chưa có TK đăng nhập` : ""
+          }`}
           icon={Boxes}
-          tint="border-emerald-500/25 bg-emerald-500/10 text-emerald-400"
+          tint={
+            unlistedLogins > 0
+              ? "border-amber-500/25 bg-amber-500/10 text-amber-400"
+              : "border-emerald-500/25 bg-emerald-500/10 text-emerald-400"
+          }
         />
         <StatCard
           label="Phần mềm"
@@ -220,31 +219,15 @@ export default async function AdminProductsPage() {
           <AdminProducts
             products={rows.map((p) => ({
               code: p.code,
+              name: p.name ?? "",
               rank: p.rank,
               status: p.status,
               price: Number(p.price),
-              oldPrice: Number(p.oldPrice),
               categoryName: p.category.name,
               orderCount: p._count.orders,
               imageUrl: p.imageUrl ?? "",
-              gallery: p.images,
               tag: p.tags[0]?.label ?? "",
-              vip: p.vp,
-              vipIngame: p.rp,
-              skinNames: p.skins.filter((s) => s.kind === "WEAPON_SKIN").map((s) => s.name),
-              characterNames: p.skins.filter((s) => s.kind === "AGENT").map((s) => s.name),
-              gearNames: p.skins.filter((s) => s.kind === "BUDDY").map((s) => s.name),
-            }))}
-            removed={removed.map((p) => ({
-              code: p.code,
-              rank: p.rank,
-              categoryName: p.category.name,
-              orderCount: p._count.orders,
-              // Formatted here, where the timezone is fixed — the same reason
-              // every other admin screen formats its dates on the server.
-              deletedLabel: p.deletedAt!.toLocaleDateString("vi-VN", {
-                timeZone: "Asia/Ho_Chi_Minh",
-              }),
+              hasLogin: readLogin(p) !== null,
             }))}
             categories={categories.map((c) => ({ slug: c.slug, name: c.name }))}
           />
@@ -267,8 +250,6 @@ export default async function AdminProductsPage() {
               downloadUrl: s.downloadUrl ?? "",
               imageUrl: s.imageUrl ?? "",
               videoUrl: s.videoUrl ?? "",
-              version: s.version ?? "",
-              platform: s.platform ?? "",
               packages: s.packages.map((p) => ({
                 id: p.id,
                 label: p.label,
@@ -297,6 +278,7 @@ export default async function AdminProductsPage() {
             }))}
             missing={missing.slice(0, MISSING_SHOWN).map((s) => s.name)}
             missingTotal={missing.length}
+            hotPickSkin={settings.hotPickSkin}
           />
         </section>
       </AdminProductTabs>

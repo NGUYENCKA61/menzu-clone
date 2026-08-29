@@ -349,11 +349,13 @@ describe("home layout migration", () => {
     const parsed = parseSettings([{ key: SETTING_KEYS.homeBlocks, value: saved }]);
 
     // Both new blocks arrive, switched on, and every earlier choice survives —
-    // including the one the shop had hidden. The retired bar is dropped.
+    // including the one the shop had hidden. The retired bar and the retired
+    // tools hub are dropped.
     expect(parsed.homeBlocks).toContain("docs");
     expect(parsed.homeBlocks).toContain("seo");
     expect(parsed.homeBlocks).toContain("-flash");
     expect(parsed.homeBlocks).not.toContain("quick");
+    expect(parsed.homeBlocks).not.toContain("utilities");
     expect(parsed.homeBlocks).toHaveLength(HOME_BLOCKS.length);
     expect(parsed.homeBlocks.slice(0, 2)).toEqual(["hero", "-flash"]);
   });
@@ -396,6 +398,15 @@ describe("hero and SEO settings", () => {
     const normalized = normalizeSettings({ heroTitle: "  ", heroPrimaryLabel: "" });
     expect(normalized.heroTitle).toBe(DEFAULT_SETTINGS.heroTitle);
     expect(normalized.heroPrimaryLabel).toBe(DEFAULT_SETTINGS.heroPrimaryLabel);
+  });
+
+  it("lets the badge above the eyebrow be emptied, and ships one by default", () => {
+    // Blank is a choice — no pill — unlike the heading, which falls back.
+    expect(normalizeSettings({ heroBadge: "  " }).heroBadge).toBe("");
+    expect(parseSettings([]).heroBadge).toBe("Official OBV Hax Reseller");
+    expect(
+      parseSettings([{ key: SETTING_KEYS.heroBadge, value: " Đại lý uỷ quyền " }]).heroBadge,
+    ).toBe("Đại lý uỷ quyền");
   });
 
   it("lets the optional parts be emptied on purpose", () => {

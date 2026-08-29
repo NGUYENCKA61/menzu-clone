@@ -10,6 +10,13 @@ export interface FlashSaleTier {
 
 export interface FlashSaleItem {
   code: string;
+  /**
+   * /{category-slug}/{product-slug}. Optional only because the scraped
+   * fixture below predates slugs; every item the shop actually serves carries
+   * one, and the card falls back to the shop index rather than to an address
+   * that no longer resolves.
+   */
+  href?: string;
   /** The shop's uploaded picture; absent, the by-code path below is shown. */
   imageUrl?: string | null;
   /**

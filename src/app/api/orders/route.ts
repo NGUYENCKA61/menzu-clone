@@ -1,7 +1,15 @@
 import { NextResponse } from "next/server";
 
+import {
+  currentOrderIdOf,
+  deliversAutomatically,
+  loginHandover,
+  readLogin,
+  tagOf,
+} from "@/lib/accountLogin";
 import { agencyCutFor, clampAgencyPercent } from "@/lib/agency";
 import { db } from "@/lib/db";
+import { deliverKeys } from "@/lib/licenseKeys";
 import { getCurrentUser } from "@/lib/session";
 import { getShopSettings } from "@/lib/settingsStore";
 import { evaluateVoucher } from "@/lib/voucher";
@@ -67,7 +75,11 @@ export async function POST(request: Request) {
       if (locked.length === 0) throw new Error("NOT_FOUND");
       if (locked[0].status !== "AVAILABLE") throw new Error("ALREADY_SOLD");
 
-      const product = await tx.product.findUniqueOrThrow({ where: { code } });
+      const product = await tx.product.findUniqueOrThrow({
+        where: { code },
+        // The tag decides whether the sign-in goes out by itself.
+        include: { tags: { select: { label: true }, take: 1 } },
+      });
 
       // What it costs right now. Asked again inside the transaction rather
       // than trusted from the page, so a sale that ended while the dialog sat
@@ -92,7 +104,12 @@ export async function POST(request: Request) {
       // price changed, while the page sat open.
       const isSoftware = product.productType === "SOFTWARE_GAME";
 
-      let chosenPackage: { id: string; price: bigint; label: string } | null = null;
+      let chosenPackage: {
+        id: string;
+        price: bigint;
+        label: string;
+        durationHours: number | null;
+      } | null = null;
       if (isSoftware) {
         const wanted = body?.packageId?.trim();
         if (!wanted) throw new Error("PACKAGE_REQUIRED");
@@ -100,7 +117,7 @@ export async function POST(request: Request) {
         // cannot be used to buy this one at that one's price.
         const found = await tx.productPackage.findFirst({
           where: { id: wanted, productId: product.id },
-          select: { id: true, price: true, label: true },
+          select: { id: true, price: true, label: true, durationHours: true },
         });
         if (!found) throw new Error("BAD_PACKAGE");
         chosenPackage = found;
@@ -195,6 +212,9 @@ export async function POST(request: Request) {
           productId: product.id,
           packageId: chosenPackage?.id ?? null,
           quantity,
+          // Software is sold on the promise of a key per unit; an account is
+          // the thing itself and is owed none.
+          keysOwed: isSoftware ? quantity : 0,
           method: "BUY_NOW",
           status: "PAID",
           listPrice,
@@ -204,6 +224,21 @@ export async function POST(request: Request) {
           total,
         },
       });
+
+      // The keys come off the shelf inside the same transaction that charges
+      // for them, so a sale can never be paid for without the stock moving.
+      // Fewer than were bought is not a failure: the tier is out, the order
+      // stands, and what is owed shows up on the shop's key desk. Refusing the
+      // sale instead would turn every empty shelf into a lost order.
+      const delivered = chosenPackage
+        ? await deliverKeys(tx, {
+            packageId: chosenPackage.id,
+            orderId: order.id,
+            userId: user.id,
+            wanted: quantity,
+            durationHours: chosenPackage.durationHours,
+          })
+        : 0;
 
       await tx.transaction.create({
         data: {
@@ -222,13 +257,30 @@ export async function POST(request: Request) {
         },
       });
 
-      return { order, balanceAfter, total };
+      return {
+        order,
+        balanceAfter,
+        total,
+        delivered,
+        quantity,
+        isSoftware,
+        // Whether the sign-in went out with the order — an NFA account with
+        // one on the row — or the shop hands this one over in person. Read
+        // inside the lock, so it describes the product as it was sold.
+        loginReady: deliversAutomatically(tagOf(product)) && readLogin(product) !== null,
+      };
     });
 
     return NextResponse.json({
       orderCode: result.order.code,
       total: Number(result.total),
       balance: Number(result.balanceAfter),
+      // What the buy panel needs to say more than "đã mua": how many keys are
+      // waiting on /orders, and whether any are still to come — or, for an
+      // account, whether a sign-in is waiting there or the shop has to be asked.
+      ...(result.isSoftware
+        ? { keysDelivered: result.delivered, keysPending: result.quantity - result.delivered }
+        : { loginReady: result.loginReady }),
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : "";
@@ -277,7 +329,26 @@ export async function GET() {
   const orders = await db.order.findMany({
     where: { userId: user.id },
     orderBy: { createdAt: "desc" },
-    include: { product: { select: { code: true, imageUrl: true, rank: true } } },
+    include: {
+      product: {
+        select: {
+          code: true,
+          imageUrl: true,
+          rank: true,
+          productType: true,
+          loginUsername: true,
+          loginPassword: true,
+          loginNote: true,
+          orders: {
+            where: { status: "PAID" },
+            orderBy: { createdAt: "desc" },
+            take: 1,
+            select: { id: true },
+          },
+          tags: { select: { label: true }, take: 1 },
+        },
+      },
+    },
   });
 
   return NextResponse.json({
@@ -286,7 +357,14 @@ export async function GET() {
       status: o.status,
       total: Number(o.total),
       createdAt: o.createdAt.toISOString(),
-      product: o.product,
+      product: { code: o.product.code, imageUrl: o.product.imageUrl, rank: o.product.rank },
+      // The buyer's own orders only, and nothing unless the order is PAID and
+      // still the latest sale of that account — the same gate the page applies.
+      login: loginHandover(o, {
+        ...o.product,
+        currentOrderId: currentOrderIdOf(o.product),
+        tag: tagOf(o.product),
+      }),
     })),
   });
 }

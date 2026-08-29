@@ -15,9 +15,10 @@ export async function GET() {
 /**
  * Replace the settings.
  *
- * The whole object is sent rather than a patch: the form edits every field on
- * one screen, and a partial write would let two admins saving different tabs
- * silently overwrite each other's fields.
+ * The body is laid over what is stored before it is normalized, so a caller
+ * may send only the fields it edits — the Cấu hình form still sends the whole
+ * object, but the HOT PICK control on the Kho ảnh screen sends one field and
+ * must not blank the rest on its way through.
  */
 export async function PUT(request: Request) {
   const admin = await getAdmin();
@@ -26,7 +27,7 @@ export async function PUT(request: Request) {
   const body = (await request.json().catch(() => null)) as Partial<ShopSettings> | null;
   if (!body) return NextResponse.json({ error: "Dữ liệu không hợp lệ" }, { status: 400 });
 
-  const settings = normalizeSettings(body);
+  const settings = normalizeSettings({ ...(await getShopSettings()), ...body });
 
   const invalid = validateSettings(settings);
   if (invalid) return NextResponse.json({ error: invalid }, { status: 400 });

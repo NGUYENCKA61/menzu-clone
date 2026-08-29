@@ -11,7 +11,7 @@ export function FlashSaleCard({ item }: FlashSaleCardProps) {
   return (
     <div className="w-[calc(50%-6px)] sm:w-[calc(50%-12px)] md:w-[calc(33.333%-16px)] lg:w-[calc(33.333%-16px)] xl:w-[calc(25%-18px)] shrink-0 snap-start">
       <Link
-        href={`/account/${item.code}`}
+        href={item.href ?? "/categories"}
         className="group relative w-full h-full flex flex-col bg-neutral-900 border rounded-[14px] p-2 transition-[border-color,background-color] duration-200 shadow-md border-neutral-800 hover:border-neutral-700"
       >
         {item.discount !== null && (
@@ -42,20 +42,20 @@ export function FlashSaleCard({ item }: FlashSaleCardProps) {
 
         <div className="mt-auto pt-2.5 flex flex-col gap-2">
           {/* The listing card's labelled strip, compacted for this tile:
-              glyphs and numbers in the section's indigo, RANK white,
+              glyphs and numbers in the shop's accent, RANK white,
               entries split by pipes. Hidden per entry when unset. */}
           {item.rank ? (
             <div className="flex w-full items-center justify-between gap-1 overflow-hidden rounded-lg border border-[#292a30] bg-[#111216] px-2 py-1 uppercase">
               <span className="flex min-w-0 items-center gap-1 whitespace-nowrap text-[8px] sm:text-[10px] font-extrabold text-[#c7c8cd]">
-                <span aria-hidden className="text-indigo-400">▲</span> Rank:
+                <span aria-hidden className="text-[var(--menzu-accent)]">▲</span> Rank:
                 <span className="truncate text-white">{item.rank}</span>
               </span>
               {(item.vip ?? 0) > 0 ? (
                 <>
                   <span aria-hidden className="text-[8px] sm:text-[10px] text-[#3a3b42]">|</span>
                   <span className="flex items-center gap-1 whitespace-nowrap text-[8px] sm:text-[10px] font-extrabold text-[#c7c8cd]">
-                    <span aria-hidden className="text-indigo-400">◆</span> VIP:
-                    <span className="text-indigo-400">{item.vip}</span>
+                    <span aria-hidden className="text-[var(--menzu-accent)]">◆</span> VIP:
+                    <span className="text-[var(--menzu-accent)]">{item.vip}</span>
                   </span>
                 </>
               ) : null}
@@ -63,15 +63,15 @@ export function FlashSaleCard({ item }: FlashSaleCardProps) {
                 <>
                   <span aria-hidden className="text-[8px] sm:text-[10px] text-[#3a3b42]">|</span>
                   <span className="hidden min-[400px]:flex items-center gap-1 whitespace-nowrap text-[8px] sm:text-[10px] font-extrabold text-[#c7c8cd]">
-                    <span aria-hidden className="text-indigo-400">◇</span> VIP Ingame:
-                    <span className="text-indigo-400">{item.vipIngame}</span>
+                    <span aria-hidden className="text-[var(--menzu-accent)]">◇</span> VIP Ingame:
+                    <span className="text-[var(--menzu-accent)]">{item.vipIngame}</span>
                   </span>
                 </>
               ) : null}
             </div>
           ) : null}
 
-          <div className="relative w-full bg-gradient-to-b from-indigo-500 to-indigo-600 border border-indigo-500/30 text-[#FFE5A0] rounded-lg flex items-center px-1 sm:px-2 hover:from-indigo-600 hover:to-indigo-700 transition-colors duration-150 group h-[38px] sm:h-[44px]">
+          <div className="relative w-full bg-gradient-to-b from-[var(--menzu-accent)] to-[var(--menzu-accent-dark)] border border-white/[0.08] text-[#FFE5A0] rounded-lg flex items-center px-1 sm:px-2 hover:from-[var(--menzu-accent-dark)] hover:to-[var(--menzu-accent-dark)] transition-colors duration-150 group h-[38px] sm:h-[44px]">
             <span className="absolute left-2 sm:left-3 shrink-0 hidden sm:flex items-center justify-center">
               <ShoppingCart size={16} />
             </span>

@@ -1,7 +1,10 @@
 import { NextResponse } from "next/server";
 
+import { parseLoginInput } from "@/lib/accountLogin";
 import { FORBIDDEN, getAdmin } from "@/lib/admin";
 import { db } from "@/lib/db";
+import { docHtmlIsEmpty, isHtmlBody, sanitizeDocHtml } from "@/lib/docHtml";
+import { uniqueProductSlug } from "@/lib/routes";
 
 /** Create a product. */
 export async function POST(request: Request) {
@@ -12,10 +15,19 @@ export async function POST(request: Request) {
     code?: string;
     categorySlug?: string;
     rank?: string;
+    /** Optional display name; the card falls back to rank/skins without one. */
+    name?: string;
     price?: number;
     oldPrice?: number;
     level?: number;
     imageUrl?: string;
+    /** Optional write-up typed at creation; sanitised like every rich body. */
+    description?: string;
+    /** The account's sign-in, if the shop has it to hand already. Both or
+     *  neither; it can equally be typed later on the account's own page. */
+    loginUsername?: string;
+    loginPassword?: string;
+    loginNote?: string;
   } | null;
 
   const code = body?.code?.trim().toUpperCase();
@@ -37,6 +49,13 @@ export async function POST(request: Request) {
     );
   }
 
+  const login = parseLoginInput(body);
+  if (login.kind === "invalid") {
+    return NextResponse.json({ error: login.error }, { status: 400 });
+  }
+  // Untouched and cleared land the same three nulls on a new row.
+  const loginColumns = login.kind === "set" ? login.value : {};
+
   const category = await db.category.findUnique({ where: { slug: categorySlug } });
   if (!category) {
     return NextResponse.json({ error: "Danh mục không tồn tại" }, { status: 404 });
@@ -56,26 +75,67 @@ export async function POST(request: Request) {
       data: {
         deletedAt: null,
         categoryId: category.id,
-        rank: body?.rank?.trim() || "Unranked",
+        rank: body?.rank?.trim() || "",
+        name: body?.name?.trim() || null,
         price: BigInt(Math.floor(price)),
         oldPrice: BigInt(Math.floor(oldPrice)),
         status: "AVAILABLE",
+        // The old row's sign-in is what its last buyer was handed. Whatever
+        // was typed now replaces it, and typing nothing clears it: an account
+        // coming back on the shelf must not carry the credentials it left with.
+        loginUsername: null,
+        loginPassword: null,
+        loginNote: null,
+        ...loginColumns,
       },
     });
     return NextResponse.json({ code: revived.code, revived: true });
   }
 
+  // An account has no name, but its address should still say what it is:
+  // "acc-gold-1-vlr9999" tells a search engine and a customer something,
+  // where the bare lowercased code told neither anything. No rank typed
+  // stores a blank - every screen simply leaves the stat out - and the
+  // address falls back to "acc-{code}" until a real rank upgrades it.
+  const rankValue = body?.rank?.trim() || "";
+  const nameValue = body?.name?.trim() || null;
+
+  // Same cage the PATCH runs it through; a blank stays null.
+  let createDescription: string | null = null;
+  if (body?.description?.trim()) {
+    const value = body.description.trim();
+    if (!isHtmlBody(value)) createDescription = value;
+    else {
+      const clean = sanitizeDocHtml(value);
+      createDescription = docHtmlIsEmpty(clean) ? null : clean;
+    }
+  }
+
+  const taken = await db.product.findMany({ select: { slug: true } });
   const product = await db.product.create({
     data: {
       code,
+      slug: uniqueProductSlug(
+        // A named account is addressed by its name; a nameless one by rank
+        // and code, as before.
+        (nameValue ? `${nameValue} ${code}` : `Acc ${rankValue} ${code}`).replace(
+          /\s+/g,
+          " ",
+        ),
+        code,
+        taken.map((p) => p.slug),
+      ),
+      name: nameValue,
       categoryId: category.id,
-      rank: body?.rank?.trim() || "Unranked",
+      rank: rankValue,
+      description: createDescription,
       level: Number(body?.level ?? 0) || 0,
       price: BigInt(Math.floor(price)),
       oldPrice: BigInt(Math.floor(oldPrice)),
       imageUrl:
         body?.imageUrl?.trim() ||
         `/sites/menzu-lol-f7ae197a/root-8a5edab2/images/account/${code}.webp`,
+      ...loginColumns,
     },
   });
 
@@ -159,10 +219,24 @@ export async function PATCH(request: Request) {
     tag?: string;
     vip?: number;
     vipIngame?: number;
+    /** Rich-editor HTML, caged to the sanctioned tags before it lands. */
+    description?: string;
+    rank?: string;
+    /** Display name; empty clears it and the card falls back to rank/skins. */
+    name?: string;
+    /** The sign-in handed to the buyer. Both or neither; both empty clears. */
+    loginUsername?: string;
+    loginPassword?: string;
+    loginNote?: string;
   } | null;
 
   const code = body?.code;
   if (!code) return NextResponse.json({ error: "Thiếu mã" }, { status: 400 });
+
+  const login = parseLoginInput(body);
+  if (login.kind === "invalid") {
+    return NextResponse.json({ error: login.error }, { status: 400 });
+  }
 
   const allowed = ["AVAILABLE", "RESERVED", "SOLD", "HIDDEN"] as const;
   type Status = (typeof allowed)[number];
@@ -187,7 +261,7 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ error: "Tag tối đa 30 ký tự" }, { status: 400 });
   }
 
-  // The strip's two labelled numbers, stored in the vp/rp columns. Zero is a
+  // The strip's two labelled numbers, stored in the vip/vipIngame columns. Zero is a
   // real value — it is how the shop takes an entry off the card.
   const readCount = (value: number | undefined) => {
     if (value === undefined) return undefined;
@@ -196,6 +270,20 @@ export async function PATCH(request: Request) {
   };
   const vip = readCount(body?.vip);
   const vipIngame = readCount(body?.vipIngame);
+
+  // Same cage the software description passes through: HTML is sanitised, an
+  // empty document stores as null so the storefront section disappears rather
+  // than rendering a blank block.
+  let description: string | null | undefined;
+  if (body?.description !== undefined) {
+    const value = body.description.trim();
+    if (!value) description = null;
+    else if (!isHtmlBody(value)) description = value;
+    else {
+      const clean = sanitizeDocHtml(value);
+      description = docHtmlIsEmpty(clean) ? null : clean;
+    }
+  }
   if (vip === null || vipIngame === null) {
     return NextResponse.json({ error: "Chỉ số VIP không hợp lệ" }, { status: 400 });
   }
@@ -206,7 +294,11 @@ export async function PATCH(request: Request) {
     imageUrl === undefined &&
     tag === undefined &&
     vip === undefined &&
-    vipIngame === undefined
+    vipIngame === undefined &&
+    description === undefined &&
+    body?.rank === undefined &&
+    body?.name === undefined &&
+    login.kind === "untouched"
   ) {
     return NextResponse.json({ error: "Không có thay đổi" }, { status: 400 });
   }
@@ -214,14 +306,53 @@ export async function PATCH(request: Request) {
   const product = await db.product.findUnique({ where: { code } });
   if (!product) return NextResponse.json({ error: "Không tìm thấy" }, { status: 404 });
 
+  // A tool hands out keys; the columns exist on its row only because the two
+  // types share a table. Writing them there would put a sign-in nothing ever
+  // reads on a product, and a "pending" that nothing could ever clear.
+  if (login.kind === "set" && product.productType !== "ACCOUNT_GAME") {
+    return NextResponse.json(
+      { error: "Phần mềm giao key, không có tài khoản đăng nhập" },
+      { status: 400 },
+    );
+  }
+
+  // Rank rides the price-and-status save. When the account still wears the
+  // "acc-unknown-…" address it was born with (created before a rank was
+  // known), the address is upgraded to carry the real rank — an address
+  // nobody has been given yet is not yet a promise. One the shop has edited,
+  // or one already carrying a rank, stays put.
+  const rank = body?.rank !== undefined ? body.rank.trim() : undefined;
+  const name = body?.name !== undefined ? body.name.trim() || null : undefined;
+  let slug: string | undefined;
+  if (rank && rank !== product.rank) {
+    // Three born shapes: blank is today's placeholder, "Unknown" and
+    // "Unranked" the ones rows from the two earlier defaults still wear.
+    const bornWith = ["", "Unknown", "Unranked"].map((placeholder) =>
+      uniqueProductSlug(`Acc ${placeholder} ${product.code}`.replace(/\s+/g, " "), product.code, []),
+    );
+    if (bornWith.includes(product.slug)) {
+      const taken = await db.product.findMany({ select: { slug: true } });
+      slug = uniqueProductSlug(
+        `Acc ${rank} ${product.code}`,
+        product.code,
+        taken.filter((p) => p.slug !== product.slug).map((p) => p.slug),
+      );
+    }
+  }
+
   await db.product.update({
     where: { code },
     data: {
       ...(status ? { status } : {}),
       ...(price !== undefined ? { price } : {}),
       ...(imageUrl !== undefined ? { imageUrl } : {}),
-      ...(vip !== undefined ? { vp: vip } : {}),
-      ...(vipIngame !== undefined ? { rp: vipIngame } : {}),
+      ...(vip !== undefined ? { vip } : {}),
+      ...(vipIngame !== undefined ? { vipIngame } : {}),
+      ...(description !== undefined ? { description } : {}),
+      ...(rank !== undefined ? { rank } : {}),
+      ...(name !== undefined ? { name } : {}),
+      ...(slug ? { slug } : {}),
+      ...(login.kind === "set" ? login.value : {}),
     },
   });
 

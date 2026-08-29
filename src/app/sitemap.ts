@@ -2,6 +2,7 @@ import type { MetadataRoute } from "next";
 
 import { db } from "@/lib/db";
 import { SITE_URL } from "@/lib/seo";
+import { categoryHref, productHref } from "@/lib/routes";
 
 /**
  * Sitemap built from the live catalogue, not a hand-written list — stock turns
@@ -36,7 +37,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // URL that answers 404 is the one thing a sitemap must not do.
     db.product.findMany({
       where: { deletedAt: null },
-      select: { code: true, updatedAt: true, productType: true },
+      select: {
+        slug: true,
+        updatedAt: true,
+        category: { select: { slug: true } },
+      },
     }),
     db.category.findMany({ select: { slug: true, updatedAt: true } }),
     // Only articles that have been written: the empty ones are noindex, and
@@ -57,18 +62,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority,
     })),
     ...categories.map((category) => ({
-      url: `${SITE_URL}/category/${category.slug}`,
+      url: `${SITE_URL}${categoryHref(category.slug)}`,
       lastModified: category.updatedAt,
       changeFrequency: "daily" as const,
       priority: 0.8,
     })),
-    // The two types live under different routes, and the wrong one 404s. The
-    // discriminator picks the prefix rather than a second query, so a type
-    // added later cannot quietly inherit the account URL.
+    // One address per product, whatever its type: the category it sits in and
+    // its own slug. The two types used to need different prefixes here, and
+    // guessing the wrong one put a 404 in the sitemap.
     ...products.map((product) => ({
-      url: `${SITE_URL}/${
-        product.productType === "SOFTWARE_GAME" ? "software" : "account"
-      }/${product.code}`,
+      url: `${SITE_URL}${productHref(product.category.slug, product.slug)}`,
       lastModified: product.updatedAt,
       changeFrequency: "weekly" as const,
       priority: 0.7,

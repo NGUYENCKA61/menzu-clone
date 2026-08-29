@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { FORBIDDEN, getAdmin } from "@/lib/admin";
 import { db } from "@/lib/db";
+import { formatDuration } from "@/lib/duration";
 
 /**
  * Tiers are read cheapest-first everywhere they are shown, so the price is the
@@ -10,6 +11,26 @@ import { db } from "@/lib/db";
  */
 function sortOrderFor(price: number): number {
   return Math.min(Math.floor(price), 2_000_000_000);
+}
+
+/**
+ * Keeps the product's flat price equal to its cheapest tier.
+ *
+ * The storefront never reads the flat column for software — cards print the
+ * tiers, the buy panel prices the chosen one, search results quote the
+ * cheapest — so the column is a derived figure, and derived figures are
+ * written by the thing they derive from rather than by a second form the shop
+ * has to remember to keep in step. Zero when no tiers remain: the card shows
+ * "Chưa có gói" then, not a price.
+ */
+async function syncFlatPrice(productId: string): Promise<void> {
+  const cheapest = await db.productPackage.findFirst({
+    where: { productId },
+    orderBy: { price: "asc" },
+    select: { price: true },
+  });
+  const price = cheapest?.price ?? 0n;
+  await db.product.update({ where: { id: productId }, data: { price, oldPrice: price } });
 }
 
 /** Add a duration tier to a software product. */
@@ -25,15 +46,25 @@ export async function POST(request: Request) {
   } | null;
 
   const code = body?.code?.trim();
-  const label = body?.label?.trim();
   const price = Number(body?.price ?? 0);
 
-  if (!code || !label) {
-    return NextResponse.json({ error: "Thiếu tên gói" }, { status: 400 });
+  if (!code) {
+    return NextResponse.json({ error: "Thiếu mã sản phẩm" }, { status: 400 });
   }
   if (!Number.isFinite(price) || price <= 0) {
     return NextResponse.json({ error: "Giá gói không hợp lệ" }, { status: 400 });
   }
+
+  // Hours, whichever unit the form offered — the conversion belongs where the
+  // shop picked "giờ" or "ngày", not here.
+  const rawHours = Number(body?.durationHours);
+  const durationHours =
+    Number.isFinite(rawHours) && rawHours > 0 ? Math.floor(rawHours) : null;
+
+  // An un-named tier is called by its duration — "7 ngày", "Vĩnh viễn" — so a
+  // blank name can never refuse a tier. The forms already do this; deciding it
+  // here as well means every caller gets the same tier the forms would make.
+  const label = body?.label?.trim() || formatDuration(durationHours);
 
   const product = await db.product.findFirst({
     where: { code, productType: "SOFTWARE_GAME" },
@@ -43,19 +74,17 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Không tìm thấy phần mềm" }, { status: 404 });
   }
 
-  // Hours, whichever unit the form offered — the conversion belongs where the
-  // shop picked "giờ" or "ngày", not here.
-  const hours = Number(body?.durationHours);
   const created = await db.productPackage.create({
     data: {
       productId: product.id,
       label,
-      durationHours: Number.isFinite(hours) && hours > 0 ? Math.floor(hours) : null,
+      durationHours,
       price: BigInt(Math.floor(price)),
       sortOrder: sortOrderFor(price),
     },
   });
 
+  await syncFlatPrice(product.id);
   return NextResponse.json({ id: created.id });
 }
 
@@ -84,7 +113,10 @@ export async function PATCH(request: Request) {
   const id = body?.id?.trim();
   if (!id) return NextResponse.json({ error: "Thiếu gói" }, { status: 400 });
 
-  const pkg = await db.productPackage.findUnique({ where: { id }, select: { id: true } });
+  const pkg = await db.productPackage.findUnique({
+    where: { id },
+    select: { id: true, productId: true },
+  });
   if (!pkg) return NextResponse.json({ error: "Không tìm thấy gói" }, { status: 404 });
 
   // Each field is only touched when the body carries it, so a form that edits
@@ -125,6 +157,7 @@ export async function PATCH(request: Request) {
     },
   });
 
+  if (price !== undefined) await syncFlatPrice(pkg.productId);
   return NextResponse.json({ ok: true });
 }
 
@@ -153,5 +186,6 @@ export async function DELETE(request: Request) {
   }
 
   await db.productPackage.delete({ where: { id } });
+  await syncFlatPrice(pkg.productId);
   return NextResponse.json({ ok: true });
 }

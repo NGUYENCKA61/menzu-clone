@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
 
 import { FORBIDDEN, getAdmin } from "@/lib/admin";
+import { parsePlatform } from "@/lib/categoryPlatform";
 import { db } from "@/lib/db";
+import { isReservedSlug } from "@/lib/routes";
 import { slugify } from "@/lib/slug";
 
 function count(value: unknown, fallback = 0): number {
@@ -17,6 +19,7 @@ export async function POST(request: Request) {
   const body = (await request.json().catch(() => null)) as {
     name?: string;
     slug?: string;
+    description?: string;
     imageUrl?: string;
   } | null;
 
@@ -28,6 +31,17 @@ export async function POST(request: Request) {
     return NextResponse.json(
       { error: "Tên danh mục phải có ít nhất một chữ hoặc số" },
       { status: 400 },
+    );
+  }
+
+  // A category lives at the root — /hack-pubg — so a slug that matches a page
+  // the site already serves would be shadowed by it forever: Next.js answers
+  // the static route and the category becomes unreachable. Refused at the desk,
+  // where it can be renamed, rather than discovered as a dead link later.
+  if (isReservedSlug(slug)) {
+    return NextResponse.json(
+      { error: `Đường dẫn "${slug}" trùng với một trang có sẵn của hệ thống` },
+      { status: 409 },
     );
   }
 
@@ -47,6 +61,10 @@ export async function POST(request: Request) {
     data: {
       name,
       slug,
+      // Optional, and stored as NULL when blank rather than as "": the home
+      // page tile tests it for truthiness to decide whether to draw the line
+      // at all, and an empty string would draw an empty one.
+      description: body?.description?.trim() || null,
       imageUrl: body?.imageUrl?.trim() || null,
       sortOrder: (last?.sortOrder ?? 0) + 1,
     },
@@ -74,12 +92,19 @@ export async function PATCH(request: Request) {
     slug?: string;
     description?: string;
     imageUrl?: string;
+    /** "PC" / "MOBILE" / "SPOOFER"; "" clears. See src/lib/categoryPlatform.ts. */
+    platform?: string;
     soldCount?: number;
     stockCount?: number;
   } | null;
 
   const id = body?.id?.trim();
   if (!id) return NextResponse.json({ error: "Thiếu danh mục" }, { status: 400 });
+
+  const platform = parsePlatform(body?.platform);
+  if (!platform.ok) {
+    return NextResponse.json({ error: "Nền tảng không hợp lệ" }, { status: 400 });
+  }
 
   const category = await db.category.findUnique({ where: { id } });
   if (!category) {
@@ -128,6 +153,14 @@ export async function PATCH(request: Request) {
       return NextResponse.json({ error: "Đường dẫn không hợp lệ" }, { status: 400 });
     }
     if (slug !== category.slug) {
+      // Same reservation as on create: the root is shared with the site's own
+      // pages, and the static one always wins.
+      if (isReservedSlug(slug)) {
+        return NextResponse.json(
+          { error: `Đường dẫn "${slug}" trùng với một trang có sẵn của hệ thống` },
+          { status: 409 },
+        );
+      }
       const clash = await db.category.findUnique({ where: { slug } });
       if (clash) {
         return NextResponse.json(
@@ -150,6 +183,7 @@ export async function PATCH(request: Request) {
       ...(body?.description !== undefined
         ? { description: body.description.trim() || null }
         : {}),
+      ...(body?.platform !== undefined ? { platform: platform.value } : {}),
       ...(body?.soldCount !== undefined
         ? { soldCount: count(body.soldCount, category.soldCount) }
         : {}),

@@ -6,20 +6,30 @@ import { useRef, useState } from "react";
 import {
   Boxes,
   ExternalLink,
+  Eye,
+  EyeOff,
+  FileText,
   ImagePlus,
+  KeyRound,
   RotateCcw,
   Save,
-  ShieldAlert,
   Swords,
   Tag,
   Trash2,
   Wallet,
 } from "lucide-react";
 
-import { AdminError, ConfirmDialog } from "./AdminStates";
+import { deliversAutomatically } from "@/lib/accountLogin";
+
+import { AdminError } from "./AdminStates";
+import { RichTextEditor } from "./RichTextEditor";
 
 export interface AccountDetailView {
   code: string;
+  /** The shop's own title, or "" - the storefront then titles by rank/skins. */
+  name: string;
+  /** Where "Xem trang khách" goes — the product's one public address. */
+  publicHref: string;
   rank: string;
   status: string;
   price: number;
@@ -34,6 +44,15 @@ export interface AccountDetailView {
   skinNames: string[];
   characterNames: string[];
   gearNames: string[];
+  /** The stored description lifted to editor HTML on the server — legacy
+   *  plain text arrives already converted. */
+  descriptionHtml: string;
+  /** The sign-in handed to the buyer, "" where the shop has typed nothing. */
+  loginUsername: string;
+  loginPassword: string;
+  loginNote: string;
+  /** Whoever holds the account now — the latest paid order — or null on the shelf. */
+  buyer: { username: string; orderCode: string } | null;
 }
 
 const CARD = "rounded-xl border border-white/[0.08] bg-[#0e0e11] p-5 flex flex-col gap-4";
@@ -72,10 +91,14 @@ export function AdminAccountDetail({ account }: { account: AccountDetailView }) 
   const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<{ tone: "ok" | "err"; text: string } | null>(null);
-  const [removing, setRemoving] = useState(false);
+  const [descHtml, setDescHtml] = useState(account.descriptionHtml);
+  /** What the database holds; advanced on every successful save. */
+  const [descBaseline, setDescBaseline] = useState(account.descriptionHtml);
 
   const [price, setPrice] = useState(String(account.price));
   const [status, setStatus] = useState(account.status);
+  const [rank, setRank] = useState(account.rank);
+  const [name, setName] = useState(account.name);
   const [tag, setTag] = useState(account.tag);
   const [vip, setVip] = useState(account.vip > 0 ? String(account.vip) : "");
   const [vipIngame, setVipIngame] = useState(
@@ -84,6 +107,18 @@ export function AdminAccountDetail({ account }: { account: AccountDetailView }) 
   const [skinText, setSkinText] = useState(account.skinNames.join("\n"));
   const [characterText, setCharacterText] = useState(account.characterNames.join("\n"));
   const [gearText, setGearText] = useState(account.gearNames.join("\n"));
+
+  const [loginUser, setLoginUser] = useState(account.loginUsername);
+  const [loginPass, setLoginPass] = useState(account.loginPassword);
+  const [loginNote, setLoginNote] = useState(account.loginNote);
+  const [showPass, setShowPass] = useState(false);
+  /** What the database holds; advanced on every successful save, so the
+   *  status line and the save button describe the row and not the form. */
+  const [loginBaseline, setLoginBaseline] = useState({
+    username: account.loginUsername,
+    password: account.loginPassword,
+    note: account.loginNote,
+  });
 
   const coverRef = useRef<HTMLInputElement>(null);
   const galleryRef = useRef<HTMLInputElement>(null);
@@ -120,6 +155,14 @@ export function AdminAccountDetail({ account }: { account: AccountDetailView }) 
     }
   }
 
+  async function saveDescription() {
+    const data = await api("PATCH", { code: account.code, description: descHtml });
+    if (data) {
+      setDescBaseline(descHtml);
+      setMsg({ tone: "ok", text: "Đã lưu mô tả sản phẩm" });
+    }
+  }
+
   /** Uploads one picture through the shared uploader, returns its path. */
   async function upload(file: File): Promise<string | null> {
     setBusy(true);
@@ -144,8 +187,14 @@ export function AdminAccountDetail({ account }: { account: AccountDetailView }) 
 
   async function savePriceStatus() {
     const value = Number(price.replace(/\D/g, ""));
-    const data = await api("PATCH", { code: account.code, price: value, status });
-    if (data) setMsg({ tone: "ok", text: "Đã lưu giá và trạng thái" });
+    const data = await api("PATCH", {
+      code: account.code,
+      price: value,
+      status,
+      rank: rank.trim(),
+      name: name.trim(),
+    });
+    if (data) setMsg({ tone: "ok", text: "Đã lưu thông tin" });
   }
 
   async function saveTag() {
@@ -181,6 +230,33 @@ export function AdminAccountDetail({ account }: { account: AccountDetailView }) 
       saved.push(`${data.count as number} ${list.label}`);
     }
     setMsg({ tone: "ok", text: `Đã lưu ${saved.join(", ")}` });
+  }
+
+  async function saveLogin() {
+    const next = {
+      username: loginUser.trim(),
+      password: loginPass.trim(),
+      note: loginNote.trim(),
+    };
+    const data = await api("PATCH", {
+      code: account.code,
+      loginUsername: next.username,
+      loginPassword: next.password,
+      loginNote: next.note,
+    });
+    if (!data) return;
+    setLoginUser(next.username);
+    setLoginPass(next.password);
+    setLoginNote(next.note);
+    setLoginBaseline(next);
+    setMsg({
+      tone: "ok",
+      text: next.username
+        ? account.buyer
+          ? `Đã lưu — ${account.buyer.username} thấy ngay trong Lịch sử mua`
+          : "Đã lưu — giao tự động khi bán"
+        : "Đã xoá thông tin đăng nhập khỏi tài khoản này",
+    });
   }
 
   async function changeCover(file: File) {
@@ -235,8 +311,51 @@ export function AdminAccountDetail({ account }: { account: AccountDetailView }) 
     }
   }
 
-  const priceChanged =
-    Number(price.replace(/\D/g, "")) !== account.price || status !== account.status;
+  // Everything this card's save sends - the button wakes when any of it
+  // differs from what the server last gave us, not only the price.
+  const infoChanged =
+    Number(price.replace(/\D/g, "")) !== account.price ||
+    status !== account.status ||
+    rank.trim() !== account.rank ||
+    name.trim() !== account.name;
+
+  const loginChanged =
+    loginUser.trim() !== loginBaseline.username ||
+    loginPass.trim() !== loginBaseline.password ||
+    loginNote.trim() !== loginBaseline.note;
+  /** Whether the row holds a sign-in a buyer could use — both halves. */
+  const loginStored = loginBaseline.username !== "" && loginBaseline.password !== "";
+
+  // What the sign-in card says above its fields. The saved tag decides the
+  // mode: NFA goes out by itself, anything else the shop hands over in person
+  // and the fields here are its own record. Within NFA, the four combinations
+  // of "is there one" and "is anyone holding the account" — never a to-do,
+  // only what the buyer did and did not get.
+  const autoDelivery = deliversAutomatically(account.tag);
+  const loginStatus = !autoDelivery
+    ? {
+        tone: "border-indigo-500/25 bg-indigo-500/10 text-indigo-300",
+        text: `Tag ${account.tag || "trống"} — bàn giao tay: khách được báo liên hệ shop, thông tin ở đây chỉ để shop tra cứu. Gắn tag NFA nếu muốn giao tự động.`,
+      }
+    : loginStored
+      ? account.buyer
+        ? {
+            tone: "border-emerald-500/30 bg-emerald-500/10 text-emerald-400",
+            text: `Đã giao tự động cho ${account.buyer.username} (đơn ${account.buyer.orderCode}) — khách thấy trong Lịch sử mua.`,
+          }
+        : {
+            tone: "border-white/10 bg-white/[0.03] text-neutral-300",
+            text: "NFA — sẵn sàng: bán xong là khách nhận ngay trong Lịch sử mua, không cần bàn giao tay.",
+          }
+      : account.buyer
+        ? {
+            tone: "border-white/10 bg-white/[0.03] text-neutral-300",
+            text: `Đã bán cho ${account.buyer.username} (đơn ${account.buyer.orderCode}) khi chưa có thông tin đăng nhập — nhập vào thì khách thấy trong Lịch sử mua.`,
+          }
+        : {
+            tone: "border-amber-500/30 bg-amber-500/10 text-amber-400",
+            text: "NFA chưa có thông tin đăng nhập — bán xong khách sẽ không nhận được gì tự động, phải liên hệ shop.",
+          };
 
   return (
     <div className="flex flex-col gap-5">
@@ -280,7 +399,7 @@ export function AdminAccountDetail({ account }: { account: AccountDetailView }) 
           </div>
           <p className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[11px] text-neutral-500">
             <span>{account.categoryName}</span>
-            <span>Rank {account.rank}</span>
+            {account.rank ? <span>Rank {account.rank}</span> : null}
             <span className="tabular-nums">{account.orderCount} đơn</span>
             <span className="font-black tabular-nums text-rose-400">
               {formatVnd(account.price)}đ
@@ -293,7 +412,7 @@ export function AdminAccountDetail({ account }: { account: AccountDetailView }) 
           </p>
         </div>
         <a
-          href={`/account/${encodeURIComponent(account.code)}`}
+          href={account.publicHref}
           target="_blank"
           rel="noreferrer"
           className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-white/[0.08] bg-white/[0.03] px-3.5 text-[10px] font-black uppercase tracking-widest text-neutral-300 transition-colors hover:bg-white/[0.08] hover:text-white"
@@ -311,6 +430,30 @@ export function AdminAccountDetail({ account }: { account: AccountDetailView }) 
               Giá & trạng thái
             </span>
             <div className="flex flex-wrap items-end gap-3">
+              <div>
+                <label htmlFor="acc-name" className={LABEL}>
+                  Tên sản phẩm
+                </label>
+                <input
+                  id="acc-name"
+                  value={name}
+                  onChange={(event) => setName(event.target.value)}
+                  placeholder="ACC VIP FULL SKIN"
+                  className={`${FIELD} w-52`}
+                />
+              </div>
+              <div>
+                <label htmlFor="acc-rank" className={LABEL}>
+                  Rank
+                </label>
+                <input
+                  id="acc-rank"
+                  value={rank}
+                  onChange={(event) => setRank(event.target.value)}
+                  placeholder="GOLD 1"
+                  className={`${FIELD} w-36`}
+                />
+              </div>
               <div>
                 <label htmlFor="acc-price" className={LABEL}>
                   Giá bán (đ)
@@ -344,7 +487,7 @@ export function AdminAccountDetail({ account }: { account: AccountDetailView }) 
               </div>
               <button
                 type="button"
-                disabled={busy || !priceChanged}
+                disabled={busy || !infoChanged}
                 onClick={savePriceStatus}
                 className={ACTION}
               >
@@ -368,18 +511,26 @@ export function AdminAccountDetail({ account }: { account: AccountDetailView }) 
                 <label htmlFor="acc-tag" className={LABEL}>
                   Tag góc card <span className="text-neutral-600">(trống = ẩn)</span>
                 </label>
-                <input
+                <select
                   id="acc-tag"
                   value={tag}
-                  maxLength={30}
                   onChange={(event) => setTag(event.target.value)}
-                  placeholder="DROP MAIL"
                   className={`${FIELD} w-44`}
-                />
+                >
+                  <option value="" className="bg-neutral-900">
+                    — không tag —
+                  </option>
+                  <option value="NFA" className="bg-neutral-900">
+                    NFA
+                  </option>
+                  <option value="FULL THÔNG TIN" className="bg-neutral-900">
+                    FULL THÔNG TIN
+                  </option>
+                </select>
               </div>
               <div>
                 <label htmlFor="acc-vip" className={LABEL}>
-                  VP
+                  VIP
                 </label>
                 <input
                   id="acc-vip"
@@ -393,11 +544,11 @@ export function AdminAccountDetail({ account }: { account: AccountDetailView }) 
                 />
               </div>
               <div>
-                <label htmlFor="acc-rp" className={LABEL}>
-                  RP
+                <label htmlFor="acc-vipingame" className={LABEL}>
+                  VIP Ingame
                 </label>
                 <input
-                  id="acc-rp"
+                  id="acc-vipingame"
                   inputMode="numeric"
                   value={vipIngame}
                   onChange={(event) =>
@@ -458,6 +609,95 @@ export function AdminAccountDetail({ account }: { account: AccountDetailView }) 
         </div>
 
         <div className="flex flex-col gap-4 min-w-0">
+          {/* First in the column: what the buyer is handed the moment they
+              pay. Everything else here makes the account sell; this makes
+              the sale complete without anyone touching it. */}
+          <section className={CARD}>
+            <span className={CARD_HEAD}>
+              <KeyRound size={13} className="text-neutral-400" />
+              Thông tin đăng nhập giao khách
+            </span>
+            <p
+              role="status"
+              className={`rounded-lg border px-3 py-2 text-[11px] font-semibold leading-relaxed ${loginStatus.tone}`}
+            >
+              {loginStatus.text}
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label htmlFor="acc-login-user" className={LABEL}>
+                  Tên đăng nhập
+                </label>
+                <input
+                  id="acc-login-user"
+                  value={loginUser}
+                  onChange={(event) => setLoginUser(event.target.value)}
+                  autoComplete="off"
+                  spellCheck={false}
+                  placeholder="riot_user"
+                  className={`${FIELD} font-mono`}
+                />
+              </div>
+              <div>
+                <label htmlFor="acc-login-pass" className={LABEL}>
+                  Mật khẩu
+                </label>
+                <div className="relative">
+                  <input
+                    id="acc-login-pass"
+                    type={showPass ? "text" : "password"}
+                    value={loginPass}
+                    onChange={(event) => setLoginPass(event.target.value)}
+                    autoComplete="new-password"
+                    spellCheck={false}
+                    placeholder="••••••••"
+                    className={`${FIELD} pr-9 font-mono`}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPass((s) => !s)}
+                    aria-label={showPass ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
+                    className="absolute right-1.5 top-1/2 -translate-y-1/2 rounded-md p-1 text-neutral-500 transition-colors hover:bg-white/10 hover:text-white"
+                  >
+                    {showPass ? <EyeOff size={13} /> : <Eye size={13} />}
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div>
+              <label htmlFor="acc-login-note" className={LABEL}>
+                Ghi chú bàn giao <span className="text-neutral-600">(không bắt buộc)</span>
+              </label>
+              <textarea
+                id="acc-login-note"
+                value={loginNote}
+                onChange={(event) => setLoginNote(event.target.value)}
+                rows={3}
+                placeholder="Mail khôi phục, mã 2FA, lưu ý đổi mật khẩu…"
+                className={`${FIELD} resize-y leading-relaxed`}
+              />
+            </div>
+            <div className="flex flex-wrap items-center gap-3">
+              <button
+                type="button"
+                disabled={busy || !loginChanged}
+                onClick={saveLogin}
+                className={ACTION}
+              >
+                <Save size={12} />
+                Lưu thông tin đăng nhập
+              </button>
+              {loginChanged ? (
+                <span className="text-[11px] text-neutral-500">Có thay đổi chưa lưu</span>
+              ) : null}
+            </div>
+            <p className="text-[11px] text-neutral-500">
+              Acc tag NFA giao tự động: khách thanh toán xong là thấy ngay trong Lịch
+              sử mua của họ. Tag khác bàn giao tay. Trang sản phẩm ngoài kệ không
+              hiện. Cần cả tên đăng nhập lẫn mật khẩu; để trống cả hai rồi lưu để xoá.
+            </p>
+          </section>
+
           <section className={CARD}>
             <span className={CARD_HEAD}>
               <ImagePlus size={13} className="text-neutral-400" />
@@ -575,53 +815,38 @@ export function AdminAccountDetail({ account }: { account: AccountDetailView }) 
             />
           </section>
 
-          <section className="rounded-xl border border-red-500/20 bg-red-500/[0.03] p-5 flex flex-col gap-3">
-            <span className={CARD_HEAD}>
-              <ShieldAlert size={13} className="text-red-400" />
-              Vùng nguy hiểm
-            </span>
-            <div className="flex flex-wrap items-center gap-3">
-              <button
-                type="button"
-                disabled={busy}
-                onClick={() => setRemoving(true)}
-                className="h-[34px] px-4 rounded-lg border border-red-500/30 bg-red-500/10 hover:bg-red-500/20 disabled:opacity-40 text-[10px] font-black uppercase tracking-widest text-red-400 transition-colors inline-flex items-center gap-1.5"
-              >
-                <Trash2 size={12} />
-                Gỡ khỏi cửa hàng
-              </button>
-              <span className="text-[11px] text-neutral-500">
-                {account.orderCount > 0
-                  ? `${account.orderCount} đơn cũ giữ nguyên — khôi phục được ở tab Tài khoản.`
-                  : "Chưa có đơn nào nên sẽ xóa hẳn, không khôi phục được."}
-              </span>
-            </div>
-          </section>
         </div>
       </div>
 
-      <ConfirmDialog
-        open={removing}
-        danger
-        pending={busy}
-        title="Gỡ tài khoản khỏi cửa hàng?"
-        body={
-          account.orderCount > 0
-            ? `#${account.code} rời kệ ngay. ${account.orderCount} đơn cũ vẫn nguyên, và tài khoản khôi phục được từ mục "đã gỡ" trong tab Tài khoản.`
-            : `#${account.code} chưa có đơn nào nên sẽ bị xóa hẳn và không khôi phục được.`
-        }
-        confirmLabel="Gỡ khỏi cửa hàng"
-        onCancel={() => setRemoving(false)}
-        onConfirm={async () => {
-          const data = await api(
-            "DELETE",
-            null,
-            `?code=${encodeURIComponent(account.code)}`,
-          );
-          setRemoving(false);
-          if (data) router.push("/admin/products");
-        }}
-      />
+
+      {/* Full width below the grid — prose wants room the columns don't have.
+          Same card the software desk has: an account with a story (full access,
+          mail gốc, cam kết) deserves the same editor a tool gets. */}
+      <section className={CARD}>
+        <span className={CARD_HEAD}>
+          <FileText size={13} className="text-neutral-400" />
+          Mô tả sản phẩm
+        </span>
+        <RichTextEditor initialHtml={account.descriptionHtml} onUpdate={setDescHtml} />
+        <p className="text-[11px] text-neutral-500">
+          Có nội dung ở đây thì card ngoài danh mục và panel mua hiện lời này
+          (rút thành chữ thường). Để trống rồi lưu thì quay về câu mặc định.
+        </p>
+        <div className="flex flex-wrap items-center gap-3">
+          <button
+            type="button"
+            disabled={busy || descHtml === descBaseline}
+            onClick={saveDescription}
+            className={ACTION}
+          >
+            <Save size={12} />
+            Lưu mô tả
+          </button>
+          {descHtml !== descBaseline ? (
+            <span className="text-[11px] text-neutral-500">Có thay đổi chưa lưu</span>
+          ) : null}
+        </div>
+      </section>
     </div>
   );
 }

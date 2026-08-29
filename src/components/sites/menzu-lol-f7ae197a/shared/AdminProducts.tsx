@@ -1,44 +1,30 @@
 "use client";
 
-import { Eye, ImageIcon, Plus, RotateCcw, Swords, Trash2, Upload } from "lucide-react";
-import Image from "next/image";
+import { Eye, ImageIcon, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Fragment, useRef, useState } from "react";
+import { useState } from "react";
 
-import { SKIN_CHIP_COUNT } from "./productData";
+import { deliversAutomatically } from "@/lib/accountLogin";
+
+import { AdminImagePicker } from "./AdminImagePicker";
+import { AdminSearch, ConfirmDialog } from "./AdminStates";
 
 export interface AdminProductRow {
   code: string;
+  /** The shop's own title, or "" - the storefront then titles by rank/skins. */
+  name: string;
   rank: string;
   status: string;
   price: number;
-  oldPrice: number;
   categoryName: string;
   orderCount: number;
   /** The uploaded picture path, or "" for the by-code default. */
   imageUrl: string;
-  /** Extra screenshots the detail gallery pages through with its arrows. */
-  gallery: { id: string; url: string }[];
-  /** The card's corner pill — "DROP MAIL" — or "" for none. */
+  /** The card's corner pill — "NFA" / "FULL THÔNG TIN" — or "" for none. */
   tag: string;
-  /** The stat strip's labelled numbers; 0 hides the entry on the card. */
-  vip: number;
-  vipIngame: number;
-  /** Weapon skins, in the order the shop listed them. */
-  skinNames: string[];
-  /** Characters (AGENT rows) and gear (BUDDY rows), same ordering rule. */
-  characterNames: string[];
-  gearNames: string[];
-}
-
-/** A product the shop has removed — kept only so it can be put back. */
-export interface AdminRemovedProductRow {
-  code: string;
-  rank: string;
-  categoryName: string;
-  orderCount: number;
-  deletedLabel: string;
+  /** Whether a sign-in is on the row. Only NFA hands it over by itself. */
+  hasLogin: boolean;
 }
 
 export interface AdminCategoryOption {
@@ -46,9 +32,16 @@ export interface AdminCategoryOption {
   name: string;
 }
 
+// The shop-wide admin field: same border, ground, radius and size as Cấu
+// hình, Nhóm, and the two product detail screens. This page used to be the
+// only one on a lighter, rounder, larger variant, so moving between it and a
+// detail screen changed the shape of every box on the way.
 const FIELD =
-  "w-full rounded-xl border border-white/5 bg-white/5 px-3 py-2.5 text-sm text-white outline-none focus:border-[var(--brand)]/60 transition-colors placeholder-neutral-600";
+  "w-full rounded-lg border border-white/10 bg-neutral-950/60 px-3 py-2 text-xs text-white outline-none focus:border-[var(--brand)]/60 transition-colors placeholder-neutral-600";
 const LABEL = "block text-[10px] font-black uppercase tracking-widest text-neutral-500 mb-1.5";
+// The status pick on a shelf row - the same small select the software list uses.
+const MINI =
+  "rounded-lg border border-white/10 bg-neutral-950 px-2 py-1 text-[11px] font-bold text-neutral-200";
 
 const STATUS_LABEL: Record<string, string> = {
   AVAILABLE: "Đang bán",
@@ -63,49 +56,28 @@ function formatVnd(n: number): string {
 
 export function AdminProducts({
   products,
-  removed,
   categories,
 }: {
   products: AdminProductRow[];
-  removed: AdminRemovedProductRow[];
   categories: AdminCategoryOption[];
 }) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<{ tone: "ok" | "err"; text: string } | null>(null);
-  // The row whose delete is armed. Deleting is one click away and the button
-  // is a bare icon, so it asks once — inline rather than through confirm(),
-  // which would freeze the page behind a browser dialog.
-  const [arming, setArming] = useState<string | null>(null);
+  // The row whose delete is pending its confirm dialog.
+  const [removing, setRemoving] = useState<AdminProductRow | null>(null);
+  const [query, setQuery] = useState("");
 
   const [code, setCode] = useState("");
+  const [newName, setNewName] = useState("");
   const [categorySlug, setCategorySlug] = useState(categories[0]?.slug ?? "");
-  const [rank, setRank] = useState("");
+  const [newDescription, setNewDescription] = useState("");
+  const [newImage, setNewImage] = useState("");
+  const [uploadingNew, setUploadingNew] = useState(false);
   const [price, setPrice] = useState("");
   const [oldPrice, setOldPrice] = useState("");
-
-  // The account whose skin list is open, and the text being edited. One at a
-  // time: the editor is a tall block inside the table, and two of them open at
-  // once would push the row being worked on off the screen.
-  const [editingSkins, setEditingSkins] = useState<string | null>(null);
-  const [skinText, setSkinText] = useState("");
-  const [characterText, setCharacterText] = useState("");
-  const [gearText, setGearText] = useState("");
-
-  // The account whose picture editor is open, and the path being edited.
-  // Opening one editor closes the other for the same reason there is only one
-  // of each: the table is the screen's spine and blocks must not stack.
-  const [editingImage, setEditingImage] = useState<string | null>(null);
-  const [imageDraft, setImageDraft] = useState("");
-  const imageFileRef = useRef<HTMLInputElement>(null);
-  const galleryFileRef = useRef<HTMLInputElement>(null);
-
-  // The card's corner pill and stat numbers, edited together — they are the
-  // card-face metadata and share one save.
-  const [editingTag, setEditingTag] = useState<string | null>(null);
-  const [tagDraft, setTagDraft] = useState("");
-  const [vipDraft, setVipDraft] = useState("");
-  const [vipIngameDraft, setVipIngameDraft] = useState("");
+  const [newLoginUser, setNewLoginUser] = useState("");
+  const [newLoginPass, setNewLoginPass] = useState("");
 
   /** Returns the parsed body on success, null on failure. */
   async function call(
@@ -146,7 +118,7 @@ export function AdminProducts({
    * in the only way the admin cares about: whether it can be undone.
    */
   async function handleDelete(row: AdminProductRow) {
-    setArming(null);
+    setRemoving(null);
     const data = await call("DELETE", null, `?code=${encodeURIComponent(row.code)}`);
     if (!data) return;
     setMsg({
@@ -154,212 +126,49 @@ export function AdminProducts({
       text:
         data.mode === "hard"
           ? `Đã xoá hẳn ${row.code} — chưa có đơn nào nên không còn gì để giữ lại`
-          : `Đã xoá ${row.code} khỏi cửa hàng. ${row.orderCount} đơn cũ vẫn nguyên, khôi phục được ở mục dưới`,
+          : `Đã xoá ${row.code} khỏi cửa hàng. ${row.orderCount} đơn cũ vẫn nguyên.`,
     });
   }
 
-  async function handleRestore(row: AdminRemovedProductRow) {
-    const data = await call("PUT", null, `?code=${encodeURIComponent(row.code)}`);
-    if (data) setMsg({ tone: "ok", text: `Đã khôi phục ${row.code}` });
-  }
-
   /**
-   * Opens the skin editor on the saved list, or closes it if this row's is
-   * already open. Prefilling from the row rather than fetching keeps the text
-   * area showing exactly what the storefront is showing.
+   * Upload for the create form: answers with the URL and nothing else — the
+   * account does not exist yet, so the URL rides along on the POST.
    */
-  function toggleSkins(row: AdminProductRow) {
-    if (editingSkins === row.code) {
-      setEditingSkins(null);
-      return;
-    }
-    setEditingSkins(row.code);
-    setEditingImage(null);
-    setEditingTag(null);
-    setSkinText(row.skinNames.join("\n"));
-    setCharacterText(row.characterNames.join("\n"));
-    setGearText(row.gearNames.join("\n"));
-    setMsg(null);
-  }
-
-  /** Opens the picture editor prefilled with what the storefront is using. */
-  function toggleImage(row: AdminProductRow) {
-    if (editingImage === row.code) {
-      setEditingImage(null);
-      return;
-    }
-    setEditingImage(row.code);
-    setEditingSkins(null);
-    setEditingTag(null);
-    setImageDraft(row.imageUrl);
-    setMsg(null);
-  }
-
-  function toggleTag(row: AdminProductRow) {
-    if (editingTag === row.code) {
-      setEditingTag(null);
-      return;
-    }
-    setEditingTag(row.code);
-    setEditingSkins(null);
-    setEditingImage(null);
-    setTagDraft(row.tag);
-    // Zero renders as an empty field: it means "not on the card", and making
-    // the admin stare at literal zeros would invite leaving them there.
-    setVipDraft(row.vip > 0 ? String(row.vip) : "");
-    setVipIngameDraft(row.vipIngame > 0 ? String(row.vipIngame) : "");
-    setMsg(null);
-  }
-
-  async function handleSaveTag(row: AdminProductRow) {
-    const value = tagDraft.trim();
-    const data = await call("PATCH", {
-      code: row.code,
-      tag: value,
-      // An emptied field goes back to zero, which takes the entry off the card.
-      vip: Number(vipDraft.replace(/\D/g, "")) || 0,
-      vipIngame: Number(vipIngameDraft.replace(/\D/g, "")) || 0,
-    });
-    if (!data) return;
-    setEditingTag(null);
-    setMsg({ tone: "ok", text: `Đã lưu tag & chỉ số cho ${row.code}` });
-  }
-
-  /**
-   * Add one extra screenshot: through the shared uploader for the file, then
-   * the gallery route for the row — one motion for the admin either way.
-   */
-  async function handleGalleryFile(row: AdminProductRow, file: File) {
-    setBusy(true);
+  async function uploadNewImage(file: File): Promise<string | null> {
+    setUploadingNew(true);
     setMsg(null);
     try {
       const form = new FormData();
-      form.set("file", file);
-      const up = await fetch("/api/admin/products/image", { method: "POST", body: form });
-      const uploaded = (await up.json().catch(() => ({}))) as Record<string, unknown>;
-      if (!up.ok) {
-        setMsg({ tone: "err", text: (uploaded.error as string) ?? "Tải ảnh thất bại" });
-        return;
-      }
-      const res = await fetch("/api/admin/products/gallery", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ code: row.code, url: uploaded.url }),
-      });
-      const data = (await res.json().catch(() => ({}))) as Record<string, unknown>;
-      if (!res.ok) {
-        setMsg({ tone: "err", text: (data.error as string) ?? "Không thêm được ảnh phụ" });
-        return;
-      }
-      setMsg({ tone: "ok", text: `Đã thêm ảnh phụ cho ${row.code}` });
-      router.refresh();
-    } catch {
-      setMsg({ tone: "err", text: "Không kết nối được máy chủ" });
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  async function handleGalleryDelete(row: AdminProductRow, id: string) {
-    setBusy(true);
-    setMsg(null);
-    try {
-      const res = await fetch(`/api/admin/products/gallery?id=${encodeURIComponent(id)}`, {
-        method: "DELETE",
-      });
-      const data = (await res.json().catch(() => ({}))) as Record<string, unknown>;
-      if (!res.ok) {
-        setMsg({ tone: "err", text: (data.error as string) ?? "Không xoá được ảnh phụ" });
-        return;
-      }
-      setMsg({ tone: "ok", text: `Đã bỏ một ảnh phụ khỏi ${row.code}` });
-      router.refresh();
-    } catch {
-      setMsg({ tone: "err", text: "Không kết nối được máy chủ" });
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  async function handleSaveImage(row: AdminProductRow, value: string) {
-    const data = await call("PATCH", { code: row.code, imageUrl: value });
-    if (!data) return;
-    setEditingImage(null);
-    setMsg({
-      tone: "ok",
-      text: value.trim()
-        ? `Đã đổi ảnh cho ${row.code}`
-        : `${row.code} dùng lại ảnh mặc định theo mã`,
-    });
-  }
-
-  /**
-   * Upload straight off the disk, then save in the same motion — picking a
-   * file is already the decision, and a second "Lưu" after it would only be
-   * a chance to forget.
-   */
-  async function handleImageFile(row: AdminProductRow, file: File) {
-    setBusy(true);
-    setMsg(null);
-    try {
-      const form = new FormData();
-      form.set("file", file);
+      form.append("file", file);
       const res = await fetch("/api/admin/products/image", { method: "POST", body: form });
-      const data = (await res.json().catch(() => ({}))) as Record<string, unknown>;
-      if (!res.ok) {
-        setMsg({ tone: "err", text: (data.error as string) ?? "Tải ảnh thất bại" });
-        return;
+      const data = (await res.json().catch(() => ({}))) as { url?: string; error?: string };
+      if (!res.ok || !data.url) {
+        setMsg({ tone: "err", text: data.error ?? "Tải ảnh thất bại" });
+        return null;
       }
-      setImageDraft(data.url as string);
-      setBusy(false);
-      await handleSaveImage(row, data.url as string);
+      return data.url;
     } catch {
       setMsg({ tone: "err", text: "Không kết nối được máy chủ" });
+      return null;
     } finally {
-      setBusy(false);
+      setUploadingNew(false);
     }
-  }
-
-  /** All three lists in one save — each kind replaces only its own rows. */
-  async function handleSaveSkins(row: AdminProductRow) {
-    const toNames = (text: string) =>
-      text
-        .split("\n")
-        .map((line) => line.trim())
-        .filter(Boolean);
-
-    const lists = [
-      { kind: "WEAPON_SKIN", names: toNames(skinText), label: "súng" },
-      { kind: "AGENT", names: toNames(characterText), label: "nhân vật" },
-      { kind: "BUDDY", names: toNames(gearText), label: "trang bị" },
-    ];
-
-    const saved: string[] = [];
-    for (const list of lists) {
-      const data = await call(
-        "PUT",
-        { code: row.code, names: list.names, kind: list.kind },
-        "",
-        "/skins",
-      );
-      // The failed list's error is already on screen; stopping here leaves
-      // the editor open so nothing saved before it is misreported.
-      if (!data) return;
-      saved.push(`${data.count as number} ${list.label}`);
-    }
-
-    setEditingSkins(null);
-    setMsg({ tone: "ok", text: `Đã lưu ${saved.join(", ")} cho ${row.code}` });
   }
 
   async function handleCreate(event: React.FormEvent) {
     event.preventDefault();
+    // No rank here: it is set on the account's own page, where the address
+    // upgrades itself the first time a real rank lands.
     const data = await call("POST", {
       code,
+      name: newName,
       categorySlug,
-      rank,
+      description: newDescription,
+      imageUrl: newImage,
       price: Number(price.replace(/\D/g, "")),
       oldPrice: Number((oldPrice || price).replace(/\D/g, "")),
+      loginUsername: newLoginUser,
+      loginPassword: newLoginPass,
     });
     if (data) {
       setMsg({
@@ -371,11 +180,28 @@ export function AdminProducts({
           : `Đã thêm ${code.toUpperCase()}`,
       });
       setCode("");
-      setRank("");
+      setNewName("");
+      setNewDescription("");
+      setNewImage("");
       setPrice("");
       setOldPrice("");
+      setNewLoginUser("");
+      setNewLoginPass("");
     }
   }
+
+  /** Code, name, rank, category or tag — the things a listing is known by. */
+  const needle = query.trim().toLowerCase();
+  const shown = needle
+    ? products.filter(
+        (p) =>
+          p.code.toLowerCase().includes(needle) ||
+          p.name.toLowerCase().includes(needle) ||
+          p.rank.toLowerCase().includes(needle) ||
+          p.categoryName.toLowerCase().includes(needle) ||
+          p.tag.toLowerCase().includes(needle),
+      )
+    : products;
 
   return (
     <div className="flex flex-col gap-6">
@@ -399,6 +225,17 @@ export function AdminProducts({
             />
           </div>
           <div>
+            <label className={LABEL}>
+              Tên sản phẩm <span className="text-neutral-600">(không bắt buộc)</span>
+            </label>
+            <input
+              value={newName}
+              onChange={(e) => setNewName(e.target.value)}
+              placeholder="ACC VIP FULL SKIN"
+              className={FIELD}
+            />
+          </div>
+          <div>
             <label className={LABEL}>Danh mục</label>
             <select
               value={categorySlug}
@@ -411,15 +248,6 @@ export function AdminProducts({
                 </option>
               ))}
             </select>
-          </div>
-          <div>
-            <label className={LABEL}>Rank</label>
-            <input
-              value={rank}
-              onChange={(e) => setRank(e.target.value)}
-              placeholder="GOLD 1"
-              className={FIELD}
-            />
           </div>
           <div>
             <label className={LABEL}>Giá bán</label>
@@ -444,6 +272,71 @@ export function AdminProducts({
           </div>
         </div>
 
+        <div>
+          <label className={LABEL}>
+            Mô tả <span className="text-neutral-600">(không bắt buộc)</span>
+          </label>
+          <textarea
+            value={newDescription}
+            onChange={(e) => setNewDescription(e.target.value)}
+            rows={2}
+            placeholder="Acc full access, mail gốc, đổi được toàn bộ thông tin…"
+            className={FIELD}
+          />
+        </div>
+
+        {/* The sign-in an NFA account hands its buyer by itself. Offered here
+            because this is the moment the shop has it open in front of them;
+            it can equally be typed later on the account's own page. */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label className={LABEL}>
+              Tài khoản đăng nhập giao khách{" "}
+              <span className="text-neutral-600">
+                (tag NFA giao tự động — không bắt buộc, nhập sau cũng được)
+              </span>
+            </label>
+            <input
+              value={newLoginUser}
+              onChange={(e) => setNewLoginUser(e.target.value)}
+              autoComplete="off"
+              placeholder="riot_user"
+              className={`${FIELD} font-mono`}
+            />
+          </div>
+          <div>
+            <label className={LABEL}>Mật khẩu giao khách</label>
+            <input
+              value={newLoginPass}
+              onChange={(e) => setNewLoginPass(e.target.value)}
+              autoComplete="off"
+              placeholder="nhập cùng tài khoản"
+              className={`${FIELD} font-mono`}
+            />
+          </div>
+        </div>
+
+        <div>
+          <label className={LABEL}>
+            Ảnh sản phẩm <span className="text-neutral-600">(không bắt buộc — trống thì dùng ảnh theo mã)</span>
+          </label>
+          <input
+            value={newImage}
+            onChange={(e) => setNewImage(e.target.value)}
+            placeholder="/sites/…/images/account/VLR9999.webp"
+            aria-label="Đường dẫn ảnh sản phẩm"
+            className={FIELD}
+          />
+          <AdminImagePicker
+            uploading={uploadingNew}
+            value={newImage}
+            onPick={async (file) => {
+              const url = await uploadNewImage(file);
+              if (url) setNewImage(url);
+            }}
+          />
+        </div>
+
         {msg ? (
           <p
             role="alert"
@@ -466,505 +359,126 @@ export function AdminProducts({
         </button>
       </form>
 
-      <div className="w-full overflow-x-auto rounded-2xl border border-white/10 bg-neutral-900/40">
-        <table className="w-full min-w-[980px] text-left">
-          <thead>
-            <tr className="border-b border-white/10">
-              {["Mã", "Ảnh", "Danh mục", "Rank", "Tag", "Súng", "Giá", "Trạng thái", ""].map((h) => (
-                <th
-                  key={h}
-                  className="px-5 py-3.5 text-[10px] font-black uppercase tracking-widest text-neutral-500 whitespace-nowrap"
-                >
-                  {h}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {products.map((p) => (
-              <Fragment key={p.code}>
-                <tr className="border-b border-white/5 last:border-0">
-                  <td className="px-5 py-3 text-xs font-black">
-                    {/* Straight to the account's own desk — every editor on
-                        one page instead of one-at-a-time strips in the table. */}
-                    <Link
-                      href={`/admin/products/${encodeURIComponent(p.code)}`}
-                      className="text-white hover:text-rose-400 transition-colors"
-                    >
-                      #{p.code}
-                    </Link>
-                  </td>
-                  <td className="px-5 py-3">
-                    <button
-                      type="button"
-                      onClick={() => toggleImage(p)}
-                      title="Sửa ảnh của tài khoản này"
-                      className={`relative block h-9 w-14 overflow-hidden rounded-lg border transition-colors ${
-                        editingImage === p.code
-                          ? "border-[var(--brand)]/60"
-                          : "border-white/10 hover:border-white/30"
-                      }`}
-                    >
-                      {p.imageUrl ? (
-                        <Image
-                          src={p.imageUrl}
-                          alt={p.code}
-                          fill
-                          sizes="56px"
-                          className="object-cover"
-                        />
-                      ) : (
-                        // No upload yet: the storefront is showing the by-code
-                        // default, so an icon says "nothing chosen" better than
-                        // previewing a file that may not exist.
-                        <span className="grid h-full w-full place-items-center bg-neutral-950 text-neutral-600">
-                          <ImageIcon size={14} />
-                        </span>
-                      )}
-                    </button>
-                  </td>
-                  <td className="px-5 py-3 text-xs text-neutral-400">{p.categoryName}</td>
-                  <td className="px-5 py-3 text-xs text-neutral-300">{p.rank}</td>
-                  <td className="px-5 py-3">
-                    <button
-                      type="button"
-                      onClick={() => toggleTag(p)}
-                      title="Sửa tag góc phải của card"
-                      className={`inline-flex items-center rounded-lg border px-2.5 py-1 text-[11px] font-bold whitespace-nowrap transition-colors ${
-                        editingTag === p.code
-                          ? "border-[var(--brand)]/60 bg-[var(--brand)]/10 text-white"
-                          : p.tag
-                            ? "border-[var(--brand)]/40 bg-[var(--brand)]/10 text-[#ff6c88] hover:border-[var(--brand)]/60"
-                            : "border-white/10 text-neutral-500 hover:border-white/25 hover:text-white"
-                      }`}
-                    >
-                      {p.tag || "Thêm"}
-                    </button>
-                  </td>
-                  <td className="px-5 py-3">
-                    <button
-                      type="button"
-                      onClick={() => toggleSkins(p)}
-                      title="Sửa danh sách súng của tài khoản này"
-                      className={`inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-[11px] font-bold whitespace-nowrap transition-colors ${
-                        editingSkins === p.code
-                          ? "border-[var(--brand)]/60 bg-[var(--brand)]/10 text-white"
-                          : "border-white/10 text-neutral-300 hover:border-white/25 hover:text-white"
-                      }`}
-                    >
-                      <Swords size={12} />
-                      {/* The count is the useful figure at a glance; "Thêm" is
-                          what the button does when there is nothing to count. */}
-                      {p.skinNames.length > 0 ? `${p.skinNames.length} súng` : "Thêm"}
-                    </button>
-                  </td>
-                  <td className="px-5 py-3 text-xs font-bold text-white">
-                    {formatVnd(p.price)}đ
-                  </td>
-                  <td className="px-5 py-3">
-                    <select
-                      value={p.status}
-                      disabled={busy}
-                      onChange={(e) =>
-                        call("PATCH", { code: p.code, status: e.target.value })
-                      }
-                      className="rounded-lg border border-white/10 bg-neutral-950 px-2 py-1 text-[11px] font-bold text-neutral-200"
-                    >
-                      {Object.entries(STATUS_LABEL).map(([value, label]) => (
-                        <option key={value} value={value} className="bg-neutral-900">
-                          {label}
-                        </option>
-                      ))}
-                    </select>
-                  </td>
-                  <td className="px-5 py-3 text-right">
-                    {arming === p.code ? (
-                      // The armed state spells out what will happen to this
-                      // particular row, because the two outcomes differ and the
-                      // admin cannot tell them apart from the table alone.
-                      <div className="flex items-center justify-end gap-2">
-                        <span className="text-[10px] font-bold text-neutral-400 whitespace-nowrap">
-                          {p.orderCount > 0
-                            ? `Giữ ${p.orderCount} đơn cũ?`
-                            : "Xoá hẳn?"}
-                        </span>
-                        <button
-                          type="button"
-                          disabled={busy}
-                          onClick={() => handleDelete(p)}
-                          className="h-7 px-2.5 rounded-lg bg-red-500/90 hover:bg-red-500 disabled:opacity-60 transition-colors text-[10px] font-black uppercase tracking-widest text-white"
-                        >
-                          Xoá
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setArming(null)}
-                          className="h-7 px-2.5 rounded-lg border border-white/10 hover:bg-white/5 transition-colors text-[10px] font-black uppercase tracking-widest text-neutral-300"
-                        >
-                          Huỷ
-                        </button>
-                      </div>
-                    ) : (
-                      <span className="inline-flex items-center gap-1">
-                        <Link
-                          href={`/admin/products/${encodeURIComponent(p.code)}`}
-                          title="Mở trang chi tiết"
-                          aria-label={`Chi tiết tài khoản ${p.code}`}
-                          className="p-2 rounded-lg text-neutral-500 hover:text-rose-400 hover:bg-rose-500/10 transition-colors inline-flex"
-                        >
-                          <Eye size={14} />
-                        </Link>
-                        <button
-                          type="button"
-                          disabled={busy}
-                          title={
-                            p.orderCount > 0
-                              ? `Xoá khỏi cửa hàng — ${p.orderCount} đơn cũ được giữ lại`
-                              : "Xoá sản phẩm"
-                          }
-                          onClick={() => setArming(p.code)}
-                          className="p-2 rounded-lg text-neutral-500 hover:text-red-400 hover:bg-red-500/10 disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-neutral-500 transition-colors"
-                        >
-                          <Trash2 size={14} />
-                        </button>
-                      </span>
-                    )}
-                  </td>
-                </tr>
+      {/* Drawn whenever there is anything to find: the shop asked for it while
+          holding two accounts, which is already enough to want it. */}
+      {products.length > 0 ? (
+        <AdminSearch
+          value={query}
+          onChange={setQuery}
+          placeholder="Tìm theo mã, rank, danh mục hoặc tag…"
+          label="Tìm tài khoản"
+        />
+      ) : null}
 
-                {/* The skin list, edited as plain text under its own row. A
-                    line per weapon rather than a field per weapon: the shop
-                    reads them off an inventory screen and types them straight
-                    down, and pasting the lot at once has to work. */}
-                {editingSkins === p.code ? (
-                  <tr className="border-b border-white/5 bg-neutral-950/60">
-                    <td colSpan={9} className="px-5 py-4">
-                      <div className="flex flex-col gap-3">
-                        {/* Three lists, one per inventory tab. Typed the same
-                            way — a line per item — and saved together. */}
-                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-                          <div>
-                            <label className={LABEL}>
-                              Súng của #{p.code} — mỗi dòng một cây
-                            </label>
-                            <textarea
-                              value={skinText}
-                              onChange={(e) => setSkinText(e.target.value)}
-                              rows={6}
-                              spellCheck={false}
-                              placeholder={"M200 Dominator\nM4A1-S Prism Beast\nAK12-Knife Iron Spider"}
-                              className={`${FIELD} resize-y leading-relaxed`}
-                            />
-                          </div>
-                          <div>
-                            <label className={LABEL}>Nhân vật</label>
-                            <textarea
-                              value={characterText}
-                              onChange={(e) => setCharacterText(e.target.value)}
-                              rows={6}
-                              spellCheck={false}
-                              placeholder={"Nikita\nSFG"}
-                              className={`${FIELD} resize-y leading-relaxed`}
-                            />
-                          </div>
-                          <div>
-                            <label className={LABEL}>Trang bị</label>
-                            <textarea
-                              value={gearText}
-                              onChange={(e) => setGearText(e.target.value)}
-                              rows={6}
-                              spellCheck={false}
-                              placeholder={"C4 Vàng\nBăng đạn mở rộng"}
-                              className={`${FIELD} resize-y leading-relaxed`}
-                            />
-                          </div>
-                        </div>
-                        <p className="text-[11px] text-neutral-500">
-                          Card ngoài cửa hàng chỉ in súng — {SKIN_CHIP_COUNT} tên đầu,
-                          phần còn lại gộp thành “+N” — nên xếp cây đắt giá nhất lên
-                          trên. Nhân vật và Trang bị chỉ hiện trong kho đồ ở trang chi
-                          tiết. Để trống danh sách nào rồi lưu là xoá danh sách đó.
-                        </p>
-                        <div className="flex gap-2">
-                          <button
-                            type="button"
-                            disabled={busy}
-                            onClick={() => handleSaveSkins(p)}
-                            className="h-9 px-4 rounded-xl bg-[var(--brand)] hover:bg-[var(--brand-dark)] disabled:opacity-70 transition-colors text-[10px] font-black uppercase tracking-widest text-white"
-                          >
-                            {busy ? "Đang lưu…" : "Lưu danh sách"}
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => setEditingSkins(null)}
-                            className="h-9 px-4 rounded-xl border border-white/10 hover:bg-white/5 transition-colors text-[10px] font-black uppercase tracking-widest text-neutral-300"
-                          >
-                            Huỷ
-                          </button>
-                        </div>
-                      </div>
-                    </td>
-                  </tr>
-                ) : null}
+      {shown.length === 0 ? (
+        <p className="rounded-2xl border border-dashed border-white/10 bg-white/[0.02] px-5 py-10 text-center text-sm text-neutral-500">
+          {needle
+            ? `Không có tài khoản nào khớp "${query.trim()}".`
+            : "Chưa có tài khoản nào."}
+        </p>
+      ) : null}
 
-                {/* The picture editor. Choosing a file uploads and saves in one
-                    motion; the path field is for pasting a link by hand, and
-                    saving it empty goes back to the by-code default. */}
-                {editingImage === p.code ? (
-                  <tr className="border-b border-white/5 bg-neutral-950/60">
-                    <td colSpan={9} className="px-5 py-4">
-                      <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
-                        <div className="relative aspect-[16/10] w-full max-w-[240px] shrink-0 overflow-hidden rounded-xl border border-white/10 bg-neutral-950">
-                          {imageDraft ? (
-                            <Image
-                              src={imageDraft}
-                              alt={p.code}
-                              fill
-                              sizes="240px"
-                              className="object-cover"
-                            />
-                          ) : (
-                            <span className="grid h-full w-full place-items-center text-[11px] font-bold text-neutral-600">
-                              Ảnh mặc định theo mã
-                            </span>
-                          )}
-                        </div>
+      {/* One line per account, the same shelf the software list keeps: what
+          it is, whether it is on sale, and the two verbs. Everything else —
+          tag, chỉ số, súng, ảnh, giá — lives on the detail page the Sửa
+          button opens; it used to be inlined here too, which made every row
+          a whole form and the list a scroll. */}
+      {shown.map((p) => (
+        <div
+          key={p.code}
+          className="rounded-2xl border border-white/10 bg-neutral-900/40 flex flex-wrap items-center gap-3 px-5 py-4"
+        >
+          {/* The cover, at the tile size the software and category lists
+              wear, so the three shelves read as one. */}
+          <span className="relative h-10 w-16 shrink-0 overflow-hidden rounded-lg border border-white/10 bg-neutral-950">
+            {p.imageUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={p.imageUrl} alt="" className="h-full w-full object-cover" />
+            ) : (
+              <span className="grid h-full w-full place-items-center text-neutral-600">
+                <ImageIcon size={14} />
+              </span>
+            )}
+          </span>
 
-                        <div className="flex w-full flex-col gap-3">
-                          <div>
-                            <label className={LABEL}>Ảnh của #{p.code}</label>
-                            <input
-                              value={imageDraft}
-                              onChange={(e) => setImageDraft(e.target.value)}
-                              placeholder="/uploads/accounts/… hoặc để trống dùng ảnh mặc định"
-                              className={FIELD}
-                            />
-                          </div>
-                          <div className="flex flex-wrap gap-2">
-                            <button
-                              type="button"
-                              disabled={busy}
-                              onClick={() => imageFileRef.current?.click()}
-                              className="inline-flex items-center gap-1.5 h-9 px-4 rounded-xl bg-[var(--brand)] hover:bg-[var(--brand-dark)] disabled:opacity-70 transition-colors text-[10px] font-black uppercase tracking-widest text-white"
-                            >
-                              <Upload size={12} />
-                              Chọn từ máy
-                            </button>
-                            <button
-                              type="button"
-                              disabled={busy}
-                              onClick={() => handleSaveImage(p, imageDraft)}
-                              className="h-9 px-4 rounded-xl border border-white/10 hover:bg-white/5 disabled:opacity-50 transition-colors text-[10px] font-black uppercase tracking-widest text-neutral-200"
-                            >
-                              Lưu đường dẫn
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => setEditingImage(null)}
-                              className="h-9 px-4 rounded-xl border border-white/10 hover:bg-white/5 transition-colors text-[10px] font-black uppercase tracking-widest text-neutral-300"
-                            >
-                              Huỷ
-                            </button>
-                          </div>
-                          <p className="text-[11px] text-neutral-500">
-                            Chọn ảnh từ máy là lưu luôn. Ảnh hiện ở card ngoài cửa
-                            hàng, trang chi tiết và ảnh chia sẻ SEO.
-                          </p>
-
-                          {/* Extra screenshots: what the detail gallery's
-                              arrows page through. Separate from the main
-                              picture on purpose — that one is the card face,
-                              these are the tour behind it. */}
-                          <div className="border-t border-white/5 pt-3">
-                            <label className={LABEL}>
-                              Ảnh phụ ({p.gallery.length}/12) — khách lướt bằng mũi
-                              tên trên trang chi tiết
-                            </label>
-                            <div className="flex flex-wrap items-center gap-2">
-                              {p.gallery.map((g) => (
-                                <span
-                                  key={g.id}
-                                  className="group/thumb relative block h-12 w-[76px] overflow-hidden rounded-lg border border-white/10"
-                                >
-                                  <Image
-                                    src={g.url}
-                                    alt=""
-                                    fill
-                                    sizes="76px"
-                                    className="object-cover"
-                                  />
-                                  <button
-                                    type="button"
-                                    disabled={busy}
-                                    title="Bỏ ảnh này"
-                                    onClick={() => handleGalleryDelete(p, g.id)}
-                                    className="absolute inset-0 grid place-items-center bg-black/70 text-red-400 opacity-0 transition-opacity group-hover/thumb:opacity-100"
-                                  >
-                                    <Trash2 size={14} />
-                                  </button>
-                                </span>
-                              ))}
-                              <button
-                                type="button"
-                                disabled={busy || p.gallery.length >= 12}
-                                onClick={() => galleryFileRef.current?.click()}
-                                className="grid h-12 w-[76px] place-items-center rounded-lg border border-dashed border-white/20 text-neutral-500 transition-colors hover:border-white/40 hover:text-white disabled:opacity-40"
-                              >
-                                <Plus size={16} />
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-
-                        <input
-                          ref={imageFileRef}
-                          type="file"
-                          accept="image/png,image/jpeg,image/webp"
-                          hidden
-                          onChange={(e) => {
-                            const file = e.target.files?.[0];
-                            e.target.value = "";
-                            if (file) void handleImageFile(p, file);
-                          }}
-                        />
-                        <input
-                          ref={galleryFileRef}
-                          type="file"
-                          accept="image/png,image/jpeg,image/webp"
-                          hidden
-                          onChange={(e) => {
-                            const file = e.target.files?.[0];
-                            e.target.value = "";
-                            if (file) void handleGalleryFile(p, file);
-                          }}
-                        />
-                      </div>
-                    </td>
-                  </tr>
-                ) : null}
-
-                {/* The tag & stats editor: the pieces of card-face metadata
-                    that are typed rather than uploaded — the corner pill and
-                    the strip's two labelled numbers. Saved empty, each comes
-                    off the card. */}
-                {editingTag === p.code ? (
-                  <tr className="border-b border-white/5 bg-neutral-950/60">
-                    <td colSpan={9} className="px-5 py-4">
-                      <div className="flex flex-col gap-3">
-                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-[minmax(0,320px)_120px_120px]">
-                          <div>
-                            <label className={LABEL}>
-                              Tag góc phải card #{p.code}
-                            </label>
-                            <input
-                              value={tagDraft}
-                              onChange={(e) => setTagDraft(e.target.value)}
-                              maxLength={30}
-                              placeholder="DROP MAIL — trống là gỡ"
-                              className={FIELD}
-                            />
-                          </div>
-                          <div>
-                            <label className={LABEL}>VIP</label>
-                            <input
-                              inputMode="numeric"
-                              value={vipDraft}
-                              onChange={(e) => setVipDraft(e.target.value)}
-                              placeholder="7"
-                              className={FIELD}
-                            />
-                          </div>
-                          <div>
-                            <label className={LABEL}>VIP Ingame</label>
-                            <input
-                              inputMode="numeric"
-                              value={vipIngameDraft}
-                              onChange={(e) => setVipIngameDraft(e.target.value)}
-                              placeholder="9"
-                              className={FIELD}
-                            />
-                          </div>
-                        </div>
-                        <p className="text-[11px] text-neutral-500">
-                          VIP và VIP Ingame hiện trên dải chỉ số của card, cạnh
-                          Rank. Để trống ô nào thì card giấu chỉ số đó.
-                        </p>
-                        <div className="flex flex-wrap items-center gap-2">
-                          <button
-                            type="button"
-                            disabled={busy}
-                            onClick={() => handleSaveTag(p)}
-                            className="h-9 px-4 rounded-xl bg-[var(--brand)] hover:bg-[var(--brand-dark)] disabled:opacity-70 transition-colors text-[10px] font-black uppercase tracking-widest text-white"
-                          >
-                            {busy ? "Đang lưu…" : "Lưu tag"}
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => setEditingTag(null)}
-                            className="h-9 px-4 rounded-xl border border-white/10 hover:bg-white/5 transition-colors text-[10px] font-black uppercase tracking-widest text-neutral-300"
-                          >
-                            Huỷ
-                          </button>
-                          {/* The one value this shop actually uses, one click
-                              away instead of retyped each time. */}
-                          <button
-                            type="button"
-                            onClick={() => setTagDraft("DROP MAIL")}
-                            className="h-9 px-3 rounded-xl border border-[var(--brand)]/40 bg-[var(--brand)]/10 hover:bg-[var(--brand)]/20 transition-colors text-[10px] font-black uppercase tracking-widest text-[#ff6c88]"
-                          >
-                            ✉ Drop Mail
-                          </button>
-                        </div>
-                      </div>
-                    </td>
-                  </tr>
-                ) : null}
-              </Fragment>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Only drawn when there is something in it. A permanently visible
-          "Đã xoá (0)" would be one more thing to read past on a screen whose
-          job is the table above. */}
-      {removed.length > 0 ? (
-        <div className="rounded-2xl border border-white/10 bg-neutral-900/40 overflow-hidden">
-          <div className="px-5 py-3.5 border-b border-white/10">
-            <span className="text-[10px] font-black uppercase tracking-widest text-neutral-500">
-              Đã xoá ({removed.length})
-            </span>
-            <p className="text-[11px] text-neutral-500 mt-1">
-              Không hiện ngoài cửa hàng. Đơn hàng cũ vẫn xem được, và khôi phục
-              lại thì tài khoản trở về đúng trạng thái trước khi xoá.
+          <div className="min-w-0 flex-1">
+            <Link
+              href={`/admin/products/${encodeURIComponent(p.code)}`}
+              className="group inline-flex items-center gap-1.5"
+            >
+              <p className="text-sm font-black text-white truncate transition-colors group-hover:text-rose-400">
+                #{p.code}
+                {p.name ? ` — ${p.name}` : ""}
+              </p>
+              <Eye
+                size={13}
+                className="shrink-0 text-neutral-600 transition-colors group-hover:text-rose-400"
+              />
+            </Link>
+            <p className="text-[11px] text-neutral-500 mt-0.5">
+              {p.categoryName} · {formatVnd(p.price)}đ
+              {p.rank ? ` · ${p.rank}` : ""}
+              {p.tag ? ` · ${p.tag}` : ""}
+              {/* Said on the shelf, not only on the detail page: an NFA
+                  account sold without this hands its buyer nothing. Other
+                  tags are handed over in person and need no line here. */}
+              {deliversAutomatically(p.tag) && !p.hasLogin ? (
+                <span className="text-amber-400"> · chưa có TK đăng nhập</span>
+              ) : null}
             </p>
           </div>
-          <ul>
-            {removed.map((p) => (
-              <li
-                key={p.code}
-                className="flex flex-wrap items-center gap-x-4 gap-y-2 px-5 py-3 border-b border-white/5 last:border-0"
-              >
-                <span className="text-xs font-black text-neutral-300">#{p.code}</span>
-                <span className="text-xs text-neutral-500">{p.categoryName}</span>
-                <span className="text-xs text-neutral-500">{p.rank}</span>
-                <span className="text-[11px] text-neutral-600">
-                  Xoá ngày {p.deletedLabel} · {p.orderCount} đơn
-                </span>
-                <button
-                  type="button"
-                  disabled={busy}
-                  onClick={() => handleRestore(p)}
-                  className="ml-auto inline-flex items-center gap-1.5 h-8 px-3 rounded-lg border border-white/10 hover:bg-white/5 disabled:opacity-50 transition-colors text-[10px] font-black uppercase tracking-widest text-neutral-200"
-                >
-                  <RotateCcw size={12} />
-                  Khôi phục
-                </button>
-              </li>
+
+          <select
+            value={p.status}
+            disabled={busy}
+            aria-label={`Trạng thái bán của ${p.code}`}
+            onChange={(e) => call("PATCH", { code: p.code, status: e.target.value })}
+            className={MINI}
+          >
+            {Object.entries(STATUS_LABEL).map(([value, label]) => (
+              <option key={value} value={value} className="bg-neutral-900">
+                {label}
+              </option>
             ))}
-          </ul>
+          </select>
+
+          <Link
+            href={`/admin/products/${encodeURIComponent(p.code)}`}
+            className="h-8 px-3 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 text-[10px] font-black uppercase tracking-widest text-neutral-300 transition-colors inline-flex items-center"
+          >
+            Sửa
+          </Link>
+
+          <button
+            type="button"
+            disabled={busy}
+            title="Xoá tài khoản"
+            aria-label={`Xoá ${p.code}`}
+            onClick={() => setRemoving(p)}
+            className="p-2 rounded-lg text-neutral-500 hover:text-red-400 hover:bg-red-500/10 disabled:opacity-30 transition-colors"
+          >
+            <Trash2 size={14} />
+          </button>
         </div>
-      ) : null}
+      ))}
+
+      <ConfirmDialog
+        open={removing !== null}
+        danger
+        pending={busy}
+        title="Xoá tài khoản?"
+        body={
+          removing
+            ? removing.orderCount > 0
+              ? `#${removing.code} rời kệ ngay. ${removing.orderCount} đơn cũ vẫn nguyên, và tài khoản khôi phục được.`
+              : `#${removing.code} chưa có đơn nào nên sẽ bị xóa hẳn và không khôi phục được.`
+            : ""
+        }
+        confirmLabel="Xoá tài khoản"
+        onCancel={() => setRemoving(null)}
+        onConfirm={() => removing && handleDelete(removing)}
+      />
+
     </div>
   );
 }

@@ -1,12 +1,22 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Headphones, RefreshCw, ShieldCheck, X, Zap } from "lucide-react";
+import { Headphones, Lock, RefreshCw, ShieldCheck, X, Zap } from "lucide-react";
+
+import { productHref } from "@/lib/routes";
+
 import { formatVnd } from "./productData";
 
 export interface AccountDetail {
   code: string;
+  /** The shop's own title; "" falls back to "Mã #{code}". */
+  name: string;
+  /** The shop's write-up as running text, for the panel's two-line blurb. */
+  descriptionText: string;
+  /** The product half of its address: /{category-slug}/{slug}. */
+  slug: string;
   /** The shop's uploaded picture, or null to fall back to the by-code path. */
   imageUrl: string | null;
   /** Extra screenshots after the main picture; the gallery arrows page through. */
@@ -19,8 +29,8 @@ export interface AccountDetail {
   cards: number;
   sprays: number;
   level: number;
-  vp: number;
-  rp: number;
+  vip: number;
+  vipIngame: number;
   kc: number;
   tag: string | null;
   mailType: string;
@@ -38,10 +48,6 @@ export interface AccountBuyPanelProps {
   account: AccountDetail;
 }
 
-const STAT_ROW_CLASS = "flex items-center justify-between py-2.5 border-b border-white/5";
-const STAT_LABEL_CLASS = "text-[11px] font-black uppercase tracking-widest text-neutral-500";
-const STAT_VALUE_CLASS = "text-sm font-bold text-white";
-
 /** The software panel's four reassurances, with the delivery line made ours. */
 const TRUST = [
   { icon: Zap, label: "Giao acc tự động" },
@@ -49,6 +55,10 @@ const TRUST = [
   { icon: RefreshCw, label: "Bảo hành tài khoản" },
   { icon: Headphones, label: "Hỗ trợ 24/7" },
 ];
+
+const STAT_ROW_CLASS = "flex items-center justify-between py-2.5 border-b border-white/5";
+const STAT_LABEL_CLASS = "text-[11px] font-black uppercase tracking-widest text-neutral-500";
+const STAT_VALUE_CLASS = "text-sm font-bold text-white";
 
 /**
  * Right-hand purchase panel on the account-detail page: stat rows, price
@@ -81,6 +91,8 @@ export function AccountBuyPanel({ account }: AccountBuyPanelProps) {
   const [buying, setBuying] = useState(false);
   const [buyError, setBuyError] = useState<string | null>(null);
   const [orderCode, setOrderCode] = useState<string | null>(null);
+  /** Whether the sign-in went out by itself (NFA), or the shop hands it over. */
+  const [loginReady, setLoginReady] = useState(false);
 
   const [applied, setApplied] = useState<{ cut: number; total: number } | null>(null);
   const [voucherError, setVoucherError] = useState<string | null>(null);
@@ -153,10 +165,11 @@ export function AccountBuyPanel({ account }: AccountBuyPanelProps) {
         error?: string;
         orderCode?: string;
         balance?: number;
+        loginReady?: boolean;
       };
 
       if (response.status === 401) {
-        router.push(`/login?next=/account/${account.code}`);
+        router.push(`/login?next=${encodeURIComponent(productHref(account.categorySlug, account.slug))}`);
         return;
       }
       if (!response.ok) {
@@ -165,12 +178,15 @@ export function AccountBuyPanel({ account }: AccountBuyPanelProps) {
       }
 
       setOrderCode(data.orderCode ?? "");
+      setLoginReady(data.loginReady === true);
       setBalanceState(data.balance ?? 0);
+      // Long enough to read which of the two things the second line says —
+      // the sign-in is waiting on /orders, or the shop has to be asked.
       window.setTimeout(() => {
         // refresh() so the catalogue and header re-render without the sold item.
         router.refresh();
         router.push("/orders");
-      }, 1400);
+      }, 2200);
     } catch {
       setBuyError("Không kết nối được máy chủ");
     } finally {
@@ -186,13 +202,17 @@ export function AccountBuyPanel({ account }: AccountBuyPanelProps) {
   const amountToTopUp = Math.max(payable - balance, 0);
   const canAfford = balance >= payable;
 
-  // Rows with nothing to say stay off the page: a fresh account showing
-  // "VIP 0 / KC 0" would be noise dressed as facts. Labels follow the card's
-  // strip — the vp/rp columns carry VIP and VIP INGAME on this shop.
+  // VIP and VIP INGAME always print their labels, matching the card's strip:
+  // an unfilled one simply has nothing after it. Level and KC still leave the
+  // page at zero — "Level 0" would be noise dressed as a fact.
   const numericStats = [
     { label: "Level", value: String(account.level), show: account.level > 0 },
-    { label: "VIP", value: String(account.vp), show: account.vp > 0 },
-    { label: "VIP Ingame", value: String(account.rp), show: account.rp > 0 },
+    { label: "VIP", value: account.vip > 0 ? String(account.vip) : "", show: true },
+    {
+      label: "VIP Ingame",
+      value: account.vipIngame > 0 ? String(account.vipIngame) : "",
+      show: true,
+    },
     { label: "KC", value: formatVnd(account.kc), show: account.kc > 0 },
   ].filter((s) => s.show);
 
@@ -202,8 +222,19 @@ export function AccountBuyPanel({ account }: AccountBuyPanelProps) {
           software page leads with its status pill. */}
       {account.tag !== null && (
         <span className="self-start inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-3 py-1.5">
-          <span className="text-[10px] font-black uppercase tracking-widest text-[#ff6c88]">
-            ✉ {account.tag}
+          <span
+            className={`inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest ${
+              account.tag.toUpperCase() === "NFA"
+                ? "text-emerald-400"
+                : "text-[#ff6c88]"
+            }`}
+          >
+            {account.tag.toUpperCase() === "NFA" ? (
+              <Lock size={11} strokeWidth={2.75} aria-hidden />
+            ) : (
+              <span aria-hidden>✉</span>
+            )}
+            {account.tag}
           </span>
           {account.mailType ? (
             <span className="text-[10px] font-bold text-neutral-400">
@@ -215,11 +246,11 @@ export function AccountBuyPanel({ account }: AccountBuyPanelProps) {
 
       <div className="space-y-3">
         <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-white">
-          Mã #{account.code}
+          {account.name || `Mã #${account.code}`}
         </h1>
         <p className="text-sm leading-relaxed text-neutral-400 max-w-[560px]">
-          Tài khoản game nhiều vật phẩm, inventory đẹp và sẵn sàng giao ngay.
-          Thông tin tài khoản được kiểm tra trước khi bàn giao.
+          {account.descriptionText ||
+            "Tài khoản game nhiều vật phẩm, inventory đẹp và sẵn sàng giao ngay. Thông tin tài khoản được kiểm tra trước khi bàn giao."}
         </p>
       </div>
 
@@ -227,6 +258,8 @@ export function AccountBuyPanel({ account }: AccountBuyPanelProps) {
         <span className="pb-1 text-[10px] font-black uppercase tracking-widest text-neutral-500">
           Thông tin tài khoản:
         </span>
+        {/* The Rank row always prints its label, like the card's strip — an
+            account with no rank yet just shows nothing beside it. */}
         <div className={STAT_ROW_CLASS}>
           <span className={STAT_LABEL_CLASS}>Rank</span>
           <div className="flex flex-col items-end gap-1">
@@ -347,7 +380,7 @@ export function AccountBuyPanel({ account }: AccountBuyPanelProps) {
               </div>
               <div className="flex items-center gap-1.5 mt-1">
                 <span className="text-neutral-500">≡ Danh Mục:</span>
-                <span className="text-violet-400 font-bold uppercase">
+                <span className="text-[var(--menzu-accent)] font-bold uppercase">
                   {account.categoryName}
                 </span>
               </div>
@@ -379,7 +412,7 @@ export function AccountBuyPanel({ account }: AccountBuyPanelProps) {
                       setVoucherError(null);
                     }}
                     placeholder="Nhập mã voucher..."
-                    className="w-28 min-w-0 rounded-lg border border-white/10 bg-white/5 px-2.5 py-1.5 text-xs text-white outline-none focus:border-[var(--brand)]/60 placeholder-neutral-600 transition-colors"
+                    className="w-28 min-w-0 rounded-lg border border-white/10 bg-white/5 px-2.5 py-1.5 text-xs text-white outline-none focus:border-[var(--menzu-accent)]/60 placeholder-neutral-600 transition-colors"
                   />
                   <button
                     type="button"
@@ -421,7 +454,7 @@ export function AccountBuyPanel({ account }: AccountBuyPanelProps) {
 
               <div className="flex items-center justify-between">
                 <span className="text-sm font-black uppercase text-white">TỔNG THANH TOÁN</span>
-                <span className="text-base font-black text-[var(--brand)]">
+                <span className="text-base font-black text-[var(--menzu-accent)]">
                   {formatVnd(payable)} ₫
                 </span>
               </div>
@@ -460,6 +493,11 @@ export function AccountBuyPanel({ account }: AccountBuyPanelProps) {
               {orderCode ? (
                 <p className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-2.5 text-[12px] font-semibold text-emerald-400">
                   Mua thành công · Đơn {orderCode}
+                  <span className="mt-1 block font-medium text-emerald-300/90">
+                    {loginReady
+                      ? "Tài khoản và mật khẩu đăng nhập đã sẵn trong Lịch sử mua."
+                      : "Tài khoản bàn giao trực tiếp — liên hệ shop kèm mã đơn để nhận."}
+                  </span>
                 </p>
               ) : null}
 
@@ -470,17 +508,17 @@ export function AccountBuyPanel({ account }: AccountBuyPanelProps) {
                   type="button"
                   onClick={handleBuy}
                   disabled={buying || orderCode !== null}
-                  className="w-full rounded-2xl bg-[var(--brand)] hover:bg-[var(--brand-dark)] disabled:opacity-70 disabled:cursor-wait text-white font-black py-4 uppercase tracking-widest text-sm transition-colors flex items-center justify-center"
+                  className="w-full rounded-2xl bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] disabled:opacity-70 disabled:cursor-wait text-white font-black py-4 uppercase tracking-widest text-sm transition-colors flex items-center justify-center"
                 >
                   {buying ? "Đang xử lý…" : "Xác nhận mua"}
                 </button>
               ) : (
-                <a
+                <Link
                   href="/wallet"
-                  className="w-full rounded-2xl bg-[var(--brand)] hover:bg-[var(--brand-dark)] text-white font-black py-4 uppercase tracking-widest text-sm transition-colors flex items-center justify-center"
+                  className="w-full rounded-2xl bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] text-white font-black py-4 uppercase tracking-widest text-sm transition-colors flex items-center justify-center"
                 >
                   Nạp tiền
-                </a>
+                </Link>
               )}
             </div>
           </div>

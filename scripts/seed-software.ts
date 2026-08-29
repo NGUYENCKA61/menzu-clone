@@ -12,6 +12,7 @@
  * Prices and tier names are the ones on the brief's mockup, not invented.
  */
 import { db } from "@/lib/db";
+import { slugify } from "@/lib/slug";
 
 const TIERS = [
   { label: "1 ngày", durationHours: 24, price: 29_000 },
@@ -32,9 +33,6 @@ const SEEDS = [
     // Points at a page that exists in this clone rather than an invented
     // download host, so the button on the card goes somewhere real.
     downloadUrl: "/app/download",
-    // The two figures the brief's own sample prints for this product.
-    version: "Premium 2.4.1",
-    platform: "Windows 10 / 11",
   },
 ];
 
@@ -76,14 +74,13 @@ async function main() {
       where: { code: seed.code },
       create: {
         code: seed.code,
+        slug: slugify(seed.name) || seed.code.toLowerCase(),
         categoryId: category.id,
         productType: "SOFTWARE_GAME",
         name: seed.name,
         description: seed.description,
         softwareStatus: seed.softwareStatus,
         downloadUrl: seed.downloadUrl,
-        version: seed.version,
-        platform: seed.platform,
         // A tool has no rank; the column stays required for the accounts that
         // do have one.
         rank: "",
@@ -98,8 +95,6 @@ async function main() {
         description: seed.description,
         softwareStatus: seed.softwareStatus,
         downloadUrl: seed.downloadUrl,
-        version: seed.version,
-        platform: seed.platform,
         deletedAt: null,
       },
     });

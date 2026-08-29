@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { db } from "@/lib/db";
+import { deliverKeys } from "@/lib/licenseKeys";
 import { getCurrentUser } from "@/lib/session";
 import { getShopSettings } from "@/lib/settingsStore";
 
@@ -38,7 +39,9 @@ export async function POST() {
         where: { userId: user.id },
         include: {
           product: { select: { id: true, code: true, name: true, status: true, deletedAt: true } },
-          package: { select: { id: true, label: true, price: true } },
+          package: {
+            select: { id: true, label: true, price: true, durationHours: true },
+          },
         },
       });
       if (items.length === 0) throw new Error("EMPTY");
@@ -67,6 +70,8 @@ export async function POST() {
       await tx.user.update({ where: { id: user.id }, data: { balance: balanceAfter } });
 
       const orderCodes: string[] = [];
+      /** Lines the shelf could not cover, named so the reply can say which. */
+      const shortLines: string[] = [];
       for (const item of items) {
         const lineTotal = item.package.price * BigInt(item.quantity);
         const order = await tx.order.create({
@@ -76,6 +81,9 @@ export async function POST() {
             productId: item.product.id,
             packageId: item.package.id,
             quantity: item.quantity,
+            // The basket only ever holds software tiers, so every line is
+            // owed its keys.
+            keysOwed: item.quantity,
             method: "BUY_NOW",
             status: "PAID",
             listPrice: lineTotal,
@@ -85,6 +93,21 @@ export async function POST() {
           },
         });
         orderCodes.push(order.code);
+
+        // Keys move in the same transaction as the money, per line. A tier
+        // that is out does not stop the basket: the order stands, what is
+        // owed shows on the shop's key desk, and the reply names the line so
+        // the shopper is told rather than left to notice.
+        const delivered = await deliverKeys(tx, {
+          packageId: item.package.id,
+          orderId: order.id,
+          userId: user.id,
+          wanted: item.quantity,
+          durationHours: item.package.durationHours,
+        });
+        if (delivered < item.quantity) {
+          shortLines.push(item.product.name ?? item.product.code);
+        }
 
         // Software is a licence, so the listing stays up. Only the sold tally
         // moves.
@@ -114,13 +137,14 @@ export async function POST() {
 
       await tx.cartItem.deleteMany({ where: { userId: user.id } });
 
-      return { orderCodes, total, balanceAfter };
+      return { orderCodes, total, balanceAfter, shortLines };
     });
 
     return NextResponse.json({
       orderCodes: result.orderCodes,
       total: Number(result.total),
       balance: Number(result.balanceAfter),
+      pendingKeys: result.shortLines,
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : "";

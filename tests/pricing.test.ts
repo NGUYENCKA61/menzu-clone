@@ -28,6 +28,7 @@ describe("formatVnd", () => {
 describe("discountPct", () => {
   const make = (oldPrice: number, price: number): Product => ({
     code: "TEST",
+    href: "/tai-khoan-game/test",
     rank: "Unranked",
     skins: 0,
     tiers: [],
