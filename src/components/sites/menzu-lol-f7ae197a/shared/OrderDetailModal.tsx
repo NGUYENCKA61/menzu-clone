@@ -1,0 +1,701 @@
+"use client";
+
+import {
+  ArrowRight,
+  CalendarDays,
+  Check,
+  Copy,
+  Eye,
+  EyeOff,
+  Hash,
+  Info,
+  KeyRound,
+  Lock,
+  MessageCircle,
+  Receipt,
+  ShieldCheck,
+  User,
+  Wallet,
+  X,
+} from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import { createPortal } from "react-dom";
+
+import type { LoginHandover } from "@/lib/accountLogin";
+
+import { formatVnd } from "./productData";
+
+/**
+ * Everything the receipt prints, already shaped for the screen: dates as
+ * text, money as numbers, and the sign-in exactly as the order page decided
+ * it. Plain data, because it crosses from the server page into this client
+ * component.
+ */
+export interface OrderDetailData {
+  code: string;
+  /** The status pill's text and colours, decided by the page. */
+  statusLabel: string;
+  statusClass: string;
+  /** Settled — the one status under which a handover can exist at all. */
+  paid: boolean;
+  /** "28/08/2026" — formatted by the page so both agree on the locale. */
+  date: string;
+  total: number;
+  /**
+   * What the line was worth before any cut: the tier price for software,
+   * the crossed-out shelf price for an account — which the shop may leave
+   * at zero, or below the asking price, so it is only trusted when it is
+   * above what was paid.
+   */
+  listPrice: number;
+  quantity: number;
+  productName: string;
+  productCode: string;
+  productHref: string;
+  categoryName: string;
+  imageUrl: string | null;
+  isSoftware: boolean;
+  packageLabel: string | null;
+  productRank: string;
+  /** Software: the licence keys handed over, and how many are still owed. */
+  keys: string[];
+  keysPending: number;
+  /** Accounts: the sign-in, or the word that the shop hands it over itself. */
+  login: LoginHandover;
+}
+
+/*
+ * Every class below is one the account area already speaks — the ledger
+ * rows, the "Đơn hàng của bạn" frame, the wallet buttons — so the receipt
+ * reads as a page of this site rather than a sketch pasted over it. Two
+ * radii (xl for blocks, 2xl for the card), one label style, the row's own
+ * status chip, and the primary/ghost button pair from the account pages.
+ */
+const LABEL =
+  "flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-neutral-500";
+const GHOST_BTN =
+  "inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-3.5 text-[10px] font-black uppercase tracking-widest text-neutral-300 transition-colors hover:bg-white/10 hover:text-white";
+const CELL =
+  "border-t border-white/[0.06] px-4 py-4 text-sm text-neutral-200 sm:px-5";
+const FOCUSABLE =
+  'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+/*
+ * One scroll lock for however many receipts are open. Two can be — Tab out
+ * of one card and press Enter on the next row's button — and a per-card
+ * lock would let the second card's cleanup hand the page back its
+ * scrollbar while the first is still up, or the first's cleanup restore
+ * "hidden" as the value it found.
+ */
+let scrollLocks = 0;
+let savedOverflow = "";
+function lockScroll() {
+  if (scrollLocks++ === 0) {
+    savedOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+  }
+}
+function unlockScroll() {
+  if (--scrollLocks === 0) document.body.style.overflow = savedOverflow;
+}
+
+/** One value with its copy button; the password variant starts masked. */
+function HandoverBox({
+  label,
+  icon,
+  value,
+  secret = false,
+}: {
+  label: string;
+  icon: ReactNode;
+  value: string;
+  secret?: boolean;
+}) {
+  const [shown, setShown] = useState(!secret);
+  const [copied, setCopied] = useState(false);
+  const valueRef = useRef<HTMLSpanElement>(null);
+
+  useEffect(() => {
+    if (!copied) return;
+    const timer = window.setTimeout(() => setCopied(false), 1600);
+    return () => window.clearTimeout(timer);
+  }, [copied]);
+
+  async function copy() {
+    try {
+      await navigator.clipboard.writeText(value);
+      setCopied(true);
+    } catch {
+      // Refused clipboard: show the value and leave it selected, so one
+      // Ctrl+C finishes what the button could not.
+      setShown(true);
+      requestAnimationFrame(() => {
+        const node = valueRef.current;
+        const selection = window.getSelection();
+        if (!node || !selection) return;
+        const range = document.createRange();
+        range.selectNodeContents(node);
+        selection.removeAllRanges();
+        selection.addRange(range);
+      });
+    }
+  }
+
+  const name = label.toLowerCase();
+
+  return (
+    <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4 transition-colors hover:border-white/[0.12]">
+      <span className={`${LABEL} mb-2`}>
+        {icon}
+        {label}
+      </span>
+      {/* Value above the buttons on a phone; the pair would otherwise leave
+          the value a few characters of room. */}
+      <div className="flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
+        <span
+          ref={valueRef}
+          className="min-w-0 max-w-full truncate font-mono text-sm font-bold tracking-wide text-white"
+        >
+          {shown ? value : "•".repeat(Math.min(Math.max(value.length, 8), 18))}
+        </span>
+        <span className="flex shrink-0 items-center gap-2">
+          {secret ? (
+            <button
+              type="button"
+              onClick={() => setShown((s) => !s)}
+              className={GHOST_BTN}
+              aria-label={shown ? `Ẩn ${name}` : `Hiện ${name}`}
+            >
+              {shown ? (
+                <EyeOff className="h-3 w-3" />
+              ) : (
+                <Eye className="h-3 w-3" />
+              )}
+              {shown ? "Ẩn" : "Hiện"}
+            </button>
+          ) : null}
+          <button
+            type="button"
+            onClick={copy}
+            aria-label={copied ? `Đã chép ${name}` : `Sao chép ${name}`}
+            className={`${GHOST_BTN} ${
+              copied
+                ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/10 hover:text-emerald-400"
+                : ""
+            }`}
+          >
+            {copied ? (
+              <Check className="h-3 w-3" />
+            ) : (
+              <Copy className="h-3 w-3" />
+            )}
+            {copied ? "Đã chép" : "Sao chép"}
+          </button>
+          <span role="status" className="sr-only">
+            {copied ? `Đã sao chép ${name}` : ""}
+          </span>
+        </span>
+      </div>
+    </div>
+  );
+}
+
+function OverviewCell({
+  icon,
+  label,
+  className = "",
+  children,
+}: {
+  icon: ReactNode;
+  label: string;
+  className?: string;
+  children: ReactNode;
+}) {
+  return (
+    <div className={`p-4 sm:p-5 ${className}`}>
+      <span className={`${LABEL} mb-2.5`}>
+        {icon}
+        {label}
+      </span>
+      {children}
+    </div>
+  );
+}
+
+/**
+ * "Chi tiết đơn hàng": the receipt for one order, opened over the list.
+ *
+ * Built to the shop's reference sketch — a card over a blurred backdrop
+ * with a header, a four-cell overview, the product line as a table, the
+ * handover block (sign-in for an account, keys for a tool) and a support
+ * footer. The trigger is the "XEM ĐƠN HÀNG" button this component draws;
+ * the card lives in the same component so the list page stays a server
+ * component and hands over nothing but data.
+ *
+ * Esc and a click on the backdrop close it; focus moves into the card on
+ * open, cycles inside it, and returns to the button on close; the page
+ * behind it does not scroll while it is up. The card is portalled to
+ * `document.body`: the account frame's `<main>` is its own stacking
+ * context, and an overlay rendered inside it sat under the site header no
+ * matter its z-index.
+ */
+export function OrderDetailModal({
+  order,
+  supportHref,
+  children,
+  className,
+}: {
+  order: OrderDetailData;
+  supportHref: string;
+  /**
+   * The row that opens the receipt. Given, the whole row is the trigger and
+   * a link inside it (the product) still goes where it points; absent, the
+   * component draws its own "Xem đơn hàng" button.
+   */
+  children?: ReactNode;
+  className?: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const triggerRef = useRef<HTMLElement | null>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+  // A drag that starts on a key and ends past the card's edge is a
+  // selection, not a dismissal — only a press that began on the backdrop
+  // closes.
+  const pressedBackdrop = useRef(false);
+
+  useEffect(() => {
+    if (!open) return;
+    const panel = panelRef.current;
+    const opener = triggerRef.current;
+    panel?.focus();
+    lockScroll();
+
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        setOpen(false);
+        return;
+      }
+      if (event.key !== "Tab" || !panel) return;
+      const focusable = panel.querySelectorAll<HTMLElement>(FOCUSABLE);
+      if (focusable.length === 0) {
+        event.preventDefault();
+        return;
+      }
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      const active = document.activeElement;
+      if (event.shiftKey && (active === first || active === panel)) {
+        event.preventDefault();
+        last.focus();
+      } else if (
+        !event.shiftKey &&
+        (active === last || !panel.contains(active))
+      ) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      unlockScroll();
+      opener?.focus();
+    };
+  }, [open]);
+
+  // The crossed-out shelf price is only a discount when it is above what
+  // was paid; the receipt otherwise prices the line at what it cost.
+  const base = Math.max(order.listPrice, order.total);
+  const unitPrice =
+    order.quantity > 0 ? Math.round(base / order.quantity) : base;
+  const discount = Math.max(0, order.listPrice - order.total);
+  const iconClass = "h-3.5 w-3.5";
+  // The row's own rule: a tier for a tool, a rank for an account, nothing
+  // when the shop typed neither.
+  const chip = order.packageLabel ?? (order.productRank || null);
+
+  const setTrigger = (node: HTMLElement | null) => {
+    triggerRef.current = node;
+  };
+
+  return (
+    <>
+      {children ? (
+        <div
+          ref={setTrigger}
+          role="button"
+          tabIndex={0}
+          aria-haspopup="dialog"
+          aria-expanded={open}
+          onClick={(event) => {
+            // A press on the product link is a visit to the product.
+            if ((event.target as HTMLElement).closest("a, button")) return;
+            setOpen(true);
+          }}
+          onKeyDown={(event) => {
+            if (event.target !== event.currentTarget) return;
+            if (event.key === "Enter" || event.key === " ") {
+              event.preventDefault();
+              setOpen(true);
+            }
+          }}
+          className={className}
+        >
+          {children}
+        </div>
+      ) : (
+        <button
+          ref={setTrigger}
+          type="button"
+          onClick={() => setOpen(true)}
+          className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg bg-[var(--menzu-accent)] px-4 text-[10px] font-black uppercase tracking-widest text-white transition-colors hover:bg-[var(--menzu-accent-dark)]"
+        >
+          <Receipt className="h-3.5 w-3.5" />
+          Xem đơn hàng
+        </button>
+      )}
+
+      {open
+        ? createPortal(
+            <div
+              role="presentation"
+              onPointerDown={(event) => {
+                pressedBackdrop.current = event.target === event.currentTarget;
+              }}
+              onClick={(event) => {
+                if (
+                  event.target === event.currentTarget &&
+                  pressedBackdrop.current
+                )
+                  setOpen(false);
+              }}
+              className="order-modal-backdrop fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 p-4 backdrop-blur-md sm:p-8"
+            >
+              <div
+                ref={panelRef}
+                tabIndex={-1}
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby={`order-${order.code}-title`}
+                className="order-modal-card relative max-h-[calc(100dvh-2rem)] w-full max-w-[1150px] overflow-y-auto rounded-2xl border border-white/10 bg-[#101114] shadow-[0_25px_80px_rgba(0,0,0,0.7)] outline-none sm:max-h-[calc(100dvh-4rem)]"
+              >
+                {/* HEADER */}
+                <div className="flex items-center justify-between gap-4 border-b border-white/[0.06] px-5 py-5 sm:px-6">
+                  <div className="flex items-start gap-3">
+                    <span
+                      aria-hidden
+                      className="mt-1 h-5 w-[3px] shrink-0 rounded-full bg-[var(--menzu-accent)]"
+                    />
+                    <div>
+                      <h2
+                        id={`order-${order.code}-title`}
+                        className="text-lg font-black uppercase tracking-wider text-white sm:text-xl"
+                      >
+                        Chi tiết đơn hàng
+                      </h2>
+                      <p className="mt-1 text-xs text-neutral-500">
+                        Thông tin sản phẩm và dữ liệu bàn giao của đơn hàng.
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setOpen(false)}
+                    aria-label="Đóng"
+                    className="group grid h-10 w-10 shrink-0 place-items-center rounded-full border border-white/10 bg-white/5 text-neutral-300 transition-colors hover:bg-white/15 hover:text-white"
+                  >
+                    <X className="h-4 w-4 transition-transform duration-300 group-hover:rotate-90" />
+                  </button>
+                </div>
+
+                {/* BODY */}
+                <div className="p-5 sm:p-6">
+                  {/* OVERVIEW — two by two until the four cells have room
+                      for their labels on one line. */}
+                  <div className="mb-6 grid grid-cols-2 overflow-hidden rounded-xl border border-white/10 bg-white/[0.02] lg:grid-cols-[1.5fr_1fr_1fr_1fr]">
+                    <OverviewCell
+                      icon={<Hash className={iconClass} />}
+                      label="Mã đơn hàng"
+                      className="border-b border-r border-white/[0.06] lg:border-b-0"
+                    >
+                      <span className="font-mono text-[15px] font-bold tracking-wide text-white">
+                        {order.code}
+                      </span>
+                    </OverviewCell>
+                    <OverviewCell
+                      icon={<CalendarDays className={iconClass} />}
+                      label="Ngày mua"
+                      className="border-b border-white/[0.06] lg:border-b-0 lg:border-r"
+                    >
+                      <span className="text-[15px] font-bold tabular-nums text-white">
+                        {order.date}
+                      </span>
+                    </OverviewCell>
+                    <OverviewCell
+                      icon={<Wallet className={iconClass} />}
+                      label="Tổng thanh toán"
+                      className="border-r border-white/[0.06]"
+                    >
+                      <span className="text-xl font-black tabular-nums text-white">
+                        {formatVnd(order.total)}đ
+                      </span>
+                    </OverviewCell>
+                    <OverviewCell
+                      icon={<ShieldCheck className={iconClass} />}
+                      label="Trạng thái"
+                    >
+                      {/* The list row's chip, verbatim — the same order wears
+                          the same badge on both sides of the button. */}
+                      <span
+                        className={`inline-flex whitespace-nowrap rounded-lg border px-2 py-1 text-[10px] font-black uppercase tracking-wider ${order.statusClass}`}
+                      >
+                        {order.statusLabel}
+                      </span>
+                    </OverviewCell>
+                  </div>
+
+                  {/* PRODUCT */}
+                  <h3 className="mb-4 text-sm font-black uppercase tracking-wider text-white">
+                    Sản phẩm đã mua
+                  </h3>
+                  <div className="overflow-x-auto">
+                    <table className="w-full min-w-[640px] border-separate border-spacing-0 overflow-hidden rounded-xl border border-white/10">
+                      <thead>
+                        <tr>
+                          {[
+                            "Sản phẩm",
+                            "Gói dịch vụ",
+                            "Số lượng",
+                            "Đơn giá",
+                            "Thành tiền",
+                          ].map((head) => (
+                            <th
+                              key={head}
+                              className="whitespace-nowrap bg-white/[0.03] px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-neutral-500 sm:px-5"
+                            >
+                              {head}
+                            </th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr className="transition-colors hover:bg-white/[0.02]">
+                          <td className={CELL}>
+                            <div className="flex items-center gap-4">
+                              <span className="relative h-14 w-[84px] shrink-0 overflow-hidden rounded-xl border border-white/10 bg-neutral-950">
+                                {order.imageUrl ? (
+                                  <Image
+                                    src={order.imageUrl}
+                                    alt=""
+                                    fill
+                                    sizes="84px"
+                                    className="object-cover object-[85%_center]"
+                                  />
+                                ) : null}
+                              </span>
+                              {/* A table cell grows to fit its content, so the
+                                  ellipsis only works against a ceiling. */}
+                              <div className="min-w-0 max-w-[200px] md:max-w-[320px]">
+                                <Link
+                                  href={order.productHref}
+                                  className="mb-1 block truncate text-sm font-black text-white transition-colors hover:text-[var(--menzu-accent)]"
+                                >
+                                  {order.isSoftware
+                                    ? order.productName
+                                    : `#${order.productCode}`}
+                                </Link>
+                                <div className="truncate text-[11px] font-semibold text-neutral-500">
+                                  Danh mục{" "}
+                                  <span className="text-neutral-300">
+                                    {order.categoryName}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          </td>
+                          <td className={CELL}>
+                            {chip ? (
+                              <span className="inline-flex whitespace-nowrap rounded-md border border-white/15 bg-white/10 px-2 py-0.5 text-[9px] font-black uppercase tracking-widest text-neutral-300">
+                                {chip}
+                              </span>
+                            ) : (
+                              <span className="text-neutral-500">—</span>
+                            )}
+                          </td>
+                          <td className={`${CELL} tabular-nums`}>
+                            {order.quantity}
+                          </td>
+                          <td className={`${CELL} tabular-nums`}>
+                            {formatVnd(unitPrice)}đ
+                          </td>
+                          <td className={`${CELL} tabular-nums`}>
+                            <strong className="text-white">
+                              {formatVnd(order.total)}đ
+                            </strong>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  {discount > 0 ? (
+                    <dl className="ml-auto mt-3 grid w-full max-w-xs grid-cols-[1fr_auto] gap-x-6 gap-y-1 pr-4 text-xs tabular-nums sm:pr-5">
+                      <dt className="text-neutral-500">Tạm tính</dt>
+                      <dd className="text-right text-neutral-300">
+                        {formatVnd(order.listPrice)}đ
+                      </dd>
+                      <dt className="text-neutral-500">Giảm giá</dt>
+                      <dd className="text-right font-bold text-emerald-400">
+                        −{formatVnd(discount)}đ
+                      </dd>
+                      <dt className="border-t border-white/[0.06] pt-1 font-black uppercase tracking-wider text-neutral-400">
+                        Thành tiền
+                      </dt>
+                      <dd className="border-t border-white/[0.06] pt-1 text-right text-sm font-black text-white">
+                        {formatVnd(order.total)}đ
+                      </dd>
+                    </dl>
+                  ) : null}
+
+                  {/* HANDOVER */}
+                  <div className="relative mt-6 overflow-hidden rounded-xl border border-white/10 bg-white/[0.02] p-4 sm:p-5">
+                    <div
+                      aria-hidden
+                      className="pointer-events-none absolute -right-16 -top-20 h-48 w-48 rounded-full bg-[var(--menzu-accent)]/10 blur-3xl"
+                    />
+                    <div className="relative mb-4 flex items-center gap-2.5 text-sm font-black uppercase tracking-wider text-white">
+                      <span className="flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--menzu-accent)]/25 bg-[var(--menzu-accent)]/15 text-[var(--menzu-accent)]">
+                        <KeyRound className="h-3.5 w-3.5" />
+                      </span>
+                      Thông tin đăng nhập / bàn giao
+                    </div>
+
+                    <div className="relative">
+                      {order.isSoftware ? (
+                        order.keys.length > 0 || order.keysPending > 0 ? (
+                          <div className="flex flex-col gap-4">
+                            {order.keys.length > 0 ? (
+                              <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+                                {order.keys.map((key, index) => (
+                                  <HandoverBox
+                                    key={`${index}-${key}`}
+                                    icon={<KeyRound className="h-3 w-3" />}
+                                    label={
+                                      order.keys.length > 1
+                                        ? `Key ${index + 1}`
+                                        : "Key"
+                                    }
+                                    value={key}
+                                  />
+                                ))}
+                              </div>
+                            ) : null}
+                            {order.keysPending > 0 ? (
+                              <p className="text-xs font-semibold text-amber-400">
+                                {order.keysPending} key đang được chuẩn bị —
+                                shop sẽ giao trong ít phút, key sẽ hiện ngay tại
+                                đây.
+                              </p>
+                            ) : null}
+                          </div>
+                        ) : (
+                          <p className="text-xs text-neutral-400">
+                            Đơn này chưa có key để hiển thị.
+                          </p>
+                        )
+                      ) : order.login.state === "ready" ? (
+                        <div className="flex flex-col gap-4">
+                          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+                            <HandoverBox
+                              icon={<User className="h-3 w-3" />}
+                              label="Tài khoản"
+                              value={order.login.login.username}
+                            />
+                            <HandoverBox
+                              icon={<Lock className="h-3 w-3" />}
+                              label="Mật khẩu"
+                              value={order.login.login.password}
+                              secret
+                            />
+                          </div>
+                          {order.login.login.note ? (
+                            <p className="whitespace-pre-line break-words rounded-xl border border-white/[0.06] bg-white/[0.03] px-4 py-3 text-xs leading-relaxed text-neutral-300">
+                              {order.login.login.note}
+                            </p>
+                          ) : null}
+                        </div>
+                      ) : order.login.state === "manual" ? (
+                        <div className="flex items-start gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
+                          <MessageCircle className="mt-0.5 h-4 w-4 shrink-0 text-neutral-400" />
+                          <p className="text-xs leading-relaxed text-neutral-300">
+                            Tài khoản này được bàn giao trực tiếp — liên hệ shop
+                            kèm mã đơn{" "}
+                            <strong className="font-mono text-white">
+                              {order.code}
+                            </strong>{" "}
+                            để nhận thông tin đăng nhập.
+                          </p>
+                        </div>
+                      ) : order.paid ? (
+                        // Paid, yet no handover: the shop has since put this
+                        // account back on the shelf and handed it to a later
+                        // buyer. "Shows once paid" would be a lie next to the
+                        // green chip.
+                        <div className="flex items-start gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
+                          <MessageCircle className="mt-0.5 h-4 w-4 shrink-0 text-neutral-400" />
+                          <p className="text-xs leading-relaxed text-neutral-300">
+                            Tài khoản này đã được shop bàn giao lại — liên hệ
+                            shop kèm mã đơn{" "}
+                            <strong className="font-mono text-white">
+                              {order.code}
+                            </strong>{" "}
+                            nếu cần hỗ trợ.
+                          </p>
+                        </div>
+                      ) : (
+                        <p className="text-xs text-neutral-400">
+                          Dữ liệu bàn giao hiện khi đơn đã thanh toán.
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* NOTE */}
+                  <div className="mt-4 flex items-start gap-3 rounded-r-xl border-l-[3px] border-[var(--menzu-accent)] bg-[var(--menzu-accent)]/5 px-4 py-3.5 text-xs leading-relaxed text-neutral-400">
+                    <Info className="mt-0.5 h-4 w-4 shrink-0 text-[var(--menzu-accent)]" />
+                    <span>
+                      Vui lòng lưu lại mã đơn hàng để được hỗ trợ khi cần thiết.
+                      Không chia sẻ thông tin tài khoản hoặc dữ liệu bàn giao
+                      cho người khác.
+                    </span>
+                  </div>
+                </div>
+
+                {/* FOOTER */}
+                <div className="flex flex-wrap items-center justify-between gap-3 border-t border-white/[0.06] bg-white/[0.02] px-5 py-4 sm:px-6">
+                  <span className="text-xs text-neutral-500">
+                    Cần hỗ trợ về đơn hàng này? Gửi kèm mã đơn{" "}
+                    <span className="font-mono font-bold text-neutral-300">
+                      {order.code}
+                    </span>
+                  </span>
+                  <Link
+                    href={supportHref}
+                    className="group inline-flex h-10 items-center gap-2 rounded-xl bg-[var(--menzu-accent)] px-5 text-[11px] font-black uppercase tracking-widest text-white transition-colors hover:bg-[var(--menzu-accent-dark)]"
+                  >
+                    <MessageCircle className="h-4 w-4" />
+                    Liên hệ hỗ trợ
+                    <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+                  </Link>
+                </div>
+              </div>
+            </div>,
+            document.body,
+          )
+        : null}
+    </>
+  );
+}
