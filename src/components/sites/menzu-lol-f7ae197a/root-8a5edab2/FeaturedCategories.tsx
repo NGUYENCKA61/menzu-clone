@@ -28,7 +28,7 @@ const CAPTURED_CARDS: CategoryCard[] = [
     line1: "ACC TỰ CHỌN",
     line2: "VALORANT",
     art: `${ART_BASE}/clove.webp`,
-    href: "/category/account-valorant-tu-chon",
+    href: "/account-valorant-tu-chon",
   },
   { line1: "CHECK SKIN KHO ĐỒ", line2: "VALORANT", art: `${ART_BASE}/omen.webp`, href: "#" },
   { line1: "BUILD KHO ĐỒ", line2: "VIP", art: `${ART_BASE}/jett.webp`, href: "#" },
@@ -38,8 +38,8 @@ const CAPTURED_CARDS: CategoryCard[] = [
 ];
 
 const CARD_THEME = {
-  "--theme-hover": "#6366f1",
-  "--theme-border": "#4748af",
+  "--theme-hover": "var(--menzu-accent)",
+  "--theme-border": "rgba(255, 255, 255, 0.15)",
 } as CSSProperties;
 
 export function FeaturedCategories({ cards }: { cards?: CategoryCard[] }) {
@@ -54,9 +54,9 @@ export function FeaturedCategories({ cards }: { cards?: CategoryCard[] }) {
           SẢN PHẨM NỔI BẬT
         </h2>
         <div className="flex items-center justify-center gap-2 mt-3 opacity-60">
-          <div className="w-16 h-px bg-gradient-to-l from-indigo-500 to-transparent" />
-          <div className="w-2 h-2 rotate-45 border border-indigo-400 bg-indigo-500/50" />
-          <div className="w-16 h-px bg-gradient-to-r from-indigo-500 to-transparent" />
+          <div className="w-16 h-px bg-gradient-to-l from-[var(--menzu-accent)] to-transparent" />
+          <div className="w-2 h-2 rotate-45 border border-[var(--menzu-accent)] bg-[var(--menzu-accent)]/50" />
+          <div className="w-16 h-px bg-gradient-to-r from-[var(--menzu-accent)] to-transparent" />
         </div>
       </div>
 

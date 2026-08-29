@@ -5,6 +5,7 @@ import type { DocCard } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab
 import type { ProductCard } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/productRowData";
 import { db } from "@/lib/db";
 import { orderBySlugs, splitTileName } from "@/lib/homeSections";
+import { categoryHref } from "@/lib/routes";
 
 /**
  * The four tile rows on the homepage.
@@ -21,6 +22,7 @@ function toCard(c: {
   name: string;
   slug: string;
   description: string | null;
+  platform: string | null;
   soldCount: number;
   stockCount: number;
 }): ProductCard {
@@ -28,7 +30,8 @@ function toCard(c: {
     image: c.imageUrl ?? "",
     title: c.name,
     description: c.description,
-    href: `/category/${c.slug}`,
+    platform: c.platform,
+    href: categoryHref(c.slug),
     // Both stat labels drive colour in ProductRow's tone lookup, so they stay
     // exactly as the live site words them.
     stats: [
@@ -56,8 +59,16 @@ export interface HomeGroup {
  *
  * A group with nothing in it is dropped rather than drawn as a heading over
  * an empty grid.
+ *
+ * `count` caps each row at the admin's "cards per row"; a group named in
+ * `unlimited` is handed every category it has instead — the game list
+ * reveals itself three lines at a time on the page, so cutting it here would
+ * hide games behind a button that never shows them.
  */
-export async function getHomeGroups(count: number): Promise<HomeGroup[]> {
+export async function getHomeGroups(
+  count: number,
+  unlimited: readonly string[] = [],
+): Promise<HomeGroup[]> {
   const groups = await db.group.findMany({
     where: { isActive: true },
     orderBy: { sortOrder: "asc" },
@@ -71,7 +82,10 @@ export async function getHomeGroups(count: number): Promise<HomeGroup[]> {
       id: group.id,
       slug: group.slug,
       name: group.name,
-      cards: group.categories.slice(0, count).map((link) => toCard(link.category)),
+      cards: (unlimited.includes(group.slug)
+        ? group.categories
+        : group.categories.slice(0, count)
+      ).map((link) => toCard(link.category)),
     }))
     .filter((group) => group.cards.length > 0);
 }
@@ -87,7 +101,7 @@ export async function getHomeCategoryCards(slugs: string[]): Promise<CategoryCar
     .map((category) => ({
       ...splitTileName(category.name),
       art: category.imageUrl!,
-      href: `/category/${category.slug}`,
+      href: categoryHref(category.slug),
     }));
 }
 

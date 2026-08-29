@@ -1,0 +1,135 @@
+"use client";
+
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
+
+/** Milliseconds a set of tiles rests before the next step. */
+const STEP_MS = 3000;
+
+/** The flash-sale carousel's arrows, so the two sliders on the page match. */
+const ARROW =
+  "absolute top-1/2 z-20 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border-2 border-neutral-700 bg-neutral-800 text-[var(--menzu-accent)] transition-colors hover:bg-neutral-700 sm:h-11 sm:w-11";
+
+/**
+ * A row of tiles that slides one tile to the left on a beat until the last
+ * tile is in view, then glides all the way back to the start and goes again
+ * — and that a reader can drive by hand with the arrow at either edge.
+ *
+ * The same rhythm the account card's skin strip keeps — a step, a rest, a
+ * step, then home — rather than a marquee that never stops, because these
+ * tiles are links: a reader needs them to hold still long enough to aim at
+ * one, and the run back to the start is what says "that was all of them".
+ *
+ * Tile width and gap are CSS variables the viewport sets per breakpoint (in
+ * a container query unit, so they follow the row's own width) and the
+ * transform is written in the same variables, so a resize never leaves the
+ * strip between tiles. How many tiles fit is measured on each move, so the
+ * end of the run is the real end at whatever width the row has right now.
+ *
+ * An arrow press restarts the clock, so the strip does not step again on
+ * its own a moment after somebody moved it. Holds still under the pointer
+ * or a keyboard focus. Readers who asked for less motion get a strip that
+ * only the arrows move (see .row-slider in globals.css) — the clock never
+ * starts for them.
+ */
+export function RowSlider({ count, children }: { count: number; children: ReactNode }) {
+  const viewportRef = useRef<HTMLDivElement>(null);
+  const trackRef = useRef<HTMLDivElement>(null);
+  const [index, setIndex] = useState(0);
+  /** True while the strip is on its way back to the start — a longer glide. */
+  const [rewinding, setRewinding] = useState(false);
+  const [held, setHeld] = useState(false);
+  /** Bumped by every arrow press; the clock restarts from that moment. */
+  const [beat, setBeat] = useState(0);
+
+  /** The last index the strip can stand on with the viewport full of tiles. */
+  const lastIndex = useCallback(() => {
+    const viewport = viewportRef.current;
+    const track = trackRef.current;
+    const first = track?.firstElementChild;
+    if (!viewport || !track || !(first instanceof HTMLElement)) return 0;
+    const gap = parseFloat(getComputedStyle(track).columnGap) || 0;
+    const tile = first.getBoundingClientRect().width;
+    const visible = Math.max(1, Math.round((viewport.clientWidth + gap) / (tile + gap)));
+    return Math.max(0, count - visible);
+  }, [count]);
+
+  /** One step on. Past the end it is the glide home. */
+  const forward = useCallback(() => {
+    const last = lastIndex();
+    setIndex((current) => {
+      if (current >= last) {
+        setRewinding(true);
+        return 0;
+      }
+      setRewinding(false);
+      return current + 1;
+    });
+  }, [lastIndex]);
+
+  /** One step back; from the start, round to the end. */
+  const backward = useCallback(() => {
+    const last = lastIndex();
+    setIndex((current) => {
+      setRewinding(current === 0);
+      return current === 0 ? last : current - 1;
+    });
+  }, [lastIndex]);
+
+  useEffect(() => {
+    if (held || count < 2) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const timer = window.setInterval(forward, STEP_MS);
+    return () => window.clearInterval(timer);
+    // `beat` is here on purpose: an arrow press restarts the interval.
+  }, [held, count, forward, beat]);
+
+  return (
+    <div className="relative">
+      {/* Outside the viewport, which clips, and pulled half out past the row's
+          edges like the flash-sale arrows — the tiles keep their full width
+          and the arrows sit in the page gutter. */}
+      <button
+        type="button"
+        aria-label="Trượt về trước"
+        onClick={() => {
+          backward();
+          setBeat((b) => b + 1);
+        }}
+        className={`${ARROW} left-0 -translate-x-3 sm:-translate-x-4`}
+      >
+        <ChevronLeft size={20} aria-hidden />
+      </button>
+      <button
+        type="button"
+        aria-label="Trượt tiếp"
+        onClick={() => {
+          forward();
+          setBeat((b) => b + 1);
+        }}
+        className={`${ARROW} right-0 translate-x-3 sm:translate-x-4`}
+      >
+        <ChevronRight size={20} aria-hidden />
+      </button>
+
+      <div
+        ref={viewportRef}
+        className="row-slider-viewport @container w-full overflow-hidden [--gap:1rem] sm:[--gap:1.5rem] [--tile-w:calc((100cqw-1rem)/2)] md:[--tile-w:calc((100cqw-3rem)/3)] lg:[--tile-w:calc((100cqw-4.5rem)/4)]"
+        onMouseEnter={() => setHeld(true)}
+        onMouseLeave={() => setHeld(false)}
+        onFocus={() => setHeld(true)}
+        onBlur={() => setHeld(false)}
+      >
+        <div
+          ref={trackRef}
+          className={`row-slider-track flex w-max gap-[var(--gap)] transition-transform ease-in-out ${
+            rewinding ? "duration-[1100ms]" : "duration-700"
+          }`}
+          style={{ transform: `translateX(calc(${index} * -1 * (var(--tile-w) + var(--gap))))` }}
+        >
+          {children}
+        </div>
+      </div>
+    </div>
+  );
+}

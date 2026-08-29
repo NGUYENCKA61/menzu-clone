@@ -94,20 +94,16 @@ export function PartnersSection({ partners }: { partners: PartnerView[] }) {
     <section className="w-full">
       <style dangerouslySetInnerHTML={{ __html: MARQUEE_STYLES }} />
 
-      {/* Centered, unlike the row headings above — this block closes the
-          social-proof pair with the reviews, and the mock treats it as its own
-          little masthead: red eyebrow between two rules, then the heading,
-          then one line of copy. */}
+      {/* Centered, unlike the row headings above — this block opens the
+          social-proof pair with the reviews. The mock's "Trusted Partners"
+          eyebrow between two rules went by the shop's decision: the heading
+          says it already, and the line only made the top of the block busy.
+          Two-tone like the reviews heading right above it — white with the
+          one word that matters in the accent red — after a whole-line red
+          and a whole-line purple both read as too much of one colour. */}
       <div className="mb-10 flex flex-col items-center text-center">
-        <div className="flex items-center gap-3">
-          <span aria-hidden className="h-px w-8 bg-[var(--menzu-accent)]" />
-          <span className="text-[11px] font-black uppercase tracking-[0.3em] text-[var(--menzu-accent)]">
-            Trusted Partners
-          </span>
-          <span aria-hidden className="h-px w-8 bg-[var(--menzu-accent)]" />
-        </div>
-        <h2 className="mt-3 text-2xl sm:text-3xl font-black uppercase tracking-wider text-white">
-          Đối tác uy tín của chúng tôi
+        <h2 className="text-2xl sm:text-3xl font-black uppercase tracking-wider text-white">
+          Đối tác <span className="text-[var(--menzu-accent)]">uy tín</span> của chúng tôi
         </h2>
       </div>
 

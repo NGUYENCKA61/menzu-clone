@@ -1,4 +1,4 @@
-import { Flame } from "lucide-react";
+import { TrendingUp } from "lucide-react";
 
 import { FeaturedCategories } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/FeaturedCategories";
 import { FlashSaleSection } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/FlashSaleSection";
@@ -15,16 +15,18 @@ import { ReviewsSection } from "@/components/sites/menzu-lol-f7ae197a/root-8a5ed
 import { SiteFooter } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/SiteFooter";
 import { SiteHeader } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/SiteHeader";
 import { MobileBottomNav } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/MobileBottomNav";
-import { ToolsRail } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/ToolsRail";
+import { ConnectRailSection } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/ConnectRailSection";
 import { PartnersSection } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/PartnersSection";
 import { formatVnd } from "@/components/sites/menzu-lol-f7ae197a/shared/productData";
 import { getFeedback, getFlashSaleItems, getPartners } from "@/lib/queries";
 import { JsonLd, organizationJsonLd } from "@/lib/seo";
 import { visibleBlocks } from "@/lib/settings";
 import { getShopSettings } from "@/lib/settingsStore";
-import { UtilitiesHub } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/UtilitiesHub";
 
 export const dynamic = "force-dynamic";
+
+/** The group that carries the search, the platform chips and "Xem thêm". */
+const GAME_LIST_SLUG = "danh-sach-hack-game";
 
 /**
  * Lucide icons drawn after a group row's heading, keyed by the group's slug.
@@ -36,11 +38,11 @@ export const dynamic = "force-dynamic";
  * own internal whitespace it sits about one word-space off the title, reading
  * as its last word rather than an element floating after it.
  */
-// One icon on the whole page, deliberately: the flame is what marks the
-// featured row out, and a glyph on every heading would dilute exactly that.
+// One icon on the whole page, deliberately: the arrow is what marks
+// the featured row out, and a glyph on every heading would dilute exactly that.
 const GROUP_ICONS: Record<string, React.ReactNode> = {
   "hot-trending": (
-    <Flame
+    <TrendingUp
       size={24}
       aria-hidden
       className="animate-bounce-subtle -ml-1.5 shrink-0 text-[var(--menzu-accent)]"
@@ -56,7 +58,9 @@ export default async function Home() {
     getPartners(),
   ]);
   const [homeGroups, categoryCards, docCards] = await Promise.all([
-    getHomeGroups(settings.homeRowCount),
+    // The game list is not capped: it shows three lines and reveals the rest
+    // behind "Xem thêm", so it needs every category to be there to reveal.
+    getHomeGroups(settings.homeRowCount, [GAME_LIST_SLUG]),
     getHomeCategoryCards(settings.homeCategorySlugs),
     getHomeDocCards(settings.homeDocSlugs),
   ]);
@@ -70,6 +74,7 @@ export default async function Home() {
         banner={settings.heroBanner}
         video={settings.heroVideo}
         title={settings.heroTitle}
+        badge={settings.heroBadge}
         subtitle={settings.heroSubtitle}
         primaryLabel={settings.heroPrimaryLabel}
         primaryHref={settings.heroPrimaryHref}
@@ -100,6 +105,9 @@ export default async function Home() {
             cards={group.cards}
             viewAllHref="/categories"
             tone="menzu"
+            marquee={group.slug === "hot-trending"}
+            ranked={group.slug === "hot-trending"}
+            searchable={group.slug === GAME_LIST_SLUG}
           />
         ))}
       </div>
@@ -117,7 +125,6 @@ export default async function Home() {
       />
     ),
     partners: <PartnersSection key="partners" partners={partners} />,
-    utilities: <UtilitiesHub key="utilities" />,
     seo: (
       <SeoContent
         key="seo"
@@ -129,7 +136,7 @@ export default async function Home() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col text-white overflow-x-clip selection:bg-indigo-500/30 transition-colors duration-300">
+    <div className="min-h-screen flex flex-col text-white overflow-x-clip selection:bg-[var(--menzu-accent)]/30 transition-colors duration-300">
       <JsonLd data={organizationJsonLd()} />
       {/* spacer reserving the fixed header's 104px */}
       <div className="w-full shrink-0 h-[104px]" />
@@ -137,8 +144,10 @@ export default async function Home() {
 
       <main className="flex-1 relative z-20 w-full flex flex-col">
         <div className="w-full">
-          <div className="w-full max-w-[1320px] mx-auto px-4 lg:px-6 py-6 lg:py-10 space-y-12">
-            <div className="w-full flex flex-col space-y-6 sm:space-y-12">
+          <div className="w-full max-w-[1320px] mx-auto px-4 lg:px-6 py-6 lg:py-10 pb-16 lg:pb-24">
+            {/* A wider beat between blocks than the rows keep inside them, so
+                the page reads as sections rather than as one long list. */}
+            <div className="w-full flex flex-col space-y-12 sm:space-y-20">
               {visibleBlocks(settings).map((id) => blocks[id])}
             </div>
           </div>
@@ -146,7 +155,7 @@ export default async function Home() {
         <SiteFooter />
       </main>
 
-      <ToolsRail />
+      <ConnectRailSection />
       <MobileBottomNav />
     </div>
   );

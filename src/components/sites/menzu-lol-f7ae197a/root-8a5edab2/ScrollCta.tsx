@@ -60,7 +60,7 @@ export function ScrollCta({
         <ArrowDown
           size={13}
           aria-hidden
-          className="animate-bounce-subtle shrink-0 text-[var(--menzu-accent)]"
+          className="animate-bounce-subtle shrink-0 text-white"
         />
       </a>
     </div>

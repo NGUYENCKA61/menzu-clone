@@ -1,0 +1,10 @@
+/* A home-page row with more than four tiles slides (RowSlider): one tile
+   left on a beat, then a glide back to the start, with an arrow at either
+   edge for driving it by hand. Under reduced motion the row never steps on
+   its own — RowSlider does not start its clock — and the arrows move it
+   without the easing, so every tile is still reachable and nothing glides. */
+@media (prefers-reduced-motion: reduce) {
+  .row-slider-track {
+    transition: none;
+  }
+}

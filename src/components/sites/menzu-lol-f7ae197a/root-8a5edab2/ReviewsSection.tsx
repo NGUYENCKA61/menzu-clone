@@ -54,8 +54,8 @@ const REVIEWS: Review[] = [
 
 export function ReviewsSection({ reviews = REVIEWS }: { reviews?: Review[] } = {}) {
   return (
-    <div className="mb-12 lg:mb-16">
-      <div className="mb-14 w-full border-t border-[#1b1c28] pt-12">
+    <div>
+      <div className="w-full border-t border-white/[0.06] pt-12 lg:pt-16">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-6 items-stretch">
           <div className="lg:col-span-3 flex flex-col justify-center gap-3.5 lg:gap-4 pt-0 lg:pt-0 relative overflow-hidden">
             <div className="hidden lg:block absolute left-0 top-1/2 -translate-y-1/2 text-[100px] font-black text-white/[0.015] select-none tracking-widest uppercase pointer-events-none -z-10">
@@ -88,7 +88,7 @@ export function ReviewsSection({ reviews = REVIEWS }: { reviews?: Review[] } = {
 
               <Link
                 href="/feedback"
-                className="group flex items-center gap-1 text-[10px] sm:text-xs font-bold text-neutral-400 hover:text-white transition-colors uppercase tracking-widest border-b border-neutral-700 hover:border-[var(--brand)]"
+                className="group flex items-center gap-1 text-[10px] sm:text-xs font-bold text-neutral-400 hover:text-white transition-colors uppercase tracking-widest border-b border-neutral-700 hover:border-[var(--menzu-accent)]"
               >
                 Xem tất cả
                 <ArrowRight size={14} />
@@ -101,7 +101,7 @@ export function ReviewsSection({ reviews = REVIEWS }: { reviews?: Review[] } = {
               {reviews.map((review) => (
                 <div
                   key={review.avatar}
-                  className="w-[280px] sm:w-[320px] lg:w-[calc((100%-32px)/3)] border border-[#25283b] p-5 rounded-2xl snap-start shrink-0 flex flex-col group relative overflow-hidden cursor-pointer hover:border-[#3a3e5a] transition-colors bg-[#0d0d12]"
+                  className="w-[280px] sm:w-[320px] lg:w-[calc((100%-32px)/3)] border border-white/[0.08] p-5 rounded-[15px] snap-start shrink-0 flex flex-col group relative overflow-hidden cursor-pointer hover:border-[var(--menzu-accent)]/40 transition-colors bg-[#101114]"
                 >
                   <div className="flex items-center gap-3 mb-3">
                     <div className="relative w-10 h-10 rounded-full overflow-hidden shrink-0 border border-white/10">
@@ -117,7 +117,7 @@ export function ReviewsSection({ reviews = REVIEWS }: { reviews?: Review[] } = {
                       <BadgeCheck
                         size={13}
                         aria-label={VERIFIED_BADGE_TEXT}
-                        className="text-indigo-400 shrink-0"
+                        className="text-emerald-400 shrink-0"
                       />
                     </div>
                     <span className="shrink-0 text-[10px] text-neutral-500 font-semibold">

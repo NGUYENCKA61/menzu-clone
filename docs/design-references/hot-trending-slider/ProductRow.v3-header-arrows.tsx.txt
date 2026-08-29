@@ -12,7 +12,6 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { ProductCard } from "./productRowData";
-import { RowSearch } from "./RowSearch";
 import { RowSlider } from "./RowSlider";
 
 /**
@@ -39,18 +38,6 @@ export interface ProductRowProps {
    * "Hot trending" alone.
    */
   marquee?: boolean;
-  /**
-   * A "TOP THÁNG" pill on every tile. For the one row that is the month's
-   * pick — hot trending — and nothing else, where the pill would be a claim
-   * nobody made.
-   */
-  ranked?: boolean;
-  /**
-   * A search field over the tiles that narrows them by name as you type.
-   * For the row that lists every game the shop hacks, where a reader
-   * arrives knowing which one they want.
-   */
-  searchable?: boolean;
   className?: string;
 }
 
@@ -179,16 +166,7 @@ const HIDDEN_STATS = new Set(["Đã Bán", "Đang Bán"]);
 const MARQUEE_FROM = 5;
 
 /** One tile, drawn the same in the grid and on the slider. */
-function RowCard({
-  card,
-  t,
-  top = false,
-}: {
-  card: ProductCard;
-  t: (typeof TONES)[RowTone];
-  /** Wear the "TOP THÁNG" pill. */
-  top?: boolean;
-}) {
+function RowCard({ card, t }: { card: ProductCard; t: (typeof TONES)[RowTone] }) {
   const stats = card.stats.filter((s) => !HIDDEN_STATS.has(s.label));
 
   return (
@@ -220,16 +198,6 @@ function RowCard({
             t.image,
           )}
         />
-        {/* The month's-pick pill, in the top-left corner the account card
-            keeps its code in and dressed the same — dark glass, small caps —
-            in the accent red, words only — the shop tried a glyph and took it
-            off. No number:
-            the shop wanted the label, not a ranking. */}
-        {top ? (
-          <span className="absolute left-1.5 top-1.5 z-10 inline-flex items-center rounded-full border border-white/10 bg-[#0d0d12]/80 px-1.5 py-0.5 text-[8px] font-black uppercase tracking-wide text-[var(--menzu-accent)] backdrop-blur-md sm:left-2 sm:top-2 sm:px-2 sm:text-[9px]">
-            Top tháng
-          </span>
-        ) : null}
       </div>
 
       <h3
@@ -325,8 +293,6 @@ export function ProductRow({
   viewAllHref,
   tone = "indigo",
   marquee: runs = false,
-  ranked = false,
-  searchable = false,
   className,
 }: ProductRowProps) {
   const t = TONES[tone];
@@ -334,6 +300,9 @@ export function ProductRow({
   // need it: a short row that glided would be motion for its own sake.
   const marquee = runs && cards.length >= MARQUEE_FROM;
 
+  // The heading and the link are built once and placed by whichever layout
+  // the row takes: the still grid draws them in its own header line, the
+  // slider draws them around its arrows.
   const title = (
     <div className="flex items-center gap-2.5">
       <div className="w-[3px] h-5 bg-[var(--menzu-accent)] rounded-full shrink-0" />
@@ -356,38 +325,28 @@ export function ProductRow({
 
   return (
     <section className={cn("w-full", className)}>
-      <div className="flex flex-row items-center justify-between mb-8">
-        {title}
-        {viewAll}
-      </div>
+      {marquee ? null : (
+        <div className="flex flex-row items-center justify-between mb-8">
+          {title}
+          {viewAll}
+        </div>
+      )}
 
       {marquee ? (
         // Each tile takes the width the viewport sets per breakpoint — a
         // quarter, a third, a half of it — with the grid's own gaps, so the
         // sliding row and the still row show tiles of one size.
-        <RowSlider count={cards.length}>
+        <RowSlider count={cards.length} title={title} viewAll={viewAll}>
           {cards.map((card) => (
             <div key={card.href} className="w-[var(--tile-w)] shrink-0">
-              <RowCard card={card} t={t} top={ranked} />
+              <RowCard card={card} t={t} />
             </div>
           ))}
         </RowSlider>
-      ) : searchable ? (
-        // The tiles are drawn here, on the server, and handed to the search
-        // as finished nodes — it only chooses which of them to show.
-        <RowSearch
-          viewAllHref={viewAllHref}
-          items={cards.map((card) => ({
-            key: card.href,
-            title: card.title,
-            platform: card.platform ?? null,
-            node: <RowCard card={card} t={t} top={ranked} />,
-          }))}
-        />
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
           {cards.map((card) => (
-            <RowCard key={card.href} card={card} t={t} top={ranked} />
+            <RowCard key={card.href} card={card} t={t} />
           ))}
         </div>
       )}

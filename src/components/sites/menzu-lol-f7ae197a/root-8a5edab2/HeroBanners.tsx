@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { ArrowRight, BadgeCheck, BookCheck, ShoppingBag } from "lucide-react";
 
 import { DEFAULT_SETTINGS } from "@/lib/settings";
 import { ScrollCta } from "./ScrollCta";
@@ -24,6 +25,8 @@ interface HeroBannersProps {
   banner?: string;
   /** Plays in place of the still when set. */
   video?: string;
+  /** The pill above the eyebrow. Empty draws none. */
+  badge?: string;
   /** Newlines are line breaks — the heading is written to sit on two rows. */
   title?: string;
   subtitle?: string;
@@ -47,6 +50,7 @@ interface HeroBannersProps {
 export function HeroBanners({
   banner = DEFAULT_SETTINGS.heroBanner,
   video = DEFAULT_SETTINGS.heroVideo,
+  badge = DEFAULT_SETTINGS.heroBadge,
   title = DEFAULT_SETTINGS.heroTitle,
   subtitle = DEFAULT_SETTINGS.heroSubtitle,
   primaryLabel = DEFAULT_SETTINGS.heroPrimaryLabel,
@@ -73,9 +77,11 @@ export function HeroBanners({
     // and pushes the cue out of sight. pb-20 is the cue's own room, so it
     // never sits over the copy or the artwork.
     // isolate so the -z background layer stacks against this section, not the
-    // page; overflow-hidden keeps the shooting stars and the wide glows from
-    // spilling past the fold.
-    <section className="relative isolate flex w-full flex-col justify-center overflow-hidden min-h-[calc(100svh-128px)] pt-6 pb-20 sm:pt-10 lg:min-h-[calc(100svh-144px)] lg:pt-14">
+    // page. Clipped on the vertical axis only, so nothing spills past the
+    // fold; sideways stays visible because the reseller pill above the eyebrow
+    // is pulled 14px left of the copy edge (into the page padding) and a full
+    // clip took its rounded corner off. The sky layer clips itself.
+    <section className="relative isolate flex w-full flex-col justify-center overflow-x-visible overflow-y-clip min-h-[calc(100svh-128px)] pt-6 pb-20 sm:pt-10 lg:min-h-[calc(100svh-144px)] lg:pt-14">
       {/* A field of faint, slowly twinkling stars over the page's own black,
           plus three shooting stars on long offset timers so one crosses now
           and then rather than all at once. Decoration only — aria-hidden, no
@@ -98,10 +104,24 @@ export function HeroBanners({
           have room for their full width, and they close up on a narrow laptop
           instead of overflowing. z-10 lifts them clear of the sky layer. */}
       <div className="relative z-10 flex flex-col gap-10 lg:flex-row lg:items-center lg:justify-between lg:gap-8">
-        <div className="flex w-full flex-col items-start lg:w-auto lg:min-w-0 lg:max-w-[440px] lg:flex-1 lg:-translate-y-4">
+        <div className="flex w-full flex-col items-start lg:w-auto lg:min-w-0 lg:max-w-[440px] lg:flex-1 lg:-translate-y-12">
+          {/* The reseller pill: dark glass with a red check, the same chrome
+              the listing cards' corner badges wear, so it reads as a badge
+              and not as a third line of copy. Fades up with the eyebrow.
+              Pulled left by its own padding so the check sits on the same
+              edge as the "We are" below it, not one pad-width in. */}
+          {badge ? (
+            <span className="animate-fade-up -ml-3.5 mb-4 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3.5 py-1.5 text-[10px] font-black uppercase tracking-[0.18em] text-neutral-200 backdrop-blur-md">
+              <BadgeCheck size={13} aria-hidden className="text-[var(--menzu-accent)]" />
+              {badge}
+            </span>
+          ) : null}
+
           {/* Eyebrow line: fades up first, then the heading types itself in
               after it (HEADING_DELAY). */}
-          <span className="animate-fade-up block text-[13px] font-bold uppercase tracking-[0.3em] text-white sm:text-sm">
+          {/* The eyebrow in the accent, so the block opens the way every row
+              heading below it does — a red mark, then white type. */}
+          <span className="animate-fade-up block text-[13px] font-bold uppercase tracking-[0.3em] text-[var(--menzu-accent)] sm:text-sm">
             We are
           </span>
 
@@ -139,7 +159,7 @@ export function HeroBanners({
           </h1>
 
           {subtitle ? (
-            <p className="mt-5 max-w-[460px] text-[14px] leading-relaxed text-neutral-400">
+            <p className="mt-5 max-w-[460px] text-[14px] leading-relaxed text-neutral-300">
               {subtitle}
             </p>
           ) : null}
@@ -149,14 +169,18 @@ export function HeroBanners({
               href={primaryHref}
               className={`${CTA} bg-[var(--menzu-accent)] text-white hover:bg-[var(--menzu-accent-dark)]`}
             >
-              {primaryLabel} →
+              <ShoppingBag size={15} aria-hidden />
+              {primaryLabel}
+              <ArrowRight size={14} aria-hidden />
             </Link>
             {secondaryLabel && secondaryHref ? (
               <Link
                 href={secondaryHref}
                 className={`${CTA} border border-white/10 bg-white/[0.04] text-white hover:bg-white/[0.08]`}
               >
-                {secondaryLabel} →
+                <BookCheck size={15} aria-hidden />
+                {secondaryLabel}
+                <ArrowRight size={14} aria-hidden />
               </Link>
             ) : null}
           </div>
@@ -165,8 +189,9 @@ export function HeroBanners({
         {/* The artwork in a wide 16/9 frame, the shape the shop's covers and
             banner already come in, so object-cover crops almost nothing. The
             rounder corners and the ring match the media card in the
-            reference. */}
-        <div className="relative aspect-[16/9] w-full overflow-hidden rounded-3xl border border-white/[0.07] bg-[#0a0a0c] shadow-[0_30px_80px_-30px_rgba(0,0,0,0.8)] lg:w-auto lg:min-w-0 lg:max-w-[650px] lg:flex-1">
+            reference; the second shadow is a faint wash of the accent under
+            the card, so it sits on the black instead of floating over it. */}
+        <div className="relative aspect-[16/9] w-full overflow-hidden rounded-3xl border border-white/[0.08] bg-[#0a0a0c] shadow-[0_30px_80px_-30px_rgba(0,0,0,0.85),0_40px_120px_-40px_rgba(255,49,88,0.35)] lg:w-auto lg:min-w-0 lg:max-w-[650px] lg:flex-1">
           {video ? (
             // Muted and inline, because a hero that makes noise or takes over
             // the screen on a phone is a hero people leave. The still stays as
