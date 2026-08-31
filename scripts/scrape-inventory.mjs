@@ -12,7 +12,7 @@
  * are written to Product. Products already carrying counts are skipped, so
  * this is safe to re-run and safe to interrupt.
  */
-import { writeFile, mkdtemp, rm } from "node:fs/promises";
+import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { spawnSync } from "node:child_process";
