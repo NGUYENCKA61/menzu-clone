@@ -739,6 +739,11 @@ export interface OrderRow {
   /** The keys themselves, and how many are still owed. */
   keys: OrderKeyRow[];
   keysPending: number;
+  /** Software only: the tool's installer and its manual, as the product
+   *  carries them today. Null hides that button; null for both hides the
+   *  whole card. Withheld unless the order is a settled software order. */
+  downloadUrl: string | null;
+  docsUrl: string | null;
   /**
    * Accounts only: the sign-in the buyer was handed, or that they are still
    * waiting on. "none" for software and for orders that were never paid.
@@ -760,6 +765,8 @@ export async function getOrders(userId: string): Promise<OrderRow[]> {
           rank: true,
           imageUrl: true,
           productType: true,
+          downloadUrl: true,
+          docsUrl: true,
           category: { select: { slug: true, name: true } },
           // The one storefront read of these three columns, and it is scoped
           // by the `userId` above: only the buyer's own orders reach here, and
@@ -815,6 +822,16 @@ export async function getOrders(userId: string): Promise<OrderRow[]> {
     // so neither ever reads as waiting.
     keysPending:
       o.status === "PAID" ? Math.max(0, o.keysOwed - o.licenseKeys.length) : 0,
+    // Handed over only with a settled software order. An account order has no
+    // installer, and an unpaid one has bought nothing yet.
+    downloadUrl:
+      o.status === "PAID" && o.product.productType === "SOFTWARE_GAME"
+        ? o.product.downloadUrl
+        : null,
+    docsUrl:
+      o.status === "PAID" && o.product.productType === "SOFTWARE_GAME"
+        ? o.product.docsUrl
+        : null,
     login: loginHandover(o, {
       ...o.product,
       currentOrderId: currentOrderIdOf(o.product),

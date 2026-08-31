@@ -103,6 +103,8 @@ export default async function OrdersPage() {
                   productRank: o.productRank,
                   keys: o.keys.map((key) => key.value),
                   keysPending: o.keysPending,
+                  downloadUrl: o.downloadUrl,
+                  docsUrl: o.docsUrl,
                   login: o.login,
                 }}
               >

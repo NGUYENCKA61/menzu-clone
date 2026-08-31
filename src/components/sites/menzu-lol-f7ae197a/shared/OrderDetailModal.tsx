@@ -5,8 +5,10 @@ import {
   CalendarDays,
   Check,
   Copy,
+  Download,
   Eye,
   EyeOff,
+  FileText,
   Hash,
   Info,
   KeyRound,
@@ -63,6 +65,10 @@ export interface OrderDetailData {
   /** Software: the licence keys handed over, and how many are still owed. */
   keys: string[];
   keysPending: number;
+  /** Software: the installer and the manual. Null hides that one button;
+   *  null for both leaves the keys the full width they had before. */
+  downloadUrl: string | null;
+  docsUrl: string | null;
   /** Accounts: the sign-in, or the word that the shop hands it over itself. */
   login: LoginHandover;
 }
@@ -181,6 +187,112 @@ function HandoverBox({
   );
 }
 
+/**
+ * The tool and its manual, in the half of the handover block the keys leave
+ * empty.
+ *
+ * A one-key order left that side blank, and the two things a buyer needs after
+ * paying — the key and the installer — were a scroll apart, the second one on
+ * a product page they had to navigate back to. The block itself does not
+ * change size: the keys move into the left column of a grid that was already
+ * two columns wide when an order had two keys.
+ *
+ * Either link may be missing, and when both are the card is not drawn at all,
+ * so a shop that has uploaded neither sees exactly what it saw before.
+ */
+function DownloadCard({
+  downloadUrl,
+  docsUrl,
+  productName,
+}: {
+  downloadUrl: string | null;
+  docsUrl: string | null;
+  /** The tool's own name, so the row says what is being downloaded. */
+  productName: string;
+}) {
+  return (
+    <div className="flex flex-col gap-2.5">
+      {downloadUrl ? (
+        <FileRow
+          icon={<Download className="h-3.5 w-3.5" />}
+          tint="border-[var(--menzu-accent)]/25 bg-[var(--menzu-accent)]/15 text-[var(--menzu-accent)]"
+          eyebrow="Link tải hack"
+          title={productName}
+          href={downloadUrl}
+          action="Tải về"
+          actionClass="bg-[var(--menzu-accent)] text-white hover:bg-[var(--menzu-accent-dark)]"
+          arrow={<Download className="h-3 w-3 shrink-0" />}
+        />
+      ) : null}
+      {docsUrl ? (
+        <FileRow
+          icon={<FileText className="h-3.5 w-3.5" />}
+          tint="border-violet-500/25 bg-violet-500/15 text-violet-300"
+          eyebrow="Tài liệu hướng dẫn"
+          title="Cài đặt & sử dụng"
+          href={docsUrl}
+          action="Xem"
+          actionClass="border border-white/10 bg-white/5 text-neutral-300 hover:bg-white/10 hover:text-white"
+          arrow={<ArrowRight className="h-3 w-3 shrink-0" />}
+        />
+      ) : null}
+    </div>
+  );
+}
+
+/**
+ * One downloadable thing: what it is, what it is called, and the way to it.
+ *
+ * Two lines rather than three. The third was a sentence that said nothing the
+ * eyebrow had not already said — "Hướng dẫn chi tiết sản phẩm" under "Tài liệu
+ * hướng dẫn" — and it cost the whole handover block thirty pixels of height.
+ */
+function FileRow({
+  icon,
+  tint,
+  eyebrow,
+  title,
+  href,
+  action,
+  actionClass,
+  arrow,
+}: {
+  icon: ReactNode;
+  /** Border, fill and glyph colour for the square badge. */
+  tint: string;
+  eyebrow: string;
+  title: string;
+  href: string;
+  action: string;
+  actionClass: string;
+  arrow: ReactNode;
+}) {
+  return (
+    <div className="flex flex-1 items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] p-3 transition-colors hover:border-white/[0.12]">
+      <span
+        className={`grid h-8 w-8 shrink-0 place-items-center rounded-lg border ${tint}`}
+      >
+        {icon}
+      </span>
+      {/* min-w-0 so a long tool name truncates instead of pushing the button
+          off the card. */}
+      <div className="min-w-0 flex-1">
+        <span className={LABEL}>{eyebrow}</span>
+        <p className="mt-0.5 truncate text-[13px] font-black text-white">{title}</p>
+      </div>
+      <a
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={`inline-flex h-8 shrink-0 items-center gap-1.5 rounded-lg px-3.5 text-[10px] font-black uppercase tracking-widest transition-colors ${actionClass}`}
+      >
+        {action}
+        {arrow}
+      </a>
+    </div>
+  );
+}
+
 function OverviewCell({
   icon,
   label,
@@ -277,6 +389,8 @@ export function OrderDetailModal({
   // The row's own rule: a tier for a tool, a rank for an account, nothing
   // when the shop typed neither.
   const chip = order.packageLabel ?? (order.productRank || null);
+  /** Whether the shop has given this buyer anything to download at all. */
+  const hasFiles = Boolean(order.downloadUrl || order.docsUrl);
 
   const setTrigger = (node: HTMLElement | null) => {
     triggerRef.current = node;
@@ -508,19 +622,40 @@ export function OrderDetailModal({
                       aria-hidden
                       className="pointer-events-none absolute -right-16 -top-20 h-48 w-48 rounded-full bg-[var(--menzu-accent)]/10 blur-3xl"
                     />
-                    <div className="relative mb-4 flex items-center gap-2.5 text-sm font-black uppercase tracking-wider text-white">
-                      <span className="flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--menzu-accent)]/25 bg-[var(--menzu-accent)]/15 text-[var(--menzu-accent)]">
+                    {/* One line. The sentence under it — "Thông tin được cung
+                        cấp sau khi thanh toán" — was telling a reader who is
+                        looking straight at their key that they will get it
+                        once they pay. */}
+                    <div className="relative mb-4 flex items-center gap-2.5">
+                      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[var(--menzu-accent)]/25 bg-[var(--menzu-accent)]/15 text-[var(--menzu-accent)]">
                         <KeyRound className="h-3.5 w-3.5" />
                       </span>
-                      Thông tin đăng nhập / bàn giao
+                      <h3 className="text-sm font-black uppercase tracking-wider text-white">
+                        Thông tin đăng nhập / bàn giao
+                      </h3>
                     </div>
 
                     <div className="relative">
                       {order.isSoftware ? (
-                        order.keys.length > 0 || order.keysPending > 0 ? (
+                        // With files to offer, the keys take the left half and
+                        // the download rows the right — the card is one hand-
+                        // over, and the empty space beside a single key is
+                        // where they belong. Top-aligned so the shorter side
+                        // does not stretch.
+                        <div
+                          className={`grid gap-4 ${
+                            hasFiles ? "lg:grid-cols-2 lg:items-start" : ""
+                          }`}
+                        >
                           <div className="flex flex-col gap-4">
                             {order.keys.length > 0 ? (
-                              <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+                              <div
+                                className={`grid gap-4 ${
+                                  hasFiles
+                                    ? "grid-cols-1"
+                                    : "grid-cols-1 lg:grid-cols-2"
+                                }`}
+                              >
                                 {order.keys.map((key, index) => (
                                   <HandoverBox
                                     key={`${index}-${key}`}
@@ -542,12 +677,21 @@ export function OrderDetailModal({
                                 đây.
                               </p>
                             ) : null}
+                            {order.keys.length === 0 &&
+                            order.keysPending === 0 ? (
+                              <p className="text-xs text-neutral-400">
+                                Đơn này chưa có key để hiển thị.
+                              </p>
+                            ) : null}
                           </div>
-                        ) : (
-                          <p className="text-xs text-neutral-400">
-                            Đơn này chưa có key để hiển thị.
-                          </p>
-                        )
+                          {hasFiles ? (
+                            <DownloadCard
+                              downloadUrl={order.downloadUrl}
+                              docsUrl={order.docsUrl}
+                              productName={order.productName}
+                            />
+                          ) : null}
+                        </div>
                       ) : order.login.state === "ready" ? (
                         <div className="flex flex-col gap-4">
                           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
