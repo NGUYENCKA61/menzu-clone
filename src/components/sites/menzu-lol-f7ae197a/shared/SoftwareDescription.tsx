@@ -42,6 +42,9 @@ export interface SoftwareDescriptionProps {
    *  Only ever non-empty when `setupGuideAccess` is "unlocked". */
   setupGuideHtml: string;
   setupGuideAccess: SetupGuideAccess;
+  /** What share of the price the shop gives back when this tool fails, as a
+   *  whole percent. Null prints no line — see the warranty block. */
+  refundRate: number | null;
   /** Where a guest who has already bought goes to prove it. */
   loginHref: string;
 }
@@ -84,6 +87,7 @@ export function SoftwareDescription({
   guideHtml,
   setupGuideHtml,
   setupGuideAccess,
+  refundRate,
   loginHref,
 }: SoftwareDescriptionProps) {
   /**
@@ -262,6 +266,20 @@ export function SoftwareDescription({
           và hoàn tiền được áp dụng theo từng sản phẩm và gói dịch vụ. Vui lòng
           xem đầy đủ chính sách trước khi mua.
         </p>
+        {/* The figure the sentence above stops short of. Printed only when the
+            shop has set one: a made-up number here is a promise a buyer would
+            hold them to. Set in the accent so a skimming reader finds it — it
+            is the one thing in this block anybody is looking for. */}
+        {typeof refundRate === "number" ? (
+          <p className={`${BODY} mt-2.5`}>
+            <span className="font-bold text-white">Tỷ lệ hoàn trả:</span>{" "}
+            <span className="font-black text-[var(--menzu-accent)]">
+              {refundRate}%
+            </span>{" "}
+            — mức bảo hành và hoàn trả khách hàng được nhận nếu sản phẩm xảy ra
+            sự cố, lỗi ngoài ý muốn.
+          </p>
+        ) : null}
       </div>
     </>
   );

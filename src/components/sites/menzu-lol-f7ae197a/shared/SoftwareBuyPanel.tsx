@@ -10,7 +10,6 @@ import { productHref } from "@/lib/routes";
 
 import { formatVnd } from "./productData";
 import { SoftwareCheckoutDialog } from "./SoftwareCheckoutDialog";
-import { StatusSubscribeButton } from "./StatusSubscribeButton";
 
 export interface SoftwarePackageView {
   id: string;
@@ -37,6 +36,12 @@ export interface SoftwareDetail {
   /** "Hướng dẫn thiết lập & sử dụng" as editor HTML; "" prints the default. */
   setupGuideHtml: string;
   softwareStatus: "UNDETECTED" | "DETECTED" | "UPDATING" | null;
+  /** What share of the price comes back if the tool fails, as a whole percent.
+   *  Null means the shop has set none and the policy block stays silent. */
+  refundRate: number | null;
+  /** The shop's own pills beside the detection state — "TOP #1 BÁN CHẠY",
+   *  "MỚI RA MẮT". Up to two; empty draws none. */
+  badges: string[];
   images: string[];
   /** Raw YouTube link as the shop pasted it; the gallery parses it. */
   videoUrl: string | null;
@@ -92,12 +97,12 @@ const MAX_QUANTITY = 99;
 export function SoftwareBuyPanel({
   software,
   initialPackageId,
-  statusSubscribed,
 }: {
   software: SoftwareDetail;
   /** From `?pkg=` — the tier a listing card was already showing. */
   initialPackageId?: string;
-  /** Following this tool's status; null for a guest. */
+  /** Following this tool's status; null for a guest. Still threaded down from
+   *  the route, unread while "Nhận thông báo" is off the page. */
   statusSubscribed: boolean | null;
 }) {
   const router = useRouter();
@@ -178,22 +183,34 @@ export function SoftwareBuyPanel({
 
   return (
     <div className="flex flex-col gap-6">
-      {/* The state, and beside it the way to hear when it changes. */}
-      {status ? (
+      {/* The state, and beside it whatever the shop wants said about this tool
+          — "TOP #1 BÁN CHẠY", a launch, a sale. "Nhận thông báo" stood here
+          until the shop asked for it off the page; the button, its route and
+          the following it records all still exist, so putting it back is
+          restoring three lines.
+
+          The row is drawn whenever either half has something to say: a tool
+          with no detection state can still carry a badge. */}
+      {status || software.badges.length > 0 ? (
         <div className="flex flex-wrap items-center gap-2">
-          <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-3 py-1.5">
-            <span className={`h-1.5 w-1.5 rounded-full ${status.dot}`} />
-            <span
-              className={`text-[10px] font-black uppercase tracking-widest ${status.text}`}
-            >
-              {status.label}
+          {status ? (
+            <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-3 py-1.5">
+              <span className={`h-1.5 w-1.5 rounded-full ${status.dot}`} />
+              <span
+                className={`text-[10px] font-black uppercase tracking-widest ${status.text}`}
+              >
+                {status.label}
+              </span>
             </span>
-          </span>
-          <StatusSubscribeButton
-            productCode={software.code}
-            initial={statusSubscribed}
-            loginNext={productHref(software.categorySlug, software.slug)}
-          />
+          ) : null}
+          {software.badges.map((label) => (
+            <span
+              key={label}
+              className="inline-flex items-center rounded-full border border-[var(--menzu-accent)]/30 bg-[var(--menzu-accent)]/10 px-3 py-1.5 text-[10px] font-black uppercase tracking-widest text-[var(--menzu-accent)]"
+            >
+              {label}
+            </span>
+          ))}
         </div>
       ) : null}
 

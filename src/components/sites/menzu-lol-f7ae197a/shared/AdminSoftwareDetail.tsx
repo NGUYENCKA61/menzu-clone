@@ -76,10 +76,37 @@ export interface SoftwareDetailView {
    *  plain text arrives already converted. */
   descriptionHtml: string;
   downloadUrl: string;
+  /** "Link tài liệu sử dụng" — the manual handed over beside the installer. */
+  docsUrl: string;
+  /** The refund promise as a whole percent, or "" where none is set. Typed as
+   *  a string because that is what the input holds, and "" has to survive the
+   *  round trip as "not set" rather than becoming a zero. */
+  refundRate: string;
+  /** The pills beside the detection state on the customer's page — up to two,
+   *  padded to two so the form always has both boxes. */
+  badges: string[];
   imageUrl: string;
   videoUrl: string;
   packages: SoftwarePackageView[];
 }
+
+/**
+ * The badges a shop reaches for most, one click each.
+ *
+ * Suggestions, not a menu: the boxes below stay free text, because the reason
+ * a badge exists is to say the thing this tool's week calls for, and a fixed
+ * list would be back to no badge at all the first time that thing is not on it.
+ */
+const BADGE_PRESETS = [
+  "TOP #1 BÁN CHẠY",
+  "BÁN CHẠY NHẤT",
+  "MỚI RA MẮT",
+  "KHUYÊN DÙNG",
+  "SẮP HẾT HÀNG",
+  "GIẢM GIÁ SỐC",
+  "ỔN ĐỊNH NHẤT",
+  "HOT",
+];
 
 const CARD = "rounded-xl border border-white/[0.08] bg-[#0e0e11] p-5 flex flex-col gap-4";
 const CARD_HEAD =
@@ -142,6 +169,10 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
   /** What the database holds; advanced on every successful save. */
   const [descBaseline, setDescBaseline] = useState(software.descriptionHtml);
   const [downloadUrl, setDownloadUrl] = useState(software.downloadUrl);
+  const [docsUrl, setDocsUrl] = useState(software.docsUrl);
+  const [refundRate, setRefundRate] = useState(software.refundRate);
+  const [badge1, setBadge1] = useState(software.badges[0] ?? "");
+  const [badge2, setBadge2] = useState(software.badges[1] ?? "");
   const [videoUrl, setVideoUrl] = useState(software.videoUrl);
   const [status, setStatus] = useState(software.status);
   const [softwareStatus, setSoftwareStatus] = useState(
@@ -194,6 +225,11 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
       name,
       slug,
       downloadUrl,
+      docsUrl,
+      refundRate: refundRate.trim(),
+      // Sent as a pair; the server drops the blanks, so clearing the first box
+      // and leaving the second promotes it rather than leaving a hole.
+      badges: [badge1, badge2],
       videoUrl,
     });
     if (data) setMsg({ tone: "ok", text: "Đã lưu thông tin phần mềm" });
@@ -483,6 +519,118 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
                   placeholder="https://…"
                   className={FIELD}
                 />
+              </div>
+              <div>
+                <label htmlFor="sw-docs" className={LABEL}>
+                  Link tài liệu sử dụng
+                </label>
+                <input
+                  id="sw-docs"
+                  value={docsUrl}
+                  onChange={(event) => setDocsUrl(event.target.value)}
+                  placeholder="https://…"
+                  className={FIELD}
+                />
+                <p className="mt-1.5 text-[11px] text-neutral-500">
+                  Hiện cùng &ldquo;Link tải&rdquo; trong đơn hàng của khách, ngay
+                  cạnh key. Để trống nếu chưa có.
+                </p>
+              </div>
+              <div>
+                <span className={LABEL}>Nhãn nổi bật (tối đa 2)</span>
+                {/* The shop still types whatever it likes; these are the ones
+                    it would otherwise type again on every product, one click
+                    instead of eighteen keystrokes in caps. */}
+                <div className="mb-2 flex flex-wrap gap-1.5">
+                  {BADGE_PRESETS.map((preset) => {
+                    const taken = [badge1, badge2].some(
+                      (b) => b.trim().toUpperCase() === preset,
+                    );
+                    return (
+                      <button
+                        key={preset}
+                        type="button"
+                        disabled={taken || (badge1.trim() !== "" && badge2.trim() !== "")}
+                        // Fills the first empty box; both full and the chips
+                        // go dead rather than silently overwriting a label.
+                        onClick={() =>
+                          badge1.trim() === "" ? setBadge1(preset) : setBadge2(preset)
+                        }
+                        className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[10px] font-black uppercase tracking-widest text-neutral-400 transition-colors hover:border-[var(--brand)]/40 hover:bg-[var(--brand)]/10 hover:text-[var(--brand)] disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:border-white/10 disabled:hover:bg-white/[0.04] disabled:hover:text-neutral-400"
+                      >
+                        + {preset}
+                      </button>
+                    );
+                  })}
+                </div>
+                <div className="flex flex-col gap-2">
+                  <input
+                    id="sw-badge-1"
+                    value={badge1}
+                    onChange={(event) => setBadge1(event.target.value)}
+                    placeholder="VD: TOP #1 BÁN CHẠY"
+                    maxLength={40}
+                    aria-label="Nhãn nổi bật thứ nhất"
+                    className={FIELD}
+                  />
+                  <input
+                    id="sw-badge-2"
+                    value={badge2}
+                    onChange={(event) => setBadge2(event.target.value)}
+                    placeholder="VD: MỚI RA MẮT (không bắt buộc)"
+                    maxLength={40}
+                    aria-label="Nhãn nổi bật thứ hai"
+                    className={FIELD}
+                  />
+                </div>
+                <p className="mt-1.5 text-[11px] text-neutral-500">
+                  Hiện thành nhãn đỏ cạnh trạng thái ở trang khách. Gõ gì hiện
+                  nấy — &ldquo;TOP #1 BÁN CHẠY&rdquo;, &ldquo;MỚI RA MẮT&rdquo;,
+                  &ldquo;SẮP HẾT HÀNG&rdquo;. Để trống cả hai thì không hiện
+                  nhãn nào.
+                </p>
+                {/* What the customer will see, in the customer's colours. */}
+                {[badge1, badge2].some((b) => b.trim()) ? (
+                  <div className="mt-2 flex flex-wrap items-center gap-2">
+                    {[badge1, badge2]
+                      .map((b) => b.trim())
+                      .filter(Boolean)
+                      .map((label) => (
+                        <span
+                          key={label}
+                          className="inline-flex items-center rounded-full border border-[var(--brand)]/30 bg-[var(--brand)]/10 px-3 py-1.5 text-[10px] font-black uppercase tracking-widest text-[var(--brand)]"
+                        >
+                          {label}
+                        </span>
+                      ))}
+                  </div>
+                ) : null}
+              </div>
+              <div>
+                <label htmlFor="sw-refund" className={LABEL}>
+                  Tỷ lệ hoàn trả (%)
+                </label>
+                {/* type=number so a phone offers the digit pad; the value still
+                    travels as the string the input holds, because "" is the
+                    shop saying "chưa có" and a zero is a very different
+                    promise. */}
+                <input
+                  id="sw-refund"
+                  type="number"
+                  min={0}
+                  max={100}
+                  step={1}
+                  value={refundRate}
+                  onChange={(event) => setRefundRate(event.target.value)}
+                  placeholder="VD: 80"
+                  className={FIELD}
+                />
+                <p className="mt-1.5 text-[11px] text-neutral-500">
+                  Mức bảo hành / hoàn trả khách nhận được nếu sản phẩm gặp sự cố
+                  ngoài ý muốn. Hiện dưới mục &ldquo;Chính sách bảo hành &amp;
+                  hoàn tiền&rdquo; ở trang khách. Để trống thì không hiện dòng
+                  nào.
+                </p>
               </div>
               <div>
                 <label htmlFor="sw-video" className={LABEL}>

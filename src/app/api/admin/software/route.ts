@@ -12,7 +12,9 @@ import {
   sanitizeRequirements,
   serializeRequirements,
 } from "@/lib/productRequirements";
+import { serializeBadges } from "@/lib/productBadges";
 import { cleanGuideHtml } from "@/lib/productGuide";
+import { RATE_ABSENT, RATE_BAD, readRefundRate } from "@/lib/refundRate";
 import { uniqueProductSlug } from "@/lib/routes";
 import { slugify } from "@/lib/slug";
 
@@ -24,6 +26,7 @@ function readStatus(value: unknown): SoftwareStatusValue | undefined {
     ? (value as SoftwareStatusValue)
     : undefined;
 }
+
 
 /**
  * A stock code minted from the name — "HACK CS2 BẢN MỚI" -> "HACKCS2BANMOI".
@@ -74,6 +77,8 @@ export async function POST(request: Request) {
     price?: number;
     imageUrl?: string;
     downloadUrl?: string;
+    docsUrl?: string;
+    refundRate?: number | string | null;
   } | null;
 
   const typedCode = body?.code?.trim().toUpperCase() || null;
@@ -88,6 +93,14 @@ export async function POST(request: Request) {
   if (!categorySlug) return NextResponse.json({ error: "Thiếu danh mục" }, { status: 400 });
   if (!Number.isFinite(price) || price < 0) {
     return NextResponse.json({ error: "Giá không hợp lệ" }, { status: 400 });
+  }
+
+  const refundRate = readRefundRate(body?.refundRate);
+  if (refundRate === RATE_BAD) {
+    return NextResponse.json(
+      { error: "Tỷ lệ hoàn trả phải là số nguyên từ 0 đến 100" },
+      { status: 400 },
+    );
   }
 
   const category = await db.category.findUnique({ where: { slug: categorySlug } });
@@ -122,6 +135,10 @@ export async function POST(request: Request) {
     status: "AVAILABLE" as const,
     imageUrl: body?.imageUrl?.trim() || null,
     downloadUrl: body?.downloadUrl?.trim() || null,
+    docsUrl: body?.docsUrl?.trim() || null,
+    // Left off the create form: a tool is born without a promise and gets one
+    // when the shop decides what it is.
+    refundRate: refundRate === RATE_ABSENT ? null : refundRate,
     // A tool has no rank. The column stays required for the accounts that do,
     // so software writes the empty string rather than a fake value that would
     // show up if anything ever printed it.
@@ -183,12 +200,26 @@ export async function PATCH(request: Request) {
     setupGuide?: string;
     price?: number;
     downloadUrl?: string;
+    docsUrl?: string;
+    /** Whole percent 0–100; "" clears the promise back to "not set". */
+    refundRate?: number | string | null;
+    /** The pills beside the detection state, sent whole. An empty list takes
+     *  them all off the page. */
+    badges?: unknown;
     imageUrl?: string;
     videoUrl?: string;
   } | null;
 
   const code = body?.code?.trim();
   if (!code) return NextResponse.json({ error: "Thiếu mã" }, { status: 400 });
+
+  const refundRate = readRefundRate(body?.refundRate);
+  if (refundRate === RATE_BAD) {
+    return NextResponse.json(
+      { error: "Tỷ lệ hoàn trả phải là số nguyên từ 0 đến 100" },
+      { status: 400 },
+    );
+  }
 
   const product = await db.product.findFirst({
     where: { code, productType: "SOFTWARE_GAME" },
@@ -271,6 +302,16 @@ export async function PATCH(request: Request) {
       // takes the button off the card.
       ...(body?.downloadUrl !== undefined
         ? { downloadUrl: body.downloadUrl.trim() || null }
+        : {}),
+      // Same convention as the others: "" clears the link and hides its button.
+      ...(body?.docsUrl !== undefined ? { docsUrl: body.docsUrl.trim() || null } : {}),
+      // "" clears it, which takes the "Tỷ lệ hoàn trả" line off the policy
+      // block rather than printing a promise of zero.
+      ...(refundRate !== RATE_ABSENT ? { refundRate } : {}),
+      // Sent whole or not at all, like the feature and requirement lists: an
+      // empty list is the shop clearing every badge, not "leave them alone".
+      ...(body?.badges !== undefined
+        ? { badge: serializeBadges(body.badges) }
         : {}),
       // "" clears the picture, dropping the card back to its empty frame.
       ...(body?.imageUrl !== undefined ? { imageUrl: body.imageUrl.trim() || null } : {}),

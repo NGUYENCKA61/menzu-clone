@@ -10,6 +10,7 @@ import { getAdmin } from "@/lib/admin";
 import { db } from "@/lib/db";
 import { isHtmlBody, plainToDocHtml } from "@/lib/docHtml";
 import { readKeyStore } from "@/lib/packageKeyStore";
+import { parseBadges } from "@/lib/productBadges";
 import { noteToEditorHtml, parseFeatures } from "@/lib/productFeatures";
 import { parseRequirements } from "@/lib/productRequirements";
 import { guideToEditorHtml } from "@/lib/productGuide";
@@ -127,6 +128,12 @@ export default async function AdminAccountDetailPage({
                 : plainToDocHtml(software.description)
               : "",
             downloadUrl: software.downloadUrl ?? "",
+            docsUrl: software.docsUrl ?? "",
+            // "" rather than "0": the form has to be able to tell "no promise
+            // set" from "we refund nothing".
+            refundRate:
+              software.refundRate === null ? "" : String(software.refundRate),
+            badges: parseBadges(software.badge),
             imageUrl: software.imageUrl ?? "",
             videoUrl: software.videoUrl ?? "",
             packages: software.packages.map((p, index) => ({

@@ -105,6 +105,7 @@ export function SoftwareDetailView({
               guideHtml={software.guideHtml}
               setupGuideHtml={software.setupGuideHtml}
               setupGuideAccess={setupGuideAccess}
+              refundRate={software.refundRate}
               loginHref={`/login?next=${encodeURIComponent(productHref(software.categorySlug, software.slug))}`}
             />
           </div>

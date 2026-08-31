@@ -571,6 +571,25 @@ model Product {
   /// embed at render time, so nobody has to know what an embed URL looks like.
   /// Null falls the frame back to the picture.
   videoUrl       String?
+  /// How much of what a buyer paid comes back when the tool fails them, as a
+  /// whole percent: 100 is "we make you whole", 50 is half. Its own column
+  /// rather than a sentence in the description because it is a promise the
+  /// shop makes per tool — a cheap one-day key and a month of a flagship do
+  /// not carry the same guarantee — and because a number can be shown, sorted
+  /// and argued about, while a sentence buried in prose cannot.
+  ///
+  /// Null means the shop has not set one, and the policy block simply does not
+  /// print the line: an unanswered question is better than a made-up figure a
+  /// buyer would hold them to.
+  refundRate     Int?
+  /// The pill beside the detection state — "TOP #1 BÁN CHẠY", "MỚI RA MẮT",
+  /// whatever the shop wants said about this tool this week.
+  ///
+  /// Typed rather than computed. A best-seller rank could be counted from the
+  /// orders, but then the shop could not say "sắp hết hàng" or run a slogan
+  /// for a weekend, and a badge nobody typed would appear on a page by itself.
+  /// Null draws no pill.
+  badge          String?
 
   // --- ACCOUNT_GAME ----------------------------------------------------
   /// Software rows leave these at their empty or zero values. `rank` stays
