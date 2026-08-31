@@ -1,11 +1,14 @@
 import { describe, expect, it } from "vitest";
 
-import { evaluateVoucher, type VoucherRules } from "@/lib/voucher";
+import { evaluateVoucher, voucherRules, type VoucherRules } from "@/lib/voucher";
 
 const NOW = new Date("2026-08-12T10:00:00Z");
 
 function voucher(overrides: Partial<VoucherRules> = {}): VoucherRules {
   return {
+    scope: "ALL",
+    categoryId: null,
+    productIds: [],
     percentOff: 10,
     amountOff: null,
     minOrder: null,
@@ -17,6 +20,43 @@ function voucher(overrides: Partial<VoucherRules> = {}): VoucherRules {
     ...overrides,
   };
 }
+
+describe("evaluateVoucher scope", () => {
+  const target = { productId: "p1", categoryId: "c1" };
+
+  it("applies an ALL code with or without a target", () => {
+    expect(evaluateVoucher(voucher(), 10_000n, NOW).ok).toBe(true);
+    expect(evaluateVoucher(voucher(), 10_000n, NOW, target).ok).toBe(true);
+  });
+
+  it("applies a PRODUCT code only to the products it names", () => {
+    const v = voucher({ scope: "PRODUCT", productIds: ["p1", "p3"] });
+    expect(evaluateVoucher(v, 10_000n, NOW, target).ok).toBe(true);
+    expect(evaluateVoucher(v, 10_000n, NOW, { ...target, productId: "p3" }).ok).toBe(true);
+    expect(evaluateVoucher(v, 10_000n, NOW, { ...target, productId: "p2" }).ok).toBe(false);
+    // No target at all — nothing to match against.
+    expect(evaluateVoucher(v, 10_000n, NOW).ok).toBe(false);
+  });
+
+  it("reads the product links off a voucher row", () => {
+    const row = { ...voucher({ scope: "PRODUCT" }), id: "v1", products: [{ productId: "p1" }] };
+    expect(voucherRules(row)?.productIds).toEqual(["p1"]);
+    expect(voucherRules(null)).toBeNull();
+    expect(evaluateVoucher(voucherRules(row), 10_000n, NOW, target).ok).toBe(true);
+  });
+
+  it("applies a CATEGORY code to every product in that category", () => {
+    const v = voucher({ scope: "CATEGORY", categoryId: "c1" });
+    expect(evaluateVoucher(v, 10_000n, NOW, target).ok).toBe(true);
+    expect(evaluateVoucher(v, 10_000n, NOW, { ...target, productId: "p9" }).ok).toBe(true);
+    expect(evaluateVoucher(v, 10_000n, NOW, { ...target, categoryId: "c2" }).ok).toBe(false);
+  });
+
+  it("refuses a scoped code whose target was removed", () => {
+    expect(evaluateVoucher(voucher({ scope: "PRODUCT", productIds: [] }), 10_000n, NOW, target).ok).toBe(false);
+    expect(evaluateVoucher(voucher({ scope: "CATEGORY", categoryId: null }), 10_000n, NOW, target).ok).toBe(false);
+  });
+});
 
 describe("evaluateVoucher", () => {
   it("takes a percentage off the price being charged", () => {

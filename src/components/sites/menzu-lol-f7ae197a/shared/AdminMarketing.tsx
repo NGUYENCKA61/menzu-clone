@@ -24,6 +24,9 @@ export interface VoucherView {
   startsAt: string | null;
   expiresAt: string | null;
   active: boolean;
+  scope: "ALL" | "CATEGORY" | "PRODUCT";
+  /** Printed as-is in the table: what the code may be spent on. */
+  scopeLabel: string;
 }
 
 export interface FlashSaleView {
@@ -97,9 +100,15 @@ function StatMini({
  */
 export function AdminMarketing({
   vouchers,
+  categories,
+  products,
   sales,
 }: {
   vouchers: VoucherView[];
+  /** For the "Áp dụng cho danh mục" pick. */
+  categories: { slug: string; name: string }[];
+  /** For the "Những sản phẩm chỉ định" pick: every live product. */
+  products: { code: string; name: string; category: string }[];
   sales: FlashSaleView[];
 }) {
   const router = useRouter();
@@ -116,12 +125,29 @@ export function AdminMarketing({
   const [vStart, setVStart] = useState("");
   const [vEnd, setVEnd] = useState("");
   const [maxUses, setMaxUses] = useState("");
+  const [scope, setScope] = useState<"ALL" | "CATEGORY" | "PRODUCT">("ALL");
+  const [scopeCategory, setScopeCategory] = useState("");
+  /** Codes ticked in the product pick. */
+  const [scopeProducts, setScopeProducts] = useState<string[]>([]);
+  const [productQuery, setProductQuery] = useState("");
 
   // Flash sale form
   const [productCode, setProductCode] = useState("");
   const [salePrice, setSalePrice] = useState("");
   const [sStart, setSStart] = useState("");
   const [sEnd, setSEnd] = useState("");
+
+  // The product pick, narrowed by the search box. Ticked rows always stay
+  // in view, so what the code covers is visible while searching for more.
+  const needle = productQuery.trim().toLowerCase();
+  const pickable = products.filter(
+    (p) =>
+      scopeProducts.includes(p.code) ||
+      !needle ||
+      p.name.toLowerCase().includes(needle) ||
+      p.code.toLowerCase().includes(needle) ||
+      p.category.toLowerCase().includes(needle),
+  );
 
   async function call(url: string, method: string, body: Record<string, unknown>) {
     setPending(true);
@@ -195,6 +221,10 @@ export function AdminMarketing({
           <form
             onSubmit={async (event) => {
               event.preventDefault();
+              if (scope === "PRODUCT" && scopeProducts.length === 0) {
+                setError("Chọn ít nhất một sản phẩm để áp dụng mã");
+                return;
+              }
               const ok = await call("/api/admin/vouchers", "POST", {
                 code,
                 percentOff: digits(percentOff),
@@ -203,10 +233,14 @@ export function AdminMarketing({
                 maxUses: digits(maxUses),
                 startsAt: vStart || undefined,
                 expiresAt: vEnd || undefined,
+                scope,
+                categorySlug: scope === "CATEGORY" ? scopeCategory : undefined,
+                productCodes: scope === "PRODUCT" ? scopeProducts : undefined,
               });
               if (ok) {
                 setCode(""); setPercentOff(""); setAmountOff("");
                 setMinOrder(""); setVStart(""); setVEnd(""); setMaxUses("");
+                setScope("ALL"); setScopeCategory(""); setScopeProducts([]); setProductQuery("");
               }
             }}
             className="rounded-xl border border-white/[0.08] bg-[#0e0e11] p-5 grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-4"
@@ -243,6 +277,87 @@ export function AdminMarketing({
               <label htmlFor="v-max" className={LABEL}>Lượt dùng tối đa</label>
               <input id="v-max" inputMode="numeric" value={maxUses} onChange={(e) => setMaxUses(e.target.value)} placeholder="Không giới hạn" className={FIELD} />
             </div>
+            <div>
+              <label htmlFor="v-scope" className={LABEL}>Áp dụng cho</label>
+              <select
+                id="v-scope"
+                value={scope}
+                onChange={(e) => setScope(e.target.value as "ALL" | "CATEGORY" | "PRODUCT")}
+                className={FIELD}
+              >
+                <option value="ALL" className="bg-neutral-900">Mọi sản phẩm</option>
+                <option value="CATEGORY" className="bg-neutral-900">Một danh mục</option>
+                <option value="PRODUCT" className="bg-neutral-900">Những sản phẩm chỉ định</option>
+              </select>
+            </div>
+            {scope === "CATEGORY" ? (
+              <div>
+                <label htmlFor="v-category" className={LABEL}>Danh mục</label>
+                <select
+                  id="v-category"
+                  required
+                  value={scopeCategory}
+                  onChange={(e) => setScopeCategory(e.target.value)}
+                  className={FIELD}
+                >
+                  <option value="" className="bg-neutral-900">— Chọn danh mục —</option>
+                  {categories.map((c) => (
+                    <option key={c.slug} value={c.slug} className="bg-neutral-900">
+                      {c.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            ) : scope === "PRODUCT" ? (
+              <div className="sm:col-span-2">
+                <div className="flex items-baseline justify-between gap-3">
+                  <label htmlFor="v-product-search" className={LABEL}>Sản phẩm chỉ định</label>
+                  <span className="text-[10px] font-black uppercase tracking-widest text-neutral-500">
+                    Đã chọn {scopeProducts.length}
+                  </span>
+                </div>
+                <input
+                  id="v-product-search"
+                  value={productQuery}
+                  onChange={(e) => setProductQuery(e.target.value)}
+                  placeholder="Tìm theo tên, mã hoặc danh mục…"
+                  className={FIELD}
+                />
+                <div
+                  role="group"
+                  aria-label="Chọn sản phẩm áp dụng mã"
+                  className="mt-2 max-h-44 overflow-y-auto rounded-xl border border-white/[0.08] bg-white/[0.02] divide-y divide-white/[0.05]"
+                >
+                  {pickable.length === 0 ? (
+                    <p className="px-3 py-3 text-xs text-neutral-500">Không có sản phẩm nào khớp.</p>
+                  ) : (
+                    pickable.map((p) => {
+                      const checked = scopeProducts.includes(p.code);
+                      return (
+                        <label
+                          key={p.code}
+                          className={`flex cursor-pointer items-center gap-3 px-3 py-2 text-xs transition-colors hover:bg-white/[0.04] ${checked ? "bg-white/[0.05]" : ""}`}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={checked}
+                            onChange={() =>
+                              setScopeProducts((prev) =>
+                                checked ? prev.filter((c) => c !== p.code) : [...prev, p.code],
+                              )
+                            }
+                            className="h-3.5 w-3.5 shrink-0 accent-[var(--brand)]"
+                          />
+                          <span className="min-w-0 flex-1 truncate font-bold text-white">{p.name}</span>
+                          <span className="shrink-0 font-mono text-[10px] font-black text-neutral-400">{p.code}</span>
+                          <span className="hidden shrink-0 text-[10px] text-neutral-500 sm:inline">{p.category}</span>
+                        </label>
+                      );
+                    })
+                  )}
+                </div>
+              </div>
+            ) : null}
             <div className="flex items-end">
               <button type="submit" disabled={pending} className="w-full h-[42px] rounded-xl bg-[var(--brand)] hover:bg-[var(--brand-dark)] disabled:opacity-60 text-[11px] font-black uppercase tracking-widest text-white transition-colors inline-flex items-center justify-center gap-1.5">
                 <Plus size={14} />
@@ -255,10 +370,10 @@ export function AdminMarketing({
             <AdminEmpty title="Chưa có voucher nào" body="Tạo mã đầu tiên bằng biểu mẫu bên trên." />
           ) : (
             <div className="w-full overflow-x-auto rounded-xl border border-white/[0.08] bg-[#0e0e11]">
-              <table className="w-full min-w-[820px] text-left">
+              <table className="w-full min-w-[1000px] text-left">
                 <thead>
                   <tr className="border-b border-white/10">
-                    {["Mã", "Giảm", "Đơn tối thiểu", "Đã dùng", "Hiệu lực", "Trạng thái", ""].map((c) => (
+                    {["Mã", "Giảm", "Áp dụng", "Đơn tối thiểu", "Đã dùng", "Hiệu lực", "Trạng thái", ""].map((c) => (
                       <th key={c} scope="col" className="px-5 py-3.5 text-[10px] font-black uppercase tracking-widest text-neutral-500 whitespace-nowrap">{c}</th>
                     ))}
                   </tr>
@@ -275,6 +390,9 @@ export function AdminMarketing({
                         ) : (
                           <span className="text-[11px] text-neutral-700">—</span>
                         )}
+                      </td>
+                      <td className="px-5 py-3 text-xs text-neutral-300 whitespace-nowrap">
+                        {v.scopeLabel}
                       </td>
                       <td className="px-5 py-3 text-xs text-neutral-400 tabular-nums">
                         {v.minOrder ? `${formatVnd(v.minOrder)}đ` : "—"}

@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { AdminMarketing } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminMarketing";
 import { AdminShell } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminShell";
 import { getAdmin } from "@/lib/admin";
-import { listFlashSales, listVouchers } from "@/lib/queries";
+import { listCategories, listFlashSales, listProductPicks, listVouchers } from "@/lib/queries";
 
 export const metadata: Metadata = { title: "Marketing | Quản trị" };
 export const dynamic = "force-dynamic";
@@ -26,7 +26,12 @@ export default async function AdminMarketingPage() {
   // visitor that an admin area exists here at all.
   if (!admin) notFound();
 
-  const [vouchers, sales] = await Promise.all([listVouchers(), listFlashSales()]);
+  const [vouchers, sales, categories, products] = await Promise.all([
+    listVouchers(),
+    listFlashSales(),
+    listCategories(),
+    listProductPicks(),
+  ]);
 
   return (
     <AdminShell
@@ -35,6 +40,8 @@ export default async function AdminMarketingPage() {
       username={admin.username}
     >
       <AdminMarketing
+        categories={categories.map((c) => ({ slug: c.slug, name: c.name }))}
+        products={products}
         vouchers={vouchers.map((v) => ({
           ...v,
           startsAt: formatWhen(v.startsAt),

@@ -16,6 +16,11 @@ export async function POST(request: Request) {
     minOrder?: number;
     startsAt?: string;
     expiresAt?: string;
+    /** "ALL" (default), "CATEGORY" with categorySlug, or "PRODUCT" with
+     *  productCodes — the list of products the code is good for. */
+    scope?: string;
+    categorySlug?: string;
+    productCodes?: string[];
   } | null;
 
   const code = body?.code?.trim().toUpperCase();
@@ -75,6 +80,47 @@ export async function POST(request: Request) {
   const maxUsesRaw = Number(body?.maxUses ?? 0);
   const maxUses = Number.isFinite(maxUsesRaw) && maxUsesRaw > 0 ? Math.floor(maxUsesRaw) : null;
 
+  // Scope: what the code may be spent on. Targets are resolved here so a
+  // typo in a product code is refused now, not discovered by a customer.
+  const scope =
+    body?.scope === "CATEGORY" || body?.scope === "PRODUCT" ? body.scope : "ALL";
+  let categoryId: string | null = null;
+  let productIds: string[] = [];
+  if (scope === "CATEGORY") {
+    const slug = body?.categorySlug?.trim();
+    const category = slug ? await db.category.findUnique({ where: { slug } }) : null;
+    if (!category) {
+      return NextResponse.json({ error: "Chọn danh mục để áp dụng mã" }, { status: 400 });
+    }
+    categoryId = category.id;
+  } else if (scope === "PRODUCT") {
+    const codes = Array.from(
+      new Set(
+        (Array.isArray(body?.productCodes) ? body.productCodes : [])
+          .map((c) => String(c).trim().toUpperCase())
+          .filter(Boolean),
+      ),
+    );
+    if (codes.length === 0) {
+      return NextResponse.json(
+        { error: "Chọn ít nhất một sản phẩm để áp dụng mã" },
+        { status: 400 },
+      );
+    }
+    const products = await db.product.findMany({
+      where: { code: { in: codes }, deletedAt: null },
+      select: { id: true, code: true },
+    });
+    const missing = codes.filter((c) => !products.some((p) => p.code === c));
+    if (missing.length > 0) {
+      return NextResponse.json(
+        { error: `Không tìm thấy sản phẩm với mã: ${missing.join(", ")}` },
+        { status: 400 },
+      );
+    }
+    productIds = products.map((p) => p.id);
+  }
+
   const voucher = await db.voucher.create({
     data: {
       code,
@@ -84,6 +130,9 @@ export async function POST(request: Request) {
       minOrder,
       startsAt,
       expiresAt,
+      scope,
+      categoryId,
+      products: { create: productIds.map((productId) => ({ productId })) },
     },
   });
 
