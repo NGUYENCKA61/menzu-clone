@@ -59,12 +59,21 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }),
   ]);
 
-  const now = new Date();
+  // The newest thing the shop has published. A static route's own copy does
+  // not change on a schedule, so stamping it with "now" — which is what the
+  // hourly revalidate made it do — told a crawler that every page had just
+  // changed, every hour, forever. A signal that is always true carries no
+  // information, and a crawler that learns to distrust it distrusts the whole
+  // file. The catalogue's own latest edit is the honest answer.
+  const freshest = [...categories, ...products, ...docs]
+    .map((row) => row.updatedAt.getTime())
+    .reduce((newest, at) => Math.max(newest, at), 0);
+  const shopChanged = new Date(freshest || Date.now());
 
   return [
     ...STATIC_ROUTES.map(([path, priority, changeFrequency]) => ({
       url: `${SITE_URL}${path}`,
-      lastModified: now,
+      lastModified: shopChanged,
       changeFrequency,
       priority,
     })),

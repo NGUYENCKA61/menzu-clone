@@ -15,9 +15,28 @@
  */
 export const SITE_URL = (
   process.env.NEXT_PUBLIC_SITE_URL ??
+  // Netlify names the deployed address itself, which is the right answer on
+  // the host this shop actually runs on — and without it a production build
+  // that forgot the variable published canonical tags, a sitemap and a robots
+  // file all pointing at localhost, which is an instruction to de-index the
+  // whole site.
+  process.env.URL ??
   (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null) ??
   "http://localhost:3000"
 ).replace(/\/$/, "");
+
+// Said out loud once, at build time, because the symptom — every canonical
+// pointing at a machine nobody can reach — is invisible until a search engine
+// acts on it.
+if (
+  process.env.NODE_ENV === "production" &&
+  SITE_URL.startsWith("http://localhost")
+) {
+  console.warn(
+    "[seo] NEXT_PUBLIC_SITE_URL is not set: canonical tags, the sitemap and " +
+      "robots.txt will all point at localhost.",
+  );
+}
 
 /**
  * The shop's name for structured data, which is built in helpers that have no

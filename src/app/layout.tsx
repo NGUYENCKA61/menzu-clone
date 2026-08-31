@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
@@ -34,6 +34,19 @@ function describe(brandName: string): string {
  * Built per request so the shop name set in Cấu hình → Nhận diện reaches the
  * browser tab and the share cards, not just the header.
  */
+/**
+ * The colour a phone paints its own chrome with — the address bar on Android
+ * Chrome, the status bar on an installed app. The manifest already declared
+ * one, but a manifest is only read once the site is installed; a visitor who
+ * simply opens the page got the browser's default grey above a black page.
+ *
+ * Built per request, like the rest, so the shop's own accent reaches it.
+ */
+export async function generateViewport(): Promise<Viewport> {
+  const { brandColor } = await getShopSettings();
+  return { themeColor: brandColor };
+}
+
 export async function generateMetadata(): Promise<Metadata> {
   const { brandName, heroBanner } = await getShopSettings();
   const headline = `${brandName} | Hack Game & Tài Khoản Game Uy Tín`;

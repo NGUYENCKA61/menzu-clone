@@ -14,10 +14,18 @@ const PRIVATE_PREFIXES = [
   "/wallet",
   "/orders",
   "/transactions",
-  "/topup",
-  "/voucher",
+  "/security",
+  "/2fa",
+  "/cart",
+  "/affiliate",
+  "/agency/dashboard",
   "/login",
   "/signup",
+  "/forgot-password",
+  "/reset-password",
+  // No /topup or /voucher: neither route exists, and a rule naming a page
+  // that was never built only makes this file harder to read against the
+  // routes that are actually here.
 ];
 
 export default function robots(): MetadataRoute.Robots {
