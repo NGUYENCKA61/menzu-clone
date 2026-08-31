@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
-import { SITE_NAME, SITE_URL } from "@/lib/seo";
+import { SITE_URL } from "@/lib/seo";
 import { PageBackdrop } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/PageBackdrop";
 import { Preloader } from "@/components/sites/menzu-lol-f7ae197a/shared/Preloader";
 import { SupportWidgetHost } from "@/components/sites/menzu-lol-f7ae197a/shared/SupportWidgetHost";
@@ -22,8 +22,13 @@ const headingNow = localFont({
   display: "swap",
 });
 
-const DESCRIPTION =
-  "Menzu Valorant — shop account Valorant uy tín, giá tốt. Acc tự chọn, check skin kho đồ, build kho đồ, thu acc và dịch vụ game.";
+/**
+ * Written from the shop's own name so a rebrand in Cấu hình → Nhận diện
+ * reaches the search results too, not only the header.
+ */
+function describe(brandName: string): string {
+  return `${brandName} — shop hack game và tài khoản game uy tín. Hack Valorant, CS2, PUBG, Liên Quân: key bản quyền giao tự động, cập nhật liên tục, hỗ trợ 24/7.`;
+}
 
 /**
  * Built per request so the shop name set in Cấu hình → Nhận diện reaches the
@@ -31,7 +36,8 @@ const DESCRIPTION =
  */
 export async function generateMetadata(): Promise<Metadata> {
   const { brandName, heroBanner } = await getShopSettings();
-  const headline = `${brandName} | Shop Account Valorant Uy Tín`;
+  const headline = `${brandName} | Hack Game & Tài Khoản Game Uy Tín`;
+  const DESCRIPTION = describe(brandName);
 
   return {
   // Required for Open Graph and canonical tags: Next resolves every relative
@@ -44,21 +50,28 @@ export async function generateMetadata(): Promise<Metadata> {
     template: `%s | ${brandName}`,
   },
   description: DESCRIPTION,
-  applicationName: SITE_NAME,
+  applicationName: brandName,
   keywords: [
-    "account valorant",
-    "acc valorant giá rẻ",
-    "shop acc valorant",
-    "acc valorant tự chọn",
-    "mua acc valorant",
-    "nạp vp valorant",
-    "menzu valorant",
+    "hack game",
+    "hack valorant",
+    "hack cs2",
+    "hack pubg",
+    "tool game",
+    "key bản quyền",
+    "shop hack game",
+    "mua acc game",
+    "acc valorant",
   ],
-  alternates: { canonical: "/" },
+  // No canonical here on purpose. Metadata is inherited, so a canonical set
+  // on the root layout is emitted on every page that does not override it —
+  // which told Google that /categories, /thong-bao and the rest were all
+  // copies of the home page, and asked it to drop them from the index. Each
+  // page names its own address; the home page's is on the home page.
   openGraph: {
     type: "website",
     locale: "vi_VN",
-    url: SITE_URL,
+    // og:url is inherited the same way and is left to the pages for the same
+    // reason; a share card pointing everything at "/" is the same mistake.
     siteName: brandName,
     title: headline,
     description: DESCRIPTION,
@@ -67,7 +80,7 @@ export async function generateMetadata(): Promise<Metadata> {
         url: heroBanner,
         width: 1200,
         height: 630,
-        alt: `${brandName} — shop account Valorant`,
+        alt: `${brandName} — shop hack game và tài khoản game`,
       },
     ],
   },

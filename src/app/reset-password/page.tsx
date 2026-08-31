@@ -1,9 +1,16 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 
 import { SiteFooter } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/SiteFooter";
 import { ResetPasswordForm } from "@/components/sites/menzu-lol-f7ae197a/shared/ResetPasswordForm";
 
-export const metadata: Metadata = { title: "Đặt lại mật khẩu" };
+export const metadata: Metadata = {
+  title: "Đặt lại mật khẩu",
+  // Nothing here belongs in a search index: it is either a sign-in step or
+  // one visitor's own account. Followed, not indexed, so the links still
+  // pass through.
+  robots: { index: false, follow: true },
+};
 
 /**
  * Where the reset email's link lands. The token is read here, once, on the
@@ -41,12 +48,12 @@ export default async function ResetPasswordPage({
                   Đường dẫn không đầy đủ. Hãy mở đúng liên kết trong email đặt
                   lại mật khẩu — hoặc yêu cầu một liên kết mới.
                 </p>
-                <a
+                <Link
                   href="/forgot-password"
                   className="flex w-full items-center justify-center rounded-2xl bg-[var(--menzu-accent)] py-4 text-sm font-black uppercase tracking-widest text-white transition-colors hover:bg-[var(--menzu-accent-dark)]"
                 >
                   Yêu cầu liên kết mới
-                </a>
+                </Link>
               </>
             )}
           </div>

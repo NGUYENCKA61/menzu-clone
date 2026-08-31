@@ -27,7 +27,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   return {
     title: article.title,
-    description: article.excerpt ?? `${article.title} — Wiki & Hướng dẫn Menzu Valorant.`,
+    description: article.excerpt ?? `${article.title} — Wiki & Hướng dẫn THICHTHIHACK.`,
     alternates: { canonical: `/docs/${slug}` },
     openGraph: {
       type: "article",

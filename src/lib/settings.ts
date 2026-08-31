@@ -51,6 +51,14 @@ export interface ShopSettings {
   discordClientId: string;
   discordClientSecret: string;
 
+  // --- Đồng bộ trạng thái từ Telegram ---------------------------------------
+  /** Bot token from @BotFather. Blank turns the webhook off entirely. */
+  telegramBotToken: string;
+  /** Shared secret echoed back by Telegram in a header on every call. */
+  telegramSecret: string;
+  /** The one chat whose messages are obeyed; blank obeys none. */
+  telegramChatId: string;
+
   // --- Gửi email (quên mật khẩu) --------------------------------------------
   /**
    * Plain SMTP, because it is the one door every provider opens — a Gmail app
@@ -240,6 +248,9 @@ export const DEFAULT_SETTINGS: ShopSettings = {
   googleClientSecret: "",
   discordClientId: "",
   discordClientSecret: "",
+  telegramBotToken: "",
+  telegramSecret: "",
+  telegramChatId: "",
   smtpHost: "",
   smtpPort: 587,
   smtpUser: "",
@@ -248,7 +259,7 @@ export const DEFAULT_SETTINGS: ShopSettings = {
   purchasesEnabled: true,
   closedMessage: "Shop đang tạm ngưng bán hàng, vui lòng quay lại sau ít phút.",
 
-  brandName: "Menzu Valorant",
+  brandName: "THICHTHIHACK",
   brandLogo: LOGO,
   // The shop's red — the same value globals.css gives --brand and
   // --menzu-accent, so the storefront has one accent until Nhận diện says
@@ -263,7 +274,7 @@ export const DEFAULT_SETTINGS: ShopSettings = {
   authPanelImages: [AUTH_PANEL],
   authSlideEnabled: true,
   authSlideSeconds: 5,
-  authPanelSubtitle: "Menzu Valorant",
+  authPanelSubtitle: "THICHTHIHACK",
   authLoginTitle: "Welcome\nBack",
   authSignupTitle: "Join\nUs",
   contactZalo: "",
@@ -335,6 +346,9 @@ export const SETTING_KEYS: Record<keyof ShopSettings, string> = {
   googleClientSecret: "oauth.google.clientSecret",
   discordClientId: "oauth.discord.clientId",
   discordClientSecret: "oauth.discord.clientSecret",
+  telegramBotToken: "integrations.telegram.botToken",
+  telegramSecret: "integrations.telegram.secret",
+  telegramChatId: "integrations.telegram.chatId",
   smtpHost: "mail.smtp.host",
   smtpPort: "mail.smtp.port",
   smtpUser: "mail.smtp.user",
@@ -666,6 +680,18 @@ export function parseSettings(rows: Iterable<{ key: string; value: string }>): S
       stored.get(SETTING_KEYS.discordClientId),
       DEFAULT_SETTINGS.discordClientId,
     ),
+    telegramBotToken: toOptionalText(
+      stored.get(SETTING_KEYS.telegramBotToken),
+      DEFAULT_SETTINGS.telegramBotToken,
+    ),
+    telegramSecret: toOptionalText(
+      stored.get(SETTING_KEYS.telegramSecret),
+      DEFAULT_SETTINGS.telegramSecret,
+    ),
+    telegramChatId: toOptionalText(
+      stored.get(SETTING_KEYS.telegramChatId),
+      DEFAULT_SETTINGS.telegramChatId,
+    ),
     discordClientSecret: toOptionalText(
       stored.get(SETTING_KEYS.discordClientSecret),
       DEFAULT_SETTINGS.discordClientSecret,
@@ -825,6 +851,9 @@ export function serializeSettings(settings: ShopSettings): { key: string; value:
     googleClientSecret: settings.googleClientSecret.trim(),
     discordClientId: settings.discordClientId.trim(),
     discordClientSecret: settings.discordClientSecret.trim(),
+    telegramBotToken: settings.telegramBotToken.trim(),
+    telegramSecret: settings.telegramSecret.trim(),
+    telegramChatId: settings.telegramChatId.trim(),
     smtpHost: settings.smtpHost.trim(),
     smtpPort: String(settings.smtpPort),
     smtpUser: settings.smtpUser.trim(),
@@ -922,6 +951,9 @@ export function normalizeSettings(raw: Partial<ShopSettings> | null): ShopSettin
     googleClientSecret: String(raw?.googleClientSecret ?? "").trim(),
     discordClientId: String(raw?.discordClientId ?? "").trim(),
     discordClientSecret: String(raw?.discordClientSecret ?? "").trim(),
+    telegramBotToken: String(raw?.telegramBotToken ?? "").trim(),
+    telegramSecret: String(raw?.telegramSecret ?? "").trim(),
+    telegramChatId: String(raw?.telegramChatId ?? "").trim(),
     smtpHost: String(raw?.smtpHost ?? "").trim(),
     // Junk falls back to 587, the port the world's SMTP defaults to.
     smtpPort:

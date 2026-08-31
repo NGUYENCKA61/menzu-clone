@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { TrendingUp } from "lucide-react";
 
 import { FeaturedCategories } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/FeaturedCategories";
@@ -24,6 +25,12 @@ import { visibleBlocks } from "@/lib/settings";
 import { getShopSettings } from "@/lib/settingsStore";
 
 export const dynamic = "force-dynamic";
+
+/** The one page whose address really is "/". */
+export const metadata: Metadata = {
+  alternates: { canonical: "/" },
+  openGraph: { url: "/" },
+};
 
 /** The group that carries the search, the platform chips and "Xem thêm". */
 const GAME_LIST_SLUG = "danh-sach-hack-game";

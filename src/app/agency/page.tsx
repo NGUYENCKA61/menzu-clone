@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 
 import { redirect } from "next/navigation";
 import { ArrowRight, BadgePercent, Handshake, KeyRound, PackageCheck, Store } from "lucide-react";
@@ -8,7 +9,13 @@ import { REFERRAL_PERCENT } from "@/lib/referral";
 import { getCurrentUser } from "@/lib/session";
 import { getShopSettings } from "@/lib/settingsStore";
 
-export const metadata: Metadata = { title: "Nâng cấp đại lý" };
+export const metadata: Metadata = {
+  title: "Nâng cấp đại lý",
+  // Nothing here belongs in a search index: it is either a sign-in step or
+  // one visitor's own account. Followed, not indexed, so the links still
+  // pass through.
+  robots: { index: false, follow: true },
+};
 export const dynamic = "force-dynamic";
 
 /**
@@ -60,7 +67,7 @@ export default async function AgencyPage() {
     >
       <div className="flex flex-col gap-6">
         {isAgency ? (
-          <a
+          <Link
             href="/agency/dashboard"
             className="flex items-center gap-4 rounded-2xl border border-amber-500/30 bg-amber-500/[0.06] p-5 transition-colors hover:border-amber-500/50 hover:bg-amber-500/10"
           >
@@ -78,7 +85,7 @@ export default async function AgencyPage() {
             <span className="ml-auto inline-flex shrink-0 items-center gap-1.5 text-[11px] font-black uppercase tracking-widest text-amber-400">
               Vào bàn đại lý <ArrowRight size={13} />
             </span>
-          </a>
+          </Link>
         ) : null}
 
         <div className="rounded-2xl border border-white/10 bg-neutral-900/50 p-6 flex items-start gap-5">
@@ -161,12 +168,12 @@ export default async function AgencyPage() {
 
         <p className="text-xs text-neutral-500">
           Muốn kiếm nhẹ nhàng hơn?{" "}
-          <a
+          <Link
             href="/affiliate"
             className="font-black uppercase tracking-wider text-[var(--menzu-accent)] hover:text-white transition-colors"
           >
             Cộng tác viên
-          </a>{" "}
+          </Link>{" "}
           — chia sẻ liên kết giới thiệu, nhận {REFERRAL_PERCENT}% mỗi giao dịch
           nạp tiền.
         </p>

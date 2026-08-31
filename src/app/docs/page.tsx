@@ -9,7 +9,7 @@ import { listDocArticles } from "@/lib/queries";
 export const metadata: Metadata = {
   title: "Wiki & Hướng Dẫn",
   description:
-    "Tổng hợp hướng dẫn mua acc, chính sách bảo hành đổi trả và các câu hỏi thường gặp khi giao dịch tại Menzu Valorant.",
+    "Tổng hợp hướng dẫn mua acc, chính sách bảo hành đổi trả và các câu hỏi thường gặp khi giao dịch tại THICHTHIHACK.",
   alternates: { canonical: "/docs" },
 };
 

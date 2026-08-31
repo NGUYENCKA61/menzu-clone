@@ -14,6 +14,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
@@ -205,13 +206,13 @@ export function UserMenu({ user }: { user: HeaderUser }) {
                   one click away. */}
               {isAdmin ? (
                 <div className={GROUP}>
-                  <a
+                  <Link
                     href="/admin"
                     className={`${ROW} text-[var(--menzu-accent)] hover:bg-[var(--menzu-accent)]/10`}
                   >
                     <Shield size={18} className="shrink-0" />
                     <span className={SHOUT}>Dashboard</span>
-                  </a>
+                  </Link>
                 </div>
               ) : null}
 
@@ -219,13 +220,13 @@ export function UserMenu({ user }: { user: HeaderUser }) {
                   one privileged link above the everyday groups. */}
               {user.role === "AGENCY" ? (
                 <div className={GROUP}>
-                  <a
+                  <Link
                     href="/agency/dashboard"
                     className={`${ROW} text-amber-400 hover:bg-amber-500/10`}
                   >
                     <KeyRound size={18} className="shrink-0" />
                     <span className={SHOUT}>Bàn đại lý</span>
-                  </a>
+                  </Link>
                 </div>
               ) : null}
 

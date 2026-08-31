@@ -25,9 +25,9 @@ const APP_ICON = `${IMAGES}/app/iconapp.webp`;
 const SCREENSHOTS = [11, 22, 33, 44, 55, 66].map((n) => `${IMAGES}/app/wlist${n}.webp`);
 
 export const metadata: Metadata = {
-  title: "Tải App Menzu Valorant",
+  title: "Tải App THICHTHIHACK",
   description:
-    "Tải ứng dụng Menzu Valorant cho Android và iOS — theo dõi Daily Shop, nhận thông báo đẩy khi skin yêu thích xuất hiện, quản lý kho đồ và số dư VP/RP.",
+    "Tải ứng dụng THICHTHIHACK cho Android và iOS — theo dõi Daily Shop, nhận thông báo đẩy khi skin yêu thích xuất hiện, quản lý kho đồ và số dư VP/RP.",
   alternates: { canonical: "/app/download" },
 };
 
@@ -140,11 +140,11 @@ export default async function AppDownloadPage() {
               <div className="lg:col-span-5 space-y-8 sm:space-y-10">
                 <div className="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-5 max-w-[460px] mx-auto lg:mx-0">
                   <div className="w-16 h-16 sm:w-20 sm:h-20 shrink-0 rounded-[24%] overflow-hidden border border-zinc-800 shadow-2xl relative">
-                    <Image src={APP_ICON} alt="Biểu tượng ứng dụng Menzu Valorant" fill sizes="80px" className="object-cover" />
+                    <Image src={APP_ICON} alt="Biểu tượng ứng dụng THICHTHIHACK" fill sizes="80px" className="object-cover" />
                   </div>
                   <div className="space-y-2 flex-1">
                     <h1 className="text-lg sm:text-2xl lg:text-[25px] font-extrabold leading-snug text-white tracking-tight">
-                      Menzu Valorant App
+                      THICHTHIHACK App
                     </h1>
                     <p className="text-neutral-400 text-[11px] sm:text-xs leading-relaxed">
                       Theo dõi Daily Shop, nhận thông báo đẩy tức thì và quản lý

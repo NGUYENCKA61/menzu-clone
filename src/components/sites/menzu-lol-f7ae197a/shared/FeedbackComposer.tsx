@@ -323,9 +323,9 @@ export function FeedbackComposer({ user, today }: { user: ComposerUser; today: s
               </div>
               <p className="text-xs text-neutral-600 leading-relaxed">
                 Muốn đổi ảnh? Cập nhật ở trang{" "}
-                <a href="/profile" className="text-emerald-500 hover:text-emerald-400 font-bold">
+                <Link href="/profile" className="text-emerald-500 hover:text-emerald-400 font-bold">
                   Tổng quan
-                </a>{" "}
+                </Link>{" "}
                 trước khi gửi.
               </p>
             </div>

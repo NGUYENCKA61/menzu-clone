@@ -19,7 +19,12 @@ export const SITE_URL = (
   "http://localhost:3000"
 ).replace(/\/$/, "");
 
-export const SITE_NAME = "Menzu Valorant";
+/**
+ * The shop's name for structured data, which is built in helpers that have no
+ * access to the settings row. Keep it in step with Cấu hình → Nhận diện; the
+ * browser tab and the share cards read that setting directly.
+ */
+export const SITE_NAME = "THICHTHIHACK";
 
 export function absoluteUrl(path: string): string {
   return path.startsWith("http") ? path : `${SITE_URL}${path.startsWith("/") ? path : `/${path}`}`;
@@ -28,12 +33,13 @@ export function absoluteUrl(path: string): string {
 interface ProductLdInput {
   code: string;
   price: number;
-  oldPrice: number;
   imageUrl: string;
   categoryName: string;
   rank: string;
   weaponSkins: number;
   available: boolean;
+  /** The product's own address — /{category}/{slug}. */
+  href: string;
 }
 
 /**
@@ -46,17 +52,19 @@ export function productJsonLd(product: ProductLdInput) {
   return {
     "@context": "https://schema.org",
     "@type": "Product",
-    name: `Tài khoản Valorant ${product.code} — Rank ${product.rank}, ${product.weaponSkins} skin`,
+    name: `Tài khoản ${product.categoryName} ${product.code} — Rank ${product.rank}, ${product.weaponSkins} skin`,
     description:
-      `Account Valorant mã ${product.code}, rank ${product.rank}, ${product.weaponSkins} skin súng. ` +
+      `Tài khoản mã ${product.code}, rank ${product.rank}, ${product.weaponSkins} skin súng. ` +
       `Thuộc danh mục ${product.categoryName} tại ${SITE_NAME}.`,
     sku: product.code,
     image: absoluteUrl(product.imageUrl),
     category: product.categoryName,
-    brand: { "@type": "Brand", name: "Valorant" },
     offers: {
       "@type": "Offer",
-      url: absoluteUrl(`/account/${product.code}`),
+      // The real address. This said /account/<code>, an URL scheme the shop
+      // stopped using — every offer pointed at a 404, which is worse for a
+      // crawler than no offer at all.
+      url: absoluteUrl(product.href),
       priceCurrency: "VND",
       price: product.price,
       availability: product.available
@@ -64,6 +72,63 @@ export function productJsonLd(product: ProductLdInput) {
         : "https://schema.org/SoldOut",
       seller: { "@type": "Organization", name: SITE_NAME },
     },
+  };
+}
+
+interface SoftwareLdInput {
+  code: string;
+  name: string;
+  description: string;
+  imageUrl: string;
+  categoryName: string;
+  href: string;
+  available: boolean;
+  /** Every duration on sale, so the range shows rather than one figure. */
+  prices: number[];
+}
+
+/**
+ * schema.org/Product for a tool.
+ *
+ * A tool is not one-of-a-kind and is sold in several durations at several
+ * prices, so it carries an AggregateOffer with the range rather than the
+ * single Offer an account gets. Without this the software pages — which are
+ * most of the shop now — offered a crawler nothing but prose.
+ */
+export function softwareJsonLd(software: SoftwareLdInput) {
+  const prices = software.prices.filter((p) => p > 0).sort((a, b) => a - b);
+  const availability = software.available
+    ? "https://schema.org/InStock"
+    : "https://schema.org/OutOfStock";
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: software.name,
+    description: software.description,
+    sku: software.code,
+    image: absoluteUrl(software.imageUrl),
+    category: software.categoryName,
+    offers:
+      prices.length > 1
+        ? {
+            "@type": "AggregateOffer",
+            url: absoluteUrl(software.href),
+            priceCurrency: "VND",
+            lowPrice: prices[0],
+            highPrice: prices[prices.length - 1],
+            offerCount: prices.length,
+            availability,
+            seller: { "@type": "Organization", name: SITE_NAME },
+          }
+        : {
+            "@type": "Offer",
+            url: absoluteUrl(software.href),
+            priceCurrency: "VND",
+            price: prices[0] ?? 0,
+            availability,
+            seller: { "@type": "Organization", name: SITE_NAME },
+          },
   };
 }
 

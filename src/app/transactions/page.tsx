@@ -6,7 +6,13 @@ import { TransactionsTable } from "@/components/sites/menzu-lol-f7ae197a/shared/
 import { getTransactions } from "@/lib/queries";
 import { getCurrentUser } from "@/lib/session";
 
-export const metadata: Metadata = { title: "Lịch sử giao dịch" };
+export const metadata: Metadata = {
+  title: "Lịch sử giao dịch",
+  // Nothing here belongs in a search index: it is either a sign-in step or
+  // one visitor's own account. Followed, not indexed, so the links still
+  // pass through.
+  robots: { index: false, follow: true },
+};
 export const dynamic = "force-dynamic";
 
 function formatWhen(date: Date): string {

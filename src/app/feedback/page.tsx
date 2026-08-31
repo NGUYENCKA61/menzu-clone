@@ -13,7 +13,11 @@ import {
 } from "@/components/sites/menzu-lol-f7ae197a/shared/FeedbackBoard";
 import { getFeedback } from "@/lib/queries";
 
-export const metadata: Metadata = { title: "Đánh giá khách hàng" };
+export const metadata: Metadata = {
+  title: "Đánh giá khách hàng",
+  alternates: { canonical: "/feedback" },
+  openGraph: { url: "/feedback" },
+};
 export const dynamic = "force-dynamic";
 
 /** "17:56 18/08/2026" — built by hand so server and client can never disagree

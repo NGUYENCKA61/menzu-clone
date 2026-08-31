@@ -11,6 +11,8 @@ import { ConnectRailSection } from "@/components/sites/menzu-lol-f7ae197a/root-8
 // The layout's template appends the shop's name.
 export const metadata: Metadata = {
   title: "Danh sách danh mục",
+  alternates: { canonical: "/categories" },
+  openGraph: { url: "/categories" },
 };
 
 /**

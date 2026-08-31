@@ -8,6 +8,10 @@ export const metadata: Metadata = {
   description:
     "Tạo mã xác thực 2 lớp (TOTP) cho tài khoản Valorant từ secret key. Xử lý hoàn toàn trên trình duyệt, không gửi secret lên máy chủ.",
   alternates: { canonical: "/2fa" },
+  // Nothing here belongs in a search index: it is either a sign-in step or
+  // one visitor's own account. Followed, not indexed, so the links still
+  // pass through.
+  robots: { index: false, follow: true },
 };
 
 export default function TwoFactorPage() {

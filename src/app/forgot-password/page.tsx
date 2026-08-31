@@ -1,11 +1,18 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 
 import { SiteFooter } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/SiteFooter";
 import { ForgotPasswordForm } from "@/components/sites/menzu-lol-f7ae197a/shared/ForgotPasswordForm";
 import { mailEnabled } from "@/lib/settings";
 import { getShopSettings } from "@/lib/settingsStore";
 
-export const metadata: Metadata = { title: "Quên mật khẩu" };
+export const metadata: Metadata = {
+  title: "Quên mật khẩu",
+  // Nothing here belongs in a search index: it is either a sign-in step or
+  // one visitor's own account. Followed, not indexed, so the links still
+  // pass through.
+  robots: { index: false, follow: true },
+};
 
 /**
  * A single small card, no brand panel: this page exists for one errand and the
@@ -61,12 +68,12 @@ export default async function ForgotPasswordPage() {
                   Gửi kèm tên đăng nhập của bạn, admin sẽ xác minh và cấp lại mật
                   khẩu.
                 </p>
-                <a
+                <Link
                   href="/login"
                   className="mt-2 text-center text-xs font-black uppercase tracking-widest text-[var(--menzu-accent)] transition-colors hover:text-[var(--menzu-accent-dark)]"
                 >
                   Về trang đăng nhập
-                </a>
+                </Link>
               </div>
             )}
           </div>

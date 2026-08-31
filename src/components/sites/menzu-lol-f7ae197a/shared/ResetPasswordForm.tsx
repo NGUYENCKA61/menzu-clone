@@ -1,6 +1,7 @@
 "use client";
 
 import { Eye, EyeOff, Lock, ShieldCheck } from "lucide-react";
+import Link from "next/link";
 import { useState } from "react";
 
 import { StatusToast } from "./StatusToast";
@@ -70,12 +71,12 @@ export function ResetPasswordForm({ token }: { token: string }) {
           Mật khẩu đã đổi
         </h2>
         <p className="mt-3 text-[13px] leading-relaxed text-neutral-300">{done}</p>
-        <a
+        <Link
           href="/login"
           className="mt-6 inline-flex h-11 w-full items-center justify-center rounded-2xl bg-[var(--menzu-accent)] text-[13px] font-black uppercase tracking-widest text-white transition-colors hover:bg-[var(--menzu-accent-dark)]"
         >
           Đăng nhập ngay
-        </a>
+        </Link>
       </div>
     );
   }

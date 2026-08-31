@@ -10,7 +10,7 @@ const BACKDROP =
 
 export const metadata: Metadata = {
   title: "Thông tin liên hệ",
-  description: "Các kênh liên hệ và cộng đồng chính thức của Menzu Valorant.",
+  description: "Các kênh liên hệ và cộng đồng chính thức của THICHTHIHACK.",
   alternates: { canonical: "/bio" },
 };
 

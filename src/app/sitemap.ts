@@ -20,10 +20,14 @@ const STATIC_ROUTES: [path: string, priority: number, freq: Frequency][] = [
   // No /news: the live site links "TIN TỨC" from its header but the route
   // 404s there, so this clone 404s too rather than inventing a section.
   ["/docs", 0.4, "monthly"],
-  ["/security", 0.3, "yearly"],
+  ["/thong-bao", 0.4, "daily"],
+  ["/cap-bac", 0.4, "monthly"],
+  // No /security: it is one visitor's own account page and now says noindex,
+  // and listing a noindex page here hands a crawler two contradictory orders.
   ["/bio", 0.3, "yearly"],
   ["/app/download", 0.3, "monthly"],
-  ["/2fa", 0.3, "monthly"],
+  // No /2fa either: setting up two-factor is an account errand, not a page a
+  // stranger arrives at from a search.
   ["/checkwc", 0.3, "monthly"],
 ];
 
@@ -36,7 +40,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // Removed accounts are left out: their pages 404, and offering a crawler a
     // URL that answers 404 is the one thing a sitemap must not do.
     db.product.findMany({
-      where: { deletedAt: null },
+      // Hidden products are left out beside the removed ones: their pages now
+      // 404, and a sitemap that offers a crawler a URL answering 404 is the
+      // one thing a sitemap must not do.
+      where: { deletedAt: null, status: { not: "HIDDEN" } },
       select: {
         slug: true,
         updatedAt: true,

@@ -361,12 +361,12 @@ export function RegisterForm({
 
                 <p className="mt-8 text-center text-xs text-neutral-500">
                   Đã có tài khoản?
-                  <a
+                  <Link
                     href="/login"
                     className="text-[var(--menzu-accent)] hover:text-[var(--menzu-accent-dark)] font-black transition-colors ml-1"
                   >
                     Đăng nhập ngay
-                  </a>
+                  </Link>
                 </p>
               </div>
             </div>

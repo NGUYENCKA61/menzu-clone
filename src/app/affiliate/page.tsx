@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
@@ -11,7 +12,13 @@ import { db } from "@/lib/db";
 import { REFERRAL_PERCENT } from "@/lib/referral";
 import { getCurrentUser } from "@/lib/session";
 
-export const metadata: Metadata = { title: "Cộng tác viên" };
+export const metadata: Metadata = {
+  title: "Cộng tác viên",
+  // Nothing here belongs in a search index: it is either a sign-in step or
+  // one visitor's own account. Followed, not indexed, so the links still
+  // pass through.
+  robots: { index: false, follow: true },
+};
 export const dynamic = "force-dynamic";
 
 /**
@@ -259,12 +266,12 @@ export default async function AffiliatePage() {
 
         <p className="text-xs text-neutral-500">
           Có đầu ra ổn định và muốn nhập theo lô?{" "}
-          <a
+          <Link
             href="/agency"
             className="font-black uppercase tracking-wider text-[var(--menzu-accent)] transition-colors hover:text-white"
           >
             Nâng cấp đại lý
-          </a>{" "}
+          </Link>{" "}
           để làm việc thẳng với admin.
         </p>
       </div>

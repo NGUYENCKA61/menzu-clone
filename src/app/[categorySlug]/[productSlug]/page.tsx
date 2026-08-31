@@ -5,8 +5,16 @@ import { AccountDetailView } from "@/components/sites/menzu-lol-f7ae197a/shared/
 import { SoftwareDetailView } from "@/components/sites/menzu-lol-f7ae197a/shared/SoftwareDetailView";
 import { formatVnd } from "@/components/sites/menzu-lol-f7ae197a/shared/productData";
 import { docHtmlToPlainText, isHtmlBody } from "@/lib/docHtml";
-import { getAccountDetail, getSoftwareDetail, resolveProduct } from "@/lib/queries";
+import {
+  getAccountDetail,
+  getSoftwareDetail,
+  hasPaidOrderFor,
+  resolveProduct,
+} from "@/lib/queries";
 import { productHref } from "@/lib/routes";
+import { JsonLd, softwareJsonLd } from "@/lib/seo";
+import { getCurrentUser } from "@/lib/session";
+import { isStatusSubscribed } from "@/lib/statusEvents";
 
 interface PageProps {
   params: Promise<{ categorySlug: string; productSlug: string }>;
@@ -129,9 +137,57 @@ export default async function ProductPage({ params, searchParams }: PageProps) {
     const software = await getSoftwareDetail(slug);
     if (!software) notFound();
     const { pkg } = await searchParams;
-    return <SoftwareDetailView software={software} initialPackageId={pkg} />;
+
+    // The setup guide is for a buyer with the tool in hand, so the page
+    // decides here, on the server, who is one: the text is dropped from what
+    // the view receives rather than hidden by it, and the HTML a browser gets
+    // never carries a guide its reader has not paid for.
+    const user = await getCurrentUser();
+    const [bought, statusSubscribed] = user
+      ? await Promise.all([
+          hasPaidOrderFor(user.id, software.code),
+          isStatusSubscribed(user.id, software.code),
+        ])
+      : [false, null];
+    const setupGuideAccess = !user ? "guest" : bought ? "unlocked" : "locked";
+    const shown =
+      setupGuideAccess === "unlocked"
+        ? software
+        : { ...software, setupGuideHtml: "" };
+
+    const href = productHref(software.categorySlug, software.slug);
+    return (
+      <>
+        {/* What a crawler reads instead of the prose: the tool, its shelf and
+            the range of durations it sells in. Without it the software pages
+            — most of the shop — offered a search engine nothing structured at
+            all, so none of them could show a price in results. */}
+        <JsonLd
+          data={softwareJsonLd({
+            code: software.code,
+            name: software.name,
+            description: software.description || `${software.name} — ${software.categoryName}`,
+            imageUrl: software.images[0] ?? "",
+            categoryName: software.categoryName,
+            href,
+            available: software.inStock,
+            prices: software.packages.map((p) => p.price),
+          })}
+        />
+        {/* The breadcrumb list is the view's own — emitting a second one here
+            would tell a crawler the page has two different trails. */}
+        <SoftwareDetailView
+          software={shown}
+          initialPackageId={pkg}
+          setupGuideAccess={setupGuideAccess}
+          statusSubscribed={statusSubscribed}
+        />
+      </>
+    );
   }
 
+  // The account view emits its own Product and BreadcrumbList — accounts had
+  // structured data from the start; it was only the tools that had none.
   const account = await getAccountDetail(slug);
   if (!account) notFound();
   return <AccountDetailView account={account} />;

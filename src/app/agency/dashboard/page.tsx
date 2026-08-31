@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 
 import { redirect } from "next/navigation";
 import { KeyRound, PiggyBank, Wallet } from "lucide-react";
@@ -13,7 +14,13 @@ import { clampAgencyPercent } from "@/lib/agency";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/session";
 
-export const metadata: Metadata = { title: "Bàn đại lý" };
+export const metadata: Metadata = {
+  title: "Bàn đại lý",
+  // Nothing here belongs in a search index: it is either a sign-in step or
+  // one visitor's own account. Followed, not indexed, so the links still
+  // pass through.
+  robots: { index: false, follow: true },
+};
 export const dynamic = "force-dynamic";
 
 /**
@@ -29,7 +36,13 @@ export default async function AgencyDashboardPage() {
   if (user.role !== "AGENCY" && user.role !== "ADMIN") redirect("/agency");
 
   // This account's own negotiated rate — the only place it is ever shown.
-  const percent = clampAgencyPercent(user.agencyPercent);
+  //
+  // Zero for an admin who is not also an agency, because the checkout applies
+  // the percent by ROLE: an admin looking in here saw wholesale figures and
+  // would then have been charged retail, with no line anywhere explaining the
+  // difference. The desk quotes what this account will actually pay.
+  const percent =
+    user.role === "AGENCY" ? clampAgencyPercent(user.agencyPercent) : 0;
 
   const [products, orders, savedAgg] = await Promise.all([
     db.product.findMany({
@@ -130,13 +143,13 @@ export default async function AgencyDashboardPage() {
       }
       crumb="Bàn đại lý"
       action={
-        <a
+        <Link
           href="/wallet"
           className="inline-flex h-10 items-center gap-2 rounded-xl bg-[var(--menzu-accent)] px-4 text-[11px] font-black uppercase tracking-widest text-white transition-colors hover:bg-[var(--menzu-accent-dark)]"
         >
           <Wallet size={14} />
           Nạp tiền
-        </a>
+        </Link>
       }
     >
       <div className="flex flex-col gap-4">

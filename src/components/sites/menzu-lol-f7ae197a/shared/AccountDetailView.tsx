@@ -3,7 +3,7 @@ import { SiteFooter } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/
 import { SiteHeader } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/SiteHeader";
 import { ConnectRailSection } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/ConnectRailSection";
 import { getInventory, getRelatedProducts } from "@/lib/queries";
-import { categoryHref } from "@/lib/routes";
+import { categoryHref, productHref } from "@/lib/routes";
 import { breadcrumbJsonLd, JsonLd, productJsonLd } from "@/lib/seo";
 
 import { AccountBuyPanel, type AccountDetail } from "./AccountBuyPanel";
@@ -29,7 +29,6 @@ export async function AccountDetailView({ account }: { account: AccountDetail })
         data={productJsonLd({
           code: account.code,
           price: account.price,
-          oldPrice: account.oldPrice,
           imageUrl:
             account.imageUrl ??
             `/sites/menzu-lol-f7ae197a/root-8a5edab2/images/account/${account.code}.webp`,
@@ -37,6 +36,9 @@ export async function AccountDetailView({ account }: { account: AccountDetail })
           rank: account.rank,
           weaponSkins: account.weaponSkins,
           available: !account.sold,
+          // The offer used to point at /account/<code>, an address the shop
+          // stopped serving — every offer led a crawler to a 404.
+          href: productHref(account.categorySlug, account.slug),
         })}
       />
       <JsonLd

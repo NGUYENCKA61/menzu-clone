@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   ArrowLeftRight,
@@ -113,7 +114,7 @@ export function AccountSidebar({
             duplicated a menu two clicks away. */}
         {isAdmin ? (
           <div className="mb-2 pb-2 border-b border-white/5">
-            <a
+            <Link
               href="/admin"
               className="flex items-center gap-3 py-2.5 px-3 rounded-lg text-[var(--menzu-accent)] hover:text-white hover:bg-[var(--menzu-accent)]/10 transition-colors"
             >
@@ -121,14 +122,14 @@ export function AccountSidebar({
               <span className="text-sm font-black uppercase tracking-wider">
                 Dashboard quản lý
               </span>
-            </a>
+            </Link>
           </div>
         ) : null}
 
         {/* The đại lý's own door — same privileged slot as the admin's. */}
         {user?.role === "AGENCY" ? (
           <div className="mb-2 pb-2 border-b border-white/5">
-            <a
+            <Link
               href="/agency/dashboard"
               className="flex items-center gap-3 py-2.5 px-3 rounded-lg text-amber-400 hover:text-white hover:bg-amber-500/10 transition-colors"
             >
@@ -136,7 +137,7 @@ export function AccountSidebar({
               <span className="text-sm font-black uppercase tracking-wider">
                 Bàn đại lý
               </span>
-            </a>
+            </Link>
           </div>
         ) : null}
 

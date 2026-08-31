@@ -1,6 +1,7 @@
 "use client";
 
 import { ArrowLeft, MailCheck, User } from "lucide-react";
+import Link from "next/link";
 import { useState } from "react";
 
 import { StatusToast } from "./StatusToast";
@@ -67,12 +68,12 @@ export function ForgotPasswordForm() {
           Đã gửi yêu cầu
         </h2>
         <p className="mt-3 text-[13px] leading-relaxed text-neutral-300">{sentMessage}</p>
-        <a
+        <Link
           href="/login"
           className="mt-6 inline-flex h-11 w-full items-center justify-center rounded-2xl bg-[var(--menzu-accent)] text-[13px] font-black uppercase tracking-widest text-white transition-colors hover:bg-[var(--menzu-accent-dark)]"
         >
           Về trang đăng nhập
-        </a>
+        </Link>
       </div>
     );
   }
@@ -108,13 +109,13 @@ export function ForgotPasswordForm() {
         {pending ? "ĐANG GỬI…" : "GỬI ĐƯỜNG DẪN ĐẶT LẠI"}
       </button>
 
-      <a
+      <Link
         href="/login"
         className="mt-6 flex items-center justify-center gap-2 text-xs font-black uppercase tracking-widest text-neutral-400 transition-colors hover:text-white"
       >
         <ArrowLeft size={14} />
         Về trang đăng nhập
-      </a>
+      </Link>
 
       {error ? (
         <StatusToast

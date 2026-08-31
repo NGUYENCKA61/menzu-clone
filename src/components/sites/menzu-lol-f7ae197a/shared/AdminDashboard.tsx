@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import {
   CreditCard,
   Landmark,
@@ -388,12 +389,12 @@ function TransactionTable({ rows }: { rows: TransactionRow[] }) {
     <div className={`${CARD} overflow-hidden`}>
       <div className="flex items-center justify-between gap-3 px-5 py-4">
         <h3 className={CAP}>Giao dịch gần đây</h3>
-        <a
+        <Link
           href="/admin/operations"
           className="text-[11px] font-semibold text-neutral-400 hover:text-white transition-colors"
         >
           Xem tất cả →
-        </a>
+        </Link>
       </div>
 
       <div className="w-full overflow-x-auto">
