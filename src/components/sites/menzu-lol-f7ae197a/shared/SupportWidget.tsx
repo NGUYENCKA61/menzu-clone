@@ -50,6 +50,12 @@ export function SupportWidget({
   // its paging controls in.
   if (pathname.startsWith("/admin")) return null;
 
+  // The basket's summary column ends in the "Thanh toán" button, in the very
+  // corner the tab sits in — the one press the whole page exists for was
+  // landing on customer care instead. Support is a click away in the footer
+  // and on every product page; the checkout is not.
+  if (pathname === "/cart") return null;
+
   return (
     // pointer-events-none on the frame, restored on each real control below.
     // The frame is as tall as the collapsed panel plus the tab, and the panel

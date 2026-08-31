@@ -4,7 +4,9 @@ import { ArrowRight, ShoppingCart } from "lucide-react";
 
 import { CartView } from "@/components/sites/menzu-lol-f7ae197a/shared/CartView";
 import { SimplePage } from "@/components/sites/menzu-lol-f7ae197a/shared/SimplePage";
+import { clampAgencyPercent } from "@/lib/agency";
 import { db } from "@/lib/db";
+import { readMemberTier, TIER_RULES } from "@/lib/memberTiers";
 import { productHref } from "@/lib/routes";
 import { getCurrentUser } from "@/lib/session";
 
@@ -72,9 +74,24 @@ export default async function CartPage() {
     );
   }
 
+  // What this shopper's own account is worth against the basket, decided the
+  // way the checkout decides it: wholesale beats the tier and never stacks.
+  const agencyPercent =
+    user!.role === "AGENCY" ? clampAgencyPercent(user!.agencyPercent) : 0;
+  const memberTier = readMemberTier(user!.tier);
+  const tierPercent =
+    agencyPercent === 0 ? TIER_RULES[memberTier].discountPercent : 0;
+
   return (
     <SimplePage title="Giỏ Hàng Của Bạn" crumb="Giỏ hàng">
       <CartView
+        viewer={{
+          balance: user!.balance,
+          tier: tierPercent > 0 ? memberTier : null,
+          tierLabel: TIER_RULES[memberTier].label,
+          tierPercent,
+          agencyPercent,
+        }}
         lines={items.map((i) => ({
           id: i.id,
           code: i.product.code,

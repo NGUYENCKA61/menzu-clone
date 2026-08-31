@@ -1,6 +1,8 @@
 import { currentAnnouncements } from "@/lib/announcementStore";
+import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/session";
 import { getShopSettings } from "@/lib/settingsStore";
+import { subscribedStatusEvents } from "@/lib/statusEvents";
 
 import { SiteHeaderClient } from "./SiteHeaderClient";
 
@@ -15,7 +17,14 @@ export async function SiteHeader() {
   // The reader has to be known before the notices can be: a targeted notice is
   // fetched by matching their account, so this cannot be one Promise.all.
   const [user, settings] = await Promise.all([getCurrentUser(), getShopSettings()]);
-  const announcements = await currentAnnouncements(user?.id ?? null);
+  const [announcements, statusEvents, cartCount] = await Promise.all([
+    currentAnnouncements(user?.id ?? null),
+    // Only the tools this reader follows; a guest follows nothing.
+    user ? subscribedStatusEvents(user.id) : Promise.resolve([]),
+    // Lines, not units: the badge answers "how many things are waiting",
+    // which is what the basket page then lists. A guest has no basket.
+    user ? db.cartItem.count({ where: { userId: user.id } }) : Promise.resolve(0),
+  ]);
 
   return (
     <SiteHeaderClient
@@ -39,6 +48,14 @@ export async function SiteHeader() {
           month: "2-digit",
           year: "numeric",
         }),
+      }))}
+      cartCount={cartCount}
+      statusEvents={statusEvents.map((e) => ({
+        id: e.id,
+        productName: e.productName,
+        productHref: e.productHref,
+        status: e.status,
+        at: e.at.toISOString(),
       }))}
       user={
         user

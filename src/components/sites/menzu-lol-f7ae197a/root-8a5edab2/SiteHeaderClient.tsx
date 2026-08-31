@@ -17,7 +17,10 @@ import {
 import {
   AnnouncementCenter,
   type AnnouncementItem,
+  type StatusEventItem,
 } from "../shared/AnnouncementCenter";
+import { STATUS_TAB_HREF } from "@/lib/softwareStatus";
+import { CartButton } from "./CartButton";
 import { UserMenu, type HeaderUser } from "./UserMenu";
 import { useEffect, useState } from "react"
 import { MobileDrawer, type DrawerGroup } from "./MobileDrawer"
@@ -37,6 +40,7 @@ const LINK_HREFS: Record<string, string> = {
   // Read by the main bar rather than the strip above, which now says
   // "XEM TRẠNG THÁI" instead.
   "HỖ TRỢ": "/feedback",
+  "XEM TRẠNG THÁI": STATUS_TAB_HREF,
   "WIKI & HƯỚNG DẪN": "/docs",
   "GÓP Ý": "/feedback",
   "Nạp Qua ATM + Momo": "/wallet",
@@ -147,10 +151,16 @@ export function SiteHeaderClient({
   user,
   brand,
   announcements,
+  statusEvents,
+  cartCount,
 }: {
   user: HeaderUser | null;
   brand: HeaderBrand;
   announcements: AnnouncementItem[];
+  /** Status changes of the tools this reader follows; empty for a guest. */
+  statusEvents: StatusEventItem[];
+  /** Lines waiting in the basket; 0 for a guest. */
+  cartCount: number;
 }) {
   const [drawerOpen, setDrawerOpen] = useState(false)
 
@@ -285,7 +295,13 @@ export function SiteHeaderClient({
         <div className="flex items-center gap-3 sm:gap-4">
           {/* Renders nothing at all when the shop has no live notice, so a
               header with an empty bell is not the resting state. */}
-          <AnnouncementCenter announcements={announcements} />
+          {/* Basket and bell read as one cluster of icon buttons — they are
+              the same kind of control, so they sit tight against each other
+              and keep the wider gap for the account button beside them. */}
+          <div className="flex items-center gap-1.5">
+            <CartButton count={cartCount} />
+            <AnnouncementCenter announcements={announcements} statusEvents={statusEvents} />
+          </div>
 
           {user ? (
             <UserMenu user={user} />
