@@ -23,6 +23,12 @@ import {
   type AnnouncementType,
 } from "@/lib/announcements";
 
+import {
+  SOFTWARE_STATUS,
+  STATUS_EVENT_COPY,
+  type SoftwareStatusValue,
+} from "@/lib/softwareStatus";
+
 import { TYPE_ICONS, TYPE_TILE } from "./announcementIcons";
 import { useClientNow } from "./useClientClock";
 
@@ -43,6 +49,23 @@ export interface AnnouncementItem {
   startAt: string;
   /** Formatted on the server, where the timezone is fixed. */
   updatedLabel: string;
+}
+
+/** One status change of a tool the reader follows — a bell row that links
+ *  to the tool rather than opening a notice. */
+export interface StatusEventItem {
+  id: string;
+  productName: string;
+  productHref: string;
+  status: SoftwareStatusValue;
+  /** ISO, measured against the reader's clock like `startAt`. */
+  at: string;
+}
+
+/** What a browser remembers a status row under: the row is immutable, so
+ *  its id is the whole key. */
+function statusKey(id: string): string {
+  return `menzu.status.${id}`;
 }
 
 /**
@@ -179,8 +202,10 @@ function useSeen(): Set<string> | null {
  */
 export function AnnouncementCenter({
   announcements,
+  statusEvents = [],
 }: {
   announcements: AnnouncementItem[];
+  statusEvents?: StatusEventItem[];
 }) {
   const now = useClientNow();
   const seen = useSeen();
@@ -200,6 +225,12 @@ export function AnnouncementCenter({
         : announcements.filter((a) => !seen.has(dismissalKey(a.id, a.revision))),
     [announcements, seen],
   );
+  const unreadStatus = useMemo(
+    () => (seen === null ? [] : statusEvents.filter((e) => !seen.has(statusKey(e.id)))),
+    [statusEvents, seen],
+  );
+  // The badge counts both kinds; the modal only ever opens for a notice.
+  const unreadCount = unread.length + unreadStatus.length;
 
   // Snoozed notices stay unread — they keep their place in the bell and their
   // dot in the list. All that is held back is the modal opening by itself.
@@ -239,9 +270,20 @@ export function AnnouncementCenter({
   const markAllRead = useCallback(() => {
     const next = new Set(seen ?? []);
     for (const item of announcements) next.add(dismissalKey(item.id, item.revision));
+    for (const event of statusEvents) next.add(statusKey(event.id));
     writeSeen(next);
     setAutoDone(true);
-  }, [announcements, seen]);
+  }, [announcements, statusEvents, seen]);
+
+  /** A status row is read the moment it is followed to the tool. */
+  const readStatus = useCallback(
+    (event: StatusEventItem) => {
+      const next = new Set(seen ?? []);
+      next.add(statusKey(event.id));
+      writeSeen(next);
+    },
+    [seen],
+  );
 
   const snooze = useCallback(
     (item: AnnouncementItem) => {
@@ -287,15 +329,15 @@ export function AnnouncementCenter({
           type="button"
           onClick={() => setOpenList((open) => !open)}
           aria-label={
-            unread.length > 0 ? `Thông báo, ${unread.length} chưa đọc` : "Thông báo"
+            unreadCount > 0 ? `Thông báo, ${unreadCount} chưa đọc` : "Thông báo"
           }
           aria-expanded={openList}
           className="relative flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-neutral-300 hover:text-white hover:bg-white/10 transition-colors"
         >
           <Bell size={16} />
-          {unread.length > 0 ? (
+          {unreadCount > 0 ? (
             <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-600 px-1 text-[10px] font-semibold leading-none text-white">
-              {unread.length}
+              {unreadCount}
             </span>
           ) : null}
         </button>
@@ -306,7 +348,7 @@ export function AnnouncementCenter({
               <span className="text-[14px] font-bold text-white">Thông báo</span>
               {/* Only offered when it would do something. A control that is
                   always there and usually inert teaches people to ignore it. */}
-              {unread.length > 0 ? (
+              {unreadCount > 0 ? (
                 <button
                   type="button"
                   onClick={markAllRead}
@@ -318,7 +360,7 @@ export function AnnouncementCenter({
             </div>
 
             <div className="max-h-[340px] overflow-y-auto">
-              {announcements.length === 0 ? (
+              {announcements.length === 0 && statusEvents.length === 0 ? (
                 <div className="px-4 py-10 text-center">
                   <span className="mx-auto flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/5 text-neutral-600">
                     <BellOff size={18} />
@@ -387,6 +429,64 @@ export function AnnouncementCenter({
                       />
                     ) : null}
                   </button>
+                );
+              })}
+
+              {/* The tools this reader follows, under the shop's notices. A
+                  row is a link to the tool — there is nothing more to read
+                  than the line itself — and following it marks it read. */}
+              {statusEvents.length > 0 ? (
+                <div className="border-t border-white/[0.07] px-4 pt-3 pb-1 text-[10px] font-black uppercase tracking-widest text-neutral-500">
+                  Trạng thái hack
+                </div>
+              ) : null}
+              {statusEvents.map((event) => {
+                const isUnread = unreadStatus.some((e) => e.id === event.id);
+                const state = SOFTWARE_STATUS[event.status];
+                return (
+                  <Link
+                    key={event.id}
+                    href={event.productHref}
+                    onClick={() => {
+                      readStatus(event);
+                      setOpenList(false);
+                    }}
+                    className={`flex w-full items-start gap-3 border-b border-white/[0.07] px-4 py-3 text-left transition-colors last:border-0 ${
+                      isUnread
+                        ? "bg-[var(--menzu-accent)]/[0.06] hover:bg-[var(--menzu-accent)]/[0.1]"
+                        : "hover:bg-white/[0.03]"
+                    }`}
+                  >
+                    <span
+                      className={`mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border ${state.tile}`}
+                    >
+                      <span className={`h-2 w-2 rounded-full ${state.dot}`} />
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className={`block text-[10px] font-black uppercase tracking-widest ${state.text}`}>
+                        {state.label}
+                      </span>
+                      <span
+                        className={`mt-0.5 block truncate text-[13px] font-bold ${
+                          isUnread ? "text-white" : "text-neutral-300"
+                        }`}
+                      >
+                        {event.productName}
+                      </span>
+                      <span className="mt-0.5 block truncate text-[11px] text-neutral-400">
+                        {STATUS_EVENT_COPY[event.status]}
+                      </span>
+                      <span className="mt-1 block text-[10px] text-neutral-600">
+                        {now === null ? "" : relativeTime(new Date(event.at), new Date(now))}
+                      </span>
+                    </span>
+                    {isUnread ? (
+                      <span
+                        aria-label="Chưa đọc"
+                        className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-[var(--menzu-accent)]"
+                      />
+                    ) : null}
+                  </Link>
                 );
               })}
             </div>

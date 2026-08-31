@@ -228,6 +228,9 @@ export function AdminSettings({
   const [ggId, setGgId] = useState(settings.googleClientId);
   const [ggSecret, setGgSecret] = useState(settings.googleClientSecret);
   const [dcId, setDcId] = useState(settings.discordClientId);
+  const [tgToken, setTgToken] = useState(settings.telegramBotToken);
+  const [tgSecret, setTgSecret] = useState(settings.telegramSecret);
+  const [tgChat, setTgChat] = useState(settings.telegramChatId);
   const [dcSecret, setDcSecret] = useState(settings.discordClientSecret);
   const [smtpHost, setSmtpHost] = useState(settings.smtpHost);
   const [smtpPort, setSmtpPort] = useState(String(settings.smtpPort));
@@ -490,6 +493,9 @@ export function AdminSettings({
           googleClientId: ggId,
           googleClientSecret: ggSecret,
           discordClientId: dcId,
+          telegramBotToken: tgToken,
+          telegramSecret: tgSecret,
+          telegramChatId: tgChat,
           discordClientSecret: dcSecret,
           smtpHost,
           smtpPort,
@@ -977,6 +983,66 @@ export function AdminSettings({
                     value={dcSecret}
                     onChange={(event) => setDcSecret(event.target.value)}
                     placeholder="•••"
+                    className={`${FIELD} font-mono`}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="border-t border-white/5 pt-5">
+              <span className={LABEL}>Đồng bộ trạng thái hack từ Telegram</span>
+              <p className={HINT}>
+                Nhắn trong kênh của shop là trạng thái tự đổi, kèm ảnh và ghi chú.
+                Cú pháp: <span className="font-mono text-neutral-300">MÃ_TOOL trạng_thái ghi chú</span> —
+                ví dụ <span className="font-mono text-neutral-300">VALTOOL01 die Đang vá, chờ 24h</span>.
+                Nhận các từ: undetected/ok/ngon/an toàn · detected/die/dính · updating/bảo trì/đang cập nhật.
+                Gửi ảnh thì viết cú pháp vào phần chú thích ảnh.
+                <br />
+                Cách bật: nhắn @BotFather lấy token → thêm bot vào kênh → mở
+                <span className="font-mono text-neutral-300">
+                  {" "}https://api.telegram.org/bot&lt;TOKEN&gt;/setWebhook?url=&lt;tên miền&gt;/api/integrations/telegram&amp;secret_token=&lt;secret&gt;
+                </span>
+                . Bỏ trống bất kỳ ô nào là tắt đồng bộ.
+              </p>
+              <div className="grid gap-3 sm:grid-cols-3">
+                <div>
+                  <label htmlFor="tg-token" className={LABEL}>
+                    Bot token
+                  </label>
+                  <input
+                    id="tg-token"
+                    type="password"
+                    autoComplete="off"
+                    value={tgToken}
+                    onChange={(event) => setTgToken(event.target.value)}
+                    placeholder="•••"
+                    className={`${FIELD} font-mono`}
+                  />
+                </div>
+                <div>
+                  <label htmlFor="tg-secret" className={LABEL}>
+                    Secret webhook
+                  </label>
+                  <input
+                    id="tg-secret"
+                    type="password"
+                    autoComplete="off"
+                    value={tgSecret}
+                    onChange={(event) => setTgSecret(event.target.value)}
+                    placeholder="•••"
+                    className={`${FIELD} font-mono`}
+                  />
+                </div>
+                <div>
+                  <label htmlFor="tg-chat" className={LABEL}>
+                    ID kênh / nhóm
+                  </label>
+                  <input
+                    id="tg-chat"
+                    autoComplete="off"
+                    value={tgChat}
+                    onChange={(event) => setTgChat(event.target.value)}
+                    placeholder="-1001234567890"
                     className={`${FIELD} font-mono`}
                   />
                 </div>
