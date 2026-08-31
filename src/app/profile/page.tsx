@@ -5,7 +5,6 @@ import { redirect } from "next/navigation";
 import {
   BadgeCheck,
   Check,
-  Gem,
   ShieldCheck,
   ShoppingBag,
   Wallet,
@@ -13,6 +12,7 @@ import {
 
 import { AccountPageFrame } from "@/components/sites/menzu-lol-f7ae197a/shared/AccountPageFrame";
 import { AvatarUploader } from "@/components/sites/menzu-lol-f7ae197a/shared/AvatarUploader";
+import { TierBadge } from "@/components/sites/menzu-lol-f7ae197a/shared/TierBadge";
 import { WithdrawCommission } from "@/components/sites/menzu-lol-f7ae197a/shared/WithdrawCommission";
 import {
   DiscordMark,
@@ -20,11 +20,24 @@ import {
 } from "@/components/sites/menzu-lol-f7ae197a/shared/OAuthButtons";
 import { formatVnd } from "@/components/sites/menzu-lol-f7ae197a/shared/productData";
 import { db } from "@/lib/db";
+import {
+  formatTierPercent,
+  readMemberTier,
+  TIER_RULES,
+  TIER_STYLE,
+  tierProgress,
+} from "@/lib/memberTiers";
 import { getCurrentUser } from "@/lib/session";
 import { discordOauthEnabled, googleOauthEnabled } from "@/lib/settings";
 import { getShopSettings } from "@/lib/settingsStore";
 
-export const metadata: Metadata = { title: "Tổng quan tài khoản" };
+export const metadata: Metadata = {
+  title: "Tổng quan tài khoản",
+  // Nothing here belongs in a search index: it is either a sign-in step or
+  // one visitor's own account. Followed, not indexed, so the links still
+  // pass through.
+  robots: { index: false, follow: true },
+};
 export const dynamic = "force-dynamic";
 
 /**
@@ -36,18 +49,6 @@ export const dynamic = "force-dynamic";
  * The commission card reads the wallet's own commission balance, so a referrer
  * with nothing earned sees a truthful zero and Rút tiền stays locked.
  */
-
-/** Progress ceiling the tier bar counts toward. */
-const XP_CAP = 1000;
-
-/** Each MemberTier's colour kit; unknown values wear bronze. */
-const TIERS: Record<string, { text: string; bar: string }> = {
-  BRONZE: { text: "text-orange-300", bar: "bg-orange-400" },
-  SILVER: { text: "text-neutral-300", bar: "bg-neutral-300" },
-  GOLD: { text: "text-amber-300", bar: "bg-amber-400" },
-  PLATINUM: { text: "text-cyan-300", bar: "bg-cyan-400" },
-  DIAMOND: { text: "text-violet-300", bar: "bg-violet-400" },
-};
 
 const PROVIDER_NAMES: Record<string, string> = {
   google: "Google",
@@ -85,19 +86,27 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
   const user = await getCurrentUser();
   if (!user) redirect("/login?next=%2Fprofile");
 
-  const [settings, linkedRows, query] = await Promise.all([
+  const [settings, linkedRows, query, toppedUpRow] = await Promise.all([
     getShopSettings(),
     db.linkedAccount.findMany({
       where: { userId: user.id },
       select: { provider: true },
     }),
     searchParams,
+    // Lifetime completed top-ups: what the tier is earned from.
+    db.topUp.aggregate({
+      _sum: { amount: true },
+      where: { userId: user.id, status: "COMPLETED" },
+    }),
   ]);
   const linkedSet = new Set(linkedRows.map((row) => row.provider));
   const isAdmin = user.role === "ADMIN";
 
-  const tier = TIERS[user.tier] ?? TIERS.BRONZE!;
-  const xpPercent = Math.min(100, (user.points / XP_CAP) * 100);
+  const memberTier = readMemberTier(user.tier);
+  const tier = TIER_STYLE[memberTier];
+  const toppedUp = Number(toppedUpRow._sum.amount ?? 0n);
+  const progress = tierProgress(toppedUp, memberTier);
+  const nextRule = progress.next ? TIER_RULES[progress.next] : null;
 
   const providers = [
     {
@@ -183,31 +192,57 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                 <span
                   className={`text-2xl font-black uppercase tracking-wider leading-none ${tier.text}`}
                 >
-                  {user.tier}
+                  {TIER_RULES[memberTier].label}
                 </span>
-                <Gem size={20} className="shrink-0 text-neutral-500" />
+                <TierBadge tier={memberTier} size="sm" />
               </div>
               <div className="mt-2 flex items-center justify-between gap-3">
                 <span className="text-[10px] font-black uppercase tracking-widest text-neutral-400">
                   Tiến độ cấp bậc
                 </span>
-                {/* XP is Điểm thưởng counted against the mockup's 1.000
-                    ceiling — no separate experience number exists yet. */}
-                <span className="text-[10px] font-bold tracking-wider text-neutral-500">
-                  {formatVnd(user.points)} / {formatVnd(XP_CAP)} XP
+                {/* Lifetime top-ups against the next threshold — the figure
+                    the rank is actually earned from. */}
+                <span className="text-[10px] font-bold tracking-wider text-neutral-500 tabular-nums">
+                  {nextRule
+                    ? `${formatVnd(toppedUp)} / ${formatVnd(nextRule.minTopUp)}đ`
+                    : `${formatVnd(toppedUp)}đ · hạng cao nhất`}
                 </span>
               </div>
               <div className="h-2 overflow-hidden rounded-full border border-white/5 bg-black/60">
                 <div
                   className={`h-full rounded-full ${tier.bar}`}
-                  style={{ width: `${xpPercent}%` }}
+                  style={{ width: `${progress.percent}%` }}
                 />
               </div>
             </div>
 
             <div className="mt-auto rounded-xl border border-white/[0.06] bg-white/[0.03] px-4 py-3 text-xs leading-relaxed text-neutral-400">
-              Tích lũy để thừa hưởng thêm đặc quyền và ưu đãi dành riêng cho
-              thành viên
+              {nextRule && progress.next ? (
+                <>
+                  Còn{" "}
+                  <span className="font-bold text-white tabular-nums">
+                    {formatVnd(progress.remaining)}đ
+                  </span>{" "}
+                  nạp thêm để lên{" "}
+                  <span className={`font-bold ${TIER_STYLE[progress.next].text}`}>
+                    {nextRule.label}
+                  </span>
+                  .{" "}
+                </>
+              ) : (
+                "Bạn đang ở hạng cao nhất. "
+              )}
+              {TIER_RULES[memberTier].discountPercent > 0
+                ? `Hạng hiện tại giảm ${formatTierPercent(TIER_RULES[memberTier].discountPercent)}% khi mua tool.`
+                : nextRule
+                  ? `Lên ${nextRule.label} để bắt đầu được giảm giá khi mua tool.`
+                  : ""}{" "}
+              <Link
+                href="/cap-bac"
+                className="font-bold text-[var(--menzu-accent)] hover:underline"
+              >
+                Xem quyền lợi các hạng →
+              </Link>
             </div>
           </div>
 

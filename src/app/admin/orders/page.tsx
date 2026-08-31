@@ -313,7 +313,7 @@ export default async function AdminOrdersPage({
                           {formatVnd(Number(o.listPrice))}đ
                         </span>
                         <span className="mt-0.5 flex items-center gap-1.5 text-[11px] font-bold text-amber-400">
-                          −{o.discountPct}%
+                          −{String(o.discountPct).replace(".", ",")}%
                           {o.voucher ? (
                             <span className="rounded border border-indigo-500/25 bg-indigo-500/10 px-1.5 py-0.5 font-mono text-[10px] font-bold text-indigo-400">
                               {o.voucher.code}

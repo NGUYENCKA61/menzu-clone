@@ -41,11 +41,11 @@ type Pending =
 
 /** Each tier keeps its metal: the dot and the word share one color. */
 const TIER_COLOR: Record<string, string> = {
-  BRONZE: "text-amber-600",
-  SILVER: "text-neutral-300",
+  CLASSIC: "text-neutral-300",
   GOLD: "text-yellow-400",
   PLATINUM: "text-cyan-300",
   DIAMOND: "text-violet-300",
+  ELITE: "text-rose-300",
 };
 
 /**

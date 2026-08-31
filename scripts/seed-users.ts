@@ -30,7 +30,7 @@ const GIVEN = [
   "vy", "yen",
 ];
 
-const TIERS = ["BRONZE", "SILVER", "GOLD", "PLATINUM", "DIAMOND"] as const;
+const TIERS = ["CLASSIC", "GOLD", "PLATINUM", "DIAMOND", "ELITE"] as const;
 const BLOCK_REASONS = [
   "Chargeback sau khi nhận acc",
   "Nghi ngờ dùng thẻ cào giả",

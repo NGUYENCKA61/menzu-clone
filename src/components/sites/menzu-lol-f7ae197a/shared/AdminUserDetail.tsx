@@ -28,14 +28,14 @@ type Pending =
   | { kind: "password" }
   | null;
 
-const TIERS = ["BRONZE", "SILVER", "GOLD", "PLATINUM", "DIAMOND"] as const;
+const TIERS = ["CLASSIC", "GOLD", "PLATINUM", "DIAMOND", "ELITE"] as const;
 
 const TIER_COLOR: Record<string, string> = {
-  BRONZE: "text-amber-600",
-  SILVER: "text-neutral-300",
+  CLASSIC: "text-neutral-300",
   GOLD: "text-yellow-400",
   PLATINUM: "text-cyan-300",
   DIAMOND: "text-violet-300",
+  ELITE: "text-rose-300",
 };
 
 const CARD = "rounded-xl border border-white/[0.08] bg-[#0e0e11] p-5 flex flex-col gap-4";
