@@ -89,6 +89,8 @@ export async function buildCatalogue(): Promise<string> {
     features: featuresOrDefault(parseFeatures(p.features)).map((f) => ({ ...f })),
     // The editor stores HTML; markup in a prompt is tokens spent on angle
     // brackets. A product with no guide of its own carries the shop's default.
+    // The setup guide is deliberately NOT here: it is sold with the tool and
+    // shown only to a buyer, and this catalogue goes to whoever is chatting.
     guide: p.guide ? docHtmlToPlainText(p.guide, 900) : DEFAULT_GUIDE,
     description: p.description ? docHtmlToPlainText(p.description, 400) : "",
   }));

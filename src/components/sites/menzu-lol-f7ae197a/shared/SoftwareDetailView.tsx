@@ -5,11 +5,15 @@ import { ConnectRailSection } from "@/components/sites/menzu-lol-f7ae197a/root-8
 import { ScrollCta } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/ScrollCta";
 import { docHtmlToPlainText, isHtmlBody } from "@/lib/docHtml";
 import { breadcrumbJsonLd, JsonLd } from "@/lib/seo";
-import { categoryHref } from "@/lib/routes";
+import { categoryHref, productHref } from "@/lib/routes";
 
 import { Breadcrumb } from "./Breadcrumb";
 import { SoftwareBuyPanel, type SoftwareDetail } from "./SoftwareBuyPanel";
-import { DESCRIPTION_SECTION_ID, SoftwareDescription } from "./SoftwareDescription";
+import {
+  DESCRIPTION_SECTION_ID,
+  SoftwareDescription,
+  type SetupGuideAccess,
+} from "./SoftwareDescription";
 import { SoftwareGallery } from "./SoftwareGallery";
 
 /**
@@ -23,9 +27,15 @@ import { SoftwareGallery } from "./SoftwareGallery";
 export function SoftwareDetailView({
   software,
   initialPackageId,
+  setupGuideAccess,
+  statusSubscribed,
 }: {
   software: SoftwareDetail;
   initialPackageId?: string;
+  /** Decided by the route, which knows who is looking. */
+  setupGuideAccess: SetupGuideAccess;
+  /** Following this tool's status; null for a guest. */
+  statusSubscribed: boolean | null;
 }) {
   // One stored field, two voices: the rich HTML (if the admin wrote one) goes
   // to the description section in full; every place that prints a sentence —
@@ -75,6 +85,7 @@ export function SoftwareDetailView({
               <SoftwareBuyPanel
                 software={{ ...software, description: plainDescription }}
                 initialPackageId={initialPackageId}
+                statusSubscribed={statusSubscribed}
               />
             </div>
 
@@ -89,8 +100,12 @@ export function SoftwareDetailView({
               description={plainDescription}
               richHtml={richDescription}
               features={software.features}
+              requirements={software.requirements}
               featuresNote={software.featuresNote}
               guideHtml={software.guideHtml}
+              setupGuideHtml={software.setupGuideHtml}
+              setupGuideAccess={setupGuideAccess}
+              loginHref={`/login?next=${encodeURIComponent(productHref(software.categorySlug, software.slug))}`}
             />
           </div>
         </div>

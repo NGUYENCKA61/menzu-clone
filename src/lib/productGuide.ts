@@ -1,5 +1,6 @@
 /**
- * "Hướng dẫn sử dụng" — the how-to block, per product.
+ * "Hướng dẫn cài đặt" and "Hướng dẫn thiết lập & sử dụng" — the two how-to
+ * blocks, per product.
  *
  * Written in the same rich editor the description and the feature note use,
  * stored the same way, and caged by the same allowlist. A product with nothing
@@ -20,6 +21,11 @@ export const DEFAULT_GUIDE =
   "Sau khi thanh toán thành công, hệ thống sẽ cung cấp sản phẩm theo phương " +
   "thức giao hàng được cấu hình. Vui lòng đọc hướng dẫn sử dụng và kiểm tra " +
   "yêu cầu hệ thống trước khi cài đặt.";
+
+/** Under "Hướng dẫn thiết lập & sử dụng" until the shop writes one. */
+export const DEFAULT_SETUP_GUIDE =
+  "Sau khi cài đặt, mở tool và nhập key đã nhận để kích hoạt, bật các tính " +
+  "năng cần dùng rồi vào game. Cần hỗ trợ thiết lập, liên hệ shop kèm mã đơn.";
 
 /**
  * Cleans what the editor sends. An empty document stores as null rather than

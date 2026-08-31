@@ -1,12 +1,26 @@
+import { Lock } from "lucide-react";
+import Link from "next/link";
+
 import { DocHtml } from "@/lib/docFormat";
 import { featuresOrDefault, type ProductFeature } from "@/lib/productFeatures";
-import { DEFAULT_GUIDE } from "@/lib/productGuide";
+import { DEFAULT_GUIDE, DEFAULT_SETUP_GUIDE } from "@/lib/productGuide";
+import {
+  requirementsOrDefault,
+  type ProductRequirement,
+} from "@/lib/productRequirements";
 
 /**
  * Where the "Xem chi tiết" cue lands, and the id this section wears. Shared so
  * the two cannot drift apart into a button that scrolls nowhere.
  */
 export const DESCRIPTION_SECTION_ID = "mo-ta-san-pham";
+
+/**
+ * Who is reading the setup guide: a buyer of this tool, a signed-in reader
+ * who has not bought it, or nobody signed in at all. The route decides; the
+ * text itself only arrives for "unlocked".
+ */
+export type SetupGuideAccess = "unlocked" | "locked" | "guest";
 
 export interface SoftwareDescriptionProps {
   name: string;
@@ -18,31 +32,19 @@ export interface SoftwareDescriptionProps {
   richHtml?: string | null;
   /** The product's own "Tính năng nổi bật"; empty falls back to the default. */
   features: ProductFeature[];
+  /** The product's own "Yêu cầu hệ thống"; empty falls back to the default. */
+  requirements: ProductRequirement[];
   /** The write-up under that list, as editor HTML. "" draws nothing. */
   featuresNote: string;
-  /** "Hướng dẫn sử dụng" as editor HTML; "" prints the default sentence. */
+  /** "Hướng dẫn cài đặt" as editor HTML; "" prints the default sentence. */
   guideHtml: string;
+  /** "Hướng dẫn thiết lập & sử dụng" as editor HTML; "" prints the default.
+   *  Only ever non-empty when `setupGuideAccess` is "unlocked". */
+  setupGuideHtml: string;
+  setupGuideAccess: SetupGuideAccess;
+  /** Where a guest who has already bought goes to prove it. */
+  loginHref: string;
 }
-
-/**
- * What a machine has to be for these tools to run.
- *
- * Written here rather than read from the product, like FEATURES below and for
- * the same reason: it is the same answer for every tool the shop sells today.
- * Written verbatim as the shop worded it — the spacing and the "!" are theirs.
- * The moment one tool needs a different answer, these become columns and this
- * list becomes their default.
- */
-const REQUIREMENTS: { label: string; value: string }[] = [
-  { label: "Hỗ trợ", value: "Windows 10, 11 Net nhà" },
-  {
-    label: "Yêu cầu thêm",
-    value: "UEFI bios,enable virtualization,disable secure boot",
-  },
-  { label: "CPU hỗ trợ", value: "Intel and AMD with AVX" },
-  { label: "Thiết lập màn hình", value: "Không viền !" },
-  { label: "Nền tảng", value: "Steam" },
-];
 
 const SUB_HEADING = "mt-10 text-[17px] font-black uppercase tracking-wider text-white";
 /**
@@ -58,6 +60,13 @@ const SUB_HEADING = "mt-10 text-[17px] font-black uppercase tracking-wider text-
  */
 const BODY = "text-sm leading-[1.65] text-neutral-300";
 
+/** The words the locked panel sets in red: what happens, and what to press. */
+function Hi({ children }: { children: React.ReactNode }) {
+  return (
+    <span className="font-bold text-[var(--menzu-accent)]">{children}</span>
+  );
+}
+
 /**
  * The long-form block under the buy panel.
  *
@@ -70,8 +79,12 @@ export function SoftwareDescription({
   description,
   richHtml,
   features,
+  requirements,
   featuresNote,
   guideHtml,
+  setupGuideHtml,
+  setupGuideAccess,
+  loginHref,
 }: SoftwareDescriptionProps) {
   /**
    * The product's own highlights, or the shop's default list where it has none.
@@ -121,7 +134,7 @@ export function SoftwareDescription({
    */
   const guideBlock = (
     <>
-      <h3 className={SUB_HEADING}>Hướng dẫn sử dụng</h3>
+      <h3 className={SUB_HEADING}>Hướng dẫn cài đặt</h3>
       {guideHtml ? (
         <div className="mt-4">
           <DocHtml body={guideHtml} />
@@ -133,6 +146,62 @@ export function SoftwareDescription({
   );
 
   /**
+   * What to do once it is installed — sign in with the key, which switches
+   * to set, how to play with it. Its own heading under the install guide
+   * because a buyer reads the two at different moments: one before the
+   * download, the other with the tool already open.
+   *
+   * Only a buyer of this tool gets the text; everyone else gets the heading
+   * and a locked panel saying so, with the way to unlock it. The heading
+   * stays for them on purpose — knowing a guide exists is part of what is
+   * being bought.
+   */
+  const setupGuideBlock = (
+    <>
+      <h3 className={SUB_HEADING}>Hướng dẫn thiết lập &amp; sử dụng</h3>
+      {setupGuideAccess !== "unlocked" ? (
+        <div className="mt-4 flex items-start gap-4 rounded-2xl border border-white/10 bg-white/[0.02] px-5 py-4 sm:px-6">
+          <span className="mt-0.5 grid h-9 w-9 shrink-0 place-items-center rounded-full border border-white/10 bg-white/5 text-[var(--menzu-accent)]">
+            <Lock className="h-4 w-4" aria-hidden />
+          </span>
+          <div className="min-w-0">
+            <p className="text-sm font-black uppercase tracking-wider text-white">
+              Mở khoá sau khi thuê key
+            </p>
+            <p className={`mt-1 ${BODY}`}>
+              <Hi>Nội dung chỉ hiển thị</Hi> sau khi bạn đã <Hi>thuê key</Hi> của
+              tool này. <Hi>Chọn gói</Hi> ở trên và bấm <Hi>Mua ngay</Hi> —{" "}
+              <Hi>thanh toán xong</Hi>, quay lại trang này là xem được.
+              {setupGuideAccess === "guest" ? (
+                <>
+                  {" "}
+                  Đã mua rồi?{" "}
+                  <Link
+                    href={loginHref}
+                    className="font-bold text-white underline underline-offset-2 hover:text-[var(--menzu-accent)]"
+                  >
+                    Đăng nhập
+                  </Link>{" "}
+                  để xem.
+                </>
+              ) : null}
+            </p>
+          </div>
+        </div>
+      ) : setupGuideHtml ? (
+        <div className="mt-4">
+          <DocHtml body={setupGuideHtml} />
+        </div>
+      ) : (
+        <p className={`mt-4 ${BODY}`}>{DEFAULT_SETUP_GUIDE}</p>
+      )}
+    </>
+  );
+
+  /**
+   * What a machine has to be for this tool to run — the product's own list,
+   * or the shop's default where it has none, like the features above.
+   *
    * One panel with the requirements ruled off inside it, rather than a tile
    * per line: they are one list, and a list is what it reads as — label on the
    * left, answer on the right, each on its own row. It grows downwards as
@@ -151,7 +220,7 @@ export function SoftwareDescription({
   const factsCard = (
     <div className="mt-4 max-w-[720px] rounded-2xl border border-white/10 bg-white/[0.02] px-5 py-1.5 sm:px-6 sm:py-2">
       <dl>
-        {REQUIREMENTS.map((f, index) => (
+        {requirementsOrDefault(requirements).map((f, index) => (
           <div
             key={f.label}
             className={`grid grid-cols-1 gap-x-6 gap-y-1 py-3.5 sm:grid-cols-[minmax(140px,30%)_1fr] ${
@@ -220,6 +289,8 @@ export function SoftwareDescription({
 
         {guideBlock}
 
+        {setupGuideBlock}
+
         {warrantyBlock}
       </section>
     );
@@ -252,6 +323,8 @@ export function SoftwareDescription({
       {featuresBlock}
 
       {guideBlock}
+
+      {setupGuideBlock}
 
       {warrantyBlock}
     </section>

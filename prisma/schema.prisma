@@ -26,12 +26,17 @@ enum UserRole {
   ADMIN
 }
 
+/// Classic is the first rung; Gold, Platinum, Diamond and Elite are earned
+/// by lifetime spend. BRONZE and SIGNATURE are retired values that stay in
+/// the database type (Postgres cannot drop one) — nothing writes them.
 enum MemberTier {
-  BRONZE
-  SILVER
+  CLASSIC
   GOLD
   PLATINUM
   DIAMOND
+  ELITE
+  BRONZE
+  SIGNATURE
 }
 
 model User {
@@ -40,6 +45,15 @@ model User {
   uid          Int        @unique @default(autoincrement())
   username     String     @unique
   email        String?    @unique
+  /// When a provider vouched for `email`, and null when nobody did.
+  ///
+  /// The shop has no mail server, so an address a customer types is only ever
+  /// a claim. This column is what separates the two, and signing in with
+  /// Google or Discord is allowed to walk into an existing account on the
+  /// strength of a matching address ONLY when this is set — otherwise anyone
+  /// could register with somebody else's address and wait for them to press
+  /// the Google button. Cleared whenever the address is edited by hand.
+  emailVerifiedAt DateTime?
   passwordHash String?
   avatarUrl    String?
   role         UserRole   @default(MEMBER)
@@ -54,7 +68,7 @@ model User {
   blockedAt    DateTime?
   /// Shown to the admin who blocked it, and to nobody else.
   blockedReason String?
-  tier         MemberTier @default(BRONZE)
+  tier         MemberTier @default(CLASSIC)
 
   /// Purchases are debited from this balance — the checkout dialog has no card
   /// entry, only "Số dư ví hiện tại" and "Cần nạp thêm".
@@ -95,6 +109,7 @@ model User {
   cartItems     CartItem[]
   passwordResets PasswordReset[]
   feedbacks     Feedback[]
+  statusSubscriptions SoftwareStatusSubscription[]
   licenseKeys   LicenseKey[]
 
   @@map("users")
@@ -449,6 +464,7 @@ model Category {
   /// Which rows show this category. Deleting the category takes its links
   /// with it; it never takes the group.
   groups    GroupCategory[]
+  vouchers  Voucher[]
 
   @@map("categories")
 }
@@ -516,6 +532,10 @@ model Product {
   /// product has none of its own and the page prints the shop's default list.
   /// See src/lib/productFeatures.ts.
   features   String?
+  /// "Yêu cầu hệ thống" as a JSON list of {label, value}, stored like
+  /// `features` and for the same reason. Null prints the list every tool
+  /// printed when it was a constant in the page.
+  requirements String?
   /// The write-up under that list, as sanitized editor HTML.
   ///
   /// Its own column rather than more rows in `features`: the list answers
@@ -529,6 +549,11 @@ model Product {
   /// a shop that has written no guide for a product still tells the buyer
   /// something rather than showing an empty heading.
   guide      String?
+  /// "Hướng dẫn thiết lập & sử dụng", as sanitized editor HTML: what to do
+  /// once the tool is installed — sign in with the key, which switches to
+  /// set, how to play with it. Its own column beside `guide` because the two
+  /// are read at different moments. Null prints DEFAULT_SETUP_GUIDE.
+  setupGuide String?
 
   // --- SOFTWARE_GAME ---------------------------------------------------
   /// Null on accounts, where the idea does not apply.
@@ -537,6 +562,10 @@ model Product {
   /// folder, a guide, whatever the shop hands out. Null hides the button
   /// rather than rendering one that goes nowhere.
   downloadUrl    String?
+  /// Where the buyer's "Tài liệu sử dụng" button points — a PDF, a Drive doc,
+  /// a wiki page. Separate from `downloadUrl` because the tool and its manual
+  /// are handed over as two different links; null hides the button.
+  docsUrl        String?
   /// A YouTube link for the detail page's main frame. Stored as the shop
   /// pasted it — a watch URL, a share link, a bare id — and turned into an
   /// embed at render time, so nobody has to know what an embed URL looks like.
@@ -629,6 +658,9 @@ model Product {
   packages   ProductPackage[]
   images     ProductImage[]
   cartItems  CartItem[]
+  statusEvents      SoftwareStatusEvent[]
+  statusSubscribers SoftwareStatusSubscription[]
+  vouchers          VoucherProduct[]
 
   @@index([categoryId, status])
   @@index([price])
@@ -846,7 +878,7 @@ model Order {
   /// The checkout dialog itemises all of these, so all of them are stored —
   /// recomputing a historical total from the current product price would drift.
   listPrice   BigInt
-  discountPct Int            @default(0)
+  discountPct Float          @default(0)
   voucherId   String?
   voucher     Voucher?       @relation(fields: [voucherId], references: [id])
   voucherCut  BigInt         @default(0)
@@ -929,7 +961,35 @@ model Voucher {
   active      Boolean   @default(true)
   orders      Order[]
 
+  /// What the code may be spent on: everything, one category, or a list of
+  /// named products. The category is a nullable link so a category removed
+  /// later never breaks the row — the code then simply matches nothing; a
+  /// removed product just drops out of the list.
+  scope      VoucherScope @default(ALL)
+  categoryId String?
+  category   Category?    @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  products   VoucherProduct[]
+
+  @@index([categoryId])
   @@map("vouchers")
+}
+
+/// One of the products a PRODUCT-scoped voucher may be spent on.
+model VoucherProduct {
+  voucherId String
+  voucher   Voucher @relation(fields: [voucherId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@id([voucherId, productId])
+  @@index([productId])
+  @@map("voucher_products")
+}
+
+enum VoucherScope {
+  ALL
+  CATEGORY
+  PRODUCT
 }
 
 /// What still has to happen after a spin resolves.
@@ -1266,4 +1326,48 @@ model AnnouncementRecipient {
   /// The direction the visitor query travels: given a reader, which notices.
   @@index([userId])
   @@map("announcement_recipients")
+}
+
+/// One line of a tool's detection history: the state it moved to and when.
+///
+/// The admin route writes a row in the same transaction as the change to
+/// `softwareStatus`, so the two cannot disagree. The status tab of /thong-bao
+/// lists every tool's rows; a subscriber's bell lists the rows of the tools
+/// they follow.
+model SoftwareStatusEvent {
+  id        String         @id @default(cuid())
+  productId String
+  product   Product        @relation(fields: [productId], references: [id], onDelete: Cascade)
+  status    SoftwareStatus
+  createdAt DateTime       @default(now())
+
+  /// A picture pinned to this change — a screenshot of the ban wave, the
+  /// changelog, whatever the shop wants customers to see beside the words.
+  /// Null is the ordinary case and draws nothing.
+  imageUrl  String?
+  /// What the shop wants to say about this particular change, in its own
+  /// words. Null falls back to the sentence the status itself implies.
+  note      String?
+  /// Where the change came from: "admin" when somebody pressed it in the
+  /// desk, or the integration's name when a message from Telegram flipped it.
+  /// Kept so a surprising change can be traced back to whoever sent it.
+  source    String?
+
+  @@index([productId, createdAt])
+  @@index([createdAt])
+  @@map("software_status_events")
+}
+
+/// "Nhận thông báo trạng thái": this user follows this tool. Absence is the
+/// default — nobody hears about anything until they press the button.
+model SoftwareStatusSubscription {
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@id([userId, productId])
+  @@index([productId])
+  @@map("software_status_subscriptions")
 }
