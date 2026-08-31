@@ -1,7 +1,6 @@
 import { randomBytes } from "node:crypto";
-import { mkdir, writeFile } from "node:fs/promises";
-import { join } from "node:path";
 
+import { storeUpload } from "@/lib/blobStore";
 import { NextResponse } from "next/server";
 import sharp from "sharp";
 
@@ -33,8 +32,6 @@ export async function GET() {
 /** The chip on the card is one of these, nothing free-form. */
 const SERVICES = new Set(["MUA KEY", "MUA ACC", "NẠP TIỀN", "KHÁC"]);
 
-const UPLOAD_DIR = join(process.cwd(), "public", "uploads", "feedback");
-const PUBLIC_PREFIX = "/uploads/feedback/";
 const TYPES = new Set(["image/png", "image/jpeg", "image/webp"]);
 /** The form says "max 5MB" — bill screenshots run bigger than avatars. */
 const MAX_BYTES = 5 * 1024 * 1024;
@@ -126,9 +123,7 @@ export async function POST(request: Request) {
     }
 
     const filename = `${user.uid}-${randomBytes(8).toString("hex")}.webp`;
-    await mkdir(UPLOAD_DIR, { recursive: true });
-    await writeFile(join(UPLOAD_DIR, filename), processed);
-    imageUrl = `${PUBLIC_PREFIX}${filename}`;
+    imageUrl = await storeUpload("feedback", filename, processed, "image/webp");
   }
 
   await db.feedback.create({

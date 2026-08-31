@@ -1,16 +1,11 @@
 import { randomBytes } from "node:crypto";
-import { mkdir, writeFile } from "node:fs/promises";
-import { join } from "node:path";
 
+import { storeUpload } from "@/lib/blobStore";
 import { NextResponse } from "next/server";
 import sharp from "sharp";
 
 import { FORBIDDEN, getAdmin } from "@/lib/admin";
 import { readImageSize } from "@/lib/authPanel";
-
-/** Same local-disk discipline as every other uploader in the admin. */
-const UPLOAD_DIR = join(process.cwd(), "public", "uploads", "docs");
-const PUBLIC_PREFIX = "/uploads/docs/";
 
 const TYPES = new Set(["image/png", "image/jpeg", "image/webp"]);
 const MAX_BYTES = 5 * 1024 * 1024;
@@ -70,8 +65,7 @@ export async function POST(request: Request) {
   }
 
   const name = `doc-${randomBytes(8).toString("hex")}.webp`;
-  await mkdir(UPLOAD_DIR, { recursive: true });
-  await writeFile(join(UPLOAD_DIR, name), processed);
+  const url = await storeUpload("docs", name, processed, "image/webp");
 
-  return NextResponse.json({ url: `${PUBLIC_PREFIX}${name}` });
+  return NextResponse.json({ url });
 }

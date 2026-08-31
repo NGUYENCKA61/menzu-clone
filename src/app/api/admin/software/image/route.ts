@@ -1,18 +1,10 @@
 import { randomBytes } from "node:crypto";
-import { mkdir, writeFile } from "node:fs/promises";
-import { join } from "node:path";
 
+import { storeUpload } from "@/lib/blobStore";
 import { NextResponse } from "next/server";
 
 import { FORBIDDEN, getAdmin } from "@/lib/admin";
 import { extensionFor, readImageSize } from "@/lib/authPanel";
-
-/**
- * Local disk under /public, like every other uploader here. Self-hosted only;
- * a read-only serverless filesystem would need object storage instead — that
- * change lives in this one function.
- */
-const UPLOAD_DIR = join(process.cwd(), "public", "uploads", "software");
 
 const TYPES = new Set(["image/png", "image/jpeg", "image/webp"]);
 const MAX_BYTES = 8 * 1024 * 1024;
@@ -77,8 +69,7 @@ export async function POST(request: Request) {
 
   // Never the client's filename — it can carry path separators.
   const name = `${randomBytes(12).toString("hex")}${extensionFor(file.type)}`;
-  await mkdir(UPLOAD_DIR, { recursive: true });
-  await writeFile(join(UPLOAD_DIR, name), bytes);
+  const storedUrl = await storeUpload("software", name, bytes, file.type);
 
-  return NextResponse.json({ url: `/uploads/software/${name}`, width: size.width, height: size.height });
+  return NextResponse.json({ url: storedUrl, width: size.width, height: size.height });
 }

@@ -1,14 +1,13 @@
+import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 
 import { NextResponse } from "next/server";
 
 import { FORBIDDEN, getAdmin } from "@/lib/admin";
+import { blobStoreIsRemote, storeUpload } from "@/lib/blobStore";
 import { prepareHeroVideo } from "@/lib/heroVideo";
 
-/**
- * Local disk under /public, like every other uploader on this site. Works
- * self-hosted; moving to object storage means changing this one function.
- */
+/** Where the transcode does its work before the file is stored for real. */
 const UPLOAD_DIR = join(process.cwd(), "public", "uploads", "hero");
 
 /** mp4 and webm — the two containers every current browser plays muted. */
@@ -92,10 +91,24 @@ export async function POST(request: Request) {
 
   // The stored name comes out of prepareHeroVideo as random hex — never the
   // client's filename, which can carry path separators.
+  //
+  // This one still goes through the disk on its way out, because the
+  // transcode itself needs real files to hand to ffmpeg. When a bucket is
+  // configured the finished file is copied up and the local copy is left
+  // behind as a build artefact; the URL the shop stores is the bucket's.
   const prepared = await prepareHeroVideo(bytes, extension, UPLOAD_DIR);
+  const localPath = join(UPLOAD_DIR, prepared.fileName);
+  const url = blobStoreIsRemote()
+    ? await storeUpload(
+        "hero",
+        prepared.fileName,
+        new Uint8Array(await readFile(localPath)),
+        prepared.fileName.endsWith(".webm") ? "video/webm" : "video/mp4",
+      )
+    : `/uploads/hero/${prepared.fileName}`;
 
   return NextResponse.json({
-    url: `/uploads/hero/${prepared.fileName}`,
+    url,
     mode: prepared.mode,
     inBytes: file.size,
     outBytes: prepared.outBytes,

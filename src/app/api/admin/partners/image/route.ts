@@ -1,17 +1,10 @@
 import { randomBytes } from "node:crypto";
-import { mkdir, writeFile } from "node:fs/promises";
-import { join } from "node:path";
 
+import { storeUpload } from "@/lib/blobStore";
 import { NextResponse } from "next/server";
 
 import { FORBIDDEN, getAdmin } from "@/lib/admin";
 import { extensionFor, readImageSize } from "@/lib/authPanel";
-
-/**
- * Local disk under /public, like every other uploader on this site. Works
- * self-hosted; moving to object storage means changing this one function.
- */
-const UPLOAD_DIR = join(process.cwd(), "public", "uploads", "partners");
 
 const TYPES = new Set(["image/png", "image/jpeg", "image/webp"]);
 const MAX_BYTES = 4 * 1024 * 1024;
@@ -69,8 +62,7 @@ export async function POST(request: Request) {
 
   // Never the client's filename — it can carry path separators.
   const name = `${randomBytes(12).toString("hex")}${extensionFor(file.type)}`;
-  await mkdir(UPLOAD_DIR, { recursive: true });
-  await writeFile(join(UPLOAD_DIR, name), bytes);
+  const storedUrl = await storeUpload("partners", name, bytes, file.type);
 
-  return NextResponse.json({ url: `/uploads/partners/${name}` });
+  return NextResponse.json({ url: storedUrl });
 }

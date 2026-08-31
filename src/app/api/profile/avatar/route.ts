@@ -1,20 +1,12 @@
 import { randomBytes } from "node:crypto";
-import { mkdir, unlink, writeFile } from "node:fs/promises";
-import { join } from "node:path";
 
+import { removeUpload, storeUpload } from "@/lib/blobStore";
 import { NextResponse } from "next/server";
 import sharp from "sharp";
 
 import { readImageSize } from "@/lib/authPanel";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/session";
-
-/**
- * Local disk under /public, like every admin uploader. Self-hosted only; a
- * read-only serverless filesystem would need object storage instead.
- */
-const UPLOAD_DIR = join(process.cwd(), "public", "uploads", "avatars");
-const PUBLIC_PREFIX = "/uploads/avatars/";
 
 const TYPES = new Set(["image/png", "image/jpeg", "image/webp"]);
 /** Tighter than the product uploaders: this picture renders 64px at most. */
@@ -112,19 +104,16 @@ export async function POST(request: Request) {
   // Never the client's filename — it can carry path separators. The uid
   // prefix keeps the folder browsable; the random tail busts every cache.
   const name = `${user.uid}-${randomBytes(8).toString("hex")}.webp`;
-  await mkdir(UPLOAD_DIR, { recursive: true });
-  await writeFile(join(UPLOAD_DIR, name), processed);
+  const storedUrl = await storeUpload("avatars", name, processed, file.type);
 
-  const avatarUrl = `${PUBLIC_PREFIX}${name}`;
+  const avatarUrl = storedUrl;
   await db.user.update({ where: { id: user.id }, data: { avatarUrl } });
 
-  // The replaced file goes with the replacement — but only ever a file this
-  // folder owns, so a doctored avatarUrl cannot aim the unlink elsewhere.
-  if (user.avatarUrl?.startsWith(PUBLIC_PREFIX)) {
-    const old = user.avatarUrl.slice(PUBLIC_PREFIX.length);
-    if (old && !old.includes("/") && !old.includes("\\") && !old.includes("..")) {
-      await unlink(join(UPLOAD_DIR, old)).catch(() => {});
-    }
+  // The replaced file goes with the replacement. removeUpload only touches an
+  // address this module wrote, so a doctored avatarUrl cannot aim it
+  // elsewhere, and it never throws — the row is already correct.
+  if (user.avatarUrl && user.avatarUrl !== avatarUrl) {
+    await removeUpload(user.avatarUrl);
   }
 
   return NextResponse.json({ avatarUrl });

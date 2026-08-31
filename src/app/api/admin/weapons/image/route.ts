@@ -1,7 +1,6 @@
 import { randomBytes } from "node:crypto";
-import { mkdir, unlink, writeFile } from "node:fs/promises";
-import { basename, join } from "node:path";
 
+import { removeUpload, storeUpload } from "@/lib/blobStore";
 import { NextResponse } from "next/server";
 
 import { FORBIDDEN, getAdmin } from "@/lib/admin";
@@ -13,8 +12,6 @@ import {
   weaponKey,
   type FetchResult,
 } from "@/lib/weaponImages";
-
-const UPLOAD_DIR = join(process.cwd(), "public", "uploads", "weapons");
 
 const MAX_NAME_LENGTH = 80;
 
@@ -81,10 +78,9 @@ export async function POST(request: Request) {
   // each save also means a replaced picture cannot be served from a browser
   // cache holding the old one.
   const filename = `${randomBytes(12).toString("hex")}${extensionFor(type)}`;
-  await mkdir(UPLOAD_DIR, { recursive: true });
-  await writeFile(join(UPLOAD_DIR, filename), bytes);
-
-  const url = `/uploads/weapons/${filename}`;
+  // `type` here, not file.type: this route also accepts a URL to fetch from,
+  // so there is not always a File to ask.
+  const url = await storeUpload("weapons", filename, bytes, type);
   const key = weaponKey(name);
   const previous = await db.weaponImage.findUnique({
     where: { key },
@@ -102,8 +98,8 @@ export async function POST(request: Request) {
   // behind every time. Deleted only once the row is safely updated, only for
   // files this route wrote, and never at the cost of the save itself — the
   // library is already correct whether or not the disk cooperates.
-  if (previous && previous.url !== url && previous.url.startsWith("/uploads/weapons/")) {
-    await unlink(join(UPLOAD_DIR, basename(previous.url))).catch(() => {});
+  if (previous && previous.url !== url) {
+    await removeUpload(previous.url);
   }
 
   return NextResponse.json({

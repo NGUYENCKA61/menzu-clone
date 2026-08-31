@@ -1,7 +1,6 @@
 import { randomBytes } from "node:crypto";
-import { mkdir, writeFile } from "node:fs/promises";
-import { join } from "node:path";
 
+import { storeUpload } from "@/lib/blobStore";
 import { NextResponse } from "next/server";
 
 import { FORBIDDEN, getAdmin } from "@/lib/admin";
@@ -11,16 +10,6 @@ import {
   extensionFor,
   readImageSize,
 } from "@/lib/authPanel";
-
-/**
- * Where the sign-in artwork lands.
- *
- * The local disk under /public, matching the trade-screenshot uploader already
- * on this site. That works for a self-hosted shop and not on a read-only
- * serverless filesystem; moving to object storage means changing this function
- * and nothing else.
- */
-const UPLOAD_DIR = join(process.cwd(), "public", "uploads", "auth");
 
 /**
  * Accepts a new panel image and returns the path the settings should store.
@@ -55,11 +44,10 @@ export async function POST(request: Request) {
   // name like "../../x" would escape the upload directory.
   const name = `${randomBytes(12).toString("hex")}${extensionFor(file.type)}`;
 
-  await mkdir(UPLOAD_DIR, { recursive: true });
-  await writeFile(join(UPLOAD_DIR, name), bytes);
+  const storedUrl = await storeUpload("auth", name, bytes, file.type);
 
   return NextResponse.json({
-    url: `/uploads/auth/${name}`,
+    url: storedUrl,
     width: size!.width,
     height: size!.height,
   });
