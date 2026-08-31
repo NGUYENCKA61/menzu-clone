@@ -5,11 +5,13 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import {
   BookOpen,
+  Cpu,
   ExternalLink,
   FileText,
   ImagePlus,
   KeyRound,
   Save,
+  Settings2,
   Sparkles,
   Wallet,
 } from "lucide-react";
@@ -19,6 +21,12 @@ import {
   featuresToLines,
   parseFeatureLines,
 } from "@/lib/productFeatures";
+import {
+  parseRequirementLines,
+  REQUIREMENT_MAX,
+  requirementsToLines,
+  type ProductRequirement,
+} from "@/lib/productRequirements";
 
 import { AdminError } from "./AdminStates";
 import { AdminImagePicker } from "./AdminImagePicker";
@@ -46,10 +54,14 @@ export interface SoftwareDetailView {
   code: string;
   /** This product's own feature list. Empty means it uses the shop default. */
   features: FeatureDraft[];
+  /** This product's own "Yêu cầu hệ thống". Empty means the shop default. */
+  requirements: ProductRequirement[];
   /** The write-up under that list, lifted to editor HTML on the server. */
   featuresNoteHtml: string;
-  /** "Hướng dẫn sử dụng", lifted to editor HTML on the server. */
+  /** "Hướng dẫn cài đặt", lifted to editor HTML on the server. */
   guideHtml: string;
+  /** "Hướng dẫn thiết lập & sử dụng", lifted the same way. */
+  setupGuideHtml: string;
   /** The product half of its address; the desk lets the shop edit it. */
   slug: string;
   categorySlug: string;
@@ -108,12 +120,24 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
   const [featureBaseline, setFeatureBaseline] = useState(
     featuresToLines(software.features),
   );
+  const [requirementText, setRequirementText] = useState(
+    requirementsToLines(software.requirements),
+  );
+  /** What the database holds; advanced on every successful save. */
+  const [requirementBaseline, setRequirementBaseline] = useState(
+    requirementsToLines(software.requirements),
+  );
   const [noteHtml, setNoteHtml] = useState(software.featuresNoteHtml);
   /** What the database holds; advanced on every successful save. */
   const [noteBaseline, setNoteBaseline] = useState(software.featuresNoteHtml);
   const [guideHtml, setGuideHtml] = useState(software.guideHtml);
   /** What the database holds; advanced on every successful save. */
   const [guideBaseline, setGuideBaseline] = useState(software.guideHtml);
+  const [setupGuideHtml, setSetupGuideHtml] = useState(software.setupGuideHtml);
+  /** What the database holds; advanced on every successful save. */
+  const [setupGuideBaseline, setSetupGuideBaseline] = useState(
+    software.setupGuideHtml,
+  );
   const [descHtml, setDescHtml] = useState(software.descriptionHtml);
   /** What the database holds; advanced on every successful save. */
   const [descBaseline, setDescBaseline] = useState(software.descriptionHtml);
@@ -123,11 +147,16 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
   const [softwareStatus, setSoftwareStatus] = useState(
     software.softwareStatus ?? "UNDETECTED",
   );
+  /** Ride along with the NEXT status change, then reset. Not stored on the
+   *  product: each change keeps its own picture and its own words. */
+  const [statusImageUrl, setStatusImageUrl] = useState("");
+  const [statusNote, setStatusNote] = useState("");
 
   const detectMeta = SOFTWARE_STATUS[softwareStatus] ?? SOFTWARE_STATUS.UNDETECTED!;
   // Counted from what is typed, not from what is saved: the figure beside the
   // button has to answer "am I about to go over the limit".
   const featureCount = parseFeatureLines(featureText).length;
+  const requirementCount = parseRequirementLines(requirementText).length;
   const totalOrders = software.packages.reduce((sum, p) => sum + p.orderCount, 0);
 
   async function api(
@@ -192,6 +221,27 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
     }
   }
 
+  async function saveRequirements() {
+    const list = parseRequirementLines(requirementText);
+    const data = await api("/api/admin/software", "PATCH", {
+      code: software.code,
+      requirements: list,
+    });
+    if (data) {
+      // Written back from the parsed list, as the features are: blank lines
+      // and label-only lines are gone, and the box shows what was stored.
+      const normalised = requirementsToLines(list);
+      setRequirementText(normalised);
+      setRequirementBaseline(normalised);
+      setMsg({
+        tone: "ok",
+        text: list.length
+          ? `Đã lưu ${list.length} yêu cầu hệ thống`
+          : "Đã xoá — trang khách dùng lại danh sách mặc định",
+      });
+    }
+  }
+
   async function saveFeaturesNote() {
     const data = await api("/api/admin/software", "PATCH", {
       code: software.code,
@@ -216,7 +266,23 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
       setMsg({
         tone: "ok",
         text: guideHtml
-          ? "Đã lưu hướng dẫn sử dụng"
+          ? "Đã lưu hướng dẫn cài đặt"
+          : "Đã xoá — trang khách dùng lại câu mặc định",
+      });
+    }
+  }
+
+  async function saveSetupGuide() {
+    const data = await api("/api/admin/software", "PATCH", {
+      code: software.code,
+      setupGuide: setupGuideHtml,
+    });
+    if (data) {
+      setSetupGuideBaseline(setupGuideHtml);
+      setMsg({
+        tone: "ok",
+        text: setupGuideHtml
+          ? "Đã lưu hướng dẫn thiết lập & sử dụng"
           : "Đã xoá — trang khách dùng lại câu mặc định",
       });
     }
@@ -240,8 +306,39 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
       code: software.code,
       status,
       softwareStatus,
+      // Only mean anything when the detection state actually moves; the route
+      // ignores them otherwise, and they are cleared here either way so the
+      // next change starts from a blank sheet.
+      statusImageUrl,
+      statusNote,
     });
-    if (data) setMsg({ tone: "ok", text: "Đã lưu trạng thái" });
+    if (data) {
+      setStatusImageUrl("");
+      setStatusNote("");
+      setMsg({ tone: "ok", text: "Đã lưu trạng thái" });
+    }
+  }
+
+  /** Uploads the picture that will ride along with the next status change. */
+  async function pickStatusImage(file: File) {
+    setBusy(true);
+    setMsg(null);
+    try {
+      const form = new FormData();
+      form.set("file", file);
+      const res = await fetch("/api/admin/software/image", { method: "POST", body: form });
+      const data = (await res.json().catch(() => ({}))) as Record<string, unknown>;
+      if (!res.ok) {
+        setMsg({ tone: "err", text: (data.error as string) ?? "Không tải được ảnh" });
+        return;
+      }
+      setStatusImageUrl(data.url as string);
+      setMsg({ tone: "ok", text: "Đã tải ảnh — bấm Lưu để đăng kèm trạng thái" });
+    } catch {
+      setMsg({ tone: "err", text: "Không kết nối được máy chủ" });
+    } finally {
+      setBusy(false);
+    }
   }
 
   async function changeCover(file: File) {
@@ -458,6 +555,60 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
               Trạng thái hack hiện thành pill trên card ngoài cửa hàng — khách nhìn nó để
               quyết định mua.
             </p>
+
+            {/* Attached to the change itself, not to the tool: the history on
+                /thong-bao keeps each change with the picture and the sentence
+                it was announced with. Both are optional and both reset after
+                a save. */}
+            <div className="flex flex-col gap-2 border-t border-white/[0.06] pt-4">
+              <span className={LABEL}>Kèm theo lần đổi trạng thái này</span>
+              <textarea
+                value={statusNote}
+                onChange={(event) => setStatusNote(event.target.value)}
+                rows={2}
+                placeholder="Ghi chú gửi khách — ví dụ: Đã vá, chờ 24h rồi dùng lại."
+                className={`${FIELD} resize-y`}
+              />
+              <div className="flex flex-wrap items-center gap-3">
+                <label className={`${ACTION} cursor-pointer`}>
+                  <ImagePlus size={12} />
+                  {statusImageUrl ? "Đổi ảnh" : "Thêm ảnh"}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(event) => {
+                      const file = event.target.files?.[0];
+                      if (file) void pickStatusImage(file);
+                      event.target.value = "";
+                    }}
+                  />
+                </label>
+                {statusImageUrl ? (
+                  <>
+                    <span className="relative h-11 w-16 overflow-hidden rounded-lg border border-white/10 bg-neutral-950">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={statusImageUrl}
+                        alt="Ảnh kèm trạng thái"
+                        className="h-full w-full object-cover"
+                      />
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setStatusImageUrl("")}
+                      className="text-[11px] font-bold text-neutral-400 transition-colors hover:text-red-400"
+                    >
+                      Bỏ ảnh
+                    </button>
+                  </>
+                ) : (
+                  <span className="text-[11px] text-neutral-500">
+                    Chỉ hiện khi trạng thái thực sự đổi.
+                  </span>
+                )}
+              </div>
+            </div>
           </section>
         </div>
 
@@ -525,6 +676,44 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
           {descHtml !== descBaseline ? (
             <span className="text-[11px] text-neutral-500">Có thay đổi chưa lưu</span>
           ) : null}
+        </div>
+      </section>
+
+      <section className={CARD}>
+        <span className={CARD_HEAD}>
+          <Cpu size={13} className="text-neutral-400" />
+          Yêu cầu hệ thống
+        </span>
+        <textarea
+          aria-label="Yêu cầu hệ thống"
+          rows={6}
+          value={requirementText}
+          onChange={(event) => setRequirementText(event.target.value)}
+          placeholder={
+            "Hỗ trợ: Windows 10, 11\nCPU hỗ trợ: Intel and AMD with AVX\nNền tảng: Steam"
+          }
+          className={`${FIELD} resize-y leading-relaxed`}
+        />
+        <p className="text-[11px] text-neutral-500">
+          Mỗi dòng một yêu cầu, dạng <span className="font-mono text-neutral-400">Nhãn: giá trị</span>
+          — nhãn in bên trái, giá trị in đậm bên phải trong khung &ldquo;Yêu cầu hệ
+          thống&rdquo; trên trang khách. Dòng không có dấu hai chấm bị bỏ qua. Xoá hết thì
+          trang khách in lại danh sách mặc định chung của shop chứ không trống.
+        </p>
+        <div className="flex flex-wrap items-center gap-3">
+          <button
+            type="button"
+            disabled={busy || requirementText === requirementBaseline}
+            onClick={saveRequirements}
+            className={ACTION}
+          >
+            <Save size={12} />
+            Lưu yêu cầu hệ thống
+          </button>
+          <span className="text-[11px] text-neutral-500">
+            {requirementCount}/{REQUIREMENT_MAX} dòng
+            {requirementText !== requirementBaseline ? " · có thay đổi chưa lưu" : ""}
+          </span>
         </div>
       </section>
 
@@ -601,11 +790,11 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
       <section className={CARD}>
         <span className={CARD_HEAD}>
           <BookOpen size={13} className="text-neutral-400" />
-          Hướng dẫn sử dụng
+          Hướng dẫn cài đặt
         </span>
         <RichTextEditor initialHtml={software.guideHtml} onUpdate={setGuideHtml} />
         <p className="text-[11px] text-neutral-500">
-          Khu &ldquo;Hướng dẫn sử dụng&rdquo; trên trang khách — cách tải, cách bật,
+          Khu &ldquo;Hướng dẫn cài đặt&rdquo; trên trang khách — cách tải, cách bật,
           cách nhập key. Soạn y như ô mô tả: đậm, màu, đánh số, chèn ảnh chụp màn hình.
           Để trống thì trang khách in lại câu mặc định chung của shop chứ không trống.
         </p>
@@ -620,6 +809,38 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
             Lưu hướng dẫn
           </button>
           {guideHtml !== guideBaseline ? (
+            <span className="text-[11px] text-neutral-500">Có thay đổi chưa lưu</span>
+          ) : null}
+        </div>
+      </section>
+
+      <section className={CARD}>
+        <span className={CARD_HEAD}>
+          <Settings2 size={13} className="text-neutral-400" />
+          Hướng dẫn thiết lập &amp; sử dụng
+        </span>
+        <RichTextEditor
+          initialHtml={software.setupGuideHtml}
+          onUpdate={setSetupGuideHtml}
+        />
+        <p className="text-[11px] text-neutral-500">
+          Khu &ldquo;Hướng dẫn thiết lập &amp; sử dụng&rdquo; trên trang khách, ngay
+          dưới hướng dẫn cài đặt — nhập key, bật tính năng, chỉnh thông số, thao tác
+          trong game. <span className="text-neutral-400">Chỉ khách đã thuê key của tool
+          này mới đọc được</span>; người khác thấy ô khoá &ldquo;Mở khoá sau khi thuê
+          key&rdquo;. Để trống thì khách đã mua thấy câu mặc định chung của shop.
+        </p>
+        <div className="flex flex-wrap items-center gap-3">
+          <button
+            type="button"
+            disabled={busy || setupGuideHtml === setupGuideBaseline}
+            onClick={saveSetupGuide}
+            className={ACTION}
+          >
+            <Save size={12} />
+            Lưu hướng dẫn thiết lập
+          </button>
+          {setupGuideHtml !== setupGuideBaseline ? (
             <span className="text-[11px] text-neutral-500">Có thay đổi chưa lưu</span>
           ) : null}
         </div>

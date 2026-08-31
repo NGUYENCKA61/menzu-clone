@@ -35,8 +35,12 @@ describe("package durations", () => {
   it("reopens an edit form in the unit the shop typed", () => {
     expect(splitDuration(3)).toEqual({ value: "3", unit: "hour" });
     expect(splitDuration(168)).toEqual({ value: "7", unit: "day" });
-    // A lifetime tier comes back as an empty box, not a zero to clear.
-    expect(splitDuration(null)).toEqual({ value: "", unit: "day" });
+    // A lifetime tier comes back as an empty box with the picker already on
+    // "vĩnh viễn". It used to open on "ngày" with nothing in the number box,
+    // which reads as a duration somebody forgot to fill in rather than as the
+    // deliberate choice it is — and saving that form silently sold a lifetime
+    // key. The picker now says what the row means.
+    expect(splitDuration(null)).toEqual({ value: "", unit: "forever" });
   });
 
   it("survives the round trip in both units", () => {

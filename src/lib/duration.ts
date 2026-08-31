@@ -42,10 +42,19 @@ const UNIT_NAMES: Record<DurationUnit, string> = {
 };
 
 /**
- * Largest unit first, so 720 hours reads back as "1 tháng" rather than as
- * "30 ngày" — the shop typed the month.
+ * How a stored duration is read back: years, then days, then hours.
+ *
+ * Weeks and months are typeable but are not read back, and that is the whole
+ * point. Every tier this shop sells is named in days — "1 ngày", "7 ngày",
+ * "22 ngày", "30 ngày" — so reading 168 hours as "1 tuần" or 720 as "1 tháng"
+ * printed a word beside the tier that the shop had never typed, disagreeing
+ * with the tier's own label a few pixels away. A month typed on the form is
+ * stored as its hours and reads back as "30 ngày", which is what both the shop
+ * and the customer call it.
+ *
+ * Years stay, because "365 ngày" is nobody's idea of how to say a year.
  */
-const READ_ORDER: DurationUnit[] = ["year", "month", "week", "day", "hour"];
+const READ_ORDER: DurationUnit[] = ["year", "day", "hour"];
 
 /** The fact printed next to a tier: "7 ngày", "1 tháng", or a lifetime key. */
 export function formatDuration(hours: number | null): string {

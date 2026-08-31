@@ -131,12 +131,23 @@ export async function fetchWeaponImage(rawUrl: string): Promise<FetchResult> {
       // one; this is the same request Chrome would make for an <img>.
       headers: { accept: "image/*", "user-agent": "Mozilla/5.0" },
       signal: AbortSignal.timeout(TIMEOUT_MS),
-      redirect: "follow",
+      // Not followed. The allowlist above is checked against the address that
+      // was typed, and a redirect is the allowed host telling this server to
+      // go and fetch some other address instead — which is the allowlist
+      // handing its own key away, and the shape a request-forgery attack
+      // takes. A genuine CDN answers the image directly.
+      redirect: "manual",
     });
   } catch {
     return { ok: false, error: "Không tải được ảnh — quá thời gian chờ hoặc bị chặn" };
   }
 
+  if (res.status >= 300 && res.status < 400) {
+    return {
+      ok: false,
+      error: "Link này chuyển hướng sang nơi khác — dùng link ảnh trực tiếp.",
+    };
+  }
   if (!res.ok) {
     return { ok: false, error: `Nguồn trả về lỗi ${res.status} — kiểm tra lại link ảnh` };
   }
@@ -154,6 +165,32 @@ export async function fetchWeaponImage(rawUrl: string): Promise<FetchResult> {
   }
 
   const type = (res.headers.get("content-type") ?? "").split(";")[0]!.trim().toLowerCase();
-  const bytes = new Uint8Array(await res.arrayBuffer());
+
+  // A source that declares no length still must not be able to stream an
+  // unbounded body into this process's memory, so the read is capped as it
+  // happens rather than measured after it finishes.
+  const reader = res.body?.getReader();
+  if (!reader) return { ok: false, error: "Nguồn không trả về dữ liệu ảnh" };
+  const chunks: Uint8Array[] = [];
+  let total = 0;
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    total += value.byteLength;
+    if (total > MAX_BYTES) {
+      await reader.cancel();
+      return {
+        ok: false,
+        error: `Ảnh tối đa ${MAX_BYTES / 1024 / 1024}MB — ảnh này lớn hơn.`,
+      };
+    }
+    chunks.push(value);
+  }
+  const bytes = new Uint8Array(total);
+  let at = 0;
+  for (const chunk of chunks) {
+    bytes.set(chunk, at);
+    at += chunk.byteLength;
+  }
   return inspectImage(bytes, type);
 }

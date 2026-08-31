@@ -42,7 +42,11 @@ export async function GET(request: Request) {
   const url = new URL(request.url);
   const params = url.searchParams;
 
-  const page = Math.max(1, Number(params.get("page") ?? 1) || 1);
+  // Capped as well as floored: ?page=99999999 turned into an OFFSET the
+  // database had to count past row by row, which is a free way to make the
+  // server work hard. No shelf here is a thousand pages deep.
+  const MAX_PAGE = 1000;
+  const page = Math.min(MAX_PAGE, Math.max(1, Number(params.get("page") ?? 1) || 1));
   const sortParam = params.get("sort");
   const sort: SortKey =
     sortParam === "price_asc" || sortParam === "price_desc" ? sortParam : "newest";

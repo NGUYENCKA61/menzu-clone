@@ -35,7 +35,18 @@ export async function POST(request: Request) {
   if (!Number.isFinite(raw) || raw <= 0) {
     return NextResponse.json({ error: "Số tiền không hợp lệ" }, { status: 400 });
   }
+  // A ceiling as well as a floor. Postgres BIGINT stops at about 9.2×10^18,
+  // and a request for more than that reached the driver as a value it could
+  // not store — a 500 and a stack in the log for what is really just a silly
+  // number in a form. A hundred billion đồng is far past any real top-up.
+  const MAX_TOPUP = 100_000_000_000n;
   const amount = BigInt(Math.floor(raw));
+  if (amount > MAX_TOPUP) {
+    return NextResponse.json(
+      { error: `Số tiền nạp tối đa ${MAX_TOPUP.toLocaleString("vi-VN")}đ` },
+      { status: 400 },
+    );
+  }
   if (amount < BigInt(settings.topUpMin)) {
     return NextResponse.json(
       { error: `Nạp từ ${settings.topUpMin.toLocaleString("vi-VN")}đ trở lên` },

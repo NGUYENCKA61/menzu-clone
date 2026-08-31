@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import Image from "next/image";
-import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { AccountPageFrame } from "@/components/sites/menzu-lol-f7ae197a/shared/AccountPageFrame";
@@ -11,7 +10,13 @@ import { formatVnd } from "@/components/sites/menzu-lol-f7ae197a/shared/productD
 import { getOrders } from "@/lib/queries";
 import { getCurrentUser } from "@/lib/session";
 
-export const metadata: Metadata = { title: "Lịch sử mua hàng" };
+export const metadata: Metadata = {
+  title: "Lịch sử mua hàng",
+  // Nothing here belongs in a search index: it is either a sign-in step or
+  // one visitor's own account. Followed, not indexed, so the links still
+  // pass through.
+  robots: { index: false, follow: true },
+};
 export const dynamic = "force-dynamic";
 
 const STATUS_LABEL: Record<string, string> = {
@@ -70,13 +75,13 @@ export default async function OrdersPage() {
             // actually has to hand when hunting for a past purchase.
             haystack: [o.code, o.productCode, o.productName, o.productRank],
             node: (
-              // The whole row opens the receipt; only the picture and the
-              // title lead to the product. The modal owns the row so the
-              // click, the keyboard and the focus return all live in one
-              // client component.
+              // The whole row — picture and title included — opens the
+              // receipt; the product link lives inside it. The modal owns
+              // the row so the click, the keyboard and the focus return all
+              // live in one client component.
               <OrderDetailModal
                 supportHref="/feedback"
-                className="flex cursor-pointer flex-col gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] p-4 outline-none transition-colors hover:border-white/[0.12] focus-visible:ring-2 focus-visible:ring-[var(--menzu-accent)]/60 sm:flex-row sm:items-center sm:gap-4"
+                className="group flex cursor-pointer flex-col gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] p-4 outline-none transition-colors hover:border-white/[0.12] focus-visible:ring-2 focus-visible:ring-[var(--menzu-accent)]/60 sm:flex-row sm:items-center sm:gap-4"
                 order={{
                   code: o.code,
                   statusLabel: STATUS_LABEL[o.status] ?? o.status,
@@ -101,10 +106,7 @@ export default async function OrdersPage() {
                   login: o.login,
                 }}
               >
-                <Link
-                  href={o.productHref}
-                  className="flex min-w-0 flex-1 items-center gap-4"
-                >
+                <div className="flex min-w-0 flex-1 items-center gap-4">
                   <div className="relative h-16 w-24 shrink-0 overflow-hidden rounded-xl border border-white/10 bg-neutral-950">
                     {o.imageUrl ? (
                       <Image
@@ -119,7 +121,7 @@ export default async function OrdersPage() {
 
                   <div className="flex min-w-0 flex-1 flex-col gap-1">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="text-sm font-black text-white transition-colors hover:text-[var(--menzu-accent)]">
+                      <span className="text-sm font-black text-white transition-colors group-hover:text-[var(--menzu-accent)]">
                         {o.isSoftware ? o.productName : `#${o.productCode}`}
                       </span>
                       {/* A tier says more about a software order than a rank
@@ -139,7 +141,7 @@ export default async function OrdersPage() {
                       Đơn {o.code} · {shortDate(o.createdAt)}
                     </span>
                   </div>
-                </Link>
+                </div>
 
                 <div className="flex shrink-0 items-center justify-between gap-4 sm:flex-col sm:items-end sm:gap-1.5">
                   <span className="text-sm font-black text-white">

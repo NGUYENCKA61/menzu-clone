@@ -6,7 +6,16 @@ import { db } from "@/lib/db";
 export async function GET() {
   const categories = await db.category.findMany({
     orderBy: { sortOrder: "asc" },
-    include: { _count: { select: { products: true } } },
+    include: {
+      // Counted the way the shelf is actually stocked. The bare count
+      // included products the shop had removed or hidden, so a category
+      // advertised twelve and showed four.
+      _count: {
+        select: {
+          products: { where: { deletedAt: null, status: { not: "HIDDEN" } } },
+        },
+      },
+    },
   });
 
   return NextResponse.json({

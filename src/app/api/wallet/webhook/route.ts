@@ -34,11 +34,16 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Nạp tự động đang tắt" }, { status: 503 });
   }
 
-  const header =
-    request.headers.get("authorization")?.replace(/^(Apikey|Bearer)\s+/i, "") ??
-    request.headers.get("x-webhook-secret") ??
-    "";
-  if (!sameSecret(header, settings.topUpApiKey)) {
+  // Every place the key might be, tried in turn — not the first one that
+  // merely exists. A provider that sends its own Authorization header for
+  // something else, alongside the secret header it was told to send, would
+  // otherwise be refused on the strength of the wrong one.
+  const candidates = [
+    request.headers.get("authorization")?.replace(/^(Apikey|Bearer)\s+/i, ""),
+    request.headers.get("x-webhook-secret"),
+    request.headers.get("x-api-key"),
+  ].filter((value): value is string => Boolean(value));
+  if (!candidates.some((value) => sameSecret(value, settings.topUpApiKey))) {
     return NextResponse.json({ error: "Sai API key" }, { status: 401 });
   }
 

@@ -8,6 +8,10 @@ import {
   sanitizeFeatures,
   serializeFeatures,
 } from "@/lib/productFeatures";
+import {
+  sanitizeRequirements,
+  serializeRequirements,
+} from "@/lib/productRequirements";
 import { cleanGuideHtml } from "@/lib/productGuide";
 import { uniqueProductSlug } from "@/lib/routes";
 import { slugify } from "@/lib/slug";
@@ -145,6 +149,10 @@ export async function POST(request: Request) {
       ...data,
     },
   });
+  // The first line of its history: the state it was born in.
+  await db.softwareStatusEvent.create({
+    data: { productId: created.id, status: data.softwareStatus },
+  });
   return NextResponse.json({ code: created.code });
 }
 
@@ -158,14 +166,21 @@ export async function PATCH(request: Request) {
     name?: string;
     description?: string;
     softwareStatus?: string;
+    /** Pinned to the status change this request makes, if it makes one. */
+    statusImageUrl?: string;
+    statusNote?: string;
     status?: string;
     slug?: string;
     /** The whole "Tính năng nổi bật" list, replaced as a block. */
     features?: unknown;
+    /** The whole "Yêu cầu hệ thống" list, replaced as a block. */
+    requirements?: unknown;
     /** The write-up under it, as editor HTML. */
     featuresNote?: string;
-    /** "Hướng dẫn sử dụng", as editor HTML. */
+    /** "Hướng dẫn cài đặt", as editor HTML. */
     guide?: string;
+    /** "Hướng dẫn thiết lập & sử dụng", as editor HTML. */
+    setupGuide?: string;
     price?: number;
     downloadUrl?: string;
     imageUrl?: string;
@@ -212,7 +227,15 @@ export async function PATCH(request: Request) {
       ? BigInt(Math.floor(Number(body.price)))
       : undefined;
 
-  await db.product.update({
+  // A status change leaves its line in the history, in the same transaction
+  // as the change itself — the tab and the bell read that table, not the
+  // column, and a row without the change (or the reverse) would lie.
+  const nextStatus = readStatus(body?.softwareStatus);
+  const statusChanged =
+    nextStatus !== undefined && nextStatus !== product.softwareStatus;
+
+  await db.$transaction([
+    db.product.update({
     where: { code },
     data: {
       ...(body?.name?.trim() ? { name: body.name.trim() } : {}),
@@ -222,18 +245,26 @@ export async function PATCH(request: Request) {
       ...(body?.features !== undefined
         ? { features: serializeFeatures(sanitizeFeatures(body.features)) }
         : {}),
+      ...(body?.requirements !== undefined
+        ? {
+            requirements: serializeRequirements(
+              sanitizeRequirements(body.requirements),
+            ),
+          }
+        : {}),
       // Sent as "" to clear it, same convention as the description.
       ...(body?.featuresNote !== undefined
         ? { featuresNote: cleanFeaturesNote(body.featuresNote) }
         : {}),
       // "" clears it, which puts the default sentence back on the page.
       ...(body?.guide !== undefined ? { guide: cleanGuideHtml(body.guide) } : {}),
+      ...(body?.setupGuide !== undefined
+        ? { setupGuide: cleanGuideHtml(body.setupGuide) }
+        : {}),
       ...(body?.description !== undefined
         ? { description: cleanDescription(body.description) }
         : {}),
-      ...(readStatus(body?.softwareStatus)
-        ? { softwareStatus: readStatus(body?.softwareStatus) }
-        : {}),
+      ...(nextStatus ? { softwareStatus: nextStatus } : {}),
       ...(stockStatus ? { status: stockStatus } : {}),
       ...(price !== undefined ? { price } : {}),
       // Sent as "" to clear it, which is how the admin removes a dead link and
@@ -248,7 +279,25 @@ export async function PATCH(request: Request) {
       // silently dropped here and leaving the admin wondering what they typed.
       ...(body?.videoUrl !== undefined ? { videoUrl: body.videoUrl.trim() || null } : {}),
     },
-  });
+    }),
+    ...(statusChanged && nextStatus
+      ? [
+          db.softwareStatusEvent.create({
+            data: {
+              productId: product.id,
+              status: nextStatus,
+              // Both optional and both only meaningful on the change they were
+              // sent with, which is why they live on the event and not on the
+              // product: the next change gets its own picture and its own
+              // words, and the history keeps each where it happened.
+              imageUrl: body?.statusImageUrl?.trim() || null,
+              note: body?.statusNote?.trim() || null,
+              source: "admin",
+            },
+          }),
+        ]
+      : []),
+  ]);
 
   return NextResponse.json({ ok: true });
 }

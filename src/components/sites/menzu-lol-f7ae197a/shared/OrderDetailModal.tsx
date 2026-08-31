@@ -25,6 +25,7 @@ import { createPortal } from "react-dom";
 
 import type { LoginHandover } from "@/lib/accountLogin";
 
+import { lockScroll, trapTab, unlockScroll } from "./modalChrome";
 import { formatVnd } from "./productData";
 
 /**
@@ -79,28 +80,6 @@ const GHOST_BTN =
   "inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-3.5 text-[10px] font-black uppercase tracking-widest text-neutral-300 transition-colors hover:bg-white/10 hover:text-white";
 const CELL =
   "border-t border-white/[0.06] px-4 py-4 text-sm text-neutral-200 sm:px-5";
-const FOCUSABLE =
-  'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])';
-
-/*
- * One scroll lock for however many receipts are open. Two can be — Tab out
- * of one card and press Enter on the next row's button — and a per-card
- * lock would let the second card's cleanup hand the page back its
- * scrollbar while the first is still up, or the first's cleanup restore
- * "hidden" as the value it found.
- */
-let scrollLocks = 0;
-let savedOverflow = "";
-function lockScroll() {
-  if (scrollLocks++ === 0) {
-    savedOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-  }
-}
-function unlockScroll() {
-  if (--scrollLocks === 0) document.body.style.overflow = savedOverflow;
-}
-
 /** One value with its copy button; the password variant starts masked. */
 function HandoverBox({
   label,
@@ -278,25 +257,7 @@ export function OrderDetailModal({
         setOpen(false);
         return;
       }
-      if (event.key !== "Tab" || !panel) return;
-      const focusable = panel.querySelectorAll<HTMLElement>(FOCUSABLE);
-      if (focusable.length === 0) {
-        event.preventDefault();
-        return;
-      }
-      const first = focusable[0];
-      const last = focusable[focusable.length - 1];
-      const active = document.activeElement;
-      if (event.shiftKey && (active === first || active === panel)) {
-        event.preventDefault();
-        last.focus();
-      } else if (
-        !event.shiftKey &&
-        (active === last || !panel.contains(active))
-      ) {
-        event.preventDefault();
-        first.focus();
-      }
+      if (event.key === "Tab" && panel) trapTab(panel, event);
     };
     window.addEventListener("keydown", onKey);
 
@@ -312,7 +273,6 @@ export function OrderDetailModal({
   const base = Math.max(order.listPrice, order.total);
   const unitPrice =
     order.quantity > 0 ? Math.round(base / order.quantity) : base;
-  const discount = Math.max(0, order.listPrice - order.total);
   const iconClass = "h-3.5 w-3.5";
   // The row's own rule: a tier for a tool, a rank for an account, nothing
   // when the shop typed neither.
@@ -541,24 +501,6 @@ export function OrderDetailModal({
                       </tbody>
                     </table>
                   </div>
-                  {discount > 0 ? (
-                    <dl className="ml-auto mt-3 grid w-full max-w-xs grid-cols-[1fr_auto] gap-x-6 gap-y-1 pr-4 text-xs tabular-nums sm:pr-5">
-                      <dt className="text-neutral-500">Tạm tính</dt>
-                      <dd className="text-right text-neutral-300">
-                        {formatVnd(order.listPrice)}đ
-                      </dd>
-                      <dt className="text-neutral-500">Giảm giá</dt>
-                      <dd className="text-right font-bold text-emerald-400">
-                        −{formatVnd(discount)}đ
-                      </dd>
-                      <dt className="border-t border-white/[0.06] pt-1 font-black uppercase tracking-wider text-neutral-400">
-                        Thành tiền
-                      </dt>
-                      <dd className="border-t border-white/[0.06] pt-1 text-right text-sm font-black text-white">
-                        {formatVnd(order.total)}đ
-                      </dd>
-                    </dl>
-                  ) : null}
 
                   {/* HANDOVER */}
                   <div className="relative mt-6 overflow-hidden rounded-xl border border-white/10 bg-white/[0.02] p-4 sm:p-5">

@@ -9,10 +9,17 @@ export async function GET(
 ) {
   const { code } = await params;
 
-  // findFirst so `deletedAt` can join the filter: a removed account answers
-  // 404 here exactly as it does on the page it backs.
+  // findFirst so the visibility filters can join in: a removed account answers
+  // 404 here exactly as it does on the page it backs, and one the shop has
+  // hidden must do the same — an endpoint that still serves it is a way to
+  // read the shelf the shop deliberately took down.
   const product = await db.product.findFirst({
-    where: { code, deletedAt: null, productType: "ACCOUNT_GAME" },
+    where: {
+      code,
+      deletedAt: null,
+      productType: "ACCOUNT_GAME",
+      status: { not: "HIDDEN" },
+    },
     include: {
       tags: true,
       category: { select: { slug: true, name: true } },

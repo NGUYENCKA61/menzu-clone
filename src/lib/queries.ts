@@ -15,6 +15,7 @@ import { productHref } from "@/lib/routes";
 import { weaponKey } from "@/lib/weaponImages";
 import type { AccountDetail } from "@/components/sites/menzu-lol-f7ae197a/shared/AccountBuyPanel";
 import type { SoftwareDetail } from "@/components/sites/menzu-lol-f7ae197a/shared/SoftwareBuyPanel";
+import { parseRequirements } from "@/lib/productRequirements";
 import type { SoftwareCardView } from "@/components/sites/menzu-lol-f7ae197a/shared/SoftwareCard";
 import {
   SKIN_CHIP_COUNT,
@@ -411,6 +412,7 @@ export async function getCategoryPage(
     // query, so its address is this category's slug and the tool's own.
     href: productHref(category.slug, s.slug),
     name: s.name ?? s.code,
+    categoryName: category.name,
     imageUrl: s.imageUrl,
     description: s.description ?? "",
     status: s.softwareStatus,
@@ -512,7 +514,16 @@ export async function getAccountDetail(
   // Typed as well as addressed: a tool's slug would otherwise render a page of
   // blank stat rows instead of a 404.
   const p = await db.product.findFirst({
-    where: { slug, deletedAt: null, productType: "ACCOUNT_GAME" },
+    // Hidden means hidden, address included. A shop that takes a listing down
+    // has decided nobody should be looking at it, and a page that still
+    // answers to a shared link is not down at all — a SOLD account still
+    // resolves, because its buyer has the link in their own order history.
+    where: {
+      slug,
+      deletedAt: null,
+      productType: "ACCOUNT_GAME",
+      status: { not: "HIDDEN" },
+    },
     include: {
       category: { select: { slug: true, name: true } },
       tags: { select: { label: true } },
@@ -563,6 +574,24 @@ export async function getAccountDetail(
 }
 
 /**
+ * Whether this user has ever paid for this tool — any tier, any time. The
+ * setup guide is written for someone with the tool in hand, and a paid order
+ * is what puts it there; a refund or a cancellation does not count, and a
+ * key that has since run out still does, because the guide is about the
+ * tool, not the licence.
+ */
+export async function hasPaidOrderFor(
+  userId: string,
+  productCode: string,
+): Promise<boolean> {
+  const order = await db.order.findFirst({
+    where: { userId, status: "PAID", product: { code: productCode } },
+    select: { id: true },
+  });
+  return order !== null;
+}
+
+/**
  * A software product and everything its page prints.
  *
  * Found by slug, which is what the address carries: the code is what the shop
@@ -572,7 +601,12 @@ export async function getAccountDetail(
  */
 export async function getSoftwareDetail(slug: string): Promise<SoftwareDetail | null> {
   const p = await db.product.findFirst({
-    where: { slug, deletedAt: null, productType: "SOFTWARE_GAME" },
+    where: {
+      slug,
+      deletedAt: null,
+      productType: "SOFTWARE_GAME",
+      status: { not: "HIDDEN" },
+    },
     include: {
       category: { select: { slug: true, name: true } },
       packages: { orderBy: { sortOrder: "asc" } },
@@ -591,10 +625,13 @@ export async function getSoftwareDetail(slug: string): Promise<SoftwareDetail | 
     // Empty when the product has none of its own; the page prints the shop's
     // default list in that case rather than nothing.
     features: parseFeatures(p.features),
+    // Same rule for the requirements panel: empty means the shop's default.
+    requirements: parseRequirements(p.requirements),
     // The write-up under the list; "" simply draws nothing after the bullets.
     featuresNote: p.featuresNote ?? "",
-    // The how-to block; "" prints the default sentence.
+    // The two how-to blocks; "" prints each one's default sentence.
     guideHtml: p.guide ?? "",
+    setupGuideHtml: p.setupGuide ?? "",
     softwareStatus: p.softwareStatus,
     images: p.images.length > 0 ? p.images.map((i) => i.url) : p.imageUrl ? [p.imageUrl] : [],
     videoUrl: p.videoUrl,
@@ -1147,6 +1184,9 @@ export async function listFlashSales(take = 100): Promise<AdminFlashSaleRow[]> {
 
 export interface AdminVoucherRow {
   code: string;
+  scope: "ALL" | "CATEGORY" | "PRODUCT";
+  /** "Tất cả sản phẩm", "Danh mục: X" or "N sản phẩm: A, B". */
+  scopeLabel: string;
   percentOff: number | null;
   amountOff: number | null;
   minOrder: number | null;
@@ -1158,9 +1198,30 @@ export interface AdminVoucherRow {
 }
 
 export async function listVouchers(take = 100): Promise<AdminVoucherRow[]> {
-  const rows = await db.voucher.findMany({ orderBy: { code: "asc" }, take });
+  const rows = await db.voucher.findMany({
+    orderBy: { code: "asc" },
+    take,
+    include: {
+      category: { select: { name: true } },
+      products: {
+        orderBy: { product: { code: "asc" } },
+        select: { product: { select: { code: true, name: true } } },
+      },
+    },
+  });
   return rows.map((v) => ({
     code: v.code,
+    scope: v.scope,
+    scopeLabel:
+      v.scope === "CATEGORY"
+        ? `Danh mục: ${v.category?.name ?? "(đã xoá)"}`
+        : v.scope === "PRODUCT"
+          ? v.products.length === 0
+            ? "Sản phẩm: (đã xoá)"
+            : `${v.products.length} sản phẩm: ${v.products
+                .map((link) => link.product.name ?? link.product.code)
+                .join(", ")}`
+          : "Tất cả sản phẩm",
     percentOff: v.percentOff,
     amountOff: v.amountOff === null ? null : Number(v.amountOff),
     minOrder: v.minOrder === null ? null : Number(v.minOrder),
@@ -1263,6 +1324,20 @@ export async function listAdminGroups() {
     isActive: group.isActive,
     sortOrder: group.sortOrder,
     categoryIds: group.categories.map((link) => link.categoryId),
+  }));
+}
+
+/** Every live product, for pickers that name products: code, name, category. */
+export async function listProductPicks() {
+  const rows = await db.product.findMany({
+    where: { deletedAt: null },
+    orderBy: [{ category: { sortOrder: "asc" } }, { name: "asc" }],
+    select: { code: true, name: true, category: { select: { name: true } } },
+  });
+  return rows.map((p) => ({
+    code: p.code,
+    name: p.name ?? p.code,
+    category: p.category.name,
   }));
 }
 

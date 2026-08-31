@@ -75,6 +75,8 @@ export function AgencyKeyDesk({
       const data = (await response.json().catch(() => null)) as {
         orderCode?: string;
         balance?: number;
+        total?: number;
+        keysDelivered?: number;
         error?: string;
         shortfall?: number;
       } | null;
@@ -89,10 +91,15 @@ export function AgencyKeyDesk({
         });
         return;
       }
+      // What actually happened, not a fixed sentence. Keys come off the shelf
+      // inside the same transaction that charges for them, so by the time this
+      // reply arrives they are already in Đơn hàng — "Admin sẽ giao key cho
+      // bạn" sent every buyer off to wait for something they already had.
+      const delivered = data?.keysDelivered ?? 0;
       setToast({
         tone: "success",
         title: "Đã tạo đơn key",
-        message: `Đơn ${data?.orderCode} · ${formatVnd(total)}đ. Admin sẽ giao key cho bạn; số dư còn ${formatVnd(data?.balance ?? 0)}đ.`,
+        message: `Đơn ${data?.orderCode} · ${formatVnd(data?.total ?? total)}đ · ${delivered} key đã có trong Đơn hàng của bạn. Số dư còn ${formatVnd(data?.balance ?? 0)}đ.`,
       });
       router.refresh();
     } catch {

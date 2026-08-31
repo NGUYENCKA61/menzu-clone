@@ -11,6 +11,7 @@ import { db } from "@/lib/db";
 import { isHtmlBody, plainToDocHtml } from "@/lib/docHtml";
 import { readKeyStore } from "@/lib/packageKeyStore";
 import { noteToEditorHtml, parseFeatures } from "@/lib/productFeatures";
+import { parseRequirements } from "@/lib/productRequirements";
 import { guideToEditorHtml } from "@/lib/productGuide";
 import { productHref } from "@/lib/routes";
 
@@ -104,10 +105,12 @@ export default async function AdminAccountDetailPage({
           software={{
             publicHref: productHref(software.category.slug, software.slug),
             features: parseFeatures(software.features),
+            requirements: parseRequirements(software.requirements),
             // Lifted to editor HTML here so the client bundle never needs the
             // converter — same treatment the description gets.
             featuresNoteHtml: noteToEditorHtml(software.featuresNote),
             guideHtml: guideToEditorHtml(software.guide),
+            setupGuideHtml: guideToEditorHtml(software.setupGuide),
             slug: software.slug,
             categorySlug: software.category.slug,
             code: software.code,
