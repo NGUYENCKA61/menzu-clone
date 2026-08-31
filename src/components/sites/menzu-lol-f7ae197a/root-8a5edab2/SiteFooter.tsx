@@ -100,7 +100,12 @@ function Column({
 }) {
   return (
     <div className="flex flex-col gap-3.5">
-      <h4 className={HEADING}>{heading}</h4>
+      {/* h2, not h4. These footer columns are the page's last top-level
+          sections, and the only headings above them are the h2s of the
+          sections themselves — an h4 with no h3 anywhere before it leaves a
+          screen reader's outline with a hole in it, which is exactly what
+          heading-order reports. The styling is the footer's own either way. */}
+      <h2 className={HEADING}>{heading}</h2>
       <ul className="flex flex-col gap-2.5">
         {links.map((link) => (
           <li key={`${link.href}-${link.label}`}>

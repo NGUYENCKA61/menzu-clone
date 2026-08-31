@@ -208,7 +208,10 @@ export function HeroBanners({
           ) : (
             <Image
               src={banner}
-              alt="banner"
+              // Decorative: the heading beside it already says what the shop
+              // is, and "banner" only made a screen reader announce a word
+              // that tells its listener nothing.
+              alt=""
               fill
               sizes="(max-width: 1024px) 100vw, 620px"
               className="select-none object-cover"

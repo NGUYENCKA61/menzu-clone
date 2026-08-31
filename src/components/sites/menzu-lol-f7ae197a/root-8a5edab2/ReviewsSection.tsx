@@ -104,8 +104,24 @@ export function ReviewsSection({ reviews = REVIEWS }: { reviews?: Review[] } = {
                   className="w-[280px] sm:w-[320px] lg:w-[calc((100%-32px)/3)] border border-white/[0.08] p-5 rounded-[15px] snap-start shrink-0 flex flex-col group relative overflow-hidden cursor-pointer hover:border-[var(--menzu-accent)]/40 transition-colors bg-[#101114]"
                 >
                   <div className="flex items-center gap-3 mb-3">
-                    <div className="relative w-10 h-10 rounded-full overflow-hidden shrink-0 border border-white/10">
-                      <Image src={review.avatar} alt={review.name} fill className="object-cover" />
+                    <div className="relative grid w-10 h-10 place-items-center rounded-full overflow-hidden shrink-0 border border-white/10 bg-white/5">
+                      {/* A reviewer who never uploaded a picture used to get an
+                          empty src, which a browser resolves to the page's own
+                          address and downloads in full to use as an image. The
+                          first letter of their name says as much and costs
+                          nothing. */}
+                      {review.avatar ? (
+                        <Image
+                          src={review.avatar}
+                          alt={review.name}
+                          fill
+                          className="object-cover"
+                        />
+                      ) : (
+                        <span className="text-[13px] font-black uppercase text-neutral-400">
+                          {review.name.trim().charAt(0) || "?"}
+                        </span>
+                      )}
                     </div>
                     <div className="flex min-w-0 flex-1 items-center gap-1.5">
                       {/* h3, as the live cards use — a reviewer's name heads

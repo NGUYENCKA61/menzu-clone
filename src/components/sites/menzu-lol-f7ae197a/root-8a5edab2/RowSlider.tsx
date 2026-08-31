@@ -142,10 +142,16 @@ export function RowSlider({ count, children }: { count: number; children: ReactN
       </div>
 
       {last > 0 ? (
-        <div className="mt-5 flex items-center justify-center gap-2" role="tablist" aria-label="Vị trí">
+        <div className="mt-5 flex items-center justify-center" role="tablist" aria-label="Vị trí">
           {Array.from({ length: last + 1 }, (_, position) => {
             const current = position === index;
             return (
+              // The dot a finger has to hit is 6px tall and was 6px wide, with
+              // 8px between it and the next — far under the 24px a touch
+              // target needs, so on a phone this row was a line of near-misses.
+              // The button is now a 24px-tall box with its own padding and the
+              // dot drawn inside it: the same picture, a target three times
+              // the size, and no gap needed because the padding is the gap.
               <button
                 key={position}
                 type="button"
@@ -153,19 +159,28 @@ export function RowSlider({ count, children }: { count: number; children: ReactN
                 aria-selected={current}
                 aria-label={`Vị trí ${position + 1}`}
                 onClick={() => press(position)}
-                className={`relative h-1.5 overflow-hidden rounded-full transition-[width,background-color] duration-300 ${
-                  current ? "w-8 bg-white/15" : "w-1.5 bg-white/20 hover:bg-white/40"
-                }`}
+                // px-2.5 rather than px-1: 6px of dot plus 20px of padding is
+                // the 24px a touch target needs, and the padding doubles as
+                // the spacing between them.
+                className="group/dot flex h-6 items-center px-2.5"
               >
-                {current ? (
-                  // Remounted on every move so the fill starts from zero.
-                  <span
-                    key={`${index}-${beat}`}
-                    aria-hidden
-                    className="row-slider-progress absolute inset-0 rounded-full bg-[var(--menzu-accent)]"
-                    style={{ ["--row-slider-step" as string]: `${STEP_MS}ms` }}
-                  />
-                ) : null}
+                <span
+                  aria-hidden
+                  className={`relative block h-1.5 overflow-hidden rounded-full transition-[width,background-color] duration-300 ${
+                    current
+                      ? "w-8 bg-white/15"
+                      : "w-1.5 bg-white/20 group-hover/dot:bg-white/40"
+                  }`}
+                >
+                  {current ? (
+                    // Remounted on every move so the fill starts from zero.
+                    <span
+                      key={`${index}-${beat}`}
+                      className="row-slider-progress absolute inset-0 rounded-full bg-[var(--menzu-accent)]"
+                      style={{ ["--row-slider-step" as string]: `${STEP_MS}ms` }}
+                    />
+                  ) : null}
+                </span>
               </button>
             );
           })}

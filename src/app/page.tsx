@@ -150,6 +150,15 @@ export default async function Home() {
       <SiteHeader />
 
       <main className="flex-1 relative z-20 w-full flex flex-col">
+        {/* The home page's h1 lives inside the hero, which the shop can switch
+            off in Cấu hình — and a front page with no h1 tells a crawler
+            nothing about what the site is. This one is always here, read by
+            screen readers and search engines and drawn by neither. */}
+        {!visibleBlocks(settings).includes("hero") ? (
+          <h1 className="sr-only">
+            {settings.brandName} — hack game và tài khoản game
+          </h1>
+        ) : null}
         <div className="w-full">
           <div className="w-full max-w-[1320px] mx-auto px-4 lg:px-6 py-6 lg:py-10 pb-16 lg:pb-24">
             {/* A wider beat between blocks than the rows keep inside them, so

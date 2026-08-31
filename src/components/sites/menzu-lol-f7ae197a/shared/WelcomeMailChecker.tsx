@@ -74,9 +74,11 @@ export function WelcomeMailChecker() {
             <Mail size={20} />
           </div>
           <div>
-            <h1 className="text-lg font-black uppercase tracking-wider text-white">
+            {/* h2: the page frame already carries the h1, and two of them left
+                the document with no single statement of what the page is. */}
+            <h2 className="text-lg font-black uppercase tracking-wider text-white">
               Check Thư Welcome
-            </h1>
+            </h2>
             <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--menzu-accent)]">
               Riot Mail Checker
             </p>

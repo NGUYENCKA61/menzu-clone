@@ -172,7 +172,18 @@ export function SoftwareCard({ software }: { software: SoftwareCardView }) {
                 disabled={!hasPackages}
                 aria-haspopup="listbox"
                 aria-expanded={open}
-                aria-label={`Chọn gói cho ${software.name}`}
+                // The visible words come first, then which tool they belong
+                // to. An aria-label that does not begin with the text on the
+                // button leaves anyone driving the page by voice unable to
+                // say what they can see — "chọn gói" was the label while the
+                // button read "-- Chọn gói --" or a tier and a price.
+                aria-label={`${
+                  chosen
+                    ? `${chosen.label} — ${formatVnd(chosen.price)}đ`
+                    : hasPackages
+                      ? "Chọn gói"
+                      : "Chưa có gói"
+                } — ${software.name}`}
                 onClick={() => hasPackages && setOpen((o) => !o)}
                 className={`flex h-[42px] w-full items-center justify-between gap-1 rounded-[9px] border bg-[#111216] px-2.5 text-[11px] font-extrabold outline-none transition-colors duration-200 hover:border-[var(--menzu-accent)]/45 hover:text-white aria-expanded:border-[var(--menzu-accent)]/45 aria-expanded:text-white disabled:opacity-50 ${
                   chosen

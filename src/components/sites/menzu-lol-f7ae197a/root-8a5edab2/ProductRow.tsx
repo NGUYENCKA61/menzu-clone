@@ -210,16 +210,23 @@ function RowCard({
           t.frame,
         )}
       >
-        <Image
-          src={card.image}
-          alt={card.title}
-          fill
-          sizes="(min-width: 1024px) 25vw, (min-width: 768px) 33vw, 50vw"
-          className={cn(
-            "transition-transform duration-500 group-hover:scale-110",
-            t.image,
-          )}
-        />
+        {/* Nothing at all rather than an empty src. A category the shop has
+            not given a picture arrived here as "", and the browser reads an
+            empty src as "this page's own address" — it fetched the whole page
+            again, once per pictureless tile, to use as an image. The frame
+            keeps its shape either way. */}
+        {card.image ? (
+          <Image
+            src={card.image}
+            alt={card.title}
+            fill
+            sizes="(min-width: 1024px) 25vw, (min-width: 768px) 33vw, 50vw"
+            className={cn(
+              "transition-transform duration-500 group-hover:scale-110",
+              t.image,
+            )}
+          />
+        ) : null}
         {/* The month's-pick pill, in the top-left corner the account card
             keeps its code in and dressed the same — dark glass, small caps —
             in the accent red, words only — the shop tried a glyph and took it

@@ -136,13 +136,6 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
   const hasAccounts = data.accountTotal > 0;
   const sellsNothing = !hasAccounts && data.softwareTotal === 0;
 
-  // Every page needs exactly one top-level heading, and this one had none —
-  // both shelves were h2 under nothing, which leaves a screen reader with no
-  // statement of what the page is and a crawler with no title for it. The
-  // first shelf that actually renders takes the h1; the styling is identical,
-  // so nothing moves.
-  const SoftwareHeading = "h1";
-  const AccountHeading = data.softwareTotal > 0 ? "h2" : "h1";
 
   return (
     <div className="min-h-screen flex flex-col text-white overflow-x-clip selection:bg-[var(--menzu-accent)]/30 transition-colors duration-300">
@@ -157,6 +150,15 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
               items={[{ label: "Trang chủ", href: "/" }, { label: data.name }]}
             />
 
+            {/* The page's one top-level heading. The design has no room for a
+                title — the breadcrumb already names the shelf and the two
+                section headings do the visible work — but a page with no h1
+                gives a screen reader no statement of where it is and a crawler
+                no title for it. Read, not drawn, and it keeps the two shelf
+                headings at h2 so the outline runs h1 → h2 → h3 without a
+                gap. */}
+            <h1 className="sr-only">Danh mục {data.name}</h1>
+
             {/* Software first, with its own search: the panel below filters on
                 rank, skins and a price band, none of which describe a tool, so
                 a grid that sat under it would look filtered and never be. */}
@@ -165,9 +167,9 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
                 {/* Named after the shelf, not the kind of goods: "Danh mục Hack
                     Valorant" says where you are, where "Phần mềm" only said
                     what these tiles were. */}
-                <SoftwareHeading className="text-lg sm:text-xl font-black uppercase tracking-wider text-white">
+                <h2 className="text-lg sm:text-xl font-black uppercase tracking-wider text-white">
                   Danh mục {data.name}
-                </SoftwareHeading>
+                </h2>
                 <SoftwareFilterPanel />
                 {data.software.length > 0 ? (
                   <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:gap-8">
@@ -204,9 +206,9 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
                 {/* Always headed, like the software shelf above it — and by the
                     game, not the shelf: a category called "Hack Valorant" sells
                     Valorant accounts, so the leading "Hack" comes off. */}
-                <AccountHeading className="text-lg sm:text-xl font-black uppercase tracking-wider text-white mb-5">
+                <h2 className="text-lg sm:text-xl font-black uppercase tracking-wider text-white mb-5">
                   Danh mục tài khoản game {data.name.replace(/^hacks+/i, "")}
-                </AccountHeading>
+                </h2>
 
                 <CategoryFilterPanel hotPicks={hotPicks} />
 
@@ -253,18 +255,11 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
               // Nothing on sale here at all, so the page is this box. "No
               // products" rather than "no accounts": with no software grid
               // above it either, the narrower wording would leave a reader
-              // unable to tell a bare category from a filtered one. It still
-              // gets the page's one h1 — an empty shelf is still a shelf, and
-              // it still has a name.
-              <>
-              <h1 className="mb-5 text-lg font-black uppercase tracking-wider text-white sm:text-xl">
-                Danh mục {data.name}
-              </h1>
+              // unable to tell a bare category from a filtered one.
               <EmptyPanel
                 title="Chưa có sản phẩm nào"
                 note="Hiện tại danh mục này đang trống hoặc đã bán hết. Vui lòng quay lại sau!"
               />
-              </>
             ) : null}
           </div>
         </div>
