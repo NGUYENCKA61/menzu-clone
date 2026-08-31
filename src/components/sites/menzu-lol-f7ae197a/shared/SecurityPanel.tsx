@@ -60,6 +60,10 @@ export interface SessionView {
 
 export interface SecurityPanelProps {
   email?: string | null;
+  /** False for an account that arrived through Google or Discord and has
+   *  never set one — the form then asks for no current password, because
+   *  there is none to give. */
+  hasPassword: boolean;
   googleLinked: boolean;
   discordLinked: boolean;
   /** True once the provider's keys sit in Cấu hình. */
@@ -73,6 +77,7 @@ export interface SecurityPanelProps {
 
 export function SecurityPanel({
   email,
+  hasPassword,
   googleLinked,
   discordLinked,
   googleEnabled,
@@ -85,6 +90,8 @@ export function SecurityPanel({
   const [tab, setTab] = useState<Tab>(initialTab);
 
   const [emailValue, setEmailValue] = useState(email ?? "");
+  /** Asked for because this address is what "Quên mật khẩu" mails to. */
+  const [emailPassword, setEmailPassword] = useState("");
   const [emailBusy, setEmailBusy] = useState(false);
   const [emailMsg, setEmailMsg] = useState<{ tone: "ok" | "err"; text: string } | null>(
     null,
@@ -127,7 +134,7 @@ export function SecurityPanel({
       const res = await fetch("/api/account/email", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ email: emailValue }),
+        body: JSON.stringify({ email: emailValue, password: emailPassword }),
       });
       const data = (await res.json().catch(() => ({}))) as { error?: string };
       setEmailMsg(
@@ -135,7 +142,10 @@ export function SecurityPanel({
           ? { tone: "ok", text: "Đã cập nhật email" }
           : { tone: "err", text: data.error ?? "Không cập nhật được email" },
       );
-      if (res.ok) router.refresh();
+      if (res.ok) {
+        setEmailPassword("");
+        router.refresh();
+      }
     } catch {
       setEmailMsg({ tone: "err", text: "Không kết nối được máy chủ" });
     } finally {
@@ -239,10 +249,12 @@ export function SecurityPanel({
                 label it would have announced the input as "Địa chỉ Email"
                 while saying nothing about what to type. */}
             {/* The live site verifies an email change with an OTP it mails
-                out. No mail delivery is configured here, so the change is
-                applied directly rather than shipping a "Gửi mã OTP" button
-                that sends nothing. Wire up a mailer before trusting this
-                field to prove ownership of an address. */}
+                out. No mail delivery is configured here, so the new address
+                is taken on trust — but the current password is asked for
+                first, because this address is where "Quên mật khẩu" sends its
+                link and a stolen session must not be able to redirect it.
+                Wire up a mailer before trusting this field to prove ownership
+                of an address. */}
             <div className="flex flex-wrap items-center justify-between gap-3">
               <h3 className={CARD_TITLE}>Địa chỉ Email</h3>
               <span className={CARD_HINT}>Nơi nhận link đặt lại mật khẩu</span>
@@ -259,6 +271,18 @@ export function SecurityPanel({
               placeholder="Nhập email mới của bạn"
               className={FIELD}
             />
+            <label htmlFor="sec-email-pw" className="sr-only">
+              Mật khẩu hiện tại
+            </label>
+            <input
+              id="sec-email-pw"
+              type="password"
+              autoComplete="current-password"
+              value={emailPassword}
+              onChange={(e) => setEmailPassword(e.target.value)}
+              placeholder="Mật khẩu hiện tại"
+              className={FIELD}
+            />
             {emailMsg ? <Notice tone={emailMsg.tone}>{emailMsg.text}</Notice> : null}
             <button type="submit" disabled={emailBusy} className={SUBMIT}>
               {emailBusy ? "Đang lưu…" : "Cập nhật"}
@@ -270,7 +294,9 @@ export function SecurityPanel({
             className="rounded-2xl border border-white/10 bg-neutral-900/50 p-5 flex flex-col gap-3"
           >
             <div className="flex flex-wrap items-center justify-between gap-3">
-              <h3 className={CARD_TITLE}>Đổi Mật Khẩu</h3>
+              <h3 className={CARD_TITLE}>
+                {hasPassword ? "Đổi Mật Khẩu" : "Đặt Mật Khẩu"}
+              </h3>
               <span className={CARD_HINT}>Đổi xong mọi thiết bị phải đăng nhập lại</span>
             </div>
 
@@ -278,18 +304,31 @@ export function SecurityPanel({
                 placeholders, so they are visually hidden — a placeholder is
                 not a label: it disappears the moment you start typing, and a
                 screen reader may never announce it at all. */}
-            <label htmlFor="sec-current" className="sr-only">
-              Mật khẩu hiện tại
-            </label>
-            <input
-              id="sec-current"
-              type="password"
-              autoComplete="current-password"
-              value={current}
-              onChange={(e) => setCurrent(e.target.value)}
-              placeholder="Nhập mật khẩu hiện tại"
-              className={FIELD}
-            />
+            {hasPassword ? (
+              <>
+                <label htmlFor="sec-current" className="sr-only">
+                  Mật khẩu hiện tại
+                </label>
+                <input
+                  id="sec-current"
+                  type="password"
+                  autoComplete="current-password"
+                  value={current}
+                  onChange={(e) => setCurrent(e.target.value)}
+                  placeholder="Nhập mật khẩu hiện tại"
+                  className={FIELD}
+                />
+              </>
+            ) : (
+              // Signed in through Google or Discord and never set one. Asking
+              // for a current password here was a door with no key: the field
+              // could never be filled, and "Quên mật khẩu" cannot help either
+              // when the provider gave no verified address.
+              <p className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3 text-[12px] leading-relaxed text-neutral-400">
+                Tài khoản này đăng nhập bằng Google/Discord nên chưa có mật khẩu.
+                Đặt một mật khẩu để đăng nhập được cả hai cách.
+              </p>
+            )}
 
             <label htmlFor="sec-next" className="sr-only">
               Mật khẩu mới

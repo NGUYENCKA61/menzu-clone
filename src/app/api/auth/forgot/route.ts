@@ -3,9 +3,11 @@ import { createHash, randomBytes } from "node:crypto";
 import { NextResponse } from "next/server";
 
 import { clientIp } from "@/lib/clientIp";
+import { trimmed } from "@/lib/jsonField";
 import { db } from "@/lib/db";
 import { sendMail } from "@/lib/mailer";
 import { checkResetRate, recordAttempt } from "@/lib/rateLimit";
+import { SITE_URL } from "@/lib/seo";
 import { mailEnabled } from "@/lib/settings";
 import { getShopSettings } from "@/lib/settingsStore";
 
@@ -30,7 +32,7 @@ export async function POST(request: Request) {
   const body = (await request.json().catch(() => null)) as {
     identifier?: string;
   } | null;
-  const identifier = body?.identifier?.trim() ?? "";
+  const identifier = trimmed(body?.identifier);
 
   if (!identifier) {
     return NextResponse.json(
@@ -62,7 +64,12 @@ export async function POST(request: Request) {
   await recordAttempt("RESET", identifier, ip);
 
   const user = await db.user.findFirst({
-    where: { OR: [{ username: identifier }, { email: identifier }] },
+    where: {
+      OR: [
+        { username: { equals: identifier, mode: "insensitive" } },
+        { email: { equals: identifier, mode: "insensitive" } },
+      ],
+    },
   });
 
   if (user?.email && !user.blockedAt) {
@@ -80,7 +87,22 @@ export async function POST(request: Request) {
       },
     });
 
-    const link = `${new URL(request.url).origin}/reset-password?token=${token}`;
+    // The configured public address wins over the one this request happened
+    // to arrive at. Behind a proxy — or on a self-hosted box, where the server
+    // binds 0.0.0.0 — the request's own origin is an address that means
+    // nothing outside the machine, and the customer receives a mail whose link
+    // cannot be clicked.
+    //
+    // A localhost value is ignored on purpose: it is the fallback a fresh
+    // clone gets, and it is often left pointing at a port the developer is not
+    // actually serving on, so the request itself is the better answer there.
+    const configured = /^https?:\/\/(localhost|127\.0\.0\.1|0\.0\.0\.0)(:|$)/.test(
+      SITE_URL,
+    )
+      ? null
+      : SITE_URL;
+    const origin = configured ?? new URL(request.url).origin;
+    const link = `${origin}/reset-password?token=${token}`;
     try {
       await sendMail(
         settings,

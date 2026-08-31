@@ -26,6 +26,21 @@ describe("clientIp", () => {
     );
   });
 
+  it("trusts the edge's own header over anything the caller sent", () => {
+    // The forwarded chain is written by whoever calls; this one is written by
+    // Netlify. On the deployed site it is the only address worth believing,
+    // and it is what makes the register limit hold at all.
+    expect(
+      clientIp(
+        requestWith({
+          "x-nf-client-connection-ip": "198.51.100.7",
+          "x-forwarded-for": "203.0.113.9",
+          "x-real-ip": "192.0.2.1",
+        }),
+      ),
+    ).toBe("198.51.100.7");
+  });
+
   it("falls back to x-real-ip when no forwarded chain is present", () => {
     expect(clientIp(requestWith({ "x-real-ip": "198.51.100.7" }))).toBe("198.51.100.7");
   });

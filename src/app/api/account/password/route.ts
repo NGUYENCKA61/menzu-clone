@@ -1,15 +1,23 @@
 import { NextResponse } from "next/server";
 
 import { hashPassword, validateCredentials, verifyPassword } from "@/lib/auth";
+import { text } from "@/lib/jsonField";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/session";
 
 /**
- * Change password.
+ * Change password — or set the first one.
  *
  * Requires the current password even though the caller already holds a valid
- * session — a stolen session should not be enough to lock the real owner out.
- * All other sessions are dropped afterwards so a thief loses access.
+ * session: a stolen session should not be enough to lock the real owner out.
+ * All sessions are dropped afterwards so a thief loses access.
+ *
+ * An account that arrived through Google or Discord has no password to ask
+ * for, and demanding one made this endpoint impossible to satisfy — the
+ * customer could never set one, and "Quên mật khẩu" could not help either
+ * because it needs an address the provider verified, which Discord does not
+ * always give. So a passwordless account sets its first password here, on the
+ * strength of the session and the provider that issued it.
  */
 export async function POST(request: Request) {
   const user = await getCurrentUser();
@@ -24,7 +32,7 @@ export async function POST(request: Request) {
   } | null;
 
   const currentPassword = body?.currentPassword ?? "";
-  const newPassword = body?.newPassword ?? "";
+  const newPassword = text(body?.newPassword);
   const confirmPassword = body?.confirmPassword ?? "";
 
   if (newPassword !== confirmPassword) {
@@ -38,11 +46,15 @@ export async function POST(request: Request) {
   if (invalid) return NextResponse.json({ error: invalid }, { status: 400 });
 
   const row = await db.user.findUniqueOrThrow({ where: { id: user.id } });
-  if (!(await verifyPassword(currentPassword, row.passwordHash))) {
-    return NextResponse.json(
-      { error: "Mật khẩu hiện tại không đúng" },
-      { status: 401 },
-    );
+  // Null means there is no password yet — nothing to prove, and nothing an
+  // attacker could have guessed either.
+  if (row.passwordHash !== null) {
+    if (!(await verifyPassword(currentPassword, row.passwordHash))) {
+      return NextResponse.json(
+        { error: "Mật khẩu hiện tại không đúng" },
+        { status: 401 },
+      );
+    }
   }
 
   await db.user.update({

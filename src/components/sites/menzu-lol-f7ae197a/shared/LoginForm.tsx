@@ -1,10 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Eye, EyeOff, Lock, User } from "lucide-react";
 
 import { canGoBack } from "@/lib/navigation";
+import { safeNext } from "@/lib/safeNext";
 
 import { AuthPanelSlider } from "./AuthPanelSlider";
 import { StatusToast } from "./StatusToast";
@@ -84,6 +86,8 @@ export function LoginForm({
       exchange: "Không xác thực được với nhà cung cấp. Vui lòng thử lại.",
       profile: "Không đọc được thông tin tài khoản. Vui lòng thử lại.",
       blocked: "Tài khoản đã bị khóa. Vui lòng liên hệ hỗ trợ.",
+      email:
+        "Email này đã thuộc về một tài khoản khác. Hãy đăng nhập bằng mật khẩu, rồi liên kết ở trang Bảo mật.",
     };
     // Deferred a tick: the point of this effect is reacting to an external
     // input (the URL), and updating state synchronously inside an effect is
@@ -105,7 +109,9 @@ export function LoginForm({
   /** Honour ?next= so the "Mua Ngay" gate returns you to the product. */
   function redirectAfterLogin() {
     const next = new URLSearchParams(window.location.search).get("next");
-    window.location.href = next && next.startsWith("/") ? next : "/";
+    // safeNext, not "starts with a slash": //evil.com starts with a slash and
+    // is another website.
+    window.location.href = safeNext(next);
   }
 
   async function handleSubmit(event: React.FormEvent) {
@@ -237,12 +243,12 @@ export function LoginForm({
                       >
                         Mật khẩu
                       </label>
-                      <a
+                      <Link
                         href="/forgot-password"
                         className="text-[10px] font-bold text-[var(--menzu-accent)] hover:text-[var(--menzu-accent-dark)] cursor-pointer transition-colors uppercase tracking-wider mr-1"
                       >
                         Quên mật khẩu?
-                      </a>
+                      </Link>
                     </div>
                     <div className="relative">
                       <Lock
@@ -316,12 +322,12 @@ export function LoginForm({
 
                 <p className="mt-8 text-center text-xs text-neutral-500">
                   Chưa có tài khoản?
-                  <a
+                  <Link
                     href="/signup"
                     className="text-[var(--menzu-accent)] hover:text-[var(--menzu-accent-dark)] font-black transition-colors ml-1"
                   >
                     Tạo mới ngay
-                  </a>
+                  </Link>
                 </p>
               </div>
             </div>

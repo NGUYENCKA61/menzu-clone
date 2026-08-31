@@ -11,7 +11,13 @@ import { getCurrentUser } from "@/lib/session";
 import { discordOauthEnabled, googleOauthEnabled } from "@/lib/settings";
 import { getShopSettings } from "@/lib/settingsStore";
 
-export const metadata: Metadata = { title: "Bảo mật tài khoản" };
+export const metadata: Metadata = {
+  title: "Bảo mật tài khoản",
+  // Nothing here belongs in a search index: it is either a sign-in step or
+  // one visitor's own account. Followed, not indexed, so the links still
+  // pass through.
+  robots: { index: false, follow: true },
+};
 export const dynamic = "force-dynamic";
 
 const PROVIDER_NAMES: Record<string, string> = {
@@ -32,6 +38,15 @@ interface SecurityPageProps {
 export default async function SecurityPage({ searchParams }: SecurityPageProps) {
   const user = await getCurrentUser();
   if (!user) redirect("/login?next=%2Fsecurity");
+
+  // Whether this account has a password at all. An OAuth-only account has
+  // none, and the form must ask for a first one rather than for a current
+  // one it can never be given.
+  const passwordRow = await db.user.findUniqueOrThrow({
+    where: { id: user.id },
+    select: { passwordHash: true },
+  });
+  const hasPassword = passwordRow.passwordHash !== null;
 
   const [settings, linkedRows, sessions, store, query] = await Promise.all([
     getShopSettings(),
@@ -81,6 +96,7 @@ export default async function SecurityPage({ searchParams }: SecurityPageProps) 
     >
       <SecurityPanel
         email={user.email}
+        hasPassword={hasPassword}
         googleLinked={linkedSet.has("google")}
         discordLinked={linkedSet.has("discord")}
         googleEnabled={googleOauthEnabled(settings)}

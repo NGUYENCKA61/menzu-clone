@@ -79,13 +79,14 @@ export async function GET(request: Request) {
     return response;
   }
 
-  const user = await findOrCreateOauthUser({
+  const resolved = await findOrCreateOauthUser({
     provider: "discord",
     providerId: profile.id,
     email: profile.verified ? (profile.email ?? null) : null,
     displayName: profile.global_name ?? profile.username ?? "discord user",
   });
-  if (!user) return fail("blocked");
+  if (!resolved.ok) return fail(resolved.reason);
+  const user = resolved.user;
 
   await db.user.update({
     where: { id: user.id },

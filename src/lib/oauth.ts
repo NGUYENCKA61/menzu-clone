@@ -3,6 +3,7 @@ import "server-only";
 import { randomBytes } from "node:crypto";
 
 import { db } from "@/lib/db";
+import { safeNext } from "@/lib/safeNext";
 
 /**
  * The shared half of "Đăng nhập bằng Google/Discord": state handling and the
@@ -23,9 +24,9 @@ export interface OauthState {
 export function newOauthState(next: string | null): OauthState {
   return {
     state: randomBytes(16).toString("hex"),
-    // Same rule as the login form: a relative path or nothing, so the round
-    // trip cannot be pointed at another origin.
-    next: next && next.startsWith("/") ? next : "/",
+    // Same rule as the login form, and the same reason: "starts with a slash"
+    // let //evil.com through, which a browser reads as another site.
+    next: safeNext(next),
   };
 }
 
@@ -38,7 +39,10 @@ export function decodeState(raw: string | undefined): OauthState | null {
   if (!raw) return null;
   const split = raw.indexOf(":");
   if (split < 1) return null;
-  return { state: raw.slice(0, split), next: raw.slice(split + 1) };
+  // Checked again on the way back in, not only on the way out: the cookie is
+  // the attacker's own browser's, and the callback redirects to whatever it
+  // says.
+  return { state: raw.slice(0, split), next: safeNext(raw.slice(split + 1)) };
 }
 
 /** What the callback needs from any provider, whatever it calls the fields. */
@@ -51,23 +55,35 @@ export interface OauthProfile {
   displayName: string;
 }
 
+/** Either the account this identity belongs in, or why it gets none. */
+export type OauthResolution =
+  | { ok: true; user: Awaited<ReturnType<typeof db.user.findUniqueOrThrow>> }
+  | { ok: false; reason: "blocked" | "email" };
+
 /**
  * Provider profile in, shop user out.
  *
  * Three doors, tried in order:
  *  1. This provider identity has signed in before — its LinkedAccount row
  *     points at the user.
- *  2. The provider vouches for an email some account already owns — the
- *     identity is linked to that account. This is what lets somebody who
- *     registered by hand later press the Google button and land in their own
- *     account instead of a duplicate.
+ *  2. The provider vouches for an address that an account already owns AND
+ *     that account's address is itself verified — the identity is linked to
+ *     it, so a customer who first arrived by Google can press Discord later
+ *     and land in the same account.
  *  3. Nobody — a fresh user is created with no password; the provider is
  *     their way in until they set one.
  *
- * Returns null only for a blocked account: OAuth is a door, and blocked means
- * every door.
+ * Door 2 turns on `emailVerifiedAt` and not on the address alone, because an
+ * address alone proves nothing about who typed it. Without that test, anyone
+ * could register (or edit their address) to their victim's, sit back, and be
+ * handed the account the first time the victim pressed the Google button —
+ * with the victim topping up a wallet the attacker still holds the password
+ * to. An address that nobody vouched for now sends the visitor back to the
+ * form with something to do about it, rather than into a stranger's account.
  */
-export async function findOrCreateOauthUser(profile: OauthProfile) {
+export async function findOrCreateOauthUser(
+  profile: OauthProfile,
+): Promise<OauthResolution> {
   const linked = await db.linkedAccount.findUnique({
     where: {
       provider_providerId: {
@@ -78,13 +94,20 @@ export async function findOrCreateOauthUser(profile: OauthProfile) {
     include: { user: true },
   });
   if (linked) {
-    return linked.user.blockedAt ? null : linked.user;
+    return linked.user.blockedAt
+      ? { ok: false, reason: "blocked" }
+      : { ok: true, user: linked.user };
   }
 
   if (profile.email) {
     const byEmail = await db.user.findUnique({ where: { email: profile.email } });
     if (byEmail) {
-      if (byEmail.blockedAt) return null;
+      if (byEmail.blockedAt) return { ok: false, reason: "blocked" };
+      // Held by somebody whose address was never confirmed: this is where the
+      // takeover would happen, so it stops here. Not a silent duplicate
+      // account either — the address is unique, and a second one carrying it
+      // could not be written anyway.
+      if (byEmail.emailVerifiedAt === null) return { ok: false, reason: "email" };
       await db.linkedAccount.create({
         data: {
           userId: byEmail.id,
@@ -92,7 +115,7 @@ export async function findOrCreateOauthUser(profile: OauthProfile) {
           providerId: profile.providerId,
         },
       });
-      return byEmail;
+      return { ok: true, user: byEmail };
     }
   }
 
@@ -100,6 +123,9 @@ export async function findOrCreateOauthUser(profile: OauthProfile) {
     data: {
       username: await freeUsername(profile.displayName, profile.email),
       email: profile.email,
+      // The address arrived with the provider's word behind it — the callback
+      // drops anything the provider had not confirmed before calling here.
+      emailVerifiedAt: profile.email ? new Date() : null,
       passwordHash: null,
       // No avatar copied over: the provider hands a URL on its own CDN, and
       // this shop's next/image serves no foreign hosts — storing it took the
@@ -110,7 +136,7 @@ export async function findOrCreateOauthUser(profile: OauthProfile) {
       },
     },
   });
-  return user;
+  return { ok: true, user };
 }
 
 /**

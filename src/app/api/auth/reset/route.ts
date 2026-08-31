@@ -3,6 +3,7 @@ import { createHash } from "node:crypto";
 import { NextResponse } from "next/server";
 
 import { hashPassword } from "@/lib/auth";
+import { text } from "@/lib/jsonField";
 import { db } from "@/lib/db";
 
 /**
@@ -23,7 +24,7 @@ export async function POST(request: Request) {
   } | null;
 
   const token = body?.token?.trim() ?? "";
-  const password = body?.password ?? "";
+  const password = text(body?.password);
 
   if (!token) {
     return NextResponse.json(

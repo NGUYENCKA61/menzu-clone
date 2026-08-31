@@ -1,12 +1,19 @@
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 
 import { SiteFooter } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/SiteFooter";
 import { RegisterForm } from "@/components/sites/menzu-lol-f7ae197a/shared/RegisterForm";
+import { getCurrentUser } from "@/lib/session";
 import { getShopSettings } from "@/lib/settingsStore";
 import { turnstileEnabled } from "@/lib/turnstile";
 
 export const metadata: Metadata = {
-  title: "Menzu Valorant | Đăng ký",
+  // Bare, because the root layout appends the shop's name to it.
+  title: "Đăng ký",
+  // Nothing here belongs in a search index: it is either a sign-in step or
+  // one visitor's own account. Followed, not indexed, so the links still
+  // pass through.
+  robots: { index: false, follow: true },
 };
 
 export default async function RegisterPage({
@@ -14,6 +21,10 @@ export default async function RegisterPage({
 }: {
   searchParams: Promise<{ ref?: string }>;
 }) {
+  // The live check, for the same reason /login makes it: a dead cookie must
+  // not stand between a customer and the form.
+  if (await getCurrentUser()) redirect("/");
+
   const [settings, { ref }] = await Promise.all([getShopSettings(), searchParams]);
 
   return (

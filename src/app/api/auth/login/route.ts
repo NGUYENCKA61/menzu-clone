@@ -6,8 +6,10 @@ import {
   sessionExpiry,
   verifyPassword,
 } from "@/lib/auth";
+import { text, trimmed } from "@/lib/jsonField";
 import { db } from "@/lib/db";
 import { clientIp } from "@/lib/clientIp";
+import { crossSiteRequest } from "@/lib/sameOrigin";
 import { resolveSessionLocation } from "@/lib/device";
 import {
   CAPTCHA_AFTER_FAILURES,
@@ -21,14 +23,22 @@ import { TURNSTILE_FAILED, turnstileEnabled } from "@/lib/turnstile";
 import { verifyTurnstile } from "@/lib/turnstileVerify";
 
 export async function POST(request: Request) {
+  // Refused before anything is read: a page on another site posting the
+  // attacker's own credentials here would sign the visitor into the
+  // attacker's account, and every đồng they topped up afterwards would be
+  // topping up somebody else's wallet.
+  if (crossSiteRequest(request)) {
+    return NextResponse.json({ error: "Yêu cầu không hợp lệ" }, { status: 403 });
+  }
+
   const body = (await request.json().catch(() => null)) as {
     identifier?: string;
     password?: string;
     turnstileToken?: string;
   } | null;
 
-  const identifier = body?.identifier?.trim() ?? "";
-  const password = body?.password ?? "";
+  const identifier = trimmed(body?.identifier);
+  const password = text(body?.password);
 
   if (!identifier || !password) {
     return NextResponse.json(
@@ -80,9 +90,18 @@ export async function POST(request: Request) {
     }
   }
 
-  // The live form accepts "Email hoặc Tên đăng nhập" in one field.
+  // The live form accepts "Email hoặc Tên đăng nhập" in one field. Matched
+  // without case: registration refuses a name that differs from an existing
+  // one only in capitals, so there is exactly one row this can find, and a
+  // customer typing "Admin" for the account they created as "admin" gets in
+  // rather than being told their password is wrong.
   const user = await db.user.findFirst({
-    where: { OR: [{ username: identifier }, { email: identifier }] },
+    where: {
+      OR: [
+        { username: { equals: identifier, mode: "insensitive" } },
+        { email: { equals: identifier, mode: "insensitive" } },
+      ],
+    },
   });
 
   // Same message and same work either way — do not leak which accounts exist.

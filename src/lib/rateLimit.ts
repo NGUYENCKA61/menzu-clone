@@ -129,7 +129,10 @@ export async function recordAttempt(
   ip: string,
 ): Promise<void> {
   await db.authAttempt.create({
-    data: { kind, identifier: identifier.toLowerCase(), ip },
+    // Capped: the identifier is whatever the caller typed into the sign-in
+    // box, and a row per attempt means an unbounded field is an unbounded
+    // table. 64 is past any username or address this shop accepts.
+    data: { kind, identifier: identifier.toLowerCase().slice(0, 64), ip },
   });
 
   try {

@@ -7,8 +7,10 @@ import {
   sessionExpiry,
   validateCredentials,
 } from "@/lib/auth";
+import { text, trimmed } from "@/lib/jsonField";
 import { db } from "@/lib/db";
 import { clientIp } from "@/lib/clientIp";
+import { crossSiteRequest } from "@/lib/sameOrigin";
 import { resolveSessionLocation } from "@/lib/device";
 import {
   CAPTCHA_AFTER_REGISTRATIONS,
@@ -21,6 +23,12 @@ import { TURNSTILE_FAILED, turnstileEnabled } from "@/lib/turnstile";
 import { verifyTurnstile } from "@/lib/turnstileVerify";
 
 export async function POST(request: Request) {
+  // Same guard as sign-in: a form on another site must not be able to create
+  // an account in the visitor's browser and sign them into it.
+  if (crossSiteRequest(request)) {
+    return NextResponse.json({ error: "Yêu cầu không hợp lệ" }, { status: 403 });
+  }
+
   const body = (await request.json().catch(() => null)) as {
     username?: string;
     password?: string;
@@ -29,9 +37,9 @@ export async function POST(request: Request) {
     ref?: string;
   } | null;
 
-  const username = body?.username?.trim() ?? "";
-  const password = body?.password ?? "";
-  const email = body?.email?.trim() || null;
+  const username = trimmed(body?.username);
+  const password = text(body?.password);
+  const email = trimmed(body?.email) || null;
 
   const invalid = validateCredentials(username, password);
   if (invalid) return NextResponse.json({ error: invalid }, { status: 400 });
@@ -71,15 +79,24 @@ export async function POST(request: Request) {
     }
   }
 
+  // Compared without case, both of them. "Admin" and "admin" are the same
+  // name to every customer who reads it, and letting both exist made signing
+  // in a coin toss between two accounts — the same for an address, which mail
+  // servers do not case-fold either.
   const clash = await db.user.findFirst({
-    where: { OR: [{ username }, ...(email ? [{ email }] : [])] },
+    where: {
+      OR: [
+        { username: { equals: username, mode: "insensitive" } },
+        ...(email ? [{ email: { equals: email, mode: "insensitive" as const } }] : []),
+      ],
+    },
     select: { username: true, email: true },
   });
   if (clash) {
     return NextResponse.json(
       {
         error:
-          clash.username === username
+          clash.username.toLowerCase() === username.toLowerCase()
             ? "Tên đăng nhập đã tồn tại"
             : "Email đã được sử dụng",
       },

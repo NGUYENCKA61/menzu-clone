@@ -89,7 +89,7 @@ export async function GET(request: Request) {
     return response;
   }
 
-  const user = await findOrCreateOauthUser({
+  const resolved = await findOrCreateOauthUser({
     provider: "google",
     providerId: profile.sub,
     // Unverified addresses are dropped rather than trusted: linking by an
@@ -97,7 +97,8 @@ export async function GET(request: Request) {
     email: profile.email_verified ? (profile.email ?? null) : null,
     displayName: profile.name ?? "google user",
   });
-  if (!user) return fail("blocked");
+  if (!resolved.ok) return fail(resolved.reason);
+  const user = resolved.user;
 
   await db.user.update({
     where: { id: user.id },

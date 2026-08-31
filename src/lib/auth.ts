@@ -52,13 +52,31 @@ export function sessionExpiry(): Date {
   return new Date(Date.now() + SESSION_TTL_DAYS * 24 * 60 * 60 * 1000);
 }
 
-/** Minimum viable validation, mirroring what the live form accepts. */
+/** The longest a name may be — a ceiling, so one row cannot be a paragraph. */
+const USERNAME_MAX = 32;
+
+/**
+ * Minimum viable validation, mirroring what the live form accepts.
+ *
+ * The one rule that is not about length: a username may not look like an
+ * email address. Sign-in and "Quên mật khẩu" both accept either, and match on
+ * whichever row turns up first, so a name registered as somebody else's
+ * address made that person's own sign-in a coin toss between two accounts.
+ * Refusing the shape at the door is what keeps the two namespaces apart.
+ */
 export function validateCredentials(
   username: string,
   password: string,
 ): string | null {
-  if (username.trim().length < 3) {
+  const name = username.trim();
+  if (name.length < 3) {
     return "Tên đăng nhập phải có ít nhất 3 ký tự";
+  }
+  if (name.length > USERNAME_MAX) {
+    return `Tên đăng nhập tối đa ${USERNAME_MAX} ký tự`;
+  }
+  if (name.includes("@")) {
+    return "Tên đăng nhập không được chứa ký tự @";
   }
   if (password.length < 6) {
     return "Mật khẩu phải có ít nhất 6 ký tự";
