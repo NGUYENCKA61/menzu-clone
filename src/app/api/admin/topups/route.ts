@@ -41,7 +41,21 @@ export async function PATCH(request: Request) {
 
   // --- reject --------------------------------------------------------------
   if (body?.action === "reject") {
-    await db.topUp.update({ where: { id: topUp.id }, data: { status: "FAILED" } });
+    // Still PENDING is checked by the write itself, not by the read above it.
+    // The automatic credit path runs constantly — every customer sitting on
+    // the transfer screen polls it — so money can land in the seconds between
+    // the two, and an unconditional write would stamp FAILED over a top-up
+    // that had already been paid into the wallet and written into the ledger.
+    const rejected = await db.topUp.updateMany({
+      where: { id: topUp.id, status: "PENDING" },
+      data: { status: "FAILED" },
+    });
+    if (rejected.count === 0) {
+      return NextResponse.json(
+        { error: "Lệnh nạp này vừa được xử lý, hãy tải lại hàng đợi" },
+        { status: 409 },
+      );
+    }
     return NextResponse.json({ code: topUp.code, status: "FAILED" });
   }
 

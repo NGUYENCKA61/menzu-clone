@@ -1,5 +1,8 @@
 import { db } from "@/lib/db";
+import { liftTierFor } from "@/lib/tierLift";
 import { commissionFor } from "@/lib/referral";
+import { makeShortCode } from "@/lib/shortCode";
+import { creditWallet } from "@/lib/wallet";
 import {
   extractTopUpCode,
   TOPUP_EXPIRY_MINUTES,
@@ -7,9 +10,7 @@ import {
 } from "@/lib/topup";
 
 /** Ledger codes ("GD…"); exported for the commission-withdraw route. */
-export function makeCode(prefix: string): string {
-  return `${prefix}${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
-}
+export const makeCode = makeShortCode;
 
 /**
  * Retires requests nobody paid.
@@ -80,12 +81,10 @@ export async function creditTopUp(
       if (claimed.count === 0) throw new Error("ALREADY_HANDLED");
 
       const current = await tx.user.findUniqueOrThrow({ where: { id: topUp.userId } });
-      const balanceAfter = current.balance + topUp.amount;
-
-      await tx.user.update({
-        where: { id: topUp.userId },
-        data: { balance: balanceAfter },
-      });
+      // Added by the database, not here: a purchase settling at the same
+      // moment would otherwise be wiped out by a balance computed from a
+      // figure read before it.
+      const balanceAfter = await creditWallet(tx, topUp.userId, topUp.amount);
 
       await tx.transaction.create({
         data: {
@@ -131,6 +130,10 @@ export async function creditTopUp(
     });
 
   if (balance === null) return { ok: false, reason: "ALREADY_HANDLED" };
+
+  // Money in can lift the tier, and only lift. After the credit has
+  // committed, never inside it: a rank bump must not roll a deposit back.
+  await liftTierFor(topUp.userId);
 
   return {
     ok: true,

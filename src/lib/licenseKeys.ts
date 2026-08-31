@@ -52,11 +52,26 @@ export async function deliverKeys(
 ): Promise<number> {
   if (input.wanted <= 0) return 0;
 
+  // What this order can still be given, asked of the order itself rather than
+  // trusted from the caller. Every caller computes it correctly today, but the
+  // arithmetic lives in two of them and an order handed more keys than it paid
+  // for cannot be undone: a delivered key is never returned to the shelf, and
+  // the buyer's page prints every key attached to their order. So the ceiling
+  // is enforced here, where there is exactly one copy of it.
+  const order = await tx.order.findUnique({
+    where: { id: input.orderId },
+    select: { keysOwed: true, _count: { select: { licenseKeys: true } } },
+  });
+  if (!order) return 0;
+  const room = order.keysOwed - order._count.licenseKeys;
+  const wanted = Math.min(input.wanted, room);
+  if (wanted <= 0) return 0;
+
   const claimed = await tx.$queryRaw<{ id: string }[]>`
     SELECT id FROM license_keys
     WHERE "packageId" = ${input.packageId} AND status = 'AVAILABLE'
     ORDER BY "createdAt" ASC
-    LIMIT ${input.wanted}
+    LIMIT ${wanted}
     FOR UPDATE SKIP LOCKED
   `;
   if (claimed.length === 0) return 0;
@@ -100,6 +115,18 @@ export async function fillBackorders(
     where: { packageId, status: "AVAILABLE" },
   });
   if (available === 0) return { orders: 0, keys: 0 };
+
+  // The queue is locked before it is measured. Two batches pasted at the same
+  // moment would otherwise both read "this order is short three keys" and both
+  // hand it three — different keys, no conflict, nothing to notice afterwards,
+  // because every screen that reports what is owed floors the figure at zero.
+  // Holding the rows makes the second paste wait and then count again.
+  await tx.$queryRaw`
+    SELECT id FROM orders
+    WHERE "packageId" = ${packageId} AND status = 'PAID' AND "keysOwed" > 0
+    ORDER BY "createdAt" ASC
+    FOR UPDATE
+  `;
 
   const orders = await tx.order.findMany({
     where: { packageId, status: "PAID", keysOwed: { gt: 0 } },

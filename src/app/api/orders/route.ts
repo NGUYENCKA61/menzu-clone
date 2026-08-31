@@ -12,13 +12,13 @@ import { db } from "@/lib/db";
 import { deliverKeys } from "@/lib/licenseKeys";
 import { getCurrentUser } from "@/lib/session";
 import { getShopSettings } from "@/lib/settingsStore";
-import { evaluateVoucher } from "@/lib/voucher";
+import { makeShortCode } from "@/lib/shortCode";
+import { evaluateVoucher, voucherRules } from "@/lib/voucher";
+import { balanceOf, debitWallet } from "@/lib/wallet";
+import { readMemberTier, TIER_RULES, tierDiscountFor } from "@/lib/memberTiers";
 
 /** Short human-facing code, e.g. DH8F3K2Q. */
-function makeCode(prefix: string): string {
-  const rand = Math.random().toString(36).slice(2, 8).toUpperCase();
-  return `${prefix}${rand}`;
-}
+const makeCode = makeShortCode;
 
 /**
  * Buy an account.
@@ -67,13 +67,22 @@ export async function POST(request: Request) {
       // in a query of its own: a product taken down between the page render
       // and this transaction has to read as gone, and any second look would be
       // outside the lock. Quoted because Prisma leaves the column camelCased.
-      const locked = await tx.$queryRaw<{ id: string; status: string }[]>`
-        SELECT id, status FROM products
+      const locked = await tx.$queryRaw<
+        { id: string; status: string; productType: string }[]
+      >`
+        SELECT id, status, "productType" FROM products
         WHERE code = ${code} AND "deletedAt" IS NULL
         FOR UPDATE
       `;
       if (locked.length === 0) throw new Error("NOT_FOUND");
-      if (locked[0].status !== "AVAILABLE") throw new Error("ALREADY_SOLD");
+      if (locked[0].status !== "AVAILABLE") {
+        // An account that is not available was bought by somebody else; a
+        // tool was taken off the shelf by the shop. Same column, two
+        // different pieces of news.
+        throw new Error(
+          locked[0].productType === "SOFTWARE_GAME" ? "OFF_SHELF" : "ALREADY_SOLD",
+        );
+      }
 
       const product = await tx.product.findUniqueOrThrow({
         where: { code },
@@ -149,39 +158,60 @@ export async function POST(request: Request) {
           : 0;
       const agencyCut = agencyPct > 0 ? agencyCutFor(lineTotal, agencyPct) : 0n;
 
+      // Hạng thành viên: a percent off software for everyone who is not
+      // already on wholesale, taken before the voucher so a code prices
+      // what the member actually pays. Read from the row, like the role.
+      const memberTier = readMemberTier(buyer.tier);
+      const tierPct =
+        isSoftware && agencyPct === 0 ? TIER_RULES[memberTier].discountPercent : 0;
+      const tierCut = tierPct > 0 ? tierDiscountFor(lineTotal, memberTier) : 0n;
+
       // Voucher, if supplied and still usable. The same rules back the
       // "Áp dụng" preview, so what the dialog quoted is what is charged.
       let voucherId: string | null = null;
       let voucherCut = 0n;
       if (voucherCode && agencyPct === 0) {
-        const v = await tx.voucher.findUnique({ where: { code: voucherCode } });
-        // Judged against the line total, not the unit price: a minimum-spend
-        // voucher should be met by buying three keys, and a percentage one
-        // should come off all three.
-        const applied = evaluateVoucher(v, lineTotal, now);
+        const v = await tx.voucher.findUnique({
+          where: { code: voucherCode },
+          include: { products: { select: { productId: true } } },
+        });
+        // Judged against the line total after the tier's cut, not the unit
+        // price: a minimum-spend voucher should be met by buying three keys,
+        // and a percentage one should come off all three.
+        const applied = evaluateVoucher(voucherRules(v), lineTotal - tierCut, now, {
+          productId: product.id,
+          categoryId: product.categoryId,
+        });
         if (!v || !applied.ok) throw new Error("BAD_VOUCHER");
 
         voucherId = v.id;
         voucherCut = applied.cut;
 
-        await tx.voucher.update({
-          where: { id: v.id },
+        // The count is raised with the limit riding on the same statement, the
+        // way the wallet is debited. Judging "is there a use left" against the
+        // number read a dozen queries ago let ten simultaneous checkouts all
+        // spend the last use of a one-use code.
+        const bumped = await tx.voucher.updateMany({
+          where: {
+            id: v.id,
+            ...(v.maxUses !== null ? { usedCount: { lt: v.maxUses } } : {}),
+          },
           data: { usedCount: { increment: 1 } },
         });
+        if (bumped.count === 0) throw new Error("BAD_VOUCHER");
       }
 
-      const total = lineTotal - agencyCut - voucherCut;
+      const total = lineTotal - agencyCut - tierCut - voucherCut;
 
-      if (buyer.balance < total) {
-        throw new Error(`INSUFFICIENT:${total - buyer.balance}`);
+      // Charged in one guarded statement rather than "read, subtract, write":
+      // two checkouts running at once would otherwise both read the same
+      // balance and the second write would erase the first debit.
+      const balanceAfter = await debitWallet(tx, user.id, total);
+      if (balanceAfter === null) {
+        // The wallet moved since it was read — say what is actually missing
+        // now, not what was missing a few statements ago.
+        throw new Error(`INSUFFICIENT:${total - (await balanceOf(tx, user.id))}`);
       }
-
-      const balanceAfter = buyer.balance - total;
-
-      await tx.user.update({
-        where: { id: user.id },
-        data: { balance: balanceAfter },
-      });
 
       // An account is gone once it is bought; software is a licence and the
       // listing stays up for the next buyer. Marking a tool SOLD would take it
@@ -201,9 +231,11 @@ export async function POST(request: Request) {
       const discountPct =
         agencyPct > 0
           ? agencyPct
-          : !isSoftware && product.oldPrice > 0n
-            ? Number(((product.oldPrice - unitPrice) * 100n) / product.oldPrice)
-            : 0;
+          : tierPct > 0
+            ? tierPct
+            : !isSoftware && product.oldPrice > 0n
+              ? Number(((product.oldPrice - unitPrice) * 100n) / product.oldPrice)
+              : 0;
 
       const order = await tx.order.create({
         data: {
@@ -227,9 +259,9 @@ export async function POST(request: Request) {
 
       // The keys come off the shelf inside the same transaction that charges
       // for them, so a sale can never be paid for without the stock moving.
-      // Fewer than were bought is not a failure: the tier is out, the order
-      // stands, and what is owed shows up on the shop's key desk. Refusing the
-      // sale instead would turn every empty shelf into a lost order.
+      // A shelf with fewer keys than were bought refuses the whole sale:
+      // throwing here rolls back the charge, the order and the voucher use,
+      // and the buyer is told the shop is short instead of being owed keys.
       const delivered = chosenPackage
         ? await deliverKeys(tx, {
             packageId: chosenPackage.id,
@@ -239,6 +271,9 @@ export async function POST(request: Request) {
             durationHours: chosenPackage.durationHours,
           })
         : 0;
+      if (chosenPackage && delivered < quantity) {
+        throw new Error(`OUT_OF_KEYS:${delivered}`);
+      }
 
       await tx.transaction.create({
         data: {
@@ -251,7 +286,13 @@ export async function POST(request: Request) {
           description: chosenPackage
             ? `Mua ${product.name ?? product.code} — ${chosenPackage.label}${
                 quantity > 1 ? ` ×${quantity}` : ""
-              }${agencyPct > 0 ? " · giá đại lý" : ""}`
+              }${
+                agencyPct > 0
+                  ? " · giá đại lý"
+                  : tierCut > 0n
+                    ? ` · ưu đãi hạng ${TIER_RULES[memberTier].label}`
+                    : ""
+              }`
             : `Mua tài khoản #${product.code}`,
           method: "Ví Menzu",
         },
@@ -261,6 +302,7 @@ export async function POST(request: Request) {
         order,
         balanceAfter,
         total,
+        tierCut,
         delivered,
         quantity,
         isSoftware,
@@ -275,6 +317,7 @@ export async function POST(request: Request) {
       orderCode: result.order.code,
       total: Number(result.total),
       balance: Number(result.balanceAfter),
+      tierCut: Number(result.tierCut),
       // What the buy panel needs to say more than "đã mua": how many keys are
       // waiting on /orders, and whether any are still to come — or, for an
       // account, whether a sign-in is waiting there or the shop has to be asked.
@@ -291,6 +334,15 @@ export async function POST(request: Request) {
     if (message === "ALREADY_SOLD") {
       return NextResponse.json({ error: "Tài khoản đã được bán" }, { status: 409 });
     }
+    if (message === "OFF_SHELF") {
+      // A tool is a licence and is never "sold" — it was taken down while the
+      // dialog sat open, and telling a buyer their software was sold to
+      // somebody else made no sense at all.
+      return NextResponse.json(
+        { error: "Sản phẩm này đang tạm ngừng bán" },
+        { status: 409 },
+      );
+    }
     if (message === "PACKAGE_REQUIRED") {
       return NextResponse.json({ error: "Hãy chọn gói trước khi mua" }, { status: 400 });
     }
@@ -299,6 +351,19 @@ export async function POST(request: Request) {
       // is why it does not say the id was wrong.
       return NextResponse.json(
         { error: "Gói này không còn bán, hãy chọn lại" },
+        { status: 409 },
+      );
+    }
+    if (message.startsWith("OUT_OF_KEYS:")) {
+      const available = Number(message.slice("OUT_OF_KEYS:".length));
+      return NextResponse.json(
+        {
+          error:
+            available > 0
+              ? `Số lượng trên hệ thống không đủ — gói này chỉ còn ${available} key.`
+              : "Số lượng trên hệ thống không đủ — gói này đã hết key.",
+          available,
+        },
         { status: 409 },
       );
     }

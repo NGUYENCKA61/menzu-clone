@@ -6,6 +6,7 @@ import { FORBIDDEN, getAdmin } from "@/lib/admin";
 import { AGENCY_PERCENT_MAX, AGENCY_PERCENT_MIN } from "@/lib/agency";
 import { hashPassword, validateCredentials } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { adjustWallet } from "@/lib/wallet";
 
 function makeCode(prefix: string): string {
   return `${prefix}${randomBytes(3).toString("hex").toUpperCase()}`;
@@ -104,7 +105,7 @@ export async function PATCH(request: Request) {
 
   // --- member tier ---------------------------------------------------------
   if (action === "tier") {
-    const allowed = ["BRONZE", "SILVER", "GOLD", "PLATINUM", "DIAMOND"] as const;
+    const allowed = ["CLASSIC", "GOLD", "PLATINUM", "DIAMOND", "ELITE"] as const;
     type Tier = (typeof allowed)[number];
     if (!allowed.includes(body?.tier as Tier)) {
       return NextResponse.json({ error: "Hạng không hợp lệ" }, { status: 400 });
@@ -163,11 +164,12 @@ export async function PATCH(request: Request) {
     // without the matching Transaction is the one thing the purchase path was
     // built to prevent, and an admin tool is no reason to make an exception.
     const result = await db.$transaction(async (tx) => {
-      const current = await tx.user.findUniqueOrThrow({ where: { id: target.id } });
-      const balanceAfter = current.balance + delta;
-      if (balanceAfter < 0n) throw new Error("NEGATIVE");
+      // The database does the sum and refuses to go below zero in the same
+      // statement, so an adjustment made while the customer is buying cannot
+      // undo their purchase by writing a balance computed before it.
+      const balanceAfter = await adjustWallet(tx, target.id, delta);
+      if (balanceAfter === null) throw new Error("NEGATIVE");
 
-      await tx.user.update({ where: { id: target.id }, data: { balance: balanceAfter } });
       await tx.transaction.create({
         data: {
           code: makeCode("AD"),
