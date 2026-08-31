@@ -1,14 +1,16 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Headphones, Minus, Plus, RefreshCw, ShieldCheck, Zap } from "lucide-react";
 
 import type { ProductFeature } from "@/lib/productFeatures";
+import type { ProductRequirement } from "@/lib/productRequirements";
 import { productHref } from "@/lib/routes";
 
 import { formatVnd } from "./productData";
+import { SoftwareCheckoutDialog } from "./SoftwareCheckoutDialog";
+import { StatusSubscribeButton } from "./StatusSubscribeButton";
 
 export interface SoftwarePackageView {
   id: string;
@@ -26,10 +28,14 @@ export interface SoftwareDetail {
   description: string;
   /** The product's own "Tính năng nổi bật"; empty means use the default. */
   features: ProductFeature[];
+  /** The product's own "Yêu cầu hệ thống"; empty means use the default. */
+  requirements: ProductRequirement[];
   /** The write-up under that list, as editor HTML. "" draws nothing. */
   featuresNote: string;
-  /** "Hướng dẫn sử dụng" as editor HTML; "" prints the default sentence. */
+  /** "Hướng dẫn cài đặt" as editor HTML; "" prints the default sentence. */
   guideHtml: string;
+  /** "Hướng dẫn thiết lập & sử dụng" as editor HTML; "" prints the default. */
+  setupGuideHtml: string;
   softwareStatus: "UNDETECTED" | "DETECTED" | "UPDATING" | null;
   images: string[];
   /** Raw YouTube link as the shop pasted it; the gallery parses it. */
@@ -46,10 +52,21 @@ export interface SoftwareDetail {
  * The detection pill. Colour carries the meaning here, so the three states are
  * written out as whole class strings — Tailwind cannot see a composed one.
  */
-const STATUS_STYLE: Record<string, { dot: string; text: string; label: string }> = {
-  UNDETECTED: { dot: "bg-emerald-500", text: "text-emerald-400", label: "Undetected" },
+const STATUS_STYLE: Record<
+  string,
+  { dot: string; text: string; label: string }
+> = {
+  UNDETECTED: {
+    dot: "bg-emerald-500",
+    text: "text-emerald-400",
+    label: "Undetected",
+  },
   DETECTED: { dot: "bg-red-500", text: "text-red-400", label: "Detected" },
-  UPDATING: { dot: "bg-amber-500", text: "text-amber-400", label: "Đang cập nhật" },
+  UPDATING: {
+    dot: "bg-amber-500",
+    text: "text-amber-400",
+    label: "Đang cập nhật",
+  },
 };
 
 const TRUST = [
@@ -75,10 +92,13 @@ const MAX_QUANTITY = 99;
 export function SoftwareBuyPanel({
   software,
   initialPackageId,
+  statusSubscribed,
 }: {
   software: SoftwareDetail;
   /** From `?pkg=` — the tier a listing card was already showing. */
   initialPackageId?: string;
+  /** Following this tool's status; null for a guest. */
+  statusSubscribed: boolean | null;
 }) {
   const router = useRouter();
 
@@ -93,15 +113,10 @@ export function SoftwareBuyPanel({
   const [quantity, setQuantity] = useState(1);
 
   const [busy, setBusy] = useState(false);
-  const [msg, setMsg] = useState<{ tone: "ok" | "err"; text: string } | null>(null);
+  const [msg, setMsg] = useState<{ tone: "ok" | "err"; text: string } | null>(
+    null,
+  );
   const [confirming, setConfirming] = useState(false);
-  /** Refusals from the buy call. Kept apart from `msg`: the dialog covers the
-   *  panel, so anything printed out there while it is open is unreadable. */
-  const [dialogError, setDialogError] = useState<string | null>(null);
-  /** The wallet, read when the dialog opens; null until it answers. */
-  const [balance, setBalance] = useState<number | null>(null);
-  /** Set on success so the panel can offer the way to the order. */
-  const [orderCode, setOrderCode] = useState<string | null>(null);
 
   const chosen = useMemo(
     () => software.packages.find((p) => p.id === packageId) ?? null,
@@ -109,47 +124,12 @@ export function SoftwareBuyPanel({
   );
 
   const total = (chosen?.price ?? 0) * quantity;
-  // Unknown until the wallet answers, and unknown counts as affordable: a slow
-  // reply must not stand between a buyer with money and the confirm button.
-  // The server checks the balance again anyway, inside the transaction.
-  const canAfford = balance === null || balance >= total;
 
-  useEffect(() => {
-    if (!confirming) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setConfirming(false);
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [confirming]);
-
-  // The wallet is read when the dialog opens rather than on page load: it is
-  // the one moment the figure matters, and it can have changed in another tab
-  // since the page was drawn. A guest has no wallet to show and stays null, so
-  // they still get the confirm button — pressing it is what sends them to the
-  // login page with this product waiting on the other side.
-  useEffect(() => {
-    if (!confirming) return;
-    let cancelled = false;
-    fetch("/api/auth/me")
-      .then((r) => r.json())
-      .then((d: { user?: { balance?: number } | null }) => {
-        if (!cancelled) setBalance(d.user ? (d.user.balance ?? 0) : null);
-      })
-      .catch(() => {
-        if (!cancelled) setBalance(null);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [confirming]);
-
-  // Changing the tier invalidates any quoted shortfall, and leaving the old
-  // one on screen would have it argue with the price above it.
+  // Changing the tier clears whatever the last action said — a "đã thêm vào
+  // giỏ" line about the other tier would argue with the price above it.
   function pickPackage(id: string) {
     setPackageId(id);
     setMsg(null);
-    setDialogError(null);
   }
 
   async function addToCart() {
@@ -160,13 +140,22 @@ export function SoftwareBuyPanel({
       const res = await fetch("/api/cart", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ code: software.code, packageId: chosen.id, quantity }),
+        body: JSON.stringify({
+          code: software.code,
+          packageId: chosen.id,
+          quantity,
+        }),
       });
       if (res.status === 401) {
-        router.push(`/login?next=${encodeURIComponent(productHref(software.categorySlug, software.slug))}`);
+        router.push(
+          `/login?next=${encodeURIComponent(productHref(software.categorySlug, software.slug))}`,
+        );
         return;
       }
-      const data = (await res.json().catch(() => ({}))) as { error?: string; count?: number };
+      const data = (await res.json().catch(() => ({}))) as {
+        error?: string;
+        count?: number;
+      };
       if (!res.ok) {
         setMsg({ tone: "err", text: data.error ?? "Không thêm được vào giỏ" });
         return;
@@ -183,60 +172,29 @@ export function SoftwareBuyPanel({
     }
   }
 
-  async function buyNow() {
-    if (!chosen) return;
-    setBusy(true);
-    setMsg(null);
-    setDialogError(null);
-    try {
-      const res = await fetch("/api/orders", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ code: software.code, packageId: chosen.id, quantity }),
-      });
-      if (res.status === 401) {
-        router.push(`/login?next=${encodeURIComponent(productHref(software.categorySlug, software.slug))}`);
-        return;
-      }
-      const data = (await res.json().catch(() => ({}))) as {
-        error?: string;
-        orderCode?: string;
-        shortfall?: number;
-      };
-      if (!res.ok) {
-        // Stays in the dialog, which is still open and covering the panel.
-        setDialogError(data.error ?? "Không thể tạo đơn hàng");
-        // The server knows the exact gap; trust it over the figure the wallet
-        // read a moment ago, which a purchase in another tab may have moved.
-        if (typeof data.shortfall === "number" && chosen) {
-          setBalance(Math.max(0, total - data.shortfall));
-        }
-        return;
-      }
-      setConfirming(false);
-      setOrderCode(data.orderCode ?? null);
-      setMsg({ tone: "ok", text: `Đã mua — mã đơn ${data.orderCode}` });
-      router.refresh();
-    } catch {
-      setDialogError("Không kết nối được máy chủ");
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  const status = software.softwareStatus ? STATUS_STYLE[software.softwareStatus] : null;
+  const status = software.softwareStatus
+    ? STATUS_STYLE[software.softwareStatus]
+    : null;
 
   return (
     <div className="flex flex-col gap-6">
+      {/* The state, and beside it the way to hear when it changes. */}
       {status ? (
-        <span className="self-start inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-3 py-1.5">
-          <span className={`h-1.5 w-1.5 rounded-full ${status.dot}`} />
-          <span
-            className={`text-[10px] font-black uppercase tracking-widest ${status.text}`}
-          >
-            {status.label}
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-3 py-1.5">
+            <span className={`h-1.5 w-1.5 rounded-full ${status.dot}`} />
+            <span
+              className={`text-[10px] font-black uppercase tracking-widest ${status.text}`}
+            >
+              {status.label}
+            </span>
           </span>
-        </span>
+          <StatusSubscribeButton
+            productCode={software.code}
+            initial={statusSubscribed}
+            loginNext={productHref(software.categorySlug, software.slug)}
+          />
+        </div>
       ) : null}
 
       <div className="space-y-3">
@@ -291,14 +249,20 @@ export function SoftwareBuyPanel({
               software.inStock ? "bg-emerald-500" : "bg-neutral-600"
             }`}
           />
-          <span className={software.inStock ? "text-emerald-400" : "text-neutral-500"}>
+          <span
+            className={
+              software.inStock ? "text-emerald-400" : "text-neutral-500"
+            }
+          >
             {software.inStock ? "Còn hàng" : "Tạm hết hàng"}
           </span>
         </p>
       </div>
 
       <div className="flex items-center gap-3">
-        <span className="text-[13px] font-semibold text-neutral-400">Số lượng:</span>
+        <span className="text-[13px] font-semibold text-neutral-400">
+          Số lượng:
+        </span>
         <button
           type="button"
           aria-label="Giảm số lượng"
@@ -340,16 +304,6 @@ export function SoftwareBuyPanel({
           }
         >
           {msg.text}
-          {/* A paid order is only half the errand — the key and the download
-              live on the order, so the way there goes with the receipt. */}
-          {msg.tone === "ok" && orderCode ? (
-            <>
-              {" · "}
-              <Link href="/orders" className="underline hover:text-white">
-                Xem đơn hàng
-              </Link>
-            </>
-          ) : null}
         </p>
       ) : null}
 
@@ -383,7 +337,9 @@ export function SoftwareBuyPanel({
             <div
               key={t.label}
               className={`flex flex-col items-center gap-2 px-3 py-5 text-center ${
-                index < TRUST.length - 1 ? "sm:border-r border-white/[0.07]" : ""
+                index < TRUST.length - 1
+                  ? "sm:border-r border-white/[0.07]"
+                  : ""
               }`}
             >
               <Icon size={18} className="text-[var(--menzu-accent)]" />
@@ -395,103 +351,22 @@ export function SoftwareBuyPanel({
         })}
       </div>
 
-      {/* Buying spends real balance, so it asks once and shows the figure it is
-          about to take rather than only the unit price above. */}
-      {confirming && chosen ? (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
-          <div
-            className="absolute inset-0 bg-black/75"
-            onClick={() => setConfirming(false)}
-          />
-          <div
-            role="dialog"
-            aria-modal="true"
-            aria-label="Xác nhận mua"
-            className="relative w-full max-w-[420px] rounded-2xl border border-white/10 bg-[#0e0e11] p-6 shadow-2xl"
-          >
-            <h2 className="text-lg font-bold text-white">Xác nhận mua</h2>
-            <div className="mt-4 space-y-2 text-[13px]">
-              <div className="flex justify-between gap-4">
-                <span className="text-neutral-500">Sản phẩm</span>
-                <span className="font-semibold text-white text-right">{software.name}</span>
-              </div>
-              <div className="flex justify-between gap-4">
-                <span className="text-neutral-500">Gói</span>
-                <span className="font-semibold text-white">{chosen.label}</span>
-              </div>
-              <div className="flex justify-between gap-4">
-                <span className="text-neutral-500">Số lượng</span>
-                <span className="font-semibold text-white">{quantity}</span>
-              </div>
-              <div className="flex justify-between gap-4 border-t border-white/10 pt-2 mt-2">
-                <span className="text-neutral-500">Trừ vào ví</span>
-                <span className="font-black text-[var(--menzu-accent)]">
-                  {formatVnd(total)}đ
-                </span>
-              </div>
-
-              {/* The figure the decision actually turns on. Withheld until the
-                  wallet answers rather than flashing a zero that would read as
-                  an empty account. */}
-              {balance !== null ? (
-                <>
-                  <div className="flex justify-between gap-4">
-                    <span className="text-neutral-500">Số dư ví</span>
-                    <span className="font-semibold text-white">{formatVnd(balance)}đ</span>
-                  </div>
-                  {!canAfford ? (
-                    <div className="flex justify-between gap-4">
-                      <span className="text-neutral-500">Cần nạp thêm</span>
-                      <span className="font-bold text-red-400">
-                        {formatVnd(total - balance)}đ
-                      </span>
-                    </div>
-                  ) : null}
-                </>
-              ) : null}
-            </div>
-
-            {dialogError ? (
-              <p
-                role="alert"
-                className="mt-4 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-2.5 text-[12px] font-semibold text-red-400"
-              >
-                {dialogError}
-              </p>
-            ) : null}
-
-            <div className="mt-6 flex gap-2.5">
-              <button
-                type="button"
-                onClick={() => setConfirming(false)}
-                className="flex-1 h-11 rounded-xl border border-white/10 hover:bg-white/5 transition-colors text-[11px] font-black uppercase tracking-widest text-neutral-300"
-              >
-                Huỷ
-              </button>
-              {/* A wallet that cannot cover this offers no confirm button —
-                  pressing it would only fetch the same refusal — and sends the
-                  buyer to top up instead. */}
-              {canAfford ? (
-                <button
-                  type="button"
-                  disabled={busy}
-                  onClick={buyNow}
-                  className="flex-1 h-11 rounded-xl bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] disabled:opacity-60 transition-colors text-[11px] font-black uppercase tracking-widest text-white"
-                >
-                  {busy ? "Đang xử lý…" : "Xác nhận"}
-                </button>
-              ) : (
-                <Link
-                  href="/wallet"
-                  className="flex-1 h-11 rounded-xl bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] transition-colors text-[11px] font-black uppercase tracking-widest text-white inline-flex items-center justify-center"
-                >
-                  Nạp tiền
-                </Link>
-              )}
-            </div>
-          </div>
-        </div>
-      ) : null}
+      {/* Buying spends real balance, so it asks once and shows the figure it
+          is about to take — after any voucher — rather than only the unit
+          price above. The same dialog a listing card opens. */}
+      <SoftwareCheckoutDialog
+        open={confirming}
+        onClose={() => setConfirming(false)}
+        product={{
+          code: software.code,
+          name: software.name,
+          categoryName: software.categoryName,
+          imageUrl: software.images[0] ?? null,
+          loginNext: productHref(software.categorySlug, software.slug),
+        }}
+        tier={chosen}
+        quantity={quantity}
+      />
     </div>
   );
 }

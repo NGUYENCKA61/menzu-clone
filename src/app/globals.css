@@ -1050,3 +1050,98 @@ body.lightbox-open .site-nav {
     animation: none;
   }
 }
+
+/* The receipt's tick, once, as the "Thanh toán thành công" view appears:
+   the badge pops in with a little overshoot, the stroke draws itself, a
+   ring ripples out and eight sparks fly from the centre. Each spark's
+   direction comes in through --spark-angle from the markup. */
+@keyframes tick-pop {
+  0% {
+    transform: scale(0.4);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.12);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+@keyframes tick-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes tick-ring {
+  0% {
+    transform: scale(0.7);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(1.9);
+    opacity: 0;
+  }
+}
+@keyframes tick-spark {
+  0% {
+    transform: rotate(var(--spark-angle)) translateY(0) scale(1);
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  100% {
+    transform: rotate(var(--spark-angle)) translateY(-46px) scale(0.2);
+    opacity: 0;
+  }
+}
+.tick-badge {
+  animation: tick-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+.tick-badge svg path {
+  stroke-dasharray: 32;
+  stroke-dashoffset: 32;
+  animation: tick-draw 0.4s ease-out 0.3s forwards;
+}
+.tick-ring {
+  animation: tick-ring 0.9s ease-out 0.25s both;
+}
+.tick-spark {
+  animation: tick-spark 0.8s ease-out 0.35s both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .tick-badge {
+    animation: none;
+  }
+  .tick-badge svg path {
+    stroke-dashoffset: 0;
+    animation: none;
+  }
+  .tick-ring,
+  .tick-spark {
+    display: none;
+  }
+}
+
+/* The receipt replacing the confirm view inside the same card: its body
+   rises into place so the change of state is felt, not only read. */
+@keyframes receipt-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.receipt-in {
+  animation: receipt-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .receipt-in {
+    animation: none;
+  }
+}

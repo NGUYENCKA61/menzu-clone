@@ -3,10 +3,10 @@
 import { ChevronDown } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 import { formatVnd } from "./productData";
+import { SoftwareCheckoutDialog } from "./SoftwareCheckoutDialog";
 
 export interface SoftwareCardPackage {
   id: string;
@@ -19,6 +19,8 @@ export interface SoftwareCardView {
   /** /{category-slug}/{product-slug}, built by the query layer. */
   href: string;
   name: string;
+  /** Named in the checkout dialog under the tool, as the product page does. */
+  categoryName: string;
   imageUrl: string | null;
   /** The feature line under the title, e.g. "Aimbot · ESP · No Recoil". */
   description: string;
@@ -49,10 +51,10 @@ const STATUS: Record<string, { dot: string; text: string; label: string }> = {
  * title and "Xem chi tiết" lead to the product page.
  */
 export function SoftwareCard({ software }: { software: SoftwareCardView }) {
-  const router = useRouter();
   const [packageId, setPackageId] = useState("");
   const [hint, setHint] = useState(false);
   const [open, setOpen] = useState(false);
+  const [confirming, setConfirming] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Close the tier dropdown on an outside click or Escape. Bound only while it
@@ -93,20 +95,27 @@ export function SoftwareCard({ software }: { software: SoftwareCardView }) {
     }`;
 
   /**
-   * Hands off to the product page with the tier already selected rather than
-   * charging here — the wallet confirmation lives there, and a listing card
-   * that could spend money on one click is not one anyone should trust.
+   * Opens the same "Xác nhận mua" the product page uses, right here: a buyer
+   * who has picked a tier on the shelf should not have to walk into the
+   * product page to pay for it. Nothing is charged on this click — the
+   * dialog shows the sum and asks once, as it does there.
    */
   function rentNow() {
     if (!chosen) {
       setHint(true);
       return;
     }
-    router.push(`${detailHref}?pkg=${encodeURIComponent(chosen.id)}`);
+    setConfirming(true);
   }
 
   return (
-    <div className="group flex h-full w-full flex-col rounded-[15px] border border-[#24252a] bg-[#101114] transition-all duration-[250ms] hover:-translate-y-1 hover:border-[var(--menzu-accent)]/50 hover:shadow-[0_15px_40px_#00000088]">
+    // The hover lift is a transform, which makes the card its own stacking
+    // context: the open tier list, however high its z-index, could never rise
+    // above the cards and sections drawn after this one. While the list is
+    // open the whole card steps up a layer instead.
+    <div
+      className={`group relative flex h-full w-full flex-col rounded-[15px] border border-[#24252a] bg-[#101114] transition-all duration-[250ms] hover:-translate-y-1 hover:border-[var(--menzu-accent)]/50 hover:shadow-[0_15px_40px_#00000088] ${open ? "z-40" : ""}`}
+    >
       {/* Picture flush to the card's edges. The shop's image when set; otherwise
           the reference's dark gradient with the tool's name centred over it. */}
       <Link href={detailHref} className="block">
@@ -233,11 +242,15 @@ export function SoftwareCard({ software }: { software: SoftwareCardView }) {
             </button>
           </div>
 
-          {hint ? (
-            <p role="alert" className="text-[11px] font-semibold text-[var(--menzu-accent)]">
-              Hãy chọn gói thời hạn trước.
-            </p>
-          ) : null}
+          {/* One slot that is always in the tree, so a line appearing here
+              is appended into it rather than inserted between siblings. */}
+          <div aria-live="polite" className="empty:hidden">
+            {hint ? (
+              <p role="alert" className="text-[11px] font-semibold text-[var(--menzu-accent)]">
+                Hãy chọn gói thời hạn trước.
+              </p>
+            ) : null}
+          </div>
 
           <Link
             href={detailHref}
@@ -247,6 +260,20 @@ export function SoftwareCard({ software }: { software: SoftwareCardView }) {
           </Link>
         </div>
       </div>
+
+      <SoftwareCheckoutDialog
+        open={confirming}
+        onClose={() => setConfirming(false)}
+        product={{
+          code: software.code,
+          name: software.name,
+          categoryName: software.categoryName,
+          imageUrl: software.imageUrl,
+          loginNext: detailHref,
+        }}
+        tier={chosen}
+        quantity={1}
+      />
     </div>
   );
 }

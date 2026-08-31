@@ -1,13 +1,22 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Headphones, Lock, RefreshCw, ShieldCheck, X, Zap } from "lucide-react";
+import { Headphones, Lock, RefreshCw, ShieldCheck, Zap } from "lucide-react";
 
 import { productHref } from "@/lib/routes";
 
-import { formatVnd } from "./productData";
+import {
+  BuyConfirmDialog,
+  ConfirmFooter,
+  DialogAlert,
+  PayableBlock,
+  PriceList,
+  PriceRow,
+  ProductTile,
+  VoucherField,
+} from "./BuyConfirmDialog";
+import { formatVnd, productImage } from "./productData";
 
 export interface AccountDetail {
   code: string;
@@ -74,20 +83,10 @@ export function AccountBuyPanel({ account }: AccountBuyPanelProps) {
   const [open, setOpen] = useState(false);
   const [voucher, setVoucher] = useState("");
 
-  useEffect(() => {
-    if (!open) return;
-
-    function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") setOpen(false);
-    }
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [open]);
-
   const pct = Math.round((1 - account.price / account.oldPrice) * 100);
 
-  const [balanceState, setBalanceState] = useState<number | null>(null);
+  /** The wallet, read when the dialog opens; null until it answers. */
+  const [balance, setBalance] = useState<number | null>(null);
   const [buying, setBuying] = useState(false);
   const [buyError, setBuyError] = useState<string | null>(null);
   const [orderCode, setOrderCode] = useState<string | null>(null);
@@ -112,6 +111,10 @@ export function AccountBuyPanel({ account }: AccountBuyPanelProps) {
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ code: voucher.trim(), productCode: account.code }),
       });
+      if (response.status === 401) {
+        router.push(`/login?next=${encodeURIComponent(productHref(account.categorySlug, account.slug))}`);
+        return;
+      }
       const data = (await response.json().catch(() => ({}))) as {
         error?: string;
         cut?: number;
@@ -129,23 +132,31 @@ export function AccountBuyPanel({ account }: AccountBuyPanelProps) {
     }
   }
 
-  // Fetch the signed-in user's wallet when the dialog opens; guests get null
-  // and see the same "top up" path the live site shows a short balance.
+  // The wallet is read when the dialog opens rather than on page load: it is
+  // the one moment the figure matters, and it can have changed in another tab
+  // since the page was drawn. A guest has no wallet to show and stays null, so
+  // they still get the confirm button — pressing it is what sends them to the
+  // login page with this account waiting on the other side.
   useEffect(() => {
     if (!open) return;
     let cancelled = false;
     fetch("/api/auth/me")
       .then((r) => r.json())
       .then((d: { user?: { balance?: number } | null }) => {
-        if (!cancelled) setBalanceState(d.user?.balance ?? 0);
+        if (!cancelled) setBalance(d.user ? (d.user.balance ?? 0) : null);
       })
       .catch(() => {
-        if (!cancelled) setBalanceState(0);
+        if (!cancelled) setBalance(null);
       });
     return () => {
       cancelled = true;
     };
   }, [open]);
+
+  function openDialog() {
+    setBuyError(null);
+    setOpen(true);
+  }
 
   async function handleBuy() {
     if (buying) return;
@@ -166,6 +177,7 @@ export function AccountBuyPanel({ account }: AccountBuyPanelProps) {
         orderCode?: string;
         balance?: number;
         loginReady?: boolean;
+        shortfall?: number;
       };
 
       if (response.status === 401) {
@@ -174,12 +186,18 @@ export function AccountBuyPanel({ account }: AccountBuyPanelProps) {
       }
       if (!response.ok) {
         setBuyError(data.error ?? "Không thể tạo đơn hàng");
+        // The server knows the exact gap; trust it over the figure the
+        // wallet read a moment ago, which a purchase in another tab may
+        // have moved.
+        if (typeof data.shortfall === "number") {
+          setBalance(Math.max(0, payable - data.shortfall));
+        }
         return;
       }
 
       setOrderCode(data.orderCode ?? "");
       setLoginReady(data.loginReady === true);
-      setBalanceState(data.balance ?? 0);
+      setBalance(data.balance ?? 0);
       // Long enough to read which of the two things the second line says —
       // the sign-in is waiting on /orders, or the shop has to be asked.
       window.setTimeout(() => {
@@ -194,13 +212,12 @@ export function AccountBuyPanel({ account }: AccountBuyPanelProps) {
     }
   }
 
-  // null until /api/auth/me answers; treat that (and guests) as 0 so the
-  // dialog opens on the "top up" branch rather than flashing a confirm button.
-  const balance = balanceState ?? 0;
-  // Measured against what will actually be charged, so a voucher that brings
-  // the price under the wallet balance unlocks the confirm button.
-  const amountToTopUp = Math.max(payable - balance, 0);
-  const canAfford = balance >= payable;
+  // Unknown until the wallet answers, and unknown counts as affordable: a
+  // slow reply must not stand between a buyer with money and the confirm
+  // button, and the server checks the balance again anyway, inside the
+  // transaction. Measured against what will actually be charged, so a
+  // voucher that brings the price under the balance unlocks the button.
+  const canAfford = balance === null || balance >= payable;
 
   // VIP and VIP INGAME always print their labels, matching the card's strip:
   // an unfilled one simply has nothing after it. Level and KC still leave the
@@ -318,7 +335,7 @@ export function AccountBuyPanel({ account }: AccountBuyPanelProps) {
         <button
           type="button"
           disabled={account.sold}
-          onClick={() => setOpen(true)}
+          onClick={openDialog}
           className="w-full h-14 rounded-2xl bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] disabled:opacity-50 transition-colors text-[13px] font-black uppercase tracking-widest text-white"
         >
           Mua ngay
@@ -354,176 +371,74 @@ export function AccountBuyPanel({ account }: AccountBuyPanelProps) {
         })}
       </div>
 
-      {open && (
-        <div
-          className="fixed inset-0 z-[9999] bg-black/60 flex items-center justify-center p-4"
-          onClick={() => setOpen(false)}
-        >
-          <div
-            className="bg-[#111111] border border-white/10 rounded-[28px] w-full sm:max-w-md max-h-[90vh] overflow-hidden relative shadow-none flex flex-col"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <button
-              type="button"
-              onClick={() => setOpen(false)}
-              aria-label="Đóng"
-              className="absolute top-4 right-4 bg-white/5 hover:bg-white/10 text-neutral-400 hover:text-white p-2 rounded-full transition-all"
-            >
-              <X size={16} />
-            </button>
-
-            <div className="flex flex-col items-center pt-4 pb-2 relative px-6">
-              <h3 className="text-lg font-bold text-white mb-2">Xác Nhận Mua Tài Khoản</h3>
-              <div className="flex items-center gap-1.5">
-                <span className="text-xs text-neutral-400 font-medium">Mã số</span>
-                <span className="text-xs font-bold text-yellow-500">#{account.code}</span>
-              </div>
-              <div className="flex items-center gap-1.5 mt-1">
-                <span className="text-neutral-500">≡ Danh Mục:</span>
-                <span className="text-[var(--menzu-accent)] font-bold uppercase">
-                  {account.categoryName}
-                </span>
-              </div>
-            </div>
-
-            <div className="px-5 py-1.5 overflow-y-auto flex-1 min-h-0 space-y-2.5">
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-neutral-400">Giá Gốc</span>
-                <span className="text-xs font-bold text-white">
-                  {formatVnd(account.oldPrice)} ₫
-                </span>
-              </div>
-
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-neutral-400">Giảm Giá</span>
-                <span className="text-xs font-bold text-white">{pct}%</span>
-              </div>
-
-              <div className="flex items-center justify-between gap-2">
-                <span className="text-xs text-neutral-400 shrink-0">Mã Giảm Giá / Voucher</span>
-                <div className="flex items-center gap-1.5">
-                  <input
-                    type="text"
-                    value={voucher}
-                    onChange={(event) => {
-                      setVoucher(event.target.value);
-                      // A quote belongs to the code it was fetched for.
-                      setApplied(null);
-                      setVoucherError(null);
-                    }}
-                    placeholder="Nhập mã voucher..."
-                    className="w-28 min-w-0 rounded-lg border border-white/10 bg-white/5 px-2.5 py-1.5 text-xs text-white outline-none focus:border-[var(--menzu-accent)]/60 placeholder-neutral-600 transition-colors"
-                  />
-                  <button
-                    type="button"
-                    disabled={checking || voucher.trim().length === 0}
-                    onClick={handleApplyVoucher}
-                    className="shrink-0 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 disabled:opacity-40 disabled:hover:bg-white/5 px-3 py-1.5 text-xs font-bold text-white transition-colors"
-                  >
-                    {checking ? "Đang kiểm…" : "Áp dụng"}
-                  </button>
-                </div>
-              </div>
-
-              {/* The button used to do nothing at all: the code was posted with
-                  the purchase and the customer only learned it worked after
-                  paying. */}
-              {voucherError ? (
-                <p role="alert" className="text-[11px] font-semibold text-red-400 text-right">
-                  {voucherError}
-                </p>
-              ) : null}
-
-              {applied ? (
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-emerald-400">Voucher đã áp dụng</span>
-                  <span className="text-xs font-bold text-emerald-400">
-                    −{formatVnd(applied.cut)} ₫
-                  </span>
-                </div>
-              ) : null}
-
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-neutral-400">Tổng tiền</span>
-                <span className="text-xs font-bold text-white">
-                  {formatVnd(account.price)} ₫
-                </span>
-              </div>
-
-              <div className="h-px bg-white/10" />
-
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-black uppercase text-white">TỔNG THANH TOÁN</span>
-                <span className="text-base font-black text-[var(--menzu-accent)]">
-                  {formatVnd(payable)} ₫
-                </span>
-              </div>
-
-              <div className="pt-2">
-                <h4 className="text-xs font-black uppercase tracking-wider text-neutral-300">
-                  Quyền Lợi & Bảo Hành
-                </h4>
-              </div>
-
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-neutral-400">Số dư ví hiện tại:</span>
-                <span className="text-xs font-bold text-white">{formatVnd(balance)} ₫</span>
-              </div>
-
-              {!canAfford ? (
-                <div className="flex items-center justify-between pb-2">
-                  <span className="text-xs text-neutral-400">Cần nạp thêm:</span>
-                  <span className="text-xs font-bold text-red-400">
-                    {formatVnd(amountToTopUp)} ₫
-                  </span>
-                </div>
-              ) : null}
-            </div>
-
-            <div className="px-5 pb-5 pt-2 flex flex-col gap-2.5">
-              {buyError ? (
-                <p
-                  role="alert"
-                  className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-2.5 text-[12px] font-semibold text-red-400"
-                >
-                  {buyError}
-                </p>
-              ) : null}
-
-              {orderCode ? (
-                <p className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-2.5 text-[12px] font-semibold text-emerald-400">
-                  Mua thành công · Đơn {orderCode}
-                  <span className="mt-1 block font-medium text-emerald-300/90">
-                    {loginReady
-                      ? "Tài khoản và mật khẩu đăng nhập đã sẵn trong Lịch sử mua."
-                      : "Tài khoản bàn giao trực tiếp — liên hệ shop kèm mã đơn để nhận."}
-                  </span>
-                </p>
-              ) : null}
-
-              {/* The live dialog offers no confirm button when the wallet is
-                  short — it sends you to top up instead. */}
-              {canAfford ? (
-                <button
-                  type="button"
-                  onClick={handleBuy}
-                  disabled={buying || orderCode !== null}
-                  className="w-full rounded-2xl bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] disabled:opacity-70 disabled:cursor-wait text-white font-black py-4 uppercase tracking-widest text-sm transition-colors flex items-center justify-center"
-                >
-                  {buying ? "Đang xử lý…" : "Xác nhận mua"}
-                </button>
-              ) : (
-                <Link
-                  href="/wallet"
-                  className="w-full rounded-2xl bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] text-white font-black py-4 uppercase tracking-widest text-sm transition-colors flex items-center justify-center"
-                >
-                  Nạp tiền
-                </Link>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Buying spends real balance, so it asks once and shows the figure it
+          is about to take — after any voucher — before it does. */}
+      <BuyConfirmDialog
+        open={open}
+        onClose={() => setOpen(false)}
+        footer={
+          <ConfirmFooter
+            onCancel={() => setOpen(false)}
+            onConfirm={handleBuy}
+            busy={buying}
+            canAfford={canAfford}
+            done={orderCode !== null}
+          />
+        }
+      >
+        <ProductTile
+          imageUrl={account.imageUrl ?? productImage(account.code)}
+          imageClassName="object-cover object-[85%_center]"
+          name={account.name || `Mã #${account.code}`}
+          chip={account.rank || null}
+          meta={`#${account.code} · ${account.categoryName}`}
+        />
+        <PriceList>
+          {pct > 0 ? (
+            <>
+              <PriceRow
+                label="Giá gốc"
+                value={`${formatVnd(account.oldPrice)}đ`}
+                tone="strike"
+              />
+              <PriceRow label="Giảm giá" value={`−${pct}%`} tone="ok" />
+            </>
+          ) : null}
+          <PriceRow label="Tạm tính" value={`${formatVnd(account.price)}đ`} />
+          {applied ? (
+            <PriceRow
+              label="Mã giảm giá"
+              value={`−${formatVnd(applied.cut)}đ`}
+              tone="ok"
+            />
+          ) : null}
+        </PriceList>
+        <VoucherField
+          value={voucher}
+          onChange={(next) => {
+            setVoucher(next);
+            // A quote belongs to the code it was fetched for.
+            setApplied(null);
+            setVoucherError(null);
+          }}
+          onApply={handleApplyVoucher}
+          checking={checking}
+          error={voucherError}
+          applied={applied}
+        />
+        <PayableBlock payable={payable} balance={balance} />
+        {buyError ? <DialogAlert tone="err">{buyError}</DialogAlert> : null}
+        {orderCode ? (
+          <DialogAlert tone="ok">
+            Mua thành công · Đơn {orderCode}
+            <span className="mt-1 block font-medium text-emerald-300/90">
+              {loginReady
+                ? "Tài khoản và mật khẩu đăng nhập đã sẵn trong Lịch sử mua."
+                : "Tài khoản bàn giao trực tiếp — liên hệ shop kèm mã đơn để nhận."}
+            </span>
+          </DialogAlert>
+        ) : null}
+      </BuyConfirmDialog>
     </div>
   );
 }
