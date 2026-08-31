@@ -1,6 +1,8 @@
 import { Fragment } from "react";
 import { ChevronRight, House } from "lucide-react";
 
+import { SiteLink } from "./SiteLink";
+
 export interface Crumb {
   label: string;
   href?: string;
@@ -24,10 +26,10 @@ function BreadcrumbTrail({ items }: { items: Crumb[] }) {
         return (
           <Fragment key={`${item.label}-${index}`}>
             {item.href ? (
-              <a href={item.href} className={CRUMB_LINK_CLASS}>
+              <SiteLink href={item.href} className={CRUMB_LINK_CLASS}>
                 {isFirst && <House size={12} />}
                 {item.label}
-              </a>
+              </SiteLink>
             ) : (
               <span className={CRUMB_CURRENT_CLASS}>
                 {isFirst && <House size={12} />}

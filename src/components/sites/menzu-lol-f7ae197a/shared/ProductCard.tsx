@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { SiteLink } from "./SiteLink";
 import { Lock } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -112,7 +113,7 @@ export function ProductCard({ product }: ProductCardProps) {
   );
 
   return (
-    <a
+    <SiteLink
       href={product.href}
       onMouseEnter={() => setHovering(true)}
       onMouseLeave={() => {
@@ -124,7 +125,16 @@ export function ProductCard({ product }: ProductCardProps) {
       <div className="relative aspect-[16/10] w-full overflow-hidden bg-[#17181b]">
         <Image
           src={product.imageUrl ?? productImage(product.code)}
-          alt={product.code}
+          // A stock code is not a description. Somebody hearing this read out
+          // learns what the picture is of — the rank and how many skins are on
+          // the account — rather than a string of characters.
+          alt={
+            product.rank
+              ? `Tài khoản ${product.code} — rank ${product.rank}${
+                  product.skins > 0 ? `, ${product.skins} skin` : ""
+                }`
+              : `Tài khoản ${product.code}`
+          }
           fill
           sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
           className="object-cover object-[85%_center] transition-transform duration-500 group-hover:scale-105"
@@ -290,6 +300,6 @@ export function ProductCard({ product }: ProductCardProps) {
           </div>
         </div>
       </div>
-    </a>
+    </SiteLink>
   );
 }

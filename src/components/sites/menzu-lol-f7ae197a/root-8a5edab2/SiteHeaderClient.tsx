@@ -21,6 +21,7 @@ import {
 } from "../shared/AnnouncementCenter";
 import { STATUS_TAB_HREF } from "@/lib/softwareStatus";
 import { CartButton } from "./CartButton";
+import { SiteLink } from "../shared/SiteLink";
 import { UserMenu, type HeaderUser } from "./UserMenu";
 import { useEffect, useState } from "react"
 import { MobileDrawer, type DrawerGroup } from "./MobileDrawer"
@@ -121,7 +122,7 @@ function NavDropdown({ label, items }: { label: string; items: DropdownItem[] })
               // Icon and label rest at different greys, so they cannot share
               // one inherited colour the way the trigger's chevron does — each
               // carries its own rule to arrive at the same red together.
-              <a
+              <SiteLink
                 key={item.label}
                 href={hrefFor(item.label)}
                 className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-white/5 transition-colors group/item"
@@ -133,7 +134,7 @@ function NavDropdown({ label, items }: { label: string; items: DropdownItem[] })
                 <span className="text-[10px] font-bold text-neutral-200 group-hover/item:text-[var(--menzu-accent)] uppercase tracking-wider transition-colors duration-200 ease-[ease]">
                   {item.label}
                 </span>
-              </a>
+              </SiteLink>
             )
           })}
         </div>
@@ -198,16 +199,16 @@ export function SiteHeaderClient({
       >
         <div className="max-w-[1320px] w-full mx-auto px-4 lg:px-6 h-full flex items-center justify-between">
           <div className="lg:hidden flex items-center h-full relative">
-            <a href={hrefFor(QUICK_LINKS[0])} className={QUICK_LINK_CLASS}>
+            <SiteLink href={hrefFor(QUICK_LINKS[0])} className={QUICK_LINK_CLASS}>
               {QUICK_LINKS[0]}
-            </a>
+            </SiteLink>
           </div>
 
           <div className="hidden lg:flex items-center gap-5 h-full">
             {QUICK_LINKS.map((link) => (
-              <a key={link} href={hrefFor(link)} className={QUICK_LINK_CLASS}>
+              <SiteLink key={link} href={hrefFor(link)} className={QUICK_LINK_CLASS}>
                 {link}
-              </a>
+              </SiteLink>
             ))}
           </div>
 
