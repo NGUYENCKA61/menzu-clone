@@ -17,6 +17,20 @@ import {
 } from "lucide-react";
 
 import {
+  badgePillClass,
+  BADGE_COLOR_KEYS,
+  BADGE_COLORS,
+  BADGE_ICON_KEYS,
+  BADGE_ICONS,
+  BADGE_PILL_BASE,
+  DEFAULT_BADGE_COLOR,
+  DEFAULT_BADGE_ICON,
+  MAX_BADGE_LENGTH,
+  type BadgeColor,
+  type BadgeIconName,
+  type ProductBadge,
+} from "@/lib/productBadges";
+import {
   FEATURE_MAX,
   featuresToLines,
   parseFeatureLines,
@@ -29,6 +43,7 @@ import {
 } from "@/lib/productRequirements";
 
 import { AdminError } from "./AdminStates";
+import { BadgeIcon } from "./BadgeIcon";
 import { AdminImagePicker } from "./AdminImagePicker";
 import { AdminSoftwarePackages } from "./AdminSoftwarePackages";
 import type { PackageKeysView } from "./AdminPackageKeys";
@@ -83,8 +98,8 @@ export interface SoftwareDetailView {
    *  round trip as "not set" rather than becoming a zero. */
   refundRate: string;
   /** The pills beside the detection state on the customer's page — up to two,
-   *  padded to two so the form always has both boxes. */
-  badges: string[];
+   *  each with its own colour. */
+  badges: ProductBadge[];
   imageUrl: string;
   videoUrl: string;
   packages: SoftwarePackageView[];
@@ -109,6 +124,106 @@ const BADGE_PRESETS = [
 ];
 
 const CARD = "rounded-xl border border-white/[0.08] bg-[#0e0e11] p-5 flex flex-col gap-4";
+
+/**
+ * One badge, whole: the words, the colour they print in, and the glyph in
+ * front of them.
+ *
+ * Boxed together because the card carries two of these — a palette floating
+ * under both would have to say which badge it colours.
+ */
+function BadgeField({
+  id,
+  ordinal,
+  placeholder,
+  value,
+  onValue,
+  color,
+  onColor,
+  icon,
+  onIcon,
+}: {
+  id: string;
+  /** "thứ nhất" / "thứ hai" — what the screen reader calls this one. */
+  ordinal: string;
+  placeholder: string;
+  value: string;
+  onValue: (next: string) => void;
+  color: BadgeColor;
+  onColor: (next: BadgeColor) => void;
+  icon: BadgeIconName;
+  onIcon: (next: BadgeIconName) => void;
+}) {
+  return (
+    <div className="flex flex-col gap-2 rounded-lg border border-white/[0.06] bg-black/20 p-2.5">
+      <input
+        id={id}
+        value={value}
+        onChange={(event) => onValue(event.target.value)}
+        placeholder={placeholder}
+        maxLength={MAX_BADGE_LENGTH}
+        aria-label={`Nhãn nổi bật ${ordinal}`}
+        className={FIELD}
+      />
+
+      <div
+        role="radiogroup"
+        aria-label={`Màu nhãn ${ordinal}`}
+        className="flex flex-wrap items-center gap-1"
+      >
+        {BADGE_COLOR_KEYS.map((key) => (
+          <button
+            key={key}
+            type="button"
+            role="radio"
+            aria-checked={color === key}
+            aria-label={BADGE_COLORS[key].label}
+            title={BADGE_COLORS[key].label}
+            onClick={() => onColor(key)}
+            // A ring rather than a border on the chosen one: a border would
+            // move the dot by a pixel and the row would twitch on every click.
+            className={`h-5 w-5 rounded-full transition-all ${BADGE_COLORS[key].swatch} ${
+              color === key
+                ? "ring-2 ring-white ring-offset-2 ring-offset-[#0e0e11]"
+                : "opacity-45 hover:opacity-100"
+            }`}
+          />
+        ))}
+      </div>
+
+      <div
+        role="radiogroup"
+        aria-label={`Icon nhãn ${ordinal}`}
+        className="flex flex-wrap items-center gap-1"
+      >
+        {BADGE_ICON_KEYS.map((key) => (
+          <button
+            key={key}
+            type="button"
+            role="radio"
+            aria-checked={icon === key}
+            aria-label={BADGE_ICONS[key]}
+            title={BADGE_ICONS[key]}
+            onClick={() => onIcon(key)}
+            className={`grid h-6 w-6 place-items-center rounded-md border text-[10px] transition-colors ${
+              icon === key
+                ? "border-white/40 bg-white/10 text-white"
+                : "border-white/[0.08] text-neutral-500 hover:border-white/20 hover:text-neutral-200"
+            }`}
+          >
+            {/* The empty option needs a mark of its own, or it reads as a
+                button that failed to load. */}
+            {key === "none" ? (
+              <span aria-hidden>—</span>
+            ) : (
+              <BadgeIcon icon={key} className="h-3 w-3" />
+            )}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
 const CARD_HEAD =
   "flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-neutral-500";
 const FIELD =
@@ -171,8 +286,20 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
   const [downloadUrl, setDownloadUrl] = useState(software.downloadUrl);
   const [docsUrl, setDocsUrl] = useState(software.docsUrl);
   const [refundRate, setRefundRate] = useState(software.refundRate);
-  const [badge1, setBadge1] = useState(software.badges[0] ?? "");
-  const [badge2, setBadge2] = useState(software.badges[1] ?? "");
+  const [badge1, setBadge1] = useState(software.badges[0]?.label ?? "");
+  const [badge2, setBadge2] = useState(software.badges[1]?.label ?? "");
+  const [color1, setColor1] = useState<BadgeColor>(
+    software.badges[0]?.color ?? DEFAULT_BADGE_COLOR,
+  );
+  const [color2, setColor2] = useState<BadgeColor>(
+    software.badges[1]?.color ?? DEFAULT_BADGE_COLOR,
+  );
+  const [icon1, setIcon1] = useState<BadgeIconName>(
+    software.badges[0]?.icon ?? DEFAULT_BADGE_ICON,
+  );
+  const [icon2, setIcon2] = useState<BadgeIconName>(
+    software.badges[1]?.icon ?? DEFAULT_BADGE_ICON,
+  );
   const [videoUrl, setVideoUrl] = useState(software.videoUrl);
   const [status, setStatus] = useState(software.status);
   const [softwareStatus, setSoftwareStatus] = useState(
@@ -229,7 +356,10 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
       refundRate: refundRate.trim(),
       // Sent as a pair; the server drops the blanks, so clearing the first box
       // and leaving the second promotes it rather than leaving a hole.
-      badges: [badge1, badge2],
+      badges: [
+        { label: badge1, color: color1, icon: icon1 },
+        { label: badge2, color: color2, icon: icon2 },
+      ],
       videoUrl,
     });
     if (data) setMsg({ tone: "ok", text: "Đã lưu thông tin phần mềm" });
@@ -563,44 +693,54 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
                     );
                   })}
                 </div>
-                <div className="flex flex-col gap-2">
-                  <input
+                <div className="flex flex-col gap-3">
+                  <BadgeField
                     id="sw-badge-1"
-                    value={badge1}
-                    onChange={(event) => setBadge1(event.target.value)}
+                    ordinal="thứ nhất"
                     placeholder="VD: TOP #1 BÁN CHẠY"
-                    maxLength={40}
-                    aria-label="Nhãn nổi bật thứ nhất"
-                    className={FIELD}
+                    value={badge1}
+                    onValue={setBadge1}
+                    color={color1}
+                    onColor={setColor1}
+                    icon={icon1}
+                    onIcon={setIcon1}
                   />
-                  <input
+                  <BadgeField
                     id="sw-badge-2"
-                    value={badge2}
-                    onChange={(event) => setBadge2(event.target.value)}
+                    ordinal="thứ hai"
                     placeholder="VD: MỚI RA MẮT (không bắt buộc)"
-                    maxLength={40}
-                    aria-label="Nhãn nổi bật thứ hai"
-                    className={FIELD}
+                    value={badge2}
+                    onValue={setBadge2}
+                    color={color2}
+                    onColor={setColor2}
+                    icon={icon2}
+                    onIcon={setIcon2}
                   />
                 </div>
                 <p className="mt-1.5 text-[11px] text-neutral-500">
-                  Hiện thành nhãn đỏ cạnh trạng thái ở trang khách. Gõ gì hiện
-                  nấy — &ldquo;TOP #1 BÁN CHẠY&rdquo;, &ldquo;MỚI RA MẮT&rdquo;,
-                  &ldquo;SẮP HẾT HÀNG&rdquo;. Để trống cả hai thì không hiện
-                  nhãn nào.
+                  Hiện cạnh trạng thái ở trang khách. Gõ gì hiện nấy —
+                  &ldquo;TOP #1 BÁN CHẠY&rdquo;, &ldquo;MỚI RA MẮT&rdquo;,
+                  &ldquo;SẮP HẾT HÀNG&rdquo;. Mỗi nhãn chọn màu riêng bằng dãy
+                  chấm bên phải. Để trống cả hai thì không hiện nhãn nào.
                 </p>
                 {/* What the customer will see, in the customer's colours. */}
                 {[badge1, badge2].some((b) => b.trim()) ? (
-                  <div className="mt-2 flex flex-wrap items-center gap-2">
-                    {[badge1, badge2]
-                      .map((b) => b.trim())
-                      .filter(Boolean)
-                      .map((label) => (
+                  <div className="mt-2.5 flex flex-wrap items-center gap-2 rounded-lg border border-white/[0.06] bg-black/40 px-3 py-2.5">
+                    <span className="text-[9px] font-black uppercase tracking-widest text-neutral-600">
+                      Xem trước
+                    </span>
+                    {[
+                      { label: badge1.trim(), color: color1, icon: icon1 },
+                      { label: badge2.trim(), color: color2, icon: icon2 },
+                    ]
+                      .filter((b) => b.label)
+                      .map((b) => (
                         <span
-                          key={label}
-                          className="inline-flex items-center rounded-full border border-[var(--brand)]/30 bg-[var(--brand)]/10 px-3 py-1.5 text-[10px] font-black uppercase tracking-widest text-[var(--brand)]"
+                          key={b.label}
+                          className={`${BADGE_PILL_BASE} ${badgePillClass(b.color)}`}
                         >
-                          {label}
+                          <BadgeIcon icon={b.icon} />
+                          {b.label}
                         </span>
                       ))}
                   </div>

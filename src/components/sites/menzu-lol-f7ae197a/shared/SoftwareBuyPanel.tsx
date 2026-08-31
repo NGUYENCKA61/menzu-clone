@@ -4,10 +4,16 @@ import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { Headphones, Minus, Plus, RefreshCw, ShieldCheck, Zap } from "lucide-react";
 
+import {
+  badgePillClass,
+  BADGE_PILL_BASE,
+  type ProductBadge,
+} from "@/lib/productBadges";
 import type { ProductFeature } from "@/lib/productFeatures";
 import type { ProductRequirement } from "@/lib/productRequirements";
 import { productHref } from "@/lib/routes";
 
+import { BadgeIcon } from "./BadgeIcon";
 import { formatVnd } from "./productData";
 import { SoftwareCheckoutDialog } from "./SoftwareCheckoutDialog";
 
@@ -40,8 +46,8 @@ export interface SoftwareDetail {
    *  Null means the shop has set none and the policy block stays silent. */
   refundRate: number | null;
   /** The shop's own pills beside the detection state — "TOP #1 BÁN CHẠY",
-   *  "MỚI RA MẮT". Up to two; empty draws none. */
-  badges: string[];
+   *  "MỚI RA MẮT". Up to two, each with its own colour; empty draws none. */
+  badges: ProductBadge[];
   images: string[];
   /** Raw YouTube link as the shop pasted it; the gallery parses it. */
   videoUrl: string | null;
@@ -203,12 +209,13 @@ export function SoftwareBuyPanel({
               </span>
             </span>
           ) : null}
-          {software.badges.map((label) => (
+          {software.badges.map((badge) => (
             <span
-              key={label}
-              className="inline-flex items-center rounded-full border border-[var(--menzu-accent)]/30 bg-[var(--menzu-accent)]/10 px-3 py-1.5 text-[10px] font-black uppercase tracking-widest text-[var(--menzu-accent)]"
+              key={badge.label}
+              className={`${BADGE_PILL_BASE} ${badgePillClass(badge.color)}`}
             >
-              {label}
+              <BadgeIcon icon={badge.icon} />
+              {badge.label}
             </span>
           ))}
         </div>
