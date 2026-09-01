@@ -667,48 +667,6 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
                 </p>
               </div>
               <div>
-                <label htmlFor="sw-refund" className={LABEL}>
-                  Tỷ lệ hoàn trả (%)
-                </label>
-                {/* type=number so a phone offers the digit pad; the value still
-                    travels as the string the input holds, because "" is the
-                    shop saying "chưa có" and a zero is a very different
-                    promise. */}
-                <input
-                  id="sw-refund"
-                  type="number"
-                  min={0}
-                  max={100}
-                  step={1}
-                  value={refundRate}
-                  onChange={(event) => setRefundRate(event.target.value)}
-                  placeholder="VD: 80"
-                  className={FIELD}
-                />
-                <p className="mt-1.5 text-[11px] text-neutral-500">
-                  Mức bảo hành / hoàn trả khách nhận được nếu sản phẩm gặp sự cố
-                  ngoài ý muốn. Hiện dưới mục &ldquo;Chính sách bảo hành &amp;
-                  hoàn tiền&rdquo; ở trang khách. Để trống thì không hiện dòng
-                  nào.
-                </p>
-              </div>
-              <div>
-                <label htmlFor="sw-video" className={LABEL}>
-                  Video demo
-                </label>
-                <input
-                  id="sw-video"
-                  value={videoUrl}
-                  onChange={(event) => setVideoUrl(event.target.value)}
-                  placeholder="https://youtube.com/…"
-                  className={FIELD}
-                />
-              </div>
-              {/* Full width, and last: the two badge boxes are tall enough that
-                  anything sharing their row floats at the top with a column of
-                  dead space under it — which is exactly how the refund field
-                  went unnoticed. */}
-              <div className="sm:col-span-2">
                 <span className={LABEL}>Nhãn nổi bật (tối đa 2)</span>
                 {/* The shop still types whatever it likes; these are the ones
                     it would otherwise type again on every product, one click
@@ -735,7 +693,7 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
                     );
                   })}
                 </div>
-                <div className="grid gap-3 sm:grid-cols-2">
+                <div className="flex flex-col gap-3">
                   <BadgeField
                     id="sw-badge-1"
                     ordinal="thứ nhất"
@@ -787,6 +745,44 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
                       ))}
                   </div>
                 ) : null}
+              </div>
+              <div>
+                <label htmlFor="sw-refund" className={LABEL}>
+                  Tỷ lệ hoàn trả (%)
+                </label>
+                {/* type=number so a phone offers the digit pad; the value still
+                    travels as the string the input holds, because "" is the
+                    shop saying "chưa có" and a zero is a very different
+                    promise. */}
+                <input
+                  id="sw-refund"
+                  type="number"
+                  min={0}
+                  max={100}
+                  step={1}
+                  value={refundRate}
+                  onChange={(event) => setRefundRate(event.target.value)}
+                  placeholder="VD: 80"
+                  className={FIELD}
+                />
+                <p className="mt-1.5 text-[11px] text-neutral-500">
+                  Mức bảo hành / hoàn trả khách nhận được nếu sản phẩm gặp sự cố
+                  ngoài ý muốn. Hiện dưới mục &ldquo;Chính sách bảo hành &amp;
+                  hoàn tiền&rdquo; ở trang khách. Để trống thì không hiện dòng
+                  nào.
+                </p>
+              </div>
+              <div>
+                <label htmlFor="sw-video" className={LABEL}>
+                  Video demo
+                </label>
+                <input
+                  id="sw-video"
+                  value={videoUrl}
+                  onChange={(event) => setVideoUrl(event.target.value)}
+                  placeholder="https://youtube.com/…"
+                  className={FIELD}
+                />
               </div>
             </div>
             <button type="button" disabled={busy} onClick={saveInfo} className={`${ACTION} self-start`}>
