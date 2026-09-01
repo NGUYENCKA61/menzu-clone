@@ -590,6 +590,18 @@ model Product {
   /// for a weekend, and a badge nobody typed would appear on a page by itself.
   /// Null draws no pill.
   badge          String?
+  /// Whether the detection pill shows on the product's own page, where the
+  /// badges sit right beside it. True always shows it, false always hides it.
+  ///
+  /// Null — the default, and what every row written before this held — leaves
+  /// it to the badges: a tool carrying "TOP #1 BÁN CHẠY" hides the pill, a
+  /// tool carrying none keeps it. Three states rather than a boolean because
+  /// "the shop has not said" and "the shop said hide it" want different
+  /// answers the day a badge is deleted.
+  ///
+  /// The storefront card is not affected: there the pill is the only thing
+  /// saying whether the tool is safe to buy.
+  showStatus     Boolean?
 
   // --- ACCOUNT_GAME ----------------------------------------------------
   /// Software rows leave these at their empty or zero values. `rank` stays

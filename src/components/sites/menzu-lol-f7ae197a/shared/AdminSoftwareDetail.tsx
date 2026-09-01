@@ -36,6 +36,11 @@ import {
   parseFeatureLines,
 } from "@/lib/productFeatures";
 import {
+  STATUS_PILL_MODES,
+  STATUS_PILL_MODE_KEYS,
+  type StatusPillMode,
+} from "@/lib/statusPill";
+import {
   parseRequirementLines,
   REQUIREMENT_MAX,
   requirementsToLines,
@@ -85,6 +90,9 @@ export interface SoftwareDetailView {
   name: string;
   categoryName: string;
   softwareStatus: string | null;
+  /** Whether that state shows on the product's own page — "auto" leaves it to
+   *  whether a badge is already speaking for the tool. */
+  statusPill: StatusPillMode;
   status: string;
   price: number;
   /** The stored description lifted to editor HTML on the server — legacy
@@ -302,6 +310,9 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
   );
   const [videoUrl, setVideoUrl] = useState(software.videoUrl);
   const [status, setStatus] = useState(software.status);
+  const [statusPill, setStatusPill] = useState<StatusPillMode>(
+    software.statusPill,
+  );
   const [softwareStatus, setSoftwareStatus] = useState(
     software.softwareStatus ?? "UNDETECTED",
   );
@@ -472,6 +483,7 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
       code: software.code,
       status,
       softwareStatus,
+      statusPill,
       // Only mean anything when the detection state actually moves; the route
       // ignores them otherwise, and they are cleared here either way so the
       // next change starts from a blank sheet.
@@ -834,6 +846,28 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
                   ))}
                 </select>
               </div>
+              {/* Only about the product's own page. The card outside keeps the
+                  pill either way, which is why this sits next to the state
+                  rather than under the badges it competes with. */}
+              <div>
+                <label htmlFor="sw-pill" className={LABEL}>
+                  Hiện ở trang chi tiết
+                </label>
+                <select
+                  id="sw-pill"
+                  value={statusPill}
+                  onChange={(event) =>
+                    setStatusPill(event.target.value as StatusPillMode)
+                  }
+                  className={`${FIELD} w-52`}
+                >
+                  {STATUS_PILL_MODE_KEYS.map((mode) => (
+                    <option key={mode} value={mode} className="bg-neutral-900">
+                      {STATUS_PILL_MODES[mode]}
+                    </option>
+                  ))}
+                </select>
+              </div>
               <button type="button" disabled={busy} onClick={savePricing} className={ACTION}>
                 <Save size={12} />
                 Lưu
@@ -841,7 +875,10 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
             </div>
             <p className="text-[11px] text-neutral-500">
               Trạng thái hack hiện thành pill trên card ngoài cửa hàng — khách nhìn nó để
-              quyết định mua.
+              quyết định mua. Card ngoài luôn hiện; ô bên phải chỉ quyết định
+              trang chi tiết, nơi pill đứng chung hàng với nhãn nổi bật.
+              &ldquo;Tự động&rdquo; nghĩa là có nhãn thì ẩn pill, không nhãn thì
+              hiện.
             </p>
 
             {/* Attached to the change itself, not to the tool: the history on

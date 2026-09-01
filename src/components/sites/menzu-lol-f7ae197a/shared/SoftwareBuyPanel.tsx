@@ -42,6 +42,10 @@ export interface SoftwareDetail {
   /** "Hướng dẫn thiết lập & sử dụng" as editor HTML; "" prints the default. */
   setupGuideHtml: string;
   softwareStatus: "UNDETECTED" | "DETECTED" | "UPDATING" | null;
+  /** Whether that state is drawn here. Resolved on the server: the shop can
+   *  force it either way, and left alone it stays out of the badges' way. The
+   *  storefront card shows the pill regardless. */
+  showStatus: boolean;
   /** What share of the price comes back if the tool fails, as a whole percent.
    *  Null means the shop has set none and the policy block stays silent. */
   refundRate: number | null;
@@ -183,9 +187,10 @@ export function SoftwareBuyPanel({
     }
   }
 
-  const status = software.softwareStatus
-    ? STATUS_STYLE[software.softwareStatus]
-    : null;
+  const status =
+    software.showStatus && software.softwareStatus
+      ? STATUS_STYLE[software.softwareStatus]
+      : null;
 
   return (
     <div className="flex flex-col gap-6">
@@ -196,7 +201,8 @@ export function SoftwareBuyPanel({
           restoring three lines.
 
           The row is drawn whenever either half has something to say: a tool
-          with no detection state can still carry a badge. */}
+          with no detection state can still carry a badge, and a tool whose
+          shop has hidden the state carries only badges. */}
       {status || software.badges.length > 0 ? (
         <div className="flex flex-wrap items-center gap-2">
           {status ? (

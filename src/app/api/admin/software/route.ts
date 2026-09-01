@@ -15,6 +15,7 @@ import {
 import { serializeBadges } from "@/lib/productBadges";
 import { cleanGuideHtml } from "@/lib/productGuide";
 import { RATE_ABSENT, RATE_BAD, readRefundRate } from "@/lib/refundRate";
+import { PILL_ABSENT, PILL_BAD, readStatusPill } from "@/lib/statusPill";
 import { uniqueProductSlug } from "@/lib/routes";
 import { slugify } from "@/lib/slug";
 
@@ -206,6 +207,10 @@ export async function PATCH(request: Request) {
     /** The pills beside the detection state, sent whole. An empty list takes
      *  them all off the page. */
     badges?: unknown;
+    /** "auto" | "show" | "hide" — whether the detection pill is drawn on the
+     *  product's own page. Its own field rather than part of the badge list
+     *  because the shop sets it beside the state it hides, not beside them. */
+    statusPill?: unknown;
     imageUrl?: string;
     videoUrl?: string;
   } | null;
@@ -217,6 +222,14 @@ export async function PATCH(request: Request) {
   if (refundRate === RATE_BAD) {
     return NextResponse.json(
       { error: "Tỷ lệ hoàn trả phải là số nguyên từ 0 đến 100" },
+      { status: 400 },
+    );
+  }
+
+  const statusPill = readStatusPill(body?.statusPill);
+  if (statusPill === PILL_BAD) {
+    return NextResponse.json(
+      { error: "Tùy chọn hiện trạng thái không hợp lệ" },
       { status: 400 },
     );
   }
@@ -313,6 +326,10 @@ export async function PATCH(request: Request) {
       ...(body?.badges !== undefined
         ? { badge: serializeBadges(body.badges) }
         : {}),
+      // Null is a real answer here — "leave it to the badges" — so the column
+      // is written whenever the field was sent at all, not merely when it is
+      // truthy.
+      ...(statusPill !== PILL_ABSENT ? { showStatus: statusPill } : {}),
       // "" clears the picture, dropping the card back to its empty frame.
       ...(body?.imageUrl !== undefined ? { imageUrl: body.imageUrl.trim() || null } : {}),
       // Stored as pasted. Validation happens where it renders, so a link that

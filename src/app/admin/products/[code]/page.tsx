@@ -15,6 +15,7 @@ import { noteToEditorHtml, parseFeatures } from "@/lib/productFeatures";
 import { parseRequirements } from "@/lib/productRequirements";
 import { guideToEditorHtml } from "@/lib/productGuide";
 import { productHref } from "@/lib/routes";
+import { statusPillMode } from "@/lib/statusPill";
 
 export const metadata: Metadata = { title: "Chi tiết sản phẩm | Quản trị" };
 export const dynamic = "force-dynamic";
@@ -118,6 +119,7 @@ export default async function AdminAccountDetailPage({
             name: software.name ?? software.code,
             categoryName: software.category.name,
             softwareStatus: software.softwareStatus,
+            statusPill: statusPillMode(software.showStatus),
             status: software.status,
             price: Number(software.price),
             // Lifted to editor HTML here so the client bundle never needs the

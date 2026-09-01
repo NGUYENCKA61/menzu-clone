@@ -11,6 +11,7 @@ import {
 import { db } from "@/lib/db";
 import { docHtmlToPlainText } from "@/lib/docHtml";
 import { parseBadges } from "@/lib/productBadges";
+import { showsStatusPill } from "@/lib/statusPill";
 import { parseFeatures } from "@/lib/productFeatures";
 import { productHref } from "@/lib/routes";
 import { weaponKey } from "@/lib/weaponImages";
@@ -616,6 +617,10 @@ export async function getSoftwareDetail(slug: string): Promise<SoftwareDetail | 
   });
   if (!p) return null;
 
+  // Read once: the pill beside them is drawn or not depending on how many
+  // there are.
+  const badges = parseBadges(p.badge);
+
   return {
     code: p.code,
     slug: p.slug,
@@ -634,11 +639,14 @@ export async function getSoftwareDetail(slug: string): Promise<SoftwareDetail | 
     guideHtml: p.guide ?? "",
     setupGuideHtml: p.setupGuide ?? "",
     softwareStatus: p.softwareStatus,
+    // Resolved here rather than in the panel so the client never has to know
+    // what the null in that column means.
+    showStatus: showsStatusPill(p.showStatus, badges.length),
     // Null when the shop has promised no figure; the policy block prints the
     // line only when there is one to print.
     refundRate: p.refundRate,
     // Empty draws no pills at all.
-    badges: parseBadges(p.badge),
+    badges,
     images: p.images.length > 0 ? p.images.map((i) => i.url) : p.imageUrl ? [p.imageUrl] : [],
     videoUrl: p.videoUrl,
     packages: p.packages.map((pk) => ({
