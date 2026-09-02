@@ -18,6 +18,7 @@ import { RATE_ABSENT, RATE_BAD, readRefundRate } from "@/lib/refundRate";
 import { PILL_ABSENT, PILL_BAD, readStatusPill } from "@/lib/statusPill";
 import { uniqueProductSlug } from "@/lib/routes";
 import { slugify } from "@/lib/slug";
+import { postStatusToTelegram } from "@/lib/telegramNotify";
 
 const STATUSES = ["UNDETECTED", "DETECTED", "UPDATING"] as const;
 type SoftwareStatusValue = (typeof STATUSES)[number];
@@ -356,6 +357,17 @@ export async function PATCH(request: Request) {
         ]
       : []),
   ]);
+
+  // A status the admin flips in the panel reaches the Telegram channel the
+  // same way one flipped from Telegram does. After the write, never blocking it.
+  if (statusChanged && nextStatus) {
+    await postStatusToTelegram(
+      product.id,
+      nextStatus,
+      body?.statusNote?.trim() || null,
+      body?.statusImageUrl?.trim() || null,
+    );
+  }
 
   return NextResponse.json({ ok: true });
 }

@@ -7,6 +7,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { getShopSettings } from "@/lib/settingsStore";
 import { parseStatusCommand } from "@/lib/statusCommand";
+import { postStatusToTelegram } from "@/lib/telegramNotify";
 
 /**
  * Telegram's webhook: the shop's own channel drives the detection state.
@@ -171,6 +172,10 @@ export async function POST(request: Request) {
       },
     }),
   ]);
+
+  // Announce it back out to the channel the customers watch — after the change
+  // is saved, and never blocking the webhook's reply to Telegram.
+  await postStatusToTelegram(product.id, command.status, command.note || null, imageUrl);
 
   return ok({
     code: command.productCode,
