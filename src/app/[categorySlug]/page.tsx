@@ -60,11 +60,27 @@ function toAmount(raw: string | undefined): number | undefined {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { categorySlug: slug } = await params;
   const data = await getCategoryPage(slug);
+  const name = data?.name ?? slug;
+  const canonical = categoryHref(slug);
+  // A real sentence for the search snippet and the social card, built from what
+  // the category actually holds rather than left blank.
+  const kinds = data
+    ? [data.accountTotal > 0 ? "tài khoản game" : "", data.softwareTotal > 0 ? "phần mềm hỗ trợ" : ""]
+        .filter(Boolean)
+        .join(" và ")
+    : "";
+  const description = `${name} tại THICHTHIHACK${kinds ? ` — ${kinds}` : ""}: giá tốt, giao dịch tự động, uy tín.`;
   return {
-    title: `Danh mục ${data?.name ?? slug}`,
+    title: `Danh mục ${name}`,
+    description,
     // The category sits at the root and is reached from several groups; the
     // canonical says which of those addresses is the page itself.
-    alternates: { canonical: categoryHref(slug) },
+    alternates: { canonical },
+    openGraph: {
+      title: `Danh mục ${name}`,
+      description,
+      url: canonical,
+    },
   };
 }
 
