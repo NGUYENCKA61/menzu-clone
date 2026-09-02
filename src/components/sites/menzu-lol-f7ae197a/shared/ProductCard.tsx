@@ -84,10 +84,10 @@ export function ProductCard({ product }: ProductCardProps) {
   // stretch-to-fit grid.
   const skinTiles = (
     <>
-      {skinChips.map((skin) =>
+      {skinChips.map((skin, index) =>
         skin.imageUrl ? (
           <span
-            key={skin.name}
+            key={`${skin.name}-${index}`}
             title={skin.name}
             className="relative grid h-12 w-[72px] shrink-0 place-items-center overflow-hidden rounded-[10px] border border-[#24252a] bg-[#0c0d0f]"
           >
@@ -101,7 +101,7 @@ export function ProductCard({ product }: ProductCardProps) {
           </span>
         ) : (
           <span
-            key={skin.name}
+            key={`${skin.name}-${index}`}
             title={skin.name}
             className="grid h-12 w-[72px] shrink-0 place-items-center overflow-hidden rounded-[10px] border border-[#24252a] bg-[#0c0d0f] px-1 text-center text-[9px] font-extrabold leading-tight text-[#9b9da5]"
           >

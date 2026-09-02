@@ -309,7 +309,13 @@ export async function POST(request: Request) {
       );
     }
     if (message.startsWith("SHORTKEY:")) {
-      const [, name, left] = message.split(":");
+      // The name is user-facing and can hold a colon ("Valorant: Premium"),
+      // so split from the right: the count is the last field, the name is
+      // everything between the prefix and it.
+      const rest = message.slice("SHORTKEY:".length);
+      const cut = rest.lastIndexOf(":");
+      const name = cut >= 0 ? rest.slice(0, cut) : rest;
+      const left = cut >= 0 ? rest.slice(cut + 1) : "";
       return NextResponse.json(
         {
           error:

@@ -1,3 +1,4 @@
+import { timingSafeEqual } from "node:crypto";
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 
@@ -113,7 +114,11 @@ export async function POST(request: Request) {
   if (!token || !secret || !chatId) {
     return NextResponse.json({ error: "Chưa bật đồng bộ Telegram" }, { status: 404 });
   }
-  if (request.headers.get("x-telegram-bot-api-secret-token") !== secret) {
+  // Constant-time, like the wallet webhook/sync secrets: a plain !== leaks the
+  // secret one byte at a time through response timing.
+  const given = Buffer.from(request.headers.get("x-telegram-bot-api-secret-token") ?? "");
+  const want = Buffer.from(secret);
+  if (given.length !== want.length || !timingSafeEqual(given, want)) {
     return NextResponse.json({ error: "Sai secret" }, { status: 401 });
   }
 

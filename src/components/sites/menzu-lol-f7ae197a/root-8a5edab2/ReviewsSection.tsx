@@ -98,9 +98,9 @@ export function ReviewsSection({ reviews = REVIEWS }: { reviews?: Review[] } = {
 
           <div className="lg:col-span-9 relative min-w-0">
             <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory hide-scrollbar menzu-scroll-x overscroll-x-contain cursor-grab active:cursor-grabbing select-none">
-              {reviews.map((review) => (
+              {reviews.map((review, index) => (
                 <div
-                  key={review.avatar}
+                  key={`${review.name}-${review.date}-${index}`}
                   className="w-[280px] sm:w-[320px] lg:w-[calc((100%-32px)/3)] border border-white/[0.08] p-5 rounded-[15px] snap-start shrink-0 flex flex-col group relative overflow-hidden cursor-pointer hover:border-[var(--menzu-accent)]/40 transition-colors bg-[#101114]"
                 >
                   <div className="flex items-center gap-3 mb-3">
