@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 
 import {
   SESSION_COOKIE,
+  hashPassword,
+  isLegacyHash,
   newSessionToken,
   sessionExpiry,
   verifyPassword,
@@ -120,6 +122,23 @@ export async function POST(request: Request) {
       },
       { status: 401 },
     );
+  }
+
+  // The password was right, so this is the one moment the plaintext exists and
+  // the account can be moved off the old site's unsalted SHA1 without asking
+  // anybody to reset anything. Done before the blocked check on purpose: a
+  // blocked account that later gets unblocked should already be upgraded.
+  // Failure here is not the customer's problem — they signed in correctly, so
+  // the old hash simply survives to be upgraded on their next visit.
+  if (isLegacyHash(user.passwordHash)) {
+    try {
+      await db.user.update({
+        where: { id: user.id },
+        data: { passwordHash: await hashPassword(password) },
+      });
+    } catch (error) {
+      console.error("[login] khong nang cap duoc hash cu", error);
+    }
   }
 
   // Checked after the password, deliberately: refusing a blocked account

@@ -1,6 +1,6 @@
 import "server-only";
 
-import { randomBytes, scrypt, timingSafeEqual } from "node:crypto";
+import { createHash, randomBytes, scrypt, timingSafeEqual } from "node:crypto";
 import { promisify } from "node:util";
 
 const scryptAsync = promisify(scrypt) as (
@@ -23,6 +23,29 @@ export async function hashPassword(password: string): Promise<string> {
   return `scrypt$${salt.toString("hex")}$${key.toString("hex")}`;
 }
 
+/**
+ * The old site's hash for a password, or null when the shape is not one.
+ *
+ * The imported accounts carry `sha1md5$<40 hex>`: the old PHP site stored
+ * `sha1(md5(password))`, established by finding the recipe that reproduced the
+ * hashes of hundreds of common passwords in the exported table. Double-hashing
+ * an unsalted digest is the hashing of about 2010 and is not defensible in
+ * 2026, so it is accepted here only for as long as it takes each of those
+ * people to sign in once — the alternative was telling 8,477 customers to reset
+ * a password they still know. There is no pepper: the recipe above verified
+ * without one.
+ */
+function legacyHash(password: string, algorithm: string): Buffer | null {
+  if (algorithm !== "sha1md5") return null;
+  const md5 = createHash("md5").update(password, "utf8").digest("hex");
+  return createHash("sha1").update(md5, "utf8").digest();
+}
+
+/** True when this hash is one of the old site's and wants replacing. */
+export function isLegacyHash(stored: string | null): boolean {
+  return Boolean(stored) && !stored!.startsWith("scrypt$");
+}
+
 /** Constant-time verification. Returns false for any malformed stored value. */
 export async function verifyPassword(
   password: string,
@@ -30,7 +53,15 @@ export async function verifyPassword(
 ): Promise<boolean> {
   if (!stored) return false;
   const parts = stored.split("$");
-  if (parts.length !== 3 || parts[0] !== "scrypt") return false;
+  if (parts.length !== 3) {
+    // Two parts is an imported hash: `<algorithm>$<hex>`.
+    if (parts.length !== 2) return false;
+    const expected = Buffer.from(parts[1], "hex");
+    const actual = legacyHash(password, parts[0]);
+    if (!actual || actual.length !== expected.length || expected.length === 0) return false;
+    return timingSafeEqual(actual, expected);
+  }
+  if (parts[0] !== "scrypt") return false;
 
   const salt = Buffer.from(parts[1], "hex");
   const expected = Buffer.from(parts[2], "hex");
