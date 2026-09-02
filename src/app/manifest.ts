@@ -2,6 +2,10 @@ import type { MetadataRoute } from "next";
 
 import { getShopSettings } from "@/lib/settingsStore";
 
+// Rendered per request, like the root layout: it reads the shop's settings,
+// and the build machine has no database (see app/layout.tsx).
+export const dynamic = "force-dynamic";
+
 /**
  * Web app manifest — what Android and Chrome read when a visitor adds the shop
  * to their home screen.

@@ -33,7 +33,10 @@ const STATIC_ROUTES: [path: string, priority: number, freq: Frequency][] = [
 
 type Frequency = "daily" | "weekly" | "monthly" | "yearly";
 
-export const revalidate = 3600;
+// Built per request rather than hourly: the hourly version was prerendered at
+// build time, and the Docker build has no database to read the catalogue from
+// (see app/layout.tsx). Three small queries per crawler visit is nothing.
+export const dynamic = "force-dynamic";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const [products, categories, docs] = await Promise.all([

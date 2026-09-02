@@ -9,6 +9,17 @@ import { SupportWidgetHost } from "@/components/sites/menzu-lol-f7ae197a/shared/
 import { DEFAULT_SETTINGS } from "@/lib/settings";
 import { getShopSettings } from "@/lib/settingsStore";
 
+/**
+ * Every page renders per request. The root metadata, viewport and manifest all
+ * read the shop's settings from the database, and the Docker image is built on
+ * a machine that has no database yet — the Postgres container is a sibling
+ * that only exists once the stack is up, so prerendering at build time died on
+ * the first query. The pages that used to be static (/bio, /docs, the sign-in
+ * forms) render in a few milliseconds anyway, which costs less than the build
+ * needing a live database.
+ */
+export const dynamic = "force-dynamic";
+
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin", "vietnamese"],
