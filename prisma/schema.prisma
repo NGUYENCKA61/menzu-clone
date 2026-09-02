@@ -113,6 +113,9 @@ model User {
   licenseKeys   LicenseKey[]
   refundRequests RefundRequest[]
 
+  /// The admin list sorts newest-first and pages through; at 8k+ accounts an
+  /// unindexed createdAt means a full sort on every page.
+  @@index([createdAt])
   @@map("users")
 }
 

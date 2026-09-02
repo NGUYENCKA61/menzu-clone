@@ -1179,17 +1179,23 @@ export async function listUsers(
     },
   });
 
+  // Aggregate only the page's own users, not the whole topups/orders tables.
+  // At 8,477 accounts and thousands of top-ups, an unfiltered groupBy scanned
+  // both tables in full on every page load; scoping it to these ids keeps the
+  // list flat no matter how large the shop grows.
+  const ids = users.map((u) => u.id);
+
   const topped = await db.topUp.groupBy({
     by: ["userId"],
     _sum: { amount: true },
-    where: { status: "COMPLETED" },
+    where: { status: "COMPLETED", userId: { in: ids } },
   });
   const toppedByUser = new Map(topped.map((row) => [row.userId, Number(row._sum.amount ?? 0)]));
 
   const spend = await db.order.groupBy({
     by: ["userId"],
     _sum: { total: true },
-    where: { status: "PAID" },
+    where: { status: "PAID", userId: { in: ids } },
   });
   const spentByUser = new Map(spend.map((row) => [row.userId, Number(row._sum.total ?? 0)]));
 
