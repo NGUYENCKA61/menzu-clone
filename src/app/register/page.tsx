@@ -15,8 +15,14 @@ import { permanentRedirect } from "next/navigation";
 export default async function RegisterRedirect({
   searchParams,
 }: {
-  searchParams: Promise<{ ref?: string }>;
+  searchParams: Promise<{ ref?: string; next?: string }>;
 }) {
-  const { ref } = await searchParams;
-  permanentRedirect(ref ? `/signup?ref=${encodeURIComponent(ref)}` : "/signup");
+  const { ref, next } = await searchParams;
+  const query = new URLSearchParams();
+  if (ref) query.set("ref", ref);
+  // Carried across so a gate that sent the buyer to the legacy /register path
+  // still returns them to the product after they sign up.
+  if (next) query.set("next", next);
+  const suffix = query.toString();
+  permanentRedirect(suffix ? `/signup?${suffix}` : "/signup");
 }

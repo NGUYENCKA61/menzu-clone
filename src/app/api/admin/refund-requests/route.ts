@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { getAdmin } from "@/lib/admin";
+import { announceToUser } from "@/lib/announcementStore";
 import { db } from "@/lib/db";
 import { readRefundAmount } from "@/lib/refundRequests";
 import { makeCode } from "@/lib/topupStore";
@@ -81,6 +82,15 @@ export async function PATCH(request: Request) {
       where: { id },
       data: { status: "REJECTED", adminNote: note, decidedAt: new Date() },
     });
+    // The buyer opened this request and has been waiting on an answer; tell
+    // them it was declined rather than leaving it silently stuck as pending.
+    await announceToUser(found.userId, {
+      title: "Yêu cầu hoàn tiền chưa được duyệt",
+      body:
+        `Đơn ${found.order.code}: yêu cầu hoàn tiền chưa được chấp nhận.` +
+        (note ? ` Lý do: ${note}` : " Bạn liên hệ hỗ trợ nếu cần thêm thông tin."),
+      type: "INFO",
+    });
     return NextResponse.json({ ok: true });
   }
 
@@ -151,6 +161,22 @@ export async function PATCH(request: Request) {
     }
     throw error;
   }
+
+  // Approved, and the money has moved — tell the buyer, and where to see it.
+  // Outside the transaction on purpose: a failed notice must not roll back a
+  // refund that already paid out.
+  const moneyText = `${Number(amount).toLocaleString("vi-VN")}đ`;
+  await announceToUser(found.userId, {
+    title: "Yêu cầu hoàn tiền được duyệt",
+    body:
+      method === "WALLET"
+        ? `Đơn ${found.order.code} đã được hoàn ${moneyText} vào ví của bạn.`
+        : `Đơn ${found.order.code} đã được duyệt hoàn ${moneyText}. Shop sẽ chuyển cho bạn.`,
+    type: "INFO",
+    ...(method === "WALLET"
+      ? { cta: { label: "Xem giao dịch", href: "/transactions" } }
+      : {}),
+  });
 
   return NextResponse.json({ ok: true });
 }

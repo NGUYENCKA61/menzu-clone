@@ -47,6 +47,7 @@ export function RegisterForm({
   panelSubtitle,
   panelTitle,
   refCode = null,
+  next = "/",
 }: {
   turnstileSiteKey: string | null;
   /** Artwork behind the card. Comes from Cấu hình → Giao diện. */
@@ -58,6 +59,9 @@ export function RegisterForm({
   panelTitle: string;
   /** The ?ref= a referral link arrived with; rides along on submit. */
   refCode?: string | null;
+  /** Where to go after signing up, already sanitised on the server. "/" means
+   *  the visitor came on their own, so land them on their profile instead. */
+  next?: string;
 }) {
   const router = useRouter();
   const [username, setUsername] = useState("");
@@ -135,7 +139,9 @@ export function RegisterForm({
       }
 
       router.refresh();
-      router.push("/profile");
+      // Back to whatever gate sent them here (a product they were buying), or
+      // their profile when they arrived on their own.
+      router.push(next === "/" ? "/profile" : next);
     } catch {
       setError("Không kết nối được máy chủ");
       setPending(false);
@@ -362,7 +368,7 @@ export function RegisterForm({
                 <p className="mt-8 text-center text-xs text-neutral-500">
                   Đã có tài khoản?
                   <Link
-                    href="/login"
+                    href={next === "/" ? "/login" : `/login?next=${encodeURIComponent(next)}`}
                     className="text-[var(--menzu-accent)] hover:text-[var(--menzu-accent-dark)] font-black transition-colors ml-1"
                   >
                     Đăng nhập ngay

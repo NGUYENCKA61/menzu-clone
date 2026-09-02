@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft, Eye, EyeOff, Lock, User } from "lucide-react";
 
 import { canGoBack } from "@/lib/navigation";
-import { safeNext } from "@/lib/safeNext";
 
 import { AuthPanelSlider } from "./AuthPanelSlider";
 import { StatusToast } from "./StatusToast";
@@ -45,6 +44,7 @@ export function LoginForm({
   slideSeconds,
   panelSubtitle,
   panelTitle,
+  next = "/",
 }: {
   turnstileSiteKey: string | null;
   /** True once that provider's keys are in Cấu hình — the button becomes a door. */
@@ -57,6 +57,9 @@ export function LoginForm({
   panelSubtitle: string;
   /** Newlines are line breaks, which is how the two-row overlay is written. */
   panelTitle: string;
+  /** Where to return after signing in, already sanitised on the server. "/"
+   *  when the visitor came here on their own rather than through a gate. */
+  next?: string;
 }) {
   const router = useRouter();
   const [username, setUsername] = useState("");
@@ -106,12 +109,10 @@ export function LoginForm({
     return () => window.clearTimeout(timer);
   }, []);
 
-  /** Honour ?next= so the "Mua Ngay" gate returns you to the product. */
+  /** Honour ?next= so the "Mua Ngay" gate returns you to the product. The
+   *  target was sanitised on the server and handed down as `next`. */
   function redirectAfterLogin() {
-    const next = new URLSearchParams(window.location.search).get("next");
-    // safeNext, not "starts with a slash": //evil.com starts with a slash and
-    // is another website.
-    window.location.href = safeNext(next);
+    window.location.href = next;
   }
 
   async function handleSubmit(event: React.FormEvent) {
@@ -323,7 +324,7 @@ export function LoginForm({
                 <p className="mt-8 text-center text-xs text-neutral-500">
                   Chưa có tài khoản?
                   <Link
-                    href="/signup"
+                    href={next === "/" ? "/signup" : `/signup?next=${encodeURIComponent(next)}`}
                     className="text-[var(--menzu-accent)] hover:text-[var(--menzu-accent-dark)] font-black transition-colors ml-1"
                   >
                     Tạo mới ngay

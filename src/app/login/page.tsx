@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 
 import { SiteFooter } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/SiteFooter";
 import { LoginForm } from "@/components/sites/menzu-lol-f7ae197a/shared/LoginForm";
+import { safeNext } from "@/lib/safeNext";
 import { getCurrentUser } from "@/lib/session";
 import { discordOauthEnabled, googleOauthEnabled } from "@/lib/settings";
 import { getShopSettings } from "@/lib/settingsStore";
@@ -21,14 +22,24 @@ export const metadata: Metadata = {
  * The live site has no header and no tools rail on /login — just the card and
  * the footer. Verified against https://menzu.lol/login while logged out.
  */
-export default async function LoginPage() {
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ next?: string }>;
+}) {
   // Asked of the database, not of the cookie: a customer whose session was
   // revoked — password changed, other devices signed out, thirty days gone —
   // still carries the cookie, and bouncing them on that alone locked them out
   // of the very page that would fix it.
   if (await getCurrentUser()) redirect("/");
 
-  const settings = await getShopSettings();
+  const [settings, { next: rawNext }] = await Promise.all([
+    getShopSettings(),
+    searchParams,
+  ]);
+  // Sanitised on the server so the browser never sees an unsafe target, and so
+  // the "Tạo mới ngay" link can carry it on to /signup unchanged.
+  const next = safeNext(rawNext);
 
   return (
     <div className="min-h-screen flex flex-col text-white overflow-x-clip selection:bg-[var(--menzu-accent)]/30">
@@ -47,6 +58,7 @@ export default async function LoginPage() {
           slideSeconds={settings.authSlideSeconds}
           panelSubtitle={settings.authPanelSubtitle}
           panelTitle={settings.authLoginTitle}
+          next={next}
         />
         <SiteFooter />
       </main>

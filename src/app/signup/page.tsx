@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 
 import { SiteFooter } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/SiteFooter";
 import { RegisterForm } from "@/components/sites/menzu-lol-f7ae197a/shared/RegisterForm";
+import { safeNext } from "@/lib/safeNext";
 import { getCurrentUser } from "@/lib/session";
 import { getShopSettings } from "@/lib/settingsStore";
 import { turnstileEnabled } from "@/lib/turnstile";
@@ -19,13 +20,19 @@ export const metadata: Metadata = {
 export default async function RegisterPage({
   searchParams,
 }: {
-  searchParams: Promise<{ ref?: string }>;
+  searchParams: Promise<{ ref?: string; next?: string }>;
 }) {
   // The live check, for the same reason /login makes it: a dead cookie must
   // not stand between a customer and the form.
   if (await getCurrentUser()) redirect("/");
 
-  const [settings, { ref }] = await Promise.all([getShopSettings(), searchParams]);
+  const [settings, { ref, next: rawNext }] = await Promise.all([
+    getShopSettings(),
+    searchParams,
+  ]);
+  // Sanitised here so the form returns the new customer to the product they
+  // were buying rather than always to /profile. "/" means they came on their own.
+  const next = safeNext(rawNext);
 
   return (
     <div className="min-h-screen flex flex-col text-white overflow-x-clip selection:bg-[var(--menzu-accent)]/30">
@@ -42,6 +49,7 @@ export default async function RegisterPage({
           panelSubtitle={settings.authPanelSubtitle}
           panelTitle={settings.authSignupTitle}
           refCode={ref ?? null}
+          next={next}
         />
         <SiteFooter />
       </main>
