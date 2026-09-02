@@ -218,9 +218,9 @@ export function SupportWidget({
     // inside it passes clicks through rather than swallowing them, which means
     // they land on the frame instead. Anything the page puts in that corner
     // became unclickable: the paging buttons on the admin lists sit there.
-    <div className="pointer-events-none fixed bottom-0 right-4 z-[101] hidden flex-col items-end sm:flex">
+    <div className="pointer-events-none fixed bottom-0 right-4 z-[101] flex flex-col items-end">
       <div
-        className={`mb-0 w-[340px] origin-bottom transition-all duration-300 ${
+        className={`mb-0 w-[calc(100vw-2rem)] max-w-[340px] origin-bottom transition-all duration-300 ${
           open
             ? "pointer-events-auto translate-y-0 opacity-100"
             : "pointer-events-none translate-y-4 opacity-0"
