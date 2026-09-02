@@ -58,6 +58,7 @@ docs
 scripts
 
 # Docker files themselves (no need to copy into image)
+deploy
 Dockerfile
 docker-compose.yml
 .dockerignore

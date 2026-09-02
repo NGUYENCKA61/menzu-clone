@@ -59,7 +59,11 @@ services:
     container_name: menzu-app
     restart: unless-stopped
     ports:
-      - "${PORT:-3000}:3000"
+      # Bound to loopback only: Caddy on the host (deploy/Caddyfile) is the
+      # public face and terminates HTTPS. Exposing 3000 to the world would let
+      # visitors reach the plain-http app, where the secure cookie cannot be
+      # set and login silently fails.
+      - "127.0.0.1:${PORT:-3000}:3000"
     environment:
       - NODE_ENV=production
       - NEXT_TELEMETRY_DISABLED=1
@@ -69,8 +73,9 @@ services:
     volumes:
       # Uploaded images (catalogue art rsynced up + everything the admin uploads
       # later) live on the host, not in the image, so a rebuild never wipes them
-      # and they can be backed up on their own.
-      - ./uploads:/app/public/uploads
+      # and they can be backed up on their own. UPLOADS_DIR points Caddy's file
+      # server at the same directory (see deploy/Caddyfile).
+      - ${UPLOADS_DIR:-./uploads}:/app/public/uploads
     depends_on:
       postgres:
         condition: service_healthy
