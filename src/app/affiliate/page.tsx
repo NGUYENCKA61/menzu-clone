@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
-import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { HandCoins, Handshake, Link2, UserPlus, Users } from "lucide-react";
 
@@ -10,6 +9,7 @@ import { ReferralLinkBox } from "@/components/sites/menzu-lol-f7ae197a/shared/Re
 import { formatVnd } from "@/components/sites/menzu-lol-f7ae197a/shared/productData";
 import { db } from "@/lib/db";
 import { REFERRAL_PERCENT } from "@/lib/referral";
+import { absoluteUrl } from "@/lib/seo";
 import { getCurrentUser } from "@/lib/session";
 
 export const metadata: Metadata = {
@@ -63,8 +63,7 @@ export default async function AffiliatePage() {
   const user = await getCurrentUser();
   if (!user) redirect("/login?next=%2Faffiliate");
 
-  const [head, referredCount, earnedAgg, recent] = await Promise.all([
-    headers(),
+  const [referredCount, earnedAgg, recent] = await Promise.all([
     db.user.count({ where: { referredById: user.id } }),
     db.referralEarning.aggregate({
       where: { userId: user.id },
@@ -86,11 +85,10 @@ export default async function AffiliatePage() {
     }),
   ]);
 
-  // The link is built server-side from this request's own host, so what the
-  // box shows is exactly what the visitor's address bar said.
-  const host = head.get("host") ?? "localhost:3100";
-  const proto = head.get("x-forwarded-proto") ?? "http";
-  const link = `${proto}://${host}/register?ref=${user.uid}`;
+  // Built from the shop's configured address, not this request's Host header:
+  // the referral link is copied and shared, so it must be the real public
+  // domain even when the page was reached over a proxy or by IP.
+  const link = absoluteUrl(`/register?ref=${user.uid}`);
 
   const totalEarned = Number(earnedAgg._sum.amount ?? 0n);
 

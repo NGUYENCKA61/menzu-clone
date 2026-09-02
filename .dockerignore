@@ -10,6 +10,15 @@ out
 build
 dist
 
+# Uploaded images are a host-mounted volume (./uploads), not baked into the
+# image — a rebuild must not wipe what the admin uploaded, and the catalogue
+# art is rsynced up separately.
+public/uploads
+
+# Old-site database dump: real customer emails and password hashes. Must never
+# reach a built image any more than it reaches git.
+private
+
 # Git
 .git
 .gitignore

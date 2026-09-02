@@ -1,11 +1,62 @@
+# Production stack for the VPS: Postgres, a one-shot migrator, and the app.
+#
+#   docker compose up -d --build
+#
+# Reads secrets from .env (never committed): POSTGRES_PASSWORD, DATABASE_URL,
+# NEXT_PUBLIC_SITE_URL, and anything optional (ANTHROPIC_API_KEY, SMTP…). See
+# .env.production.example for the full list.
+
 services:
+  # The database, on the same machine. Its data lives in a named volume so it
+  # survives `docker compose down` and every image rebuild.
+  postgres:
+    image: postgres:16-alpine
+    container_name: menzu-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-menzu}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: ${POSTGRES_DB:-menzu}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-menzu} -d ${POSTGRES_DB:-menzu}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # Applies pending migrations once, then exits. The app waits for it to finish
+  # so the schema is always current before a single request is served — and it
+  # runs here, not in the app's start command, so two app replicas could never
+  # migrate at the same time. Uses the builder stage because that is the one
+  # with the Prisma CLI and the migration files.
+  migrate:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: builder
+    image: menzu-migrate:latest
+    env_file:
+      - path: .env
+        required: true
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: ["npx", "prisma", "migrate", "deploy"]
+    restart: "no"
+
   app:
     build:
       context: .
       dockerfile: Dockerfile
       target: runner
-    image: ai-website-cloner:latest
-    container_name: ai-website-cloner
+      args:
+        # Baked into the build — it reaches the browser, so it cannot wait for
+        # runtime env. Must be the real https domain.
+        NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL}
+    image: menzu-app:latest
+    container_name: menzu-app
     restart: unless-stopped
     ports:
       - "${PORT:-3000}:3000"
@@ -13,41 +64,24 @@ services:
       - NODE_ENV=production
       - NEXT_TELEMETRY_DISABLED=1
     env_file:
-      - path: .env.local
-        required: false
       - path: .env
-        required: false
-    healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://localhost:3000/ || exit 1"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 10s
-
-  dev:
-    build:
-      context: .
-      dockerfile: Dockerfile.dev
-    image: ai-website-cloner:dev
-    container_name: ai-website-cloner-dev
-    restart: unless-stopped
-    ports:
-      - "${DEV_PORT:-3001}:3000"
-    environment:
-      - NODE_ENV=development
-      - NEXT_TELEMETRY_DISABLED=1
-    env_file:
-      - path: .env.local
-        required: false
-      - path: .env
-        required: false
+        required: true
     volumes:
-      - .:/app
-      - /app/node_modules
-      - /app/.next
+      # Uploaded images (catalogue art rsynced up + everything the admin uploads
+      # later) live on the host, not in the image, so a rebuild never wipes them
+      # and they can be backed up on their own.
+      - ./uploads:/app/public/uploads
+    depends_on:
+      postgres:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://localhost:3000/ || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 15s
+      start_period: 20s
+
+volumes:
+  pgdata:

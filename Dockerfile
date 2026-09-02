@@ -48,6 +48,13 @@ COPY . .
 
 ENV NODE_ENV=production
 
+# NEXT_PUBLIC_SITE_URL is inlined at build time (it reaches the browser), so it
+# must be present now, not merely at runtime. Passed from docker-compose's
+# build.args; without it every canonical, OG tag and sitemap URL would freeze to
+# the localhost fallback and the live site would be de-indexed.
+ARG NEXT_PUBLIC_SITE_URL
+ENV NEXT_PUBLIC_SITE_URL=${NEXT_PUBLIC_SITE_URL}
+
 # Next.js collects completely anonymous telemetry data about general usage.
 # Learn more here: https://nextjs.org/telemetry
 # Uncomment the following line in case you want to disable telemetry during the build.
@@ -77,6 +84,14 @@ FROM node:${NODE_VERSION} AS runner
 
 # Set working directory
 WORKDIR /app
+
+# ffmpeg/ffprobe for hero-video re-encoding (src/lib/heroVideo.ts). Without them
+# the code already falls back to storing the original untouched, so this is an
+# optimisation, not a hard dependency — but the shop uploads hero videos, so it
+# earns its place. Cleaned in the same layer to keep the image small.
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends ffmpeg \
+  && rm -rf /var/lib/apt/lists/*
 
 # Set production environment variables
 ENV NODE_ENV=production
