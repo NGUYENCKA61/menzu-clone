@@ -157,7 +157,7 @@ export function AssistantChat() {
       <p className="flex items-start gap-1.5 px-3 pb-2.5 text-[10px] leading-relaxed text-neutral-500">
         <Sparkles size={11} className="mt-[1px] shrink-0" />
         Trợ lý AI tư vấn sản phẩm và hướng dẫn cài đặt. Không xem được đơn hàng hay
-        số dư — việc đó nhắn admin bên dưới.
+        số dư — việc đó bấm &quot;Nhắn admin&quot; ở trên.
       </p>
     </div>
   );

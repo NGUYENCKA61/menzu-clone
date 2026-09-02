@@ -62,3 +62,11 @@ docs/research/**/captures/*.html
 
 # Local Netlify folder
 .netlify
+
+# Database dumps from the old PHP site: real customer emails and password
+# hashes for ~8,600 people, and this repository is public. Never commit these.
+private/
+*.sql
+*.sql.gz
+*.sql.zip
+!prisma/migrations/**/*.sql

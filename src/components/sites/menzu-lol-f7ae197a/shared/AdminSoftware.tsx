@@ -42,8 +42,8 @@ const MINI =
   "rounded-lg border border-white/10 bg-neutral-950 px-2 py-1 text-[11px] font-bold text-neutral-200";
 
 const SOFTWARE_STATUS: Record<string, string> = {
-  UNDETECTED: "Undetected",
-  DETECTED: "Detected",
+  UNDETECTED: "Chưa phát hiện",
+  DETECTED: "Đã phát hiện",
   UPDATING: "Đang cập nhật",
 };
 

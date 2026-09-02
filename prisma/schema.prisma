@@ -111,6 +111,7 @@ model User {
   feedbacks     Feedback[]
   statusSubscriptions SoftwareStatusSubscription[]
   licenseKeys   LicenseKey[]
+  refundRequests RefundRequest[]
 
   @@map("users")
 }
@@ -928,8 +929,74 @@ model Order {
   /// stock — that shortfall IS the shop's to-do list.
   licenseKeys LicenseKey[]
 
+  /// What the buyer has asked back, if anything. At most one open request at
+  /// a time, which the route enforces rather than the schema: a rejected
+  /// request must not block a second attempt after the shop says why.
+  refundRequests RefundRequest[]
+
   @@index([userId, createdAt])
   @@map("orders")
+}
+
+enum RefundStatus {
+  /// Waiting on the shop. The only state a buyer can create.
+  PENDING
+  /// The shop agreed. How the money went back is `method`.
+  APPROVED
+  /// The shop said no, with `adminNote` carrying why.
+  REJECTED
+}
+
+/// How an approved refund was actually paid.
+enum RefundMethod {
+  /// Outside the site — bank transfer, e-wallet, cash. The shop moves it and
+  /// this row is only the note that it agreed to.
+  MANUAL
+  /// Credited to the buyer's balance here, which the site can do itself. The
+  /// wallet transaction is written in the same database transaction as the
+  /// decision, so a refund that is recorded is a refund that was paid.
+  WALLET
+}
+
+/// A buyer asking for money back on one order.
+///
+/// Its own table rather than columns on the order: an order can be argued
+/// about twice — refused once, asked again with a screenshot — and each round
+/// has its own words, its own evidence and its own date. Flattening that into
+/// the order would keep only the last one.
+model RefundRequest {
+  id        String       @id @default(cuid())
+  orderId   String
+  order     Order        @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  /// Denormalised from the order so the desk can list one buyer's requests
+  /// without joining, and so a request survives being read after the order
+  /// row is gone.
+  userId    String
+  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// What went wrong, in the buyer's own words. Required: a request with no
+  /// reason is a button press, and the shop cannot answer one.
+  reason    String
+  /// Optional screenshot — a ban message, a crash, a key that was refused.
+  imageUrl  String?
+  status    RefundStatus @default(PENDING)
+  /// How it was paid. Null while pending and on a rejection — there is no
+  /// method for money that never moved.
+  method    RefundMethod?
+  /// What was actually given back, in đồng. Not derived from the order and the
+  /// product's promised percentage: the shop can settle for more or less than
+  /// the promise, and a figure recomputed later from a rate that has since
+  /// changed would quietly rewrite history.
+  amount    BigInt?
+  /// The shop's answer, shown to the buyer beside the decision.
+  adminNote String?
+  createdAt DateTime     @default(now())
+  /// When the shop decided. Null while it is still waiting.
+  decidedAt DateTime?
+
+  @@index([userId, createdAt])
+  @@index([status, createdAt])
+  @@index([orderId])
+  @@map("refund_requests")
 }
 
 /// Who a key is allowed to be: on the shelf, handed to a buyer, or withdrawn
@@ -1031,6 +1098,10 @@ enum SpinWinStatus {
   PENDING
   /// Sent. Kept rather than deleted so a customer can be answered later.
   SENT
+  /// The winner did not want it and took points instead. Kept rather than
+  /// deleted for the same reason SENT is: the row is the answer to "what
+  /// happened to my prize".
+  EXCHANGED
 }
 
 enum TransactionKind {
@@ -1054,6 +1125,66 @@ enum TransactionStatus {
 /// table exists: nothing in the account can pay it out, so the row is what
 /// tells the shop there is a parcel to send — and what stops "tôi trúng pad
 /// chuột" from being an argument nobody can settle.
+/// One wedge of the reward wheel, as the shop has it set now.
+///
+/// The table used to live in code, which meant retuning the odds — or adding a
+/// prize for Tết — was a deploy. It is data now, and `DEFAULT_PRIZES` in
+/// `lib/spin.ts` is the table a shop that has never touched this screen still
+/// spins on: an empty table means "not set up", never "a wheel with no
+/// prizes".
+///
+/// A won prize does not read from here. `SpinWin` copies the label and the
+/// amount at the moment of the draw, because what a customer was promised
+/// cannot change afterwards just because the shop retuned the wheel.
+model SpinPrize {
+  /// The shop's own id for the slice — "cash-2k". Stored on every SpinWin, so
+  /// it is the primary key rather than a cuid nobody would recognise.
+  id        String   @id
+  label     String
+  /// The short form the wedge prints; a wedge is only so wide.
+  short     String
+  /// A sentence about the prize, for the places with room for one — the reward
+  /// list and the card that tells a winner what they got. Not drawn on the
+  /// wedge itself, which fits a few characters and no more.
+  description String?
+  /// NOTHING | POINTS | BALANCE | ITEM | VOUCHER. A string rather than an enum: the code
+  /// already owns this vocabulary and a migration per new kind would be the
+  /// deploy this table exists to avoid.
+  kind      String
+  /// Points for POINTS, đồng for BALANCE, ignored by the other two.
+  amount    Int      @default(0)
+  /// Picture in the wedge, served from /public. Null draws the label alone.
+  image     String?
+  /// What the wedge is painted — a name from the palette in lib/spin.ts, not a
+  /// colour value. Null (and any name the palette has since dropped) means
+  /// "auto": alternating darks with the rare slices in violet, which is what
+  /// the wheel did before the shop could choose.
+  color     String?
+  /// Relative chance, not a percentage: the draw divides by the running total,
+  /// so one slice can be retuned without correcting all the others.
+  weight    Int      @default(1)
+  /// Where it sits on the wheel, clockwise from the top.
+  sortOrder Int      @default(0)
+  /// Off keeps the row — and its history — without putting it on the wheel.
+  active    Boolean  @default(true)
+  /// How long a won discount code lasts, in days. Only meaningful on a
+  /// VOUCHER; null falls back to the code's own default. A code that never
+  /// expires is a discount the shop can never retire.
+  voucherDays Int?
+  /// What a winner gets back if they would rather have points than the parcel.
+  /// Only meaningful on an ITEM; null means this one cannot be traded back,
+  /// which is the honest default — the shop decides what its own mousepad is
+  /// worth in points, and a number invented here would be a promise nobody
+  /// made.
+  exchangePoints Int?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([active, sortOrder])
+  @@map("spin_prizes")
+}
+
 model SpinWin {
   id        String        @id @default(cuid())
   userId    String
@@ -1066,6 +1197,32 @@ model SpinWin {
   kind      String
   amount    Int           @default(0)
   status    SpinWinStatus @default(NONE)
+
+  /// Where the parcel goes. Asked for after the wheel stops, not at sign-up:
+  /// most customers never win one, and an address collected from everybody to
+  /// serve the few is a database of home addresses the shop did not need.
+  /// Null until the winner fills the form in.
+  recipient String?
+  phone     String?
+  address   String?
+  /// "Gọi trước khi giao", "giao giờ hành chính" — the winner's own words.
+  note      String?
+  /// The discount code minted for this win, on a VOUCHER row. Stored here as
+  /// well as in `vouchers` because this is the row the winner reads: "what did
+  /// I win" is answered from their own history, not from a table of codes.
+  voucherCode String?
+  /// The courier's number once the parcel is on its way. The winner's page
+  /// reads it back to them, which is the whole point of collecting it: an
+  /// address taken and never answered leaves them with nothing to check.
+  tracking String?
+  /// What the shop wrote back — "gửi qua GHTK, 2-3 ngày". Shown beside the
+  /// tracking number on the winner's own page.
+  shopNote String?
+  /// Points handed back instead of the parcel, on an EXCHANGED row. Stored
+  /// rather than read from the prize table, which the shop can retune
+  /// afterwards.
+  pointsBack Int?
+
   createdAt DateTime      @default(now())
 
   @@index([status, createdAt])
@@ -1316,6 +1473,33 @@ model Announcement {
   /// a heading and no text is a rendering accident, not a notice.
   noticeTitle String?
   noticeBody  String?
+
+  /// Keeps the notice out of the modal that opens by itself. It still lands
+  /// in the bell, still counts as unread, still opens when pressed — it just
+  /// does not interrupt. A spin win is the case this exists for: the card that
+  /// announced it is still on the screen, and a reader who spins forty times
+  /// would otherwise meet forty modals.
+  silent Boolean @default(false)
+
+  /// A button on the notice that goes somewhere — "Xem ngay" beside a refund
+  /// request, straight to the request. Both or neither, for the same reason
+  /// the callout is: a labelled button with nowhere to go is worse than none.
+  ///
+  /// A path on this site, not a URL: the notices are written by the shop and
+  /// by the code, and a field that accepted "https://" would be a link the
+  /// desk could be talked into pointing anywhere.
+  ctaLabel String?
+  ctaHref  String?
+
+  /// What the shop is posting, when the notice is a gift that has to travel.
+  /// Set means "this notice owes every reader named on it a parcel": the
+  /// address form opens for them and the parcel joins the Gửi quà queue under
+  /// this name, which is why it is stored apart from the title — "Quà tri ân
+  /// tháng 9" reads fine on the notice and tells the person with the tape gun
+  /// nothing.
+  ///
+  /// Null on everything else, which is nearly every notice.
+  giftLabel String?
 
   /// The window. `startAt <= now <= endAt` is the whole activeness test, so
   /// nothing has to run on a schedule to switch a notice on or off at the

@@ -40,6 +40,8 @@ export interface StatusTool {
   name: string;
   href: string;
   categoryName: string;
+  /** Its category's half of the address — the shelf this tool sits on. */
+  categorySlug: string;
   imageUrl: string | null;
   status: SoftwareStatusValue | null;
   /** When the state last changed; null for a tool with no history yet. */
@@ -172,6 +174,7 @@ export async function listSoftwareForStatus(): Promise<StatusTool[]> {
     name: p.name ?? p.code,
     href: productHref(p.category.slug, p.slug),
     categoryName: p.category.name,
+    categorySlug: p.category.slug,
     imageUrl: p.images[0]?.url ?? p.imageUrl,
     status: readSoftwareStatus(p.softwareStatus),
     changedAt: p.statusEvents[0]?.createdAt ?? null,

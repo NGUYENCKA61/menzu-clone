@@ -6,6 +6,13 @@ import { useState } from "react";
 import { BadgeCheck, CreditCard, Landmark, Search, Star, Trash2 } from "lucide-react";
 
 import { AdminEmpty, AdminError, ConfirmDialog } from "./AdminStates";
+import {
+  AdminRefundRequests,
+  type RefundRequestRow,
+} from "./AdminRefundRequests";
+import { AdminSpinPrizes } from "./AdminSpinPrizes";
+import { AdminSpinWins, type SpinWinRow } from "./AdminSpinWins";
+import type { Prize } from "@/lib/spin";
 import { GAP, pageCount, pageRange, pageStrip, PER_PAGE } from "@/lib/paging";
 
 export interface FeedbackView {
@@ -143,12 +150,30 @@ function formatVnd(n: number): string {
 export function AdminOperations({
   feedback,
   topUps,
+  refunds,
+  spinWins,
+  spinPrizes,
+  spinStored,
+  initialTab = "feedback",
 }: {
   feedback: FeedbackView[];
   topUps: TopUpView[];
+  refunds: RefundRequestRow[];
+  /** Physical prizes the wheel owes and somebody has to post. */
+  spinWins: SpinWinRow[];
+  /** The wheel as it is set now, in wheel order. */
+  spinPrizes: Prize[];
+  /** False while the shop is still on the table in code. */
+  spinStored: boolean;
+  /** Which tab to open on. Read from the URL, so a page that links back here
+   *  — a prize's own page, say — returns to the tab it was opened from
+   *  instead of dumping the reader on the reviews. */
+  initialTab?: "feedback" | "topups" | "refunds" | "spin" | "parcels";
 }) {
   const router = useRouter();
-  const [tab, setTab] = useState<"feedback" | "topups">("feedback");
+  const [tab, setTab] = useState<
+    "feedback" | "topups" | "refunds" | "spin" | "parcels"
+  >(initialTab);
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
   const [removing, setRemoving] = useState<FeedbackView | null>(null);
@@ -185,6 +210,8 @@ export function AdminOperations({
   const fbSlice = shownFeedback.slice((fbCurrent - 1) * PER_PAGE, fbCurrent * PER_PAGE);
   const fbRange = pageRange(fbCurrent, PER_PAGE, shownFeedback.length);
   const pendingCount = feedback.filter((f) => !f.approved).length;
+  const waitingRefunds = refunds.filter((r) => r.status === "PENDING").length;
+  const unsentPrizes = spinWins.filter((w) => !w.sent).length;
 
   async function call(url: string, body: Record<string, unknown>) {
     setPending(true);
@@ -218,11 +245,56 @@ export function AdminOperations({
         <button type="button" onClick={() => setTab("topups")} className={tab === "topups" ? TAB_ON : TAB_OFF}>
           Nạp tiền
         </button>
+        {/* The count rides on the tab rather than waiting inside it: an
+            unanswered refund is somebody waiting on their money, and the desk
+            should see there is one without opening the tab to find out. */}
+        <button
+          type="button"
+          onClick={() => setTab("refunds")}
+          className={tab === "refunds" ? TAB_ON : TAB_OFF}
+        >
+          Hoàn trả
+          {waitingRefunds > 0 ? (
+            <span className="ml-1.5 rounded-md bg-black/25 px-1.5 py-0.5 text-[10px]">
+              {waitingRefunds}
+            </span>
+          ) : null}
+        </button>
+        <button
+          type="button"
+          onClick={() => setTab("spin")}
+          className={tab === "spin" ? TAB_ON : TAB_OFF}
+        >
+          Vòng quay
+        </button>
+        {/* Beside the wheel it comes from, but a tab of its own: choosing what
+            the wheel gives away and posting what it gave away are different
+            jobs on different days. Same rule as the refund tab — the badge
+            counts the errand, which here is a parcel somebody is waiting for
+            in the post. */}
+        <button
+          type="button"
+          onClick={() => setTab("parcels")}
+          className={tab === "parcels" ? TAB_ON : TAB_OFF}
+        >
+          Gửi quà
+          {unsentPrizes > 0 ? (
+            <span className="ml-1.5 rounded-md bg-black/25 px-1.5 py-0.5 text-[10px]">
+              {unsentPrizes}
+            </span>
+          ) : null}
+        </button>
       </div>
 
       {error ? <AdminError message={error} onRetry={() => setError(null)} /> : null}
 
-      {tab === "feedback" ? (
+      {tab === "parcels" ? (
+        <AdminSpinWins wins={spinWins} />
+      ) : tab === "spin" ? (
+        <AdminSpinPrizes prizes={spinPrizes} stored={spinStored} />
+      ) : tab === "refunds" ? (
+        <AdminRefundRequests rows={refunds} />
+      ) : tab === "feedback" ? (
         feedback.length === 0 ? (
           <AdminEmpty title="Chưa có đánh giá nào" />
         ) : (

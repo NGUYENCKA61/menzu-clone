@@ -1145,3 +1145,77 @@ body.lightbox-open .site-nav {
     animation: none;
   }
 }
+
+/* ---------------------------------------------------------------------------
+   The reward wheel's celebration.
+
+   Two strengths, because two outcomes deserve different noise: a rare prize
+   gets falling confetti, an ordinary one a few sparks and a ring. Both are
+   decoration over a card that already says what was won in words, so both are
+   switched off entirely for a reader who has asked for less motion — nothing
+   is lost by it.
+--------------------------------------------------------------------------- */
+
+@keyframes confettiFall {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, -10%, 0) rotate(0deg);
+  }
+  10% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    /* Past the bottom of the card, so a piece leaves rather than piling up. */
+    transform: translate3d(var(--drift, 0), 320%, 0) rotate(var(--twist, 540deg));
+  }
+}
+
+.animate-confetti {
+  animation: confettiFall var(--fall, 2.4s) cubic-bezier(0.25, 0.6, 0.5, 1)
+    var(--delay, 0s) forwards;
+}
+
+/* The quieter one: a spark drifts up from behind the prize and fades. */
+@keyframes sparkRise {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 0, 0) scale(0.4);
+  }
+  25% {
+    opacity: 0.9;
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(var(--drift, 0), -160%, 0) scale(1);
+  }
+}
+
+.animate-spark {
+  animation: sparkRise var(--fall, 1.6s) ease-out var(--delay, 0s) forwards;
+}
+
+/* One ring, once. A pulse that repeated would turn the card into an alarm. */
+@keyframes winRing {
+  0% {
+    opacity: 0.55;
+    transform: scale(0.6);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(2.1);
+  }
+}
+
+.animate-win-ring {
+  animation: winRing 1.1s ease-out var(--delay, 0s) forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-confetti,
+  .animate-spark,
+  .animate-win-ring {
+    animation: none;
+    opacity: 0;
+  }
+}

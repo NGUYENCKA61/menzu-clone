@@ -7,6 +7,7 @@ import { AccountEmpty } from "@/components/sites/menzu-lol-f7ae197a/shared/Accou
 import { ListSearch } from "@/components/sites/menzu-lol-f7ae197a/shared/ListSearch";
 import { OrderDetailModal } from "@/components/sites/menzu-lol-f7ae197a/shared/OrderDetailModal";
 import { formatVnd } from "@/components/sites/menzu-lol-f7ae197a/shared/productData";
+import { dayHeading, dayTime } from "@/lib/dayGroups";
 import { getOrders } from "@/lib/queries";
 import { getCurrentUser } from "@/lib/session";
 
@@ -35,6 +36,41 @@ const STATUS_CLASS: Record<string, string> = {
   REFUNDED: "border-rose-500/30 bg-rose-500/10 text-rose-400",
 };
 
+/**
+ * What the badge on a row says, which is not always the order's own status.
+ *
+ * A refused refund leaves the order exactly as it was — paid, key valid — so
+ * OrderStatus has nothing to record it with, and nothing should: the sale did
+ * not change. What changed is the answer the buyer is waiting on, and that is
+ * what the badge is for. An approved refund is a different matter and does
+ * move the order to REFUNDED, so it needs no special case here.
+ */
+function orderBadge(o: {
+  status: string;
+  refundRejected: boolean;
+  refundPending: boolean;
+}): { label: string; className: string } {
+  const fallback = {
+    label: STATUS_LABEL[o.status] ?? o.status,
+    className:
+      STATUS_CLASS[o.status] ?? "border-white/10 bg-white/5 text-neutral-400",
+  };
+  if (o.status !== "PAID") return fallback;
+  if (o.refundPending) {
+    return {
+      label: "Chờ duyệt hoàn tiền",
+      className: "border-amber-500/30 bg-amber-500/10 text-amber-400",
+    };
+  }
+  if (o.refundRejected) {
+    return {
+      label: "Từ chối hoàn tiền",
+      className: "border-rose-500/30 bg-rose-500/10 text-rose-400",
+    };
+  }
+  return fallback;
+}
+
 function shortDate(date: Date): string {
   return date.toLocaleDateString("vi-VN", {
     day: "2-digit",
@@ -48,6 +84,9 @@ export default async function OrdersPage() {
   if (!user) redirect("/login?next=%2Forders");
 
   const orders = await getOrders(user.id);
+  // One clock reading for the whole render, so a page drawn across midnight
+  // cannot label two rows of the same day differently.
+  const now = new Date();
 
   return (
     <AccountPageFrame
@@ -71,6 +110,9 @@ export default async function OrdersPage() {
           frameHint="Bấm vào đơn để xem key hoặc tài khoản đăng nhập"
           rows={orders.map((o) => ({
             key: o.code,
+            // The heading this row sits under. The list arrives newest first,
+            // so the days come out newest first too.
+            group: dayHeading(o.createdAt, now),
             // Searched by order code, product code and name — what a buyer
             // actually has to hand when hunting for a past purchase.
             haystack: [o.code, o.productCode, o.productName, o.productRank],
@@ -81,7 +123,8 @@ export default async function OrdersPage() {
               // live in one client component.
               <OrderDetailModal
                 supportHref="/feedback"
-                className="group flex cursor-pointer flex-col gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] p-4 outline-none transition-colors hover:border-white/[0.12] focus-visible:ring-2 focus-visible:ring-[var(--menzu-accent)]/60 sm:flex-row sm:items-center sm:gap-4"
+                refundHref={`/orders/${o.code}/hoan-tra`}
+                className="group flex cursor-pointer flex-col gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] p-4 outline-none transition-colors hover:border-white/[0.12] hover:bg-white/[0.04] focus-visible:ring-2 focus-visible:ring-[var(--menzu-accent)]/60 sm:flex-row sm:items-center sm:gap-4"
                 order={{
                   code: o.code,
                   statusLabel: STATUS_LABEL[o.status] ?? o.status,
@@ -89,6 +132,7 @@ export default async function OrdersPage() {
                     STATUS_CLASS[o.status] ??
                     "border-white/10 bg-white/5 text-neutral-400",
                   paid: o.status === "PAID",
+                  refunded: o.status === "REFUNDED",
                   date: shortDate(o.createdAt),
                   total: o.total,
                   listPrice: o.listPrice,
@@ -106,6 +150,8 @@ export default async function OrdersPage() {
                   downloadUrl: o.downloadUrl,
                   docsUrl: o.docsUrl,
                   login: o.login,
+                  canRefund: o.canRefund,
+                  refundBlockedReason: o.refundBlockedReason,
                 }}
               >
                 <div className="flex min-w-0 flex-1 items-center gap-4">
@@ -139,8 +185,11 @@ export default async function OrdersPage() {
                         </span>
                       ) : null}
                     </div>
+                    {/* The clock, not the date: the day is written once over
+                        the group this row sits in, and repeating it on every
+                        line was the noisiest thing on the page. */}
                     <span className="text-[11px] font-semibold text-neutral-500">
-                      Đơn {o.code} · {shortDate(o.createdAt)}
+                      Đơn {o.code} · {dayTime(o.createdAt)}
                     </span>
                   </div>
                 </div>
@@ -150,12 +199,9 @@ export default async function OrdersPage() {
                     {formatVnd(o.total)}đ
                   </span>
                   <span
-                    className={`rounded-lg border px-2 py-1 text-[10px] font-black uppercase tracking-wider ${
-                      STATUS_CLASS[o.status] ??
-                      "border-white/10 bg-white/5 text-neutral-400"
-                    }`}
+                    className={`rounded-lg border px-2 py-1 text-[10px] font-black uppercase tracking-wider ${orderBadge(o).className}`}
                   >
-                    {STATUS_LABEL[o.status] ?? o.status}
+                    {orderBadge(o).label}
                   </span>
                 </div>
               </OrderDetailModal>

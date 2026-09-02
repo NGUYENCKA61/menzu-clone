@@ -80,7 +80,7 @@ export function SoftwareGallery({ name, images, videoUrl }: SoftwareGalleryProps
         className="flex w-full items-center justify-between gap-3 rounded-xl border border-white/10 bg-white/[0.02] px-4 py-3.5 hover:border-emerald-500/70 hover:bg-white/[0.05] transition-colors"
       >
         <span className="flex min-w-0 items-center gap-2.5">
-          {/* The same emerald the "Còn hàng" line and the Undetected pill use,
+          {/* The same emerald the "Còn hàng" line and the detection pill use,
               so the three reassurances on this page read as one voice. */}
           <ShieldCheck size={15} className="shrink-0 text-emerald-400" />
           <span className="truncate text-[12px] font-bold uppercase tracking-widest text-white">

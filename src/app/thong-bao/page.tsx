@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Radar } from "lucide-react";
 
 import { SimplePage } from "@/components/sites/menzu-lol-f7ae197a/shared/SimplePage";
+import { StatusSubscribeSearch } from "@/components/sites/menzu-lol-f7ae197a/shared/StatusSubscribeSearch";
 import { TYPE_ICONS, TYPE_TILE } from "@/components/sites/menzu-lol-f7ae197a/shared/announcementIcons";
 import { currentAnnouncements } from "@/lib/announcementStore";
 import { TYPE_LABELS } from "@/lib/announcements";
@@ -11,9 +12,15 @@ import { getCurrentUser } from "@/lib/session";
 import {
   SOFTWARE_STATUS,
   STATUS_EVENT_COPY,
+  STATUS_SUBSCRIBE_HREF,
   STATUS_TAB_HREF,
 } from "@/lib/softwareStatus";
-import { listStatusEvents, type StatusEventRow } from "@/lib/statusEvents";
+import {
+  listSoftwareForStatus,
+  listStatusEvents,
+  subscribedProductIds,
+  type StatusEventRow,
+} from "@/lib/statusEvents";
 
 export const metadata: Metadata = {
   title: "Thông báo",
@@ -73,6 +80,15 @@ function groupByDay(events: StatusEventRow[]): { key: string; items: StatusEvent
 }
 
 const LABEL = "text-[10px] font-black uppercase tracking-widest text-neutral-500";
+/** The line under the tabs saying what the open one is for. Two tabs both
+ *  about hack status need telling apart, and their names alone do not do it:
+ *  one is everything that happened, the other is what to be told about next.
+ *
+ *  Kept to one line on a desktop — no max-width holding it back and short
+ *  enough to fit — because at two lines it stops reading as a caption on the
+ *  tab and starts reading as the page opening with a paragraph. A phone still
+ *  wraps it, which is fine: there it is the only thing on its line. */
+const TAB_NOTE = "mb-5 text-[13px] leading-relaxed text-neutral-400";
 const TAB =
   "inline-flex h-10 items-center gap-2 rounded-xl border px-4 text-[11px] font-black uppercase tracking-widest transition-colors";
 const TAB_ON = "border-[var(--menzu-accent)] bg-[var(--menzu-accent)] text-white";
@@ -80,17 +96,22 @@ const TAB_OFF =
   "border-white/10 bg-white/5 text-neutral-300 hover:bg-white/10 hover:text-white";
 
 /**
- * Where "Xem tất cả thông báo" lands, in two tabs.
+ * Where "Xem tất cả thông báo" lands, in three tabs.
  *
  * "Thông báo hệ thống" is the list the bell shows, in full rather than
  * truncated to a line each. Addressed notices are resolved against the
  * reader here exactly as they are for the dropdown, so a private notice is
  * not readable by opening this page signed out.
  *
- * "Thông báo trạng thái hack" is a status board: every live tool as a
- * card with its state and a follow chip, and the history as a timeline by
- * day. Following a tool — from the chip beside its status on the product
- * page — is what puts its changes on the reader's bell.
+ * "Trạng thái hack chung" is the history: every state a tool has moved
+ * through, as a timeline by day.
+ *
+ * "Đăng ký nhận thông báo" is the shelf beside it — every live
+ * tool, searchable, each with the follow chip. Its own tab rather than a
+ * panel above the history, because the two answer different questions and
+ * the history is long enough to bury anything put over it. Following a tool
+ * — from here, or from the chip on its own page — is what puts its changes
+ * on the reader's bell.
  */
 export default async function AnnouncementsPage({
   searchParams,
@@ -99,32 +120,87 @@ export default async function AnnouncementsPage({
 }) {
   const { tab } = await searchParams;
   const statusTab = tab === "trang-thai";
+  const subscribeTab = tab === "dang-ky";
   const user = await getCurrentUser();
-  const [announcements, events] = await Promise.all([
+  const [announcements, events, tools, followed] = await Promise.all([
     currentAnnouncements(user?.id ?? null),
     listStatusEvents(),
+    listSoftwareForStatus(),
+    // A guest follows nothing; asking the database to confirm that costs a
+    // query to learn what the missing session already said.
+    user ? subscribedProductIds(user.id) : Promise.resolve(new Set<string>()),
   ]);
   const now = new Date();
+
+  // Null rather than false for a guest: the chip has three faces, and "not
+  // signed in" is the one that offers a sign-in instead of a silent no-op.
+  const subscribeList = tools.map((tool) => ({
+    code: tool.code,
+    name: tool.name,
+    href: tool.href,
+    categoryName: tool.categoryName,
+    categorySlug: tool.categorySlug,
+    imageUrl: tool.imageUrl,
+    status: tool.status,
+    subscribed: user ? followed.has(tool.id) : null,
+  }));
 
   return (
     <SimplePage title="Thông báo" crumb="Thông báo">
       <nav aria-label="Loại thông báo" className="mb-6 flex flex-wrap gap-2">
-        <Link href="/thong-bao" className={`${TAB} ${statusTab ? TAB_OFF : TAB_ON}`}>
+        <Link
+          href="/thong-bao"
+          className={`${TAB} ${statusTab || subscribeTab ? TAB_OFF : TAB_ON}`}
+        >
           Thông báo hệ thống
           <span className="rounded-md bg-black/20 px-1.5 py-0.5 text-[10px]">
             {announcements.length}
           </span>
         </Link>
         <Link href={STATUS_TAB_HREF} className={`${TAB} ${statusTab ? TAB_ON : TAB_OFF}`}>
-          Thông báo trạng thái hack
+          Trạng thái hack chung
           <span className="rounded-md bg-black/20 px-1.5 py-0.5 text-[10px]">
             {events.length}
           </span>
         </Link>
+        {/* The count is how many the reader follows, not how many exist: on
+            this tab that is the number they came to check, and a signed-out
+            reader follows none. */}
+        <Link
+          href={STATUS_SUBSCRIBE_HREF}
+          className={`${TAB} ${subscribeTab ? TAB_ON : TAB_OFF}`}
+        >
+          Đăng ký nhận thông báo
+          <span className="rounded-md bg-black/20 px-1.5 py-0.5 text-[10px]">
+            {followed.size}
+          </span>
+        </Link>
       </nav>
 
-      {statusTab ? (
-        <div className="flex flex-col gap-6">
+      {subscribeTab ? (
+        // No heading of its own: the tab above it is lit and says the same
+        // four words, and printing them twice a centimetre apart reads as a
+        // mistake rather than as structure. The line below is not the heading
+        // again — it says what this tab does that the other one does not.
+        <>
+          <p className={TAB_NOTE}>
+            Nhận thông báo cho riêng từng bản hack — chỉ bản bạn chọn mới báo về
+            chuông.
+          </p>
+          <StatusSubscribeSearch
+            tools={subscribeList}
+            loginNext={STATUS_SUBSCRIBE_HREF}
+          />
+        </>
+      ) : statusTab ? (
+        // No flex column around these two: its gap stacked on top of the
+        // note's own margin and left the line floating in the middle of the
+        // space instead of sitting under the tabs like its neighbour's does.
+        <>
+          <p className={TAB_NOTE}>
+            Tình trạng và tình hình cập nhật của tất cả các bản hack, xếp theo
+            ngày.
+          </p>
           <section>
             <div className="mb-4 flex items-center gap-2">
               <Radar size={14} className="text-[var(--menzu-accent)]" />
@@ -214,7 +290,7 @@ export default async function AnnouncementsPage({
               </div>
             )}
           </section>
-        </div>
+        </>
       ) : announcements.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-white/10 bg-white/[0.02] py-16 text-center">
           <p className="text-sm font-bold text-white">Chưa có thông báo nào</p>

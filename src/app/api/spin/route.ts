@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 
 import { db } from "@/lib/db";
+import { announceToUser } from "@/lib/announcementStore";
+import { readVoucherDays } from "@/lib/spin";
+import { listSpinPrizes } from "@/lib/spinPrizes";
 import { getCurrentUser } from "@/lib/session";
 import { drawPrize, SPIN_COST } from "@/lib/spin";
 import { makeCode } from "@/lib/topupStore";
@@ -20,6 +23,21 @@ import { makeCode } from "@/lib/topupStore";
  * the balance check. The loser gets RETRY and answers 409 rather than paying
  * once for two draws.
  */
+/** What the bell says about each kind of win. */
+const WON_BODY: Record<
+  string,
+  (p: { label: string; amount: number; voucherCode: string | null }) => string
+> = {
+  BALANCE: (p) =>
+    `${p.amount.toLocaleString("vi-VN")}đ đã được cộng thẳng vào ví của bạn.`,
+  POINTS: (p) =>
+    `${p.amount.toLocaleString("vi-VN")} điểm đã được cộng, quay tiếp được ngay.`,
+  VOUCHER: (p) =>
+    `Mã giảm giá của bạn: ${p.voucherCode ?? ""}. Dùng được một lần khi thanh toán.`,
+  ITEM: () =>
+    "Điền địa chỉ nhận hàng ở trang vòng quay để shop gửi cho bạn, hoặc đổi lấy điểm nếu không có nhu cầu.",
+};
+
 export async function POST() {
   const user = await getCurrentUser();
   if (!user) {
@@ -27,6 +45,8 @@ export async function POST() {
   }
 
   try {
+    const prizes = await listSpinPrizes();
+
     const result = await db.$transaction(async (tx) => {
       const before = await tx.user.findUniqueOrThrow({
         where: { id: user.id },
@@ -43,7 +63,7 @@ export async function POST() {
       });
       if (charged.count === 0) throw new Error("RETRY");
 
-      const { index, prize } = drawPrize(Math.random());
+      const { index, prize } = drawPrize(Math.random(), prizes);
 
       if (prize.kind === "POINTS") {
         await tx.user.update({
@@ -75,16 +95,37 @@ export async function POST() {
         });
       }
 
+      // A code of this winner's own, good once. Handing out one shared code
+      // would make the prize a price cut the moment somebody posted it.
+      let voucherCode: string | null = null;
+      if (prize.kind === "VOUCHER") {
+        voucherCode = makeCode("VQ");
+        const shopRow = prizes.find((p) => p.id === prize.id);
+        await tx.voucher.create({
+          data: {
+            code: voucherCode,
+            percentOff: prize.amount,
+            maxUses: 1,
+            active: true,
+            expiresAt: new Date(
+              Date.now() +
+                readVoucherDays(shopRow?.voucherDays) * 24 * 3600 * 1000,
+            ),
+          },
+        });
+      }
+
       // Written for every spin, not only the ones that owe something: the
       // receipt is what answers "tôi quay ra cái gì" later, and for an ITEM it
       // is the only record that a parcel is owed at all.
-      await tx.spinWin.create({
+      const win = await tx.spinWin.create({
         data: {
           userId: user.id,
           prizeId: prize.id,
           label: prize.label,
           kind: prize.kind,
           amount: prize.amount,
+          voucherCode,
           status: prize.kind === "ITEM" ? "PENDING" : "NONE",
         },
       });
@@ -96,17 +137,39 @@ export async function POST() {
 
       return {
         index,
+        // The receipt's own id, so the notice can point at this parcel rather
+        // than at the wheel and leave the winner to find it.
+        winId: win.id,
         prize: {
           id: prize.id,
           label: prize.label,
           kind: prize.kind,
           amount: prize.amount,
           image: prize.image ?? null,
+          voucherCode,
         },
         points: after.points,
         balance: Number(after.balance),
       };
     });
+
+    // Whatever the wheel gave, it lands in the bell too. The card on screen
+    // says it first; this is the copy that is still there tomorrow, and for a
+    // parcel it carries the way back to the form.
+    if (result.prize.kind !== "NOTHING") {
+      await announceToUser(user.id, {
+        title: `Bạn vừa trúng ${result.prize.label}`,
+        body: WON_BODY[result.prize.kind](result.prize),
+        ...(result.prize.kind === "ITEM"
+          ? {
+              cta: {
+                label: "Điền địa chỉ nhận",
+                href: `/vong-quay/qua/${result.winId}`,
+              },
+            }
+          : {}),
+      });
+    }
 
     return NextResponse.json(result);
   } catch (error) {

@@ -1,5 +1,6 @@
 import { assistantConfigured } from "@/lib/assistant";
 import { getBioProfile } from "@/lib/queries";
+import { getShopSettings } from "@/lib/settingsStore";
 
 import { SupportWidget } from "./SupportWidget";
 
@@ -15,7 +16,7 @@ import { SupportWidget } from "./SupportWidget";
  * itself never leaves the server.
  */
 export async function SupportWidgetHost() {
-  const profile = await getBioProfile();
+  const [profile, settings] = await Promise.all([getBioProfile(), getShopSettings()]);
   const channels =
     profile?.links
       .filter((link) => link.page === 1)
@@ -32,5 +33,14 @@ export async function SupportWidgetHost() {
   // opens an empty panel is worse than no tab.
   if (!assistant && channels.length === 0) return null;
 
-  return <SupportWidget channels={channels} assistant={assistant} />;
+  return (
+    <SupportWidget
+      channels={channels}
+      assistant={assistant}
+      // The same name and mark the header wears, read from the same settings:
+      // a panel with its own copy would keep calling the shop by its old name
+      // the day it is renamed.
+      brand={{ name: settings.brandName, logo: settings.brandLogo }}
+    />
+  );
 }

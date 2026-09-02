@@ -244,10 +244,10 @@ const ACTION =
 /** The detection pill customers see on the storefront card. */
 const SOFTWARE_STATUS: Record<string, { label: string; tint: string }> = {
   UNDETECTED: {
-    label: "Undetected",
+    label: "Chưa phát hiện",
     tint: "border-emerald-500/30 bg-emerald-500/10 text-emerald-400",
   },
-  DETECTED: { label: "Detected", tint: "border-red-500/30 bg-red-500/10 text-red-400" },
+  DETECTED: { label: "Đã phát hiện", tint: "border-red-500/30 bg-red-500/10 text-red-400" },
   UPDATING: {
     label: "Đang cập nhật",
     tint: "border-amber-500/30 bg-amber-500/10 text-amber-400",

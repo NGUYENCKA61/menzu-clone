@@ -10,6 +10,14 @@ export interface SearchableRow {
   haystack: string[];
   node: ReactNode;
   key: string;
+  /**
+   * A heading this row belongs under — "Hôm nay", "30/08/2026".
+   *
+   * Consecutive rows sharing one get a single header between them. A list that
+   * passes none renders exactly as it did before, which is every list here but
+   * the orders one.
+   */
+  group?: string;
 }
 
 /** Same paging rhythm as the wallet and transactions ledgers. */
@@ -36,6 +44,24 @@ export interface ListSearchProps {
    */
   frameTitle?: string;
   frameHint?: string;
+}
+
+/**
+ * The visible rows cut into runs of the same `group`.
+ *
+ * Cut per page rather than per list: a day split across two pages gets its
+ * heading again on the second, and the count under each heading is the number
+ * of rows actually beneath it. A count of the whole day printed over three of
+ * its rows would be a caption that disagrees with what it captions.
+ */
+function runs(rows: SearchableRow[]): { group?: string; rows: SearchableRow[] }[] {
+  const out: { group?: string; rows: SearchableRow[] }[] = [];
+  for (const row of rows) {
+    const last = out[out.length - 1];
+    if (last && last.group === row.group) last.rows.push(row);
+    else out.push({ group: row.group, rows: [row] });
+  }
+  return out;
 }
 
 /**
@@ -86,8 +112,23 @@ export function ListSearch({
     ) : (
       <>
         <div className="space-y-3">
-          {visible.map((row) => (
-            <div key={row.key}>{row.node}</div>
+          {runs(visible).map((run) => (
+            <div key={run.group ?? run.rows[0]!.key} className="space-y-3">
+              {run.group ? (
+                <div className="flex items-center gap-3 pt-1 first:pt-0">
+                  <span className="shrink-0 text-[10px] font-black uppercase tracking-widest text-neutral-500">
+                    {run.group}
+                  </span>
+                  <span aria-hidden className="h-px flex-1 bg-white/[0.07]" />
+                  <span className="shrink-0 text-[10px] font-black uppercase tracking-widest text-neutral-600">
+                    {run.rows.length} {unit}
+                  </span>
+                </div>
+              ) : null}
+              {run.rows.map((row) => (
+                <div key={row.key}>{row.node}</div>
+              ))}
+            </div>
           ))}
         </div>
         <Pager

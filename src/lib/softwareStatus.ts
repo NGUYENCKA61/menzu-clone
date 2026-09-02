@@ -11,18 +11,23 @@ export type SoftwareStatusValue = "UNDETECTED" | "DETECTED" | "UPDATING";
 /** The status tab of /thong-bao; the header strip's "XEM TRẠNG THÁI" too. */
 export const STATUS_TAB_HREF = "/thong-bao?tab=trang-thai";
 
+/** Its neighbour: the shelf of tools to follow, searchable. Its own tab
+ *  because "what happened" and "tell me next time" are two errands, and the
+ *  history is long enough to bury a search box put above it. */
+export const STATUS_SUBSCRIBE_HREF = "/thong-bao?tab=dang-ky";
+
 export const SOFTWARE_STATUS: Record<
   SoftwareStatusValue,
   { label: string; dot: string; text: string; tile: string }
 > = {
   UNDETECTED: {
-    label: "Undetected",
+    label: "Chưa phát hiện",
     dot: "bg-emerald-500",
     text: "text-emerald-400",
     tile: "border-emerald-500/30 bg-emerald-500/10 text-emerald-400",
   },
   DETECTED: {
-    label: "Detected",
+    label: "Đã phát hiện",
     dot: "bg-red-500",
     text: "text-red-400",
     tile: "border-red-500/30 bg-red-500/10 text-red-400",

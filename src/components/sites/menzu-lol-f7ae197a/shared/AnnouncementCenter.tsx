@@ -1,6 +1,6 @@
 "use client";
 
-import { Bell, BellOff, X } from "lucide-react";
+import { ArrowRight, Bell, BellOff, X } from "lucide-react";
 import Link from "next/link";
 
 import {
@@ -42,6 +42,10 @@ export interface AnnouncementItem {
   /** The callout box at the foot. Both or neither. */
   noticeTitle: string | null;
   noticeBody: string | null;
+  /** A button that takes the reader straight to what the notice is about —
+   *  "Xem ngay" on a refund request lands on the request. Both or neither. */
+  ctaLabel: string | null;
+  ctaHref: string | null;
   type: AnnouncementType;
   priority: AnnouncementPriority;
   revision: number;
@@ -688,10 +692,28 @@ export function AnnouncementModal({
               "Đóng" does — closes and marks read. The claiming itself is
               whatever the shop wrote in the body, because nothing in the
               codebase grants anything. */}
+          {/* When the notice is about something with an address, the way there
+              is the primary button and closing becomes the quiet one: a notice
+              that names a screen and then leaves the reader to go find it has
+              done half its job. */}
+          {item.ctaLabel && item.ctaHref ? (
+            <Link
+              href={item.ctaHref}
+              onClick={onClose}
+              className="inline-flex h-10 items-center gap-1.5 rounded-lg bg-rose-500 px-6 text-[13px] font-semibold text-white transition-colors hover:bg-rose-600"
+            >
+              {item.ctaLabel}
+              <ArrowRight size={14} />
+            </Link>
+          ) : null}
           <button
             type="button"
             onClick={onClose}
-            className="h-10 rounded-lg bg-rose-500 px-6 text-[13px] font-semibold text-white transition-colors hover:bg-rose-600"
+            className={
+              item.ctaLabel && item.ctaHref
+                ? "h-10 rounded-lg border border-white/10 bg-white/[0.03] px-4 text-[13px] font-medium text-neutral-300 transition-colors hover:bg-white/[0.07] hover:text-white"
+                : "h-10 rounded-lg bg-rose-500 px-6 text-[13px] font-semibold text-white transition-colors hover:bg-rose-600"
+            }
           >
             {item.type === "GIFT" ? "Nhận quà" : "Đóng"}
           </button>

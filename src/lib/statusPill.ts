@@ -1,10 +1,10 @@
 /**
- * Whether a tool's detection pill — "Undetected", "Detected", "Đang cập nhật"
- * — appears on the tool's own page.
+ * Whether a tool's detection pill — "Chưa phát hiện", "Đã phát hiện", "Đang
+ * cập nhật" — appears on the tool's own page.
  *
  * The pill and the shop's badges share one row under the title, and two or
  * three pills competing there is one pill too many: the badge is what the shop
- * wants read first, and "Undetected" beside it is noise the storefront card
+ * wants read first, and the state beside it is noise the storefront card
  * already carried. So the shop gets to say, per tool, and the answer it gives
  * by saying nothing is the one that keeps that row short.
  *

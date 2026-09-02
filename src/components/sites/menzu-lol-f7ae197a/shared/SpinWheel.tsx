@@ -5,28 +5,33 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Gift, RotateCw, Sparkles, X } from "lucide-react";
 
-import { PRIZES, SPIN_COST, WHEEL } from "@/lib/spin";
+import {
+  SPIN_COST,
+  winFanfare,
+  type Prize,
+  type PrizeKind,
+} from "@/lib/spin";
 import { formatVnd } from "./productData";
+import { SpinCelebration } from "./SpinCelebration";
+import { SpinWheelFace } from "./SpinWheelFace";
 
 /** Full turns the wheel makes before it starts hunting for its slice. */
 const FLOURISH_TURNS = 5;
 const SPIN_MS = 4200;
 
-const SLICE = 360 / PRIZES.length;
 
-/** Alternating wedge fills — the wheel has to read as eight parts at a glance. */
-const WEDGE = ["#1c1c22", "#141419"];
-/** The rare slices wear the accent so the good outcome is visibly the small one. */
-const HIGHLIGHT = "rgb(124 58 237 / 0.45)";
+
 
 interface SpinResult {
   index: number;
   prize: {
     id: string;
     label: string;
-    kind: string;
+    kind: PrizeKind;
     amount: number;
     image: string | null;
+    /** The code minted for this win, on a VOUCHER. Null on every other kind. */
+    voucherCode: string | null;
   };
   points: number;
   balance: number;
@@ -36,22 +41,11 @@ interface SpinResult {
 const SETTLED: Record<string, string> = {
   BALANCE: "Đã cộng thẳng vào số dư ví của bạn.",
   POINTS: "Đã cộng vào điểm thưởng, quay tiếp được ngay.",
+  VOUCHER: "Mã dưới đây là của riêng bạn, dùng được một lần khi thanh toán.",
   ITEM: "Shop đã ghi nhận phần quà này và sẽ liên hệ để gửi cho bạn.",
   NOTHING: "Vẫn còn cơ hội ở lượt sau.",
 };
 
-/** Cartesian point on the wheel for an angle measured from twelve o'clock. */
-function pointAt(angle: number, radius: number): [number, number] {
-  const radians = ((angle - 90) * Math.PI) / 180;
-  return [50 + radius * Math.cos(radians), 50 + radius * Math.sin(radians)];
-}
-
-/** The wedge path for slice `i`, drawn from the centre out. */
-function wedgePath(index: number): string {
-  const [x1, y1] = pointAt(index * SLICE, 50);
-  const [x2, y2] = pointAt((index + 1) * SLICE, 50);
-  return `M 50 50 L ${x1.toFixed(3)} ${y1.toFixed(3)} A 50 50 0 0 1 ${x2.toFixed(3)} ${y2.toFixed(3)} Z`;
-}
 
 /**
  * The wheel.
@@ -65,12 +59,20 @@ function wedgePath(index: number): string {
 export function SpinWheel({
   points,
   canSpin,
+  prizes,
 }: {
   /** The reader's points at page load; kept current by the server's answer. */
   points: number;
   /** False when the shop's own guard says spinning is off. */
   canSpin: boolean;
+  /** The wheel the shop has set, in wheel order. Read on the server so the
+   *  picture and the draw can never be two different tables. */
+  prizes: Prize[];
 }) {
+  // Recomputed from the table rather than fixed at nine: the shop can add and
+  // remove slices, and every angle on this wheel is a function of how many
+  // there are.
+  const SLICE = 360 / Math.max(1, prizes.length);
   const router = useRouter();
   const [angle, setAngle] = useState(0);
   const [spinning, setSpinning] = useState(false);
@@ -156,78 +158,14 @@ export function SpinWheel({
           <div className="h-0 w-0 border-x-[10px] border-t-[18px] border-x-transparent border-t-[var(--menzu-violet)]" />
         </div>
 
-        <svg
-          viewBox="0 0 100 100"
-          role="img"
-          aria-label="Vòng quay đổi thưởng"
+        <SpinWheelFace
+          prizes={prizes}
           className="h-full w-full rounded-full border-4 border-white/10 shadow-[0_0_60px_-15px_rgb(124_58_237_/_0.5)]"
           style={{
             transform: `rotate(${angle}deg)`,
             transition: `transform ${SPIN_MS}ms cubic-bezier(0.16, 1, 0.3, 1)`,
           }}
-        >
-          {PRIZES.map((prize, index) => {
-            const rare = prize.weight <= 5;
-            const centre = index * SLICE + SLICE / 2;
-            // Carried round with its wedge, a label past the horizon arrives
-            // upside down. The lower half is flipped about the label's own
-            // spot, which lands it the right way up in the same slice.
-            const flipped = centre > 90 && centre < 270;
-            return (
-              <g key={prize.id}>
-                <path
-                  d={wedgePath(index)}
-                  fill={rare ? HIGHLIGHT : WEDGE[index % 2]}
-                  stroke="rgb(255 255 255 / 0.08)"
-                  strokeWidth={0.3}
-                />
-                {/* Picture and label ride the wedge as one group, flipped
-                    about their own middle in the lower half so neither
-                    arrives upside down. */}
-                {/* Picture and label ride the wedge as one group, flipped
-                    about their own middle in the lower half so neither
-                    arrives upside down. Both sit as far out as they fit: a
-                    wedge is 2·r·sin(180°/n) wide, so every unit closer to the
-                    hub is width the label does not have. */}
-                <g
-                  transform={`rotate(${centre} 50 50)${
-                    flipped
-                      ? ` rotate(180 50 ${
-                          prize.image
-                            ? (WHEEL.imageY + WHEEL.labelYWithImage) / 2
-                            : WHEEL.labelY
-                        })`
-                      : ""
-                  }`}
-                >
-                  {prize.image ? (
-                    <image
-                      href={prize.image}
-                      x={50 - WHEEL.imageSize / 2}
-                      y={WHEEL.imageY}
-                      width={WHEEL.imageSize}
-                      height={WHEEL.imageSize}
-                      preserveAspectRatio="xMidYMid meet"
-                    />
-                  ) : null}
-                  <text
-                    x={50}
-                    y={prize.image ? WHEEL.labelYWithImage : WHEEL.labelY}
-                    textAnchor="middle"
-                    fontSize={WHEEL.fontSize}
-                    fontWeight={700}
-                    fill={rare ? "#ffffff" : "#a3a3a3"}
-                  >
-                    {prize.short}
-                  </text>
-                </g>
-              </g>
-            );
-          })}
-          {/* The socket the button sits in. Drawn inside the wheel so it turns
-              with it and the seam never shows. */}
-          <circle cx={50} cy={50} r={15} fill="#0b0b10" stroke="rgb(255 255 255 / 0.12)" strokeWidth={0.6} />
-        </svg>
+        />
 
         {/* The hub IS the button. Outside the rotating svg, or it would spin
             away from under the finger that pressed it. */}
@@ -304,11 +242,21 @@ export function SpinWheel({
               />
             ) : null}
 
+            {/* Behind everything the card says, and hidden from a screen
+                reader: the words below are the result, this is only how it
+                feels. How loud it gets is read off the wheel's own weights. */}
+            <SpinCelebration
+              fanfare={winFanfare(
+                { kind: result.prize.kind, weight: prizes[result.index]?.weight ?? 0 },
+                prizes,
+              )}
+            />
+
             <button
               type="button"
               aria-label="Đóng"
               onClick={() => setResult(null)}
-              className="absolute right-3 top-3 grid h-8 w-8 place-items-center rounded-lg text-neutral-500 transition-colors hover:bg-white/5 hover:text-white"
+              className="absolute right-3 top-3 z-10 grid h-8 w-8 place-items-center rounded-lg text-neutral-500 transition-colors hover:bg-white/5 hover:text-white"
             >
               <X size={15} />
             </button>
@@ -358,6 +306,15 @@ export function SpinWheel({
             <p className="relative mt-2.5 text-[12px] leading-relaxed text-neutral-500">
               {SETTLED[result.prize.kind] ?? SETTLED.NOTHING}
             </p>
+
+            {/* The one thing on this card the reader has to keep. Set in mono
+                and given its own box, because a code read wrong is a code that
+                does not work and nobody can say why. */}
+            {result.prize.voucherCode ? (
+              <p className="relative mt-4 rounded-xl border border-[var(--menzu-violet)]/40 bg-[var(--menzu-violet)]/10 px-4 py-3 text-center font-mono text-lg font-black tracking-[0.2em] text-white">
+                {result.prize.voucherCode}
+              </p>
+            ) : null}
 
             <p className="relative mt-4 rounded-xl border border-white/[0.07] bg-white/[0.03] px-4 py-2.5 text-[12px] text-neutral-400">
               Còn{" "}

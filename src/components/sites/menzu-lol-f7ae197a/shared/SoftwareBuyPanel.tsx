@@ -74,9 +74,9 @@ const STATUS_STYLE: Record<
   UNDETECTED: {
     dot: "bg-emerald-500",
     text: "text-emerald-400",
-    label: "Undetected",
+    label: "Chưa phát hiện",
   },
-  DETECTED: { dot: "bg-red-500", text: "text-red-400", label: "Detected" },
+  DETECTED: { dot: "bg-red-500", text: "text-red-400", label: "Đã phát hiện" },
   UPDATING: {
     dot: "bg-amber-500",
     text: "text-amber-400",

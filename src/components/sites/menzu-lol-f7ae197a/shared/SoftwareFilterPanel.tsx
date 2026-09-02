@@ -15,9 +15,9 @@ import { ScopeSearchField } from "./ScopeSearchField";
 
 const STATUS_OPTIONS = [
   { value: "all", label: "Tất cả" },
-  { value: "undetected", label: "Undetected" },
+  { value: "undetected", label: "Chưa phát hiện" },
   { value: "updating", label: "Đang cập nhật" },
-  { value: "detected", label: "Detected" },
+  { value: "detected", label: "Đã phát hiện" },
 ] as const;
 
 const SORT_OPTIONS = [

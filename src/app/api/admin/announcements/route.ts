@@ -14,6 +14,13 @@ import {
   TITLE_MAX,
 } from "@/lib/announcements";
 import { db } from "@/lib/db";
+import { openGiftParcels } from "@/lib/giftParcelStore";
+import {
+  GIFT_PARCEL_HREF,
+  GIFT_PARCEL_LABEL,
+  giftParcelProblem,
+  readGiftLabel,
+} from "@/lib/giftParcels";
 
 /**
  * Managing the notices shown to visitors.
@@ -38,6 +45,7 @@ interface Payload {
   priority?: string;
   status?: string;
   audience?: string;
+  giftLabel?: string | null;
   usernames?: unknown;
   bullets?: unknown;
   noticeTitle?: string | null;
@@ -168,17 +176,33 @@ export async function POST(request: Request) {
   const notice = readNoticeBox(body);
   if (!notice.ok) return NextResponse.json({ error: notice.error }, { status: 400 });
 
+  // A gift that has to travel. The flag is the name of the thing being sent:
+  // set it and every reader named on the notice gets an address form and a
+  // row in the Gửi quà queue, once the notice is actually published.
+  const gift = readGiftLabel(body?.giftLabel);
+  if (!gift.ok) return NextResponse.json({ error: gift.error }, { status: 400 });
+  const type = readType(body?.type) ?? "INFO";
+  const giftProblem = giftParcelProblem({ type, audience, giftLabel: gift.label });
+  if (giftProblem) return NextResponse.json({ error: giftProblem }, { status: 400 });
+
   const announcement = await db.announcement.create({
     data: {
       title: title.text,
       body: text.text,
-      type: readType(body?.type) ?? "INFO",
+      type,
       priority: readPriority(body?.priority) ?? "NORMAL",
       // Created as a draft unless the shop said otherwise, so a half-written
       // notice cannot reach the whole site the moment it is saved.
       status: readStatus(body?.status) ?? "DRAFT",
       audience,
       bullets: readBullets(body?.bullets),
+      giftLabel: gift.label,
+      // The button is written by the flag rather than typed: it has one right
+      // destination, and a desk free to point it anywhere would eventually
+      // point it at the wheel.
+      ...(gift.label
+        ? { ctaLabel: GIFT_PARCEL_LABEL, ctaHref: GIFT_PARCEL_HREF }
+        : {}),
       noticeTitle: notice.title,
       noticeBody: notice.body,
       startAt,
@@ -188,6 +212,10 @@ export async function POST(request: Request) {
       },
     },
   });
+
+  // Published on the spot rather than as a draft: the parcels are owed the
+  // moment the readers are told.
+  await openGiftParcels(announcement.id);
 
   return NextResponse.json({ id: announcement.id });
 }
@@ -218,6 +246,11 @@ export async function PATCH(request: Request) {
       where: { id },
       data: { status: body.action === "publish" ? "PUBLISHED" : "DISABLED" },
     });
+    // Publishing a gift notice is what opens its parcels. Disabling one does
+    // not close them: the readers have already been told, and taking back a
+    // promise nobody has posted yet is a decision for the desk, not a
+    // side-effect of hiding a notice.
+    if (body.action === "publish") await openGiftParcels(id);
     return NextResponse.json({ ok: true });
   }
 
@@ -297,6 +330,30 @@ export async function PATCH(request: Request) {
     }
   }
 
+  // The gift flag, read after type and audience so it can be checked against
+  // what the notice is about to become rather than what it was.
+  if (body?.giftLabel !== undefined) {
+    const gift = readGiftLabel(body.giftLabel);
+    if (!gift.ok) return NextResponse.json({ error: gift.error }, { status: 400 });
+    const problem = giftParcelProblem({
+      type: (data.type as string | undefined) ?? current.type,
+      audience: (data.audience as string | undefined) ?? current.audience,
+      giftLabel: gift.label,
+    });
+    if (problem) return NextResponse.json({ error: problem }, { status: 400 });
+
+    data.giftLabel = gift.label;
+    if (gift.label) {
+      data.ctaLabel = GIFT_PARCEL_LABEL;
+      data.ctaHref = GIFT_PARCEL_HREF;
+    } else if (current.ctaHref === GIFT_PARCEL_HREF) {
+      // Only the button this feature put there. A notice written by the refund
+      // code carries its own, and clearing that would break a working link.
+      data.ctaLabel = null;
+      data.ctaHref = null;
+    }
+  }
+
   if (Object.keys(data).length === 0 && recipients === null) {
     return NextResponse.json({ error: "Không có gì để sửa" }, { status: 400 });
   }
@@ -326,6 +383,11 @@ export async function PATCH(request: Request) {
           }),
         ]),
   ]);
+
+  // Adding names to a gift notice that is already out owes those names a
+  // parcel too; the ones already opened are left alone.
+  await openGiftParcels(id);
+
   return NextResponse.json({ ok: true });
 }
 

@@ -15,6 +15,7 @@ import {
   Lock,
   MessageCircle,
   Receipt,
+  RotateCcw,
   ShieldCheck,
   User,
   Wallet,
@@ -43,6 +44,9 @@ export interface OrderDetailData {
   statusClass: string;
   /** Settled — the one status under which a handover can exist at all. */
   paid: boolean;
+  /** Paid once and given back. Not the same as never paid, and the card says
+   *  so where it would otherwise claim the handover is still coming. */
+  refunded: boolean;
   /** "28/08/2026" — formatted by the page so both agree on the locale. */
   date: string;
   total: number;
@@ -71,6 +75,14 @@ export interface OrderDetailData {
   docsUrl: string | null;
   /** Accounts: the sign-in, or the word that the shop hands it over itself. */
   login: LoginHandover;
+  /**
+   * Whether "Yêu cầu hoàn trả" is still live on this order — decided by the
+   * page, which knows when it was bought and how long the window is.
+   */
+  canRefund: boolean;
+  /** Why not, when it is not: shown on the dead button so the buyer learns
+   *  the window existed rather than pressing a thing that ignores them. */
+  refundBlockedReason: string | null;
 }
 
 /*
@@ -335,11 +347,18 @@ function OverviewCell({
 export function OrderDetailModal({
   order,
   supportHref,
+  refundHref = supportHref,
   children,
   className,
 }: {
   order: OrderDetailData;
   supportHref: string;
+  /**
+   * Where "Yêu cầu hoàn trả" goes. Defaults to the support destination, which
+   * is where the request is handled by hand today; the caller can point it at
+   * a form of its own the day there is one, without this card knowing.
+   */
+  refundHref?: string;
   /**
    * The row that opens the receipt. Given, the whole row is the trigger and
    * a link inside it (the product) still goes where it points; absent, the
@@ -741,6 +760,15 @@ export function OrderDetailModal({
                             nếu cần hỗ trợ.
                           </p>
                         </div>
+                      ) : order.refunded ? (
+                        // "Shows once paid" would be a lie here: this one WAS
+                        // paid, and the shop gave the money back. Saying so is
+                        // the difference between a withdrawn order and an
+                        // order the site appears to have lost.
+                        <p className="text-xs text-neutral-400">
+                          Đơn đã được hoàn tiền — dữ liệu bàn giao không còn
+                          hiển thị.
+                        </p>
                       ) : (
                         <p className="text-xs text-neutral-400">
                           Dữ liệu bàn giao hiện khi đơn đã thanh toán.
@@ -768,14 +796,44 @@ export function OrderDetailModal({
                       {order.code}
                     </span>
                   </span>
-                  <Link
-                    href={supportHref}
-                    className="group inline-flex h-10 items-center gap-2 rounded-xl bg-[var(--menzu-accent)] px-5 text-[11px] font-black uppercase tracking-widest text-white transition-colors hover:bg-[var(--menzu-accent-dark)]"
-                  >
-                    <MessageCircle className="h-4 w-4" />
-                    Liên hệ hỗ trợ
-                    <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
-                  </Link>
+                  {/* Two ways out of this card, and the quieter one first:
+                      asking for money back is the rarer errand, so it gets the
+                      outline while "liên hệ hỗ trợ" keeps the filled button.
+                      Only offered on a paid order — there is nothing to refund
+                      on one that was never charged or was refunded already. */}
+                  <div className="flex flex-wrap items-center gap-2.5">
+                    {order.paid ? (
+                      order.canRefund ? (
+                        <Link
+                          href={refundHref}
+                          className="inline-flex h-10 items-center gap-2 rounded-xl border border-white/12 bg-white/[0.04] px-4 text-[11px] font-black uppercase tracking-widest text-neutral-300 transition-colors hover:border-[var(--menzu-accent)]/50 hover:bg-[var(--menzu-accent)]/10 hover:text-[var(--menzu-accent)]"
+                        >
+                          <RotateCcw className="h-4 w-4" />
+                          Yêu cầu hoàn trả
+                        </Link>
+                      ) : (
+                        // Left in place, dead, with the reason on it: removed
+                        // entirely and a buyer past the window would go looking
+                        // for a button that was never there.
+                        <span
+                          aria-disabled
+                          title={order.refundBlockedReason ?? undefined}
+                          className="inline-flex h-10 cursor-not-allowed items-center gap-2 rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 text-[11px] font-black uppercase tracking-widest text-neutral-600"
+                        >
+                          <RotateCcw className="h-4 w-4" />
+                          Yêu cầu hoàn trả
+                        </span>
+                      )
+                    ) : null}
+                    <Link
+                      href={supportHref}
+                      className="group inline-flex h-10 items-center gap-2 rounded-xl bg-[var(--menzu-accent)] px-5 text-[11px] font-black uppercase tracking-widest text-white transition-colors hover:bg-[var(--menzu-accent-dark)]"
+                    >
+                      <MessageCircle className="h-4 w-4" />
+                      Liên hệ hỗ trợ
+                      <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+                    </Link>
+                  </div>
                 </div>
               </div>
             </div>,

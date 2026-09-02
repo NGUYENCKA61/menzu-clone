@@ -44,6 +44,8 @@ export interface AdminAnnouncementRow {
   bullets: string[];
   noticeTitle: string | null;
   noticeBody: string | null;
+  /** Set when the notice owes each reader a parcel, and the name it travels under. */
+  giftLabel: string | null;
   /** What the shop decided, crossed with the clock — computed on the server. */
   state: AnnouncementState;
   /** Pre-formatted for the datetime-local inputs. */
@@ -111,6 +113,7 @@ const EMPTY = {
   bullets: "",
   noticeTitle: "",
   noticeBody: "",
+  giftLabel: "",
   type: "INFO" as AnnouncementType,
   priority: "NORMAL" as AnnouncementPriority,
   audience: "ALL" as AnnouncementAudience,
@@ -214,6 +217,11 @@ export function AdminAnnouncements({
       bullets: parseBullets(form.bullets),
       noticeTitle: form.noticeTitle,
       noticeBody: form.noticeBody,
+      // Only a targeted gift can owe parcels, and the API says so rather than
+      // trusting this — but sending it anywhere else would only earn an error
+      // the admin cannot act on from the form they are looking at.
+      giftLabel:
+        form.type === "GIFT" && form.audience === "USERS" ? form.giftLabel : "",
       type: form.type,
       priority: form.priority,
       audience: form.audience,
@@ -242,6 +250,7 @@ export function AdminAnnouncements({
       bullets: row.bullets.join("\n"),
       noticeTitle: row.noticeTitle ?? "",
       noticeBody: row.noticeBody ?? "",
+      giftLabel: row.giftLabel ?? "",
       type: row.type,
       priority: row.priority,
       audience: row.audience,
@@ -476,6 +485,36 @@ export function AdminAnnouncements({
             />
           </div>
         </div>
+
+        {/* A gift that has to travel. Shown only where it can be true: a
+            broadcast cannot owe parcels, and a maintenance notice is not a
+            present. Filling it in is what turns the notice into an errand —
+            the reader gets an address form and the shop gets a queue row. */}
+        {form.type === "GIFT" && form.audience === "USERS" ? (
+          <div className="rounded-xl border border-amber-500/25 bg-amber-500/[0.05] p-3.5">
+            <label className={LABEL}>
+              Quà cần giao tận nơi
+              <span className="ml-2 font-bold normal-case tracking-normal text-neutral-500">
+                để trống nếu không phải gửi hàng
+              </span>
+            </label>
+            <input
+              value={form.giftLabel}
+              onChange={(e) => setForm({ ...form, giftLabel: e.target.value })}
+              maxLength={80}
+              placeholder="Áo thun THICHTHIHACK size L"
+              className={FIELD}
+            />
+            <p className="mt-2 text-[11px] leading-relaxed text-neutral-400">
+              Điền tên quà thì thông báo sẽ có nút{" "}
+              <span className="font-bold text-amber-300">Điền địa chỉ nhận</span> cho
+              khách nhập tên, số điện thoại và địa chỉ — giống khi quay trúng quà
+              tặng. Quà hiện trong mục{" "}
+              <span className="font-bold text-neutral-300">Vận hành → Gửi quà</span>{" "}
+              sau khi thông báo được đăng.
+            </p>
+          </div>
+        ) : null}
 
         <p className="text-[11px] text-neutral-500">
           Để trống thời gian bắt đầu là chạy ngay, để trống kết thúc là chạy đến khi

@@ -11,6 +11,7 @@ import {
 import { db } from "@/lib/db";
 import { docHtmlToPlainText } from "@/lib/docHtml";
 import { parseBadges } from "@/lib/productBadges";
+import { refundBlockedReason } from "@/lib/refundRequests";
 import { showsStatusPill } from "@/lib/statusPill";
 import { parseFeatures } from "@/lib/productFeatures";
 import { productHref } from "@/lib/routes";
@@ -763,6 +764,20 @@ export interface OrderRow {
    * waiting on. "none" for software and for orders that were never paid.
    */
   login: LoginHandover;
+  /**
+   * Whether "Yêu cầu hoàn trả" is still open on this order, and why not when
+   * it is not — resolved here so the row, the receipt and the refund page all
+   * read one answer rather than three copies of the rule.
+   */
+  canRefund: boolean;
+  refundBlockedReason: string | null;
+  /** The newest refund round on this order was turned down. The order itself
+   *  is untouched — still paid, key still valid — but the row says so, because
+   *  a buyer who asked and was refused should not have to open the receipt to
+   *  find out. */
+  refundRejected: boolean;
+  /** …or is still being looked at. */
+  refundPending: boolean;
 }
 
 export async function getOrders(userId: string): Promise<OrderRow[]> {
@@ -806,6 +821,16 @@ export async function getOrders(userId: string): Promise<OrderRow[]> {
       licenseKeys: {
         orderBy: { deliveredAt: "asc" },
         select: { value: true, expiresAt: true },
+      },
+      // Only whether one is still open: a decided request is no bar, and the
+      // refund page loads the rounds themselves when it needs them.
+      // The newest round, whatever state it is in: the row needs to know both
+      // whether one is still open and whether the last answer was a refusal,
+      // and asking twice would be two queries for one fact.
+      refundRequests: {
+        orderBy: { createdAt: "desc" },
+        select: { status: true },
+        take: 1,
       },
     },
   });
@@ -851,6 +876,24 @@ export async function getOrders(userId: string): Promise<OrderRow[]> {
       currentOrderId: currentOrderIdOf(o.product),
       tag: tagOf(o.product),
     }),
+    ...(() => {
+      const latest = o.refundRequests[0]?.status ?? null;
+      const blocked = refundBlockedReason({
+        orderStatus: o.status,
+        openRequest: latest === "PENDING",
+        purchasedAt: o.createdAt,
+        now,
+      });
+      return {
+        canRefund: blocked === null,
+        refundBlockedReason: blocked,
+        // Only the newest round counts: a refusal the buyer has since answered
+        // with a second request is history, and the row should say what is
+        // true now.
+        refundRejected: latest === "REJECTED",
+        refundPending: latest === "PENDING",
+      };
+    })(),
   }));
 }
 
