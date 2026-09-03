@@ -647,22 +647,23 @@ export function AnnouncementModal({
           </p>
 
           {item.imageUrl ? (
-            // The same frame a status change's picture gets on /thong-bao:
-            // 420 wide and 280 tall at most, cropped rather than letterboxed
-            // (a black band above a screenshot reads as a broken image), and
-            // the whole picture one click away.
+            // Edge to edge inside the sheet: the sheet is barely wider than
+            // the picture, and a 420px cap left a ragged gap down the right.
+            // The height is still capped, cropped rather than letterboxed (a
+            // black band above a screenshot reads as a broken image), and the
+            // whole picture is one click away.
             <a
               href={item.imageUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-4 block w-full max-w-[420px] overflow-hidden rounded-xl border border-white/10 bg-neutral-950 transition-colors hover:border-white/25"
+              className="mt-4 block w-full overflow-hidden rounded-xl border border-white/10 bg-neutral-950 transition-colors hover:border-white/25"
             >
               <Image
                 src={item.imageUrl}
                 alt=""
-                width={840}
-                height={472}
-                className="max-h-[280px] w-full object-cover"
+                width={1120}
+                height={630}
+                className="max-h-[300px] w-full object-cover"
               />
             </a>
           ) : null}
