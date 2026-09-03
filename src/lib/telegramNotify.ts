@@ -186,6 +186,35 @@ export async function postCategoryStatusToTelegram(input: {
   }
 }
 
+/**
+ * A word to the people who run the channel, in their own chats — the desk's
+ * business, not the customers'. Telegram says who the admins are; a human
+ * admin who has never opened the bot cannot be messaged, and that refusal
+ * is logged like any other.
+ */
+export async function notifyTelegramAdmins(text: string): Promise<void> {
+  try {
+    const settings = await getShopSettings();
+    const token = settings.telegramBotToken.trim();
+    const chatId = settings.telegramChatId.trim();
+    if (!token || !chatId) return;
+
+    const res = await fetch(
+      `https://api.telegram.org/bot${token}/getChatAdministrators?chat_id=${encodeURIComponent(chatId)}`,
+    );
+    if (!res.ok) return;
+    const data = (await res.json()) as {
+      result?: { user?: { id?: number; is_bot?: boolean } }[];
+    };
+    const humans = (data.result ?? [])
+      .map((member) => member.user)
+      .filter((user): user is { id: number; is_bot?: boolean } => typeof user?.id === "number" && !user.is_bot);
+    await Promise.all(humans.map((user) => sendTelegramMessage(token, String(user.id), text)));
+  } catch (error) {
+    console.error("[telegram] admin notice failed:", error);
+  }
+}
+
 /** One glyph per kind of notice, so the channel can tell a sale from an outage. */
 export const NOTICE_EMOJI: Record<string, string> = {
   UPDATE: "🆕",

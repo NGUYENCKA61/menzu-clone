@@ -5,8 +5,11 @@ import { NextResponse } from "next/server";
 import sharp from "sharp";
 
 import { readImageSize } from "@/lib/authPanel";
+import { announceToAdmins } from "@/lib/announcementStore";
 import { db } from "@/lib/db";
+import { absoluteUrl } from "@/lib/seo";
 import { getCurrentUser } from "@/lib/session";
+import { escapeTelegramHtml, notifyTelegramAdmins } from "@/lib/telegramNotify";
 
 /** Backs the homepage reviews carousel. Approved rows only — a submission
  *  is invisible everywhere until an admin lets it through. */
@@ -143,6 +146,30 @@ export async function POST(request: Request) {
       userId: user.id,
     },
   });
+
+  // The desk hears about it twice — on the admin bell, and in each channel
+  // admin's own Telegram chat — because a review waits for a person, and a
+  // person who is not told does not come. Neither can fail the submission:
+  // the review is saved above, and both helpers swallow their own errors.
+  const stars = "★".repeat(rating) + "☆".repeat(5 - rating);
+  const excerpt = body.length > 140 ? `${body.slice(0, 140)}…` : body;
+  await announceToAdmins({
+    title: "Đánh giá mới cần duyệt",
+    body:
+      `${name} — ${stars}\n"${excerpt}"\n` +
+      `Chưa hiện ngoài shop. Bấm "Duyệt ngay" để duyệt hoặc ẩn.`,
+    priority: "HIGH",
+    days: 14,
+    cta: { label: "Duyệt ngay", href: "/admin/operations" },
+  });
+  await notifyTelegramAdmins(
+    [
+      "📝 <b>Đánh giá mới cần duyệt</b>",
+      `${escapeTelegramHtml(name)} — ${stars}`,
+      `"${escapeTelegramHtml(excerpt)}"`,
+      `🔗 ${absoluteUrl("/admin/operations")}`,
+    ].join("\n"),
+  );
 
   return NextResponse.json({ ok: true });
 }
