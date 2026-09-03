@@ -15,6 +15,7 @@ import { productHref } from "@/lib/routes";
 import { JsonLd, softwareJsonLd } from "@/lib/seo";
 import { getCurrentUser } from "@/lib/session";
 import { isStatusSubscribed } from "@/lib/statusEvents";
+import { shareCard } from "@/lib/shareCard";
 
 interface PageProps {
   params: Promise<{ categorySlug: string; productSlug: string }>;
@@ -67,12 +68,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
         description ||
         `${software.name} — phần mềm hỗ trợ gaming, giao key tự động, bảo hành trong suốt thời gian sử dụng.`,
       alternates: { canonical },
-      openGraph: {
-        title: software.name,
-        description,
-        url: canonical,
-        images: software.images.slice(0, 1),
-      },
+      // The card carries the bare name: the price-from suffix belongs in a
+      // search result, not on a picture shared into a chat.
+      ...(await shareCard({ url: canonical, title: software.name, image: software.images[0] })),
     };
   }
 
@@ -96,14 +94,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     title,
     description,
     alternates: { canonical },
-    openGraph: {
-      type: "website",
-      title,
-      description,
+    ...(await shareCard({
       url: canonical,
-      images: [{ url: image, alt: `Kho đồ tài khoản ${account.code}` }],
-    },
-    twitter: { card: "summary_large_image", title, description, images: [image] },
+      image: { url: image, alt: `Kho đồ tài khoản ${account.code}` },
+    })),
   };
 }
 

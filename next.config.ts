@@ -3,10 +3,13 @@ import type { NextConfig } from "next";
 /**
  * Security headers applied to every response.
  *
- * No Content-Security-Policy here on purpose. Next injects inline bootstrap
- * scripts for hydration, so a real CSP needs a per-request nonce threaded
- * through middleware — adding a static one with 'unsafe-inline' would look
- * like protection while granting exactly what CSP exists to prevent.
+ * The Content-Security-Policy below has no script-src on purpose. Next injects
+ * inline bootstrap scripts for hydration, so a real script policy needs a
+ * per-request nonce threaded through middleware — a static one with
+ * 'unsafe-inline' would look like protection while granting exactly what CSP
+ * exists to prevent. The directives that need no nonce are still worth
+ * having: they close the <base>-tag and plugin routes an injected fragment
+ * could take, and back X-Frame-Options in browsers that read only CSP.
  */
 const SECURITY_HEADERS = [
   // Stop browsers second-guessing declared content types, which is how a
@@ -19,11 +22,19 @@ const SECURITY_HEADERS = [
   { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), interest-cohort=()" },
   // Clickjacking: nothing here is meant to be embedded.
   { key: "X-Frame-Options", value: "DENY" },
+  {
+    key: "Content-Security-Policy",
+    value: "base-uri 'self'; object-src 'none'; frame-ancestors 'none'",
+  },
   { key: "X-DNS-Prefetch-Control", value: "on" },
 ];
 
 const nextConfig: NextConfig = {
   output: "standalone",
+
+  // "X-Powered-By: Next.js" on every response names the framework to anyone
+  // matching CVEs against fingerprints, and buys the shop nothing.
+  poweredByHeader: false,
 
   /**
    * Hosts allowed to load `next dev`'s JavaScript.

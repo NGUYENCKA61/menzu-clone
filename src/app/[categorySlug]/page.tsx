@@ -18,6 +18,7 @@ import { getCategoryPage } from "@/lib/queries";
 import { categoryHref } from "@/lib/routes";
 import { getShopSettings } from "@/lib/settingsStore";
 import { weaponKey } from "@/lib/weaponImages";
+import { shareCard } from "@/lib/shareCard";
 
 interface PageProps {
   params: Promise<{ categorySlug: string }>;
@@ -76,11 +77,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     // The category sits at the root and is reached from several groups; the
     // canonical says which of those addresses is the page itself.
     alternates: { canonical },
-    openGraph: {
-      title: `Danh mục ${name}`,
-      description,
-      url: canonical,
-    },
+    ...(await shareCard({ url: canonical })),
   };
 }
 

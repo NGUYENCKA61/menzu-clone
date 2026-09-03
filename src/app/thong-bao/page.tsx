@@ -21,12 +21,15 @@ import {
   subscribedProductIds,
   type StatusEventRow,
 } from "@/lib/statusEvents";
+import { shareCard } from "@/lib/shareCard";
 
-export const metadata: Metadata = {
-  title: "Thông báo",
-  alternates: { canonical: "/thong-bao" },
-  openGraph: { url: "/thong-bao" },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  return {
+    title: "Thông báo",
+    alternates: { canonical: "/thong-bao" },
+    ...(await shareCard({ url: "/thong-bao" })),
+  };
+}
 export const dynamic = "force-dynamic";
 
 /** The shop's clock, whatever machine renders the page. */

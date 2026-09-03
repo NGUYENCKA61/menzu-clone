@@ -8,6 +8,7 @@ import { Preloader } from "@/components/sites/menzu-lol-f7ae197a/shared/Preloade
 import { SupportWidgetHost } from "@/components/sites/menzu-lol-f7ae197a/shared/SupportWidgetHost";
 import { DEFAULT_SETTINGS } from "@/lib/settings";
 import { getShopSettings } from "@/lib/settingsStore";
+import { shareCard } from "@/lib/shareCard";
 
 /**
  * Every page renders per request. The root metadata, viewport and manifest all
@@ -59,7 +60,7 @@ export async function generateViewport(): Promise<Viewport> {
 }
 
 export async function generateMetadata(): Promise<Metadata> {
-  const { brandName, heroBanner } = await getShopSettings();
+  const { brandName } = await getShopSettings();
   const headline = `${brandName} | Hack Game & Tài Khoản Game Uy Tín`;
   const DESCRIPTION = describe(brandName);
 
@@ -91,29 +92,10 @@ export async function generateMetadata(): Promise<Metadata> {
   // which told Google that /categories, /thong-bao and the rest were all
   // copies of the home page, and asked it to drop them from the index. Each
   // page names its own address; the home page's is on the home page.
-  openGraph: {
-    type: "website",
-    locale: "vi_VN",
-    // og:url is inherited the same way and is left to the pages for the same
-    // reason; a share card pointing everything at "/" is the same mistake.
-    siteName: brandName,
-    title: headline,
-    description: DESCRIPTION,
-    images: [
-      {
-        url: heroBanner,
-        width: 1200,
-        height: 630,
-        alt: `${brandName} — shop hack game và tài khoản game`,
-      },
-    ],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: headline,
-    description: DESCRIPTION,
-    images: [heroBanner],
-  },
+  // No og:url here either, for the same reason. Pages that want a card of
+  // their own spread shareCard() rather than writing an `openGraph` block,
+  // because Next replaces this whole object, images included, when they do.
+  ...(await shareCard({})),
   robots: {
     index: true,
     follow: true,

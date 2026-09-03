@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { preload } from "react-dom";
 import { ArrowRight, BadgeCheck, BookCheck, ShoppingBag } from "lucide-react";
 
 import { DEFAULT_SETTINGS } from "@/lib/settings";
@@ -63,6 +64,12 @@ export function HeroBanners({
   const totalChars = lines.reduce((sum, line) => sum + Array.from(line).length, 0);
   // Runs across every line so the stagger does not restart on the second row.
   let charCursor = 0;
+
+  // With a video in the frame the poster is the largest paint on the page,
+  // and it was fetched at the same priority as the 4 MB clip beside it, so on
+  // a phone it lost the bandwidth race and LCP waited on it. Asking for it
+  // first is what the `priority` Image in the still branch already does.
+  if (video) preload(banner, { as: "image", fetchPriority: "high" });
 
   return (
     // No card around this. The hero sits on the page's own dark ground, which

@@ -7,13 +7,16 @@ import { MobileBottomNav } from "@/components/sites/menzu-lol-f7ae197a/root-8a5e
 import { SiteFooter } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/SiteFooter";
 import { SiteHeader } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/SiteHeader";
 import { ConnectRailSection } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/ConnectRailSection";
+import { shareCard } from "@/lib/shareCard";
 
 // The layout's template appends the shop's name.
-export const metadata: Metadata = {
-  title: "Danh sách danh mục",
-  alternates: { canonical: "/categories" },
-  openGraph: { url: "/categories" },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  return {
+    title: "Danh sách danh mục",
+    alternates: { canonical: "/categories" },
+    ...(await shareCard({ url: "/categories" })),
+  };
+}
 
 /**
  * The catalogue is read from Postgres at request time. Without this Next.js

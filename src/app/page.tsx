@@ -23,14 +23,17 @@ import { getFeedback, getFlashSaleItems, getPartners } from "@/lib/queries";
 import { JsonLd, organizationJsonLd } from "@/lib/seo";
 import { visibleBlocks } from "@/lib/settings";
 import { getShopSettings } from "@/lib/settingsStore";
+import { shareCard } from "@/lib/shareCard";
 
 export const dynamic = "force-dynamic";
 
 /** The one page whose address really is "/". */
-export const metadata: Metadata = {
-  alternates: { canonical: "/" },
-  openGraph: { url: "/" },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  return {
+    alternates: { canonical: "/" },
+    ...(await shareCard({ url: "/" })),
+  };
+}
 
 /** The group that carries the search, the platform chips and "Xem thêm". */
 const GAME_LIST_SLUG = "danh-sach-hack-game";

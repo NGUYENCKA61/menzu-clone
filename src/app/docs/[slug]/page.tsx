@@ -8,6 +8,7 @@ import { SimplePage } from "@/components/sites/menzu-lol-f7ae197a/shared/SimpleP
 import { DocBody, DocHtml } from "@/lib/docFormat";
 import { isHtmlBody } from "@/lib/docHtml";
 import { getDocArticle } from "@/lib/queries";
+import { shareCard } from "@/lib/shareCard";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -29,12 +30,12 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     title: article.title,
     description: article.excerpt ?? `${article.title} — Wiki & Hướng dẫn THICHTHIHACK.`,
     alternates: { canonical: `/docs/${slug}` },
-    openGraph: {
+    ...(await shareCard({
+      url: `/docs/${slug}`,
       type: "article",
-      title: article.title,
       publishedTime: article.publishedAt.toISOString(),
-      images: [{ url: article.thumbnailUrl }],
-    },
+      image: { url: article.thumbnailUrl, alt: article.title },
+    })),
     // An article with no body has nothing to rank for, and indexing empty
     // pages costs crawl budget that the catalogue needs.
     ...(article.body ? {} : { robots: { index: false, follow: true } }),

@@ -10,6 +10,12 @@
 # file server also does byte ranges, which the hero video needs to seek.
 # UPLOADS_DIR in .env must point at the same directory.
 180.93.111.201.sslip.io {
+	# A year of HTTPS-only for browsers that have been here once: the redirect
+	# on port 80 protects the first visit, this protects every one after. No
+	# includeSubDomains, so when the shop moves to its real domain a subdomain
+	# served elsewhere over plain http stays reachable.
+	header Strict-Transport-Security "max-age=31536000"
+
 	handle_path /uploads/* {
 		root * /var/www/menzu/uploads
 		header X-Content-Type-Options nosniff
