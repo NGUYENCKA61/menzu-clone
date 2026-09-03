@@ -866,7 +866,10 @@ export async function getOrders(userId: string): Promise<OrderRow[]> {
     imageUrl: o.product.imageUrl,
     categoryName: o.product.category.name,
     listPrice: Number(o.listPrice),
-    packageLabel: o.package?.label ?? null,
+    // A random listing's package is the shelf its sign-ins sit on, not a
+    // tier the buyer chose: the row and the receipt show the rank instead,
+    // exactly as an ordinary account's do.
+    packageLabel: o.product.accountPool ? null : (o.package?.label ?? null),
     quantity: o.quantity,
     keys: o.licenseKeys.map((k) => ({
       value: k.value,
