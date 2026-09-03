@@ -57,6 +57,7 @@ export async function POST(request: Request) {
               code: true,
               name: true,
               status: true,
+              softwareStatus: true,
               deletedAt: true,
               // For the voucher's scope test, line by line.
               categoryId: true,
@@ -75,6 +76,13 @@ export async function POST(request: Request) {
       const dead = items.find(
         (i) => i.product.deletedAt !== null || i.product.status !== "AVAILABLE",
       );
+      // A tool caught since it was put in the basket stops the checkout the
+      // same way, but says so: "no longer sold" would send the shopper looking
+      // for a listing that is still right there.
+      const caught = items.find((i) => i.product.softwareStatus === "DETECTED");
+      if (!dead && caught) {
+        throw new Error(`CAUGHT:${caught.product.name ?? caught.product.code}`);
+      }
       if (dead) {
         throw new Error(`GONE:${dead.product.name ?? dead.product.code}`);
       }
@@ -330,6 +338,14 @@ export async function POST(request: Request) {
       return NextResponse.json(
         { error: "Mã giảm giá không hợp lệ hoặc không áp dụng cho giỏ này" },
         { status: 400 },
+      );
+    }
+    if (message.startsWith("CAUGHT:")) {
+      return NextResponse.json(
+        {
+          error: `"${message.slice(7)}" đang bị phát hiện, tạm khóa mua key — hãy xoá khỏi giỏ rồi thử lại`,
+        },
+        { status: 409 },
       );
     }
     if (message.startsWith("GONE:")) {

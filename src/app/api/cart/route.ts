@@ -45,13 +45,20 @@ export async function POST(request: Request) {
 
   const product = await db.product.findFirst({
     where: { code, deletedAt: null, productType: "SOFTWARE_GAME" },
-    select: { id: true, status: true },
+    select: { id: true, status: true, softwareStatus: true },
   });
   if (!product) {
     return NextResponse.json({ error: "Không tìm thấy phần mềm" }, { status: 404 });
   }
   if (product.status !== "AVAILABLE") {
     return NextResponse.json({ error: "Sản phẩm đang tạm hết hàng" }, { status: 409 });
+  }
+  // Same rule as the order itself: a caught tool cannot even be put aside.
+  if (product.softwareStatus === "DETECTED") {
+    return NextResponse.json(
+      { error: "Tool này đang bị phát hiện — shop tạm khóa mua key" },
+      { status: 409 },
+    );
   }
 
   // Scoped to the product, so a tier id lifted from another listing cannot be

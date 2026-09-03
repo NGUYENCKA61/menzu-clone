@@ -194,6 +194,10 @@ export function SoftwareBuyPanel({
     software.showStatus && software.softwareStatus
       ? STATUS_STYLE[software.softwareStatus]
       : null;
+  // Said here even when the shop hides the status pill: a greyed-out button
+  // with no reason reads as a broken page. The server refuses the order and
+  // the basket line either way; this only spares the shopper the round trip.
+  const locked = software.softwareStatus === "DETECTED";
 
   return (
     <div className="flex flex-col gap-6">
@@ -340,6 +344,13 @@ export function SoftwareBuyPanel({
         </p>
       ) : null}
 
+      {locked ? (
+        <p className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-[13px] leading-relaxed text-red-300">
+          Tool đang bị phát hiện, shop tạm khóa mua key. Theo dõi kênh thông báo để biết
+          khi có bản an toàn.
+        </p>
+      ) : null}
+
       {/* Buying outright is the primary action, so it leads and carries the
           filled accent. The basket keeps the same size and position in the
           stack but drops to the outlined treatment — two solid red buttons
@@ -347,7 +358,7 @@ export function SoftwareBuyPanel({
       <div className="space-y-3">
         <button
           type="button"
-          disabled={busy || !chosen || !software.inStock}
+          disabled={busy || !chosen || !software.inStock || locked}
           onClick={() => setConfirming(true)}
           className="w-full h-14 rounded-2xl bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] disabled:opacity-50 transition-colors text-[13px] font-black uppercase tracking-widest text-white"
         >
@@ -355,7 +366,7 @@ export function SoftwareBuyPanel({
         </button>
         <button
           type="button"
-          disabled={busy || !chosen || !software.inStock}
+          disabled={busy || !chosen || !software.inStock || locked}
           onClick={addToCart}
           className="w-full h-14 rounded-2xl border border-[var(--menzu-accent)]/70 bg-white/[0.02] hover:bg-white/[0.06] disabled:opacity-50 transition-colors text-[13px] font-black uppercase tracking-widest text-white"
         >
