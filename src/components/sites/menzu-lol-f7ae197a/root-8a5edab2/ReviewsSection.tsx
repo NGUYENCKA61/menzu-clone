@@ -8,159 +8,142 @@ export interface Review {
   body: string;
   amount: string;
   avatar: string;
+  /** 1–5; a review from before ratings were kept counts as five. */
+  rating?: number;
 }
-
-const AVATAR_BASE = "/sites/menzu-lol-f7ae197a/root-8a5edab2/images/feedback/avatar";
 
 const VERIFIED_BADGE_TEXT = "Tài khoản đã xác minh";
 
-const REVIEWS: Review[] = [
-  {
-    name: "Duy Anh",
-    date: "23/03/2024",
-    body: "+1 uy tín đã giao dịch 4 lần",
-    amount: "5.250.000đ",
-    avatar: `${AVATAR_BASE}/fb-avatar-3c833108-c1b0-4492-8a30-78a3db774db5.webp`,
-  },
-  {
-    name: "Quang Lâm",
-    date: "05/02/2023",
-    body: "Ut vs tận tâm nha ae",
-    amount: "2.100.000đ",
-    avatar: `${AVATAR_BASE}/fb-avatar-57655c36-1580-45c7-a1af-e8d5e65d3c7d.webp`,
-  },
-  {
-    name: "Phạm Thế Cường",
-    date: "26/04/2026",
-    body: "Tuy mua trả góp nhg UT!",
-    amount: "2.480.000đ",
-    avatar: `${AVATAR_BASE}/fb-avatar-5a6a7b1c-bb9f-4d15-b22c-6e1537d86b83.webp`,
-  },
-  {
-    name: "Nguyễn Tuấn Hùng",
-    date: "01/10/2024",
-    body: "+1 legit giao dịch nhanh gọn",
-    amount: "2.400.000đ",
-    avatar: `${AVATAR_BASE}/fb-avatar-d8dfdbc4-4045-4ff7-ac86-f4d450a99ffb.webp`,
-  },
-  {
-    name: "Nguyễn Thành Xuyên",
-    date: "02/08/2025",
-    body: "+1 legit nha",
-    amount: "2.000.000đ",
-    avatar: `${AVATAR_BASE}/fb-avatar-2d4a2ff1-693f-4a6a-b222-57f910f9866c.webp`,
-  },
-];
-
-export function ReviewsSection({ reviews = REVIEWS }: { reviews?: Review[] } = {}) {
+/** Five stars, the first `filled` of them lit. */
+function Stars({ filled, size = 14 }: { filled: number; size?: number }) {
   return (
-    <div>
-      <div className="w-full border-t border-white/[0.06] pt-12 lg:pt-16">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-6 items-stretch">
-          <div className="lg:col-span-3 flex flex-col justify-center gap-3.5 lg:gap-4 pt-0 lg:pt-0 relative overflow-hidden">
-            <div className="hidden lg:block absolute left-0 top-1/2 -translate-y-1/2 text-[100px] font-black text-white/[0.015] select-none tracking-widest uppercase pointer-events-none -z-10">
-              TRUST
-            </div>
+    <div className="flex items-center gap-0.5" aria-label={`${filled} trên 5 sao`}>
+      {[0, 1, 2, 3, 4].map((star) => (
+        <Star
+          key={star}
+          size={size}
+          aria-hidden
+          className={star < filled ? "fill-amber-400 text-amber-400" : "text-white/15"}
+        />
+      ))}
+    </div>
+  );
+}
 
-            {/* Two stacked lines, the second in the shop's red — the accent
-                sits in the words themselves now, so the side bar came off. */}
-            <h2 className="text-2xl sm:text-3xl font-black uppercase tracking-wider leading-tight">
-              <span className="block text-white">Đánh giá</span>
-              <span className="block text-[var(--menzu-accent)]">Khách hàng</span>
-            </h2>
+/**
+ * The reviews on the home page, under the strip of figures.
+ *
+ * Laid out the way the reference shop lays out its Trustpilot wall: a small
+ * pill and a centred heading, then a row of cards that each lead with the
+ * stars, carry the words in the middle, and sign off with who said them.
+ * The transaction the review came from sits in the corner where the
+ * reference shows its source badge — it is the shop's own proof.
+ *
+ * Four across on a desktop; on anything narrower the row scrolls sideways
+ * rather than stacking a screen's worth of cards under the fold.
+ */
+export function ReviewsSection({
+  reviews,
+  summary,
+}: {
+  reviews: Review[];
+  /** The average of approved reviews and how many there are; null when none. */
+  summary?: { rating: number; count: number } | null;
+}) {
+  if (reviews.length === 0) return null;
 
-            <div className="flex flex-row items-end justify-between lg:flex-col lg:items-start lg:gap-4 w-full mt-1 lg:mt-0">
-              <div className="flex items-center gap-3">
-                <div className="text-4xl sm:text-5xl font-black text-white tracking-tighter leading-none">
-                  5.0
+  return (
+    <section
+      aria-labelledby="reviews-heading"
+      className="w-full border-t border-white/[0.06] pt-12 lg:pt-16"
+    >
+      <div className="mx-auto flex max-w-2xl flex-col items-center gap-3 text-center">
+        <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-emerald-400">
+          <BadgeCheck size={12} aria-hidden />
+          Từ khách đã mua và xác minh
+        </span>
+        <h2
+          id="reviews-heading"
+          className="text-2xl font-black uppercase leading-tight tracking-wider sm:text-3xl"
+        >
+          <span className="text-white">Được game thủ </span>
+          <span className="text-[var(--menzu-accent)]">tin dùng</span>
+        </h2>
+        <p className="text-[13px] text-neutral-400">
+          Đánh giá thật từ khách hàng đã giao dịch, admin duyệt trước khi hiện.
+        </p>
+        {summary ? (
+          <div className="mt-1 flex items-center gap-2.5">
+            <Stars filled={Math.round(summary.rating)} size={15} />
+            <span className="text-sm font-black text-white">
+              {summary.rating.toLocaleString("vi-VN", {
+                minimumFractionDigits: 1,
+                maximumFractionDigits: 1,
+              })}
+              <span className="text-neutral-500">/5</span>
+            </span>
+            <span className="text-[11px] font-bold uppercase tracking-widest text-neutral-500">
+              · {summary.count} đánh giá
+            </span>
+          </div>
+        ) : null}
+      </div>
+
+      <div className="mt-8 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:grid lg:grid-cols-4 lg:overflow-visible lg:pb-0">
+        {reviews.map((review, index) => (
+          <article
+            key={`${review.name}-${review.date}-${index}`}
+            className="flex w-[280px] shrink-0 snap-start flex-col gap-4 rounded-2xl border border-white/[0.08] bg-white/[0.02] p-5 transition-colors hover:border-white/[0.16] sm:w-[320px] lg:w-auto"
+          >
+            <Stars filled={Math.min(5, Math.max(1, review.rating ?? 5))} />
+
+            {/* The words, and nothing else, in the middle: React escapes them,
+                the quotes are typographic, and the block grows to keep every
+                card's foot on one line. */}
+            <p className="flex-1 text-[13.5px] leading-relaxed text-neutral-200">
+              “{review.body}”
+            </p>
+
+            <div className="flex items-center justify-between gap-3 border-t border-white/[0.06] pt-4">
+              <div className="flex min-w-0 items-center gap-2.5">
+                <div className="relative grid h-8 w-8 shrink-0 place-items-center overflow-hidden rounded-full border border-white/10 bg-white/5">
+                  {review.avatar ? (
+                    <Image src={review.avatar} alt="" fill sizes="32px" className="object-cover" />
+                  ) : (
+                    <span className="text-[12px] font-black uppercase text-neutral-400">
+                      {review.name.trim().charAt(0) || "?"}
+                    </span>
+                  )}
                 </div>
-                <div className="flex flex-col gap-1.5">
-                  <div className="flex items-center gap-0.5">
-                    {[0, 1, 2, 3, 4].map((star) => (
-                      <Star key={star} size={13} className="fill-amber-400 text-amber-400" />
-                    ))}
+                <div className="min-w-0">
+                  <div className="flex items-center gap-1">
+                    <h3 className="truncate text-[13px] font-bold text-white">{review.name}</h3>
+                    <BadgeCheck
+                      size={12}
+                      aria-label={VERIFIED_BADGE_TEXT}
+                      className="shrink-0 text-emerald-400"
+                    />
                   </div>
-                  <div className="text-[9px] text-neutral-400 font-extrabold uppercase tracking-widest whitespace-nowrap leading-none">
-                    600 ĐÁNH GIÁ THỰC
-                  </div>
+                  <span className="block text-[10px] font-semibold text-neutral-500">{review.date}</span>
                 </div>
               </div>
-
-              <Link
-                href="/feedback"
-                className="group flex items-center gap-1 text-[10px] sm:text-xs font-bold text-neutral-400 hover:text-white transition-colors uppercase tracking-widest border-b border-neutral-700 hover:border-[var(--menzu-accent)]"
-              >
-                Xem tất cả
-                <ArrowRight size={14} />
-              </Link>
+              <span className="shrink-0 rounded-md border border-emerald-500/30 bg-emerald-500/10 px-2 py-1 text-[10px] font-black text-emerald-400">
+                {review.amount}
+              </span>
             </div>
-          </div>
-
-          <div className="lg:col-span-9 relative min-w-0">
-            <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory hide-scrollbar menzu-scroll-x overscroll-x-contain cursor-grab active:cursor-grabbing select-none">
-              {reviews.map((review, index) => (
-                <div
-                  key={`${review.name}-${review.date}-${index}`}
-                  className="w-[280px] sm:w-[320px] lg:w-[calc((100%-32px)/3)] border border-white/[0.08] p-5 rounded-[15px] snap-start shrink-0 flex flex-col group relative overflow-hidden cursor-pointer hover:border-[var(--menzu-accent)]/40 transition-colors bg-[#101114]"
-                >
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="relative grid w-10 h-10 place-items-center rounded-full overflow-hidden shrink-0 border border-white/10 bg-white/5">
-                      {/* A reviewer who never uploaded a picture used to get an
-                          empty src, which a browser resolves to the page's own
-                          address and downloads in full to use as an image. The
-                          first letter of their name says as much and costs
-                          nothing. */}
-                      {review.avatar ? (
-                        <Image
-                          src={review.avatar}
-                          alt={review.name}
-                          fill
-                          className="object-cover"
-                        />
-                      ) : (
-                        <span className="text-[13px] font-black uppercase text-neutral-400">
-                          {review.name.trim().charAt(0) || "?"}
-                        </span>
-                      )}
-                    </div>
-                    <div className="flex min-w-0 flex-1 items-center gap-1.5">
-                      {/* h3, as the live cards use — a reviewer's name heads
-                          their card, and a screen reader should be able to
-                          jump between reviews by heading. The check alone now
-                          carries the verified claim, so it keeps a label for
-                          readers who cannot see it. */}
-                      <h3 className="text-sm font-bold text-white truncate">{review.name}</h3>
-                      <BadgeCheck
-                        size={13}
-                        aria-label={VERIFIED_BADGE_TEXT}
-                        className="text-emerald-400 shrink-0"
-                      />
-                    </div>
-                    <span className="shrink-0 text-[10px] text-neutral-500 font-semibold">
-                      {review.date}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center gap-0.5 mb-2">
-                    {[0, 1, 2, 3, 4].map((star) => (
-                      <Star key={star} size={12} className="fill-amber-400 text-amber-400" />
-                    ))}
-                  </div>
-
-                  <p className="text-[13px] text-neutral-300 leading-relaxed mb-4 flex-1">{review.body}</p>
-
-                  {/* The date moved up beside the name, so the foot line is
-                      the transaction alone, spread to both edges. */}
-                  <div className="flex items-center justify-between pt-3 border-t border-white/5 mt-auto">
-                    <span className="text-[10px] text-neutral-500 font-semibold">Giao dịch:</span>
-                    <span className="text-[11px] font-black text-emerald-400">{review.amount}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
+          </article>
+        ))}
       </div>
-    </div>
+
+      <div className="mt-6 flex justify-center">
+        <Link
+          href="/feedback"
+          className="group inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-neutral-400 transition-colors hover:text-white"
+        >
+          Xem tất cả đánh giá
+          <ArrowRight size={14} className="transition-transform group-hover:translate-x-0.5" />
+        </Link>
+      </div>
+    </section>
   );
 }

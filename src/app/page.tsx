@@ -136,7 +136,13 @@ export default async function Home() {
             body: r.body,
             amount: formatVnd(r.amount) + "đ",
             avatar: r.avatarUrl ?? "",
+            rating: r.rating,
           }))}
+          summary={
+            trust.rating && reviews.length > 0
+              ? { rating: trust.rating, count: reviews.length }
+              : null
+          }
         />
       </div>
     ),
