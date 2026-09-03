@@ -3,7 +3,7 @@ import { SiteFooter } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/
 import { SiteHeader } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/SiteHeader";
 import { ConnectRailSection } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/ConnectRailSection";
 import { ScrollCta } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/ScrollCta";
-import { Layers } from "lucide-react";
+import { Star } from "lucide-react";
 
 import { docHtmlToPlainText, isHtmlBody } from "@/lib/docHtml";
 import { breadcrumbJsonLd, JsonLd } from "@/lib/seo";
@@ -138,7 +138,7 @@ export function SoftwareDetailView({
               id="similar-software-heading"
               className="mb-5 flex items-center gap-2.5 text-lg sm:text-xl font-black uppercase tracking-wider text-white"
             >
-              <Layers size={22} aria-hidden className="shrink-0 text-[var(--menzu-accent)]" />
+              <Star size={22} aria-hidden className="shrink-0 text-[var(--menzu-accent)]" />
               Sản phẩm tương tự
             </h2>
             {/* One row, whatever the screen: three tiles across on a desktop,
