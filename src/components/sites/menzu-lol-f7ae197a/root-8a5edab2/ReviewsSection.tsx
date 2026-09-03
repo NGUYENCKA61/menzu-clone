@@ -66,8 +66,8 @@ export function ReviewsSection({
           id="reviews-heading"
           className="text-2xl font-black uppercase leading-tight tracking-wider sm:text-3xl"
         >
-          <span className="text-white">Được game thủ </span>
-          <span className="text-[var(--menzu-accent)]">tin dùng</span>
+          <span className="text-white">Chiến thắng </span>
+          <span className="text-[var(--menzu-accent)]">trong tầm tay bạn</span>
         </h2>
         <p className="text-[13px] text-neutral-400">
           Đánh giá thật từ khách hàng đã giao dịch, admin duyệt trước khi hiện.
