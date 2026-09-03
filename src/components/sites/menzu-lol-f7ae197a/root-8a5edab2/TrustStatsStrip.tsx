@@ -2,19 +2,22 @@ import { Clock, ShoppingBag, Star, Users, type LucideIcon } from "lucide-react";
 
 import type { TrustStats } from "@/lib/trustStats";
 
+import { CountUp } from "./CountUp";
+
 /**
- * "8.400+", "402.000+": rounded down to the hundred once past a thousand, so
- * the figure reads as a scale rather than a count that is stale by tomorrow.
+ * 8.400 for 8,478, 21.200 for 21,285: rounded down to the hundred once past
+ * a thousand, so the figure reads as a scale rather than a count that is
+ * stale by tomorrow. The "+" the tile adds says the rest.
  */
-function compact(n: number): string {
-  const floor = n >= 1000 ? Math.floor(n / 100) * 100 : n;
-  return `${floor.toLocaleString("vi-VN")}+`;
+function compact(n: number): number {
+  return n >= 1000 ? Math.floor(n / 100) * 100 : n;
 }
 
 interface Tile {
   icon: LucideIcon;
-  value: string;
-  /** The coloured tail after the number — "+", "năm", "/5". */
+  value: number;
+  decimals: number;
+  /** The coloured tail after the number — "+", "+ năm", "/5". */
   unit: string;
   label: string;
 }
@@ -22,22 +25,23 @@ interface Tile {
 /**
  * The strip of four figures above the reviews: how much the shop has done,
  * for how many, for how long, and how it was rated. The numbers are the
- * loud part — big, white, with the unit in the accent — and the labels sit
- * quiet and uppercase under them, the way the reference shop does it.
+ * loud part — big, white, counting up as the strip scrolls into view, with
+ * the unit in the accent — and the labels sit quiet and uppercase under
+ * them, the way the reference shop does it.
  */
 export function TrustStatsStrip({ stats }: { stats: TrustStats }) {
   const tiles: Tile[] = [];
   if (stats.orders) {
-    tiles.push({ icon: ShoppingBag, value: compact(stats.orders), unit: "", label: "Đơn đã giao" });
+    tiles.push({ icon: ShoppingBag, value: compact(stats.orders), decimals: 0, unit: "+", label: "Đơn đã giao" });
   }
   if (stats.customers) {
-    tiles.push({ icon: Users, value: compact(stats.customers), unit: "", label: "Khách hàng" });
+    tiles.push({ icon: Users, value: compact(stats.customers), decimals: 0, unit: "+", label: "Khách hàng" });
   }
   if (stats.years) {
-    tiles.push({ icon: Clock, value: `${stats.years}`, unit: "+ năm", label: "Hoạt động" });
+    tiles.push({ icon: Clock, value: stats.years, decimals: 0, unit: "+ năm", label: "Hoạt động" });
   }
   if (stats.rating) {
-    tiles.push({ icon: Star, value: stats.rating.toFixed(1), unit: "/5", label: "Đánh giá trung bình" });
+    tiles.push({ icon: Star, value: stats.rating, decimals: 1, unit: "/5", label: "Đánh giá trung bình" });
   }
   // One figure alone is a boast; two make a record.
   if (tiles.length < 2) return null;
@@ -57,10 +61,9 @@ export function TrustStatsStrip({ stats }: { stats: TrustStats }) {
               <div className="flex items-baseline gap-1.5">
                 <Icon size={16} aria-hidden className="mb-0.5 self-center text-[var(--menzu-accent)]" />
                 <span className="text-4xl font-black leading-none tracking-tight text-white sm:text-5xl">
-                  {tile.value.replace(/\+$/, "")}
+                  <CountUp value={tile.value} decimals={tile.decimals} />
                 </span>
                 <span className="text-xl font-black leading-none text-[var(--menzu-accent)] sm:text-2xl">
-                  {tile.value.endsWith("+") ? "+" : ""}
                   {tile.unit}
                 </span>
               </div>
