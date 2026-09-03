@@ -130,8 +130,8 @@ export default async function Home() {
       <div key="reviews">
         <TrustStatsStrip stats={trust} />
         <ReviewsSection
-          // Three on the home page — a taste; the rest live on /feedback.
-          reviews={reviews.slice(0, 3).map((r) => ({
+          // Four on the home page — a taste; the rest live on /feedback.
+          reviews={reviews.slice(0, 4).map((r) => ({
             name: r.name,
             date: r.createdAt.toLocaleDateString("vi-VN"),
             body: r.body,

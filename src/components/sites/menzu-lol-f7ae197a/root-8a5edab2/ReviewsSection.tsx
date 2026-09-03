@@ -39,7 +39,7 @@ function Stars({ filled, size = 14 }: { filled: number; size?: number }) {
  * The transaction the review came from sits in the corner where the
  * reference shows its source badge — it is the shop's own proof.
  *
- * Three across on a desktop; on anything narrower the row scrolls sideways
+ * Four across on a desktop; on anything narrower the row scrolls sideways
  * rather than stacking a screen's worth of cards under the fold.
  */
 export function ReviewsSection({
@@ -89,7 +89,7 @@ export function ReviewsSection({
         ) : null}
       </div>
 
-      <div className="mt-8 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:grid lg:grid-cols-3 lg:overflow-visible lg:pb-0">
+      <div className="mt-8 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:grid lg:grid-cols-4 lg:overflow-visible lg:pb-0">
         {reviews.map((review, index) => (
           <article
             key={`${review.name}-${review.date}-${index}`}
