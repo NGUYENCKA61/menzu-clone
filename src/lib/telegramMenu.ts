@@ -32,6 +32,8 @@ export interface MenuScreen {
 
 export type MenuAction =
   | { kind: "cats" }
+  /** "🔍 Tìm tool": open the reply box, the next message is the search. */
+  | { kind: "find" }
   | { kind: "cat"; id: string }
   | { kind: "tool"; id: string }
   /** A state tapped: ask for the note before anything changes. */
@@ -207,10 +209,44 @@ function shorten(text: string, max: number): string {
   return trimmed.length > max ? `${trimmed.slice(0, max - 1)}…` : trimmed;
 }
 
+/**
+ * A list of tools as the message reads them and as the buttons pick them.
+ *
+ * The names the shop gives its tools run to sixty shouting characters, and
+ * on a button that is eight readable ones — the desk could not tell two
+ * builds apart. So the message carries the full line per tool, dot, code in
+ * bold, name, and the buttons under it carry only the code, three to a row.
+ */
+function toolLines(
+  tools: { id: string; code: string; name: string | null; softwareStatus: SoftwareStatusValue | null }[],
+): { text: string; rows: InlineButton[][] } {
+  const text = tools
+    .map(
+      (tool) =>
+        `${dot(tool.softwareStatus)} <b>${escapeTelegramHtml(tool.code)}</b> ${escapeTelegramHtml(
+          shorten(tool.name ?? "", 72),
+        )}`,
+    )
+    .join("\n");
+  const rows: InlineButton[][] = [];
+  for (let i = 0; i < tools.length; i += 3) {
+    rows.push(
+      tools.slice(i, i + 3).map((tool) => ({
+        text: `${dot(tool.softwareStatus)} ${tool.code}`,
+        callback_data: `tool:${tool.id}`,
+      })),
+    );
+  }
+  return { text, rows };
+}
+
+const FIND_BUTTON: InlineButton = { text: "🔍 Tìm tool", callback_data: "find" };
+
 /** The button's data, read back. Anything else is a stale or forged tap. */
 export function parseCallback(data: string | undefined): MenuAction | null {
   if (!data) return null;
   if (data === "cats") return { kind: "cats" };
+  if (data === "find") return { kind: "find" };
   const open = /^(cat|tool|cstat):([\w-]{1,40})$/.exec(data);
   if (open) return { kind: open[1] as "cat" | "tool" | "cstat", id: open[2]! };
   const set =
@@ -275,8 +311,9 @@ export async function categoryScreen(): Promise<MenuScreen> {
       callback_data: `cat:${id}`,
     },
   ]);
+  keyboard.push([FIND_BUTTON]);
   return {
-    text: "<b>Chọn danh mục</b>\nBấm danh mục để xem tool, bấm tool để đổi trạng thái.\nHoặc gõ mã / tên tool để tìm nhanh.",
+    text: "<b>Chọn danh mục</b>\nBấm danh mục để xem tool, bấm tool để đổi trạng thái.\nHoặc bấm 🔍 rồi gõ mã / tên tool để tìm nhanh.",
     keyboard,
   };
 }
@@ -305,16 +342,11 @@ export async function searchScreen(query: string): Promise<MenuScreen> {
       keyboard: [[{ text: "🏠 Danh mục", callback_data: "cats" }]],
     };
   }
-  const keyboard = tools.map((tool) => [
-    {
-      text: `${dot(tool.softwareStatus)} ${tool.code} · ${shorten(tool.name ?? "", 26)}`,
-      callback_data: `tool:${tool.id}`,
-    },
-  ]);
-  keyboard.push([{ text: "🏠 Danh mục", callback_data: "cats" }]);
+  const { text, rows } = toolLines(tools);
+  const keyboard = [...rows, [FIND_BUTTON, { text: "🏠 Danh mục", callback_data: "cats" }]];
   const cap = tools.length === 20 ? " (20 đầu tiên)" : "";
   return {
-    text: `<b>Kết quả cho “${escapeTelegramHtml(q)}”</b> · ${tools.length} tool${cap}\n${LEGEND}`,
+    text: `<b>Kết quả cho “${escapeTelegramHtml(q)}”</b> · ${tools.length} tool${cap}\n\n${text}\n\nBấm mã để đổi trạng thái.`,
     keyboard,
   };
 }
@@ -357,16 +389,14 @@ export async function toolsScreen(categoryId: string): Promise<MenuScreen | null
   const first = tools[0];
   if (!first) return null;
 
-  const keyboard = tools.map((tool) => [
-    {
-      text: `${dot(tool.softwareStatus)} ${tool.code} · ${shorten(tool.name ?? "", 26)}`,
-      callback_data: `tool:${tool.id}`,
-    },
-  ]);
-  keyboard.push([{ text: "⚙️ Đổi trạng thái cả danh mục", callback_data: `cstat:${categoryId}` }]);
-  keyboard.push([{ text: "⬅️ Danh mục", callback_data: "cats" }]);
+  const { text, rows } = toolLines(tools);
+  const keyboard = [
+    ...rows,
+    [{ text: "⚙️ Đổi trạng thái cả danh mục", callback_data: `cstat:${categoryId}` }],
+    [FIND_BUTTON, { text: "⬅️ Danh mục", callback_data: "cats" }],
+  ];
   return {
-    text: `<b>${escapeTelegramHtml(first.category.name)}</b> · ${tools.length} tool\n${LEGEND}`,
+    text: `<b>${escapeTelegramHtml(first.category.name)}</b> · ${tools.length} tool\n${LEGEND}\n\n${text}\n\nBấm mã để đổi trạng thái.`,
     keyboard,
   };
 }

@@ -210,6 +210,15 @@ async function handleCallback(token: string, channelId: string, query: TelegramC
     case "cats":
       screen = await categoryScreen();
       break;
+    case "find":
+      // Opens the reply box on the phone; whatever comes back is the search.
+      await telegramCall(token, "sendMessage", {
+        chat_id: chat.id,
+        text: "Gõ mã hoặc một từ trong tên tool:",
+        reply_markup: { force_reply: true, input_field_placeholder: "vd: valorant, HACK12" },
+      });
+      redraw = false;
+      break;
     case "cat":
       screen = await toolsScreen(action.id);
       break;
