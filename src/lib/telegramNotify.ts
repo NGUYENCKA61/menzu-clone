@@ -85,7 +85,9 @@ export async function registerTelegramCommands(token: string): Promise<void> {
   await telegramCall(token, "setMyCommands", {
     commands: [
       { command: "list", description: "Mã tool và trạng thái hiện tại" },
+      { command: "notice", description: "Đăng thông báo hệ thống lên web và kênh" },
       { command: "help", description: "Cú pháp đổi trạng thái" },
+      { command: "cancel", description: "Hủy thao tác đang dở" },
     ],
   });
 }
@@ -141,7 +143,7 @@ export async function postStatusToTelegram(
 }
 
 /** One glyph per kind of notice, so the channel can tell a sale from an outage. */
-const NOTICE_EMOJI: Record<string, string> = {
+export const NOTICE_EMOJI: Record<string, string> = {
   UPDATE: "🆕",
   MAINTENANCE: "🛠️",
   PROMO: "🎉",

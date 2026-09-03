@@ -4,26 +4,37 @@ import path from "node:path";
 
 import { NextResponse } from "next/server";
 
+import { BODY_MAX, TITLE_MAX } from "@/lib/announcements";
 import { db } from "@/lib/db";
+import { absoluteUrl } from "@/lib/seo";
 import { getShopSettings } from "@/lib/settingsStore";
 import { SOFTWARE_STATUS } from "@/lib/softwareStatus";
 import { parseStatusCommand } from "@/lib/statusCommand";
 import {
   askNoteScreen,
   categoryScreen,
+  clearDraft,
   clearPending,
   listScreenText,
+  noticeBodyScreen,
+  noticeTitleScreen,
+  noticeTypeScreen,
   parseCallback,
+  peekDraft,
   peekPending,
+  publishNotice,
   searchScreen,
+  setDraftTitle,
   setPending,
   setStatus,
+  startDraft,
   toolScreen,
   toolsScreen,
   type MenuScreen,
 } from "@/lib/telegramMenu";
 import {
   escapeTelegramHtml,
+  postAnnouncementToTelegram,
   postStatusToTelegram,
   sendTelegramMessage,
   telegramCall,
@@ -54,7 +65,7 @@ import {
  */
 
 /** Where a photo pulled off Telegram lands. Same folder family as uploads. */
-const PHOTO_DIR = path.join(process.cwd(), "public", "uploads", "status");
+const UPLOADS_DIR = path.join(process.cwd(), "public", "uploads");
 const MAX_PHOTO_BYTES = 5 * 1024 * 1024;
 
 interface TelegramPhoto {
@@ -135,6 +146,9 @@ function helpText(): string {
     "<b>Không muốn gõ lệnh</b>",
     "/list mở menu: danh mục → tool → trạng thái. Chọn xong, gửi ghi chú kèm ảnh, hoặc bấm Đổi ngay.",
     "Gõ mã hoặc một từ trong tên tool để tìm nhanh, ví dụ <code>valorant</code>.",
+    "",
+    "<b>Thông báo hệ thống</b>",
+    "/notice → chọn loại → gửi tiêu đề → gửi nội dung (kèm ảnh nếu có). Lên web và lên kênh ngay. /cancel để hủy thao tác đang dở.",
   ].join("\n");
 }
 
@@ -214,6 +228,14 @@ async function handleCallback(token: string, channelId: string, query: TelegramC
       clearPending(String(userId));
       screen = await toolScreen(action.id);
       break;
+    case "notice":
+      startDraft(String(userId), action.type);
+      screen = noticeTitleScreen(action.type);
+      break;
+    case "noticeCancel":
+      clearDraft(String(userId));
+      screen = { text: "Đã hủy thông báo.", keyboard: [] };
+      break;
     case "go": {
       clearPending(String(userId));
       const result = await setStatus(action.id, action.status);
@@ -261,6 +283,7 @@ async function handleCallback(token: string, channelId: string, query: TelegramC
 async function savePhoto(
   photos: TelegramPhoto[] | undefined,
   token: string,
+  folder: "status" | "announcements" = "status",
 ): Promise<string | null> {
   const largest = photos?.[photos.length - 1];
   if (!largest?.file_id) return null;
@@ -286,9 +309,10 @@ async function savePhoto(
     const safeExt = ["jpg", "jpeg", "png", "webp", "gif"].includes(ext) ? ext : "jpg";
     const name = `${Date.now().toString(36)}-${largest.file_id.slice(-8)}.${safeExt}`;
 
-    await mkdir(PHOTO_DIR, { recursive: true });
-    await writeFile(path.join(PHOTO_DIR, name), bytes);
-    return `/uploads/status/${name}`;
+    const dir = path.join(UPLOADS_DIR, folder);
+    await mkdir(dir, { recursive: true });
+    await writeFile(path.join(dir, name), bytes);
+    return `/uploads/${folder}/${name}`;
   } catch {
     return null;
   }
@@ -358,8 +382,66 @@ export async function POST(request: Request) {
     return ok({ answered: "list" });
   }
 
-  const command = parseStatusCommand(text);
   const userKey = message.from?.id !== undefined ? String(message.from.id) : null;
+
+  if (slash === "notice" || slash === "thongbao") {
+    if (fromChannel) return ok({ ignored: "thông báo chỉ viết từ chat riêng" });
+    await showScreen(token, replyTo, noticeTypeScreen());
+    return ok({ answered: "notice-type" });
+  }
+  if (slash === "cancel") {
+    if (userKey) {
+      clearDraft(userKey);
+      clearPending(userKey);
+    }
+    await reply("Đã hủy thao tác đang dở.");
+    return ok({ answered: "cancel" });
+  }
+
+  // A notice half-written takes every message until it is done: a title, then
+  // a body. It is checked before the status grammar because a title like
+  // "Update xong" would otherwise read as a tool code and a state.
+  const draft = !fromChannel && userKey ? peekDraft(userKey) : null;
+  if (draft && userKey) {
+    if (draft.title === null) {
+      if (!text) {
+        await reply("Gửi tiêu đề dạng chữ.");
+        return ok({ answered: "notice-title-empty" });
+      }
+      if (text.length > TITLE_MAX) {
+        await reply(`Tiêu đề dài quá (${text.length}/${TITLE_MAX} ký tự), gửi lại ngắn hơn.`);
+        return ok({ answered: "notice-title-long" });
+      }
+      setDraftTitle(userKey, text);
+      await showScreen(token, replyTo, noticeBodyScreen(text));
+      return ok({ answered: "notice-title" });
+    }
+    if (!text) {
+      await reply("Gửi nội dung dạng chữ. Ảnh thì gửi kèm chú thích là nội dung.");
+      return ok({ answered: "notice-body-empty" });
+    }
+    if (text.length > BODY_MAX) {
+      await reply(`Nội dung dài quá (${text.length}/${BODY_MAX} ký tự), gửi lại ngắn hơn.`);
+      return ok({ answered: "notice-body-long" });
+    }
+    clearDraft(userKey);
+    const imageUrl = await savePhoto(message.photo, token, "announcements");
+    const id = await publishNotice({
+      type: draft.type,
+      title: draft.title,
+      body: text,
+      imageUrl,
+    });
+    await postAnnouncementToTelegram(id);
+    await reply(
+      `✅ Đã đăng thông báo <b>${escapeTelegramHtml(draft.title)}</b> lên web${
+        imageUrl ? " kèm ảnh" : ""
+      } và lên kênh.\n🔗 ${absoluteUrl("/thong-bao")}`,
+    );
+    return ok({ answered: "notice" });
+  }
+
+  const command = parseStatusCommand(text);
   if (!command) {
     // The channel carries the shop's other posts too, so a post that is not
     // a command is simply not for the bot.

@@ -1,8 +1,9 @@
 import "server-only";
 
+import { BODY_MAX, TITLE_MAX, TYPE_LABELS, type AnnouncementType } from "@/lib/announcements";
 import { db } from "@/lib/db";
 import { SOFTWARE_STATUS, type SoftwareStatusValue } from "@/lib/softwareStatus";
-import { escapeTelegramHtml, STATUS_EMOJI } from "@/lib/telegramNotify";
+import { escapeTelegramHtml, NOTICE_EMOJI, STATUS_EMOJI } from "@/lib/telegramNotify";
 
 /**
  * The bot's tap-through menu for an admin's private chat.
@@ -35,7 +36,10 @@ export type MenuAction =
   | { kind: "set"; id: string; status: SoftwareStatusValue }
   /** "Đổi ngay": the same state, applied with no note. */
   | { kind: "go"; id: string; status: SoftwareStatusValue }
-  | { kind: "cancel"; id: string };
+  | { kind: "cancel"; id: string }
+  /** A notice's kind tapped: the title and body come typed next. */
+  | { kind: "notice"; type: AnnouncementType }
+  | { kind: "noticeCancel" };
 
 /**
  * A state chosen from the menu, waiting for its note.
@@ -57,7 +61,113 @@ const PENDING_TTL_MS = 10 * 60_000;
 const pending = new Map<string, PendingChange>();
 
 export function setPending(userId: string, change: Omit<PendingChange, "expiresAt">): void {
+  drafts.delete(userId);
   pending.set(userId, { ...change, expiresAt: Date.now() + PENDING_TTL_MS });
+}
+
+/**
+ * A notice being written from the chat: the kind is tapped, the title and
+ * the body typed one after the other. Same ten-minute memory as a pending
+ * state, and the two exclude each other — an admin is doing one thing.
+ */
+export interface NoticeDraft {
+  type: AnnouncementType;
+  title: string | null;
+  expiresAt: number;
+}
+
+const drafts = new Map<string, NoticeDraft>();
+
+export function startDraft(userId: string, type: AnnouncementType): void {
+  pending.delete(userId);
+  drafts.set(userId, { type, title: null, expiresAt: Date.now() + PENDING_TTL_MS });
+}
+
+export function peekDraft(userId: string): NoticeDraft | null {
+  const draft = drafts.get(userId);
+  if (!draft) return null;
+  if (draft.expiresAt < Date.now()) {
+    drafts.delete(userId);
+    return null;
+  }
+  return draft;
+}
+
+export function setDraftTitle(userId: string, title: string): void {
+  const draft = drafts.get(userId);
+  if (draft) drafts.set(userId, { ...draft, title });
+}
+
+export function clearDraft(userId: string): void {
+  drafts.delete(userId);
+}
+
+/** The kinds a notice from the chat can be; a gift needs the desk's form. */
+const NOTICE_TYPES: AnnouncementType[] = ["INFO", "UPDATE", "MAINTENANCE", "PROMO"];
+
+export function noticeTypeScreen(): MenuScreen {
+  const button = (type: AnnouncementType) => ({
+    text: `${NOTICE_EMOJI[type] ?? "📢"} ${TYPE_LABELS[type]}`,
+    callback_data: `notice:${type}`,
+  });
+  return {
+    text: "<b>Thông báo hệ thống mới</b>\nLên web (popup + trang Thông báo) và lên kênh. Chọn loại:",
+    keyboard: [
+      [button(NOTICE_TYPES[0]!), button(NOTICE_TYPES[1]!)],
+      [button(NOTICE_TYPES[2]!), button(NOTICE_TYPES[3]!)],
+      [{ text: "❌ Hủy", callback_data: "notice:cancel" }],
+    ],
+  };
+}
+
+export function noticeTitleScreen(type: AnnouncementType): MenuScreen {
+  return {
+    text: [
+      `Loại: ${NOTICE_EMOJI[type] ?? "📢"} <b>${TYPE_LABELS[type]}</b>`,
+      "",
+      `Gửi <b>tiêu đề</b> thông báo (tối đa ${TITLE_MAX} ký tự):`,
+    ].join("\n"),
+    keyboard: [[{ text: "❌ Hủy", callback_data: "notice:cancel" }]],
+  };
+}
+
+export function noticeBodyScreen(title: string): MenuScreen {
+  return {
+    text: [
+      `Tiêu đề: <b>${escapeTelegramHtml(title)}</b>`,
+      "",
+      `Gửi <b>nội dung</b> (tối đa ${BODY_MAX} ký tự). Muốn kèm ảnh thì gửi ảnh và ghi nội dung vào chú thích.`,
+    ].join("\n"),
+    keyboard: [[{ text: "❌ Hủy", callback_data: "notice:cancel" }]],
+  };
+}
+
+/**
+ * The notice, live on the site the moment it is written: published, for
+ * everyone, starting now — the chat is where the desk goes to say something
+ * immediately, and a draft it would have to go and publish from the desk
+ * defeats that. The channel post is the caller's next step.
+ */
+export async function publishNotice(input: {
+  type: AnnouncementType;
+  title: string;
+  body: string;
+  imageUrl: string | null;
+}): Promise<string> {
+  const row = await db.announcement.create({
+    data: {
+      title: input.title,
+      body: input.body,
+      type: input.type,
+      priority: "NORMAL",
+      status: "PUBLISHED",
+      audience: "ALL",
+      bullets: [],
+      imageUrl: input.imageUrl,
+    },
+    select: { id: true },
+  });
+  return row.id;
 }
 
 export function peekPending(userId: string): PendingChange | null {
@@ -103,6 +213,9 @@ export function parseCallback(data: string | undefined): MenuAction | null {
   }
   const cancel = /^cancel:([\w-]{1,40})$/.exec(data);
   if (cancel) return { kind: "cancel", id: cancel[1]! };
+  if (data === "notice:cancel") return { kind: "noticeCancel" };
+  const notice = /^notice:(INFO|UPDATE|MAINTENANCE|PROMO)$/.exec(data);
+  if (notice) return { kind: "notice", type: notice[1] as AnnouncementType };
   return null;
 }
 
