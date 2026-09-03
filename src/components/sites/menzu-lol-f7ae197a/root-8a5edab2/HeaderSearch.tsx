@@ -15,14 +15,10 @@ interface Hit {
   note: string;
 }
 
-/** The bell's and the basket's square, for the button the phone gets. */
-const ICON_BUTTON =
-  "relative flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-neutral-300 transition-colors hover:bg-white/10 hover:text-white";
-
 /**
  * The search box in the header, left of the basket.
  *
- * A box on a desktop, a button that opens one on a phone. It asks the search
+ * A box on a desktop, nothing on a phone. It asks the search
  * route on every pause in typing and lists what came back under itself —
  * shelves first, then tools and accounts — so the reader lands on the page
  * rather than on a results page that would only list the same rows again.
@@ -30,7 +26,6 @@ const ICON_BUTTON =
  */
 export function HeaderSearch() {
   const router = useRouter();
-  const [open, setOpen] = useState(false);
   const [q, setQ] = useState("");
   const [hits, setHits] = useState<Hit[]>([]);
   const [loading, setLoading] = useState(false);
@@ -68,10 +63,7 @@ export function HeaderSearch() {
   // A click anywhere else puts the list away.
   useEffect(() => {
     const onDown = (event: MouseEvent) => {
-      if (box.current && !box.current.contains(event.target as Node)) {
-        setOpen(false);
-        setHits([]);
-      }
+      if (box.current && !box.current.contains(event.target as Node)) setHits([]);
     };
     document.addEventListener("mousedown", onDown);
     return () => document.removeEventListener("mousedown", onDown);
@@ -80,7 +72,6 @@ export function HeaderSearch() {
   const reset = () => {
     setQ("");
     setHits([]);
-    setOpen(false);
   };
 
   const onKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
@@ -108,25 +99,10 @@ export function HeaderSearch() {
   const showList = term.length >= 2 && (shown.length > 0 || !loading);
 
   return (
-    <div ref={box} className="relative">
-      <button
-        type="button"
-        aria-label="Tìm kiếm"
-        aria-expanded={open}
-        onClick={() => {
-          setOpen(true);
-          window.setTimeout(() => input.current?.focus(), 0);
-        }}
-        className={`${ICON_BUTTON} md:hidden`}
-      >
-        <Search size={16} />
-      </button>
-
-      <div
-        className={`${
-          open ? "absolute right-0 top-11 z-50 w-[min(92vw,22rem)]" : "hidden"
-        } md:relative md:static md:block md:w-48 lg:w-60 xl:w-72`}
-      >
+    // Desktop only: on a phone the header has no room for a box, and the
+    // shop chose no button either — the drawer and the shelves do the job.
+    <div ref={box} className="relative hidden md:block">
+      <div className="relative md:w-48 lg:w-60 xl:w-72">
         <label className="relative flex h-9 items-center rounded-xl border border-white/10 bg-white/5 text-neutral-300 transition-colors focus-within:border-white/25 focus-within:bg-white/[0.08]">
           <Search size={15} aria-hidden className="ml-3 shrink-0 text-neutral-500" />
           <input
