@@ -11,8 +11,10 @@ import { getShopSettings } from "@/lib/settingsStore";
 import { SOFTWARE_STATUS } from "@/lib/softwareStatus";
 import { parseStatusCommand } from "@/lib/statusCommand";
 import {
+  askCategoryNoteScreen,
   askNoteScreen,
   categoryScreen,
+  categoryStateScreen,
   clearDraft,
   clearPending,
   listScreenText,
@@ -24,6 +26,7 @@ import {
   peekPending,
   publishNotice,
   searchScreen,
+  setCategoryStatus,
   setDraftTitle,
   setPending,
   setStatus,
@@ -35,6 +38,7 @@ import {
 import {
   escapeTelegramHtml,
   postAnnouncementToTelegram,
+  postCategoryStatusToTelegram,
   postStatusToTelegram,
   sendTelegramMessage,
   telegramCall,
@@ -145,6 +149,7 @@ function helpText(): string {
     "",
     "<b>Không muốn gõ lệnh</b>",
     "/list mở menu: danh mục → tool → trạng thái. Chọn xong, gửi ghi chú kèm ảnh, hoặc bấm Đổi ngay.",
+    "Cả danh mục một lần (game bảo trì): trong danh mục bấm ⚙️ Đổi trạng thái cả danh mục, hoặc gõ slug danh mục thay mã tool, ví dụ <code>hack-cs2-counter-strike-2 bảo trì game đang update</code>.",
     "Gõ mã hoặc một từ trong tên tool để tìm nhanh, ví dụ <code>valorant</code>.",
     "",
     "<b>Thông báo hệ thống</b>",
@@ -216,7 +221,8 @@ async function handleCallback(token: string, channelId: string, query: TelegramC
       screen = await askNoteScreen(action.id, action.status);
       if (screen) {
         setPending(String(userId), {
-          productId: action.id,
+          scope: "tool",
+          id: action.id,
           status: action.status,
           chatId: String(chat.id),
           messageId,
@@ -228,6 +234,39 @@ async function handleCallback(token: string, channelId: string, query: TelegramC
       clearPending(String(userId));
       screen = await toolScreen(action.id);
       break;
+    case "cstat":
+      screen = await categoryStateScreen(action.id);
+      break;
+    case "cset": {
+      screen = await askCategoryNoteScreen(action.id, action.status);
+      if (screen) {
+        setPending(String(userId), {
+          scope: "category",
+          id: action.id,
+          status: action.status,
+          chatId: String(chat.id),
+          messageId,
+        });
+      }
+      break;
+    }
+    case "cgo": {
+      clearPending(String(userId));
+      const done = await setCategoryStatus(action.id, action.status);
+      if (done && done.changed > 0) {
+        await postCategoryStatusToTelegram({
+          ...done,
+          status: action.status,
+          note: null,
+          imageUrl: null,
+        });
+        toast = `Đã đổi ${done.changed}/${done.total} tool sang ${SOFTWARE_STATUS[action.status].label}, đã đăng lên kênh.`;
+      } else if (done) {
+        toast = "Cả danh mục đã ở trạng thái đó rồi.";
+      }
+      screen = await toolsScreen(action.id);
+      break;
+    }
     case "notice":
       startDraft(String(userId), action.type);
       screen = noticeTitleScreen(action.type);
@@ -454,20 +493,33 @@ export async function POST(request: Request) {
       clearPending(userKey);
       const imageUrl = await savePhoto(message.photo, token);
       const note = text || null;
-      const result = await setStatus(waiting.productId, waiting.status, note, imageUrl);
-      if (result === "changed") {
-        await postStatusToTelegram(waiting.productId, waiting.status, note, imageUrl);
-        await reply(
-          `✅ Đã đổi sang <b>${SOFTWARE_STATUS[waiting.status].label}</b>${note ? " kèm ghi chú" : ""}${
-            imageUrl ? " và ảnh" : ""
-          }. Đã đăng lên kênh.`,
-        );
-      } else if (result === "same") {
-        await reply("Tool đang ở trạng thái đó rồi, không có gì đổi.");
+      const label = SOFTWARE_STATUS[waiting.status].label;
+      const extras = `${note ? " kèm ghi chú" : ""}${imageUrl ? " và ảnh" : ""}`;
+      if (waiting.scope === "category") {
+        const done = await setCategoryStatus(waiting.id, waiting.status, note, imageUrl);
+        if (done && done.changed > 0) {
+          await postCategoryStatusToTelegram({ ...done, status: waiting.status, note, imageUrl });
+          await reply(
+            `✅ Đã đổi ${done.changed}/${done.total} tool trong <b>${escapeTelegramHtml(done.name)}</b> sang <b>${label}</b>${extras}. Đã đăng lên kênh.`,
+          );
+        } else if (done) {
+          await reply("Cả danh mục đã ở trạng thái đó rồi, không có gì đổi.");
+        } else {
+          await reply("Danh mục này không còn nữa.");
+        }
       } else {
-        await reply("Tool này không còn nữa.");
+        const result = await setStatus(waiting.id, waiting.status, note, imageUrl);
+        if (result === "changed") {
+          await postStatusToTelegram(waiting.id, waiting.status, note, imageUrl);
+          await reply(`✅ Đã đổi sang <b>${label}</b>${extras}. Đã đăng lên kênh.`);
+        } else if (result === "same") {
+          await reply("Tool đang ở trạng thái đó rồi, không có gì đổi.");
+        } else {
+          await reply("Tool này không còn nữa.");
+        }
       }
-      const after = await toolScreen(waiting.productId);
+      const after =
+        waiting.scope === "category" ? await toolsScreen(waiting.id) : await toolScreen(waiting.id);
       if (after) {
         await telegramCall(token, "editMessageText", {
           chat_id: waiting.chatId,
@@ -499,6 +551,28 @@ export async function POST(request: Request) {
     select: { id: true, softwareStatus: true },
   });
   if (!product) {
+    // Not a tool code — perhaps a category slug, which flips the whole
+    // shelf: "hack-cs2-counter-strike-2 bảo trì game đang update".
+    const category = await db.category.findFirst({
+      where: { slug: command.productCode.toLowerCase() },
+      select: { id: true },
+    });
+    if (category) {
+      const note = command.note || null;
+      const imageUrl = await savePhoto(message.photo, token);
+      const done = await setCategoryStatus(category.id, command.status, note, imageUrl);
+      if (done && done.changed > 0) {
+        await postCategoryStatusToTelegram({ ...done, status: command.status, note, imageUrl });
+        if (!fromChannel) {
+          await reply(
+            `✅ Đã đổi ${done.changed}/${done.total} tool trong <b>${escapeTelegramHtml(done.name)}</b> sang <b>${SOFTWARE_STATUS[command.status].label}</b>. Đã đăng lên kênh.`,
+          );
+        }
+        return ok({ category: command.productCode, status: command.status, changed: done.changed });
+      }
+      if (!fromChannel) await reply("Cả danh mục đã ở trạng thái đó rồi, không có gì đổi.");
+      return ok({ ignored: "trạng thái không đổi", category: command.productCode });
+    }
     if (!fromChannel) {
       await reply(
         `Không có tool mã <b>${escapeTelegramHtml(command.productCode)}</b>. Gõ /list để xem mã.`,

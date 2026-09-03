@@ -1,7 +1,7 @@
 import "server-only";
 
 import { db } from "@/lib/db";
-import { productHref } from "@/lib/routes";
+import { categoryHref, productHref } from "@/lib/routes";
 import { absoluteUrl } from "@/lib/seo";
 import { getShopSettings } from "@/lib/settingsStore";
 import {
@@ -139,6 +139,50 @@ export async function postStatusToTelegram(
   } catch (error) {
     // Left unsent rather than failing the status change that earned it.
     console.error("[telegram] status post failed:", error);
+  }
+}
+
+/**
+ * A whole category's change, as one post: "every CS2 tool is updating" is
+ * one piece of news, and five posts saying it would bury the channel.
+ */
+export async function postCategoryStatusToTelegram(input: {
+  name: string;
+  slug: string;
+  status: SoftwareStatusValue;
+  note: string | null;
+  imageUrl: string | null;
+  changed: number;
+  total: number;
+}): Promise<void> {
+  try {
+    const settings = await getShopSettings();
+    const token = settings.telegramBotToken.trim();
+    const chatId = settings.telegramChatId.trim();
+    if (!token || !chatId) return;
+
+    const text = [
+      `${STATUS_EMOJI[input.status]} <b>${escapeTelegramHtml(input.name)}</b> · cả danh mục`,
+      `Trạng thái: <b>${SOFTWARE_STATUS[input.status].label}</b> · ${input.changed}/${input.total} tool`,
+      escapeTelegramHtml(`Toàn bộ tool ${input.name} ${STATUS_EVENT_COPY[input.status]}`),
+      input.note ? `📝 ${escapeTelegramHtml(input.note)}` : "",
+      `🔗 ${absoluteUrl(categoryHref(input.slug))}`,
+    ]
+      .filter(Boolean)
+      .join("\n");
+
+    if (input.imageUrl) {
+      const sent = await telegramCall(token, "sendPhoto", {
+        chat_id: chatId,
+        photo: absoluteUrl(input.imageUrl),
+        caption: text,
+        parse_mode: "HTML",
+      });
+      if (sent) return;
+    }
+    await sendTelegramMessage(token, chatId, text);
+  } catch (error) {
+    console.error("[telegram] category post failed:", error);
   }
 }
 

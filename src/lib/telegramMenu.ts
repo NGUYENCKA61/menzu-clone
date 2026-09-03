@@ -37,6 +37,10 @@ export type MenuAction =
   /** "Đổi ngay": the same state, applied with no note. */
   | { kind: "go"; id: string; status: SoftwareStatusValue }
   | { kind: "cancel"; id: string }
+  /** A whole category: pick a state, ask for the note, apply to every tool. */
+  | { kind: "cstat"; id: string }
+  | { kind: "cset"; id: string; status: SoftwareStatusValue }
+  | { kind: "cgo"; id: string; status: SoftwareStatusValue }
   /** A notice's kind tapped: the title and body come typed next. */
   | { kind: "notice"; type: AnnouncementType }
   | { kind: "noticeCancel" };
@@ -49,7 +53,9 @@ export type MenuAction =
  * serves the webhook, so a map is the right size of store.
  */
 export interface PendingChange {
-  productId: string;
+  /** One tool, or every tool in a category. */
+  scope: "tool" | "category";
+  id: string;
   status: SoftwareStatusValue;
   /** The menu message to redraw once the change lands. */
   chatId: string;
@@ -203,13 +209,18 @@ function shorten(text: string, max: number): string {
 export function parseCallback(data: string | undefined): MenuAction | null {
   if (!data) return null;
   if (data === "cats") return { kind: "cats" };
-  const open = /^(cat|tool):([\w-]{1,40})$/.exec(data);
-  if (open) return { kind: open[1] as "cat" | "tool", id: open[2]! };
-  const set = /^(set|go):([\w-]{1,40}):(UNDETECTED|STABLE|UPDATED|RISKY|UPDATING|DETECTED)$/.exec(
-    data,
-  );
+  const open = /^(cat|tool|cstat):([\w-]{1,40})$/.exec(data);
+  if (open) return { kind: open[1] as "cat" | "tool" | "cstat", id: open[2]! };
+  const set =
+    /^(set|go|cset|cgo):([\w-]{1,40}):(UNDETECTED|STABLE|UPDATED|RISKY|UPDATING|DETECTED)$/.exec(
+      data,
+    );
   if (set) {
-    return { kind: set[1] as "set" | "go", id: set[2]!, status: set[3] as SoftwareStatusValue };
+    return {
+      kind: set[1] as "set" | "go" | "cset" | "cgo",
+      id: set[2]!,
+      status: set[3] as SoftwareStatusValue,
+    };
   }
   const cancel = /^cancel:([\w-]{1,40})$/.exec(data);
   if (cancel) return { kind: "cancel", id: cancel[1]! };
@@ -350,11 +361,101 @@ export async function toolsScreen(categoryId: string): Promise<MenuScreen | null
       callback_data: `tool:${tool.id}`,
     },
   ]);
+  keyboard.push([{ text: "⚙️ Đổi trạng thái cả danh mục", callback_data: `cstat:${categoryId}` }]);
   keyboard.push([{ text: "⬅️ Danh mục", callback_data: "cats" }]);
   return {
     text: `<b>${escapeTelegramHtml(first.category.name)}</b> · ${tools.length} tool\n${LEGEND}`,
     keyboard,
   };
+}
+
+/** The state picker for a whole category: every tool in it, one tap. */
+export async function categoryStateScreen(categoryId: string): Promise<MenuScreen | null> {
+  const category = await db.category.findUnique({
+    where: { id: categoryId },
+    select: { name: true },
+  });
+  if (!category) return null;
+  const total = await db.product.count({ where: { ...SOFTWARE_WHERE, categoryId } });
+  const choice = (status: SoftwareStatusValue, label: string) => ({
+    text: `${STATUS_EMOJI[status]} ${label}`,
+    callback_data: `cset:${categoryId}:${status}`,
+  });
+  return {
+    text: [
+      `<b>${escapeTelegramHtml(category.name)}</b> · ${total} tool`,
+      "",
+      "Đổi trạng thái cho <b>TẤT CẢ</b> tool trong danh mục này:",
+    ].join("\n"),
+    keyboard: [
+      [choice("UNDETECTED", "An toàn"), choice("STABLE", "Ổn định")],
+      [choice("UPDATED", "Cập nhật mới"), choice("RISKY", "Rủi ro")],
+      [choice("UPDATING", "Bảo trì"), choice("DETECTED", "Phát hiện")],
+      [{ text: "⬅️ Quay lại", callback_data: `cat:${categoryId}` }],
+    ],
+  };
+}
+
+export async function askCategoryNoteScreen(
+  categoryId: string,
+  status: SoftwareStatusValue,
+): Promise<MenuScreen | null> {
+  const category = await db.category.findUnique({
+    where: { id: categoryId },
+    select: { name: true },
+  });
+  if (!category) return null;
+  return {
+    text: [
+      `Đã chọn ${STATUS_EMOJI[status]} <b>${SOFTWARE_STATUS[status].label}</b> cho cả danh mục <b>${escapeTelegramHtml(category.name)}</b>.`,
+      "",
+      "Gửi ghi chú (kèm ảnh nếu có) trong 10 phút, hoặc bấm:",
+    ].join("\n"),
+    keyboard: [
+      [{ text: "✅ Đổi ngay, không ghi chú", callback_data: `cgo:${categoryId}:${status}` }],
+      [{ text: "❌ Hủy", callback_data: `cat:${categoryId}` }],
+    ],
+  };
+}
+
+export interface CategoryChange {
+  name: string;
+  slug: string;
+  /** How many tools actually moved, and how many the category holds. */
+  changed: number;
+  total: number;
+}
+
+/**
+ * Every tool in the category, flipped at once — a game patched, and the
+ * whole shelf goes to "updating". Only the tools not already there change
+ * and get a history row, so the count the announcement quotes is honest.
+ */
+export async function setCategoryStatus(
+  categoryId: string,
+  status: SoftwareStatusValue,
+  note: string | null = null,
+  imageUrl: string | null = null,
+): Promise<CategoryChange | null> {
+  const category = await db.category.findUnique({
+    where: { id: categoryId },
+    select: { name: true, slug: true },
+  });
+  if (!category) return null;
+  const tools = await db.product.findMany({
+    where: { ...SOFTWARE_WHERE, categoryId },
+    select: { id: true, softwareStatus: true },
+  });
+  const stale = tools.filter((tool) => tool.softwareStatus !== status).map((tool) => tool.id);
+  if (stale.length > 0) {
+    await db.$transaction([
+      db.product.updateMany({ where: { id: { in: stale } }, data: { softwareStatus: status } }),
+      db.softwareStatusEvent.createMany({
+        data: stale.map((productId) => ({ productId, status, note, imageUrl, source: "telegram" })),
+      }),
+    ]);
+  }
+  return { name: category.name, slug: category.slug, changed: stale.length, total: tools.length };
 }
 
 export async function toolScreen(productId: string): Promise<MenuScreen | null> {
