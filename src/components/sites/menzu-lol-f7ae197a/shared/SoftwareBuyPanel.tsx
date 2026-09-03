@@ -16,6 +16,7 @@ import { productHref } from "@/lib/routes";
 import { BadgeIcon } from "./BadgeIcon";
 import { formatVnd } from "./productData";
 import { SoftwareCheckoutDialog } from "./SoftwareCheckoutDialog";
+import { isSalesLocked, salesLockReason } from "@/lib/softwareStatus";
 
 export interface SoftwarePackageView {
   id: string;
@@ -197,7 +198,7 @@ export function SoftwareBuyPanel({
   // Said here even when the shop hides the status pill: a greyed-out button
   // with no reason reads as a broken page. The server refuses the order and
   // the basket line either way; this only spares the shopper the round trip.
-  const locked = software.softwareStatus === "DETECTED";
+  const locked = isSalesLocked(software.softwareStatus);
 
   return (
     <div className="flex flex-col gap-6">
@@ -346,8 +347,8 @@ export function SoftwareBuyPanel({
 
       {locked ? (
         <p className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-[13px] leading-relaxed text-red-300">
-          Tool đang bị phát hiện, shop tạm khóa mua key. Theo dõi kênh thông báo để biết
-          khi có bản an toàn.
+          Tool {salesLockReason(software.softwareStatus)}, shop tạm khóa mua key. Theo dõi kênh
+          thông báo để biết khi có bản mới.
         </p>
       ) : null}
 

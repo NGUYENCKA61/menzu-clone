@@ -9,6 +9,7 @@ import { getShopSettings } from "@/lib/settingsStore";
 import { makeShortCode } from "@/lib/shortCode";
 import { evaluateVoucherForCart, voucherRules } from "@/lib/voucher";
 import { balanceOf, debitWallet } from "@/lib/wallet";
+import { isSalesLocked } from "@/lib/softwareStatus";
 
 const makeCode = makeShortCode;
 
@@ -79,7 +80,7 @@ export async function POST(request: Request) {
       // A tool caught since it was put in the basket stops the checkout the
       // same way, but says so: "no longer sold" would send the shopper looking
       // for a listing that is still right there.
-      const caught = items.find((i) => i.product.softwareStatus === "DETECTED");
+      const caught = items.find((i) => isSalesLocked(i.product.softwareStatus));
       if (!dead && caught) {
         throw new Error(`CAUGHT:${caught.product.name ?? caught.product.code}`);
       }
@@ -343,7 +344,7 @@ export async function POST(request: Request) {
     if (message.startsWith("CAUGHT:")) {
       return NextResponse.json(
         {
-          error: `"${message.slice(7)}" đang bị phát hiện, tạm khóa mua key — hãy xoá khỏi giỏ rồi thử lại`,
+          error: `"${message.slice(7)}" đang tạm khóa mua key (bị phát hiện hoặc đang cập nhật) — hãy xoá khỏi giỏ rồi thử lại`,
         },
         { status: 409 },
       );

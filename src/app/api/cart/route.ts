@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/session";
+import { isSalesLocked, salesLockReason } from "@/lib/softwareStatus";
 
 const MAX_QUANTITY = 99;
 
@@ -53,10 +54,11 @@ export async function POST(request: Request) {
   if (product.status !== "AVAILABLE") {
     return NextResponse.json({ error: "Sản phẩm đang tạm hết hàng" }, { status: 409 });
   }
-  // Same rule as the order itself: a caught tool cannot even be put aside.
-  if (product.softwareStatus === "DETECTED") {
+  // Same rule as the order itself: a caught or updating tool cannot even be
+  // put aside.
+  if (isSalesLocked(product.softwareStatus)) {
     return NextResponse.json(
-      { error: "Tool này đang bị phát hiện — shop tạm khóa mua key" },
+      { error: `Tool này ${salesLockReason(product.softwareStatus)} — shop tạm khóa mua key` },
       { status: 409 },
     );
   }

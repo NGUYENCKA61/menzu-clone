@@ -76,6 +76,20 @@ export const STATUS_EVENT_COPY: Record<SoftwareStatusValue, string> = {
   RISKY: "đang có rủi ro — cân nhắc trước khi dùng, chờ thông báo mới.",
 };
 
+/**
+ * The states in which the shop sells no key: caught, and mid-update. A key
+ * sold during an update is a key that does not work until the update lands,
+ * and that is a refund request waiting to happen.
+ */
+export function isSalesLocked(status: string | null | undefined): boolean {
+  return status === "DETECTED" || status === "UPDATING";
+}
+
+/** Why, in the words the buy panel and the order refusal share. */
+export function salesLockReason(status: string | null | undefined): string {
+  return status === "UPDATING" ? "đang cập nhật" : "đang bị phát hiện";
+}
+
 export function readSoftwareStatus(value: unknown): SoftwareStatusValue | null {
   return typeof value === "string" && Object.hasOwn(SOFTWARE_STATUS, value)
     ? (value as SoftwareStatusValue)

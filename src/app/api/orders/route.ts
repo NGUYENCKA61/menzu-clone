@@ -16,6 +16,7 @@ import { makeShortCode } from "@/lib/shortCode";
 import { evaluateVoucher, voucherRules } from "@/lib/voucher";
 import { balanceOf, debitWallet } from "@/lib/wallet";
 import { readMemberTier, TIER_RULES, tierDiscountFor } from "@/lib/memberTiers";
+import { isSalesLocked, salesLockReason } from "@/lib/softwareStatus";
 
 /** Short human-facing code, e.g. DH8F3K2Q. */
 const makeCode = makeShortCode;
@@ -83,11 +84,11 @@ export async function POST(request: Request) {
           locked[0].productType === "SOFTWARE_GAME" ? "OFF_SHELF" : "ALREADY_SOLD",
         );
       }
-      // Caught by the anti-cheat: a key sold now is a ban sold now. The page
-      // stays up so it can say why, but nothing is sold from it until the
-      // desk marks the tool safe again.
-      if (locked[0].productType === "SOFTWARE_GAME" && locked[0].softwareStatus === "DETECTED") {
-        throw new Error("DETECTED");
+      // Caught by the anti-cheat, or mid-update: a key sold now is a ban or
+      // a dud sold now. The page stays up so it can say why, but nothing is
+      // sold from it until the desk marks the tool safe again.
+      if (locked[0].productType === "SOFTWARE_GAME" && isSalesLocked(locked[0].softwareStatus)) {
+        throw new Error(`LOCKED:${locked[0].softwareStatus}`);
       }
 
       const product = await tx.product.findUniqueOrThrow({
@@ -349,9 +350,11 @@ export async function POST(request: Request) {
         { status: 409 },
       );
     }
-    if (message === "DETECTED") {
+    if (message.startsWith("LOCKED:")) {
       return NextResponse.json(
-        { error: "Tool này đang bị phát hiện — shop tạm khóa mua key cho đến khi có bản an toàn" },
+        {
+          error: `Tool này ${salesLockReason(message.slice(7))} — shop tạm khóa mua key cho đến khi có bản an toàn`,
+        },
         { status: 409 },
       );
     }
