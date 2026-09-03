@@ -330,16 +330,24 @@ export default async function AnnouncementsPage({
                 {item.title}
               </h2>
 
+              {/* Same frame as a status change's picture further down the
+                  page: capped at 420 wide and 280 tall, the whole picture one
+                  click away. Full-width it dwarfed the notice it illustrated. */}
               {item.imageUrl ? (
-                <div className="relative mt-3 aspect-video w-full overflow-hidden rounded-xl border border-white/[0.08] bg-black/40">
+                <a
+                  href={item.imageUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-3 block w-full max-w-[420px] overflow-hidden rounded-xl border border-white/10 bg-neutral-950 transition-colors hover:border-white/25"
+                >
                   <Image
                     src={item.imageUrl}
                     alt=""
-                    fill
-                    sizes="(max-width: 768px) 100vw, 720px"
-                    className="object-cover"
+                    width={840}
+                    height={472}
+                    className="max-h-[280px] w-full object-cover"
                   />
-                </div>
+                </a>
               ) : null}
 
               {/* Plain text, rendered as text — the same rule the modal keeps.

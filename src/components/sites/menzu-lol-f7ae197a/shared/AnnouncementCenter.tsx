@@ -647,18 +647,24 @@ export function AnnouncementModal({
           </p>
 
           {item.imageUrl ? (
-            // 16:9 and cropped rather than letterboxed: the shop's pictures
-            // are screenshots of the feature, and a black band above and
-            // below one reads as a broken image.
-            <div className="relative mt-4 aspect-video w-full overflow-hidden rounded-xl border border-white/[0.08] bg-black/40">
+            // The same frame a status change's picture gets on /thong-bao:
+            // 420 wide and 280 tall at most, cropped rather than letterboxed
+            // (a black band above a screenshot reads as a broken image), and
+            // the whole picture one click away.
+            <a
+              href={item.imageUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-4 block w-full max-w-[420px] overflow-hidden rounded-xl border border-white/10 bg-neutral-950 transition-colors hover:border-white/25"
+            >
               <Image
                 src={item.imageUrl}
                 alt=""
-                fill
-                sizes="(max-width: 640px) 100vw, 560px"
-                className="object-cover"
+                width={840}
+                height={472}
+                className="max-h-[280px] w-full object-cover"
               />
-            </div>
+            </a>
           ) : null}
 
           {/* whitespace-pre-line keeps the shop's line breaks. It is still
