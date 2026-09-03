@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { FORBIDDEN, getAdmin } from "@/lib/admin";
 import { normalizeSettings, validateSettings, type ShopSettings } from "@/lib/settings";
 import { getShopSettings, saveShopSettings } from "@/lib/settingsStore";
+import { registerTelegramCommands } from "@/lib/telegramNotify";
 
 /** The current settings, for anything that wants them without a page load. */
 export async function GET() {
@@ -33,5 +34,10 @@ export async function PUT(request: Request) {
   if (invalid) return NextResponse.json({ error: invalid }, { status: 400 });
 
   await saveShopSettings(settings);
+  // The bot's "/" menu follows the token: a new token is a new bot with an
+  // empty menu. Cheap, idempotent, and logged rather than thrown on failure.
+  if (settings.telegramBotToken.trim()) {
+    await registerTelegramCommands(settings.telegramBotToken.trim());
+  }
   return NextResponse.json(settings);
 }

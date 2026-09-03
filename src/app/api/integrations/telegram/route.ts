@@ -6,8 +6,14 @@ import { NextResponse } from "next/server";
 
 import { db } from "@/lib/db";
 import { getShopSettings } from "@/lib/settingsStore";
+import { SOFTWARE_STATUS } from "@/lib/softwareStatus";
 import { parseStatusCommand } from "@/lib/statusCommand";
-import { postStatusToTelegram } from "@/lib/telegramNotify";
+import {
+  escapeTelegramHtml,
+  postStatusToTelegram,
+  sendTelegramMessage,
+  STATUS_EMOJI,
+} from "@/lib/telegramNotify";
 
 /**
  * Telegram's webhook: the shop's own channel drives the detection state.
@@ -45,7 +51,8 @@ interface TelegramPhoto {
 interface TelegramMessage {
   text?: string;
   caption?: string;
-  chat?: { id?: number | string };
+  chat?: { id?: number | string; type?: string };
+  from?: { id?: number | string };
   photo?: TelegramPhoto[];
 }
 
@@ -57,6 +64,81 @@ interface TelegramUpdate {
 }
 
 const ok = (body: Record<string, unknown>) => NextResponse.json({ ok: true, ...body });
+
+/**
+ * Whether this Telegram user runs the channel. Asked of Telegram every time
+ * rather than remembered: an admin taken off the channel must lose the bot
+ * the same moment, and the desk is a handful of messages a day.
+ */
+async function isChannelAdmin(
+  token: string,
+  channelId: string,
+  userId: number | string,
+): Promise<boolean> {
+  try {
+    const res = await fetch(
+      `https://api.telegram.org/bot${token}/getChatMember?chat_id=${encodeURIComponent(
+        channelId,
+      )}&user_id=${encodeURIComponent(String(userId))}`,
+    );
+    if (!res.ok) return false;
+    const data = (await res.json()) as { result?: { status?: string } };
+    return data.result?.status === "creator" || data.result?.status === "administrator";
+  } catch {
+    return false;
+  }
+}
+
+/** What the bot says to /help — the syntax, in the words the desk types. */
+function helpText(): string {
+  return [
+    "<b>Đổi trạng thái tool</b>",
+    "Gõ mã tool, rồi trạng thái, rồi ghi chú nếu có. Gửi kèm ảnh thì ghi lệnh vào chú thích của ảnh.",
+    "",
+    "<code>HACK12 die</code> → 🔴 Đã phát hiện",
+    "<code>HACK12 ok</code> → 🟢 Chưa phát hiện",
+    "<code>HACK12 bảo trì đang fix</code> → 🟡 Đang cập nhật, ghi chú \"đang fix\"",
+    "",
+    "<b>Từ khóa trạng thái</b>",
+    "🟢 ok, safe, live, ngon, an toàn, undetected",
+    "🔴 die, ban, dính, phát hiện, detected",
+    "🟡 update, fix, bảo trì, cập nhật, đang cập nhật",
+    "",
+    "Nhắn ở đây hoặc đăng trong kênh đều được; đổi xong bot tự đăng lên kênh. /list để xem mã tool.",
+  ].join("\n");
+}
+
+/**
+ * What the bot says to /list: every tool with its state, in chunks that fit
+ * Telegram's 4096-character message cap.
+ */
+async function listText(): Promise<string[]> {
+  const tools = await db.product.findMany({
+    where: { productType: "SOFTWARE_GAME", deletedAt: null },
+    select: { code: true, name: true, softwareStatus: true },
+    orderBy: { code: "asc" },
+  });
+  if (tools.length === 0) return ["Chưa có tool nào trong shop."];
+
+  const lines = tools.map((tool) => {
+    const name = (tool.name ?? "").trim();
+    const short = name.length > 42 ? `${name.slice(0, 41)}…` : name;
+    const dot = tool.softwareStatus ? STATUS_EMOJI[tool.softwareStatus] : "⚪";
+    return `${dot} <code>${escapeTelegramHtml(tool.code)}</code> ${escapeTelegramHtml(short)}`;
+  });
+
+  const chunks: string[] = [];
+  let current = "<b>Mã tool và trạng thái</b> · 🟢 an toàn · 🔴 phát hiện · 🟡 cập nhật\n";
+  for (const line of lines) {
+    if (current.length + line.length + 1 > 3800) {
+      chunks.push(current);
+      current = "";
+    }
+    current += `\n${line}`;
+  }
+  chunks.push(current);
+  return chunks;
+}
 
 /**
  * Downloads the largest photo on the message and returns its public path.
@@ -131,13 +213,47 @@ export async function POST(request: Request) {
     update?.edited_channel_post;
   if (!message) return ok({ ignored: "không có nội dung" });
 
-  if (String(message.chat?.id ?? "") !== chatId) {
-    return ok({ ignored: "khác kênh" });
+  // Two places the bot listens: the channel itself, and a private chat with
+  // one of the channel's own admins — so the desk can ask for the list and
+  // check the syntax without every customer reading the keystrokes. Anyone
+  // else who finds the bot gets silence.
+  const fromChannel = String(message.chat?.id ?? "") === chatId;
+  if (!fromChannel) {
+    const userId = message.from?.id;
+    if (message.chat?.type !== "private" || userId === undefined) {
+      return ok({ ignored: "khác kênh" });
+    }
+    if (!(await isChannelAdmin(token, chatId, userId))) {
+      return ok({ ignored: "không phải admin kênh" });
+    }
   }
+  // An answer goes back where the words came from: the channel, or the
+  // admin's own chat.
+  const replyTo = fromChannel ? chatId : String(message.chat?.id);
+  const reply = (text: string) => sendTelegramMessage(token, replyTo, text);
 
   // A photo carries its words in the caption; a plain message in the text.
-  const command = parseStatusCommand(message.text ?? message.caption);
-  if (!command) return ok({ ignored: "không phải lệnh đổi trạng thái" });
+  const text = (message.text ?? message.caption ?? "").trim();
+  const slash = /^\/([a-z_]+)(?:@\w+)?(?:\s|$)/i.exec(text)?.[1]?.toLowerCase();
+  if (slash === "start" || slash === "help") {
+    await reply(helpText());
+    return ok({ answered: "help" });
+  }
+  if (slash === "list") {
+    for (const chunk of await listText()) await reply(chunk);
+    return ok({ answered: "list" });
+  }
+
+  const command = parseStatusCommand(text);
+  if (!command) {
+    // The channel carries the shop's other posts too, so a post that is not
+    // a command is simply not for the bot. In a private chat every message
+    // is, and silence there reads as a broken bot.
+    if (!fromChannel) {
+      await reply("Không hiểu lệnh này. Gõ /help để xem cú pháp, /list để xem mã tool.");
+    }
+    return ok({ ignored: "không phải lệnh đổi trạng thái" });
+  }
 
   const product = await db.product.findFirst({
     where: {
@@ -147,11 +263,23 @@ export async function POST(request: Request) {
     },
     select: { id: true, softwareStatus: true },
   });
-  if (!product) return ok({ ignored: `không có tool ${command.productCode}` });
+  if (!product) {
+    if (!fromChannel) {
+      await reply(
+        `Không có tool mã <b>${escapeTelegramHtml(command.productCode)}</b>. Gõ /list để xem mã.`,
+      );
+    }
+    return ok({ ignored: `không có tool ${command.productCode}` });
+  }
 
   if (product.softwareStatus === command.status) {
     // Saying the same thing twice is not a change, and a history full of
     // "still detected" would bury the moment it actually turned.
+    if (!fromChannel) {
+      await reply(
+        `${command.productCode} đang ở trạng thái <b>${SOFTWARE_STATUS[command.status].label}</b> rồi, không có gì đổi.`,
+      );
+    }
     return ok({ ignored: "trạng thái không đổi", code: command.productCode });
   }
 
@@ -176,6 +304,11 @@ export async function POST(request: Request) {
   // Announce it back out to the channel the customers watch — after the change
   // is saved, and never blocking the webhook's reply to Telegram.
   await postStatusToTelegram(product.id, command.status, command.note || null, imageUrl);
+  if (!fromChannel) {
+    await reply(
+      `✅ ${command.productCode} → <b>${SOFTWARE_STATUS[command.status].label}</b>. Đã đăng lên kênh.`,
+    );
+  }
 
   return ok({
     code: command.productCode,

@@ -15,6 +15,7 @@ import {
 } from "@/lib/announcements";
 import { db } from "@/lib/db";
 import { openGiftParcels } from "@/lib/giftParcelStore";
+import { postAnnouncementToTelegram } from "@/lib/telegramNotify";
 import {
   GIFT_PARCEL_HREF,
   GIFT_PARCEL_LABEL,
@@ -216,6 +217,9 @@ export async function POST(request: Request) {
   // Published on the spot rather than as a draft: the parcels are owed the
   // moment the readers are told.
   await openGiftParcels(announcement.id);
+  // Out to the channel too, when it was published on the spot; the helper
+  // itself leaves drafts, scheduled and per-customer notices alone.
+  await postAnnouncementToTelegram(announcement.id);
 
   return NextResponse.json({ id: announcement.id });
 }
@@ -250,7 +254,10 @@ export async function PATCH(request: Request) {
     // not close them: the readers have already been told, and taking back a
     // promise nobody has posted yet is a decision for the desk, not a
     // side-effect of hiding a notice.
-    if (body.action === "publish") await openGiftParcels(id);
+    if (body.action === "publish") {
+      await openGiftParcels(id);
+      await postAnnouncementToTelegram(id);
+    }
     return NextResponse.json({ ok: true });
   }
 
