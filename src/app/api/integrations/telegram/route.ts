@@ -9,9 +9,14 @@ import { getShopSettings } from "@/lib/settingsStore";
 import { SOFTWARE_STATUS } from "@/lib/softwareStatus";
 import { parseStatusCommand } from "@/lib/statusCommand";
 import {
+  askNoteScreen,
   categoryScreen,
+  clearPending,
   listScreenText,
   parseCallback,
+  peekPending,
+  searchScreen,
+  setPending,
   setStatus,
   toolScreen,
   toolsScreen,
@@ -126,7 +131,10 @@ function helpText(): string {
     "🔴 die, ban, dính, phát hiện, detected",
     "",
     "Nhắn ở đây hoặc đăng trong kênh đều được; đổi xong bot tự đăng lên kênh.",
-    "Không muốn gõ: /list mở menu bấm chọn danh mục → tool → trạng thái.",
+    "",
+    "<b>Không muốn gõ lệnh</b>",
+    "/list mở menu: danh mục → tool → trạng thái. Chọn xong, gửi ghi chú kèm ảnh, hoặc bấm Đổi ngay.",
+    "Gõ mã hoặc một từ trong tên tool để tìm nhanh, ví dụ <code>valorant</code>.",
   ].join("\n");
 }
 
@@ -190,6 +198,24 @@ async function handleCallback(token: string, channelId: string, query: TelegramC
       screen = await toolScreen(action.id);
       break;
     case "set": {
+      // Nothing changes yet: the next message from this admin is the note.
+      screen = await askNoteScreen(action.id, action.status);
+      if (screen) {
+        setPending(String(userId), {
+          productId: action.id,
+          status: action.status,
+          chatId: String(chat.id),
+          messageId,
+        });
+      }
+      break;
+    }
+    case "cancel":
+      clearPending(String(userId));
+      screen = await toolScreen(action.id);
+      break;
+    case "go": {
+      clearPending(String(userId));
       const result = await setStatus(action.id, action.status);
       if (result === "changed") {
         await postStatusToTelegram(action.id, action.status, null, null);
@@ -333,15 +359,54 @@ export async function POST(request: Request) {
   }
 
   const command = parseStatusCommand(text);
+  const userKey = message.from?.id !== undefined ? String(message.from.id) : null;
   if (!command) {
     // The channel carries the shop's other posts too, so a post that is not
-    // a command is simply not for the bot. In a private chat every message
-    // is, and silence there reads as a broken bot.
-    if (!fromChannel) {
-      await reply("Không hiểu lệnh này. Gõ /help để xem cú pháp, /list để xem mã tool.");
+    // a command is simply not for the bot.
+    if (fromChannel) return ok({ ignored: "không phải lệnh đổi trạng thái" });
+
+    // In a private chat every message is for the bot: the note a tapped state
+    // is waiting for, or else a search.
+    const waiting = userKey ? peekPending(userKey) : null;
+    if (waiting && userKey) {
+      clearPending(userKey);
+      const imageUrl = await savePhoto(message.photo, token);
+      const note = text || null;
+      const result = await setStatus(waiting.productId, waiting.status, note, imageUrl);
+      if (result === "changed") {
+        await postStatusToTelegram(waiting.productId, waiting.status, note, imageUrl);
+        await reply(
+          `✅ Đã đổi sang <b>${SOFTWARE_STATUS[waiting.status].label}</b>${note ? " kèm ghi chú" : ""}${
+            imageUrl ? " và ảnh" : ""
+          }. Đã đăng lên kênh.`,
+        );
+      } else if (result === "same") {
+        await reply("Tool đang ở trạng thái đó rồi, không có gì đổi.");
+      } else {
+        await reply("Tool này không còn nữa.");
+      }
+      const after = await toolScreen(waiting.productId);
+      if (after) {
+        await telegramCall(token, "editMessageText", {
+          chat_id: waiting.chatId,
+          message_id: waiting.messageId,
+          text: after.text,
+          parse_mode: "HTML",
+          reply_markup: { inline_keyboard: after.keyboard },
+        });
+      }
+      return ok({ answered: "note" });
     }
+
+    if (text) {
+      await showScreen(token, replyTo, await searchScreen(text));
+      return ok({ answered: "search" });
+    }
+    await reply("Gõ mã hoặc tên tool để tìm, /list để mở menu, /help để xem cú pháp.");
     return ok({ ignored: "không phải lệnh đổi trạng thái" });
   }
+  // A typed command outranks a tap left half-done.
+  if (userKey) clearPending(userKey);
 
   const product = await db.product.findFirst({
     where: {

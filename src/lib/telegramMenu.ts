@@ -31,7 +31,48 @@ export type MenuAction =
   | { kind: "cats" }
   | { kind: "cat"; id: string }
   | { kind: "tool"; id: string }
-  | { kind: "set"; id: string; status: SoftwareStatusValue };
+  /** A state tapped: ask for the note before anything changes. */
+  | { kind: "set"; id: string; status: SoftwareStatusValue }
+  /** "Đổi ngay": the same state, applied with no note. */
+  | { kind: "go"; id: string; status: SoftwareStatusValue }
+  | { kind: "cancel"; id: string };
+
+/**
+ * A state chosen from the menu, waiting for its note.
+ *
+ * Kept in memory, per admin, for ten minutes: the whole exchange is "tap, then
+ * type", and a restart in between costs one tap, not a status. One process
+ * serves the webhook, so a map is the right size of store.
+ */
+export interface PendingChange {
+  productId: string;
+  status: SoftwareStatusValue;
+  /** The menu message to redraw once the change lands. */
+  chatId: string;
+  messageId: number;
+  expiresAt: number;
+}
+
+const PENDING_TTL_MS = 10 * 60_000;
+const pending = new Map<string, PendingChange>();
+
+export function setPending(userId: string, change: Omit<PendingChange, "expiresAt">): void {
+  pending.set(userId, { ...change, expiresAt: Date.now() + PENDING_TTL_MS });
+}
+
+export function peekPending(userId: string): PendingChange | null {
+  const change = pending.get(userId);
+  if (!change) return null;
+  if (change.expiresAt < Date.now()) {
+    pending.delete(userId);
+    return null;
+  }
+  return change;
+}
+
+export function clearPending(userId: string): void {
+  pending.delete(userId);
+}
 
 /** Only the tools carry a status; account listings never appear here. */
 const SOFTWARE_WHERE = { productType: "SOFTWARE_GAME" as const, deletedAt: null };
@@ -54,8 +95,14 @@ export function parseCallback(data: string | undefined): MenuAction | null {
   if (data === "cats") return { kind: "cats" };
   const open = /^(cat|tool):([\w-]{1,40})$/.exec(data);
   if (open) return { kind: open[1] as "cat" | "tool", id: open[2]! };
-  const set = /^set:([\w-]{1,40}):(UNDETECTED|STABLE|UPDATED|RISKY|UPDATING|DETECTED)$/.exec(data);
-  if (set) return { kind: "set", id: set[1]!, status: set[2] as SoftwareStatusValue };
+  const set = /^(set|go):([\w-]{1,40}):(UNDETECTED|STABLE|UPDATED|RISKY|UPDATING|DETECTED)$/.exec(
+    data,
+  );
+  if (set) {
+    return { kind: set[1] as "set" | "go", id: set[2]!, status: set[3] as SoftwareStatusValue };
+  }
+  const cancel = /^cancel:([\w-]{1,40})$/.exec(data);
+  if (cancel) return { kind: "cancel", id: cancel[1]! };
   return null;
 }
 
@@ -103,8 +150,69 @@ export async function categoryScreen(): Promise<MenuScreen> {
     },
   ]);
   return {
-    text: "<b>Chọn danh mục</b>\nBấm danh mục để xem tool, bấm tool để đổi trạng thái.",
+    text: "<b>Chọn danh mục</b>\nBấm danh mục để xem tool, bấm tool để đổi trạng thái.\nHoặc gõ mã / tên tool để tìm nhanh.",
     keyboard,
+  };
+}
+
+/**
+ * Whatever the admin typed that was not a command, read as a search: a code,
+ * or a word from the name. Twenty at most — past that the words were too few.
+ */
+export async function searchScreen(query: string): Promise<MenuScreen> {
+  const q = query.trim().slice(0, 60);
+  const tools = await db.product.findMany({
+    where: {
+      ...SOFTWARE_WHERE,
+      OR: [
+        { code: { contains: q, mode: "insensitive" } },
+        { name: { contains: q, mode: "insensitive" } },
+      ],
+    },
+    select: { id: true, code: true, name: true, softwareStatus: true },
+    orderBy: { code: "asc" },
+    take: 20,
+  });
+  if (tools.length === 0) {
+    return {
+      text: `Không thấy tool nào khớp “${escapeTelegramHtml(q)}”. Thử mã (HACK12) hoặc một từ trong tên.`,
+      keyboard: [[{ text: "🏠 Danh mục", callback_data: "cats" }]],
+    };
+  }
+  const keyboard = tools.map((tool) => [
+    {
+      text: `${dot(tool.softwareStatus)} ${tool.code} · ${shorten(tool.name ?? "", 26)}`,
+      callback_data: `tool:${tool.id}`,
+    },
+  ]);
+  keyboard.push([{ text: "🏠 Danh mục", callback_data: "cats" }]);
+  const cap = tools.length === 20 ? " (20 đầu tiên)" : "";
+  return {
+    text: `<b>Kết quả cho “${escapeTelegramHtml(q)}”</b> · ${tools.length} tool${cap}\n${LEGEND}`,
+    keyboard,
+  };
+}
+
+/** The screen a tapped state leads to: the ask for a note. */
+export async function askNoteScreen(
+  productId: string,
+  status: SoftwareStatusValue,
+): Promise<MenuScreen | null> {
+  const tool = await db.product.findFirst({
+    where: { ...SOFTWARE_WHERE, id: productId },
+    select: { code: true },
+  });
+  if (!tool) return null;
+  return {
+    text: [
+      `Đã chọn ${STATUS_EMOJI[status]} <b>${SOFTWARE_STATUS[status].label}</b> cho <b>${escapeTelegramHtml(tool.code)}</b>.`,
+      "",
+      "Gửi ghi chú (kèm ảnh nếu có) trong 10 phút, hoặc bấm:",
+    ].join("\n"),
+    keyboard: [
+      [{ text: "✅ Đổi ngay, không ghi chú", callback_data: `go:${productId}:${status}` }],
+      [{ text: "❌ Hủy", callback_data: `cancel:${productId}` }],
+    ],
   };
 }
 
@@ -185,6 +293,8 @@ export async function toolScreen(productId: string): Promise<MenuScreen | null> 
 export async function setStatus(
   productId: string,
   status: SoftwareStatusValue,
+  note: string | null = null,
+  imageUrl: string | null = null,
 ): Promise<"changed" | "same" | "missing"> {
   const product = await db.product.findFirst({
     where: { ...SOFTWARE_WHERE, id: productId },
@@ -196,7 +306,7 @@ export async function setStatus(
   await db.$transaction([
     db.product.update({ where: { id: product.id }, data: { softwareStatus: status } }),
     db.softwareStatusEvent.create({
-      data: { productId: product.id, status, note: null, imageUrl: null, source: "telegram" },
+      data: { productId: product.id, status, note, imageUrl, source: "telegram" },
     }),
   ]);
   return "changed";
