@@ -663,7 +663,7 @@ export function OrderDetailModal({
                         // like the single account's.
                         <div className="flex flex-col gap-4">
                           {order.keys.length > 0 ? (
-                            <div className="flex flex-col gap-3">
+                            <div className="flex flex-col gap-4">
                               {order.keys.map((key, index) => {
                                 const at = key.indexOf("|");
                                 const username = at < 0 ? key : key.slice(0, at);
@@ -673,10 +673,10 @@ export function OrderDetailModal({
                                   // by side, as the single account shows its
                                   // own, with the ordinal above when there are
                                   // several.
-                                  <div
-                                    key={`${index}-${key}`}
-                                    className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-3"
-                                  >
+                                  // No card around the pair: the two boxes are
+                                  // cards already, and a frame around them was
+                                  // a box inside a box.
+                                  <div key={`${index}-${key}`}>
                                     {order.keys.length > 1 ? (
                                       <span className="mb-2 block text-[10px] font-black uppercase tracking-widest text-neutral-500">
                                         Tài khoản {index + 1}
