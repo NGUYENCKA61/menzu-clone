@@ -23,6 +23,17 @@ export interface TrustStats {
   rating: number | null;
 }
 
+/**
+ * What the old PHP shop had done before this site took over, counted in its
+ * dump of 2026-09-02 (private/old.sql, never committed): 21,285 rows in
+ * tbl_history_hack — one per hack bought — the oldest dated 2023-02-09. The
+ * orders themselves were never imported (their keys belong to a system that
+ * no longer exists), so the history lives on as two numbers: the paid orders
+ * of this site are added on top, and the years count from that first sale.
+ */
+const LEGACY_ORDERS = 21_285;
+const LEGACY_START_YEAR = 2023;
+
 /** "402.000", "402,000", "402000+" all read as 402000; blank or junk as null. */
 function typed(value: string): number | null {
   const digits = value.replace(/[^\d.]/g, "");
@@ -34,7 +45,7 @@ function typed(value: string): number | null {
 export async function getTrustStats(settings: ShopSettings): Promise<TrustStats> {
   const typedOrders = typed(settings.statOrders);
   const [orders, customers, oldest, averageRating] = await Promise.all([
-    typedOrders ?? db.order.count({ where: { status: "PAID" } }),
+    typedOrders ?? db.order.count({ where: { status: "PAID" } }).then((n) => LEGACY_ORDERS + n),
     typed(settings.statCustomers) ?? db.user.count(),
     typed(settings.statStartYear)
       ? null
@@ -45,11 +56,13 @@ export async function getTrustStats(settings: ShopSettings): Promise<TrustStats>
         .then((r) => r._avg.rating),
   ]);
 
-  const startYear = typed(settings.statStartYear) ?? oldest?.createdAt.getFullYear() ?? null;
+  const startYear =
+    typed(settings.statStartYear) ??
+    Math.min(LEGACY_START_YEAR, oldest?.createdAt.getFullYear() ?? LEGACY_START_YEAR);
   const years = startYear ? Math.max(1, new Date().getFullYear() - startYear) : null;
 
-  // A count this site can vouch for is honest at 5 and absurd on a strip;
-  // the desk types the old shop's total to make the figure worth showing.
+  // With the old shop's history under it the live figure is always worth
+  // showing; the floor only guards a fresh install with no history at all.
   const ordersWorthShowing = typedOrders !== null || (orders ?? 0) >= 100;
 
   return {
