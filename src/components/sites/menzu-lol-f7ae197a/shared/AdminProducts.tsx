@@ -25,6 +25,25 @@ export interface AdminProductRow {
   tag: string;
   /** Whether a sign-in is on the row. Only NFA hands it over by itself. */
   hasLogin: boolean;
+  /** "Acc random": sold by the piece; how many sign-ins are left. */
+  accountPool: boolean;
+  poolAvailable: number;
+}
+
+/** The shelves the list is split into; sold accounts kept apart from the ones on sale. */
+const TABS = [
+  { value: "AVAILABLE", label: "Đang bán" },
+  { value: "SOLD", label: "Đã bán" },
+  { value: "HIDDEN", label: "Đã ẩn" },
+  { value: "ALL", label: "Tất cả" },
+] as const;
+type Tab = (typeof TABS)[number]["value"];
+
+function onTab(status: string, tab: Tab): boolean {
+  if (tab === "ALL") return true;
+  if (tab === "SOLD") return status === "SOLD";
+  if (tab === "HIDDEN") return status === "HIDDEN";
+  return status === "AVAILABLE" || status === "RESERVED";
 }
 
 export interface AdminCategoryOption {
@@ -67,6 +86,9 @@ export function AdminProducts({
   // The row whose delete is pending its confirm dialog.
   const [removing, setRemoving] = useState<AdminProductRow | null>(null);
   const [query, setQuery] = useState("");
+  // Sold accounts used to sit among the ones on sale, and the desk kept
+  // mistaking one for the other; each shelf is its own tab now.
+  const [tab, setTab] = useState<Tab>("AVAILABLE");
 
   const [code, setCode] = useState("");
   const [newName, setNewName] = useState("");
@@ -192,8 +214,9 @@ export function AdminProducts({
 
   /** Code, name, rank, category or tag — the things a listing is known by. */
   const needle = query.trim().toLowerCase();
+  const onShelf = products.filter((p) => onTab(p.status, tab));
   const shown = needle
-    ? products.filter(
+    ? onShelf.filter(
         (p) =>
           p.code.toLowerCase().includes(needle) ||
           p.name.toLowerCase().includes(needle) ||
@@ -201,7 +224,7 @@ export function AdminProducts({
           p.categoryName.toLowerCase().includes(needle) ||
           p.tag.toLowerCase().includes(needle),
       )
-    : products;
+    : onShelf;
 
   return (
     <div className="flex flex-col gap-6">
@@ -370,6 +393,31 @@ export function AdminProducts({
         />
       ) : null}
 
+      {products.length > 0 ? (
+        <div className="flex flex-wrap gap-2" role="tablist" aria-label="Kệ tài khoản">
+          {TABS.map((t) => {
+            const count = products.filter((p) => onTab(p.status, t.value)).length;
+            const active = tab === t.value;
+            return (
+              <button
+                key={t.value}
+                type="button"
+                role="tab"
+                aria-selected={active}
+                onClick={() => setTab(t.value)}
+                className={`rounded-lg border px-3 py-1.5 text-[11px] font-black uppercase tracking-wider transition-colors ${
+                  active
+                    ? "border-[var(--brand)]/60 bg-[var(--brand)]/15 text-white"
+                    : "border-white/10 bg-white/[0.03] text-neutral-400 hover:text-white"
+                }`}
+              >
+                {t.label} · {count}
+              </button>
+            );
+          })}
+        </div>
+      ) : null}
+
       {shown.length === 0 ? (
         <p className="rounded-2xl border border-dashed border-white/10 bg-white/[0.02] px-5 py-10 text-center text-sm text-neutral-500">
           {needle
@@ -419,6 +467,9 @@ export function AdminProducts({
               {p.categoryName} · {formatVnd(p.price)}đ
               {p.rank ? ` · ${p.rank}` : ""}
               {p.tag ? ` · ${p.tag}` : ""}
+              {p.accountPool ? (
+                <span className="text-sky-400"> · acc random · còn {p.poolAvailable}</span>
+              ) : null}
               {/* Said on the shelf, not only on the detail page: an NFA
                   account sold without this hands its buyer nothing. Other
                   tags are handed over in person and need no line here. */}

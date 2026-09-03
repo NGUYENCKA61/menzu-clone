@@ -67,6 +67,8 @@ export interface Product {
   extraSkins: number; // skins past the chips shown -> "+11" chip
   oldPrice: number; // 7200000
   price: number; // 3960000
+  /** "Acc random": how many sign-ins are left. Null (or absent) on an ordinary account. */
+  stock?: number | null;
 }
 
 /**

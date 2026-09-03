@@ -119,6 +119,17 @@ export async function POST(request: Request) {
       // the same reason the price is: the tier could have been retired, or its
       // price changed, while the page sat open.
       const isSoftware = product.productType === "SOFTWARE_GAME";
+      // An "acc random" listing: an account by type, sold by the piece from a
+      // shelf of sign-ins the way a tool sells keys, and never marked SOLD.
+      const isPool = !isSoftware && product.accountPool;
+      const poolPackage = isPool
+        ? await tx.productPackage.findFirst({
+            where: { productId: product.id },
+            orderBy: { sortOrder: "asc" },
+            select: { id: true },
+          })
+        : null;
+      if (isPool && !poolPackage) throw new Error("OUT_OF_ACC:0");
 
       let chosenPackage: {
         id: string;
@@ -141,7 +152,9 @@ export async function POST(request: Request) {
 
       const quantity = isSoftware
         ? Math.min(99, Math.max(1, Math.floor(Number(body?.quantity ?? 1)) || 1))
-        : 1;
+        : isPool
+          ? Math.min(999, Math.max(1, Math.floor(Number(body?.quantity ?? 1)) || 1))
+          : 1;
 
       // A flash sale discounts the account's own price. It has no meaning
       // against a tier list, so software takes the tier price as it stands.
@@ -226,7 +239,7 @@ export async function POST(request: Request) {
       await tx.product.update({
         where: { id: product.id },
         data: {
-          ...(isSoftware ? {} : { status: "SOLD" as const }),
+          ...(isSoftware || isPool ? {} : { status: "SOLD" as const }),
           soldCount: { increment: quantity },
         },
       });
@@ -234,7 +247,7 @@ export async function POST(request: Request) {
       // Software has no crossed-out price to discount from, so the tier price
       // is both the list price and what was charged — unless the buyer is an
       // agency, whose percent IS the discount.
-      const listPrice = isSoftware ? lineTotal : product.oldPrice;
+      const listPrice = isSoftware ? lineTotal : product.oldPrice * BigInt(quantity);
       const discountPct =
         agencyPct > 0
           ? agencyPct
@@ -249,11 +262,11 @@ export async function POST(request: Request) {
           code: makeCode("DH"),
           userId: user.id,
           productId: product.id,
-          packageId: chosenPackage?.id ?? null,
+          packageId: chosenPackage?.id ?? poolPackage?.id ?? null,
           quantity,
           // Software is sold on the promise of a key per unit; an account is
           // the thing itself and is owed none.
-          keysOwed: isSoftware ? quantity : 0,
+          keysOwed: isSoftware || isPool ? quantity : 0,
           method: "BUY_NOW",
           status: "PAID",
           listPrice,
@@ -269,17 +282,18 @@ export async function POST(request: Request) {
       // A shelf with fewer keys than were bought refuses the whole sale:
       // throwing here rolls back the charge, the order and the voucher use,
       // and the buyer is told the shop is short instead of being owed keys.
-      const delivered = chosenPackage
+      const shelf = chosenPackage?.id ?? poolPackage?.id ?? null;
+      const delivered = shelf
         ? await deliverKeys(tx, {
-            packageId: chosenPackage.id,
+            packageId: shelf,
             orderId: order.id,
             userId: user.id,
             wanted: quantity,
-            durationHours: chosenPackage.durationHours,
+            durationHours: chosenPackage?.durationHours ?? null,
           })
         : 0;
-      if (chosenPackage && delivered < quantity) {
-        throw new Error(`OUT_OF_KEYS:${delivered}`);
+      if (shelf && delivered < quantity) {
+        throw new Error(`${isPool ? "OUT_OF_ACC" : "OUT_OF_KEYS"}:${delivered}`);
       }
 
       await tx.transaction.create({
@@ -300,7 +314,9 @@ export async function POST(request: Request) {
                     ? ` · ưu đãi hạng ${TIER_RULES[memberTier].label}`
                     : ""
               }`
-            : `Mua tài khoản #${product.code}`,
+            : isPool
+              ? `Mua ${quantity} tài khoản ${product.name ?? product.code}`
+              : `Mua tài khoản #${product.code}`,
           method: "Ví Menzu",
         },
       });
@@ -313,6 +329,7 @@ export async function POST(request: Request) {
         delivered,
         quantity,
         isSoftware,
+        isPool,
         // Whether the sign-in went out with the order — an NFA account with
         // one on the row — or the shop hands this one over in person. Read
         // inside the lock, so it describes the product as it was sold.
@@ -330,7 +347,9 @@ export async function POST(request: Request) {
       // account, whether a sign-in is waiting there or the shop has to be asked.
       ...(result.isSoftware
         ? { keysDelivered: result.delivered, keysPending: result.quantity - result.delivered }
-        : { loginReady: result.loginReady }),
+        : result.isPool
+          ? { accountsDelivered: result.delivered }
+          : { loginReady: result.loginReady }),
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : "";
@@ -377,6 +396,19 @@ export async function POST(request: Request) {
             available > 0
               ? `Số lượng trên hệ thống không đủ — gói này chỉ còn ${available} key.`
               : "Số lượng trên hệ thống không đủ — gói này đã hết key.",
+          available,
+        },
+        { status: 409 },
+      );
+    }
+    if (message.startsWith("OUT_OF_ACC:")) {
+      const available = Number(message.slice("OUT_OF_ACC:".length));
+      return NextResponse.json(
+        {
+          error:
+            available > 0
+              ? `Kho chỉ còn ${available} tài khoản — giảm số lượng rồi thử lại.`
+              : "Kho tài khoản này vừa hết, shop sẽ nhập thêm sớm.",
           available,
         },
         { status: 409 },

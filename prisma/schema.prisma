@@ -653,6 +653,10 @@ model Product {
   /// Whatever else the buyer needs to take the account over — mail khôi phục,
   /// mã 2FA, "đổi mật khẩu ngay". Plain text, rendered as text.
   loginNote     String?
+  /// "Acc random": one listing, a pile of sign-ins that all fit its description,
+  /// sold by the piece from the listing's one package the way a tool sells
+  /// keys, and never marked SOLD. See src/lib/accountPool.ts.
+  accountPool   Boolean       @default(false)
 
   /// Prices are whole VND — never floats.
   oldPrice   BigInt

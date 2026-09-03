@@ -143,6 +143,7 @@ export default async function OrdersPage() {
                   categoryName: o.categoryName,
                   imageUrl: o.imageUrl,
                   isSoftware: o.isSoftware,
+                  isPool: o.isPool,
                   packageLabel: o.packageLabel,
                   productRank: o.productRank,
                   keys: o.keys.map((key) => key.value),

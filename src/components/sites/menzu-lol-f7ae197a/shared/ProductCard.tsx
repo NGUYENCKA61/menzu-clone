@@ -153,6 +153,11 @@ export function ProductCard({ product }: ProductCardProps) {
           <span className="inline-flex items-center rounded-full border border-white/10 bg-[#0d0d12]/80 px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-white backdrop-blur-md">
             #{product.code}
           </span>
+          {product.stock !== undefined && product.stock !== null ? (
+            <span className="inline-flex items-center rounded-full border border-sky-500/30 bg-sky-500/10 px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-sky-400">
+              Còn {product.stock} acc
+            </span>
+          ) : null}
           {product.tag !== null && (
             /* Dressed as the software card's status pill — same dark glass,
                same type — minus the coloured dot; the text colour carries the

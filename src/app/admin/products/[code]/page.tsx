@@ -152,6 +152,31 @@ export default async function AdminAccountDetailPage({
     );
   }
 
+  // The shelf behind an "acc random" listing, as the key desk reads it.
+  const pool = product.accountPool
+    ? await (async () => {
+        const pkg = await db.productPackage.findFirst({
+          where: { productId: product.id },
+          orderBy: { sortOrder: "asc" },
+          select: { id: true },
+        });
+        const store = pkg ? await readKeyStore(pkg.id) : null;
+        return {
+          available: store?.available ?? 0,
+          sold: store?.sold ?? 0,
+          shelf: store?.shelf ?? [],
+          recent: (store?.recent ?? []).map((k) => ({
+            id: k.id,
+            value: k.value,
+            // readKeyStore already formats the time and flattens the buyer.
+            when: k.deliveredAt,
+            buyer: k.username,
+            orderCode: k.orderCode ?? "",
+          })),
+        };
+      })()
+    : null;
+
   return (
     <AdminShell
       title={product.name || `#${product.code}`}
@@ -203,6 +228,8 @@ export default async function AdminAccountDetailPage({
           buyer: product.orders[0]
             ? { username: product.orders[0].user.username, orderCode: product.orders[0].code }
             : null,
+          accountPool: product.accountPool,
+          pool,
         }}
       />
     </AdminShell>

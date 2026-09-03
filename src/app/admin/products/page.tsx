@@ -15,6 +15,7 @@ import { AdminShell } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminSh
 import { AdminSoftware } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminSoftware";
 import { AdminWeaponImages } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminWeaponImages";
 import { deliversAutomatically, readLogin, tagOf } from "@/lib/accountLogin";
+import { poolStock } from "@/lib/accountPool";
 import { getAdmin } from "@/lib/admin";
 import { db } from "@/lib/db";
 import { listAdminCategories } from "@/lib/queries";
@@ -138,6 +139,7 @@ export default async function AdminProductsPage() {
   // NFA accounts on the shelf that would sell with nothing to hand over by
   // themselves. Other tags are handed over in person and need no sign-in on
   // the row; this is the list to fix before the next sale, not after it.
+  const stock = await poolStock(rows.filter((p) => p.accountPool).map((p) => p.id));
   const forSale = rows.filter((p) => p.status === "AVAILABLE");
   const unlistedLogins = forSale.filter(
     (p) => deliversAutomatically(tagOf(p)) && readLogin(p) === null,
@@ -228,6 +230,8 @@ export default async function AdminProductsPage() {
               imageUrl: p.imageUrl ?? "",
               tag: p.tags[0]?.label ?? "",
               hasLogin: readLogin(p) !== null,
+              accountPool: p.accountPool,
+              poolAvailable: stock.get(p.id) ?? 0,
             }))}
             categories={categories.map((c) => ({ slug: c.slug, name: c.name }))}
           />

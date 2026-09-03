@@ -64,6 +64,8 @@ export interface OrderDetailData {
   categoryName: string;
   imageUrl: string | null;
   isSoftware: boolean;
+  /** An "acc random" order: every key is a sign-in, "user|pass". */
+  isPool: boolean;
   packageLabel: string | null;
   productRank: string;
   /** Software: the licence keys handed over, and how many are still owed. */
@@ -655,7 +657,56 @@ export function OrderDetailModal({
                     </div>
 
                     <div className="relative">
-                      {order.isSoftware ? (
+                      {order.isPool ? (
+                        // Each key is one sign-in; shown as the pair it is,
+                        // not as a key, with the password behind a reveal
+                        // like the single account's.
+                        <div className="flex flex-col gap-4">
+                          {order.keys.length > 0 ? (
+                            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+                              {order.keys.map((key, index) => {
+                                const at = key.indexOf("|");
+                                const username = at < 0 ? key : key.slice(0, at);
+                                const password = at < 0 ? "" : key.slice(at + 1);
+                                return (
+                                  <div
+                                    key={`${index}-${key}`}
+                                    className="flex flex-col gap-2 rounded-xl border border-white/[0.06] bg-white/[0.02] p-3"
+                                  >
+                                    {order.keys.length > 1 ? (
+                                      <span className="text-[10px] font-black uppercase tracking-widest text-neutral-500">
+                                        Tài khoản {index + 1}
+                                      </span>
+                                    ) : null}
+                                    <HandoverBox
+                                      icon={<User className="h-3 w-3" />}
+                                      label="Tài khoản"
+                                      value={username}
+                                    />
+                                    <HandoverBox
+                                      icon={<Lock className="h-3 w-3" />}
+                                      label="Mật khẩu"
+                                      value={password}
+                                      secret
+                                    />
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          ) : null}
+                          {order.keysPending > 0 ? (
+                            <p className="text-xs font-semibold text-amber-400">
+                              {order.keysPending} tài khoản đang được chuẩn bị — shop
+                              sẽ giao trong ít phút, sẽ hiện ngay tại đây.
+                            </p>
+                          ) : null}
+                          {order.keys.length === 0 && order.keysPending === 0 ? (
+                            <p className="text-xs text-neutral-400">
+                              Đơn này chưa có tài khoản để hiển thị.
+                            </p>
+                          ) : null}
+                        </div>
+                      ) : order.isSoftware ? (
                         // With files to offer, the keys take the left half and
                         // the download rows the right — the card is one hand-
                         // over, and the empty space beside a single key is

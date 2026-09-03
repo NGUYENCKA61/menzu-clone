@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { parseLoginInput } from "@/lib/accountLogin";
+import { ensurePoolPackage } from "@/lib/accountPool";
 import { FORBIDDEN, getAdmin } from "@/lib/admin";
 import { db } from "@/lib/db";
 import { docHtmlIsEmpty, isHtmlBody, sanitizeDocHtml } from "@/lib/docHtml";
@@ -228,6 +229,8 @@ export async function PATCH(request: Request) {
     loginUsername?: string;
     loginPassword?: string;
     loginNote?: string;
+    /** "Acc random": sold by the piece from a shelf of sign-ins. */
+    accountPool?: boolean;
   } | null;
 
   const code = body?.code;
@@ -298,6 +301,7 @@ export async function PATCH(request: Request) {
     description === undefined &&
     body?.rank === undefined &&
     body?.name === undefined &&
+    body?.accountPool === undefined &&
     login.kind === "untouched"
   ) {
     return NextResponse.json({ error: "Không có thay đổi" }, { status: 400 });
@@ -352,9 +356,16 @@ export async function PATCH(request: Request) {
       ...(rank !== undefined ? { rank } : {}),
       ...(name !== undefined ? { name } : {}),
       ...(slug ? { slug } : {}),
+      ...(typeof body?.accountPool === "boolean" ? { accountPool: body.accountPool } : {}),
       ...(login.kind === "set" ? login.value : {}),
     },
   });
+
+  // A random listing's shelf is its one package, made the moment the flag
+  // goes on and kept at the listing's price whenever that moves.
+  if (body?.accountPool === true || (product.accountPool && price !== undefined)) {
+    await ensurePoolPackage(product.id, price ?? product.price);
+  }
 
   // Tags are rows, not a column, and the card only reads the first — so
   // "set the tag" is spelled replace-all: clear what is there, write the one

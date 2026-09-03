@@ -16,6 +16,7 @@ import {
   Swords,
   Tag,
   Trash2,
+  Users,
   Wallet,
 } from "lucide-react";
 
@@ -23,6 +24,14 @@ import { deliversAutomatically } from "@/lib/accountLogin";
 
 import { AdminError } from "./AdminStates";
 import { RichTextEditor } from "./RichTextEditor";
+
+/** The shelf behind an "acc random" listing, as the page reads it. */
+export interface PoolView {
+  available: number;
+  sold: number;
+  shelf: { id: string; value: string }[];
+  recent: { id: string; value: string; when: string; buyer: string; orderCode: string }[];
+}
 
 export interface AccountDetailView {
   code: string;
@@ -53,6 +62,9 @@ export interface AccountDetailView {
   loginNote: string;
   /** Whoever holds the account now — the latest paid order — or null on the shelf. */
   buyer: { username: string; orderCode: string } | null;
+  /** "Acc random": sold by the piece from the shelf below. */
+  accountPool: boolean;
+  pool: PoolView | null;
 }
 
 const CARD = "rounded-xl border border-white/[0.08] bg-[#0e0e11] p-5 flex flex-col gap-4";
@@ -120,13 +132,16 @@ export function AdminAccountDetail({ account }: { account: AccountDetailView }) 
     note: account.loginNote,
   });
 
+  const [poolOn, setPoolOn] = useState(account.accountPool);
+  const [poolText, setPoolText] = useState("");
+
   const coverRef = useRef<HTMLInputElement>(null);
   const galleryRef = useRef<HTMLInputElement>(null);
 
   const statusMeta = STATUS_META[account.status] ?? STATUS_META.HIDDEN!;
 
   async function api(
-    method: "PATCH" | "PUT" | "DELETE",
+    method: "PATCH" | "PUT" | "POST" | "DELETE",
     payload: Record<string, unknown> | null,
     query = "",
     sub = "",
@@ -153,6 +168,37 @@ export function AdminAccountDetail({ account }: { account: AccountDetailView }) 
     } finally {
       setBusy(false);
     }
+  }
+
+  async function togglePool(next: boolean) {
+    const data = await api("PATCH", { code: account.code, accountPool: next });
+    if (!data) return;
+    setPoolOn(next);
+    setMsg({
+      tone: "ok",
+      text: next
+        ? "Đã bật acc random — dán tài khoản vào kho bên dưới"
+        : "Đã tắt acc random — sản phẩm là một tài khoản duy nhất",
+    });
+  }
+
+  async function addToPool() {
+    if (!poolText.trim()) return;
+    const data = await api("POST", { code: account.code, block: poolText }, "", "/pool");
+    if (!data) return;
+    setPoolText("");
+    const filled = Number(data.filled ?? 0);
+    setMsg({
+      tone: "ok",
+      text: `Đã thêm ${Number(data.added ?? 0)} tài khoản vào kho${
+        filled > 0 ? `, giao ngay ${filled} đơn đang chờ` : ""
+      } — còn ${Number(data.available ?? 0)}`,
+    });
+  }
+
+  async function removeFromPool(keyId: string) {
+    const data = await api("DELETE", { code: account.code, keyId }, "", "/pool");
+    if (data) setMsg({ tone: "ok", text: "Đã xoá cặp tài khoản khỏi kho" });
   }
 
   async function saveDescription() {
@@ -609,6 +655,122 @@ export function AdminAccountDetail({ account }: { account: AccountDetailView }) 
         </div>
 
         <div className="flex flex-col gap-4 min-w-0">
+          {/* "Acc random": the listing is a kind of account and the shelf
+              under it holds every sign-in of that kind. Sold by the piece. */}
+          <section className={CARD}>
+            <span className={CARD_HEAD}>
+              <Users size={13} className="text-neutral-400" />
+              Acc random — bán theo số lượng
+            </span>
+            <label className="flex items-start gap-2.5 text-xs leading-relaxed text-neutral-300">
+              <input
+                type="checkbox"
+                checked={poolOn}
+                disabled={busy}
+                onChange={(event) => togglePool(event.target.checked)}
+                className="mt-0.5 h-4 w-4 accent-[var(--brand)]"
+              />
+              <span>
+                Bật kho tài khoản: nhiều cặp tài khoản/mật khẩu cùng loại, khách chọn số
+                lượng, giao tự động từ kho. Rank, ảnh, mô tả ở trang này là đặc điểm
+                chung của cả kho.
+              </span>
+            </label>
+            {poolOn ? (
+              <>
+                <div className="flex flex-wrap gap-3 text-[11px] font-bold">
+                  <span className="rounded-lg border border-sky-500/30 bg-sky-500/10 px-2.5 py-1 text-sky-400">
+                    Còn {account.pool?.available ?? 0} tài khoản
+                  </span>
+                  <span className="rounded-lg border border-white/10 bg-white/5 px-2.5 py-1 text-neutral-400">
+                    Đã giao {account.pool?.sold ?? 0}
+                  </span>
+                </div>
+                <div>
+                  <label htmlFor="acc-pool-block" className={LABEL}>
+                    Thêm vào kho — mỗi dòng một cặp
+                  </label>
+                  <textarea
+                    id="acc-pool-block"
+                    rows={5}
+                    value={poolText}
+                    onChange={(event) => setPoolText(event.target.value)}
+                    spellCheck={false}
+                    placeholder={"taikhoan1|matkhau1\ntaikhoan2 matkhau2\nemail@x.com:matkhau3"}
+                    className={`${FIELD} resize-y font-mono`}
+                  />
+                  <div className="mt-2 flex flex-wrap items-center gap-3">
+                    <button
+                      type="button"
+                      disabled={busy || !poolText.trim()}
+                      onClick={addToPool}
+                      className={ACTION}
+                    >
+                      <Save size={12} />
+                      Thêm vào kho
+                    </button>
+                    <span className="text-[11px] text-neutral-500">
+                      Nhận dấu |, dấu :, tab hoặc khoảng trắng giữa tài khoản và mật khẩu.
+                      Cặp trùng bị bỏ qua.
+                    </span>
+                  </div>
+                </div>
+                {account.pool && account.pool.shelf.length > 0 ? (
+                  <div>
+                    <span className={LABEL}>Trong kho (mới nhất {account.pool.shelf.length})</span>
+                    <ul className="flex max-h-56 flex-col gap-1 overflow-y-auto">
+                      {account.pool.shelf.map((key) => (
+                        <li
+                          key={key.id}
+                          className="flex items-center gap-2 rounded-lg border border-white/[0.06] bg-neutral-950/60 px-2.5 py-1.5"
+                        >
+                          <span className="min-w-0 flex-1 truncate font-mono text-[11px] text-neutral-200">
+                            {key.value.replace("|", "  |  ")}
+                          </span>
+                          <button
+                            type="button"
+                            disabled={busy}
+                            onClick={() => removeFromPool(key.id)}
+                            aria-label="Xoá cặp này"
+                            className="shrink-0 rounded-md p-1 text-neutral-500 transition-colors hover:text-rose-400"
+                          >
+                            <Trash2 size={12} />
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
+                {account.pool && account.pool.recent.length > 0 ? (
+                  <div>
+                    <span className={LABEL}>Đã giao gần đây</span>
+                    <ul className="flex max-h-40 flex-col gap-1 overflow-y-auto">
+                      {account.pool.recent.map((key) => (
+                        <li
+                          key={key.id}
+                          className="flex flex-wrap items-center gap-x-3 gap-y-0.5 rounded-lg border border-white/[0.06] bg-neutral-950/40 px-2.5 py-1.5 text-[11px]"
+                        >
+                          <span className="min-w-0 flex-1 truncate font-mono text-neutral-400">
+                            {key.value.replace("|", "  |  ")}
+                          </span>
+                          <span className="text-neutral-500">
+                            {key.buyer ? `${key.buyer} · ` : ""}
+                            {key.orderCode ? `${key.orderCode} · ` : ""}
+                            {key.when}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
+              </>
+            ) : (
+              <p className="text-[11px] text-neutral-500">
+                Tắt: sản phẩm là một tài khoản duy nhất, giao thông tin đăng nhập ở ô bên dưới.
+              </p>
+            )}
+          </section>
+
           {/* First in the column: what the buyer is handed the moment they
               pay. Everything else here makes the account sell; this makes
               the sale complete without anyone touching it. */}
@@ -617,6 +779,11 @@ export function AdminAccountDetail({ account }: { account: AccountDetailView }) 
               <KeyRound size={13} className="text-neutral-400" />
               Thông tin đăng nhập giao khách
             </span>
+            {poolOn ? (
+              <p className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-[11px] font-semibold text-amber-400">
+                Acc random giao từ kho ở trên — ô này không dùng.
+              </p>
+            ) : null}
             <p
               role="status"
               className={`rounded-lg border px-3 py-2 text-[11px] font-semibold leading-relaxed ${loginStatus.tone}`}

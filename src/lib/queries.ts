@@ -8,6 +8,7 @@ import {
   tagOf,
   type LoginHandover,
 } from "@/lib/accountLogin";
+import { poolStock } from "@/lib/accountPool";
 import { db } from "@/lib/db";
 import { docHtmlToPlainText } from "@/lib/docHtml";
 import { parseBadges } from "@/lib/productBadges";
@@ -401,9 +402,10 @@ export async function getCategoryPage(
     db.product.count({ where: softwareWhere(category.id, {}) }),
   ]);
 
-  const [sale, images] = await Promise.all([
+  const [sale, images, stock] = await Promise.all([
     runningSalePrices(rows.map((p) => p.id)),
     weaponImages(rows),
+    poolStock(rows.filter((p) => p.accountPool).map((p) => p.id)),
   ]);
 
   // Cheapest tier first, which is the order the card's dropdown reads in. No
@@ -453,7 +455,12 @@ export async function getCategoryPage(
     page,
     totalPages: Math.max(1, Math.ceil(total / PAGE_SIZE)),
     software,
-    products: rows.map((p) => toProductCard(p, sale.get(p.id) ?? p.price, images)),
+    products: rows.map((p) => ({
+      ...toProductCard(p, sale.get(p.id) ?? p.price, images),
+      // A random listing wears how many are left where an account wears
+      // nothing: it is the one card whose stock is a number.
+      stock: p.accountPool ? (stock.get(p.id) ?? 0) : null,
+    })),
   };
 }
 
@@ -536,7 +543,10 @@ export async function getAccountDetail(
   });
   if (!p) return null;
 
-  const sale = await runningSalePrices([p.id]);
+  const [sale, stock] = await Promise.all([
+    runningSalePrices([p.id]),
+    p.accountPool ? poolStock([p.id]) : Promise.resolve(new Map<string, number>()),
+  ]);
 
   return {
     code: p.code,
@@ -572,7 +582,10 @@ export async function getAccountDetail(
     categoryName: p.category.name,
     categorySlug: p.category.slug,
     viewers: p.viewers,
-    sold: p.status !== "AVAILABLE",
+    // A random listing is never "sold": it is on the shelf while its pile
+    // lasts, and the pile says how many are left.
+    sold: !p.accountPool && p.status !== "AVAILABLE",
+    pool: p.accountPool ? { available: stock.get(p.id) ?? 0 } : null,
   };
 }
 
@@ -742,6 +755,8 @@ export interface OrderRow {
   /** The product's canonical address, so the row opens the page it names. */
   productHref: string;
   isSoftware: boolean;
+  /** An "acc random" order: every key on it is a sign-in, "user|pass". */
+  isPool: boolean;
   productRank: string;
   imageUrl: string | null;
   /** The shelf the product sits on today — "Danh mục Hack PUBG" on the receipt. */
@@ -794,6 +809,7 @@ export async function getOrders(userId: string): Promise<OrderRow[]> {
           rank: true,
           imageUrl: true,
           productType: true,
+          accountPool: true,
           downloadUrl: true,
           docsUrl: true,
           category: { select: { slug: true, name: true } },
@@ -845,6 +861,7 @@ export async function getOrders(userId: string): Promise<OrderRow[]> {
     // but the link on it has to lead somewhere that exists today.
     productHref: productHref(o.product.category.slug, o.product.slug),
     isSoftware: o.product.productType === "SOFTWARE_GAME",
+    isPool: o.product.productType === "ACCOUNT_GAME" && o.product.accountPool,
     productRank: o.product.rank,
     imageUrl: o.product.imageUrl,
     categoryName: o.product.category.name,

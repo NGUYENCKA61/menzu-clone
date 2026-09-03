@@ -51,6 +51,8 @@ export interface AccountDetail {
   viewers: number;
   /** Sold accounts keep their page so crawled links stay valid. */
   sold: boolean;
+  /** Set on an "acc random" listing: how many sign-ins are left to sell. */
+  pool: { available: number } | null;
 }
 
 export interface AccountBuyPanelProps {
@@ -92,6 +94,20 @@ export function AccountBuyPanel({ account }: AccountBuyPanelProps) {
   const [orderCode, setOrderCode] = useState<string | null>(null);
   /** Whether the sign-in went out by itself (NFA), or the shop hands it over. */
   const [loginReady, setLoginReady] = useState(false);
+  // "Acc random": sold by the piece, so the panel carries a count and the
+  // dialog reports how many sign-ins landed in the buyer's history.
+  const pool = account.pool;
+  const [quantity, setQuantity] = useState(1);
+  const [bought, setBought] = useState(0);
+  const unitCount = pool ? quantity : 1;
+  const soldOut = pool ? pool.available <= 0 : account.sold;
+  const stockText = pool
+    ? pool.available > 0
+      ? `Còn ${pool.available} acc`
+      : "Tạm hết hàng"
+    : account.sold
+      ? "Đã bán"
+      : "Còn hàng";
 
   const [applied, setApplied] = useState<{ cut: number; total: number } | null>(null);
   const [voucherError, setVoucherError] = useState<string | null>(null);
@@ -99,7 +115,7 @@ export function AccountBuyPanel({ account }: AccountBuyPanelProps) {
 
   // What the wallet will actually be debited, so the dialog and the server
   // agree before the customer commits.
-  const payable = applied?.total ?? account.price;
+  const payable = applied?.total ?? account.price * unitCount;
 
   async function handleApplyVoucher() {
     setChecking(true);
@@ -109,7 +125,11 @@ export function AccountBuyPanel({ account }: AccountBuyPanelProps) {
       const response = await fetch("/api/vouchers/check", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ code: voucher.trim(), productCode: account.code }),
+        body: JSON.stringify({
+          code: voucher.trim(),
+          productCode: account.code,
+          quantity: unitCount,
+        }),
       });
       if (response.status === 401) {
         router.push(`/login?next=${encodeURIComponent(productHref(account.categorySlug, account.slug))}`);
@@ -169,6 +189,7 @@ export function AccountBuyPanel({ account }: AccountBuyPanelProps) {
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
           code: account.code,
+          quantity: unitCount,
           voucher: voucher.trim() || undefined,
         }),
       });
@@ -177,6 +198,7 @@ export function AccountBuyPanel({ account }: AccountBuyPanelProps) {
         orderCode?: string;
         balance?: number;
         loginReady?: boolean;
+        accountsDelivered?: number;
         shortfall?: number;
       };
 
@@ -197,6 +219,7 @@ export function AccountBuyPanel({ account }: AccountBuyPanelProps) {
 
       setOrderCode(data.orderCode ?? "");
       setLoginReady(data.loginReady === true);
+      setBought(data.accountsDelivered ?? 0);
       setBalance(data.balance ?? 0);
       // Long enough to read which of the two things the second line says —
       // the sign-in is waiting on /orders, or the shop has to be asked.
@@ -316,13 +339,9 @@ export function AccountBuyPanel({ account }: AccountBuyPanelProps) {
         <p className="text-4xl font-black text-white">{formatVnd(account.price)}đ</p>
         <p className="flex items-center gap-2 text-[13px] font-semibold">
           <span
-            className={`h-1.5 w-1.5 rounded-full ${
-              account.sold ? "bg-neutral-600" : "bg-emerald-500"
-            }`}
+            className={`h-1.5 w-1.5 rounded-full ${soldOut ? "bg-neutral-600" : "bg-emerald-500"}`}
           />
-          <span className={account.sold ? "text-neutral-500" : "text-emerald-400"}>
-            {account.sold ? "Đã bán" : "Còn hàng"}
-          </span>
+          <span className={soldOut ? "text-neutral-500" : "text-emerald-400"}>{stockText}</span>
         </p>
       </div>
 
@@ -331,10 +350,54 @@ export function AccountBuyPanel({ account }: AccountBuyPanelProps) {
           count, interest, credit limit — nobody has decided, and a button that
           opens nothing is worse than no button. Product.depositFrom stays in
           the schema so putting them back is a UI change, not a migration. */}
+      {pool ? (
+        <div className="flex flex-wrap items-center gap-3">
+          <span className="text-[13px] font-semibold text-neutral-400">Số lượng</span>
+          <div className="flex items-center rounded-xl border border-white/10 bg-white/[0.03]">
+            <button
+              type="button"
+              aria-label="Bớt một"
+              disabled={quantity <= 1}
+              onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+              className="h-10 w-10 text-lg font-black text-neutral-300 transition-colors hover:text-white disabled:opacity-40"
+            >
+              −
+            </button>
+            <input
+              type="number"
+              min={1}
+              max={Math.max(1, pool.available)}
+              value={quantity}
+              onChange={(e) =>
+                setQuantity(
+                  Math.min(
+                    Math.max(1, pool.available),
+                    Math.max(1, Math.floor(Number(e.target.value)) || 1),
+                  ),
+                )
+              }
+              className="h-10 w-16 bg-transparent text-center text-sm font-black text-white outline-none"
+            />
+            <button
+              type="button"
+              aria-label="Thêm một"
+              disabled={quantity >= pool.available}
+              onClick={() => setQuantity((q) => Math.min(pool.available, q + 1))}
+              className="h-10 w-10 text-lg font-black text-neutral-300 transition-colors hover:text-white disabled:opacity-40"
+            >
+              +
+            </button>
+          </div>
+          <span className="text-[12px] font-semibold text-neutral-500">
+            = {formatVnd(account.price * quantity)}đ
+          </span>
+        </div>
+      ) : null}
+
       <div className="space-y-3">
         <button
           type="button"
-          disabled={account.sold}
+          disabled={soldOut}
           onClick={openDialog}
           className="w-full h-14 rounded-2xl bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] disabled:opacity-50 transition-colors text-[13px] font-black uppercase tracking-widest text-white"
         >
@@ -404,7 +467,8 @@ export function AccountBuyPanel({ account }: AccountBuyPanelProps) {
               <PriceRow label="Giảm giá" value={`−${pct}%`} tone="ok" />
             </>
           ) : null}
-          <PriceRow label="Tạm tính" value={`${formatVnd(account.price)}đ`} />
+          {pool ? <PriceRow label="Số lượng" value={`${quantity} acc`} /> : null}
+          <PriceRow label="Tạm tính" value={`${formatVnd(account.price * unitCount)}đ`} />
           {applied ? (
             <PriceRow
               label="Mã giảm giá"
@@ -432,9 +496,11 @@ export function AccountBuyPanel({ account }: AccountBuyPanelProps) {
           <DialogAlert tone="ok">
             Mua thành công · Đơn {orderCode}
             <span className="mt-1 block font-medium text-emerald-300/90">
-              {loginReady
-                ? "Tài khoản và mật khẩu đăng nhập đã sẵn trong Lịch sử mua."
-                : "Tài khoản bàn giao trực tiếp — liên hệ shop kèm mã đơn để nhận."}
+              {pool
+                ? `${bought} tài khoản đã sẵn trong Lịch sử mua.`
+                : loginReady
+                  ? "Tài khoản và mật khẩu đăng nhập đã sẵn trong Lịch sử mua."
+                  : "Tài khoản bàn giao trực tiếp — liên hệ shop kèm mã đơn để nhận."}
             </span>
           </DialogAlert>
         ) : null}
