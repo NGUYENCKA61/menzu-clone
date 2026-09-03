@@ -125,11 +125,11 @@ export async function activeAnnouncements(
           : { audience: "ALL" },
       ],
     },
-    // Descending over a Postgres enum sorts by declaration order, and
-    // AnnouncementPriority is declared LOW → NORMAL → HIGH, so this puts HIGH
-    // first. That coupling is quiet enough to break by accident: reordering
-    // the enum in the schema silently reverses this list.
-    orderBy: [{ priority: "desc" }, { startAt: "desc" }],
+    // Newest first, full stop. Priority used to sort ahead of the date, which
+    // pinned a HIGH notice over everything the shop wrote after it — and the
+    // desk read that as new notices sinking. Priority still colours the row
+    // and decides which one opens by itself; it no longer decides the order.
+    orderBy: { startAt: "desc" },
     take,
   });
   // No recipients included: the reader has no business knowing who else was
