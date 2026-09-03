@@ -16,6 +16,9 @@ import { ScopeSearchField } from "./ScopeSearchField";
 const STATUS_OPTIONS = [
   { value: "all", label: "Tất cả" },
   { value: "undetected", label: "Chưa phát hiện" },
+  { value: "stable", label: "Ổn định" },
+  { value: "updated", label: "Cập nhật mới" },
+  { value: "risky", label: "Rủi ro" },
   { value: "updating", label: "Đang cập nhật" },
   { value: "detected", label: "Đã phát hiện" },
 ] as const;

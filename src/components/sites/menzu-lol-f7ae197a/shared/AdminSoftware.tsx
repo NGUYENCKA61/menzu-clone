@@ -43,8 +43,11 @@ const MINI =
 
 const SOFTWARE_STATUS: Record<string, string> = {
   UNDETECTED: "Chưa phát hiện",
-  DETECTED: "Đã phát hiện",
+  STABLE: "Ổn định",
+  UPDATED: "Cập nhật mới",
+  RISKY: "Rủi ro",
   UPDATING: "Đang cập nhật",
+  DETECTED: "Đã phát hiện",
 };
 
 const STOCK_STATUS: Record<string, string> = {

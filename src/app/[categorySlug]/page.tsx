@@ -47,6 +47,9 @@ const HOT_PICK_ROTATION = 8;
 /** The status chips' URL values, and the column values they stand for. */
 const SOFTWARE_STATUSES = {
   undetected: "UNDETECTED",
+  stable: "STABLE",
+  updated: "UPDATED",
+  risky: "RISKY",
   updating: "UPDATING",
   detected: "DETECTED",
 } as const;

@@ -252,6 +252,12 @@ const SOFTWARE_STATUS: Record<string, { label: string; tint: string }> = {
     label: "Đang cập nhật",
     tint: "border-amber-500/30 bg-amber-500/10 text-amber-400",
   },
+  STABLE: { label: "Ổn định", tint: "border-sky-500/30 bg-sky-500/10 text-sky-400" },
+  UPDATED: {
+    label: "Cập nhật mới",
+    tint: "border-violet-500/30 bg-violet-500/10 text-violet-400",
+  },
+  RISKY: { label: "Rủi ro", tint: "border-orange-500/30 bg-orange-500/10 text-orange-400" },
 };
 
 /**

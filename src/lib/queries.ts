@@ -256,7 +256,7 @@ export interface CategoryFilters {
   software?: string;
   /** Matches a tool by the feature line under its name. */
   softwareFeature?: string;
-  softwareStatus?: "UNDETECTED" | "DETECTED" | "UPDATING";
+  softwareStatus?: "UNDETECTED" | "STABLE" | "UPDATED" | "RISKY" | "UPDATING" | "DETECTED";
   softwareSort?: "newest" | "price-asc" | "price-desc";
 }
 

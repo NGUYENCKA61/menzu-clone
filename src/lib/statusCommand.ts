@@ -14,7 +14,9 @@
  *   VALTOOL01 undetected
  */
 
-export type ParsedStatus = "UNDETECTED" | "DETECTED" | "UPDATING";
+import type { SoftwareStatusValue } from "@/lib/softwareStatus";
+
+export type ParsedStatus = SoftwareStatusValue;
 
 export interface StatusCommand {
   productCode: string;
@@ -23,7 +25,7 @@ export interface StatusCommand {
   note: string;
 }
 
-/** The words the shop actually types, mapped to the three states. */
+/** The words the shop actually types, mapped to the states. */
 const WORDS: Record<string, ParsedStatus> = {
   undetected: "UNDETECTED",
   undetect: "UNDETECTED",
@@ -48,6 +50,27 @@ const WORDS: Record<string, ParsedStatus> = {
   baotri: "UPDATING",
   dangcapnhat: "UPDATING",
   capnhat: "UPDATING",
+
+  stable: "STABLE",
+  ondinh: "STABLE",
+
+  // "cập nhật" alone is the work in progress (above); these are the work done.
+  // The parser tries the longest run of words first, so "cập nhật mới" lands
+  // here and never on the two-word UPDATING entry.
+  updated: "UPDATED",
+  new: "UPDATED",
+  xong: "UPDATED",
+  done: "UPDATED",
+  capnhatmoi: "UPDATED",
+  capnhatxong: "UPDATED",
+  dacapnhat: "UPDATED",
+
+  risky: "RISKY",
+  risk: "RISKY",
+  ruiro: "RISKY",
+  nguyhiem: "RISKY",
+  canhbao: "RISKY",
+  warning: "RISKY",
 };
 
 /** Lowercased, accents dropped, everything but letters and digits removed. */

@@ -36,7 +36,7 @@ export type MenuAction =
 /** Only the tools carry a status; account listings never appear here. */
 const SOFTWARE_WHERE = { productType: "SOFTWARE_GAME" as const, deletedAt: null };
 
-const LEGEND = "🟢 an toàn · 🔴 phát hiện · 🟡 cập nhật";
+const LEGEND = "🟢 an toàn · 🔵 ổn định · 🟣 cập nhật mới · 🟠 rủi ro · 🟡 bảo trì · 🔴 phát hiện";
 
 function dot(status: SoftwareStatusValue | null): string {
   return status ? STATUS_EMOJI[status] : "⚪";
@@ -54,7 +54,7 @@ export function parseCallback(data: string | undefined): MenuAction | null {
   if (data === "cats") return { kind: "cats" };
   const open = /^(cat|tool):([\w-]{1,40})$/.exec(data);
   if (open) return { kind: open[1] as "cat" | "tool", id: open[2]! };
-  const set = /^set:([\w-]{1,40}):(UNDETECTED|DETECTED|UPDATING)$/.exec(data);
+  const set = /^set:([\w-]{1,40}):(UNDETECTED|STABLE|UPDATED|RISKY|UPDATING|DETECTED)$/.exec(data);
   if (set) return { kind: "set", id: set[1]!, status: set[2] as SoftwareStatusValue };
   return null;
 }
@@ -66,16 +66,21 @@ export async function categoryScreen(): Promise<MenuScreen> {
     orderBy: { category: { name: "asc" } },
   });
 
-  const groups = new Map<string, { name: string; total: number; detected: number; updating: number }>();
+  const groups = new Map<
+    string,
+    { name: string; total: number; detected: number; risky: number; updating: number }
+  >();
   for (const tool of tools) {
     const group = groups.get(tool.category.id) ?? {
       name: tool.category.name,
       total: 0,
       detected: 0,
+      risky: 0,
       updating: 0,
     };
     group.total += 1;
     if (tool.softwareStatus === "DETECTED") group.detected += 1;
+    if (tool.softwareStatus === "RISKY") group.risky += 1;
     if (tool.softwareStatus === "UPDATING") group.updating += 1;
     groups.set(tool.category.id, group);
   }
@@ -89,6 +94,7 @@ export async function categoryScreen(): Promise<MenuScreen> {
         shorten(group.name, 28),
         `${group.total} tool`,
         group.detected ? `🔴${group.detected}` : "",
+        group.risky ? `🟠${group.risky}` : "",
         group.updating ? `🟡${group.updating}` : "",
       ]
         .filter(Boolean)
@@ -159,11 +165,9 @@ export async function toolScreen(productId: string): Promise<MenuScreen | null> 
       "Chọn trạng thái mới:",
     ].join("\n"),
     keyboard: [
-      [
-        choice("UNDETECTED", "An toàn"),
-        choice("DETECTED", "Phát hiện"),
-        choice("UPDATING", "Bảo trì"),
-      ],
+      [choice("UNDETECTED", "An toàn"), choice("STABLE", "Ổn định")],
+      [choice("UPDATED", "Cập nhật mới"), choice("RISKY", "Rủi ro")],
+      [choice("UPDATING", "Bảo trì"), choice("DETECTED", "Phát hiện")],
       [
         { text: `⬅️ ${shorten(tool.category.name, 20)}`, callback_data: `cat:${tool.categoryId}` },
         { text: "🏠 Danh mục", callback_data: "cats" },

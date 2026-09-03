@@ -502,6 +502,12 @@ enum SoftwareStatus {
   UNDETECTED
   DETECTED
   UPDATING
+  /// Running well for a while now: the calm green after the green.
+  STABLE
+  /// Just updated, new build or new features; the desk moves it on to STABLE.
+  UPDATED
+  /// A warning short of DETECTED: use with care, watch the channel.
+  RISKY
 }
 
 /// One purchasable game account. `code` is the public identifier shown as

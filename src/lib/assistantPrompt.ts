@@ -63,6 +63,9 @@ const DETECT_LABEL: Record<string, string> = {
   UNDETECTED: "chưa bị phát hiện",
   DETECTED: "đang bị phát hiện — KHÔNG nên dùng",
   UPDATING: "đang cập nhật, tạm ngưng bán",
+  STABLE: "ổn định, dùng bình thường",
+  UPDATED: "vừa cập nhật xong, có bản mới",
+  RISKY: "có rủi ro — cân nhắc trước khi dùng",
 };
 
 function money(value: number): string {

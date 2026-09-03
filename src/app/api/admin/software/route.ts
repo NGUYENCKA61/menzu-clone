@@ -20,7 +20,7 @@ import { uniqueProductSlug } from "@/lib/routes";
 import { slugify } from "@/lib/slug";
 import { postStatusToTelegram } from "@/lib/telegramNotify";
 
-const STATUSES = ["UNDETECTED", "DETECTED", "UPDATING"] as const;
+const STATUSES = ["UNDETECTED", "STABLE", "UPDATED", "RISKY", "UPDATING", "DETECTED"] as const;
 type SoftwareStatusValue = (typeof STATUSES)[number];
 
 function readStatus(value: unknown): SoftwareStatusValue | undefined {

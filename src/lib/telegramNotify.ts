@@ -31,6 +31,9 @@ export const STATUS_EMOJI: Record<SoftwareStatusValue, string> = {
   UNDETECTED: "🟢",
   DETECTED: "🔴",
   UPDATING: "🟡",
+  STABLE: "🔵",
+  UPDATED: "🟣",
+  RISKY: "🟠",
 };
 
 /** Telegram's HTML parse mode needs only these three escaped in text. */

@@ -41,7 +41,7 @@ export interface SoftwareDetail {
   guideHtml: string;
   /** "Hướng dẫn thiết lập & sử dụng" as editor HTML; "" prints the default. */
   setupGuideHtml: string;
-  softwareStatus: "UNDETECTED" | "DETECTED" | "UPDATING" | null;
+  softwareStatus: "UNDETECTED" | "STABLE" | "UPDATED" | "RISKY" | "UPDATING" | "DETECTED" | null;
   /** Whether that state is drawn here. Resolved on the server: the shop can
    *  force it either way, and left alone it stays out of the badges' way. The
    *  storefront card shows the pill regardless. */
@@ -82,6 +82,9 @@ const STATUS_STYLE: Record<
     text: "text-amber-400",
     label: "Đang cập nhật",
   },
+  STABLE: { dot: "bg-sky-500", text: "text-sky-400", label: "Ổn định" },
+  UPDATED: { dot: "bg-violet-500", text: "text-violet-400", label: "Cập nhật mới" },
+  RISKY: { dot: "bg-orange-500", text: "text-orange-400", label: "Rủi ro" },
 };
 
 const TRUST = [

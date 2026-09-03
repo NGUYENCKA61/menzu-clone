@@ -24,7 +24,7 @@ export interface SoftwareCardView {
   imageUrl: string | null;
   /** The feature line under the title, e.g. "Aimbot · ESP · No Recoil". */
   description: string;
-  status: "UNDETECTED" | "DETECTED" | "UPDATING" | null;
+  status: "UNDETECTED" | "STABLE" | "UPDATED" | "RISKY" | "UPDATING" | "DETECTED" | null;
   packages: SoftwareCardPackage[];
   /** Null hides the download button rather than pointing it nowhere. */
   downloadUrl: string | null;
@@ -39,6 +39,9 @@ const STATUS: Record<string, { dot: string; text: string; label: string }> = {
   UNDETECTED: { dot: "bg-emerald-500", text: "text-emerald-400", label: "Chưa phát hiện" },
   DETECTED: { dot: "bg-red-500", text: "text-red-400", label: "Đã phát hiện" },
   UPDATING: { dot: "bg-amber-500", text: "text-amber-400", label: "Đang cập nhật" },
+  STABLE: { dot: "bg-sky-500", text: "text-sky-400", label: "Ổn định" },
+  UPDATED: { dot: "bg-violet-500", text: "text-violet-400", label: "Cập nhật mới" },
+  RISKY: { dot: "bg-orange-500", text: "text-orange-400", label: "Rủi ro" },
 };
 
 /**
