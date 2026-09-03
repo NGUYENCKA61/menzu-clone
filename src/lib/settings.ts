@@ -59,6 +59,13 @@ export interface ShopSettings {
   /** The one chat whose messages are obeyed; blank obeys none. */
   telegramChatId: string;
 
+  // --- Số liệu tin cậy (dải số trên phần Đánh giá) ---------------------------
+  /** Typed figures; "" means "what the database can vouch for". See lib/trustStats.ts. */
+  statOrders: string;
+  statCustomers: string;
+  statStartYear: string;
+  statRating: string;
+
   // --- Gửi email (quên mật khẩu) --------------------------------------------
   /**
    * Plain SMTP, because it is the one door every provider opens — a Gmail app
@@ -251,6 +258,10 @@ export const DEFAULT_SETTINGS: ShopSettings = {
   telegramBotToken: "",
   telegramSecret: "",
   telegramChatId: "",
+  statOrders: "",
+  statCustomers: "",
+  statStartYear: "",
+  statRating: "",
   smtpHost: "",
   smtpPort: 587,
   smtpUser: "",
@@ -349,6 +360,10 @@ export const SETTING_KEYS: Record<keyof ShopSettings, string> = {
   telegramBotToken: "integrations.telegram.botToken",
   telegramSecret: "integrations.telegram.secret",
   telegramChatId: "integrations.telegram.chatId",
+  statOrders: "trust.orders",
+  statCustomers: "trust.customers",
+  statStartYear: "trust.startYear",
+  statRating: "trust.rating",
   smtpHost: "mail.smtp.host",
   smtpPort: "mail.smtp.port",
   smtpUser: "mail.smtp.user",
@@ -692,6 +707,16 @@ export function parseSettings(rows: Iterable<{ key: string; value: string }>): S
       stored.get(SETTING_KEYS.telegramChatId),
       DEFAULT_SETTINGS.telegramChatId,
     ),
+    statOrders: toOptionalText(stored.get(SETTING_KEYS.statOrders), DEFAULT_SETTINGS.statOrders),
+    statCustomers: toOptionalText(
+      stored.get(SETTING_KEYS.statCustomers),
+      DEFAULT_SETTINGS.statCustomers,
+    ),
+    statStartYear: toOptionalText(
+      stored.get(SETTING_KEYS.statStartYear),
+      DEFAULT_SETTINGS.statStartYear,
+    ),
+    statRating: toOptionalText(stored.get(SETTING_KEYS.statRating), DEFAULT_SETTINGS.statRating),
     discordClientSecret: toOptionalText(
       stored.get(SETTING_KEYS.discordClientSecret),
       DEFAULT_SETTINGS.discordClientSecret,
@@ -854,6 +879,10 @@ export function serializeSettings(settings: ShopSettings): { key: string; value:
     telegramBotToken: settings.telegramBotToken.trim(),
     telegramSecret: settings.telegramSecret.trim(),
     telegramChatId: settings.telegramChatId.trim(),
+    statOrders: settings.statOrders.trim(),
+    statCustomers: settings.statCustomers.trim(),
+    statStartYear: settings.statStartYear.trim(),
+    statRating: settings.statRating.trim(),
     smtpHost: settings.smtpHost.trim(),
     smtpPort: String(settings.smtpPort),
     smtpUser: settings.smtpUser.trim(),
@@ -954,6 +983,10 @@ export function normalizeSettings(raw: Partial<ShopSettings> | null): ShopSettin
     telegramBotToken: String(raw?.telegramBotToken ?? "").trim(),
     telegramSecret: String(raw?.telegramSecret ?? "").trim(),
     telegramChatId: String(raw?.telegramChatId ?? "").trim(),
+    statOrders: String(raw?.statOrders ?? "").trim(),
+    statCustomers: String(raw?.statCustomers ?? "").trim(),
+    statStartYear: String(raw?.statStartYear ?? "").trim(),
+    statRating: String(raw?.statRating ?? "").trim(),
     smtpHost: String(raw?.smtpHost ?? "").trim(),
     // Junk falls back to 587, the port the world's SMTP defaults to.
     smtpPort:

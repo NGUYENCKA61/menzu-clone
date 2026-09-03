@@ -13,6 +13,7 @@ import {
   getHomeGroups,
 } from "@/lib/homeRows";
 import { ReviewsSection } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/ReviewsSection";
+import { TrustStatsStrip } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/TrustStatsStrip";
 import { SiteFooter } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/SiteFooter";
 import { SiteHeader } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/SiteHeader";
 import { MobileBottomNav } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/MobileBottomNav";
@@ -23,6 +24,7 @@ import { getFeedback, getFlashSaleItems, getPartners } from "@/lib/queries";
 import { JsonLd, organizationJsonLd } from "@/lib/seo";
 import { visibleBlocks } from "@/lib/settings";
 import { getShopSettings } from "@/lib/settingsStore";
+import { getTrustStats } from "@/lib/trustStats";
 import { shareCard } from "@/lib/shareCard";
 
 export const dynamic = "force-dynamic";
@@ -62,6 +64,7 @@ const GROUP_ICONS: Record<string, React.ReactNode> = {
 
 export default async function Home() {
   const settings = await getShopSettings();
+  const trust = await getTrustStats(settings);
   const [flashSaleItems, reviews, partners] = await Promise.all([
     getFlashSaleItems(),
     getFeedback(),
@@ -123,16 +126,19 @@ export default async function Home() {
       </div>
     ),
     reviews: (
-      <ReviewsSection
-        key="reviews"
-        reviews={reviews.map((r) => ({
-          name: r.name,
-          date: r.createdAt.toLocaleDateString("vi-VN"),
-          body: r.body,
-          amount: formatVnd(r.amount) + "đ",
-          avatar: r.avatarUrl ?? "",
-        }))}
-      />
+      // The figures ride above the reviews they vouch for, as one block.
+      <div key="reviews">
+        <TrustStatsStrip stats={trust} />
+        <ReviewsSection
+          reviews={reviews.map((r) => ({
+            name: r.name,
+            date: r.createdAt.toLocaleDateString("vi-VN"),
+            body: r.body,
+            amount: formatVnd(r.amount) + "đ",
+            avatar: r.avatarUrl ?? "",
+          }))}
+        />
+      </div>
     ),
     partners: <PartnersSection key="partners" partners={partners} />,
     seo: (

@@ -231,6 +231,10 @@ export function AdminSettings({
   const [tgToken, setTgToken] = useState(settings.telegramBotToken);
   const [tgSecret, setTgSecret] = useState(settings.telegramSecret);
   const [tgChat, setTgChat] = useState(settings.telegramChatId);
+  const [statOrders, setStatOrders] = useState(settings.statOrders);
+  const [statCustomers, setStatCustomers] = useState(settings.statCustomers);
+  const [statStartYear, setStatStartYear] = useState(settings.statStartYear);
+  const [statRating, setStatRating] = useState(settings.statRating);
   const [dcSecret, setDcSecret] = useState(settings.discordClientSecret);
   const [smtpHost, setSmtpHost] = useState(settings.smtpHost);
   const [smtpPort, setSmtpPort] = useState(String(settings.smtpPort));
@@ -496,6 +500,10 @@ export function AdminSettings({
           telegramBotToken: tgToken,
           telegramSecret: tgSecret,
           telegramChatId: tgChat,
+          statOrders,
+          statCustomers,
+          statStartYear,
+          statRating,
           discordClientSecret: dcSecret,
           smtpHost,
           smtpPort,
@@ -984,6 +992,70 @@ export function AdminSettings({
                     onChange={(event) => setDcSecret(event.target.value)}
                     placeholder="•••"
                     className={`${FIELD} font-mono`}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="border-t border-white/5 pt-5">
+              <span className={LABEL}>Số liệu tin cậy — dải số trên phần Đánh giá</span>
+              <p className={HINT}>
+                Để trống ô nào thì lấy số thật từ hệ thống: đơn đã giao = đơn đã thanh toán trên
+                site này, khách hàng = số tài khoản, năm bắt đầu = năm của tài khoản cũ nhất,
+                điểm = trung bình đánh giá đã duyệt. Điền số của site cũ vào để cộng dồn lịch sử.
+                Số hiện dạng làm tròn xuống trăm kèm dấu +, ví dụ 8.400+.
+              </p>
+              <div className="grid gap-3 sm:grid-cols-4">
+                <div>
+                  <label htmlFor="stat-orders" className={LABEL}>
+                    Đơn đã giao
+                  </label>
+                  <input
+                    id="stat-orders"
+                    inputMode="numeric"
+                    value={statOrders}
+                    onChange={(event) => setStatOrders(event.target.value)}
+                    placeholder="vd 402000"
+                    className={FIELD}
+                  />
+                </div>
+                <div>
+                  <label htmlFor="stat-customers" className={LABEL}>
+                    Khách hàng
+                  </label>
+                  <input
+                    id="stat-customers"
+                    inputMode="numeric"
+                    value={statCustomers}
+                    onChange={(event) => setStatCustomers(event.target.value)}
+                    placeholder="tự lấy số tài khoản"
+                    className={FIELD}
+                  />
+                </div>
+                <div>
+                  <label htmlFor="stat-start-year" className={LABEL}>
+                    Năm bắt đầu bán
+                  </label>
+                  <input
+                    id="stat-start-year"
+                    inputMode="numeric"
+                    value={statStartYear}
+                    onChange={(event) => setStatStartYear(event.target.value)}
+                    placeholder="vd 2022"
+                    className={FIELD}
+                  />
+                </div>
+                <div>
+                  <label htmlFor="stat-rating" className={LABEL}>
+                    Điểm đánh giá /5
+                  </label>
+                  <input
+                    id="stat-rating"
+                    inputMode="decimal"
+                    value={statRating}
+                    onChange={(event) => setStatRating(event.target.value)}
+                    placeholder="vd 4.8"
+                    className={FIELD}
                   />
                 </div>
               </div>
