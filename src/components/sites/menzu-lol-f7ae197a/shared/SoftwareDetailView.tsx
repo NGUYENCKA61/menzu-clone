@@ -3,15 +3,13 @@ import { SiteFooter } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/
 import { SiteHeader } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/SiteHeader";
 import { ConnectRailSection } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/ConnectRailSection";
 import { ScrollCta } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/ScrollCta";
-import { Layers } from "lucide-react";
-
 import { docHtmlToPlainText, isHtmlBody } from "@/lib/docHtml";
 import { breadcrumbJsonLd, JsonLd } from "@/lib/seo";
 import { categoryHref, productHref } from "@/lib/routes";
 
 import { Breadcrumb } from "./Breadcrumb";
-import { CardBoundary } from "./CardBoundary";
-import { SoftwareCard, type SoftwareCardView } from "./SoftwareCard";
+import { SimilarSoftwareStrip } from "./SimilarSoftwareStrip";
+import { type SoftwareCardView } from "./SoftwareCard";
 import { SoftwareBuyPanel, type SoftwareDetail } from "./SoftwareBuyPanel";
 import {
   DESCRIPTION_SECTION_ID,
@@ -126,50 +124,16 @@ export function SoftwareDetailView({
             />
           </div>
         </div>
-        {/* The same tiles the category shelf uses, so a reader who got here
-            from search and found the wrong build has the right one a scroll
-            away instead of a click back and a hunt. */}
-        {similar.length > 0 ? (
-          <section
-            aria-labelledby="similar-software-heading"
-            className="max-w-[1320px] mx-auto w-full px-4 lg:px-6 pb-16"
-          >
-            <h2
-              id="similar-software-heading"
-              className="mb-5 flex items-center gap-2.5 text-lg sm:text-xl font-black uppercase tracking-wider text-white"
-            >
-              <Layers size={22} aria-hidden className="shrink-0 text-[var(--menzu-accent)]" />
-              Sản phẩm tương tự
-            </h2>
-            {/* One row, whatever the screen: three tiles across on a desktop,
-                and on anything narrower a strip that scrolls sideways rather
-                than a stack that pushes the footer a screen down. */}
-            <div className="flex gap-4 overflow-x-auto pb-2 snap-x snap-mandatory [scrollbar-width:none] lg:grid lg:grid-cols-3 lg:gap-6 lg:overflow-visible lg:pb-0 xl:gap-8">
-              {similar.map((s) => (
-                <div
-                  key={s.code}
-                  className="w-[82vw] max-w-[360px] shrink-0 snap-start lg:w-auto lg:max-w-none"
-                >
-                  <CardBoundary>
-                    <SoftwareCard
-                      software={
-                        isHtmlBody(s.description)
-                          ? {
-                              ...s,
-                              description: docHtmlToPlainText(
-                                s.description,
-                                180,
-                              ),
-                            }
-                          : s
-                      }
-                    />
-                  </CardBoundary>
-                </div>
-              ))}
-            </div>
-          </section>
-        ) : null}
+        {/* A rich-editor description is HTML; the card prints a sentence, so
+            it gets the prose without the tags — stripped here, on the server,
+            because the strip itself runs in the browser. */}
+        <SimilarSoftwareStrip
+          items={similar.map((s) =>
+            isHtmlBody(s.description)
+              ? { ...s, description: docHtmlToPlainText(s.description, 180) }
+              : s,
+          )}
+        />
         <SiteFooter />
       </main>
 
