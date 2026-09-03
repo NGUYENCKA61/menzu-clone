@@ -1,6 +1,7 @@
 "use client";
 
 import { ArrowRight, Bell, BellOff, X } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 
 import {
@@ -42,6 +43,8 @@ export interface AnnouncementItem {
   /** The callout box at the foot. Both or neither. */
   noticeTitle: string | null;
   noticeBody: string | null;
+  /** An illustration above the body, when the shop attached one. */
+  imageUrl: string | null;
   /** A button that takes the reader straight to what the notice is about —
    *  "Xem ngay" on a refund request lands on the request. Both or neither. */
   ctaLabel: string | null;
@@ -642,6 +645,21 @@ export function AnnouncementModal({
           <p className="mt-1.5 text-[12px] text-neutral-500">
             Cập nhật: {item.updatedLabel}
           </p>
+
+          {item.imageUrl ? (
+            // 16:9 and cropped rather than letterboxed: the shop's pictures
+            // are screenshots of the feature, and a black band above and
+            // below one reads as a broken image.
+            <div className="relative mt-4 aspect-video w-full overflow-hidden rounded-xl border border-white/[0.08] bg-black/40">
+              <Image
+                src={item.imageUrl}
+                alt=""
+                fill
+                sizes="(max-width: 640px) 100vw, 560px"
+                className="object-cover"
+              />
+            </div>
+          ) : null}
 
           {/* whitespace-pre-line keeps the shop's line breaks. It is still
               text: React escapes it, and nothing here renders HTML. */}

@@ -173,6 +173,7 @@ export async function postAnnouncementToTelegram(announcementId: string): Promis
         bullets: true,
         noticeTitle: true,
         noticeBody: true,
+        imageUrl: true,
         ctaHref: true,
         startAt: true,
       },
@@ -196,9 +197,25 @@ export async function postAnnouncementToTelegram(announcementId: string): Promis
         escapeTelegramHtml(notice.noticeBody),
       );
     }
-    lines.push("", `🔗 ${absoluteUrl(notice.ctaHref ?? "/thong-bao")}`);
+    const link = `🔗 ${absoluteUrl(notice.ctaHref ?? "/thong-bao")}`;
+    lines.push("", link);
+    const text = lines.join("\n");
 
-    await sendTelegramMessage(token, chatId, lines.join("\n"));
+    // A picture goes out as a photo with the words in its caption. Telegram
+    // caps a caption at 1024 characters, so a long notice sends the picture
+    // under its title and the full text right behind it.
+    if (notice.imageUrl) {
+      const fits = text.length <= 1000;
+      const sent = await telegramCall(token, "sendPhoto", {
+        chat_id: chatId,
+        photo: absoluteUrl(notice.imageUrl),
+        caption: fits ? text : `${lines[0] ?? ""}\n\n${link}`,
+        parse_mode: "HTML",
+      });
+      if (sent && fits) return;
+    }
+
+    await sendTelegramMessage(token, chatId, text);
   } catch (error) {
     console.error("[telegram] notice post failed:", error);
   }

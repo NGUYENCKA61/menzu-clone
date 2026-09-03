@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import {
@@ -44,6 +45,8 @@ export interface AdminAnnouncementRow {
   bullets: string[];
   noticeTitle: string | null;
   noticeBody: string | null;
+  /** An illustration above the body, or null. */
+  imageUrl: string | null;
   /** Set when the notice owes each reader a parcel, and the name it travels under. */
   giftLabel: string | null;
   /** What the shop decided, crossed with the clock — computed on the server. */
@@ -113,6 +116,7 @@ const EMPTY = {
   bullets: "",
   noticeTitle: "",
   noticeBody: "",
+  imageUrl: "",
   giftLabel: "",
   type: "INFO" as AnnouncementType,
   priority: "NORMAL" as AnnouncementPriority,
@@ -130,6 +134,7 @@ export function AdminAnnouncements({
   const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<{ tone: "ok" | "err"; text: string } | null>(null);
+  const [uploading, setUploading] = useState(false);
 
   const [form, setForm] = useState(EMPTY);
   // The id being edited, or null while the form is creating a new notice.
@@ -208,6 +213,27 @@ export function AdminAnnouncements({
     }
   }
 
+  async function uploadImage(file: File) {
+    setUploading(true);
+    setMsg(null);
+    try {
+      const data = new FormData();
+      data.append("file", file);
+      const res = await fetch("/api/admin/announcements/image", { method: "POST", body: data });
+      const json = (await res.json().catch(() => ({}))) as { url?: string; error?: string };
+      if (!res.ok || !json.url) {
+        setMsg({ tone: "err", text: json.error ?? "Tải ảnh thất bại" });
+        return;
+      }
+      const url = json.url;
+      setForm((current) => ({ ...current, imageUrl: url }));
+    } catch {
+      setMsg({ tone: "err", text: "Không kết nối được máy chủ" });
+    } finally {
+      setUploading(false);
+    }
+  }
+
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
     const payload = {
@@ -217,6 +243,7 @@ export function AdminAnnouncements({
       bullets: parseBullets(form.bullets),
       noticeTitle: form.noticeTitle,
       noticeBody: form.noticeBody,
+      imageUrl: form.imageUrl,
       // Only a targeted gift can owe parcels, and the API says so rather than
       // trusting this — but sending it anywhere else would only earn an error
       // the admin cannot act on from the form they are looking at.
@@ -250,6 +277,7 @@ export function AdminAnnouncements({
       bullets: row.bullets.join("\n"),
       noticeTitle: row.noticeTitle ?? "",
       noticeBody: row.noticeBody ?? "",
+      imageUrl: row.imageUrl ?? "",
       giftLabel: row.giftLabel ?? "",
       type: row.type,
       priority: row.priority,
@@ -355,6 +383,45 @@ export function AdminAnnouncements({
             placeholder={"Vui lòng nhập đúng nội dung chuyển khoản được cung cấp.\nKhông chỉnh sửa nội dung chuyển khoản khi thực hiện thanh toán."}
             className={`${FIELD} resize-y`}
           />
+        </div>
+
+        <div>
+          <label className={LABEL}>
+            Ảnh minh họa
+            <span className="ml-2 font-bold normal-case tracking-normal text-neutral-600">
+              PNG, JPG hoặc WebP, tối đa 5MB · để trống thì không có ảnh
+            </span>
+          </label>
+          {form.imageUrl ? (
+            <div className="relative mb-2 aspect-video w-full max-w-md overflow-hidden rounded-lg border border-white/10 bg-black/40">
+              <Image src={form.imageUrl} alt="" fill sizes="448px" className="object-cover" />
+            </div>
+          ) : null}
+          <div className="flex flex-wrap items-center gap-2">
+            <label className="inline-flex h-10 cursor-pointer items-center rounded-lg border border-white/10 bg-white/[0.03] px-4 text-[13px] font-medium text-neutral-200 transition-colors hover:bg-white/[0.06]">
+              {uploading ? "Đang tải…" : form.imageUrl ? "Đổi ảnh" : "Chọn ảnh"}
+              <input
+                type="file"
+                accept="image/png,image/jpeg,image/webp"
+                className="hidden"
+                disabled={uploading}
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) void uploadImage(file);
+                  e.target.value = "";
+                }}
+              />
+            </label>
+            {form.imageUrl ? (
+              <button
+                type="button"
+                onClick={() => setForm({ ...form, imageUrl: "" })}
+                className="h-10 rounded-lg px-3 text-[13px] font-medium text-neutral-400 transition-colors hover:text-white"
+              >
+                Bỏ ảnh
+              </button>
+            ) : null}
+          </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">

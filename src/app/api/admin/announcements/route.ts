@@ -51,9 +51,28 @@ interface Payload {
   bullets?: unknown;
   noticeTitle?: string | null;
   noticeBody?: string | null;
+  imageUrl?: string | null;
   startAt?: string | null;
   endAt?: string | null;
   action?: string;
+}
+
+/**
+ * The illustration's address, or null for none. Only what the desk's own
+ * uploader wrote is accepted — the same rule as ctaHref: a field that took
+ * any URL would be a picture the desk could be talked into pointing anywhere.
+ */
+function readImageUrl(
+  value: unknown,
+): { ok: true; url: string | null } | { ok: false; error: string } {
+  if (value === undefined || value === null) return { ok: true, url: null };
+  if (typeof value !== "string") return { ok: false, error: "Ảnh không hợp lệ" };
+  const url = value.trim();
+  if (!url) return { ok: true, url: null };
+  if (!/^\/uploads\/announcements\/notice-[a-f0-9]{16}\.webp$/.test(url)) {
+    return { ok: false, error: "Ảnh phải được tải lên bằng nút Chọn ảnh" };
+  }
+  return { ok: true, url };
 }
 
 /** Trims a list of bullet lines down to what the model will hold. */
@@ -176,6 +195,8 @@ export async function POST(request: Request) {
 
   const notice = readNoticeBox(body);
   if (!notice.ok) return NextResponse.json({ error: notice.error }, { status: 400 });
+  const image = readImageUrl(body?.imageUrl);
+  if (!image.ok) return NextResponse.json({ error: image.error }, { status: 400 });
 
   // A gift that has to travel. The flag is the name of the thing being sent:
   // set it and every reader named on the notice gets an address form and a
@@ -206,6 +227,7 @@ export async function POST(request: Request) {
         : {}),
       noticeTitle: notice.title,
       noticeBody: notice.body,
+      imageUrl: image.url,
       startAt,
       endAt,
       recipients: {
@@ -318,6 +340,12 @@ export async function PATCH(request: Request) {
     data.noticeBody = notice.body;
   }
 
+  if (body?.imageUrl !== undefined) {
+    const image = readImageUrl(body.imageUrl);
+    if (!image.ok) return NextResponse.json({ error: image.error }, { status: 400 });
+    data.imageUrl = image.url;
+  }
+
   // Addressing is replaced wholesale rather than merged: the form sends the
   // list the admin is looking at, and merging would make removing somebody
   // impossible.
@@ -372,7 +400,8 @@ export async function PATCH(request: Request) {
     data.title !== undefined ||
     data.body !== undefined ||
     data.bullets !== undefined ||
-    data.noticeTitle !== undefined
+    data.noticeTitle !== undefined ||
+    data.imageUrl !== undefined
   ) {
     data.revision = current.revision + 1;
   }

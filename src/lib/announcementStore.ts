@@ -21,6 +21,8 @@ export interface AnnouncementRow {
   bullets: string[];
   noticeTitle: string | null;
   noticeBody: string | null;
+  /** An illustration above the body, or null. A path under /uploads. */
+  imageUrl: string | null;
   /** A button on the notice, and the path it opens. Both or neither. */
   ctaLabel: string | null;
   ctaHref: string | null;
@@ -48,6 +50,7 @@ interface RawRow {
   bullets: string[];
   noticeTitle: string | null;
   noticeBody: string | null;
+  imageUrl: string | null;
   ctaLabel: string | null;
   ctaHref: string | null;
   silent: boolean;

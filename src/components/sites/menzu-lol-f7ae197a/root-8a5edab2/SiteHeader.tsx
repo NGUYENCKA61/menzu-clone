@@ -39,6 +39,7 @@ export async function SiteHeader() {
         bullets: a.bullets,
         noticeTitle: a.noticeTitle,
         noticeBody: a.noticeBody,
+        imageUrl: a.imageUrl,
         ctaLabel: a.ctaLabel,
         ctaHref: a.ctaHref,
         type: a.type,

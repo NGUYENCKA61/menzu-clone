@@ -58,6 +58,7 @@ export default async function AdminAnnouncementsPage() {
           bullets: row.bullets,
           noticeTitle: row.noticeTitle,
           noticeBody: row.noticeBody,
+          imageUrl: row.imageUrl,
           giftLabel: row.giftLabel,
           // Derived here rather than in the browser, so a stale tab cannot
           // report a notice as running after its window closed.

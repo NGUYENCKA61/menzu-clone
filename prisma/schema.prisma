@@ -1477,6 +1477,11 @@ model Announcement {
   noticeTitle String?
   noticeBody  String?
 
+  /// An illustration above the body: a screenshot of the feature the notice
+  /// is about. A path under /uploads written by the desk's own uploader, so
+  /// the same rule as ctaHref keeps it on this site.
+  imageUrl String?
+
   /// Keeps the notice out of the modal that opens by itself. It still lands
   /// in the bell, still counts as unread, still opens when pressed — it just
   /// does not interrupt. A spin win is the case this exists for: the card that

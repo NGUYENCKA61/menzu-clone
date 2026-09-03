@@ -330,6 +330,18 @@ export default async function AnnouncementsPage({
                 {item.title}
               </h2>
 
+              {item.imageUrl ? (
+                <div className="relative mt-3 aspect-video w-full overflow-hidden rounded-xl border border-white/[0.08] bg-black/40">
+                  <Image
+                    src={item.imageUrl}
+                    alt=""
+                    fill
+                    sizes="(max-width: 768px) 100vw, 720px"
+                    className="object-cover"
+                  />
+                </div>
+              ) : null}
+
               {/* Plain text, rendered as text — the same rule the modal keeps.
                   whitespace-pre-line preserves the shop's own line breaks. */}
               <p className="mt-2 whitespace-pre-line text-[13.5px] leading-relaxed text-neutral-300">
