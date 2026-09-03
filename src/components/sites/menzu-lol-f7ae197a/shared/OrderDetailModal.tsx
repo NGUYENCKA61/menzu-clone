@@ -663,32 +663,38 @@ export function OrderDetailModal({
                         // like the single account's.
                         <div className="flex flex-col gap-4">
                           {order.keys.length > 0 ? (
-                            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+                            <div className="flex flex-col gap-3">
                               {order.keys.map((key, index) => {
                                 const at = key.indexOf("|");
                                 const username = at < 0 ? key : key.slice(0, at);
                                 const password = at < 0 ? "" : key.slice(at + 1);
                                 return (
+                                  // One row per sign-in: name and password side
+                                  // by side, as the single account shows its
+                                  // own, with the ordinal above when there are
+                                  // several.
                                   <div
                                     key={`${index}-${key}`}
-                                    className="flex flex-col gap-2 rounded-xl border border-white/[0.06] bg-white/[0.02] p-3"
+                                    className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-3"
                                   >
                                     {order.keys.length > 1 ? (
-                                      <span className="text-[10px] font-black uppercase tracking-widest text-neutral-500">
+                                      <span className="mb-2 block text-[10px] font-black uppercase tracking-widest text-neutral-500">
                                         Tài khoản {index + 1}
                                       </span>
                                     ) : null}
-                                    <HandoverBox
-                                      icon={<User className="h-3 w-3" />}
-                                      label="Tài khoản"
-                                      value={username}
-                                    />
-                                    <HandoverBox
-                                      icon={<Lock className="h-3 w-3" />}
-                                      label="Mật khẩu"
-                                      value={password}
-                                      secret
-                                    />
+                                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                                      <HandoverBox
+                                        icon={<User className="h-3 w-3" />}
+                                        label="Tài khoản"
+                                        value={username}
+                                      />
+                                      <HandoverBox
+                                        icon={<Lock className="h-3 w-3" />}
+                                        label="Mật khẩu"
+                                        value={password}
+                                        secret
+                                      />
+                                    </div>
                                   </div>
                                 );
                               })}
