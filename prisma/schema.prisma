@@ -469,6 +469,7 @@ model Category {
   /// with it; it never takes the group.
   groups    GroupCategory[]
   vouchers  Voucher[]
+  statusEvents SoftwareStatusEvent[]
 
   @@map("categories")
 }
@@ -1582,6 +1583,15 @@ model SoftwareStatusEvent {
   /// Kept so a surprising change can be traced back to whoever sent it.
   source    String?
 
+  /// Set when the change was made to a whole category at once: every tool
+  /// in it got its own row (the product page keeps its own history), and the
+  /// rows share this id so the public history and the bell can show the
+  /// batch as one line, "ca danh muc", instead of one per tool.
+  batchId    String?
+  categoryId String?
+  category   Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  @@index([batchId])
   @@index([productId, createdAt])
   @@index([createdAt])
   @@map("software_status_events")

@@ -1,5 +1,7 @@
 import "server-only";
 
+import { randomBytes } from "node:crypto";
+
 import { BODY_MAX, TITLE_MAX, TYPE_LABELS, type AnnouncementType } from "@/lib/announcements";
 import { db } from "@/lib/db";
 import { SOFTWARE_STATUS, type SoftwareStatusValue } from "@/lib/softwareStatus";
@@ -448,10 +450,22 @@ export async function setCategoryStatus(
   });
   const stale = tools.filter((tool) => tool.softwareStatus !== status).map((tool) => tool.id);
   if (stale.length > 0) {
+    // One id across the batch: the public history and the bell fold these
+    // rows into a single "cả danh mục" line, while each product page keeps
+    // its own row.
+    const batchId = randomBytes(12).toString("hex");
     await db.$transaction([
       db.product.updateMany({ where: { id: { in: stale } }, data: { softwareStatus: status } }),
       db.softwareStatusEvent.createMany({
-        data: stale.map((productId) => ({ productId, status, note, imageUrl, source: "telegram" })),
+        data: stale.map((productId) => ({
+          productId,
+          status,
+          note,
+          imageUrl,
+          source: "telegram",
+          batchId,
+          categoryId,
+        })),
       }),
     ]);
   }

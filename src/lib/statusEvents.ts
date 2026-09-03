@@ -1,7 +1,7 @@
 import "server-only";
 
 import { db } from "@/lib/db";
-import { productHref } from "@/lib/routes";
+import { categoryHref, productHref } from "@/lib/routes";
 import {
   readSoftwareStatus,
   type SoftwareStatusValue,
@@ -21,6 +21,13 @@ export interface StatusEventRow {
   id: string;
   status: SoftwareStatusValue;
   at: Date;
+  /**
+   * One tool, or a whole category changed at once. A category row stands
+   * for every tool's row in that batch: its name and link are the
+   * category's, and `toolCount` says how many tools moved.
+   */
+  scope: "tool" | "category";
+  toolCount: number;
   productId: string;
   productCode: string;
   productName: string;
@@ -55,6 +62,8 @@ const EVENT_SELECT = {
   imageUrl: true,
   note: true,
   source: true,
+  batchId: true,
+  category: { select: { name: true, slug: true } },
   product: {
     select: {
       id: true,
@@ -73,6 +82,8 @@ type RawEvent = {
   imageUrl: string | null;
   note: string | null;
   source: string | null;
+  batchId: string | null;
+  category: { name: string; slug: string } | null;
   product: {
     id: string;
     code: string;
@@ -89,6 +100,8 @@ function toRow(e: RawEvent): StatusEventRow | null {
     id: e.id,
     status,
     at: e.createdAt,
+    scope: "tool",
+    toolCount: 1,
     productId: e.product.id,
     productCode: e.product.code,
     productName: e.product.name ?? e.product.code,
@@ -100,6 +113,47 @@ function toRow(e: RawEvent): StatusEventRow | null {
   };
 }
 
+/**
+ * The rows of one batch folded into a single category row.
+ *
+ * A game patched flips every tool on its shelf in one go, and the desk
+ * announces it once; the history should read the same way. The rows still
+ * exist one per tool — the product page shows its own — but here they fold
+ * into "HACK CS2 · cả danh mục (5 tool)", linked to the shelf, keyed by the
+ * batch so a browser's dismissal of the bell row sticks.
+ */
+function collapseBatches(rows: RawEvent[]): StatusEventRow[] {
+  const out: StatusEventRow[] = [];
+  const seen = new Map<string, StatusEventRow>();
+  for (const raw of rows) {
+    if (!raw.batchId || !raw.category) {
+      const row = toRow(raw);
+      if (row) out.push(row);
+      continue;
+    }
+    const open = seen.get(raw.batchId);
+    if (open) {
+      open.toolCount += 1;
+      open.productName = `${raw.category.name} · cả danh mục (${open.toolCount} tool)`;
+      continue;
+    }
+    const first = toRow(raw);
+    if (!first) continue;
+    const row: StatusEventRow = {
+      ...first,
+      id: raw.batchId,
+      scope: "category",
+      toolCount: 1,
+      productName: `${raw.category.name} · cả danh mục (1 tool)`,
+      productHref: categoryHref(raw.category.slug),
+      categoryName: raw.category.name,
+    };
+    seen.set(raw.batchId, row);
+    out.push(row);
+  }
+  return out;
+}
+
 /** Every live tool's history, newest first — the public tab. */
 export async function listStatusEvents(take = 60): Promise<StatusEventRow[]> {
   const rows = await db.softwareStatusEvent.findMany({
@@ -108,7 +162,7 @@ export async function listStatusEvents(take = 60): Promise<StatusEventRow[]> {
     take,
     select: EVENT_SELECT,
   });
-  return rows.map(toRow).filter((r): r is StatusEventRow => r !== null);
+  return collapseBatches(rows);
 }
 
 /** History of the tools this reader follows — what the bell shows. */
@@ -124,7 +178,7 @@ export async function subscribedStatusEvents(
     take,
     select: EVENT_SELECT,
   });
-  return rows.map(toRow).filter((r): r is StatusEventRow => r !== null);
+  return collapseBatches(rows);
 }
 
 /** The tools this reader follows, by product id. */

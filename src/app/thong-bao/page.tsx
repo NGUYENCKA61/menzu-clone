@@ -243,7 +243,7 @@ export default async function AnnouncementsPage({
                                 {state.label}
                               </span>
                               <span className="text-[11px] font-semibold text-neutral-500">
-                                {event.categoryName}
+                                {event.scope === "category" ? "Cả danh mục" : event.categoryName}
                               </span>
                             </div>
                             <p className="mt-1.5 text-[13.5px] leading-relaxed text-neutral-300">
