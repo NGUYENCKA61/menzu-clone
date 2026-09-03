@@ -199,10 +199,15 @@ export function SiteHeaderClient({
         }`}
       >
         <div className="max-w-[1320px] w-full mx-auto px-4 lg:px-6 h-full flex items-center justify-between">
-          <div className="lg:hidden flex items-center h-full relative">
-            <SiteLink href={hrefFor(QUICK_LINKS[0])} className={QUICK_LINK_CLASS}>
-              {QUICK_LINKS[0]}
-            </SiteLink>
+          {/* On a phone the strip used to show the first link alone, as the
+              captured site did; the shop read that as the rest being lost.
+              All five, in a row that scrolls sideways under the thumb. */}
+          <div className="lg:hidden flex h-full min-w-0 items-center gap-5 overflow-x-auto whitespace-nowrap [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            {QUICK_LINKS.map((link) => (
+              <SiteLink key={link} href={hrefFor(link)} className={QUICK_LINK_CLASS}>
+                {link}
+              </SiteLink>
+            ))}
           </div>
 
           <div className="hidden lg:flex items-center gap-5 h-full">
