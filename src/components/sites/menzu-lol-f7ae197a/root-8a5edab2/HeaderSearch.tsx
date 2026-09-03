@@ -125,7 +125,7 @@ export function HeaderSearch() {
       <div
         className={`${
           open ? "absolute right-0 top-11 z-50 w-[min(92vw,22rem)]" : "hidden"
-        } md:relative md:static md:block md:w-36 md:transition-[width] md:duration-200 md:focus-within:w-60 lg:w-40 lg:focus-within:w-64`}
+        } md:relative md:static md:block md:w-48 lg:w-60 xl:w-72`}
       >
         <label className="relative flex h-9 items-center rounded-xl border border-white/10 bg-white/5 text-neutral-300 transition-colors focus-within:border-white/25 focus-within:bg-white/[0.08]">
           <Search size={15} aria-hidden className="ml-3 shrink-0 text-neutral-500" />
