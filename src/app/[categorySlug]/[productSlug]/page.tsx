@@ -8,6 +8,7 @@ import { docHtmlToPlainText, isHtmlBody } from "@/lib/docHtml";
 import {
   getAccountDetail,
   getSoftwareDetail,
+  listSimilarSoftware,
   hasPaidOrderFor,
   resolveProduct,
 } from "@/lib/queries";
@@ -137,12 +138,15 @@ export default async function ProductPage({ params, searchParams }: PageProps) {
     // the view receives rather than hidden by it, and the HTML a browser gets
     // never carries a guide its reader has not paid for.
     const user = await getCurrentUser();
-    const [bought, statusSubscribed] = user
-      ? await Promise.all([
-          hasPaidOrderFor(user.id, software.code),
-          isStatusSubscribed(user.id, software.code),
-        ])
-      : [false, null];
+    const [[bought, statusSubscribed], similar] = await Promise.all([
+      user
+        ? Promise.all([
+            hasPaidOrderFor(user.id, software.code),
+            isStatusSubscribed(user.id, software.code),
+          ])
+        : Promise.resolve([false, null] as const),
+      listSimilarSoftware(software.code, software.categorySlug),
+    ]);
     const setupGuideAccess = !user ? "guest" : bought ? "unlocked" : "locked";
     const shown =
       setupGuideAccess === "unlocked"
@@ -175,6 +179,7 @@ export default async function ProductPage({ params, searchParams }: PageProps) {
           initialPackageId={pkg}
           setupGuideAccess={setupGuideAccess}
           statusSubscribed={statusSubscribed}
+          similar={similar}
         />
       </>
     );

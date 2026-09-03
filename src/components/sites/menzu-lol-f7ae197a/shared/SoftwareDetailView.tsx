@@ -8,6 +8,8 @@ import { breadcrumbJsonLd, JsonLd } from "@/lib/seo";
 import { categoryHref, productHref } from "@/lib/routes";
 
 import { Breadcrumb } from "./Breadcrumb";
+import { CardBoundary } from "./CardBoundary";
+import { SoftwareCard, type SoftwareCardView } from "./SoftwareCard";
 import { SoftwareBuyPanel, type SoftwareDetail } from "./SoftwareBuyPanel";
 import {
   DESCRIPTION_SECTION_ID,
@@ -29,6 +31,7 @@ export function SoftwareDetailView({
   initialPackageId,
   setupGuideAccess,
   statusSubscribed,
+  similar,
 }: {
   software: SoftwareDetail;
   initialPackageId?: string;
@@ -36,6 +39,8 @@ export function SoftwareDetailView({
   setupGuideAccess: SetupGuideAccess;
   /** Following this tool's status; null for a guest. */
   statusSubscribed: boolean | null;
+  /** Other tools for the row at the foot of the page; empty draws no row. */
+  similar: SoftwareCardView[];
 }) {
   // One stored field, two voices: the rich HTML (if the admin wrote one) goes
   // to the description section in full; every place that prints a sentence —
@@ -110,6 +115,35 @@ export function SoftwareDetailView({
             />
           </div>
         </div>
+        {/* The same tiles the category shelf uses, so a reader who got here
+            from search and found the wrong build has the right one a scroll
+            away instead of a click back and a hunt. */}
+        {similar.length > 0 ? (
+          <section
+            aria-labelledby="similar-software-heading"
+            className="max-w-[1320px] mx-auto w-full px-4 lg:px-6 pb-16"
+          >
+            <h2
+              id="similar-software-heading"
+              className="mb-5 text-lg sm:text-xl font-black uppercase tracking-wider text-white"
+            >
+              Sản phẩm tương tự
+            </h2>
+            <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:gap-8">
+              {similar.map((s) => (
+                <CardBoundary key={s.code}>
+                  <SoftwareCard
+                    software={
+                      isHtmlBody(s.description)
+                        ? { ...s, description: docHtmlToPlainText(s.description, 180) }
+                        : s
+                    }
+                  />
+                </CardBoundary>
+              ))}
+            </div>
+          </section>
+        ) : null}
         <SiteFooter />
       </main>
 

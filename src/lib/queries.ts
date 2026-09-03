@@ -1456,3 +1456,62 @@ export async function listTopUps(take = 200): Promise<AdminTopUpRow[]> {
     createdAt: t.createdAt,
   }));
 }
+
+/**
+ * Other tools to show under one: the same shelf first, newest first, and when
+ * the shelf is thin, tools from the neighbouring shelves fill the row. Only
+ * what is on sale — a tile for a tool that cannot be bought is a dead end at
+ * the foot of a page whose reader was ready to buy.
+ */
+export async function listSimilarSoftware(
+  code: string,
+  categorySlug: string,
+  take = 6,
+): Promise<SoftwareCardView[]> {
+  const select = {
+    code: true,
+    slug: true,
+    name: true,
+    imageUrl: true,
+    description: true,
+    softwareStatus: true,
+    downloadUrl: true,
+    category: { select: { slug: true, name: true } },
+    packages: {
+      orderBy: { price: "asc" as const },
+      select: { id: true, label: true, price: true },
+    },
+  };
+  const base = {
+    productType: "SOFTWARE_GAME" as const,
+    status: "AVAILABLE" as const,
+    deletedAt: null,
+    code: { not: code },
+  };
+  const own = await db.product.findMany({
+    where: { ...base, category: { slug: categorySlug } },
+    orderBy: { createdAt: "desc" },
+    take,
+    select,
+  });
+  const rest =
+    own.length < take
+      ? await db.product.findMany({
+          where: { ...base, category: { slug: { not: categorySlug } } },
+          orderBy: { createdAt: "desc" },
+          take: take - own.length,
+          select,
+        })
+      : [];
+  return [...own, ...rest].map((s) => ({
+    code: s.code,
+    href: productHref(s.category.slug, s.slug),
+    name: s.name ?? s.code,
+    categoryName: s.category.name,
+    imageUrl: s.imageUrl,
+    description: s.description ?? "",
+    status: s.softwareStatus,
+    packages: s.packages.map((p) => ({ id: p.id, label: p.label, price: Number(p.price) })),
+    downloadUrl: s.downloadUrl,
+  }));
+}
