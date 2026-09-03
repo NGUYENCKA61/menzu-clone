@@ -9,10 +9,19 @@ import { getShopSettings } from "@/lib/settingsStore";
 import { SOFTWARE_STATUS } from "@/lib/softwareStatus";
 import { parseStatusCommand } from "@/lib/statusCommand";
 import {
+  categoryScreen,
+  listScreenText,
+  parseCallback,
+  setStatus,
+  toolScreen,
+  toolsScreen,
+  type MenuScreen,
+} from "@/lib/telegramMenu";
+import {
   escapeTelegramHtml,
   postStatusToTelegram,
   sendTelegramMessage,
-  STATUS_EMOJI,
+  telegramCall,
 } from "@/lib/telegramNotify";
 
 /**
@@ -56,11 +65,19 @@ interface TelegramMessage {
   photo?: TelegramPhoto[];
 }
 
+interface TelegramCallback {
+  id: string;
+  from?: { id?: number | string };
+  message?: { chat?: { id?: number | string; type?: string }; message_id?: number };
+  data?: string;
+}
+
 interface TelegramUpdate {
   message?: TelegramMessage;
   channel_post?: TelegramMessage;
   edited_message?: TelegramMessage;
   edited_channel_post?: TelegramMessage;
+  callback_query?: TelegramCallback;
 }
 
 const ok = (body: Record<string, unknown>) => NextResponse.json({ ok: true, ...body });
@@ -104,40 +121,101 @@ function helpText(): string {
     "🔴 die, ban, dính, phát hiện, detected",
     "🟡 update, fix, bảo trì, cập nhật, đang cập nhật",
     "",
-    "Nhắn ở đây hoặc đăng trong kênh đều được; đổi xong bot tự đăng lên kênh. /list để xem mã tool.",
+    "Nhắn ở đây hoặc đăng trong kênh đều được; đổi xong bot tự đăng lên kênh.",
+    "Không muốn gõ: /list mở menu bấm chọn danh mục → tool → trạng thái.",
   ].join("\n");
 }
 
+/** A screen as a fresh message, buttons under it. */
+function showScreen(token: string, chatId: string, screen: MenuScreen): Promise<boolean> {
+  return telegramCall(token, "sendMessage", {
+    chat_id: chatId,
+    text: screen.text,
+    parse_mode: "HTML",
+    reply_markup: { inline_keyboard: screen.keyboard },
+  });
+}
+
 /**
- * What the bot says to /list: every tool with its state, in chunks that fit
- * Telegram's 4096-character message cap.
+ * A tap on one of the menu's buttons: redraw the message as the next screen,
+ * and for a state button, make the change first — recorded and announced
+ * exactly as a typed command would be.
+ *
+ * Every tap is answered, even a refused one: until answerCallbackQuery
+ * arrives the tapped button shows a spinner, and a spinner that never stops
+ * reads as a dead bot.
  */
-async function listText(): Promise<string[]> {
-  const tools = await db.product.findMany({
-    where: { productType: "SOFTWARE_GAME", deletedAt: null },
-    select: { code: true, name: true, softwareStatus: true },
-    orderBy: { code: "asc" },
-  });
-  if (tools.length === 0) return ["Chưa có tool nào trong shop."];
+async function handleCallback(token: string, channelId: string, query: TelegramCallback) {
+  const answer = (text?: string) =>
+    telegramCall(token, "answerCallbackQuery", {
+      callback_query_id: query.id,
+      ...(text ? { text } : {}),
+    });
 
-  const lines = tools.map((tool) => {
-    const name = (tool.name ?? "").trim();
-    const short = name.length > 42 ? `${name.slice(0, 41)}…` : name;
-    const dot = tool.softwareStatus ? STATUS_EMOJI[tool.softwareStatus] : "⚪";
-    return `${dot} <code>${escapeTelegramHtml(tool.code)}</code> ${escapeTelegramHtml(short)}`;
-  });
-
-  const chunks: string[] = [];
-  let current = "<b>Mã tool và trạng thái</b> · 🟢 an toàn · 🔴 phát hiện · 🟡 cập nhật\n";
-  for (const line of lines) {
-    if (current.length + line.length + 1 > 3800) {
-      chunks.push(current);
-      current = "";
-    }
-    current += `\n${line}`;
+  const userId = query.from?.id;
+  const chat = query.message?.chat;
+  const messageId = query.message?.message_id;
+  if (userId === undefined || chat?.id === undefined || messageId === undefined) {
+    await answer();
+    return ok({ ignored: "callback thiếu dữ liệu" });
   }
-  chunks.push(current);
-  return chunks;
+  // The menu is only ever sent to a private chat, but a forwarded copy of
+  // it would carry the buttons along — so the tap is checked, not the chat.
+  if (chat.type !== "private" || !(await isChannelAdmin(token, channelId, userId))) {
+    await answer("Chỉ admin của kênh dùng được menu này.");
+    return ok({ ignored: "không phải admin kênh" });
+  }
+
+  const action = parseCallback(query.data);
+  if (!action) {
+    await answer();
+    return ok({ ignored: "callback lạ" });
+  }
+
+  let screen: MenuScreen | null = null;
+  let toast: string | undefined;
+  let redraw = true;
+  switch (action.kind) {
+    case "cats":
+      screen = await categoryScreen();
+      break;
+    case "cat":
+      screen = await toolsScreen(action.id);
+      break;
+    case "tool":
+      screen = await toolScreen(action.id);
+      break;
+    case "set": {
+      const result = await setStatus(action.id, action.status);
+      if (result === "changed") {
+        await postStatusToTelegram(action.id, action.status, null, null);
+        toast = `Đã đổi sang ${SOFTWARE_STATUS[action.status].label}, đã đăng lên kênh.`;
+      } else if (result === "same") {
+        toast = "Đang ở trạng thái đó rồi.";
+        // Nothing changed, so the screen is already right; an edit to the
+        // same text is one Telegram refuses, and refusals are logged.
+        redraw = false;
+      }
+      screen = await toolScreen(action.id);
+      break;
+    }
+  }
+
+  if (!screen) {
+    toast = "Mục này không còn nữa.";
+    screen = await categoryScreen();
+  }
+  if (redraw) {
+    await telegramCall(token, "editMessageText", {
+      chat_id: chat.id,
+      message_id: messageId,
+      text: screen.text,
+      parse_mode: "HTML",
+      reply_markup: { inline_keyboard: screen.keyboard },
+    });
+  }
+  await answer(toast);
+  return ok({ answered: action.kind });
 }
 
 /**
@@ -206,6 +284,8 @@ export async function POST(request: Request) {
   }
 
   const update = (await request.json().catch(() => null)) as TelegramUpdate | null;
+  if (update?.callback_query) return handleCallback(token, chatId, update.callback_query);
+
   const message =
     update?.message ??
     update?.channel_post ??
@@ -240,7 +320,11 @@ export async function POST(request: Request) {
     return ok({ answered: "help" });
   }
   if (slash === "list") {
-    for (const chunk of await listText()) await reply(chunk);
+    if (fromChannel) {
+      for (const chunk of await listScreenText()) await reply(chunk);
+    } else {
+      await showScreen(token, replyTo, await categoryScreen());
+    }
     return ok({ answered: "list" });
   }
 
