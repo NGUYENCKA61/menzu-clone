@@ -135,7 +135,7 @@ export function ReviewsSection({
         ))}
       </div>
 
-      <div className="mt-6 flex justify-center">
+      <div className="mt-6 flex justify-end">
         <Link
           href="/feedback"
           className="group inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-neutral-400 transition-colors hover:text-white"
