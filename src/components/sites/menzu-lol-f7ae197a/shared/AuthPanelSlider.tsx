@@ -74,9 +74,12 @@ export function AuthPanelSlider({
                 src={src}
                 alt=""
                 fill
-                // Only the first is worth blocking the paint for; the rest
-                // arrive long before their turn comes round.
-                priority={i === 0}
+                // Never `priority`: that put a preload for the first picture
+                // into every login and register response, and on a phone the
+                // whole panel is display:none, so the download was paid for a
+                // picture nobody saw. Lazy, the browser fetches it only where
+                // the panel is on screen, which on a desktop is as soon as
+                // layout settles.
                 sizes="50vw"
                 // Above the site's default 75. This is one large picture
                 // filling half the card, held still for seconds at a time and

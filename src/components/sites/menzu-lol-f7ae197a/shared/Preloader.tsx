@@ -13,14 +13,25 @@ import { useEffect, useState } from "react";
 let hasCompleted = false;
 
 /**
+ * Longest any visitor sees the cover, counted from navigation start. Past
+ * this the page is usable enough that hiding it costs more than it hides.
+ */
+const MAX_COVER_MS = 2500;
+
+/**
  * Full-screen cover for the initial page load: dark ground, the shop's brand
  * centered, a red ring and ĐANG TẢI… under it.
  *
  * Server-rendered visible, so it is on screen from the first paint — before
- * any JS arrives, which is the whole point of a preloader. It leaves on the
- * window load event (all images, fonts and chunks in), with a hard cap so a
- * hung third-party resource cannot hold the shop hostage, and a noscript
+ * any JS arrives, which is the whole point of a preloader. It leaves once the
+ * document is parsed and the web fonts are in, with a hard cap counted from
+ * navigation start so nothing can hold the shop hostage, and a noscript
  * escape so a browser without JS is not left staring at it forever.
+ *
+ * Not on window load: that waits for every image and the hero video, and on
+ * a phone it kept the cover up for seconds over a page that was already
+ * readable underneath. The one thing worth waiting for is the fonts, so the
+ * wordmark does not flash from fallback to brand face as the cover lifts.
  */
 export function Preloader({ brand }: { brand: { name: string } }) {
   const [phase, setPhase] = useState<"covering" | "fading" | "gone">(
@@ -30,16 +41,18 @@ export function Preloader({ brand }: { brand: { name: string } }) {
   useEffect(() => {
     if (phase === "covering") {
       const begin = () => setPhase("fading");
-      if (document.readyState === "complete") {
-        begin();
-        return;
-      }
-      window.addEventListener("load", begin);
-      // Load can hang on one slow resource; past this point the page is
-      // usable enough that hiding it behind a spinner costs more than it hides.
-      const cap = window.setTimeout(begin, 6000);
+      const whenFontsIn = () => {
+        // Guarded: an old WebView without the Font Loading API must still
+        // get its page back, and the cap below covers it either way.
+        const fonts = (document as { fonts?: FontFaceSet }).fonts;
+        if (fonts) fonts.ready.then(begin, begin);
+        else begin();
+      };
+      if (document.readyState !== "loading") whenFontsIn();
+      else document.addEventListener("DOMContentLoaded", whenFontsIn);
+      const cap = window.setTimeout(begin, Math.max(0, MAX_COVER_MS - performance.now()));
       return () => {
-        window.removeEventListener("load", begin);
+        document.removeEventListener("DOMContentLoaded", whenFontsIn);
         window.clearTimeout(cap);
       };
     }

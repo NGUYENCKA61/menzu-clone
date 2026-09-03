@@ -113,9 +113,11 @@ ENV HOSTNAME="0.0.0.0"
 # Copy production assets
 COPY --from=builder --chown=node:node /app/public ./public
 
-# Set the correct permission for prerender cache
-RUN mkdir .next
-RUN chown node:node .next
+# .next must be writable by the runtime user (prerender cache), and the image
+# optimiser's cache directory has to exist before the named volume in
+# docker-compose mounts over it, so the volume inherits node's ownership
+# instead of root's.
+RUN mkdir -p .next/cache/images && chown -R node:node .next
 
 # Automatically leverage output traces to reduce image size
 # https://nextjs.org/docs/advanced-features/output-file-tracing

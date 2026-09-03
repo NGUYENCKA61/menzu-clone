@@ -9,10 +9,15 @@ const run = promisify(execFile);
 
 /**
  * At or under this video bitrate the file is already lean and a re-encode
- * would only trade quality for nothing; it gets remuxed instead — audio
- * stripped, moov atom moved up front — which is lossless and near-instant.
+ * would only trade quality for nothing; it gets remuxed instead (audio
+ * stripped, moov atom moved up front), which is lossless and near-instant.
+ *
+ * 1.2 Mbps, not more: the hero autoplays on every visit to the home page,
+ * phones on mobile data included, and at 960 wide that is already generous.
+ * The old 5 Mbps ceiling waved a 27 MB file through as "lean", and it was the
+ * largest thing on the site by a factor of ten.
  */
-const LEAN_BPS = 5_000_000;
+const LEAN_BPS = 1_200_000;
 
 /**
  * The encoder holds the upload request open while it works, so it gets a
@@ -67,8 +72,8 @@ async function probeVideo(path: string): Promise<ProbeInfo | null> {
  * Turns whatever the admin uploaded into the video the visitors should get.
  *
  * Three outcomes, in order of preference:
- * - "encoded"  — heavy input, re-encoded to H.264 CRF 28, audio stripped
- *   (the hero always plays muted), capped at 1920 wide, faststart so playback
+ * - "encoded"  — heavy input, re-encoded to H.264 CRF 30 under a 1 Mbps cap, audio
+ *   stripped (the hero always plays muted), 960 wide at most, faststart so playback
  *   begins before the download finishes;
  * - "remuxed"  — input already lean H.264, kept bit-for-bit, just cleaned up
  *   the same way, losslessly;
@@ -114,14 +119,22 @@ export async function prepareHeroVideo(
           "-c:v",
           "libx264",
           "-crf",
-          "28",
+          "30",
           "-preset",
           "medium",
+          // A rate ceiling on top of CRF: CRF alone lets a busy, grainy clip
+          // balloon; capped, the worst second still streams over 4G.
+          "-maxrate",
+          "1000k",
+          "-bufsize",
+          "2000k",
           "-pix_fmt",
           "yuv420p",
           "-vf",
-          // \, keeps the comma inside min() from splitting the filtergraph.
-          "scale=min(1920\\,iw):-2",
+          // The hero frame is 650 CSS px wide at most, so 960 covers it at
+          // 1.5x and anything larger only costs bytes. \, keeps the comma
+          // inside min() from splitting the filtergraph.
+          "scale=min(960\\,iw):-2",
           "-movflags",
           "+faststart",
           outPath,

@@ -6,6 +6,14 @@
 # NEXT_PUBLIC_SITE_URL, and anything optional (ANTHROPIC_API_KEY, SMTP…). See
 # .env.production.example for the full list.
 
+# Every container keeps a bounded log: unbounded json-file logs are the
+# classic way a small VPS fills its disk months later.
+x-logging: &bounded-logs
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
   # The database, on the same machine. Its data lives in a named volume so it
   # survives `docker compose down` and every image rebuild.
@@ -13,6 +21,7 @@ services:
     image: postgres:16-alpine
     container_name: menzu-postgres
     restart: unless-stopped
+    logging: *bounded-logs
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-menzu}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
@@ -45,6 +54,7 @@ services:
         condition: service_healthy
     command: ["npx", "prisma", "migrate", "deploy"]
     restart: "no"
+    logging: *bounded-logs
 
   app:
     build:
@@ -58,6 +68,7 @@ services:
     image: menzu-app:latest
     container_name: menzu-app
     restart: unless-stopped
+    logging: *bounded-logs
     ports:
       # Bound to loopback only: Caddy on the host (deploy/Caddyfile) is the
       # public face and terminates HTTPS. Exposing 3000 to the world would let
@@ -76,6 +87,11 @@ services:
       # and they can be backed up on their own. UPLOADS_DIR points Caddy's file
       # server at the same directory (see deploy/Caddyfile).
       - ${UPLOADS_DIR:-./uploads}:/app/public/uploads
+      # The image optimiser's cache. Without a home of its own it lived in the
+      # container's writable layer and vanished with every rebuild, so each
+      # deploy re-encoded the whole catalogue (a hundred-odd cold resizes)
+      # while visitors waited on them.
+      - image-cache:/app/.next/cache/images
     depends_on:
       postgres:
         condition: service_healthy
@@ -93,3 +109,4 @@ services:
 
 volumes:
   pgdata:
+  image-cache:
