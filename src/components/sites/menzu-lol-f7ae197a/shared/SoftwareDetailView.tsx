@@ -45,7 +45,9 @@ export function SoftwareDetailView({
   // One stored field, two voices: the rich HTML (if the admin wrote one) goes
   // to the description section in full; every place that prints a sentence —
   // the buy panel's blurb — gets the prose stripped back out of it.
-  const richDescription = isHtmlBody(software.description) ? software.description : null;
+  const richDescription = isHtmlBody(software.description)
+    ? software.description
+    : null;
   const plainDescription = richDescription
     ? docHtmlToPlainText(richDescription, 220)
     : software.description;
@@ -55,7 +57,10 @@ export function SoftwareDetailView({
       <JsonLd
         data={breadcrumbJsonLd([
           { name: "Trang chủ", path: "/" },
-          { name: software.categoryName, path: categoryHref(software.categorySlug) },
+          {
+            name: software.categoryName,
+            path: categoryHref(software.categorySlug),
+          },
           { name: software.name },
         ])}
       />
@@ -97,7 +102,11 @@ export function SoftwareDetailView({
             {/* The same cue the home page's hero carries, in normal flow here
                 rather than pinned to a corner. */}
             <div className="mt-12 flex justify-center">
-              <ScrollCta targetId={DESCRIPTION_SECTION_ID} label="Xem chi tiết" placement="" />
+              <ScrollCta
+                targetId={DESCRIPTION_SECTION_ID}
+                label="Xem chi tiết"
+                placement=""
+              />
             </div>
 
             <SoftwareDescription
@@ -129,17 +138,31 @@ export function SoftwareDetailView({
             >
               Sản phẩm tương tự
             </h2>
-            <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:gap-8">
+            {/* One row, whatever the screen: three tiles across on a desktop,
+                and on anything narrower a strip that scrolls sideways rather
+                than a stack that pushes the footer a screen down. */}
+            <div className="flex gap-4 overflow-x-auto pb-2 snap-x snap-mandatory [scrollbar-width:none] lg:grid lg:grid-cols-3 lg:gap-6 lg:overflow-visible lg:pb-0 xl:gap-8">
               {similar.map((s) => (
-                <CardBoundary key={s.code}>
-                  <SoftwareCard
-                    software={
-                      isHtmlBody(s.description)
-                        ? { ...s, description: docHtmlToPlainText(s.description, 180) }
-                        : s
-                    }
-                  />
-                </CardBoundary>
+                <div
+                  key={s.code}
+                  className="w-[82vw] max-w-[360px] shrink-0 snap-start lg:w-auto lg:max-w-none"
+                >
+                  <CardBoundary>
+                    <SoftwareCard
+                      software={
+                        isHtmlBody(s.description)
+                          ? {
+                              ...s,
+                              description: docHtmlToPlainText(
+                                s.description,
+                                180,
+                              ),
+                            }
+                          : s
+                      }
+                    />
+                  </CardBoundary>
+                </div>
               ))}
             </div>
           </section>

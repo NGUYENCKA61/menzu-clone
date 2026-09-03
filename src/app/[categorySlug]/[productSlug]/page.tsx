@@ -145,7 +145,8 @@ export default async function ProductPage({ params, searchParams }: PageProps) {
             isStatusSubscribed(user.id, software.code),
           ])
         : Promise.resolve([false, null] as const),
-      listSimilarSoftware(software.code, software.categorySlug),
+      // Three: one row on a desktop, and a strip that scrolls on a phone.
+      listSimilarSoftware(software.code, software.categorySlug, 3),
     ]);
     const setupGuideAccess = !user ? "guest" : bought ? "unlocked" : "locked";
     const shown =
