@@ -21,6 +21,8 @@ export interface TrustStats {
   customers: number | null;
   years: number | null;
   rating: number | null;
+  /** Approved reviews on record, for the "· N đánh giá" beside the average. */
+  reviews: number;
 }
 
 /**
@@ -44,7 +46,7 @@ function typed(value: string): number | null {
 
 export async function getTrustStats(settings: ShopSettings): Promise<TrustStats> {
   const typedOrders = typed(settings.statOrders);
-  const [orders, customers, oldest, averageRating] = await Promise.all([
+  const [orders, customers, oldest, averageRating, reviews] = await Promise.all([
     typedOrders ?? db.order.count({ where: { status: "PAID" } }).then((n) => LEGACY_ORDERS + n),
     typed(settings.statCustomers) ?? db.user.count(),
     typed(settings.statStartYear)
@@ -54,6 +56,7 @@ export async function getTrustStats(settings: ShopSettings): Promise<TrustStats>
       db.feedback
         .aggregate({ _avg: { rating: true }, where: { approved: true } })
         .then((r) => r._avg.rating),
+    db.feedback.count({ where: { approved: true } }),
   ]);
 
   const startYear =
@@ -72,5 +75,6 @@ export async function getTrustStats(settings: ShopSettings): Promise<TrustStats>
     // One decimal, and never above five: a typed "48" is a typo, not a score.
     rating:
       averageRating && averageRating > 0 ? Math.min(5, Math.round(averageRating * 10) / 10) : null,
+    reviews,
   };
 }

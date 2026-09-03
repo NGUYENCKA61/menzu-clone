@@ -130,7 +130,8 @@ export default async function Home() {
       <div key="reviews">
         <TrustStatsStrip stats={trust} />
         <ReviewsSection
-          reviews={reviews.map((r) => ({
+          // Three on the home page — a taste; the rest live on /feedback.
+          reviews={reviews.slice(0, 3).map((r) => ({
             name: r.name,
             date: r.createdAt.toLocaleDateString("vi-VN"),
             body: r.body,
@@ -140,7 +141,7 @@ export default async function Home() {
           }))}
           summary={
             trust.rating && reviews.length > 0
-              ? { rating: trust.rating, count: reviews.length }
+              ? { rating: trust.rating, count: trust.reviews }
               : null
           }
         />
