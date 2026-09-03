@@ -21,6 +21,7 @@ import {
 } from "../shared/AnnouncementCenter";
 import { STATUS_TAB_HREF } from "@/lib/softwareStatus";
 import { CartButton } from "./CartButton";
+import { HeaderSearch } from "./HeaderSearch"
 import { SiteLink } from "../shared/SiteLink";
 import { UserMenu, type HeaderUser } from "./UserMenu";
 import { useEffect, useState } from "react"
@@ -300,6 +301,8 @@ export function SiteHeaderClient({
               the same kind of control, so they sit tight against each other
               and keep the wider gap for the account button beside them. */}
           <div className="flex items-center gap-1.5">
+            {/* Left of the basket: a box on a desktop, a button on a phone. */}
+            <HeaderSearch />
             <CartButton count={cartCount} />
             <AnnouncementCenter announcements={announcements} statusEvents={statusEvents} />
           </div>
