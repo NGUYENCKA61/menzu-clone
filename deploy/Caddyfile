@@ -1,7 +1,7 @@
-# Caddy site config for the VPS. Copy to /etc/caddy/Caddyfile, put the real
-# domain on the first line, then `systemctl reload caddy`. Caddy obtains and
-# renews the Let's Encrypt certificate on its own; ports 80 and 443 must be
-# reachable from the internet for that.
+# Caddy site config for the VPS. Copy to /etc/caddy/Caddyfile, then
+# `systemctl reload caddy`. Caddy obtains and renews the Let's Encrypt
+# certificates on its own; ports 80 and 443 must be reachable from the
+# internet for that.
 #
 # The uploads folder is served by Caddy, not by Next: a production Next server
 # lists public/ once when it starts and never looks again, so a picture the
@@ -9,11 +9,16 @@
 # answers 404 through it. Caddy reads the directory on every request, and its
 # file server also does byte ranges, which the hero video needs to seek.
 # UPLOADS_DIR in .env must point at the same directory.
-180.93.111.201.sslip.io {
+#
+# Two names for one site: the real domain, and the sslip.io address the shop
+# ran on before it had one. The old address stays until every link to it has
+# died; it is the one that spells out the VPS's IP, so once Cloudflare fronts
+# the real domain it should come off this list.
+thichthihackk.com, 180.93.111.201.sslip.io {
 	# A year of HTTPS-only for browsers that have been here once: the redirect
 	# on port 80 protects the first visit, this protects every one after. No
-	# includeSubDomains, so when the shop moves to its real domain a subdomain
-	# served elsewhere over plain http stays reachable.
+	# includeSubDomains, so a subdomain served elsewhere over plain http stays
+	# reachable.
 	header Strict-Transport-Security "max-age=31536000"
 
 	handle_path /uploads/* {
@@ -29,4 +34,10 @@
 	handle {
 		reverse_proxy localhost:3000
 	}
+}
+
+# One address per page: www folds into the bare domain, permanently, so a
+# search engine never sees two copies of the shop.
+www.thichthihackk.com {
+	redir https://thichthihackk.com{uri} permanent
 }
