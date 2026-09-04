@@ -313,7 +313,10 @@ function blurb(description: string | null): string {
     .replace(/&gt;/g, ">")
     .replace(/&amp;/g, "&")
     .replace(/(?:\\r\\n|\brn\b)+/g, " ");
-  const plain = (isHtmlBody(raw) ? docHtmlToPlainText(raw) : raw.replace(/<[^>]+>/g, " "))
+  // Read before the guard: isHtmlBody narrows its argument, and the plain
+  // branch would otherwise be handed a value TypeScript calls never.
+  const stripped = raw.replace(/<[^>]+>/g, " ");
+  const plain = (isHtmlBody(raw) ? docHtmlToPlainText(raw) : stripped)
     .replace(/\s+/g, " ")
     .trim();
   return plain.length > 240 ? `${plain.slice(0, 237)}…` : plain;
