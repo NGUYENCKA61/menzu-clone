@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowDown, ChevronDown } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 
 /**
  * The cue at the foot of the hero: there is more below, here is where it
@@ -63,11 +63,11 @@ export function ScrollCta({
             pill on a tool page gets a still chevron in the accent instead: an
             arrow nodding on its own next to a row of calm buttons read as a
             glitch rather than an invitation. */}
-        {animated ? (
-          <ArrowDown size={13} aria-hidden className="animate-bounce-subtle shrink-0 text-white" />
-        ) : (
-          <ChevronDown size={14} aria-hidden className="shrink-0 text-[var(--menzu-accent)]" />
-        )}
+        <ChevronDown
+          size={15}
+          aria-hidden
+          className={`${animated ? "animate-bounce-subtle " : ""}shrink-0 text-[var(--menzu-accent)]`}
+        />
       </a>
     </div>
   );
