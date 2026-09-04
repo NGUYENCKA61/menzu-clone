@@ -83,7 +83,9 @@ export function softwareSearchHint(categoryName: string, toolNames: (string | nu
   const game = shortGameName(categoryName);
   const editions = editionsOf(toolNames).slice(0, 3);
   if (editions.length > 0) {
-    return `Tìm: Hack ${game} bản ${editions.join(", ")}…`;
+    // The editions are the eye-catcher, so they are printed in capitals
+    // whatever case the tool name wrote them in.
+    return `Tìm: Hack ${game} bản ${editions.map((e) => e.toUpperCase()).join(", ")}…`;
   }
   const first = toolNames.find((n): n is string => Boolean(n))?.trim();
   if (first) {
