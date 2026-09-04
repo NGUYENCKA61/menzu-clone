@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowDown } from "lucide-react";
+import { ArrowDown, ChevronDown } from "lucide-react";
 
 /**
  * The cue at the foot of the hero: there is more below, here is where it
@@ -57,11 +57,15 @@ export function ScrollCta({
         className={`${animated ? "animate-bounce-subtle " : ""}${tone} inline-flex items-center gap-2 whitespace-nowrap rounded-full border bg-[#0d0d12]/85 px-4 py-2 text-[10px] font-black uppercase tracking-[0.14em] backdrop-blur-md transition-colors`}
       >
         {label}
-        <ArrowDown
-          size={13}
-          aria-hidden
-          className="animate-bounce-subtle shrink-0 text-white"
-        />
+        {/* The hero keeps its bouncing arrow, the pull it exists for. The quiet
+            pill on a tool page gets a still chevron in the accent instead: an
+            arrow nodding on its own next to a row of calm buttons read as a
+            glitch rather than an invitation. */}
+        {animated ? (
+          <ArrowDown size={13} aria-hidden className="animate-bounce-subtle shrink-0 text-white" />
+        ) : (
+          <ChevronDown size={14} aria-hidden className="shrink-0 text-[var(--menzu-accent)]" />
+        )}
       </a>
     </div>
   );
