@@ -41,7 +41,7 @@ describe("softwareSearchHint", () => {
         "HACK CFVN BẢN UNNAMED",
         "HACK CFVN BẢN PRO",
       ]),
-    ).toBe("Tìm: HACK Đột Kích CFVN bản OBV, VS, UNNAMED…");
+    ).toBe("Tìm: Hack Đột Kích CFVN bản OBV, VS, UNNAMED…");
   });
 
   it("falls back to the first tool's name when nothing says 'bản'", () => {
@@ -51,6 +51,6 @@ describe("softwareSearchHint", () => {
   });
 
   it("names the game alone when the shelf is empty", () => {
-    expect(softwareSearchHint("HACK NARAKA VN", [])).toBe("Tìm HACK Naraka VN…");
+    expect(softwareSearchHint("HACK NARAKA VN", [])).toBe("Tìm Hack Naraka VN…");
   });
 });
