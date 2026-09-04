@@ -137,7 +137,7 @@ function DirectChannel({
       target="_blank"
       rel="noopener noreferrer"
       aria-label={label}
-      className="flex h-12 items-center gap-3 rounded-full border border-white/[0.14] bg-[#0c0d12] pl-3 pr-5 shadow-[0_12px_40px_-10px_rgba(0,0,0,0.9),inset_0_1px_0_rgba(255,255,255,0.14)] transition-colors duration-200 active:bg-[#14141c]"
+      className="flex h-12 w-[168px] items-center gap-3 whitespace-nowrap rounded-full border border-white/[0.14] bg-[#0c0d12] pl-3 pr-4 shadow-[0_12px_40px_-10px_rgba(0,0,0,0.9),inset_0_1px_0_rgba(255,255,255,0.14)] transition-colors duration-200 active:bg-[#14141c]"
     >
       <Image
         src={iconUrl}
@@ -448,7 +448,7 @@ export function SupportWidget({
       ) : null}
       {canMessage ? (
         <div
-          className={`mb-2.5 flex flex-col items-stretch gap-2.5 transition-all duration-200 sm:hidden ${
+          className={`mb-2.5 flex flex-col items-end gap-2.5 transition-all duration-200 sm:hidden ${
             open ? "pointer-events-auto translate-y-0 opacity-100" : "pointer-events-none translate-y-2 opacity-0"
           }`}
           aria-hidden={!open}
