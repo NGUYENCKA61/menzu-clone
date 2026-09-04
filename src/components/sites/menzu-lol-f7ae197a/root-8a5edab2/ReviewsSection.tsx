@@ -137,7 +137,7 @@ export function ReviewsSection({
 
             <div className="mt-4 flex items-center justify-between gap-3 border-t border-white/[0.06] pt-3">
               <span className="text-[11px] font-bold text-neutral-500">Giao dịch:</span>
-              <span className="text-[13px] font-black tabular-nums text-emerald-400">{review.amount}</span>
+              <span className="text-[13px] font-black tabular-nums text-sky-400">{review.amount}</span>
             </div>
           </article>
         ))}
