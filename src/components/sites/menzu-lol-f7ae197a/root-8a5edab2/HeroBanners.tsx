@@ -4,7 +4,7 @@ import { preload } from "react-dom";
 import { ArrowRight, BadgeCheck, BookCheck, ShoppingBag } from "lucide-react";
 
 import { DEFAULT_SETTINGS } from "@/lib/settings";
-import { ScrollCta } from "./ScrollCta";
+import { HeroTrustTags } from "./HeroTrustTags";
 
 /**
  * Where the hero's scroll cue lands, and the id the categories section wears.
@@ -228,7 +228,9 @@ export function HeroBanners({
         </div>
       </div>
 
-      <ScrollCta targetId={SCROLL_TARGET_ID} label="Khám phá sản phẩm" animated />
+      {/* The four reasons to relax stand where the scroll cue stood; a
+          visitor who has read them scrolls on without being told to. */}
+      <HeroTrustTags />
     </section>
   );
 }
