@@ -9,31 +9,6 @@ export interface PartnerView {
   url: string | null;
 }
 
-/**
- * How many times the set is repeated inside the moving track.
- *
- * The loop animates the track left by exactly one set's share of its width,
- * then snaps back — seamless only while one set is at least as wide as the
- * viewport. Four copies keep that true down to a couple of partners on a
- * desktop screen; the animation distance below must stay in step with it.
- */
-const COPIES = 4;
-
-const MARQUEE_STYLES = `
-.partners-marquee {
-  animation: ticker-scroll var(--partners-duration, 36s) linear infinite;
-  will-change: transform;
-}
-.partners-marquee:hover {
-  animation-play-state: paused;
-}
-@media (prefers-reduced-motion: reduce) {
-  .partners-marquee {
-    animation: none;
-  }
-}
-`;
-
 function Tile({ partner }: { partner: PartnerView }) {
   const body = (
     <>
@@ -41,29 +16,26 @@ function Tile({ partner }: { partner: PartnerView }) {
         <Image
           src={partner.logoUrl}
           alt={partner.name}
-          width={140}
-          height={40}
-          className="h-9 w-auto max-w-[140px] object-contain"
+          width={160}
+          height={48}
+          className="h-10 w-auto max-w-[150px] object-contain"
         />
       ) : (
         <span className="text-sm font-black uppercase tracking-widest text-neutral-300">
           {partner.name}
         </span>
       )}
-      {/* Fits inside the tile's existing 80px without growing it: the logo is
-          36px and this line 12, so a column with a small gap still centers
-          with room over. Brightens a step with the tile's own hover. */}
       {partner.tagline ? (
-        <span className="max-w-full truncate text-center text-[10px] font-semibold leading-none text-neutral-400 transition-colors group-hover/partner:text-neutral-200">
+        <span className="max-w-full truncate text-center text-[10px] font-semibold leading-none text-neutral-500 transition-colors group-hover/partner:text-neutral-300">
           {partner.tagline}
         </span>
       ) : null}
     </>
   );
-
+  // Dashed cells, as on a sheet of stickers: the logos are the content and
+  // the lines only keep them apart.
   const tileClass =
-    "group/partner flex h-20 w-[180px] shrink-0 flex-col items-center justify-center gap-1.5 rounded-xl border border-white/10 bg-white/[0.03] px-5 transition-colors hover:border-[var(--menzu-accent)]/50 hover:bg-white/[0.06]";
-
+    "group/partner flex h-24 flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-white/15 bg-white/[0.02] px-4 transition-colors hover:border-white/30 hover:bg-white/[0.05]";
   // A link only when there is somewhere to go — a dead anchor would show a
   // pointer cursor over nothing.
   return partner.url ? (
@@ -76,62 +48,37 @@ function Tile({ partner }: { partner: PartnerView }) {
 }
 
 /**
- * "Đối tác uy tín" — a marquee of partner logos.
+ * "Đối tác uy tín" — the shop's partners as a still grid of logos under a
+ * heading with its own ghost behind it.
  *
- * Renders nothing while the shop has added no partners: a heading over an
- * empty strip would be worse than no section, and nothing here is seeded
- * with invented names.
+ * Still rather than a marquee: a dozen logos fit on one screen, and a grid
+ * lets every one be read; a strip that glides is for a roster too long to
+ * show. The ghost word behind the heading is the block's one flourish and
+ * sits at four percent white, felt more than read.
  *
- * The motion reuses the global ticker-scroll keyframes. The track holds the
- * set COPIES times and travels 1/COPIES of its width per loop, so the reset
- * lands on an identical frame. Repeats past the first are aria-hidden — a
- * screen reader should meet each partner once.
+ * Renders nothing while the shop has added no partners (Admin → Đối tác): a
+ * heading over an empty grid would be worse than no section, and nothing
+ * here is seeded with invented names.
  */
 export function PartnersSection({ partners }: { partners: PartnerView[] }) {
   if (partners.length === 0) return null;
-
   return (
     <section className="w-full">
-      <style dangerouslySetInnerHTML={{ __html: MARQUEE_STYLES }} />
-
-      {/* Centered, unlike the row headings above — this block opens the
-          social-proof pair with the reviews. The mock's "Trusted Partners"
-          eyebrow between two rules went by the shop's decision: the heading
-          says it already, and the line only made the top of the block busy.
-          Two-tone like the reviews heading right above it — white with the
-          one word that matters in the accent red — after a whole-line red
-          and a whole-line purple both read as too much of one colour. */}
-      <div className="mb-10 flex flex-col items-center text-center">
-        <h2 className="text-2xl sm:text-3xl font-black uppercase tracking-wider text-white">
+      <div className="relative mb-10 flex flex-col items-center text-center">
+        <span
+          aria-hidden
+          className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 select-none whitespace-nowrap text-[56px] font-black uppercase leading-none tracking-wider text-white/[0.04] sm:text-[96px]"
+        >
+          Đối tác
+        </span>
+        <h2 className="relative text-2xl font-black uppercase tracking-wider text-white sm:text-3xl">
           Đối tác <span className="text-[var(--menzu-accent)]">uy tín</span> của chúng tôi
         </h2>
       </div>
-
-      <div className="relative overflow-hidden py-1">
-        {/* Soft fades at both edges so tiles slide in and out of a gradient
-            instead of popping at a hard border. */}
-        <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-16 bg-gradient-to-r from-[#0d0d12] to-transparent" />
-        <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-16 bg-gradient-to-l from-[#0d0d12] to-transparent" />
-
-        <div
-          className="partners-marquee flex gap-4"
-          style={{
-            ["--ticker-width" as string]: `${100 / COPIES}%`,
-            // 4s per partner: one loop in 24s for the six starters — ~49px/s,
-            // brisk enough to read as motion at a glance, still slow enough
-            // that a logo is recognised mid-glide. Scales with the roster, so
-            // a longer strip keeps the same feel instead of speeding up.
-            ["--partners-duration" as string]: `${Math.max(16, partners.length * 4)}s`,
-          }}
-        >
-          {Array.from({ length: COPIES }, (_, copy) =>
-            partners.map((partner) => (
-              <div key={`${partner.id}-${copy}`} aria-hidden={copy > 0 || undefined}>
-                <Tile partner={partner} />
-              </div>
-            )),
-          )}
-        </div>
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-6">
+        {partners.map((partner) => (
+          <Tile key={partner.id} partner={partner} />
+        ))}
       </div>
     </section>
   );
