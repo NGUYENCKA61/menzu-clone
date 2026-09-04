@@ -1,6 +1,6 @@
 import { PackageOpen } from "lucide-react";
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 
 import { MobileBottomNav } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/MobileBottomNav";
 import { SiteFooter } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/SiteFooter";
@@ -19,6 +19,7 @@ import { categoryHref } from "@/lib/routes";
 import { getShopSettings } from "@/lib/settingsStore";
 import { weaponKey } from "@/lib/weaponImages";
 import { shareCard } from "@/lib/shareCard";
+import { categoryBehindOldSlug } from "@/lib/slugHistory";
 
 interface PageProps {
   params: Promise<{ categorySlug: string }>;
@@ -111,7 +112,14 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
       ? (query.pmsort as "newest" | "price-asc" | "price-desc")
       : undefined,
   });
-  if (!data) notFound();
+  if (!data) {
+    // Nothing lives here now; maybe something used to. A renamed category
+    // keeps answering on its old address with a permanent redirect, so links
+    // shared before the rename stay alive and search engines follow along.
+    const moved = await categoryBehindOldSlug(slug);
+    if (moved) permanentRedirect(categoryHref(moved.slug));
+    notFound();
+  }
 
   // The HOT PICK chip's rotating cast: the picture library's newest items,
   // led by whatever name Cấu hình pins. The pin joins even with no picture

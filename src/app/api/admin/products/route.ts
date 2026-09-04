@@ -6,6 +6,7 @@ import { FORBIDDEN, getAdmin } from "@/lib/admin";
 import { db } from "@/lib/db";
 import { docHtmlIsEmpty, isHtmlBody, sanitizeDocHtml } from "@/lib/docHtml";
 import { uniqueProductSlug } from "@/lib/routes";
+import { forgetSlug, rememberProductSlug } from "@/lib/slugHistory";
 
 /** Create a product. */
 export async function POST(request: Request) {
@@ -139,6 +140,9 @@ export async function POST(request: Request) {
       ...loginColumns,
     },
   });
+  // A fresh listing owns its address outright; a stale memory of it from a
+  // product renamed away long ago must not outlive this one.
+  await forgetSlug("PRODUCT", product.slug);
 
   return NextResponse.json({ code: product.code });
 }
@@ -360,6 +364,9 @@ export async function PATCH(request: Request) {
       ...(login.kind === "set" ? login.value : {}),
     },
   });
+  // The address it was born with keeps answering, redirecting to the new
+  // one, for any link handed out before the rank was known.
+  if (slug) await rememberProductSlug(product.id, product.slug, slug);
 
   // A random listing's shelf is its one package, made the moment the flag
   // goes on and kept at the listing's price whenever that moves.

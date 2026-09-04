@@ -18,6 +18,7 @@ import { RATE_ABSENT, RATE_BAD, readRefundRate } from "@/lib/refundRate";
 import { PILL_ABSENT, PILL_BAD, readStatusPill } from "@/lib/statusPill";
 import { uniqueProductSlug } from "@/lib/routes";
 import { slugify } from "@/lib/slug";
+import { forgetSlug, rememberSlugOps } from "@/lib/slugHistory";
 import { postStatusToTelegram } from "@/lib/telegramNotify";
 
 const STATUSES = ["UNDETECTED", "STABLE", "UPDATED", "RISKY", "UPDATING", "DETECTED"] as const;
@@ -168,6 +169,9 @@ export async function POST(request: Request) {
       ...data,
     },
   });
+  // A fresh tool owns its address outright; a stale memory of it from a
+  // product renamed away long ago must not outlive this one.
+  await forgetSlug("PRODUCT", created.slug);
   // The first line of its history: the state it was born in.
   await db.softwareStatusEvent.create({
     data: { productId: created.id, status: data.softwareStatus },
@@ -280,6 +284,11 @@ export async function PATCH(request: Request) {
     nextStatus !== undefined && nextStatus !== product.softwareStatus;
 
   await db.$transaction([
+    // The old address keeps answering, redirecting to the new one, so a link
+    // posted to the channel or shared on Zalo before this save stays alive.
+    // Written in the same transaction as the change: a memory of an address
+    // that never actually changed would be a lie the router acts on.
+    ...(slug ? rememberSlugOps("PRODUCT", product.id, product.slug, slug) : []),
     db.product.update({
     where: { code },
     data: {

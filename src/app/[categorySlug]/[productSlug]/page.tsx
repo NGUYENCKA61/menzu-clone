@@ -17,6 +17,7 @@ import { JsonLd, softwareJsonLd } from "@/lib/seo";
 import { getCurrentUser } from "@/lib/session";
 import { isStatusSubscribed } from "@/lib/statusEvents";
 import { shareCard } from "@/lib/shareCard";
+import { productBehindOldSlug } from "@/lib/slugHistory";
 
 interface PageProps {
   params: Promise<{ categorySlug: string; productSlug: string }>;
@@ -123,7 +124,14 @@ export default async function ProductPage({ params, searchParams }: PageProps) {
   const category = decodeSegment(categorySlug);
 
   const found = await resolveProduct({ slug });
-  if (!found) notFound();
+  if (!found) {
+    // No product answers on this slug now; one may have before it was
+    // renamed. Its old address redirects, permanently, to its current one,
+    // so a link posted before the rename keeps working.
+    const moved = await productBehindOldSlug(slug);
+    if (moved) permanentRedirect(productHref(moved.categorySlug, moved.slug));
+    notFound();
+  }
   if (found.categorySlug !== category) {
     permanentRedirect(productHref(found.categorySlug, found.slug));
   }

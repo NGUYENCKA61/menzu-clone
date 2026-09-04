@@ -5,6 +5,7 @@ import { parsePlatform } from "@/lib/categoryPlatform";
 import { db } from "@/lib/db";
 import { isReservedSlug } from "@/lib/routes";
 import { slugify } from "@/lib/slug";
+import { forgetSlug, rememberCategorySlug } from "@/lib/slugHistory";
 
 function count(value: unknown, fallback = 0): number {
   const n = Number(value);
@@ -70,6 +71,9 @@ export async function POST(request: Request) {
     },
   });
 
+  // Should the address have belonged to a category that was renamed away
+  // from it, this page owns it now and the old memory must not outlive it.
+  await forgetSlug("CATEGORY", slug);
   return NextResponse.json({ id: category.id, slug: category.slug });
 }
 
@@ -192,6 +196,12 @@ export async function PATCH(request: Request) {
         : {}),
     },
   });
+  // The old address keeps answering, with a permanent redirect to the new
+  // one: every link to the category (and to each tool under it, whose URLs
+  // carry the category slug) that was shared before this save stays alive.
+  if (slug && slug !== category.slug) {
+    await rememberCategorySlug(category.id, category.slug, slug);
+  }
 
   return NextResponse.json({ ok: true });
 }
