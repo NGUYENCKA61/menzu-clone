@@ -332,19 +332,12 @@ export function SiteHeaderClient({
             <NavDropdown label="NẠP TIỀN" items={NAP_TIEN_ITEMS} />
             <NavDropdown label="SHOP ACC" items={SHOP_ACC_ITEMS} />
 
-            {/* Signed in only: the wheel spends the points an account has, and
-                /vong-quay bounces a signed-out visitor to the login page. A rung
-                that always ends in a redirect is a rung that lies about what it
-                does, so it is drawn only once it leads somewhere.
-
-                Last in the row on purpose — appearing here leaves the four
-                rungs the shop knows exactly where they were before signing in,
-                rather than shuffling them along by one. */}
-            {user ? (
-              <Link href="/vong-quay" className={NAV_LINK_CLASS}>
-                ĐỔI THƯỞNG
-              </Link>
-            ) : null}
+            {/* Shown to everyone, signed in or not: a visitor who does not know
+                the wheel exists never signs in for it. /vong-quay itself asks
+                for the login and comes back here after. */}
+            <Link href="/vong-quay" className={NAV_LINK_CLASS}>
+              ĐỔI THƯỞNG
+            </Link>
           </div>
         </div>
 
