@@ -75,7 +75,7 @@ export function editionsOf(toolNames: (string | null)[]): string[] {
 }
 
 /**
- * "Tìm: hack Đột Kích CFVN bản OBV, bản VS…". Without any edition in the
+ * "Tìm: HACK Đột Kích CFVN bản OBV, bản VS…". Without any edition in the
  * names, the first tool's own name stands in; with no tools at all, the game
  * alone.
  */
@@ -83,12 +83,12 @@ export function softwareSearchHint(categoryName: string, toolNames: (string | nu
   const game = shortGameName(categoryName);
   const editions = editionsOf(toolNames).slice(0, 3);
   if (editions.length > 0) {
-    return `Tìm: hack ${game} ${editions.map((e) => `bản ${e}`).join(", ")}…`;
+    return `Tìm: HACK ${game} ${editions.map((e) => `bản ${e}`).join(", ")}…`;
   }
   const first = toolNames.find((n): n is string => Boolean(n))?.trim();
   if (first) {
     const cut = first.length > 34 ? `${first.slice(0, 33).trimEnd()}…` : first;
     return `Tìm: ${cut}`;
   }
-  return `Tìm hack ${game}…`;
+  return `Tìm HACK ${game}…`;
 }
