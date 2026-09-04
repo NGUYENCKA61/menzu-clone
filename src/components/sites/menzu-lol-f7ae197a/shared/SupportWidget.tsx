@@ -113,11 +113,10 @@ function ContactRow({
 }
 
 /**
- * One channel as a round button with its name beside it, for the phone,
- * where the panel is skipped and the mark itself is the press. Same glass
- * as the tab, the channel's own mark on it, the name on a small pill to its
- * left so the two fanned-out buttons read as a choice rather than two
- * unlabelled blue circles.
+ * One channel as a single pill, mark and name together, for the phone,
+ * where the panel is skipped and the pill itself is the press. Same glass
+ * as the tab; the channel's own mark leads, its name follows, so the two
+ * fanned-out pills read as a choice rather than two unlabelled blue circles.
  */
 function DirectChannel({
   href,
@@ -138,24 +137,16 @@ function DirectChannel({
       target="_blank"
       rel="noopener noreferrer"
       aria-label={label}
-      className="group flex items-center gap-2.5"
+      className={`flex h-12 items-center gap-2.5 rounded-full pl-2.5 pr-4 shadow-[0_12px_40px_-10px_rgba(0,0,0,0.9),inset_0_1px_0_rgba(255,255,255,0.14)] transition-colors duration-200 active:bg-[#14141c]/80 ${GLASS}`}
     >
-      <span
-        className={`rounded-full px-3 py-1.5 text-[12px] font-bold leading-none text-white shadow-[0_8px_30px_-10px_rgba(0,0,0,0.9),inset_0_1px_0_rgba(255,255,255,0.14)] ${GLASS}`}
-      >
-        {name}
-      </span>
-      <span
-        className={`grid h-14 w-14 place-items-center rounded-full shadow-[0_12px_40px_-10px_rgba(0,0,0,0.9),inset_0_1px_0_rgba(255,255,255,0.14)] transition-colors duration-200 group-active:bg-[#14141c]/80 ${GLASS}`}
-      >
-        <Image
-          src={iconUrl}
-          alt=""
-          width={26}
-          height={26}
-          className="h-[26px] w-[26px] object-contain"
-        />
-      </span>
+      <Image
+        src={iconUrl}
+        alt=""
+        width={26}
+        height={26}
+        className="h-[26px] w-[26px] shrink-0 object-contain"
+      />
+      <span className="text-[13px] font-bold leading-none text-white">{name}</span>
     </a>
   );
 }
