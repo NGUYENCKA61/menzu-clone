@@ -59,8 +59,34 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Dữ liệu gửi lên không hợp lệ" }, { status: 400 });
   }
 
-  const name = String(form.get("name") ?? "").trim().slice(0, 50);
-  const service = String(form.get("service") ?? "");
+  // From the receipt in Lịch sử mua: the order is the shop's own record of
+  // what was bought and paid, so the service and the amount come from it,
+  // the review is marked verified on the spot, and there is one per order.
+  const orderId = String(form.get("orderId") ?? "").trim() || null;
+  const order = orderId
+    ? await db.order.findFirst({
+        where: { id: orderId, userId: user.id, status: "PAID" },
+        select: {
+          id: true,
+          total: true,
+          product: { select: { productType: true } },
+          feedback: { select: { id: true } },
+        },
+      })
+    : null;
+  if (orderId && !order) {
+    return NextResponse.json({ error: "Không tìm thấy đơn hàng đã thanh toán này" }, { status: 404 });
+  }
+  if (order?.feedback) {
+    return NextResponse.json({ error: "Đơn này đã được đánh giá rồi" }, { status: 409 });
+  }
+  const name =
+    String(form.get("name") ?? "").trim().slice(0, 50) || (order ? user.username : "");
+  const service = order
+    ? order.product.productType === "SOFTWARE_GAME"
+      ? "MUA KEY"
+      : "MUA ACC"
+    : String(form.get("service") ?? "");
   const rating = Number(form.get("rating"));
   const amountRaw = String(form.get("amount") ?? "0").replace(/[^\d]/g, "");
   const body = String(form.get("body") ?? "").trim().slice(0, 1000);
@@ -75,16 +101,20 @@ export async function POST(request: Request) {
   if (!Number.isInteger(rating) || rating < 1 || rating > 5) {
     return NextResponse.json({ error: "Chọn số sao từ 1 đến 5" }, { status: 400 });
   }
-  const amount = BigInt(amountRaw || "0");
+  const amount = order ? order.total : BigInt(amountRaw || "0");
   if (amount > 1_000_000_000n) {
     return NextResponse.json({ error: "Trị giá giao dịch không hợp lệ" }, { status: 400 });
   }
 
   // One review in the queue per account. Stops a held-down submit button —
   // and a spammer — from flooding the moderation list.
-  const waiting = await db.feedback.count({
-    where: { userId: user.id, approved: false },
-  });
+  // One free-form review at a time; an order-backed one is already bounded
+  // to one per purchase and need not wait behind it.
+  const waiting = order
+    ? 0
+    : await db.feedback.count({
+        where: { userId: user.id, approved: false },
+      });
   if (waiting > 0) {
     return NextResponse.json(
       { error: "Bạn đã có đánh giá đang chờ duyệt. Chờ admin duyệt xong nhé." },
@@ -142,7 +172,8 @@ export async function POST(request: Request) {
       imageUrl,
       anonymous,
       approved: false,
-      verified: false,
+      verified: order !== null,
+      orderId: order?.id ?? null,
       userId: user.id,
     },
   });

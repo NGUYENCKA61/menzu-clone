@@ -782,7 +782,10 @@ export interface OrderKeyRow {
 }
 
 export interface OrderRow {
+  id: string;
   code: string;
+  /** The buyer already reviewed this purchase (approved or still waiting). */
+  reviewed: boolean;
   status: string;
   total: number;
   createdAt: Date;
@@ -884,10 +887,13 @@ export async function getOrders(userId: string): Promise<OrderRow[]> {
         select: { status: true },
         take: 1,
       },
+      feedback: { select: { id: true } },
     },
   });
   return rows.map((o) => ({
+    id: o.id,
     code: o.code,
+    reviewed: o.feedback !== null,
     status: o.status,
     total: Number(o.total),
     createdAt: o.createdAt,

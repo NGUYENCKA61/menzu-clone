@@ -950,6 +950,8 @@ model Order {
   /// The keys handed over. Fewer than `keysOwed` while the tier is out of
   /// stock — that shortfall IS the shop's to-do list.
   licenseKeys LicenseKey[]
+  /// The buyer's review of this purchase, if they left one from the receipt.
+  feedback    Feedback?
 
   /// What the buyer has asked back, if anything. At most one open request at
   /// a time, which the route enforces rather than the schema: a rejected
@@ -1387,6 +1389,10 @@ model Feedback {
   approved  Boolean  @default(true)
   userId    String?
   user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  /// The purchase this review is about, when it was written from the receipt
+  /// in Lịch sử mua: one review per order, and the proof behind `verified`.
+  orderId   String?  @unique
+  order     Order?   @relation(fields: [orderId], references: [id], onDelete: SetNull)
   createdAt DateTime @default(now())
 
   @@map("feedback")

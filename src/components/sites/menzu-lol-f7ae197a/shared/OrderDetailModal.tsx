@@ -29,6 +29,7 @@ import { createPortal } from "react-dom";
 import type { LoginHandover } from "@/lib/accountLogin";
 
 import { lockScroll, trapTab, unlockScroll } from "./modalChrome";
+import { OrderReview } from "./OrderReview";
 import { formatVnd } from "./productData";
 
 /**
@@ -38,7 +39,10 @@ import { formatVnd } from "./productData";
  * component.
  */
 export interface OrderDetailData {
+  id: string;
   code: string;
+  /** The buyer already reviewed this purchase. */
+  reviewed: boolean;
   /** The status pill's text and colours, decided by the page. */
   statusLabel: string;
   statusClass: string;
@@ -859,6 +863,10 @@ export function OrderDetailModal({
                       Only offered on a paid order — there is nothing to refund
                       on one that was never charged or was refunded already. */}
                   <div className="flex flex-wrap items-center gap-2.5">
+                    {/* The review first, since it is the one thing here a
+                        happy buyer does; only a paid order has anything to
+                        review. */}
+                    {order.paid ? <OrderReview orderId={order.id} reviewed={order.reviewed} /> : null}
                     {order.paid ? (
                       order.canRefund ? (
                         <Link

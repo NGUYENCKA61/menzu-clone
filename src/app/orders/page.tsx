@@ -126,6 +126,8 @@ export default async function OrdersPage() {
                 refundHref={`/orders/${o.code}/hoan-tra`}
                 className="group flex cursor-pointer flex-col gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] p-4 outline-none transition-colors hover:border-white/[0.12] hover:bg-white/[0.04] focus-visible:ring-2 focus-visible:ring-[var(--menzu-accent)]/60 sm:flex-row sm:items-center sm:gap-4"
                 order={{
+                  id: o.id,
+                  reviewed: o.reviewed,
                   code: o.code,
                   statusLabel: STATUS_LABEL[o.status] ?? o.status,
                   statusClass:
@@ -204,6 +206,17 @@ export default async function OrdersPage() {
                   >
                     {orderBadge(o).label}
                   </span>
+                  {/* The review lives on the receipt; this is the reason to
+                      open it. A paid order either has one or is asking. */}
+                  {o.status === "PAID" ? (
+                    <span
+                      className={`text-[10px] font-black uppercase tracking-wider ${
+                        o.reviewed ? "text-emerald-400" : "text-[var(--menzu-accent)]"
+                      }`}
+                    >
+                      {o.reviewed ? "★ Đã đánh giá" : "★ Đánh giá"}
+                    </span>
+                  ) : null}
                 </div>
               </OrderDetailModal>
             ),
