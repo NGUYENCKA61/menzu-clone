@@ -8,6 +8,8 @@ import { useState } from "react";
 export interface DrawerItem {
   label: string;
   icon: LucideIcon;
+  /** Where it goes; "#" for a destination the clone does not have yet. */
+  href: string;
 }
 
 export interface DrawerGroup {
@@ -104,17 +106,21 @@ export function MobileDrawer({ open, onClose, groups }: MobileDrawerProps) {
 
                 {isOpen && (
                   <div className="flex flex-col pb-1">
-                    {group.items.map(({ label, icon: Icon }) => (
-                      <a
+                    {group.items.map(({ label, icon: Icon, href }) => (
+                      // Closed on the press: the header lives in the layout
+                      // and survives the navigation, so the drawer would
+                      // otherwise still be open over the new page.
+                      <Link
                         key={label}
-                        href="#"
+                        href={href}
+                        onClick={onClose}
                         className="flex items-center gap-3 py-2.5 pl-10 pr-6 text-neutral-400 hover:text-white hover:bg-white/[0.02] transition-colors"
                       >
                         <Icon size={13} className="text-neutral-500 shrink-0" />
                         <span className="text-[11px] font-semibold tracking-wide">
                           {label}
                         </span>
-                      </a>
+                      </Link>
                     ))}
                   </div>
                 )}

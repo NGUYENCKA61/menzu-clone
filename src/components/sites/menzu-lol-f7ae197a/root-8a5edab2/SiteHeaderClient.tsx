@@ -3,15 +3,20 @@
 import Image from "next/image"
 import Link from "next/link"
 import {
+  Activity,
   AppWindow,
+  BookOpen,
   ChevronDown,
   Cpu,
   CreditCard,
   Gift,
   KeyRound,
   Menu,
+  MessageSquare,
   Smartphone,
+  Star,
   User,
+  Users,
   type LucideIcon,
 } from "lucide-react"
 import {
@@ -90,10 +95,29 @@ const SHOP_ACC_ITEMS: DropdownItem[] = [
   { label: "Sự Kiện Tặng Hack", icon: Gift },
 ]
 
+/**
+ * The strip's five links, as drawer rows. On a phone the strip is gone (the
+ * bottom bar took its place and its height), and these are the only links
+ * on it that the bottom bar does not carry, so the menu carries them.
+ */
+const QUICK_LINK_ITEMS: DropdownItem[] = [
+  { label: "ĐÁNH GIÁ", icon: Star },
+  { label: "XEM TRẠNG THÁI", icon: Activity },
+  { label: "WIKI & HƯỚNG DẪN", icon: BookOpen },
+  { label: "GÓP Ý", icon: MessageSquare },
+  { label: "CỘNG ĐỒNG", icon: Users },
+]
+
+// Each row goes where its desktop twin goes: the same label lookup, so a
+// destination added for the dropdowns reaches the drawer in the same edit.
+const withHrefs = (items: DropdownItem[]) =>
+  items.map((item) => ({ ...item, href: hrefFor(item.label) }))
+
 const DRAWER_GROUPS: DrawerGroup[] = [
-  { label: "CÁC LOẠI HACK", items: HACK_CATEGORY_ITEMS },
-  { label: "NẠP TIỀN", items: NAP_TIEN_ITEMS },
-  { label: "SHOP ACC", items: SHOP_ACC_ITEMS },
+  { label: "CÁC LOẠI HACK", items: withHrefs(HACK_CATEGORY_ITEMS) },
+  { label: "NẠP TIỀN", items: withHrefs(NAP_TIEN_ITEMS) },
+  { label: "SHOP ACC", items: withHrefs(SHOP_ACC_ITEMS) },
+  { label: "LIÊN KẾT NHANH", items: withHrefs(QUICK_LINK_ITEMS) },
 ]
 
 function NavDropdown({ label, items }: { label: string; items: DropdownItem[] }) {
@@ -193,8 +217,11 @@ export function SiteHeaderClient({
           : "bg-[#1a1a1a]"
       }`}
     >
+      {/* Not on a phone: the bottom bar holds the first-rank links there,
+          and the strip's own five sit in the menu under LIÊN KẾT NHANH, so
+          this row would only push the page down 40px for a second copy. */}
       <div
-        className={`flex w-full overflow-hidden border-b bg-[#1a1a1a] transition-all duration-300 ${
+        className={`hidden w-full overflow-hidden border-b bg-[#1a1a1a] transition-all duration-300 sm:flex ${
           scrolled ? "h-0 opacity-0 border-transparent" : "h-[40px] opacity-100 border-white/5"
         }`}
       >
