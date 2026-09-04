@@ -6,6 +6,7 @@ import { AccountPageFrame } from "@/components/sites/menzu-lol-f7ae197a/shared/A
 import { AccountEmpty } from "@/components/sites/menzu-lol-f7ae197a/shared/AccountShell";
 import { ListSearch } from "@/components/sites/menzu-lol-f7ae197a/shared/ListSearch";
 import { OrderDetailModal } from "@/components/sites/menzu-lol-f7ae197a/shared/OrderDetailModal";
+import { OrderReviewTag } from "@/components/sites/menzu-lol-f7ae197a/shared/OrderReview";
 import { formatVnd } from "@/components/sites/menzu-lol-f7ae197a/shared/productData";
 import { dayHeading, dayTime } from "@/lib/dayGroups";
 import { getOrders } from "@/lib/queries";
@@ -206,16 +207,11 @@ export default async function OrdersPage() {
                   >
                     {orderBadge(o).label}
                   </span>
-                  {/* The review lives on the receipt; this is the reason to
-                      open it. A paid order either has one or is asking. */}
+                  {/* A paid order either has its review or is asking for
+                      one; the tag opens a small box of its own, not the
+                      receipt. */}
                   {o.status === "PAID" ? (
-                    <span
-                      className={`text-[10px] font-black uppercase tracking-wider ${
-                        o.reviewed ? "text-emerald-400" : "text-[var(--menzu-accent)]"
-                      }`}
-                    >
-                      {o.reviewed ? "★ Đã đánh giá" : "★ Đánh giá"}
-                    </span>
+                    <OrderReviewTag orderId={o.id} reviewed={o.reviewed} />
                   ) : null}
                 </div>
               </OrderDetailModal>

@@ -1,18 +1,24 @@
 "use client";
 
-import { Check, Star } from "lucide-react";
-import { useState } from "react";
+import { Star, X } from "lucide-react";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 
 /**
- * The review a buyer leaves on one of their own orders, from the receipt.
+ * The review a buyer leaves on one of their own orders, from the row it sits
+ * on in Lịch sử mua.
  *
- * Lives here rather than on the reviews page because the order is the proof:
- * the shop already knows what was bought, for how much, and that it was paid,
- * so the buyer picks stars and writes a line and nothing else. One review per
- * order, enforced by the API; the reviews page's free-form composer stays for
- * anyone who bought before there were orders to point at.
+ * A small tag on the row ("★ Đánh giá") that opens a small box: stars, a few
+ * words, an anonymous switch, nothing else. The order is the proof — the
+ * shop already knows what was bought, for how much, and that it was paid —
+ * so nothing is asked twice. One review per order, enforced by the API; the
+ * reviews page's free-form composer stays for anyone who bought before there
+ * were orders to point at.
+ *
+ * The tag lives inside the receipt's trigger, so its clicks stop there: a
+ * press on "Đánh giá" must not also open the receipt behind it.
  */
-export function OrderReview({
+export function OrderReviewTag({
   orderId,
   reviewed,
 }: {
@@ -21,35 +27,61 @@ export function OrderReview({
   reviewed: boolean;
 }) {
   const [open, setOpen] = useState(false);
+  const [done, setDone] = useState(reviewed);
+
+  if (done) {
+    return (
+      <span className="text-[10px] font-black uppercase tracking-wider text-emerald-400">
+        ★ Đã đánh giá
+      </span>
+    );
+  }
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={(event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          setOpen(true);
+        }}
+        onKeyDown={(event) => event.stopPropagation()}
+        className="text-[10px] font-black uppercase tracking-wider text-[var(--menzu-accent)] transition-colors hover:text-white"
+      >
+        ★ Đánh giá
+      </button>
+      {open ? (
+        <ReviewDialog orderId={orderId} onClose={() => setOpen(false)} onDone={() => setDone(true)} />
+      ) : null}
+    </>
+  );
+}
+
+function ReviewDialog({
+  orderId,
+  onClose,
+  onDone,
+}: {
+  orderId: string;
+  onClose: () => void;
+  onDone: () => void;
+}) {
   const [rating, setRating] = useState(5);
   const [hover, setHover] = useState(0);
   const [body, setBody] = useState("");
   const [anonymous, setAnonymous] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [done, setDone] = useState(reviewed);
   const [error, setError] = useState<string | null>(null);
+  const [sent, setSent] = useState(false);
 
-  if (done) {
-    return (
-      <span className="inline-flex h-10 items-center gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 text-[11px] font-black uppercase tracking-wider text-emerald-300">
-        <Check className="h-4 w-4" />
-        {reviewed ? "Đã đánh giá" : "Đã gửi · chờ duyệt"}
-      </span>
-    );
-  }
-
-  if (!open) {
-    return (
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        className="inline-flex h-10 items-center gap-2 rounded-xl border border-[var(--menzu-accent)]/40 bg-transparent px-4 text-[11px] font-black uppercase tracking-wider text-[#ddd] transition-colors hover:bg-[var(--menzu-accent)]/10 hover:text-white"
-      >
-        <Star className="h-4 w-4 text-[var(--menzu-accent)]" />
-        Đánh giá đơn này
-      </button>
-    );
-  }
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
 
   async function submit() {
     if (submitting) return;
@@ -67,7 +99,8 @@ export function OrderReview({
         setError(data?.error ?? "Không gửi được, thử lại sau.");
         return;
       }
-      setDone(true);
+      setSent(true);
+      onDone();
     } catch {
       setError("Không gửi được, thử lại sau.");
     } finally {
@@ -75,74 +108,99 @@ export function OrderReview({
     }
   }
 
-  return (
-    <div className="flex w-full flex-col gap-3 rounded-xl border border-white/10 bg-white/[0.03] p-4">
-      <div className="flex items-center justify-between gap-3">
-        <span className="text-[10px] font-black uppercase tracking-widest text-neutral-500">
-          Đánh giá đơn này
-        </span>
-        <div className="flex items-center gap-1" onMouseLeave={() => setHover(0)}>
-          {[1, 2, 3, 4, 5].map((n) => (
-            <button
-              key={n}
-              type="button"
-              aria-label={`${n} sao`}
-              onMouseEnter={() => setHover(n)}
-              onClick={() => setRating(n)}
-              className="p-0.5"
-            >
-              <Star
-                className={`h-5 w-5 transition-colors ${
-                  n <= (hover || rating)
-                    ? "fill-amber-400 text-amber-400"
-                    : "text-neutral-600"
-                }`}
-              />
-            </button>
-          ))}
+  // Stopped at the card: the dialog is rendered through a portal, but React
+  // still bubbles its events up the component tree, into the receipt's
+  // trigger this tag sits in.
+  const stop = (event: React.SyntheticEvent) => event.stopPropagation();
+
+  return createPortal(
+    <div
+      className="fixed inset-0 z-[120] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"
+      onClick={(event) => {
+        stop(event);
+        onClose();
+      }}
+      onKeyDown={stop}
+    >
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label="Đánh giá đơn hàng"
+        onClick={stop}
+        className="flex w-full max-w-sm flex-col gap-4 rounded-2xl border border-white/10 bg-[#0c0d12] p-5 shadow-2xl"
+      >
+        <div className="flex items-center justify-between">
+          <span className="text-sm font-black uppercase tracking-wider text-white">
+            Đánh giá đơn hàng
+          </span>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Đóng"
+            className="rounded-lg p-1 text-neutral-500 transition-colors hover:text-white"
+          >
+            <X className="h-4 w-4" />
+          </button>
         </div>
+
+        {sent ? (
+          <p className="text-sm text-neutral-300">
+            Cảm ơn bạn! Đánh giá đã gửi, admin duyệt xong sẽ hiện ngoài trang đánh giá.
+          </p>
+        ) : (
+          <>
+            <div className="flex items-center gap-1.5" onMouseLeave={() => setHover(0)}>
+              {[1, 2, 3, 4, 5].map((n) => (
+                <button
+                  key={n}
+                  type="button"
+                  aria-label={`${n} sao`}
+                  onMouseEnter={() => setHover(n)}
+                  onClick={() => setRating(n)}
+                  className="p-0.5"
+                >
+                  <Star
+                    className={`h-7 w-7 transition-colors ${
+                      n <= (hover || rating) ? "fill-amber-400 text-amber-400" : "text-neutral-600"
+                    }`}
+                  />
+                </button>
+              ))}
+            </div>
+            <textarea
+              value={body}
+              onChange={(event) => setBody(event.target.value.slice(0, 1000))}
+              rows={4}
+              autoFocus
+              placeholder="Tool dùng thế nào, giao key nhanh không, hỗ trợ ra sao…"
+              className="w-full resize-none rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-sm text-white outline-none placeholder:text-neutral-600 focus:border-white/25"
+            />
+            <label className="flex cursor-pointer items-center gap-2 text-[11px] font-semibold text-neutral-400">
+              <input
+                type="checkbox"
+                checked={anonymous}
+                onChange={(event) => setAnonymous(event.target.checked)}
+                className="h-3.5 w-3.5 accent-[var(--menzu-accent)]"
+              />
+              Ẩn tên của tôi
+            </label>
+            {error ? (
+              <p role="alert" className="text-[11px] font-semibold text-[var(--menzu-accent)]">
+                {error}
+              </p>
+            ) : null}
+            <button
+              type="button"
+              onClick={submit}
+              disabled={submitting || body.trim().length < 5}
+              className="inline-flex h-10 items-center justify-center rounded-xl bg-[var(--menzu-accent)] px-5 text-[11px] font-black uppercase tracking-wider text-white transition-colors hover:bg-[var(--menzu-accent-dark)] disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {submitting ? "Đang gửi…" : "Gửi đánh giá"}
+            </button>
+          </>
+        )}
       </div>
-      <textarea
-        value={body}
-        onChange={(event) => setBody(event.target.value.slice(0, 1000))}
-        rows={3}
-        placeholder="Tool dùng thế nào, giao key nhanh không, hỗ trợ ra sao…"
-        className="w-full resize-none rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-sm text-white outline-none placeholder:text-neutral-600 focus:border-white/25"
-      />
-      <label className="flex cursor-pointer items-center gap-2 text-[11px] font-semibold text-neutral-400">
-        <input
-          type="checkbox"
-          checked={anonymous}
-          onChange={(event) => setAnonymous(event.target.checked)}
-          className="h-3.5 w-3.5 accent-[var(--menzu-accent)]"
-        />
-        Ẩn tên của tôi
-      </label>
-      {error ? (
-        <p role="alert" className="text-[11px] font-semibold text-[var(--menzu-accent)]">
-          {error}
-        </p>
-      ) : null}
-      <div className="flex items-center gap-2">
-        <button
-          type="button"
-          onClick={submit}
-          disabled={submitting || body.trim().length < 5}
-          className="inline-flex h-10 items-center gap-2 rounded-xl bg-[var(--menzu-accent)] px-5 text-[11px] font-black uppercase tracking-wider text-white transition-colors hover:bg-[var(--menzu-accent-dark)] disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          {submitting ? "Đang gửi…" : "Gửi đánh giá"}
-        </button>
-        <button
-          type="button"
-          onClick={() => setOpen(false)}
-          className="inline-flex h-10 items-center rounded-xl border border-white/10 bg-white/5 px-4 text-[11px] font-black uppercase tracking-wider text-neutral-300 transition-colors hover:text-white"
-        >
-          Để sau
-        </button>
-        <span className="ml-auto text-[10px] text-neutral-600">
-          Sau khi admin duyệt sẽ hiện ngoài trang đánh giá.
-        </span>
-      </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
