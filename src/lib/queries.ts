@@ -307,8 +307,24 @@ function softwareWhere(categoryId: string, filters: CategoryFilters) {
           ],
         }
       : {}),
+    // "Tìm chức năng": every word typed must appear somewhere the tool
+    // describes itself — its name, its description, its own feature list (the
+    // JSON text of titles and bodies) or the note under it. Word by word, so
+    // "aimbot esp" finds a tool that lists the two on separate lines.
     ...(feature
-      ? { description: { contains: feature, mode: "insensitive" as const } }
+      ? {
+          AND: feature
+            .split(/[s,]+/)
+            .filter(Boolean)
+            .map((word) => ({
+              OR: [
+                { name: { contains: word, mode: "insensitive" as const } },
+                { description: { contains: word, mode: "insensitive" as const } },
+                { features: { contains: word, mode: "insensitive" as const } },
+                { featuresNote: { contains: word, mode: "insensitive" as const } },
+              ],
+            })),
+        }
       : {}),
     ...(filters.softwareStatus ? { softwareStatus: filters.softwareStatus } : {}),
   };
