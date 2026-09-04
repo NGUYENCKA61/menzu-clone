@@ -23,9 +23,10 @@ const INITIALISMS = new Set([
   "HWID",
   "CSGO",
   "LMHT",
-  "NARAKA",
-  "VALO",
 ]);
+
+/** Little words inside a name that read best in lowercase: Call of Duty. */
+const MINOR_WORDS = new Set(["OF", "AND", "THE"]);
 
 function isInitialism(word: string): boolean {
   return /^[A-Z0-9]{1,3}$/.test(word) || /^[A-Z]*\d[A-Z0-9]*$/.test(word) || INITIALISMS.has(word);
@@ -42,7 +43,11 @@ export function shortGameName(categoryName: string): string {
     .filter(Boolean)
     .slice(0, 4)
     .map((word) =>
-      isInitialism(word) ? word : word.charAt(0).toUpperCase() + word.slice(1).toLowerCase(),
+      MINOR_WORDS.has(word)
+        ? word.toLowerCase()
+        : isInitialism(word)
+          ? word
+          : word.charAt(0).toUpperCase() + word.slice(1).toLowerCase(),
     )
     .join(" ");
 }

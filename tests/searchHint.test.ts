@@ -12,6 +12,7 @@ describe("shortGameName", () => {
     expect(shortGameName("HACK DELTA FORCE MỚI")).toBe("Delta Force");
     expect(shortGameName("HACK PUBG STEAM PC")).toBe("PUBG Steam PC");
     expect(shortGameName("HACK TRUY KÍCH PC - TRUY KÍCH 2")).toBe("Truy Kích PC");
+    expect(shortGameName("HACK CALL OF DUTY WARZONE BLACK OPS 6")).toBe("Call of Duty Warzone");
   });
 });
 
