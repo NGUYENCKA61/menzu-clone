@@ -69,8 +69,8 @@ export default async function FeedbackPage() {
 
             <div className="flex items-start justify-between gap-3 mb-6">
               <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20 shrink-0 mt-0.5">
-                  <Star className="w-5 h-5 text-emerald-400 fill-emerald-400" />
+                <div className="w-10 h-10 rounded-xl bg-[var(--menzu-accent)]/10 flex items-center justify-center border border-[var(--menzu-accent)]/20 shrink-0 mt-0.5">
+                  <Star className="w-5 h-5 text-[var(--menzu-accent)] fill-[var(--menzu-accent)]" />
                 </div>
                 <div>
                   <h1 className="text-2xl sm:text-3xl font-black uppercase tracking-wider text-white">
@@ -83,17 +83,17 @@ export default async function FeedbackPage() {
               </div>
               <Link
                 href="/feedback/submit"
-                className="inline-flex items-center gap-1.5 sm:gap-2 bg-emerald-500 hover:bg-emerald-400 text-black font-black px-3.5 py-2 sm:px-5 sm:py-2.5 rounded-xl whitespace-nowrap text-[10px] sm:text-xs uppercase tracking-wider w-fit mt-0.5 transition-colors"
+                className="inline-flex items-center gap-1.5 sm:gap-2 bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] text-white font-black px-3.5 py-2 sm:px-5 sm:py-2.5 rounded-xl whitespace-nowrap text-[10px] sm:text-xs uppercase tracking-wider w-fit mt-0.5 transition-colors"
               >
-                <Star size={13} className="fill-black sm:w-3.5 sm:h-3.5" />
+                <Star size={13} className="fill-white sm:w-3.5 sm:h-3.5" />
                 Viết đánh giá
               </Link>
             </div>
 
-            <div className="flex items-center gap-2 sm:gap-2.5 bg-emerald-500/5 border border-emerald-500/20 rounded-2xl px-3 py-2.5 sm:px-4 sm:py-3 mb-6">
-              <ShieldCheck size={16} className="text-emerald-500 shrink-0" />
+            <div className="flex items-center gap-2 sm:gap-2.5 bg-[var(--menzu-accent)]/5 border border-[var(--menzu-accent)]/20 rounded-2xl px-3 py-2.5 sm:px-4 sm:py-3 mb-6">
+              <ShieldCheck size={16} className="text-[var(--menzu-accent)] shrink-0" />
               <p className="text-[11px] sm:text-sm text-neutral-300 leading-normal">
-                <span className="font-black text-emerald-400">100% đánh giá</span> được tổng
+                <span className="font-black text-[var(--menzu-accent)]">100% đánh giá</span> được tổng
                 hợp từ khách đã giao dịch. Có thể yêu cầu đối chiếu lịch sử giao dịch để xác
                 minh.
               </p>

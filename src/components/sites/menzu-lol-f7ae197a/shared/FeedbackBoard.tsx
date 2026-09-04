@@ -153,7 +153,7 @@ function ReviewCard({ item }: { item: FeedbackItem }) {
             href={item.imageUrl}
             target="_blank"
             rel="noreferrer"
-            className="mt-4 block rounded-2xl overflow-hidden border border-neutral-800 w-fit max-w-2xl cursor-zoom-in hover:border-emerald-500/50 transition-colors group/img"
+            className="mt-4 block rounded-2xl overflow-hidden border border-neutral-800 w-fit max-w-2xl cursor-zoom-in hover:border-[var(--menzu-accent)]/50 transition-colors group/img"
           >
             {/* Plain img: attachment sizes vary and the file already went
                 through sharp on the way in — next/image would re-run it. */}
@@ -183,10 +183,10 @@ function ReviewCard({ item }: { item: FeedbackItem }) {
 
 const PAGE_BTN =
   "w-10 h-10 rounded-xl text-sm font-black transition-all flex items-center justify-center cursor-pointer active:scale-95";
-const PAGE_ON = `${PAGE_BTN} bg-emerald-500 text-black border border-emerald-500 font-extrabold`;
-const PAGE_OFF = `${PAGE_BTN} bg-white/5 border border-white/5 text-neutral-400 hover:text-emerald-400 hover:bg-emerald-500/10`;
+const PAGE_ON = `${PAGE_BTN} bg-[var(--menzu-accent)] text-white border border-[var(--menzu-accent)] font-extrabold`;
+const PAGE_OFF = `${PAGE_BTN} bg-white/5 border border-white/5 text-neutral-400 hover:text-[var(--menzu-accent)] hover:bg-[var(--menzu-accent)]/10`;
 const ARROW_BTN =
-  "w-10 h-10 rounded-xl bg-white/5 border border-white/5 text-neutral-500 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center transition-all cursor-pointer active:scale-95 hover:bg-emerald-500/10 hover:text-emerald-400";
+  "w-10 h-10 rounded-xl bg-white/5 border border-white/5 text-neutral-500 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center transition-all cursor-pointer active:scale-95 hover:bg-[var(--menzu-accent)]/10 hover:text-[var(--menzu-accent)]";
 
 /** The star buttons inside the filter capsule, shared by both breakpoints. */
 function RatingStars({
@@ -233,7 +233,7 @@ function SortToggle({ asc, onChange }: { asc: boolean; onChange: (asc: boolean) 
         title="Mới nhất"
         onClick={() => onChange(false)}
         className={`p-1.5 rounded-lg transition-all ${
-          asc ? "text-neutral-500 hover:text-neutral-300" : "bg-emerald-500 text-black"
+          asc ? "text-neutral-500 hover:text-neutral-300" : "bg-[var(--menzu-accent)] text-white"
         }`}
       >
         <ArrowDownWideNarrow size={18} />
@@ -243,7 +243,7 @@ function SortToggle({ asc, onChange }: { asc: boolean; onChange: (asc: boolean) 
         title="Cũ nhất"
         onClick={() => onChange(true)}
         className={`p-1.5 rounded-lg transition-all ${
-          asc ? "bg-emerald-500 text-black" : "text-neutral-500 hover:text-neutral-300"
+          asc ? "bg-[var(--menzu-accent)] text-white" : "text-neutral-500 hover:text-neutral-300"
         }`}
       >
         <ArrowUpNarrowWide size={18} />
@@ -298,7 +298,7 @@ export function FeedbackBoard({ items }: { items: FeedbackItem[] }) {
               <span className="text-[9px] font-black text-neutral-600 uppercase tracking-[0.2em] leading-none mb-1">
                 Lọc theo
               </span>
-              <span className="text-xs font-black text-emerald-500 uppercase tracking-widest leading-none">
+              <span className="text-xs font-black text-[var(--menzu-accent)] uppercase tracking-widest leading-none">
                 Rating
               </span>
             </div>
@@ -310,7 +310,7 @@ export function FeedbackBoard({ items }: { items: FeedbackItem[] }) {
         {/* Desktop: label, capsule, sort pushed to the far edge. */}
         <div className="w-full bg-neutral-900/40 border border-neutral-800/60 p-4 rounded-2xl hidden sm:flex sm:items-center sm:gap-4">
           <div className="flex items-center gap-2 text-neutral-400 text-xs font-black uppercase tracking-widest mr-2">
-            <Funnel size={14} className="text-emerald-500" />
+            <Funnel size={14} className="text-[var(--menzu-accent)]" />
             <span>Bộ lọc:</span>
           </div>
           <div className="flex items-center gap-4 bg-neutral-950/60 border border-neutral-800 px-5 py-2.5 rounded-2xl shadow-inner shadow-black/40">
@@ -318,7 +318,7 @@ export function FeedbackBoard({ items }: { items: FeedbackItem[] }) {
               <span className="text-[9px] font-black text-neutral-600 uppercase tracking-[0.2em] leading-none mb-1">
                 Lọc theo
               </span>
-              <span className="text-xs font-black text-emerald-500 uppercase tracking-widest leading-none">
+              <span className="text-xs font-black text-[var(--menzu-accent)] uppercase tracking-widest leading-none">
                 Rating
               </span>
             </div>

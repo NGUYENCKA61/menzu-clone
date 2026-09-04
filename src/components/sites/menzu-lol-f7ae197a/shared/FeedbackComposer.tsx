@@ -41,7 +41,7 @@ const SERVICES: { value: string; icon: LucideIcon }[] = [
 
 const LABEL = "block text-xs font-black uppercase tracking-wider text-neutral-500 mb-2";
 const FIELD =
-  "w-full bg-neutral-950/80 border border-neutral-800 rounded-xl px-4 py-3 text-white text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/30 outline-none transition-all";
+  "w-full bg-neutral-950/80 border border-neutral-800 rounded-xl px-4 py-3 text-white text-sm focus:border-[var(--menzu-accent)] focus:ring-1 focus:ring-[var(--menzu-accent)]/30 outline-none transition-all";
 
 function formatVnd(n: number): string {
   return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
@@ -177,7 +177,7 @@ export function FeedbackComposer({ user, today }: { user: ComposerUser; today: s
           <span className="text-[10px] text-neutral-500 uppercase font-black tracking-[0.15em] mb-1">
             Trị giá giao dịch
           </span>
-          <span className="text-2xl font-black text-emerald-400 tabular-nums leading-none">
+          <span className="text-2xl font-black text-[var(--menzu-accent)] tabular-nums leading-none">
             {formatVnd(amountNumber)}&nbsp;₫
           </span>
         </div>
@@ -188,8 +188,8 @@ export function FeedbackComposer({ user, today }: { user: ComposerUser; today: s
   if (done) {
     return (
       <div className="max-w-xl mx-auto bg-neutral-900/60 border border-neutral-800/60 rounded-3xl p-8 sm:p-10 flex flex-col items-center text-center gap-4">
-        <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
-          <CircleCheckBig size={26} className="text-emerald-400" />
+        <div className="w-14 h-14 rounded-2xl bg-[var(--menzu-accent)]/10 border border-[var(--menzu-accent)]/20 flex items-center justify-center">
+          <CircleCheckBig size={26} className="text-[var(--menzu-accent)]" />
         </div>
         <h2 className="text-xl font-black uppercase tracking-wider text-white">
           Đã gửi đánh giá
@@ -201,7 +201,7 @@ export function FeedbackComposer({ user, today }: { user: ComposerUser; today: s
         <div className="flex flex-col sm:flex-row gap-3 pt-2">
           <Link
             href="/feedback"
-            className="h-10 px-6 rounded-xl bg-emerald-500 hover:bg-emerald-400 transition-colors text-[11px] font-black uppercase tracking-widest text-black inline-flex items-center justify-center"
+            className="h-10 px-6 rounded-xl bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] transition-colors text-[11px] font-black uppercase tracking-widest text-white inline-flex items-center justify-center"
           >
             Xem trang đánh giá
           </Link>
@@ -243,10 +243,10 @@ export function FeedbackComposer({ user, today }: { user: ComposerUser; today: s
                 type="button"
                 onClick={() => setServiceOpen((v) => !v)}
                 aria-expanded={serviceOpen}
-                className="w-full bg-neutral-950/80 border border-neutral-800 rounded-xl px-4 py-3 text-white text-sm flex items-center justify-between hover:border-emerald-500/50 transition-all focus:border-emerald-500"
+                className="w-full bg-neutral-950/80 border border-neutral-800 rounded-xl px-4 py-3 text-white text-sm flex items-center justify-between hover:border-[var(--menzu-accent)]/50 transition-all focus:border-[var(--menzu-accent)]"
               >
                 <div className="flex items-center gap-2.5">
-                  <span className="text-emerald-500">
+                  <span className="text-[var(--menzu-accent)]">
                     <ServiceIcon size={16} />
                   </span>
                   <span className="font-bold tracking-wide">{service}</span>
@@ -268,21 +268,21 @@ export function FeedbackComposer({ user, today }: { user: ComposerUser; today: s
                           setService(value);
                           setServiceOpen(false);
                         }}
-                        className={`w-full flex items-center gap-3 px-4 py-3.5 text-sm transition-all hover:bg-emerald-500/10 group ${
+                        className={`w-full flex items-center gap-3 px-4 py-3.5 text-sm transition-all hover:bg-[var(--menzu-accent)]/10 group ${
                           active
-                            ? "bg-emerald-500/10 text-emerald-400"
+                            ? "bg-[var(--menzu-accent)]/10 text-[var(--menzu-accent)]"
                             : "text-neutral-400 hover:text-white"
                         }`}
                       >
                         <span
                           className={`transition-colors ${
-                            active ? "text-emerald-400" : "text-neutral-500 group-hover:text-emerald-500"
+                            active ? "text-[var(--menzu-accent)]" : "text-neutral-500 group-hover:text-[var(--menzu-accent)]"
                           }`}
                         >
                           <Icon size={16} />
                         </span>
                         <span className="font-bold">{value}</span>
-                        {active ? <CircleCheck size={14} className="ml-auto text-emerald-400" /> : null}
+                        {active ? <CircleCheck size={14} className="ml-auto text-[var(--menzu-accent)]" /> : null}
                       </button>
                     );
                   })}
@@ -304,7 +304,7 @@ export function FeedbackComposer({ user, today }: { user: ComposerUser; today: s
             <div className="flex items-center gap-3">
               <div
                 className={`shrink-0 w-12 h-12 rounded-full overflow-hidden border-2 flex items-center justify-center bg-neutral-900 transition-all ${
-                  user.avatarUrl ? "border-emerald-500/60" : "border-dashed border-neutral-700"
+                  user.avatarUrl ? "border-[var(--menzu-accent)]/60" : "border-dashed border-neutral-700"
                 }`}
               >
                 {user.avatarUrl ? (
@@ -323,7 +323,7 @@ export function FeedbackComposer({ user, today }: { user: ComposerUser; today: s
               </div>
               <p className="text-xs text-neutral-600 leading-relaxed">
                 Muốn đổi ảnh? Cập nhật ở trang{" "}
-                <Link href="/profile" className="text-emerald-500 hover:text-emerald-400 font-bold">
+                <Link href="/profile" className="text-[var(--menzu-accent)] hover:text-[var(--menzu-accent)] font-bold">
                   Tổng quan
                 </Link>{" "}
                 trước khi gửi.
@@ -439,7 +439,7 @@ export function FeedbackComposer({ user, today }: { user: ComposerUser; today: s
               <div
                 className={`w-5 h-5 rounded-md border-2 transition-all flex items-center justify-center ${
                   anonymous
-                    ? "bg-emerald-500 border-emerald-500"
+                    ? "bg-[var(--menzu-accent)] border-[var(--menzu-accent)]"
                     : "bg-neutral-900 border-neutral-700 group-hover:border-neutral-500"
                 }`}
               >
@@ -463,7 +463,7 @@ export function FeedbackComposer({ user, today }: { user: ComposerUser; today: s
           <button
             type="submit"
             disabled={submitting}
-            className="w-full bg-emerald-500 hover:bg-emerald-400 disabled:opacity-70 disabled:cursor-wait text-black font-black py-3.5 rounded-2xl mt-2 flex justify-center items-center gap-2 transition-colors uppercase tracking-wider text-sm"
+            className="w-full bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] disabled:opacity-70 disabled:cursor-wait text-white font-black py-3.5 rounded-2xl mt-2 flex justify-center items-center gap-2 transition-colors uppercase tracking-wider text-sm"
           >
             {submitting ? "Đang gửi..." : "Gửi đánh giá"}
           </button>
@@ -472,7 +472,7 @@ export function FeedbackComposer({ user, today }: { user: ComposerUser; today: s
 
       <div className="hidden lg:block lg:col-span-5 sticky top-28">
         <div className="mb-4 flex items-center gap-2">
-          <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+          <div className="w-2 h-2 rounded-full bg-[var(--menzu-accent)] animate-pulse" />
           <span className="text-[10px] font-black text-neutral-500 uppercase tracking-[0.2em]">
             Preview
           </span>
@@ -481,7 +481,7 @@ export function FeedbackComposer({ user, today }: { user: ComposerUser; today: s
 
         <div className="mt-6 bg-neutral-900/40 border border-neutral-800/60 rounded-3xl p-6">
           <div className="flex items-center gap-2 mb-4">
-            <ShieldCheck size={15} className="text-emerald-500" />
+            <ShieldCheck size={15} className="text-[var(--menzu-accent)]" />
             <span className="text-xs font-black uppercase tracking-wider text-white">
               Chính sách đánh giá
             </span>
@@ -493,7 +493,7 @@ export function FeedbackComposer({ user, today }: { user: ComposerUser; today: s
               "Admin sẽ duyệt đánh giá trước khi hiển thị công khai.",
             ].map((line) => (
               <li key={line} className="flex items-start gap-2.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0 mt-1.5" />
+                <span className="w-1.5 h-1.5 rounded-full bg-[var(--menzu-accent)] shrink-0 mt-1.5" />
                 <span className="text-xs text-neutral-400 leading-relaxed">{line}</span>
               </li>
             ))}
