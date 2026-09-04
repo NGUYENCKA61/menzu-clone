@@ -8,16 +8,14 @@ export interface Review {
   body: string;
   amount: string;
   avatar: string;
-  /** 1–5; a review from before ratings were kept counts as five. */
   rating?: number;
+  /** Backed by an order, or marked verified by an admin. */
+  verified: boolean;
 }
 
-const VERIFIED_BADGE_TEXT = "Tài khoản đã xác minh";
-
-/** Five stars, the first `filled` of them lit. */
-function Stars({ filled, size = 14 }: { filled: number; size?: number }) {
+function Stars({ filled, size = 13 }: { filled: number; size?: number }) {
   return (
-    <div className="flex items-center gap-0.5" aria-label={`${filled} trên 5 sao`}>
+    <div className="flex items-center gap-[3px]" aria-label={`${filled} trên 5 sao`}>
       {[0, 1, 2, 3, 4].map((star) => (
         <Star
           key={star}
@@ -31,26 +29,25 @@ function Stars({ filled, size = 14 }: { filled: number; size?: number }) {
 }
 
 /**
- * The reviews on the home page, under the strip of figures.
+ * The home page's review block, in the reviews page's own card: who said it
+ * first (avatar in the accent ring, name, the verified mark when earned, the
+ * date), then the stars, then the words as a quotation, then what they paid.
+ * Trust comes from the person, so the person leads.
  *
- * Laid out the way the reference shop lays out its Trustpilot wall: a small
- * pill and a centred heading, then a row of cards that each lead with the
- * stars, carry the words in the middle, and sign off with who said them.
- * The transaction the review came from sits in the corner where the
- * reference shows its source badge — it is the shop's own proof.
- *
- * Four across on a desktop; on anything narrower the row scrolls sideways
- * rather than stacking a screen's worth of cards under the fold.
+ * The pill over the block says every review below is from a verified buyer,
+ * and it appears only when that is so: the four newest shown must all carry
+ * the mark. As buyers start reviewing from their orders it comes back on its
+ * own, with the proof right under it.
  */
 export function ReviewsSection({
   reviews,
   summary,
 }: {
   reviews: Review[];
-  /** The average of approved reviews and how many there are; null when none. */
   summary?: { rating: number; count: number } | null;
 }) {
   if (reviews.length === 0) return null;
+  const allVerified = reviews.every((review) => review.verified);
 
   return (
     <section
@@ -58,10 +55,12 @@ export function ReviewsSection({
       className="w-full border-t border-white/[0.06] pt-12 lg:pt-16"
     >
       <div className="mx-auto flex max-w-2xl flex-col items-center gap-3 text-center">
-        <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-emerald-400">
-          <BadgeCheck size={12} aria-hidden />
-          Từ khách đã mua và xác minh
-        </span>
+        {allVerified ? (
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-emerald-300">
+            <BadgeCheck size={12} aria-hidden />
+            Từ khách đã mua và xác minh
+          </span>
+        ) : null}
         <h2
           id="reviews-heading"
           className="text-2xl font-black uppercase leading-tight tracking-wider sm:text-3xl"
@@ -93,43 +92,52 @@ export function ReviewsSection({
         {reviews.map((review, index) => (
           <article
             key={`${review.name}-${review.date}-${index}`}
-            className="flex w-[280px] shrink-0 snap-start flex-col gap-4 rounded-2xl border border-white/[0.08] bg-white/[0.02] p-5 transition-colors hover:border-white/[0.16] sm:w-[320px] lg:w-auto"
+            className="flex w-[280px] shrink-0 snap-start flex-col rounded-2xl border border-white/[0.08] bg-white/[0.02] p-5 transition-colors hover:border-white/[0.16] sm:w-[320px] lg:w-auto"
           >
-            <Stars filled={Math.min(5, Math.max(1, review.rating ?? 5))} />
-
-            {/* The words, and nothing else, in the middle: React escapes them,
-                the quotes are typographic, and the block grows to keep every
-                card's foot on one line. */}
-            <p className="flex-1 text-[13.5px] leading-relaxed text-neutral-200">
-              “{review.body}”
-            </p>
-
-            <div className="flex items-center justify-between gap-3 border-t border-white/[0.06] pt-4">
-              <div className="flex min-w-0 items-center gap-2.5">
-                <div className="relative grid h-8 w-8 shrink-0 place-items-center overflow-hidden rounded-full border border-white/10 bg-white/5">
+            <div className="flex items-start gap-3">
+              <div className="shrink-0 rounded-full border-[2.5px] border-[var(--menzu-accent)] p-[2px]">
+                <div className="relative grid h-10 w-10 place-items-center overflow-hidden rounded-full bg-neutral-800">
                   {review.avatar ? (
-                    <Image src={review.avatar} alt="" fill sizes="32px" className="object-cover" />
+                    <Image src={review.avatar} alt="" fill sizes="40px" className="object-cover" />
                   ) : (
-                    <span className="text-[12px] font-black uppercase text-neutral-400">
+                    <span className="text-sm font-black uppercase text-neutral-400">
                       {review.name.trim().charAt(0) || "?"}
                     </span>
                   )}
                 </div>
-                <div className="min-w-0">
-                  <div className="flex items-center gap-1">
-                    <h3 className="truncate text-[13px] font-bold text-white">{review.name}</h3>
-                    <BadgeCheck
-                      size={12}
-                      aria-label={VERIFIED_BADGE_TEXT}
-                      className="shrink-0 text-emerald-400"
-                    />
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex min-w-0 items-center gap-1.5">
+                    <h3 className="truncate text-[14px] font-black text-white">{review.name}</h3>
+                    {review.verified ? (
+                      <BadgeCheck
+                        size={14}
+                        aria-label="Tài khoản đã xác minh"
+                        className="shrink-0 text-[#0866FF]"
+                      />
+                    ) : null}
                   </div>
-                  <span className="block text-[10px] font-semibold text-neutral-500">{review.date}</span>
+                  <span className="shrink-0 text-[10px] font-semibold text-neutral-500">
+                    {review.date}
+                  </span>
+                </div>
+                <div className="mt-1.5">
+                  <Stars filled={Math.min(5, Math.max(1, review.rating ?? 5))} />
                 </div>
               </div>
-              <span className="shrink-0 rounded-md border border-emerald-500/30 bg-emerald-500/10 px-2 py-1 text-[10px] font-black text-emerald-400">
-                {review.amount}
-              </span>
+            </div>
+
+            {/* The words, and nothing else, in the middle: React escapes
+                them, the bar on the left says "quoted", and the block grows
+                to keep every card's foot on one line. */}
+            <p className="mt-4 flex-1 border-l-2 border-white/10 pl-3 text-[13.5px] leading-relaxed text-neutral-200 [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:3] overflow-hidden">
+              {review.body}
+            </p>
+
+            <div className="mt-4 flex items-center justify-between gap-3 border-t border-white/[0.06] pt-3">
+              <span className="text-[11px] font-bold text-neutral-500">Giao dịch:</span>
+              <span className="text-[13px] font-black tabular-nums text-emerald-400">{review.amount}</span>
             </div>
           </article>
         ))}

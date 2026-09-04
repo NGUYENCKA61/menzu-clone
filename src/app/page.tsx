@@ -138,6 +138,7 @@ export default async function Home() {
             amount: formatVnd(r.amount) + "đ",
             avatar: r.avatarUrl ?? "",
             rating: r.rating,
+            verified: r.verified,
           }))}
           summary={
             trust.rating && reviews.length > 0
