@@ -106,6 +106,10 @@ export function HeaderSearch() {
         <label className="relative flex h-9 items-center rounded-xl border border-white/10 bg-white/5 text-neutral-300 transition-colors focus-within:border-white/25 focus-within:bg-white/[0.08]">
           <Search size={15} aria-hidden className="ml-3 shrink-0 text-neutral-500" />
           <input
+            // Password managers and similar extensions stamp their own attributes
+            // onto text inputs before React hydrates; without this the dev overlay
+            // reports a mismatch the app did not cause (production patches it quietly).
+            suppressHydrationWarning
             ref={input}
             type="search"
             value={q}

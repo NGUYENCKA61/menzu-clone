@@ -161,6 +161,10 @@ export function RowSearch({
       >
         <Search size={15} aria-hidden className="shrink-0 text-neutral-500" />
         <input
+          // Password managers and similar extensions stamp their own attributes
+          // onto text inputs before React hydrates; without this the dev overlay
+          // reports a mismatch the app did not cause (production patches it quietly).
+          suppressHydrationWarning
           id={inputId}
           type="search"
           value={query}
