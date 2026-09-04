@@ -15,6 +15,7 @@ import { SoftwareFilterPanel } from "@/components/sites/menzu-lol-f7ae197a/share
 import { db } from "@/lib/db";
 import { docHtmlToPlainText, isHtmlBody } from "@/lib/docHtml";
 import { getCategoryPage } from "@/lib/queries";
+import { softwareSearchHint } from "@/lib/searchHint";
 import { categoryHref } from "@/lib/routes";
 import { getShopSettings } from "@/lib/settingsStore";
 import { weaponKey } from "@/lib/weaponImages";
@@ -197,7 +198,12 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
                 <h2 className="text-lg sm:text-xl font-black uppercase tracking-wider text-white">
                   Danh mục {data.name}
                 </h2>
-                <SoftwareFilterPanel />
+                <SoftwareFilterPanel
+                  hint={softwareSearchHint(
+                    data.name,
+                    data.software.map((s) => s.name),
+                  )}
+                />
                 {data.software.length > 0 ? (
                   <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:gap-8">
                     {data.software.map((s) => (

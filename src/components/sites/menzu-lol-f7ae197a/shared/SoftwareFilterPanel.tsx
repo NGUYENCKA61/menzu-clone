@@ -52,7 +52,12 @@ type SortValue = (typeof SORT_OPTIONS)[number]["value"];
  * prices it was matching; the two price sorts answer the same question without
  * the footnote.
  */
-export function SoftwareFilterPanel() {
+export function SoftwareFilterPanel({
+  hint = "Tìm tool theo tên…",
+}: {
+  /** The example in the name box, built from this category's own tools. */
+  hint?: string;
+}) {
   const router = useRouter();
   const pathname = usePathname();
   const params = useSearchParams();
@@ -87,7 +92,7 @@ export function SoftwareFilterPanel() {
           <ScopeSearchField
             value={nameQuery}
             onChange={setNameQuery}
-            placeholder="Tìm: HACK CS2 Bản Midnight, Valorant Tool Premium......"
+            placeholder={hint}
             // The breathing outline without the gold pill: the pill was tried
             // here and taken back off, the glow was asked to stay — breathing
             // purple into red rather than the account banner's red into gold.
