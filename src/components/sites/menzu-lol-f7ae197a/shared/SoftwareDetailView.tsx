@@ -2,7 +2,6 @@ import { MobileBottomNav } from "@/components/sites/menzu-lol-f7ae197a/root-8a5e
 import { SiteFooter } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/SiteFooter";
 import { SiteHeader } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/SiteHeader";
 import { ConnectRailSection } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/ConnectRailSection";
-import { ScrollCta } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/ScrollCta";
 import { docHtmlToPlainText, isHtmlBody } from "@/lib/docHtml";
 import { breadcrumbJsonLd, JsonLd } from "@/lib/seo";
 import { categoryHref, productHref } from "@/lib/routes";
@@ -12,7 +11,6 @@ import { SimilarSoftwareStrip } from "./SimilarSoftwareStrip";
 import { type SoftwareCardView } from "./SoftwareCard";
 import { SoftwareBuyPanel, type SoftwareDetail } from "./SoftwareBuyPanel";
 import {
-  DESCRIPTION_SECTION_ID,
   SoftwareDescription,
   type SetupGuideAccess,
 } from "./SoftwareDescription";
@@ -96,16 +94,6 @@ export function SoftwareDetailView({
                 software={{ ...software, description: plainDescription }}
                 initialPackageId={initialPackageId}
                 statusSubscribed={statusSubscribed}
-              />
-            </div>
-
-            {/* The same cue the home page's hero carries, in normal flow here
-                rather than pinned to a corner. */}
-            <div className="mt-12 flex justify-center">
-              <ScrollCta
-                targetId={DESCRIPTION_SECTION_ID}
-                label="Xem chi tiết"
-                placement=""
               />
             </div>
 
