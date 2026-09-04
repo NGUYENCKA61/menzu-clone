@@ -133,8 +133,8 @@ function drawerGroupsFor(
       .map((item) => ({ ...item, href: linkFor(item.label) }))
   return [
     { label: "CÁC LOẠI HACK", items: withHrefs(HACK_CATEGORY_ITEMS) },
-    { label: "SHOP ACC", items: withHrefs(SHOP_ACC_ITEMS) },
     { label: "NẠP TIỀN", items: withHrefs(NAP_TIEN_ITEMS) },
+    { label: "SHOP ACC", items: withHrefs(SHOP_ACC_ITEMS) },
     { label: "LIÊN KẾT NHANH", items: withHrefs(QUICK_LINK_ITEMS) },
   ]
 }
@@ -329,8 +329,8 @@ export function SiteHeaderClient({
 
           <div className="hidden lg:flex items-center gap-5 h-full">
             <NavDropdown label="CÁC LOẠI HACK" items={HACK_CATEGORY_ITEMS} />
-            <NavDropdown label="SHOP ACC" items={SHOP_ACC_ITEMS} />
             <NavDropdown label="NẠP TIỀN" items={NAP_TIEN_ITEMS} />
+            <NavDropdown label="SHOP ACC" items={SHOP_ACC_ITEMS} />
 
             {/* Shown to everyone, signed in or not: a visitor who does not know
                 the wheel exists never signs in for it. /vong-quay itself asks
