@@ -4,15 +4,13 @@ import { editionsOf, shortGameName, softwareSearchHint } from "@/lib/searchHint"
 
 describe("shortGameName", () => {
   it("drops the HACK prefix and the tail after a dash", () => {
-    expect(shortGameName("HACK ĐỘT KÍCH CFVN - CF4VN")).toBe("Đột Kích CFVN");
+    expect(shortGameName("HACK ĐỘT KÍCH CFVN - CF4VN")).toBe("ĐỘT KÍCH CFVN");
   });
 
-  it("keeps initialisms and cases the rest as names", () => {
-    expect(shortGameName("HACK CS2 COUNTER STRIKE 2")).toBe("CS2 Counter Strike 2");
-    expect(shortGameName("HACK DELTA FORCE MỚI")).toBe("Delta Force");
-    expect(shortGameName("HACK PUBG STEAM PC")).toBe("PUBG Steam PC");
-    expect(shortGameName("HACK TRUY KÍCH PC - TRUY KÍCH 2")).toBe("Truy Kích PC");
-    expect(shortGameName("HACK CALL OF DUTY WARZONE BLACK OPS 6")).toBe("Call of Duty Warzone");
+  it("drops 'mới' and keeps at most four words, in capitals", () => {
+    expect(shortGameName("HACK DELTA FORCE MỚI")).toBe("DELTA FORCE");
+    expect(shortGameName("hack Call of Duty Warzone Black Ops 6")).toBe("CALL OF DUTY WARZONE");
+    expect(shortGameName("HACK TRUY KÍCH PC - TRUY KÍCH 2")).toBe("TRUY KÍCH PC");
   });
 });
 
@@ -33,7 +31,7 @@ describe("editionsOf", () => {
 });
 
 describe("softwareSearchHint", () => {
-  it("names the game and its editions", () => {
+  it("names the game and its editions, bản said once", () => {
     expect(
       softwareSearchHint("HACK ĐỘT KÍCH CFVN - CF4VN", [
         "HACK CFVN BẢN OBV",
@@ -41,7 +39,7 @@ describe("softwareSearchHint", () => {
         "HACK CFVN BẢN UNNAMED",
         "HACK CFVN BẢN PRO",
       ]),
-    ).toBe("Tìm: HACK Đột Kích CFVN bản OBV, VS, UNNAMED…");
+    ).toBe("Tìm: HACK ĐỘT KÍCH CFVN bản OBV, VS, UNNAMED…");
   });
 
   it("falls back to the first tool's name when nothing says 'bản'", () => {
@@ -51,6 +49,6 @@ describe("softwareSearchHint", () => {
   });
 
   it("names the game alone when the shelf is empty", () => {
-    expect(softwareSearchHint("HACK NARAKA VN", [])).toBe("Tìm HACK Naraka VN…");
+    expect(softwareSearchHint("HACK NARAKA VN", [])).toBe("Tìm HACK NARAKA VN…");
   });
 });
