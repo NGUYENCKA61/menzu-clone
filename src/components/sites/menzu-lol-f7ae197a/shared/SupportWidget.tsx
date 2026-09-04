@@ -8,6 +8,7 @@ import {
   ChevronRight,
   Clock,
   ExternalLink,
+  MessageCircle,
   MessagesSquare,
   UserRound,
   X,
@@ -424,12 +425,19 @@ export function SupportWidget({
           into the aria-label, and the open state swaps the mark for a cross
           since the chevron that says so on wider screens is hidden here.
 
-          And when the shop has a channel to press, the phone skips the tab
-          and the panel altogether: the Messenger and Zalo marks are the
-          buttons, and a tap opens that conversation in its app. The tab is
-          kept for wider screens, and for a phone with nothing to press. */}
+          And when the shop has a channel to press, the phone skips the panel:
+          the round button wears a chat mark, and a tap fans out the Messenger
+          and Zalo marks above it, each of which opens that conversation in
+          its app. The same open flag drives the fan here and the panel on
+          wider screens; only one of the two is ever on screen. */}
       {canMessage ? (
-        <div className="pointer-events-auto flex flex-col items-end gap-2.5 sm:hidden">
+        <div
+          className={`mb-2.5 flex flex-col items-end gap-2.5 transition-all duration-200 sm:hidden ${
+            open ? "pointer-events-auto translate-y-0 opacity-100" : "pointer-events-none translate-y-2 opacity-0"
+          }`}
+          aria-hidden={!open}
+          inert={!open}
+        >
           {fanpage ? (
             <DirectChannel
               href={fanpage.chatUrl}
@@ -442,7 +450,7 @@ export function SupportWidget({
           ) : null}
         </div>
       ) : null}
-      <div className={canMessage ? "pointer-events-auto hidden sm:block" : "pointer-events-auto"}>
+      <div className="pointer-events-auto">
         <button
           type="button"
           onClick={toggle}
@@ -457,17 +465,23 @@ export function SupportWidget({
               Named for what is actually behind it: a person when a person can
               be reached, the bot only when the bot is all there is. */}
           {open ? <X aria-hidden size={22} className="shrink-0 text-white sm:hidden" /> : null}
+          {/* The phone's mark when there are channels to fan out: a chat
+              bubble, since the press opens a choice of chats rather than a
+              person. Wider screens keep the person or the bot. */}
+          {canMessage && !open ? (
+            <MessageCircle aria-hidden size={24} className="shrink-0 text-[var(--menzu-accent)] sm:hidden" />
+          ) : null}
           {assistant && !fanpage ? (
             <Bot
               aria-hidden
               size={21}
-              className={`shrink-0 text-[var(--menzu-accent)] ${open ? "hidden sm:block" : ""}`}
+              className={`shrink-0 text-[var(--menzu-accent)] ${open || canMessage ? "hidden sm:block" : ""}`}
             />
           ) : (
             <UserRound
               aria-hidden
               size={21}
-              className={`shrink-0 text-[var(--menzu-accent)] ${open ? "hidden sm:block" : ""}`}
+              className={`shrink-0 text-[var(--menzu-accent)] ${open || canMessage ? "hidden sm:block" : ""}`}
             />
           )}
 
