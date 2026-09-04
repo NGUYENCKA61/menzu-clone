@@ -1,20 +1,29 @@
 # Caddy site config for the VPS. Copy to /etc/caddy/Caddyfile, then
 # `systemctl reload caddy`. Caddy obtains and renews the Let's Encrypt
-# certificates on its own; ports 80 and 443 must be reachable from the
-# internet for that.
+# certificates on its own; Cloudflare passes the renewal check through to
+# port 80 here, so the certificate keeps renewing behind the proxy.
+#
+# Cloudflare sits in front of this site: the public DNS points at Cloudflare,
+# which connects to this box from its own address ranges only, and the
+# firewall (deploy/cf-firewall.sh) lets nothing else reach ports 80 and 443.
+# That keeps the VPS's address out of sight. Two consequences are handled
+# below: the visitor's real address arrives in Cloudflare's headers rather
+# than as the remote address, and the old sslip.io name, which spelled out the
+# address, is gone from the list.
 #
 # The uploads folder is served by Caddy, not by Next: a production Next server
 # lists public/ once when it starts and never looks again, so a picture the
-# admin uploads afterwards — or one rsynced up after the container started —
+# admin uploads afterwards, or one rsynced up after the container started,
 # answers 404 through it. Caddy reads the directory on every request, and its
 # file server also does byte ranges, which the hero video needs to seek.
 # UPLOADS_DIR in .env must point at the same directory.
 #
-# Two names for one site: the real domain, and the sslip.io address the shop
-# ran on before it had one. The old address stays until every link to it has
-# died; it is the one that spells out the VPS's IP, so once Cloudflare fronts
-# the real domain it should come off this list.
-thichthihackk.com, 180.93.111.201.sslip.io {
+# The Cloudflare ranges appear twice on purpose (once as the connections we
+# trust, once as the ones we do not); they come from
+# https://www.cloudflare.com/ips-v4 and /ips-v6 and change once in years. The
+# firewall script compares them with the live list every month and sends the
+# admins a Telegram message when this file needs the new entries.
+thichthihackk.com {
 	# A year of HTTPS-only for browsers that have been here once: the redirect
 	# on port 80 protects the first visit, this protects every one after. No
 	# includeSubDomains, so a subdomain served elsewhere over plain http stays
@@ -32,7 +41,22 @@ thichthihackk.com, 180.93.111.201.sslip.io {
 	}
 
 	handle {
-		reverse_proxy localhost:3000
+		# A connection that did not come from Cloudflare (there should be none
+		# once the firewall is up) must not get to name the visitor: the app
+		# reads Cf-Connecting-Ip as the truth for its login and register
+		# limits, and the Netlify header from the shop's old home is read the
+		# same way, so both are stripped unless Cloudflare wrote them.
+		@direct not remote_ip 173.245.48.0/20 103.21.244.0/22 103.22.200.0/22 103.31.4.0/22 141.101.64.0/18 108.162.192.0/18 190.93.240.0/20 188.114.96.0/20 197.234.240.0/22 198.41.128.0/17 162.158.0.0/15 104.16.0.0/13 104.24.0.0/14 172.64.0.0/13 131.0.72.0/22 2400:cb00::/32 2606:4700::/32 2803:f800::/32 2405:b500::/32 2405:8100::/32 2a06:98c0::/29 2c0f:f248::/32
+		request_header @direct -Cf-Connecting-Ip
+		request_header -X-Nf-Client-Connection-Ip
+
+		reverse_proxy localhost:3000 {
+			# From a trusted proxy the X-Forwarded-For chain is passed on with
+			# the visitor still leftmost; from anyone else Caddy replaces it
+			# with the connection's own address, so a forged chain never
+			# reaches the app.
+			trusted_proxies 173.245.48.0/20 103.21.244.0/22 103.22.200.0/22 103.31.4.0/22 141.101.64.0/18 108.162.192.0/18 190.93.240.0/20 188.114.96.0/20 197.234.240.0/22 198.41.128.0/17 162.158.0.0/15 104.16.0.0/13 104.24.0.0/14 172.64.0.0/13 131.0.72.0/22 2400:cb00::/32 2606:4700::/32 2803:f800::/32 2405:b500::/32 2405:8100::/32 2a06:98c0::/29 2c0f:f248::/32
+		}
 	}
 }
 

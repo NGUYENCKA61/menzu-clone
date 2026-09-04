@@ -41,6 +41,19 @@ describe("clientIp", () => {
     ).toBe("198.51.100.7");
   });
 
+  it("reads Cloudflare's header before the forwarded chain", () => {
+    // Written by Cloudflare on the way in; Caddy strips it from any
+    // connection that is not Cloudflare's, so when it arrives it is true.
+    expect(
+      clientIp(
+        requestWith({
+          "cf-connecting-ip": "198.51.100.7",
+          "x-forwarded-for": "203.0.113.9, 172.64.0.1",
+          "x-real-ip": "192.0.2.1",
+        }),
+      ),
+    ).toBe("198.51.100.7");
+  });
   it("falls back to x-real-ip when no forwarded chain is present", () => {
     expect(clientIp(requestWith({ "x-real-ip": "198.51.100.7" }))).toBe("198.51.100.7");
   });
