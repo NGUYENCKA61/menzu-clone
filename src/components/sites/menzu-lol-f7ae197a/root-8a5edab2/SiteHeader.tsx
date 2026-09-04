@@ -29,6 +29,9 @@ export async function SiteHeader() {
   return (
     <SiteHeaderClient
       brand={{ name: settings.brandName, logo: settings.brandLogo }}
+      telegramShopUrl={
+        settings.telegramShopUsername ? `https://t.me/${settings.telegramShopUsername}` : null
+      }
       // "5 phút trước" goes over as ISO, because it has to be measured against
       // the reader's clock; the update date is formatted here, where the
       // timezone is fixed and the two renders cannot disagree.

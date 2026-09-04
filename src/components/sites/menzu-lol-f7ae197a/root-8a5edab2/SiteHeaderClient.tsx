@@ -12,7 +12,7 @@ import {
   Gift,
   KeyRound,
   Menu,
-  MessageSquare,
+  Send,
   Smartphone,
   Star,
   User,
@@ -49,7 +49,6 @@ const LINK_HREFS: Record<string, string> = {
   "HỖ TRỢ": "/feedback",
   "XEM TRẠNG THÁI": STATUS_TAB_HREF,
   "WIKI & HƯỚNG DẪN": "/docs",
-  "GÓP Ý": "/feedback",
   "Nạp Qua ATM + Momo": "/wallet",
   "Nạp Thẻ Điện Thoại": "/wallet",
 }
@@ -58,7 +57,22 @@ function hrefFor(label: string): string {
   return LINK_HREFS[label] ?? "#"
 }
 
-const QUICK_LINKS = ["ĐÁNH GIÁ", "XEM TRẠNG THÁI", "WIKI & HƯỚNG DẪN", "GÓP Ý", "CỘNG ĐỒNG"]
+/**
+ * The one strip link whose address is not a page here but the shop's
+ * Telegram bot, read from Cấu hình at render time; left out entirely while
+ * no bot is configured, since a dead link sells nothing.
+ */
+const TELEGRAM_SHOP_LINK = "MUA TRÊN TELEGRAM"
+
+// "GÓP Ý" used to sit fourth and went to the same page as "ĐÁNH GIÁ"; the
+// reviews took its slot and the Telegram shop took the front.
+const QUICK_LINKS = [
+  TELEGRAM_SHOP_LINK,
+  "XEM TRẠNG THÁI",
+  "WIKI & HƯỚNG DẪN",
+  "ĐÁNH GIÁ",
+  "CỘNG ĐỒNG",
+]
 
 // Nav text sits at neutral-200 rather than the captured neutral-400: at 10-11px
 // and letter-spaced, the darker grey on the near-black bar was closer to
@@ -101,24 +115,32 @@ const SHOP_ACC_ITEMS: DropdownItem[] = [
  * on it that the bottom bar does not carry, so the menu carries them.
  */
 const QUICK_LINK_ITEMS: DropdownItem[] = [
-  { label: "ĐÁNH GIÁ", icon: Star },
+  { label: TELEGRAM_SHOP_LINK, icon: Send },
   { label: "XEM TRẠNG THÁI", icon: Activity },
   { label: "WIKI & HƯỚNG DẪN", icon: BookOpen },
-  { label: "GÓP Ý", icon: MessageSquare },
+  { label: "ĐÁNH GIÁ", icon: Star },
   { label: "CỘNG ĐỒNG", icon: Users },
 ]
 
 // Each row goes where its desktop twin goes: the same label lookup, so a
 // destination added for the dropdowns reaches the drawer in the same edit.
-const withHrefs = (items: DropdownItem[]) =>
-  items.map((item) => ({ ...item, href: hrefFor(item.label) }))
-
-const DRAWER_GROUPS: DrawerGroup[] = [
-  { label: "CÁC LOẠI HACK", items: withHrefs(HACK_CATEGORY_ITEMS) },
-  { label: "NẠP TIỀN", items: withHrefs(NAP_TIEN_ITEMS) },
-  { label: "SHOP ACC", items: withHrefs(SHOP_ACC_ITEMS) },
-  { label: "LIÊN KẾT NHANH", items: withHrefs(QUICK_LINK_ITEMS) },
-]
+// Built per render rather than once, because one address (the Telegram
+// shop) comes from settings the component is handed.
+function drawerGroupsFor(
+  linkFor: (label: string) => string,
+  telegramShop: boolean,
+): DrawerGroup[] {
+  const withHrefs = (items: DropdownItem[]) =>
+    items
+      .filter((item) => telegramShop || item.label !== TELEGRAM_SHOP_LINK)
+      .map((item) => ({ ...item, href: linkFor(item.label) }))
+  return [
+    { label: "CÁC LOẠI HACK", items: withHrefs(HACK_CATEGORY_ITEMS) },
+    { label: "NẠP TIỀN", items: withHrefs(NAP_TIEN_ITEMS) },
+    { label: "SHOP ACC", items: withHrefs(SHOP_ACC_ITEMS) },
+    { label: "LIÊN KẾT NHANH", items: withHrefs(QUICK_LINK_ITEMS) },
+  ]
+}
 
 function NavDropdown({ label, items }: { label: string; items: DropdownItem[] }) {
   return (
@@ -179,6 +201,7 @@ export function SiteHeaderClient({
   announcements,
   statusEvents,
   cartCount,
+  telegramShopUrl,
 }: {
   user: HeaderUser | null;
   brand: HeaderBrand;
@@ -187,7 +210,15 @@ export function SiteHeaderClient({
   statusEvents: StatusEventItem[];
   /** Lines waiting in the basket; 0 for a guest. */
   cartCount: number;
+  /** t.me link of the shop bot, or null while Cấu hình has no bot. */
+  telegramShopUrl: string | null;
 }) {
+  const linkFor = (label: string) =>
+    label === TELEGRAM_SHOP_LINK ? (telegramShopUrl ?? "#") : hrefFor(label)
+  const quickLinks = QUICK_LINKS.filter(
+    (link) => link !== TELEGRAM_SHOP_LINK || telegramShopUrl !== null,
+  )
+  const drawerGroups = drawerGroupsFor(linkFor, telegramShopUrl !== null)
   const [drawerOpen, setDrawerOpen] = useState(false)
 
   // True once the page has scrolled past the top bar. Drives the condensed
@@ -230,16 +261,16 @@ export function SiteHeaderClient({
               captured site did; the shop read that as the rest being lost.
               All five, in a row that scrolls sideways under the thumb. */}
           <div className="lg:hidden flex h-full min-w-0 items-center gap-5 overflow-x-auto whitespace-nowrap [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            {QUICK_LINKS.map((link) => (
-              <SiteLink key={link} href={hrefFor(link)} className={QUICK_LINK_CLASS}>
+            {quickLinks.map((link) => (
+              <SiteLink key={link} href={linkFor(link)} className={QUICK_LINK_CLASS}>
                 {link}
               </SiteLink>
             ))}
           </div>
 
           <div className="hidden lg:flex items-center gap-5 h-full">
-            {QUICK_LINKS.map((link) => (
-              <SiteLink key={link} href={hrefFor(link)} className={QUICK_LINK_CLASS}>
+            {quickLinks.map((link) => (
+              <SiteLink key={link} href={linkFor(link)} className={QUICK_LINK_CLASS}>
                 {link}
               </SiteLink>
             ))}
@@ -358,7 +389,7 @@ export function SiteHeaderClient({
       <MobileDrawer
         open={drawerOpen}
         onClose={() => setDrawerOpen(false)}
-        groups={DRAWER_GROUPS}
+        groups={drawerGroups}
       />
     </nav>
   )
