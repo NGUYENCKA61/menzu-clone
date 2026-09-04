@@ -218,7 +218,10 @@ export function SupportWidget({
     // inside it passes clicks through rather than swallowing them, which means
     // they land on the frame instead. Anything the page puts in that corner
     // became unclickable: the paging buttons on the admin lists sit there.
-    <div className="pointer-events-none fixed bottom-0 right-4 z-[101] flex flex-col items-end">
+    // On a phone the bottom edge belongs to the bottom nav (h-16, sm:hidden),
+    // so the whole thing lifts above it; from sm up it hinges on the window
+    // edge as before.
+    <div className="pointer-events-none fixed bottom-[calc(4rem+0.75rem)] right-3 z-[101] flex flex-col items-end sm:bottom-0 sm:right-4">
       <div
         className={`mb-0 w-[calc(100vw-2rem)] max-w-[340px] origin-bottom transition-all duration-300 ${
           open
@@ -377,13 +380,20 @@ export function SupportWidget({
 
       {/* The same pane as the panel, hinged at the bottom edge of the window.
           It carries no accent fill of its own — the shop's colour appears once,
-          on the mark, and everything else is light on glass. */}
+          on the mark, and everything else is light on glass.
+
+          On a phone the tab is the mark alone, a round button the size of a
+          thumb: the wide tab covered a third of the bottom nav and its two
+          lines of text were unreadable at that width anyway. The name moves
+          into the aria-label, and the open state swaps the mark for a cross
+          since the chevron that says so on wider screens is hidden here. */}
       <div className="pointer-events-auto">
         <button
           type="button"
           onClick={toggle}
           aria-expanded={open}
-          className={`group flex min-w-[250px] items-center gap-3 rounded-t-[18px] border-b-0 px-3.5 py-3 text-left shadow-[0_-12px_40px_-10px_rgba(0,0,0,0.9),inset_0_1px_0_rgba(255,255,255,0.14)] transition-colors duration-200 hover:bg-[#14141c]/80 ${GLASS}`}
+          aria-label={assistant && !fanpage ? "Trợ lý AI" : "Chăm sóc khách hàng"}
+          className={`group flex h-14 w-14 items-center justify-center rounded-full text-left shadow-[0_12px_40px_-10px_rgba(0,0,0,0.9),inset_0_1px_0_rgba(255,255,255,0.14)] transition-colors duration-200 hover:bg-[#14141c]/80 sm:h-auto sm:w-auto sm:min-w-[250px] sm:justify-start sm:gap-3 sm:rounded-none sm:rounded-t-[18px] sm:border-b-0 sm:px-3.5 sm:py-3 sm:shadow-[0_-12px_40px_-10px_rgba(0,0,0,0.9),inset_0_1px_0_rgba(255,255,255,0.14)] ${GLASS}`}
         >
           {/* Bare, with no tile around it. The tab is already a lit pane, so a
               second pane behind the icon was a box inside a box — and the mark
@@ -391,13 +401,22 @@ export function SupportWidget({
 
               Named for what is actually behind it: a person when a person can
               be reached, the bot only when the bot is all there is. */}
+          {open ? <X aria-hidden size={22} className="shrink-0 text-white sm:hidden" /> : null}
           {assistant && !fanpage ? (
-            <Bot aria-hidden size={21} className="shrink-0 text-[var(--menzu-accent)]" />
+            <Bot
+              aria-hidden
+              size={21}
+              className={`shrink-0 text-[var(--menzu-accent)] ${open ? "hidden sm:block" : ""}`}
+            />
           ) : (
-            <UserRound aria-hidden size={21} className="shrink-0 text-[var(--menzu-accent)]" />
+            <UserRound
+              aria-hidden
+              size={21}
+              className={`shrink-0 text-[var(--menzu-accent)] ${open ? "hidden sm:block" : ""}`}
+            />
           )}
 
-          <span className="min-w-0 flex-1">
+          <span className="hidden min-w-0 flex-1 sm:block">
             <span className="block text-[13px] font-bold leading-tight tracking-tight text-white">
               {assistant && !fanpage ? "Trợ lý AI" : "Chăm sóc khách hàng"}
             </span>
@@ -413,7 +432,7 @@ export function SupportWidget({
           <ChevronDown
             aria-hidden
             size={15}
-            className={`shrink-0 text-neutral-500 transition-[transform,color] duration-200 group-hover:text-white ${
+            className={`hidden shrink-0 text-neutral-500 transition-[transform,color] duration-200 group-hover:text-white sm:block ${
               open ? "" : "rotate-180"
             }`}
           />
