@@ -4,7 +4,11 @@ import Link from "next/link";
 import { ChevronDown, ChevronUp, Search, X } from "lucide-react";
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 
-import { CATEGORY_PLATFORMS, type CategoryPlatform } from "@/lib/categoryPlatform";
+import {
+  CATEGORY_PLATFORMS,
+  platformLabel,
+  type CategoryPlatform,
+} from "@/lib/categoryPlatform";
 import { columnsOf, hiddenAfter, revealLimit } from "@/lib/rowReveal";
 
 /** One tile the row can show, with the words it can be found by. */
@@ -198,7 +202,7 @@ export function RowSearch({
               onClick={() => ask({ platform: value as CategoryPlatform | typeof ALL })}
               className={`${CHIP} ${active ? CHIP_ACTIVE : CHIP_IDLE}`}
             >
-              {value === ALL ? "Tất cả" : value}
+              {value === ALL ? "Tất cả" : platformLabel(value)}
             </button>
           );
         })}
@@ -281,7 +285,7 @@ export function RowSearch({
           <p className="text-sm font-bold text-white">
             {needle
               ? `Không có game nào khớp “${query.trim()}”`
-              : `Chưa có game nào ở mục ${platform}`}
+              : `Chưa có game nào ở mục ${platformLabel(platform)}`}
           </p>
           <p className="text-[12px] text-neutral-400">
             {needle

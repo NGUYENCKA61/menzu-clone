@@ -7,8 +7,8 @@ import {
 } from "@/lib/categoryPlatform";
 
 describe("category platform", () => {
-  it("knows exactly the three the home page filters by", () => {
-    expect(CATEGORY_PLATFORMS).toEqual(["PC", "MOBILE", "SPOOFER"]);
+  it("knows exactly the four the home page filters by", () => {
+    expect(CATEGORY_PLATFORMS).toEqual(["PC", "MOBILE", "SPOOFER", "DMA"]);
     expect(isCategoryPlatform("PC")).toBe(true);
     expect(isCategoryPlatform("CONSOLE")).toBe(false);
     expect(isCategoryPlatform(1)).toBe(false);
@@ -18,6 +18,7 @@ describe("category platform", () => {
     // The select sends the value as is; a hand-typed client may not.
     expect(parsePlatform("MOBILE")).toEqual({ ok: true, value: "MOBILE" });
     expect(parsePlatform(" spoofer ")).toEqual({ ok: true, value: "SPOOFER" });
+    expect(parsePlatform("dma")).toEqual({ ok: true, value: "DMA" });
   });
 
   it("clears on blank and refuses anything invented", () => {

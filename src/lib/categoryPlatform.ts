@@ -8,9 +8,18 @@
  * platform. Stored on the category as the value itself ("PC"), which is
  * also what the chip prints.
  */
-export const CATEGORY_PLATFORMS = ["PC", "MOBILE", "SPOOFER"] as const;
+export const CATEGORY_PLATFORMS = ["PC", "MOBILE", "SPOOFER", "DMA"] as const;
 
 export type CategoryPlatform = (typeof CATEGORY_PLATFORMS)[number];
+
+/**
+ * What the chip and the admin's select print. The stored value stays a
+ * single word; the one that is not its own label is the DMA / mạch shelf,
+ * whose hardware the shop's customers know by both names.
+ */
+export function platformLabel(value: CategoryPlatform | string): string {
+  return value === "DMA" ? "DMA / MẠCH" : value;
+}
 
 export function isCategoryPlatform(value: unknown): value is CategoryPlatform {
   return (

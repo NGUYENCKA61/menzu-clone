@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { AdminError } from "./AdminStates";
-import { CATEGORY_PLATFORMS } from "@/lib/categoryPlatform";
+import { CATEGORY_PLATFORMS, platformLabel } from "@/lib/categoryPlatform";
 
 import { AdminImagePicker } from "./AdminImagePicker";
 
@@ -207,7 +207,7 @@ export function AdminCategoryDetail({
               </option>
               {CATEGORY_PLATFORMS.map((value) => (
                 <option key={value} value={value} className="bg-neutral-900">
-                  {value}
+                  {platformLabel(value)}
                 </option>
               ))}
             </select>
