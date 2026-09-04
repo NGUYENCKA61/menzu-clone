@@ -137,7 +137,7 @@ function DirectChannel({
       target="_blank"
       rel="noopener noreferrer"
       aria-label={label}
-      className={`flex h-12 items-center gap-2.5 rounded-full pl-2.5 pr-4 shadow-[0_12px_40px_-10px_rgba(0,0,0,0.9),inset_0_1px_0_rgba(255,255,255,0.14)] transition-colors duration-200 active:bg-[#14141c]/80 ${GLASS}`}
+      className="flex h-12 items-center gap-3 rounded-full border border-white/[0.14] bg-[#0c0d12] pl-3 pr-5 shadow-[0_12px_40px_-10px_rgba(0,0,0,0.9),inset_0_1px_0_rgba(255,255,255,0.14)] transition-colors duration-200 active:bg-[#14141c]"
     >
       <Image
         src={iconUrl}
@@ -435,6 +435,17 @@ export function SupportWidget({
           and Zalo marks above it, each of which opens that conversation in
           its app. The same open flag drives the fan here and the panel on
           wider screens; only one of the two is ever on screen. */}
+      {canMessage && open ? (
+        // Behind everything in the frame (negative z inside its stacking
+        // context), above the page and the bottom bar: the page dims, the two
+        // pills stand alone, and a tap anywhere else closes them.
+        <button
+          type="button"
+          onClick={toggle}
+          aria-label="Đóng"
+          className="pointer-events-auto fixed inset-0 -z-10 bg-black/60 backdrop-blur-[2px] sm:hidden"
+        />
+      ) : null}
       {canMessage ? (
         <div
           className={`mb-2.5 flex flex-col items-stretch gap-2.5 transition-all duration-200 sm:hidden ${
