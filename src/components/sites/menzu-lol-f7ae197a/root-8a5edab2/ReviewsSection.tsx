@@ -62,21 +62,6 @@ export function ReviewsSection({
         <p className="text-[13px] text-neutral-400">
           Đánh giá thật từ khách hàng đã giao dịch, admin duyệt trước khi hiện.
         </p>
-        {summary ? (
-          <div className="mt-1 flex items-center gap-2.5">
-            <Stars filled={Math.round(summary.rating)} size={15} />
-            <span className="text-sm font-black text-white">
-              {summary.rating.toLocaleString("vi-VN", {
-                minimumFractionDigits: 1,
-                maximumFractionDigits: 1,
-              })}
-              <span className="text-neutral-500">/5</span>
-            </span>
-            <span className="text-[11px] font-bold uppercase tracking-widest text-neutral-500">
-              · {summary.count} đánh giá
-            </span>
-          </div>
-        ) : null}
       </div>
 
       <div className="mt-8 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:grid lg:grid-cols-4 lg:overflow-visible lg:pb-0">
@@ -134,7 +119,27 @@ export function ReviewsSection({
         ))}
       </div>
 
-      <div className="mt-6 flex justify-end">
+      {/* The score and the count sit on the same line as the way to the rest:
+          a reader who has just read four cards is told what the whole says
+          and where to read it, in one glance. */}
+      <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
+        {summary ? (
+          <div className="flex items-center gap-2.5">
+            <Stars filled={Math.round(summary.rating)} size={15} />
+            <span className="text-sm font-black text-white">
+              {summary.rating.toLocaleString("vi-VN", {
+                minimumFractionDigits: 1,
+                maximumFractionDigits: 1,
+              })}
+              <span className="text-neutral-500">/5</span>
+            </span>
+            <span className="text-[11px] font-bold uppercase tracking-widest text-neutral-500">
+              · {summary.count} đánh giá
+            </span>
+          </div>
+        ) : (
+          <span />
+        )}
         <Link
           href="/feedback"
           className="group inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-neutral-400 transition-colors hover:text-white"
