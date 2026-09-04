@@ -41,7 +41,7 @@ describe("softwareSearchHint", () => {
         "HACK CFVN BẢN UNNAMED",
         "HACK CFVN BẢN PRO",
       ]),
-    ).toBe("Tìm: HACK Đột Kích CFVN bản OBV, bản VS, bản UNNAMED…");
+    ).toBe("Tìm: HACK Đột Kích CFVN bản OBV, VS, UNNAMED…");
   });
 
   it("falls back to the first tool's name when nothing says 'bản'", () => {
