@@ -56,7 +56,7 @@ export function ReviewsSection({
     >
       <div className="mx-auto flex max-w-2xl flex-col items-center gap-3 text-center">
         {allVerified ? (
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-[#0866FF]/40 bg-[#0866FF]/10 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-sky-300">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-emerald-300">
             <BadgeCheck size={12} aria-hidden />
             Từ khách đã mua và xác minh
           </span>
