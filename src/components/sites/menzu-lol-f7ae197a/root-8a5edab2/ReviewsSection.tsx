@@ -18,7 +18,7 @@ export interface Review {
  * something; "4,8/5 · 6 đánh giá" reads as a small shop trying to look big.
  * Nothing to switch back on: the line appears by itself past this count.
  */
-const MIN_REVIEWS_FOR_SCORE = 20;
+const MIN_REVIEWS_FOR_SCORE = 100;
 
 function Stars({ filled, size = 13 }: { filled: number; size?: number }) {
   return (
