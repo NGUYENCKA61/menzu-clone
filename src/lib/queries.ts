@@ -179,6 +179,17 @@ const CARD_SKINS = {
   orderBy: { id: "asc" },
 } as const;
 
+/**
+ * A product a stranger can reach: not removed, not hidden. Sold ones count,
+ * since their pages still resolve. The sitemap and the category page both
+ * decide "is there anything here" with this one clause, so they cannot
+ * disagree about which categories exist for a crawler.
+ */
+export const LISTED_PRODUCT = {
+  deletedAt: null,
+  status: { not: "HIDDEN" },
+} as const satisfies Prisma.ProductWhereInput;
+
 export interface CategoryPageData {
   name: string;
   slug: string;
@@ -203,6 +214,13 @@ export interface CategoryPageData {
    * that sells no software from one whose software the search just excluded.
    */
   softwareTotal: number;
+  /**
+   * Whether a search engine should list this page: true once the category
+   * holds at least one product a visitor can open. An empty category is
+   * noindex and stays out of the sitemap until its first product arrives,
+   * then comes back on its own; nobody has to remember a switch.
+   */
+  listed: boolean;
   total: number;
   totalPages: number;
   page: number;
@@ -369,7 +387,7 @@ export async function getCategoryPage(
 
   const where = categoryWhere(category.id, filters);
 
-  const [total, rows, softwareRows, accountTotal, softwareTotal] = await Promise.all([
+  const [total, rows, softwareRows, accountTotal, softwareTotal, listedTotal] = await Promise.all([
     db.product.count({ where }),
     db.product.findMany({
       where,
@@ -400,6 +418,7 @@ export async function getCategoryPage(
     // and its listing cannot drift over what "sellable" means.
     db.product.count({ where: categoryWhere(category.id, {}) }),
     db.product.count({ where: softwareWhere(category.id, {}) }),
+    db.product.count({ where: { categoryId: category.id, ...LISTED_PRODUCT } }),
   ]);
 
   const [sale, images, stock] = await Promise.all([
@@ -452,6 +471,7 @@ export async function getCategoryPage(
     total,
     accountTotal,
     softwareTotal,
+    listed: listedTotal > 0,
     page,
     totalPages: Math.max(1, Math.ceil(total / PAGE_SIZE)),
     software,

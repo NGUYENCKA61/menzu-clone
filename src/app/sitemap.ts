@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 
 import { db } from "@/lib/db";
+import { LISTED_PRODUCT } from "@/lib/queries";
 import { SITE_URL } from "@/lib/seo";
 import { categoryHref, productHref } from "@/lib/routes";
 
@@ -46,14 +47,22 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       // Hidden products are left out beside the removed ones: their pages now
       // 404, and a sitemap that offers a crawler a URL answering 404 is the
       // one thing a sitemap must not do.
-      where: { deletedAt: null, status: { not: "HIDDEN" } },
+      where: LISTED_PRODUCT,
       select: {
         slug: true,
         updatedAt: true,
         category: { select: { slug: true } },
       },
     }),
-    db.category.findMany({ select: { slug: true, updatedAt: true } }),
+    // Only categories with something in them. An empty one says "no products
+    // yet" and nothing else, which a crawler would index as a thin page; it
+    // joins the list the moment its first product is published, and leaves
+    // again if the last one goes. The page itself says noindex on the same
+    // rule (see [categorySlug]/page.tsx).
+    db.category.findMany({
+      where: { products: { some: LISTED_PRODUCT } },
+      select: { slug: true, updatedAt: true },
+    }),
     // Only articles that have been written: the empty ones are noindex, and
     // listing a noindex page here sends crawlers two contradictory signals.
     db.docArticle.findMany({

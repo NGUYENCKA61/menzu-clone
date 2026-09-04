@@ -80,6 +80,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     // The category sits at the root and is reached from several groups; the
     // canonical says which of those addresses is the page itself.
     alternates: { canonical },
+    // An empty category has nothing to rank for and is left out of the
+    // sitemap; it is indexed again the day its first product appears.
+    ...(data && !data.listed ? { robots: { index: false, follow: true } } : {}),
     ...(await shareCard({ url: canonical })),
   };
 }
