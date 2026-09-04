@@ -34,10 +34,8 @@ function Stars({ filled, size = 13 }: { filled: number; size?: number }) {
  * date), then the stars, then the words as a quotation, then what they paid.
  * Trust comes from the person, so the person leads.
  *
- * The pill over the block says every review below is from a verified buyer,
- * and it appears only when that is so: the four newest shown must all carry
- * the mark. As buyers start reviewing from their orders it comes back on its
- * own, with the proof right under it.
+ * No pill over the block: the verified mark on each card says what is
+ * verified, and a blanket claim over all four was either untrue or redundant.
  */
 export function ReviewsSection({
   reviews,
@@ -47,7 +45,6 @@ export function ReviewsSection({
   summary?: { rating: number; count: number } | null;
 }) {
   if (reviews.length === 0) return null;
-  const allVerified = reviews.every((review) => review.verified);
 
   return (
     <section
@@ -55,12 +52,6 @@ export function ReviewsSection({
       className="w-full border-t border-white/[0.06] pt-12 lg:pt-16"
     >
       <div className="mx-auto flex max-w-2xl flex-col items-center gap-3 text-center">
-        {allVerified ? (
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-emerald-300">
-            <BadgeCheck size={12} aria-hidden />
-            Từ khách đã mua và xác minh
-          </span>
-        ) : null}
         <h2
           id="reviews-heading"
           className="text-2xl font-black uppercase leading-tight tracking-wider sm:text-3xl"
