@@ -113,18 +113,23 @@ function ContactRow({
 }
 
 /**
- * One channel as a round button, for the phone, where the panel is skipped
- * and the mark itself is the press. Same glass as the tab, the channel's own
- * mark on it; the name lives in the aria-label since there is no room for
- * words at this size.
+ * One channel as a round button with its name beside it, for the phone,
+ * where the panel is skipped and the mark itself is the press. Same glass
+ * as the tab, the channel's own mark on it, the name on a small pill to its
+ * left so the two fanned-out buttons read as a choice rather than two
+ * unlabelled blue circles.
  */
 function DirectChannel({
   href,
   iconUrl,
+  name,
   label,
 }: {
   href: string;
   iconUrl: string;
+  /** What it is called, printed beside the mark. */
+  name: string;
+  /** What pressing it does, for screen readers. */
   label: string;
 }) {
   return (
@@ -133,15 +138,24 @@ function DirectChannel({
       target="_blank"
       rel="noopener noreferrer"
       aria-label={label}
-      className={`grid h-14 w-14 place-items-center rounded-full shadow-[0_12px_40px_-10px_rgba(0,0,0,0.9),inset_0_1px_0_rgba(255,255,255,0.14)] transition-colors duration-200 active:bg-[#14141c]/80 ${GLASS}`}
+      className="group flex items-center gap-2.5"
     >
-      <Image
-        src={iconUrl}
-        alt=""
-        width={26}
-        height={26}
-        className="h-[26px] w-[26px] object-contain"
-      />
+      <span
+        className={`rounded-full px-3 py-1.5 text-[12px] font-bold leading-none text-white shadow-[0_8px_30px_-10px_rgba(0,0,0,0.9),inset_0_1px_0_rgba(255,255,255,0.14)] ${GLASS}`}
+      >
+        {name}
+      </span>
+      <span
+        className={`grid h-14 w-14 place-items-center rounded-full shadow-[0_12px_40px_-10px_rgba(0,0,0,0.9),inset_0_1px_0_rgba(255,255,255,0.14)] transition-colors duration-200 group-active:bg-[#14141c]/80 ${GLASS}`}
+      >
+        <Image
+          src={iconUrl}
+          alt=""
+          width={26}
+          height={26}
+          className="h-[26px] w-[26px] object-contain"
+        />
+      </span>
     </a>
   );
 }
@@ -442,11 +456,12 @@ export function SupportWidget({
             <DirectChannel
               href={fanpage.chatUrl}
               iconUrl={fanpage.iconUrl}
+              name="Facebook"
               label="Nhắn qua Messenger"
             />
           ) : null}
           {zalo ? (
-            <DirectChannel href={zalo.chatUrl} iconUrl={zalo.iconUrl} label="Nhắn qua Zalo" />
+            <DirectChannel href={zalo.chatUrl} iconUrl={zalo.iconUrl} name="Zalo" label="Nhắn qua Zalo" />
           ) : null}
         </div>
       ) : null}
