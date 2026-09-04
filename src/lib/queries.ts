@@ -314,7 +314,7 @@ function softwareWhere(categoryId: string, filters: CategoryFilters) {
     ...(feature
       ? {
           AND: feature
-            .split(/[s,]+/)
+            .split(/[\s,]+/)
             .filter(Boolean)
             .map((word) => ({
               OR: [
