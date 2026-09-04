@@ -13,6 +13,13 @@ export interface Review {
   verified: boolean;
 }
 
+/**
+ * The score is printed only once there are enough reviews for one to mean
+ * something; "4,8/5 · 6 đánh giá" reads as a small shop trying to look big.
+ * Nothing to switch back on: the line appears by itself past this count.
+ */
+const MIN_REVIEWS_FOR_SCORE = 20;
+
 function Stars({ filled, size = 13 }: { filled: number; size?: number }) {
   return (
     <div className="flex items-center gap-[3px]" aria-label={`${filled} trên 5 sao`}>
@@ -123,7 +130,7 @@ export function ReviewsSection({
           a reader who has just read four cards is told what the whole says
           and where to read it, in one glance. */}
       <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
-        {summary ? (
+        {summary && summary.count >= MIN_REVIEWS_FOR_SCORE ? (
           <div className="flex items-center gap-2.5">
             <Stars filled={Math.round(summary.rating)} size={15} />
             <span className="text-sm font-black text-white">
