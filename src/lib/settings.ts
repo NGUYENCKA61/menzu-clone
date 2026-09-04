@@ -59,6 +59,14 @@ export interface ShopSettings {
   /** The one chat whose messages are obeyed; blank obeys none. */
   telegramChatId: string;
 
+  // --- Bot bán hàng Telegram ------------------------------------------------
+  /** A second bot, the one customers talk to. Blank means no shop on Telegram. */
+  telegramShopToken: string;
+  /** Its webhook secret; also signs the profile page's link-account tokens. */
+  telegramShopSecret: string;
+  /** The bot's @handle, read from Telegram when the token is saved. */
+  telegramShopUsername: string;
+
   // --- Số liệu tin cậy (dải số trên phần Đánh giá) ---------------------------
   /** Typed figures; "" means "what the database can vouch for". See lib/trustStats.ts. */
   statOrders: string;
@@ -258,6 +266,9 @@ export const DEFAULT_SETTINGS: ShopSettings = {
   telegramBotToken: "",
   telegramSecret: "",
   telegramChatId: "",
+  telegramShopToken: "",
+  telegramShopSecret: "",
+  telegramShopUsername: "",
   statOrders: "",
   statCustomers: "",
   statStartYear: "",
@@ -360,6 +371,9 @@ export const SETTING_KEYS: Record<keyof ShopSettings, string> = {
   telegramBotToken: "integrations.telegram.botToken",
   telegramSecret: "integrations.telegram.secret",
   telegramChatId: "integrations.telegram.chatId",
+  telegramShopToken: "integrations.telegramShop.botToken",
+  telegramShopSecret: "integrations.telegramShop.secret",
+  telegramShopUsername: "integrations.telegramShop.username",
   statOrders: "trust.orders",
   statCustomers: "trust.customers",
   statStartYear: "trust.startYear",
@@ -707,6 +721,18 @@ export function parseSettings(rows: Iterable<{ key: string; value: string }>): S
       stored.get(SETTING_KEYS.telegramChatId),
       DEFAULT_SETTINGS.telegramChatId,
     ),
+    telegramShopToken: toOptionalText(
+      stored.get(SETTING_KEYS.telegramShopToken),
+      DEFAULT_SETTINGS.telegramShopToken,
+    ),
+    telegramShopSecret: toOptionalText(
+      stored.get(SETTING_KEYS.telegramShopSecret),
+      DEFAULT_SETTINGS.telegramShopSecret,
+    ),
+    telegramShopUsername: toOptionalText(
+      stored.get(SETTING_KEYS.telegramShopUsername),
+      DEFAULT_SETTINGS.telegramShopUsername,
+    ),
     statOrders: toOptionalText(stored.get(SETTING_KEYS.statOrders), DEFAULT_SETTINGS.statOrders),
     statCustomers: toOptionalText(
       stored.get(SETTING_KEYS.statCustomers),
@@ -879,6 +905,9 @@ export function serializeSettings(settings: ShopSettings): { key: string; value:
     telegramBotToken: settings.telegramBotToken.trim(),
     telegramSecret: settings.telegramSecret.trim(),
     telegramChatId: settings.telegramChatId.trim(),
+    telegramShopToken: settings.telegramShopToken.trim(),
+    telegramShopSecret: settings.telegramShopSecret.trim(),
+    telegramShopUsername: settings.telegramShopUsername.trim().replace(/^@/, ""),
     statOrders: settings.statOrders.trim(),
     statCustomers: settings.statCustomers.trim(),
     statStartYear: settings.statStartYear.trim(),
@@ -983,6 +1012,9 @@ export function normalizeSettings(raw: Partial<ShopSettings> | null): ShopSettin
     telegramBotToken: String(raw?.telegramBotToken ?? "").trim(),
     telegramSecret: String(raw?.telegramSecret ?? "").trim(),
     telegramChatId: String(raw?.telegramChatId ?? "").trim(),
+    telegramShopToken: String(raw?.telegramShopToken ?? "").trim(),
+    telegramShopSecret: String(raw?.telegramShopSecret ?? "").trim(),
+    telegramShopUsername: String(raw?.telegramShopUsername ?? "").trim().replace(/^@/, ""),
     statOrders: String(raw?.statOrders ?? "").trim(),
     statCustomers: String(raw?.statCustomers ?? "").trim(),
     statStartYear: String(raw?.statStartYear ?? "").trim(),

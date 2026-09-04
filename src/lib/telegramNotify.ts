@@ -46,13 +46,19 @@ export function escapeTelegramHtml(text: string): string {
  * Telegram's own reason, which names the wrong chat id or the character its
  * HTML parser rejected — the two ways a bot goes quiet.
  */
+/**
+ * Where the Bot API lives. Overridable so a local stand-in can receive the
+ * calls during a test; unset in every real deployment.
+ */
+export const TELEGRAM_API_BASE = process.env.TELEGRAM_API_BASE ?? "https://api.telegram.org";
+
 export async function telegramCall(
   token: string,
   method: string,
   payload: Record<string, unknown>,
 ): Promise<boolean> {
   try {
-    const res = await fetch(`https://api.telegram.org/bot${token}/${method}`, {
+    const res = await fetch(`${TELEGRAM_API_BASE}/bot${token}/${method}`, {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify(payload),

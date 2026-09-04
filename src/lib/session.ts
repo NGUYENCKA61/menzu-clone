@@ -19,6 +19,8 @@ export interface CurrentUser {
   commissionBalance: number;
   /** The đại lý's own negotiated percent; 0 for everyone else. */
   agencyPercent: number;
+  /** Telegram user id when the account is reachable through the shop bot. */
+  telegramId: string | null;
   createdAt: Date;
 }
 
@@ -65,6 +67,7 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
     balance: Number(u.balance),
     points: u.points,
     commissionBalance: Number(u.commissionBalance),
+    telegramId: u.telegramId,
     agencyPercent: u.agencyPercent,
     createdAt: u.createdAt,
   };

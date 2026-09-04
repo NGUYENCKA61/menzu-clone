@@ -231,6 +231,9 @@ export function AdminSettings({
   const [tgToken, setTgToken] = useState(settings.telegramBotToken);
   const [tgSecret, setTgSecret] = useState(settings.telegramSecret);
   const [tgChat, setTgChat] = useState(settings.telegramChatId);
+  const [shopToken, setShopToken] = useState(settings.telegramShopToken);
+  const [shopSecret, setShopSecret] = useState(settings.telegramShopSecret);
+  const [shopUsername, setShopUsername] = useState(settings.telegramShopUsername);
   const [statOrders, setStatOrders] = useState(settings.statOrders);
   const [statCustomers, setStatCustomers] = useState(settings.statCustomers);
   const [statStartYear, setStatStartYear] = useState(settings.statStartYear);
@@ -500,6 +503,9 @@ export function AdminSettings({
           telegramBotToken: tgToken,
           telegramSecret: tgSecret,
           telegramChatId: tgChat,
+          telegramShopToken: shopToken,
+          telegramShopSecret: shopSecret,
+          telegramShopUsername: shopUsername,
           statOrders,
           statCustomers,
           statStartYear,
@@ -1115,6 +1121,58 @@ export function AdminSettings({
                     value={tgChat}
                     onChange={(event) => setTgChat(event.target.value)}
                     placeholder="-1001234567890"
+                    className={`${FIELD} font-mono`}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="border-t border-white/5 pt-5">
+              <span className={LABEL}>Bot bán hàng Telegram</span>
+              <p className={HINT}>
+                Bot thứ hai, dành cho khách: xem hàng, mua bằng ví, nhận key trong chat, nạp tiền
+                bằng mã chuyển khoản như trên web. Tạo bot mới trong @BotFather rồi dán token;
+                secret là chuỗi ngẫu nhiên bất kỳ. Lưu xong shop tự trỏ webhook và tự đọc tên bot.
+              </p>
+              <div className="grid gap-3 md:grid-cols-3 mt-3">
+                <div>
+                  <label htmlFor="shop-token" className={LABEL}>
+                    Bot token
+                  </label>
+                  <input
+                    id="shop-token"
+                    type="password"
+                    autoComplete="off"
+                    value={shopToken}
+                    onChange={(event) => setShopToken(event.target.value)}
+                    placeholder="•••"
+                    className={`${FIELD} font-mono`}
+                  />
+                </div>
+                <div>
+                  <label htmlFor="shop-secret" className={LABEL}>
+                    Secret webhook
+                  </label>
+                  <input
+                    id="shop-secret"
+                    type="password"
+                    autoComplete="off"
+                    value={shopSecret}
+                    onChange={(event) => setShopSecret(event.target.value)}
+                    placeholder="•••"
+                    className={`${FIELD} font-mono`}
+                  />
+                </div>
+                <div>
+                  <label htmlFor="shop-username" className={LABEL}>
+                    Tên bot (@)
+                  </label>
+                  <input
+                    id="shop-username"
+                    autoComplete="off"
+                    value={shopUsername}
+                    onChange={(event) => setShopUsername(event.target.value)}
+                    placeholder="tự điền sau khi lưu"
                     className={`${FIELD} font-mono`}
                   />
                 </div>

@@ -55,6 +55,10 @@ model User {
   /// the Google button. Cleared whenever the address is edited by hand.
   emailVerifiedAt DateTime?
   passwordHash String?
+  /// The Telegram user this account belongs to, when the shop bot made it or
+  /// the owner linked it from their profile. One Telegram account, one shop
+  /// account: the bot looks the buyer up by this on every message.
+  telegramId   String?    @unique
   avatarUrl    String?
   role         UserRole   @default(MEMBER)
   /// Address seen at the last successful sign-in, for support lookups.

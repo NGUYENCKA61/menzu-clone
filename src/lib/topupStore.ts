@@ -2,6 +2,7 @@ import { db } from "@/lib/db";
 import { liftTierFor } from "@/lib/tierLift";
 import { commissionFor } from "@/lib/referral";
 import { makeShortCode } from "@/lib/shortCode";
+import { notifyTopUpOnTelegram } from "@/lib/telegramShop";
 import { creditWallet } from "@/lib/wallet";
 import {
   extractTopUpCode,
@@ -134,6 +135,9 @@ export async function creditTopUp(
   // Money in can lift the tier, and only lift. After the credit has
   // committed, never inside it: a rank bump must not roll a deposit back.
   await liftTierFor(topUp.userId);
+  // A buyer who came through the shop bot hears about the money where they
+  // are; best-effort, and after the credit is safely written.
+  await notifyTopUpOnTelegram(topUp.userId, topUp.amount, balance);
 
   return {
     ok: true,

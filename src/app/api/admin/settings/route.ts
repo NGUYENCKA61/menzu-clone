@@ -4,6 +4,7 @@ import { FORBIDDEN, getAdmin } from "@/lib/admin";
 import { normalizeSettings, validateSettings, type ShopSettings } from "@/lib/settings";
 import { getShopSettings, saveShopSettings } from "@/lib/settingsStore";
 import { registerTelegramCommands } from "@/lib/telegramNotify";
+import { setUpShopBot } from "@/lib/telegramShop";
 
 /** The current settings, for anything that wants them without a page load. */
 export async function GET() {
@@ -38,6 +39,18 @@ export async function PUT(request: Request) {
   // empty menu. Cheap, idempotent, and logged rather than thrown on failure.
   if (settings.telegramBotToken.trim()) {
     await registerTelegramCommands(settings.telegramBotToken.trim());
+  }
+  // The shop bot needs more than a menu: its webhook is pointed at this site
+  // and its @handle is read back, since the profile page links to it by name.
+  if (settings.telegramShopToken.trim() && settings.telegramShopSecret.trim()) {
+    const username = await setUpShopBot(
+      settings.telegramShopToken.trim(),
+      settings.telegramShopSecret.trim(),
+    );
+    if (username && username !== settings.telegramShopUsername) {
+      settings.telegramShopUsername = username;
+      await saveShopSettings(settings);
+    }
   }
   return NextResponse.json(settings);
 }

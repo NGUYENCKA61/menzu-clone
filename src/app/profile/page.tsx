@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 
 import { AccountPageFrame } from "@/components/sites/menzu-lol-f7ae197a/shared/AccountPageFrame";
+import { TelegramGlyph } from "@/components/sites/menzu-lol-f7ae197a/shared/BrandGlyphs";
 import { AvatarUploader } from "@/components/sites/menzu-lol-f7ae197a/shared/AvatarUploader";
 import { TierBadge } from "@/components/sites/menzu-lol-f7ae197a/shared/TierBadge";
 import { WithdrawCommission } from "@/components/sites/menzu-lol-f7ae197a/shared/WithdrawCommission";
@@ -29,6 +30,7 @@ import {
 } from "@/lib/memberTiers";
 import { getCurrentUser } from "@/lib/session";
 import { discordOauthEnabled, googleOauthEnabled } from "@/lib/settings";
+import { linkUrl as telegramLinkUrl } from "@/lib/telegramShop";
 import { getShopSettings } from "@/lib/settingsStore";
 
 export const metadata: Metadata = {
@@ -323,6 +325,46 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
             </span>
           </div>
           <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+            {/* Telegram is not an OAuth door: the link is a signed t.me URL the
+                shop bot verifies, and "linked" is the telegramId on the user
+                row rather than an oauth_links entry. Same card, its own state. */}
+            {(() => {
+              const telegramLink = telegramLinkUrl(settings, user.id);
+              return (
+                <div className="flex items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
+                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-black/50">
+                    <TelegramGlyph className="w-5 h-5 text-[#29a9eb]" />
+                  </span>
+                  <span className="flex min-w-0 flex-col gap-1">
+                    <span className="text-sm font-bold leading-none text-white">Telegram</span>
+                    <span className="truncate text-[11px] leading-none text-neutral-500">
+                      {user.telegramId ? "Đã liên kết" : "Chưa liên kết"} · Mua hàng và nhận key ngay trong Telegram
+                    </span>
+                  </span>
+                  {user.telegramId ? (
+                    <span className="ml-auto inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3.5 text-[10px] font-black uppercase tracking-wider text-emerald-300">
+                      <Check size={12} /> Đã liên kết
+                    </span>
+                  ) : telegramLink ? (
+                    <a
+                      href={telegramLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="ml-auto inline-flex h-9 shrink-0 items-center rounded-lg bg-[var(--menzu-accent)] px-4 text-[10px] font-black uppercase tracking-wider text-white transition-colors hover:bg-[#ff1f4a]"
+                    >
+                      Liên kết
+                    </a>
+                  ) : (
+                    <span
+                      title="Chưa bật — điền token bot bán hàng Telegram ở Cấu hình để mở"
+                      className="ml-auto inline-flex h-9 shrink-0 items-center rounded-lg border border-white/10 bg-white/[0.04] px-4 text-[10px] font-black uppercase tracking-wider text-neutral-500"
+                    >
+                      Chưa mở
+                    </span>
+                  )}
+                </div>
+              );
+            })()}
             {providers.map((provider) => {
               const isLinked = linkedSet.has(provider.key);
               return (
