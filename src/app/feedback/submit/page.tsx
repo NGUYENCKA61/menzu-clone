@@ -44,8 +44,8 @@ export default async function FeedbackSubmitPage() {
             />
 
             <div className="flex items-start gap-3 mb-8">
-              <div className="w-10 h-10 rounded-xl bg-[var(--menzu-accent)]/10 flex items-center justify-center border border-[var(--menzu-accent)]/20 shrink-0 mt-0.5">
-                <Star className="w-5 h-5 text-[var(--menzu-accent)] fill-[var(--menzu-accent)]" />
+              <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20 shrink-0 mt-0.5">
+                <Star className="w-5 h-5 text-emerald-400 fill-emerald-400" />
               </div>
               <div>
                 <h1 className="text-2xl sm:text-3xl font-black uppercase tracking-wider text-white">
