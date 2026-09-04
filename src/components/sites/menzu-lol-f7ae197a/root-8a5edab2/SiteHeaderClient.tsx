@@ -44,9 +44,6 @@ interface DropdownItem {
  */
 const LINK_HREFS: Record<string, string> = {
   "ĐÁNH GIÁ": "/feedback",
-  // Read by the main bar rather than the strip above, which now says
-  // "XEM TRẠNG THÁI" instead.
-  "HỖ TRỢ": "/feedback",
   "XEM TRẠNG THÁI": STATUS_TAB_HREF,
   "WIKI & HƯỚNG DẪN": "/docs",
   "Nạp Qua ATM + Momo": "/wallet",
@@ -333,12 +330,6 @@ export function SiteHeaderClient({
           <div className="hidden lg:flex items-center gap-5 h-full">
             <NavDropdown label="CÁC LOẠI HACK" items={HACK_CATEGORY_ITEMS} />
             <NavDropdown label="NẠP TIỀN" items={NAP_TIEN_ITEMS} />
-            {/* A plain link, per the shop — support is one page, not a menu.
-                Addressed through hrefFor like the strip above, so the shop's
-                two "HỖ TRỢ" rungs cannot drift to different pages. */}
-            <Link href={hrefFor("HỖ TRỢ")} className={NAV_LINK_CLASS}>
-              HỖ TRỢ
-            </Link>
             <NavDropdown label="SHOP ACC" items={SHOP_ACC_ITEMS} />
 
             {/* Signed in only: the wheel spends the points an account has, and
