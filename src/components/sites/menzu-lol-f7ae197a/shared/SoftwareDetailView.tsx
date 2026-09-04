@@ -106,7 +106,6 @@ export function SoftwareDetailView({
                 targetId={DESCRIPTION_SECTION_ID}
                 label="Xem chi tiết"
                 placement=""
-                variant="button"
               />
             </div>
 

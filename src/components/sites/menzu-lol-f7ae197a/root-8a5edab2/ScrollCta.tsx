@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowDown, ChevronDown } from "lucide-react";
+import { ArrowDown } from "lucide-react";
 
 /**
  * The cue at the foot of the hero: there is more below, here is where it
@@ -22,22 +22,11 @@ import { ArrowDown, ChevronDown } from "lucide-react";
  */
 const HERO_PLACEMENT = "absolute bottom-5 left-1/2 -translate-x-1/2";
 
-/** Upgrade the anchor's jump to a glide, unless the reader asked for no motion. */
-function glide(event: React.MouseEvent<HTMLAnchorElement>, targetId: string) {
-  const target = document.getElementById(targetId);
-  if (!target) return;
-  event.preventDefault();
-  // Honoured explicitly: "smooth" ignores the reader's motion setting.
-  const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  target.scrollIntoView({ behavior: still ? "auto" : "smooth", block: "start" });
-}
-
 export function ScrollCta({
   targetId,
   label,
   placement = HERO_PLACEMENT,
   animated = false,
-  variant = "pill",
 }: {
   targetId: string;
   label: string;
@@ -45,29 +34,7 @@ export function ScrollCta({
   /** Brighten the pill and bounce it in step with the arrow. The home hero
    *  wants that extra pull; the software page keeps the quiet default. */
   animated?: boolean;
-  /**
-   * "pill" is the hero's floating glass capsule. "button" is the same
-   * shape as the outlined buttons on the software cards and buy panel, for
-   * a page where the cue sits among those buttons and a glass pill with a
-   * bouncing arrow read as something from another site.
-   */
-  variant?: "pill" | "button";
 }) {
-  if (variant === "button") {
-    return (
-      <div className={placement}>
-        <a
-          href={`#${targetId}`}
-          onClick={(event) => glide(event, targetId)}
-          className="inline-flex h-[42px] items-center justify-center gap-2 rounded-[9px] border border-[var(--menzu-accent)]/40 bg-transparent px-6 text-[11px] font-extrabold uppercase tracking-wide text-[#ddd] transition-colors hover:bg-[var(--menzu-accent)]/10 hover:text-white"
-        >
-          {label}
-          <ChevronDown size={15} aria-hidden className="shrink-0 text-[var(--menzu-accent)]" />
-        </a>
-      </div>
-    );
-  }
-
   const tone = animated
     ? "border-white/20 text-neutral-200 hover:border-white/40 hover:text-white"
     : "border-white/10 text-neutral-400 hover:border-white/20 hover:text-white";
@@ -79,7 +46,14 @@ export function ScrollCta({
     <div className={placement}>
       <a
         href={`#${targetId}`}
-        onClick={(event) => glide(event, targetId)}
+        onClick={(event) => {
+          const target = document.getElementById(targetId);
+          if (!target) return;
+          event.preventDefault();
+          // Honoured explicitly: "smooth" ignores the reader's motion setting.
+          const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+          target.scrollIntoView({ behavior: still ? "auto" : "smooth", block: "start" });
+        }}
         className={`${animated ? "animate-bounce-subtle " : ""}${tone} inline-flex items-center gap-2 whitespace-nowrap rounded-full border bg-[#0d0d12]/85 px-4 py-2 text-[10px] font-black uppercase tracking-[0.14em] backdrop-blur-md transition-colors`}
       >
         {label}
