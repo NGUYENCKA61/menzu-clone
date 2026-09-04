@@ -1,87 +1,74 @@
 "use client";
 
-import { Star, X } from "lucide-react";
+import { ImagePlus, Star, X } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { createPortal } from "react-dom";
 
 /**
- * The review a buyer leaves on one of their own orders, from the row it sits
- * on in Lịch sử mua.
- *
- * A small tag on the row ("★ Đánh giá") that opens a small box: stars, a few
- * words, an anonymous switch, nothing else. The order is the proof — the
- * shop already knows what was bought, for how much, and that it was paid —
- * so nothing is asked twice. One review per order, enforced by the API; the
- * reviews page's free-form composer stays for anyone who bought before there
- * were orders to point at.
- *
- * The tag lives inside the receipt's trigger, so its clicks stop there: a
- * press on "Đánh giá" must not also open the receipt behind it.
+ * The tag on an order's row in Lịch sử mua: "★ Đánh giá" leads to the
+ * order's own review page, "★ Đã đánh giá" says it is done. It sits inside
+ * the receipt's trigger, so its click stops there — a press on the tag must
+ * not also open the receipt behind it.
  */
-export function OrderReviewTag({
-  orderId,
-  reviewed,
-}: {
-  orderId: string;
-  /** A review already exists for this order (approved or still waiting). */
-  reviewed: boolean;
-}) {
-  const [open, setOpen] = useState(false);
-  const [done, setDone] = useState(reviewed);
-
-  if (done) {
+export function OrderReviewTag({ href, reviewed }: { href: string; reviewed: boolean }) {
+  if (reviewed) {
     return (
       <span className="text-[10px] font-black uppercase tracking-wider text-emerald-400">
         ★ Đã đánh giá
       </span>
     );
   }
-
   return (
-    <>
-      <button
-        type="button"
-        onClick={(event) => {
-          event.preventDefault();
-          event.stopPropagation();
-          setOpen(true);
-        }}
-        onKeyDown={(event) => event.stopPropagation()}
-        className="text-[10px] font-black uppercase tracking-wider text-[var(--menzu-accent)] transition-colors hover:text-white"
-      >
-        ★ Đánh giá
-      </button>
-      {open ? (
-        <ReviewDialog orderId={orderId} onClose={() => setOpen(false)} onDone={() => setDone(true)} />
-      ) : null}
-    </>
+    <Link
+      href={href}
+      onClick={(event) => event.stopPropagation()}
+      onKeyDown={(event) => event.stopPropagation()}
+      className="text-[10px] font-black uppercase tracking-wider text-[var(--menzu-accent)] transition-colors hover:text-white"
+    >
+      ★ Đánh giá
+    </Link>
   );
 }
 
-function ReviewDialog({
-  orderId,
-  onClose,
-  onDone,
-}: {
-  orderId: string;
-  onClose: () => void;
-  onDone: () => void;
-}) {
+const MAX_BYTES = 5 * 1024 * 1024;
+
+/**
+ * The review itself, on the order's own page. Stars, a few words, a photo if
+ * they like (the bill, a screenshot), an anonymous switch. The order is the
+ * proof — the shop already knows what was bought, for how much, and that it
+ * was paid — so nothing is asked twice. One review per order, enforced by
+ * the API.
+ */
+export function OrderReviewForm({ orderId, onDone }: { orderId: string; onDone: string }) {
+  const router = useRouter();
   const [rating, setRating] = useState(5);
   const [hover, setHover] = useState(0);
   const [body, setBody] = useState("");
   const [anonymous, setAnonymous] = useState(false);
+  const [file, setFile] = useState<File | null>(null);
+  const [preview, setPreview] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [sent, setSent] = useState(false);
 
   useEffect(() => {
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") onClose();
+    return () => {
+      if (preview) URL.revokeObjectURL(preview);
     };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [onClose]);
+  }, [preview]);
+
+  function pick(next: File | null) {
+    if (preview) URL.revokeObjectURL(preview);
+    if (next && next.size > MAX_BYTES) {
+      setError(`Ảnh tối đa 5MB. File này ${(next.size / 1024 / 1024).toFixed(1)}MB.`);
+      setFile(null);
+      setPreview(null);
+      return;
+    }
+    setError(null);
+    setFile(next);
+    setPreview(next ? URL.createObjectURL(next) : null);
+  }
 
   async function submit() {
     if (submitting) return;
@@ -93,14 +80,15 @@ function ReviewDialog({
       form.set("rating", String(rating));
       form.set("body", body.trim());
       if (anonymous) form.set("anonymous", "1");
+      if (file) form.set("image", file);
       const response = await fetch("/api/feedback", { method: "POST", body: form });
       const data = (await response.json().catch(() => null)) as { error?: string } | null;
       if (!response.ok) {
         setError(data?.error ?? "Không gửi được, thử lại sau.");
         return;
       }
-      setSent(true);
-      onDone();
+      router.push(onDone);
+      router.refresh();
     } catch {
       setError("Không gửi được, thử lại sau.");
     } finally {
@@ -108,99 +96,110 @@ function ReviewDialog({
     }
   }
 
-  // Stopped at the card: the dialog is rendered through a portal, but React
-  // still bubbles its events up the component tree, into the receipt's
-  // trigger this tag sits in.
-  const stop = (event: React.SyntheticEvent) => event.stopPropagation();
+  const LABEL = "text-[10px] font-black uppercase tracking-widest text-neutral-500";
+  const WORDS_MIN = 5;
 
-  return createPortal(
-    <div
-      className="fixed inset-0 z-[120] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"
-      onClick={(event) => {
-        stop(event);
-        onClose();
-      }}
-      onKeyDown={stop}
-    >
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-label="Đánh giá đơn hàng"
-        onClick={stop}
-        className="flex w-full max-w-sm flex-col gap-4 rounded-2xl border border-white/10 bg-[#0c0d12] p-5 shadow-2xl"
-      >
-        <div className="flex items-center justify-between">
-          <span className="text-sm font-black uppercase tracking-wider text-white">
-            Đánh giá đơn hàng
-          </span>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Đóng"
-            className="rounded-lg p-1 text-neutral-500 transition-colors hover:text-white"
-          >
-            <X className="h-4 w-4" />
-          </button>
-        </div>
-
-        {sent ? (
-          <p className="text-sm text-neutral-300">
-            Cảm ơn bạn! Đánh giá đã gửi, admin duyệt xong sẽ hiện ngoài trang đánh giá.
-          </p>
-        ) : (
-          <>
-            <div className="flex items-center gap-1.5" onMouseLeave={() => setHover(0)}>
-              {[1, 2, 3, 4, 5].map((n) => (
-                <button
-                  key={n}
-                  type="button"
-                  aria-label={`${n} sao`}
-                  onMouseEnter={() => setHover(n)}
-                  onClick={() => setRating(n)}
-                  className="p-0.5"
-                >
-                  <Star
-                    className={`h-7 w-7 transition-colors ${
-                      n <= (hover || rating) ? "fill-amber-400 text-amber-400" : "text-neutral-600"
-                    }`}
-                  />
-                </button>
-              ))}
-            </div>
-            <textarea
-              value={body}
-              onChange={(event) => setBody(event.target.value.slice(0, 1000))}
-              rows={4}
-              autoFocus
-              placeholder="Tool dùng thế nào, giao key nhanh không, hỗ trợ ra sao…"
-              className="w-full resize-none rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-sm text-white outline-none placeholder:text-neutral-600 focus:border-white/25"
-            />
-            <label className="flex cursor-pointer items-center gap-2 text-[11px] font-semibold text-neutral-400">
-              <input
-                type="checkbox"
-                checked={anonymous}
-                onChange={(event) => setAnonymous(event.target.checked)}
-                className="h-3.5 w-3.5 accent-[var(--menzu-accent)]"
+  return (
+    <div className="flex flex-col gap-5">
+      <div>
+        <span className={LABEL}>Số sao</span>
+        <div className="mt-2 flex items-center gap-1.5" onMouseLeave={() => setHover(0)}>
+          {[1, 2, 3, 4, 5].map((n) => (
+            <button
+              key={n}
+              type="button"
+              aria-label={`${n} sao`}
+              onMouseEnter={() => setHover(n)}
+              onClick={() => setRating(n)}
+              className="p-0.5"
+            >
+              <Star
+                className={`h-8 w-8 transition-colors ${
+                  n <= (hover || rating) ? "fill-amber-400 text-amber-400" : "text-neutral-600"
+                }`}
               />
-              Ẩn tên của tôi
-            </label>
-            {error ? (
-              <p role="alert" className="text-[11px] font-semibold text-[var(--menzu-accent)]">
-                {error}
-              </p>
-            ) : null}
+            </button>
+          ))}
+          <span className="ml-2 text-[12px] font-bold text-neutral-400">
+            {["", "Tệ", "Không ổn", "Tạm được", "Hài lòng", "Tuyệt vời"][hover || rating]}
+          </span>
+        </div>
+      </div>
+
+      <div>
+        <span className={LABEL}>Nhận xét</span>
+        <textarea
+          value={body}
+          onChange={(event) => setBody(event.target.value.slice(0, 1000))}
+          rows={5}
+          placeholder="Tool dùng thế nào, giao key nhanh không, hỗ trợ ra sao…"
+          className="mt-2 w-full resize-none rounded-xl border border-white/10 bg-black/30 px-4 py-3 text-sm text-white outline-none placeholder:text-neutral-600 focus:border-white/25"
+        />
+        <div className="mt-2 flex flex-wrap items-center justify-between gap-2 text-[11px] font-semibold">
+          <span className="text-neutral-500">Ít nhất {WORDS_MIN} ký tự, tối đa 1000.</span>
+          <span className="tabular-nums text-neutral-600">{body.length}/1000</span>
+        </div>
+      </div>
+
+      <div>
+        <span className={LABEL}>Ảnh đính kèm (không bắt buộc)</span>
+        {preview ? (
+          <div className="relative mt-2 w-full max-w-sm overflow-hidden rounded-xl border border-white/10 bg-neutral-950">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={preview} alt="" className="max-h-[260px] w-full object-cover" />
             <button
               type="button"
-              onClick={submit}
-              disabled={submitting || body.trim().length < 5}
-              className="inline-flex h-10 items-center justify-center rounded-xl bg-[var(--menzu-accent)] px-5 text-[11px] font-black uppercase tracking-wider text-white transition-colors hover:bg-[var(--menzu-accent-dark)] disabled:cursor-not-allowed disabled:opacity-50"
+              onClick={() => pick(null)}
+              aria-label="Bỏ ảnh"
+              className="absolute right-2 top-2 grid h-8 w-8 place-items-center rounded-lg border border-white/10 bg-black/70 text-neutral-300 transition-colors hover:text-white"
             >
-              {submitting ? "Đang gửi…" : "Gửi đánh giá"}
+              <X className="h-4 w-4" />
             </button>
-          </>
+          </div>
+        ) : (
+          <label className="mt-2 inline-flex h-10 cursor-pointer items-center gap-2 rounded-xl border border-white/12 bg-white/[0.04] px-4 text-[11px] font-black uppercase tracking-wider text-neutral-200 transition-colors hover:bg-white/[0.08]">
+            <ImagePlus className="h-4 w-4" />
+            Chọn ảnh
+            <input
+              type="file"
+              accept="image/png,image/jpeg,image/webp"
+              onChange={(event) => pick(event.target.files?.[0] ?? null)}
+              className="hidden"
+            />
+          </label>
         )}
+        <p className="mt-2 text-[11px] text-neutral-500">PNG, JPG hoặc WebP, tối đa 5MB.</p>
       </div>
-    </div>,
-    document.body,
+
+      <label className="flex cursor-pointer items-center gap-2 text-[12px] font-semibold text-neutral-400">
+        <input
+          type="checkbox"
+          checked={anonymous}
+          onChange={(event) => setAnonymous(event.target.checked)}
+          className="h-3.5 w-3.5 accent-[var(--menzu-accent)]"
+        />
+        Ẩn tên của tôi trên trang đánh giá
+      </label>
+
+      {error ? (
+        <p role="alert" className="text-[12px] font-semibold text-[var(--menzu-accent)]">
+          {error}
+        </p>
+      ) : null}
+
+      <div className="flex flex-wrap items-center gap-3">
+        <button
+          type="button"
+          onClick={submit}
+          disabled={submitting || body.trim().length < WORDS_MIN}
+          className="inline-flex h-11 items-center justify-center rounded-xl bg-[var(--menzu-accent)] px-6 text-[11px] font-black uppercase tracking-wider text-white transition-colors hover:bg-[var(--menzu-accent-dark)] disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          {submitting ? "Đang gửi…" : "Gửi đánh giá"}
+        </button>
+        <span className="text-[11px] text-neutral-500">
+          Admin duyệt xong sẽ hiện ngoài trang đánh giá, kèm dấu đã mua.
+        </span>
+      </div>
+    </div>
   );
 }

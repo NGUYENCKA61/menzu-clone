@@ -208,10 +208,10 @@ export default async function OrdersPage() {
                     {orderBadge(o).label}
                   </span>
                   {/* A paid order either has its review or is asking for
-                      one; the tag opens a small box of its own, not the
-                      receipt. */}
+                      one; the tag leads to the order's own review page, the
+                      way the refund request has one. */}
                   {o.status === "PAID" ? (
-                    <OrderReviewTag orderId={o.id} reviewed={o.reviewed} />
+                    <OrderReviewTag href={`/orders/${o.code}/danh-gia`} reviewed={o.reviewed} />
                   ) : null}
                 </div>
               </OrderDetailModal>
