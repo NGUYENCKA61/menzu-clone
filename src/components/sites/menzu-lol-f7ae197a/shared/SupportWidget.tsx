@@ -112,6 +112,40 @@ function ContactRow({
 }
 
 /**
+ * One channel as a round button, for the phone, where the panel is skipped
+ * and the mark itself is the press. Same glass as the tab, the channel's own
+ * mark on it; the name lives in the aria-label since there is no room for
+ * words at this size.
+ */
+function DirectChannel({
+  href,
+  iconUrl,
+  label,
+}: {
+  href: string;
+  iconUrl: string;
+  label: string;
+}) {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label={label}
+      className={`grid h-14 w-14 place-items-center rounded-full shadow-[0_12px_40px_-10px_rgba(0,0,0,0.9),inset_0_1px_0_rgba(255,255,255,0.14)] transition-colors duration-200 active:bg-[#14141c]/80 ${GLASS}`}
+    >
+      <Image
+        src={iconUrl}
+        alt=""
+        width={26}
+        height={26}
+        className="h-[26px] w-[26px] object-contain"
+      />
+    </a>
+  );
+}
+
+/**
  * Floating support panel pinned to the bottom-right, on every page.
  *
  * One tab, one panel, two channels behind a chooser: the assistant, which
@@ -224,6 +258,8 @@ export function SupportWidget({
     <div className="pointer-events-none fixed bottom-[calc(4rem+0.75rem)] right-3 z-[101] flex flex-col items-end sm:bottom-0 sm:right-4">
       <div
         className={`mb-0 w-[calc(100vw-2rem)] max-w-[340px] origin-bottom transition-all duration-300 ${
+          canMessage ? "hidden sm:block " : ""
+        }${
           open
             ? "pointer-events-auto translate-y-0 opacity-100"
             : "pointer-events-none translate-y-4 opacity-0"
@@ -386,8 +422,27 @@ export function SupportWidget({
           thumb: the wide tab covered a third of the bottom nav and its two
           lines of text were unreadable at that width anyway. The name moves
           into the aria-label, and the open state swaps the mark for a cross
-          since the chevron that says so on wider screens is hidden here. */}
-      <div className="pointer-events-auto">
+          since the chevron that says so on wider screens is hidden here.
+
+          And when the shop has a channel to press, the phone skips the tab
+          and the panel altogether: the Messenger and Zalo marks are the
+          buttons, and a tap opens that conversation in its app. The tab is
+          kept for wider screens, and for a phone with nothing to press. */}
+      {canMessage ? (
+        <div className="pointer-events-auto flex flex-col items-end gap-2.5 sm:hidden">
+          {fanpage ? (
+            <DirectChannel
+              href={fanpage.chatUrl}
+              iconUrl={fanpage.iconUrl}
+              label="Nhắn qua Messenger"
+            />
+          ) : null}
+          {zalo ? (
+            <DirectChannel href={zalo.chatUrl} iconUrl={zalo.iconUrl} label="Nhắn qua Zalo" />
+          ) : null}
+        </div>
+      ) : null}
+      <div className={canMessage ? "pointer-events-auto hidden sm:block" : "pointer-events-auto"}>
         <button
           type="button"
           onClick={toggle}
