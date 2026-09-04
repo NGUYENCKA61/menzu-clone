@@ -37,7 +37,9 @@ export function ScrollCta({
 }) {
   const tone = animated
     ? "border-white/20 text-neutral-200 hover:border-white/40 hover:text-white"
-    : "border-white/10 text-neutral-400 hover:border-white/20 hover:text-white";
+    : // The tool page: the accent border the cards and buy panel wear, so the
+      // pill belongs to the same row of controls; same size as before.
+      "border-[var(--menzu-accent)]/40 text-neutral-300 hover:border-[var(--menzu-accent)] hover:text-white";
 
   return (
     // Placement on the wrapper, motion on the link inside it: the hero's
