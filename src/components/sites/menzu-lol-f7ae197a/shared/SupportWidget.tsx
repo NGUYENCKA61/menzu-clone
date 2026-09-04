@@ -472,7 +472,7 @@ export function SupportWidget({
           type="button"
           onClick={toggle}
           aria-expanded={open}
-          aria-label={assistant && !fanpage ? "Trợ lý AI" : "Chăm sóc khách hàng"}
+          aria-label={assistant && !fanpage ? "Trợ lý AI" : "Hỗ trợ khách hàng"}
           className={`group flex h-14 w-14 items-center justify-center rounded-full text-left shadow-[0_12px_40px_-10px_rgba(0,0,0,0.9),inset_0_1px_0_rgba(255,255,255,0.14)] transition-colors duration-200 hover:bg-[#14141c]/80 sm:h-auto sm:w-auto sm:min-w-[250px] sm:justify-start sm:gap-3 sm:rounded-none sm:rounded-t-[18px] sm:border-b-0 sm:px-3.5 sm:py-3 sm:shadow-[0_-12px_40px_-10px_rgba(0,0,0,0.9),inset_0_1px_0_rgba(255,255,255,0.14)] ${GLASS}`}
         >
           {/* Bare, with no tile around it. The tab is already a lit pane, so a
@@ -504,7 +504,7 @@ export function SupportWidget({
 
           <span className="hidden min-w-0 flex-1 sm:block">
             <span className="block text-[13px] font-bold leading-tight tracking-tight text-white">
-              {assistant && !fanpage ? "Trợ lý AI" : "Chăm sóc khách hàng"}
+              {assistant && !fanpage ? "Trợ lý AI" : "Hỗ trợ khách hàng"}
             </span>
             {/* The hours, not a status: this tab is server-rendered and can be
                 served from a cache, and a green "online" frozen into a cached
