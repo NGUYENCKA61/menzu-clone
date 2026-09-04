@@ -443,7 +443,7 @@ export function FeedbackComposer({ user, today }: { user: ComposerUser; today: s
                     : "bg-neutral-900 border-neutral-700 group-hover:border-neutral-500"
                 }`}
               >
-                {anonymous ? <Check size={13} strokeWidth={3.5} className="text-black" /> : null}
+                {anonymous ? <Check size={13} strokeWidth={3.5} className="text-white" /> : null}
               </div>
             </div>
             <div>
