@@ -12,6 +12,31 @@ export interface PartnerView {
 }
 
 /**
+ * How many times the set is repeated inside the moving track.
+ *
+ * The loop animates the track left by exactly one set's share of its width,
+ * then snaps back — seamless only while one set is at least as wide as the
+ * viewport. Four copies keep that true down to a couple of partners on a
+ * desktop screen; the animation distance below must stay in step with it.
+ */
+const COPIES = 4;
+
+const MARQUEE_STYLES = `
+.partners-marquee {
+  animation: ticker-scroll var(--partners-duration, 36s) linear infinite;
+  will-change: transform;
+}
+.partners-marquee:hover {
+  animation-play-state: paused;
+}
+@media (prefers-reduced-motion: reduce) {
+  .partners-marquee {
+    animation: none;
+  }
+}
+`;
+
+/**
  * One partner as a small standing card: the square mark on top, the name
  * under it, the line under that. The shop's partners are cheat makers whose
  * marks are square avatars, so the card is built round a 1:1 image — 64px,
@@ -19,12 +44,11 @@ export interface PartnerView {
  * dark mark keeps an edge on the dark glass. A partner without a mark gets
  * its initial in the same square.
  *
- * The card moves like the review cards right above it — rises in on scroll
- * (`.reveal-card`, --i apart), lifts on hover, and carries the accent glow
- * that follows the cursor (`.spot-glow`) — so the two blocks read as one
- * band of proof.
+ * Under the pointer the card lifts and carries the accent glow that follows
+ * the cursor (`.spot-glow`, placed by RevealGrid), the same touch the review
+ * cards above have; the strip pauses while the pointer is on it.
  */
-function Card({ partner, index }: { partner: PartnerView; index: number }) {
+function Card({ partner }: { partner: PartnerView }) {
   const body = (
     <>
       <span aria-hidden className="spot-glow -z-10" />
@@ -57,8 +81,7 @@ function Card({ partner, index }: { partner: PartnerView; index: number }) {
   );
 
   const cardClass =
-    "reveal-card group/partner relative isolate flex w-[150px] shrink-0 flex-col items-center gap-3 rounded-2xl border border-white/[0.08] bg-white/[0.02] px-3 py-5 text-center shadow-[inset_0_1px_0_0_rgb(255_255_255/0.04),0_1px_2px_0_rgb(0_0_0/0.4)] transition-[border-color,translate,box-shadow] duration-300 hover:-translate-y-0.5 hover:border-white/[0.2] hover:shadow-[inset_0_1px_0_0_rgb(255_255_255/0.06),0_8px_24px_-8px_rgb(255_49_88/0.18)] sm:w-[160px]";
-  const seat = { ["--i" as string]: index };
+    "group/partner relative isolate flex w-[160px] shrink-0 flex-col items-center gap-3 rounded-2xl border border-white/[0.08] bg-white/[0.02] px-3 py-5 text-center shadow-[inset_0_1px_0_0_rgb(255_255_255/0.04),0_1px_2px_0_rgb(0_0_0/0.4)] transition-[border-color,translate,box-shadow] duration-300 hover:-translate-y-0.5 hover:border-white/[0.2] hover:shadow-[inset_0_1px_0_0_rgb(255_255_255/0.06),0_8px_24px_-8px_rgb(255_49_88/0.18)]";
 
   // A link only when there is somewhere to go — a dead anchor would show a
   // pointer cursor over nothing.
@@ -68,36 +91,38 @@ function Card({ partner, index }: { partner: PartnerView; index: number }) {
       target="_blank"
       rel="noopener noreferrer"
       data-spot
-      style={seat}
       className={cardClass}
     >
       {body}
     </a>
   ) : (
-    <div data-spot style={seat} className={cardClass}>
+    <div data-spot className={cardClass}>
       {body}
     </div>
   );
 }
 
 /**
- * "Đối tác uy tín" — the makers whose tools the shop sells, as a still,
- * centred row of standing cards under a faint accent wash.
- *
- * Still rather than sliding: five marks fit on one line, and a strip that
- * scrolls the same five past four times over read as filler. The cards wrap
- * to two or three a row on phones.
+ * "Đối tác uy tín" — the makers whose tools the shop sells, as standing
+ * cards gliding past in a marquee under a faint accent wash.
  *
  * Renders nothing while the shop has added no partners: a heading over an
- * empty row would be worse than no section, and nothing here is seeded with
- * invented names.
+ * empty strip would be worse than no section, and nothing here is seeded
+ * with invented names.
+ *
+ * The motion reuses the global ticker-scroll keyframes. The track holds the
+ * set COPIES times and travels 1/COPIES of its width per loop, so the reset
+ * lands on an identical frame. Repeats past the first are aria-hidden — a
+ * screen reader should meet each partner once.
  */
 export function PartnersSection({ partners }: { partners: PartnerView[] }) {
   if (partners.length === 0) return null;
 
   return (
     <section className="relative w-full">
-      {/* A soft pool of the accent behind the row, the way the hero's sky
+      <style dangerouslySetInnerHTML={{ __html: MARQUEE_STYLES }} />
+
+      {/* A soft pool of the accent behind the strip, the way the hero's sky
           and lmarket's sections sit their content on a glow rather than on
           flat black. Blurred wide and kept faint so it is felt, not seen. */}
       <div
@@ -118,10 +143,35 @@ export function PartnersSection({ partners }: { partners: PartnerView[] }) {
         </p>
       </div>
 
-      <RevealGrid className="mt-8 flex flex-wrap justify-center gap-4">
-        {partners.map((partner, index) => (
-          <Card key={partner.id} partner={partner} index={index} />
-        ))}
+      {/* The clip box gets padding pulled back by the same margins, so a
+          lifted card's shadow is not cut off at the bottom edge while the
+          block keeps its height. RevealGrid here only places the glow; no
+          card rises in — the strip's own glide is the motion. */}
+      <RevealGrid className="relative -my-8 mt-0 overflow-hidden py-8">
+        {/* Soft fades at both edges so cards slide in and out of a gradient
+            instead of popping at a hard border. */}
+        <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-16 bg-gradient-to-r from-[#0d0d12] to-transparent" />
+        <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-16 bg-gradient-to-l from-[#0d0d12] to-transparent" />
+
+        <div
+          className="partners-marquee flex gap-4"
+          style={{
+            ["--ticker-width" as string]: `${100 / COPIES}%`,
+            // 4s per partner: one loop in 24s for six — ~44px/s, brisk
+            // enough to read as motion at a glance, still slow enough that
+            // a mark is recognised mid-glide. Scales with the roster, so a
+            // longer strip keeps the same feel instead of speeding up.
+            ["--partners-duration" as string]: `${Math.max(16, partners.length * 4)}s`,
+          }}
+        >
+          {Array.from({ length: COPIES }, (_, copy) =>
+            partners.map((partner) => (
+              <div key={`${partner.id}-${copy}`} aria-hidden={copy > 0 || undefined}>
+                <Card partner={partner} />
+              </div>
+            )),
+          )}
+        </div>
       </RevealGrid>
     </section>
   );
