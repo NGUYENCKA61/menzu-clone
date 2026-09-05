@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, BadgeCheck, Star } from "lucide-react";
 
-import { ReviewsReveal } from "./ReviewsReveal";
+import { RevealGrid } from "./RevealGrid";
 
 export interface Review {
   name: string;
@@ -98,11 +98,11 @@ export function ReviewsSection({
           after another when the grid scrolls into view (`.reveal-card`,
           delayed by --i), their stars pop in after, and under the pointer a
           soft accent glow follows the cursor across the card (`.spot-glow`,
-          placed at --spot-x/--spot-y by ReviewsReveal). The card also lifts
+          placed at --spot-x/--spot-y by RevealGrid). The card also lifts
           half a step and brightens its edge on hover. `isolate` keeps the
           glow's negative z-index inside the card, between its background
           and its words. */}
-      <ReviewsReveal className="mt-8 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:grid lg:grid-cols-4 lg:overflow-visible lg:pb-0">
+      <RevealGrid className="mt-8 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:grid lg:grid-cols-4 lg:overflow-visible lg:pb-0">
         {reviews.map((review, index) => (
           <article
             key={`${review.name}-${review.date}-${index}`}
@@ -158,7 +158,7 @@ export function ReviewsSection({
             </div>
           </article>
         ))}
-      </ReviewsReveal>
+      </RevealGrid>
 
       {/* The score and the count sit on the same line as the way to the rest:
           a reader who has just read four cards is told what the whole says

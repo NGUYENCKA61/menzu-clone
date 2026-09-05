@@ -3,10 +3,11 @@
 import { useEffect, useRef, type ReactNode } from "react";
 
 /**
- * The reviews grid's motion, the way lmarket.net's testimonial wall moves:
- * the cards rise in one after another the first time the grid scrolls into
- * view, their stars pop in after, and under the pointer each card shows a
- * soft accent glow that follows the cursor.
+ * A grid whose cards move the way lmarket.net's testimonial wall moves: they
+ * rise in one after another the first time the grid scrolls into view (the
+ * reviews' stars pop in after), and under the pointer each card shows a soft
+ * accent glow that follows the cursor. The home reviews and the partner
+ * strip both use it.
  *
  * Nothing here draws. Once mounted the wrapper marks itself `data-reveal`
  * (so a page without JavaScript shows every card at rest, nothing hidden
@@ -15,7 +16,7 @@ import { useEffect, useRef, type ReactNode } from "react";
  * attributes. The glow reads `--spot-x`/`--spot-y` on each card, set from
  * one mousemove listener on the grid.
  */
-export function ReviewsReveal({
+export function RevealGrid({
   className,
   children,
 }: {
