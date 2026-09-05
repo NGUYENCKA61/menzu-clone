@@ -5,6 +5,7 @@ import { ArrowRight, BadgeCheck, BookCheck, ShoppingBag } from "lucide-react";
 
 import { DEFAULT_SETTINGS } from "@/lib/settings";
 import { ScrollCta } from "./ScrollCta";
+import { HeroTrustTags } from "./HeroTrustTags";
 
 /**
  * Where the hero's scroll cue lands, and the id the categories section wears.
@@ -81,14 +82,15 @@ export function HeroBanners({
     // the section's bottom edge on the fold, which is what puts the scroll cue
     // at the bottom of the screen rather than somewhere below it. svh, not vh,
     // because vh on a phone measures the screen without the browser's own bars
-    // and pushes the cue out of sight. pb-20 is the cue's own room, so it
-    // never sits over the copy or the artwork.
+    // and pushes the cue out of sight. The bottom padding is the room for
+    // the cue and the tag row under it (two rows of tags on phones), so
+    // neither sits over the copy or the artwork.
     // isolate so the -z background layer stacks against this section, not the
     // page. Clipped on the vertical axis only, so nothing spills past the
     // fold; sideways stays visible because the reseller pill above the eyebrow
     // is pulled 14px left of the copy edge (into the page padding) and a full
     // clip took its rounded corner off. The sky layer clips itself.
-    <section className="relative isolate flex w-full flex-col justify-center overflow-x-visible overflow-y-clip min-h-[calc(100svh-128px)] pt-6 pb-20 sm:pt-10 lg:min-h-[calc(100svh-144px)] lg:pt-14">
+    <section className="relative isolate flex w-full flex-col justify-center overflow-x-visible overflow-y-clip min-h-[calc(100svh-128px)] pt-6 pb-32 sm:pb-24 sm:pt-10 lg:min-h-[calc(100svh-144px)] lg:pt-14">
       {/* A field of faint, slowly twinkling stars over the page's own black,
           plus three shooting stars on long offset timers so one crosses now
           and then rather than all at once. Decoration only — aria-hidden, no
@@ -228,7 +230,12 @@ export function HeroBanners({
         </div>
       </div>
 
-      <ScrollCta targetId={SCROLL_TARGET_ID} label="Khám phá sản phẩm" animated />
+      {/* The cue and, under it, four short promises. One wrapper holds both
+          so the pair stays centred as a unit; the cue keeps its own bounce. */}
+      <div className="absolute bottom-4 left-1/2 flex w-[calc(100%-2rem)] max-w-3xl -translate-x-1/2 flex-col items-center gap-3 sm:bottom-5 sm:w-auto">
+        <ScrollCta targetId={SCROLL_TARGET_ID} label="Khám phá sản phẩm" animated placement="" />
+        <HeroTrustTags />
+      </div>
     </section>
   );
 }
