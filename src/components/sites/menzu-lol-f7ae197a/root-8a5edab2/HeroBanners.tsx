@@ -5,7 +5,6 @@ import { ArrowRight, BadgeCheck, BookCheck, ShoppingBag } from "lucide-react";
 
 import { DEFAULT_SETTINGS } from "@/lib/settings";
 import { ScrollCta } from "./ScrollCta";
-import { HeroTrustTags } from "./HeroTrustTags";
 
 /**
  * Where the hero's scroll cue lands, and the id the categories section wears.
@@ -191,12 +190,6 @@ export function HeroBanners({
                 <ArrowRight size={14} aria-hidden />
               </Link>
             ) : null}
-          </div>
-
-          {/* Four short promises under the buttons, where the eye lands after
-              "Xem sản phẩm": the reasons to press it. */}
-          <div className="mt-6">
-            <HeroTrustTags />
           </div>
         </div>
 
