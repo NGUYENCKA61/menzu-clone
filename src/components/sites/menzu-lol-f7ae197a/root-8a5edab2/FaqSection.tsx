@@ -90,10 +90,12 @@ export function FaqSection({ faq, contact }: { faq: FaqEntry[]; contact: FaqCont
       {schema ? <JsonLd data={schema} /> : null}
 
       {/* The original's pool of colour behind the block: wide, blurred far
-          and kept faint, so the cards sit on a glow rather than flat black. */}
+          and kept faint, so the cards sit on a glow rather than flat black.
+          Half what it was — with the support card's own tint beside it the
+          two together turned the right of the block red. */}
       <div
         aria-hidden
-        className="pointer-events-none absolute left-1/2 top-1/4 -z-10 h-[400px] w-[min(800px,100%)] -translate-x-1/2 rounded-full bg-[var(--menzu-accent)]/[0.06] blur-[180px]"
+        className="pointer-events-none absolute left-1/2 top-1/4 -z-10 h-[400px] w-[min(800px,100%)] -translate-x-1/2 rounded-full bg-[var(--menzu-accent)]/[0.03] blur-[180px]"
       />
 
       <RevealGrid className="grid items-start gap-10 lg:grid-cols-12 lg:gap-12">
@@ -122,7 +124,7 @@ export function FaqSection({ faq, contact }: { faq: FaqEntry[]; contact: FaqCont
           <div
             data-spot
             style={{ ["--i" as string]: 1 }}
-            className="reveal-card relative isolate overflow-hidden rounded-2xl border border-[var(--menzu-accent)]/25 bg-gradient-to-b from-[var(--menzu-accent)]/[0.08] to-white/[0.02] p-6 sm:p-7 lg:sticky lg:top-24"
+            className="reveal-card relative isolate overflow-hidden rounded-2xl border border-[var(--menzu-accent)]/20 bg-gradient-to-b from-[var(--menzu-accent)]/[0.05] to-white/[0.02] p-6 sm:p-7 lg:sticky lg:top-24"
           >
             {/* Lit from the corner at rest, brighter under the pointer's own glow. */}
             <span aria-hidden className="spot-glow spot-glow-on -z-10" />

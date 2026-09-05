@@ -86,18 +86,21 @@ const TONES: Record<
   },
   // A neutral ring at rest, the accent only under the pointer — the same
   // chrome the product and software cards wear, so the four kinds of tile on
-  // the site read as one set. The always-lit XEM NGAY button is the tile's
-  // one red at rest. The image frame stays borderless; the art bleeds to the
-  // frame's own rounding.
+  // the site read as one set. The XEM NGAY button is the tile's one red at
+  // rest, worn as an outline — red words on the tile's own dark, inside a
+  // half-strength red edge — and filled solid only under the pointer: a home
+  // page shows twenty of these at once, and twenty solid red blocks were what
+  // made it glare. (A red-tinted face was tried first and came out maroon and
+  // muddy; the dark face keeps the edge and the words crisp.) The image frame
+  // stays borderless; the art bleeds to the frame's own rounding.
   menzu: {
     card: "border-white/[0.08] hover:border-[var(--menzu-accent)]/50",
     frame: "border-transparent",
     image: "object-cover",
     title: "group-hover:text-[var(--menzu-accent)]",
-    buttonEdge:
-      "bg-[var(--menzu-accent)] group-hover:bg-[var(--menzu-accent-dark)]",
+    buttonEdge: "bg-[var(--menzu-accent)]/50 group-hover:bg-[var(--menzu-accent)]",
     buttonFace:
-      "bg-[var(--menzu-accent)] group-hover:bg-[var(--menzu-accent-dark)]",
+      "bg-[#111116] text-[var(--menzu-accent)] group-hover:bg-[var(--menzu-accent)] group-hover:text-white",
   },
 };
 
@@ -328,7 +331,9 @@ function RowCard({
               t.buttonFace,
             )}
           >
-            <span className="text-white font-black text-[10px] sm:text-xs uppercase tracking-widest">
+            {/* Colour comes from the face (the tone decides), so the words and
+                the chevron change together when the button fills. */}
+            <span className="font-black text-[10px] sm:text-xs uppercase tracking-widest">
               XEM NGAY
             </span>
             <ChevronRight size={12} />
