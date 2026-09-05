@@ -386,6 +386,7 @@ export function ProductRow({
         // The tiles are drawn here, on the server, and handed to the search
         // as finished nodes — it only chooses which of them to show.
         <RowSearch
+          openOnArrival={id}
           viewAllHref={viewAllHref}
           items={cards.map((card) => ({
             key: card.href,

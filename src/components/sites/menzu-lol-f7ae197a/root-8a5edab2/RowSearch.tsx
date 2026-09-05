@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ChevronDown, ChevronUp, Search, X } from "lucide-react";
 
 import { BorderBeam } from "./BorderBeam";
+import { EXPLORE_EVENT } from "./ScrollCta";
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 
 import {
@@ -78,11 +79,18 @@ export function RowSearch({
   items,
   viewAllHref,
   placeholder = "Tìm game…",
+  openOnArrival,
 }: {
   items: RowSearchItem[];
   /** Where the empty state sends a reader who found nothing. */
   viewAllHref: string;
   placeholder?: string;
+  /**
+   * The row's anchor id. When the hero's cue lands on it, or the page is
+   * opened at that anchor, the grid unfolds past its first line by itself —
+   * a reader who asked to explore should not have to press "Xem thêm" too.
+   */
+  openOnArrival?: string;
 }) {
   const [query, setQuery] = useState("");
   const [platform, setPlatform] = useState<CategoryPlatform | typeof ALL>(ALL);
@@ -126,6 +134,34 @@ export function RowSearch({
   useEffect(() => () => {
     if (closeTimer.current !== null) window.clearTimeout(closeTimer.current);
   }, []);
+
+  // Arrival opens the grid: the cue's event after it has scrolled here, or
+  // the page loading with this row's anchor in the address.
+  useEffect(() => {
+    if (!openOnArrival) return;
+    const open = () => {
+      if (closeTimer.current !== null) window.clearTimeout(closeTimer.current);
+      closeTimer.current = null;
+      setClosing(false);
+      setExpanded(true);
+    };
+    const onExplore = (event: Event) => {
+      if ((event as CustomEvent<string>).detail === openOnArrival) open();
+    };
+    const onHash = () => {
+      if (window.location.hash === `#${openOnArrival}`) open();
+    };
+    window.addEventListener(EXPLORE_EVENT, onExplore);
+    window.addEventListener("hashchange", onHash);
+    // Already at the anchor: a load or reload with the hash in the address.
+    const arrived = window.location.hash === `#${openOnArrival}`;
+    const settleIn = arrived ? window.setTimeout(open, 0) : null;
+    return () => {
+      window.removeEventListener(EXPLORE_EVENT, onExplore);
+      window.removeEventListener("hashchange", onHash);
+      if (settleIn !== null) window.clearTimeout(settleIn);
+    };
+  }, [openOnArrival]);
 
   function settle() {
     if (closeTimer.current !== null) window.clearTimeout(closeTimer.current);

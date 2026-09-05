@@ -22,6 +22,12 @@ import { ChevronDown } from "lucide-react";
  */
 const HERO_PLACEMENT = "absolute bottom-5 left-1/2 -translate-x-1/2";
 
+/**
+ * Fired on window after the cue has sent the page to its target, with the
+ * target's id as detail, so the block that was reached can react.
+ */
+export const EXPLORE_EVENT = "menzu:explore";
+
 export function ScrollCta({
   targetId,
   label,
@@ -55,6 +61,9 @@ export function ScrollCta({
           // Honoured explicitly: "smooth" ignores the reader's motion setting.
           const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
           target.scrollIntoView({ behavior: still ? "auto" : "smooth", block: "start" });
+          // Whoever owns the target may open up on arrival — the game list
+          // unfolds past its first line (RowSearch listens for this).
+          window.dispatchEvent(new CustomEvent(EXPLORE_EVENT, { detail: targetId }));
         }}
         className={`${animated ? "animate-bounce-subtle " : ""}${tone} inline-flex items-center gap-2 whitespace-nowrap rounded-full border bg-[#0d0d12]/85 px-4 py-2 text-[10px] font-black uppercase tracking-[0.14em] backdrop-blur-md transition-colors`}
       >
