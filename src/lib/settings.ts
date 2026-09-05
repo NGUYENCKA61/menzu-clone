@@ -285,7 +285,7 @@ export const DEFAULT_SETTINGS: ShopSettings = {
   // The shop's red — the same value globals.css gives --brand and
   // --menzu-accent, so the storefront has one accent until Nhận diện says
   // otherwise. Was menzu's purple.
-  brandColor: "#EA2E51",
+  brandColor: "#FF3158",
   heroBanner: BANNER,
   siteBackground: BACKDROP,
   flashSaleBackground:
@@ -454,18 +454,6 @@ function toNumberList(raw: string | undefined, fallback: number[]): number[] {
 
 function toText(raw: string | undefined, fallback: string): string {
   return raw?.trim() || fallback;
-}
-
-/**
- * The red the storefront shipped with until 2026-09-05. Every install that
- * saved Nhận diện without touching the colour stored it, so on read it means
- * "no choice" — the stylesheet's own red applies — rather than an override
- * pinning the old neon to every button while the headings wear the new one.
- */
-const LEGACY_BRAND_COLOR = "#ff3158";
-
-function fromLegacyBrand(hex: string): string {
-  return hex.toLowerCase() === LEGACY_BRAND_COLOR ? DEFAULT_SETTINGS.brandColor : hex;
 }
 
 /** Optional text: an empty stored value means empty, not "use the default". */
@@ -772,9 +760,7 @@ export function parseSettings(rows: Iterable<{ key: string; value: string }>): S
 
     brandName: toText(stored.get(SETTING_KEYS.brandName), DEFAULT_SETTINGS.brandName),
     brandLogo: toText(stored.get(SETTING_KEYS.brandLogo), DEFAULT_SETTINGS.brandLogo),
-    brandColor: fromLegacyBrand(
-      toText(stored.get(SETTING_KEYS.brandColor), DEFAULT_SETTINGS.brandColor),
-    ),
+    brandColor: toText(stored.get(SETTING_KEYS.brandColor), DEFAULT_SETTINGS.brandColor),
     heroBanner: toText(stored.get(SETTING_KEYS.heroBanner), DEFAULT_SETTINGS.heroBanner),
     siteBackground: toText(
       stored.get(SETTING_KEYS.siteBackground),

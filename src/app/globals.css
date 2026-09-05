@@ -137,26 +137,13 @@
  * ------------------------------------------------------------------------ */
 
 .dark {
-  /* body/page surface. The capture's value was #050508 (lab 2.75 0 0),
-     a black with nothing in it; lifted a step so the white and the red on
-     it stop vibrating — the shop found the page glaring. The foreground
-     comes down from pure white to an ivory for the same reason; see
-     --color-white below, which carries the same value into every
-     text-white / bg-white / border-white utility. */
-  --background: #0d0d12;
-  --foreground: #ececf1;
-}
-
-/* What Tailwind hands out for `white`. Pure #fff on a near-black page is
-   the harshest contrast the screen can show, and this shop writes almost
-   every line of copy in it. The same ivory as --foreground, so a heading
-   set with text-white and body copy set through the token agree. */
-@theme {
-  --color-white: #ececf1;
+  /* body/page surface — live value lab(2.75381 0 0) */
+  --background: #050508;
+  --foreground: #ffffff;
 }
 
 :root {
-  --menzu-bg: #0d0d12;
+  --menzu-bg: #050508;
   --menzu-nav: #1a1a1a;
   --menzu-rail: #0c0d12;
   --menzu-backdrop-dim: rgb(10 10 13 / 0.7);
@@ -167,8 +154,8 @@
      root layout. menzu.lol shipped purple here; this shop chose its red, the
      same value as --menzu-accent below, so the storefront carries ONE accent
      — a purple button beside a red heading read as two shops on one page. */
-  --brand: #ea2e51;
-  --brand-dark: #d11f40;
+  --brand: #ff3158;
+  --brand-dark: #e01e43;
 
   /* The purple the whole site used to wear, kept for the reward wheel: when
      the storefront and the account pages moved to red the shop asked for the
@@ -192,11 +179,8 @@
   /* The sign-in card's accent, the exact red the brief named. Its own token
      rather than a change to --brand: red was asked for on that page, and
      --brand paints every button on the storefront. */
-  /* Was #ff3158 / #e01e43 — the same hue with the neon taken off it (82%
-     saturation, 55% lightness in place of 100% / 60%), because a red at
-     full saturation on black glows, and this one is on every heading. */
-  --menzu-accent: #ea2e51;
-  --menzu-accent-dark: #d11f40;
+  --menzu-accent: #ff3158;
+  --menzu-accent-dark: #e01e43;
   --menzu-scroll-thumb-hover: color-mix(in oklab, var(--color-rose-500) 95%, transparent);
   --menzu-scroll-thumb-active: var(--color-rose-500);
 }

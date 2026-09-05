@@ -37,7 +37,7 @@ export async function AccountPageFrame({
     // Opaque site-black on the page root: it paints over the fixed z-[-1]
     // PageBackdrop artwork, because the original shows its account screens
     // on plain black, not over the storefront picture.
-    <div className="min-h-screen flex flex-col text-white overflow-x-clip selection:bg-[var(--menzu-accent)]/30 bg-[var(--menzu-bg)]">
+    <div className="min-h-screen flex flex-col text-white overflow-x-clip selection:bg-[var(--menzu-accent)]/30 bg-[#050508]">
       <div className="w-full shrink-0 h-[104px]" />
       <SiteHeader />
 
