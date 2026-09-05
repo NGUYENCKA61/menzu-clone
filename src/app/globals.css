@@ -1219,3 +1219,45 @@ body.lightbox-open .site-nav {
     opacity: 0;
   }
 }
+
+/* A spot of light running round a control's border (BorderBeam.tsx). The
+   element fills its parent, keeps the parent's radius, and is masked down to
+   its own transparent border so only the ring can show; the ::after comet
+   then rides that ring on an offset-path. The knobs are unitless numbers set
+   as custom properties by the component. */
+.border-beam {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  border: calc(var(--beam-border-width, 1.5) * 1px) solid transparent;
+  -webkit-mask: linear-gradient(transparent, transparent), linear-gradient(#fff, #fff);
+  mask: linear-gradient(transparent, transparent), linear-gradient(#fff, #fff);
+  -webkit-mask-clip: padding-box, border-box;
+  mask-clip: padding-box, border-box;
+  -webkit-mask-composite: source-in, xor;
+  mask-composite: intersect;
+  --beam-from: var(--menzu-accent);
+  --beam-to: var(--menzu-accent-dark);
+}
+.border-beam::after {
+  content: "";
+  position: absolute;
+  aspect-ratio: 1;
+  width: calc(var(--beam-size, 120) * 1px);
+  background: linear-gradient(to left, var(--beam-from), var(--beam-to), transparent);
+  offset-anchor: calc(var(--beam-anchor, 90) * 1%) 50%;
+  offset-path: rect(0 auto auto 0 round calc(var(--beam-size, 120) * 1px));
+  animation: border-beam calc(var(--beam-duration, 10) * 1s) infinite linear;
+  animation-delay: var(--beam-delay, 0s);
+}
+@keyframes border-beam {
+  to {
+    offset-distance: 100%;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .border-beam::after {
+    animation: none;
+  }
+}

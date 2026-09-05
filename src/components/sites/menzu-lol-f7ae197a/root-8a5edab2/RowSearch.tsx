@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { ChevronDown, ChevronUp, Search, X } from "lucide-react";
+
+import { BorderBeam } from "./BorderBeam";
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 
 import {
@@ -156,14 +158,27 @@ export function RowSearch({
 
   return (
     <div className="flex flex-col gap-4">
-      {/* The category page's search shell, one size down: same rounding,
-          same dark glass, the accent on focus. As wide as the grid under it,
-          so the field and the four tiles share their outer edges. */}
+      {/* The search pill lmarket.net's hero wears, in the shop's red: frosted
+          glass with a soft sheen from the top-left, a hairline highlight along
+          the top edge, a comet of light running round the border, and the
+          accent on the border, ring and glass while the field has focus. As
+          wide as the grid under it, so the field and the tiles share their
+          outer edges. The overlays come first and cannot be clicked; the
+          icon, field and clear button are positioned so they paint over them. */}
       <label
         htmlFor={inputId}
-        className="flex h-11 w-full items-center gap-2.5 rounded-2xl border border-neutral-800/60 bg-neutral-900/60 px-4 transition-colors focus-within:border-[var(--menzu-accent)]/60"
+        className="group/search relative isolate flex h-12 w-full items-center gap-2.5 rounded-full border border-white/15 bg-white/[0.04] px-4 shadow-[0_8px_32px_-8px_rgb(0_0_0/0.5),inset_0_1px_0_0_rgb(255_255_255/0.08)] backdrop-blur-md transition-all focus-within:border-[var(--menzu-accent)]/60 focus-within:bg-white/[0.06] focus-within:ring-2 focus-within:ring-[var(--menzu-accent)]/25"
       >
-        <Search size={15} aria-hidden className="shrink-0 text-neutral-500" />
+        <span
+          aria-hidden
+          className="pointer-events-none absolute inset-0 rounded-full bg-[linear-gradient(135deg,rgba(255,255,255,0.10)_0%,rgba(255,255,255,0.04)_35%,transparent_70%)]"
+        />
+        <BorderBeam />
+        <Search
+          size={15}
+          aria-hidden
+          className="relative shrink-0 text-neutral-500 transition-colors group-focus-within/search:text-[var(--menzu-accent)]"
+        />
         <input
           // Password managers and similar extensions stamp their own attributes
           // onto text inputs before React hydrates; without this the dev overlay
@@ -175,14 +190,14 @@ export function RowSearch({
           onChange={(event) => ask({ query: event.target.value })}
           placeholder={placeholder}
           autoComplete="off"
-          className="min-w-0 flex-1 bg-transparent text-[13px] text-white outline-none placeholder:text-neutral-500 [&::-webkit-search-cancel-button]:hidden"
+          className="relative min-w-0 flex-1 bg-transparent text-[13px] text-white outline-none placeholder:text-neutral-500 [&::-webkit-search-cancel-button]:hidden"
         />
         {query ? (
           <button
             type="button"
             onClick={() => ask({ query: "" })}
             aria-label="Xoá tìm kiếm"
-            className="shrink-0 rounded-md p-0.5 text-neutral-500 transition-colors hover:text-white"
+            className="relative shrink-0 rounded-md p-0.5 text-neutral-500 transition-colors hover:text-white"
           >
             <X size={14} />
           </button>
