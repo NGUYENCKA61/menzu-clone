@@ -56,7 +56,7 @@ export function ScrollCta({
           const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
           target.scrollIntoView({ behavior: still ? "auto" : "smooth", block: "start" });
         }}
-        className={`${animated ? "animate-bounce-subtle " : ""}${tone} inline-flex items-center gap-2 whitespace-nowrap rounded-full border bg-[#0d0d12]/85 px-4 py-2 text-[10px] font-black uppercase tracking-[0.14em] backdrop-blur-md transition-colors`}
+        className={`${animated ? "animate-bounce-subtle " : ""}${tone} inline-flex items-center gap-2 whitespace-nowrap rounded-xl border bg-[#0d0d12]/85 px-4 py-2 text-[10px] font-black uppercase tracking-[0.14em] backdrop-blur-md transition-colors`}
       >
         {label}
         {/* The hero keeps its bouncing arrow, the pull it exists for. The quiet
