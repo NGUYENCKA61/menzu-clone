@@ -57,7 +57,7 @@ const GROUP_ICONS: Record<string, React.ReactNode> = {
     <TrendingUp
       size={24}
       aria-hidden
-      className="animate-bounce-subtle -ml-1.5 shrink-0 text-[var(--menzu-accent)]"
+      className="-ml-1.5 shrink-0 text-[var(--menzu-accent)]"
     />
   ),
 };
