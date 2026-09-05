@@ -82,19 +82,18 @@ const MARQUEE_FROM = 5;
 
 /**
  * The line under the name. A service tile prints its own figures ("Giá từ
- * 50.000đ · Đã xong 120"); a category prints the line the admin wrote for
- * it — the one the old tile carried, which is where the home page's
- * keywords live ("HACK DELTA FORCE an toàn, giá rẻ, Aimbot…"); the first
- * version of this tile dropped it and the page lost a dozen of them. A
- * tile with neither shows its platform, or the name alone. The product
- * count is a mark on the cover instead, see RowCard.
+ * 50.000đ · Đã xong 120"); a category says how many products it lists, the
+ * way lmarket's game tiles say "18 cheats" — counted from the catalogue,
+ * never the admin-typed stock figure — or its platform while it lists
+ * nothing; a tile with none of those shows the name alone.
  */
 function describe(card: ProductCard): string | null {
   const figures = card.stats.filter((stat) => !HIDDEN_STATS.has(stat.label));
   if (figures.length > 0) {
     return figures.map((stat) => `${stat.label} ${stat.value}`).join(" · ");
   }
-  return card.description?.trim() || card.platform || null;
+  if (card.count && card.count > 0) return `${card.count} sản phẩm`;
+  return card.platform ?? null;
 }
 
 /**
@@ -170,24 +169,12 @@ function RowCard({
         </span>
       ) : null}
 
-      {/* How many products the category lists, the way lmarket's game tiles
-          say "18 cheats" — counted from the catalogue, never the admin-typed
-          stock figure — as a mark on the cover's other corner, in the same
-          glass as the month's-pick pill so the two read as a pair. */}
-      {card.count && card.count > 0 ? (
-        <span className="absolute right-2.5 top-2.5 z-10 inline-flex items-center rounded-full border border-white/10 bg-[#0d0d12]/80 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-white/75 backdrop-blur-md">
-          {card.count} sản phẩm
-        </span>
-      ) : null}
-
       <div className="absolute inset-x-0 bottom-0 p-3">
         <h3 className="line-clamp-1 text-[13px] font-black uppercase tracking-wide text-white drop-shadow-[0_2px_8px_rgb(0_0_0/0.9)] sm:text-[15px]">
           {card.title}
         </h3>
-        {/* One line, as typed: a category's line is a sentence of keywords
-            and reads as one, not as a tracked label. */}
         {detail ? (
-          <p className="mt-0.5 line-clamp-1 text-[10px] font-medium text-white/65 drop-shadow-[0_1px_4px_rgb(0_0_0/0.8)] sm:text-[11px]">
+          <p className="mt-1 line-clamp-1 text-[9px] font-bold uppercase tracking-widest text-white/60 drop-shadow-[0_1px_4px_rgb(0_0_0/0.8)] sm:text-[10px]">
             {detail}
           </p>
         ) : null}
