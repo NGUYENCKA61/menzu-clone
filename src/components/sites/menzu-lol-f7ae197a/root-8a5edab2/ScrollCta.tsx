@@ -36,7 +36,7 @@ export function ScrollCta({
   animated?: boolean;
 }) {
   const tone = animated
-    ? "border-white/20 text-neutral-200 hover:border-white/40 hover:text-white"
+    ? "border-white/15 text-neutral-200 hover:border-white/40 hover:text-white"
     : // The tool page: the accent border the cards and buy panel wear, so the
       // pill belongs to the same row of controls; same size as before.
       "border-[var(--menzu-accent)]/40 text-neutral-300 hover:border-[var(--menzu-accent)] hover:text-white";
@@ -56,7 +56,7 @@ export function ScrollCta({
           const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
           target.scrollIntoView({ behavior: still ? "auto" : "smooth", block: "start" });
         }}
-        className={`${animated ? "animate-bounce-subtle " : ""}${tone} inline-flex items-center gap-2 whitespace-nowrap rounded-full border bg-[#0d0d12]/85 px-4 py-2 text-[10px] font-black uppercase tracking-[0.14em] backdrop-blur-md transition-colors`}
+        className={`${animated ? "animate-bounce-subtle " : ""}${tone} inline-flex items-center gap-2 whitespace-nowrap rounded-[10px] border bg-[#0d0d12]/85 px-5 py-3 text-[10px] font-black uppercase tracking-[0.14em] backdrop-blur-md transition-colors`}
       >
         {label}
         {/* The hero keeps its bouncing arrow, the pull it exists for. The quiet
