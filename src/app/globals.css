@@ -138,12 +138,12 @@
 
 .dark {
   /* body/page surface — live value lab(2.75381 0 0) */
-  --background: #0f1015;
+  --background: #050508;
   --foreground: #ffffff;
 }
 
 :root {
-  --menzu-bg: #0f1015;
+  --menzu-bg: #050508;
   --menzu-nav: #1a1a1a;
   --menzu-rail: #0c0d12;
   --menzu-backdrop-dim: rgb(10 10 13 / 0.7);
