@@ -46,9 +46,10 @@ export interface ProductRowProps {
    */
   ranked?: boolean;
   /**
-   * A search field over the tiles that narrows them by name as you type.
-   * For the row that lists every game the shop hacks, where a reader
-   * arrives knowing which one they want.
+   * A search field and platform chips over the tiles. For the row that
+   * lists every game the shop hacks, where a reader arrives knowing which
+   * one they want. Every non-sliding row folds to one line behind "Xem
+   * thêm" regardless; this only adds the controls.
    */
   searchable?: boolean;
   /** An anchor on the row, for the hero's "Khám phá sản phẩm" cue to land on. */
@@ -60,15 +61,18 @@ export interface ProductRowProps {
  * Full class strings per tone, never composed — Tailwind reads source text and
  * cannot see a class name that only exists once the template has run.
  */
-const TONES: Record<RowTone, {
-  card: string;
-  frame: string;
-  /** How the cover art meets the frame — cover crops, contain letterboxes. */
-  image: string;
-  title: string;
-  buttonEdge: string;
-  buttonFace: string;
-}> = {
+const TONES: Record<
+  RowTone,
+  {
+    card: string;
+    frame: string;
+    /** How the cover art meets the frame — cover crops, contain letterboxes. */
+    image: string;
+    title: string;
+    buttonEdge: string;
+    buttonFace: string;
+  }
+> = {
   // Kept for callers that still ask for it; drawn in the same neutrals with
   // an outlined button, now that the site has one accent rather than two.
   indigo: {
@@ -76,7 +80,8 @@ const TONES: Record<RowTone, {
     frame: "border-white/[0.06] group-hover:border-[var(--menzu-accent)]/30",
     image: "object-cover",
     title: "group-hover:text-[var(--menzu-accent)]",
-    buttonEdge: "bg-[var(--menzu-accent)]/50 group-hover:bg-[var(--menzu-accent)]",
+    buttonEdge:
+      "bg-[var(--menzu-accent)]/50 group-hover:bg-[var(--menzu-accent)]",
     buttonFace: "bg-[#101114] group-hover:bg-[var(--menzu-accent)]",
   },
   // A neutral ring at rest, the accent only under the pointer — the same
@@ -89,8 +94,10 @@ const TONES: Record<RowTone, {
     frame: "border-transparent",
     image: "object-cover",
     title: "group-hover:text-[var(--menzu-accent)]",
-    buttonEdge: "bg-[var(--menzu-accent)] group-hover:bg-[var(--menzu-accent-dark)]",
-    buttonFace: "bg-[var(--menzu-accent)] group-hover:bg-[var(--menzu-accent-dark)]",
+    buttonEdge:
+      "bg-[var(--menzu-accent)] group-hover:bg-[var(--menzu-accent-dark)]",
+    buttonFace:
+      "bg-[var(--menzu-accent)] group-hover:bg-[var(--menzu-accent-dark)]",
   },
 };
 
@@ -293,7 +300,12 @@ function RowCard({
                   <span className="text-[7px] sm:text-[10px] text-gray-500 font-bold uppercase mb-0 sm:mb-0.5 whitespace-nowrap">
                     {stat.label}
                   </span>
-                  <span className={cn("text-[10px] sm:text-sm font-black leading-none", tone.text)}>
+                  <span
+                    className={cn(
+                      "text-[10px] sm:text-sm font-black leading-none",
+                      tone.text,
+                    )}
+                  >
                     {stat.value}
                   </span>
                 </div>
@@ -396,11 +408,21 @@ export function ProductRow({
           }))}
         />
       ) : (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
-          {cards.map((card) => (
-            <RowCard key={card.href} card={card} t={t} top={ranked} />
-          ))}
-        </div>
+        // Every other row folds the same way the game list does, without
+        // the search: one line at rest, the rest behind "Xem thêm", so a
+        // group of twelve accounts takes no more of the home page than a
+        // group of four until a reader asks.
+        <RowSearch
+          filters={false}
+          openOnArrival={id}
+          viewAllHref={viewAllHref}
+          items={cards.map((card) => ({
+            key: card.href,
+            title: card.title,
+            platform: card.platform ?? null,
+            node: <RowCard card={card} t={t} top={ranked} />,
+          }))}
+        />
       )}
     </section>
   );

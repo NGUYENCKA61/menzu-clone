@@ -80,6 +80,7 @@ export function RowSearch({
   viewAllHref,
   placeholder = "Tìm game…",
   openOnArrival,
+  filters = true,
 }: {
   items: RowSearchItem[];
   /** Where the empty state sends a reader who found nothing. */
@@ -91,6 +92,13 @@ export function RowSearch({
    * a reader who asked to explore should not have to press "Xem thêm" too.
    */
   openOnArrival?: string;
+  /**
+   * The search field and the platform chips. Off, the grid is only the
+   * fold: one line at rest, "Xem thêm" for the rest — what every ordinary
+   * row on the home page gets, where a search over a handful of tiles
+   * would be more control than content.
+   */
+  filters?: boolean;
 }) {
   const [query, setQuery] = useState("");
   const [platform, setPlatform] = useState<CategoryPlatform | typeof ALL>(ALL);
@@ -120,7 +128,8 @@ export function RowSearch({
   useEffect(() => {
     const grid = gridRef.current;
     if (!grid) return;
-    const update = () => setColumns(columnsOf(getComputedStyle(grid).gridTemplateColumns));
+    const update = () =>
+      setColumns(columnsOf(getComputedStyle(grid).gridTemplateColumns));
     update();
     const observer = new ResizeObserver(update);
     observer.observe(grid);
@@ -131,9 +140,12 @@ export function RowSearch({
 
   // A fold that is still playing when the component goes must not fire
   // into nothing.
-  useEffect(() => () => {
-    if (closeTimer.current !== null) window.clearTimeout(closeTimer.current);
-  }, []);
+  useEffect(
+    () => () => {
+      if (closeTimer.current !== null) window.clearTimeout(closeTimer.current);
+    },
+    [],
+  );
 
   // Arrival opens the grid: the cue's event after it has scrolled here, or
   // the page loading with this row's anchor in the address.
@@ -169,7 +181,10 @@ export function RowSearch({
     setClosing(false);
   }
 
-  function ask(next: { query?: string; platform?: CategoryPlatform | typeof ALL }) {
+  function ask(next: {
+    query?: string;
+    platform?: CategoryPlatform | typeof ALL;
+  }) {
     if (next.query !== undefined) setQuery(next.query);
     if (next.platform !== undefined) setPlatform(next.platform);
     settle();
@@ -180,21 +195,29 @@ export function RowSearch({
   function collapse() {
     if (closing) return;
     const leaving = shown.length - firstLine;
-    if (leaving <= 0 || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    if (
+      leaving <= 0 ||
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    ) {
       setExpanded(false);
       return;
     }
     setClosing(true);
-    closeTimer.current = window.setTimeout(() => {
-      closeTimer.current = null;
-      setClosing(false);
-      setExpanded(false);
-    }, OUT_MS + OUT_STAGGER_MS * (leaving - 1));
+    closeTimer.current = window.setTimeout(
+      () => {
+        closeTimer.current = null;
+        setClosing(false);
+        setExpanded(false);
+      },
+      OUT_MS + OUT_STAGGER_MS * (leaving - 1),
+    );
   }
 
   return (
     <div className="flex flex-col gap-4">
-      {/* The search pill lmarket.net's hero wears, in the shop's red — the
+      {filters ? (
+        <>
+          {/* The search pill lmarket.net's hero wears, in the shop's red — the
           shape and the comet of light running round the border — over the
           category page's own dark glass: the shop tried lmarket's brighter
           fill with its sheen and highlight and asked for the quiet one back.
@@ -202,59 +225,67 @@ export function RowSearch({
           As wide as the grid under it, so the field and the tiles share
           their outer edges. The beam comes first and cannot be clicked; the
           icon, field and clear button are positioned so they paint over it. */}
-      <label
-        htmlFor={inputId}
-        className="group/search relative isolate flex h-12 w-full items-center gap-2.5 rounded-full border border-neutral-800/60 bg-neutral-900/60 px-4 transition-colors focus-within:border-[var(--menzu-accent)]/60"
-      >
-        <BorderBeam />
-        <Search
-          size={15}
-          aria-hidden
-          className="relative shrink-0 text-neutral-500 transition-colors group-focus-within/search:text-[var(--menzu-accent)]"
-        />
-        <input
-          // Password managers and similar extensions stamp their own attributes
-          // onto text inputs before React hydrates; without this the dev overlay
-          // reports a mismatch the app did not cause (production patches it quietly).
-          suppressHydrationWarning
-          id={inputId}
-          type="search"
-          value={query}
-          onChange={(event) => ask({ query: event.target.value })}
-          placeholder={placeholder}
-          autoComplete="off"
-          className="relative min-w-0 flex-1 bg-transparent text-[13px] text-white outline-none placeholder:text-neutral-500 [&::-webkit-search-cancel-button]:hidden"
-        />
-        {query ? (
-          <button
-            type="button"
-            onClick={() => ask({ query: "" })}
-            aria-label="Xoá tìm kiếm"
-            className="relative shrink-0 rounded-md p-0.5 text-neutral-500 transition-colors hover:text-white"
+          <label
+            htmlFor={inputId}
+            className="group/search relative isolate flex h-12 w-full items-center gap-2.5 rounded-full border border-neutral-800/60 bg-neutral-900/60 px-4 transition-colors focus-within:border-[var(--menzu-accent)]/60"
           >
-            <X size={14} />
-          </button>
-        ) : null}
-      </label>
+            <BorderBeam />
+            <Search
+              size={15}
+              aria-hidden
+              className="relative shrink-0 text-neutral-500 transition-colors group-focus-within/search:text-[var(--menzu-accent)]"
+            />
+            <input
+              // Password managers and similar extensions stamp their own attributes
+              // onto text inputs before React hydrates; without this the dev overlay
+              // reports a mismatch the app did not cause (production patches it quietly).
+              suppressHydrationWarning
+              id={inputId}
+              type="search"
+              value={query}
+              onChange={(event) => ask({ query: event.target.value })}
+              placeholder={placeholder}
+              autoComplete="off"
+              className="relative min-w-0 flex-1 bg-transparent text-[13px] text-white outline-none placeholder:text-neutral-500 [&::-webkit-search-cancel-button]:hidden"
+            />
+            {query ? (
+              <button
+                type="button"
+                onClick={() => ask({ query: "" })}
+                aria-label="Xoá tìm kiếm"
+                className="relative shrink-0 rounded-md p-0.5 text-neutral-500 transition-colors hover:text-white"
+              >
+                <X size={14} />
+              </button>
+            ) : null}
+          </label>
 
-      {/* One chip per platform, "Tất cả" first. A radio group in all but
+          {/* One chip per platform, "Tất cả" first. A radio group in all but
           markup: exactly one is lit, and pressing the lit one changes nothing. */}
-      <div role="group" aria-label="Phân loại" className="flex flex-wrap items-center gap-2">
-        {[ALL, ...CATEGORY_PLATFORMS].map((value) => {
-          const active = platform === value;
-          return (
-            <button
-              key={value}
-              type="button"
-              aria-pressed={active}
-              onClick={() => ask({ platform: value as CategoryPlatform | typeof ALL })}
-              className={`${CHIP} ${active ? CHIP_ACTIVE : CHIP_IDLE}`}
-            >
-              {value === ALL ? "Tất cả" : platformLabel(value)}
-            </button>
-          );
-        })}
-      </div>
+          <div
+            role="group"
+            aria-label="Phân loại"
+            className="flex flex-wrap items-center gap-2"
+          >
+            {[ALL, ...CATEGORY_PLATFORMS].map((value) => {
+              const active = platform === value;
+              return (
+                <button
+                  key={value}
+                  type="button"
+                  aria-pressed={active}
+                  onClick={() =>
+                    ask({ platform: value as CategoryPlatform | typeof ALL })
+                  }
+                  className={`${CHIP} ${active ? CHIP_ACTIVE : CHIP_IDLE}`}
+                >
+                  {value === ALL ? "Tất cả" : platformLabel(value)}
+                </button>
+              );
+            })}
+          </div>
+        </>
+      ) : null}
 
       {hasTiles ? (
         <>
@@ -289,7 +320,10 @@ export function RowSearch({
                             animationDelay: `${(leaving - 1 - seat) * OUT_STAGGER_MS}ms`,
                             animationFillMode: "forwards",
                           }
-                        : { animationDelay: `${seat * IN_STAGGER_MS}ms`, animationFillMode: "backwards" }
+                        : {
+                            animationDelay: `${seat * IN_STAGGER_MS}ms`,
+                            animationFillMode: "backwards",
+                          }
                       : undefined
                   }
                 >
@@ -311,7 +345,11 @@ export function RowSearch({
               >
                 Xem thêm
                 <span className="text-neutral-500">({hidden})</span>
-                <ChevronDown size={14} aria-hidden className="transition-transform group-hover:translate-y-0.5" />
+                <ChevronDown
+                  size={14}
+                  aria-hidden
+                  className="transition-transform group-hover:translate-y-0.5"
+                />
               </button>
             </div>
           ) : expanded ? (
@@ -328,7 +366,7 @@ export function RowSearch({
             </div>
           ) : null}
         </>
-      ) : (
+      ) : filters ? (
         <div className="flex flex-col items-center justify-center gap-2 rounded-[15px] border border-dashed border-white/10 bg-white/[0.02] px-5 py-10 text-center">
           <p className="text-sm font-bold text-white">
             {needle
@@ -347,7 +385,7 @@ export function RowSearch({
             Xem tất cả danh mục
           </Link>
         </div>
-      )}
+      ) : null}
     </div>
   );
 }
