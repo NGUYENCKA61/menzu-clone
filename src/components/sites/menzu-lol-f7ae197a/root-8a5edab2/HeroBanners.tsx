@@ -98,9 +98,6 @@ export function HeroBanners({
           pointer target. */}
       <div aria-hidden className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
         <div className="hero-starfield" />
-        {/* lmarket's weather: a wide pool of blue under the hero, so the stars
-            and the copy sit on a glow rather than on flat black. */}
-        <div className="ambient-glow left-1/2 top-[-10%] h-[420px] w-[min(820px,120%)] -translate-x-1/2" />
         {shootingStars ? (
           <>
             <span className="hero-shooting" style={{ top: "8%", left: "58%", animationDelay: "0s", animationDuration: "7s" }} />
