@@ -3,7 +3,7 @@ import Image from "next/image";
 export interface PartnerView {
   id: string;
   name: string;
-  /** The small grey line under the logo. Null draws the tile without it. */
+  /** The small grey line under the name. Null draws the tile without it. */
   tagline: string | null;
   logoUrl: string | null;
   url: string | null;
@@ -34,35 +34,46 @@ const MARQUEE_STYLES = `
 }
 `;
 
+/**
+ * One partner: a square mark on the left, the name (and the line under it)
+ * on the right. The shop's partners are cheat makers whose marks are square
+ * avatars, not wide wordmarks, so the tile is built for a 1:1 image — 48px,
+ * softly rounded, a hairline ring so a dark mark keeps an edge against the
+ * dark glass. A partner without a mark gets its initial in the same square.
+ */
 function Tile({ partner }: { partner: PartnerView }) {
   const body = (
     <>
-      {partner.logoUrl ? (
-        <Image
-          src={partner.logoUrl}
-          alt={partner.name}
-          width={140}
-          height={40}
-          className="h-9 w-auto max-w-[140px] object-contain"
-        />
-      ) : (
-        <span className="text-sm font-black uppercase tracking-widest text-neutral-300">
+      <span className="grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-lg bg-white/[0.04] ring-1 ring-white/10">
+        {partner.logoUrl ? (
+          <Image
+            src={partner.logoUrl}
+            alt=""
+            width={96}
+            height={96}
+            className="h-12 w-12 object-cover"
+          />
+        ) : (
+          <span className="text-lg font-black uppercase text-neutral-300">
+            {partner.name.trim().charAt(0) || "?"}
+          </span>
+        )}
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="block truncate text-[13px] font-black uppercase tracking-wider text-white">
           {partner.name}
         </span>
-      )}
-      {/* Fits inside the tile's existing 80px without growing it: the logo is
-          36px and this line 12, so a column with a small gap still centers
-          with room over. Brightens a step with the tile's own hover. */}
-      {partner.tagline ? (
-        <span className="max-w-full truncate text-center text-[10px] font-semibold leading-none text-neutral-400 transition-colors group-hover/partner:text-neutral-200">
-          {partner.tagline}
-        </span>
-      ) : null}
+        {partner.tagline ? (
+          <span className="mt-0.5 block truncate text-[10px] font-semibold text-neutral-400 transition-colors group-hover/partner:text-neutral-200">
+            {partner.tagline}
+          </span>
+        ) : null}
+      </span>
     </>
   );
 
   const tileClass =
-    "group/partner flex h-20 w-[180px] shrink-0 flex-col items-center justify-center gap-1.5 rounded-xl border border-white/10 bg-white/[0.03] px-5 transition-colors hover:border-[var(--menzu-accent)]/50 hover:bg-white/[0.06]";
+    "group/partner flex h-20 w-[220px] shrink-0 items-center gap-3.5 rounded-xl border border-white/10 bg-white/[0.03] px-4 transition-colors hover:border-[var(--menzu-accent)]/50 hover:bg-white/[0.06]";
 
   // A link only when there is somewhere to go — a dead anchor would show a
   // pointer cursor over nothing.
@@ -76,7 +87,7 @@ function Tile({ partner }: { partner: PartnerView }) {
 }
 
 /**
- * "Đối tác uy tín" — a marquee of partner logos.
+ * "Đối tác uy tín" — a marquee of partner tiles.
  *
  * Renders nothing while the shop has added no partners: a heading over an
  * empty strip would be worse than no section, and nothing here is seeded
@@ -117,10 +128,10 @@ export function PartnersSection({ partners }: { partners: PartnerView[] }) {
           className="partners-marquee flex gap-4"
           style={{
             ["--ticker-width" as string]: `${100 / COPIES}%`,
-            // 4s per partner: one loop in 24s for the six starters — ~49px/s,
-            // brisk enough to read as motion at a glance, still slow enough
-            // that a logo is recognised mid-glide. Scales with the roster, so
-            // a longer strip keeps the same feel instead of speeding up.
+            // 4s per partner: one loop in 20s for five — ~47px/s, brisk
+            // enough to read as motion at a glance, still slow enough that
+            // a mark is recognised mid-glide. Scales with the roster, so a
+            // longer strip keeps the same feel instead of speeding up.
             ["--partners-duration" as string]: `${Math.max(16, partners.length * 4)}s`,
           }}
         >
