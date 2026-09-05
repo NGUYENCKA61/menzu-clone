@@ -7,20 +7,6 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  /* lmarket.net's cool greys in place of Tailwind's neutral ones: the same
-     lightness steps, so every contrast stays, with a hint of hue 224 so
-     cards, borders and muted text sit on the blue-black page as one. */
-  --color-neutral-50: #f7f8fa;
-  --color-neutral-100: #eff1f5;
-  --color-neutral-200: #dde0e8;
-  --color-neutral-300: #c8cdd8;
-  --color-neutral-400: #9aa1b2;
-  --color-neutral-500: #6f7789;
-  --color-neutral-600: #4f5667;
-  --color-neutral-700: #3d4351;
-  --color-neutral-800: #242832;
-  --color-neutral-900: #161920;
-  --color-neutral-950: #0b0d12;
   --font-sans: var(--font-inter), "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
     "Liberation Mono", "Courier New", monospace;
@@ -152,12 +138,12 @@
 
 .dark {
   /* body/page surface — live value lab(2.75381 0 0) */
-  --background: #0f1015;
+  --background: #050508;
   --foreground: #ffffff;
 }
 
 :root {
-  --menzu-bg: #0f1015;
+  --menzu-bg: #050508;
   --menzu-nav: #1a1a1a;
   --menzu-rail: #0c0d12;
   --menzu-backdrop-dim: rgb(10 10 13 / 0.7);
@@ -168,8 +154,8 @@
      root layout. menzu.lol shipped purple here; this shop chose its red, the
      same value as --menzu-accent below, so the storefront carries ONE accent
      — a purple button beside a red heading read as two shops on one page. */
-  --brand: #2563eb;
-  --brand-dark: #1d4ed8;
+  --brand: #ff3158;
+  --brand-dark: #e01e43;
 
   /* The purple the whole site used to wear, kept for the reward wheel: when
      the storefront and the account pages moved to red the shop asked for the
@@ -188,15 +174,15 @@
   /* Taken from the palette token rather than copied as a hex, so it stays the
      same red as bg-rose-500 renders — the two differ, because Tailwind emits
      these through a wider gamut than a hand-written sRGB triple. */
-  --menzu-scroll-thumb: color-mix(in oklab, var(--brand) 85%, transparent);
+  --menzu-scroll-thumb: color-mix(in oklab, var(--color-rose-500) 85%, transparent);
 
-  /* The storefront's accent now simply IS the brand colour: the shop moved
-     the whole site to lmarket.net's blue and wants one knob — Cấu hình →
-     Nhận diện — to recolour buttons, headings, rings and glows together. */
-  --menzu-accent: var(--brand);
-  --menzu-accent-dark: var(--brand-dark);
-  --menzu-scroll-thumb-hover: color-mix(in oklab, var(--brand) 95%, transparent);
-  --menzu-scroll-thumb-active: var(--brand);
+  /* The sign-in card's accent, the exact red the brief named. Its own token
+     rather than a change to --brand: red was asked for on that page, and
+     --brand paints every button on the storefront. */
+  --menzu-accent: #ff3158;
+  --menzu-accent-dark: #e01e43;
+  --menzu-scroll-thumb-hover: color-mix(in oklab, var(--color-rose-500) 95%, transparent);
+  --menzu-scroll-thumb-active: var(--color-rose-500);
 }
 
 /*
@@ -692,14 +678,14 @@ body.lightbox-open .site-nav {
   0%,
   100% {
     box-shadow:
-      0 0 0 1px color-mix(in srgb, var(--brand) 30%, transparent),
-      0 0 10px color-mix(in srgb, var(--brand) 12%, transparent);
+      0 0 0 1px rgb(255 49 88 / 0.3),
+      0 0 10px rgb(255 49 88 / 0.12);
   }
   50% {
     box-shadow:
-      0 0 0 2px rgb(59 130 246 / 0.5),
-      0 0 22px rgb(59 130 246 / 0.25),
-      0 0 40px color-mix(in srgb, var(--brand) 12%, transparent);
+      0 0 0 2px rgb(239 68 68 / 0.5),
+      0 0 22px rgb(239 68 68 / 0.25),
+      0 0 40px rgb(255 49 88 / 0.12);
   }
 }
 .search-glow-brand {
@@ -1354,40 +1340,4 @@ body.lightbox-open .site-nav {
    (the FAQ's support card) rather than only under the pointer. */
 .spot-glow-on {
   opacity: 1;
-}
-
-/* lmarket.net's hero ground, which is paint and not a picture: a pool of
-   colour bleeding down from above the fold, and a faint dot grid that has
-   faded out by the middle of the hero. In lmarket's own blue, by the shop's
-   choice, with the rest of the cool palette. */
-.hero-glow {
-  position: absolute;
-  inset: 0 0 auto 0;
-  height: 460px;
-  background: radial-gradient(
-    ellipse 70% 100% at 50% -10%,
-    rgba(0, 85, 251, 0.2) 0%,
-    rgba(10, 54, 180, 0.06) 45%,
-    transparent 75%
-  );
-}
-.hero-dots {
-  position: absolute;
-  inset: 0;
-  opacity: 0.4;
-  background-image: radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.07) 1px, transparent 0);
-  background-size: 32px 32px;
-  -webkit-mask-image: linear-gradient(to bottom, black 0%, transparent 60%);
-  mask-image: linear-gradient(to bottom, black 0%, transparent 60%);}
-
-/* lmarket.net's pool of colour behind a block: their blue, blurred far and
-   kept faint, so the ground has weather instead of being flat. Size and
-   place it with utilities; this is only the paint. */
-.ambient-glow {
-  pointer-events: none;
-  position: absolute;
-  border-radius: 9999px;
-  background: linear-gradient(63.4deg, #0a36b4 8%, #0055fb 57%, #0094ff 106%);
-  opacity: 0.07;
-  filter: blur(180px);
 }

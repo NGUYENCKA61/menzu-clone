@@ -241,15 +241,15 @@ export function SiteHeaderClient({
     <nav
       className={`site-nav fixed top-0 left-0 right-0 z-[100] transition-all duration-300 flex flex-col ${
         scrolled
-          ? "bg-[var(--menzu-bg)]/70 backdrop-blur-xl shadow-lg shadow-black/30"
-          : "bg-[var(--menzu-bg)]/70 backdrop-blur-xl"
+          ? "bg-[#1a1a1a]/80 backdrop-blur-xl shadow-lg shadow-black/30"
+          : "bg-[#1a1a1a]"
       }`}
     >
       {/* Not on a phone: the bottom bar holds the first-rank links there,
           and the strip's own five sit in the menu under LIÊN KẾT NHANH, so
           this row would only push the page down 40px for a second copy. */}
       <div
-        className={`hidden w-full overflow-hidden border-b transition-all duration-300 sm:flex ${
+        className={`hidden w-full overflow-hidden border-b bg-[#1a1a1a] transition-all duration-300 sm:flex ${
           scrolled ? "h-0 opacity-0 border-transparent" : "h-[40px] opacity-100 border-white/5"
         }`}
       >

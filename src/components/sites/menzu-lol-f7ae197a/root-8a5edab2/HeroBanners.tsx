@@ -97,10 +97,6 @@ export function HeroBanners({
           and then rather than all at once. Decoration only — aria-hidden, no
           pointer target. */}
       <div aria-hidden className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
-        {/* lmarket's ground under the stars: the accent pooling down from
-            above the fold and a dot grid fading out by mid-hero. */}
-        <div className="hero-glow" />
-        <div className="hero-dots" />
         <div className="hero-starfield" />
         {shootingStars ? (
           <>
