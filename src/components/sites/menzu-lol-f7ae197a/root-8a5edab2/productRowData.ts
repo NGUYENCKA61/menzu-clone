@@ -28,10 +28,4 @@ export interface ProductCard {
    * on categories nobody has tagged yet.
    */
   platform?: string | null;
-  /**
-   * How many products the category lists right now, counted, not typed —
-   * the line under a category's name ("18 sản phẩm"). Absent on service
-   * tiles, which print their own figures instead.
-   */
-  count?: number;
 }

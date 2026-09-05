@@ -4,7 +4,6 @@ import type { CategoryCard } from "@/components/sites/menzu-lol-f7ae197a/root-8a
 import type { DocCard } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/DocsSection";
 import type { ProductCard } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/productRowData";
 import { db } from "@/lib/db";
-import { LISTED_PRODUCT } from "@/lib/queries";
 import { orderBySlugs, splitTileName } from "@/lib/homeSections";
 import { categoryHref } from "@/lib/routes";
 
@@ -26,7 +25,6 @@ function toCard(c: {
   platform: string | null;
   soldCount: number;
   stockCount: number;
-  _count?: { products: number };
 }): ProductCard {
   return {
     image: c.imageUrl ?? "",
@@ -34,7 +32,6 @@ function toCard(c: {
     description: c.description,
     platform: c.platform,
     href: categoryHref(c.slug),
-    count: c._count?.products,
     // Both stat labels drive colour in ProductRow's tone lookup, so they stay
     // exactly as the live site words them.
     stats: [
@@ -76,14 +73,7 @@ export async function getHomeGroups(
     where: { isActive: true },
     orderBy: { sortOrder: "asc" },
     include: {
-      categories: {
-        orderBy: { sortOrder: "asc" },
-        include: {
-          // The listed products per category, for the tile's "N sản phẩm"
-          // line — the same filter the category page counts with.
-          category: { include: { _count: { select: { products: { where: LISTED_PRODUCT } } } } },
-        },
-      },
+      categories: { orderBy: { sortOrder: "asc" }, include: { category: true } },
     },
   });
 

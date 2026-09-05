@@ -1,6 +1,15 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import {
+  ArrowRight,
+  Boxes,
+  ChevronRight,
+  CircleCheck,
+  Layers,
+  ShoppingBag,
+  Tag,
+  type LucideIcon,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { ProductCard } from "./productRowData";
 import { RowSearch } from "./RowSearch";
@@ -49,23 +58,121 @@ export interface ProductRowProps {
 }
 
 /**
- * What a tone still decides now that every tile is the cover itself: how the
- * art meets the box. Both cover it edge to edge today; the record stays so a
- * row that needs its logos letterboxed can ask for `object-contain` without
- * touching the tile.
+ * Full class strings per tone, never composed — Tailwind reads source text and
+ * cannot see a class name that only exists once the template has run.
  */
-const TONES: Record<RowTone, { image: string }> = {
-  indigo: { image: "object-cover" },
-  menzu: { image: "object-cover" },
+const TONES: Record<
+  RowTone,
+  {
+    card: string;
+    frame: string;
+    /** How the cover art meets the frame — cover crops, contain letterboxes. */
+    image: string;
+    title: string;
+    buttonEdge: string;
+    buttonFace: string;
+  }
+> = {
+  // Kept for callers that still ask for it; drawn in the same neutrals with
+  // an outlined button, now that the site has one accent rather than two.
+  indigo: {
+    card: "border-white/[0.08] hover:border-[var(--menzu-accent)]/50",
+    frame: "border-white/[0.06] group-hover:border-[var(--menzu-accent)]/30",
+    image: "object-cover",
+    title: "group-hover:text-[var(--menzu-accent)]",
+    buttonEdge:
+      "bg-[var(--menzu-accent)]/50 group-hover:bg-[var(--menzu-accent)]",
+    buttonFace: "bg-[#101114] group-hover:bg-[var(--menzu-accent)]",
+  },
+  // A neutral ring at rest, the accent only under the pointer — the same
+  // chrome the product and software cards wear, so the four kinds of tile on
+  // the site read as one set. The always-lit XEM NGAY button is the tile's
+  // one red at rest. The image frame stays borderless; the art bleeds to the
+  // frame's own rounding.
+  menzu: {
+    card: "border-white/[0.08] hover:border-[var(--menzu-accent)]/50",
+    frame: "border-transparent",
+    image: "object-cover",
+    title: "group-hover:text-[var(--menzu-accent)]",
+    buttonEdge:
+      "bg-[var(--menzu-accent)] group-hover:bg-[var(--menzu-accent-dark)]",
+    buttonFace:
+      "bg-[var(--menzu-accent)] group-hover:bg-[var(--menzu-accent-dark)]",
+  },
 };
 
+interface StatTone {
+  bg: string;
+  border: string;
+  text: string;
+  icon: LucideIcon;
+}
+
+// Tailwind can't see dynamically-built class names, so every stat tone needs
+// its full class strings spelled out here, keyed by the stat label.
+const STAT_TONES: Record<string, StatTone> = {
+  "Đã Bán": {
+    bg: "bg-red-500/10",
+    border: "border-red-500/20",
+    text: "text-red-500",
+    icon: ShoppingBag,
+  },
+  "Đang Bán": {
+    bg: "bg-green-500/10",
+    border: "border-green-500/20",
+    text: "text-green-500",
+    icon: Boxes,
+  },
+  "Loại SP": {
+    bg: "bg-white/[0.04]",
+    border: "border-white/[0.08]",
+    text: "text-neutral-200",
+    icon: Layers,
+  },
+  "Giá từ": {
+    bg: "bg-amber-500/10",
+    border: "border-amber-500/20",
+    text: "text-amber-500",
+    icon: Tag,
+  },
+  "Báo giá": {
+    bg: "bg-amber-500/10",
+    border: "border-amber-500/20",
+    text: "text-amber-500",
+    icon: Tag,
+  },
+  "Đã xong": {
+    bg: "bg-green-500/10",
+    border: "border-green-500/20",
+    text: "text-green-500",
+    icon: CircleCheck,
+  },
+};
+
+// Safe fallback so the tone lookup stays total for any unrecognized label.
+const DEFAULT_STAT_TONE: StatTone = {
+  bg: "bg-white/[0.04]",
+  border: "border-white/[0.08]",
+  text: "text-neutral-200",
+  icon: Layers,
+};
+
+function getStatTone(label: string): StatTone {
+  return STAT_TONES[label] ?? DEFAULT_STAT_TONE;
+}
+
 /**
- * Stats the tile never prints as figures.
+ * Stats the card no longer prints.
  *
  * A display filter, deliberately, and not a change upstream: `soldCount` and
  * `stockCount` are still queried, still carried in the row data, and still
- * editable on the admin's category screen; the tile's "N sản phẩm" line is
- * counted from the catalogue instead (ProductCard.count).
+ * editable on the admin's category screen — they are shop-facing marketing
+ * figures somebody may want back. Removing them from `homeRows` instead would
+ * have deleted the numbers along with the tiles.
+ *
+ * The service rows share this component and keep their own stats ("Giá từ",
+ * "Đã xong"), which is why this names two labels rather than dropping the
+ * block outright.
  */
 const HIDDEN_STATS = new Set(["Đã Bán", "Đang Bán"]);
 
@@ -80,34 +187,7 @@ const HIDDEN_STATS = new Set(["Đã Bán", "Đang Bán"]);
  */
 const MARQUEE_FROM = 5;
 
-/**
- * The line under the name. A service tile prints its own figures ("Giá từ
- * 50.000đ · Đã xong 120"); a category says how many products it lists, the
- * way lmarket's game tiles say "18 cheats" — counted from the catalogue,
- * never the admin-typed stock figure — or its platform while it lists
- * nothing; a tile with none of those shows the name alone.
- */
-function describe(card: ProductCard): string | null {
-  const figures = card.stats.filter((stat) => !HIDDEN_STATS.has(stat.label));
-  if (figures.length > 0) {
-    return figures.map((stat) => `${stat.label} ${stat.value}`).join(" · ");
-  }
-  if (card.count && card.count > 0) return `${card.count} sản phẩm`;
-  return card.platform ?? null;
-}
-
-/**
- * One tile, drawn the same in the grid and on the slider — the way
- * lmarket.net draws a game on its cheats page: the cover fills the box, the
- * name and one line of detail sit on it over a dark gradient at the foot,
- * and there is nothing else to read. Under the pointer the tile lifts and
- * grows a little, an accent ring and a hairline light along its top edge,
- * the cover eases in, and the rest of the row dims to let it stand out (the
- * grid wears `group/grid` for that; the slider's tiles simply lift).
- *
- * 4:3 rather than the original's square: the shop exports its covers at
- * 16:9, and a square would cut almost half of each one away.
- */
+/** One tile, drawn the same in the grid and on the slider. */
 function RowCard({
   card,
   t,
@@ -115,68 +195,145 @@ function RowCard({
 }: {
   card: ProductCard;
   t: (typeof TONES)[RowTone];
-  /** Wear the "TOP THÁNG" mark. */
+  /** Wear the "TOP THÁNG" pill. */
   top?: boolean;
 }) {
-  const detail = describe(card);
+  const stats = card.stats.filter((s) => !HIDDEN_STATS.has(s.label));
 
   return (
     <Link
       href={card.href}
-      className="group/card relative block aspect-[4/3] w-full overflow-hidden rounded-xl border border-white/10 bg-[#101114] will-change-transform transition-all duration-500 ease-out hover:z-20 hover:-translate-y-1.5 hover:scale-[1.02] hover:border-[var(--menzu-accent)]/40 hover:shadow-[0_18px_36px_-14px_color-mix(in_oklab,var(--menzu-accent)_55%,transparent)] group-hover/grid:opacity-70 hover:opacity-100!"
+      className={cn(
+        // The product cards' surface, radius and lift, so a category
+        // tile and an account tile in the next row read as one family.
+        "group flex h-full flex-col bg-[#101114] rounded-[15px] overflow-hidden border transition-all duration-[250ms] p-3 sm:p-4 hover:-translate-y-1 hover:shadow-[0_15px_40px_#00000088]",
+        t.card,
+      )}
     >
-      {/* Nothing at all rather than an empty src. A category the shop has
-          not given a picture arrived here as "", and the browser reads an
-          empty src as "this page's own address" — it fetched the whole page
-          again, once per pictureless tile, to use as an image. The box keeps
-          its shape and its dark either way. */}
-      {card.image ? (
-        <Image
-          src={card.image}
-          alt={card.title}
-          fill
-          sizes="(min-width: 1024px) 25vw, (min-width: 768px) 33vw, 50vw"
-          className={cn(
-            "transition-transform duration-700 ease-out group-hover/card:scale-[1.04]",
-            t.image,
-          )}
-        />
-      ) : null}
-
-      {/* The foot fades to black so the words read on any cover. */}
+      {/* 16/9 — the ratio the shop exports its covers at, so a standard
+          cover fills the frame edge to edge with nothing cropped and
+          nothing letterboxed. */}
       <div
-        aria-hidden
-        className="pointer-events-none absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-black/95 via-black/40 to-transparent"
-      />
-
-      {/* Lit under the pointer: an inset ring in the accent and a hairline
-          along the top edge, the original's two-part glow. */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 rounded-xl opacity-0 transition-opacity duration-300 group-hover/card:opacity-100"
+        className={cn(
+          "relative w-full aspect-[16/9] rounded-[10px] overflow-hidden mb-4 border transition-colors",
+          t.frame,
+        )}
       >
-        <div className="absolute inset-0 rounded-xl ring-1 ring-inset ring-[var(--menzu-accent)]/60" />
-        <div className="absolute -top-px left-3 right-3 h-px bg-gradient-to-r from-transparent via-[var(--menzu-accent)] to-transparent" />
+        {/* Nothing at all rather than an empty src. A category the shop has
+            not given a picture arrived here as "", and the browser reads an
+            empty src as "this page's own address" — it fetched the whole page
+            again, once per pictureless tile, to use as an image. The frame
+            keeps its shape either way. */}
+        {card.image ? (
+          <Image
+            src={card.image}
+            alt={card.title}
+            fill
+            sizes="(min-width: 1024px) 25vw, (min-width: 768px) 33vw, 50vw"
+            className={cn(
+              "transition-transform duration-500 group-hover:scale-110",
+              t.image,
+            )}
+          />
+        ) : null}
+        {/* The month's-pick pill, in the top-left corner the account card
+            keeps its code in and dressed the same — dark glass, small caps —
+            in the accent red, words only — the shop tried a glyph and took it
+            off. No number:
+            the shop wanted the label, not a ranking. */}
+        {top ? (
+          <span className="absolute left-1.5 top-1.5 z-10 inline-flex items-center rounded-full border border-white/10 bg-[#0d0d12]/80 px-1.5 py-0.5 text-[8px] font-black uppercase tracking-wide text-[var(--menzu-accent)] backdrop-blur-md sm:left-2 sm:top-2 sm:px-2 sm:text-[9px]">
+            Top tháng
+          </span>
+        ) : null}
       </div>
 
-      {/* The month's-pick mark, where the original pins "★ FEATURED": amber
-          on the cover's top-left, so it is a tag on the picture rather than
-          a second accent beside the red. */}
-      {top ? (
-        <span className="absolute left-2.5 top-2.5 z-10 rounded-md bg-amber-500/90 px-2 py-1 text-[10px] font-bold tracking-wide text-amber-950">
-          ★ TOP THÁNG
-        </span>
+      <h3
+        className={cn(
+          "text-center text-sm sm:text-base font-black uppercase text-white mb-2 transition-colors tracking-wide",
+          t.title,
+        )}
+      >
+        {card.title}
+      </h3>
+
+      {/* Clamped at two lines rather than trusted to be short: the text
+          is typed into an admin field, and one long entry would
+          otherwise stretch its tile taller than the three beside it and
+          pull the whole row's buttons out of line. */}
+      {card.description ? (
+        <p className="text-center text-[11px] sm:text-xs leading-[1.55] text-[#9b9da5] mb-4 line-clamp-2">
+          {card.description}
+        </p>
+      ) : (
+        <div className="mb-2" />
+      )}
+
+      {/* Dropped entirely when nothing is left, so a card with no stats
+          does not carry the block's bottom margin as a stray gap. */}
+      {stats.length > 0 ? (
+        <div className="grid grid-cols-2 gap-1.5 sm:gap-3 mb-3 sm:mb-4">
+          {stats.map((stat) => {
+            const tone = getStatTone(stat.label);
+            const StatIcon = tone.icon;
+
+            return (
+              <div
+                key={stat.label}
+                className="bg-[#0a0a0d] rounded-lg p-1 sm:p-2 xl:p-2.5 flex flex-col xl:flex-row items-center justify-center xl:justify-start gap-1 xl:gap-2.5 border border-white/[0.06] relative overflow-hidden group-hover:border-white/[0.12]"
+              >
+                <div className="absolute top-0 left-0 w-1.5 h-1.5 border-t border-l border-[var(--menzu-accent)]/50 hidden sm:block" />
+                <div className="absolute bottom-0 right-0 w-1.5 h-1.5 border-b border-r border-[var(--menzu-accent)]/50 hidden sm:block" />
+
+                <div
+                  className={cn(
+                    "w-5 h-5 sm:w-7 sm:h-7 xl:w-8 xl:h-8 rounded flex items-center justify-center shrink-0 border",
+                    tone.bg,
+                    tone.border,
+                    tone.text,
+                  )}
+                >
+                  <StatIcon size={12} />
+                </div>
+
+                <div className="flex flex-col items-center xl:items-start text-center xl:text-left">
+                  <span className="text-[7px] sm:text-[10px] text-gray-500 font-bold uppercase mb-0 sm:mb-0.5 whitespace-nowrap">
+                    {stat.label}
+                  </span>
+                  <span
+                    className={cn(
+                      "text-[10px] sm:text-sm font-black leading-none",
+                      tone.text,
+                    )}
+                  >
+                    {stat.value}
+                  </span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
       ) : null}
 
-      <div className="absolute inset-x-0 bottom-0 p-3">
-        <h3 className="line-clamp-1 text-sm font-bold text-white drop-shadow-[0_2px_8px_rgb(0_0_0/0.9)] sm:text-base">
-          {card.title}
-        </h3>
-        {detail ? (
-          <p className="mt-0.5 line-clamp-1 text-[11px] text-white/70 drop-shadow-[0_1px_4px_rgb(0_0_0/0.8)]">
-            {detail}
-          </p>
-        ) : null}
+      <div className="w-full mt-auto relative">
+        <div
+          className={cn(
+            "relative w-full p-[1.5px] transition-all duration-300 [clip-path:polygon(8px_0,100%_0,100%_calc(100%-8px),calc(100%-8px)_100%,0_100%,0_8px)]",
+            t.buttonEdge,
+          )}
+        >
+          <div
+            className={cn(
+              "relative w-full transition-colors duration-300 flex items-center justify-center gap-1.5 py-2.5 sm:py-3 [clip-path:polygon(7px_0,100%_0,100%_calc(100%-7px),calc(100%-7px)_100%,0_100%,0_7px)]",
+              t.buttonFace,
+            )}
+          >
+            <span className="text-white font-black text-[10px] sm:text-xs uppercase tracking-widest">
+              XEM NGAY
+            </span>
+            <ChevronRight size={12} />
+          </div>
+        </div>
       </div>
     </Link>
   );
