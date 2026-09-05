@@ -2,6 +2,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, BadgeCheck, Star } from "lucide-react";
 
+import { ReviewsReveal } from "./ReviewsReveal";
+
 export interface Review {
   name: string;
   date: string;
@@ -20,17 +22,38 @@ export interface Review {
  */
 const MIN_REVIEWS_FOR_SCORE = 100;
 
-function Stars({ filled, size = 13 }: { filled: number; size?: number }) {
+/**
+ * `pop` wraps each star so it can scale in after its card has risen — the
+ * cards' stars only; the summary line's stars stand still.
+ */
+function Stars({
+  filled,
+  size = 13,
+  pop = false,
+}: {
+  filled: number;
+  size?: number;
+  pop?: boolean;
+}) {
   return (
     <div className="flex items-center gap-[3px]" aria-label={`${filled} trên 5 sao`}>
-      {[0, 1, 2, 3, 4].map((star) => (
-        <Star
-          key={star}
-          size={size}
-          aria-hidden
-          className={star < filled ? "fill-amber-400 text-amber-400" : "text-white/15"}
-        />
-      ))}
+      {[0, 1, 2, 3, 4].map((star) => {
+        const icon = (
+          <Star
+            key={star}
+            size={size}
+            aria-hidden
+            className={star < filled ? "fill-amber-400 text-amber-400" : "text-white/15"}
+          />
+        );
+        return pop ? (
+          <span key={star} className="reveal-star inline-flex" style={{ ["--s" as string]: star }}>
+            {icon}
+          </span>
+        ) : (
+          icon
+        );
+      })}
     </div>
   );
 }
@@ -71,12 +94,23 @@ export function ReviewsSection({
         </p>
       </div>
 
-      <div className="mt-8 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:grid lg:grid-cols-4 lg:overflow-visible lg:pb-0">
+      {/* The motion lmarket.net's testimonial wall has: cards rise in one
+          after another when the grid scrolls into view (`.reveal-card`,
+          delayed by --i), their stars pop in after, and under the pointer a
+          soft accent glow follows the cursor across the card (`.spot-glow`,
+          placed at --spot-x/--spot-y by ReviewsReveal). The card also lifts
+          half a step and brightens its edge on hover. `isolate` keeps the
+          glow's negative z-index inside the card, between its background
+          and its words. */}
+      <ReviewsReveal className="mt-8 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:grid lg:grid-cols-4 lg:overflow-visible lg:pb-0">
         {reviews.map((review, index) => (
           <article
             key={`${review.name}-${review.date}-${index}`}
-            className="flex w-[280px] shrink-0 snap-start flex-col rounded-2xl border border-white/[0.08] bg-white/[0.02] p-5 transition-colors hover:border-white/[0.16] sm:w-[320px] lg:w-auto"
+            data-spot
+            style={{ ["--i" as string]: index }}
+            className="reveal-card group relative isolate flex w-[280px] shrink-0 snap-start flex-col rounded-2xl border border-white/[0.08] bg-white/[0.02] p-5 shadow-[inset_0_1px_0_0_rgb(255_255_255/0.04),0_1px_2px_0_rgb(0_0_0/0.4)] transition-[border-color,translate,box-shadow] duration-300 hover:-translate-y-0.5 hover:border-white/[0.2] hover:shadow-[inset_0_1px_0_0_rgb(255_255_255/0.06),0_8px_24px_-8px_rgb(255_49_88/0.18)] sm:w-[320px] lg:w-auto"
           >
+            <span aria-hidden className="spot-glow -z-10" />
             <div className="flex items-start gap-3">
               <div className="shrink-0 rounded-full border-[2.5px] border-[var(--menzu-accent)] p-[2px]">
                 <div className="relative grid h-10 w-10 place-items-center overflow-hidden rounded-full bg-neutral-800">
@@ -106,7 +140,7 @@ export function ReviewsSection({
                   </span>
                 </div>
                 <div className="mt-1.5">
-                  <Stars filled={Math.min(5, Math.max(1, review.rating ?? 5))} />
+                  <Stars filled={Math.min(5, Math.max(1, review.rating ?? 5))} pop />
                 </div>
               </div>
             </div>
@@ -124,7 +158,7 @@ export function ReviewsSection({
             </div>
           </article>
         ))}
-      </div>
+      </ReviewsReveal>
 
       {/* The score and the count sit on the same line as the way to the rest:
           a reader who has just read four cards is told what the whole says

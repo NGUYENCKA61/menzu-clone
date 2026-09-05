@@ -1261,3 +1261,77 @@ body.lightbox-open .site-nav {
     animation: none;
   }
 }
+
+/* The home reviews grid (ReviewsReveal.tsx). Until the wrapper has mounted
+   nothing is hidden, so a page without JavaScript shows the cards at rest.
+   Mounted but not yet seen, cards and stars wait below and small; seen, each
+   card rises in --i steps and its stars pop after it, --s apart. Hover lift
+   uses the `translate` property, so it never fights these transforms. */
+[data-reveal]:not([data-inview]) .reveal-card {
+  opacity: 0;
+  transform: translateY(30px);
+}
+[data-reveal]:not([data-inview]) .reveal-star {
+  opacity: 0;
+  transform: scale(0);
+}
+[data-inview] .reveal-card {
+  animation: reveal-rise 0.6s ease-out both;
+  animation-delay: calc(var(--i, 0) * 110ms);
+}
+[data-inview] .reveal-star {
+  animation: reveal-pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  animation-delay: calc(var(--i, 0) * 110ms + 320ms + var(--s, 0) * 70ms);
+}
+@keyframes reveal-rise {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes reveal-pop {
+  from {
+    opacity: 0;
+    transform: scale(0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* A soft accent glow that follows the pointer across a card. The card sets
+   --spot-x/--spot-y (px from its top-left) on mousemove; the glow fades in
+   under the pointer and out when it leaves. */
+.spot-glow {
+  pointer-events: none;
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  background: radial-gradient(
+    320px circle at var(--spot-x, 50%) var(--spot-y, 50%),
+    color-mix(in srgb, var(--menzu-accent) 14%, transparent),
+    transparent 60%
+  );
+}
+[data-spot]:hover .spot-glow {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal]:not([data-inview]) .reveal-card,
+  [data-reveal]:not([data-inview]) .reveal-star {
+    opacity: 1;
+    transform: none;
+  }
+  [data-inview] .reveal-card,
+  [data-inview] .reveal-star {
+    animation: none;
+  }
+}
