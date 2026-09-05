@@ -93,7 +93,7 @@ export function FaqSection({ faq, contact }: { faq: FaqEntry[]; contact: FaqCont
           and kept faint, so the cards sit on a glow rather than flat black. */}
       <div
         aria-hidden
-        className="pointer-events-none absolute left-1/2 top-1/4 -z-10 h-[400px] w-[min(800px,100%)] -translate-x-1/2 rounded-full bg-[var(--menzu-accent)]/[0.06] blur-[180px]"
+        className="ambient-glow left-1/2 top-1/4 -z-10 h-[400px] w-[min(800px,100%)] -translate-x-1/2"
       />
 
       <RevealGrid className="grid items-start gap-10 lg:grid-cols-12 lg:gap-12">
