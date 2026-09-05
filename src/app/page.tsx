@@ -3,7 +3,10 @@ import { TrendingUp } from "lucide-react";
 
 import { FeaturedCategories } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/FeaturedCategories";
 import { FlashSaleSection } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/FlashSaleSection";
-import { HeroBanners } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/HeroBanners";
+import {
+  HeroBanners,
+  SCROLL_TARGET_ID,
+} from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/HeroBanners";
 import { ProductRow } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/ProductRow";
 import { DocsSection } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/DocsSection";
 import { SeoContent } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/SeoContent";
@@ -108,11 +111,21 @@ export default async function Home() {
     // One row per group, in the order the admin arranged them. Headings and
     // membership come from the groups table, so this file no longer knows
     // what any row is called.
+    // The hero's "Khám phá sản phẩm" cue lands on the game-list row — the
+    // shop's choice: that row is the catalogue. Should the row ever be gone,
+    // the whole block takes the anchor so the cue still goes somewhere.
+    // scroll-mt clears the fixed header, so the heading lands below it.
     groups: (
-      <div key="groups" className="flex w-full flex-col space-y-6 sm:space-y-12">
+      <div
+        key="groups"
+        id={homeGroups.some((group) => group.slug === GAME_LIST_SLUG) ? undefined : SCROLL_TARGET_ID}
+        className="flex w-full flex-col space-y-6 sm:space-y-12 scroll-mt-[120px]"
+      >
         {homeGroups.map((group) => (
           <ProductRow
             key={group.id}
+            id={group.slug === GAME_LIST_SLUG ? SCROLL_TARGET_ID : undefined}
+            className={group.slug === GAME_LIST_SLUG ? "scroll-mt-[120px]" : undefined}
             heading={group.name}
             headingSuffix={GROUP_ICONS[group.slug]}
             cards={group.cards}

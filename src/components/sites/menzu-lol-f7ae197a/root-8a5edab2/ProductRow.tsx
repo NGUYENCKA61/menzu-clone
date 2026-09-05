@@ -51,6 +51,8 @@ export interface ProductRowProps {
    * arrives knowing which one they want.
    */
   searchable?: boolean;
+  /** An anchor on the row, for the hero's "Khám phá sản phẩm" cue to land on. */
+  id?: string;
   className?: string;
 }
 
@@ -334,6 +336,7 @@ export function ProductRow({
   marquee: runs = false,
   ranked = false,
   searchable = false,
+  id,
   className,
 }: ProductRowProps) {
   const t = TONES[tone];
@@ -362,7 +365,7 @@ export function ProductRow({
   );
 
   return (
-    <section className={cn("w-full", className)}>
+    <section id={id} className={cn("w-full", className)}>
       <div className="flex flex-row items-center justify-between mb-8">
         {title}
         {viewAll}

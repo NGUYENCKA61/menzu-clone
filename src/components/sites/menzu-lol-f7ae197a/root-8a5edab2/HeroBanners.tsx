@@ -7,10 +7,13 @@ import { DEFAULT_SETTINGS } from "@/lib/settings";
 import { ScrollCta } from "./ScrollCta";
 
 /**
- * Where the hero's scroll cue lands, and the id the categories section wears.
- * Shared so the two cannot drift apart into a link that scrolls nowhere.
+ * Where the hero's scroll cue lands: the "Danh sách hack game" row on the
+ * home page, which hangs this id on itself (page.tsx). Shared so the two
+ * cannot drift apart into a link that scrolls nowhere — which is what
+ * happened while the id sat on the featured strip and the shop switched
+ * that strip off.
  */
-export const SCROLL_TARGET_ID = "danh-muc-san-pham";
+export const SCROLL_TARGET_ID = "danh-sach-hack-game";
 
 const CTA =
   "inline-flex items-center justify-center gap-2 rounded-[10px] px-6 py-3.5 text-[11px] font-black uppercase tracking-[0.14em] transition-colors";
