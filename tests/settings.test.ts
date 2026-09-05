@@ -48,6 +48,15 @@ describe("parseSettings", () => {
     expect(off.purchasesEnabled).toBe(false);
   });
 
+  it("reads the red the shop shipped with as no choice at all", () => {
+    // Every install that saved Nhận diện without touching the colour stored
+    // #FF3158; it must follow the stylesheet's red, not pin the old one.
+    const legacy = parseSettings([{ key: SETTING_KEYS.brandColor, value: "#FF3158" }]);
+    const chosen = parseSettings([{ key: SETTING_KEYS.brandColor, value: "#123456" }]);
+    expect(legacy.brandColor).toBe(DEFAULT_SETTINGS.brandColor);
+    expect(chosen.brandColor).toBe("#123456");
+  });
+
   it("falls back rather than accepting a corrupt value", () => {
     const parsed = parseSettings([
       { key: SETTING_KEYS.topUpMin, value: "không phải số" },

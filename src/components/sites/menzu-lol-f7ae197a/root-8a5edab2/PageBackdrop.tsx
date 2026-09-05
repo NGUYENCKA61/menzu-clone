@@ -8,7 +8,10 @@ import Image from "next/image";
  *
  * Live site: `div.fixed.top-0.left-0.w-full.h-[100vh].z-[-1].overflow-hidden.pointer-events-none`
  * containing an `img.object-cover.object-center.transition-all.duration-700` and a
- * `div.absolute.inset-0.bg-[#0a0a0d]/70` dim overlay.
+ * `div.absolute.inset-0.bg-[#0a0a0d]/70` dim overlay. The dim is painted in
+ * the page's own ground (--menzu-bg) rather than the capture's hex, so the
+ * one token decides how dark the site sits; a black picture under it comes
+ * out a shade lighter than pure black, which is the point.
  */
 export function PageBackdrop({ src }: { src?: string }) {
   return (
@@ -23,7 +26,7 @@ export function PageBackdrop({ src }: { src?: string }) {
           className="object-cover object-center transition-all duration-700"
         />
       ) : null}
-      <div className="absolute inset-0 bg-[#0a0a0d]/70" />
+      <div className="absolute inset-0 bg-[var(--menzu-bg)]/70" />
     </div>
   );
 }
