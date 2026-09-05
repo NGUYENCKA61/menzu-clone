@@ -38,11 +38,13 @@ export function DocsSection({ articles }: { articles: DocCard[] }) {
             Xem hướng dẫn
           </h2>
         </div>
-        {/* The pill every product row wears for the same link. */}
-        <Link href="/docs" className="group inline-flex h-9 items-center gap-1.5 rounded-[10px] border border-white/10 bg-white/[0.03] px-4 text-[10px] font-black uppercase tracking-widest text-neutral-200 transition-colors hover:border-[var(--menzu-accent)]/50 hover:bg-[var(--menzu-accent)]/10 hover:text-[var(--menzu-accent)] sm:text-[11px]">
+        <Link
+          href="/docs"
+          className="group flex items-center gap-1 border-b border-neutral-700 text-[10px] font-bold uppercase tracking-widest text-neutral-400 transition-colors hover:border-[var(--brand)] hover:text-white sm:text-xs"
+        >
           <span className="hidden sm:inline">XEM TẤT CẢ</span>
           <span className="sm:hidden">XEM THÊM</span>
-          <ArrowRight size={14} className="transition-transform group-hover:translate-x-0.5" />
+          <ArrowRight size={14} />
         </Link>
       </div>
 

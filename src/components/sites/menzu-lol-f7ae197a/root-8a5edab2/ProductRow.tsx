@@ -159,22 +159,21 @@ function RowCard({
         <div className="absolute -top-px left-3 right-3 h-px bg-gradient-to-r from-transparent via-[var(--menzu-accent)] to-transparent" />
       </div>
 
-      {/* The month's-pick mark, where the original pins "★ FEATURED", in
-          the chrome the shop settled on for it — dark glass, red small caps,
-          words only — so the page keeps its one accent (an amber tag was
-          tried here and read as a second one). */}
+      {/* The month's-pick mark, where the original pins "★ FEATURED": amber
+          on the cover's top-left, so it is a tag on the picture rather than
+          a second accent beside the red. */}
       {top ? (
-        <span className="absolute left-2.5 top-2.5 z-10 inline-flex items-center rounded-full border border-white/10 bg-[#0d0d12]/80 px-2 py-0.5 text-[9px] font-black uppercase tracking-wide text-[var(--menzu-accent)] backdrop-blur-md">
-          Top tháng
+        <span className="absolute left-2.5 top-2.5 z-10 rounded-md bg-amber-500/90 px-2 py-1 text-[10px] font-bold tracking-wide text-amber-950">
+          ★ TOP THÁNG
         </span>
       ) : null}
 
       <div className="absolute inset-x-0 bottom-0 p-3">
-        <h3 className="line-clamp-1 text-[13px] font-black uppercase tracking-wide text-white drop-shadow-[0_2px_8px_rgb(0_0_0/0.9)] sm:text-[15px]">
+        <h3 className="line-clamp-1 text-sm font-bold text-white drop-shadow-[0_2px_8px_rgb(0_0_0/0.9)] sm:text-base">
           {card.title}
         </h3>
         {detail ? (
-          <p className="mt-1 line-clamp-1 text-[9px] font-bold uppercase tracking-widest text-white/60 drop-shadow-[0_1px_4px_rgb(0_0_0/0.8)] sm:text-[10px]">
+          <p className="mt-0.5 line-clamp-1 text-[11px] text-white/70 drop-shadow-[0_1px_4px_rgb(0_0_0/0.8)]">
             {detail}
           </p>
         ) : null}
@@ -209,13 +208,14 @@ export function ProductRow({
       {headingSuffix}
     </div>
   );
-  // The same pill the grid's "Xem thêm" wears below, so the row's two
-  // controls read as one kind of thing rather than a link above a button.
   const viewAll = (
-    <Link href={viewAllHref} className="group inline-flex h-9 items-center gap-1.5 rounded-[10px] border border-white/10 bg-white/[0.03] px-4 text-[10px] font-black uppercase tracking-widest text-neutral-200 transition-colors hover:border-[var(--menzu-accent)]/50 hover:bg-[var(--menzu-accent)]/10 hover:text-[var(--menzu-accent)] sm:text-[11px]">
+    <Link
+      href={viewAllHref}
+      className="group flex items-center gap-1 text-[10px] sm:text-xs font-bold text-neutral-400 hover:text-white transition-colors uppercase tracking-widest border-b border-neutral-700 hover:border-[var(--menzu-accent)]"
+    >
       <span className="hidden sm:inline">XEM TẤT CẢ</span>
       <span className="sm:hidden">XEM THÊM</span>
-      <ArrowRight size={14} className="transition-transform group-hover:translate-x-0.5" />
+      <ArrowRight size={14} />
     </Link>
   );
 
