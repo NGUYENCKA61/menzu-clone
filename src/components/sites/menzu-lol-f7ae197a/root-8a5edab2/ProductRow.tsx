@@ -242,7 +242,7 @@ function RowCard({
             off. No number:
             the shop wanted the label, not a ranking. */}
         {top ? (
-          <span className="absolute left-1.5 top-1.5 z-10 inline-flex items-center rounded-full border border-[var(--menzu-accent)]/40 bg-[var(--menzu-accent)]/20 px-1.5 py-0.5 text-[8px] font-black uppercase tracking-wide text-[var(--menzu-accent)] backdrop-blur-md sm:left-2 sm:top-2 sm:px-2 sm:text-[9px]">
+          <span className="absolute left-1.5 top-1.5 z-10 inline-flex items-center rounded-full border border-[var(--menzu-accent)]/40 bg-[#0d0d12]/80 px-1.5 py-0.5 text-[8px] font-black uppercase tracking-wide text-[var(--menzu-accent)] backdrop-blur-md sm:left-2 sm:top-2 sm:px-2 sm:text-[9px]">
             Top tháng
           </span>
         ) : null}
