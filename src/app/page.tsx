@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Sparkles } from "lucide-react";
+import { TrendingUp } from "lucide-react";
 
 import { FeaturedCategories } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/FeaturedCategories";
 import { FlashSaleSection } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/FlashSaleSection";
@@ -54,7 +54,7 @@ const GAME_LIST_SLUG = "danh-sach-hack-game";
 // the featured row out, and a glyph on every heading would dilute exactly that.
 const GROUP_ICONS: Record<string, React.ReactNode> = {
   "hot-trending": (
-    <Sparkles
+    <TrendingUp
       size={24}
       aria-hidden
       className="-ml-1.5 shrink-0 text-[var(--menzu-accent)]"
