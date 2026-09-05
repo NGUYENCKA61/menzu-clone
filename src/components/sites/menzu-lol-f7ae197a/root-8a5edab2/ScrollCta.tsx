@@ -28,6 +28,9 @@ const HERO_PLACEMENT = "absolute bottom-5 left-1/2 -translate-x-1/2";
  */
 export const EXPLORE_EVENT = "menzu:explore";
 
+/** How long a smooth scroll is given before the target is told anyway. */
+const SCROLL_AT_MOST_MS = 900;
+
 export function ScrollCta({
   targetId,
   label,
@@ -60,10 +63,32 @@ export function ScrollCta({
           event.preventDefault();
           // Honoured explicitly: "smooth" ignores the reader's motion setting.
           const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-          target.scrollIntoView({ behavior: still ? "auto" : "smooth", block: "start" });
           // Whoever owns the target may open up on arrival — the game list
-          // unfolds past its first line (RowSearch listens for this).
-          window.dispatchEvent(new CustomEvent(EXPLORE_EVENT, { detail: targetId }));
+          // unfolds past its first line (RowSearch listens for this). Told
+          // only once the glide has ended, so the unfolding plays in view
+          // instead of while the page is still on its way there; a jump, or
+          // a target already in place, is told at once.
+          const announce = () =>
+            window.dispatchEvent(new CustomEvent(EXPLORE_EVENT, { detail: targetId }));
+          const margin = parseFloat(getComputedStyle(target).scrollMarginTop) || 0;
+          const inPlace = Math.abs(target.getBoundingClientRect().top - margin) < 4;
+          target.scrollIntoView({ behavior: still ? "auto" : "smooth", block: "start" });
+          if (still || inPlace) {
+            announce();
+            return;
+          }
+          // `scrollend` where the browser has it; a timer covers the rest and
+          // a glide that never reports its end.
+          let told = false;
+          const arrive = () => {
+            if (told) return;
+            told = true;
+            window.removeEventListener("scrollend", arrive);
+            window.clearTimeout(latest);
+            announce();
+          };
+          const latest = window.setTimeout(arrive, SCROLL_AT_MOST_MS);
+          window.addEventListener("scrollend", arrive);
         }}
         className={`${animated ? "animate-bounce-subtle " : ""}${tone} inline-flex items-center gap-2 whitespace-nowrap rounded-full border bg-[#0d0d12]/85 px-4 py-2 text-[10px] font-black uppercase tracking-[0.14em] backdrop-blur-md transition-colors`}
       >
