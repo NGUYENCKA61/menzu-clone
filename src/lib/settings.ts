@@ -184,7 +184,7 @@ export interface ShopSettings {
   seoFaq: FaqEntry[];
 }
 
-/** One question and its answer in the SEO block at the foot of the home page. */
+/** One question and its answer in the FAQ block near the foot of the home page. */
 export interface FaqEntry {
   q: string;
   a: string;
@@ -228,12 +228,11 @@ export const HOME_BLOCKS: { id: string; label: string }[] = [
   // entry each time somebody adds one.
   { id: "groups", label: "Các nhóm danh mục" },
   { id: "reviews", label: "Đánh giá khách hàng" },
-  // Sits under the reviews — social proof, then who stands behind it. The
-  // shop tried it the other way round and came back. "ticker" (recent
-  // purchases) used to sit here, and "utilities" (the Valorant tools hub with
-  // its trade-in panel) after it; layouts that still store either id simply
-  // have it filtered out on read.
-  { id: "partners", label: "Đối tác uy tín" },
+  // Sits under the reviews — the proof, then the questions a buyer has left.
+  // "partners" (a strip of maker logos), "ticker" (recent purchases) and
+  // "utilities" (the Valorant tools hub) used to sit here; layouts that still
+  // store any of those ids simply have it filtered out on read.
+  { id: "faq", label: "Câu hỏi thường gặp" },
   { id: "seo", label: "SEO Content" },
 ];
 

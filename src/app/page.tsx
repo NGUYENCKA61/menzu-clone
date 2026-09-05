@@ -21,9 +21,9 @@ import { SiteFooter } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/
 import { SiteHeader } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/SiteHeader";
 import { MobileBottomNav } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/MobileBottomNav";
 import { ConnectRailSection } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/ConnectRailSection";
-import { PartnersSection } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/PartnersSection";
+import { FaqSection } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/FaqSection";
 import { formatVnd } from "@/components/sites/menzu-lol-f7ae197a/shared/productData";
-import { getFeedback, getFlashSaleItems, getPartners } from "@/lib/queries";
+import { getFeedback, getFlashSaleItems } from "@/lib/queries";
 import { JsonLd, organizationJsonLd } from "@/lib/seo";
 import { visibleBlocks } from "@/lib/settings";
 import { getShopSettings } from "@/lib/settingsStore";
@@ -68,11 +68,7 @@ const GROUP_ICONS: Record<string, React.ReactNode> = {
 export default async function Home() {
   const settings = await getShopSettings();
   const trust = await getTrustStats(settings);
-  const [flashSaleItems, reviews, partners] = await Promise.all([
-    getFlashSaleItems(),
-    getFeedback(),
-    getPartners(),
-  ]);
+  const [flashSaleItems, reviews] = await Promise.all([getFlashSaleItems(), getFeedback()]);
   const [homeGroups, categoryCards, docCards] = await Promise.all([
     // The game list is not capped: it shows three lines and reveals the rest
     // behind "Xem thêm", so it needs every category to be there to reveal.
@@ -161,15 +157,20 @@ export default async function Home() {
         />
       </div>
     ),
-    partners: <PartnersSection key="partners" partners={partners} />,
-    seo: (
-      <SeoContent
-        key="seo"
-        heading={settings.seoHeading}
-        body={settings.seoBody}
+    // The questions live here now; the SEO block below keeps its prose and
+    // no longer prints the same list a second time.
+    faq: (
+      <FaqSection
+        key="faq"
         faq={settings.seoFaq}
+        contact={{
+          facebook: settings.contactFacebook,
+          zalo: settings.contactZalo,
+          telegram: settings.contactTelegram,
+        }}
       />
     ),
+    seo: <SeoContent key="seo" heading={settings.seoHeading} body={settings.seoBody} faq={[]} />,
   };
 
   return (

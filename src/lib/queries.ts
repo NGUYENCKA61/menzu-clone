@@ -26,7 +26,6 @@ import {
   type Product,
   type TierColor,
 } from "@/components/sites/menzu-lol-f7ae197a/shared/productData";
-import type { PartnerView } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/PartnersSection";
 import type { FlashSaleItem } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/flashSaleData";
 import type { ContentTier } from "@prisma/client";
 
@@ -1085,9 +1084,18 @@ export async function getFeedback(take = 20): Promise<ReviewRow[]> {
 // ---------------------------------------------------------------------------
 
 /**
- * The "Đối tác uy tín" strip, in display order. Empty until the shop adds
- * partners in the admin, and the section hides itself while it is.
+ * The partners the admin keeps under Marketing → Đối tác, in display order.
+ * Nothing on the site prints them any more (the home strip made way for the
+ * FAQ); the admin screen still lists and edits them.
  */
+export interface PartnerView {
+  id: string;
+  name: string;
+  tagline: string | null;
+  logoUrl: string | null;
+  url: string | null;
+}
+
 export async function getPartners(): Promise<PartnerView[]> {
   const rows = await db.partner.findMany({
     orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
