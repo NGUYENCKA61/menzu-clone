@@ -1335,3 +1335,9 @@ body.lightbox-open .site-nav {
     animation: none;
   }
 }
+
+/* The same glow, always on — for a card that is lit from its corner at rest
+   (the FAQ's support card) rather than only under the pointer. */
+.spot-glow-on {
+  opacity: 1;
+}

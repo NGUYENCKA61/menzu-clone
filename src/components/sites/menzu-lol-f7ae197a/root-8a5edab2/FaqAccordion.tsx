@@ -31,8 +31,19 @@ const ICONS: LucideIcon[] = [ShieldCheck, Zap, CreditCard, Headphones, RefreshCw
  * The answer's height animates with the grid-rows trick — 0fr to 1fr — so
  * it slides open without measuring anything. The answers are in the page
  * whether open or not, which is what keeps the FAQPage markup honest.
+ *
+ * Inside a RevealGrid each card rises in on scroll (`.reveal-card`, seated
+ * from `revealFrom` so it follows whatever the caller put above it) and
+ * shows the accent glow that follows the cursor (`.spot-glow`).
  */
-export function FaqAccordion({ items }: { items: FaqEntry[] }) {
+export function FaqAccordion({
+  items,
+  revealFrom = 0,
+}: {
+  items: FaqEntry[];
+  /** The --i seat of the first card; the caller's own reveals come before. */
+  revealFrom?: number;
+}) {
   const [open, setOpen] = useState(0);
 
   return (
@@ -43,12 +54,15 @@ export function FaqAccordion({ items }: { items: FaqEntry[] }) {
         return (
           <div
             key={`${entry.q}-${index}`}
-            className={`overflow-hidden rounded-2xl border transition-colors duration-300 ${
+            data-spot
+            style={{ ["--i" as string]: revealFrom + index }}
+            className={`reveal-card relative isolate overflow-hidden rounded-2xl border transition-colors duration-300 ${
               isOpen
                 ? "border-[var(--menzu-accent)]/40 bg-[var(--menzu-accent)]/[0.04]"
                 : "border-white/10 bg-white/[0.02] hover:border-white/20"
             }`}
           >
+            <span aria-hidden className="spot-glow -z-10" />
             <button
               type="button"
               aria-expanded={isOpen}

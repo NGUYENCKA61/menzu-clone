@@ -6,6 +6,7 @@ import type { FaqEntry } from "@/lib/settings";
 import { SUPPORT_WINDOW } from "@/lib/supportHours";
 
 import { FaqAccordion } from "./FaqAccordion";
+import { RevealGrid } from "./RevealGrid";
 
 /**
  * The five questions a buyer has left after the proof, answered the way this
@@ -58,6 +59,12 @@ const BUTTON =
  * and to the guides. The card sticks while the questions scroll on wide
  * screens.
  *
+ * It moves as the original does: over a faint pool of the accent, the
+ * heading, each question and the card rise in one after another the first
+ * time the block scrolls into view (RevealGrid + `.reveal-card`), every
+ * question card carries the cursor glow, and the support card is lit from
+ * its corner at rest.
+ *
  * The questions come from Cấu hình (the same list the SEO block used to
  * print) and fall back to the shop's five stock ones; the FAQPage markup
  * describes whichever is shown.
@@ -79,12 +86,19 @@ export function FaqSection({ faq, contact }: { faq: FaqEntry[]; contact: FaqCont
   ].filter((door) => door !== null);
 
   return (
-    <section aria-labelledby="faq-heading" className="w-full">
+    <section aria-labelledby="faq-heading" className="relative w-full">
       {schema ? <JsonLd data={schema} /> : null}
 
-      <div className="grid items-start gap-10 lg:grid-cols-12 lg:gap-12">
+      {/* The original's pool of colour behind the block: wide, blurred far
+          and kept faint, so the cards sit on a glow rather than flat black. */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute left-1/2 top-1/4 -z-10 h-[400px] w-[min(800px,100%)] -translate-x-1/2 rounded-full bg-[var(--menzu-accent)]/[0.06] blur-[180px]"
+      />
+
+      <RevealGrid className="grid items-start gap-10 lg:grid-cols-12 lg:gap-12">
         <div className="lg:col-span-7">
-          <div className="mb-8">
+          <div className="reveal-card mb-8" style={{ ["--i" as string]: 0 }}>
             <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-neutral-400">
               FAQ
             </div>
@@ -101,11 +115,17 @@ export function FaqSection({ faq, contact }: { faq: FaqEntry[]; contact: FaqCont
             </p>
           </div>
 
-          <FaqAccordion items={items} />
+          <FaqAccordion items={items} revealFrom={1} />
         </div>
 
         <div className="lg:col-span-5">
-          <div className="relative overflow-hidden rounded-2xl border border-[var(--menzu-accent)]/25 bg-gradient-to-b from-[var(--menzu-accent)]/[0.08] to-white/[0.02] p-6 sm:p-7 lg:sticky lg:top-24">
+          <div
+            data-spot
+            style={{ ["--i" as string]: 1 }}
+            className="reveal-card relative isolate overflow-hidden rounded-2xl border border-[var(--menzu-accent)]/25 bg-gradient-to-b from-[var(--menzu-accent)]/[0.08] to-white/[0.02] p-6 sm:p-7 lg:sticky lg:top-24"
+          >
+            {/* Lit from the corner at rest, brighter under the pointer's own glow. */}
+            <span aria-hidden className="spot-glow spot-glow-on -z-10" />
             <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-[var(--menzu-accent)]/30 bg-[var(--menzu-accent)]/10 px-2.5 py-1 text-[11px] font-bold text-[var(--menzu-accent)]">
               <span className="relative flex h-2 w-2">
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[var(--menzu-accent)] opacity-60" />
@@ -161,7 +181,7 @@ export function FaqSection({ faq, contact }: { faq: FaqEntry[]; contact: FaqCont
             </div>
           </div>
         </div>
-      </div>
+      </RevealGrid>
     </section>
   );
 }
