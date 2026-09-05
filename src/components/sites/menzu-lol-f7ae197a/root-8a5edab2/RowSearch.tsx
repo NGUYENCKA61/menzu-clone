@@ -291,7 +291,7 @@ export function RowSearch({
         <>
           <div
             ref={gridRef}
-            className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 pt-1"
+            className="group/grid grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 pt-1"
           >
             {shown.map((item, index) => {
               // Tiles the press just opened rise in one after another, the
