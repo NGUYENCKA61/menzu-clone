@@ -168,8 +168,8 @@
      root layout. menzu.lol shipped purple here; this shop chose its red, the
      same value as --menzu-accent below, so the storefront carries ONE accent
      — a purple button beside a red heading read as two shops on one page. */
-  --brand: #ff3158;
-  --brand-dark: #e01e43;
+  --brand: #2563eb;
+  --brand-dark: #1d4ed8;
 
   /* The purple the whole site used to wear, kept for the reward wheel: when
      the storefront and the account pages moved to red the shop asked for the
@@ -188,15 +188,15 @@
   /* Taken from the palette token rather than copied as a hex, so it stays the
      same red as bg-rose-500 renders — the two differ, because Tailwind emits
      these through a wider gamut than a hand-written sRGB triple. */
-  --menzu-scroll-thumb: color-mix(in oklab, var(--color-rose-500) 85%, transparent);
+  --menzu-scroll-thumb: color-mix(in oklab, var(--brand) 85%, transparent);
 
-  /* The sign-in card's accent, the exact red the brief named. Its own token
-     rather than a change to --brand: red was asked for on that page, and
-     --brand paints every button on the storefront. */
-  --menzu-accent: #ff3158;
-  --menzu-accent-dark: #e01e43;
-  --menzu-scroll-thumb-hover: color-mix(in oklab, var(--color-rose-500) 95%, transparent);
-  --menzu-scroll-thumb-active: var(--color-rose-500);
+  /* The storefront's accent now simply IS the brand colour: the shop moved
+     the whole site to lmarket.net's blue and wants one knob — Cấu hình →
+     Nhận diện — to recolour buttons, headings, rings and glows together. */
+  --menzu-accent: var(--brand);
+  --menzu-accent-dark: var(--brand-dark);
+  --menzu-scroll-thumb-hover: color-mix(in oklab, var(--brand) 95%, transparent);
+  --menzu-scroll-thumb-active: var(--brand);
 }
 
 /*
@@ -692,14 +692,14 @@ body.lightbox-open .site-nav {
   0%,
   100% {
     box-shadow:
-      0 0 0 1px rgb(255 49 88 / 0.3),
-      0 0 10px rgb(255 49 88 / 0.12);
+      0 0 0 1px color-mix(in srgb, var(--brand) 30%, transparent),
+      0 0 10px color-mix(in srgb, var(--brand) 12%, transparent);
   }
   50% {
     box-shadow:
-      0 0 0 2px rgb(239 68 68 / 0.5),
-      0 0 22px rgb(239 68 68 / 0.25),
-      0 0 40px rgb(255 49 88 / 0.12);
+      0 0 0 2px rgb(59 130 246 / 0.5),
+      0 0 22px rgb(59 130 246 / 0.25),
+      0 0 40px color-mix(in srgb, var(--brand) 12%, transparent);
   }
 }
 .search-glow-brand {

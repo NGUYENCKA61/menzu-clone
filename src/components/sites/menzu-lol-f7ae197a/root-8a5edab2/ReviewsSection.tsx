@@ -79,8 +79,13 @@ export function ReviewsSection({
   return (
     <section
       aria-labelledby="reviews-heading"
-      className="w-full border-t border-white/[0.06] pt-12 lg:pt-16"
+      className="relative w-full border-t border-white/[0.06] pt-12 lg:pt-16"
     >
+      {/* lmarket's pool of blue under its testimonial wall, at the foot. */}
+      <div
+        aria-hidden
+        className="ambient-glow bottom-0 left-1/2 -z-10 h-[400px] w-[min(800px,100%)] -translate-x-1/2"
+      />
       <div className="mx-auto flex max-w-2xl flex-col items-center gap-3 text-center">
         <h2
           id="reviews-heading"
@@ -108,7 +113,7 @@ export function ReviewsSection({
             key={`${review.name}-${review.date}-${index}`}
             data-spot
             style={{ ["--i" as string]: index }}
-            className="reveal-card group relative isolate flex w-[280px] shrink-0 snap-start flex-col rounded-2xl border border-white/[0.08] bg-white/[0.02] p-5 shadow-[inset_0_1px_0_0_rgb(255_255_255/0.04),0_1px_2px_0_rgb(0_0_0/0.4)] transition-[border-color,translate,box-shadow] duration-300 hover:-translate-y-0.5 hover:border-white/[0.2] hover:shadow-[inset_0_1px_0_0_rgb(255_255_255/0.06),0_8px_24px_-8px_rgb(255_49_88/0.18)] sm:w-[320px] lg:w-auto"
+            className="reveal-card group relative isolate flex w-[280px] shrink-0 snap-start flex-col rounded-2xl border border-white/[0.08] bg-white/[0.02] p-5 shadow-[inset_0_1px_0_0_rgb(255_255_255/0.04),0_1px_2px_0_rgb(0_0_0/0.4)] transition-[border-color,translate,box-shadow] duration-300 hover:-translate-y-0.5 hover:border-white/[0.2] hover:shadow-[inset_0_1px_0_0_rgb(255_255_255/0.06),0_8px_24px_-8px_color-mix(in_srgb,var(--menzu-accent)_18%,transparent)] sm:w-[320px] lg:w-auto"
           >
             <span aria-hidden className="spot-glow -z-10" />
             <div className="flex items-start gap-3">
