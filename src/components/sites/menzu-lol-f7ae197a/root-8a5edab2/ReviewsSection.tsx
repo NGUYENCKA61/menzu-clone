@@ -77,21 +77,29 @@ export function ReviewsSection({
   if (reviews.length === 0) return null;
 
   return (
-    <section
-      aria-labelledby="reviews-heading"
-      className="w-full border-t border-white/[0.06] pt-12 lg:pt-16"
-    >
-      <div className="mx-auto flex max-w-2xl flex-col items-center gap-3 text-center">
-        <h2
-          id="reviews-heading"
-          className="text-2xl font-black uppercase leading-tight tracking-wider sm:text-3xl"
+    <section aria-labelledby="reviews-heading" className="w-full">
+      {/* The heading every product row wears — the red bar and the uppercase
+          title on the left, the way to the rest on the right — so this block
+          lines up with the rows above it instead of centring itself apart
+          from them, which read as a second page starting mid-scroll. */}
+      <div className="mb-8 flex flex-row items-center justify-between">
+        <div className="flex items-center gap-2.5">
+          <div className="h-5 w-[3px] shrink-0 rounded-full bg-[var(--menzu-accent)]" />
+          <h2
+            id="reviews-heading"
+            className="text-xl font-black uppercase tracking-wider text-white sm:text-2xl"
+          >
+            Chiến thắng <span className="text-[var(--menzu-accent)]">trong tầm tay bạn</span>
+          </h2>
+        </div>
+        <Link
+          href="/feedback"
+          className="group flex items-center gap-1 border-b border-neutral-700 text-[10px] font-bold uppercase tracking-widest text-neutral-400 transition-colors hover:border-[var(--menzu-accent)] hover:text-white sm:text-xs"
         >
-          <span className="text-white">Chiến thắng </span>
-          <span className="text-[var(--menzu-accent)]">trong tầm tay bạn</span>
-        </h2>
-        <p className="text-[13px] text-neutral-400">
-          Đánh giá thật từ khách hàng đã giao dịch, admin duyệt trước khi hiện.
-        </p>
+          <span className="hidden sm:inline">Xem tất cả</span>
+          <span className="sm:hidden">Xem thêm</span>
+          <ArrowRight size={14} />
+        </Link>
       </div>
 
       {/* The motion lmarket.net's testimonial wall has: cards rise in one
@@ -102,7 +110,7 @@ export function ReviewsSection({
           half a step and brightens its edge on hover. `isolate` keeps the
           glow's negative z-index inside the card, between its background
           and its words. */}
-      <RevealGrid className="mt-8 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:grid lg:grid-cols-4 lg:overflow-visible lg:pb-0">
+      <RevealGrid className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:grid lg:grid-cols-4 lg:overflow-visible lg:pb-0">
         {reviews.map((review, index) => (
           <article
             key={`${review.name}-${review.date}-${index}`}
@@ -160,11 +168,10 @@ export function ReviewsSection({
         ))}
       </RevealGrid>
 
-      {/* The score and the count sit on the same line as the way to the rest:
-          a reader who has just read four cards is told what the whole says
-          and where to read it, in one glance. */}
-      <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
-        {summary && summary.count >= MIN_REVIEWS_FOR_SCORE ? (
+      {/* The score and the count under the cards, once there are enough
+          reviews for the figure to mean something. */}
+      {summary && summary.count >= MIN_REVIEWS_FOR_SCORE ? (
+        <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2.5">
             <Stars filled={Math.round(summary.rating)} size={15} />
             <span className="text-sm font-black text-white">
@@ -178,17 +185,8 @@ export function ReviewsSection({
               · {summary.count} đánh giá
             </span>
           </div>
-        ) : (
-          <span />
-        )}
-        <Link
-          href="/feedback"
-          className="group inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-neutral-400 transition-colors hover:text-white"
-        >
-          Xem tất cả đánh giá
-          <ArrowRight size={14} className="transition-transform group-hover:translate-x-0.5" />
-        </Link>
-      </div>
+        </div>
+      ) : null}
     </section>
   );
 }

@@ -104,7 +104,7 @@ function Card({ partner }: { partner: PartnerView }) {
 
 /**
  * "Đối tác uy tín" — the makers whose tools the shop sells, as standing
- * cards gliding past in a marquee under a faint accent wash.
+ * cards gliding past in a marquee under a row heading like every other.
  *
  * Renders nothing while the shop has added no partners: a heading over an
  * empty strip would be worse than no section, and nothing here is seeded
@@ -122,25 +122,14 @@ export function PartnersSection({ partners }: { partners: PartnerView[] }) {
     <section className="relative w-full">
       <style dangerouslySetInnerHTML={{ __html: MARQUEE_STYLES }} />
 
-      {/* A soft pool of the accent behind the strip, the way the hero's sky
-          and lmarket's sections sit their content on a glow rather than on
-          flat black. Blurred wide and kept faint so it is felt, not seen. */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute left-1/2 top-1/2 -z-10 h-[280px] w-[min(720px,100%)] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[var(--menzu-accent)]/[0.07] blur-[110px]"
-      />
-
-      {/* Centered, unlike the row headings above — this block closes the
-          social-proof pair with the reviews. Two-tone like the reviews
-          heading right above it — white with the one word that matters in
-          the accent red. */}
-      <div className="mx-auto flex max-w-2xl flex-col items-center gap-3 text-center">
-        <h2 className="text-2xl font-black uppercase tracking-wider text-white sm:text-3xl">
+      {/* The heading every product row wears — red bar, uppercase title on
+          the left — so the strip lines up with the rows and the reviews
+          above it. The clip box below brings its own 32px of room on top. */}
+      <div className="flex items-center gap-2.5">
+        <div className="h-5 w-[3px] shrink-0 rounded-full bg-[var(--menzu-accent)]" />
+        <h2 className="text-xl font-black uppercase tracking-wider text-white sm:text-2xl">
           Đối tác <span className="text-[var(--menzu-accent)]">uy tín</span> của chúng tôi
         </h2>
-        <p className="text-[13px] text-neutral-400">
-          Những nhà phát triển đứng sau các tool shop đang phân phối.
-        </p>
       </div>
 
       {/* The clip box gets padding pulled back by the same margins, so a
