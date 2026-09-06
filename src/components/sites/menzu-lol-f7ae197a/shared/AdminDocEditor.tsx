@@ -24,6 +24,8 @@ export interface DocEditorView {
   body: string | null;
   views: number;
   publishedAt: string;
+  /** Pinned onto the wiki's featured card; at most one article is. */
+  featured: boolean;
 }
 
 const CATEGORY_META: Record<string, { label: string; icon: LucideIcon; tint: string }> = {
@@ -67,12 +69,14 @@ export function AdminDocEditor({
   const router = useRouter();
   const [title, setTitle] = useState(doc.title);
   const [excerpt, setExcerpt] = useState(doc.excerpt ?? "");
+  const [featured, setFeatured] = useState(doc.featured);
   const [html, setHtml] = useState(initialHtml);
   /** What the database currently holds, advanced on every successful save. */
   const [baseline, setBaseline] = useState({
     title: doc.title,
     excerpt: doc.excerpt ?? "",
     html: initialHtml,
+    featured: doc.featured,
   });
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -81,7 +85,10 @@ export function AdminDocEditor({
   const meta = CATEGORY_META[doc.category];
   const Icon = meta?.icon ?? FileText;
   const dirty =
-    title !== baseline.title || excerpt !== baseline.excerpt || html !== baseline.html;
+    title !== baseline.title ||
+    excerpt !== baseline.excerpt ||
+    html !== baseline.html ||
+    featured !== baseline.featured;
   const hasBody = html !== "";
 
   async function save() {
@@ -92,14 +99,14 @@ export function AdminDocEditor({
       const response = await fetch("/api/admin/docs", {
         method: "PATCH",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ slug: doc.slug, title, excerpt, body: html }),
+        body: JSON.stringify({ slug: doc.slug, title, excerpt, body: html, featured }),
       });
       const data = (await response.json().catch(() => ({}))) as { error?: string };
       if (!response.ok) {
         setError(data.error ?? "Lưu thất bại");
         return;
       }
-      setBaseline({ title, excerpt, html });
+      setBaseline({ title, excerpt, html, featured });
       setSaved(true);
       router.refresh();
     } catch {
@@ -180,7 +187,7 @@ export function AdminDocEditor({
           <div>
             <label htmlFor="doc-excerpt" className={LABEL}>
               Mô tả ngắn{" "}
-              <span className="text-neutral-600">(hiện trong kết quả tìm kiếm)</span>
+              <span className="text-neutral-600">(hiện trong kết quả tìm kiếm và card Nội dung nổi bật ở Wiki)</span>
             </label>
             <input
               id="doc-excerpt"
@@ -193,6 +200,24 @@ export function AdminDocEditor({
             />
           </div>
         </div>
+
+        <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-white/10 bg-neutral-950/40 p-3">
+          <input
+            type="checkbox"
+            checked={featured}
+            onChange={(e) => {
+              setFeatured(e.target.checked);
+              setSaved(false);
+            }}
+            className="mt-0.5 h-4 w-4 accent-[var(--menzu-accent)]"
+          />
+          <span>
+            <span className="block text-sm font-bold text-white">Ghim lên Nội dung nổi bật</span>
+            <span className="block text-[11px] text-neutral-500">
+              Bài này lên card đầu trang Wiki. Chỉ một bài được ghim; ghim bài này sẽ bỏ ghim bài khác. Không ghim bài nào thì card lấy bài Hướng dẫn xem nhiều nhất.
+            </span>
+          </span>
+        </label>
 
         <div>
           <span className={LABEL}>Nội dung</span>

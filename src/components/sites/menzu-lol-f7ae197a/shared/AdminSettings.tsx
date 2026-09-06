@@ -2165,7 +2165,7 @@ export function AdminSettings({
 
           <section className={CARD}>
             <span className={HEADING}>SEO Content</span>
-            {sectionSwitch("seo", "Đoạn chữ và FAQ ở cuối trang chủ.")}
+            {sectionSwitch("seo", "Đoạn chữ ở cuối trang chủ. FAQ hiện ở cuối trang chủ và trang Wiki & Hướng dẫn.")}
 
             <div>
               <span className={LABEL}>Tiêu đề</span>

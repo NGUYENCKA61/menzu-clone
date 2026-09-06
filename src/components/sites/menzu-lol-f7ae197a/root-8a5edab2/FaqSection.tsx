@@ -15,7 +15,7 @@ import { RevealGrid } from "./RevealGrid";
  * until the shop writes its own in Cấu hình → Cấu hình trang chủ → FAQ,
  * which replaces the whole list.
  */
-const DEFAULT_FAQ: FaqEntry[] = [
+export const DEFAULT_FAQ: FaqEntry[] = [
   {
     q: "Dùng tool có an toàn không?",
     a: "Mọi tool trên shop được theo dõi liên tục. Trạng thái từng tool (Undetected, Ổn định, Cập nhật mới, Rủi ro, Đang cập nhật, Detected) hiện ở bảng Trạng thái và đổi ngay khi game vá; tool bị phát hiện sẽ khóa bán tới khi cập nhật xong. Nhiều danh mục có kèm HWID spoofer để bảo vệ thêm. Đọc kỹ hướng dẫn của từng tool trước khi dùng.",

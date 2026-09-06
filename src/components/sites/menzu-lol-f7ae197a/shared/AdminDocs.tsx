@@ -26,6 +26,8 @@ export interface DocView {
   title: string;
   category: string;
   excerpt: string | null;
+  /** Pinned onto the wiki's featured card; at most one article is. */
+  featured: boolean;
   body: string | null;
   views: number;
   publishedAt: string;
@@ -214,6 +216,11 @@ export function AdminDocs({ docs }: { docs: DocView[] }) {
               >
                 {doc.body ? "Đã có nội dung" : "Đang biên soạn"}
               </span>
+              {doc.featured ? (
+                <span className="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded border border-[var(--menzu-accent)]/40 bg-[var(--menzu-accent)]/10 text-[var(--menzu-accent)]">
+                  Nổi bật
+                </span>
+              ) : null}
             </div>
             <p className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[11px] text-neutral-500">
               <span className="font-mono text-neutral-600">/{doc.slug}</span>

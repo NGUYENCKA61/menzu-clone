@@ -234,6 +234,9 @@ model DocArticle {
   views        Int         @default(0)
   publishedAt  DateTime
   sortOrder    Int         @default(0)
+  /// Pinned onto the wiki's featured card. At most one article is: the API
+  /// unpins the rest when one is pinned. None pinned = the most-read guide leads.
+  featured     Boolean     @default(false)
   updatedAt    DateTime    @updatedAt @default(now())
 
   @@index([category, sortOrder])

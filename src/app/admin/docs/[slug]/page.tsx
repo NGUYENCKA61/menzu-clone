@@ -69,6 +69,7 @@ export default async function AdminDocEditorPage({
           excerpt: doc.excerpt,
           body: doc.body,
           views: doc.views,
+          featured: doc.featured,
           publishedAt: doc.publishedAt.toLocaleDateString("vi-VN", {
             day: "2-digit",
             month: "2-digit",

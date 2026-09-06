@@ -29,6 +29,7 @@ export default async function AdminDocsPage() {
           title: doc.title,
           category: doc.category,
           excerpt: doc.excerpt,
+          featured: doc.featured,
           body: doc.body,
           views: doc.views,
           publishedAt: doc.publishedAt.toLocaleDateString("vi-VN", {

@@ -40,6 +40,7 @@ export async function POST(request: Request) {
     category?: string;
     excerpt?: string;
     body?: string;
+    featured?: boolean;
   } | null;
 
   const title = payload?.title?.trim();
@@ -62,6 +63,10 @@ export async function POST(request: Request) {
     slug = `${base}-${n}`;
   }
 
+  // One featured card, one article: pinning this one unpins whichever held it.
+  const featured = payload?.featured === true;
+  if (featured) await db.docArticle.updateMany({ data: { featured: false } });
+
   const created = await db.docArticle.create({
     data: {
       slug,
@@ -71,6 +76,7 @@ export async function POST(request: Request) {
       body: payload?.body?.trim() || null,
       thumbnailUrl: DEFAULT_THUMB[kind],
       publishedAt: new Date(),
+      featured,
     },
   });
 
@@ -80,8 +86,8 @@ export async function POST(request: Request) {
 /**
  * Edits a wiki article's prose.
  *
- * Only title, excerpt and body are writable. Slug, dates and view counts stay
- * put: the slug is a published URL, and letting an editor rewrite a view count
+ * Only title, excerpt, body and the featured pin are writable. Slug, dates
+ * and view counts stay put: the slug is a published URL, and letting an editor rewrite a view count
  * would turn a measurement into a decoration.
  */
 export async function PATCH(request: Request) {
@@ -93,6 +99,7 @@ export async function PATCH(request: Request) {
     title?: string;
     excerpt?: string;
     body?: string;
+    featured?: boolean;
   } | null;
 
   const slug = body?.slug?.trim();
@@ -121,12 +128,18 @@ export async function PATCH(request: Request) {
       : rawProse;
   const excerpt = body?.excerpt?.trim();
 
+  // One featured card, one article: pinning this one unpins whichever held it.
+  if (body?.featured === true) {
+    await db.docArticle.updateMany({ where: { slug: { not: slug } }, data: { featured: false } });
+  }
+
   const updated = await db.docArticle.update({
     where: { slug },
     data: {
       ...(title !== undefined ? { title } : {}),
       ...(body?.excerpt !== undefined ? { excerpt: excerpt || null } : {}),
       ...(body?.body !== undefined ? { body: prose || null } : {}),
+      ...(body?.featured !== undefined ? { featured: body.featured === true } : {}),
     },
   });
 
