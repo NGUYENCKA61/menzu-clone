@@ -1,11 +1,11 @@
 "use client";
 
-import { ChevronDown } from "lucide-react";
+import { ArrowRight, ChevronDown } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
-import { formatVnd } from "./productData";
+import { formatVnd, isFreeTool } from "./productData";
 import { SoftwareCheckoutDialog } from "./SoftwareCheckoutDialog";
 
 export interface SoftwareCardPackage {
@@ -52,8 +52,18 @@ const STATUS: Record<string, { dot: string; text: string; label: string }> = {
  * The card is a div, not one big anchor: it carries a select and buttons, and a
  * form control inside an `<a>` is invalid and unusable. Only the picture, the
  * title and "Xem chi tiết" lead to the product page.
+ *
+ * `variant="compact"` (the "Sản phẩm tương tự" strip) sells nothing on the tile:
+ * the tier picker and rent button give way to the cheapest tier as
+ * "Chỉ từ …" and one white pill to the page.
  */
-export function SoftwareCard({ software }: { software: SoftwareCardView }) {
+export function SoftwareCard({
+  software,
+  variant = "shelf",
+}: {
+  software: SoftwareCardView;
+  variant?: "shelf" | "compact";
+}) {
   const [packageId, setPackageId] = useState("");
   const [hint, setHint] = useState(false);
   const [open, setOpen] = useState(false);
@@ -85,6 +95,9 @@ export function SoftwareCard({ software }: { software: SoftwareCardView }) {
   const chosen = software.packages.find((p) => p.id === packageId) ?? null;
   const hasPackages = software.packages.length > 0;
   const detailHref = software.href;
+  const minPrice = software.packages.length
+    ? Math.min(...software.packages.map((p) => p.price))
+    : null;
 
   // One dropdown row. Same 11px/Inter as the trigger and the buttons, so the
   // open list matches the card exactly (the whole reason for a custom picker
@@ -163,6 +176,34 @@ export function SoftwareCard({ software }: { software: SoftwareCardView }) {
           {software.description}
         </p>
 
+        {variant === "compact" ? (
+          <div className="mt-auto flex items-end justify-between gap-3 pt-3">
+            <div className="min-w-0">
+              <span className="block text-[10px] font-black uppercase tracking-[0.18em] text-[#8a8c94]">
+                Chỉ từ
+              </span>
+              {minPrice !== null && !isFreeTool(software.packages) ? (
+                <span className="mt-1 flex items-baseline gap-1">
+                  <span className="text-[22px] font-black leading-none tracking-tight text-white">
+                    {formatVnd(minPrice)}
+                  </span>
+                  <span className="text-[12px] font-bold text-[#9b9da5]">đ</span>
+                </span>
+              ) : (
+                <span className="mt-1 block text-[18px] font-black leading-none text-white">
+                  {minPrice === null ? "Liên hệ" : "Miễn phí"}
+                </span>
+              )}
+            </div>
+            <Link
+              href={detailHref}
+              className="inline-flex h-[42px] shrink-0 items-center gap-2 rounded-full bg-[var(--menzu-accent)] px-5 text-[11px] font-extrabold uppercase tracking-wide text-white transition-colors hover:bg-[var(--menzu-accent-dark)]"
+            >
+              Thuê ngay
+              <ArrowRight size={14} aria-hidden />
+            </Link>
+          </div>
+        ) : (
         <div className="mt-auto flex flex-col gap-2">
           <div className="grid grid-cols-2 gap-2">
             {/* Custom picker: a native <select>'s open list is drawn by the OS
@@ -273,8 +314,10 @@ export function SoftwareCard({ software }: { software: SoftwareCardView }) {
             Xem chi tiết
           </Link>
         </div>
+        )}
       </div>
 
+      {variant === "shelf" ? (
       <SoftwareCheckoutDialog
         open={confirming}
         onClose={() => setConfirming(false)}
@@ -288,6 +331,7 @@ export function SoftwareCard({ software }: { software: SoftwareCardView }) {
         tier={chosen}
         quantity={1}
       />
+      ) : null}
     </div>
   );
 }

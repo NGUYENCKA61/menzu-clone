@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound, permanentRedirect } from "next/navigation";
 
 import { AccountDetailView } from "@/components/sites/menzu-lol-f7ae197a/shared/AccountDetailView";
+import { isFreeTool } from "@/components/sites/menzu-lol-f7ae197a/shared/productData";
 import { SoftwareDetailView } from "@/components/sites/menzu-lol-f7ae197a/shared/SoftwareDetailView";
 import { formatVnd } from "@/components/sites/menzu-lol-f7ae197a/shared/productData";
 import { docHtmlToPlainText, isHtmlBody } from "@/lib/docHtml";
@@ -153,9 +154,15 @@ export default async function ProductPage({ params, searchParams }: PageProps) {
             isStatusSubscribed(user.id, software.code),
           ])
         : Promise.resolve([false, null] as const),
-      // Nine: three show at once on a desktop, the arrows bring in the rest.
-      listSimilarSoftware(software.code, software.categorySlug, 9),
+      // Twelve, so that nine remain once free tools are set aside below:
+      // three show at once on a desktop, the arrows bring in the rest.
+      listSimilarSoftware(software.code, software.categorySlug, 12),
     ]);
+    // A free tool is not offered beside a paid one: its page is its own
+    // thing, still to come. Beside another free tool it stays.
+    const similarShown = (
+      isFreeTool(software.packages) ? similar : similar.filter((s) => !isFreeTool(s.packages))
+    ).slice(0, 9);
     const setupGuideAccess = !user ? "guest" : bought ? "unlocked" : "locked";
     const shown =
       setupGuideAccess === "unlocked"
@@ -188,7 +195,7 @@ export default async function ProductPage({ params, searchParams }: PageProps) {
           initialPackageId={pkg}
           setupGuideAccess={setupGuideAccess}
           statusSubscribed={statusSubscribed}
-          similar={similar}
+          similar={similarShown}
         />
       </>
     );

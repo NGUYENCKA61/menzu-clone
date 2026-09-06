@@ -308,6 +308,15 @@ export function discountPct(p: Product): number {
 
 // Locale-independent VND grouping (thousands separated by ".") so server and
 // client render identical markup regardless of ICU data availability.
+/**
+ * A free tool, by the shop's own convention: its cheapest tier is priced at
+ * the 1đ placeholder (or nothing). Read wherever a price is printed or a
+ * paid tool's company is chosen.
+ */
+export function isFreeTool(packages: { price: number }[]): boolean {
+  return packages.length > 0 && Math.min(...packages.map((p) => p.price)) <= 1;
+}
+
 export function formatVnd(n: number): string {
   return Math.round(n)
     .toString()

@@ -108,7 +108,7 @@ export function SimilarSoftwareStrip({ items }: { items: SoftwareCardView[] }) {
             className="w-[82vw] max-w-[360px] shrink-0 snap-start sm:w-[calc(50%-0.5rem)] sm:max-w-none lg:w-[calc((100%-3rem)/3)] xl:w-[calc((100%-4rem)/3)]"
           >
             <CardBoundary>
-              <SoftwareCard software={s} />
+              <SoftwareCard software={s} variant="compact" />
             </CardBoundary>
           </div>
         ))}
