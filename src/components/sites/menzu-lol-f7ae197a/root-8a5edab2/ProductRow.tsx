@@ -7,7 +7,6 @@ import {
   CircleCheck,
   Layers,
   ShoppingBag,
-  Star,
   Tag,
   type LucideIcon,
 } from "lucide-react";
@@ -239,12 +238,11 @@ function RowCard({
         ) : null}
         {/* The month's-pick pill, in the top-left corner, worn the way
             lmarket.net marks a FEATURED product: a solid amber tag, dark amber
-            words, a filled Lucide star in front, square-ish corners. No number: the shop
+            words, a star in front, square-ish corners. No number: the shop
             wanted the label, not a ranking. */}
         {top ? (
-          <span className="absolute left-1.5 top-1.5 z-10 inline-flex items-center gap-1 rounded-md bg-amber-500/90 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-amber-950 sm:left-2.5 sm:top-2.5 sm:px-2 sm:py-1 sm:text-[10px]">
-            <Star size={10} className="shrink-0 fill-current" aria-hidden />
-            Top tháng
+          <span className="absolute left-1.5 top-1.5 z-10 inline-flex items-center rounded-md bg-amber-500/90 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-amber-950 sm:left-2.5 sm:top-2.5 sm:px-2 sm:py-1 sm:text-[10px]">
+            ★ Top tháng
           </span>
         ) : null}
       </div>
