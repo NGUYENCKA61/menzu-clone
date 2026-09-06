@@ -48,14 +48,6 @@ describe("parseSettings", () => {
     expect(off.purchasesEnabled).toBe(false);
   });
 
-  it("reads an empty site background as no picture, not as the default", () => {
-    // A cleared field is the shop choosing a black page; only a row that
-    // was never written means "use the captured artwork".
-    const black = parseSettings([{ key: SETTING_KEYS.siteBackground, value: "" }]);
-    expect(black.siteBackground).toBe("");
-    expect(parseSettings([]).siteBackground).toBe(DEFAULT_SETTINGS.siteBackground);
-  });
-
   it("falls back rather than accepting a corrupt value", () => {
     const parsed = parseSettings([
       { key: SETTING_KEYS.topUpMin, value: "không phải số" },

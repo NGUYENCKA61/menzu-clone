@@ -1424,16 +1424,6 @@ export function AdminSettings({
                     <span className="text-[10px] text-neutral-600">
                       PNG / JPG / WebP · tối thiểu 960×540
                     </span>
-                    {/* Clears the field: an empty background is the page's own
-                        black, no picture at all. */}
-                    <button
-                      type="button"
-                      onClick={() => setSiteBackground("")}
-                      disabled={siteBackground === ""}
-                      className="inline-flex h-9 items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 text-[10px] font-black uppercase tracking-widest text-neutral-200 transition-colors hover:bg-white/10 disabled:cursor-default disabled:opacity-40"
-                    >
-                      Nền đen
-                    </button>
                   </div>
                   {siteBgMsg ? (
                     <p
@@ -1450,8 +1440,8 @@ export function AdminSettings({
                 </div>
               </div>
               <p className={HINT}>
-                Ảnh cố định phía sau mọi trang, đã phủ tối 70% để chữ dễ đọc. Để trống
-                (nút Nền đen) thì không có ảnh, nền đen trơn.
+                Ảnh cố định phía sau mọi trang, đã phủ tối 70% để chữ dễ đọc. Để trống thì
+                dùng lại ảnh mặc định.
               </p>
             </div>
 

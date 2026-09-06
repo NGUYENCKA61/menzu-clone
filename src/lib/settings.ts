@@ -98,12 +98,7 @@ export interface ShopSettings {
   brandColor: string;
   /** The wide image at the top of the home page. */
   heroBanner: string;
-  /**
-   * Fixed artwork behind every page, sitting under a dimming overlay. Empty
-   * means none — the page's own black — which is a choice the shop makes in
-   * Nhận diện, not a missing value; only a row that was never written falls
-   * back to the captured artwork.
-   */
+  /** Fixed artwork behind every page, sitting under a dimming overlay. */
   siteBackground: string;
   /** Backdrop inside the homepage flash-sale frame, shown at 10% opacity. */
   flashSaleBackground: string;
@@ -767,7 +762,7 @@ export function parseSettings(rows: Iterable<{ key: string; value: string }>): S
     brandLogo: toText(stored.get(SETTING_KEYS.brandLogo), DEFAULT_SETTINGS.brandLogo),
     brandColor: toText(stored.get(SETTING_KEYS.brandColor), DEFAULT_SETTINGS.brandColor),
     heroBanner: toText(stored.get(SETTING_KEYS.heroBanner), DEFAULT_SETTINGS.heroBanner),
-    siteBackground: toOptionalText(
+    siteBackground: toText(
       stored.get(SETTING_KEYS.siteBackground),
       DEFAULT_SETTINGS.siteBackground,
     ),
@@ -1041,8 +1036,7 @@ export function normalizeSettings(raw: Partial<ShopSettings> | null): ShopSettin
     brandLogo: String(raw?.brandLogo ?? "").trim() || DEFAULT_SETTINGS.brandLogo,
     brandColor: String(raw?.brandColor ?? "").trim() || DEFAULT_SETTINGS.brandColor,
     heroBanner: String(raw?.heroBanner ?? "").trim() || DEFAULT_SETTINGS.heroBanner,
-    // Empty stays empty: a cleared field is the shop asking for a black page.
-    siteBackground: String(raw?.siteBackground ?? "").trim(),
+    siteBackground: String(raw?.siteBackground ?? "").trim() || DEFAULT_SETTINGS.siteBackground,
     flashSaleBackground:
       String(raw?.flashSaleBackground ?? "").trim() || DEFAULT_SETTINGS.flashSaleBackground,
     // No `||` fallback: blank is a real choice here — it means "no chip" —
