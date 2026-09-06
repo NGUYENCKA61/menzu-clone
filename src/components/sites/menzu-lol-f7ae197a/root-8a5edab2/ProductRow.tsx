@@ -236,14 +236,13 @@ function RowCard({
             )}
           />
         ) : null}
-        {/* The month's-pick pill, in the top-left corner the account card
-            keeps its code in and dressed the same — dark glass, small caps —
-            in the accent red, words only — the shop tried a glyph and took it
-            off. No number:
-            the shop wanted the label, not a ranking. */}
+        {/* The month's-pick pill, in the top-left corner, worn the way
+            lmarket.net marks a FEATURED product: a solid amber tag, dark amber
+            words, a star in front, square-ish corners. No number: the shop
+            wanted the label, not a ranking. */}
         {top ? (
-          <span className="absolute left-1.5 top-1.5 z-10 inline-flex items-center rounded-full border border-white/10 bg-[#0d0d12]/80 px-1.5 py-0.5 text-[8px] font-black uppercase tracking-wide text-[var(--menzu-accent)] backdrop-blur-md sm:left-2 sm:top-2 sm:px-2 sm:text-[9px]">
-            Top tháng
+          <span className="absolute left-1.5 top-1.5 z-10 inline-flex items-center rounded-md bg-amber-500/90 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-amber-950 sm:left-2.5 sm:top-2.5 sm:px-2 sm:py-1 sm:text-[10px]">
+            ★ Top tháng
           </span>
         ) : null}
       </div>
