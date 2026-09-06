@@ -21,6 +21,8 @@ interface MobileDrawerProps {
   open: boolean;
   onClose: () => void;
   groups: DrawerGroup[];
+  brandName: string;
+  brandLogo: string;
 }
 
 /**
@@ -30,8 +32,9 @@ interface MobileDrawerProps {
  *   backdrop  closed: `opacity-0 pointer-events-none`     open: `opacity-100`
  *   panel     closed: `-translate-x-full`                 open: `translate-x-0`
  */
-export function MobileDrawer({ open, onClose, groups }: MobileDrawerProps) {
+export function MobileDrawer({ open, onClose, groups, brandName, brandLogo }: MobileDrawerProps) {
   const [expanded, setExpanded] = useState<string | null>(null);
+  const brandWord = brandName.trim().split(" ")[0] || brandName;
 
   return (
     <>
@@ -57,8 +60,8 @@ export function MobileDrawer({ open, onClose, groups }: MobileDrawerProps) {
             <div className="relative w-9 h-9 flex items-center justify-center">
               <span className="navbar-spin-ring absolute inset-[-2px] rounded-full border border-transparent border-t-red-500 animate-spin-slow" />
               <Image
-                src="/sites/menzu-lol-f7ae197a/root-8a5edab2/images/site/logos/menzu-logo.webp"
-                alt="Menzu"
+                src={brandLogo}
+                alt={brandWord}
                 width={24}
                 height={24}
                 className="w-6 h-6 object-contain"
@@ -66,10 +69,10 @@ export function MobileDrawer({ open, onClose, groups }: MobileDrawerProps) {
             </div>
             <div className="flex flex-col leading-none">
               <span className="text-lg font-black italic tracking-tighter text-white">
-                MENZU
+                {brandWord}
               </span>
               <span className="text-[8px] font-bold tracking-[0.2em] text-red-500 uppercase">
-                Valorant
+                hack là thích
               </span>
             </div>
           </a>

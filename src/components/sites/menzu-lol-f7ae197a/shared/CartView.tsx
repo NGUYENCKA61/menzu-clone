@@ -566,7 +566,7 @@ export function CartView({
         )}
 
         <p className="relative mt-3 text-[11px] leading-relaxed text-neutral-500">
-          Trừ thẳng vào ví Menzu. Key được giao ngay sau khi thanh toán.
+          Trừ thẳng vào số dư ví. Key được giao ngay sau khi thanh toán.
         </p>
       </aside>
     </div>

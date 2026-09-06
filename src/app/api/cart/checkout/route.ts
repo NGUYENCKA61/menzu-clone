@@ -275,7 +275,7 @@ export async function POST(request: Request) {
                 ? ` · ưu đãi hạng ${TIER_RULES[memberTier].label}`
                 : ""
           }${voucherCut > 0n ? " · mã giảm giá" : ""}`,
-          method: "Ví Menzu",
+          method: `Ví ${settings.brandName}`,
         },
       });
 

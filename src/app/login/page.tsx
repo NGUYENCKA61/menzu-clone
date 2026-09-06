@@ -60,6 +60,7 @@ export default async function LoginPage({
             turnstileEnabled(settings) ? settings.turnstileSiteKey : null
           }
           googleEnabled={googleOauthEnabled(settings)}
+          brandName={settings.brandName}
           discordEnabled={discordOauthEnabled(settings)}
           panelImages={settings.authPanelImages}
           slideEnabled={settings.authSlideEnabled}

@@ -40,6 +40,7 @@ function goBack(push: (href: string) => void) {
  * consistent with what was measured rather than inventing a new design.
  */
 export function RegisterForm({
+  brandName,
   turnstileSiteKey,
   panelImages,
   slideEnabled,
@@ -49,6 +50,8 @@ export function RegisterForm({
   refCode = null,
   next = "/",
 }: {
+  /** The shop's name, for the mobile eyebrow and the terms line. */
+  brandName: string;
   turnstileSiteKey: string | null;
   /** Artwork behind the card. Comes from Cấu hình → Giao diện. */
   panelImages: string[];
@@ -198,7 +201,7 @@ export function RegisterForm({
               <div className="w-full max-w-[420px]">
                 <div className="mb-8">
                   <p className="text-[10px] uppercase tracking-[0.3em] text-[var(--menzu-accent)] mb-2 font-black lg:hidden">
-                    Menzu Shop
+                    {brandName}
                   </p>
                   <h1 className="text-4xl font-black text-white uppercase tracking-tight">
                     Đăng ký
@@ -343,7 +346,7 @@ export function RegisterForm({
                       >
                         Chính sách bảo mật
                       </Link>{" "}
-                      của Menzu.
+                      của {brandName}.
                     </span>
                   </label>
 

@@ -257,7 +257,7 @@ export async function placeOrder(input: CheckoutInput): Promise<CheckoutResult> 
           : isPool
             ? `Mua ${quantity} tài khoản ${product.name ?? product.code}`
             : `Mua tài khoản #${product.code}`,
-        method: "Ví Menzu",
+        method: `Ví ${settings.brandName}`,
       },
     });
 

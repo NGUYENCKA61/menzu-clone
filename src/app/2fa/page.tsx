@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 
 import { SimplePage } from "@/components/sites/menzu-lol-f7ae197a/shared/SimplePage";
 import { TotpTool } from "@/components/sites/menzu-lol-f7ae197a/shared/TotpTool";
+import { getShopSettings } from "@/lib/settingsStore";
 
 export const metadata: Metadata = {
   title: "Trình Tạo Mã 2FA",
@@ -14,9 +15,10 @@ export const metadata: Metadata = {
   robots: { index: false, follow: true },
 };
 
-export default function TwoFactorPage() {
+export default async function TwoFactorPage() {
+  const { brandName } = await getShopSettings();
   return (
-    <SimplePage title="Trình Tạo Mã 2FA" crumb="Menzu 2FA">
+    <SimplePage title="Trình Tạo Mã 2FA" crumb={`${brandName} 2FA`}>
       <TotpTool />
     </SimplePage>
   );

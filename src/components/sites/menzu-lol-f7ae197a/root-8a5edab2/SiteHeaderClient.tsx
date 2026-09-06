@@ -374,6 +374,8 @@ export function SiteHeaderClient({
         open={drawerOpen}
         onClose={() => setDrawerOpen(false)}
         groups={drawerGroups}
+        brandName={brand.name}
+        brandLogo={brand.logo}
       />
     </nav>
   )

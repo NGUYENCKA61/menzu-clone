@@ -53,6 +53,7 @@ export default async function RegisterPage({
           slideSeconds={settings.authSlideSeconds}
           panelSubtitle={settings.authPanelSubtitle}
           panelTitle={settings.authSignupTitle}
+          brandName={settings.brandName}
           refCode={ref ?? null}
           next={next}
         />

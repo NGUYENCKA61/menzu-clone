@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 
 import { SimplePage } from "@/components/sites/menzu-lol-f7ae197a/shared/SimplePage";
 import { WelcomeMailChecker } from "@/components/sites/menzu-lol-f7ae197a/shared/WelcomeMailChecker";
+import { getShopSettings } from "@/lib/settingsStore";
 
 export const metadata: Metadata = {
   title: "Check Thư Welcome",
@@ -10,9 +11,10 @@ export const metadata: Metadata = {
   alternates: { canonical: "/checkwc" },
 };
 
-export default function CheckWelcomePage() {
+export default async function CheckWelcomePage() {
+  const { brandName } = await getShopSettings();
   return (
-    <SimplePage title="Check Thư Welcome" crumb="Menzu Mail Checker">
+    <SimplePage title="Check Thư Welcome" crumb={`${brandName} Mail Checker`}>
       <WelcomeMailChecker />
     </SimplePage>
   );

@@ -36,6 +36,7 @@ function goBack(push: (href: string) => void) {
  * another origin.
  */
 export function LoginForm({
+  brandName,
   turnstileSiteKey,
   googleEnabled,
   discordEnabled,
@@ -46,6 +47,8 @@ export function LoginForm({
   panelTitle,
   next = "/",
 }: {
+  /** The shop's name, for the mobile eyebrow over the heading. */
+  brandName: string;
   turnstileSiteKey: string | null;
   /** True once that provider's keys are in Cấu hình — the button becomes a door. */
   googleEnabled?: boolean;
@@ -201,7 +204,7 @@ export function LoginForm({
               <div className="w-full max-w-[420px]">
                 <div className="mb-8">
                   <p className="text-[10px] uppercase tracking-[0.3em] text-[var(--menzu-accent)] mb-2 font-black lg:hidden">
-                    Menzu Shop
+                    {brandName}
                   </p>
                   <h1 className="text-4xl font-black text-white uppercase tracking-tight">
                     Đăng nhập
