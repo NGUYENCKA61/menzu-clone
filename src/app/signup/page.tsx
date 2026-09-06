@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
 import { SiteFooter } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/SiteFooter";
+import { SiteHeader } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/SiteHeader";
 import { RegisterForm } from "@/components/sites/menzu-lol-f7ae197a/shared/RegisterForm";
 import { safeNext } from "@/lib/safeNext";
 import { getCurrentUser } from "@/lib/session";
@@ -36,6 +37,10 @@ export default async function RegisterPage({
 
   return (
     <div className="min-h-screen flex flex-col text-white overflow-x-clip selection:bg-[var(--menzu-accent)]/30">
+      {/* spacer reserving the fixed header's 104px */}
+      <div className="w-full shrink-0 h-[104px]" />
+      <SiteHeader />
+
       <main className="flex-1 relative z-20 w-full flex flex-col">
         <RegisterForm
           // Public half only. The secret stays server-side, where the token is

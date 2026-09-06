@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
 import { SiteFooter } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/SiteFooter";
+import { SiteHeader } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/SiteHeader";
 import { LoginForm } from "@/components/sites/menzu-lol-f7ae197a/shared/LoginForm";
 import { safeNext } from "@/lib/safeNext";
 import { getCurrentUser } from "@/lib/session";
@@ -19,8 +20,11 @@ export const metadata: Metadata = {
 };
 
 /**
- * The live site has no header and no tools rail on /login — just the card and
- * the footer. Verified against https://menzu.lol/login while logged out.
+ * The live site keeps its header on /login — the top strip and the main bar,
+ * then the "Quay lại" link and the card, then the footer. Checked against
+ * https://menzu.lol/login (logged out, 2026-09-06) and the August capture in
+ * docs/research; an earlier note here said the opposite and was wrong. Only
+ * the floating tools rail is absent.
  */
 export default async function LoginPage({
   searchParams,
@@ -43,6 +47,10 @@ export default async function LoginPage({
 
   return (
     <div className="min-h-screen flex flex-col text-white overflow-x-clip selection:bg-[var(--menzu-accent)]/30">
+      {/* spacer reserving the fixed header's 104px */}
+      <div className="w-full shrink-0 h-[104px]" />
+      <SiteHeader />
+
       <main className="flex-1 relative z-20 w-full flex flex-col">
         <LoginForm
           // Only the public half crosses to the browser. The secret stays on
