@@ -824,6 +824,8 @@ export interface OrderRow {
    */
   canRefund: boolean;
   refundBlockedReason: string | null;
+  /** A warranty report the shop has not closed yet. */
+  warrantyOpen: boolean;
   /** The newest refund round on this order was turned down. The order itself
    *  is untouched — still paid, key still valid — but the row says so, because
    *  a buyer who asked and was refused should not have to open the receipt to
@@ -887,12 +889,20 @@ export async function getOrders(userId: string): Promise<OrderRow[]> {
         take: 1,
       },
       feedback: { select: { id: true } },
+      // Only whether one is still open: the row wears a badge for it and
+      // holds back the review tag while it is.
+      warrantyRequests: {
+        where: { status: { not: "RESOLVED" } },
+        select: { id: true },
+        take: 1,
+      },
     },
   });
   return rows.map((o) => ({
     id: o.id,
     code: o.code,
     reviewed: o.feedback !== null,
+    warrantyOpen: o.warrantyRequests.length > 0,
     status: o.status,
     total: Number(o.total),
     createdAt: o.createdAt,
@@ -942,6 +952,7 @@ export async function getOrders(userId: string): Promise<OrderRow[]> {
       const blocked = refundBlockedReason({
         orderStatus: o.status,
         openRequest: latest === "PENDING",
+        reviewed: o.feedback !== null,
         purchasedAt: o.createdAt,
         now,
       });

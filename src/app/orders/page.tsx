@@ -50,6 +50,7 @@ function orderBadge(o: {
   status: string;
   refundRejected: boolean;
   refundPending: boolean;
+  warrantyOpen: boolean;
 }): { label: string; className: string } {
   const fallback = {
     label: STATUS_LABEL[o.status] ?? o.status,
@@ -67,6 +68,14 @@ function orderBadge(o: {
     return {
       label: "Từ chối hoàn tiền",
       className: "border-rose-500/30 bg-rose-500/10 text-rose-400",
+    };
+  }
+  // A report the shop is still working: the order is paid and stays so, but
+  // the buyer is waiting on a fix, and the row should say that.
+  if (o.warrantyOpen) {
+    return {
+      label: "Đang bảo hành",
+      className: "border-amber-500/30 bg-amber-500/10 text-amber-400",
     };
   }
   return fallback;
@@ -123,7 +132,7 @@ export default async function OrdersPage() {
               // the row so the click, the keyboard and the focus return all
               // live in one client component.
               <OrderDetailModal
-                supportHref="/feedback"
+                supportHref={`/orders/${o.code}/bao-hanh`}
                 refundHref={`/orders/${o.code}/hoan-tra`}
                 className="group flex cursor-pointer flex-col gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] p-4 outline-none transition-colors hover:border-white/[0.12] hover:bg-white/[0.04] focus-visible:ring-2 focus-visible:ring-[var(--menzu-accent)]/60 sm:flex-row sm:items-center sm:gap-4"
                 order={{
@@ -202,17 +211,29 @@ export default async function OrdersPage() {
                   <span className="text-sm font-black text-white">
                     {formatVnd(o.total)}đ
                   </span>
-                  <span
-                    className={`rounded-lg border px-2 py-1 text-[10px] font-black uppercase tracking-wider ${orderBadge(o).className}`}
-                  >
-                    {orderBadge(o).label}
-                  </span>
-                  {/* A paid order either has its review or is asking for
-                      one; the tag leads to the order's own review page, the
-                      way the refund request has one. */}
-                  {o.status === "PAID" ? (
-                    <OrderReviewTag href={`/orders/${o.code}/danh-gia`} reviewed={o.reviewed} />
-                  ) : null}
+                  {/* Status and review side by side under the price, one
+                      line instead of a three-storey stack. */}
+                  <div className="flex items-center gap-2">
+                    {/* This is the paid list, so a plainly paid order says
+                        nothing here — only the exceptions (waiting, refunded,
+                        a refund refused) wear a badge that needs reading. */}
+                    {o.status === "PAID" && !o.refundPending && !o.refundRejected && !o.warrantyOpen ? null : (
+                      <span
+                        className={`rounded-lg border px-2 py-1 text-[10px] font-black uppercase tracking-wider ${orderBadge(o).className}`}
+                      >
+                        {orderBadge(o).label}
+                      </span>
+                    )}
+                    {/* A paid order either has its review or is asking for
+                        one; the tag leads to the order's own review page, the
+                        way the refund request has one. Not while a refund is
+                        pending or was refused, or a warranty report is still
+                        open: the product was trouble, and that is no moment
+                        to ask for stars. */}
+                    {o.status === "PAID" && !o.refundPending && !o.refundRejected && !o.warrantyOpen ? (
+                      <OrderReviewTag href={`/orders/${o.code}/danh-gia`} reviewed={o.reviewed} />
+                    ) : null}
+                  </div>
                 </div>
               </OrderDetailModal>
             ),

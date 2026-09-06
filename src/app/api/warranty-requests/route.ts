@@ -7,26 +7,27 @@ import { announceToAdmins } from "@/lib/announcementStore";
 import { readImageSize } from "@/lib/authPanel";
 import { storeUpload } from "@/lib/blobStore";
 import { db } from "@/lib/db";
-import { readReason, refundBlockedReason } from "@/lib/refundRequests";
 import { getCurrentUser } from "@/lib/session";
+import {
+  readDescription,
+  readIssue,
+  WARRANTY_ISSUE,
+  warrantyBlockedReason,
+} from "@/lib/warrantyRequests";
 
-/** Same discipline as the review uploader: bytes checked, EXIF stripped,
+/** Same discipline as the refund uploader: bytes checked, EXIF stripped,
  *  re-encoded — never the client's file or its filename. */
 const TYPES = new Set(["image/png", "image/jpeg", "image/webp"]);
 const MAX_BYTES = 5 * 1024 * 1024;
 const MIN_SIDE = 64;
 const MAX_SIDE = 8192;
-/** A ban screenshot reads fine at this width and the page never draws one
- *  wider. */
 const MAX_STORED_WIDTH = 1400;
 
 /**
- * A signed-in buyer asks for one of their own orders back.
+ * A signed-in buyer reports that one of their own orders is not working.
  *
- * Multipart rather than JSON because the evidence rides along with the words:
- * a screenshot of the ban message is most of what makes a request answerable,
- * and asking for it in a second request would lose it whenever the first
- * succeeded and the second did not.
+ * Multipart, like the refund request, because the screenshot of the error is
+ * most of what makes the report answerable and should travel with the words.
  */
 export async function POST(request: Request) {
   const user = await getCurrentUser();
@@ -44,7 +45,11 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Thiếu mã đơn" }, { status: 400 });
   }
 
-  const said = readReason(form.get("reason"));
+  const picked = readIssue(form.get("issue"));
+  if (!picked.ok) {
+    return NextResponse.json({ error: picked.error }, { status: 400 });
+  }
+  const said = readDescription(form.get("description"));
   if (!said.ok) {
     return NextResponse.json({ error: said.error }, { status: 400 });
   }
@@ -56,28 +61,23 @@ export async function POST(request: Request) {
     select: {
       id: true,
       status: true,
-      createdAt: true,
       product: { select: { name: true, code: true } },
-      refundRequests: {
-        where: { status: "PENDING" },
+      warrantyRequests: {
+        where: { status: { not: "RESOLVED" } },
         select: { id: true },
         take: 1,
       },
-      feedback: { select: { id: true } },
     },
   });
   if (!order) {
     return NextResponse.json({ error: "Không tìm thấy đơn hàng" }, { status: 404 });
   }
 
-  // Checked here and not only in the form: the window is the shop's promise,
-  // and a promise enforced by a disabled button is not enforced.
-  const blocked = refundBlockedReason({
+  // Checked here and not only in the form: a rule enforced by a disabled
+  // button is not enforced.
+  const blocked = warrantyBlockedReason({
     orderStatus: order.status,
-    openRequest: order.refundRequests.length > 0,
-    reviewed: order.feedback !== null,
-    purchasedAt: order.createdAt,
-    now: new Date(),
+    openRequest: order.warrantyRequests.length > 0,
   });
   if (blocked) {
     return NextResponse.json({ error: blocked }, { status: 400 });
@@ -129,14 +129,15 @@ export async function POST(request: Request) {
     }
 
     const filename = `${user.uid}-${randomBytes(8).toString("hex")}.webp`;
-    imageUrl = await storeUpload("refunds", filename, processed, "image/webp");
+    imageUrl = await storeUpload("warranty", filename, processed, "image/webp");
   }
 
-  const created = await db.refundRequest.create({
+  await db.warrantyRequest.create({
     data: {
       orderId: order.id,
       userId: user.id,
-      reason: said.reason,
+      issue: picked.issue,
+      description: said.description,
       imageUrl,
     },
     select: { id: true },
@@ -144,19 +145,17 @@ export async function POST(request: Request) {
 
   // The desk hears about it on the bell. Awaited so a failure to write the
   // notice cannot land after the response — but it swallows its own errors,
-  // so the buyer's request never fails over a notification.
+  // so the buyer's report never fails over a notification.
   await announceToAdmins({
-    title: "Yêu cầu hoàn trả mới",
+    title: "Yêu cầu bảo hành mới",
     body:
-      `${user.username} vừa gửi yêu cầu hoàn trả cho đơn ${code} — ` +
-      `${order.product.name ?? order.product.code}.\n` +
-      `Bấm "Xem ngay" để đọc lý do và trả lời.`,
-    // Somebody is waiting on their money; this belongs above the week's
-    // maintenance notice on the bell.
+      `${user.username} vừa báo lỗi đơn ${code} — ` +
+      `${order.product.name ?? order.product.code}: ${WARRANTY_ISSUE[picked.issue].label}.\n` +
+      `Bấm "Xem ngay" để đọc mô tả và xử lý.`,
+    // Somebody paid and cannot use what they bought; this belongs above the
+    // week's maintenance notice on the bell.
     priority: "HIGH",
-    // Straight to the request. Telling the desk where to navigate and then
-    // making it navigate there by hand is half a notification.
-    cta: { label: "Xem ngay", href: `/admin/refunds/${created.id}` },
+    cta: { label: "Xem ngay", href: "/admin/warranty" },
   });
 
   return NextResponse.json({ ok: true });

@@ -8,6 +8,7 @@ import {
   LayoutGrid,
   MessageSquare,
   Settings,
+  ShieldCheck,
   ShoppingBag,
   Ticket,
   Users,
@@ -17,6 +18,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 
+import { DEFAULT_SETTINGS } from "@/lib/settings";
+
 const NAV: { label: string; href: string; icon: LucideIcon }[] = [
   { label: "Tổng quan", href: "/admin", icon: LayoutDashboard },
   // Categories live inside the products screen — they are the first step of
@@ -24,6 +27,7 @@ const NAV: { label: string; href: string; icon: LucideIcon }[] = [
   { label: "Sản phẩm", href: "/admin/products", icon: Boxes },
   { label: "Nhóm danh mục", href: "/admin/groups", icon: LayoutGrid },
   { label: "Đơn hàng", href: "/admin/orders", icon: ShoppingBag },
+  { label: "Bảo hành", href: "/admin/warranty", icon: ShieldCheck },
   { label: "Marketing", href: "/admin/marketing", icon: Ticket },
   { label: "Người dùng", href: "/admin/users", icon: Users },
   { label: "Bài viết", href: "/admin/docs", icon: FileText },
@@ -69,9 +73,16 @@ export function AdminShell({
           push the dashboard off the bottom of the screen. */}
       <aside className="lg:sticky lg:top-0 lg:h-screen lg:w-[228px] shrink-0 border-b lg:border-b-0 lg:border-r border-white/[0.06] bg-[#0a0a0c] flex flex-col">
         <div className="px-5 py-5">
-          <Link href="/admin" className="text-lg font-black uppercase tracking-wider">
-            <span className="text-white">Men</span>
-            <span className="text-rose-500">zu</span>
+          {/* The shop's own name, not the source shop's. The rest of the
+              brand is a setting the admin pages do not fetch, so the default
+              stands in here; the storefront header reads the stored one. */}
+          <Link href="/admin" className="block">
+            <span className="block text-lg font-black uppercase tracking-wider text-white">
+              {DEFAULT_SETTINGS.brandName}
+            </span>
+            <span className="block text-[9px] font-black uppercase tracking-[0.25em] text-rose-500">
+              Quản trị
+            </span>
           </Link>
         </div>
 

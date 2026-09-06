@@ -200,7 +200,7 @@ export function SoftwareCard({
               className="inline-flex h-[42px] shrink-0 items-center gap-2 rounded-full bg-[var(--menzu-accent)] px-5 text-[11px] font-extrabold uppercase tracking-wide text-white transition-colors hover:bg-[var(--menzu-accent-dark)]"
             >
               Thuê ngay
-              <ArrowRight size={14} aria-hidden />
+              <ArrowRight size={14} strokeWidth={2.75} aria-hidden />
             </Link>
           </div>
         ) : (

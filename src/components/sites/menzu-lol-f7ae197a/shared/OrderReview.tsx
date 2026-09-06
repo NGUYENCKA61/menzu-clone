@@ -12,10 +12,16 @@ import { useEffect, useState } from "react";
  * not also open the receipt behind it.
  */
 export function OrderReviewTag({ href, reviewed }: { href: string; reviewed: boolean }) {
+  // Same pill as the status badge beside it, so the right-hand column reads
+  // as one stack: price, status, review. Green once written; accent, and a
+  // real button on hover, while it is still an invitation.
+  const pill =
+    "inline-flex items-center gap-1 rounded-lg border px-2 py-1 text-[10px] font-black uppercase tracking-wider";
   if (reviewed) {
     return (
-      <span className="text-[10px] font-black uppercase tracking-wider text-emerald-400">
-        ★ Đã đánh giá
+      <span className={`${pill} border-emerald-500/30 bg-emerald-500/10 text-emerald-400`}>
+        <Star size={11} aria-hidden className="fill-current" />
+        Đã đánh giá
       </span>
     );
   }
@@ -24,9 +30,10 @@ export function OrderReviewTag({ href, reviewed }: { href: string; reviewed: boo
       href={href}
       onClick={(event) => event.stopPropagation()}
       onKeyDown={(event) => event.stopPropagation()}
-      className="text-[10px] font-black uppercase tracking-wider text-[var(--menzu-accent)] transition-colors hover:text-white"
+      className={`${pill} border-[var(--menzu-accent)]/40 bg-[var(--menzu-accent)]/10 text-[var(--menzu-accent)] transition-colors hover:bg-[var(--menzu-accent)] hover:text-white`}
     >
-      ★ Đánh giá
+      <Star size={11} aria-hidden className="fill-current" />
+      Đánh giá
     </Link>
   );
 }

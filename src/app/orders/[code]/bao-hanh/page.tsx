@@ -2,23 +2,24 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { ArrowLeft, Info, ShieldCheck } from "lucide-react";
+import { ArrowLeft, Clock, Info } from "lucide-react";
 
 import { AccountPageFrame } from "@/components/sites/menzu-lol-f7ae197a/shared/AccountPageFrame";
-import { RefundRequestForm } from "@/components/sites/menzu-lol-f7ae197a/shared/RefundRequestForm";
 import { formatVnd } from "@/components/sites/menzu-lol-f7ae197a/shared/productData";
+import { WarrantyRequestForm } from "@/components/sites/menzu-lol-f7ae197a/shared/WarrantyRequestForm";
 import { db } from "@/lib/db";
 import { dayTime } from "@/lib/dayGroups";
-import {
-  refundBlockedReason,
-  refundDeadline,
-  REFUND_STATUS,
-  REFUND_WINDOW_DAYS,
-} from "@/lib/refundRequests";
 import { getCurrentUser } from "@/lib/session";
+import { SUPPORT_WINDOW } from "@/lib/supportHours";
+import {
+  WARRANTY_ISSUE,
+  WARRANTY_STATUS,
+  warrantyBlockedReason,
+  warrantyOpen,
+} from "@/lib/warrantyRequests";
 
 export const metadata: Metadata = {
-  title: "Yêu cầu hoàn trả",
+  title: "Hỗ trợ bảo hành",
   // One buyer's own order. Followed, not indexed, like the rest of the
   // account area.
   robots: { index: false, follow: true },
@@ -26,8 +27,7 @@ export const metadata: Metadata = {
 export const dynamic = "force-dynamic";
 
 const CARD = "rounded-2xl border border-white/10 bg-neutral-900/50 p-5 sm:p-6";
-const LABEL =
-  "text-[10px] font-black uppercase tracking-widest text-neutral-500";
+const LABEL = "text-[10px] font-black uppercase tracking-widest text-neutral-500";
 
 function stamp(date: Date): string {
   return `${date.toLocaleDateString("vi-VN", {
@@ -39,17 +39,12 @@ function stamp(date: Date): string {
 }
 
 /**
- * The refund request screen for one order.
- *
- * Its own page rather than a panel in the receipt: what makes a request
- * answerable is a description and a screenshot, and both want more room than a
- * modal footer has. The order is restated in full at the top so the buyer is
- * never asked to describe something they can no longer see.
- *
- * Every refusal is decided here as well as in the route. A disabled button is
- * a courtesy, not a rule.
+ * The warranty screen for one order: the order restated, every report made on
+ * it with the shop's answer, and the form for a new one — or the reason there
+ * is none. Its own page, like the refund request, because a description and a
+ * screenshot want more room than a receipt's footer.
  */
-export default async function RefundRequestPage({
+export default async function WarrantyRequestPage({
   params,
 }: {
   params: Promise<{ code: string }>;
@@ -57,7 +52,7 @@ export default async function RefundRequestPage({
   const { code } = await params;
   const user = await getCurrentUser();
   if (!user) {
-    redirect(`/login?next=${encodeURIComponent(`/orders/${code}/hoan-tra`)}`);
+    redirect(`/login?next=${encodeURIComponent(`/orders/${code}/bao-hanh`)}`);
   }
 
   // Scoped to this buyer: somebody else's order code answers 404 rather than
@@ -70,17 +65,16 @@ export default async function RefundRequestPage({
       total: true,
       quantity: true,
       createdAt: true,
-      product: {
-        select: { name: true, code: true, imageUrl: true, refundRate: true },
-      },
+      product: { select: { name: true, code: true, imageUrl: true } },
       package: { select: { label: true } },
-      feedback: { select: { id: true } },
-      refundRequests: {
+      warrantyRequests: {
         orderBy: { createdAt: "desc" },
         select: {
           id: true,
           status: true,
-          reason: true,
+          issue: true,
+          description: true,
+          imageUrl: true,
           adminNote: true,
           createdAt: true,
         },
@@ -89,21 +83,17 @@ export default async function RefundRequestPage({
   });
   if (!order) notFound();
 
-  const open = order.refundRequests.some((r) => r.status === "PENDING");
-  const blocked = refundBlockedReason({
+  const blocked = warrantyBlockedReason({
     orderStatus: order.status,
-    openRequest: open,
-    reviewed: order.feedback !== null,
-    purchasedAt: order.createdAt,
-    now: new Date(),
+    openRequest: order.warrantyRequests.some((r) => warrantyOpen(r.status)),
   });
   const productName = order.product.name ?? order.product.code;
 
   return (
     <AccountPageFrame
-      title="Yêu cầu hoàn trả"
-      subtitle={`Đơn ${order.code} — mô tả sự cố để shop xem xét hoàn tiền`}
-      crumb="Yêu cầu hoàn trả"
+      title="Hỗ trợ bảo hành"
+      subtitle={`Đơn ${order.code} — báo lỗi để shop kiểm tra và xử lý`}
+      crumb="Hỗ trợ bảo hành"
       action={
         <Link
           href="/orders"
@@ -115,7 +105,7 @@ export default async function RefundRequestPage({
       }
     >
       <div className="flex flex-col gap-5">
-        {/* WHAT IS BEING ARGUED ABOUT */}
+        {/* THE ORDER BEING REPORTED */}
         <section className={CARD}>
           <span className={LABEL}>Đơn hàng</span>
           <div className="mt-3 flex flex-wrap items-center gap-4">
@@ -139,65 +129,65 @@ export default async function RefundRequestPage({
               </p>
             </div>
             <div className="shrink-0 text-right">
-              <p className="text-lg font-black text-white">
-                {formatVnd(Number(order.total))}đ
-              </p>
+              <p className="text-lg font-black text-white">{formatVnd(Number(order.total))}đ</p>
               <p className={LABEL}>Đã thanh toán</p>
             </div>
           </div>
 
-          {/* The promise the shop already published on the product page. Shown
-              here so the buyer is asking against a known figure rather than
-              hoping for one. */}
           <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-2 border-t border-white/[0.06] pt-4">
-            {typeof order.product.refundRate === "number" ? (
-              <span className="inline-flex items-center gap-2 text-[12px] text-neutral-400">
-                <ShieldCheck className="h-4 w-4 text-emerald-400" />
-                Tỷ lệ hoàn trả sản phẩm này:{" "}
-                <span className="font-black text-[var(--menzu-accent)]">
-                  {order.product.refundRate}%
-                </span>
-              </span>
-            ) : null}
-            <span className="text-[12px] text-neutral-400">
-              Hạn yêu cầu:{" "}
-              <span className="font-bold text-neutral-200">
-                {stamp(refundDeadline(order.createdAt))}
-              </span>{" "}
-              ({REFUND_WINDOW_DAYS} ngày kể từ lúc mua)
+            <span className="inline-flex items-center gap-2 text-[12px] text-neutral-400">
+              <Clock className="h-4 w-4 text-[var(--menzu-accent)]" />
+              Shop xử lý bảo hành {SUPPORT_WINDOW} mỗi ngày; ngoài giờ cứ gửi, sáng shop
+              làm ngay.
             </span>
           </div>
         </section>
 
-        {/* PAST ROUNDS, IF ANY */}
-        {order.refundRequests.length > 0 ? (
+        {/* PAST REPORTS, IF ANY */}
+        {order.warrantyRequests.length > 0 ? (
           <section className={CARD}>
             <span className={LABEL}>Yêu cầu đã gửi</span>
             <ul className="mt-3 flex flex-col gap-3">
-              {order.refundRequests.map((r) => {
-                const state = REFUND_STATUS[r.status];
+              {order.warrantyRequests.map((r) => {
+                const state = WARRANTY_STATUS[r.status];
                 return (
-                  <li
-                    key={r.id}
-                    className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4"
-                  >
+                  <li key={r.id} className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
                     <div className="flex flex-wrap items-center gap-2.5">
                       <span
                         className={`inline-flex items-center rounded-md border px-2 py-0.5 text-[10px] font-black uppercase tracking-wider ${state.tile}`}
                       >
                         {state.label}
                       </span>
+                      <span className="inline-flex items-center rounded-md border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-neutral-300">
+                        {WARRANTY_ISSUE[r.issue].label}
+                      </span>
                       <span className="text-[11px] font-semibold text-neutral-500">
                         {stamp(r.createdAt)}
                       </span>
                     </div>
                     <p className="mt-2.5 whitespace-pre-line text-[13px] leading-relaxed text-neutral-300">
-                      {r.reason}
+                      {r.description}
                     </p>
+                    {r.imageUrl ? (
+                      <a
+                        href={r.imageUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="mt-3 block w-full max-w-xs overflow-hidden rounded-lg border border-white/10"
+                      >
+                        <Image
+                          src={r.imageUrl}
+                          alt="Ảnh lỗi đã gửi"
+                          width={640}
+                          height={360}
+                          unoptimized
+                          className="max-h-[200px] w-full object-cover"
+                        />
+                      </a>
+                    ) : null}
                     {r.adminNote ? (
                       <p className="mt-3 rounded-r-lg border-l-2 border-[var(--menzu-accent)] bg-[var(--menzu-accent)]/[0.06] px-3.5 py-2.5 text-[12.5px] leading-relaxed text-neutral-300">
-                        <span className="font-bold text-white">Shop trả lời:</span>{" "}
-                        {r.adminNote}
+                        <span className="font-bold text-white">Shop trả lời:</span> {r.adminNote}
                       </p>
                     ) : null}
                   </li>
@@ -215,7 +205,7 @@ export default async function RefundRequestPage({
               <span>{blocked}</span>
             </div>
           ) : (
-            <RefundRequestForm code={order.code} onDone="/orders" />
+            <WarrantyRequestForm code={order.code} onDone="/orders" />
           )}
         </section>
       </div>

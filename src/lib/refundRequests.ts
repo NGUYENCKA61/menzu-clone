@@ -144,11 +144,13 @@ export function refundWindowClosed(purchasedAt: Date, now: Date): boolean {
 /**
  * Whether this order can be asked about, and what to say when it cannot.
  *
- * Three refusals, and the order they are checked in is the order they make
+ * Four refusals, and the order they are checked in is the order they make
  * sense in. An order that was never charged has nothing to give back, whatever
  * else is true of it. One already being argued about should not collect a
  * second opinion while the shop is still forming the first — and saying "quá
- * hạn" to somebody who asked in time and is waiting would be a lie. Only then
+ * hạn" to somebody who asked in time and is waiting would be a lie. A review
+ * is the buyer's word that the purchase was what they wanted, so an order
+ * they have already rated is closed to refunds — the shop's rule. Only then
  * does the clock matter.
  *
  * A *decided* request is no bar: a rejection the buyer can answer is the whole
@@ -157,11 +159,14 @@ export function refundWindowClosed(purchasedAt: Date, now: Date): boolean {
 export function refundBlockedReason({
   orderStatus,
   openRequest,
+  reviewed,
   purchasedAt,
   now,
 }: {
   orderStatus: string;
   openRequest: boolean;
+  /** The buyer has already reviewed this order. */
+  reviewed: boolean;
   purchasedAt: Date;
   now: Date;
 }): string | null {
@@ -170,6 +175,9 @@ export function refundBlockedReason({
   }
   if (openRequest) {
     return "Đơn này đã có một yêu cầu đang chờ shop xử lý.";
+  }
+  if (reviewed) {
+    return "Đơn này đã được đánh giá — sau khi đánh giá thì không yêu cầu hoàn trả được nữa.";
   }
   if (refundWindowClosed(purchasedAt, now)) {
     return `Đã quá ${REFUND_WINDOW_DAYS} ngày kể từ lúc mua — đơn này không còn yêu cầu hoàn trả được.`;

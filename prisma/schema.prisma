@@ -116,6 +116,7 @@ model User {
   statusSubscriptions SoftwareStatusSubscription[]
   licenseKeys   LicenseKey[]
   refundRequests RefundRequest[]
+  warrantyRequests WarrantyRequest[]
 
   /// The admin list sorts newest-first and pages through; at 8k+ accounts an
   /// unindexed createdAt means a full sort on every page.
@@ -960,6 +961,7 @@ model Order {
   /// a time, which the route enforces rather than the schema: a rejected
   /// request must not block a second attempt after the shop says why.
   refundRequests RefundRequest[]
+  warrantyRequests WarrantyRequest[]
 
   @@index([userId, createdAt])
   @@map("orders")
@@ -983,6 +985,52 @@ enum RefundMethod {
   /// wallet transaction is written in the same database transaction as the
   /// decision, so a refund that is recorded is a refund that was paid.
   WALLET
+}
+
+/// What a buyer says is wrong with a tool they paid for.
+enum WarrantyIssue {
+  /// The key is refused, expired early, or will not activate.
+  KEY_INVALID
+  /// The game flagged the tool, or the account was banned after using it.
+  DETECTED
+  /// It will not install, will not open, or crashes.
+  INSTALL
+  OTHER
+}
+
+/// Where a warranty report stands. OPEN is the buyer's to create; the desk
+/// moves it on, and RESOLVED is final.
+enum WarrantyStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+}
+
+/// A buyer reporting that one order is not working — the step before a refund.
+///
+/// Its own table, like refund_requests: an order can be reported on more than
+/// once over its life (a key replaced, then a later update breaking it), and
+/// each report carries its own answer. One open report per order at a time,
+/// enforced by the route.
+model WarrantyRequest {
+  id          String         @id @default(cuid())
+  orderId     String
+  order       Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  issue       WarrantyIssue
+  description String
+  imageUrl    String?
+  status      WarrantyStatus @default(OPEN)
+  /// What the shop did or asked, shown to the buyer under the report.
+  adminNote   String?
+  createdAt   DateTime       @default(now())
+  resolvedAt  DateTime?
+
+  @@index([userId, createdAt])
+  @@index([status, createdAt])
+  @@index([orderId])
+  @@map("warranty_requests")
 }
 
 /// A buyer asking for money back on one order.

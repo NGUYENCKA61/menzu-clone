@@ -889,8 +889,8 @@ export function OrderDetailModal({
                       href={supportHref}
                       className="group inline-flex h-10 items-center gap-2 rounded-xl bg-[var(--menzu-accent)] px-5 text-[11px] font-black uppercase tracking-widest text-white transition-colors hover:bg-[var(--menzu-accent-dark)]"
                     >
-                      <MessageCircle className="h-4 w-4" />
-                      Liên hệ hỗ trợ
+                      <ShieldCheck className="h-4 w-4" />
+                      Hỗ trợ bảo hành
                       <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
                     </Link>
                   </div>

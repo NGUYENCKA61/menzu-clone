@@ -92,7 +92,7 @@ describe("refundBlockedReason", () => {
   const soon = new Date("2026-09-02T10:00:00Z");
   /** Outside it: a week after. */
   const late = new Date("2026-09-08T10:00:00Z");
-  const paid = { orderStatus: "PAID", openRequest: false, purchasedAt: bought };
+  const paid = { orderStatus: "PAID", openRequest: false, reviewed: false, purchasedAt: bought };
 
   it("lets a paid order inside the window through", () => {
     expect(refundBlockedReason({ ...paid, now: soon })).toBeNull();
@@ -110,6 +110,12 @@ describe("refundBlockedReason", () => {
     expect(
       refundBlockedReason({ ...paid, openRequest: true, now: soon }),
     ).toMatch(/đang chờ/);
+  });
+
+  it("refuses an order the buyer has already reviewed", () => {
+    expect(refundBlockedReason({ ...paid, reviewed: true, now: soon })).toMatch(
+      /đã được đánh giá/,
+    );
   });
 
   it("refuses once three days have passed", () => {
