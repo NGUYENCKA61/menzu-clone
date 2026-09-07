@@ -14,7 +14,11 @@
  *    page script. "same-origin" is our own page; "none" is a typed address or
  *    a bookmark. Anything else came from somewhere else.
  *  - `Origin` is the older signal and is compared against the address the
- *    request actually arrived at.
+ *    request actually arrived at — the Host header, which the proxy in front
+ *    of the shop passes through unchanged. Not `request.url`: behind that
+ *    proxy, and on the dev server reached by IP, the URL the server believes
+ *    it has is "localhost", and a genuine Safari 16 or Firefox 89 (neither
+ *    sends Sec-Fetch-Site) would be turned away from its own sign-in form.
  *
  * A request carrying neither is not a browser at all — curl, a script, a
  * mobile client — and a program impersonating nobody's browser cannot commit
@@ -28,8 +32,12 @@ export function crossSiteRequest(request: Request): boolean {
   const origin = request.headers.get("origin");
   if (!origin) return false;
 
+  const host =
+    request.headers.get("host") ??
+    request.headers.get("x-forwarded-host") ??
+    new URL(request.url).host;
   try {
-    return new URL(origin).origin !== new URL(request.url).origin;
+    return new URL(origin).host !== host;
   } catch {
     // An Origin that will not parse is not one this site sent.
     return true;

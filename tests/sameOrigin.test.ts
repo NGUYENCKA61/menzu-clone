@@ -18,6 +18,23 @@ describe("crossSiteRequest", () => {
     expect(crossSiteRequest(post({ origin: "https://evil.com" }))).toBe(true);
   });
 
+  it("judges Origin by the address the request arrived at, not the server's own idea of it", () => {
+    // Behind Caddy the process only ever sees "localhost"; the Host header is
+    // what the visitor actually typed. Same for the dev server reached by IP.
+    expect(
+      crossSiteRequest(post({ host: "thichthihackk.com", origin: "https://thichthihackk.com" })),
+    ).toBe(false);
+    expect(
+      crossSiteRequest(post({ host: "192.168.1.26:3100", origin: "http://192.168.1.26:3100" })),
+    ).toBe(false);
+    expect(
+      crossSiteRequest(post({ host: "thichthihackk.com", origin: "https://evil.com" })),
+    ).toBe(true);
+    expect(
+      crossSiteRequest(post({ host: "thichthihackk.com", origin: "https://thichthihackk.com.evil.com" })),
+    ).toBe(true);
+  });
+
   it("believes the browser's own header over the one page script can set", () => {
     expect(
       crossSiteRequest(
