@@ -353,11 +353,19 @@ export function OrderDetailModal({
   order,
   supportHref,
   refundHref = supportHref,
+  autoOpen = false,
   children,
   className,
 }: {
   order: OrderDetailData;
   supportHref: string;
+  /**
+   * Open on mount — the receipt this page was asked for by name, as when a
+   * buyer follows an order code from the checkout receipt. There is no
+   * trigger to hand focus back to in that case, and the close path already
+   * copes with an opener that was never pressed.
+   */
+  autoOpen?: boolean;
   /**
    * Where "Yêu cầu hoàn trả" goes. Defaults to the support destination, which
    * is where the request is handled by hand today; the caller can point it at
@@ -372,7 +380,7 @@ export function OrderDetailModal({
   children?: ReactNode;
   className?: string;
 }) {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(autoOpen);
   const triggerRef = useRef<HTMLElement | null>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   // A drag that starts on a key and ends past the card's edge is a

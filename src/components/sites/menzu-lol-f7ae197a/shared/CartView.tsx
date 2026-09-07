@@ -3,14 +3,17 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import {
   ArrowRight,
   BadgePercent,
   Check,
+  KeyRound,
   Minus,
   Plus,
   Receipt,
+  ShieldCheck,
+  ShoppingCart,
   Ticket,
   Trash2,
   Wallet,
@@ -48,6 +51,32 @@ export interface CartViewer {
   agencyPercent: number;
 }
 
+/**
+ * What the receipt shows once the basket is paid. Snapshotted in checkout()
+ * the moment the server says yes: the refresh that follows empties `lines`,
+ * so everything the receipt says about the goods has to be kept here.
+ */
+interface CheckoutReceipt {
+  orderCodes: string[];
+  /** The basket as it was paid — name, tier, count, price, picture. */
+  lines: CartLine[];
+  listTotal: number;
+  agencyCut: number;
+  agencyPercent: number;
+  tierCut: number;
+  tierLabel: string;
+  tierPercent: number;
+  voucherCut: number;
+  /** The code that earned voucherCut; null when none was typed. */
+  voucherCode: string | null;
+  /** What the wallet paid. */
+  total: number;
+  /** What the wallet holds now. */
+  balance: number;
+  /** Epoch ms when the server answered — the receipt's timestamp. */
+  paidAt: number;
+}
+
 /* Colour on this page carries meaning rather than decoration: the shop's red
    marks what a shopper acts on and what they will be charged, emerald marks
    money coming back off the price, and everything structural stays neutral.
@@ -57,6 +86,30 @@ const STEP_BUTTON =
   "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/[0.03] text-neutral-300 transition-colors hover:border-[var(--menzu-accent)]/40 hover:bg-[var(--menzu-accent)]/10 hover:text-[var(--menzu-accent)] disabled:opacity-40 disabled:hover:border-white/10 disabled:hover:bg-white/[0.03] disabled:hover:text-neutral-300";
 const LABEL =
   "text-[10px] font-black uppercase tracking-widest text-neutral-500";
+
+/* The receipt prints top to bottom: each band rises into place a beat after
+   the one above it (receipt-in, in globals.css). Written out in full because
+   Tailwind reads class strings, not templates; stilled for readers who asked
+   for less motion. */
+const BAND_IN = {
+  head: "motion-reduce:animate-none animate-[receipt-in_0.45s_cubic-bezier(0.22,1,0.36,1)_both]",
+  lines:
+    "motion-reduce:animate-none animate-[receipt-in_0.45s_cubic-bezier(0.22,1,0.36,1)_90ms_both]",
+  sums: "motion-reduce:animate-none animate-[receipt-in_0.45s_cubic-bezier(0.22,1,0.36,1)_180ms_both]",
+  foot: "motion-reduce:animate-none animate-[receipt-in_0.45s_cubic-bezier(0.22,1,0.36,1)_270ms_both]",
+} as const;
+
+/** "21:14 · 06/09/2026" — the clock and the date a paper receipt prints. */
+function formatPaidAt(ms: number): string {
+  const d = new Date(ms);
+  const two = (n: number) => String(n).padStart(2, "0");
+  return `${two(d.getHours())}:${two(d.getMinutes())} · ${two(d.getDate())}/${two(d.getMonth() + 1)}/${d.getFullYear()}`;
+}
+
+/** The server's figure where it gave one, the basket's own quote otherwise. */
+function numberOr(value: unknown, fallback: number): number {
+  return typeof value === "number" ? value : fallback;
+}
 
 /** One line of the summary: a name on the left, a figure on the right. */
 function SumRow({
@@ -78,6 +131,79 @@ function SumRow({
       >
         {value}
       </span>
+    </div>
+  );
+}
+
+/** One purchased line, as the basket showed it, with the controls gone. */
+function ReceiptLine({ line }: { line: CartLine }) {
+  return (
+    <li className="flex items-center gap-3 py-3 sm:gap-4">
+      {/* The name below is the line's link; the picture is the same door
+          without a second name for screen readers to read out. */}
+      <Link
+        href={line.href}
+        aria-hidden
+        tabIndex={-1}
+        className="relative h-12 w-[72px] shrink-0 overflow-hidden rounded-lg border border-white/10 bg-neutral-950"
+      >
+        {line.imageUrl ? (
+          <Image
+            src={line.imageUrl}
+            alt=""
+            fill
+            sizes="72px"
+            className="object-cover object-[85%_center]"
+          />
+        ) : null}
+      </Link>
+      <div className="min-w-0 flex-1">
+        <Link
+          href={line.href}
+          className="block truncate text-sm font-black text-white transition-colors hover:text-[var(--menzu-accent)]"
+        >
+          {line.name}
+        </Link>
+        <div className="mt-1 flex flex-wrap items-center gap-1.5">
+          {/* Neutral here, not the accent: nothing on a receipt is left to
+              act on, so the chip only tells one line from the next. */}
+          <span className="rounded-md border border-white/15 bg-white/10 px-2 py-0.5 text-[9px] font-black uppercase tracking-widest text-neutral-300">
+            {line.packageLabel}
+          </span>
+          <span className="text-[11px] font-semibold tabular-nums text-neutral-500">
+            ×{line.quantity} · {formatVnd(line.unitPrice)}đ / bản
+          </span>
+        </div>
+      </div>
+      <span className="shrink-0 text-right text-sm font-black tabular-nums text-white">
+        {formatVnd(line.unitPrice * line.quantity)}đ
+      </span>
+    </li>
+  );
+}
+
+/** Nothing in the basket — and, signed out, no basket to look at yet. */
+export function CartEmpty({ signedIn }: { signedIn: boolean }) {
+  return (
+    <div className="w-full flex flex-col items-center justify-center py-20 text-center">
+      <div className="w-16 h-16 rounded-2xl bg-white/[0.03] border border-white/10 flex items-center justify-center mb-5">
+        <ShoppingCart size={26} className="text-neutral-600" />
+      </div>
+
+      <p className="text-xl font-bold text-white mb-2">Giỏ hàng của bạn đang trống</p>
+      <p className="text-sm text-neutral-400 max-w-[460px] leading-relaxed">
+        {signedIn
+          ? "Chọn một phần mềm và thêm gói bạn muốn vào giỏ. Tài khoản game thì mua thẳng trên trang sản phẩm."
+          : "Hãy đăng nhập để xem giỏ hàng của bạn."}
+      </p>
+
+      <Link
+        href={signedIn ? "/categories" : "/login?next=/cart"}
+        className="mt-6 inline-flex items-center gap-2 h-10 px-5 rounded-xl bg-[var(--brand)] hover:bg-[var(--brand-dark)] transition-colors text-[11px] font-black uppercase tracking-widest text-white"
+      >
+        {signedIn ? "Quay lại cửa hàng" : "Đăng nhập"}
+        <ArrowRight size={14} />
+      </Link>
     </div>
   );
 }
@@ -109,11 +235,7 @@ export function CartView({
   const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [done, setDone] = useState<{
-    orderCodes: string[];
-    total: number;
-    balance: number;
-  } | null>(null);
+  const [done, setDone] = useState<CheckoutReceipt | null>(null);
 
   const [voucher, setVoucher] = useState("");
   const [applied, setApplied] = useState<{ cut: number; total: number } | null>(
@@ -121,7 +243,31 @@ export function CartView({
   );
   const [voucherError, setVoucherError] = useState<string | null>(null);
   const [checking, setChecking] = useState(false);
+  const receiptRef = useRef<HTMLElement>(null);
 
+  /* The press that pays is usually made from the summary, half a screen down,
+     and the basket it replaces was taller than the receipt — so without this
+     the buyer is left staring at whatever happens to be under their scroll
+     position. The page is put where the receipt is instead: no animation, no
+     travel, the card is simply already there. Laid out before the browser
+     paints, so the wrong position is never on screen to flicker away from.
+     A receipt taller than the screen gets its head just under the fixed
+     chrome, because the tick and the two figures are what should be landed
+     on. */
+  useLayoutEffect(() => {
+    if (!done) return;
+    const node = receiptRef.current;
+    if (!node) return;
+    // The site's fixed header, plus a little air above the card.
+    const CHROME = 116;
+    const box = node.getBoundingClientRect();
+    const room = window.innerHeight - CHROME;
+    const target =
+      box.height < room
+        ? window.scrollY + box.top - CHROME - (room - box.height) / 2
+        : window.scrollY + box.top - CHROME;
+    window.scrollTo({ top: Math.max(0, target), behavior: "instant" });
+  }, [done]);
   const listTotal = lines.reduce((sum, l) => sum + l.unitPrice * l.quantity, 0);
   // Wholesale beats the tier and does not stack with a code, exactly as the
   // checkout decides it.
@@ -220,6 +366,10 @@ export function CartView({
         shortfall?: number;
         orderCodes?: string[];
         total?: number;
+        listTotal?: number;
+        agencyCut?: number;
+        tierCut?: number;
+        voucherCut?: number;
         balance?: number;
       };
       if (res.status === 401) {
@@ -234,10 +384,23 @@ export function CartView({
         );
         return;
       }
+      // The server's figures where it gave them, the basket's own quote
+      // where it did not. The goods and the account's percentages come from
+      // the props, which the refresh below is about to empty.
       setDone({
         orderCodes: data.orderCodes ?? [],
-        total: typeof data.total === "number" ? data.total : payable,
-        balance: typeof data.balance === "number" ? data.balance : viewer.balance,
+        lines,
+        listTotal: numberOr(data.listTotal, listTotal),
+        agencyCut: numberOr(data.agencyCut, agencyCut),
+        agencyPercent: viewer.agencyPercent,
+        tierCut: numberOr(data.tierCut, tierCut),
+        tierLabel: viewer.tierLabel,
+        tierPercent: viewer.tierPercent,
+        voucherCut: numberOr(data.voucherCut, voucherCut),
+        voucherCode: voucher.trim() || null,
+        total: numberOr(data.total, payable),
+        balance: numberOr(data.balance, viewer.balance),
+        paidAt: Date.now(),
       });
       router.refresh();
     } catch {
@@ -248,53 +411,249 @@ export function CartView({
   }
 
   if (done) {
-    return (
-      <div className="mx-auto flex w-full max-w-[560px] flex-col items-center py-10 text-center">
-        <span className="grid h-14 w-14 place-items-center rounded-full border border-emerald-500/30 bg-emerald-500/10 text-emerald-400">
-          <Check className="h-7 w-7" strokeWidth={2.5} />
-        </span>
-        <p className="mt-4 text-xl font-black uppercase tracking-wider text-white">
-          Thanh toán thành công
-        </p>
-        <p className="mt-1.5 text-sm text-neutral-400">
-          {done.orderCodes.length === 1
-            ? "Đơn đã ghi vào lịch sử mua của bạn."
-            : `Đã tạo ${done.orderCodes.length} đơn hàng.`}
-        </p>
+    const copies = done.lines.reduce((sum, l) => sum + l.quantity, 0);
+    const orders = done.orderCodes.length;
+    const saved = done.agencyCut + done.tierCut + done.voucherCut;
+    // One order has its own warranty form; several are picked from the list.
+    const warrantyHref =
+      orders === 1 ? `/orders/${done.orderCodes[0]}/bao-hanh` : "/orders";
 
-        <div className="mt-5 w-full rounded-2xl border border-white/10 bg-white/[0.02] p-5 text-left">
-          <span className={LABEL}>
-            {done.orderCodes.length === 1 ? "Mã đơn hàng" : "Các mã đơn hàng"}
-          </span>
-          <div className="mt-2 flex flex-wrap gap-2">
-            {done.orderCodes.map((code) => (
+    return (
+      /* One card, read top to bottom like the slip a till prints: who paid
+         and when, what was bought, the tear line, what it cost, the codes,
+         and what to do next. The frame is an inset ring rather than a
+         border so the tear line's notches can punch clean through it. */
+      <section
+        ref={receiptRef}
+        aria-label="Biên lai thanh toán"
+        className="relative mx-auto w-full max-w-[720px] overflow-hidden rounded-2xl bg-white/[0.02] inset-ring-1 inset-ring-white/10"
+      >
+        {/* HEAD */}
+        <div
+          className={`flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6 ${BAND_IN.head}`}
+        >
+          <div className="flex items-center gap-4">
+            {/* The buy dialog's tick, minus its sparks: the badge pops in,
+                the stroke draws itself, one ring ripples out. */}
+            <span className="relative grid h-12 w-12 shrink-0 place-items-center">
               <span
-                key={code}
-                className="rounded-lg border border-white/10 bg-white/5 px-2.5 py-1 font-mono text-[13px] font-bold tracking-wider text-white"
-              >
-                {code}
+                aria-hidden
+                className="tick-ring absolute inset-0 rounded-full border-2 border-emerald-400/60"
+              />
+              <span className="tick-badge grid h-12 w-12 place-items-center rounded-full border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 shadow-[0_0_28px_rgba(16,185,129,0.22)]">
+                <Check className="h-6 w-6" strokeWidth={2.5} aria-hidden />
               </span>
-            ))}
+            </span>
+            <div className="min-w-0">
+              <h2 className="text-lg font-black uppercase tracking-wider text-white">
+                Thanh toán thành công
+              </h2>
+              {/* The two figures a buyer wants first, before the bands print. */}
+              <p className="mt-0.5 text-[13px] text-neutral-400">
+                Đã trừ ví{" "}
+                <span className="font-bold tabular-nums text-white">{formatVnd(done.total)}đ</span>
+                {" · "}còn{" "}
+                <span className="font-bold tabular-nums text-white">{formatVnd(done.balance)}đ</span>{" "}
+                trong ví
+              </p>
+            </div>
           </div>
-          <div className="mt-4 space-y-2 border-t border-white/[0.06] pt-4">
-            <SumRow label="Đã trừ ví" value={`${formatVnd(done.total)}đ`} />
-            <SumRow
-              label="Số dư ví còn lại"
-              value={`${formatVnd(done.balance)}đ`}
-            />
+          {/* A row under the title on a phone, a column at the far right
+              on a desk — the stamp in a receipt's corner. */}
+          <div className="flex items-baseline justify-between gap-4 border-t border-white/[0.06] pt-3 sm:flex-col sm:items-end sm:gap-1 sm:border-0 sm:pt-0">
+            <span className={`${LABEL} inline-flex items-center gap-1.5`}>
+              <Receipt className="h-3 w-3" aria-hidden />
+              {orders === 1 ? "Biên lai" : `Biên lai · ${orders} đơn`}
+            </span>
+            <span className="text-[12px] font-semibold tabular-nums text-neutral-300">
+              {formatPaidAt(done.paidAt)}
+            </span>
           </div>
         </div>
 
-        <Link
-          href="/orders"
-          className="mt-6 inline-flex h-11 items-center gap-2 rounded-xl bg-[var(--menzu-accent)] px-6 text-[11px] font-black uppercase tracking-widest text-white transition-colors hover:bg-[var(--menzu-accent-dark)]"
+        {/* LINES */}
+        {done.lines.length > 0 ? (
+          <div
+            className={`border-t border-white/[0.06] px-5 pb-2 pt-4 sm:px-6 ${BAND_IN.lines}`}
+          >
+            <div className="mb-1 flex items-center justify-between gap-3">
+              <span className={LABEL}>
+                {done.lines.length} sản phẩm · {copies} bản
+              </span>
+              <span className={LABEL}>Thành tiền</span>
+            </div>
+            <ul className="divide-y divide-white/[0.06]">
+              {done.lines.map((line) => (
+                <ReceiptLine key={line.id} line={line} />
+              ))}
+            </ul>
+          </div>
+        ) : null}
+
+        {/* TEAR LINE — the goods above, the money below. The two notches
+            are page-coloured discs sitting on the card's edge; the card
+            clips their outer halves, so what is left reads as a punch. */}
+        <div aria-hidden className="relative mt-2 border-t border-dashed border-white/10">
+          <span className="absolute -left-[9px] -top-[9px] h-[18px] w-[18px] rounded-full border border-white/10 bg-[var(--menzu-bg)]" />
+          <span className="absolute -right-[9px] -top-[9px] h-[18px] w-[18px] rounded-full border border-white/10 bg-[var(--menzu-bg)]" />
+        </div>
+
+        {/* FIGURES — the same rows the basket quoted, now as what was
+            charged. Only printed when something came off: a list price that
+            equals the charge would be a row saying nothing. The sum is white
+            because there is nothing left to press; the balance is the green
+            the basket used once the wallet covered it. */}
+        <div className={`px-5 py-5 sm:px-6 ${BAND_IN.sums}`}>
+          {saved > 0 ? (
+            <div className="space-y-2.5">
+              <SumRow label="Tạm tính" value={`${formatVnd(done.listTotal)}đ`} />
+              {done.agencyCut > 0 ? (
+                <SumRow
+                  label={
+                    <span className="inline-flex items-center gap-1.5">
+                      <BadgePercent className="h-3.5 w-3.5" />
+                      Giá đại lý −{done.agencyPercent}%
+                    </span>
+                  }
+                  value={`−${formatVnd(done.agencyCut)}đ`}
+                  tone="ok"
+                />
+              ) : null}
+              {done.tierCut > 0 ? (
+                <SumRow
+                  label={
+                    <span className="inline-flex items-center gap-1.5">
+                      <BadgePercent className="h-3.5 w-3.5" />
+                      Hạng {done.tierLabel}
+                      {done.tierPercent > 0 ? ` −${formatTierPercent(done.tierPercent)}%` : ""}
+                    </span>
+                  }
+                  value={`−${formatVnd(done.tierCut)}đ`}
+                  tone="ok"
+                />
+              ) : null}
+              {done.voucherCut > 0 ? (
+                <SumRow
+                  label={
+                    <span className="inline-flex items-center gap-1.5">
+                      <Ticket className="h-3.5 w-3.5" />
+                      {done.voucherCode ? (
+                        <>
+                          Mã{" "}
+                          <span className="font-mono font-bold tracking-wider text-neutral-300">
+                            {done.voucherCode}
+                          </span>
+                        </>
+                      ) : (
+                        "Mã giảm giá"
+                      )}
+                    </span>
+                  }
+                  value={`−${formatVnd(done.voucherCut)}đ`}
+                  tone="ok"
+                />
+              ) : null}
+            </div>
+          ) : null}
+
+          <div className={saved > 0 ? "mt-4 border-t border-white/10 pt-4" : ""}>
+            <div className="flex items-baseline justify-between gap-4">
+              <span className={LABEL}>Đã trừ ví</span>
+              <span className="text-xl font-black tabular-nums text-white">
+                {formatVnd(done.total)}đ
+              </span>
+            </div>
+            {saved > 0 ? (
+              <p className="mt-1 text-right text-[11px] font-semibold text-emerald-400">
+                Tiết kiệm {formatVnd(saved)}đ so với giá niêm yết
+              </p>
+            ) : null}
+            <div className="mt-2.5 flex items-baseline justify-between gap-4 text-[12px]">
+              <span className="inline-flex items-center gap-1.5 text-neutral-500">
+                <Wallet className="h-3.5 w-3.5" />
+                Số dư ví còn lại
+              </span>
+              <span className="font-semibold tabular-nums text-emerald-400">
+                {formatVnd(done.balance)}đ
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* NEXT — where the keys are, and the two ways off this page. */}
+        <div
+          className={`border-t border-white/[0.06] bg-white/[0.02] px-5 py-4 sm:px-6 ${BAND_IN.foot}`}
         >
-          <Receipt className="h-4 w-4" />
-          Xem đơn hàng
-        </Link>
-      </div>
+          {/* A div, not a p: the codes below are buttons, and a paragraph
+              is no place to keep them. */}
+          <div
+            role="status"
+            className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-[12px] font-semibold text-emerald-400"
+          >
+            <p className="flex items-start gap-2.5">
+              <KeyRound className="mt-1 h-3.5 w-3.5 shrink-0" aria-hidden />
+              {/* The orders are named in the sentence that says the keys are
+                  in them — the code IS the order's name. The chips copy
+                  rather than open; the red button below is the way in. */}
+              <span>
+                {copies === 1
+                  ? "Key và link tải đã giao vào đơn"
+                  : `${copies} key và link tải đã giao vào ${orders} đơn`}{" "}
+                {done.orderCodes.map((code, index) => (
+                  <span key={code}>
+                    {index > 0 ? ", " : null}
+                    <Link
+                      href={`/orders?don=${code}`}
+                      className="font-mono font-bold tracking-wider text-emerald-300 underline decoration-emerald-400/50 underline-offset-2 transition-colors hover:text-white hover:decoration-white"
+                    >
+                      {code}
+                    </Link>
+                  </span>
+                ))}
+                {" "}
+                — bấm mã để mở đơn. Đọc hướng dẫn cài đặt trên trang tool trước
+                khi chạy.
+              </span>
+            </p>
+          </div>
+          {/* One red button, the dominant object; the other door stays quiet. */}
+          <div className="mt-4 flex flex-col gap-2.5 sm:flex-row">
+            <Link
+              href="/orders"
+              className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[var(--menzu-accent)] px-6 sm:flex-1 text-[11px] font-black uppercase tracking-widest text-white shadow-lg shadow-[var(--menzu-accent)]/25 transition-colors hover:bg-[var(--menzu-accent-dark)]"
+            >
+              <KeyRound className="h-4 w-4" aria-hidden />
+              Lấy key trong đơn hàng
+            </Link>
+            <Link
+              href="/categories"
+              className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-white/10 px-6 text-[11px] font-black uppercase tracking-widest text-neutral-300 transition-colors hover:bg-white/5 hover:text-white"
+            >
+              Tiếp tục mua
+              <ArrowRight className="h-4 w-4" aria-hidden />
+            </Link>
+          </div>
+          <p className="mt-3 text-center text-[11px] leading-relaxed text-neutral-500">
+            Cần hỗ trợ?{" "}
+            <Link
+              href={warrantyHref}
+              className="inline-flex items-center gap-1 font-semibold text-neutral-300 underline-offset-2 transition-colors hover:text-white hover:underline"
+            >
+              <ShieldCheck className="h-3 w-3" aria-hidden />
+              Gửi bảo hành ngay trong đơn
+            </Link>
+          </p>
+        </div>
+      </section>
     );
   }
+
+  // The empty state is drawn here, not by the page, on purpose: the success
+  // card above is client state, and the refresh that follows a checkout
+  // re-renders the page with an empty basket. Had the page swapped this
+  // component out for its own "nothing here" view, the card would have gone
+  // with it — the shopper paid and saw only an empty cart.
+  if (lines.length === 0) return <CartEmpty signedIn />;
 
   const count = lines.reduce((sum, l) => sum + l.quantity, 0);
 
@@ -320,11 +679,16 @@ export function CartView({
           {lines.map((line) => (
             <li
               key={line.id}
-              className="group flex flex-wrap items-center gap-4 rounded-2xl border border-white/[0.06] bg-gradient-to-br from-white/[0.05] via-white/[0.02] to-transparent p-3.5 transition-colors hover:border-[var(--menzu-accent)]/25 sm:p-4"
+              /* Two rows of three on a phone — picture, name and bin above,
+                 stepper and total below — and one row of five on a desk. One
+                 DOM for both; only where each cell lands changes. A single
+                 flex row wrapped here before, and at phone width the name
+                 was the thing squeezed to nothing. */
+              className="group grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-x-3 gap-y-3 rounded-2xl border border-white/[0.06] bg-gradient-to-br from-white/[0.05] via-white/[0.02] to-transparent p-3.5 transition-colors hover:border-[var(--menzu-accent)]/25 sm:grid-cols-[auto_minmax(0,1fr)_auto_6rem_auto] sm:gap-4 sm:p-4"
             >
               <Link
                 href={line.href}
-                className="relative h-16 w-24 shrink-0 overflow-hidden rounded-xl border border-white/10 bg-neutral-950 transition-colors group-hover:border-[var(--menzu-accent)]/30"
+                className="relative col-start-1 row-span-2 row-start-1 h-14 w-20 shrink-0 self-start overflow-hidden rounded-xl border border-white/10 bg-neutral-950 transition-colors group-hover:border-[var(--menzu-accent)]/30 sm:row-span-1 sm:h-16 sm:w-24 sm:self-center"
               >
                 {line.imageUrl ? (
                   <Image
@@ -340,7 +704,7 @@ export function CartView({
               <div className="min-w-0 flex-1">
                 <Link
                   href={line.href}
-                  className="block truncate text-sm font-black text-white transition-colors hover:text-[var(--menzu-accent)]"
+                  className="line-clamp-2 text-sm font-black leading-snug text-white transition-colors hover:text-[var(--menzu-accent)]"
                 >
                   {line.name}
                 </Link>
@@ -348,7 +712,7 @@ export function CartView({
                   {/* The tier is what distinguishes one line from the next when
                       all three are the same tool, so it is the chip that gets
                       the colour. */}
-                  <span className="rounded-md border border-[var(--menzu-accent)]/25 bg-[var(--menzu-accent)]/10 px-2 py-0.5 text-[9px] font-black uppercase tracking-widest text-[var(--menzu-accent)]">
+                  <span className="whitespace-nowrap rounded-md border border-[var(--menzu-accent)]/25 bg-[var(--menzu-accent)]/10 px-2 py-0.5 text-[9px] font-black uppercase tracking-widest text-[var(--menzu-accent)]">
                     {line.packageLabel}
                   </span>
                   <span className="text-[11px] font-semibold tabular-nums text-neutral-400">
@@ -357,7 +721,7 @@ export function CartView({
                 </div>
               </div>
 
-              <div className="flex items-center gap-1.5">
+              <div className="col-start-2 flex items-center gap-1.5 sm:col-start-3 sm:row-start-1">
                 <button
                   type="button"
                   aria-label={`Giảm số lượng ${line.name}`}
@@ -387,7 +751,7 @@ export function CartView({
 
               {/* Money the shopper will part with, in the colour every price
                   on this site is written in. */}
-              <span className="w-24 text-right text-sm font-black tabular-nums text-[var(--menzu-accent)]">
+              <span className="col-start-3 justify-self-end text-right text-sm font-black tabular-nums text-[var(--menzu-accent)] sm:col-start-4 sm:row-start-1">
                 {formatVnd(line.unitPrice * line.quantity)}đ
               </span>
 
@@ -398,7 +762,7 @@ export function CartView({
                 onClick={() =>
                   send("DELETE", null, `?id=${encodeURIComponent(line.id)}`)
                 }
-                className="rounded-lg p-2 text-neutral-500 transition-colors hover:bg-red-500/10 hover:text-red-400 disabled:opacity-40"
+                className="col-start-3 row-start-1 self-start justify-self-end rounded-lg p-2 text-neutral-500 transition-colors hover:bg-red-500/10 hover:text-red-400 disabled:opacity-40 sm:col-start-5 sm:self-center"
               >
                 <Trash2 size={14} />
               </button>

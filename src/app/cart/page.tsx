@@ -1,8 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import { ArrowRight, ShoppingCart } from "lucide-react";
-
-import { CartView } from "@/components/sites/menzu-lol-f7ae197a/shared/CartView";
+import { CartEmpty, CartView } from "@/components/sites/menzu-lol-f7ae197a/shared/CartView";
 import { SimplePage } from "@/components/sites/menzu-lol-f7ae197a/shared/SimplePage";
 import { clampAgencyPercent } from "@/lib/agency";
 import { db } from "@/lib/db";
@@ -28,57 +25,40 @@ export const dynamic = "force-dynamic";
 export default async function CartPage() {
   const user = await getCurrentUser();
 
-  const items = user
-    ? await db.cartItem.findMany({
-        where: { userId: user.id },
-        orderBy: { createdAt: "asc" },
-        include: {
-          product: {
-            select: {
-              code: true,
-              slug: true,
-              name: true,
-              imageUrl: true,
-              category: { select: { slug: true } },
-            },
-          },
-          package: { select: { label: true, price: true } },
-        },
-      })
-    : [];
-
-  if (items.length === 0) {
+  // Signed out there is no basket to read, only the invitation to sign in.
+  if (!user) {
     return (
       <SimplePage title="Giỏ Hàng Của Bạn" crumb="Giỏ hàng">
-        <div className="w-full flex flex-col items-center justify-center py-20 text-center">
-          <div className="w-16 h-16 rounded-2xl bg-white/[0.03] border border-white/10 flex items-center justify-center mb-5">
-            <ShoppingCart size={26} className="text-neutral-600" />
-          </div>
-
-          <p className="text-xl font-bold text-white mb-2">Giỏ hàng của bạn đang trống</p>
-          <p className="text-sm text-neutral-400 max-w-[460px] leading-relaxed">
-            {user
-              ? "Chọn một phần mềm và thêm gói bạn muốn vào giỏ. Tài khoản game thì mua thẳng trên trang sản phẩm."
-              : "Hãy đăng nhập để xem giỏ hàng của bạn."}
-          </p>
-
-          <Link
-            href={user ? "/categories" : "/login?next=/cart"}
-            className="mt-6 inline-flex items-center gap-2 h-10 px-5 rounded-xl bg-[var(--brand)] hover:bg-[var(--brand-dark)] transition-colors text-[11px] font-black uppercase tracking-widest text-white"
-          >
-            {user ? "Quay lại cửa hàng" : "Đăng nhập"}
-            <ArrowRight size={14} />
-          </Link>
-        </div>
+        <CartEmpty signedIn={false} />
       </SimplePage>
     );
   }
 
+  // Signed in, the basket is always mounted, empty or not: it draws its own
+  // empty state, and after a checkout it keeps the receipt on screen while the
+  // refresh that follows finds nothing left in it.
+  const items = await db.cartItem.findMany({
+    where: { userId: user.id },
+    orderBy: { createdAt: "asc" },
+    include: {
+      product: {
+        select: {
+          code: true,
+          slug: true,
+          name: true,
+          imageUrl: true,
+          category: { select: { slug: true } },
+        },
+      },
+      package: { select: { label: true, price: true } },
+    },
+  });
+
   // What this shopper's own account is worth against the basket, decided the
   // way the checkout decides it: wholesale beats the tier and never stacks.
   const agencyPercent =
-    user!.role === "AGENCY" ? clampAgencyPercent(user!.agencyPercent) : 0;
-  const memberTier = readMemberTier(user!.tier);
+    user.role === "AGENCY" ? clampAgencyPercent(user.agencyPercent) : 0;
+  const memberTier = readMemberTier(user.tier);
   const tierPercent =
     agencyPercent === 0 ? TIER_RULES[memberTier].discountPercent : 0;
 
@@ -86,7 +66,7 @@ export default async function CartPage() {
     <SimplePage title="Giỏ Hàng Của Bạn" crumb="Giỏ hàng">
       <CartView
         viewer={{
-          balance: user!.balance,
+          balance: user.balance,
           tier: tierPercent > 0 ? memberTier : null,
           tierLabel: TIER_RULES[memberTier].label,
           tierPercent,

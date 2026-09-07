@@ -89,7 +89,13 @@ function shortDate(date: Date): string {
   });
 }
 
-export default async function OrdersPage() {
+export default async function OrdersPage({
+  searchParams,
+}: {
+  /** `?don=<mã đơn>` opens that order's receipt on arrival. */
+  searchParams: Promise<{ don?: string }>;
+}) {
+  const { don } = await searchParams;
   const user = await getCurrentUser();
   if (!user) redirect("/login?next=%2Forders");
 
@@ -132,6 +138,7 @@ export default async function OrdersPage() {
               // the row so the click, the keyboard and the focus return all
               // live in one client component.
               <OrderDetailModal
+                autoOpen={don === o.code}
                 supportHref={`/orders/${o.code}/bao-hanh`}
                 refundHref={`/orders/${o.code}/hoan-tra`}
                 className="group flex cursor-pointer flex-col gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] p-4 outline-none transition-colors hover:border-white/[0.12] hover:bg-white/[0.04] focus-visible:ring-2 focus-visible:ring-[var(--menzu-accent)]/60 sm:flex-row sm:items-center sm:gap-4"
