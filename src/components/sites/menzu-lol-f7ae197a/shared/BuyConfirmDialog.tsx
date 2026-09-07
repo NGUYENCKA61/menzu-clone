@@ -191,7 +191,7 @@ export function ProductTile({
             src={imageUrl}
             alt=""
             fill
-            sizes="72px"
+            sizes="144px"
             className={imageClassName}
             onError={() => setBroken(true)}
           />

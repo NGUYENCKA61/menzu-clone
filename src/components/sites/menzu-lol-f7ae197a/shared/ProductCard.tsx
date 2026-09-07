@@ -95,7 +95,7 @@ export function ProductCard({ product }: ProductCardProps) {
               src={skin.imageUrl}
               alt={skin.name}
               fill
-              sizes="72px"
+              sizes="144px"
               className="object-contain p-1"
             />
           </span>

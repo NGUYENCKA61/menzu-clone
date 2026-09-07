@@ -152,7 +152,7 @@ function ReceiptLine({ line }: { line: CartLine }) {
             src={line.imageUrl}
             alt=""
             fill
-            sizes="72px"
+            sizes="144px"
             className="object-cover object-[85%_center]"
           />
         ) : null}
@@ -695,7 +695,7 @@ export function CartView({
                     src={line.imageUrl}
                     alt={line.name}
                     fill
-                    sizes="96px"
+                    sizes="192px"
                     className="object-cover object-[85%_center]"
                   />
                 ) : null}

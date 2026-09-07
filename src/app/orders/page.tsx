@@ -83,6 +83,9 @@ function orderBadge(o: {
 
 function shortDate(date: Date): string {
   return date.toLocaleDateString("vi-VN", {
+    // Near midnight the server clock and the customer are on different
+    // days; the shop clock decides which one the order belongs to.
+    timeZone: "Asia/Ho_Chi_Minh",
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
@@ -181,7 +184,11 @@ export default async function OrdersPage({
                         src={o.imageUrl}
                         alt={o.productCode}
                         fill
-                        sizes="96px"
+                        // Twice the box: the browser downsizes a 192px file
+                        // to 96px far more kindly than the encoder makes a
+                        // 96px one, and the picture is a screenshot of a
+                        // menu — fine text that a soft file turns to mush.
+                        sizes="192px"
                         className="object-cover object-[85%_center]"
                       />
                     ) : null}
@@ -215,7 +222,7 @@ export default async function OrdersPage({
                 </div>
 
                 <div className="flex shrink-0 items-center justify-between gap-4 sm:flex-col sm:items-end sm:gap-1.5">
-                  <span className="text-sm font-black text-white">
+                  <span className="text-sm font-black tabular-nums text-white">
                     {formatVnd(o.total)}đ
                   </span>
                   {/* Status and review side by side under the price, one

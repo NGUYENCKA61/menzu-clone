@@ -22,10 +22,12 @@ function sameSecret(given: string, expected: string): boolean {
  * `Authorization: Apikey <key>` — so both that and a plain secret header are
  * accepted.
  *
- * Only a transfer whose description carries a pending code and whose amount
- * matches it is credited. Everything else is reported back and left for a
- * human; guessing which request a stray transfer belongs to is how money ends
- * up in the wrong wallet.
+ * A transfer whose description carries an open request's code is credited
+ * for the amount it carried, matched or not, as long as the figure is
+ * plausible (the difference is recorded and told). A transfer with no code,
+ * one for a request already settled, or one carrying an implausible figure
+ * is reported back and left for a human — guessing which request a stray
+ * transfer belongs to is how money ends up in the wrong wallet.
  */
 export async function POST(request: Request) {
   const settings = await getShopSettings();

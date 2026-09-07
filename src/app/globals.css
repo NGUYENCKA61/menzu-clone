@@ -766,9 +766,15 @@ body.lightbox-open .site-nav {
     error-card-in 0.22s ease-out,
     error-card-shake 0.45s ease-in-out 0.26s;
 }
+/* The same sheet asking a question or reporting a job done: it rises in,
+   it does not shake — the shake is the error's, and nothing here is one. */
+.notice-modal-card {
+  animation: error-card-in 0.22s ease-out;
+}
 @media (prefers-reduced-motion: reduce) {
   .error-modal-backdrop,
-  .error-modal-card {
+  .error-modal-card,
+  .notice-modal-card {
     animation: none;
   }
 }

@@ -4,7 +4,14 @@ import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/session";
 import { bankReady } from "@/lib/settings";
 import { getShopSettings } from "@/lib/settingsStore";
-import { makeTopUpCode, topUpExpiresAt, transferNoteFor } from "@/lib/topup";
+import {
+  CARD_DIGITS_MAX,
+  CARD_DIGITS_MIN,
+  makeTopUpCode,
+  readCardDigits,
+  topUpExpiresAt,
+  transferNoteFor,
+} from "@/lib/topup";
 
 /**
  * Opens a top-up request. It does not add money.
@@ -27,6 +34,8 @@ export async function POST(request: Request) {
     amount?: number;
     method?: string;
     carrier?: string;
+    serial?: string;
+    pin?: string;
   } | null;
 
   const settings = await getShopSettings();
@@ -78,6 +87,32 @@ export async function POST(request: Request) {
     );
   }
 
+  // The card itself, and it must be a card: a request that names no carrier
+  // or carries half a card is one nobody can redeem, and it would sit in the
+  // queue looking like money that never arrives.
+  let cardSerial: string | null = null;
+  let cardPin: string | null = null;
+  if (method === "CARD") {
+    if (!body?.carrier) {
+      return NextResponse.json({ error: "Chọn nhà mạng của thẻ" }, { status: 400 });
+    }
+    cardSerial = readCardDigits(body?.serial);
+    cardPin = readCardDigits(body?.pin);
+    const lengths = `${CARD_DIGITS_MIN}–${CARD_DIGITS_MAX} chữ số`;
+    if (!cardSerial) {
+      return NextResponse.json(
+        { error: `Số seri chỉ gồm chữ số, ${lengths}` },
+        { status: 400 },
+      );
+    }
+    if (!cardPin) {
+      return NextResponse.json(
+        { error: `Mã thẻ chỉ gồm chữ số, ${lengths}` },
+        { status: 400 },
+      );
+    }
+  }
+
   // No cap on how many requests can be open at once. There used to be one,
   // back when every request needed an admin to read the bank statement and two
   // pending transfers of the same amount were hard to tell apart. Each request
@@ -91,6 +126,8 @@ export async function POST(request: Request) {
       amount,
       status: "PENDING",
       carrier: method === "CARD" ? (body?.carrier ?? null) : null,
+      cardSerial,
+      cardPin,
     },
   });
 

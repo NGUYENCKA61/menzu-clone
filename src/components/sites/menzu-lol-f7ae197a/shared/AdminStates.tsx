@@ -67,6 +67,9 @@ export interface ConfirmDialogProps {
   /** Red styling for anything that destroys or reverses money. */
   danger?: boolean;
   pending?: boolean;
+  /** A field between the body and the buttons, for the one action that needs
+   *  a figure typed before it goes — the amount a transfer actually carried. */
+  children?: ReactNode;
   onConfirm: () => void;
   onCancel: () => void;
 }
@@ -85,6 +88,7 @@ export function ConfirmDialog({
   confirmLabel = "Xác nhận",
   danger = false,
   pending = false,
+  children,
   onConfirm,
   onCancel,
 }: ConfirmDialogProps) {
@@ -129,6 +133,7 @@ export function ConfirmDialog({
           {title}
         </h2>
         <p className="mt-2 text-xs text-neutral-400 leading-relaxed">{body}</p>
+        {children ? <div className="mt-4">{children}</div> : null}
 
         <div className="mt-6 flex gap-3">
           <button

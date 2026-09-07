@@ -1,3 +1,5 @@
+import { parseCardRates, serializeCardRates, type CardRate } from "@/lib/topup";
+
 /**
  * Shop settings that used to be constants in the code.
  *
@@ -13,8 +15,26 @@
 export interface ShopSettings {
   /** Smallest accepted top-up, in đồng. */
   topUpMin: number;
-  /** The amount buttons offered on /wallet. */
+  /** The amount buttons offered on /wallet's bank tab. */
   topUpPresets: number[];
+  /**
+   * The amount buttons offered on the thẻ cào tab — the denominations the
+   * carriers actually print. Separate from the bank list on purpose: a card
+   * for 2.000.000đ does not exist, and offering one invites exactly the
+   * mistake that loses a customer their card.
+   */
+  topUpCardPresets: number[];
+  /**
+   * What the shop keeps out of each card denomination, in percent. Empty means
+   * cards are credited whole — which is what the shop did before it started
+   * redeeming cards through a service that takes a cut.
+   */
+  topUpCardRates: CardRate[];
+  /**
+   * What the shop keeps out of a card when the pair list says nothing about
+   * that denomination — which is normally every denomination. Percent.
+   */
+  topUpCardFee: number;
   bankTopUpEnabled: boolean;
   cardTopUpEnabled: boolean;
 
@@ -102,6 +122,8 @@ export interface ShopSettings {
   siteBackground: string;
   /** Backdrop inside the homepage flash-sale frame, shown at 10% opacity. */
   flashSaleBackground: string;
+  /** Behind the account overview's banner; empty = the first category's cover. */
+  profileBanner: string;
   /**
    * The item pinned to the front of the "HOT PICK" chip's rotation, inside the
    * category page's skin search. The chip cycles through the picture library on
@@ -248,6 +270,16 @@ export const BACKDROP =
 export const DEFAULT_SETTINGS: ShopSettings = {
   topUpMin: 10_000,
   topUpPresets: [50_000, 200_000, 500_000, 1_000_000, 2_000_000, 5_000_000],
+  topUpCardPresets: [
+    10_000, 20_000, 30_000, 50_000, 100_000, 200_000, 300_000, 500_000, 1_000_000,
+  ],
+  // Nothing kept until the shop says so: a rate that appeared by itself would
+  // be money quietly taken off a customer's card.
+  topUpCardRates: [],
+  // The redemption desks charge between 15 and 22 percent depending on the
+  // denomination; one round number in the middle is what a shop actually
+  // wants to think about.
+  topUpCardFee: 20,
   bankTopUpEnabled: true,
   cardTopUpEnabled: true,
   // Empty on purpose: an account number is the shop's own, and a placeholder
@@ -288,6 +320,7 @@ export const DEFAULT_SETTINGS: ShopSettings = {
   brandColor: "#FF3158",
   heroBanner: BANNER,
   siteBackground: BACKDROP,
+  profileBanner: "",
   flashSaleBackground:
     "/sites/menzu-lol-f7ae197a/root-8a5edab2/images/behance/f945cb242281183.696998e170840.webp",
   // Off until a shop picks something. See the field's note above.
@@ -356,6 +389,9 @@ export const ROW_COUNT_MAX = 24;
 export const SETTING_KEYS: Record<keyof ShopSettings, string> = {
   topUpMin: "topup.min",
   topUpPresets: "topup.presets",
+  topUpCardPresets: "topup.cardPresets",
+  topUpCardRates: "topup.cardRates",
+  topUpCardFee: "topup.cardFee",
   bankTopUpEnabled: "topup.bank",
   cardTopUpEnabled: "topup.card",
   bankAccounts: "bank.accounts",
@@ -391,6 +427,7 @@ export const SETTING_KEYS: Record<keyof ShopSettings, string> = {
   heroBanner: "brand.heroBanner",
   siteBackground: "brand.background",
   flashSaleBackground: "home.flashSale.background",
+  profileBanner: "profile.banner",
   hotPickSkin: "category.hotPickSkin",
   authPanelImages: "auth.panelImages",
   authSlideEnabled: "auth.slide",
@@ -674,6 +711,12 @@ export function parseSettings(rows: Iterable<{ key: string; value: string }>): S
       stored.get(SETTING_KEYS.topUpPresets),
       DEFAULT_SETTINGS.topUpPresets,
     ),
+    topUpCardPresets: toNumberList(
+      stored.get(SETTING_KEYS.topUpCardPresets),
+      DEFAULT_SETTINGS.topUpCardPresets,
+    ),
+    topUpCardRates: parseCardRates(stored.get(SETTING_KEYS.topUpCardRates) ?? ""),
+    topUpCardFee: toNumber(stored.get(SETTING_KEYS.topUpCardFee), DEFAULT_SETTINGS.topUpCardFee),
     bankTopUpEnabled: toBoolean(
       stored.get(SETTING_KEYS.bankTopUpEnabled),
       DEFAULT_SETTINGS.bankTopUpEnabled,
@@ -770,6 +813,7 @@ export function parseSettings(rows: Iterable<{ key: string; value: string }>): S
       stored.get(SETTING_KEYS.flashSaleBackground),
       DEFAULT_SETTINGS.flashSaleBackground,
     ),
+    profileBanner: toText(stored.get(SETTING_KEYS.profileBanner), DEFAULT_SETTINGS.profileBanner),
     hotPickSkin: toText(
       stored.get(SETTING_KEYS.hotPickSkin),
       DEFAULT_SETTINGS.hotPickSkin,
@@ -890,6 +934,11 @@ export function serializeSettings(settings: ShopSettings): { key: string; value:
   const values: Record<keyof ShopSettings, string> = {
     topUpMin: String(Math.floor(settings.topUpMin)),
     topUpPresets: settings.topUpPresets.map((preset) => Math.floor(preset)).join(","),
+    topUpCardPresets: settings.topUpCardPresets
+      .map((preset) => Math.floor(preset))
+      .join(","),
+    topUpCardRates: serializeCardRates(settings.topUpCardRates),
+    topUpCardFee: String(settings.topUpCardFee),
     bankTopUpEnabled: String(settings.bankTopUpEnabled),
     cardTopUpEnabled: String(settings.cardTopUpEnabled),
     bankAccounts: JSON.stringify(settings.bankAccounts),
@@ -925,6 +974,7 @@ export function serializeSettings(settings: ShopSettings): { key: string; value:
     heroBanner: settings.heroBanner.trim(),
     siteBackground: settings.siteBackground.trim(),
     flashSaleBackground: settings.flashSaleBackground.trim(),
+    profileBanner: settings.profileBanner.trim(),
     hotPickSkin: settings.hotPickSkin.trim(),
     authPanelImages: JSON.stringify(settings.authPanelImages),
     authSlideEnabled: String(settings.authSlideEnabled),
@@ -979,11 +1029,26 @@ export function serializeSettings(settings: ShopSettings): { key: string; value:
  * into the shop's configuration.
  */
 export function normalizeSettings(raw: Partial<ShopSettings> | null): ShopSettings {
-  const presets = Array.isArray(raw?.topUpPresets)
-    ? raw.topUpPresets
-        .map((preset) => Math.floor(Number(preset)))
-        .filter((preset) => Number.isFinite(preset) && preset > 0)
-    : DEFAULT_SETTINGS.topUpPresets;
+  const readPresets = (
+    value: unknown,
+    fallback: number[],
+  ): number[] =>
+    Array.isArray(value)
+      ? value
+          .map((preset) => Math.floor(Number(preset)))
+          .filter((preset) => Number.isFinite(preset) && preset > 0)
+      : fallback;
+
+  const presets = readPresets(raw?.topUpPresets, DEFAULT_SETTINGS.topUpPresets);
+  // Re-parsed rather than trusted: the field arrives as whatever the browser
+  // sent, and a percent of 120 would hand the customer a negative wallet.
+  const cardRates = parseCardRates(
+    Array.isArray(raw?.topUpCardRates) ? serializeCardRates(raw.topUpCardRates as CardRate[]) : "",
+  );
+  const cardPresets = readPresets(
+    raw?.topUpCardPresets,
+    DEFAULT_SETTINGS.topUpCardPresets,
+  );
 
   const topUpMin = Math.floor(Number(raw?.topUpMin));
 
@@ -992,6 +1057,12 @@ export function normalizeSettings(raw: Partial<ShopSettings> | null): ShopSettin
     // Sorted and de-duplicated so the buttons on /wallet always read low to
     // high, whatever order they were typed in.
     topUpPresets: [...new Set(presets)].sort((a, b) => a - b),
+    topUpCardPresets: [...new Set(cardPresets)].sort((a, b) => a - b),
+    topUpCardRates: cardRates,
+    topUpCardFee: (() => {
+      const fee = Number(raw?.topUpCardFee);
+      return Number.isFinite(fee) && fee >= 0 && fee < 100 ? fee : DEFAULT_SETTINGS.topUpCardFee;
+    })(),
     bankTopUpEnabled: Boolean(raw?.bankTopUpEnabled),
     cardTopUpEnabled: Boolean(raw?.cardTopUpEnabled),
     // Half-typed rows are dropped rather than saved: an account without a
@@ -1039,6 +1110,8 @@ export function normalizeSettings(raw: Partial<ShopSettings> | null): ShopSettin
     siteBackground: String(raw?.siteBackground ?? "").trim() || DEFAULT_SETTINGS.siteBackground,
     flashSaleBackground:
       String(raw?.flashSaleBackground ?? "").trim() || DEFAULT_SETTINGS.flashSaleBackground,
+    // Empty is a real value here: it hands the banner back to the catalogue.
+    profileBanner: String(raw?.profileBanner ?? "").trim(),
     // No `||` fallback: blank is a real choice here — it means "no chip" —
     // where for the pictures above it would leave an empty <Image src>.
     hotPickSkin: String(raw?.hotPickSkin ?? "").trim(),

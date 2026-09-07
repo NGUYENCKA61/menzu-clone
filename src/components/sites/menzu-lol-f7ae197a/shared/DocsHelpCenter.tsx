@@ -318,7 +318,7 @@ export function DocsHelpCenter({
                         src={article.thumbnailUrl}
                         alt=""
                         fill
-                        sizes="64px"
+                        sizes="128px"
                         className="object-cover transition-transform duration-500 group-hover:scale-105"
                       />
                     </div>
@@ -504,7 +504,7 @@ function ArticleRows({ items }: { items: DocCard[] }) {
               src={article.thumbnailUrl}
               alt=""
               fill
-              sizes="96px"
+              sizes="192px"
               className="object-cover transition-transform duration-500 group-hover:scale-105"
             />
           </div>

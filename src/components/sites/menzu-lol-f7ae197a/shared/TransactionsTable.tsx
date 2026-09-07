@@ -1,6 +1,16 @@
 "use client";
 
-import { Search, X } from "lucide-react";
+import {
+  CreditCard,
+  Gift,
+  RotateCcw,
+  Search,
+  ShoppingCart,
+  SlidersHorizontal,
+  Ticket,
+  X,
+  type LucideIcon,
+} from "lucide-react";
 import { useMemo, useState } from "react";
 
 import { Pager } from "./Pager";
@@ -8,6 +18,8 @@ import { formatVnd } from "./productData";
 
 export interface LedgerView {
   code: string;
+  /** TOPUP · PURCHASE · REFUND · REWARD · ADJUSTMENT */
+  kind: string;
   status: string;
   delta: number;
   balanceAfter: number;
@@ -16,24 +28,43 @@ export interface LedgerView {
   createdAt: string;
 }
 
+/* No status column. A row is written here only once money has actually
+   moved — a top-up still waiting on the bank lives on the Nạp tiền page,
+   not in this ledger — so every row would read "Thành công", and a column
+   that says the same word down its whole length says nothing. */
+/* The row's kind as a small glyph where a running number used to be: the
+   number said nothing, the glyph says what happened before a word is read —
+   the way a bank app marks a statement line. Bare, not boxed. */
+const KIND: Record<string, { icon: LucideIcon; label: string }> = {
+  PURCHASE: { icon: ShoppingCart, label: "Mua hàng" },
+  TOPUP: { icon: CreditCard, label: "Nạp tiền" },
+  REFUND: { icon: RotateCcw, label: "Hoàn tiền" },
+  REWARD: { icon: Gift, label: "Thưởng" },
+  ADJUSTMENT: { icon: SlidersHorizontal, label: "Điều chỉnh" },
+};
+
+/**
+ * A top-up is drawn by how the money arrived, not just by its kind: a bank
+ * transfer is the bank, a scratch card is the card. Both are "Nạp tiền" in
+ * the ledger, and reading which one it was should not mean reading the
+ * method line underneath. Everything else is its kind and nothing more.
+ */
+function glyphFor(row: LedgerView): { icon: LucideIcon; label: string } | undefined {
+  const kind = KIND[row.kind];
+  if (!kind) return undefined;
+  if (row.kind === "TOPUP" && normalise(row.method ?? "").includes("the cao")) {
+    return { icon: Ticket, label: "Nạp thẻ cào" };
+  }
+  return kind;
+}
+
 const COLUMNS = [
-  "Mã GD & Thời gian",
+  "Loại",
+  "Thời gian",
+  "Mã GD",
   "Chi tiết & Phương thức",
   "Biến động & Số dư",
-  "Trạng thái",
 ];
-
-const STATUS_LABEL: Record<string, string> = {
-  SUCCESS: "Thành công",
-  PENDING: "Đang xử lý",
-  FAILED: "Thất bại",
-};
-
-const STATUS_CLASS: Record<string, string> = {
-  SUCCESS: "text-emerald-400 bg-emerald-500/10 border-emerald-500/30",
-  PENDING: "text-amber-400 bg-amber-500/10 border-amber-500/30",
-  FAILED: "text-red-400 bg-red-500/10 border-red-500/30",
-};
 
 /** Same paging rhythm as the wallet's ledger. */
 const PAGE_SIZE = 10;
@@ -117,7 +148,17 @@ export function TransactionsTable({ rows }: { rows: LedgerView[] }) {
         </div>
 
         <div className="w-full overflow-x-auto rounded-xl border border-white/[0.06] bg-white/[0.02]">
-        <table className="w-full min-w-[720px] text-left">
+        <table className="w-full min-w-[760px] table-fixed text-left">
+          {/* Three fixed shares — who/when, what, how much — so a long
+              description wraps inside its own column instead of squeezing
+              the figures, and the row reads as three blocks in step. */}
+          <colgroup>
+            <col className="w-[6%]" />
+            <col className="w-[13%]" />
+            <col className="w-[15%]" />
+            <col className="w-[44%]" />
+            <col className="w-[22%]" />
+          </colgroup>
           <thead>
             <tr className="border-b border-white/10">
               {COLUMNS.map((column) => (
@@ -142,10 +183,31 @@ export function TransactionsTable({ rows }: { rows: LedgerView[] }) {
               visible.map((row) => (
                 <tr key={row.code} className="border-b border-white/5 last:border-0">
                   <td className="px-5 py-4">
+                    {(() => {
+                      const glyph = glyphFor(row);
+                      if (!glyph) return null;
+                      const Icon = glyph.icon;
+                      return (
+                        <span title={glyph.label} className="inline-flex text-neutral-400">
+                          <Icon size={16} strokeWidth={2} aria-hidden />
+                          <span className="sr-only">{glyph.label}</span>
+                        </span>
+                      );
+                    })()}
+                  </td>
+                  {/* "09:07 07/09/2026" — the clock on top, the date under it. */}
+                  <td className="px-5 py-4 whitespace-nowrap">
                     <div className="flex flex-col">
-                      <span className="text-xs font-black text-white">{row.code}</span>
-                      <span className="text-[11px] text-neutral-500">{row.createdAt}</span>
+                      <span className="text-xs font-semibold tabular-nums text-neutral-200">
+                        {row.createdAt.split(" ")[0]}
+                      </span>
+                      <span className="text-[11px] tabular-nums text-neutral-500">
+                        {row.createdAt.split(" ").slice(1).join(" ")}
+                      </span>
                     </div>
+                  </td>
+                  <td className="px-5 py-4 whitespace-nowrap">
+                    <span className="font-mono text-xs font-bold text-white">{row.code}</span>
                   </td>
                   <td className="px-5 py-4">
                     <div className="flex flex-col">
@@ -160,8 +222,8 @@ export function TransactionsTable({ rows }: { rows: LedgerView[] }) {
                       <span
                         className={
                           row.delta >= 0
-                            ? "text-xs font-black text-emerald-400"
-                            : "text-xs font-black text-red-400"
+                            ? "text-sm font-black tabular-nums text-emerald-400"
+                            : "text-sm font-black tabular-nums text-red-400"
                         }
                       >
                         {row.delta >= 0 ? "+" : "−"}
@@ -171,15 +233,6 @@ export function TransactionsTable({ rows }: { rows: LedgerView[] }) {
                         Số dư: {formatVnd(row.balanceAfter)}đ
                       </span>
                     </div>
-                  </td>
-                  <td className="px-5 py-4">
-                    <span
-                      className={`inline-flex px-2 py-1 rounded-lg border text-[10px] font-black uppercase tracking-wider ${
-                        STATUS_CLASS[row.status] ?? "text-neutral-400 bg-white/5 border-white/10"
-                      }`}
-                    >
-                      {STATUS_LABEL[row.status] ?? row.status}
-                    </span>
                   </td>
                 </tr>
               ))

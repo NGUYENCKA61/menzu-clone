@@ -157,11 +157,23 @@ function pick(row: Record<string, unknown>, keys: string[]): unknown {
  * An amount can arrive as 200000, "200000", "200,000", "200.000" or "+200000".
  * Everything but the digits and a leading sign is separator noise.
  */
+/**
+ * Reads "50.000", "50,000", "50000.00", "1,5" or "-200000" as the đồng they
+ * mean. A separator followed by one or two digits at the very end is a
+ * fraction and is dropped; every other separator groups thousands. Stripping
+ * every non-digit, as this once did, read "50000.00" as five million.
+ */
 function readAmount(raw: unknown): number {
   if (typeof raw === "number") return Math.floor(raw);
   if (typeof raw !== "string") return Number.NaN;
-  const cleaned = raw.replace(/[^\d-]/g, "");
-  return cleaned ? Math.floor(Number(cleaned)) : Number.NaN;
+  const text = raw.replace(/\s+/g, "");
+  const sign = text.startsWith("-") ? -1 : 1;
+  const body = text.replace(/^[-+]/, "").replace(/[^\d.,]/g, "");
+  if (!body) return Number.NaN;
+  const match = /^(.*?)(?:[.,]\d{1,2})?$/.exec(body);
+  const whole = (match?.[1] ?? body).replace(/[.,]/g, "");
+  if (!whole) return Number.NaN;
+  return sign * Math.floor(Number(whole));
 }
 
 export function readTransfers(payload: unknown): IncomingTransfer[] {
@@ -234,4 +246,174 @@ export function describeShape(payload: unknown): {
   const first = list?.[0];
   const itemKeys = first && typeof first === "object" ? Object.keys(first) : [];
   return { topLevel, listKey, itemKeys };
+}
+
+/** "45.000đ" — the ledger's own way of writing money. */
+function dong(amount: number): string {
+  return `${amount.toLocaleString("vi-VN")}đ`;
+}
+
+/**
+ * What the ledger row says about a credited request. When the transfer
+ * matched the request it is the plain line; when it did not, the line
+ * carries both figures, because a statement that showed 45.000đ against a
+ * request for 50.000đ with no word about it would look like a mistake.
+ */
+export function creditLine(code: string, requested: number, received: number): string {
+  if (received === requested) return `Nạp tiền vào ví · ${code}`;
+  return `Nạp tiền vào ví · ${code} · lệnh ${dong(requested)}, nhận ${dong(received)}`;
+}
+
+/**
+ * The notice a customer gets when what they sent was not what they asked
+ * for. The wallet took the real figure, and this says so plainly: nothing
+ * was lost, nothing was rounded, and the shop knows.
+ */
+export function mismatchNotice(
+  code: string,
+  requested: number,
+  received: number,
+): { title: string; body: string } {
+  const short = received < requested;
+  return {
+    title: short ? "Nhận thiếu so với lệnh nạp" : "Nhận dư so với lệnh nạp",
+    body: `Lệnh ${code} ghi ${dong(requested)}, ngân hàng báo về ${dong(received)}. Ví đã được cộng đúng ${dong(received)}${
+      short ? " — bạn có thể nạp thêm phần còn thiếu bằng một lệnh mới." : "."
+    }`,
+  };
+}
+
+/**
+ * What the shop keeps out of a scratch card, per denomination.
+ *
+ * Card top-ups are not free money: the desk that redeems the card takes a cut,
+ * and it is a different cut for a 10.000đ card than for a 500.000đ one. The
+ * shop configures the pairs; anything not listed is credited whole, so a new
+ * denomination cannot silently start charging a rate nobody chose.
+ */
+export interface CardRate {
+  /** The face value printed on the card. */
+  amount: number;
+  /** What the shop keeps, in percent. 20.5 means the wallet gets 79.5%. */
+  percent: number;
+}
+
+/** "10000:27.5, 50000:20.5" — what the admin types, in one field. */
+export function parseCardRates(raw: string): CardRate[] {
+  const rates: CardRate[] = [];
+  // Read as pairs wherever they appear rather than split on a separator: the
+  // comma is both what separates two pairs and how a Vietnamese keyboard
+  // writes 20,5 percent, and splitting on it turns one rate into two.
+  const pairs = raw.matchAll(/([0-9][0-9.s]*)s*:s*([0-9]+(?:[.,][0-9]+)?)/g);
+  for (const [, left, right] of pairs) {
+    const amount = Math.floor(Number(left.replace(/[^0-9]/g, "")));
+    const percent = Number(right.replace(",", "."));
+    if (!Number.isFinite(amount) || amount <= 0) continue;
+    if (!Number.isFinite(percent) || percent < 0 || percent >= 100) continue;
+    rates.push({ amount, percent });
+  }
+  return rates.sort((a, b) => a.amount - b.amount);
+}
+
+export function serializeCardRates(rates: CardRate[]): string {
+  return rates.map((rate) => `${Math.floor(rate.amount)}:${rate.percent}`).join(",");
+}
+
+/**
+ * The rate for one denomination.
+ *
+ * One number covers the whole card tab — the redemption desk's own table only
+ * moves a few points between denominations — and the pair list is there for
+ * the denominations where that is not close enough.
+ */
+export function cardRateFor(
+  amount: number,
+  rates: CardRate[],
+  fallbackPercent = 0,
+): number {
+  const listed = rates.find((rate) => rate.amount === amount)?.percent;
+  if (listed !== undefined) return listed;
+  return fallbackPercent > 0 && fallbackPercent < 100 ? fallbackPercent : 0;
+}
+
+/**
+ * What the wallet actually gets for a card of this face value.
+ *
+ * Rounded down to the đồng, and never below zero: the customer is told this
+ * figure before they send the card, and the ledger is credited with it, so the
+ * two can never disagree by a rounding step.
+ */
+export function cardNet(
+  amount: number,
+  rates: CardRate[],
+  fallbackPercent = 0,
+): number {
+  const percent = cardRateFor(amount, rates, fallbackPercent);
+  if (percent <= 0) return Math.max(0, Math.floor(amount));
+  return Math.max(0, Math.floor((amount * (100 - percent)) / 100));
+}
+
+/**
+ * The digits off a scratch card, or null if what was typed cannot be one.
+ *
+ * Spaces, dots and dashes are dropped rather than refused — people read the
+ * numbers off the card in groups and type them that way. Everything else must
+ * be a digit: a serial with a letter in it is a typo, and sending it to the
+ * carrier's redemption desk only wastes the one attempt the card has.
+ */
+export const CARD_DIGITS_MIN = 6;
+export const CARD_DIGITS_MAX = 24;
+
+export function readCardDigits(raw: unknown): string | null {
+  if (typeof raw !== "string") return null;
+  const digits = raw.replace(/[\s.-]/g, "");
+  if (!/^[0-9]+$/.test(digits)) return null;
+  if (digits.length < CARD_DIGITS_MIN || digits.length > CARD_DIGITS_MAX) return null;
+  return digits;
+}
+
+/** Below this, an automatic credit is not attempted — a human looks first. */
+export const AUTO_CREDIT_FLOOR = 1_000;
+/** Above this multiple of the request, likewise — a mis-read amount, most likely. */
+export const AUTO_CREDIT_CEILING_FACTOR = 2;
+
+/**
+ * Whether a transfer that names a request may be credited without a human:
+ * anything from the floor up to twice the request is a plausible short or
+ * over payment; outside that band the likelier story is a mis-parsed figure
+ * or a mistake worth a look, and the money waits rather than moves.
+ */
+export function autoCreditVerdict(
+  requested: number,
+  received: number,
+): "ok" | "too-small" | "too-large" {
+  if (received < AUTO_CREDIT_FLOOR) return "too-small";
+  if (received > requested * AUTO_CREDIT_CEILING_FACTOR) return "too-large";
+  return "ok";
+}
+
+/**
+ * The bell notice for the desk when a transfer was held rather than credited.
+ *
+ * Written from the same three figures every time, deliberately: the feed
+ * replays its history on every poll, and the store tells the desk once per
+ * distinct (code, amount) by looking for a notice with exactly this text.
+ * Says what to do, because the queue row alone still shows the request's
+ * own figure and a plain "Xác nhận" there would credit that, not this.
+ */
+export function heldNotice(
+  code: string,
+  requested: number,
+  received: number,
+  username: string,
+): { title: string; body: string } {
+  const verdict = autoCreditVerdict(requested, received);
+  const why =
+    verdict === "too-small"
+      ? `dưới mức tự cộng ${dong(AUTO_CREDIT_FLOOR)}`
+      : `hơn gấp ${AUTO_CREDIT_CEILING_FACTOR} lần lệnh`;
+  return {
+    title: `Chuyển khoản cần duyệt · ${code}`,
+    body: `${username} chuyển ${dong(received)} cho lệnh ${dong(requested)} — ${why}, ví CHƯA cộng. Đối chiếu sao kê rồi bấm Xác nhận và ghi đúng số tiền thực nhận, hoặc Từ chối.`,
+  };
 }

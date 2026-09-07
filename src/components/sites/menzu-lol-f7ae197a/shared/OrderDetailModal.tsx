@@ -598,7 +598,7 @@ export function OrderDetailModal({
                                     src={order.imageUrl}
                                     alt=""
                                     fill
-                                    sizes="84px"
+                                    sizes="168px"
                                     className="object-cover object-[85%_center]"
                                   />
                                 ) : null}

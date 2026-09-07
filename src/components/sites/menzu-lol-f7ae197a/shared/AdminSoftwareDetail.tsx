@@ -567,7 +567,7 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
       <div className="rounded-xl border border-white/[0.08] bg-[#0e0e11] p-5 flex flex-wrap items-center gap-5">
         <span className="relative h-16 w-24 shrink-0 overflow-hidden rounded-lg border border-white/10 bg-neutral-900">
           {software.imageUrl ? (
-            <Image src={software.imageUrl} alt="" fill sizes="96px" className="object-cover" />
+            <Image src={software.imageUrl} alt="" fill sizes="192px" className="object-cover" />
           ) : (
             <span className="flex h-full w-full items-center justify-center text-neutral-600">
               <KeyRound size={20} />

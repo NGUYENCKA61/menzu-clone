@@ -210,6 +210,11 @@ export function AdminSettings({
 
   const [topUpMin, setTopUpMin] = useState(String(settings.topUpMin));
   const [presets, setPresets] = useState(settings.topUpPresets.join(", "));
+  const [cardPresets, setCardPresets] = useState(settings.topUpCardPresets.join(", "));
+  const [cardFee, setCardFee] = useState(String(settings.topUpCardFee));
+  const [cardRates, setCardRates] = useState(
+    settings.topUpCardRates.map((rate) => `${rate.amount}:${rate.percent}`).join(", "),
+  );
   const [bank, setBank] = useState(settings.bankTopUpEnabled);
   const [card, setCard] = useState(settings.cardTopUpEnabled);
   const [purchases, setPurchases] = useState(settings.purchasesEnabled);
@@ -290,6 +295,9 @@ export function AdminSettings({
   const [flashSaleBackground, setFlashSaleBackground] = useState(settings.flashSaleBackground);
   const [flashBgUploading, setFlashBgUploading] = useState(false);
   const [flashBgMsg, setFlashBgMsg] = useState<{ tone: "ok" | "err"; text: string } | null>(null);
+  const [profileBanner, setProfileBanner] = useState(settings.profileBanner);
+  const [bannerUploading, setBannerUploading] = useState(false);
+  const [bannerMsg, setBannerMsg] = useState<{ tone: "ok" | "err"; text: string } | null>(null);
   const [siteBgUploading, setSiteBgUploading] = useState(false);
   const [siteBgMsg, setSiteBgMsg] = useState<{ tone: "ok" | "err"; text: string } | null>(null);
 
@@ -316,6 +324,28 @@ export function AdminSettings({
       setFlashBgMsg({ tone: "err", text: "Không kết nối được máy chủ" });
     } finally {
       setFlashBgUploading(false);
+    }
+  }
+
+  /** The overview banner rides the same upload door as the site backdrop. */
+  async function uploadProfileBanner(file: File) {
+    setBannerUploading(true);
+    setBannerMsg(null);
+    try {
+      const form = new FormData();
+      form.append("file", file);
+      const res = await fetch("/api/admin/site/background", { method: "POST", body: form });
+      const data = (await res.json().catch(() => ({}))) as { url?: string; error?: string };
+      if (!res.ok || !data.url) {
+        setBannerMsg({ tone: "err", text: data.error ?? "Tải ảnh thất bại" });
+        return;
+      }
+      setProfileBanner(data.url);
+      setBannerMsg({ tone: "ok", text: "Đã tải ảnh — nhớ bấm Lưu để áp dụng" });
+    } catch {
+      setBannerMsg({ tone: "err", text: "Không kết nối được máy chủ" });
+    } finally {
+      setBannerUploading(false);
     }
   }
 
@@ -490,6 +520,21 @@ export function AdminSettings({
             .split(",")
             .map((part) => Number(part.replace(/\D/g, "")))
             .filter((value) => value > 0),
+          topUpCardPresets: cardPresets
+            .split(",")
+            .map((part) => Number(part.replace(/\D/g, "")))
+            .filter((value) => value > 0),
+          topUpCardFee: Number(cardFee.replace(",", ".").replace(/[^0-9.]/g, "")),
+          topUpCardRates: cardRates
+            .split(",")
+            .map((part) => {
+              const [left, right] = part.split(":");
+              return {
+                amount: Number(String(left ?? "").replace(/\D/g, "")),
+                percent: Number(String(right ?? "").trim().replace(",", ".")),
+              };
+            })
+            .filter((rate) => rate.amount > 0 && Number.isFinite(rate.percent)),
           bankTopUpEnabled: bank,
           cardTopUpEnabled: card,
           bankAccounts: accounts,
@@ -524,6 +569,7 @@ export function AdminSettings({
           heroBanner,
           siteBackground,
           flashSaleBackground,
+          profileBanner,
           authPanelImages: panelImages,
           authSlideEnabled: slideOn,
           authSlideSeconds: Number(slideSeconds) || 5,
@@ -562,6 +608,9 @@ export function AdminSettings({
       const data = (await response.json().catch(() => ({}))) as {
         error?: string;
         topUpPresets?: number[];
+        topUpCardPresets?: number[];
+        topUpCardRates?: { amount: number; percent: number }[];
+        topUpCardFee?: number;
       };
       if (!response.ok) {
         setError(data.error ?? "Không lưu được cấu hình");
@@ -570,6 +619,11 @@ export function AdminSettings({
       // The server sorts and de-duplicates the presets, so show back what was
       // actually stored rather than what was typed.
       if (data.topUpPresets) setPresets(data.topUpPresets.join(", "));
+      if (data.topUpCardPresets) setCardPresets(data.topUpCardPresets.join(", "));
+      if (typeof data.topUpCardFee === "number") setCardFee(String(data.topUpCardFee));
+      if (data.topUpCardRates) {
+        setCardRates(data.topUpCardRates.map((rate) => `${rate.amount}:${rate.percent}`).join(", "));
+      }
       setSaved(true);
       router.refresh();
     } catch {
@@ -637,8 +691,63 @@ export function AdminSettings({
                   className={`${FIELD} tabular-nums`}
                 />
                 <p className={HINT}>
-                  Các nút số tiền ở trang Nạp thẻ, cách nhau bằng dấu phẩy. Mệnh giá thấp
-                  hơn mức tối thiểu sẽ bị từ chối khi lưu.
+                  Các nút số tiền ở tab Ngân hàng, cách nhau bằng dấu phẩy. Mệnh giá
+                  thấp hơn mức tối thiểu sẽ bị từ chối khi lưu.
+                </p>
+              </div>
+
+              <div>
+                <label htmlFor="topup-card-presets" className={LABEL}>
+                  Mệnh giá thẻ cào
+                </label>
+                <input
+                  id="topup-card-presets"
+                  value={cardPresets}
+                  onChange={(event) => setCardPresets(event.target.value)}
+                  placeholder="10000, 20000, 50000"
+                  className={`${FIELD} tabular-nums`}
+                />
+                <p className={HINT}>
+                  Chỉ những mệnh giá nhà mạng thật sự in trên thẻ. Đưa ra một mệnh
+                  giá không tồn tại là mời khách khai sai và mất thẻ.
+                </p>
+              </div>
+
+              <div>
+                <label htmlFor="topup-card-fee" className={LABEL}>
+                  Chiết khấu thẻ cào (%)
+                </label>
+                <input
+                  id="topup-card-fee"
+                  value={cardFee}
+                  onChange={(event) => setCardFee(event.target.value)}
+                  placeholder="20"
+                  className={`${FIELD} tabular-nums`}
+                />
+                <p className={HINT}>
+                  Phần shop giữ lại của mọi mệnh giá thẻ. Bên gạch thẻ thu
+                  khoảng 15 đến 22% tùy mệnh giá, nên 20 là mức an toàn. Để 0
+                  là cộng đủ 100%.
+                </p>
+              </div>
+
+              <div className="sm:col-span-2">
+                <label htmlFor="topup-card-rates" className={LABEL}>
+                  Chiết khấu riêng theo mệnh giá
+                </label>
+                <input
+                  id="topup-card-rates"
+                  value={cardRates}
+                  onChange={(event) => setCardRates(event.target.value)}
+                  placeholder="10000:27.5, 50000:20.5, 100000:20.5"
+                  className={`${FIELD} font-mono`}
+                />
+                <p className={HINT}>
+                  Chỉ khai khi một mệnh giá cần mức khác mức chung, viết theo
+                  dạng mệnh giá:phần trăm, cách nhau bằng dấu phẩy. Thẻ 50.000đ
+                  với 15.5 nghĩa là ví khách nhận 42.250đ. Mệnh giá không khai
+                  ở đây dùng mức chung phía trên, và trang nạp hiện đúng con số
+                  đó trước khi khách gửi thẻ.
                 </p>
               </div>
             </div>
@@ -1442,6 +1551,85 @@ export function AdminSettings({
               <p className={HINT}>
                 Ảnh cố định phía sau mọi trang, đã phủ tối 70% để chữ dễ đọc. Để trống thì
                 dùng lại ảnh mặc định.
+              </p>
+            </div>
+
+            <div>
+              <span className={LABEL}>Ảnh banner trang Tổng quan tài khoản</span>
+              <div className="flex flex-col gap-3 sm:flex-row">
+                {/* The banner's own wide shape; no dim, the page fades it
+                    itself along the left and the bottom. */}
+                <div className="relative aspect-[3/1] w-full shrink-0 overflow-hidden rounded-xl border border-white/10 bg-[#111111] sm:w-[200px]">
+                  {profileBanner ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={profileBanner}
+                      alt="Xem trước banner trang Tổng quan"
+                      className="absolute inset-0 h-full w-full object-cover"
+                    />
+                  ) : (
+                    <span className="absolute inset-0 grid place-items-center text-[10px] font-black uppercase tracking-widest text-neutral-600">
+                      Bìa danh mục đầu
+                    </span>
+                  )}
+                </div>
+
+                <div className="flex min-w-0 flex-1 flex-col gap-2">
+                  <input
+                    value={profileBanner}
+                    onChange={(event) => setProfileBanner(event.target.value)}
+                    className={`${FIELD} font-mono`}
+                    placeholder="/uploads/site/… hoặc đường dẫn ảnh"
+                  />
+                  <div className="flex flex-wrap items-center gap-3">
+                    <label
+                      className={`inline-flex h-9 cursor-pointer items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 text-[10px] font-black uppercase tracking-widest text-neutral-200 transition-colors hover:bg-white/10 ${
+                        bannerUploading ? "pointer-events-none opacity-60" : ""
+                      }`}
+                    >
+                      <Upload size={13} />
+                      {bannerUploading ? "Đang tải lên…" : "Chọn ảnh từ máy"}
+                      <input
+                        type="file"
+                        accept="image/png,image/jpeg,image/webp"
+                        className="hidden"
+                        onChange={(event) => {
+                          const file = event.target.files?.[0];
+                          event.target.value = "";
+                          if (file) void uploadProfileBanner(file);
+                        }}
+                      />
+                    </label>
+                    {profileBanner ? (
+                      <button
+                        type="button"
+                        onClick={() => setProfileBanner("")}
+                        className="inline-flex h-9 items-center rounded-lg border border-white/10 bg-white/5 px-3 text-[10px] font-black uppercase tracking-widest text-neutral-400 transition-colors hover:bg-white/10 hover:text-white"
+                      >
+                        Dùng bìa danh mục
+                      </button>
+                    ) : null}
+                    <span className="text-[10px] text-neutral-600">
+                      PNG / JPG / WebP · tối thiểu 960×540
+                    </span>
+                  </div>
+                  {bannerMsg ? (
+                    <p
+                      role="alert"
+                      className={
+                        bannerMsg.tone === "ok"
+                          ? "rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-[11px] font-semibold text-emerald-400"
+                          : "rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-[11px] font-semibold text-red-400"
+                      }
+                    >
+                      {bannerMsg.text}
+                    </p>
+                  ) : null}
+                </div>
+              </div>
+              <p className={HINT}>
+                Ảnh game phía sau đầu trang Tổng quan tài khoản của khách. Để trống thì lấy
+                ảnh bìa của danh mục đầu tiên.
               </p>
             </div>
 

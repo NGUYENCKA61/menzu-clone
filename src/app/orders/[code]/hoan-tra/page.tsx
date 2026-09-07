@@ -125,7 +125,7 @@ export default async function RefundRequestPage({
                   src={order.product.imageUrl}
                   alt=""
                   fill
-                  sizes="96px"
+                  sizes="192px"
                   className="object-cover object-[85%_center]"
                 />
               ) : null}

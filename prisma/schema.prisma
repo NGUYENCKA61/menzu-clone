@@ -1359,6 +1359,14 @@ model TopUp {
   status    TopUpStatus @default(PENDING)
   /// Carrier for CARD top-ups ("1. Chọn nhà mạng").
   carrier   String?
+
+  /// The two numbers printed on a scratch card, as the customer typed them.
+  /// Only ever set on a CARD request. Kept on the request rather than passed
+  /// over chat: the desk redeems the card from the queue, and a card that
+  /// turned out to be used or mistyped still has a record of what arrived.
+  cardSerial String?
+  cardPin    String?
+
   /// The 1% its referrer earned when this was credited, if any.
   earning   ReferralEarning?
   createdAt DateTime    @default(now())

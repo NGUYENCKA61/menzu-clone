@@ -1442,6 +1442,9 @@ export interface AdminTopUpRow {
   avatarUrl: string | null;
   method: string;
   carrier: string | null;
+  /** Both null unless method is CARD. */
+  cardSerial: string | null;
+  cardPin: string | null;
   amount: number;
   status: string;
   createdAt: Date;
@@ -1532,6 +1535,9 @@ export async function listTopUps(take = 200): Promise<AdminTopUpRow[]> {
     avatarUrl: t.user.avatarUrl,
     method: t.method,
     carrier: t.carrier,
+    // The card itself, for the one screen that has to redeem it.
+    cardSerial: t.cardSerial,
+    cardPin: t.cardPin,
     amount: Number(t.amount),
     status: t.status,
     createdAt: t.createdAt,

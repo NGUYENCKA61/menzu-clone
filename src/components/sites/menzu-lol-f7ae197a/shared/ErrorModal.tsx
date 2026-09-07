@@ -1,6 +1,6 @@
 "use client";
 
-import { X } from "lucide-react";
+import { Check, X } from "lucide-react";
 import { useEffect, useRef } from "react";
 
 export interface ErrorModalProps {
@@ -8,6 +8,12 @@ export interface ErrorModalProps {
   title: string;
   message: string;
   onClose: () => void;
+  /**
+   * "error" is the red cross and "Thử lại"; "done" is the same sheet with a
+   * quiet tick and a plain "Đóng" — for a thing that finished as asked and
+   * simply needs saying (an invoice withdrawn, say).
+   */
+  tone?: "error" | "done";
 }
 
 /**
@@ -24,7 +30,8 @@ export interface ErrorModalProps {
  * No close cross in the corner: the button is the way out, and Escape and the
  * backdrop do the same thing.
  */
-export function ErrorModal({ title, message, onClose }: ErrorModalProps) {
+export function ErrorModal({ title, message, onClose, tone = "error" }: ErrorModalProps) {
+  const done = tone === "done";
   const confirm = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
@@ -69,10 +76,20 @@ export function ErrorModal({ title, message, onClose }: ErrorModalProps) {
         // this replaced was drawn with the same red border, and it is the one
         // cue that says "error" before a single word is read. 1.5px, as the
         // category page's red-rimmed search field draws it.
-        className="error-modal-card relative w-full max-w-[380px] rounded-xl border-[1.5px] border-red-500/40 bg-[#131316] px-7 py-8 text-center shadow-2xl shadow-red-950/40"
+        className={`relative w-full max-w-[380px] rounded-xl border-[1.5px] bg-[#131316] px-7 py-8 text-center shadow-2xl ${
+          done
+            ? "notice-modal-card border-white/10 shadow-black/60"
+            : "error-modal-card border-red-500/40 shadow-red-950/40"
+        }`}
       >
-        <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border-2 border-red-500 bg-red-500/15 text-red-500">
-          <X size={30} strokeWidth={3} />
+        <span
+          className={`mx-auto flex h-16 w-16 items-center justify-center rounded-full border-2 ${
+            done
+              ? "border-neutral-500 bg-white/5 text-neutral-200"
+              : "border-red-500 bg-red-500/15 text-red-500"
+          }`}
+        >
+          {done ? <Check size={30} strokeWidth={3} /> : <X size={30} strokeWidth={3} />}
         </span>
 
         <h2
@@ -92,7 +109,7 @@ export function ErrorModal({ title, message, onClose }: ErrorModalProps) {
           onClick={onClose}
           className="mt-6 h-11 w-full rounded-lg bg-[var(--menzu-accent)] text-[13px] font-black uppercase tracking-widest text-white transition-colors hover:bg-[var(--menzu-accent-dark)]"
         >
-          Thử lại
+          {done ? "Đóng" : "Thử lại"}
         </button>
       </div>
     </div>

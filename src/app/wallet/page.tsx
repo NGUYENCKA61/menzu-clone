@@ -13,6 +13,9 @@ export const dynamic = "force-dynamic";
 
 function formatWhen(date: Date): string {
   return date.toLocaleString("vi-VN", {
+    // The shop clock, not the servers: the container runs on UTC, and a
+    // request made at 20:38 in Sài Gòn printed 13:38 on live.
+    timeZone: "Asia/Ho_Chi_Minh",
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
@@ -41,6 +44,9 @@ export default async function WalletPage() {
       <WalletTopUp
         minAmount={settings.topUpMin}
         presets={settings.topUpPresets}
+        cardPresets={settings.topUpCardPresets}
+        cardRates={settings.topUpCardRates}
+        cardFee={settings.topUpCardFee}
         bankEnabled={settings.bankTopUpEnabled}
         cardEnabled={settings.cardTopUpEnabled}
         autoEnabled={settings.autoTopUpEnabled}

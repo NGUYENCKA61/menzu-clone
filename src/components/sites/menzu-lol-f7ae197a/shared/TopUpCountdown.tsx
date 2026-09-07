@@ -38,11 +38,7 @@ export function TopUpCountdown({ deadline }: { deadline: string | null }) {
   }
 
   return (
-    <span
-      className={`font-mono tabular-nums ${
-        left <= URGENT_MS ? "text-red-400" : "text-amber-300"
-      }`}
-    >
+    <span className={`font-mono tabular-nums ${left <= URGENT_MS ? "text-red-400" : ""}`}>
       {formatCountdown(left)}
     </span>
   );

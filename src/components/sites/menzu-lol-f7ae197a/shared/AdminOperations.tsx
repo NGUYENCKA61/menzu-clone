@@ -31,12 +31,22 @@ export interface FeedbackView {
   createdAt: string;
 }
 
+/** The Cấu hình screen's field, label and hint, for the one form on this
+ *  screen: the figure typed before a top-up is credited by hand. */
+const FIELD =
+  "w-full rounded-lg border border-white/10 bg-neutral-950/60 px-3 py-2 text-xs text-white outline-none focus:border-[var(--brand)]/60 transition-colors placeholder-neutral-600";
+const LABEL = "block text-[10px] font-black uppercase tracking-widest text-neutral-500 mb-1.5";
+const HINT = "mt-1.5 text-[11px] text-neutral-500";
+
 export interface TopUpView {
   code: string;
   username: string;
   avatarUrl: string | null;
   method: string;
   carrier: string | null;
+  /** Both null unless the request is a card one. */
+  cardSerial: string | null;
+  cardPin: string | null;
   amount: number;
   status: string;
   createdAt: string;
@@ -178,6 +188,11 @@ export function AdminOperations({
   const [pending, setPending] = useState(false);
   const [removing, setRemoving] = useState<FeedbackView | null>(null);
   const [confirming, setConfirming] = useState<TopUpView | null>(null);
+  // Digits only, pre-filled with the request's own figure: the statement
+  // usually shows exactly that, and an admin who saw something else — a short
+  // payment, or one the automatic path held as implausible — types it here.
+  const [received, setReceived] = useState("");
+  const receivedAmount = received === "" ? 0 : Number(received);
   const [topUpQuery, setTopUpQuery] = useState("");
   const [topUpPage, setTopUpPage] = useState(1);
   const [fbQuery, setFbQuery] = useState("");
@@ -553,6 +568,22 @@ export function AdminOperations({
                       )}
                       {row.method === "CARD" ? (row.carrier ?? "Thẻ cào") : "Ngân hàng"}
                     </span>
+                    {/* The card itself, right where it is redeemed from: the
+                        desk reads these two numbers into the carrier's page,
+                        and having to open a second screen for them is how a
+                        digit gets mistyped. */}
+                    {row.cardSerial && row.cardPin ? (
+                      <span className="mt-1 flex flex-col font-mono text-[11px] leading-tight text-neutral-300">
+                        <span>
+                          <span className="text-neutral-600">Seri </span>
+                          {row.cardSerial}
+                        </span>
+                        <span>
+                          <span className="text-neutral-600">Mã </span>
+                          {row.cardPin}
+                        </span>
+                      </span>
+                    ) : null}
                   </td>
                   <td
                     className={`px-5 py-3 text-xs font-black tabular-nums whitespace-nowrap ${
@@ -587,7 +618,10 @@ export function AdminOperations({
                         <button
                           type="button"
                           disabled={pending}
-                          onClick={() => setConfirming(row)}
+                          onClick={() => {
+                            setConfirming(row);
+                            setReceived(String(row.amount));
+                          }}
                           className="h-8 px-3 rounded-lg border border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 disabled:opacity-50 text-[10px] font-black uppercase tracking-widest text-emerald-400 transition-colors whitespace-nowrap"
                         >
                           Xác nhận
@@ -627,17 +661,47 @@ export function AdminOperations({
         title="Xác nhận đã nhận được tiền?"
         body={
           confirming
-            ? `Ví của ${confirming.username} sẽ được cộng ${formatVnd(confirming.amount)}đ ngay lập tức và ghi một dòng vào lịch sử giao dịch. Chỉ bấm khi bạn đã nhìn thấy tiền về tài khoản với nội dung NAP ${confirming.code}.`
+            ? `Ví của ${confirming.username} sẽ được cộng ${formatVnd(receivedAmount)}đ ngay lập tức và ghi một dòng vào lịch sử giao dịch. Chỉ bấm khi bạn đã nhìn thấy tiền về tài khoản với nội dung NAP ${confirming.code}.`
             : ""
         }
         confirmLabel="Cộng tiền vào ví"
         onCancel={() => setConfirming(null)}
         onConfirm={async () => {
           if (!confirming) return;
-          await call("/api/admin/topups", { code: confirming.code, action: "confirm" });
+          if (receivedAmount <= 0) {
+            setError("Số tiền thực nhận không hợp lệ");
+            return;
+          }
+          await call("/api/admin/topups", {
+            code: confirming.code,
+            action: "confirm",
+            // Sent only when it differs, so the plain click stays the plain click.
+            ...(receivedAmount !== confirming.amount ? { amount: receivedAmount } : {}),
+          });
           setConfirming(null);
         }}
-      />
+      >
+        {confirming ? (
+          <div>
+            <label htmlFor="topup-received" className={LABEL}>
+              Số tiền thực nhận (đ)
+            </label>
+            <input
+              id="topup-received"
+              inputMode="numeric"
+              autoComplete="off"
+              value={received}
+              onChange={(event) => setReceived(event.target.value.replace(/\D/g, ""))}
+              className={`${FIELD} font-black tabular-nums`}
+            />
+            <p className={HINT}>
+              {receivedAmount === confirming.amount
+                ? "Đúng số lệnh ghi. Sửa nếu sao kê báo số khác."
+                : `Khác lệnh ghi ${formatVnd(confirming.amount)}đ — ví cộng đúng số này, lệnh được ghi lại theo số này.`}
+            </p>
+          </div>
+        ) : null}
+      </ConfirmDialog>
 
       <ConfirmDialog
         open={removing !== null}

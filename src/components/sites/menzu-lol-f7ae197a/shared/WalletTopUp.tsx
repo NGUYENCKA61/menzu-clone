@@ -2,19 +2,25 @@
 
 import {
   Ban,
-  Banknote,
   Check,
   Clock,
-  CreditCard,
+  Copy,
   Hourglass,
-  X,
-  type LucideIcon,
+  ClipboardPaste,
+  Loader2,
+  Ticket,
+  XCircle,
+  CreditCard,
 } from "lucide-react";
+import Image from "next/image";
+
+import { cardNet, cardRateFor, type CardRate } from "@/lib/topup";
 import { useRouter } from "next/navigation";
 
 import { useCallback, useEffect, useState } from "react";
 
 import { Pager } from "./Pager";
+import { ErrorModal } from "./ErrorModal";
 import { TopUpCountdown, useTimeLeft } from "./TopUpCountdown";
 import { TopUpSuccessDialog } from "./TopUpSuccessDialog";
 
@@ -24,15 +30,19 @@ type Method = "bank" | "card";
  * Carriers whose prepaid cards the shop accepts.
  *
  * Rendered as tinted text rather than brand logos: the marks are the
- * carriers' trademarks, and a name identifies the card just as well for
- * someone holding one. Drop the SVGs in later if the shop has the rights.
+ * carriers' own marks, the way every top-up desk in the country draws
+ * them: a customer holding a card matches the logo before the word.
  */
 const CARRIERS = [
-  { value: "Viettel", label: "Viettel", tint: "#EE0033" },
-  { value: "Vinaphone", label: "Vinaphone", tint: "#0066B3" },
-  { value: "Mobifone", label: "Mobifone", tint: "#0F4C99" },
-  { value: "Garena", label: "Garena", tint: "#F04E23" },
-  { value: "Zing", label: "Zing", tint: "#00A3E0" },
+  // Measured off the files: the letters, not the drawing. Vinaphone pads its
+  // canvas, Zing wraps its word in a badge and Garena stands a dragon next to
+  // one, so a shared image height renders five different type sizes. These
+  // heights put every wordmark at about 15px.
+  { value: "Viettel", label: "Viettel", logo: "/images/carriers/viettel.svg", height: 16 },
+  { value: "Vinaphone", label: "Vinaphone", logo: "/images/carriers/vinaphone.svg", height: 24 },
+  { value: "Mobifone", label: "Mobifone", logo: "/images/carriers/mobifone.svg", height: 15 },
+  { value: "Garena", label: "Garena", logo: "/images/carriers/garena.svg", height: 26 },
+  { value: "Zing", label: "Zing", logo: "/images/carriers/zing.svg", height: 25 },
 ] as const;
 
 export interface TopUpHistoryRow {
@@ -64,12 +74,83 @@ const PRESET_ACTIVE =
 const PRESET_INACTIVE =
   "px-4 py-2 rounded-lg text-[11px] font-bold border border-neutral-800/60 bg-neutral-950/40 text-neutral-400 hover:text-white hover:border-neutral-700 transition-colors whitespace-nowrap";
 
+/** The card-number boxes: the admin field, sized for digits. */
+const CARD_FIELD =
+  "w-full rounded-xl border border-white/10 bg-neutral-950/60 px-3.5 py-2.5 font-mono text-sm tracking-wider text-white outline-none transition-colors focus:border-[var(--menzu-accent)]/60 placeholder:font-sans placeholder:tracking-normal placeholder:text-neutral-600";
+const CARD_LABEL = "text-[10px] font-black uppercase tracking-widest text-neutral-400";
+
+/**
+ * One of the two numbers off a scratch card.
+ *
+ * Digits only as they are typed, and a paste button inside the field: on a
+ * phone these numbers usually arrive from a message, and asking someone to
+ * long-press a 15-digit field is asking for a mistyped card.
+ */
+function CardNumberField({
+  id,
+  label,
+  placeholder,
+  value,
+  onChange,
+}: {
+  id: string;
+  label: string;
+  placeholder: string;
+  value: string;
+  onChange: (next: string) => void;
+}) {
+  const take = (raw: string) => onChange(raw.replace(/\D/g, "").slice(0, 24));
+  return (
+    <div className="flex flex-col gap-1.5">
+      <label htmlFor={id} className={CARD_LABEL}>
+        {label}
+      </label>
+      <div className="relative">
+        <input
+          id={id}
+          inputMode="numeric"
+          autoComplete="off"
+          placeholder={placeholder}
+          value={value}
+          onChange={(event) => take(event.target.value)}
+          className={`${CARD_FIELD} pr-11`}
+        />
+        <button
+          type="button"
+          aria-label={`Dán ${label}`}
+          onClick={async () => {
+            try {
+              take(await navigator.clipboard.readText());
+            } catch {
+              // Blocked or empty clipboard: the field is still typeable, and
+              // an error here would be noise about something optional.
+            }
+          }}
+          className="absolute right-2 top-1/2 -translate-y-1/2 rounded-lg p-1.5 text-neutral-500 transition-colors hover:text-white"
+        >
+          <ClipboardPaste size={15} />
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export interface WalletTopUpProps {
   history?: TopUpHistoryRow[];
   /** Smallest accepted amount, from the shop settings. */
   minAmount: number;
   /** The amount buttons, already sorted low to high by the server. */
   presets: number[];
+  /**
+   * The thẻ cào tab's own amounts — the denominations the carriers actually
+   * print. A card for 2.000.000đ does not exist, so the bank list must not be
+   * what the card tab offers.
+   */
+  cardPresets: number[];
+  /** Overrides per denomination; empty means every card uses the one rate. */
+  cardRates: CardRate[];
+  /** The rate every denomination uses unless the list overrides it. */
+  cardFee: number;
   bankEnabled: boolean;
   cardEnabled: boolean;
   /** Every account the shop can be paid into; empty means none configured. */
@@ -107,12 +188,17 @@ interface Credited {
   balance: number;
 }
 
-/** One transfer detail with a copy button — every value here gets retyped. */
+/**
+ * One transfer detail. The two values a buyer actually retypes into their
+ * banking app — the account number and the transfer note — carry a copy
+ * button; the rest are there to be read and checked, not moved.
+ */
 function CopyRow({
   label,
   value,
   display,
   highlight = false,
+  copyable = true,
   onCopy,
   copied,
 }: {
@@ -120,6 +206,7 @@ function CopyRow({
   value: string;
   display?: string;
   highlight?: boolean;
+  copyable?: boolean;
   onCopy: (label: string, value: string) => void;
   copied: string | null;
 }) {
@@ -136,63 +223,101 @@ function CopyRow({
         >
           {display ?? value}
         </span>
-        <button
-          type="button"
-          onClick={() => onCopy(label, value)}
-          className="shrink-0 rounded-md border border-white/10 bg-white/5 hover:bg-white/10 px-2 py-1 text-[10px] font-black uppercase tracking-widest text-neutral-300 transition-colors"
-        >
-          {copied === label ? "Đã chép" : "Chép"}
-        </button>
+        {/* Every row reserves the button's slot, filled or empty, so the
+            values end on one line instead of a ragged edge. */}
+        <span className="flex w-8 shrink-0 justify-end">
+          {copyable ? (
+            <button
+              type="button"
+              onClick={() => onCopy(label, value)}
+              aria-label={copied === label ? `Đã copy ${label}` : `Copy ${label}`}
+              title={copied === label ? "Đã copy" : "Copy"}
+              className={`grid h-7 w-7 place-items-center rounded-md border transition-colors ${
+                copied === label
+                  ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
+                  : "border-white/10 bg-white/5 text-neutral-300 hover:bg-white/10 hover:text-white"
+              }`}
+            >
+              {copied === label ? <Check size={13} strokeWidth={3} /> : <Copy size={13} />}
+            </button>
+          ) : null}
+        </span>
       </div>
     </div>
   );
 }
 
+/* A state is one coloured word beside the code, and only when it needs
+   saying: a credited row is told by its signed green figure. No seal, no
+   framed pill — a statement, not a row of badges. */
+/* The seal on the row's left carries the state's colour; the word beside the
+   code stays quiet except where the state is live or wrong. */
 const HISTORY_STATUS: Record<
   string,
-  { text: string; className: string; icon: LucideIcon; box: string }
+  { text: string; box: string; sum: string; code: string; card: string }
 > = {
   PENDING: {
     text: "Đang chờ",
-    className: "border-amber-500/30 bg-amber-500/10 text-amber-400",
-    icon: Clock,
     box: "border-amber-500/25 bg-amber-500/10 text-amber-400",
+    sum: "text-amber-400",
+    code: "text-white",
+    // The edge, and only the edge: the row you can still act on is outlined,
+    // the ground under it stays the same as every other row.
+    card: "border-amber-500/40 bg-white/[0.02]",
   },
   COMPLETED: {
     text: "Đã cộng",
-    className: "border-emerald-500/30 bg-emerald-500/10 text-emerald-400",
-    icon: Check,
-    box: "border-emerald-500/25 bg-emerald-500/10 text-emerald-400",
+    box: "border-white/10 bg-white/[0.06] text-neutral-300",
+    sum: "text-white",
+    code: "text-white",
+    card: "border-white/[0.06] bg-white/[0.02]",
   },
   FAILED: {
     text: "Từ chối",
-    className: "border-red-500/30 bg-red-500/10 text-red-400",
-    icon: X,
-    box: "border-red-500/25 bg-red-500/10 text-red-400",
+    // Quieted to match the other dead rows: still red, because a refusal
+    // is not the same as a request the customer dropped, but no longer
+    // the brightest thing on a page of finished requests.
+    box: "border-red-500/15 bg-red-500/[0.06] text-red-400/60",
+    sum: "text-neutral-600 line-through",
+    code: "text-neutral-500",
+    card: "border-white/[0.06] bg-white/[0.02]",
   },
-  // Still honoured if the transfer shows up later, so it does not read as a
-  // refusal.
+  // Time ran out, and the request is still honoured if the transfer shows up
+  // later — so the seal warns in red without the strike a refusal wears.
   EXPIRED: {
     text: "Quá hạn",
-    className: "border-white/10 bg-white/5 text-neutral-500",
-    icon: Hourglass,
-    box: "border-white/10 bg-white/5 text-neutral-500",
+    box: "border-red-500/25 bg-red-500/10 text-red-400",
+    sum: "text-neutral-600",
+    code: "text-neutral-500",
+    card: "border-white/[0.06] bg-white/[0.02]",
   },
   CANCELLED: {
     text: "Đã hủy",
-    className: "border-white/10 bg-white/5 text-neutral-500",
-    icon: Ban,
     box: "border-white/10 bg-white/5 text-neutral-500",
+    sum: "text-neutral-600",
+    code: "text-neutral-500",
+    card: "border-white/[0.06] bg-white/[0.02]",
   },
 };
 
-/** Rows per page of history. */
+/** Rows per page of history, once the whole list is open. */
 const PAGE_SIZE = 10;
 
 /**
- * One method's ledger, paged. A pending row is a live thing: clicking it
- * reopens its invoice above, where the cancel link lives. Rows wear the
- * inner-tile chrome of the overview page's cards.
+ * How many finished requests the page shows before it stops.
+ *
+ * The list used to run to fifty, and on a busy account that is a screen and a
+ * half of cancelled requests under the one thing the page is for. Anything
+ * still waiting is always shown — that is the live part — and the rest is
+ * five rows and a way in to the whole list.
+ */
+const RECENT_COUNT = 5;
+
+/**
+ * One method's ledger, paged, drawn as a statement: one block, hairlines
+ * between rows, the figure at the right edge. A pending row is a live thing —
+ * marked by a red bar on its left, and clicking it reopens its invoice above,
+ * where the cancel link lives.
  */
 function HistoryList({
   rows,
@@ -204,11 +329,20 @@ function HistoryList({
   onOpen: (row: TopUpHistoryRow) => void;
 }) {
   const [page, setPage] = useState(0);
+  const [showAll, setShowAll] = useState(false);
   const pageCount = Math.max(1, Math.ceil(rows.length / PAGE_SIZE));
   // Clamped rather than reset by effect: cancelling the last row of the last
   // page shrinks pageCount and the view just follows.
   const current = Math.min(page, pageCount - 1);
-  const visible = rows.slice(current * PAGE_SIZE, current * PAGE_SIZE + PAGE_SIZE);
+  // Short by default: everything still waiting, then the five newest of the
+  // rest. Nothing is dropped — "Xem tất cả" opens the paged list in place.
+  const waiting = rows.filter((row) => row.status === "PENDING");
+  const settled = rows.filter((row) => row.status !== "PENDING");
+  const short = [...waiting, ...settled.slice(0, RECENT_COUNT)];
+  const hidden = rows.length - short.length;
+  const visible = showAll
+    ? rows.slice(current * PAGE_SIZE, current * PAGE_SIZE + PAGE_SIZE)
+    : short;
 
   if (rows.length === 0) {
     return (
@@ -219,81 +353,101 @@ function HistoryList({
   }
 
   return (
-    <div className="flex flex-col gap-2">
-      {visible.map((row) => {
-        const isPending = row.status === "PENDING";
-        const status = HISTORY_STATUS[row.status] ?? HISTORY_STATUS.PENDING!;
-        const StatusIcon = status.icon;
-        return (
-          <div
-            key={row.code}
-            onClick={isPending ? () => onOpen(row) : undefined}
-            className={`flex items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3 ${
-              isPending
-                ? "cursor-pointer transition-colors hover:border-red-500/40 hover:bg-white/[0.05]"
-                : ""
-            }`}
-          >
-            {/* The state as a coloured seal, readable before any word is. */}
-            <span
-              className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border ${status.box}`}
-            >
-              <StatusIcon size={15} />
-            </span>
-
-            <div className="flex min-w-0 flex-1 flex-col gap-1">
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="font-mono text-xs font-bold text-white">
-                  {row.code}
-                </span>
-                <span
-                  className={`text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md border ${status.className}`}
-                >
-                  {status.text}
-                </span>
-              </div>
-              {/* Carrier only on card rows — the section heading already
-                  names the method. The countdown rides here because after a
-                  reload this line is the only place it can live. */}
-              <span className="truncate text-[11px] text-neutral-500">
-                {row.method === "CARD" ? `${row.carrier ?? "Thẻ cào"} · ` : ""}
-                {row.createdAt}
-                {isPending && row.expiresAt ? (
-                  <>
-                    {" "}
-                    · còn <TopUpCountdown deadline={row.expiresAt} />
-                  </>
-                ) : null}
-              </span>
-            </div>
-
-            {/* Money talks in colour: green and signed once credited, struck
-                through once the request can no longer credit, plain while
-                everything is still open. */}
-            <span
-              className={`shrink-0 text-sm font-black ${
-                row.status === "COMPLETED"
-                  ? "text-emerald-400"
-                  : row.status === "FAILED" || row.status === "CANCELLED"
-                    ? "text-neutral-600 line-through"
-                    : "text-neutral-200"
+    <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-2">
+        {visible.map((row) => {
+          const isPending = row.status === "PENDING";
+          const status = HISTORY_STATUS[row.status] ?? HISTORY_STATUS.PENDING!;
+          return (
+            <div
+              key={row.code}
+              onClick={isPending ? () => onOpen(row) : undefined}
+              /* Each request its own card, as the overview page's tiles are.
+                 One of them owns an edge: the amber one, still waiting for
+                 money, and the only card that answers a press because it is
+                 the only one with an invoice left to open. */
+              className={`flex items-center gap-4 rounded-xl border px-4 py-3 ${status.card} ${
+                isPending
+                  ? "cursor-pointer transition-colors hover:border-amber-500/60 hover:bg-white/[0.04]"
+                  : ""
               }`}
             >
-              {row.status === "COMPLETED" ? "+" : ""}
-              {formatVnd(row.amount)}đ
-            </span>
-          </div>
-        );
-      })}
+              {/* The state as a coloured seal, readable before any word is;
+                  the pending one turns. */}
+              <span
+                title={status.text}
+                className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border ${status.box}`}
+              >
+                <span className="sr-only">{status.text}</span>
+                {isPending ? (
+                  <Loader2 size={15} className="animate-spin motion-reduce:animate-none" aria-hidden />
+                ) : row.status === "COMPLETED" ? (
+                  row.method === "CARD" ? (
+                    <Ticket size={15} aria-hidden />
+                  ) : (
+                    <CreditCard size={15} aria-hidden />
+                  )
+                ) : row.status === "FAILED" ? (
+                  <XCircle size={15} aria-hidden />
+                ) : row.status === "EXPIRED" ? (
+                  <Hourglass size={15} aria-hidden />
+                ) : (
+                  <Ban size={15} aria-hidden />
+                )}
+              </span>
 
-      <Pager
-        page={current}
-        pageCount={pageCount}
-        onSelect={setPage}
-        total={rows.length}
-        pageSize={PAGE_SIZE}
-        unit="lệnh"
-      />
+              <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+                <div className="flex flex-wrap items-baseline gap-x-2">
+                  <span className={`font-mono text-xs font-bold ${status.code}`}>{row.code}</span>
+                  {isPending && row.expiresAt ? (
+                    <span className="text-[11px] font-semibold text-amber-400">
+                      còn <TopUpCountdown deadline={row.expiresAt} />
+                    </span>
+                  ) : null}
+                </div>
+                {/* Carrier only on card rows — the section heading already
+                    names the method. */}
+                <span
+                  className={`truncate text-[11px] ${
+                    status.code === "text-white" ? "text-neutral-500" : "text-neutral-600"
+                  }`}
+                >
+                  {row.method === "CARD" ? `${row.carrier ?? "Thẻ cào"} · ` : ""}
+                  {row.createdAt}
+                </span>
+              </div>
+
+              {/* Money talks in colour: green and signed once credited, struck
+                  through once the request can no longer credit, plain while
+                  everything is still open. The green is the ledger's green, so
+                  the same money reads the same on both pages. */}
+              <span className={`shrink-0 text-sm font-black tabular-nums ${status.sum}`}>
+                {row.status === "COMPLETED" ? "+" : ""}
+                {formatVnd(row.amount)}đ
+              </span>
+            </div>
+          );
+        })}
+      </div>
+
+      {showAll ? (
+        <Pager
+          page={current}
+          pageCount={pageCount}
+          onSelect={setPage}
+          total={rows.length}
+          pageSize={PAGE_SIZE}
+          unit="lệnh"
+        />
+      ) : hidden > 0 ? (
+        <button
+          type="button"
+          onClick={() => setShowAll(true)}
+          className="self-start text-[11px] font-black uppercase tracking-widest text-neutral-400 transition-colors hover:text-white"
+        >
+          Xem tất cả {rows.length} lệnh
+        </button>
+      ) : null}
     </div>
   );
 }
@@ -302,6 +456,9 @@ export function WalletTopUp({
   history = [],
   minAmount,
   presets,
+  cardPresets,
+  cardRates,
+  cardFee,
   bankEnabled,
   cardEnabled,
   banks,
@@ -318,11 +475,27 @@ export function WalletTopUp({
   // open on a form the server is going to refuse.
   const [method, setMethod] = useState<Method>(bankEnabled ? "bank" : "card");
   const [carrier, setCarrier] = useState<string>("");
+  // Digits only as they are typed: people read the numbers off the card in
+  // groups and paste them with spaces, and that must not become an error.
+  const [serial, setSerial] = useState("");
+  const [pin, setPin] = useState("");
   const router = useRouter();
   // Which code "Hủy" is working on — one flag serves the invoice card's link
   // and every history-row chip without them sharing a spinner.
   const [cancelingCode, setCancelingCode] = useState<string | null>(null);
+  // The code just withdrawn, shown on a sheet until it is dismissed: the
+  // card above simply disappears otherwise, which reads as a glitch.
+  const [cancelled, setCancelled] = useState<string | null>(null);
   const [amount, setAmount] = useState("");
+  // Every box the card form needs before it can be sent. The carrier and the
+  // denomination are picked, the two numbers are typed; anything shorter than
+  // six digits is half a card.
+  const cardReady =
+    Boolean(carrier) && amount !== "" && serial.length >= 6 && pin.length >= 6;
+  // The two figures the card tab talks in: what the shop keeps, and what the
+  // wallet gets. Both read from the same helper the server credits with.
+  const cardPercent = amount ? cardRateFor(Number(amount), cardRates, cardFee) : 0;
+  const cardCredit = amount ? cardNet(Number(amount), cardRates, cardFee) : 0;
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState<Invoice | null>(null);
@@ -422,9 +595,9 @@ export function WalletTopUp({
         body: JSON.stringify({
           amount: Number(amount.replace(/\D/g, "")),
           method: method === "card" ? "CARD" : "BANK",
-          // Only meaningful for a card top-up; the endpoint ignores it for
-          // bank transfers rather than storing a carrier that means nothing.
-          ...(method === "card" ? { carrier } : {}),
+          // Only meaningful for a card top-up; the endpoint ignores them for
+          // bank transfers rather than storing fields that mean nothing.
+          ...(method === "card" ? { carrier, serial, pin } : {}),
         }),
       });
       const data = (await response.json().catch(() => ({}))) as {
@@ -450,6 +623,8 @@ export function WalletTopUp({
         method,
         expiresAt: data.expiresAt ?? null,
       });
+      setSerial("");
+      setPin("");
     } catch {
       setError("Không kết nối được máy chủ");
     } finally {
@@ -480,6 +655,7 @@ export function WalletTopUp({
         return;
       }
       if (done?.code === code) setDone(null);
+      setCancelled(code);
       // The history below is server-rendered; refresh so the row shows Đã hủy.
       router.refresh();
     } catch {
@@ -524,7 +700,7 @@ export function WalletTopUp({
             onClick={() => setMethod("bank")}
             className={method === "bank" ? TAB_ACTIVE : TAB_INACTIVE}
           >
-            <Banknote size={15} />
+            <CreditCard size={15} />
             Ngân Hàng
           </button>
         ) : null}
@@ -534,7 +710,7 @@ export function WalletTopUp({
             onClick={() => setMethod("card")}
             className={method === "card" ? TAB_ACTIVE : TAB_INACTIVE}
           >
-            <CreditCard size={15} />
+            <Ticket size={15} />
             Thẻ Cào
           </button>
         ) : null}
@@ -565,15 +741,24 @@ export function WalletTopUp({
                 Đã nhận được tiền · đang cập nhật ví
               </span>
             ) : (
-              <span className="text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-md border border-red-500/30 bg-red-500/10 text-red-400">
+              <span className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-md border border-red-500/30 bg-red-500/10 text-red-400">
+                {/* Turning while the request is alive: the page is watching
+                    the bank, and this is what says so before any word. */}
+                <Loader2 size={12} className="animate-spin motion-reduce:animate-none" aria-hidden />
                 {autoEnabled ? "Đang chờ tiền về" : "Đang chờ xác nhận"}
               </span>
             )}
             {/* Placed next to the status, because it qualifies it: the request
                 is waiting, and this is how much longer it waits for. */}
             {!credited && done.expiresAt ? (
-              <span className="text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-md border border-white/10 bg-white/5 text-neutral-400">
-                Còn <TopUpCountdown deadline={done.expiresAt} />
+              <span
+                className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-md border border-white/10 bg-white/5 text-neutral-400"
+                aria-label="Thời gian còn lại"
+              >
+                <Clock size={12} aria-hidden />
+                <span className="text-white">
+                  <TopUpCountdown deadline={done.expiresAt} />
+                </span>
               </span>
             ) : null}
           </div>
@@ -601,13 +786,14 @@ export function WalletTopUp({
               />
 
               <div className="flex-1 min-w-0 flex flex-col gap-2.5">
-                <CopyRow label="Ngân hàng" value={bank.name || bank.code} onCopy={copy} copied={copied} />
+                <CopyRow label="Ngân hàng" value={bank.name || bank.code} copyable={false} onCopy={copy} copied={copied} />
                 <CopyRow label="Số tài khoản" value={bank.account} onCopy={copy} copied={copied} />
-                <CopyRow label="Chủ tài khoản" value={bank.holder} onCopy={copy} copied={copied} />
+                <CopyRow label="Chủ tài khoản" value={bank.holder} copyable={false} onCopy={copy} copied={copied} />
                 <CopyRow
                   label="Số tiền"
                   value={String(done.amount)}
                   display={`${formatVnd(done.amount)}đ`}
+                  copyable={false}
                   onCopy={copy}
                   copied={copied}
                 />
@@ -629,9 +815,10 @@ export function WalletTopUp({
             </div>
           ) : (
             <p className="text-[13px] text-neutral-300 leading-relaxed">
-              Gửi ảnh thẻ cào ({done.amount.toLocaleString("vi-VN")}đ) kèm mã{" "}
-              <span className="font-mono font-bold text-white">{done.code}</span> cho shop
-              qua Zalo để được đối soát. Tiền vào ví ngay khi shop xác nhận.
+              Đã nhận thẻ {done.amount.toLocaleString("vi-VN")}đ, mã lệnh{" "}
+              <span className="font-mono font-bold text-white">{done.code}</span>. Shop
+              đang đối soát với nhà mạng — tiền vào ví ngay khi thẻ hợp lệ. Bạn
+              không cần gửi gì thêm, cứ đóng trang này.
             </p>
           )}
 
@@ -651,7 +838,19 @@ export function WalletTopUp({
         </div>
       ) : null}
 
-      {!bankEnabled && !cardEnabled ? (
+      {/* Told after, not asked before: the owner found the question a nag.
+          The sheet is what stops the card's disappearance reading as a
+          glitch. */}
+      {cancelled ? (
+        <ErrorModal
+          tone="done"
+          title="Đã hủy hóa đơn"
+          message={`Lệnh ${cancelled} đã được hủy. Bạn có thể tạo hóa đơn mới bất cứ lúc nào.`}
+          onClose={() => setCancelled(null)}
+        />
+      ) : null}
+
+      {done ? null : !bankEnabled && !cardEnabled ? (
         <div className="rounded-2xl border border-white/10 bg-neutral-900/50 px-5 py-10 text-center">
           <p className="text-sm font-bold text-white">Tạm ngưng nhận nạp tiền</p>
           <p className="mt-1.5 text-[13px] text-neutral-400">
@@ -720,14 +919,14 @@ export function WalletTopUp({
           </div>
 
           <div className="flex flex-wrap gap-2">
-            {presets.map((p) => (
+            {presets.map((preset) => (
               <button
-                key={p}
+                key={preset}
                 type="button"
-                onClick={() => setAmount(String(p))}
-                className={amount === String(p) ? PRESET_ACTIVE : PRESET_INACTIVE}
+                onClick={() => setAmount(String(preset))}
+                className={amount === String(preset) ? PRESET_ACTIVE : PRESET_INACTIVE}
               >
-                {formatVnd(p)}
+                {formatVnd(preset)}
               </button>
             ))}
           </div>
@@ -738,12 +937,6 @@ export function WalletTopUp({
               className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-2.5 text-[12px] font-semibold text-red-400"
             >
               {error}
-            </p>
-          ) : null}
-
-          {done ? (
-            <p className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-2.5 text-[12px] font-semibold text-emerald-400">
-              Đã tạo lệnh nạp {done.code}. Xem hướng dẫn chuyển khoản bên dưới.
             </p>
           ) : null}
 
@@ -771,39 +964,114 @@ export function WalletTopUp({
                   type="button"
                   onClick={() => setCarrier(option.value)}
                   aria-pressed={carrier === option.value}
-                  className={`h-14 rounded-xl border text-[11px] font-black uppercase tracking-wider transition-colors ${
+                  aria-label={option.label}
+                  className={`relative flex h-12 items-center justify-center rounded-xl border px-4 transition-colors ${
                     carrier === option.value
-                      ? "border-[var(--menzu-accent)] bg-[var(--menzu-accent)]/10 text-white"
-                      : "border-neutral-800 bg-neutral-950/60 text-neutral-400 hover:border-neutral-600 hover:text-white"
+                      ? "border-[var(--menzu-accent)] bg-[var(--menzu-accent)]/10"
+                      : "border-neutral-800 bg-neutral-950/60 hover:border-neutral-600"
                   }`}
-                  style={carrier === option.value ? undefined : { color: option.tint }}
                 >
-                  {option.label}
+                  {/* The mark, not the word, at the height measured for it
+                      rather than one height for all five. */}
+                  <Image
+                    src={option.logo}
+                    alt={option.label}
+                    width={160}
+                    height={40}
+                    style={{ height: option.height }}
+                    className="w-auto max-w-[86%] object-contain"
+                  />
+                  {carrier === option.value ? (
+                    <span
+                      aria-hidden
+                      className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-[var(--menzu-accent)]"
+                    />
+                  ) : null}
                 </button>
               ))}
             </div>
           </fieldset>
 
-          <div className="flex flex-col gap-2">
-            <h3 className="text-[10px] font-black uppercase tracking-widest text-neutral-300">
-              Số tiền nạp
-            </h3>
-            <div className="flex flex-wrap gap-2">
-              {presets.map((preset) => (
-                <button
-                  key={preset}
-                  type="button"
-                  onClick={() => setAmount(String(preset))}
-                  className={amount === String(preset) ? PRESET_ACTIVE : PRESET_INACTIVE}
-                >
-                  {formatVnd(preset)}
-                </button>
-              ))}
+          {carrier ? (
+            <div className="flex flex-col gap-3">
+              <div className="flex flex-wrap items-center gap-2">
+                <h3 className="text-[10px] font-black uppercase tracking-widest text-neutral-500">
+                  2. Chọn mệnh giá
+                </h3>
+                <span className="rounded-md border border-red-500/30 bg-red-500/10 px-2 py-0.5 text-[10px] font-bold text-red-400">
+                  Lưu ý: Chọn sai mệnh giá sẽ mất thẻ
+                </span>
+              </div>
+              {/* One tile per denomination rather than a row of chips: the
+                  figure is the thing being chosen, and it should be big
+                  enough to check against the card in the customer's hand. */}
+              <div className="flex flex-wrap gap-2">
+                {cardPresets.map((preset) => (
+                  <button
+                    key={preset}
+                    type="button"
+                    onClick={() => setAmount(String(preset))}
+                    className={amount === String(preset) ? PRESET_ACTIVE : PRESET_INACTIVE}
+                  >
+                    {formatVnd(preset)}
+                  </button>
+                ))}
+              </div>
+              {/* What the wallet will actually get, said before the card is
+                  sent rather than discovered in the ledger afterwards. Only
+                  when the shop keeps something — a shop that credits cards
+                  whole has nothing to explain. */}
+              {/* One quiet green line: the wallet's own colour on the one
+                  figure the customer is promised, and the reason for it in
+                  the same breath. Still a single line tall. */}
+              {amount && cardPercent > 0 ? (
+                <div className="flex items-center justify-between gap-4 rounded-xl border border-emerald-500/30 bg-emerald-500/[0.06] px-4 py-3">
+                  <div className="flex flex-col gap-0.5">
+                    <span className="text-[11px] font-black uppercase tracking-widest text-emerald-400">
+                      Thực nhận về ví
+                    </span>
+                    <span className="text-[11px] text-neutral-400">
+                      Đã trừ chiết khấu {String(cardPercent).replace(".", ",")}%
+                    </span>
+                  </div>
+                  <span className="shrink-0 text-lg font-black tabular-nums text-emerald-400">
+                    {formatVnd(cardCredit)}đ
+                  </span>
+                </div>
+              ) : null}
             </div>
-            <span className="text-[11px] text-neutral-500">
-              Chọn đúng mệnh giá in trên thẻ. Sai mệnh giá thẻ sẽ mất.
-            </span>
-          </div>
+          ) : null}
+
+          {/* The card itself. Typed here rather than sent to the shop over
+              chat: the request then carries everything the desk needs, and
+              the customer is not left holding two numbers and no instructions. */}
+          {carrier && amount ? (
+            <div className="flex flex-col gap-2">
+              <h3 className="text-[10px] font-black uppercase tracking-widest text-neutral-500">
+                3. Thông tin mã thẻ
+              </h3>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <CardNumberField
+                  id="card-pin"
+                  label="Mã thẻ (PIN)"
+                  placeholder="Nhập mã thẻ..."
+                  value={pin}
+                  onChange={setPin}
+                />
+                <CardNumberField
+                  id="card-serial"
+                  label="Số serial"
+                  placeholder="Nhập số serial..."
+                  value={serial}
+                  onChange={setSerial}
+                />
+              </div>
+              <span className="text-[11px] text-neutral-500">
+                Cào lớp bạc rồi nhập đúng hai dãy số trên thẻ. Thẻ đã dùng hoặc
+                nhập sai sẽ bị từ chối.
+              </span>
+            </div>
+          ) : null}
 
           {error ? (
             <p
@@ -814,18 +1082,16 @@ export function WalletTopUp({
             </p>
           ) : null}
 
-          {done ? (
-            <p className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-2.5 text-[12px] font-semibold text-emerald-400">
-              Đã tạo lệnh nạp {done.code}. Xem hướng dẫn chuyển khoản bên dưới.
-            </p>
-          ) : null}
-
           <button
             type="submit"
-            disabled={pending || !carrier}
+            disabled={pending || !cardReady}
             className="w-full rounded-2xl bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] disabled:opacity-50 disabled:cursor-not-allowed text-white font-black py-3.5 uppercase tracking-widest text-xs transition-colors"
           >
-            {pending ? "Đang xử lý…" : "Tạo hóa đơn"}
+            {pending
+              ? "Đang xử lý…"
+              : cardReady
+                ? `Nạp ${CARRIERS.find((option) => option.value === carrier)?.label ?? "thẻ"} ${formatVnd(Number(amount))}đ`
+                : "Nạp thẻ cào"}
           </button>
         </form>
       )}
@@ -837,7 +1103,7 @@ export function WalletTopUp({
       <section className="flex flex-col gap-4 rounded-2xl border border-white/10 bg-neutral-900/50 p-5">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h3 className="text-sm font-black uppercase tracking-wider text-white">
-            {method === "card" ? "Lịch sử nạp thẻ cào" : "Lịch sử nạp ngân hàng"}
+            {method === "card" ? "Thẻ nạp gần đây" : "Lịch sử nạp ngân hàng"}
           </h3>
           <span className="text-xs text-neutral-500">
             Bấm vào lệnh đang chờ để mở lại hóa đơn

@@ -20,6 +20,8 @@ export async function PATCH(request: Request) {
   const body = (await request.json().catch(() => null)) as {
     code?: string;
     action?: string;
+    /** What the statement actually shows, when it is not the request's figure. */
+    amount?: unknown;
   } | null;
 
   const code = body?.code?.trim();
@@ -60,10 +62,20 @@ export async function PATCH(request: Request) {
   }
 
   // --- confirm -------------------------------------------------------------
-  // No expected amount: an admin looking at the bank statement has already
-  // decided this transfer is the one, which is exactly the judgement the
-  // automatic path is not allowed to make.
+  // An admin looking at the bank statement has already decided this transfer
+  // is the one, which is exactly the judgement the automatic path is not
+  // allowed to make. The figure they type is what the wallet gets — short,
+  // over, or outside the band that holds a transfer for them in the first
+  // place; left out, the request's own figure is credited.
+  let received: number | undefined;
+  if (body?.amount !== undefined && body.amount !== null && body.amount !== "") {
+    received = Number(body.amount);
+    if (!Number.isInteger(received) || received <= 0) {
+      return NextResponse.json({ error: "Số tiền thực nhận không hợp lệ" }, { status: 400 });
+    }
+  }
   const result = await creditTopUp(code, {
+    ...(received !== undefined ? { expectAmount: received, byHand: true } : {}),
     note: `Ngân Hàng · duyệt bởi ${admin.username}`,
   });
 
@@ -78,6 +90,7 @@ export async function PATCH(request: Request) {
     code: result.code,
     status: "COMPLETED",
     username: result.username,
+    amount: result.amount,
     balance: result.balance,
   });
 }
