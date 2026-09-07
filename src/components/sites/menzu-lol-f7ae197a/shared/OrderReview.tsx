@@ -13,14 +13,19 @@ import { useEffect, useState } from "react";
  */
 export function OrderReviewTag({ href, reviewed }: { href: string; reviewed: boolean }) {
   // Same pill as the status badge beside it, so the right-hand column reads
-  // as one stack: price, status, review. Green once written; accent, and a
-  // real button on hover, while it is still an invitation.
+  // as one stack: price, status, review. Once written it goes quiet: no
+  // frame, no fill, grey type, and only the star kept gold — the colour the
+  // form paints it in — so the one thing still asking to be pressed in the
+  // list is the red invitation. The pill's padding stays so it lines up
+  // with that invitation on the rows around it. The star is the
+  // form's own language: an outline while it is still to be given, filled
+  // once it has been — two states told apart by shape, not only by colour.
   const pill =
     "inline-flex items-center gap-1 rounded-lg border px-2 py-1 text-[10px] font-black uppercase tracking-wider";
   if (reviewed) {
     return (
-      <span className={`${pill} border-emerald-500/30 bg-emerald-500/10 text-emerald-400`}>
-        <Star size={11} aria-hidden className="fill-current" />
+      <span className={`${pill} border-transparent bg-transparent text-neutral-500`}>
+        <Star size={11} aria-hidden className="fill-current text-amber-400" />
         Đã đánh giá
       </span>
     );
@@ -32,7 +37,7 @@ export function OrderReviewTag({ href, reviewed }: { href: string; reviewed: boo
       onKeyDown={(event) => event.stopPropagation()}
       className={`${pill} border-[var(--menzu-accent)]/40 bg-[var(--menzu-accent)]/10 text-[var(--menzu-accent)] transition-colors hover:bg-[var(--menzu-accent)] hover:text-white`}
     >
-      <Star size={11} aria-hidden className="fill-current" />
+      <Star size={11} aria-hidden />
       Đánh giá
     </Link>
   );
