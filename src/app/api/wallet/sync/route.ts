@@ -110,12 +110,25 @@ async function runSync(request: Request) {
 
   const report = await applyTransfers(transfers, "Ngân Hàng · tự động");
 
+  // The report is the shop's, not the caller's. Its lines name other customers
+  // and the money they moved — "NTxxxx: cộng 5.000.000đ cho <tên>" — and quote
+  // sixty characters of the bank statement they were read from, which is where
+  // the sender's own name usually sits. Every customer waiting on a transfer
+  // polls this route every ten seconds, so handing that back to a signed-in
+  // caller published the shop's incoming cash to anyone who registered.
+  //
+  // A customer needs none of it: the wallet page throws this response away and
+  // watches its own request through /api/wallet/status. The counts stay because
+  // they say nothing about who, and the scheduler running on the shop's key
+  // still gets the full report to log.
   return NextResponse.json({
     polled: true,
-    feeds: feeds.length,
-    received: transfers.length,
     expired,
-    ...report,
+    matched: report.matched,
+    skipped: report.skipped,
+    ...(byKey
+      ? { feeds: feeds.length, received: transfers.length, details: report.details }
+      : {}),
   });
 }
 
