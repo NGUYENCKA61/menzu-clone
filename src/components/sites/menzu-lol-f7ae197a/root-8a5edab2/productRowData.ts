@@ -28,12 +28,4 @@ export interface ProductCard {
    * on categories nobody has tagged yet.
    */
   platform?: string | null;
-  /**
-   * The cheapest thing this category actually sells, in đồng.
-   *
-   * 0 means everything in it is free; undefined or null means nobody has
-   * worked it out — a service tile, or a category with nothing in stock — and
-   * the tile simply says nothing rather than printing a zero.
-   */
-  minPrice?: number | null;
 }
