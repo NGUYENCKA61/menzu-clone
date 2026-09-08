@@ -3,7 +3,6 @@ import Link from "next/link";
 import {
   ArrowRight,
   Boxes,
-  ChevronRight,
   CircleCheck,
   Layers,
   ShoppingBag,
@@ -11,6 +10,7 @@ import {
   Tag,
   type LucideIcon,
 } from "lucide-react";
+import { formatVnd } from "@/components/sites/menzu-lol-f7ae197a/shared/productData";
 import { cn } from "@/lib/utils";
 import type { ProductCard } from "./productRowData";
 import { RowSearch } from "./RowSearch";
@@ -200,6 +200,15 @@ function RowCard({
   top?: boolean;
 }) {
   const stats = card.stats.filter((s) => !HIDDEN_STATS.has(s.label));
+  // "Từ 35.000đ", or "Miễn phí" for a category whose every tier is free.
+  // Nothing at all when the shop has not stocked it — an empty right-hand
+  // side reads better than a zero.
+  const price =
+    card.minPrice === null || card.minPrice === undefined
+      ? null
+      : card.minPrice === 0
+        ? { text: "Miễn phí", from: false }
+        : { text: `${formatVnd(card.minPrice)}đ`, from: true };
 
   return (
     <Link
@@ -207,7 +216,7 @@ function RowCard({
       className={cn(
         // The product cards' surface, radius and lift, so a category
         // tile and an account tile in the next row read as one family.
-        "group flex h-full flex-col bg-[#101114] rounded-[15px] overflow-hidden border transition-all duration-[250ms] p-3 sm:p-4 hover:-translate-y-1 hover:shadow-[0_15px_40px_#00000088]",
+        "group flex h-full flex-col bg-[#101114] rounded-[15px] overflow-hidden border transition-all duration-[250ms] p-3 sm:p-4 hover:-translate-y-[3px] hover:shadow-[0_12px_30px_#0000008c] active:scale-[0.985] motion-reduce:active:scale-100",
         t.card,
       )}
     >
@@ -216,7 +225,7 @@ function RowCard({
           nothing letterboxed. */}
       <div
         className={cn(
-          "relative w-full aspect-[16/9] rounded-[10px] overflow-hidden mb-4 border transition-colors",
+          "relative w-full aspect-[16/9] rounded-[10px] overflow-hidden mb-3 sm:mb-3.5 border transition-colors",
           t.frame,
         )}
       >
@@ -232,7 +241,7 @@ function RowCard({
             fill
             sizes="(min-width: 1024px) 25vw, (min-width: 768px) 33vw, 50vw"
             className={cn(
-              "transition-transform duration-500 group-hover:scale-110",
+              "transition-transform duration-500 group-hover:scale-[1.04]",
               t.image,
             )}
           />
@@ -242,33 +251,48 @@ function RowCard({
             words, a filled Lucide star in front, square-ish corners. No number: the shop
             wanted the label, not a ranking. */}
         {top ? (
-          <span className="absolute left-1.5 top-1.5 z-10 inline-flex items-center gap-1 rounded-md bg-amber-500/90 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-amber-950 sm:left-2.5 sm:top-2.5 sm:px-2 sm:py-1 sm:text-[10px]">
-            <Star size={10} className="shrink-0 fill-current" aria-hidden />
+          <span className="absolute left-2 top-2 z-10 inline-flex items-center gap-1 rounded-md bg-amber-500/90 px-1.5 py-[3px] text-[9px] font-bold uppercase tracking-wide text-amber-950">
+            <Star size={8} className="shrink-0 fill-current" aria-hidden />
             Top tháng
+          </span>
+        ) : null}
+
+        {/* The price rides the picture on a phone, where the action row has
+            no room beside the button — so it costs the tile no height. */}
+        {price ? (
+          <span className="absolute bottom-1.5 left-1.5 z-10 inline-flex items-baseline gap-1 rounded-md border border-white/10 bg-[#06060b]/85 px-1.5 py-[3px] backdrop-blur-[2px] sm:hidden">
+            {price.from ? (
+              <span className="text-[8px] font-bold uppercase tracking-[0.14em] text-[#9b9da5]">
+                Từ
+              </span>
+            ) : null}
+            <span className="text-[10px] font-black leading-none text-white">{price.text}</span>
           </span>
         ) : null}
       </div>
 
-      <h3
-        className={cn(
-          "text-center text-sm sm:text-base font-black uppercase text-white mb-2 transition-colors tracking-wide",
-          t.title,
-        )}
-      >
-        {card.title}
-      </h3>
+      <div className="flex items-start gap-2 sm:gap-2.5">
+        <span
+          aria-hidden
+          className="mt-[4px] h-[13px] w-[3px] shrink-0 rounded-full bg-[var(--menzu-accent)] sm:h-[14px]"
+        />
+        <h3
+          className={cn(
+            "line-clamp-2 min-h-[33px] text-[12.5px] font-extrabold uppercase leading-[1.3] text-white transition-colors sm:min-h-[39px] sm:text-[15px]",
+            t.title,
+          )}
+        >
+          {card.title}
+        </h3>
+      </div>
 
       {/* Clamped at two lines rather than trusted to be short: the text
           is typed into an admin field, and one long entry would
           otherwise stretch its tile taller than the three beside it and
           pull the whole row's buttons out of line. */}
-      {card.description ? (
-        <p className="text-center text-[11px] sm:text-xs leading-[1.55] text-[#9b9da5] mb-4 line-clamp-2">
-          {card.description}
-        </p>
-      ) : (
-        <div className="mb-2" />
-      )}
+      <p className="mb-3 mt-1.5 line-clamp-2 min-h-[33px] text-[10.5px] leading-[1.55] text-[#9b9da5] sm:mb-3.5 sm:min-h-[36px] sm:text-[11.5px]">
+        {card.description}
+      </p>
 
       {/* Dropped entirely when nothing is left, so a card with no stats
           does not carry the block's bottom margin as a stray gap. */}
@@ -316,16 +340,18 @@ function RowCard({
         </div>
       ) : null}
 
-      <div className="w-full mt-auto relative">
+      <div className="mt-auto h-px w-full bg-white/[0.06] transition-colors group-hover:bg-white/10" />
+
+      <div className="mt-2.5 flex items-center justify-between gap-2 sm:mt-3">
         <div
           className={cn(
-            "relative w-full p-[1.5px] transition-all duration-300 [clip-path:polygon(8px_0,100%_0,100%_calc(100%-8px),calc(100%-8px)_100%,0_100%,0_8px)]",
+            "relative w-full p-[1.5px] transition-all duration-300 sm:w-auto [clip-path:polygon(8px_0,100%_0,100%_calc(100%-8px),calc(100%-8px)_100%,0_100%,0_8px)]",
             t.buttonEdge,
           )}
         >
           <div
             className={cn(
-              "relative w-full overflow-hidden transition-colors duration-300 flex items-center justify-center gap-1.5 py-2.5 sm:py-3 [clip-path:polygon(7px_0,100%_0,100%_calc(100%-7px),calc(100%-7px)_100%,0_100%,0_7px)]",
+              "relative flex w-full items-center justify-center gap-1.5 overflow-hidden py-2 transition-colors duration-300 sm:px-4 sm:py-2.5 lg:px-5 [clip-path:polygon(7px_0,100%_0,100%_calc(100%-7px),calc(100%-7px)_100%,0_100%,0_7px)]",
               t.buttonFace,
             )}
           >
@@ -335,15 +361,30 @@ function RowCard({
               aria-hidden
               className="pointer-events-none absolute inset-y-0 -left-full w-1/2 -skew-x-12 bg-gradient-to-r from-transparent via-white/30 to-transparent transition-transform duration-700 ease-out group-hover:translate-x-[300%] motion-reduce:hidden"
             />
-            <span className="relative text-white font-black text-[10px] sm:text-xs uppercase tracking-widest">
+            <span className="relative whitespace-nowrap text-[10px] font-black uppercase tracking-[0.12em] text-white sm:text-[11px]">
               XEM NGAY
             </span>
-            <ChevronRight
+            <ArrowRight
               size={12}
-              className="relative transition-transform duration-300 group-hover:translate-x-1 motion-reduce:transform-none"
+              className="relative shrink-0 transition-transform duration-300 group-hover:translate-x-1 motion-reduce:transform-none"
             />
           </div>
         </div>
+
+        {/* Beside the button from the tablet up; on a phone it rides the
+            picture instead, where it costs the tile no height. */}
+        {price ? (
+          <span className="hidden shrink-0 items-baseline gap-1 whitespace-nowrap sm:inline-flex">
+            {price.from ? (
+              <span className="hidden text-[9px] font-bold uppercase tracking-[0.14em] text-[#7c7f88] lg:inline">
+                Từ
+              </span>
+            ) : null}
+            <span className="text-[12px] font-extrabold leading-none text-white">
+              {price.text}
+            </span>
+          </span>
+        ) : null}
       </div>
     </Link>
   );
