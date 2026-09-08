@@ -325,14 +325,23 @@ function RowCard({
         >
           <div
             className={cn(
-              "relative w-full transition-colors duration-300 flex items-center justify-center gap-1.5 py-2.5 sm:py-3 [clip-path:polygon(7px_0,100%_0,100%_calc(100%-7px),calc(100%-7px)_100%,0_100%,0_7px)]",
+              "relative w-full overflow-hidden transition-colors duration-300 flex items-center justify-center gap-1.5 py-2.5 sm:py-3 [clip-path:polygon(7px_0,100%_0,100%_calc(100%-7px),calc(100%-7px)_100%,0_100%,0_7px)]",
               t.buttonFace,
             )}
           >
-            <span className="text-white font-black text-[10px] sm:text-xs uppercase tracking-widest">
+            {/* The sweep: a soft white band parked off the left edge that
+                crosses to the right while the pointer is on the tile. */}
+            <span
+              aria-hidden
+              className="pointer-events-none absolute inset-y-0 -left-full w-1/2 -skew-x-12 bg-gradient-to-r from-transparent via-white/30 to-transparent transition-transform duration-700 ease-out group-hover:translate-x-[300%] motion-reduce:hidden"
+            />
+            <span className="relative text-white font-black text-[10px] sm:text-xs uppercase tracking-widest">
               XEM NGAY
             </span>
-            <ChevronRight size={12} />
+            <ChevronRight
+              size={12}
+              className="relative transition-transform duration-300 group-hover:translate-x-1 motion-reduce:transform-none"
+            />
           </div>
         </div>
       </div>

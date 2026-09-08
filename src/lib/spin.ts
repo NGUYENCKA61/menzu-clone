@@ -11,15 +11,15 @@
 export const SPIN_COST = 100;
 
 /** What a shopper has to spend to earn one spin, in đồng. */
-export const VND_PER_SPIN = 50_000;
+export const VND_PER_SPIN = 100_000;
 
 /**
  * The points a purchase earns.
  *
- * Proportional rather than a whole spin per 50.000đ: a 120.000đ order would
- * otherwise throw away 20.000đ of spending, and two 30.000đ orders would earn
- * nothing at all while one 60.000đ order earned a spin. Counted per đồng, the
- * remainders keep and the headline still holds exactly — 50.000đ is 100
+ * Proportional rather than a whole spin per 100.000đ: a 250.000đ order would
+ * otherwise throw away 50.000đ of spending, and two 60.000đ orders would earn
+ * nothing at all while one 120.000đ order earned a spin. Counted per đồng, the
+ * remainders keep and the headline still holds exactly — 100.000đ is 100
  * points, which is one spin.
  *
  * Rounded down, so the shop never owes a point it did not sell.

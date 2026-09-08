@@ -411,20 +411,20 @@ describe("pointsForSpend", () => {
   });
 
   it("keeps the remainder instead of dropping it", () => {
-    // 120.000đ is two spins and a bit; the bit stays on the account.
-    expect(pointsForSpend(120_000)).toBe(240);
+    // 250.000đ is two spins and a half; the half stays on the account.
+    expect(pointsForSpend(250_000)).toBe(250);
     // Two small orders earn what one order of their sum would.
     expect(pointsForSpend(30_000) + pointsForSpend(30_000)).toBe(pointsForSpend(60_000));
   });
 
   it("rounds down, so the shop never owes a point it did not sell", () => {
-    expect(pointsForSpend(499)).toBe(0);
-    expect(pointsForSpend(500)).toBe(1);
-    expect(pointsForSpend(999)).toBe(1);
+    expect(pointsForSpend(999)).toBe(0);
+    expect(pointsForSpend(1_000)).toBe(1);
+    expect(pointsForSpend(1_999)).toBe(1);
   });
 
   it("reads a bigint total, which is what an order carries", () => {
-    expect(pointsForSpend(50_000n)).toBe(SPIN_COST);
+    expect(pointsForSpend(100_000n)).toBe(SPIN_COST);
   });
 
   it("awards nothing for a free or nonsense total", () => {
