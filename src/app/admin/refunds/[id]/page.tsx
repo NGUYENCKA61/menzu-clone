@@ -15,6 +15,7 @@ import {
   REFUND_STATUS,
 } from "@/lib/refundRequests";
 import { productHref } from "@/lib/routes";
+import { dayStamp } from "@/lib/dayGroups";
 
 export const metadata: Metadata = { title: "Chi tiết hoàn trả | Quản trị" };
 export const dynamic = "force-dynamic";
@@ -23,13 +24,7 @@ const CARD = "rounded-xl border border-white/[0.08] bg-[#0e0e11] p-5";
 const LABEL = "text-[10px] font-black uppercase tracking-widest text-neutral-500";
 
 function formatWhen(date: Date): string {
-  return date.toLocaleString("vi-VN", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  return dayStamp(date);
 }
 
 /** One labelled figure in the strip across the top. */

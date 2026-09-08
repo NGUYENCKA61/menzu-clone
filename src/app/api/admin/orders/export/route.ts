@@ -12,6 +12,7 @@ import {
   type OrderStatus,
 } from "@/lib/orders";
 import { orderWhere } from "@/lib/orderStore";
+import { dayStamp } from "@/lib/dayGroups";
 
 /** Ceiling on one export, so a click cannot try to stream the whole table. */
 const EXPORT_MAX = 5000;
@@ -62,7 +63,7 @@ export async function GET(request: Request) {
     ],
     orders.map((order) => [
       order.code,
-      order.createdAt.toLocaleString("vi-VN", { timeZone: "Asia/Ho_Chi_Minh" }),
+      dayStamp(order.createdAt),
       order.user.username,
       order.user.uid,
       order.product.code,

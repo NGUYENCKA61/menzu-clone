@@ -7,6 +7,7 @@ import { HandCoins, Handshake, Link2, UserPlus, Users } from "lucide-react";
 import { AccountPageFrame } from "@/components/sites/menzu-lol-f7ae197a/shared/AccountPageFrame";
 import { ReferralLinkBox } from "@/components/sites/menzu-lol-f7ae197a/shared/ReferralLinkBox";
 import { formatVnd } from "@/components/sites/menzu-lol-f7ae197a/shared/productData";
+import { dayKey } from "@/lib/dayGroups";
 import { db } from "@/lib/db";
 import { REFERRAL_PERCENT } from "@/lib/referral";
 import { absoluteUrl } from "@/lib/seo";
@@ -38,14 +39,6 @@ const STEPS = [
     text: `Mỗi lệnh nạp thành công của họ, bạn nhận ngay ${REFERRAL_PERCENT}% vào hoa hồng`,
   },
 ] as const;
-
-function formatDay(date: Date): string {
-  return date.toLocaleDateString("vi-VN", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-  });
-}
 
 const EARNING_COLUMNS = ["Thành viên", "Số tiền nạp", "Hoa hồng", "Thời gian"];
 
@@ -251,7 +244,7 @@ export default async function AffiliatePage() {
                       </td>
                       <td className="px-5 py-4">
                         <span className="text-[11px] tabular-nums text-neutral-500">
-                          {formatDay(earning.createdAt)}
+                          {dayKey(earning.createdAt)}
                         </span>
                       </td>
                     </tr>

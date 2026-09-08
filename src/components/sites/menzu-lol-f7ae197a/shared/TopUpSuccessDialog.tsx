@@ -9,8 +9,10 @@ import { formatVnd } from "./productData";
 export interface TopUpSuccessDialogProps {
   /** The request that just settled, so the customer can match it to a receipt. */
   code: string;
-  /** What went in, in đồng. */
+  /** What the wallet received, in đồng — the figure the balance moved by. */
   amount: number;
+  /** The card's face value, when the fee made it larger than `amount`. */
+  face?: number;
   /** What the wallet holds now, as the server saw it after crediting. */
   balance: number;
   onClose: () => void;
@@ -34,6 +36,7 @@ export interface TopUpSuccessDialogProps {
 export function TopUpSuccessDialog({
   code,
   amount,
+  face,
   balance,
   onClose,
 }: TopUpSuccessDialogProps) {
@@ -91,6 +94,13 @@ export function TopUpSuccessDialog({
         <p className="mt-2 text-[25px] font-black leading-none text-rose-500 tabular-nums">
           +{formatVnd(amount)}đ
         </p>
+        {/* A card credits net of the fee. Printing the face value here while
+            the balance below moved by less made the dialog argue with itself. */}
+        {face !== undefined && face > amount ? (
+          <p className="mt-1.5 text-[11px] text-neutral-500 tabular-nums">
+            Thẻ {formatVnd(face)}đ · phí {formatVnd(face - amount)}đ
+          </p>
+        ) : null}
 
         <dl className="mt-6 flex flex-col gap-3 rounded-lg bg-white/[0.04] px-4 py-3.5 text-left">
           <div className="flex items-center justify-between gap-3">

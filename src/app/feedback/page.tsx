@@ -11,6 +11,7 @@ import {
   FeedbackBoard,
   type FeedbackItem,
 } from "@/components/sites/menzu-lol-f7ae197a/shared/FeedbackBoard";
+import { dayStamp } from "@/lib/dayGroups";
 import { getFeedback } from "@/lib/queries";
 import { shareCard } from "@/lib/shareCard";
 
@@ -22,15 +23,6 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 export const dynamic = "force-dynamic";
-
-/** "17:56 18/08/2026" — built by hand so server and client can never disagree
- *  about locale quirks. */
-function formatWhen(date: Date): string {
-  const p = (n: number) => String(n).padStart(2, "0");
-  return `${p(date.getHours())}:${p(date.getMinutes())} ${p(date.getDate())}/${p(
-    date.getMonth() + 1,
-  )}/${date.getFullYear()}`;
-}
 
 /**
  * The customer-reviews wall, rebuilt from the original: emerald header with
@@ -51,7 +43,7 @@ export default async function FeedbackPage() {
     imageUrl: r.imageUrl,
     anonymous: r.anonymous,
     verified: r.verified,
-    when: formatWhen(r.createdAt),
+    when: dayStamp(r.createdAt),
     ts: r.createdAt.getTime(),
   }));
 

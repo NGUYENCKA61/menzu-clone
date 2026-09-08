@@ -7,8 +7,10 @@ import { AccountPageFrame } from "@/components/sites/menzu-lol-f7ae197a/shared/A
 import { SecurityPanel } from "@/components/sites/menzu-lol-f7ae197a/shared/SecurityPanel";
 import { db } from "@/lib/db";
 import { describeUserAgent } from "@/lib/device";
+import { dayKey, dayTime } from "@/lib/dayGroups";
 import { getCurrentUser } from "@/lib/session";
 import { discordOauthEnabled, googleOauthEnabled } from "@/lib/settings";
+import { linkUrl as telegramLinkUrl } from "@/lib/telegramShop";
 import { getShopSettings } from "@/lib/settingsStore";
 
 export const metadata: Metadata = {
@@ -25,10 +27,10 @@ const PROVIDER_NAMES: Record<string, string> = {
   discord: "Discord",
 };
 
-/** "13:34 - 21/08/2026", the shape the device row's second line reads in. */
+/** "13:34 - 21/08/2026", the shape the device row's second line reads in.
+ *  Its own dash, but the shop's clock like everywhere else. */
 function deviceWhen(date: Date): string {
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${pad(date.getHours())}:${pad(date.getMinutes())} - ${pad(date.getDate())}/${pad(date.getMonth() + 1)}/${date.getFullYear()}`;
+  return `${dayTime(date)} - ${dayKey(date)}`;
 }
 
 interface SecurityPageProps {
@@ -101,6 +103,8 @@ export default async function SecurityPage({ searchParams }: SecurityPageProps) 
         discordLinked={linkedSet.has("discord")}
         googleEnabled={googleOauthEnabled(settings)}
         discordEnabled={discordOauthEnabled(settings)}
+        telegramUrl={telegramLinkUrl(settings, user.id)}
+        telegramLinked={Boolean(user.telegramId)}
         initialTab={linkNotice ? "linked" : "security"}
         linkNotice={linkNotice}
         sessions={sessions.map((session) => ({

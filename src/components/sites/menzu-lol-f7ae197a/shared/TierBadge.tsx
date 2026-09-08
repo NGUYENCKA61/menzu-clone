@@ -55,6 +55,7 @@ const METAL_TEXT: Record<MemberTierValue, string> = {
 };
 
 const SEAL_SIZE = {
+  xs: { box: "h-6 w-6 p-[1.5px]", glyph: 11 },
   sm: { box: "h-9 w-9 p-[2px]", glyph: 15 },
   md: { box: "h-11 w-11 p-[2.5px]", glyph: 18 },
   lg: { box: "h-14 w-14 p-[3px]", glyph: 24 },
@@ -84,6 +85,7 @@ const ICON: Record<MemberTierValue, { icon: LucideIcon; tile: string }> = {
 };
 
 const ICON_SIZE = {
+  xs: { box: "h-6 w-6 rounded-lg", icon: 13 },
   sm: { box: "h-9 w-9 rounded-xl", icon: 16 },
   md: { box: "h-11 w-11 rounded-xl", icon: 20 },
   lg: { box: "h-14 w-14 rounded-2xl", icon: 26 },
@@ -96,7 +98,7 @@ export function TierBadge({
   className = "",
 }: {
   tier: MemberTierValue;
-  size?: "sm" | "md" | "lg";
+  size?: "xs" | "sm" | "md" | "lg";
   variant?: "seal" | "icon";
   className?: string;
 }) {

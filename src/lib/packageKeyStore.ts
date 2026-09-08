@@ -1,6 +1,7 @@
 import "server-only";
 
 import { db } from "@/lib/db";
+import { dayStamp } from "@/lib/dayGroups";
 
 /**
  * One tier's key store, read for the admin desks.
@@ -22,13 +23,7 @@ const SHELF_SHOWN = 1000;
 const DELIVERED_SHOWN = 15;
 
 function stamp(date: Date): string {
-  return date.toLocaleString("vi-VN", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  return dayStamp(date);
 }
 
 /**

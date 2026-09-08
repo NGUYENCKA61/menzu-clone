@@ -20,6 +20,7 @@ import { AdminShell } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminSh
 import { formatVnd } from "@/components/sites/menzu-lol-f7ae197a/shared/productData";
 import { currentOrderIdOf, loginHandover, tagOf } from "@/lib/accountLogin";
 import { getAdmin } from "@/lib/admin";
+import { dayStamp } from "@/lib/dayGroups";
 import { db } from "@/lib/db";
 import {
   hasOrderFilters,
@@ -234,13 +235,7 @@ export default async function AdminOrdersPage({
                     <div className="flex flex-col">
                       <span className="font-mono text-xs font-black text-white">{o.code}</span>
                       <span className="mt-0.5 text-[11px] text-neutral-500 tabular-nums">
-                        {o.createdAt.toLocaleString("vi-VN", {
-                          day: "2-digit",
-                          month: "2-digit",
-                          year: "numeric",
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
+                        {dayStamp(o.createdAt)}
                       </span>
                     </div>
                   </td>

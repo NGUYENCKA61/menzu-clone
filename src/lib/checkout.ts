@@ -23,6 +23,7 @@ import { getShopSettings } from "@/lib/settingsStore";
 import { makeShortCode } from "@/lib/shortCode";
 import { isSalesLocked, salesLockReason } from "@/lib/softwareStatus";
 import { evaluateVoucher, voucherRules } from "@/lib/voucher";
+import { pointsForSpend } from "@/lib/spin";
 import { balanceOf, debitWallet } from "@/lib/wallet";
 
 /** Short human-facing code, e.g. DH8F3K2Q. */
@@ -260,6 +261,17 @@ export async function placeOrder(input: CheckoutInput): Promise<CheckoutResult> 
         method: `Ví ${settings.brandName}`,
       },
     });
+
+    // Spending earns spins. Incremented by the database inside the same
+    // transaction as the debit, so a purchase that rolls back takes its
+    // points with it.
+    const earned = pointsForSpend(total);
+    if (earned > 0) {
+      await tx.user.update({
+        where: { id: input.userId },
+        data: { points: { increment: earned } },
+      });
+    }
 
     return {
       orderId: order.id,

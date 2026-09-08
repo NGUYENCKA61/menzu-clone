@@ -50,6 +50,9 @@ export interface TopUpHistoryRow {
   method: string;
   carrier: string | null;
   amount: number;
+  /** What the wallet received. Below `amount` on a card once the fee comes
+   *  off; null on rows that predate the column, which read `amount`. */
+  credited: number | null;
   status: string;
   /** Pre-formatted on the server so the two renders cannot disagree. */
   createdAt: string;
@@ -184,7 +187,10 @@ interface Invoice {
 /** What the success dialog needs, once a request has actually been paid. */
 interface Credited {
   code: string;
+  /** The card's face value — what was asked for. */
   amount: number;
+  /** What the wallet actually got, once the card fee came off. */
+  credited: number;
   balance: number;
 }
 
@@ -421,9 +427,19 @@ function HistoryList({
                   through once the request can no longer credit, plain while
                   everything is still open. The green is the ledger's green, so
                   the same money reads the same on both pages. */}
-              <span className={`shrink-0 text-sm font-black tabular-nums ${status.sum}`}>
-                {row.status === "COMPLETED" ? "+" : ""}
-                {formatVnd(row.amount)}đ
+              <span className="flex shrink-0 flex-col items-end gap-0.5">
+                <span className={`text-sm font-black tabular-nums ${status.sum}`}>
+                  {row.status === "COMPLETED" ? "+" : ""}
+                  {formatVnd(row.credited ?? row.amount)}đ
+                </span>
+                {row.status === "COMPLETED" &&
+                row.credited !== null &&
+                row.credited < row.amount ? (
+                  <span className="text-[10px] tabular-nums text-neutral-500">
+                    thẻ {formatVnd(row.amount)}đ · phí{" "}
+                    {formatVnd(row.amount - row.credited)}đ
+                  </span>
+                ) : null}
               </span>
             </div>
           );
@@ -531,12 +547,14 @@ export function WalletTopUp({
         const data = (await status.json()) as {
           status?: string;
           amount?: number;
+          credited?: number | null;
           balance?: number;
         };
         if (!stopped && data.status === "COMPLETED") {
           setCredited({
             code: waitingCode,
             amount: data.amount ?? 0,
+            credited: data.credited ?? data.amount ?? 0,
             balance: data.balance ?? 0,
           });
         }
@@ -1126,7 +1144,8 @@ export function WalletTopUp({
       {credited ? (
         <TopUpSuccessDialog
           code={credited.code}
-          amount={credited.amount}
+          amount={credited.credited}
+          face={credited.amount}
           balance={credited.balance}
           onClose={dismissCredited}
         />

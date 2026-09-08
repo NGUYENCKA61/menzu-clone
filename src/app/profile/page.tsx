@@ -5,25 +5,20 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import {
   BadgeCheck,
-  BadgePercent,
   Check,
-  Crown,
+  Gift,
   HandCoins,
   Receipt,
-  ShieldCheck,
   ShoppingBag,
   Wallet,
 } from "lucide-react";
 
 import { AccountPageFrame } from "@/components/sites/menzu-lol-f7ae197a/shared/AccountPageFrame";
-import { TelegramGlyph } from "@/components/sites/menzu-lol-f7ae197a/shared/BrandGlyphs";
 import { AvatarUploader } from "@/components/sites/menzu-lol-f7ae197a/shared/AvatarUploader";
+import { BannerUploader } from "@/components/sites/menzu-lol-f7ae197a/shared/BannerUploader";
 import { WithdrawCommission } from "@/components/sites/menzu-lol-f7ae197a/shared/WithdrawCommission";
-import {
-  DiscordMark,
-  GoogleMark,
-} from "@/components/sites/menzu-lol-f7ae197a/shared/OAuthButtons";
 import { formatVnd } from "@/components/sites/menzu-lol-f7ae197a/shared/productData";
+import { SHOP_TZ } from "@/lib/dayGroups";
 import { db } from "@/lib/db";
 import {
   formatTierPercent,
@@ -33,8 +28,6 @@ import {
   tierProgress,
 } from "@/lib/memberTiers";
 import { getCurrentUser } from "@/lib/session";
-import { discordOauthEnabled, googleOauthEnabled } from "@/lib/settings";
-import { linkUrl as telegramLinkUrl } from "@/lib/telegramShop";
 import { getShopSettings } from "@/lib/settingsStore";
 
 export const metadata: Metadata = {
@@ -61,11 +54,13 @@ const PROVIDER_NAMES: Record<string, string> = {
   discord: "Discord",
 };
 
-/** The column of doors beside the tier card; the first is the red one. */
+/** The column of doors beside the tier card; the first is the red one.
+ *  Three, named the way the sidebar names them. Bảo mật is one click away in
+ *  that sidebar already, and Discord belongs with the other links. */
 const QUICK_ACTIONS = [
   { label: "Nạp tiền", href: "/wallet", icon: Wallet, primary: true },
-  { label: "Xem đơn hàng", href: "/orders", icon: ShoppingBag, primary: false },
-  { label: "Bảo mật", href: "/security", icon: ShieldCheck, primary: false },
+  { label: "Lịch sử mua", href: "/orders", icon: ShoppingBag, primary: false },
+  { label: "Đổi thưởng", href: "/vong-quay", icon: Gift, primary: false },
 ] as const;
 
 /** Behind the banner when no category has a cover: the shop's own backdrop. */
@@ -96,12 +91,8 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
   const user = await getCurrentUser();
   if (!user) redirect("/login?next=%2Fprofile");
 
-  const [settings, linkedRows, query, toppedUpRow, spentRow, paidOrders, cover] = await Promise.all([
+  const [settings, query, toppedUpRow, spentRow, paidOrders, cover] = await Promise.all([
     getShopSettings(),
-    db.linkedAccount.findMany({
-      where: { userId: user.id },
-      select: { provider: true },
-    }),
     searchParams,
     // Lifetime completed top-ups: what the tier is earned from.
     db.topUp.aggregate({
@@ -122,11 +113,12 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
       select: { imageUrl: true },
     }),
   ]);
-  // The shop's own choice first, then the catalogue's lead cover, then the
-  // site backdrop — so the page is never bare.
-  const bannerArt = settings.profileBanner || cover?.imageUrl || BANNER_FALLBACK;
+  // The member's own choice first — this is their page — then the shop's,
+  // then the catalogue's lead cover, then the site backdrop, so the card is
+  // never bare for somebody who never picked one.
+  const bannerArt =
+    user.bannerUrl || settings.profileBanner || cover?.imageUrl || BANNER_FALLBACK;
   const spent = Math.abs(Number(spentRow._sum.delta ?? 0n));
-  const linkedSet = new Set(linkedRows.map((row) => row.provider));
   const isAdmin = user.role === "ADMIN";
 
   const memberTier = readMemberTier(user.tier);
@@ -134,23 +126,6 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
   const toppedUp = Number(toppedUpRow._sum.amount ?? 0n);
   const progress = tierProgress(toppedUp, memberTier);
   const nextRule = progress.next ? TIER_RULES[progress.next] : null;
-
-  const providers = [
-    {
-      key: "discord",
-      name: "Discord",
-      perk: "Nhận thông báo đơn hàng",
-      enabled: discordOauthEnabled(settings),
-      mark: <DiscordMark className="w-5 h-5 text-[#5865F2]" />,
-    },
-    {
-      key: "google",
-      name: "Google",
-      perk: "Đăng nhập nhanh hơn",
-      enabled: googleOauthEnabled(settings),
-      mark: <GoogleMark className="w-5 h-5" />,
-    },
-  ] as const;
 
   return (
     <AccountPageFrame
@@ -171,10 +146,12 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
           </div>
         ) : null}
 
-        {/* BANNER — game art behind the identity, faded to the card's own
-            ground on the left and along the bottom so the type sits on ink,
-            not on a picture. The tier card and the doors live inside it. */}
+        {/* BANNER — game art across the whole card, darkened only where the
+            words sit: a soft wash off the left edge, and a stronger one rising
+            from the bottom. The tier card and the doors live inside it. */}
         <section className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#0e0e12]">
+          <BannerUploader hasOwn={Boolean(user.bannerUrl)} />
+
           <div className="absolute inset-0">
             <Image
               src={bannerArt}
@@ -182,13 +159,15 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
               fill
               priority
               sizes="(max-width: 1280px) 100vw, 960px"
-              className="object-cover object-[70%_30%] opacity-70"
+              className="object-cover object-[60%_28%] opacity-95"
             />
-            <div className="absolute inset-0 bg-gradient-to-r from-[#0e0e12] via-[#0e0e12]/70 to-[#0e0e12]/10" />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#0e0e12] via-[#0e0e12]/60 to-transparent" />
+            {/* Left wash: enough to seat the name, gone by a third across. */}
+            <div className="absolute inset-0 bg-gradient-to-r from-[#0e0e12] via-[#0e0e12]/45 to-transparent" />
+            {/* Foot wash: the band the tier card and the doors sit on. */}
+            <div className="absolute inset-0 bg-gradient-to-t from-[#0e0e12] via-[#0e0e12]/50 to-transparent" />
           </div>
 
-          <div className="relative flex flex-col gap-6 p-5 sm:p-7">
+          <div className="relative flex flex-col gap-6 p-5 pt-14 sm:p-7">
             {/* Who — avatar, name, role, when they joined. */}
             <div className="flex items-center gap-4 sm:gap-5">
               <AvatarUploader avatarUrl={user.avatarUrl} username={user.username} />
@@ -215,6 +194,7 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                   <span className="mx-2 text-neutral-600">·</span>
                   Tham gia từ{" "}
                   {user.createdAt.toLocaleDateString("vi-VN", {
+                    timeZone: SHOP_TZ,
                     day: "2-digit",
                     month: "2-digit",
                     year: "numeric",
@@ -224,33 +204,19 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
             </div>
 
             {/* The tier card and the doors, side by side from lg. */}
-            <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_240px]">
-              <div className="flex flex-col gap-4 rounded-2xl border border-white/10 bg-[#0e0e12]/80 p-5 backdrop-blur-sm">
+            <div className="grid grid-cols-1 gap-4 sm:mt-5 lg:grid-cols-[minmax(0,1fr)_240px]">
+              <div className="flex flex-col gap-2 rounded-2xl border border-white/10 bg-[#0e0e12]/60 p-5 backdrop-blur-md">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <span className="text-[10px] font-black uppercase tracking-widest text-neutral-400">
                     Cấp bậc
                   </span>
-                  <span className="inline-flex items-center gap-2 text-sm font-bold">
-                    <span className={tier.text}>{TIER_RULES[memberTier].label}</span>
-                    {nextRule && progress.next ? (
-                      <>
-                        <span className="text-neutral-600">›</span>
-                        <span className={TIER_STYLE[progress.next].text}>{nextRule.label}</span>
-                      </>
-                    ) : null}
+                  <span className={`text-sm font-bold ${tier.text} ${tier.glow}`}>
+                    {TIER_RULES[memberTier].label}
                   </span>
                 </div>
 
                 <div>
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-2xl font-black tabular-nums leading-none text-white">
-                      {formatVnd(toppedUp)}
-                    </span>
-                    <span className="text-[11px] font-semibold tabular-nums text-neutral-500">
-                      {nextRule ? `/ ${formatVnd(nextRule.minTopUp)}đ đã nạp` : "đ đã nạp · hạng cao nhất"}
-                    </span>
-                  </div>
-                  <div className="mt-3 h-2 overflow-hidden rounded-full border border-white/5 bg-black/60">
+                  <div className="h-2 overflow-hidden rounded-full border border-white/5 bg-black/60">
                     <div
                       className={`h-full rounded-full ${tier.bar}`}
                       style={{ width: `${progress.percent}%` }}
@@ -259,48 +225,59 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                   <p className="mt-2 text-[12px] text-neutral-400">
                     {nextRule && progress.next ? (
                       <>
-                        Còn{" "}
-                        <span className="font-bold tabular-nums text-white">
-                          {formatVnd(progress.remaining)}đ
-                        </span>{" "}
-                        để lên{" "}
-                        <span className={`font-bold ${TIER_STYLE[progress.next].text}`}>
-                          {nextRule.label}
-                        </span>
+                        Tích lũy thêm để nhận những đặc quyền{" "}
+                        <Link
+                          href="/cap-bac"
+                          className="font-bold text-white underline-offset-2 transition-colors hover:underline"
+                        >
+                          ưu đãi
+                        </Link>{" "}
+                        dành riêng cho khách hàng
                       </>
                     ) : (
                       "Bạn đang ở hạng cao nhất"
                     )}
-                    <span className="mx-1.5 text-neutral-600">·</span>
-                    <Link href="/cap-bac" className="font-bold text-[var(--menzu-accent)] hover:underline">
-                      Xem quyền lợi các hạng →
-                    </Link>
                   </p>
                 </div>
 
-                {/* Three facts the rank brings, in one row. */}
-                <div className="grid grid-cols-1 gap-3 border-t border-white/[0.06] pt-4 sm:grid-cols-3">
+                {/* What the rank is worth today, what the points are, and what
+                    the next rank would pay — the last one is the only place on
+                    the site that answers "why keep topping up". */}
+                <div className="mt-auto grid grid-cols-3 gap-3 border-t border-white/[0.06] pt-1.5">
                   {[
-                    { icon: Crown, label: "Hạng hiện tại", value: TIER_RULES[memberTier].label, tone: tier.text },
                     {
-                      icon: BadgePercent,
                       label: "Ưu đãi mua tool",
-                      value: TIER_RULES[memberTier].discountPercent > 0
-                        ? `Giảm ${formatTierPercent(TIER_RULES[memberTier].discountPercent)}%`
-                        : "Chưa có",
+                      value: `Giảm ${formatTierPercent(TIER_RULES[memberTier].discountPercent)}%`,
+                      tone: tier.text,
+                    },
+                    {
+                      label: "Điểm thưởng",
+                      value: `${user.points.toLocaleString("vi-VN")} điểm`,
                       tone: "text-white",
                     },
-                    { icon: Receipt, label: "Đơn đã mua", value: `${paidOrders} đơn`, tone: "text-white" },
-                  ].map(({ icon: Icon, label, value, tone }) => (
-                    <div key={label} className="flex min-w-0 items-center gap-2.5">
-                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/[0.04] text-neutral-300">
-                        <Icon size={15} />
+                    nextRule && progress.next
+                      ? {
+                          label: `Lên ${nextRule.label} được`,
+                          value: `Giảm ${formatTierPercent(nextRule.discountPercent)}%`,
+                          tone: "text-white",
+                        }
+                      : {
+                          label: "Hạng hiện tại",
+                          value: TIER_RULES[memberTier].label,
+                          tone: "text-white",
+                        },
+                  ].map(({ label, value, tone }, index) => (
+                    <div key={label} className="flex min-w-0 flex-col gap-0.5">
+                      <span className="truncate text-[9px] font-black uppercase tracking-widest text-neutral-500">
+                        {label}
                       </span>
-                      <span className="flex min-w-0 flex-col">
-                        <span className="truncate text-[10px] font-black uppercase tracking-widest text-neutral-500">
-                          {label}
-                        </span>
-                        <span className={`truncate text-sm font-black ${tone}`}>{value}</span>
+                      <span
+                        className={`flex min-w-0 items-center gap-1 text-[13px] font-bold leading-none ${tone}`}
+                      >
+                        {index === 0 ? (
+                          <Check size={13} strokeWidth={3} className={`shrink-0 ${tier.text}`} />
+                        ) : null}
+                        <span className="truncate">{value}</span>
                       </span>
                     </div>
                   ))}
@@ -312,178 +289,65 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                   <Link
                     key={href}
                     href={href}
-                    className={`inline-flex h-11 items-center justify-center gap-2 rounded-xl border text-[12px] font-black uppercase tracking-wider transition-colors ${
+                    className={`inline-flex h-11 items-center justify-center gap-2 rounded-xl border text-[12px] font-black uppercase tracking-wider transition-all ${
                       primary
-                        ? "border-[var(--menzu-accent)] bg-[var(--menzu-accent)] text-white hover:bg-[var(--menzu-accent-dark)]"
-                        : "border-white/10 bg-[#0e0e12]/80 text-neutral-200 backdrop-blur-sm hover:border-white/25 hover:bg-white/[0.06]"
+                        ? "border-[var(--menzu-accent)] bg-[var(--menzu-accent)] text-white shadow-[0_10px_28px_-12px_var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] hover:shadow-[0_12px_32px_-10px_var(--menzu-accent)]"
+                        : "border-white/15 bg-black/35 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] backdrop-blur-md hover:border-white/35 hover:bg-black/50"
                     }`}
                   >
                     <Icon size={15} />
                     {label}
                   </Link>
                 ))}
-                {(() => {
-                  const discord = providers.find((p) => p.key === "discord");
-                  const linked = linkedSet.has("discord");
-                  const enabled = discord?.enabled ?? false;
-                  const cls =
-                    "inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-white/10 bg-[#0e0e12]/80 text-[12px] font-black uppercase tracking-wider text-neutral-200 backdrop-blur-sm transition-colors hover:border-white/25 hover:bg-white/[0.06]";
-                  if (linked) {
-                    return (
-                      <span className={`${cls} cursor-default text-emerald-300`}>
-                        <DiscordMark className="h-4 w-4 text-[#5865F2]" /> Discord · đã liên kết
-                      </span>
-                    );
-                  }
-                  if (!enabled || !discord) return null;
-                  // A plain anchor on purpose, as the link rows below: this is
-                  // an OAuth door served by a route handler, not a page.
-                  return (
-                    <a href={`/api/auth/${discord.key}?next=%2Fprofile`} className={cls}>
-                      <DiscordMark className="h-4 w-4 text-[#5865F2]" /> Discord
-                    </a>
-                  );
-                })()}
+              </div>
+            </div>
+
+            {/* THE ACCOUNT IN NUMBERS — inside the card rather than a strip of
+                its own below it, so the page is one block instead of two. */}
+            <div className="-mx-5 -mb-5 grid grid-cols-2 border-t border-white/10 bg-[#0e0e12]/70 backdrop-blur-sm sm:-mx-7 sm:-mb-7 lg:grid-cols-4 lg:divide-x lg:divide-white/[0.06]">
+              {[
+                { icon: Wallet, label: "Số dư khả dụng", value: formatVnd(user.balance), unit: "đ", tone: "text-emerald-400" },
+                { icon: Receipt, label: "Tổng chi tiêu", value: formatVnd(spent), unit: "đ", tone: "text-white" },
+                { icon: ShoppingBag, label: "Đơn hàng", value: String(paidOrders), unit: "", tone: "text-white" },
+              ].map(({ icon: Icon, label, value, unit, tone }) => (
+                <div key={label} className="flex flex-col gap-3 p-5">
+                  <span className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-neutral-400">
+                    <span className="flex h-7 w-7 items-center justify-center rounded-md border border-white/10 bg-white/[0.04] text-neutral-300">
+                      <Icon size={13} />
+                    </span>
+                    {label}
+                  </span>
+                  <span className="flex min-h-9 items-center">
+                    <span className={`text-2xl font-black tabular-nums leading-none ${tone}`}>
+                      {value}
+                      {unit ? (
+                        <span className="ml-1 text-xs font-bold text-neutral-500">{unit}</span>
+                      ) : null}
+                    </span>
+                  </span>
+                </div>
+              ))}
+              <div className="flex flex-col gap-3 p-5">
+                <span className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-neutral-400">
+                  <span className="flex h-7 w-7 items-center justify-center rounded-md border border-white/10 bg-white/[0.04] text-neutral-300">
+                    <HandCoins size={13} />
+                  </span>
+                  Hoa hồng khả dụng
+                </span>
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <span className="flex min-h-9 items-center">
+                    <span className="text-2xl font-black tabular-nums leading-none text-white">
+                      {formatVnd(user.commissionBalance)}
+                      <span className="ml-1 text-xs font-bold text-neutral-500">đ</span>
+                    </span>
+                  </span>
+                  <WithdrawCommission amount={user.commissionBalance} />
+                </div>
               </div>
             </div>
           </div>
         </section>
 
-        {/* FOUR FIGURES — the account in numbers, one strip. The commission
-            tile keeps its withdraw door; a referrer with nothing earned sees a
-            truthful zero and the door stays locked. */}
-        <section className="grid grid-cols-2 divide-white/[0.06] rounded-2xl border border-white/10 bg-neutral-900/50 lg:grid-cols-4 lg:divide-x">
-          {[
-            { icon: Wallet, label: "Số dư khả dụng", value: formatVnd(user.balance), unit: "đ", tone: "text-emerald-400" },
-            { icon: Receipt, label: "Tổng chi tiêu", value: formatVnd(spent), unit: "đ", tone: "text-white" },
-            { icon: ShoppingBag, label: "Đơn hàng", value: String(paidOrders), unit: "", tone: "text-white" },
-          ].map(({ icon: Icon, label, value, unit, tone }) => (
-            <div key={label} className="flex flex-col gap-3 p-5">
-              <span className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-neutral-400">
-                <span className="flex h-7 w-7 items-center justify-center rounded-md border border-white/10 bg-white/[0.04] text-neutral-300">
-                  <Icon size={13} />
-                </span>
-                {label}
-              </span>
-              <span className={`text-2xl font-black tabular-nums leading-none ${tone}`}>
-                {value}
-                {unit ? <span className="ml-1 text-xs font-bold text-neutral-500">{unit}</span> : null}
-              </span>
-            </div>
-          ))}
-          <div className="flex flex-col gap-3 p-5">
-            <span className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-neutral-400">
-              <span className="flex h-7 w-7 items-center justify-center rounded-md border border-white/10 bg-white/[0.04] text-neutral-300">
-                <HandCoins size={13} />
-              </span>
-              Hoa hồng khả dụng
-            </span>
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <span className="text-2xl font-black tabular-nums leading-none text-white">
-                {formatVnd(user.commissionBalance)}
-                <span className="ml-1 text-xs font-bold text-neutral-500">đ</span>
-              </span>
-              <WithdrawCommission amount={user.commissionBalance} />
-            </div>
-          </div>
-        </section>
-
-        <div className="flex flex-col gap-4 rounded-2xl border border-white/10 bg-neutral-900/50 p-5">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <span className="text-sm font-black uppercase tracking-wider text-white">
-              Liên kết tài khoản
-            </span>
-            <span className="text-xs text-neutral-500">
-              Kết nối để sử dụng thêm tiện ích
-            </span>
-          </div>
-          <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
-            {/* Telegram is not an OAuth door: the link is a signed t.me URL the
-                shop bot verifies, and "linked" is the telegramId on the user
-                row rather than an oauth_links entry. Same card, its own state. */}
-            {(() => {
-              const telegramLink = telegramLinkUrl(settings, user.id);
-              return (
-                <div className="flex items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
-                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-black/50">
-                    <TelegramGlyph className="w-5 h-5 text-[#29a9eb]" />
-                  </span>
-                  <span className="flex min-w-0 flex-col gap-1">
-                    <span className="text-sm font-bold leading-none text-white">Telegram</span>
-                    <span className="truncate text-[11px] leading-none text-neutral-500">
-                      {user.telegramId ? "Đã liên kết" : "Chưa liên kết"} · Mua hàng và nhận key ngay trong Telegram
-                    </span>
-                  </span>
-                  {user.telegramId ? (
-                    <span className="ml-auto inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3.5 text-[10px] font-black uppercase tracking-wider text-emerald-300">
-                      <Check size={12} /> Đã liên kết
-                    </span>
-                  ) : telegramLink ? (
-                    <a
-                      href={telegramLink}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="ml-auto inline-flex h-9 shrink-0 items-center rounded-lg bg-[var(--menzu-accent)] px-4 text-[10px] font-black uppercase tracking-wider text-white transition-colors hover:bg-[#ff1f4a]"
-                    >
-                      Liên kết
-                    </a>
-                  ) : (
-                    <span
-                      title="Chưa bật — điền token bot bán hàng Telegram ở Cấu hình để mở"
-                      className="ml-auto inline-flex h-9 shrink-0 items-center rounded-lg border border-white/10 bg-white/[0.04] px-4 text-[10px] font-black uppercase tracking-wider text-neutral-500"
-                    >
-                      Chưa mở
-                    </span>
-                  )}
-                </div>
-              );
-            })()}
-            {providers.map((provider) => {
-              const isLinked = linkedSet.has(provider.key);
-              return (
-                <div
-                  key={provider.key}
-                  className="flex items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] p-4"
-                >
-                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-black/50">
-                    {provider.mark}
-                  </span>
-                  <span className="flex min-w-0 flex-col gap-1">
-                    <span className="text-sm font-bold leading-none text-white">
-                      {provider.name}
-                    </span>
-                    <span className="truncate text-[11px] leading-none text-neutral-500">
-                      {isLinked ? "Đã liên kết" : "Chưa liên kết"} · {provider.perk}
-                    </span>
-                  </span>
-                  {isLinked ? (
-                    <span className="ml-auto inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3.5 text-[10px] font-black uppercase tracking-widest text-emerald-300">
-                      <Check size={12} /> Đã liên kết
-                    </span>
-                  ) : provider.enabled ? (
-                    <a
-                      href={`/api/auth/${provider.key}?next=%2Fprofile`}
-                      className="ml-auto inline-flex h-9 shrink-0 items-center rounded-lg bg-[var(--menzu-accent)] px-4 text-[10px] font-black uppercase tracking-widest text-white transition-colors hover:bg-[var(--menzu-accent-dark)]"
-                    >
-                      Liên kết
-                    </a>
-                  ) : (
-                    // No keys in Cấu hình means no door. It says so instead of
-                    // wearing the same accent as the button that works — a
-                    // control that looks live and does nothing costs the reader
-                    // a click to find out.
-                    <span
-                      title={`Chưa bật — điền khóa ${provider.name} ở Cấu hình để mở`}
-                      className="ml-auto inline-flex h-9 shrink-0 items-center rounded-lg border border-white/10 bg-white/[0.04] px-4 text-[10px] font-black uppercase tracking-widest text-neutral-400"
-                    >
-                      Chưa mở
-                    </span>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </div>
       </div>
     </AccountPageFrame>
   );

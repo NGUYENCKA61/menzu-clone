@@ -32,6 +32,16 @@ export function dayTime(date: Date): string {
   });
 }
 
+/** "17:56 08/09/2026" in the shop's clock — the shape a dated row reads in.
+ *
+ * Every screen that prints a moment goes through here or through the two
+ * helpers above. Hand-rolled versions built from getHours()/getDate() read the
+ * MACHINE's clock, and this machine runs UTC, so they printed seven hours
+ * early against the same moment on /orders and /wallet. */
+export function dayStamp(date: Date): string {
+  return `${dayTime(date)} ${dayKey(date)}`;
+}
+
 /**
  * What to print over a day: "Hôm nay", "Hôm qua", or the date itself.
  *

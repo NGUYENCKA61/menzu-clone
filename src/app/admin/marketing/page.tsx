@@ -5,19 +5,13 @@ import { AdminMarketing } from "@/components/sites/menzu-lol-f7ae197a/shared/Adm
 import { AdminShell } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminShell";
 import { getAdmin } from "@/lib/admin";
 import { listCategories, listFlashSales, listProductPicks, listVouchers } from "@/lib/queries";
+import { dayStamp } from "@/lib/dayGroups";
 
 export const metadata: Metadata = { title: "Marketing | Quản trị" };
 export const dynamic = "force-dynamic";
 
 function formatWhen(date: Date | null): string | null {
-  if (!date) return null;
-  return date.toLocaleString("vi-VN", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  return date ? dayStamp(date) : null;
 }
 
 export default async function AdminMarketingPage() {

@@ -117,7 +117,12 @@ export default async function RootLayout({
   const brandOverride =
     brandColor.toLowerCase() === DEFAULT_SETTINGS.brandColor.toLowerCase()
       ? null
-      : `:root{--brand:${brandColor};--brand-dark:color-mix(in oklab, ${brandColor} 85%, black)}`;
+      : `:root{--brand:${brandColor};--brand-dark:color-mix(in oklab, ${brandColor} 85%, black);` +
+        // The storefront reads --menzu-accent, not --brand, on the great
+        // majority of its buttons and badges. Overriding only --brand left
+        // "Màu chủ đạo" repainting a handful of surfaces and leaving the rest
+        // the old red — on the same screen.
+        `--menzu-accent:${brandColor};--menzu-accent-dark:color-mix(in oklab, ${brandColor} 85%, black)}`;
 
   return (
     <html

@@ -11,6 +11,7 @@ import {
 } from "@/components/sites/menzu-lol-f7ae197a/shared/AgencyKeyDesk";
 import { formatVnd } from "@/components/sites/menzu-lol-f7ae197a/shared/productData";
 import { clampAgencyPercent } from "@/lib/agency";
+import { dayStamp } from "@/lib/dayGroups";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/session";
 
@@ -230,13 +231,7 @@ export default async function AgencyDashboardPage() {
                     {formatVnd(Number(order.total))}đ
                   </span>
                   <span className="w-full text-[11px] text-neutral-500 sm:w-auto">
-                    {order.createdAt.toLocaleString("vi-VN", {
-                      day: "2-digit",
-                      month: "2-digit",
-                      year: "numeric",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
+                    {dayStamp(order.createdAt)}
                   </span>
                 </div>
               ))}

@@ -72,6 +72,7 @@ export default async function WalletPage() {
           method: row.method,
           carrier: row.carrier,
           amount: row.amount,
+          credited: row.credited,
           status: row.status,
           createdAt: formatWhen(row.createdAt),
           // Rebuilt with the same helper the create route uses, so a pending

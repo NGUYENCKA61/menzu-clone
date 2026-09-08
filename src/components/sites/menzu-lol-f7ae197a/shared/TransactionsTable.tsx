@@ -3,6 +3,7 @@
 import {
   CreditCard,
   Gift,
+  HandCoins,
   RotateCcw,
   Search,
   ShoppingCart,
@@ -47,13 +48,21 @@ const KIND: Record<string, { icon: LucideIcon; label: string }> = {
  * A top-up is drawn by how the money arrived, not just by its kind: a bank
  * transfer is the bank, a scratch card is the card. Both are "Nạp tiền" in
  * the ledger, and reading which one it was should not mean reading the
- * method line underneath. Everything else is its kind and nothing more.
+ * method line underneath.
+ *
+ * Commission moved out of the referral balance is filed as REWARD too, and
+ * a gift box is the wrong picture for money the member earned by bringing
+ * somebody in — it wears the same hands the overview page gives it.
+ * Everything else is its kind and nothing more.
  */
 function glyphFor(row: LedgerView): { icon: LucideIcon; label: string } | undefined {
   const kind = KIND[row.kind];
   if (!kind) return undefined;
   if (row.kind === "TOPUP" && normalise(row.method ?? "").includes("the cao")) {
     return { icon: Ticket, label: "Nạp thẻ cào" };
+  }
+  if (row.kind === "REWARD" && normalise(row.method ?? "").includes("hoa hong")) {
+    return { icon: HandCoins, label: "Rút hoa hồng" };
   }
   return kind;
 }

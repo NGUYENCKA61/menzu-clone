@@ -36,6 +36,7 @@ import {
   TELEGRAM_API_BASE,
   telegramCall,
 } from "@/lib/telegramNotify";
+import { dayKey, dayTime } from "@/lib/dayGroups";
 import { makeTopUpCode, topUpExpiresAt, transferNoteFor } from "@/lib/topup";
 
 export interface TelegramFrom {
@@ -533,7 +534,7 @@ async function handoverLines(result: CheckoutResult): Promise<string[]> {
       (k) =>
         `🔑 <code>${esc(k.value)}</code>${
           k.expiresAt && !Number.isNaN(k.expiresAt.getTime())
-            ? ` · hết hạn ${k.expiresAt.toLocaleDateString("vi-VN")}`
+            ? ` · hết hạn ${dayKey(k.expiresAt)}`
             : ""
         }`,
     );
@@ -716,7 +717,7 @@ export async function createTopUp(
     "",
     `📝 Nội dung chuyển khoản (bắt buộc, chép đúng):\n<code>${esc(note)}</code>`,
     "",
-    `Lệnh nạp hết hạn lúc ${expires.toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" })}. Tiền vào ví là bot báo ngay tại đây.`,
+    `Lệnh nạp hết hạn lúc ${dayTime(expires)}. Tiền vào ví là bot báo ngay tại đây.`,
   ].join("\n");
   const qrUrl = bank?.code
     ? `https://img.vietqr.io/image/${encodeURIComponent(bank.code)}-${encodeURIComponent(
@@ -777,7 +778,7 @@ export async function ordersScreen(user: ShopUser): Promise<MenuScreen> {
     };
   }
   const blocks = orders.map((o) => {
-    const head = `<b>${o.code}</b> · ${o.createdAt.toLocaleDateString("vi-VN")} · ${vnd(o.total)}\n${esc(
+    const head = `<b>${o.code}</b> · ${dayKey(o.createdAt)} · ${vnd(o.total)}\n${esc(
       o.product.name ?? o.product.code,
     )}${o.package && !o.product.accountPool ? ` — ${esc(o.package.label)}` : ""}${
       o.quantity > 1 ? ` × ${o.quantity}` : ""

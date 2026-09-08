@@ -18,7 +18,7 @@ export async function GET(request: Request) {
 
   const topUp = await db.topUp.findFirst({
     where: { code, userId: user.id },
-    select: { code: true, status: true, amount: true },
+    select: { code: true, status: true, amount: true, credited: true },
   });
   if (!topUp) {
     return NextResponse.json({ error: "Không tìm thấy lệnh nạp" }, { status: 404 });
@@ -28,6 +28,9 @@ export async function GET(request: Request) {
     code: topUp.code,
     status: topUp.status,
     amount: Number(topUp.amount),
+    // What the wallet got, which is less than the card's face value once the
+    // fee comes off. Older rows have none and the screen falls back to amount.
+    credited: topUp.credited === null ? null : Number(topUp.credited),
     // Read after the reconciliation pass that precedes this call, so the
     // success dialog can show what the wallet holds now rather than making the
     // customer reload to find out.

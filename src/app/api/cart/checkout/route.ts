@@ -8,6 +8,7 @@ import { getCurrentUser } from "@/lib/session";
 import { getShopSettings } from "@/lib/settingsStore";
 import { makeShortCode } from "@/lib/shortCode";
 import { evaluateVoucherForCart, voucherRules } from "@/lib/voucher";
+import { pointsForSpend } from "@/lib/spin";
 import { balanceOf, debitWallet } from "@/lib/wallet";
 import { isSalesLocked } from "@/lib/softwareStatus";
 
@@ -278,6 +279,16 @@ export async function POST(request: Request) {
           method: `Ví ${settings.brandName}`,
         },
       });
+
+      // One basket, one payment, one award — counted on what was actually
+      // paid, after every discount, the same figure the ledger row carries.
+      const earned = pointsForSpend(total);
+      if (earned > 0) {
+        await tx.user.update({
+          where: { id: user.id },
+          data: { points: { increment: earned } },
+        });
+      }
 
       // The basket was emptied at the top, as the act of claiming it. Anything
       // added to it while this was running is a new basket and stays.

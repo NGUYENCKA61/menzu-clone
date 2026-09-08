@@ -11,6 +11,8 @@ export interface CurrentUser {
   username: string;
   email: string | null;
   avatarUrl: string | null;
+  /** The member's own overview cover; null falls back to the shop's. */
+  bannerUrl: string | null;
   role: string;
   tier: string;
   balance: number;
@@ -62,6 +64,7 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
     username: u.username,
     email: u.email,
     avatarUrl: u.avatarUrl,
+    bannerUrl: u.bannerUrl,
     role: u.role,
     tier: u.tier,
     balance: Number(u.balance),

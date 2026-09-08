@@ -16,7 +16,9 @@ import {
   winFanfare,
   type Prize,
   RECIPIENT_MAX,
+  pointsForSpend,
   SPIN_COST,
+  VND_PER_SPIN,
   totalWeight,
   wedgeWidthAt,
   WHEEL,
@@ -400,5 +402,34 @@ describe("winFanfare", () => {
 
   it("does not divide by an empty wheel", () => {
     expect(winFanfare(wheel[1]!, [])).toBe("small");
+  });
+});
+
+describe("pointsForSpend", () => {
+  it("turns the headline into exactly one spin", () => {
+    expect(pointsForSpend(VND_PER_SPIN)).toBe(SPIN_COST);
+  });
+
+  it("keeps the remainder instead of dropping it", () => {
+    // 120.000đ is two spins and a bit; the bit stays on the account.
+    expect(pointsForSpend(120_000)).toBe(240);
+    // Two small orders earn what one order of their sum would.
+    expect(pointsForSpend(30_000) + pointsForSpend(30_000)).toBe(pointsForSpend(60_000));
+  });
+
+  it("rounds down, so the shop never owes a point it did not sell", () => {
+    expect(pointsForSpend(499)).toBe(0);
+    expect(pointsForSpend(500)).toBe(1);
+    expect(pointsForSpend(999)).toBe(1);
+  });
+
+  it("reads a bigint total, which is what an order carries", () => {
+    expect(pointsForSpend(50_000n)).toBe(SPIN_COST);
+  });
+
+  it("awards nothing for a free or nonsense total", () => {
+    expect(pointsForSpend(0)).toBe(0);
+    expect(pointsForSpend(-5_000)).toBe(0);
+    expect(pointsForSpend(Number.NaN)).toBe(0);
   });
 });

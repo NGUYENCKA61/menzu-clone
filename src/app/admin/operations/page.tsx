@@ -9,18 +9,13 @@ import { db } from "@/lib/db";
 import { listFeedback, listTopUps } from "@/lib/queries";
 import { listSpinPrizesForAdmin } from "@/lib/spinPrizes";
 import { expireStaleTopUps } from "@/lib/topupStore";
+import { dayStamp } from "@/lib/dayGroups";
 
 export const metadata: Metadata = { title: "Vận hành | Quản trị" };
 export const dynamic = "force-dynamic";
 
 function formatWhen(date: Date): string {
-  return date.toLocaleString("vi-VN", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  return dayStamp(date);
 }
 
 const TABS = ["feedback", "topups", "refunds", "spin", "parcels"] as const;

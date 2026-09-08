@@ -1190,7 +1190,11 @@ export interface TopUpRow {
   code: string;
   method: string;
   carrier: string | null;
+  /** What was asked for — a card's face value, a transfer's figure. */
   amount: number;
+  /** What the wallet received. Lower than `amount` on a card once the fee
+   *  comes off; null on rows written before the column, which read `amount`. */
+  credited: number | null;
   status: string;
   createdAt: Date;
 }
@@ -1207,6 +1211,7 @@ export async function getTopUps(userId: string, take = 10): Promise<TopUpRow[]> 
     method: t.method,
     carrier: t.carrier,
     amount: Number(t.amount),
+    credited: t.credited === null ? null : Number(t.credited),
     status: t.status,
     createdAt: t.createdAt,
   }));

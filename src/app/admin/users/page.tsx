@@ -11,29 +11,18 @@ import { GAP, pageCount, pageRange, pageStrip, parsePage } from "@/lib/paging";
 import { listUsers } from "@/lib/queries";
 import { hasUserFilters, parseUserFilters, USERS_PER_PAGE } from "@/lib/users";
 import { userWhere } from "@/lib/userStore";
+import { dayKey, dayStamp } from "@/lib/dayGroups";
 
 export const metadata: Metadata = { title: "Người dùng | Quản trị" };
 export const dynamic = "force-dynamic";
 
 function formatDate(date: Date | null): string | null {
-  if (!date) return null;
-  return date.toLocaleDateString("vi-VN", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-  });
+  return date ? dayKey(date) : null;
 }
 
 /** The last sign-in needs the hour too — "hôm nay" is not an answer to when. */
 function formatDateTime(date: Date | null): string | null {
-  if (!date) return null;
-  return date.toLocaleString("vi-VN", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  return date ? dayStamp(date) : null;
 }
 
 export default async function AdminUsersPage({

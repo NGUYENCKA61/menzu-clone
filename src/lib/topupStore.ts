@@ -79,7 +79,7 @@ export type CreditResult =
  */
 export async function creditTopUp(
   code: string,
-  options: { expectAmount?: number; note?: string; byHand?: boolean } = {},
+  options: { expectAmount?: number; note?: string; by?: string; byHand?: boolean } = {},
 ): Promise<CreditResult> {
   const topUp = await db.topUp.findUnique({
     where: { code },
@@ -141,7 +141,11 @@ export async function creditTopUp(
         // difference between that and what the wallet was credited.
         data: {
           status: "COMPLETED",
+          // The face value stays put on a card; only the bank path rewrites
+          // the request to what actually arrived.
           ...(cardKept > 0 ? {} : { amount: received }),
+          // …and this is the one figure every screen should read.
+          credited: received,
         },
       });
       if (claimed.count === 0) throw new Error("ALREADY_HANDLED");
@@ -164,7 +168,12 @@ export async function creditTopUp(
             cardKept > 0
               ? `Nạp thẻ cào · ${topUp.code} · thẻ ${requested.toLocaleString("vi-VN")}đ, phí ${cardKept.toLocaleString("vi-VN")}đ`
               : creditLine(topUp.code, requested, Number(received)),
-          method: options.note ?? (topUp.method === "CARD" ? "Thẻ Cào" : "Ngân Hàng"),
+          method:
+            options.note ??
+            (() => {
+              const word = topUp.method === "CARD" ? "Thẻ Cào" : "Ngân Hàng";
+              return options.by ? `${word} · duyệt bởi ${options.by}` : word;
+            })(),
         },
       });
 
@@ -223,7 +232,7 @@ export async function creditTopUp(
       await announceToAdmins({
         title: `Nạp lệch số tiền · ${topUp.code}`,
         body: `${topUp.user.username} chuyển ${Number(received).toLocaleString("vi-VN")}đ cho lệnh ${requested.toLocaleString("vi-VN")}đ. Ví đã cộng đúng số nhận, lệnh đã ghi lại theo số nhận.`,
-        cta: { label: "Xem nạp tiền", href: "/admin/topups" },
+        cta: { label: "Xem nạp tiền", href: "/admin/operations?tab=topups" },
       });
     }
   }
@@ -263,7 +272,7 @@ async function flagHeldTransfer(
     if (told) return;
     await announceToAdmins({
       ...notice,
-      cta: { label: "Mở hàng đợi nạp", href: "/admin/topups" },
+      cta: { label: "Mở hàng đợi nạp", href: "/admin/operations?tab=topups" },
     });
   } catch {
     // The report still carries it; the bell is the convenience.

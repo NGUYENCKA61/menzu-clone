@@ -10,6 +10,26 @@
 /** Points one spin costs. */
 export const SPIN_COST = 100;
 
+/** What a shopper has to spend to earn one spin, in đồng. */
+export const VND_PER_SPIN = 50_000;
+
+/**
+ * The points a purchase earns.
+ *
+ * Proportional rather than a whole spin per 50.000đ: a 120.000đ order would
+ * otherwise throw away 20.000đ of spending, and two 30.000đ orders would earn
+ * nothing at all while one 60.000đ order earned a spin. Counted per đồng, the
+ * remainders keep and the headline still holds exactly — 50.000đ is 100
+ * points, which is one spin.
+ *
+ * Rounded down, so the shop never owes a point it did not sell.
+ */
+export function pointsForSpend(total: bigint | number): number {
+  const spent = typeof total === "bigint" ? Number(total) : total;
+  if (!Number.isFinite(spent) || spent <= 0) return 0;
+  return Math.floor((spent * SPIN_COST) / VND_PER_SPIN);
+}
+
 /**
  * NOTHING, POINTS, BALANCE and VOUCHER settle themselves inside the spin's own
  * transaction — the last by minting a discount code on the spot. ITEM cannot:

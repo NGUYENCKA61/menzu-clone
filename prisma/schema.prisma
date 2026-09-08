@@ -60,6 +60,11 @@ model User {
   /// account: the bot looks the buyer up by this on every message.
   telegramId   String?    @unique
   avatarUrl    String?
+
+  /// The cover picture on this member's own overview page, chosen by them.
+  /// Null falls back to the shop's banner and then to the catalogue cover,
+  /// so the page is never bare for somebody who never set one.
+  bannerUrl    String?
   role         UserRole   @default(MEMBER)
   /// Address seen at the last successful sign-in, for support lookups.
   /// Best-effort: it comes from a proxy header, so treat it as a hint.
@@ -1356,6 +1361,11 @@ model TopUp {
   user      User        @relation(fields: [userId], references: [id])
   method    TopUpMethod
   amount    BigInt
+  /// What the wallet actually received. A scratch card credits net of the
+  /// shop's fee while `amount` keeps the card's face value — the number the
+  /// customer typed and the desk redeems — so the two are not the same fact.
+  /// Null on every row written before this column, which read `amount`.
+  credited  BigInt?
   status    TopUpStatus @default(PENDING)
   /// Carrier for CARD top-ups ("1. Chọn nhà mạng").
   carrier   String?

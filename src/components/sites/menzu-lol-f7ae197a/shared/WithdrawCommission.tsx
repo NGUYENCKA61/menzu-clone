@@ -64,7 +64,11 @@ export function WithdrawCommission({ amount }: { amount: number }) {
         onClick={withdraw}
         disabled={pending || amount <= 0}
         title={amount <= 0 ? "Chưa có hoa hồng để rút" : undefined}
-        className="inline-flex h-9 shrink-0 items-center rounded-lg border border-amber-400/40 bg-amber-400/10 px-4 text-[10px] font-black uppercase tracking-widest text-amber-300 transition-colors hover:bg-amber-400/20 disabled:cursor-not-allowed disabled:opacity-50"
+        className={`inline-flex h-9 shrink-0 items-center rounded-lg border px-4 text-[10px] font-black uppercase tracking-widest transition-colors disabled:cursor-not-allowed ${
+          amount > 0
+            ? "border-[var(--menzu-accent)]/40 bg-[var(--menzu-accent)]/10 text-[var(--menzu-accent)] hover:bg-[var(--menzu-accent)]/20"
+            : "border-white/10 bg-white/[0.03] text-neutral-500"
+        }`}
       >
         {pending ? "Đang rút…" : "Rút tiền"}
       </button>

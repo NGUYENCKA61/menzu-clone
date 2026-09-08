@@ -46,30 +46,35 @@ export const TIER_RULES: Record<MemberTierValue, TierRule> = {
 /** Each tier keeps its metal wherever it is printed. */
 export const TIER_STYLE: Record<
   MemberTierValue,
-  { text: string; bar: string; tile: string }
+  { text: string; bar: string; tile: string; glow: string }
 > = {
   CLASSIC: {
     text: "text-neutral-300",
+    glow: "[text-shadow:0_0_14px_rgba(212,212,212,0.45)]",
     bar: "bg-neutral-300",
     tile: "border-neutral-300/30 bg-neutral-300/10 text-neutral-200",
   },
   GOLD: {
     text: "text-amber-300",
+    glow: "[text-shadow:0_0_14px_rgba(251,191,36,0.55)]",
     bar: "bg-amber-400",
     tile: "border-amber-400/30 bg-amber-400/10 text-amber-300",
   },
   PLATINUM: {
     text: "text-cyan-300",
+    glow: "[text-shadow:0_0_14px_rgba(34,211,238,0.55)]",
     bar: "bg-cyan-400",
     tile: "border-cyan-400/30 bg-cyan-400/10 text-cyan-300",
   },
   DIAMOND: {
     text: "text-violet-300",
+    glow: "[text-shadow:0_0_14px_rgba(167,139,250,0.6)]",
     bar: "bg-violet-400",
     tile: "border-violet-400/30 bg-violet-400/10 text-violet-300",
   },
   ELITE: {
     text: "text-rose-300",
+    glow: "[text-shadow:0_0_14px_rgba(251,113,133,0.6)]",
     bar: "bg-rose-400",
     tile: "border-rose-400/30 bg-rose-400/10 text-rose-300",
   },

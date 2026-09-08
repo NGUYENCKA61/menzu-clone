@@ -11,6 +11,7 @@ import {
   type UserTier,
 } from "@/lib/users";
 import { userWhere } from "@/lib/userStore";
+import { dayKey } from "@/lib/dayGroups";
 
 /** Ceiling on one export, so a click cannot try to stream the whole table. */
 const EXPORT_MAX = 5000;
@@ -98,7 +99,7 @@ export async function GET(request: Request) {
       user._count.orders,
       spentByUser.get(user.id) ?? 0,
       toppedByUser.get(user.id) ?? 0,
-      user.createdAt.toLocaleDateString("vi-VN", { timeZone: "Asia/Ho_Chi_Minh" }),
+      dayKey(user.createdAt),
       user.blockedAt ? "Đã khóa" : "Đang hoạt động",
       user.blockedReason ?? "",
     ]),

@@ -76,7 +76,9 @@ export async function PATCH(request: Request) {
   }
   const result = await creditTopUp(code, {
     ...(received !== undefined ? { expectAmount: received, byHand: true } : {}),
-    note: `Ngân Hàng · duyệt bởi ${admin.username}`,
+    // Not a written-out method: this desk approves card top-ups too, and
+    // naming the method here filed every one of them under the bank.
+    by: admin.username,
   });
 
   if (!result.ok) {

@@ -1,5 +1,6 @@
 import { currentAnnouncements } from "@/lib/announcementStore";
 import { db } from "@/lib/db";
+import { dayKey } from "@/lib/dayGroups";
 import { getCurrentUser } from "@/lib/session";
 import { getShopSettings } from "@/lib/settingsStore";
 import { subscribedStatusEvents } from "@/lib/statusEvents";
@@ -33,8 +34,8 @@ export async function SiteHeader() {
         settings.telegramShopUsername ? `https://t.me/${settings.telegramShopUsername}` : null
       }
       // "5 phút trước" goes over as ISO, because it has to be measured against
-      // the reader's clock; the update date is formatted here, where the
-      // timezone is fixed and the two renders cannot disagree.
+      // the reader's clock; the update date is formatted here, on the shop's
+      // clock, so the two renders cannot disagree.
       announcements={announcements.map((a) => ({
         id: a.id,
         title: a.title,
@@ -49,11 +50,7 @@ export async function SiteHeader() {
         priority: a.priority,
         revision: a.revision,
         startAt: a.startAt.toISOString(),
-        updatedLabel: a.updatedAt.toLocaleDateString("vi-VN", {
-          day: "2-digit",
-          month: "2-digit",
-          year: "numeric",
-        }),
+        updatedLabel: dayKey(a.updatedAt),
       }))}
       cartCount={cartCount}
       statusEvents={statusEvents.map((e) => ({

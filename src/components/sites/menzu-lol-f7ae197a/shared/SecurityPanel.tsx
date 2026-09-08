@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { DiscordMark, GoogleMark } from "./OAuthButtons";
+import { TelegramGlyph } from "./BrandGlyphs";
 
 type Tab = "security" | "linked" | "devices";
 
@@ -69,6 +70,13 @@ export interface SecurityPanelProps {
   /** True once the provider's keys sit in Cấu hình. */
   googleEnabled: boolean;
   discordEnabled: boolean;
+  /**
+   * Telegram is not an OAuth door: the link is a signed t.me URL the shop bot
+   * verifies, and "linked" is the telegramId on the user row rather than an
+   * oauth_links entry. Empty when the shop has no bot configured.
+   */
+  telegramUrl?: string | null;
+  telegramLinked?: boolean;
   sessions: SessionView[];
   /** The OAuth callback lands with ?linked= — open on that tab. */
   initialTab?: Tab;
@@ -82,6 +90,8 @@ export function SecurityPanel({
   discordLinked,
   googleEnabled,
   discordEnabled,
+  telegramUrl = null,
+  telegramLinked = false,
   sessions,
   initialTab = "security",
   linkNotice = null,
@@ -371,6 +381,43 @@ export function SecurityPanel({
           {linkNotice ? <Notice tone={linkNotice.tone}>{linkNotice.text}</Notice> : null}
 
           <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+            <div className="flex items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-black/50">
+                  <TelegramGlyph className="h-5 w-5 text-[#29a9eb]" />
+                </span>
+                <span className="flex min-w-0 flex-col gap-1">
+                  <span className="text-sm font-bold leading-none text-white">Telegram</span>
+                  <span className="truncate text-[11px] leading-none text-neutral-500">
+                    {telegramLinked ? "Đã liên kết" : "Chưa liên kết"} · Mua và nhận key
+                    trong Telegram
+                  </span>
+                </span>
+                {telegramLinked ? (
+                  <span className="ml-auto inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3.5 text-[10px] font-black uppercase tracking-widest text-emerald-300">
+                    <Check size={12} /> Đã liên kết
+                  </span>
+                ) : telegramUrl ? (
+                  // Leaves the site for the bot, so a plain anchor with the
+                  // usual precautions rather than a router link.
+                  <a
+                    href={telegramUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="ml-auto inline-flex h-9 shrink-0 items-center rounded-lg bg-[var(--menzu-accent)] px-4 text-[10px] font-black uppercase tracking-widest text-white transition-colors hover:bg-[var(--menzu-accent-dark)]"
+                  >
+                    Liên kết
+                  </a>
+                ) : (
+                  // Same rule as the OAuth cards: no bot in Cấu hình, no door,
+                  // and it says so rather than wearing the live accent.
+                  <span
+                    title="Chưa bật — điền bot bán hàng Telegram ở Cấu hình để mở"
+                    className="ml-auto inline-flex h-9 shrink-0 items-center rounded-lg border border-white/10 bg-white/[0.04] px-4 text-[10px] font-black uppercase tracking-widest text-neutral-400"
+                  >
+                    Chưa mở
+                  </span>
+                )}
+              </div>
             {providers.map((provider) => (
               <div
                 key={provider.key}
