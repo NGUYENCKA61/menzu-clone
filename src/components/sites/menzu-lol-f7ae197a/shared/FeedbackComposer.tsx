@@ -343,7 +343,7 @@ export function FeedbackComposer({ user, today }: { user: ComposerUser; today: s
                     type="button"
                     title={`${n} sao`}
                     onClick={() => setRating(n)}
-                    className="focus:outline-none transition-transform hover:scale-110 active:scale-95"
+                    className="rounded transition-transform hover:scale-110 active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60"
                   >
                     <Star
                       size={28}

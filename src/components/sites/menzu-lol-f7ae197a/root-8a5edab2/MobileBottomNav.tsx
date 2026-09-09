@@ -61,13 +61,17 @@ export function MobileBottomNav() {
               aria-current={current ? "page" : undefined}
               className={
                 current
-                  ? "flex flex-col items-center justify-center gap-1 text-[var(--menzu-accent)] transition-colors"
-                  : "flex flex-col items-center justify-center gap-1 text-neutral-500 hover:text-[var(--menzu-accent)] transition-colors"
+                  ? "press-nav flex flex-col items-center justify-center text-[var(--menzu-accent)] transition-colors"
+                  : "press-nav flex flex-col items-center justify-center text-neutral-500 hover:text-[var(--menzu-accent)] transition-colors"
               }
             >
-              <Icon size={18} />
-              <span className="text-[9px] font-bold uppercase tracking-wider whitespace-nowrap">
-                {label}
+              {/* One child, so the press has one thing to sink: the icon and
+                  its label move together, and the tab's own box stays put. */}
+              <span className="flex flex-col items-center gap-1">
+                <Icon size={18} />
+                <span className="text-[9px] font-bold uppercase tracking-wider whitespace-nowrap">
+                  {label}
+                </span>
               </span>
             </Link>
           );

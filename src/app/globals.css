@@ -1363,6 +1363,47 @@ body.lightbox-open .site-nav {
 .link-pending ~ svg {
   color: var(--menzu-accent);
 }
+
+/* One press for every control that takes a finger.
+
+   319 buttons, and eleven of them answered a press with anything at all;
+   the rest spoke only in :hover, which does not exist on a phone. A press is
+   a 1px sink and a 1.5% shrink over 90ms - done before the finger lifts,
+   never the toy-shop scale-95 on a full-width button. Declared outside the
+   utility layer, so it owns the element's whole transition: the colour
+   timings are Tailwind's own 150ms, kept, and transform joins them.
+
+   Under reduced motion the shrink goes and a slight darkening stands in;
+   an answer that is only removed is a control that stopped answering. */
+.press {
+  transition-property: transform, color, background-color, border-color, box-shadow, opacity;
+  transition-duration: 90ms, 150ms, 150ms, 150ms, 150ms, 150ms;
+  transition-timing-function: cubic-bezier(0.2, 0, 0.2, 1);
+}
+.press:active:not(:disabled) {
+  transform: translateY(1px) scale(0.985);
+}
+/* The phone's bottom tabs: the press goes on the icon-and-label inside the
+   link, not on the link. Scaling a 9px label's whole cell blurs it; scaling
+   the pair a touch more, from its own centre, reads as the tab answering. */
+.press-nav > * {
+  transition: transform 90ms cubic-bezier(0.2, 0, 0.2, 1);
+}
+.press-nav:active > * {
+  transform: translateY(1px) scale(0.94);
+}
+@media (prefers-reduced-motion: reduce) {
+  .press,
+  .press-nav > * {
+    transition-property: color, background-color, border-color, box-shadow, opacity;
+    transition-duration: 150ms;
+  }
+  .press:active:not(:disabled),
+  .press-nav:active > * {
+    transform: none;
+    filter: brightness(0.92);
+  }
+}
 @media (prefers-reduced-motion: reduce) {
   .link-pending {
     animation: none;

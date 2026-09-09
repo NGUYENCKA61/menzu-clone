@@ -376,7 +376,7 @@ export function AccountBuyPanel({ account }: AccountBuyPanelProps) {
                   ),
                 )
               }
-              className="h-10 w-16 bg-transparent text-center text-sm font-black text-white outline-none"
+              className="h-10 w-16 rounded-lg bg-transparent text-center text-sm font-black text-white outline-none focus-visible:ring-2 focus-visible:ring-[var(--menzu-accent)]/50"
             />
             <button
               type="button"
@@ -399,7 +399,7 @@ export function AccountBuyPanel({ account }: AccountBuyPanelProps) {
           type="button"
           disabled={soldOut}
           onClick={openDialog}
-          className="w-full h-14 rounded-2xl bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] disabled:opacity-50 transition-colors text-[13px] font-black uppercase tracking-widest text-white"
+          className="press w-full h-14 rounded-2xl bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] disabled:opacity-50 text-[13px] font-black uppercase tracking-widest text-white"
         >
           Mua ngay
         </button>

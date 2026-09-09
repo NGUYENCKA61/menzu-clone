@@ -208,7 +208,7 @@ function RatingStars({
           type="button"
           title={`${n} sao`}
           onClick={() => onPick(n === value ? 0 : n)}
-          className="transition-all active:scale-90 hover:scale-125"
+          className="rounded transition-transform hover:scale-110 active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60"
         >
           <Star
             size={size}

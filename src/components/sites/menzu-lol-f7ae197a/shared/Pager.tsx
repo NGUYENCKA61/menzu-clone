@@ -13,7 +13,7 @@ import { GAP, pageRange, pageStrip } from "@/lib/paging";
  */
 
 const SHAPE =
-  "flex h-8 min-w-8 items-center justify-center rounded-lg border px-2 text-[12px] font-semibold transition-colors";
+  "press flex h-8 min-w-8 items-center justify-center rounded-lg border px-2 text-[12px] font-semibold";
 const CHIP_CURRENT = `${SHAPE} border-rose-500/60 bg-rose-500/15 text-rose-400`;
 const CHIP_IDLE = `${SHAPE} border-white/[0.08] bg-white/[0.03] text-neutral-300 hover:bg-white/[0.08] hover:text-white`;
 const CHIP_OFF = `${SHAPE} border-white/[0.06] text-neutral-700 cursor-default`;

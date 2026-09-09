@@ -128,7 +128,10 @@ export function OrderReviewForm({ orderId, onDone }: { orderId: string; onDone: 
               aria-label={`${n} sao`}
               onMouseEnter={() => setHover(n)}
               onClick={() => setRating(n)}
-              className="p-0.5"
+              // The same press the /feedback picker makes, and a ring for
+              // the keyboard: five identical buttons with no focus state is
+              // a row nobody can tab through.
+              className="rounded p-0.5 transition-transform hover:scale-110 active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60"
             >
               <Star
                 className={`h-8 w-8 transition-colors ${

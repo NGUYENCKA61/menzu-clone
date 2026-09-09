@@ -11,10 +11,10 @@
  */
 
 export const CHIP_INACTIVE =
-  "px-3 py-1.5 rounded-lg text-[11px] font-bold border border-neutral-800/60 bg-neutral-950/40 text-neutral-400 hover:text-white hover:border-neutral-700 transition-colors whitespace-nowrap";
+  "press px-3 py-1.5 rounded-lg text-[11px] font-bold border border-neutral-800/60 bg-neutral-950/40 text-neutral-400 hover:text-white hover:border-neutral-700 whitespace-nowrap";
 
 export const CHIP_ACTIVE =
-  "px-3 py-1.5 rounded-lg text-[11px] font-bold border border-[var(--menzu-accent)]/40 bg-[var(--menzu-accent)]/10 text-[var(--menzu-accent)] transition-colors whitespace-nowrap";
+  "press px-3 py-1.5 rounded-lg text-[11px] font-bold border border-[var(--menzu-accent)]/40 bg-[var(--menzu-accent)]/10 text-[var(--menzu-accent)] whitespace-nowrap";
 
 export const CHIP_DISABLED =
   "px-3 py-1.5 rounded-lg text-[11px] font-bold border border-neutral-800/60 bg-neutral-950/40 text-neutral-600 cursor-not-allowed whitespace-nowrap";

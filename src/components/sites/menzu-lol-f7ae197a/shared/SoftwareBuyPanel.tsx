@@ -395,7 +395,7 @@ export function SoftwareBuyPanel({
           type="button"
           disabled={busy || !chosen || !software.inStock || locked}
           onClick={() => setConfirming(true)}
-          className="w-full h-14 rounded-2xl bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] disabled:opacity-50 transition-colors text-[13px] font-black uppercase tracking-widest text-white"
+          className="press w-full h-14 rounded-2xl bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] disabled:opacity-50 text-[13px] font-black uppercase tracking-widest text-white"
         >
           Mua ngay
         </button>
@@ -403,7 +403,7 @@ export function SoftwareBuyPanel({
           type="button"
           disabled={busy || !chosen || !software.inStock || locked}
           onClick={addToCart}
-          className="w-full h-14 rounded-2xl border border-[var(--menzu-accent)]/70 bg-white/[0.02] hover:bg-white/[0.06] disabled:opacity-50 transition-colors text-[13px] font-black uppercase tracking-widest text-white"
+          className="press w-full h-14 rounded-2xl border border-[var(--menzu-accent)]/70 bg-white/[0.02] hover:bg-white/[0.06] disabled:opacity-50 text-[13px] font-black uppercase tracking-widest text-white"
         >
           Thêm vào giỏ
         </button>
