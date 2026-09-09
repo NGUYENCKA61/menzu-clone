@@ -158,7 +158,7 @@ export function SoftwareCard({
           )}
 
           {status ? (
-            <span className="absolute right-3 top-3 z-20 inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-[#0d0d12]/80 px-2.5 py-1 backdrop-blur-md">
+            <span className="absolute right-3 top-3 z-20 inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-[#0d0d12]/88 px-2.5 py-1">
               <span aria-hidden className={`h-1.5 w-1.5 rounded-full ${status.dot}`} />
               <span className={`text-[10px] font-black uppercase tracking-wide ${status.text}`}>
                 {status.label}

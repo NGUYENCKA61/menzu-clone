@@ -253,7 +253,7 @@ export function SiteHeaderClient({
     <nav
       className={`site-nav fixed top-0 left-0 right-0 z-[100] transition-all duration-300 flex flex-col ${
         scrolled
-          ? "bg-[#1a1a1a]/80 backdrop-blur-xl shadow-lg shadow-black/30"
+          ? "bg-[#141416]/97 shadow-lg shadow-black/30 sm:bg-[#1a1a1a]/80 sm:backdrop-blur-xl"
           : "bg-[#1a1a1a]"
       }`}
     >

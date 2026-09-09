@@ -159,7 +159,7 @@ export function ProductCard({ product, priority = false, eager = false }: Produc
           {/* Same pill as the tag beside it — the two corner badges should
               weigh the same. White text: the code identifies, it does not
               warn or promise. */}
-          <span className="inline-flex items-center rounded-full border border-white/10 bg-[#0d0d12]/80 px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-white backdrop-blur-md">
+          <span className="inline-flex items-center rounded-full border border-white/10 bg-[#0d0d12]/88 px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-white">
             #{product.code}
           </span>
           {product.stock !== undefined && product.stock !== null ? (
@@ -172,7 +172,7 @@ export function ProductCard({ product, priority = false, eager = false }: Produc
                same type — minus the coloured dot; the text colour carries the
                meaning: NFA green, FULL THÔNG TIN (and anything else) red. */
             <span
-              className={`inline-flex items-center gap-1 rounded-full border border-white/10 bg-[#0d0d12]/80 px-2.5 py-1 text-[10px] font-black uppercase tracking-wide backdrop-blur-md ${
+              className={`inline-flex items-center gap-1 rounded-full border border-white/10 bg-[#0d0d12]/88 px-2.5 py-1 text-[10px] font-black uppercase tracking-wide ${
                 product.tag.toUpperCase() === "NFA"
                   ? "text-emerald-400"
                   : "text-[#ff6c88]"
