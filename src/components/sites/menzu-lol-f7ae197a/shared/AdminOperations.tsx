@@ -38,6 +38,27 @@ const FIELD =
 const LABEL = "block text-[10px] font-black uppercase tracking-widest text-neutral-500 mb-1.5";
 const HINT = "mt-1.5 text-[11px] text-neutral-500";
 
+/**
+ * The reasons a top-up is actually refused, one tap each.
+ *
+ * Typed out every time, they came out differently every time — and a desk in a
+ * hurry types nothing at all, which is the case this whole field exists to
+ * stop. Split by method because a bank transfer is never refused for a used
+ * card and a card is never refused for a missing transfer note.
+ */
+const REJECT_REASONS: Record<"BANK" | "CARD", readonly string[]> = {
+  BANK: [
+    "Không tìm thấy giao dịch chuyển khoản nào khớp với mã lệnh này.",
+    "Nội dung chuyển khoản sai — vui lòng nạp lại và ghi đúng nội dung.",
+    "Số tiền chuyển không khớp với lệnh nạp.",
+  ],
+  CARD: [
+    "Thẻ sai số seri hoặc mã thẻ — kiểm tra lại rồi gửi lệnh mới.",
+    "Thẻ đã được sử dụng trước đó.",
+    "Sai mệnh giá thẻ so với số tiền của lệnh nạp.",
+  ],
+};
+
 export interface TopUpView {
   code: string;
   username: string;
@@ -193,6 +214,10 @@ export function AdminOperations({
   // payment, or one the automatic path held as implausible — types it here.
   const [received, setReceived] = useState("");
   const receivedAmount = received === "" ? 0 : Number(received);
+  // A refusal now says why, because the customer reads it: the request goes
+  // grey in their history with the desk's sentence under it.
+  const [rejecting, setRejecting] = useState<TopUpView | null>(null);
+  const [rejectNote, setRejectNote] = useState("");
   const [topUpQuery, setTopUpQuery] = useState("");
   const [topUpPage, setTopUpPage] = useState(1);
   const [fbQuery, setFbQuery] = useState("");
@@ -629,7 +654,10 @@ export function AdminOperations({
                         <button
                           type="button"
                           disabled={pending}
-                          onClick={() => call("/api/admin/topups", { code: row.code, action: "reject" })}
+                          onClick={() => {
+                            setRejecting(row);
+                            setRejectNote("");
+                          }}
                           className="h-8 px-3 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 disabled:opacity-50 text-[10px] font-black uppercase tracking-widest text-neutral-400 transition-colors whitespace-nowrap"
                         >
                           Từ chối
@@ -698,6 +726,67 @@ export function AdminOperations({
               {receivedAmount === confirming.amount
                 ? "Đúng số lệnh ghi. Sửa nếu sao kê báo số khác."
                 : `Khác lệnh ghi ${formatVnd(confirming.amount)}đ — ví cộng đúng số này, lệnh được ghi lại theo số này.`}
+            </p>
+          </div>
+        ) : null}
+      </ConfirmDialog>
+
+      <ConfirmDialog
+        open={rejecting !== null}
+        danger
+        pending={pending}
+        title="Từ chối lệnh nạp này?"
+        body={
+          rejecting
+            ? `Lệnh ${rejecting.code} của ${rejecting.username} sẽ chuyển sang Từ chối và không cộng tiền. Lý do bên dưới hiện thẳng trong lịch sử nạp của khách.`
+            : ""
+        }
+        confirmLabel="Từ chối lệnh nạp"
+        onCancel={() => setRejecting(null)}
+        onConfirm={async () => {
+          if (!rejecting) return;
+          await call("/api/admin/topups", {
+            code: rejecting.code,
+            action: "reject",
+            // Left out when nothing was written, so the column stays null
+            // rather than holding an empty sentence.
+            ...(rejectNote.trim() ? { note: rejectNote.trim() } : {}),
+          });
+          setRejecting(null);
+        }}
+      >
+        {rejecting ? (
+          <div>
+            <span className={LABEL}>Lý do gửi cho khách</span>
+            <div className="mb-2 flex flex-wrap gap-1.5">
+              {REJECT_REASONS[rejecting.method === "CARD" ? "CARD" : "BANK"].map((reason) => (
+                <button
+                  key={reason}
+                  type="button"
+                  onClick={() => setRejectNote(reason)}
+                  className={
+                    rejectNote === reason
+                      ? "rounded-lg border border-[var(--menzu-accent)]/50 bg-[var(--menzu-accent)]/15 px-2.5 py-1.5 text-left text-[11px] font-semibold text-[var(--menzu-accent)] transition-colors"
+                      : "rounded-lg border border-white/10 bg-white/[0.03] px-2.5 py-1.5 text-left text-[11px] font-medium text-neutral-400 transition-colors hover:border-white/20 hover:text-white"
+                  }
+                >
+                  {reason}
+                </button>
+              ))}
+            </div>
+            <textarea
+              id="topup-reject-note"
+              rows={2}
+              maxLength={200}
+              value={rejectNote}
+              onChange={(event) => setRejectNote(event.target.value)}
+              placeholder="Hoặc tự viết lý do…"
+              className={`${FIELD} resize-none`}
+            />
+            <p className={HINT}>
+              {rejectNote.trim()
+                ? `Khách sẽ đọc đúng câu này. Còn ${200 - rejectNote.length} ký tự.`
+                : "Bỏ trống cũng được, nhưng khách sẽ chỉ thấy chữ Từ chối và sẽ nhắn hỏi."}
             </p>
           </div>
         ) : null}

@@ -22,6 +22,8 @@ export async function PATCH(request: Request) {
     action?: string;
     /** What the statement actually shows, when it is not the request's figure. */
     amount?: unknown;
+    /** Why it is being refused. Goes back to the customer as written. */
+    note?: unknown;
   } | null;
 
   const code = body?.code?.trim();
@@ -43,6 +45,11 @@ export async function PATCH(request: Request) {
 
   // --- reject --------------------------------------------------------------
   if (body?.action === "reject") {
+    // The reason, kept short. It is written into the customer's history, so a
+    // pasted screenful of log would push the row's own facts off the card;
+    // two hundred characters is a sentence and then some.
+    const note =
+      typeof body.note === "string" ? body.note.trim().slice(0, 200) || null : null;
     // Still PENDING is checked by the write itself, not by the read above it.
     // The automatic credit path runs constantly — every customer sitting on
     // the transfer screen polls it — so money can land in the seconds between
@@ -50,7 +57,7 @@ export async function PATCH(request: Request) {
     // that had already been paid into the wallet and written into the ledger.
     const rejected = await db.topUp.updateMany({
       where: { id: topUp.id, status: "PENDING" },
-      data: { status: "FAILED" },
+      data: { status: "FAILED", note },
     });
     if (rejected.count === 0) {
       return NextResponse.json(

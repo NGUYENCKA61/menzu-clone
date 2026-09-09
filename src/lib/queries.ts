@@ -1196,6 +1196,8 @@ export interface TopUpRow {
    *  comes off; null on rows written before the column, which read `amount`. */
   credited: number | null;
   status: string;
+  /** Why the desk refused it, when it did. */
+  note: string | null;
   createdAt: Date;
 }
 
@@ -1213,6 +1215,7 @@ export async function getTopUps(userId: string, take = 10): Promise<TopUpRow[]> 
     amount: Number(t.amount),
     credited: t.credited === null ? null : Number(t.credited),
     status: t.status,
+    note: t.note,
     createdAt: t.createdAt,
   }));
 }

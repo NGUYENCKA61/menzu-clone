@@ -1381,6 +1381,11 @@ model TopUp {
   cardSerial String?
   cardPin    String?
 
+  /// Why the desk refused it, in the desk's own words. Only ever set on a
+  /// FAILED row, and shown to the customer: a refusal with no reason reads as
+  /// the shop keeping the money, and the answer ends up in chat anyway.
+  note      String?
+
   /// The 1% its referrer earned when this was credited, if any.
   earning   ReferralEarning?
   createdAt DateTime    @default(now())

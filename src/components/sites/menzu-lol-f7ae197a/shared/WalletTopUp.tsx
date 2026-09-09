@@ -54,6 +54,8 @@ export interface TopUpHistoryRow {
    *  off; null on rows that predate the column, which read `amount`. */
   credited: number | null;
   status: string;
+  /** Why the desk refused it. Null on every row that was not refused. */
+  note?: string | null;
   /** Pre-formatted on the server so the two renders cannot disagree. */
   createdAt: string;
   /** ISO deadline while the request is still waiting; null once it is not. */
@@ -421,6 +423,13 @@ function HistoryList({
                   {row.method === "CARD" ? `${row.carrier ?? "Thẻ cào"} · ` : ""}
                   {row.createdAt}
                 </span>
+                {/* The desk's answer to "tại sao", on the row it belongs to.
+                    A refusal that says only "Từ chối" reads as the shop
+                    keeping the money, and the reason was asked for in chat
+                    every single time. */}
+                {row.note ? (
+                  <span className="text-[11px] leading-snug text-red-400/80">{row.note}</span>
+                ) : null}
               </div>
 
               {/* Money talks in colour: green and signed once credited, struck

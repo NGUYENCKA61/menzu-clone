@@ -74,6 +74,9 @@ export default async function WalletPage() {
           amount: row.amount,
           credited: row.credited,
           status: row.status,
+          // Only carried on a refusal: it is the desk's answer to "why", and
+          // on any other row there is no question being asked.
+          note: row.status === "FAILED" ? row.note : null,
           createdAt: formatWhen(row.createdAt),
           // Rebuilt with the same helper the create route uses, so a pending
           // row can reopen as the full invoice after a reload.
