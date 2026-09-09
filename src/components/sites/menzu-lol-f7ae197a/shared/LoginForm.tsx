@@ -311,6 +311,7 @@ export function LoginForm({
                     {pending ? <Loader2 size={14} className="animate-spin motion-reduce:animate-none" aria-hidden /> : null}
                     {pending ? "ĐANG XỬ LÝ…" : "ĐĂNG NHẬP"}
                   </button>
+                  <span role="status" aria-live="polite" className="sr-only">{pending ? "Đang xử lý" : ""}</span>
                 </form>
 
                 <div className="flex items-center gap-4 my-7">

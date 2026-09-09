@@ -931,6 +931,7 @@ export function CartView({
             {busy ? "Đang xử lý…" : "Thanh toán"}
           </button>
         )}
+        <span role="status" aria-live="polite" className="sr-only">{busy ? "Đang xử lý" : ""}</span>
 
         <p className="relative mt-3 text-[11px] leading-relaxed text-neutral-500">
           Trừ thẳng vào số dư ví. Key được giao ngay sau khi thanh toán.

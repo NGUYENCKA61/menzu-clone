@@ -1362,6 +1362,8 @@ body.lightbox-open .site-nav {
 }
 .link-pending ~ svg {
   color: var(--menzu-accent);
+  /* The same hold as the wash, so the two arrive together. */
+  transition: color 0s linear 120ms;
 }
 
 /* One press for every control that takes a finger.
@@ -1416,12 +1418,16 @@ html[data-filtering] .catalog-grid {
   .press:active:not(:disabled),
   .press-nav:active > * {
     transform: none;
-    filter: brightness(0.92);
+    /* Additive, not multiplicative: brightness() on a near-black chip is a
+       one-step change nobody sees. An inset wash of white paints over any
+       ground and under the label. */
+    box-shadow: inset 0 0 0 100vmax rgb(255 255 255 / 0.08);
   }
 }
 @media (prefers-reduced-motion: reduce) {
+  /* No fade, but the hold stays: it is what keeps a fast navigation from
+     flashing, and that is not a motion preference. */
   .link-pending {
-    animation: none;
-    opacity: 1;
+    animation: link-pending-in 0s linear 120ms forwards;
   }
 }

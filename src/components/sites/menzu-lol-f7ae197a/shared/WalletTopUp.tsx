@@ -1027,6 +1027,7 @@ export function WalletTopUp({
             {pending ? <Loader2 size={14} className="animate-spin motion-reduce:animate-none" aria-hidden /> : null}
             {pending ? "Đang xử lý…" : "Tạo hóa đơn"}
           </button>
+          <span role="status" aria-live="polite" className="sr-only">{pending ? "Đang xử lý" : ""}</span>
         </form>
       ) : (
         <form

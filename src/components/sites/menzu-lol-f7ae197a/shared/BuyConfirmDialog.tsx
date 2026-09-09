@@ -423,6 +423,9 @@ export function ConfirmFooter({
 }) {
   return (
     <>
+      {/* What the spinner says, for a reader that cannot see it: aria-busy
+          on a disabled control is announced by nothing. */}
+      <span role="status" aria-live="polite" className="sr-only">{busy ? "Đang xử lý" : ""}</span>
       <button type="button" onClick={onCancel} className={FOOTER_GHOST_BTN}>
         Huỷ
       </button>

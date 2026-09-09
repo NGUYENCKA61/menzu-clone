@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { ImagePlus, Loader2, Send, X } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { REASON_MAX, REASON_MIN } from "@/lib/refundRequests";
 
@@ -31,19 +31,26 @@ export function RefundRequestForm({
   const router = useRouter();
   const [reason, setReason] = useState("");
   const [file, setFile] = useState<File | null>(null);
+  const [preview, setPreview] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // The preview is a value derived from the file, not state kept in step
-  // with it: one object URL per file, made when the file changes and revoked
-  // when it is replaced or the form unmounts. An effect that set state on
-  // every change was a render for nothing.
-  const preview = useMemo(() => (file ? URL.createObjectURL(file) : null), [file]);
-  useEffect(() => {
-    if (!preview) return;
-    return () => URL.revokeObjectURL(preview);
-  }, [preview]);
+  // One object URL alive at a time, made where the file is picked. Made in
+  // render it ran twice under StrictMode and leaked one per pick; set from
+  // an effect it was a render for nothing. The unmount effect revokes the
+  // last one.
+  const pickFile = (next: File | null) => {
+    setPreview((old) => {
+      if (old) URL.revokeObjectURL(old);
+      return next ? URL.createObjectURL(next) : null;
+    });
+    setFile(next);
+  };
+  useEffect(() => () => {
+    if (preview) URL.revokeObjectURL(preview);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- unmount only
+  }, []);
 
   const short = reason.trim().length < REASON_MIN;
   const left = REASON_MIN - reason.trim().length;
@@ -119,7 +126,7 @@ export function RefundRequestForm({
             <button
               type="button"
               onClick={() => {
-                setFile(null);
+                pickFile(null);
                 if (inputRef.current) inputRef.current.value = "";
               }}
               aria-label="Bỏ ảnh"
@@ -139,7 +146,7 @@ export function RefundRequestForm({
               className="hidden"
               onChange={(event) => {
                 const picked = event.target.files?.[0] ?? null;
-                setFile(picked);
+                pickFile(picked);
                 setError(null);
               }}
             />

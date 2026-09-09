@@ -243,6 +243,10 @@ export function UserMenu({ user }: { user: HeaderUser }) {
                       <Link
                         key={href}
                         href={href}
+                        // Close on the click itself. A bare anchor used to
+                        // close this by reloading the page; a router link
+                        // to the page already open reloads nothing.
+                        onClick={() => setOpen(false)}
                         aria-current={active ? "page" : undefined}
                         className={`${ROW} ${
                           active
