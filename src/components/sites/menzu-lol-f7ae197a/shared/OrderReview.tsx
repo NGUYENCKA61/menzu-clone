@@ -145,7 +145,7 @@ export function OrderReviewForm({ orderId, onDone }: { orderId: string; onDone: 
           onChange={(event) => setBody(event.target.value.slice(0, 1000))}
           rows={5}
           placeholder="Tool dùng thế nào, giao key nhanh không, hỗ trợ ra sao…"
-          className="mt-2 w-full resize-none rounded-xl border border-white/10 bg-black/30 px-4 py-3 text-sm text-white outline-none placeholder:text-neutral-600 focus:border-white/25"
+          className="mt-2 w-full resize-none rounded-xl border border-white/10 bg-neutral-950/60 px-4 py-3 text-sm text-white outline-none transition-colors placeholder:text-neutral-600 focus:border-[var(--menzu-accent)]/60"
         />
         <div className="mt-2 flex flex-wrap items-center justify-between gap-2 text-[11px] font-semibold">
           <span className="text-neutral-500">Ít nhất {WORDS_MIN} ký tự, tối đa 1000.</span>
