@@ -967,11 +967,18 @@ export async function getOrders(userId: string): Promise<OrderRow[]> {
     // exactly as an ordinary account's do.
     packageLabel: o.product.accountPool ? null : (o.package?.label ?? null),
     quantity: o.quantity,
-    keys: o.licenseKeys.map((k) => ({
-      value: k.value,
-      expiresAt: k.expiresAt,
-      expired: k.expiresAt !== null && k.expiresAt < now,
-    })),
+    // Only while the order stands. A refunded order had its money given back,
+    // and a licence that keeps working after that is the tool sold for
+    // nothing — the sign-in of an account order has always been withdrawn the
+    // same way, and the key was the one thing left behind.
+    keys:
+      o.status === "PAID"
+        ? o.licenseKeys.map((k) => ({
+            value: k.value,
+            expiresAt: k.expiresAt,
+            expired: k.expiresAt !== null && k.expiresAt < now,
+          }))
+        : [],
     // What the sale promised, less what it handed over. An account order and
     // every software order from before the shop kept keys carry keysOwed 0,
     // so neither ever reads as waiting.

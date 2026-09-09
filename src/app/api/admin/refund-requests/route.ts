@@ -4,6 +4,9 @@ import { getAdmin } from "@/lib/admin";
 import { announceToUser } from "@/lib/announcementStore";
 import { db } from "@/lib/db";
 import { readRefundAmount } from "@/lib/refundRequests";
+import { absoluteUrl } from "@/lib/seo";
+import { pointsForSpend } from "@/lib/spin";
+import { escapeTelegramHtml, notifyTelegramAdmins } from "@/lib/telegramNotify";
 import { makeCode } from "@/lib/topupStore";
 import { creditWallet } from "@/lib/wallet";
 
@@ -63,7 +66,23 @@ export async function PATCH(request: Request) {
       status: true,
       userId: true,
       orderId: true,
-      order: { select: { code: true, total: true } },
+      order: {
+        select: {
+          code: true,
+          total: true,
+          // Read for the notice below: a refunded account order leaves an
+          // account nobody can buy and nobody has told the desk about.
+          product: {
+            select: {
+              code: true,
+              name: true,
+              status: true,
+              productType: true,
+              accountPool: true,
+            },
+          },
+        },
+      },
     },
   });
   if (!found) {
@@ -139,6 +158,20 @@ export async function PATCH(request: Request) {
       });
       if (settled.count === 0) throw new Error("ALREADY_REFUNDED");
 
+      // The spins that spending bought go back with the money. Otherwise a
+      // buy-and-refund is a free wheel: 100.000đ spent and refunded still
+      // earned a spin, and the shop pays the prize out of nothing.
+      //
+      // GREATEST rather than a plain decrement: the points may already have
+      // been spun away, and an account holding minus fifty points would be
+      // barred from spinning until it bought its way back to zero. Written as
+      // one statement so a spin settling at the same instant cannot slip
+      // between a read and a write.
+      const earned = pointsForSpend(Number(found.order.total));
+      if (earned > 0) {
+        await tx.$executeRaw`UPDATE "users" SET "points" = GREATEST("points" - ${earned}, 0) WHERE "id" = ${found.userId}`;
+      }
+
       if (method !== "WALLET") return;
 
       // Incremented by the database rather than computed from a figure read a
@@ -188,6 +221,23 @@ export async function PATCH(request: Request) {
       ? { cta: { label: "Xem giao dịch", href: "/transactions" } }
       : {}),
   });
+
+  // One account, sold once, refunded, and still marked sold. Nobody can buy
+  // it and nothing says so, which is how an account quietly leaves the shelf
+  // for good. It is not put back automatically on purpose: the buyer has seen
+  // the password, so relisting is a decision with a password change in front
+  // of it — this only makes sure somebody is asked to make it.
+  const sold = found.order.product;
+  if (sold.productType === "ACCOUNT_GAME" && !sold.accountPool && sold.status === "SOLD") {
+    await notifyTelegramAdmins(
+      [
+        "♻️ <b>Acc đã hoàn tiền, vẫn đang “Đã bán”</b>",
+        escapeTelegramHtml(`#${sold.code} — ${sold.name ?? sold.code} · đơn ${found.order.code}`),
+        "Khách đã biết mật khẩu: đổi mật khẩu rồi mới mở bán lại.",
+        `🔗 ${absoluteUrl(`/admin/products/${sold.code}`)}`,
+      ].join("\n"),
+    );
+  }
 
   return NextResponse.json({ ok: true });
 }

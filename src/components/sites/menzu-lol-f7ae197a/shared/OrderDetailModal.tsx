@@ -734,7 +734,9 @@ export function OrderDetailModal({
                           ) : null}
                           {order.keys.length === 0 && order.keysPending === 0 ? (
                             <p className="text-xs text-neutral-400">
-                              Đơn này chưa có tài khoản để hiển thị.
+                              {order.refunded
+                                ? "Đơn đã được hoàn tiền — thông tin đăng nhập đã thu hồi."
+                                : "Đơn này chưa có tài khoản để hiển thị."}
                             </p>
                           ) : null}
                         </div>
@@ -801,7 +803,9 @@ export function OrderDetailModal({
                             {order.keys.length === 0 &&
                             order.keysPending === 0 ? (
                               <p className="text-xs text-neutral-400">
-                                Đơn này chưa có key để hiển thị.
+                                {order.refunded
+                                  ? "Đơn đã được hoàn tiền — key đã thu hồi."
+                                  : "Đơn này chưa có key để hiển thị."}
                               </p>
                             ) : null}
                           </div>
