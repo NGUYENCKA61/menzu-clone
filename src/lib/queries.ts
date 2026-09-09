@@ -1529,11 +1529,27 @@ export async function listAdminCategories(): Promise<AdminCategoryRow[]> {
 }
 
 export async function listTopUps(take = 200): Promise<AdminTopUpRow[]> {
-  const rows = await db.topUp.findMany({
-    orderBy: { createdAt: "desc" },
-    take,
-    include: { user: { select: { username: true, avatarUrl: true } } },
-  });
+  // Everything still waiting, and then recent history to fill the screen.
+  //
+  // Ordering the whole table by date and taking the newest 200 meant a burst
+  // of new requests could push a customer's real one — money already sent,
+  // waiting to be credited — off the only screen that can credit it, and the
+  // search box only looks at what was loaded. Waiting requests are the work;
+  // they come first and none of them is ever left out.
+  const [waiting, settled] = await Promise.all([
+    db.topUp.findMany({
+      where: { status: "PENDING" },
+      orderBy: { createdAt: "desc" },
+      include: { user: { select: { username: true, avatarUrl: true } } },
+    }),
+    db.topUp.findMany({
+      where: { status: { not: "PENDING" } },
+      orderBy: { createdAt: "desc" },
+      take,
+      include: { user: { select: { username: true, avatarUrl: true } } },
+    }),
+  ]);
+  const rows = [...waiting, ...settled];
   return rows.map((t) => ({
     code: t.code,
     username: t.user.username,

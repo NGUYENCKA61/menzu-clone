@@ -14,6 +14,15 @@ import {
 } from "@/lib/topup";
 
 /**
+ * How many requests one account may leave open at once.
+ *
+ * Five is more than anybody needs — a person transfers, waits, and is credited
+ * — and few enough that no single account can bury the desk under a queue only
+ * it can see past.
+ */
+const MAX_OPEN_REQUESTS = 5;
+
+/**
  * Opens a top-up request. It does not add money.
  *
  * The wallet is credited when an admin confirms the transfer on the Vận hành
@@ -113,11 +122,26 @@ export async function POST(request: Request) {
     }
   }
 
-  // No cap on how many requests can be open at once. There used to be one,
-  // back when every request needed an admin to read the bank statement and two
-  // pending transfers of the same amount were hard to tell apart. Each request
-  // carries its own code in the transfer description, so they are told apart by
-  // the code, not by being rationed.
+  // A ceiling on how many requests one account can leave open.
+  //
+  // Not about telling them apart — each carries its own code in the transfer
+  // description, which is why the old cap went. It is about the desk: the
+  // queue is the only screen that credits a bank transfer or redeems a card,
+  // and an account that opens a few hundred requests pushes everybody else's
+  // real ones off it. Nobody legitimately has six transfers in flight; the
+  // ones already open expire on their own, so this never becomes a wall.
+  const open = await db.topUp.count({
+    where: { userId: user.id, status: "PENDING" },
+  });
+  if (open >= MAX_OPEN_REQUESTS) {
+    return NextResponse.json(
+      {
+        error: `Bạn đang có ${open} lệnh nạp chưa hoàn tất. Hoàn tất hoặc huỷ bớt rồi tạo lệnh mới.`,
+      },
+      { status: 429 },
+    );
+  }
+
   const topUp = await db.topUp.create({
     data: {
       code: makeTopUpCode(),
