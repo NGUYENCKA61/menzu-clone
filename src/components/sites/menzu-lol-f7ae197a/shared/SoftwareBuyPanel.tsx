@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
-import { Headphones, Minus, Plus, RefreshCw, ShieldCheck, Zap } from "lucide-react";
+import { Headphones, Loader2, Minus, Plus, RefreshCw, ShieldCheck, Zap } from "lucide-react";
 
 import {
   badgePillClass,
@@ -16,6 +16,7 @@ import { productHref } from "@/lib/routes";
 import { BadgeIcon } from "./BadgeIcon";
 import { formatVnd } from "./productData";
 import { SoftwareCheckoutDialog } from "./SoftwareCheckoutDialog";
+import { StatusToast } from "./StatusToast";
 import { isSalesLocked, salesLockReason } from "@/lib/softwareStatus";
 
 export interface SoftwarePackageView {
@@ -132,7 +133,7 @@ export function SoftwareBuyPanel({
   const [quantity, setQuantity] = useState(1);
 
   const [busy, setBusy] = useState(false);
-  const [msg, setMsg] = useState<{ tone: "ok" | "err"; text: string } | null>(
+  const [toast, setToast] = useState<{ tone: "success" | "error"; text: string } | null>(
     null,
   );
   const [confirming, setConfirming] = useState(false);
@@ -162,13 +163,13 @@ export function SoftwareBuyPanel({
   // giỏ" line about the other tier would argue with the price above it.
   function pickPackage(id: string) {
     setPackageId(id);
-    setMsg(null);
+    setToast(null);
   }
 
   async function addToCart() {
     if (!chosen) return;
     setBusy(true);
-    setMsg(null);
+    setToast(null);
     try {
       const res = await fetch("/api/cart", {
         method: "POST",
@@ -190,16 +191,16 @@ export function SoftwareBuyPanel({
         count?: number;
       };
       if (!res.ok) {
-        setMsg({ tone: "err", text: data.error ?? "Không thêm được vào giỏ" });
+        setToast({ tone: "error", text: data.error ?? "Không thêm được vào giỏ" });
         return;
       }
-      setMsg({
-        tone: "ok",
+      setToast({
+        tone: "success",
         text: `Đã thêm ${chosen.label} ×${quantity} vào giỏ hàng`,
       });
       router.refresh();
     } catch {
-      setMsg({ tone: "err", text: "Không kết nối được máy chủ" });
+      setToast({ tone: "error", text: "Không kết nối được máy chủ" });
     } finally {
       setBusy(false);
     }
@@ -357,19 +358,6 @@ export function SoftwareBuyPanel({
         </button>
       </div>
 
-      {msg ? (
-        <p
-          role="alert"
-          className={
-            msg.tone === "ok"
-              ? "rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-[12px] font-semibold text-emerald-400"
-              : "rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-[12px] font-semibold text-red-400"
-          }
-        >
-          {msg.text}
-        </p>
-      ) : null}
-
       {locked ? (
         <p className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-[13px] leading-relaxed text-red-300">
           Tool {salesLockReason(software.softwareStatus)}, shop tạm khóa mua key. Theo dõi kênh
@@ -403,9 +391,11 @@ export function SoftwareBuyPanel({
           type="button"
           disabled={busy || !chosen || !software.inStock || locked}
           onClick={addToCart}
-          className="press w-full h-14 rounded-2xl border border-[var(--menzu-accent)]/70 bg-white/[0.02] hover:bg-white/[0.06] disabled:opacity-50 text-[13px] font-black uppercase tracking-widest text-white"
+          aria-busy={busy}
+          className="press flex w-full h-14 items-center justify-center gap-2 rounded-2xl border border-[var(--menzu-accent)]/70 bg-white/[0.02] hover:bg-white/[0.06] disabled:opacity-50 text-[13px] font-black uppercase tracking-widest text-white"
         >
-          Thêm vào giỏ
+          {busy ? <Loader2 size={14} className="animate-spin motion-reduce:animate-none" aria-hidden /> : null}
+          {busy ? "Đang thêm…" : "Thêm vào giỏ"}
         </button>
       </div>
 
@@ -447,6 +437,14 @@ export function SoftwareBuyPanel({
         quantity={quantity}
         risky={software.softwareStatus === "RISKY"}
       />
+      {toast ? (
+        <StatusToast
+          tone={toast.tone}
+          title={toast.tone === "success" ? "Đã thêm vào giỏ" : "Chưa thêm được"}
+          message={toast.text}
+          onClose={() => setToast(null)}
+        />
+      ) : null}
     </div>
   );
 }

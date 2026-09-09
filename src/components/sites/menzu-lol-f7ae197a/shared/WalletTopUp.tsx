@@ -528,6 +528,10 @@ export function WalletTopUp({
   const [credited, setCredited] = useState<Credited | null>(null);
   /** The desk turned this request down while the screen was watching it. */
   const [refused, setRefused] = useState<{ code: string; note: string | null } | null>(null);
+  /** The QR picture comes from a third party. Until it lands the frame says
+   *  so; if it never does, the frame says that too, with a way to try again. */
+  const [qr, setQr] = useState<"loading" | "ready" | "failed">("loading");
+  const [qrTry, setQrTry] = useState(0);
 
   // The request this page watches: the one just opened, or whatever the server
   // says is still unpaid and recent. Watching one specific code, rather than
@@ -657,6 +661,7 @@ export function WalletTopUp({
       // No reload: the balance has not moved yet and will not until the shop
       // confirms, and reloading would throw away the transfer instructions the
       // customer is about to use.
+      setQr("loading");
       setDone({
         code: data.invoiceCode ?? "",
         amount: data.amount ?? 0,
@@ -711,6 +716,7 @@ export function WalletTopUp({
    * QR — for the customer who closed the tab mid-transfer and came back.
    */
   function openRow(row: TopUpHistoryRow) {
+    setQr("loading");
     setDone({
       code: row.code,
       amount: row.amount,
@@ -854,14 +860,53 @@ export function WalletTopUp({
               {/* VietQR renders the bank, account, amount and description into
                   one scan. Plain <img>: it is a third-party URL and adding it
                   to next/image's allow-list would be config for one picture. */}
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={`https://img.vietqr.io/image/${encodeURIComponent(bank.code)}-${encodeURIComponent(bank.account)}-compact2.png?amount=${done.amount}&addInfo=${encodeURIComponent(done.transferNote)}&accountName=${encodeURIComponent(bank.holder)}`}
-                alt={`Mã QR chuyển khoản ${formatVnd(done.amount)}đ`}
-                width={220}
-                height={310}
-                className="w-[220px] h-auto shrink-0 rounded-xl bg-white"
-              />
+              {/* Three states in one 220×310 frame, so the invoice never
+                  jolts. Dark until the picture is here — a white block on the
+                  money screen is what it used to show while it waited on a
+                  third party, and what it showed forever when that party did
+                  not answer. The ground turns white only with the picture,
+                  never a beat before it. */}
+              <div
+                className={`relative h-[310px] w-[220px] shrink-0 overflow-hidden rounded-xl border transition-colors ${
+                  qr === "ready" ? "border-white bg-white" : "border-white/10 bg-white/[0.04]"
+                }`}
+              >
+                {qr !== "failed" ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    key={qrTry}
+                    src={`https://img.vietqr.io/image/${encodeURIComponent(bank.code)}-${encodeURIComponent(bank.account)}-compact2.png?amount=${done.amount}&addInfo=${encodeURIComponent(done.transferNote)}&accountName=${encodeURIComponent(bank.holder)}${qrTry ? `&r=${qrTry}` : ""}`}
+                    alt={`Mã QR chuyển khoản ${formatVnd(done.amount)}đ`}
+                    width={220}
+                    height={310}
+                    onLoad={() => setQr("ready")}
+                    onError={() => setQr("failed")}
+                    className={`h-auto w-[220px] transition-opacity duration-200 ${qr === "ready" ? "opacity-100" : "opacity-0"}`}
+                  />
+                ) : null}
+                {qr === "loading" ? (
+                  <span className="absolute inset-0 flex items-center justify-center text-[11px] font-semibold text-neutral-500">
+                    Đang tạo mã QR…
+                  </span>
+                ) : null}
+                {qr === "failed" ? (
+                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 px-4 text-center">
+                    <p className="text-[11px] leading-relaxed text-neutral-400">
+                      Không tải được mã QR — bạn vẫn chuyển khoản được bằng thông tin bên cạnh.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setQr("loading");
+                        setQrTry((n) => n + 1);
+                      }}
+                      className="press rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-[10px] font-black uppercase tracking-widest text-neutral-300 hover:bg-white/10"
+                    >
+                      Thử lại
+                    </button>
+                  </div>
+                ) : null}
+              </div>
 
               <div className="flex-1 min-w-0 flex flex-col gap-2.5">
                 <CopyRow label="Ngân hàng" value={bank.name || bank.code} copyable={false} onCopy={copy} copied={copied} />
