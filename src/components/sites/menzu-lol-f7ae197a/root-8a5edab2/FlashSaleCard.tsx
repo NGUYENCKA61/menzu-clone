@@ -1,4 +1,4 @@
-import Image from "next/image";
+import { CardImage } from "@/components/sites/menzu-lol-f7ae197a/shared/CardImage";
 import Link from "next/link";
 import { ShoppingCart } from "lucide-react";
 import { getAccountImagePath, type FlashSaleItem } from "./flashSaleData";
@@ -27,7 +27,7 @@ export function FlashSaleCard({ item }: FlashSaleCardProps) {
         )}
 
         <div className="relative aspect-[4/3] w-full overflow-hidden bg-neutral-900 rounded-[10px]">
-          <Image
+          <CardImage
             src={item.imageUrl ?? getAccountImagePath(item.code)}
             alt={`Tài khoản #${item.code}`}
             fill

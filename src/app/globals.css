@@ -1431,3 +1431,44 @@ html[data-filtering] .catalog-grid {
     animation: link-pending-in 0s linear 120ms forwards;
   }
 }
+
+/* A card's picture on its way (shared/CardImage.tsx). The sweep is the
+   shimmer-sweep keyframe that has sat unused since it was written, held
+   back 120ms so a cached picture never shows it; the picture itself fades in
+   over 260ms on a wrapper of its own, opacity only. Under reduced motion the
+   sweep becomes a still wash and the fade is dropped. */
+@keyframes card-wait-in {
+  to {
+    opacity: 1;
+  }
+}
+.card-image-wait {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  overflow: hidden;
+  pointer-events: none;
+  animation: card-wait-in 0s linear 120ms forwards;
+}
+.card-image-wait::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(100deg, transparent 30%, rgb(255 255 255 / 0.06) 50%, transparent 70%);
+  animation: shimmer-sweep 1.4s ease-in-out infinite;
+}
+.card-image-in {
+  transition: opacity 260ms cubic-bezier(0.2, 0, 0.2, 1);
+}
+.card-image-in.is-waiting {
+  opacity: 0;
+}
+@media (prefers-reduced-motion: reduce) {
+  .card-image-wait::after {
+    animation: none;
+    background: rgb(255 255 255 / 0.04);
+  }
+  .card-image-in {
+    transition: none;
+  }
+}

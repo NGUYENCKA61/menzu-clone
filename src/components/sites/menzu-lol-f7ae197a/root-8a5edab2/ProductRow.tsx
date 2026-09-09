@@ -1,4 +1,4 @@
-import Image from "next/image";
+import { CardImage } from "@/components/sites/menzu-lol-f7ae197a/shared/CardImage";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -226,7 +226,7 @@ function RowCard({
             again, once per pictureless tile, to use as an image. The frame
             keeps its shape either way. */}
         {card.image ? (
-          <Image
+          <CardImage
             src={card.image}
             alt={card.title}
             fill

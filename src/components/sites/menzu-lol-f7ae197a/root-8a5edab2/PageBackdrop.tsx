@@ -1,4 +1,4 @@
-import Image from "next/image";
+import { CardImage } from "@/components/sites/menzu-lol-f7ae197a/shared/CardImage";
 
 /**
  * Fixed full-viewport background artwork that sits behind every page, under a
@@ -14,13 +14,13 @@ export function PageBackdrop({ src }: { src?: string }) {
   return (
     <div className="fixed top-0 left-0 w-full h-[100vh] z-[-1] overflow-hidden pointer-events-none">
       {src ? (
-        <Image
+        <CardImage
           src={src}
           alt=""
           fill
           priority
           sizes="100vw"
-          className="object-cover object-center transition-all duration-700"
+          className="object-cover object-center"
         />
       ) : null}
       <div className="absolute inset-0 bg-[#0a0a0d]/70" />

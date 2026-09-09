@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { CardImage } from "@/components/sites/menzu-lol-f7ae197a/shared/CardImage";
 import { SiteLink } from "./SiteLink";
 import { Lock } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
@@ -15,6 +16,10 @@ import {
 
 export interface ProductCardProps {
   product: Product;
+  /** First in its grid: preloaded. One per page, since each is a <link rel=preload>. */
+  priority?: boolean;
+  /** Second and third: fetched before the rest, no preload. */
+  eager?: boolean;
 }
 
 /** Alt text for the tier icons, which are images and say nothing on their own. */
@@ -49,7 +54,7 @@ const CAROUSEL_INTERVAL_MS = 2500;
  * every part of the tile leads there and the pill is a styled span rather than
  * a nested control.
  */
-export function ProductCard({ product }: ProductCardProps) {
+export function ProductCard({ product, priority = false, eager = false }: ProductCardProps) {
   const skinChips = product.skinChips ?? [];
   const pct = discountPct(product);
 
@@ -123,7 +128,7 @@ export function ProductCard({ product }: ProductCardProps) {
       className="group flex h-full w-full flex-col overflow-hidden rounded-[15px] border border-[#24252a] bg-[#101114] transition-all duration-[250ms] hover:-translate-y-1 hover:border-[var(--menzu-accent)]/50 hover:shadow-[0_15px_40px_#00000088]"
     >
       <div className="relative aspect-[16/10] w-full overflow-hidden bg-[#17181b]">
-        <Image
+        <CardImage
           src={product.imageUrl ?? productImage(product.code)}
           // A stock code is not a description. Somebody hearing this read out
           // learns what the picture is of — the rank and how many skins are on
@@ -137,6 +142,10 @@ export function ProductCard({ product }: ProductCardProps) {
           }
           fill
           sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+          // The first card of a grid is preloaded, the next two fetched
+          // eagerly; the rest wait their turn. Never both on one picture —
+          // Next warns, and priority already implies eager.
+          {...(priority ? { priority: true } : eager ? { loading: "eager" as const } : {})}
           className="object-cover object-[85%_center] transition-transform duration-500 group-hover:scale-105"
         />
         {/* A fade along the bottom edge so the picture hands off to the body

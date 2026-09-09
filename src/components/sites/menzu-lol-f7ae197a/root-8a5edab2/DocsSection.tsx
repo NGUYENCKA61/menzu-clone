@@ -1,5 +1,5 @@
 import { ArrowRight, Eye } from "lucide-react";
-import Image from "next/image";
+import { CardImage } from "@/components/sites/menzu-lol-f7ae197a/shared/CardImage";
 import Link from "next/link";
 
 /** What a card needs, which is less than a whole article row. */
@@ -56,7 +56,7 @@ export function DocsSection({ articles }: { articles: DocCard[] }) {
             className="group flex flex-col overflow-hidden rounded-2xl border border-white/[0.07] bg-white/[0.02] transition-colors hover:border-white/15 hover:bg-white/[0.04]"
           >
             <div className="relative aspect-[16/9] w-full overflow-hidden bg-[#0a0a0c]">
-              <Image
+              <CardImage
                 src={article.thumbnailUrl}
                 alt=""
                 fill

@@ -1,7 +1,7 @@
 "use client";
 
 import { ArrowRight, ChevronDown } from "lucide-react";
-import Image from "next/image";
+import { CardImage } from "@/components/sites/menzu-lol-f7ae197a/shared/CardImage";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
@@ -60,9 +60,15 @@ const STATUS: Record<string, { dot: string; text: string; label: string }> = {
 export function SoftwareCard({
   software,
   variant = "shelf",
+  priority = false,
+  eager = false,
 }: {
   software: SoftwareCardView;
   variant?: "shelf" | "compact";
+  /** First in its grid: preloaded. One per page. */
+  priority?: boolean;
+  /** Second and third: fetched before the rest, no preload. */
+  eager?: boolean;
 }) {
   const [packageId, setPackageId] = useState("");
   const [hint, setHint] = useState(false);
@@ -137,11 +143,12 @@ export function SoftwareCard({
       <Link href={detailHref} className="block">
         <div className="relative grid aspect-[16/9] w-full place-items-center overflow-hidden rounded-t-[14px] bg-[linear-gradient(135deg,#171922,#36151e,#0d0e12)]">
           {software.imageUrl ? (
-            <Image
+            <CardImage
               src={software.imageUrl}
               alt={software.name}
               fill
               sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+              {...(priority ? { priority: true } : eager ? { loading: "eager" as const } : {})}
               className="object-cover transition-transform duration-500 group-hover:scale-[1.025]"
             />
           ) : (
