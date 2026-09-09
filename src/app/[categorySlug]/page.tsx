@@ -56,6 +56,22 @@ const SOFTWARE_STATUSES = {
   detected: "DETECTED",
 } as const;
 
+/**
+ * The shop's own line about this shelf, under the shelf's heading.
+ *
+ * It was written in the admin and printed only on the home page's tile, which
+ * left every category page — most of the shop's addresses — with no prose of
+ * its own at all: nothing for a reader arriving from a search to read, and
+ * nothing for the search to have found. Drawn nothing when the shop has
+ * written nothing, rather than a blank line where it would be.
+ */
+function CategoryBlurb({ text }: { text: string }) {
+  if (!text.trim()) return null;
+  return (
+    <p className="max-w-[760px] text-[13px] leading-relaxed text-neutral-400">{text}</p>
+  );
+}
+
 /** A blank or junk parameter means "no filter", never an error page. */
 function toAmount(raw: string | undefined): number | undefined {
   if (!raw) return undefined;
@@ -75,7 +91,15 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
         .filter(Boolean)
         .join(" và ")
     : "";
-  const description = `${name} tại THICHTHIHACK${kinds ? ` — ${kinds}` : ""}: giá tốt, giao dịch tự động, uy tín.`;
+  // The shop's own sentence about the shelf, when it has written one: it says
+  // something this page has that every other category page does not, where the
+  // built one differs only in the name it starts with.
+  const written = data?.description?.trim() ?? "";
+  const description = written
+    ? written.length > 160
+      ? `${written.slice(0, 157).trimEnd()}…`
+      : written
+    : `${name} tại THICHTHIHACK${kinds ? ` — ${kinds}` : ""}: giá tốt, giao dịch tự động, uy tín.`;
   return {
     title: `Danh mục ${name}`,
     description,
@@ -195,9 +219,12 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
                 {/* Named after the shelf, not the kind of goods: "Danh mục Hack
                     Valorant" says where you are, where "Phần mềm" only said
                     what these tiles were. */}
-                <h2 className="text-lg sm:text-xl font-black uppercase tracking-wider text-white">
-                  Danh mục {data.name}
-                </h2>
+                <div className="flex flex-col gap-2.5">
+                  <h2 className="text-lg sm:text-xl font-black uppercase tracking-wider text-white">
+                    Danh mục {data.name}
+                  </h2>
+                  <CategoryBlurb text={data.description} />
+                </div>
                 <SoftwareFilterPanel
                   hint={softwareSearchHint(
                     data.name,
@@ -242,6 +269,15 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
                 <h2 className="text-lg sm:text-xl font-black uppercase tracking-wider text-white mb-5">
                   Danh mục tài khoản game {data.name.replace(/^hacks+/i, "")}
                 </h2>
+
+                {/* Only when the tools above did not already carry it: the
+                    sentence describes the shelf, and a shelf says a thing
+                    about itself once. */}
+                {data.softwareTotal > 0 ? null : (
+                  <div className="mb-5">
+                    <CategoryBlurb text={data.description} />
+                  </div>
+                )}
 
                 <CategoryFilterPanel hotPicks={hotPicks} />
 

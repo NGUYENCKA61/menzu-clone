@@ -192,6 +192,8 @@ export const LISTED_PRODUCT = {
 export interface CategoryPageData {
   name: string;
   slug: string;
+  /** The shop's own line about this shelf; "" when it has written none. */
+  description: string;
   /** Accounts. Paged, filtered and sorted by the panel above the grid. */
   products: Product[];
   /**
@@ -483,6 +485,10 @@ export async function getCategoryPage(
   return {
     name: category.name,
     slug: category.slug,
+    // Written once in the admin and until now printed only on the home page's
+    // tile. It is the only sentence about this shelf the shop has written,
+    // and this is the page it was written about.
+    description: category.description ?? "",
     total,
     accountTotal,
     softwareTotal,
