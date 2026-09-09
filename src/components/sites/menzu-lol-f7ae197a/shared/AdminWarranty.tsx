@@ -7,6 +7,7 @@ import { CheckCircle2, ExternalLink, Wrench } from "lucide-react";
 
 import {
   WARRANTY_ISSUE,
+  WARRANTY_REPLIES,
   WARRANTY_STATUS,
   type WarrantyIssue,
   type WarrantyStatus,
@@ -200,6 +201,26 @@ function TicketCard({ row }: { row: WarrantyRow }) {
 
       {open ? (
         <div className="mt-4 flex flex-col gap-2.5 border-t border-white/[0.06] pt-4">
+          {/* The three answers this kind of fault actually gets. Tapped in,
+              then edited — a reply is required to close a ticket, so without
+              these the quickest way to close one was the worst sentence. */}
+          <div className="flex flex-wrap gap-1.5">
+            {WARRANTY_REPLIES[row.issue].map((reply) => (
+              <button
+                key={reply}
+                type="button"
+                onClick={() => setNote(reply)}
+                title={reply}
+                className={
+                  note === reply
+                    ? "max-w-full truncate rounded-lg border border-[var(--brand)]/50 bg-[var(--brand)]/15 px-2.5 py-1.5 text-left text-[11px] font-semibold text-[var(--brand)] transition-colors"
+                    : "max-w-full truncate rounded-lg border border-white/10 bg-white/[0.03] px-2.5 py-1.5 text-left text-[11px] font-medium text-neutral-400 transition-colors hover:border-white/20 hover:text-white"
+                }
+              >
+                {reply}
+              </button>
+            ))}
+          </div>
           <textarea
             value={note}
             onChange={(event) => setNote(event.target.value.slice(0, 500))}

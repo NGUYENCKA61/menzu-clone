@@ -31,6 +31,42 @@ export const WARRANTY_ISSUE: Record<WarrantyIssue, { label: string; hint: string
 
 export const WARRANTY_ISSUE_KEYS = Object.keys(WARRANTY_ISSUE) as WarrantyIssue[];
 
+/**
+ * The answers the desk actually gives, one tap each, per kind of fault.
+ *
+ * A warranty reply is read by a customer who is already unhappy, and typed by
+ * somebody working through a queue. Typed fresh every time it comes out
+ * shorter and blunter each time — and the reply is required to close a ticket,
+ * so the fastest way to close one was always the worst sentence. These are the
+ * shop's own wording, editable after a tap: the point is a decent first draft,
+ * not a form letter.
+ *
+ * Each list ends with the answer that is not good news, because that one needs
+ * the most care and is the one nobody wants to compose twice.
+ */
+export const WARRANTY_REPLIES: Record<WarrantyIssue, readonly string[]> = {
+  KEY_INVALID: [
+    "Shop đã cấp key mới cho đơn này, bạn xem lại trong Lịch sử mua hàng nhé.",
+    "Key đã được gia hạn thêm đúng thời gian bạn bị mất, bạn kiểm tra lại giúp shop.",
+    "Key này đang bị trùng phiên đăng nhập. Bạn thoát hết máy cũ rồi nhập lại giúp shop nhé.",
+  ],
+  DETECTED: [
+    "Tool đang bị phát hiện, shop đã tạm ngưng bán và đang cập nhật bản mới. Bạn tạm dừng dùng và theo dõi kênh trạng thái, có bản mới shop báo ngay.",
+    "Bản mới đã cập nhật xong, bạn tải lại ở phần Link tải hack trong đơn rồi dùng bình thường nhé.",
+    "Shop đã bù thêm thời gian cho đơn này vì thời gian tool ngưng hoạt động.",
+  ],
+  INSTALL: [
+    "Bạn tắt hết phần mềm diệt virus (kể cả Windows Defender) rồi giải nén lại và chạy bằng quyền Administrator giúp shop nhé.",
+    "Lỗi này do thiếu bản Visual C++ / .NET. Bạn cài theo hướng dẫn trong phần Tài liệu sử dụng của đơn rồi chạy lại nhé.",
+    "Shop đã gửi bản cài khác cho trường hợp máy của bạn, bạn xem lại link tải trong đơn nhé.",
+  ],
+  OTHER: [
+    "Shop đã xử lý xong phần này cho bạn, bạn kiểm tra lại giúp shop nhé.",
+    "Shop đã cấp lại sản phẩm cho đơn này, bạn xem trong Lịch sử mua hàng nhé.",
+    "Trường hợp này ngoài phạm vi bảo hành nên shop chưa hỗ trợ đổi/cấp lại được. Bạn nhắn shop qua kênh hỗ trợ để shop xem thêm giúp bạn.",
+  ],
+};
+
 /** The chosen issue, or the sentence to show instead of accepting it. */
 export function readIssue(
   value: unknown,
