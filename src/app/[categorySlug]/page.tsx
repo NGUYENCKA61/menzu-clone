@@ -15,6 +15,7 @@ import { SoftwareFilterPanel } from "@/components/sites/menzu-lol-f7ae197a/share
 import { db } from "@/lib/db";
 import { docHtmlToPlainText, isHtmlBody } from "@/lib/docHtml";
 import { getCategoryPage } from "@/lib/queries";
+import { breadcrumbJsonLd, itemListJsonLd, JsonLd } from "@/lib/seo";
 import { softwareSearchHint } from "@/lib/searchHint";
 import { categoryHref } from "@/lib/routes";
 import { getShopSettings } from "@/lib/settingsStore";
@@ -188,9 +189,25 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
   const hasAccounts = data.accountTotal > 0;
   const sellsNothing = !hasAccounts && data.softwareTotal === 0;
 
+  // What a crawler is told about the shelf itself. Both detail pages have had
+  // their own structured data from the start and the pages that list them had
+  // none at all — not even the trail that says where this page sits.
+  const shelf = itemListJsonLd(`Danh mục ${data.name}`, [
+    ...data.software.map((s) => ({ name: s.name, path: s.href })),
+    // An account card falls back to its code when the shop has not named it,
+    // exactly as the card itself does.
+    ...data.products.map((p) => ({ name: p.name ?? p.code, path: p.href })),
+  ]);
 
   return (
     <div className="min-h-screen flex flex-col text-white overflow-x-clip selection:bg-[var(--menzu-accent)]/30 transition-colors duration-300">
+      <JsonLd
+        data={breadcrumbJsonLd([
+          { name: "Trang chủ", path: "/" },
+          { name: data.name, path: categoryHref(data.slug) },
+        ])}
+      />
+      {shelf ? <JsonLd data={shelf} /> : null}
       <div className="w-full shrink-0 h-[104px]" />
       <SiteHeader />
 

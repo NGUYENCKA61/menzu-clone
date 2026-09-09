@@ -166,6 +166,38 @@ export function breadcrumbJsonLd(trail: { name: string; path?: string }[]) {
 }
 
 /**
+ * schema.org/ItemList for a category's shelf.
+ *
+ * The category pages are most of the shop's public addresses and carried no
+ * structured data at all — not even a breadcrumb, which both detail pages have
+ * had from the start. A crawler therefore knew a tool's price from its own page
+ * and nothing whatever about the shelf that lists forty of them.
+ *
+ * Deliberately a list of links rather than a list of Products: the entries here
+ * carry no price, and a Product with no offer is a worse answer than a plain
+ * pointer at the page that has one. Positions are one-based and follow the
+ * order the page draws.
+ */
+export function itemListJsonLd(
+  name: string,
+  items: { name: string; path: string }[],
+) {
+  if (items.length === 0) return null;
+  return {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name,
+    numberOfItems: items.length,
+    itemListElement: items.map((entry, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      name: entry.name,
+      url: absoluteUrl(entry.path),
+    })),
+  };
+}
+
+/**
  * schema.org/FAQPage for the questions in the home page's SEO block.
  *
  * The same questions the reader sees, marked up so a search engine can show
