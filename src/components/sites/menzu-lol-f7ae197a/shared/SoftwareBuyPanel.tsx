@@ -368,6 +368,15 @@ export function SoftwareBuyPanel({
           Tool {salesLockReason(software.softwareStatus)}, shop tạm khóa mua key. Theo dõi kênh
           thông báo để biết khi có bản mới.
         </p>
+      ) : software.packages.length === 0 ? (
+        // A tool the shop has listed but not priced yet. Both buttons are
+        // already dead in that case — there is no tier to put in a basket —
+        // and a page with two grey buttons and no sentence reads as broken
+        // rather than as unfinished.
+        <p className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-[13px] leading-relaxed text-amber-300">
+          Tool này shop chưa mở bán — chưa có gói và giá. Bấm theo dõi ở kênh thông báo để
+          biết khi shop mở bán nhé.
+        </p>
       ) : null}
 
       {/* Buying outright is the primary action, so it leads and carries the
