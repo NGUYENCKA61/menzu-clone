@@ -101,11 +101,16 @@ export async function creditTopUp(
   // the queue is settled at the rate the shop publishes now — the same figure
   // the customer was shown on the form.
   let cardKept = 0;
+  // The face the fee comes off: the value the customer declared, unless the
+  // desk corrects it below.
+  let cardFace = requested;
+  const cardRates =
+    topUp.method === "CARD" ? await getShopSettings() : null;
+  const netOfCard = (face: number) =>
+    cardRates ? cardNet(face, cardRates.topUpCardRates, cardRates.topUpCardFee) : face;
   if (topUp.method === "CARD") {
-    const settings = await getShopSettings();
-    const net = cardNet(requested, settings.topUpCardRates, settings.topUpCardFee);
-    cardKept = requested - net;
-    received = BigInt(net);
+    received = BigInt(netOfCard(requested));
+    cardKept = requested - Number(received);
   }
   if (options.expectAmount !== undefined) {
     if (!Number.isFinite(options.expectAmount) || options.expectAmount <= 0) {
@@ -126,7 +131,16 @@ export async function creditTopUp(
         },
       };
     }
-    received = BigInt(Math.trunc(options.expectAmount));
+    const typed = Math.trunc(options.expectAmount);
+    if (topUp.method === "CARD") {
+      // A corrected face value, not a corrected credit: the shop's cut comes
+      // off it exactly as it would have come off the declared one.
+      cardFace = typed;
+      received = BigInt(netOfCard(typed));
+      cardKept = typed - Number(received);
+    } else {
+      received = BigInt(typed);
+    }
   }
   const mismatch = cardKept === 0 && received !== topUp.amount;
 
@@ -141,9 +155,14 @@ export async function creditTopUp(
         // difference between that and what the wallet was credited.
         data: {
           status: "COMPLETED",
-          // The face value stays put on a card; only the bank path rewrites
-          // the request to what actually arrived.
-          ...(cardKept > 0 ? {} : { amount: received }),
+          // A bank request is rewritten to the money that came. A card keeps a
+          // face value — but the desk may have corrected which one, and the
+          // corrected figure is what the row should record.
+          ...(topUp.method === "CARD"
+            ? cardFace !== requested
+              ? { amount: BigInt(cardFace) }
+              : {}
+            : { amount: received }),
           // …and this is the one figure every screen should read.
           credited: received,
         },
@@ -166,7 +185,7 @@ export async function creditTopUp(
           balanceAfter,
           description:
             cardKept > 0
-              ? `Nạp thẻ cào · ${topUp.code} · thẻ ${requested.toLocaleString("vi-VN")}đ, phí ${cardKept.toLocaleString("vi-VN")}đ`
+              ? `Nạp thẻ cào · ${topUp.code} · thẻ ${cardFace.toLocaleString("vi-VN")}đ, phí ${cardKept.toLocaleString("vi-VN")}đ`
               : creditLine(topUp.code, requested, Number(received)),
           method:
             options.note ??

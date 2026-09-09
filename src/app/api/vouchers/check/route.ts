@@ -170,7 +170,13 @@ export async function POST(request: Request) {
     base = lineTotal - tierDiscountFor(lineTotal, readMemberTier(buyer?.tier));
   } else {
     const sale = await runningSalePrices([product.id]);
-    base = sale.get(product.id) ?? product.price;
+    const unit = sale.get(product.id) ?? product.price;
+    // Only a pool listing sells in multiples; a one-of-a-kind account is one
+    // account however many the caller asks for, exactly as checkout treats it.
+    const quantity = product.accountPool
+      ? Math.min(MAX_QUANTITY, Math.max(1, Math.floor(Number(body?.quantity ?? 1)) || 1))
+      : 1;
+    base = unit * BigInt(quantity);
   }
 
   const voucher = await db.voucher.findUnique({

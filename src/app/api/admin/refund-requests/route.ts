@@ -129,10 +129,15 @@ export async function PATCH(request: Request) {
       // give the money back, whichever way it goes back. Both halves in one
       // transaction: an order still marked paid beside an approved refund is
       // the pair of facts that starts an argument.
-      await tx.order.update({
-        where: { id: found.orderId },
+      //
+      // Conditional, like the claim above it: an order that is already
+      // REFUNDED has had its money back once, and a second approval — of a
+      // second request opened on the same order — must not pay it again.
+      const settled = await tx.order.updateMany({
+        where: { id: found.orderId, status: "PAID" },
         data: { status: "REFUNDED" },
       });
+      if (settled.count === 0) throw new Error("ALREADY_REFUNDED");
 
       if (method !== "WALLET") return;
 
@@ -156,6 +161,12 @@ export async function PATCH(request: Request) {
     if (error instanceof Error && error.message === "ALREADY_HANDLED") {
       return NextResponse.json(
         { error: "Yêu cầu này vừa được xử lý bởi một phiên khác." },
+        { status: 409 },
+      );
+    }
+    if (error instanceof Error && error.message === "ALREADY_REFUNDED") {
+      return NextResponse.json(
+        { error: "Đơn này đã được hoàn tiền rồi — không thể hoàn lần nữa." },
         { status: 409 },
       );
     }

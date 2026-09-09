@@ -1044,6 +1044,10 @@ model WarrantyRequest {
 /// about twice — refused once, asked again with a screenshot — and each round
 /// has its own words, its own evidence and its own date. Flattening that into
 /// the order would keep only the last one.
+/// One order can carry at most one PENDING request at a time. Said in SQL as
+/// a partial unique index (migration 20260909040000): Prisma has no syntax for
+/// "unique only while status is PENDING", and saying it in the route alone
+/// left a gap wide enough for two tabs to both get through.
 model RefundRequest {
   id        String       @id @default(cuid())
   orderId   String
