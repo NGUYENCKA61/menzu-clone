@@ -156,7 +156,66 @@ export function TransactionsTable({ rows }: { rows: LedgerView[] }) {
           </span>
         </div>
 
-        <div className="w-full overflow-x-auto rounded-xl border border-white/[0.06] bg-white/[0.02]">
+        {/* Under lg the table gives way to cards. A 760px table in a 430px
+            screen put "Biến động & Số dư" — the one thing anybody opens this
+            page to see — entirely off the right edge, with nothing to say
+            that a swipe would find it. Each transaction is one card here,
+            its figure on a line of its own, the way a bank app writes a
+            statement. */}
+        <div className="flex flex-col gap-2 lg:hidden">
+          {filtered.length === 0 ? (
+            <p className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-5 py-12 text-center text-sm text-neutral-400">
+              Không tìm thấy giao dịch nào phù hợp
+            </p>
+          ) : (
+            visible.map((row) => {
+              const glyph = glyphFor(row);
+              const Icon = glyph?.icon;
+              return (
+                <article
+                  key={row.code}
+                  className="flex items-start gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3"
+                >
+                  <span className="mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-white/[0.08] bg-white/[0.04] text-neutral-300">
+                    {Icon ? <Icon size={15} strokeWidth={2} aria-hidden /> : null}
+                    <span className="sr-only">{glyph?.label}</span>
+                  </span>
+                  <div className="flex min-w-0 flex-1 flex-col gap-1">
+                    <div className="flex items-start justify-between gap-3">
+                      <span className="line-clamp-2 text-[12.5px] font-semibold leading-snug text-neutral-100">
+                        {row.description}
+                      </span>
+                      <span
+                        className={
+                          row.delta >= 0
+                            ? "shrink-0 text-sm font-black tabular-nums text-emerald-400"
+                            : "shrink-0 text-sm font-black tabular-nums text-red-400"
+                        }
+                      >
+                        {row.delta >= 0 ? "+" : "−"}
+                        {formatVnd(Math.abs(row.delta))}đ
+                      </span>
+                    </div>
+                    {/* Time, then the code; the balance keeps the right edge
+                        even when a long clock pushes it onto its own line. */}
+                    <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5 text-[11px] text-neutral-500">
+                      <span className="tabular-nums">
+                        {row.createdAt}
+                        <span className="text-neutral-600">{" · "}</span>
+                        <span className="font-mono text-neutral-400">{row.code}</span>
+                      </span>
+                      <span className="ml-auto shrink-0 tabular-nums">
+                        Số dư {formatVnd(row.balanceAfter)}đ
+                      </span>
+                    </div>
+                  </div>
+                </article>
+              );
+            })
+          )}
+        </div>
+
+        <div className="hidden w-full overflow-x-auto rounded-xl border border-white/[0.06] bg-white/[0.02] lg:block">
         <table className="w-full min-w-[760px] table-fixed text-left">
           {/* Three fixed shares — who/when, what, how much — so a long
               description wraps inside its own column instead of squeezing
