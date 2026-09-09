@@ -13,7 +13,7 @@ import {
   KeyRound,
   Menu,
   Send,
-  Smartphone,
+  Ticket,
   Star,
   User,
   Users,
@@ -44,10 +44,18 @@ interface DropdownItem {
  */
 const LINK_HREFS: Record<string, string> = {
   "ĐÁNH GIÁ": "/feedback",
+  // Three labels that used to fall through to "#". Each now goes where it
+  // honestly leads: every tool the shop sells is software, so the software
+  // menu is the shelf of shelves; the gift events are announcements and live
+  // on the notices page; and the community is the list of the shop’s own
+  // channels.
+  "HACK PHẦN MỀM": "/categories",
+  "Sự Kiện Tặng Hack": "/thong-bao",
+  "CỘNG ĐỒNG": "/lien-he",
   "XEM TRẠNG THÁI": STATUS_TAB_HREF,
   "WIKI & HƯỚNG DẪN": "/docs",
-  "Nạp Qua ATM + Momo": "/wallet",
-  "Nạp Thẻ Điện Thoại": "/wallet",
+  "Nạp Qua Ngân Hàng": "/wallet",
+  "Nạp Thẻ Cào": "/wallet",
 }
 
 function hrefFor(label: string): string {
@@ -93,8 +101,12 @@ const HACK_CATEGORY_ITEMS: DropdownItem[] = [
 ]
 
 const NAP_TIEN_ITEMS: DropdownItem[] = [
-  { label: "Nạp Qua ATM + Momo", icon: CreditCard },
-  { label: "Nạp Thẻ Điện Thoại", icon: Smartphone },
+  // Named and marked as the wallet names and marks them: the wallet has two
+  // tabs, Ngân Hàng and Thẻ Cào, and no wallet provider at all — "Momo" was a
+  // promise nothing in the shop can keep. The card keeps the ticket the wallet
+  // gives it; a phone glyph here meant a third thing that does not exist.
+  { label: "Nạp Qua Ngân Hàng", icon: CreditCard },
+  { label: "Nạp Thẻ Cào", icon: Ticket },
 ]
 
 // Placeholder labels, left from when this menu was "HACK FREE MIỄN PHÍ": the
