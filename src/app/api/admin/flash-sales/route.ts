@@ -23,6 +23,22 @@ export async function POST(request: Request) {
   const product = await db.product.findFirst({ where: { code, deletedAt: null } });
   if (!product) return NextResponse.json({ error: "Không tìm thấy sản phẩm" }, { status: 404 });
 
+  // A tool is priced by the tier the buyer picks — 3 giờ, 30 ngày — and a
+  // flash sale carries one figure with no tier attached to it. Nothing in the
+  // shop reads that figure for a tool: the home row lists accounts only, and
+  // checkout charges the chosen package. So a sale scheduled on a tool used to
+  // save cleanly, appear in the list, and do absolutely nothing — which is
+  // worse than a refusal, because the shop believes it is running a sale.
+  if (product.productType !== "ACCOUNT_GAME") {
+    return NextResponse.json(
+      {
+        error:
+          "Flash sale chỉ áp dụng cho tài khoản game. Tool bán theo gói, muốn giảm giá thì sửa giá gói trong trang sản phẩm.",
+      },
+      { status: 400 },
+    );
+  }
+
   const salePrice = Number(body?.salePrice ?? 0);
   if (!Number.isFinite(salePrice) || salePrice <= 0) {
     return NextResponse.json({ error: "Giá sale không hợp lệ" }, { status: 400 });
