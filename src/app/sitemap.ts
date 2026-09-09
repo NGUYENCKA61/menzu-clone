@@ -23,6 +23,10 @@ const STATIC_ROUTES: [path: string, priority: number, freq: Frequency][] = [
   ["/docs", 0.4, "monthly"],
   ["/thong-bao", 0.4, "daily"],
   ["/cap-bac", 0.4, "monthly"],
+  // Worth indexing on its own: somebody who has just been messaged by a fake
+  // account searches for the shop's real addresses, and this is the page that
+  // answers that.
+  ["/lien-he", 0.4, "monthly"],
   // No /security: it is one visitor's own account page and now says noindex,
   // and listing a noindex page here hands a crawler two contradictory orders.
   ["/bio", 0.3, "yearly"],

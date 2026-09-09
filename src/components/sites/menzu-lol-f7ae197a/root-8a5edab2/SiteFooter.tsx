@@ -200,7 +200,9 @@ export async function SiteFooter() {
     { label: "Điều khoản sử dụng", href: policyHref(/điều khoản|dieu-khoan|terms/i) },
     { label: "Chính sách bảo mật", href: policyHref(/bảo mật|bao-mat|privacy/i) },
     { label: "DMCA & Bản quyền", href: policyHref(/dmca|bản quyền|ban-quyen|copyright/i) },
-    { label: "Liên hệ hỗ trợ", href: "/feedback" },
+    // /feedback is the wall of customer reviews; a reader who clicked "liên hệ
+    // hỗ trợ" wanted the shop's own addresses, which is a different page.
+    { label: "Liên hệ hỗ trợ", href: "/lien-he" },
   ];
 
   return (
