@@ -3,7 +3,7 @@
 import { Loader2, Search, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 interface Hit {
@@ -74,6 +74,33 @@ export function HeaderSearch() {
     setHits([]);
   };
 
+  // Navigate first, clear after. Clearing on Enter left an empty box and no
+  // list while the next page took its half-second — which reads as "it
+  // deleted what I typed and did nothing". The words stay, the icon turns,
+  // and the box empties once the address has actually changed. A pick that
+  // points at the page already open changes no address, so it clears at
+  // once instead.
+  const pathname = usePathname();
+  const [navigating, setNavigating] = useState(false);
+  // Adjusted during render rather than in an effect: the address changed,
+  // so the box is cleared before anything is painted for the new page.
+  const [clearedFor, setClearedFor] = useState(pathname);
+  if (clearedFor !== pathname) {
+    setClearedFor(pathname);
+    setQ("");
+    setHits([]);
+    setNavigating(false);
+  }
+  const go = (href: string) => {
+    if (href === pathname) {
+      reset();
+      return;
+    }
+    setNavigating(true);
+    setHits([]);
+    router.push(href);
+  };
+
   const onKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === "ArrowDown" && hits.length > 0) {
       event.preventDefault();
@@ -85,8 +112,7 @@ export function HeaderSearch() {
       const hit = hits[active];
       if (hit) {
         event.preventDefault();
-        reset();
-        router.push(hit.href);
+        go(hit.href);
       }
     } else if (event.key === "Escape") {
       reset();
@@ -104,7 +130,11 @@ export function HeaderSearch() {
     <div ref={box} className="relative hidden md:block">
       <div className="relative md:w-48 lg:w-60 xl:w-72">
         <label className="relative flex h-9 items-center rounded-xl border border-white/10 bg-white/5 text-neutral-300 transition-colors focus-within:border-white/25 focus-within:bg-white/[0.08]">
-          <Search size={15} aria-hidden className="ml-3 shrink-0 text-neutral-500" />
+          {navigating ? (
+            <Loader2 size={15} aria-hidden className="ml-3 shrink-0 animate-spin text-neutral-500 motion-reduce:animate-none" />
+          ) : (
+            <Search size={15} aria-hidden className="ml-3 shrink-0 text-neutral-500" />
+          )}
           <input
             // Password managers and similar extensions stamp their own attributes
             // onto text inputs before React hydrates; without this the dev overlay
@@ -150,7 +180,10 @@ export function HeaderSearch() {
                   <li key={`${hit.kind}-${hit.code}`} role="option" aria-selected={index === active}>
                     <Link
                       href={hit.href}
-                      onClick={reset}
+                      onClick={(event) => {
+                        event.preventDefault();
+                        go(hit.href);
+                      }}
                       onMouseEnter={() => setActive(index)}
                       className={`flex items-center gap-3 px-3 py-2 transition-colors ${
                         index === active ? "bg-white/[0.08]" : ""

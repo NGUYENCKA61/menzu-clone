@@ -113,9 +113,16 @@ export function LoginForm({
   }, []);
 
   /** Honour ?next= so the "Mua Ngay" gate returns you to the product. The
-   *  target was sanitised on the server and handed down as `next`. */
+   *  target was sanitised on the server and handed down as `next`, so it is
+   *  always an address inside the app — which is what lets this go through
+   *  the router. A hard window.location here threw the running application
+   *  away and put the ĐANG TẢI curtain back up for the returning customer
+   *  every single day; the register form beside it has always done it this
+   *  way. refresh() first, so the header is drawn signed-in with the cookie
+   *  the response just set. */
   function redirectAfterLogin() {
-    window.location.href = next;
+    router.refresh();
+    router.push(next);
   }
 
   async function handleSubmit(event: React.FormEvent) {

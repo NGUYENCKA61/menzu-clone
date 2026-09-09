@@ -6,6 +6,7 @@ import {
   History,
   KeyRound,
   LayoutGrid,
+  Loader2,
   LogOut,
   Shield,
   ShieldCheck,
@@ -19,6 +20,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 import { LinkPending } from "@/components/sites/menzu-lol-f7ae197a/shared/LinkPending";
+import { StatusToast } from "@/components/sites/menzu-lol-f7ae197a/shared/StatusToast";
 
 export interface HeaderUser {
   username: string;
@@ -119,14 +121,39 @@ export function UserMenu({ user }: { user: HeaderUser }) {
     };
   }, [open]);
 
+  const [leaving, setLeaving] = useState(false);
+  const [logoutFailed, setLogoutFailed] = useState(false);
+
+  // The last thing anyone does in a session, and it used to do it in
+  // silence: the menu stayed open, the row stayed lit, a second press was
+  // possible, and every failure was swallowed. The menu closes on the press
+  // — the cheapest honest answer, since an account menu means nothing once
+  // you have asked to leave — and a failure reopens it with a word.
   async function handleLogout() {
-    await fetch("/api/auth/logout", { method: "POST" }).catch(() => {});
+    if (leaving) return;
+    setLeaving(true);
+    setLogoutFailed(false);
+    setOpen(false);
+    const res = await fetch("/api/auth/logout", { method: "POST" }).catch(() => null);
+    if (!res || !res.ok) {
+      setLeaving(false);
+      setLogoutFailed(true);
+      setOpen(true);
+      return;
+    }
     router.refresh();
     router.push("/");
   }
 
   return (
     <>
+      {logoutFailed ? (
+        <StatusToast
+          title="Không đăng xuất được"
+          message="Máy chủ không trả lời. Thử lại, hoặc đóng trình duyệt để kết thúc phiên."
+          onClose={() => setLogoutFailed(false)}
+        />
+      ) : null}
       {/* A second bell used to sit here, from the captured markup: an anchor
           to "#" with a badge hard-coded to 0. It went nowhere and counted
           nothing. The one in the header beside it is the real one — it lists
@@ -270,10 +297,15 @@ export function UserMenu({ user }: { user: HeaderUser }) {
                 <button
                   type="button"
                   onClick={handleLogout}
-                  className={`${ROW} text-[var(--menzu-accent)] hover:bg-[var(--menzu-accent)]/10`}
+                  disabled={leaving}
+                  className={`${ROW} text-[var(--menzu-accent)] hover:bg-[var(--menzu-accent)]/10 disabled:opacity-70`}
                 >
-                  <LogOut size={18} className="shrink-0" />
-                  <span className={SHOUT}>Đăng xuất</span>
+                  {leaving ? (
+                    <Loader2 size={18} className="shrink-0 animate-spin motion-reduce:animate-none" aria-hidden />
+                  ) : (
+                    <LogOut size={18} className="shrink-0" />
+                  )}
+                  <span className={SHOUT}>{leaving ? "Đang đăng xuất…" : "Đăng xuất"}</span>
                 </button>
               </div>
             </div>
