@@ -526,6 +526,8 @@ export function WalletTopUp({
   const [done, setDone] = useState<Invoice | null>(null);
   const [copied, setCopied] = useState<string | null>(null);
   const [credited, setCredited] = useState<Credited | null>(null);
+  /** The desk turned this request down while the screen was watching it. */
+  const [refused, setRefused] = useState<{ code: string; note: string | null } | null>(null);
 
   // The request this page watches: the one just opened, or whatever the server
   // says is still unpaid and recent. Watching one specific code, rather than
@@ -541,14 +543,16 @@ export function WalletTopUp({
    * nothing, so this costs a request every ten seconds and no more.
    */
   useEffect(() => {
-    if (!autoEnabled || credited || !waitingCode) return;
+    if (credited || refused || !waitingCode) return;
     let stopped = false;
 
     const tick = async () => {
       try {
         // Ask the shop to read its statement. The answer is ignored: it covers
         // every customer, and may have been served from the rate-limit window.
-        await fetch("/api/wallet/sync", { method: "POST" });
+        // Only when the feed is automatic; by hand there is nothing to read,
+        // and the status call below still catches the desk's decision.
+        if (autoEnabled) await fetch("/api/wallet/sync", { method: "POST" });
 
         // Then ask about this request specifically, which also catches one
         // settled by an admin or the scheduler between two ticks.
@@ -558,6 +562,7 @@ export function WalletTopUp({
           amount?: number;
           credited?: number | null;
           balance?: number;
+          note?: string | null;
         };
         if (!stopped && data.status === "COMPLETED") {
           setCredited({
@@ -566,6 +571,15 @@ export function WalletTopUp({
             credited: data.credited ?? data.amount ?? 0,
             balance: data.balance ?? 0,
           });
+        }
+        // Turned down. The card stops breathing and says so; a spinner that
+        // keeps turning over a decided request promises something that is
+        // not happening.
+        if (!stopped && data.status === "FAILED") {
+          setRefused({ code: waitingCode, note: data.note ?? null });
+          // The history below is server-rendered and still reads "Đang chờ";
+          // with the invoice closed it is the only place the refusal shows.
+          router.refresh();
         }
       } catch {
         // A failed poll is not worth telling the customer about; the next one
@@ -579,7 +593,7 @@ export function WalletTopUp({
       stopped = true;
       window.clearInterval(timer);
     };
-  }, [waitingCode, autoEnabled, credited]);
+  }, [waitingCode, autoEnabled, credited, refused]);
 
   // Whether the request on screen has run past the window the shop holds it
   // for. Not a refusal: a late transfer still credits, so this only changes
@@ -751,8 +765,12 @@ export function WalletTopUp({
         // glow, and the hairline scan along the top edge — the same signature
         // the storefront's search fields wear.
         <div
-          className={`relative overflow-hidden rounded-2xl border-[1.5px] border-red-500/30 bg-[#111] shadow-[0_0_40px_rgba(239,68,68,0.07)] p-5 flex flex-col gap-4 ${
-            credited ? "" : "invoice-breathe"
+          className={`relative overflow-hidden rounded-2xl border-[1.5px] bg-[#111] p-5 flex flex-col gap-4 ${
+            refused
+              ? "border-red-500/70"
+              : credited
+                ? "border-red-500/30 shadow-[0_0_40px_rgba(239,68,68,0.07)]"
+                : "invoice-breathe border-red-500/30 shadow-[0_0_40px_rgba(239,68,68,0.07)]"
           }`}
         >
           <span
@@ -763,7 +781,12 @@ export function WalletTopUp({
             <span className="text-sm font-black uppercase tracking-widest text-white">
               Lệnh nạp <span className="font-mono text-red-400">{done.code}</span>
             </span>
-            {credited ? (
+            {refused ? (
+              <span className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-md bg-red-500 text-white">
+                <XCircle size={12} aria-hidden />
+                {done.method === "card" ? "Thẻ bị từ chối" : "Lệnh nạp bị từ chối"}
+              </span>
+            ) : credited ? (
               <span className="text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-md border border-emerald-500/30 bg-emerald-500/10 text-emerald-400">
                 Đã nhận được tiền · đang cập nhật ví
               </span>
@@ -777,7 +800,7 @@ export function WalletTopUp({
             )}
             {/* Placed next to the status, because it qualifies it: the request
                 is waiting, and this is how much longer it waits for. */}
-            {!credited && done.expiresAt ? (
+            {!credited && !refused && done.expiresAt ? (
               <span
                 className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-md border border-white/10 bg-white/5 text-neutral-400"
                 aria-label="Thời gian còn lại"
@@ -790,7 +813,35 @@ export function WalletTopUp({
             ) : null}
           </div>
 
-          {overdue && !credited ? (
+          {/* The desk said no. The reason it typed, or the plain fact when it
+              typed none, and the way back to the form — not a shake: this
+              arrived from a ten-second poll, not from anything the customer
+              pressed, and a card that jolts on its own is motion nobody asked
+              for. */}
+          {refused ? (
+            <div className="flex flex-col gap-3 rounded-xl border border-red-500/30 bg-red-500/[0.07] px-4 py-3">
+              <p className="text-[12.5px] leading-relaxed text-neutral-200">
+                {refused.note
+                  ? refused.note
+                  : done.method === "card"
+                    ? "Shop không nạp được thẻ này. Kiểm tra lại số seri và mã thẻ, hoặc liên hệ hỗ trợ kèm mã lệnh."
+                    : "Shop không xác nhận được lệnh nạp này. Liên hệ hỗ trợ kèm mã lệnh nếu bạn đã chuyển tiền."}
+              </p>
+              <button
+                type="button"
+                onClick={() => {
+                  setDone(null);
+                  setRefused(null);
+                  setError(null);
+                }}
+                className="press self-start rounded-lg bg-[var(--menzu-accent)] px-4 py-2 text-[11px] font-black uppercase tracking-widest text-white hover:bg-[var(--menzu-accent-dark)]"
+              >
+                {done.method === "card" ? "Nhập thẻ khác" : "Tạo lệnh khác"}
+              </button>
+            </div>
+          ) : null}
+
+          {overdue && !credited && !refused ? (
             <p className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2.5 text-[12px] leading-relaxed text-neutral-300">
               Hết thời gian giữ lệnh. Nếu bạn{" "}
               <span className="font-bold text-white">đã chuyển khoản</span>, tiền vẫn được
@@ -852,7 +903,7 @@ export function WalletTopUp({
           {/* Bottom-right on purpose: the exit door of the card, past every
               transfer detail. Gone once money has arrived — a credited
               request has nothing left to cancel. */}
-          {!credited ? (
+          {!credited && !refused ? (
             <button
               type="button"
               onClick={() => cancelByCode(done.code)}
