@@ -110,7 +110,7 @@ export function ConfirmDialog({
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
       {/* Clicking the backdrop cancels — the safe outcome, never the action. */}
-      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onCancel} />
+      <div className="order-modal-backdrop absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onCancel} />
 
       <div
         ref={panel}
@@ -118,7 +118,7 @@ export function ConfirmDialog({
         aria-modal="true"
         aria-labelledby="confirm-title"
         tabIndex={-1}
-        className="relative w-full max-w-[420px] rounded-2xl border border-white/10 bg-[#12141c] p-6 shadow-2xl outline-none"
+        className="order-modal-card relative w-full max-w-[420px] rounded-2xl border border-white/10 bg-[#12141c] p-6 shadow-2xl outline-none"
       >
         <button
           type="button"

@@ -223,14 +223,17 @@ export function SpinWheel({
           className="fixed inset-0 z-[200] flex items-center justify-center p-4"
           onClick={() => setResult(null)}
         >
-          <div className="absolute inset-0 bg-black/75 backdrop-blur-[2px]" />
+          <div className="order-modal-backdrop absolute inset-0 bg-black/75 backdrop-blur-[2px]" />
 
           <div
             role="dialog"
             aria-modal="true"
             aria-label="Kết quả vòng quay"
             onClick={(e) => e.stopPropagation()}
-            className={`relative w-full max-w-[380px] overflow-hidden rounded-2xl border bg-[#0e0e11] p-7 text-center shadow-2xl ${
+            // Rises in; no bounce. The confetti is the celebration, and a
+            // card that bounced under "Chưa trúng lần này" would be a joke at
+            // the expense of somebody who just spent points.
+            className={`order-modal-card relative w-full max-w-[380px] overflow-hidden rounded-2xl border bg-[#0e0e11] p-7 text-center shadow-2xl ${
               won ? "border-[var(--menzu-violet)]/40" : "border-white/10"
             }`}
           >

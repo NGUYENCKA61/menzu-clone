@@ -174,7 +174,7 @@ export function AccountGallery({
           aria-modal="true"
           aria-label={`Ảnh tài khoản ${code}`}
           onClick={() => setLightbox(false)}
-          className="fixed inset-0 z-[300] flex items-center justify-center bg-black/90 p-4 sm:p-8"
+          className="order-modal-backdrop fixed inset-0 z-[300] flex items-center justify-center bg-black/90 p-4 sm:p-8"
         >
           <button
             type="button"
@@ -185,8 +185,13 @@ export function AccountGallery({
             <X size={18} />
           </button>
 
+          {/* The rise is on a wrapper rather than on the picture's own box:
+              that box is the containing block for the filled <Image>, and
+              a transform on it would move the picture's frame of reference
+              mid-animation. */}
+          <div className="order-modal-card flex h-full max-h-[85vh] w-full max-w-[1280px]">
           <div
-            className="relative h-full max-h-[85vh] w-full max-w-[1280px]"
+            className="relative h-full w-full"
             onClick={(e) => e.stopPropagation()}
           >
             <Image
@@ -196,6 +201,7 @@ export function AccountGallery({
               sizes="100vw"
               className="object-contain"
             />
+          </div>
           </div>
 
           {paged ? (

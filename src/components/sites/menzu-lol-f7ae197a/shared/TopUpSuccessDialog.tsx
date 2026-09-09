@@ -72,13 +72,16 @@ export function TopUpSuccessDialog({
     <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
       {/* Its own element rather than a handler on the wrapper, so selecting the
           code to copy it does not close the sheet. */}
-      <div className="absolute inset-0 bg-black/75" onClick={onClose} />
+      <div className="error-modal-backdrop absolute inset-0 bg-black/75" onClick={onClose} />
 
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="topup-success-title"
-        className="relative w-full max-w-[380px] rounded-xl border border-white/10 bg-[#131316] px-7 py-8 text-center shadow-2xl"
+        // notice-modal-card: the same rise the error sheet makes, without
+        // its shake. This is the one sheet a customer sees at the moment
+        // their money arrives, and it used to appear in a single frame.
+        className="notice-modal-card relative w-full max-w-[380px] rounded-xl border border-white/10 bg-[#131316] px-7 py-8 text-center shadow-2xl"
       >
         <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border-2 border-rose-500 bg-rose-500/15 text-rose-500">
           <Check size={30} strokeWidth={3} />

@@ -597,7 +597,7 @@ export function AnnouncementModal({
 
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/75" onClick={onClose} />
+      <div className="order-modal-backdrop absolute inset-0 bg-black/75" onClick={onClose} />
 
       <div
         ref={panel}
@@ -605,7 +605,10 @@ export function AnnouncementModal({
         aria-modal="true"
         aria-labelledby="announcement-title"
         tabIndex={-1}
-        className="relative flex max-h-[86vh] w-full max-w-[560px] flex-col overflow-hidden rounded-xl border border-white/10 bg-[#0e0e11] shadow-2xl outline-none"
+        // The same short rise the receipt and the buy dialog make. This sheet
+        // opens itself over the hero for a first-time visitor; appearing in
+        // one frame read as a pop-up, not as the shop speaking.
+        className="order-modal-card relative flex max-h-[86vh] w-full max-w-[560px] flex-col overflow-hidden rounded-xl border border-white/10 bg-[#0e0e11] shadow-2xl outline-none"
       >
         {/* A single accent rule along the top edge — the one piece of colour
             the frame gets, so the eye lands on the sheet before the words. */}
