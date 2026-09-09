@@ -47,11 +47,6 @@ export interface SoftwareDetail {
    *  force it either way, and left alone it stays out of the badges' way. The
    *  storefront card shows the pill regardless. */
   showStatus: boolean;
-  /** How many whole days this tool has run without being caught — counted
-   *  from the moment it came back to a safe state, or from the day it was
-   *  listed if it never went down. Null while it is not in a safe state, and
-   *  on its first day, when "an toàn 0 ngày" says nothing. */
-  safeDays: number | null;
   /** What share of the price comes back if the tool fails, as a whole percent.
    *  Null means the shop has set none and the policy block stays silent. */
   refundRate: number | null;
@@ -239,19 +234,6 @@ export function SoftwareBuyPanel({
                 className={`text-[10px] font-black uppercase tracking-widest ${status.text}`}
               >
                 {status.label}
-              </span>
-            </span>
-          ) : null}
-          {/* The one number a buyer of a hack actually weighs. "Chưa phát
-              hiện" is a state; "an toàn 47 ngày" is a record, and it is the
-              difference between a claim and evidence. Counted from the day it
-              came back up, so a tool that was caught last week cannot borrow
-              the streak it had before that. */}
-          {status && software.safeDays !== null ? (
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/[0.07] px-3 py-1.5">
-              <ShieldCheck size={12} className="text-emerald-400" />
-              <span className="text-[10px] font-black uppercase tracking-widest text-emerald-400">
-                An toàn {software.safeDays} ngày
               </span>
             </span>
           ) : null}

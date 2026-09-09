@@ -656,50 +656,6 @@ export async function hasPaidOrderFor(
  * the type as well, so an account's slug answers null here rather than
  * rendering a tool page whose every field would be blank.
  */
-/** The states in which a tool is not running clean, and its streak is over. */
-const UNSAFE_STATUSES = ["DETECTED", "UPDATING", "RISKY"] as const;
-
-/**
- * How long this tool has gone without being caught, in whole days.
- *
- * Counted from the change that brought it back up, not from the detection
- * itself: a tool caught a month ago and fixed yesterday has a streak of one
- * day, and reading it the other way would advertise a month of safety that
- * never happened. A tool that has never been caught counts from the day it was
- * listed, which is the whole of its record.
- *
- * Null while it is not in a safe state — there is no streak to print — and on
- * its first day, because "an toàn 0 ngày" is worse than saying nothing.
- */
-async function safeDaysFor(
-  productId: string,
-  status: string | null,
-  listedAt: Date,
-): Promise<number | null> {
-  if (status === null || (UNSAFE_STATUSES as readonly string[]).includes(status)) return null;
-
-  const lastFall = await db.softwareStatusEvent.findFirst({
-    where: { productId, status: { in: [...UNSAFE_STATUSES] } },
-    orderBy: { createdAt: "desc" },
-    select: { createdAt: true },
-  });
-  let since = listedAt;
-  if (lastFall) {
-    const recovery = await db.softwareStatusEvent.findFirst({
-      where: { productId, createdAt: { gt: lastFall.createdAt } },
-      orderBy: { createdAt: "asc" },
-      select: { createdAt: true },
-    });
-    // No change after the fall means the column and the history disagree —
-    // the status was edited straight on the product rather than through the
-    // desk. Trust the history and print nothing.
-    if (!recovery) return null;
-    since = recovery.createdAt;
-  }
-  const days = Math.floor((Date.now() - since.getTime()) / 86_400_000);
-  return days >= 1 ? days : null;
-}
-
 export async function getSoftwareDetail(slug: string): Promise<SoftwareDetail | null> {
   const p = await db.product.findFirst({
     where: {
@@ -721,7 +677,6 @@ export async function getSoftwareDetail(slug: string): Promise<SoftwareDetail | 
   const badges = parseBadges(p.badge);
 
   return {
-    safeDays: await safeDaysFor(p.id, p.softwareStatus, p.createdAt),
     code: p.code,
     slug: p.slug,
     // A shop that has not named the tool yet falls back to its code, which is
