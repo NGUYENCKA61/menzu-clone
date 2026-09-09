@@ -149,6 +149,20 @@ export function SoftwareBuyPanel({
 
   const total = (chosen?.price ?? 0) * quantity;
 
+  // Per day, for the chosen tier alone — the quantity is copies of the tier,
+  // not more days, so it plays no part. Rounded up: a figure the shop rounded
+  // down would be one the buyer could not actually buy at.
+  const perDay = (() => {
+    const hours = chosen?.durationHours ?? 0;
+    if (!chosen || hours < 24) return null;
+    const days = hours / 24;
+    // A lifetime tier is sold as 99999 hours; dividing that into a price
+    // prints a per-day figure of a few đồng, which is a joke rather than an
+    // argument.
+    if (days > 400) return null;
+    return Math.ceil(chosen.price / days);
+  })();
+
   // Changing the tier clears whatever the last action said — a "đã thêm vào
   // giỏ" line about the other tier would argue with the price above it.
   function pickPackage(id: string) {
@@ -299,6 +313,17 @@ export function SoftwareBuyPanel({
 
       <div className="space-y-2">
         <p className="text-4xl font-black text-white">{formatVnd(total)}đ</p>
+        {/* What the tier works out at per day. The tiers run from three hours
+            to a month, and comparing 35.000đ against 100.000đ in your head
+            while the labels say "7 ngày" and "30 ngày" is arithmetic the page
+            can do — it is also the argument for the longer tier, which is the
+            one the shop would rather sell. Only from a day up: below that the
+            figure is a fraction of a day and says nothing. */}
+        {perDay !== null ? (
+          <p className="text-[12px] font-semibold text-neutral-500">
+            ≈ {formatVnd(perDay)}đ/ngày
+          </p>
+        ) : null}
         <p className="flex items-center gap-2 text-[13px] font-semibold">
           <span
             className={`h-1.5 w-1.5 rounded-full ${
