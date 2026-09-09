@@ -2,6 +2,7 @@
 
 import { AlertTriangle, Inbox, Loader2, Search, X } from "lucide-react";
 import { useEffect, useRef, type ReactNode } from "react";
+import { lockScroll, trapTab, unlockScroll } from "./modalChrome";
 
 /** Spinner for a panel that is fetching. */
 export function AdminLoading({ label = "Đang tải…" }: { label?: string }) {
@@ -97,12 +98,20 @@ export function ConfirmDialog({
   useEffect(() => {
     if (!open) return;
     panel.current?.focus();
+    // The same lock and the same Tab trap as every other overlay: this one
+    // fronts the storefront too (the wheel's exchange button), and a
+    // confirm box the page scrolls away behind reads as pasted on.
+    lockScroll();
 
     const onKey = (event: KeyboardEvent) => {
       if (event.key === "Escape") onCancel();
+      if (event.key === "Tab" && panel.current) trapTab(panel.current, event);
     };
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      unlockScroll();
+    };
   }, [open, onCancel]);
 
   if (!open) return null;

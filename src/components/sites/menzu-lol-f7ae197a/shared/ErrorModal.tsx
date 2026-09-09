@@ -2,6 +2,7 @@
 
 import { Check, X } from "lucide-react";
 import { useEffect, useRef } from "react";
+import { lockScroll, unlockScroll } from "./modalChrome";
 
 export interface ErrorModalProps {
   /** What failed — "Đăng nhập thất bại". The message below says why. */
@@ -51,12 +52,11 @@ export function ErrorModal({ title, message, onClose, tone = "error" }: ErrorMod
     };
     window.addEventListener("keydown", onKey);
 
-    const previous = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
+    lockScroll();
 
     return () => {
       window.removeEventListener("keydown", onKey);
-      document.body.style.overflow = previous;
+      unlockScroll();
     };
   }, [onClose]);
 

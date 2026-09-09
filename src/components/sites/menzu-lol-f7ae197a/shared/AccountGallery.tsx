@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { productImage } from "./productData";
+import { lockScroll, unlockScroll } from "./modalChrome";
 
 export interface AccountGalleryProps {
   code: string;
@@ -59,9 +60,13 @@ export function AccountGallery({
     };
     window.addEventListener("keydown", onKey);
     document.body.classList.add("lightbox-open");
+    // The class only hides the header; nothing stopped the page scrolling
+    // behind a full-screen picture.
+    lockScroll();
     return () => {
       window.removeEventListener("keydown", onKey);
       document.body.classList.remove("lightbox-open");
+      unlockScroll();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lightbox]);

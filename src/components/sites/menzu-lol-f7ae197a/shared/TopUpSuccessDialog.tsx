@@ -5,6 +5,7 @@ import { Check } from "lucide-react";
 import { useEffect, useRef } from "react";
 
 import { formatVnd } from "./productData";
+import { lockScroll, unlockScroll } from "./modalChrome";
 
 export interface TopUpSuccessDialogProps {
   /** The request that just settled, so the customer can match it to a receipt. */
@@ -59,12 +60,11 @@ export function TopUpSuccessDialog({
     };
     window.addEventListener("keydown", onKey);
 
-    const previous = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
+    lockScroll();
 
     return () => {
       window.removeEventListener("keydown", onKey);
-      document.body.style.overflow = previous;
+      unlockScroll();
     };
   }, [onClose]);
 

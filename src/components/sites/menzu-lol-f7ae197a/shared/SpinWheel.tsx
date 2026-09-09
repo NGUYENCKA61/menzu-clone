@@ -14,6 +14,7 @@ import {
 import { formatVnd } from "./productData";
 import { SpinCelebration } from "./SpinCelebration";
 import { SpinWheelFace } from "./SpinWheelFace";
+import { lockScroll, unlockScroll } from "./modalChrome";
 
 /** Full turns the wheel makes before it starts hunting for its slice. */
 const FLOURISH_TURNS = 5;
@@ -99,7 +100,11 @@ export function SpinWheel({
       if (e.key === "Escape") setResult(null);
     };
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    lockScroll();
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      unlockScroll();
+    };
   }, [result]);
 
   async function spin() {

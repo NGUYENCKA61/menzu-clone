@@ -32,6 +32,7 @@ import {
 
 import { TYPE_ICONS, TYPE_TILE } from "./announcementIcons";
 import { useClientNow } from "./useClientClock";
+import { lockScroll, unlockScroll } from "./modalChrome";
 
 export interface AnnouncementItem {
   id: string;
@@ -586,12 +587,11 @@ export function AnnouncementModal({
     };
     window.addEventListener("keydown", onKey);
 
-    const previous = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
+    lockScroll();
 
     return () => {
       window.removeEventListener("keydown", onKey);
-      document.body.style.overflow = previous;
+      unlockScroll();
     };
   }, [item.id, item.revision]);
 
