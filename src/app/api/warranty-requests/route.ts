@@ -7,6 +7,8 @@ import { announceToAdmins } from "@/lib/announcementStore";
 import { readImageSize } from "@/lib/authPanel";
 import { storeUpload } from "@/lib/blobStore";
 import { db } from "@/lib/db";
+import { absoluteUrl } from "@/lib/seo";
+import { escapeTelegramHtml, notifyTelegramAdmins } from "@/lib/telegramNotify";
 import { getCurrentUser } from "@/lib/session";
 import {
   readDescription,
@@ -157,6 +159,16 @@ export async function POST(request: Request) {
     priority: "HIGH",
     cta: { label: "Xem ngay", href: "/admin/warranty" },
   });
+  await notifyTelegramAdmins(
+    [
+      "🛠 <b>Yêu cầu bảo hành mới</b>",
+      `${escapeTelegramHtml(user.username)} · đơn ${escapeTelegramHtml(code)}`,
+      escapeTelegramHtml(
+        `${order.product.name ?? order.product.code} — ${WARRANTY_ISSUE[picked.issue].label}`,
+      ),
+      `🔗 ${absoluteUrl("/admin/warranty")}`,
+    ].join("\n"),
+  );
 
   return NextResponse.json({ ok: true });
 }

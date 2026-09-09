@@ -59,6 +59,7 @@ export async function POST(request: Request) {
               code: true,
               name: true,
               status: true,
+              productType: true,
               softwareStatus: true,
               deletedAt: true,
               // For the voucher's scope test, line by line.
@@ -279,6 +280,16 @@ export async function POST(request: Request) {
           method: `Ví ${settings.brandName}`,
         },
       });
+
+      // Every tool in the basket, watched from now on.
+      for (const item of items) {
+        if (item.product.productType !== "SOFTWARE_GAME") continue;
+        await tx.softwareStatusSubscription.upsert({
+          where: { userId_productId: { userId: user.id, productId: item.product.id } },
+          create: { userId: user.id, productId: item.product.id },
+          update: {},
+        });
+      }
 
       // One basket, one payment, one award — counted on what was actually
       // paid, after every discount, the same figure the ledger row carries.

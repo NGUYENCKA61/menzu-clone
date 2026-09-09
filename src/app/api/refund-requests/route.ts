@@ -7,6 +7,8 @@ import { announceToAdmins } from "@/lib/announcementStore";
 import { readImageSize } from "@/lib/authPanel";
 import { storeUpload } from "@/lib/blobStore";
 import { db } from "@/lib/db";
+import { absoluteUrl } from "@/lib/seo";
+import { escapeTelegramHtml, notifyTelegramAdmins } from "@/lib/telegramNotify";
 import { readReason, refundBlockedReason } from "@/lib/refundRequests";
 import { getCurrentUser } from "@/lib/session";
 
@@ -158,6 +160,14 @@ export async function POST(request: Request) {
     // making it navigate there by hand is half a notification.
     cta: { label: "Xem ngay", href: `/admin/refunds/${created.id}` },
   });
+  await notifyTelegramAdmins(
+    [
+      "💸 <b>Yêu cầu hoàn trả mới</b>",
+      `${escapeTelegramHtml(user.username)} · đơn ${escapeTelegramHtml(code)}`,
+      escapeTelegramHtml(order.product.name ?? order.product.code),
+      `🔗 ${absoluteUrl(`/admin/refunds/${created.id}`)}`,
+    ].join("\n"),
+  );
 
   return NextResponse.json({ ok: true });
 }

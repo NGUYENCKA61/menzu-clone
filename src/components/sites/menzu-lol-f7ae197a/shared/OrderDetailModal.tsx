@@ -37,6 +37,21 @@ import { formatVnd } from "./productData";
  * it. Plain data, because it crosses from the server page into this client
  * component.
  */
+/**
+ * One key as the receipt shows it.
+ *
+ * The expiry is a finished sentence rather than a date, and it is written on
+ * the server: this page already formats its times there so the two renders
+ * cannot disagree about a timezone, and the same rule has to hold for the one
+ * line that tells somebody their tool is about to stop working.
+ */
+export interface OrderKeyView {
+  value: string;
+  /** "Hết hạn 12/10/2026 · còn 5 ngày", or null for a key with no end. */
+  expiry: string | null;
+  expired: boolean;
+}
+
 export interface OrderDetailData {
   id: string;
   code: string;
@@ -72,7 +87,7 @@ export interface OrderDetailData {
   packageLabel: string | null;
   productRank: string;
   /** Software: the licence keys handed over, and how many are still owed. */
-  keys: string[];
+  keys: OrderKeyView[];
   keysPending: number;
   /** Software: the installer and the manual. Null hides that one button;
    *  null for both leaves the keys the full width they had before. */
@@ -676,9 +691,9 @@ export function OrderDetailModal({
                           {order.keys.length > 0 ? (
                             <div className="flex flex-col gap-4">
                               {order.keys.map((key, index) => {
-                                const at = key.indexOf("|");
-                                const username = at < 0 ? key : key.slice(0, at);
-                                const password = at < 0 ? "" : key.slice(at + 1);
+                                const at = key.value.indexOf("|");
+                                const username = at < 0 ? key.value : key.value.slice(0, at);
+                                const password = at < 0 ? "" : key.value.slice(at + 1);
                                 return (
                                   // One row per sign-in: name and password side
                                   // by side, as the single account shows its
@@ -687,7 +702,7 @@ export function OrderDetailModal({
                                   // No card around the pair: the two boxes are
                                   // cards already, and a frame around them was
                                   // a box inside a box.
-                                  <div key={`${index}-${key}`}>
+                                  <div key={`${index}-${key.value}`}>
                                     {order.keys.length > 1 ? (
                                       <span className="mb-2 block text-[10px] font-black uppercase tracking-widest text-neutral-500">
                                         Tài khoản {index + 1}
@@ -744,16 +759,35 @@ export function OrderDetailModal({
                                 }`}
                               >
                                 {order.keys.map((key, index) => (
-                                  <HandoverBox
-                                    key={`${index}-${key}`}
-                                    icon={<KeyRound className="h-3 w-3" />}
-                                    label={
-                                      order.keys.length > 1
-                                        ? `Key ${index + 1}`
-                                        : "Key"
-                                    }
-                                    value={key}
-                                  />
+                                  <div
+                                    key={`${index}-${key.value}`}
+                                    className="flex flex-col gap-1.5"
+                                  >
+                                    <HandoverBox
+                                      icon={<KeyRound className="h-3 w-3" />}
+                                      label={
+                                        order.keys.length > 1
+                                          ? `Key ${index + 1}`
+                                          : "Key"
+                                      }
+                                      value={key.value}
+                                    />
+                                    {/* The one thing a buyer comes back to this
+                                        page to find out, and until now the only
+                                        place it existed was the shop's own key
+                                        shelf. A key that has run out says so in
+                                        red, so nobody spends an evening
+                                        wondering why the tool stopped. */}
+                                    {key.expiry ? (
+                                      <span
+                                        className={`px-1 text-[11px] font-semibold ${
+                                          key.expired ? "text-red-400" : "text-neutral-500"
+                                        }`}
+                                      >
+                                        {key.expiry}
+                                      </span>
+                                    ) : null}
+                                  </div>
                                 ))}
                               </div>
                             ) : null}

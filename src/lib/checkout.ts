@@ -262,6 +262,15 @@ export async function placeOrder(input: CheckoutInput): Promise<CheckoutResult> 
       },
     });
 
+    // A tool's buyer hears about that tool from now on.
+    if (isSoftware) {
+      await tx.softwareStatusSubscription.upsert({
+        where: { userId_productId: { userId: input.userId, productId: product.id } },
+        create: { userId: input.userId, productId: product.id },
+        update: {},
+      });
+    }
+
     // Spending earns spins. Incremented by the database inside the same
     // transaction as the debit, so a purchase that rolls back takes its
     // points with it.

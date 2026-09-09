@@ -1390,6 +1390,8 @@ model TopUp {
   /// now runs on every reconciliation pass rather than once a day. Without
   /// this it is a sequential scan of every top-up the shop has ever taken.
   @@index([status, createdAt])
+  /// "Has this card been sent before?", asked on every scratch-card request.
+  @@index([carrier, cardSerial])
   @@map("topups")
 }
 

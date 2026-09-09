@@ -122,6 +122,33 @@ export async function POST(request: Request) {
     }
   }
 
+  // The same card, twice. It can only be redeemed once, so a second request
+  // for it is either a double tap — which would leave the customer looking at
+  // two requests and one of them refused, reading as "the shop ate my card" —
+  // or somebody hoping the desk credits it a second time by hand. Compared on
+  // the digits, not on what was typed: a space or a dash would slip past.
+  if (method === "CARD" && cardSerial) {
+    const already = await db.topUp.findFirst({
+      where: {
+        carrier: body?.carrier ?? null,
+        cardSerial,
+        status: { in: ["PENDING", "COMPLETED"] },
+      },
+      select: { code: true, status: true },
+    });
+    if (already) {
+      return NextResponse.json(
+        {
+          error:
+            already.status === "PENDING"
+              ? `Thẻ này bạn đã gửi rồi — xem mã lệnh ${already.code} trong lịch sử nạp.`
+              : `Thẻ này đã được nạp trước đó (mã lệnh ${already.code}).`,
+        },
+        { status: 409 },
+      );
+    }
+  }
+
   // A ceiling on how many requests one account can leave open.
   //
   // Not about telling them apart — each carries its own code in the transfer
