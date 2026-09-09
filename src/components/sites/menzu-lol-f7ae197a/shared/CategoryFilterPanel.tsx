@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useOptimistic, useState, useTransition } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Package, Search } from "lucide-react";
 
@@ -90,6 +90,21 @@ export function CategoryFilterPanel({ hotPicks }: CategoryFilterPanelProps) {
   const sort = (params.get("sort") as SortValue) ?? "newest";
   const source = (params.get("nguon") as SourceValue) ?? "all";
 
+  // The pressed chip lights in the same frame as the press. The URL is the
+  // only source of truth — these are React's own optimistic copies of it,
+  // which it hands back to the URL's value when the navigation commits or
+  // fails — so a chip can never stay lit for a filter that did not land.
+  const [isPending, startTransition] = useTransition();
+  const [shownSort, showSort] = useOptimistic(sort);
+  const [shownSource, showSource] = useOptimistic(source);
+
+  // The grid is the server page's, out of this panel's reach; it reads this
+  // attribute off <html> and steps back while the filter is on its way.
+  useEffect(() => {
+    document.documentElement.toggleAttribute("data-filtering", isPending);
+    return () => document.documentElement.removeAttribute("data-filtering");
+  }, [isPending]);
+
   /**
    * Rewrites the URL, which is what the listing actually reads.
    *
@@ -108,7 +123,12 @@ export function CategoryFilterPanel({ hotPicks }: CategoryFilterPanelProps) {
     // rarely page 4 of the new one.
     next.delete("page");
     const query = next.toString();
-    router.push(query ? `${pathname}?${query}` : pathname);
+    // As a transition: the page in front stays up and interactive until the
+    // new one is ready, instead of dropping to its loading skeleton on every
+    // chip. This is what lets a category page carry a loading.tsx at all.
+    startTransition(() => {
+      router.push(query ? `${pathname}?${query}` : pathname);
+    });
   }
 
   function handlePricePresetClick(index: number) {
@@ -247,8 +267,13 @@ export function CategoryFilterPanel({ hotPicks }: CategoryFilterPanelProps) {
                   <button
                     key={option.value}
                     type="button"
-                    onClick={() => apply({ sort: option.value === "newest" ? "" : option.value })}
-                    className={sort === option.value ? CHIP_ACTIVE : CHIP_INACTIVE}
+                    onClick={() =>
+                      startTransition(() => {
+                        showSort(option.value);
+                        apply({ sort: option.value === "newest" ? "" : option.value });
+                      })
+                    }
+                    className={shownSort === option.value ? CHIP_ACTIVE : CHIP_INACTIVE}
                   >
                     {option.label}
                   </button>
@@ -263,8 +288,13 @@ export function CategoryFilterPanel({ hotPicks }: CategoryFilterPanelProps) {
                   <button
                     key={option.value}
                     type="button"
-                    onClick={() => apply({ nguon: option.value === "all" ? "" : option.value })}
-                    className={source === option.value ? CHIP_ACTIVE : CHIP_INACTIVE}
+                    onClick={() =>
+                      startTransition(() => {
+                        showSource(option.value);
+                        apply({ nguon: option.value === "all" ? "" : option.value });
+                      })
+                    }
+                    className={shownSource === option.value ? CHIP_ACTIVE : CHIP_INACTIVE}
                   >
                     {option.label}
                   </button>

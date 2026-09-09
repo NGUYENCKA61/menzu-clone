@@ -257,7 +257,7 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
                   )}
                 />
                 {data.software.length > 0 ? (
-                  <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:gap-8">
+                  <div className="catalog-grid grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:gap-8">
                     {data.software.map((s) => (
                       // Each card in its own boundary: a fault in one tile
                       // costs that tile, not the shelf.
@@ -308,7 +308,7 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
 
                 <div className="flex flex-col gap-10">
                   {data.products.length > 0 ? (
-                    <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:gap-8">
+                    <div className="catalog-grid grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:gap-8">
                       {data.products.map((product) => (
                         <ProductCard key={product.code} product={product} />
                       ))}

@@ -2,7 +2,7 @@
 
 import { Crosshair, Search } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useOptimistic, useState, useTransition } from "react";
 
 import {
   CHIP_ACTIVE,
@@ -67,6 +67,18 @@ export function SoftwareFilterPanel({
   const status = (params.get("tt") as StatusValue) ?? "all";
   const sort = (params.get("pmsort") as SortValue) ?? "newest";
 
+  // Same arrangement as the account panel above it: optimistic copies of the
+  // URL's two chip values, a transition around the push, and the grid told
+  // through <html> that a filter is on its way.
+  const [isPending, startTransition] = useTransition();
+  const [shownStatus, showStatus] = useOptimistic(status);
+  const [shownSort, showSort] = useOptimistic(sort);
+
+  useEffect(() => {
+    document.documentElement.toggleAttribute("data-filtering", isPending);
+    return () => document.documentElement.removeAttribute("data-filtering");
+  }, [isPending]);
+
   /** Rewrites the URL, which is what the listing actually reads. */
   function apply(changes: Record<string, string>) {
     const next = new URLSearchParams(params.toString());
@@ -75,7 +87,9 @@ export function SoftwareFilterPanel({
       else next.delete(key);
     }
     const search = next.toString();
-    router.push(search ? `${pathname}?${search}` : pathname);
+    startTransition(() => {
+      router.push(search ? `${pathname}?${search}` : pathname);
+    });
   }
 
   function handleSubmit(event: React.FormEvent) {
@@ -133,8 +147,13 @@ export function SoftwareFilterPanel({
                 <button
                   key={option.value}
                   type="button"
-                  onClick={() => apply({ tt: option.value === "all" ? "" : option.value })}
-                  className={status === option.value ? CHIP_ACTIVE : CHIP_INACTIVE}
+                  onClick={() =>
+                    startTransition(() => {
+                      showStatus(option.value);
+                      apply({ tt: option.value === "all" ? "" : option.value });
+                    })
+                  }
+                  className={shownStatus === option.value ? CHIP_ACTIVE : CHIP_INACTIVE}
                 >
                   {option.label}
                 </button>
@@ -150,9 +169,12 @@ export function SoftwareFilterPanel({
                   key={option.value}
                   type="button"
                   onClick={() =>
-                    apply({ pmsort: option.value === "newest" ? "" : option.value })
+                    startTransition(() => {
+                      showSort(option.value);
+                      apply({ pmsort: option.value === "newest" ? "" : option.value });
+                    })
                   }
-                  className={sort === option.value ? CHIP_ACTIVE : CHIP_INACTIVE}
+                  className={shownSort === option.value ? CHIP_ACTIVE : CHIP_INACTIVE}
                 >
                   {option.label}
                 </button>

@@ -1392,6 +1392,21 @@ body.lightbox-open .site-nav {
 .press-nav:active > * {
   transform: translateY(1px) scale(0.94);
 }
+
+/* The catalogue while a filter is on its way to the server. The chip that
+   was pressed has already lit (useOptimistic); the grid steps back to 60%
+   and stops taking clicks until the new one arrives, no lower - under that
+   it reads as a page that failed. Held back 120ms so a fast filter shows
+   nothing at all. Set by the filter panels as an attribute on <html>, since
+   the grid is the server page's and the panel cannot reach it directly. */
+.catalog-grid {
+  transition: opacity 150ms cubic-bezier(0.2, 0, 0.2, 1);
+}
+html[data-filtering] .catalog-grid {
+  opacity: 0.6;
+  pointer-events: none;
+  transition-delay: 120ms;
+}
 @media (prefers-reduced-motion: reduce) {
   .press,
   .press-nav > * {
