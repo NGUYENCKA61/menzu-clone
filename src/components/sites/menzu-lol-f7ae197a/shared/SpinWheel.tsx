@@ -15,10 +15,15 @@ import { formatVnd } from "./productData";
 import { SpinCelebration } from "./SpinCelebration";
 import { SpinWheelFace } from "./SpinWheelFace";
 import { lockScroll, unlockScroll } from "./modalChrome";
+import { Loader2 } from "lucide-react";
 
 /** Full turns the wheel makes before it starts hunting for its slice. */
 const FLOURISH_TURNS = 5;
 const SPIN_MS = 4200;
+/** With motion reduced: no flourish, straight to the slice, and quickly. A
+ *  shorter clock with the same five turns would be a blur — worse, for
+ *  exactly the people who asked for less. */
+const CALM_SPIN_MS = 400;
 
 
 
@@ -76,6 +81,7 @@ export function SpinWheel({
   const SLICE = 360 / Math.max(1, prizes.length);
   const router = useRouter();
   const [angle, setAngle] = useState(0);
+  const [spinMs, setSpinMs] = useState(SPIN_MS);
   const [spinning, setSpinning] = useState(false);
   const [result, setResult] = useState<SpinResult | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -131,11 +137,17 @@ export function SpinWheel({
       }
 
       // Land the slice's middle under the pointer at twelve o'clock, then add
-      // whole turns on top so the wheel always makes the same show of it.
+      // whole turns on top so the wheel always makes the same show of it —
+      // unless the reader asked for less motion, in which case it goes to
+      // the slice and stops.
+      const calm = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const turns = calm ? 0 : FLOURISH_TURNS;
+      const clock = calm ? CALM_SPIN_MS : SPIN_MS;
+      setSpinMs(clock);
       const target = 360 - (data.index * SLICE + SLICE / 2);
       setAngle((current) => {
         const base = Math.ceil(current / 360) * 360;
-        return base + FLOURISH_TURNS * 360 + target;
+        return base + turns * 360 + target;
       });
 
       // The points are already spent server-side; the panel above catches up
@@ -144,9 +156,11 @@ export function SpinWheel({
         setResult(data);
         setBalanceLeft(data.points);
         setSpinning(false);
-        // A money prize lands in the wallet, which the header prints.
-        if (data.prize.kind === "BALANCE") router.refresh();
-      }, SPIN_MS);
+        // Every spin costs points and the page above the wheel prints them
+        // from the server; refreshing only on a money prize left the two
+        // figures disagreeing after every other kind of result.
+        router.refresh();
+      }, clock);
     } catch {
       setError("Không kết nối được máy chủ");
       setSpinning(false);
@@ -168,7 +182,7 @@ export function SpinWheel({
           className="h-full w-full rounded-full border-4 border-white/10 shadow-[0_0_60px_-15px_rgb(124_58_237_/_0.5)]"
           style={{
             transform: `rotate(${angle}deg)`,
-            transition: `transform ${SPIN_MS}ms cubic-bezier(0.16, 1, 0.3, 1)`,
+            transition: `transform ${spinMs}ms cubic-bezier(0.16, 1, 0.3, 1)`,
           }}
         />
 
@@ -180,10 +194,16 @@ export function SpinWheel({
           onClick={spin}
           className="absolute left-1/2 top-1/2 z-10 grid h-[27%] w-[27%] -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border-4 border-[#0b0b10] bg-[var(--menzu-violet)] text-white shadow-[0_0_30px_-4px_rgb(124_58_237_/_0.8)] transition-colors hover:bg-[var(--menzu-violet-dark)] disabled:bg-neutral-700 disabled:text-neutral-400 disabled:shadow-none"
         >
-          <span className="text-[13px] font-black uppercase tracking-widest leading-none sm:text-[15px]">
-            {spinning ? "…" : affordable ? "Quay" : "Hết lượt"}
+          <span className="flex items-center justify-center text-[13px] font-black uppercase tracking-widest leading-none sm:text-[15px]">
+            {spinning ? (
+              <Loader2 size={16} className="animate-spin motion-reduce:animate-none" aria-label="Đang quay" />
+            ) : affordable ? (
+              "Quay"
+            ) : (
+              "Hết lượt"
+            )}
           </span>
-          {!spinning && affordable ? (
+          {affordable ? (
             <span className="mt-1 text-[9px] font-bold leading-none text-white/70 sm:text-[10px]">
               {formatVnd(SPIN_COST)} điểm
             </span>
