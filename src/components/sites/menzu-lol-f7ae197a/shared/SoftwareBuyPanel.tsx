@@ -438,6 +438,7 @@ export function SoftwareBuyPanel({
         }}
         tier={chosen}
         quantity={quantity}
+        risky={software.softwareStatus === "RISKY"}
       />
     </div>
   );

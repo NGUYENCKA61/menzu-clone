@@ -409,6 +409,7 @@ export function ConfirmFooter({
   busy,
   canAfford,
   done = false,
+  blocked = false,
 }: {
   onCancel: () => void;
   onConfirm: () => void;
@@ -416,6 +417,9 @@ export function ConfirmFooter({
   canAfford: boolean;
   /** The order went through; the button stays but takes no second press. */
   done?: boolean;
+  /** Something in the card above is still waiting on the buyer — a warning
+   *  they have to acknowledge. Money is not spent until it is. */
+  blocked?: boolean;
 }) {
   return (
     <>
@@ -425,7 +429,7 @@ export function ConfirmFooter({
       {canAfford ? (
         <button
           type="button"
-          disabled={busy || done}
+          disabled={busy || done || blocked}
           onClick={onConfirm}
           className={`${FOOTER_PRIMARY_BTN} disabled:opacity-60`}
         >

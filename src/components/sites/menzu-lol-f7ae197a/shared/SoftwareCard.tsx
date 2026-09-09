@@ -330,6 +330,7 @@ export function SoftwareCard({
         }}
         tier={chosen}
         quantity={1}
+        risky={software.status === "RISKY"}
       />
       ) : null}
     </div>

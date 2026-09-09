@@ -77,6 +77,7 @@ export function SoftwareCheckoutDialog({
   tier,
   quantity,
   onBought,
+  risky = false,
 }: {
   open: boolean;
   onClose: () => void;
@@ -84,6 +85,10 @@ export function SoftwareCheckoutDialog({
   tier: CheckoutTier | null;
   quantity: number;
   onBought?: (orderCode: string) => void;
+  /** The tool is flagged "Rủi ro". The shop still sells it — that is what the
+   *  state means, short of DETECTED — but the buyer says out loud that they
+   *  know before the wallet is touched. */
+  risky?: boolean;
 }) {
   const router = useRouter();
 
@@ -104,6 +109,9 @@ export function SoftwareCheckoutDialog({
   const [checking, setChecking] = useState(false);
   /** Set when the order went through; the dialog then shows the receipt. */
   const [purchase, setPurchase] = useState<Purchase | null>(null);
+  /** The buyer has ticked the risk warning. Only ever asked for on a tool the
+   *  shop has flagged "Rủi ro". */
+  const [acceptedRisk, setAcceptedRisk] = useState(false);
 
   const lineTotal = (tier?.price ?? 0) * quantity;
   // The member's cut, taken before any voucher — the same order the server
@@ -135,6 +143,9 @@ export function SoftwareCheckoutDialog({
     setDialogError(null);
     // A fresh opening is a fresh purchase; the last receipt is not it.
     setPurchase(null);
+    // And a fresh acknowledgement: the warning is read once per purchase, not
+    // once per browser session.
+    setAcceptedRisk(false);
     let cancelled = false;
     fetch("/api/auth/me")
       .then((r) => r.json())
@@ -363,11 +374,31 @@ export function SoftwareCheckoutDialog({
           onConfirm={buyNow}
           busy={busy}
           canAfford={canAfford}
+          blocked={risky && !acceptedRisk}
         />
       }
     >
       {tier ? (
         <>
+          {/* "Rủi ro" is the state between running clean and caught: the shop
+              still sells it, and a buyer who was not told finds out from a
+              ban. Said here, where the money is about to move, and ticked —
+              a warning nobody has to answer is a warning nobody reads. */}
+          {risky ? (
+            <label className="flex cursor-pointer gap-3 rounded-xl border border-orange-500/30 bg-orange-500/10 px-4 py-3">
+              <input
+                type="checkbox"
+                checked={acceptedRisk}
+                onChange={(event) => setAcceptedRisk(event.target.checked)}
+                className="mt-0.5 h-4 w-4 shrink-0 accent-orange-500"
+              />
+              <span className="text-[12px] leading-relaxed text-orange-200">
+                Tool này đang ở trạng thái{" "}
+                <span className="font-black">Rủi ro</span> — có khả năng bị phát hiện. Tôi
+                hiểu và vẫn muốn mua.
+              </span>
+            </label>
+          ) : null}
           <ProductTile
             imageUrl={product.imageUrl}
             name={product.name}
