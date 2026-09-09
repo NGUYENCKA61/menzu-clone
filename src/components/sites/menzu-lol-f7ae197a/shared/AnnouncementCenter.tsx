@@ -350,7 +350,7 @@ export function AnnouncementCenter({
         </button>
 
         {openList ? (
-          <div className="absolute right-0 top-11 z-50 w-[340px] overflow-hidden rounded-xl border border-white/10 bg-[#12141c] shadow-2xl">
+          <div className="absolute right-0 top-11 z-50 w-[340px] overflow-hidden rounded-xl border border-white/10 bg-[#101114] shadow-2xl">
             <div className="flex items-center justify-between gap-3 border-b border-white/[0.07] px-4 py-3">
               <span className="text-[14px] font-bold text-white">Thông báo</span>
               {/* Only offered when it would do something. A control that is

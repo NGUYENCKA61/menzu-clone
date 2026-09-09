@@ -50,8 +50,10 @@ const SOFTWARE_STATUS: Record<string, string> = {
   DETECTED: "Đã phát hiện",
 };
 
+// "Đang bán", as the tool’s own screen and the account table both call it —
+// one column, one word.
 const STOCK_STATUS: Record<string, string> = {
-  AVAILABLE: "Còn hàng",
+  AVAILABLE: "Đang bán",
   HIDDEN: "Đã ẩn",
 };
 
