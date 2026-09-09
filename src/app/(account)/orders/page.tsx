@@ -8,7 +8,7 @@ import { ListSearch } from "@/components/sites/menzu-lol-f7ae197a/shared/ListSea
 import { OrderDetailModal } from "@/components/sites/menzu-lol-f7ae197a/shared/OrderDetailModal";
 import { OrderReviewTag } from "@/components/sites/menzu-lol-f7ae197a/shared/OrderReview";
 import { formatVnd } from "@/components/sites/menzu-lol-f7ae197a/shared/productData";
-import { dayHeading, dayKey, dayTime } from "@/lib/dayGroups";
+import { dayHeading, dayTime } from "@/lib/dayGroups";
 import { getOrders } from "@/lib/queries";
 import { getCurrentUser } from "@/lib/session";
 
@@ -92,22 +92,6 @@ function shortDate(date: Date): string {
   });
 }
 
-/**
- * When a key runs out, as a sentence.
- *
- * Null for a key with no end — a permanent licence should not carry a line
- * about expiry at all, and "Vĩnh viễn" under every key on the page is noise
- * on the ninety per cent of orders that never expire.
- */
-function keyExpiry(expiresAt: Date | null, expired: boolean, now: Date): string | null {
-  if (!expiresAt) return null;
-  if (expired) return `Đã hết hạn ${dayKey(expiresAt)}`;
-  const days = Math.ceil((expiresAt.getTime() - now.getTime()) / 86_400_000);
-  return days <= 1
-    ? `Hết hạn hôm nay, ${dayTime(expiresAt)}`
-    : `Hết hạn ${dayKey(expiresAt)} · còn ${days} ngày`;
-}
-
 export default async function OrdersPage({
   searchParams,
 }: {
@@ -184,11 +168,9 @@ export default async function OrdersPage({
                   isPool: o.isPool,
                   packageLabel: o.packageLabel,
                   productRank: o.productRank,
-                  keys: o.keys.map((key) => ({
-                    value: key.value,
-                    expiry: keyExpiry(key.expiresAt, key.expired, now),
-                    expired: key.expired,
-                  })),
+                  // The value only: a key's clock starts on activation, so
+                  // no date from the sale belongs under it.
+                  keys: o.keys.map((key) => ({ value: key.value })),
                   keysPending: o.keysPending,
                   downloadUrl: o.downloadUrl,
                   docsUrl: o.docsUrl,

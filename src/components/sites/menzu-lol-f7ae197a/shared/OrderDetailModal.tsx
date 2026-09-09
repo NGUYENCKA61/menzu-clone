@@ -40,16 +40,12 @@ import { formatVnd } from "./productData";
 /**
  * One key as the receipt shows it.
  *
- * The expiry is a finished sentence rather than a date, and it is written on
- * the server: this page already formats its times there so the two renders
- * cannot disagree about a timezone, and the same rule has to hold for the one
- * line that tells somebody their tool is about to stop working.
+ * No expiry line, on purpose: a key's clock starts when the customer
+ * activates it, not when they buy it, so a date computed from the sale would
+ * be wrong for every key bought and kept for later.
  */
 export interface OrderKeyView {
   value: string;
-  /** "Hết hạn 12/10/2026 · còn 5 ngày", or null for a key with no end. */
-  expiry: string | null;
-  expired: boolean;
 }
 
 export interface OrderDetailData {
@@ -774,21 +770,6 @@ export function OrderDetailModal({
                                       }
                                       value={key.value}
                                     />
-                                    {/* The one thing a buyer comes back to this
-                                        page to find out, and until now the only
-                                        place it existed was the shop's own key
-                                        shelf. A key that has run out says so in
-                                        red, so nobody spends an evening
-                                        wondering why the tool stopped. */}
-                                    {key.expiry ? (
-                                      <span
-                                        className={`px-1 text-[11px] font-semibold ${
-                                          key.expired ? "text-red-400" : "text-neutral-500"
-                                        }`}
-                                      >
-                                        {key.expiry}
-                                      </span>
-                                    ) : null}
                                   </div>
                                 ))}
                               </div>
