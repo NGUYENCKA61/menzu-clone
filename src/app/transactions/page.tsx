@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
 import { AccountPageFrame } from "@/components/sites/menzu-lol-f7ae197a/shared/AccountPageFrame";
+import { AccountEmpty } from "@/components/sites/menzu-lol-f7ae197a/shared/AccountShell";
 import { TransactionsTable } from "@/components/sites/menzu-lol-f7ae197a/shared/TransactionsTable";
 import { getTransactions } from "@/lib/queries";
 import { getCurrentUser } from "@/lib/session";
@@ -38,12 +39,26 @@ export default async function TransactionsPage() {
       subtitle="Tra cứu dòng tiền chi tiêu và nạp"
       crumb="Lịch sử giao dịch"
     >
+      {/* An account with no rows at all is not a search that missed. Left to
+          the table, a new customer met a search box, a heading reading "0
+          giao dịch gần nhất" and the sentence "Không tìm thấy giao dịch nào
+          phù hợp" — as though they had typed something wrong. /orders has
+          drawn the two cases apart from the start. */}
+      {rows.length === 0 ? (
+        <AccountEmpty
+          title="Chưa có giao dịch nào"
+          body="Mọi lần nạp tiền và mua hàng sẽ hiện ở đây, kèm số dư sau mỗi lần."
+          ctaLabel="Nạp tiền"
+          ctaHref="/wallet"
+        />
+      ) : (
       <TransactionsTable
         // Formatted here, on the server, where the locale is fixed. Passing
         // Date objects into a client component would format twice — once per
         // timezone — and React reports the mismatch as a hydration error.
         rows={rows.map((row) => ({ ...row, createdAt: formatWhen(row.createdAt) }))}
       />
+      )}
     </AccountPageFrame>
   );
 }
