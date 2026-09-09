@@ -149,6 +149,19 @@ function SlugPicker({
   );
 }
 
+/**
+ * A key for the cron URL: 32 hex characters from the browser's own CSPRNG.
+ *
+ * Generated here rather than on the server so the admin sees it before saving
+ * and can put it in the scheduler in the same sitting — and so an admin who
+ * changes their mind can simply not press Lưu.
+ */
+function randomKey(): string {
+  const bytes = new Uint8Array(16);
+  crypto.getRandomValues(bytes);
+  return Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
+}
+
 function formatVnd(n: number): string {
   return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 }
@@ -228,6 +241,7 @@ export function AdminSettings({
 
   const [auto, setAuto] = useState(settings.autoTopUpEnabled);
   const [apiKey, setApiKey] = useState(settings.topUpApiKey);
+  const [cronKey, setCronKey] = useState(settings.topUpCronKey);
   const [tsSite, setTsSite] = useState(settings.turnstileSiteKey);
   const [tsSecret, setTsSecret] = useState(settings.turnstileSecretKey);
   const [ggId, setGgId] = useState(settings.googleClientId);
@@ -540,6 +554,7 @@ export function AdminSettings({
           bankAccounts: accounts,
           autoTopUpEnabled: auto,
           topUpApiKey: apiKey,
+          topUpCronKey: cronKey,
           turnstileSiteKey: tsSite,
           turnstileSecretKey: tsSecret,
           googleClientId: ggId,
@@ -928,6 +943,37 @@ export function AdminSettings({
             </div>
 
             <div>
+              <label htmlFor="topup-cron-key" className={LABEL}>
+                Key cho lịch chạy nền
+              </label>
+              <div className="flex gap-2">
+                <input
+                  id="topup-cron-key"
+                  autoComplete="off"
+                  value={cronKey}
+                  onChange={(event) => setCronKey(event.target.value)}
+                  placeholder="Bấm Tạo key để sinh tự động"
+                  className={`${FIELD} font-mono`}
+                />
+                <button
+                  type="button"
+                  onClick={() => setCronKey(randomKey())}
+                  className="h-11 shrink-0 rounded-xl border border-white/10 bg-white/5 px-3.5 text-[10px] font-black uppercase tracking-widest text-neutral-300 transition-colors hover:bg-white/10"
+                >
+                  Tạo key
+                </button>
+              </div>
+              <p className={HINT}>
+                Key riêng cho địa chỉ chạy nền bên dưới, để{" "}
+                <span className="font-bold text-white">không phải đem API key đi dán</span>{" "}
+                vào web hẹn giờ của người khác. Key này chỉ khiến shop tự đọc lại sao kê
+                của chính mình — lộ ra cũng không ai cộng tiền được. API key thì khác: ai
+                có nó là bắn được danh sách giao dịch giả vào webhook. Để trống thì địa chỉ
+                dưới vẫn dùng API key như trước.
+              </p>
+            </div>
+
+            <div>
               <p className="text-[11px] text-neutral-500">
                 Địa chỉ đối soát khai riêng ở từng ngân hàng phía trên. Nút dưới đây gọi
                 thử tất cả và cho biết đọc được giao dịch hay không.
@@ -964,12 +1010,19 @@ export function AdminSettings({
 
             <div className="rounded-xl border border-white/5 bg-neutral-950/40 px-4 py-3">
               <span className={LABEL}>Địa chỉ chạy nền 24/7 (khuyến nghị)</span>
+              {/* The whole address, key and all, when there is a cron key to
+                  print: it goes straight into a scheduler's box, and half an
+                  address is an invitation to paste the wrong secret into the
+                  other half. */}
               <p className="font-mono text-xs text-neutral-300 break-all">
-                {origin}/api/wallet/sync?key=&lt;API-KEY&gt;
+                {origin}/api/wallet/sync?key=
+                {cronKey.trim() ? cronKey.trim() : <>&lt;API-KEY&gt;</>}
               </p>
               <p className="mt-1.5 text-[11px] text-neutral-500">
-                Dán vào một dịch vụ hẹn giờ miễn phí (cron-job.org…) và cho chạy mỗi phút,
-                thay <span className="font-mono">&lt;API-KEY&gt;</span> bằng key ở trên.
+                Dán vào một dịch vụ hẹn giờ miễn phí (cron-job.org…) và cho chạy mỗi phút.
+                {cronKey.trim()
+                  ? " Nhớ bấm Lưu trước, key mới có hiệu lực."
+                  : " Nên bấm Tạo key ở trên rồi lưu — dán API key vào web của người khác là rủi ro không cần thiết."}{" "}
                 Không có cái này thì web chỉ đối soát lúc có khách đang mở màn hình chờ —
                 khách chuyển tiền xong tắt trang là phải đợi rất lâu.
               </p>

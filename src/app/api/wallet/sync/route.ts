@@ -51,7 +51,16 @@ async function runSync(request: Request) {
     request.headers.get("x-webhook-secret") ??
     new URL(request.url).searchParams.get("key") ??
     "";
-  const byKey = Boolean(settings.topUpApiKey) && sameSecret(header, settings.topUpApiKey);
+  // Two secrets open this door, and only this door. The cron key is the one
+  // written into the URL an outside scheduler is given: it makes the shop read
+  // its own bank feed and nothing else, so a leak of it costs a few wasted
+  // requests. The API key still works, because that is what shops set up
+  // before the cron key existed — but it is the key that also opens the
+  // webhook, where a posted list of invented transfers becomes real money, so
+  // the settings screen no longer puts it in a URL.
+  const byKey =
+    (Boolean(settings.topUpCronKey) && sameSecret(header, settings.topUpCronKey)) ||
+    (Boolean(settings.topUpApiKey) && sameSecret(header, settings.topUpApiKey));
 
   if (!byKey && !(await getCurrentUser())) {
     return NextResponse.json({ error: "Bạn cần đăng nhập" }, { status: 401 });

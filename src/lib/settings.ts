@@ -51,6 +51,18 @@ export interface ShopSettings {
   autoTopUpEnabled: boolean;
   /** Shared secret a provider must present when it pushes to the webhook. */
   topUpApiKey: string;
+  /**
+   * The secret in the reconciliation URL a cron service is given.
+   *
+   * Separate from `topUpApiKey` on purpose. That one authorises the webhook,
+   * which takes a list of transfers on trust and credits wallets from it — a
+   * leak of it mints money. This one only makes the shop go and read its own
+   * bank feed, so it is safe to paste into a third-party scheduler where it
+   * lives in a URL, in that site’s logs and in every proxy between. Empty
+   * falls back to the API key, which is what shops set up before this
+   * existed.
+   */
+  topUpCronKey: string;
 
   /**
    * Cloudflare Turnstile. Both halves or neither: the widget cannot be drawn
@@ -288,6 +300,7 @@ export const DEFAULT_SETTINGS: ShopSettings = {
   bankAccounts: [],
   autoTopUpEnabled: false,
   topUpApiKey: "",
+  topUpCronKey: "",
   turnstileSiteKey: "",
   turnstileSecretKey: "",
   googleClientId: "",
@@ -397,6 +410,7 @@ export const SETTING_KEYS: Record<keyof ShopSettings, string> = {
   bankAccounts: "bank.accounts",
   autoTopUpEnabled: "topup.auto",
   topUpApiKey: "topup.apiKey",
+  topUpCronKey: "topup.cronKey",
   turnstileSiteKey: "turnstile.siteKey",
   turnstileSecretKey: "turnstile.secretKey",
   googleClientId: "oauth.google.clientId",
@@ -731,6 +745,10 @@ export function parseSettings(rows: Iterable<{ key: string; value: string }>): S
       DEFAULT_SETTINGS.autoTopUpEnabled,
     ),
     topUpApiKey: toOptionalText(stored.get(SETTING_KEYS.topUpApiKey), DEFAULT_SETTINGS.topUpApiKey),
+    topUpCronKey: toOptionalText(
+      stored.get(SETTING_KEYS.topUpCronKey),
+      DEFAULT_SETTINGS.topUpCronKey,
+    ),
     turnstileSiteKey: toOptionalText(
       stored.get(SETTING_KEYS.turnstileSiteKey),
       DEFAULT_SETTINGS.turnstileSiteKey,
@@ -944,6 +962,7 @@ export function serializeSettings(settings: ShopSettings): { key: string; value:
     bankAccounts: JSON.stringify(settings.bankAccounts),
     autoTopUpEnabled: String(settings.autoTopUpEnabled),
     topUpApiKey: settings.topUpApiKey.trim(),
+    topUpCronKey: settings.topUpCronKey.trim(),
     turnstileSiteKey: settings.turnstileSiteKey.trim(),
     turnstileSecretKey: settings.turnstileSecretKey.trim(),
     googleClientId: settings.googleClientId.trim(),
@@ -1073,6 +1092,7 @@ export function normalizeSettings(raw: Partial<ShopSettings> | null): ShopSettin
       : DEFAULT_SETTINGS.bankAccounts,
     autoTopUpEnabled: Boolean(raw?.autoTopUpEnabled),
     topUpApiKey: String(raw?.topUpApiKey ?? "").trim(),
+    topUpCronKey: String(raw?.topUpCronKey ?? "").trim(),
     turnstileSiteKey: String(raw?.turnstileSiteKey ?? "").trim(),
     turnstileSecretKey: String(raw?.turnstileSecretKey ?? "").trim(),
     googleClientId: String(raw?.googleClientId ?? "").trim(),
