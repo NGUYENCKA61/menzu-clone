@@ -9,6 +9,7 @@ import {
   BadgePercent,
   Check,
   KeyRound,
+  Loader2,
   Minus,
   Plus,
   Receipt,
@@ -922,9 +923,11 @@ export function CartView({
           <button
             type="button"
             disabled={busy}
+            aria-busy={busy}
             onClick={checkout}
-            className="relative mt-4 flex h-12 w-full items-center justify-center rounded-xl bg-[var(--menzu-accent)] text-[12px] font-black uppercase tracking-widest text-white shadow-lg shadow-[var(--menzu-accent)]/25 transition-colors hover:bg-[var(--menzu-accent-dark)] disabled:opacity-60 disabled:shadow-none"
+            className="relative mt-4 flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[var(--menzu-accent)] text-[12px] font-black uppercase tracking-widest text-white shadow-lg shadow-[var(--menzu-accent)]/25 transition-colors hover:bg-[var(--menzu-accent-dark)] disabled:opacity-60 disabled:shadow-none"
           >
+            {busy ? <Loader2 size={14} className="animate-spin motion-reduce:animate-none" aria-hidden /> : null}
             {busy ? "Đang xử lý…" : "Thanh toán"}
           </button>
         )}

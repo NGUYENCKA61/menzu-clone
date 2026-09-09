@@ -36,7 +36,7 @@ export function ReferralLinkBox({ link }: { link: string }) {
       <button
         type="button"
         onClick={copy}
-        className="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-xl bg-[var(--brand)] px-5 text-[11px] font-black uppercase tracking-widest text-white transition-colors hover:bg-[var(--brand-dark)]"
+        className="inline-flex h-11 min-w-[130px] shrink-0 items-center justify-center gap-2 rounded-xl bg-[var(--brand)] px-5 text-[11px] font-black uppercase tracking-widest text-white transition-colors hover:bg-[var(--brand-dark)]"
       >
         {copied ? <Check size={14} /> : <Copy size={14} />}
         {copied ? "Đã chép" : "Chép link"}

@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, Ticket, Wallet, X } from "lucide-react";
+import { Check, Loader2, Ticket, Wallet, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
@@ -430,9 +430,14 @@ export function ConfirmFooter({
         <button
           type="button"
           disabled={busy || done || blocked}
+          aria-busy={busy}
           onClick={onConfirm}
-          className={`${FOOTER_PRIMARY_BTN} disabled:opacity-60`}
+          className={`${FOOTER_PRIMARY_BTN} gap-2 disabled:opacity-60`}
         >
+          {/* The one button on the site that takes money, and it only dimmed.
+              The spinner every other waiting control wears, so "is it
+              doing anything" is answered the same way here. */}
+          {busy ? <Loader2 size={14} className="animate-spin motion-reduce:animate-none" aria-hidden /> : null}
           {busy ? "Đang xử lý…" : "Xác nhận"}
         </button>
       ) : (

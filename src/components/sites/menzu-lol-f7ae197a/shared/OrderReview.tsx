@@ -97,13 +97,18 @@ export function OrderReviewForm({ orderId, onDone }: { orderId: string; onDone: 
       const data = (await response.json().catch(() => null)) as { error?: string } | null;
       if (!response.ok) {
         setError(data?.error ?? "Không gửi được, thử lại sau.");
+        setSubmitting(false);
         return;
       }
+      // Only a failure gives the button back. On success the page is about to
+      // change; a button that revived first invited a second send.
       router.push(onDone);
       router.refresh();
+      // If the page has not changed in eight seconds, something upstream is
+      // stuck; give the button back rather than leave it dead.
+      window.setTimeout(() => setSubmitting(false), 8000);
     } catch {
       setError("Không gửi được, thử lại sau.");
-    } finally {
       setSubmitting(false);
     }
   }

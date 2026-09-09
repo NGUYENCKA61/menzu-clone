@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { ImagePlus, Loader2, Send, X } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import {
   DESCRIPTION_MAX,
@@ -36,21 +36,19 @@ export function WarrantyRequestForm({
   const [issue, setIssue] = useState<WarrantyIssue | null>(null);
   const [description, setDescription] = useState("");
   const [file, setFile] = useState<File | null>(null);
-  const [preview, setPreview] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // One object URL alive at a time, and none after unmount.
+  // The preview is a value derived from the file, not state kept in step
+  // with it: one object URL per file, made when the file changes and revoked
+  // when it is replaced or the form unmounts. An effect that set state on
+  // every change was a render for nothing.
+  const preview = useMemo(() => (file ? URL.createObjectURL(file) : null), [file]);
   useEffect(() => {
-    if (!file) {
-      setPreview(null);
-      return;
-    }
-    const url = URL.createObjectURL(file);
-    setPreview(url);
-    return () => URL.revokeObjectURL(url);
-  }, [file]);
+    if (!preview) return;
+    return () => URL.revokeObjectURL(preview);
+  }, [preview]);
 
   const short = description.trim().length < DESCRIPTION_MIN;
   const left = DESCRIPTION_MIN - description.trim().length;
@@ -70,13 +68,18 @@ export function WarrantyRequestForm({
       const data = (await res.json().catch(() => ({}))) as { error?: string };
       if (!res.ok) {
         setError(data.error ?? "Không gửi được yêu cầu");
+        setBusy(false);
         return;
       }
+      // Only a failure gives the button back. On success the page is about to
+      // change; a button that revived first invited a second send.
       router.push(onDone);
       router.refresh();
+      // If the page has not changed in eight seconds, something upstream is
+      // stuck; give the button back rather than leave it dead.
+      window.setTimeout(() => setBusy(false), 8000);
     } catch {
       setError("Không kết nối được máy chủ");
-    } finally {
       setBusy(false);
     }
   }

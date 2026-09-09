@@ -970,8 +970,10 @@ export function WalletTopUp({
           <button
             type="submit"
             disabled={pending}
-            className="w-full rounded-2xl bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] disabled:opacity-70 disabled:cursor-wait text-white font-black py-3.5 uppercase tracking-widest text-xs transition-colors"
+            aria-busy={pending}
+            className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] disabled:opacity-70 disabled:cursor-wait text-white font-black py-3.5 uppercase tracking-widest text-xs transition-colors"
           >
+            {pending ? <Loader2 size={14} className="animate-spin motion-reduce:animate-none" aria-hidden /> : null}
             {pending ? "Đang xử lý…" : "Tạo hóa đơn"}
           </button>
         </form>

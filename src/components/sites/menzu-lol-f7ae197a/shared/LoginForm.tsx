@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Eye, EyeOff, Lock, User } from "lucide-react";
+import { ArrowLeft, Eye, EyeOff, Loader2, Lock, User } from "lucide-react";
 
 import { canGoBack } from "@/lib/navigation";
 
@@ -303,10 +303,12 @@ export function LoginForm({
                       pending ||
                       (Boolean(turnstileSiteKey) && captchaNeeded && !captcha)
                     }
-                    className={`w-full rounded-2xl bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] disabled:opacity-70 disabled:cursor-wait text-white font-black py-4 uppercase tracking-widest text-sm transition-colors ${
+                    aria-busy={pending}
+                    className={`flex w-full items-center justify-center gap-2 rounded-2xl bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] disabled:opacity-70 disabled:cursor-wait text-white font-black py-4 uppercase tracking-widest text-sm transition-colors ${
                       turnstileSiteKey && captchaNeeded ? "mt-5" : "mt-7"
                     }`}
                   >
+                    {pending ? <Loader2 size={14} className="animate-spin motion-reduce:animate-none" aria-hidden /> : null}
                     {pending ? "ĐANG XỬ LÝ…" : "ĐĂNG NHẬP"}
                   </button>
                 </form>
