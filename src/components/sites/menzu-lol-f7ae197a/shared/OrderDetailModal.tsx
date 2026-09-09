@@ -931,14 +931,34 @@ export function OrderDetailModal({
                         </span>
                       )
                     ) : null}
-                    <Link
-                      href={supportHref}
-                      className="group inline-flex h-10 items-center gap-2 rounded-xl bg-[var(--menzu-accent)] px-5 text-[11px] font-black uppercase tracking-widest text-white transition-colors hover:bg-[var(--menzu-accent-dark)]"
-                    >
-                      <ShieldCheck className="h-4 w-4" />
-                      Hỗ trợ bảo hành
-                      <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
-                    </Link>
+                    {/* Warranty is for an order that stands. The page behind
+                        this button refuses a cancelled or refunded one — so it
+                        used to lead a buyer to a form that opens with "chỉ đơn
+                        đã thanh toán mới yêu cầu bảo hành được". Dead in place
+                        with the reason on it, like its neighbour. */}
+                    {order.paid ? (
+                      <Link
+                        href={supportHref}
+                        className="group inline-flex h-10 items-center gap-2 rounded-xl bg-[var(--menzu-accent)] px-5 text-[11px] font-black uppercase tracking-widest text-white transition-colors hover:bg-[var(--menzu-accent-dark)]"
+                      >
+                        <ShieldCheck className="h-4 w-4" />
+                        Hỗ trợ bảo hành
+                        <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+                      </Link>
+                    ) : (
+                      <span
+                        aria-disabled
+                        title={
+                          order.refunded
+                            ? "Đơn đã được hoàn tiền nên không còn bảo hành."
+                            : "Chỉ đơn đã thanh toán mới yêu cầu bảo hành được."
+                        }
+                        className="inline-flex h-10 cursor-not-allowed items-center gap-2 rounded-xl border border-white/[0.06] bg-white/[0.02] px-5 text-[11px] font-black uppercase tracking-widest text-neutral-600"
+                      >
+                        <ShieldCheck className="h-4 w-4" />
+                        Hỗ trợ bảo hành
+                      </span>
+                    )}
                   </div>
                 </div>
               </div>

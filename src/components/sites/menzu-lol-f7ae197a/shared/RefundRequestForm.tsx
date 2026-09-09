@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { ImagePlus, RotateCcw, Send, X } from "lucide-react";
+import { ImagePlus, Loader2, Send, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 import { REASON_MAX, REASON_MIN } from "@/lib/refundRequests";
@@ -162,7 +162,7 @@ export function RefundRequestForm({
           className="inline-flex h-11 items-center gap-2 rounded-xl bg-[var(--menzu-accent)] px-6 text-[11px] font-black uppercase tracking-widest text-white transition-colors hover:bg-[var(--menzu-accent-dark)] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-[var(--menzu-accent)]"
         >
           {busy ? (
-            <RotateCcw className="h-4 w-4 animate-spin" />
+            <Loader2 className="h-4 w-4 animate-spin motion-reduce:animate-none" />
           ) : (
             <Send className="h-4 w-4" />
           )}

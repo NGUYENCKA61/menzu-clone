@@ -32,6 +32,14 @@ const LABEL = "block text-[10px] font-black uppercase tracking-widest text-neutr
 const CARD = "rounded-xl border border-white/[0.08] bg-[#0e0e11] p-5 flex flex-col gap-4";
 const HEADING = "text-[10px] font-black uppercase tracking-widest text-neutral-500";
 const HINT = "mt-1.5 text-[11px] text-neutral-500";
+
+/**
+ * The colour the shop falls back to, so the picker offers it rather than the
+ * violet left over from the site this was cloned from — an admin who cleared
+ * the field and opened the swatch was shown a colour the shop has never used
+ * and could reasonably take for the original.
+ */
+const DEFAULT_BRAND_COLOR = "#FF3158";
 const ICON_BUTTON =
   "h-7 w-7 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-white/5 text-neutral-300 transition-colors inline-flex items-center justify-center";
 
@@ -1488,13 +1496,13 @@ export function AdminSettings({
                     id="brand-color"
                     value={brandColor}
                     onChange={(event) => setBrandColor(event.target.value)}
-                    placeholder="#7C3AED"
+                    placeholder={DEFAULT_BRAND_COLOR}
                     className={`${FIELD} font-mono uppercase`}
                   />
                   <input
                     type="color"
                     aria-label="Chọn màu chủ đạo"
-                    value={/^#[0-9a-fA-F]{6}$/.test(brandColor) ? brandColor : "#7C3AED"}
+                    value={/^#[0-9a-fA-F]{6}$/.test(brandColor) ? brandColor : DEFAULT_BRAND_COLOR}
                     onChange={(event) => setBrandColor(event.target.value.toUpperCase())}
                     className="h-9 w-10 shrink-0 rounded-lg border border-white/10 bg-neutral-950/60 cursor-pointer"
                   />

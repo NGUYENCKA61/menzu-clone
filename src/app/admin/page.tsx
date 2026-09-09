@@ -140,8 +140,15 @@ export default async function AdminHome() {
       username: row.user.username,
       avatarUrl: row.user.avatarUrl,
       kind: row.method === "CARD" ? "Nạp thẻ" : "Nạp bank",
-      amount: `+${formatVnd(Number(row.amount))}đ`,
-      credit: true,
+      // Only a completed top-up is money. This feed reads the newest twelve
+      // whatever their state, and it used to stamp every one of them with a
+      // plus and paint it green — so a request refused a minute ago sat at the
+      // top of the first screen an admin opens reading "+500.000đ" in the
+      // colour of money arriving. The queue tab has always had this right.
+      amount: `${row.status === "COMPLETED" ? "+" : ""}${formatVnd(
+        Number(row.credited ?? row.amount),
+      )}đ`,
+      credit: row.status === "COMPLETED",
       at: row.createdAt,
       state: txState("topup", row.status),
     })),

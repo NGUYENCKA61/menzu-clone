@@ -63,7 +63,13 @@ export default async function AgencyDashboardPage() {
       },
     }),
     db.order.findMany({
-      where: { userId: user.id, product: { productType: "SOFTWARE_GAME" } },
+      // Paid only, as every other count in the shop is: an order that was
+      // refunded is not a purchase this desk made.
+      where: {
+        userId: user.id,
+        status: "PAID",
+        product: { productType: "SOFTWARE_GAME" },
+      },
       orderBy: { createdAt: "desc" },
       take: 8,
       select: {
@@ -80,6 +86,7 @@ export default async function AgencyDashboardPage() {
     db.order.aggregate({
       where: {
         userId: user.id,
+        status: "PAID",
         discountPct: { gt: 0 },
         packageId: { not: null },
       },

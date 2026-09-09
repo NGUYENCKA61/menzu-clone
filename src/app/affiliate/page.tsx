@@ -73,7 +73,10 @@ export default async function AffiliatePage() {
         // Masked before display: the referrer recognises who they invited,
         // but a screenshot of this table names nobody's spending.
         fromUser: { select: { username: true } },
-        topUp: { select: { amount: true } },
+        // `credited` as well as `amount`: on a scratch card the two differ by
+        // the shop’s fee, and the commission is a share of what actually
+        // reached the wallet.
+        topUp: { select: { amount: true, credited: true } },
       },
     }),
   ]);
@@ -234,7 +237,9 @@ export default async function AffiliatePage() {
                       </td>
                       <td className="px-5 py-4">
                         <span className="text-xs font-bold tabular-nums text-neutral-200">
-                          {formatVnd(Number(earning.topUp.amount))}đ
+                          {formatVnd(
+                            Number(earning.topUp.credited ?? earning.topUp.amount),
+                          )}đ
                         </span>
                       </td>
                       <td className="px-5 py-4">

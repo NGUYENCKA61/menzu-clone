@@ -1251,7 +1251,7 @@ export function validateSettings(settings: ShopSettings): string | null {
   // The colour is written straight into a CSS custom property, so anything
   // that is not a plain hex would either do nothing or let arbitrary CSS in.
   if (!/^#[0-9a-fA-F]{6}$/.test(settings.brandColor)) {
-    return "Màu chủ đạo phải là mã hex 6 ký tự, ví dụ #7C3AED";
+    return `Màu chủ đạo phải là mã hex 6 ký tự, ví dụ ${DEFAULT_SETTINGS.brandColor}`;
   }
   for (const [label, path] of [
     ["Logo", settings.brandLogo],

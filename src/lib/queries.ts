@@ -787,8 +787,16 @@ export async function getRelatedProducts(
     },
   });
 
-  const images = await weaponImages(rows);
-  return rows.map((p) => toProductCard(p, p.price, images));
+  // The sale price, exactly as the category grid reads it. Without this the
+  // strip at the foot of a product page printed the shelf price for an account
+  // that is on sale — and the −% flag with it — so a shopper who clicked one
+  // watched the price drop on arrival, and the shop hid a discount it was
+  // already giving.
+  const [images, sale] = await Promise.all([
+    weaponImages(rows),
+    runningSalePrices(rows.map((p) => p.id)),
+  ]);
+  return rows.map((p) => toProductCard(p, sale.get(p.id) ?? p.price, images));
 }
 
 // ---------------------------------------------------------------------------

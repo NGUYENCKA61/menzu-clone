@@ -8,6 +8,7 @@ import { AccountPageFrame } from "@/components/sites/menzu-lol-f7ae197a/shared/A
 import { RefundRequestForm } from "@/components/sites/menzu-lol-f7ae197a/shared/RefundRequestForm";
 import { formatVnd } from "@/components/sites/menzu-lol-f7ae197a/shared/productData";
 import { db } from "@/lib/db";
+import { ORDER_STATUS_LABELS, type OrderStatus } from "@/lib/orders";
 import { dayTime } from "@/lib/dayGroups";
 import {
   refundBlockedReason,
@@ -142,7 +143,13 @@ export default async function RefundRequestPage({
               <p className="text-lg font-black text-white">
                 {formatVnd(Number(order.total))}đ
               </p>
-              <p className={LABEL}>Đã thanh toán</p>
+              {/* The order’s real state, from the one table that names them.
+                  Written out as "Đã thanh toán" whatever it was, this line
+                  contradicted the refusal printed a few centimetres below it
+                  on an order that had been refunded. */}
+              <p className={LABEL}>
+                {ORDER_STATUS_LABELS[order.status as OrderStatus] ?? order.status}
+              </p>
             </div>
           </div>
 
