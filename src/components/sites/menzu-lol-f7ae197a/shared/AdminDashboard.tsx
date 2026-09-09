@@ -59,12 +59,16 @@ const STATE_TINT: Record<TxState, string> = {
   SUCCESS: "border-emerald-500/25 bg-emerald-500/10 text-emerald-400",
   PENDING: "border-amber-500/25 bg-amber-500/10 text-amber-400",
   FAILED: "border-rose-500/25 bg-rose-500/10 text-rose-400",
+  // Grey, like every other withdrawn row in the shop: red is for something
+  // that went wrong.
+  CANCELLED: "border-white/10 bg-white/5 text-neutral-400",
 };
 
 const STATE_TEXT: Record<TxState, string> = {
   SUCCESS: "text-emerald-400",
   PENDING: "text-amber-400",
   FAILED: "text-rose-400",
+  CANCELLED: "text-neutral-400",
 };
 
 /** The icon a ledger row wears, keyed on the label the page already builds. */

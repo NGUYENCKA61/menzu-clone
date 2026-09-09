@@ -100,12 +100,15 @@ function round(n: number): number {
 }
 
 /** What a transaction row's status reads as, and how it is tinted. */
-export type TxState = "SUCCESS" | "PENDING" | "FAILED";
+export type TxState = "SUCCESS" | "PENDING" | "FAILED" | "CANCELLED";
 
 export const TX_STATE_LABELS: Record<TxState, string> = {
   SUCCESS: "Thành công",
   PENDING: "Đang chờ",
   FAILED: "Thất bại",
+  // Withdrawn by the person who opened it. Nothing failed, and the queue tab
+  // has always said so; only this page swept it into the red bucket.
+  CANCELLED: "Đã hủy",
 };
 
 /**
@@ -120,9 +123,13 @@ export function txState(kind: "topup" | "order", status: string): TxState {
   if (kind === "topup") {
     if (status === "COMPLETED") return "SUCCESS";
     if (status === "PENDING") return "PENDING";
+    if (status === "CANCELLED") return "CANCELLED";
     return "FAILED";
   }
   if (status === "PAID") return "SUCCESS";
   if (status === "PENDING") return "PENDING";
+  // An order stays as it was: the shop creates them PAID and the only thing
+  // that moves one is a refund, so a cancelled order here is a leftover and
+  // not the everyday case this split was made for.
   return "FAILED";
 }
