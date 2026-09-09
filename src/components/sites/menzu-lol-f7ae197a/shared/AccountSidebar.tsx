@@ -3,6 +3,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+
+import { LinkPending } from "./LinkPending";
 import {
   ArrowLeftRight,
   ChevronsUp,
@@ -50,10 +52,11 @@ const NAV_GROUPS: AccountNavItem[][] = [
 
 // Tailwind can't see dynamically-composed class names, so the link's active
 // and inactive states are always emitted as complete literal strings.
+// `relative` so the pending wash has something to fill.
 const LINK_ACTIVE =
-  "flex items-center gap-3 py-2.5 px-3 rounded-lg text-sm font-bold transition-colors bg-[var(--menzu-accent)]/10 text-white";
+  "relative flex items-center gap-3 py-2.5 px-3 rounded-lg text-sm font-bold transition-colors bg-[var(--menzu-accent)]/10 text-white";
 const LINK_INACTIVE =
-  "flex items-center gap-3 py-2.5 px-3 rounded-lg text-sm font-bold transition-colors text-neutral-300 hover:text-white hover:bg-white/5";
+  "relative flex items-center gap-3 py-2.5 px-3 rounded-lg text-sm font-bold transition-colors text-neutral-300 hover:text-white hover:bg-white/5";
 
 /**
  * Authenticated account sidebar navigation. The live /profile "tab bar" is
@@ -149,16 +152,20 @@ export function AccountSidebar({
             {group.map(({ label, href, icon: Icon }) => {
               const isActive = pathname === href;
 
+              // <Link>, as the two privileged rows above already are: a
+              // bare anchor here reloaded the whole application on every
+              // menu click, ĐANG TẢI curtain and all.
               return (
-                <a
+                <Link
                   key={href}
                   href={href}
                   aria-current={isActive ? "page" : undefined}
                   className={isActive ? LINK_ACTIVE : LINK_INACTIVE}
                 >
+                  <LinkPending />
                   <Icon size={16} />
                   {label}
-                </a>
+                </Link>
               );
             })}
           </div>

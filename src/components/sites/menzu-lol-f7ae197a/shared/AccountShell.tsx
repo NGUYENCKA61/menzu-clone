@@ -1,4 +1,7 @@
+import Link from "next/link";
+
 import { AccountSidebar, type SidebarUser } from "./AccountSidebar";
+import { LinkPending } from "./LinkPending";
 import { Breadcrumb } from "./Breadcrumb";
 
 export interface AccountShellProps {
@@ -72,12 +75,13 @@ export function AccountEmpty({ title, body, ctaLabel, ctaHref }: AccountEmptyPro
       <p className="text-xl font-bold text-white mb-2">{title}</p>
       <p className="text-neutral-400">{body}</p>
       {ctaLabel && ctaHref && (
-        <a
+        <Link
           href={ctaHref}
-          className="mt-5 inline-flex items-center gap-2 h-10 px-5 rounded-xl bg-[var(--brand)] hover:bg-[var(--brand-dark)] transition-colors text-[11px] font-black uppercase tracking-widest text-white"
+          className="relative mt-5 inline-flex items-center gap-2 h-10 px-5 rounded-xl bg-[var(--brand)] hover:bg-[var(--brand-dark)] transition-colors text-[11px] font-black uppercase tracking-widest text-white"
         >
           {ctaLabel}
-        </a>
+          <LinkPending />
+        </Link>
       )}
     </div>
   );

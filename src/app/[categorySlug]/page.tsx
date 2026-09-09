@@ -10,10 +10,14 @@ import { Breadcrumb } from "@/components/sites/menzu-lol-f7ae197a/shared/Breadcr
 import { CategoryFilterPanel } from "@/components/sites/menzu-lol-f7ae197a/shared/CategoryFilterPanel";
 import { ProductCard } from "@/components/sites/menzu-lol-f7ae197a/shared/ProductCard";
 import { CardBoundary } from "@/components/sites/menzu-lol-f7ae197a/shared/CardBoundary";
+import { LinkPending } from "@/components/sites/menzu-lol-f7ae197a/shared/LinkPending";
 import { SoftwareCard } from "@/components/sites/menzu-lol-f7ae197a/shared/SoftwareCard";
 import { SoftwareFilterPanel } from "@/components/sites/menzu-lol-f7ae197a/shared/SoftwareFilterPanel";
 import { db } from "@/lib/db";
 import { docHtmlToPlainText, isHtmlBody } from "@/lib/docHtml";
+import Link from "next/link";
+
+import { pageHrefFor } from "@/lib/paging";
 import { getCategoryPage } from "@/lib/queries";
 import { breadcrumbJsonLd, itemListJsonLd, JsonLd } from "@/lib/seo";
 import { softwareSearchHint } from "@/lib/searchHint";
@@ -175,6 +179,10 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
 
   const pageNumbers = buildPageList(data.page, data.totalPages);
 
+  // A page link carries every filter the reader has set and changes only the
+  // page — see pageHrefFor for the bug this replaces.
+  const pageHref = (n: number) => pageHrefFor(categoryHref(slug), query, n);
+
   // Three shapes for the account half, decided by what the category holds.
   //   accounts on sale         the whole section: heading, panel, grid, pager
   //   software but no accounts nothing at all. The panel filters on rank,
@@ -320,17 +328,23 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
                             …
                           </span>
                         ) : (
-                          <a
+                          // The router's link, not a bare anchor: an anchor is
+                          // a document navigation, which threw the running app
+                          // away and put the ĐANG TẢI curtain back up for a
+                          // page-two click.
+                          <Link
                             key={n}
-                            href={`${categoryHref(slug)}?page=${n}`}
+                            href={pageHref(n)}
+                            aria-current={n === data.page ? "page" : undefined}
                             className={
                               n === data.page
-                                ? "w-9 h-9 flex items-center justify-center rounded-lg text-[13px] font-black bg-[var(--menzu-accent)] text-white"
-                                : "w-9 h-9 flex items-center justify-center rounded-lg text-[13px] font-bold bg-neutral-900 border border-neutral-800 text-neutral-400 hover:text-white transition-colors"
+                                ? "relative w-9 h-9 flex items-center justify-center rounded-lg text-[13px] font-black bg-[var(--menzu-accent)] text-white"
+                                : "relative w-9 h-9 flex items-center justify-center rounded-lg text-[13px] font-bold bg-neutral-900 border border-neutral-800 text-neutral-400 hover:text-white transition-colors"
                             }
                           >
                             {n}
-                          </a>
+                            <LinkPending />
+                          </Link>
                         ),
                       )}
                     </div>

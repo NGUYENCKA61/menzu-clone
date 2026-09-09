@@ -18,6 +18,8 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
+import { LinkPending } from "@/components/sites/menzu-lol-f7ae197a/shared/LinkPending";
+
 export interface HeaderUser {
   username: string;
   balance: number;
@@ -238,7 +240,7 @@ export function UserMenu({ user }: { user: HeaderUser }) {
                     // thing a menu of six links can tell you for free.
                     const active = pathname === href;
                     return (
-                      <a
+                      <Link
                         key={href}
                         href={href}
                         aria-current={active ? "page" : undefined}
@@ -248,12 +250,13 @@ export function UserMenu({ user }: { user: HeaderUser }) {
                             : "text-neutral-200 hover:bg-white/5 hover:text-white"
                         }`}
                       >
+                        <LinkPending />
                         <Icon
                           size={18}
                           className={`shrink-0 ${active ? "text-[var(--menzu-accent)]" : "text-neutral-400"}`}
                         />
                         <span className="text-[14px] font-medium">{label}</span>
-                      </a>
+                      </Link>
                     );
                   })}
                 </div>

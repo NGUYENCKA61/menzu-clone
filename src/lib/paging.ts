@@ -111,3 +111,28 @@ export function searchNeedsSync(typed: string, inUrl: string | null): boolean {
 export function pageCount(matching: number, perPage: number = PER_PAGE): number {
   return Math.max(1, Math.ceil(matching / perPage));
 }
+
+/**
+ * The address of page `n` of the list the reader is already looking at.
+ *
+ * Every filter in `query` rides along and only `page` changes. Built from
+ * nothing — `?page=2` — a page link dropped the price band, the sort, the
+ * skin and the source on the way to the second page, so a shopper who had
+ * narrowed the shelf down got the whole shelf back. Page one is the bare
+ * address: `?page=1` and no `page` are the same page and should not be two
+ * URLs. Blank and non-string values are left out rather than written back.
+ */
+export function pageHrefFor(
+  base: string,
+  query: Record<string, string | string[] | undefined>,
+  n: number,
+): string {
+  const params = new URLSearchParams();
+  for (const [key, value] of Object.entries(query)) {
+    if (key === "page" || typeof value !== "string" || value === "") continue;
+    params.set(key, value);
+  }
+  if (n > 1) params.set("page", String(n));
+  const qs = params.toString();
+  return qs ? `${base}?${qs}` : base;
+}

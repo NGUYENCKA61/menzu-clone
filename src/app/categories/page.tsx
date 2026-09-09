@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 
 import { categoryHref } from "@/lib/routes";
 import { listCategories } from "@/lib/queries";
 import { Breadcrumb } from "@/components/sites/menzu-lol-f7ae197a/shared/Breadcrumb";
+import { LinkPending } from "@/components/sites/menzu-lol-f7ae197a/shared/LinkPending";
 import { MobileBottomNav } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/MobileBottomNav";
 import { SiteFooter } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/SiteFooter";
 import { SiteHeader } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/SiteHeader";
@@ -54,18 +56,19 @@ export default async function CategoriesPage() {
             {categories.length > 0 ? (
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
                 {categories.map((c) => (
-                  <a
+                  <Link
                     key={c.slug}
                     href={categoryHref(c.slug)}
-                    className="group flex flex-col justify-between gap-3 bg-[#101114] rounded-[15px] overflow-hidden border border-white/[0.08] hover:border-[var(--menzu-accent)]/50 hover:-translate-y-1 hover:shadow-[0_15px_40px_#00000088] transition-all duration-[250ms] p-5 min-h-[120px]"
+                    className="group relative flex flex-col justify-between gap-3 bg-[#101114] rounded-[15px] overflow-hidden border border-white/[0.08] hover:border-[var(--menzu-accent)]/50 hover:-translate-y-1 hover:shadow-[0_15px_40px_#00000088] transition-all duration-[250ms] p-5 min-h-[120px]"
                   >
+                    <LinkPending />
                     <span className="text-sm font-black uppercase text-white group-hover:text-[var(--menzu-accent)] transition-colors tracking-widest leading-snug">
                       {c.name}
                     </span>
                     <span className="text-[11px] font-bold uppercase tracking-widest text-neutral-500">
                       {c.productCount} sản phẩm
                     </span>
-                  </a>
+                  </Link>
                 ))}
               </div>
             ) : (

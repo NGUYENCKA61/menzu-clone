@@ -1347,3 +1347,25 @@ body.lightbox-open .site-nav {
 .spot-glow-on {
   opacity: 1;
 }
+
+/* The wash a pressed link wears while the next page is on its way (see
+   shared/LinkPending.tsx). Held back 120ms so a navigation that lands fast
+   never flashes, then in over 120ms — the same beat as every colour change
+   on the site. The icon beside it takes the accent by the same rule. */
+@keyframes link-pending-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.link-pending {
+  opacity: 0;
+  animation: link-pending-in 120ms cubic-bezier(0.2, 0, 0.2, 1) 120ms forwards;
+}
+.link-pending ~ svg {
+  color: var(--menzu-accent);
+}
+@media (prefers-reduced-motion: reduce) {
+  .link-pending {
+    animation: none;
+    opacity: 1;
+  }
+}
