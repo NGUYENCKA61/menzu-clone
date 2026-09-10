@@ -3,6 +3,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+
+import { postFormWithProgress } from "./uploadForm";
 import {
   Banknote,
   Check,
@@ -17,6 +19,7 @@ import {
   Star,
   X,
   type LucideIcon,
+  Loader2,
 } from "lucide-react";
 
 import {
@@ -63,6 +66,8 @@ export function FeedbackComposer({ user, today }: { user: ComposerUser; today: s
   const [anonymous, setAnonymous] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [filePreview, setFilePreview] = useState<string | null>(null);
+  /** 0..1 while a picture is leaving; null when nothing is. */
+  const [progress, setProgress] = useState<number | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -116,9 +121,21 @@ export function FeedbackComposer({ user, today }: { user: ComposerUser; today: s
       form.set("anonymous", anonymous ? "1" : "0");
       if (file) form.set("image", file);
 
-      const response = await fetch("/api/feedback", { method: "POST", body: form });
-      const data = (await response.json().catch(() => ({}))) as { error?: string };
-      if (!response.ok) {
+      // With a picture the send goes over XMLHttpRequest for its upload
+      // progress; without one, fetch as before.
+      let ok: boolean;
+      let data: { error?: string };
+      if (file) {
+        setProgress(0);
+        const result = await postFormWithProgress("/api/feedback", form, setProgress);
+        ok = result.ok;
+        data = (result.json ?? {}) as { error?: string };
+      } else {
+        const response = await fetch("/api/feedback", { method: "POST", body: form });
+        ok = response.ok;
+        data = (await response.json().catch(() => ({}))) as { error?: string };
+      }
+      if (!ok) {
         setError(data.error ?? "Gửi đánh giá thất bại, thử lại nhé");
         return;
       }
@@ -127,6 +144,7 @@ export function FeedbackComposer({ user, today }: { user: ComposerUser; today: s
       setError("Không kết nối được máy chủ");
     } finally {
       setSubmitting(false);
+      setProgress(null);
     }
   }
 
@@ -167,9 +185,16 @@ export function FeedbackComposer({ user, today }: { user: ComposerUser; today: s
         </p>
       )}
       {filePreview ? (
-        <div className="mt-4 rounded-2xl overflow-hidden border border-neutral-800 w-fit max-w-full">
+        <div className="relative mt-4 rounded-2xl overflow-hidden border border-neutral-800 w-fit max-w-full">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={filePreview} alt="" className="w-full h-auto object-cover max-h-[260px]" />
+          {/* The thing that is busy is the picture, not the whole button:
+              the same veil the avatar wears while it uploads. */}
+          {progress !== null ? (
+            <span className="absolute inset-0 flex items-center justify-center bg-black/60">
+              <Loader2 size={22} className="animate-spin text-white motion-reduce:animate-none" aria-hidden />
+            </span>
+          ) : null}
         </div>
       ) : null}
       {amountNumber > 0 ? (
@@ -465,8 +490,34 @@ export function FeedbackComposer({ user, today }: { user: ComposerUser; today: s
             disabled={submitting}
             className="w-full bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] disabled:opacity-70 disabled:cursor-wait text-white font-black py-3.5 rounded-2xl mt-2 flex justify-center items-center gap-2 transition-colors uppercase tracking-wider text-sm"
           >
-            {submitting ? "Đang gửi..." : "Gửi đánh giá"}
+            {submitting ? (
+              <Loader2 size={14} className="animate-spin motion-reduce:animate-none" aria-hidden />
+            ) : null}
+            {submitting
+              ? progress === null
+                ? "Đang gửi..."
+                : progress < 1
+                  ? `Đang tải ảnh… ${Math.round(progress * 100)}%`
+                  : "Đang xử lý ảnh…"
+              : "Gửi đánh giá"}
           </button>
+          {progress !== null ? (
+            <span
+              role="progressbar"
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-valuenow={Math.round(progress * 100)}
+              aria-label="Tải ảnh lên"
+              className="mt-2 block h-0.5 w-full overflow-hidden rounded-full bg-white/10"
+            >
+              {/* Data, not decoration: under reduced motion the bar still moves,
+                  only in steps rather than glides. */}
+              <span
+                className="block h-full w-full origin-left bg-[var(--menzu-accent)] transition-transform duration-150 ease-linear motion-reduce:transition-none"
+                style={{ transform: `scaleX(${progress})` }}
+              />
+            </span>
+          ) : null}
         </form>
       </div>
 

@@ -1,9 +1,11 @@
 "use client";
 
-import { ImagePlus, Star, X } from "lucide-react";
+import { ImagePlus, Star, X, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+
+import { postFormWithProgress } from "./uploadForm";
 
 /**
  * The tag on an order's row in Lịch sử mua: "★ Đánh giá" leads to the
@@ -60,6 +62,8 @@ export function OrderReviewForm({ orderId, onDone }: { orderId: string; onDone: 
   const [anonymous, setAnonymous] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
+  /** 0..1 while a picture is leaving; null when nothing is. */
+  const [progress, setProgress] = useState<number | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -93,11 +97,24 @@ export function OrderReviewForm({ orderId, onDone }: { orderId: string; onDone: 
       form.set("body", body.trim());
       if (anonymous) form.set("anonymous", "1");
       if (file) form.set("image", file);
-      const response = await fetch("/api/feedback", { method: "POST", body: form });
-      const data = (await response.json().catch(() => null)) as { error?: string } | null;
-      if (!response.ok) {
+      // With a picture the send goes over XMLHttpRequest for its upload
+      // progress; without one, fetch as before.
+      let ok: boolean;
+      let data: { error?: string } | null;
+      if (file) {
+        setProgress(0);
+        const result = await postFormWithProgress("/api/feedback", form, setProgress);
+        ok = result.ok;
+        data = (result.json ?? null) as { error?: string } | null;
+      } else {
+        const response = await fetch("/api/feedback", { method: "POST", body: form });
+        ok = response.ok;
+        data = (await response.json().catch(() => null)) as { error?: string } | null;
+      }
+      if (!ok) {
         setError(data?.error ?? "Không gửi được, thử lại sau.");
         setSubmitting(false);
+        setProgress(null);
         return;
       }
       // Only a failure gives the button back. On success the page is about to
@@ -106,10 +123,14 @@ export function OrderReviewForm({ orderId, onDone }: { orderId: string; onDone: 
       router.refresh();
       // If the page has not changed in eight seconds, something upstream is
       // stuck; give the button back rather than leave it dead.
-      window.setTimeout(() => setSubmitting(false), 8000);
+      window.setTimeout(() => {
+        setSubmitting(false);
+        setProgress(null);
+      }, 8000);
     } catch {
       setError("Không gửi được, thử lại sau.");
       setSubmitting(false);
+      setProgress(null);
     }
   }
 
@@ -167,6 +188,13 @@ export function OrderReviewForm({ orderId, onDone }: { orderId: string; onDone: 
           <div className="relative mt-2 w-full max-w-sm overflow-hidden rounded-xl border border-white/10 bg-neutral-950">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={preview} alt="" className="max-h-[260px] w-full object-cover" />
+            {/* The thing that is busy is the picture, not the whole button:
+                the same veil the avatar wears while it uploads. */}
+            {progress !== null ? (
+              <span className="absolute inset-0 flex items-center justify-center bg-black/60">
+                <Loader2 size={22} className="animate-spin text-white motion-reduce:animate-none" aria-hidden />
+              </span>
+            ) : null}
             <button
               type="button"
               onClick={() => pick(null)}
@@ -212,14 +240,40 @@ export function OrderReviewForm({ orderId, onDone }: { orderId: string; onDone: 
           type="button"
           onClick={submit}
           disabled={submitting || body.trim().length < WORDS_MIN}
-          className="inline-flex h-11 items-center justify-center rounded-xl bg-[var(--menzu-accent)] px-6 text-[11px] font-black uppercase tracking-wider text-white transition-colors hover:bg-[var(--menzu-accent-dark)] disabled:cursor-not-allowed disabled:opacity-50"
+          className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[var(--menzu-accent)] px-6 text-[11px] font-black uppercase tracking-wider text-white transition-colors hover:bg-[var(--menzu-accent-dark)] disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {submitting ? "Đang gửi…" : "Gửi đánh giá"}
+          {submitting ? (
+            <Loader2 size={14} className="animate-spin motion-reduce:animate-none" aria-hidden />
+          ) : null}
+          {submitting
+            ? progress === null
+              ? "Đang gửi…"
+              : progress < 1
+                ? `Đang tải ảnh… ${Math.round(progress * 100)}%`
+                : "Đang xử lý ảnh…"
+            : "Gửi đánh giá"}
         </button>
         <span className="text-[11px] text-neutral-500">
           Admin duyệt xong sẽ hiện ngoài trang đánh giá, kèm dấu đã mua.
         </span>
       </div>
+      {progress !== null ? (
+        <span
+          role="progressbar"
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={Math.round(progress * 100)}
+          aria-label="Tải ảnh lên"
+          className="mt-2 block h-0.5 w-full overflow-hidden rounded-full bg-white/10"
+        >
+          {/* Data, not decoration: under reduced motion the bar still moves,
+              only in steps rather than glides. */}
+          <span
+            className="block h-full w-full origin-left bg-[var(--menzu-accent)] transition-transform duration-150 ease-linear motion-reduce:transition-none"
+            style={{ transform: `scaleX(${progress})` }}
+          />
+        </span>
+      ) : null}
     </div>
   );
 }
