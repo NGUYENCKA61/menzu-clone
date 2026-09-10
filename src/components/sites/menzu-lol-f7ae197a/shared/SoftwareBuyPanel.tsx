@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { Headphones, Loader2, Minus, Plus, RefreshCw, ShieldCheck, Zap } from "lucide-react";
 
 import {
@@ -16,6 +16,7 @@ import { productHref } from "@/lib/routes";
 import { BadgeIcon } from "./BadgeIcon";
 import { formatVnd } from "./productData";
 import { SoftwareCheckoutDialog } from "./SoftwareCheckoutDialog";
+import { StickyBuyBar } from "./StickyBuyBar";
 import { StatusToast } from "./StatusToast";
 import { isSalesLocked, salesLockReason } from "@/lib/softwareStatus";
 
@@ -137,6 +138,8 @@ export function SoftwareBuyPanel({
     null,
   );
   const [confirming, setConfirming] = useState(false);
+  /** The page's own buttons; the phone's sticky bar shows while they are off screen. */
+  const buyRef = useRef<HTMLDivElement>(null);
 
   const chosen = useMemo(
     () => software.packages.find((p) => p.id === packageId) ?? null,
@@ -378,7 +381,7 @@ export function SoftwareBuyPanel({
           filled accent. The basket keeps the same size and position in the
           stack but drops to the outlined treatment — two solid red buttons
           stacked would leave neither of them reading as the main one. */}
-      <div className="space-y-3">
+      <div ref={buyRef} className="space-y-3">
         <button
           type="button"
           disabled={busy || !chosen || !software.inStock || locked}
@@ -419,6 +422,15 @@ export function SoftwareBuyPanel({
           );
         })}
       </div>
+
+      <StickyBuyBar
+        anchorRef={buyRef}
+        label={chosen ? `${software.name} · ${chosen.label}` : software.name}
+        price={`${formatVnd(total)}đ`}
+        cta="Mua ngay"
+        disabled={busy || !chosen || !software.inStock || locked}
+        onPress={() => setConfirming(true)}
+      />
 
       {/* Buying spends real balance, so it asks once and shows the figure it
           is about to take — after any voucher — rather than only the unit

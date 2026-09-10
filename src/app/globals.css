@@ -1496,3 +1496,29 @@ html[data-filtering] .catalog-grid {
     opacity: 0.25;
   }
 }
+
+/* The phone's sticky buy bar (StickyBuyBar) stands on the bottom nav; the
+   support bubble stood there too. While the bar is up the bubble lifts by
+   the bar's height, on the same clock the bar slides in on. */
+@media (max-width: 639.98px) {
+  body[data-buy-bar] .support-frame {
+    bottom: calc(4rem + 0.75rem + 4rem);
+  }
+  .support-frame {
+    transition: bottom 220ms ease-out;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .support-frame {
+      transition: none;
+    }
+  }
+}
+
+/* A strip that scrolls sideways under a finger, with no bar drawn for it:
+   the peek and the dots already say there is more. */
+.hide-scrollbar {
+  scrollbar-width: none;
+}
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}

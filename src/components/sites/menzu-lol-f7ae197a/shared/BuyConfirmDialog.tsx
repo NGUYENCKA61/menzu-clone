@@ -3,7 +3,14 @@
 import { Check, Loader2, Ticket, Wallet, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useId, useRef, useState, type ReactNode } from "react";
+import {
+  useEffect,
+  useId,
+  useRef,
+  useState,
+  type CSSProperties,
+  type ReactNode,
+} from "react";
 import { createPortal } from "react-dom";
 
 import { lockScroll, trapTab, unlockScroll } from "./modalChrome";
@@ -159,6 +166,48 @@ export function BuyConfirmDialog({
       </div>
     </div>,
     document.body,
+  );
+}
+
+/** Where the eight sparks fly, in degrees round the badge. */
+const SPARK_ANGLES = [0, 45, 90, 135, 180, 225, 270, 315];
+
+/**
+ * The head of a receipt: the tick and the order code.
+ *
+ * Plays once, the moment the receipt appears: the badge pops in, the tick
+ * draws itself, a ring ripples out and sparks fly. The keyframes live in
+ * globals.css beside the modal's own. One piece for every purchase on the
+ * site — a tool, an account, a basket — so paying for anything is answered
+ * the same way.
+ */
+export function ReceiptTick({ code }: { code: string }) {
+  return (
+    <div className="flex flex-col items-center pt-1 text-center">
+      <span className="relative grid h-14 w-14 place-items-center">
+        <span
+          aria-hidden
+          className="tick-ring absolute inset-0 rounded-full border-2 border-emerald-400/60"
+        />
+        {SPARK_ANGLES.map((angle) => (
+          <span
+            key={angle}
+            aria-hidden
+            className="tick-spark absolute left-1/2 top-1/2 -ml-[3px] -mt-[3px] h-1.5 w-1.5 rounded-full bg-emerald-400"
+            style={{ "--spark-angle": `${angle}deg` } as CSSProperties}
+          />
+        ))}
+        <span className="tick-badge grid h-14 w-14 place-items-center rounded-full border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 shadow-[0_0_32px_rgba(16,185,129,0.25)]">
+          <Check className="h-7 w-7" strokeWidth={2.5} aria-hidden />
+        </span>
+      </span>
+      <p className="mt-3 text-[10px] font-black uppercase tracking-widest text-neutral-500">
+        Mã đơn hàng
+      </p>
+      <span className="mt-1.5 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 font-mono text-base font-bold tracking-wider text-white">
+        {code}
+      </span>
+    </div>
   );
 }
 

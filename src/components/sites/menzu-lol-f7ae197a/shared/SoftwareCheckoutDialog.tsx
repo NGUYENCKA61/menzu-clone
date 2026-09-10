@@ -1,9 +1,8 @@
 "use client";
 
-import { Check } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState, type CSSProperties } from "react";
+import { useEffect, useState } from "react";
 
 import {
   BuyConfirmDialog,
@@ -11,6 +10,7 @@ import {
   DialogAlert,
   FOOTER_GHOST_BTN,
   FOOTER_PRIMARY_BTN,
+  ReceiptTick,
   PayableBlock,
   PriceList,
   PriceRow,
@@ -60,7 +60,6 @@ export interface CheckoutProduct {
  */
 
 /** Where the eight sparks around the success tick fly to, in degrees. */
-const SPARK_ANGLES = [0, 45, 90, 135, 180, 225, 270, 315];
 
 /** What the buy call answered, kept for the receipt view. */
 interface Purchase {
@@ -298,34 +297,7 @@ export function SoftwareCheckoutDialog({
             card, so it makes its own entrance — the card itself does not
             remount, and a swap with no motion reads as a glitch. */}
         <div className="receipt-in space-y-4">
-        <div className="flex flex-col items-center pt-1 text-center">
-          {/* Plays once, the moment the receipt appears: the badge pops in,
-              the tick draws itself, a ring ripples out and sparks fly. The
-              keyframes live in globals.css beside the modal's own. */}
-          <span className="relative grid h-14 w-14 place-items-center">
-            <span
-              aria-hidden
-              className="tick-ring absolute inset-0 rounded-full border-2 border-emerald-400/60"
-            />
-            {SPARK_ANGLES.map((angle) => (
-              <span
-                key={angle}
-                aria-hidden
-                className="tick-spark absolute left-1/2 top-1/2 -ml-[3px] -mt-[3px] h-1.5 w-1.5 rounded-full bg-emerald-400"
-                style={{ "--spark-angle": `${angle}deg` } as CSSProperties}
-              />
-            ))}
-            <span className="tick-badge grid h-14 w-14 place-items-center rounded-full border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 shadow-[0_0_32px_rgba(16,185,129,0.25)]">
-              <Check className="h-7 w-7" strokeWidth={2.5} aria-hidden />
-            </span>
-          </span>
-          <p className="mt-3 text-[10px] font-black uppercase tracking-widest text-neutral-500">
-            Mã đơn hàng
-          </p>
-          <span className="mt-1.5 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 font-mono text-base font-bold tracking-wider text-white">
-            {purchase.orderCode}
-          </span>
-        </div>
+        <ReceiptTick code={purchase.orderCode} />
         <ProductTile
           imageUrl={product.imageUrl}
           name={product.name}

@@ -261,7 +261,7 @@ export function SupportWidget({
     // On a phone the bottom edge belongs to the bottom nav (h-16, sm:hidden),
     // so the whole thing lifts above it; from sm up it hinges on the window
     // edge as before.
-    <div className="pointer-events-none fixed bottom-[calc(4rem+0.75rem)] right-3 z-[101] flex flex-col items-end sm:bottom-0 sm:right-4">
+    <div className="support-frame pointer-events-none fixed bottom-[calc(4rem+0.75rem)] right-3 z-[101] flex flex-col items-end sm:bottom-0 sm:right-4">
       <div
         className={`mb-0 w-[calc(100vw-2rem)] max-w-[340px] origin-bottom transition-all duration-300 ${
           canMessage ? "hidden sm:block " : ""

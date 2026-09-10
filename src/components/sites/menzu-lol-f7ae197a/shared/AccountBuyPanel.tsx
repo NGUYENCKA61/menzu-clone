@@ -1,7 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Headphones, Lock, RefreshCw, ShieldCheck, Zap } from "lucide-react";
 
 import { productHref } from "@/lib/routes";
@@ -10,13 +11,17 @@ import {
   BuyConfirmDialog,
   ConfirmFooter,
   DialogAlert,
+  FOOTER_GHOST_BTN,
+  FOOTER_PRIMARY_BTN,
   PayableBlock,
   PriceList,
   PriceRow,
   ProductTile,
+  ReceiptTick,
   VoucherField,
 } from "./BuyConfirmDialog";
 import { formatVnd, productImage } from "./productData";
+import { StickyBuyBar } from "./StickyBuyBar";
 
 export interface AccountDetail {
   code: string;
@@ -92,6 +97,12 @@ export function AccountBuyPanel({ account }: AccountBuyPanelProps) {
   const [buying, setBuying] = useState(false);
   const [buyError, setBuyError] = useState<string | null>(null);
   const [orderCode, setOrderCode] = useState<string | null>(null);
+  /** What the wallet was actually debited, kept for the receipt. */
+  const [paid, setPaid] = useState(0);
+  /** The page's own buttons; the phone's sticky bar shows while they are off screen. */
+  const buyRef = useRef<HTMLDivElement>(null);
+  /** The refusal in the dialog, scrolled to when it appears. */
+  const errorRef = useRef<HTMLDivElement>(null);
   /** Whether the sign-in went out by itself (NFA), or the shop hands it over. */
   const [loginReady, setLoginReady] = useState(false);
   // "Acc random": sold by the piece, so the panel carries a count and the
@@ -178,6 +189,24 @@ export function AccountBuyPanel({ account }: AccountBuyPanelProps) {
     setOpen(true);
   }
 
+  // A refusal lands under the price list, which on a phone is below the
+  // fold of the dialog's scroll box; the box is brought to it. The dialog
+  // stays as it is otherwise — the buyer has a code to fix or a wallet to
+  // fill, and a card that re-runs its entrance over an open dialog reads as
+  // a render fault.
+  useEffect(() => {
+    if (buyError) errorRef.current?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  }, [buyError]);
+
+  /** The receipt was read; the panel is ready for another purchase. */
+  function closeReceipt() {
+    setOpen(false);
+    setOrderCode(null);
+    setBought(0);
+    setApplied(null);
+    setVoucher("");
+  }
+
   async function handleBuy() {
     if (buying) return;
     setBuying(true);
@@ -217,17 +246,18 @@ export function AccountBuyPanel({ account }: AccountBuyPanelProps) {
         return;
       }
 
+      setPaid(payable);
       setOrderCode(data.orderCode ?? "");
       setLoginReady(data.loginReady === true);
       setBought(data.accountsDelivered ?? 0);
       setBalance(data.balance ?? 0);
-      // Long enough to read which of the two things the second line says —
-      // the sign-in is waiting on /orders, or the shop has to be asked.
-      window.setTimeout(() => {
-        // refresh() so the catalogue and header re-render without the sold item.
-        router.refresh();
-        router.push("/orders");
-      }, 2200);
+      // So the catalogue, the header balance and this page's own stock line
+      // re-render without the sold item. The receipt stays up until it is
+      // read: it used to be a green line at the foot of the confirm view,
+      // below the fold on a phone, and the page left for /orders by itself
+      // 2.2 seconds later - the dearest thing on the site was answered
+      // worse than a key. The receipt now carries the way there.
+      router.refresh();
     } catch {
       setBuyError("Không kết nối được máy chủ");
     } finally {
@@ -394,7 +424,7 @@ export function AccountBuyPanel({ account }: AccountBuyPanelProps) {
         </div>
       ) : null}
 
-      <div className="space-y-3">
+      <div ref={buyRef} className="space-y-3">
         <button
           type="button"
           disabled={soldOut}
@@ -434,8 +464,70 @@ export function AccountBuyPanel({ account }: AccountBuyPanelProps) {
         })}
       </div>
 
-      {/* Buying spends real balance, so it asks once and shows the figure it
-          is about to take — after any voucher — before it does. */}
+      <StickyBuyBar
+        anchorRef={buyRef}
+        label={account.name || `Mã #${account.code}`}
+        price={`${formatVnd(account.price * unitCount)}đ`}
+        cta="Mua ngay"
+        disabled={soldOut}
+        onPress={openDialog}
+      />
+
+      {orderCode !== null ? (
+        /* The receipt takes the place of the confirm view inside the same
+           card, the way the tool's checkout answers: the tick, the code, the
+           figures to check against the wallet, and where the account is. */
+        <BuyConfirmDialog
+          open={open}
+          onClose={closeReceipt}
+          title="Thanh toán thành công"
+          subtitle="Đơn đã ghi vào lịch sử mua của bạn."
+          accent="success"
+          footer={
+            <div className="receipt-in flex flex-1 gap-2.5">
+              <button type="button" onClick={closeReceipt} className={FOOTER_GHOST_BTN}>
+                Đóng
+              </button>
+              <Link href="/orders" className={FOOTER_PRIMARY_BTN}>
+                Xem đơn ngay
+              </Link>
+            </div>
+          }
+        >
+          <div className="receipt-in space-y-4">
+            <ReceiptTick code={orderCode} />
+            <ProductTile
+              imageUrl={account.imageUrl ?? productImage(account.code)}
+              imageClassName="object-cover object-[85%_center]"
+              name={account.name || `Mã #${account.code}`}
+              chip={account.rank || null}
+              meta={`#${account.code} · ${account.categoryName}`}
+            />
+            <PriceList>
+              <PriceRow label="Đã trừ ví" value={`${formatVnd(paid)}đ`} />
+              {balance !== null ? (
+                <PriceRow label="Số dư ví còn lại" value={`${formatVnd(balance)}đ`} />
+              ) : null}
+              {pool ? (
+                <PriceRow
+                  label="Acc đã giao"
+                  value={`${bought}/${quantity}`}
+                  tone={bought >= quantity ? "ok" : "plain"}
+                />
+              ) : null}
+            </PriceList>
+            <DialogAlert tone="ok">
+              {pool
+                ? `${bought} tài khoản đã sẵn trong Lịch sử mua.`
+                : loginReady
+                  ? "Tài khoản và mật khẩu đăng nhập đã sẵn trong Lịch sử mua."
+                  : "Tài khoản bàn giao trực tiếp — liên hệ shop kèm mã đơn để nhận."}
+            </DialogAlert>
+          </div>
+        </BuyConfirmDialog>
+      ) : (
+      /* Buying spends real balance, so it asks once and shows the figure it
+         is about to take — after any voucher — before it does. */
       <BuyConfirmDialog
         open={open}
         onClose={() => setOpen(false)}
@@ -445,7 +537,6 @@ export function AccountBuyPanel({ account }: AccountBuyPanelProps) {
             onConfirm={handleBuy}
             busy={buying}
             canAfford={canAfford}
-            done={orderCode !== null}
           />
         }
       >
@@ -491,20 +582,13 @@ export function AccountBuyPanel({ account }: AccountBuyPanelProps) {
           applied={applied}
         />
         <PayableBlock payable={payable} balance={balance} />
-        {buyError ? <DialogAlert tone="err">{buyError}</DialogAlert> : null}
-        {orderCode ? (
-          <DialogAlert tone="ok">
-            Mua thành công · Đơn {orderCode}
-            <span className="mt-1 block font-medium text-emerald-300/90">
-              {pool
-                ? `${bought} tài khoản đã sẵn trong Lịch sử mua.`
-                : loginReady
-                  ? "Tài khoản và mật khẩu đăng nhập đã sẵn trong Lịch sử mua."
-                  : "Tài khoản bàn giao trực tiếp — liên hệ shop kèm mã đơn để nhận."}
-            </span>
-          </DialogAlert>
+        {buyError ? (
+          <div ref={errorRef}>
+            <DialogAlert tone="err">{buyError}</DialogAlert>
+          </div>
         ) : null}
       </BuyConfirmDialog>
+      )}
     </div>
   );
 }
