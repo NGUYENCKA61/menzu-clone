@@ -718,7 +718,7 @@ export function AdminAccountDetail({ account }: { account: AccountDetailView }) 
                 {account.pool && account.pool.shelf.length > 0 ? (
                   <div>
                     <span className={LABEL}>Trong kho (mới nhất {account.pool.shelf.length})</span>
-                    <ul className="flex max-h-56 flex-col gap-1 overflow-y-auto">
+                    <ul className="flex max-h-56 flex-col gap-2 overflow-y-auto">
                       {account.pool.shelf.map((key) => (
                         <li
                           key={key.id}
@@ -732,9 +732,12 @@ export function AdminAccountDetail({ account }: { account: AccountDetailView }) 
                             disabled={busy}
                             onClick={() => removeFromPool(key.id)}
                             aria-label="Xoá cặp này"
-                            className="shrink-0 rounded-md p-1 text-neutral-500 transition-colors hover:text-rose-400"
+                            // 32px, not 20: on a phone these sit at the right
+                            // edge where the thumb also grabs the page, 18px
+                            // apart, and each one throws a key away.
+                            className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-neutral-500 transition-colors hover:bg-white/10 hover:text-rose-400"
                           >
-                            <Trash2 size={12} />
+                            <Trash2 size={14} />
                           </button>
                         </li>
                       ))}
@@ -824,9 +827,9 @@ export function AdminAccountDetail({ account }: { account: AccountDetailView }) 
                     type="button"
                     onClick={() => setShowPass((s) => !s)}
                     aria-label={showPass ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
-                    className="absolute right-1.5 top-1/2 -translate-y-1/2 rounded-md p-1 text-neutral-500 transition-colors hover:bg-white/10 hover:text-white"
+                    className="absolute right-1 top-1/2 inline-flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-md text-neutral-500 transition-colors hover:bg-white/10 hover:text-white"
                   >
-                    {showPass ? <EyeOff size={13} /> : <Eye size={13} />}
+                    {showPass ? <EyeOff size={14} /> : <Eye size={14} />}
                   </button>
                 </div>
               </div>

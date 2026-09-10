@@ -39,6 +39,11 @@ import { startOfDayVn } from "@/lib/time";
 export const metadata: Metadata = { title: "Đơn hàng | Quản trị" };
 export const dynamic = "force-dynamic";
 
+// The last column stays in view while the rest scrolls: with the sidebar a
+// 1024 laptop has 732px for a 1012px table and the buttons were the first
+// thing to go. Same surface as the card so the rows slide under it.
+const STICKY_ACTIONS =
+  "sticky right-0 z-10 bg-[#0e0e11] border-l border-white/[0.06] shadow-[-10px_0_14px_-10px_rgba(0,0,0,0.7)]";
 const STATUS_CLASS: Record<string, string> = {
   PAID: "text-emerald-400 bg-emerald-500/10 border-emerald-500/30",
   PENDING: "text-amber-400 bg-amber-500/10 border-amber-500/30",
@@ -201,7 +206,9 @@ export default async function AdminOrdersPage({
               ].map((h, index) => (
                 <th
                   key={h || `actions-${index}`}
-                  className="px-5 py-3.5 text-[10px] font-black uppercase tracking-widest text-neutral-500 whitespace-nowrap"
+                  className={`px-5 py-3.5 text-[10px] font-black uppercase tracking-widest text-neutral-500 whitespace-nowrap ${
+                    index === 7 ? STICKY_ACTIONS : ""
+                  }`}
                 >
                   {h}
                 </th>
@@ -333,7 +340,7 @@ export default async function AdminOrdersPage({
                       {ORDER_STATUS_LABELS[o.status as OrderStatus] ?? o.status}
                     </span>
                   </td>
-                  <td className="px-5 py-3 text-right">
+                  <td className={`px-5 py-3 text-right ${STICKY_ACTIONS}`}>
                     {/* Goes to the account that was sold. There is no separate
                         order-detail screen, and every field an order has is
                         already on this row — what the admin cannot see from

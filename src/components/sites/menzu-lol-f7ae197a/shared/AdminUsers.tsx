@@ -48,6 +48,12 @@ const TIER_COLOR: Record<string, string> = {
   ELITE: "text-rose-300",
 };
 
+// The last column stays in view while the rest scrolls: with the sidebar a
+// 1024 laptop has 732px for a 1093px table and the buttons were the first
+// thing to go. Same surface as the card so the rows slide under it.
+const STICKY_ACTIONS =
+  "sticky right-0 z-10 bg-[#0e0e11] border-l border-white/[0.06] shadow-[-10px_0_14px_-10px_rgba(0,0,0,0.7)]";
+
 /**
  * Quiet by default, colored on hover — four of these per row used to be four
  * loud pills, and eight rows of pills read as a wall of alarms.
@@ -183,7 +189,9 @@ export function AdminUsers({
                 ].map((head) => (
                   <th
                     key={head}
-                    className="px-4 py-3.5 text-[10px] font-black uppercase tracking-widest text-neutral-500 whitespace-nowrap"
+                    className={`px-4 py-3.5 text-[10px] font-black uppercase tracking-widest text-neutral-500 whitespace-nowrap ${
+                      head === "Thao tác" ? STICKY_ACTIONS : ""
+                    }`}
                   >
                     {head}
                   </th>
@@ -319,7 +327,7 @@ export function AdminUsers({
                     </span>
                   </td>
 
-                  <td className="px-4 py-3">
+                  <td className={`px-4 py-3 ${STICKY_ACTIONS}`}>
                     <div className="flex items-center gap-1.5">
                       <Link
                         href={`/admin/users/${user.uid}`}

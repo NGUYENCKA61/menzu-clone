@@ -116,6 +116,7 @@ export function AdminMarketing({
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
   const [removing, setRemoving] = useState<FlashSaleView | null>(null);
+  const [disabling, setDisabling] = useState<VoucherView | null>(null);
 
   // Voucher form
   const [code, setCode] = useState("");
@@ -171,6 +172,7 @@ export function AdminMarketing({
     } finally {
       setPending(false);
       setRemoving(null);
+      setDisabling(null);
     }
   }
 
@@ -417,7 +419,13 @@ export function AdminMarketing({
                         <button
                           type="button"
                           disabled={pending}
-                          onClick={() => call("/api/admin/vouchers", "PATCH", { code: v.code, active: !v.active })}
+                          // Off asks first (below); on is one tap — a code
+                          // switched on by mistake costs nothing.
+                          onClick={() =>
+                            v.active
+                              ? setDisabling(v)
+                              : call("/api/admin/vouchers", "PATCH", { code: v.code, active: true })
+                          }
                           className={v.active ? BTN_OFF : BTN_ON}
                         >
                           <Power size={12} />
@@ -545,6 +553,23 @@ export function AdminMarketing({
         confirmLabel="Xoá đợt sale"
         onCancel={() => setRemoving(null)}
         onConfirm={() => removing && call("/api/admin/flash-sales", "PATCH", { id: removing.id, remove: true })}
+      />
+
+      {/* Turning a code off used to take effect on the tap — on a phone that
+          tap lands 650px into a sideways-scrolling table, and an audit's
+          stray click switched two live codes off before anyone saw. Deleting
+          a sale already asks; this asks too. */}
+      <ConfirmDialog
+        open={disabling !== null}
+        danger
+        pending={pending}
+        title={disabling ? `Tắt mã ${disabling.code}?` : ""}
+        body="Khách sẽ không nhập được mã này nữa cho tới khi bật lại. Đơn đã dùng mã không bị ảnh hưởng."
+        confirmLabel="Tắt mã"
+        onCancel={() => setDisabling(null)}
+        onConfirm={() =>
+          disabling && call("/api/admin/vouchers", "PATCH", { code: disabling.code, active: false })
+        }
       />
     </div>
   );

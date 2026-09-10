@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
-import { SITE_URL } from "@/lib/seo";
+import { SITE_URL, siteDescription } from "@/lib/seo";
 import { PageBackdrop } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/PageBackdrop";
 import { Preloader } from "@/components/sites/menzu-lol-f7ae197a/shared/Preloader";
 import { SupportWidgetHost } from "@/components/sites/menzu-lol-f7ae197a/shared/SupportWidgetHost";
@@ -35,14 +35,6 @@ const headingNow = localFont({
 });
 
 /**
- * Written from the shop's own name so a rebrand in Cấu hình → Nhận diện
- * reaches the search results too, not only the header.
- */
-function describe(brandName: string): string {
-  return `${brandName} — shop hack game và tài khoản game uy tín. Hack Valorant, CS2, PUBG, Liên Quân: key bản quyền giao tự động, cập nhật liên tục, hỗ trợ 24/7.`;
-}
-
-/**
  * Built per request so the shop name set in Cấu hình → Nhận diện reaches the
  * browser tab and the share cards, not just the header.
  */
@@ -62,7 +54,7 @@ export async function generateViewport(): Promise<Viewport> {
 export async function generateMetadata(): Promise<Metadata> {
   const { brandName } = await getShopSettings();
   const headline = `${brandName} | Hack Game & Tài Khoản Game Uy Tín`;
-  const DESCRIPTION = describe(brandName);
+  const DESCRIPTION = siteDescription(brandName);
 
   return {
   // Required for Open Graph and canonical tags: Next resolves every relative

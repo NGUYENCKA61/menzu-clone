@@ -2,15 +2,13 @@
 
 import { useEffect, useOptimistic, useState, useTransition } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { ChevronDown, Package, Search, SlidersHorizontal } from "lucide-react";
+import { ChevronDown, Search, SlidersHorizontal } from "lucide-react";
 
 import {
   CHIP_ACTIVE,
-  CHIP_DISABLED,
   CHIP_INACTIVE,
   GROUP_LABEL_CLASS,
   PANEL_CLASS,
-  SEARCH_SHELL_CLASS,
 } from "./filterChrome";
 import { ScopeSearchField } from "./ScopeSearchField";
 
@@ -20,13 +18,15 @@ interface PricePreset {
   max: string;
 }
 
+// Bands for what this shop sells — accounts from 7.000đ to 70.000đ — not the
+// cloned shop's 500K-to-5M ladder, on which every account here fell into the
+// first chip and the other five found nothing. The top band stays open.
 const PRICE_PRESETS: PricePreset[] = [
-  { label: "Dưới 500K", min: "0", max: "500000" },
-  { label: "500K - 1M", min: "500000", max: "1000000" },
-  { label: "1M - 2M", min: "1000000", max: "2000000" },
-  { label: "2M - 3M", min: "2000000", max: "3000000" },
-  { label: "3M - 5M", min: "3000000", max: "5000000" },
-  { label: "5M+ trở lên", min: "5000000", max: "" },
+  { label: "Dưới 50K", min: "0", max: "50000" },
+  { label: "50K - 100K", min: "50000", max: "100000" },
+  { label: "100K - 200K", min: "100000", max: "200000" },
+  { label: "200K - 500K", min: "200000", max: "500000" },
+  { label: "500K trở lên", min: "500000", max: "" },
 ];
 
 const SORT_OPTIONS = [
@@ -36,16 +36,6 @@ const SORT_OPTIONS = [
 ] as const;
 
 type SortValue = (typeof SORT_OPTIONS)[number]["value"];
-
-const SOURCE_OPTIONS = [
-  { value: "all", label: "Tất cả" },
-  { value: "drop", label: "DROP" },
-  { value: "menzu", label: "MENZU" },
-] as const;
-
-type SourceValue = (typeof SOURCE_OPTIONS)[number]["value"];
-
-const NO_DATA = "Shop chưa có dữ liệu cho bộ lọc này";
 
 const PRICE_INPUT_SHELL_CLASS =
   "flex items-center gap-1.5 h-10 px-3 rounded-lg bg-neutral-950/60 border border-neutral-800/60 flex-1 min-w-0";
@@ -64,11 +54,12 @@ export interface CategoryFilterPanelProps {
 /**
  * Search + filter panel above the category listing.
  *
- * Every control that has data behind it writes to the URL and the listing
- * queries from there. The two chips under "Khác" and the rank chip are left
- * disabled: nothing in the schema records a free-account flag or a rank band
- * to filter on, and a live-looking control that changes nothing is what this
- * panel was before.
+ * Every control writes to the URL and the listing queries from there. The
+ * panel used to carry the cloned shop's controls as well — a "Nguồn" split
+ * between DROP mail and MENZU, a rank chip, "LOL Free" / "TFT Free", a box
+ * for Valorant buddies and cards — over a shelf of Đột Kích accounts; those
+ * are gone, and the one box searches the whole account (name, rank,
+ * description, skins).
  */
 export function CategoryFilterPanel({ hotPicks }: CategoryFilterPanelProps) {
   const router = useRouter();
@@ -76,7 +67,6 @@ export function CategoryFilterPanel({ hotPicks }: CategoryFilterPanelProps) {
   const params = useSearchParams();
 
   const [skinQuery, setSkinQuery] = useState(params.get("skin") ?? "");
-  const [accessoryQuery, setAccessoryQuery] = useState(params.get("phukien") ?? "");
   const [priceMin, setPriceMin] = useState(params.get("min") ?? "");
   const [priceMax, setPriceMax] = useState(params.get("max") ?? "");
   const [pricePreset, setPricePreset] = useState<number | null>(() => {
@@ -88,7 +78,6 @@ export function CategoryFilterPanel({ hotPicks }: CategoryFilterPanelProps) {
     return index === -1 ? null : index;
   });
   const sort = (params.get("sort") as SortValue) ?? "newest";
-  const source = (params.get("nguon") as SourceValue) ?? "all";
 
   // The pressed chip lights in the same frame as the press. The URL is the
   // only source of truth — these are React's own optimistic copies of it,
@@ -96,11 +85,9 @@ export function CategoryFilterPanel({ hotPicks }: CategoryFilterPanelProps) {
   // fails — so a chip can never stay lit for a filter that did not land.
   const [isPending, startTransition] = useTransition();
   const [shownSort, showSort] = useOptimistic(sort);
-  const [shownSource, showSource] = useOptimistic(source);
   /** The price and chip groups, on a phone: folded until asked for. */
   const [filtersOpen, setFiltersOpen] = useState(false);
-  const filtering =
-    priceMin !== "" || priceMax !== "" || shownSort !== "newest" || shownSource !== "all";
+  const filtering = priceMin !== "" || priceMax !== "" || shownSort !== "newest";
 
   // The grid is the server page's, out of this panel's reach; it reads this
   // attribute off <html> and steps back while the filter is on its way.
@@ -157,7 +144,6 @@ export function CategoryFilterPanel({ hotPicks }: CategoryFilterPanelProps) {
     event.preventDefault();
     apply({
       skin: skinQuery.trim(),
-      phukien: accessoryQuery.trim(),
       min: priceMin.replace(/\D/g, ""),
       max: priceMax.replace(/\D/g, ""),
     });
@@ -170,15 +156,15 @@ export function CategoryFilterPanel({ hotPicks }: CategoryFilterPanelProps) {
     <div className="mt-14 mb-10">
       <form onSubmit={handleSubmit} className="flex flex-col gap-3 w-full">
         <div className="flex flex-col md:flex-row gap-2.5">
-          <div className="flex-[6] relative min-w-0">
+          <div className="flex-1 relative min-w-0">
             <ScopeSearchField
               value={skinQuery}
               onChange={setSkinQuery}
-              placeholder="Tìm: ORA by OneTap, Forsaken, Bubblegum Deathwish......"
+              placeholder="Tìm theo tên, rank, mô tả hoặc skin…"
               // A real non-breaking space, not the "&nbsp;" the capture
               // shows: a JSX string attribute is text, not markup, and the
               // entity would print itself.
-              badge={"✦ Tìm skin yêu thích của bạn"}
+              badge={"✦ Tìm tài khoản"}
               hotPick={
                 hotPicks && hotPicks.length > 0
                   ? {
@@ -194,19 +180,6 @@ export function CategoryFilterPanel({ hotPicks }: CategoryFilterPanelProps) {
                   : undefined
               }
             />
-          </div>
-
-          <div className="flex-[4] relative min-w-0">
-            <div className={SEARCH_SHELL_CLASS}>
-              <Package size={15} className="text-neutral-500 shrink-0" />
-              <input
-                type="text"
-                value={accessoryQuery}
-                onChange={(event) => setAccessoryQuery(event.target.value)}
-                placeholder="Tìm phụ kiện (Buddy, Card...)"
-                className="flex-1 bg-transparent outline-none text-white placeholder-neutral-500 text-sm cursor-text"
-              />
-            </div>
           </div>
 
           <button
@@ -310,48 +283,6 @@ export function CategoryFilterPanel({ hotPicks }: CategoryFilterPanelProps) {
                     {option.label}
                   </button>
                 ))}
-              </div>
-            </div>
-
-            <div>
-              <span className={GROUP_LABEL_CLASS}>Nguồn</span>
-              <div className="flex flex-wrap gap-2">
-                {SOURCE_OPTIONS.map((option) => (
-                  <button
-                    key={option.value}
-                    type="button"
-                    onClick={() =>
-                      startTransition(() => {
-                        showSource(option.value);
-                        apply({ nguon: option.value === "all" ? "" : option.value });
-                      })
-                    }
-                    className={shownSource === option.value ? CHIP_ACTIVE : CHIP_INACTIVE}
-                  >
-                    {option.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <span className={GROUP_LABEL_CLASS}>Rank</span>
-              <div className="flex flex-wrap gap-2">
-                <button type="button" disabled title={NO_DATA} className={CHIP_DISABLED}>
-                  Rank: Bất kỳ
-                </button>
-              </div>
-            </div>
-
-            <div>
-              <span className={GROUP_LABEL_CLASS}>Khác</span>
-              <div className="flex flex-wrap gap-2">
-                <button type="button" disabled title={NO_DATA} className={CHIP_DISABLED}>
-                  LOL Free
-                </button>
-                <button type="button" disabled title={NO_DATA} className={CHIP_DISABLED}>
-                  TFT Free
-                </button>
               </div>
             </div>
           </div>

@@ -29,6 +29,9 @@ export const metadata: Metadata = {
   description:
     "Tải ứng dụng THICHTHIHACK cho Android và iOS — theo dõi Daily Shop, nhận thông báo đẩy khi skin yêu thích xuất hiện, quản lý kho đồ và số dư VP/RP.",
   alternates: { canonical: "/app/download" },
+  // Out of the index until the shop ships a build: a search result promising
+  // an app that ends on two "chưa có bản tải" buttons is worse than none.
+  robots: { index: false, follow: true },
 };
 
 const FEATURES = [

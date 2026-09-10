@@ -30,7 +30,8 @@ const STATIC_ROUTES: [path: string, priority: number, freq: Frequency][] = [
   // No /security: it is one visitor's own account page and now says noindex,
   // and listing a noindex page here hands a crawler two contradictory orders.
   ["/bio", 0.3, "yearly"],
-  ["/app/download", 0.3, "monthly"],
+  // No /app/download: there is no build to download yet, and the page says
+  // noindex until there is.
   // No /2fa either: setting up two-factor is an account errand, not a page a
   // stranger arrives at from a search.
   ["/checkwc", 0.3, "monthly"],

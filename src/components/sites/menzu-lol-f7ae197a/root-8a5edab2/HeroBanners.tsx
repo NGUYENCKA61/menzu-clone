@@ -136,7 +136,10 @@ export function HeroBanners({
               once, not letter by letter. */}
           <h1
             aria-label={title.replace(/\n/g, " ")}
-            className="mt-2 text-[28px] font-black uppercase leading-[1.06] tracking-tight text-white sm:text-[36px] lg:text-[46px]"
+            // One unbreakable word in a column capped at 440px: at 46px it is
+            // 485px wide and its last letters ran under the video card on
+            // every screen from 1024 to 1279. 40px is 422px — inside the cap.
+            className="mt-2 text-[28px] font-black uppercase leading-[1.06] tracking-tight text-white sm:text-[36px] lg:text-[40px] xl:text-[46px]"
           >
             {lines.map((line, li) => (
               <span key={li} className="block whitespace-nowrap" aria-hidden>

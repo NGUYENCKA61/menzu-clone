@@ -157,13 +157,15 @@ export function TransactionsTable({ rows }: { rows: LedgerView[] }) {
           </span>
         </div>
 
-        {/* Under lg the table gives way to cards. A 760px table in a 430px
+        {/* Under xl the table gives way to cards. A 760px table in a 430px
             screen put "Biến động & Số dư" — the one thing anybody opens this
             page to see — entirely off the right edge, with nothing to say
             that a swipe would find it. Each transaction is one card here,
             its figure on a line of its own, the way a bank app writes a
-            statement. */}
-        <div className="flex flex-col gap-2 lg:hidden">
+            statement. The same happened, 131px of it, at 1024: the account
+            column is 672px there and the table's floor is 760, so the cards
+            stay until the column can hold the table whole. */}
+        <div className="flex flex-col gap-2 xl:hidden">
           {filtered.length === 0 ? (
             <p className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-5 py-12 text-center text-sm text-neutral-400">
               Không tìm thấy giao dịch nào phù hợp
@@ -216,7 +218,7 @@ export function TransactionsTable({ rows }: { rows: LedgerView[] }) {
           )}
         </div>
 
-        <div className="hidden w-full overflow-x-auto rounded-xl border border-white/[0.06] bg-white/[0.02] lg:block">
+        <div className="hidden w-full overflow-x-auto rounded-xl border border-white/[0.06] bg-white/[0.02] xl:block">
         <table className="w-full min-w-[760px] table-fixed text-left">
           {/* Three fixed shares — who/when, what, how much — so a long
               description wraps inside its own column instead of squeezing

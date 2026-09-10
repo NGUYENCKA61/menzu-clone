@@ -175,7 +175,7 @@ export default async function Home() {
 
   return (
     <div className="min-h-screen flex flex-col text-white overflow-x-clip selection:bg-[var(--menzu-accent)]/30 transition-colors duration-300">
-      <JsonLd data={organizationJsonLd()} />
+      <JsonLd data={organizationJsonLd(settings.brandName)} />
       {/* spacer reserving the fixed header's 104px */}
       <div className="w-full shrink-0 h-[104px]" />
       <SiteHeader />

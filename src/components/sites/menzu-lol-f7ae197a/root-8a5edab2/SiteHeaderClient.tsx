@@ -90,7 +90,7 @@ const QUICK_LINK_CLASS =
 // because there are two of them now, and a nav where one rung underlines on
 // hover and its neighbour does not reads as a bug rather than as a variant.
 const NAV_LINK_CLASS =
-  "relative flex items-center gap-1.5 px-3 py-2 rounded-lg text-[11px] font-extrabold uppercase tracking-widest text-neutral-200 hover:text-[var(--menzu-accent)] transition-colors duration-200 ease-[ease] after:absolute after:bottom-1.5 after:inset-x-3 after:h-[2px] after:origin-left after:scale-x-0 after:rounded-full after:bg-[var(--menzu-accent)] after:transition-transform after:duration-200 hover:after:scale-x-100"
+  "relative flex items-center gap-1.5 whitespace-nowrap px-3 py-2 rounded-lg text-[11px] font-extrabold uppercase tracking-widest text-neutral-200 hover:text-[var(--menzu-accent)] transition-colors duration-200 ease-[ease] after:absolute after:bottom-1.5 after:inset-x-3 after:h-[2px] after:origin-left after:scale-x-0 after:rounded-full after:bg-[var(--menzu-accent)] after:transition-transform after:duration-200 hover:after:scale-x-100"
 
 // The two ways the shop sells a hack: a board you plug in, and a file you run.
 // Labels only for now — neither has a page in this clone, so both fall to "#"
@@ -165,7 +165,7 @@ function NavDropdown({ label, items }: { label: string; items: DropdownItem[] })
           into the panel, which is where it spends most of the interaction. */}
       <button
         type="button"
-        className="relative flex items-center gap-2 px-3 py-2 rounded-lg text-[11px] font-extrabold uppercase tracking-widest text-neutral-200 group-hover:text-[var(--menzu-accent)] transition-colors duration-200 ease-[ease] after:absolute after:bottom-1.5 after:inset-x-3 after:h-[2px] after:origin-left after:scale-x-0 after:rounded-full after:bg-[var(--menzu-accent)] after:transition-transform after:duration-200 group-hover:after:scale-x-100"
+        className="relative flex items-center gap-2 whitespace-nowrap px-3 py-2 rounded-lg text-[11px] font-extrabold uppercase tracking-widest text-neutral-200 group-hover:text-[var(--menzu-accent)] transition-colors duration-200 ease-[ease] after:absolute after:bottom-1.5 after:inset-x-3 after:h-[2px] after:origin-left after:scale-x-0 after:rounded-full after:bg-[var(--menzu-accent)] after:transition-transform after:duration-200 group-hover:after:scale-x-100"
       >
         {label}
         <ChevronDown size={14} />
@@ -269,7 +269,7 @@ export function SiteHeaderClient({
           {/* On a phone the strip used to show the first link alone, as the
               captured site did; the shop read that as the rest being lost.
               All five, in a row that scrolls sideways under the thumb. */}
-          <div className="lg:hidden flex h-full min-w-0 items-center gap-5 overflow-x-auto whitespace-nowrap [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <div className="xl:hidden flex h-full min-w-0 items-center gap-5 overflow-x-auto whitespace-nowrap [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             {quickLinks.map((link) => (
               <SiteLink key={link} href={linkFor(link)} className={QUICK_LINK_CLASS}>
                 {link}
@@ -277,7 +277,7 @@ export function SiteHeaderClient({
             ))}
           </div>
 
-          <div className="hidden lg:flex items-center gap-5 h-full">
+          <div className="hidden xl:flex items-center gap-5 h-full">
             {quickLinks.map((link) => (
               <SiteLink key={link} href={linkFor(link)} className={QUICK_LINK_CLASS}>
                 {link}
@@ -304,7 +304,7 @@ export function SiteHeaderClient({
               aria-label="Menu"
               aria-expanded={drawerOpen}
               onClick={() => setDrawerOpen(true)}
-              className="lg:hidden p-1.5 text-neutral-200 hover:text-white transition-colors flex items-center justify-center"
+              className="xl:hidden p-1.5 text-neutral-200 hover:text-white transition-colors flex items-center justify-center"
             >
               <Menu size={18} />
             </button>
@@ -331,7 +331,7 @@ export function SiteHeaderClient({
                   {brandWord}
                 </span>
                 {brandTail ? (
-                  <span className="text-[9px] font-bold tracking-[0.2em] text-red-500 uppercase">
+                  <span className="whitespace-nowrap text-[9px] font-bold tracking-[0.2em] text-red-500 uppercase">
                     {brandTail}
                   </span>
                 ) : null}
@@ -339,7 +339,14 @@ export function SiteHeaderClient({
             </Link>
           </div>
 
-          <div className="hidden lg:flex items-center gap-5 h-full">
+          {/* The full bar from xl, not lg: logo, four rungs, the search box,
+              the bell and the account need about 1160px, so on every screen
+              from 1024 to 1279 (an iPad on its side, a small laptop) the
+              rungs wrapped to two and three lines and, once the header had
+              shrunk on scroll, poked out of it. Those widths now get the
+              tablet header — menu button, strip of quick links, search —
+              which already fits. MobileDrawer switches on the same line. */}
+          <div className="hidden xl:flex items-center gap-5 h-full">
             <NavDropdown label="CÁC LOẠI HACK" items={HACK_CATEGORY_ITEMS} />
             <NavDropdown label="SHOP ACC" items={SHOP_ACC_ITEMS} />
             <NavDropdown label="NẠP TIỀN" items={NAP_TIEN_ITEMS} />

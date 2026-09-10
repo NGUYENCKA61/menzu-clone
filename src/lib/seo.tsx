@@ -219,16 +219,26 @@ export function faqJsonLd(entries: { q: string; a: string }[]) {
   };
 }
 
+/**
+ * The one sentence the shop is described by. The meta description on every
+ * page and the schema.org record on the homepage read this same string, so a
+ * rebrand in Cấu hình → Nhận diện reaches both — and the record can no longer
+ * drift back to the cloned shop's "acc Valorant, cày thuê và nạp VP", which
+ * it did for a month while the page above it said hack game.
+ */
+export function siteDescription(brandName: string): string {
+  return `${brandName} — shop hack game và tài khoản game uy tín. Hack Valorant, CS2, PUBG, Liên Quân: key bản quyền giao tự động, cập nhật liên tục, hỗ trợ 24/7.`;
+}
+
 /** schema.org/Organization for the homepage. */
-export function organizationJsonLd() {
+export function organizationJsonLd(brandName: string) {
   return {
     "@context": "https://schema.org",
     "@type": "OnlineStore",
-    name: SITE_NAME,
+    name: brandName,
     url: SITE_URL,
     logo: absoluteUrl("/sites/menzu-lol-f7ae197a/root-8a5edab2/images/site/logos/menzu-logo.webp"),
-    description:
-      "Shop account Valorant uy tín — acc tự chọn, acc giá rẻ, dịch vụ cày thuê và nạp VP.",
+    description: siteDescription(brandName),
     areaServed: "VN",
   };
 }

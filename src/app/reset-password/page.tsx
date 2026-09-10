@@ -1,9 +1,27 @@
+import { createHash } from "node:crypto";
+
 import type { Metadata } from "next";
 import Link from "next/link";
 
 import { SiteFooter } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/SiteFooter";
 import { SiteHeader } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/SiteHeader";
 import { ResetPasswordForm } from "@/components/sites/menzu-lol-f7ae197a/shared/ResetPasswordForm";
+import { db } from "@/lib/db";
+
+/**
+ * Whether the link can still be spent — the same test /api/auth/reset makes
+ * before it changes anything, made here read-only so the page can say so
+ * up front. It used to draw the form for any token at all, and a customer on
+ * a stale link typed a new password twice before the API told them.
+ */
+async function linkIsLive(token: string): Promise<boolean> {
+  const tokenHash = createHash("sha256").update(token).digest("hex");
+  const reset = await db.passwordReset.findUnique({
+    where: { tokenHash },
+    select: { usedAt: true, expiresAt: true, user: { select: { blockedAt: true } } },
+  });
+  return !!reset && !reset.usedAt && reset.expiresAt > new Date() && !reset.user.blockedAt;
+}
 
 export const metadata: Metadata = {
   title: "Đặt lại mật khẩu",
@@ -26,6 +44,7 @@ export default async function ResetPasswordPage({
   searchParams: Promise<{ token?: string }>;
 }) {
   const { token } = await searchParams;
+  const live = token ? await linkIsLive(token) : false;
 
   return (
     <div className="min-h-screen flex flex-col text-white overflow-x-clip selection:bg-[var(--menzu-accent)]/30">
@@ -40,7 +59,7 @@ export default async function ResetPasswordPage({
               Đặt lại mật khẩu
             </h1>
 
-            {token ? (
+            {token && live ? (
               <>
                 <p className="mt-2 mb-8 text-sm font-medium text-neutral-400">
                   Chọn mật khẩu mới cho tài khoản của bạn
@@ -50,8 +69,9 @@ export default async function ResetPasswordPage({
             ) : (
               <>
                 <p className="mt-2 mb-8 text-sm font-medium text-neutral-400">
-                  Đường dẫn không đầy đủ. Hãy mở đúng liên kết trong email đặt
-                  lại mật khẩu — hoặc yêu cầu một liên kết mới.
+                  {token
+                    ? "Đường dẫn đặt lại này không còn dùng được — mỗi liên kết chỉ dùng một lần và sẽ hết hạn sau một lúc. Hãy yêu cầu một liên kết mới."
+                    : "Đường dẫn không đầy đủ. Hãy mở đúng liên kết trong email đặt lại mật khẩu — hoặc yêu cầu một liên kết mới."}
                 </p>
                 <Link
                   href="/forgot-password"

@@ -31,8 +31,6 @@ interface PageProps {
     max?: string;
     sort?: string;
     skin?: string;
-    phukien?: string;
-    nguon?: string;
     /** The software panel's own keys, kept apart from the account panel's. */
     pm?: string;
     cn?: string;
@@ -42,7 +40,6 @@ interface PageProps {
 }
 
 const SORTS = new Set(["newest", "price-asc", "price-desc"]);
-const SOURCES = new Set(["all", "drop", "menzu"]);
 
 /** How many library items the HOT PICK chip rotates through, besides the pin. */
 const HOT_PICK_ROTATION = 8;
@@ -83,7 +80,10 @@ function toAmount(raw: string | undefined): number | undefined {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { categorySlug: slug } = await params;
   const data = await getCategoryPage(slug);
-  const name = data?.name ?? slug;
+  // No shelf by that name: the body answers 404, and the tab, the crawler
+  // and the share card must not be handed a made-up "Danh mục <slug>" first.
+  if (!data) return { title: "Không tìm thấy trang", robots: { index: false, follow: true } };
+  const name = data.name;
   const canonical = categoryHref(slug);
   // A real sentence for the search snippet and the social card, built from what
   // the category actually holds rather than left blank.
@@ -126,10 +126,6 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
       ? (query.sort as "newest" | "price-asc" | "price-desc")
       : undefined,
     skin: query.skin?.trim() || undefined,
-    accessory: query.phukien?.trim() || undefined,
-    source: SOURCES.has(query.nguon ?? "")
-      ? (query.nguon as "all" | "drop" | "menzu")
-      : undefined,
     software: query.pm?.trim() || undefined,
     softwareFeature: query.cn?.trim() || undefined,
     softwareStatus:
@@ -283,9 +279,13 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
               <>
                 {/* Always headed, like the software shelf above it — and by the
                     game, not the shelf: a category called "Hack Valorant" sells
-                    Valorant accounts, so the leading "Hack" comes off. */}
+                    Valorant accounts, so the leading "Hack" (or "Tool hack +")
+                    comes off. It used to read /^hacks+/ — a lost backslash —
+                    which matched "hacks" and never "HACK ", so every shelf
+                    was headed "tài khoản game HACK …". */}
                 <h2 className="text-lg sm:text-xl font-black uppercase tracking-wider text-white mb-5">
-                  Danh mục tài khoản game {data.name.replace(/^hacks+/i, "")}
+                  Danh mục tài khoản game{" "}
+                  {data.name.replace(/^(tool\s+)?hack\s*\+?\s*/i, "").trim() || data.name}
                 </h2>
 
                 {/* Only when the tools above did not already carry it: the

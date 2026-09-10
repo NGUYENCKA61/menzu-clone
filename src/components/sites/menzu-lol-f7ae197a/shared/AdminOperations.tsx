@@ -163,9 +163,9 @@ const TOPUP_STATUS: Record<string, { text: string; className: string }> = {
 };
 
 const TAB_ON =
-  "px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest bg-[var(--brand)] text-white transition-colors";
+  "whitespace-nowrap px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest bg-[var(--brand)] text-white transition-colors";
 const TAB_OFF =
-  "px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest border border-white/10 bg-white/[0.03] text-neutral-400 hover:text-white transition-colors";
+  "whitespace-nowrap px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest border border-white/10 bg-white/[0.03] text-neutral-400 hover:text-white transition-colors";
 
 function formatVnd(n: number): string {
   return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
@@ -278,7 +278,10 @@ export function AdminOperations({
 
   return (
     <div className="flex flex-col gap-5">
-      <div className="flex gap-2 overflow-x-auto">
+      {/* Five pills are 413px; on a 390px phone the row scrolled and the
+          last tab — the parcels waiting to be posted, badge and all — showed
+          one letter. They wrap to two rows there and stay one row from sm. */}
+      <div className="flex flex-wrap gap-2 sm:flex-nowrap sm:overflow-x-auto">
         <button type="button" onClick={() => setTab("feedback")} className={tab === "feedback" ? TAB_ON : TAB_OFF}>
           Đánh giá
         </button>

@@ -267,11 +267,12 @@ export interface CategoryFilters {
   min?: number;
   max?: number;
   sort?: "newest" | "price-asc" | "price-desc";
-  /** Matches a weapon skin by name. */
+  /**
+   * The one search box on an account shelf: matches the account's name, its
+   * rank line, its description or any skin it carries. It was a weapon-skin
+   * search — the cloned shop's, where every account was a Valorant one.
+   */
   skin?: string;
-  /** Matches a buddy, card, spray or agent by name. */
-  accessory?: string;
-  source?: "all" | "drop" | "menzu";
   /** Matches a tool by name, or by the code the card falls back to. */
   software?: string;
   /** Matches a tool by the feature line under its name. */
@@ -331,8 +332,6 @@ function softwareWhere(categoryId: string, filters: CategoryFilters) {
   };
 }
 
-const ACCESSORY_KINDS = ["BUDDY", "CARD", "SPRAY", "AGENT"] as const;
-
 /**
  * Turns the filter panel's choices into a query.
  *
@@ -346,7 +345,8 @@ function categoryWhere(categoryId: string, filters: CategoryFilters) {
   if (filters.min !== undefined) price.gte = BigInt(Math.floor(filters.min));
   if (filters.max !== undefined) price.lte = BigInt(Math.floor(filters.max));
 
-  const dropTag = { some: { label: { contains: "DROP", mode: "insensitive" as const } } };
+  const term = filters.skin?.trim();
+  const like = term ? { contains: term, mode: "insensitive" as const } : null;
 
   return {
     categoryId,
@@ -361,30 +361,16 @@ function categoryWhere(categoryId: string, filters: CategoryFilters) {
     // covers the grid, the total and the page count together.
     deletedAt: null,
     ...(price.gte !== undefined || price.lte !== undefined ? { price } : {}),
-    ...(filters.skin
+    ...(like
       ? {
-          skins: {
-            some: {
-              kind: "WEAPON_SKIN" as const,
-              name: { contains: filters.skin, mode: "insensitive" as const },
-            },
-          },
+          OR: [
+            { name: like },
+            { rank: like },
+            { description: like },
+            { skins: { some: { name: like } } },
+          ],
         }
       : {}),
-    ...(filters.accessory
-      ? {
-          skins: {
-            some: {
-              kind: { in: [...ACCESSORY_KINDS] },
-              name: { contains: filters.accessory, mode: "insensitive" as const },
-            },
-          },
-        }
-      : {}),
-    // Only "DROP MAIL" is recorded as a tag, so "Menzu" reads as "everything
-    // that is not drop mail" — the split the shop's own tagging supports.
-    ...(filters.source === "drop" ? { tags: dropTag } : {}),
-    ...(filters.source === "menzu" ? { NOT: { tags: dropTag } } : {}),
   };
 }
 
