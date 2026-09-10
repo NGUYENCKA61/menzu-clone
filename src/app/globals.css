@@ -1579,3 +1579,41 @@ html[data-filtering] .catalog-grid {
     transition-duration: 0s;
   }
 }
+
+/* The order receipt on a phone: a bottom sheet. The backdrop sits the
+   card on the screen's foot with no margin, the card keeps only its top
+   corners and 88dvh, and it rises from below on iOS's sheet curve -
+   momentum, no bounce - instead of lifting 15px from the middle like a
+   desk dialog. Its exit slides back down and finishes inside the 180ms
+   useOverlayPresence keeps it mounted for. Transform only: animating
+   max-height would relayout every frame. From sm up nothing changes. */
+@media (max-width: 639.98px) {
+  .order-sheet {
+    align-items: flex-end;
+    padding: 0;
+  }
+  .order-sheet .order-modal-card {
+    border-radius: 1.5rem 1.5rem 0 0;
+    max-height: 88dvh;
+    animation: order-sheet-in 280ms cubic-bezier(0.32, 0.72, 0, 1);
+  }
+  .order-sheet .order-modal-card-out {
+    animation: order-sheet-out 170ms ease-in forwards;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .order-sheet .order-modal-card,
+    .order-sheet .order-modal-card-out {
+      animation: none;
+    }
+  }
+}
+@keyframes order-sheet-in {
+  from {
+    transform: translateY(100%);
+  }
+}
+@keyframes order-sheet-out {
+  to {
+    transform: translateY(100%);
+  }
+}
