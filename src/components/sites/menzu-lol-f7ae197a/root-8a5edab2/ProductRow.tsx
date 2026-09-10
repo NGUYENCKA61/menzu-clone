@@ -207,7 +207,7 @@ function RowCard({
       className={cn(
         // The product cards' surface, radius and lift, so a category
         // tile and an account tile in the next row read as one family.
-        "group flex h-full flex-col bg-[#101114] rounded-[15px] overflow-hidden border transition-all duration-[250ms] p-3 sm:p-4 hover:-translate-y-1 hover:shadow-[0_15px_40px_#00000088]",
+        "group flex h-full flex-col bg-[#101114] rounded-[15px] overflow-hidden border lift-card p-3 sm:p-4 hover:-translate-y-1 hover:shadow-[0_15px_40px_#00000088]",
         t.card,
       )}
     >

@@ -51,6 +51,20 @@
 }
 
 :root {
+  /* Motion. Three lengths and two curves, so a duration is a choice
+     from a short list rather than a number typed on the spot:
+     --dur-1 for colour, border and a press; --dur-2 for a chip, an
+     icon or a dropped panel; --dur-3 for a panel, a dialog, a drawer;
+     --dur-lift for the card lift, which most cards already ran at.
+     --ease-out is receipt-in's curve; --ease-pop is the tick's, and
+     for the tick alone. The 150ms transition-colors everywhere is
+     right as it is and is left alone. */
+  --dur-1: 120ms;
+  --dur-2: 220ms;
+  --dur-3: 320ms;
+  --dur-lift: 250ms;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-pop: cubic-bezier(0.34, 1.56, 0.64, 1);
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
@@ -257,16 +271,6 @@
   }
 }
 
-@keyframes smoothSlideUp {
-  0% {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  100% {
-    opacity: 1;
-    transform: translate(0);
-  }
-}
 
 @keyframes shimmer-sweep {
   0% {
@@ -278,15 +282,6 @@
   }
 }
 
-@keyframes heroFloat {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
-}
 
 @keyframes bounceSubtle {
   0%,
@@ -322,14 +317,6 @@
   }
 }
 
-@keyframes ticker-scroll {
-  0% {
-    transform: translate3d(0, 0, 0);
-  }
-  100% {
-    transform: translate3d(calc(-1 * var(--ticker-width, 50%)), 0, 0);
-  }
-}
 
 @keyframes slideUpFade {
   0% {
@@ -850,27 +837,6 @@ body.lightbox-open .site-nav {
 @media (prefers-reduced-motion: reduce) {
   .invoice-breathe,
   .receipt-in.invoice-breathe {
-    animation: none;
-  }
-}
-
-/* Option two for the invoice's top edge: instead of the whole border
-   breathing, a short bright thread runs back and forth along the hairline —
-   the menzu scanner made two pixels tall. 35% wide band: -100% parks it off
-   the left edge, 286% (100/35 of its own width) off the right. */
-@keyframes invoice-scan {
-  from {
-    transform: translateX(-100%);
-  }
-  to {
-    transform: translateX(286%);
-  }
-}
-.invoice-scan {
-  animation: invoice-scan 2.6s ease-in-out infinite alternate;
-}
-@media (prefers-reduced-motion: reduce) {
-  .invoice-scan {
     animation: none;
   }
 }
@@ -1551,5 +1517,65 @@ html[data-filtering] .catalog-grid {
 @media (prefers-reduced-motion: reduce) {
   .drop-in {
     animation: none;
+  }
+}
+
+/* One lift for every card that lifts: 4px over --dur-lift on the three
+   things a lift changes. The same gesture ran at 250ms/4px on the
+   product cards, 300ms/2px on the reviews and the wiki, and 150ms on
+   one wiki tile - scrolling from the home page to /docs, one mouse
+   movement came back at three speeds. transition-all on a card with a
+   40px shadow also asked the browser to interpolate the shadow and
+   everything else for nothing. */
+.lift-card {
+  transition-property: translate, border-color, box-shadow, background-color;
+  transition-duration: var(--dur-lift);
+  transition-timing-function: var(--ease-out);
+}
+
+/* The exit every overlay lacked. Shorter than the entrance (150ms
+   against 250): the reader has already decided. The backdrop starts
+   60ms after the card and is the last thing to go, so the card never
+   floats over a page that has already come back. Nothing here takes a
+   press. useOverlayPresence keeps the element mounted for the length
+   of this and no longer; under reduced motion it unmounts at once and
+   these never run. */
+@keyframes order-modal-out {
+  to {
+    opacity: 0;
+    transform: translateY(8px) scale(0.985);
+  }
+}
+@keyframes order-backdrop-out {
+  to {
+    opacity: 0;
+  }
+}
+.order-modal-card-out {
+  animation: order-modal-out 150ms ease-in forwards;
+  pointer-events: none;
+}
+.order-modal-backdrop-out {
+  animation: order-backdrop-out 120ms ease-in 60ms forwards;
+  pointer-events: none;
+}
+@keyframes toast-out {
+  to {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+}
+.status-toast-out {
+  animation: toast-out 150ms ease-in forwards;
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .order-modal-card-out,
+  .order-modal-backdrop-out,
+  .status-toast-out {
+    animation: none;
+  }
+  .lift-card {
+    transition-duration: 0s;
   }
 }

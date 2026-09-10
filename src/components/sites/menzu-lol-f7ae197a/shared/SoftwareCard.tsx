@@ -136,7 +136,7 @@ export function SoftwareCard({
     // above the cards and sections drawn after this one. While the list is
     // open the whole card steps up a layer instead.
     <div
-      className={`group relative flex h-full w-full flex-col rounded-[15px] border border-[#24252a] bg-[#101114] transition-all duration-[250ms] hover:-translate-y-1 hover:border-[var(--menzu-accent)]/50 hover:shadow-[0_15px_40px_#00000088] ${open ? "z-40" : ""}`}
+      className={`group relative flex h-full w-full flex-col rounded-[15px] border border-[#24252a] bg-[#101114] lift-card hover:-translate-y-1 hover:border-[var(--menzu-accent)]/50 hover:shadow-[0_15px_40px_#00000088] ${open ? "z-40" : ""}`}
     >
       {/* Picture flush to the card's edges. The shop's image when set; otherwise
           the reference's dark gradient with the tool's name centred over it. */}

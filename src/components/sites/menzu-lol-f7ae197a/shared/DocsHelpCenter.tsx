@@ -251,7 +251,7 @@ export function DocsHelpCenter({
               <SectionHead label="Nội dung nổi bật" note="Được quan tâm" />
               <Link
                 href={`/docs/${featured.slug}`}
-                className="group relative isolate block overflow-hidden rounded-2xl border border-[var(--menzu-accent)]/25 bg-gradient-to-br from-[var(--menzu-accent)]/[0.12] via-[#121216] to-[#121216] p-6 transition-all hover:-translate-y-0.5 hover:border-[var(--menzu-accent)]/50 hover:shadow-xl hover:shadow-black/40"
+                className="group relative isolate block overflow-hidden rounded-2xl border border-[var(--menzu-accent)]/25 bg-gradient-to-br from-[var(--menzu-accent)]/[0.12] via-[#121216] to-[#121216] p-6 lift-card hover:-translate-y-1 hover:border-[var(--menzu-accent)]/50 hover:shadow-xl hover:shadow-black/40"
               >
                 {/* The article's own picture, faded and washed out towards the
                     text, so the card reads as that article and not a box. */}
@@ -517,7 +517,7 @@ function ArticleRows({ items }: { items: DocCard[] }) {
         <Link
           key={article.slug}
           href={`/docs/${article.slug}`}
-          className="group flex items-center gap-4 rounded-xl border border-white/10 bg-[#121216] p-3 transition-all duration-300 hover:-translate-y-0.5 hover:border-[var(--menzu-accent)]/50 hover:bg-white/[0.03] hover:shadow-lg hover:shadow-black/40"
+          className="group flex items-center gap-4 rounded-xl border border-white/10 bg-[#121216] p-3 lift-card hover:-translate-y-1 hover:border-[var(--menzu-accent)]/50 hover:bg-white/[0.03] hover:shadow-lg hover:shadow-black/40"
         >
           <div className="relative h-16 w-24 shrink-0 overflow-hidden rounded-lg bg-black/40">
             <Image

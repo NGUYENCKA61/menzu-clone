@@ -59,7 +59,7 @@ export default async function CategoriesPage() {
                   <Link
                     key={c.slug}
                     href={categoryHref(c.slug)}
-                    className="group relative flex flex-col justify-between gap-3 bg-[#101114] rounded-[15px] overflow-hidden border border-white/[0.08] hover:border-[var(--menzu-accent)]/50 hover:-translate-y-1 hover:shadow-[0_15px_40px_#00000088] transition-all duration-[250ms] p-5 min-h-[120px]"
+                    className="group relative flex flex-col justify-between gap-3 bg-[#101114] rounded-[15px] overflow-hidden border border-white/[0.08] hover:border-[var(--menzu-accent)]/50 hover:-translate-y-1 hover:shadow-[0_15px_40px_#00000088] lift-card p-5 min-h-[120px]"
                   >
                     <LinkPending />
                     <span className="text-sm font-black uppercase text-white group-hover:text-[var(--menzu-accent)] transition-colors tracking-widest leading-snug">
