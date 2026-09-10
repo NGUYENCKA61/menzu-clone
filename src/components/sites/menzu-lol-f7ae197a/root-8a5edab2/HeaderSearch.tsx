@@ -169,7 +169,7 @@ export function HeaderSearch() {
         </label>
 
         {showList ? (
-          <div className="absolute left-0 right-0 top-11 z-50 overflow-hidden rounded-xl border border-white/10 bg-[#0d0d12]/95 shadow-2xl backdrop-blur-xl">
+          <div className="drop-in absolute left-0 right-0 top-11 z-50 overflow-hidden rounded-xl border border-white/10 bg-[#0d0d12]/95 shadow-2xl backdrop-blur-xl">
             {shown.length === 0 ? (
               <p className="px-4 py-3 text-[12px] text-neutral-500">
                 Không thấy gì khớp “{term}”.

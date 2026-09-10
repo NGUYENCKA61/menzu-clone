@@ -189,7 +189,7 @@ export function UserMenu({ user }: { user: HeaderUser }) {
           // panel, so the two still share a corner though this one is now the
           // shorter of the pair - and they can never be open at once anyway, each
           // closing on the other's click.
-          <div className="absolute right-0 top-11 z-[100] w-[260px] overflow-hidden rounded-xl border border-white/10 bg-[#101114] shadow-2xl">
+          <div className="drop-in absolute right-0 top-11 z-[100] w-[260px] overflow-hidden rounded-xl border border-white/10 bg-[#101114] shadow-2xl">
             {/* Who you are: the face, the name, and the two pills the live
                 menu sets under it rather than beside it — the name gets the
                 full width that way, however long it runs. */}

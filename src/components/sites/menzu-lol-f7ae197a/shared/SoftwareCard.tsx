@@ -259,7 +259,7 @@ export function SoftwareCard({
               {open ? (
                 <div
                     role="listbox"
-                    className="absolute left-0 top-[calc(100%+6px)] z-50 min-w-full w-max max-w-[230px] overflow-hidden rounded-[10px] border border-[var(--menzu-accent)]/40 bg-[#160b0e] p-1.5 shadow-[0_18px_40px_#0009]"
+                    className="drop-in absolute left-0 top-[calc(100%+6px)] z-50 min-w-full w-max max-w-[230px] overflow-hidden rounded-[10px] border border-[var(--menzu-accent)]/40 bg-[#160b0e] p-1.5 shadow-[0_18px_40px_#0009]"
                   >
                     <button
                       type="button"

@@ -839,8 +839,17 @@ body.lightbox-open .site-nav {
 .invoice-breathe {
   animation: invoice-breathe 2.4s ease-in-out infinite;
 }
+/* The invoice arrives the way a receipt does (receipt-in) and then
+   breathes; one animation property, so the card that wears both runs
+   both. */
+.receipt-in.invoice-breathe {
+  animation:
+    receipt-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) both,
+    invoice-breathe 2.4s ease-in-out infinite;
+}
 @media (prefers-reduced-motion: reduce) {
-  .invoice-breathe {
+  .invoice-breathe,
+  .receipt-in.invoice-breathe {
     animation: none;
   }
 }
@@ -1521,4 +1530,26 @@ html[data-filtering] .catalog-grid {
 }
 .hide-scrollbar::-webkit-scrollbar {
   display: none;
+}
+
+/* A panel dropped from the header or a card: the user menu, the search
+   results, the notification panel, a card's tier list, the banner menu.
+   They mounted in one frame while the mega-menu beside them faded and
+   slid 4px - the same gesture here, shorter, since these open on a press
+   rather than a hover and a press expects its answer at once. Mount only:
+   they unmount on close, and a close is a decision already made. */
+.drop-in {
+  animation: drop-in 160ms cubic-bezier(0.2, 0, 0.2, 1) both;
+  transform-origin: top;
+}
+@keyframes drop-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .drop-in {
+    animation: none;
+  }
 }

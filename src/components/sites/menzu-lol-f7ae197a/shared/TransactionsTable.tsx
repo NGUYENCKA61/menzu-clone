@@ -12,9 +12,9 @@ import {
   X,
   type LucideIcon,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 
-import { Pager } from "./Pager";
+import { Pager, scrollListTop } from "./Pager";
 import { formatVnd } from "./productData";
 
 export interface LedgerView {
@@ -99,6 +99,7 @@ function normalise(value: string): string {
 export function TransactionsTable({ rows }: { rows: LedgerView[] }) {
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(0);
+  const listRef = useRef<HTMLDivElement>(null);
 
   const filtered = useMemo(() => {
     const needle = normalise(query.trim());
@@ -117,7 +118,7 @@ export function TransactionsTable({ rows }: { rows: LedgerView[] }) {
   const visible = filtered.slice(current * PAGE_SIZE, current * PAGE_SIZE + PAGE_SIZE);
 
   return (
-    <div className="space-y-4">
+    <div ref={listRef} className="scroll-mt-28 space-y-4">
       <div className="relative">
         <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-500" />
         <input
@@ -312,7 +313,10 @@ export function TransactionsTable({ rows }: { rows: LedgerView[] }) {
         <Pager
           page={current}
           pageCount={pageCount}
-          onSelect={setPage}
+          onSelect={(next) => {
+            setPage(next);
+            scrollListTop(listRef.current);
+          }}
           total={filtered.length}
           pageSize={PAGE_SIZE}
           unit="giao dịch"

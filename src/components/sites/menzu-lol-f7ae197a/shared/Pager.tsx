@@ -20,6 +20,24 @@ const CHIP_CURRENT = `${SHAPE} border-rose-500/60 bg-rose-500/15 text-rose-400`;
 const CHIP_IDLE = `${SHAPE} press border-white/[0.08] bg-white/[0.03] text-neutral-300 hover:bg-white/[0.08] hover:text-white`;
 const CHIP_OFF = `${SHAPE} border-white/[0.06] text-neutral-700 cursor-default`;
 
+/**
+ * Bring a list's head back into view after a page change. The pager sits
+ * under the list, so the press that changes the page is made from the foot
+ * of the screen while the ten new rows land above it — the viewport stays
+ * where it was and the reader is looking at the tail of a page they have
+ * not read. The feedback board has always done this; the two money pages
+ * did not. Smooth, unless the reader asked for less motion; the target
+ * carries scroll-mt so the fixed header does not cover its first line.
+ */
+export function scrollListTop(node: HTMLElement | null) {
+  node?.scrollIntoView({
+    block: "start",
+    behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+      ? "auto"
+      : "smooth",
+  });
+}
+
 export function Pager({
   page,
   pageCount,

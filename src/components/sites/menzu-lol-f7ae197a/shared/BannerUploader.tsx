@@ -120,7 +120,7 @@ export function BannerUploader({ hasOwn }: BannerUploaderProps) {
       {open ? (
         <div
           role="menu"
-          className="absolute right-0 top-10 w-48 overflow-hidden rounded-xl border border-white/12 bg-[#14141a]/95 py-1 shadow-[0_18px_40px_-12px_rgba(0,0,0,0.8)] backdrop-blur-md"
+          className="drop-in absolute right-0 top-10 w-48 overflow-hidden rounded-xl border border-white/12 bg-[#14141a]/95 py-1 shadow-[0_18px_40px_-12px_rgba(0,0,0,0.8)] backdrop-blur-md"
         >
           <button
             type="button"

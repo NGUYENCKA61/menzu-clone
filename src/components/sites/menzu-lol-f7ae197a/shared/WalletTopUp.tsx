@@ -17,9 +17,9 @@ import Image from "next/image";
 import { cardNet, cardRateFor, type CardRate } from "@/lib/topup";
 import { useRouter } from "next/navigation";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
-import { Pager } from "./Pager";
+import { Pager, scrollListTop } from "./Pager";
 import { ErrorModal } from "./ErrorModal";
 import { TopUpCountdown, useTimeLeft } from "./TopUpCountdown";
 import { TopUpSuccessDialog } from "./TopUpSuccessDialog";
@@ -338,6 +338,7 @@ function HistoryList({
 }) {
   const [page, setPage] = useState(0);
   const [showAll, setShowAll] = useState(false);
+  const listRef = useRef<HTMLDivElement>(null);
   const pageCount = Math.max(1, Math.ceil(rows.length / PAGE_SIZE));
   // Clamped rather than reset by effect: cancelling the last row of the last
   // page shrinks pageCount and the view just follows.
@@ -361,7 +362,7 @@ function HistoryList({
   }
 
   return (
-    <div className="flex flex-col gap-3">
+    <div ref={listRef} className="scroll-mt-28 flex flex-col gap-3">
       <div className="flex flex-col gap-2">
         {visible.map((row) => {
           const isPending = row.status === "PENDING";
@@ -459,7 +460,10 @@ function HistoryList({
         <Pager
           page={current}
           pageCount={pageCount}
-          onSelect={setPage}
+          onSelect={(next) => {
+            setPage(next);
+            scrollListTop(listRef.current);
+          }}
           total={rows.length}
           pageSize={PAGE_SIZE}
           unit="lệnh"
@@ -771,7 +775,7 @@ export function WalletTopUp({
         // glow, and the hairline scan along the top edge — the same signature
         // the storefront's search fields wear.
         <div
-          className={`relative overflow-hidden rounded-2xl border-[1.5px] bg-[#111] p-5 flex flex-col gap-4 ${
+          className={`receipt-in relative overflow-hidden rounded-2xl border-[1.5px] bg-[#111] p-5 flex flex-col gap-4 ${
             refused
               ? "border-red-500/70"
               : credited
@@ -1119,7 +1123,7 @@ export function WalletTopUp({
           </fieldset>
 
           {carrier ? (
-            <div className="flex flex-col gap-3">
+            <div className="receipt-in flex flex-col gap-3">
               <div className="flex flex-wrap items-center gap-2">
                 <h3 className="text-[10px] font-black uppercase tracking-widest text-neutral-500">
                   2. Chọn mệnh giá
@@ -1172,7 +1176,7 @@ export function WalletTopUp({
               chat: the request then carries everything the desk needs, and
               the customer is not left holding two numbers and no instructions. */}
           {carrier && amount ? (
-            <div className="flex flex-col gap-2">
+            <div className="receipt-in flex flex-col gap-2">
               <h3 className="text-[10px] font-black uppercase tracking-widest text-neutral-500">
                 3. Thông tin mã thẻ
               </h3>

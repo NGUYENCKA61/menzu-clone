@@ -1,9 +1,9 @@
 "use client";
 
 import { Search, X } from "lucide-react";
-import { useMemo, useState, type ReactNode } from "react";
+import { useMemo, useRef, useState, type ReactNode } from "react";
 
-import { Pager } from "./Pager";
+import { Pager, scrollListTop } from "./Pager";
 
 export interface SearchableRow {
   /** Everything the query is matched against, already flattened to strings. */
@@ -83,6 +83,7 @@ export function ListSearch({
 }: ListSearchProps) {
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(0);
+  const listRef = useRef<HTMLDivElement>(null);
 
   const normalise = (value: string) =>
     value
@@ -134,7 +135,10 @@ export function ListSearch({
         <Pager
           page={current}
           pageCount={pageCount}
-          onSelect={setPage}
+          onSelect={(next) => {
+            setPage(next);
+            scrollListTop(listRef.current);
+          }}
           total={filtered.length}
           pageSize={PAGE_SIZE}
           unit={unit}
@@ -143,7 +147,7 @@ export function ListSearch({
     );
 
   return (
-    <div className="space-y-4">
+    <div ref={listRef} className="scroll-mt-28 space-y-4">
       <div className="relative">
         <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-500" />
         <input
