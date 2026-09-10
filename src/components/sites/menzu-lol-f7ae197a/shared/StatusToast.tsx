@@ -3,6 +3,8 @@
 import { Check, X } from "lucide-react";
 import { createPortal } from "react-dom";
 
+import { useLeave } from "./useOverlayPresence";
+
 export interface StatusToastProps {
   /** Red with a cross, or green with a tick. Defaults to the bad news. */
   tone?: "error" | "success";
@@ -52,6 +54,11 @@ export function StatusToast({
   onClose,
 }: StatusToastProps) {
   const look = TONES[tone];
+  // Out the way it came in, sliding back off the edge, whether the clock
+  // ran down or the cross was pressed. Under reduced motion the exit is
+  // no exit at all - and the clock never runs there, so the cross is the
+  // only way out and must still work at once.
+  const { leaving, leave } = useLeave(onClose);
 
   // Through a portal to <body>. The login card wears transform-gpu, and a
   // transformed ancestor turns position:fixed into "fixed to me" — rendered
@@ -69,7 +76,7 @@ export function StatusToast({
     <div className="fixed right-0 top-0 z-[200] w-full max-w-[360px]">
       <div
         role="alert"
-        className={`status-toast relative overflow-hidden rounded-bl-xl border-[1.5px] bg-[#131316] shadow-2xl ${look.shell}`}
+        className={`status-toast relative overflow-hidden rounded-bl-xl border-[1.5px] bg-[#131316] shadow-2xl ${look.shell}${leaving ? " status-toast-out" : ""}`}
       >
         <div className="flex items-start gap-3 py-3.5 pl-4 pr-10">
           <span
@@ -89,7 +96,7 @@ export function StatusToast({
 
         <button
           type="button"
-          onClick={onClose}
+          onClick={leave}
           aria-label="Đóng thông báo"
           className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-lg text-neutral-500 transition-colors hover:bg-white/5 hover:text-white"
         >
@@ -101,7 +108,7 @@ export function StatusToast({
         <span
           aria-hidden
           onAnimationEnd={(event) => {
-            if (event.animationName === "toast-clock") onClose();
+            if (event.animationName === "toast-clock") leave();
           }}
           className={`status-toast-clock absolute inset-x-0 bottom-0 block h-[3px] ${look.clock}`}
         />

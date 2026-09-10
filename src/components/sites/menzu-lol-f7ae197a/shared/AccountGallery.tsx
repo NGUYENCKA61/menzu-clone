@@ -11,6 +11,7 @@ import {
 import { useEffect, useState } from "react";
 import { productImage } from "./productData";
 import { lockScroll, unlockScroll } from "./modalChrome";
+import { useOverlayPresence } from "./useOverlayPresence";
 
 export interface AccountGalleryProps {
   code: string;
@@ -42,6 +43,7 @@ export function AccountGallery({
 
   const paged = slides.length > 1;
   const [lightbox, setLightbox] = useState(false);
+  const { mounted: lightboxMounted, leaving: lightboxLeaving } = useOverlayPresence(lightbox);
 
   function step(delta: number) {
     setIndex((i) => (i + delta + slides.length) % slides.length);
@@ -173,13 +175,14 @@ export function AccountGallery({
       {/* The lightbox: the picture, near full-screen, over everything. It
           shares the frame's index, so paging in here moves the page's frame
           too and closing lands where the customer left off. */}
-      {lightbox ? (
+      {lightboxMounted ? (
         <div
           role="dialog"
           aria-modal="true"
           aria-label={`Ảnh tài khoản ${code}`}
           onClick={() => setLightbox(false)}
-          className="order-modal-backdrop fixed inset-0 z-[300] flex items-center justify-center bg-black/90 p-4 sm:p-8"
+          className={`order-modal-backdrop fixed inset-0 z-[300] flex items-center justify-center bg-black/90 p-4 sm:p-8${lightboxLeaving ? " order-modal-backdrop-out" : ""}`}
+          inert={lightboxLeaving}
         >
           <button
             type="button"
@@ -194,7 +197,7 @@ export function AccountGallery({
               that box is the containing block for the filled <Image>, and
               a transform on it would move the picture's frame of reference
               mid-animation. */}
-          <div className="order-modal-card flex h-full max-h-[85vh] w-full max-w-[1280px]">
+          <div className={`order-modal-card flex h-full max-h-[85vh] w-full max-w-[1280px]${lightboxLeaving ? " order-modal-card-out" : ""}`}>
           <div
             className="relative h-full w-full"
             onClick={(e) => e.stopPropagation()}

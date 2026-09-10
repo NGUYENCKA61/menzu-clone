@@ -33,6 +33,7 @@ import {
 import { TYPE_ICONS, TYPE_TILE } from "./announcementIcons";
 import { useClientNow } from "./useClientClock";
 import { lockScroll, unlockScroll } from "./modalChrome";
+import { useLeave } from "./useOverlayPresence";
 
 export interface AnnouncementItem {
   id: string;
@@ -546,18 +547,14 @@ export function AnnouncementModal({
   const HeaderIcon = TYPE_ICONS[item.type];
 
   /**
-   * The latest onClose, reachable from an effect that does not depend on it.
-   *
-   * The parent re-renders every second — a shared clock drives the "5 phút
-   * trước" labels in the bell list — and onClose is a fresh closure each time.
-   * Naming it as a dependency below therefore tore the effect down and set it
-   * up again every second, and its first act is to focus the panel: whatever
-   * button the reader had just tabbed to lost focus within the second.
+   * The exit, and a stable way out. The parent re-renders every second — a
+   * shared clock drives the "5 phút trước" labels in the bell list — and
+   * onClose is a fresh closure each time; naming it as a dependency below
+   * tore the effect down and set it up again every second, and its first
+   * act is to focus the panel. `leave` never changes, and reads the latest
+   * onClose when the exit ends.
    */
-  const closeRef = useRef(onClose);
-  useEffect(() => {
-    closeRef.current = onClose;
-  });
+  const { leaving, leave } = useLeave(onClose);
 
   // Keyed to the notice, not to the callback: a different notice deserves the
   // focus and the scroll lock afresh, a re-render of the same one does not.
@@ -566,7 +563,7 @@ export function AnnouncementModal({
 
     const onKey = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
-        closeRef.current();
+        leave();
         return;
       }
       if (event.key !== "Tab") return;
@@ -593,11 +590,11 @@ export function AnnouncementModal({
       window.removeEventListener("keydown", onKey);
       unlockScroll();
     };
-  }, [item.id, item.revision]);
+  }, [item.id, item.revision, leave]);
 
   return (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
-      <div className="order-modal-backdrop absolute inset-0 bg-black/75" onClick={onClose} />
+    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4" inert={leaving}>
+      <div className={`order-modal-backdrop absolute inset-0 bg-black/75${leaving ? " order-modal-backdrop-out" : ""}`} onClick={leave} />
 
       <div
         ref={panel}
@@ -608,7 +605,7 @@ export function AnnouncementModal({
         // The same short rise the receipt and the buy dialog make. This sheet
         // opens itself over the hero for a first-time visitor; appearing in
         // one frame read as a pop-up, not as the shop speaking.
-        className="order-modal-card relative flex max-h-[86vh] w-full max-w-[560px] flex-col overflow-hidden rounded-xl border border-white/10 bg-[#0e0e11] shadow-2xl outline-none"
+        className={`order-modal-card relative flex max-h-[86vh] w-full max-w-[560px] flex-col overflow-hidden rounded-xl border border-white/10 bg-[#0e0e11] shadow-2xl outline-none${leaving ? " order-modal-card-out" : ""}`}
       >
         {/* A single accent rule along the top edge — the one piece of colour
             the frame gets, so the eye lands on the sheet before the words. */}
@@ -628,7 +625,7 @@ export function AnnouncementModal({
           </h2>
           <button
             type="button"
-            onClick={onClose}
+            onClick={leave}
             aria-label="Đóng"
             className="ml-auto text-neutral-600 transition-colors hover:text-neutral-300"
           >
@@ -727,7 +724,7 @@ export function AnnouncementModal({
           {item.ctaLabel && item.ctaHref ? (
             <Link
               href={item.ctaHref}
-              onClick={onClose}
+              onClick={leave}
               className="inline-flex h-10 items-center gap-1.5 rounded-lg bg-rose-500 px-6 text-[13px] font-semibold text-white transition-colors hover:bg-rose-600"
             >
               {item.ctaLabel}
@@ -736,7 +733,7 @@ export function AnnouncementModal({
           ) : null}
           <button
             type="button"
-            onClick={onClose}
+            onClick={leave}
             className={
               item.ctaLabel && item.ctaHref
                 ? "h-10 rounded-lg border border-white/10 bg-white/[0.03] px-4 text-[13px] font-medium text-neutral-300 transition-colors hover:bg-white/[0.07] hover:text-white"

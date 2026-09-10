@@ -3,6 +3,7 @@
 import { AlertTriangle, Inbox, Loader2, Search, X } from "lucide-react";
 import { useEffect, useRef, type ReactNode } from "react";
 import { lockScroll, trapTab, unlockScroll } from "./modalChrome";
+import { useOverlayPresence } from "./useOverlayPresence";
 
 /** Spinner for a panel that is fetching. */
 export function AdminLoading({ label = "Đang tải…" }: { label?: string }) {
@@ -94,6 +95,7 @@ export function ConfirmDialog({
   onCancel,
 }: ConfirmDialogProps) {
   const panel = useRef<HTMLDivElement>(null);
+  const { mounted, leaving } = useOverlayPresence(open);
 
   useEffect(() => {
     if (!open) return;
@@ -114,12 +116,12 @@ export function ConfirmDialog({
     };
   }, [open, onCancel]);
 
-  if (!open) return null;
+  if (!mounted) return null;
 
   return (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4" inert={leaving}>
       {/* Clicking the backdrop cancels — the safe outcome, never the action. */}
-      <div className="order-modal-backdrop absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onCancel} />
+      <div className={`order-modal-backdrop absolute inset-0 bg-black/70 backdrop-blur-sm${leaving ? " order-modal-backdrop-out" : ""}`} onClick={onCancel} />
 
       <div
         ref={panel}
@@ -127,7 +129,7 @@ export function ConfirmDialog({
         aria-modal="true"
         aria-labelledby="confirm-title"
         tabIndex={-1}
-        className="order-modal-card relative w-full max-w-[420px] rounded-2xl border border-white/10 bg-[#12141c] p-6 shadow-2xl outline-none"
+        className={`order-modal-card relative w-full max-w-[420px] rounded-2xl border border-white/10 bg-[#12141c] p-6 shadow-2xl outline-none${leaving ? " order-modal-card-out" : ""}`}
       >
         <button
           type="button"

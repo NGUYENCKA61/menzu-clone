@@ -29,6 +29,7 @@ import { createPortal } from "react-dom";
 import type { LoginHandover } from "@/lib/accountLogin";
 
 import { lockScroll, trapTab, unlockScroll } from "./modalChrome";
+import { useOverlayPresence } from "./useOverlayPresence";
 import { formatVnd } from "./productData";
 
 /**
@@ -398,6 +399,7 @@ export function OrderDetailModal({
   // selection, not a dismissal — only a press that began on the backdrop
   // closes.
   const pressedBackdrop = useRef(false);
+  const { mounted, leaving } = useOverlayPresence(open);
 
   useEffect(() => {
     if (!open) return;
@@ -476,7 +478,7 @@ export function OrderDetailModal({
         </button>
       )}
 
-      {open
+      {mounted
         ? createPortal(
             <div
               role="presentation"
@@ -490,7 +492,8 @@ export function OrderDetailModal({
                 )
                   setOpen(false);
               }}
-              className="order-modal-backdrop fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 p-4 backdrop-blur-md sm:p-8"
+              className={`order-modal-backdrop fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 p-4 backdrop-blur-md sm:p-8${leaving ? " order-modal-backdrop-out" : ""}`}
+              inert={leaving}
             >
               <div
                 ref={panelRef}
@@ -498,7 +501,7 @@ export function OrderDetailModal({
                 role="dialog"
                 aria-modal="true"
                 aria-labelledby={`order-${order.code}-title`}
-                className="order-modal-card relative max-h-[calc(100dvh-2rem)] w-full max-w-[1150px] overflow-y-auto rounded-2xl border border-white/10 bg-[#101114] shadow-[0_25px_80px_rgba(0,0,0,0.7)] outline-none sm:max-h-[calc(100dvh-4rem)]"
+                className={`order-modal-card relative max-h-[calc(100dvh-2rem)] w-full max-w-[1150px] overflow-y-auto rounded-2xl border border-white/10 bg-[#101114] shadow-[0_25px_80px_rgba(0,0,0,0.7)] outline-none sm:max-h-[calc(100dvh-4rem)]${leaving ? " order-modal-card-out" : ""}`}
               >
                 {/* HEADER */}
                 <div className="flex items-center justify-between gap-4 border-b border-white/[0.06] px-5 py-5 sm:px-6">

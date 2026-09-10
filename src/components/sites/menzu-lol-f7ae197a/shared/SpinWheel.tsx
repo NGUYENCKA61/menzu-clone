@@ -15,6 +15,7 @@ import { formatVnd } from "./productData";
 import { SpinCelebration } from "./SpinCelebration";
 import { SpinWheelFace } from "./SpinWheelFace";
 import { lockScroll, unlockScroll } from "./modalChrome";
+import { useLeave } from "./useOverlayPresence";
 import { Loader2 } from "lucide-react";
 
 /** Full turns the wheel makes before it starts hunting for its slice. */
@@ -84,6 +85,8 @@ export function SpinWheel({
   const [spinMs, setSpinMs] = useState(SPIN_MS);
   const [spinning, setSpinning] = useState(false);
   const [result, setResult] = useState<SpinResult | null>(null);
+  // The card plays its exit before the state that holds it is cleared.
+  const { leaving, leave } = useLeave(() => setResult(null));
   const [error, setError] = useState<string | null>(null);
   const [balanceLeft, setBalanceLeft] = useState(points);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -100,10 +103,11 @@ export function SpinWheel({
   }, []);
 
   // While the card is up it owns the keyboard, like every other dialog here.
+  // Handed back the moment the exit starts, not when the card is gone.
   useEffect(() => {
-    if (!result) return;
+    if (!result || leaving) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setResult(null);
+      if (e.key === "Escape") leave();
     };
     window.addEventListener("keydown", onKey);
     lockScroll();
@@ -111,7 +115,7 @@ export function SpinWheel({
       window.removeEventListener("keydown", onKey);
       unlockScroll();
     };
-  }, [result]);
+  }, [result, leaving, leave]);
 
   async function spin() {
     if (spinning || !canSpin) return;
@@ -246,9 +250,10 @@ export function SpinWheel({
       {result ? (
         <div
           className="fixed inset-0 z-[200] flex items-center justify-center p-4"
-          onClick={() => setResult(null)}
+          onClick={leave}
+          inert={leaving}
         >
-          <div className="order-modal-backdrop absolute inset-0 bg-black/75 backdrop-blur-[2px]" />
+          <div className={`order-modal-backdrop absolute inset-0 bg-black/75 backdrop-blur-[2px]${leaving ? " order-modal-backdrop-out" : ""}`} />
 
           <div
             role="dialog"
@@ -258,7 +263,7 @@ export function SpinWheel({
             // Rises in; no bounce. The confetti is the celebration, and a
             // card that bounced under "Chưa trúng lần này" would be a joke at
             // the expense of somebody who just spent points.
-            className={`order-modal-card relative w-full max-w-[380px] overflow-hidden rounded-2xl border bg-[#0e0e11] p-7 text-center shadow-2xl ${
+            className={`order-modal-card${leaving ? " order-modal-card-out" : ""} relative w-full max-w-[380px] overflow-hidden rounded-2xl border bg-[#0e0e11] p-7 text-center shadow-2xl ${
               won ? "border-[var(--menzu-violet)]/40" : "border-white/10"
             }`}
           >
@@ -283,7 +288,7 @@ export function SpinWheel({
             <button
               type="button"
               aria-label="Đóng"
-              onClick={() => setResult(null)}
+              onClick={leave}
               className="absolute right-3 top-3 z-10 grid h-8 w-8 place-items-center rounded-lg text-neutral-500 transition-colors hover:bg-white/5 hover:text-white"
             >
               <X size={15} />
@@ -358,7 +363,7 @@ export function SpinWheel({
             <div className="relative mt-5 flex gap-2.5">
               <button
                 type="button"
-                onClick={() => setResult(null)}
+                onClick={leave}
                 className="h-11 flex-1 rounded-xl border border-white/10 text-[11px] font-black uppercase tracking-widest text-neutral-300 transition-colors hover:bg-white/5"
               >
                 Đóng

@@ -6,6 +6,7 @@ import { useEffect, useRef } from "react";
 
 import { formatVnd } from "./productData";
 import { lockScroll, unlockScroll } from "./modalChrome";
+import { useLeave } from "./useOverlayPresence";
 
 export interface TopUpSuccessDialogProps {
   /** The request that just settled, so the customer can match it to a receipt. */
@@ -42,13 +43,14 @@ export function TopUpSuccessDialog({
   onClose,
 }: TopUpSuccessDialogProps) {
   const confirm = useRef<HTMLButtonElement>(null);
+  const { leaving, leave } = useLeave(onClose);
 
   useEffect(() => {
     confirm.current?.focus();
 
     const onKey = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
-        onClose();
+        leave();
         return;
       }
       // One control, so trapping Tab is just keeping it here — enough to stop
@@ -66,13 +68,13 @@ export function TopUpSuccessDialog({
       window.removeEventListener("keydown", onKey);
       unlockScroll();
     };
-  }, [onClose]);
+  }, [leave]);
 
   return (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4" inert={leaving}>
       {/* Its own element rather than a handler on the wrapper, so selecting the
           code to copy it does not close the sheet. */}
-      <div className="error-modal-backdrop absolute inset-0 bg-black/75" onClick={onClose} />
+      <div className={`error-modal-backdrop absolute inset-0 bg-black/75${leaving ? " order-modal-backdrop-out" : ""}`} onClick={leave} />
 
       <div
         role="dialog"
@@ -81,7 +83,7 @@ export function TopUpSuccessDialog({
         // notice-modal-card: the same rise the error sheet makes, without
         // its shake. This is the one sheet a customer sees at the moment
         // their money arrives, and it used to appear in a single frame.
-        className="notice-modal-card relative w-full max-w-[380px] rounded-xl border border-white/10 bg-[#131316] px-7 py-8 text-center shadow-2xl"
+        className={`notice-modal-card relative w-full max-w-[380px] rounded-xl border border-white/10 bg-[#131316] px-7 py-8 text-center shadow-2xl${leaving ? " order-modal-card-out" : ""}`}
       >
         <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border-2 border-rose-500 bg-rose-500/15 text-rose-500">
           <Check size={30} strokeWidth={3} />
@@ -129,7 +131,7 @@ export function TopUpSuccessDialog({
         <button
           ref={confirm}
           type="button"
-          onClick={onClose}
+          onClick={leave}
           className="mt-5 h-11 w-full rounded-lg bg-rose-500 text-[13px] font-black uppercase tracking-widest text-white transition-colors hover:bg-rose-600"
         >
           Xong

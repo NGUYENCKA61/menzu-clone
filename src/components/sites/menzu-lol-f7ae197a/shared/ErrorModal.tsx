@@ -3,6 +3,7 @@
 import { Check, X } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { lockScroll, unlockScroll } from "./modalChrome";
+import { useLeave } from "./useOverlayPresence";
 
 export interface ErrorModalProps {
   /** What failed — "Đăng nhập thất bại". The message below says why. */
@@ -34,13 +35,14 @@ export interface ErrorModalProps {
 export function ErrorModal({ title, message, onClose, tone = "error" }: ErrorModalProps) {
   const done = tone === "done";
   const confirm = useRef<HTMLButtonElement>(null);
+  const { leaving, leave } = useLeave(onClose);
 
   useEffect(() => {
     confirm.current?.focus();
 
     const onKey = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
-        onClose();
+        leave();
         return;
       }
       // One control, so trapping Tab is just keeping it here — enough to stop
@@ -58,13 +60,13 @@ export function ErrorModal({ title, message, onClose, tone = "error" }: ErrorMod
       window.removeEventListener("keydown", onKey);
       unlockScroll();
     };
-  }, [onClose]);
+  }, [leave]);
 
   return (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4" inert={leaving}>
       <div
-        className="error-modal-backdrop absolute inset-0 bg-black/75"
-        onClick={onClose}
+        className={`error-modal-backdrop absolute inset-0 bg-black/75${leaving ? " order-modal-backdrop-out" : ""}`}
+        onClick={leave}
       />
 
       <div
@@ -80,7 +82,7 @@ export function ErrorModal({ title, message, onClose, tone = "error" }: ErrorMod
           done
             ? "notice-modal-card border-white/10 shadow-black/60"
             : "error-modal-card border-red-500/40 shadow-red-950/40"
-        }`}
+        }${leaving ? " order-modal-card-out" : ""}`}
       >
         <span
           className={`mx-auto flex h-16 w-16 items-center justify-center rounded-full border-2 ${
@@ -106,7 +108,7 @@ export function ErrorModal({ title, message, onClose, tone = "error" }: ErrorMod
         <button
           ref={confirm}
           type="button"
-          onClick={onClose}
+          onClick={leave}
           className="mt-6 h-11 w-full rounded-lg bg-[var(--menzu-accent)] text-[13px] font-black uppercase tracking-widest text-white transition-colors hover:bg-[var(--menzu-accent-dark)]"
         >
           {done ? "Đóng" : "Thử lại"}
