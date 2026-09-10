@@ -258,6 +258,8 @@ export function AdminSettings({
   const [tgToken, setTgToken] = useState(settings.telegramBotToken);
   const [tgSecret, setTgSecret] = useState(settings.telegramSecret);
   const [tgChat, setTgChat] = useState(settings.telegramChatId);
+  const [lowStock, setLowStock] = useState(String(settings.lowStockThreshold));
+  const [lowStockMail, setLowStockMail] = useState(settings.lowStockEmail);
   const [shopToken, setShopToken] = useState(settings.telegramShopToken);
   const [shopSecret, setShopSecret] = useState(settings.telegramShopSecret);
   const [shopUsername, setShopUsername] = useState(settings.telegramShopUsername);
@@ -574,6 +576,8 @@ export function AdminSettings({
           telegramShopToken: shopToken,
           telegramShopSecret: shopSecret,
           telegramShopUsername: shopUsername,
+          lowStockThreshold: Number(lowStock.replace(/\D/g, "")),
+          lowStockEmail: lowStockMail,
           statOrders,
           statCustomers,
           statStartYear,
@@ -1293,6 +1297,60 @@ export function AdminSettings({
                     placeholder="-1001234567890"
                     className={`${FIELD} font-mono`}
                   />
+                </div>
+              </div>
+            </div>
+
+            <div className="border-t border-white/5 pt-5">
+              <span className={LABEL}>Cảnh báo sắp hết hàng</span>
+              <p className={HINT}>
+                Khi một gói tụt xuống còn bằng ngưỡng này, shop được báo — kèm
+                tên sản phẩm, tên gói, số còn lại và link vào trang nhập thêm.
+                Báo thêm một lần nữa khi gói hết sạch, rồi im cho tới khi shop
+                nhập hàng mới. Tính cho cả key tool lẫn kho acc random. Để{" "}
+                <span className="font-mono text-neutral-300">0</span> là tắt.
+                Telegram thì bot nhắn riêng cho admin của kênh ở trên, nên cần
+                đã điền bot token và ID kênh, và admin phải từng bấm Start với
+                bot. Email thì cần phần SMTP bên dưới đã điền.
+              </p>
+              <div className="grid gap-3 sm:grid-cols-3">
+                <div>
+                  <label htmlFor="low-stock" className={LABEL}>
+                    Còn bao nhiêu thì báo
+                  </label>
+                  <input
+                    id="low-stock"
+                    inputMode="numeric"
+                    autoComplete="off"
+                    value={lowStock}
+                    onChange={(event) => setLowStock(event.target.value)}
+                    placeholder="3"
+                    className={FIELD}
+                  />
+                  <p className={HINT}>
+                    {Number(lowStock.replace(/\D/g, "")) > 0
+                      ? `Hiện tại: báo khi một gói chỉ còn ${Number(lowStock.replace(/\D/g, ""))} key hoặc ít hơn`
+                      : "Hiện tại: đang tắt, shop tự canh kho"}
+                  </p>
+                </div>
+                <div className="sm:col-span-2">
+                  <label htmlFor="low-stock-mail" className={LABEL}>
+                    Email nhận cảnh báo
+                  </label>
+                  <input
+                    id="low-stock-mail"
+                    type="text"
+                    inputMode="email"
+                    autoComplete="off"
+                    value={lowStockMail}
+                    onChange={(event) => setLowStockMail(event.target.value)}
+                    placeholder="shop@gmail.com, nhaphang@gmail.com"
+                    className={FIELD}
+                  />
+                  <p className={HINT}>
+                    Nhiều địa chỉ thì ngăn nhau bằng dấu phẩy. Bỏ trống là chỉ
+                    báo qua Telegram.
+                  </p>
                 </div>
               </div>
             </div>

@@ -4,6 +4,7 @@ import { ensurePoolPackage, parseCredentialBlock } from "@/lib/accountPool";
 import { FORBIDDEN, getAdmin } from "@/lib/admin";
 import { db } from "@/lib/db";
 import { fillBackorders } from "@/lib/licenseKeys";
+import { clearLowStockMark } from "@/lib/stockAlerts";
 import { readKeyStore } from "@/lib/packageKeyStore";
 
 /** One paste at a time; a list longer than this is two pastes. */
@@ -90,6 +91,9 @@ export async function POST(request: Request) {
     return { added: created.count, filled };
   });
   const available = await db.licenseKey.count({ where: { packageId, status: "AVAILABLE" } });
+  // Same as the key desk: stock arriving spends the warning that the shelf was
+  // thin, so the next slide down is announced again.
+  await clearLowStockMark(packageId);
 
   return NextResponse.json({ ...result, available });
 }

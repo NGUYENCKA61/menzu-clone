@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { agencyCutFor, clampAgencyPercent } from "@/lib/agency";
 import { db } from "@/lib/db";
 import { deliverKeys } from "@/lib/licenseKeys";
+import { alertLowStock } from "@/lib/stockAlerts";
 import { readMemberTier, TIER_RULES, tierDiscountFor } from "@/lib/memberTiers";
 import { getCurrentUser } from "@/lib/session";
 import { getShopSettings } from "@/lib/settingsStore";
@@ -41,6 +42,9 @@ export async function POST(request: Request) {
     voucher?: string;
   } | null;
   const voucherCode = body?.voucher?.trim() || null;
+
+  /** Every shelf the basket drew from, looked at once the money has committed. */
+  const soldFrom: string[] = [];
 
   try {
     const result = await db.$transaction(async (tx) => {
@@ -247,6 +251,7 @@ export async function POST(request: Request) {
             `SHORTKEY:${item.product.name ?? item.product.code}:${delivered}`,
           );
         }
+        soldFrom.push(item.package.id);
 
         // Software is a licence, so the listing stays up. Only the sold tally
         // moves.
@@ -314,6 +319,11 @@ export async function POST(request: Request) {
         balanceAfter,
       };
     });
+
+    // Not awaited: the shopper is watching a spinner, and warning the desk can
+    // take a round trip to Telegram and an SMTP handshake. alertLowStock
+    // swallows its own failures, so nothing here can reject.
+    void alertLowStock(soldFrom);
 
     return NextResponse.json({
       orderCodes: result.orderCodes,

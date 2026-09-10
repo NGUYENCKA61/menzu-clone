@@ -851,6 +851,11 @@ model ProductPackage {
   /// a one-day key and a lifetime key are different goods, and the shop hands
   /// out whichever one was paid for.
   licenseKeys  LicenseKey[]
+  /// Which low-stock warning the desk has already had for this tier: null for
+  /// none, otherwise the count that was on the shelf when it went out (0 once
+  /// the shelf-is-empty warning has been sent). Cleared when keys are added.
+  /// See src/lib/stockAlerts.ts.
+  lowStockNotifiedCount Int?
 
   @@index([productId, sortOrder])
   @@map("product_packages")

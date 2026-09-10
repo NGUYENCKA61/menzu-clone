@@ -99,6 +99,22 @@ export interface ShopSettings {
   /** The bot's @handle, read from Telegram when the token is saved. */
   telegramShopUsername: string;
 
+  // --- Cảnh báo sắp hết hàng ------------------------------------------------
+  /**
+   * How few keys (or pooled sign-ins) a tier may hold before the desk is told.
+   * Counted per tier, because a tier is what a buyer actually pays for: a tool
+   * with a full month shelf and an empty one-day shelf is out of stock for
+   * everyone who wanted a day. 0 turns the warning off.
+   */
+  lowStockThreshold: number;
+  /**
+   * Who else gets told, by email — one address or several separated by commas.
+   * Blank sends none. Telegram reaches a phone in a second and email survives
+   * a bot being kicked from the channel, so the shop is told twice by two
+   * routes that fail for different reasons.
+   */
+  lowStockEmail: string;
+
   // --- Số liệu tin cậy (dải số trên phần Đánh giá) ---------------------------
   /** Typed figures; "" means "what the database can vouch for". See lib/trustStats.ts. */
   statOrders: string;
@@ -313,6 +329,10 @@ export const DEFAULT_SETTINGS: ShopSettings = {
   telegramShopToken: "",
   telegramShopSecret: "",
   telegramShopUsername: "",
+  // Three is a shelf that can still serve today's buyers while the shop
+  // pastes more in — not a number anybody has to think about on install.
+  lowStockThreshold: 3,
+  lowStockEmail: "",
   statOrders: "",
   statCustomers: "",
   statStartYear: "",
@@ -423,6 +443,8 @@ export const SETTING_KEYS: Record<keyof ShopSettings, string> = {
   telegramShopToken: "integrations.telegramShop.botToken",
   telegramShopSecret: "integrations.telegramShop.secret",
   telegramShopUsername: "integrations.telegramShop.username",
+  lowStockThreshold: "stock.lowThreshold",
+  lowStockEmail: "stock.lowEmail",
   statOrders: "trust.orders",
   statCustomers: "trust.customers",
   statStartYear: "trust.startYear",
@@ -646,6 +668,20 @@ export function discordOauthEnabled(settings: ShopSettings): boolean {
   return Boolean(settings.discordClientId.trim() && settings.discordClientSecret.trim());
 }
 
+/**
+ * The addresses a low-stock warning is emailed to, one per entry.
+ *
+ * Written as one field because that is how a shop thinks of it — "gửi cho
+ * tôi và cho thằng nhập hàng" — and split on commas or semicolons here so the
+ * form, the validator and the sender all agree on what was meant.
+ */
+export function lowStockRecipients(settings: ShopSettings): string[] {
+  return settings.lowStockEmail
+    .split(/[,;]/)
+    .map((address) => address.trim())
+    .filter(Boolean);
+}
+
 /** Enough SMTP to actually hand a message to a relay. */
 export function mailEnabled(settings: ShopSettings): boolean {
   return Boolean(
@@ -792,6 +828,14 @@ export function parseSettings(rows: Iterable<{ key: string; value: string }>): S
     telegramShopUsername: toOptionalText(
       stored.get(SETTING_KEYS.telegramShopUsername),
       DEFAULT_SETTINGS.telegramShopUsername,
+    ),
+    lowStockThreshold: toNumber(
+      stored.get(SETTING_KEYS.lowStockThreshold),
+      DEFAULT_SETTINGS.lowStockThreshold,
+    ),
+    lowStockEmail: toOptionalText(
+      stored.get(SETTING_KEYS.lowStockEmail),
+      DEFAULT_SETTINGS.lowStockEmail,
     ),
     statOrders: toOptionalText(stored.get(SETTING_KEYS.statOrders), DEFAULT_SETTINGS.statOrders),
     statCustomers: toOptionalText(
@@ -975,6 +1019,8 @@ export function serializeSettings(settings: ShopSettings): { key: string; value:
     telegramShopToken: settings.telegramShopToken.trim(),
     telegramShopSecret: settings.telegramShopSecret.trim(),
     telegramShopUsername: settings.telegramShopUsername.trim().replace(/^@/, ""),
+    lowStockThreshold: String(Math.floor(settings.lowStockThreshold)),
+    lowStockEmail: settings.lowStockEmail.trim(),
     statOrders: settings.statOrders.trim(),
     statCustomers: settings.statCustomers.trim(),
     statStartYear: settings.statStartYear.trim(),
@@ -1105,6 +1151,11 @@ export function normalizeSettings(raw: Partial<ShopSettings> | null): ShopSettin
     telegramShopToken: String(raw?.telegramShopToken ?? "").trim(),
     telegramShopSecret: String(raw?.telegramShopSecret ?? "").trim(),
     telegramShopUsername: String(raw?.telegramShopUsername ?? "").trim().replace(/^@/, ""),
+    lowStockThreshold: (() => {
+      const value = Math.floor(Number(raw?.lowStockThreshold));
+      return Number.isFinite(value) ? value : Number.NaN;
+    })(),
+    lowStockEmail: String(raw?.lowStockEmail ?? "").trim(),
     statOrders: String(raw?.statOrders ?? "").trim(),
     statCustomers: String(raw?.statCustomers ?? "").trim(),
     statStartYear: String(raw?.statStartYear ?? "").trim(),
@@ -1198,6 +1249,19 @@ export function normalizeSettings(raw: Partial<ShopSettings> | null): ShopSettin
 export function validateSettings(settings: ShopSettings): string | null {
   if (!Number.isInteger(settings.topUpMin) || settings.topUpMin < 1_000) {
     return "Mức nạp tối thiểu phải từ 1.000đ trở lên";
+  }
+  if (
+    !Number.isInteger(settings.lowStockThreshold) ||
+    settings.lowStockThreshold < 0 ||
+    settings.lowStockThreshold > 999
+  ) {
+    return "Ngưỡng cảnh báo sắp hết hàng phải là số từ 0 đến 999 (0 là tắt)";
+  }
+  const badRecipient = lowStockRecipients(settings).find(
+    (address) => !/^[^\s@]+@[^\s@.]+\.[^\s@]+$/.test(address),
+  );
+  if (badRecipient) {
+    return `Email nhận cảnh báo không hợp lệ: ${badRecipient}`;
   }
   if (settings.topUpPresets.length === 0) {
     return "Cần ít nhất một mệnh giá gợi ý";

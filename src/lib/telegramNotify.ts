@@ -206,7 +206,7 @@ export async function notifyTelegramAdmins(text: string): Promise<void> {
     if (!token || !chatId) return;
 
     const res = await fetch(
-      `https://api.telegram.org/bot${token}/getChatAdministrators?chat_id=${encodeURIComponent(chatId)}`,
+      `${TELEGRAM_API_BASE}/bot${token}/getChatAdministrators?chat_id=${encodeURIComponent(chatId)}`,
     );
     if (!res.ok) return;
     const data = (await res.json()) as {

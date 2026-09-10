@@ -18,6 +18,7 @@ import {
 import { agencyCutFor, clampAgencyPercent } from "@/lib/agency";
 import { db } from "@/lib/db";
 import { deliverKeys } from "@/lib/licenseKeys";
+import { alertLowStock } from "@/lib/stockAlerts";
 import { readMemberTier, TIER_RULES, tierDiscountFor } from "@/lib/memberTiers";
 import { getShopSettings } from "@/lib/settingsStore";
 import { makeShortCode } from "@/lib/shortCode";
@@ -72,7 +73,10 @@ export async function placeOrder(input: CheckoutInput): Promise<CheckoutResult> 
   if (!code) throw new Error("NOT_FOUND");
   const voucherCode = input.voucher?.trim() || null;
 
-  return db.$transaction(async (tx) => {
+  /** The shelf this sale drew from, looked at once the money has committed. */
+  const soldFrom: string[] = [];
+
+  const result = await db.$transaction(async (tx) => {
     const locked = await tx.$queryRaw<
       { id: string; status: string; productType: string; softwareStatus: string | null }[]
     >`
@@ -236,6 +240,7 @@ export async function placeOrder(input: CheckoutInput): Promise<CheckoutResult> 
     if (shelf && delivered < quantity) {
       throw new Error(`${isPool ? "OUT_OF_ACC" : "OUT_OF_KEYS"}:${delivered}`);
     }
+    if (shelf && delivered > 0) soldFrom.push(shelf);
 
     await tx.transaction.create({
       data: {
@@ -297,6 +302,13 @@ export async function placeOrder(input: CheckoutInput): Promise<CheckoutResult> 
       packageLabel: chosenPackage?.label ?? null,
     };
   });
+
+  // Not awaited: the buyer is watching a spinner, and telling the desk its
+  // shelf is thin can take a round trip to Telegram and an SMTP handshake.
+  // alertLowStock swallows its own failures, so nothing here can reject.
+  void alertLowStock(soldFrom);
+
+  return result;
 }
 
 export interface CheckoutFailure {

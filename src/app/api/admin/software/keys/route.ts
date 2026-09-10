@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { FORBIDDEN, getAdmin } from "@/lib/admin";
 import { db } from "@/lib/db";
 import { fillBackorders, parseKeyBlock } from "@/lib/licenseKeys";
+import { clearLowStockMark } from "@/lib/stockAlerts";
 
 /** How many keys one paste may carry. A batch larger than this is a mistake. */
 const MAX_PER_PASTE = 500;
@@ -58,6 +59,11 @@ export async function POST(request: Request) {
     const filled = await fillBackorders(tx, packageId);
     return { added: created.count, filled };
   });
+
+  // The shelf has grown, so the warning about it being thin is spent: the next
+  // slide down earns a fresh one. Checked after the backorders were filled,
+  // because a batch that all went straight to waiting buyers left nothing.
+  await clearLowStockMark(packageId);
 
   return NextResponse.json({
     added: result.added,

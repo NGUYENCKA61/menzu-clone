@@ -1,0 +1,12 @@
+-- Which low-stock warning has already gone out for this tier.
+--
+-- NULL means none has: the next sale that leaves the shelf at or below the
+-- shop's threshold sends the first one and writes the count it saw. 0 means
+-- the shelf-is-empty warning has gone out too. Adding keys sets it back to
+-- NULL, so a tier that is restocked and sold down again is announced afresh.
+--
+-- On the tier rather than the product because a tier is what a buyer pays
+-- for: a tool with a month of stock and no one-day keys is out of stock for
+-- everyone who wanted a day. Pooled account listings own exactly one tier,
+-- so the same column covers them.
+ALTER TABLE "product_packages" ADD COLUMN "lowStockNotifiedCount" INTEGER;
