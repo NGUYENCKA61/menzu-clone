@@ -185,7 +185,7 @@ export default async function AdminOrdersPage({
         <AdminOrderFilters filters={filters} />
       </div>
 
-      <div className="w-full overflow-x-auto rounded-xl border border-white/[0.08] bg-[#0e0e11]">
+      <div className="admin-list w-full overflow-x-auto rounded-xl border border-white/[0.08] bg-[#0e0e11]">
         <table className="w-full min-w-[900px] text-left">
           <thead>
             <tr className="border-b border-white/10">

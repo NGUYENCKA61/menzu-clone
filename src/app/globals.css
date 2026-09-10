@@ -1617,3 +1617,15 @@ html[data-filtering] .catalog-grid {
     transform: translateY(100%);
   }
 }
+
+/* An admin list while its filter bar has a new query on the way: it
+   steps back and stops taking clicks until the new rows arrive, no
+   lower - a screen staff look at all day must not flash. Set by the
+   filter bars as an attribute on <html>, like the storefront's. */
+.admin-list {
+  transition: opacity 150ms cubic-bezier(0.2, 0, 0.2, 1);
+}
+html[data-admin-filtering] .admin-list {
+  opacity: 0.6;
+  pointer-events: none;
+}

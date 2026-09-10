@@ -2,7 +2,7 @@
 
 import { Download, Search } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useTransition } from "react";
 
 import { searchNeedsSync } from "@/lib/paging";
 import {
@@ -31,6 +31,15 @@ const VIEWS = [
 
 export function AdminUserFilters({ filters }: { filters: UserFilters }) {
   const router = useRouter();
+  // The list is the server page's, out of this bar's reach; it reads the
+  // attribute off <html> and steps back while a filter is on its way -
+  // the same move the storefront's filter panels make. A plain
+  // router.replace gave the bar nothing to show for the wait.
+  const [isPending, startTransition] = useTransition();
+  useEffect(() => {
+    document.documentElement.toggleAttribute("data-admin-filtering", isPending);
+    return () => document.documentElement.removeAttribute("data-admin-filtering");
+  }, [isPending]);
   const pathname = usePathname();
   const params = useSearchParams();
 
@@ -50,10 +59,10 @@ export function AdminUserFilters({ filters }: { filters: UserFilters }) {
       else next.delete("q");
       // A new search invalidates where you were in the list.
       next.delete("page");
-      router.replace(`${pathname}?${next}`, { scroll: false });
+      startTransition(() => router.replace(`${pathname}?${next}`, { scroll: false }));
     }, 350);
     return () => window.clearTimeout(timer);
-  }, [q, params, pathname, router]);
+  }, [q, params, pathname, router, startTransition]);
 
   function go(patch: Record<string, string>) {
     const next = new URLSearchParams(params.toString());
@@ -62,7 +71,7 @@ export function AdminUserFilters({ filters }: { filters: UserFilters }) {
       else next.delete(key);
     }
     next.delete("page");
-    router.replace(`${pathname}?${next}`, { scroll: false });
+    startTransition(() => router.replace(`${pathname}?${next}`, { scroll: false }));
   }
 
   const active =

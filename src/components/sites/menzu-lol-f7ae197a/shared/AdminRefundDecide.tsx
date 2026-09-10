@@ -4,6 +4,8 @@ import { useRouter } from "next/navigation";
 import { Check, X } from "lucide-react";
 import { useState } from "react";
 
+import { ConfirmDialog } from "./AdminStates";
+
 import {
   REFUND_METHOD,
   REFUND_METHOD_KEYS,
@@ -44,6 +46,8 @@ export function AdminRefundDecide({
   const [note, setNote] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  /** The wallet credit asks once before it moves money. */
+  const [confirming, setConfirming] = useState(false);
 
   async function decide(status: "APPROVED" | "REJECTED") {
     setBusy(true);
@@ -57,12 +61,18 @@ export function AdminRefundDecide({
       if (!res.ok) {
         const data = (await res.json().catch(() => ({}))) as { error?: string };
         setError(data.error ?? "Không cập nhật được");
+        setBusy(false);
         return;
       }
+      setConfirming(false);
       router.refresh();
+      // Only a failure gives the buttons back at once. On success the page
+      // is about to change under them; buttons that revived first invited
+      // a second credit. If nothing has changed in eight seconds something
+      // upstream is stuck - give them back rather than leave them dead.
+      window.setTimeout(() => setBusy(false), 8000);
     } catch {
       setError("Không kết nối được máy chủ");
-    } finally {
       setBusy(false);
     }
   }
@@ -156,11 +166,24 @@ export function AdminRefundDecide({
         </p>
       ) : null}
 
+      {/* Crediting a wallet is the one press in this box that cannot be
+          taken back, and it used to happen on the press itself. */}
+      <ConfirmDialog
+        open={confirming}
+        danger
+        title="Cộng tiền vào ví khách?"
+        body={`Ví của khách được cộng ${amount ? Number(amount).toLocaleString("vi-VN") : "…"}đ ngay khi xác nhận, kèm một dòng trong lịch sử giao dịch. Không hoàn tác được.`}
+        confirmLabel="Chấp nhận & cộng ví"
+        pending={busy}
+        onConfirm={() => decide("APPROVED")}
+        onCancel={() => setConfirming(false)}
+      />
+
       <div className="flex flex-wrap items-center gap-2.5">
         <button
           type="button"
           disabled={busy}
-          onClick={() => decide("APPROVED")}
+          onClick={() => (method === "WALLET" ? setConfirming(true) : decide("APPROVED"))}
           className={`${ACTION} bg-emerald-500/15 text-emerald-400 hover:bg-emerald-500/25`}
         >
           <Check size={13} />

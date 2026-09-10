@@ -167,7 +167,7 @@ export function AdminUsers({
       {visible.length === 0 ? (
         <AdminEmpty title={emptyNote} />
       ) : (
-        <div className="w-full overflow-x-auto rounded-xl border border-white/[0.08] bg-[#0e0e11]">
+        <div className="admin-list w-full overflow-x-auto rounded-xl border border-white/[0.08] bg-[#0e0e11]">
           <table className="w-full min-w-[1000px] text-left">
             <thead>
               <tr className="border-b border-white/[0.06]">
