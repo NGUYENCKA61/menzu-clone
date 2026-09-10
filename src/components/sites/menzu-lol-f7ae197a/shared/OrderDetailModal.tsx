@@ -595,7 +595,57 @@ export function OrderDetailModal({
                   <h3 className="mb-4 text-sm font-black uppercase tracking-wider text-white">
                     Sản phẩm đã mua
                   </h3>
-                  <div className="overflow-x-auto">
+                  {/* Below sm, one card instead of the table: five columns
+                      in a 390px sheet meant a 640px table scrolling sideways
+                      inside a sheet that itself scrolls, and a reader saw the
+                      first column alone. */}
+                  <div className="rounded-xl border border-white/10 bg-white/[0.02] p-3 sm:hidden">
+                    <div className="flex items-center gap-3">
+                      <span className="relative h-12 w-[72px] shrink-0 overflow-hidden rounded-lg border border-white/10 bg-neutral-950">
+                        {order.imageUrl ? (
+                          <Image
+                            src={order.imageUrl}
+                            alt=""
+                            fill
+                            sizes="144px"
+                            className="object-cover object-[85%_center]"
+                          />
+                        ) : null}
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <Link
+                          href={order.productHref}
+                          className="block truncate text-[13px] font-black text-white"
+                        >
+                          {order.isSoftware ? order.productName : `#${order.productCode}`}
+                        </Link>
+                        <div className="mt-1 flex min-w-0 items-center gap-2 text-[11px] font-semibold text-neutral-500">
+                          {chip ? (
+                            <span className="inline-flex shrink-0 rounded-md border border-white/15 bg-white/10 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-widest text-neutral-300">
+                              {chip}
+                            </span>
+                          ) : null}
+                          <span className="truncate">{order.categoryName}</span>
+                        </div>
+                      </div>
+                    </div>
+                    <dl className="mt-3 grid grid-cols-3 gap-2 border-t border-white/[0.06] pt-3 text-[11px]">
+                      <div>
+                        <dt className="text-neutral-500">Số lượng</dt>
+                        <dd className="mt-0.5 font-bold tabular-nums text-neutral-200">{order.quantity}</dd>
+                      </div>
+                      <div>
+                        <dt className="text-neutral-500">Đơn giá</dt>
+                        <dd className="mt-0.5 font-bold tabular-nums text-neutral-200">{formatVnd(unitPrice)}đ</dd>
+                      </div>
+                      <div className="text-right">
+                        <dt className="text-neutral-500">Thành tiền</dt>
+                        <dd className="mt-0.5 font-black tabular-nums text-white">{formatVnd(order.total)}đ</dd>
+                      </div>
+                    </dl>
+                  </div>
+
+                  <div className="hidden overflow-x-auto sm:block">
                     <table className="w-full min-w-[640px] border-separate border-spacing-0 overflow-hidden rounded-xl border border-white/10">
                       <thead>
                         <tr>
@@ -759,7 +809,12 @@ export function OrderDetailModal({
                         // where they belong. Top-aligned so the shorter side
                         // does not stretch.
                         <div
-                          className={`grid gap-4 ${
+                          // grid-cols-1 spelled out: an implicit track is
+                          // sized by its content, and the download row's
+                          // one-line name pushed the block 160px past the
+                          // card on a phone; minmax(0, 1fr) is what lets the
+                          // name truncate instead.
+                          className={`grid grid-cols-1 gap-4 ${
                             hasFiles ? "lg:grid-cols-2 lg:items-start" : ""
                           }`}
                         >
@@ -892,7 +947,7 @@ export function OrderDetailModal({
                 </div>
 
                 {/* FOOTER */}
-                <div className="flex flex-wrap items-center justify-between gap-3 border-t border-white/[0.06] bg-white/[0.02] px-5 py-4 sm:px-6">
+                <div className="flex flex-col gap-3 border-t border-white/[0.06] bg-white/[0.02] px-5 py-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:px-6">
                   <span className="text-xs text-neutral-500">
                     Cần hỗ trợ về đơn hàng này? Gửi kèm mã đơn{" "}
                     <span className="font-mono font-bold text-neutral-300">
@@ -904,58 +959,50 @@ export function OrderDetailModal({
                       outline while "liên hệ hỗ trợ" keeps the filled button.
                       Only offered on a paid order — there is nothing to refund
                       on one that was never charged or was refunded already. */}
-                  <div className="flex flex-wrap items-center gap-2.5">
-                    {order.paid ? (
-                      order.canRefund ? (
+                  {/* On a phone the two ways out sit side by side, each
+                      filling half the width; on a desk they keep their own
+                      widths at the right. A control that cannot be pressed is
+                      no longer drawn as a grey button - its reason used to
+                      live in a hover title, which a phone cannot hover - but
+                      as a line that says why, under the buttons. */}
+                  <div className="flex w-full flex-col gap-2 sm:w-auto">
+                    <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto sm:flex-wrap sm:items-center sm:gap-2.5">
+                      {order.paid && order.canRefund ? (
                         <Link
                           href={refundHref}
-                          className="inline-flex h-10 items-center gap-2 rounded-xl border border-white/12 bg-white/[0.04] px-4 text-[11px] font-black uppercase tracking-widest text-neutral-300 transition-colors hover:border-[var(--menzu-accent)]/50 hover:bg-[var(--menzu-accent)]/10 hover:text-[var(--menzu-accent)]"
+                          className="press inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-white/12 bg-white/[0.04] px-4 text-[11px] font-black uppercase tracking-widest text-neutral-300 hover:border-[var(--menzu-accent)]/50 hover:bg-[var(--menzu-accent)]/10 hover:text-[var(--menzu-accent)] sm:h-10"
                         >
                           <RotateCcw className="h-4 w-4" />
                           Yêu cầu hoàn trả
                         </Link>
-                      ) : (
-                        // Left in place, dead, with the reason on it: removed
-                        // entirely and a buyer past the window would go looking
-                        // for a button that was never there.
-                        <span
-                          aria-disabled
-                          title={order.refundBlockedReason ?? undefined}
-                          className="inline-flex h-10 cursor-not-allowed items-center gap-2 rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 text-[11px] font-black uppercase tracking-widest text-neutral-600"
+                      ) : null}
+                      {order.paid ? (
+                        <Link
+                          href={supportHref}
+                          className={`press group inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[var(--menzu-accent)] px-5 text-[11px] font-black uppercase tracking-widest text-white hover:bg-[var(--menzu-accent-dark)] sm:h-10${
+                            order.canRefund ? "" : " col-span-2"
+                          }`}
                         >
-                          <RotateCcw className="h-4 w-4" />
-                          Yêu cầu hoàn trả
-                        </span>
-                      )
+                          <ShieldCheck className="h-4 w-4" />
+                          Hỗ trợ bảo hành
+                          <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+                        </Link>
+                      ) : null}
+                    </div>
+                    {order.paid && !order.canRefund && order.refundBlockedReason ? (
+                      <p className="text-[11px] leading-snug text-neutral-500">
+                        <RotateCcw className="mr-1 inline h-3 w-3 align-[-2px]" aria-hidden />
+                        Không hoàn trả được: {order.refundBlockedReason}
+                      </p>
                     ) : null}
-                    {/* Warranty is for an order that stands. The page behind
-                        this button refuses a cancelled or refunded one — so it
-                        used to lead a buyer to a form that opens with "chỉ đơn
-                        đã thanh toán mới yêu cầu bảo hành được". Dead in place
-                        with the reason on it, like its neighbour. */}
-                    {order.paid ? (
-                      <Link
-                        href={supportHref}
-                        className="group inline-flex h-10 items-center gap-2 rounded-xl bg-[var(--menzu-accent)] px-5 text-[11px] font-black uppercase tracking-widest text-white transition-colors hover:bg-[var(--menzu-accent-dark)]"
-                      >
-                        <ShieldCheck className="h-4 w-4" />
-                        Hỗ trợ bảo hành
-                        <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
-                      </Link>
-                    ) : (
-                      <span
-                        aria-disabled
-                        title={
-                          order.refunded
-                            ? "Đơn đã được hoàn tiền nên không còn bảo hành."
-                            : "Chỉ đơn đã thanh toán mới yêu cầu bảo hành được."
-                        }
-                        className="inline-flex h-10 cursor-not-allowed items-center gap-2 rounded-xl border border-white/[0.06] bg-white/[0.02] px-5 text-[11px] font-black uppercase tracking-widest text-neutral-600"
-                      >
-                        <ShieldCheck className="h-4 w-4" />
-                        Hỗ trợ bảo hành
-                      </span>
-                    )}
+                    {!order.paid ? (
+                      <p className="text-[11px] leading-snug text-neutral-500">
+                        <ShieldCheck className="mr-1 inline h-3 w-3 align-[-2px]" aria-hidden />
+                        {order.refunded
+                          ? "Đơn đã được hoàn tiền nên không còn bảo hành."
+                          : "Chỉ đơn đã thanh toán mới yêu cầu bảo hành được."}
+                      </p>
+                    ) : null}
                   </div>
                 </div>
 

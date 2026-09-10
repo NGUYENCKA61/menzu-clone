@@ -320,7 +320,7 @@ export default async function AnnouncementsPage({
                   const Icon = TYPE_ICONS[item.type];
                   return (
                     <span
-                      className={`inline-flex items-center gap-1.5 rounded-md border px-2 py-0.5 text-[11px] font-medium ${TYPE_TILE}`}
+                      className={`inline-flex items-center gap-1.5 rounded-md border px-2 py-0.5 text-[11px] font-medium ${TYPE_TILE[item.type]}`}
                     >
                       <Icon size={12} />
                       {TYPE_LABELS[item.type]}
