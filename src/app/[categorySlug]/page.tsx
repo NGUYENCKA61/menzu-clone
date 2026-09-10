@@ -2,10 +2,6 @@ import { PackageOpen } from "lucide-react";
 import type { Metadata } from "next";
 import { notFound, permanentRedirect } from "next/navigation";
 
-import { MobileBottomNav } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/MobileBottomNav";
-import { SiteFooter } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/SiteFooter";
-import { SiteHeader } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/SiteHeader";
-import { ConnectRailSection } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/ConnectRailSection";
 import { Breadcrumb } from "@/components/sites/menzu-lol-f7ae197a/shared/Breadcrumb";
 import { CategoryFilterPanel } from "@/components/sites/menzu-lol-f7ae197a/shared/CategoryFilterPanel";
 import { ProductCard } from "@/components/sites/menzu-lol-f7ae197a/shared/ProductCard";
@@ -208,7 +204,7 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
   ]);
 
   return (
-    <div className="min-h-screen flex flex-col text-white overflow-x-clip selection:bg-[var(--menzu-accent)]/30 transition-colors duration-300">
+    <>
       <JsonLd
         data={breadcrumbJsonLd([
           { name: "Trang chủ", path: "/" },
@@ -216,11 +212,6 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
         ])}
       />
       {shelf ? <JsonLd data={shelf} /> : null}
-      <div className="w-full shrink-0 h-[104px]" />
-      <SiteHeader />
-
-      <main className="flex-1 relative z-20 w-full flex flex-col">
-        <div className="w-full">
           {/* pb-24 matches the account page's resting gap before the footer. */}
           <div className="max-w-[1320px] mx-auto px-4 lg:px-6 pt-12 pb-24">
             <Breadcrumb
@@ -372,13 +363,7 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
               />
             ) : null}
           </div>
-        </div>
-        <SiteFooter />
-      </main>
-
-      <ConnectRailSection />
-      <MobileBottomNav />
-    </div>
+    </>
   );
 }
 

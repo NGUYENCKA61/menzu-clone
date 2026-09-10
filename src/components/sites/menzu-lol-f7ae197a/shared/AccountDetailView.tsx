@@ -1,7 +1,3 @@
-import { MobileBottomNav } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/MobileBottomNav";
-import { SiteFooter } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/SiteFooter";
-import { SiteHeader } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/SiteHeader";
-import { ConnectRailSection } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/ConnectRailSection";
 import { getInventory, getRelatedProducts } from "@/lib/queries";
 import { categoryHref, productHref } from "@/lib/routes";
 import { breadcrumbJsonLd, JsonLd, productJsonLd } from "@/lib/seo";
@@ -24,7 +20,7 @@ export async function AccountDetailView({ account }: { account: AccountDetail })
   ]);
 
   return (
-    <div className="min-h-screen flex flex-col text-white overflow-x-clip selection:bg-[var(--menzu-accent)]/30">
+    <>
       <JsonLd
         data={productJsonLd({
           code: account.code,
@@ -48,11 +44,6 @@ export async function AccountDetailView({ account }: { account: AccountDetail })
           { name: `Mã ${account.code}` },
         ])}
       />
-      <div className="w-full shrink-0 h-[104px]" />
-      <SiteHeader />
-
-      <main className="flex-1 relative z-20 w-full flex flex-col">
-        <div className="w-full">
           {/* Same 32px of air under the fixed header as the software page —
               the two detail pages should hang their breadcrumbs at one height.
               pb-24 is the resting gap before the footer, on the container so
@@ -99,12 +90,6 @@ export async function AccountDetailView({ account }: { account: AccountDetail })
               </div>
             ) : null}
           </div>
-        </div>
-        <SiteFooter />
-      </main>
-
-      <ConnectRailSection />
-      <MobileBottomNav />
-    </div>
+    </>
   );
 }

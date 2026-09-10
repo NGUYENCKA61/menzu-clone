@@ -1,7 +1,3 @@
-import { MobileBottomNav } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/MobileBottomNav";
-import { SiteFooter } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/SiteFooter";
-import { SiteHeader } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/SiteHeader";
-import { ConnectRailSection } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/ConnectRailSection";
 import { docHtmlToPlainText, isHtmlBody } from "@/lib/docHtml";
 import { breadcrumbJsonLd, JsonLd } from "@/lib/seo";
 import { categoryHref, productHref } from "@/lib/routes";
@@ -51,7 +47,7 @@ export function SoftwareDetailView({
     : software.description;
 
   return (
-    <div className="min-h-screen flex flex-col text-white overflow-x-clip selection:bg-[var(--menzu-accent)]/30">
+    <>
       <JsonLd
         data={breadcrumbJsonLd([
           { name: "Trang chủ", path: "/" },
@@ -62,11 +58,6 @@ export function SoftwareDetailView({
           { name: software.name },
         ])}
       />
-      <div className="w-full shrink-0 h-[104px]" />
-      <SiteHeader />
-
-      <main className="flex-1 relative z-20 w-full flex flex-col">
-        <div className="w-full">
           {/* The breadcrumb otherwise starts on the exact pixel the fixed
               header ends, with nothing between them. The gap goes on the
               container rather than on Breadcrumb itself, which is shared with
@@ -111,7 +102,6 @@ export function SoftwareDetailView({
               loginHref={`/login?next=${encodeURIComponent(productHref(software.categorySlug, software.slug))}`}
             />
           </div>
-        </div>
         {/* A rich-editor description is HTML; the card prints a sentence, so
             it gets the prose without the tags — stripped here, on the server,
             because the strip itself runs in the browser. */}
@@ -122,11 +112,6 @@ export function SoftwareDetailView({
               : s,
           )}
         />
-        <SiteFooter />
-      </main>
-
-      <ConnectRailSection />
-      <MobileBottomNav />
-    </div>
+    </>
   );
 }
