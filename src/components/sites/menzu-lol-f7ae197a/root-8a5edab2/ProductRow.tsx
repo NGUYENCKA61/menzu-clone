@@ -399,7 +399,7 @@ export function ProductRow({
         // sliding row and the still row show tiles of one size.
         <RowSlider count={cards.length}>
           {cards.map((card) => (
-            <div key={card.href} className="w-[var(--tile-w)] shrink-0">
+            <div key={card.href} className="w-[var(--tile-w)] shrink-0 snap-start">
               <RowCard card={card} t={t} top={ranked} />
             </div>
           ))}

@@ -5,41 +5,62 @@ import { useCallback, useEffect, useRef, useState, type ReactNode } from "react"
 /** Milliseconds a set of tiles rests before the next step. */
 const STEP_MS = 3000;
 
+/** How long a touch keeps the clock stopped after the finger lifts. */
+const TOUCH_REST_MS = 6000;
+
 /**
  * A row of tiles that slides one tile to the left on a beat until the last
  * tile is in view, then glides all the way back to the start and goes again
- * — driven by hand too, with the dots below it.
+ * — driven by hand too, with a swipe or the dots below it.
  *
  * The same rhythm the account card's skin strip keeps — a step, a rest, a
  * step, then home — rather than a marquee that never stops, because these
  * tiles are links: a reader needs them to hold still long enough to aim at
  * one, and the run back to the start is what says "that was all of them".
  *
+ * The viewport is a real scroll container with snap points, the grammar the
+ * flash-sale and similar-tools strips already use: a finger can swipe it,
+ * the swipe has the system's own momentum and settles on a tile, and the
+ * clock moves it with scrollTo rather than a transform. It was a clipped
+ * box moved by translateX before, which a phone could neither swipe nor
+ * stop — a card would walk away under the finger reaching for it. A touch
+ * stops the clock before anything else happens (scrolling under a finger
+ * still on the screen makes Android drop the gesture and the strip jump),
+ * and it stays stopped for six seconds after the last touch.
+ *
  * Tile width and gap are CSS variables the viewport sets per breakpoint (in
  * a container query unit, so they follow the row's own width). The tiles
  * are cut a little short of the row, so a sliver of the next one shows at
  * the right edge under a fade — the row says "there is more" before anyone
- * touches it. On the last step the strip is clamped to its far end rather
- * than to a tile boundary, so the run finishes flush with the row's edge and
- * not on a gap. How many tiles fit is measured on each move.
+ * touches it. How many tiles fit is measured on each move.
  *
- * Under the row, one dot per position; the current one is drawn long and
- * fills over the length of a beat, so the reader can see the strip is on a
- * clock and where it is. A press on a dot restarts the clock. Holds still
- * under the pointer or a keyboard focus. Readers who asked for less motion
- * get a strip only the dots move.
+ * Under the row, one dot per position, read from where the strip actually
+ * is; the current one is drawn long and fills over the length of a beat, so
+ * the reader can see the strip is on a clock and where it is. A press on a
+ * dot restarts the clock. Holds still under the pointer, a keyboard focus,
+ * or a finger. Readers who asked for less motion get a strip that never
+ * steps on its own and jumps rather than glides when driven.
  */
 export function RowSlider({ count, children }: { count: number; children: ReactNode }) {
   const viewportRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
+  /** Where the strip stands, read back from its scroll position. */
   const [index, setIndex] = useState(0);
-  /** True while the strip is on its way back to the start — a longer glide. */
-  const [rewinding, setRewinding] = useState(false);
   const [held, setHeld] = useState(false);
-  /** Bumped by every dot press; the clock restarts from that moment. */
+  /** Bumped by every dot press and every clock step; the fill restarts. */
   const [beat, setBeat] = useState(0);
   /** Highest index the strip can stand on at the row's current width. */
   const [last, setLast] = useState(0);
+  const touchRest = useRef<number | null>(null);
+
+  /** One tile plus one gap: the distance a step covers. */
+  const stepWidth = useCallback(() => {
+    const track = trackRef.current;
+    const first = track?.firstElementChild;
+    if (!track || !(first instanceof HTMLElement)) return 0;
+    const gap = parseFloat(getComputedStyle(track).columnGap) || 0;
+    return first.getBoundingClientRect().width + gap;
+  }, []);
 
   const measureLast = useCallback(() => {
     const viewport = viewportRef.current;
@@ -71,72 +92,111 @@ export function RowSlider({ count, children }: { count: number; children: ReactN
     return () => observer.disconnect();
   }, [measureLast]);
 
-  /** Jump to a position; anything past the end lands on the start. */
+  // The dots follow the strip, whoever moved it — the clock, a dot, or a
+  // finger. Passive, and only a state update per event: React batches them.
+  useEffect(() => {
+    const viewport = viewportRef.current;
+    if (!viewport) return;
+    const onScroll = () => {
+      const step = stepWidth();
+      if (!step) return;
+      const end = measureLast();
+      setIndex(Math.max(0, Math.min(end, Math.round(viewport.scrollLeft / step))));
+    };
+    viewport.addEventListener("scroll", onScroll, { passive: true });
+    return () => viewport.removeEventListener("scroll", onScroll);
+  }, [stepWidth, measureLast]);
+
+  /** Slide to a position; anything past the end lands on the start. */
   const go = useCallback(
     (target: number) => {
+      const viewport = viewportRef.current;
+      const step = stepWidth();
+      if (!viewport || !step) return;
       const end = measureLast();
       setLast(end);
-      setIndex((current) => {
-        const next = target > end ? 0 : target < 0 ? end : target;
-        // The glide home and the wrap to the end are long moves; a step is short.
-        setRewinding(Math.abs(next - current) > 1);
-        return next;
+      const next = target > end ? 0 : target < 0 ? end : target;
+      // Past the last snap point the container simply stops at its end, so
+      // the final stop is flush with the row's edge rather than on a gap.
+      viewport.scrollTo({
+        left: next * step,
+        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+          ? "auto"
+          : "smooth",
       });
     },
-    [measureLast],
+    [stepWidth, measureLast],
   );
 
   useEffect(() => {
     if (held || count < 2) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const timer = window.setInterval(() => {
+      const viewport = viewportRef.current;
+      const step = stepWidth();
+      if (!viewport || !step) return;
+      // Read from the strip itself, not from state: a swipe may have moved
+      // it since the last render.
       const end = measureLast();
-      setLast(end);
-      setIndex((current) => {
-        const next = current >= end ? 0 : current + 1;
-        setRewinding(next === 0);
-        return next;
-      });
+      const current = Math.round(viewport.scrollLeft / step);
+      go(current >= end ? 0 : current + 1);
+      setBeat((b) => b + 1);
     }, STEP_MS);
     return () => window.clearInterval(timer);
     // `beat` is here on purpose: a press restarts the interval.
-  }, [held, count, measureLast, beat]);
+  }, [held, count, stepWidth, measureLast, go, beat]);
 
   const press = (target: number) => {
     go(target);
     setBeat((b) => b + 1);
   };
 
+  /** A finger on the strip stops the clock, now and for a while after. */
+  const touch = () => {
+    setHeld(true);
+    if (touchRest.current !== null) window.clearTimeout(touchRest.current);
+    touchRest.current = window.setTimeout(() => {
+      touchRest.current = null;
+      setHeld(false);
+      // The fill and the clock start together again.
+      setBeat((b) => b + 1);
+    }, TOUCH_REST_MS);
+  };
+
+  useEffect(
+    () => () => {
+      if (touchRest.current !== null) window.clearTimeout(touchRest.current);
+    },
+    [],
+  );
+
   return (
     <div className={held ? "row-slider-held" : undefined}>
 
       {/* --peek is the sliver of the next tile left showing; the fade is a
           mask so it works over the page's artwork, not only over flat black.
-          The left fade only exists once something has slid out that way. */}
+          The left fade only exists once something has slid out that way.
+          overscroll-x-contain matters: without it a swipe past the end
+          hands the gesture to the system, which reads it as "back". */}
       <div
         ref={viewportRef}
-        className={`row-slider-viewport @container w-full overflow-hidden [--gap:1rem] [--peek:28px] sm:[--gap:1.5rem] sm:[--peek:40px] [--tile-w:calc((100cqw-1rem-var(--peek))/2)] md:[--tile-w:calc((100cqw-3rem-var(--peek))/3)] lg:[--tile-w:calc((100cqw-4.5rem-var(--peek))/4)] ${
+        className={`row-slider-viewport hide-scrollbar @container w-full snap-x snap-mandatory overflow-x-auto overscroll-x-contain [--gap:1rem] [--peek:28px] sm:[--gap:1.5rem] sm:[--peek:40px] [--tile-w:calc((100cqw-1rem-var(--peek))/2)] md:[--tile-w:calc((100cqw-3rem-var(--peek))/3)] lg:[--tile-w:calc((100cqw-4.5rem-var(--peek))/4)] ${
           index > 0
             ? "[mask-image:linear-gradient(to_right,transparent,black_40px,black_calc(100%-72px),transparent)]"
             : "[mask-image:linear-gradient(to_right,black_calc(100%-72px),transparent)]"
         }`}
         onMouseEnter={() => setHeld(true)}
-        onMouseLeave={() => setHeld(false)}
+        onMouseLeave={() => {
+          if (touchRest.current === null) setHeld(false);
+        }}
         onFocus={() => setHeld(true)}
-        onBlur={() => setHeld(false)}
+        onBlur={() => {
+          if (touchRest.current === null) setHeld(false);
+        }}
+        onTouchStart={touch}
+        onTouchEnd={touch}
       >
-        <div
-          ref={trackRef}
-          className={`row-slider-track flex w-max gap-[var(--gap)] transition-transform ease-in-out ${
-            rewinding ? "duration-[1100ms]" : "duration-700"
-          }`}
-          style={{
-            // Clamped to the strip's far end so the last stop is flush with
-            // the row's edge instead of leaving the peek's width empty.
-            ["--track-w" as string]: `calc(${count} * var(--tile-w) + ${count - 1} * var(--gap))`,
-            transform: `translateX(calc(-1 * min(${index} * (var(--tile-w) + var(--gap)), var(--track-w) - 100cqw)))`,
-          }}
-        >
+        <div ref={trackRef} className="row-slider-track flex w-max gap-[var(--gap)]">
           {children}
         </div>
       </div>
@@ -173,9 +233,10 @@ export function RowSlider({ count, children }: { count: number; children: ReactN
                   }`}
                 >
                   {current ? (
-                    // Remounted on every move so the fill starts from zero.
+                    // Remounted on every beat so the fill starts from zero
+                    // with the clock, wherever the strip happens to stand.
                     <span
-                      key={`${index}-${beat}`}
+                      key={beat}
                       className="row-slider-progress absolute inset-0 rounded-full bg-[var(--menzu-accent)]"
                       style={{ ["--row-slider-step" as string]: `${STEP_MS}ms` }}
                     />
