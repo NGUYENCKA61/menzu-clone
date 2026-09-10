@@ -47,6 +47,26 @@ const TONES = {
  * dismissal with it. Under reduced motion the bar never runs and the toast
  * waits for its close button instead.
  */
+/**
+ * One fixed column in the corner that every toast portals into, made the
+ * first time a toast needs it. Two toasts used to portal to <body> each
+ * with its own fixed box at the same corner and sit on top of each other -
+ * the second unreadable, the first unreachable. In a flex column they
+ * stack, each with its own slide-in, and the column takes no presses of
+ * its own so the page under the gap between two toasts stays live.
+ */
+function toastColumn(): HTMLElement {
+  let column = document.getElementById("status-toast-column");
+  if (!column) {
+    column = document.createElement("div");
+    column.id = "status-toast-column";
+    column.className =
+      "pointer-events-none fixed right-0 top-0 z-[200] flex w-full max-w-[360px] flex-col items-stretch gap-2";
+    document.body.appendChild(column);
+  }
+  return column;
+}
+
 export function StatusToast({
   tone = "error",
   title,
@@ -73,7 +93,7 @@ export function StatusToast({
     // Flush in the corner — no offset. The two corners that touch the edges
     // are squared off, so the toast reads as growing out of the corner
     // instead of a rounded box that missed it by a pixel.
-    <div className="fixed right-0 top-0 z-[200] w-full max-w-[360px]">
+    <div className="pointer-events-auto w-full">
       <div
         role="alert"
         className={`status-toast relative overflow-hidden rounded-bl-xl border-[1.5px] bg-[#131316] shadow-2xl ${look.shell}${leaving ? " status-toast-out" : ""}`}
@@ -114,6 +134,6 @@ export function StatusToast({
         />
       </div>
     </div>,
-    document.body,
+    toastColumn(),
   );
 }

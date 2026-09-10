@@ -1,7 +1,8 @@
 "use client";
 
+import { Loader2 } from "lucide-react";
 import Link from "next/link";
-import { useEffect } from "react";
+import { useEffect, useTransition } from "react";
 
 /**
  * Last-resort boundary for uncaught render and data errors.
@@ -19,6 +20,11 @@ export default function GlobalError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  // reset() re-renders the failed subtree; inside a transition the button
+  // stays busy until that render has landed, instead of going silent the
+  // way every other unanswered button on the site once did.
+  const [retrying, startRetry] = useTransition();
+
   useEffect(() => {
     console.error(error);
   }, [error]);
@@ -45,10 +51,13 @@ export default function GlobalError({
       <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
         <button
           type="button"
-          onClick={reset}
-          className="inline-flex items-center h-10 px-5 rounded-xl bg-[var(--brand)] hover:bg-[var(--brand-dark)] transition-colors text-[11px] font-black uppercase tracking-widest text-white"
+          disabled={retrying}
+          aria-busy={retrying}
+          onClick={() => startRetry(() => reset())}
+          className="inline-flex items-center gap-2 h-10 px-5 rounded-xl bg-[var(--brand)] hover:bg-[var(--brand-dark)] transition-colors text-[11px] font-black uppercase tracking-widest text-white disabled:opacity-60"
         >
-          Thử lại
+          {retrying ? <Loader2 size={14} className="animate-spin motion-reduce:animate-none" aria-hidden /> : null}
+          {retrying ? "Đang thử lại…" : "Thử lại"}
         </button>
         <Link
           href="/"

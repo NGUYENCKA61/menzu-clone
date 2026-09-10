@@ -131,8 +131,11 @@ export function TotpTool() {
         {code ? (
           <div className="space-y-3 pt-2 border-t border-white/5">
             <div className="flex items-center justify-between gap-4">
+              {/* Remounted on every new code, so its arrival is a small
+                  drop rather than six digits silently becoming six others. */}
               <span
-                className="text-4xl sm:text-5xl font-black tracking-[0.2em] text-white font-mono"
+                key={code}
+                className="drop-in text-4xl sm:text-5xl font-black tracking-[0.2em] text-white font-mono"
                 aria-live="polite"
               >
                 {code}
@@ -150,9 +153,14 @@ export function TotpTool() {
             <div className="space-y-1.5">
               <div className="h-1.5 w-full rounded-full bg-white/5 overflow-hidden">
                 <div
-                  className={`h-full rounded-full transition-[width] duration-1000 ease-linear ${
-                    remaining <= 5 ? "bg-red-500" : "bg-emerald-500"
-                  }`}
+                  // No transition on the beat the window rolls over: the bar
+                  // used to crawl BACK from 1s to 30s over a full second, as
+                  // if time ran the wrong way. It snaps to full and counts
+                  // down from there; readers who asked for less motion get
+                  // the snap on every beat.
+                  className={`h-full rounded-full motion-reduce:transition-none ${
+                    remaining === TOTP_PERIOD ? "" : "transition-[width] duration-1000 ease-linear"
+                  } ${remaining <= 5 ? "bg-red-500" : "bg-emerald-500"}`}
                   style={{ width: `${(remaining / TOTP_PERIOD) * 100}%` }}
                 />
               </div>

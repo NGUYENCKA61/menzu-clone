@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { ConfirmDialog } from "./AdminStates";
 import { StatusToast } from "./StatusToast";
 import { formatVnd } from "./productData";
 
@@ -16,6 +17,8 @@ import { formatVnd } from "./productData";
 export function WithdrawCommission({ amount }: { amount: number }) {
   const router = useRouter();
   const [pending, setPending] = useState(false);
+  /** One press moved the whole commission; it asks first now. */
+  const [confirming, setConfirming] = useState(false);
   const [toast, setToast] = useState<{
     tone: "success" | "error";
     title: string;
@@ -40,6 +43,7 @@ export function WithdrawCommission({ amount }: { amount: number }) {
         });
         return;
       }
+      setConfirming(false);
       setToast({
         tone: "success",
         title: "Đã rút hoa hồng",
@@ -59,9 +63,18 @@ export function WithdrawCommission({ amount }: { amount: number }) {
 
   return (
     <>
+      <ConfirmDialog
+        open={confirming}
+        title="Rút hoa hồng về ví?"
+        body={`${formatVnd(amount)}đ hoa hồng sẽ chuyển sang số dư khả dụng để mua hàng. Một lần cho cả khoản, không tách được.`}
+        confirmLabel="Rút tiền"
+        pending={pending}
+        onConfirm={withdraw}
+        onCancel={() => setConfirming(false)}
+      />
       <button
         type="button"
-        onClick={withdraw}
+        onClick={() => setConfirming(true)}
         disabled={pending || amount <= 0}
         title={amount <= 0 ? "Chưa có hoa hồng để rút" : undefined}
         className={`inline-flex h-9 shrink-0 items-center rounded-lg border px-4 text-[10px] font-black uppercase tracking-widest transition-colors disabled:cursor-not-allowed ${
