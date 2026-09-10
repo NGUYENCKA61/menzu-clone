@@ -277,12 +277,10 @@ export function AccountBuyPanel({ account }: AccountBuyPanelProps) {
   // page at zero — "Level 0" would be noise dressed as a fact.
   const numericStats = [
     { label: "Level", value: String(account.level), show: account.level > 0 },
-    { label: "VIP", value: account.vip > 0 ? String(account.vip) : "", show: true },
-    {
-      label: "VIP Ingame",
-      value: account.vipIngame > 0 ? String(account.vipIngame) : "",
-      show: true,
-    },
+    // Shown only with a figure: a label with nothing after it, twice in a
+    // row, read as a broken page on a phone.
+    { label: "VIP", value: String(account.vip), show: account.vip > 0 },
+    { label: "VIP Ingame", value: String(account.vipIngame), show: account.vipIngame > 0 },
     { label: "KC", value: formatVnd(account.kc), show: account.kc > 0 },
   ].filter((s) => s.show);
 
@@ -315,7 +313,7 @@ export function AccountBuyPanel({ account }: AccountBuyPanelProps) {
       )}
 
       <div className="space-y-3">
-        <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-white">
+        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-white">
           {account.name || `Mã #${account.code}`}
         </h1>
         <p className="text-sm leading-relaxed text-neutral-400 max-w-[560px]">
@@ -366,7 +364,7 @@ export function AccountBuyPanel({ account }: AccountBuyPanelProps) {
             </span>
           </div>
         ) : null}
-        <p className="text-4xl font-black text-white">{formatVnd(account.price)}đ</p>
+        <p className="text-3xl sm:text-4xl font-black text-white">{formatVnd(account.price)}đ</p>
         <p className="flex items-center gap-2 text-[13px] font-semibold">
           <span
             className={`h-1.5 w-1.5 rounded-full ${soldOut ? "bg-neutral-600" : "bg-emerald-500"}`}
@@ -434,15 +432,15 @@ export function AccountBuyPanel({ account }: AccountBuyPanelProps) {
           Mua ngay
         </button>
 
-        {/* Decorative on purpose — the trade-in programme was retired, but the
-            page keeps the button for the look of the original. It goes
-            nowhere by design. */}
-        <button
-          type="button"
-          className="flex w-full h-14 items-center justify-center rounded-2xl border border-[var(--menzu-accent)]/70 bg-white/[0.02] hover:bg-white/[0.06] transition-colors text-[13px] font-black uppercase tracking-widest text-white"
+        {/* The trade-in programme is handled by hand at the desk, so the
+            button leads there. It used to go nowhere at all - a 56px control
+            under MUA NGAY that answered a press with nothing. */}
+        <Link
+          href="/lien-he"
+          className="press flex w-full h-14 items-center justify-center rounded-2xl border border-[var(--menzu-accent)]/70 bg-white/[0.02] hover:bg-white/[0.06] text-[13px] font-black uppercase tracking-widest text-white"
         >
           Thu cũ đổi mới
-        </button>
+        </Link>
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-4 rounded-2xl border border-white/10 bg-white/[0.02] overflow-hidden">

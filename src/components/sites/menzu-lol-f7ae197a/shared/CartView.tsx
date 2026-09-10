@@ -726,7 +726,7 @@ export function CartView({
             type="button"
             disabled={busy || isPending}
             onClick={() => send({ kind: "clear" }, "DELETE", null, "?all=1")}
-            className="text-[11px] font-bold text-neutral-500 transition-colors hover:text-red-400 disabled:opacity-40"
+            className="-my-2 px-1 py-2 text-[11px] font-bold text-neutral-500 transition-colors hover:text-red-400 disabled:opacity-40"
           >
             Xoá hết
           </button>

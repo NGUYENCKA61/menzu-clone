@@ -254,7 +254,7 @@ export function SoftwareBuyPanel({
       ) : null}
 
       <div className="space-y-3">
-        <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-white">
+        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-white">
           {software.name}
         </h1>
         {software.description ? (
@@ -298,7 +298,7 @@ export function SoftwareBuyPanel({
       ) : null}
 
       <div className="space-y-2">
-        <p className="text-4xl font-black text-white">{formatVnd(total)}đ</p>
+        <p className="text-3xl sm:text-4xl font-black text-white">{formatVnd(total)}đ</p>
         {/* What the tier works out at per day. The tiers run from three hours
             to a month, and comparing 35.000đ against 100.000đ in your head
             while the labels say "7 ngày" and "30 ngày" is arithmetic the page

@@ -307,11 +307,18 @@ export function RowSearch({
                 <div
                   key={item.key}
                   className={
-                    revealed
-                      ? closing
-                        ? "animate-fade-down motion-reduce:animate-none"
-                        : "animate-fade-up motion-reduce:animate-none"
-                      : undefined
+                    [
+                      // One tile in a two-column phone grid sat in half the
+                      // width with the other half empty; alone, it takes the row.
+                      shown.length === 1 ? "col-span-2 md:col-span-1" : "",
+                      revealed
+                        ? closing
+                          ? "animate-fade-down motion-reduce:animate-none"
+                          : "animate-fade-up motion-reduce:animate-none"
+                        : "",
+                    ]
+                      .filter(Boolean)
+                      .join(" ") || undefined
                   }
                   style={
                     revealed

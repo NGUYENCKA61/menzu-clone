@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { docHtmlToPlainText } from "@/lib/docHtml";
+import { docHtmlToPlainText, sanitizeDocHtml, stripNewlineArtifacts } from "@/lib/docHtml";
 
 /**
  * One stored description, two voices: the rich HTML goes to the page, and this
@@ -38,5 +38,32 @@ describe("docHtmlToPlainText", () => {
     expect(short.endsWith("…")).toBe(true);
     // Under the limit it is left exactly as it reads.
     expect(docHtmlToPlainText("<p>ngắn</p>", 20)).toBe("ngắn");
+  });
+});
+
+describe("stripNewlineArtifacts", () => {
+  it("turns the old site's bare rn runs back into line breaks", () => {
+    expect(stripNewlineArtifacts(" rnrn<p></p>rnrn<span>DEMO</span>rn\t<li>")).toBe(
+      " \n<p></p>\n<span>DEMO</span>\n\t<li>",
+    );
+  });
+
+  it("leaves rn inside a word alone", () => {
+    expect(stripNewlineArtifacts("modern Bern turn rn")).toBe("modern Bern turn \n");
+  });
+
+  it("is applied on both voices", () => {
+    expect(docHtmlToPlainText("rnrn<p>Hello</p>rnrn<p>World</p>")).toBe("Hello World");
+    expect(sanitizeDocHtml("<p>A</p>rnrn<p>B</p>")).not.toContain("rn");
+  });
+});
+
+describe("sanitizeDocHtml font sizes", () => {
+  it("keeps a span up to 20px and drops a larger one", () => {
+    const out = sanitizeDocHtml(
+      '<span style="font-size:28px">A</span><span style="font-size:16px">B</span>',
+    );
+    expect(out).toContain("font-size:16px");
+    expect(out).not.toContain("28px");
   });
 });

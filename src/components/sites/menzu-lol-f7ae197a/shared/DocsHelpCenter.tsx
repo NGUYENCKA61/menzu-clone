@@ -206,7 +206,11 @@ export function DocsHelpCenter({
 
       <div className="grid gap-6 lg:grid-cols-[220px_minmax(0,1fr)_300px] lg:items-start">
         {/* Left rail: the shelves. A row of chips below lg, a column above. */}
-        <aside className="lg:sticky lg:top-[120px]">
+        {/* min-w-0: a grid column is at least as wide as its content's
+            minimum, and the rail's scroll row below counts its every button
+            towards that - 455px on a 390px phone, which pushed the whole
+            page past the right edge. */}
+        <aside className="min-w-0 lg:sticky lg:top-[120px]">
           <div className="rounded-2xl border border-white/10 bg-[#121216] p-3">
             <p className="mb-2 px-2 text-[10px] font-black uppercase tracking-widest text-neutral-500">
               Danh mục
@@ -316,7 +320,7 @@ export function DocsHelpCenter({
         </div>
 
         {/* Right rail: newest, quick doors, a human. */}
-        <aside className="space-y-5">
+        <aside className="min-w-0 space-y-5">
           <Panel
             title="Bài viết mới"
             action={

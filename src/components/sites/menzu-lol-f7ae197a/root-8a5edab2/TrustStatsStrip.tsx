@@ -38,7 +38,7 @@ export function TrustStatsStrip({ stats }: { stats: TrustStats }) {
     tiles.push({ icon: Users, value: compact(stats.customers), decimals: 0, unit: "+", label: "Khách hàng" });
   }
   if (stats.years) {
-    tiles.push({ icon: Clock, value: stats.years, decimals: 0, unit: "+ năm", label: "Hoạt động" });
+    tiles.push({ icon: Clock, value: stats.years, decimals: 0, unit: "+", label: "Năm hoạt động" });
   }
   if (stats.rating) {
     tiles.push({ icon: Star, value: stats.rating, decimals: 1, unit: "/5", label: "Đánh giá trung bình" });
@@ -60,10 +60,10 @@ export function TrustStatsStrip({ stats }: { stats: TrustStats }) {
             >
               <div className="flex items-baseline gap-1.5">
                 <Icon size={16} aria-hidden className="mb-0.5 self-center text-[var(--menzu-accent)]" />
-                <span className="text-4xl font-black leading-none tracking-tight text-white sm:text-5xl">
+                <span className="text-3xl font-black leading-none tracking-tight text-white sm:text-5xl">
                   <CountUp value={tile.value} decimals={tile.decimals} />
                 </span>
-                <span className="text-xl font-black leading-none text-[var(--menzu-accent)] sm:text-2xl">
+                <span className="text-lg font-black leading-none text-[var(--menzu-accent)] sm:text-2xl">
                   {tile.unit}
                 </span>
               </div>

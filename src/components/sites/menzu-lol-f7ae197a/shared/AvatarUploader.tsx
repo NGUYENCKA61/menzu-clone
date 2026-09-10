@@ -85,7 +85,7 @@ export function AvatarUploader({ avatarUrl, username }: AvatarUploaderProps) {
         aria-label="Đổi ảnh đại diện"
         disabled={pending}
         onClick={() => input.current?.click()}
-        className="absolute -bottom-0.5 -right-0.5 flex h-6 w-6 items-center justify-center rounded-full border-2 border-[#0e0f14] bg-[var(--brand)] text-white transition-colors hover:bg-[var(--brand-dark)] disabled:cursor-not-allowed disabled:opacity-60"
+        className="absolute -bottom-0.5 -right-0.5 flex h-6 w-6 items-center justify-center rounded-full border-2 border-[#0e0f14] bg-[var(--brand)] after:absolute after:-inset-2 after:content-[''] text-white transition-colors hover:bg-[var(--brand-dark)] disabled:cursor-not-allowed disabled:opacity-60"
       >
         <Pencil size={10} />
       </button>

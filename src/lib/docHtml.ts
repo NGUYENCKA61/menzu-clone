@@ -20,8 +20,19 @@ export function isHtmlBody(body: string | null | undefined): body is string {
   return typeof body === "string" && body.trimStart().startsWith("<");
 }
 
+/**
+ * Newline sequences from the old site arrived with their backslashes
+ * stripped: "\r\n" became the two letters "rn", and "rnrn" sat between
+ * paragraphs as visible text on 22 of 33 products. A run of "rn" that is
+ * not part of a word is a lost line break, and is put back as one — the
+ * sanitizer then treats it as whitespace, the plain-text voice as a space.
+ */
+export function stripNewlineArtifacts(text: string): string {
+  return text.replace(/(?<![\p{L}\p{N}])(?:rn)+(?![\p{L}\p{N}])/gu, "\n");
+}
+
 export function sanitizeDocHtml(html: string): string {
-  return sanitizeHtml(html, {
+  return sanitizeHtml(stripNewlineArtifacts(html), {
     allowedTags: [
       "p",
       "br",
@@ -56,7 +67,10 @@ export function sanitizeDocHtml(html: string): string {
     },
     allowedSchemes: ["http", "https", "mailto"],
     allowedStyles: {
-      span: { color: COLOR_VALUE, "font-size": [/^(?:1[2-9]|2[0-8])px$/] },
+      // Up to 20px, on a 14px page. The old site's write-ups carry 24px
+      // and 28px spans that on a phone read as a shout; past the cap the
+      // size is dropped and the span falls back to the page's own.
+      span: { color: COLOR_VALUE, "font-size": [/^(?:1[2-9]|20)px$/] },
       // The editor's size and alignment controls, nothing else.
       img: {
         width: [/^(?:100|[1-9]?\d)(?:\.\d+)?%$/],
@@ -110,7 +124,7 @@ export function docHtmlToPlainText(html: string, maxLength?: number): string {
   // space behind runs a heading straight into the paragraph under it —
   // "Tính năng nổi bậtAimbot mượt" — and that string is what a search result,
   // an OG card and a product tile all print.
-  const spaced = html.replace(
+  const spaced = stripNewlineArtifacts(html).replace(
     /<br\s*\/?>|<\/(?:p|h[1-6]|li|ul|ol|blockquote|div|figure|figcaption|pre|tr|td|th)>/gi,
     " ",
   );

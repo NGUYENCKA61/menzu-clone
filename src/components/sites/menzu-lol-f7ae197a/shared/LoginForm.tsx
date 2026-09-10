@@ -217,7 +217,7 @@ export function LoginForm({
                     Đăng nhập
                   </h1>
                   <p className="text-sm text-neutral-400 mt-2 font-medium">
-                    Trải nghiệm dịch vụ Valorant ngay hôm nay
+                    Mua tool, tài khoản game và nhận key ngay lập tức
                   </p>
                 </div>
 
@@ -279,7 +279,7 @@ export function LoginForm({
                         type="button"
                         onClick={() => setShowPassword((previous) => !previous)}
                         aria-label={showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-white transition-colors focus:outline-none"
+                        className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-neutral-500 hover:text-white transition-colors focus:outline-none"
                       >
                         {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                       </button>

@@ -93,7 +93,7 @@ const LABEL = "text-[10px] font-black uppercase tracking-widest text-neutral-500
  *  wraps it, which is fine: there it is the only thing on its line. */
 const TAB_NOTE = "mb-5 text-[13px] leading-relaxed text-neutral-400";
 const TAB =
-  "inline-flex h-10 items-center gap-2 rounded-xl border px-4 text-[11px] font-black uppercase tracking-widest transition-colors";
+  "inline-flex h-10 shrink-0 items-center gap-2 rounded-xl border px-4 text-[11px] font-black uppercase tracking-widest transition-colors";
 const TAB_ON = "border-[var(--menzu-accent)] bg-[var(--menzu-accent)] text-white";
 const TAB_OFF =
   "border-white/10 bg-white/5 text-neutral-300 hover:bg-white/10 hover:text-white";
@@ -150,7 +150,13 @@ export default async function AnnouncementsPage({
 
   return (
     <SimplePage title="Thông báo" crumb="Thông báo">
-      <nav aria-label="Loại thông báo" className="mb-6 flex flex-wrap gap-2">
+      {/* On a phone the three tabs scroll as one row, bleeding to the
+          screen's edges; stacked, they took three lines before a single
+          notice was in view. */}
+      <nav
+        aria-label="Loại thông báo"
+        className="hide-scrollbar -mx-4 mb-6 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:flex-wrap sm:px-0 sm:pb-0"
+      >
         <Link
           href="/thong-bao"
           className={`${TAB} ${statusTab || subscribeTab ? TAB_OFF : TAB_ON}`}
