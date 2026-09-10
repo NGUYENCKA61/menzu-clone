@@ -1472,3 +1472,27 @@ html[data-filtering] .catalog-grid {
     transition: none;
   }
 }
+
+/* A basket line whose bin was pressed. It fades and eases a little to the
+   right the moment the finger lifts, while the server is still being told,
+   and the refresh that follows takes it out of a list it has already left.
+   It stops at a quarter rather than nothing: the request can take a beat,
+   and a bare gap in the list reads as a glitch where a ghost reads as
+   "going". A refused removal ends the transition and the line brightens
+   back to where it was. */
+.cart-line-out {
+  animation: cart-line-out 220ms cubic-bezier(0.2, 0, 0.2, 1) forwards;
+  pointer-events: none;
+}
+@keyframes cart-line-out {
+  to {
+    opacity: 0.25;
+    transform: translateX(10px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cart-line-out {
+    animation: none;
+    opacity: 0.25;
+  }
+}

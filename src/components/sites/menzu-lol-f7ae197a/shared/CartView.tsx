@@ -3,7 +3,13 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useLayoutEffect, useRef, useState } from "react";
+import {
+  useLayoutEffect,
+  useOptimistic,
+  useRef,
+  useState,
+  useTransition,
+} from "react";
 import {
   ArrowRight,
   BadgePercent,
@@ -28,6 +34,20 @@ import {
 } from "@/lib/memberTiers";
 
 import { formatVnd } from "./productData";
+
+/** What the basket does on a press, before the server has heard of it. */
+type CartAction =
+  | { kind: "quantity"; id: string; quantity: number }
+  | { kind: "remove"; id: string }
+  | { kind: "clear" };
+
+/** A line as drawn: the server's, plus what this screen is doing to it. */
+interface ShownLine extends CartLine {
+  /** Its count was just changed here; the server is being told. */
+  pending?: boolean;
+  /** The bin was pressed; it fades in place until the refresh drops it. */
+  leaving?: boolean;
+}
 
 export interface CartLine {
   id: string;
@@ -236,6 +256,38 @@ export function CartView({
   const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  /* Each press on a line answers on that line, in the same frame: the count
+     changes under the finger, a binned line starts fading, and only the
+     line that was touched goes quiet while the server is told - the others
+     keep taking presses. The optimistic list lasts exactly as long as the
+     transition that made it, which the refresh below is part of; a refused
+     change ends the transition and the list falls back to the server's, so
+     a line that could not be removed simply brightens again. Before this,
+     every button in the basket went grey together and nothing moved until
+     the round trip came back. */
+  const [isPending, startTransition] = useTransition();
+  const [shown, show] = useOptimistic<ShownLine[], CartAction>(
+    lines,
+    (state, action) => {
+      switch (action.kind) {
+        case "quantity":
+          return state.map((l) =>
+            l.id === action.id
+              ? { ...l, quantity: action.quantity, pending: true }
+              : l,
+          );
+        case "remove":
+          return state.map((l) =>
+            l.id === action.id ? { ...l, leaving: true } : l,
+          );
+        case "clear":
+          return state.map((l) => ({ ...l, leaving: true }));
+      }
+    },
+  );
+  /** The lines still in the basket as far as this screen is concerned. */
+  const kept = shown.filter((l) => !l.leaving);
   const [done, setDone] = useState<CheckoutReceipt | null>(null);
 
   const [voucher, setVoucher] = useState("");
@@ -269,7 +321,7 @@ export function CartView({
         : window.scrollY + box.top - CHROME;
     window.scrollTo({ top: Math.max(0, target), behavior: "instant" });
   }, [done]);
-  const listTotal = lines.reduce((sum, l) => sum + l.unitPrice * l.quantity, 0);
+  const listTotal = kept.reduce((sum, l) => sum + l.unitPrice * l.quantity, 0);
   // Wholesale beats the tier and does not stack with a code, exactly as the
   // checkout decides it.
   const agencyCut =
@@ -290,33 +342,37 @@ export function CartView({
     setVoucherError(null);
   }
 
-  async function send(
+  function send(
+    action: CartAction,
     method: "PATCH" | "DELETE",
     body: Record<string, unknown> | null,
     query = "",
   ) {
-    setBusy(true);
     setError(null);
-    try {
-      const res = await fetch(`/api/cart${query}`, {
-        method,
-        ...(body
-          ? { headers: { "content-type": "application/json" }, body: JSON.stringify(body) }
-          : {}),
-      });
-      if (!res.ok) {
-        const data = (await res.json().catch(() => ({}))) as { error?: string };
-        setError(data.error ?? "Thao tác thất bại");
-        return;
+    startTransition(async () => {
+      show(action);
+      try {
+        const res = await fetch(`/api/cart${query}`, {
+          method,
+          ...(body
+            ? { headers: { "content-type": "application/json" }, body: JSON.stringify(body) }
+            : {}),
+        });
+        if (!res.ok) {
+          const data = (await res.json().catch(() => ({}))) as { error?: string };
+          setError(data.error ?? "Thao tác thất bại");
+          return;
+        }
+        // The basket changed, so any quote against the old one is gone with
+        // it. The refresh is started inside this transition on purpose: the
+        // optimistic list holds until the server's new one has arrived and
+        // been drawn, so the count never snaps back for a frame in between.
+        dropQuote();
+        startTransition(() => router.refresh());
+      } catch {
+        setError("Không kết nối được máy chủ");
       }
-      // The basket changed, so any quote against the old one is gone with it.
-      dropQuote();
-      router.refresh();
-    } catch {
-      setError("Không kết nối được máy chủ");
-    } finally {
-      setBusy(false);
-    }
+    });
   }
 
   async function applyVoucher() {
@@ -656,7 +712,7 @@ export function CartView({
   // with it — the shopper paid and saw only an empty cart.
   if (lines.length === 0) return <CartEmpty signedIn />;
 
-  const count = lines.reduce((sum, l) => sum + l.quantity, 0);
+  const count = kept.reduce((sum, l) => sum + l.quantity, 0);
 
   return (
     <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start">
@@ -664,12 +720,12 @@ export function CartView({
       <div className="min-w-0">
         <div className="mb-3 flex items-center justify-between gap-3">
           <span className={LABEL}>
-            {lines.length} sản phẩm · {count} bản
+            {kept.length} sản phẩm · {count} bản
           </span>
           <button
             type="button"
-            disabled={busy}
-            onClick={() => send("DELETE", null, "?all=1")}
+            disabled={busy || isPending}
+            onClick={() => send({ kind: "clear" }, "DELETE", null, "?all=1")}
             className="text-[11px] font-bold text-neutral-500 transition-colors hover:text-red-400 disabled:opacity-40"
           >
             Xoá hết
@@ -677,15 +733,17 @@ export function CartView({
         </div>
 
         <ul className="flex flex-col gap-3">
-          {lines.map((line) => (
+          {shown.map((line) => (
             <li
               key={line.id}
+              inert={line.leaving}
+              aria-busy={line.pending}
               /* Two rows of three on a phone — picture, name and bin above,
                  stepper and total below — and one row of five on a desk. One
                  DOM for both; only where each cell lands changes. A single
                  flex row wrapped here before, and at phone width the name
                  was the thing squeezed to nothing. */
-              className="group grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-x-3 gap-y-3 rounded-2xl border border-white/[0.06] bg-gradient-to-br from-white/[0.05] via-white/[0.02] to-transparent p-3.5 transition-colors hover:border-[var(--menzu-accent)]/25 sm:grid-cols-[auto_minmax(0,1fr)_auto_6rem_auto] sm:gap-4 sm:p-4"
+              className={`group grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-x-3 gap-y-3 rounded-2xl border border-white/[0.06] bg-gradient-to-br from-white/[0.05] via-white/[0.02] to-transparent p-3.5 transition-colors hover:border-[var(--menzu-accent)]/25 sm:grid-cols-[auto_minmax(0,1fr)_auto_6rem_auto] sm:gap-4 sm:p-4${line.leaving ? " cart-line-out" : ""}`}
             >
               <Link
                 href={line.href}
@@ -726,9 +784,13 @@ export function CartView({
                 <button
                   type="button"
                   aria-label={`Giảm số lượng ${line.name}`}
-                  disabled={busy || line.quantity <= 1}
+                  disabled={line.pending || line.quantity <= 1}
                   onClick={() =>
-                    send("PATCH", { id: line.id, quantity: line.quantity - 1 })
+                    send(
+                      { kind: "quantity", id: line.id, quantity: line.quantity - 1 },
+                      "PATCH",
+                      { id: line.id, quantity: line.quantity - 1 },
+                    )
                   }
                   className={STEP_BUTTON}
                 >
@@ -740,9 +802,13 @@ export function CartView({
                 <button
                   type="button"
                   aria-label={`Tăng số lượng ${line.name}`}
-                  disabled={busy || line.quantity >= 99}
+                  disabled={line.pending || line.quantity >= 99}
                   onClick={() =>
-                    send("PATCH", { id: line.id, quantity: line.quantity + 1 })
+                    send(
+                      { kind: "quantity", id: line.id, quantity: line.quantity + 1 },
+                      "PATCH",
+                      { id: line.id, quantity: line.quantity + 1 },
+                    )
                   }
                   className={STEP_BUTTON}
                 >
@@ -752,16 +818,26 @@ export function CartView({
 
               {/* Money the shopper will part with, in the colour every price
                   on this site is written in. */}
-              <span className="col-start-3 justify-self-end text-right text-sm font-black tabular-nums text-[var(--menzu-accent)] sm:col-start-4 sm:row-start-1">
+              <span className="col-start-3 inline-flex items-center justify-end gap-1.5 justify-self-end text-right text-sm font-black tabular-nums text-[var(--menzu-accent)] sm:col-start-4 sm:row-start-1">
+                {/* The figure is already the new one; the spinner says the
+                    server has not confirmed it yet. */}
+                {line.pending ? (
+                  <Loader2 size={12} className="animate-spin motion-reduce:animate-none" aria-hidden />
+                ) : null}
                 {formatVnd(line.unitPrice * line.quantity)}đ
               </span>
 
               <button
                 type="button"
                 aria-label={`Xoá ${line.name}`}
-                disabled={busy}
+                disabled={line.pending}
                 onClick={() =>
-                  send("DELETE", null, `?id=${encodeURIComponent(line.id)}`)
+                  send(
+                    { kind: "remove", id: line.id },
+                    "DELETE",
+                    null,
+                    `?id=${encodeURIComponent(line.id)}`,
+                  )
                 }
                 className="col-start-3 row-start-1 self-start justify-self-end rounded-lg p-2 text-neutral-500 transition-colors hover:bg-red-500/10 hover:text-red-400 disabled:opacity-40 sm:col-start-5 sm:self-center"
               >
@@ -922,7 +998,7 @@ export function CartView({
         ) : (
           <button
             type="button"
-            disabled={busy}
+            disabled={busy || isPending}
             aria-busy={busy}
             onClick={checkout}
             className="relative mt-4 flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[var(--menzu-accent)] text-[12px] font-black uppercase tracking-widest text-white shadow-lg shadow-[var(--menzu-accent)]/25 transition-colors hover:bg-[var(--menzu-accent-dark)] disabled:opacity-60 disabled:shadow-none"
@@ -931,7 +1007,9 @@ export function CartView({
             {busy ? "Đang xử lý…" : "Thanh toán"}
           </button>
         )}
-        <span role="status" aria-live="polite" className="sr-only">{busy ? "Đang xử lý" : ""}</span>
+        <span role="status" aria-live="polite" className="sr-only">
+          {busy ? "Đang xử lý" : isPending ? "Đang cập nhật giỏ" : ""}
+        </span>
 
         <p className="relative mt-3 text-[11px] leading-relaxed text-neutral-500">
           Trừ thẳng vào số dư ví. Key được giao ngay sau khi thanh toán.
