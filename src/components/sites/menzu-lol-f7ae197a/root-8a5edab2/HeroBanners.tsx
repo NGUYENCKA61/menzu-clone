@@ -1,9 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
-import { preload } from "react-dom";
 import { ArrowRight, BadgeCheck, BookCheck, ShoppingBag } from "lucide-react";
 
 import { DEFAULT_SETTINGS } from "@/lib/settings";
+import { HeroVideo } from "./HeroVideo";
 import { ScrollCta } from "./ScrollCta";
 
 /**
@@ -68,11 +68,6 @@ export function HeroBanners({
   // Runs across every line so the stagger does not restart on the second row.
   let charCursor = 0;
 
-  // With a video in the frame the poster is the largest paint on the page,
-  // and it was fetched at the same priority as the 4 MB clip beside it, so on
-  // a phone it lost the bandwidth race and LCP waited on it. Asking for it
-  // first is what the `priority` Image in the still branch already does.
-  if (video) preload(banner, { as: "image", fetchPriority: "high" });
 
   return (
     // No card around this. The hero sits on the page's own dark ground, which
@@ -204,17 +199,10 @@ export function HeroBanners({
         <div className="relative aspect-[16/9] w-full overflow-hidden rounded-3xl border border-white/[0.08] bg-[#0a0a0c] shadow-[0_30px_80px_-30px_rgba(0,0,0,0.85),0_40px_120px_-40px_rgba(255,49,88,0.35)] lg:w-auto lg:min-w-0 lg:max-w-[650px] lg:flex-1">
           {video ? (
             // Muted and inline, because a hero that makes noise or takes over
-            // the screen on a phone is a hero people leave. The still stays as
-            // the poster, so the frame is never blank while it loads.
-            <video
-              src={video}
-              poster={banner}
-              autoPlay
-              muted
-              loop
-              playsInline
-              className="absolute inset-0 h-full w-full select-none object-cover"
-            />
+            // the screen on a phone is a hero people leave. The still is drawn
+            // first and stays; the clip fades in over it once it is running,
+            // and never loads at all for readers who asked for less motion.
+            <HeroVideo src={video} poster={banner} />
           ) : (
             <Image
               src={banner}
