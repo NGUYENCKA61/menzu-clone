@@ -1,6 +1,6 @@
 "use client";
 
-import { Crosshair, Search } from "lucide-react";
+import { ChevronDown, Crosshair, Search, SlidersHorizontal } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useOptimistic, useState, useTransition } from "react";
 
@@ -73,6 +73,9 @@ export function SoftwareFilterPanel({
   const [isPending, startTransition] = useTransition();
   const [shownStatus, showStatus] = useOptimistic(status);
   const [shownSort, showSort] = useOptimistic(sort);
+  /** The chip groups, on a phone: folded until asked for. */
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const filtering = shownStatus !== "all" || shownSort !== "newest";
 
   useEffect(() => {
     document.documentElement.toggleAttribute("data-filtering", isPending);
@@ -136,6 +139,34 @@ export function SoftwareFilterPanel({
         </button>
       </div>
 
+      {/* On a phone the chip groups fold behind one row: two search boxes,
+          three rows of chips and a full-width button took the whole first
+          screen before a single product was in view. The row stays open
+          by itself while a filter other than the default is on, so what is
+          narrowing the list is never hidden. From md up the panel is
+          always open, as before. */}
+      <button
+        type="button"
+        onClick={() => setFiltersOpen((o) => !o)}
+        aria-expanded={filtersOpen || filtering}
+        className="md:hidden flex h-10 w-full items-center justify-between rounded-xl border border-white/10 bg-white/[0.03] px-3.5 text-[11px] font-black uppercase tracking-widest text-neutral-300"
+      >
+        <span className="flex items-center gap-2">
+          <SlidersHorizontal size={14} aria-hidden />
+          Bộ lọc
+          {filtering ? (
+            <span className="rounded-md bg-[var(--brand)]/15 px-1.5 py-0.5 text-[10px] text-[var(--brand)]">
+              Đang lọc
+            </span>
+          ) : null}
+        </span>
+        <ChevronDown
+          size={14}
+          aria-hidden
+          className={`transition-transform duration-200 motion-reduce:transition-none ${filtersOpen || filtering ? "rotate-180" : ""}`}
+        />
+      </button>
+      <div className={filtersOpen || filtering ? "" : "hidden md:block"}>
       <div className={PANEL_CLASS}>
         <div className="flex flex-col lg:flex-row lg:flex-wrap lg:items-end gap-2.5 w-full">
           <div>
@@ -183,10 +214,11 @@ export function SoftwareFilterPanel({
           </div>
         </div>
       </div>
+      </div>
 
       <button
         type="submit"
-        className="md:hidden w-full bg-[var(--brand)] hover:bg-[var(--brand-dark)] active:scale-95 text-white font-black rounded-xl py-3.5 transition flex items-center justify-center gap-2"
+        className="press md:hidden flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-[var(--brand)] text-[13px] font-black text-white hover:bg-[var(--brand-dark)]"
       >
         <Search size={16} />
         Tìm kiếm

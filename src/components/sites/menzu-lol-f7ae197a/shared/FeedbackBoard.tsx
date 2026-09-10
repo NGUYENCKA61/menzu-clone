@@ -208,7 +208,7 @@ function RatingStars({
           type="button"
           title={`${n} sao`}
           onClick={() => onPick(n === value ? 0 : n)}
-          className="rounded transition-transform hover:scale-110 active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60"
+          className="-m-1.5 rounded p-1.5 transition-transform hover:scale-110 active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60"
         >
           <Star
             size={size}
@@ -292,7 +292,7 @@ export function FeedbackBoard({ items }: { items: FeedbackItem[] }) {
     <>
       <div id="feedback-list-top" className="w-full scroll-mt-24 mb-8">
         {/* Phone: the capsule and the sort share one row. */}
-        <div className="w-full bg-neutral-900/40 border border-neutral-800/60 p-4 rounded-2xl flex items-center justify-between gap-2 sm:hidden">
+        <div className="w-full bg-neutral-900/40 border border-neutral-800/60 p-4 rounded-2xl flex flex-wrap items-center justify-between gap-2 sm:hidden">
           <div className="flex items-center gap-3 bg-neutral-950/60 border border-neutral-800 px-3.5 py-2 rounded-xl shadow-inner shadow-black/40 shrink-0">
             <div className="flex flex-col mr-1 shrink-0 whitespace-nowrap">
               <span className="text-[9px] font-black text-neutral-600 uppercase tracking-[0.2em] leading-none mb-1">

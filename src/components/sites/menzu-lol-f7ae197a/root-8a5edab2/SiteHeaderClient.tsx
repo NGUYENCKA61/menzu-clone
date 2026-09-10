@@ -371,10 +371,14 @@ export function SiteHeaderClient({
           ) : (
             <Link
               href="/login"
+              aria-label="Đăng nhập"
               className="flex items-center gap-2 h-9 px-3.5 sm:px-4 rounded-[10px] bg-[var(--brand)] hover:bg-[var(--brand-dark)] transition-colors duration-200 border border-white/10 shrink-0"
             >
               <User size={16} />
-              <span className="text-[10px] sm:text-[11px] font-black uppercase tracking-widest text-white whitespace-nowrap">
+              {/* Under 360px the header has no room for the word: with the
+                  menu, the logo, the basket and the bell it ran 13px past the
+                  edge. The icon and the label carry it there. */}
+              <span className="text-[10px] sm:text-[11px] font-black uppercase tracking-widest text-white whitespace-nowrap max-[359px]:hidden">
                 Đăng nhập
               </span>
             </Link>

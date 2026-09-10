@@ -2,7 +2,7 @@
 
 import { useEffect, useOptimistic, useState, useTransition } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { Package, Search } from "lucide-react";
+import { ChevronDown, Package, Search, SlidersHorizontal } from "lucide-react";
 
 import {
   CHIP_ACTIVE,
@@ -97,6 +97,10 @@ export function CategoryFilterPanel({ hotPicks }: CategoryFilterPanelProps) {
   const [isPending, startTransition] = useTransition();
   const [shownSort, showSort] = useOptimistic(sort);
   const [shownSource, showSource] = useOptimistic(source);
+  /** The price and chip groups, on a phone: folded until asked for. */
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const filtering =
+    priceMin !== "" || priceMax !== "" || shownSort !== "newest" || shownSource !== "all";
 
   // The grid is the server page's, out of this panel's reach; it reads this
   // attribute off <html> and steps back while the filter is on its way.
@@ -214,6 +218,34 @@ export function CategoryFilterPanel({ hotPicks }: CategoryFilterPanelProps) {
           </button>
         </div>
 
+        {/* On a phone the chip groups fold behind one row: two search boxes,
+            three rows of chips and a full-width button took the whole first
+            screen before a single product was in view. The row stays open
+            by itself while a filter other than the default is on, so what is
+            narrowing the list is never hidden. From md up the panel is
+            always open, as before. */}
+        <button
+          type="button"
+          onClick={() => setFiltersOpen((o) => !o)}
+          aria-expanded={filtersOpen || filtering}
+          className="md:hidden flex h-10 w-full items-center justify-between rounded-xl border border-white/10 bg-white/[0.03] px-3.5 text-[11px] font-black uppercase tracking-widest text-neutral-300"
+        >
+          <span className="flex items-center gap-2">
+            <SlidersHorizontal size={14} aria-hidden />
+            Bộ lọc
+            {filtering ? (
+              <span className="rounded-md bg-[var(--brand)]/15 px-1.5 py-0.5 text-[10px] text-[var(--brand)]">
+                Đang lọc
+              </span>
+            ) : null}
+          </span>
+          <ChevronDown
+            size={14}
+            aria-hidden
+            className={`transition-transform duration-200 motion-reduce:transition-none ${filtersOpen || filtering ? "rotate-180" : ""}`}
+          />
+        </button>
+        <div className={filtersOpen || filtering ? "" : "hidden md:block"}>
         <div className={PANEL_CLASS}>
           <div className="flex flex-col xl:flex-row xl:items-end gap-4">
             <div>
@@ -324,10 +356,11 @@ export function CategoryFilterPanel({ hotPicks }: CategoryFilterPanelProps) {
             </div>
           </div>
         </div>
+        </div>
 
         <button
           type="submit"
-          className="md:hidden w-full bg-[var(--brand)] hover:bg-[var(--brand-dark)] active:scale-95 text-white font-black rounded-xl py-3.5 transition flex items-center justify-center gap-2"
+          className="press md:hidden flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-[var(--brand)] text-[13px] font-black text-white hover:bg-[var(--brand-dark)]"
         >
           <Search size={16} />
           Tìm kiếm

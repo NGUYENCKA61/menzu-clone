@@ -69,7 +69,7 @@ export function Pager({
       </p>
 
       {pageCount > 1 ? (
-        <nav aria-label="Phân trang" className="flex items-center gap-1.5">
+        <nav aria-label="Phân trang" className="flex flex-wrap items-center gap-1.5">
           {page === 0 ? (
             <span aria-hidden className={CHIP_OFF}>
               ‹
