@@ -103,10 +103,27 @@ export function DocsHelpCenter({
   const [chosen, setChosen] = useState<DocCategoryKey | null>(null);
   const [query, setQuery] = useState("");
   const tab = chosen ?? hashTab ?? "FAQ";
+  /** Bumped by a shelf press; the scroll to the list runs once the new
+   *  shelf has been laid out, not before. */
+  const [jump, setJump] = useState(0);
 
   useEffect(() => {
     if (hashTab) document.getElementById(LIST_ID)?.scrollIntoView({ block: "start" });
   }, [hashTab]);
+
+  // After the commit, so the browser measures the shelf that is actually
+  // there. Scrolling from the press handler fixed the target by the OLD
+  // layout, and a shorter shelf then left the smooth scroll running to a
+  // point that no longer existed, pinned at the foot of the document.
+  useEffect(() => {
+    if (jump === 0) return;
+    document.getElementById(LIST_ID)?.scrollIntoView({
+      block: "start",
+      behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+        ? "auto"
+        : "smooth",
+    });
+  }, [jump]);
 
   const q = query.trim().toLowerCase();
   const matches = (text: string) => q === "" || text.toLowerCase().includes(q);
@@ -116,10 +133,13 @@ export function DocsHelpCenter({
   const shelfArticles = shelf(tab).filter((a) => matches(a.title));
   const shown = tab === "FAQ" ? faqItems.length + shelfArticles.length : shelfArticles.length;
 
+  // Counted against the search, like the list: a rail that says "12" beside
+  // a shelf the box has just emptied is arguing with the page.
+  const onShelf = (key: DocCategoryKey) => shelf(key).filter((a) => matches(a.title)).length;
   const counts: Record<DocCategoryKey, number> = {
-    FAQ: faq.length + shelf("FAQ").length,
-    GUIDE: shelf("GUIDE").length,
-    WARRANTY: shelf("WARRANTY").length,
+    FAQ: faqItems.length + onShelf("FAQ"),
+    GUIDE: onShelf("GUIDE"),
+    WARRANTY: onShelf("WARRANTY"),
   };
 
   // The pinned article leads (admin: "Ghim lên Nội dung nổi bật"); with none
@@ -154,7 +174,7 @@ export function DocsHelpCenter({
   function openShelf(key: DocCategoryKey) {
     setChosen(key);
     setQuery("");
-    document.getElementById(LIST_ID)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    setJump((j) => j + 1);
   }
 
   return (
