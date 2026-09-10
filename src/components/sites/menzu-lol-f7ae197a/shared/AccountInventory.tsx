@@ -27,6 +27,9 @@ const ACCOUNT_INVENTORY_STYLES = `
 }
 .skin-tab-enter   { animation: skin-tab-enter 0.38s cubic-bezier(.22,1,.36,1) both; will-change: opacity; }
 .card-item-appear { animation: card-appear 0.5s cubic-bezier(.22,1,.36,1) both; }
+@media (prefers-reduced-motion: reduce) {
+  .skin-tab-enter, .card-item-appear { animation: none; }
+}
 `;
 
 type InventoryTabKey = "weaponSkins" | "buddies" | "agents" | "cards" | "sprays";

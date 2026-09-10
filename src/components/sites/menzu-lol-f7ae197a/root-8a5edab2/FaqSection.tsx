@@ -128,7 +128,7 @@ export function FaqSection({ faq, contact }: { faq: FaqEntry[]; contact: FaqCont
             <span aria-hidden className="spot-glow spot-glow-on -z-10" />
             <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-[var(--menzu-accent)]/30 bg-[var(--menzu-accent)]/10 px-2.5 py-1 text-[11px] font-bold text-[var(--menzu-accent)]">
               <span className="relative flex h-2 w-2">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[var(--menzu-accent)] opacity-60" />
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[var(--menzu-accent)] opacity-60 motion-reduce:hidden" />
                 <span className="relative inline-flex h-2 w-2 rounded-full bg-[var(--menzu-accent)]" />
               </span>
               Hỗ trợ {SUPPORT_WINDOW} mỗi ngày

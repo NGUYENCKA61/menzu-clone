@@ -30,7 +30,7 @@ const SHELL =
 
 /** The band that sweeps across on hover; each brand tints it its own way. */
 const SHEEN =
-  "absolute inset-0 w-full h-full bg-gradient-to-r from-transparent to-transparent -translate-x-[150%] group-hover/btn:translate-x-[150%] transition-transform duration-1000 ease-in-out";
+  "absolute inset-0 w-full h-full bg-gradient-to-r from-transparent to-transparent -translate-x-[150%] group-hover/btn:translate-x-[150%] transition-transform duration-1000 ease-in-out motion-reduce:hidden";
 
 const ICON = "w-4 h-4 relative z-10 transition-transform duration-300 group-hover/btn:scale-110";
 

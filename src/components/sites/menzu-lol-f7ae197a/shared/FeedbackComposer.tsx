@@ -472,7 +472,7 @@ export function FeedbackComposer({ user, today }: { user: ComposerUser; today: s
 
       <div className="hidden lg:block lg:col-span-5 sticky top-28">
         <div className="mb-4 flex items-center gap-2">
-          <div className="w-2 h-2 rounded-full bg-[var(--menzu-accent)] animate-pulse" />
+          <div className="w-2 h-2 rounded-full bg-[var(--menzu-accent)] animate-pulse motion-reduce:animate-none" />
           <span className="text-[10px] font-black text-neutral-500 uppercase tracking-[0.2em]">
             Preview
           </span>
