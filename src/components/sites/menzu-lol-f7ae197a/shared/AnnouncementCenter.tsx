@@ -30,7 +30,7 @@ import {
   type SoftwareStatusValue,
 } from "@/lib/softwareStatus";
 
-import { TYPE_ICONS, TYPE_TEXT, TYPE_TILE } from "./announcementIcons";
+import { TYPE_ICONS, TYPE_TILE } from "./announcementIcons";
 import { useClientNow } from "./useClientClock";
 import { lockScroll, unlockScroll } from "./modalChrome";
 import { useLeave } from "./useOverlayPresence";
@@ -404,7 +404,7 @@ export function AnnouncementCenter({
                     }`}
                   >
                     <span
-                      className={`mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border ${TYPE_TILE[item.type]}`}
+                      className={`mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border ${TYPE_TILE}`}
                     >
                       <Icon size={16} />
                     </span>
@@ -413,7 +413,7 @@ export function AnnouncementCenter({
                       {/* The kind, then the headline. Naming the kind in the
                           accent above the title is what makes a column of five
                           notices scannable without reading any of them. */}
-                      <span className={`block text-[10px] font-black uppercase tracking-widest ${TYPE_TEXT[item.type]}`}>
+                      <span className="block text-[10px] font-black uppercase tracking-widest text-[var(--menzu-accent)]">
                         {TYPE_LABELS[item.type]}
                       </span>
                       <span
@@ -616,7 +616,7 @@ export function AnnouncementModal({
               table use. It replaced a fixed "!", which read as a warning on a
               notice that was handing somebody a present. */}
           <span
-            className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border ${TYPE_TILE[item.type]}`}
+            className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border ${TYPE_TILE}`}
           >
             <HeaderIcon size={16} />
           </span>

@@ -26,28 +26,11 @@ export const TYPE_ICONS: Record<AnnouncementType, LucideIcon> = {
 };
 
 /**
- * The tile behind each glyph, one colour per kind.
+ * The tile behind each glyph.
  *
- * They were all the shop's red, on the theory that the glyph alone would
- * tell them apart; in the bell's list five red squares in a column read as
- * five of the same thing, and the owner asked for colour. Red stays with
- * the promotion - the kind that sells - and the rest take a colour with a
- * meaning of its own: amber for maintenance (caution), the wheel's violet
- * for a gift, sky for an update, and a plain grey for a plain notice.
+ * All the same red. The brief asked for one accent and the modal reference
+ * shows every kind wearing it — the icon is what distinguishes them, not the
+ * colour, which keeps a list of four rows from reading as a paint chart.
  */
-export const TYPE_TILE: Record<AnnouncementType, string> = {
-  UPDATE: "border-sky-500/30 bg-sky-500/10 text-sky-400",
-  MAINTENANCE: "border-amber-500/30 bg-amber-500/10 text-amber-400",
-  PROMO: "border-[var(--menzu-accent)]/30 bg-[var(--menzu-accent)]/10 text-[var(--menzu-accent)]",
-  INFO: "border-white/12 bg-white/[0.06] text-neutral-300",
-  GIFT: "border-[var(--menzu-violet)]/40 bg-[var(--menzu-violet)]/15 text-[var(--menzu-violet)]",
-};
-
-/** The kind's name in the same colour as its tile, for the line above a title. */
-export const TYPE_TEXT: Record<AnnouncementType, string> = {
-  UPDATE: "text-sky-400",
-  MAINTENANCE: "text-amber-400",
-  PROMO: "text-[var(--menzu-accent)]",
-  INFO: "text-neutral-400",
-  GIFT: "text-[var(--menzu-violet)]",
-};
+export const TYPE_TILE =
+  "border-[var(--menzu-accent)]/30 bg-[var(--menzu-accent)]/10 text-[var(--menzu-accent)]";

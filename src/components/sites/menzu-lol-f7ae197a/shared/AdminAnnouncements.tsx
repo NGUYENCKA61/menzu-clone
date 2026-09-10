@@ -719,7 +719,7 @@ export function AdminAnnouncements({
                   <td className="px-5 py-3 whitespace-nowrap">
                     {/* The same glyph the customer sees on the notice itself. */}
                     <span className="inline-flex items-center gap-2 text-xs text-neutral-300">
-                      <span className={`flex h-6 w-6 items-center justify-center rounded-md border ${TYPE_TILE[row.type]}`}>
+                      <span className={`flex h-6 w-6 items-center justify-center rounded-md border ${TYPE_TILE}`}>
                         {(() => {
                           const Icon = TYPE_ICONS[row.type];
                           return <Icon size={12} />;
