@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, type ReactNode } from "react";
+import { useLayoutEffect, useRef, type ReactNode } from "react";
 
 /**
  * A grid whose cards move the way lmarket.net's testimonial wall moves: they
@@ -25,21 +25,32 @@ export function RevealGrid({
 }) {
   const ref = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
+  // Layout effect, not effect: the attribute that hides the cards has to
+  // land before the browser paints, or a grid already on screen is drawn
+  // at rest for one frame, hidden, then revealed - a blink. A grid already
+  // in view is marked seen in the same pass, for the same reason.
+  useLayoutEffect(() => {
     const node = ref.current;
     if (!node) return;
     node.dataset.reveal = "";
-    if (typeof IntersectionObserver === "undefined") {
+    if (
+      typeof IntersectionObserver === "undefined" ||
+      node.getBoundingClientRect().top < window.innerHeight
+    ) {
       node.dataset.inview = "";
       return;
     }
+    // Fires when the grid's top edge crosses 88% of the way down the
+    // screen. The old threshold of 0.15 was a share of the grid's own
+    // area, meaningless for a grid taller than the screen: on a phone the
+    // FAQ's reveal ran while the grid was still below the fold.
     const observer = new IntersectionObserver(
       (entries) => {
         if (!entries.some((entry) => entry.isIntersecting)) return;
         node.dataset.inview = "";
         observer.disconnect();
       },
-      { threshold: 0.15 },
+      { threshold: 0, rootMargin: "0px 0px -12% 0px" },
     );
     observer.observe(node);
     return () => observer.disconnect();
