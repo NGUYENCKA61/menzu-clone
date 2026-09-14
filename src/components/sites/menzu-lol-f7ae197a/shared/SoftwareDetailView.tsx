@@ -23,12 +23,15 @@ import { SoftwareGallery } from "./SoftwareGallery";
 export function SoftwareDetailView({
   software,
   initialPackageId,
+  initialQuantity,
   setupGuideAccess,
   statusSubscribed,
   similar,
 }: {
   software: SoftwareDetail;
   initialPackageId?: string;
+  /** From `?sl=` — the quantity a guest had set before the login gate. */
+  initialQuantity?: number;
   /** Decided by the route, which knows who is looking. */
   setupGuideAccess: SetupGuideAccess;
   /** Following this tool's status; null for a guest. */
@@ -75,7 +78,7 @@ export function SoftwareDetailView({
               ]}
             />
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-14">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-10 lg:gap-14">
               <SoftwareGallery
                 name={software.name}
                 images={software.images}
@@ -84,6 +87,7 @@ export function SoftwareDetailView({
               <SoftwareBuyPanel
                 software={{ ...software, description: plainDescription }}
                 initialPackageId={initialPackageId}
+                initialQuantity={initialQuantity}
                 statusSubscribed={statusSubscribed}
               />
             </div>

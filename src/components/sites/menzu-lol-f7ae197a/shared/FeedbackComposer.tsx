@@ -107,6 +107,11 @@ export function FeedbackComposer({ user, today }: { user: ComposerUser; today: s
 
     if (!name.trim()) {
       setError("Nhập tên hiển thị");
+      // The box the message is about is a screen above the button on a
+      // phone; bring it back and put the cursor in it.
+      const field = document.getElementById("fb-name");
+      field?.scrollIntoView({ block: "center", behavior: "smooth" });
+      (field as HTMLInputElement | null)?.focus({ preventScroll: true });
       return;
     }
 

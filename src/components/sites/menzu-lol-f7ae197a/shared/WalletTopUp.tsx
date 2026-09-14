@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 
-import { cardNet, cardRateFor, type CardRate } from "@/lib/topup";
+import { CARD_DIGITS_MIN, cardNet, cardRateFor, type CardRate } from "@/lib/topup";
 import { useRouter } from "next/navigation";
 
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -81,7 +81,7 @@ const PRESET_INACTIVE =
 
 /** The card-number boxes: the admin field, sized for digits. */
 const CARD_FIELD =
-  "w-full rounded-xl border border-white/10 bg-neutral-950/60 px-3.5 py-2.5 font-mono text-sm tracking-wider text-white outline-none transition-colors focus:border-[var(--menzu-accent)]/60 placeholder:font-sans placeholder:tracking-normal placeholder:text-neutral-600";
+  "w-full rounded-xl border border-white/10 bg-neutral-950/60 px-3.5 py-2.5 font-mono text-sm tracking-wider text-white outline-none transition-colors focus:border-[var(--menzu-accent)]/60 placeholder:font-sans placeholder:tracking-normal placeholder:text-neutral-500";
 const CARD_LABEL = "text-[10px] font-black uppercase tracking-widest text-neutral-400";
 
 /**
@@ -105,6 +105,9 @@ function CardNumberField({
   onChange: (next: string) => void;
 }) {
   const take = (raw: string) => onChange(raw.replace(/\D/g, "").slice(0, 24));
+  // Half a number gets told so, under the box it is about. The button below
+  // used to just stay grey, and nothing said which of the two was short.
+  const short = value.length > 0 && value.length < CARD_DIGITS_MIN;
   return (
     <div className="flex flex-col gap-1.5">
       <label htmlFor={id} className={CARD_LABEL}>
@@ -136,6 +139,11 @@ function CardNumberField({
           <ClipboardPaste size={15} />
         </button>
       </div>
+      {short ? (
+        <span className="text-[11px] font-semibold text-red-400">
+          {label} cần ít nhất {CARD_DIGITS_MIN} chữ số
+        </span>
+      ) : null}
     </div>
   );
 }
@@ -286,7 +294,7 @@ const HISTORY_STATUS: Record<
     // is not the same as a request the customer dropped, but no longer
     // the brightest thing on a page of finished requests.
     box: "border-red-500/15 bg-red-500/[0.06] text-red-400/60",
-    sum: "text-neutral-600 line-through",
+    sum: "text-neutral-400 line-through",
     code: "text-neutral-500",
     card: "border-white/[0.06] bg-white/[0.02]",
   },
@@ -295,14 +303,14 @@ const HISTORY_STATUS: Record<
   EXPIRED: {
     text: "Quá hạn",
     box: "border-red-500/25 bg-red-500/10 text-red-400",
-    sum: "text-neutral-600",
+    sum: "text-neutral-400",
     code: "text-neutral-500",
     card: "border-white/[0.06] bg-white/[0.02]",
   },
   CANCELLED: {
     text: "Đã hủy",
     box: "border-white/10 bg-white/5 text-neutral-500",
-    sum: "text-neutral-600",
+    sum: "text-neutral-400",
     code: "text-neutral-500",
     card: "border-white/[0.06] bg-white/[0.02]",
   },
@@ -418,7 +426,7 @@ function HistoryList({
                     names the method. */}
                 <span
                   className={`truncate text-[11px] ${
-                    status.code === "text-white" ? "text-neutral-500" : "text-neutral-600"
+                    status.code === "text-white" ? "text-neutral-400" : "text-neutral-500"
                   }`}
                 >
                   {row.method === "CARD" ? `${row.carrier ?? "Thẻ cào"} · ` : ""}
@@ -519,8 +527,15 @@ export function WalletTopUp({
   // Every box the card form needs before it can be sent. The carrier and the
   // denomination are picked, the two numbers are typed; anything shorter than
   // six digits is half a card.
+  // The amount must be one the carriers print. A figure typed on the bank
+  // tab used to ride along here and produce "Nạp Viettel 25.000đ" for a
+  // denomination that does not exist.
+  const cardAmountOk = amount !== "" && cardPresets.includes(Number(amount));
   const cardReady =
-    Boolean(carrier) && amount !== "" && serial.length >= 6 && pin.length >= 6;
+    Boolean(carrier) &&
+    cardAmountOk &&
+    serial.length >= CARD_DIGITS_MIN &&
+    pin.length >= CARD_DIGITS_MIN;
   // The two figures the card tab talks in: what the shop keeps, and what the
   // wallet gets. Both read from the same helper the server credits with.
   const cardPercent = amount ? cardRateFor(Number(amount), cardRates, cardFee) : 0;
@@ -748,7 +763,14 @@ export function WalletTopUp({
         {bankEnabled ? (
           <button
             type="button"
-            onClick={() => setMethod("bank")}
+            // The amount and any error belong to the tab they were typed on:
+            // a bank figure carried into the card form named a denomination
+            // no carrier prints, and a bank refusal sat over the card button.
+            onClick={() => {
+              setMethod("bank");
+              setAmount("");
+              setError(null);
+            }}
             className={method === "bank" ? TAB_ACTIVE : TAB_INACTIVE}
           >
             <CreditCard size={15} />
@@ -758,7 +780,11 @@ export function WalletTopUp({
         {cardEnabled ? (
           <button
             type="button"
-            onClick={() => setMethod("card")}
+            onClick={() => {
+              setMethod("card");
+              setAmount("");
+              setError(null);
+            }}
             className={method === "card" ? TAB_ACTIVE : TAB_INACTIVE}
           >
             <Ticket size={15} />
@@ -1034,7 +1060,7 @@ export function WalletTopUp({
                 }
                 inputMode="numeric"
                 placeholder="0"
-                className="flex-1 bg-transparent outline-none text-white text-sm font-bold tabular-nums placeholder-neutral-600"
+                className="flex-1 bg-transparent outline-none text-white text-sm font-bold tabular-nums placeholder-neutral-500"
               />
               <span className="text-[11px] font-black uppercase tracking-widest text-neutral-500">
                 VNĐ
@@ -1175,7 +1201,7 @@ export function WalletTopUp({
           {/* The card itself. Typed here rather than sent to the shop over
               chat: the request then carries everything the desk needs, and
               the customer is not left holding two numbers and no instructions. */}
-          {carrier && amount ? (
+          {carrier && cardAmountOk ? (
             <div className="receipt-in flex flex-col gap-2">
               <h3 className="text-[10px] font-black uppercase tracking-widest text-neutral-500">
                 3. Thông tin mã thẻ

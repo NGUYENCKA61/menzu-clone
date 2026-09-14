@@ -33,7 +33,7 @@ const STATUS_LABEL: Record<string, string> = {
 const STATUS_CLASS: Record<string, string> = {
   PAID: "border-emerald-500/30 bg-emerald-500/10 text-emerald-400",
   PENDING: "border-amber-500/30 bg-amber-500/10 text-amber-400",
-  CANCELLED: "border-white/10 bg-white/5 text-neutral-500",
+  CANCELLED: "border-white/10 bg-white/5 text-neutral-400",
   REFUNDED: "border-rose-500/30 bg-rose-500/10 text-rose-400",
 };
 
@@ -217,7 +217,7 @@ export default async function OrdersPage({
                     {/* The clock, not the date: the day is written once over
                         the group this row sits in, and repeating it on every
                         line was the noisiest thing on the page. */}
-                    <span className="text-[11px] font-semibold text-neutral-500">
+                    <span className="text-[11px] font-semibold text-neutral-400">
                       Đơn {o.code} · {dayTime(o.createdAt)}
                     </span>
                   </div>

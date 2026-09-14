@@ -1,6 +1,5 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
-import localFont from "next/font/local";
 import "./globals.css";
 import { SITE_URL, siteDescription } from "@/lib/seo";
 import { PageBackdrop } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/PageBackdrop";
@@ -23,14 +22,10 @@ export const dynamic = "force-dynamic";
 
 const inter = Inter({
   variable: "--font-inter",
-  subsets: ["latin", "vietnamese"],
-  display: "swap",
-});
-
-const headingNow = localFont({
-  src: "../../public/sites/menzu-lol-f7ae197a/shared/fonts/headingnow-extrabold.ttf",
-  variable: "--font-headingnow",
-  weight: "800",
+  // latin-ext too: its unicode-range overlaps the Vietnamese one and is
+  // declared after it, so the browser fetched that file anyway for Đ, ư, ơ —
+  // but only after layout. Listed here, it preloads with the others.
+  subsets: ["latin", "vietnamese", "latin-ext"],
   display: "swap",
 });
 
@@ -119,7 +114,7 @@ export default async function RootLayout({
   return (
     <html
       lang="vi"
-      className={`${inter.variable} ${headingNow.variable} h-full antialiased overflow-y-scroll dark`}
+      className={`${inter.variable} h-full antialiased overflow-y-scroll dark`}
     >
       <body className="min-h-full flex flex-col">
         {brandOverride ? <style>{brandOverride}</style> : null}

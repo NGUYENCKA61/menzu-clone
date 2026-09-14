@@ -46,7 +46,11 @@ export function LoginForm({
   panelSubtitle,
   panelTitle,
   next = "/",
+  reason,
 }: {
+  /** Why the visitor is here, when the return address says — replaces the
+   *  marketing subtitle so the card answers the door they came through. */
+  reason?: string;
   /** The shop's name, for the mobile eyebrow over the heading. */
   brandName: string;
   turnstileSiteKey: string | null;
@@ -216,8 +220,8 @@ export function LoginForm({
                   <h1 className="text-4xl font-black text-white uppercase tracking-tight">
                     Đăng nhập
                   </h1>
-                  <p className="text-sm text-neutral-400 mt-2 font-medium">
-                    Mua tool, tài khoản game và nhận key ngay lập tức
+                  <p className={`mt-2 text-sm font-medium ${reason ? "text-white" : "text-neutral-400"}`}>
+                    {reason ?? "Mua tool, tài khoản game và nhận key ngay lập tức"}
                   </p>
                 </div>
 
@@ -241,7 +245,7 @@ export function LoginForm({
                         value={username}
                         onChange={(event) => setUsername(event.target.value)}
                         placeholder="Email hoặc Tên đăng nhập"
-                        className="w-full rounded-2xl border border-white/5 bg-white/5 pl-12 pr-4 py-4 text-sm text-white outline-none focus:border-[var(--menzu-accent)]/60 transition-colors placeholder-neutral-600"
+                        className="w-full rounded-2xl border border-white/5 bg-white/5 pl-12 pr-4 py-4 text-sm text-white outline-none focus:border-[var(--menzu-accent)]/60 transition-colors placeholder-neutral-500"
                       />
                     </div>
                   </div>
@@ -273,13 +277,13 @@ export function LoginForm({
                         value={password}
                         onChange={(event) => setPassword(event.target.value)}
                         placeholder="••••••••"
-                        className="w-full rounded-2xl border border-white/5 bg-white/5 pl-12 pr-12 py-4 text-sm text-white outline-none focus:border-[var(--menzu-accent)]/60 transition-colors placeholder-neutral-600"
+                        className="w-full rounded-2xl border border-white/5 bg-white/5 pl-12 pr-12 py-4 text-sm text-white outline-none focus:border-[var(--menzu-accent)]/60 transition-colors placeholder-neutral-500"
                       />
                       <button
                         type="button"
                         onClick={() => setShowPassword((previous) => !previous)}
                         aria-label={showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
-                        className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-neutral-500 hover:text-white transition-colors focus:outline-none"
+                        className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md p-2 text-neutral-500 hover:text-white transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--menzu-accent)]/60"
                       >
                         {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                       </button>

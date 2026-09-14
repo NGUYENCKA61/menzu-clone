@@ -29,6 +29,7 @@ import { CartButton } from "./CartButton";
 import { HeaderSearch } from "./HeaderSearch"
 import { SiteLink } from "../shared/SiteLink";
 import { UserMenu, type HeaderUser } from "./UserMenu";
+import { usePathname } from "next/navigation"
 import { useEffect, useState } from "react"
 import { MobileDrawer, type DrawerGroup } from "./MobileDrawer"
 
@@ -83,8 +84,11 @@ const QUICK_LINKS = [
 // and letter-spaced, the darker grey on the near-black bar was closer to
 // disabled than to a link. Hover still lands on pure white, so the two states
 // stay distinguishable.
+// As tall as the 40px strip it sits in: the five links used to be 15px text
+// boxes with no padding — the only nav a tablet shows, and a thumb missed
+// them. One size up too; 10px was the cloned desktop setting.
 const QUICK_LINK_CLASS =
-  "text-[10px] font-bold uppercase tracking-widest text-neutral-300 hover:text-white transition-colors"
+  "inline-flex h-full items-center text-[11px] font-bold uppercase tracking-widest text-neutral-300 hover:text-white transition-colors"
 
 // A rung of the main bar that opens a page rather than a panel. Written once
 // because there are two of them now, and a nav where one rung underlines on
@@ -165,12 +169,17 @@ function NavDropdown({ label, items }: { label: string; items: DropdownItem[] })
           into the panel, which is where it spends most of the interaction. */}
       <button
         type="button"
-        className="relative flex items-center gap-2 whitespace-nowrap px-3 py-2 rounded-lg text-[11px] font-extrabold uppercase tracking-widest text-neutral-200 group-hover:text-[var(--menzu-accent)] transition-colors duration-200 ease-[ease] after:absolute after:bottom-1.5 after:inset-x-3 after:h-[2px] after:origin-left after:scale-x-0 after:rounded-full after:bg-[var(--menzu-accent)] after:transition-transform after:duration-200 group-hover:after:scale-x-100"
+        aria-haspopup="true"
+        className="relative flex items-center gap-2 whitespace-nowrap px-3 py-2 rounded-lg text-[11px] font-extrabold uppercase tracking-widest text-neutral-200 group-hover:text-[var(--menzu-accent)] group-focus-within:text-[var(--menzu-accent)] transition-colors duration-200 ease-[ease] after:absolute after:bottom-1.5 after:inset-x-3 after:h-[2px] after:origin-left after:scale-x-0 after:rounded-full after:bg-[var(--menzu-accent)] after:transition-transform after:duration-200 group-hover:after:scale-x-100 group-focus-within:after:scale-x-100"
       >
         {label}
         <ChevronDown size={14} />
       </button>
-      <div className="absolute top-full left-0 pt-1 transition-all duration-300 z-[110] w-56 opacity-0 translate-y-1 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto">
+      {/* Also on focus-within: a keyboard reached the trigger and then
+          tabbed into six invisible links, each of which navigated on Enter.
+          With the panel open while anything inside holds focus, whatever is
+          focused is on screen. */}
+      <div className="absolute top-full left-0 pt-1 transition-all duration-300 z-[110] w-56 opacity-0 translate-y-1 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto group-focus-within:opacity-100 group-focus-within:translate-y-0 group-focus-within:pointer-events-auto">
         <div className="rounded-xl border border-white/10 bg-[#0c0d12]/95 backdrop-blur-xl p-2 shadow-xl">
           {items.map((item) => {
             const Icon = item.icon
@@ -229,6 +238,18 @@ export function SiteHeaderClient({
   )
   const drawerGroups = drawerGroupsFor(linkFor, telegramShopUrl !== null)
   const [drawerOpen, setDrawerOpen] = useState(false)
+
+  // The login button brings the visitor back to the page they were reading:
+  // it used to be a bare /login, and a guest who tapped it on a tool page was
+  // dropped on the home page afterwards — on a phone, where the header has no
+  // search box, that meant finding the tool again through the drawer. The
+  // path alone is enough (product addresses carry no query); the auth pages
+  // and the home page get the bare link.
+  const pathname = usePathname()
+  const loginHref =
+    pathname === "/" || /^\/(login|signup|register|forgot-password|reset-password)(\/|$)/.test(pathname)
+      ? "/login"
+      : `/login?next=${encodeURIComponent(pathname)}`
 
   // True once the page has scrolled past the top bar. Drives the condensed
   // header: top bar hidden, main row shorter, translucent + blurred, logo
@@ -377,7 +398,7 @@ export function SiteHeaderClient({
             <UserMenu user={user} />
           ) : (
             <Link
-              href="/login"
+              href={loginHref}
               aria-label="Đăng nhập"
               className="flex items-center gap-2 h-9 px-3.5 sm:px-4 rounded-[10px] bg-[var(--brand)] hover:bg-[var(--brand-dark)] transition-colors duration-200 border border-white/10 shrink-0"
             >
@@ -399,6 +420,7 @@ export function SiteHeaderClient({
         groups={drawerGroups}
         brandName={brand.name}
         brandLogo={brand.logo}
+        user={user}
       />
     </nav>
   )

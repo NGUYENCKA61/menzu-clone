@@ -7,7 +7,7 @@ import { useState } from "react";
 import { ADDRESS_MIN, CLAIM_NOTE_MAX } from "@/lib/spin";
 
 const FIELD =
-  "w-full rounded-lg border border-white/10 bg-neutral-950/60 px-3 py-2 text-sm text-white outline-none transition-colors placeholder-neutral-600 focus:border-[var(--menzu-violet)]/60";
+  "w-full rounded-lg border border-white/10 bg-neutral-950/60 px-3 py-2 text-sm text-white outline-none transition-colors placeholder-neutral-500 focus:border-[var(--menzu-violet)]/60";
 const LABEL =
   "mb-1.5 block text-[10px] font-black uppercase tracking-widest text-neutral-500";
 const ACTION =

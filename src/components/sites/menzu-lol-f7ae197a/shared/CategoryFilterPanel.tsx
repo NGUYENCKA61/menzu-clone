@@ -38,9 +38,9 @@ const SORT_OPTIONS = [
 type SortValue = (typeof SORT_OPTIONS)[number]["value"];
 
 const PRICE_INPUT_SHELL_CLASS =
-  "flex items-center gap-1.5 h-10 px-3 rounded-lg bg-neutral-950/60 border border-neutral-800/60 flex-1 min-w-0";
+  "flex items-center gap-1.5 h-10 px-3 rounded-lg bg-neutral-950/60 border border-neutral-800/60 flex-1 min-w-0 transition-colors focus-within:border-[var(--menzu-accent)]/60";
 const PRICE_INPUT_CLASS =
-  "bg-transparent outline-none text-white text-sm w-full min-w-0 font-bold tabular-nums placeholder-neutral-600";
+  "bg-transparent outline-none text-white text-sm w-full min-w-0 font-bold tabular-nums placeholder-neutral-500";
 
 export interface CategoryFilterPanelProps {
   /**

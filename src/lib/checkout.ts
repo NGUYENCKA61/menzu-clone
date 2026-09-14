@@ -71,7 +71,8 @@ export async function placeOrder(input: CheckoutInput): Promise<CheckoutResult> 
 
   const code = input.code.trim();
   if (!code) throw new Error("NOT_FOUND");
-  const voucherCode = input.voucher?.trim() || null;
+  // Upper-cased like the admin stores it, so "thichthihack20" is the code.
+  const voucherCode = input.voucher?.trim().toUpperCase() || null;
 
   /** The shelf this sale drew from, looked at once the money has committed. */
   const soldFrom: string[] = [];

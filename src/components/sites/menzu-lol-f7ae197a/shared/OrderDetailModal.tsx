@@ -599,7 +599,7 @@ export function OrderDetailModal({
                       in a 390px sheet meant a 640px table scrolling sideways
                       inside a sheet that itself scrolls, and a reader saw the
                       first column alone. */}
-                  <div className="rounded-xl border border-white/10 bg-white/[0.02] p-3 sm:hidden">
+                  <div className="rounded-xl border border-white/10 bg-white/[0.02] p-3 lg:hidden">
                     <div className="flex items-center gap-3">
                       <span className="relative h-12 w-[72px] shrink-0 overflow-hidden rounded-lg border border-white/10 bg-neutral-950">
                         {order.imageUrl ? (
@@ -645,7 +645,10 @@ export function OrderDetailModal({
                     </dl>
                   </div>
 
-                  <div className="hidden overflow-x-auto sm:block">
+                  {/* The table only from lg: at 768 it was 887px in a 654px box and the
+                      three money columns sat off the right edge with no
+                      scrollbar to say so; the card above already carries them. */}
+                  <div className="hidden overflow-x-auto lg:block">
                     <table className="w-full min-w-[640px] border-separate border-spacing-0 overflow-hidden rounded-xl border border-white/10">
                       <thead>
                         <tr>
@@ -682,7 +685,7 @@ export function OrderDetailModal({
                               </span>
                               {/* A table cell grows to fit its content, so the
                                   ellipsis only works against a ceiling. */}
-                              <div className="min-w-0 max-w-[200px] md:max-w-[320px]">
+                              <div className="min-w-0 max-w-[200px] lg:max-w-[260px] xl:max-w-[320px]">
                                 <Link
                                   href={order.productHref}
                                   className="mb-1 block truncate text-sm font-black text-white transition-colors hover:text-[var(--menzu-accent)]"

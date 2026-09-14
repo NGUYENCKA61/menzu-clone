@@ -230,7 +230,7 @@ function RowCard({
             src={card.image}
             alt={card.title}
             fill
-            sizes="(min-width: 1024px) 25vw, (min-width: 768px) 33vw, 50vw"
+            sizes="(min-width: 1024px) 25vw, (min-width: 768px) 33vw, 40vw"
             className={cn(
               "transition-transform duration-500 group-hover:scale-110",
               t.image,

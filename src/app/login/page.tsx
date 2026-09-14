@@ -5,6 +5,28 @@ import { SiteFooter } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/
 import { SiteHeader } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/SiteHeader";
 import { LoginForm } from "@/components/sites/menzu-lol-f7ae197a/shared/LoginForm";
 import { safeNext } from "@/lib/safeNext";
+
+const REASONS: [string, string][] = [
+  ["/feedback/submit", "Đăng nhập để viết đánh giá"],
+  ["/wallet", "Đăng nhập để nạp tiền vào ví"],
+  ["/vong-quay", "Đăng nhập để quay thưởng"],
+  ["/orders", "Đăng nhập để xem lịch sử mua"],
+  ["/transactions", "Đăng nhập để xem lịch sử giao dịch"],
+  ["/profile", "Đăng nhập để mở hồ sơ"],
+  ["/security", "Đăng nhập để vào mục bảo mật"],
+  ["/affiliate", "Đăng nhập để xem hoa hồng giới thiệu"],
+  ["/cart", "Đăng nhập để thanh toán giỏ hàng"],
+  ["/thong-bao", "Đăng nhập để nhận thông báo trạng thái"],
+];
+
+/** The interrupted errand, when the return address names one. */
+function reasonFor(next: string): string | undefined {
+  // A product page carries ?pkg= or ?sl= only when the buy dialog sent the
+  // visitor here, so that query is the one reliable sign of a purchase.
+  if (/[?&](pkg|sl)=/.test(next)) return "Đăng nhập để hoàn tất đơn hàng";
+  const hit = REASONS.find(([prefix]) => next === prefix || next.startsWith(`${prefix}/`) || next.startsWith(`${prefix}?`));
+  return hit?.[1];
+}
 import { getCurrentUser } from "@/lib/session";
 import { discordOauthEnabled, googleOauthEnabled } from "@/lib/settings";
 import { getShopSettings } from "@/lib/settingsStore";
@@ -44,6 +66,12 @@ export default async function LoginPage({
   // Sanitised on the server so the browser never sees an unsafe target, and so
   // the "Tạo mới ngay" link can carry it on to /signup unchanged.
   const next = safeNext(rawNext);
+  // One line under the heading that names what the visitor was doing when
+  // the gate closed; six different doors used to lead to the same card with
+  // nothing but the marketing subtitle. Keyed on the prefix of a known page
+  // and left alone otherwise — a two-segment path could be a shelf as easily
+  // as a product.
+  const reason = reasonFor(next);
 
   return (
     <div className="min-h-screen flex flex-col text-white overflow-x-clip selection:bg-[var(--menzu-accent)]/30">
@@ -68,6 +96,7 @@ export default async function LoginPage({
           panelSubtitle={settings.authPanelSubtitle}
           panelTitle={settings.authLoginTitle}
           next={next}
+          reason={reason}
         />
         <SiteFooter />
       </main>

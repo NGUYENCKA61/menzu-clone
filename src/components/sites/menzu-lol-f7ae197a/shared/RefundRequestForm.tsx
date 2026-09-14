@@ -8,7 +8,7 @@ import { useEffect, useRef, useState } from "react";
 import { REASON_MAX, REASON_MIN } from "@/lib/refundRequests";
 
 const FIELD =
-  "w-full rounded-xl border border-white/10 bg-neutral-950/60 px-4 py-3 text-sm text-white outline-none transition-colors placeholder-neutral-600 focus:border-[var(--menzu-accent)]/60";
+  "w-full rounded-xl border border-white/10 bg-neutral-950/60 px-4 py-3 text-sm text-white outline-none transition-colors placeholder-neutral-500 focus:border-[var(--menzu-accent)]/60";
 const LABEL =
   "mb-2 block text-[10px] font-black uppercase tracking-widest text-neutral-500";
 const TYPES = ["image/png", "image/jpeg", "image/webp"];

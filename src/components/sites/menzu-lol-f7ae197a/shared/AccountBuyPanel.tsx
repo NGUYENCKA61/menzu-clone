@@ -62,6 +62,8 @@ export interface AccountDetail {
 
 export interface AccountBuyPanelProps {
   account: AccountDetail;
+  /** From `?sl=` — the quantity a guest had set before the login gate. */
+  initialQuantity?: number;
 }
 
 /** The software panel's four reassurances, with the delivery line made ours. */
@@ -85,7 +87,7 @@ const STAT_VALUE_CLASS = "text-sm font-bold text-white";
  * button that posts to /api/orders, a short balance shows "Cần nạp thêm" and a
  * link to /wallet with no confirm button at all, exactly as the live one does.
  */
-export function AccountBuyPanel({ account }: AccountBuyPanelProps) {
+export function AccountBuyPanel({ account, initialQuantity }: AccountBuyPanelProps) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [voucher, setVoucher] = useState("");
@@ -94,6 +96,9 @@ export function AccountBuyPanel({ account }: AccountBuyPanelProps) {
 
   /** The wallet, read when the dialog opens; null until it answers. */
   const [balance, setBalance] = useState<number | null>(null);
+  /** Whether anybody is signed in; null until the probe answers. Kept apart
+   *  from `balance`, which is also null while waiting and after a failure. */
+  const [signedIn, setSignedIn] = useState<boolean | null>(null);
   const [buying, setBuying] = useState(false);
   const [buyError, setBuyError] = useState<string | null>(null);
   const [orderCode, setOrderCode] = useState<string | null>(null);
@@ -108,9 +113,16 @@ export function AccountBuyPanel({ account }: AccountBuyPanelProps) {
   // "Acc random": sold by the piece, so the panel carries a count and the
   // dialog reports how many sign-ins landed in the buyer's history.
   const pool = account.pool;
-  const [quantity, setQuantity] = useState(1);
+  const [quantity, setQuantity] = useState(initialQuantity ?? 1);
   const [bought, setBought] = useState(0);
   const unitCount = pool ? quantity : 1;
+
+  // Where a guest goes to sign in, carrying the count so they come back to
+  // the same order; the product page reads ?sl= on the way in.
+  const loginHref = `/login?next=${encodeURIComponent(
+    `${productHref(account.categorySlug, account.slug)}${pool && quantity > 1 ? `?sl=${quantity}` : ""}`,
+  )}`;
+  const guest = signedIn === false;
   const soldOut = pool ? pool.available <= 0 : account.sold;
   const stockText = pool
     ? pool.available > 0
@@ -143,7 +155,7 @@ export function AccountBuyPanel({ account }: AccountBuyPanelProps) {
         }),
       });
       if (response.status === 401) {
-        router.push(`/login?next=${encodeURIComponent(productHref(account.categorySlug, account.slug))}`);
+        router.push(loginHref);
         return;
       }
       const data = (await response.json().catch(() => ({}))) as {
@@ -174,7 +186,9 @@ export function AccountBuyPanel({ account }: AccountBuyPanelProps) {
     fetch("/api/auth/me")
       .then((r) => r.json())
       .then((d: { user?: { balance?: number } | null }) => {
-        if (!cancelled) setBalance(d.user ? (d.user.balance ?? 0) : null);
+        if (cancelled) return;
+        setSignedIn(Boolean(d.user));
+        setBalance(d.user ? (d.user.balance ?? 0) : null);
       })
       .catch(() => {
         if (!cancelled) setBalance(null);
@@ -232,7 +246,7 @@ export function AccountBuyPanel({ account }: AccountBuyPanelProps) {
       };
 
       if (response.status === 401) {
-        router.push(`/login?next=${encodeURIComponent(productHref(account.categorySlug, account.slug))}`);
+        router.push(loginHref);
         return;
       }
       if (!response.ok) {
@@ -529,12 +543,16 @@ export function AccountBuyPanel({ account }: AccountBuyPanelProps) {
       <BuyConfirmDialog
         open={open}
         onClose={() => setOpen(false)}
+        // A guest is told what the button does before pressing it; it used
+        // to read XÁC NHẬN and land them on a bare login page.
+        subtitle={guest ? "Đăng nhập để hoàn tất đơn này — lựa chọn của bạn sẽ được giữ nguyên." : undefined}
         footer={
           <ConfirmFooter
             onCancel={() => setOpen(false)}
-            onConfirm={handleBuy}
+            onConfirm={guest ? () => router.push(loginHref) : handleBuy}
             busy={buying}
             canAfford={canAfford}
+            confirmLabel={guest ? "Đăng nhập để mua" : undefined}
           />
         }
       >
@@ -566,19 +584,21 @@ export function AccountBuyPanel({ account }: AccountBuyPanelProps) {
             />
           ) : null}
         </PriceList>
-        <VoucherField
-          value={voucher}
-          onChange={(next) => {
-            setVoucher(next);
-            // A quote belongs to the code it was fetched for.
-            setApplied(null);
-            setVoucherError(null);
-          }}
-          onApply={handleApplyVoucher}
-          checking={checking}
-          error={voucherError}
-          applied={applied}
-        />
+        {guest ? null : (
+          <VoucherField
+            value={voucher}
+            onChange={(next) => {
+              setVoucher(next);
+              // A quote belongs to the code it was fetched for.
+              setApplied(null);
+              setVoucherError(null);
+            }}
+            onApply={handleApplyVoucher}
+            checking={checking}
+            error={voucherError}
+            applied={applied}
+          />
+        )}
         <PayableBlock payable={payable} balance={balance} />
         {buyError ? (
           <div ref={errorRef}>

@@ -12,7 +12,7 @@ import { StatusToast } from "./StatusToast";
 import { TurnstileBox } from "./TurnstileBox";
 
 const FIELD_CLASS =
-  "w-full rounded-2xl border border-white/5 bg-white/5 pl-12 pr-4 py-4 text-sm text-white outline-none focus:border-[var(--menzu-accent)]/60 transition-colors placeholder-neutral-600";
+  "w-full rounded-2xl border border-white/5 bg-white/5 pl-12 pr-4 py-4 text-sm text-white outline-none focus:border-[var(--menzu-accent)]/60 transition-colors placeholder-neutral-500";
 const LABEL_CLASS =
   "block text-[11px] font-black uppercase tracking-widest text-neutral-400 mb-2.5 ml-1";
 
@@ -93,6 +93,12 @@ export function RegisterForm({
     // so a form with only an email in it is still an empty form.
     if (!username.trim() && !password && !confirm) {
       setError("Vui lòng nhập đủ thông tin");
+      return;
+    }
+    // Said, not silently refused: the button used to sit disabled at 70%
+    // and a tap on it did nothing at all.
+    if (!agreed) {
+      setError("Vui lòng tick đồng ý Điều khoản sử dụng để tiếp tục");
       return;
     }
     if (username.trim().length < 3) {
@@ -278,7 +284,7 @@ export function RegisterForm({
                         type="button"
                         onClick={() => setShowPassword((previous) => !previous)}
                         aria-label={showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-white transition-colors focus:outline-none"
+                        className="absolute right-4 top-1/2 -translate-y-1/2 rounded-md text-neutral-500 hover:text-white transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--menzu-accent)]/60"
                       >
                         {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                       </button>
@@ -359,10 +365,9 @@ export function RegisterForm({
                     // nothing there.
                     disabled={
                       pending ||
-                      !agreed ||
                       (Boolean(turnstileSiteKey) && captchaNeeded && !captcha)
                     }
-                    className="w-full rounded-2xl bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] disabled:opacity-70 disabled:cursor-wait text-white font-black py-4 uppercase tracking-widest text-sm transition-colors mt-5"
+                    className="w-full rounded-2xl bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] disabled:opacity-70 disabled:cursor-not-allowed text-white font-black py-4 uppercase tracking-widest text-sm transition-colors mt-5"
                   >
                     {pending ? "ĐANG XỬ LÝ…" : "ĐĂNG KÝ"}
                   </button>

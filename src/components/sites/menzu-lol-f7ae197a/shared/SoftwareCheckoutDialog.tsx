@@ -96,6 +96,13 @@ export function SoftwareCheckoutDialog({
   const [dialogError, setDialogError] = useState<string | null>(null);
   /** The wallet, read when the dialog opens; null until it answers. */
   const [balance, setBalance] = useState<number | null>(null);
+  /**
+   * Whether anybody is signed in at all: null until the probe answers, so a
+   * customer on a slow line is not shown the guest wording for a second.
+   * Kept apart from `balance`, which is also null while waiting and after a
+   * network failure.
+   */
+  const [signedIn, setSignedIn] = useState<boolean | null>(null);
   /** The buyer's member tier, when it earns a cut here; null otherwise. */
   const [memberTier, setMemberTier] = useState<MemberTierValue | null>(null);
 
@@ -145,6 +152,7 @@ export function SoftwareCheckoutDialog({
     // And a fresh acknowledgement: the warning is read once per purchase, not
     // once per browser session.
     setAcceptedRisk(false);
+    setSignedIn(null);
     let cancelled = false;
     fetch("/api/auth/me")
       .then((r) => r.json())
@@ -158,6 +166,7 @@ export function SoftwareCheckoutDialog({
           } | null;
         }) => {
           if (cancelled) return;
+          setSignedIn(Boolean(d.user));
           setBalance(d.user ? (d.user.balance ?? 0) : null);
           // Wholesale does not stack with the tier, so an agency on a
           // percent sees no member cut — the server would not take one.
@@ -177,7 +186,15 @@ export function SoftwareCheckoutDialog({
     };
   }, [open]);
 
-  const loginHref = `/login?next=${encodeURIComponent(product.loginNext)}`;
+  // The tier and the count ride along, so a guest who signs in comes back to
+  // the order they were looking at and not to an empty panel. The product
+  // page reads ?pkg= and ?sl= back on the way in.
+  const loginHref = `/login?next=${encodeURIComponent(
+    tier
+      ? `${product.loginNext}${product.loginNext.includes("?") ? "&" : "?"}pkg=${encodeURIComponent(tier.id)}&sl=${quantity}`
+      : product.loginNext,
+  )}`;
+  const guest = signedIn === false;
 
   async function handleApplyVoucher() {
     if (!tier) return;
@@ -340,13 +357,19 @@ export function SoftwareCheckoutDialog({
     <BuyConfirmDialog
       open={open && tier !== null}
       onClose={onClose}
+      // A guest used to see the full confirm view — voucher box, "TỔNG THANH
+      // TOÁN", a red XÁC NHẬN — and pressing it dropped them on a bare login
+      // page with no word about the order. Now the card says what will
+      // happen and the button says where it goes.
+      subtitle={guest ? "Đăng nhập để hoàn tất đơn này — gói và số lượng sẽ được giữ nguyên." : undefined}
       footer={
         <ConfirmFooter
           onCancel={onClose}
-          onConfirm={buyNow}
+          onConfirm={guest ? () => router.push(loginHref) : buyNow}
           busy={busy}
           canAfford={canAfford}
-          blocked={risky && !acceptedRisk}
+          blocked={!guest && risky && !acceptedRisk}
+          confirmLabel={guest ? "Đăng nhập để mua" : undefined}
         />
       }
     >
@@ -396,19 +419,24 @@ export function SoftwareCheckoutDialog({
               />
             ) : null}
           </PriceList>
-          <VoucherField
-            value={voucher}
-            onChange={(next) => {
-              setVoucher(next);
-              // A quote belongs to the code it was fetched for.
-              setApplied(null);
-              setVoucherError(null);
-            }}
-            onApply={handleApplyVoucher}
-            checking={checking}
-            error={voucherError}
-            applied={applied}
-          />
+          {/* Not for a guest: a code typed here could not survive the login
+              gate, and "Áp dụng" used to throw them onto the login page
+              mid-word. */}
+          {guest ? null : (
+            <VoucherField
+              value={voucher}
+              onChange={(next) => {
+                setVoucher(next);
+                // A quote belongs to the code it was fetched for.
+                setApplied(null);
+                setVoucherError(null);
+              }}
+              onApply={handleApplyVoucher}
+              checking={checking}
+              error={voucherError}
+              applied={applied}
+            />
+          )}
           <PayableBlock payable={payable} balance={balance} />
           {dialogError ? <DialogAlert tone="err">{dialogError}</DialogAlert> : null}
         </>

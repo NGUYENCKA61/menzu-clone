@@ -138,7 +138,7 @@ export function AssistantChat() {
           disabled={busy}
           placeholder="Nhập câu hỏi…"
           aria-label="Câu hỏi cho trợ lý"
-          className="min-w-0 flex-1 rounded-xl border border-white/10 bg-neutral-950/60 px-3 py-2 text-[12px] text-white outline-none transition-colors placeholder-neutral-600 focus:border-[var(--brand)]/60 disabled:opacity-60"
+          className="min-w-0 flex-1 rounded-xl border border-white/10 bg-neutral-950/60 px-3 py-2 text-[12px] text-white outline-none transition-colors placeholder-neutral-500 focus:border-[var(--brand)]/60 disabled:opacity-60"
         />
         <button
           type="submit"

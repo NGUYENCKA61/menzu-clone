@@ -1,7 +1,18 @@
 import type { CSSProperties } from "react";
 import Image from "next/image";
+import localFont from "next/font/local";
 
 import { SiteLink } from "../shared/SiteLink";
+
+// The display face for the two big words on each card, declared here and
+// nowhere else: on <html> it was preloaded by every page of the site (77 KB
+// of TTF) for a block only the home page draws.
+const headingNow = localFont({
+  src: "../../../../../public/sites/menzu-lol-f7ae197a/shared/fonts/headingnow-extrabold.ttf",
+  variable: "--font-headingnow",
+  weight: "800",
+  display: "swap",
+});
 
 export interface CategoryCard {
   href: string;
@@ -110,7 +121,7 @@ export function FeaturedCategories({ cards }: { cards?: CategoryCard[] }) {
 
               {/* [4] Text block */}
               <div className="relative z-30 flex flex-col items-center w-full text-center mt-auto pb-0 sm:pb-1">
-                <div className="mb-3 sm:mb-4 flex flex-col items-center w-full font-[family-name:var(--font-headingnow)]">
+                <div className={`${headingNow.variable} mb-3 sm:mb-4 flex flex-col items-center w-full font-[family-name:var(--font-headingnow)]`}>
                   <span className="text-[18px] sm:text-[22px] lg:text-[28px] font-black uppercase tracking-normal leading-none mb-1 whitespace-nowrap">
                     {card.line1}
                   </span>

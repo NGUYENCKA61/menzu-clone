@@ -134,6 +134,13 @@ export function FlashSaleSection({
   }`;
   const clockUnitClass = "text-[9px] font-bold text-neutral-500";
 
+  // Nothing on sale, nothing drawn. The live home page spent weeks showing
+  // this frame with its countdown and both arrows around an empty track —
+  // a sale banner with nothing on sale — because the map below had no
+  // length check. After the hooks, which must run in the same order on
+  // every render.
+  if (items.length === 0) return null;
+
   return (
     <>
       <div className="mb-12 lg:mb-16">

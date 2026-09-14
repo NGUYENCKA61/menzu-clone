@@ -351,8 +351,14 @@ export function AnnouncementCenter({
           ) : null}
         </button>
 
+        {/* On a phone the panel is pinned to the viewport's edges, not to
+            the bell: hung off the bell at 340px it ran 104px past the left
+            edge of a 390px screen and its heading and footer link were cut
+            off. The header nav is position:fixed with no transform, so a
+            fixed child lays out against the viewport. From sm up it is the
+            same dropdown under the bell as before. */}
         {openList ? (
-          <div className="drop-in absolute right-0 top-11 z-50 w-[340px] overflow-hidden rounded-xl border border-white/10 bg-[#101114] shadow-2xl">
+          <div className="drop-in fixed inset-x-4 top-[58px] z-50 w-auto overflow-hidden rounded-xl border border-white/10 bg-[#101114] shadow-2xl sm:absolute sm:inset-x-auto sm:right-0 sm:top-11 sm:w-[340px]">
             <div className="flex items-center justify-between gap-3 border-b border-white/[0.07] px-4 py-3">
               <span className="text-[14px] font-bold text-white">Thông báo</span>
               {/* Only offered when it would do something. A control that is
@@ -609,7 +615,7 @@ export function AnnouncementModal({
       >
         {/* A single accent rule along the top edge — the one piece of colour
             the frame gets, so the eye lands on the sheet before the words. */}
-        <span aria-hidden className="absolute inset-x-0 top-0 h-px bg-rose-500/70" />
+        <span aria-hidden className="absolute inset-x-0 top-0 h-px bg-[var(--menzu-accent)]/70" />
 
         <header className="flex shrink-0 items-center gap-3 border-b border-white/[0.07] px-5 py-4">
           {/* The kind's own glyph, the same one the bell list and the admin
@@ -663,6 +669,10 @@ export function AnnouncementModal({
                 alt=""
                 width={1120}
                 height={630}
+                // Without this the optimizer offered "w=3840 2x" and every
+                // phone took the full 1600px original (92 KB, the largest
+                // response on a shelf page) for a box about 306px wide.
+                sizes="(max-width: 640px) calc(100vw - 84px), 480px"
                 className="max-h-[300px] w-full object-cover"
               />
             </a>
@@ -682,7 +692,7 @@ export function AnnouncementModal({
                   <li key={index} className="flex gap-2.5">
                     <span
                       aria-hidden
-                      className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-rose-500"
+                      className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--menzu-accent)]"
                     />
                     <span className="text-[13.5px] leading-relaxed text-neutral-300">
                       {line}
@@ -696,8 +706,8 @@ export function AnnouncementModal({
           {item.noticeTitle && item.noticeBody ? (
             // A left rule rather than a full border: it marks the passage as
             // set apart without drawing a second box inside the sheet.
-            <div className="mt-5 rounded-r-lg border-l-2 border-rose-500 bg-rose-500/[0.06] px-4 py-3">
-              <p className="text-[13px] font-semibold text-rose-400">{item.noticeTitle}</p>
+            <div className="mt-5 rounded-r-lg border-l-2 border-[var(--menzu-accent)] bg-[var(--menzu-accent)]/[0.06] px-4 py-3">
+              <p className="text-[13px] font-semibold text-[var(--menzu-accent)]">{item.noticeTitle}</p>
               <p className="mt-1 whitespace-pre-line text-[13px] leading-relaxed text-neutral-300">
                 {item.noticeBody}
               </p>
@@ -725,7 +735,7 @@ export function AnnouncementModal({
             <Link
               href={item.ctaHref}
               onClick={leave}
-              className="inline-flex h-10 items-center gap-1.5 rounded-lg bg-rose-500 px-6 text-[13px] font-semibold text-white transition-colors hover:bg-rose-600"
+              className="inline-flex h-10 items-center gap-1.5 rounded-lg bg-[var(--menzu-accent)] px-6 text-[13px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent-dark)]"
             >
               {item.ctaLabel}
               <ArrowRight size={14} />
@@ -737,7 +747,7 @@ export function AnnouncementModal({
             className={
               item.ctaLabel && item.ctaHref
                 ? "h-10 rounded-lg border border-white/10 bg-white/[0.03] px-4 text-[13px] font-medium text-neutral-300 transition-colors hover:bg-white/[0.07] hover:text-white"
-                : "h-10 rounded-lg bg-rose-500 px-6 text-[13px] font-semibold text-white transition-colors hover:bg-rose-600"
+                : "h-10 rounded-lg bg-[var(--menzu-accent)] px-6 text-[13px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent-dark)]"
             }
           >
             {item.type === "GIFT" ? "Nhận quà" : "Đóng"}

@@ -137,7 +137,9 @@ export function ConnectRail({ links }: { links: ConnectLinks }) {
           four cards it always had; here the count is whatever the shop has
           filled in, and a fixed height would either clip the fifth row or
           leave a gap under the second. */}
-      <div className="flex flex-col gap-2">
+      {/* inert while slid off-screen: its five links used to take a Tab stop
+          each at x=-196 with nothing visible, and Enter opened another site. */}
+      <div inert={collapsed || undefined} className="flex flex-col gap-2">
         {rows.map(({ key, title, subtitle, Glyph, ink, hover }) => (
           <a
             key={key}

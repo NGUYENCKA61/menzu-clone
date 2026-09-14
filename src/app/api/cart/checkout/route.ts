@@ -41,7 +41,7 @@ export async function POST(request: Request) {
   const body = (await request.json().catch(() => null)) as {
     voucher?: string;
   } | null;
-  const voucherCode = body?.voucher?.trim() || null;
+  const voucherCode = body?.voucher?.trim().toUpperCase() || null;
 
   /** Every shelf the basket drew from, looked at once the money has committed. */
   const soldFrom: string[] = [];

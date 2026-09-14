@@ -334,7 +334,11 @@ export function VoucherField({
           id={id}
           type="text"
           value={value}
-          onChange={(event) => onChange(event.target.value)}
+          // Upper-cased as typed, so what the box shows is what is sent: the
+          // CSS `uppercase` below only dressed the letters, and a code typed
+          // in lower case was refused as "không tồn tại" while it looked
+          // right on screen. The cart's box already does this.
+          onChange={(event) => onChange(event.target.value.toUpperCase())}
           onKeyDown={(event) => {
             if (event.key === "Enter") {
               event.preventDefault();
@@ -345,7 +349,7 @@ export function VoucherField({
           autoCapitalize="characters"
           autoComplete="off"
           spellCheck={false}
-          className="h-10 min-w-0 flex-1 rounded-xl border border-white/10 bg-white/5 px-3 text-sm font-semibold uppercase tracking-wide text-white outline-none transition-colors placeholder:font-normal placeholder:normal-case placeholder:tracking-normal placeholder:text-neutral-600 focus:border-[var(--menzu-accent)]/60"
+          className="h-10 min-w-0 flex-1 rounded-xl border border-white/10 bg-white/5 px-3 text-sm font-semibold uppercase tracking-wide text-white outline-none transition-colors placeholder:font-normal placeholder:normal-case placeholder:tracking-normal placeholder:text-neutral-500 focus:border-[var(--menzu-accent)]/60"
         />
         <button
           type="button"
@@ -462,6 +466,7 @@ export function ConfirmFooter({
   canAfford,
   done = false,
   blocked = false,
+  confirmLabel = "Xác nhận",
 }: {
   onCancel: () => void;
   onConfirm: () => void;
@@ -472,6 +477,9 @@ export function ConfirmFooter({
   /** Something in the card above is still waiting on the buyer — a warning
    *  they have to acknowledge. Money is not spent until it is. */
   blocked?: boolean;
+  /** What the red button says — "Đăng nhập để mua" for a guest, who is
+   *  about to be sent to the login page rather than charged. */
+  confirmLabel?: string;
 }) {
   return (
     <>
@@ -493,7 +501,7 @@ export function ConfirmFooter({
               The spinner every other waiting control wears, so "is it
               doing anything" is answered the same way here. */}
           {busy ? <Loader2 size={14} className="animate-spin motion-reduce:animate-none" aria-hidden /> : null}
-          {busy ? "Đang xử lý…" : "Xác nhận"}
+          {busy ? "Đang xử lý…" : confirmLabel}
         </button>
       ) : (
         <Link href="/wallet" className={FOOTER_PRIMARY_BTN}>

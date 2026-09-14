@@ -44,7 +44,7 @@ export const SEARCH_SHELL_CLASS =
  * whatever the glow happened to be doing when the screenshot was taken.
  */
 export const SCOPE_SHELL_CLASS =
-  "flex items-center gap-2 h-[50px] px-4 rounded-3xl bg-[#111] border-[1.5px] border-[rgba(239,68,68,0.2)] transition-colors";
+  "flex items-center gap-2 h-[50px] px-4 rounded-3xl bg-[#111] border-[1.5px] border-[rgba(239,68,68,0.2)] transition-colors focus-within:border-[var(--menzu-accent)]/60";
 
 export const SEARCH_INPUT_CLASS =
   "flex-1 bg-transparent outline-none text-white placeholder-neutral-400 text-sm transition-colors";

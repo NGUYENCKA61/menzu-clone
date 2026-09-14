@@ -113,10 +113,13 @@ const MAX_QUANTITY = 99;
 export function SoftwareBuyPanel({
   software,
   initialPackageId,
+  initialQuantity,
 }: {
   software: SoftwareDetail;
   /** From `?pkg=` — the tier a listing card was already showing. */
   initialPackageId?: string;
+  /** From `?sl=` — the quantity a guest had set before the login gate. */
+  initialQuantity?: number;
   /** Following this tool's status; null for a guest. Still threaded down from
    *  the route, unread while "Nhận thông báo" is off the page. */
   statusSubscribed: boolean | null;
@@ -131,7 +134,7 @@ export function SoftwareBuyPanel({
       ? initialPackageId!
       : (software.packages[0]?.id ?? ""),
   );
-  const [quantity, setQuantity] = useState(1);
+  const [quantity, setQuantity] = useState(initialQuantity ?? 1);
 
   const [busy, setBusy] = useState(false);
   const [toast, setToast] = useState<{ tone: "success" | "error"; text: string } | null>(

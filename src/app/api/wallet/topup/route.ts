@@ -83,6 +83,15 @@ export async function POST(request: Request) {
       { status: 400 },
     );
   }
+  // A card is worth what is printed on it. The form only offers those
+  // figures, but a stale amount from the bank tab once reached here as
+  // 25.000đ, and the desk would have had to guess what the card really was.
+  if (method === "CARD" && !settings.topUpCardPresets.includes(Number(amount))) {
+    return NextResponse.json(
+      { error: "Chọn đúng mệnh giá in trên thẻ" },
+      { status: 400 },
+    );
+  }
   if (method === "BANK" && !settings.bankTopUpEnabled) {
     return NextResponse.json(
       { error: "Shop đang tạm ngưng nhận nạp qua ngân hàng" },

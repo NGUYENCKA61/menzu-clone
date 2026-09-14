@@ -12,7 +12,14 @@ import { ProductCard } from "./ProductCard";
  * One account's page, whole. The counterpart to SoftwareDetailView: the route
  * decides which of the two a slug means, and this draws the account.
  */
-export async function AccountDetailView({ account }: { account: AccountDetail }) {
+export async function AccountDetailView({
+  account,
+  initialQuantity,
+}: {
+  account: AccountDetail;
+  /** From `?sl=` — the quantity a guest had set before the login gate. */
+  initialQuantity?: number;
+}) {
   const [related, inventory] = await Promise.all([
     // Three, matching the grid's columns — a fourth would sit alone on row two.
     getRelatedProducts(account.code, account.categorySlug, 3),
@@ -61,14 +68,14 @@ export async function AccountDetailView({ account }: { account: AccountDetail })
             />
 
             <div className="w-full max-w-[1320px] mx-auto flex flex-col">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
                 <AccountGallery
                   code={account.code}
                   imageUrl={account.imageUrl}
                   images={account.images}
                   viewers={account.viewers}
                 />
-                <AccountBuyPanel account={account} />
+                <AccountBuyPanel account={account} initialQuantity={initialQuantity} />
               </div>
 
               <AccountInventory account={account} items={inventory} />

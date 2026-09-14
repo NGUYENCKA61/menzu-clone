@@ -83,6 +83,52 @@ async function probeVideo(path: string): Promise<ProbeInfo | null> {
  *
  * Callers validate the bytes first — this function trusts them.
  */
+/**
+ * The phone's copy of the clip, written beside the main one as
+ * `<stem>-480.mp4` (HeroVideo.tsx asks for it by that name below 768px).
+ * 480 wide covers a 390px phone at 1.2x; the rate cap is what a 4G page
+ * can carry without the hero holding the rest of the page up. Best effort:
+ * a failure here is logged and the phone gets the full clip, as before.
+ */
+export async function writePhoneRendition(inPath: string, outPath: string): Promise<boolean> {
+  try {
+    await run(
+      "ffmpeg",
+      [
+        "-y",
+        "-v",
+        "error",
+        "-i",
+        inPath,
+        "-an",
+        "-c:v",
+        "libx264",
+        "-crf",
+        "30",
+        "-preset",
+        "medium",
+        "-maxrate",
+        "450k",
+        "-bufsize",
+        "900k",
+        "-pix_fmt",
+        "yuv420p",
+        "-vf",
+        "scale=min(480\\,iw):-2",
+        "-movflags",
+        "+faststart",
+        outPath,
+      ],
+      { timeout: ENCODE_TIMEOUT_MS, killSignal: "SIGKILL", maxBuffer: 8 * 1024 * 1024 },
+    );
+    return (await stat(outPath)).size > 0;
+  } catch (error) {
+    console.error("[hero-video] phone rendition failed, the phone gets the full clip:", error);
+    await rm(outPath, { force: true }).catch(() => {});
+    return false;
+  }
+}
+
 export async function prepareHeroVideo(
   bytes: Uint8Array,
   extension: string,
@@ -148,6 +194,7 @@ export async function prepareHeroVideo(
       });
       const outBytes = (await stat(outPath)).size;
       if (outBytes > 0 && (lean || outBytes < bytes.byteLength)) {
+        await writePhoneRendition(inPath, join(outDir, `${stem}-480.mp4`));
         return { fileName, mode: lean ? "remuxed" : "encoded", outBytes };
       }
       // Empty output, or an "encode" that came out bigger than what went in.

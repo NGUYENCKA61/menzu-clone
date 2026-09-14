@@ -16,7 +16,7 @@ const SHAPE =
   "flex h-8 min-w-8 items-center justify-center rounded-lg border px-2 text-[12px] font-semibold";
 // Only the chips that go somewhere answer a press. The current page and the
 // greyed end arrows are drawn from the same shape and must not sink.
-const CHIP_CURRENT = `${SHAPE} border-rose-500/60 bg-rose-500/15 text-rose-400`;
+const CHIP_CURRENT = `${SHAPE} border-[var(--menzu-accent)]/60 bg-[var(--menzu-accent)]/15 text-[var(--menzu-accent)]`;
 const CHIP_IDLE = `${SHAPE} press border-white/[0.08] bg-white/[0.03] text-neutral-300 hover:bg-white/[0.08] hover:text-white`;
 const CHIP_OFF = `${SHAPE} border-white/[0.06] text-neutral-700 cursor-default`;
 

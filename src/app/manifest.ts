@@ -14,7 +14,7 @@ export const dynamic = "force-dynamic";
  * "maskable" would let launchers crop into it.
  */
 export default async function manifest(): Promise<MetadataRoute.Manifest> {
-  const { brandName, brandLogo, brandColor } = await getShopSettings();
+  const { brandName, brandColor } = await getShopSettings();
 
   return {
     name: `${brandName} — Hack game & tài khoản game`,
@@ -28,10 +28,14 @@ export default async function manifest(): Promise<MetadataRoute.Manifest> {
     theme_color: brandColor,
     lang: "vi",
     categories: ["games", "shopping"],
-    // One entry, with the sizes it genuinely covers. It was declared twice at
-    // two exact sizes it is not — the shop uploads one logo, and telling a
-    // launcher a 400px file is 512×512 gets it rendered blurry rather than
-    // rescaled from something better. "any" lets the browser pick and scale.
-    icons: [{ src: brandLogo, sizes: "any", type: "image/webp", purpose: "any" }],
+    // Two square PNGs cut from the logo (public/seo), at the sizes they
+    // really are. Pointing this at the raw 512×552 logo with sizes "any" had
+    // Chrome pull the whole 31 KB file on every page load while it judged
+    // installability; it now takes the 9 KB one, and the big one only on
+    // install. The shop's own logo stays for the header.
+    icons: [
+      { src: "/seo/icon-192.png", sizes: "192x192", type: "image/png", purpose: "any" },
+      { src: "/seo/icon-512.png", sizes: "512x512", type: "image/png", purpose: "any" },
+    ],
   };
 }

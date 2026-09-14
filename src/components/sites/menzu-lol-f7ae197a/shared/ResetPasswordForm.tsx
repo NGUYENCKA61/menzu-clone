@@ -100,7 +100,7 @@ export function ResetPasswordForm({ token }: { token: string }) {
           value={password}
           onChange={(event) => setPassword(event.target.value)}
           placeholder="Ít nhất 6 ký tự"
-          className="w-full rounded-2xl border border-white/5 bg-white/5 pl-12 pr-12 py-4 text-sm text-white outline-none focus:border-[var(--menzu-accent)]/60 transition-colors placeholder-neutral-600"
+          className="w-full rounded-2xl border border-white/5 bg-white/5 pl-12 pr-12 py-4 text-sm text-white outline-none focus:border-[var(--menzu-accent)]/60 transition-colors placeholder-neutral-500"
         />
         <button
           type="button"
@@ -129,7 +129,7 @@ export function ResetPasswordForm({ token }: { token: string }) {
           value={confirm}
           onChange={(event) => setConfirm(event.target.value)}
           placeholder="Nhập lại mật khẩu mới"
-          className="w-full rounded-2xl border border-white/5 bg-white/5 pl-12 pr-4 py-4 text-sm text-white outline-none focus:border-[var(--menzu-accent)]/60 transition-colors placeholder-neutral-600"
+          className="w-full rounded-2xl border border-white/5 bg-white/5 pl-12 pr-4 py-4 text-sm text-white outline-none focus:border-[var(--menzu-accent)]/60 transition-colors placeholder-neutral-500"
         />
       </div>
 

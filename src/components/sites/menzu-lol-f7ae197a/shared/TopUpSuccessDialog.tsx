@@ -85,7 +85,7 @@ export function TopUpSuccessDialog({
         // their money arrives, and it used to appear in a single frame.
         className={`notice-modal-card relative w-full max-w-[380px] rounded-xl border border-white/10 bg-[#131316] px-7 py-8 text-center shadow-2xl${leaving ? " order-modal-card-out" : ""}`}
       >
-        <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border-2 border-rose-500 bg-rose-500/15 text-rose-500">
+        <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border-2 border-[var(--menzu-accent)] bg-[var(--menzu-accent)]/15 text-[var(--menzu-accent)]">
           <Check size={30} strokeWidth={3} />
         </span>
 
@@ -96,7 +96,7 @@ export function TopUpSuccessDialog({
           Nạp tiền thành công
         </h2>
 
-        <p className="mt-2 text-[25px] font-black leading-none text-rose-500 tabular-nums">
+        <p className="mt-2 text-[25px] font-black leading-none text-[var(--menzu-accent)] tabular-nums">
           +{formatVnd(amount)}đ
         </p>
         {/* A card credits net of the fee. Printing the face value here while
@@ -132,7 +132,7 @@ export function TopUpSuccessDialog({
           ref={confirm}
           type="button"
           onClick={leave}
-          className="mt-5 h-11 w-full rounded-lg bg-rose-500 text-[13px] font-black uppercase tracking-widest text-white transition-colors hover:bg-rose-600"
+          className="mt-5 h-11 w-full rounded-lg bg-[var(--menzu-accent)] text-[13px] font-black uppercase tracking-widest text-white transition-colors hover:bg-[var(--menzu-accent-dark)]"
         >
           Xong
         </button>

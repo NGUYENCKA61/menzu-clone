@@ -107,7 +107,7 @@ export function TotpTool() {
               autoComplete="off"
               spellCheck={false}
               placeholder="VD: GEZDGNBVGY3TQOJQ..."
-              className="w-full rounded-2xl border border-white/5 bg-white/5 pl-12 pr-4 py-4 text-sm font-mono text-white outline-none focus:border-[var(--menzu-accent)]/60 transition-colors placeholder-neutral-600"
+              className="w-full rounded-2xl border border-white/5 bg-white/5 pl-12 pr-4 py-4 text-sm font-mono text-white outline-none focus:border-[var(--menzu-accent)]/60 transition-colors placeholder-neutral-500"
             />
           </div>
 

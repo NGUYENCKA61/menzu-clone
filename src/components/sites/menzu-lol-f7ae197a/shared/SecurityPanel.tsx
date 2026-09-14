@@ -23,7 +23,7 @@ const TAB_INACTIVE =
 // Quiet shells on purpose: four stacked form fields in red outlines read as
 // four warnings. The red treatment stays on the single search boxes only.
 const FIELD =
-  "w-full rounded-xl border border-white/5 bg-white/5 px-4 py-3 text-sm text-white outline-none focus:border-[var(--menzu-accent)]/60 transition-colors placeholder-neutral-600";
+  "w-full rounded-xl border border-white/5 bg-white/5 px-4 py-3 text-sm text-white outline-none focus:border-[var(--menzu-accent)]/60 transition-colors placeholder-neutral-500";
 /** The overview page's card header pair. */
 const CARD_TITLE = "text-sm font-black uppercase tracking-wider text-white";
 const CARD_HINT = "text-xs text-neutral-500";

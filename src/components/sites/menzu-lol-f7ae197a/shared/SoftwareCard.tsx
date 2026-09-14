@@ -236,7 +236,7 @@ export function SoftwareCard({
                       : "Chưa có gói"
                 } — ${software.name}`}
                 onClick={() => hasPackages && setOpen((o) => !o)}
-                className={`flex h-[42px] w-full items-center justify-between gap-1 rounded-[9px] border bg-[#111216] px-2.5 text-[11px] font-extrabold outline-none transition-colors duration-200 hover:border-[var(--menzu-accent)]/45 hover:text-white aria-expanded:border-[var(--menzu-accent)]/45 aria-expanded:text-white disabled:opacity-50 ${
+                className={`flex h-[42px] w-full items-center justify-between gap-1 rounded-[9px] border bg-[#111216] px-2.5 text-[11px] font-extrabold outline-none transition-colors duration-200 hover:border-[var(--menzu-accent)]/45 hover:text-white focus-visible:ring-2 focus-visible:ring-[var(--menzu-accent)]/40 aria-expanded:border-[var(--menzu-accent)]/45 aria-expanded:text-white disabled:opacity-50 ${
                   chosen
                     ? "border-[var(--menzu-accent)]/45 text-white"
                     : "border-[#292a30] text-[#aaa]"

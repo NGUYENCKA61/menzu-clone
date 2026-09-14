@@ -20,9 +20,19 @@ import { isStatusSubscribed } from "@/lib/statusEvents";
 import { shareCard } from "@/lib/shareCard";
 import { productBehindOldSlug } from "@/lib/slugHistory";
 
+/**
+ * The quantity a guest had set before the login gate, carried back through
+ * ?sl= so they return to the same order and not an empty panel. Anything odd
+ * falls back to one.
+ */
+function readQuantity(raw: string | undefined): number | undefined {
+  const value = Number(raw);
+  return Number.isInteger(value) && value > 1 && value <= 99 ? value : undefined;
+}
+
 interface PageProps {
   params: Promise<{ categorySlug: string; productSlug: string }>;
-  searchParams: Promise<{ pkg?: string }>;
+  searchParams: Promise<{ pkg?: string; sl?: string }>;
 }
 
 /** Route params arrive percent-encoded; a malformed one is used as typed. */
@@ -140,7 +150,7 @@ export default async function ProductPage({ params, searchParams }: PageProps) {
   if (found.isSoftware) {
     const software = await getSoftwareDetail(slug);
     if (!software) notFound();
-    const { pkg } = await searchParams;
+    const { pkg, sl } = await searchParams;
 
     // The setup guide is for a buyer with the tool in hand, so the page
     // decides here, on the server, who is one: the text is dropped from what
@@ -193,6 +203,7 @@ export default async function ProductPage({ params, searchParams }: PageProps) {
         <SoftwareDetailView
           software={shown}
           initialPackageId={pkg}
+          initialQuantity={readQuantity(sl)}
           setupGuideAccess={setupGuideAccess}
           statusSubscribed={statusSubscribed}
           similar={similarShown}
@@ -205,5 +216,6 @@ export default async function ProductPage({ params, searchParams }: PageProps) {
   // structured data from the start; it was only the tools that had none.
   const account = await getAccountDetail(slug);
   if (!account) notFound();
-  return <AccountDetailView account={account} />;
+  const { sl } = await searchParams;
+  return <AccountDetailView account={account} initialQuantity={readQuantity(sl)} />;
 }

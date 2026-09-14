@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ChevronDown, X, type LucideIcon } from "lucide-react";
+import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 import { lockScroll, trapTab, unlockScroll } from "@/components/sites/menzu-lol-f7ae197a/shared/modalChrome";
@@ -25,6 +26,8 @@ interface MobileDrawerProps {
   groups: DrawerGroup[];
   brandName: string;
   brandLogo: string;
+  /** Who is signed in, if anyone; a guest gets the two doors below. */
+  user: { username: string } | null;
 }
 
 /**
@@ -34,7 +37,14 @@ interface MobileDrawerProps {
  *   backdrop  closed: `opacity-0 pointer-events-none`     open: `opacity-100`
  *   panel     closed: `-translate-x-full`                 open: `translate-x-0`
  */
-export function MobileDrawer({ open, onClose, groups, brandName, brandLogo }: MobileDrawerProps) {
+export function MobileDrawer({ open, onClose, groups, brandName, brandLogo, user }: MobileDrawerProps) {
+  // Where the two doors lead back to afterwards: the page this drawer was
+  // opened on, unless that is the home page or an auth page itself.
+  const pathname = usePathname();
+  const back =
+    pathname === "/" || /^\/(login|signup|register|forgot-password|reset-password)(\/|$)/.test(pathname)
+      ? ""
+      : `?next=${encodeURIComponent(pathname)}`;
   const [expanded, setExpanded] = useState<string | null>(null);
   const brandWord = brandName.trim().split(" ")[0] || brandName;
   const panel = useRef<HTMLDivElement>(null);
@@ -115,6 +125,30 @@ export function MobileDrawer({ open, onClose, groups, brandName, brandLogo }: Mo
             <X size={18} />
           </button>
         </div>
+
+        {/* A guest had no way in from here: the drawer held four category
+            accordions and nothing about an account, and the only register
+            link on a phone was the last line of the login card. Two doors
+            at the top, then the categories. A signed-in visitor has the
+            account menu in the header already. */}
+        {user ? null : (
+          <div className="grid grid-cols-2 gap-2 px-4 pt-4">
+            <Link
+              href={`/login${back}`}
+              onClick={onClose}
+              className="press flex h-10 items-center justify-center rounded-xl bg-[var(--brand)] text-[11px] font-black uppercase tracking-widest text-white hover:bg-[var(--brand-dark)]"
+            >
+              Đăng nhập
+            </Link>
+            <Link
+              href={`/signup${back}`}
+              onClick={onClose}
+              className="press flex h-10 items-center justify-center rounded-xl border border-white/15 bg-white/[0.04] text-[11px] font-black uppercase tracking-widest text-neutral-200 hover:bg-white/[0.08]"
+            >
+              Tạo tài khoản
+            </Link>
+          </div>
+        )}
 
         <div className="flex-1 overflow-y-auto overscroll-contain py-3 space-y-0.5 menzu-scroll-x select-none">
           {groups.map((group) => {

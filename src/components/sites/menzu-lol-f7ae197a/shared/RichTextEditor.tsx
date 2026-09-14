@@ -141,7 +141,7 @@ const IMAGE_SIZES = ["25%", "50%", "75%", "100%"];
 
 const PANEL_LABEL = "text-[9px] font-black uppercase tracking-widest text-neutral-500";
 const PANEL_INPUT =
-  "h-7 rounded-md border border-white/10 bg-neutral-950/60 px-1.5 text-[11px] font-bold tabular-nums text-white outline-none focus:border-[var(--brand)]/60 placeholder-neutral-600";
+  "h-7 rounded-md border border-white/10 bg-neutral-950/60 px-1.5 text-[11px] font-bold tabular-nums text-white outline-none focus:border-[var(--brand)]/60 placeholder-neutral-500";
 
 /**
  * Everything about the selected image, in one visible panel.
@@ -699,7 +699,7 @@ export function RichTextEditor({
               if (event.key === "Escape") setLinkOpen(false);
             }}
             placeholder="https://... (để trống rồi Gắn = gỡ link)"
-            className="h-8 flex-1 min-w-[220px] rounded-md border border-white/10 bg-neutral-950/60 px-2.5 text-xs text-white outline-none focus:border-[var(--brand)]/60 placeholder-neutral-600"
+            className="h-8 flex-1 min-w-[220px] rounded-md border border-white/10 bg-neutral-950/60 px-2.5 text-xs text-white outline-none focus:border-[var(--brand)]/60 placeholder-neutral-500"
           />
           <button
             type="button"

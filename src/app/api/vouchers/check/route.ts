@@ -97,7 +97,9 @@ export async function POST(request: Request) {
     cart?: boolean;
   } | null;
 
-  const code = body?.code?.trim();
+  // Codes are stored upper-case (the admin route writes them so); a customer
+  // who types one in lower case meant the same code.
+  const code = body?.code?.trim().toUpperCase();
   if (!code) {
     return NextResponse.json({ error: "Thiếu mã giảm giá" }, { status: 400 });
   }

@@ -124,8 +124,8 @@ export function SoftwareFilterPanel({
               type="text"
               value={featureQuery}
               onChange={(event) => setFeatureQuery(event.target.value)}
-              placeholder="Tìm chức năng (Aimbot, ESP...)"
-              className="flex-1 bg-transparent outline-none text-white placeholder-neutral-500 text-sm cursor-text"
+              placeholder="Tìm chức năng (Aimbot, ESP…)"
+              className="flex-1 bg-transparent outline-none text-white placeholder-neutral-500 text-sm cursor-text text-ellipsis"
             />
           </div>
         </div>

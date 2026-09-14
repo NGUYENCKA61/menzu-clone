@@ -99,7 +99,7 @@ export function WelcomeMailChecker() {
             rows={9}
             spellCheck={false}
             placeholder="Delivered-To: ...&#10;Authentication-Results: ...&#10;From: Riot Games <noreply@riotgames.com>"
-            className="w-full rounded-2xl border border-white/5 bg-white/5 px-4 py-3.5 text-[12px] font-mono text-white outline-none focus:border-[var(--menzu-accent)]/60 transition-colors placeholder-neutral-600 resize-y"
+            className="w-full rounded-2xl border border-white/5 bg-white/5 px-4 py-3.5 text-[12px] font-mono text-white outline-none focus:border-[var(--menzu-accent)]/60 transition-colors placeholder-neutral-500 resize-y"
           />
           <button
             type="submit"

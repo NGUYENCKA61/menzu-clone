@@ -887,7 +887,7 @@ export function CartView({
               }}
               placeholder="Nhập mã"
               aria-label="Mã giảm giá"
-              className="h-10 min-w-0 flex-1 rounded-lg border border-white/10 bg-neutral-950/60 px-3 font-mono text-[13px] font-bold uppercase tracking-wider text-white outline-none transition-colors placeholder:font-sans placeholder:font-normal placeholder:normal-case placeholder:tracking-normal placeholder:text-neutral-600 focus:border-[var(--menzu-accent)]/60"
+              className="h-10 min-w-0 flex-1 rounded-lg border border-white/10 bg-neutral-950/60 px-3 font-mono text-[13px] font-bold uppercase tracking-wider text-white outline-none transition-colors placeholder:font-sans placeholder:font-normal placeholder:normal-case placeholder:tracking-normal placeholder:text-neutral-500 focus:border-[var(--menzu-accent)]/60"
             />
             <button
               type="button"

@@ -16,6 +16,49 @@ import sanitizeHtml from "sanitize-html";
 /** The colors the palette buttons write — anything else is stripped. */
 const COLOR_VALUE = [/^#(?:[0-9a-f]{3}|[0-9a-f]{6}|[0-9a-f]{8})$/i, /^rgba?\([\d\s.,%]+\)$/i];
 
+/**
+ * Whether an inline colour would vanish on the shop's near-black page.
+ *
+ * The old site was white, and 15 of its 40 product write-ups carry
+ * <span style="color:#000000"> runs — black ink that here prints at 1.03:1,
+ * invisible but for the link underline. A colour that dark is dropped and
+ * the span falls back to the page's own; the palette colours the editor
+ * writes are all far brighter than the line.
+ */
+function tooDarkToRead(value: string): boolean {
+  const v = value.trim().toLowerCase();
+  let r: number, g: number, b: number;
+  const hex = /^#([0-9a-f]{3}|[0-9a-f]{6}|[0-9a-f]{8})$/.exec(v);
+  const rgb = /^rgba?\(\s*(\d+)[\s,]+(\d+)[\s,]+(\d+)/.exec(v);
+  if (hex) {
+    const h = hex[1]!.length === 3 ? hex[1]!.split("").map((c) => c + c).join("") : hex[1]!;
+    [r, g, b] = [0, 2, 4].map((i) => parseInt(h.slice(i, i + 2), 16)) as [number, number, number];
+  } else if (rgb) {
+    [r, g, b] = [Number(rgb[1]), Number(rgb[2]), Number(rgb[3])];
+  } else {
+    return false;
+  }
+  const lin = (c: number) => {
+    const s = c / 255;
+    return s <= 0.03928 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4;
+  };
+  return 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b) < 0.1;
+}
+
+/** Strips a too-dark colour out of a style attribute, keeping the rest. */
+function dropDarkInk(style: string | undefined): string | undefined {
+  if (!style) return style;
+  const kept = style
+    .split(";")
+    .map((decl) => decl.trim())
+    .filter(Boolean)
+    .filter((decl) => {
+      const [prop, ...rest] = decl.split(":");
+      return !(prop?.trim().toLowerCase() === "color" && tooDarkToRead(rest.join(":")));
+    });
+  return kept.length ? kept.join("; ") : undefined;
+}
+
 export function isHtmlBody(body: string | null | undefined): body is string {
   return typeof body === "string" && body.trimStart().startsWith("<");
 }
@@ -89,6 +132,14 @@ export function sanitizeDocHtml(html: string): string {
       frame.tag === "img" && !String(frame.attribs?.src ?? "").startsWith("/"),
     transformTags: {
       a: sanitizeHtml.simpleTransform("a", { rel: "noopener noreferrer", target: "_blank" }),
+      // Runs before the style filter, so it sees the raw attribute and can
+      // take the black ink out while leaving a font-size beside it alone.
+      span: (tagName, attribs) => {
+        const style = dropDarkInk(attribs.style);
+        const { style: _dropped, ...rest } = attribs;
+        void _dropped;
+        return { tagName, attribs: style ? { ...rest, style } : rest };
+      },
     },
   });
 }
