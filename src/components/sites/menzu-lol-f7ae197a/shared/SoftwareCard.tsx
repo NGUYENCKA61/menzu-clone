@@ -87,7 +87,10 @@ export function SoftwareCard({
       }
     };
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false);
+      if (e.key !== "Escape") return;
+      setOpen(false);
+      // The trigger takes focus back; it used to fall to <body>.
+      dropdownRef.current?.querySelector<HTMLElement>('button[aria-haspopup="listbox"]')?.focus({ preventScroll: true });
     };
     document.addEventListener("mousedown", onPointer);
     document.addEventListener("keydown", onKey);
@@ -269,6 +272,7 @@ export function SoftwareCard({
                         setPackageId("");
                         setHint(false);
                         setOpen(false);
+                        dropdownRef.current?.querySelector<HTMLElement>('button[aria-haspopup="listbox"]')?.focus({ preventScroll: true });
                       }}
                       className={`mb-1 ${optionCls(packageId === "")}`}
                     >
@@ -284,6 +288,7 @@ export function SoftwareCard({
                           setPackageId(p.id);
                           setHint(false);
                           setOpen(false);
+                          dropdownRef.current?.querySelector<HTMLElement>('button[aria-haspopup="listbox"]')?.focus({ preventScroll: true });
                         }}
                         className={optionCls(p.id === packageId)}
                       >

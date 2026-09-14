@@ -315,7 +315,10 @@ export function AnnouncementCenter({
       if (!listRef.current?.contains(event.target as Node)) setOpenList(false);
     };
     const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setOpenList(false);
+      if (event.key !== "Escape") return;
+      setOpenList(false);
+      // Focus goes back to the bell rather than to <body>.
+      listRef.current?.querySelector<HTMLElement>("button")?.focus({ preventScroll: true });
     };
     window.addEventListener("pointerdown", onDown);
     window.addEventListener("keydown", onKey);

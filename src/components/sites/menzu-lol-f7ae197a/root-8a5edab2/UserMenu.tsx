@@ -111,7 +111,11 @@ export function UserMenu({ user }: { user: HeaderUser }) {
       if (!wrapper.current?.contains(event.target as Node)) setOpen(false);
     }
     function onKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") setOpen(false);
+      if (event.key !== "Escape") return;
+      setOpen(false);
+      // Back to the button that opened it: a keyboard user's focus otherwise
+      // fell to <body> and the next Tab started the page over.
+      wrapper.current?.querySelector<HTMLElement>("button")?.focus({ preventScroll: true });
     }
     document.addEventListener("mousedown", onPointerDown);
     window.addEventListener("keydown", onKeyDown);
