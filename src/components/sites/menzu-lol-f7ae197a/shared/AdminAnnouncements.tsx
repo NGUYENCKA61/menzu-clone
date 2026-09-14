@@ -8,6 +8,7 @@ import {
   CalendarClock,
   FileText,
   Megaphone,
+  Plus,
   Search,
   type LucideIcon,
 } from "lucide-react";
@@ -139,6 +140,9 @@ export function AdminAnnouncements({
   const [form, setForm] = useState(EMPTY);
   // The id being edited, or null while the form is creating a new notice.
   const [editing, setEditing] = useState<string | null>(null);
+  /** On a phone the composer is folded until asked for: 1.300px of form sat
+   *  between the heading and the first of 52 notices. Editing unfolds it. */
+  const [composerOpen, setComposerOpen] = useState(false);
 
   const [search, setSearch] = useState("");
   const [stateFilter, setStateFilter] = useState<"" | AnnouncementState>("");
@@ -319,9 +323,19 @@ export function AdminAnnouncements({
         />
       </div>
 
+      <button
+        type="button"
+        onClick={() => setComposerOpen((o) => !o)}
+        aria-expanded={composerOpen || editing !== null}
+        className="press flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] text-[11px] font-black uppercase tracking-widest text-neutral-200 sm:hidden"
+      >
+        <Plus size={14} aria-hidden />
+        {composerOpen || editing ? "Thu gọn biểu mẫu" : "Thêm thông báo"}
+      </button>
+
       <form
         onSubmit={handleSubmit}
-        className="rounded-xl border border-white/[0.08] bg-[#0e0e11] p-5 flex flex-col gap-4"
+        className={`rounded-xl border border-white/[0.08] bg-[#0e0e11] p-5 flex-col gap-4 ${composerOpen || editing ? "flex" : "hidden sm:flex"}`}
       >
         <div className="flex items-center justify-between gap-3">
           <span className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-neutral-500">
@@ -669,7 +683,62 @@ export function AdminAnnouncements({
         </select>
       </div>
 
-      <div className="w-full overflow-x-auto rounded-xl border border-white/[0.08] bg-[#0e0e11]">
+      {/* On a phone the table was 1.141px wide in a 348px scroller and the
+          Tắt/Sửa/Xóa buttons sat 790px to the right. One card per notice. */}
+      <div className="flex flex-col gap-2 sm:hidden">
+        {visible.length === 0 ? (
+          <p className="rounded-xl border border-white/[0.08] bg-[#0e0e11] px-5 py-12 text-center text-neutral-400">
+            {announcements.length === 0 ? "Chưa có thông báo nào" : "Không có thông báo nào khớp bộ lọc"}
+          </p>
+        ) : (
+          visible.map((row) => {
+            const Icon = TYPE_ICONS[row.type];
+            return (
+              <article key={row.id} className="rounded-xl border border-white/[0.08] bg-[#0e0e11] p-3.5">
+                <div className="flex items-start justify-between gap-3">
+                  <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-md border ${TYPE_TILE}`}>
+                    <Icon size={13} />
+                  </span>
+                  <span className={`shrink-0 px-2.5 py-1 rounded-lg border text-[10px] font-black uppercase tracking-wider whitespace-nowrap ${STATE_TINT[row.state]}`}>
+                    {STATE_LABELS[row.state]}
+                  </span>
+                </div>
+                <p className="mt-2 text-[13px] font-black leading-snug text-white">{row.title}</p>
+                <p className="mt-1 text-[11px] leading-relaxed text-neutral-400 line-clamp-2">{row.body}</p>
+                <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-neutral-400">
+                  <span>{TYPE_LABELS[row.type]}</span>
+                  <span className={`px-2 py-0.5 rounded-lg border text-[10px] font-black uppercase tracking-wider ${PRIORITY_TINT[row.priority] ?? PRIORITY_TINT.NORMAL}`}>
+                    {PRIORITY_LABELS[row.priority]}
+                  </span>
+                  <span>{row.audience === "ALL" ? "Tất cả" : `${row.recipients.length} người`}</span>
+                </div>
+                <p className="mt-1.5 text-[11px] text-neutral-500 tabular-nums">
+                  {row.startAt} · {row.endAt ? `đến ${row.endAt}` : "không giới hạn"}
+                </p>
+                <div className="mt-3 flex flex-wrap gap-2 border-t border-white/[0.06] pt-3">
+                  {row.status === "PUBLISHED" ? (
+                    <ActionButton busy={busy} tone="warn" onClick={() => send("PATCH", { id: row.id, action: "disable" }, "Đã tắt thông báo")}>
+                      Tắt
+                    </ActionButton>
+                  ) : (
+                    <ActionButton busy={busy} tone="go" onClick={() => send("PATCH", { id: row.id, action: "publish" }, "Đã đăng thông báo")}>
+                      Đăng
+                    </ActionButton>
+                  )}
+                  <ActionButton busy={busy} onClick={() => startEdit(row)}>
+                    Sửa
+                  </ActionButton>
+                  <ActionButton busy={busy} tone="danger" onClick={() => setRemoving(row)}>
+                    Xóa
+                  </ActionButton>
+                </div>
+              </article>
+            );
+          })
+        )}
+      </div>
+
+      <div className="hidden w-full overflow-x-auto rounded-xl border border-white/[0.08] bg-[#0e0e11] sm:block">
         <table className="w-full min-w-[860px] text-left">
           <thead>
             <tr className="border-b border-white/10">
@@ -834,7 +903,7 @@ function ActionButton({
       type="button"
       disabled={busy}
       onClick={onClick}
-      className={`px-2.5 py-1 rounded-lg border text-[10px] font-black uppercase tracking-wider transition-colors disabled:opacity-50 ${ACTION_TONE[tone]}`}
+      className={`press inline-flex h-8 items-center px-3 rounded-lg border text-[10px] font-black uppercase tracking-wider transition-colors disabled:opacity-50 ${ACTION_TONE[tone]}`}
     >
       {children}
     </button>

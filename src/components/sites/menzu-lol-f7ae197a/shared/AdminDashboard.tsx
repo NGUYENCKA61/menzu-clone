@@ -135,7 +135,7 @@ export function AdminDashboard({
   return (
     <div className="flex flex-col gap-7">
       <Section title="Hôm nay" note="00:00–23:59 giờ Việt Nam">
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4">
           {todayStats.map((stat) => (
             <StatCard key={stat.label} {...stat} />
           ))}
@@ -143,7 +143,7 @@ export function AdminDashboard({
       </Section>
 
       <Section title="Thống kê">
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4">
           {totals.map((stat) => (
             <StatCard key={stat.label} {...stat} />
           ))}
@@ -198,7 +198,7 @@ function StatCard({ label, value, sub, tone, icon: Icon, tint }: StatItem) {
         </span>
       </div>
       <span
-        className={`text-[26px] font-black leading-none tabular-nums ${
+        className={`min-w-0 break-all text-[20px] font-black leading-none tabular-nums sm:text-[26px] ${
           idle ? "text-neutral-600" : "text-white"
         }`}
       >
@@ -395,13 +395,45 @@ function TransactionTable({ rows }: { rows: TransactionRow[] }) {
         <h3 className={CAP}>Giao dịch gần đây</h3>
         <Link
           href="/admin/operations"
-          className="text-[11px] font-semibold text-neutral-400 hover:text-white transition-colors"
+          className="press -mr-2 rounded-lg px-2 py-2 text-xs font-semibold text-neutral-400 hover:text-white transition-colors"
         >
           Xem tất cả →
         </Link>
       </div>
 
-      <div className="w-full overflow-x-auto">
+      {/* On a phone the 760px table showed the code and half a name; the sum
+          and the state were 400px to the right. Two-line rows instead. */}
+      <ul className="border-t border-white/[0.06] sm:hidden">
+        {rows.length === 0 ? (
+          <li className="px-5 py-12 text-center text-neutral-500">Chưa có giao dịch nào.</li>
+        ) : (
+          rows.map((row) => {
+            const KindIcon = KIND_ICON[row.kind];
+            return (
+              <li key={row.code} className="flex items-center gap-3 border-b border-white/[0.04] px-4 py-3 last:border-0">
+                <Avatar username={row.username} avatarUrl={row.avatarUrl} size={32} />
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="truncate text-[13px] font-semibold text-white">{row.username}</span>
+                    <span className={`shrink-0 text-[13px] font-bold tabular-nums ${row.credit ? "text-emerald-400" : "text-white"}`}>{row.amount}</span>
+                  </div>
+                  <div className="mt-0.5 flex items-center justify-between gap-3 text-[11px] text-neutral-500">
+                    <span className="flex min-w-0 items-center gap-1.5 truncate">
+                      {KindIcon ? <KindIcon size={12} className="shrink-0" /> : null}
+                      {row.kind} · {row.time}
+                    </span>
+                    <span className={`shrink-0 rounded-md border px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider ${STATE_TINT[row.state]}`}>
+                      {TX_STATE_LABELS[row.state]}
+                    </span>
+                  </div>
+                </div>
+              </li>
+            );
+          })
+        )}
+      </ul>
+
+      <div className="hidden w-full overflow-x-auto sm:block">
         <table className="w-full min-w-[760px] text-left">
           <thead>
             <tr className="border-y border-white/[0.06]">

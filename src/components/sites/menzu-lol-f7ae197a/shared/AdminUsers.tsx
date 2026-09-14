@@ -166,6 +166,104 @@ export function AdminUsers({
     };
   })();
 
+  /** The role/lock chip, shared by the card and the table row. */
+  const statusPill = (user: AdminUserView) => (
+        <span
+          className={`inline-block rounded-md border px-2 py-1 text-[10px] font-black uppercase tracking-wider whitespace-nowrap ${
+            user.blockedAt
+              ? "border-red-500/30 bg-red-500/10 text-red-400"
+              : user.role === "ADMIN"
+                ? "border-violet-500/30 bg-violet-500/10 text-violet-400"
+                : user.role === "AGENCY"
+                  ? "border-amber-500/30 bg-amber-500/10 text-amber-400"
+                  : "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
+          }`}
+        >
+          {user.blockedAt
+            ? "Đã khóa"
+            : user.role === "ADMIN"
+              ? "Quản trị"
+              : user.role === "AGENCY"
+                ? `Đại lý · ${user.agencyPercent}%`
+                : "Hoạt động"}
+        </span>
+  );
+
+  /** The four moderation buttons, shared by the card and the table row. */
+  const actions = (user: AdminUserView, isSelf: boolean) => (
+        <div className="flex items-center gap-1.5">
+          <Link
+            href={`/admin/users/${user.uid}`}
+            aria-label={`Hồ sơ chi tiết của ${user.username}`}
+            title="Mở hồ sơ chi tiết"
+            className={`${ICON_BTN} text-neutral-400 hover:border-rose-500/30 hover:bg-rose-500/10 hover:text-rose-400`}
+          >
+            <Eye size={14} />
+          </Link>
+    
+          <button
+            type="button"
+            disabled={busy || isSelf}
+            aria-label={
+              user.role === "ADMIN"
+                ? `Thu hồi quyền quản trị của ${user.username}`
+                : `Cấp quyền quản trị cho ${user.username}`
+            }
+            title={
+              isSelf
+                ? "Không thể tự đổi quyền của mình"
+                : user.role === "ADMIN"
+                  ? "Thu hồi quyền quản trị"
+                  : "Cấp quyền quản trị"
+            }
+            onClick={() => setConfirming({ kind: "role", user })}
+            className={`${ICON_BTN} ${
+              user.role === "ADMIN"
+                ? "text-violet-400 hover:border-violet-500/30 hover:bg-violet-500/10"
+                : "text-neutral-500 hover:border-rose-500/30 hover:bg-rose-500/10 hover:text-rose-400"
+            }`}
+          >
+            <Shield size={13} />
+          </button>
+    
+          <button
+            type="button"
+            disabled={busy || isSelf}
+            aria-label={
+              user.blockedAt
+                ? `Mở khóa ${user.username}`
+                : `Khóa ${user.username}`
+            }
+            title={
+              isSelf
+                ? "Không thể tự khóa tài khoản của mình"
+                : user.blockedAt
+                  ? "Mở khóa tài khoản"
+                  : "Khóa tài khoản"
+            }
+            onClick={() => setConfirming({ kind: "block", user })}
+            className={`${ICON_BTN} ${
+              user.blockedAt
+                ? "text-emerald-400 hover:border-emerald-500/30 hover:bg-emerald-500/10"
+                : "text-neutral-500 hover:border-amber-500/30 hover:bg-amber-500/10 hover:text-amber-400"
+            }`}
+          >
+            {user.blockedAt ? <Unlock size={13} /> : <Ban size={13} />}
+          </button>
+    
+          <button
+            type="button"
+            disabled={busy || isSelf}
+            onClick={() => setConfirming({ kind: "delete", user })}
+            aria-label={`Xóa tài khoản ${user.username}`}
+            title={isSelf ? "Không thể tự xóa tài khoản của mình" : "Xóa tài khoản"}
+            className={`${ICON_BTN} text-neutral-500 hover:border-red-500/30 hover:bg-red-500/10 hover:text-red-400`}
+          >
+            <Trash2 size={13} />
+          </button>
+        </div>
+  );
+
   return (
     <div className="flex flex-col gap-5">
       {error ? <AdminError message={error} onRetry={() => setError(null)} /> : null}
@@ -173,7 +271,54 @@ export function AdminUsers({
       {visible.length === 0 ? (
         <AdminEmpty title={emptyNote} />
       ) : (
-        <div className="admin-list w-full overflow-x-auto rounded-xl border border-white/[0.08] bg-[#0e0e11]">
+        <>
+        {/* On a phone the table was 1.093px wide in a 348px scroller and the
+            four buttons sat 750px to the right. One card per customer, the
+            same chip and the same four buttons at the foot. */}
+        <div className="admin-list flex flex-col gap-2 sm:hidden">
+          {visible.map((user) => {
+            const isSelf = user.username === selfUsername;
+            return (
+              <article key={user.username} className="rounded-xl border border-white/[0.08] bg-[#0e0e11] p-3.5">
+                <div className="flex items-start justify-between gap-3">
+                  <Link href={`/admin/users/${user.uid}`} className="flex min-w-0 items-center gap-3">
+                    <span className={`flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 bg-neutral-900 ${
+                      user.blockedAt ? "border-red-500/40" : user.role === "ADMIN" ? "border-violet-500/50" : user.role === "AGENCY" ? "border-amber-500/50" : "border-white/10"
+                    }`}>
+                      {user.avatarUrl ? (
+                        <Image src={user.avatarUrl} alt="" width={36} height={36} className={`h-full w-full object-cover ${user.blockedAt ? "opacity-50 grayscale" : ""}`} />
+                      ) : (
+                        <span aria-hidden className="text-[13px] font-black uppercase text-neutral-500">{user.username.slice(0, 1)}</span>
+                      )}
+                    </span>
+                    <span className="min-w-0">
+                      <span className="block truncate text-[13px] font-bold text-white">{user.username}</span>
+                      <span className="block text-[11px] text-neutral-500 tabular-nums">UID {user.uid}{user.email ? ` · ${user.email}` : ""}</span>
+                    </span>
+                  </Link>
+                  {statusPill(user)}
+                </div>
+                <dl className="mt-3 grid grid-cols-3 gap-2 text-[11px]">
+                  <div>
+                    <dt className="text-[10px] font-black uppercase tracking-widest text-neutral-500">Số dư</dt>
+                    <dd className={`mt-0.5 font-bold tabular-nums ${user.balance > 0 ? "text-emerald-400" : "text-neutral-500"}`}>{formatVnd(user.balance)}đ</dd>
+                  </div>
+                  <div>
+                    <dt className="text-[10px] font-black uppercase tracking-widest text-neutral-500">Hạng</dt>
+                    <dd className={`mt-0.5 font-black uppercase tracking-wider ${TIER_COLOR[user.tier] ?? "text-neutral-300"}`}>{user.tier}</dd>
+                  </div>
+                  <div>
+                    <dt className="text-[10px] font-black uppercase tracking-widest text-neutral-500">Đơn</dt>
+                    <dd className="mt-0.5 tabular-nums text-neutral-300">{user.orderCount > 0 ? `${user.orderCount} · ${formatVnd(user.totalSpent)}đ` : "—"}</dd>
+                  </div>
+                </dl>
+                <div className="mt-3 border-t border-white/[0.06] pt-3">{actions(user, isSelf)}</div>
+              </article>
+            );
+          })}
+        </div>
+
+        <div className="admin-list hidden w-full overflow-x-auto rounded-xl border border-white/[0.08] bg-[#0e0e11] sm:block">
           <table className="w-full min-w-[1000px] text-left">
             <thead>
               <tr className="border-b border-white/[0.06]">
@@ -306,99 +451,11 @@ export function AdminUsers({
                     {/* Blocked outranks the role badge: an admin who has been
                         locked out is locked out, and reading "Quản trị" on
                         that row would say the opposite. */}
-                    <span
-                      className={`inline-block rounded-md border px-2 py-1 text-[10px] font-black uppercase tracking-wider whitespace-nowrap ${
-                        user.blockedAt
-                          ? "border-red-500/30 bg-red-500/10 text-red-400"
-                          : user.role === "ADMIN"
-                            ? "border-violet-500/30 bg-violet-500/10 text-violet-400"
-                            : user.role === "AGENCY"
-                              ? "border-amber-500/30 bg-amber-500/10 text-amber-400"
-                              : "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
-                      }`}
-                    >
-                      {user.blockedAt
-                        ? "Đã khóa"
-                        : user.role === "ADMIN"
-                          ? "Quản trị"
-                          : user.role === "AGENCY"
-                            ? `Đại lý · ${user.agencyPercent}%`
-                            : "Hoạt động"}
-                    </span>
+                    {statusPill(user)}
                   </td>
 
                   <td className={`px-4 py-3 ${STICKY_ACTIONS}`}>
-                    <div className="flex items-center gap-1.5">
-                      <Link
-                        href={`/admin/users/${user.uid}`}
-                        aria-label={`Hồ sơ chi tiết của ${user.username}`}
-                        title="Mở hồ sơ chi tiết"
-                        className={`${ICON_BTN} text-neutral-400 hover:border-rose-500/30 hover:bg-rose-500/10 hover:text-rose-400`}
-                      >
-                        <Eye size={14} />
-                      </Link>
-
-                      <button
-                        type="button"
-                        disabled={busy || isSelf}
-                        aria-label={
-                          user.role === "ADMIN"
-                            ? `Thu hồi quyền quản trị của ${user.username}`
-                            : `Cấp quyền quản trị cho ${user.username}`
-                        }
-                        title={
-                          isSelf
-                            ? "Không thể tự đổi quyền của mình"
-                            : user.role === "ADMIN"
-                              ? "Thu hồi quyền quản trị"
-                              : "Cấp quyền quản trị"
-                        }
-                        onClick={() => setConfirming({ kind: "role", user })}
-                        className={`${ICON_BTN} ${
-                          user.role === "ADMIN"
-                            ? "text-violet-400 hover:border-violet-500/30 hover:bg-violet-500/10"
-                            : "text-neutral-500 hover:border-rose-500/30 hover:bg-rose-500/10 hover:text-rose-400"
-                        }`}
-                      >
-                        <Shield size={13} />
-                      </button>
-
-                      <button
-                        type="button"
-                        disabled={busy || isSelf}
-                        aria-label={
-                          user.blockedAt
-                            ? `Mở khóa ${user.username}`
-                            : `Khóa ${user.username}`
-                        }
-                        title={
-                          isSelf
-                            ? "Không thể tự khóa tài khoản của mình"
-                            : user.blockedAt
-                              ? "Mở khóa tài khoản"
-                              : "Khóa tài khoản"
-                        }
-                        onClick={() => setConfirming({ kind: "block", user })}
-                        className={`${ICON_BTN} ${
-                          user.blockedAt
-                            ? "text-emerald-400 hover:border-emerald-500/30 hover:bg-emerald-500/10"
-                            : "text-neutral-500 hover:border-amber-500/30 hover:bg-amber-500/10 hover:text-amber-400"
-                        }`}
-                      >
-                        {user.blockedAt ? <Unlock size={13} /> : <Ban size={13} />}
-                      </button>
-
-                      <button
-                        type="button"
-                        disabled={busy || isSelf}
-                        onClick={() => setConfirming({ kind: "delete", user })}
-                        aria-label={`Xóa tài khoản ${user.username}`}
-                        title={isSelf ? "Không thể tự xóa tài khoản của mình" : "Xóa tài khoản"}
-                        className={`${ICON_BTN} text-neutral-500 hover:border-red-500/30 hover:bg-red-500/10 hover:text-red-400`}
-                      >
-                        <Trash2 size={13} />
-                      </button>
-                    </div>
+                    {actions(user, isSelf)}
                   </td>
                 </tr>
             );
@@ -406,6 +463,7 @@ export function AdminUsers({
             </tbody>
           </table>
         </div>
+        </>
       )}
 
       <ConfirmDialog

@@ -143,6 +143,19 @@ export default async function AdminOrdersPage({
     return query ? `/admin/orders?${query}` : "/admin/orders";
   }
 
+  // What both layouts below need per row, computed once: the card list on a
+  // phone and the table from sm up read the same array.
+  const rows = orders.map((o) => ({
+    o,
+    MethodIcon: METHOD_ICON[o.method],
+    discounted: o.discountPct > 0 || o.voucher !== null,
+    login: loginHandover(o, {
+      ...o.product,
+      currentOrderId: currentOrderIdOf(o.product),
+      tag: tagOf(o.product),
+    }),
+  }));
+
   return (
     <AdminShell
       title="Đơn hàng"
@@ -155,7 +168,7 @@ export default async function AdminOrdersPage({
         </span>
       }
     >
-      <div className="mb-5 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+      <div className="mb-5 grid grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4">
         <StatCard
           label="Tổng đơn hàng"
           value={totalOrders.toLocaleString("vi-VN")}
@@ -190,7 +203,90 @@ export default async function AdminOrdersPage({
         <AdminOrderFilters filters={filters} />
       </div>
 
-      <div className="admin-list w-full overflow-x-auto rounded-xl border border-white/[0.08] bg-[#0e0e11]">
+      {/* On a phone the table was 1.012px wide in a 348px scroller: the owner
+          saw the code and the customer, and "Thành tiền" and "Trạng thái" sat
+          350-570px to the right. One card per order instead, with the four
+          things a phone visit is for — who, what, how much, paid or not. */}
+      <div className="admin-list flex flex-col gap-2 sm:hidden">
+        {rows.length === 0 ? (
+          <p className="rounded-xl border border-white/[0.08] bg-[#0e0e11] px-5 py-12 text-center text-neutral-400">
+            {filtered ? "Không có đơn nào khớp bộ lọc" : "Chưa có đơn hàng nào"}
+          </p>
+        ) : (
+          rows.map(({ o, MethodIcon, discounted, login }) => (
+            <article
+              key={o.code}
+              className="rounded-xl border border-white/[0.08] bg-[#0e0e11] p-3.5"
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <span className="block font-mono text-xs font-black text-white">{o.code}</span>
+                  <span className="block text-[11px] text-neutral-500 tabular-nums">{dayStamp(o.createdAt)}</span>
+                </div>
+                <span
+                  className={`inline-flex shrink-0 px-2 py-1 rounded-lg border text-[10px] font-black uppercase tracking-wider whitespace-nowrap ${
+                    STATUS_CLASS[o.status] ?? "text-neutral-400 bg-white/5 border-white/10"
+                  }`}
+                >
+                  {ORDER_STATUS_LABELS[o.status as OrderStatus] ?? o.status}
+                </span>
+              </div>
+              <Link
+                href={`/admin/users/${o.user.uid}`}
+                className="mt-3 flex items-center gap-2.5"
+              >
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full border border-white/10 bg-neutral-900">
+                  {o.user.avatarUrl ? (
+                    <Image src={o.user.avatarUrl} alt="" width={32} height={32} className="h-full w-full object-cover" />
+                  ) : (
+                    <span aria-hidden className="text-[11px] font-black uppercase text-neutral-500">
+                      {o.user.username.slice(0, 1)}
+                    </span>
+                  )}
+                </span>
+                <span className="flex min-w-0 flex-col">
+                  <span className="truncate text-xs font-bold text-neutral-200">{o.user.username}</span>
+                  <span className="text-[11px] text-neutral-500 tabular-nums">UID {o.user.uid}</span>
+                </span>
+              </Link>
+              <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
+                <span className="font-mono font-bold text-white">#{o.product.code}</span>
+                <span className="flex items-center gap-1 text-neutral-400">
+                  {MethodIcon ? <MethodIcon size={12} className="text-neutral-500" /> : null}
+                  {ORDER_METHOD_LABELS[o.method as OrderMethod] ?? o.method}
+                </span>
+                {login.state === "ready" ? (
+                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-400">
+                    <KeyRound size={10} /> Đã giao TK tự động
+                  </span>
+                ) : login.state === "manual" ? (
+                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-indigo-400">
+                    <KeyRound size={10} /> Bàn giao tay
+                  </span>
+                ) : null}
+              </div>
+              <div className="mt-3 flex items-center justify-between gap-3 border-t border-white/[0.06] pt-3">
+                <div className="flex flex-col">
+                  {discounted ? (
+                    <span className="text-[11px] text-neutral-500 line-through tabular-nums">
+                      {formatVnd(Number(o.listPrice))}đ
+                    </span>
+                  ) : null}
+                  <span className="text-base font-black text-rose-500 tabular-nums">{formatVnd(Number(o.total))}đ</span>
+                </div>
+                <Link
+                  href={productHref(o.product.category.slug, o.product.slug)}
+                  className="press inline-flex h-9 items-center gap-1.5 rounded-lg border border-white/[0.07] bg-white/[0.03] px-3 text-[11px] font-bold text-neutral-300 transition-colors hover:border-rose-500/30 hover:bg-rose-500/10 hover:text-rose-400"
+                >
+                  <Eye size={14} /> Xem sản phẩm
+                </Link>
+              </div>
+            </article>
+          ))
+        )}
+      </div>
+
+      <div className="admin-list hidden w-full overflow-x-auto rounded-xl border border-white/[0.08] bg-[#0e0e11] sm:block">
         <table className="w-full min-w-[900px] text-left">
           <thead>
             <tr className="border-b border-white/10">
@@ -225,14 +321,7 @@ export default async function AdminOrdersPage({
                 </td>
               </tr>
             ) : (
-              orders.map((o) => {
-                const MethodIcon = METHOD_ICON[o.method];
-                const discounted = o.discountPct > 0 || o.voucher !== null;
-                const login = loginHandover(o, {
-                  ...o.product,
-                  currentOrderId: currentOrderIdOf(o.product),
-                  tag: tagOf(o.product),
-                });
+              rows.map(({ o, MethodIcon, discounted, login }) => {
                 return (
                 <tr
                   key={o.code}
@@ -434,7 +523,7 @@ function StatCard({
         </span>
       </div>
       <span
-        className={`text-[26px] font-black leading-none tabular-nums ${
+        className={`min-w-0 break-all text-[20px] font-black leading-none tabular-nums sm:text-[26px] ${
           idle ? "text-neutral-600" : "text-white"
         }`}
       >

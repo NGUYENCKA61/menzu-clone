@@ -561,7 +561,89 @@ export function AdminOperations({
           {shownTopUps.length === 0 ? (
             <AdminEmpty title={`Không có lượt nạp nào khớp "${topUpQuery.trim()}"`} />
           ) : (
-        <div className="w-full overflow-x-auto rounded-xl border border-white/[0.08] bg-[#0e0e11]">
+        <>
+        {/* On a phone the table was 800px in a 348px scroller and the two
+            buttons that credit or refuse a top-up sat 430px past the right
+            edge. One card per request, buttons at the foot, the card's two
+            numbers allowed to break so a long PIN never overflows. */}
+        <div className="flex flex-col gap-2 sm:hidden">
+          {topUpSlice.map((row) => {
+            const status = TOPUP_STATUS[row.status] ?? TOPUP_STATUS.PENDING!;
+            return (
+              <article key={row.code} className="rounded-xl border border-white/[0.08] bg-[#0e0e11] p-3.5">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <span className="block font-mono text-xs font-black text-white">#{row.code}</span>
+                    <span className="block text-[11px] text-neutral-500">{row.createdAt}</span>
+                  </div>
+                  <span className={`shrink-0 text-[10px] font-black uppercase tracking-wider px-2 py-1 rounded-lg border whitespace-nowrap ${status.className}`}>
+                    {status.text}
+                  </span>
+                </div>
+                <div className="mt-3 flex items-center justify-between gap-3">
+                  <span className="flex min-w-0 items-center gap-2.5">
+                    <MiniAvatar username={row.username} avatarUrl={row.avatarUrl} />
+                    <span className="truncate text-xs font-bold text-neutral-200">{row.username}</span>
+                  </span>
+                  <span
+                    className={`shrink-0 text-base font-black tabular-nums ${
+                      row.status === "COMPLETED"
+                        ? "text-emerald-400"
+                        : row.status === "FAILED" || row.status === "CANCELLED"
+                          ? "text-neutral-400 line-through"
+                          : "text-white"
+                    }`}
+                  >
+                    {row.status === "COMPLETED" ? "+" : ""}
+                    {formatVnd(row.amount)}đ
+                  </span>
+                </div>
+                <div className="mt-2 flex items-center gap-1.5 text-[11px] text-neutral-400">
+                  {row.method === "CARD" ? (
+                    <CreditCard size={13} className="shrink-0 text-violet-400" />
+                  ) : (
+                    <Landmark size={13} className="shrink-0 text-sky-400" />
+                  )}
+                  {row.method === "CARD" ? (row.carrier ?? "Thẻ cào") : "Ngân hàng"}
+                </div>
+                {row.cardSerial && row.cardPin ? (
+                  <div className="mt-2 flex flex-col gap-0.5 rounded-lg border border-white/[0.06] bg-neutral-950/60 px-3 py-2 font-mono text-[12px] leading-snug text-neutral-200 break-all">
+                    <span><span className="text-neutral-500">Seri </span>{row.cardSerial}</span>
+                    <span><span className="text-neutral-500">Mã </span>{row.cardPin}</span>
+                  </div>
+                ) : null}
+                {row.status === "PENDING" ? (
+                  <div className="mt-3 grid grid-cols-2 gap-2 border-t border-white/[0.06] pt-3">
+                    <button
+                      type="button"
+                      disabled={pending}
+                      onClick={() => {
+                        setConfirming(row);
+                        setReceived(String(row.amount));
+                      }}
+                      className="press h-10 rounded-lg border border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 disabled:opacity-50 text-[11px] font-black uppercase tracking-widest text-emerald-400 transition-colors"
+                    >
+                      Xác nhận
+                    </button>
+                    <button
+                      type="button"
+                      disabled={pending}
+                      onClick={() => {
+                        setRejecting(row);
+                        setRejectNote("");
+                      }}
+                      className="press h-10 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 disabled:opacity-50 text-[11px] font-black uppercase tracking-widest text-neutral-400 transition-colors"
+                    >
+                      Từ chối
+                    </button>
+                  </div>
+                ) : null}
+              </article>
+            );
+          })}
+        </div>
+
+        <div className="hidden w-full overflow-x-auto rounded-xl border border-white/[0.08] bg-[#0e0e11] sm:block">
           <table className="w-full min-w-[760px] text-left">
             <thead>
               <tr className="border-b border-white/10">
@@ -673,6 +755,7 @@ export function AdminOperations({
             </tbody>
           </table>
         </div>
+        </>
           )}
 
           {shownTopUps.length > 0 ? (

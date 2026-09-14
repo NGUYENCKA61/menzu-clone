@@ -93,7 +93,7 @@ export default async function AdminUsersPage({
         </span>
       }
     >
-      <div className="mb-5 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+      <div className="mb-5 grid grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4">
         <StatCard
           label="Tổng người dùng"
           value={allUsers.toLocaleString("vi-VN")}
@@ -209,7 +209,7 @@ function StatCard({
       <span className="text-[10px] font-black uppercase tracking-widest text-neutral-500">
         {label}
       </span>
-      <span className="text-[26px] font-black leading-none text-white tabular-nums">
+      <span className="min-w-0 break-all text-[20px] font-black leading-none text-white tabular-nums sm:text-[26px]">
         {value}
       </span>
       <span className="text-[11px] text-neutral-500">{sub}</span>

@@ -64,7 +64,7 @@ function StatCard({
         </span>
       </div>
       <span
-        className={`text-[26px] font-black leading-none tabular-nums ${
+        className={`min-w-0 break-all text-[20px] font-black leading-none tabular-nums sm:text-[26px] ${
           idle ? "text-neutral-600" : "text-white"
         }`}
       >
@@ -151,7 +151,7 @@ export default async function AdminProductsPage() {
       subtitle="Danh mục, tài khoản, phần mềm và kho ảnh — mỗi thứ một thẻ"
       username={admin.username}
     >
-      <div className="mb-5 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+      <div className="mb-5 grid grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4">
         <StatCard
           label="Danh mục"
           value={String(categories.length)}
