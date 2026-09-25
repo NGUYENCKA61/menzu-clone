@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, BadgeCheck, BookCheck, ShoppingBag } from "lucide-react";
+import { BadgeCheck, BookCheck, ShoppingBag } from "lucide-react";
 
 import { DEFAULT_SETTINGS } from "@/lib/settings";
 import { HeroVideo } from "./HeroVideo";
@@ -179,7 +179,6 @@ export function HeroBanners({
             >
               <ShoppingBag size={15} aria-hidden />
               {primaryLabel}
-              <ArrowRight size={14} aria-hidden />
             </Link>
             {secondaryLabel && secondaryHref ? (
               <Link
@@ -188,7 +187,6 @@ export function HeroBanners({
               >
                 <BookCheck size={15} aria-hidden />
                 {secondaryLabel}
-                <ArrowRight size={14} aria-hidden />
               </Link>
             ) : null}
           </div>
