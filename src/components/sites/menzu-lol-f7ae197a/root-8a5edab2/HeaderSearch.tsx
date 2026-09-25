@@ -160,7 +160,12 @@ export function HeaderSearch() {
             aria-label="Tìm sản phẩm"
             autoComplete="off"
             enterKeyHint="search"
-            className="h-full w-full min-w-0 bg-transparent px-2 text-[13px] font-semibold text-white outline-none placeholder:font-normal placeholder:text-neutral-400 [&::-webkit-search-cancel-button]:hidden"
+            // The hint is #8a8a8a, not neutral-400: on #17171c that is 5.17:1,
+            // still past AA, while neutral-400 sat at 7.08:1 and read as loud
+            // as the nav rungs beside it — a prompt should be quieter than the
+            // words around it. Do not drop it to neutral-500; that is 3.77:1
+            // and fails, which is why audit 4 raised it off neutral-600.
+            className="h-full w-full min-w-0 bg-transparent px-2 text-[13px] font-semibold text-white outline-none placeholder:font-normal placeholder:text-[#8a8a8a] [&::-webkit-search-cancel-button]:hidden"
           />
           {loading ? (
             <Loader2 size={14} aria-hidden className="mr-2.5 shrink-0 animate-spin text-neutral-500" />
