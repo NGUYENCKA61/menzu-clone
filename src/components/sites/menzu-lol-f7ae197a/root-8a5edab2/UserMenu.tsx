@@ -171,7 +171,7 @@ export function UserMenu({ user }: { user: HeaderUser }) {
           // h-9, which is the bell beside it and the Đăng nhập button this
           // replaces when signed out. It stood 6px taller than both, and a
           // taller trigger drops its panel 6px lower than the bell's.
-          className="flex h-9 items-center gap-2 sm:gap-2.5 px-1 sm:px-2 rounded-[10px] border border-[#2b2b31] bg-[#131318] hover:border-white/20 hover:bg-[#232329] transition-colors"
+          className="flex h-9 items-center gap-2 sm:gap-2.5 px-1 sm:px-2 rounded-[10px] border border-[#2b2b31] bg-[#17171c] hover:border-white/20 hover:bg-[#232329] transition-colors"
         >
           {/* The captured markup left this box empty, so the trigger showed a
               black square where every signed-in header shows a face. */}
