@@ -297,12 +297,18 @@ export function UserMenu({ user }: { user: HeaderUser }) {
                 </div>
               ))}
 
+              {/* Grey, not red. Red at both ends of a nine-row menu — the admin
+                  door at the top, this at the bottom — read as decoration
+                  rather than rank, and signing out deletes nothing; it is
+                  the one action here you can undo by doing it again. It
+                  keeps the shouted type so it still ends the list, and takes
+                  the accent back the moment you reach for it. */}
               <div className={GROUP}>
                 <button
                   type="button"
                   onClick={handleLogout}
                   disabled={leaving}
-                  className={`${ROW} text-[var(--menzu-accent)] hover:bg-[var(--menzu-accent)]/10 disabled:opacity-70`}
+                  className={`${ROW} text-neutral-400 hover:bg-[var(--menzu-accent)]/10 hover:text-[var(--menzu-accent)] disabled:opacity-70`}
                 >
                   {leaving ? (
                     <Loader2 size={18} className="shrink-0 animate-spin motion-reduce:animate-none" aria-hidden />
