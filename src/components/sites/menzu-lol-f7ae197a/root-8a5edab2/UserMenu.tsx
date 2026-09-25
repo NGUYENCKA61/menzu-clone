@@ -315,7 +315,7 @@ export function UserMenu({ user }: { user: HeaderUser }) {
                   ) : (
                     <LogOut size={18} className="shrink-0" />
                   )}
-                  <span className="text-[14px] font-medium">{leaving ? "Đang đăng xuất…" : "Đăng xuất"}</span>
+                  <span className={SHOUT}>{leaving ? "Đang đăng xuất…" : "Đăng xuất"}</span>
                 </button>
               </div>
             </div>
