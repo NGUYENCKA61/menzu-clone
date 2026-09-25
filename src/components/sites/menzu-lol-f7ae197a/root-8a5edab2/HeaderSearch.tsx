@@ -128,12 +128,17 @@ export function HeaderSearch() {
     // Desktop only: on a phone the header has no room for a box, and the
     // shop chose no button either — the drawer and the shelves do the job.
     <div ref={box} className="relative hidden md:block">
-      <div className="relative md:w-48 lg:w-60 xl:w-72">
-        <label className="relative flex h-9 items-center rounded-xl border border-white/10 bg-white/5 text-neutral-300 transition-colors focus-within:border-white/25 focus-within:bg-white/[0.08]">
+      <div className="relative md:w-52 lg:w-64 xl:w-80">
+        {/* A well, not a frosted chip. The bar is #1a1a1a, so a solid field a
+            few steps darker reads as something you type into; white at 5%
+            over white at 10% read as decoration and sat at the wrong radius
+            from the button beside it. Borrowed from lmarket.net, which does
+            the same thing in the same trade. */}
+        <label className="relative flex h-9 items-center rounded-[10px] border border-[#2b2b31] bg-[#101013] text-neutral-300 transition-colors focus-within:border-[var(--menzu-accent)]/70 focus-within:ring-[3px] focus-within:ring-[var(--menzu-accent)]/15">
           {navigating ? (
-            <Loader2 size={15} aria-hidden className="ml-3 shrink-0 animate-spin text-neutral-500 motion-reduce:animate-none" />
+            <Loader2 size={15} aria-hidden className="ml-2.5 shrink-0 animate-spin text-neutral-500 motion-reduce:animate-none" />
           ) : (
-            <Search size={15} aria-hidden className="ml-3 shrink-0 text-neutral-500" />
+            <Search size={15} aria-hidden className="ml-2.5 shrink-0 text-neutral-500" />
           )}
           <input
             // Password managers and similar extensions stamp their own attributes
@@ -149,7 +154,7 @@ export function HeaderSearch() {
             aria-label="Tìm sản phẩm"
             autoComplete="off"
             enterKeyHint="search"
-            className="h-full w-full min-w-0 bg-transparent px-2.5 text-[12px] font-semibold text-white outline-none placeholder:text-neutral-400 [&::-webkit-search-cancel-button]:hidden"
+            className="h-full w-full min-w-0 bg-transparent px-2 text-[13px] font-medium text-white outline-none placeholder:font-normal placeholder:text-neutral-400 [&::-webkit-search-cancel-button]:hidden"
           />
           {loading ? (
             <Loader2 size={14} aria-hidden className="mr-2.5 shrink-0 animate-spin text-neutral-500" />
@@ -161,7 +166,7 @@ export function HeaderSearch() {
                 setQ("");
                 input.current?.focus();
               }}
-              className="mr-1.5 shrink-0 rounded-md p-1 text-neutral-500 transition-colors hover:text-white"
+              className="mr-1.5 shrink-0 rounded-md p-1 text-neutral-500 transition-colors hover:bg-white/10 hover:text-white"
             >
               <X size={14} />
             </button>
@@ -169,7 +174,7 @@ export function HeaderSearch() {
         </label>
 
         {showList ? (
-          <div className="drop-in absolute left-0 right-0 top-11 z-50 overflow-hidden rounded-xl border border-white/10 bg-[#0d0d12]/95 shadow-2xl backdrop-blur-xl">
+          <div className="drop-in absolute left-0 right-0 top-[42px] z-50 overflow-hidden rounded-[10px] border border-[#2b2b31] bg-[#0b0b0f]/97 shadow-2xl backdrop-blur-xl">
             {shown.length === 0 ? (
               <p className="px-4 py-3 text-[12px] text-neutral-500">
                 Không thấy gì khớp “{term}”.
