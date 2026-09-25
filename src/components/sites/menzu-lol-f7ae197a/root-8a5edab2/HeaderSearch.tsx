@@ -151,7 +151,12 @@ export function HeaderSearch() {
             value={q}
             onChange={(event) => setQ(event.target.value)}
             onKeyDown={onKeyDown}
-            placeholder="Tìm hack, acc…"
+            // A question, not a label: it invites typing, and it promises
+            // nothing the box cannot do. "Tìm kiếm mọi thứ" was a lie — this
+            // searches tools, accounts and shelves, not news, wiki or orders —
+            // and at 768px, where the field has 133px of room, this is the
+            // shortest of the candidates at 95px, so it can never clip.
+            placeholder="Bạn cần tìm gì?"
             aria-label="Tìm sản phẩm"
             autoComplete="off"
             enterKeyHint="search"
