@@ -5,7 +5,7 @@ import { Radar } from "lucide-react";
 
 import { SimplePage } from "@/components/sites/menzu-lol-f7ae197a/shared/SimplePage";
 import { StatusSubscribeSearch } from "@/components/sites/menzu-lol-f7ae197a/shared/StatusSubscribeSearch";
-import { TYPE_ICONS, TYPE_TILE } from "@/components/sites/menzu-lol-f7ae197a/shared/announcementIcons";
+import { TYPE_TILE } from "@/components/sites/menzu-lol-f7ae197a/shared/announcementIcons";
 import { currentAnnouncements } from "@/lib/announcementStore";
 import { TYPE_LABELS } from "@/lib/announcements";
 import { getCurrentUser } from "@/lib/session";
@@ -315,18 +315,13 @@ export default async function AnnouncementsPage({
               className="rounded-2xl border border-white/10 bg-neutral-900/50 p-5"
             >
               <div className="flex flex-wrap items-center gap-2">
-                {(() => {
-                  // Same glyph as the bell list and the notice itself.
-                  const Icon = TYPE_ICONS[item.type];
-                  return (
-                    <span
-                      className={`inline-flex items-center gap-1.5 rounded-md border px-2 py-0.5 text-[11px] font-medium ${TYPE_TILE}`}
-                    >
-                      <Icon size={12} />
-                      {TYPE_LABELS[item.type]}
-                    </span>
-                  );
-                })()}
+                {/* The word, not a glyph: the shop asked for the notice
+                    icons to come off the storefront. */}
+                <span
+                  className={`inline-flex items-center rounded-md border px-2 py-0.5 text-[11px] font-medium ${TYPE_TILE}`}
+                >
+                  {TYPE_LABELS[item.type]}
+                </span>
                 <span className="text-[11px] text-neutral-500">
                   {formatWhen(item.startAt)}
                 </span>

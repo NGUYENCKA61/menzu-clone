@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowRight, Bell, BellOff, X } from "lucide-react";
+import { ArrowRight, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -16,21 +16,12 @@ import {
 import {
   dismissalKey,
   isSnoozed,
-  relativeTime,
   SNOOZE_MS,
   TYPE_HEADINGS,
-  TYPE_LABELS,
   type AnnouncementPriority,
   type AnnouncementType,
 } from "@/lib/announcements";
 
-import {
-  SOFTWARE_STATUS,
-  STATUS_EVENT_COPY,
-  type SoftwareStatusValue,
-} from "@/lib/softwareStatus";
-
-import { TYPE_ICONS, TYPE_TILE } from "./announcementIcons";
 import { useClientNow } from "./useClientClock";
 import { lockScroll, unlockScroll } from "./modalChrome";
 import { useLeave } from "./useOverlayPresence";
@@ -58,23 +49,6 @@ export interface AnnouncementItem {
   startAt: string;
   /** Formatted on the server, where the timezone is fixed. */
   updatedLabel: string;
-}
-
-/** One status change of a tool the reader follows — a bell row that links
- *  to the tool rather than opening a notice. */
-export interface StatusEventItem {
-  id: string;
-  productName: string;
-  productHref: string;
-  status: SoftwareStatusValue;
-  /** ISO, measured against the reader's clock like `startAt`. */
-  at: string;
-}
-
-/** What a browser remembers a status row under: the row is immutable, so
- *  its id is the whole key. */
-function statusKey(id: string): string {
-  return `menzu.status.${id}`;
 }
 
 /**
@@ -202,30 +176,21 @@ function useSeen(): Set<string> | null {
 }
 
 /**
- * The bell, its list, and the notice modal.
+ * The notice sheet, and the memory of what this browser has already read.
  *
- * One component rather than a bell in the header and a modal in the layout,
- * because they share one piece of state: what this browser has already read.
- * Split across two trees that would need a provider around the whole site to
- * keep the badge honest when somebody closes the modal.
+ * It had a bell and a dropdown list in the header too, until the shop asked
+ * for the notification icons to come off the storefront. What a customer
+ * wants now lives on /thong-bao, which the header strip and the phone tab
+ * bar both reach; this only decides whether an unread notice opens by
+ * itself, once per page load.
  */
-export function AnnouncementCenter({
-  announcements,
-  statusEvents = [],
-}: {
-  announcements: AnnouncementItem[];
-  statusEvents?: StatusEventItem[];
-}) {
+export function AnnouncementCenter({ announcements }: { announcements: AnnouncementItem[] }) {
   const now = useClientNow();
   const seen = useSeen();
   const snoozes = useSnoozes();
-  const [openList, setOpenList] = useState(false);
-  // What the visitor opened from the list, which outranks the automatic one.
-  const [picked, setPicked] = useState<AnnouncementItem | null>(null);
-  // Set the first time anything is closed, so the modal opens by itself once
+  // Set the first time anything is closed, so the sheet opens by itself once
   // per page load rather than marching through every unread notice in turn.
   const [autoDone, setAutoDone] = useState(false);
-  const listRef = useRef<HTMLDivElement>(null);
 
   const unread = useMemo(
     () =>
@@ -234,15 +199,8 @@ export function AnnouncementCenter({
         : announcements.filter((a) => !seen.has(dismissalKey(a.id, a.revision))),
     [announcements, seen],
   );
-  const unreadStatus = useMemo(
-    () => (seen === null ? [] : statusEvents.filter((e) => !seen.has(statusKey(e.id)))),
-    [statusEvents, seen],
-  );
-  // The badge counts both kinds; the modal only ever opens for a notice.
-  const unreadCount = unread.length + unreadStatus.length;
-
-  // Snoozed notices stay unread — they keep their place in the bell and their
-  // dot in the list. All that is held back is the modal opening by itself.
+  // A snoozed notice is still unread; all that is held back is the sheet
+  // opening by itself.
   const autoTarget = useMemo(() => {
     if (seen === null || snoozes === null || now === null) return null;
     return (
@@ -255,41 +213,14 @@ export function AnnouncementCenter({
   // Derived rather than stored: the first unread notice is showing precisely
   // because it is unread, so closing it — which marks it read — closes it. No
   // effect has to notice and no second copy of the truth can drift from it.
-  const reading = picked ?? (autoDone ? null : autoTarget);
+  const reading = autoDone ? null : autoTarget;
 
   const dismiss = useCallback(
     (item: AnnouncementItem) => {
       const next = new Set(seen ?? []);
       next.add(dismissalKey(item.id, item.revision));
       writeSeen(next);
-      setPicked(null);
       setAutoDone(true);
-    },
-    [seen],
-  );
-
-  /**
-   * Clears the badge without opening anything.
-   *
-   * Marks every notice currently on the list, not only the unread ones — the
-   * set is keyed by id and revision, so re-adding one already there changes
-   * nothing, and listing them all means a notice that arrives between two
-   * renders is not quietly marked read without ever being shown.
-   */
-  const markAllRead = useCallback(() => {
-    const next = new Set(seen ?? []);
-    for (const item of announcements) next.add(dismissalKey(item.id, item.revision));
-    for (const event of statusEvents) next.add(statusKey(event.id));
-    writeSeen(next);
-    setAutoDone(true);
-  }, [announcements, statusEvents, seen]);
-
-  /** A status row is read the moment it is followed to the tool. */
-  const readStatus = useCallback(
-    (event: StatusEventItem) => {
-      const next = new Set(seen ?? []);
-      next.add(statusKey(event.id));
-      writeSeen(next);
     },
     [seen],
   );
@@ -301,234 +232,22 @@ export function AnnouncementCenter({
         dismissalKey(item.id, item.revision),
         Date.now() + SNOOZE_MS,
       );
-      setPicked(null);
       setAutoDone(true);
     },
     [snoozes],
   );
 
-  // Clicking away closes the list. Pointerdown rather than click, so it fires
-  // before a link inside the list would navigate.
-  useEffect(() => {
-    if (!openList) return;
-    const onDown = (event: PointerEvent) => {
-      if (!listRef.current?.contains(event.target as Node)) setOpenList(false);
-    };
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key !== "Escape") return;
-      setOpenList(false);
-      // Focus goes back to the bell rather than to <body>.
-      listRef.current?.querySelector<HTMLElement>("button")?.focus({ preventScroll: true });
-    };
-    window.addEventListener("pointerdown", onDown);
-    window.addEventListener("keydown", onKey);
-    return () => {
-      window.removeEventListener("pointerdown", onDown);
-      window.removeEventListener("keydown", onKey);
-    };
-  }, [openList]);
-
-  // The bell is drawn whether or not the shop has anything to say. It used to
-  // hide itself when the list was empty, back when the header carried a second
-  // decorative bell that was always there; that one is gone, and a header
-  // whose notification icon appears and disappears reads as broken rather than
-  // as quiet.
-
-  return (
-    <>
-      <div ref={listRef} className="relative">
-        <button
-          type="button"
-          onClick={() => setOpenList((open) => !open)}
-          aria-label={
-            unreadCount > 0 ? `Thông báo, ${unreadCount} chưa đọc` : "Thông báo"
-          }
-          aria-expanded={openList}
-          className="relative flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-neutral-300 hover:text-white hover:bg-white/10 transition-colors"
-        >
-          <Bell size={16} />
-          {unreadCount > 0 ? (
-            <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-600 px-1 text-[10px] font-semibold leading-none text-white">
-              {unreadCount}
-            </span>
-          ) : null}
-        </button>
-
-        {/* On a phone the panel is pinned to the viewport's edges, not to
-            the bell: hung off the bell at 340px it ran 104px past the left
-            edge of a 390px screen and its heading and footer link were cut
-            off. The header nav is position:fixed with no transform, so a
-            fixed child lays out against the viewport. From sm up it is the
-            same dropdown under the bell as before. */}
-        {openList ? (
-          <div className="drop-in fixed inset-x-4 top-[58px] z-50 w-auto overflow-hidden rounded-xl border border-white/10 bg-[#101114] shadow-2xl sm:absolute sm:inset-x-auto sm:right-0 sm:top-11 sm:w-[340px]">
-            <div className="flex items-center justify-between gap-3 border-b border-white/[0.07] px-4 py-3">
-              <span className="text-[14px] font-bold text-white">Thông báo</span>
-              {/* Only offered when it would do something. A control that is
-                  always there and usually inert teaches people to ignore it. */}
-              {unreadCount > 0 ? (
-                <button
-                  type="button"
-                  onClick={markAllRead}
-                  className="text-[10px] font-black uppercase tracking-widest text-[var(--menzu-accent)] transition-opacity hover:opacity-80"
-                >
-                  Đánh dấu đã đọc
-                </button>
-              ) : null}
-            </div>
-
-            <div className="max-h-[340px] overflow-y-auto">
-              {announcements.length === 0 && statusEvents.length === 0 ? (
-                <div className="px-4 py-10 text-center">
-                  <span className="mx-auto flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/5 text-neutral-600">
-                    <BellOff size={18} />
-                  </span>
-                  <p className="mt-3 text-[13px] font-semibold text-neutral-300">
-                    Chưa có thông báo nào
-                  </p>
-                  <p className="mt-1 text-[11px] text-neutral-500">
-                    Thông báo từ shop sẽ hiện ở đây.
-                  </p>
-                </div>
-              ) : null}
-
-              {announcements.map((item) => {
-                const isUnread = unread.some((a) => a.id === item.id);
-                const Icon = TYPE_ICONS[item.type];
-                return (
-                  <button
-                    key={item.id}
-                    type="button"
-                    onClick={() => {
-                      setPicked(item);
-                      setOpenList(false);
-                    }}
-                    // The unread wash is deliberately faint. It marks a row
-                    // without competing with the dot, and a list where every
-                    // row glows is a list nobody scans.
-                    className={`flex w-full items-start gap-3 border-b border-white/[0.07] px-4 py-3 text-left transition-colors last:border-0 ${
-                      isUnread
-                        ? "bg-[var(--menzu-accent)]/[0.06] hover:bg-[var(--menzu-accent)]/[0.1]"
-                        : "hover:bg-white/[0.03]"
-                    }`}
-                  >
-                    <span
-                      className={`mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border ${TYPE_TILE}`}
-                    >
-                      <Icon size={16} />
-                    </span>
-
-                    <span className="min-w-0 flex-1">
-                      {/* The kind, then the headline. Naming the kind in the
-                          accent above the title is what makes a column of five
-                          notices scannable without reading any of them. */}
-                      <span className="block text-[10px] font-black uppercase tracking-widest text-[var(--menzu-accent)]">
-                        {TYPE_LABELS[item.type]}
-                      </span>
-                      <span
-                        className={`mt-0.5 block truncate text-[13px] font-bold ${
-                          isUnread ? "text-white" : "text-neutral-300"
-                        }`}
-                      >
-                        {item.title}
-                      </span>
-                      <span className="mt-0.5 block truncate text-[11px] text-neutral-400">
-                        {item.body}
-                      </span>
-                      <span className="mt-1 block text-[10px] text-neutral-600">
-                        {now === null ? "" : relativeTime(new Date(item.startAt), new Date(now))}
-                      </span>
-                    </span>
-
-                    {isUnread ? (
-                      <span
-                        aria-label="Chưa đọc"
-                        className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-[var(--menzu-accent)]"
-                      />
-                    ) : null}
-                  </button>
-                );
-              })}
-
-              {/* The tools this reader follows, under the shop's notices. A
-                  row is a link to the tool — there is nothing more to read
-                  than the line itself — and following it marks it read. */}
-              {statusEvents.length > 0 ? (
-                <div className="border-t border-white/[0.07] px-4 pt-3 pb-1 text-[10px] font-black uppercase tracking-widest text-neutral-500">
-                  Trạng thái hack
-                </div>
-              ) : null}
-              {statusEvents.map((event) => {
-                const isUnread = unreadStatus.some((e) => e.id === event.id);
-                const state = SOFTWARE_STATUS[event.status];
-                return (
-                  <Link
-                    key={event.id}
-                    href={event.productHref}
-                    onClick={() => {
-                      readStatus(event);
-                      setOpenList(false);
-                    }}
-                    className={`flex w-full items-start gap-3 border-b border-white/[0.07] px-4 py-3 text-left transition-colors last:border-0 ${
-                      isUnread
-                        ? "bg-[var(--menzu-accent)]/[0.06] hover:bg-[var(--menzu-accent)]/[0.1]"
-                        : "hover:bg-white/[0.03]"
-                    }`}
-                  >
-                    <span
-                      className={`mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border ${state.tile}`}
-                    >
-                      <span className={`h-2 w-2 rounded-full ${state.dot}`} />
-                    </span>
-                    <span className="min-w-0 flex-1">
-                      <span className={`block text-[10px] font-black uppercase tracking-widest ${state.text}`}>
-                        {state.label}
-                      </span>
-                      <span
-                        className={`mt-0.5 block truncate text-[13px] font-bold ${
-                          isUnread ? "text-white" : "text-neutral-300"
-                        }`}
-                      >
-                        {event.productName}
-                      </span>
-                      <span className="mt-0.5 block truncate text-[11px] text-neutral-400">
-                        {STATUS_EVENT_COPY[event.status]}
-                      </span>
-                      <span className="mt-1 block text-[10px] text-neutral-600">
-                        {now === null ? "" : relativeTime(new Date(event.at), new Date(now))}
-                      </span>
-                    </span>
-                    {isUnread ? (
-                      <span
-                        aria-label="Chưa đọc"
-                        className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-[var(--menzu-accent)]"
-                      />
-                    ) : null}
-                  </Link>
-                );
-              })}
-            </div>
-
-            <Link
-              href="/thong-bao"
-              onClick={() => setOpenList(false)}
-              className="block border-t border-white/[0.07] px-4 py-3 text-center text-[11px] font-black uppercase tracking-widest text-[var(--menzu-accent)] transition-colors hover:bg-white/[0.03]"
-            >
-              Xem tất cả thông báo →
-            </Link>
-          </div>
-        ) : null}
-      </div>
-
-      {reading ? (
-        <AnnouncementModal
-          item={reading}
-          onClose={() => dismiss(reading)}
-          onSnooze={() => snooze(reading)}
-        />
-      ) : null}
-    </>
-  );
+  // Nothing of its own in the header any more — the bell and its dropdown
+  // came out on the owner's word. What is left is the sheet that opens by
+  // itself for an unread notice; everything else a customer wants is on
+  // /thong-bao, which the header strip and the phone tab bar both reach.
+  return reading ? (
+    <AnnouncementModal
+      item={reading}
+      onClose={() => dismiss(reading)}
+      onSnooze={() => snooze(reading)}
+    />
+  ) : null;
 }
 
 /**
@@ -553,7 +272,6 @@ export function AnnouncementModal({
   onSnooze: () => void;
 }) {
   const panel = useRef<HTMLDivElement>(null);
-  const HeaderIcon = TYPE_ICONS[item.type];
 
   /**
    * The exit, and a stable way out. The parent re-renders every second — a
@@ -620,15 +338,10 @@ export function AnnouncementModal({
             the frame gets, so the eye lands on the sheet before the words. */}
         <span aria-hidden className="absolute inset-x-0 top-0 h-px bg-[var(--menzu-accent)]/70" />
 
+        {/* No glyph beside the heading: the shop asked for the notice icons
+            to come off the storefront. The accent rule above and the heading
+            say what this is. */}
         <header className="flex shrink-0 items-center gap-3 border-b border-white/[0.07] px-5 py-4">
-          {/* The kind's own glyph, the same one the bell list and the admin
-              table use. It replaced a fixed "!", which read as a warning on a
-              notice that was handing somebody a present. */}
-          <span
-            className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border ${TYPE_TILE}`}
-          >
-            <HeaderIcon size={16} />
-          </span>
           <h2 className="text-[15px] font-semibold text-white">
             {TYPE_HEADINGS[item.type]}
           </h2>

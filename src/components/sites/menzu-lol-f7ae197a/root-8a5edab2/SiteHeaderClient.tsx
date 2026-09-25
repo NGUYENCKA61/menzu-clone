@@ -19,11 +19,7 @@ import {
   Users,
   type LucideIcon,
 } from "lucide-react"
-import {
-  AnnouncementCenter,
-  type AnnouncementItem,
-  type StatusEventItem,
-} from "../shared/AnnouncementCenter";
+import { AnnouncementCenter, type AnnouncementItem } from "../shared/AnnouncementCenter";
 import { STATUS_TAB_HREF } from "@/lib/softwareStatus";
 import { CartButton } from "./CartButton";
 import { HeaderSearch } from "./HeaderSearch"
@@ -217,7 +213,6 @@ export function SiteHeaderClient({
   user,
   brand,
   announcements,
-  statusEvents,
   cartCount,
   telegramShopUrl,
 }: {
@@ -225,7 +220,6 @@ export function SiteHeaderClient({
   brand: HeaderBrand;
   announcements: AnnouncementItem[];
   /** Status changes of the tools this reader follows; empty for a guest. */
-  statusEvents: StatusEventItem[];
   /** Lines waiting in the basket; 0 for a guest. */
   cartCount: number;
   /** t.me link of the shop bot, or null while Cấu hình has no bot. */
@@ -391,7 +385,6 @@ export function SiteHeaderClient({
             {/* Left of the basket: a box on a desktop, a button on a phone. */}
             <HeaderSearch />
             <CartButton count={cartCount} />
-            <AnnouncementCenter announcements={announcements} statusEvents={statusEvents} />
           </div>
 
           {user ? (
@@ -413,6 +406,11 @@ export function SiteHeaderClient({
           )}
         </div>
       </div>
+
+      {/* Draws nothing in the bar: only the notice sheet, when there is an
+          unread one. It used to be the bell between the basket and the
+          account button. */}
+      <AnnouncementCenter announcements={announcements} />
 
       <MobileDrawer
         open={drawerOpen}
