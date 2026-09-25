@@ -129,12 +129,12 @@ export function HeaderSearch() {
     // shop chose no button either — the drawer and the shelves do the job.
     <div ref={box} className="relative hidden md:block">
       <div className="relative md:w-44 lg:w-52 xl:w-56">
-        {/* A well, not a frosted chip. The bar is #1a1a1a, so a solid field a
-            few steps darker reads as something you type into; white at 5%
-            over white at 10% read as decoration and sat at the wrong radius
-            from the button beside it. Borrowed from lmarket.net, which does
-            the same thing in the same trade. */}
-        <label className="relative flex h-9 items-center rounded-[10px] border border-[#2b2b31] bg-[#101013] text-neutral-300 transition-colors focus-within:border-[var(--menzu-accent)]/70 focus-within:ring-[3px] focus-within:ring-[var(--menzu-accent)]/15">
+        {/* A well, not a frosted chip. The bar is #0f1015, so the field goes
+            a couple of steps darker again and reads as something you type
+            into; white at 5% over white at 10% read as decoration and sat at
+            the wrong radius from the button beside it. Borrowed from
+            lmarket.net, which does the same thing in the same trade. */}
+        <label className="relative flex h-9 items-center rounded-[10px] border border-[#2b2b31] bg-[#08080b] text-neutral-300 transition-colors focus-within:border-[var(--menzu-accent)]/70 focus-within:ring-[3px] focus-within:ring-[var(--menzu-accent)]/15">
           {navigating ? (
             <Loader2 size={15} aria-hidden className="ml-2.5 shrink-0 animate-spin text-neutral-500 motion-reduce:animate-none" />
           ) : (
