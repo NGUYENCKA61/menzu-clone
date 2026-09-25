@@ -130,12 +130,12 @@ export function HeaderSearch() {
     <div ref={box} className="relative hidden md:block">
       <div className="relative md:w-44 lg:w-52 xl:w-56">
         {/* A well, not a frosted chip. The bar is #0f1015 and the field sits
-            one step lighter at #17171c: on a near-black bar the thing you
+            one step lighter at #131318: on a near-black bar the thing you
             press has to catch light, not sink below it — darker than the bar
             and only the hairline was holding its shape. White at 5% over
             white at 10% read as decoration and sat at the wrong radius from
             the button beside it. */}
-        <label className="relative flex h-9 items-center rounded-[10px] border border-[#2b2b31] bg-[#17171c] text-neutral-300 transition-colors focus-within:border-[var(--menzu-accent)]/70 focus-within:ring-[3px] focus-within:ring-[var(--menzu-accent)]/15">
+        <label className="relative flex h-9 items-center rounded-[10px] border border-[#2b2b31] bg-[#131318] text-neutral-300 transition-colors focus-within:border-[var(--menzu-accent)]/70 focus-within:ring-[3px] focus-within:ring-[var(--menzu-accent)]/15">
           {navigating ? (
             <Loader2 size={15} aria-hidden className="ml-2.5 shrink-0 animate-spin text-neutral-500 motion-reduce:animate-none" />
           ) : (
@@ -160,10 +160,10 @@ export function HeaderSearch() {
             aria-label="Tìm sản phẩm"
             autoComplete="off"
             enterKeyHint="search"
-            // The hint is #8a8a8a, not neutral-400: on #17171c that is 5.17:1,
-            // still past AA, while neutral-400 sat at 7.08:1 and read as loud
+            // The hint is #8a8a8a, not neutral-400: on #131318 that is 5.36:1,
+            // still past AA, while neutral-400 sat at 7.34:1 and read as loud
             // as the nav rungs beside it — a prompt should be quieter than the
-            // words around it. Do not drop it to neutral-500; that is 3.77:1
+            // words around it. Do not drop it to neutral-500; that is 3.91:1
             // and fails, which is why audit 4 raised it off neutral-600.
             className="h-full w-full min-w-0 bg-transparent px-2 text-[13px] font-semibold text-white outline-none placeholder:font-normal placeholder:text-[#8a8a8a] [&::-webkit-search-cancel-button]:hidden"
           />
