@@ -128,7 +128,7 @@ export function HeaderSearch() {
     // Desktop only: on a phone the header has no room for a box, and the
     // shop chose no button either — the drawer and the shelves do the job.
     <div ref={box} className="relative hidden md:block">
-      <div className="relative md:w-52 lg:w-64 xl:w-80">
+      <div className="relative md:w-44 lg:w-52 xl:w-56">
         {/* A well, not a frosted chip. The bar is #1a1a1a, so a solid field a
             few steps darker reads as something you type into; white at 5%
             over white at 10% read as decoration and sat at the wrong radius
@@ -150,7 +150,7 @@ export function HeaderSearch() {
             value={q}
             onChange={(event) => setQ(event.target.value)}
             onKeyDown={onKeyDown}
-            placeholder="Tìm hack, tài khoản…"
+            placeholder="Tìm hack, acc…"
             aria-label="Tìm sản phẩm"
             autoComplete="off"
             enterKeyHint="search"
@@ -174,7 +174,7 @@ export function HeaderSearch() {
         </label>
 
         {showList ? (
-          <div className="drop-in absolute left-0 right-0 top-[42px] z-50 overflow-hidden rounded-[10px] border border-[#2b2b31] bg-[#0b0b0f]/97 shadow-2xl backdrop-blur-xl">
+          <div className="drop-in absolute right-0 top-[42px] z-50 w-[420px] max-w-[calc(100vw-2rem)] overflow-hidden rounded-[10px] border border-[#2b2b31] bg-[#0b0b0f]/97 shadow-2xl backdrop-blur-xl">
             {shown.length === 0 ? (
               <p className="px-4 py-3 text-[12px] text-neutral-500">
                 Không thấy gì khớp “{term}”.
