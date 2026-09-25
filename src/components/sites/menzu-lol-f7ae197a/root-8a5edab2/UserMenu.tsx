@@ -171,7 +171,7 @@ export function UserMenu({ user }: { user: HeaderUser }) {
           // h-9, which is the bell beside it and the Đăng nhập button this
           // replaces when signed out. It stood 6px taller than both, and a
           // taller trigger drops its panel 6px lower than the bell's.
-          className="flex h-9 items-center gap-2 sm:gap-2.5 px-1 sm:px-2 rounded-xl bg-white/10 border border-white/10 hover:bg-white/15 hover:border-white/20 transition-colors"
+          className="flex h-9 items-center gap-2 sm:gap-2.5 px-1 sm:px-2 rounded-[10px] border border-[#2b2b31] bg-[#08080b] hover:border-white/20 hover:bg-[#131318] transition-colors"
         >
           {/* The captured markup left this box empty, so the trigger showed a
               black square where every signed-in header shows a face. */}
@@ -193,7 +193,7 @@ export function UserMenu({ user }: { user: HeaderUser }) {
           // panel, so the two still share a corner though this one is now the
           // shorter of the pair - and they can never be open at once anyway, each
           // closing on the other's click.
-          <div className="drop-in absolute right-0 top-11 z-[100] w-[260px] overflow-hidden rounded-xl border border-white/10 bg-[#101114] shadow-2xl">
+          <div className="drop-in absolute right-0 top-[42px] z-[100] w-[260px] overflow-hidden rounded-[10px] border border-[#2b2b31] bg-[#0b0b0f]/97 shadow-2xl backdrop-blur-xl">
             {/* Who you are: the face, the name, and the two pills the live
                 menu sets under it rather than beside it — the name gets the
                 full width that way, however long it runs. */}
