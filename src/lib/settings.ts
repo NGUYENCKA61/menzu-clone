@@ -388,13 +388,15 @@ export const DEFAULT_SETTINGS: ShopSettings = {
     "acc-tft-hang-hieu",
   ],
 
-  // The words the hero shipped with, so moving them into settings changes
-  // nothing on screen until somebody edits one.
+  // The hero's words. They started as whatever the clone shipped with;
+  // the subtitle is the owner's own, rewritten here rather than in the
+  // database because no settings row overrides these keys — check before
+  // editing, since an admin edit would win over anything written here.
   heroBadge: "Official OBV Hax Reseller",
   heroTitle: "THICHTHIHACK.COM",
   heroSubtitle:
-    "Kho tài khoản Valorant, phần mềm và dịch vụ gaming. Giao dịch nhanh chóng, " +
-    "hỗ trợ tận tâm và cập nhật sản phẩm mỗi ngày.",
+    "Cung cấp đa dạng các bản hack cho những tựa game phổ biến, đảm bảo " +
+    "tính bảo mật và khả năng vận hành ổn định.",
   heroPrimaryLabel: "Xem sản phẩm",
   heroPrimaryHref: "/categories",
   heroSecondaryLabel: "Xem hướng dẫn",
