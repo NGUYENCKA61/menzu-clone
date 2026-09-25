@@ -176,7 +176,9 @@ function NavDropdown({ label, items }: { label: string; items: DropdownItem[] })
           With the panel open while anything inside holds focus, whatever is
           focused is on screen. */}
       <div className="absolute top-full left-0 pt-1 transition-all duration-300 z-[110] w-56 opacity-0 translate-y-1 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto group-focus-within:opacity-100 group-focus-within:translate-y-0 group-focus-within:pointer-events-auto">
-        <div className="rounded-xl border border-white/10 bg-[#0c0d12]/95 backdrop-blur-xl p-2 shadow-xl">
+        {/* The same corner, hairline and ground as the search results panel:
+            two lists hanging off one bar should not be two designs. */}
+        <div className="rounded-[10px] border border-[#2b2b31] bg-[#0b0b0f]/97 backdrop-blur-xl p-2 shadow-xl">
           {items.map((item) => {
             const Icon = item.icon
             return (
@@ -393,7 +395,7 @@ export function SiteHeaderClient({
             <Link
               href={loginHref}
               aria-label="Đăng nhập"
-              className="flex items-center gap-2 h-9 px-3.5 sm:px-4 rounded-[10px] bg-[var(--brand)] hover:bg-[var(--brand-dark)] transition-colors duration-200 border border-white/10 shrink-0"
+              className="flex items-center gap-2 h-9 px-3.5 sm:px-4 rounded-[10px] bg-[var(--brand)] hover:bg-[var(--brand-dark)] transition-colors duration-200 shrink-0"
             >
               <User size={16} />
               {/* Under 360px the header has no room for the word: with the
