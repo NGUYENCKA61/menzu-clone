@@ -1,5 +1,6 @@
 "use client"
 
+import Image from "next/image"
 import Link from "next/link"
 import {
   Activity,
@@ -258,6 +259,13 @@ export function SiteHeaderClient({
     return () => window.removeEventListener("scroll", onScroll)
   }, [])
 
+  // The logotype's big line is the name's first word; the small line is the
+  // shop's tagline, fixed here rather than derived from the rest of the name —
+  // the preloader and metadata read brand.name whole, so restyling this tail
+  // must never reword them.
+  const [brandWord] = brand.name.trim().split(/\s+/);
+  const brandTail = "hack là thích";
+
   return (
     <nav
       className={`site-nav fixed top-0 left-0 right-0 z-[100] transition-all duration-300 flex flex-col ${
@@ -318,11 +326,33 @@ export function SiteHeaderClient({
               <Menu size={18} />
             </button>
 
-            {/* The mark and the wordmark came out on the owner's word; the
-                slot now carries a rung like every other, so the bar opens
-                with words rather than a lockup. */}
-            <Link href="/" className={NAV_LINK_CLASS}>
-              Trang chủ
+            <Link
+              href="/"
+              className={`flex items-center gap-3 group origin-left transition-transform duration-300 ${
+                scrolled ? "scale-[0.94]" : "scale-100"
+              }`}
+            >
+              <div className="relative">
+                <Image
+                  src={brand.logo}
+                  alt={brandWord}
+                  width={28}
+                  height={28}
+                  priority
+                  className="w-7 h-7 object-contain transition-transform duration-500 group-hover:scale-110"
+                />
+                <span className="navbar-spin-ring absolute inset-[-2px] rounded-full border border-transparent border-t-red-500 transition-transform duration-1000 group-hover:scale-110 animate-spin-slow" />
+              </div>
+              <div className="flex flex-col leading-none">
+                <span className="text-xl font-black italic tracking-tighter text-white">
+                  {brandWord}
+                </span>
+                {brandTail ? (
+                  <span className="whitespace-nowrap text-[9px] font-bold tracking-[0.2em] text-red-500 uppercase">
+                    {brandTail}
+                  </span>
+                ) : null}
+              </div>
             </Link>
           </div>
 
