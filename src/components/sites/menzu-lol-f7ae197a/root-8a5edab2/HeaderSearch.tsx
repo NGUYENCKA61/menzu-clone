@@ -154,7 +154,7 @@ export function HeaderSearch() {
             aria-label="Tìm sản phẩm"
             autoComplete="off"
             enterKeyHint="search"
-            className="h-full w-full min-w-0 bg-transparent px-2 text-[13px] font-semibold text-white outline-none placeholder:text-[11px] placeholder:font-bold placeholder:uppercase placeholder:tracking-widest placeholder:text-neutral-400 [&::-webkit-search-cancel-button]:hidden"
+            className="h-full w-full min-w-0 bg-transparent px-2 text-[13px] font-semibold text-white outline-none placeholder:font-normal placeholder:text-neutral-400 [&::-webkit-search-cancel-button]:hidden"
           />
           {loading ? (
             <Loader2 size={14} aria-hidden className="mr-2.5 shrink-0 animate-spin text-neutral-500" />
