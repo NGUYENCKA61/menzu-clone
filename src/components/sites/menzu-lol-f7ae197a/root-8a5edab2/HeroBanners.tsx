@@ -81,12 +81,19 @@ export function HeroBanners({
     // because vh on a phone measures the screen without the browser's own bars
     // and pushes the cue out of sight. pb-20 is the cue's own room, so it
     // never sits over the copy or the artwork.
+    //
+    // From lg the two gaps the eye measures are made equal: header to the top
+    // of the copy and artwork, and their bottom to the scroll cue. The page
+    // container already puts 40px above this section, and the cue stands
+    // 20px off its bottom edge and is 33px tall, so pt 0 with pb 93 leaves
+    // 40px plus the same centring slack on both sides. At pt-14/pb-20 the
+    // top gap ran 69px longer than the bottom one on every screen.
     // isolate so the -z background layer stacks against this section, not the
     // page. Clipped on the vertical axis only, so nothing spills past the
     // fold; sideways stays visible because the reseller pill above the eyebrow
     // is pulled 14px left of the copy edge (into the page padding) and a full
     // clip took its rounded corner off. The sky layer clips itself.
-    <section className="relative isolate flex w-full flex-col justify-center overflow-x-visible overflow-y-clip min-h-[calc(100svh-128px)] pt-6 pb-20 sm:pt-10 lg:min-h-[calc(100svh-144px)] lg:pt-14">
+    <section className="relative isolate flex w-full flex-col justify-center overflow-x-visible overflow-y-clip min-h-[calc(100svh-128px)] pt-6 pb-20 sm:pt-10 lg:min-h-[calc(100svh-144px)] lg:pt-0 lg:pb-[93px]">
       {/* A field of faint, slowly twinkling stars over the page's own black,
           plus three shooting stars on long offset timers so one crosses now
           and then rather than all at once. Decoration only — aria-hidden, no
@@ -107,9 +114,13 @@ export function HeroBanners({
           the reference spaces its hero. Each side is capped and allowed to
           shrink (flex-1 + max-w + min-w-0), so the gap only opens once both
           have room for their full width, and they close up on a narrow laptop
-          instead of overflowing. z-10 lifts them clear of the sky layer. */}
-      <div className="relative z-10 flex flex-col gap-10 lg:flex-row lg:items-center lg:justify-between lg:gap-8">
-        <div className="flex w-full flex-col items-start lg:w-auto lg:min-w-0 lg:max-w-[440px] lg:flex-1 lg:-translate-y-12">
+          instead of overflowing. z-10 lifts them clear of the sky layer.
+          Top-aligned with items-start: the copy used to be nudged up a fixed
+          48px from centre, which lined its top up with the artwork only while
+          the card was 365px tall — from 1024 to 1279, where the card shrinks,
+          the copy stuck out 37px above it. */}
+      <div className="relative z-10 flex flex-col gap-10 lg:flex-row lg:items-start lg:justify-between lg:gap-8">
+        <div className="flex w-full flex-col items-start lg:w-auto lg:min-w-0 lg:max-w-[440px] lg:flex-1">
           {/* The reseller pill: dark glass with a red check, the same chrome
               the listing cards' corner badges wear, so it reads as a badge
               and not as a third line of copy. Fades up with the eyebrow.
