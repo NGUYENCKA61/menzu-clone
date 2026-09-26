@@ -38,9 +38,9 @@ export default async function RegisterPage({
 
   return (
     <div className="min-h-screen flex flex-col text-white overflow-x-clip selection:bg-[var(--menzu-accent)]/30">
-      {/* The site artwork again, blurred to near-black behind the card (see
-          PageBackdrop's `soft`), covering the root layout's sharp copy. */}
-      <PageBackdrop src={settings.siteBackground} soft />
+      {/* Site-black with a faint light from the top (PageBackdrop's
+          "spotlight"), covering the root layout's artwork. */}
+      <PageBackdrop tone="spotlight" />
       {/* spacer reserving the fixed header's 104px */}
       <div className="w-full shrink-0 h-[104px]" />
       <SiteHeader />
