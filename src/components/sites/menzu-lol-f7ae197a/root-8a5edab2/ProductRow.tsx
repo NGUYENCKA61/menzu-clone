@@ -210,7 +210,11 @@ function RowCard({
       className={cn(
         // The product cards' surface, radius and lift, so a category
         // tile and an account tile in the next row read as one family.
-        "group flex h-full flex-col bg-[#101114] rounded-[15px] overflow-hidden border lift-card p-3 sm:p-4 hover:-translate-y-1 hover:shadow-[0_15px_40px_#00000088]",
+        "group flex h-full flex-col bg-[#101114] rounded-[15px] overflow-hidden border lift-card hover:-translate-y-1 hover:shadow-[0_15px_40px_#00000088]",
+        // The game list's wider tile runs its cover to the card's edges, the
+        // way lmarket and elitehacks do, and sets its words in a padded block
+        // under it; every other row keeps the inset frame.
+        wide ? "p-0" : "p-3 sm:p-4",
         t.card,
       )}
     >
@@ -219,7 +223,8 @@ function RowCard({
           nothing letterboxed. */}
       <div
         className={cn(
-          "relative w-full aspect-[16/9] rounded-[10px] overflow-hidden mb-4 border transition-colors",
+          "relative w-full aspect-[16/9] overflow-hidden transition-colors",
+          wide ? "" : "rounded-[10px] mb-4 border",
           t.frame,
         )}
       >
@@ -261,7 +266,10 @@ function RowCard({
 
       <h3
         className={cn(
-          "text-center text-sm sm:text-base font-black uppercase text-white mb-2 transition-colors tracking-wide",
+          "text-sm font-black uppercase text-white transition-colors tracking-wide",
+          wide
+            ? "px-3 pt-3 mb-1.5 text-left sm:px-4 sm:pt-3.5 sm:text-[15px]"
+            : "text-center mb-2 sm:text-base",
           t.title,
         )}
       >
@@ -273,7 +281,12 @@ function RowCard({
           otherwise stretch its tile taller than the three beside it and
           pull the whole row's buttons out of line. */}
       {card.description ? (
-        <p className="text-center text-[11px] sm:text-xs leading-[1.55] text-[#9b9da5] mb-4 line-clamp-2">
+        <p
+          className={cn(
+            "text-[11px] sm:text-xs leading-[1.55] text-[#9b9da5] line-clamp-2",
+            wide ? "px-3 mb-3.5 text-left sm:px-4" : "text-center mb-4",
+          )}
+        >
           {card.description}
         </p>
       ) : (
@@ -326,7 +339,7 @@ function RowCard({
         </div>
       ) : null}
 
-      <div className="w-full mt-auto relative">
+      <div className={cn("w-full mt-auto relative", wide && "px-3 pb-3 sm:px-4 sm:pb-4")}>
         <div
           className={cn(
             "relative w-full p-[1.5px] transition-all duration-300 [clip-path:polygon(8px_0,100%_0,100%_calc(100%-8px),calc(100%-8px)_100%,0_100%,0_8px)]",
