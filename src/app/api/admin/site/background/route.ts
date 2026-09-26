@@ -20,7 +20,10 @@ const MIN_HEIGHT = 540;
 const MAX_SIDE = 8000;
 
 /**
- * Takes a site-background image and answers with the path to store.
+ * Takes a site-background image and answers with the path to store. The
+ * same door serves the flash-sale ground, the overview banner and the hero
+ * still, each shown wide enough that the same floor suits it — which is why
+ * the size error says "Ảnh", not "Ảnh nền".
  *
  * It does not write the setting — uploading and saving stay separate, like
  * every picker on the settings screen, so the admin previews it first and can
@@ -63,7 +66,7 @@ export async function POST(request: Request) {
   if (size.width < MIN_WIDTH || size.height < MIN_HEIGHT) {
     return NextResponse.json(
       {
-        error: `Ảnh nền tối thiểu ${MIN_WIDTH}×${MIN_HEIGHT}px. Ảnh này ${size.width}×${size.height}px.`,
+        error: `Ảnh tối thiểu ${MIN_WIDTH}×${MIN_HEIGHT}px. Ảnh này ${size.width}×${size.height}px.`,
       },
       { status: 400 },
     );

@@ -315,6 +315,8 @@ export function AdminSettings({
   const [brandLogo, setBrandLogo] = useState(settings.brandLogo);
   const [brandColor, setBrandColor] = useState(settings.brandColor);
   const [heroBanner, setHeroBanner] = useState(settings.heroBanner);
+  const [heroBannerUploading, setHeroBannerUploading] = useState(false);
+  const [heroBannerMsg, setHeroBannerMsg] = useState<{ tone: "ok" | "err"; text: string } | null>(null);
   const [siteBackground, setSiteBackground] = useState(settings.siteBackground);
   const [flashSaleBackground, setFlashSaleBackground] = useState(settings.flashSaleBackground);
   const [flashBgUploading, setFlashBgUploading] = useState(false);
@@ -391,6 +393,29 @@ export function AdminSettings({
       setSiteBgMsg({ tone: "err", text: "Không kết nối được máy chủ" });
     } finally {
       setSiteBgUploading(false);
+    }
+  }
+
+  /** The hero still rides the same door too: the path lands in the field and
+   *  applies on Lưu, like every other picker here. */
+  async function uploadHeroBanner(file: File) {
+    setHeroBannerUploading(true);
+    setHeroBannerMsg(null);
+    try {
+      const form = new FormData();
+      form.append("file", file);
+      const res = await fetch("/api/admin/site/background", { method: "POST", body: form });
+      const data = (await res.json().catch(() => ({}))) as { url?: string; error?: string };
+      if (!res.ok || !data.url) {
+        setHeroBannerMsg({ tone: "err", text: data.error ?? "Tải ảnh thất bại" });
+        return;
+      }
+      setHeroBanner(data.url);
+      setHeroBannerMsg({ tone: "ok", text: "Đã tải ảnh — nhớ bấm Lưu để áp dụng" });
+    } catch {
+      setHeroBannerMsg({ tone: "err", text: "Không kết nối được máy chủ" });
+    } finally {
+      setHeroBannerUploading(false);
     }
   }
 
@@ -1592,15 +1617,72 @@ export function AdminSettings({
               <label htmlFor="hero-banner" className={LABEL}>
                 Ảnh banner đầu trang
               </label>
-              <input
-                id="hero-banner"
-                value={heroBanner}
-                onChange={(event) => setHeroBanner(event.target.value)}
-                className={`${FIELD} font-mono`}
-              />
+              <div className="flex flex-col gap-3 sm:flex-row">
+                {/* The hero frame's own 16:9, cropped the way the page crops it
+                    (object-cover, no dim), so a wide promo banner shows here
+                    exactly how much of its sides the homepage will cut. */}
+                <div className="relative aspect-[16/9] w-full shrink-0 overflow-hidden rounded-xl border border-white/10 bg-[#111111] sm:w-[200px]">
+                  {heroBanner ? (
+                    // A plain img: the value can be any path the shop typed, and
+                    // next/image would need each one in its allow-list.
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={heroBanner}
+                      alt="Xem trước ảnh banner đầu trang"
+                      className="absolute inset-0 h-full w-full object-cover"
+                    />
+                  ) : null}
+                </div>
+
+                <div className="flex min-w-0 flex-1 flex-col gap-2">
+                  <input
+                    id="hero-banner"
+                    value={heroBanner}
+                    onChange={(event) => setHeroBanner(event.target.value)}
+                    className={`${FIELD} font-mono`}
+                    placeholder="/uploads/site/… hoặc đường dẫn ảnh"
+                  />
+                  <div className="flex flex-wrap items-center gap-3">
+                    <label
+                      className={`inline-flex h-9 cursor-pointer items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 text-[10px] font-black uppercase tracking-widest text-neutral-200 transition-colors hover:bg-white/10 ${
+                        heroBannerUploading ? "pointer-events-none opacity-60" : ""
+                      }`}
+                    >
+                      <Upload size={13} />
+                      {heroBannerUploading ? "Đang tải lên…" : "Chọn ảnh từ máy"}
+                      <input
+                        type="file"
+                        accept="image/png,image/jpeg,image/webp"
+                        className="hidden"
+                        onChange={(event) => {
+                          const file = event.target.files?.[0];
+                          event.target.value = "";
+                          if (file) void uploadHeroBanner(file);
+                        }}
+                      />
+                    </label>
+                    <span className="text-[10px] text-neutral-600">
+                      PNG / JPG / WebP · nên khổ 16:9, vd 1920×1080 · tối thiểu 960×540
+                    </span>
+                  </div>
+                  {heroBannerMsg ? (
+                    <p
+                      role="alert"
+                      className={
+                        heroBannerMsg.tone === "ok"
+                          ? "rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-[11px] font-semibold text-emerald-400"
+                          : "rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-[11px] font-semibold text-red-400"
+                      }
+                    >
+                      {heroBannerMsg.text}
+                    </p>
+                  ) : null}
+                </div>
+              </div>
               <p className={HINT}>
                 Ảnh lớn trên cùng trang chủ, cũng là ảnh hiện ra khi ai đó chia sẻ link
-                shop lên Facebook hay Zalo.
+                shop lên Facebook hay Zalo. Khi đã có video hero, đây là khung chờ lúc
+                video đang tải và là ảnh hiện thay khi video không chạy được.
               </p>
             </div>
 
