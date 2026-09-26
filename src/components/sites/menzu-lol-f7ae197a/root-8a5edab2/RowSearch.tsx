@@ -81,6 +81,7 @@ export function RowSearch({
   placeholder = "Tìm game…",
   openOnArrival,
   filters = true,
+  wide = false,
 }: {
   items: RowSearchItem[];
   /** Where the empty state sends a reader who found nothing. */
@@ -99,6 +100,12 @@ export function RowSearch({
    * would be more control than content.
    */
   filters?: boolean;
+  /**
+   * Three tiles a line from lg instead of four — the game list's, where the
+   * cover art is what sells the game and a quarter of the row cropped it
+   * small and broke long titles onto a second line.
+   */
+  wide?: boolean;
 }) {
   const [query, setQuery] = useState("");
   const [platform, setPlatform] = useState<CategoryPlatform | typeof ALL>(ALL);
@@ -106,7 +113,9 @@ export function RowSearch({
   /** True while "Thu gọn" is playing the tiles out, before they go. */
   const [closing, setClosing] = useState(false);
   const closeTimer = useRef<number | null>(null);
-  const [columns, setColumns] = useState(4);
+  // The server cannot measure, so it guesses the desktop count; a wide row
+  // guessing four would draw a fourth tile and then take it away.
+  const [columns, setColumns] = useState(wide ? 3 : 4);
   const gridRef = useRef<HTMLDivElement>(null);
   const inputId = useId();
 
@@ -291,7 +300,7 @@ export function RowSearch({
         <>
           <div
             ref={gridRef}
-            className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 pt-1"
+            className={`grid grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 pt-1 ${wide ? "" : "lg:grid-cols-4"}`}
           >
             {shown.map((item, index) => {
               // Tiles the press just opened rise in one after another, the

@@ -193,11 +193,14 @@ function RowCard({
   card,
   t,
   top = false,
+  wide = false,
 }: {
   card: ProductCard;
   t: (typeof TONES)[RowTone];
   /** Wear the "TOP THÁNG" pill. */
   top?: boolean;
+  /** Drawn a third of the row wide (the game list), not a quarter. */
+  wide?: boolean;
 }) {
   const stats = card.stats.filter((s) => !HIDDEN_STATS.has(s.label));
 
@@ -230,7 +233,14 @@ function RowCard({
             src={card.image}
             alt={card.title}
             fill
-            sizes="(min-width: 1024px) 25vw, (min-width: 768px) 33vw, 40vw"
+            // A third of a row that stops growing at 1320px is ~372px of
+            // picture; asked for as a quarter it came back soft on a sharp
+            // screen once the game list went three across.
+            sizes={
+              wide
+                ? "(min-width: 1320px) 400px, (min-width: 768px) 33vw, 40vw"
+                : "(min-width: 1024px) 25vw, (min-width: 768px) 33vw, 40vw"
+            }
             className={cn(
               "transition-transform duration-500 group-hover:scale-110",
               t.image,
@@ -408,13 +418,14 @@ export function ProductRow({
         // The tiles are drawn here, on the server, and handed to the search
         // as finished nodes — it only chooses which of them to show.
         <RowSearch
+          wide
           openOnArrival={id}
           viewAllHref={viewAllHref}
           items={cards.map((card) => ({
             key: card.href,
             title: card.title,
             platform: card.platform ?? null,
-            node: <RowCard card={card} t={t} top={ranked} />,
+            node: <RowCard card={card} t={t} top={ranked} wide />,
           }))}
         />
       ) : (
