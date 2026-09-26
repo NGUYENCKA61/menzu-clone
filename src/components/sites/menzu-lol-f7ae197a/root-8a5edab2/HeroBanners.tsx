@@ -206,8 +206,10 @@ export function HeroBanners({
         {/* The artwork in a wide 16/9 frame, the shape the shop's covers and
             banner already come in, so object-cover crops almost nothing. The
             rounder corners and the ring match the media card in the
-            reference; the second shadow is a faint wash of the accent under
-            the card, so it sits on the black instead of floating over it.
+            reference. The red wash that used to glow beneath the card came
+            off on the owner's word; in its place a wide black halo on every
+            side, which darkens the busy page picture right behind the frame
+            so the video stands clear of it.
             From 1400px (87.5rem — in rem so it sorts after lg:max-w and wins)
             the card runs 40px past the container's right edge —
             past the header's last button — the way gachatool.com's does on a
@@ -215,7 +217,7 @@ export function HeroBanners({
             margin, so it runs 40px past the header while its left edge gives
             20px back to the gap beside the copy.
             Below 1400 there is no side margin to spend and it stays flush. */}
-        <div className="relative aspect-[16/9] w-full overflow-hidden rounded-3xl border border-white/[0.08] bg-[#0a0a0c] shadow-[0_30px_80px_-30px_rgba(0,0,0,0.85),0_40px_120px_-40px_rgba(255,49,88,0.35)] lg:w-auto lg:min-w-0 lg:max-w-[650px] lg:flex-1 min-[87.5rem]:-mr-10 min-[87.5rem]:max-w-[670px]">
+        <div className="relative aspect-[16/9] w-full overflow-hidden rounded-3xl border border-white/[0.08] bg-[#0a0a0c] shadow-[0_30px_80px_-30px_rgba(0,0,0,0.9),0_0_140px_30px_rgba(0,0,0,0.65)] lg:w-auto lg:min-w-0 lg:max-w-[650px] lg:flex-1 min-[87.5rem]:-mr-10 min-[87.5rem]:max-w-[670px]">
           {video ? (
             // Muted and inline, because a hero that makes noise or takes over
             // the screen on a phone is a hero people leave. The still is drawn
