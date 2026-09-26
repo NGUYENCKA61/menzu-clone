@@ -79,6 +79,12 @@ export interface ProductRowProps {
   quiet?: boolean;
   /** Lines of tiles shown before "Xem thêm" (see RowSearch). */
   rows?: number;
+  /**
+   * Set the row in its own panel — a faint surface, a hairline and a large
+   * radius around heading and tiles — so neighbouring rows read as separate
+   * blocks rather than one run of cards.
+   */
+  panel?: boolean;
   /** An anchor on the row, for the hero's "Khám phá ngay" cue to land on. */
   id?: string;
   className?: string;
@@ -287,8 +293,13 @@ function RowCard({
             words, a filled Lucide star in front, square-ish corners. No number: the shop
             wanted the label, not a ranking. */}
         {top ? (
-          <span className="absolute left-1.5 top-1.5 z-10 inline-flex items-center gap-1 rounded-md bg-amber-500/90 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-amber-950 sm:left-2.5 sm:top-2.5 sm:px-2 sm:py-1 sm:text-[10px]">
-            <Star size={10} className="shrink-0 fill-current" aria-hidden />
+          <span
+            className={cn(
+              "absolute left-1.5 top-1.5 z-10 inline-flex items-center gap-1 rounded-md bg-amber-500/90 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-amber-950 sm:left-2.5 sm:top-2.5 sm:px-2 sm:py-1 sm:text-[10px]",
+              quiet && "border border-white/10 bg-[#0a0a0d]/70 text-neutral-100",
+            )}
+          >
+            <Star size={10} className={cn("shrink-0 fill-current", quiet && "text-amber-400")} aria-hidden />
             Top tháng
           </span>
         ) : null}
@@ -607,6 +618,7 @@ export function ProductRow({
   list = false,
   quiet = false,
   rows = 1,
+  panel = false,
   id,
   className,
 }: ProductRowProps) {
@@ -637,8 +649,16 @@ export function ProductRow({
   );
 
   return (
-    <section id={id} className={cn("w-full", className)}>
-      <div className="flex flex-row items-center justify-between mb-8">
+    <section
+      id={id}
+      className={cn(
+        "w-full",
+        panel &&
+          "rounded-[18px] border border-white/[0.07] bg-white/[0.022] px-3.5 py-4 sm:rounded-3xl sm:px-7 sm:pt-7 sm:pb-6",
+        className,
+      )}
+    >
+      <div className={cn("flex flex-row items-center justify-between mb-8", panel && "mb-5 sm:mb-6")}>
         {title}
         {viewAll}
       </div>
@@ -654,7 +674,7 @@ export function ProductRow({
         <RowSlider count={cards.length}>
           {cards.map((card) => (
             <div key={card.href} className="w-[var(--tile-w)] shrink-0 snap-start">
-              <RowCard card={card} t={t} top={ranked} />
+              <RowCard card={card} t={t} top={ranked} quiet={quiet} />
             </div>
           ))}
         </RowSlider>
@@ -690,7 +710,7 @@ export function ProductRow({
             key: card.href,
             title: card.title,
             platform: card.platform ?? null,
-            node: <RowCard card={card} t={t} top={ranked} />,
+            node: <RowCard card={card} t={t} top={ranked} quiet={quiet} />,
           }))}
         />
       )}

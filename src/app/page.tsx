@@ -131,9 +131,9 @@ export default async function Home() {
             tone="menzu"
             marquee={group.slug === "hot-trending"}
             ranked={group.slug === "hot-trending"}
-            list={group.slug === "hot-trending"}
             searchable={group.slug === GAME_LIST_SLUG}
-            quiet={group.slug === GAME_LIST_SLUG}
+            quiet={group.slug === "hot-trending" || group.slug === GAME_LIST_SLUG}
+            panel={group.slug === "hot-trending" || group.slug === GAME_LIST_SLUG}
             rows={group.slug === GAME_LIST_SLUG ? 2 : 1}
           />
         ))}
