@@ -4,13 +4,14 @@ import { CardImage } from "@/components/sites/menzu-lol-f7ae197a/shared/CardImag
  * The home page's own backdrop, drawn over the root layout's fixed artwork
  * (the same z-[-1], later in the stream), on gachatool.com's pattern: the
  * picture sits behind the first screen only and fades out at its foot, and
- * from there down the page is a calm near-black with a fine grain and a
- * scatter of dim stars. Under the old backdrop the artwork stayed behind
- * every row of cards to the footer, and the owner found the page busy.
+ * from there down the page is a calm near-black with a fine grain. Under
+ * the old backdrop the artwork stayed behind every row of cards to the
+ * footer, and the owner found the page busy. (gachatool also scatters
+ * stars over its sky; they were tried here and taken out as clutter.)
  *
  * The picture scrolls away with the hero (absolute); the sky stays put
- * (fixed). Grain and stars come after the picture so they lie over it too.
- * Their styles are the home-sky-* classes in globals.css.
+ * (fixed). The grain comes after the picture so it lies over it too. Their
+ * styles are the home-sky-* classes in globals.css.
  */
 export function HomeBackdrop({ src }: { src?: string }) {
   return (
@@ -33,8 +34,6 @@ export function HomeBackdrop({ src }: { src?: string }) {
         </div>
       ) : null}
       <div aria-hidden className="home-sky-grain pointer-events-none fixed inset-0 z-[-1]" />
-      <div aria-hidden className="home-sky-stars pointer-events-none fixed inset-0 z-[-1]" />
-      <div aria-hidden className="home-sky-twinkle pointer-events-none fixed inset-0 z-[-1]" />
     </>
   );
 }
