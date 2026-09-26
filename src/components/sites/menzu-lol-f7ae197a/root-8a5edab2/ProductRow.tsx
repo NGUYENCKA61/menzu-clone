@@ -53,7 +53,7 @@ export interface ProductRowProps {
    * thêm" regardless; this only adds the controls.
    */
   searchable?: boolean;
-  /** An anchor on the row, for the hero's "Khám phá sản phẩm" cue to land on. */
+  /** An anchor on the row, for the hero's "Khám phá ngay" cue to land on. */
   id?: string;
   className?: string;
 }

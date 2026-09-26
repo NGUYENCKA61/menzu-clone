@@ -237,7 +237,7 @@ export function HeroBanners({
         </div>
       </div>
 
-      <ScrollCta targetId={SCROLL_TARGET_ID} label="Khám phá sản phẩm" animated />
+      <ScrollCta targetId={SCROLL_TARGET_ID} label="Khám phá ngay" animated />
     </section>
   );
 }

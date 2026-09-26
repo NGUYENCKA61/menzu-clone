@@ -107,7 +107,7 @@ export default async function Home() {
     // One row per group, in the order the admin arranged them. Headings and
     // membership come from the groups table, so this file no longer knows
     // what any row is called.
-    // The hero's "Khám phá sản phẩm" cue lands on the game-list row — the
+    // The hero's "Khám phá ngay" cue lands on the game-list row — the
     // shop's choice: that row is the catalogue. Should the row ever be gone,
     // the whole block takes the anchor so the cue still goes somewhere.
     // scroll-mt clears the fixed header, so the heading lands below it.
