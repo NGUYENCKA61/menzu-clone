@@ -131,7 +131,9 @@ export default async function Home() {
             tone="menzu"
             marquee={group.slug === "hot-trending"}
             ranked={group.slug === "hot-trending"}
+            bento={group.slug === "hot-trending"}
             searchable={group.slug === GAME_LIST_SLUG}
+            tiles={group.slug === GAME_LIST_SLUG}
           />
         ))}
       </div>

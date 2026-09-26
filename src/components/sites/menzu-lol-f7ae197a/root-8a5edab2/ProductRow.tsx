@@ -53,6 +53,18 @@ export interface ProductRowProps {
    * thêm" regardless; this only adds the controls.
    */
   searchable?: boolean;
+  /**
+   * One large tile beside four small ones instead of a row of cards — the
+   * month's picks on the home page. Needs five tiles; with fewer the row
+   * keeps its ordinary layout.
+   */
+  bento?: boolean;
+  /**
+   * Picture tiles instead of cards: the cover fills the tile and the name
+   * sits over it, with no blurb and no button, four a line and two lines
+   * before "Xem thêm". The game list's, on lmarket's pattern.
+   */
+  tiles?: boolean;
   /** An anchor on the row, for the hero's "Khám phá ngay" cue to land on. */
   id?: string;
   className?: string;
@@ -372,6 +384,135 @@ function RowCard({
   );
 }
 
+/** Tiles a bento row draws: the lead and the four beside it. */
+const BENTO_SIZE = 5;
+
+/**
+ * The month's picks as a bento: the first tile large, the next four small
+ * beside it. Only the large one carries the "Top tháng" pill, a line of
+ * blurb and the red XEM NGAY, so the row has one red button where it had one
+ * per card — and it no longer wears the same card as the game list under it,
+ * which is what made the two rows run together. Tiles past the fifth wait on
+ * the index page, behind the row's "Xem tất cả".
+ */
+function RowBento({ cards, ranked }: { cards: ProductCard[]; ranked: boolean }) {
+  const [lead, ...rest] = cards.slice(0, BENTO_SIZE);
+  return (
+    <div className="grid grid-cols-2 gap-3 sm:gap-3.5 md:h-[360px] md:grid-cols-[2fr_1fr_1fr] md:grid-rows-2 lg:h-[470px]">
+      <BentoTile card={lead} lead ranked={ranked} />
+      {rest.map((card) => (
+        <BentoTile key={card.href} card={card} />
+      ))}
+    </div>
+  );
+}
+
+function BentoTile({
+  card,
+  lead = false,
+  ranked = false,
+}: {
+  card: ProductCard;
+  /** The large tile: pill, blurb and button. */
+  lead?: boolean;
+  ranked?: boolean;
+}) {
+  return (
+    <Link
+      href={card.href}
+      className={cn(
+        "group relative isolate overflow-hidden rounded-2xl border border-white/[0.07] bg-[#0c0d10] transition-colors hover:border-white/20",
+        // A phone stacks the lead across both columns over a 2×2 of the rest;
+        // from md the grid's own rows give every tile its height.
+        lead
+          ? "col-span-2 aspect-[16/11] md:col-span-1 md:row-span-2 md:aspect-auto"
+          : "aspect-[16/11] md:aspect-auto",
+      )}
+    >
+      {card.image ? (
+        <CardImage
+          src={card.image}
+          alt={card.title}
+          fill
+          sizes={
+            lead
+              ? "(min-width: 1320px) 640px, (min-width: 768px) 50vw, 100vw"
+              : "(min-width: 1320px) 320px, (min-width: 768px) 25vw, 50vw"
+          }
+          className="object-cover transition-transform duration-500 group-hover:scale-105 motion-reduce:transform-none"
+        />
+      ) : null}
+      <span
+        aria-hidden
+        className="absolute inset-0 bg-gradient-to-t from-[#08080b]/95 via-[#08080b]/30 via-50% to-transparent to-75%"
+      />
+      <span
+        className={cn(
+          "absolute inset-x-3.5 bottom-3 flex flex-col gap-1.5",
+          lead && "sm:inset-x-6 sm:bottom-6 sm:gap-2.5",
+        )}
+      >
+        {lead && ranked ? (
+          <span className="inline-flex items-center gap-1 self-start rounded-md bg-amber-500/90 px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-amber-950">
+            <Star size={10} className="shrink-0 fill-current" aria-hidden />
+            Top tháng
+          </span>
+        ) : null}
+        <h3
+          className={cn(
+            "font-black uppercase leading-tight text-white",
+            lead ? "text-lg sm:text-[28px] sm:leading-[1.08]" : "text-xs sm:text-sm",
+          )}
+        >
+          {card.title}
+        </h3>
+        {lead && card.description ? (
+          <p className="hidden max-w-[78%] text-[13px] leading-relaxed text-[#c7c9d1] line-clamp-2 sm:block">
+            {card.description}
+          </p>
+        ) : null}
+        {lead ? (
+          <span className="mt-1 inline-flex items-center gap-1 self-start rounded-[10px] bg-[var(--menzu-accent)] px-4 py-2.5 text-[11px] font-black uppercase tracking-[0.12em] text-white transition-colors group-hover:bg-[var(--menzu-accent-dark)]">
+            Xem ngay
+            <ChevronRight size={12} aria-hidden />
+          </span>
+        ) : null}
+      </span>
+    </Link>
+  );
+}
+
+/**
+ * A game as a picture tile, on lmarket's pattern: the cover fills a 4:3
+ * tile and the name sits over its foot on a dark fade. The whole tile is the
+ * link, so the list no longer runs a red bar under every game.
+ */
+function RowTile({ card }: { card: ProductCard }) {
+  return (
+    <Link
+      href={card.href}
+      className="group relative isolate block aspect-[4/3] overflow-hidden rounded-[14px] border border-white/[0.06] bg-[#0c0d10] transition-colors hover:border-white/20"
+    >
+      {card.image ? (
+        <CardImage
+          src={card.image}
+          alt={card.title}
+          fill
+          sizes="(min-width: 1320px) 310px, (min-width: 1024px) 25vw, (min-width: 768px) 33vw, 50vw"
+          className="object-cover transition-transform duration-500 group-hover:scale-105 motion-reduce:transform-none"
+        />
+      ) : null}
+      <span
+        aria-hidden
+        className="absolute inset-0 bg-gradient-to-t from-[#08080b]/95 via-[#08080b]/45 via-40% to-transparent to-65%"
+      />
+      <h3 className="absolute inset-x-3.5 bottom-3 text-[13px] font-black uppercase leading-tight tracking-wide text-white sm:text-sm">
+        {card.title}
+      </h3>
+    </Link>
+  );
+}
+
 export function ProductRow({
   heading,
   headingSuffix,
@@ -381,10 +522,13 @@ export function ProductRow({
   marquee: runs = false,
   ranked = false,
   searchable = false,
+  bento: wantsBento = false,
+  tiles = false,
   id,
   className,
 }: ProductRowProps) {
   const t = TONES[tone];
+  const bento = wantsBento && cards.length >= BENTO_SIZE;
   // Only a row that asked to run does, and only once it has enough tiles to
   // need it: a short row that glided would be motion for its own sake.
   const marquee = runs && cards.length >= MARQUEE_FROM;
@@ -416,7 +560,9 @@ export function ProductRow({
         {viewAll}
       </div>
 
-      {marquee ? (
+      {bento ? (
+        <RowBento cards={cards} ranked={ranked} />
+      ) : marquee ? (
         // Each tile takes the width the viewport sets per breakpoint — a
         // quarter, a third, a half of it — with the grid's own gaps, so the
         // sliding row and the still row show tiles of one size.
@@ -431,14 +577,15 @@ export function ProductRow({
         // The tiles are drawn here, on the server, and handed to the search
         // as finished nodes — it only chooses which of them to show.
         <RowSearch
-          wide
+          wide={!tiles}
+          rows={tiles ? 2 : 1}
           openOnArrival={id}
           viewAllHref={viewAllHref}
           items={cards.map((card) => ({
             key: card.href,
             title: card.title,
             platform: card.platform ?? null,
-            node: <RowCard card={card} t={t} top={ranked} wide />,
+            node: tiles ? <RowTile card={card} /> : <RowCard card={card} t={t} top={ranked} wide />,
           }))}
         />
       ) : (

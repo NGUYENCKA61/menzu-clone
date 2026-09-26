@@ -12,7 +12,7 @@ import {
   platformLabel,
   type CategoryPlatform,
 } from "@/lib/categoryPlatform";
-import { columnsOf, hiddenAfter, revealLimit } from "@/lib/rowReveal";
+import { columnsOf, FIRST_ROWS, hiddenAfter, revealLimit } from "@/lib/rowReveal";
 
 /** One tile the row can show, with the words it can be found by. */
 export interface RowSearchItem {
@@ -82,6 +82,7 @@ export function RowSearch({
   openOnArrival,
   filters = true,
   wide = false,
+  rows = FIRST_ROWS,
 }: {
   items: RowSearchItem[];
   /** Where the empty state sends a reader who found nothing. */
@@ -106,6 +107,11 @@ export function RowSearch({
    * small and broke long titles onto a second line.
    */
   wide?: boolean;
+  /**
+   * Lines of tiles shown before "Xem thêm". One for ordinary rows; the game
+   * list's picture tiles are small enough to show two.
+   */
+  rows?: number;
 }) {
   const [query, setQuery] = useState("");
   const [platform, setPlatform] = useState<CategoryPlatform | typeof ALL>(ALL);
@@ -125,8 +131,9 @@ export function RowSearch({
       (platform === ALL || item.platform === platform) &&
       (!needle || fold(item.title).includes(needle)),
   );
-  // One line at rest; "Xem thêm" opens the whole list at once.
-  const firstLine = revealLimit(columns);
+  // One line at rest (or `rows` of them); "Xem thêm" opens the whole list
+  // at once.
+  const firstLine = revealLimit(columns, rows);
   const limit = expanded ? matched.length : firstLine;
   const shown = matched.slice(0, limit);
   const hidden = hiddenAfter(matched.length, limit);
