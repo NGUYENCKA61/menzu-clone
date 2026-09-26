@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
+import { PageBackdrop } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/PageBackdrop";
 import { SiteFooter } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/SiteFooter";
 import { SiteHeader } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/SiteHeader";
 import { LoginForm } from "@/components/sites/menzu-lol-f7ae197a/shared/LoginForm";
@@ -74,9 +75,10 @@ export default async function LoginPage({
   const reason = reasonFor(next);
 
   return (
-    // Plain site-black over the fixed PageBackdrop artwork, as SimplePage
-    // does, on the owner's word: the card stands alone on black.
-    <div className="min-h-screen flex flex-col text-white overflow-x-clip selection:bg-[var(--menzu-accent)]/30 bg-[#050508]">
+    <div className="min-h-screen flex flex-col text-white overflow-x-clip selection:bg-[var(--menzu-accent)]/30">
+      {/* The site artwork again, blurred to near-black behind the card (see
+          PageBackdrop's `soft`), covering the root layout's sharp copy. */}
+      <PageBackdrop src={settings.siteBackground} soft />
       {/* spacer reserving the fixed header's 104px */}
       <div className="w-full shrink-0 h-[104px]" />
       <SiteHeader />
