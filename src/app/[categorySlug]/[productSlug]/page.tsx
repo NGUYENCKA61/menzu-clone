@@ -8,10 +8,12 @@ import { formatVnd } from "@/components/sites/menzu-lol-f7ae197a/shared/productD
 import { docHtmlToPlainText, isHtmlBody } from "@/lib/docHtml";
 import {
   getAccountDetail,
+  getProductReviews,
   getSoftwareDetail,
   listSimilarSoftware,
   hasPaidOrderFor,
   resolveProduct,
+  reviewableOrderFor,
 } from "@/lib/queries";
 import { productHref } from "@/lib/routes";
 import { JsonLd, softwareJsonLd } from "@/lib/seo";
@@ -157,16 +159,19 @@ export default async function ProductPage({ params, searchParams }: PageProps) {
     // the view receives rather than hidden by it, and the HTML a browser gets
     // never carries a guide its reader has not paid for.
     const user = await getCurrentUser();
-    const [[bought, statusSubscribed], similar] = await Promise.all([
+    const [[bought, statusSubscribed, reviewOrder], similar, productReviews] = await Promise.all([
       user
         ? Promise.all([
             hasPaidOrderFor(user.id, software.code),
             isStatusSubscribed(user.id, software.code),
+            reviewableOrderFor(user.id, software.code),
           ])
-        : Promise.resolve([false, null] as const),
+        : Promise.resolve([false, null, null] as const),
       // Twelve, so that nine remain once free tools are set aside below:
       // three show at once on a desktop, the arrows bring in the rest.
       listSimilarSoftware(software.code, software.categorySlug, 12),
+      // Six: two lines of three on a desktop.
+      getProductReviews(software.code, 6),
     ]);
     // A free tool is not offered beside a paid one: its page is its own
     // thing, still to come. Beside another free tool it stays.
@@ -206,6 +211,20 @@ export default async function ProductPage({ params, searchParams }: PageProps) {
           initialQuantity={readQuantity(sl)}
           setupGuideAccess={setupGuideAccess}
           statusSubscribed={statusSubscribed}
+          reviews={{
+            reviews: productReviews.rows.map((r) => ({
+              name: r.name,
+              date: r.createdAt.toLocaleDateString("vi-VN"),
+              body: r.body,
+              amount: formatVnd(r.amount) + "đ",
+              avatar: r.avatarUrl ?? "",
+              rating: r.rating,
+              verified: r.verified,
+            })),
+            count: productReviews.count,
+            average: productReviews.average,
+            reviewHref: reviewOrder ? `/orders/${reviewOrder}/danh-gia` : null,
+          }}
           similar={similarShown}
         />
       </>

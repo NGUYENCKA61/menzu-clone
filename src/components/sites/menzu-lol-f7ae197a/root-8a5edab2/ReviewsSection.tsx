@@ -26,7 +26,7 @@ const MIN_REVIEWS_FOR_SCORE = 100;
  * `pop` wraps each star so it can scale in after its card has risen — the
  * cards' stars only; the summary line's stars stand still.
  */
-function Stars({
+export function Stars({
   filled,
   size = 13,
   pop = false,
@@ -59,10 +59,81 @@ function Stars({
 }
 
 /**
- * The home page's review block, in the reviews page's own card: who said it
- * first (avatar in the accent ring, name, the verified mark when earned, the
- * date), then the stars, then the words as a quotation, then what they paid.
- * Trust comes from the person, so the person leads.
+ * One review, in the reviews page's own card: who said it first (avatar in
+ * the accent ring, name, the verified mark when earned, the date), then the
+ * stars, then the words as a quotation, then what they paid. Trust comes
+ * from the person, so the person leads. Shared by the home page's block and
+ * a tool page's own reviews; both lay it out inside a RevealGrid, which
+ * `index` staggers.
+ *
+ * The motion lmarket.net's testimonial wall has: cards rise in one after
+ * another when the grid scrolls into view (`.reveal-card`, delayed by --i),
+ * their stars pop in after, and under the pointer a soft accent glow follows
+ * the cursor across the card (`.spot-glow`, placed at --spot-x/--spot-y by
+ * RevealGrid). The card also lifts half a step and brightens its edge on
+ * hover. `isolate` keeps the glow's negative z-index inside the card,
+ * between its background and its words.
+ */
+export function ReviewCard({ review, index }: { review: Review; index: number }) {
+  return (
+    <article
+      data-spot
+      style={{ ["--i" as string]: index }}
+      className="reveal-card group relative isolate flex w-[280px] shrink-0 snap-start flex-col rounded-2xl border border-white/[0.08] bg-white/[0.02] p-5 shadow-[inset_0_1px_0_0_rgb(255_255_255/0.04),0_1px_2px_0_rgb(0_0_0/0.4)] lift-card hover:-translate-y-1 hover:border-white/[0.2] hover:shadow-[inset_0_1px_0_0_rgb(255_255_255/0.06),0_8px_24px_-8px_rgb(255_49_88/0.18)] sm:w-[320px] lg:w-auto"
+    >
+      <span aria-hidden className="spot-glow -z-10" />
+      <div className="flex items-start gap-3">
+        <div className="shrink-0 rounded-full border-[2.5px] border-[var(--menzu-accent)] p-[2px]">
+          <div className="relative grid h-10 w-10 place-items-center overflow-hidden rounded-full bg-neutral-800">
+            {review.avatar ? (
+              <Image src={review.avatar} alt="" fill sizes="40px" className="object-cover" />
+            ) : (
+              <span className="text-sm font-black uppercase text-neutral-400">
+                {review.name.trim().charAt(0) || "?"}
+              </span>
+            )}
+          </div>
+        </div>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-start justify-between gap-2">
+            <div className="flex min-w-0 items-center gap-1.5">
+              <h3 className="truncate text-[14px] font-black text-white">{review.name}</h3>
+              {review.verified ? (
+                <BadgeCheck
+                  size={14}
+                  aria-label="Tài khoản đã xác minh"
+                  className="shrink-0 text-[#0866FF]"
+                />
+              ) : null}
+            </div>
+            <span className="shrink-0 text-[10px] font-semibold text-neutral-500">
+              {review.date}
+            </span>
+          </div>
+          <div className="mt-1.5">
+            <Stars filled={Math.min(5, Math.max(1, review.rating ?? 5))} pop />
+          </div>
+        </div>
+      </div>
+
+      {/* The words, and nothing else, in the middle: React escapes them, the
+          bar on the left says "quoted", and the block grows to keep every
+          card's foot on one line. */}
+      <p className="mt-4 flex-1 border-l-2 border-white/10 pl-3 text-[13.5px] leading-relaxed text-neutral-200 [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:3] overflow-hidden">
+        {review.body}
+      </p>
+
+      <div className="mt-4 flex items-center justify-between gap-3 border-t border-white/[0.06] pt-3">
+        <span className="text-[11px] font-bold text-neutral-500">Giao dịch:</span>
+        <span className="text-[13px] font-black tabular-nums text-emerald-400">{review.amount}</span>
+      </div>
+    </article>
+  );
+}
+
+/**
+ * The home page's review block: four ReviewCards, then the score and the way
+ * to the rest.
  *
  * No pill over the block: the verified mark on each card says what is
  * verified, and a blanket claim over all four was either untrue or redundant.
@@ -94,69 +165,9 @@ export function ReviewsSection({
         </p>
       </div>
 
-      {/* The motion lmarket.net's testimonial wall has: cards rise in one
-          after another when the grid scrolls into view (`.reveal-card`,
-          delayed by --i), their stars pop in after, and under the pointer a
-          soft accent glow follows the cursor across the card (`.spot-glow`,
-          placed at --spot-x/--spot-y by RevealGrid). The card also lifts
-          half a step and brightens its edge on hover. `isolate` keeps the
-          glow's negative z-index inside the card, between its background
-          and its words. */}
       <RevealGrid className="mt-8 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:grid lg:grid-cols-4 lg:overflow-visible lg:pb-0">
         {reviews.map((review, index) => (
-          <article
-            key={`${review.name}-${review.date}-${index}`}
-            data-spot
-            style={{ ["--i" as string]: index }}
-            className="reveal-card group relative isolate flex w-[280px] shrink-0 snap-start flex-col rounded-2xl border border-white/[0.08] bg-white/[0.02] p-5 shadow-[inset_0_1px_0_0_rgb(255_255_255/0.04),0_1px_2px_0_rgb(0_0_0/0.4)] lift-card hover:-translate-y-1 hover:border-white/[0.2] hover:shadow-[inset_0_1px_0_0_rgb(255_255_255/0.06),0_8px_24px_-8px_rgb(255_49_88/0.18)] sm:w-[320px] lg:w-auto"
-          >
-            <span aria-hidden className="spot-glow -z-10" />
-            <div className="flex items-start gap-3">
-              <div className="shrink-0 rounded-full border-[2.5px] border-[var(--menzu-accent)] p-[2px]">
-                <div className="relative grid h-10 w-10 place-items-center overflow-hidden rounded-full bg-neutral-800">
-                  {review.avatar ? (
-                    <Image src={review.avatar} alt="" fill sizes="40px" className="object-cover" />
-                  ) : (
-                    <span className="text-sm font-black uppercase text-neutral-400">
-                      {review.name.trim().charAt(0) || "?"}
-                    </span>
-                  )}
-                </div>
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="flex items-start justify-between gap-2">
-                  <div className="flex min-w-0 items-center gap-1.5">
-                    <h3 className="truncate text-[14px] font-black text-white">{review.name}</h3>
-                    {review.verified ? (
-                      <BadgeCheck
-                        size={14}
-                        aria-label="Tài khoản đã xác minh"
-                        className="shrink-0 text-[#0866FF]"
-                      />
-                    ) : null}
-                  </div>
-                  <span className="shrink-0 text-[10px] font-semibold text-neutral-500">
-                    {review.date}
-                  </span>
-                </div>
-                <div className="mt-1.5">
-                  <Stars filled={Math.min(5, Math.max(1, review.rating ?? 5))} pop />
-                </div>
-              </div>
-            </div>
-
-            {/* The words, and nothing else, in the middle: React escapes
-                them, the bar on the left says "quoted", and the block grows
-                to keep every card's foot on one line. */}
-            <p className="mt-4 flex-1 border-l-2 border-white/10 pl-3 text-[13.5px] leading-relaxed text-neutral-200 [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:3] overflow-hidden">
-              {review.body}
-            </p>
-
-            <div className="mt-4 flex items-center justify-between gap-3 border-t border-white/[0.06] pt-3">
-              <span className="text-[11px] font-bold text-neutral-500">Giao dịch:</span>
-              <span className="text-[13px] font-black tabular-nums text-emerald-400">{review.amount}</span>
-            </div>
-          </article>
+          <ReviewCard key={`${review.name}-${review.date}-${index}`} review={review} index={index} />
         ))}
       </RevealGrid>
 

@@ -3,6 +3,7 @@ import { breadcrumbJsonLd, JsonLd } from "@/lib/seo";
 import { categoryHref, productHref } from "@/lib/routes";
 
 import { Breadcrumb } from "./Breadcrumb";
+import { ProductReviews, type ProductReviewsData } from "./ProductReviews";
 import { SimilarSoftwareStrip } from "./SimilarSoftwareStrip";
 import { type SoftwareCardView } from "./SoftwareCard";
 import { SoftwareBuyPanel, type SoftwareDetail } from "./SoftwareBuyPanel";
@@ -26,6 +27,7 @@ export function SoftwareDetailView({
   initialQuantity,
   setupGuideAccess,
   statusSubscribed,
+  reviews,
   similar,
 }: {
   software: SoftwareDetail;
@@ -36,6 +38,8 @@ export function SoftwareDetailView({
   setupGuideAccess: SetupGuideAccess;
   /** Following this tool's status; null for a guest. */
   statusSubscribed: boolean | null;
+  /** This tool's own reviews, drawn above the similar row. */
+  reviews: ProductReviewsData;
   /** Other tools for the row at the foot of the page; empty draws no row. */
   similar: SoftwareCardView[];
 }) {
@@ -106,6 +110,7 @@ export function SoftwareDetailView({
               loginHref={`/login?next=${encodeURIComponent(productHref(software.categorySlug, software.slug))}`}
             />
           </div>
+        <ProductReviews data={reviews} />
         {/* A rich-editor description is HTML; the card prints a sentence, so
             it gets the prose without the tags — stripped here, on the server,
             because the strip itself runs in the browser. */}
