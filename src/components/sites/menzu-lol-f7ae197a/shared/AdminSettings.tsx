@@ -16,6 +16,7 @@ import {
 
 import {
   DEFAULT_SETTINGS,
+  HERO_IMAGES_MAX,
   HOME_BLOCKS,
   ROW_COUNT_MAX,
   ROW_COUNT_MIN,
@@ -455,6 +456,32 @@ export function AdminSettings({
   const [heroAltHref, setHeroAltHref] = useState(settings.heroSecondaryHref);
   const [shootingStars, setShootingStars] = useState(settings.heroShootingStars);
   const [heroVideo, setHeroVideo] = useState(settings.heroVideo);
+  const [heroMedia, setHeroMedia] = useState<"video" | "image">(settings.heroMedia);
+  const [heroImages, setHeroImages] = useState<string[]>(settings.heroImages);
+  const [heroImgUploading, setHeroImgUploading] = useState(false);
+  const [heroImgMsg, setHeroImgMsg] = useState<{ tone: "ok" | "err"; text: string } | null>(null);
+
+  /** Adds a picture to the hero's list; like every picker here, Lưu applies it. */
+  async function uploadHeroImage(file: File) {
+    setHeroImgUploading(true);
+    setHeroImgMsg(null);
+    try {
+      const form = new FormData();
+      form.append("file", file);
+      const res = await fetch("/api/admin/site/background", { method: "POST", body: form });
+      const data = (await res.json().catch(() => ({}))) as { url?: string; error?: string };
+      if (!res.ok || !data.url) {
+        setHeroImgMsg({ tone: "err", text: data.error ?? "Tải ảnh thất bại" });
+        return;
+      }
+      setHeroImages((list) => [...list, data.url!].slice(0, HERO_IMAGES_MAX));
+      setHeroImgMsg({ tone: "ok", text: "Đã thêm ảnh — nhớ bấm Lưu để áp dụng" });
+    } catch {
+      setHeroImgMsg({ tone: "err", text: "Không kết nối được máy chủ" });
+    } finally {
+      setHeroImgUploading(false);
+    }
+  }
   const [heroVideoUploading, setHeroVideoUploading] = useState(false);
   const [heroVideoMsg, setHeroVideoMsg] = useState<{
     tone: "ok" | "err";
@@ -650,6 +677,8 @@ export function AdminSettings({
           heroSecondaryLabel: heroAltLabel,
           heroSecondaryHref: heroAltHref,
           heroVideo,
+          heroMedia,
+          heroImages,
           heroShootingStars: shootingStars,
           // Blank boxes are not empty claims, they are boxes nobody filled in.
           seoHeading,
@@ -2428,61 +2457,193 @@ export function AdminSettings({
               </div>
             </div>
 
+            {/* What fills the hero's frame. Switching keeps the other choice's
+                files, so flipping back to the clip does not mean pasting its
+                address again. */}
             <div>
-              <span className={LABEL}>Video hero</span>
-              <input
-                value={heroVideo}
-                onChange={(event) => setHeroVideo(event.target.value)}
-                className={FIELD}
-                placeholder="/videos/hero.mp4 — để trống thì dùng ảnh"
-              />
+              <span className={LABEL}>Hero hiển thị</span>
+              <div role="radiogroup" aria-label="Hero hiển thị" className="inline-flex rounded-lg border border-white/10 bg-neutral-950/60 p-1">
+                {([["video", "Video"], ["image", "Ảnh"]] as const).map(([value, label]) => (
+                  <button
+                    key={value}
+                    type="button"
+                    role="radio"
+                    aria-checked={heroMedia === value}
+                    onClick={() => setHeroMedia(value)}
+                    className={`h-8 rounded-md px-4 text-[12px] font-bold transition-colors ${
+                      heroMedia === value
+                        ? "bg-[var(--menzu-accent)] text-white"
+                        : "text-neutral-400 hover:text-white"
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
 
-              <div className="mt-2 flex flex-wrap items-center gap-3">
-                <label
-                  className={`inline-flex h-9 cursor-pointer items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 text-[10px] font-black uppercase tracking-widest text-neutral-200 transition-colors hover:bg-white/10 ${
-                    heroVideoUploading ? "pointer-events-none opacity-60" : ""
-                  }`}
-                >
-                  <Upload size={13} />
-                  {heroVideoUploading ? "Đang tải & nén video…" : "Chọn video từ máy"}
-                  <input
-                    type="file"
-                    accept="video/mp4,video/webm"
-                    className="hidden"
-                    onChange={(event) => {
-                      const file = event.target.files?.[0];
-                      // Cleared so picking the same file twice fires change
-                      // again — otherwise a failed upload could not be retried
-                      // with that file.
-                      event.target.value = "";
-                      if (file) void uploadHeroVideo(file);
-                    }}
-                  />
-                </label>
-                <span className="text-[10px] text-neutral-600">
-                  MP4 / WebM · tối đa 200MB · server tự nén sau khi tải lên, file nặng
-                  chờ 1–3 phút
-                </span>
+            {heroMedia === "video" ? (
+              <div>
+                <span className={LABEL}>Video hero</span>
+                <input
+                  value={heroVideo}
+                  onChange={(event) => setHeroVideo(event.target.value)}
+                  className={FIELD}
+                  placeholder="/videos/hero.mp4 — để trống thì dùng ảnh"
+                />
+
+                <div className="mt-2 flex flex-wrap items-center gap-3">
+                  <label
+                    className={`inline-flex h-9 cursor-pointer items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 text-[10px] font-black uppercase tracking-widest text-neutral-200 transition-colors hover:bg-white/10 ${
+                      heroVideoUploading ? "pointer-events-none opacity-60" : ""
+                    }`}
+                  >
+                    <Upload size={13} />
+                    {heroVideoUploading ? "Đang tải & nén video…" : "Chọn video từ máy"}
+                    <input
+                      type="file"
+                      accept="video/mp4,video/webm"
+                      className="hidden"
+                      onChange={(event) => {
+                        const file = event.target.files?.[0];
+                        // Cleared so picking the same file twice fires change
+                        // again — otherwise a failed upload could not be retried
+                        // with that file.
+                        event.target.value = "";
+                        if (file) void uploadHeroVideo(file);
+                      }}
+                    />
+                  </label>
+                  <span className="text-[10px] text-neutral-600">
+                    MP4 / WebM · tối đa 200MB · server tự nén sau khi tải lên, file nặng
+                    chờ 1–3 phút
+                  </span>
+                </div>
+
+                {heroVideoMsg ? (
+                  <p
+                    role="alert"
+                    className={
+                      heroVideoMsg.tone === "ok"
+                        ? "mt-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-[11px] font-semibold text-emerald-400"
+                        : "mt-2 rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-[11px] font-semibold text-red-400"
+                    }
+                  >
+                    {heroVideoMsg.text}
+                  </p>
+                ) : null}
+
+                <p className={HINT}>
+                  Có video thì video thay chỗ ảnh, ảnh banner ở thẻ Nhận diện thành khung
+                  chờ trong lúc video tải. Video chạy tự động, lặp lại và luôn tắt tiếng.
+                </p>
               </div>
 
-              {heroVideoMsg ? (
-                <p
-                  role="alert"
-                  className={
-                    heroVideoMsg.tone === "ok"
-                      ? "mt-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-[11px] font-semibold text-emerald-400"
-                      : "mt-2 rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-[11px] font-semibold text-red-400"
-                  }
-                >
-                  {heroVideoMsg.text}
-                </p>
-              ) : null}
+            ) : (
+              <div>
+                <span className={LABEL}>Ảnh hero ({heroImages.length}/{HERO_IMAGES_MAX})</span>
+                {heroImages.length > 0 ? (
+                  <div className="flex flex-col gap-1.5">
+                    {heroImages.map((src, index) => (
+                      <div
+                        key={`${src}-${index}`}
+                        className="flex items-center gap-2 rounded-lg border border-white/10 bg-neutral-950/60 px-2 py-1.5"
+                      >
+                        <div className="relative aspect-[16/9] w-20 shrink-0 overflow-hidden rounded-md bg-[#111111]">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={src} alt="" className="absolute inset-0 h-full w-full object-cover" />
+                        </div>
+                        <span className="flex-1 min-w-0 truncate font-mono text-[11px] text-neutral-300">
+                          {index + 1}. {src}
+                        </span>
+                        <button
+                          type="button"
+                          className={ICON_BUTTON}
+                          disabled={index === 0}
+                          aria-label="Đưa lên trên"
+                          onClick={() => {
+                            const next = [...heroImages];
+                            [next[index - 1], next[index]] = [next[index]!, next[index - 1]!];
+                            setHeroImages(next);
+                          }}
+                        >
+                          <ArrowUp size={13} />
+                        </button>
+                        <button
+                          type="button"
+                          className={ICON_BUTTON}
+                          disabled={index === heroImages.length - 1}
+                          aria-label="Đưa xuống dưới"
+                          onClick={() => {
+                            const next = [...heroImages];
+                            [next[index], next[index + 1]] = [next[index + 1]!, next[index]!];
+                            setHeroImages(next);
+                          }}
+                        >
+                          <ArrowDown size={13} />
+                        </button>
+                        <button
+                          type="button"
+                          aria-label="Xóa ảnh"
+                          title="Xóa ảnh này"
+                          onClick={() => setHeroImages(heroImages.filter((_, i) => i !== index))}
+                          className="h-7 w-7 rounded-lg border border-red-500/30 bg-red-500/10 text-red-400 transition-colors hover:bg-red-500/20 inline-flex items-center justify-center"
+                        >
+                          <Trash2 size={13} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="rounded-lg border border-dashed border-white/10 px-3 py-3 text-[12px] text-neutral-500">
+                    Chưa có ảnh nào — hero đang dùng ảnh banner ở thẻ Nhận diện.
+                  </p>
+                )}
 
-              <p className={HINT}>
-                Có video thì video thay chỗ ảnh, ảnh banner ở thẻ Nhận diện thành khung
-                chờ trong lúc video tải. Video chạy tự động, lặp lại và luôn tắt tiếng.
-              </p>
-            </div>
+                <div className="mt-2 flex flex-wrap items-center gap-3">
+                  <label
+                    className={`inline-flex h-9 cursor-pointer items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 text-[10px] font-black uppercase tracking-widest text-neutral-200 transition-colors hover:bg-white/10 ${
+                      heroImgUploading || heroImages.length >= HERO_IMAGES_MAX ? "pointer-events-none opacity-60" : ""
+                    }`}
+                  >
+                    <Upload size={13} />
+                    {heroImgUploading ? "Đang tải lên…" : "Thêm ảnh từ máy"}
+                    <input
+                      type="file"
+                      accept="image/png,image/jpeg,image/webp"
+                      className="hidden"
+                      onChange={(event) => {
+                        const file = event.target.files?.[0];
+                        event.target.value = "";
+                        if (file) void uploadHeroImage(file);
+                      }}
+                    />
+                  </label>
+                  <span className="text-[10px] text-neutral-600">
+                    PNG / JPG / WebP · nên khổ 16:9, vd 1920×1080 · tối thiểu 960×540
+                  </span>
+                </div>
+
+                {heroImgMsg ? (
+                  <p
+                    role="alert"
+                    className={
+                      heroImgMsg.tone === "ok"
+                        ? "mt-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-[11px] font-semibold text-emerald-400"
+                        : "mt-2 rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-[11px] font-semibold text-red-400"
+                    }
+                  >
+                    {heroImgMsg.text}
+                  </p>
+                ) : null}
+
+                <p className={HINT}>
+                  Một ảnh thì đứng yên. Từ hai ảnh trở lên thì tự chuyển, 4 giây một ảnh,
+                  có chấm tròn ở góc để khách bấm qua lại — như gachatool. Thứ tự ở đây
+                  là thứ tự chạy. Video đã tải lên vẫn được giữ, đổi lại “Video” là dùng lại.
+                </p>
+              </div>
+            )}
 
             <Toggle
               checked={shootingStars}

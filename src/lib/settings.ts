@@ -217,6 +217,13 @@ export interface ShopSettings {
    * the still image, which is what every shop starts with.
    */
   heroVideo: string;
+  /** What fills the hero's frame: the clip above, or the pictures below. */
+  heroMedia: "video" | "image";
+  /**
+   * The frame's pictures when heroMedia is "image": one stands still, two or
+   * more cross-fade in turn. Empty falls back to heroBanner.
+   */
+  heroImages: string[];
   /** Whether the hero draws the shooting-star streaks over the starfield. */
   heroShootingStars: boolean;
 
@@ -402,6 +409,8 @@ export const DEFAULT_SETTINGS: ShopSettings = {
   heroSecondaryLabel: "Xem hướng dẫn",
   heroSecondaryHref: "/docs",
   heroVideo: "",
+  heroMedia: "video",
+  heroImages: [],
   heroShootingStars: true,
 
   // Empty means "whatever the section already showed": the captured tiles for
@@ -494,6 +503,8 @@ export const SETTING_KEYS: Record<keyof ShopSettings, string> = {
   heroSecondaryLabel: "home.hero.altLabel",
   heroSecondaryHref: "home.hero.altHref",
   heroVideo: "home.hero.video",
+  heroMedia: "home.hero.media",
+  heroImages: "home.hero.images",
   heroShootingStars: "home.hero.shootingStars",
 
   homeCategorySlugs: "home.row.categories",
@@ -581,6 +592,26 @@ export function readImageList(value: unknown): string[] {
     : [];
   const cleaned = list.map((item) => item.trim()).filter(Boolean);
   return cleaned.length > 0 ? cleaned : [DEFAULT_SETTINGS.authPanelImages[0]!];
+}
+
+/** Most pictures the hero frame will cycle through. */
+export const HERO_IMAGES_MAX = 8;
+
+/** The hero's pictures from anything: strings only, trimmed, blanks dropped, capped. */
+export function cleanHeroImages(value: unknown): string[] {
+  const list = Array.isArray(value)
+    ? value.filter((item): item is string => typeof item === "string")
+    : [];
+  return list.map((item) => item.trim()).filter(Boolean).slice(0, HERO_IMAGES_MAX);
+}
+
+function toHeroImages(raw: string | undefined): string[] {
+  if (!raw) return [];
+  try {
+    return cleanHeroImages(JSON.parse(raw));
+  } catch {
+    return [];
+  }
 }
 
 function toImageList(raw: string | undefined, legacy: string | undefined): string[] {
@@ -972,6 +1003,8 @@ export function parseSettings(rows: Iterable<{ key: string; value: string }>): S
       DEFAULT_SETTINGS.heroSecondaryHref,
     ),
     heroVideo: toOptionalText(stored.get(SETTING_KEYS.heroVideo), DEFAULT_SETTINGS.heroVideo),
+    heroMedia: stored.get(SETTING_KEYS.heroMedia) === "image" ? "image" : "video",
+    heroImages: toHeroImages(stored.get(SETTING_KEYS.heroImages)),
     heroShootingStars: toBoolean(
       stored.get(SETTING_KEYS.heroShootingStars),
       DEFAULT_SETTINGS.heroShootingStars,
@@ -1071,6 +1104,8 @@ export function serializeSettings(settings: ShopSettings): { key: string; value:
     heroSecondaryLabel: settings.heroSecondaryLabel.trim(),
     heroSecondaryHref: settings.heroSecondaryHref.trim(),
     heroVideo: settings.heroVideo.trim(),
+    heroMedia: settings.heroMedia,
+    heroImages: JSON.stringify(settings.heroImages),
     heroShootingStars: String(settings.heroShootingStars),
 
     homeCategorySlugs: settings.homeCategorySlugs.join(","),
@@ -1229,6 +1264,8 @@ export function normalizeSettings(raw: Partial<ShopSettings> | null): ShopSettin
     heroSecondaryLabel: String(raw?.heroSecondaryLabel ?? "").trim(),
     heroSecondaryHref: String(raw?.heroSecondaryHref ?? "").trim(),
     heroVideo: String(raw?.heroVideo ?? "").trim(),
+    heroMedia: raw?.heroMedia === "image" ? "image" : "video",
+    heroImages: cleanHeroImages(raw?.heroImages),
     heroShootingStars: Boolean(raw?.heroShootingStars),
 
     homeCategorySlugs: toTextList(raw?.homeCategorySlugs),
@@ -1330,6 +1367,11 @@ export function validateSettings(settings: ShopSettings): string | null {
   if (settings.heroVideo && !settings.heroVideo.startsWith("/") &&
       !/^https?:\/\//.test(settings.heroVideo)) {
     return "Video hero phải là đường dẫn bắt đầu bằng / hoặc http";
+  }
+  for (const path of settings.heroImages) {
+    if (!path.startsWith("/") && !/^https?:\/\//.test(path)) {
+      return "Ảnh hero phải là đường dẫn bắt đầu bằng / hoặc http";
+    }
   }
   // Written straight into href. A link that is neither a path nor a URL goes
   // nowhere, and "javascript:" would go somewhere worse.

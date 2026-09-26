@@ -3,6 +3,7 @@ import Link from "next/link";
 import { BadgeCheck, BookCheck, ShoppingBag } from "lucide-react";
 
 import { DEFAULT_SETTINGS } from "@/lib/settings";
+import { HeroImageCarousel } from "./HeroImageCarousel";
 import { HeroVideo } from "./HeroVideo";
 import { ScrollCta } from "./ScrollCta";
 
@@ -27,8 +28,12 @@ const HEADING_DELAY = 0.5;
 interface HeroBannersProps {
   /** The still artwork, and the poster frame when a video is set. */
   banner?: string;
-  /** Plays in place of the still when set. */
+  /** Plays in place of the still when set and `media` is "video". */
   video?: string;
+  /** Cấu hình's choice for the frame: the clip, or the pictures. */
+  media?: "video" | "image";
+  /** The pictures for "image": one stands still, more cross-fade. */
+  images?: string[];
   /** The pill above the eyebrow. Empty draws none. */
   badge?: string;
   /** Newlines are line breaks — the heading is written to sit on two rows. */
@@ -54,6 +59,8 @@ interface HeroBannersProps {
 export function HeroBanners({
   banner = DEFAULT_SETTINGS.heroBanner,
   video = DEFAULT_SETTINGS.heroVideo,
+  media = DEFAULT_SETTINGS.heroMedia,
+  images = DEFAULT_SETTINGS.heroImages,
   badge = DEFAULT_SETTINGS.heroBadge,
   title = DEFAULT_SETTINGS.heroTitle,
   subtitle = DEFAULT_SETTINGS.heroSubtitle,
@@ -64,6 +71,8 @@ export function HeroBanners({
   shootingStars = true,
 }: HeroBannersProps) {
   const lines = title.split("\n").filter((line) => line.trim());
+  // "Ảnh" with nothing uploaded yet shows the banner, as the frame always did.
+  const slides = media === "image" && images.length > 0 ? images : [banner];
   const totalChars = lines.reduce((sum, line) => sum + Array.from(line).length, 0);
   // Runs across every line so the stagger does not restart on the second row.
   let charCursor = 0;
@@ -218,15 +227,17 @@ export function HeroBanners({
             20px back to the gap beside the copy.
             Below 1400 there is no side margin to spend and it stays flush. */}
         <div className="relative aspect-[16/9] w-full overflow-hidden rounded-3xl border border-white/[0.08] bg-[#0a0a0c] shadow-[0_30px_80px_-30px_rgba(0,0,0,0.9),0_0_140px_30px_rgba(0,0,0,0.65)] lg:w-auto lg:min-w-0 lg:max-w-[650px] lg:flex-1 min-[87.5rem]:-mr-10 min-[87.5rem]:max-w-[670px]">
-          {video ? (
+          {media === "video" && video ? (
             // Muted and inline, because a hero that makes noise or takes over
             // the screen on a phone is a hero people leave. The still is drawn
             // first and stays; the clip fades in over it once it is running,
             // and never loads at all for readers who asked for less motion.
             <HeroVideo src={video} poster={banner} />
+          ) : slides.length > 1 ? (
+            <HeroImageCarousel images={slides} />
           ) : (
             <Image
-              src={banner}
+              src={slides[0] ?? banner}
               // Decorative: the heading beside it already says what the shop
               // is, and "banner" only made a screen reader announce a word
               // that tells its listener nothing.

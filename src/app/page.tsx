@@ -85,6 +85,8 @@ export default async function Home() {
         key="hero"
         banner={settings.heroBanner}
         video={settings.heroVideo}
+        media={settings.heroMedia}
+        images={settings.heroImages}
         title={settings.heroTitle}
         badge={settings.heroBadge}
         subtitle={settings.heroSubtitle}
