@@ -65,6 +65,20 @@ export interface ProductRowProps {
    * before "Xem thêm". The game list's, on lmarket's pattern.
    */
   tiles?: boolean;
+  /**
+   * The picks as rows instead of cards — a small cover, the pill, the name
+   * and one line of blurb, two columns from md. Hot trending's, when the
+   * owner tries it against the bento.
+   */
+  list?: boolean;
+  /**
+   * Cards in a quieter dress: a grey outlined XEM NGAY instead of the red
+   * one, a one-line blurb, a paler surface. For the game list under a list
+   * of picks, so the page does not run a red bar under every game.
+   */
+  quiet?: boolean;
+  /** Lines of tiles shown before "Xem thêm" (see RowSearch). */
+  rows?: number;
   /** An anchor on the row, for the hero's "Khám phá ngay" cue to land on. */
   id?: string;
   className?: string;
@@ -206,6 +220,7 @@ function RowCard({
   t,
   top = false,
   wide = false,
+  quiet = false,
 }: {
   card: ProductCard;
   t: (typeof TONES)[RowTone];
@@ -213,6 +228,8 @@ function RowCard({
   top?: boolean;
   /** Drawn a third of the row wide (the game list), not a quarter. */
   wide?: boolean;
+  /** Grey outlined button, one-line blurb, paler surface (see ProductRow). */
+  quiet?: boolean;
 }) {
   const stats = card.stats.filter((s) => !HIDDEN_STATS.has(s.label));
 
@@ -228,6 +245,7 @@ function RowCard({
         // under it; every other row keeps the inset frame.
         wide ? "p-0" : "p-3 sm:p-4",
         t.card,
+        quiet && "bg-white/[0.028] border-white/[0.07] hover:border-white/20",
       )}
     >
       {/* 16/9 — the ratio the shop exports its covers at, so a standard
@@ -297,6 +315,7 @@ function RowCard({
           className={cn(
             "text-[11px] sm:text-xs leading-[1.55] text-[#9b9da5] line-clamp-2",
             wide ? "px-3 mb-3.5 text-left sm:px-4" : "text-center mb-4",
+            quiet && "line-clamp-1 text-[#8a8c95]",
           )}
         >
           {card.description}
@@ -356,19 +375,25 @@ function RowCard({
           className={cn(
             "relative w-full p-[1.5px] transition-all duration-300 [clip-path:polygon(8px_0,100%_0,100%_calc(100%-8px),calc(100%-8px)_100%,0_100%,0_8px)]",
             t.buttonEdge,
+            quiet && "p-0 bg-transparent group-hover:bg-transparent [clip-path:none]",
           )}
         >
           <div
             className={cn(
               "relative w-full overflow-hidden transition-colors duration-300 flex items-center justify-center gap-1.5 py-2.5 sm:py-3 [clip-path:polygon(7px_0,100%_0,100%_calc(100%-7px),calc(100%-7px)_100%,0_100%,0_7px)]",
               t.buttonFace,
+              quiet &&
+                "sm:py-2.5 rounded-[10px] border border-white/[0.09] bg-white/5 group-hover:bg-white/10 [clip-path:none]",
             )}
           >
             {/* The sweep: a soft white band parked off the left edge that
                 crosses to the right while the pointer is on the tile. */}
             <span
               aria-hidden
-              className="pointer-events-none absolute inset-y-0 -left-full w-1/2 -skew-x-12 bg-gradient-to-r from-transparent via-white/30 to-transparent transition-transform duration-700 ease-out group-hover:translate-x-[300%] motion-reduce:hidden"
+              className={cn(
+                "pointer-events-none absolute inset-y-0 -left-full w-1/2 -skew-x-12 bg-gradient-to-r from-transparent via-white/30 to-transparent transition-transform duration-700 ease-out group-hover:translate-x-[300%] motion-reduce:hidden",
+                quiet && "hidden",
+              )}
             />
             <span className="relative text-white font-black text-[10px] sm:text-xs uppercase tracking-widest">
               XEM NGAY
@@ -513,6 +538,61 @@ function RowTile({ card }: { card: ProductCard }) {
   );
 }
 
+/** Rows a list of picks draws: three lines of two on a desktop. */
+const LIST_SIZE = 6;
+
+/**
+ * The month's picks as rows: a small cover, the pill, the name and one line
+ * of blurb, with a chevron where the red button was. It reads as a short
+ * list of picks rather than a second copy of the game grid under it; each
+ * row is the link.
+ */
+function RowList({ cards, ranked }: { cards: ProductCard[]; ranked: boolean }) {
+  return (
+    <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+      {cards.slice(0, LIST_SIZE).map((card) => (
+        <Link
+          key={card.href}
+          href={card.href}
+          className="group flex min-w-0 items-center gap-3.5 rounded-[14px] border border-white/[0.07] bg-white/[0.028] p-2.5 transition-colors hover:border-white/20"
+        >
+          <span className="relative aspect-[16/9] w-[118px] shrink-0 overflow-hidden rounded-[10px] bg-[#111] md:w-[168px]">
+            {card.image ? (
+              <CardImage
+                src={card.image}
+                alt={card.title}
+                fill
+                sizes="(min-width: 768px) 168px, 118px"
+                className="object-cover transition-transform duration-500 group-hover:scale-105 motion-reduce:transform-none"
+              />
+            ) : null}
+          </span>
+          <span className="flex min-w-0 flex-1 flex-col gap-1">
+            {ranked ? (
+              <span className="inline-flex items-center gap-1 text-[10px] font-extrabold uppercase tracking-[0.08em] text-amber-400">
+                <Star size={10} className="shrink-0 fill-current" aria-hidden />
+                Top tháng
+              </span>
+            ) : null}
+            <h3 className="truncate text-sm font-black uppercase tracking-[0.02em] text-white">
+              {card.title}
+            </h3>
+            {card.description ? (
+              <p className="truncate text-xs text-[#8a8c95]">{card.description}</p>
+            ) : null}
+          </span>
+          <span
+            aria-hidden
+            className="grid size-[34px] shrink-0 place-items-center rounded-[10px] bg-white/5 text-neutral-300 transition-colors group-hover:bg-white/10 group-hover:text-white"
+          >
+            <ChevronRight size={16} />
+          </span>
+        </Link>
+      ))}
+    </div>
+  );
+}
+
 export function ProductRow({
   heading,
   headingSuffix,
@@ -524,6 +604,9 @@ export function ProductRow({
   searchable = false,
   bento: wantsBento = false,
   tiles = false,
+  list = false,
+  quiet = false,
+  rows = 1,
   id,
   className,
 }: ProductRowProps) {
@@ -562,6 +645,8 @@ export function ProductRow({
 
       {bento ? (
         <RowBento cards={cards} ranked={ranked} />
+      ) : list ? (
+        <RowList cards={cards} ranked={ranked} />
       ) : marquee ? (
         // Each tile takes the width the viewport sets per breakpoint — a
         // quarter, a third, a half of it — with the grid's own gaps, so the
@@ -578,14 +663,18 @@ export function ProductRow({
         // as finished nodes — it only chooses which of them to show.
         <RowSearch
           wide={!tiles}
-          rows={tiles ? 2 : 1}
+          rows={rows}
           openOnArrival={id}
           viewAllHref={viewAllHref}
           items={cards.map((card) => ({
             key: card.href,
             title: card.title,
             platform: card.platform ?? null,
-            node: tiles ? <RowTile card={card} /> : <RowCard card={card} t={t} top={ranked} wide />,
+            node: tiles ? (
+              <RowTile card={card} />
+            ) : (
+              <RowCard card={card} t={t} top={ranked} wide quiet={quiet} />
+            ),
           }))}
         />
       ) : (
