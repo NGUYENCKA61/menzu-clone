@@ -61,8 +61,9 @@ export interface ProductRowProps {
   bento?: boolean;
   /**
    * Picture tiles instead of cards: the cover fills the tile and the name
-   * sits over it, with no blurb and no button, four a line and two lines
-   * before "Xem thêm". The game list's, on lmarket's pattern.
+   * sits over it, with no blurb and no button, on lmarket's pattern. The game
+   * list takes 4:3 tiles, four a line; a sliding row (hot trending) takes
+   * wider 16:10 ones and keeps its "Top tháng" pill.
    */
   tiles?: boolean;
   /**
@@ -519,15 +520,19 @@ function BentoTile({
 }
 
 /**
- * A game as a picture tile, on lmarket's pattern: the cover fills a 4:3
- * tile and the name sits over its foot on a dark fade. The whole tile is the
- * link, so the list no longer runs a red bar under every game.
+ * A game as a picture tile, on lmarket's pattern: the cover fills the tile
+ * and the name sits over its foot on a dark fade. The whole tile is the link,
+ * so the list no longer runs a red bar under every game. 4:3 in the game
+ * list; `pick` is the sliding row's wider 16:10 tile, with the month's pill.
  */
-function RowTile({ card }: { card: ProductCard }) {
+function RowTile({ card, pick = false }: { card: ProductCard; pick?: boolean }) {
   return (
     <Link
       href={card.href}
-      className="group relative isolate block aspect-[4/3] overflow-hidden rounded-[14px] border border-white/[0.06] bg-[#0c0d10] transition-colors hover:border-white/20"
+      className={cn(
+        "group relative isolate block overflow-hidden rounded-[14px] border border-white/[0.06] bg-[#0c0d10] transition-colors hover:border-white/20",
+        pick ? "aspect-[16/10]" : "aspect-[4/3]",
+      )}
     >
       {card.image ? (
         <CardImage
@@ -537,6 +542,12 @@ function RowTile({ card }: { card: ProductCard }) {
           sizes="(min-width: 1320px) 310px, (min-width: 1024px) 25vw, (min-width: 768px) 33vw, 50vw"
           className="object-cover transition-transform duration-500 group-hover:scale-105 motion-reduce:transform-none"
         />
+      ) : null}
+      {pick ? (
+        <span className="absolute left-2.5 top-2.5 z-10 inline-flex items-center gap-1 rounded-md bg-amber-500/90 px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-amber-950">
+          <Star size={10} className="shrink-0 fill-current" aria-hidden />
+          Top tháng
+        </span>
       ) : null}
       <span
         aria-hidden
@@ -674,7 +685,11 @@ export function ProductRow({
         <RowSlider count={cards.length}>
           {cards.map((card) => (
             <div key={card.href} className="w-[var(--tile-w)] shrink-0 snap-start">
-              <RowCard card={card} t={t} top={ranked} quiet={quiet} />
+              {tiles ? (
+                <RowTile card={card} pick={ranked} />
+              ) : (
+                <RowCard card={card} t={t} top={ranked} quiet={quiet} />
+              )}
             </div>
           ))}
         </RowSlider>
