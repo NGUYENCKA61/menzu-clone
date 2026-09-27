@@ -8,6 +8,10 @@ import { CardImage } from "@/components/sites/menzu-lol-f7ae197a/shared/CardImag
  * black, so the colour carries on without the detail that made the rows of
  * cards look busy (option G3 of the owner's backgrounds).
  *
+ * The sharp picture holds to 70% of the screen's height and fades out over
+ * the last 30%, down to the "Khám phá ngay" cue: fading from 45% had the
+ * dark start right under the video frame, which the owner found too early.
+ *
  * The sharp copy scrolls away with the hero (absolute); the blurred one
  * stays put (fixed). The blur is a filter on the image, scaled up a little
  * so its faded rim falls outside the frame, in a dark-filled frame.
@@ -30,7 +34,7 @@ export function HomeBackdrop({ src }: { src?: string }) {
       {src ? (
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-x-0 top-0 z-[-1] h-[100svh] overflow-hidden [mask-image:linear-gradient(to_bottom,black_45%,transparent)]"
+          className="pointer-events-none absolute inset-x-0 top-0 z-[-1] h-[100svh] overflow-hidden [mask-image:linear-gradient(to_bottom,black_70%,transparent)]"
         >
           <CardImage
             src={src}
