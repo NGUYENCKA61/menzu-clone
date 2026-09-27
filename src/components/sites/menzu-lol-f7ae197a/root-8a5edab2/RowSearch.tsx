@@ -77,7 +77,7 @@ const OUT_STAGGER_MS = 25;
 export function RowSearch({
   items,
   viewAllHref,
-  placeholder = "Tìm game…",
+  placeholder = "Tìm kiếm một tựa game, spoofer…",
   openOnArrival,
   filters = true,
   wide = false,
