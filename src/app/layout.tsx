@@ -120,7 +120,7 @@ export default async function RootLayout({
         {brandOverride ? <style>{brandOverride}</style> : null}
         {/* Fixed behind every page (z-[-1]); each shop's own picture, dimmed.
             Site-wide here rather than per-page so it covers the whole app. */}
-        <PageBackdrop src={siteBackground} />
+        <PageBackdrop src={siteBackground} blur />
         {/* First in the stream so the cover paints before anything under it.
             Lives outside {children} like the widget below: client navigation
             must not remount it, or it would flash on every route change. */}
