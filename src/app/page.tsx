@@ -43,6 +43,12 @@ export async function generateMetadata(): Promise<Metadata> {
 /** The group that carries the search, the platform chips and "Xem thêm". */
 const GAME_LIST_SLUG = "danh-sach-hack-game";
 
+/** One line under a row's heading, keyed by the group's slug. */
+const GROUP_BLURBS: Record<string, string> = {
+  "hot-trending": "Những bản hack được khách chọn mua nhiều nhất trong tháng.",
+  [GAME_LIST_SLUG]: "Chọn tựa game bạn chơi để xem các bản hack đang bán.",
+};
+
 export default async function Home() {
   const settings = await getShopSettings();
   const trust = await getTrustStats(settings);
@@ -106,7 +112,8 @@ export default async function Home() {
             cards={group.cards}
             viewAllHref="/categories"
             tone="menzu"
-            plainHeading={group.slug === "hot-trending"}
+            plainHeading={group.slug === "hot-trending" || group.slug === GAME_LIST_SLUG}
+            description={GROUP_BLURBS[group.slug]}
             marquee={group.slug === "hot-trending"}
             ranked={group.slug === "hot-trending"}
             searchable={group.slug === GAME_LIST_SLUG}
