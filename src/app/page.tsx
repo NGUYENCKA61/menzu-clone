@@ -106,6 +106,7 @@ export default async function Home() {
             cards={group.cards}
             viewAllHref="/categories"
             tone="menzu"
+            plainHeading={group.slug === "hot-trending"}
             marquee={group.slug === "hot-trending"}
             ranked={group.slug === "hot-trending"}
             searchable={group.slug === GAME_LIST_SLUG}

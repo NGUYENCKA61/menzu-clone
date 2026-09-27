@@ -30,6 +30,11 @@ export interface ProductRowProps {
    * Decorative: pass it aria-hidden.
    */
   headingSuffix?: React.ReactNode;
+  /**
+   * The heading as the admin typed it ("Hot trending tháng này") instead of
+   * set in capitals, with ordinary letter spacing to match.
+   */
+  plainHeading?: boolean;
   cards: ProductCard[];
   /** Destination of the row's "Xem tất cả" link — the matching index page. */
   viewAllHref: string;
@@ -665,6 +670,7 @@ export function ProductRow({
   quiet = false,
   rows = 1,
   panel = false,
+  plainHeading = false,
   id,
   className,
 }: ProductRowProps) {
@@ -677,7 +683,12 @@ export function ProductRow({
   const title = (
     <div className="flex items-center gap-2.5">
       <div className="w-[3px] h-5 bg-[var(--menzu-accent)] rounded-full shrink-0" />
-      <h2 className="text-xl sm:text-2xl font-black uppercase tracking-wider text-white">
+      <h2
+        className={cn(
+          "text-xl sm:text-2xl font-black text-white",
+          plainHeading ? "tracking-tight" : "uppercase tracking-wider",
+        )}
+      >
         {heading}
       </h2>
       {headingSuffix}
