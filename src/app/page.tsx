@@ -183,7 +183,7 @@ export default async function Home() {
     <div className="min-h-screen flex flex-col text-white overflow-x-clip selection:bg-[var(--menzu-accent)]/30 transition-colors duration-300">
       {/* The artwork sharp behind the first screen only, blurred to near-black
           under the rest; covers the root layout's full-page backdrop. */}
-      <HomeBackdrop src={settings.siteBackground} look="navy" />
+      <HomeBackdrop src={settings.siteBackground} />
       <JsonLd data={organizationJsonLd(settings.brandName)} />
       {/* spacer reserving the fixed header's 104px */}
       <div className="w-full shrink-0 h-[104px]" />
