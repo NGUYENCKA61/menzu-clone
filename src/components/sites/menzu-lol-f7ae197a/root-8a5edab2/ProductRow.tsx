@@ -696,13 +696,13 @@ export function ProductRow({
   const marquee = runs && cards.length >= MARQUEE_FROM;
 
   const title = (
-    <div className="flex items-center gap-2.5">
+    <div className="flex min-w-0 items-center gap-2.5">
       <div className="w-[3px] h-5 bg-[var(--menzu-accent)] rounded-full shrink-0" />
       <h2
         className={cn(
           "text-white",
           plainHeading
-            ? "text-[22px] font-bold leading-tight tracking-[-0.01em] sm:text-[30px]"
+            ? "text-xl font-bold leading-tight tracking-[-0.01em] sm:text-[30px]"
             : "text-xl font-black uppercase tracking-wider sm:text-2xl",
         )}
       >
@@ -714,7 +714,7 @@ export function ProductRow({
   const viewAll = (
     <Link
       href={viewAllHref}
-      className="group flex items-center gap-1 text-[10px] sm:text-xs font-bold text-neutral-400 hover:text-white transition-colors uppercase tracking-widest border-b border-neutral-700 hover:border-[var(--menzu-accent)]"
+      className="group flex shrink-0 items-center gap-1 whitespace-nowrap text-[10px] sm:text-xs font-bold text-neutral-400 hover:text-white transition-colors uppercase tracking-widest border-b border-neutral-700 hover:border-[var(--menzu-accent)]"
     >
       <span className="hidden sm:inline">XEM TẤT CẢ</span>
       <span className="sm:hidden">XEM THÊM</span>
@@ -734,7 +734,7 @@ export function ProductRow({
     >
       <div
         className={cn(
-          "flex flex-row items-center justify-between mb-8",
+          "flex flex-row items-center justify-between gap-3 mb-8",
           panel && "mb-5 sm:mb-6",
           description && "mb-0 sm:mb-0",
         )}
