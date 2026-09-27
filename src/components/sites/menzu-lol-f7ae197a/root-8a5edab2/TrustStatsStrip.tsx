@@ -28,8 +28,12 @@ interface Tile {
  * loud part — big, white, counting up as the strip scrolls into view, with
  * the unit in the accent — and the labels sit quiet and uppercase under
  * them, the way the reference shop does it.
+ *
+ * `slim` is the lower strip the home page sets between Hot trending and the
+ * game list, where elitehacks puts its own figures: smaller numbers and less
+ * air, so it reads as a pause between two rows rather than a section.
  */
-export function TrustStatsStrip({ stats }: { stats: TrustStats }) {
+export function TrustStatsStrip({ stats, slim = false }: { stats: TrustStats; slim?: boolean }) {
   const tiles: Tile[] = [];
   if (stats.orders) {
     tiles.push({ icon: ShoppingBag, value: compact(stats.orders), decimals: 0, unit: "+", label: "Đơn đã giao" });
@@ -47,27 +51,45 @@ export function TrustStatsStrip({ stats }: { stats: TrustStats }) {
   if (tiles.length < 2) return null;
 
   return (
-    <section aria-label="Số liệu của shop" className="mx-auto w-full max-w-[1320px] px-4 pb-4 lg:px-6">
-      <div className="grid grid-cols-2 gap-y-8 rounded-3xl border border-white/[0.06] bg-white/[0.02] px-4 py-8 lg:grid-cols-4 lg:gap-y-0 lg:px-8 lg:py-10">
+    <section aria-label="Số liệu của shop" className={`mx-auto w-full max-w-[1320px] px-4 lg:px-6 ${slim ? "" : "pb-4"}`}>
+      <div
+        className={
+          slim
+            ? "grid grid-cols-2 gap-y-5 rounded-2xl border border-white/[0.06] bg-white/[0.02] px-4 py-5 lg:grid-cols-4 lg:gap-y-0 lg:px-8 lg:py-6"
+            : "grid grid-cols-2 gap-y-8 rounded-3xl border border-white/[0.06] bg-white/[0.02] px-4 py-8 lg:grid-cols-4 lg:gap-y-0 lg:px-8 lg:py-10"
+        }
+      >
         {tiles.map((tile, index) => {
           const Icon = tile.icon;
           return (
             <div
               key={tile.label}
-              className={`flex flex-col items-center gap-2 text-center ${
+              className={`flex flex-col items-center text-center ${slim ? "gap-1.5" : "gap-2"} ${
                 index > 0 ? "lg:border-l lg:border-white/[0.08]" : ""
               } ${index % 2 === 1 ? "border-l border-white/[0.08] lg:border-l" : ""}`}
             >
               <div className="flex items-baseline gap-1.5">
-                <Icon size={16} aria-hidden className="mb-0.5 self-center text-[var(--menzu-accent)]" />
-                <span className="text-3xl font-black leading-none tracking-tight text-white sm:text-5xl">
+                <Icon size={slim ? 14 : 16} aria-hidden className="mb-0.5 self-center text-[var(--menzu-accent)]" />
+                <span
+                  className={`font-black leading-none tracking-tight text-white ${
+                    slim ? "text-2xl sm:text-3xl lg:text-[34px]" : "text-3xl sm:text-5xl"
+                  }`}
+                >
                   <CountUp value={tile.value} decimals={tile.decimals} />
                 </span>
-                <span className="text-lg font-black leading-none text-[var(--menzu-accent)] sm:text-2xl">
+                <span
+                  className={`font-black leading-none text-[var(--menzu-accent)] ${
+                    slim ? "text-base sm:text-xl" : "text-lg sm:text-2xl"
+                  }`}
+                >
                   {tile.unit}
                 </span>
               </div>
-              <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-neutral-500">
+              <span
+                className={`font-bold uppercase tracking-[0.2em] text-neutral-500 ${
+                  slim ? "text-[10px] sm:text-[11px]" : "text-[11px]"
+                }`}
+              >
                 {tile.label}
               </span>
             </div>

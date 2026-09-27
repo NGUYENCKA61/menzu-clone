@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Fragment } from "react";
 
 import { FeaturedCategories } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/FeaturedCategories";
 import { FlashSaleSection } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/FlashSaleSection";
@@ -55,6 +56,14 @@ export default async function Home() {
     getHomeDocCards(settings.homeDocSlugs),
   ]);
 
+  // The shop's figures sit between Hot trending and the game list, where
+  // elitehacks sets its own between its picks and its catalogue: seen on the
+  // second screen rather than after all the games. With no Hot trending row
+  // on show they go back above the reviews.
+  const statsAfterTrending =
+    visibleBlocks(settings).includes("groups") &&
+    homeGroups.some((group) => group.slug === "hot-trending");
+
   // Each block is built once and picked out by id below, so the order on the
   // page is the order the admin arranged and nothing renders twice.
   const blocks: Record<string, React.ReactNode> = {
@@ -98,29 +107,34 @@ export default async function Home() {
         className="flex w-full flex-col space-y-6 sm:space-y-12 scroll-mt-[120px]"
       >
         {homeGroups.map((group) => (
-          <ProductRow
-            key={group.id}
-            id={group.slug === GAME_LIST_SLUG ? SCROLL_TARGET_ID : undefined}
-            className={group.slug === GAME_LIST_SLUG ? "scroll-mt-[120px]" : undefined}
-            heading={group.name}
-            cards={group.cards}
-            viewAllHref="/categories"
-            hideViewAll={group.slug === "hot-trending"}
-            tone="menzu"
-            marquee={group.slug === "hot-trending"}
-            ranked={group.slug === "hot-trending"}
-            searchable={group.slug === GAME_LIST_SLUG}
-            tiles={group.slug === "hot-trending" || group.slug === GAME_LIST_SLUG}
-            bigPicks={group.slug === "hot-trending"}
-            rows={group.slug === GAME_LIST_SLUG ? 2 : 1}
-          />
+          <Fragment key={group.id}>
+            <ProductRow
+              id={group.slug === GAME_LIST_SLUG ? SCROLL_TARGET_ID : undefined}
+              className={group.slug === GAME_LIST_SLUG ? "scroll-mt-[120px]" : undefined}
+              heading={group.name}
+              cards={group.cards}
+              viewAllHref="/categories"
+              hideViewAll={group.slug === "hot-trending"}
+              tone="menzu"
+              marquee={group.slug === "hot-trending"}
+              ranked={group.slug === "hot-trending"}
+              searchable={group.slug === GAME_LIST_SLUG}
+              tiles={group.slug === "hot-trending" || group.slug === GAME_LIST_SLUG}
+              bigPicks={group.slug === "hot-trending"}
+              rows={group.slug === GAME_LIST_SLUG ? 2 : 1}
+            />
+            {statsAfterTrending && group.slug === "hot-trending" ? (
+              <TrustStatsStrip stats={trust} slim />
+            ) : null}
+          </Fragment>
         ))}
       </div>
     ),
     reviews: (
-      // The figures ride above the reviews they vouch for, as one block.
+      // The figures ride above the reviews only when there is no Hot trending
+      // row for them to follow (statsAfterTrending).
       <div key="reviews">
-        <TrustStatsStrip stats={trust} />
+        {statsAfterTrending ? null : <TrustStatsStrip stats={trust} />}
         <ReviewsSection
           // Four on the home page — a taste; the rest live on /feedback.
           reviews={reviews.slice(0, 4).map((r) => ({
