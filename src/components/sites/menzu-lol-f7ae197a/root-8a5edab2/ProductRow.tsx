@@ -578,7 +578,7 @@ function RowTile({
             big && "lg:left-3.5 lg:top-3.5 lg:text-[11px]",
           )}
         >
-          <span aria-hidden className="size-1.5 shrink-0 rounded-full bg-[var(--menzu-accent)] ring-2 ring-[var(--menzu-accent)]/30" />
+          <Star size={10} className="shrink-0 fill-current text-[var(--menzu-accent)]" aria-hidden />
           Top tháng
         </span>
       ) : null}
