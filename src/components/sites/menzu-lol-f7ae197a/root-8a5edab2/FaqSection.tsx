@@ -87,10 +87,11 @@ export function FaqSection({ faq, contact }: { faq: FaqEntry[]; contact: FaqCont
 
   return (
     // The hairline and air above it are the reviews section's own, so the
-    // two information blocks after the shop open the same way.
+    // two information blocks after the shop open the same way: a line the
+    // width of the window, clipped by the home page's wrapper.
     <section
       aria-labelledby="faq-heading"
-      className="relative w-full border-t border-white/[0.06] pt-12 lg:pt-16"
+      className="relative w-full pt-12 lg:pt-16 before:absolute before:left-1/2 before:top-0 before:h-px before:w-screen before:-translate-x-1/2 before:bg-white/[0.06]"
     >
       {schema ? <JsonLd data={schema} /> : null}
 

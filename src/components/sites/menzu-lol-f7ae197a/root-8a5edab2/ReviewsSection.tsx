@@ -148,9 +148,11 @@ export function ReviewsSection({
   if (reviews.length === 0) return null;
 
   return (
+    // The hairline above runs the width of the window, not the content
+    // (see FaqSection); the home page's wrapper clips the overflow.
     <section
       aria-labelledby="reviews-heading"
-      className="w-full border-t border-white/[0.06] pt-12 lg:pt-16"
+      className="relative w-full pt-12 lg:pt-16 before:absolute before:left-1/2 before:top-0 before:h-px before:w-screen before:-translate-x-1/2 before:bg-white/[0.06]"
     >
       <div className="mx-auto flex max-w-2xl flex-col items-center gap-3 text-center">
         <h2
