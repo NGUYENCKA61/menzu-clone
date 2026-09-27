@@ -16,7 +16,8 @@ import { CardImage } from "@/components/sites/menzu-lol-f7ae197a/shared/CardImag
  *
  * Live site: `div.fixed.top-0.left-0.w-full.h-[100vh].z-[-1].overflow-hidden.pointer-events-none`
  * containing an `img.object-cover.object-center.transition-all.duration-700` and a
- * `div.absolute.inset-0.bg-[#0a0a0d]/70` dim overlay.
+ * `div.absolute.inset-0.bg-[#0a0a0d]/70` dim overlay. This one dims to 86% on
+ * the owner's word: at 70% the artwork stayed busy behind every row of cards.
  */
 export function PageBackdrop({ src, soft = false }: { src?: string; soft?: boolean }) {
   return (
@@ -35,7 +36,7 @@ export function PageBackdrop({ src, soft = false }: { src?: string; soft?: boole
           className={`object-cover object-center ${soft ? "scale-110 blur-[28px] saturate-70" : ""}`}
         />
       ) : null}
-      <div className={`absolute inset-0 ${soft ? "bg-[#08080b]/94" : "bg-[#0a0a0d]/70"}`} />
+      <div className={`absolute inset-0 ${soft ? "bg-[#08080b]/94" : "bg-[#0a0a0d]/86"}`} />
     </div>
   );
 }
