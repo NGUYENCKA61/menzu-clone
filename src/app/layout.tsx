@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Be_Vietnam_Pro, Inter, Montserrat } from "next/font/google";
+import { Inter } from "next/font/google";
 import "./globals.css";
 import { SITE_URL, siteDescription } from "@/lib/seo";
 import { PageBackdrop } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/PageBackdrop";
@@ -25,29 +25,6 @@ const inter = Inter({
   // latin-ext too: its unicode-range overlaps the Vietnamese one and is
   // declared after it, so the browser fetched that file anyway for Đ, ư, ơ —
   // but only after layout. Listed here, it preloads with the others.
-  subsets: ["latin", "vietnamese", "latin-ext"],
-  display: "swap",
-});
-
-/**
- * The headings' type (h1–h3, see globals.css): geometric, wide, and complete
- * for Vietnamese — elitehacks and gachatool set their headings in it.
- */
-const montserrat = Montserrat({
-  variable: "--font-montserrat",
-  subsets: ["latin", "vietnamese", "latin-ext"],
-  display: "swap",
-});
-
-/**
- * The running text's type since the T3 trial, drawn for Vietnamese — the
- * marks sit clear of the letters at every weight. Not a variable font on
- * Google, so the weights the site uses are listed. Inter stays loaded behind
- * both until the trial is settled.
- */
-const beVietnamPro = Be_Vietnam_Pro({
-  variable: "--font-be-vietnam-pro",
-  weight: ["400", "500", "600", "700", "800", "900"],
   subsets: ["latin", "vietnamese", "latin-ext"],
   display: "swap",
 });
@@ -137,7 +114,7 @@ export default async function RootLayout({
   return (
     <html
       lang="vi"
-      className={`${inter.variable} ${montserrat.variable} ${beVietnamPro.variable} h-full antialiased overflow-y-scroll dark`}
+      className={`${inter.variable} h-full antialiased overflow-y-scroll dark`}
     >
       <body className="min-h-full flex flex-col">
         {brandOverride ? <style>{brandOverride}</style> : null}
