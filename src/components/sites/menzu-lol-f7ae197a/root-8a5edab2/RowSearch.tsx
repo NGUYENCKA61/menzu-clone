@@ -232,17 +232,23 @@ export function RowSearch({
     <div className="flex flex-col gap-4">
       {filters ? (
         <>
-          {/* The search pill lmarket.net's hero wears, in the shop's red, over
-          the category page's own dark glass: the shop tried lmarket's brighter
-          fill with its sheen and highlight and asked for the quiet one back.
-          The comet of light that ran round the border (BorderBeam) came off
-          at the shop's request too. The accent takes the border and the icon
-          while the field has focus. As wide as the grid under it, so the
-          field and the tiles share their outer edges. */}
+          {/* The search pill lmarket.net's hero wears, in the shop's red:
+          frosted glass with a soft sheen from the top-left, a hairline
+          highlight along the top edge and a shadow under it, and the accent on
+          the border, ring and glass while the field has focus. On trial again
+          at the shop's request (it once asked for the quiet dark glass back);
+          the comet of light that ran round the border stays off. As wide as
+          the grid under it, so the field and the tiles share their outer
+          edges. The sheen comes first and cannot be clicked; the icon, field
+          and clear button are positioned so they paint over it. */}
           <label
             htmlFor={inputId}
-            className="group/search relative isolate flex h-12 w-full items-center gap-2.5 rounded-full border border-neutral-800/60 bg-neutral-900/60 px-4 transition-colors focus-within:border-[var(--menzu-accent)]/60"
+            className="group/search relative isolate flex h-12 w-full items-center gap-2.5 rounded-full border border-white/15 bg-white/[0.04] px-4 shadow-[0_8px_32px_-8px_rgb(0_0_0/0.5),inset_0_1px_0_0_rgb(255_255_255/0.08)] backdrop-blur-md transition-all focus-within:border-[var(--menzu-accent)]/60 focus-within:bg-white/[0.06] focus-within:ring-2 focus-within:ring-[var(--menzu-accent)]/25"
           >
+            <span
+              aria-hidden
+              className="pointer-events-none absolute inset-0 rounded-full bg-[linear-gradient(135deg,rgba(255,255,255,0.10)_0%,rgba(255,255,255,0.04)_35%,transparent_70%)]"
+            />
             <Search
               size={15}
               aria-hidden
