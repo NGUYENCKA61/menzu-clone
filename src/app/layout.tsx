@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Montserrat } from "next/font/google";
 import "./globals.css";
 import { SITE_URL, siteDescription } from "@/lib/seo";
 import { PageBackdrop } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/PageBackdrop";
@@ -25,6 +25,17 @@ const inter = Inter({
   // latin-ext too: its unicode-range overlaps the Vietnamese one and is
   // declared after it, so the browser fetched that file anyway for Đ, ư, ơ —
   // but only after layout. Listed here, it preloads with the others.
+  subsets: ["latin", "vietnamese", "latin-ext"],
+  display: "swap",
+});
+
+/**
+ * The site's type since the T1 trial: geometric, wide, and complete for
+ * Vietnamese — elitehacks and gachatool set their headings in it. Inter
+ * stays loaded behind it in --font-sans until the trial is settled.
+ */
+const montserrat = Montserrat({
+  variable: "--font-montserrat",
   subsets: ["latin", "vietnamese", "latin-ext"],
   display: "swap",
 });
@@ -114,7 +125,7 @@ export default async function RootLayout({
   return (
     <html
       lang="vi"
-      className={`${inter.variable} h-full antialiased overflow-y-scroll dark`}
+      className={`${inter.variable} ${montserrat.variable} h-full antialiased overflow-y-scroll dark`}
     >
       <body className="min-h-full flex flex-col">
         {brandOverride ? <style>{brandOverride}</style> : null}
