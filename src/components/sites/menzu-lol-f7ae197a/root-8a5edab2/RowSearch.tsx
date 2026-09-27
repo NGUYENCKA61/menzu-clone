@@ -246,7 +246,7 @@ export function RowSearch({
             <Search
               size={15}
               aria-hidden
-              className="relative shrink-0 text-neutral-500 transition-colors group-focus-within/search:text-[var(--menzu-accent)]"
+              className="relative shrink-0 text-neutral-400 transition-colors group-focus-within/search:text-[var(--menzu-accent)]"
             />
             <input
               // Password managers and similar extensions stamp their own attributes
