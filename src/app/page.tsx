@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { TrendingUp } from "lucide-react";
 
 import { FeaturedCategories } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/FeaturedCategories";
 import { FlashSaleSection } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/FlashSaleSection";
@@ -43,28 +42,6 @@ export async function generateMetadata(): Promise<Metadata> {
 
 /** The group that carries the search, the platform chips and "Xem thêm". */
 const GAME_LIST_SLUG = "danh-sach-hack-game";
-
-/**
- * Lucide icons drawn after a group row's heading, keyed by the group's slug.
- *
- * The Group table used to carry an admin-typed emoji; the shop retired that
- * in favour of Lucide glyphs, and those are components, so the assignment
- * lives here rather than in a column. A group without an entry simply has no
- * icon. Pulled in with -ml-1.5 against the row's 10px gap: with the glyph's
- * own internal whitespace it sits about one word-space off the title, reading
- * as its last word rather than an element floating after it.
- */
-// One icon on the whole page, deliberately: the arrow is what marks
-// the featured row out, and a glyph on every heading would dilute exactly that.
-const GROUP_ICONS: Record<string, React.ReactNode> = {
-  "hot-trending": (
-    <TrendingUp
-      size={24}
-      aria-hidden
-      className="-ml-1.5 shrink-0 text-[var(--menzu-accent)]"
-    />
-  ),
-};
 
 export default async function Home() {
   const settings = await getShopSettings();
@@ -126,7 +103,6 @@ export default async function Home() {
             id={group.slug === GAME_LIST_SLUG ? SCROLL_TARGET_ID : undefined}
             className={group.slug === GAME_LIST_SLUG ? "scroll-mt-[120px]" : undefined}
             heading={group.name}
-            headingSuffix={GROUP_ICONS[group.slug]}
             cards={group.cards}
             viewAllHref="/categories"
             tone="menzu"
