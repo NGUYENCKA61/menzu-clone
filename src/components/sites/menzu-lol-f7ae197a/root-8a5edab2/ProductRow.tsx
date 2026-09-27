@@ -67,6 +67,11 @@ export interface ProductRowProps {
    */
   tiles?: boolean;
   /**
+   * With `marquee` and `tiles`: the slider shows three picture tiles at a
+   * time on a desktop instead of four, each a third of the row (option B3).
+   */
+  bigPicks?: boolean;
+  /**
    * The picks as rows instead of cards — a small cover, the pill, the name
    * and one line of blurb, two columns from md. Hot trending's, when the
    * owner tries it against the bento.
@@ -523,9 +528,18 @@ function BentoTile({
  * A game as a picture tile, on lmarket's pattern: the cover fills the tile
  * and the name sits over its foot on a dark fade. The whole tile is the link,
  * so the list no longer runs a red bar under every game. 4:3 in the game
- * list; `pick` is the sliding row's wider 16:10 tile, with the month's pill.
+ * list; `pick` is the sliding row's wider 16:10 tile, with the month's pill;
+ * `big` is a tile a third of the row wide on a desktop rather than a quarter.
  */
-function RowTile({ card, pick = false }: { card: ProductCard; pick?: boolean }) {
+function RowTile({
+  card,
+  pick = false,
+  big = false,
+}: {
+  card: ProductCard;
+  pick?: boolean;
+  big?: boolean;
+}) {
   return (
     <Link
       href={card.href}
@@ -539,12 +553,21 @@ function RowTile({ card, pick = false }: { card: ProductCard; pick?: boolean }) 
           src={card.image}
           alt={card.title}
           fill
-          sizes="(min-width: 1320px) 310px, (min-width: 1024px) 25vw, (min-width: 768px) 33vw, 50vw"
+          sizes={
+            big
+              ? "(min-width: 1320px) 420px, (min-width: 768px) 33vw, 50vw"
+              : "(min-width: 1320px) 310px, (min-width: 1024px) 25vw, (min-width: 768px) 33vw, 50vw"
+          }
           className="object-cover transition-transform duration-500 group-hover:scale-105 motion-reduce:transform-none"
         />
       ) : null}
       {pick ? (
-        <span className="absolute left-2.5 top-2.5 z-10 inline-flex items-center gap-1 rounded-md bg-amber-500/90 px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-amber-950">
+        <span
+          className={cn(
+            "absolute left-2.5 top-2.5 z-10 inline-flex items-center gap-1 rounded-md bg-amber-500/90 px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-amber-950",
+            big && "lg:left-3.5 lg:top-3.5 lg:text-[11px]",
+          )}
+        >
           <Star size={10} className="shrink-0 fill-current" aria-hidden />
           Top tháng
         </span>
@@ -553,7 +576,12 @@ function RowTile({ card, pick = false }: { card: ProductCard; pick?: boolean }) 
         aria-hidden
         className="absolute inset-0 bg-gradient-to-t from-[#08080b]/95 via-[#08080b]/45 via-40% to-transparent to-65%"
       />
-      <h3 className="absolute inset-x-3.5 bottom-3 text-[13px] font-black uppercase leading-tight tracking-wide text-white sm:text-sm">
+      <h3
+        className={cn(
+          "absolute inset-x-3.5 bottom-3 text-[13px] font-black uppercase leading-tight tracking-wide text-white sm:text-sm",
+          big && "lg:inset-x-5 lg:bottom-4 lg:text-base",
+        )}
+      >
         {card.title}
       </h3>
     </Link>
@@ -626,6 +654,7 @@ export function ProductRow({
   searchable = false,
   bento: wantsBento = false,
   tiles = false,
+  bigPicks = false,
   list = false,
   quiet = false,
   rows = 1,
@@ -682,11 +711,11 @@ export function ProductRow({
         // Each tile takes the width the viewport sets per breakpoint — a
         // quarter, a third, a half of it — with the grid's own gaps, so the
         // sliding row and the still row show tiles of one size.
-        <RowSlider count={cards.length}>
+        <RowSlider count={cards.length} wide={bigPicks}>
           {cards.map((card) => (
             <div key={card.href} className="w-[var(--tile-w)] shrink-0 snap-start">
               {tiles ? (
-                <RowTile card={card} pick={ranked} />
+                <RowTile card={card} pick={ranked} big={bigPicks} />
               ) : (
                 <RowCard card={card} t={t} top={ranked} quiet={quiet} />
               )}

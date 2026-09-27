@@ -32,7 +32,8 @@ const TOUCH_REST_MS = 6000;
  * a container query unit, so they follow the row's own width). The tiles
  * are cut a little short of the row, so a sliver of the next one shows at
  * the right edge under a fade — the row says "there is more" before anyone
- * touches it. How many tiles fit is measured on each move.
+ * touches it. How many tiles fit is measured on each move. `wide` keeps the
+ * tablet's three tiles to a view on a desktop too, so each is larger.
  *
  * Under the row, one dot per position, read from where the strip actually
  * is; the current one is drawn long and fills over the length of a beat, so
@@ -41,7 +42,16 @@ const TOUCH_REST_MS = 6000;
  * or a finger. Readers who asked for less motion get a strip that never
  * steps on its own and jumps rather than glides when driven.
  */
-export function RowSlider({ count, children }: { count: number; children: ReactNode }) {
+export function RowSlider({
+  count,
+  wide = false,
+  children,
+}: {
+  count: number;
+  /** Three tiles to a view on a desktop instead of four. */
+  wide?: boolean;
+  children: ReactNode;
+}) {
   const viewportRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   /** Where the strip stands, read back from its scroll position. */
@@ -180,7 +190,9 @@ export function RowSlider({ count, children }: { count: number; children: ReactN
           hands the gesture to the system, which reads it as "back". */}
       <div
         ref={viewportRef}
-        className={`row-slider-viewport hide-scrollbar @container w-full snap-x snap-mandatory overflow-x-auto overscroll-x-contain [--gap:1rem] [--peek:28px] sm:[--gap:1.5rem] sm:[--peek:40px] [--tile-w:calc((100cqw-1rem-var(--peek))/2)] md:[--tile-w:calc((100cqw-3rem-var(--peek))/3)] lg:[--tile-w:calc((100cqw-4.5rem-var(--peek))/4)] ${
+        className={`row-slider-viewport hide-scrollbar @container w-full snap-x snap-mandatory overflow-x-auto overscroll-x-contain [--gap:1rem] [--peek:28px] sm:[--gap:1.5rem] sm:[--peek:40px] [--tile-w:calc((100cqw-1rem-var(--peek))/2)] md:[--tile-w:calc((100cqw-3rem-var(--peek))/3)] ${
+          wide ? "" : "lg:[--tile-w:calc((100cqw-4.5rem-var(--peek))/4)]"
+        } ${
           index > 0
             ? "[mask-image:linear-gradient(to_right,transparent,black_40px,black_calc(100%-72px),transparent)]"
             : "[mask-image:linear-gradient(to_right,black_calc(100%-72px),transparent)]"
