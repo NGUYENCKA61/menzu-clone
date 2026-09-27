@@ -143,6 +143,13 @@
   html {
     @apply font-sans;
   }
+  /* T3: headings in Montserrat over Be Vietnam Pro text (layout.tsx loads
+     both). The variable is set by next/font on <html>. */
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-montserrat), "Montserrat", var(--font-be-vietnam-pro), ui-sans-serif, system-ui, sans-serif;
+  }
 }
 
 /* ---------------------------------------------------------------------------
