@@ -86,7 +86,12 @@ export function FaqSection({ faq, contact }: { faq: FaqEntry[]; contact: FaqCont
   ].filter((door) => door !== null);
 
   return (
-    <section aria-labelledby="faq-heading" className="relative w-full">
+    // The hairline and air above it are the reviews section's own, so the
+    // two information blocks after the shop open the same way.
+    <section
+      aria-labelledby="faq-heading"
+      className="relative w-full border-t border-white/[0.06] pt-12 lg:pt-16"
+    >
       {schema ? <JsonLd data={schema} /> : null}
 
       {/* The original's pool of colour behind the block: wide, blurred far
