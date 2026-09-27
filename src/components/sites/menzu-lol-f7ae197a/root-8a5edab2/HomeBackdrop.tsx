@@ -11,12 +11,17 @@ import { CardImage } from "@/components/sites/menzu-lol-f7ae197a/shared/CardImag
  *
  * The picture scrolls away with the hero (absolute); the sky stays put
  * (fixed). The grain comes after the picture so it lies over it too. Their
- * styles are the home-sky-* classes in globals.css.
+ * styles are the home-sky-* classes in globals.css. `plain` drops the glows
+ * and the grain for a flat near-black under the first screen, the other
+ * version the owner is weighing.
  */
-export function HomeBackdrop({ src }: { src?: string }) {
+export function HomeBackdrop({ src, plain = false }: { src?: string; plain?: boolean }) {
   return (
     <>
-      <div aria-hidden className="home-sky-base pointer-events-none fixed inset-0 z-[-1]" />
+      <div
+        aria-hidden
+        className={`pointer-events-none fixed inset-0 z-[-1] ${plain ? "bg-[#08080b]" : "home-sky-base"}`}
+      />
       {src ? (
         <div
           aria-hidden
@@ -33,7 +38,9 @@ export function HomeBackdrop({ src }: { src?: string }) {
           <div className="absolute inset-0 bg-[#0a0a0d]/70" />
         </div>
       ) : null}
-      <div aria-hidden className="home-sky-grain pointer-events-none fixed inset-0 z-[-1]" />
+      {plain ? null : (
+        <div aria-hidden className="home-sky-grain pointer-events-none fixed inset-0 z-[-1]" />
+      )}
     </>
   );
 }
