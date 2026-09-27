@@ -51,7 +51,12 @@ export function TrustStatsStrip({ stats, slim = false }: { stats: TrustStats; sl
   if (tiles.length < 2) return null;
 
   return (
-    <section aria-label="Số liệu của shop" className={`mx-auto w-full max-w-[1320px] px-4 lg:px-6 ${slim ? "" : "pb-4"}`}>
+    <section
+      aria-label="Số liệu của shop"
+      // Slim, it sits among the rows and takes their width; on its own it
+      // brings its own gutter.
+      className={slim ? "w-full" : "mx-auto w-full max-w-[1320px] px-4 pb-4 lg:px-6"}
+    >
       <div
         className={
           slim
@@ -86,8 +91,11 @@ export function TrustStatsStrip({ stats, slim = false }: { stats: TrustStats; sl
                 </span>
               </div>
               <span
-                className={`font-bold uppercase tracking-[0.2em] text-neutral-500 ${
-                  slim ? "text-[10px] sm:text-[11px]" : "text-[11px]"
+                className={`font-bold uppercase text-neutral-500 ${
+                  // Tighter on a phone, so "Đánh giá trung bình" keeps to one line.
+                  slim
+                    ? "text-[10px] tracking-[0.12em] sm:text-[11px] sm:tracking-[0.2em]"
+                    : "text-[11px] tracking-[0.2em]"
                 }`}
               >
                 {tile.label}
