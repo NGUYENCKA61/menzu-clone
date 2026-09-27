@@ -697,7 +697,6 @@ export function ProductRow({
 
   const title = (
     <div className="flex min-w-0 items-center gap-2.5">
-      <div className="w-[3px] h-5 bg-[var(--menzu-accent)] rounded-full shrink-0" />
       <h2
         className={cn(
           "text-white",
@@ -743,8 +742,7 @@ export function ProductRow({
         {viewAll}
       </div>
       {description ? (
-        // Indented past the red rung, so it lines up under the heading's words.
-        <p className="mt-1.5 mb-5 pl-[13px] text-[13.5px] leading-relaxed text-[#9b9da5] sm:mb-7 sm:text-[15px]">
+        <p className="mt-1.5 mb-5 text-[13.5px] leading-relaxed text-[#9b9da5] sm:mb-7 sm:text-[15px]">
           {description}
         </p>
       ) : null}
