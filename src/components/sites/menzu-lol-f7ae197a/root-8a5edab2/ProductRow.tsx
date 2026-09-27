@@ -30,14 +30,6 @@ export interface ProductRowProps {
    * Decorative: pass it aria-hidden.
    */
   headingSuffix?: React.ReactNode;
-  /**
-   * The heading in title case ("Hot Trending Tháng Này", whatever case the
-   * admin typed it in), larger and bold rather than black, instead of set in
-   * capitals — the T1 typography trial.
-   */
-  plainHeading?: boolean;
-  /** One line under the heading saying what the row is. */
-  description?: string;
   cards: ProductCard[];
   /** Destination of the row's "Xem tất cả" link — the matching index page. */
   viewAllHref: string;
@@ -439,17 +431,6 @@ function RowCard({
   );
 }
 
-/**
- * "DANH SÁCH HACK GAME" or "Hot trending tháng này" → "Danh Sách Hack Game":
- * every word capitalised, the rest lower case, with Vietnamese casing rules.
- * The group names are typed in any case in the admin.
- */
-function titleCase(text: string): string {
-  return text
-    .toLocaleLowerCase("vi")
-    .replace(/(^|\s)(\S)/g, (_, space: string, first: string) => space + first.toLocaleUpperCase("vi"));
-}
-
 /** Tiles a bento row draws: the lead and the four beside it. */
 const BENTO_SIZE = 5;
 
@@ -602,7 +583,7 @@ function RowTile({
       />
       <h3
         className={cn(
-          "absolute inset-x-3.5 bottom-3 text-[13px] font-bold leading-tight text-white sm:text-sm",
+          "absolute inset-x-3.5 bottom-3 text-[13px] font-black uppercase leading-tight tracking-wide text-white sm:text-sm",
           big && "lg:inset-x-5 lg:bottom-4 lg:text-base",
         )}
       >
@@ -684,8 +665,6 @@ export function ProductRow({
   quiet = false,
   rows = 1,
   panel = false,
-  plainHeading = false,
-  description,
   id,
   className,
 }: ProductRowProps) {
@@ -696,16 +675,10 @@ export function ProductRow({
   const marquee = runs && cards.length >= MARQUEE_FROM;
 
   const title = (
-    <div className="flex min-w-0 items-center gap-2.5">
-      <h2
-        className={cn(
-          "text-white",
-          plainHeading
-            ? "text-xl font-bold leading-tight tracking-[-0.01em] sm:text-[30px]"
-            : "text-xl font-black uppercase tracking-wider sm:text-2xl",
-        )}
-      >
-        {plainHeading ? titleCase(heading) : heading}
+    <div className="flex items-center gap-2.5">
+      <div className="w-[3px] h-5 bg-[var(--menzu-accent)] rounded-full shrink-0" />
+      <h2 className="text-xl sm:text-2xl font-black uppercase tracking-wider text-white">
+        {heading}
       </h2>
       {headingSuffix}
     </div>
@@ -713,7 +686,7 @@ export function ProductRow({
   const viewAll = (
     <Link
       href={viewAllHref}
-      className="group flex shrink-0 items-center gap-1 whitespace-nowrap text-[10px] sm:text-xs font-bold text-neutral-400 hover:text-white transition-colors uppercase tracking-widest border-b border-neutral-700 hover:border-[var(--menzu-accent)]"
+      className="group flex items-center gap-1 text-[10px] sm:text-xs font-bold text-neutral-400 hover:text-white transition-colors uppercase tracking-widest border-b border-neutral-700 hover:border-[var(--menzu-accent)]"
     >
       <span className="hidden sm:inline">XEM TẤT CẢ</span>
       <span className="sm:hidden">XEM THÊM</span>
@@ -731,21 +704,10 @@ export function ProductRow({
         className,
       )}
     >
-      <div
-        className={cn(
-          "flex flex-row items-center justify-between gap-3 mb-8",
-          panel && "mb-5 sm:mb-6",
-          description && "mb-0 sm:mb-0",
-        )}
-      >
+      <div className={cn("flex flex-row items-center justify-between mb-8", panel && "mb-5 sm:mb-6")}>
         {title}
         {viewAll}
       </div>
-      {description ? (
-        <p className="mt-1.5 mb-5 text-[13.5px] leading-relaxed text-[#9b9da5] sm:mb-7 sm:text-[15px]">
-          {description}
-        </p>
-      ) : null}
 
       {bento ? (
         <RowBento cards={cards} ranked={ranked} />
