@@ -181,9 +181,9 @@ export default async function Home() {
 
   return (
     <div className="min-h-screen flex flex-col text-white overflow-x-clip selection:bg-[var(--menzu-accent)]/30 transition-colors duration-300">
-      {/* lmarket's way: a flat dark page, a red light and a dot grid behind the
-          first screen; covers the root layout's full-page artwork. */}
-      <HomeBackdrop />
+      {/* The artwork behind the first screen only, lmarket's flat dark tone
+          under the rest; covers the root layout's full-page backdrop. */}
+      <HomeBackdrop src={settings.siteBackground} />
       <JsonLd data={organizationJsonLd(settings.brandName)} />
       {/* spacer reserving the fixed header's 104px */}
       <div className="w-full shrink-0 h-[104px]" />

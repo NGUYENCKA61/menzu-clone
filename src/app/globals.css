@@ -437,28 +437,6 @@
 }
 
 /* ---------------------------------------------------------------------------
- * Home page backdrop, lmarket's way (HomeBackdrop, option L1): a light in the
- * shop's colour falling from the top of the first screen, and a faint dot
- * grid that fades out before the rows of cards.
- * ------------------------------------------------------------------------ */
-.home-l1-glow {
-  background: radial-gradient(
-    70% 100% at 50% -10%,
-    color-mix(in srgb, var(--menzu-accent) 20%, transparent) 0%,
-    color-mix(in srgb, var(--menzu-accent) 6%, transparent) 45%,
-    transparent 75%
-  );
-}
-
-.home-l1-grid {
-  opacity: 0.4;
-  background-image: radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.07) 1px, transparent 0);
-  background-size: 32px 32px;
-  -webkit-mask-image: linear-gradient(to bottom, black 55%, transparent);
-  mask-image: linear-gradient(to bottom, black 55%, transparent);
-}
-
-/* ---------------------------------------------------------------------------
  * Hero heading types itself in: each character is a span that pops from
  * opacity 0 on a staggered delay, then a caret blinks at the tail. The text is
  * whole in the DOM (readable, no-JS safe); reduced motion shows it at once.
