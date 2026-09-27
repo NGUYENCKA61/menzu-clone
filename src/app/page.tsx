@@ -7,6 +7,7 @@ import {
   HeroBanners,
   SCROLL_TARGET_ID,
 } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/HeroBanners";
+import { HomeBackdrop } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/HomeBackdrop";
 import { ProductRow } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/ProductRow";
 import { DocsSection } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/DocsSection";
 import { SeoContent } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/SeoContent";
@@ -180,6 +181,9 @@ export default async function Home() {
 
   return (
     <div className="min-h-screen flex flex-col text-white overflow-x-clip selection:bg-[var(--menzu-accent)]/30 transition-colors duration-300">
+      {/* The artwork behind the first screen only, a calm grained sky under
+          the rest; covers the root layout's full-page backdrop. */}
+      <HomeBackdrop src={settings.siteBackground} />
       <JsonLd data={organizationJsonLd(settings.brandName)} />
       {/* spacer reserving the fixed header's 104px */}
       <div className="w-full shrink-0 h-[104px]" />
