@@ -1,6 +1,16 @@
 "use client";
 
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
+
+/**
+ * The arrows, flat squares like the game list's chips and search field: 10px
+ * corners, a dark fill with a hairline edge, a white chevron, half over the
+ * row's edge. Only from sm up — a phone swipes, sees the next tile peeking,
+ * and would lose picture to them.
+ */
+const ARROW =
+  "absolute top-1/2 z-20 hidden h-[42px] w-[42px] -translate-y-1/2 items-center justify-center rounded-[10px] bg-[#1d1e23] text-white shadow-[0_0_0_1px_rgba(255,255,255,0.08),0_6px_16px_-6px_rgba(0,0,0,0.6)] transition-colors hover:bg-[#26272d] sm:flex";
 
 /** Milliseconds a set of tiles rests before the next step. */
 const STEP_MS = 3000;
@@ -183,34 +193,59 @@ export function RowSlider({
   return (
     <div className={held ? "row-slider-held" : undefined}>
 
-      {/* --peek is the sliver of the next tile left showing; the fade is a
-          mask so it works over the page's artwork, not only over flat black.
-          The left fade only exists once something has slid out that way.
-          overscroll-x-contain matters: without it a swipe past the end
-          hands the gesture to the system, which reads it as "back". */}
-      <div
-        ref={viewportRef}
-        className={`row-slider-viewport hide-scrollbar @container w-full snap-x snap-mandatory overflow-x-auto overscroll-x-contain [--gap:1rem] [--peek:28px] sm:[--gap:1.5rem] sm:[--peek:40px] [--tile-w:calc((100cqw-1rem-var(--peek))/2)] md:[--tile-w:calc((100cqw-3rem-var(--peek))/3)] ${
-          wide ? "" : "lg:[--tile-w:calc((100cqw-4.5rem-var(--peek))/4)]"
-        } ${
-          index > 0
-            ? "[mask-image:linear-gradient(to_right,transparent,black_40px,black_calc(100%-72px),transparent)]"
-            : "[mask-image:linear-gradient(to_right,black_calc(100%-72px),transparent)]"
-        }`}
-        onMouseEnter={() => setHeld(true)}
-        onMouseLeave={() => {
-          if (touchRest.current === null) setHeld(false);
-        }}
-        onFocus={() => setHeld(true)}
-        onBlur={() => {
-          if (touchRest.current === null) setHeld(false);
-        }}
-        onTouchStart={touch}
-        onTouchEnd={touch}
-      >
-        <div ref={trackRef} className="row-slider-track flex w-max gap-[var(--gap)]">
-          {children}
+      <div className="relative">
+        {/* --peek is the sliver of the next tile left showing; the fade is a
+            mask so it works over the page's artwork, not only over flat black.
+            The left fade only exists once something has slid out that way.
+            overscroll-x-contain matters: without it a swipe past the end
+            hands the gesture to the system, which reads it as "back". */}
+        <div
+          ref={viewportRef}
+          className={`row-slider-viewport hide-scrollbar @container w-full snap-x snap-mandatory overflow-x-auto overscroll-x-contain [--gap:1rem] [--peek:28px] sm:[--gap:1.5rem] sm:[--peek:40px] [--tile-w:calc((100cqw-1rem-var(--peek))/2)] md:[--tile-w:calc((100cqw-3rem-var(--peek))/3)] ${
+            wide ? "" : "lg:[--tile-w:calc((100cqw-4.5rem-var(--peek))/4)]"
+          } ${
+            index > 0
+              ? "[mask-image:linear-gradient(to_right,transparent,black_40px,black_calc(100%-72px),transparent)]"
+              : "[mask-image:linear-gradient(to_right,black_calc(100%-72px),transparent)]"
+          }`}
+          onMouseEnter={() => setHeld(true)}
+          onMouseLeave={() => {
+            if (touchRest.current === null) setHeld(false);
+          }}
+          onFocus={() => setHeld(true)}
+          onBlur={() => {
+            if (touchRest.current === null) setHeld(false);
+          }}
+          onTouchStart={touch}
+          onTouchEnd={touch}
+        >
+          <div ref={trackRef} className="row-slider-track flex w-max gap-[var(--gap)]">
+            {children}
+          </div>
         </div>
+
+        {/* One tile per press, wrapping at either end like the clock does; a
+            press restarts the clock, as a dot does. */}
+        {last > 0 ? (
+          <>
+            <button
+              type="button"
+              aria-label="Trước"
+              onClick={() => press(index - 1)}
+              className={`${ARROW} left-0 -translate-x-4`}
+            >
+              <ChevronLeft size={20} />
+            </button>
+            <button
+              type="button"
+              aria-label="Sau"
+              onClick={() => press(index + 1)}
+              className={`${ARROW} right-0 translate-x-4`}
+            >
+              <ChevronRight size={20} />
+            </button>
+          </>
+        ) : null}
       </div>
 
       {last > 0 ? (
