@@ -4,7 +4,6 @@ import Link from "next/link";
 import {
   ChevronDown,
   ChevronUp,
-  CircuitBoard,
   Cpu,
   LayoutGrid,
   Monitor,
@@ -68,8 +67,14 @@ const CHIP_FACES: Record<string, { label: string; Icon: LucideIcon }> = {
   PC: { label: "PC", Icon: Monitor },
   MOBILE: { label: "Mobile", Icon: Smartphone },
   SPOOFER: { label: "Spoofer", Icon: Cpu },
-  DMA: { label: "DMA / Mạch", Icon: CircuitBoard },
 };
+
+/**
+ * The platforms the row offers as chips: all but DMA / mạch, which the shop
+ * took off the row. The admin can still tag a category DMA; it then shows
+ * under "Tất cả" only.
+ */
+const CHIP_PLATFORMS = CATEGORY_PLATFORMS.filter((value) => value !== "DMA");
 
 /** The reveal: each opened tile rises in this many ms after the one before. */
 const IN_STAGGER_MS = 40;
@@ -307,7 +312,7 @@ export function RowSearch({
             aria-label="Phân loại"
             className="flex flex-wrap items-center gap-2.5"
           >
-            {[ALL, ...CATEGORY_PLATFORMS].map((value) => {
+            {[ALL, ...CHIP_PLATFORMS].map((value) => {
               const active = platform === value;
               const face = CHIP_FACES[value];
               return (
