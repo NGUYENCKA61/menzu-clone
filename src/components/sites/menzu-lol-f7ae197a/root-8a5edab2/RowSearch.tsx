@@ -232,27 +232,21 @@ export function RowSearch({
     <div className="flex flex-col gap-4">
       {filters ? (
         <>
-          {/* The search pill lmarket.net's hero wears, in the shop's red:
-          frosted glass with a soft sheen from the top-left, a hairline
-          highlight along the top edge and a shadow under it, and the accent on
-          the border, ring and glass while the field has focus. On trial again
-          at the shop's request (it once asked for the quiet dark glass back);
-          the comet of light that ran round the border stays off. As wide as
-          the grid under it, so the field and the tiles share their outer
-          edges. The sheen comes first and cannot be clicked; the icon, field
-          and clear button are positioned so they paint over it. */}
+          {/* The search field in elitehacks' manner: a flat fill a shade lighter
+          than the page, 10px corners like the chips under it, no border, sheen
+          or shadow, and a bright magnifier as the one thing that catches the
+          eye. The shop tried lmarket's glass pill here twice and found it
+          loud on a long bar over a flat page. The accent rings the field and
+          takes the icon while it has focus. As wide as the grid under it, so
+          the field and the tiles share their outer edges. */}
           <label
             htmlFor={inputId}
-            className="group/search relative isolate flex h-12 w-full items-center gap-2.5 rounded-full border border-white/15 bg-white/[0.04] px-4 shadow-[0_8px_32px_-8px_rgb(0_0_0/0.5),inset_0_1px_0_0_rgb(255_255_255/0.08)] backdrop-blur-md transition-all focus-within:border-[var(--menzu-accent)]/60 focus-within:bg-white/[0.06] focus-within:ring-2 focus-within:ring-[var(--menzu-accent)]/25"
+            className="group/search relative isolate flex h-12 w-full items-center gap-3 rounded-[10px] bg-white/[0.07] px-4 transition-shadow focus-within:ring-1 focus-within:ring-[var(--menzu-accent)]/60"
           >
-            <span
-              aria-hidden
-              className="pointer-events-none absolute inset-0 rounded-full bg-[linear-gradient(135deg,rgba(255,255,255,0.10)_0%,rgba(255,255,255,0.04)_35%,transparent_70%)]"
-            />
             <Search
-              size={15}
+              size={18}
               aria-hidden
-              className="relative shrink-0 text-neutral-400 transition-colors group-focus-within/search:text-[var(--menzu-accent)]"
+              className="relative shrink-0 text-neutral-200 transition-colors group-focus-within/search:text-[var(--menzu-accent)]"
             />
             <input
               // Password managers and similar extensions stamp their own attributes
@@ -265,7 +259,7 @@ export function RowSearch({
               onChange={(event) => ask({ query: event.target.value })}
               placeholder={placeholder}
               autoComplete="off"
-              className="relative min-w-0 flex-1 bg-transparent text-[13px] text-white outline-none placeholder:text-neutral-500 [&::-webkit-search-cancel-button]:hidden"
+              className="relative min-w-0 flex-1 bg-transparent text-sm text-white outline-none placeholder:text-neutral-400 [&::-webkit-search-cancel-button]:hidden"
             />
             {query ? (
               <button
