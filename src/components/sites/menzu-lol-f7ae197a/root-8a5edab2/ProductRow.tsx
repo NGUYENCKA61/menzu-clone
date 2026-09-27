@@ -33,6 +33,11 @@ export interface ProductRowProps {
   cards: ProductCard[];
   /** Destination of the row's "Xem tất cả" link — the matching index page. */
   viewAllHref: string;
+  /**
+   * No "Xem tất cả" beside the heading. Hot trending's went unclicked, the
+   * shop found; its tiles are the way in.
+   */
+  hideViewAll?: boolean;
   tone?: RowTone;
   /**
    * Let the row slide once it holds five or more tiles. Off, a
@@ -653,6 +658,7 @@ export function ProductRow({
   headingSuffix,
   cards,
   viewAllHref,
+  hideViewAll = false,
   tone = "indigo",
   marquee: runs = false,
   ranked = false,
@@ -706,7 +712,7 @@ export function ProductRow({
     >
       <div className={cn("flex flex-row items-center justify-between mb-8", panel && "mb-5 sm:mb-6")}>
         {title}
-        {viewAll}
+        {hideViewAll ? null : viewAll}
       </div>
 
       {bento ? (

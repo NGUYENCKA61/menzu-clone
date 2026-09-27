@@ -105,6 +105,7 @@ export default async function Home() {
             heading={group.name}
             cards={group.cards}
             viewAllHref="/categories"
+            hideViewAll={group.slug === "hot-trending"}
             tone="menzu"
             marquee={group.slug === "hot-trending"}
             ranked={group.slug === "hot-trending"}
