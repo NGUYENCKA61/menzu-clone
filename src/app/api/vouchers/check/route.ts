@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 import { clampAgencyPercent } from "@/lib/agency";
 import { db } from "@/lib/db";
-import { runningSalePrices } from "@/lib/queries";
+import { runningPackageSales, runningSalePrices, tierPriceNow } from "@/lib/queries";
 import { getCurrentUser } from "@/lib/session";
 import {
   evaluateVoucher,
@@ -148,7 +148,9 @@ export async function POST(request: Request) {
       MAX_QUANTITY,
       Math.max(1, Math.floor(Number(body?.quantity ?? 1)) || 1),
     );
-    const lineTotal = pkg.price * BigInt(quantity);
+    // At the tier's flash-sale price while one runs, as checkout charges it.
+    const tierSale = await runningPackageSales([pkg.id]);
+    const lineTotal = tierPriceNow(pkg, tierSale) * BigInt(quantity);
 
     // Wholesale is already the deal: the checkout quietly ignores a code on
     // an agency's software order, so the preview must not promise one.

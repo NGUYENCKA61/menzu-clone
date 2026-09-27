@@ -12,6 +12,7 @@ import { evaluateVoucherForCart, voucherRules } from "@/lib/voucher";
 import { pointsForSpend } from "@/lib/spin";
 import { balanceOf, debitWallet } from "@/lib/wallet";
 import { isSalesLocked } from "@/lib/softwareStatus";
+import { runningPackageSales, tierPriceNow } from "@/lib/queries";
 
 const makeCode = makeShortCode;
 
@@ -94,10 +95,19 @@ export async function POST(request: Request) {
         throw new Error(`GONE:${dead.product.name ?? dead.product.code}`);
       }
 
-      // What the basket is worth at list price, and what each line is worth,
-      // kept side by side: the discounts below are shared out per line so the
-      // orders written at the end each carry their own honest figure.
-      const lineList = items.map((i) => i.package.price * BigInt(i.quantity));
+      // A tier on flash sale costs its sale price, read inside the
+      // transaction like everything else the charge depends on.
+      const tierSale = await runningPackageSales(
+        items.map((i) => i.package.id),
+        tx,
+      );
+      const unitOf = (i: (typeof items)[number]) => tierPriceNow(i.package, tierSale);
+
+      // What the basket is worth before the member's cuts, and what each line
+      // is worth, kept side by side: the discounts below are shared out per
+      // line so the orders written at the end each carry their own honest
+      // figure.
+      const lineList = items.map((i) => unitOf(i) * BigInt(i.quantity));
       const listTotal = lineList.reduce((sum, value) => sum + value, 0n);
 
       // Read inside the transaction, like the single-buy endpoint: the
@@ -197,7 +207,12 @@ export async function POST(request: Request) {
         agencyPct > 0 ? agencyPct : tierPct > 0 ? tierPct : 0;
 
       for (const [index, item] of items.entries()) {
-        const lineList = item.package.price * BigInt(item.quantity);
+        const lineList = unitOf(item) * BigInt(item.quantity);
+        // The shelf figure the receipt crosses out, and the sale's percent
+        // when a flash sale is the only discount on the line.
+        const shelf = item.package.price * BigInt(item.quantity);
+        const salePct =
+          shelf > lineList ? Number(((shelf - lineList) * 100n) / shelf) : 0;
         const last = index === items.length - 1;
         const lineTotal = last
           ? total - chargedSoFar
@@ -224,8 +239,8 @@ export async function POST(request: Request) {
             keysOwed: item.quantity,
             method: "BUY_NOW",
             status: "PAID",
-            listPrice: lineList,
-            discountPct,
+            listPrice: shelf,
+            discountPct: discountPct > 0 ? discountPct : salePct,
             voucherId,
             voucherCut: lineVoucherCut,
             total: lineTotal,

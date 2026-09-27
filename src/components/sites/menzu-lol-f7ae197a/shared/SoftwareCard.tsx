@@ -12,6 +12,11 @@ export interface SoftwareCardPackage {
   id: string;
   label: string;
   price: number;
+  /**
+   * The shelf price while a flash sale runs on this tier, to cross out beside
+   * `price`, which is then the sale price. Absent when there is no sale.
+   */
+  listPrice?: number;
 }
 
 export interface SoftwareCardView {
@@ -293,6 +298,11 @@ export function SoftwareCard({
                         className={optionCls(p.id === packageId)}
                       >
                         {p.label} — {formatVnd(p.price)}đ
+                        {p.listPrice ? (
+                          <span className="ml-1.5 text-[11px] text-[#8a8c94] line-through">
+                            {formatVnd(p.listPrice)}đ
+                          </span>
+                        ) : null}
                       </button>
                     ))}
                 </div>

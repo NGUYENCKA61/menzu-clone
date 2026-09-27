@@ -51,6 +51,7 @@ export default async function AdminMarketingPage() {
           endsAt: formatWhen(s.endsAt) ?? "",
           active: s.active,
           running: s.running,
+          packageLabel: s.packageLabel,
         }))}
       />
     </AdminShell>

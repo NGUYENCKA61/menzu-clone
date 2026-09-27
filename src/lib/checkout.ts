@@ -20,6 +20,7 @@ import { db } from "@/lib/db";
 import { deliverKeys } from "@/lib/licenseKeys";
 import { alertLowStock } from "@/lib/stockAlerts";
 import { readMemberTier, TIER_RULES, tierDiscountFor } from "@/lib/memberTiers";
+import { runningPackageSales, tierPriceNow } from "@/lib/queries";
 import { getShopSettings } from "@/lib/settingsStore";
 import { makeShortCode } from "@/lib/shortCode";
 import { isSalesLocked, salesLockReason } from "@/lib/softwareStatus";
@@ -101,6 +102,8 @@ export async function placeOrder(input: CheckoutInput): Promise<CheckoutResult> 
     const sale = await tx.flashSale.findFirst({
       where: {
         productId: product.id,
+        // A tier's sale is read below, against the tier the buyer chose.
+        packageId: null,
         active: true,
         startsAt: { lte: now },
         endsAt: { gte: now },
@@ -146,7 +149,14 @@ export async function placeOrder(input: CheckoutInput): Promise<CheckoutResult> 
         ? Math.min(999, Math.max(1, asked))
         : 1;
 
-    const unitPrice = chosenPackage ? chosenPackage.price : (sale?.salePrice ?? product.price);
+    // A tier on flash sale is charged its sale price, read inside this
+    // transaction exactly as the account's is above.
+    const tierSale = chosenPackage
+      ? await runningPackageSales([chosenPackage.id], tx)
+      : new Map<string, bigint>();
+    const unitPrice = chosenPackage
+      ? tierPriceNow(chosenPackage, tierSale)
+      : (sale?.salePrice ?? product.price);
     const lineTotal = unitPrice * BigInt(quantity);
 
     // Re-read the buyer inside the transaction — for the balance below, and
@@ -200,7 +210,11 @@ export async function placeOrder(input: CheckoutInput): Promise<CheckoutResult> 
       },
     });
 
-    const listPrice = isSoftware ? lineTotal : product.oldPrice * BigInt(quantity);
+    // The shelf figure, which the receipt crosses out when less was paid: a
+    // tool's is the tier's own price, sale or not.
+    const listPrice = isSoftware
+      ? (chosenPackage?.price ?? unitPrice) * BigInt(quantity)
+      : product.oldPrice * BigInt(quantity);
     const discountPct =
       agencyPct > 0
         ? agencyPct
@@ -208,7 +222,9 @@ export async function placeOrder(input: CheckoutInput): Promise<CheckoutResult> 
           ? tierPct
           : !isSoftware && product.oldPrice > 0n
             ? Number(((product.oldPrice - unitPrice) * 100n) / product.oldPrice)
-            : 0;
+            : chosenPackage && unitPrice < chosenPackage.price
+              ? Number(((chosenPackage.price - unitPrice) * 100n) / chosenPackage.price)
+              : 0;
 
     const order = await tx.order.create({
       data: {

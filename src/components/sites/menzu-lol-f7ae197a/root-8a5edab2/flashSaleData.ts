@@ -9,7 +9,16 @@ export interface FlashSaleTier {
 }
 
 export interface FlashSaleItem {
+  /**
+   * Tells cards apart where the code cannot: one tool can have several tiers
+   * on sale at once. Absent on an account, whose code is unique.
+   */
+  key?: string;
   code: string;
+  /** The tool's name, for a tier on sale; an account leads with its code. */
+  name?: string;
+  /** The tier on sale, "7 ngày", for a tool; absent on an account. */
+  packageLabel?: string;
   /**
    * /{category-slug}/{product-slug}. Optional only because the scraped
    * fixture below predates slugs; every item the shop actually serves carries

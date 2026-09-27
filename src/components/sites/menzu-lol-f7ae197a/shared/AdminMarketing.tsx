@@ -40,6 +40,8 @@ export interface FlashSaleView {
   active: boolean;
   /** Computed server-side against one clock, so both renders agree. */
   running: boolean;
+  /** The tier on sale, for a tool; null for an account. */
+  packageLabel: string | null;
 }
 
 function formatVnd(n: number): string {
@@ -107,8 +109,16 @@ export function AdminMarketing({
   vouchers: VoucherView[];
   /** For the "Áp dụng cho danh mục" pick. */
   categories: { slug: string; name: string }[];
-  /** For the "Những sản phẩm chỉ định" pick: every live product. */
-  products: { code: string; name: string; category: string }[];
+  /**
+   * For the "Những sản phẩm chỉ định" pick: every live product. A tool also
+   * lists its tiers, one of which its flash sale must name.
+   */
+  products: {
+    code: string;
+    name: string;
+    category: string;
+    packages: { id: string; label: string; price: number }[];
+  }[];
   sales: FlashSaleView[];
 }) {
   const router = useRouter();
@@ -134,6 +144,7 @@ export function AdminMarketing({
 
   // Flash sale form
   const [productCode, setProductCode] = useState("");
+  const [salePackage, setSalePackage] = useState("");
   const [salePrice, setSalePrice] = useState("");
   const [sStart, setSStart] = useState("");
   const [sEnd, setSEnd] = useState("");
@@ -177,6 +188,14 @@ export function AdminMarketing({
   }
 
   const digits = (value: string) => Number(value.replace(/\D/g, "")) || 0;
+
+  // The product the sale form's code names, and its tiers when it is a tool.
+  // An account, or a code that matches nothing yet, has none to pick.
+  const saleProduct = products.find(
+    (p) => p.code.toLowerCase() === productCode.trim().toLowerCase(),
+  );
+  const saleTiers = saleProduct?.packages ?? [];
+  const saleTier = saleTiers.find((t) => t.id === salePackage) ?? null;
 
   return (
     <div className="flex flex-col gap-5">
@@ -446,25 +465,72 @@ export function AdminMarketing({
               event.preventDefault();
               const ok = await call("/api/admin/flash-sales", "POST", {
                 productCode,
+                packageId: saleTiers.length > 0 ? salePackage : undefined,
                 salePrice: digits(salePrice),
                 startsAt: sStart,
                 endsAt: sEnd,
               });
-              if (ok) { setProductCode(""); setSalePrice(""); setSStart(""); setSEnd(""); }
+              if (ok) { setProductCode(""); setSalePackage(""); setSalePrice(""); setSStart(""); setSEnd(""); }
             }}
-            className="rounded-xl border border-white/[0.08] bg-[#0e0e11] p-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4"
+            className="rounded-xl border border-white/[0.08] bg-[#0e0e11] p-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4"
           >
-            <div className="sm:col-span-2 lg:col-span-5 -mb-1 flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-neutral-500">
+            <div className="sm:col-span-2 lg:col-span-6 -mb-1 flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-neutral-500">
               <Zap size={13} className="text-neutral-400" />
               Lên lịch flash sale
             </div>
             <div>
               <label htmlFor="s-code" className={LABEL}>Mã sản phẩm</label>
-              <input id="s-code" required value={productCode} onChange={(e) => setProductCode(e.target.value)} placeholder="VLR2079" className={FIELD} />
+              <input
+                id="s-code"
+                required
+                list="s-code-options"
+                value={productCode}
+                onChange={(e) => {
+                  setProductCode(e.target.value);
+                  setSalePackage("");
+                }}
+                placeholder="VLR2079"
+                className={FIELD}
+              />
+              {/* Suggests codes by name as the shop types, tools included:
+                  their codes are not the kind anybody remembers. */}
+              <datalist id="s-code-options">
+                {products.map((p) => (
+                  <option key={p.code} value={p.code}>
+                    {p.name}
+                  </option>
+                ))}
+              </datalist>
+            </div>
+            <div>
+              <label htmlFor="s-package" className={LABEL}>Gói</label>
+              {/* A tool's sale names the tier it discounts; an account has one
+                  price and nothing to choose here. */}
+              <select
+                id="s-package"
+                required={saleTiers.length > 0}
+                disabled={saleTiers.length === 0}
+                value={salePackage}
+                onChange={(e) => setSalePackage(e.target.value)}
+                className={`${FIELD} disabled:opacity-50`}
+              >
+                {saleTiers.length === 0 ? (
+                  <option value="">Chỉ dùng cho tool</option>
+                ) : (
+                  <>
+                    <option value="">Chọn gói…</option>
+                    {saleTiers.map((t) => (
+                      <option key={t.id} value={t.id}>
+                        {t.label} · {formatVnd(t.price)}đ
+                      </option>
+                    ))}
+                  </>
+                )}
+              </select>
             </div>
             <div>
               <label htmlFor="s-price" className={LABEL}>Giá sale</label>
-              <input id="s-price" inputMode="numeric" required value={salePrice} onChange={(e) => setSalePrice(e.target.value)} placeholder="1990000" className={FIELD} />
+              <input id="s-price" inputMode="numeric" required value={salePrice} onChange={(e) => setSalePrice(e.target.value)} placeholder={saleTier ? `Dưới ${formatVnd(saleTier.price)}` : "1990000"} className={FIELD} />
             </div>
             <div>
               <label htmlFor="s-start" className={LABEL}>Bắt đầu</label>
@@ -501,7 +567,7 @@ export function AdminMarketing({
                   </span>
                   <span className="flex min-w-0 flex-col">
                     <span className="font-mono text-xs font-black text-white">{s.productCode}</span>
-                    <span className="text-[11px] text-neutral-500">{s.productRank}</span>
+                    <span className="text-[11px] text-neutral-500">{s.packageLabel ? `Gói ${s.packageLabel}` : s.productRank}</span>
                   </span>
                   <span className="text-xs tabular-nums">
                     <span className="line-through text-neutral-600">{formatVnd(s.price)}đ</span>{" "}
@@ -547,7 +613,7 @@ export function AdminMarketing({
         title="Xoá đợt flash sale?"
         body={
           removing
-            ? `Đợt sale của ${removing.productCode} sẽ bị xoá hẳn. Sản phẩm quay về giá ${formatVnd(removing.price)}đ. Muốn giữ lịch để dùng lại thì bấm Tắt thay vì xoá.`
+            ? `Đợt sale của ${removing.productCode}${removing.packageLabel ? ` (gói ${removing.packageLabel})` : ""} sẽ bị xoá hẳn. ${removing.packageLabel ? "Gói" : "Sản phẩm"} quay về giá ${formatVnd(removing.price)}đ. Muốn giữ lịch để dùng lại thì bấm Tắt thay vì xoá.`
             : ""
         }
         confirmLabel="Xoá đợt sale"

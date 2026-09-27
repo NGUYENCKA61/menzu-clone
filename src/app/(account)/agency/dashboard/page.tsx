@@ -13,6 +13,7 @@ import { formatVnd } from "@/components/sites/menzu-lol-f7ae197a/shared/productD
 import { clampAgencyPercent } from "@/lib/agency";
 import { dayStamp } from "@/lib/dayGroups";
 import { db } from "@/lib/db";
+import { runningPackageSales, tierPriceNow } from "@/lib/queries";
 import { getCurrentUser } from "@/lib/session";
 
 export const metadata: Metadata = {
@@ -94,6 +95,12 @@ export default async function AgencyDashboardPage() {
     }),
   ]);
 
+  // A tier on flash sale is quoted at its sale price, which is what
+  // /api/orders will charge for it before this account's percent.
+  const tierSale = await runningPackageSales(
+    products.flatMap((product) => product.packages.map((pack) => pack.id)),
+  );
+
   const deskProducts: DeskProduct[] = products
     .filter((product) => product.packages.length > 0)
     .map((product) => ({
@@ -102,7 +109,7 @@ export default async function AgencyDashboardPage() {
       packages: product.packages.map((pack) => ({
         id: pack.id,
         label: pack.label,
-        price: Number(pack.price),
+        price: Number(tierPriceNow(pack, tierSale)),
       })),
     }));
 

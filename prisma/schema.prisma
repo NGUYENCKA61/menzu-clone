@@ -847,6 +847,8 @@ model ProductPackage {
   sortOrder    Int     @default(0)
   orders       Order[]
   cartItems    CartItem[]
+  /// Flash sales on this tier (FlashSale.packageId).
+  flashSales   FlashSale[]
   /// The tier's own stock of licence keys. Per tier rather than per product:
   /// a one-day key and a lifetime key are different goods, and the shop hands
   /// out whichever one was paid for.
@@ -1492,6 +1494,11 @@ model FlashSale {
   id         String   @id @default(cuid())
   productId  String
   product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  /// The tier on sale, for a tool. A tool is sold by the tier the buyer picks,
+  /// so its sale names one and `salePrice` is that tier's price while the
+  /// sale runs. Null for an account, which has one price of its own.
+  packageId  String?
+  package    ProductPackage? @relation(fields: [packageId], references: [id], onDelete: Cascade)
   /// Price during the sale. The product keeps its own price for afterwards.
   salePrice  BigInt
   startsAt   DateTime
@@ -1500,6 +1507,7 @@ model FlashSale {
   createdAt  DateTime @default(now())
 
   @@index([active, startsAt, endsAt])
+  @@index([packageId])
   @@map("flash_sales")
 }
 

@@ -25,6 +25,11 @@ export interface SoftwarePackageView {
   /** Shown verbatim — "1 ngày", "Vĩnh viễn". */
   label: string;
   price: number;
+  /**
+   * The shelf price while a flash sale runs on this tier, to cross out beside
+   * `price`, which is then the sale price. Absent when there is no sale.
+   */
+  listPrice?: number;
   durationHours: number | null;
 }
 
@@ -290,6 +295,13 @@ export function SoftwareBuyPanel({
                   <span className="text-[13px] font-bold text-white whitespace-nowrap">
                     {p.label}
                   </span>
+                  {/* A tier on flash sale: its shelf price crossed out, then
+                      the price the buyer pays. */}
+                  {p.listPrice ? (
+                    <span className="text-[11px] font-semibold text-neutral-500 line-through whitespace-nowrap">
+                      {formatVnd(p.listPrice)}đ
+                    </span>
+                  ) : null}
                   <span className="text-[13px] font-bold text-[var(--menzu-accent)] whitespace-nowrap">
                     {formatVnd(p.price)}đ
                   </span>
@@ -301,7 +313,21 @@ export function SoftwareBuyPanel({
       ) : null}
 
       <div className="space-y-2">
-        <p className="text-3xl sm:text-4xl font-black text-white">{formatVnd(total)}đ</p>
+        <p className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+          <span className="text-3xl sm:text-4xl font-black text-white">{formatVnd(total)}đ</span>
+          {chosen?.listPrice ? (
+            // The tier is on flash sale: what it costs off sale, crossed out,
+            // and the percent the sale takes off.
+            <>
+              <span className="text-base sm:text-lg font-bold text-neutral-500 line-through">
+                {formatVnd(chosen.listPrice * quantity)}đ
+              </span>
+              <span className="rounded-md bg-[var(--menzu-accent)]/15 px-2 py-0.5 text-[12px] font-black text-[var(--menzu-accent)]">
+                -{Math.round((1 - chosen.price / chosen.listPrice) * 100)}%
+              </span>
+            </>
+          ) : null}
+        </p>
         {/* What the tier works out at per day. The tiers run from three hours
             to a month, and comparing 35.000đ against 100.000đ in your head
             while the labels say "7 ngày" and "30 ngày" is arithmetic the page

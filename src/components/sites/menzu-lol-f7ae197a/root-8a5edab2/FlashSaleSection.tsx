@@ -205,7 +205,7 @@ export function FlashSaleSection({
                 className="flex overflow-x-auto gap-4 sm:gap-6 pb-2 hide-scrollbar relative z-10 -mx-4 sm:mx-0 px-4 sm:px-0 scroll-px-4 sm:scroll-px-0 snap-x snap-mandatory cursor-grab"
               >
                 {items.map((item) => (
-                  <FlashSaleCard key={item.code} item={item} />
+                  <FlashSaleCard key={item.key ?? item.code} item={item} />
                 ))}
               </div>
 

@@ -14,6 +14,7 @@ import { docHtmlToPlainText } from "@/lib/docHtml";
 import { parseBadges } from "@/lib/productBadges";
 import { refundBlockedReason } from "@/lib/refundRequests";
 import { showsStatusPill } from "@/lib/statusPill";
+import { isSalesLocked } from "@/lib/softwareStatus";
 import { parseFeatures } from "@/lib/productFeatures";
 import { productHref } from "@/lib/routes";
 import { weaponKey } from "@/lib/weaponImages";
@@ -251,6 +252,8 @@ export async function runningSalePrices(
       startsAt: { lte: now },
       endsAt: { gte: now },
       productId: { in: productIds },
+      // A tier's sale prices that tier, not the tool: runningPackageSales.
+      packageId: null,
     },
     select: { productId: true, salePrice: true },
     orderBy: { salePrice: "asc" },
@@ -261,6 +264,72 @@ export async function runningSalePrices(
     if (!prices.has(sale.productId)) prices.set(sale.productId, sale.salePrice);
   }
   return prices;
+}
+
+type SaleReader = Pick<Prisma.TransactionClient, "flashSale">;
+
+/**
+ * Sale prices for whichever of these tiers has a flash sale running now,
+ * keyed by package id: the tool's half of runningSalePrices.
+ *
+ * Takes the client so checkout can ask inside its own transaction, as the
+ * account path does. The cheapest wins on overlap, for the same reason.
+ */
+export async function runningPackageSales(
+  packageIds: string[],
+  client: SaleReader = db,
+): Promise<Map<string, bigint>> {
+  if (packageIds.length === 0) return new Map();
+
+  const now = new Date();
+  const sales = await client.flashSale.findMany({
+    where: {
+      active: true,
+      startsAt: { lte: now },
+      endsAt: { gte: now },
+      packageId: { in: packageIds },
+    },
+    select: { packageId: true, salePrice: true },
+    orderBy: { salePrice: "asc" },
+  });
+
+  const prices = new Map<string, bigint>();
+  for (const sale of sales) {
+    if (sale.packageId && !prices.has(sale.packageId)) prices.set(sale.packageId, sale.salePrice);
+  }
+  return prices;
+}
+
+/**
+ * What a tier costs a buyer right now: its sale price while one runs. A sale
+ * left standing above a tier the shop has since repriced lower never raises
+ * the price back up.
+ */
+export function tierPriceNow(
+  pkg: { id: string; price: bigint },
+  sales: Map<string, bigint>,
+): bigint {
+  const sale = sales.get(pkg.id);
+  return sale !== undefined && sale < pkg.price ? sale : pkg.price;
+}
+
+/**
+ * A tier as the storefront prints it: `price` is what the buyer pays now, and
+ * `listPrice` the shelf figure to cross out, present only while a sale runs on
+ * that tier. Every total the pages add up reads `price`, so they charge what
+ * checkout will.
+ */
+function tierView(
+  pkg: { id: string; label: string; price: bigint },
+  sales: Map<string, bigint>,
+): { id: string; label: string; price: number; listPrice?: number } {
+  const now = tierPriceNow(pkg, sales);
+  return {
+    id: pkg.id,
+    label: pkg.label,
+    price: Number(now),
+    ...(now < pkg.price ? { listPrice: Number(pkg.price) } : {}),
+  };
 }
 
 export interface CategoryFilters {
@@ -424,10 +493,11 @@ export async function getCategoryPage(
     db.product.count({ where: { categoryId: category.id, ...LISTED_PRODUCT } }),
   ]);
 
-  const [sale, images, stock] = await Promise.all([
+  const [sale, images, stock, tierSale] = await Promise.all([
     runningSalePrices(rows.map((p) => p.id)),
     weaponImages(rows),
     poolStock(rows.filter((p) => p.accountPool).map((p) => p.id)),
+    runningPackageSales(softwareRows.flatMap((s) => s.packages.map((p) => p.id))),
   ]);
 
   // Cheapest tier first, which is the order the card's dropdown reads in. No
@@ -443,11 +513,11 @@ export async function getCategoryPage(
     imageUrl: s.imageUrl,
     description: s.description ?? "",
     status: s.softwareStatus,
-    packages: s.packages.map((p) => ({
-      id: p.id,
-      label: p.label,
-      price: Number(p.price),
-    })),
+    // Cheapest first by what they cost today: a sale can take a tier below
+    // the one that led.
+    packages: s.packages
+      .map((p) => tierView(p, tierSale))
+      .sort((a, b) => a.price - b.price),
     downloadUrl: s.downloadUrl,
   }));
 
@@ -658,6 +728,8 @@ export async function getSoftwareDetail(slug: string): Promise<SoftwareDetail | 
   });
   if (!p) return null;
 
+  const tierSale = await runningPackageSales(p.packages.map((pk) => pk.id));
+
   // Read once: the pill beside them is drawn or not depending on how many
   // there are.
   const badges = parseBadges(p.badge);
@@ -690,10 +762,9 @@ export async function getSoftwareDetail(slug: string): Promise<SoftwareDetail | 
     badges,
     images: p.images.length > 0 ? p.images.map((i) => i.url) : p.imageUrl ? [p.imageUrl] : [],
     videoUrl: p.videoUrl,
+    // In the shop's own order: the buy panel lists the tiers as arranged.
     packages: p.packages.map((pk) => ({
-      id: pk.id,
-      label: pk.label,
-      price: Number(pk.price),
+      ...tierView(pk, tierSale),
       durationHours: pk.durationHours,
     })),
     categoryName: p.category.name,
@@ -993,8 +1064,10 @@ export async function getFlashSaleItems(take = 20): Promise<FlashSaleItem[]> {
   // anything yet, which is how this worked before scheduling existed.
   const scheduled = await db.flashSale.findMany({
     where: { active: true, startsAt: { lte: now }, endsAt: { gte: now } },
-    select: { productId: true },
+    select: { productId: true, packageId: true },
   });
+  const accountIds = scheduled.filter((s) => s.packageId === null).map((s) => s.productId);
+  const tierIds = scheduled.flatMap((s) => (s.packageId === null ? [] : [s.packageId]));
 
   // Both branches exclude removed products: a sale scheduled before the shop
   // took the account down must not resurrect it on the home page.
@@ -1005,13 +1078,13 @@ export async function getFlashSaleItems(take = 20): Promise<FlashSaleItem[]> {
             status: "AVAILABLE",
             deletedAt: null,
             productType: "ACCOUNT_GAME",
-            id: { in: scheduled.map((s) => s.productId) },
+            id: { in: accountIds },
           }
         : {
             status: "AVAILABLE",
             deletedAt: null,
-            // The flash-sale card prints a skin count and tier chips, so it
-            // only ever describes an account.
+            // The account card prints a skin count and tier chips, and a tool
+            // has no discount of its own outside a scheduled sale.
             productType: "ACCOUNT_GAME",
             oldPrice: { gt: 0 },
           },
@@ -1021,26 +1094,51 @@ export async function getFlashSaleItems(take = 20): Promise<FlashSaleItem[]> {
     },
   });
 
+  // A tool's sale names a tier. Same rules as the accounts: removed or
+  // unlisted tools are left out, and so is one the anti-cheat has caught,
+  // since checkout would refuse the very tier the card advertises.
+  const tiers =
+    tierIds.length > 0
+      ? await db.productPackage.findMany({
+          where: {
+            id: { in: tierIds },
+            product: { status: "AVAILABLE", deletedAt: null, productType: "SOFTWARE_GAME" },
+          },
+          select: {
+            id: true,
+            label: true,
+            price: true,
+            product: {
+              select: {
+                code: true,
+                slug: true,
+                name: true,
+                imageUrl: true,
+                softwareStatus: true,
+                category: { select: { slug: true } },
+              },
+            },
+          },
+        })
+      : [];
+
   // The scheduled price is what the card must print. Reading p.price here was
   // the bug: an admin could set a sale price, watch the row pick the product
   // up, and still see the ordinary price on every card.
-  const sale = await runningSalePrices(rows.map((p) => p.id));
+  const [sale, tierSale] = await Promise.all([
+    runningSalePrices(rows.map((p) => p.id)),
+    runningPackageSales(tiers.map((t) => t.id)),
+  ]);
   const priceOf = (p: { id: string; price: bigint }) => sale.get(p.id) ?? p.price;
+  const cutOf = (price: bigint, was: bigint) => 1 - Number(price) / Number(was);
+  const percent = (price: bigint, was: bigint) => Math.round(cutOf(price, was) * 100);
 
-  const discountOf = (price: bigint, oldPrice: bigint) =>
-    1 - Number(price) / Number(oldPrice);
-
-  return rows
+  const accounts = rows
     .filter((p) => priceOf(p) < p.oldPrice)
-    .sort(
-      (a, b) =>
-        discountOf(priceOf(b), b.oldPrice) - discountOf(priceOf(a), a.oldPrice),
-    )
-    .slice(0, take)
     .map((p) => {
       const price = priceOf(p);
-      const pct = Math.round((1 - Number(price) / Number(p.oldPrice)) * 100);
-      return {
+      const pct = percent(price, p.oldPrice);
+      const item: FlashSaleItem = {
         code: p.code,
         href: productHref(p.category.slug, p.slug),
         imageUrl: p.imageUrl,
@@ -1053,7 +1151,37 @@ export async function getFlashSaleItems(take = 20): Promise<FlashSaleItem[]> {
         skins: countKind(p.skins, "WEAPON_SKIN"),
         tiers: toTiers(p.skins).map((t) => ({ color: t.color, count: t.count })),
       };
+      return { cut: cutOf(price, p.oldPrice), item };
     });
+
+  const tools = tiers
+    .filter((t) => !isSalesLocked(t.product.softwareStatus))
+    .map((t) => ({ t, price: tierPriceNow(t, tierSale) }))
+    .filter(({ t, price }) => price < t.price)
+    .map(({ t, price }) => {
+      const pct = percent(price, t.price);
+      const item: FlashSaleItem = {
+        key: `${t.product.code}:${t.id}`,
+        code: t.product.code,
+        // Opens the product page with this tier already chosen.
+        href: `${productHref(t.product.category.slug, t.product.slug)}?pkg=${encodeURIComponent(t.id)}`,
+        imageUrl: t.product.imageUrl,
+        name: t.product.name ?? t.product.code,
+        packageLabel: t.label,
+        discount: pct > 0 ? `-${pct}%` : null,
+        oldPrice: `${formatVndString(Number(t.price))} VND`,
+        newPrice: `${formatVndString(Number(price))} VND`,
+        skins: 0,
+        tiers: [],
+      };
+      return { cut: cutOf(price, t.price), item };
+    });
+
+  // Biggest saving first, accounts and tools alike.
+  return [...accounts, ...tools]
+    .sort((a, b) => b.cut - a.cut)
+    .slice(0, take)
+    .map(({ item }) => item);
 }
 
 function formatVndString(n: number): string {
@@ -1379,6 +1507,8 @@ export interface AdminFlashSaleRow {
   active: boolean;
   /** Whether the window is open right now. */
   running: boolean;
+  /** The tier on sale, for a tool; null for an account. */
+  packageLabel: string | null;
 }
 
 /**
@@ -1393,14 +1523,19 @@ export async function listFlashSales(take = 100): Promise<AdminFlashSaleRow[]> {
   const rows = await db.flashSale.findMany({
     orderBy: { startsAt: "desc" },
     take,
-    include: { product: { select: { code: true, rank: true, price: true } } },
+    include: {
+      product: { select: { code: true, rank: true, price: true } },
+      package: { select: { label: true, price: true } },
+    },
   });
   return rows.map((r) => ({
     running: r.active && r.startsAt.getTime() <= now && r.endsAt.getTime() >= now,
     id: r.id,
     productCode: r.product.code,
     productRank: r.product.rank,
-    price: Number(r.product.price),
+    // A tier's sale is measured against that tier, not the tool's "from" price.
+    price: Number(r.package?.price ?? r.product.price),
+    packageLabel: r.package?.label ?? null,
     salePrice: Number(r.salePrice),
     startsAt: r.startsAt,
     endsAt: r.endsAt,
@@ -1561,12 +1696,24 @@ export async function listProductPicks() {
   const rows = await db.product.findMany({
     where: { deletedAt: null },
     orderBy: [{ category: { sortOrder: "asc" } }, { name: "asc" }],
-    select: { code: true, name: true, category: { select: { name: true } } },
+    select: {
+      code: true,
+      name: true,
+      productType: true,
+      category: { select: { name: true } },
+      packages: { orderBy: { sortOrder: "asc" }, select: { id: true, label: true, price: true } },
+    },
   });
   return rows.map((p) => ({
     code: p.code,
     name: p.name ?? p.code,
     category: p.category.name,
+    // A tool's flash sale names one of these. An account's lone package is
+    // its pool shelf rather than a tier on offer, so it lists none.
+    packages:
+      p.productType === "SOFTWARE_GAME"
+        ? p.packages.map((k) => ({ id: k.id, label: k.label, price: Number(k.price) }))
+        : [],
   }));
 }
 
@@ -1660,6 +1807,7 @@ export async function listSimilarSoftware(
       },
     },
   });
+  const tierSale = await runningPackageSales(rows.flatMap((s) => s.packages.map((p) => p.id)));
   return rows.map((s) => ({
     code: s.code,
     href: productHref(s.category.slug, s.slug),
@@ -1668,7 +1816,9 @@ export async function listSimilarSoftware(
     imageUrl: s.imageUrl,
     description: s.description ?? "",
     status: s.softwareStatus,
-    packages: s.packages.map((p) => ({ id: p.id, label: p.label, price: Number(p.price) })),
+    packages: s.packages
+      .map((p) => tierView(p, tierSale))
+      .sort((a, b) => a.price - b.price),
     downloadUrl: s.downloadUrl,
   }));
 }

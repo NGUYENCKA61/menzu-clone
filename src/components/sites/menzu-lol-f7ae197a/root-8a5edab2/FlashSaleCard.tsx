@@ -29,14 +29,17 @@ export function FlashSaleCard({ item }: FlashSaleCardProps) {
         <div className="relative aspect-[4/3] w-full overflow-hidden bg-neutral-900 rounded-[10px]">
           <CardImage
             src={item.imageUrl ?? getAccountImagePath(item.code)}
-            alt={`Tài khoản #${item.code}`}
+            alt={item.name ?? `Tài khoản #${item.code}`}
             fill
             sizes="(min-width: 1280px) 25vw, (min-width: 768px) 33vw, 50vw"
-            className="absolute inset-0 w-full h-full object-cover object-[85%_center] md:group-hover:scale-105 transition-transform duration-500"
+            // Account shots are cropped to keep the agent on the right; a
+            // tool's cover is an ordinary picture, centred.
+            className={`absolute inset-0 w-full h-full object-cover ${item.name ? "object-center" : "object-[85%_center]"} md:group-hover:scale-105 transition-transform duration-500`}
           />
           <div className="absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-black/40 to-transparent pointer-events-none" />
           <span className="absolute bottom-0 left-0 bg-neutral-900 text-white text-[8px] sm:text-[10px] font-black px-1.5 sm:px-2 py-0.5 rounded-tr-lg">
-            #{item.code}
+            {/* A tool's tag names the tier on sale; an account's, its code. */}
+            {item.packageLabel ?? `#${item.code}`}
           </span>
         </div>
 
@@ -68,6 +71,13 @@ export function FlashSaleCard({ item }: FlashSaleCardProps) {
                   </span>
                 </>
               ) : null}
+            </div>
+          ) : item.name ? (
+            // A tool has no rank to show, so its name takes the strip.
+            <div className="flex w-full items-center overflow-hidden rounded-lg border border-[#292a30] bg-[#111216] px-2 py-1">
+              <span className="truncate text-[8px] sm:text-[10px] font-extrabold uppercase text-white">
+                {item.name}
+              </span>
             </div>
           ) : null}
 

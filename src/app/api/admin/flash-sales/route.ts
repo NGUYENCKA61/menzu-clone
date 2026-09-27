@@ -3,13 +3,15 @@ import { NextResponse } from "next/server";
 import { FORBIDDEN, getAdmin } from "@/lib/admin";
 import { db } from "@/lib/db";
 
-/** Schedule a sale on one product. */
+/** Schedule a sale on one account, or on one tier of a tool. */
 export async function POST(request: Request) {
   const admin = await getAdmin();
   if (!admin) return NextResponse.json(FORBIDDEN, { status: 403 });
 
   const body = (await request.json().catch(() => null)) as {
     productCode?: string;
+    /** The tier on sale; required for a tool, ignored for an account. */
+    packageId?: string;
     salePrice?: number;
     startsAt?: string;
     endsAt?: string;
@@ -23,20 +25,21 @@ export async function POST(request: Request) {
   const product = await db.product.findFirst({ where: { code, deletedAt: null } });
   if (!product) return NextResponse.json({ error: "Không tìm thấy sản phẩm" }, { status: 404 });
 
-  // A tool is priced by the tier the buyer picks — 3 giờ, 30 ngày — and a
-  // flash sale carries one figure with no tier attached to it. Nothing in the
-  // shop reads that figure for a tool: the home row lists accounts only, and
-  // checkout charges the chosen package. So a sale scheduled on a tool used to
-  // save cleanly, appear in the list, and do absolutely nothing — which is
-  // worse than a refusal, because the shop believes it is running a sale.
-  if (product.productType !== "ACCOUNT_GAME") {
-    return NextResponse.json(
-      {
-        error:
-          "Flash sale chỉ áp dụng cho tài khoản game. Tool bán theo gói, muốn giảm giá thì sửa giá gói trong trang sản phẩm.",
-      },
-      { status: 400 },
-    );
+  // A tool is priced by the tier the buyer picks — 3 giờ, 30 ngày — so its
+  // sale names one, and everything that prices that tier (the product page,
+  // the basket, checkout) charges the sale price while it runs. An account has
+  // one price and takes no tier.
+  let tier: { id: string; price: bigint } | null = null;
+  if (product.productType === "SOFTWARE_GAME") {
+    const packageId = body?.packageId?.trim();
+    if (!packageId) {
+      return NextResponse.json({ error: "Chọn gói được giảm giá" }, { status: 400 });
+    }
+    tier = await db.productPackage.findFirst({
+      where: { id: packageId, productId: product.id },
+      select: { id: true, price: true },
+    });
+    if (!tier) return NextResponse.json({ error: "Không tìm thấy gói" }, { status: 404 });
   }
 
   const salePrice = Number(body?.salePrice ?? 0);
@@ -44,9 +47,10 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Giá sale không hợp lệ" }, { status: 400 });
   }
   // A "sale" at or above the shelf price is not a sale, and shoppers notice.
-  if (BigInt(Math.floor(salePrice)) >= product.price) {
+  // A tier's shelf price is the tier's own, not the tool's "from" figure.
+  if (BigInt(Math.floor(salePrice)) >= (tier?.price ?? product.price)) {
     return NextResponse.json(
-      { error: "Giá sale phải thấp hơn giá bán hiện tại" },
+      { error: tier ? "Giá sale phải thấp hơn giá gói hiện tại" : "Giá sale phải thấp hơn giá bán hiện tại" },
       { status: 400 },
     );
   }
@@ -60,11 +64,13 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Thời gian kết thúc phải sau lúc bắt đầu" }, { status: 400 });
   }
 
-  // Overlapping windows on one product would leave two prices valid at once
-  // with nothing deciding which the shopper is charged.
+  // Overlapping windows on one account, or one tier, would leave two prices
+  // valid at once with nothing deciding which the shopper is charged. Two
+  // tiers of one tool can run side by side.
   const clash = await db.flashSale.findFirst({
     where: {
       productId: product.id,
+      packageId: tier?.id ?? null,
       active: true,
       startsAt: { lte: endsAt },
       endsAt: { gte: startsAt },
@@ -72,7 +78,11 @@ export async function POST(request: Request) {
   });
   if (clash) {
     return NextResponse.json(
-      { error: "Sản phẩm đã có đợt sale trùng khoảng thời gian này" },
+      {
+        error: tier
+          ? "Gói này đã có đợt sale trùng khoảng thời gian này"
+          : "Sản phẩm đã có đợt sale trùng khoảng thời gian này",
+      },
       { status: 409 },
     );
   }
@@ -80,6 +90,7 @@ export async function POST(request: Request) {
   const created = await db.flashSale.create({
     data: {
       productId: product.id,
+      packageId: tier?.id ?? null,
       salePrice: BigInt(Math.floor(salePrice)),
       startsAt,
       endsAt,

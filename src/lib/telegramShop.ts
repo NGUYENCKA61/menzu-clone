@@ -22,6 +22,7 @@ import { createHmac, timingSafeEqual } from "node:crypto";
 import { deliversAutomatically, readLogin, tagOf } from "@/lib/accountLogin";
 import { poolStock, splitCredential } from "@/lib/accountPool";
 import { checkoutFailure, placeOrder, type CheckoutResult } from "@/lib/checkout";
+import { runningPackageSales, tierPriceNow } from "@/lib/queries";
 import { db } from "@/lib/db";
 import { docHtmlToPlainText, isHtmlBody } from "@/lib/docHtml";
 import { LISTED_PRODUCT } from "@/lib/queries";
@@ -278,19 +279,25 @@ export async function categoryScreen(categoryId: string): Promise<MenuScreen | n
           status: true,
           price: true,
           accountPool: true,
-          packages: { orderBy: { price: "asc" }, take: 1, select: { price: true } },
+          // Every tier, not just the cheapest: a flash sale can make another
+          // one the "từ" price.
+          packages: { select: { id: true, price: true } },
         },
       },
     },
   });
   if (!category) return null;
+  const tierSale = await runningPackageSales(
+    category.products.flatMap((p) => p.packages.map((k) => k.id)),
+  );
   const buttons = category.products
     .filter((p) => p.status === "AVAILABLE")
     .map((p) => {
       const name = p.name ?? p.code;
       if (p.productType === "SOFTWARE_GAME") {
         const status = readSoftwareStatus(p.softwareStatus);
-        const from = p.packages[0]?.price;
+        const prices = p.packages.map((k) => tierPriceNow(k, tierSale));
+        const from = prices.length ? prices.reduce((a, b) => (b < a ? b : a)) : undefined;
         return {
           text: `${status ? STATUS_EMOJI[status] : "⚪"} ${name}${from !== undefined ? ` · từ ${vnd(from)}` : ""}`,
           callback_data: `t:${p.id}`,
@@ -365,12 +372,20 @@ export async function productScreen(productId: string): Promise<MenuScreen | nul
       return { text: lines.join("\n"), keyboard: [back] };
     }
     lines.push("\n<b>Chọn gói:</b>");
+    const tierSale = await runningPackageSales(p.packages.map((pkg) => pkg.id));
     return {
       text: lines.join("\n"),
       keyboard: [
-        ...p.packages.map((pkg) => [
-          { text: `${pkg.label} · ${vnd(pkg.price)}`, callback_data: `q:${pkg.id}:1` },
-        ]),
+        ...p.packages.map((pkg) => {
+          const now = tierPriceNow(pkg, tierSale);
+          // A button cannot cross a price out, so a tier on sale says so
+          // with the bolt and its percent.
+          const text =
+            now < pkg.price
+              ? `⚡ ${pkg.label} · ${vnd(now)} (-${Number(((pkg.price - now) * 100n) / pkg.price)}%)`
+              : `${pkg.label} · ${vnd(pkg.price)}`;
+          return [{ text, callback_data: `q:${pkg.id}:1` }];
+        }),
         back,
       ],
     };
@@ -443,11 +458,14 @@ export async function confirmKeysScreen(
   });
   if (!pkg || pkg.product.deletedAt) return null;
   const n = Math.min(99, quantity);
-  const total = pkg.price * BigInt(n);
+  // What checkout will charge: the tier's flash-sale price while one runs.
+  const unit = tierPriceNow(pkg, await runningPackageSales([pkg.id]));
+  const total = unit * BigInt(n);
   const short = total - user.balance;
   const text = [
     `<b>${esc(pkg.product.name ?? pkg.product.code)}</b>`,
     `Gói: ${esc(pkg.label)} × ${n}`,
+    ...(unit < pkg.price ? [`⚡ Flash sale: ${vnd(unit)} / gói (giá gốc ${vnd(pkg.price)})`] : []),
     `Thành tiền: <b>${vnd(total)}</b>`,
     `Số dư: ${vnd(user.balance)}${short > 0n ? ` — thiếu ${vnd(short)}` : ""}`,
   ].join("\n");

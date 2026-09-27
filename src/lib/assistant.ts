@@ -15,6 +15,7 @@ import { docHtmlToPlainText } from "@/lib/docHtml";
 import { featuresOrDefault, parseFeatures } from "@/lib/productFeatures";
 import { DEFAULT_GUIDE } from "@/lib/productGuide";
 import { productHref } from "@/lib/routes";
+import { runningPackageSales, tierPriceNow } from "@/lib/queries";
 
 /**
  * The shop's assistant: the half that talks to the database and to the model.
@@ -55,7 +56,7 @@ export async function buildCatalogue(): Promise<string> {
         category: { select: { name: true, slug: true } },
         packages: {
           orderBy: { price: "asc" },
-          select: { label: true, price: true, durationHours: true },
+          select: { id: true, label: true, price: true, durationHours: true },
         },
       },
       orderBy: { name: "asc" },
@@ -74,6 +75,11 @@ export async function buildCatalogue(): Promise<string> {
     }),
   ]);
 
+  // A tier on flash sale is quoted at the price the buyer would pay today.
+  const tierSale = await runningPackageSales(
+    software.flatMap((p) => p.packages.map((t) => t.id)),
+  );
+
   const tools: CatalogueSoftware[] = software.map((p) => ({
     name: p.name ?? p.code,
     href: productHref(p.category.slug, p.slug),
@@ -83,7 +89,7 @@ export async function buildCatalogue(): Promise<string> {
     price: Number(p.price),
     tiers: p.packages.map((t) => ({
       label: t.label,
-      price: Number(t.price),
+      price: Number(tierPriceNow(t, tierSale)),
       durationHours: t.durationHours,
     })),
     features: featuresOrDefault(parseFeatures(p.features)).map((f) => ({ ...f })),

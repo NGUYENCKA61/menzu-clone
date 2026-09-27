@@ -4,6 +4,7 @@ import { SimplePage } from "@/components/sites/menzu-lol-f7ae197a/shared/SimpleP
 import { clampAgencyPercent } from "@/lib/agency";
 import { db } from "@/lib/db";
 import { readMemberTier, TIER_RULES } from "@/lib/memberTiers";
+import { runningPackageSales, tierPriceNow } from "@/lib/queries";
 import { productHref } from "@/lib/routes";
 import { getCurrentUser } from "@/lib/session";
 
@@ -50,9 +51,12 @@ export default async function CartPage() {
           category: { select: { slug: true } },
         },
       },
-      package: { select: { label: true, price: true } },
+      package: { select: { id: true, label: true, price: true } },
     },
   });
+
+  // A tier on flash sale is shown at the price checkout will charge for it.
+  const tierSale = await runningPackageSales(items.map((i) => i.package.id));
 
   // What this shopper's own account is worth against the basket, decided the
   // way the checkout decides it: wholesale beats the tier and never stacks.
@@ -78,7 +82,7 @@ export default async function CartPage() {
           href: productHref(i.product.category.slug, i.product.slug),
           name: i.product.name ?? i.product.code,
           packageLabel: i.package.label,
-          unitPrice: Number(i.package.price),
+          unitPrice: Number(tierPriceNow(i.package, tierSale)),
           quantity: i.quantity,
           imageUrl: i.product.imageUrl,
         }))}
