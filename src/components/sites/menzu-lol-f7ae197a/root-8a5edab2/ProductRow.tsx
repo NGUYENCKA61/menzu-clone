@@ -72,6 +72,11 @@ export interface ProductRowProps {
    */
   bigPicks?: boolean;
   /**
+   * With `tiles` on the game list: three tiles a line from lg instead of
+   * four, each a third of the row, so the covers show larger (option B2).
+   */
+  bigTiles?: boolean;
+  /**
    * The picks as rows instead of cards — a small cover, the pill, the name
    * and one line of blurb, two columns from md. Hot trending's, when the
    * owner tries it against the bento.
@@ -655,6 +660,7 @@ export function ProductRow({
   bento: wantsBento = false,
   tiles = false,
   bigPicks = false,
+  bigTiles = false,
   list = false,
   quiet = false,
   rows = 1,
@@ -726,7 +732,7 @@ export function ProductRow({
         // The tiles are drawn here, on the server, and handed to the search
         // as finished nodes — it only chooses which of them to show.
         <RowSearch
-          wide={!tiles}
+          wide={!tiles || bigTiles}
           rows={rows}
           openOnArrival={id}
           viewAllHref={viewAllHref}
@@ -735,7 +741,7 @@ export function ProductRow({
             title: card.title,
             platform: card.platform ?? null,
             node: tiles ? (
-              <RowTile card={card} />
+              <RowTile card={card} big={bigTiles} />
             ) : (
               <RowCard card={card} t={t} top={ranked} wide quiet={quiet} />
             ),
