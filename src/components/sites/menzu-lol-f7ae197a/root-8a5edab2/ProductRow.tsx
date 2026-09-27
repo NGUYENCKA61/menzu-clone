@@ -574,10 +574,11 @@ function RowTile({
       {pick ? (
         <span
           className={cn(
-            "absolute left-2.5 top-2.5 z-10 inline-flex items-center rounded-md bg-white px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-neutral-950",
+            "absolute left-2.5 top-2.5 z-10 inline-flex items-center gap-1 rounded-md bg-[#0a0a0d]/70 px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-white ring-1 ring-inset ring-white/15 backdrop-blur-[6px]",
             big && "lg:left-3.5 lg:top-3.5 lg:text-[11px]",
           )}
         >
+          <span aria-hidden className="size-1.5 shrink-0 rounded-full bg-[var(--menzu-accent)] ring-2 ring-[var(--menzu-accent)]/30" />
           Top tháng
         </span>
       ) : null}
