@@ -574,11 +574,10 @@ function RowTile({
       {pick ? (
         <span
           className={cn(
-            "absolute left-2.5 top-2.5 z-10 inline-flex items-center gap-1 rounded-md bg-[#0a0a0d]/70 px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-white ring-1 ring-inset ring-white/15 backdrop-blur-[6px]",
+            "absolute left-2.5 top-2.5 z-10 inline-flex items-center rounded-md bg-[#0a0a0d]/70 px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-white ring-1 ring-inset ring-white/15 backdrop-blur-[6px]",
             big && "lg:left-3.5 lg:top-3.5 lg:text-[11px]",
           )}
         >
-          <Star size={10} className="shrink-0 fill-current text-[var(--menzu-accent)]" aria-hidden />
           Top tháng
         </span>
       ) : null}
