@@ -134,7 +134,6 @@ export default async function Home() {
             ranked={group.slug === "hot-trending"}
             searchable={group.slug === GAME_LIST_SLUG}
             tiles={group.slug === "hot-trending" || group.slug === GAME_LIST_SLUG}
-            bigTiles={group.slug === GAME_LIST_SLUG}
             rows={group.slug === GAME_LIST_SLUG ? 2 : 1}
           />
         ))}

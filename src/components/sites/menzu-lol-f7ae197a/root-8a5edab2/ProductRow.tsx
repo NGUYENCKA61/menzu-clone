@@ -67,11 +67,6 @@ export interface ProductRowProps {
    */
   tiles?: boolean;
   /**
-   * With `tiles` on the game list: three tiles a line from lg instead of
-   * four, each a third of the row, so the covers show larger (option B2).
-   */
-  bigTiles?: boolean;
-  /**
    * The picks as rows instead of cards — a small cover, the pill, the name
    * and one line of blurb, two columns from md. Hot trending's, when the
    * owner tries it against the bento.
@@ -528,18 +523,9 @@ function BentoTile({
  * A game as a picture tile, on lmarket's pattern: the cover fills the tile
  * and the name sits over its foot on a dark fade. The whole tile is the link,
  * so the list no longer runs a red bar under every game. 4:3 in the game
- * list; `pick` is the sliding row's wider 16:10 tile, with the month's pill;
- * `big` is a game tile a third of the row wide rather than a quarter.
+ * list; `pick` is the sliding row's wider 16:10 tile, with the month's pill.
  */
-function RowTile({
-  card,
-  pick = false,
-  big = false,
-}: {
-  card: ProductCard;
-  pick?: boolean;
-  big?: boolean;
-}) {
+function RowTile({ card, pick = false }: { card: ProductCard; pick?: boolean }) {
   return (
     <Link
       href={card.href}
@@ -553,11 +539,7 @@ function RowTile({
           src={card.image}
           alt={card.title}
           fill
-          sizes={
-            big
-              ? "(min-width: 1320px) 420px, (min-width: 768px) 33vw, 50vw"
-              : "(min-width: 1320px) 310px, (min-width: 1024px) 25vw, (min-width: 768px) 33vw, 50vw"
-          }
+          sizes="(min-width: 1320px) 310px, (min-width: 1024px) 25vw, (min-width: 768px) 33vw, 50vw"
           className="object-cover transition-transform duration-500 group-hover:scale-105 motion-reduce:transform-none"
         />
       ) : null}
@@ -571,12 +553,7 @@ function RowTile({
         aria-hidden
         className="absolute inset-0 bg-gradient-to-t from-[#08080b]/95 via-[#08080b]/45 via-40% to-transparent to-65%"
       />
-      <h3
-        className={cn(
-          "absolute inset-x-3.5 bottom-3 text-[13px] font-black uppercase leading-tight tracking-wide text-white sm:text-sm",
-          big && "lg:inset-x-5 lg:bottom-4 lg:text-base",
-        )}
-      >
+      <h3 className="absolute inset-x-3.5 bottom-3 text-[13px] font-black uppercase leading-tight tracking-wide text-white sm:text-sm">
         {card.title}
       </h3>
     </Link>
@@ -649,7 +626,6 @@ export function ProductRow({
   searchable = false,
   bento: wantsBento = false,
   tiles = false,
-  bigTiles = false,
   list = false,
   quiet = false,
   rows = 1,
@@ -721,7 +697,7 @@ export function ProductRow({
         // The tiles are drawn here, on the server, and handed to the search
         // as finished nodes — it only chooses which of them to show.
         <RowSearch
-          wide={!tiles || bigTiles}
+          wide={!tiles}
           rows={rows}
           openOnArrival={id}
           viewAllHref={viewAllHref}
@@ -730,7 +706,7 @@ export function ProductRow({
             title: card.title,
             platform: card.platform ?? null,
             node: tiles ? (
-              <RowTile card={card} big={bigTiles} />
+              <RowTile card={card} />
             ) : (
               <RowCard card={card} t={t} top={ranked} wide quiet={quiet} />
             ),
