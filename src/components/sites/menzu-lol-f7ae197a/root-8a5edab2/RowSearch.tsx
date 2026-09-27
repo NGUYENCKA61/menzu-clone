@@ -6,7 +6,7 @@ import {
   ChevronUp,
   CircuitBoard,
   Cpu,
-  Gamepad2,
+  LayoutGrid,
   Monitor,
   Search,
   Smartphone,
@@ -50,18 +50,21 @@ const ALL = "ALL";
 
 // elitehacks' tabs: the search field's own flat fill and corners, an icon
 // before the word, and the chosen one filled solid in the shop's colour.
+// Lettered like every small label on the site (12px black capitals, wide),
+// not like elitehacks, whose whole site is set in ordinary case.
 const CHIP =
-  "inline-flex h-10 items-center justify-center gap-2 rounded-[10px] px-4 text-sm font-semibold transition-colors lg:min-w-[150px]";
+  "inline-flex h-10 items-center justify-center gap-2 rounded-[10px] px-4 text-xs font-black uppercase tracking-widest transition-colors lg:min-w-[150px]";
 const CHIP_IDLE = "bg-white/[0.07] text-neutral-400 hover:bg-white/[0.1] hover:text-white";
 const CHIP_ACTIVE = "bg-[var(--menzu-accent)] text-white";
 
 /**
- * What each chip shows: the word in ordinary case, as elitehacks writes its
- * tabs, and the icon before it. platformLabel stays the admin's wording; a
- * platform added later without an entry here falls back to it, iconless.
+ * What each chip shows: its word and the icon before it. "Tất cả" is a
+ * grid, since it holds the spoofers and DMA boards as well as games.
+ * platformLabel stays the admin's wording; a platform added later without an
+ * entry here falls back to it, iconless.
  */
 const CHIP_FACES: Record<string, { label: string; Icon: LucideIcon }> = {
-  [ALL]: { label: "Tất cả", Icon: Gamepad2 },
+  [ALL]: { label: "Tất cả", Icon: LayoutGrid },
   PC: { label: "PC", Icon: Monitor },
   MOBILE: { label: "Mobile", Icon: Smartphone },
   SPOOFER: { label: "Spoofer", Icon: Cpu },
@@ -317,7 +320,7 @@ export function RowSearch({
                   }
                   className={`${CHIP} ${active ? CHIP_ACTIVE : CHIP_IDLE}`}
                 >
-                  {face ? <face.Icon size={18} aria-hidden className="shrink-0" /> : null}
+                  {face ? <face.Icon size={16} aria-hidden className="shrink-0" /> : null}
                   {face?.label ?? platformLabel(value)}
                 </button>
               );
@@ -387,7 +390,7 @@ export function RowSearch({
               <button
                 type="button"
                 onClick={() => setExpanded(true)}
-                className="group inline-flex h-10 items-center gap-2 rounded-[10px] border border-white/10 bg-white/[0.03] px-5 text-[11px] font-black uppercase tracking-widest text-neutral-200 transition-colors hover:border-[var(--menzu-accent)]/50 hover:bg-[var(--menzu-accent)]/10 hover:text-[var(--menzu-accent)]"
+                className="group inline-flex h-10 items-center gap-2 rounded-[10px] bg-white/[0.07] px-5 text-xs font-black uppercase tracking-widest text-neutral-200 transition-colors hover:bg-white/[0.1] hover:text-white"
               >
                 Xem thêm
                 <span className="text-neutral-500">({hidden})</span>
@@ -404,7 +407,7 @@ export function RowSearch({
                 type="button"
                 onClick={collapse}
                 disabled={closing}
-                className="inline-flex h-10 items-center gap-2 rounded-[10px] border border-white/10 bg-white/[0.03] px-5 text-[11px] font-black uppercase tracking-widest text-neutral-400 transition-colors hover:border-white/25 hover:text-white disabled:opacity-60"
+                className="inline-flex h-10 items-center gap-2 rounded-[10px] bg-white/[0.07] px-5 text-xs font-black uppercase tracking-widest text-neutral-400 transition-colors hover:bg-white/[0.1] hover:text-white disabled:opacity-60"
               >
                 Thu gọn
                 <ChevronUp size={14} aria-hidden />
