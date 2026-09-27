@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { ChevronDown, ChevronUp, Search, X } from "lucide-react";
 
-import { BorderBeam } from "./BorderBeam";
 import { EXPLORE_EVENT } from "./ScrollCta";
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 
@@ -233,19 +232,17 @@ export function RowSearch({
     <div className="flex flex-col gap-4">
       {filters ? (
         <>
-          {/* The search pill lmarket.net's hero wears, in the shop's red — the
-          shape and the comet of light running round the border — over the
-          category page's own dark glass: the shop tried lmarket's brighter
+          {/* The search pill lmarket.net's hero wears, in the shop's red, over
+          the category page's own dark glass: the shop tried lmarket's brighter
           fill with its sheen and highlight and asked for the quiet one back.
-          The accent takes the border and the icon while the field has focus.
-          As wide as the grid under it, so the field and the tiles share
-          their outer edges. The beam comes first and cannot be clicked; the
-          icon, field and clear button are positioned so they paint over it. */}
+          The comet of light that ran round the border (BorderBeam) came off
+          at the shop's request too. The accent takes the border and the icon
+          while the field has focus. As wide as the grid under it, so the
+          field and the tiles share their outer edges. */}
           <label
             htmlFor={inputId}
             className="group/search relative isolate flex h-12 w-full items-center gap-2.5 rounded-full border border-neutral-800/60 bg-neutral-900/60 px-4 transition-colors focus-within:border-[var(--menzu-accent)]/60"
           >
-            <BorderBeam />
             <Search
               size={15}
               aria-hidden
