@@ -4,13 +4,13 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 
 /**
- * The arrows as Netflix draws them: a band the height of the tiles at each
- * edge, dark at the edge and clear by 72px, with a large white chevron on
- * it; the band darkens under the pointer. Only from sm up — a phone swipes,
- * sees the next tile peeking, and would lose picture to them.
+ * The arrows, flat squares like the game list's chips and search field: 10px
+ * corners, a dark fill with a hairline edge, a white chevron, half over the
+ * row's edge. Only from sm up — a phone swipes, sees the next tile peeking,
+ * and would lose picture to them.
  */
 const ARROW =
-  "absolute inset-y-0 z-20 hidden w-[72px] items-center text-white from-[#08080b]/90 to-transparent hover:from-[#08080b] sm:flex";
+  "absolute top-1/2 z-20 hidden h-[42px] w-[42px] -translate-y-1/2 items-center justify-center rounded-[10px] bg-[#1d1e23] text-white shadow-[0_0_0_1px_rgba(255,255,255,0.08),0_6px_16px_-6px_rgba(0,0,0,0.6)] transition-colors hover:bg-[#26272d] sm:flex";
 
 /** Milliseconds a set of tiles rests before the next step. */
 const STEP_MS = 3000;
@@ -232,17 +232,17 @@ export function RowSlider({
               type="button"
               aria-label="Trước"
               onClick={() => press(index - 1)}
-              className={`${ARROW} left-0 justify-start rounded-l-[14px] bg-gradient-to-r pl-3.5`}
+              className={`${ARROW} left-0 -translate-x-4`}
             >
-              <ChevronLeft size={30} className="drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]" />
+              <ChevronLeft size={20} />
             </button>
             <button
               type="button"
               aria-label="Sau"
               onClick={() => press(index + 1)}
-              className={`${ARROW} right-0 justify-end rounded-r-[14px] bg-gradient-to-l pr-3.5`}
+              className={`${ARROW} right-0 translate-x-4`}
             >
-              <ChevronRight size={30} className="drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]" />
+              <ChevronRight size={20} />
             </button>
           </>
         ) : null}
