@@ -2,26 +2,31 @@ import { CardImage } from "@/components/sites/menzu-lol-f7ae197a/shared/CardImag
 
 /**
  * The home page's own backdrop, drawn over the root layout's fixed artwork
- * (the same z-[-1], later in the stream), on gachatool.com's pattern: the
- * picture sits behind the first screen only and fades out at its foot, and
- * from there down the page is a calm near-black with a fine grain. Under
- * the old backdrop the artwork stayed behind every row of cards to the
- * footer, and the owner found the page busy. (gachatool also scatters
- * stars over its sky; they were tried here and taken out as clutter.)
+ * (the same z-[-1], later in the stream). The picture shows sharp behind the
+ * first screen only and fades out at its foot, on gachatool.com's pattern;
+ * from there down the page sits on the same picture blurred and all but
+ * black, so the colour carries on without the detail that made the rows of
+ * cards look busy (option G3 of the owner's backgrounds).
  *
- * The picture scrolls away with the hero (absolute); the sky stays put
- * (fixed). The grain comes after the picture so it lies over it too. Their
- * styles are the home-sky-* classes in globals.css. `plain` drops the glows
- * and the grain for a flat near-black under the first screen, the other
- * version the owner is weighing.
+ * The sharp copy scrolls away with the hero (absolute); the blurred one
+ * stays put (fixed). The blur is a filter on the image, scaled up a little
+ * so its faded rim falls outside the frame, in a dark-filled frame.
  */
-export function HomeBackdrop({ src, plain = false }: { src?: string; plain?: boolean }) {
+export function HomeBackdrop({ src }: { src?: string }) {
   return (
     <>
-      <div
-        aria-hidden
-        className={`pointer-events-none fixed inset-0 z-[-1] ${plain ? "bg-[#08080b]" : "home-sky-base"}`}
-      />
+      <div aria-hidden className="pointer-events-none fixed inset-0 z-[-1] overflow-hidden bg-[#08080b]">
+        {src ? (
+          <CardImage
+            src={src}
+            alt=""
+            fill
+            sizes="100vw"
+            className="object-cover object-center scale-[1.12] blur-[30px] saturate-75"
+          />
+        ) : null}
+        <div className="absolute inset-0 bg-[#08080b]/90" />
+      </div>
       {src ? (
         <div
           aria-hidden
@@ -38,9 +43,6 @@ export function HomeBackdrop({ src, plain = false }: { src?: string; plain?: boo
           <div className="absolute inset-0 bg-[#0a0a0d]/70" />
         </div>
       ) : null}
-      {plain ? null : (
-        <div aria-hidden className="home-sky-grain pointer-events-none fixed inset-0 z-[-1]" />
-      )}
     </>
   );
 }
