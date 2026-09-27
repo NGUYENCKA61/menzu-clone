@@ -326,6 +326,16 @@ export function RowSearch({
               );
             })}
           </div>
+          {/* How many categories the search and the chip leave on show: the
+              whole list at rest ("22 danh mục"), fewer once narrowed. Said
+              aloud politely as it changes; the empty state below speaks
+              when nothing is left. */}
+          <p
+            aria-live="polite"
+            className="text-[11px] font-bold uppercase tracking-[0.2em] text-neutral-500"
+          >
+            {matched.length > 0 ? `${matched.length} danh mục` : null}
+          </p>
         </>
       ) : null}
 

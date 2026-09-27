@@ -30,12 +30,6 @@ export interface ProductRowProps {
    * Decorative: pass it aria-hidden.
    */
   headingSuffix?: React.ReactNode;
-  /**
-   * A fact set small under the heading, in the site's label style — the game
-   * list's "22 danh mục". Not a sentence about the row: the search and chips
-   * under it already say what it is for.
-   */
-  subline?: string;
   cards: ProductCard[];
   /** Destination of the row's "Xem tất cả" link — the matching index page. */
   viewAllHref: string;
@@ -662,7 +656,6 @@ function RowList({ cards, ranked }: { cards: ProductCard[]; ranked: boolean }) {
 export function ProductRow({
   heading,
   headingSuffix,
-  subline,
   cards,
   viewAllHref,
   hideViewAll = false,
@@ -717,27 +710,10 @@ export function ProductRow({
         className,
       )}
     >
-      <div
-        className={cn(
-          "flex flex-row items-center justify-between mb-8",
-          panel && "mb-5 sm:mb-6",
-          subline && "mb-1.5 sm:mb-1.5",
-        )}
-      >
+      <div className={cn("flex flex-row items-center justify-between mb-8", panel && "mb-5 sm:mb-6")}>
         {title}
         {hideViewAll ? null : viewAll}
       </div>
-      {subline ? (
-        // In line with the heading's words, past the red rung.
-        <p
-          className={cn(
-            "mb-6 pl-[13px] text-[11px] font-bold uppercase tracking-[0.2em] text-neutral-500 sm:mb-8",
-            panel && "mb-5 sm:mb-6",
-          )}
-        >
-          {subline}
-        </p>
-      ) : null}
 
       {bento ? (
         <RowBento cards={cards} ranked={ranked} />

@@ -112,9 +112,6 @@ export default async function Home() {
               id={group.slug === GAME_LIST_SLUG ? SCROLL_TARGET_ID : undefined}
               className={group.slug === GAME_LIST_SLUG ? "scroll-mt-[120px]" : undefined}
               heading={group.name}
-              subline={
-                group.slug === GAME_LIST_SLUG ? `${group.cards.length} danh mục` : undefined
-              }
               cards={group.cards}
               viewAllHref="/categories"
               hideViewAll={group.slug === "hot-trending"}
