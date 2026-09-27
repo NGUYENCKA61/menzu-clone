@@ -121,7 +121,7 @@ export default async function Home() {
               searchable={group.slug === GAME_LIST_SLUG}
               tiles={group.slug === "hot-trending" || group.slug === GAME_LIST_SLUG}
               bigPicks={group.slug === "hot-trending"}
-              rows={group.slug === GAME_LIST_SLUG ? 2 : 1}
+              rows={group.slug === GAME_LIST_SLUG ? 3 : 1}
             />
             {statsAfterTrending && group.slug === "hot-trending" ? (
               <TrustStatsStrip stats={trust} slim />
