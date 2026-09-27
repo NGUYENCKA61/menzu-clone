@@ -5,14 +5,12 @@ import { useCallback, useEffect, useRef, useState, type ReactNode } from "react"
 
 /**
  * The arrows as Netflix draws them: a band the height of the tiles at each
- * edge, clear by 72px, with a large white chevron on it. Light — half dark at
- * the very edge — because the row already fades out at that edge, and a
- * heavier band stacked on the fade darkened the last tile well past it. It
- * deepens under the pointer. Only from sm up — a phone swipes, sees the next
- * tile peeking, and would lose picture to them.
+ * edge, dark at the edge and clear by 72px, with a large white chevron on
+ * it; the band darkens under the pointer. Only from sm up — a phone swipes,
+ * sees the next tile peeking, and would lose picture to them.
  */
 const ARROW =
-  "absolute inset-y-0 z-20 hidden w-[72px] items-center text-white from-[#08080b]/50 to-transparent hover:from-[#08080b]/75 sm:flex";
+  "absolute inset-y-0 z-20 hidden w-[72px] items-center text-white from-[#08080b]/90 to-transparent hover:from-[#08080b] sm:flex";
 
 /** Milliseconds a set of tiles rests before the next step. */
 const STEP_MS = 3000;
