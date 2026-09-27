@@ -1,16 +1,16 @@
 "use client";
 
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronsLeft, ChevronsRight } from "lucide-react";
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 
 /**
- * The arrows, flat squares like the game list's chips and search field: 10px
- * corners, a dark fill with a hairline edge, a white chevron, half over the
- * row's edge. Only from sm up — a phone swipes, sees the next tile peeking,
- * and would lose picture to them.
+ * The arrows, elitehacks' solid squares in the shop's red: 10px corners, a
+ * white double chevron, a soft glow of the same red under them, half over
+ * the row's edge. Only from sm up — a phone swipes, sees the next tile
+ * peeking, and would lose picture to them.
  */
 const ARROW =
-  "absolute top-1/2 z-20 hidden h-[42px] w-[42px] -translate-y-1/2 items-center justify-center rounded-[10px] bg-[#1d1e23] text-white shadow-[0_0_0_1px_rgba(255,255,255,0.08),0_6px_16px_-6px_rgba(0,0,0,0.6)] transition-colors hover:bg-[#26272d] sm:flex";
+  "absolute top-1/2 z-20 hidden h-[46px] w-[46px] -translate-y-1/2 items-center justify-center rounded-[10px] bg-[var(--menzu-accent)] text-white shadow-[0_8px_20px_-8px_color-mix(in_oklab,var(--menzu-accent)_60%,transparent)] transition-colors hover:bg-[var(--menzu-accent-dark)] sm:flex";
 
 /** Milliseconds a set of tiles rests before the next step. */
 const STEP_MS = 3000;
@@ -234,7 +234,7 @@ export function RowSlider({
               onClick={() => press(index - 1)}
               className={`${ARROW} left-0 -translate-x-4`}
             >
-              <ChevronLeft size={20} />
+              <ChevronsLeft size={20} />
             </button>
             <button
               type="button"
@@ -242,7 +242,7 @@ export function RowSlider({
               onClick={() => press(index + 1)}
               className={`${ARROW} right-0 translate-x-4`}
             >
-              <ChevronRight size={20} />
+              <ChevronsRight size={20} />
             </button>
           </>
         ) : null}
