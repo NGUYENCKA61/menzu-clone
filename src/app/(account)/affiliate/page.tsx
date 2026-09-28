@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { HandCoins, Handshake, Link2, UserPlus, Users } from "lucide-react";
 
 import { AccountPageFrame } from "@/components/sites/menzu-lol-f7ae197a/shared/AccountPageFrame";
+import { AccountPanel } from "@/components/sites/menzu-lol-f7ae197a/shared/AccountPanel";
 import { ReferralLinkBox } from "@/components/sites/menzu-lol-f7ae197a/shared/ReferralLinkBox";
 import { formatVnd } from "@/components/sites/menzu-lol-f7ae197a/shared/productData";
 import { dayKey } from "@/lib/dayGroups";
@@ -98,7 +99,7 @@ export default async function AffiliatePage() {
       // and red type on a red tint was the hardest thing on the page to read.
       tone: "text-white",
       box: "border-white/10 bg-white/[0.06] text-[var(--menzu-accent)]",
-      shell: "border-white/10 bg-neutral-900/50",
+      shell: "border-white/5 bg-white/[0.02]",
     },
     {
       icon: HandCoins,
@@ -124,153 +125,155 @@ export default async function AffiliatePage() {
   ] as const;
 
   return (
-    <AccountPageFrame
-      title="Cộng tác viên"
-      subtitle={`Chia sẻ liên kết giới thiệu, nhận ${REFERRAL_PERCENT}% mỗi giao dịch nạp tiền`}
-      crumb="Cộng tác viên"
-    >
-      <div className="flex flex-col gap-4">
-        <section className="flex flex-col gap-4 rounded-2xl border border-white/10 bg-neutral-900/50 p-5">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <h3 className="text-sm font-black uppercase tracking-wider text-white">
-              Liên kết giới thiệu của bạn
-            </h3>
-            <span className="text-xs text-neutral-500">
-              Ai đăng ký qua link này là người bạn giới thiệu
-            </span>
-          </div>
-          <ReferralLinkBox link={link} />
-        </section>
+    <AccountPageFrame crumb="Cộng tác viên">
+      <AccountPanel
+        icon={Handshake}
+        title="Cộng tác viên"
+        subtitle={`Chia sẻ liên kết giới thiệu, nhận ${REFERRAL_PERCENT}% mỗi giao dịch nạp tiền`}
+      >
+        <div className="flex flex-col gap-4">
+          <section className="flex flex-col gap-4 rounded-2xl border border-white/5 bg-white/[0.02] p-5 sm:p-6">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <h3 className="text-sm font-black uppercase tracking-wider text-white">
+                Liên kết giới thiệu của bạn
+              </h3>
+              <span className="text-xs text-neutral-500">
+                Ai đăng ký qua link này là người bạn giới thiệu
+              </span>
+            </div>
+            <ReferralLinkBox link={link} />
+          </section>
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-          {stats.map(({ icon: Icon, label, value, unit, tone, box, shell }) => (
-            <div
-              key={label}
-              className={`flex items-center gap-4 rounded-2xl border p-5 ${shell}`}
-            >
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            {stats.map(({ icon: Icon, label, value, unit, tone, box, shell }) => (
               <div
-                className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border ${box}`}
+                key={label}
+                className={`flex items-center gap-4 rounded-2xl border p-5 ${shell}`}
               >
-                <Icon size={18} />
+                <div
+                  className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border ${box}`}
+                >
+                  <Icon size={18} />
+                </div>
+                <div className="flex min-w-0 flex-col gap-1.5">
+                  <span className="text-[10px] font-black uppercase tracking-widest text-neutral-300">
+                    {label}
+                  </span>
+                  <span className={`text-2xl font-black leading-none ${tone}`}>
+                    {value}{" "}
+                    <span className="text-sm font-bold opacity-80">{unit}</span>
+                  </span>
+                </div>
               </div>
-              <div className="flex min-w-0 flex-col gap-1.5">
-                <span className="text-[10px] font-black uppercase tracking-widest text-neutral-300">
-                  {label}
-                </span>
-                <span className={`text-2xl font-black leading-none ${tone}`}>
-                  {value}{" "}
-                  <span className="text-sm font-bold opacity-80">{unit}</span>
-                </span>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <section className="flex flex-col gap-4 rounded-2xl border border-white/10 bg-neutral-900/50 p-5">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <h3 className="text-sm font-black uppercase tracking-wider text-white">
-              Cách hoạt động
-            </h3>
-            <span className="text-xs text-neutral-500">
-              Hoa hồng rút về ví ở trang Tổng quan
-            </span>
-          </div>
-          <ol className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-            {STEPS.map(({ icon: Icon, text }, index) => (
-              <li
-                key={text}
-                className="flex items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] p-4"
-              >
-                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/[0.06]">
-                  <Icon size={16} className="text-[var(--menzu-accent)]" />
-                </span>
-                <span className="text-sm font-semibold leading-snug text-neutral-200">
-                  <span className="mr-1.5 font-black text-white">{index + 1}.</span>
-                  {text}
-                </span>
-              </li>
             ))}
-          </ol>
-        </section>
-
-        <section className="flex flex-col gap-4 rounded-2xl border border-white/10 bg-neutral-900/50 p-5">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <h3 className="text-sm font-black uppercase tracking-wider text-white">
-              Hoa hồng gần đây
-            </h3>
-            <span className="text-xs text-neutral-500">
-              {REFERRAL_PERCENT}% mỗi lệnh nạp được cộng của người bạn giới thiệu
-            </span>
           </div>
-          {recent.length === 0 ? (
-            <div className="rounded-xl border border-dashed border-white/10 bg-white/[0.02] py-10 text-center text-sm text-neutral-400">
-              Chưa có hoa hồng nào — gửi liên kết cho bạn bè để bắt đầu.
-            </div>
-          ) : (
-            <div className="w-full overflow-x-auto rounded-xl border border-white/[0.06] bg-white/[0.02]">
-              <table className="w-full min-w-[520px] text-left">
-                <thead>
-                  <tr className="border-b border-white/10">
-                    {EARNING_COLUMNS.map((column) => (
-                      <th
-                        key={column}
-                        scope="col"
-                        className="px-5 py-3.5 text-[10px] font-black uppercase tracking-widest text-neutral-500 whitespace-nowrap"
-                      >
-                        {column}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {recent.map((earning) => (
-                    <tr
-                      key={earning.id}
-                      className="border-b border-white/5 transition-colors last:border-0 hover:bg-white/[0.03]"
-                    >
-                      <td className="px-5 py-4">
-                        {/* The shop accent: the name is the row's subject, and it
-                            reads as one. */}
-                        <span className="inline-flex rounded-md border border-white/10 bg-white/[0.06] px-2 py-1 text-[11px] font-bold leading-none text-neutral-200">
-                          {maskName(earning.fromUser.username)}
-                        </span>
-                      </td>
-                      <td className="px-5 py-4">
-                        <span className="text-xs font-bold tabular-nums text-neutral-200">
-                          {formatVnd(
-                            Number(earning.topUp.credited ?? earning.topUp.amount),
-                          )}đ
-                        </span>
-                      </td>
-                      <td className="px-5 py-4">
-                        <span className="inline-flex rounded-md border border-emerald-500/30 bg-emerald-500/10 px-2 py-1 text-[11px] font-black leading-none tabular-nums text-emerald-400">
-                          +{formatVnd(Number(earning.amount))}đ
-                        </span>
-                      </td>
-                      <td className="px-5 py-4">
-                        <span className="text-[11px] tabular-nums text-neutral-500">
-                          {dayKey(earning.createdAt)}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </section>
 
-        <p className="text-xs text-neutral-500">
-          Có đầu ra ổn định và muốn nhập theo lô?{" "}
-          <Link
-            href="/agency"
-            className="font-black uppercase tracking-wider text-[var(--menzu-accent)] transition-colors hover:text-white"
-          >
-            Nâng cấp đại lý
-          </Link>{" "}
-          để làm việc thẳng với admin.
-        </p>
-      </div>
+          <section className="flex flex-col gap-4 rounded-2xl border border-white/5 bg-white/[0.02] p-5 sm:p-6">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <h3 className="text-sm font-black uppercase tracking-wider text-white">
+                Cách hoạt động
+              </h3>
+              <span className="text-xs text-neutral-500">
+                Hoa hồng rút về ví ở trang Tổng quan
+              </span>
+            </div>
+            <ol className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+              {STEPS.map(({ icon: Icon, text }, index) => (
+                <li
+                  key={text}
+                  className="flex items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] p-4"
+                >
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/[0.06]">
+                    <Icon size={16} className="text-[var(--menzu-accent)]" />
+                  </span>
+                  <span className="text-sm font-semibold leading-snug text-neutral-200">
+                    <span className="mr-1.5 font-black text-white">{index + 1}.</span>
+                    {text}
+                  </span>
+                </li>
+              ))}
+            </ol>
+          </section>
+
+          <section className="flex flex-col gap-4 rounded-2xl border border-white/5 bg-white/[0.02] p-5 sm:p-6">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <h3 className="text-sm font-black uppercase tracking-wider text-white">
+                Hoa hồng gần đây
+              </h3>
+              <span className="text-xs text-neutral-500">
+                {REFERRAL_PERCENT}% mỗi lệnh nạp được cộng của người bạn giới thiệu
+              </span>
+            </div>
+            {recent.length === 0 ? (
+              <div className="rounded-xl border border-dashed border-white/10 bg-white/[0.02] py-10 text-center text-sm text-neutral-400">
+                Chưa có hoa hồng nào — gửi liên kết cho bạn bè để bắt đầu.
+              </div>
+            ) : (
+              <div className="w-full overflow-x-auto rounded-xl border border-white/[0.06] bg-white/[0.02]">
+                <table className="w-full min-w-[520px] text-left">
+                  <thead>
+                    <tr className="border-b border-white/10">
+                      {EARNING_COLUMNS.map((column) => (
+                        <th
+                          key={column}
+                          scope="col"
+                          className="px-5 py-3.5 text-[10px] font-black uppercase tracking-widest text-neutral-500 whitespace-nowrap"
+                        >
+                          {column}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {recent.map((earning) => (
+                      <tr
+                        key={earning.id}
+                        className="border-b border-white/5 transition-colors last:border-0 hover:bg-white/[0.03]"
+                      >
+                        <td className="px-5 py-4">
+                          {/* The shop accent: the name is the row's subject, and it
+                              reads as one. */}
+                          <span className="inline-flex rounded-md border border-white/10 bg-white/[0.06] px-2 py-1 text-[11px] font-bold leading-none text-neutral-200">
+                            {maskName(earning.fromUser.username)}
+                          </span>
+                        </td>
+                        <td className="px-5 py-4">
+                          <span className="text-xs font-bold tabular-nums text-neutral-200">
+                            {formatVnd(
+                              Number(earning.topUp.credited ?? earning.topUp.amount),
+                            )}đ
+                          </span>
+                        </td>
+                        <td className="px-5 py-4">
+                          <span className="inline-flex rounded-md border border-emerald-500/30 bg-emerald-500/10 px-2 py-1 text-[11px] font-black leading-none tabular-nums text-emerald-400">
+                            +{formatVnd(Number(earning.amount))}đ
+                          </span>
+                        </td>
+                        <td className="px-5 py-4">
+                          <span className="text-[11px] tabular-nums text-neutral-500">
+                            {dayKey(earning.createdAt)}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </section>
+
+          <p className="text-xs text-neutral-500">
+            Có đầu ra ổn định và muốn nhập theo lô?{" "}
+            <Link
+              href="/agency"
+              className="font-black uppercase tracking-wider text-[var(--menzu-accent)] transition-colors hover:text-white"
+            >
+              Nâng cấp đại lý
+            </Link>{" "}
+            để làm việc thẳng với admin.
+          </p>
+        </div>
+      </AccountPanel>
     </AccountPageFrame>
   );
 }

@@ -16,14 +16,14 @@ const TABS: { id: Tab; label: string; icon: typeof ShieldCheck }[] = [
 ];
 
 const TAB_ACTIVE =
-  "flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest bg-[var(--menzu-accent)] text-white transition-colors";
+  "flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest border border-[var(--menzu-accent)]/30 bg-[var(--menzu-accent)]/10 text-white transition-colors";
 const TAB_INACTIVE =
-  "flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest border border-white/10 bg-white/[0.03] text-neutral-400 hover:text-white transition-colors";
+  "flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest border border-white/5 bg-white/[0.02] text-neutral-400 hover:text-white hover:bg-white/5 transition-colors";
 
 // Quiet shells on purpose: four stacked form fields in red outlines read as
 // four warnings. The red treatment stays on the single search boxes only.
 const FIELD =
-  "w-full rounded-xl border border-white/5 bg-white/5 px-4 py-3 text-sm text-white outline-none focus:border-[var(--menzu-accent)]/60 transition-colors placeholder-neutral-500";
+  "w-full rounded-xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white outline-none focus:border-[var(--menzu-accent)]/50 transition-colors placeholder-neutral-500";
 /** The overview page's card header pair. */
 const CARD_TITLE = "text-sm font-black uppercase tracking-wider text-white";
 const CARD_HINT = "text-xs text-neutral-500";
@@ -243,7 +243,7 @@ export function SecurityPanel({
             onClick={() => setTab(id)}
             className={tab === id ? TAB_ACTIVE : TAB_INACTIVE}
           >
-            <Icon size={14} />
+            <Icon size={14} className={tab === id ? "text-[var(--menzu-accent)]" : undefined} />
             {label}
           </button>
         ))}
@@ -253,7 +253,7 @@ export function SecurityPanel({
         <div className="flex flex-col gap-4">
           <form
             onSubmit={submitEmail}
-            className="rounded-2xl border border-white/10 bg-neutral-900/50 p-5 flex flex-col gap-3"
+            className="rounded-2xl border border-white/5 bg-white/[0.02] p-5 sm:p-6 flex flex-col gap-3"
           >
             {/* A heading, not a label: it titles the whole form. Used as a
                 label it would have announced the input as "Địa chỉ Email"
@@ -301,7 +301,7 @@ export function SecurityPanel({
 
           <form
             onSubmit={submitPassword}
-            className="rounded-2xl border border-white/10 bg-neutral-900/50 p-5 flex flex-col gap-3"
+            className="rounded-2xl border border-white/5 bg-white/[0.02] p-5 sm:p-6 flex flex-col gap-3"
           >
             <div className="flex flex-wrap items-center justify-between gap-3">
               <h3 className={CARD_TITLE}>
@@ -372,7 +372,7 @@ export function SecurityPanel({
           </form>
         </div>
       ) : tab === "linked" ? (
-        <section className="flex flex-col gap-4 rounded-2xl border border-white/10 bg-neutral-900/50 p-5">
+        <section className="flex flex-col gap-4 rounded-2xl border border-white/5 bg-white/[0.02] p-5 sm:p-6">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <h3 className={CARD_TITLE}>Liên kết nền tảng</h3>
             <span className={CARD_HINT}>Kết nối để sử dụng thêm tiện ích</span>
@@ -460,7 +460,7 @@ export function SecurityPanel({
           </div>
         </section>
       ) : (
-        <section className="flex flex-col gap-4 rounded-2xl border border-white/10 bg-neutral-900/50 p-5">
+        <section className="flex flex-col gap-4 rounded-2xl border border-white/5 bg-white/[0.02] p-5 sm:p-6">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <h3 className={CARD_TITLE}>Quản lý thiết bị</h3>
             <span className={CARD_HINT}>Các phiên đăng nhập đang hoạt động</span>

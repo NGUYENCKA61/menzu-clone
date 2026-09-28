@@ -8,12 +8,14 @@ import {
   Check,
   Gift,
   HandCoins,
+  LayoutDashboard,
   Receipt,
   ShoppingBag,
   Wallet,
 } from "lucide-react";
 
 import { AccountPageFrame } from "@/components/sites/menzu-lol-f7ae197a/shared/AccountPageFrame";
+import { AccountPanel } from "@/components/sites/menzu-lol-f7ae197a/shared/AccountPanel";
 import { AvatarUploader } from "@/components/sites/menzu-lol-f7ae197a/shared/AvatarUploader";
 import { BannerUploader } from "@/components/sites/menzu-lol-f7ae197a/shared/BannerUploader";
 import { WithdrawCommission } from "@/components/sites/menzu-lol-f7ae197a/shared/WithdrawCommission";
@@ -128,227 +130,232 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
   const nextRule = progress.next ? TIER_RULES[progress.next] : null;
 
   return (
-    <AccountPageFrame
-      title="Tổng quan tài khoản"
-      subtitle="Quản lý tài khoản, số dư và các dịch vụ của bạn."
-      crumb="Tổng quan tài khoản"
-    >
-      <div className="flex flex-col gap-4">
-        {query.linked && PROVIDER_NAMES[query.linked] ? (
-          <div className="rounded-xl border border-emerald-500/25 bg-emerald-500/10 px-4 py-3 text-sm font-bold text-emerald-300">
-            Đã liên kết {PROVIDER_NAMES[query.linked]} vào tài khoản của bạn.
-          </div>
-        ) : null}
-        {query.linkError && PROVIDER_NAMES[query.linkError] ? (
-          <div className="rounded-xl border border-red-500/25 bg-red-500/10 px-4 py-3 text-sm font-bold text-red-300">
-            Tài khoản {PROVIDER_NAMES[query.linkError]} này đang liên kết với một
-            người dùng khác.
-          </div>
-        ) : null}
+    // The title sits inside menzu's #111 panel, as on /wallet, /transactions
+    // and /orders; the layout inside is this shop's own (the owner, 29/09:
+    // "bố cục theo web mình").
+    <AccountPageFrame crumb="Tổng quan tài khoản">
+      <AccountPanel
+        icon={LayoutDashboard}
+        title="Tổng quan tài khoản"
+        subtitle="Quản lý tài khoản, số dư và các dịch vụ của bạn."
+      >
+        <div className="flex flex-col gap-4">
+          {query.linked && PROVIDER_NAMES[query.linked] ? (
+            <div className="rounded-xl border border-emerald-500/25 bg-emerald-500/10 px-4 py-3 text-sm font-bold text-emerald-300">
+              Đã liên kết {PROVIDER_NAMES[query.linked]} vào tài khoản của bạn.
+            </div>
+          ) : null}
+          {query.linkError && PROVIDER_NAMES[query.linkError] ? (
+            <div className="rounded-xl border border-red-500/25 bg-red-500/10 px-4 py-3 text-sm font-bold text-red-300">
+              Tài khoản {PROVIDER_NAMES[query.linkError]} này đang liên kết với một
+              người dùng khác.
+            </div>
+          ) : null}
 
-        {/* BANNER — game art across the whole card, darkened only where the
-            words sit: a soft wash off the left edge, and a stronger one rising
-            from the bottom. The tier card and the doors live inside it. */}
-        <section className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#0e0e12]">
-          <BannerUploader hasOwn={Boolean(user.bannerUrl)} />
+          {/* BANNER — game art across the whole card, darkened only where the
+              words sit: a soft wash off the left edge, and a stronger one rising
+              from the bottom. The tier card and the doors live inside it. */}
+          <section className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#111111]">
+            <BannerUploader hasOwn={Boolean(user.bannerUrl)} />
 
-          <div className="absolute inset-0">
-            <Image
-              src={bannerArt}
-              alt=""
-              fill
-              priority
-              sizes="(max-width: 1280px) 100vw, 960px"
-              className="object-cover object-[60%_28%] opacity-95"
-            />
-            {/* Left wash: enough to seat the name, gone by a third across. */}
-            <div className="absolute inset-0 bg-gradient-to-r from-[#0e0e12] via-[#0e0e12]/45 to-transparent" />
-            {/* Foot wash: the band the tier card and the doors sit on. */}
-            <div className="absolute inset-0 bg-gradient-to-t from-[#0e0e12] via-[#0e0e12]/50 to-transparent" />
-          </div>
-
-          <div className="relative flex flex-col gap-6 p-5 pt-14 sm:p-7">
-            {/* Who — avatar, name, role, when they joined. */}
-            <div className="flex items-center gap-4 sm:gap-5">
-              <AvatarUploader avatarUrl={user.avatarUrl} username={user.username} />
-              <div className="flex min-w-0 flex-col gap-2">
-                <div className="flex min-w-0 flex-wrap items-center gap-2.5">
-                  <span className="truncate text-2xl font-black uppercase tracking-wide leading-none text-white sm:text-3xl">
-                    {user.username}
-                  </span>
-                  <BadgeCheck size={18} className="shrink-0 fill-emerald-500 text-white" />
-                  <SkewPlate
-                    className={
-                      isAdmin
-                        ? "bg-[var(--menzu-accent)] text-white"
-                        : user.role === "AGENCY"
-                          ? "bg-gradient-to-r from-[#b45309] to-[#d97706] text-white"
-                          : "bg-gradient-to-r from-neutral-600 to-neutral-700 text-white"
-                    }
-                  >
-                    {isAdmin ? "Admin" : user.role === "AGENCY" ? "Đại lý" : "Member"}
-                  </SkewPlate>
-                </div>
-                <span className="text-[12px] font-semibold text-neutral-300">
-                  UID {user.uid}
-                  <span className="mx-2 text-neutral-600">·</span>
-                  Tham gia từ{" "}
-                  {user.createdAt.toLocaleDateString("vi-VN", {
-                    timeZone: SHOP_TZ,
-                    day: "2-digit",
-                    month: "2-digit",
-                    year: "numeric",
-                  })}
-                </span>
-              </div>
+            <div className="absolute inset-0">
+              <Image
+                src={bannerArt}
+                alt=""
+                fill
+                priority
+                sizes="(max-width: 1280px) 100vw, 960px"
+                className="object-cover object-[60%_28%] opacity-95"
+              />
+              {/* Left wash: enough to seat the name, gone by a third across. */}
+              <div className="absolute inset-0 bg-gradient-to-r from-[#111111] via-[#111111]/45 to-transparent" />
+              {/* Foot wash: the band the tier card and the doors sit on. */}
+              <div className="absolute inset-0 bg-gradient-to-t from-[#111111] via-[#111111]/50 to-transparent" />
             </div>
 
-            {/* The tier card and the doors, side by side from lg. */}
-            <div className="grid grid-cols-1 gap-4 sm:mt-5 lg:grid-cols-[minmax(0,1fr)_240px]">
-              <div className="flex flex-col gap-2 rounded-2xl border border-white/10 bg-[#0e0e12]/60 p-5 backdrop-blur-md">
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <span className="text-[10px] font-black uppercase tracking-widest text-neutral-400">
-                    Cấp bậc
-                  </span>
-                  <span className={`text-sm font-bold ${tier.text} ${tier.glow}`}>
-                    {TIER_RULES[memberTier].label}
-                  </span>
-                </div>
-
-                <div>
-                  <div className="h-2 overflow-hidden rounded-full border border-white/5 bg-black/60">
-                    <div
-                      className={`h-full rounded-full ${tier.bar}`}
-                      style={{ width: `${progress.percent}%` }}
-                    />
+            <div className="relative flex flex-col gap-6 p-5 pt-14 sm:p-7">
+              {/* Who — avatar, name, role, when they joined. */}
+              <div className="flex items-center gap-4 sm:gap-5">
+                <AvatarUploader avatarUrl={user.avatarUrl} username={user.username} />
+                <div className="flex min-w-0 flex-col gap-2">
+                  <div className="flex min-w-0 flex-wrap items-center gap-2.5">
+                    <span className="truncate text-2xl font-black uppercase tracking-wide leading-none text-white sm:text-3xl">
+                      {user.username}
+                    </span>
+                    <BadgeCheck size={18} className="shrink-0 fill-emerald-500 text-white" />
+                    <SkewPlate
+                      className={
+                        isAdmin
+                          ? "bg-[var(--menzu-accent)] text-white"
+                          : user.role === "AGENCY"
+                            ? "bg-gradient-to-r from-[#b45309] to-[#d97706] text-white"
+                            : "bg-gradient-to-r from-neutral-600 to-neutral-700 text-white"
+                      }
+                    >
+                      {isAdmin ? "Admin" : user.role === "AGENCY" ? "Đại lý" : "Member"}
+                    </SkewPlate>
                   </div>
-                  <p className="mt-2 text-[12px] text-neutral-400">
-                    {nextRule && progress.next ? (
-                      <>
-                        Tích lũy thêm để nhận những đặc quyền{" "}
-                        <Link
-                          href="/cap-bac"
-                          className="font-bold text-white underline-offset-2 transition-colors hover:underline"
+                  <span className="text-[12px] font-semibold text-neutral-300">
+                    UID {user.uid}
+                    <span className="mx-2 text-neutral-600">·</span>
+                    Tham gia từ{" "}
+                    {user.createdAt.toLocaleDateString("vi-VN", {
+                      timeZone: SHOP_TZ,
+                      day: "2-digit",
+                      month: "2-digit",
+                      year: "numeric",
+                    })}
+                  </span>
+                </div>
+              </div>
+
+              {/* The tier card and the doors, side by side from lg. */}
+              <div className="grid grid-cols-1 gap-4 sm:mt-5 lg:grid-cols-[minmax(0,1fr)_240px]">
+                <div className="flex flex-col gap-2 rounded-2xl border border-white/10 bg-[#111111]/60 p-5 backdrop-blur-md">
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <span className="text-[10px] font-black uppercase tracking-widest text-neutral-400">
+                      Cấp bậc
+                    </span>
+                    <span className={`text-sm font-bold ${tier.text} ${tier.glow}`}>
+                      {TIER_RULES[memberTier].label}
+                    </span>
+                  </div>
+
+                  <div>
+                    <div className="h-2 overflow-hidden rounded-full border border-white/5 bg-black/60">
+                      <div
+                        className={`h-full rounded-full ${tier.bar}`}
+                        style={{ width: `${progress.percent}%` }}
+                      />
+                    </div>
+                    <p className="mt-2 text-[12px] text-neutral-400">
+                      {nextRule && progress.next ? (
+                        <>
+                          Tích lũy thêm để nhận những đặc quyền{" "}
+                          <Link
+                            href="/cap-bac"
+                            className="font-bold text-white underline-offset-2 transition-colors hover:underline"
+                          >
+                            ưu đãi
+                          </Link>{" "}
+                          dành riêng cho khách hàng
+                        </>
+                      ) : (
+                        "Bạn đang ở hạng cao nhất"
+                      )}
+                    </p>
+                  </div>
+
+                  {/* What the rank is worth today, what the points are, and what
+                      the next rank would pay — the last one is the only place on
+                      the site that answers "why keep topping up". */}
+                  <div className="mt-auto grid grid-cols-3 gap-3 border-t border-white/[0.06] pt-1.5">
+                    {[
+                      {
+                        label: "Ưu đãi mua tool",
+                        value: `Giảm ${formatTierPercent(TIER_RULES[memberTier].discountPercent)}%`,
+                        tone: tier.text,
+                      },
+                      {
+                        label: "Điểm thưởng",
+                        value: `${user.points.toLocaleString("vi-VN")} điểm`,
+                        tone: "text-white",
+                      },
+                      nextRule && progress.next
+                        ? {
+                            label: `Lên ${nextRule.label} được`,
+                            value: `Giảm ${formatTierPercent(nextRule.discountPercent)}%`,
+                            tone: "text-white",
+                          }
+                        : {
+                            label: "Hạng hiện tại",
+                            value: TIER_RULES[memberTier].label,
+                            tone: "text-white",
+                          },
+                    ].map(({ label, value, tone }, index) => (
+                      <div key={label} className="flex min-w-0 flex-col gap-0.5">
+                        <span className="truncate text-[9px] font-black uppercase tracking-widest text-neutral-500">
+                          {label}
+                        </span>
+                        <span
+                          className={`flex min-w-0 items-center gap-1 text-[13px] font-bold leading-none ${tone}`}
                         >
-                          ưu đãi
-                        </Link>{" "}
-                        dành riêng cho khách hàng
-                      </>
-                    ) : (
-                      "Bạn đang ở hạng cao nhất"
-                    )}
-                  </p>
+                          {index === 0 ? (
+                            <Check size={13} strokeWidth={3} className={`shrink-0 ${tier.text}`} />
+                          ) : null}
+                          <span className="truncate">{value}</span>
+                        </span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
 
-                {/* What the rank is worth today, what the points are, and what
-                    the next rank would pay — the last one is the only place on
-                    the site that answers "why keep topping up". */}
-                <div className="mt-auto grid grid-cols-3 gap-3 border-t border-white/[0.06] pt-1.5">
-                  {[
-                    {
-                      label: "Ưu đãi mua tool",
-                      value: `Giảm ${formatTierPercent(TIER_RULES[memberTier].discountPercent)}%`,
-                      tone: tier.text,
-                    },
-                    {
-                      label: "Điểm thưởng",
-                      value: `${user.points.toLocaleString("vi-VN")} điểm`,
-                      tone: "text-white",
-                    },
-                    nextRule && progress.next
-                      ? {
-                          label: `Lên ${nextRule.label} được`,
-                          value: `Giảm ${formatTierPercent(nextRule.discountPercent)}%`,
-                          tone: "text-white",
-                        }
-                      : {
-                          label: "Hạng hiện tại",
-                          value: TIER_RULES[memberTier].label,
-                          tone: "text-white",
-                        },
-                  ].map(({ label, value, tone }, index) => (
-                    <div key={label} className="flex min-w-0 flex-col gap-0.5">
-                      <span className="truncate text-[9px] font-black uppercase tracking-widest text-neutral-500">
-                        {label}
-                      </span>
-                      <span
-                        className={`flex min-w-0 items-center gap-1 text-[13px] font-bold leading-none ${tone}`}
-                      >
-                        {index === 0 ? (
-                          <Check size={13} strokeWidth={3} className={`shrink-0 ${tier.text}`} />
-                        ) : null}
-                        <span className="truncate">{value}</span>
-                      </span>
-                    </div>
+                <div className="flex flex-col gap-2.5">
+                  {QUICK_ACTIONS.map(({ label, href, icon: Icon, primary }) => (
+                    <Link
+                      key={href}
+                      href={href}
+                      className={`inline-flex h-11 items-center justify-center gap-2 rounded-xl border text-[12px] font-black uppercase tracking-wider transition-all ${
+                        primary
+                          ? "border-[var(--menzu-accent)] bg-[var(--menzu-accent)] text-white shadow-[0_10px_28px_-12px_var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] hover:shadow-[0_12px_32px_-10px_var(--menzu-accent)]"
+                          : "border-white/15 bg-black/35 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] backdrop-blur-md hover:border-white/35 hover:bg-black/50"
+                      }`}
+                    >
+                      <Icon size={15} />
+                      {label}
+                    </Link>
                   ))}
                 </div>
               </div>
 
-              <div className="flex flex-col gap-2.5">
-                {QUICK_ACTIONS.map(({ label, href, icon: Icon, primary }) => (
-                  <Link
-                    key={href}
-                    href={href}
-                    className={`inline-flex h-11 items-center justify-center gap-2 rounded-xl border text-[12px] font-black uppercase tracking-wider transition-all ${
-                      primary
-                        ? "border-[var(--menzu-accent)] bg-[var(--menzu-accent)] text-white shadow-[0_10px_28px_-12px_var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] hover:shadow-[0_12px_32px_-10px_var(--menzu-accent)]"
-                        : "border-white/15 bg-black/35 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] backdrop-blur-md hover:border-white/35 hover:bg-black/50"
-                    }`}
-                  >
-                    <Icon size={15} />
-                    {label}
-                  </Link>
+              {/* THE ACCOUNT IN NUMBERS — inside the card rather than a strip of
+                  its own below it, so the page is one block instead of two. */}
+              <div className="-mx-5 -mb-5 grid grid-cols-2 border-t border-white/10 bg-[#111111]/70 backdrop-blur-sm sm:-mx-7 sm:-mb-7 lg:grid-cols-4 lg:divide-x lg:divide-white/[0.06]">
+                {[
+                  { icon: Wallet, label: "Số dư khả dụng", value: formatVnd(user.balance), unit: "đ", tone: "text-emerald-400" },
+                  { icon: Receipt, label: "Tổng chi tiêu", value: formatVnd(spent), unit: "đ", tone: "text-white" },
+                  { icon: ShoppingBag, label: "Đơn hàng", value: String(paidOrders), unit: "", tone: "text-white" },
+                ].map(({ icon: Icon, label, value, unit, tone }) => (
+                  <div key={label} className="flex flex-col gap-3 p-5">
+                    <span className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-neutral-400">
+                      <span className="flex h-7 w-7 items-center justify-center rounded-md border border-white/10 bg-white/[0.04] text-neutral-300">
+                        <Icon size={13} />
+                      </span>
+                      {label}
+                    </span>
+                    <span className="flex min-h-9 items-center">
+                      <span className={`text-2xl font-black tabular-nums leading-none ${tone}`}>
+                        {value}
+                        {unit ? (
+                          <span className="ml-1 text-xs font-bold text-neutral-500">{unit}</span>
+                        ) : null}
+                      </span>
+                    </span>
+                  </div>
                 ))}
-              </div>
-            </div>
-
-            {/* THE ACCOUNT IN NUMBERS — inside the card rather than a strip of
-                its own below it, so the page is one block instead of two. */}
-            <div className="-mx-5 -mb-5 grid grid-cols-2 border-t border-white/10 bg-[#0e0e12]/70 backdrop-blur-sm sm:-mx-7 sm:-mb-7 lg:grid-cols-4 lg:divide-x lg:divide-white/[0.06]">
-              {[
-                { icon: Wallet, label: "Số dư khả dụng", value: formatVnd(user.balance), unit: "đ", tone: "text-emerald-400" },
-                { icon: Receipt, label: "Tổng chi tiêu", value: formatVnd(spent), unit: "đ", tone: "text-white" },
-                { icon: ShoppingBag, label: "Đơn hàng", value: String(paidOrders), unit: "", tone: "text-white" },
-              ].map(({ icon: Icon, label, value, unit, tone }) => (
-                <div key={label} className="flex flex-col gap-3 p-5">
+                <div className="flex flex-col gap-3 p-5">
                   <span className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-neutral-400">
                     <span className="flex h-7 w-7 items-center justify-center rounded-md border border-white/10 bg-white/[0.04] text-neutral-300">
-                      <Icon size={13} />
+                      <HandCoins size={13} />
                     </span>
-                    {label}
+                    Hoa hồng khả dụng
                   </span>
-                  <span className="flex min-h-9 items-center">
-                    <span className={`text-2xl font-black tabular-nums leading-none ${tone}`}>
-                      {value}
-                      {unit ? (
-                        <span className="ml-1 text-xs font-bold text-neutral-500">{unit}</span>
-                      ) : null}
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <span className="flex min-h-9 items-center">
+                      <span className="text-2xl font-black tabular-nums leading-none text-white">
+                        {formatVnd(user.commissionBalance)}
+                        <span className="ml-1 text-xs font-bold text-neutral-500">đ</span>
+                      </span>
                     </span>
-                  </span>
-                </div>
-              ))}
-              <div className="flex flex-col gap-3 p-5">
-                <span className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-neutral-400">
-                  <span className="flex h-7 w-7 items-center justify-center rounded-md border border-white/10 bg-white/[0.04] text-neutral-300">
-                    <HandCoins size={13} />
-                  </span>
-                  Hoa hồng khả dụng
-                </span>
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <span className="flex min-h-9 items-center">
-                    <span className="text-2xl font-black tabular-nums leading-none text-white">
-                      {formatVnd(user.commissionBalance)}
-                      <span className="ml-1 text-xs font-bold text-neutral-500">đ</span>
-                    </span>
-                  </span>
-                  <WithdrawCommission amount={user.commissionBalance} />
+                    <WithdrawCommission amount={user.commissionBalance} />
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        </section>
+          </section>
 
-      </div>
+        </div>
+      </AccountPanel>
     </AccountPageFrame>
   );
 }
