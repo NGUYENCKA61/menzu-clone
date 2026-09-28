@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useCallback, useRef, useState, useSyncExternalStore } from "react";
 import {
   EditorContent,
   Node,
@@ -27,6 +27,7 @@ import {
   Link as LinkIcon,
   List,
   ListOrdered,
+  MoveHorizontal,
   Play,
   Redo2,
   SquareCode,
@@ -787,6 +788,218 @@ function VideoPanelInner({ editor }: { editor: Editor }) {
   );
 }
 
+/** Where a dragged picture or video can land: a side and a push, or centred. */
+interface Place {
+  align: "left" | "right" | null;
+  offset: string | null;
+}
+
+/**
+ * The selected picture or video, and the element that carries its margins —
+ * the <img> itself when a caption has wrapped it in a <figure>, and for a
+ * video the .doc-video frame inside the wrapper React node views are mounted
+ * in. Null while anything else is selected.
+ */
+function selectedMovable(
+  editor: Editor,
+): { type: "image" | "youtubeVideo"; target: HTMLElement } | null {
+  const type = editor.isActive("image")
+    ? "image"
+    : editor.isActive("youtubeVideo")
+      ? "youtubeVideo"
+      : null;
+  if (!type) return null;
+  const dom = editor.view.nodeDOM(editor.state.selection.from);
+  if (!(dom instanceof HTMLElement)) return null;
+  const target =
+    type === "image"
+      ? dom.tagName === "IMG"
+        ? dom
+        : dom.querySelector("img")
+      : dom.classList.contains("doc-video")
+        ? dom
+        : dom.querySelector(".doc-video");
+  return target instanceof HTMLElement ? { type, target } : null;
+}
+
+/**
+ * Where a drag has the element, snapped: pushes in 5% steps, and centred
+ * once its middle is within 3% of the column's. Past the room beside it a
+ * push is cut back, as the "Lề" box does.
+ */
+function placeAt(x: number, w: number, columnWidth: number): Place {
+  const middle = x + w / 2;
+  if (Math.abs(middle - columnWidth / 2) <= columnWidth * 0.03) {
+    return { align: null, offset: null };
+  }
+  const widthPct = `${(w / columnWidth) * 100}%`;
+  const snap = (px: number) =>
+    fittingOffset(`${Math.round((px / columnWidth) * 20) * 5}%`, widthPct);
+  return middle < columnWidth / 2
+    ? { align: "left", offset: snap(x) }
+    : { align: "right", offset: snap(columnWidth - x - w) };
+}
+
+/** The left edge a place puts an element of this width at. */
+function leftOf(place: Place, w: number, columnWidth: number): number {
+  const push = place.offset ? (parseFloat(place.offset) / 100) * columnWidth : 0;
+  if (place.align === "left") return push;
+  if (place.align === "right") return columnWidth - w - push;
+  return (columnWidth - w) / 2;
+}
+
+/** What the handle says while a drag is on, in the "Lề" box's own words. */
+function placeLabel(place: Place): string {
+  if (place.align === "left") return place.offset ? `← Lề trái ${place.offset}` : "← Sát trái";
+  if (place.align === "right") return place.offset ? `Lề phải ${place.offset} →` : "Sát phải →";
+  return "Giữa";
+}
+
+/**
+ * The drag handle on the selected picture or video: hold it and move the
+ * element left or right with the mouse (or a finger).
+ *
+ * It writes the same side and push the panel's buttons and "Lề" box write,
+ * snapped to their 5% steps, so a drag and a typed number land on the same
+ * values. Away from the middle the element leans to the nearer side, pushed
+ * in from it; near the middle it snaps back to centred. A full-width element
+ * has nowhere to go and is halved first, as picking a side does.
+ *
+ * While the drag is on, only the element's transform moves — the document
+ * changes once, on release, so a drag is one step to undo.
+ *
+ * The handle sits over the frame, outside the editable area, so ProseMirror's
+ * own drag (moving a block up or down the page) is left alone.
+ */
+function MoveHandle({ editor }: { editor: Editor }) {
+  const subscribe = useCallback(
+    (notify: () => void) => {
+      // A video's node view is React, and re-renders a beat after the
+      // transaction that changed it — read the box again once it has, or the
+      // handle stays where the video was.
+      let frame = 0;
+      let later: ReturnType<typeof setTimeout> | undefined;
+      const onTransaction = () => {
+        notify();
+        cancelAnimationFrame(frame);
+        clearTimeout(later);
+        frame = requestAnimationFrame(notify);
+        later = setTimeout(notify, 120);
+      };
+      editor.on("transaction", onTransaction);
+      window.addEventListener("resize", notify);
+      return () => {
+        editor.off("transaction", onTransaction);
+        window.removeEventListener("resize", notify);
+        cancelAnimationFrame(frame);
+        clearTimeout(later);
+      };
+    },
+    [editor],
+  );
+  // Where the selected element sits in the frame, as one string, so React is
+  // handed the same value until something has actually moved.
+  const box = useSyncExternalStore(
+    subscribe,
+    () => {
+      if (editor.isDestroyed) return "";
+      const hit = selectedMovable(editor);
+      const frame = editor.view.dom.closest("[data-editor-frame]");
+      if (!hit || !frame) return "";
+      const r = hit.target.getBoundingClientRect();
+      const f = frame.getBoundingClientRect();
+      return [r.left - f.left, r.top - f.top, r.width, r.height].map(Math.round).join(",");
+    },
+    () => "",
+  );
+
+  const drag = useRef<{
+    type: "image" | "youtubeVideo";
+    from: number;
+    // Measured on the first move, not on the press: halving the element on
+    // the press re-renders it, and a video's node view does that after the
+    // press has returned.
+    measured: { target: HTMLElement; x0: number; w: number; columnWidth: number } | null;
+    place: Place | null;
+  } | null>(null);
+  const [preview, setPreview] = useState<{ dx: number; label: string } | null>(null);
+
+  if (!box) return null;
+  const [left, top, width, height] = box.split(",").map(Number) as [number, number, number, number];
+
+  function start(event: React.PointerEvent<HTMLButtonElement>) {
+    event.preventDefault();
+    event.stopPropagation();
+    const hit = selectedMovable(editor);
+    if (!hit) return;
+    // No width set means as wide as it goes (a video stops at 960px): there
+    // is no room to move it, so it is halved first, as picking a side does.
+    if (!editor.getAttributes(hit.type).width) {
+      editor.chain().updateAttributes(hit.type, { width: "50%" }).run();
+    }
+    drag.current = { type: hit.type, from: event.clientX, measured: null, place: null };
+    event.currentTarget.setPointerCapture(event.pointerId);
+    setPreview({ dx: 0, label: "Kéo sang trái / phải" });
+  }
+
+  function move(event: React.PointerEvent<HTMLButtonElement>) {
+    const d = drag.current;
+    if (!d) return;
+    if (!d.measured) {
+      const hit = selectedMovable(editor);
+      if (!hit) return;
+      const r = hit.target.getBoundingClientRect();
+      const column = editor.view.dom.getBoundingClientRect();
+      d.measured = {
+        target: hit.target,
+        x0: r.left - column.left,
+        w: r.width,
+        columnWidth: editor.view.dom.clientWidth,
+      };
+    }
+    const m = d.measured;
+    const x = Math.min(Math.max(m.x0 + event.clientX - d.from, 0), m.columnWidth - m.w);
+    const place = placeAt(x, m.w, m.columnWidth);
+    const dx = leftOf(place, m.w, m.columnWidth) - m.x0;
+    m.target.style.transform = `translateX(${dx}px)`;
+    d.place = place;
+    setPreview({ dx, label: placeLabel(place) });
+  }
+
+  function end() {
+    const d = drag.current;
+    if (!d) return;
+    drag.current = null;
+    if (d.measured) d.measured.target.style.transform = "";
+    setPreview(null);
+    if (d.place) {
+      editor
+        .chain()
+        .focus()
+        .updateAttributes(d.type, { align: d.place.align, offset: d.place.offset })
+        .run();
+    }
+  }
+
+  return (
+    <button
+      type="button"
+      aria-label="Kéo để dời ảnh hoặc video sang trái, phải"
+      title="Giữ và kéo sang trái / phải — nhả chuột để đặt"
+      onPointerDown={start}
+      onPointerMove={move}
+      onPointerUp={end}
+      onPointerCancel={end}
+      onClick={(event) => event.stopPropagation()}
+      className="absolute z-10 inline-flex -translate-x-1/2 cursor-ew-resize touch-none select-none items-center gap-1.5 rounded-full border border-white/15 bg-neutral-900/90 px-2.5 py-1 text-[10px] font-black uppercase tracking-widest text-white shadow-lg transition-colors hover:border-[var(--brand)]/60"
+      style={{ left: left + width / 2 + (preview?.dx ?? 0), top: top + Math.max(height - 34, 4) }}
+    >
+      <MoveHorizontal size={13} aria-hidden />
+      {preview ? preview.label : "Kéo để dời"}
+    </button>
+  );
+}
+
 /** One key on the formatting bar; lit while its mark is active at the caret. */
 function ToolButton({
   label,
@@ -1249,10 +1462,12 @@ export function RichTextEditor({
       ) : null}
 
       <div
-        className="rounded-xl border border-white/10 bg-neutral-950/60 px-4 py-3 transition-colors focus-within:border-[var(--brand)]/60 cursor-text"
+        data-editor-frame
+        className="relative rounded-xl border border-white/10 bg-neutral-950/60 px-4 py-3 transition-colors focus-within:border-[var(--brand)]/60 cursor-text"
         onClick={() => editor?.chain().focus().run()}
       >
         <EditorContent editor={editor} />
+        {editor ? <MoveHandle editor={editor} /> : null}
       </div>
     </div>
   );
