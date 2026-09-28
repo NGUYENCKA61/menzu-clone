@@ -20,7 +20,6 @@ import {
   ReceiptTick,
   VoucherField,
 } from "./BuyConfirmDialog";
-import { PriceBox } from "./PriceBox";
 import { formatVnd, productImage } from "./productData";
 import { StickyBuyBar } from "./StickyBuyBar";
 
@@ -368,13 +367,25 @@ export function AccountBuyPanel({ account, initialQuantity }: AccountBuyPanelPro
         ))}
       </div>
 
-      <PriceBox
-        price={account.price}
-        listPrice={pct > 0 ? account.oldPrice : null}
-        perDay={null}
-        inStock={!soldOut}
-        stockText={stockText}
-      />
+      <div className="space-y-2">
+        {pct > 0 ? (
+          <div className="flex items-center gap-2">
+            <span className="px-2 py-1 rounded-lg bg-red-500/15 border border-red-500/30 text-red-400 text-[11px] font-black">
+              -{pct}%
+            </span>
+            <span className="text-sm text-neutral-500 line-through">
+              {formatVnd(account.oldPrice)}đ
+            </span>
+          </div>
+        ) : null}
+        <p className="text-3xl sm:text-4xl font-black text-white">{formatVnd(account.price)}đ</p>
+        <p className="flex items-center gap-2 text-[13px] font-semibold">
+          <span
+            className={`h-1.5 w-1.5 rounded-full ${soldOut ? "bg-neutral-600" : "bg-emerald-500"}`}
+          />
+          <span className={soldOut ? "text-neutral-500" : "text-emerald-400"}>{stockText}</span>
+        </p>
+      </div>
 
       {/* "Cọc / Trả Góp" and "Tiêu trước trả sau" are deliberately absent.
           Both are credit products whose terms — deposit share, instalment
