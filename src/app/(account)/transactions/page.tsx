@@ -19,6 +19,13 @@ export const dynamic = "force-dynamic";
 /** The request code a top-up line carries ("Nạp tiền vào ví · NT8F3K2Q"). */
 const TOPUP_CODE = /\bNT[A-Z0-9]{6}\b/;
 
+/**
+ * The tier note a purchase line carries (" · ưu đãi hạng Elite"), dropped from
+ * the buyer's own ledger to keep the line short, as the owner asked. The row
+ * keeps it, so the shop still sees why the price was lower.
+ */
+const TIER_NOTE = /\s*·\s*ưu đãi hạng [^·]*/u;
+
 export default async function TransactionsPage() {
   const user = await getCurrentUser();
   if (!user) redirect("/login?next=%2Ftransactions");
@@ -37,6 +44,7 @@ export default async function TransactionsPage() {
           const topUp = row.kind === "TOPUP" ? TOPUP_CODE.exec(row.description)?.[0] : undefined;
           return {
             ...row,
+            description: row.description.replace(TIER_NOTE, "").trim(),
             createdAt: moneyStamp(row.createdAt),
             day: shopDay(row.createdAt),
             // menzu's eye opens the invoice behind a top-up and the orders
