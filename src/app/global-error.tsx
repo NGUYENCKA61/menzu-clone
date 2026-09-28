@@ -28,7 +28,7 @@ export default function GlobalError({
     <html lang="vi">
       <body className="min-h-screen bg-[#050508] text-white">
         <div className="min-h-screen flex flex-col items-center justify-center px-4 text-center">
-          <p className="text-6xl sm:text-7xl font-black tracking-tighter text-[#ff3158] mb-3">500</p>
+          <p className="text-6xl sm:text-7xl font-black tracking-tighter text-[#e13d3f] mb-3">500</p>
           <p className="text-xl font-bold text-white mb-2">ĐÃ CÓ LỖI XẢY RA</p>
           <p className="text-neutral-400 max-w-[520px]">
             Hệ thống gặp sự cố khi tải trang này. Bạn có thể thử lại — nếu vẫn lỗi,
@@ -45,7 +45,7 @@ export default function GlobalError({
               disabled={retrying}
               aria-busy={retrying}
               onClick={() => startRetry(() => reset())}
-              className="inline-flex h-10 items-center gap-2 rounded-xl bg-[#ff3158] px-5 text-[11px] font-black uppercase tracking-widest text-white transition-colors hover:bg-[#e0234a] disabled:opacity-60"
+              className="inline-flex h-10 items-center gap-2 rounded-xl bg-[#e13d3f] px-5 text-[11px] font-black uppercase tracking-widest text-white transition-colors hover:bg-[#c92f33] disabled:opacity-60"
             >
               {retrying ? <Loader2 size={14} className="animate-spin motion-reduce:animate-none" aria-hidden /> : null}
               {retrying ? "Đang thử lại…" : "Thử lại"}

@@ -49,9 +49,9 @@ export interface TopUpHistoryRow {
 /*
  * Every class below is menzu's /wallet, measured off the live page, colours
  * included: its green on the tab, the chosen carrier and denomination and the
- * card button. Its violet (the title's mark) is red here, but not the shop's
- * #ff3158, which read as neon on this ground: #e13d3f is menzu's violet-500
- * with only the hue turned — same lightness, same strength (28/09/2026).
+ * card button. Its violet (the title's mark) is the shop's accent here —
+ * #e13d3f since 28/09/2026, menzu's violet-500 with only the hue turned red,
+ * which is why the two sit on the page with the same weight.
  */
 const STEP = "text-xs text-neutral-400 font-bold uppercase tracking-wider";
 
@@ -528,7 +528,7 @@ export function WalletTopUp({
       <div>
         <div className="mb-8">
           <h1 className="text-xl sm:text-2xl font-black text-white uppercase tracking-wider mb-2 flex items-center gap-3">
-            <QrCode size={24} className="shrink-0 text-[#e13d3f]" aria-hidden />
+            <QrCode size={24} className="shrink-0 text-[var(--menzu-accent)]" aria-hidden />
             Nạp tiền vào tài khoản
           </h1>
           <p className="text-xs sm:text-sm text-neutral-400 leading-relaxed">

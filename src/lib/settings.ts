@@ -356,8 +356,9 @@ export const DEFAULT_SETTINGS: ShopSettings = {
   brandLogo: LOGO,
   // The shop's red — the same value globals.css gives --brand and
   // --menzu-accent, so the storefront has one accent until Nhận diện says
-  // otherwise. Was menzu's purple.
-  brandColor: "#FF3158",
+  // otherwise. Was menzu's purple, then #FF3158 until 28/09/2026, which read
+  // as neon; this is menzu's violet-500 turned red at the same weight.
+  brandColor: "#E13D3F",
   heroBanner: BANNER,
   siteBackground: BACKDROP,
   profileBanner: "",

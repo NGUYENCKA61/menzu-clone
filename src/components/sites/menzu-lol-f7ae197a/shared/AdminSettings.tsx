@@ -40,7 +40,7 @@ const HINT = "mt-1.5 text-[11px] text-neutral-500";
  * the field and opened the swatch was shown a colour the shop has never used
  * and could reasonably take for the original.
  */
-const DEFAULT_BRAND_COLOR = "#FF3158";
+const DEFAULT_BRAND_COLOR = "#E13D3F";
 const ICON_BUTTON =
   "h-7 w-7 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-white/5 text-neutral-300 transition-colors inline-flex items-center justify-center";
 

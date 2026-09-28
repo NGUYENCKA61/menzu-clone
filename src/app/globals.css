@@ -167,9 +167,12 @@
      admin's Cấu hình → Nhận diện screen overrides them per-request from the
      root layout. menzu.lol shipped purple here; this shop chose its red, the
      same value as --menzu-accent below, so the storefront carries ONE accent
-     — a purple button beside a red heading read as two shops on one page. */
-  --brand: #ff3158;
-  --brand-dark: #e01e43;
+     — a purple button beside a red heading read as two shops on one page.
+     #e13d3f since 28/09/2026: menzu's violet-500 with only the hue turned
+     red, same lightness and strength. The old #ff3158 was a light, pinkish,
+     full-strength red that glowed like neon on this ground. */
+  --brand: #e13d3f;
+  --brand-dark: #c92f33;
 
   /* The purple the whole site used to wear, kept for the reward wheel: when
      the storefront and the account pages moved to red the shop asked for the
@@ -178,25 +181,23 @@
   --menzu-violet: #7c3aed;
   --menzu-violet-dark: #6d28d9;
 
-  /* Scrollbar. The same red the admin screens use for their accent — buttons,
-     badges, the active sidebar row, the revenue line — so the bar reads as
-     part of the same set rather than a stray colour.
+  /* Scrollbar, in the storefront's accent, so the bar reads as part of the
+     same set rather than a stray colour. It was Tailwind's rose-500, which
+     glowed like the old neon red; read through the token, Nhận diện now moves
+     the bar with every button.
      One hue through the three states, varied by opacity alone: a thumb that
      changed colour as you grabbed it would read as a different control. Kept
      nearly opaque, because over a near-black gutter a thinned tint loses its
      hue before it loses its brightness and comes out grey. */
-  /* Taken from the palette token rather than copied as a hex, so it stays the
-     same red as bg-rose-500 renders — the two differ, because Tailwind emits
-     these through a wider gamut than a hand-written sRGB triple. */
-  --menzu-scroll-thumb: color-mix(in oklab, var(--color-rose-500) 85%, transparent);
+  --menzu-scroll-thumb: color-mix(in oklab, var(--menzu-accent) 85%, transparent);
 
   /* The sign-in card's accent, the exact red the brief named. Its own token
      rather than a change to --brand: red was asked for on that page, and
      --brand paints every button on the storefront. */
-  --menzu-accent: #ff3158;
-  --menzu-accent-dark: #e01e43;
-  --menzu-scroll-thumb-hover: color-mix(in oklab, var(--color-rose-500) 95%, transparent);
-  --menzu-scroll-thumb-active: var(--color-rose-500);
+  --menzu-accent: #e13d3f;
+  --menzu-accent-dark: #c92f33;
+  --menzu-scroll-thumb-hover: color-mix(in oklab, var(--menzu-accent) 95%, transparent);
+  --menzu-scroll-thumb-active: var(--menzu-accent);
 }
 
 /*
@@ -656,23 +657,22 @@ body.lightbox-open .site-nav {
 }
 
 /* The software search's breathing border: the account field's rhythm and
-   weights, run in the shop's one accent — resting on the accent red
-   (#ff3158) and peaking in the effects' brighter red (#ef4444), the same red
-   the reticle and the scan band inside the field already carry. It used to
-   rest on purple when the site still had a purple; hardcoded like every
-   colour in these keyframes. */
+   weights, run in the shop's one accent — resting on the accent and peaking
+   in the effects' brighter red (#ef4444), the same red the reticle and the
+   scan band inside the field already carry. The resting red reads the token,
+   so it follows Nhận diện instead of staying the old #ff3158. */
 @keyframes search-glow-brand {
   0%,
   100% {
     box-shadow:
-      0 0 0 1px rgb(255 49 88 / 0.3),
-      0 0 10px rgb(255 49 88 / 0.12);
+      0 0 0 1px color-mix(in oklab, var(--menzu-accent) 30%, transparent),
+      0 0 10px color-mix(in oklab, var(--menzu-accent) 12%, transparent);
   }
   50% {
     box-shadow:
       0 0 0 2px rgb(239 68 68 / 0.5),
       0 0 22px rgb(239 68 68 / 0.25),
-      0 0 40px rgb(255 49 88 / 0.12);
+      0 0 40px color-mix(in oklab, var(--menzu-accent) 12%, transparent);
   }
 }
 .search-glow-brand {
