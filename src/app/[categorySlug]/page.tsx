@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { notFound, permanentRedirect } from "next/navigation";
 
 import { Breadcrumb } from "@/components/sites/menzu-lol-f7ae197a/shared/Breadcrumb";
-import { CategoryHero } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/CategoryHero";
+import { CategoryHero, CategoryPageShade } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/CategoryHero";
 import { CategoryFilterPanel } from "@/components/sites/menzu-lol-f7ae197a/shared/CategoryFilterPanel";
 import { ProductCard } from "@/components/sites/menzu-lol-f7ae197a/shared/ProductCard";
 import { CardBoundary } from "@/components/sites/menzu-lol-f7ae197a/shared/CardBoundary";
@@ -193,6 +193,7 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
         ])}
       />
       {shelf ? <JsonLd data={shelf} /> : null}
+          <CategoryPageShade />
           {/* The shelf's name as the page's h1, over its picture, with the
               breadcrumb and the shop's sentence about it — menzu's header. */}
           <CategoryHero
