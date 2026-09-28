@@ -67,6 +67,7 @@ export default async function AdminCategoryDetailPage({
           description: category.description ?? "",
           platform: category.platform ?? "",
           imageUrl: category.imageUrl ?? "",
+          bannerUrl: category.bannerUrl ?? "",
           // As text: the editor treats them as digits-in-a-box, not numbers.
           soldCount: String(category.soldCount),
           stockCount: String(category.stockCount),

@@ -199,7 +199,7 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
           <CategoryHero
             name={data.name}
             description={data.description}
-            imageUrl={data.imageUrl}
+            imageUrl={data.heroImageUrl}
             breadcrumb={
               <Breadcrumb
                 items={[{ label: "Trang chủ", href: "/" }, { label: data.name }]}
