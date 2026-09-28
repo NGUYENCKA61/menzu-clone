@@ -138,6 +138,7 @@ export default async function AdminAccountDetailPage({
             badges: parseBadges(software.badge),
             imageUrl: software.imageUrl ?? "",
             videoUrl: software.videoUrl ?? "",
+            summary: software.summary ?? "",
             packages: software.packages.map((p, index) => ({
               id: p.id,
               label: p.label,

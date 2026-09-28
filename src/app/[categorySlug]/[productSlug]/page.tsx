@@ -71,11 +71,15 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       (min, p) => (min === null || p.price < min ? p.price : min),
       null as number | null,
     );
-    // A rich-editor description is HTML — search results get its prose, not
-    // its tags, and never more than a sentence or two of it.
-    const description = isHtmlBody(software.description)
-      ? docHtmlToPlainText(software.description, 160)
-      : software.description;
+    // The shop's "Mô tả ngắn" first: a sentence written to stand alone is what
+    // a search result wants. Failing that, the long description — which is
+    // HTML from the rich editor, so search results get its prose, not its
+    // tags, and never more than a sentence or two of it.
+    const description =
+      software.summary ||
+      (isHtmlBody(software.description)
+        ? docHtmlToPlainText(software.description, 160)
+        : software.description);
 
     return {
       title: from === null ? software.name : `${software.name} — Từ ${formatVnd(from)}đ`,
@@ -195,7 +199,14 @@ export default async function ProductPage({ params, searchParams }: PageProps) {
           data={softwareJsonLd({
             code: software.code,
             name: software.name,
-            description: software.description || `${software.name} — ${software.categoryName}`,
+            // Plain text either way: an empty editor body is "<p></p>", which
+            // is truthy and would otherwise reach the crawler as markup.
+            description:
+              software.summary ||
+              (isHtmlBody(software.description)
+                ? docHtmlToPlainText(software.description, 300)
+                : software.description) ||
+              `${software.name} — ${software.categoryName}`,
             imageUrl: software.images[0] ?? "",
             categoryName: software.categoryName,
             href,

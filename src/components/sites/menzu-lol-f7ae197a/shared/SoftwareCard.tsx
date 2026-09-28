@@ -27,7 +27,7 @@ export interface SoftwareCardView {
   /** Named in the checkout dialog under the tool, as the product page does. */
   categoryName: string;
   imageUrl: string | null;
-  /** The feature line under the title, e.g. "Aimbot · ESP · No Recoil". */
+  /** The two lines under the title: the tool's "Mô tả ngắn", or "" for none. */
   description: string;
   status: "UNDETECTED" | "STABLE" | "UPDATED" | "RISKY" | "UPDATING" | "DETECTED" | null;
   packages: SoftwareCardPackage[];

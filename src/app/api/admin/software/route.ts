@@ -14,6 +14,7 @@ import {
 } from "@/lib/productRequirements";
 import { serializeBadges } from "@/lib/productBadges";
 import { cleanGuideHtml } from "@/lib/productGuide";
+import { SUMMARY_MAX_LENGTH } from "@/lib/productSummary";
 import { RATE_ABSENT, RATE_BAD, readRefundRate } from "@/lib/refundRate";
 import { PILL_ABSENT, PILL_BAD, readStatusPill } from "@/lib/statusPill";
 import { uniqueProductSlug } from "@/lib/routes";
@@ -218,6 +219,8 @@ export async function PATCH(request: Request) {
     statusPill?: unknown;
     imageUrl?: string;
     videoUrl?: string;
+    /** "Mô tả ngắn", plain text; "" clears it. */
+    summary?: string;
   } | null;
 
   const code = body?.code?.trim();
@@ -235,6 +238,17 @@ export async function PATCH(request: Request) {
   if (statusPill === PILL_BAD) {
     return NextResponse.json(
       { error: "Tùy chọn hiện trạng thái không hợp lệ" },
+      { status: 400 },
+    );
+  }
+
+  // Refused rather than cut: the box in the admin already stops at the limit,
+  // so anything longer came from somewhere else, and trimming it silently
+  // would publish a sentence nobody wrote.
+  const summary = typeof body?.summary === "string" ? body.summary.trim() : undefined;
+  if (summary !== undefined && summary.length > SUMMARY_MAX_LENGTH) {
+    return NextResponse.json(
+      { error: `Mô tả ngắn tối đa ${SUMMARY_MAX_LENGTH} ký tự` },
       { status: 400 },
     );
   }
@@ -346,6 +360,8 @@ export async function PATCH(request: Request) {
       // is not YouTube falls the frame back to the picture rather than being
       // silently dropped here and leaving the admin wondering what they typed.
       ...(body?.videoUrl !== undefined ? { videoUrl: body.videoUrl.trim() || null } : {}),
+      // "" clears it, and the page then prints nothing under the title.
+      ...(summary !== undefined ? { summary: summary || null } : {}),
     },
     }),
     ...(statusChanged && nextStatus

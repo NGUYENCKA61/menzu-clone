@@ -46,6 +46,7 @@ import {
   requirementsToLines,
   type ProductRequirement,
 } from "@/lib/productRequirements";
+import { SUMMARY_MAX_LENGTH } from "@/lib/productSummary";
 
 import { AdminError } from "./AdminStates";
 import { BadgeIcon } from "./BadgeIcon";
@@ -110,6 +111,9 @@ export interface SoftwareDetailView {
   badges: ProductBadge[];
   imageUrl: string;
   videoUrl: string;
+  /** "Mô tả ngắn" — the line under the title on the customer's page; "" is
+   *  none, and none prints nothing there. */
+  summary: string;
   packages: SoftwarePackageView[];
 }
 
@@ -315,6 +319,7 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
     software.badges[1]?.icon ?? DEFAULT_BADGE_ICON,
   );
   const [videoUrl, setVideoUrl] = useState(software.videoUrl);
+  const [summary, setSummary] = useState(software.summary);
   const [status, setStatus] = useState(software.status);
   const [statusPill, setStatusPill] = useState<StatusPillMode>(
     software.statusPill,
@@ -378,6 +383,7 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
         { label: badge2, color: color2, icon: icon2 },
       ],
       videoUrl,
+      summary,
     });
     if (data) setMsg({ tone: "ok", text: "Đã lưu thông tin phần mềm" });
   }
@@ -630,6 +636,34 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
                   onChange={(event) => setName(event.target.value)}
                   className={FIELD}
                 />
+              </div>
+              {/* Right under the name, because that is where it prints: the
+                  line under the title on the customer's page and on the
+                  tool's card. Plain text — a blurb has no use for headings or
+                  colour — and it stops at the limit rather than being cut
+                  after the save. */}
+              <div className="sm:col-span-2">
+                <label htmlFor="sw-summary" className={LABEL}>
+                  Mô tả ngắn
+                </label>
+                <textarea
+                  id="sw-summary"
+                  rows={3}
+                  maxLength={SUMMARY_MAX_LENGTH}
+                  value={summary}
+                  onChange={(event) => setSummary(event.target.value)}
+                  placeholder="VD: Bản private an toàn, cập nhật liên tục, aimbot mượt và ESP rõ ràng, dễ cài cho cả người mới."
+                  className={`${FIELD} resize-y leading-relaxed`}
+                />
+                <p className="mt-1.5 flex justify-between gap-3 text-[11px] text-neutral-500">
+                  <span>
+                    1–2 câu, hiện ngay dưới tên sản phẩm ở trang khách và trên thẻ
+                    sản phẩm. Để trống thì không hiện gì.
+                  </span>
+                  <span className="shrink-0 tabular-nums">
+                    {summary.length}/{SUMMARY_MAX_LENGTH}
+                  </span>
+                </p>
               </div>
               {/* The address, spelled out with the category it hangs from —
                   the shop should see the whole URL it is about to publish,

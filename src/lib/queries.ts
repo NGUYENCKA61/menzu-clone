@@ -384,9 +384,10 @@ function softwareWhere(categoryId: string, filters: CategoryFilters) {
         }
       : {}),
     // "Tìm chức năng": every word typed must appear somewhere the tool
-    // describes itself — its name, its description, its own feature list (the
-    // JSON text of titles and bodies) or the note under it. Word by word, so
-    // "aimbot esp" finds a tool that lists the two on separate lines.
+    // describes itself — its name, its short or long description, its own
+    // feature list (the JSON text of titles and bodies) or the note under it.
+    // Word by word, so "aimbot esp" finds a tool that lists the two on
+    // separate lines.
     ...(feature
       ? {
           AND: feature
@@ -395,6 +396,7 @@ function softwareWhere(categoryId: string, filters: CategoryFilters) {
             .map((word) => ({
               OR: [
                 { name: { contains: word, mode: "insensitive" as const } },
+                { summary: { contains: word, mode: "insensitive" as const } },
                 { description: { contains: word, mode: "insensitive" as const } },
                 { features: { contains: word, mode: "insensitive" as const } },
                 { featuresNote: { contains: word, mode: "insensitive" as const } },
@@ -516,7 +518,9 @@ export async function getCategoryPage(
     name: s.name ?? s.code,
     categoryName: category.name,
     imageUrl: s.imageUrl,
-    description: s.description ?? "",
+    // The card's two lines are the shop's "Mô tả ngắn", the same sentence the
+    // tool's page prints under its title; none leaves them blank.
+    description: s.summary ?? "",
     status: s.softwareStatus,
     // Cheapest first by what they cost today: a sale can take a tier below
     // the one that led.
@@ -747,6 +751,9 @@ export async function getSoftwareDetail(slug: string): Promise<SoftwareDetail | 
     // at least unique, rather than rendering an empty heading.
     name: p.name ?? p.code,
     description: p.description ?? "",
+    // "" prints nothing under the title: no stand-in sentence, by the shop's
+    // wish.
+    summary: p.summary ?? "",
     // Empty when the product has none of its own; the page prints the shop's
     // default list in that case rather than nothing.
     features: parseFeatures(p.features),
@@ -1803,7 +1810,7 @@ export async function listSimilarSoftware(
       slug: true,
       name: true,
       imageUrl: true,
-      description: true,
+      summary: true,
       softwareStatus: true,
       downloadUrl: true,
       category: { select: { slug: true, name: true } },
@@ -1820,7 +1827,8 @@ export async function listSimilarSoftware(
     name: s.name ?? s.code,
     categoryName: s.category.name,
     imageUrl: s.imageUrl,
-    description: s.description ?? "",
+    // The "Mô tả ngắn", as on the category grid's cards.
+    description: s.summary ?? "",
     status: s.softwareStatus,
     packages: s.packages
       .map((p) => tierView(p, tierSale))

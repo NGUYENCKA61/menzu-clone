@@ -554,8 +554,14 @@ model Product {
   /// Shown as the product's title. Accounts are known by their `code` and
   /// leave this null; software carries a real name — "Valorant Tool Premium".
   name       String?
-  /// The paragraph under the title. Software only, in practice.
+  /// The long description, as editor HTML: the "Mô tả sản phẩm" section.
+  /// Software only, in practice.
   description String?
+  /// "Mô tả ngắn": the sentence or two under a tool's title and on its card,
+  /// as plain text. Its own column again: for a while `description` did both
+  /// jobs, and the opening of a long write-up made a poor blurb. Null prints
+  /// nothing there — the shop wants no stand-in sentence.
+  summary     String?
   /// "Tính năng nổi bật", as a JSON array of {title, body}.
   ///
   /// One column rather than a child table because the list is written and read

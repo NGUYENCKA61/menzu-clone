@@ -39,7 +39,10 @@ export interface SoftwareDetail {
   /** The product half of its address: /{category-slug}/{slug}. */
   slug: string;
   name: string;
+  /** The long write-up, as stored: the "Mô tả sản phẩm" section's. */
   description: string;
+  /** "Mô tả ngắn", the line under the title; "" prints nothing there. */
+  summary: string;
   /** The product's own "Tính năng nổi bật"; empty means use the default. */
   features: ProductFeature[];
   /** The product's own "Yêu cầu hệ thống"; empty means use the default. */
@@ -252,9 +255,11 @@ export function SoftwareBuyPanel({
         <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-white">
           {software.name}
         </h1>
-        {software.description ? (
+        {/* The shop's own "Mô tả ngắn", or nothing: no opening lines lifted
+            from the long write-up, and no stock sentence in its place. */}
+        {software.summary ? (
           <p className="text-sm leading-relaxed text-neutral-400 max-w-[560px]">
-            {software.description}
+            {software.summary}
           </p>
         ) : null}
       </div>

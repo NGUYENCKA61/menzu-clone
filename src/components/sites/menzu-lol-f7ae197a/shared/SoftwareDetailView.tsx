@@ -43,9 +43,10 @@ export function SoftwareDetailView({
   /** Other tools for the row at the foot of the page; empty draws no row. */
   similar: SoftwareCardView[];
 }) {
-  // One stored field, two voices: the rich HTML (if the admin wrote one) goes
-  // to the description section in full; every place that prints a sentence —
-  // the buy panel's blurb — gets the prose stripped back out of it.
+  // The long write-up belongs to the description section alone: the rich HTML
+  // (if the admin wrote one) in full, or the plain sentence behind the name.
+  // The line under the title is the shop's own "Mô tả ngắn" (`summary`), and
+  // is no longer lifted from the opening of this.
   const richDescription = isHtmlBody(software.description)
     ? software.description
     : null;
@@ -89,7 +90,7 @@ export function SoftwareDetailView({
                 videoUrl={software.videoUrl}
               />
               <SoftwareBuyPanel
-                software={{ ...software, description: plainDescription }}
+                software={software}
                 initialPackageId={initialPackageId}
                 initialQuantity={initialQuantity}
                 statusSubscribed={statusSubscribed}
