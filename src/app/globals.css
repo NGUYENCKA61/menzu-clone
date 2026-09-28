@@ -995,19 +995,21 @@ body.lightbox-open .site-nav {
   object-fit: cover;
 }
 /* On a phone every video takes the whole width: at 50% of a phone the player
-   is too small to watch, whatever size it was given on a desktop. A picture
-   keeps its width but loses its push ("Lề"), which on a narrow screen only
-   squeezes it — it sits flush against the side it leans to instead. */
+   is too small to watch, whatever size it was given on a desktop. So does a
+   picture given a width in the editor — half a phone is too small to read a
+   screenshot — with its push ("Lề") and any set height dropped so it keeps
+   its shape. A picture left at its own size (an icon, a small badge) keeps
+   that size: stretched, it would only blur. */
 @media (max-width: 639px) {
   .doc-prose .doc-video {
     width: 100% !important;
     margin-left: 0 !important;
     margin-right: 0 !important;
   }
-  .doc-prose img[data-offset="left"] {
+  .doc-prose img[style*="width"] {
+    width: 100% !important;
+    height: auto !important;
     margin-left: 0 !important;
-  }
-  .doc-prose img[data-offset="right"] {
     margin-right: 0 !important;
   }
 }
