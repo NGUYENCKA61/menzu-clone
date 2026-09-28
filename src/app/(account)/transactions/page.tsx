@@ -2,10 +2,10 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
 import { AccountPageFrame } from "@/components/sites/menzu-lol-f7ae197a/shared/AccountPageFrame";
-import { AccountEmpty } from "@/components/sites/menzu-lol-f7ae197a/shared/AccountShell";
 import { TransactionsTable } from "@/components/sites/menzu-lol-f7ae197a/shared/TransactionsTable";
 import { getTransactions } from "@/lib/queries";
 import { getCurrentUser } from "@/lib/session";
+import { moneyStamp, shopDay } from "@/lib/stamp";
 
 export const metadata: Metadata = {
   title: "Lịch sử giao dịch",
@@ -16,16 +16,8 @@ export const metadata: Metadata = {
 };
 export const dynamic = "force-dynamic";
 
-function formatWhen(date: Date): string {
-  return date.toLocaleString("vi-VN", {
-    timeZone: "Asia/Ho_Chi_Minh",
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
+/** The request code a top-up line carries ("Nạp tiền vào ví · NT8F3K2Q"). */
+const TOPUP_CODE = /\bNT[A-Z0-9]{6}\b/;
 
 export default async function TransactionsPage() {
   const user = await getCurrentUser();
@@ -34,31 +26,25 @@ export default async function TransactionsPage() {
   const rows = await getTransactions(user.id);
 
   return (
-    <AccountPageFrame
-      title="Lịch sử giao dịch"
-      subtitle="Tra cứu dòng tiền chi tiêu và nạp"
-      crumb="Lịch sử giao dịch"
-    >
-      {/* An account with no rows at all is not a search that missed. Left to
-          the table, a new customer met a search box, a heading reading "0
-          giao dịch gần nhất" and the sentence "Không tìm thấy giao dịch nào
-          phù hợp" — as though they had typed something wrong. /orders has
-          drawn the two cases apart from the start. */}
-      {rows.length === 0 ? (
-        <AccountEmpty
-          title="Chưa có giao dịch nào"
-          body="Mọi lần nạp tiền và mua hàng sẽ hiện ở đây, kèm số dư sau mỗi lần."
-          ctaLabel="Nạp tiền"
-          ctaHref="/wallet"
-        />
-      ) : (
+    // No title on the frame: menzu draws "Lịch sử giao dịch" inside the
+    // ledger's own panel, as it does on /wallet.
+    <AccountPageFrame crumb="Lịch sử giao dịch">
       <TransactionsTable
-        // Formatted here, on the server, where the locale is fixed. Passing
-        // Date objects into a client component would format twice — once per
-        // timezone — and React reports the mismatch as a hydration error.
-        rows={rows.map((row) => ({ ...row, createdAt: formatWhen(row.createdAt) }))}
+        // Formatted here, on the server, where the locale and timezone are
+        // fixed. Formatting in the client component would run once per
+        // timezone and React reports the mismatch as a hydration error.
+        rows={rows.map((row) => {
+          const topUp = row.kind === "TOPUP" ? TOPUP_CODE.exec(row.description)?.[0] : undefined;
+          return {
+            ...row,
+            createdAt: moneyStamp(row.createdAt),
+            day: shopDay(row.createdAt),
+            // menzu's eye opens the invoice behind a top-up and the orders
+            // behind a purchase; the rest have nothing further to show.
+            href: topUp ? `/wallet/${topUp}` : row.kind === "PURCHASE" ? "/orders" : null,
+          };
+        })}
       />
-      )}
     </AccountPageFrame>
   );
 }

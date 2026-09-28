@@ -1,82 +1,73 @@
 "use client";
 
 import {
-  CreditCard,
-  Gift,
-  HandCoins,
-  RotateCcw,
+  Calendar,
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  Eye,
+  Funnel,
+  History,
+  ListFilter,
   Search,
-  ShoppingCart,
-  SlidersHorizontal,
-  Ticket,
-  X,
-  type LucideIcon,
+  Trash2,
 } from "lucide-react";
-import { useMemo, useRef, useState } from "react";
+import Link from "next/link";
 
-import { Pager, scrollListTop } from "./Pager";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+
+import { GAP, pageStrip } from "@/lib/paging";
+
 import { formatVnd } from "./productData";
 
 export interface LedgerView {
   code: string;
   /** TOPUP · PURCHASE · REFUND · REWARD · ADJUSTMENT */
   kind: string;
+  /** SUCCESS · PENDING · FAILED */
   status: string;
   delta: number;
   balanceAfter: number;
   description: string;
   method: string | null;
+  /** "22:55 - 28/09/2026", written on the server in the shop's clock. */
   createdAt: string;
+  /** "2026-09-28", the shop-clock day the date filters compare. */
+  day: string;
+  /** Where the eye leads: the top-up's invoice, or the purchase history. */
+  href: string | null;
 }
 
-/* No status column. A row is written here only once money has actually
-   moved — a top-up still waiting on the bank lives on the Nạp tiền page,
-   not in this ledger — so every row would read "Thành công", and a column
-   that says the same word down its whole length says nothing. */
-/* The row's kind as a small glyph where a running number used to be: the
-   number said nothing, the glyph says what happened before a word is read —
-   the way a bank app marks a statement line. Bare, not boxed. */
-const KIND: Record<string, { icon: LucideIcon; label: string }> = {
-  PURCHASE: { icon: ShoppingCart, label: "Mua hàng" },
-  TOPUP: { icon: CreditCard, label: "Nạp tiền" },
-  REFUND: { icon: RotateCcw, label: "Hoàn tiền" },
-  REWARD: { icon: Gift, label: "Thưởng" },
-  ADJUSTMENT: { icon: SlidersHorizontal, label: "Điều chỉnh" },
+/*
+ * Every class below is menzu's /transactions, measured off the live page.
+ * Its violet (the title's mark, the current page) is the shop's accent; its
+ * green and red are what money did.
+ */
+
+/** menzu shows ten to a page. */
+const PAGE_SIZE = 10;
+
+const STATUS: Record<string, { label: string; tone: string }> = {
+  SUCCESS: { label: "Thành công", tone: "text-emerald-400 border-emerald-500/20 bg-emerald-500/10" },
+  PENDING: { label: "Chờ xử lý", tone: "text-amber-400 border-amber-500/20 bg-amber-500/10" },
+  FAILED: { label: "Thất bại", tone: "text-red-400 border-red-500/20 bg-red-500/10" },
 };
 
-/**
- * A top-up is drawn by how the money arrived, not just by its kind: a bank
- * transfer is the bank, a scratch card is the card. Both are "Nạp tiền" in
- * the ledger, and reading which one it was should not mean reading the
- * method line underneath.
- *
- * Commission moved out of the referral balance is filed as REWARD too, and
- * a gift box is the wrong picture for money the member earned by bringing
- * somebody in — it wears the same hands the overview page gives it.
- * Everything else is its kind and nothing more.
- */
-function glyphFor(row: LedgerView): { icon: LucideIcon; label: string } | undefined {
-  const kind = KIND[row.kind];
-  if (!kind) return undefined;
-  if (row.kind === "TOPUP" && normalise(row.method ?? "").includes("the cao")) {
-    return { icon: Ticket, label: "Nạp thẻ cào" };
-  }
-  if (row.kind === "REWARD" && normalise(row.method ?? "").includes("hoa hong")) {
-    return { icon: HandCoins, label: "Rút hoa hồng" };
-  }
-  return kind;
-}
+const KIND_LABEL: Record<string, string> = {
+  TOPUP: "Nạp tiền",
+  PURCHASE: "Mua hàng",
+  REFUND: "Hoàn tiền",
+  REWARD: "Thưởng",
+  ADJUSTMENT: "Điều chỉnh",
+};
 
-const COLUMNS = [
-  "Loại",
-  "Thời gian",
-  "Mã GD",
-  "Chi tiết & Phương thức",
-  "Biến động & Số dư",
-];
-
-/** Same paging rhythm as the wallet's ledger. */
-const PAGE_SIZE = 10;
+const FIELD =
+  "w-full bg-white/[0.03] border border-white/10 hover:border-white/20 text-white text-sm rounded-xl pl-3.5 pr-10 py-3 outline-none focus:border-emerald-500/50 transition-colors appearance-none cursor-pointer";
+const FIELD_LABEL = "block text-[11px] font-bold text-neutral-500 mb-2 uppercase tracking-wider";
+const PAGE_ARROW =
+  "w-10 h-10 rounded-xl bg-white/5 border border-white/5 text-neutral-500 hover:text-white disabled:opacity-30 disabled:hover:bg-white/5 disabled:hover:text-neutral-500 flex items-center justify-center transition-all cursor-pointer disabled:cursor-not-allowed active:scale-95 hover:bg-white/10";
+const PAGE_NUMBER =
+  "w-10 h-10 rounded-xl text-sm font-black transition-all flex items-center justify-center cursor-pointer active:scale-95";
 
 /** Diacritic-insensitive, so "giao dich" finds "giao dịch". */
 function normalise(value: string): string {
@@ -87,243 +78,477 @@ function normalise(value: string): string {
     .replace(/đ/g, "d");
 }
 
+/** The method as its chip: the part before any " · " note ("duyệt bởi …"). */
+function methodChip(row: LedgerView): string {
+  const method = (row.method ?? "").split(" · ")[0]?.trim();
+  return method || KIND_LABEL[row.kind] || row.kind;
+}
+
+function money(value: number): string {
+  return `${formatVnd(value)} ₫`;
+}
+
+/** The figure, and for money that moved the balance on either side of it. */
+function Amount({ row, phone = false }: { row: LedgerView; phone?: boolean }) {
+  const sign = row.delta >= 0 ? "+" : "-";
+  const tone =
+    row.status === "FAILED"
+      ? "text-neutral-500 line-through"
+      : row.status === "PENDING"
+        ? "text-neutral-300"
+        : row.delta >= 0
+          ? "text-emerald-400"
+          : "text-red-400";
+  return (
+    <>
+      <span className={`font-black text-sm block mb-1 ${tone}`}>
+        {sign}
+        {money(Math.abs(row.delta))}
+      </span>
+      {row.status === "SUCCESS" ? (
+        <div
+          className={`text-[10px] text-neutral-500 font-medium ${phone ? "" : "mt-1 "}flex flex-col items-end gap-0.5`}
+        >
+          <span>Trước: {money(row.balanceAfter - row.delta)}</span>
+          <span>Sau: {money(row.balanceAfter)}</span>
+        </div>
+      ) : null}
+    </>
+  );
+}
+
+function StatusPill({ status, phone = false }: { status: string; phone?: boolean }) {
+  const look = STATUS[status] ?? STATUS.SUCCESS!;
+  return (
+    <span
+      className={`whitespace-nowrap ${look.tone} text-[9px] font-bold uppercase tracking-widest border ${phone ? "px-2 py-0.5" : "px-2.5 py-1"} rounded`}
+    >
+      {look.label}
+    </span>
+  );
+}
+
+function Select({
+  value,
+  onChange,
+  children,
+  label,
+}: {
+  value: string;
+  onChange: (next: string) => void;
+  children: ReactNode;
+  label: string;
+}) {
+  return (
+    <div className="relative">
+      <select
+        aria-label={label}
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        className={FIELD}
+      >
+        {children}
+      </select>
+      <ChevronDown
+        size={16}
+        className="absolute right-3.5 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none"
+        aria-hidden
+      />
+    </div>
+  );
+}
+
+function DateField({
+  value,
+  onChange,
+  label,
+}: {
+  value: string;
+  onChange: (next: string) => void;
+  label: string;
+}) {
+  return (
+    <div className="relative">
+      <input
+        type="date"
+        aria-label={label}
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        className={`${FIELD} [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:inset-0`}
+      />
+      <Calendar
+        size={16}
+        className="absolute right-3.5 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none"
+        aria-hidden
+      />
+    </div>
+  );
+}
+
 /**
- * The ledger table with its search box.
+ * The account's ledger, as menzu's "Lịch sử giao dịch" draws it: one #111
+ * panel with its title inside, a search box and a filter menu, a four-column
+ * table (cards on a phone), and a pager.
  *
- * A client component because the filter runs in the browser — the query is
+ * A client component because the filters run in the browser — the query is
  * capped at 50 rows server-side, so a round trip per keystroke would buy
  * nothing. Dates arrive pre-formatted: formatting them here would render on
- * the server in one timezone and rehydrate in another, and React would flag
- * the mismatch.
+ * the server in one timezone and rehydrate in another.
  */
 export function TransactionsTable({ rows }: { rows: LedgerView[] }) {
   const [query, setQuery] = useState("");
+  const [direction, setDirection] = useState("ALL");
+  const [status, setStatus] = useState("ALL");
+  const [from, setFrom] = useState("");
+  const [to, setTo] = useState("");
+  const [open, setOpen] = useState(false);
   const [page, setPage] = useState(0);
-  const listRef = useRef<HTMLDivElement>(null);
+  const menu = useRef<HTMLDivElement>(null);
+  const top = useRef<HTMLDivElement>(null);
+
+  // A press anywhere outside the menu puts it away, as menzu's does.
+  useEffect(() => {
+    if (!open) return;
+    const onDown = (event: MouseEvent) => {
+      if (!menu.current?.contains(event.target as Node)) setOpen(false);
+    };
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("mousedown", onDown);
+    window.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDown);
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [open]);
 
   const filtered = useMemo(() => {
     const needle = normalise(query.trim());
-    if (!needle) return rows;
-    return rows.filter((row) =>
-      [row.code, row.description, row.method ?? ""].some((value) =>
-        normalise(value).includes(needle),
-      ),
+    return rows.filter(
+      (row) =>
+        (!needle ||
+          [row.code, row.description, row.method ?? ""].some((value) =>
+            normalise(value).includes(needle),
+          )) &&
+        (direction === "ALL" || (direction === "IN" ? row.delta >= 0 : row.delta < 0)) &&
+        (status === "ALL" || row.status === status) &&
+        (!from || row.day >= from) &&
+        (!to || row.day <= to),
     );
-  }, [rows, query]);
+  }, [rows, query, direction, status, from, to]);
 
+  const filtering = direction !== "ALL" || status !== "ALL" || Boolean(from) || Boolean(to);
   const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
-  // Clamped rather than reset by effect: a narrowing search shrinks pageCount
+  // Clamped rather than reset by effect: a narrowing filter shrinks pageCount
   // and the view just follows.
   const current = Math.min(page, pageCount - 1);
   const visible = filtered.slice(current * PAGE_SIZE, current * PAGE_SIZE + PAGE_SIZE);
 
-  return (
-    <div ref={listRef} className="scroll-mt-28 space-y-4">
-      <div className="relative">
-        <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-500" />
-        <input
-          type="search"
-          value={query}
-          onChange={(event) => {
-            setQuery(event.target.value);
-            // A new search starts reading from its first page.
-            setPage(0);
-          }}
-          placeholder="Tìm kiếm mã GD, nội dung..."
-          aria-label="Tìm kiếm giao dịch"
-          className="w-full appearance-none rounded-2xl border-[1.5px] border-red-500/20 bg-[#111] pl-11 pr-10 py-3 text-sm text-white outline-none focus:border-red-500/60 transition-colors placeholder-neutral-500"
-        />
-        {query ? (
-          <button
-            type="button"
-            onClick={() => setQuery("")}
-            aria-label="Xoá tìm kiếm"
-            className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-white transition-colors"
-          >
-            <X size={15} />
-          </button>
-        ) : null}
-      </div>
+  // Every filter change starts reading from the first page.
+  const refilter = <T,>(set: (value: T) => void) => (value: T) => {
+    set(value);
+    setPage(0);
+  };
 
-      {/* The overview page's card language: shell, white header, muted note
-          on the right — the table itself sits inside as an inner tile. */}
-      <section className="flex flex-col gap-4 rounded-2xl border border-white/10 bg-neutral-900/50 p-5">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <h3 className="text-sm font-black uppercase tracking-wider text-white">
-            Biến động số dư
-          </h3>
-          <span className="text-xs text-neutral-500">
-            {filtered.length} giao dịch gần nhất
-          </span>
+  const goTo = (next: number) => {
+    setPage(next);
+    top.current?.scrollIntoView({
+      block: "start",
+      behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+    });
+  };
+
+  const eye = (row: LedgerView, phone: boolean) =>
+    row.href ? (
+      <Link
+        href={row.href}
+        aria-label={`Xem ${row.kind === "TOPUP" ? "hóa đơn" : "đơn hàng"} của giao dịch ${row.code}`}
+        className={
+          phone
+            ? "text-neutral-400 hover:text-white transition-colors"
+            : "p-1.5 text-neutral-500 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+        }
+      >
+        <Eye size={16} aria-hidden />
+      </Link>
+    ) : null;
+
+  return (
+    <div
+      ref={top}
+      className="scroll-mt-28 w-full bg-[#111111] border border-white/5 rounded-2xl sm:rounded-[24px] p-4 sm:p-8 lg:p-10 relative min-h-[750px]"
+    >
+      <div>
+        <div className="mb-8 relative z-10">
+          <h1 className="text-xl sm:text-2xl font-black text-white uppercase tracking-wider mb-2 flex items-center gap-3">
+            <History size={24} className="shrink-0 text-[var(--menzu-accent)]" aria-hidden />
+            Lịch sử giao dịch
+          </h1>
+          <p className="text-xs sm:text-sm text-neutral-400 leading-relaxed">
+            Tra cứu dòng tiền chi tiêu và nạp vào tài khoản.
+          </p>
         </div>
 
-        {/* Under xl the table gives way to cards. A 760px table in a 430px
-            screen put "Biến động & Số dư" — the one thing anybody opens this
-            page to see — entirely off the right edge, with nothing to say
-            that a swipe would find it. Each transaction is one card here,
-            its figure on a line of its own, the way a bank app writes a
-            statement. The same happened, 131px of it, at 1024: the account
-            column is 672px there and the table's floor is 760, so the cards
-            stay until the column can hold the table whole. */}
-        <div className="flex flex-col gap-2 xl:hidden">
-          {filtered.length === 0 ? (
-            <p className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-5 py-12 text-center text-sm text-neutral-400">
-              Không tìm thấy giao dịch nào phù hợp
+        {rows.length === 0 ? (
+          // An account with no rows at all is not a search that missed: it
+          // gets its own words and the way in, not a filter that found nothing.
+          <div className="p-8 text-center bg-white/[0.02] border border-white/5 rounded-2xl relative z-10">
+            <p className="text-neutral-400 text-sm">Chưa có giao dịch nào.</p>
+            <p className="mt-1 text-neutral-500 text-xs">
+              Mọi lần nạp tiền và mua hàng sẽ hiện ở đây, kèm số dư trước và sau mỗi lần.
             </p>
-          ) : (
-            visible.map((row) => {
-              const glyph = glyphFor(row);
-              const Icon = glyph?.icon;
-              return (
-                <article
-                  key={row.code}
-                  className="flex items-start gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3"
+            <Link
+              href="/wallet"
+              className="mt-5 inline-flex items-center gap-2 rounded-xl bg-white px-5 py-2.5 text-sm font-bold text-black transition-colors hover:bg-neutral-200"
+            >
+              Nạp tiền
+            </Link>
+          </div>
+        ) : (
+          <>
+            <div className="mb-6 flex items-center gap-3 relative z-30">
+              <div className="relative flex-1">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Search size={16} className="text-neutral-500" aria-hidden />
+                </div>
+                <input
+                  type="search"
+                  value={query}
+                  onChange={(event) => refilter(setQuery)(event.target.value)}
+                  placeholder="Tìm kiếm mã GD, nội dung..."
+                  aria-label="Tìm kiếm giao dịch"
+                  className="w-full bg-[#111111] border border-white/10 rounded-xl py-2.5 pl-10 pr-4 text-sm text-white placeholder-neutral-500 outline-none focus:border-emerald-500/50 transition-colors"
+                />
+              </div>
+
+              <div ref={menu} className="relative shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setOpen((now) => !now)}
+                  aria-expanded={open}
+                  aria-label="Bộ lọc"
+                  className={`flex items-center justify-center w-11 h-11 rounded-xl border transition-colors ${
+                    open || filtering
+                      ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400"
+                      : "bg-[#111111] border-white/10 text-neutral-400 hover:text-white hover:bg-white/5"
+                  }`}
                 >
-                  <span className="mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-white/[0.08] bg-white/[0.04] text-neutral-300">
-                    {Icon ? <Icon size={15} strokeWidth={2} aria-hidden /> : null}
-                    <span className="sr-only">{glyph?.label}</span>
-                  </span>
-                  <div className="flex min-w-0 flex-1 flex-col gap-1">
-                    <div className="flex items-start justify-between gap-3">
-                      <span className="line-clamp-2 text-[12.5px] font-semibold leading-snug text-neutral-100">
-                        {row.description}
-                      </span>
-                      <span
-                        className={
-                          row.delta >= 0
-                            ? "shrink-0 text-sm font-black tabular-nums text-emerald-400"
-                            : "shrink-0 text-sm font-black tabular-nums text-red-400"
-                        }
-                      >
-                        {row.delta >= 0 ? "+" : "−"}
-                        {formatVnd(Math.abs(row.delta))}đ
-                      </span>
+                  <Funnel size={18} aria-hidden />
+                </button>
+
+                {open ? (
+                  <div className="absolute top-full right-0 mt-2 w-[min(380px,calc(100vw-2rem))] bg-[#111111] border border-white/10 rounded-[24px] z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-300">
+                    <div className="p-6 pb-4 border-b border-white/5">
+                      <h4 className="text-base font-black text-white uppercase tracking-widest flex items-center gap-2">
+                        <ListFilter size={18} className="text-emerald-400" aria-hidden />
+                        Bộ Lọc
+                      </h4>
                     </div>
-                    {/* Time, then the code; the balance keeps the right edge
-                        even when a long clock pushes it onto its own line. */}
-                    <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5 text-[11px] text-neutral-500">
-                      <span className="tabular-nums">
-                        {row.createdAt}
-                        <span className="text-neutral-600">{" · "}</span>
-                        <span className="font-mono text-neutral-400">{row.code}</span>
-                      </span>
-                      <span className="ml-auto shrink-0 tabular-nums">
-                        Số dư {formatVnd(row.balanceAfter)}đ
-                      </span>
+                    <div className="p-6 flex flex-col gap-5">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <span className={FIELD_LABEL}>Phân loại</span>
+                          <Select label="Phân loại" value={direction} onChange={refilter(setDirection)}>
+                            <option value="ALL" className="bg-[#111111] text-white">Tất cả loại</option>
+                            <option value="IN" className="bg-[#111111] text-white">Tiền nạp</option>
+                            <option value="OUT" className="bg-[#111111] text-white">Chi tiêu</option>
+                          </Select>
+                        </div>
+                        <div>
+                          <span className={FIELD_LABEL}>Trạng thái</span>
+                          <Select label="Trạng thái" value={status} onChange={refilter(setStatus)}>
+                            <option value="ALL" className="bg-[#111111] text-white">Tất cả</option>
+                            <option value="SUCCESS" className="bg-[#111111] text-white">Thành công</option>
+                            <option value="PENDING" className="bg-[#111111] text-white">Chờ xử lý</option>
+                            <option value="FAILED" className="bg-[#111111] text-white">Thất bại</option>
+                          </Select>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <span className={FIELD_LABEL}>Từ ngày</span>
+                          <DateField label="Từ ngày" value={from} onChange={refilter(setFrom)} />
+                        </div>
+                        <div>
+                          <span className={FIELD_LABEL}>Đến ngày</span>
+                          <DateField label="Đến ngày" value={to} onChange={refilter(setTo)} />
+                        </div>
+                      </div>
+                    </div>
+                    <div className="p-6 bg-white/[0.02] border-t border-white/5 flex items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={() => setOpen(false)}
+                        className="flex-1 bg-white/[0.05] hover:bg-white/[0.08] border border-white/10 text-neutral-300 font-bold text-sm py-3 rounded-xl transition-all flex items-center justify-center gap-2 active:scale-[0.98]"
+                      >
+                        Đóng
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setDirection("ALL");
+                          setStatus("ALL");
+                          setFrom("");
+                          setTo("");
+                          setPage(0);
+                        }}
+                        className="flex-1 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 font-black text-sm py-3 rounded-xl transition-all flex items-center justify-center gap-2 active:scale-[0.98]"
+                      >
+                        <Trash2 size={16} aria-hidden />
+                        Xóa lọc
+                      </button>
                     </div>
                   </div>
-                </article>
-              );
-            })
-          )}
-        </div>
+                ) : null}
+              </div>
+            </div>
 
-        <div className="hidden w-full overflow-x-auto rounded-xl border border-white/[0.06] bg-white/[0.02] xl:block">
-        <table className="w-full min-w-[760px] table-fixed text-left">
-          {/* Three fixed shares — who/when, what, how much — so a long
-              description wraps inside its own column instead of squeezing
-              the figures, and the row reads as three blocks in step. */}
-          <colgroup>
-            <col className="w-[6%]" />
-            <col className="w-[13%]" />
-            <col className="w-[15%]" />
-            <col className="w-[44%]" />
-            <col className="w-[22%]" />
-          </colgroup>
-          <thead>
-            <tr className="border-b border-white/10">
-              {COLUMNS.map((column) => (
-                <th
-                  key={column}
-                  scope="col"
-                  className="px-5 py-3.5 text-[10px] font-black uppercase tracking-widest text-neutral-500 whitespace-nowrap"
-                >
-                  {column}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {filtered.length === 0 ? (
-              <tr>
-                <td colSpan={COLUMNS.length} className="px-5 py-14 text-center text-neutral-400">
-                  Không tìm thấy giao dịch nào phù hợp
-                </td>
-              </tr>
-            ) : (
-              visible.map((row) => (
-                <tr key={row.code} className="border-b border-white/5 last:border-0">
-                  <td className="px-5 py-4">
-                    {(() => {
-                      const glyph = glyphFor(row);
-                      if (!glyph) return null;
-                      const Icon = glyph.icon;
-                      return (
-                        <span title={glyph.label} className="inline-flex text-neutral-400">
-                          <Icon size={16} strokeWidth={2} aria-hidden />
-                          <span className="sr-only">{glyph.label}</span>
+            <div className="hidden md:block border border-white/5 bg-[#111111] rounded-[16px] overflow-hidden relative z-10">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs min-w-[700px]">
+                  <thead className="bg-white/[0.02] border-b border-white/5 uppercase tracking-widest text-neutral-500">
+                    <tr>
+                      <th scope="col" className="px-5 py-4 font-bold">Mã GD &amp; Thời gian</th>
+                      <th scope="col" className="px-5 py-4 font-bold">Chi tiết &amp; Phương thức</th>
+                      <th scope="col" className="px-5 py-4 font-bold text-right">Biến động &amp; Số dư</th>
+                      <th scope="col" className="pl-5 pr-[60px] py-4 font-bold text-center">Trạng thái</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {visible.length === 0 ? (
+                      <tr>
+                        <td colSpan={4} className="px-5 py-14 text-center text-sm text-neutral-500">
+                          Không tìm thấy giao dịch nào phù hợp.
+                        </td>
+                      </tr>
+                    ) : (
+                      visible.map((row) => (
+                        <tr
+                          key={row.code}
+                          className="border-b border-white/5 hover:bg-white/[0.02] transition-colors group"
+                        >
+                          <td className="px-5 py-4 align-middle">
+                            <span className="font-bold text-neutral-300 block mb-1">#{row.code}</span>
+                            <span className="text-[10px] text-neutral-500 font-mono">{row.createdAt}</span>
+                          </td>
+                          <td className="px-5 py-4 align-middle">
+                            <span className="font-bold text-neutral-200 block mb-1">{row.description}</span>
+                            <span className="text-[9px] text-neutral-500 uppercase tracking-widest bg-white/5 px-2 py-0.5 rounded inline-block mb-2">
+                              {methodChip(row)}
+                            </span>
+                          </td>
+                          <td className="px-5 py-4 text-right align-middle">
+                            <Amount row={row} />
+                          </td>
+                          <td className="px-5 py-4 align-middle">
+                            <div className="flex items-center justify-center gap-2">
+                              <div className="w-[100px] flex justify-center">
+                                <StatusPill status={row.status} />
+                              </div>
+                              <div className="w-8 flex justify-center">{eye(row, false)}</div>
+                            </div>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div className="md:hidden flex flex-col gap-3 relative z-10">
+              {visible.length === 0 ? (
+                <div className="p-8 text-center bg-white/[0.02] border border-white/5 rounded-2xl">
+                  <p className="text-neutral-500 text-sm">Không tìm thấy giao dịch nào phù hợp.</p>
+                </div>
+              ) : (
+                visible.map((row) => (
+                  <div
+                    key={row.code}
+                    className="border border-white/5 bg-[#111111] rounded-[16px] p-4 flex flex-col gap-3 relative overflow-hidden transition-all hover:border-emerald-500/30"
+                  >
+                    <div className="flex justify-between items-start gap-4">
+                      <div className="min-w-0 flex-1">
+                        <span className="font-bold text-neutral-200 block text-sm mb-1 break-words">
+                          {row.description}
                         </span>
-                      );
-                    })()}
-                  </td>
-                  {/* "09:07 07/09/2026" — the clock on top, the date under it. */}
-                  <td className="px-5 py-4 whitespace-nowrap">
-                    <div className="flex flex-col">
-                      <span className="text-xs font-semibold tabular-nums text-neutral-200">
-                        {row.createdAt.split(" ")[0]}
-                      </span>
-                      <span className="text-[11px] tabular-nums text-neutral-500">
-                        {row.createdAt.split(" ").slice(1).join(" ")}
-                      </span>
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono text-neutral-500 text-xs font-bold">#{row.code}</span>
+                          <span className="text-[9px] text-neutral-500 uppercase tracking-widest bg-white/5 px-1.5 py-0.5 rounded">
+                            {methodChip(row)}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="text-right shrink-0">
+                        <Amount row={row} phone />
+                      </div>
                     </div>
-                  </td>
-                  <td className="px-5 py-4 whitespace-nowrap">
-                    <span className="font-mono text-xs font-bold text-white">{row.code}</span>
-                  </td>
-                  <td className="px-5 py-4">
-                    <div className="flex flex-col">
-                      <span className="text-xs font-semibold text-neutral-200">
-                        {row.description}
-                      </span>
-                      <span className="text-[11px] text-neutral-500">{row.method ?? "—"}</span>
+                    <div className="flex items-center justify-between mt-2 pt-3 border-t border-white/5">
+                      <span className="text-[10px] text-neutral-500 font-mono">{row.createdAt}</span>
+                      <div className="flex items-center gap-3">
+                        <StatusPill status={row.status} phone />
+                        {eye(row, true)}
+                      </div>
                     </div>
-                  </td>
-                  <td className="px-5 py-4">
-                    <div className="flex flex-col">
-                      <span
-                        className={
-                          row.delta >= 0
-                            ? "text-sm font-black tabular-nums text-emerald-400"
-                            : "text-sm font-black tabular-nums text-red-400"
-                        }
-                      >
-                        {row.delta >= 0 ? "+" : "−"}
-                        {formatVnd(Math.abs(row.delta))}đ
-                      </span>
-                      <span className="text-[11px] text-neutral-500">
-                        Số dư: {formatVnd(row.balanceAfter)}đ
-                      </span>
-                    </div>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-        </div>
+                  </div>
+                ))
+              )}
+            </div>
 
-        <Pager
-          page={current}
-          pageCount={pageCount}
-          onSelect={(next) => {
-            setPage(next);
-            scrollListTop(listRef.current);
-          }}
-          total={filtered.length}
-          pageSize={PAGE_SIZE}
-          unit="giao dịch"
-        />
-      </section>
+            {pageCount > 1 ? (
+              <div className="mt-6 pt-6 border-t border-white/5 relative z-10">
+                <div className="w-full flex justify-center items-center">
+                  <nav
+                    aria-label="Phân trang"
+                    className="isolate inline-flex -space-x-px rounded-xl shadow-sm gap-1.5 items-center justify-center"
+                  >
+                    <button
+                      type="button"
+                      onClick={() => goTo(current - 1)}
+                      disabled={current === 0}
+                      aria-label="Trang trước"
+                      className={PAGE_ARROW}
+                    >
+                      <ChevronLeft size={16} aria-hidden />
+                    </button>
+                    {pageStrip(current + 1, pageCount).map((n, index) =>
+                      n === GAP ? (
+                        <span key={`gap-${index}`} className="w-10 text-center text-sm text-neutral-600">
+                          {GAP}
+                        </span>
+                      ) : (
+                        <button
+                          key={n}
+                          type="button"
+                          onClick={() => goTo(n - 1)}
+                          aria-current={n - 1 === current ? "page" : undefined}
+                          className={`${PAGE_NUMBER} ${
+                            n - 1 === current
+                              ? "bg-[var(--menzu-accent)] text-white border border-[var(--menzu-accent)]"
+                              : "bg-white/5 border border-white/5 text-neutral-400 hover:text-white hover:bg-white/10"
+                          }`}
+                        >
+                          {n}
+                        </button>
+                      ),
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => goTo(current + 1)}
+                      disabled={current >= pageCount - 1}
+                      aria-label="Trang sau"
+                      className={PAGE_ARROW}
+                    >
+                      <ChevronRight size={16} aria-hidden />
+                    </button>
+                  </nav>
+                </div>
+              </div>
+            ) : null}
+          </>
+        )}
+      </div>
     </div>
   );
 }

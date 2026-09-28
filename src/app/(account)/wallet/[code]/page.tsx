@@ -6,6 +6,7 @@ import { TopUpInvoice } from "@/components/sites/menzu-lol-f7ae197a/shared/TopUp
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/session";
 import { getShopSettings } from "@/lib/settingsStore";
+import { moneyStamp } from "@/lib/stamp";
 import {
   cardNet,
   cardRateFor,
@@ -16,23 +17,6 @@ import {
 
 export const metadata: Metadata = { title: "Thanh toán hóa đơn" };
 export const dynamic = "force-dynamic";
-
-/** "15:44 - 28/09/2026" in the shop's clock — how menzu stamps an invoice. */
-function stamp(date: Date): string {
-  const parts = new Intl.DateTimeFormat("en-GB", {
-    // The shop clock, not the server's: the container runs on UTC.
-    timeZone: "Asia/Ho_Chi_Minh",
-    hour: "2-digit",
-    minute: "2-digit",
-    hourCycle: "h23",
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-  }).formatToParts(date);
-  const part = (type: Intl.DateTimeFormatPartTypes) =>
-    parts.find((p) => p.type === type)?.value ?? "";
-  return `${part("hour")}:${part("minute")} - ${part("day")}/${part("month")}/${part("year")}`;
-}
 
 /**
  * One top-up request as an invoice — menzu's "Thanh toán hóa đơn".
@@ -113,7 +97,7 @@ export default async function TopUpInvoicePage({
         // Never the whole card, and never the PIN: the page may be on a
         // screen somebody else can see.
         serialTail={topUp.cardSerial ? topUp.cardSerial.slice(-4) : null}
-        createdAt={stamp(topUp.createdAt)}
+        createdAt={moneyStamp(topUp.createdAt)}
         expiresAt={topUpExpiresAt(topUp.createdAt).toISOString()}
         // Unsettled and recent, by the same rule the wallet page watches by.
         watch={watchableTopUp([topUp]) !== null}
