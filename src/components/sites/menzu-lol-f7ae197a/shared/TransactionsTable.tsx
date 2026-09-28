@@ -1,23 +1,18 @@
 "use client";
 
-import {
-  Calendar,
-  ChevronDown,
-  ChevronLeft,
-  ChevronRight,
-  Eye,
-  Funnel,
-  History,
-  ListFilter,
-  Search,
-  Trash2,
-} from "lucide-react";
+import { Eye, History } from "lucide-react";
 import Link from "next/link";
 
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useMemo, useRef, useState } from "react";
 
-import { GAP, pageStrip } from "@/lib/paging";
-
+import {
+  FilterDate,
+  FilterSelect,
+  ListPager,
+  ListToolbar,
+  normalise,
+  scrollPanelTop,
+} from "./AccountListChrome";
 import { formatVnd } from "./productData";
 
 export interface LedgerView {
@@ -72,23 +67,6 @@ function splitStamp(stamp: string): [string, string] {
   return [clock, date];
 }
 
-const FIELD =
-  "w-full bg-white/[0.03] border border-white/10 hover:border-white/20 text-white text-sm rounded-xl pl-3.5 pr-10 py-3 outline-none focus:border-emerald-500/50 transition-colors appearance-none cursor-pointer";
-const FIELD_LABEL = "block text-[11px] font-bold text-neutral-500 mb-2 uppercase tracking-wider";
-const PAGE_ARROW =
-  "w-10 h-10 rounded-xl bg-white/5 border border-white/5 text-neutral-500 hover:text-white disabled:opacity-30 disabled:hover:bg-white/5 disabled:hover:text-neutral-500 flex items-center justify-center transition-all cursor-pointer disabled:cursor-not-allowed active:scale-95 hover:bg-white/10";
-const PAGE_NUMBER =
-  "w-10 h-10 rounded-xl text-sm font-black transition-all flex items-center justify-center cursor-pointer active:scale-95";
-
-/** Diacritic-insensitive, so "giao dich" finds "giao dịch". */
-function normalise(value: string): string {
-  return value
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
-    .replace(/đ/g, "d");
-}
-
 /** The method as its chip: the part before any " · " note ("duyệt bởi …"). */
 function methodChip(row: LedgerView): string {
   const method = (row.method ?? "").split(" · ")[0]?.trim();
@@ -139,67 +117,10 @@ function StatusPill({ status, phone = false }: { status: string; phone?: boolean
   );
 }
 
-function Select({
-  value,
-  onChange,
-  children,
-  label,
-}: {
-  value: string;
-  onChange: (next: string) => void;
-  children: ReactNode;
-  label: string;
-}) {
-  return (
-    <div className="relative">
-      <select
-        aria-label={label}
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        className={FIELD}
-      >
-        {children}
-      </select>
-      <ChevronDown
-        size={16}
-        className="absolute right-3.5 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none"
-        aria-hidden
-      />
-    </div>
-  );
-}
-
-function DateField({
-  value,
-  onChange,
-  label,
-}: {
-  value: string;
-  onChange: (next: string) => void;
-  label: string;
-}) {
-  return (
-    <div className="relative">
-      <input
-        type="date"
-        aria-label={label}
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        className={`${FIELD} [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:inset-0`}
-      />
-      <Calendar
-        size={16}
-        className="absolute right-3.5 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none"
-        aria-hidden
-      />
-    </div>
-  );
-}
-
 /**
  * The account's ledger, as menzu's "Lịch sử giao dịch" draws it: one #111
- * panel with its title inside, a search box and a filter menu, a four-column
- * table (cards on a phone), and a pager.
+ * panel with its title inside, a search box and a filter menu, the table
+ * (cards below xl), and a pager.
  *
  * A client component because the filters run in the browser — the query is
  * capped at 50 rows server-side, so a round trip per keystroke would buy
@@ -212,27 +133,8 @@ export function TransactionsTable({ rows }: { rows: LedgerView[] }) {
   const [status, setStatus] = useState("ALL");
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
-  const [open, setOpen] = useState(false);
   const [page, setPage] = useState(0);
-  const menu = useRef<HTMLDivElement>(null);
   const top = useRef<HTMLDivElement>(null);
-
-  // A press anywhere outside the menu puts it away, as menzu's does.
-  useEffect(() => {
-    if (!open) return;
-    const onDown = (event: MouseEvent) => {
-      if (!menu.current?.contains(event.target as Node)) setOpen(false);
-    };
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setOpen(false);
-    };
-    document.addEventListener("mousedown", onDown);
-    window.addEventListener("keydown", onKey);
-    return () => {
-      document.removeEventListener("mousedown", onDown);
-      window.removeEventListener("keydown", onKey);
-    };
-  }, [open]);
 
   const filtered = useMemo(() => {
     const needle = normalise(query.trim());
@@ -257,17 +159,9 @@ export function TransactionsTable({ rows }: { rows: LedgerView[] }) {
   const visible = filtered.slice(current * PAGE_SIZE, current * PAGE_SIZE + PAGE_SIZE);
 
   // Every filter change starts reading from the first page.
-  const refilter = <T,>(set: (value: T) => void) => (value: T) => {
+  const refilter = (set: (value: string) => void) => (value: string) => {
     set(value);
     setPage(0);
-  };
-
-  const goTo = (next: number) => {
-    setPage(next);
-    top.current?.scrollIntoView({
-      block: "start",
-      behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
-    });
   };
 
   const eye = (row: LedgerView, phone: boolean) =>
@@ -318,102 +212,50 @@ export function TransactionsTable({ rows }: { rows: LedgerView[] }) {
           </div>
         ) : (
           <>
-            <div className="mb-6 flex items-center gap-3 relative z-30">
-              <div className="relative flex-1">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Search size={16} className="text-neutral-500" aria-hidden />
-                </div>
-                <input
-                  type="search"
-                  value={query}
-                  onChange={(event) => refilter(setQuery)(event.target.value)}
-                  placeholder="Tìm kiếm mã GD, nội dung..."
-                  aria-label="Tìm kiếm giao dịch"
-                  className="w-full bg-[#111111] border border-white/10 rounded-xl py-2.5 pl-10 pr-4 text-sm text-white placeholder-neutral-500 outline-none focus:border-emerald-500/50 transition-colors"
+            <ListToolbar
+              tone="green"
+              query={query}
+              onQuery={refilter(setQuery)}
+              placeholder="Tìm kiếm mã GD, nội dung..."
+              filtering={filtering}
+              onClear={() => {
+                setDirection("ALL");
+                setStatus("ALL");
+                setFrom("");
+                setTo("");
+                setPage(0);
+              }}
+            >
+              <div className="grid grid-cols-2 gap-4">
+                <FilterSelect
+                  tone="green"
+                  label="Phân loại"
+                  value={direction}
+                  onChange={refilter(setDirection)}
+                  options={[
+                    ["ALL", "Tất cả loại"],
+                    ["IN", "Tiền nạp"],
+                    ["OUT", "Chi tiêu"],
+                  ]}
+                />
+                <FilterSelect
+                  tone="green"
+                  label="Trạng thái"
+                  value={status}
+                  onChange={refilter(setStatus)}
+                  options={[
+                    ["ALL", "Tất cả"],
+                    ["SUCCESS", "Thành công"],
+                    ["PENDING", "Chờ xử lý"],
+                    ["FAILED", "Thất bại"],
+                  ]}
                 />
               </div>
-
-              <div ref={menu} className="relative shrink-0">
-                <button
-                  type="button"
-                  onClick={() => setOpen((now) => !now)}
-                  aria-expanded={open}
-                  aria-label="Bộ lọc"
-                  className={`flex items-center justify-center w-11 h-11 rounded-xl border transition-colors ${
-                    open || filtering
-                      ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400"
-                      : "bg-[#111111] border-white/10 text-neutral-400 hover:text-white hover:bg-white/5"
-                  }`}
-                >
-                  <Funnel size={18} aria-hidden />
-                </button>
-
-                {open ? (
-                  <div className="absolute top-full right-0 mt-2 w-[min(380px,calc(100vw-2rem))] bg-[#111111] border border-white/10 rounded-[24px] z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-300">
-                    <div className="p-6 pb-4 border-b border-white/5">
-                      <h4 className="text-base font-black text-white uppercase tracking-widest flex items-center gap-2">
-                        <ListFilter size={18} className="text-emerald-400" aria-hidden />
-                        Bộ Lọc
-                      </h4>
-                    </div>
-                    <div className="p-6 flex flex-col gap-5">
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <span className={FIELD_LABEL}>Phân loại</span>
-                          <Select label="Phân loại" value={direction} onChange={refilter(setDirection)}>
-                            <option value="ALL" className="bg-[#111111] text-white">Tất cả loại</option>
-                            <option value="IN" className="bg-[#111111] text-white">Tiền nạp</option>
-                            <option value="OUT" className="bg-[#111111] text-white">Chi tiêu</option>
-                          </Select>
-                        </div>
-                        <div>
-                          <span className={FIELD_LABEL}>Trạng thái</span>
-                          <Select label="Trạng thái" value={status} onChange={refilter(setStatus)}>
-                            <option value="ALL" className="bg-[#111111] text-white">Tất cả</option>
-                            <option value="SUCCESS" className="bg-[#111111] text-white">Thành công</option>
-                            <option value="PENDING" className="bg-[#111111] text-white">Chờ xử lý</option>
-                            <option value="FAILED" className="bg-[#111111] text-white">Thất bại</option>
-                          </Select>
-                        </div>
-                      </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <span className={FIELD_LABEL}>Từ ngày</span>
-                          <DateField label="Từ ngày" value={from} onChange={refilter(setFrom)} />
-                        </div>
-                        <div>
-                          <span className={FIELD_LABEL}>Đến ngày</span>
-                          <DateField label="Đến ngày" value={to} onChange={refilter(setTo)} />
-                        </div>
-                      </div>
-                    </div>
-                    <div className="p-6 bg-white/[0.02] border-t border-white/5 flex items-center gap-3">
-                      <button
-                        type="button"
-                        onClick={() => setOpen(false)}
-                        className="flex-1 bg-white/[0.05] hover:bg-white/[0.08] border border-white/10 text-neutral-300 font-bold text-sm py-3 rounded-xl transition-all flex items-center justify-center gap-2 active:scale-[0.98]"
-                      >
-                        Đóng
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setDirection("ALL");
-                          setStatus("ALL");
-                          setFrom("");
-                          setTo("");
-                          setPage(0);
-                        }}
-                        className="flex-1 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 font-black text-sm py-3 rounded-xl transition-all flex items-center justify-center gap-2 active:scale-[0.98]"
-                      >
-                        <Trash2 size={16} aria-hidden />
-                        Xóa lọc
-                      </button>
-                    </div>
-                  </div>
-                ) : null}
+              <div className="grid grid-cols-2 gap-4">
+                <FilterDate tone="green" label="Từ ngày" value={from} onChange={refilter(setFrom)} />
+                <FilterDate tone="green" label="Đến ngày" value={to} onChange={refilter(setTo)} />
               </div>
-            </div>
+            </ListToolbar>
 
             {/* Five columns want about 800px, which the account column only
                 has from xl; below that each transaction is a card, as the
@@ -527,56 +369,14 @@ export function TransactionsTable({ rows }: { rows: LedgerView[] }) {
               )}
             </div>
 
-            {pageCount > 1 ? (
-              <div className="mt-6 pt-6 border-t border-white/5 relative z-10">
-                <div className="w-full flex justify-center items-center">
-                  <nav
-                    aria-label="Phân trang"
-                    className="isolate inline-flex -space-x-px rounded-xl shadow-sm gap-1.5 items-center justify-center"
-                  >
-                    <button
-                      type="button"
-                      onClick={() => goTo(current - 1)}
-                      disabled={current === 0}
-                      aria-label="Trang trước"
-                      className={PAGE_ARROW}
-                    >
-                      <ChevronLeft size={16} aria-hidden />
-                    </button>
-                    {pageStrip(current + 1, pageCount).map((n, index) =>
-                      n === GAP ? (
-                        <span key={`gap-${index}`} className="w-10 text-center text-sm text-neutral-600">
-                          {GAP}
-                        </span>
-                      ) : (
-                        <button
-                          key={n}
-                          type="button"
-                          onClick={() => goTo(n - 1)}
-                          aria-current={n - 1 === current ? "page" : undefined}
-                          className={`${PAGE_NUMBER} ${
-                            n - 1 === current
-                              ? "bg-[var(--menzu-accent)] text-white border border-[var(--menzu-accent)]"
-                              : "bg-white/5 border border-white/5 text-neutral-400 hover:text-white hover:bg-white/10"
-                          }`}
-                        >
-                          {n}
-                        </button>
-                      ),
-                    )}
-                    <button
-                      type="button"
-                      onClick={() => goTo(current + 1)}
-                      disabled={current >= pageCount - 1}
-                      aria-label="Trang sau"
-                      className={PAGE_ARROW}
-                    >
-                      <ChevronRight size={16} aria-hidden />
-                    </button>
-                  </nav>
-                </div>
-              </div>
-            ) : null}
+            <ListPager
+              page={current}
+              pageCount={pageCount}
+              onSelect={(next) => {
+                setPage(next);
+                scrollPanelTop(top.current);
+              }}
+            />
           </>
         )}
       </div>

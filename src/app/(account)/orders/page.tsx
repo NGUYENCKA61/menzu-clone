@@ -1,16 +1,11 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import { redirect } from "next/navigation";
 
 import { AccountPageFrame } from "@/components/sites/menzu-lol-f7ae197a/shared/AccountPageFrame";
-import { AccountEmpty } from "@/components/sites/menzu-lol-f7ae197a/shared/AccountShell";
-import { ListSearch } from "@/components/sites/menzu-lol-f7ae197a/shared/ListSearch";
-import { OrderDetailModal } from "@/components/sites/menzu-lol-f7ae197a/shared/OrderDetailModal";
-import { OrderReviewTag } from "@/components/sites/menzu-lol-f7ae197a/shared/OrderReview";
-import { formatVnd } from "@/components/sites/menzu-lol-f7ae197a/shared/productData";
-import { dayHeading, dayTime } from "@/lib/dayGroups";
+import { OrdersList } from "@/components/sites/menzu-lol-f7ae197a/shared/OrdersList";
 import { getOrders } from "@/lib/queries";
 import { getCurrentUser } from "@/lib/session";
+import { moneyStamp, shopDay } from "@/lib/stamp";
 
 export const metadata: Metadata = {
   title: "Lịch sử mua hàng",
@@ -28,8 +23,7 @@ const STATUS_LABEL: Record<string, string> = {
   REFUNDED: "Đã hoàn tiền",
 };
 
-// Every status used to wear the PAID green, which read as "fine" on a
-// cancelled order. Colour now follows meaning, same palette as the ledgers.
+// The receipt's own pill. Colour follows meaning, same palette as the ledgers.
 const STATUS_CLASS: Record<string, string> = {
   PAID: "border-emerald-500/30 bg-emerald-500/10 text-emerald-400",
   PENDING: "border-amber-500/30 bg-amber-500/10 text-amber-400",
@@ -37,48 +31,40 @@ const STATUS_CLASS: Record<string, string> = {
   REFUNDED: "border-rose-500/30 bg-rose-500/10 text-rose-400",
 };
 
+/* The card's pill, in menzu's weight ("HOÀN THÀNH" on a paid order). */
+const TONE = {
+  green: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
+  amber: "bg-amber-500/10 text-amber-400 border-amber-500/20",
+  rose: "bg-rose-500/10 text-rose-400 border-rose-500/20",
+  grey: "bg-white/5 text-neutral-400 border-white/10",
+} as const;
+
 /**
- * What the badge on a row says, which is not always the order's own status.
+ * What the pill on a card says, which is not always the order's own status.
  *
  * A refused refund leaves the order exactly as it was — paid, key valid — so
  * OrderStatus has nothing to record it with, and nothing should: the sale did
  * not change. What changed is the answer the buyer is waiting on, and that is
- * what the badge is for. An approved refund is a different matter and does
- * move the order to REFUNDED, so it needs no special case here.
+ * what the pill is for. An approved refund does move the order to REFUNDED.
  */
 function orderBadge(o: {
   status: string;
   refundRejected: boolean;
   refundPending: boolean;
   warrantyOpen: boolean;
-}): { label: string; className: string } {
-  const fallback = {
-    label: STATUS_LABEL[o.status] ?? o.status,
-    className:
-      STATUS_CLASS[o.status] ?? "border-white/10 bg-white/5 text-neutral-400",
-  };
-  if (o.status !== "PAID") return fallback;
-  if (o.refundPending) {
-    return {
-      label: "Chờ duyệt hoàn tiền",
-      className: "border-amber-500/30 bg-amber-500/10 text-amber-400",
-    };
+}): { label: string; tone: string } {
+  if (o.status === "PAID") {
+    if (o.refundPending) return { label: "Chờ duyệt hoàn tiền", tone: TONE.amber };
+    if (o.refundRejected) return { label: "Từ chối hoàn tiền", tone: TONE.rose };
+    // A report the shop is still working: the order is paid and stays so, but
+    // the buyer is waiting on a fix, and the card should say that.
+    if (o.warrantyOpen) return { label: "Đang bảo hành", tone: TONE.amber };
+    return { label: "Hoàn thành", tone: TONE.green };
   }
-  if (o.refundRejected) {
-    return {
-      label: "Từ chối hoàn tiền",
-      className: "border-rose-500/30 bg-rose-500/10 text-rose-400",
-    };
-  }
-  // A report the shop is still working: the order is paid and stays so, but
-  // the buyer is waiting on a fix, and the row should say that.
-  if (o.warrantyOpen) {
-    return {
-      label: "Đang bảo hành",
-      className: "border-amber-500/30 bg-amber-500/10 text-amber-400",
-    };
-  }
-  return fallback;
+  if (o.status === "PENDING") return { label: "Chờ xử lý", tone: TONE.amber };
+  if (o.status === "REFUNDED") return { label: "Đã hoàn tiền", tone: TONE.rose };
+  if (o.status === "CANCELLED") return { label: "Đã hủy", tone: TONE.grey };
+  return { label: STATUS_LABEL[o.status] ?? o.status, tone: TONE.grey };
 }
 
 function shortDate(date: Date): string {
@@ -103,160 +89,72 @@ export default async function OrdersPage({
   if (!user) redirect("/login?next=%2Forders");
 
   const orders = await getOrders(user.id);
-  // One clock reading for the whole render, so a page drawn across midnight
-  // cannot label two rows of the same day differently.
-  const now = new Date();
 
   return (
-    <AccountPageFrame
-      title="Lịch sử mua hàng"
-      subtitle="Đơn đã thanh toán, kèm key hoặc tài khoản đăng nhập"
-      crumb="Lịch sử mua"
-    >
-      {
-        <ListSearch
-          emptyState={
-            <AccountEmpty
-              title="Chưa có đơn hàng nào"
-              body="Bạn chưa mua tài khoản nào trên hệ thống"
-              ctaLabel="Mua Ngay"
-              ctaHref="/categories"
-            />
-          }
-          placeholder="Tìm theo mã đơn hoặc tên sản phẩm..."
-          unit="đơn hàng"
-          frameTitle="Đơn hàng của bạn"
-          frameHint="Bấm vào đơn để xem key hoặc tài khoản đăng nhập"
-          rows={orders.map((o) => ({
-            key: o.code,
-            // The heading this row sits under. The list arrives newest first,
-            // so the days come out newest first too.
-            group: dayHeading(o.createdAt, now),
-            // Searched by order code, product code and name — what a buyer
-            // actually has to hand when hunting for a past purchase.
+    // No title on the frame: menzu draws "Lịch sử mua hàng" inside the list's
+    // own panel, as on /wallet and /transactions.
+    <AccountPageFrame crumb="Lịch sử mua">
+      <OrdersList
+        orders={orders.map((o) => {
+          // A paid order either has its review or is asking for one. Not while
+          // a refund is pending or was refused, or a warranty report is still
+          // open: the product was trouble, and that is no moment to ask for
+          // stars.
+          const settled =
+            o.status === "PAID" && !o.refundPending && !o.refundRejected && !o.warrantyOpen;
+          return {
+            detail: {
+              id: o.id,
+              reviewed: o.reviewed,
+              code: o.code,
+              statusLabel: STATUS_LABEL[o.status] ?? o.status,
+              statusClass: STATUS_CLASS[o.status] ?? "border-white/10 bg-white/5 text-neutral-400",
+              paid: o.status === "PAID",
+              refunded: o.status === "REFUNDED",
+              date: shortDate(o.createdAt),
+              total: o.total,
+              listPrice: o.listPrice,
+              quantity: o.quantity,
+              productName: o.productName,
+              productCode: o.productCode,
+              productHref: o.productHref,
+              categoryName: o.categoryName,
+              imageUrl: o.imageUrl,
+              isSoftware: o.isSoftware,
+              isPool: o.isPool,
+              packageLabel: o.packageLabel,
+              productRank: o.productRank,
+              // The value only: a key's clock starts on activation, so no date
+              // from the sale belongs under it.
+              keys: o.keys.map((key) => ({ value: key.value })),
+              keysPending: o.keysPending,
+              downloadUrl: o.downloadUrl,
+              docsUrl: o.docsUrl,
+              login: o.login,
+              canRefund: o.canRefund,
+              refundBlockedReason: o.refundBlockedReason,
+            },
+            autoOpen: don === o.code,
+            supportHref: `/orders/${o.code}/bao-hanh`,
+            refundHref: `/orders/${o.code}/hoan-tra`,
+            title: o.isSoftware ? o.productName : `#${o.productCode}`,
+            chip: o.packageLabel ?? (o.productRank || null),
+            isSoftware: o.isSoftware,
+            quantity: o.quantity,
+            imageUrl: o.imageUrl,
+            stamp: moneyStamp(o.createdAt),
+            day: shopDay(o.createdAt),
+            at: o.createdAt.getTime(),
+            total: o.total,
+            status: o.status,
+            badge: orderBadge(o),
+            review: settled ? { href: `/orders/${o.code}/danh-gia`, reviewed: o.reviewed } : null,
+            // Searched by order code, product code, name and rank — what a
+            // buyer actually has to hand when hunting for a past purchase.
             haystack: [o.code, o.productCode, o.productName, o.productRank],
-            node: (
-              // The whole row — picture and title included — opens the
-              // receipt; the product link lives inside it. The modal owns
-              // the row so the click, the keyboard and the focus return all
-              // live in one client component.
-              <OrderDetailModal
-                autoOpen={don === o.code}
-                supportHref={`/orders/${o.code}/bao-hanh`}
-                refundHref={`/orders/${o.code}/hoan-tra`}
-                className="group flex cursor-pointer flex-col gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] p-4 outline-none transition-colors hover:border-white/[0.12] hover:bg-white/[0.04] focus-visible:ring-2 focus-visible:ring-[var(--menzu-accent)]/60 sm:flex-row sm:items-center sm:gap-4"
-                order={{
-                  id: o.id,
-                  reviewed: o.reviewed,
-                  code: o.code,
-                  statusLabel: STATUS_LABEL[o.status] ?? o.status,
-                  statusClass:
-                    STATUS_CLASS[o.status] ??
-                    "border-white/10 bg-white/5 text-neutral-400",
-                  paid: o.status === "PAID",
-                  refunded: o.status === "REFUNDED",
-                  date: shortDate(o.createdAt),
-                  total: o.total,
-                  listPrice: o.listPrice,
-                  quantity: o.quantity,
-                  productName: o.productName,
-                  productCode: o.productCode,
-                  productHref: o.productHref,
-                  categoryName: o.categoryName,
-                  imageUrl: o.imageUrl,
-                  isSoftware: o.isSoftware,
-                  isPool: o.isPool,
-                  packageLabel: o.packageLabel,
-                  productRank: o.productRank,
-                  // The value only: a key's clock starts on activation, so
-                  // no date from the sale belongs under it.
-                  keys: o.keys.map((key) => ({ value: key.value })),
-                  keysPending: o.keysPending,
-                  downloadUrl: o.downloadUrl,
-                  docsUrl: o.docsUrl,
-                  login: o.login,
-                  canRefund: o.canRefund,
-                  refundBlockedReason: o.refundBlockedReason,
-                }}
-              >
-                <div className="flex min-w-0 flex-1 items-center gap-4">
-                  <div className="relative h-16 w-24 shrink-0 overflow-hidden rounded-xl border border-white/10 bg-neutral-950">
-                    {o.imageUrl ? (
-                      <Image
-                        src={o.imageUrl}
-                        alt={o.productCode}
-                        fill
-                        // Twice the box: the browser downsizes a 192px file
-                        // to 96px far more kindly than the encoder makes a
-                        // 96px one, and the picture is a screenshot of a
-                        // menu — fine text that a soft file turns to mush.
-                        sizes="192px"
-                        className="object-cover object-[85%_center]"
-                      />
-                    ) : null}
-                  </div>
-
-                  <div className="flex min-w-0 flex-1 flex-col gap-1">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="text-sm font-black text-white transition-colors group-hover:text-[var(--menzu-accent)]">
-                        {o.isSoftware ? o.productName : `#${o.productCode}`}
-                      </span>
-                      {/* A tier says more about a software order than a rank
-                          copied off an account row ever did. */}
-                      {(o.packageLabel ?? o.productRank) ? (
-                        <span className="rounded-md border border-white/15 bg-white/10 px-2 py-0.5 text-[9px] font-black uppercase tracking-widest text-neutral-300">
-                          {o.packageLabel ?? o.productRank}
-                        </span>
-                      ) : null}
-                      {o.quantity > 1 ? (
-                        <span className="text-[10px] font-black tabular-nums text-neutral-400">
-                          ×{o.quantity}
-                        </span>
-                      ) : null}
-                    </div>
-                    {/* The clock, not the date: the day is written once over
-                        the group this row sits in, and repeating it on every
-                        line was the noisiest thing on the page. */}
-                    <span className="text-[11px] font-semibold text-neutral-400">
-                      Đơn {o.code} · {dayTime(o.createdAt)}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="flex shrink-0 items-center justify-between gap-4 sm:flex-col sm:items-end sm:gap-1.5">
-                  <span className="text-sm font-black tabular-nums text-white">
-                    {formatVnd(o.total)}đ
-                  </span>
-                  {/* Status and review side by side under the price, one
-                      line instead of a three-storey stack. */}
-                  <div className="flex items-center gap-2">
-                    {/* This is the paid list, so a plainly paid order says
-                        nothing here — only the exceptions (waiting, refunded,
-                        a refund refused) wear a badge that needs reading. */}
-                    {o.status === "PAID" && !o.refundPending && !o.refundRejected && !o.warrantyOpen ? null : (
-                      <span
-                        className={`rounded-lg border px-2 py-1 text-[10px] font-black uppercase tracking-wider ${orderBadge(o).className}`}
-                      >
-                        {orderBadge(o).label}
-                      </span>
-                    )}
-                    {/* A paid order either has its review or is asking for
-                        one; the tag leads to the order's own review page, the
-                        way the refund request has one. Not while a refund is
-                        pending or was refused, or a warranty report is still
-                        open: the product was trouble, and that is no moment
-                        to ask for stars. */}
-                    {o.status === "PAID" && !o.refundPending && !o.refundRejected && !o.warrantyOpen ? (
-                      <OrderReviewTag href={`/orders/${o.code}/danh-gia`} reviewed={o.reviewed} />
-                    ) : null}
-                  </div>
-                </div>
-              </OrderDetailModal>
-            ),
-          }))}
-          emptyLabel="Không tìm thấy đơn hàng nào khớp."
-        />
-      }
+          };
+        })}
+      />
     </AccountPageFrame>
   );
 }
