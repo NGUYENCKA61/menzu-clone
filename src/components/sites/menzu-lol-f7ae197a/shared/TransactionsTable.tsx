@@ -35,9 +35,10 @@ export interface LedgerView {
 
 /*
  * menzu's /transactions, measured off the live page: the panel, the search
- * and filter menu, its four columns, the before/after balances, the status
- * pill and eye, the pager. (The old ledger's separate Thời gian and Mã GD
- * columns were tried on 28/09/2026; the owner went back to menzu's four.)
+ * and filter menu, four columns, the before/after balances, the status pill
+ * and eye, the pager. One change: the time has the first column to itself —
+ * a buyer hunts a line by when, not by its code — and the code sits small
+ * beside the method chip (29/09/2026, after five columns proved too wide).
  * menzu's violet (the title's mark, the current page) is the shop's accent;
  * its green and red are what money did.
  */
@@ -59,6 +60,12 @@ const KIND_LABEL: Record<string, string> = {
   REWARD: "Thưởng",
   ADJUSTMENT: "Điều chỉnh",
 };
+
+/** "22:55 - 28/09/2026" as its clock and its date. */
+function splitStamp(stamp: string): [string, string] {
+  const [clock = stamp, date = ""] = stamp.split(" - ");
+  return [clock, date];
+}
 
 /** The method as its chip: the part before any " · " note ("duyệt bởi …"). */
 function methodChip(row: LedgerView): string {
@@ -255,7 +262,7 @@ export function TransactionsTable({ rows }: { rows: LedgerView[] }) {
                 <table className="w-full text-left text-xs min-w-[700px]">
                   <thead className="bg-white/[0.02] border-b border-white/5 uppercase tracking-widest text-neutral-500">
                     <tr>
-                      <th scope="col" className="px-5 py-4 font-bold">Mã GD &amp; Thời gian</th>
+                      <th scope="col" className="px-5 py-4 font-bold">Thời gian</th>
                       <th scope="col" className="px-5 py-4 font-bold">Chi tiết &amp; Phương thức</th>
                       <th scope="col" className="px-5 py-4 font-bold text-right">Biến động &amp; Số dư</th>
                       <th scope="col" className="pl-5 pr-[60px] py-4 font-bold text-center">Trạng thái</th>
@@ -269,34 +276,41 @@ export function TransactionsTable({ rows }: { rows: LedgerView[] }) {
                         </td>
                       </tr>
                     ) : (
-                      visible.map((row) => (
-                        <tr
-                          key={row.code}
-                          className="border-b border-white/5 hover:bg-white/[0.02] transition-colors group"
-                        >
-                          <td className="px-5 py-4 align-middle">
-                            <span className="font-bold text-neutral-300 block mb-1">#{row.code}</span>
-                            <span className="text-[10px] text-neutral-500 font-mono">{row.createdAt}</span>
-                          </td>
-                          <td className="px-5 py-4 align-middle">
-                            <span className="font-bold text-neutral-200 block mb-1">{row.description}</span>
-                            <span className="text-[9px] text-neutral-500 uppercase tracking-widest bg-white/5 px-2 py-0.5 rounded inline-block mb-2">
-                              {methodChip(row)}
-                            </span>
-                          </td>
-                          <td className="px-5 py-4 text-right align-middle">
-                            <Amount row={row} />
-                          </td>
-                          <td className="px-5 py-4 align-middle">
-                            <div className="flex items-center justify-center gap-2">
-                              <div className="w-[100px] flex justify-center">
-                                <StatusPill status={row.status} />
+                      visible.map((row) => {
+                        const [clock, date] = splitStamp(row.createdAt);
+                        return (
+                          <tr
+                            key={row.code}
+                            className="border-b border-white/5 hover:bg-white/[0.02] transition-colors group"
+                          >
+                            {/* The clock on top, the date under it. */}
+                            <td className="px-5 py-4 align-middle whitespace-nowrap">
+                              <span className="font-bold text-neutral-200 block mb-1 tabular-nums">{clock}</span>
+                              <span className="text-[10px] text-neutral-500 font-mono">{date}</span>
+                            </td>
+                            <td className="px-5 py-4 align-middle">
+                              <span className="font-bold text-neutral-200 block mb-1">{row.description}</span>
+                              <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mb-2">
+                                <span className="text-[9px] text-neutral-500 uppercase tracking-widest bg-white/5 px-2 py-0.5 rounded">
+                                  {methodChip(row)}
+                                </span>
+                                <span className="text-[10px] text-neutral-500 font-mono">#{row.code}</span>
                               </div>
-                              <div className="w-8 flex justify-center">{eye(row, false)}</div>
-                            </div>
-                          </td>
-                        </tr>
-                      ))
+                            </td>
+                            <td className="px-5 py-4 text-right align-middle">
+                              <Amount row={row} />
+                            </td>
+                            <td className="px-5 py-4 align-middle">
+                              <div className="flex items-center justify-center gap-2">
+                                <div className="w-[100px] flex justify-center">
+                                  <StatusPill status={row.status} />
+                                </div>
+                                <div className="w-8 flex justify-center">{eye(row, false)}</div>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })
                     )}
                   </tbody>
                 </table>

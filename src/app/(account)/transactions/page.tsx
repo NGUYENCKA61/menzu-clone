@@ -20,11 +20,18 @@ export const dynamic = "force-dynamic";
 const TOPUP_CODE = /\bNT[A-Z0-9]{6}\b/;
 
 /**
- * The tier note a purchase line carries (" · ưu đãi hạng Elite"), dropped from
- * the buyer's own ledger to keep the line short, as the owner asked. The row
- * keeps it, so the shop still sees why the price was lower.
+ * A ledger line as the buyer reads it, written shorter than the row keeps it
+ * (the shop still sees the stored words), as the owner asked on 29/09/2026:
+ * a top-up reads "Nạp tiền mã NT8F3K2Q", menzu's way, rather than "Nạp tiền
+ * vào ví · NT8F3K2Q", and a purchase drops its " · ưu đãi hạng Elite".
  */
-const TIER_NOTE = /\s*·\s*ưu đãi hạng [^·]*/u;
+function buyerLine(description: string): string {
+  return description
+    .replace(/^Nạp tiền vào ví · (NT[A-Z0-9]{6})/u, "Nạp tiền mã $1")
+    .replace(/^Nạp thẻ cào · (NT[A-Z0-9]{6})/u, "Nạp thẻ cào mã $1")
+    .replace(/\s*·\s*ưu đãi hạng [^·]*/u, "")
+    .trim();
+}
 
 export default async function TransactionsPage() {
   const user = await getCurrentUser();
@@ -44,7 +51,7 @@ export default async function TransactionsPage() {
           const topUp = row.kind === "TOPUP" ? TOPUP_CODE.exec(row.description)?.[0] : undefined;
           return {
             ...row,
-            description: row.description.replace(TIER_NOTE, "").trim(),
+            description: buyerLine(row.description),
             createdAt: moneyStamp(row.createdAt),
             day: shopDay(row.createdAt),
             // menzu's eye opens the invoice behind a top-up and the orders
