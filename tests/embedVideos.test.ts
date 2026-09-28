@@ -131,3 +131,37 @@ describe("embedVideos — the editor's video block", () => {
     expect(embedVideos(html)).toBe(html);
   });
 });
+
+/**
+ * "Lề": a picture or video pushed in from the side it leans to. It is the
+ * margin on that side, in percent, plus `data-offset` naming the side so a
+ * phone can drop the push.
+ */
+describe("the push from the side (Lề)", () => {
+  it("keeps a picture's push and the side it is pushed from", () => {
+    const clean = sanitizeDocHtml(
+      '<img src="/uploads/docs/a.webp" style="width: 40%; margin-left: 20%; margin-right: auto" data-offset="left">',
+    );
+    expect(clean).toMatch(/margin-left:\s*20%/);
+    expect(clean).toContain('data-offset="left"');
+  });
+
+  it("keeps a video block's push and plays it there", () => {
+    const out = embedVideos(
+      sanitizeDocHtml(
+        '<div data-youtube="dQw4w9WgXcQ" style="width: 50%; margin-left: auto; margin-right: 15%" data-offset="right"></div>',
+      ),
+    );
+    expect(out).toMatch(/<div class="doc-video" style="width:\s*50%;\s*margin-left:\s*auto;\s*margin-right:\s*15%;?">/);
+  });
+
+  it("refuses a push of 100% or more, and any side but left or right", () => {
+    const clean = sanitizeDocHtml(
+      '<img src="/uploads/docs/a.webp" style="margin-left: 150%; margin-right: auto" data-offset="middle">',
+    );
+    expect(clean).not.toMatch(/150%/);
+    // The sanitizer empties a value it does not know rather than dropping
+    // the name; an empty one matches no phone rule, which is what counts.
+    expect(clean).not.toMatch(/data-offset="(?!left"|right")/);
+  });
+});

@@ -49,10 +49,36 @@ const PALETTE: { name: string; hex: string; dot: string }[] = [
   { name: "tím", hex: "#a78bfa", dot: "bg-violet-400" },
 ];
 
+/** A margin that is a push from the edge ("20%"), as opposed to 0 or auto. */
+const PUSH = /^\d+(?:\.\d+)?%$/;
+
+/** The side an element leans to, read off its two margins; null = centred. */
+function alignFrom(element: HTMLElement): "left" | "right" | null {
+  const left = element.style.marginLeft;
+  const right = element.style.marginRight;
+  if (right === "auto" && (left === "0px" || PUSH.test(left))) return "left";
+  if (left === "auto" && (right === "0px" || PUSH.test(right))) return "right";
+  return null;
+}
+
+/** How far it is pushed in from that side ("20%"), or null for flush. */
+function offsetFrom(element: HTMLElement): string | null {
+  const left = element.style.marginLeft;
+  const right = element.style.marginRight;
+  if (right === "auto" && PUSH.test(left)) return left;
+  if (left === "auto" && PUSH.test(right)) return right;
+  return null;
+}
+
 /**
- * Width and side, shared by pictures and video blocks — both written as the
- * inline styles the sanitizer's `width: N%` and side-margin allowances let
- * through, so a video sizes and leans exactly as a picture does.
+ * Width, side and push, shared by pictures and video blocks — all written as
+ * the inline styles the sanitizer's `width: N%` and side-margin allowances
+ * let through, so a video sizes and leans exactly as a picture does.
+ *
+ * The push ("Lề") is the margin on the side the element leans to: 20% on a
+ * left-leaning picture is `margin-left: 20%`. A centred one has no side to
+ * push from. `data-offset` names the pushed side, so a phone can drop the
+ * push and give the picture the whole narrow screen.
  */
 const SIZE_AND_ALIGN = {
   width: {
@@ -61,37 +87,66 @@ const SIZE_AND_ALIGN = {
     renderHTML: (attributes: { width?: string | null }) =>
       attributes.width ? { style: `width: ${attributes.width}` } : {},
   },
+  // Written by `align`, which knows which side it belongs to.
+  offset: {
+    default: null,
+    parseHTML: offsetFrom,
+    renderHTML: () => ({}),
+  },
   // null = centered, the stylesheet default. Left and right override the
-  // auto margins inline.
+  // auto margins inline, pushed in by the offset where there is one.
   align: {
     default: null,
-    parseHTML: (element: HTMLElement) => {
-      const left = element.style.marginLeft;
-      const right = element.style.marginRight;
-      if (left === "0px" && right === "auto") return "left";
-      if (left === "auto" && right === "0px") return "right";
-      return null;
+    parseHTML: alignFrom,
+    renderHTML: (attributes: { align?: string | null; offset?: string | null }) => {
+      const push = attributes.offset ?? null;
+      if (attributes.align === "left") {
+        return {
+          style: `margin-left: ${push ?? "0"}; margin-right: auto`,
+          ...(push ? { "data-offset": "left" } : {}),
+        };
+      }
+      if (attributes.align === "right") {
+        return {
+          style: `margin-left: auto; margin-right: ${push ?? "0"}`,
+          ...(push ? { "data-offset": "right" } : {}),
+        };
+      }
+      return {};
     },
-    renderHTML: (attributes: { align?: string | null }) =>
-      attributes.align === "left"
-        ? { style: "margin-left: 0; margin-right: auto" }
-        : attributes.align === "right"
-          ? { style: "margin-left: auto; margin-right: 0" }
-          : {},
   },
 };
 
-/** The inline style a width and side come to — the node view's own copy of
- *  what SIZE_AND_ALIGN writes into the stored HTML. */
-function sizeStyle(width: string | null, align: string | null): React.CSSProperties {
+/** The inline style a width, side and push come to — the node view's own
+ *  copy of what SIZE_AND_ALIGN writes into the stored HTML. */
+function sizeStyle(
+  width: string | null,
+  align: string | null,
+  offset: string | null,
+): React.CSSProperties {
   return {
     ...(width ? { width } : {}),
     ...(align === "left"
-      ? { marginLeft: 0, marginRight: "auto" }
+      ? { marginLeft: offset ?? 0, marginRight: "auto" }
       : align === "right"
-        ? { marginLeft: "auto", marginRight: 0 }
+        ? { marginLeft: "auto", marginRight: offset ?? 0 }
         : {}),
   };
+}
+
+/** "50%" → 50; null, which is full width, → 100. */
+function widthPercent(width: string | null): number {
+  return width ? parseFloat(width) : 100;
+}
+
+/**
+ * A push that still fits beside something this wide, or null. Past the room
+ * left over, a pushed picture would hang off the far edge of the page.
+ */
+function fittingOffset(offset: string | null, width: string | null): string | null {
+  if (!offset) return null;
+  const n = Math.min(parseFloat(offset), 100 - widthPercent(width));
+  return n >= 1 ? `${Math.round(n)}%` : null;
 }
 
 /** The image node, taught to carry a width — written as an inline style the
@@ -109,6 +164,7 @@ const SizedImage = Image.extend({
         renderHTML: (attributes: { height?: string | null }) =>
           attributes.height ? { style: `height: ${attributes.height}` } : {},
       },
+      offset: SIZE_AND_ALIGN.offset,
       align: SIZE_AND_ALIGN.align,
       // Lives in the <figcaption>, never on the img tag itself.
       caption: {
@@ -132,20 +188,14 @@ const SizedImage = Image.extend({
           if (typeof element === "string") return false;
           const img = element.querySelector("img");
           if (!img?.getAttribute("src")) return false;
-          const left = img.style.marginLeft;
-          const right = img.style.marginRight;
           return {
             src: img.getAttribute("src"),
             alt: img.getAttribute("alt"),
             title: img.getAttribute("title"),
             width: img.style.width || null,
             height: img.style.height || null,
-            align:
-              left === "0px" && right === "auto"
-                ? "left"
-                : left === "auto" && right === "0px"
-                  ? "right"
-                  : null,
+            align: alignFrom(img),
+            offset: offsetFrom(img),
             caption: element.querySelector("figcaption")?.textContent?.trim() || null,
             captionItalic:
               element.querySelector("figcaption")?.style.fontStyle !== "normal",
@@ -185,6 +235,7 @@ function VideoBlockView({ node, selected }: NodeViewProps) {
       style={sizeStyle(
         (node.attrs.width as string | null) ?? null,
         (node.attrs.align as string | null) ?? null,
+        (node.attrs.offset as string | null) ?? null,
       )}
       data-drag-handle
     >
@@ -227,6 +278,7 @@ const YoutubeVideo = Node.create({
           attributes.videoId ? { "data-youtube": attributes.videoId } : {},
       },
       width: SIZE_AND_ALIGN.width,
+      offset: SIZE_AND_ALIGN.offset,
       align: SIZE_AND_ALIGN.align,
     };
   },
@@ -244,9 +296,105 @@ const YoutubeVideo = Node.create({
 /** Quick stops for the image width, alongside the free-typed box. */
 const IMAGE_SIZES = ["25%", "50%", "75%", "100%"];
 
+/** Quick stops for the push from the side, alongside its own typed box. */
+const OFFSETS = ["0%", "10%", "20%", "30%"];
+
 const PANEL_LABEL = "text-[9px] font-black uppercase tracking-widest text-neutral-500";
 const PANEL_INPUT =
   "h-7 rounded-md border border-white/10 bg-neutral-950/60 px-1.5 text-[11px] font-bold tabular-nums text-white outline-none focus:border-[var(--brand)]/60 placeholder-neutral-500";
+
+/**
+ * "Lề": how far the selected picture or video is pushed in from the side it
+ * leans to, as a percent of the column. Shared by both panels.
+ *
+ * It goes with the side buttons rather than beside them. A centred element
+ * has no side to push from, so typing a push there makes it lean left with
+ * that push — no second click needed. A full-width one is halved first, as
+ * picking a side does. The push never runs past the room beside the element:
+ * a picture pushed off the page is the one result nobody wants.
+ */
+function OffsetControls({
+  editor,
+  nodeType,
+  width,
+  align,
+  offset,
+}: {
+  editor: Editor;
+  nodeType: "image" | "youtubeVideo";
+  width: string | null;
+  align: string | null;
+  offset: string | null;
+}) {
+  const [draft, setDraft] = useState((offset ?? "0%").replace("%", ""));
+  // The quick stops and the side buttons write the push from outside the
+  // draft — follow them, via the adjust-during-render pattern.
+  const [seen, setSeen] = useState(offset);
+  if (seen !== offset) {
+    setSeen(offset);
+    setDraft((offset ?? "0%").replace("%", ""));
+  }
+
+  function apply(n: number) {
+    if (!n) {
+      editor.chain().focus().updateAttributes(nodeType, { offset: null }).run();
+      return;
+    }
+    const nextWidth = width ?? "50%";
+    editor
+      .chain()
+      .focus()
+      .updateAttributes(nodeType, {
+        width: nextWidth,
+        align: align ?? "left",
+        offset: fittingOffset(`${n}%`, nextWidth),
+      })
+      .run();
+  }
+
+  const current = offset ?? "0%";
+  return (
+    <>
+      <span aria-hidden className="h-4 w-px bg-white/[0.08]" />
+      <span className={PANEL_LABEL} title="Khoảng cách từ mép bên đang căn">
+        Lề
+      </span>
+      <input
+        aria-label="Lề: khoảng cách từ mép bên đang căn (phần trăm, Enter để áp dụng)"
+        value={draft}
+        onChange={(event) => setDraft(event.target.value.replace(/\D/g, "").slice(0, 2))}
+        onBlur={() => apply(Number(draft) || 0)}
+        onKeyDown={(event) => {
+          if (event.key === "Enter") {
+            event.preventDefault();
+            apply(Number(draft) || 0);
+          }
+        }}
+        className={`${PANEL_INPUT} w-10 text-center ${align ? "" : "opacity-60"}`}
+      />
+      <span className="text-[10px] font-bold text-neutral-500">%</span>
+      {OFFSETS.map((stop) => {
+        const on = current === stop;
+        return (
+          <button
+            key={stop}
+            type="button"
+            title={stop === "0%" ? "Sát mép" : `Đẩy vào ${stop} từ mép`}
+            onMouseDown={(event) => event.preventDefault()}
+            onClick={() => apply(parseFloat(stop))}
+            className={`h-7 rounded-md px-1.5 text-[10px] font-black tabular-nums transition-colors ${
+              on
+                ? "bg-[var(--brand)]/25 text-white"
+                : "text-neutral-400 hover:bg-white/[0.08] hover:text-white"
+            }`}
+          >
+            {stop}
+          </button>
+        );
+      })}
+    </>
+  );
+}
 
 /**
  * Everything about the selected image, in one visible panel.
@@ -265,6 +413,7 @@ function ImagePanelInner({ editor }: { editor: Editor }) {
   const width = (attrs.width as string | null) ?? null;
   const height = (attrs.height as string | null) ?? null;
   const align = (attrs.align as string | null) ?? null;
+  const offset = (attrs.offset as string | null) ?? null;
   const caption = (attrs.caption as string | null) ?? "";
   const captionItalic = (attrs.captionItalic as boolean) !== false;
 
@@ -283,7 +432,11 @@ function ImagePanelInner({ editor }: { editor: Editor }) {
   function commitWidth() {
     const n = Number(wDraft.replace(/\D/g, ""));
     const value = !n || n >= 100 ? null : `${Math.max(10, Math.min(100, n))}%`;
-    editor.chain().updateAttributes("image", { width: value }).run();
+    // A wider picture leaves less room beside it; the push shrinks to fit.
+    editor
+      .chain()
+      .updateAttributes("image", { width: value, offset: fittingOffset(offset, value) })
+      .run();
   }
 
   function commitHeight() {
@@ -325,13 +478,14 @@ function ImagePanelInner({ editor }: { editor: Editor }) {
             type="button"
             title={`Ảnh rộng ${size}`}
             onMouseDown={(event) => event.preventDefault()}
-            onClick={() =>
+            onClick={() => {
+              const value = size === "100%" ? null : size;
               editor
                 .chain()
                 .focus()
-                .updateAttributes("image", { width: size === "100%" ? null : size })
-                .run()
-            }
+                .updateAttributes("image", { width: value, offset: fittingOffset(offset, value) })
+                .run();
+            }}
             className={`h-7 rounded-md px-1.5 text-[10px] font-black tabular-nums transition-colors ${
               on
                 ? "bg-[var(--brand)]/25 text-white"
@@ -382,6 +536,9 @@ function ImagePanelInner({ editor }: { editor: Editor }) {
                   // A full-width image cannot visibly lean — picking a side
                   // shrinks it to half so the choice shows immediately.
                   ...(value && !width ? { width: "50%" } : {}),
+                  // Centred has no side to push from; switching sides keeps
+                  // the push.
+                  offset: value ? offset : null,
                 })
                 .run()
             }
@@ -395,6 +552,14 @@ function ImagePanelInner({ editor }: { editor: Editor }) {
           </button>
         );
       })}
+
+      <OffsetControls
+        editor={editor}
+        nodeType="image"
+        width={width}
+        align={align}
+        offset={offset}
+      />
 
       <span aria-hidden className="h-4 w-px bg-white/[0.08]" />
       <span className={PANEL_LABEL}>Chú thích</span>
@@ -451,9 +616,10 @@ function ImagePanelInner({ editor }: { editor: Editor }) {
 }
 
 /**
- * The selected video block's width and side, in the picture panel's own
- * shape: the same box, the same quick stops, the same three sides. A video
- * has no height of its own (it is always 16:9), no caption and no alt.
+ * The selected video block's width, side and push, in the picture panel's
+ * own shape: the same box, the same quick stops, the same three sides, the
+ * same "Lề". A video has no height of its own (it is always 16:9), no
+ * caption and no alt.
  */
 function VideoPanel({ editor }: { editor: Editor }) {
   // Remount per selected node, so the draft resets when another video is picked.
@@ -464,6 +630,7 @@ function VideoPanelInner({ editor }: { editor: Editor }) {
   const attrs = editor.getAttributes("youtubeVideo");
   const width = (attrs.width as string | null) ?? null;
   const align = (attrs.align as string | null) ?? null;
+  const offset = (attrs.offset as string | null) ?? null;
   const id = (attrs.videoId as string | null) ?? null;
 
   const [wDraft, setWDraft] = useState((width ?? "100%").replace("%", ""));
@@ -478,7 +645,11 @@ function VideoPanelInner({ editor }: { editor: Editor }) {
   function commitWidth() {
     const n = Number(wDraft.replace(/\D/g, ""));
     const value = !n || n >= 100 ? null : `${Math.max(10, Math.min(100, n))}%`;
-    editor.chain().updateAttributes("youtubeVideo", { width: value }).run();
+    // A wider video leaves less room beside it; the push shrinks to fit.
+    editor
+      .chain()
+      .updateAttributes("youtubeVideo", { width: value, offset: fittingOffset(offset, value) })
+      .run();
   }
 
   return (
@@ -511,13 +682,17 @@ function VideoPanelInner({ editor }: { editor: Editor }) {
             type="button"
             title={`Video rộng ${size}`}
             onMouseDown={(event) => event.preventDefault()}
-            onClick={() =>
+            onClick={() => {
+              const value = size === "100%" ? null : size;
               editor
                 .chain()
                 .focus()
-                .updateAttributes("youtubeVideo", { width: size === "100%" ? null : size })
-                .run()
-            }
+                .updateAttributes("youtubeVideo", {
+                  width: value,
+                  offset: fittingOffset(offset, value),
+                })
+                .run();
+            }}
             className={`h-7 rounded-md px-1.5 text-[10px] font-black tabular-nums transition-colors ${
               on
                 ? "bg-[var(--brand)]/25 text-white"
@@ -555,6 +730,9 @@ function VideoPanelInner({ editor }: { editor: Editor }) {
                   // A full-width video cannot visibly lean — picking a side
                   // shrinks it to half so the choice shows, as with pictures.
                   ...(value && !width ? { width: "50%" } : {}),
+                  // Centred has no side to push from; switching sides keeps
+                  // the push.
+                  offset: value ? offset : null,
                 })
                 .run()
             }
@@ -568,6 +746,14 @@ function VideoPanelInner({ editor }: { editor: Editor }) {
           </button>
         );
       })}
+
+      <OffsetControls
+        editor={editor}
+        nodeType="youtubeVideo"
+        width={width}
+        align={align}
+        offset={offset}
+      />
 
       {id ? (
         <>

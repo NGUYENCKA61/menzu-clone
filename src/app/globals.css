@@ -995,11 +995,19 @@ body.lightbox-open .site-nav {
   object-fit: cover;
 }
 /* On a phone every video takes the whole width: at 50% of a phone the player
-   is too small to watch, whatever size it was given on a desktop. */
+   is too small to watch, whatever size it was given on a desktop. A picture
+   keeps its width but loses its push ("Lề"), which on a narrow screen only
+   squeezes it — it sits flush against the side it leans to instead. */
 @media (max-width: 639px) {
   .doc-prose .doc-video {
     width: 100% !important;
     margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+  .doc-prose img[data-offset="left"] {
+    margin-left: 0 !important;
+  }
+  .doc-prose img[data-offset="right"] {
     margin-right: 0 !important;
   }
 }

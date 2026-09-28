@@ -20,8 +20,13 @@ const COLOR_VALUE = [/^#(?:[0-9a-f]{3}|[0-9a-f]{6}|[0-9a-f]{8})$/i, /^rgba?\([\d
 
 /** A width the editor's size box can write: a whole or decimal percent. */
 const WIDTH_PERCENT = [/^(?:100|[1-9]?\d)(?:\.\d+)?%$/];
-/** The margins the editor's left / right alignment writes. */
-const SIDE_MARGIN = [/^(?:0(?:px)?|auto)$/];
+/** The margins the editor's left / right alignment writes: flush (0), the
+ *  free side (auto), or a push in from the leaning side ("Lề", under 100%). */
+const SIDE_MARGIN = [/^(?:0(?:px)?|auto|\d{1,2}(?:\.\d+)?%)$/];
+
+/** Which side a picture or video is pushed in from — the only two values the
+ *  editor writes, and the hook a phone uses to drop the push. */
+const OFFSET_SIDE = { name: "data-offset", multiple: false, values: ["left", "right"] };
 
 /**
  * Whether an inline colour would vanish on the shop's near-black page.
@@ -111,13 +116,13 @@ export function sanitizeDocHtml(html: string): string {
     ],
     allowedAttributes: {
       a: ["href", "rel", "target"],
-      img: ["src", "alt", "style"],
+      img: ["src", "alt", "style", OFFSET_SIDE],
       span: ["style"],
       p: ["style"],
       h2: ["style"],
       h3: ["style"],
       figcaption: ["style"],
-      div: ["data-youtube", "style"],
+      div: ["data-youtube", "style", OFFSET_SIDE],
     },
     allowedSchemes: ["http", "https", "mailto"],
     allowedStyles: {
