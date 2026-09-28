@@ -177,7 +177,14 @@ export default async function ProductPage({ params, searchParams }: PageProps) {
     const similarShown = (
       isFreeTool(software.packages) ? similar : similar.filter((s) => !isFreeTool(s.packages))
     ).slice(0, 9);
-    const setupGuideAccess = !user ? "guest" : bought ? "unlocked" : "locked";
+    // The shop's own admins read it too: they wrote it, and checking a guide —
+    // the video in it above all — should not take buying a key from their own
+    // shop. The role comes from the database row, not the cookie.
+    const setupGuideAccess = !user
+      ? "guest"
+      : bought || user.role === "ADMIN"
+        ? "unlocked"
+        : "locked";
     const shown =
       setupGuideAccess === "unlocked"
         ? software

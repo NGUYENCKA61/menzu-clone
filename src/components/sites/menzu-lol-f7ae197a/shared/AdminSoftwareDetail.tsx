@@ -1196,7 +1196,8 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
           trong game. <span className="text-neutral-400">Chỉ khách đã thuê key của tool
           này mới đọc được</span>; người khác thấy ô khoá &ldquo;Mở khoá sau khi thuê
           key&rdquo;. Muốn chèn video: dán link YouTube (nên để &ldquo;Không công
-          khai&rdquo;) thành một dòng riêng — video cũng chỉ khách đã mua mới thấy. Để
+          khai&rdquo;) thành một dòng riêng — video cũng chỉ khách đã mua mới thấy.
+          Tài khoản admin luôn xem được khu này trên trang khách để kiểm tra. Để
           trống thì khách đã mua thấy câu mặc định chung của shop.
         </p>
         <div className="flex flex-wrap items-center gap-3">
