@@ -14,6 +14,7 @@ import type { ProductRequirement } from "@/lib/productRequirements";
 import { productHref } from "@/lib/routes";
 
 import { BadgeIcon } from "./BadgeIcon";
+import { PriceBox } from "./PriceBox";
 import { formatVnd } from "./productData";
 import { SoftwareCheckoutDialog } from "./SoftwareCheckoutDialog";
 import { StickyBuyBar } from "./StickyBuyBar";
@@ -312,48 +313,19 @@ export function SoftwareBuyPanel({
         </div>
       ) : null}
 
-      <div className="space-y-2">
-        <p className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-          <span className="text-3xl sm:text-4xl font-black text-white">{formatVnd(total)}đ</span>
-          {chosen?.listPrice ? (
-            // The tier is on flash sale: what it costs off sale, crossed out,
-            // and the percent the sale takes off.
-            <>
-              <span className="text-base sm:text-lg font-bold text-neutral-500 line-through">
-                {formatVnd(chosen.listPrice * quantity)}đ
-              </span>
-              <span className="rounded-md bg-[var(--menzu-accent)]/15 px-2 py-0.5 text-[12px] font-black text-[var(--menzu-accent)]">
-                -{Math.round((1 - chosen.price / chosen.listPrice) * 100)}%
-              </span>
-            </>
-          ) : null}
-        </p>
-        {/* What the tier works out at per day. The tiers run from three hours
-            to a month, and comparing 35.000đ against 100.000đ in your head
-            while the labels say "7 ngày" and "30 ngày" is arithmetic the page
-            can do — it is also the argument for the longer tier, which is the
-            one the shop would rather sell. Only from a day up: below that the
-            figure is a fraction of a day and says nothing. */}
-        {perDay !== null ? (
-          <p className="text-[12px] font-semibold text-neutral-500">
-            ≈ {formatVnd(perDay)}đ/ngày
-          </p>
-        ) : null}
-        <p className="flex items-center gap-2 text-[13px] font-semibold">
-          <span
-            className={`h-1.5 w-1.5 rounded-full ${
-              software.inStock ? "bg-emerald-500" : "bg-neutral-600"
-            }`}
-          />
-          <span
-            className={
-              software.inStock ? "text-emerald-400" : "text-neutral-500"
-            }
-          >
-            {software.inStock ? "Còn hàng" : "Tạm hết hàng"}
-          </span>
-        </p>
-      </div>
+      {/* The price, any sale on the tier, what the tier works out at per day
+          and whether it is in stock, together in one box. The per-day figure
+          because the tiers run from three hours to a month, and comparing
+          35.000đ against 100.000đ in your head while the labels say "7 ngày"
+          and "30 ngày" is arithmetic the page can do — it is also the argument
+          for the longer tier, which is the one the shop would rather sell. */}
+      <PriceBox
+        price={total}
+        listPrice={chosen?.listPrice ? chosen.listPrice * quantity : null}
+        perDay={perDay}
+        inStock={software.inStock}
+        stockText={software.inStock ? "Còn hàng" : "Tạm hết hàng"}
+      />
 
       <div className="flex items-center gap-3">
         <span className="text-[13px] font-semibold text-neutral-400">
