@@ -287,7 +287,12 @@ export async function SiteFooter() {
               {wordmark}
               <span className="text-neutral-400">.COM</span>
             </span>
-            . All rights reserved.
+            {/* Parted by dots rather than full stops, as menzu parts its
+                footer: a full stop straight after ".COM" read as a stutter. */}
+            <span aria-hidden className="mx-2 text-neutral-700">
+              •
+            </span>
+            All rights reserved
             {/* Who built it, signed the way menzu signs its footer: after the
                 copyright from md up, on a line of its own on a phone, where a
                 separator would be left hanging at the end of a wrapped line. */}
