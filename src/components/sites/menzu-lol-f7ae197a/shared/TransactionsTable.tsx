@@ -39,9 +39,13 @@ export interface LedgerView {
 }
 
 /*
- * Every class below is menzu's /transactions, measured off the live page.
- * Its violet (the title's mark, the current page) is the shop's accent; its
- * green and red are what money did.
+ * menzu's /transactions, measured off the live page — the panel, the search
+ * and filter menu, the before/after balances, the status pill and eye, the
+ * pager — with the shop's own columns kept from the ledger it replaced:
+ * Thời gian and Mã GD each stand on their own, as the owner asked
+ * (28/09/2026; its Loại glyph column was tried and dropped the same night).
+ * menzu's violet (the title's mark, the current page) is the shop's accent;
+ * its green and red are what money did.
  */
 
 /** menzu shows ten to a page. */
@@ -53,6 +57,7 @@ const STATUS: Record<string, { label: string; tone: string }> = {
   FAILED: { label: "Thất bại", tone: "text-red-400 border-red-500/20 bg-red-500/10" },
 };
 
+/** A row's kind in words, for a row that carries no method of its own. */
 const KIND_LABEL: Record<string, string> = {
   TOPUP: "Nạp tiền",
   PURCHASE: "Mua hàng",
@@ -60,6 +65,12 @@ const KIND_LABEL: Record<string, string> = {
   REWARD: "Thưởng",
   ADJUSTMENT: "Điều chỉnh",
 };
+
+/** "22:55 - 28/09/2026" as its clock and its date. */
+function splitStamp(stamp: string): [string, string] {
+  const [clock = stamp, date = ""] = stamp.split(" - ");
+  return [clock, date];
+}
 
 const FIELD =
   "w-full bg-white/[0.03] border border-white/10 hover:border-white/20 text-white text-sm rounded-xl pl-3.5 pr-10 py-3 outline-none focus:border-emerald-500/50 transition-colors appearance-none cursor-pointer";
@@ -404,60 +415,80 @@ export function TransactionsTable({ rows }: { rows: LedgerView[] }) {
               </div>
             </div>
 
-            <div className="hidden md:block border border-white/5 bg-[#111111] rounded-[16px] overflow-hidden relative z-10">
+            {/* Five columns want about 800px, which the account column only
+                has from xl; below that each transaction is a card, as the
+                old ledger did, rather than a table scrolled sideways. */}
+            <div className="hidden xl:block border border-white/5 bg-[#111111] rounded-[16px] overflow-hidden relative z-10">
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs min-w-[700px]">
+                <table className="w-full table-fixed text-left text-xs min-w-[800px]">
+                  {/* Fixed shares, so a long description wraps inside its own
+                      column instead of squeezing the figures. */}
+                  <colgroup>
+                    <col className="w-[12%]" />
+                    <col className="w-[15%]" />
+                    <col className="w-[31%]" />
+                    <col className="w-[21%]" />
+                    <col className="w-[21%]" />
+                  </colgroup>
                   <thead className="bg-white/[0.02] border-b border-white/5 uppercase tracking-widest text-neutral-500">
                     <tr>
-                      <th scope="col" className="px-5 py-4 font-bold">Mã GD &amp; Thời gian</th>
-                      <th scope="col" className="px-5 py-4 font-bold">Chi tiết &amp; Phương thức</th>
-                      <th scope="col" className="px-5 py-4 font-bold text-right">Biến động &amp; Số dư</th>
-                      <th scope="col" className="pl-5 pr-[60px] py-4 font-bold text-center">Trạng thái</th>
+                      <th scope="col" className="pl-5 pr-4 py-4 font-bold whitespace-nowrap">Thời gian</th>
+                      <th scope="col" className="px-4 py-4 font-bold whitespace-nowrap">Mã GD</th>
+                      <th scope="col" className="px-4 py-4 font-bold whitespace-nowrap">Chi tiết &amp; Phương thức</th>
+                      <th scope="col" className="px-4 py-4 font-bold whitespace-nowrap text-right">Biến động &amp; Số dư</th>
+                      <th scope="col" className="pl-4 pr-[52px] py-4 font-bold whitespace-nowrap text-center">Trạng thái</th>
                     </tr>
                   </thead>
                   <tbody>
                     {visible.length === 0 ? (
                       <tr>
-                        <td colSpan={4} className="px-5 py-14 text-center text-sm text-neutral-500">
+                        <td colSpan={5} className="px-5 py-14 text-center text-sm text-neutral-500">
                           Không tìm thấy giao dịch nào phù hợp.
                         </td>
                       </tr>
                     ) : (
-                      visible.map((row) => (
-                        <tr
-                          key={row.code}
-                          className="border-b border-white/5 hover:bg-white/[0.02] transition-colors group"
-                        >
-                          <td className="px-5 py-4 align-middle">
-                            <span className="font-bold text-neutral-300 block mb-1">#{row.code}</span>
-                            <span className="text-[10px] text-neutral-500 font-mono">{row.createdAt}</span>
-                          </td>
-                          <td className="px-5 py-4 align-middle">
-                            <span className="font-bold text-neutral-200 block mb-1">{row.description}</span>
-                            <span className="text-[9px] text-neutral-500 uppercase tracking-widest bg-white/5 px-2 py-0.5 rounded inline-block mb-2">
-                              {methodChip(row)}
-                            </span>
-                          </td>
-                          <td className="px-5 py-4 text-right align-middle">
-                            <Amount row={row} />
-                          </td>
-                          <td className="px-5 py-4 align-middle">
-                            <div className="flex items-center justify-center gap-2">
-                              <div className="w-[100px] flex justify-center">
-                                <StatusPill status={row.status} />
+                      visible.map((row) => {
+                        const [clock, date] = splitStamp(row.createdAt);
+                        return (
+                          <tr
+                            key={row.code}
+                            className="border-b border-white/5 hover:bg-white/[0.02] transition-colors group"
+                          >
+                            {/* The clock on top, the date under it. */}
+                            <td className="pl-5 pr-4 py-4 align-middle whitespace-nowrap">
+                              <span className="font-bold text-neutral-200 block mb-1 tabular-nums">{clock}</span>
+                              <span className="text-[10px] text-neutral-500 font-mono">{date}</span>
+                            </td>
+                            <td className="px-4 py-4 align-middle">
+                              <span className="font-bold text-neutral-300 font-mono break-all">#{row.code}</span>
+                            </td>
+                            <td className="px-4 py-4 align-middle">
+                              <span className="font-bold text-neutral-200 block mb-1">{row.description}</span>
+                              <span className="text-[9px] text-neutral-500 uppercase tracking-widest bg-white/5 px-2 py-0.5 rounded inline-block">
+                                {methodChip(row)}
+                              </span>
+                            </td>
+                            <td className="px-4 py-4 text-right align-middle">
+                              <Amount row={row} />
+                            </td>
+                            <td className="pl-4 pr-3 py-4 align-middle">
+                              <div className="flex items-center justify-center gap-2">
+                                <div className="w-[100px] flex justify-center">
+                                  <StatusPill status={row.status} />
+                                </div>
+                                <div className="w-8 flex justify-center">{eye(row, false)}</div>
                               </div>
-                              <div className="w-8 flex justify-center">{eye(row, false)}</div>
-                            </div>
-                          </td>
-                        </tr>
-                      ))
+                            </td>
+                          </tr>
+                        );
+                      })
                     )}
                   </tbody>
                 </table>
               </div>
             </div>
 
-            <div className="md:hidden flex flex-col gap-3 relative z-10">
+            <div className="xl:hidden flex flex-col gap-3 relative z-10">
               {visible.length === 0 ? (
                 <div className="p-8 text-center bg-white/[0.02] border border-white/5 rounded-2xl">
                   <p className="text-neutral-500 text-sm">Không tìm thấy giao dịch nào phù hợp.</p>
