@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { notFound, permanentRedirect } from "next/navigation";
 
 import { Breadcrumb } from "@/components/sites/menzu-lol-f7ae197a/shared/Breadcrumb";
+import { CategoryHero } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/CategoryHero";
 import { CategoryFilterPanel } from "@/components/sites/menzu-lol-f7ae197a/shared/CategoryFilterPanel";
 import { ProductCard } from "@/components/sites/menzu-lol-f7ae197a/shared/ProductCard";
 import { CardBoundary } from "@/components/sites/menzu-lol-f7ae197a/shared/CardBoundary";
@@ -53,22 +54,6 @@ const SOFTWARE_STATUSES = {
   updating: "UPDATING",
   detected: "DETECTED",
 } as const;
-
-/**
- * The shop's own line about this shelf, under the shelf's heading.
- *
- * It was written in the admin and printed only on the home page's tile, which
- * left every category page — most of the shop's addresses — with no prose of
- * its own at all: nothing for a reader arriving from a search to read, and
- * nothing for the search to have found. Drawn nothing when the shop has
- * written nothing, rather than a blank line where it would be.
- */
-function CategoryBlurb({ text }: { text: string }) {
-  if (!text.trim()) return null;
-  return (
-    <p className="max-w-[760px] text-[13px] leading-relaxed text-neutral-400">{text}</p>
-  );
-}
 
 /** A blank or junk parameter means "no filter", never an error page. */
 function toAmount(raw: string | undefined): number | undefined {
@@ -208,20 +193,21 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
         ])}
       />
       {shelf ? <JsonLd data={shelf} /> : null}
-          {/* pb-24 matches the account page's resting gap before the footer. */}
-          <div className="max-w-[1320px] mx-auto px-4 lg:px-6 pt-12 pb-24">
-            <Breadcrumb
-              items={[{ label: "Trang chủ", href: "/" }, { label: data.name }]}
-            />
+          {/* The shelf's name as the page's h1, over its picture, with the
+              breadcrumb and the shop's sentence about it — menzu's header. */}
+          <CategoryHero
+            name={data.name}
+            description={data.description}
+            imageUrl={data.imageUrl}
+            breadcrumb={
+              <Breadcrumb
+                items={[{ label: "Trang chủ", href: "/" }, { label: data.name }]}
+              />
+            }
+          />
 
-            {/* The page's one top-level heading. The design has no room for a
-                title — the breadcrumb already names the shelf and the two
-                section headings do the visible work — but a page with no h1
-                gives a screen reader no statement of where it is and a crawler
-                no title for it. Read, not drawn, and it keeps the two shelf
-                headings at h2 so the outline runs h1 → h2 → h3 without a
-                gap. */}
-            <h1 className="sr-only">Danh mục {data.name}</h1>
+          {/* pb-24 matches the account page's resting gap before the footer. */}
+          <div className="max-w-[1320px] mx-auto px-4 lg:px-6 pt-2 pb-24">
 
             {/* Software first, with its own search: the panel below filters on
                 rank, skins and a price band, none of which describe a tool, so
@@ -231,12 +217,9 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
                 {/* Named after the shelf, not the kind of goods: "Danh mục Hack
                     Valorant" says where you are, where "Phần mềm" only said
                     what these tiles were. */}
-                <div className="flex flex-col gap-2.5">
-                  <h2 className="text-lg sm:text-xl font-black uppercase tracking-wider text-white">
-                    Danh mục {data.name}
-                  </h2>
-                  <CategoryBlurb text={data.description} />
-                </div>
+                {/* Read, not drawn: the header above already names the shelf
+                    and says its sentence. It keeps the outline h1 → h2. */}
+                <h2 className="sr-only">Danh mục {data.name}</h2>
                 <SoftwareFilterPanel
                   hint={softwareSearchHint(
                     data.name,
@@ -287,15 +270,6 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
                   Danh mục tài khoản game{" "}
                   {data.name.replace(/^(tool\s+)?hack\s*\+?\s*/i, "").trim() || data.name}
                 </h2>
-
-                {/* Only when the tools above did not already carry it: the
-                    sentence describes the shelf, and a shelf says a thing
-                    about itself once. */}
-                {data.softwareTotal > 0 ? null : (
-                  <div className="mb-5">
-                    <CategoryBlurb text={data.description} />
-                  </div>
-                )}
 
                 <CategoryFilterPanel hotPicks={hotPicks} />
 

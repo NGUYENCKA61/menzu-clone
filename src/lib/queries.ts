@@ -195,6 +195,8 @@ export interface CategoryPageData {
   slug: string;
   /** The shop's own line about this shelf; "" when it has written none. */
   description: string;
+  /** The shelf's picture (its home tile's), drawn across the top of its page. */
+  imageUrl: string | null;
   /** Accounts. Paged, filtered and sorted by the panel above the grid. */
   products: Product[];
   /**
@@ -545,6 +547,7 @@ export async function getCategoryPage(
     // tile. It is the only sentence about this shelf the shop has written,
     // and this is the page it was written about.
     description: category.description ?? "",
+    imageUrl: category.imageUrl,
     total,
     accountTotal,
     softwareTotal,
