@@ -1,12 +1,9 @@
 import Link from "next/link";
 import { MessageSquareText, PenLine, Star } from "lucide-react";
 
-import { RevealGrid } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/RevealGrid";
-import {
-  ReviewCard,
-  Stars,
-  type Review,
-} from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/ReviewsSection";
+import { Stars } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/ReviewsSection";
+
+import { ProductReviewList, type ProductReviewItem } from "./ProductReviewList";
 
 /**
  * Below this many reviews the average is left out: "5,0/5" over one review
@@ -14,9 +11,13 @@ import {
  */
 const MIN_FOR_SCORE = 3;
 
+/** Where the page strip scrolls back to when it turns the page. */
+const SECTION_ID = "danh-gia-san-pham";
+
 export interface ProductReviewsData {
-  /** The newest few, already masked and formatted for the card. */
-  reviews: Review[];
+  /** Every approved review of this tool, newest first, already masked and
+   *  formatted — the list pages through them in the browser. */
+  reviews: ProductReviewItem[];
   /** Every approved review of this tool. */
   count: number;
   average: number | null;
@@ -52,9 +53,12 @@ export function ProductReviews({ data }: { data: ProductReviewsData }) {
   ) : null;
 
   return (
+    // scroll-mt keeps the heading clear of the fixed header when a turn of
+    // the page scrolls back up to it.
     <section
+      id={SECTION_ID}
       aria-labelledby="product-reviews-heading"
-      className="mx-auto w-full max-w-[1320px] px-4 pb-14 lg:px-6"
+      className="mx-auto w-full max-w-[1320px] scroll-mt-[120px] px-4 pb-14 lg:px-6"
     >
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5">
@@ -87,19 +91,12 @@ export function ProductReviews({ data }: { data: ProductReviewsData }) {
         {reviews.length > 0 ? writeButton : null}
       </div>
 
+      {/* A list rather than the home page's card grid — the owner's pick,
+          "C" — because a tool gathers its reviews one buyer at a time: one
+          or two cards left most of a three-wide grid empty, where a list
+          reads the same at one review or fifty. Paged five at a time. */}
       {reviews.length > 0 ? (
-        <>
-          <RevealGrid className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:grid lg:grid-cols-3 lg:overflow-visible lg:pb-0">
-            {reviews.map((review, index) => (
-              <ReviewCard key={`${review.name}-${review.date}-${index}`} review={review} index={index} />
-            ))}
-          </RevealGrid>
-          {count > reviews.length ? (
-            <p className="mt-4 text-center text-xs text-neutral-500">
-              Đang hiện {reviews.length} đánh giá mới nhất trong tổng số {count}.
-            </p>
-          ) : null}
-        </>
+        <ProductReviewList items={reviews} anchorId={SECTION_ID} />
       ) : (
         <div className="flex flex-col items-center gap-2.5 rounded-2xl border border-dashed border-white/10 bg-white/[0.02] px-5 py-10 text-center">
           <span className="grid h-11 w-11 place-items-center rounded-full bg-amber-400/10 text-amber-400">

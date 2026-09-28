@@ -89,27 +89,37 @@ export function StarRow({ rating, size = 13 }: { rating: number; size?: number }
 /**
  * The avatar in its accent ring. Anonymous reviews get the original's light-grey
  * incognito disc; a signed reviewer without a picture gets their initial.
+ * `compact` is the 40px one a tool's page lists its reviews with.
  */
 export function ReviewAvatar({
   name,
   avatarUrl,
   anonymous,
+  compact = false,
 }: {
   name: string;
   avatarUrl: string | null;
   anonymous: boolean;
+  compact?: boolean;
 }) {
   return (
     <div className="relative inline-block shrink-0 rounded-full p-[2px] border-[2.5px] border-[var(--menzu-accent)]">
-      <div className="w-11 h-11 sm:w-[50px] sm:h-[50px] rounded-full overflow-hidden flex items-center justify-center bg-neutral-800">
+      <div
+        className={`${
+          compact ? "w-10 h-10" : "w-11 h-11 sm:w-[50px] sm:h-[50px]"
+        } rounded-full overflow-hidden flex items-center justify-center bg-neutral-800`}
+      >
         {anonymous ? (
           <div className="w-full h-full bg-[#D1D5DB] flex items-center justify-center">
-            <VenetianMask className="w-6 h-6 text-neutral-700 opacity-80" />
+            <VenetianMask className={`${compact ? "w-5 h-5" : "w-6 h-6"} text-neutral-700 opacity-80`} />
           </div>
         ) : avatarUrl ? (
           <Image src={avatarUrl} alt="" width={50} height={50} className="w-full h-full object-cover" />
         ) : (
-          <span aria-hidden className="text-base font-black uppercase text-neutral-400">
+          <span
+            aria-hidden
+            className={`${compact ? "text-sm" : "text-base"} font-black uppercase text-neutral-400`}
+          >
             {name.slice(0, 1)}
           </span>
         )}
@@ -351,49 +361,68 @@ export function FeedbackBoard({ items }: { items: FeedbackItem[] }) {
       )}
 
       {totalPages > 1 ? (
-        <div className="flex justify-center mt-10">
-          <nav className="isolate inline-flex rounded-xl gap-1.5 items-center justify-center" aria-label="Phân trang">
-            <button
-              type="button"
-              title="Trang trước"
-              disabled={current <= 1}
-              onClick={() => jumpTo(current - 1)}
-              className={ARROW_BTN}
-            >
-              <ChevronLeft size={16} />
-            </button>
-            {pageStrip(current, totalPages).map((p, i) =>
-              p === GAP ? (
-                <span
-                  key={`gap-${i}`}
-                  className="w-10 h-10 flex items-center justify-center text-neutral-500 text-sm font-bold select-none"
-                >
-                  ...
-                </span>
-              ) : (
-                <button
-                  key={p}
-                  type="button"
-                  aria-current={p === current ? "page" : undefined}
-                  onClick={() => jumpTo(p)}
-                  className={p === current ? PAGE_ON : PAGE_OFF}
-                >
-                  {p}
-                </button>
-              ),
-            )}
-            <button
-              type="button"
-              title="Trang sau"
-              disabled={current >= totalPages}
-              onClick={() => jumpTo(current + 1)}
-              className={ARROW_BTN}
-            >
-              <ChevronRight size={16} />
-            </button>
-          </nav>
-        </div>
+        <FeedbackPager current={current} totalPages={totalPages} onJump={jumpTo} />
       ) : null}
     </>
+  );
+}
+
+/**
+ * The page strip under a list of reviews: arrows either side, the first and
+ * last page always in reach. Its own component so a tool's page turns through
+ * its reviews with the same buttons this page does.
+ */
+export function FeedbackPager({
+  current,
+  totalPages,
+  onJump,
+}: {
+  current: number;
+  totalPages: number;
+  onJump: (page: number) => void;
+}) {
+  return (
+    <div className="flex justify-center mt-10">
+      <nav className="isolate inline-flex rounded-xl gap-1.5 items-center justify-center" aria-label="Phân trang">
+        <button
+          type="button"
+          title="Trang trước"
+          disabled={current <= 1}
+          onClick={() => onJump(current - 1)}
+          className={ARROW_BTN}
+        >
+          <ChevronLeft size={16} />
+        </button>
+        {pageStrip(current, totalPages).map((p, i) =>
+          p === GAP ? (
+            <span
+              key={`gap-${i}`}
+              className="w-10 h-10 flex items-center justify-center text-neutral-500 text-sm font-bold select-none"
+            >
+              ...
+            </span>
+          ) : (
+            <button
+              key={p}
+              type="button"
+              aria-current={p === current ? "page" : undefined}
+              onClick={() => onJump(p)}
+              className={p === current ? PAGE_ON : PAGE_OFF}
+            >
+              {p}
+            </button>
+          ),
+        )}
+        <button
+          type="button"
+          title="Trang sau"
+          disabled={current >= totalPages}
+          onClick={() => onJump(current + 1)}
+          className={ARROW_BTN}
+        >
+          <ChevronRight size={16} />
+        </button>
+      </nav>
+    </div>
   );
 }
