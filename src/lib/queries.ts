@@ -1242,51 +1242,6 @@ export async function getFeedback(take = 20): Promise<ReviewRow[]> {
   return rows.map(toReviewRow);
 }
 
-/**
- * One tool's own reviews, for its page: the approved ones written from a
- * receipt for it (Feedback → Order → Product). Reviews typed on the open form
- * carry no order, so they are about the shop rather than any one tool and
- * stay on /feedback. The count and average cover every approved review of
- * the tool; the rows are the newest `take`.
- */
-export async function getProductReviews(
-  productCode: string,
-  take = 6,
-): Promise<{ rows: ReviewRow[]; count: number; average: number | null }> {
-  const where = { approved: true, order: { product: { code: productCode } } };
-  const [rows, totals] = await Promise.all([
-    db.feedback.findMany({ where, orderBy: { createdAt: "desc" }, take }),
-    db.feedback.aggregate({ where, _count: { _all: true }, _avg: { rating: true } }),
-  ]);
-  return {
-    rows: rows.map(toReviewRow),
-    count: totals._count._all,
-    average: totals._avg.rating,
-  };
-}
-
-/**
- * The code of a buyer's latest paid order for a tool that has no review yet
- * — where the tool page's "Viết đánh giá" leads. Null when every such order
- * is reviewed, or there is none.
- */
-export async function reviewableOrderFor(
-  userId: string,
-  productCode: string,
-): Promise<string | null> {
-  const order = await db.order.findFirst({
-    where: {
-      userId,
-      status: "PAID",
-      product: { code: productCode },
-      feedback: { is: null },
-    },
-    orderBy: { createdAt: "desc" },
-    select: { code: true },
-  });
-  return order?.code ?? null;
-}
-
 
 // ---------------------------------------------------------------------------
 // Partners

@@ -8,12 +8,10 @@ import { formatVnd } from "@/components/sites/menzu-lol-f7ae197a/shared/productD
 import { docHtmlToPlainText, isHtmlBody } from "@/lib/docHtml";
 import {
   getAccountDetail,
-  getProductReviews,
   getSoftwareDetail,
   listSimilarSoftware,
   hasPaidOrderFor,
   resolveProduct,
-  reviewableOrderFor,
 } from "@/lib/queries";
 import { productHref } from "@/lib/routes";
 import { JsonLd, softwareJsonLd } from "@/lib/seo";
@@ -163,20 +161,16 @@ export default async function ProductPage({ params, searchParams }: PageProps) {
     // the view receives rather than hidden by it, and the HTML a browser gets
     // never carries a guide its reader has not paid for.
     const user = await getCurrentUser();
-    const [[bought, statusSubscribed, reviewOrder], similar, productReviews] = await Promise.all([
+    const [[bought, statusSubscribed], similar] = await Promise.all([
       user
         ? Promise.all([
             hasPaidOrderFor(user.id, software.code),
             isStatusSubscribed(user.id, software.code),
-            reviewableOrderFor(user.id, software.code),
           ])
-        : Promise.resolve([false, null, null] as const),
+        : Promise.resolve([false, null] as const),
       // Twelve, so that nine remain once free tools are set aside below:
       // three show at once on a desktop, the arrows bring in the rest.
       listSimilarSoftware(software.code, software.categorySlug, 12),
-      // Every approved review, up to the 500 /feedback reads: the list pages
-      // through them in the browser, three at a time, as /feedback does.
-      getProductReviews(software.code, 500),
     ]);
     // A free tool is not offered beside a paid one: its page is its own
     // thing, still to come. Beside another free tool it stays.
@@ -223,23 +217,6 @@ export default async function ProductPage({ params, searchParams }: PageProps) {
           initialQuantity={readQuantity(sl)}
           setupGuideAccess={setupGuideAccess}
           statusSubscribed={statusSubscribed}
-          reviews={{
-            reviews: productReviews.rows.map((r) => ({
-              name: r.name,
-              avatarUrl: r.avatarUrl,
-              anonymous: r.anonymous,
-              verified: r.verified,
-              rating: r.rating,
-              body: r.body,
-              imageUrl: r.imageUrl,
-              // No figure for a zero: /feedback leaves the line off then too.
-              amount: r.amount > 0 ? formatVnd(r.amount) + "đ" : "",
-              date: r.createdAt.toLocaleDateString("vi-VN"),
-            })),
-            count: productReviews.count,
-            average: productReviews.average,
-            reviewHref: reviewOrder ? `/orders/${reviewOrder}/danh-gia` : null,
-          }}
           similar={similarShown}
         />
       </>

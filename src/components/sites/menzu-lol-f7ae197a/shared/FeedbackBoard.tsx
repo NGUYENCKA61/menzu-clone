@@ -89,37 +89,27 @@ export function StarRow({ rating, size = 13 }: { rating: number; size?: number }
 /**
  * The avatar in its accent ring. Anonymous reviews get the original's light-grey
  * incognito disc; a signed reviewer without a picture gets their initial.
- * `compact` is the 40px one a tool's page lists its reviews with.
  */
 export function ReviewAvatar({
   name,
   avatarUrl,
   anonymous,
-  compact = false,
 }: {
   name: string;
   avatarUrl: string | null;
   anonymous: boolean;
-  compact?: boolean;
 }) {
   return (
     <div className="relative inline-block shrink-0 rounded-full p-[2px] border-[2.5px] border-[var(--menzu-accent)]">
-      <div
-        className={`${
-          compact ? "w-10 h-10" : "w-11 h-11 sm:w-[50px] sm:h-[50px]"
-        } rounded-full overflow-hidden flex items-center justify-center bg-neutral-800`}
-      >
+      <div className="w-11 h-11 sm:w-[50px] sm:h-[50px] rounded-full overflow-hidden flex items-center justify-center bg-neutral-800">
         {anonymous ? (
           <div className="w-full h-full bg-[#D1D5DB] flex items-center justify-center">
-            <VenetianMask className={`${compact ? "w-5 h-5" : "w-6 h-6"} text-neutral-700 opacity-80`} />
+            <VenetianMask className="w-6 h-6 text-neutral-700 opacity-80" />
           </div>
         ) : avatarUrl ? (
           <Image src={avatarUrl} alt="" width={50} height={50} className="w-full h-full object-cover" />
         ) : (
-          <span
-            aria-hidden
-            className={`${compact ? "text-sm" : "text-base"} font-black uppercase text-neutral-400`}
-          >
+          <span aria-hidden className="text-base font-black uppercase text-neutral-400">
             {name.slice(0, 1)}
           </span>
         )}
@@ -368,11 +358,10 @@ export function FeedbackBoard({ items }: { items: FeedbackItem[] }) {
 }
 
 /**
- * The page strip under a list of reviews: arrows either side, the first and
- * last page always in reach. Its own component so a tool's page turns through
- * its reviews with the same buttons this page does.
+ * The page strip under the list: arrows either side, the first and last page
+ * always in reach.
  */
-export function FeedbackPager({
+function FeedbackPager({
   current,
   totalPages,
   onJump,
