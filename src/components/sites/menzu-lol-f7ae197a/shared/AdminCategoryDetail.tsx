@@ -16,6 +16,8 @@ export interface AdminCategoryDetailView {
   /** "PC" / "MOBILE" / "SPOOFER", or "" for none. */
   platform: string;
   imageUrl: string;
+  /** The category page's wide header picture; "" uses imageUrl there. */
+  bannerUrl: string;
   soldCount: string;
   stockCount: string;
   /** How many products actually sit in it, for the note under the two counters. */
@@ -51,16 +53,18 @@ export function AdminCategoryDetail({
   const [description, setDescription] = useState(category.description);
   const [platform, setPlatform] = useState(category.platform);
   const [imageUrl, setImageUrl] = useState(category.imageUrl);
+  const [bannerUrl, setBannerUrl] = useState(category.bannerUrl);
   const [soldCount, setSoldCount] = useState(category.soldCount);
   const [stockCount, setStockCount] = useState(category.stockCount);
 
   const [busy, setBusy] = useState(false);
-  const [uploading, setUploading] = useState(false);
+  /** Which of the two pictures is uploading, so only its button waits. */
+  const [uploading, setUploading] = useState<"tile" | "banner" | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [ok, setOk] = useState<string | null>(null);
 
-  async function uploadImage(file: File): Promise<string | null> {
-    setUploading(true);
+  async function uploadImage(file: File, slot: "tile" | "banner"): Promise<string | null> {
+    setUploading(slot);
     setError(null);
     setOk(null);
     try {
@@ -86,7 +90,7 @@ export function AdminCategoryDetail({
       setError("Không kết nối được máy chủ");
       return null;
     } finally {
-      setUploading(false);
+      setUploading(null);
     }
   }
 
@@ -105,6 +109,7 @@ export function AdminCategoryDetail({
           description,
           platform,
           imageUrl,
+          bannerUrl,
           // Typed as text so a half-deleted number does not become NaN under
           // the cursor; the digits are what the server is sent.
           soldCount: Number(soldCount.replace(/\D/g, "")),
@@ -220,6 +225,9 @@ export function AdminCategoryDetail({
         <div className="flex flex-col gap-4 min-w-0">
           <section className={CARD}>
             <span className={CARD_HEAD}>Ảnh bìa</span>
+            <p className="-mt-2 text-[11px] text-neutral-500">
+              Hiện trên ô danh mục ngoài trang chủ.
+            </p>
             <input
               value={imageUrl}
               onChange={(event) => setImageUrl(event.target.value)}
@@ -228,11 +236,36 @@ export function AdminCategoryDetail({
               className={FIELD}
             />
             <AdminImagePicker
-              uploading={uploading}
+              uploading={uploading === "tile"}
               value={imageUrl}
               onPick={async (file) => {
-                const url = await uploadImage(file);
+                const url = await uploadImage(file, "tile");
                 if (url) setImageUrl(url);
+              }}
+            />
+          </section>
+
+          {/* The wide picture over the top of the category's own page. Left
+              empty, that header uses the tile picture above, stretched. */}
+          <section className={CARD}>
+            <span className={CARD_HEAD}>Ảnh đầu trang danh mục</span>
+            <p className="-mt-2 text-[11px] text-neutral-500">
+              Ảnh ngang chạy ngang đầu trang danh mục, nên từ 1920×600px trở lên.
+              Để trống thì dùng ảnh bìa ở trên.
+            </p>
+            <input
+              value={bannerUrl}
+              onChange={(event) => setBannerUrl(event.target.value)}
+              placeholder="Để trống: dùng ảnh bìa"
+              aria-label="Đường dẫn ảnh đầu trang danh mục"
+              className={FIELD}
+            />
+            <AdminImagePicker
+              uploading={uploading === "banner"}
+              value={bannerUrl}
+              onPick={async (file) => {
+                const url = await uploadImage(file, "banner");
+                if (url) setBannerUrl(url);
               }}
             />
           </section>
