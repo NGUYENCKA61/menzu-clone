@@ -25,7 +25,10 @@ export function CategoryHero({
   breadcrumb: ReactNode;
 }) {
   return (
-    <section className="relative isolate overflow-hidden">
+    // The layout reserves 104px for the header, which is only 64px tall on a
+    // phone: pulled up there, so the picture starts right under the header
+    // instead of below a strip of backdrop.
+    <section className="relative isolate -mt-10 overflow-hidden sm:mt-0">
       {imageUrl ? (
         <div
           aria-hidden
