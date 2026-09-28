@@ -472,10 +472,6 @@ model Category {
   platform  String?
   sortOrder Int       @default(0)
   imageUrl  String?
-  /// The wide picture across the top of the category's own page. Null falls
-  /// back to imageUrl, the home tile's picture, which is small and cropped
-  /// hard when stretched that wide.
-  bannerUrl String?
   soldCount Int       @default(0)
   stockCount Int      @default(0)
   /// Feeds sitemap.xml's <lastmod>. Stamping every entry with "now" instead

@@ -96,8 +96,6 @@ export async function PATCH(request: Request) {
     slug?: string;
     description?: string;
     imageUrl?: string;
-    /** The category page's wide header picture; "" clears it. */
-    bannerUrl?: string;
     /** "PC" / "MOBILE" / "SPOOFER"; "" clears. See src/lib/categoryPlatform.ts. */
     platform?: string;
     soldCount?: number;
@@ -184,10 +182,6 @@ export async function PATCH(request: Request) {
       ...(slug ? { slug } : {}),
       ...(body?.imageUrl !== undefined
         ? { imageUrl: body.imageUrl.trim() || null }
-        : {}),
-      // Cleared, the category page falls back to the tile picture above.
-      ...(body?.bannerUrl !== undefined
-        ? { bannerUrl: body.bannerUrl.trim() || null }
         : {}),
       // Sent as "" to clear it, which takes the line off the home page tile.
       ...(body?.description !== undefined
