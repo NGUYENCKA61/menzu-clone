@@ -25,11 +25,12 @@ export interface ProductReviewItem {
 }
 
 /**
- * Reviews per page. Five, because the reviews are one section of a tool's
- * page rather than the page: past five the list starts to push "Sản phẩm
- * tương tự" off the screen, and the page strip is right there for the rest.
+ * Reviews per page. Three, because the reviews are one section of a tool's
+ * page rather than the page: five, with photos, made the block nearly a
+ * screen tall between the description and "Sản phẩm tương tự", which the
+ * owner found cluttered. The page strip is right there for the rest.
  */
-const PER_PAGE = 5;
+const PER_PAGE = 3;
 
 /**
  * A tool's reviews as a list, one ruled row each — the way product reviews

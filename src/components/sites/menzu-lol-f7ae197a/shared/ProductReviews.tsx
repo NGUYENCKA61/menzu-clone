@@ -34,12 +34,17 @@ export interface ProductReviewsData {
  *
  * Only reviews of this tool — the ones written from a receipt for it — and
  * nothing of the shop's general praise, on the owner's word: a reader on
- * this page is asking about this tool. With none yet the block stays, as a
- * quiet note that says where reviews come from, so the first buyer to write
- * one knows where it will land.
+ * this page is asking about this tool.
+ *
+ * With none yet the block is left out altogether. It used to stay as an
+ * empty box, which on a shop with no reviews yet put the same "chưa có đánh
+ * giá" on every tool — clutter the owner saw, and a line that reads as
+ * "nobody buys this". The one reader who still gets it is a buyer who can
+ * write the first review: the note and the button are for them.
  */
 export function ProductReviews({ data }: { data: ProductReviewsData }) {
   const { reviews, count, average, reviewHref } = data;
+  if (reviews.length === 0 && !reviewHref) return null;
   const score = average !== null && count >= MIN_FOR_SCORE ? average : null;
 
   const writeButton = reviewHref ? (
@@ -94,7 +99,7 @@ export function ProductReviews({ data }: { data: ProductReviewsData }) {
       {/* A list rather than the home page's card grid — the owner's pick,
           "C" — because a tool gathers its reviews one buyer at a time: one
           or two cards left most of a three-wide grid empty, where a list
-          reads the same at one review or fifty. Paged five at a time. */}
+          reads the same at one review or fifty. Paged three at a time. */}
       {reviews.length > 0 ? (
         <ProductReviewList items={reviews} anchorId={SECTION_ID} />
       ) : (

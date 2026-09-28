@@ -175,7 +175,7 @@ export default async function ProductPage({ params, searchParams }: PageProps) {
       // three show at once on a desktop, the arrows bring in the rest.
       listSimilarSoftware(software.code, software.categorySlug, 12),
       // Every approved review, up to the 500 /feedback reads: the list pages
-      // through them in the browser, five at a time, as /feedback does.
+      // through them in the browser, three at a time, as /feedback does.
       getProductReviews(software.code, 500),
     ]);
     // A free tool is not offered beside a paid one: its page is its own
