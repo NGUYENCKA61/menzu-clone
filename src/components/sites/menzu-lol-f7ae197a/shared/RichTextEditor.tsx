@@ -1,7 +1,15 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { EditorContent, useEditor, type Editor } from "@tiptap/react";
+import {
+  EditorContent,
+  Node,
+  NodeViewWrapper,
+  ReactNodeViewRenderer,
+  useEditor,
+  type Editor,
+  type NodeViewProps,
+} from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import { Color } from "@tiptap/extension-color";
 import Image from "@tiptap/extension-image";
@@ -19,8 +27,10 @@ import {
   Link as LinkIcon,
   List,
   ListOrdered,
+  Play,
   Redo2,
   SquareCode,
+  SquarePlay,
   Strikethrough,
   TextQuote,
   UnderlineIcon,
@@ -28,6 +38,8 @@ import {
   Unlink,
   type LucideIcon,
 } from "lucide-react";
+
+import { youtubeVideoId } from "@/lib/youtube";
 
 /** The palette the color buttons write — hex twins of the site's accents. */
 const PALETTE: { name: string; hex: string; dot: string }[] = [
@@ -37,6 +49,51 @@ const PALETTE: { name: string; hex: string; dot: string }[] = [
   { name: "tím", hex: "#a78bfa", dot: "bg-violet-400" },
 ];
 
+/**
+ * Width and side, shared by pictures and video blocks — both written as the
+ * inline styles the sanitizer's `width: N%` and side-margin allowances let
+ * through, so a video sizes and leans exactly as a picture does.
+ */
+const SIZE_AND_ALIGN = {
+  width: {
+    default: null,
+    parseHTML: (element: HTMLElement) => element.style.width || null,
+    renderHTML: (attributes: { width?: string | null }) =>
+      attributes.width ? { style: `width: ${attributes.width}` } : {},
+  },
+  // null = centered, the stylesheet default. Left and right override the
+  // auto margins inline.
+  align: {
+    default: null,
+    parseHTML: (element: HTMLElement) => {
+      const left = element.style.marginLeft;
+      const right = element.style.marginRight;
+      if (left === "0px" && right === "auto") return "left";
+      if (left === "auto" && right === "0px") return "right";
+      return null;
+    },
+    renderHTML: (attributes: { align?: string | null }) =>
+      attributes.align === "left"
+        ? { style: "margin-left: 0; margin-right: auto" }
+        : attributes.align === "right"
+          ? { style: "margin-left: auto; margin-right: 0" }
+          : {},
+  },
+};
+
+/** The inline style a width and side come to — the node view's own copy of
+ *  what SIZE_AND_ALIGN writes into the stored HTML. */
+function sizeStyle(width: string | null, align: string | null): React.CSSProperties {
+  return {
+    ...(width ? { width } : {}),
+    ...(align === "left"
+      ? { marginLeft: 0, marginRight: "auto" }
+      : align === "right"
+        ? { marginLeft: "auto", marginRight: 0 }
+        : {}),
+  };
+}
+
 /** The image node, taught to carry a width — written as an inline style the
  *  sanitizer's `width: N%` allowance lets through. */
 const SizedImage = Image.extend({
@@ -45,36 +102,14 @@ const SizedImage = Image.extend({
       ...this.parent?.(),
       // The sizing attributes each emit `style`; tiptap's mergeAttributes
       // concatenates them, so an image can carry all of these at once.
-      width: {
-        default: null,
-        parseHTML: (element: HTMLElement) => element.style.width || null,
-        renderHTML: (attributes: { width?: string | null }) =>
-          attributes.width ? { style: `width: ${attributes.width}` } : {},
-      },
+      width: SIZE_AND_ALIGN.width,
       height: {
         default: null,
         parseHTML: (element: HTMLElement) => element.style.height || null,
         renderHTML: (attributes: { height?: string | null }) =>
           attributes.height ? { style: `height: ${attributes.height}` } : {},
       },
-      // null = centered, the stylesheet default. Left and right override the
-      // auto margins inline.
-      align: {
-        default: null,
-        parseHTML: (element: HTMLElement) => {
-          const left = element.style.marginLeft;
-          const right = element.style.marginRight;
-          if (left === "0px" && right === "auto") return "left";
-          if (left === "auto" && right === "0px") return "right";
-          return null;
-        },
-        renderHTML: (attributes: { align?: string | null }) =>
-          attributes.align === "left"
-            ? { style: "margin-left: 0; margin-right: auto" }
-            : attributes.align === "right"
-              ? { style: "margin-left: auto; margin-right: 0" }
-              : {},
-      },
+      align: SIZE_AND_ALIGN.align,
       // Lives in the <figcaption>, never on the img tag itself.
       caption: {
         default: null,
@@ -133,6 +168,76 @@ const SizedImage = Image.extend({
         caption,
       ],
     ];
+  },
+});
+
+/**
+ * The video block's face in the editor: the video's own cover in the frame
+ * the page will draw (the same .doc-video rules, at the same width and on
+ * the same side), with a play mark over it. What is set here is what the
+ * page shows, as with pictures.
+ */
+function VideoBlockView({ node, selected }: NodeViewProps) {
+  const id = (node.attrs.videoId as string | null) ?? null;
+  return (
+    <NodeViewWrapper
+      className="doc-video"
+      style={sizeStyle(
+        (node.attrs.width as string | null) ?? null,
+        (node.attrs.align as string | null) ?? null,
+      )}
+      data-drag-handle
+    >
+      {id ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={`https://i.ytimg.com/vi/${id}/hqdefault.jpg`} alt="" draggable={false} />
+      ) : null}
+      <span className="pointer-events-none absolute inset-0 grid place-items-center">
+        <span className="grid h-11 w-16 place-items-center rounded-xl bg-[#ff0033] text-white shadow-lg">
+          <Play size={20} className="fill-current" aria-hidden />
+        </span>
+      </span>
+      {selected ? (
+        <span className="pointer-events-none absolute inset-0 rounded-[inherit] ring-2 ring-inset ring-[var(--brand)]" />
+      ) : null}
+    </NodeViewWrapper>
+  );
+}
+
+/**
+ * The video block: a YouTube video, sized and aligned the way a picture is.
+ *
+ * Stored as an empty `<div data-youtube="ID">` carrying the same width and
+ * margin styles a picture writes. The sanitizer lets exactly that through —
+ * never an iframe — and the page builds the player around the id
+ * (embedVideos in lib/docHtml).
+ */
+const YoutubeVideo = Node.create({
+  name: "youtubeVideo",
+  group: "block",
+  atom: true,
+  draggable: true,
+  selectable: true,
+  addAttributes() {
+    return {
+      videoId: {
+        default: null,
+        parseHTML: (element: HTMLElement) => element.getAttribute("data-youtube"),
+        renderHTML: (attributes: { videoId?: string | null }) =>
+          attributes.videoId ? { "data-youtube": attributes.videoId } : {},
+      },
+      width: SIZE_AND_ALIGN.width,
+      align: SIZE_AND_ALIGN.align,
+    };
+  },
+  parseHTML() {
+    return [{ tag: "div[data-youtube]" }];
+  },
+  renderHTML({ HTMLAttributes }) {
+    return ["div", HTMLAttributes];
+  },
+  addNodeView() {
+    return ReactNodeViewRenderer(VideoBlockView);
   },
 });
 
@@ -345,6 +450,145 @@ function ImagePanelInner({ editor }: { editor: Editor }) {
   );
 }
 
+/**
+ * The selected video block's width and side, in the picture panel's own
+ * shape: the same box, the same quick stops, the same three sides. A video
+ * has no height of its own (it is always 16:9), no caption and no alt.
+ */
+function VideoPanel({ editor }: { editor: Editor }) {
+  // Remount per selected node, so the draft resets when another video is picked.
+  return <VideoPanelInner key={editor.state.selection.from} editor={editor} />;
+}
+
+function VideoPanelInner({ editor }: { editor: Editor }) {
+  const attrs = editor.getAttributes("youtubeVideo");
+  const width = (attrs.width as string | null) ?? null;
+  const align = (attrs.align as string | null) ?? null;
+  const id = (attrs.videoId as string | null) ?? null;
+
+  const [wDraft, setWDraft] = useState((width ?? "100%").replace("%", ""));
+  // The quick stops and the sides write width from outside the draft —
+  // follow them, as the picture panel does.
+  const [seenWidth, setSeenWidth] = useState(width);
+  if (seenWidth !== width) {
+    setSeenWidth(width);
+    setWDraft((width ?? "100%").replace("%", ""));
+  }
+
+  function commitWidth() {
+    const n = Number(wDraft.replace(/\D/g, ""));
+    const value = !n || n >= 100 ? null : `${Math.max(10, Math.min(100, n))}%`;
+    editor.chain().updateAttributes("youtubeVideo", { width: value }).run();
+  }
+
+  return (
+    <div className="mb-2 flex flex-wrap items-center gap-x-2.5 gap-y-2 rounded-lg border border-[var(--brand)]/30 bg-[var(--brand)]/[0.06] px-3 py-2">
+      <span className="text-[9px] font-black uppercase tracking-widest text-[#a78bfa]">
+        Video đang chọn
+      </span>
+      <span aria-hidden className="h-4 w-px bg-white/[0.08]" />
+
+      <span className={PANEL_LABEL}>Rộng</span>
+      <input
+        aria-label="Chiều rộng video (phần trăm, Enter để áp dụng)"
+        value={wDraft}
+        onChange={(event) => setWDraft(event.target.value.replace(/\D/g, "").slice(0, 3))}
+        onBlur={commitWidth}
+        onKeyDown={(event) => {
+          if (event.key === "Enter") {
+            event.preventDefault();
+            commitWidth();
+          }
+        }}
+        className={`${PANEL_INPUT} w-12 text-center`}
+      />
+      <span className="text-[10px] font-bold text-neutral-500">%</span>
+      {IMAGE_SIZES.map((size) => {
+        const on = (width ?? "100%") === size;
+        return (
+          <button
+            key={size}
+            type="button"
+            title={`Video rộng ${size}`}
+            onMouseDown={(event) => event.preventDefault()}
+            onClick={() =>
+              editor
+                .chain()
+                .focus()
+                .updateAttributes("youtubeVideo", { width: size === "100%" ? null : size })
+                .run()
+            }
+            className={`h-7 rounded-md px-1.5 text-[10px] font-black tabular-nums transition-colors ${
+              on
+                ? "bg-[var(--brand)]/25 text-white"
+                : "text-neutral-400 hover:bg-white/[0.08] hover:text-white"
+            }`}
+          >
+            {size}
+          </button>
+        );
+      })}
+
+      <span aria-hidden className="h-4 w-px bg-white/[0.08]" />
+      <span className={PANEL_LABEL}>Căn</span>
+      {(
+        [
+          ["left", AlignLeft, "Video căn trái"],
+          [null, AlignCenter, "Video căn giữa"],
+          ["right", AlignRight, "Video căn phải"],
+        ] as const
+      ).map(([value, AlignIcon, label]) => {
+        const on = align === value;
+        return (
+          <button
+            key={label}
+            type="button"
+            title={label}
+            aria-label={label}
+            onMouseDown={(event) => event.preventDefault()}
+            onClick={() =>
+              editor
+                .chain()
+                .focus()
+                .updateAttributes("youtubeVideo", {
+                  align: value,
+                  // A full-width video cannot visibly lean — picking a side
+                  // shrinks it to half so the choice shows, as with pictures.
+                  ...(value && !width ? { width: "50%" } : {}),
+                })
+                .run()
+            }
+            className={`h-7 w-7 rounded-md transition-colors inline-flex items-center justify-center ${
+              on
+                ? "bg-[var(--brand)]/25 text-white"
+                : "text-neutral-400 hover:bg-white/[0.08] hover:text-white"
+            }`}
+          >
+            <AlignIcon size={13} />
+          </button>
+        );
+      })}
+
+      {id ? (
+        <>
+          <span aria-hidden className="h-4 w-px bg-white/[0.08]" />
+          <a
+            href={`https://www.youtube.com/watch?v=${id}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[10px] font-bold text-neutral-400 underline underline-offset-2 hover:text-white"
+          >
+            Mở trên YouTube
+          </a>
+        </>
+      ) : null}
+      <span className="text-[10px] text-neutral-500">
+        Trên điện thoại video luôn rộng hết màn hình.
+      </span>
+    </div>
+  );
+}
+
 /** One key on the formatting bar; lit while its mark is active at the caret. */
 function ToolButton({
   label,
@@ -405,6 +649,9 @@ export function RichTextEditor({
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [linkOpen, setLinkOpen] = useState(false);
   const [linkUrl, setLinkUrl] = useState("");
+  const [videoOpen, setVideoOpen] = useState(false);
+  const [videoUrl, setVideoUrl] = useState("");
+  const [videoError, setVideoError] = useState<string | null>(null);
   const imageRef = useRef<HTMLInputElement>(null);
 
   const editor = useEditor({
@@ -418,6 +665,7 @@ export function RichTextEditor({
       FontSize,
       Color,
       SizedImage,
+      YoutubeVideo,
       TextAlign.configure({ types: ["heading", "paragraph"] }),
     ],
     content: initialHtml,
@@ -456,6 +704,24 @@ export function RichTextEditor({
     const href = /^(https?:\/\/|mailto:)/i.test(raw) ? raw : `https://${raw}`;
     editor.chain().focus().extendMarkRange("link").setLink({ href }).run();
     setLinkOpen(false);
+  }
+
+  /**
+   * Drops a video block at the caret from whatever YouTube address was
+   * pasted. Anything that is not one is refused here, in words, rather than
+   * becoming a block that plays nothing.
+   */
+  function insertVideo() {
+    if (!editor) return;
+    const id = youtubeVideoId(videoUrl);
+    if (!id) {
+      setVideoError("Link này không phải video YouTube");
+      return;
+    }
+    editor.chain().focus().insertContent({ type: "youtubeVideo", attrs: { videoId: id } }).run();
+    setVideoUrl("");
+    setVideoError(null);
+    setVideoOpen(false);
   }
 
   /** Uploads one illustration and drops it at the caret. */
@@ -669,6 +935,25 @@ export function RichTextEditor({
             if (file) void insertImage(file);
           }}
         />
+        <button
+          type="button"
+          title="Chèn video YouTube (chỉnh rộng và căn lề như ảnh)"
+          aria-label="Chèn video YouTube"
+          aria-pressed={videoOpen}
+          onMouseDown={(event) => event.preventDefault()}
+          onClick={() => {
+            setVideoError(null);
+            setVideoOpen((open) => !open);
+          }}
+          className={`h-8 px-2.5 rounded-lg border transition-colors inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest ${
+            videoOpen
+              ? "border-[var(--brand)]/50 bg-[var(--brand)]/15 text-white"
+              : "border-white/[0.07] bg-white/[0.03] text-neutral-400 hover:bg-white/[0.08] hover:text-white"
+          }`}
+        >
+          <SquarePlay size={14} />
+          Video
+        </button>
         <span aria-hidden className="mx-0.5 h-5 w-px bg-white/[0.08]" />
         <ToolButton
           label="Hoàn tác (Ctrl+Z)"
@@ -718,7 +1003,48 @@ export function RichTextEditor({
         </div>
       ) : null}
 
+      {videoOpen ? (
+        <div className="mb-2 flex flex-wrap items-center gap-2 rounded-lg border border-white/[0.07] bg-white/[0.03] px-3 py-2">
+          <SquarePlay size={13} className="shrink-0 text-neutral-500" />
+          <input
+            autoFocus
+            value={videoUrl}
+            onChange={(event) => {
+              setVideoUrl(event.target.value);
+              setVideoError(null);
+            }}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") {
+                event.preventDefault();
+                insertVideo();
+              }
+              if (event.key === "Escape") setVideoOpen(false);
+            }}
+            placeholder="Dán link YouTube (nên để Không công khai)..."
+            className="h-8 flex-1 min-w-[220px] rounded-md border border-white/10 bg-neutral-950/60 px-2.5 text-xs text-white outline-none focus:border-[var(--brand)]/60 placeholder-neutral-500"
+          />
+          <button
+            type="button"
+            onClick={insertVideo}
+            className="h-8 px-3.5 rounded-lg bg-[var(--brand)] hover:bg-[var(--brand-dark)] text-[10px] font-black uppercase tracking-widest text-white transition-colors"
+          >
+            Chèn video
+          </button>
+          <button
+            type="button"
+            onClick={() => setVideoOpen(false)}
+            className="h-8 px-3 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 text-[10px] font-black uppercase tracking-widest text-neutral-300 transition-colors"
+          >
+            Đóng
+          </button>
+          {videoError ? (
+            <p className="basis-full text-[11px] font-bold text-red-400">{videoError}</p>
+          ) : null}
+        </div>
+      ) : null}
+
       {editor?.isActive("image") ? <ImagePanel editor={editor} /> : null}
+      {editor?.isActive("youtubeVideo") ? <VideoPanel editor={editor} /> : null}
 
       {uploadError ? (
         <p className="mb-2 text-[11px] font-bold text-red-400">{uploadError}</p>

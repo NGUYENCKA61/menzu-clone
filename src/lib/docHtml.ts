@@ -1,6 +1,6 @@
 import sanitizeHtml from "sanitize-html";
 
-import { youtubeEmbedUrl } from "@/lib/youtube";
+import { youtubeEmbedUrl, youtubeVideoId } from "@/lib/youtube";
 
 /**
  * The wiki's HTML era, kept on a leash.
@@ -17,6 +17,11 @@ import { youtubeEmbedUrl } from "@/lib/youtube";
 
 /** The colors the palette buttons write — anything else is stripped. */
 const COLOR_VALUE = [/^#(?:[0-9a-f]{3}|[0-9a-f]{6}|[0-9a-f]{8})$/i, /^rgba?\([\d\s.,%]+\)$/i];
+
+/** A width the editor's size box can write: a whole or decimal percent. */
+const WIDTH_PERCENT = [/^(?:100|[1-9]?\d)(?:\.\d+)?%$/];
+/** The margins the editor's left / right alignment writes. */
+const SIDE_MARGIN = [/^(?:0(?:px)?|auto)$/];
 
 /**
  * Whether an inline colour would vanish on the shop's near-black page.
@@ -100,6 +105,9 @@ export function sanitizeDocHtml(html: string): string {
       "code",
       "figure",
       "figcaption",
+      // The editor's video block: an empty div naming a YouTube id, which
+      // embedVideos turns into the player. The iframe itself is never kept.
+      "div",
     ],
     allowedAttributes: {
       a: ["href", "rel", "target"],
@@ -109,6 +117,7 @@ export function sanitizeDocHtml(html: string): string {
       h2: ["style"],
       h3: ["style"],
       figcaption: ["style"],
+      div: ["data-youtube", "style"],
     },
     allowedSchemes: ["http", "https", "mailto"],
     allowedStyles: {
@@ -118,10 +127,16 @@ export function sanitizeDocHtml(html: string): string {
       span: { color: COLOR_VALUE, "font-size": [/^(?:1[2-9]|20)px$/] },
       // The editor's size and alignment controls, nothing else.
       img: {
-        width: [/^(?:100|[1-9]?\d)(?:\.\d+)?%$/],
+        width: WIDTH_PERCENT,
         height: [/^\d{2,4}px$/],
-        "margin-left": [/^(?:0(?:px)?|auto)$/],
-        "margin-right": [/^(?:0(?:px)?|auto)$/],
+        "margin-left": SIDE_MARGIN,
+        "margin-right": SIDE_MARGIN,
+      },
+      // A video block sizes and leans exactly as a picture does.
+      div: {
+        width: WIDTH_PERCENT,
+        "margin-left": SIDE_MARGIN,
+        "margin-right": SIDE_MARGIN,
       },
       p: { "text-align": [/^(?:left|center|right|justify)$/] },
       h2: { "text-align": [/^(?:left|center|right|justify)$/] },
@@ -129,9 +144,14 @@ export function sanitizeDocHtml(html: string): string {
       figcaption: { "font-style": [/^(?:italic|normal)$/] },
     },
     // Illustrations come from this shop's own uploader; an <img> aimed at
-    // another host is dropped whole rather than fetched by every reader.
+    // another host is dropped whole rather than fetched by every reader. A
+    // video block whose id is not a YouTube id goes the same way, rather than
+    // reaching the page as an empty frame.
     exclusiveFilter: (frame) =>
-      frame.tag === "img" && !String(frame.attribs?.src ?? "").startsWith("/"),
+      (frame.tag === "img" && !String(frame.attribs?.src ?? "").startsWith("/")) ||
+      (frame.tag === "div" &&
+        frame.attribs?.["data-youtube"] !== undefined &&
+        youtubeVideoId(frame.attribs["data-youtube"]) !== frame.attribs["data-youtube"]),
     transformTags: {
       a: sanitizeHtml.simpleTransform("a", { rel: "noopener noreferrer", target: "_blank" }),
       // Runs before the style filter, so it sees the raw attribute and can
@@ -157,39 +177,68 @@ const LONE_ADDRESS = /<p(?:\s[^>]*)?>\s*(?:<a\s[^>]*>([^<]*)<\/a>|([^<\s]+))\s*<
 const YOUTUBE_ADDRESS = /youtu\.be\/|youtube(?:-nocookie)?\.com\//i;
 
 /**
- * A YouTube link on a line of its own becomes the video, played in place.
- *
- * The editor has no video button and the sanitizer takes every iframe out, so
- * the shop cannot paste an embed code — nor should it: an iframe kept from
- * the database would be a door any page on the internet could come through.
- * Instead, once the body is sanitized, a paragraph holding only a YouTube
- * address is swapped for a player this code builds around the video's id,
- * the one thing taken from the text, which youtubeEmbedUrl lets through only
- * as eleven safe characters. A YouTube link inside a sentence, or under words
- * of its own, stays a link.
- *
- * The address has to read as YouTube's: youtubeEmbedUrl also accepts a bare
- * id, and "Configuring" alone on a line is eleven letters, not a video.
+ * The editor's video block as the sanitizer leaves it: an empty div, its
+ * attributes in group 1. Whether it is a video is read off `data-youtube`.
  */
-export function embedVideoLines(html: string): string {
-  return html.replace(LONE_ADDRESS, (whole, linkWords?: string, bare?: string) => {
-    const text = (linkWords ?? bare ?? "").replace(/&amp;/g, "&").trim();
-    if (!YOUTUBE_ADDRESS.test(text)) return whole;
-    const src = youtubeEmbedUrl(text);
-    if (!src) return whole;
-    return (
-      `<div class="doc-video"><iframe src="${src}" title="Video YouTube" loading="lazy"` +
-      ` allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"` +
-      ` referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>`
-    );
-  });
+const EMPTY_DIV = /<div\b([^>]*)>\s*<\/div>/g;
+
+/**
+ * The player, built here around an id rather than kept from the database.
+ * `style` is the block's own width and margins, already cut down by the
+ * sanitizer to what the editor's size and alignment controls write.
+ */
+function player(src: string, style?: string): string {
+  return (
+    `<div class="doc-video"${style ? ` style="${style}"` : ""}>` +
+    `<iframe src="${src}" title="Video YouTube" loading="lazy"` +
+    ` allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"` +
+    ` referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>`
+  );
+}
+
+/**
+ * YouTube videos, played in place. Two ways in, both run after sanitizing:
+ *
+ * - The editor's video block (the "Video" button): an empty div naming the
+ *   video's id, sized and aligned the way pictures are. It becomes the
+ *   player at the width and on the side the shop chose.
+ * - A YouTube link alone on its line, the older way, which still works: the
+ *   paragraph becomes the player at the default width. A link inside a
+ *   sentence, or under words of its own, stays a link.
+ *
+ * The sanitizer takes every iframe out, so no embed code from the database
+ * ever reaches a page: an iframe kept from there would be a door any page on
+ * the internet could come through. The player is built here around the id —
+ * the one thing taken from the stored HTML, and only as the eleven safe
+ * characters youtubeVideoId lets through.
+ *
+ * A pasted address has to read as YouTube's: youtubeEmbedUrl also accepts a
+ * bare id, and "Configuring" alone on a line is eleven letters, not a video.
+ */
+export function embedVideos(html: string): string {
+  return html
+    .replace(EMPTY_DIV, (whole, attrs: string) => {
+      const id = /data-youtube="([^"]*)"/.exec(attrs)?.[1];
+      if (id === undefined) return whole;
+      // A block the sanitizer somehow let through with a bad id plays
+      // nothing rather than an empty frame.
+      if (youtubeVideoId(id) !== id) return "";
+      return player(youtubeEmbedUrl(id)!, /style="([^"]*)"/.exec(attrs)?.[1]);
+    })
+    .replace(LONE_ADDRESS, (whole, linkWords?: string, bare?: string) => {
+      const text = (linkWords ?? bare ?? "").replace(/&amp;/g, "&").trim();
+      if (!YOUTUBE_ADDRESS.test(text)) return whole;
+      const src = youtubeEmbedUrl(text);
+      return src ? player(src) : whole;
+    });
 }
 
 /** True when the HTML says nothing — no text, no picture. TipTap's idea of an
  *  empty document is "<p></p>", which must store as null, not as a blank page
  *  Google would index. */
 export function docHtmlIsEmpty(html: string): boolean {
-  if (/<img[\s>]/i.test(html)) return false;
+  // A picture or a video block is content though it holds no words.
+  if (/<img[\s>]|data-youtube=/i.test(html)) return false;
   const text = sanitizeHtml(html, { allowedTags: [], allowedAttributes: {} });
   return text.replace(/&nbsp;|\s/g, "").length === 0;
 }

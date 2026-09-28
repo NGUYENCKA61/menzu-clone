@@ -967,25 +967,41 @@ body.lightbox-open .site-nav {
   color: #a3a3a3;
 }
 
-/* A YouTube link on its own line, played in place (embedVideoLines): framed
-   like the illustrations beside it, 16:9, and wide enough — up to 960px —
-   that YouTube picks a sharp rendition for a guide full of menu text. */
+/* A YouTube video played in place (embedVideos): framed like the
+   illustrations beside it, 16:9, centred as they are, and by default wide
+   enough — up to 960px — that YouTube picks a sharp rendition for a guide
+   full of menu text. The editor's video block carries its own width and
+   side the way a picture does, inline, and that wins over these. */
 .doc-prose .doc-video {
   position: relative;
   width: 100%;
   max-width: 960px;
+  margin-inline: auto;
   aspect-ratio: 16 / 9;
   overflow: hidden;
   border-radius: 0.75rem;
   border: 1px solid rgb(255 255 255 / 0.1);
   background: #0a0a0d;
 }
-.doc-prose .doc-video iframe {
+.doc-prose .doc-video iframe,
+.doc-prose .doc-video img {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
+  margin: 0;
   border: 0;
+  border-radius: 0;
+  object-fit: cover;
+}
+/* On a phone every video takes the whole width: at 50% of a phone the player
+   is too small to watch, whatever size it was given on a desktop. */
+@media (max-width: 639px) {
+  .doc-prose .doc-video {
+    width: 100% !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
 }
 
 /* A home-page row with more than four tiles slides (RowSlider): one tile

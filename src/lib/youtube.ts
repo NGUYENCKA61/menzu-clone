@@ -32,11 +32,22 @@ function embed(id: string): string {
 }
 
 export function youtubeEmbedUrl(input: string | null | undefined): string | null {
+  const id = youtubeVideoId(input);
+  return id ? embed(id) : null;
+}
+
+/**
+ * The eleven-character id inside whatever was pasted, or null.
+ *
+ * Its own export for the editor's video block, which stores the id rather
+ * than an address, so the page can build the player itself.
+ */
+export function youtubeVideoId(input: string | null | undefined): string | null {
   const raw = input?.trim();
   if (!raw) return null;
 
   // A bare id — what somebody pastes having copied only part of the URL.
-  if (VIDEO_ID.test(raw)) return embed(raw);
+  if (VIDEO_ID.test(raw)) return raw;
 
   let url: URL;
   try {
@@ -53,14 +64,14 @@ export function youtubeEmbedUrl(input: string | null | undefined): string | null
 
   if (host === "youtu.be") {
     const id = url.pathname.slice(1).split("/")[0] ?? "";
-    return VIDEO_ID.test(id) ? embed(id) : null;
+    return VIDEO_ID.test(id) ? id : null;
   }
 
   if (!HOSTS.has(host)) return null;
 
   const v = url.searchParams.get("v");
-  if (v && VIDEO_ID.test(v)) return embed(v);
+  if (v && VIDEO_ID.test(v)) return v;
 
   const matched = PATH_FORMS.exec(url.pathname);
-  return matched ? embed(matched[1]!) : null;
+  return matched ? matched[1]! : null;
 }

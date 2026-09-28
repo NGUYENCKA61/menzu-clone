@@ -1161,9 +1161,9 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
         <p className="text-[11px] text-neutral-500">
           Khu &ldquo;Hướng dẫn cài đặt&rdquo; trên trang khách — cách tải, cách bật,
           cách nhập key. Soạn y như ô mô tả: đậm, màu, đánh số, chèn ảnh chụp màn hình.
-          Muốn chèn video: dán link YouTube thành một dòng riêng, trang khách hiện
-          thành video ngay chỗ đó. Để trống thì trang khách in lại câu mặc định chung
-          của shop chứ không trống.
+          Muốn chèn video: bấm nút &ldquo;Video&rdquo; rồi dán link YouTube — bấm vào
+          video để chỉnh rộng và căn lề như ảnh. Để trống thì trang khách in lại câu
+          mặc định chung của shop chứ không trống.
         </p>
         <div className="flex flex-wrap items-center gap-3">
           <button
@@ -1195,8 +1195,9 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
           dưới hướng dẫn cài đặt — nhập key, bật tính năng, chỉnh thông số, thao tác
           trong game. <span className="text-neutral-400">Chỉ khách đã thuê key của tool
           này mới đọc được</span>; người khác thấy ô khoá &ldquo;Mở khoá sau khi thuê
-          key&rdquo;. Muốn chèn video: dán link YouTube (nên để &ldquo;Không công
-          khai&rdquo;) thành một dòng riêng — video cũng chỉ khách đã mua mới thấy.
+          key&rdquo;. Muốn chèn video: bấm nút &ldquo;Video&rdquo; rồi dán link YouTube
+          (nên để &ldquo;Không công khai&rdquo;), bấm vào video để chỉnh rộng và căn lề
+          như ảnh — video cũng chỉ khách đã mua mới thấy.
           Tài khoản admin luôn xem được khu này trên trang khách để kiểm tra. Để
           trống thì khách đã mua thấy câu mặc định chung của shop.
         </p>
