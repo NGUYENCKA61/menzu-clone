@@ -5,8 +5,10 @@ import { LinkPending } from "./LinkPending";
 import { Breadcrumb } from "./Breadcrumb";
 
 export interface AccountShellProps {
-  title: string;
-  subtitle: string;
+  /** Left out by a page that draws its own title inside its panel, as
+   *  menzu's /wallet does. */
+  title?: string;
+  subtitle?: string;
   crumb: string;
   isAdmin?: boolean;
   user?: SidebarUser | null;
@@ -32,23 +34,27 @@ export function AccountShell({
 }: AccountShellProps) {
   return (
     <div className="w-full max-w-[1320px] mx-auto px-4 lg:px-6 py-8 flex flex-col min-h-screen">
+      {/* The box keeps the 24px, as on menzu; the pill's own margin used to
+          ride inside it and doubled the gap on every account page. */}
       <div className="mb-6">
-        <Breadcrumb items={[{ label: "Trang chủ", href: "/" }, { label: crumb }]} />
+        <Breadcrumb margin="mb-0" items={[{ label: "Trang chủ", href: "/" }, { label: crumb }]} />
       </div>
 
       <div className="flex flex-col lg:flex-row gap-6 items-start">
         <AccountSidebar isAdmin={isAdmin} user={user} />
 
         <div className="flex-1 w-full min-w-0">
-          <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-black uppercase tracking-wider text-white">
-                {title}
-              </h1>
-              <p className="text-sm text-neutral-400 mt-1.5">{subtitle}</p>
+          {title ? (
+            <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
+              <div>
+                <h1 className="text-2xl sm:text-3xl font-black uppercase tracking-wider text-white">
+                  {title}
+                </h1>
+                <p className="text-sm text-neutral-400 mt-1.5">{subtitle}</p>
+              </div>
+              {action ? <div className="shrink-0">{action}</div> : null}
             </div>
-            {action ? <div className="shrink-0">{action}</div> : null}
-          </div>
+          ) : null}
 
           {children}
         </div>

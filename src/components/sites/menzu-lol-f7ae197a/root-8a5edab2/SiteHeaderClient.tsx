@@ -52,7 +52,8 @@ const LINK_HREFS: Record<string, string> = {
   "XEM TRẠNG THÁI": STATUS_TAB_HREF,
   "WIKI & HƯỚNG DẪN": "/docs",
   "Nạp Qua Ngân Hàng": "/wallet",
-  "Nạp Thẻ Cào": "/wallet",
+  // menzu's own address for the card desk: the wallet opens on its Thẻ cào tab.
+  "Nạp Thẻ Cào": "/wallet?method=card",
 }
 
 function hrefFor(label: string): string {

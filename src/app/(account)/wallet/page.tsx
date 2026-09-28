@@ -5,8 +5,9 @@ import { AccountPageFrame } from "@/components/sites/menzu-lol-f7ae197a/shared/A
 import { WalletTopUp } from "@/components/sites/menzu-lol-f7ae197a/shared/WalletTopUp";
 import { getTopUps } from "@/lib/queries";
 import { getCurrentUser } from "@/lib/session";
+import { bankReady } from "@/lib/settings";
 import { getShopSettings } from "@/lib/settingsStore";
-import { topUpExpiresAt, transferNoteFor, watchableTopUp } from "@/lib/topup";
+import { topUpExpiresAt, watchableTopUp } from "@/lib/topup";
 
 export const metadata: Metadata = { title: "Nạp tiền" };
 export const dynamic = "force-dynamic";
@@ -29,18 +30,15 @@ export default async function WalletPage() {
   if (!user) redirect("/login?next=%2Fwallet");
 
   const [history, settings] = await Promise.all([
-    // 50 rather than the default 10: the client pages through these locally,
-    // five to a screen.
+    // 50 rather than the default 10: the client pages through these locally.
     getTopUps(user.id, 50),
     getShopSettings(),
   ]);
 
   return (
-    <AccountPageFrame
-      title="Nạp tiền vào tài khoản"
-      subtitle="Hệ thống nạp tiền tự động 24/7"
-      crumb="Nạp tiền ví"
-    >
+    // No title on the frame: menzu draws "Nạp tiền vào tài khoản" inside the
+    // desk's own panel, and WalletTopUp does the same.
+    <AccountPageFrame crumb="Nạp tiền ví">
       <WalletTopUp
         minAmount={settings.topUpMin}
         presets={settings.topUpPresets}
@@ -49,6 +47,7 @@ export default async function WalletPage() {
         cardFee={settings.topUpCardFee}
         bankEnabled={settings.bankTopUpEnabled}
         cardEnabled={settings.cardTopUpEnabled}
+        bankReady={bankReady(settings)}
         autoEnabled={settings.autoTopUpEnabled}
         // Decided here, where createdAt is still a real date rather than the
         // display string the history rows carry.
@@ -56,14 +55,6 @@ export default async function WalletPage() {
           const row = watchableTopUp(history);
           return row ? { code: row.code, expiresAt: row.expiresAt.toISOString() } : null;
         })()}
-        // Only what a customer needs to make the transfer. The reconciliation
-        // URL stays on the server — it carries the account's token.
-        banks={settings.bankAccounts.map((account) => ({
-          code: account.code,
-          name: account.name,
-          account: account.account,
-          holder: account.holder,
-        }))}
         // Dates are formatted here, where the locale and timezone are fixed.
         // Formatting inside the client component would run once per timezone
         // and React would report the mismatch as a hydration error.
@@ -78,9 +69,6 @@ export default async function WalletPage() {
           // on any other row there is no question being asked.
           note: row.status === "FAILED" ? row.note : null,
           createdAt: formatWhen(row.createdAt),
-          // Rebuilt with the same helper the create route uses, so a pending
-          // row can reopen as the full invoice after a reload.
-          transferNote: transferNoteFor(row.code),
           // Only a request still waiting has time left to count down. An ISO
           // string rather than a number of seconds, because the page may sit
           // in a cache for a while before anyone reads it.

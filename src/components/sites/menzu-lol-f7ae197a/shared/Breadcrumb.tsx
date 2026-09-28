@@ -48,15 +48,24 @@ function BreadcrumbTrail({ items }: { items: Crumb[] }) {
  * Page breadcrumb trail. Live site renders two sibling <nav> elements — a
  * pill-shaped desktop version and a plain mobile version — toggled purely
  * via `hidden`/breakpoint classes rather than JS, so both stay in the DOM.
+ *
+ * `margin` is the gap under it: 24px on most pages, none where the page
+ * wraps it in its own spaced box, as the account shell and the invoice do.
  */
-export function Breadcrumb({ items }: { items: Crumb[] }) {
+export function Breadcrumb({
+  items,
+  margin = "mb-6",
+}: {
+  items: Crumb[];
+  margin?: "mb-6" | "mb-0";
+}) {
   return (
     <>
-      <nav className="hidden sm:inline-flex items-center flex-wrap gap-x-3 gap-y-2 px-4 py-2.5 bg-[#111111]/80 border border-white/10 hover:border-white/20 shadow-lg rounded-full text-xs font-black uppercase tracking-widest text-neutral-300 leading-normal backdrop-blur-md transition-all group/nav w-fit mb-6">
+      <nav className={`hidden sm:inline-flex items-center flex-wrap gap-x-3 gap-y-2 px-4 py-2.5 bg-[#111111]/80 border border-white/10 hover:border-white/20 shadow-lg rounded-full text-xs font-black uppercase tracking-widest text-neutral-300 leading-normal backdrop-blur-md transition-all group/nav w-fit ${margin}`}>
         <BreadcrumbTrail items={items} />
       </nav>
 
-      <nav className="flex sm:hidden flex-wrap items-center gap-x-2 gap-y-2.5 text-[10px] font-black uppercase tracking-widest leading-normal transition-all w-fit mb-6">
+      <nav className={`flex sm:hidden flex-wrap items-center gap-x-2 gap-y-2.5 text-[10px] font-black uppercase tracking-widest leading-normal transition-all w-fit ${margin}`}>
         <BreadcrumbTrail items={items} />
       </nav>
     </>

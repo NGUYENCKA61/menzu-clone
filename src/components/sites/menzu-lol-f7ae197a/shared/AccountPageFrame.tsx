@@ -4,8 +4,9 @@ import { getCurrentUser } from "@/lib/session";
 import { AccountShell } from "./AccountShell";
 
 interface AccountPageFrameProps {
-  title: string;
-  subtitle: string;
+  /** Left out by a page that draws its own title inside its panel. */
+  title?: string;
+  subtitle?: string;
   crumb: string;
   /** Optional control rendered to the right of the title, header-level. */
   action?: ReactNode;

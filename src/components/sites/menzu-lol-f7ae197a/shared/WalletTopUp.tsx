@@ -2,48 +2,32 @@
 
 import {
   Ban,
-  Check,
-  Clock,
-  Copy,
-  Hourglass,
-  ClipboardPaste,
-  Loader2,
-  Ticket,
-  XCircle,
+  CircleAlert,
+  Clipboard,
   CreditCard,
+  History,
+  Hourglass,
+  Loader2,
+  QrCode,
+  Ticket,
+  Wallet,
+  XCircle,
 } from "lucide-react";
-import Image from "next/image";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+
+import { useCallback, useRef, useState } from "react";
 
 import { CARD_DIGITS_MIN, cardNet, cardRateFor, type CardRate } from "@/lib/topup";
-import { useRouter } from "next/navigation";
-
-import { useCallback, useEffect, useRef, useState } from "react";
 
 import { Pager, scrollListTop } from "./Pager";
-import { ErrorModal } from "./ErrorModal";
-import { TopUpCountdown, useTimeLeft } from "./TopUpCountdown";
-import { TopUpSuccessDialog } from "./TopUpSuccessDialog";
+import { formatVnd } from "./productData";
+import { CARRIERS } from "./topUpCarriers";
+import { TopUpCountdown } from "./TopUpCountdown";
+import { CreditedLines, TopUpDialog } from "./TopUpDialog";
+import { useTopUpWatch, type TopUpOutcome } from "./useTopUpWatch";
 
 type Method = "bank" | "card";
-
-/**
- * Carriers whose prepaid cards the shop accepts.
- *
- * Rendered as tinted text rather than brand logos: the marks are the
- * carriers' own marks, the way every top-up desk in the country draws
- * them: a customer holding a card matches the logo before the word.
- */
-const CARRIERS = [
-  // Measured off the files: the letters, not the drawing. Vinaphone pads its
-  // canvas, Zing wraps its word in a badge and Garena stands a dragon next to
-  // one, so a shared image height renders five different type sizes. These
-  // heights put every wordmark at about 15px.
-  { value: "Viettel", label: "Viettel", logo: "/images/carriers/viettel.svg", height: 16 },
-  { value: "Vinaphone", label: "Vinaphone", logo: "/images/carriers/vinaphone.svg", height: 24 },
-  { value: "Mobifone", label: "Mobifone", logo: "/images/carriers/mobifone.svg", height: 15 },
-  { value: "Garena", label: "Garena", logo: "/images/carriers/garena.svg", height: 26 },
-  { value: "Zing", label: "Zing", logo: "/images/carriers/zing.svg", height: 25 },
-] as const;
 
 export interface TopUpHistoryRow {
   code: string;
@@ -60,29 +44,20 @@ export interface TopUpHistoryRow {
   createdAt: string;
   /** ISO deadline while the request is still waiting; null once it is not. */
   expiresAt: string | null;
-  /** The description the customer was told to write — lets a pending row
-   *  reopen as the full invoice after a reload. */
-  transferNote: string;
 }
 
-function formatVnd(n: number): string {
-  return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+/*
+ * Every class below is menzu's /wallet, measured off the live page, colours
+ * included: its green on the tab, the chosen carrier and denomination and the
+ * card button, its violet on the title's mark. The shop's red was tried here
+ * first; the owner asked for menzu's own colours (28/09/2026).
+ */
+const STEP = "text-xs text-neutral-400 font-bold uppercase tracking-wider";
+
+/** A fee as menzu prints it on the corner of a tile: "- 20.5 %". */
+function feeBadge(rate: number): string {
+  return `- ${rate} %`;
 }
-
-const TAB_ACTIVE =
-  "flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest bg-[var(--menzu-accent)] text-white transition-colors";
-const TAB_INACTIVE =
-  "flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest border border-white/10 bg-white/[0.03] text-neutral-400 hover:text-white transition-colors";
-
-const PRESET_ACTIVE =
-  "px-4 py-2 rounded-lg text-[11px] font-bold border border-[var(--menzu-accent)]/50 bg-[var(--menzu-accent)]/15 text-[var(--menzu-accent)] transition-colors whitespace-nowrap";
-const PRESET_INACTIVE =
-  "px-4 py-2 rounded-lg text-[11px] font-bold border border-neutral-800/60 bg-neutral-950/40 text-neutral-400 hover:text-white hover:border-neutral-700 transition-colors whitespace-nowrap";
-
-/** The card-number boxes: the admin field, sized for digits. */
-const CARD_FIELD =
-  "w-full rounded-xl border border-white/10 bg-neutral-950/60 px-3.5 py-2.5 font-mono text-sm tracking-wider text-white outline-none transition-colors focus:border-[var(--menzu-accent)]/60 placeholder:font-sans placeholder:tracking-normal placeholder:text-neutral-500";
-const CARD_LABEL = "text-[10px] font-black uppercase tracking-widest text-neutral-400";
 
 /**
  * One of the two numbers off a scratch card.
@@ -105,12 +80,11 @@ function CardNumberField({
   onChange: (next: string) => void;
 }) {
   const take = (raw: string) => onChange(raw.replace(/\D/g, "").slice(0, 24));
-  // Half a number gets told so, under the box it is about. The button below
-  // used to just stay grey, and nothing said which of the two was short.
+  // Half a number gets told so, under the box it is about.
   const short = value.length > 0 && value.length < CARD_DIGITS_MIN;
   return (
-    <div className="flex flex-col gap-1.5">
-      <label htmlFor={id} className={CARD_LABEL}>
+    <div>
+      <label htmlFor={id} className="text-[11px] text-neutral-500 font-bold uppercase mb-1.5 block ml-1">
         {label}
       </label>
       <div className="relative">
@@ -121,7 +95,7 @@ function CardNumberField({
           placeholder={placeholder}
           value={value}
           onChange={(event) => take(event.target.value)}
-          className={`${CARD_FIELD} pr-11`}
+          className="w-full bg-white/[0.02] border border-white/10 rounded-xl pl-4 pr-12 py-3.5 text-sm text-white placeholder:text-neutral-700 focus:outline-none focus:border-emerald-500/50 focus:bg-emerald-500/5 transition-all font-mono shadow-inner"
         />
         <button
           type="button"
@@ -134,13 +108,13 @@ function CardNumberField({
               // an error here would be noise about something optional.
             }
           }}
-          className="absolute right-2 top-1/2 -translate-y-1/2 rounded-lg p-1.5 text-neutral-500 transition-colors hover:text-white"
+          className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-neutral-500 hover:text-white hover:bg-white/10 rounded-lg transition-all"
         >
-          <ClipboardPaste size={15} />
+          <Clipboard size={15} aria-hidden />
         </button>
       </div>
       {short ? (
-        <span className="text-[11px] font-semibold text-red-400">
+        <span className="mt-1.5 ml-1 block text-[11px] font-semibold text-red-400">
           {label} cần ít nhất {CARD_DIGITS_MIN} chữ số
         </span>
       ) : null}
@@ -166,8 +140,8 @@ export interface WalletTopUpProps {
   cardFee: number;
   bankEnabled: boolean;
   cardEnabled: boolean;
-  /** Every account the shop can be paid into; empty means none configured. */
-  banks: BankAccount[];
+  /** Whether the shop has an account to be paid into. */
+  bankReady: boolean;
   /** Whether a matched transfer credits the wallet without an admin. */
   autoEnabled: boolean;
   /**
@@ -178,94 +152,6 @@ export interface WalletTopUpProps {
   watch: { code: string; expiresAt: string } | null;
 }
 
-export interface BankAccount {
-  code: string;
-  name: string;
-  account: string;
-  holder: string;
-}
-
-interface Invoice {
-  code: string;
-  amount: number;
-  transferNote: string;
-  method: Method;
-  /** ISO, from the server's clock rather than this browser's. */
-  expiresAt: string | null;
-}
-
-/** What the success dialog needs, once a request has actually been paid. */
-interface Credited {
-  code: string;
-  /** The card's face value — what was asked for. */
-  amount: number;
-  /** What the wallet actually got, once the card fee came off. */
-  credited: number;
-  balance: number;
-}
-
-/**
- * One transfer detail. The two values a buyer actually retypes into their
- * banking app — the account number and the transfer note — carry a copy
- * button; the rest are there to be read and checked, not moved.
- */
-function CopyRow({
-  label,
-  value,
-  display,
-  highlight = false,
-  copyable = true,
-  onCopy,
-  copied,
-}: {
-  label: string;
-  value: string;
-  display?: string;
-  highlight?: boolean;
-  copyable?: boolean;
-  onCopy: (label: string, value: string) => void;
-  copied: string | null;
-}) {
-  return (
-    <div className="flex items-center justify-between gap-3">
-      <span className="text-[10px] font-black uppercase tracking-widest text-neutral-500 shrink-0">
-        {label}
-      </span>
-      <div className="flex items-center gap-2 min-w-0">
-        <span
-          className={`truncate text-sm font-bold ${
-            highlight ? "text-amber-300 font-mono" : "text-white"
-          }`}
-        >
-          {display ?? value}
-        </span>
-        {/* Every row reserves the button's slot, filled or empty, so the
-            values end on one line instead of a ragged edge. */}
-        <span className="flex w-8 shrink-0 justify-end">
-          {copyable ? (
-            <button
-              type="button"
-              onClick={() => onCopy(label, value)}
-              aria-label={copied === label ? `Đã copy ${label}` : `Copy ${label}`}
-              title={copied === label ? "Đã copy" : "Copy"}
-              className={`grid h-7 w-7 place-items-center rounded-md border transition-colors ${
-                copied === label
-                  ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
-                  : "border-white/10 bg-white/5 text-neutral-300 hover:bg-white/10 hover:text-white"
-              }`}
-            >
-              {copied === label ? <Check size={13} strokeWidth={3} /> : <Copy size={13} />}
-            </button>
-          ) : null}
-        </span>
-      </div>
-    </div>
-  );
-}
-
-/* A state is one coloured word beside the code, and only when it needs
-   saying: a credited row is told by its signed green figure. No seal, no
-   framed pill — a statement, not a row of badges. */
 /* The seal on the row's left carries the state's colour; the word beside the
    code stays quiet except where the state is live or wrong. */
 const HISTORY_STATUS: Record<
@@ -322,34 +208,23 @@ const PAGE_SIZE = 10;
 /**
  * How many finished requests the page shows before it stops.
  *
- * The list used to run to fifty, and on a busy account that is a screen and a
- * half of cancelled requests under the one thing the page is for. Anything
- * still waiting is always shown — that is the live part — and the rest is
- * five rows and a way in to the whole list.
+ * Anything still waiting is always shown — that is the live part — and the
+ * rest is five rows and a way in to the whole list.
  */
 const RECENT_COUNT = 5;
 
 /**
- * One method's ledger, paged, drawn as a statement: one block, hairlines
- * between rows, the figure at the right edge. A pending row is a live thing —
- * marked by a red bar on its left, and clicking it reopens its invoice above,
- * where the cancel link lives.
+ * One method's ledger, paged: each request its own card, the figure at the
+ * right edge. A pending row is the live one — outlined, and a link to its
+ * invoice, where the transfer details and the cancel button live.
  */
-function HistoryList({
-  rows,
-  empty,
-  onOpen,
-}: {
-  rows: TopUpHistoryRow[];
-  empty: string;
-  onOpen: (row: TopUpHistoryRow) => void;
-}) {
+function HistoryList({ rows, empty }: { rows: TopUpHistoryRow[]; empty: string }) {
   const [page, setPage] = useState(0);
   const [showAll, setShowAll] = useState(false);
   const listRef = useRef<HTMLDivElement>(null);
   const pageCount = Math.max(1, Math.ceil(rows.length / PAGE_SIZE));
-  // Clamped rather than reset by effect: cancelling the last row of the last
-  // page shrinks pageCount and the view just follows.
+  // Clamped rather than reset by effect: a list that shrinks under the pager
+  // just shows its last page.
   const current = Math.min(page, pageCount - 1);
   // Short by default: everything still waiting, then the five newest of the
   // rest. Nothing is dropped — "Xem tất cả" opens the paged list in place.
@@ -363,8 +238,8 @@ function HistoryList({
 
   if (rows.length === 0) {
     return (
-      <div className="rounded-xl border border-dashed border-white/10 bg-white/[0.02] py-10 text-center text-sm text-neutral-400">
-        {empty}
+      <div className="p-8 text-center bg-white/[0.02] border border-white/5 rounded-2xl">
+        <p className="text-neutral-500 text-sm">{empty}</p>
       </div>
     );
   }
@@ -375,20 +250,8 @@ function HistoryList({
         {visible.map((row) => {
           const isPending = row.status === "PENDING";
           const status = HISTORY_STATUS[row.status] ?? HISTORY_STATUS.PENDING!;
-          return (
-            <div
-              key={row.code}
-              onClick={isPending ? () => onOpen(row) : undefined}
-              /* Each request its own card, as the overview page's tiles are.
-                 One of them owns an edge: the amber one, still waiting for
-                 money, and the only card that answers a press because it is
-                 the only one with an invoice left to open. */
-              className={`flex items-center gap-4 rounded-xl border px-4 py-3 ${status.card} ${
-                isPending
-                  ? "cursor-pointer transition-colors hover:border-amber-500/60 hover:bg-white/[0.04]"
-                  : ""
-              }`}
-            >
+          const body = (
+            <>
               {/* The state as a coloured seal, readable before any word is;
                   the pending one turns. */}
               <span
@@ -422,8 +285,8 @@ function HistoryList({
                     </span>
                   ) : null}
                 </div>
-                {/* Carrier only on card rows — the section heading already
-                    names the method. */}
+                {/* Carrier only on card rows — the heading already names the
+                    method. */}
                 <span
                   className={`truncate text-[11px] ${
                     status.code === "text-white" ? "text-neutral-400" : "text-neutral-500"
@@ -432,10 +295,7 @@ function HistoryList({
                   {row.method === "CARD" ? `${row.carrier ?? "Thẻ cào"} · ` : ""}
                   {row.createdAt}
                 </span>
-                {/* The desk's answer to "tại sao", on the row it belongs to.
-                    A refusal that says only "Từ chối" reads as the shop
-                    keeping the money, and the reason was asked for in chat
-                    every single time. */}
+                {/* The desk's answer to "tại sao", on the row it belongs to. */}
                 {row.note ? (
                   <span className="text-[11px] leading-snug text-red-400/80">{row.note}</span>
                 ) : null}
@@ -443,8 +303,7 @@ function HistoryList({
 
               {/* Money talks in colour: green and signed once credited, struck
                   through once the request can no longer credit, plain while
-                  everything is still open. The green is the ledger's green, so
-                  the same money reads the same on both pages. */}
+                  everything is still open. */}
               <span className="flex shrink-0 flex-col items-end gap-0.5">
                 <span className={`text-sm font-black tabular-nums ${status.sum}`}>
                   {row.status === "COMPLETED" ? "+" : ""}
@@ -454,11 +313,24 @@ function HistoryList({
                 row.credited !== null &&
                 row.credited < row.amount ? (
                   <span className="text-[10px] tabular-nums text-neutral-500">
-                    thẻ {formatVnd(row.amount)}đ · phí{" "}
-                    {formatVnd(row.amount - row.credited)}đ
+                    thẻ {formatVnd(row.amount)}đ · phí {formatVnd(row.amount - row.credited)}đ
                   </span>
                 ) : null}
               </span>
+            </>
+          );
+          const shape = `flex items-center gap-4 rounded-xl border px-4 py-3 ${status.card}`;
+          return isPending ? (
+            <Link
+              key={row.code}
+              href={`/wallet/${row.code}`}
+              className={`${shape} transition-colors hover:border-amber-500/60 hover:bg-white/[0.04]`}
+            >
+              {body}
+            </Link>
+          ) : (
+            <div key={row.code} className={shape}>
+              {body}
             </div>
           );
         })}
@@ -498,35 +370,41 @@ export function WalletTopUp({
   cardFee,
   bankEnabled,
   cardEnabled,
-  banks,
+  bankReady,
   autoEnabled,
   watch,
 }: WalletTopUpProps) {
-  // Which account the customer says they will transfer to. It only decides
-  // which QR is drawn — reconciliation reads every account, so paying the
-  // other one still settles the request.
-  const [bankIndex, setBankIndex] = useState(0);
-  const bank = banks[bankIndex] ?? null;
-  // Bank first: it is the path that settles by itself, and the one the shop
-  // wants people on. Never a tab that is switched off, though — that would
-  // open on a form the server is going to refuse.
-  const [method, setMethod] = useState<Method>(bankEnabled ? "bank" : "card");
+  const router = useRouter();
+  // The tab lives in the address, as on menzu (?method=card), so the header's
+  // "Nạp Thẻ Cào", a reload and a shared link all open the same desk. Bank
+  // unless the card was asked for: it is the path that settles by itself.
+  // Never a tab that is switched off — that would be a form the server is
+  // going to refuse.
+  const asked: Method = useSearchParams().get("method") === "card" ? "card" : "bank";
+  const method: Method = !bankEnabled ? "card" : !cardEnabled ? "bank" : asked;
   const [carrier, setCarrier] = useState<string>("");
   // Digits only as they are typed: people read the numbers off the card in
   // groups and paste them with spaces, and that must not become an error.
   const [serial, setSerial] = useState("");
   const [pin, setPin] = useState("");
-  const router = useRouter();
-  // Which code "Hủy" is working on — one flag serves the invoice card's link
-  // and every history-row chip without them sharing a spinner.
-  const [cancelingCode, setCancelingCode] = useState<string | null>(null);
-  // The code just withdrawn, shown on a sheet until it is dismissed: the
-  // card above simply disappears otherwise, which reads as a glitch.
-  const [cancelled, setCancelled] = useState<string | null>(null);
   const [amount, setAmount] = useState("");
-  // Every box the card form needs before it can be sent. The carrier and the
-  // denomination are picked, the two numbers are typed; anything shorter than
-  // six digits is half a card.
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [credited, setCredited] = useState<TopUpOutcome | null>(null);
+
+  // The amount and any error belong to the tab they were typed on: a bank
+  // figure carried into the card form named a denomination no carrier prints,
+  // and a bank refusal sat over the card button. Reset while rendering, the
+  // way React resets state on a changed input, because the tab can change
+  // from outside too — the header's links move the address.
+  const [formFor, setFormFor] = useState<Method>(method);
+  if (formFor !== method) {
+    setFormFor(method);
+    setAmount("");
+    setError(null);
+  }
+
+  const bankAmountOk = amount !== "" && Number(amount) >= minAmount;
   // The amount must be one the carriers print. A figure typed on the bank
   // tab used to ride along here and produce "Nạp Viettel 25.000đ" for a
   // denomination that does not exist.
@@ -536,113 +414,30 @@ export function WalletTopUp({
     cardAmountOk &&
     serial.length >= CARD_DIGITS_MIN &&
     pin.length >= CARD_DIGITS_MIN;
-  // The two figures the card tab talks in: what the shop keeps, and what the
-  // wallet gets. Both read from the same helper the server credits with.
-  const cardPercent = amount ? cardRateFor(Number(amount), cardRates, cardFee) : 0;
-  const cardCredit = amount ? cardNet(Number(amount), cardRates, cardFee) : 0;
-  const [pending, setPending] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [done, setDone] = useState<Invoice | null>(null);
-  const [copied, setCopied] = useState<string | null>(null);
-  const [credited, setCredited] = useState<Credited | null>(null);
-  /** The desk turned this request down while the screen was watching it. */
-  const [refused, setRefused] = useState<{ code: string; note: string | null } | null>(null);
-  /** The QR picture comes from a third party. Until it lands the frame says
-   *  so; if it never does, the frame says that too, with a way to try again. */
-  const [qr, setQr] = useState<"loading" | "ready" | "failed">("loading");
-  const [qrTry, setQrTry] = useState(0);
+  const carrierLabel = CARRIERS.find((option) => option.value === carrier)?.label ?? "thẻ";
 
-  // The request this page watches: the one just opened, or whatever the server
-  // says is still unpaid and recent. Watching one specific code, rather than
-  // the shop's overall match count, means a poll that was rate limited or that
-  // credited somebody else cannot make this page act.
-  const waitingCode = done?.code ?? watch?.code ?? null;
-  const deadline = done?.expiresAt ?? watch?.expiresAt ?? null;
+  // Something opened earlier and still unpaid: the page keeps asking, so a
+  // transfer made after the invoice was closed still lands with a receipt.
+  useTopUpWatch(credited ? null : (watch?.code ?? null), autoEnabled, (outcome) => {
+    if (outcome.status === "COMPLETED") setCredited(outcome);
+    // Turned down: the history below is server-rendered and still reads
+    // "Đang chờ"; the refresh is what puts the refusal on its row.
+    else router.refresh();
+  });
 
   /**
-   * While the customer has something outstanding, ask the shop to check its
-   * statement. That is what makes an automatic top-up land in seconds without
-   * a cron server — and when auto is off the endpoint answers immediately with
-   * nothing, so this costs a request every ten seconds and no more.
-   */
-  useEffect(() => {
-    if (credited || refused || !waitingCode) return;
-    let stopped = false;
-
-    const tick = async () => {
-      try {
-        // Ask the shop to read its statement. The answer is ignored: it covers
-        // every customer, and may have been served from the rate-limit window.
-        // Only when the feed is automatic; by hand there is nothing to read,
-        // and the status call below still catches the desk's decision.
-        if (autoEnabled) await fetch("/api/wallet/sync", { method: "POST" });
-
-        // Then ask about this request specifically, which also catches one
-        // settled by an admin or the scheduler between two ticks.
-        const status = await fetch("/api/wallet/status?code=" + waitingCode);
-        const data = (await status.json()) as {
-          status?: string;
-          amount?: number;
-          credited?: number | null;
-          balance?: number;
-          note?: string | null;
-        };
-        if (!stopped && data.status === "COMPLETED") {
-          setCredited({
-            code: waitingCode,
-            amount: data.amount ?? 0,
-            credited: data.credited ?? data.amount ?? 0,
-            balance: data.balance ?? 0,
-          });
-        }
-        // Turned down. The card stops breathing and says so; a spinner that
-        // keeps turning over a decided request promises something that is
-        // not happening.
-        if (!stopped && data.status === "FAILED") {
-          setRefused({ code: waitingCode, note: data.note ?? null });
-          // The history below is server-rendered and still reads "Đang chờ";
-          // with the invoice closed it is the only place the refusal shows.
-          router.refresh();
-        }
-      } catch {
-        // A failed poll is not worth telling the customer about; the next one
-        // is ten seconds away and the shop can still confirm by hand.
-      }
-    };
-
-    const timer = window.setInterval(tick, 10_000);
-    void tick();
-    return () => {
-      stopped = true;
-      window.clearInterval(timer);
-    };
-  }, [waitingCode, autoEnabled, credited, refused]);
-
-  // Whether the request on screen has run past the window the shop holds it
-  // for. Not a refusal: a late transfer still credits, so this only changes
-  // what the screen says, never what it does.
-  const timeLeft = useTimeLeft(credited ? null : deadline);
-  const overdue = timeLeft !== null && timeLeft <= 0;
-
-  /**
-   * Reload once the customer has read the receipt.
-   *
-   * Everything around this component was rendered before the money arrived:
-   * the balance in the header, and the history row still reading "Đang chờ".
+   * Reload once the customer has read the receipt: the balance in the header
+   * and the history row were rendered before the money arrived.
    */
   const dismissCredited = useCallback(() => {
     window.location.reload();
   }, []);
 
-  async function copy(label: string, value: string) {
-    try {
-      await navigator.clipboard.writeText(value);
-      setCopied(label);
-      window.setTimeout(() => setCopied(null), 1500);
-    } catch {
-      // Clipboard is blocked on insecure origins; the value is on screen to
-      // read anyway, so this is not worth an error message.
-    }
+  function switchTo(next: Method) {
+    if (next === method || pending) return;
+    // The history API rather than the router: nothing on the server changes
+    // with the tab, and Next feeds the new address to useSearchParams.
+    window.history.replaceState(null, "", next === "card" ? "/wallet?method=card" : "/wallet");
   }
 
   async function handleSubmit(event: React.FormEvent) {
@@ -650,7 +445,6 @@ export function WalletTopUp({
     if (pending) return;
     setPending(true);
     setError(null);
-    setDone(null);
 
     try {
       const response = await fetch("/api/wallet/topup", {
@@ -667,626 +461,408 @@ export function WalletTopUp({
       const data = (await response.json().catch(() => ({}))) as {
         error?: string;
         invoiceCode?: string;
-        amount?: number;
-        transferNote?: string;
-        expiresAt?: string;
       };
 
-      if (!response.ok) {
+      if (!response.ok || !data.invoiceCode) {
         setError(data.error ?? "Không tạo được hóa đơn");
+        setPending(false);
         return;
       }
 
-      // No reload: the balance has not moved yet and will not until the shop
-      // confirms, and reloading would throw away the transfer instructions the
-      // customer is about to use.
-      setQr("loading");
-      setDone({
-        code: data.invoiceCode ?? "",
-        amount: data.amount ?? 0,
-        transferNote: data.transferNote ?? "",
-        method,
-        expiresAt: data.expiresAt ?? null,
-      });
-      setSerial("");
-      setPin("");
+      // The invoice is its own page, as on menzu: the transfer details, the
+      // QR and the wait live there, and the address survives a reload. The
+      // button stays busy until that page takes over.
+      router.push(`/wallet/${data.invoiceCode}`);
     } catch {
       setError("Không kết nối được máy chủ");
-    } finally {
       setPending(false);
     }
   }
 
-  /**
-   * Withdraws a request — from the invoice card or straight off a history
-   * row. The server refuses anything already settled, so a transfer that
-   * landed a moment ago is safe: the refusal simply shows as the error strip.
-   */
-  async function cancelByCode(code: string) {
-    if (cancelingCode) return;
-    setCancelingCode(code);
-    setError(null);
-    try {
-      const response = await fetch("/api/wallet/cancel", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ code }),
-      });
-      const data = (await response.json().catch(() => null)) as {
-        error?: string;
-      } | null;
-      if (!response.ok) {
-        setError(data?.error ?? "Không hủy được lệnh, thử lại sau");
-        return;
-      }
-      if (done?.code === code) setDone(null);
-      setCancelled(code);
-      // The history below is server-rendered; refresh so the row shows Đã hủy.
-      router.refresh();
-    } catch {
-      setError("Không kết nối được máy chủ");
-    } finally {
-      setCancelingCode(null);
-    }
-  }
+  const errorLine = error ? (
+    <p
+      role="alert"
+      className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-2.5 text-[12px] font-semibold text-red-400"
+    >
+      {error}
+    </p>
+  ) : null;
 
-  /**
-   * A pending history row reopens as the live invoice — same panel, same
-   * QR — for the customer who closed the tab mid-transfer and came back.
-   */
-  function openRow(row: TopUpHistoryRow) {
-    setQr("loading");
-    setDone({
-      code: row.code,
-      amount: row.amount,
-      transferNote: row.transferNote,
-      method: row.method === "CARD" ? "card" : "bank",
-      expiresAt: row.expiresAt,
-    });
-    setError(null);
-    // The panel mounts at the top of the block, likely off-screen from a
-    // click halfway down the ledger.
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }
+  const tabs: { value: Method; label: string; icon: typeof CreditCard }[] = [
+    ...(bankEnabled ? [{ value: "bank" as const, label: "Ngân Hàng", icon: CreditCard }] : []),
+    ...(cardEnabled ? [{ value: "card" as const, label: "Thẻ Cào", icon: QrCode }] : []),
+  ];
+
+  const rows = history.filter((row) =>
+    method === "card" ? row.method === "CARD" : row.method !== "CARD",
+  );
+  // The newest transfer still waiting to be paid: menzu puts it back in front
+  // of the customer above the form, rather than letting a second one start.
+  const unpaid = history.find((row) => row.status === "PENDING" && row.method !== "CARD") ?? null;
+
+  const ledger =
+    tabs.length > 0 ? (
+      // The ledger follows the tab above it: on Ngân Hàng only bank rows, on
+      // Thẻ Cào only card rows — each method reads as its own desk. Keyed by
+      // method so switching tabs starts back at page one.
+      <div className="mt-8 border-t border-white/10 pt-8">
+        <h3 className="text-lg font-black text-white uppercase tracking-wider mb-4 flex items-center gap-2">
+          <History size={18} className="text-emerald-400" aria-hidden />
+          {method === "card" ? "Thẻ nạp gần đây" : "Lịch sử nạp ngân hàng"}
+        </h3>
+        <HistoryList
+          key={method}
+          rows={rows}
+          empty={
+            method === "card"
+              ? "Chưa có lịch sử nạp thẻ nào."
+              : "Chưa có lịch sử nạp ngân hàng nào."
+          }
+        />
+      </div>
+    ) : null;
 
   return (
-    <div className="flex flex-col gap-5">
-      <div className="rounded-xl border border-red-500/25 bg-red-500/[0.06] px-4 py-3 text-xs leading-relaxed text-neutral-300">
-        <span className="font-black uppercase tracking-wider text-red-400">
-          Lưu ý:
-        </span>{" "}
-        Tiền vào tài khoản trong 30–60s. Nếu sau thời gian trên chưa được cộng
-        tiền, vui lòng liên hệ admin.
-      </div>
+    <div className="w-full bg-[#111111] border border-white/5 rounded-[20px] sm:rounded-[24px] p-5 sm:p-8 lg:p-10 relative min-h-0 sm:min-h-[750px]">
+      <div>
+        <div className="mb-8">
+          <h1 className="text-xl sm:text-2xl font-black text-white uppercase tracking-wider mb-2 flex items-center gap-3">
+            <QrCode size={24} className="shrink-0 text-[#8b5cf6]" aria-hidden />
+            Nạp tiền vào tài khoản
+          </h1>
+          <p className="text-xs sm:text-sm text-neutral-400 leading-relaxed">
+            {autoEnabled
+              ? "Tiền sẽ được hệ thống tự động cộng 24/7."
+              : "Tiền được cộng vào ví ngay khi shop xác nhận."}
+          </p>
+        </div>
 
-      <div className="flex items-center gap-3">
-        {bankEnabled ? (
-          <button
-            type="button"
-            // The amount and any error belong to the tab they were typed on:
-            // a bank figure carried into the card form named a denomination
-            // no carrier prints, and a bank refusal sat over the card button.
-            onClick={() => {
-              setMethod("bank");
-              setAmount("");
-              setError(null);
-            }}
-            className={method === "bank" ? TAB_ACTIVE : TAB_INACTIVE}
-          >
-            <CreditCard size={15} />
-            Ngân Hàng
-          </button>
-        ) : null}
-        {cardEnabled ? (
-          <button
-            type="button"
-            onClick={() => {
-              setMethod("card");
-              setAmount("");
-              setError(null);
-            }}
-            className={method === "card" ? TAB_ACTIVE : TAB_INACTIVE}
-          >
-            <Ticket size={15} />
-            Thẻ Cào
-          </button>
-        ) : null}
-      </div>
-
-      {/* The transfer instructions. Shown after the request is opened and kept
-          on screen — this is the only place the customer can read the code the
-          shop matches their transfer by. */}
-      {done ? (
-        // The menzu red dress: near-black shell, 1.5px red border with a soft
-        // glow, and the hairline scan along the top edge — the same signature
-        // the storefront's search fields wear.
-        <div
-          className={`receipt-in relative overflow-hidden rounded-2xl border-[1.5px] bg-[#111] p-5 flex flex-col gap-4 ${
-            refused
-              ? "border-red-500/70"
-              : credited
-                ? "border-red-500/30 shadow-[0_0_40px_rgba(239,68,68,0.07)]"
-                : "invoice-breathe border-red-500/30 shadow-[0_0_40px_rgba(239,68,68,0.07)]"
-          }`}
-        >
-          <span
-            aria-hidden
-            className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-red-500/70 to-transparent"
-          />
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-            <span className="text-sm font-black uppercase tracking-widest text-white">
-              Lệnh nạp <span className="font-mono text-red-400">{done.code}</span>
-            </span>
-            {refused ? (
-              <span className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-md bg-red-500 text-white">
-                <XCircle size={12} aria-hidden />
-                {done.method === "card" ? "Thẻ bị từ chối" : "Lệnh nạp bị từ chối"}
-              </span>
-            ) : credited ? (
-              <span className="text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-md border border-emerald-500/30 bg-emerald-500/10 text-emerald-400">
-                Đã nhận được tiền · đang cập nhật ví
-              </span>
-            ) : (
-              <span className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-md border border-red-500/30 bg-red-500/10 text-red-400">
-                {/* Turning while the request is alive: the page is watching
-                    the bank, and this is what says so before any word. */}
-                <Loader2 size={12} className="animate-spin motion-reduce:animate-none" aria-hidden />
-                {autoEnabled ? "Đang chờ tiền về" : "Đang chờ xác nhận"}
-              </span>
-            )}
-            {/* Placed next to the status, because it qualifies it: the request
-                is waiting, and this is how much longer it waits for. */}
-            {!credited && !refused && done.expiresAt ? (
-              <span
-                className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-md border border-white/10 bg-white/5 text-neutral-400"
-                aria-label="Thời gian còn lại"
-              >
-                <Clock size={12} aria-hidden />
-                <span className="text-white">
-                  <TopUpCountdown deadline={done.expiresAt} />
-                </span>
-              </span>
-            ) : null}
-          </div>
-
-          {/* The desk said no. The reason it typed, or the plain fact when it
-              typed none, and the way back to the form — not a shake: this
-              arrived from a ten-second poll, not from anything the customer
-              pressed, and a card that jolts on its own is motion nobody asked
-              for. */}
-          {refused ? (
-            <div className="flex flex-col gap-3 rounded-xl border border-red-500/30 bg-red-500/[0.07] px-4 py-3">
-              <p className="text-[12.5px] leading-relaxed text-neutral-200">
-                {refused.note
-                  ? refused.note
-                  : done.method === "card"
-                    ? "Shop không nạp được thẻ này. Kiểm tra lại số seri và mã thẻ, hoặc liên hệ hỗ trợ kèm mã lệnh."
-                    : "Shop không xác nhận được lệnh nạp này. Liên hệ hỗ trợ kèm mã lệnh nếu bạn đã chuyển tiền."}
-              </p>
-              <button
-                type="button"
-                onClick={() => {
-                  setDone(null);
-                  setRefused(null);
-                  setError(null);
-                }}
-                className="press self-start rounded-lg bg-[var(--menzu-accent)] px-4 py-2 text-[11px] font-black uppercase tracking-widest text-white hover:bg-[var(--menzu-accent-dark)]"
-              >
-                {done.method === "card" ? "Nhập thẻ khác" : "Tạo lệnh khác"}
-              </button>
-            </div>
-          ) : null}
-
-          {overdue && !credited && !refused ? (
-            <p className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2.5 text-[12px] leading-relaxed text-neutral-300">
-              Hết thời gian giữ lệnh. Nếu bạn{" "}
-              <span className="font-bold text-white">đã chuyển khoản</span>, tiền vẫn được
-              cộng khi shop nhận được — đừng tạo lệnh mới, và cũng đừng chuyển lại lần nữa.
+        {tabs.length === 0 ? (
+          <div className="p-8 text-center bg-white/[0.02] border border-white/5 rounded-2xl">
+            <p className="text-sm font-bold text-white">Tạm ngưng nhận nạp tiền</p>
+            <p className="mt-1.5 text-sm text-neutral-500">
+              Shop đang tạm dừng cả nạp ngân hàng và thẻ cào. Số dư sẵn có trong ví vẫn dùng
+              để mua hàng bình thường.
             </p>
-          ) : null}
-
-          {done.method === "bank" && bank ? (
-            <div className="flex flex-col sm:flex-row gap-5">
-              {/* VietQR renders the bank, account, amount and description into
-                  one scan. Plain <img>: it is a third-party URL and adding it
-                  to next/image's allow-list would be config for one picture. */}
-              {/* Three states in one 220×310 frame, so the invoice never
-                  jolts. Dark until the picture is here — a white block on the
-                  money screen is what it used to show while it waited on a
-                  third party, and what it showed forever when that party did
-                  not answer. The ground turns white only with the picture,
-                  never a beat before it. */}
+          </div>
+        ) : (
+          <>
+            {/* The method switch: one sliding lozenge under two labels. */}
+            <div
+              role="tablist"
+              aria-label="Phương thức nạp"
+              className="relative p-1.5 bg-black/40 border border-white/10 rounded-[20px] sm:rounded-[24px] flex mb-8 w-full backdrop-blur-xl"
+            >
               <div
-                className={`relative h-[310px] w-[220px] shrink-0 overflow-hidden rounded-xl border transition-colors ${
-                  qr === "ready" ? "border-white bg-white" : "border-white/10 bg-white/[0.04]"
-                }`}
-              >
-                {qr !== "failed" ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    key={qrTry}
-                    src={`https://img.vietqr.io/image/${encodeURIComponent(bank.code)}-${encodeURIComponent(bank.account)}-compact2.png?amount=${done.amount}&addInfo=${encodeURIComponent(done.transferNote)}&accountName=${encodeURIComponent(bank.holder)}${qrTry ? `&r=${qrTry}` : ""}`}
-                    alt={`Mã QR chuyển khoản ${formatVnd(done.amount)}đ`}
-                    width={220}
-                    height={310}
-                    onLoad={() => setQr("ready")}
-                    onError={() => setQr("failed")}
-                    className={`h-auto w-[220px] transition-opacity duration-200 ${qr === "ready" ? "opacity-100" : "opacity-0"}`}
-                  />
-                ) : null}
-                {qr === "loading" ? (
-                  <span className="absolute inset-0 flex items-center justify-center text-[11px] font-semibold text-neutral-500">
-                    Đang tạo mã QR…
-                  </span>
-                ) : null}
-                {qr === "failed" ? (
-                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 px-4 text-center">
-                    <p className="text-[11px] leading-relaxed text-neutral-400">
-                      Không tải được mã QR — bạn vẫn chuyển khoản được bằng thông tin bên cạnh.
-                    </p>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setQr("loading");
-                        setQrTry((n) => n + 1);
-                      }}
-                      className="press rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-[10px] font-black uppercase tracking-widest text-neutral-300 hover:bg-white/10"
+                aria-hidden
+                className={`absolute top-1.5 bottom-1.5 left-1.5 rounded-[14px] sm:rounded-[18px] bg-emerald-500/10 border border-emerald-500/30 transition-transform duration-300 motion-reduce:transition-none ${
+                  tabs.length > 1 ? "w-[calc(50%-6px)]" : "w-[calc(100%-12px)]"
+                } ${method === "card" && tabs.length > 1 ? "translate-x-full" : "translate-x-0"}`}
+              />
+              {tabs.map((tab) => {
+                const on = method === tab.value;
+                const tone = on ? "text-emerald-400" : "text-neutral-500";
+                return (
+                  <button
+                    key={tab.value}
+                    type="button"
+                    role="tab"
+                    aria-selected={on}
+                    onClick={() => switchTo(tab.value)}
+                    className="relative z-10 flex-1 flex items-center justify-center gap-2 py-3 sm:py-4 cursor-pointer text-center group transition-all"
+                  >
+                    <tab.icon size={18} className={tone} aria-hidden />
+                    <span
+                      className={`text-xs sm:text-sm font-black uppercase tracking-wider transition-colors duration-300 ${tone}`}
                     >
-                      Thử lại
+                      {tab.label}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {method === "bank" && unpaid ? (
+              <div className="mb-6 bg-gradient-to-r from-yellow-500/10 to-yellow-500/5 border border-yellow-500/20 rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div className="flex items-start gap-3">
+                  <CircleAlert size={20} className="text-yellow-500 shrink-0 mt-0.5" aria-hidden />
+                  <div>
+                    <h4 className="text-sm font-bold text-yellow-500 mb-1">Đơn nạp tiền đang chờ xử lý</h4>
+                    <p className="text-xs text-neutral-400 leading-relaxed">
+                      Bạn có một hóa đơn <strong className="text-white">{formatVnd(unpaid.amount)}đ</strong>{" "}
+                      chưa hoàn tất.
+                    </p>
+                  </div>
+                </div>
+                <Link
+                  href={`/wallet/${unpaid.code}`}
+                  className="shrink-0 w-full sm:w-auto text-center bg-yellow-500 text-black font-bold text-xs px-5 py-2.5 rounded-lg hover:bg-yellow-400 transition-colors"
+                >
+                  Tiếp tục thanh toán
+                </Link>
+              </div>
+            ) : null}
+
+            {method === "bank" && !bankReady ? (
+              <div className="p-8 text-center bg-white/[0.02] border border-white/5 rounded-2xl">
+                <p className="text-sm font-bold text-white">Chưa nhận được chuyển khoản</p>
+                <p className="mt-1.5 text-sm text-neutral-500">
+                  Shop chưa khai báo tài khoản ngân hàng nhận tiền. Vui lòng dùng thẻ cào hoặc
+                  liên hệ shop qua Zalo.
+                </p>
+              </div>
+            ) : method === "bank" ? (
+              <div className="w-full mt-4">
+                <form
+                  onSubmit={handleSubmit}
+                  className="sm:bg-[#111111] sm:border sm:border-white/5 rounded-[24px] p-0 sm:p-10 transition-all"
+                >
+                  <div className="flex items-start sm:items-center gap-3 sm:gap-4 mb-6 sm:mb-10">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white/[0.03] border border-white/10 rounded-[14px] sm:rounded-2xl flex items-center justify-center shrink-0">
+                      <Wallet className="text-white w-5 h-5 sm:w-6 sm:h-6" aria-hidden />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-lg sm:text-xl font-bold text-white tracking-tight leading-none mb-1 sm:mb-0">
+                        Số tiền nạp
+                      </h3>
+                      <p className="text-[11px] sm:text-sm text-neutral-500 font-medium sm:mt-0.5 leading-relaxed">
+                        Nạp từ {formatVnd(minAmount)}đ trở lên. Miễn phí giao dịch.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-8">
+                    <div className="relative group">
+                      {/* State keeps bare digits (presets and submit read it
+                          as a number); only the field shows them grouped —
+                          50000 reads as 50.000 the moment it is typed. */}
+                      <input
+                        type="text"
+                        aria-label="Số tiền nạp"
+                        value={amount ? formatVnd(Number(amount)) : ""}
+                        onChange={(event) =>
+                          setAmount(event.target.value.replace(/\D/g, "").slice(0, 12))
+                        }
+                        inputMode="numeric"
+                        autoComplete="off"
+                        placeholder="0"
+                        className="w-full bg-transparent border-b-2 border-white/10 hover:border-white/30 focus:border-white pb-4 pr-16 sm:pr-20 text-4xl sm:text-6xl font-black text-white focus:outline-none transition-colors tracking-tighter placeholder:text-neutral-800"
+                      />
+                      <div
+                        className={`absolute right-0 bottom-6 font-bold text-lg sm:text-2xl transition-colors ${
+                          amount ? "text-white/60" : "text-neutral-700"
+                        }`}
+                      >
+                        VNĐ
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3 pt-2">
+                      {presets.map((preset) => (
+                        <button
+                          key={preset}
+                          type="button"
+                          onClick={() => setAmount(String(preset))}
+                          className="w-full py-3 sm:py-2.5 rounded-xl sm:rounded-full font-bold text-xs sm:text-sm transition-colors duration-200 border bg-white/[0.02] border-white/5 hover:border-white/20 text-neutral-400 hover:text-white hover:bg-white/[0.05]"
+                        >
+                          {formatVnd(preset)}
+                        </button>
+                      ))}
+                    </div>
+
+                    {errorLine}
+
+                    <div className="pt-4">
+                      <button
+                        type="submit"
+                        disabled={pending || !bankAmountOk}
+                        aria-busy={pending}
+                        className="w-full bg-white hover:bg-neutral-200 text-black rounded-2xl py-4 font-black text-base transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98]"
+                      >
+                        {pending ? (
+                          <Loader2 size={18} className="animate-spin motion-reduce:animate-none" aria-hidden />
+                        ) : null}
+                        {pending ? "Đang tạo hóa đơn…" : "Tạo hóa đơn"}
+                      </button>
+                    </div>
+                  </div>
+                </form>
+
+                <p className="text-center text-xs text-neutral-500 mt-6 flex items-center justify-center gap-2 font-medium">
+                  <span
+                    aria-hidden
+                    className={`w-2 h-2 rounded-full ${autoEnabled ? "bg-emerald-500" : "bg-amber-500"}`}
+                  />
+                  {autoEnabled
+                    ? "Hệ thống tự động xử lý hóa đơn 24/7"
+                    : "Hóa đơn được shop đối soát và cộng tiền thủ công"}
+                </p>
+              </div>
+            ) : (
+              <form onSubmit={handleSubmit} className="w-full mt-4 space-y-6">
+                <div>
+                  <span className={`${STEP} mb-3 block`}>1. Chọn nhà mạng</span>
+                  <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-2.5 sm:gap-3">
+                    {CARRIERS.map((option) => {
+                      const on = carrier === option.value;
+                      return (
+                        <button
+                          key={option.value}
+                          type="button"
+                          onClick={() => setCarrier(option.value)}
+                          aria-pressed={on}
+                          aria-label={option.label}
+                          className={`relative group overflow-hidden flex flex-col items-center justify-center p-3 sm:p-4 rounded-[16px] sm:rounded-[20px] border transition-all duration-300 ease-out ${
+                            on
+                              ? "bg-emerald-500/10 border-emerald-500"
+                              : "bg-[#161616] border-white/5 hover:border-white/10 active:scale-[0.98]"
+                          }`}
+                        >
+                          <div
+                            aria-hidden
+                            className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-br to-transparent ${
+                              on ? "from-emerald-500/10" : "from-white/5"
+                            }`}
+                          />
+                          <div className="h-8 sm:h-10 w-full flex items-center justify-center relative z-10">
+                            {/* A plain <img>, as menzu draws it: the mark
+                                fills the box up to its height or 85% of its
+                                width, whichever comes first. */}
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              src={option.logo}
+                              alt={option.label}
+                              className={`max-h-full max-w-[85%] object-contain transition-all duration-300 ${
+                                on ? "opacity-100" : "opacity-60 group-hover:opacity-100"
+                              }`}
+                            />
+                          </div>
+                          <div
+                            aria-hidden
+                            className={`absolute top-2 right-2 transition-all duration-300 ${
+                              on ? "opacity-100 scale-100" : "opacity-0 scale-50"
+                            }`}
+                          >
+                            <span className="flex h-1.5 w-1.5">
+                              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75 motion-reduce:animate-none" />
+                              <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500" />
+                            </span>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {carrier ? (
+                  <div className="animate-in fade-in slide-in-from-top-4 duration-300">
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-3">
+                      <span className={`${STEP} whitespace-nowrap`}>2. Chọn mệnh giá</span>
+                      <span className="text-red-400 font-normal text-[11px] bg-red-500/10 px-2.5 py-0.5 rounded-full w-fit whitespace-nowrap">
+                        Lưu ý: Chọn sai mệnh giá sẽ mất thẻ
+                      </span>
+                    </div>
+                    {/* Each tile says what the wallet gets: the customer
+                        knows the figure before sending the card, not from the
+                        ledger afterwards. */}
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                      {cardPresets.map((preset) => {
+                        const on = amount === String(preset);
+                        const rate = cardRateFor(preset, cardRates, cardFee);
+                        return (
+                          <button
+                            key={preset}
+                            type="button"
+                            onClick={() => setAmount(String(preset))}
+                            aria-pressed={on}
+                            className={`relative overflow-hidden p-3 rounded-xl border text-center transition-colors duration-200 ${
+                              on
+                                ? "bg-emerald-500/10 border-emerald-500"
+                                : "bg-white/[0.02] border-white/5 hover:border-white/10 hover:bg-white/[0.05]"
+                            }`}
+                          >
+                            {rate > 0 ? (
+                              <div className="absolute top-0 right-0 bg-rose-500/20 text-rose-400 text-[8px] font-bold px-1 py-[3px] leading-none rounded-bl-md border-b border-l border-rose-500/20">
+                                {feeBadge(rate)}
+                              </div>
+                            ) : null}
+                            <p
+                              className={`text-sm font-black mt-1 ${
+                                on ? "text-emerald-400" : "text-white"
+                              }`}
+                            >
+                              {formatVnd(preset)} đ
+                            </p>
+                            <p className="text-[10px] text-neutral-500 mt-0.5">
+                              Nhận:{" "}
+                              <span className="text-emerald-500 font-bold">
+                                {formatVnd(cardNet(preset, cardRates, cardFee))} đ
+                              </span>
+                            </p>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ) : null}
+
+                {/* The card itself. Typed here rather than sent to the shop
+                    over chat: the request then carries everything the desk
+                    needs. */}
+                {carrier && cardAmountOk ? (
+                  <div className="animate-in fade-in zoom-in-95 duration-200 sm:bg-[#111111] sm:border sm:border-white/5 p-0 sm:p-5 rounded-[24px] mt-6">
+                    <span className={`${STEP} mb-4 block`}>3. Thông tin mã thẻ</span>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+                      <CardNumberField
+                        id="card-pin"
+                        label="Mã Thẻ (PIN)"
+                        placeholder="Nhập mã thẻ..."
+                        value={pin}
+                        onChange={setPin}
+                      />
+                      <CardNumberField
+                        id="card-serial"
+                        label="Số Serial"
+                        placeholder="Nhập số serial..."
+                        value={serial}
+                        onChange={setSerial}
+                      />
+                    </div>
+
+                    {errorLine ? <div className="mb-4">{errorLine}</div> : null}
+
+                    <button
+                      type="submit"
+                      disabled={pending || !cardReady}
+                      aria-busy={pending}
+                      className="w-full bg-emerald-500 hover:bg-emerald-400 text-black rounded-xl py-4 font-black text-sm transition-all flex items-center justify-center gap-2 disabled:opacity-30 disabled:cursor-not-allowed active:scale-[0.99]"
+                    >
+                      {pending ? (
+                        <Loader2 size={17} className="animate-spin motion-reduce:animate-none" aria-hidden />
+                      ) : (
+                        <CreditCard size={17} aria-hidden />
+                      )}
+                      {pending ? "Đang gửi thẻ…" : `Nạp ${carrierLabel} ${formatVnd(Number(amount))} đ`}
                     </button>
                   </div>
                 ) : null}
-              </div>
+              </form>
+            )}
+          </>
+        )}
 
-              <div className="flex-1 min-w-0 flex flex-col gap-2.5">
-                <CopyRow label="Ngân hàng" value={bank.name || bank.code} copyable={false} onCopy={copy} copied={copied} />
-                <CopyRow label="Số tài khoản" value={bank.account} onCopy={copy} copied={copied} />
-                <CopyRow label="Chủ tài khoản" value={bank.holder} copyable={false} onCopy={copy} copied={copied} />
-                <CopyRow
-                  label="Số tiền"
-                  value={String(done.amount)}
-                  display={`${formatVnd(done.amount)}đ`}
-                  copyable={false}
-                  onCopy={copy}
-                  copied={copied}
-                />
-                <CopyRow
-                  label="Nội dung"
-                  value={done.transferNote}
-                  highlight
-                  onCopy={copy}
-                  copied={copied}
-                />
-                <p className="text-[11px] text-neutral-400 leading-relaxed">
-                  Ghi <span className="font-bold text-white">đúng nội dung</span> ở trên khi
-                  chuyển khoản — hệ thống dựa vào đó để biết tiền là của bạn.{" "}
-                  {autoEnabled
-                    ? "Cứ để trang này mở, tiền về là ví tự cộng trong vài giây."
-                    : "Chuyển xong cứ đóng trang, tiền vào ví ngay khi shop đối soát xong."}
-                </p>
-              </div>
-            </div>
-          ) : (
-            <p className="text-[13px] text-neutral-300 leading-relaxed">
-              Đã nhận thẻ {done.amount.toLocaleString("vi-VN")}đ, mã lệnh{" "}
-              <span className="font-mono font-bold text-white">{done.code}</span>. Shop
-              đang đối soát với nhà mạng — tiền vào ví ngay khi thẻ hợp lệ. Bạn
-              không cần gửi gì thêm, cứ đóng trang này.
-            </p>
-          )}
-
-          {/* Bottom-right on purpose: the exit door of the card, past every
-              transfer detail. Gone once money has arrived — a credited
-              request has nothing left to cancel. */}
-          {!credited && !refused ? (
-            <button
-              type="button"
-              onClick={() => cancelByCode(done.code)}
-              disabled={cancelingCode !== null}
-              className="self-end text-[11px] font-black uppercase tracking-widest text-red-400/80 transition-colors hover:text-red-300 disabled:cursor-wait disabled:opacity-60"
-            >
-              {cancelingCode === done.code ? "Đang hủy…" : "Hủy hóa đơn này"}
-            </button>
-          ) : null}
-        </div>
-      ) : null}
-
-      {/* Told after, not asked before: the owner found the question a nag.
-          The sheet is what stops the card's disappearance reading as a
-          glitch. */}
-      {cancelled ? (
-        <ErrorModal
-          tone="done"
-          title="Đã hủy hóa đơn"
-          message={`Lệnh ${cancelled} đã được hủy. Bạn có thể tạo hóa đơn mới bất cứ lúc nào.`}
-          onClose={() => setCancelled(null)}
-        />
-      ) : null}
-
-      {done ? null : !bankEnabled && !cardEnabled ? (
-        <div className="rounded-2xl border border-white/10 bg-neutral-900/50 px-5 py-10 text-center">
-          <p className="text-sm font-bold text-white">Tạm ngưng nhận nạp tiền</p>
-          <p className="mt-1.5 text-[13px] text-neutral-400">
-            Shop đang tạm dừng cả nạp ngân hàng và thẻ cào. Số dư sẵn có trong ví vẫn
-            dùng để mua hàng bình thường.
-          </p>
-        </div>
-      ) : method === "bank" && banks.length === 0 ? (
-        <div className="rounded-2xl border border-white/10 bg-neutral-900/50 px-5 py-10 text-center">
-          <p className="text-sm font-bold text-white">Chưa nhận được chuyển khoản</p>
-          <p className="mt-1.5 text-[13px] text-neutral-400">
-            Shop chưa khai báo tài khoản ngân hàng nhận tiền. Vui lòng dùng thẻ cào hoặc
-            liên hệ shop qua Zalo.
-          </p>
-        </div>
-      ) : method === "bank" ? (
-        <form
-          onSubmit={handleSubmit}
-          className="rounded-2xl border border-white/10 bg-neutral-900/50 p-5 flex flex-col gap-4"
-        >
-          {banks.length > 1 ? (
-            <div className="flex flex-col gap-2">
-              <span className="text-[10px] font-black uppercase tracking-widest text-neutral-500">
-                Chọn ngân hàng
-              </span>
-              <div className="flex flex-wrap gap-2">
-                {banks.map((option, index) => (
-                  <button
-                    key={`${option.code}-${option.account}`}
-                    type="button"
-                    onClick={() => setBankIndex(index)}
-                    aria-pressed={index === bankIndex}
-                    className={index === bankIndex ? PRESET_ACTIVE : PRESET_INACTIVE}
-                  >
-                    {option.name || option.code}
-                  </button>
-                ))}
-              </div>
-            </div>
-          ) : null}
-
-          <div className="flex flex-col gap-2">
-            <label className="text-[10px] font-black uppercase tracking-widest text-neutral-300">
-              Số tiền nạp
-            </label>
-            <div className="flex items-center gap-2 h-12 px-4 rounded-xl bg-neutral-950/60 border border-neutral-800/60 focus-within:border-[var(--menzu-accent)]/60 transition-colors">
-              {/* State keeps bare digits (presets and submit read it as a
-                  number); only the field shows them grouped — 50000 reads
-                  as 50.000 the moment it is typed. */}
-              <input
-                value={amount ? formatVnd(Number(amount)) : ""}
-                onChange={(event) =>
-                  setAmount(event.target.value.replace(/\D/g, "").slice(0, 12))
-                }
-                inputMode="numeric"
-                placeholder="0"
-                className="flex-1 bg-transparent outline-none text-white text-sm font-bold tabular-nums placeholder-neutral-500"
-              />
-              <span className="text-[11px] font-black uppercase tracking-widest text-neutral-500">
-                VNĐ
-              </span>
-            </div>
-            <span className="text-[11px] text-neutral-500">
-              Nạp từ {formatVnd(minAmount)}đ trở lên. Miễn phí giao dịch.
-            </span>
-          </div>
-
-          <div className="flex flex-wrap gap-2">
-            {presets.map((preset) => (
-              <button
-                key={preset}
-                type="button"
-                onClick={() => setAmount(String(preset))}
-                className={amount === String(preset) ? PRESET_ACTIVE : PRESET_INACTIVE}
-              >
-                {formatVnd(preset)}
-              </button>
-            ))}
-          </div>
-
-          {error ? (
-            <p
-              role="alert"
-              className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-2.5 text-[12px] font-semibold text-red-400"
-            >
-              {error}
-            </p>
-          ) : null}
-
-          <button
-            type="submit"
-            disabled={pending}
-            aria-busy={pending}
-            className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] disabled:opacity-70 disabled:cursor-wait text-white font-black py-3.5 uppercase tracking-widest text-xs transition-colors"
-          >
-            {pending ? <Loader2 size={14} className="animate-spin motion-reduce:animate-none" aria-hidden /> : null}
-            {pending ? "Đang xử lý…" : "Tạo hóa đơn"}
-          </button>
-          <span role="status" aria-live="polite" className="sr-only">{pending ? "Đang xử lý" : ""}</span>
-        </form>
-      ) : (
-        <form
-          onSubmit={handleSubmit}
-          className="rounded-2xl border border-white/10 bg-neutral-900/50 p-5 flex flex-col gap-5"
-        >
-          <fieldset className="flex flex-col gap-3">
-            <legend className="text-[10px] font-black uppercase tracking-widest text-neutral-500 mb-3">
-              1. Chọn nhà mạng
-            </legend>
-            <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
-              {CARRIERS.map((option) => (
-                <button
-                  key={option.value}
-                  type="button"
-                  onClick={() => setCarrier(option.value)}
-                  aria-pressed={carrier === option.value}
-                  aria-label={option.label}
-                  className={`relative flex h-12 items-center justify-center rounded-xl border px-4 transition-colors ${
-                    carrier === option.value
-                      ? "border-[var(--menzu-accent)] bg-[var(--menzu-accent)]/10"
-                      : "border-neutral-800 bg-neutral-950/60 hover:border-neutral-600"
-                  }`}
-                >
-                  {/* The mark, not the word, at the height measured for it
-                      rather than one height for all five. */}
-                  <Image
-                    src={option.logo}
-                    alt={option.label}
-                    width={160}
-                    height={40}
-                    style={{ height: option.height }}
-                    className="w-auto max-w-[86%] object-contain"
-                  />
-                  {carrier === option.value ? (
-                    <span
-                      aria-hidden
-                      className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-[var(--menzu-accent)]"
-                    />
-                  ) : null}
-                </button>
-              ))}
-            </div>
-          </fieldset>
-
-          {carrier ? (
-            <div className="receipt-in flex flex-col gap-3">
-              <div className="flex flex-wrap items-center gap-2">
-                <h3 className="text-[10px] font-black uppercase tracking-widest text-neutral-500">
-                  2. Chọn mệnh giá
-                </h3>
-                <span className="rounded-md border border-red-500/30 bg-red-500/10 px-2 py-0.5 text-[10px] font-bold text-red-400">
-                  Lưu ý: Chọn sai mệnh giá sẽ mất thẻ
-                </span>
-              </div>
-              {/* One tile per denomination rather than a row of chips: the
-                  figure is the thing being chosen, and it should be big
-                  enough to check against the card in the customer's hand. */}
-              <div className="flex flex-wrap gap-2">
-                {cardPresets.map((preset) => (
-                  <button
-                    key={preset}
-                    type="button"
-                    onClick={() => setAmount(String(preset))}
-                    className={amount === String(preset) ? PRESET_ACTIVE : PRESET_INACTIVE}
-                  >
-                    {formatVnd(preset)}
-                  </button>
-                ))}
-              </div>
-              {/* What the wallet will actually get, said before the card is
-                  sent rather than discovered in the ledger afterwards. Only
-                  when the shop keeps something — a shop that credits cards
-                  whole has nothing to explain. */}
-              {/* One quiet green line: the wallet's own colour on the one
-                  figure the customer is promised, and the reason for it in
-                  the same breath. Still a single line tall. */}
-              {amount && cardPercent > 0 ? (
-                <div className="flex items-center justify-between gap-4 rounded-xl border border-emerald-500/30 bg-emerald-500/[0.06] px-4 py-3">
-                  <div className="flex flex-col gap-0.5">
-                    <span className="text-[11px] font-black uppercase tracking-widest text-emerald-400">
-                      Thực nhận về ví
-                    </span>
-                    <span className="text-[11px] text-neutral-400">
-                      Đã trừ chiết khấu {String(cardPercent).replace(".", ",")}%
-                    </span>
-                  </div>
-                  <span className="shrink-0 text-lg font-black tabular-nums text-emerald-400">
-                    {formatVnd(cardCredit)}đ
-                  </span>
-                </div>
-              ) : null}
-            </div>
-          ) : null}
-
-          {/* The card itself. Typed here rather than sent to the shop over
-              chat: the request then carries everything the desk needs, and
-              the customer is not left holding two numbers and no instructions. */}
-          {carrier && cardAmountOk ? (
-            <div className="receipt-in flex flex-col gap-2">
-              <h3 className="text-[10px] font-black uppercase tracking-widest text-neutral-500">
-                3. Thông tin mã thẻ
-              </h3>
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                <CardNumberField
-                  id="card-pin"
-                  label="Mã thẻ (PIN)"
-                  placeholder="Nhập mã thẻ..."
-                  value={pin}
-                  onChange={setPin}
-                />
-                <CardNumberField
-                  id="card-serial"
-                  label="Số serial"
-                  placeholder="Nhập số serial..."
-                  value={serial}
-                  onChange={setSerial}
-                />
-              </div>
-              <span className="text-[11px] text-neutral-500">
-                Cào lớp bạc rồi nhập đúng hai dãy số trên thẻ. Thẻ đã dùng hoặc
-                nhập sai sẽ bị từ chối.
-              </span>
-            </div>
-          ) : null}
-
-          {error ? (
-            <p
-              role="alert"
-              className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-2.5 text-[12px] font-semibold text-red-400"
-            >
-              {error}
-            </p>
-          ) : null}
-
-          <button
-            type="submit"
-            disabled={pending || !cardReady}
-            className="w-full rounded-2xl bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] disabled:opacity-50 disabled:cursor-not-allowed text-white font-black py-3.5 uppercase tracking-widest text-xs transition-colors"
-          >
-            {pending
-              ? "Đang xử lý…"
-              : cardReady
-                ? `Nạp ${CARRIERS.find((option) => option.value === carrier)?.label ?? "thẻ"} ${formatVnd(Number(amount))}đ`
-                : "Nạp thẻ cào"}
-          </button>
-        </form>
-      )}
-
-      {/* The ledger follows the tab above it: on Ngân Hàng only bank rows,
-          on Thẻ Cào only card rows — each method reads as its own desk. The
-          card chrome and header row match the overview page's sections.
-          Keyed by method so switching tabs starts back at page one. */}
-      <section className="flex flex-col gap-4 rounded-2xl border border-white/10 bg-neutral-900/50 p-5">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <h3 className="text-sm font-black uppercase tracking-wider text-white">
-            {method === "card" ? "Thẻ nạp gần đây" : "Lịch sử nạp ngân hàng"}
-          </h3>
-          <span className="text-xs text-neutral-500">
-            Bấm vào lệnh đang chờ để mở lại hóa đơn
-          </span>
-        </div>
-        <HistoryList
-          key={method}
-          rows={history.filter((row) =>
-            method === "card" ? row.method === "CARD" : row.method !== "CARD",
-          )}
-          empty={
-            method === "card"
-              ? "Chưa có lệnh nạp thẻ cào nào."
-              : "Chưa có lệnh nạp ngân hàng nào."
-          }
-          onOpen={openRow}
-        />
-      </section>
+        {ledger}
+      </div>
 
       {credited ? (
-        <TopUpSuccessDialog
-          code={credited.code}
-          amount={credited.credited}
-          face={credited.amount}
-          balance={credited.balance}
+        <TopUpDialog
+          tone="green"
+          title="Nạp tiền thành công"
+          action={{ label: "Xong", onClick: dismissCredited }}
           onClose={dismissCredited}
-        />
+        >
+          <CreditedLines credited={credited.credited} face={credited.amount} />
+        </TopUpDialog>
       ) : null}
     </div>
   );
