@@ -1,5 +1,7 @@
 import sanitizeHtml from "sanitize-html";
 
+import { youtubeEmbedUrl } from "@/lib/youtube";
+
 /**
  * The wiki's HTML era, kept on a leash.
  *
@@ -141,6 +143,45 @@ export function sanitizeDocHtml(html: string): string {
         return { tagName, attribs: style ? { ...rest, style } : rest };
       },
     },
+  });
+}
+
+/**
+ * A paragraph holding nothing but one address: typed as text, or wrapped in
+ * the link the editor makes of a pasted URL. Group 1 is the link's words,
+ * group 2 the bare text.
+ */
+const LONE_ADDRESS = /<p(?:\s[^>]*)?>\s*(?:<a\s[^>]*>([^<]*)<\/a>|([^<\s]+))\s*<\/p>/g;
+
+/** Reads as a YouTube address, as opposed to merely parsing as a video id. */
+const YOUTUBE_ADDRESS = /youtu\.be\/|youtube(?:-nocookie)?\.com\//i;
+
+/**
+ * A YouTube link on a line of its own becomes the video, played in place.
+ *
+ * The editor has no video button and the sanitizer takes every iframe out, so
+ * the shop cannot paste an embed code — nor should it: an iframe kept from
+ * the database would be a door any page on the internet could come through.
+ * Instead, once the body is sanitized, a paragraph holding only a YouTube
+ * address is swapped for a player this code builds around the video's id,
+ * the one thing taken from the text, which youtubeEmbedUrl lets through only
+ * as eleven safe characters. A YouTube link inside a sentence, or under words
+ * of its own, stays a link.
+ *
+ * The address has to read as YouTube's: youtubeEmbedUrl also accepts a bare
+ * id, and "Configuring" alone on a line is eleven letters, not a video.
+ */
+export function embedVideoLines(html: string): string {
+  return html.replace(LONE_ADDRESS, (whole, linkWords?: string, bare?: string) => {
+    const text = (linkWords ?? bare ?? "").replace(/&amp;/g, "&").trim();
+    if (!YOUTUBE_ADDRESS.test(text)) return whole;
+    const src = youtubeEmbedUrl(text);
+    if (!src) return whole;
+    return (
+      `<div class="doc-video"><iframe src="${src}" title="Video YouTube" loading="lazy"` +
+      ` allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"` +
+      ` referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>`
+    );
   });
 }
 

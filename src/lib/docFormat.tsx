@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-import { sanitizeDocHtml } from "@/lib/docHtml";
+import { embedVideoLines, sanitizeDocHtml } from "@/lib/docHtml";
 
 /**
  * The wiki's tiny formatting language, rendered the same way everywhere.
@@ -156,11 +156,15 @@ function renderBlock(block: string, key: number): ReactNode {
 /**
  * A TipTap-era body: stored as HTML, sanitized again right here before it
  * reaches a reader — the database is not trusted to only hold what the API
- * let through.
+ * let through. A YouTube link alone on its line then becomes its player
+ * (embedVideoLines), which is how the shop puts a video in a guide.
  */
 export function DocHtml({ body }: { body: string }) {
   return (
-    <div className="doc-prose" dangerouslySetInnerHTML={{ __html: sanitizeDocHtml(body) }} />
+    <div
+      className="doc-prose"
+      dangerouslySetInnerHTML={{ __html: embedVideoLines(sanitizeDocHtml(body)) }}
+    />
   );
 }
 

@@ -967,6 +967,27 @@ body.lightbox-open .site-nav {
   color: #a3a3a3;
 }
 
+/* A YouTube link on its own line, played in place (embedVideoLines): framed
+   like the illustrations beside it, 16:9, and wide enough — up to 960px —
+   that YouTube picks a sharp rendition for a guide full of menu text. */
+.doc-prose .doc-video {
+  position: relative;
+  width: 100%;
+  max-width: 960px;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border-radius: 0.75rem;
+  border: 1px solid rgb(255 255 255 / 0.1);
+  background: #0a0a0d;
+}
+.doc-prose .doc-video iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
 /* A home-page row with more than four tiles slides (RowSlider): one tile
    left on a beat, then a glide back to the start, with arrows at either
    edge and dots below for driving it by hand. The current dot fills over
