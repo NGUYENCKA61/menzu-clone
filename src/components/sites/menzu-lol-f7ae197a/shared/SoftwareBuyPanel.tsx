@@ -18,6 +18,7 @@ import { formatVnd } from "./productData";
 import { SoftwareCheckoutDialog } from "./SoftwareCheckoutDialog";
 import { StickyBuyBar } from "./StickyBuyBar";
 import { StatusToast } from "./StatusToast";
+import { StockLine } from "./StockLine";
 import { isSalesLocked, salesLockReason } from "@/lib/softwareStatus";
 
 export interface SoftwarePackageView {
@@ -316,20 +317,10 @@ export function SoftwareBuyPanel({
         </p>
         {/* A per-day figure ("≈ 64.286đ/ngày") stood under the price until
             the shop asked for it off the page. */}
-        <p className="flex items-center gap-2 text-[13px] font-semibold">
-          <span
-            className={`h-1.5 w-1.5 rounded-full ${
-              software.inStock ? "bg-emerald-500" : "bg-neutral-600"
-            }`}
-          />
-          <span
-            className={
-              software.inStock ? "text-emerald-400" : "text-neutral-500"
-            }
-          >
-            {software.inStock ? "Còn hàng" : "Tạm hết hàng"}
-          </span>
-        </p>
+        <StockLine
+          inStock={software.inStock}
+          label={software.inStock ? "Còn hàng" : "Tạm hết hàng"}
+        />
       </div>
 
       <div className="flex items-center gap-3">

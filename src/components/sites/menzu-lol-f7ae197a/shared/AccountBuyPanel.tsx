@@ -22,6 +22,7 @@ import {
 } from "./BuyConfirmDialog";
 import { formatVnd, productImage } from "./productData";
 import { StickyBuyBar } from "./StickyBuyBar";
+import { StockLine } from "./StockLine";
 
 export interface AccountDetail {
   code: string;
@@ -379,12 +380,7 @@ export function AccountBuyPanel({ account, initialQuantity }: AccountBuyPanelPro
           </div>
         ) : null}
         <p className="text-3xl sm:text-4xl font-black text-white">{formatVnd(account.price)}đ</p>
-        <p className="flex items-center gap-2 text-[13px] font-semibold">
-          <span
-            className={`h-1.5 w-1.5 rounded-full ${soldOut ? "bg-neutral-600" : "bg-emerald-500"}`}
-          />
-          <span className={soldOut ? "text-neutral-500" : "text-emerald-400"}>{stockText}</span>
-        </p>
+        <StockLine inStock={!soldOut} label={stockText} />
       </div>
 
       {/* "Cọc / Trả Góp" and "Tiêu trước trả sau" are deliberately absent.
