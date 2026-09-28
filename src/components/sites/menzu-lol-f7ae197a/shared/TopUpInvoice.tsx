@@ -73,8 +73,9 @@ export interface TopUpInvoiceProps {
 
 /*
  * Measured off menzu's /deposit page, pending, paid and cancelled, colours
- * included: violet on the transfer note, green while waiting and once paid,
- * red once gone.
+ * included: green while waiting and once paid, red once gone. Its violet
+ * transfer note is #e13d3f here — menzu's violet-500 turned to red at the
+ * same lightness and strength, where the shop's #ff3158 read as neon.
  */
 const PANEL =
   "w-full bg-gradient-to-b from-[#141414] to-[#0a0a0a] border border-white/[0.08] rounded-[24px] p-5 sm:p-6 lg:p-8 flex flex-col relative group overflow-hidden";
@@ -170,7 +171,7 @@ function CopyButton({
       aria-label={done ? `Đã copy ${label}` : `Copy ${label}`}
       className={`${COPY} ${
         accent
-          ? "z-10 bg-[#8b5cf6] hover:bg-[#8b5cf6]/90"
+          ? "z-10 bg-[#e13d3f] hover:bg-[#e13d3f]/90"
           : "bg-white/10 hover:bg-white/20"
       }`}
     >
@@ -411,14 +412,14 @@ export function TopUpInvoice({
       </div>
 
       {/* The one line that decides whose money it is. */}
-      <div className="bg-gradient-to-r from-[#8b5cf6]/10 to-transparent border border-[#8b5cf6]/20 rounded-2xl p-5 sm:p-6 mb-8 sm:mb-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative overflow-hidden">
-        <div aria-hidden className="absolute top-0 left-0 w-1 h-full bg-[#8b5cf6]" />
+      <div className="bg-gradient-to-r from-[#e13d3f]/10 to-transparent border border-[#e13d3f]/20 rounded-2xl p-5 sm:p-6 mb-8 sm:mb-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative overflow-hidden">
+        <div aria-hidden className="absolute top-0 left-0 w-1 h-full bg-[#e13d3f]" />
         <div className="min-w-0">
-          <span className="text-[#8b5cf6]/80 text-[10px] sm:text-xs font-bold uppercase tracking-wider flex items-center gap-2 mb-2">
+          <span className="text-[#e13d3f]/80 text-[10px] sm:text-xs font-bold uppercase tracking-wider flex items-center gap-2 mb-2">
             <FileText size={14} aria-hidden />
             Nội dung nạp (bắt buộc)
           </span>
-          <span className="block truncate text-[#8b5cf6] font-bold text-xl sm:text-2xl tracking-wide">
+          <span className="block truncate text-[#e13d3f] font-bold text-xl sm:text-2xl tracking-wide">
             {transferNote}
           </span>
         </div>
