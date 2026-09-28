@@ -288,6 +288,16 @@ export async function SiteFooter() {
               <span className="text-neutral-400">.COM</span>
             </span>
             . All rights reserved.
+            {/* Who built it, signed the way menzu signs its footer: after the
+                copyright from md up, on a line of its own on a phone, where a
+                separator would be left hanging at the end of a wrapped line. */}
+            <span className="mt-1 block md:mt-0 md:inline">
+              <span aria-hidden className="mx-2 hidden text-neutral-700 md:inline">
+                •
+              </span>
+              Designed &amp; developed by{" "}
+              <span className="font-bold text-[var(--menzu-accent)]">KWIN</span>
+            </span>
           </p>
 
           <nav className="flex flex-wrap items-center justify-center gap-x-6 gap-y-1.5">
