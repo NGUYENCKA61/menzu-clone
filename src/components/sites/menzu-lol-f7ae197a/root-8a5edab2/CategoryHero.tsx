@@ -4,11 +4,11 @@ import { CardImage } from "@/components/sites/menzu-lol-f7ae197a/shared/CardImag
 
 /**
  * The top of a category page, built the way menzu.lol heads its own: the
- * shelf's picture runs up under the fixed header, shaded three ways — dark
- * along the bottom into the page's flat #0a0a0d, 60% dark along the top,
- * and dark from the left so the words sit on shade while the picture shows
- * to the right — with the breadcrumb, the shelf's name as the page's one h1,
- * and the shop's sentence about it.
+ * shelf's picture runs up under the fixed header, shaded dark along the
+ * bottom into the page's flat colour, 60% along the top, and evenly across,
+ * with the breadcrumb, the shelf's name as the page's one h1, and the shop's
+ * sentence about it. The colour is the home page's #0f1015 rather than
+ * menzu's #0a0a0d, so moving from the home page to a shelf keeps its ground.
  *
  * The picture is the one the admin already gives the category for its home
  * tile, so no shelf needs anything new; a shelf without one gets the same
@@ -44,14 +44,14 @@ export function CategoryHero({
             // pictures, and the header is far wider than it is tall.
             className="object-cover object-top sm:object-[right_top]"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0d] via-transparent to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0d]/60 via-transparent to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#0f1015] via-transparent to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#0f1015]/60 via-transparent to-transparent" />
           {/* One even shade across the width rather than menzu's dark-from-
               the-left: on a wide window that left the whole margin beside
               the title pitch black while the rest showed the picture. Even,
               the picture reads the same all the way across and the words
               still sit on enough shade. */}
-          <div className="absolute inset-0 bg-[#0a0a0d]/55" />
+          <div className="absolute inset-0 bg-[#0f1015]/55" />
         </div>
       ) : null}
 
@@ -71,11 +71,12 @@ export function CategoryHero({
 }
 
 /**
- * The flat #0a0a0d menzu's category pages sit on, laid over the site's
- * backdrop picture for this page only: below the header the page is dark,
- * with no artwork. Rendered inside the layout's <main>, whose z-20 stacking
+ * The flat ground a category page sits on, as menzu's do, laid over the
+ * site's backdrop picture for this page only: below the header the page is
+ * dark, with no artwork. The home page's #0f1015 (HomeBackdrop), so the two
+ * pages share one colour. Rendered inside the layout's <main>, whose z-20 stacking
  * context keeps this -z-10 layer above the backdrop and under the content.
  */
 export function CategoryPageShade() {
-  return <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 bg-[#0a0a0d]" />;
+  return <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 bg-[#0f1015]" />;
 }
