@@ -353,14 +353,26 @@ function OffsetControls({
   }
 
   const current = offset ?? "0%";
+  // The label names the edge the push is measured from, so the number never
+  // has to be read against the side buttons to be understood. Centred, it
+  // says what typing a push will do.
+  const side = align === "left" ? "trái" : align === "right" ? "phải" : null;
+  const edge = side ? `mép ${side}` : "mép trái";
   return (
     <>
       <span aria-hidden className="h-4 w-px bg-white/[0.08]" />
-      <span className={PANEL_LABEL} title="Khoảng cách từ mép bên đang căn">
-        Lề
+      <span
+        className={`${PANEL_LABEL} inline-flex items-center gap-1`}
+        title={
+          side
+            ? `Khoảng cách từ mép ${side} (đổi bên bằng nút Căn)`
+            : "Đang căn giữa — đặt lề sẽ chuyển sang căn trái"
+        }
+      >
+        {align === "right" ? "Lề phải →" : align === "left" ? "← Lề trái" : "Lề"}
       </span>
       <input
-        aria-label="Lề: khoảng cách từ mép bên đang căn (phần trăm, Enter để áp dụng)"
+        aria-label={`Lề: khoảng cách từ ${edge} (phần trăm, Enter để áp dụng)`}
         value={draft}
         onChange={(event) => setDraft(event.target.value.replace(/\D/g, "").slice(0, 2))}
         onBlur={() => apply(Number(draft) || 0)}
@@ -379,7 +391,7 @@ function OffsetControls({
           <button
             key={stop}
             type="button"
-            title={stop === "0%" ? "Sát mép" : `Đẩy vào ${stop} từ mép`}
+            title={stop === "0%" ? `Sát ${edge}` : `Đẩy vào ${stop} từ ${edge}`}
             onMouseDown={(event) => event.preventDefault()}
             onClick={() => apply(parseFloat(stop))}
             className={`h-7 rounded-md px-1.5 text-[10px] font-black tabular-nums transition-colors ${
