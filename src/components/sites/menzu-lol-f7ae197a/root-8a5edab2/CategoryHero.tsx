@@ -68,14 +68,3 @@ export function CategoryHero({
     </section>
   );
 }
-
-/**
- * The flat ground a category page sits on, as menzu's do, laid over the
- * site's backdrop picture for this page only: below the header the page is
- * dark, with no artwork. The home page's #0f1015 (HomeBackdrop), so the two
- * pages share one colour. Rendered inside the layout's <main>, whose z-20 stacking
- * context keeps this -z-10 layer above the backdrop and under the content.
- */
-export function CategoryPageShade() {
-  return <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 bg-[#0f1015]" />;
-}

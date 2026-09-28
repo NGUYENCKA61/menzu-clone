@@ -18,8 +18,10 @@ import { ConnectRailSection } from "@/components/sites/menzu-lol-f7ae197a/root-8
  * (loading.tsx beside this file, and one under [productSlug]), and the
  * real page lands when it is ready. The same move the account area made.
  *
- * No background of its own: the storefront sits over the fixed backdrop
- * picture, which the account layout paints over and this one must not.
+ * The shelves and product pages sit on the home page's flat #0f1015 laid
+ * over the site's backdrop picture, as menzu's do: long runs of text — a
+ * tool's description, its requirements — read on plain ground, and going
+ * from the home page to a shelf to a product never changes the ground.
  */
 export default function StorefrontLayout({ children }: { children: ReactNode }) {
   return (
@@ -28,6 +30,9 @@ export default function StorefrontLayout({ children }: { children: ReactNode }) 
       <SiteHeader />
 
       <main className="flex-1 relative z-20 w-full flex flex-col">
+        {/* Inside <main>, whose z-20 stacking context keeps this -z-10 layer
+            above the fixed backdrop and under the page's content. */}
+        <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 bg-[#0f1015]" />
         <div className="w-full">{children}</div>
         <SiteFooter />
       </main>
