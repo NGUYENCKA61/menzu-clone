@@ -39,7 +39,10 @@ export function CategoryHero({
             fill
             priority
             sizes="100vw"
-            className="object-cover object-center sm:object-right"
+            // Anchored to the picture's top edge rather than its middle, as
+            // the shop asked: faces and logos tend to sit high in these
+            // pictures, and the header is far wider than it is tall.
+            className="object-cover object-top sm:object-[right_top]"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0d] via-transparent to-transparent" />
           <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0d]/60 via-transparent to-transparent" />
