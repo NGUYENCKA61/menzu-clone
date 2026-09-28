@@ -46,7 +46,12 @@ export function CategoryHero({
           />
           <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0d] via-transparent to-transparent" />
           <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0d]/60 via-transparent to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-r from-[#0a0a0d] via-[#0a0a0d]/80 to-transparent sm:via-[#0a0a0d]/50" />
+          {/* One even shade across the width rather than menzu's dark-from-
+              the-left: on a wide window that left the whole margin beside
+              the title pitch black while the rest showed the picture. Even,
+              the picture reads the same all the way across and the words
+              still sit on enough shade. */}
+          <div className="absolute inset-0 bg-[#0a0a0d]/55" />
         </div>
       ) : null}
 
