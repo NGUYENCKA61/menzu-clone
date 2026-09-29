@@ -285,11 +285,14 @@ export function WalletTopUp({
     }
   }
 
+  // A refusal in menzu's shape, as the owner asked on 29/09/2026 ("thông báo
+  // kiểu này"): a red box with its mark, at the head of the bank form.
   const errorLine = error ? (
     <p
       role="alert"
-      className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-2.5 text-[12px] font-semibold text-red-400"
+      className="flex items-center gap-3 rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3.5 text-[13px] font-medium text-red-400"
     >
+      <CircleAlert size={16} className="shrink-0" aria-hidden />
       {error}
     </p>
   ) : null;
@@ -305,9 +308,9 @@ export function WalletTopUp({
   // too). What stays is what the customer can still act on, as a strip above
   // each form.
   // The open transfer, in front of the customer above the form. While it is
-  // open no second one can start — the route refuses it (openBankTopUp) and
-  // the form below is locked — and once its hold window runs out on this
-  // screen, the lock lifts without a reload.
+  // open no second one can start: the route refuses it (openBankTopUp) and
+  // the form says so in its red box. Once its hold window runs out on this
+  // screen, the strip goes without a reload.
   const unpaid = waitingBank && lapsed !== waitingBank.code ? waitingBank : null;
   // Cards still with the desk, newest first: the newest one's invoice is a
   // click away, and any others are counted.
@@ -447,13 +450,6 @@ export function WalletTopUp({
                   onSubmit={handleSubmit}
                   className="sm:bg-white/[0.02] sm:border sm:border-white/5 rounded-2xl p-0 sm:p-6 transition-all"
                 >
-                  {/* Locked while an invoice is still open: one at a time. A
-                      disabled fieldset turns off every field and button in it
-                      at once; the strip above says why. */}
-                  <fieldset
-                    disabled={Boolean(unpaid)}
-                    className={`min-w-0 transition-opacity ${unpaid ? "opacity-40" : ""}`}
-                  >
                   {/* A card header the way Bảo mật's cards read: title and
                       hint on one line, no icon tile (the page title carries
                       the Wallet mark now). */}
@@ -463,6 +459,9 @@ export function WalletTopUp({
                       Nạp từ {formatVnd(minAmount)}đ trở lên. Miễn phí giao dịch.
                     </p>
                   </div>
+
+                  {/* Under the header, above the amount, as menzu places it. */}
+                  {errorLine ? <div className="mb-5">{errorLine}</div> : null}
 
                   <div className="space-y-6">
                     <div className="relative group">
@@ -505,8 +504,6 @@ export function WalletTopUp({
                       ))}
                     </div>
 
-                    {errorLine}
-
                     <div className="pt-2">
                       <button
                         type="submit"
@@ -517,15 +514,10 @@ export function WalletTopUp({
                         {pending ? (
                           <Loader2 size={18} className="animate-spin motion-reduce:animate-none" aria-hidden />
                         ) : null}
-                        {pending
-                          ? "Đang tạo hóa đơn…"
-                          : unpaid
-                            ? "Đang có hóa đơn chờ thanh toán"
-                            : "Tạo hóa đơn"}
+                        {pending ? "Đang tạo hóa đơn…" : "Tạo hóa đơn"}
                       </button>
                     </div>
                   </div>
-                  </fieldset>
                 </form>
 
                 <p className="text-center text-xs text-neutral-500 mt-4 flex items-center justify-center gap-2 font-medium">

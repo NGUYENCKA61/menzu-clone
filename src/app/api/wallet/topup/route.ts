@@ -167,7 +167,9 @@ export async function POST(request: Request) {
     if (unpaid) {
       return NextResponse.json(
         {
-          error: `Bạn còn hóa đơn ${unpaid.code} (${Number(unpaid.amount).toLocaleString("vi-VN")}đ) chưa thanh toán. Thanh toán hoặc hủy hóa đơn đó rồi tạo hóa đơn mới.`,
+          // menzu's words (the owner, 29/09: "thông báo kiểu này"); the
+          // strip above the form already names the invoice and links it.
+          error: "Bạn có đơn nạp chờ xử lý!",
           openCode: unpaid.code,
         },
         { status: 409 },
