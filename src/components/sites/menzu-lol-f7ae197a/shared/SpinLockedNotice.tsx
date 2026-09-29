@@ -1,6 +1,6 @@
 "use client";
 
-import { Clock } from "lucide-react";
+import { Lock } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef } from "react";
 import { lockScroll, unlockScroll } from "./modalChrome";
@@ -61,14 +61,14 @@ export function SpinLockedNotice() {
         }`}
       >
         <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border-2 border-[var(--menzu-accent)] bg-[var(--menzu-accent)]/15 text-[var(--menzu-accent)]">
-          <Clock size={28} strokeWidth={2.5} />
+          <Lock size={28} strokeWidth={2.5} />
         </span>
 
         <h2
           id="spin-locked-title"
           className="mt-5 text-[17px] font-black uppercase tracking-wide text-white"
         >
-          Tính năng tạm thời chưa mở
+          Đổi thưởng tạm đóng
         </h2>
 
         <p id="spin-locked-message" className="mt-3 text-[13px] leading-relaxed text-neutral-300">

@@ -41,7 +41,7 @@ const WON_BODY: Record<
 export async function POST() {
   if (SPIN_LOCKED) {
     return NextResponse.json(
-      { error: "Tính năng tạm thời chưa mở, bạn quay lại sau nhé" },
+      { error: "Đổi thưởng đang tạm đóng, bạn quay lại sau nhé" },
       { status: 403 },
     );
   }
