@@ -40,22 +40,17 @@ export const dynamic = "force-dynamic";
  * own tuning and the shop asked for it off the page.
  */
 export default async function SpinPage() {
-  // Before the sign-in check: a closed wheel is not worth logging in for.
-  if (SPIN_LOCKED) {
-    return (
-      <SimplePage title="Vòng quay đổi thưởng" crumb="Vòng quay đổi thưởng">
-        <SpinLockedNotice />
-      </SimplePage>
-    );
-  }
-
   const [user, settings] = await Promise.all([getCurrentUser(), getShopSettings()]);
-  if (!user) redirect("/login?next=%2Fvong-quay");
+  // While the wheel is closed the page still draws it — the owner wants it
+  // seen — under a notice that sends the reader home. A closed wheel is not
+  // worth signing in for, so a visitor sees it with no points of their own.
+  if (!user && !SPIN_LOCKED) redirect("/login?next=%2Fvong-quay");
+  const points = user?.points ?? 0;
 
-  const spinsAfforded = Math.floor(user.points / SPIN_COST);
+  const spinsAfforded = Math.floor(points / SPIN_COST);
   // The same switch that closes the shop closes the wheel: it pays out real
   // balance, so it has no business running while sales are stopped.
-  const canSpin = settings.purchasesEnabled;
+  const canSpin = settings.purchasesEnabled && !SPIN_LOCKED;
   // One read for the drawing, the reward list and the prop the wheel spins on:
   // a page that pictured one table and posted to another would be advertising
   // prizes that are not on the wheel.
@@ -64,7 +59,7 @@ export default async function SpinPage() {
   // Parcels won and not yet given an address. Only ITEM wins ever reach
   // PENDING — money, points and codes settle inside the spin's own transaction
   // and are nobody's errand.
-  const unclaimed = await db.spinWin.findMany({
+  const unclaimed = !user ? [] : await db.spinWin.findMany({
     where: { userId: user.id, status: "PENDING", address: null },
     orderBy: { createdAt: "desc" },
     select: { id: true, label: true },
@@ -72,18 +67,19 @@ export default async function SpinPage() {
 
   return (
     <SimplePage title="Vòng quay đổi thưởng" crumb="Vòng quay đổi thưởng">
+      {SPIN_LOCKED ? <SpinLockedNotice /> : null}
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_320px] lg:gap-10">
         {/* The wheel leads and takes the width; the numbers read beside it on a
             wide screen and under it on a phone. */}
         <div className="flex flex-col gap-8 rounded-2xl border border-white/10 bg-neutral-900/40 px-6 py-10">
-          {!canSpin ? (
+          {!canSpin && !SPIN_LOCKED ? (
             <p className="mx-auto max-w-[520px] rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-center text-[12px] font-semibold text-amber-300">
               Shop đang tạm ngưng bán hàng nên vòng quay cũng tạm đóng. Điểm của bạn
               vẫn giữ nguyên.
             </p>
           ) : null}
 
-          <SpinWheel points={user.points} canSpin={canSpin} prizes={prizes} />
+          <SpinWheel points={points} canSpin={canSpin} prizes={prizes} />
 
           {/* One line, not one form per parcel. A reader who wins the same
               prize five times was meeting five identical address forms stacked
@@ -128,7 +124,7 @@ export default async function SpinPage() {
               Điểm thưởng của bạn
             </span>
             <span className="text-3xl font-black leading-none text-[#a78bfa]">
-              {formatVnd(user.points)}{" "}
+              {formatVnd(points)}{" "}
               <span className="text-sm font-bold text-[#a78bfa]/80">điểm</span>
             </span>
             <span className="text-xs text-neutral-500">
