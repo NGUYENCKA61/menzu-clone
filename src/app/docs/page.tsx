@@ -43,7 +43,7 @@ export default async function DocsPage() {
   }));
 
   return (
-    <SimplePage title="Wiki & Hướng Dẫn" crumb="Wiki & Hướng dẫn">
+    <SimplePage crumb="Wiki & Hướng dẫn">
       <DocsHelpCenter
         articles={articles}
         // The same questions the home page answers, from the same setting;
