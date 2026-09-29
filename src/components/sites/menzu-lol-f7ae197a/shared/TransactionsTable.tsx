@@ -191,7 +191,7 @@ export function TransactionsTable({ rows }: { rows: LedgerView[] }) {
   return (
     <div
       ref={top}
-      className="scroll-mt-28 w-full bg-[#171920] border border-white/5 rounded-2xl sm:rounded-[24px] p-4 sm:p-8 lg:p-10 relative min-h-[750px]"
+      className="scroll-mt-28 w-full bg-[#111111] border border-white/5 rounded-2xl sm:rounded-[24px] p-4 sm:p-8 lg:p-10 relative min-h-[750px]"
     >
       <div>
         <div className="mb-8 relative z-10">

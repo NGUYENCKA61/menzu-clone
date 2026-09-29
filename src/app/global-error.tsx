@@ -26,7 +26,7 @@ export default function GlobalError({
 
   return (
     <html lang="vi">
-      <body className="min-h-screen bg-[#0f1015] text-white">
+      <body className="min-h-screen bg-[#050508] text-white">
         <div className="min-h-screen flex flex-col items-center justify-center px-4 text-center">
           <p className="text-6xl sm:text-7xl font-black tracking-tighter text-[#e13d3f] mb-3">500</p>
           <p className="text-xl font-bold text-white mb-2">ĐÃ CÓ LỖI XẢY RA</p>
