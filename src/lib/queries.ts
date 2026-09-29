@@ -839,11 +839,12 @@ export interface LedgerRow {
   createdAt: Date;
 }
 
-export async function getTransactions(userId: string): Promise<LedgerRow[]> {
+/** The account's newest `limit` ledger lines, newest first. */
+export async function getTransactions(userId: string, limit: number): Promise<LedgerRow[]> {
   const rows = await db.transaction.findMany({
     where: { userId },
     orderBy: { createdAt: "desc" },
-    take: 50,
+    take: limit,
   });
   return rows.map((t) => ({
     code: t.code,

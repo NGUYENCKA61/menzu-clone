@@ -17,6 +17,17 @@ export const metadata: Metadata = {
 };
 export const dynamic = "force-dynamic";
 
+/**
+ * How far back the page reaches: the whole history in practice. The table
+ * pages, searches and filters by date in the browser over what it is given,
+ * so anything cut here is simply gone from the customer's view. It was 50
+ * until 29/09/2026, which hid everything older without a word (the owner's
+ * own local account: 67 lines, the 17 oldest unreachable; the owner had taken
+ * it for unlimited). A customer needs years to reach 2.000; an account that
+ * ever does is the moment to page on the server instead.
+ */
+const HISTORY_ROWS = 2000;
+
 /** The request code a top-up line carries ("Nạp tiền vào ví · NT8F3K2Q"). */
 const TOPUP_CODE = /\bNT[A-Z0-9]{6}\b/;
 
@@ -39,7 +50,7 @@ export default async function TransactionsPage() {
   if (!user) redirect("/login?next=%2Ftransactions");
 
   const [rows, requests] = await Promise.all([
-    getTransactions(user.id),
+    getTransactions(user.id, HISTORY_ROWS),
     // Top-up requests that never reached the wallet — waiting, turned down,
     // overdue or dropped — which the ledger has no line for: a line is only
     // written when money is credited. /wallet used to list them under its
@@ -48,7 +59,7 @@ export default async function TransactionsPage() {
     db.topUp.findMany({
       where: { userId: user.id, status: { in: ["PENDING", "FAILED", "EXPIRED", "CANCELLED"] } },
       orderBy: { createdAt: "desc" },
-      take: 50,
+      take: HISTORY_ROWS,
       select: { code: true, method: true, amount: true, status: true, carrier: true, createdAt: true },
     }),
   ]);
