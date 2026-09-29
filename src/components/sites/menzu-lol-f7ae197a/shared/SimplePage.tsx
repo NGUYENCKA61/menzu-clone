@@ -8,8 +8,7 @@ import { ConnectRailSection } from "@/components/sites/menzu-lol-f7ae197a/root-8
 import { Breadcrumb } from "./Breadcrumb";
 
 interface SimplePageProps {
-  /** Left out by a page that titles its own panel (Wiki). */
-  title?: string;
+  title: string;
   crumb: string;
   children: ReactNode;
 }
@@ -32,7 +31,6 @@ export function SimplePage({ title, crumb, children }: SimplePageProps) {
 
             {/* The row headings' red mark in front of the title, and a neutral
                 rule under it — the same opening every home-page row makes. */}
-            {title ? (
             <div className="flex items-center justify-between mb-8 pb-4 border-b border-white/10">
               <div className="flex items-center gap-3">
                 <span aria-hidden className="h-6 w-[3px] shrink-0 rounded-full bg-[var(--menzu-accent)]" />
@@ -41,7 +39,6 @@ export function SimplePage({ title, crumb, children }: SimplePageProps) {
                 </h1>
               </div>
             </div>
-            ) : null}
 
             {children}
           </div>

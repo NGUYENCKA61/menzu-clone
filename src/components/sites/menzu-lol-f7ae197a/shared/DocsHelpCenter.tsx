@@ -154,76 +154,75 @@ export function DocsHelpCenter({
   }
 
   return (
-    // The account area's frame (the owner, 29/09/2026: "đồng bộ"): the shelves
-    // as its sidebar, then one panel with the title, the search beside it and
-    // everything else inside.
-    <div className="flex flex-col lg:flex-row gap-6 items-start">
-      {/* min-w-0: the chip row below lg counts every button towards the
-          column's minimum, which pushed a 390px phone past its right edge. */}
-      <aside className="min-w-0 w-full lg:w-[280px] shrink-0 lg:sticky lg:top-[120px]">
-        <nav aria-label="Danh mục Wiki" className="bg-neutral-900/60 border border-white/10 rounded-2xl p-3">
-          <p className="mb-2 px-3 text-[10px] font-black uppercase tracking-widest text-neutral-500">
-            Danh mục
-          </p>
-          <div className="flex gap-1.5 overflow-x-auto [scrollbar-width:none] lg:flex-col lg:gap-0.5 lg:overflow-visible [&::-webkit-scrollbar]:hidden">
-            {TABS.map((t) => {
-              const Icon = t.icon;
-              const on = t.key === tab;
-              return (
-                <button
-                  key={t.key}
-                  type="button"
-                  onClick={() => openShelf(t.key)}
-                  aria-pressed={on}
-                  className={`relative flex shrink-0 items-center gap-3 py-2.5 px-3 rounded-lg text-sm font-bold text-left transition-colors lg:shrink ${
-                    on
-                      ? "bg-[var(--menzu-accent)]/10 text-white"
-                      : "text-neutral-300 hover:text-white hover:bg-white/5"
-                  }`}
-                >
-                  <Icon
-                    size={16}
-                    aria-hidden
-                    className={`shrink-0 ${on ? "text-[var(--menzu-accent)]" : "text-neutral-500"}`}
-                  />
-                  <span className="flex-1 whitespace-nowrap">{t.short}</span>
-                  <span className="rounded-full bg-white/5 px-1.5 py-0.5 text-[10px] font-bold text-neutral-500">{counts[t.key]}</span>
-                </button>
-              );
-            })}
-          </div>
-        </nav>
-      </aside>
+    <div className="space-y-8">
+      {/* Intro on the left, the search on the right — one row on a desktop. */}
+      <div className="-mt-4 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+        <p className="max-w-2xl text-sm leading-relaxed text-neutral-400">
+          Tìm nhanh hướng dẫn sử dụng, chính sách bảo hành, câu hỏi thường gặp và
+          những thông tin cần thiết khi dùng dịch vụ tại cửa hàng.
+        </p>
+        <label className="group relative block w-full shrink-0 lg:w-80">
+          <Search
+            size={15}
+            aria-hidden
+            className="pointer-events-none absolute left-3.5 top-1/2 z-10 -translate-y-1/2 text-neutral-500 transition-colors group-focus-within:text-[var(--menzu-accent)]"
+          />
+          <input
+            type="search"
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="Tìm kiếm bài viết..."
+            aria-label="Tìm kiếm bài viết"
+            className="relative h-12 w-full rounded-xl border border-white/10 bg-white/5 pl-10 pr-4 text-sm text-white placeholder-neutral-500 outline-none transition-[border-color,box-shadow,background-color] hover:bg-white/[0.08] focus:border-[var(--menzu-accent)]/60 focus:bg-white/[0.08] focus:ring-2 focus:ring-[var(--menzu-accent)]/25"
+          />
+        </label>
+      </div>
 
-      <div className="flex-1 w-full min-w-0">
-        <div className="w-full bg-transparent sm:bg-[#171920] border-0 sm:border sm:border-white/5 rounded-none sm:rounded-[24px] p-0 sm:p-8 lg:p-10 relative min-h-0 sm:min-h-[750px]">
-          <div className="mb-8 flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
-            <div className="min-w-0">
-              <h1 className="text-xl sm:text-2xl font-black text-white uppercase tracking-wider mb-2 flex items-center gap-3">
-                <BookOpen size={24} className="shrink-0 text-[var(--menzu-accent)]" aria-hidden />
-                Wiki &amp; Hướng dẫn
-              </h1>
-              <p className="max-w-xl text-xs sm:text-sm text-neutral-400 leading-relaxed">
-                Hướng dẫn sử dụng, chính sách bảo hành, câu hỏi thường gặp và những thông tin cần
-                thiết khi dùng dịch vụ tại cửa hàng.
-              </p>
+      <div className="h-px bg-gradient-to-r from-[var(--menzu-accent)]/30 via-white/10 to-transparent" />
+
+      <div className="grid gap-6 lg:grid-cols-[220px_minmax(0,1fr)] lg:items-start">
+        {/* Left rail: the shelves. A row of chips below lg, a column above. */}
+        {/* min-w-0: a grid column is at least as wide as its content's
+            minimum, and the rail's scroll row below counts its every button
+            towards that - 455px on a 390px phone, which pushed the whole
+            page past the right edge. */}
+        <aside className="min-w-0 lg:sticky lg:top-[120px]">
+          <div className="rounded-2xl border border-white/10 bg-[#121216] p-3">
+            <p className="mb-2 px-2 text-[10px] font-black uppercase tracking-widest text-neutral-500">
+              Danh mục
+            </p>
+            <div className="flex gap-1.5 overflow-x-auto [scrollbar-width:none] lg:flex-col lg:overflow-visible [&::-webkit-scrollbar]:hidden">
+              {TABS.map((t) => {
+                const Icon = t.icon;
+                const on = t.key === tab;
+                return (
+                  <button
+                    key={t.key}
+                    type="button"
+                    onClick={() => openShelf(t.key)}
+                    aria-pressed={on}
+                    className={`relative flex shrink-0 items-center gap-3 rounded-xl border px-3 py-2.5 text-left text-sm font-bold transition-colors lg:shrink ${
+                      on
+                        ? "border-[var(--menzu-accent)]/25 bg-[var(--menzu-accent)]/10 text-white"
+                        : "border-transparent text-neutral-400 hover:bg-white/5 hover:text-white"
+                    }`}
+                  >
+                    {on ? (
+                      <span className="absolute bottom-2 left-0 top-2 w-0.5 rounded-full bg-[var(--menzu-accent)]" />
+                    ) : null}
+                    <Icon
+                      size={15}
+                      aria-hidden
+                      className={`shrink-0 ${on ? "text-[var(--menzu-accent)]" : "text-neutral-500"}`}
+                    />
+                    <span className="flex-1 whitespace-nowrap">{t.short}</span>
+                    <span className="rounded-full bg-white/5 px-1.5 py-0.5 text-[10px] font-bold text-neutral-500">{counts[t.key]}</span>
+                  </button>
+                );
+              })}
             </div>
-            <label className="group relative block w-full shrink-0 xl:w-72">
-              <Search
-                size={15}
-                aria-hidden
-                className="pointer-events-none absolute left-3.5 top-1/2 z-10 -translate-y-1/2 text-neutral-500 transition-colors group-focus-within:text-[var(--menzu-accent)]"
-              />
-              <input
-                type="search"
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-                placeholder="Tìm kiếm bài viết..."
-                aria-label="Tìm kiếm bài viết"
-                className="relative h-11 w-full rounded-xl border border-white/10 bg-black/20 pl-10 pr-4 text-sm text-white placeholder-neutral-500 outline-none transition-colors focus:border-[var(--menzu-accent)]/50"
-              />
-            </label>
           </div>
+        </aside>
 
         {/* Middle: the featured guide, then the open shelf. */}
         <div className="min-w-0 space-y-8">
@@ -232,7 +231,7 @@ export function DocsHelpCenter({
               <SectionHead label="Nội dung nổi bật" note="Được quan tâm" />
               <Link
                 href={`/docs/${featured.slug}`}
-                className="group relative isolate block overflow-hidden rounded-2xl border border-[var(--menzu-accent)]/25 bg-gradient-to-br from-[var(--menzu-accent)]/[0.12] via-white/[0.02] to-white/[0.02] p-6 lift-card hover:-translate-y-1 hover:border-[var(--menzu-accent)]/50 hover:shadow-xl hover:shadow-black/40"
+                className="group relative isolate block overflow-hidden rounded-2xl border border-[var(--menzu-accent)]/25 bg-gradient-to-br from-[var(--menzu-accent)]/[0.12] via-[#121216] to-[#121216] p-6 lift-card hover:-translate-y-1 hover:border-[var(--menzu-accent)]/50 hover:shadow-xl hover:shadow-black/40"
               >
                 {/* The article's own picture, faded and washed out towards the
                     text, so the card reads as that article and not a box. */}
@@ -295,7 +294,6 @@ export function DocsHelpCenter({
             ) : null}
           </section>
         </div>
-        </div>
       </div>
     </div>
   );
@@ -314,42 +312,40 @@ function SectionHead({ label, note }: { label: string; note: string }) {
 }
 
 function ArticleRows({ items }: { items: DocCard[] }) {
-  // Two up with the cover on top: the column is wide since the right rail
-  // went, and a full-width strip with a 96px picture read as empty.
   return (
-    <div className="grid gap-4 sm:grid-cols-2">
+    <div className="grid gap-3">
       {items.map((article) => (
         <Link
           key={article.slug}
           href={`/docs/${article.slug}`}
-          className="group flex flex-col overflow-hidden rounded-2xl border border-white/5 bg-white/[0.02] lift-card hover:-translate-y-1 hover:border-[var(--menzu-accent)]/40 hover:shadow-lg hover:shadow-black/40"
+          className="group flex items-center gap-4 rounded-xl border border-white/10 bg-[#121216] p-3 lift-card hover:-translate-y-1 hover:border-[var(--menzu-accent)]/50 hover:bg-white/[0.03] hover:shadow-lg hover:shadow-black/40"
         >
-          <div className="relative aspect-video w-full overflow-hidden bg-black/40">
+          <div className="relative h-16 w-24 shrink-0 overflow-hidden rounded-lg bg-black/40">
             <Image
               src={article.thumbnailUrl}
               alt=""
               fill
-              sizes="(max-width: 640px) 100vw, 420px"
+              sizes="192px"
               className="object-cover transition-transform duration-500 group-hover:scale-105"
             />
           </div>
-          <div className="flex flex-1 flex-col gap-2 p-4">
-            <h3 className="line-clamp-2 text-sm font-bold leading-snug text-white transition-colors group-hover:text-[var(--menzu-accent)]">
+          <div className="min-w-0 flex-1">
+            <h3 className="line-clamp-2 text-[13px] font-bold leading-snug text-white transition-colors group-hover:text-[var(--menzu-accent)]">
               {article.title}
             </h3>
-            <div className="mt-auto flex items-center gap-3 text-[11px] font-bold text-neutral-500">
+            <div className="mt-1.5 flex items-center gap-3 text-[10px] font-bold text-neutral-500">
               <span>{formatDate(article.publishedAt)}</span>
               <span className="inline-flex items-center gap-1">
-                <Eye size={12} aria-hidden />
-                {formatViews(article.views)} lượt xem
+                <Eye size={11} aria-hidden />
+                {formatViews(article.views)}
               </span>
-              <ArrowRight
-                size={15}
-                aria-hidden
-                className="ml-auto shrink-0 text-neutral-600 transition-all group-hover:translate-x-0.5 group-hover:text-[var(--menzu-accent)]"
-              />
             </div>
           </div>
+          <ArrowRight
+            size={16}
+            aria-hidden
+            className="shrink-0 text-neutral-600 transition-all group-hover:translate-x-0.5 group-hover:text-[var(--menzu-accent)]"
+          />
         </Link>
       ))}
     </div>
