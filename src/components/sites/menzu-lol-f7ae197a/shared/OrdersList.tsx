@@ -111,7 +111,7 @@ export function OrdersList({ orders }: { orders: OrderCardView[] }) {
   return (
     <div
       ref={top}
-      className="scroll-mt-28 w-full bg-[#111111] border border-white/5 rounded-2xl sm:rounded-[24px] p-4 sm:p-8 lg:p-10 relative min-h-[750px]"
+      className="scroll-mt-28 w-full bg-neutral-900/60 border border-white/10 rounded-2xl sm:rounded-[24px] p-4 sm:p-8 lg:p-10 relative min-h-[750px]"
     >
       <div className="flex flex-col gap-6 relative z-10">
         <div className="mb-2 relative z-10">
