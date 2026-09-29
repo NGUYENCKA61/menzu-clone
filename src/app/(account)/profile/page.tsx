@@ -224,7 +224,7 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                     <span className="text-[10px] font-black uppercase tracking-widest text-neutral-400">
                       Cấp bậc
                     </span>
-                    <span className={`text-sm font-bold ${tier.text} ${tier.glow}`}>
+                    <span className={`text-sm font-bold ${tier.text}`}>
                       {TIER_RULES[memberTier].label}
                     </span>
                   </div>
@@ -310,9 +310,12 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                     <Link
                       key={href}
                       href={href}
-                      className={`inline-flex h-11 items-center justify-center gap-2 rounded-xl border text-[11px] font-black uppercase tracking-widest transition-all ${
+                      // Flat, as every other red button in the account area is
+                      // (the agency desk's own Nạp tiền, /security's submit):
+                      // the accent glow under it was the only one of its kind.
+                      className={`inline-flex h-11 items-center justify-center gap-2 rounded-xl border text-[11px] font-black uppercase tracking-widest transition-colors ${
                         primary
-                          ? "col-span-2 sm:col-span-1 border-[var(--menzu-accent)] bg-[var(--menzu-accent)] text-white shadow-[0_10px_28px_-12px_var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] hover:shadow-[0_12px_32px_-10px_var(--menzu-accent)]"
+                          ? "col-span-2 sm:col-span-1 border-[var(--menzu-accent)] bg-[var(--menzu-accent)] text-white hover:bg-[var(--menzu-accent-dark)]"
                           : "border-white/15 bg-black/35 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] backdrop-blur-md hover:border-white/35 hover:bg-black/50"
                       }`}
                     >
