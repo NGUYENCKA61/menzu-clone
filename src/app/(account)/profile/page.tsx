@@ -77,7 +77,9 @@ function SkewPlate({
   children: React.ReactNode;
 }) {
   return (
-    <span className={`inline-flex -skew-x-12 rounded-[4px] px-2.5 py-1.5 ${className}`}>
+    // px-2 py-1: the same plate the header menu draws for the same role
+    // (UserMenu.tsx), which calls them one badge.
+    <span className={`inline-flex -skew-x-12 rounded-[4px] px-2 py-1 ${className}`}>
       <span className="skew-x-12 text-[10px] font-black uppercase tracking-widest leading-none">
         {children}
       </span>
@@ -179,7 +181,10 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                 <AvatarUploader avatarUrl={user.avatarUrl} username={user.username} />
                 <div className="flex min-w-0 flex-col gap-2">
                   <div className="flex min-w-0 flex-wrap items-center gap-2.5">
-                    <span className="truncate text-2xl font-black uppercase tracking-wide leading-none text-white sm:text-3xl">
+                    {/* A card title under the page's h1, so one step below it:
+                        18/20px under the 20/24px title, as /wallet's card
+                        titles are. It was 30px, bigger than the title. */}
+                    <span className="truncate text-lg font-black uppercase tracking-wide leading-none text-white sm:text-xl">
                       {user.username}
                     </span>
                     <BadgeCheck size={18} className="shrink-0 fill-emerald-500 text-white" />
@@ -211,7 +216,7 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
 
               {/* The tier card and the doors, side by side from lg. */}
               <div className="grid grid-cols-1 gap-4 sm:mt-5 lg:grid-cols-[minmax(0,1fr)_240px]">
-                <div className="flex flex-col gap-2 rounded-2xl border border-white/10 bg-[#111111]/60 p-5 backdrop-blur-md">
+                <div className="flex flex-col gap-2 rounded-xl border border-white/10 bg-[#111111]/60 p-5 backdrop-blur-md">
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <span className="text-[10px] font-black uppercase tracking-widest text-neutral-400">
                       Cấp bậc
@@ -249,7 +254,7 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                   {/* What the rank is worth today, what the points are, and what
                       the next rank would pay — the last one is the only place on
                       the site that answers "why keep topping up". */}
-                  <div className="mt-auto grid grid-cols-3 gap-3 border-t border-white/[0.06] pt-1.5">
+                  <div className="mt-auto grid grid-cols-3 gap-2 border-t border-white/[0.06] pt-1.5 sm:gap-3">
                     {[
                       {
                         label: "Ưu đãi mua tool",
@@ -274,11 +279,15 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                           },
                     ].map(({ label, value, tone }, index) => (
                       <div key={label} className="flex min-w-0 flex-col gap-0.5">
-                        <span className="truncate text-[9px] font-black uppercase tracking-widest text-neutral-500">
+                        {/* 10px like every other label on the card, and allowed
+                            to wrap: at 9px with truncate a phone read "ƯU ĐÃI
+                            MU…". mt-auto keeps the three values level when only
+                            some labels take two lines. */}
+                        <span className="text-[10px] font-black uppercase leading-tight tracking-widest text-neutral-500">
                           {label}
                         </span>
                         <span
-                          className={`flex min-w-0 items-center gap-1 text-[13px] font-bold leading-none ${tone}`}
+                          className={`mt-auto flex min-w-0 items-center gap-1 text-[13px] font-bold leading-none ${tone}`}
                         >
                           {index === 0 ? (
                             <Check size={13} strokeWidth={3} className={`shrink-0 ${tier.text}`} />
@@ -295,13 +304,13 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                     <Link
                       key={href}
                       href={href}
-                      className={`inline-flex h-11 items-center justify-center gap-2 rounded-xl border text-[12px] font-black uppercase tracking-wider transition-all ${
+                      className={`inline-flex h-11 items-center justify-center gap-2 rounded-xl border text-[11px] font-black uppercase tracking-widest transition-all ${
                         primary
                           ? "border-[var(--menzu-accent)] bg-[var(--menzu-accent)] text-white shadow-[0_10px_28px_-12px_var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] hover:shadow-[0_12px_32px_-10px_var(--menzu-accent)]"
                           : "border-white/15 bg-black/35 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] backdrop-blur-md hover:border-white/35 hover:bg-black/50"
                       }`}
                     >
-                      <Icon size={15} />
+                      <Icon size={14} />
                       {label}
                     </Link>
                   ))}
@@ -316,35 +325,35 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                   { icon: Receipt, label: "Tổng chi tiêu", value: formatVnd(spent), unit: "đ", tone: "text-white" },
                   { icon: ShoppingBag, label: "Đơn hàng", value: String(paidOrders), unit: "", tone: "text-white" },
                 ].map(({ icon: Icon, label, value, unit, tone }) => (
-                  <div key={label} className="flex flex-col gap-3 p-5">
+                  // Label over figure the way /vong-quay builds its stat tiles:
+                  // a bare 13px icon (no 28px box), the unit at text-sm, and
+                  // the figure a step smaller on phones, where 24px ran past
+                  // a 2x2 cell.
+                  <div key={label} className="flex flex-col gap-2 px-5 py-4 sm:gap-3">
                     <span className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-neutral-400">
-                      <span className="flex h-7 w-7 items-center justify-center rounded-md border border-white/10 bg-white/[0.04] text-neutral-300">
-                        <Icon size={13} />
-                      </span>
+                      <Icon size={13} className="shrink-0 text-neutral-300" />
                       {label}
                     </span>
                     <span className="flex min-h-9 items-center">
-                      <span className={`text-2xl font-black tabular-nums leading-none ${tone}`}>
+                      <span className={`text-xl font-black tabular-nums leading-none sm:text-2xl ${tone}`}>
                         {value}
                         {unit ? (
-                          <span className="ml-1 text-xs font-bold text-neutral-500">{unit}</span>
+                          <span className="ml-1 text-sm font-bold text-neutral-500">{unit}</span>
                         ) : null}
                       </span>
                     </span>
                   </div>
                 ))}
-                <div className="flex flex-col gap-3 p-5">
+                <div className="flex flex-col gap-2 px-5 py-4 sm:gap-3">
                   <span className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-neutral-400">
-                    <span className="flex h-7 w-7 items-center justify-center rounded-md border border-white/10 bg-white/[0.04] text-neutral-300">
-                      <HandCoins size={13} />
-                    </span>
+                    <HandCoins size={13} className="shrink-0 text-neutral-300" />
                     Hoa hồng khả dụng
                   </span>
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <span className="flex min-h-9 items-center">
-                      <span className="text-2xl font-black tabular-nums leading-none text-white">
+                      <span className="text-xl font-black tabular-nums leading-none text-white sm:text-2xl">
                         {formatVnd(user.commissionBalance)}
-                        <span className="ml-1 text-xs font-bold text-neutral-500">đ</span>
+                        <span className="ml-1 text-sm font-bold text-neutral-500">đ</span>
                       </span>
                     </span>
                     <WithdrawCommission amount={user.commissionBalance} />
