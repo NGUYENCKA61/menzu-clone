@@ -30,7 +30,9 @@ export default async function WalletPage() {
   if (!user) redirect("/login?next=%2Fwallet");
 
   const [history, settings] = await Promise.all([
-    // 50 rather than the default 10: the client pages through these locally.
+    // No list is drawn from these any more (the history lives on
+    // /transactions); the strips above the forms read the waiting ones out of
+    // them, and watchableTopUp picks the one to poll.
     getTopUps(user.id, 50),
     getShopSettings(),
   ]);

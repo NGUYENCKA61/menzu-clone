@@ -1,30 +1,24 @@
 "use client";
 
 import {
-  Ban,
   CircleAlert,
   Clipboard,
   CreditCard,
-  History,
   Hourglass,
   Loader2,
   QrCode,
-  Ticket,
   Wallet,
-  XCircle,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useState } from "react";
 
 import { CARD_DIGITS_MIN, cardNet, cardRateFor, type CardRate } from "@/lib/topup";
 
 import { AccountPanel } from "./AccountPanel";
-import { Pager, scrollListTop } from "./Pager";
 import { formatVnd } from "./productData";
 import { CARRIERS } from "./topUpCarriers";
-import { TopUpCountdown } from "./TopUpCountdown";
 import { CreditedLines, TopUpDialog } from "./TopUpDialog";
 import { useTopUpWatch, type TopUpOutcome } from "./useTopUpWatch";
 
@@ -48,11 +42,11 @@ export interface TopUpHistoryRow {
 }
 
 /*
- * Every class below is menzu's /wallet, measured off the live page, colours
- * included: its green on the tab, the chosen carrier and denomination and the
- * card button. Its violet (the title's mark) is the shop's accent here —
- * #e13d3f since 28/09/2026, menzu's violet-500 with only the hue turned red,
- * which is why the two sit on the page with the same weight.
+ * Built off menzu's /wallet on 28/09/2026, then resized to this shop's own
+ * account pages on 29/09 (the owner: "không theo chuẩn menzu"). The colours
+ * are still menzu's: its green on the tab, the chosen carrier and
+ * denomination and the card button, and the white bank button — changing
+ * them is the owner's call, still open.
  */
 const STEP = "text-xs text-neutral-400 font-bold uppercase tracking-wider";
 
@@ -154,215 +148,6 @@ export interface WalletTopUpProps {
   watch: { code: string; expiresAt: string } | null;
 }
 
-/* The seal on the row's left carries the state's colour; the word beside the
-   code stays quiet except where the state is live or wrong. */
-const HISTORY_STATUS: Record<
-  string,
-  { text: string; box: string; sum: string; code: string; card: string }
-> = {
-  PENDING: {
-    text: "Đang chờ",
-    box: "border-amber-500/25 bg-amber-500/10 text-amber-400",
-    sum: "text-amber-400",
-    code: "text-white",
-    // The edge, and only the edge: the row you can still act on is outlined,
-    // the ground under it stays the same as every other row.
-    card: "border-amber-500/40 bg-white/[0.02]",
-  },
-  COMPLETED: {
-    text: "Đã cộng",
-    box: "border-white/10 bg-white/[0.06] text-neutral-300",
-    sum: "text-white",
-    code: "text-white",
-    card: "border-white/[0.06] bg-white/[0.02]",
-  },
-  FAILED: {
-    text: "Từ chối",
-    // Quieted to match the other dead rows: still red, because a refusal
-    // is not the same as a request the customer dropped, but no longer
-    // the brightest thing on a page of finished requests.
-    box: "border-red-500/15 bg-red-500/[0.06] text-red-400/60",
-    sum: "text-neutral-400 line-through",
-    code: "text-neutral-500",
-    card: "border-white/[0.06] bg-white/[0.02]",
-  },
-  // Time ran out, and the request is still honoured if the transfer shows up
-  // later — so the seal warns in red without the strike a refusal wears.
-  EXPIRED: {
-    text: "Quá hạn",
-    box: "border-red-500/25 bg-red-500/10 text-red-400",
-    sum: "text-neutral-400",
-    code: "text-neutral-500",
-    card: "border-white/[0.06] bg-white/[0.02]",
-  },
-  CANCELLED: {
-    text: "Đã hủy",
-    box: "border-white/10 bg-white/5 text-neutral-500",
-    sum: "text-neutral-400",
-    code: "text-neutral-500",
-    card: "border-white/[0.06] bg-white/[0.02]",
-  },
-};
-
-/** Rows per page of history, once the whole list is open. */
-const PAGE_SIZE = 10;
-
-/**
- * How many finished requests the page shows before it stops.
- *
- * Anything still waiting is always shown — that is the live part — and the
- * rest is five rows and a way in to the whole list.
- */
-const RECENT_COUNT = 5;
-
-/**
- * One method's ledger, paged: each request its own card, the figure at the
- * right edge. A pending row is the live one — outlined, and a link to its
- * invoice, where the transfer details and the cancel button live.
- */
-function HistoryList({ rows, empty }: { rows: TopUpHistoryRow[]; empty: string }) {
-  const [page, setPage] = useState(0);
-  const [showAll, setShowAll] = useState(false);
-  const listRef = useRef<HTMLDivElement>(null);
-  const pageCount = Math.max(1, Math.ceil(rows.length / PAGE_SIZE));
-  // Clamped rather than reset by effect: a list that shrinks under the pager
-  // just shows its last page.
-  const current = Math.min(page, pageCount - 1);
-  // Short by default: everything still waiting, then the five newest of the
-  // rest. Nothing is dropped — "Xem tất cả" opens the paged list in place.
-  const waiting = rows.filter((row) => row.status === "PENDING");
-  const settled = rows.filter((row) => row.status !== "PENDING");
-  const short = [...waiting, ...settled.slice(0, RECENT_COUNT)];
-  const hidden = rows.length - short.length;
-  const visible = showAll
-    ? rows.slice(current * PAGE_SIZE, current * PAGE_SIZE + PAGE_SIZE)
-    : short;
-
-  if (rows.length === 0) {
-    return (
-      <div className="p-8 text-center bg-white/[0.02] border border-white/5 rounded-2xl">
-        <p className="text-neutral-500 text-sm">{empty}</p>
-      </div>
-    );
-  }
-
-  return (
-    <div ref={listRef} className="scroll-mt-28 flex flex-col gap-3">
-      <div className="flex flex-col gap-2">
-        {visible.map((row) => {
-          const isPending = row.status === "PENDING";
-          const status = HISTORY_STATUS[row.status] ?? HISTORY_STATUS.PENDING!;
-          const body = (
-            <>
-              {/* The state as a coloured seal, readable before any word is;
-                  the pending one turns. */}
-              <span
-                title={status.text}
-                className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border ${status.box}`}
-              >
-                <span className="sr-only">{status.text}</span>
-                {isPending ? (
-                  <Loader2 size={15} className="animate-spin motion-reduce:animate-none" aria-hidden />
-                ) : row.status === "COMPLETED" ? (
-                  row.method === "CARD" ? (
-                    <Ticket size={15} aria-hidden />
-                  ) : (
-                    <CreditCard size={15} aria-hidden />
-                  )
-                ) : row.status === "FAILED" ? (
-                  <XCircle size={15} aria-hidden />
-                ) : row.status === "EXPIRED" ? (
-                  <Hourglass size={15} aria-hidden />
-                ) : (
-                  <Ban size={15} aria-hidden />
-                )}
-              </span>
-
-              <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-                <div className="flex flex-wrap items-baseline gap-x-2">
-                  <span className={`font-mono text-xs font-bold ${status.code}`}>{row.code}</span>
-                  {isPending && row.expiresAt ? (
-                    <span className="text-[11px] font-semibold text-amber-400">
-                      còn <TopUpCountdown deadline={row.expiresAt} />
-                    </span>
-                  ) : null}
-                </div>
-                {/* Carrier only on card rows — the heading already names the
-                    method. */}
-                <span
-                  className={`truncate text-[11px] ${
-                    status.code === "text-white" ? "text-neutral-400" : "text-neutral-500"
-                  }`}
-                >
-                  {row.method === "CARD" ? `${row.carrier ?? "Thẻ cào"} · ` : ""}
-                  {row.createdAt}
-                </span>
-                {/* The desk's answer to "tại sao", on the row it belongs to. */}
-                {row.note ? (
-                  <span className="text-[11px] leading-snug text-red-400/80">{row.note}</span>
-                ) : null}
-              </div>
-
-              {/* Money talks in colour: green and signed once credited, struck
-                  through once the request can no longer credit, plain while
-                  everything is still open. */}
-              <span className="flex shrink-0 flex-col items-end gap-0.5">
-                <span className={`text-sm font-black tabular-nums ${status.sum}`}>
-                  {row.status === "COMPLETED" ? "+" : ""}
-                  {formatVnd(row.credited ?? row.amount)}đ
-                </span>
-                {row.status === "COMPLETED" &&
-                row.credited !== null &&
-                row.credited < row.amount ? (
-                  <span className="text-[10px] tabular-nums text-neutral-500">
-                    thẻ {formatVnd(row.amount)}đ · phí {formatVnd(row.amount - row.credited)}đ
-                  </span>
-                ) : null}
-              </span>
-            </>
-          );
-          const shape = `flex items-center gap-4 rounded-xl border px-4 py-3 ${status.card}`;
-          return isPending ? (
-            <Link
-              key={row.code}
-              href={`/wallet/${row.code}`}
-              className={`${shape} transition-colors hover:border-amber-500/60 hover:bg-white/[0.04]`}
-            >
-              {body}
-            </Link>
-          ) : (
-            <div key={row.code} className={shape}>
-              {body}
-            </div>
-          );
-        })}
-      </div>
-
-      {showAll ? (
-        <Pager
-          page={current}
-          pageCount={pageCount}
-          onSelect={(next) => {
-            setPage(next);
-            scrollListTop(listRef.current);
-          }}
-          total={rows.length}
-          pageSize={PAGE_SIZE}
-          unit="lệnh"
-        />
-      ) : hidden > 0 ? (
-        <button
-          type="button"
-          onClick={() => setShowAll(true)}
-          className="self-start text-[11px] font-black uppercase tracking-widest text-neutral-400 transition-colors hover:text-white"
-        >
-          Xem tất cả {rows.length} lệnh
-        </button>
-      ) : null}
-    </div>
-  );
-}
-
 export function WalletTopUp({
   history = [],
   minAmount,
@@ -422,14 +207,14 @@ export function WalletTopUp({
   // transfer made after the invoice was closed still lands with a receipt.
   useTopUpWatch(credited ? null : (watch?.code ?? null), autoEnabled, (outcome) => {
     if (outcome.status === "COMPLETED") setCredited(outcome);
-    // Turned down: the history below is server-rendered and still reads
-    // "Đang chờ"; the refresh is what puts the refusal on its row.
+    // Turned down: the strips above the forms are server-rendered and still
+    // count it as waiting; the refresh is what takes it off them.
     else router.refresh();
   });
 
   /**
    * Reload once the customer has read the receipt: the balance in the header
-   * and the history row were rendered before the money arrived.
+   * and the strips above the forms were rendered before the money arrived.
    */
   const dismissCredited = useCallback(() => {
     window.location.reload();
@@ -495,28 +280,18 @@ export function WalletTopUp({
     ...(cardEnabled ? [{ value: "card" as const, label: "Thẻ Cào", icon: QrCode }] : []),
   ];
 
-  const rows = history.filter((row) =>
-    method === "card" ? row.method === "CARD" : row.method !== "CARD",
-  );
+  // No history lists here any more: every request — waiting, turned down,
+  // overdue, dropped, credited — is on /transactions beside the ledger (the
+  // owner, 29/09/2026: "đem nó vào lịch sử giao dịch", then the card list
+  // too). What stays is what the customer can still act on, as a strip above
+  // each form.
   // The newest transfer still waiting to be paid: menzu puts it back in front
   // of the customer above the form, rather than letting a second one start.
   const unpaid = history.find((row) => row.status === "PENDING" && row.method !== "CARD") ?? null;
-
-  // Only under the card tab. The bank history moved to /transactions (the
-  // owner, 29/09/2026: "đem nó vào lịch sử giao dịch"), where every request —
-  // waiting, turned down, overdue, dropped — sits beside the ledger; a bank
-  // transfer still waiting is also in the yellow strip above the form. The
-  // card list stays: a card being checked is watched from here.
-  const ledger =
-    tabs.length > 0 && method === "card" ? (
-      <div className="mt-8 border-t border-white/5 pt-6">
-        <h3 className="text-sm font-black text-white uppercase tracking-wider mb-4 flex items-center gap-2">
-          <History size={16} className="text-emerald-400" aria-hidden />
-          Thẻ nạp gần đây
-        </h3>
-        <HistoryList rows={rows} empty="Chưa có lịch sử nạp thẻ nào." />
-      </div>
-    ) : null;
+  // Cards still with the desk, newest first: the newest one's invoice is a
+  // click away, and any others are counted.
+  const checking = history.filter((row) => row.status === "PENDING" && row.method === "CARD");
+  const newestCard = checking[0] ?? null;
 
   return (
     // The account area's own panel (Tổng quan, Bảo mật…), with the sidebar's
@@ -594,6 +369,34 @@ export function WalletTopUp({
                   className="shrink-0 w-full sm:w-auto text-center bg-yellow-500 text-black font-bold text-xs px-5 py-2.5 rounded-lg hover:bg-yellow-400 transition-colors"
                 >
                   Tiếp tục thanh toán
+                </Link>
+              </div>
+            ) : null}
+
+            {/* The card tab's own strip, in the bank one's colours: a card
+                the desk is still checking, and the way back to its invoice,
+                where the outcome arrives. */}
+            {method === "card" && newestCard ? (
+              <div className="mb-6 bg-gradient-to-r from-yellow-500/10 to-yellow-500/5 border border-yellow-500/20 rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div className="flex items-start gap-3">
+                  <Hourglass size={20} className="text-yellow-500 shrink-0 mt-0.5" aria-hidden />
+                  <div>
+                    <h4 className="text-sm font-bold text-yellow-500 mb-1">Thẻ đang được kiểm tra</h4>
+                    <p className="text-xs text-neutral-400 leading-relaxed">
+                      Thẻ{" "}
+                      <strong className="text-white">
+                        {newestCard.carrier ?? "cào"} {formatVnd(newestCard.amount)}đ
+                      </strong>
+                      {checking.length > 1 ? ` và ${checking.length - 1} thẻ khác` : ""} đang chờ đối
+                      soát.
+                    </p>
+                  </div>
+                </div>
+                <Link
+                  href={`/wallet/${newestCard.code}`}
+                  className="shrink-0 w-full sm:w-auto text-center bg-yellow-500 text-black font-bold text-xs px-5 py-2.5 rounded-lg hover:bg-yellow-400 transition-colors"
+                >
+                  Xem hóa đơn
                 </Link>
               </div>
             ) : null}
@@ -689,16 +492,6 @@ export function WalletTopUp({
                   {autoEnabled
                     ? "Hệ thống tự động xử lý hóa đơn 24/7"
                     : "Hóa đơn được shop đối soát và cộng tiền thủ công"}
-                </p>
-                {/* Where the bank history went. */}
-                <p className="text-center text-xs text-neutral-500 mt-2">
-                  Các lần nạp trước xem ở{" "}
-                  <Link
-                    href="/transactions"
-                    className="font-bold text-white underline-offset-2 transition-colors hover:underline"
-                  >
-                    Lịch sử giao dịch
-                  </Link>
                 </p>
               </div>
             ) : (
@@ -855,8 +648,6 @@ export function WalletTopUp({
             )}
           </>
         )}
-
-        {ledger}
       </div>
 
       {credited ? (
