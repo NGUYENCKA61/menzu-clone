@@ -20,6 +20,7 @@ import { useCallback, useRef, useState } from "react";
 
 import { CARD_DIGITS_MIN, cardNet, cardRateFor, type CardRate } from "@/lib/topup";
 
+import { AccountPanel } from "./AccountPanel";
 import { Pager, scrollListTop } from "./Pager";
 import { formatVnd } from "./productData";
 import { CARRIERS } from "./topUpCarriers";
@@ -506,9 +507,9 @@ export function WalletTopUp({
       // The ledger follows the tab above it: on Ngân Hàng only bank rows, on
       // Thẻ Cào only card rows — each method reads as its own desk. Keyed by
       // method so switching tabs starts back at page one.
-      <div className="mt-8 border-t border-white/10 pt-8">
-        <h3 className="text-lg font-black text-white uppercase tracking-wider mb-4 flex items-center gap-2">
-          <History size={18} className="text-emerald-400" aria-hidden />
+      <div className="mt-8 border-t border-white/5 pt-6">
+        <h3 className="text-sm font-black text-white uppercase tracking-wider mb-4 flex items-center gap-2">
+          <History size={16} className="text-emerald-400" aria-hidden />
           {method === "card" ? "Thẻ nạp gần đây" : "Lịch sử nạp ngân hàng"}
         </h3>
         <HistoryList
@@ -524,19 +525,18 @@ export function WalletTopUp({
     ) : null;
 
   return (
-    <div className="w-full bg-[#111111] border border-white/5 rounded-[20px] sm:rounded-[24px] p-5 sm:p-8 lg:p-10 relative min-h-0 sm:min-h-[750px]">
+    // The account area's own panel (Tổng quan, Bảo mật…), with the sidebar's
+    // Wallet mark: the owner, 29/09, "tự restyle lại cho hợp web mình".
+    <AccountPanel
+      icon={Wallet}
+      title="Nạp tiền vào tài khoản"
+      subtitle={
+        autoEnabled
+          ? "Tiền sẽ được hệ thống tự động cộng 24/7."
+          : "Tiền được cộng vào ví ngay khi shop xác nhận."
+      }
+    >
       <div>
-        <div className="mb-8">
-          <h1 className="text-xl sm:text-2xl font-black text-white uppercase tracking-wider mb-2 flex items-center gap-3">
-            <QrCode size={24} className="shrink-0 text-[var(--menzu-accent)]" aria-hidden />
-            Nạp tiền vào tài khoản
-          </h1>
-          <p className="text-xs sm:text-sm text-neutral-400 leading-relaxed">
-            {autoEnabled
-              ? "Tiền sẽ được hệ thống tự động cộng 24/7."
-              : "Tiền được cộng vào ví ngay khi shop xác nhận."}
-          </p>
-        </div>
 
         {tabs.length === 0 ? (
           <div className="p-8 text-center bg-white/[0.02] border border-white/5 rounded-2xl">
@@ -552,11 +552,11 @@ export function WalletTopUp({
             <div
               role="tablist"
               aria-label="Phương thức nạp"
-              className="relative p-1.5 bg-black/40 border border-white/10 rounded-[20px] sm:rounded-[24px] flex mb-8 w-full backdrop-blur-xl"
+              className="relative p-1.5 bg-black/40 border border-white/10 rounded-2xl flex mb-6 w-full backdrop-blur-xl"
             >
               <div
                 aria-hidden
-                className={`absolute top-1.5 bottom-1.5 left-1.5 rounded-[14px] sm:rounded-[18px] bg-emerald-500/10 border border-emerald-500/30 transition-transform duration-300 motion-reduce:transition-none ${
+                className={`absolute top-1.5 bottom-1.5 left-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 transition-transform duration-300 motion-reduce:transition-none ${
                   tabs.length > 1 ? "w-[calc(50%-6px)]" : "w-[calc(100%-12px)]"
                 } ${method === "card" && tabs.length > 1 ? "translate-x-full" : "translate-x-0"}`}
               />
@@ -570,11 +570,11 @@ export function WalletTopUp({
                     role="tab"
                     aria-selected={on}
                     onClick={() => switchTo(tab.value)}
-                    className="relative z-10 flex-1 flex items-center justify-center gap-2 py-3 sm:py-4 cursor-pointer text-center group transition-all"
+                    className="relative z-10 flex-1 flex items-center justify-center gap-2 py-2.5 cursor-pointer text-center group transition-all"
                   >
-                    <tab.icon size={18} className={tone} aria-hidden />
+                    <tab.icon size={16} className={tone} aria-hidden />
                     <span
-                      className={`text-xs sm:text-sm font-black uppercase tracking-wider transition-colors duration-300 ${tone}`}
+                      className={`text-xs font-black uppercase tracking-widest transition-colors duration-300 ${tone}`}
                     >
                       {tab.label}
                     </span>
@@ -616,23 +616,19 @@ export function WalletTopUp({
               <div className="w-full mt-4">
                 <form
                   onSubmit={handleSubmit}
-                  className="sm:bg-[#111111] sm:border sm:border-white/5 rounded-[24px] p-0 sm:p-10 transition-all"
+                  className="sm:bg-white/[0.02] sm:border sm:border-white/5 rounded-2xl p-0 sm:p-6 transition-all"
                 >
-                  <div className="flex items-start sm:items-center gap-3 sm:gap-4 mb-6 sm:mb-10">
-                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white/[0.03] border border-white/10 rounded-[14px] sm:rounded-2xl flex items-center justify-center shrink-0">
-                      <Wallet className="text-white w-5 h-5 sm:w-6 sm:h-6" aria-hidden />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="text-lg sm:text-xl font-bold text-white tracking-tight leading-none mb-1 sm:mb-0">
-                        Số tiền nạp
-                      </h3>
-                      <p className="text-[11px] sm:text-sm text-neutral-500 font-medium sm:mt-0.5 leading-relaxed">
-                        Nạp từ {formatVnd(minAmount)}đ trở lên. Miễn phí giao dịch.
-                      </p>
-                    </div>
+                  {/* A card header the way Bảo mật's cards read: title and
+                      hint on one line, no icon tile (the page title carries
+                      the Wallet mark now). */}
+                  <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 mb-5">
+                    <h3 className="text-sm font-black uppercase tracking-wider text-white">Số tiền nạp</h3>
+                    <p className="text-xs text-neutral-500">
+                      Nạp từ {formatVnd(minAmount)}đ trở lên. Miễn phí giao dịch.
+                    </p>
                   </div>
 
-                  <div className="space-y-8">
+                  <div className="space-y-6">
                     <div className="relative group">
                       {/* State keeps bare digits (presets and submit read it
                           as a number); only the field shows them grouped —
@@ -647,10 +643,12 @@ export function WalletTopUp({
                         inputMode="numeric"
                         autoComplete="off"
                         placeholder="0"
-                        className="w-full bg-transparent border-b-2 border-white/10 hover:border-white/30 focus:border-white pb-4 pr-16 sm:pr-20 text-4xl sm:text-6xl font-black text-white focus:outline-none transition-colors tracking-tighter placeholder:text-neutral-800"
+                        // 36px at most, the size of a price on our product
+                        // page, the biggest money figure the site shows.
+                        className="w-full bg-transparent border-b-2 border-white/10 hover:border-white/30 focus:border-white pb-3 pr-14 sm:pr-16 text-3xl sm:text-4xl font-black text-white focus:outline-none transition-colors tracking-tight placeholder:text-neutral-800"
                       />
                       <div
-                        className={`absolute right-0 bottom-6 font-bold text-lg sm:text-2xl transition-colors ${
+                        className={`absolute right-0 bottom-4 font-bold text-base sm:text-lg transition-colors ${
                           amount ? "text-white/60" : "text-neutral-700"
                         }`}
                       >
@@ -658,7 +656,7 @@ export function WalletTopUp({
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3 pt-2">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
                       {presets.map((preset) => (
                         <button
                           key={preset}
@@ -673,12 +671,12 @@ export function WalletTopUp({
 
                     {errorLine}
 
-                    <div className="pt-4">
+                    <div className="pt-2">
                       <button
                         type="submit"
                         disabled={pending || !bankAmountOk}
                         aria-busy={pending}
-                        className="w-full bg-white hover:bg-neutral-200 text-black rounded-2xl py-4 font-black text-base transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98]"
+                        className="w-full h-12 bg-white hover:bg-neutral-200 text-black rounded-xl font-black text-sm transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98]"
                       >
                         {pending ? (
                           <Loader2 size={18} className="animate-spin motion-reduce:animate-none" aria-hidden />
@@ -689,7 +687,7 @@ export function WalletTopUp({
                   </div>
                 </form>
 
-                <p className="text-center text-xs text-neutral-500 mt-6 flex items-center justify-center gap-2 font-medium">
+                <p className="text-center text-xs text-neutral-500 mt-4 flex items-center justify-center gap-2 font-medium">
                   <span
                     aria-hidden
                     className={`w-2 h-2 rounded-full ${autoEnabled ? "bg-emerald-500" : "bg-amber-500"}`}
@@ -713,7 +711,7 @@ export function WalletTopUp({
                           onClick={() => setCarrier(option.value)}
                           aria-pressed={on}
                           aria-label={option.label}
-                          className={`relative group overflow-hidden flex flex-col items-center justify-center p-3 sm:p-4 rounded-[16px] sm:rounded-[20px] border transition-all duration-300 ease-out ${
+                          className={`relative group overflow-hidden flex flex-col items-center justify-center p-3 sm:p-4 rounded-xl sm:rounded-2xl border transition-all duration-300 ease-out ${
                             on
                               ? "bg-emerald-500/10 border-emerald-500"
                               : "bg-[#161616] border-white/5 hover:border-white/10 active:scale-[0.98]"
@@ -811,7 +809,7 @@ export function WalletTopUp({
                     over chat: the request then carries everything the desk
                     needs. */}
                 {carrier && cardAmountOk ? (
-                  <div className="animate-in fade-in zoom-in-95 duration-200 sm:bg-[#111111] sm:border sm:border-white/5 p-0 sm:p-5 rounded-[24px] mt-6">
+                  <div className="animate-in fade-in zoom-in-95 duration-200 sm:bg-white/[0.02] sm:border sm:border-white/5 p-0 sm:p-5 rounded-2xl mt-6">
                     <span className={`${STEP} mb-4 block`}>3. Thông tin mã thẻ</span>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
                       <CardNumberField
@@ -836,7 +834,7 @@ export function WalletTopUp({
                       type="submit"
                       disabled={pending || !cardReady}
                       aria-busy={pending}
-                      className="w-full bg-emerald-500 hover:bg-emerald-400 text-black rounded-xl py-4 font-black text-sm transition-all flex items-center justify-center gap-2 disabled:opacity-30 disabled:cursor-not-allowed active:scale-[0.99]"
+                      className="w-full h-12 bg-emerald-500 hover:bg-emerald-400 text-black rounded-xl font-black text-sm transition-all flex items-center justify-center gap-2 disabled:opacity-30 disabled:cursor-not-allowed active:scale-[0.99]"
                     >
                       {pending ? (
                         <Loader2 size={17} className="animate-spin motion-reduce:animate-none" aria-hidden />
@@ -865,6 +863,6 @@ export function WalletTopUp({
           <CreditedLines credited={credited.credited} face={credited.amount} />
         </TopUpDialog>
       ) : null}
-    </div>
+    </AccountPanel>
   );
 }
