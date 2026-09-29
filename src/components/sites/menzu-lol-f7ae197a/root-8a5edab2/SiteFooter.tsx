@@ -206,11 +206,11 @@ export async function SiteFooter() {
   ];
 
   return (
-    // The page's own black and the page's own border weight, from the tokens
-    // rather than a hex of this component's choosing: a footer a shade lighter
-    // than everything above it reads as a slab bolted on, which is exactly how
-    // #0a0a0e looked against --menzu-bg.
-    <footer className="relative z-10 w-full bg-[var(--menzu-bg)] border-t border-white/10 mt-auto">
+    // The header bar's #0f1015 (trial): the site keeps two grounds — the
+    // storefront's #0f1015 and the account and utility pages' darker
+    // --menzu-bg — and a footer in the header's tone frames every page top and
+    // bottom in the same colour, whichever ground sits between them.
+    <footer className="relative z-10 w-full bg-[#0f1015] border-t border-white/10 mt-auto">
       {/* pb-28 on the narrow layout clears the fixed bottom navigation, which
           would otherwise sit on top of the copyright line. */}
       <div className="max-w-[1320px] mx-auto px-4 lg:px-6 pt-10 pb-24 sm:py-11">
