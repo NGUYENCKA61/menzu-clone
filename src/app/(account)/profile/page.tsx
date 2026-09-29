@@ -175,7 +175,7 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
               <div className="absolute inset-0 bg-gradient-to-t from-[#111111] via-[#111111]/50 to-transparent" />
             </div>
 
-            <div className="relative flex flex-col gap-6 p-5 pt-14 sm:p-7">
+            <div className="relative flex flex-col gap-4 p-5 pt-14 sm:gap-6 sm:p-7">
               {/* Who — avatar, name, role, when they joined. */}
               <div className="flex items-center gap-4 sm:gap-5">
                 <AvatarUploader avatarUrl={user.avatarUrl} username={user.username} />
@@ -214,8 +214,11 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                 </div>
               </div>
 
-              {/* The tier card and the doors, side by side from lg. */}
-              <div className="grid grid-cols-1 gap-4 sm:mt-5 lg:grid-cols-[minmax(0,1fr)_240px]">
+              {/* The tier card and the doors, side by side from xl. At lg the
+                  sidebar is already beside the panel, and the 240px door
+                  column squeezed the tier card to ~276px, cutting its figures
+                  to "Giảm …"; below xl the doors make one row under it. */}
+              <div className="grid grid-cols-1 gap-4 sm:mt-5 xl:grid-cols-[minmax(0,1fr)_240px]">
                 <div className="flex flex-col gap-2 rounded-xl border border-white/10 bg-[#111111]/60 p-5 backdrop-blur-md">
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <span className="text-[10px] font-black uppercase tracking-widest text-neutral-400">
@@ -299,14 +302,17 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                   </div>
                 </div>
 
-                <div className="flex flex-col gap-2.5">
+                {/* Phone: Nạp tiền across, the other two side by side under
+                    it (three stacked bars pushed the balance off the first
+                    screen). sm–lg: one row of three. xl: the column. */}
+                <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 xl:flex xl:flex-col">
                   {QUICK_ACTIONS.map(({ label, href, icon: Icon, primary }) => (
                     <Link
                       key={href}
                       href={href}
                       className={`inline-flex h-11 items-center justify-center gap-2 rounded-xl border text-[11px] font-black uppercase tracking-widest transition-all ${
                         primary
-                          ? "border-[var(--menzu-accent)] bg-[var(--menzu-accent)] text-white shadow-[0_10px_28px_-12px_var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] hover:shadow-[0_12px_32px_-10px_var(--menzu-accent)]"
+                          ? "col-span-2 sm:col-span-1 border-[var(--menzu-accent)] bg-[var(--menzu-accent)] text-white shadow-[0_10px_28px_-12px_var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] hover:shadow-[0_12px_32px_-10px_var(--menzu-accent)]"
                           : "border-white/15 bg-black/35 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] backdrop-blur-md hover:border-white/35 hover:bg-black/50"
                       }`}
                     >
@@ -318,8 +324,11 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
               </div>
 
               {/* THE ACCOUNT IN NUMBERS — inside the card rather than a strip of
-                  its own below it, so the page is one block instead of two. */}
-              <div className="-mx-5 -mb-5 grid grid-cols-2 border-t border-white/10 bg-[#111111]/70 backdrop-blur-sm sm:-mx-7 sm:-mb-7 lg:grid-cols-4 lg:divide-x lg:divide-white/[0.06]">
+                  its own below it, so the page is one block instead of two.
+                  Four across from xl, the order count giving width to the
+                  commission cell: in equal quarters "Rút tiền" dropped under
+                  any commission from 10.000đ and the strip grew 117→161px. */}
+              <div className="-mx-5 -mb-5 grid grid-cols-2 border-t border-white/10 bg-[#111111]/70 backdrop-blur-sm sm:-mx-7 sm:-mb-7 xl:grid-cols-[1fr_1fr_0.7fr_1.3fr] xl:divide-x xl:divide-white/[0.06]">
                 {[
                   { icon: Wallet, label: "Số dư khả dụng", value: formatVnd(user.balance), unit: "đ", tone: "text-emerald-400" },
                   { icon: Receipt, label: "Tổng chi tiêu", value: formatVnd(spent), unit: "đ", tone: "text-white" },
