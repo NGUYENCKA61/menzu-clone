@@ -10,8 +10,8 @@ import {
   LogOut,
   Monitor,
   Plus,
-  Save,
   Send,
+  ShieldCheck,
   Smartphone,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -30,26 +30,32 @@ import { TelegramGlyph } from "./BrandGlyphs";
  * and moving to a new address also asks for the current password. What the
  * shop adds: Telegram beside Google and Discord, a first password for an
  * OAuth-only account, and "Đăng xuất" on each other device.
+ *
+ * Then brought in line with the rest of the account area, layout kept (the
+ * owner: "Đồng bộ trang bảo mật"): tabs and small buttons in the site's
+ * 11–12px black caps, the active tab tinted like the sidebar's active row,
+ * cards at the inner-card padding with caps titles, the full-width submit at
+ * /wallet's 48px, and the sidebar's shield on the first tab.
  */
 
 type Tab = "security" | "linked" | "devices";
 
-const TABS: { id: Tab; short: string; long: string; icon: typeof Save }[] = [
-  { id: "security", short: "Bảo mật", long: "Bảo mật tài khoản", icon: Save },
+const TABS: { id: Tab; short: string; long: string; icon: typeof ShieldCheck }[] = [
+  { id: "security", short: "Bảo mật", long: "Bảo mật tài khoản", icon: ShieldCheck },
   { id: "linked", short: "Liên kết", long: "Liên kết nền tảng", icon: Globe },
   { id: "devices", short: "Thiết bị", long: "Quản lý thiết bị", icon: Monitor },
 ];
 
 const TAB_BASE =
-  "flex-1 flex flex-col lg:flex-row justify-center items-center gap-1.5 lg:gap-2 p-2 sm:py-3.5 rounded-xl font-bold transition-colors";
-const TAB_ACTIVE = `${TAB_BASE} bg-[var(--menzu-accent)]/10 text-[var(--menzu-accent)] border border-[var(--menzu-accent)]/20`;
+  "flex-1 flex flex-col lg:flex-row justify-center items-center gap-1.5 lg:gap-2 p-2 sm:py-3 rounded-xl transition-colors";
+const TAB_ACTIVE = `${TAB_BASE} bg-[var(--menzu-accent)]/10 text-white border border-[var(--menzu-accent)]/30`;
 const TAB_INACTIVE = `${TAB_BASE} bg-white/[0.02] text-neutral-400 hover:text-white hover:bg-white/5 border border-white/5`;
 
 const TITLE =
   "text-xl sm:text-2xl font-black text-white uppercase tracking-wider mb-2 flex items-center gap-3";
 const SUBTITLE = "text-xs sm:text-sm text-neutral-400 leading-relaxed";
-const CARD = "relative bg-white/[0.02] border border-white/5 rounded-2xl p-6 lg:p-8 overflow-hidden group";
-const CARD_TITLE = "text-sm font-bold text-white";
+const CARD = "relative bg-white/[0.02] border border-white/5 rounded-2xl p-5 sm:p-6 overflow-hidden group";
+const CARD_TITLE = "text-sm font-black uppercase tracking-wider text-white";
 const FIELD =
   "w-full rounded-xl border border-white/10 bg-black/20 px-4 py-3 text-white text-sm outline-none placeholder:text-neutral-600 focus:border-[var(--menzu-accent)]/50 transition-colors disabled:opacity-50";
 
@@ -358,7 +364,7 @@ export function SecurityPanel({
     },
   ];
 
-  const header = (title: string, Icon: typeof Save, subtitle: string) => (
+  const header = (title: string, Icon: typeof ShieldCheck, subtitle: string) => (
     <div className="mb-2 relative z-10">
       <h1 className={TITLE}>
         <Icon className="text-[var(--menzu-accent)]" aria-hidden />
@@ -380,8 +386,11 @@ export function SecurityPanel({
             onClick={() => setTab(id)}
             className={tab === id ? TAB_ACTIVE : TAB_INACTIVE}
           >
-            <Icon className="w-5 h-5 lg:w-[18px] lg:h-[18px]" aria-hidden />
-            <span className="text-[11px] sm:text-xs lg:text-sm whitespace-nowrap">
+            <Icon
+              className={`w-5 h-5 lg:w-4 lg:h-4 ${tab === id ? "text-[var(--menzu-accent)]" : ""}`}
+              aria-hidden
+            />
+            <span className="text-[11px] sm:text-xs font-black uppercase tracking-widest whitespace-nowrap">
               <span className="lg:hidden">{short}</span>
               <span className="hidden lg:inline">{long}</span>
             </span>
@@ -394,7 +403,7 @@ export function SecurityPanel({
           <div className="flex flex-col gap-8">
             {header(
               "Bảo mật tài khoản",
-              Save,
+              ShieldCheck,
               "Cập nhật thông tin đăng nhập và quản lý mật khẩu của bạn.",
             )}
 
@@ -403,7 +412,7 @@ export function SecurityPanel({
                 /verify). A change of address also asks for the current
                 password there — see the verify route for why. */}
             <form onSubmit={sendOtp} className={CARD}>
-              <div className="flex flex-col gap-6">
+              <div className="flex flex-col gap-5">
                 <div className="flex items-center justify-between">
                   {/* A heading, not a label: it titles the whole form. */}
                   <h3 className={CARD_TITLE}>Địa chỉ Email</h3>
@@ -439,7 +448,7 @@ export function SecurityPanel({
                   <button
                     type="submit"
                     disabled={emailBusy !== null || cooldown > 0 || !emailValue.trim() || alreadyProved}
-                    className="flex items-center justify-center gap-2 rounded-xl bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] disabled:bg-white/5 text-white font-bold px-6 py-3 text-xs whitespace-nowrap transition-colors disabled:text-neutral-500"
+                    className="flex items-center justify-center gap-2 rounded-xl bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] disabled:bg-white/5 text-white text-[11px] font-black uppercase tracking-widest px-5 py-3 whitespace-nowrap transition-colors disabled:text-neutral-500"
                   >
                     {emailBusy === "send" ? (
                       <Loader2 size={16} className="animate-spin motion-reduce:animate-none" aria-hidden />
@@ -490,7 +499,7 @@ export function SecurityPanel({
                       type="button"
                       onClick={verifyOtp}
                       disabled={emailBusy !== null || otp.length !== 6}
-                      className="flex items-center justify-center gap-2 rounded-xl bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] disabled:bg-white/5 text-white font-bold px-6 py-3 text-xs whitespace-nowrap transition-colors disabled:text-neutral-500"
+                      className="flex items-center justify-center gap-2 rounded-xl bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] disabled:bg-white/5 text-white text-[11px] font-black uppercase tracking-widest px-5 py-3 whitespace-nowrap transition-colors disabled:text-neutral-500"
                     >
                       {emailBusy === "verify" ? (
                         <Loader2 size={16} className="animate-spin motion-reduce:animate-none" aria-hidden />
@@ -507,7 +516,7 @@ export function SecurityPanel({
             </form>
 
             <form onSubmit={submitPassword} className={CARD}>
-              <div className="flex flex-col gap-6">
+              <div className="flex flex-col gap-5">
                 <h3 className={CARD_TITLE}>{hasPassword ? "Đổi Mật Khẩu" : "Đặt Mật Khẩu"}</h3>
                 {/* Every field carries its own label, visually hidden: the
                     design shows only placeholders, and a placeholder is not a
@@ -566,7 +575,7 @@ export function SecurityPanel({
                 <button
                   type="submit"
                   disabled={pwBusy}
-                  className="w-full bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] disabled:bg-[var(--menzu-accent)]/50 text-white font-bold rounded-xl py-3.5 text-sm transition-colors flex items-center justify-center gap-2"
+                  className="w-full h-12 bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] disabled:bg-[var(--menzu-accent)]/50 text-white font-black rounded-xl text-sm transition-colors flex items-center justify-center gap-2"
                 >
                   {pwBusy ? (
                     <Loader2 size={16} className="animate-spin motion-reduce:animate-none" aria-hidden />
@@ -671,7 +680,7 @@ export function SecurityPanel({
                 type="button"
                 onClick={() => signOut(null)}
                 disabled={devBusy !== null || sessions.length <= 1}
-                className="bg-white/[0.02] hover:bg-red-500/10 text-neutral-300 hover:text-red-400 border border-white/5 hover:border-red-500/30 px-5 py-3 rounded-xl text-sm font-bold flex items-center gap-2 shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="bg-white/[0.02] hover:bg-red-500/10 text-neutral-300 hover:text-red-400 border border-white/5 hover:border-red-500/30 px-5 py-3 rounded-xl text-[11px] font-black uppercase tracking-widest flex items-center gap-2 shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {devBusy === "all" ? (
                   <Loader2 size={16} className="animate-spin motion-reduce:animate-none" aria-hidden />
@@ -752,7 +761,7 @@ export function SecurityPanel({
                         title="Đăng xuất thiết bị"
                         onClick={() => signOut(session.key)}
                         disabled={devBusy !== null}
-                        className="px-4 py-3 bg-white/5 hover:bg-red-500/10 text-neutral-400 hover:text-red-400 rounded-xl shrink-0 disabled:opacity-50 flex items-center justify-center gap-2 text-sm font-bold"
+                        className="px-4 py-3 bg-white/5 hover:bg-red-500/10 text-neutral-400 hover:text-red-400 rounded-xl shrink-0 disabled:opacity-50 flex items-center justify-center gap-2 text-[11px] font-black uppercase tracking-widest"
                       >
                         {devBusy === session.key ? (
                           <Loader2 size={16} className="animate-spin motion-reduce:animate-none" aria-hidden />
