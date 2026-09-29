@@ -24,7 +24,7 @@ import { ConnectRailSection } from "@/components/sites/menzu-lol-f7ae197a/root-8
  */
 export default function AccountLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="min-h-screen flex flex-col text-white overflow-x-clip selection:bg-[var(--menzu-accent)]/30 bg-[#0f1015]">
+    <div className="min-h-screen flex flex-col text-white overflow-x-clip selection:bg-[var(--menzu-accent)]/30 bg-[#050508]">
       <div className="w-full shrink-0 h-[104px]" />
       <SiteHeader />
 
