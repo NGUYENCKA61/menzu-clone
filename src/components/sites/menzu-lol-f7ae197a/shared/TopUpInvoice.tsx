@@ -504,7 +504,7 @@ export function TopUpInvoice({
         </div>
 
         <div className="text-center mb-6 w-full">
-          <p className="text-white font-bold text-lg sm:text-xl tracking-tight mb-2">
+          <p className="text-white text-sm font-black uppercase tracking-wider mb-2">
             {overdue ? "Hết thời gian giữ lệnh" : "Quét mã QR"}
           </p>
           <p className="text-neutral-500 text-xs leading-relaxed px-4">
@@ -648,16 +648,18 @@ export function TopUpInvoice({
             aria-hidden
             className="absolute top-0 left-1/2 -translate-x-1/2 w-1/2 h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700"
           />
-          <div className="flex items-center gap-4 mb-6 pb-6 border-b border-white/5">
-            <div className="w-12 h-12 sm:w-14 sm:h-14 shrink-0 bg-gradient-to-br from-neutral-800 to-neutral-900 border border-white/10 rounded-[16px] flex items-center justify-center shadow-inner">
-              <Wallet size={20} className="text-white" aria-hidden />
+          {/* Card header in the account area's type: 14px caps over a 12px
+              hint, a 40px tile (was 56px and a 20px gradient title). */}
+          <div className="flex items-center gap-3 mb-5 pb-5 border-b border-white/5">
+            <div className="w-10 h-10 shrink-0 bg-gradient-to-br from-neutral-800 to-neutral-900 border border-white/10 rounded-xl flex items-center justify-center shadow-inner">
+              <Wallet size={18} className="text-white" aria-hidden />
             </div>
             <div>
-              <h2 className="text-lg sm:text-xl font-black bg-clip-text text-transparent bg-gradient-to-r from-white to-white/70 tracking-tight mb-1">
+              <h2 className="text-sm font-black uppercase tracking-wider text-white mb-1">
                 Chi tiết giao dịch
               </h2>
               {paying ? (
-                <p className="text-neutral-500 text-[10px] sm:text-xs">
+                <p className="text-neutral-500 text-xs">
                   {autoEnabled
                     ? "Chuyển đúng nội dung để hệ thống tự động xử lý ngay lập tức."
                     : "Chuyển đúng nội dung để shop đối soát nhanh nhất."}
@@ -668,12 +670,13 @@ export function TopUpInvoice({
 
           <div className="flex-1 flex flex-col justify-center">{details}</div>
 
-          <div className="pt-6 sm:pt-8 mt-4 border-t border-dashed border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-6 px-0 sm:px-4 sm:-mx-4">
-            <span className="text-neutral-400 font-medium text-base sm:text-lg">
+          {/* 36px at most, as a price on our product page (was 60px). */}
+          <div className="pt-5 sm:pt-6 mt-4 border-t border-dashed border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-6 px-0 sm:px-4 sm:-mx-4">
+            <span className="text-neutral-400 font-medium text-sm">
               {isCard ? "Mệnh giá thẻ" : "Số tiền thanh toán"}
             </span>
-            <span className="text-white font-black text-4xl sm:text-6xl tracking-tighter sm:text-right mt-1 sm:mt-0 tabular-nums">
-              {formatVnd(amount)} <span className="text-xl sm:text-3xl text-neutral-600 font-bold">đ</span>
+            <span className="text-white font-black text-3xl sm:text-4xl tracking-tight sm:text-right mt-1 sm:mt-0 tabular-nums">
+              {formatVnd(amount)} <span className="text-base sm:text-lg text-neutral-600 font-bold">đ</span>
             </span>
           </div>
         </section>

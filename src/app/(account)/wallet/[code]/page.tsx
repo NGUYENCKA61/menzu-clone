@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
+import { Receipt } from "lucide-react";
 
 import { Breadcrumb } from "@/components/sites/menzu-lol-f7ae197a/shared/Breadcrumb";
 import { TopUpInvoice } from "@/components/sites/menzu-lol-f7ae197a/shared/TopUpInvoice";
@@ -61,8 +62,8 @@ export default async function TopUpInvoicePage({
   const amount = Number(topUp.amount);
   const isCard = topUp.method === "CARD";
 
-  // menzu's /deposit frame, class for class: a faint grid fading down from
-  // the top, the breadcrumb pill, a white-to-grey title, then the panels.
+  // A faint grid fading down from the top, the breadcrumb pill, the title,
+  // then the panels.
   return (
     <div className="relative w-full max-w-[1320px] mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 flex flex-col min-h-screen">
       <div
@@ -79,8 +80,11 @@ export default async function TopUpInvoicePage({
           ]}
         />
       </div>
+      {/* Titled like every other account page (the owner, 29/09: restyle to
+          our site, not menzu's white-to-grey title). */}
       <div className="mb-6 px-2 sm:px-0 relative z-10">
-        <h1 className="text-xl sm:text-2xl font-black bg-clip-text text-transparent bg-gradient-to-r from-white to-white/50 tracking-tight">
+        <h1 className="text-xl sm:text-2xl font-black text-white uppercase tracking-wider flex items-center gap-3">
+          <Receipt size={24} className="shrink-0 text-[var(--menzu-accent)]" aria-hidden />
           Thanh toán hóa đơn
         </h1>
       </div>
