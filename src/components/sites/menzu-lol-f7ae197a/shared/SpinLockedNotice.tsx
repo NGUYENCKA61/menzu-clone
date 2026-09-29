@@ -72,8 +72,7 @@ export function SpinLockedNotice() {
         </h2>
 
         <p id="spin-locked-message" className="mt-3 text-[13px] leading-relaxed text-neutral-300">
-          Vòng quay đổi thưởng sẽ sớm được mở. Điểm thưởng của bạn vẫn được giữ nguyên,
-          bạn quay lại sau nhé.
+          Vòng quay đổi thưởng sẽ sớm được mở. Điểm thưởng của bạn vẫn được giữ nguyên.
         </p>
 
         <button
