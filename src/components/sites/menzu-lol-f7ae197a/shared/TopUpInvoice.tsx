@@ -504,7 +504,7 @@ export function TopUpInvoice({
         </div>
 
         <div className="text-center mb-6 w-full">
-          <p className="text-white text-sm font-black uppercase tracking-wider mb-2">
+          <p className="text-white font-bold text-lg sm:text-xl tracking-tight mb-2">
             {overdue ? "Hết thời gian giữ lệnh" : "Quét mã QR"}
           </p>
           <p className="text-neutral-500 text-xs leading-relaxed px-4">
@@ -648,14 +648,15 @@ export function TopUpInvoice({
             aria-hidden
             className="absolute top-0 left-1/2 -translate-x-1/2 w-1/2 h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700"
           />
-          {/* Card header in the account area's type: 14px caps over a 12px
-              hint, a 40px tile (was 56px and a 20px gradient title). */}
-          <div className="flex items-center gap-3 mb-5 pb-5 border-b border-white/5">
-            <div className="w-10 h-10 shrink-0 bg-gradient-to-br from-neutral-800 to-neutral-900 border border-white/10 rounded-xl flex items-center justify-center shadow-inner">
-              <Wallet size={18} className="text-white" aria-hidden />
+          {/* One step above what the panel holds (16–24px figures) and one
+              below the page title: 18/20px over a 12px hint, a 48px tile. At
+              14px caps it read smaller than the bank name under it. */}
+          <div className="flex items-center gap-4 mb-6 pb-6 border-b border-white/5">
+            <div className="w-12 h-12 shrink-0 bg-gradient-to-br from-neutral-800 to-neutral-900 border border-white/10 rounded-2xl flex items-center justify-center shadow-inner">
+              <Wallet size={20} className="text-white" aria-hidden />
             </div>
             <div>
-              <h2 className="text-sm font-black uppercase tracking-wider text-white mb-1">
+              <h2 className="text-lg sm:text-xl font-bold tracking-tight text-white mb-1">
                 Chi tiết giao dịch
               </h2>
               {paying ? (
@@ -668,7 +669,11 @@ export function TopUpInvoice({
             </div>
           </div>
 
-          <div className="flex-1 flex flex-col justify-center">{details}</div>
+          {/* Straight under the header: the panel is as tall as the QR one
+              beside it, and centred the details left a gap under the title.
+              The spare height now falls above the total line instead, where a
+              receipt keeps it. */}
+          <div className="flex-1">{details}</div>
 
           {/* 36px at most, as a price on our product page (was 60px). */}
           <div className="pt-5 sm:pt-6 mt-4 border-t border-dashed border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-6 px-0 sm:px-4 sm:-mx-4">
