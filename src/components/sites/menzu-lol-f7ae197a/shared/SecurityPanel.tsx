@@ -3,6 +3,7 @@
 import {
   Check,
   CircleAlert,
+  CircleCheck,
   Globe,
   Laptop,
   Loader2,
@@ -10,10 +11,11 @@ import {
   Monitor,
   Plus,
   Save,
+  Send,
   Smartphone,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { DiscordMark, GoogleMark } from "./OAuthButtons";
 import { TelegramGlyph } from "./BrandGlyphs";
@@ -24,9 +26,10 @@ import { TelegramGlyph } from "./BrandGlyphs";
  * with the rest of the site afterwards): the three tab buttons above the
  * panel, a title per tab inside it, and its cards, fields and rows class for
  * class. menzu's indigo is the shop's accent here, as its violet became on
- * /wallet. What the shop does differently stays: the email change asks for
- * the current password (no mail is sent, so no OTP), Telegram sits beside
- * Google and Discord, and an OAuth-only account sets a first password.
+ * /wallet. The email is proved with a mailed code as on menzu ("Gửi mã OTP"),
+ * and moving to a new address also asks for the current password. What the
+ * shop adds: Telegram beside Google and Discord, a first password for an
+ * OAuth-only account, and "Đăng xuất" on each other device.
  */
 
 type Tab = "security" | "linked" | "devices";
@@ -86,6 +89,8 @@ export interface SessionView {
 
 export interface SecurityPanelProps {
   email?: string | null;
+  /** The address on file was proved: by a code typed back, or by Google. */
+  emailVerified?: boolean;
   /** False for an account that arrived through Google or Discord and has
    *  never set one — the form then asks for no current password, because
    *  there is none to give. */
@@ -115,6 +120,7 @@ function isPhone(device: string): boolean {
 
 export function SecurityPanel({
   email,
+  emailVerified = false,
   hasPassword,
   googleLinked,
   discordLinked,
@@ -130,12 +136,26 @@ export function SecurityPanel({
   const [tab, setTab] = useState<Tab>(initialTab);
 
   const [emailValue, setEmailValue] = useState(email ?? "");
-  /** Asked for because this address is what "Quên mật khẩu" mails to. */
+  /** Where the last code went; set, the code row shows under the address. */
+  const [sentTo, setSentTo] = useState<string | null>(null);
+  const [otp, setOtp] = useState("");
+  /** Asked for on a change of address: this address is what "Quên mật khẩu"
+   *  mails to, and the code alone proves the inbox, not the person. */
   const [emailPassword, setEmailPassword] = useState("");
-  const [emailBusy, setEmailBusy] = useState(false);
+  const [emailBusy, setEmailBusy] = useState<"send" | "verify" | null>(null);
+  /** Seconds until "Gửi lại mã" works again. */
+  const [cooldown, setCooldown] = useState(0);
   const [emailMsg, setEmailMsg] = useState<{ tone: "ok" | "err"; text: string } | null>(
     null,
   );
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    const timer = window.setTimeout(() => setCooldown((left) => left - 1), 1000);
+    return () => window.clearTimeout(timer);
+  }, [cooldown]);
+  const onFile = (email ?? "").toLowerCase();
+  const alreadyProved = emailVerified && emailValue.trim().toLowerCase() === onFile;
+  const needsPassword = hasPassword && sentTo !== null && sentTo.toLowerCase() !== onFile;
 
   const [current, setCurrent] = useState("");
   const [next, setNext] = useState("");
@@ -147,31 +167,69 @@ export function SecurityPanel({
   const [devBusy, setDevBusy] = useState<string | null>(null);
   const [devMsg, setDevMsg] = useState<{ tone: "ok" | "err"; text: string } | null>(null);
 
-  async function submitEmail(event: React.FormEvent) {
+  /** "Gửi mã OTP": a six-digit code to the address typed. */
+  async function sendOtp(event: React.FormEvent) {
     event.preventDefault();
-    if (emailBusy) return;
-    setEmailBusy(true);
+    if (emailBusy || cooldown > 0) return;
+    setEmailBusy("send");
     setEmailMsg(null);
     try {
-      const res = await fetch("/api/account/email", {
+      const res = await fetch("/api/account/email/otp", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ email: emailValue, password: emailPassword }),
+        body: JSON.stringify({ email: emailValue }),
       });
-      const data = (await res.json().catch(() => ({}))) as { error?: string };
-      setEmailMsg(
-        res.ok
-          ? { tone: "ok", text: "Đã cập nhật email" }
-          : { tone: "err", text: data.error ?? "Không cập nhật được email" },
-      );
-      if (res.ok) {
-        setEmailPassword("");
-        router.refresh();
+      const data = (await res.json().catch(() => ({}))) as {
+        error?: string;
+        email?: string;
+        ttlMinutes?: number;
+        retryAfter?: number;
+      };
+      if (data.retryAfter) setCooldown(data.retryAfter);
+      if (!res.ok || !data.email) {
+        setEmailMsg({ tone: "err", text: data.error ?? "Không gửi được mã xác minh" });
+        return;
       }
+      setSentTo(data.email);
+      setOtp("");
+      setEmailMsg({
+        tone: "ok",
+        text: `Đã gửi mã 6 số tới ${data.email}. Mã có hiệu lực ${data.ttlMinutes ?? 10} phút.`,
+      });
     } catch {
       setEmailMsg({ tone: "err", text: "Không kết nối được máy chủ" });
     } finally {
-      setEmailBusy(false);
+      setEmailBusy(null);
+    }
+  }
+
+  /** The code typed back; right, and the address is the account's, proved. */
+  async function verifyOtp() {
+    if (emailBusy) return;
+    setEmailBusy("verify");
+    setEmailMsg(null);
+    try {
+      const res = await fetch("/api/account/email/verify", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ code: otp, password: emailPassword }),
+      });
+      const data = (await res.json().catch(() => ({}))) as { error?: string; email?: string };
+      if (!res.ok) {
+        setEmailMsg({ tone: "err", text: data.error ?? "Không xác minh được email" });
+        return;
+      }
+      setSentTo(null);
+      setOtp("");
+      setEmailPassword("");
+      // Nothing left to resend: the address is proved.
+      setCooldown(0);
+      setEmailMsg({ tone: "ok", text: "Đã xác minh email." });
+      router.refresh();
+    } catch {
+      setEmailMsg({ tone: "err", text: "Không kết nối được máy chủ" });
+    } finally {
+      setEmailBusy(null);
     }
   }
 
@@ -340,63 +398,110 @@ export function SecurityPanel({
               "Cập nhật thông tin đăng nhập và quản lý mật khẩu của bạn.",
             )}
 
-            {/* menzu verifies an email change with an OTP it mails out. No
-                mail delivery is configured here, so the new address is taken
-                on trust — but the current password is asked for first,
-                because this address is where "Quên mật khẩu" sends its link
-                and a stolen session must not be able to redirect it. Wire up
-                a mailer before trusting this field to prove ownership of an
-                address. */}
-            <form onSubmit={submitEmail} className={CARD}>
+            {/* menzu's email card: the address and "Gửi mã OTP"; the code row opens
+                under it once a code is out (POST /api/account/email/otp, then
+                /verify). A change of address also asks for the current
+                password there — see the verify route for why. */}
+            <form onSubmit={sendOtp} className={CARD}>
               <div className="flex flex-col gap-6">
                 <div className="flex items-center justify-between">
                   {/* A heading, not a label: it titles the whole form. */}
                   <h3 className={CARD_TITLE}>Địa chỉ Email</h3>
-                  {!email ? (
+                  {email && emailVerified ? (
+                    <span className="flex items-center gap-1 px-2.5 py-1 rounded-md bg-emerald-500/10 text-[11px] font-bold text-emerald-400 border border-emerald-500/20">
+                      <CircleCheck size={12} aria-hidden />
+                      Đã xác minh
+                    </span>
+                  ) : (
                     <span className="flex items-center gap-1 px-2.5 py-1 rounded-md bg-yellow-500/10 text-[11px] font-bold text-yellow-400 border border-yellow-500/20">
                       <CircleAlert size={12} aria-hidden />
-                      Chưa có email
+                      {email ? "Chưa xác minh" : "Chưa có email"}
                     </span>
-                  ) : null}
+                  )}
                 </div>
                 <div className="flex flex-col sm:flex-row gap-3">
                   <label htmlFor="sec-email" className="sr-only">
-                    Email mới
+                    Email
                   </label>
                   <input
                     id="sec-email"
                     type="email"
                     autoComplete="email"
                     value={emailValue}
-                    onChange={(e) => setEmailValue(e.target.value)}
+                    onChange={(e) => {
+                      setEmailValue(e.target.value);
+                      // A code went to the old spelling; a new one is needed.
+                      if (sentTo) setSentTo(null);
+                    }}
                     placeholder="Nhập email mới của bạn"
-                    className={`${FIELD} sm:flex-1`}
-                  />
-                  <label htmlFor="sec-email-pw" className="sr-only">
-                    Mật khẩu hiện tại
-                  </label>
-                  <input
-                    id="sec-email-pw"
-                    type="password"
-                    autoComplete="current-password"
-                    value={emailPassword}
-                    onChange={(e) => setEmailPassword(e.target.value)}
-                    placeholder="Mật khẩu hiện tại"
-                    className={`${FIELD} sm:w-56`}
+                    className={`flex-1 ${FIELD}`}
                   />
                   <button
                     type="submit"
-                    disabled={emailBusy}
+                    disabled={emailBusy !== null || cooldown > 0 || !emailValue.trim() || alreadyProved}
                     className="flex items-center justify-center gap-2 rounded-xl bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] disabled:bg-white/5 text-white font-bold px-6 py-3 text-xs whitespace-nowrap transition-colors disabled:text-neutral-500"
                   >
-                    {emailBusy ? (
+                    {emailBusy === "send" ? (
                       <Loader2 size={16} className="animate-spin motion-reduce:animate-none" aria-hidden />
                     ) : (
-                      <Check size={16} aria-hidden />
+                      <Send size={16} aria-hidden />
                     )}
-                    {emailBusy ? "Đang lưu…" : "Cập nhật"}
+                    {cooldown > 0
+                      ? `Gửi lại sau ${cooldown}s`
+                      : sentTo
+                        ? "Gửi lại mã"
+                        : "Gửi mã OTP"}
                   </button>
                 </div>
+
+                {sentTo ? (
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <label htmlFor="sec-otp" className="sr-only">
+                      Mã xác minh
+                    </label>
+                    <input
+                      id="sec-otp"
+                      inputMode="numeric"
+                      autoComplete="one-time-code"
+                      maxLength={6}
+                      value={otp}
+                      onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                      placeholder="Nhập mã OTP 6 số"
+                      // The digits spaced out once typed; the placeholder reads normally.
+                      className={`flex-1 ${FIELD} ${otp ? "font-mono tracking-[0.3em]" : ""}`}
+                    />
+                    {needsPassword ? (
+                      <>
+                        <label htmlFor="sec-email-pw" className="sr-only">
+                          Mật khẩu hiện tại
+                        </label>
+                        <input
+                          id="sec-email-pw"
+                          type="password"
+                          autoComplete="current-password"
+                          value={emailPassword}
+                          onChange={(e) => setEmailPassword(e.target.value)}
+                          placeholder="Mật khẩu hiện tại"
+                          className={`${FIELD} sm:w-56`}
+                        />
+                      </>
+                    ) : null}
+                    <button
+                      type="button"
+                      onClick={verifyOtp}
+                      disabled={emailBusy !== null || otp.length !== 6}
+                      className="flex items-center justify-center gap-2 rounded-xl bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] disabled:bg-white/5 text-white font-bold px-6 py-3 text-xs whitespace-nowrap transition-colors disabled:text-neutral-500"
+                    >
+                      {emailBusy === "verify" ? (
+                        <Loader2 size={16} className="animate-spin motion-reduce:animate-none" aria-hidden />
+                      ) : (
+                        <Check size={16} aria-hidden />
+                      )}
+                      Xác nhận
+                    </button>
+                  </div>
+                ) : null}
+
                 {emailMsg ? <Notice tone={emailMsg.tone}>{emailMsg.text}</Notice> : null}
               </div>
             </form>

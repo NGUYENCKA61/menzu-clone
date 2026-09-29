@@ -46,7 +46,7 @@ export default async function SecurityPage({ searchParams }: SecurityPageProps) 
   // one it can never be given.
   const passwordRow = await db.user.findUniqueOrThrow({
     where: { id: user.id },
-    select: { passwordHash: true },
+    select: { passwordHash: true, emailVerifiedAt: true },
   });
   const hasPassword = passwordRow.passwordHash !== null;
 
@@ -97,6 +97,7 @@ export default async function SecurityPage({ searchParams }: SecurityPageProps) 
     <AccountPageFrame crumb="Bảo mật">
       <SecurityPanel
         email={user.email}
+        emailVerified={passwordRow.emailVerifiedAt !== null}
         hasPassword={hasPassword}
         googleLinked={linkedSet.has("google")}
         discordLinked={linkedSet.has("discord")}

@@ -117,6 +117,7 @@ model User {
   announcements AnnouncementRecipient[]
   cartItems     CartItem[]
   passwordResets PasswordReset[]
+  emailVerifications EmailVerification[]
   feedbacks     Feedback[]
   statusSubscriptions SoftwareStatusSubscription[]
   licenseKeys   LicenseKey[]
@@ -369,6 +370,26 @@ model PasswordReset {
 
   @@index([userId])
   @@map("password_resets")
+}
+
+/// A six-digit code mailed to prove an address before it becomes, or is
+/// confirmed as, the account's email (Bảo mật → "Gửi mã OTP"). Only the
+/// SHA-256 of the code is kept. Rows stay for the hour so the sends can be
+/// counted; the newest one is the one a code is checked against.
+model EmailVerification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// The address the code went to — the one that becomes the account's.
+  email     String
+  codeHash  String
+  expiresAt DateTime
+  /// Wrong codes typed against this row; five and it is spent.
+  attempts  Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@index([userId, createdAt])
+  @@map("email_verifications")
 }
 
 model LinkedAccount {
