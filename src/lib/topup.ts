@@ -59,6 +59,16 @@ export function topUpExpiresAt(createdAt: Date): Date {
   return new Date(createdAt.getTime() + TOPUP_EXPIRY_MINUTES * 60 * 1000);
 }
 
+/** Whether a request opened at `createdAt` is still inside its hold window. */
+export function stillHeld(createdAt: Date, now: Date = new Date()): boolean {
+  return topUpExpiresAt(createdAt).getTime() > now.getTime();
+}
+
+/** Milliseconds from now until an ISO deadline, never below zero. */
+export function msUntil(deadline: string, now: number = Date.now()): number {
+  return Math.max(0, new Date(deadline).getTime() - now);
+}
+
 /**
  * How long after opening a request the wallet page keeps watching for payment.
  *

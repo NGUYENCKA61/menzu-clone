@@ -39,6 +39,7 @@ import {
 } from "@/lib/telegramNotify";
 import { dayKey, dayTime } from "@/lib/dayGroups";
 import { makeTopUpCode, topUpExpiresAt, transferNoteFor } from "@/lib/topup";
+import { openBankTopUp } from "@/lib/topupOpen";
 
 export interface TelegramFrom {
   id: number | string;
@@ -712,6 +713,13 @@ export async function createTopUp(
   if (amount > 100_000_000) return { error: "Số tiền nạp tối đa 100.000.000đ một lần." };
   if (!settings.bankTopUpEnabled || !bankReady(settings)) {
     return { error: "Shop đang tạm ngưng nhận nạp qua ngân hàng." };
+  }
+  // One open invoice at a time, as on the website (openBankTopUp).
+  const unpaid = await openBankTopUp(user.id);
+  if (unpaid) {
+    return {
+      error: `Bạn còn lệnh nạp ${unpaid.code} (${vnd(Number(unpaid.amount))}) chưa thanh toán, giữ đến ${dayTime(topUpExpiresAt(unpaid.createdAt))}. Chuyển khoản đúng lệnh đó, hoặc huỷ nó trên web rồi tạo lệnh mới.`,
+    };
   }
   const topUp = await db.topUp.create({
     data: {

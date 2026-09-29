@@ -12,6 +12,7 @@ import {
   topUpExpiresAt,
   transferNoteFor,
 } from "@/lib/topup";
+import { openBankTopUp } from "@/lib/topupOpen";
 
 /**
  * How many requests one account may leave open at once.
@@ -152,6 +153,22 @@ export async function POST(request: Request) {
             already.status === "PENDING"
               ? `Thẻ này bạn đã gửi rồi — xem mã lệnh ${already.code} trong lịch sử nạp.`
               : `Thẻ này đã được nạp trước đó (mã lệnh ${already.code}).`,
+        },
+        { status: 409 },
+      );
+    }
+  }
+
+  // One bank invoice at a time: pay or cancel the open one first. `openCode`
+  // lets the page point at it; it is deliberately not `invoiceCode`, which the
+  // page reads as "created".
+  if (method === "BANK") {
+    const unpaid = await openBankTopUp(user.id);
+    if (unpaid) {
+      return NextResponse.json(
+        {
+          error: `Bạn còn hóa đơn ${unpaid.code} (${Number(unpaid.amount).toLocaleString("vi-VN")}đ) chưa thanh toán. Thanh toán hoặc hủy hóa đơn đó rồi tạo hóa đơn mới.`,
+          openCode: unpaid.code,
         },
         { status: 409 },
       );

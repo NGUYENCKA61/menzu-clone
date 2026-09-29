@@ -7,7 +7,7 @@ import { getTopUps } from "@/lib/queries";
 import { getCurrentUser } from "@/lib/session";
 import { bankReady } from "@/lib/settings";
 import { getShopSettings } from "@/lib/settingsStore";
-import { topUpExpiresAt, watchableTopUp } from "@/lib/topup";
+import { stillHeld, topUpExpiresAt, watchableTopUp } from "@/lib/topup";
 
 export const metadata: Metadata = { title: "Nạp tiền" };
 export const dynamic = "force-dynamic";
@@ -66,7 +66,10 @@ export default async function WalletPage() {
           carrier: row.carrier,
           amount: row.amount,
           credited: row.credited,
-          status: row.status,
+          // A request past its hold window reads as overdue even before a
+          // reconciliation pass marks it so: it no longer blocks a new
+          // invoice (openBankTopUp decides the same on the server).
+          status: row.status === "PENDING" && !stillHeld(row.createdAt) ? "EXPIRED" : row.status,
           // Only carried on a refusal: it is the desk's answer to "why", and
           // on any other row there is no question being asked.
           note: row.status === "FAILED" ? row.note : null,

@@ -12,13 +12,14 @@ import {
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
-import { CARD_DIGITS_MIN, cardNet, cardRateFor, type CardRate } from "@/lib/topup";
+import { CARD_DIGITS_MIN, cardNet, cardRateFor, msUntil, type CardRate } from "@/lib/topup";
 
 import { AccountPanel } from "./AccountPanel";
 import { formatVnd } from "./productData";
 import { CARRIERS } from "./topUpCarriers";
+import { TopUpCountdown } from "./TopUpCountdown";
 import { CreditedLines, TopUpDialog } from "./TopUpDialog";
 import { useTopUpWatch, type TopUpOutcome } from "./useTopUpWatch";
 
@@ -178,6 +179,20 @@ export function WalletTopUp({
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [credited, setCredited] = useState<TopUpOutcome | null>(null);
+  // The open bank invoice whose hold window ran out while this screen was up:
+  // it stops locking the form then, without a reload. One timer to the
+  // deadline rather than the shared per-second clock, which would re-render
+  // this whole desk every second for a single moment of interest.
+  const [lapsed, setLapsed] = useState<string | null>(null);
+  // The newest transfer still waiting to be paid.
+  const waitingBank = history.find((row) => row.status === "PENDING" && row.method !== "CARD") ?? null;
+  const holdCode = waitingBank?.code;
+  const holdUntil = waitingBank?.expiresAt;
+  useEffect(() => {
+    if (!holdCode || !holdUntil) return;
+    const timer = window.setTimeout(() => setLapsed(holdCode), msUntil(holdUntil));
+    return () => window.clearTimeout(timer);
+  }, [holdCode, holdUntil]);
 
   // The amount and any error belong to the tab they were typed on: a bank
   // figure carried into the card form named a denomination no carrier prints,
@@ -248,11 +263,15 @@ export function WalletTopUp({
       const data = (await response.json().catch(() => ({}))) as {
         error?: string;
         invoiceCode?: string;
+        /** Set when the refusal is an invoice still open (opened elsewhere,
+         *  say another tab): the refresh brings its strip and lock here. */
+        openCode?: string;
       };
 
       if (!response.ok || !data.invoiceCode) {
         setError(data.error ?? "Không tạo được hóa đơn");
         setPending(false);
+        if (data.openCode) router.refresh();
         return;
       }
 
@@ -285,9 +304,11 @@ export function WalletTopUp({
   // owner, 29/09/2026: "đem nó vào lịch sử giao dịch", then the card list
   // too). What stays is what the customer can still act on, as a strip above
   // each form.
-  // The newest transfer still waiting to be paid: menzu puts it back in front
-  // of the customer above the form, rather than letting a second one start.
-  const unpaid = history.find((row) => row.status === "PENDING" && row.method !== "CARD") ?? null;
+  // The open transfer, in front of the customer above the form. While it is
+  // open no second one can start — the route refuses it (openBankTopUp) and
+  // the form below is locked — and once its hold window runs out on this
+  // screen, the lock lifts without a reload.
+  const unpaid = waitingBank && lapsed !== waitingBank.code ? waitingBank : null;
   // Cards still with the desk, newest first: the newest one's invoice is a
   // click away, and any others are counted.
   const checking = history.filter((row) => row.status === "PENDING" && row.method === "CARD");
@@ -360,7 +381,18 @@ export function WalletTopUp({
                     <h4 className="text-sm font-bold text-yellow-500 mb-1">Đơn nạp tiền đang chờ xử lý</h4>
                     <p className="text-xs text-neutral-400 leading-relaxed">
                       Bạn có một hóa đơn <strong className="text-white">{formatVnd(unpaid.amount)}đ</strong>{" "}
-                      chưa hoàn tất.
+                      chưa hoàn tất
+                      {unpaid.expiresAt ? (
+                        <>
+                          {" "}
+                          (còn{" "}
+                          <strong className="text-white tabular-nums">
+                            <TopUpCountdown deadline={unpaid.expiresAt} />
+                          </strong>
+                          )
+                        </>
+                      ) : null}
+                      . Thanh toán hoặc hủy hóa đơn này để tạo hóa đơn mới.
                     </p>
                   </div>
                 </div>
@@ -415,6 +447,13 @@ export function WalletTopUp({
                   onSubmit={handleSubmit}
                   className="sm:bg-white/[0.02] sm:border sm:border-white/5 rounded-2xl p-0 sm:p-6 transition-all"
                 >
+                  {/* Locked while an invoice is still open: one at a time. A
+                      disabled fieldset turns off every field and button in it
+                      at once; the strip above says why. */}
+                  <fieldset
+                    disabled={Boolean(unpaid)}
+                    className={`min-w-0 transition-opacity ${unpaid ? "opacity-40" : ""}`}
+                  >
                   {/* A card header the way Bảo mật's cards read: title and
                       hint on one line, no icon tile (the page title carries
                       the Wallet mark now). */}
@@ -478,10 +517,15 @@ export function WalletTopUp({
                         {pending ? (
                           <Loader2 size={18} className="animate-spin motion-reduce:animate-none" aria-hidden />
                         ) : null}
-                        {pending ? "Đang tạo hóa đơn…" : "Tạo hóa đơn"}
+                        {pending
+                          ? "Đang tạo hóa đơn…"
+                          : unpaid
+                            ? "Đang có hóa đơn chờ thanh toán"
+                            : "Tạo hóa đơn"}
                       </button>
                     </div>
                   </div>
+                  </fieldset>
                 </form>
 
                 <p className="text-center text-xs text-neutral-500 mt-4 flex items-center justify-center gap-2 font-medium">
