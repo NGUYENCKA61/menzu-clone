@@ -781,7 +781,9 @@ export function WalletTopUp({
                             }`}
                           >
                             {rate > 0 ? (
-                              <div className="absolute top-0 right-0 bg-rose-500/20 text-rose-400 text-[8px] font-bold px-1 py-[3px] leading-none rounded-bl-md border-b border-l border-rose-500/20">
+                              // 9px, the smallest chip type the site uses
+                              // (the ledger's method chip); 8px was below it.
+                              <div className="absolute top-0 right-0 bg-rose-500/20 text-rose-400 text-[9px] font-bold px-1.5 py-[3px] leading-none rounded-bl-md border-b border-l border-rose-500/20">
                                 {feeBadge(rate)}
                               </div>
                             ) : null}
