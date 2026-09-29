@@ -502,25 +502,19 @@ export function WalletTopUp({
   // of the customer above the form, rather than letting a second one start.
   const unpaid = history.find((row) => row.status === "PENDING" && row.method !== "CARD") ?? null;
 
+  // Only under the card tab. The bank history moved to /transactions (the
+  // owner, 29/09/2026: "đem nó vào lịch sử giao dịch"), where every request —
+  // waiting, turned down, overdue, dropped — sits beside the ledger; a bank
+  // transfer still waiting is also in the yellow strip above the form. The
+  // card list stays: a card being checked is watched from here.
   const ledger =
-    tabs.length > 0 ? (
-      // The ledger follows the tab above it: on Ngân Hàng only bank rows, on
-      // Thẻ Cào only card rows — each method reads as its own desk. Keyed by
-      // method so switching tabs starts back at page one.
+    tabs.length > 0 && method === "card" ? (
       <div className="mt-8 border-t border-white/5 pt-6">
         <h3 className="text-sm font-black text-white uppercase tracking-wider mb-4 flex items-center gap-2">
           <History size={16} className="text-emerald-400" aria-hidden />
-          {method === "card" ? "Thẻ nạp gần đây" : "Lịch sử nạp ngân hàng"}
+          Thẻ nạp gần đây
         </h3>
-        <HistoryList
-          key={method}
-          rows={rows}
-          empty={
-            method === "card"
-              ? "Chưa có lịch sử nạp thẻ nào."
-              : "Chưa có lịch sử nạp ngân hàng nào."
-          }
-        />
+        <HistoryList rows={rows} empty="Chưa có lịch sử nạp thẻ nào." />
       </div>
     ) : null;
 
@@ -695,6 +689,16 @@ export function WalletTopUp({
                   {autoEnabled
                     ? "Hệ thống tự động xử lý hóa đơn 24/7"
                     : "Hóa đơn được shop đối soát và cộng tiền thủ công"}
+                </p>
+                {/* Where the bank history went. */}
+                <p className="text-center text-xs text-neutral-500 mt-2">
+                  Các lần nạp trước xem ở{" "}
+                  <Link
+                    href="/transactions"
+                    className="font-bold text-white underline-offset-2 transition-colors hover:underline"
+                  >
+                    Lịch sử giao dịch
+                  </Link>
                 </p>
               </div>
             ) : (

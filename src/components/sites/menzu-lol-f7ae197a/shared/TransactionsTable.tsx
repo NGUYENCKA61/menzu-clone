@@ -19,7 +19,8 @@ export interface LedgerView {
   code: string;
   /** TOPUP · PURCHASE · REFUND · REWARD · ADJUSTMENT */
   kind: string;
-  /** SUCCESS · PENDING · FAILED */
+  /** SUCCESS · PENDING · FAILED, and on a top-up request that never reached
+   *  the wallet also EXPIRED · CANCELLED. */
   status: string;
   delta: number;
   balanceAfter: number;
@@ -50,6 +51,12 @@ const STATUS: Record<string, { label: string; tone: string }> = {
   SUCCESS: { label: "Thành công", tone: "text-emerald-400 border-emerald-500/20 bg-emerald-500/10" },
   PENDING: { label: "Chờ xử lý", tone: "text-amber-400 border-amber-500/20 bg-amber-500/10" },
   FAILED: { label: "Thất bại", tone: "text-red-400 border-red-500/20 bg-red-500/10" },
+  // Top-up requests that never reached the wallet (they have no ledger line
+  // of their own; the page lists them beside it). Same words and colours as
+  // /wallet used for them: overdue still warns in red, since a late transfer
+  // is still honoured; a dropped request is only grey.
+  EXPIRED: { label: "Quá hạn", tone: "text-red-400 border-red-500/20 bg-red-500/10" },
+  CANCELLED: { label: "Đã hủy", tone: "text-neutral-500 border-white/10 bg-white/5" },
 };
 
 /** A row's kind in words, for a row that carries no method of its own. */
@@ -85,7 +92,9 @@ function Amount({ row, phone = false }: { row: LedgerView; phone?: boolean }) {
       ? "text-neutral-500 line-through"
       : row.status === "PENDING"
         ? "text-neutral-300"
-        : row.delta >= 0
+        : row.status === "EXPIRED" || row.status === "CANCELLED"
+          ? "text-neutral-500"
+          : row.delta >= 0
           ? "text-emerald-400"
           : "text-red-400";
   return (
@@ -248,6 +257,8 @@ export function TransactionsTable({ rows }: { rows: LedgerView[] }) {
                     ["SUCCESS", "Thành công"],
                     ["PENDING", "Chờ xử lý"],
                     ["FAILED", "Thất bại"],
+                    ["EXPIRED", "Quá hạn"],
+                    ["CANCELLED", "Đã hủy"],
                   ]}
                 />
               </div>
