@@ -1,11 +1,9 @@
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { ShieldCheck } from "lucide-react";
 
 import { SESSION_COOKIE } from "@/lib/auth";
 import { AccountPageFrame } from "@/components/sites/menzu-lol-f7ae197a/shared/AccountPageFrame";
-import { AccountPanel } from "@/components/sites/menzu-lol-f7ae197a/shared/AccountPanel";
 import { SecurityPanel } from "@/components/sites/menzu-lol-f7ae197a/shared/SecurityPanel";
 import { db } from "@/lib/db";
 import { describeUserAgent } from "@/lib/device";
@@ -93,35 +91,33 @@ export default async function SecurityPage({ searchParams }: SecurityPageProps) 
         : null;
 
   return (
+    // menzu's /security (the owner, 29/09/2026): the tab buttons sit above
+    // the panel and each tab titles the panel itself, so SecurityPanel draws
+    // both rather than sitting in AccountPanel.
     <AccountPageFrame crumb="Bảo mật">
-      <AccountPanel
-        icon={ShieldCheck}
-        title="Bảo mật tài khoản"
-        subtitle="Cập nhật thông tin đăng nhập và quản lý thiết bị"
-      >
-        <SecurityPanel
-          email={user.email}
-          hasPassword={hasPassword}
-          googleLinked={linkedSet.has("google")}
-          discordLinked={linkedSet.has("discord")}
-          googleEnabled={googleOauthEnabled(settings)}
-          discordEnabled={discordOauthEnabled(settings)}
-          telegramUrl={telegramLinkUrl(settings, user.id)}
-          telegramLinked={Boolean(user.telegramId)}
-          initialTab={linkNotice ? "linked" : "security"}
-          linkNotice={linkNotice}
-          sessions={sessions.map((session) => ({
-            // Never the token itself — it IS the login. The tail is enough to
-            // tell rows apart on screen.
-            key: session.id.slice(-6),
-            device: describeUserAgent(session.userAgent),
-            ip: session.ip,
-            location: session.location,
-            when: deviceWhen(session.createdAt),
-            current: session.id === token,
-          }))}
-        />
-      </AccountPanel>
+      <SecurityPanel
+        email={user.email}
+        hasPassword={hasPassword}
+        googleLinked={linkedSet.has("google")}
+        discordLinked={linkedSet.has("discord")}
+        googleEnabled={googleOauthEnabled(settings)}
+        discordEnabled={discordOauthEnabled(settings)}
+        telegramUrl={telegramLinkUrl(settings, user.id)}
+        telegramLinked={Boolean(user.telegramId)}
+        initialTab={linkNotice ? "linked" : "security"}
+        linkNotice={linkNotice}
+        sessions={sessions.map((session) => ({
+          // Never the token itself — it IS the login. The tail is enough to
+          // tell rows apart on screen, and to name one to sign out
+          // (DELETE /api/account/sessions matches it on the caller's own).
+          key: session.id.slice(-6),
+          device: describeUserAgent(session.userAgent),
+          ip: session.ip,
+          location: session.location,
+          when: deviceWhen(session.createdAt),
+          current: session.id === token,
+        }))}
+      />
     </AccountPageFrame>
   );
 }

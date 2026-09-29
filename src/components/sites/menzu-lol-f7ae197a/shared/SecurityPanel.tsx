@@ -1,45 +1,70 @@
 "use client";
 
-import { Check, Globe, Laptop, Link2, MonitorSmartphone, ShieldCheck } from "lucide-react";
+import {
+  Check,
+  CircleAlert,
+  Globe,
+  Laptop,
+  Loader2,
+  LogOut,
+  Monitor,
+  Plus,
+  Save,
+  Smartphone,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { DiscordMark, GoogleMark } from "./OAuthButtons";
 import { TelegramGlyph } from "./BrandGlyphs";
 
+/*
+ * menzu's /security, measured off the live page on 29/09/2026 at the owner's
+ * word ("sửa lại bảo mật tài khoản cho giống menzu", to be brought in line
+ * with the rest of the site afterwards): the three tab buttons above the
+ * panel, a title per tab inside it, and its cards, fields and rows class for
+ * class. menzu's indigo is the shop's accent here, as its violet became on
+ * /wallet. What the shop does differently stays: the email change asks for
+ * the current password (no mail is sent, so no OTP), Telegram sits beside
+ * Google and Discord, and an OAuth-only account sets a first password.
+ */
+
 type Tab = "security" | "linked" | "devices";
 
-const TABS: { id: Tab; label: string; icon: typeof ShieldCheck }[] = [
-  { id: "security", label: "Bảo mật", icon: ShieldCheck },
-  { id: "linked", label: "Liên kết", icon: Link2 },
-  { id: "devices", label: "Thiết bị", icon: MonitorSmartphone },
+const TABS: { id: Tab; short: string; long: string; icon: typeof Save }[] = [
+  { id: "security", short: "Bảo mật", long: "Bảo mật tài khoản", icon: Save },
+  { id: "linked", short: "Liên kết", long: "Liên kết nền tảng", icon: Globe },
+  { id: "devices", short: "Thiết bị", long: "Quản lý thiết bị", icon: Monitor },
 ];
 
-const TAB_ACTIVE =
-  "flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest border border-[var(--menzu-accent)]/30 bg-[var(--menzu-accent)]/10 text-white transition-colors";
-const TAB_INACTIVE =
-  "flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest border border-white/5 bg-white/[0.02] text-neutral-400 hover:text-white hover:bg-white/5 transition-colors";
+const TAB_BASE =
+  "flex-1 flex flex-col lg:flex-row justify-center items-center gap-1.5 lg:gap-2 p-2 sm:py-3.5 rounded-xl font-bold transition-colors";
+const TAB_ACTIVE = `${TAB_BASE} bg-[var(--menzu-accent)]/10 text-[var(--menzu-accent)] border border-[var(--menzu-accent)]/20`;
+const TAB_INACTIVE = `${TAB_BASE} bg-white/[0.02] text-neutral-400 hover:text-white hover:bg-white/5 border border-white/5`;
 
-// Quiet shells on purpose: four stacked form fields in red outlines read as
-// four warnings. The red treatment stays on the single search boxes only.
+const TITLE =
+  "text-xl sm:text-2xl font-black text-white uppercase tracking-wider mb-2 flex items-center gap-3";
+const SUBTITLE = "text-xs sm:text-sm text-neutral-400 leading-relaxed";
+const CARD = "relative bg-white/[0.02] border border-white/5 rounded-2xl p-6 lg:p-8 overflow-hidden group";
+const CARD_TITLE = "text-sm font-bold text-white";
 const FIELD =
-  "w-full rounded-xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white outline-none focus:border-[var(--menzu-accent)]/50 transition-colors placeholder-neutral-500";
-/** The overview page's card header pair. */
-const CARD_TITLE = "text-sm font-black uppercase tracking-wider text-white";
-const CARD_HINT = "text-xs text-neutral-500";
-const SUBMIT =
-  "self-start h-10 px-5 rounded-xl bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] disabled:opacity-70 disabled:cursor-wait transition-colors text-[11px] font-black uppercase tracking-widest text-white";
+  "w-full rounded-xl border border-white/10 bg-black/20 px-4 py-3 text-white text-sm outline-none placeholder:text-neutral-600 focus:border-[var(--menzu-accent)]/50 transition-colors disabled:opacity-50";
 
 function Notice({ tone, children }: { tone: "ok" | "err"; children: string }) {
   return (
     <p
       role="alert"
-      className={
+      className={`flex items-center gap-3 rounded-xl border px-4 py-3.5 text-[13px] font-medium ${
         tone === "ok"
-          ? "rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-2.5 text-[12px] font-semibold text-emerald-400"
-          : "rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-2.5 text-[12px] font-semibold text-red-400"
-      }
+          ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-400"
+          : "border-red-500/20 bg-red-500/10 text-red-400"
+      }`}
     >
+      {tone === "ok" ? (
+        <Check size={16} className="shrink-0" aria-hidden />
+      ) : (
+        <CircleAlert size={16} className="shrink-0" aria-hidden />
+      )}
       {children}
     </p>
   );
@@ -83,6 +108,11 @@ export interface SecurityPanelProps {
   linkNotice?: { tone: "ok" | "err"; text: string } | null;
 }
 
+/** A phone reads as a phone; everything else as menzu's laptop. */
+function isPhone(device: string): boolean {
+  return /android|iphone|ipad|ios|điện thoại/i.test(device);
+}
+
 export function SecurityPanel({
   email,
   hasPassword,
@@ -113,27 +143,9 @@ export function SecurityPanel({
   const [pwBusy, setPwBusy] = useState(false);
   const [pwMsg, setPwMsg] = useState<{ tone: "ok" | "err"; text: string } | null>(null);
 
-  const [devBusy, setDevBusy] = useState(false);
+  /** "all" while "Đăng xuất phiên khác" runs, else the row being signed out. */
+  const [devBusy, setDevBusy] = useState<string | null>(null);
   const [devMsg, setDevMsg] = useState<{ tone: "ok" | "err"; text: string } | null>(null);
-
-  const providers = [
-    {
-      key: "discord",
-      name: "Discord",
-      perk: "Nhận thông báo đơn hàng",
-      linked: discordLinked,
-      enabled: discordEnabled,
-      mark: <DiscordMark className="w-5 h-5 text-[#5865F2]" />,
-    },
-    {
-      key: "google",
-      name: "Google",
-      perk: "Đăng nhập nhanh hơn",
-      linked: googleLinked,
-      enabled: googleEnabled,
-      mark: <GoogleMark className="w-5 h-5" />,
-    },
-  ] as const;
 
   async function submitEmail(event: React.FormEvent) {
     event.preventDefault();
@@ -204,12 +216,22 @@ export function SecurityPanel({
     }
   }
 
-  async function revokeOthers() {
+  /** Every session but this one, or one row's (by its key). */
+  async function signOut(key: string | null) {
     if (devBusy) return;
-    setDevBusy(true);
+    setDevBusy(key ?? "all");
     setDevMsg(null);
     try {
-      const res = await fetch("/api/account/sessions", { method: "POST" });
+      const res = await fetch(
+        "/api/account/sessions",
+        key
+          ? {
+              method: "DELETE",
+              headers: { "content-type": "application/json" },
+              body: JSON.stringify({ key }),
+            }
+          : { method: "POST" },
+      );
       const data = (await res.json().catch(() => ({}))) as {
         dropped?: number;
         error?: string;
@@ -220,8 +242,9 @@ export function SecurityPanel({
       }
       setDevMsg({
         tone: "ok",
-        text:
-          data.dropped && data.dropped > 0
+        text: key
+          ? "Đã đăng xuất thiết bị."
+          : data.dropped && data.dropped > 0
             ? `Đã đăng xuất ${data.dropped} thiết bị khác.`
             : "Không có thiết bị nào khác đang đăng nhập.",
       });
@@ -229,300 +252,418 @@ export function SecurityPanel({
     } catch {
       setDevMsg({ tone: "err", text: "Không kết nối được máy chủ" });
     } finally {
-      setDevBusy(false);
+      setDevBusy(null);
     }
   }
 
+  /** Google and Discord as menzu lists them, then the shop's Telegram bot. */
+  const platforms = [
+    {
+      key: "google",
+      name: "Google",
+      linked: googleLinked,
+      href: googleEnabled ? "/api/auth/google?next=%2Fsecurity" : null,
+      external: false,
+      tile: "group-hover:bg-white/10",
+      mark: (linked: boolean) => (
+        <GoogleMark
+          className={`w-6 h-6 ${linked ? "" : "grayscale opacity-50 group-hover:grayscale-0 group-hover:opacity-100"}`}
+        />
+      ),
+    },
+    {
+      key: "discord",
+      name: "Discord",
+      linked: discordLinked,
+      href: discordEnabled ? "/api/auth/discord?next=%2Fsecurity" : null,
+      external: false,
+      tile: "group-hover:bg-[#5865F2]/10 group-hover:border-[#5865F2]/20",
+      mark: (linked: boolean) => (
+        <DiscordMark
+          className={`w-6 h-6 ${linked ? "text-[#5865F2]" : "text-neutral-500 group-hover:text-[#5865F2]"}`}
+        />
+      ),
+    },
+    {
+      key: "telegram",
+      name: "Telegram",
+      linked: telegramLinked,
+      // Leaves the site for the bot, so it opens in a new tab.
+      href: telegramUrl,
+      external: true,
+      tile: "group-hover:bg-[#29a9eb]/10 group-hover:border-[#29a9eb]/20",
+      mark: (linked: boolean) => (
+        <TelegramGlyph
+          className={`w-6 h-6 ${linked ? "text-[#29a9eb]" : "text-neutral-500 group-hover:text-[#29a9eb]"}`}
+        />
+      ),
+    },
+  ];
+
+  const header = (title: string, Icon: typeof Save, subtitle: string) => (
+    <div className="mb-2 relative z-10">
+      <h1 className={TITLE}>
+        <Icon className="text-[var(--menzu-accent)]" aria-hidden />
+        {title}
+      </h1>
+      <p className={SUBTITLE}>{subtitle}</p>
+    </div>
+  );
+
   return (
-    <div className="flex flex-col gap-5">
-      <div className="flex flex-wrap items-center gap-2.5">
-        {TABS.map(({ id, label, icon: Icon }) => (
+    <div className="w-full flex flex-col pb-6 min-h-[70vh]">
+      <div role="tablist" aria-label="Bảo mật" className="flex w-full gap-2 pb-4 mb-6 border-b border-white/5">
+        {TABS.map(({ id, short, long, icon: Icon }) => (
           <button
             key={id}
             type="button"
+            role="tab"
+            aria-selected={tab === id}
             onClick={() => setTab(id)}
             className={tab === id ? TAB_ACTIVE : TAB_INACTIVE}
           >
-            <Icon size={14} className={tab === id ? "text-[var(--menzu-accent)]" : undefined} />
-            {label}
+            <Icon className="w-5 h-5 lg:w-[18px] lg:h-[18px]" aria-hidden />
+            <span className="text-[11px] sm:text-xs lg:text-sm whitespace-nowrap">
+              <span className="lg:hidden">{short}</span>
+              <span className="hidden lg:inline">{long}</span>
+            </span>
           </button>
         ))}
       </div>
 
-      {tab === "security" ? (
-        <div className="flex flex-col gap-4">
-          <form
-            onSubmit={submitEmail}
-            className="rounded-2xl border border-white/5 bg-white/[0.02] p-5 sm:p-6 flex flex-col gap-3"
-          >
-            {/* A heading, not a label: it titles the whole form. Used as a
-                label it would have announced the input as "Địa chỉ Email"
-                while saying nothing about what to type. */}
-            {/* The live site verifies an email change with an OTP it mails
-                out. No mail delivery is configured here, so the new address
-                is taken on trust — but the current password is asked for
-                first, because this address is where "Quên mật khẩu" sends its
-                link and a stolen session must not be able to redirect it.
-                Wire up a mailer before trusting this field to prove ownership
-                of an address. */}
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <h3 className={CARD_TITLE}>Địa chỉ Email</h3>
-              <span className={CARD_HINT}>Nơi nhận link đặt lại mật khẩu</span>
-            </div>
-            <label htmlFor="sec-email" className="sr-only">
-              Email mới
-            </label>
-            <input
-              id="sec-email"
-              type="email"
-              autoComplete="email"
-              value={emailValue}
-              onChange={(e) => setEmailValue(e.target.value)}
-              placeholder="Nhập email mới của bạn"
-              className={FIELD}
-            />
-            <label htmlFor="sec-email-pw" className="sr-only">
-              Mật khẩu hiện tại
-            </label>
-            <input
-              id="sec-email-pw"
-              type="password"
-              autoComplete="current-password"
-              value={emailPassword}
-              onChange={(e) => setEmailPassword(e.target.value)}
-              placeholder="Mật khẩu hiện tại"
-              className={FIELD}
-            />
-            {emailMsg ? <Notice tone={emailMsg.tone}>{emailMsg.text}</Notice> : null}
-            <button type="submit" disabled={emailBusy} className={SUBMIT}>
-              {emailBusy ? "Đang lưu…" : "Cập nhật"}
-            </button>
-          </form>
-
-          <form
-            onSubmit={submitPassword}
-            className="rounded-2xl border border-white/5 bg-white/[0.02] p-5 sm:p-6 flex flex-col gap-3"
-          >
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <h3 className={CARD_TITLE}>
-                {hasPassword ? "Đổi Mật Khẩu" : "Đặt Mật Khẩu"}
-              </h3>
-              <span className={CARD_HINT}>Đổi xong mọi thiết bị phải đăng nhập lại</span>
-            </div>
-
-            {/* Every field carries its own label. The design shows only
-                placeholders, so they are visually hidden — a placeholder is
-                not a label: it disappears the moment you start typing, and a
-                screen reader may never announce it at all. */}
-            {hasPassword ? (
-              <>
-                <label htmlFor="sec-current" className="sr-only">
-                  Mật khẩu hiện tại
-                </label>
-                <input
-                  id="sec-current"
-                  type="password"
-                  autoComplete="current-password"
-                  value={current}
-                  onChange={(e) => setCurrent(e.target.value)}
-                  placeholder="Nhập mật khẩu hiện tại"
-                  className={FIELD}
-                />
-              </>
-            ) : (
-              // Signed in through Google or Discord and never set one. Asking
-              // for a current password here was a door with no key: the field
-              // could never be filled, and "Quên mật khẩu" cannot help either
-              // when the provider gave no verified address.
-              <p className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3 text-[12px] leading-relaxed text-neutral-400">
-                Tài khoản này đăng nhập bằng Google/Discord nên chưa có mật khẩu.
-                Đặt một mật khẩu để đăng nhập được cả hai cách.
-              </p>
+      <div className="w-full bg-transparent sm:bg-[#111111] border-none sm:border sm:border-white/5 rounded-none sm:rounded-[24px] p-0 sm:p-8 lg:p-10 relative min-h-0 sm:min-h-[500px]">
+        {tab === "security" ? (
+          <div className="flex flex-col gap-8">
+            {header(
+              "Bảo mật tài khoản",
+              Save,
+              "Cập nhật thông tin đăng nhập và quản lý mật khẩu của bạn.",
             )}
 
-            <label htmlFor="sec-next" className="sr-only">
-              Mật khẩu mới
-            </label>
-            <input
-              id="sec-next"
-              type="password"
-              autoComplete="new-password"
-              value={next}
-              onChange={(e) => setNext(e.target.value)}
-              placeholder="Nhập mật khẩu mới"
-              className={FIELD}
-            />
-
-            <label htmlFor="sec-confirm" className="sr-only">
-              Xác nhận mật khẩu mới
-            </label>
-            <input
-              id="sec-confirm"
-              type="password"
-              autoComplete="new-password"
-              value={confirm}
-              onChange={(e) => setConfirm(e.target.value)}
-              placeholder="Xác nhận lại mật khẩu mới"
-              className={FIELD}
-            />
-            {pwMsg ? <Notice tone={pwMsg.tone}>{pwMsg.text}</Notice> : null}
-            <button type="submit" disabled={pwBusy} className={SUBMIT}>
-              {pwBusy ? "Đang xử lý…" : "Đổi Mật Khẩu"}
-            </button>
-          </form>
-        </div>
-      ) : tab === "linked" ? (
-        <section className="flex flex-col gap-4 rounded-2xl border border-white/5 bg-white/[0.02] p-5 sm:p-6">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <h3 className={CARD_TITLE}>Liên kết nền tảng</h3>
-            <span className={CARD_HINT}>Kết nối để sử dụng thêm tiện ích</span>
-          </div>
-
-          {linkNotice ? <Notice tone={linkNotice.tone}>{linkNotice.text}</Notice> : null}
-
-          <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
-            <div className="flex items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
-                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-black/50">
-                  <TelegramGlyph className="h-5 w-5 text-[#29a9eb]" />
-                </span>
-                <span className="flex min-w-0 flex-col gap-1">
-                  <span className="text-sm font-bold leading-none text-white">Telegram</span>
-                  <span className="truncate text-[11px] leading-none text-neutral-500">
-                    {telegramLinked ? "Đã liên kết" : "Chưa liên kết"} · Mua và nhận key
-                    trong Telegram
-                  </span>
-                </span>
-                {telegramLinked ? (
-                  <span className="ml-auto inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3.5 text-[10px] font-black uppercase tracking-widest text-emerald-300">
-                    <Check size={12} /> Đã liên kết
-                  </span>
-                ) : telegramUrl ? (
-                  // Leaves the site for the bot, so a plain anchor with the
-                  // usual precautions rather than a router link.
-                  <a
-                    href={telegramUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="ml-auto inline-flex h-9 shrink-0 items-center rounded-lg bg-[var(--menzu-accent)] px-4 text-[10px] font-black uppercase tracking-widest text-white transition-colors hover:bg-[var(--menzu-accent-dark)]"
-                  >
-                    Liên kết
-                  </a>
-                ) : (
-                  // Same rule as the OAuth cards: no bot in Cấu hình, no door,
-                  // and it says so rather than wearing the live accent.
-                  <span
-                    title="Chưa bật — điền bot bán hàng Telegram ở Cấu hình để mở"
-                    className="ml-auto inline-flex h-9 shrink-0 items-center rounded-lg border border-white/10 bg-white/[0.04] px-4 text-[10px] font-black uppercase tracking-widest text-neutral-400"
-                  >
-                    Chưa mở
-                  </span>
-                )}
-              </div>
-            {providers.map((provider) => (
-              <div
-                key={provider.key}
-                className="flex items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] p-4"
-              >
-                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-black/50">
-                  {provider.mark}
-                </span>
-                <span className="flex min-w-0 flex-col gap-1">
-                  <span className="text-sm font-bold leading-none text-white">
-                    {provider.name}
-                  </span>
-                  <span className="truncate text-[11px] leading-none text-neutral-500">
-                    {provider.linked ? "Đã liên kết" : "Chưa liên kết"} · {provider.perk}
-                  </span>
-                </span>
-                {provider.linked ? (
-                  <span className="ml-auto inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3.5 text-[10px] font-black uppercase tracking-widest text-emerald-300">
-                    <Check size={12} /> Đã liên kết
-                  </span>
-                ) : provider.enabled ? (
-                  <a
-                    href={`/api/auth/${provider.key}?next=%2Fsecurity`}
-                    className="ml-auto inline-flex h-9 shrink-0 items-center rounded-lg bg-[var(--menzu-accent)] px-4 text-[10px] font-black uppercase tracking-widest text-white transition-colors hover:bg-[var(--menzu-accent-dark)]"
-                  >
-                    Liên kết
-                  </a>
-                ) : (
-                  // Same rule as the login buttons: a real door only once the
-                  // provider's keys sit in Cấu hình.
-                  <button
-                    type="button"
-                    className="ml-auto inline-flex h-9 shrink-0 items-center rounded-lg bg-[var(--menzu-accent)] px-4 text-[10px] font-black uppercase tracking-widest text-white"
-                  >
-                    Liên kết
-                  </button>
-                )}
-              </div>
-            ))}
-          </div>
-        </section>
-      ) : (
-        <section className="flex flex-col gap-4 rounded-2xl border border-white/5 bg-white/[0.02] p-5 sm:p-6">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <h3 className={CARD_TITLE}>Quản lý thiết bị</h3>
-            <span className={CARD_HINT}>Các phiên đăng nhập đang hoạt động</span>
-          </div>
-
-          {devMsg ? <Notice tone={devMsg.tone}>{devMsg.text}</Notice> : null}
-
-          <div className="flex flex-col gap-2">
-            {sessions.map((session) => (
-              <div
-                key={session.key}
-                className="flex items-center gap-3.5 rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3"
-              >
-                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-[var(--menzu-accent)]/25 bg-[var(--menzu-accent)]/15 text-[var(--menzu-accent)]">
-                  <Laptop size={17} />
-                </span>
-                <div className="flex min-w-0 flex-1 flex-col gap-1.5">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-sm font-bold leading-none text-white">
-                      {session.device}
+            {/* menzu verifies an email change with an OTP it mails out. No
+                mail delivery is configured here, so the new address is taken
+                on trust — but the current password is asked for first,
+                because this address is where "Quên mật khẩu" sends its link
+                and a stolen session must not be able to redirect it. Wire up
+                a mailer before trusting this field to prove ownership of an
+                address. */}
+            <form onSubmit={submitEmail} className={CARD}>
+              <div className="flex flex-col gap-6">
+                <div className="flex items-center justify-between">
+                  {/* A heading, not a label: it titles the whole form. */}
+                  <h3 className={CARD_TITLE}>Địa chỉ Email</h3>
+                  {!email ? (
+                    <span className="flex items-center gap-1 px-2.5 py-1 rounded-md bg-yellow-500/10 text-[11px] font-bold text-yellow-400 border border-yellow-500/20">
+                      <CircleAlert size={12} aria-hidden />
+                      Chưa có email
                     </span>
-                    {session.current ? (
-                      <span className="rounded-md border border-[var(--menzu-accent)]/50 bg-[var(--menzu-accent)]/10 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-[var(--menzu-accent)]">
-                        Thiết bị hiện tại
-                      </span>
-                    ) : null}
-                  </div>
-                  <span className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-[11px] text-neutral-500">
-                    <Globe size={11} className="shrink-0" />
-                    {session.ip ? (
-                      <>
-                        <span className="font-semibold text-neutral-300">
-                          {session.ip}
-                        </span>
-                        <span aria-hidden>·</span>
-                      </>
-                    ) : null}
-                    {session.location ? (
-                      <>
-                        <span>{session.location}</span>
-                        <span aria-hidden>·</span>
-                      </>
-                    ) : null}
-                    <span>{session.when}</span>
-                  </span>
+                  ) : null}
                 </div>
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <label htmlFor="sec-email" className="sr-only">
+                    Email mới
+                  </label>
+                  <input
+                    id="sec-email"
+                    type="email"
+                    autoComplete="email"
+                    value={emailValue}
+                    onChange={(e) => setEmailValue(e.target.value)}
+                    placeholder="Nhập email mới của bạn"
+                    className={`${FIELD} sm:flex-1`}
+                  />
+                  <label htmlFor="sec-email-pw" className="sr-only">
+                    Mật khẩu hiện tại
+                  </label>
+                  <input
+                    id="sec-email-pw"
+                    type="password"
+                    autoComplete="current-password"
+                    value={emailPassword}
+                    onChange={(e) => setEmailPassword(e.target.value)}
+                    placeholder="Mật khẩu hiện tại"
+                    className={`${FIELD} sm:w-56`}
+                  />
+                  <button
+                    type="submit"
+                    disabled={emailBusy}
+                    className="flex items-center justify-center gap-2 rounded-xl bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] disabled:bg-white/5 text-white font-bold px-6 py-3 text-xs whitespace-nowrap transition-colors disabled:text-neutral-500"
+                  >
+                    {emailBusy ? (
+                      <Loader2 size={16} className="animate-spin motion-reduce:animate-none" aria-hidden />
+                    ) : (
+                      <Check size={16} aria-hidden />
+                    )}
+                    {emailBusy ? "Đang lưu…" : "Cập nhật"}
+                  </button>
+                </div>
+                {emailMsg ? <Notice tone={emailMsg.tone}>{emailMsg.text}</Notice> : null}
               </div>
-            ))}
-          </div>
+            </form>
 
-          {/* Destructive, so it wears the warning colour — and it only has
-              work to do once a second session exists. */}
-          <button
-            type="button"
-            onClick={revokeOthers}
-            disabled={devBusy || sessions.length <= 1}
-            className="self-start h-10 rounded-xl border border-red-500/40 bg-red-500/10 px-5 text-[11px] font-black uppercase tracking-widest text-red-400 transition-colors hover:bg-red-500/20 hover:text-red-300 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            {devBusy ? "Đang đăng xuất…" : "Đăng xuất các thiết bị khác"}
-          </button>
-        </section>
-      )}
+            <form onSubmit={submitPassword} className={CARD}>
+              <div className="flex flex-col gap-6">
+                <h3 className={CARD_TITLE}>{hasPassword ? "Đổi Mật Khẩu" : "Đặt Mật Khẩu"}</h3>
+                {/* Every field carries its own label, visually hidden: the
+                    design shows only placeholders, and a placeholder is not a
+                    label — it disappears the moment you start typing. */}
+                <div className="flex flex-col gap-4">
+                  {hasPassword ? (
+                    <>
+                      <label htmlFor="sec-current" className="sr-only">
+                        Mật khẩu hiện tại
+                      </label>
+                      <input
+                        id="sec-current"
+                        type="password"
+                        autoComplete="current-password"
+                        value={current}
+                        onChange={(e) => setCurrent(e.target.value)}
+                        placeholder="Nhập mật khẩu hiện tại"
+                        className={FIELD}
+                      />
+                    </>
+                  ) : (
+                    // Signed in through Google or Discord and never set one.
+                    // Asking for a current password here was a door with no
+                    // key: the field could never be filled.
+                    <p className="rounded-xl border border-white/10 bg-black/20 px-4 py-3 text-[13px] leading-relaxed text-neutral-400">
+                      Tài khoản này đăng nhập bằng Google/Discord nên chưa có mật khẩu. Đặt một mật
+                      khẩu để đăng nhập được cả hai cách.
+                    </p>
+                  )}
+                  <label htmlFor="sec-next" className="sr-only">
+                    Mật khẩu mới
+                  </label>
+                  <input
+                    id="sec-next"
+                    type="password"
+                    autoComplete="new-password"
+                    value={next}
+                    onChange={(e) => setNext(e.target.value)}
+                    placeholder="Nhập mật khẩu mới"
+                    className={FIELD}
+                  />
+                  <label htmlFor="sec-confirm" className="sr-only">
+                    Xác nhận mật khẩu mới
+                  </label>
+                  <input
+                    id="sec-confirm"
+                    type="password"
+                    autoComplete="new-password"
+                    value={confirm}
+                    onChange={(e) => setConfirm(e.target.value)}
+                    placeholder="Xác nhận lại mật khẩu mới"
+                    className={FIELD}
+                  />
+                </div>
+                {pwMsg ? <Notice tone={pwMsg.tone}>{pwMsg.text}</Notice> : null}
+                <button
+                  type="submit"
+                  disabled={pwBusy}
+                  className="w-full bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] disabled:bg-[var(--menzu-accent)]/50 text-white font-bold rounded-xl py-3.5 text-sm transition-colors flex items-center justify-center gap-2"
+                >
+                  {pwBusy ? (
+                    <Loader2 size={16} className="animate-spin motion-reduce:animate-none" aria-hidden />
+                  ) : null}
+                  {pwBusy ? "Đang xử lý…" : hasPassword ? "Đổi Mật Khẩu" : "Đặt Mật Khẩu"}
+                </button>
+              </div>
+            </form>
+          </div>
+        ) : tab === "linked" ? (
+          <div className="flex flex-col gap-8">
+            {header(
+              "Liên kết nền tảng",
+              Globe,
+              "Quản lý các tài khoản mạng xã hội được liên kết với hồ sơ của bạn để đăng nhập nhanh chóng.",
+            )}
+
+            {linkNotice ? <Notice tone={linkNotice.tone}>{linkNotice.text}</Notice> : null}
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {platforms.map((platform) => {
+                // A door only when it leads somewhere: not linked yet, and
+                // the provider's keys (or the shop bot) are set in Cấu hình.
+                const door = !platform.linked && Boolean(platform.href);
+                const status = platform.linked
+                  ? "Đã liên kết"
+                  : platform.href
+                    ? "Chưa liên kết"
+                    : "Chưa mở";
+                const body = (
+                  <div className="flex items-center gap-4">
+                    <div
+                      className={`w-12 h-12 flex items-center justify-center bg-white/5 rounded-xl shrink-0 border border-white/5 ${door ? platform.tile : ""}`}
+                    >
+                      {platform.mark(platform.linked)}
+                    </div>
+                    <div className="flex flex-col">
+                      <span
+                        className={`font-bold text-base ${platform.linked ? "text-white" : "text-neutral-300 group-hover:text-white"}`}
+                      >
+                        {platform.name}
+                      </span>
+                      <span
+                        className={`text-xs font-medium ${platform.linked ? "text-emerald-400" : "text-neutral-500"}`}
+                      >
+                        {status}
+                      </span>
+                    </div>
+                    <div
+                      className={`ml-auto w-8 h-8 rounded-full flex items-center justify-center ${
+                        platform.linked
+                          ? "bg-emerald-500/15 text-emerald-400"
+                          : door
+                            ? "bg-white/5 text-neutral-400 group-hover:bg-[var(--menzu-accent)] group-hover:text-white"
+                            : "bg-white/5 text-neutral-600"
+                      }`}
+                    >
+                      {platform.linked ? <Check size={16} aria-hidden /> : <Plus size={16} aria-hidden />}
+                    </div>
+                  </div>
+                );
+                const shell = "flex flex-col gap-4 p-5 rounded-2xl bg-white/[0.02] border border-white/5";
+                return door ? (
+                  <a
+                    key={platform.key}
+                    href={platform.href!}
+                    {...(platform.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                    className={`${shell} hover:border-white/10 group`}
+                  >
+                    {body}
+                  </a>
+                ) : (
+                  <div
+                    key={platform.key}
+                    className={shell}
+                    title={
+                      platform.linked
+                        ? undefined
+                        : "Chưa bật — shop chưa cấu hình kết nối này"
+                    }
+                  >
+                    {body}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        ) : (
+          <div className="flex flex-col gap-8">
+            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between mb-2 relative z-10">
+              <div>
+                <h1 className={TITLE}>
+                  <Monitor className="text-[var(--menzu-accent)]" aria-hidden />
+                  Thiết bị hoạt động
+                </h1>
+                <p className={SUBTITLE}>
+                  Kiểm tra các phiên đăng nhập, địa chỉ IP và đăng xuất khỏi các thiết bị đáng ngờ.
+                </p>
+              </div>
+              {/* Only has work to do once a second session exists. */}
+              <button
+                type="button"
+                onClick={() => signOut(null)}
+                disabled={devBusy !== null || sessions.length <= 1}
+                className="bg-white/[0.02] hover:bg-red-500/10 text-neutral-300 hover:text-red-400 border border-white/5 hover:border-red-500/30 px-5 py-3 rounded-xl text-sm font-bold flex items-center gap-2 shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {devBusy === "all" ? (
+                  <Loader2 size={16} className="animate-spin motion-reduce:animate-none" aria-hidden />
+                ) : (
+                  <LogOut size={16} aria-hidden />
+                )}
+                Đăng xuất phiên khác
+              </button>
+            </div>
+
+            {devMsg ? <Notice tone={devMsg.tone}>{devMsg.text}</Notice> : null}
+
+            <div className="flex flex-col gap-3">
+              {sessions.map((session) => {
+                const DeviceIcon = isPhone(session.device) ? Smartphone : Laptop;
+                return (
+                  <div
+                    key={session.key}
+                    className={`flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-2xl border ${
+                      session.current
+                        ? "border-[var(--menzu-accent)]/30 bg-[var(--menzu-accent)]/[0.02]"
+                        : "border-white/5 bg-white/[0.02] hover:bg-white/[0.04]"
+                    }`}
+                  >
+                    <div className="flex items-center gap-4 overflow-hidden">
+                      <div
+                        className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${
+                          session.current
+                            ? "bg-[var(--menzu-accent)]/10 text-[var(--menzu-accent)]"
+                            : "bg-white/5 text-neutral-400"
+                        }`}
+                      >
+                        <DeviceIcon aria-hidden />
+                      </div>
+                      <div className="flex flex-col gap-1.5 min-w-0">
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-3">
+                          <span className="font-bold text-white text-sm sm:text-base break-words">
+                            {session.device}
+                          </span>
+                          {session.current ? (
+                            <span className="w-fit px-2 py-0.5 rounded-md bg-[var(--menzu-accent)]/20 text-[var(--menzu-accent)] text-[9px] sm:text-[10px] font-bold uppercase tracking-wider border border-[var(--menzu-accent)]/30">
+                              Thiết bị hiện tại
+                            </span>
+                          ) : null}
+                        </div>
+                        {/* IP, place, time — the dots only between the
+                            parts a session actually has. */}
+                        <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-1 sm:gap-2 text-[11px] sm:text-xs text-neutral-500 mt-0.5">
+                          {[
+                            session.ip ? (
+                              <span key="ip" className="flex items-center gap-1.5 font-medium text-neutral-400">
+                                <Globe size={12} className="shrink-0" aria-hidden />
+                                {session.ip}
+                              </span>
+                            ) : null,
+                            session.location ? <span key="place">{session.location}</span> : null,
+                            <span key="when">{session.when}</span>,
+                          ]
+                            .filter(Boolean)
+                            .flatMap((part, index) =>
+                              index === 0
+                                ? [part]
+                                : [
+                                    <span
+                                      key={`dot-${index}`}
+                                      aria-hidden
+                                      className="hidden sm:block w-1 h-1 rounded-full bg-neutral-700 shrink-0"
+                                    />,
+                                    part,
+                                  ],
+                            )}
+                        </div>
+                      </div>
+                    </div>
+                    {session.current ? null : (
+                      <button
+                        type="button"
+                        title="Đăng xuất thiết bị"
+                        onClick={() => signOut(session.key)}
+                        disabled={devBusy !== null}
+                        className="px-4 py-3 bg-white/5 hover:bg-red-500/10 text-neutral-400 hover:text-red-400 rounded-xl shrink-0 disabled:opacity-50 flex items-center justify-center gap-2 text-sm font-bold"
+                      >
+                        {devBusy === session.key ? (
+                          <Loader2 size={16} className="animate-spin motion-reduce:animate-none" aria-hidden />
+                        ) : (
+                          <LogOut size={16} aria-hidden />
+                        )}
+                        Đăng xuất
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
