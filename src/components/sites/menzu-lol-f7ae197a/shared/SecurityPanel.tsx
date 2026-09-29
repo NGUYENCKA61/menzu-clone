@@ -398,7 +398,7 @@ export function SecurityPanel({
         ))}
       </div>
 
-      <div className="w-full bg-transparent sm:bg-[#111111] border-none sm:border sm:border-white/5 rounded-none sm:rounded-[24px] p-0 sm:p-8 lg:p-10 relative min-h-0 sm:min-h-[500px]">
+      <div className="w-full bg-transparent sm:bg-[#171920] border-none sm:border sm:border-white/5 rounded-none sm:rounded-[24px] p-0 sm:p-8 lg:p-10 relative min-h-0 sm:min-h-[500px]">
         {tab === "security" ? (
           <div className="flex flex-col gap-8">
             {header(

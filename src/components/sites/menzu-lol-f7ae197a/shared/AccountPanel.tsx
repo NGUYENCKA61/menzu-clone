@@ -24,7 +24,7 @@ interface AccountPanelProps {
  */
 export function AccountPanel({ icon: Icon, title, subtitle, action, children }: AccountPanelProps) {
   return (
-    <div className="w-full bg-transparent sm:bg-[#111111] border-0 sm:border sm:border-white/5 rounded-none sm:rounded-[24px] p-0 sm:p-8 lg:p-10 relative min-h-0 sm:min-h-[750px]">
+    <div className="w-full bg-transparent sm:bg-[#171920] border-0 sm:border sm:border-white/5 rounded-none sm:rounded-[24px] p-0 sm:p-8 lg:p-10 relative min-h-0 sm:min-h-[750px]">
       <div className="mb-6 sm:mb-8 relative z-10 flex flex-wrap items-start justify-between gap-4">
         <div className="min-w-0">
           <h1 className="text-xl sm:text-2xl font-black text-white uppercase tracking-wider mb-2 flex items-center gap-3">
