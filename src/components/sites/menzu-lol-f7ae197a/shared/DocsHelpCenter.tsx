@@ -4,24 +4,17 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState, useSyncExternalStore } from "react";
 import {
-  Activity,
   ArrowRight,
   BookOpen,
   Eye,
-  FileText,
   HelpCircle,
-  MessageCircle,
-  MessageSquare,
   Search,
-  Send,
   ShieldCheck,
   type LucideIcon,
 } from "lucide-react";
 
 import { FaqAccordion } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/FaqAccordion";
 import type { FaqEntry } from "@/lib/settings";
-import { STATUS_TAB_HREF } from "@/lib/softwareStatus";
-import { SUPPORT_WINDOW } from "@/lib/supportHours";
 
 export type DocCategoryKey = "FAQ" | "GUIDE" | "WARRANTY";
 
@@ -88,11 +81,12 @@ const readNoHash = () => "";
 export function DocsHelpCenter({
   articles,
   faq,
-  contact,
 }: {
   articles: DocCard[];
   faq: FaqEntry[];
-  contact: HelpContact;
+  /** No longer drawn: the right rail (newest, quick doors, the contact
+   *  card) was dropped on the owner's word, 29/09/2026. */
+  contact?: HelpContact;
 }) {
   // The footer still links /docs#FAQ and /docs#WARRANTY, as it did when the
   // shelves were sections down one long page. The hash picks the shelf until
@@ -151,24 +145,6 @@ export function DocsHelpCenter({
     (guides.length > 0 ? guides : articles).slice().sort((a, b) => b.views - a.views)[0] ??
     null;
 
-  const latest = articles
-    .slice()
-    .sort((a, b) => b.publishedAt.localeCompare(a.publishedAt))
-    .slice(0, 3);
-
-  const zaloDigits = contact.zalo.replace(/\D/g, "");
-  const doors = [
-    contact.facebook
-      ? { key: "facebook", href: contact.facebook, label: "Nhắn Facebook", Icon: MessageCircle }
-      : null,
-    zaloDigits
-      ? { key: "zalo", href: `https://zalo.me/${zaloDigits}`, label: "Chat Zalo", Icon: MessageSquare }
-      : null,
-    contact.telegram
-      ? { key: "telegram", href: contact.telegram, label: "Kênh Telegram", Icon: Send }
-      : null,
-  ].filter((door): door is NonNullable<typeof door> => door !== null);
-
   const active = TABS.find((t) => t.key === tab) ?? TABS[0];
 
   function openShelf(key: DocCategoryKey) {
@@ -204,7 +180,7 @@ export function DocsHelpCenter({
 
       <div className="h-px bg-gradient-to-r from-[var(--menzu-accent)]/30 via-white/10 to-transparent" />
 
-      <div className="grid gap-6 lg:grid-cols-[220px_minmax(0,1fr)_300px] lg:items-start">
+      <div className="grid gap-6 lg:grid-cols-[220px_minmax(0,1fr)] lg:items-start">
         {/* Left rail: the shelves. A row of chips below lg, a column above. */}
         {/* min-w-0: a grid column is at least as wide as its content's
             minimum, and the rail's scroll row below counts its every button
@@ -318,118 +294,6 @@ export function DocsHelpCenter({
             ) : null}
           </section>
         </div>
-
-        {/* Right rail: newest, quick doors, a human. */}
-        <aside className="min-w-0 space-y-5">
-          <Panel
-            title="Bài viết mới"
-            action={
-              latest.length > 0
-                ? { label: "Xem tất cả", onClick: () => openShelf(latest[0]!.category) }
-                : undefined
-            }
-          >
-            {latest.length > 0 ? (
-              <div className="divide-y divide-white/5">
-                {latest.map((article) => (
-                  <Link
-                    key={article.slug}
-                    href={`/docs/${article.slug}`}
-                    className="group -mx-1 flex items-center gap-3 rounded-lg px-1 py-2.5 transition-colors hover:bg-white/[0.03] first:pt-0 last:pb-0"
-                  >
-                    <div className="relative h-12 w-16 shrink-0 overflow-hidden rounded-lg bg-black/40">
-                      <Image
-                        src={article.thumbnailUrl}
-                        alt=""
-                        fill
-                        sizes="128px"
-                        className="object-cover transition-transform duration-500 group-hover:scale-105"
-                      />
-                    </div>
-                    <div className="min-w-0">
-                      <p className="line-clamp-2 text-[12px] font-bold leading-snug text-white transition-colors group-hover:text-[var(--menzu-accent)]">
-                        {article.title}
-                      </p>
-                      <p className="mt-0.5 text-[10px] font-bold text-neutral-500">
-                        {formatDate(article.publishedAt)} · {formatViews(article.views)} lượt xem
-                      </p>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            ) : (
-              <p className="text-sm text-neutral-500">Chưa có bài viết.</p>
-            )}
-          </Panel>
-
-          <Panel title="Truy cập nhanh">
-            <div className="divide-y divide-white/5">
-              <QuickDoor
-                Icon={FileText}
-                title="Hướng dẫn mua hàng"
-                note="Quy trình mua sản phẩm"
-                href={featured ? `/docs/${featured.slug}` : undefined}
-                onClick={featured ? undefined : () => openShelf("GUIDE")}
-              />
-              <QuickDoor
-                Icon={ShieldCheck}
-                title="Chính sách bảo hành"
-                note="Điều kiện & thời hạn"
-                onClick={() => openShelf("WARRANTY")}
-              />
-              <QuickDoor
-                Icon={Activity}
-                title="Kiểm tra trạng thái"
-                note="Trạng thái các tool"
-                href={STATUS_TAB_HREF}
-              />
-            </div>
-          </Panel>
-
-          <div className="rounded-2xl border border-[var(--menzu-accent)]/25 bg-gradient-to-b from-[var(--menzu-accent)]/[0.08] to-white/[0.02] p-5">
-            <span className="flex h-9 w-9 items-center justify-center rounded-xl border border-[var(--menzu-accent)]/40 bg-[var(--menzu-accent)]/10 text-[var(--menzu-accent)]">
-              <MessageCircle size={16} aria-hidden />
-            </span>
-            <h3 className="mt-3 text-sm font-black text-white">Không tìm thấy câu trả lời?</h3>
-            <p className="mt-1.5 text-[12px] leading-relaxed text-neutral-400">
-              Liên hệ đội ngũ hỗ trợ nếu bạn cần trợ giúp với đơn hàng hoặc sản phẩm.
-              Hỗ trợ {SUPPORT_WINDOW} mỗi ngày.
-            </p>
-            {doors.length > 0 ? (
-              <a
-                href={doors[0]!.href}
-                target="_blank"
-                rel="noreferrer"
-                className="mt-4 flex h-10 items-center justify-center rounded-lg bg-white/10 text-[10px] font-black uppercase tracking-widest text-white transition-colors hover:bg-[var(--menzu-accent)]"
-              >
-                Liên hệ hỗ trợ
-              </a>
-            ) : (
-              <Link
-                href="/feedback"
-                className="mt-4 flex h-10 items-center justify-center rounded-lg bg-white/10 text-[10px] font-black uppercase tracking-widest text-white transition-colors hover:bg-[var(--menzu-accent)]"
-              >
-                Liên hệ hỗ trợ
-              </Link>
-            )}
-            {doors.length > 1 ? (
-              <div className="mt-3 flex flex-wrap gap-2">
-                {doors.map(({ key, href, label, Icon }) => (
-                  <a
-                    key={key}
-                    href={href}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex items-center gap-1.5 rounded-md border border-white/10 px-2.5 py-1.5 text-[10px] font-bold text-neutral-300 transition-colors hover:border-[var(--menzu-accent)]/50 hover:text-white"
-                  >
-                    <Icon size={12} aria-hidden />
-                    {label}
-                  </a>
-                ))}
-              </div>
-            ) : null}
-          </div>
-        </aside>
       </div>
     </div>
   );
@@ -444,73 +308,6 @@ function SectionHead({ label, note }: { label: string; note: string }) {
       </h2>
       <span className="text-[10px] font-bold uppercase tracking-widest text-neutral-500">{note}</span>
     </div>
-  );
-}
-
-function Panel({
-  title,
-  action,
-  children,
-}: {
-  title: string;
-  action?: { label: string; onClick: () => void };
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="rounded-2xl border border-white/10 bg-[#121216] p-4">
-      <div className="mb-3 flex items-center justify-between gap-3">
-        <h3 className="text-[11px] font-black uppercase tracking-widest text-white">{title}</h3>
-        {action ? (
-          <button
-            type="button"
-            onClick={action.onClick}
-            className="text-[10px] font-black uppercase tracking-widest text-[var(--menzu-accent)] hover:underline"
-          >
-            {action.label}
-          </button>
-        ) : null}
-      </div>
-      {children}
-    </div>
-  );
-}
-
-/** A row in "Truy cập nhanh": a page when it has an href, a shelf otherwise. */
-function QuickDoor({
-  Icon,
-  title,
-  note,
-  href,
-  onClick,
-}: {
-  Icon: LucideIcon;
-  title: string;
-  note: string;
-  href?: string;
-  onClick?: () => void;
-}) {
-  const body = (
-    <>
-      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/[0.03] text-neutral-400 transition-colors group-hover:border-[var(--menzu-accent)]/40 group-hover:text-[var(--menzu-accent)]">
-        <Icon size={14} aria-hidden />
-      </span>
-      <span className="min-w-0">
-        <span className="block text-[12px] font-bold text-white transition-colors group-hover:text-[var(--menzu-accent)]">
-          {title}
-        </span>
-        <span className="block text-[10px] font-bold text-neutral-500">{note}</span>
-      </span>
-    </>
-  );
-  const className = "group flex w-full items-center gap-3 py-2.5 text-left first:pt-0 last:pb-0";
-  return href ? (
-    <Link href={href} className={className}>
-      {body}
-    </Link>
-  ) : (
-    <button type="button" onClick={onClick} className={className}>
-      {body}
-    </button>
   );
 }
 
