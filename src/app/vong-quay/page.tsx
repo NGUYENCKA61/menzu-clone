@@ -5,12 +5,13 @@ import { ArrowRight, Coins, Gift, History, Ticket } from "lucide-react";
 import Link from "next/link";
 
 import { SimplePage } from "@/components/sites/menzu-lol-f7ae197a/shared/SimplePage";
+import { SpinLockedNotice } from "@/components/sites/menzu-lol-f7ae197a/shared/SpinLockedNotice";
 import { SpinWheel } from "@/components/sites/menzu-lol-f7ae197a/shared/SpinWheel";
 import { formatVnd } from "@/components/sites/menzu-lol-f7ae197a/shared/productData";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/session";
 import { getShopSettings } from "@/lib/settingsStore";
-import { readWedgeColor, SPIN_COST, WEDGE_COLORS, type Prize } from "@/lib/spin";
+import { readWedgeColor, SPIN_COST, SPIN_LOCKED, WEDGE_COLORS, type Prize } from "@/lib/spin";
 import { listSpinPrizes } from "@/lib/spinPrizes";
 
 export const metadata: Metadata = {
@@ -39,6 +40,15 @@ export const dynamic = "force-dynamic";
  * own tuning and the shop asked for it off the page.
  */
 export default async function SpinPage() {
+  // Before the sign-in check: a closed wheel is not worth logging in for.
+  if (SPIN_LOCKED) {
+    return (
+      <SimplePage title="Vòng quay đổi thưởng" crumb="Vòng quay đổi thưởng">
+        <SpinLockedNotice />
+      </SimplePage>
+    );
+  }
+
   const [user, settings] = await Promise.all([getCurrentUser(), getShopSettings()]);
   if (!user) redirect("/login?next=%2Fvong-quay");
 

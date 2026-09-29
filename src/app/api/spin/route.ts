@@ -5,7 +5,7 @@ import { announceToUser } from "@/lib/announcementStore";
 import { readVoucherDays } from "@/lib/spin";
 import { listSpinPrizes } from "@/lib/spinPrizes";
 import { getCurrentUser } from "@/lib/session";
-import { drawPrize, SPIN_COST } from "@/lib/spin";
+import { drawPrize, SPIN_COST, SPIN_LOCKED } from "@/lib/spin";
 import { makeCode } from "@/lib/topupStore";
 
 /**
@@ -39,6 +39,13 @@ const WON_BODY: Record<
 };
 
 export async function POST() {
+  if (SPIN_LOCKED) {
+    return NextResponse.json(
+      { error: "Đổi thưởng đang tạm khóa, bạn quay lại sau nhé" },
+      { status: 403 },
+    );
+  }
+
   const user = await getCurrentUser();
   if (!user) {
     return NextResponse.json({ error: "Bạn cần đăng nhập để quay" }, { status: 401 });

@@ -7,6 +7,15 @@
  * takes the points, so a spin cannot be replayed for a better result.
  */
 
+/**
+ * The owner closed the wheel for now (30/09/2026). While true, /vong-quay
+ * shows a notice and sends the reader home, and POST /api/spin refuses —
+ * both, because the page is only the door and the route is what pays out.
+ * Won parcels (/vong-quay/qua, /vong-quay/lich-su) stay reachable: a prize
+ * already won still needs its address. Set to false to reopen.
+ */
+export const SPIN_LOCKED = true;
+
 /** Points one spin costs. */
 export const SPIN_COST = 100;
 
