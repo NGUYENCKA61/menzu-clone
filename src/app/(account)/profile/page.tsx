@@ -160,7 +160,11 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
           <section className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#111111]">
             <BannerUploader hasOwn={Boolean(user.bannerUrl)} />
 
-            <div className="absolute inset-0">
+            {/* On a phone the card is ~3x taller than the art is wide-shaped
+                for, so filling it blew a quarter of the picture up 3.3x into
+                a green blur. There the art heads the card, behind the avatar
+                and name, and the foot wash fades it into the card's #111. */}
+            <div className="absolute inset-x-0 top-0 h-56 sm:inset-0 sm:h-auto">
               <Image
                 src={bannerArt}
                 alt=""
