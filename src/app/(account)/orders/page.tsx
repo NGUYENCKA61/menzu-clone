@@ -31,16 +31,19 @@ const STATUS_CLASS: Record<string, string> = {
   REFUNDED: "border-rose-500/30 bg-rose-500/10 text-rose-400",
 };
 
-/* The card's pill, in menzu's weight ("HOÀN THÀNH" on a paid order). */
+/* The card's pill, in menzu's weight. */
 const TONE = {
-  green: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
   amber: "bg-amber-500/10 text-amber-400 border-amber-500/20",
   rose: "bg-rose-500/10 text-rose-400 border-rose-500/20",
   grey: "bg-white/5 text-neutral-400 border-white/10",
 } as const;
 
 /**
- * What the pill on a card says, which is not always the order's own status.
+ * What the pill on a card says, which is not always the order's own status
+ * — and nothing at all for the usual outcome. A paid order with nothing
+ * pending wore a green "Hoàn thành" until the owner had it taken off
+ * (30/09/2026: "ai mà chẳng biết nó hoàn thành"); every card said the same
+ * word. Only a state the buyer has to notice gets a pill now.
  *
  * A refused refund leaves the order exactly as it was — paid, key valid — so
  * OrderStatus has nothing to record it with, and nothing should: the sale did
@@ -52,14 +55,14 @@ function orderBadge(o: {
   refundRejected: boolean;
   refundPending: boolean;
   warrantyOpen: boolean;
-}): { label: string; tone: string } {
+}): { label: string; tone: string } | null {
   if (o.status === "PAID") {
     if (o.refundPending) return { label: "Chờ duyệt hoàn tiền", tone: TONE.amber };
     if (o.refundRejected) return { label: "Từ chối hoàn tiền", tone: TONE.rose };
     // A report the shop is still working: the order is paid and stays so, but
     // the buyer is waiting on a fix, and the card should say that.
     if (o.warrantyOpen) return { label: "Đang bảo hành", tone: TONE.amber };
-    return { label: "Hoàn thành", tone: TONE.green };
+    return null;
   }
   if (o.status === "PENDING") return { label: "Chờ xử lý", tone: TONE.amber };
   if (o.status === "REFUNDED") return { label: "Đã hoàn tiền", tone: TONE.rose };

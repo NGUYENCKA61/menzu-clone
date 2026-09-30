@@ -41,8 +41,11 @@ export interface OrderCardView {
   total: number;
   /** PAID · PENDING · CANCELLED · REFUNDED */
   status: string;
-  /** The pill: the order's state, or the answer the buyer is waiting on. */
-  badge: { label: string; tone: string };
+  /**
+   * The pill: the order's state, or the answer the buyer is waiting on.
+   * None on a paid order with nothing pending — that is every order.
+   */
+  badge: { label: string; tone: string } | null;
   /** Where "Đánh giá" leads, while the order is one worth asking about. */
   review: { href: string; reviewed: boolean } | null;
   /** Order code, product code, name and rank: what a buyer has to hand. */
@@ -238,16 +241,20 @@ export function OrdersList({ orders }: { orders: OrderCardView[] }) {
                           {/* Kept on a phone too, unlike menzu's: the status
                               and the way to the review are the two things a
                               buyer comes back to this list for. */}
-                          <div className="flex items-center gap-2">
-                            <span
-                              className={`${order.badge.tone} px-2 py-1 rounded border uppercase tracking-widest font-black text-[9px] sm:text-[10px]`}
-                            >
-                              {order.badge.label}
-                            </span>
-                            {order.review ? (
-                              <OrderReviewTag href={order.review.href} reviewed={order.review.reviewed} />
-                            ) : null}
-                          </div>
+                          {order.badge || order.review ? (
+                            <div className="flex items-center gap-2">
+                              {order.badge ? (
+                                <span
+                                  className={`${order.badge.tone} px-2 py-1 rounded border uppercase tracking-widest font-black text-[9px] sm:text-[10px]`}
+                                >
+                                  {order.badge.label}
+                                </span>
+                              ) : null}
+                              {order.review ? (
+                                <OrderReviewTag href={order.review.href} reviewed={order.review.reviewed} />
+                              ) : null}
+                            </div>
+                          ) : null}
                         </div>
 
                         <div className="w-full sm:w-auto flex flex-row items-center justify-between sm:flex-col sm:justify-center sm:items-end gap-2 sm:gap-4 sm:pl-6 sm:border-l border-white/10 shrink-0">
