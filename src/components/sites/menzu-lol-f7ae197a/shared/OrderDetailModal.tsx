@@ -957,10 +957,11 @@ export function OrderDetailModal({
                   </div>
 
                   {/* NOTE */}
-                  {/* A reminder, drawn like the other notes in this card —
-                      red was saying "error" about a line that is not one. */}
-                  <div className="mt-4 flex items-start gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3.5 text-xs leading-relaxed text-neutral-400">
-                    <Info className="mt-0.5 h-4 w-4 shrink-0 text-neutral-500" />
+                  {/* Red on purpose: the owner wants this reminder as the
+                      sheet's one accent ("đỏ cho có điểm nhấn"), after a grey
+                      version was tried in 4bd4ac0. */}
+                  <div className="mt-4 flex items-start gap-3 rounded-r-xl border-l-[3px] border-[var(--menzu-accent)] bg-[var(--menzu-accent)]/5 px-4 py-3.5 text-xs leading-relaxed text-neutral-400">
+                    <Info className="mt-0.5 h-4 w-4 shrink-0 text-[var(--menzu-accent)]" />
                     <span>
                       Vui lòng lưu lại mã đơn hàng để được hỗ trợ khi cần thiết.
                       Không chia sẻ thông tin tài khoản hoặc dữ liệu bàn giao
