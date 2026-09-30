@@ -1,18 +1,6 @@
 "use client";
 
-import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
-
-/**
- * The arrows as Netflix draws them: a band the height of the tiles at each
- * edge, clear by 72px, with a large white chevron on it. Light — half dark at
- * the very edge — because the row already fades out at that edge, and a
- * heavier band stacked on the fade darkened the last tile well past it. It
- * deepens under the pointer. Only from sm up — a phone swipes, sees the next
- * tile peeking, and would lose picture to them.
- */
-const ARROW =
-  "absolute inset-y-0 z-20 hidden w-[72px] items-center text-white from-[#08080b]/50 to-transparent hover:from-[#08080b]/75 sm:flex";
 
 /** Milliseconds a set of tiles rests before the next step. */
 const STEP_MS = 3000;
@@ -53,6 +41,10 @@ const TOUCH_REST_MS = 6000;
  * dot restarts the clock. Holds still under the pointer, a keyboard focus,
  * or a finger. Readers who asked for less motion get a strip that never
  * steps on its own and jumps rather than glides when driven.
+ *
+ * No arrows. They were bands over the first and last tiles, from sm up;
+ * the shop had them taken off (30/09/2026) — the clock and the dots already
+ * drive the strip, and the three big pictures now show whole.
  */
 export function RowSlider({
   count,
@@ -225,29 +217,6 @@ export function RowSlider({
             {children}
           </div>
         </div>
-
-        {/* One tile per press, wrapping at either end like the clock does; a
-            press restarts the clock, as a dot does. */}
-        {last > 0 ? (
-          <>
-            <button
-              type="button"
-              aria-label="Trước"
-              onClick={() => press(index - 1)}
-              className={`${ARROW} left-0 justify-start rounded-l-[14px] bg-gradient-to-r pl-3.5`}
-            >
-              <ChevronLeft size={30} className="drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]" />
-            </button>
-            <button
-              type="button"
-              aria-label="Sau"
-              onClick={() => press(index + 1)}
-              className={`${ARROW} right-0 justify-end rounded-r-[14px] bg-gradient-to-l pr-3.5`}
-            >
-              <ChevronRight size={30} className="drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]" />
-            </button>
-          </>
-        ) : null}
       </div>
 
       {last > 0 ? (
