@@ -335,10 +335,12 @@ export function OrdersList({ orders }: { orders: OrderCardView[] }) {
                             >
                               {money(order.total)}
                             </p>
-                            {/* menzu's button as an outline, so it stops being
-                                the brightest thing on every card; the card
-                                around it is what opens the receipt. */}
-                            <span className="flex h-8 shrink-0 items-center gap-1 whitespace-nowrap rounded-lg border border-white/15 px-3 text-xs font-semibold text-neutral-200 transition-colors group-hover:border-white/30 group-hover:bg-white/5 group-hover:text-white sm:h-9 sm:px-3.5">
+                            {/* menzu's white button as a tint of it: clearer
+                                than the outline it replaced ("thử cách 2"), far
+                                quieter than solid white, which on every card
+                                out-shouted the names. The card around it is
+                                what opens the receipt. */}
+                            <span className="flex h-8 shrink-0 items-center gap-1 whitespace-nowrap rounded-lg bg-white/10 px-3 text-xs font-bold text-white transition-colors group-hover:bg-white/20 sm:h-9 sm:px-3.5">
                               Chi tiết
                               <ChevronRight className="h-3.5 w-3.5" aria-hidden />
                             </span>
