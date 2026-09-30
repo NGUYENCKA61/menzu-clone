@@ -63,13 +63,15 @@ export interface OrderCardView {
  * old list: "sắp lại thời gian theo kiểu này", then "đồng bộ về kích cỡ"):
  * grouped under one line per day while the list reads in time order.
  *
- * The card is menzu's again at the site's sizes (the owner: "còn cách nào
- * theo style menzu mà vẫn đồng bộ không", then "thử đi"): the 16:9 picture
- * at 144px, the name 16px on two lines, the labelled facts ("Mã đơn:",
- * "Thời gian:", "Gói:") side by side in 12px mono, and the price column
- * behind a hairline with "GIÁ MUA" and a 36px white "Chi tiết". The compact
- * card before it is c6bdb46. The whole card opens the receipt, which stays
- * untouched; menzu's green is still money paid.
+ * The card is menzu's layout at the site's sizes (the owner: "còn cách nào
+ * theo style menzu mà vẫn đồng bộ không", then "thử đi"), toned down after
+ * "nhìn nó có rối hay AI quá không" → "thử b": the 16:9 picture at 144px,
+ * the name 16px on two lines, one quiet line of facts in the page's own
+ * font, and the price column behind a hairline — the price in white and an
+ * outline "Chi tiết". menzu's white button, green price, "GIÁ MUA" label and
+ * mono facts made three loud colours and a row of capitals on every card.
+ * 1bba475 is the louder version, c6bdb46 the compact card. The whole card
+ * opens the receipt, which stays untouched.
  */
 
 const PAGE_SIZE = 10;
@@ -280,26 +282,31 @@ export function OrdersList({ orders }: { orders: OrderCardView[] }) {
                               <h3 className="line-clamp-2 text-sm font-black leading-snug text-white transition-colors group-hover:text-[var(--menzu-accent)] sm:text-base">
                                 {order.title}
                               </h3>
-                              {/* menzu's labelled facts, side by side rather than
-                                  stacked three high. The time alone under its
-                                  day's heading, the whole stamp when a price
-                                  sort drops the headings. */}
-                              <div className="flex flex-wrap gap-x-4 gap-y-0.5 font-mono text-[11px] text-neutral-400 sm:text-xs">
-                                <span>
-                                  <span className="text-neutral-500">Mã đơn:</span> #{order.detail.code}
+                              {/* The facts on one quiet line in the page's own
+                                  font. The time alone under its day's heading,
+                                  the whole stamp when a price sort drops the
+                                  headings. Each fact holds together, so a
+                                  narrow card breaks the line at a " · ", never
+                                  between "Gói" and "30 ngày". */}
+                              <p className="text-[11px] tabular-nums text-neutral-400 sm:text-xs">
+                                <span className="whitespace-nowrap">
+                                  <span className="text-neutral-500">Mã đơn</span> {order.detail.code}
                                 </span>
-                                <span>
-                                  <span className="text-neutral-500">Thời gian:</span>{" "}
+                                {" · "}
+                                <span className="whitespace-nowrap">
                                   {byDay ? order.clock : order.stamp}
                                 </span>
                                 {order.chip ? (
-                                  <span>
-                                    <span className="text-neutral-500">{order.isSoftware ? "Gói:" : "Hạng:"}</span>{" "}
-                                    {order.chip}
-                                    {order.quantity > 1 ? ` ×${order.quantity}` : ""}
-                                  </span>
+                                  <>
+                                    {" · "}
+                                    <span className="whitespace-nowrap">
+                                      <span className="text-neutral-500">{order.isSoftware ? "Gói" : "Hạng"}</span>{" "}
+                                      {order.chip}
+                                      {order.quantity > 1 ? ` ×${order.quantity}` : ""}
+                                    </span>
+                                  </>
                                 ) : null}
-                              </div>
+                              </p>
                               {/* The status, only when there is something to know,
                                   or the way to the review: the two things a buyer
                                   comes back to this list for. */}
@@ -322,22 +329,21 @@ export function OrdersList({ orders }: { orders: OrderCardView[] }) {
 
                           {/* menzu's price column behind a hairline — beside the
                               card from sm up, under it on a phone. */}
-                          <div className="flex shrink-0 items-end justify-between gap-3 border-t border-white/5 pt-3 sm:flex-col sm:items-end sm:justify-center sm:gap-2.5 sm:border-t-0 sm:border-l sm:border-white/10 sm:pt-0 sm:pl-5">
-                            <div className="text-left sm:text-right">
-                              <p className="mb-0.5 text-[10px] font-bold uppercase tracking-widest text-neutral-500">
-                                Giá mua
-                              </p>
-                              <p
-                                className={`text-base font-black tabular-nums ${
-                                  struck ? "text-neutral-500 line-through" : "text-emerald-400"
-                                }`}
-                              >
-                                {money(order.total)}
-                              </p>
-                            </div>
-                            {/* menzu's white button at 36px (theirs is 44); the
-                                card around it is what opens the receipt. */}
-                            <span className="flex h-8 shrink-0 items-center gap-1 whitespace-nowrap rounded-lg bg-white px-3 text-[11px] font-black uppercase tracking-wide text-black transition-colors group-hover:bg-neutral-200 sm:h-9 sm:px-4 sm:text-xs">
+                          <div className="flex shrink-0 items-center justify-between gap-3 border-t border-white/5 pt-3 sm:flex-col sm:items-end sm:justify-center sm:gap-2.5 sm:border-t-0 sm:border-l sm:border-white/10 sm:pt-0 sm:pl-5">
+                            {/* White, not menzu's green: what was paid, said
+                                plainly. No "GIÁ MUA" over it — it is plainly
+                                the price. */}
+                            <p
+                              className={`text-base font-black tabular-nums ${
+                                struck ? "text-neutral-500 line-through" : "text-white"
+                              }`}
+                            >
+                              {money(order.total)}
+                            </p>
+                            {/* menzu's button as an outline, so it stops being
+                                the brightest thing on every card; the card
+                                around it is what opens the receipt. */}
+                            <span className="flex h-8 shrink-0 items-center gap-1 whitespace-nowrap rounded-lg border border-white/15 px-3 text-xs font-semibold text-neutral-200 transition-colors group-hover:border-white/30 group-hover:bg-white/5 group-hover:text-white sm:h-9 sm:px-3.5">
                               Chi tiết
                               <ChevronRight className="h-3.5 w-3.5" aria-hidden />
                             </span>
