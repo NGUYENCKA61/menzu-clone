@@ -65,6 +65,8 @@ export interface OrderDetailData {
   refunded: boolean;
   /** "28/08/2026" — formatted by the page so both agree on the locale. */
   date: string;
+  /** "14:32", the shop clock — the list shows it, so the receipt does too. */
+  time?: string;
   total: number;
   /**
    * What the line was worth before any cut: the tier price for software,
@@ -113,9 +115,13 @@ export interface OrderDetailData {
 const LABEL =
   "flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-neutral-500";
 const GHOST_BTN =
-  "inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-3.5 text-[10px] font-black uppercase tracking-widest text-neutral-300 transition-colors hover:bg-white/10 hover:text-white";
+  "inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-3.5 text-xs font-semibold text-neutral-300 transition-colors hover:bg-white/10 hover:text-white";
 const CELL =
   "border-t border-white/[0.06] px-4 py-4 text-sm text-neutral-200 sm:px-5";
+/** Money as the /orders list and /transactions write it. */
+function money(value: number): string {
+  return `${formatVnd(value)} ₫`;
+}
 /** One value with its copy button; the password variant starts masked. */
 function HandoverBox({
   label,
@@ -314,7 +320,7 @@ function FileRow({
         href={href}
         target="_blank"
         rel="noopener noreferrer"
-        className={`inline-flex h-8 shrink-0 items-center gap-1.5 rounded-lg px-3.5 text-[10px] font-black uppercase tracking-widest transition-colors ${actionClass}`}
+        className={`inline-flex h-8 shrink-0 items-center gap-1.5 rounded-lg px-3.5 text-xs font-bold transition-colors ${actionClass}`}
       >
         {action}
         {arrow}
@@ -483,7 +489,7 @@ export function OrderDetailModal({
           ref={setTrigger}
           type="button"
           onClick={() => setOpen(true)}
-          className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg bg-[var(--menzu-accent)] px-4 text-[10px] font-black uppercase tracking-widest text-white transition-colors hover:bg-[var(--menzu-accent-dark)]"
+          className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg bg-[var(--menzu-accent)] px-4 text-xs font-bold text-white transition-colors hover:bg-[var(--menzu-accent-dark)]"
         >
           <Receipt className="h-3.5 w-3.5" />
           Xem đơn hàng
@@ -530,22 +536,19 @@ export function OrderDetailModal({
 
                 {/* HEADER */}
                 <div className="flex items-center justify-between gap-4 border-b border-white/[0.06] px-5 py-5 sm:px-6">
-                  <div className="flex items-start gap-3">
-                    <span
-                      aria-hidden
-                      className="mt-1 h-5 w-[3px] shrink-0 rounded-full bg-[var(--menzu-accent)]"
-                    />
-                    <div>
-                      <h2
-                        id={`order-${order.code}-title`}
-                        className="text-lg font-black uppercase tracking-wider text-white sm:text-xl"
-                      >
-                        Chi tiết đơn hàng
-                      </h2>
-                      <p className="mt-1 text-xs text-neutral-500">
-                        Thông tin sản phẩm và dữ liệu bàn giao của đơn hàng.
-                      </p>
-                    </div>
+                  {/* The Receipt mark the wallet invoice's title wears, in
+                      place of the red bar the storefront's sections use. */}
+                  <div>
+                    <h2
+                      id={`order-${order.code}-title`}
+                      className="flex items-center gap-2.5 text-lg font-black uppercase tracking-wider text-white sm:text-xl"
+                    >
+                      <Receipt className="h-5 w-5 shrink-0 text-[var(--menzu-accent)]" aria-hidden />
+                      Chi tiết đơn hàng
+                    </h2>
+                    <p className="mt-1 text-xs text-neutral-500">
+                      Thông tin sản phẩm và dữ liệu bàn giao của đơn hàng.
+                    </p>
                   </div>
                   <button
                     type="button"
@@ -567,7 +570,7 @@ export function OrderDetailModal({
                       label="Mã đơn hàng"
                       className="border-b border-r border-white/[0.06] lg:border-b-0"
                     >
-                      <span className="font-mono text-[15px] font-bold tracking-wide text-white">
+                      <span className="text-[15px] font-bold tabular-nums text-white">
                         {order.code}
                       </span>
                     </OverviewCell>
@@ -579,6 +582,11 @@ export function OrderDetailModal({
                       <span className="text-[15px] font-bold tabular-nums text-white">
                         {order.date}
                       </span>
+                      {order.time ? (
+                        <span className="ml-1.5 text-xs font-semibold tabular-nums text-neutral-400">
+                          {order.time}
+                        </span>
+                      ) : null}
                     </OverviewCell>
                     <OverviewCell
                       icon={<Wallet className={iconClass} />}
@@ -586,7 +594,7 @@ export function OrderDetailModal({
                       className="border-r border-white/[0.06]"
                     >
                       <span className="text-xl font-black tabular-nums text-white">
-                        {formatVnd(order.total)}đ
+                        {money(order.total)}
                       </span>
                     </OverviewCell>
                     <OverviewCell
@@ -627,7 +635,7 @@ export function OrderDetailModal({
                       <div className="min-w-0 flex-1">
                         <Link
                           href={order.productHref}
-                          className="block truncate text-[13px] font-black text-white"
+                          className="line-clamp-2 text-sm font-black leading-snug text-white"
                         >
                           {order.isSoftware ? order.productName : `#${order.productCode}`}
                         </Link>
@@ -648,11 +656,11 @@ export function OrderDetailModal({
                       </div>
                       <div>
                         <dt className="text-neutral-500">Đơn giá</dt>
-                        <dd className="mt-0.5 font-bold tabular-nums text-neutral-200">{formatVnd(unitPrice)}đ</dd>
+                        <dd className="mt-0.5 font-bold tabular-nums text-neutral-200">{money(unitPrice)}</dd>
                       </div>
                       <div className="text-right">
                         <dt className="text-neutral-500">Thành tiền</dt>
-                        <dd className="mt-0.5 font-black tabular-nums text-white">{formatVnd(order.total)}đ</dd>
+                        <dd className="mt-0.5 font-black tabular-nums text-white">{money(order.total)}</dd>
                       </div>
                     </dl>
                   </div>
@@ -700,7 +708,7 @@ export function OrderDetailModal({
                               <div className="min-w-0 max-w-[200px] lg:max-w-[260px] xl:max-w-[320px]">
                                 <Link
                                   href={order.productHref}
-                                  className="mb-1 block truncate text-sm font-black text-white transition-colors hover:text-[var(--menzu-accent)]"
+                                  className="mb-1 line-clamp-2 text-base font-black leading-snug text-white transition-colors hover:text-[var(--menzu-accent)]"
                                 >
                                   {order.isSoftware
                                     ? order.productName
@@ -728,11 +736,11 @@ export function OrderDetailModal({
                             {order.quantity}
                           </td>
                           <td className={`${CELL} tabular-nums`}>
-                            {formatVnd(unitPrice)}đ
+                            {money(unitPrice)}
                           </td>
                           <td className={`${CELL} tabular-nums`}>
                             <strong className="text-white">
-                              {formatVnd(order.total)}đ
+                              {money(order.total)}
                             </strong>
                           </td>
                         </tr>
@@ -742,10 +750,6 @@ export function OrderDetailModal({
 
                   {/* HANDOVER */}
                   <div className="relative mt-6 overflow-hidden rounded-xl border border-white/10 bg-white/[0.02] p-4 sm:p-5">
-                    <div
-                      aria-hidden
-                      className="pointer-events-none absolute -right-16 -top-20 h-48 w-48 rounded-full bg-[var(--menzu-accent)]/10 blur-3xl"
-                    />
                     {/* One line. The sentence under it — "Thông tin được cung
                         cấp sau khi thanh toán" — was telling a reader who is
                         looking straight at their key that they will get it
@@ -911,7 +915,7 @@ export function OrderDetailModal({
                           <p className="text-xs leading-relaxed text-neutral-300">
                             Tài khoản này được bàn giao trực tiếp — liên hệ shop
                             kèm mã đơn{" "}
-                            <strong className="font-mono text-white">
+                            <strong className="text-white">
                               {order.code}
                             </strong>{" "}
                             để nhận thông tin đăng nhập.
@@ -927,7 +931,7 @@ export function OrderDetailModal({
                           <p className="text-xs leading-relaxed text-neutral-300">
                             Tài khoản này đã được shop bàn giao lại — liên hệ
                             shop kèm mã đơn{" "}
-                            <strong className="font-mono text-white">
+                            <strong className="text-white">
                               {order.code}
                             </strong>{" "}
                             nếu cần hỗ trợ.
@@ -951,8 +955,10 @@ export function OrderDetailModal({
                   </div>
 
                   {/* NOTE */}
-                  <div className="mt-4 flex items-start gap-3 rounded-r-xl border-l-[3px] border-[var(--menzu-accent)] bg-[var(--menzu-accent)]/5 px-4 py-3.5 text-xs leading-relaxed text-neutral-400">
-                    <Info className="mt-0.5 h-4 w-4 shrink-0 text-[var(--menzu-accent)]" />
+                  {/* A reminder, drawn like the other notes in this card —
+                      red was saying "error" about a line that is not one. */}
+                  <div className="mt-4 flex items-start gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3.5 text-xs leading-relaxed text-neutral-400">
+                    <Info className="mt-0.5 h-4 w-4 shrink-0 text-neutral-500" />
                     <span>
                       Vui lòng lưu lại mã đơn hàng để được hỗ trợ khi cần thiết.
                       Không chia sẻ thông tin tài khoản hoặc dữ liệu bàn giao
@@ -965,7 +971,7 @@ export function OrderDetailModal({
                 <div className="flex flex-col gap-3 border-t border-white/[0.06] bg-white/[0.02] px-5 py-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:px-6">
                   <span className="text-xs text-neutral-500">
                     Cần hỗ trợ về đơn hàng này? Gửi kèm mã đơn{" "}
-                    <span className="font-mono font-bold text-neutral-300">
+                    <span className="font-bold text-neutral-300">
                       {order.code}
                     </span>
                   </span>
@@ -985,7 +991,7 @@ export function OrderDetailModal({
                       {order.paid && order.canRefund ? (
                         <Link
                           href={refundHref}
-                          className="press inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-white/12 bg-white/[0.04] px-4 text-[11px] font-black uppercase tracking-widest text-neutral-300 hover:border-[var(--menzu-accent)]/50 hover:bg-[var(--menzu-accent)]/10 hover:text-[var(--menzu-accent)] sm:h-10"
+                          className="press inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-white/12 bg-white/[0.04] px-4 text-xs font-bold text-neutral-300 hover:border-[var(--menzu-accent)]/50 hover:bg-[var(--menzu-accent)]/10 hover:text-[var(--menzu-accent)] sm:h-10"
                         >
                           <RotateCcw className="h-4 w-4" />
                           Yêu cầu hoàn trả
@@ -994,13 +1000,15 @@ export function OrderDetailModal({
                       {order.paid ? (
                         <Link
                           href={supportHref}
-                          className={`press group inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[var(--menzu-accent)] px-5 text-[11px] font-black uppercase tracking-widest text-white hover:bg-[var(--menzu-accent-dark)] sm:h-10${
+                          className={`press group inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[var(--menzu-accent)] px-3 text-xs font-bold text-white hover:bg-[var(--menzu-accent-dark)] sm:h-10 sm:px-5${
                             order.canRefund || askReview ? "" : " col-span-2"
                           }`}
                         >
                           <ShieldCheck className="h-4 w-4" />
                           Hỗ trợ bảo hành
-                          <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+                          {/* Not on a phone: in half the width the arrow pushed "Hỗ trợ bảo
+                              hành" onto two lines. */}
+                          <ArrowRight className="hidden h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 sm:block" />
                         </Link>
                       ) : null}
                       {/* The review, drawn like "Yêu cầu hoàn trả": an outline
@@ -1009,7 +1017,7 @@ export function OrderDetailModal({
                       {askReview ? (
                         <Link
                           href={reviewHref}
-                          className={`press inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-white/12 bg-white/[0.04] px-4 text-[11px] font-black uppercase tracking-widest text-neutral-300 hover:border-[var(--menzu-accent)]/50 hover:bg-[var(--menzu-accent)]/10 hover:text-[var(--menzu-accent)] sm:h-10${
+                          className={`press inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-white/12 bg-white/[0.04] px-4 text-xs font-bold text-neutral-300 hover:border-[var(--menzu-accent)]/50 hover:bg-[var(--menzu-accent)]/10 hover:text-[var(--menzu-accent)] sm:h-10${
                             order.canRefund ? " col-span-2" : ""
                           }`}
                         >
@@ -1052,7 +1060,7 @@ export function OrderDetailModal({
                   <button
                     type="button"
                     onClick={() => setOpen(false)}
-                    className="press h-11 w-full rounded-xl border border-white/10 bg-white/[0.02] text-[11px] font-black uppercase tracking-widest text-neutral-300"
+                    className="press h-11 w-full rounded-xl border border-white/10 bg-white/[0.02] text-xs font-bold text-neutral-300"
                   >
                     Đóng
                   </button>

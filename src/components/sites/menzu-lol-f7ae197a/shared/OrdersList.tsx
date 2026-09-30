@@ -69,6 +69,9 @@ export interface OrderCardView {
  * font, and the price column behind a hairline — the price in white and an
  * outline "Chi tiết". menzu's white button, green price, "GIÁ MUA" label and
  * mono facts made three loud colours and a row of capitals on every card.
+ * The card itself is the account area's lighter inner card (white at 2%),
+ * as the receipt's blocks and the other account pages draw theirs — menzu's
+ * darker card was the one surface out of step.
  * 1bba475 is the louder version, c6bdb46 the compact card. The whole card
  * opens the receipt, which stays untouched.
  */
@@ -261,7 +264,7 @@ export function OrdersList({ orders }: { orders: OrderCardView[] }) {
                           // đánh giá đi"). To bring the receipt's button back:
                           // reviewHref={order.review?.href ?? null}
                           reviewHref={null}
-                          className="group flex cursor-pointer flex-col gap-3 rounded-2xl border border-white/10 bg-neutral-950/50 p-3.5 outline-none transition-colors hover:border-white/20 hover:bg-neutral-900 focus-visible:ring-2 focus-visible:ring-[var(--menzu-accent)]/60 sm:flex-row sm:items-center sm:gap-5 sm:p-4"
+                          className="group flex cursor-pointer flex-col gap-3 rounded-2xl border border-white/5 bg-white/[0.02] p-3.5 outline-none transition-colors hover:border-white/10 hover:bg-white/[0.04] focus-visible:ring-2 focus-visible:ring-[var(--menzu-accent)]/60 sm:flex-row sm:items-center sm:gap-5 sm:p-4"
                         >
                           <div className="flex min-w-0 flex-1 items-start gap-3 sm:items-center sm:gap-5">
                             {/* menzu's 16:9 picture at 144px (theirs is 192),

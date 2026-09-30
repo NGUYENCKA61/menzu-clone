@@ -109,16 +109,22 @@ export default async function OrdersPage({
           // stars.
           const settled =
             o.status === "PAID" && !o.refundPending && !o.refundRejected && !o.warrantyOpen;
+          // One status for the card and the receipt: a warranty report or a
+          // refund in flight shows on both, and a plain paid order reads
+          // "Đã thanh toán" inside while its card stays bare.
+          const badge = orderBadge(o);
           return {
             detail: {
               id: o.id,
               reviewed: o.reviewed,
               code: o.code,
-              statusLabel: STATUS_LABEL[o.status] ?? o.status,
-              statusClass: STATUS_CLASS[o.status] ?? "border-white/10 bg-white/5 text-neutral-400",
+              statusLabel: badge?.label ?? STATUS_LABEL[o.status] ?? o.status,
+              statusClass:
+                badge?.tone ?? STATUS_CLASS[o.status] ?? "border-white/10 bg-white/5 text-neutral-400",
               paid: o.status === "PAID",
               refunded: o.status === "REFUNDED",
               date: shortDate(o.createdAt),
+              time: dayTime(o.createdAt),
               total: o.total,
               listPrice: o.listPrice,
               quantity: o.quantity,
@@ -156,7 +162,7 @@ export default async function OrdersPage({
             at: o.createdAt.getTime(),
             total: o.total,
             status: o.status,
-            badge: orderBadge(o),
+            badge,
             review: settled ? { href: `/orders/${o.code}/danh-gia`, reviewed: o.reviewed } : null,
             // Searched by order code, product code, name and rank — what a
             // buyer actually has to hand when hunting for a past purchase.
