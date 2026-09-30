@@ -1,6 +1,6 @@
 "use client";
 
-import { ShoppingBag } from "lucide-react";
+import { ChevronRight, ShoppingBag } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -61,11 +61,15 @@ export interface OrderCardView {
  * are menzu's /orders, measured off the live page, as on /transactions. The
  * cards are this shop's own again (30/09/2026 — the owner's capture of the
  * old list: "sắp lại thời gian theo kiểu này", then "đồng bộ về kích cỡ"):
- * grouped under one line per day while the list reads in time order, each
- * the account area's inner card with the site's 96×64 row picture, the name
- * on up to two lines, "Đơn … · 10:19" and the price. No white "Chi tiết" —
- * the whole card opens the receipt, which stays untouched. menzu's green is
- * still money paid.
+ * grouped under one line per day while the list reads in time order.
+ *
+ * The card is menzu's again at the site's sizes (the owner: "còn cách nào
+ * theo style menzu mà vẫn đồng bộ không", then "thử đi"): the 16:9 picture
+ * at 144px, the name 16px on two lines, the labelled facts ("Mã đơn:",
+ * "Thời gian:", "Gói:") side by side in 12px mono, and the price column
+ * behind a hairline with "GIÁ MUA" and a 36px white "Chi tiết". The compact
+ * card before it is c6bdb46. The whole card opens the receipt, which stays
+ * untouched; menzu's green is still money paid.
  */
 
 const PAGE_SIZE = 10;
@@ -252,72 +256,91 @@ export function OrdersList({ orders }: { orders: OrderCardView[] }) {
                           autoOpen={order.autoOpen}
                           supportHref={order.supportHref}
                           refundHref={order.refundHref}
-                          className="group flex cursor-pointer flex-col gap-3 rounded-xl border border-white/5 bg-white/[0.02] p-3.5 outline-none transition-colors hover:border-white/10 hover:bg-white/[0.04] focus-visible:ring-2 focus-visible:ring-[var(--menzu-accent)]/60 sm:flex-row sm:items-center sm:gap-4 sm:p-4"
+                          className="group flex cursor-pointer flex-col gap-3 rounded-2xl border border-white/10 bg-neutral-950/50 p-3.5 outline-none transition-colors hover:border-white/20 hover:bg-neutral-900 focus-visible:ring-2 focus-visible:ring-[var(--menzu-accent)]/60 sm:flex-row sm:items-center sm:gap-5 sm:p-4"
                         >
-                          <div className="flex min-w-0 flex-1 items-center gap-3 sm:gap-4">
-                            {/* The site's row picture, 96×64, as on every other
-                                list; twice the box in `sizes` keeps it sharp. */}
-                            <div className="relative h-16 w-24 shrink-0 overflow-hidden rounded-lg border border-white/10 bg-neutral-950">
+                          <div className="flex min-w-0 flex-1 items-start gap-3 sm:items-center sm:gap-5">
+                            {/* menzu's 16:9 picture at 144px (theirs is 192),
+                                so the art is not cropped; the site's 96×64 on a
+                                phone, beside the text rather than across it. */}
+                            <div className="relative aspect-[3/2] w-24 shrink-0 overflow-hidden rounded-lg border border-white/5 bg-neutral-900 sm:aspect-video sm:w-36 sm:rounded-xl">
                               {order.imageUrl ? (
                                 <Image
                                   src={order.imageUrl}
                                   alt={order.title}
                                   fill
-                                  sizes="192px"
-                                  className="object-cover"
+                                  sizes="(min-width: 640px) 288px, 192px"
+                                  className="object-cover transition-transform duration-300 group-hover:scale-105"
                                 />
                               ) : null}
                             </div>
 
                             <div className="flex min-w-0 flex-1 flex-col gap-1.5">
-                              {/* Two lines, not one: the names are long, and one
-                                  line cut them to "… AN TOÀN - CÓ …". */}
-                              <h3 className="line-clamp-2 text-sm font-black leading-snug text-white transition-colors group-hover:text-[var(--menzu-accent)]">
+                              {/* 16px on up to two lines, where menzu's 20px on
+                                  one cut the long names short. */}
+                              <h3 className="line-clamp-2 text-sm font-black leading-snug text-white transition-colors group-hover:text-[var(--menzu-accent)] sm:text-base">
                                 {order.title}
                               </h3>
-                              <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                              {/* menzu's labelled facts, side by side rather than
+                                  stacked three high. The time alone under its
+                                  day's heading, the whole stamp when a price
+                                  sort drops the headings. */}
+                              <div className="flex flex-wrap gap-x-4 gap-y-0.5 font-mono text-[11px] text-neutral-400 sm:text-xs">
+                                <span>
+                                  <span className="text-neutral-500">Mã đơn:</span> #{order.detail.code}
+                                </span>
+                                <span>
+                                  <span className="text-neutral-500">Thời gian:</span>{" "}
+                                  {byDay ? order.clock : order.stamp}
+                                </span>
                                 {order.chip ? (
-                                  <span className="rounded bg-white/5 px-2 py-0.5 text-[9px] font-black uppercase tracking-widest text-neutral-300">
+                                  <span>
+                                    <span className="text-neutral-500">{order.isSoftware ? "Gói:" : "Hạng:"}</span>{" "}
                                     {order.chip}
                                     {order.quantity > 1 ? ` ×${order.quantity}` : ""}
                                   </span>
                                 ) : null}
-                                {/* The time alone under its day's heading, the
-                                    whole stamp when a price sort drops the
-                                    headings. Shown on a phone too, where the
-                                    code and time used to be hidden. */}
-                                <span className="text-[11px] font-semibold tabular-nums text-neutral-400">
-                                  Đơn {order.detail.code} · {byDay ? order.clock : order.stamp}
-                                </span>
                               </div>
+                              {/* The status, only when there is something to know,
+                                  or the way to the review: the two things a buyer
+                                  comes back to this list for. */}
+                              {order.badge || order.review ? (
+                                <div className="mt-0.5 flex items-center gap-2">
+                                  {order.badge ? (
+                                    <span
+                                      className={`${order.badge.tone} rounded border px-2 py-1 text-[9px] font-black uppercase tracking-widest sm:text-[10px]`}
+                                    >
+                                      {order.badge.label}
+                                    </span>
+                                  ) : null}
+                                  {order.review ? (
+                                    <OrderReviewTag href={order.review.href} reviewed={order.review.reviewed} />
+                                  ) : null}
+                                </div>
+                              ) : null}
                             </div>
                           </div>
 
-                          <div className="flex shrink-0 items-center justify-between gap-3 sm:flex-col sm:items-end sm:justify-center sm:gap-1.5">
-                            <span
-                              className={`text-sm font-black tabular-nums ${
-                                struck ? "text-neutral-500 line-through" : "text-emerald-400"
-                              }`}
-                            >
-                              {money(order.total)}
+                          {/* menzu's price column behind a hairline — beside the
+                              card from sm up, under it on a phone. */}
+                          <div className="flex shrink-0 items-end justify-between gap-3 border-t border-white/5 pt-3 sm:flex-col sm:items-end sm:justify-center sm:gap-2.5 sm:border-t-0 sm:border-l sm:border-white/10 sm:pt-0 sm:pl-5">
+                            <div className="text-left sm:text-right">
+                              <p className="mb-0.5 text-[10px] font-bold uppercase tracking-widest text-neutral-500">
+                                Giá mua
+                              </p>
+                              <p
+                                className={`text-base font-black tabular-nums ${
+                                  struck ? "text-neutral-500 line-through" : "text-emerald-400"
+                                }`}
+                              >
+                                {money(order.total)}
+                              </p>
+                            </div>
+                            {/* menzu's white button at 36px (theirs is 44); the
+                                card around it is what opens the receipt. */}
+                            <span className="flex h-8 shrink-0 items-center gap-1 whitespace-nowrap rounded-lg bg-white px-3 text-[11px] font-black uppercase tracking-wide text-black transition-colors group-hover:bg-neutral-200 sm:h-9 sm:px-4 sm:text-xs">
+                              Chi tiết
+                              <ChevronRight className="h-3.5 w-3.5" aria-hidden />
                             </span>
-                            {/* The status, only when there is something to know,
-                                or the way to the review: the two things a buyer
-                                comes back to this list for. */}
-                            {order.badge || order.review ? (
-                              <div className="flex items-center gap-2">
-                                {order.badge ? (
-                                  <span
-                                    className={`${order.badge.tone} rounded border px-2 py-1 text-[9px] font-black uppercase tracking-widest sm:text-[10px]`}
-                                  >
-                                    {order.badge.label}
-                                  </span>
-                                ) : null}
-                                {order.review ? (
-                                  <OrderReviewTag href={order.review.href} reviewed={order.review.reviewed} />
-                                ) : null}
-                              </div>
-                            ) : null}
                           </div>
                         </OrderDetailModal>
                       );
