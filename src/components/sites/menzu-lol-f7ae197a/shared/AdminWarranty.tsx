@@ -88,7 +88,7 @@ export function AdminWarranty({ rows }: { rows: WarrantyRow[] }) {
           <Wrench className="mx-auto h-8 w-8 text-neutral-600" />
           <p className="mt-3 text-sm font-bold text-white">Chưa có yêu cầu bảo hành nào</p>
           <p className="mt-1 text-[12px] text-neutral-500">
-            Khách báo lỗi từ nút &ldquo;Hỗ trợ bảo hành&rdquo; trong hóa đơn đơn hàng.
+            Khách báo lỗi từ nút &ldquo;Yêu cầu bảo hành&rdquo; trong hóa đơn đơn hàng.
           </p>
         </div>
       ) : (

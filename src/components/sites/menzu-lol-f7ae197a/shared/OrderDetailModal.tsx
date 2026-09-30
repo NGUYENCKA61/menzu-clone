@@ -1011,7 +1011,7 @@ export function OrderDetailModal({
                           {/* A wrench, "sửa lỗi": the shield already marks the
                               Trạng thái cell above, with another meaning. */}
                           <Wrench className="h-4 w-4" />
-                          Hỗ trợ bảo hành
+                          Yêu cầu bảo hành
                         </Link>
                       ) : null}
                       {/* The review, drawn like "Yêu cầu hoàn trả": an outline

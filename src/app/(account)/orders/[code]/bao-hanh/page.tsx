@@ -20,7 +20,7 @@ import {
 } from "@/lib/warrantyRequests";
 
 export const metadata: Metadata = {
-  title: "Hỗ trợ bảo hành",
+  title: "Yêu cầu bảo hành",
   // One buyer's own order. Followed, not indexed, like the rest of the
   // account area.
   robots: { index: false, follow: true },
@@ -92,9 +92,9 @@ export default async function WarrantyRequestPage({
 
   return (
     <AccountPageFrame
-      title="Hỗ trợ bảo hành"
+      title="Yêu cầu bảo hành"
       subtitle={`Đơn ${order.code} — báo lỗi để shop kiểm tra và xử lý`}
-      crumb="Hỗ trợ bảo hành"
+      crumb="Yêu cầu bảo hành"
       action={
         <Link
           href="/orders"
