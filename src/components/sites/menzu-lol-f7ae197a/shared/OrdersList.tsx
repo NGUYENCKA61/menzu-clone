@@ -15,7 +15,6 @@ import {
   scrollPanelTop,
 } from "./AccountListChrome";
 import { OrderDetailModal, type OrderDetailData } from "./OrderDetailModal";
-import { OrderReviewTag } from "./OrderReview";
 import { formatVnd } from "./productData";
 
 export interface OrderCardView {
@@ -50,7 +49,7 @@ export interface OrderCardView {
    * None on a paid order with nothing pending — that is every order.
    */
   badge: { label: string; tone: string } | null;
-  /** Where "Đánh giá" leads, while the order is one worth asking about. */
+  /** Where "Đánh giá" leads — in the receipt — while the order is one worth asking about. */
   review: { href: string; reviewed: boolean } | null;
   /** Order code, product code, name and rank: what a buyer has to hand. */
   haystack: string[];
@@ -258,6 +257,7 @@ export function OrdersList({ orders }: { orders: OrderCardView[] }) {
                           autoOpen={order.autoOpen}
                           supportHref={order.supportHref}
                           refundHref={order.refundHref}
+                          reviewHref={order.review?.href ?? null}
                           className="group flex cursor-pointer flex-col gap-3 rounded-2xl border border-white/10 bg-neutral-950/50 p-3.5 outline-none transition-colors hover:border-white/20 hover:bg-neutral-900 focus-visible:ring-2 focus-visible:ring-[var(--menzu-accent)]/60 sm:flex-row sm:items-center sm:gap-5 sm:p-4"
                         >
                           <div className="flex min-w-0 flex-1 items-start gap-3 sm:items-center sm:gap-5">
@@ -307,21 +307,16 @@ export function OrdersList({ orders }: { orders: OrderCardView[] }) {
                                   </>
                                 ) : null}
                               </p>
-                              {/* The status, only when there is something to know,
-                                  or the way to the review: the two things a buyer
-                                  comes back to this list for. */}
-                              {order.badge || order.review ? (
+                              {/* The status, only when there is something to
+                                  know. "Đánh giá" moved into the receipt
+                                  (30/09/2026: "bỏ cái đánh giá ngoài card đi"). */}
+                              {order.badge ? (
                                 <div className="mt-0.5 flex items-center gap-2">
-                                  {order.badge ? (
-                                    <span
-                                      className={`${order.badge.tone} rounded border px-2 py-1 text-[9px] font-black uppercase tracking-widest sm:text-[10px]`}
-                                    >
-                                      {order.badge.label}
-                                    </span>
-                                  ) : null}
-                                  {order.review ? (
-                                    <OrderReviewTag href={order.review.href} reviewed={order.review.reviewed} />
-                                  ) : null}
+                                  <span
+                                    className={`${order.badge.tone} rounded border px-2 py-1 text-[9px] font-black uppercase tracking-widest sm:text-[10px]`}
+                                  >
+                                    {order.badge.label}
+                                  </span>
                                 </div>
                               ) : null}
                             </div>

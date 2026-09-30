@@ -17,6 +17,7 @@ import {
   Receipt,
   RotateCcw,
   ShieldCheck,
+  Star,
   User,
   Wallet,
   X,
@@ -365,6 +366,7 @@ export function OrderDetailModal({
   order,
   supportHref,
   refundHref = supportHref,
+  reviewHref = null,
   autoOpen = false,
   children,
   className,
@@ -384,6 +386,13 @@ export function OrderDetailModal({
    * a form of its own the day there is one, without this card knowing.
    */
   refundHref?: string;
+  /**
+   * Where "Đánh giá" leads, while the order is one worth asking about — paid,
+   * with no refund or warranty report open. Null or absent: no review here.
+   * It lived on the list's card until the owner moved it in (30/09/2026:
+   * "bỏ cái đánh giá ngoài card đi").
+   */
+  reviewHref?: string | null;
   /**
    * The row that opens the receipt. Given, the whole row is the trigger and
    * a link inside it (the product) still goes where it points; absent, the
@@ -440,6 +449,9 @@ export function OrderDetailModal({
   const setTrigger = (node: HTMLElement | null) => {
     triggerRef.current = node;
   };
+
+  // A review is asked for until it is given; after that one quiet line.
+  const askReview = reviewHref !== null && !order.reviewed;
 
   return (
     <>
@@ -983,7 +995,7 @@ export function OrderDetailModal({
                         <Link
                           href={supportHref}
                           className={`press group inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[var(--menzu-accent)] px-5 text-[11px] font-black uppercase tracking-widest text-white hover:bg-[var(--menzu-accent-dark)] sm:h-10${
-                            order.canRefund ? "" : " col-span-2"
+                            order.canRefund || askReview ? "" : " col-span-2"
                           }`}
                         >
                           <ShieldCheck className="h-4 w-4" />
@@ -991,11 +1003,34 @@ export function OrderDetailModal({
                           <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
                         </Link>
                       ) : null}
+                      {/* The review, drawn like "Yêu cầu hoàn trả": an outline
+                          beside the filled warranty button. On a phone it
+                          takes its own row when the refund button is there. */}
+                      {askReview ? (
+                        <Link
+                          href={reviewHref}
+                          className={`press inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-white/12 bg-white/[0.04] px-4 text-[11px] font-black uppercase tracking-widest text-neutral-300 hover:border-[var(--menzu-accent)]/50 hover:bg-[var(--menzu-accent)]/10 hover:text-[var(--menzu-accent)] sm:h-10${
+                            order.canRefund ? " col-span-2" : ""
+                          }`}
+                        >
+                          <Star className="h-4 w-4" />
+                          Đánh giá
+                        </Link>
+                      ) : null}
                     </div>
                     {order.paid && !order.canRefund && order.refundBlockedReason ? (
                       <p className="text-[11px] leading-snug text-neutral-500">
                         <RotateCcw className="mr-1 inline h-3 w-3 align-[-2px]" aria-hidden />
                         Không hoàn trả được: {order.refundBlockedReason}
+                      </p>
+                    ) : null}
+                    {reviewHref && order.reviewed ? (
+                      <p className="text-[11px] leading-snug text-neutral-500">
+                        <Star
+                          className="mr-1 inline h-3 w-3 fill-current align-[-2px] text-amber-400"
+                          aria-hidden
+                        />
+                        Bạn đã đánh giá đơn này.
                       </p>
                     ) : null}
                     {!order.paid ? (
