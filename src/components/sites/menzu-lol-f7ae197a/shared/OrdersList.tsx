@@ -151,8 +151,11 @@ export function OrdersList({ orders }: { orders: OrderCardView[] }) {
       ref={top}
       className="scroll-mt-28 w-full bg-[#111111] border border-white/5 rounded-2xl sm:rounded-[24px] p-4 sm:p-8 lg:p-10 relative min-h-[750px]"
     >
-      <div className="flex flex-col gap-6 relative z-10">
-        <div className="mb-2 relative z-10">
+      {/* Spaced as /transactions spaces the same parts: 32px under the title,
+          the search row's own 24px above the list, the pager's own margin.
+          A flex gap here doubled the last two, 48px apiece. */}
+      <div className="relative z-10">
+        <div className="mb-8 relative z-10">
           <h1 className="text-xl sm:text-2xl font-black text-white uppercase tracking-wider mb-2 flex items-center gap-3">
             <ShoppingBag size={24} className="shrink-0 text-[var(--menzu-accent)]" aria-hidden />
             Lịch sử mua hàng
