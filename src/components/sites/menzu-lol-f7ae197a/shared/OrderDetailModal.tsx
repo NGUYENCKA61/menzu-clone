@@ -1009,9 +1009,6 @@ export function OrderDetailModal({
                         >
                           <ShieldCheck className="h-4 w-4" />
                           Hỗ trợ bảo hành
-                          {/* Not on a phone: in half the width the arrow pushed "Hỗ trợ bảo
-                              hành" onto two lines. */}
-                          <ArrowRight className="hidden h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 sm:block" />
                         </Link>
                       ) : null}
                       {/* The review, drawn like "Yêu cầu hoàn trả": an outline
