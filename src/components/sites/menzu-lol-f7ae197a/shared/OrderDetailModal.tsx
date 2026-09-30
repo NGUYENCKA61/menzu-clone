@@ -21,6 +21,7 @@ import {
   Star,
   User,
   Wallet,
+  Wrench,
   X,
 } from "lucide-react";
 import Image from "next/image";
@@ -1007,7 +1008,9 @@ export function OrderDetailModal({
                             order.canRefund || askReview ? "" : " col-span-2"
                           }`}
                         >
-                          <ShieldCheck className="h-4 w-4" />
+                          {/* A wrench, "sửa lỗi": the shield already marks the
+                              Trạng thái cell above, with another meaning. */}
+                          <Wrench className="h-4 w-4" />
                           Hỗ trợ bảo hành
                         </Link>
                       ) : null}
@@ -1043,7 +1046,7 @@ export function OrderDetailModal({
                     ) : null}
                     {!order.paid ? (
                       <p className="text-[11px] leading-snug text-neutral-500">
-                        <ShieldCheck className="mr-1 inline h-3 w-3 align-[-2px]" aria-hidden />
+                        <Wrench className="mr-1 inline h-3 w-3 align-[-2px]" aria-hidden />
                         {order.refunded
                           ? "Đơn đã được hoàn tiền nên không còn bảo hành."
                           : "Chỉ đơn đã thanh toán mới yêu cầu bảo hành được."}
