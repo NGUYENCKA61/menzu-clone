@@ -1,5 +1,6 @@
 "use client";
 
+import { Loader2 } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 
@@ -44,6 +45,12 @@ export interface ScopeSearchFieldProps {
     items: { name: string; imageUrl: string | null }[];
     onPick: (name: string) => void;
   };
+  /**
+   * The listing is on its way: a spinner at the field’s right end, where the
+   * header’s search box shows its own. The scope on the left stays — it is
+   * the field’s mark, not a status light.
+   */
+  busy?: boolean;
 }
 
 /**
@@ -66,6 +73,7 @@ export function ScopeSearchField({
   badge,
   glow,
   hotPick,
+  busy = false,
 }: ScopeSearchFieldProps) {
   // The chip's rotation: one index over however many items came in. The
   // interval runs only when there is a second item to turn to, and rests while
@@ -196,6 +204,14 @@ export function ScopeSearchField({
           placeholder={placeholder}
           className={`${SEARCH_INPUT_CLASS} relative z-10 min-w-0`}
         />
+
+        {busy ? (
+          <Loader2
+            size={15}
+            aria-hidden
+            className="relative z-10 shrink-0 animate-spin text-neutral-400 motion-reduce:animate-none"
+          />
+        ) : null}
 
         {hotPick && pick ? (
           // After the input, which is the flex row's only growing item — so

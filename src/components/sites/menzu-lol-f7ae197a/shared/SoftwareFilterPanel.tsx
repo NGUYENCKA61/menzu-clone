@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronDown, Crosshair, Search, SlidersHorizontal } from "lucide-react";
+import { ChevronDown, Crosshair, Loader2, Search, SlidersHorizontal } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useOptimistic, useState, useTransition } from "react";
 
@@ -101,7 +101,7 @@ export function SoftwareFilterPanel({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-3 w-full">
+    <form onSubmit={handleSubmit} aria-busy={isPending} className="flex flex-col gap-3 w-full">
       {/* Split 6/4 like the account row above: the name is what most people
           arrive knowing, the feature is what they fall back on. */}
       <div className="flex flex-col md:flex-row gap-2.5">
@@ -110,6 +110,7 @@ export function SoftwareFilterPanel({
             value={nameQuery}
             onChange={setNameQuery}
             placeholder={hint}
+            busy={isPending}
             // The breathing outline without the gold pill: the pill was tried
             // here and taken back off, the glow was asked to stay — breathing
             // purple into red rather than the account banner's red into gold.
@@ -134,7 +135,11 @@ export function SoftwareFilterPanel({
           type="submit"
           className="hidden md:flex bg-[var(--brand)] hover:bg-[var(--brand-dark)] active:scale-95 text-white font-black rounded-xl px-6 transition items-center gap-2 shrink-0"
         >
-          <Search size={16} />
+          {isPending ? (
+            <Loader2 size={16} aria-hidden className="animate-spin motion-reduce:animate-none" />
+          ) : (
+            <Search size={16} />
+          )}
           Tìm kiếm
         </button>
       </div>
@@ -220,7 +225,11 @@ export function SoftwareFilterPanel({
         type="submit"
         className="press md:hidden flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-[var(--brand)] text-[13px] font-black text-white hover:bg-[var(--brand-dark)]"
       >
-        <Search size={16} />
+        {isPending ? (
+          <Loader2 size={16} aria-hidden className="animate-spin motion-reduce:animate-none" />
+        ) : (
+          <Search size={16} />
+        )}
         Tìm kiếm
       </button>
     </form>
