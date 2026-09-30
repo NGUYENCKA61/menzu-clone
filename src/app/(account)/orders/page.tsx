@@ -5,6 +5,7 @@ import { AccountPageFrame } from "@/components/sites/menzu-lol-f7ae197a/shared/A
 import { OrdersList } from "@/components/sites/menzu-lol-f7ae197a/shared/OrdersList";
 import { getOrders } from "@/lib/queries";
 import { getCurrentUser } from "@/lib/session";
+import { dayHeading, dayTime } from "@/lib/dayGroups";
 import { moneyStamp, shopDay } from "@/lib/stamp";
 
 export const metadata: Metadata = {
@@ -92,6 +93,9 @@ export default async function OrdersPage({
   if (!user) redirect("/login?next=%2Forders");
 
   const orders = await getOrders(user.id);
+  // One clock reading for the whole render, so a page drawn across midnight
+  // cannot put two orders of one day under different headings.
+  const now = new Date();
 
   return (
     // No title on the frame: menzu draws "Lịch sử mua hàng" inside the list's
@@ -146,6 +150,8 @@ export default async function OrdersPage({
             quantity: o.quantity,
             imageUrl: o.imageUrl,
             stamp: moneyStamp(o.createdAt),
+            group: dayHeading(o.createdAt, now),
+            clock: dayTime(o.createdAt),
             day: shopDay(o.createdAt),
             at: o.createdAt.getTime(),
             total: o.total,

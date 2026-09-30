@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronRight, ShoppingBag } from "lucide-react";
+import { ShoppingBag } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -34,6 +34,10 @@ export interface OrderCardView {
   imageUrl: string | null;
   /** "15:48 - 28/09/2026", written on the server in the shop's clock. */
   stamp: string;
+  /** "Hôm nay", "Hôm qua" or "28/09/2026": the day heading it sits under. */
+  group: string;
+  /** "15:48": the time alone, for a card under its day's heading. */
+  clock: string;
   /** "2026-09-28", the shop-clock day the date filters compare. */
   day: string;
   /** Milliseconds, for the oldest-first sort. */
@@ -53,13 +57,15 @@ export interface OrderCardView {
 }
 
 /*
- * menzu's /orders, measured off the live page: the panel with its title, the
- * search box and "Bộ Lọc" (sort, status, from/to), one card per order with
- * its picture, code, time, status pill, price and a white "Chi tiết", and
- * the pager. menzu's indigo is the shop's accent; its green is money paid.
- * The card opens this shop's own receipt rather than a page of its own, and
- * keeps the review tag and the refund and warranty states menzu does not
- * have.
+ * The panel, the search box, "Bộ Lọc" (sort, status, from/to) and the pager
+ * are menzu's /orders, measured off the live page, as on /transactions. The
+ * cards are this shop's own again (30/09/2026 — the owner's capture of the
+ * old list: "sắp lại thời gian theo kiểu này", then "đồng bộ về kích cỡ"):
+ * grouped under one line per day while the list reads in time order, each
+ * the account area's inner card with the site's 96×64 row picture, the name
+ * on up to two lines, "Đơn … · 10:19" and the price. No white "Chi tiết" —
+ * the whole card opens the receipt, which stays untouched. menzu's green is
+ * still money paid.
  */
 
 const PAGE_SIZE = 10;
@@ -73,6 +79,22 @@ const SORTS: Record<string, (a: OrderCardView, b: OrderCardView) => number> = {
 
 function money(value: number): string {
   return `${formatVnd(value)} ₫`;
+}
+
+/**
+ * The visible cards cut into runs of one day — in time order only: sorted by
+ * price the days interleave, and a heading over every card would be noise.
+ * Cut per page, so a day split across two pages gets its heading on each.
+ */
+function dayRuns(cards: OrderCardView[], byDay: boolean) {
+  const runs: { group: string | null; cards: OrderCardView[] }[] = [];
+  for (const card of cards) {
+    const group = byDay ? card.group : null;
+    const last = runs[runs.length - 1];
+    if (last && last.group === group) last.cards.push(card);
+    else runs.push({ group, cards: [card] });
+  }
+  return runs;
 }
 
 export function OrdersList({ orders }: { orders: OrderCardView[] }) {
@@ -104,6 +126,14 @@ export function OrdersList({ orders }: { orders: OrderCardView[] }) {
   // and the view just follows.
   const current = Math.min(page, pageCount - 1);
   const visible = filtered.slice(current * PAGE_SIZE, current * PAGE_SIZE + PAGE_SIZE);
+  // Days head the list only while it reads in time order.
+  const byDay = sort === "newest" || sort === "oldest";
+  // A day's count is the whole day's, not the part of it on this page.
+  const perDay = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const order of filtered) counts.set(order.group, (counts.get(order.group) ?? 0) + 1);
+    return counts;
+  }, [filtered]);
 
   // Every filter change starts reading from the first page.
   const refilter = (set: (value: string) => void) => (value: string) => {
@@ -123,7 +153,7 @@ export function OrdersList({ orders }: { orders: OrderCardView[] }) {
             Lịch sử mua hàng
           </h1>
           <p className="text-xs sm:text-sm text-neutral-400 leading-relaxed">
-            Danh sách các đơn bạn đã thanh toán, kèm key hoặc tài khoản đăng nhập.
+            Bấm vào đơn để xem key hoặc tài khoản đăng nhập.
           </p>
         </div>
 
@@ -145,7 +175,7 @@ export function OrdersList({ orders }: { orders: OrderCardView[] }) {
               tone="accent"
               query={query}
               onQuery={refilter(setQuery)}
-              placeholder="Tìm theo mã đơn hoặc tên sản phẩm..."
+              placeholder="Tìm mã đơn, tên sản phẩm…"
               filtering={filtering}
               onClear={() => {
                 setSort("newest");
@@ -186,101 +216,114 @@ export function OrdersList({ orders }: { orders: OrderCardView[] }) {
               </div>
             </ListToolbar>
 
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-5">
               {visible.length === 0 ? (
                 <div className="p-8 text-center bg-white/[0.02] border border-white/5 rounded-2xl">
                   <p className="text-neutral-500 text-sm">Không tìm thấy đơn hàng nào khớp.</p>
                 </div>
               ) : (
-                visible.map((order) => {
-                  const struck = order.status === "REFUNDED" || order.status === "CANCELLED";
-                  return (
-                    // The whole card is the receipt's trigger; the review tag
-                    // inside it is a link of its own and goes where it points.
-                    <OrderDetailModal
-                      key={order.detail.code}
-                      order={order.detail}
-                      autoOpen={order.autoOpen}
-                      supportHref={order.supportHref}
-                      refundHref={order.refundHref}
-                      className="bg-neutral-950/50 border border-white/10 rounded-2xl p-3.5 sm:p-5 hover:border-white/20 hover:bg-neutral-900 transition-all duration-300 group flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[var(--menzu-accent)]/60"
-                    >
-                      <div className="relative w-full sm:w-48 aspect-[16/10] sm:aspect-video rounded-xl overflow-hidden shrink-0 bg-neutral-900 border border-white/5">
-                        {order.imageUrl ? (
-                          <Image
-                            src={order.imageUrl}
-                            alt={order.title}
-                            fill
-                            sizes="(min-width: 640px) 192px, 100vw"
-                            className="object-cover group-hover:scale-105 transition-transform duration-300"
-                          />
-                        ) : null}
+                dayRuns(visible, byDay).map((run) => (
+                  <div
+                    key={`${run.group ?? "all"}-${run.cards[0]!.detail.code}`}
+                    className="flex flex-col gap-3"
+                  >
+                    {run.group ? (
+                      // The day once, over its orders: the same date on every
+                      // card was the noisiest thing on the page.
+                      <div className="flex items-center gap-3">
+                        <span className="shrink-0 text-[10px] font-black uppercase tracking-widest text-neutral-500">
+                          {run.group}
+                        </span>
+                        <span aria-hidden className="h-px flex-1 bg-white/[0.07]" />
+                        <span className="shrink-0 text-[10px] font-black uppercase tracking-widest text-neutral-600">
+                          {perDay.get(run.group) ?? run.cards.length} đơn hàng
+                        </span>
                       </div>
-
-                      <div className="flex-1 w-full min-w-0 flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6">
-                        <div className="flex flex-1 min-w-0 flex-col justify-center">
-                          <h3 className="text-base sm:text-xl font-black text-white truncate group-hover:text-[var(--menzu-accent)] transition-colors leading-tight mb-1 sm:mb-2">
-                            {order.title}
-                          </h3>
-                          <div className="hidden sm:flex flex-col gap-1.5 mb-3">
-                            <p className="text-xs font-mono text-neutral-400 truncate flex items-center gap-2">
-                              <span className="text-neutral-500">Mã đơn:</span>#{order.detail.code}
-                            </p>
-                            <p className="text-xs font-mono text-neutral-400 flex items-center gap-2">
-                              <span className="text-neutral-500">Thời gian:</span>
-                              {order.stamp}
-                            </p>
-                            {order.chip ? (
-                              <p className="text-xs font-mono text-neutral-400 truncate flex items-center gap-2">
-                                <span className="text-neutral-500">{order.isSoftware ? "Gói:" : "Hạng:"}</span>
-                                {order.chip}
-                                {order.quantity > 1 ? ` ×${order.quantity}` : ""}
-                              </p>
-                            ) : null}
-                          </div>
-                          {/* Kept on a phone too, unlike menzu's: the status
-                              and the way to the review are the two things a
-                              buyer comes back to this list for. */}
-                          {order.badge || order.review ? (
-                            <div className="flex items-center gap-2">
-                              {order.badge ? (
-                                <span
-                                  className={`${order.badge.tone} px-2 py-1 rounded border uppercase tracking-widest font-black text-[9px] sm:text-[10px]`}
-                                >
-                                  {order.badge.label}
-                                </span>
-                              ) : null}
-                              {order.review ? (
-                                <OrderReviewTag href={order.review.href} reviewed={order.review.reviewed} />
+                    ) : null}
+                    {run.cards.map((order) => {
+                      const struck = order.status === "REFUNDED" || order.status === "CANCELLED";
+                      return (
+                        // The whole card is the receipt's trigger; the review
+                        // tag inside it is a link of its own and goes where it
+                        // points.
+                        <OrderDetailModal
+                          key={order.detail.code}
+                          order={order.detail}
+                          autoOpen={order.autoOpen}
+                          supportHref={order.supportHref}
+                          refundHref={order.refundHref}
+                          className="group flex cursor-pointer flex-col gap-3 rounded-xl border border-white/5 bg-white/[0.02] p-3.5 outline-none transition-colors hover:border-white/10 hover:bg-white/[0.04] focus-visible:ring-2 focus-visible:ring-[var(--menzu-accent)]/60 sm:flex-row sm:items-center sm:gap-4 sm:p-4"
+                        >
+                          <div className="flex min-w-0 flex-1 items-center gap-3 sm:gap-4">
+                            {/* The site's row picture, 96×64, as on every other
+                                list; twice the box in `sizes` keeps it sharp. */}
+                            <div className="relative h-16 w-24 shrink-0 overflow-hidden rounded-lg border border-white/10 bg-neutral-950">
+                              {order.imageUrl ? (
+                                <Image
+                                  src={order.imageUrl}
+                                  alt={order.title}
+                                  fill
+                                  sizes="192px"
+                                  className="object-cover"
+                                />
                               ) : null}
                             </div>
-                          ) : null}
-                        </div>
 
-                        <div className="w-full sm:w-auto flex flex-row items-center justify-between sm:flex-col sm:justify-center sm:items-end gap-2 sm:gap-4 sm:pl-6 sm:border-l border-white/10 shrink-0">
-                          <div className="text-left sm:text-right min-w-0">
-                            <p className="text-[10px] text-neutral-500 uppercase font-bold tracking-widest mb-0.5">
-                              Giá mua
-                            </p>
-                            <p
-                              className={`text-base sm:text-xl font-black truncate ${
+                            <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+                              {/* Two lines, not one: the names are long, and one
+                                  line cut them to "… AN TOÀN - CÓ …". */}
+                              <h3 className="line-clamp-2 text-sm font-black leading-snug text-white transition-colors group-hover:text-[var(--menzu-accent)]">
+                                {order.title}
+                              </h3>
+                              <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                                {order.chip ? (
+                                  <span className="rounded bg-white/5 px-2 py-0.5 text-[9px] font-black uppercase tracking-widest text-neutral-300">
+                                    {order.chip}
+                                    {order.quantity > 1 ? ` ×${order.quantity}` : ""}
+                                  </span>
+                                ) : null}
+                                {/* The time alone under its day's heading, the
+                                    whole stamp when a price sort drops the
+                                    headings. Shown on a phone too, where the
+                                    code and time used to be hidden. */}
+                                <span className="text-[11px] font-semibold tabular-nums text-neutral-400">
+                                  Đơn {order.detail.code} · {byDay ? order.clock : order.stamp}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="flex shrink-0 items-center justify-between gap-3 sm:flex-col sm:items-end sm:justify-center sm:gap-1.5">
+                            <span
+                              className={`text-sm font-black tabular-nums ${
                                 struck ? "text-neutral-500 line-through" : "text-emerald-400"
                               }`}
                             >
                               {money(order.total)}
-                            </p>
+                            </span>
+                            {/* The status, only when there is something to know,
+                                or the way to the review: the two things a buyer
+                                comes back to this list for. */}
+                            {order.badge || order.review ? (
+                              <div className="flex items-center gap-2">
+                                {order.badge ? (
+                                  <span
+                                    className={`${order.badge.tone} rounded border px-2 py-1 text-[9px] font-black uppercase tracking-widest sm:text-[10px]`}
+                                  >
+                                    {order.badge.label}
+                                  </span>
+                                ) : null}
+                                {order.review ? (
+                                  <OrderReviewTag href={order.review.href} reviewed={order.review.reviewed} />
+                                ) : null}
+                              </div>
+                            ) : null}
                           </div>
-                          {/* Drawn as menzu's button; the card around it is
-                              what opens the receipt. */}
-                          <span className="shrink-0 px-4 py-2 sm:px-6 sm:py-3 bg-white text-black font-black uppercase tracking-wide text-xs sm:text-sm rounded-xl group-hover:bg-neutral-200 transition-colors flex items-center justify-center gap-1.5 whitespace-nowrap">
-                            Chi tiết
-                            <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" aria-hidden />
-                          </span>
-                        </div>
-                      </div>
-                    </OrderDetailModal>
-                  );
-                })
+                        </OrderDetailModal>
+                      );
+                    })}
+                  </div>
+                ))
               )}
             </div>
 
