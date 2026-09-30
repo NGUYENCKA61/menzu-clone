@@ -28,7 +28,12 @@ export function HeaderSearch() {
   const router = useRouter();
   const [q, setQ] = useState("");
   const [hits, setHits] = useState<Hit[]>([]);
-  const [loading, setLoading] = useState(false);
+  // The term whose answer `hits` holds. While the box holds any other term
+  // of two or more characters, a search is on its way — from the first
+  // keystroke, not only once the pause below has run out — and the box says
+  // so with its spinner rather than sitting still, or flashing "không thấy"
+  // for words that were never asked about.
+  const [settled, setSettled] = useState("");
   const [active, setActive] = useState(0);
   const box = useRef<HTMLDivElement>(null);
   const input = useRef<HTMLInputElement>(null);
@@ -41,17 +46,17 @@ export function HeaderSearch() {
     if (term.length < 2) return;
     const controller = new AbortController();
     const timer = window.setTimeout(() => {
-      setLoading(true);
       fetch(`/api/search?q=${encodeURIComponent(term)}`, { signal: controller.signal })
         .then((res) => (res.ok ? res.json() : { hits: [] }))
         .then((data: { hits?: Hit[] }) => {
           setHits(data.hits ?? []);
           setActive(0);
-          setLoading(false);
+          setSettled(term);
         })
         .catch(() => {
-          // Aborted by newer typing, or offline: the box keeps what it had.
-          setLoading(false);
+          // Aborted by newer typing: the newer search carries on. Offline:
+          // the box keeps what it had and stops spinning.
+          if (!controller.signal.aborted) setSettled(term);
         });
     }, 220);
     return () => {
@@ -122,7 +127,8 @@ export function HeaderSearch() {
 
   // Under two characters nothing is asked, so nothing stale is shown either.
   const shown = term.length >= 2 ? hits : [];
-  const showList = term.length >= 2 && (shown.length > 0 || !loading);
+  const searching = term.length >= 2 && settled !== term;
+  const showList = term.length >= 2 && (shown.length > 0 || !searching);
 
   return (
     // Desktop only: on a phone the header has no room for a box, and the
@@ -136,7 +142,10 @@ export function HeaderSearch() {
             white at 10% read as decoration and sat at the wrong radius from
             the button beside it. */}
         <label className="relative flex h-9 items-center rounded-[10px] border border-[#2b2b31] bg-[#17171c] text-neutral-300 transition-colors focus-within:border-[var(--menzu-accent)]/70 focus-within:ring-[3px] focus-within:ring-[var(--menzu-accent)]/15">
-          {navigating ? (
+          {/* The magnifier itself turns while a search or a pick is on its
+              way — where the eye already looks for it, not at the far end,
+              which keeps the clear button. */}
+          {navigating || searching ? (
             <Loader2 size={15} aria-hidden className="ml-2.5 shrink-0 animate-spin text-neutral-500 motion-reduce:animate-none" />
           ) : (
             <Search size={15} aria-hidden className="ml-2.5 shrink-0 text-neutral-500" />
@@ -162,9 +171,7 @@ export function HeaderSearch() {
             enterKeyHint="search"
             className="h-full w-full min-w-0 bg-transparent px-2 text-[13px] font-semibold text-white outline-none placeholder:font-normal placeholder:text-neutral-400 [&::-webkit-search-cancel-button]:hidden"
           />
-          {loading ? (
-            <Loader2 size={14} aria-hidden className="mr-2.5 shrink-0 animate-spin text-neutral-500" />
-          ) : q ? (
+          {q ? (
             <button
               type="button"
               aria-label="Xoá từ khoá"

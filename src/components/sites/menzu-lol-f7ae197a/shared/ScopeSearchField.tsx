@@ -1,5 +1,6 @@
 "use client";
 
+import { Loader2 } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 
@@ -44,6 +45,12 @@ export interface ScopeSearchFieldProps {
     items: { name: string; imageUrl: string | null }[];
     onPick: (name: string) => void;
   };
+  /**
+   * The listing is on its way: the scope at the field’s start turns into a
+   * spinner in the same spot, as the header box turns its magnifier — the
+   * owner wanted the circle where the search mark sits, not at the far end.
+   */
+  busy?: boolean;
 }
 
 /**
@@ -66,6 +73,7 @@ export function ScopeSearchField({
   badge,
   glow,
   hotPick,
+  busy = false,
 }: ScopeSearchFieldProps) {
   // The chip's rotation: one index over however many items came in. The
   // interval runs only when there is a second item to turn to, and rests while
@@ -128,58 +136,69 @@ export function ScopeSearchField({
       >
         {/* Four corner brackets round a dashed ring and a centre dot — a scope,
             not a magnifying glass. Decorative: the placeholder already says what
-            the field is for. */}
-        <svg
-          width="22"
-          height="22"
-          viewBox="0 0 22 22"
-          fill="none"
-          aria-hidden
-          className="shrink-0"
-        >
-          <circle
-            className="val-cross-ring"
-            cx="11"
-            cy="11"
-            r="8"
-            stroke="rgba(239,68,68,0.35)"
-            strokeWidth="0.8"
-            strokeDasharray="3.5 2.5"
-          />
-          <path
-            d="M5 9V5h4"
-            stroke="#ef4444"
-            strokeWidth="1.1"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            opacity="0.7"
-          />
-          <path
-            d="M13 5h4v4"
-            stroke="#ef4444"
-            strokeWidth="1.1"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            opacity="0.7"
-          />
-          <path
-            d="M17 13v4h-4"
-            stroke="#ef4444"
-            strokeWidth="1.1"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            opacity="0.7"
-          />
-          <path
-            d="M9 17H5v-4"
-            stroke="#ef4444"
-            strokeWidth="1.1"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            opacity="0.7"
-          />
-          <circle className="val-dot-blink" cx="11" cy="11" r="1.5" fill="#ef4444" />
-        </svg>
+            the field is for. While the listing loads, a spinner takes its
+            place in a box of the same size, so nothing beside it moves. */}
+        {busy ? (
+          <span className="grid h-[22px] w-[22px] shrink-0 place-items-center">
+            <Loader2
+              size={18}
+              aria-hidden
+              className="animate-spin text-[#ef4444]/80 motion-reduce:animate-none"
+            />
+          </span>
+        ) : (
+          <svg
+            width="22"
+            height="22"
+            viewBox="0 0 22 22"
+            fill="none"
+            aria-hidden
+            className="shrink-0"
+          >
+            <circle
+              className="val-cross-ring"
+              cx="11"
+              cy="11"
+              r="8"
+              stroke="rgba(239,68,68,0.35)"
+              strokeWidth="0.8"
+              strokeDasharray="3.5 2.5"
+            />
+            <path
+              d="M5 9V5h4"
+              stroke="#ef4444"
+              strokeWidth="1.1"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              opacity="0.7"
+            />
+            <path
+              d="M13 5h4v4"
+              stroke="#ef4444"
+              strokeWidth="1.1"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              opacity="0.7"
+            />
+            <path
+              d="M17 13v4h-4"
+              stroke="#ef4444"
+              strokeWidth="1.1"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              opacity="0.7"
+            />
+            <path
+              d="M9 17H5v-4"
+              stroke="#ef4444"
+              strokeWidth="1.1"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              opacity="0.7"
+            />
+            <circle className="val-dot-blink" cx="11" cy="11" r="1.5" fill="#ef4444" />
+          </svg>
+        )}
 
         {/* The original pins this hairline at left:38px. Here it is simply the
             next item in the row, so it cannot drift out of place when the shell's
