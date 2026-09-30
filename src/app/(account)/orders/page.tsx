@@ -146,6 +146,7 @@ export default async function OrdersPage({
               login: o.login,
               canRefund: o.canRefund,
               refundBlockedReason: o.refundBlockedReason,
+              refundNeedsWarranty: o.refundNeedsWarranty,
             },
             autoOpen: don === o.code,
             supportHref: `/orders/${o.code}/bao-hanh`,

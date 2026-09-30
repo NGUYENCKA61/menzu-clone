@@ -141,6 +141,49 @@ export function refundWindowClosed(purchasedAt: Date, now: Date): boolean {
   return now.getTime() > refundDeadline(purchasedAt).getTime();
 }
 
+/** One warranty report on the order, as far as refunds care. */
+export interface WarrantyRound {
+  status: string;
+  createdAt: Date;
+  resolvedAt: Date | null;
+}
+
+/**
+ * Where the refund right stands, warranty first.
+ *
+ * The shop's order of things (30/09/2026): a buyer whose order is not working
+ * reports it for warranty first and asks for the money back only after —
+ * "bảo hành trước rồi hoàn trả sau". So a report sent inside the three days
+ * after the sale is what opens refunds. While the shop is still working on it
+ * the right is held, however long that takes: a buyer who reported in time
+ * must not lose the refund to the shop's own pace. Once every report sent in
+ * time is closed, the buyer has another three days from the last close.
+ *
+ * - "needs-warranty": no report in time yet; `sendBy` is the last moment one
+ *   still opens refunds (three days from the sale).
+ * - "held": a report sent in time is still open.
+ * - "until": every report sent in time is closed; refunds end at `deadline`.
+ */
+export type RefundWindow =
+  | { kind: "needs-warranty"; sendBy: Date }
+  | { kind: "held" }
+  | { kind: "until"; deadline: Date };
+
+export function refundWindow(purchasedAt: Date, warranties: WarrantyRound[]): RefundWindow {
+  const sendBy = refundDeadline(purchasedAt);
+  const inTime = warranties.filter((w) => w.createdAt.getTime() <= sendBy.getTime());
+  if (inTime.length === 0) return { kind: "needs-warranty", sendBy };
+  if (inTime.some((w) => w.status !== "RESOLVED")) return { kind: "held" };
+  // The admin route stamps resolvedAt on every close; createdAt only stands in
+  // for a row closed before that column existed.
+  const lastClose = Math.max(...inTime.map((w) => (w.resolvedAt ?? w.createdAt).getTime()));
+  return { kind: "until", deadline: new Date(lastClose + WINDOW_MS) };
+}
+
+/** What a buyer who has not reported the order yet is told. */
+export const REFUND_NEEDS_WARRANTY =
+  "Gửi yêu cầu bảo hành trước — nếu shop không khắc phục được, bạn mới yêu cầu hoàn trả.";
+
 /**
  * Whether this order can be asked about, and what to say when it cannot.
  *
@@ -155,12 +198,18 @@ export function refundWindowClosed(purchasedAt: Date, now: Date): boolean {
  *
  * A *decided* request is no bar: a rejection the buyer can answer is the whole
  * point of keeping the rounds separate.
+ *
+ * The clock is the warranty-first one (refundWindow): no report yet asks for
+ * one while the three days last and says "quá hạn" after; a report the shop
+ * is still working holds the right open; three days after the last close it
+ * ends.
  */
 export function refundBlockedReason({
   orderStatus,
   openRequest,
   reviewed,
   purchasedAt,
+  warranties,
   now,
 }: {
   orderStatus: string;
@@ -168,6 +217,8 @@ export function refundBlockedReason({
   /** The buyer has already reviewed this order. */
   reviewed: boolean;
   purchasedAt: Date;
+  /** Every warranty report on the order, open or closed. */
+  warranties: WarrantyRound[];
   now: Date;
 }): string | null {
   if (orderStatus !== "PAID") {
@@ -179,8 +230,14 @@ export function refundBlockedReason({
   if (reviewed) {
     return "Đơn này đã được đánh giá — sau khi đánh giá thì không yêu cầu hoàn trả được nữa.";
   }
-  if (refundWindowClosed(purchasedAt, now)) {
-    return `Đã quá ${REFUND_WINDOW_DAYS} ngày kể từ lúc mua — đơn này không còn yêu cầu hoàn trả được.`;
+  const window = refundWindow(purchasedAt, warranties);
+  if (window.kind === "needs-warranty") {
+    return now.getTime() > window.sendBy.getTime()
+      ? `Đã quá ${REFUND_WINDOW_DAYS} ngày kể từ lúc mua — đơn này không còn yêu cầu hoàn trả được.`
+      : REFUND_NEEDS_WARRANTY;
+  }
+  if (window.kind === "until" && now.getTime() > window.deadline.getTime()) {
+    return `Đã quá ${REFUND_WINDOW_DAYS} ngày kể từ khi shop xử lý xong bảo hành — đơn này không còn yêu cầu hoàn trả được.`;
   }
   return null;
 }

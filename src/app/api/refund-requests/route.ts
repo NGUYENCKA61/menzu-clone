@@ -66,6 +66,7 @@ export async function POST(request: Request) {
         take: 1,
       },
       feedback: { select: { id: true } },
+      warrantyRequests: { select: { status: true, createdAt: true, resolvedAt: true } },
     },
   });
   if (!order) {
@@ -79,6 +80,7 @@ export async function POST(request: Request) {
     openRequest: order.refundRequests.length > 0,
     reviewed: order.feedback !== null,
     purchasedAt: order.createdAt,
+    warranties: order.warrantyRequests,
     now: new Date(),
   });
   if (blocked) {

@@ -12,7 +12,7 @@ import { poolStock } from "@/lib/accountPool";
 import { db } from "@/lib/db";
 import { docHtmlToPlainText } from "@/lib/docHtml";
 import { parseBadges } from "@/lib/productBadges";
-import { refundBlockedReason } from "@/lib/refundRequests";
+import { refundBlockedReason, REFUND_NEEDS_WARRANTY } from "@/lib/refundRequests";
 import { showsStatusPill } from "@/lib/statusPill";
 import { isSalesLocked } from "@/lib/softwareStatus";
 import { parseFeatures } from "@/lib/productFeatures";
@@ -911,6 +911,8 @@ export interface OrderRow {
   refundBlockedReason: string | null;
   /** A warranty report the shop has not closed yet. */
   warrantyOpen: boolean;
+  /** Refunds wait for a warranty report first (the receipt says so). */
+  refundNeedsWarranty: boolean;
   /** The newest refund round on this order was turned down. The order itself
    *  is untouched — still paid, key still valid — but the row says so, because
    *  a buyer who asked and was refused should not have to open the receipt to
@@ -974,12 +976,10 @@ export async function getOrders(userId: string): Promise<OrderRow[]> {
         take: 1,
       },
       feedback: { select: { id: true } },
-      // Only whether one is still open: the row wears a badge for it and
-      // holds back the review tag while it is.
+      // Every round: an open one gives the row its badge, and all of them
+      // set the warranty-first refund clock.
       warrantyRequests: {
-        where: { status: { not: "RESOLVED" } },
-        select: { id: true },
-        take: 1,
+        select: { status: true, createdAt: true, resolvedAt: true },
       },
     },
   });
@@ -987,7 +987,7 @@ export async function getOrders(userId: string): Promise<OrderRow[]> {
     id: o.id,
     code: o.code,
     reviewed: o.feedback !== null,
-    warrantyOpen: o.warrantyRequests.length > 0,
+    warrantyOpen: o.warrantyRequests.some((w) => w.status !== "RESOLVED"),
     status: o.status,
     total: Number(o.total),
     createdAt: o.createdAt,
@@ -1046,11 +1046,13 @@ export async function getOrders(userId: string): Promise<OrderRow[]> {
         openRequest: latest === "PENDING",
         reviewed: o.feedback !== null,
         purchasedAt: o.createdAt,
+        warranties: o.warrantyRequests,
         now,
       });
       return {
         canRefund: blocked === null,
         refundBlockedReason: blocked,
+        refundNeedsWarranty: blocked === REFUND_NEEDS_WARRANTY,
         // Only the newest round counts: a refusal the buyer has since answered
         // with a second request is history, and the row should say what is
         // true now.

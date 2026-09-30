@@ -105,6 +105,9 @@ export interface OrderDetailData {
   /** Why not, when it is not: shown on the dead button so the buyer learns
    *  the window existed rather than pressing a thing that ignores them. */
   refundBlockedReason: string | null;
+  /** Refunds wait for a warranty report first: the line under the buttons
+   *  points the buyer there rather than calling it a refusal. */
+  refundNeedsWarranty?: boolean;
 }
 
 /*
@@ -1032,7 +1035,9 @@ export function OrderDetailModal({
                     {order.paid && !order.canRefund && order.refundBlockedReason ? (
                       <p className="text-[11px] leading-snug text-neutral-500">
                         <RotateCcw className="mr-1 inline h-3 w-3 align-[-2px]" aria-hidden />
-                        Không hoàn trả được: {order.refundBlockedReason}
+                        {order.refundNeedsWarranty
+                          ? "Gặp lỗi? Gửi yêu cầu bảo hành trước — shop không khắc phục được thì bạn yêu cầu hoàn trả."
+                          : `Không hoàn trả được: ${order.refundBlockedReason}`}
                       </p>
                     ) : null}
                     {reviewHref && order.reviewed ? (

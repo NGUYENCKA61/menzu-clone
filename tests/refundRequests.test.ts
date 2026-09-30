@@ -12,7 +12,9 @@ import {
   REASON_TOO_SHORT,
   refundBlockedReason,
   refundDeadline,
+  refundWindow,
   refundWindowClosed,
+  REFUND_NEEDS_WARRANTY,
   REFUND_STATUS,
   REFUND_WINDOW_DAYS,
 } from "@/lib/refundRequests";
@@ -86,16 +88,85 @@ describe("the three-day window", () => {
   });
 });
 
+describe("refundWindow (warranty first)", () => {
+  const bought = new Date("2026-09-01T10:00:00Z");
+  const day = (d: number) => new Date(bought.getTime() + d * 24 * 60 * 60 * 1000);
+
+  it("asks for a report while none was sent in time", () => {
+    expect(refundWindow(bought, [])).toEqual({ kind: "needs-warranty", sendBy: day(3) });
+  });
+
+  it("ignores a report sent after the three days", () => {
+    const window = refundWindow(bought, [{ status: "OPEN", createdAt: day(4), resolvedAt: null }]);
+    expect(window.kind).toBe("needs-warranty");
+  });
+
+  it("counts a report sent on the deadline itself", () => {
+    const window = refundWindow(bought, [{ status: "OPEN", createdAt: day(3), resolvedAt: null }]);
+    expect(window.kind).toBe("held");
+  });
+
+  it("holds the right while any report sent in time is still open", () => {
+    const window = refundWindow(bought, [
+      { status: "RESOLVED", createdAt: day(1), resolvedAt: day(2) },
+      { status: "IN_PROGRESS", createdAt: day(2), resolvedAt: null },
+    ]);
+    expect(window.kind).toBe("held");
+  });
+
+  it("runs three days from the last close once every report is closed", () => {
+    const window = refundWindow(bought, [
+      { status: "RESOLVED", createdAt: day(1), resolvedAt: day(2) },
+      { status: "RESOLVED", createdAt: day(2), resolvedAt: day(6) },
+    ]);
+    expect(window).toEqual({ kind: "until", deadline: day(9) });
+  });
+});
+
 describe("refundBlockedReason", () => {
   const bought = new Date("2026-09-01T10:00:00Z");
+  const day = (d: number) => new Date(bought.getTime() + d * 24 * 60 * 60 * 1000);
   /** Inside the window: a day after the sale. */
   const soon = new Date("2026-09-02T10:00:00Z");
   /** Outside it: a week after. */
   const late = new Date("2026-09-08T10:00:00Z");
-  const paid = { orderStatus: "PAID", openRequest: false, reviewed: false, purchasedAt: bought };
+  /** A warranty report sent on day one, still being worked on. */
+  const reported = [{ status: "OPEN", createdAt: day(1), resolvedAt: null }];
+  const paid = {
+    orderStatus: "PAID",
+    openRequest: false,
+    reviewed: false,
+    purchasedAt: bought,
+    warranties: reported,
+  };
 
-  it("lets a paid order inside the window through", () => {
+  it("lets a paid order with a report sent in time through", () => {
     expect(refundBlockedReason({ ...paid, now: soon })).toBeNull();
+  });
+
+  it("asks for a warranty report first", () => {
+    expect(refundBlockedReason({ ...paid, warranties: [], now: soon })).toBe(
+      REFUND_NEEDS_WARRANTY,
+    );
+  });
+
+  it("keeps the right while the shop works on a report sent in time, however long", () => {
+    expect(refundBlockedReason({ ...paid, now: day(20) })).toBeNull();
+  });
+
+  it("gives three days after the shop closes the report, and no more", () => {
+    const closed = [{ status: "RESOLVED", createdAt: day(1), resolvedAt: day(5) }];
+    expect(refundBlockedReason({ ...paid, warranties: closed, now: day(7) })).toBeNull();
+    expect(refundBlockedReason({ ...paid, warranties: closed, now: day(9) })).toMatch(
+      /xử lý xong bảo hành/,
+    );
+  });
+
+  it("does not reopen refunds for a report sent after the three days", () => {
+    const tooLate = [{ status: "OPEN", createdAt: day(5), resolvedAt: null }];
+    expect(refundBlockedReason({ ...paid, warranties: tooLate, now: day(6) })).toMatch(
+      /quá 3 ngày kể từ lúc mua/,
+    );
   });
 
   it("refuses an order that was never charged", () => {
@@ -118,8 +189,8 @@ describe("refundBlockedReason", () => {
     );
   });
 
-  it("refuses once three days have passed", () => {
-    expect(refundBlockedReason({ ...paid, now: late })).toMatch(/quá 3 ngày/);
+  it("refuses once three days have passed with no report sent", () => {
+    expect(refundBlockedReason({ ...paid, warranties: [], now: late })).toMatch(/quá 3 ngày/);
   });
 
   it("says the money reason first when both are true", () => {
