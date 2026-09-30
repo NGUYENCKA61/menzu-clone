@@ -14,6 +14,7 @@ import {
   KeyRound,
   Lock,
   MessageCircle,
+  Package,
   Receipt,
   RotateCcw,
   ShieldCheck,
@@ -536,14 +537,15 @@ export function OrderDetailModal({
 
                 {/* HEADER */}
                 <div className="flex items-center justify-between gap-4 border-b border-white/[0.06] px-5 py-5 sm:px-6">
-                  {/* The Receipt mark the wallet invoice's title wears, in
-                      place of the red bar the storefront's sections use. */}
+                  {/* The Package mark (the owner's pick over Receipt), in the
+                      accent like every account page title's icon, in place of
+                      the red bar the storefront's sections use. */}
                   <div>
                     <h2
                       id={`order-${order.code}-title`}
                       className="flex items-center gap-2.5 text-lg font-black uppercase tracking-wider text-white sm:text-xl"
                     >
-                      <Receipt className="h-5 w-5 shrink-0 text-[var(--menzu-accent)]" aria-hidden />
+                      <Package className="h-5 w-5 shrink-0 text-[var(--menzu-accent)]" aria-hidden />
                       Chi tiết đơn hàng
                     </h2>
                     <p className="mt-1 text-xs text-neutral-500">
