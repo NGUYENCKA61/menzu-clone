@@ -282,31 +282,31 @@ export function OrdersList({ orders }: { orders: OrderCardView[] }) {
                               <h3 className="line-clamp-2 text-sm font-black leading-snug text-white transition-colors group-hover:text-[var(--menzu-accent)] sm:text-base">
                                 {order.title}
                               </h3>
-                              {/* The facts on one quiet line in the page's own
-                                  font. The time alone under its day's heading,
-                                  the whole stamp when a price sort drops the
-                                  headings. Each fact holds together, so a
-                                  narrow card breaks the line at a " · ", never
-                                  between "Gói" and "30 ngày". */}
-                              <p className="text-[11px] tabular-nums text-neutral-400 sm:text-xs">
-                                <span className="whitespace-nowrap">
-                                  <span className="text-neutral-500">Mã đơn</span> {order.detail.code}
-                                </span>
-                                {" · "}
-                                <span className="whitespace-nowrap">
-                                  {byDay ? order.clock : order.stamp}
-                                </span>
+                              {/* The tier (a tool) or rank (an account) as the
+                                  old list's bordered chip, so two orders of one
+                                  tool tell apart at a glance ("cái gói 1 ngày có
+                                  nên card bo như cũ" → "thử đi"); then the facts
+                                  on one quiet line. The time alone under its
+                                  day's heading, the whole stamp when a price sort
+                                  drops the headings. Each fact holds together, so
+                                  a narrow card breaks at a " · ". */}
+                              <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
                                 {order.chip ? (
-                                  <>
-                                    {" · "}
-                                    <span className="whitespace-nowrap">
-                                      <span className="text-neutral-500">{order.isSoftware ? "Gói" : "Hạng"}</span>{" "}
-                                      {order.chip}
-                                      {order.quantity > 1 ? ` ×${order.quantity}` : ""}
-                                    </span>
-                                  </>
+                                  <span className="rounded-md border border-white/15 bg-white/10 px-2 py-0.5 text-[9px] font-black uppercase tracking-widest text-neutral-300">
+                                    {order.chip}
+                                    {order.quantity > 1 ? ` ×${order.quantity}` : ""}
+                                  </span>
                                 ) : null}
-                              </p>
+                                <p className="text-[11px] tabular-nums text-neutral-400 sm:text-xs">
+                                  <span className="whitespace-nowrap">
+                                    <span className="text-neutral-500">Mã đơn</span> {order.detail.code}
+                                  </span>
+                                  {" · "}
+                                  <span className="whitespace-nowrap">
+                                    {byDay ? order.clock : order.stamp}
+                                  </span>
+                                </p>
+                              </div>
                               {/* The status, only when there is something to
                                   know. "Đánh giá" moved into the receipt
                                   (30/09/2026: "bỏ cái đánh giá ngoài card đi"). */}
