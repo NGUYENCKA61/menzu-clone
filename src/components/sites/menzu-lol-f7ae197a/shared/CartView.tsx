@@ -589,8 +589,8 @@ export function CartView({
               ) : null}
               {done.tierCut > 0 ? (
                 <SumRow
-                  label={`Giảm giá hạng ${done.tierLabel}${
-                    done.tierPercent > 0 ? ` −${formatTierPercent(done.tierPercent)}%` : ""
+                  label={`Hạng ${done.tierLabel} giảm${
+                    done.tierPercent > 0 ? ` ${formatTierPercent(done.tierPercent)}%` : " giá"
                   }`}
                   value={`−${formatVnd(done.tierCut)}đ`}
                   tone="ok"
@@ -898,7 +898,7 @@ export function CartView({
           ) : null}
           {tierCut > 0 ? (
             <SumRow
-              label={`Giảm giá hạng ${viewer.tierLabel} −${formatTierPercent(viewer.tierPercent)}%`}
+              label={`Hạng ${viewer.tierLabel} giảm ${formatTierPercent(viewer.tierPercent)}%`}
               value={`−${formatVnd(tierCut)}đ`}
               tone="ok"
             />

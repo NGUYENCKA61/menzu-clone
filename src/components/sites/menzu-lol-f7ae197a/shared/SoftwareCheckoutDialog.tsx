@@ -406,7 +406,7 @@ export function SoftwareCheckoutDialog({
             <PriceRow label="Tạm tính" value={`${formatVnd(lineTotal)}đ`} />
             {memberTier && memberCut > 0 ? (
               <PriceRow
-                label={`Ưu đãi hạng ${TIER_RULES[memberTier].label} −${formatTierPercent(TIER_RULES[memberTier].discountPercent)}%`}
+                label={`Hạng ${TIER_RULES[memberTier].label} giảm ${formatTierPercent(TIER_RULES[memberTier].discountPercent)}%`}
                 value={`−${formatVnd(memberCut)}đ`}
                 tone="ok"
               />
