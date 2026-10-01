@@ -28,7 +28,7 @@ import {
   type TierColor,
 } from "@/components/sites/menzu-lol-f7ae197a/shared/productData";
 import type { FlashSaleItem } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/flashSaleData";
-import type { ContentTier } from "@prisma/client";
+import type { ContentTier, DocCategory } from "@prisma/client";
 
 /**
  * Data access for the server components.
@@ -1323,6 +1323,18 @@ export async function listDocArticles() {
 
 export async function getDocArticle(slug: string) {
   return db.docArticle.findUnique({ where: { slug } });
+}
+
+/** Up to `take` other articles on the same shelf, most read first — the
+ *  article page's "Các bài viết liên quan", as menzu closes an article with
+ *  "Cùng chuyên mục". */
+export async function listRelatedDocs(slug: string, category: DocCategory, take = 3) {
+  return db.docArticle.findMany({
+    where: { category, slug: { not: slug } },
+    orderBy: [{ views: "desc" }, { publishedAt: "desc" }],
+    take,
+    select: { slug: true, title: true, thumbnailUrl: true, views: true, publishedAt: true },
+  });
 }
 
 export interface InventoryItem {

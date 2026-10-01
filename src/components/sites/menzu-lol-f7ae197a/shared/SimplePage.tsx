@@ -23,6 +23,14 @@ interface SimplePageProps {
   /** Something at the far end of the title row — the wiki's search box. It
    *  drops under the title on a phone. */
   action?: ReactNode;
+  /** The steps between "Trang chủ" and this page, when there are more than
+   *  one — a wiki article sits under the wiki. Replaces `crumb`. */
+  crumbs?: { label: string; href?: string }[];
+  /** A line under the title — an article's shelf, date and reads. */
+  subtitle?: ReactNode;
+  /** "normal": the title as written, not in capitals — an article's title is
+   *  a sentence ("Menzu Mail Là Gì ?"), as menzu prints it. */
+  titleCase?: "upper" | "normal";
 }
 
 /** Standard inner-page chrome: header, breadcrumb, heading, footer. */
@@ -33,6 +41,9 @@ export function SimplePage({
   icon: Icon,
   ground = "black",
   action,
+  crumbs,
+  subtitle,
+  titleCase = "upper",
 }: SimplePageProps) {
   return (
     // Opaque, covering the fixed PageBackdrop artwork — the original keeps its
@@ -50,21 +61,28 @@ export function SimplePage({
         <div className="w-full">
           <div className="max-w-[1320px] mx-auto px-4 lg:px-6 py-12">
             <Breadcrumb
-              items={[{ label: "Trang chủ", href: "/" }, { label: crumb }]}
+              items={[{ label: "Trang chủ", href: "/" }, ...(crumbs ?? [{ label: crumb }])]}
             />
 
             {/* The row headings' red mark in front of the title, and a neutral
                 rule under it — the same opening every home-page row makes. */}
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-8 pb-4 border-b border-white/10">
-              <div className="flex items-center gap-3">
-                {Icon ? (
-                  <Icon size={28} className="shrink-0 text-[var(--menzu-accent)]" aria-hidden />
-                ) : (
-                  <span aria-hidden className="h-6 w-[3px] shrink-0 rounded-full bg-[var(--menzu-accent)]" />
-                )}
-                <h1 className="text-2xl sm:text-3xl font-black uppercase tracking-wider text-white">
-                  {title}
-                </h1>
+              <div className="min-w-0">
+                <div className="flex items-center gap-3">
+                  {Icon ? (
+                    <Icon size={28} className="shrink-0 text-[var(--menzu-accent)]" aria-hidden />
+                  ) : (
+                    <span aria-hidden className="h-6 w-[3px] shrink-0 rounded-full bg-[var(--menzu-accent)]" />
+                  )}
+                  <h1
+                    className={`text-2xl sm:text-3xl font-black text-white ${
+                      titleCase === "upper" ? "uppercase tracking-wider" : "leading-tight"
+                    }`}
+                  >
+                    {title}
+                  </h1>
+                </div>
+                {subtitle ? <div className="mt-3">{subtitle}</div> : null}
               </div>
               {action}
             </div>

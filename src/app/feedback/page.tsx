@@ -62,9 +62,9 @@ export default async function FeedbackPage() {
 
             <div className="flex items-start justify-between gap-3 mb-6">
               <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-xl bg-[var(--menzu-accent)]/10 flex items-center justify-center border border-[var(--menzu-accent)]/20 shrink-0 mt-0.5">
-                  <Star className="w-5 h-5 text-[var(--menzu-accent)] fill-[var(--menzu-accent)]" />
-                </div>
+                {/* A bare red mark before the title, as the other pages now
+                    wear theirs — not a tile around it. */}
+                <Star size={28} className="mt-0.5 shrink-0 text-[var(--menzu-accent)] sm:mt-1" aria-hidden />
                 <div>
                   <h1 className="text-2xl sm:text-3xl font-black uppercase tracking-wider text-white">
                     Đánh Giá
