@@ -135,8 +135,10 @@ export function DocsHelpCenter({
   const hashTab: DocShelf | null = isDocShelf(hashKey) ? hashKey : null;
   const [chosen, setChosen] = useState<DocShelf | null>(null);
   const tab = chosen ?? hashTab ?? "FAQ";
-  /** Bumped by a shelf press; the scroll to the list runs once the new
-   *  shelf has been laid out, not before. */
+  /** Bumped by a page turn in the list; the scroll back to the list's top
+   *  runs once the new page has been laid out, not before. A shelf press
+   *  does not bump it: the page stays where the reader is (the owner,
+   *  02/10/2026: "bỏ cái script ấn các danh mục bị kéo xuống đi"). */
   const [jump, setJump] = useState(0);
 
   useEffect(() => {
@@ -184,7 +186,6 @@ export function DocsHelpCenter({
   function openShelf(key: DocShelf) {
     setChosen(key);
     setQuery("");
-    setJump((j) => j + 1);
   }
 
   const heading = searching ? `Kết quả cho “${query.trim()}”` : DOC_SHELF_LABEL[tab];
