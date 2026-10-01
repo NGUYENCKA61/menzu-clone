@@ -15,9 +15,10 @@ export const VOUCHER_LABEL =
 
 export const VOUCHER_ICON = "h-3.5 w-3.5 shrink-0 text-[var(--menzu-accent)]";
 
-/** "Đã áp dụng — giảm …" under the box, in the box's red (the owner,
- *  01/10/2026: "chữ đỏ đi"); the discount's own row below stays green. */
-export const VOUCHER_APPLIED = "mt-2 text-[11px] font-semibold text-[var(--menzu-accent)]";
+/** "Đã áp dụng mã" under the box, green like the discount's own row below,
+ *  which carries the amount (the owner, 01/10/2026: "thành đã áp dụng như
+ *  bạn nói"). It was red, and read like the box's error line. */
+export const VOUCHER_APPLIED = "mt-2 text-[11px] font-semibold text-emerald-400";
 
 /** `typed`: a code is in the box — its edge takes the accent. */
 export function voucherInputClass(typed: boolean): string {

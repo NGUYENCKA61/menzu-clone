@@ -376,7 +376,7 @@ export function VoucherField({
         </p>
       ) : null}
       {applied ? (
-        <p className={VOUCHER_APPLIED}>Đã áp dụng — giảm {formatVnd(applied.cut)}đ</p>
+        <p className={VOUCHER_APPLIED}>Đã áp dụng mã</p>
       ) : null}
     </div>
   );
