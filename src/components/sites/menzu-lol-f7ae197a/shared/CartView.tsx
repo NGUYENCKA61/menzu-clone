@@ -31,7 +31,6 @@ import {
   tierDiscountFor,
   type MemberTierValue,
 } from "@/lib/memberTiers";
-import { SUPPORT_WINDOW } from "@/lib/supportHours";
 
 import { formatVnd } from "./productData";
 import {
@@ -968,18 +967,9 @@ export function CartView({
           {busy ? "Đang xử lý" : isPending ? "Đang cập nhật giỏ" : ""}
         </span>
 
-        {/* Three short lines under the button, the way lmarket closes its
-            summary (the owner, 01/10/2026), in place of one grey sentence —
-            plain, without the ticks ("bỏ 3 dấu tick"). */}
-        <ul className="relative mt-4 flex flex-col items-center gap-1 text-[11.5px] text-neutral-500">
-          {[
-            "Trừ thẳng vào số dư ví",
-            "Giao key ngay sau khi thanh toán",
-            `Hỗ trợ bảo hành ${SUPPORT_WINDOW} mỗi ngày`,
-          ].map((promise) => (
-            <li key={promise}>{promise}</li>
-          ))}
-        </ul>
+        {/* Nothing under the button: the grey sentence that sat here, then
+            lmarket's three lines, came off on the owner's word (01/10/2026,
+            "bỏ 3 dòng này luôn đi"). */}
       </aside>
     </div>
   );
