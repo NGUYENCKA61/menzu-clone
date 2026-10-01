@@ -7,11 +7,12 @@ import { ArrowLeft, Banknote, Clock, Info, Landmark } from "lucide-react";
 import { AccountPageFrame } from "@/components/sites/menzu-lol-f7ae197a/shared/AccountPageFrame";
 import { formatVnd } from "@/components/sites/menzu-lol-f7ae197a/shared/productData";
 import { WarrantyBankForm } from "@/components/sites/menzu-lol-f7ae197a/shared/WarrantyBankForm";
+import { WarrantyChat } from "@/components/sites/menzu-lol-f7ae197a/shared/WarrantyChat";
 import { WarrantyRequestForm } from "@/components/sites/menzu-lol-f7ae197a/shared/WarrantyRequestForm";
 import { maskAccount } from "@/lib/bankRefund";
 import { db } from "@/lib/db";
 import { ORDER_STATUS_LABELS, type OrderStatus } from "@/lib/orders";
-import { dayTime } from "@/lib/dayGroups";
+import { dayStamp, dayTime } from "@/lib/dayGroups";
 import { getCurrentUser } from "@/lib/session";
 import { SUPPORT_WINDOW } from "@/lib/supportHours";
 import {
@@ -20,6 +21,7 @@ import {
   warrantyBlockedReason,
   warrantyOpen,
 } from "@/lib/warrantyRequests";
+import { MESSAGE_SELECT, toChatMessage } from "@/lib/warrantyThread";
 
 export const metadata: Metadata = {
   title: "Yêu cầu bảo hành",
@@ -78,13 +80,13 @@ export default async function WarrantyRequestPage({
           issue: true,
           description: true,
           imageUrl: true,
-          adminNote: true,
           createdAt: true,
           refundAmount: true,
           refundMethod: true,
           bankName: true,
           bankAccount: true,
           accountHolder: true,
+          messages: { orderBy: { createdAt: "asc" }, select: MESSAGE_SELECT },
         },
       },
     },
@@ -188,31 +190,6 @@ export default async function WarrantyRequestPage({
                         {stamp(r.createdAt)}
                       </span>
                     </div>
-                    <p className="mt-2.5 whitespace-pre-line text-[13px] leading-relaxed text-neutral-300">
-                      {r.description}
-                    </p>
-                    {r.imageUrl ? (
-                      <a
-                        href={r.imageUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="mt-3 block w-full max-w-xs overflow-hidden rounded-lg border border-white/10"
-                      >
-                        <Image
-                          src={r.imageUrl}
-                          alt="Ảnh lỗi đã gửi"
-                          width={640}
-                          height={360}
-                          unoptimized
-                          className="max-h-[200px] w-full object-cover"
-                        />
-                      </a>
-                    ) : null}
-                    {r.adminNote ? (
-                      <p className="mt-3 rounded-r-lg border-l-2 border-[var(--menzu-accent)] bg-[var(--menzu-accent)]/[0.06] px-3.5 py-2.5 text-[12.5px] leading-relaxed text-neutral-300">
-                        <span className="font-bold text-white">Shop trả lời:</span> {r.adminNote}
-                      </p>
-                    ) : null}
                     {/* The refund, when the shop could not fix it: settled to
                         the site account, sent to a bank, or waiting on the
                         buyer's account — the one step that is theirs. */}
@@ -285,6 +262,19 @@ export default async function WarrantyRequestPage({
                         ) : null}
                       </div>
                     ) : null}
+                    {/* The report and everything said since — open until the
+                        shop marks it done (the owner, 01/10/2026). */}
+                    <WarrantyChat
+                      ticketId={r.id}
+                      status={r.status}
+                      opening={{
+                        body: r.description,
+                        imageUrl: r.imageUrl,
+                        at: dayStamp(r.createdAt),
+                        sentAt: r.createdAt.toISOString(),
+                      }}
+                      initial={r.messages.map(toChatMessage)}
+                    />
                   </li>
                 );
               })}

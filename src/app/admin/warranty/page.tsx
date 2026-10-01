@@ -8,6 +8,8 @@ import { db } from "@/lib/db";
 import { promisedRefund, refundWindowClosed } from "@/lib/refundRequests";
 import { mailEnabled } from "@/lib/settings";
 import { getShopSettings } from "@/lib/settingsStore";
+import { awaitingShop } from "@/lib/warrantyChat";
+import { MESSAGE_SELECT, toChatMessage } from "@/lib/warrantyThread";
 
 export const metadata: Metadata = { title: "Bảo hành | Quản trị" };
 export const dynamic = "force-dynamic";
@@ -36,6 +38,9 @@ export default async function AdminWarrantyPage() {
   // visitor that an admin area exists here at all.
   if (!admin) notFound();
 
+  // Taken before the read, so anything landing while it runs still counts as
+  // news for the desk's "có cập nhật mới".
+  const loadedAt = new Date().toISOString();
   const [settings, rows] = await Promise.all([
     getShopSettings(),
     db.warrantyRequest.findMany({
@@ -47,7 +52,6 @@ export default async function AdminWarrantyPage() {
         issue: true,
         description: true,
         imageUrl: true,
-        adminNote: true,
         createdAt: true,
         resolvedAt: true,
         refundAmount: true,
@@ -67,6 +71,7 @@ export default async function AdminWarrantyPage() {
             package: { select: { label: true } },
           },
         },
+        messages: { orderBy: { createdAt: "asc" }, select: MESSAGE_SELECT },
       },
     }),
   ]);
@@ -87,7 +92,6 @@ export default async function AdminWarrantyPage() {
             issue: r.issue,
             description: r.description,
             imageUrl: r.imageUrl,
-            adminNote: r.adminNote,
             createdAt: stamp(r.createdAt),
             resolvedAt: r.resolvedAt ? stamp(r.resolvedAt) : null,
             username: r.user.username,
@@ -109,9 +113,12 @@ export default async function AdminWarrantyPage() {
             bankAccount: r.bankAccount,
             accountHolder: r.accountHolder,
             bankSubmittedAt: r.bankSubmittedAt ? stamp(r.bankSubmittedAt) : null,
+            messages: r.messages.map(toChatMessage),
+            awaitingShop: awaitingShop(r.status, r.messages.at(-1)?.fromShop ?? null),
           };
         })}
         mailOn={mailEnabled(settings)}
+        loadedAt={loadedAt}
       />
     </AdminShell>
   );

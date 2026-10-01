@@ -48,6 +48,7 @@ export async function SiteHeader() {
         revision: a.revision,
         startAt: a.startAt.toISOString(),
         updatedLabel: dayKey(a.updatedAt),
+        silent: a.silent,
       }))}
       cartCount={cartCount}
       user={

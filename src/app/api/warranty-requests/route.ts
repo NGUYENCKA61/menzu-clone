@@ -1,14 +1,10 @@
-import { randomBytes } from "node:crypto";
-
 import { NextResponse } from "next/server";
-import sharp from "sharp";
 
 import { announceToAdmins } from "@/lib/announcementStore";
-import { readImageSize } from "@/lib/authPanel";
-import { storeUpload } from "@/lib/blobStore";
 import { db } from "@/lib/db";
 import { absoluteUrl } from "@/lib/seo";
 import { escapeTelegramHtml, notifyTelegramAdmins } from "@/lib/telegramNotify";
+import { storeWarrantyImage } from "@/lib/warrantyImage";
 import { notifyWarranty } from "@/lib/warrantyNotify";
 import { getCurrentUser } from "@/lib/session";
 import {
@@ -17,14 +13,6 @@ import {
   WARRANTY_ISSUE,
   warrantyBlockedReason,
 } from "@/lib/warrantyRequests";
-
-/** Same discipline as the refund uploader: bytes checked, EXIF stripped,
- *  re-encoded — never the client's file or its filename. */
-const TYPES = new Set(["image/png", "image/jpeg", "image/webp"]);
-const MAX_BYTES = 5 * 1024 * 1024;
-const MIN_SIDE = 64;
-const MAX_SIDE = 8192;
-const MAX_STORED_WIDTH = 1400;
 
 /**
  * A signed-in buyer reports that one of their own orders is not working.
@@ -86,62 +74,18 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: blocked }, { status: 400 });
   }
 
-  let imageUrl: string | null = null;
-  const file = form.get("image");
-  if (file instanceof File && file.size > 0) {
-    if (!TYPES.has(file.type)) {
-      return NextResponse.json(
-        { error: "Ảnh chỉ nhận PNG, JPG hoặc WebP" },
-        { status: 400 },
-      );
-    }
-    if (file.size > MAX_BYTES) {
-      return NextResponse.json(
-        {
-          error: `Ảnh tối đa 5MB. File này ${(file.size / 1024 / 1024).toFixed(1)}MB.`,
-        },
-        { status: 400 },
-      );
-    }
-    const bytes = new Uint8Array(await file.arrayBuffer());
-    const size = readImageSize(bytes);
-    if (!size || size.width < MIN_SIDE || size.height < MIN_SIDE) {
-      return NextResponse.json(
-        { error: "Không đọc được ảnh — file có thể bị hỏng" },
-        { status: 400 },
-      );
-    }
-    if (size.width > MAX_SIDE || size.height > MAX_SIDE) {
-      return NextResponse.json(
-        { error: `Ảnh tối đa ${MAX_SIDE}px mỗi chiều.` },
-        { status: 400 },
-      );
-    }
-
-    const processed = await sharp(bytes, { limitInputPixels: MAX_SIDE * MAX_SIDE })
-      .rotate()
-      .resize(MAX_STORED_WIDTH, undefined, { fit: "inside", withoutEnlargement: true })
-      .webp({ quality: 85 })
-      .toBuffer()
-      .catch(() => null);
-    if (!processed) {
-      return NextResponse.json(
-        { error: "Không đọc được ảnh — file có thể bị hỏng" },
-        { status: 400 },
-      );
-    }
-
-    const filename = `${user.uid}-${randomBytes(8).toString("hex")}.webp`;
-    imageUrl = await storeUpload("warranty", filename, processed, "image/webp");
+  const image = await storeWarrantyImage(form.get("image"), user.uid);
+  if (!image.ok) {
+    return NextResponse.json({ error: image.error }, { status: 400 });
   }
 
-  await db.warrantyRequest.create({
+  const ticket = await db.warrantyRequest.create({
     data: {
       orderId: order.id,
       userId: user.id,
       issue: picked.issue,
       description: said.description,
-      imageUrl,
+      imageUrl: image.url,
     },
     select: { id: true },
   });
@@ -172,10 +116,15 @@ export async function POST(request: Request) {
   );
   // And the buyer, on the bell and by email: the first step of the ticket
   // they will follow from here.
-  await notifyWarranty(user.id, code, {
-    title: "Shop đã nhận yêu cầu bảo hành",
-    body: `Đơn ${code}: shop đã nhận báo lỗi "${WARRANTY_ISSUE[picked.issue].label}" và sẽ xử lý sớm.`,
-  });
+  await notifyWarranty(
+    user.id,
+    code,
+    {
+      title: "Shop đã nhận yêu cầu bảo hành",
+      body: `Đơn ${code}: shop đã nhận báo lỗi "${WARRANTY_ISSUE[picked.issue].label}" và sẽ xử lý sớm.`,
+    },
+    { ticketId: ticket.id },
+  );
 
   return NextResponse.json({ ok: true });
 }

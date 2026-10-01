@@ -204,7 +204,7 @@ export function warrantyBlockedReason({
     return "Đơn này đang được hoàn tiền — bạn theo dõi tiến độ ở yêu cầu phía trên.";
   }
   if (openRequest) {
-    return "Đơn này đang có một yêu cầu bảo hành chưa xử lý xong — shop sẽ trả lời trên yêu cầu đó.";
+    return "Đơn này đang có một yêu cầu bảo hành chưa xử lý xong — bạn trao đổi với shop ngay trong yêu cầu đó.";
   }
   return null;
 }

@@ -3,6 +3,7 @@
 import { ArrowRight, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 import {
   useCallback,
@@ -49,6 +50,10 @@ export interface AnnouncementItem {
   startAt: string;
   /** Formatted on the server, where the timezone is fixed. */
   updatedLabel: string;
+  /** Written by the site for one reader at the end of something that
+   *  happened to them — a warranty answer, a refund — not composed by the
+   *  shop for everyone. */
+  silent?: boolean;
 }
 
 /**
@@ -188,6 +193,7 @@ export function AnnouncementCenter({ announcements }: { announcements: Announcem
   const now = useClientNow();
   const seen = useSeen();
   const snoozes = useSnoozes();
+  const pathname = usePathname();
   // Set the first time anything is closed, so the sheet opens by itself once
   // per page load rather than marching through every unread notice in turn.
   const [autoDone, setAutoDone] = useState(false);
@@ -199,16 +205,34 @@ export function AnnouncementCenter({ announcements }: { announcements: Announcem
         : announcements.filter((a) => !seen.has(dismissalKey(a.id, a.revision))),
     [announcements, seen],
   );
+  // A notice the site wrote for this reader whose button leads to the page
+  // already open has been answered by that page: the buyer who followed the
+  // email to their warranty status is reading the shop's message, not
+  // waiting for a sheet to cover it. Marked read instead of opened. Only the
+  // site's own notices — one the shop composed for everyone and pointed at
+  // the home page must still be seen there.
+  const here = useMemo(
+    () => unread.filter((a) => a.silent && a.ctaHref !== null && a.ctaHref === pathname),
+    [unread, pathname],
+  );
+  useEffect(() => {
+    if (seen === null || here.length === 0) return;
+    const next = new Set(seen);
+    for (const a of here) next.add(dismissalKey(a.id, a.revision));
+    writeSeen(next);
+  }, [here, seen]);
+
   // A snoozed notice is still unread; all that is held back is the sheet
   // opening by itself.
   const autoTarget = useMemo(() => {
     if (seen === null || snoozes === null || now === null) return null;
     return (
       unread.find(
-        (a) => !isSnoozed(snoozes[dismissalKey(a.id, a.revision)] ?? null, now),
+        (a) =>
+          !here.includes(a) && !isSnoozed(snoozes[dismissalKey(a.id, a.revision)] ?? null, now),
       ) ?? null
     );
-  }, [unread, snoozes, seen, now]);
+  }, [unread, here, snoozes, seen, now]);
 
   // Derived rather than stored: the first unread notice is showing precisely
   // because it is unread, so closing it — which marks it read — closes it. No

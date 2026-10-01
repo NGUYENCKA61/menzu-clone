@@ -25,11 +25,19 @@ function escapeHtml(text: string): string {
  * never holds the step up: a desk action that already moved money must not
  * fail because an SMTP server did not answer, so a failure is logged and
  * swallowed — the bell already carries the news.
+ *
+ * `chat` — a message from the shop in the ticket's conversation. Every one
+ * rings the bell, but it emails only when the ticket's last email is
+ * MAIL_GAP_MS old (agreed 01/10/2026), so a run of quick replies is one
+ * email. A status change always emails, and restarts that clock.
  */
+export const MAIL_GAP_MS = 10 * 60 * 1000;
+
 export async function notifyWarranty(
   userId: string,
   orderCode: string,
   notice: { title: string; body: string },
+  options: { ticketId: string; chat?: boolean },
 ): Promise<void> {
   const href = `/orders/${orderCode}/bao-hanh`;
   await announceToUser(userId, {
@@ -45,6 +53,20 @@ export async function notifyWarranty(
       getShopSettings(),
     ]);
     if (!user?.email || !mailEnabled(settings)) return;
+
+    // Claimed in one statement, so two replies a second apart cannot both
+    // find the clock run out.
+    const now = new Date();
+    const claimed = await db.warrantyRequest.updateMany({
+      where: options.chat
+        ? {
+            id: options.ticketId,
+            OR: [{ mailedAt: null }, { mailedAt: { lt: new Date(now.getTime() - MAIL_GAP_MS) } }],
+          }
+        : { id: options.ticketId },
+      data: { mailedAt: now },
+    });
+    if (options.chat && claimed.count === 0) return;
 
     const link = absoluteUrl(href);
     const subject = `${notice.title} — đơn ${orderCode}`;

@@ -123,6 +123,7 @@ model User {
   licenseKeys   LicenseKey[]
   refundRequests RefundRequest[]
   warrantyRequests WarrantyRequest[]
+  warrantyMessages WarrantyMessage[]
 
   /// The admin list sorts newest-first and pages through; at 8k+ accounts an
   /// unindexed createdAt means a full sort on every page.
@@ -1089,10 +1090,45 @@ model WarrantyRequest {
   accountHolder   String?
   bankSubmittedAt DateTime?
 
+  /// The last email sent to the buyer about this ticket. A status change
+  /// always emails; a chat message from the shop only when the last email is
+  /// ten minutes old, so five quick replies are not five emails.
+  mailedAt DateTime?
+  messages WarrantyMessage[]
+
   @@index([userId, createdAt])
   @@index([status, createdAt])
   @@index([orderId])
   @@map("warranty_requests")
+}
+
+/// One line of the conversation on a warranty ticket: the buyer and the shop
+/// working out the fix until the shop marks it fixed or the money goes back
+/// (the owner, 01/10/2026: "khi nào tui đánh dấu đã xử lý hoặc đã khắc phục
+/// có nghĩa là xong còn không thì vẫn đang trao đổi hướng xử lý với khách
+/// hàng"). Closed tickets keep their thread, read-only.
+///
+/// The report's own description and screenshot stay on the ticket and open
+/// the thread. A desk action's note is a message too, tagged with the status
+/// it moved the ticket to, so no answer is overwritten by the next one.
+model WarrantyMessage {
+  id        String          @id @default(cuid())
+  requestId String
+  request   WarrantyRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  fromShop  Boolean
+  /// Who wrote it — the buyer, or which admin. Null once that account is gone.
+  authorId  String?
+  author    User?           @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  body      String
+  imageUrl  String?
+  /// The status a desk action moved the ticket to with this note; null for
+  /// plain conversation.
+  status    WarrantyStatus?
+  createdAt DateTime        @default(now())
+
+  @@index([requestId, createdAt])
+  @@index([fromShop, createdAt])
+  @@map("warranty_messages")
 }
 
 /// A buyer asking for money back on one order.

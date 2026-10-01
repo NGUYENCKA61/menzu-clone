@@ -99,12 +99,17 @@ export async function POST(request: Request) {
       `🔗 ${absoluteUrl("/admin/warranty")}`,
     ].join("\n"),
   );
-  await notifyWarranty(user.id, code, {
-    title: "Đã nhận số tài khoản hoàn tiền",
-    body:
-      `Đơn ${code}: shop đã nhận số tài khoản ${details.bankName} ` +
-      `${maskAccount(details.bankAccount)} và sẽ chuyển ${amount} cho bạn sớm.`,
-  });
+  await notifyWarranty(
+    user.id,
+    code,
+    {
+      title: "Đã nhận số tài khoản hoàn tiền",
+      body:
+        `Đơn ${code}: shop đã nhận số tài khoản ${details.bankName} ` +
+        `${maskAccount(details.bankAccount)} và sẽ chuyển ${amount} cho bạn sớm.`,
+    },
+    { ticketId: id },
+  );
 
   return NextResponse.json({ ok: true });
 }

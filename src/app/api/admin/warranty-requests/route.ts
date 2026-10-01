@@ -113,27 +113,54 @@ export async function PATCH(request: Request) {
         { status: 400 },
       );
     }
-    await db.warrantyRequest.update({
-      where: { id },
-      data: {
-        status,
-        // A new note replaces the old; an empty one on "đang xử lý" keeps
-        // whatever was written before.
-        adminNote: note || found.adminNote,
-        resolvedAt: status === "RESOLVED" ? new Date() : null,
+    try {
+      await db.$transaction(async (tx) => {
+        // Guarded by the state it was read in: a stale page must not mark
+        // "fixed" a ticket another session refunded a moment ago.
+        const moved = await tx.warrantyRequest.updateMany({
+          where: { id, status: { in: ["OPEN", "IN_PROGRESS"] } },
+          data: {
+            status,
+            // A new note replaces the old; an empty one on "đang xử lý" keeps
+            // whatever was written before.
+            adminNote: note || found.adminNote,
+            resolvedAt: status === "RESOLVED" ? new Date() : null,
+          },
+        });
+        if (moved.count === 0) throw new Error("ALREADY_HANDLED");
+        // The note is also a line of the conversation, so the next answer
+        // does not overwrite it.
+        if (note) {
+          await tx.warrantyMessage.create({
+            data: { requestId: id, fromShop: true, authorId: admin.id, body: note, status },
+          });
+        }
+      });
+    } catch (error) {
+      if (error instanceof Error && error.message === "ALREADY_HANDLED") {
+        return NextResponse.json(
+          { error: "Phiếu này vừa được xử lý bởi một phiên khác." },
+          { status: 409 },
+        );
+      }
+      throw error;
+    }
+    await notifyWarranty(
+      found.userId,
+      code,
+      {
+        title:
+          status === "RESOLVED" ? "Yêu cầu bảo hành đã xử lý xong" : "Yêu cầu bảo hành đang được xử lý",
+        body:
+          `Đơn ${code}: ` +
+          (status === "RESOLVED"
+            ? `shop đã xử lý xong. ${note}`
+            : note
+              ? `shop đang xử lý. ${note}`
+              : "shop đã nhận và đang xử lý, bạn chờ chút nhé."),
       },
-    });
-    await notifyWarranty(found.userId, code, {
-      title:
-        status === "RESOLVED" ? "Yêu cầu bảo hành đã xử lý xong" : "Yêu cầu bảo hành đang được xử lý",
-      body:
-        `Đơn ${code}: ` +
-        (status === "RESOLVED"
-          ? `shop đã xử lý xong. ${note}`
-          : note
-            ? `shop đang xử lý. ${note}`
-            : "shop đã nhận và đang xử lý, bạn chờ chút nhé."),
-    });
+      { ticketId: id },
+    );
     return NextResponse.json({ ok: true });
   }
 
@@ -169,22 +196,35 @@ export async function PATCH(request: Request) {
           { status: 400 },
         );
       }
-      const moved = await db.warrantyRequest.updateMany({
-        where: { id, status: { in: ["OPEN", "IN_PROGRESS"] } },
-        data: { status: "REFUNDING", refundMethod: "MANUAL", refundAmount: amount, adminNote: note },
+      const moved = await db.$transaction(async (tx) => {
+        const claimed = await tx.warrantyRequest.updateMany({
+          where: { id, status: { in: ["OPEN", "IN_PROGRESS"] } },
+          data: { status: "REFUNDING", refundMethod: "MANUAL", refundAmount: amount, adminNote: note },
+        });
+        if (claimed.count > 0) {
+          await tx.warrantyMessage.create({
+            data: { requestId: id, fromShop: true, authorId: admin.id, body: note, status: "REFUNDING" },
+          });
+        }
+        return claimed.count;
       });
-      if (moved.count === 0) {
+      if (moved === 0) {
         return NextResponse.json(
           { error: "Phiếu này vừa được xử lý bởi một phiên khác." },
           { status: 409 },
         );
       }
-      await notifyWarranty(found.userId, code, {
-        title: "Đơn được hoàn tiền qua ngân hàng",
-        body:
-          `Đơn ${code}: ${note} Shop sẽ hoàn ${money(amount)} qua ngân hàng — ` +
-          `bạn vào trang trạng thái nhập số tài khoản để nhận tiền.`,
-      });
+      await notifyWarranty(
+        found.userId,
+        code,
+        {
+          title: "Đơn được hoàn tiền qua ngân hàng",
+          body:
+            `Đơn ${code}: ${note} Shop sẽ hoàn ${money(amount)} qua ngân hàng — ` +
+            `bạn vào trang trạng thái nhập số tài khoản để nhận tiền.`,
+        },
+        { ticketId: id },
+      );
       return NextResponse.json({ ok: true });
     }
   } else {
@@ -229,6 +269,11 @@ export async function PATCH(request: Request) {
         },
       });
       if (claimed.count === 0) throw new Error("ALREADY_HANDLED");
+      if (note) {
+        await tx.warrantyMessage.create({
+          data: { requestId: id, fromShop: true, authorId: admin.id, body: note, status: "REFUNDED" },
+        });
+      }
 
       await tx.refundRequest.create({
         data: {
@@ -270,13 +315,18 @@ export async function PATCH(request: Request) {
 
   // Outside the transaction on purpose: a failed notice must not roll back a
   // refund that already paid out.
-  await notifyWarranty(found.userId, code, {
-    title: method === "WALLET" ? "Đơn đã được hoàn tiền" : "Đã chuyển khoản hoàn tiền",
-    body:
-      method === "WALLET"
-        ? `Đơn ${code}: ${note} Shop đã hoàn ${money(amount)} vào tài khoản của bạn trên web.`
-        : `Đơn ${code}: shop đã chuyển ${money(amount)} về tài khoản ${bankLine ?? "của bạn"}.${note ? ` ${note}` : ""}`,
-  });
+  await notifyWarranty(
+    found.userId,
+    code,
+    {
+      title: method === "WALLET" ? "Đơn đã được hoàn tiền" : "Đã chuyển khoản hoàn tiền",
+      body:
+        method === "WALLET"
+          ? `Đơn ${code}: ${note} Shop đã hoàn ${money(amount)} vào tài khoản của bạn trên web.`
+          : `Đơn ${code}: shop đã chuyển ${money(amount)} về tài khoản ${bankLine ?? "của bạn"}.${note ? ` ${note}` : ""}`,
+    },
+    { ticketId: id },
+  );
   await warnRefundedAccount(found.order.product, code);
 
   return NextResponse.json({ ok: true });

@@ -2,10 +2,22 @@
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { Banknote, CheckCircle2, Copy, ExternalLink, Landmark, RotateCcw, Wrench } from "lucide-react";
+import { useEffect, useState } from "react";
+import {
+  Banknote,
+  CheckCircle2,
+  Copy,
+  ExternalLink,
+  Landmark,
+  MessageCircle,
+  RotateCcw,
+  Send,
+  Wrench,
+} from "lucide-react";
 
+import { WarrantyThread } from "@/components/sites/menzu-lol-f7ae197a/shared/WarrantyThread";
 import { REFUND_METHOD, REFUND_METHOD_KEYS, type RefundMethod } from "@/lib/refundRequests";
+import { DESK_POLL_MS, type ChatMessage } from "@/lib/warrantyChat";
 import {
   WARRANTY_ISSUE,
   WARRANTY_REFUND_REPLIES,
@@ -21,7 +33,6 @@ export interface WarrantyRow {
   issue: WarrantyIssue;
   description: string;
   imageUrl: string | null;
-  adminNote: string | null;
   createdAt: string;
   resolvedAt: string | null;
   username: string;
@@ -45,6 +56,10 @@ export interface WarrantyRow {
   bankAccount: string | null;
   accountHolder: string | null;
   bankSubmittedAt: string | null;
+  /** The conversation after the report, oldest first. */
+  messages: ChatMessage[];
+  /** Open, and the buyer had the last word: the shop owes a reply. */
+  awaitingShop: boolean;
 }
 
 const FILTERS: { key: WarrantyStatus | "ALL"; label: string }[] = [
@@ -77,19 +92,34 @@ function money(amount: number): string {
  * report is answered right on its card — a note and a button — so the desk
  * never leaves the list to deal with one. Since 01/10/2026 the card is also
  * where a refund is decided: "Hoàn tiền" with an amount and a way back, to
- * the buyer's account on the site or over a bank.
+ * the buyer's account on the site or over a bank — and where the shop and the
+ * buyer talk it through, a thread on each card. A ticket whose buyer had the
+ * last word floats above everything: somebody is waiting on an answer.
  */
-export function AdminWarranty({ rows, mailOn }: { rows: WarrantyRow[]; mailOn: boolean }) {
+export function AdminWarranty({
+  rows,
+  mailOn,
+  loadedAt,
+}: {
+  rows: WarrantyRow[];
+  mailOn: boolean;
+  /** When the server read these rows — where the desk's news check starts. */
+  loadedAt: string;
+}) {
   const [filter, setFilter] = useState<WarrantyStatus | "ALL">("ALL");
 
   const count = (key: WarrantyStatus | "ALL") =>
     key === "ALL" ? rows.length : rows.filter((r) => r.status === key).length;
   const shown = rows
     .filter((r) => filter === "ALL" || r.status === filter)
-    .sort((a, b) => RANK[a.status] - RANK[b.status]);
+    .sort(
+      (a, b) => Number(b.awaitingShop) - Number(a.awaitingShop) || RANK[a.status] - RANK[b.status],
+    );
 
   return (
     <div className="flex flex-col gap-5">
+      {/* Keyed by the read time: a reload starts the count again from zero. */}
+      <DeskPulse key={loadedAt} since={loadedAt} />
       <div className="flex flex-wrap items-center gap-2">
         {FILTERS.map((f) => {
           const on = filter === f.key;
@@ -132,12 +162,52 @@ export function AdminWarranty({ rows, mailOn }: { rows: WarrantyRow[]; mailOn: b
   );
 }
 
+/**
+ * "Có cập nhật mới": asks every few seconds whether reports, messages or
+ * bank accounts have come in since the page was read, and offers a reload
+ * rather than doing one — a card that jumps to the top under an admin who
+ * is typing an answer loses the answer.
+ */
+function DeskPulse({ since }: { since: string }) {
+  const router = useRouter();
+  const [fresh, setFresh] = useState(0);
+
+  useEffect(() => {
+    const timer = window.setInterval(async () => {
+      if (document.visibilityState !== "visible") return;
+      try {
+        const res = await fetch(`/api/admin/warranty-requests/pulse?since=${encodeURIComponent(since)}`, {
+          cache: "no-store",
+        });
+        if (!res.ok) return;
+        const data = (await res.json()) as { fresh?: number };
+        setFresh(data.fresh ?? 0);
+      } catch {
+        // The next tick tries again.
+      }
+    }, DESK_POLL_MS);
+    return () => window.clearInterval(timer);
+  }, [since]);
+
+  if (fresh === 0) return null;
+  return (
+    <button
+      type="button"
+      onClick={() => router.refresh()}
+      className="sticky top-3 z-10 inline-flex items-center gap-2 self-center rounded-full border border-[var(--brand)]/50 bg-[#1a0d10]/95 px-4 py-2 text-[12px] font-bold text-white shadow-lg shadow-black/40 backdrop-blur transition-colors hover:bg-[#2a1116]"
+    >
+      <MessageCircle className="h-4 w-4 text-[var(--brand)]" />
+      Có {fresh} cập nhật mới từ khách — bấm để tải lại
+    </button>
+  );
+}
+
 type Move = "IN_PROGRESS" | "RESOLVED" | "REFUND" | "TRANSFERRED";
 
 function TicketCard({ row, mailOn }: { row: WarrantyRow; mailOn: boolean }) {
   const router = useRouter();
   const [note, setNote] = useState("");
-  const [busy, setBusy] = useState<Move | null>(null);
+  const [busy, setBusy] = useState<Move | "MESSAGE" | null>(null);
   const [error, setError] = useState<string | null>(null);
   /** The refund panel, opened by "Hoàn tiền". */
   const [refunding, setRefunding] = useState(false);
@@ -176,6 +246,31 @@ function TicketCard({ row, mailOn }: { row: WarrantyRow; mailOn: boolean }) {
     }
   }
 
+  /** "Gửi tin": a line in the conversation that leaves the status alone. */
+  async function sendMessage() {
+    if (busy) return;
+    setBusy("MESSAGE");
+    setError(null);
+    try {
+      const res = await fetch("/api/admin/warranty-requests/messages", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ id: row.id, body: note }),
+      });
+      const data = (await res.json().catch(() => ({}))) as { error?: string };
+      if (!res.ok) {
+        setError(data.error ?? "Không gửi được tin nhắn");
+        return;
+      }
+      setNote("");
+      router.refresh();
+    } catch {
+      setError("Không kết nối được máy chủ");
+    } finally {
+      setBusy(null);
+    }
+  }
+
   async function copyAccount() {
     if (!row.bankAccount) return;
     try {
@@ -190,6 +285,18 @@ function TicketCard({ row, mailOn }: { row: WarrantyRow; mailOn: boolean }) {
   const replies = refunding || row.status === "REFUNDING" ? WARRANTY_REFUND_REPLIES : WARRANTY_REPLIES[row.issue];
   const amountNumber = Number(amount);
   const amountOk = Number.isInteger(amountNumber) && amountNumber > 0 && amountNumber <= row.orderTotal;
+  // First on the row: talking it through is the desk's most common move.
+  const sendButton = (
+    <button
+      type="button"
+      disabled={busy !== null || note.trim().length === 0}
+      onClick={() => void sendMessage()}
+      className="inline-flex h-9 items-center gap-2 rounded-lg border border-white/15 bg-white/[0.06] px-3.5 text-[11px] font-black uppercase tracking-wider text-white transition-colors hover:bg-white/[0.12] disabled:cursor-not-allowed disabled:opacity-40"
+    >
+      <Send className="h-3.5 w-3.5" />
+      {busy === "MESSAGE" ? "Đang gửi…" : "Gửi tin"}
+    </button>
+  );
 
   return (
     <article className="rounded-xl border border-white/[0.08] bg-[#0e0e11] p-4 sm:p-5">
@@ -200,6 +307,12 @@ function TicketCard({ row, mailOn }: { row: WarrantyRow; mailOn: boolean }) {
           <span aria-hidden className={`h-1.5 w-1.5 rounded-full ${state.dot}`} />
           {state.label}
         </span>
+        {row.awaitingShop ? (
+          <span className="inline-flex items-center gap-1.5 rounded-md border border-[var(--brand)]/50 bg-[var(--brand)]/15 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-white">
+            <MessageCircle className="h-3 w-3 text-[var(--brand)]" />
+            Khách nhắn mới
+          </span>
+        ) : null}
         <span className="inline-flex items-center rounded-md border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-neutral-300">
           {WARRANTY_ISSUE[row.issue].label}
         </span>
@@ -258,10 +371,12 @@ function TicketCard({ row, mailOn }: { row: WarrantyRow; mailOn: boolean }) {
         </div>
       ) : null}
 
-      {row.adminNote ? (
-        <p className="mt-3 rounded-r-lg border-l-2 border-[var(--brand)] bg-[var(--brand)]/[0.06] px-3.5 py-2.5 text-[12.5px] leading-relaxed text-neutral-300">
-          <span className="font-bold text-white">Shop đã trả lời:</span> {row.adminNote}
-        </p>
+      {/* Everything said since the report — the shop's answers, notes that
+          came with a status, and the buyer's replies. */}
+      {row.messages.length > 0 ? (
+        <div className="mt-4 rounded-xl border border-white/[0.06] bg-black/20 p-3 sm:p-4">
+          <WarrantyThread viewer="shop" buyerName={row.username} opening={null} messages={row.messages} />
+        </div>
       ) : null}
 
       {/* The refund, once there is one: settled, or a bank transfer waiting
@@ -336,7 +451,7 @@ function TicketCard({ row, mailOn }: { row: WarrantyRow; mailOn: boolean }) {
             placeholder={
               refunding
                 ? "Vì sao hoàn tiền: không khắc phục được thế nào… (bắt buộc)"
-                : "Trả lời khách: đã cấp key mới / cập nhật bản mới / hướng dẫn… (bắt buộc khi đóng hoặc hoàn tiền)"
+                : "Nhắn cho khách, hoặc ghi đã xử lý thế nào… (bắt buộc khi đóng hoặc hoàn tiền)"
             }
             className={`${FIELD} resize-y leading-relaxed`}
           />
@@ -416,6 +531,7 @@ function TicketCard({ row, mailOn }: { row: WarrantyRow; mailOn: boolean }) {
               </>
             ) : working ? (
               <>
+                {sendButton}
                 {row.status === "OPEN" ? (
                   <button
                     type="button"
@@ -485,6 +601,7 @@ function TicketCard({ row, mailOn }: { row: WarrantyRow; mailOn: boolean }) {
               // REFUNDING over a bank: confirm the transfer once it is sent,
               // or switch to the site account if the buyer never answers.
               <>
+                {sendButton}
                 <button
                   type="button"
                   disabled={busy !== null || !row.bankAccount}
