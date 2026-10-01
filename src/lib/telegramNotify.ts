@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import { categoryHref, productHref } from "@/lib/routes";
 import { absoluteUrl } from "@/lib/seo";
 import { getShopSettings } from "@/lib/settingsStore";
+import { statusNoteToTelegramHtml } from "@/lib/statusNote";
 import {
   SOFTWARE_STATUS,
   STATUS_EVENT_COPY,
@@ -122,7 +123,7 @@ export async function postStatusToTelegram(
       `${STATUS_EMOJI[status]} <b>${escapeTelegramHtml(name)}</b>`,
       `Trạng thái: <b>${SOFTWARE_STATUS[status].label}</b>`,
       escapeTelegramHtml(`${name} ${STATUS_EVENT_COPY[status]}`),
-      note ? `📝 ${escapeTelegramHtml(note)}` : "",
+      note ? `📝 ${statusNoteToTelegramHtml(note, escapeTelegramHtml)}` : "",
       `🔗 ${link}`,
     ]
       .filter(Boolean)
@@ -171,7 +172,7 @@ export async function postCategoryStatusToTelegram(input: {
       `${STATUS_EMOJI[input.status]} <b>${escapeTelegramHtml(input.name)}</b> · cả danh mục`,
       `Trạng thái: <b>${SOFTWARE_STATUS[input.status].label}</b> · ${input.changed}/${input.total} tool`,
       escapeTelegramHtml(`Toàn bộ tool ${input.name} ${STATUS_EVENT_COPY[input.status]}`),
-      input.note ? `📝 ${escapeTelegramHtml(input.note)}` : "",
+      input.note ? `📝 ${statusNoteToTelegramHtml(input.note, escapeTelegramHtml)}` : "",
       `🔗 ${absoluteUrl(categoryHref(input.slug))}`,
     ]
       .filter(Boolean)

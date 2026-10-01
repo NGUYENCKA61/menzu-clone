@@ -930,10 +930,17 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
               <textarea
                 value={statusNote}
                 onChange={(event) => setStatusNote(event.target.value)}
-                rows={2}
+                rows={3}
                 placeholder="Ghi chú gửi khách — ví dụ: Đã vá, chờ 24h rồi dùng lại."
                 className={`${FIELD} resize-y`}
               />
+              {/* The note's formatting rules (lib/statusNote), named where the
+                  note is written, so a dash turning into a bullet is never a
+                  surprise. */}
+              <p className="text-[11px] leading-relaxed text-neutral-500">
+                **chữ đậm** · dòng bắt đầu bằng &quot;- &quot; là gạch đầu dòng · dòng trống để
+                tách đoạn · link dán vào tự bấm được
+              </p>
               <div className="flex flex-wrap items-center gap-3">
                 <label className={`${ACTION} cursor-pointer`}>
                   <ImagePlus size={12} />
