@@ -10,7 +10,6 @@ import { categoryHref } from "@/lib/routes";
 import { matchesSearch } from "@/lib/searchText";
 import { SOFTWARE_STATUS, type SoftwareStatusValue } from "@/lib/softwareStatus";
 
-import { NOTICE_TAB, NOTICE_TAB_COUNT, NOTICE_TAB_OFF, NOTICE_TAB_ON } from "./noticeTabLook";
 import { StatusSubscribeButton } from "./StatusSubscribeButton";
 import { StatusToast } from "./StatusToast";
 
@@ -201,20 +200,15 @@ export function StatusSubscribeSearch({
   loginNext: string;
 }) {
   const [query, setQuery] = useState("");
-  // The filter's "Đang theo dõi" answer: the reader's own list, for checking
-  // it over without scrolling every shelf.
-  const [onlyFollowed, setOnlyFollowed] = useState(false);
 
   const shelves = useMemo(
     () =>
       shelve(
-        tools.filter(
-          (tool) =>
-            (!onlyFollowed || tool.subscribed === true) &&
-            matchesSearch(query, [tool.name, tool.categoryName, tool.code]),
+        tools.filter((tool) =>
+          matchesSearch(query, [tool.name, tool.categoryName, tool.code]),
         ),
       ),
-    [tools, query, onlyFollowed],
+    [tools, query],
   );
   // "Lit" for a shelf means every tool it lists, whatever the search shows.
   const allFollowedBySlug = useMemo(() => {
@@ -225,10 +219,9 @@ export function StatusSubscribeSearch({
     return all;
   }, [tools]);
 
-  // Null on every card means nobody is signed in, and a "0 / 7" for a reader
-  // who cannot follow anything yet is a scold rather than a summary.
+  // Null on every card means nobody is signed in: the shelves' "Cả danh mục"
+  // chips then offer a sign-in, and their "đã bật" counts stay unsaid.
   const signedIn = tools.some((tool) => tool.subscribed !== null);
-  const following = tools.filter((tool) => tool.subscribed === true).length;
 
   return (
     <div className="flex flex-col gap-5">
@@ -236,9 +229,8 @@ export function StatusSubscribeSearch({
           header once scrolled), on the page's own ground so the cards pass
           beneath it rather than through it. */}
       <div className="sticky top-[58px] z-20 -mx-4 flex flex-wrap items-center gap-3 bg-[#0f1015]/95 px-4 py-3 backdrop-blur lg:-mx-6 lg:px-6">
-        {/* w-full and no flex-1 on purpose: flex-1 would set the basis to zero
-            and let the field squeeze down to share a phone's line with the
-            chips beside it, instead of taking the line and pushing them under. */}
+        {/* The search alone: the "Tất cả / Đang theo dõi" filter came off
+            (the owner, 02/10/2026: "bỏ 2 card tất cả với đang theo dõi đi"). */}
         <label className="flex h-10 w-full max-w-md items-center gap-2.5 rounded-xl border border-white/10 bg-[#101114] px-4 transition-colors focus-within:border-[var(--menzu-accent)]/60">
           <Search size={15} aria-hidden className="shrink-0 text-neutral-500" />
           <input
@@ -250,45 +242,11 @@ export function StatusSubscribeSearch({
             className="h-full w-full bg-transparent text-sm font-semibold text-white outline-none placeholder:text-neutral-500"
           />
         </label>
-        {/* One filter with two answers, each carrying its count — the
-            followed count lives here rather than in a chip of its own (the
-            owner, 01/10/2026: "cho vào phần lọc đi với phần tất cả") — in
-            the page's own tab buttons, so the row under the tabs reads as
-            the same set ("cái phần lọc cảm giác chưa đồng bộ"). */}
-        {signedIn ? (
-          <div role="group" aria-label="Lọc tool" className="flex shrink-0 flex-wrap gap-2">
-            {[
-              { followedOnly: false, label: "Tất cả", count: tools.length },
-              { followedOnly: true, label: "Đang theo dõi", count: following },
-            ].map((option) => {
-              const lit = onlyFollowed === option.followedOnly;
-              return (
-                <button
-                  key={option.label}
-                  type="button"
-                  onClick={() => setOnlyFollowed(option.followedOnly)}
-                  aria-pressed={lit}
-                  className={`${NOTICE_TAB} ${lit ? NOTICE_TAB_ON : NOTICE_TAB_OFF}`}
-                >
-                  {option.label}
-                  <span className={`${NOTICE_TAB_COUNT} tabular-nums`}>{option.count}</span>
-                </button>
-              );
-            })}
-          </div>
-        ) : null}
       </div>
 
       {tools.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-white/10 bg-white/[0.02] py-12 text-center">
           <p className="text-sm font-bold text-white">Chưa có tool nào đang bán</p>
-        </div>
-      ) : onlyFollowed && following === 0 ? (
-        <div className="rounded-2xl border border-dashed border-white/10 bg-white/[0.02] py-12 text-center">
-          <p className="text-sm font-bold text-white">Bạn chưa theo dõi tool nào</p>
-          <p className="mt-1.5 text-[13px] text-neutral-400">
-            Bấm chuông ở một tool, hoặc &quot;Cả danh mục&quot; ở đầu mỗi nhóm.
-          </p>
         </div>
       ) : shelves.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-white/10 bg-white/[0.02] py-12 text-center">
