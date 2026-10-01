@@ -96,14 +96,14 @@ export async function POST(request: Request) {
     await sendMail(
       settings,
       email,
-      `${settings.brandName} — Mã xác minh email: ${code}`,
+      `${settings.brandName} | Mã xác minh email: ${code}`,
       [
         `Xin chào ${account.username},`,
         "",
         `Mã xác minh email của bạn là: ${code}`,
         `Mã có hiệu lực trong ${OTP_TTL_MINUTES} phút. Nhập mã này ở trang Bảo mật tài khoản.`,
         "",
-        "Nếu không phải bạn yêu cầu, cứ bỏ qua email này — tài khoản của bạn không thay đổi gì.",
+        "Nếu không phải bạn yêu cầu, cứ bỏ qua email này, tài khoản của bạn không thay đổi gì.",
       ].join("\n"),
     );
   } catch {

@@ -174,7 +174,7 @@ export function SoftwareDescription({
             </p>
             <p className={`mt-1 ${BODY}`}>
               <Hi>Nội dung chỉ hiển thị</Hi> sau khi bạn đã <Hi>thuê key</Hi> của
-              tool này. <Hi>Chọn gói</Hi> ở trên và bấm <Hi>Mua ngay</Hi> —{" "}
+              tool này. <Hi>Chọn gói</Hi> ở trên và bấm <Hi>Mua ngay</Hi> -{" "}
               <Hi>thanh toán xong</Hi>, quay lại trang này là xem được.
               {setupGuideAccess === "guest" ? (
                 <>
@@ -275,8 +275,7 @@ export function SoftwareDescription({
             <span className="font-bold text-white">Tỷ lệ hoàn trả:</span>{" "}
             <span className="font-black text-[var(--menzu-accent)]">
               {refundRate}%
-            </span>{" "}
-            — mức bảo hành và hoàn trả khách hàng được nhận nếu sản phẩm xảy ra
+            </span>{" "}, mức bảo hành và hoàn trả khách hàng được nhận nếu sản phẩm xảy ra
             sự cố, lỗi ngoài ý muốn.
           </p>
         ) : null}
@@ -332,7 +331,7 @@ export function SoftwareDescription({
           whole sentence and cannot double as this one's predicate. */}
       <p className={`mt-5 ${BODY}`}>
         <span className="font-bold text-white">{name}</span>
-        {description ? ` — ${description}` : ""}
+        {description ? ` - ${description}` : ""}
       </p>
 
       <h3 className={SUB_HEADING}>Yêu cầu hệ thống</h3>

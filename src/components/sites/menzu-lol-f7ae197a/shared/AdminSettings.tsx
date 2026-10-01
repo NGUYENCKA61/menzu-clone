@@ -346,7 +346,7 @@ export function AdminSettings({
         return;
       }
       setFlashSaleBackground(data.url);
-      setFlashBgMsg({ tone: "ok", text: "Đã tải ảnh — nhớ bấm Lưu để áp dụng" });
+      setFlashBgMsg({ tone: "ok", text: "Đã tải ảnh, nhớ bấm Lưu để áp dụng" });
     } catch {
       setFlashBgMsg({ tone: "err", text: "Không kết nối được máy chủ" });
     } finally {
@@ -368,7 +368,7 @@ export function AdminSettings({
         return;
       }
       setProfileBanner(data.url);
-      setBannerMsg({ tone: "ok", text: "Đã tải ảnh — nhớ bấm Lưu để áp dụng" });
+      setBannerMsg({ tone: "ok", text: "Đã tải ảnh, nhớ bấm Lưu để áp dụng" });
     } catch {
       setBannerMsg({ tone: "err", text: "Không kết nối được máy chủ" });
     } finally {
@@ -389,7 +389,7 @@ export function AdminSettings({
         return;
       }
       setSiteBackground(data.url);
-      setSiteBgMsg({ tone: "ok", text: "Đã tải ảnh — nhớ bấm Lưu để áp dụng" });
+      setSiteBgMsg({ tone: "ok", text: "Đã tải ảnh, nhớ bấm Lưu để áp dụng" });
     } catch {
       setSiteBgMsg({ tone: "err", text: "Không kết nối được máy chủ" });
     } finally {
@@ -412,7 +412,7 @@ export function AdminSettings({
         return;
       }
       setHeroBanner(data.url);
-      setHeroBannerMsg({ tone: "ok", text: "Đã tải ảnh — nhớ bấm Lưu để áp dụng" });
+      setHeroBannerMsg({ tone: "ok", text: "Đã tải ảnh, nhớ bấm Lưu để áp dụng" });
     } catch {
       setHeroBannerMsg({ tone: "err", text: "Không kết nối được máy chủ" });
     } finally {
@@ -475,7 +475,7 @@ export function AdminSettings({
         return;
       }
       setHeroImages((list) => [...list, data.url!].slice(0, HERO_IMAGES_MAX));
-      setHeroImgMsg({ tone: "ok", text: "Đã thêm ảnh — nhớ bấm Lưu để áp dụng" });
+      setHeroImgMsg({ tone: "ok", text: "Đã thêm ảnh, nhớ bấm Lưu để áp dụng" });
     } catch {
       setHeroImgMsg({ tone: "err", text: "Không kết nối được máy chủ" });
     } finally {
@@ -516,12 +516,12 @@ export function AdminSettings({
         typeof n === "number" ? `${(n / 1048576).toFixed(1)}MB` : "?";
       const text =
         data.mode === "encoded"
-          ? `Đã nén ${mb(data.inBytes)} → ${mb(data.outBytes)} — nhớ bấm Lưu để áp dụng`
+          ? `Đã nén ${mb(data.inBytes)} → ${mb(data.outBytes)}, nhớ bấm Lưu để áp dụng`
           : data.mode === "remuxed"
-            ? `Video đã nhẹ sẵn (${mb(data.outBytes)}), giữ nguyên chất lượng — nhớ bấm Lưu để áp dụng`
+            ? `Video đã nhẹ sẵn (${mb(data.outBytes)}), giữ nguyên chất lượng, nhớ bấm Lưu để áp dụng`
             : data.mode === "stored"
-              ? `Đã tải video ${mb(data.outBytes)} nhưng server chưa nén được file này — nhớ bấm Lưu để áp dụng`
-              : "Đã tải video — nhớ bấm Lưu để áp dụng";
+              ? `Đã tải video ${mb(data.outBytes)} nhưng server chưa nén được file này, nhớ bấm Lưu để áp dụng`
+              : "Đã tải video, nhớ bấm Lưu để áp dụng";
       setHeroVideoMsg({ tone: "ok", text });
     } catch {
       setHeroVideoMsg({ tone: "err", text: "Không kết nối được máy chủ" });
@@ -848,8 +848,7 @@ export function AdminSettings({
               />
               {!bank && !card ? (
                 <p className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-2.5 text-[11px] font-semibold text-amber-400">
-                  Tắt cả hai nghĩa là khách không nạp được tiền vào ví bằng cách nào —
-                  trang Nạp thẻ sẽ chỉ còn thông báo tạm ngưng.
+                  Tắt cả hai nghĩa là khách không nạp được tiền vào ví bằng cách nào, trang Nạp thẻ sẽ chỉ còn thông báo tạm ngưng.
                 </p>
               ) : null}
             </div>
@@ -859,12 +858,12 @@ export function AdminSettings({
             <span className={HEADING}>Tài khoản nhận chuyển khoản</span>
             <p className="text-[11px] text-neutral-500">
               Khai bao nhiêu ngân hàng cũng được. Khách chọn một bên để chuyển, còn hệ
-              thống đối soát tất cả — tiền về bên nào cũng khớp được lệnh nạp.
+              thống đối soát tất cả, tiền về bên nào cũng khớp được lệnh nạp.
             </p>
 
             {accounts.length === 0 ? (
               <p className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-2.5 text-[11px] font-semibold text-amber-400">
-                Chưa có tài khoản nào — tab Ngân Hàng của khách sẽ báo tạm chưa nhận
+                Chưa có tài khoản nào, tab Ngân Hàng của khách sẽ báo tạm chưa nhận
                 chuyển khoản, và máy chủ từ chối tạo lệnh nạp qua ngân hàng.
               </p>
             ) : null}
@@ -957,7 +956,7 @@ export function AdminSettings({
                     className={`${FIELD} font-mono`}
                   />
                   <p className={HINT}>
-                    Mỗi ngân hàng một đường riêng — token trong đó chỉ đọc được đúng tài
+                    Mỗi ngân hàng một đường riêng, token trong đó chỉ đọc được đúng tài
                     khoản này. Dán nguyên cả URL kèm token.
                   </p>
                 </div>
@@ -1004,7 +1003,7 @@ export function AdminSettings({
               <p className={HINT}>
                 Vừa là chìa khóa để gọi API đối soát, vừa là mật khẩu mà bên trung gian
                 phải gửi kèm khi bắn dữ liệu sang. Không có key thì nạp tự động không bật
-                được — nếu không ai cũng gọi được vào và tự cộng tiền.
+                được, nếu không ai cũng gọi được vào và tự cộng tiền.
               </p>
             </div>
 
@@ -1033,7 +1032,7 @@ export function AdminSettings({
                 Key riêng cho địa chỉ chạy nền bên dưới, để{" "}
                 <span className="font-bold text-white">không phải đem API key đi dán</span>{" "}
                 vào web hẹn giờ của người khác. Key này chỉ khiến shop tự đọc lại sao kê
-                của chính mình — lộ ra cũng không ai cộng tiền được. API key thì khác: ai
+                của chính mình, lộ ra cũng không ai cộng tiền được. API key thì khác: ai
                 có nó là bắn được danh sách giao dịch giả vào webhook. Để trống thì địa chỉ
                 dưới vẫn dùng API key như trước.
               </p>
@@ -1055,7 +1054,7 @@ export function AdminSettings({
                   {testing ? "Đang gọi…" : "Kiểm tra kết nối"}
                 </button>
                 <span className="text-[11px] text-neutral-500">
-                  Lưu cấu hình trước rồi bấm — máy chủ gọi thử và cho biết có đọc được
+                  Lưu cấu hình trước rồi bấm, máy chủ gọi thử và cho biết có đọc được
                   giao dịch không.
                 </span>
               </div>
@@ -1088,9 +1087,8 @@ export function AdminSettings({
                 Dán vào một dịch vụ hẹn giờ miễn phí (cron-job.org…) và cho chạy mỗi phút.
                 {cronKey.trim()
                   ? " Nhớ bấm Lưu trước, key mới có hiệu lực."
-                  : " Nên bấm Tạo key ở trên rồi lưu — dán API key vào web của người khác là rủi ro không cần thiết."}{" "}
-                Không có cái này thì web chỉ đối soát lúc có khách đang mở màn hình chờ —
-                khách chuyển tiền xong tắt trang là phải đợi rất lâu.
+                  : " Nên bấm Tạo key ở trên rồi lưu, dán API key vào web của người khác là rủi ro không cần thiết."}{" "}
+                Không có cái này thì web chỉ đối soát lúc có khách đang mở màn hình chờ, khách chuyển tiền xong tắt trang là phải đợi rất lâu.
               </p>
             </div>
 
@@ -1101,7 +1099,7 @@ export function AdminSettings({
               </p>
               <p className="mt-1.5 text-[11px] text-neutral-500">
                 Dành cho dịch vụ tự bắn dữ liệu sang (Casso, SePay). Chúng gửi kèm header{" "}
-                <span className="font-mono">Authorization: Apikey &lt;key&gt;</span> — đúng
+                <span className="font-mono">Authorization: Apikey &lt;key&gt;</span>, đúng
                 key ở trên là chạy.
               </p>
             </div>
@@ -1109,7 +1107,7 @@ export function AdminSettings({
             {auto && !apiKey && !accounts.some((account) => account.apiUrl) ? (
               <p className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-2.5 text-[11px] font-semibold text-amber-400">
                 Bật nạp tự động thì cần địa chỉ API đối soát ở ít nhất một ngân hàng,
-                hoặc API key cho webhook — lưu sẽ bị từ chối.
+                hoặc API key cho webhook, lưu sẽ bị từ chối.
               </p>
             ) : null}
 
@@ -1134,7 +1132,7 @@ export function AdminSettings({
                     placeholder="0x4AAAAAAA…"
                     className={`${FIELD} font-mono`}
                   />
-                  <p className={HINT}>Công khai — nằm trong mã nguồn trang đăng nhập.</p>
+                  <p className={HINT}>Công khai, nằm trong mã nguồn trang đăng nhập.</p>
                 </div>
                 <div>
                   <label htmlFor="ts-secret" className={LABEL}>
@@ -1150,7 +1148,7 @@ export function AdminSettings({
                     className={`${FIELD} font-mono`}
                   />
                   <p className={HINT}>
-                    Bí mật — chỉ máy chủ dùng để hỏi Cloudflare. Đừng dán ra ngoài.
+                    Bí mật, chỉ máy chủ dùng để hỏi Cloudflare. Đừng dán ra ngoài.
                   </p>
                 </div>
               </div>
@@ -1166,9 +1164,9 @@ export function AdminSettings({
               <span className={LABEL}>Đăng nhập Google / Discord (OAuth)</span>
               <p className={HINT}>
                 Google: console.cloud.google.com → APIs &amp; Services → Credentials →
-                OAuth client ID (Web) — khai Redirect URI
+                OAuth client ID (Web), khai Redirect URI
                 <span className="font-mono text-neutral-300"> /api/auth/google/callback</span>.
-                Discord: discord.com/developers → New Application → OAuth2 — khai
+                Discord: discord.com/developers → New Application → OAuth2, khai
                 <span className="font-mono text-neutral-300"> /api/auth/discord/callback</span>.
                 Mỗi bên phải đủ cả hai ô thì nút mới bật.
               </p>
@@ -1232,7 +1230,7 @@ export function AdminSettings({
             </div>
 
             <div className="border-t border-white/5 pt-5">
-              <span className={LABEL}>Số liệu tin cậy — dải số trên phần Đánh giá</span>
+              <span className={LABEL}>Số liệu tin cậy, dải số trên phần Đánh giá</span>
               <p className={HINT}>
                 Để trống ô nào thì lấy số thật từ hệ thống: đơn đã giao = đơn đã thanh toán trên
                 site này, khách hàng = số tài khoản, năm bắt đầu = năm của tài khoản cũ nhất,
@@ -1299,8 +1297,7 @@ export function AdminSettings({
               <span className={LABEL}>Đồng bộ trạng thái hack từ Telegram</span>
               <p className={HINT}>
                 Nhắn trong kênh của shop là trạng thái tự đổi, kèm ảnh và ghi chú.
-                Cú pháp: <span className="font-mono text-neutral-300">MÃ_TOOL trạng_thái ghi chú</span> —
-                ví dụ <span className="font-mono text-neutral-300">VALTOOL01 die Đang vá, chờ 24h</span>.
+                Cú pháp: <span className="font-mono text-neutral-300">MÃ_TOOL trạng_thái ghi chú</span>, ví dụ <span className="font-mono text-neutral-300">VALTOOL01 die Đang vá, chờ 24h</span>.
                 Nhận các từ: undetected/ok/ngon/an toàn · detected/die/dính · updating/bảo trì/đang cập nhật.
                 Gửi ảnh thì viết cú pháp vào phần chú thích ảnh.
                 <br />
@@ -1358,7 +1355,7 @@ export function AdminSettings({
             <div className="border-t border-white/5 pt-5">
               <span className={LABEL}>Cảnh báo sắp hết hàng</span>
               <p className={HINT}>
-                Khi một gói tụt xuống còn bằng ngưỡng này, shop được báo — kèm
+                Khi một gói tụt xuống còn bằng ngưỡng này, shop được báo, kèm
                 tên sản phẩm, tên gói, số còn lại và link vào trang nhập thêm.
                 Báo thêm một lần nữa khi gói hết sạch, rồi im cho tới khi shop
                 nhập hàng mới. Tính cho cả key tool lẫn kho acc random. Để{" "}
@@ -1462,7 +1459,7 @@ export function AdminSettings({
             </div>
 
             <div className="border-t border-white/5 pt-5">
-              <span className={LABEL}>Gửi email — quên mật khẩu (SMTP)</span>
+              <span className={LABEL}>Gửi email, quên mật khẩu (SMTP)</span>
               <p className={HINT}>
                 Dùng Gmail: host <span className="font-mono text-neutral-300">smtp.gmail.com</span>,
                 port 587, user là địa chỉ Gmail, pass là
@@ -2163,7 +2160,7 @@ export function AdminSettings({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label htmlFor="auth-login-title" className={LABEL}>
-                  Tiêu đề lớn — trang đăng nhập
+                  Tiêu đề lớn, trang đăng nhập
                 </label>
                 <textarea
                   id="auth-login-title"
@@ -2176,7 +2173,7 @@ export function AdminSettings({
               </div>
               <div>
                 <label htmlFor="auth-signup-title" className={LABEL}>
-                  Tiêu đề lớn — trang đăng ký
+                  Tiêu đề lớn, trang đăng ký
                 </label>
                 <textarea
                   id="auth-signup-title"
@@ -2309,7 +2306,7 @@ export function AdminSettings({
             <p className={HINT}>
               Năm ô trên cùng nuôi dải “Theo dõi &amp; kết nối” dưới chân trang; ba ô
               nhóm nuôi thanh “KẾT NỐI” dán ở mép trái mọi trang. Để trống ô nào thì
-              dòng đó không hiện — không còn kiểu icon bấm vào không đi đâu như bản
+              dòng đó không hiện, không còn kiểu icon bấm vào không đi đâu như bản
               gốc. Trống hết thì thanh KẾT NỐI biến mất luôn.
             </p>
           </section>
@@ -2421,7 +2418,7 @@ export function AdminSettings({
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
-                <span className={LABEL}>Nút chính — chữ</span>
+                <span className={LABEL}>Nút chính, chữ</span>
                 <input
                   value={heroCtaLabel}
                   onChange={(event) => setHeroCtaLabel(event.target.value)}
@@ -2429,7 +2426,7 @@ export function AdminSettings({
                 />
               </div>
               <div>
-                <span className={LABEL}>Nút chính — link</span>
+                <span className={LABEL}>Nút chính, link</span>
                 <input
                   value={heroCtaHref}
                   onChange={(event) => setHeroCtaHref(event.target.value)}
@@ -2438,7 +2435,7 @@ export function AdminSettings({
                 />
               </div>
               <div>
-                <span className={LABEL}>Nút phụ — chữ</span>
+                <span className={LABEL}>Nút phụ, chữ</span>
                 <input
                   value={heroAltLabel}
                   onChange={(event) => setHeroAltLabel(event.target.value)}
@@ -2447,7 +2444,7 @@ export function AdminSettings({
                 />
               </div>
               <div>
-                <span className={LABEL}>Nút phụ — link</span>
+                <span className={LABEL}>Nút phụ, link</span>
                 <input
                   value={heroAltHref}
                   onChange={(event) => setHeroAltHref(event.target.value)}
@@ -2489,7 +2486,7 @@ export function AdminSettings({
                   value={heroVideo}
                   onChange={(event) => setHeroVideo(event.target.value)}
                   className={FIELD}
-                  placeholder="/videos/hero.mp4 — để trống thì dùng ảnh"
+                  placeholder="/videos/hero.mp4, để trống thì dùng ảnh"
                 />
 
                 <div className="mt-2 flex flex-wrap items-center gap-3">
@@ -2596,7 +2593,7 @@ export function AdminSettings({
                   </div>
                 ) : (
                   <p className="rounded-lg border border-dashed border-white/10 px-3 py-3 text-[12px] text-neutral-500">
-                    Chưa có ảnh nào — hero đang dùng ảnh banner ở thẻ Nhận diện.
+                    Chưa có ảnh nào, hero đang dùng ảnh banner ở thẻ Nhận diện.
                   </p>
                 )}
 
@@ -2639,7 +2636,7 @@ export function AdminSettings({
 
                 <p className={HINT}>
                   Một ảnh thì đứng yên. Từ hai ảnh trở lên thì tự chuyển, 4 giây một ảnh,
-                  có chấm tròn ở góc để khách bấm qua lại — như gachatool. Thứ tự ở đây
+                  có chấm tròn ở góc để khách bấm qua lại, như gachatool. Thứ tự ở đây
                   là thứ tự chạy. Video đã tải lên vẫn được giữ, đổi lại “Video” là dùng lại.
                 </p>
               </div>
@@ -2660,7 +2657,7 @@ export function AdminSettings({
               options={categories}
               selected={categorySlugs}
               onChange={setCategorySlugs}
-              empty="Chưa chọn danh mục nào — trang chủ giữ 4 thẻ mặc định như hiện tại."
+              empty="Chưa chọn danh mục nào, trang chủ giữ 4 thẻ mặc định như hiện tại."
             />
             <p className={HINT}>
               Thẻ lấy ảnh và tên từ chính danh mục. Danh mục chưa có ảnh sẽ bị bỏ qua vì
@@ -2675,7 +2672,7 @@ export function AdminSettings({
               options={docs}
               selected={docSlugs}
               onChange={setDocSlugs}
-              empty="Chưa chọn bài nào — trang chủ lấy 4 bài đầu trong nhóm Hướng dẫn."
+              empty="Chưa chọn bài nào, trang chủ lấy 4 bài đầu trong nhóm Hướng dẫn."
             />
           </section>
 

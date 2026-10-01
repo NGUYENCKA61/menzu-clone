@@ -157,7 +157,7 @@ export function warrantyButton(
 export const DESCRIPTION_MIN = 20;
 export const DESCRIPTION_MAX = 1000;
 
-export const DESCRIPTION_TOO_SHORT = `Vui lòng mô tả rõ hơn — ít nhất ${DESCRIPTION_MIN} ký tự.`;
+export const DESCRIPTION_TOO_SHORT = `Vui lòng mô tả rõ hơn, ít nhất ${DESCRIPTION_MIN} ký tự.`;
 export const DESCRIPTION_TOO_LONG = `Mô tả tối đa ${DESCRIPTION_MAX} ký tự.`;
 
 /** The trimmed description, or the sentence to show instead of accepting it. */
@@ -201,10 +201,10 @@ export function warrantyBlockedReason({
     return "Chỉ đơn đã thanh toán mới yêu cầu bảo hành được.";
   }
   if (refunding) {
-    return "Đơn này đang được hoàn tiền — bạn theo dõi tiến độ ở yêu cầu phía trên.";
+    return "Đơn này đang được hoàn tiền, bạn theo dõi tiến độ ở yêu cầu phía trên.";
   }
   if (openRequest) {
-    return "Đơn này đang có một yêu cầu bảo hành chưa xử lý xong — bạn trao đổi với shop ngay trong yêu cầu đó.";
+    return "Đơn này đang có một yêu cầu bảo hành chưa xử lý xong, bạn trao đổi với shop ngay trong yêu cầu đó.";
   }
   return null;
 }

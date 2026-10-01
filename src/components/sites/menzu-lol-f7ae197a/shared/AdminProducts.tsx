@@ -147,7 +147,7 @@ export function AdminProducts({
       tone: "ok",
       text:
         data.mode === "hard"
-          ? `Đã xoá hẳn ${row.code} — chưa có đơn nào nên không còn gì để giữ lại`
+          ? `Đã xoá hẳn ${row.code}, chưa có đơn nào nên không còn gì để giữ lại`
           : `Đã xoá ${row.code} khỏi cửa hàng. ${row.orderCount} đơn cũ vẫn nguyên.`,
     });
   }
@@ -198,7 +198,7 @@ export function AdminProducts({
         // Saying so matters: the account comes back with its old order history
         // attached, which is not what "thêm mới" would lead anyone to expect.
         text: data.revived
-          ? `Đã khôi phục ${code.toUpperCase()} — mã này thuộc một tài khoản đã xoá, nay dùng lại với giá vừa nhập`
+          ? `Đã khôi phục ${code.toUpperCase()}, mã này thuộc một tài khoản đã xoá, nay dùng lại với giá vừa nhập`
           : `Đã thêm ${code.toUpperCase()}`,
       });
       setCode("");
@@ -316,7 +316,7 @@ export function AdminProducts({
             <label className={LABEL}>
               Tài khoản đăng nhập giao khách{" "}
               <span className="text-neutral-600">
-                (tag NFA giao tự động — không bắt buộc, nhập sau cũng được)
+                (tag NFA giao tự động, không bắt buộc, nhập sau cũng được)
               </span>
             </label>
             <input
@@ -341,7 +341,7 @@ export function AdminProducts({
 
         <div>
           <label className={LABEL}>
-            Ảnh sản phẩm <span className="text-neutral-600">(không bắt buộc — trống thì dùng ảnh theo mã)</span>
+            Ảnh sản phẩm <span className="text-neutral-600">(không bắt buộc, trống thì dùng ảnh theo mã)</span>
           </label>
           <input
             value={newImage}
@@ -456,7 +456,7 @@ export function AdminProducts({
             >
               <p className="text-sm font-black text-white truncate transition-colors group-hover:text-rose-400">
                 #{p.code}
-                {p.name ? ` — ${p.name}` : ""}
+                {p.name ? ` - ${p.name}` : ""}
               </p>
               <Eye
                 size={13}

@@ -85,7 +85,7 @@ export async function POST(request: Request) {
   if (!ticket) return NextResponse.json({ error: "Không tìm thấy yêu cầu" }, { status: 404 });
   if (!warrantyOpen(ticket.status)) {
     return NextResponse.json(
-      { error: "Yêu cầu này đã xử lý xong — khung trao đổi đã đóng." },
+      { error: "Yêu cầu này đã xử lý xong, khung trao đổi đã đóng." },
       { status: 400 },
     );
   }

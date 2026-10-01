@@ -105,7 +105,7 @@ export function readBankDetails(input: {
     return { ok: false, error: `Số tài khoản chỉ gồm ${ACCOUNT_MIN}–${ACCOUNT_MAX} chữ số.` };
   }
   if (normaliseAccount(input.bankAccountConfirm) !== bankAccount) {
-    return { ok: false, error: "Hai lần nhập số tài khoản không khớp — bạn kiểm tra lại giúp shop." };
+    return { ok: false, error: "Hai lần nhập số tài khoản không khớp, bạn kiểm tra lại giúp shop." };
   }
 
   const accountHolder = normaliseHolder(input.accountHolder);

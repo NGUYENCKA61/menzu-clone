@@ -60,7 +60,7 @@ export async function POST(request: Request) {
     const points = prize?.exchangePoints ?? 0;
     if (points <= 0) {
       return NextResponse.json(
-        { error: "Phần quà này không đổi được điểm — shop sẽ gửi tận nơi." },
+        { error: "Phần quà này không đổi được điểm, shop sẽ gửi tận nơi." },
         { status: 400 },
       );
     }

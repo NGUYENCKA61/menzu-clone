@@ -143,7 +143,7 @@ export function AdminWeaponImages({
     if (ok) {
       setMsg({
         tone: "ok",
-        text: `Đã bỏ ${row.name} khỏi kho — card sẽ hiện lại tên thay cho ảnh`,
+        text: `Đã bỏ ${row.name} khỏi kho, card sẽ hiện lại tên thay cho ảnh`,
       });
     }
   }
@@ -280,7 +280,7 @@ export function AdminWeaponImages({
             className={`${FIELD} max-w-xs`}
           >
             <option value="" className="bg-neutral-900">
-              — tự xoay toàn kho —
+              Tự xoay toàn kho
             </option>
             {hotPickSkin &&
             !images.some((w) => w.name.toLowerCase() === hotPickSkin.toLowerCase()) ? (
@@ -305,7 +305,7 @@ export function AdminWeaponImages({
         </div>
         <p className="mt-2 text-[11px] text-neutral-500">
           Chip nhỏ trong ô tìm skin ở trang danh mục, tự xoay vòng các vật phẩm trong
-          kho này — bấm vào là lọc theo cây đang hiện. Chọn một cây để ghim nó đứng
+          kho này, bấm vào là lọc theo cây đang hiện. Chọn một cây để ghim nó đứng
           đầu vòng xoay; chọn &ldquo;tự xoay&rdquo; để thả. Kho trống thì chip ẩn.
         </p>
       </div>

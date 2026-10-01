@@ -64,7 +64,7 @@ export default async function AdminWarrantyPage() {
   return (
     <AdminShell
       title="Bảo hành"
-      subtitle="Khách báo lỗi theo từng đơn — bấm vào một yêu cầu để trao đổi, xử lý hoặc hoàn tiền"
+      subtitle="Khách báo lỗi theo từng đơn, bấm vào một yêu cầu để trao đổi, xử lý hoặc hoàn tiền"
       username={admin.username}
     >
       <AdminWarranty

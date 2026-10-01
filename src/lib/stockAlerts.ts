@@ -49,8 +49,8 @@ interface Warning {
 function describe(warning: Warning): string {
   const what = warning.tier ? `${warning.name} · gói ${warning.tier}` : warning.name;
   return warning.left === 0
-    ? `${what} — đã hết ${warning.word}`
-    : `${what} — còn ${warning.left} ${warning.word}`;
+    ? `${what}, đã hết ${warning.word}`
+    : `${what}, còn ${warning.left} ${warning.word}`;
 }
 
 /** The Telegram message: the desk reads this on a phone, so it stays short. */
@@ -104,7 +104,7 @@ function mailSubject(warnings: Warning[]): string {
   if (warnings.length === 1) {
     const only = warnings[0]!;
     return only.left === 0
-      ? `Hết ${only.word}: ${describe(only).replace(` — đã hết ${only.word}`, "")}`
+      ? `Hết ${only.word}: ${describe(only).replace(`, đã hết ${only.word}`, "")}`
       : `Sắp hết ${only.word}: ${describe(only)}`;
   }
   return `${warnings.length} gói sắp hết hàng`;

@@ -468,7 +468,7 @@ export async function confirmKeysScreen(
     `Gói: ${esc(pkg.label)} × ${n}`,
     ...(unit < pkg.price ? [`⚡ Flash sale: ${vnd(unit)} / gói (giá gốc ${vnd(pkg.price)})`] : []),
     `Thành tiền: <b>${vnd(total)}</b>`,
-    `Số dư: ${vnd(user.balance)}${short > 0n ? ` — thiếu ${vnd(short)}` : ""}`,
+    `Số dư: ${vnd(user.balance)}${short > 0n ? `, thiếu ${vnd(short)}` : ""}`,
   ].join("\n");
   const keyboard = confirmKeyboard(
     short > 0n ? `ns:${short}` : `b:${pkg.id}:${n}`,
@@ -498,7 +498,7 @@ export async function confirmPoolScreen(
     `<b>${esc(p.name ?? p.code)}</b>`,
     `Số lượng: ${n} tài khoản (còn ${stock})`,
     `Thành tiền: <b>${vnd(total)}</b>`,
-    `Số dư: ${vnd(user.balance)}${short > 0n ? ` — thiếu ${vnd(short)}` : ""}`,
+    `Số dư: ${vnd(user.balance)}${short > 0n ? `, thiếu ${vnd(short)}` : ""}`,
   ].join("\n");
   const keyboard = confirmKeyboard(
     `pb:${p.id}:${n}`,
@@ -526,7 +526,7 @@ export async function confirmAccountScreen(
   const text = [
     `<b>${esc(p.name ?? p.code)}</b>`,
     `Thành tiền: <b>${vnd(p.price)}</b>`,
-    `Số dư: ${vnd(user.balance)}${short > 0n ? ` — thiếu ${vnd(short)}` : ""}`,
+    `Số dư: ${vnd(user.balance)}${short > 0n ? `, thiếu ${vnd(short)}` : ""}`,
   ].join("\n");
   const keyboard = confirmKeyboard(`ab:${p.id}`, null, null, `t:${p.id}`);
   if (short > 0n) keyboard[0] = [{ text: `💳 Nạp thêm ${vnd(short)}`, callback_data: `ns:${short}` }];
@@ -598,7 +598,7 @@ export async function buy(
     const pending = result.quantity - result.delivered;
     const text = [
       `✅ <b>Mua thành công</b> · đơn <code>${result.orderCode}</code>`,
-      `${esc(result.productName)}${result.packageLabel ? ` — ${esc(result.packageLabel)}` : ""}${
+      `${esc(result.productName)}${result.packageLabel ? ` - ${esc(result.packageLabel)}` : ""}${
         result.quantity > 1 ? ` × ${result.quantity}` : ""
       }`,
       `Đã trừ ${vnd(result.total)} · số dư còn ${vnd(result.balanceAfter)}`,
@@ -806,7 +806,7 @@ export async function ordersScreen(user: ShopUser): Promise<MenuScreen> {
   const blocks = orders.map((o) => {
     const head = `<b>${o.code}</b> · ${dayKey(o.createdAt)} · ${vnd(o.total)}\n${esc(
       o.product.name ?? o.product.code,
-    )}${o.package && !o.product.accountPool ? ` — ${esc(o.package.label)}` : ""}${
+    )}${o.package && !o.product.accountPool ? ` - ${esc(o.package.label)}` : ""}${
       o.quantity > 1 ? ` × ${o.quantity}` : ""
     }`;
     const keys = o.licenseKeys.slice(0, 10).map((k) => {
@@ -835,7 +835,7 @@ export async function statusScreen(): Promise<MenuScreen> {
   for (const t of tools) {
     const status = readSoftwareStatus(t.softwareStatus);
     const line = `${status ? STATUS_EMOJI[status] : "⚪"} ${esc(t.name ?? t.code)}${
-      status ? ` — ${SOFTWARE_STATUS[status].label}` : ""
+      status ? ` - ${SOFTWARE_STATUS[status].label}` : ""
     }`;
     byCategory.set(t.category.name, [...(byCategory.get(t.category.name) ?? []), line]);
   }
@@ -850,11 +850,11 @@ export function helpText(settings: ShopSettings): string {
   return [
     `🤖 <b>Bot bán hàng ${esc(settings.brandName)}</b>`,
     "",
-    "/menu — màn hình chính",
-    "/vi — số dư và tài khoản",
-    "/nap 50000 — tạo lệnh nạp 50.000đ",
-    "/donhang — 5 đơn gần nhất và key",
-    "/trangthai — trạng thái từng hack",
+    "/menu, màn hình chính",
+    "/vi, số dư và tài khoản",
+    "/nap 50000, tạo lệnh nạp 50.000đ",
+    "/donhang, 5 đơn gần nhất và key",
+    "/trangthai, trạng thái từng hack",
     "",
     `Web: ${WEB_URL()}`,
   ].join("\n");

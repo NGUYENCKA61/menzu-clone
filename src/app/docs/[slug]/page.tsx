@@ -29,7 +29,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   return {
     title: article.title,
-    description: article.excerpt ?? `${article.title} — Wiki & Hướng dẫn THICHTHIHACK.`,
+    description: article.excerpt ?? `${article.title}. Wiki & Hướng dẫn THICHTHIHACK.`,
     alternates: { canonical: `/docs/${slug}` },
     ...(await shareCard({
       url: `/docs/${slug}`,

@@ -135,7 +135,7 @@ export function AdminRefundDecide({
               >
                 {suggested.toLocaleString("vi-VN")}đ
               </button>
-              . Sửa được — con số lưu lại là con số gõ ở đây.
+              . Sửa được, con số lưu lại là con số gõ ở đây.
             </>
           ) : (
             <>
@@ -204,7 +204,7 @@ export function AdminRefundDecide({
           </span>
         ) : (
           <span className="text-[11px] text-neutral-500">
-            Chỉ ghi nhận quyết định — tiền vẫn phải chuyển ngoài web.
+            Chỉ ghi nhận quyết định, tiền vẫn phải chuyển ngoài web.
           </span>
         )}
       </div>

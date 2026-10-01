@@ -139,7 +139,7 @@ export async function POST(request: Request) {
     const bytes = new Uint8Array(await file.arrayBuffer());
     const size = readImageSize(bytes);
     if (!size || size.width < MIN_SIDE || size.height < MIN_SIDE) {
-      return NextResponse.json({ error: "Không đọc được ảnh — file có thể bị hỏng" }, { status: 400 });
+      return NextResponse.json({ error: "Không đọc được ảnh, file có thể bị hỏng" }, { status: 400 });
     }
     if (size.width > MAX_SIDE || size.height > MAX_SIDE) {
       return NextResponse.json({ error: `Ảnh tối đa ${MAX_SIDE}px mỗi chiều.` }, { status: 400 });
@@ -152,7 +152,7 @@ export async function POST(request: Request) {
       .toBuffer()
       .catch(() => null);
     if (!processed) {
-      return NextResponse.json({ error: "Không đọc được ảnh — file có thể bị hỏng" }, { status: 400 });
+      return NextResponse.json({ error: "Không đọc được ảnh, file có thể bị hỏng" }, { status: 400 });
     }
 
     const filename = `${user.uid}-${randomBytes(8).toString("hex")}.webp`;
@@ -187,7 +187,7 @@ export async function POST(request: Request) {
   await announceToAdmins({
     title: "Đánh giá mới cần duyệt",
     body:
-      `${name} — ${stars}\n"${excerpt}"\n` +
+      `${name} - ${stars}\n"${excerpt}"\n` +
       `Chưa hiện ngoài shop. Bấm "Duyệt ngay" để duyệt hoặc ẩn.`,
     priority: "HIGH",
     days: 14,
@@ -196,7 +196,7 @@ export async function POST(request: Request) {
   await notifyTelegramAdmins(
     [
       "📝 <b>Đánh giá mới cần duyệt</b>",
-      `${escapeTelegramHtml(name)} — ${stars}`,
+      `${escapeTelegramHtml(name)} - ${stars}`,
       `"${escapeTelegramHtml(excerpt)}"`,
       `🔗 ${absoluteUrl("/admin/operations")}`,
     ].join("\n"),

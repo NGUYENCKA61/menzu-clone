@@ -175,7 +175,7 @@ export function AdminUserDetail({
       return {
         danger: false,
         title: granting ? "Cấp quyền đại lý?" : "Cập nhật % đại lý?",
-        body: `${user.username} sẽ mua key phần mềm với chiết khấu ${agencyPct}% qua bàn đại lý riêng. Mức % là thỏa thuận riêng — không hiển thị công khai và không kèm quyền quản trị nào.`,
+        body: `${user.username} sẽ mua key phần mềm với chiết khấu ${agencyPct}% qua bàn đại lý riêng. Mức % là thỏa thuận riêng, không hiển thị công khai và không kèm quyền quản trị nào.`,
         confirmLabel: granting ? "Cấp quyền đại lý" : `Chốt ${agencyPct}%`,
         run: async () => {
           const ok = await call({
@@ -322,7 +322,7 @@ export function AdminUserDetail({
         />
         <StatCard
           label="Địa chỉ IP"
-          value={user.lastIp ?? "—"}
+          value={user.lastIp ?? "-"}
           sub="ghi nhận ở lần đăng nhập gần nhất"
           tone="text-white break-all"
         />
@@ -477,7 +477,7 @@ export function AdminUserDetail({
               ) : null}
             </div>
             <p className={HINT}>
-              Mức % là thỏa thuận riêng từng đại lý — không hiển thị công khai ở bất kỳ đâu
+              Mức % là thỏa thuận riêng từng đại lý, không hiển thị công khai ở bất kỳ đâu
               ngoài bàn đại lý của chính họ.
             </p>
           </section>
@@ -515,7 +515,7 @@ export function AdminUserDetail({
               </button>
             </div>
             <p className={HINT}>
-              Mật khẩu hiển thị dạng chữ thường vì bạn phải đọc lại cho khách — không ai xem
+              Mật khẩu hiển thị dạng chữ thường vì bạn phải đọc lại cho khách, không ai xem
               được mật khẩu cũ, kể cả quản trị viên.
             </p>
           </section>

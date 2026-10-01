@@ -135,7 +135,7 @@ export function ProductCard({ product, priority = false, eager = false }: Produc
           // the account — rather than a string of characters.
           alt={
             product.rank
-              ? `Tài khoản ${product.code} — rank ${product.rank}${
+              ? `Tài khoản ${product.code}, rank ${product.rank}${
                   product.skins > 0 ? `, ${product.skins} skin` : ""
                 }`
               : `Tài khoản ${product.code}`
@@ -197,7 +197,7 @@ export function ProductCard({ product, priority = false, eager = false }: Produc
             {product.name ||
               [product.rank, product.skins > 0 ? `${product.skins} Skins` : ""]
                 .filter(Boolean)
-                .join(" — ") ||
+                .join(" - ") ||
               `#${product.code}`}
           </h3>
         </div>

@@ -82,7 +82,7 @@ export async function warnRefundedAccount(
   await notifyTelegramAdmins(
     [
       "♻️ <b>Acc đã hoàn tiền, vẫn đang “Đã bán”</b>",
-      escapeTelegramHtml(`#${product.code} — ${product.name ?? product.code} · đơn ${orderCode}`),
+      escapeTelegramHtml(`#${product.code} - ${product.name ?? product.code} · đơn ${orderCode}`),
       "Khách đã biết mật khẩu: đổi mật khẩu rồi mới mở bán lại.",
       `🔗 ${absoluteUrl(`/admin/products/${product.code}`)}`,
     ].join("\n"),

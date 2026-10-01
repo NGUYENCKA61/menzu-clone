@@ -36,7 +36,7 @@ export default function GlobalError({
       </p>
       <p className="text-xl font-bold text-white mb-2">ĐÃ CÓ LỖI XẢY RA</p>
       <p className="text-neutral-400 max-w-[520px]">
-        Hệ thống gặp sự cố khi tải trang này. Bạn có thể thử lại — nếu vẫn lỗi,
+        Hệ thống gặp sự cố khi tải trang này. Bạn có thể thử lại, nếu vẫn lỗi,
         vui lòng quay lại sau ít phút.
       </p>
 

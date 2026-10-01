@@ -97,8 +97,8 @@ export function StatusSubscribeButton({
         onClick={toggle}
         disabled={busy}
         aria-pressed={on}
-        aria-label={on ? "Đang theo dõi — bấm để tắt thông báo" : "Nhận thông báo"}
-        title={on ? "Đang theo dõi — bấm để tắt" : "Nhận thông báo"}
+        aria-label={on ? "Đang theo dõi, bấm để tắt thông báo" : "Nhận thông báo"}
+        title={on ? "Đang theo dõi, bấm để tắt" : "Nhận thông báo"}
         className={`${BASE} ${on ? ON : OFF}`}
       >
         {on ? <BellRing size={16} aria-hidden /> : <Bell size={16} aria-hidden />}

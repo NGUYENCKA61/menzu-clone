@@ -80,10 +80,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
         : software.description);
 
     return {
-      title: from === null ? software.name : `${software.name} — Từ ${formatVnd(from)}đ`,
+      title: from === null ? software.name : `${software.name} | Từ ${formatVnd(from)}đ`,
       description:
         description ||
-        `${software.name} — phần mềm hỗ trợ gaming, giao key tự động, bảo hành trong suốt thời gian sử dụng.`,
+        `${software.name}: phần mềm hỗ trợ gaming, giao key tự động, bảo hành trong suốt thời gian sử dụng.`,
       alternates: { canonical },
       // The card carries the bare name: the price-from suffix belongs in a
       // search result, not on a picture shared into a chat.
@@ -100,7 +100,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     account.price,
   )}đ`;
   const description =
-    `Account ${account.categoryName} mã ${account.code} — rank ${account.rank}, ` +
+    `Account ${account.categoryName} mã ${account.code}, rank ${account.rank}, ` +
     `${account.weaponSkins} skin súng, ${account.agents} agent, level ${account.level}. ` +
     `Giá ${formatVnd(account.price)}đ. Bàn giao ngay sau khi thanh toán.`;
   const image =
@@ -208,7 +208,7 @@ export default async function ProductPage({ params, searchParams }: PageProps) {
               (isHtmlBody(software.description)
                 ? docHtmlToPlainText(software.description, 300)
                 : software.description) ||
-              `${software.name} — ${software.categoryName}`,
+              `${software.name} - ${software.categoryName}`,
             imageUrl: software.images[0] ?? "",
             categoryName: software.categoryName,
             href,

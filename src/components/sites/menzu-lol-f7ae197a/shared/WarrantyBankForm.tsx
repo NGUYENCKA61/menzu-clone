@@ -156,7 +156,7 @@ export function WarrantyBankForm({
           className={`${FIELD} uppercase`}
         />
         <p className="mt-1.5 text-[11px] text-neutral-500">
-          Như in trên thẻ ngân hàng — chữ in hoa, không dấu.
+          Như in trên thẻ ngân hàng, chữ in hoa, không dấu.
         </p>
       </div>
 

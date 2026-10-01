@@ -41,8 +41,8 @@ export default async function AdminPackageDetailPage({
 
   return (
     <AdminShell
-      title={`${pkg.product.name ?? pkg.product.code} — gói ${pkg.label}`}
-      subtitle="Chi tiết gói thời hạn — giá, thời hạn và kho key"
+      title={`${pkg.product.name ?? pkg.product.code}, gói ${pkg.label}`}
+      subtitle="Chi tiết gói thời hạn, giá, thời hạn và kho key"
       username={admin.username}
       aside={
         <Link

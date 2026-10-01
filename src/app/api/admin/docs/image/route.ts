@@ -43,7 +43,7 @@ export async function POST(request: Request) {
   const size = readImageSize(bytes);
   if (!size || size.width < MIN_SIDE || size.height < MIN_SIDE) {
     return NextResponse.json(
-      { error: "Không đọc được ảnh — file có thể bị hỏng" },
+      { error: "Không đọc được ảnh, file có thể bị hỏng" },
       { status: 400 },
     );
   }
@@ -59,7 +59,7 @@ export async function POST(request: Request) {
     .catch(() => null);
   if (!processed) {
     return NextResponse.json(
-      { error: "Không đọc được ảnh — file có thể bị hỏng" },
+      { error: "Không đọc được ảnh, file có thể bị hỏng" },
       { status: 400 },
     );
   }

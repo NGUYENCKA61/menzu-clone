@@ -91,7 +91,7 @@ export default async function AdminAccountDetailPage({
     return (
       <AdminShell
         title={software.name ?? software.code}
-        subtitle="Chi tiết phần mềm — thông tin, giá, gói thời hạn"
+        subtitle="Chi tiết phần mềm, thông tin, giá, gói thời hạn"
         username={admin.username}
         aside={
           <Link
@@ -181,7 +181,7 @@ export default async function AdminAccountDetailPage({
   return (
     <AdminShell
       title={product.name || `#${product.code}`}
-      subtitle="Chi tiết tài khoản — giá, ảnh, vật phẩm và trạng thái"
+      subtitle="Chi tiết tài khoản, giá, ảnh, vật phẩm và trạng thái"
       username={admin.username}
       aside={
         <Link

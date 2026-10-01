@@ -17,11 +17,11 @@ export default async function manifest(): Promise<MetadataRoute.Manifest> {
   const { brandName, brandColor } = await getShopSettings();
 
   return {
-    name: `${brandName} — Hack game & tài khoản game`,
+    name: `${brandName} | Hack game & tài khoản game`,
     // The home-screen label has room for one word, so the first one wins.
     short_name: brandName.trim().split(/\s+/)[0],
     description:
-      "Shop hack game và tài khoản game uy tín — key bản quyền giao tự động, hỗ trợ 24/7.",
+      "Shop hack game và tài khoản game uy tín, key bản quyền giao tự động, hỗ trợ 24/7.",
     start_url: "/",
     display: "standalone",
     background_color: "#0d0d12",

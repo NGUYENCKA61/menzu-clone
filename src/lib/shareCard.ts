@@ -33,7 +33,7 @@ export async function shareCard(page: {
     url: heroBanner,
     width: 1200,
     height: 630,
-    alt: `${brandName} — shop hack game và tài khoản game`,
+    alt: `${brandName}, shop hack game và tài khoản game`,
   };
   const imageUrl = typeof image === "string" ? image : image.url;
   const words = {

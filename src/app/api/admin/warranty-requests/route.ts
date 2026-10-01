@@ -109,7 +109,7 @@ export async function PATCH(request: Request) {
   if (status === "IN_PROGRESS" || status === "RESOLVED") {
     if (found.status === "REFUNDING") {
       return NextResponse.json(
-        { error: "Phiếu này đang hoàn tiền — xác nhận đã chuyển khoản, hoặc đổi sang hoàn qua tài khoản." },
+        { error: "Phiếu này đang hoàn tiền, xác nhận đã chuyển khoản, hoặc đổi sang hoàn qua tài khoản." },
         { status: 400 },
       );
     }
@@ -167,7 +167,7 @@ export async function PATCH(request: Request) {
   // ---- Everything below moves money, or promises to.
   if (found.order.status !== "PAID") {
     return NextResponse.json(
-      { error: "Đơn này không còn ở trạng thái đã thanh toán — không hoàn tiền được." },
+      { error: "Đơn này không còn ở trạng thái đã thanh toán, không hoàn tiền được." },
       { status: 400 },
     );
   }
@@ -220,7 +220,7 @@ export async function PATCH(request: Request) {
         {
           title: "Đơn được hoàn tiền qua ngân hàng",
           body:
-            `Đơn ${code}: ${note} Shop sẽ hoàn ${money(amount)} qua ngân hàng — ` +
+            `Đơn ${code}: ${note} Shop sẽ hoàn ${money(amount)} qua ngân hàng: ` +
             `bạn vào trang trạng thái nhập số tài khoản để nhận tiền.`,
         },
         { ticketId: id },
@@ -237,7 +237,7 @@ export async function PATCH(request: Request) {
     }
     if (!found.bankAccount) {
       return NextResponse.json(
-        { error: "Khách chưa gửi số tài khoản — chưa xác nhận chuyển khoản được." },
+        { error: "Khách chưa gửi số tài khoản, chưa xác nhận chuyển khoản được." },
         { status: 400 },
       );
     }
@@ -306,7 +306,7 @@ export async function PATCH(request: Request) {
     }
     if (error instanceof Error && error.message === "ALREADY_REFUNDED") {
       return NextResponse.json(
-        { error: "Đơn này đã được hoàn tiền rồi — không thể hoàn lần nữa." },
+        { error: "Đơn này đã được hoàn tiền rồi, không thể hoàn lần nữa." },
         { status: 409 },
       );
     }

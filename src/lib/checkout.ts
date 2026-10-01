@@ -268,7 +268,7 @@ export async function placeOrder(input: CheckoutInput): Promise<CheckoutResult> 
         delta: -total,
         balanceAfter,
         description: chosenPackage
-          ? `Mua ${product.name ?? product.code} — ${chosenPackage.label}${
+          ? `Mua ${product.name ?? product.code} - ${chosenPackage.label}${
               quantity > 1 ? ` ×${quantity}` : ""
             }${
               agencyPct > 0
@@ -349,7 +349,7 @@ export function checkoutFailure(error: unknown): CheckoutFailure {
   if (message.startsWith("LOCKED:")) {
     return {
       status: 409,
-      error: `Tool này ${salesLockReason(message.slice(7))} — shop tạm khóa mua key cho đến khi có bản an toàn`,
+      error: `Tool này ${salesLockReason(message.slice(7))}, shop tạm khóa mua key cho đến khi có bản an toàn`,
     };
   }
   if (message === "PACKAGE_REQUIRED") return { status: 400, error: "Hãy chọn gói trước khi mua" };
@@ -362,8 +362,8 @@ export function checkoutFailure(error: unknown): CheckoutFailure {
       status: 409,
       error:
         available > 0
-          ? `Số lượng trên hệ thống không đủ — gói này chỉ còn ${available} key.`
-          : "Số lượng trên hệ thống không đủ — gói này đã hết key.",
+          ? `Số lượng trên hệ thống không đủ, gói này chỉ còn ${available} key.`
+          : "Số lượng trên hệ thống không đủ, gói này đã hết key.",
       available,
     };
   }
@@ -373,7 +373,7 @@ export function checkoutFailure(error: unknown): CheckoutFailure {
       status: 409,
       error:
         available > 0
-          ? `Kho chỉ còn ${available} tài khoản — giảm số lượng rồi thử lại.`
+          ? `Kho chỉ còn ${available} tài khoản, giảm số lượng rồi thử lại.`
           : "Kho tài khoản này vừa hết, shop sẽ nhập thêm sớm.",
       available,
     };

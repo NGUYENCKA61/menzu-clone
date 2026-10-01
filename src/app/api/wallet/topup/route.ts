@@ -151,7 +151,7 @@ export async function POST(request: Request) {
         {
           error:
             already.status === "PENDING"
-              ? `Thẻ này bạn đã gửi rồi — xem mã lệnh ${already.code} trong lịch sử nạp.`
+              ? `Thẻ này bạn đã gửi rồi, xem mã lệnh ${already.code} trong lịch sử nạp.`
               : `Thẻ này đã được nạp trước đó (mã lệnh ${already.code}).`,
         },
         { status: 409 },

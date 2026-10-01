@@ -370,7 +370,7 @@ function ActivityFeed({ items }: { items: ActivityItem[] }) {
                           : "text-white"
                     }`}
                   >
-                    {item.amount ?? "—"}
+                    {item.amount ?? "-"}
                   </p>
                   <p className="mt-0.5 text-[11px]">
                     <span className={STATE_TEXT[item.state]}>

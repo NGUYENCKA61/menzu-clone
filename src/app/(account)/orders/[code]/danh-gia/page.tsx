@@ -72,7 +72,7 @@ export default async function OrderReviewPage({
   return (
     <AccountPageFrame
       title="Đánh giá đơn hàng"
-      subtitle={`Đơn ${order.code} — vài dòng về tool và về shop`}
+      subtitle={`Đơn ${order.code}, vài dòng về tool và về shop`}
       crumb="Đánh giá đơn hàng"
       action={
         <Link

@@ -77,7 +77,7 @@ export function AdminCategories({ categories }: { categories: AdminCategoryView[
         setError(data.error ?? "Tải ảnh thất bại");
         return null;
       }
-      setOk(`Đã tải ảnh ${data.width}×${data.height}px — nhớ bấm Lưu`);
+      setOk(`Đã tải ảnh ${data.width}×${data.height}px, nhớ bấm Lưu`);
       return data.url;
     } catch {
       setError("Không kết nối được máy chủ");
@@ -209,7 +209,7 @@ export function AdminCategories({ categories }: { categories: AdminCategoryView[
           />
         </div>
         <p className="text-[11px] text-neutral-500">
-          Đường dẫn được tạo tự động từ tên — &ldquo;Tài Khoản Đặc Biệt&rdquo; thành{" "}
+          Đường dẫn được tạo tự động từ tên, &ldquo;Tài Khoản Đặc Biệt&rdquo; thành{" "}
           <span className="font-mono text-neutral-400">/tai-khoan-dac-biet</span>.
           Danh mục mới xếp cuối danh sách, không xáo trộn thứ tự trang chủ đang có.
         </p>
@@ -341,7 +341,7 @@ export function AdminCategories({ categories }: { categories: AdminCategoryView[
                       disabled={busy || category.productCount > 0}
                       title={
                         category.productCount > 0
-                          ? "Còn sản phẩm bên trong — chuyển chúng đi trước khi xóa"
+                          ? "Còn sản phẩm bên trong, chuyển chúng đi trước khi xóa"
                           : "Xóa danh mục"
                       }
                       onClick={() => setDeleting(category)}

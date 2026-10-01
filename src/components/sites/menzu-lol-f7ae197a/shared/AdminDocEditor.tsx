@@ -206,7 +206,7 @@ export function AdminDocEditor({
             }}
           />
           <p className="mt-1.5 text-[11px] text-neutral-500">
-            Soạn trực tiếp như Word — đậm, nghiêng, màu, ảnh hiện ngay trong khung, và
+            Soạn trực tiếp như Word, đậm, nghiêng, màu, ảnh hiện ngay trong khung, và
             trang khách sẽ hiển thị đúng như bạn thấy. Để trống thì bài hiện trạng thái
             &ldquo;đang biên soạn&rdquo; và không được Google lập chỉ mục.
           </p>

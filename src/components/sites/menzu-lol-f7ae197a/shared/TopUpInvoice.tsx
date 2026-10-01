@@ -486,7 +486,7 @@ export function TopUpInvoice({
             {qr === "failed" ? (
               <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 px-5 text-center">
                 <p className="text-xs leading-relaxed text-neutral-600">
-                  Không tải được mã QR — vẫn chuyển khoản được bằng thông tin bên cạnh.
+                  Không tải được mã QR, vẫn chuyển khoản được bằng thông tin bên cạnh.
                 </p>
                 <button
                   type="button"

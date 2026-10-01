@@ -430,7 +430,7 @@ export function AdminDocs({ docs }: { docs: DocView[] }) {
           </div>
           <p className="text-[11px] text-neutral-500">
             Đường dẫn sinh tự động từ tiêu đề và giữ nguyên về sau. Bài mới ở trạng thái
-            &ldquo;đang biên soạn&rdquo; — bấm Sửa để viết nội dung rồi mới hiện đầy đủ cho
+            &ldquo;đang biên soạn&rdquo;, bấm Sửa để viết nội dung rồi mới hiện đầy đủ cho
             khách.
           </p>
         </div>
@@ -480,7 +480,7 @@ export function AdminDocs({ docs }: { docs: DocView[] }) {
         title="Xóa bài viết?"
         body={
           removing
-            ? `Bài "${removing.title}" (/${removing.slug}) biến mất ngay và không khôi phục được — khách đã lưu link sẽ thấy 404.${removing.views > 0 ? ` ${removing.views.toLocaleString("vi-VN")} lượt xem mất theo luôn.` : ""}`
+            ? `Bài "${removing.title}" (/${removing.slug}) biến mất ngay và không khôi phục được, khách đã lưu link sẽ thấy 404.${removing.views > 0 ? ` ${removing.views.toLocaleString("vi-VN")} lượt xem mất theo luôn.` : ""}`
             : ""
         }
         confirmLabel="Xóa bài"

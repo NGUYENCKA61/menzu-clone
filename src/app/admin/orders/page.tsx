@@ -413,7 +413,7 @@ export default async function AdminOrdersPage({
                         </span>
                       </div>
                     ) : (
-                      <span className="text-[11px] text-neutral-700">—</span>
+                      <span className="text-[11px] text-neutral-700">-</span>
                     )}
                   </td>
                   <td className="px-5 py-3 text-sm font-black text-rose-500 tabular-nums whitespace-nowrap">

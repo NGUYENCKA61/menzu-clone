@@ -87,7 +87,7 @@ export function AdminSpinPrizes({
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-[12px] leading-relaxed text-neutral-400">
-          Danh sách này <b className="text-white">chính là bánh xe</b> — thứ tự ở
+          Danh sách này <b className="text-white">chính là bánh xe</b>, thứ tự ở
           đây là thứ tự nan, và cơ cấu giải thưởng khách đọc cũng lấy từ đây.{" "}
           {stored ? null : (
             <span className="text-neutral-500">

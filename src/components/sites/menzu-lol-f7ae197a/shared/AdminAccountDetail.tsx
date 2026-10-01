@@ -177,8 +177,8 @@ export function AdminAccountDetail({ account }: { account: AccountDetailView }) 
     setMsg({
       tone: "ok",
       text: next
-        ? "Đã bật acc random — dán tài khoản vào kho bên dưới"
-        : "Đã tắt acc random — sản phẩm là một tài khoản duy nhất",
+        ? "Đã bật acc random, dán tài khoản vào kho bên dưới"
+        : "Đã tắt acc random, sản phẩm là một tài khoản duy nhất",
     });
   }
 
@@ -192,7 +192,7 @@ export function AdminAccountDetail({ account }: { account: AccountDetailView }) 
       tone: "ok",
       text: `Đã thêm ${Number(data.added ?? 0)} tài khoản vào kho${
         filled > 0 ? `, giao ngay ${filled} đơn đang chờ` : ""
-      } — còn ${Number(data.available ?? 0)}`,
+      }, còn ${Number(data.available ?? 0)}`,
     });
   }
 
@@ -299,8 +299,8 @@ export function AdminAccountDetail({ account }: { account: AccountDetailView }) 
       tone: "ok",
       text: next.username
         ? account.buyer
-          ? `Đã lưu — ${account.buyer.username} thấy ngay trong Lịch sử mua`
-          : "Đã lưu — giao tự động khi bán"
+          ? `Đã lưu: ${account.buyer.username} thấy ngay trong Lịch sử mua`
+          : "Đã lưu, giao tự động khi bán"
         : "Đã xoá thông tin đăng nhập khỏi tài khoản này",
     });
   }
@@ -381,26 +381,26 @@ export function AdminAccountDetail({ account }: { account: AccountDetailView }) 
   const loginStatus = !autoDelivery
     ? {
         tone: "border-indigo-500/25 bg-indigo-500/10 text-indigo-300",
-        text: `Tag ${account.tag || "trống"} — bàn giao tay: khách được báo liên hệ shop, thông tin ở đây chỉ để shop tra cứu. Gắn tag NFA nếu muốn giao tự động.`,
+        text: `Tag ${account.tag || "trống"}, bàn giao tay: khách được báo liên hệ shop, thông tin ở đây chỉ để shop tra cứu. Gắn tag NFA nếu muốn giao tự động.`,
       }
     : loginStored
       ? account.buyer
         ? {
             tone: "border-emerald-500/30 bg-emerald-500/10 text-emerald-400",
-            text: `Đã giao tự động cho ${account.buyer.username} (đơn ${account.buyer.orderCode}) — khách thấy trong Lịch sử mua.`,
+            text: `Đã giao tự động cho ${account.buyer.username} (đơn ${account.buyer.orderCode}), khách thấy trong Lịch sử mua.`,
           }
         : {
             tone: "border-white/10 bg-white/[0.03] text-neutral-300",
-            text: "NFA — sẵn sàng: bán xong là khách nhận ngay trong Lịch sử mua, không cần bàn giao tay.",
+            text: "NFA, sẵn sàng: bán xong là khách nhận ngay trong Lịch sử mua, không cần bàn giao tay.",
           }
       : account.buyer
         ? {
             tone: "border-white/10 bg-white/[0.03] text-neutral-300",
-            text: `Đã bán cho ${account.buyer.username} (đơn ${account.buyer.orderCode}) khi chưa có thông tin đăng nhập — nhập vào thì khách thấy trong Lịch sử mua.`,
+            text: `Đã bán cho ${account.buyer.username} (đơn ${account.buyer.orderCode}) khi chưa có thông tin đăng nhập, nhập vào thì khách thấy trong Lịch sử mua.`,
           }
         : {
             tone: "border-amber-500/30 bg-amber-500/10 text-amber-400",
-            text: "NFA chưa có thông tin đăng nhập — bán xong khách sẽ không nhận được gì tự động, phải liên hệ shop.",
+            text: "NFA chưa có thông tin đăng nhập, bán xong khách sẽ không nhận được gì tự động, phải liên hệ shop.",
           };
 
   return (
@@ -564,7 +564,7 @@ export function AdminAccountDetail({ account }: { account: AccountDetailView }) 
                   className={`${FIELD} w-44`}
                 >
                   <option value="" className="bg-neutral-900">
-                    — không tag —
+                    Không tag
                   </option>
                   <option value="NFA" className="bg-neutral-900">
                     NFA
@@ -660,7 +660,7 @@ export function AdminAccountDetail({ account }: { account: AccountDetailView }) 
           <section className={CARD}>
             <span className={CARD_HEAD}>
               <Users size={13} className="text-neutral-400" />
-              Acc random — bán theo số lượng
+              Acc random, bán theo số lượng
             </span>
             <label className="flex items-start gap-2.5 text-xs leading-relaxed text-neutral-300">
               <input
@@ -688,7 +688,7 @@ export function AdminAccountDetail({ account }: { account: AccountDetailView }) 
                 </div>
                 <div>
                   <label htmlFor="acc-pool-block" className={LABEL}>
-                    Thêm vào kho — mỗi dòng một cặp
+                    Thêm vào kho, mỗi dòng một cặp
                   </label>
                   <textarea
                     id="acc-pool-block"
@@ -784,7 +784,7 @@ export function AdminAccountDetail({ account }: { account: AccountDetailView }) 
             </span>
             {poolOn ? (
               <p className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-[11px] font-semibold text-amber-400">
-                Acc random giao từ kho ở trên — ô này không dùng.
+                Acc random giao từ kho ở trên, ô này không dùng.
               </p>
             ) : null}
             <p
@@ -934,7 +934,7 @@ export function AdminAccountDetail({ account }: { account: AccountDetailView }) 
             </span>
             {account.gallery.length === 0 ? (
               <p className="rounded-lg border border-dashed border-white/10 px-3 py-4 text-center text-[11px] text-neutral-500">
-                Chưa có ảnh phụ — trang khách chỉ hiện ảnh bìa.
+                Chưa có ảnh phụ, trang khách chỉ hiện ảnh bìa.
               </p>
             ) : (
               <div className="grid grid-cols-3 gap-2">

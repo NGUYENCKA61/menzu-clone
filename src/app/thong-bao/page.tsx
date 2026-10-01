@@ -215,7 +215,7 @@ export default async function AnnouncementsPage({
               a followed tool's change arrives as a notice that opens on the
               reader's next page (lib/statusFollowers). */}
           <p className={TAB_NOTE}>
-            Bấm chuông để theo dõi từng bản hack — khi bản đó đổi trạng thái,
+            Bấm chuông để theo dõi từng bản hack, khi bản đó đổi trạng thái,
             thông báo sẽ hiện lên ở lần tới bạn vào web.
           </p>
           <StatusSubscribeSearch

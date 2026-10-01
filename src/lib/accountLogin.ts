@@ -167,7 +167,7 @@ export function parseLoginInput(body: LoginInput | null | undefined): LoginUpdat
   if ((username === "") !== (password === "")) {
     return {
       kind: "invalid",
-      error: "Cần nhập cả tên đăng nhập và mật khẩu — hoặc để trống cả hai để xoá",
+      error: "Cần nhập cả tên đăng nhập và mật khẩu, hoặc để trống cả hai để xoá",
     };
   }
   if (username.length > LOGIN_USERNAME_MAX) {

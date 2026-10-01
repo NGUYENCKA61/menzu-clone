@@ -61,7 +61,7 @@ export async function POST(request: Request) {
   // image/png on request, and this is the only check on what the bytes are.
   const size = readImageSize(bytes);
   if (!size) {
-    return NextResponse.json({ error: "Không đọc được ảnh — file có thể bị hỏng" }, { status: 400 });
+    return NextResponse.json({ error: "Không đọc được ảnh, file có thể bị hỏng" }, { status: 400 });
   }
   if (size.width < MIN_WIDTH || size.height < MIN_HEIGHT) {
     return NextResponse.json(

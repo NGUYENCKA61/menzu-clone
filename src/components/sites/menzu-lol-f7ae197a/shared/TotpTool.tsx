@@ -179,7 +179,7 @@ export function TotpTool() {
       </div>
 
       <p className="text-[11px] text-neutral-500 leading-relaxed text-center px-4">
-        Secret key được xử lý hoàn toàn trên trình duyệt của bạn — không gửi lên
+        Secret key được xử lý hoàn toàn trên trình duyệt của bạn, không gửi lên
         máy chủ và không được lưu lại.
       </p>
     </div>

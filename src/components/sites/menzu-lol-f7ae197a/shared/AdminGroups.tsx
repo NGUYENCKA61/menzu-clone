@@ -214,7 +214,7 @@ export function AdminGroups({
               }
             }}
             className="h-10 w-full rounded-lg border border-white/[0.08] bg-[#0e0e11] pl-9 pr-3.5 text-[13px] text-white outline-none transition-colors placeholder-neutral-600 focus:border-rose-500/50"
-            placeholder="Tên nhóm mới — ví dụ: Hot trending tháng này"
+            placeholder="Tên nhóm mới, ví dụ: Hot trending tháng này"
           />
         </div>
         <button
@@ -314,8 +314,7 @@ export function AdminGroups({
               className="h-4 w-4 shrink-0 accent-[var(--brand)]"
             />
             <span className="text-xs font-bold text-white">Hiện trên trang chủ</span>
-            <span className="text-[11px] text-neutral-500">
-              — tắt vẫn giữ nguyên nhóm và các danh mục đã chọn
+            <span className="text-[11px] text-neutral-500">, tắt vẫn giữ nguyên nhóm và các danh mục đã chọn
             </span>
           </label>
 
@@ -323,7 +322,7 @@ export function AdminGroups({
             <span className={LABEL}>Danh mục trong nhóm ({group.categoryIds.length})</span>
             {group.categoryIds.length === 0 ? (
               <p className="rounded-xl border border-dashed border-white/10 px-3 py-3 text-[11px] text-neutral-500">
-                Chưa chọn danh mục nào — nhóm này sẽ không hiện trên trang chủ.
+                Chưa chọn danh mục nào, nhóm này sẽ không hiện trên trang chủ.
               </p>
             ) : (
               <div className="flex flex-col gap-1.5">
@@ -412,7 +411,7 @@ export function AdminGroups({
         title="Xóa nhóm danh mục?"
         body={
           removing
-            ? `Nhóm "${removing.name}" biến mất khỏi trang chủ ngay. Các danh mục bên trong không bị xóa — chúng chỉ rời khỏi nhóm này. Muốn tạm giấu thì tắt "Hiện nhóm" thay vì xóa.`
+            ? `Nhóm "${removing.name}" biến mất khỏi trang chủ ngay. Các danh mục bên trong không bị xóa, chúng chỉ rời khỏi nhóm này. Muốn tạm giấu thì tắt "Hiện nhóm" thay vì xóa.`
             : ""
         }
         confirmLabel="Xóa nhóm"

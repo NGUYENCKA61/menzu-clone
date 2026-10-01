@@ -96,7 +96,7 @@ export async function POST(request: Request) {
   await announceToAdmins({
     title: "Yêu cầu bảo hành mới",
     body:
-      `${user.username} vừa báo lỗi đơn ${code} — ` +
+      `${user.username} vừa báo lỗi đơn ${code} - ` +
       `${order.product.name ?? order.product.code}: ${WARRANTY_ISSUE[picked.issue].label}.\n` +
       `Bấm "Xem ngay" để đọc mô tả và xử lý.`,
     // Somebody paid and cannot use what they bought; this belongs above the
@@ -109,7 +109,7 @@ export async function POST(request: Request) {
       "🛠 <b>Yêu cầu bảo hành mới</b>",
       `${escapeTelegramHtml(user.username)} · đơn ${escapeTelegramHtml(code)}`,
       escapeTelegramHtml(
-        `${order.product.name ?? order.product.code} — ${WARRANTY_ISSUE[picked.issue].label}`,
+        `${order.product.name ?? order.product.code} - ${WARRANTY_ISSUE[picked.issue].label}`,
       ),
       `🔗 ${absoluteUrl("/admin/warranty")}`,
     ].join("\n"),

@@ -68,7 +68,7 @@ export async function POST(request: Request) {
   const values = parseCredentialBlock(body?.block ?? "");
   if (values.length === 0) {
     return NextResponse.json(
-      { error: "Không đọc được cặp nào — mỗi dòng một cặp, dạng taikhoan|matkhau" },
+      { error: "Không đọc được cặp nào, mỗi dòng một cặp, dạng taikhoan|matkhau" },
       { status: 400 },
     );
   }
@@ -120,7 +120,7 @@ export async function DELETE(request: Request) {
     where: { id: keyId, status: "AVAILABLE", package: { productId: product.id } },
   });
   if (removed.count === 0) {
-    return NextResponse.json({ error: "Không xoá được — cặp này đã giao hoặc không tồn tại" }, { status: 409 });
+    return NextResponse.json({ error: "Không xoá được, cặp này đã giao hoặc không tồn tại" }, { status: 409 });
   }
   return NextResponse.json({ ok: true });
 }

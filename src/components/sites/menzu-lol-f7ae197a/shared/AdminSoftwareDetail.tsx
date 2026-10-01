@@ -226,7 +226,7 @@ function BadgeField({
             {/* The empty option needs a mark of its own, or it reads as a
                 button that failed to load. */}
             {key === "none" ? (
-              <span aria-hidden>—</span>
+              <span aria-hidden>-</span>
             ) : (
               <BadgeIcon icon={key} className="h-3 w-3" />
             )}
@@ -405,7 +405,7 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
         tone: "ok",
         text: list.length
           ? `Đã lưu ${list.length} tính năng`
-          : "Đã xoá — trang khách dùng lại danh sách mặc định",
+          : "Đã xoá, trang khách dùng lại danh sách mặc định",
       });
     }
   }
@@ -426,7 +426,7 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
         tone: "ok",
         text: list.length
           ? `Đã lưu ${list.length} yêu cầu hệ thống`
-          : "Đã xoá — trang khách dùng lại danh sách mặc định",
+          : "Đã xoá, trang khách dùng lại danh sách mặc định",
       });
     }
   }
@@ -456,7 +456,7 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
         tone: "ok",
         text: guideHtml
           ? "Đã lưu hướng dẫn cài đặt"
-          : "Đã xoá — trang khách dùng lại câu mặc định",
+          : "Đã xoá, trang khách dùng lại câu mặc định",
       });
     }
   }
@@ -472,7 +472,7 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
         tone: "ok",
         text: setupGuideHtml
           ? "Đã lưu hướng dẫn thiết lập & sử dụng"
-          : "Đã xoá — trang khách dùng lại câu mặc định",
+          : "Đã xoá, trang khách dùng lại câu mặc định",
       });
     }
   }
@@ -523,7 +523,7 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
         return;
       }
       setStatusImageUrl(data.url as string);
-      setMsg({ tone: "ok", text: "Đã tải ảnh — bấm Lưu để đăng kèm trạng thái" });
+      setMsg({ tone: "ok", text: "Đã tải ảnh, bấm Lưu để đăng kèm trạng thái" });
     } catch {
       setMsg({ tone: "err", text: "Không kết nối được máy chủ" });
     } finally {
@@ -686,7 +686,7 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
                   />
                 </div>
                 <p className="mt-1.5 text-[11px] text-neutral-500">
-                  Đổi đường dẫn là link cũ hỏng — chỉ sửa khi sản phẩm chưa được
+                  Đổi đường dẫn là link cũ hỏng, chỉ sửa khi sản phẩm chưa được
                   chia sẻ đi đâu.
                 </p>
               </div>
@@ -770,8 +770,7 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
                   />
                 </div>
                 <p className="mt-1.5 text-[11px] text-neutral-500">
-                  Hiện cạnh trạng thái ở trang khách. Gõ gì hiện nấy —
-                  &ldquo;TOP #1 BÁN CHẠY&rdquo;, &ldquo;MỚI RA MẮT&rdquo;,
+                  Hiện cạnh trạng thái ở trang khách. Gõ gì hiện nấy, &ldquo;TOP #1 BÁN CHẠY&rdquo;, &ldquo;MỚI RA MẮT&rdquo;,
                   &ldquo;SẮP HẾT HÀNG&rdquo;. Mỗi nhãn chọn màu riêng bằng dãy
                   chấm bên phải. Để trống cả hai thì không hiện nhãn nào.
                 </p>
@@ -914,7 +913,7 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
               </button>
             </div>
             <p className="text-[11px] text-neutral-500">
-              Trạng thái hack hiện thành pill trên card ngoài cửa hàng — khách nhìn nó để
+              Trạng thái hack hiện thành pill trên card ngoài cửa hàng, khách nhìn nó để
               quyết định mua. Card ngoài luôn hiện; ô bên phải chỉ quyết định
               trang chi tiết, nơi pill đứng chung hàng với nhãn nổi bật.
               &ldquo;Tự động&rdquo; nghĩa là có nhãn thì ẩn pill, không nhãn thì
@@ -931,7 +930,7 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
                 value={statusNote}
                 onChange={(event) => setStatusNote(event.target.value)}
                 rows={3}
-                placeholder="Ghi chú gửi khách — ví dụ: Đã vá, chờ 24h rồi dùng lại."
+                placeholder="Ghi chú gửi khách, ví dụ: Đã vá, chờ 24h rồi dùng lại."
                 className={`${FIELD} resize-y`}
               />
               {/* The note's formatting rules (lib/statusNote), named where the
@@ -1031,7 +1030,7 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
         <RichTextEditor initialHtml={software.descriptionHtml} onUpdate={setDescHtml} />
         <p className="text-[11px] text-neutral-500">
           Có nội dung ở đây thì khu &ldquo;Mô tả sản phẩm&rdquo; trên trang khách hiện
-          đúng bài này — đậm, màu, ảnh y như trong khung. Để trống rồi lưu thì trang
+          đúng bài này, đậm, màu, ảnh y như trong khung. Để trống rồi lưu thì trang
           khách quay về đoạn hướng dẫn và bảo hành viết sẵn. Khu &ldquo;Tính năng nổi
           bật&rdquo; và &ldquo;Yêu cầu hệ thống&rdquo; luôn hiện, dù có bài này hay không.
         </p>
@@ -1067,8 +1066,7 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
           className={`${FIELD} resize-y leading-relaxed`}
         />
         <p className="text-[11px] text-neutral-500">
-          Mỗi dòng một yêu cầu, dạng <span className="font-mono text-neutral-400">Nhãn: giá trị</span>
-          — nhãn in bên trái, giá trị in đậm bên phải trong khung &ldquo;Yêu cầu hệ
+          Mỗi dòng một yêu cầu, dạng <span className="font-mono text-neutral-400">Nhãn: giá trị</span>, nhãn in bên trái, giá trị in đậm bên phải trong khung &ldquo;Yêu cầu hệ
           thống&rdquo; trên trang khách. Dòng không có dấu hai chấm bị bỏ qua. Xoá hết thì
           trang khách in lại danh sách mặc định chung của shop chứ không trống.
         </p>
@@ -1107,7 +1105,7 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
         <p className="text-[11px] text-neutral-500">
           Mỗi dòng một tính năng, dạng <span className="font-mono text-neutral-400">Tên: mô tả</span>.
           Phần trước dấu hai chấm đầu tiên được in đậm trên trang khách, phần sau viết
-          thường. Không có dấu hai chấm thì cả dòng là tên — &ldquo;No recoil&rdquo; cũng là
+          thường. Không có dấu hai chấm thì cả dòng là tên, &ldquo;No recoil&rdquo; cũng là
           một tính năng. Xoá hết thì trang khách in lại danh sách mặc định chung của shop
           chứ không trống.
         </p>
@@ -1139,7 +1137,7 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
           <RichTextEditor initialHtml={software.featuresNoteHtml} onUpdate={setNoteHtml} />
           <p className="text-[11px] text-neutral-500">
             Đoạn viết nằm ngay dưới danh sách gạch đầu dòng ở trên. Soạn y như ô mô tả
-            sản phẩm — đậm, màu, tiêu đề, ảnh. Để trống thì trang khách không hiện gì
+            sản phẩm, đậm, màu, tiêu đề, ảnh. Để trống thì trang khách không hiện gì
             thêm sau danh sách.
           </p>
           <div className="flex flex-wrap items-center gap-3">
@@ -1166,9 +1164,9 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
         </span>
         <RichTextEditor initialHtml={software.guideHtml} onUpdate={setGuideHtml} />
         <p className="text-[11px] text-neutral-500">
-          Khu &ldquo;Hướng dẫn cài đặt&rdquo; trên trang khách — cách tải, cách bật,
+          Khu &ldquo;Hướng dẫn cài đặt&rdquo; trên trang khách, cách tải, cách bật,
           cách nhập key. Soạn y như ô mô tả: đậm, màu, đánh số, chèn ảnh chụp màn hình.
-          Muốn chèn video: bấm nút &ldquo;Video&rdquo; rồi dán link YouTube — bấm vào
+          Muốn chèn video: bấm nút &ldquo;Video&rdquo; rồi dán link YouTube, bấm vào
           video để chỉnh rộng và căn lề như ảnh. Để trống thì trang khách in lại câu
           mặc định chung của shop chứ không trống.
         </p>
@@ -1199,12 +1197,12 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
         />
         <p className="text-[11px] text-neutral-500">
           Khu &ldquo;Hướng dẫn thiết lập &amp; sử dụng&rdquo; trên trang khách, ngay
-          dưới hướng dẫn cài đặt — nhập key, bật tính năng, chỉnh thông số, thao tác
+          dưới hướng dẫn cài đặt, nhập key, bật tính năng, chỉnh thông số, thao tác
           trong game. <span className="text-neutral-400">Chỉ khách đã thuê key của tool
           này mới đọc được</span>; người khác thấy ô khoá &ldquo;Mở khoá sau khi thuê
           key&rdquo;. Muốn chèn video: bấm nút &ldquo;Video&rdquo; rồi dán link YouTube
           (nên để &ldquo;Không công khai&rdquo;), bấm vào video để chỉnh rộng và căn lề
-          như ảnh — video cũng chỉ khách đã mua mới thấy.
+          như ảnh, video cũng chỉ khách đã mua mới thấy.
           Tài khoản admin luôn xem được khu này trên trang khách để kiểm tra. Để
           trống thì khách đã mua thấy câu mặc định chung của shop.
         </p>

@@ -123,7 +123,7 @@ function ShelfFollowButton({
         onClick={toggle}
         disabled={busy}
         aria-pressed={on}
-        title={on ? `Đang theo dõi cả ${name} — bấm để bỏ` : `Theo dõi cả ${name}`}
+        title={on ? `Đang theo dõi cả ${name}, bấm để bỏ` : `Theo dõi cả ${name}`}
         className={`${CHIP} ${on ? CHIP_ON : CHIP_OFF}`}
       >
         {on ? <BellRing size={13} aria-hidden /> : <Bell size={13} aria-hidden />}
@@ -227,8 +227,11 @@ export function StatusSubscribeSearch({
     <div className="flex flex-col gap-5">
       {/* Stays under the header while the shelves scroll by (58px is the
           header once scrolled), on the page's own ground so the cards pass
-          beneath it rather than through it. */}
-      <div className="sticky top-[58px] z-20 -mx-4 flex flex-wrap items-center gap-3 bg-[#0f1015]/95 px-4 py-3 backdrop-blur lg:-mx-6 lg:px-6">
+          beneath it rather than through it. Its padding is for that stuck
+          moment only: -my-2 gives it back to the page, so at rest the box
+          sits the column's 20px from the line above and the first shelf
+          below (the owner, 02/10/2026: "có bị thưa k vậy"). */}
+      <div className="sticky top-[58px] z-20 -mx-4 -my-2 flex flex-wrap items-center gap-3 bg-[#0f1015]/95 px-4 py-2 backdrop-blur lg:-mx-6 lg:px-6">
         {/* The search alone: the "Tất cả / Đang theo dõi" filter came off
             (the owner, 02/10/2026: "bỏ 2 card tất cả với đang theo dõi đi"). */}
         <label className="flex h-10 w-full max-w-md items-center gap-2.5 rounded-xl border border-white/10 bg-[#101114] px-4 transition-colors focus-within:border-[var(--menzu-accent)]/60">

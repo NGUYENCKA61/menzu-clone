@@ -654,7 +654,7 @@ export function SecurityPanel({
                     title={
                       platform.linked
                         ? undefined
-                        : "Chưa bật — shop chưa cấu hình kết nối này"
+                        : "Chưa bật, shop chưa cấu hình kết nối này"
                     }
                   >
                     {body}

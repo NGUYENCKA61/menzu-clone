@@ -529,7 +529,7 @@ export function AccountBuyPanel({ account, initialQuantity }: AccountBuyPanelPro
                 ? `${bought} tài khoản đã sẵn trong Lịch sử mua.`
                 : loginReady
                   ? "Tài khoản và mật khẩu đăng nhập đã sẵn trong Lịch sử mua."
-                  : "Tài khoản bàn giao trực tiếp — liên hệ shop kèm mã đơn để nhận."}
+                  : "Tài khoản bàn giao trực tiếp, liên hệ shop kèm mã đơn để nhận."}
             </DialogAlert>
           </div>
         </BuyConfirmDialog>
@@ -541,7 +541,7 @@ export function AccountBuyPanel({ account, initialQuantity }: AccountBuyPanelPro
         onClose={() => setOpen(false)}
         // A guest is told what the button does before pressing it; it used
         // to read XÁC NHẬN and land them on a bare login page.
-        subtitle={guest ? "Đăng nhập để hoàn tất đơn này — lựa chọn của bạn sẽ được giữ nguyên." : undefined}
+        subtitle={guest ? "Đăng nhập để hoàn tất đơn này, lựa chọn của bạn sẽ được giữ nguyên." : undefined}
         footer={
           <ConfirmFooter
             onCancel={() => setOpen(false)}

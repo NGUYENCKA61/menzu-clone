@@ -57,7 +57,7 @@ export default async function AdminSoftwarePackagesPage({
 
   return (
     <AdminShell
-      title={`Gói thời hạn — ${software.name ?? software.code}`}
+      title={`Gói thời hạn: ${software.name ?? software.code}`}
       subtitle="Thêm gói, xem tồn key và mở chi tiết từng gói"
       username={admin.username}
       aside={

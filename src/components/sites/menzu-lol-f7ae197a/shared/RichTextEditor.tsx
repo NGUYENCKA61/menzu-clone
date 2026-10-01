@@ -367,7 +367,7 @@ function OffsetControls({
         title={
           side
             ? `Khoảng cách từ mép ${side} (đổi bên bằng nút Căn)`
-            : "Đang căn giữa — đặt lề sẽ chuyển sang căn trái"
+            : "Đang căn giữa, đặt lề sẽ chuyển sang căn trái"
         }
       >
         {align === "right" ? "Lề phải →" : align === "left" ? "← Lề trái" : "Lề"}
@@ -592,8 +592,8 @@ function ImagePanelInner({ editor }: { editor: Editor }) {
         type="button"
         title={
           captionItalic
-            ? "Chú thích đang nghiêng — bấm để dựng thẳng"
-            : "Chú thích đang thẳng — bấm để in nghiêng"
+            ? "Chú thích đang nghiêng, bấm để dựng thẳng"
+            : "Chú thích đang thẳng, bấm để in nghiêng"
         }
         aria-label="Đổi kiểu chữ chú thích nghiêng / thẳng"
         aria-pressed={captionItalic}
@@ -985,7 +985,7 @@ function MoveHandle({ editor }: { editor: Editor }) {
     <button
       type="button"
       aria-label="Kéo để dời ảnh hoặc video sang trái, phải"
-      title="Giữ và kéo sang trái / phải — nhả chuột để đặt"
+      title="Giữ và kéo sang trái / phải, nhả chuột để đặt"
       onPointerDown={start}
       onPointerMove={move}
       onPointerUp={end}
@@ -1210,8 +1210,8 @@ export function RichTextEditor({
           className="h-8 rounded-lg border border-white/[0.07] bg-[#16161a] px-2 text-[11px] font-bold text-neutral-300 outline-none focus:border-[var(--brand)]/60 transition-colors"
         >
           <option value="p">Đoạn văn</option>
-          <option value="h2">H2 — Tiêu đề lớn</option>
-          <option value="h3">H3 — Tiêu đề nhỏ</option>
+          <option value="h2">H2, Tiêu đề lớn</option>
+          <option value="h3">H3, Tiêu đề nhỏ</option>
         </select>
         {/* Font size rides the same textStyle mark the colors use. */}
         <select

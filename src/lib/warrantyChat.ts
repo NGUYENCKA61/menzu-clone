@@ -49,7 +49,7 @@ export function readMessage(value: unknown, withImage: boolean): MessageRead {
     return { ok: false, error: "Bạn chưa nhập nội dung tin nhắn." };
   }
   if (body.length > MESSAGE_MAX) {
-    return { ok: false, error: `Tin nhắn tối đa ${MESSAGE_MAX} ký tự — bạn tách làm hai tin nhé.` };
+    return { ok: false, error: `Tin nhắn tối đa ${MESSAGE_MAX} ký tự, bạn tách làm hai tin nhé.` };
   }
   return { ok: true, body };
 }
@@ -57,10 +57,10 @@ export function readMessage(value: unknown, withImage: boolean): MessageRead {
 /** Refuses a buyer who has sent too many in the last minute, or the last day. */
 export function sendingTooFast(lastMinute: number, lastDay: number): string | null {
   if (lastMinute >= BURST_LIMIT) {
-    return "Bạn gửi hơi nhanh — đợi một chút rồi gửi tiếp nhé.";
+    return "Bạn gửi hơi nhanh, đợi một chút rồi gửi tiếp nhé.";
   }
   if (lastDay >= DAILY_LIMIT) {
-    return "Hôm nay bạn đã nhắn nhiều cho yêu cầu này — shop sẽ trả lời sớm.";
+    return "Hôm nay bạn đã nhắn nhiều cho yêu cầu này, shop sẽ trả lời sớm.";
   }
   return null;
 }

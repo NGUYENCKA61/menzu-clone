@@ -198,7 +198,7 @@ export function AdminPackageKeys({
       <div className="grid gap-4 lg:grid-cols-2">
         <div className="flex flex-col gap-2">
           <label htmlFor={`paste-${packageId}`} className={HEAD}>
-            Thêm key — mỗi dòng một key
+            Thêm key, mỗi dòng một key
           </label>
           <textarea
             id={`paste-${packageId}`}
@@ -232,7 +232,7 @@ export function AdminPackageKeys({
             touched. */}
         <div className="flex flex-col gap-2">
           <label htmlFor={`remove-${packageId}`} className={HEAD}>
-            Xoá theo key — dán key cần xoá
+            Xoá theo key, dán key cần xoá
           </label>
           <textarea
             id={`remove-${packageId}`}

@@ -385,7 +385,7 @@ export function AdminAnnouncements({
 
         <div>
           <label className={LABEL}>
-            Lưu ý — mỗi dòng một gạch đầu dòng
+            Lưu ý, mỗi dòng một gạch đầu dòng
             <span className="ml-2 font-bold normal-case tracking-normal text-neutral-600">
               tối đa {BULLETS_MAX} dòng · để trống thì bỏ qua mục này
             </span>
@@ -440,7 +440,7 @@ export function AdminAnnouncements({
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <label className={LABEL}>Ô lưu ý quan trọng — tiêu đề</label>
+            <label className={LABEL}>Ô lưu ý quan trọng, tiêu đề</label>
             <input
               value={form.noticeTitle}
               onChange={(e) => setForm({ ...form, noticeTitle: e.target.value })}
@@ -449,7 +449,7 @@ export function AdminAnnouncements({
             />
           </div>
           <div>
-            <label className={LABEL}>Ô lưu ý quan trọng — nội dung</label>
+            <label className={LABEL}>Ô lưu ý quan trọng, nội dung</label>
             <input
               value={form.noticeBody}
               onChange={(e) => setForm({ ...form, noticeBody: e.target.value })}
@@ -589,7 +589,7 @@ export function AdminAnnouncements({
             <p className="mt-2 text-[11px] leading-relaxed text-neutral-400">
               Điền tên quà thì thông báo sẽ có nút{" "}
               <span className="font-bold text-amber-300">Điền địa chỉ nhận</span> cho
-              khách nhập tên, số điện thoại và địa chỉ — giống khi quay trúng quà
+              khách nhập tên, số điện thoại và địa chỉ, giống khi quay trúng quà
               tặng. Quà hiện trong mục{" "}
               <span className="font-bold text-neutral-300">Vận hành → Gửi quà</span>{" "}
               sau khi thông báo được đăng.
@@ -599,7 +599,7 @@ export function AdminAnnouncements({
 
         <p className="text-[11px] text-neutral-500">
           Để trống thời gian bắt đầu là chạy ngay, để trống kết thúc là chạy đến khi
-          tự tắt. Thông báo mới luôn ở trạng thái nháp — bấm{" "}
+          tự tắt. Thông báo mới luôn ở trạng thái nháp, bấm{" "}
           <span className="font-bold text-neutral-300">Đăng</span> ở bảng dưới mới hiện
           cho khách.
         </p>

@@ -745,7 +745,7 @@ export function OrderDetailModal({
                                 {chip}
                               </span>
                             ) : (
-                              <span className="text-neutral-500">—</span>
+                              <span className="text-neutral-500">-</span>
                             )}
                           </td>
                           <td className={`${CELL} tabular-nums`}>
@@ -825,14 +825,14 @@ export function OrderDetailModal({
                           ) : null}
                           {order.keysPending > 0 ? (
                             <p className="text-xs font-semibold text-amber-400">
-                              {order.keysPending} tài khoản đang được chuẩn bị — shop
+                              {order.keysPending} tài khoản đang được chuẩn bị, shop
                               sẽ giao trong ít phút, sẽ hiện ngay tại đây.
                             </p>
                           ) : null}
                           {order.keys.length === 0 && order.keysPending === 0 ? (
                             <p className="text-xs text-neutral-400">
                               {order.refunded
-                                ? "Đơn đã được hoàn tiền — thông tin đăng nhập đã thu hồi."
+                                ? "Đơn đã được hoàn tiền, thông tin đăng nhập đã thu hồi."
                                 : "Đơn này chưa có tài khoản để hiển thị."}
                             </p>
                           ) : null}
@@ -882,8 +882,7 @@ export function OrderDetailModal({
                             ) : null}
                             {order.keysPending > 0 ? (
                               <p className="text-xs font-semibold text-amber-400">
-                                {order.keysPending} key đang được chuẩn bị —
-                                shop sẽ giao trong ít phút, key sẽ hiện ngay tại
+                                {order.keysPending} key đang được chuẩn bị, shop sẽ giao trong ít phút, key sẽ hiện ngay tại
                                 đây.
                               </p>
                             ) : null}
@@ -891,7 +890,7 @@ export function OrderDetailModal({
                             order.keysPending === 0 ? (
                               <p className="text-xs text-neutral-400">
                                 {order.refunded
-                                  ? "Đơn đã được hoàn tiền — key đã thu hồi."
+                                  ? "Đơn đã được hoàn tiền, key đã thu hồi."
                                   : "Đơn này chưa có key để hiển thị."}
                               </p>
                             ) : null}
@@ -929,7 +928,7 @@ export function OrderDetailModal({
                         <div className="flex items-start gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
                           <MessageCircle className="mt-0.5 h-4 w-4 shrink-0 text-neutral-400" />
                           <p className="text-xs leading-relaxed text-neutral-300">
-                            Tài khoản này được bàn giao trực tiếp — liên hệ shop
+                            Tài khoản này được bàn giao trực tiếp, liên hệ shop
                             kèm mã đơn{" "}
                             <strong className="text-white">
                               {order.code}
@@ -945,7 +944,7 @@ export function OrderDetailModal({
                         <div className="flex items-start gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
                           <MessageCircle className="mt-0.5 h-4 w-4 shrink-0 text-neutral-400" />
                           <p className="text-xs leading-relaxed text-neutral-300">
-                            Tài khoản này đã được shop bàn giao lại — liên hệ
+                            Tài khoản này đã được shop bàn giao lại, liên hệ
                             shop kèm mã đơn{" "}
                             <strong className="text-white">
                               {order.code}
@@ -959,7 +958,7 @@ export function OrderDetailModal({
                         // the difference between a withdrawn order and an
                         // order the site appears to have lost.
                         <p className="text-xs text-neutral-400">
-                          Đơn đã được hoàn tiền — dữ liệu bàn giao không còn
+                          Đơn đã được hoàn tiền, dữ liệu bàn giao không còn
                           hiển thị.
                         </p>
                       ) : (

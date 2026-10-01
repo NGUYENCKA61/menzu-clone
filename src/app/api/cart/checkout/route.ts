@@ -288,8 +288,8 @@ export async function POST(request: Request) {
           balanceAfter,
           description: `${
             items.length === 1
-              ? `Mua ${items[0]!.product.name ?? items[0]!.product.code} — ${items[0]!.package.label}`
-              : `Thanh toán giỏ hàng — ${items.length} sản phẩm`
+              ? `Mua ${items[0]!.product.name ?? items[0]!.product.code} - ${items[0]!.package.label}`
+              : `Thanh toán giỏ hàng: ${items.length} sản phẩm`
           }${
             agencyPct > 0
               ? " · giá đại lý"
@@ -376,8 +376,8 @@ export async function POST(request: Request) {
         {
           error:
             Number(left) > 0
-              ? `Số lượng trên hệ thống không đủ — "${name}" chỉ còn ${left} key.`
-              : `Số lượng trên hệ thống không đủ — "${name}" đã hết key.`,
+              ? `Số lượng trên hệ thống không đủ, "${name}" chỉ còn ${left} key.`
+              : `Số lượng trên hệ thống không đủ, "${name}" đã hết key.`,
         },
         { status: 409 },
       );
@@ -391,14 +391,14 @@ export async function POST(request: Request) {
     if (message.startsWith("CAUGHT:")) {
       return NextResponse.json(
         {
-          error: `"${message.slice(7)}" đang tạm khóa mua key (bị phát hiện hoặc đang cập nhật) — hãy xoá khỏi giỏ rồi thử lại`,
+          error: `"${message.slice(7)}" đang tạm khóa mua key (bị phát hiện hoặc đang cập nhật), hãy xoá khỏi giỏ rồi thử lại`,
         },
         { status: 409 },
       );
     }
     if (message.startsWith("GONE:")) {
       return NextResponse.json(
-        { error: `"${message.slice(5)}" không còn bán — hãy xoá khỏi giỏ rồi thử lại` },
+        { error: `"${message.slice(5)}" không còn bán, hãy xoá khỏi giỏ rồi thử lại` },
         { status: 409 },
       );
     }

@@ -153,7 +153,7 @@ export default async function AgencyDashboardPage() {
       title="Bàn đại lý"
       subtitle={
         percent > 0
-          ? `Mức chiết khấu riêng của bạn: ${percent}% — thanh toán bằng số dư ví`
+          ? `Mức chiết khấu riêng của bạn: ${percent}%, thanh toán bằng số dư ví`
           : "Thanh toán bằng số dư ví"
       }
       crumb="Bàn đại lý"
@@ -206,7 +206,7 @@ export default async function AgencyDashboardPage() {
               <span className="font-black uppercase tracking-wider text-amber-400">
                 Lưu ý:
               </span>{" "}
-              Tài khoản chưa được gán mức chiết khấu — mua lúc này là giá niêm
+              Tài khoản chưa được gán mức chiết khấu, mua lúc này là giá niêm
               yết. Liên hệ admin để chốt mức riêng của bạn.
             </p>
           ) : null}
@@ -238,7 +238,7 @@ export default async function AgencyDashboardPage() {
                   </span>
                   <span className="text-[11px] text-neutral-400">
                     {order.product.name ?? order.product.code}
-                    {order.package ? ` — ${order.package.label}` : ""}
+                    {order.package ? ` - ${order.package.label}` : ""}
                     {order.quantity > 1 ? ` ×${order.quantity}` : ""}
                   </span>
                   <span className="ml-auto text-sm font-black tabular-nums text-emerald-400">

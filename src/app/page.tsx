@@ -187,7 +187,7 @@ export default async function Home() {
             screen readers and search engines and drawn by neither. */}
         {!visibleBlocks(settings).includes("hero") ? (
           <h1 className="sr-only">
-            {settings.brandName} — hack game và tài khoản game
+            {settings.brandName}: hack game và tài khoản game
           </h1>
         ) : null}
         <div className="w-full">

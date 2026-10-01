@@ -58,7 +58,7 @@ export async function POST(request: Request) {
   // put aside.
   if (isSalesLocked(product.softwareStatus)) {
     return NextResponse.json(
-      { error: `Tool này ${salesLockReason(product.softwareStatus)} — shop tạm khóa mua key` },
+      { error: `Tool này ${salesLockReason(product.softwareStatus)}, shop tạm khóa mua key` },
       { status: 409 },
     );
   }

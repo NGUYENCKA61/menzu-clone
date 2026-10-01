@@ -275,7 +275,7 @@ export function AdminSoftwarePackages({
 
         {packages.length === 0 ? (
           <p className="rounded-lg border border-dashed border-white/10 px-3 py-4 text-center text-[11px] text-neutral-500">
-            Chưa có gói nào — khách không có gì để mua cho tới khi gói đầu tiên lên kệ.
+            Chưa có gói nào, khách không có gì để mua cho tới khi gói đầu tiên lên kệ.
           </p>
         ) : (
           <div className="flex flex-col gap-1.5">
@@ -421,7 +421,7 @@ export function AdminSoftwarePackages({
                   disabled={busy || pkg.orderCount > 0}
                   title={
                     pkg.orderCount > 0
-                      ? "Gói đã có đơn — sửa được nhưng không xóa được"
+                      ? "Gói đã có đơn, sửa được nhưng không xóa được"
                       : "Xoá gói"
                   }
                   onClick={() => setRemoving(pkg)}

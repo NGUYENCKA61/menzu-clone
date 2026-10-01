@@ -92,7 +92,7 @@ export function AdminCategoryDetail({
         setError(data.error ?? "Tải ảnh thất bại");
         return null;
       }
-      setOk(`Đã tải ảnh ${data.width}×${data.height}px — nhớ bấm Lưu`);
+      setOk(`Đã tải ảnh ${data.width}×${data.height}px, nhớ bấm Lưu`);
       return data.url;
     } catch {
       setError("Không kết nối được máy chủ");
@@ -217,7 +217,7 @@ export function AdminCategoryDetail({
               className={`${FIELD} w-48`}
             >
               <option value="" className="bg-neutral-900">
-                — chưa phân loại —
+                Chưa phân loại
               </option>
               {CATEGORY_PLATFORMS.map((value) => (
                 <option key={value} value={value} className="bg-neutral-900">
@@ -334,7 +334,7 @@ export function AdminCategoryDetail({
               </div>
             </div>
             <p className="text-[11px] text-neutral-500">
-              Hai số này do shop tự đặt để in ra thẻ ngoài trang chủ — không phải số
+              Hai số này do shop tự đặt để in ra thẻ ngoài trang chủ, không phải số
               sản phẩm thật trong kho ({category.productCount}).
             </p>
           </section>

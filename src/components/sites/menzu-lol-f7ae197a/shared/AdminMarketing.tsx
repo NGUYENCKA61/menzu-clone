@@ -321,7 +321,7 @@ export function AdminMarketing({
                   onChange={(e) => setScopeCategory(e.target.value)}
                   className={FIELD}
                 >
-                  <option value="" className="bg-neutral-900">— Chọn danh mục —</option>
+                  <option value="" className="bg-neutral-900">Chọn danh mục</option>
                   {categories.map((c) => (
                     <option key={c.slug} value={c.slug} className="bg-neutral-900">
                       {c.name}
@@ -409,14 +409,14 @@ export function AdminMarketing({
                             −{v.percentOff ? `${v.percentOff}%` : `${formatVnd(v.amountOff ?? 0)}đ`}
                           </span>
                         ) : (
-                          <span className="text-[11px] text-neutral-700">—</span>
+                          <span className="text-[11px] text-neutral-700">-</span>
                         )}
                       </td>
                       <td className="px-5 py-3 text-xs text-neutral-300 whitespace-nowrap">
                         {v.scopeLabel}
                       </td>
                       <td className="px-5 py-3 text-xs text-neutral-400 tabular-nums">
-                        {v.minOrder ? `${formatVnd(v.minOrder)}đ` : "—"}
+                        {v.minOrder ? `${formatVnd(v.minOrder)}đ` : "-"}
                       </td>
                       <td className="px-5 py-3 text-xs tabular-nums whitespace-nowrap">
                         <span className={v.usedCount > 0 ? "font-bold text-white" : "text-neutral-600"}>

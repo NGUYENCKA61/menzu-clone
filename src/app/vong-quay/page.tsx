@@ -98,8 +98,7 @@ export default async function SpinPage() {
               <span className="flex-1 text-[13px] leading-relaxed text-amber-200">
                 {unclaimed.length === 1 ? (
                   <>
-                    Bạn trúng <b className="text-white">{unclaimed[0]!.label}</b> —
-                    điền địa chỉ để shop gửi tận nơi.
+                    Bạn trúng <b className="text-white">{unclaimed[0]!.label}</b>, điền địa chỉ để shop gửi tận nơi.
                   </>
                 ) : (
                   <>

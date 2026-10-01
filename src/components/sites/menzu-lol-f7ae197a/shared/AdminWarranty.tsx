@@ -272,7 +272,7 @@ function DeskPulse({ since }: { since: string }) {
       className="sticky top-3 z-10 inline-flex items-center gap-2 self-center rounded-full border border-[var(--brand)]/50 bg-[#1a0d10]/95 px-4 py-2 text-[12px] font-bold text-white shadow-lg shadow-black/40 backdrop-blur transition-colors hover:bg-[#2a1116]"
     >
       <MessageCircle className="h-4 w-4 text-[var(--brand)]" aria-hidden />
-      Có {fresh} cập nhật mới từ khách — bấm để tải lại
+      Có {fresh} cập nhật mới từ khách, bấm để tải lại
     </button>
   );
 }

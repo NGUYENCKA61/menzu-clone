@@ -229,7 +229,7 @@ export function CartEmpty({ signedIn }: { signedIn: boolean }) {
       <p className="text-sm text-neutral-400 max-w-[460px] leading-relaxed">
         {signedIn
           ? "Chọn một phần mềm và thêm gói bạn muốn vào giỏ. Tài khoản game thì mua thẳng trên trang sản phẩm."
-          : "Giỏ hàng được lưu theo tài khoản — đăng nhập là thấy lại các gói bạn đã thêm."}
+          : "Giỏ hàng được lưu theo tài khoản, đăng nhập là thấy lại các gói bạn đã thêm."}
       </p>
 
       <Link
@@ -450,7 +450,7 @@ export function CartView({
       if (!res.ok) {
         setError(
           typeof data.shortfall === "number"
-            ? `${data.error} — cần nạp thêm ${formatVnd(data.shortfall)}đ`
+            ? `${data.error}, cần nạp thêm ${formatVnd(data.shortfall)}đ`
             : (data.error ?? "Không thể thanh toán"),
         );
         return;
@@ -669,8 +669,7 @@ export function CartView({
                     </Link>
                   </span>
                 ))}
-                {" "}
-                — bấm mã để mở đơn. Đọc hướng dẫn cài đặt trên trang tool trước
+                {" "}, bấm mã để mở đơn. Đọc hướng dẫn cài đặt trên trang tool trước
                 khi chạy.
               </span>
             </p>

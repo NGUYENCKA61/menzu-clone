@@ -496,7 +496,7 @@ export function AdminWarrantyDetail({ ticket, mailOn }: { ticket: WarrantyTicket
             </div>
           ) : (
             <p className="border-t border-white/[0.06] px-4 py-4 text-[12px] text-neutral-500 sm:px-5">
-              Yêu cầu đã xong — khung trao đổi đã đóng.
+              Yêu cầu đã xong, khung trao đổi đã đóng.
             </p>
           )}
         </section>

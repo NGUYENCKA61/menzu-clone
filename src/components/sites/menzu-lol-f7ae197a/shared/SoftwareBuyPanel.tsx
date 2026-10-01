@@ -374,7 +374,7 @@ export function SoftwareBuyPanel({
         // and a page with two grey buttons and no sentence reads as broken
         // rather than as unfinished.
         <p className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-[13px] leading-relaxed text-amber-300">
-          Tool này shop chưa mở bán — chưa có gói và giá. Bấm theo dõi ở kênh thông báo để
+          Tool này shop chưa mở bán, chưa có gói và giá. Bấm theo dõi ở kênh thông báo để
           biết khi shop mở bán nhé.
         </p>
       ) : null}

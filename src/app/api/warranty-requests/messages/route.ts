@@ -91,7 +91,7 @@ export async function POST(request: Request) {
   // a fault that comes back is a new report.
   if (!warrantyOpen(ticket.status)) {
     return NextResponse.json(
-      { error: "Yêu cầu này đã xử lý xong — khung trao đổi đã đóng." },
+      { error: "Yêu cầu này đã xử lý xong, khung trao đổi đã đóng." },
       { status: 400 },
     );
   }

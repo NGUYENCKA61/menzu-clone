@@ -238,11 +238,11 @@ export function SoftwareCard({
                 // button read "-- Chọn gói --" or a tier and a price.
                 aria-label={`${
                   chosen
-                    ? `${chosen.label} — ${formatVnd(chosen.price)}đ`
+                    ? `${chosen.label} - ${formatVnd(chosen.price)}đ`
                     : hasPackages
                       ? "Chọn gói"
                       : "Chưa có gói"
-                } — ${software.name}`}
+                } - ${software.name}`}
                 onClick={() => hasPackages && setOpen((o) => !o)}
                 className={`flex h-[42px] w-full items-center justify-between gap-1 rounded-[9px] border bg-[#111216] px-2.5 text-[11px] font-extrabold outline-none transition-colors duration-200 hover:border-[var(--menzu-accent)]/45 hover:text-white focus-visible:ring-2 focus-visible:ring-[var(--menzu-accent)]/40 aria-expanded:border-[var(--menzu-accent)]/45 aria-expanded:text-white disabled:opacity-50 ${
                   chosen
@@ -252,7 +252,7 @@ export function SoftwareCard({
               >
                 <span className="truncate">
                   {chosen
-                    ? `${chosen.label} — ${formatVnd(chosen.price)}đ`
+                    ? `${chosen.label} - ${formatVnd(chosen.price)}đ`
                     : hasPackages
                       ? "-- Chọn gói --"
                       : "Chưa có gói"}
@@ -297,7 +297,7 @@ export function SoftwareCard({
                         }}
                         className={optionCls(p.id === packageId)}
                       >
-                        {p.label} — {formatVnd(p.price)}đ
+                        {p.label} - {formatVnd(p.price)}đ
                         {p.listPrice ? (
                           <span className="ml-1.5 text-[11px] text-[#8a8c94] line-through">
                             {formatVnd(p.listPrice)}đ

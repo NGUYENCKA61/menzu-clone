@@ -51,7 +51,7 @@ export async function POST() {
           message:
             transfers.length > 0
               ? `đọc được ${transfers.length} giao dịch`
-              : "gọi được nhưng chưa đọc ra giao dịch nào — có thể chưa có giao dịch, hoặc tên trường khác dự kiến",
+              : "gọi được nhưng chưa đọc ra giao dịch nào, có thể chưa có giao dịch, hoặc tên trường khác dự kiến",
         };
       } catch {
         return { bank: label, ok: false, message: "không gọi được, kiểm tra URL và token" };

@@ -47,7 +47,7 @@ export default async function AdminCategoryDetailPage({
   return (
     <AdminShell
       title={category.name}
-      subtitle="Chi tiết danh mục — tên, đường dẫn, ảnh bìa và số liệu thẻ"
+      subtitle="Chi tiết danh mục, tên, đường dẫn, ảnh bìa và số liệu thẻ"
       username={admin.username}
       aside={
         <Link

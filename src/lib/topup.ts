@@ -288,7 +288,7 @@ export function mismatchNotice(
   return {
     title: short ? "Nhận thiếu so với lệnh nạp" : "Nhận dư so với lệnh nạp",
     body: `Lệnh ${code} ghi ${dong(requested)}, ngân hàng báo về ${dong(received)}. Ví đã được cộng đúng ${dong(received)}${
-      short ? " — bạn có thể nạp thêm phần còn thiếu bằng một lệnh mới." : "."
+      short ? ", bạn có thể nạp thêm phần còn thiếu bằng một lệnh mới." : "."
     }`,
   };
 }
@@ -424,6 +424,6 @@ export function heldNotice(
       : `hơn gấp ${AUTO_CREDIT_CEILING_FACTOR} lần lệnh`;
   return {
     title: `Chuyển khoản cần duyệt · ${code}`,
-    body: `${username} chuyển ${dong(received)} cho lệnh ${dong(requested)} — ${why}, ví CHƯA cộng. Đối chiếu sao kê rồi bấm Xác nhận và ghi đúng số tiền thực nhận, hoặc Từ chối.`,
+    body: `${username} chuyển ${dong(received)} cho lệnh ${dong(requested)} - ${why}, ví CHƯA cộng. Đối chiếu sao kê rồi bấm Xác nhận và ghi đúng số tiền thực nhận, hoặc Từ chối.`,
   };
 }

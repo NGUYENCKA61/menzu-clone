@@ -281,7 +281,7 @@ export function AdminSpinPrizeEditor({
             className={`${FIELD} resize-y leading-relaxed`}
           />
           <p className={HINT}>
-            Hiện ở danh sách phần thưởng và trên thẻ báo trúng — không in lên nan,
+            Hiện ở danh sách phần thưởng và trên thẻ báo trúng, không in lên nan,
             nan chỉ vừa vài chữ. {description.trim().length}/{DESCRIPTION_MAX}
           </p>
         </div>
@@ -300,8 +300,7 @@ export function AdminSpinPrizeEditor({
           <p className={HINT}>
             <span className={over ? "font-bold text-rose-400" : "text-neutral-400"}>
               {short.trim().length}/{room} ký tự
-            </span>{" "}
-            — nan hẹp dần khi vòng quay nhiều ô, và hẹp thêm nữa nếu ô có ảnh.
+            </span>{" "}, nan hẹp dần khi vòng quay nhiều ô, và hẹp thêm nữa nếu ô có ảnh.
           </p>
         </div>
 
@@ -340,7 +339,7 @@ export function AdminSpinPrizeEditor({
           </select>
           <p className={HINT}>
             {kind === "ITEM"
-              ? "Quà tặng phải gửi tay — mỗi lượt trúng hiện ở mục Quà cần gửi."
+              ? "Quà tặng phải gửi tay, mỗi lượt trúng hiện ở mục Quà cần gửi."
               : kind === "NOTHING"
                 ? "Ô trượt, không cộng gì cho khách."
                 : kind === "VOUCHER"
@@ -368,7 +367,7 @@ export function AdminSpinPrizeEditor({
               ? "Loại này không dùng tới giá trị."
               : kind === "VOUCHER"
                 ? "Phần trăm giảm, từ 1 đến 100."
-                : "Phải lớn hơn 0 — một ô hứa thưởng mà cộng 0 là ô trượt đội lốt."}
+                : "Phải lớn hơn 0, một ô hứa thưởng mà cộng 0 là ô trượt đội lốt."}
           </p>
         </div>
 
@@ -431,7 +430,7 @@ export function AdminSpinPrizeEditor({
             />
             <p className={HINT}>
               Khách trúng món này mà không có nhu cầu thì đổi lại lấy chừng này
-              điểm để quay tiếp. Bỏ trống thì không cho đổi — shop gửi tận nơi.
+              điểm để quay tiếp. Bỏ trống thì không cho đổi, shop gửi tận nơi.
             </p>
           </div>
         ) : null}
@@ -466,7 +465,7 @@ export function AdminSpinPrizeEditor({
           </div>
           <p className={HINT}>
             {color === "auto"
-              ? "Tự động: nan xen kẽ hai màu tối, ô hiếm tô tím — đúng như vòng quay vẫn chạy."
+              ? "Tự động: nan xen kẽ hai màu tối, ô hiếm tô tím, đúng như vòng quay vẫn chạy."
               : `Nan này tô ${WEDGE_COLORS[color].label.toLowerCase()}. Xem thử ở bánh xe bên phải.`}
           </p>
         </div>
@@ -524,7 +523,7 @@ export function AdminSpinPrizeEditor({
           </div>
           <p className={HINT}>
             PNG, JPG hoặc WebP · tối đa 5MB. Nền trong suốt hiện đẹp nhất trên
-            nan. Có ảnh thì chữ bị đẩy xuống gần trục, còn ít chỗ hơn — số ký tự
+            nan. Có ảnh thì chữ bị đẩy xuống gần trục, còn ít chỗ hơn, số ký tự
             ở trên tự trừ theo.
           </p>
           {image.trim() ? (
@@ -542,7 +541,7 @@ export function AdminSpinPrizeEditor({
       ) : null}
       {saved ? (
         <p className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-[12px] font-semibold text-emerald-300">
-          Đã lưu. Vòng quay ngoài trang khách đổi theo ngay — bạn vẫn đang ở nan
+          Đã lưu. Vòng quay ngoài trang khách đổi theo ngay, bạn vẫn đang ở nan
           này, sửa tiếp được.
         </p>
       ) : null}
@@ -589,7 +588,7 @@ export function AdminSpinPrizeEditor({
             className="h-auto w-full rounded-full border-4 border-white/10"
           />
           <p className="mt-3 text-[11px] leading-relaxed text-neutral-500">
-            Đây là bánh xe khách nhìn thấy, không thêm không bớt — vẽ bằng đúng
+            Đây là bánh xe khách nhìn thấy, không thêm không bớt, vẽ bằng đúng
             đoạn mã vẽ bánh xe thật, nên chữ tràn nan ở đây thì trang khách cũng
             tràn. <b className="text-neutral-300">Bấm vào nan khác</b> để sửa
             ngay nan đó.

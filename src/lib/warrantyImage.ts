@@ -40,7 +40,7 @@ export async function storeWarrantyImage(
   const bytes = new Uint8Array(await file.arrayBuffer());
   const size = readImageSize(bytes);
   if (!size || size.width < MIN_SIDE || size.height < MIN_SIDE) {
-    return { ok: false, error: "Không đọc được ảnh — file có thể bị hỏng" };
+    return { ok: false, error: "Không đọc được ảnh, file có thể bị hỏng" };
   }
   if (size.width > MAX_SIDE || size.height > MAX_SIDE) {
     return { ok: false, error: `Ảnh tối đa ${MAX_SIDE}px mỗi chiều.` };
@@ -53,7 +53,7 @@ export async function storeWarrantyImage(
     .toBuffer()
     .catch(() => null);
   if (!processed) {
-    return { ok: false, error: "Không đọc được ảnh — file có thể bị hỏng" };
+    return { ok: false, error: "Không đọc được ảnh, file có thể bị hỏng" };
   }
 
   const filename = `${uid}-${randomBytes(8).toString("hex")}.webp`;

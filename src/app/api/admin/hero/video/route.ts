@@ -71,7 +71,7 @@ export async function POST(request: Request) {
   if (file.size > MAX_BYTES) {
     return NextResponse.json(
       {
-        error: `Video tối đa ${MAX_BYTES / 1024 / 1024}MB — file này ${(
+        error: `Video tối đa ${MAX_BYTES / 1024 / 1024}MB, file này ${(
           file.size /
           1024 /
           1024

@@ -37,7 +37,7 @@ const PERKS = [
   {
     icon: BadgePercent,
     title: "Chiết khấu mọi gói key",
-    body: "Mua key phần mềm thấp hơn giá niêm yết theo mức thỏa thuận riêng với admin — không công khai.",
+    body: "Mua key phần mềm thấp hơn giá niêm yết theo mức thỏa thuận riêng với admin, không công khai.",
   },
   {
     icon: KeyRound,
@@ -53,7 +53,7 @@ const PERKS = [
 
 const STEPS = [
   "Để được lên đại lý cần nạp tối thiểu 1.000.000đ và mua role đại lý: 500.000đ",
-  "Nhắn cho admin kèm UID của bạn — admin xác minh, chốt mức chiết khấu riêng và gắn quyền",
+  "Nhắn cho admin kèm UID của bạn, admin xác minh, chốt mức chiết khấu riêng và gắn quyền",
   "Nếu cần làm thêm cả website riêng, liên hệ với admin",
 ] as const;
 
@@ -73,7 +73,7 @@ export default async function AgencyPage() {
       <AccountPanel
         icon={ChevronsUp}
         title="Nâng cấp đại lý"
-        subtitle="Mua key giá sỉ ngay trên web — mức chiết khấu thỏa thuận riêng khi được cấp quyền"
+        subtitle="Mua key giá sỉ ngay trên web, mức chiết khấu thỏa thuận riêng khi được cấp quyền"
       >
         <div className="flex flex-col gap-6">
           {isAgency ? (
@@ -106,7 +106,7 @@ export default async function AgencyPage() {
               <span className="text-xl font-black text-white">Trở thành Đại lý</span>
               <p className="text-sm text-neutral-400 leading-relaxed">
                 Dành cho người bán có đầu ra ổn định: được admin cấp quyền là mở
-                được dashboard mua key riêng — chọn gói, chọn số lượng, trả bằng
+                được dashboard mua key riêng, chọn gói, chọn số lượng, trả bằng
                 số dư ví với mức chiết khấu thỏa thuận riêng.
               </p>
             </div>
@@ -143,7 +143,7 @@ export default async function AgencyPage() {
             </ol>
             <p className="text-xs text-neutral-500">
               UID của bạn:{" "}
-              <span className="font-bold text-neutral-300">{user.uid}</span> — gửi
+              <span className="font-bold text-neutral-300">{user.uid}</span>, gửi
               kèm khi nhắn để admin tra tài khoản nhanh.
             </p>
   
@@ -163,7 +163,7 @@ export default async function AgencyPage() {
               </div>
             ) : (
               <p className="text-xs text-neutral-500">
-                Shop chưa khai kênh liên hệ trong Cấu hình — quay lại sau nhé.
+                Shop chưa khai kênh liên hệ trong Cấu hình, quay lại sau nhé.
               </p>
             )}
           </div>
@@ -183,8 +183,7 @@ export default async function AgencyPage() {
               className="font-black uppercase tracking-wider text-[var(--menzu-accent)] hover:text-white transition-colors"
             >
               Cộng tác viên
-            </Link>{" "}
-            — chia sẻ liên kết giới thiệu, nhận {REFERRAL_PERCENT}% mỗi giao dịch
+            </Link>{" "}, chia sẻ liên kết giới thiệu, nhận {REFERRAL_PERCENT}% mỗi giao dịch
             nạp tiền.
           </p>
         </div>

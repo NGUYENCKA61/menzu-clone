@@ -112,7 +112,7 @@ export function PictureGallery({
               <div key={src} className="relative h-full w-full shrink-0">
                 <Image
                   src={src}
-                  alt={`${alt} — ảnh ${i + 1}`}
+                  alt={`${alt}, ảnh ${i + 1}`}
                   fill
                   sizes={sizes}
                   className="block h-full w-full object-contain"
@@ -209,7 +209,7 @@ export function PictureGallery({
             <div className="relative h-full w-full" onClick={(e) => e.stopPropagation()}>
               <Image
                 src={pictures[index]!}
-                alt={`${alt} — ảnh ${index + 1}`}
+                alt={`${alt}, ảnh ${index + 1}`}
                 fill
                 sizes="100vw"
                 className="object-contain"

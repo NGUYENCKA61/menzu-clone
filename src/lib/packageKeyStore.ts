@@ -74,9 +74,9 @@ export async function readKeyStore(packageId: string) {
     recent: recent.map((k) => ({
       id: k.id,
       value: k.value,
-      username: k.user?.username ?? "—",
+      username: k.user?.username ?? "-",
       orderCode: k.order?.code ?? null,
-      deliveredAt: k.deliveredAt ? stamp(k.deliveredAt) : "—",
+      deliveredAt: k.deliveredAt ? stamp(k.deliveredAt) : "-",
       expiresAt: k.expiresAt ? stamp(k.expiresAt) : null,
       expired: k.expiresAt !== null && k.expiresAt < now,
     })),

@@ -309,7 +309,7 @@ export function AdminUsers({
                   </div>
                   <div>
                     <dt className="text-[10px] font-black uppercase tracking-widest text-neutral-500">Đơn</dt>
-                    <dd className="mt-0.5 tabular-nums text-neutral-300">{user.orderCount > 0 ? `${user.orderCount} · ${formatVnd(user.totalSpent)}đ` : "—"}</dd>
+                    <dd className="mt-0.5 tabular-nums text-neutral-300">{user.orderCount > 0 ? `${user.orderCount} · ${formatVnd(user.totalSpent)}đ` : "-"}</dd>
                   </div>
                 </dl>
                 <div className="mt-3 border-t border-white/[0.06] pt-3">{actions(user, isSelf)}</div>
@@ -409,7 +409,7 @@ export function AdminUsers({
                         user.email ? "text-neutral-300" : "text-neutral-700"
                       }`}
                     >
-                      {user.email ?? "—"}
+                      {user.email ?? "-"}
                     </span>
                   </td>
 
@@ -439,12 +439,12 @@ export function AdminUsers({
                         {formatVnd(user.totalSpent)}đ
                       </span>
                     ) : (
-                      <span className="text-neutral-700">—</span>
+                      <span className="text-neutral-700">-</span>
                     )}
                   </td>
 
                   <td className="px-4 py-3 text-[12px] text-neutral-500 tabular-nums whitespace-nowrap">
-                    {user.lastOrderAt ?? "—"}
+                    {user.lastOrderAt ?? "-"}
                   </td>
 
                   <td className="px-4 py-3">

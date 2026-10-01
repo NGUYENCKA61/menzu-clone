@@ -133,7 +133,7 @@ export function SpinWheel({
       if (!res.ok) {
         setError(
           data.missing !== undefined
-            ? `Không đủ điểm — còn thiếu ${formatVnd(data.missing)} điểm.`
+            ? `Không đủ điểm, còn thiếu ${formatVnd(data.missing)} điểm.`
             : (data.error ?? "Không quay được, thử lại sau"),
         );
         setSpinning(false);

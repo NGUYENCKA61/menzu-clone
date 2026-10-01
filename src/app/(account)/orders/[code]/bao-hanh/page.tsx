@@ -109,8 +109,8 @@ export default async function WarrantyRequestPage({
       title={heading}
       subtitle={
         following
-          ? `Đơn ${order.code} — theo dõi yêu cầu bảo hành của bạn`
-          : `Đơn ${order.code} — báo lỗi để shop kiểm tra và xử lý`
+          ? `Đơn ${order.code}, theo dõi yêu cầu bảo hành của bạn`
+          : `Đơn ${order.code}, báo lỗi để shop kiểm tra và xử lý`
       }
       crumb={heading}
       action={
@@ -245,7 +245,7 @@ export default async function WarrantyRequestPage({
                                 <span className="font-bold text-white">
                                   {formatVnd(Number(r.refundAmount))}đ
                                 </span>{" "}
-                                qua ngân hàng — bạn nhập số tài khoản để nhận tiền.
+                                qua ngân hàng, bạn nhập số tài khoản để nhận tiền.
                               </>
                             )}
                           </span>

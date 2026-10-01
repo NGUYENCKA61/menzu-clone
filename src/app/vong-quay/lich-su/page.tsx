@@ -214,7 +214,7 @@ export default async function SpinHistoryPage({
           <div className="rounded-2xl border border-dashed border-white/10 bg-white/[0.02] py-16 text-center">
             <p className="text-sm font-bold text-white">Chưa trúng phần thưởng nào</p>
             <p className="mt-1.5 text-[13px] text-neutral-400">
-              Quay một lượt để bắt đầu — mỗi lần trúng sẽ được ghi lại ở đây.
+              Quay một lượt để bắt đầu, mỗi lần trúng sẽ được ghi lại ở đây.
             </p>
           </div>
         ) : (

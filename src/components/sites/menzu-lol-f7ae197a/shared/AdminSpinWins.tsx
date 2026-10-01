@@ -213,7 +213,7 @@ export function AdminSpinWins({ wins }: { wins: SpinWinRow[] }) {
                           },
                         }))
                       }
-                      placeholder="Lời nhắn gửi khách — gửi qua GHTK, 2-3 ngày…"
+                      placeholder="Lời nhắn gửi khách, gửi qua GHTK, 2-3 ngày…"
                       className="h-8 min-w-[220px] flex-1 rounded-lg border border-white/10 bg-neutral-950/60 px-2.5 text-[11px] text-white outline-none transition-colors placeholder-neutral-600 focus:border-[var(--brand)]/60"
                     />
                     <button

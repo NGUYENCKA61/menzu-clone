@@ -69,7 +69,7 @@ export async function notifyWarranty(
     if (options.chat && claimed.count === 0) return;
 
     const link = absoluteUrl(href);
-    const subject = `${notice.title} — đơn ${orderCode}`;
+    const subject = `${notice.title}, đơn ${orderCode}`;
     const text =
       `Chào ${user.username},\n\n${notice.body}\n\n` +
       `Xem trạng thái đơn ${orderCode}: ${link}\n\n${settings.brandName}`;

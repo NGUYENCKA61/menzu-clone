@@ -80,7 +80,7 @@ export function AdminPartners({ partners }: { partners: AdminPartnerRow[] }) {
         return;
       }
       setLogoUrl(data.url);
-      setMsg({ tone: "ok", text: "Đã tải logo — bấm Thêm để lưu đối tác" });
+      setMsg({ tone: "ok", text: "Đã tải logo, bấm Thêm để lưu đối tác" });
     } catch {
       setMsg({ tone: "err", text: "Không kết nối được máy chủ" });
     } finally {
@@ -208,7 +208,7 @@ export function AdminPartners({ partners }: { partners: AdminPartnerRow[] }) {
 
       {partners.length === 0 ? (
         <p className="rounded-2xl border border-dashed border-white/10 bg-white/[0.02] px-5 py-8 text-center text-sm text-neutral-500">
-          Chưa có đối tác nào — mục &ldquo;Đối tác uy tín&rdquo; đang ẩn trên trang chủ.
+          Chưa có đối tác nào, mục &ldquo;Đối tác uy tín&rdquo; đang ẩn trên trang chủ.
         </p>
       ) : (
         <ul className="rounded-2xl border border-white/10 bg-neutral-900/40 overflow-hidden">

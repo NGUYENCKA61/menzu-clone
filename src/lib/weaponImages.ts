@@ -79,7 +79,7 @@ export function inspectImage(bytes: Uint8Array, type: string): FetchResult {
 
   const size = readImageSize(bytes);
   if (!size) {
-    return { ok: false, error: "Không đọc được ảnh — file có thể bị hỏng" };
+    return { ok: false, error: "Không đọc được ảnh, file có thể bị hỏng" };
   }
   if (size.width < MIN_SIDE || size.height < MIN_SIDE) {
     return {
@@ -139,17 +139,17 @@ export async function fetchWeaponImage(rawUrl: string): Promise<FetchResult> {
       redirect: "manual",
     });
   } catch {
-    return { ok: false, error: "Không tải được ảnh — quá thời gian chờ hoặc bị chặn" };
+    return { ok: false, error: "Không tải được ảnh, quá thời gian chờ hoặc bị chặn" };
   }
 
   if (res.status >= 300 && res.status < 400) {
     return {
       ok: false,
-      error: "Link này chuyển hướng sang nơi khác — dùng link ảnh trực tiếp.",
+      error: "Link này chuyển hướng sang nơi khác, dùng link ảnh trực tiếp.",
     };
   }
   if (!res.ok) {
-    return { ok: false, error: `Nguồn trả về lỗi ${res.status} — kiểm tra lại link ảnh` };
+    return { ok: false, error: `Nguồn trả về lỗi ${res.status}, kiểm tra lại link ảnh` };
   }
 
   // Declared length first, so an oversized body is refused before it is read
@@ -181,7 +181,7 @@ export async function fetchWeaponImage(rawUrl: string): Promise<FetchResult> {
       await reader.cancel();
       return {
         ok: false,
-        error: `Ảnh tối đa ${MAX_BYTES / 1024 / 1024}MB — ảnh này lớn hơn.`,
+        error: `Ảnh tối đa ${MAX_BYTES / 1024 / 1024}MB, ảnh này lớn hơn.`,
       };
     }
     chunks.push(value);

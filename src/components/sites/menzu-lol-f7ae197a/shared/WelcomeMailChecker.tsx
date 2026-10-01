@@ -154,7 +154,7 @@ export function WelcomeMailChecker() {
                     <dt className="text-neutral-500 font-bold uppercase tracking-wider text-[9px]">
                       {label}
                     </dt>
-                    <dd className="text-neutral-200 font-mono truncate">{value ?? "—"}</dd>
+                    <dd className="text-neutral-200 font-mono truncate">{value ?? "-"}</dd>
                   </div>
                 ))}
               </dl>
@@ -190,7 +190,7 @@ export function WelcomeMailChecker() {
       </section>
 
       <p className="text-[11px] text-neutral-500 leading-relaxed text-center px-4">
-        Nội dung email được xử lý ngay trên trình duyệt của bạn — không gửi lên
+        Nội dung email được xử lý ngay trên trình duyệt của bạn, không gửi lên
         máy chủ và không được lưu lại.
       </p>
     </div>

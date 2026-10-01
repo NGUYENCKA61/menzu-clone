@@ -414,7 +414,7 @@ export function AdminSoftware({
         body={
           removing
             ? removing.packages.some((p) => p.orderCount > 0)
-              ? `"${removing.name}" đã có đơn hàng, nên sẽ được ẩn khỏi trang bán chứ không mất hẳn — khôi phục được ở mục "đã xoá" cuối trang, và lịch sử mua của khách giữ nguyên.`
+              ? `"${removing.name}" đã có đơn hàng, nên sẽ được ẩn khỏi trang bán chứ không mất hẳn, khôi phục được ở mục "đã xoá" cuối trang, và lịch sử mua của khách giữ nguyên.`
               : `"${removing.name}" chưa bán được đơn nào nên sẽ bị xoá hẳn cùng các gói của nó. Không hoàn tác được.`
             : ""
         }

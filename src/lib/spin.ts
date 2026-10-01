@@ -534,7 +534,7 @@ export function readDelivery(
   if (address.length < ADDRESS_MIN) {
     return {
       ok: false,
-      error: `Địa chỉ cần đầy đủ hơn — ít nhất ${ADDRESS_MIN} ký tự, kèm số nhà và phường/xã.`,
+      error: `Địa chỉ cần đầy đủ hơn, ít nhất ${ADDRESS_MIN} ký tự, kèm số nhà và phường/xã.`,
     };
   }
   if (address.length > ADDRESS_MAX) {

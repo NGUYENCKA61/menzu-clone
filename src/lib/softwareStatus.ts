@@ -69,11 +69,11 @@ export const SOFTWARE_STATUS: Record<
  *  clause after the tool's name. */
 export const STATUS_EVENT_COPY: Record<SoftwareStatusValue, string> = {
   UNDETECTED: "đã an toàn, dùng lại bình thường.",
-  DETECTED: "bị phát hiện — tạm ngưng sử dụng, chờ thông báo mới.",
+  DETECTED: "bị phát hiện, tạm ngưng sử dụng, chờ thông báo mới.",
   UPDATING: "đang được cập nhật, sẽ có bản mới sớm.",
   STABLE: "hoạt động ổn định, dùng bình thường.",
-  UPDATED: "vừa cập nhật xong — có bản mới, tải lại để dùng.",
-  RISKY: "đang có rủi ro — cân nhắc trước khi dùng, chờ thông báo mới.",
+  UPDATED: "vừa cập nhật xong, có bản mới, tải lại để dùng.",
+  RISKY: "đang có rủi ro, cân nhắc trước khi dùng, chờ thông báo mới.",
 };
 
 /**

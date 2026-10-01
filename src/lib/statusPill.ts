@@ -14,7 +14,7 @@
  */
 
 export const STATUS_PILL_MODES = {
-  auto: "Tự động — ẩn khi có nhãn",
+  auto: "Tự động, ẩn khi có nhãn",
   show: "Luôn hiện",
   hide: "Luôn ẩn",
 } as const;

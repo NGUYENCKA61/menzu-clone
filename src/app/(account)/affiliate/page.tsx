@@ -206,7 +206,7 @@ export default async function AffiliatePage() {
             </div>
             {recent.length === 0 ? (
               <div className="rounded-xl border border-dashed border-white/10 bg-white/[0.02] py-10 text-center text-sm text-neutral-400">
-                Chưa có hoa hồng nào — gửi liên kết cho bạn bè để bắt đầu.
+                Chưa có hoa hồng nào, gửi liên kết cho bạn bè để bắt đầu.
               </div>
             ) : (
               <div className="w-full overflow-x-auto rounded-xl border border-white/[0.06] bg-white/[0.02]">

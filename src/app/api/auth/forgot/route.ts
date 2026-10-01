@@ -107,7 +107,7 @@ export async function POST(request: Request) {
       await sendMail(
         settings,
         user.email,
-        `${settings.brandName} — Đặt lại mật khẩu`,
+        `${settings.brandName} | Đặt lại mật khẩu`,
         [
           `Xin chào ${user.username},`,
           "",
@@ -116,7 +116,7 @@ export async function POST(request: Request) {
           "",
           link,
           "",
-          "Nếu không phải bạn, cứ bỏ qua email này — mật khẩu hiện tại vẫn nguyên.",
+          "Nếu không phải bạn, cứ bỏ qua email này, mật khẩu hiện tại vẫn nguyên.",
         ].join("\n"),
       );
     } catch {

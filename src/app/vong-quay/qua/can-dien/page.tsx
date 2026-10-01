@@ -84,7 +84,7 @@ export default async function ParcelsNeedingAddressPage() {
       <div className={`${CARD} flex flex-col gap-3`}>
         <p className="text-[12.5px] leading-relaxed text-neutral-400">
           Có {waiting.length} phần quà đang chờ địa chỉ nhận hàng. Chọn từng
-          phần quà để điền thông tin — shop gửi ngay sau khi nhận được.
+          phần quà để điền thông tin, shop gửi ngay sau khi nhận được.
         </p>
 
         {waiting.map((win) => (

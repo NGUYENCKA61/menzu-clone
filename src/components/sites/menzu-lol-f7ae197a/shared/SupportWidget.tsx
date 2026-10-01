@@ -365,7 +365,7 @@ export function SupportWidget({
                   panel does the honest thing instead: it says who is on the
                   other end, and opens the app the customer already has. */}
               <p className="px-1 pt-0.5 text-[12px] leading-relaxed text-neutral-400">
-                Chọn kênh bạn hay dùng — tin nhắn vào thẳng hộp thư của shop.
+                Chọn kênh bạn hay dùng, tin nhắn vào thẳng hộp thư của shop.
                 Admin tư vấn chọn hack, xử lý đơn hàng và hướng dẫn cài đặt.
               </p>
 

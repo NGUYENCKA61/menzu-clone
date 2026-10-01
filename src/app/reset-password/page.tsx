@@ -70,8 +70,8 @@ export default async function ResetPasswordPage({
               <>
                 <p className="mt-2 mb-8 text-sm font-medium text-neutral-400">
                   {token
-                    ? "Đường dẫn đặt lại này không còn dùng được — mỗi liên kết chỉ dùng một lần và sẽ hết hạn sau một lúc. Hãy yêu cầu một liên kết mới."
-                    : "Đường dẫn không đầy đủ. Hãy mở đúng liên kết trong email đặt lại mật khẩu — hoặc yêu cầu một liên kết mới."}
+                    ? "Đường dẫn đặt lại này không còn dùng được, mỗi liên kết chỉ dùng một lần và sẽ hết hạn sau một lúc. Hãy yêu cầu một liên kết mới."
+                    : "Đường dẫn không đầy đủ. Hãy mở đúng liên kết trong email đặt lại mật khẩu, hoặc yêu cầu một liên kết mới."}
                 </p>
                 <Link
                   href="/forgot-password"

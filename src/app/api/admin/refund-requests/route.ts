@@ -160,7 +160,7 @@ export async function PATCH(request: Request) {
     }
     if (error instanceof Error && error.message === "ALREADY_REFUNDED") {
       return NextResponse.json(
-        { error: "Đơn này đã được hoàn tiền rồi — không thể hoàn lần nữa." },
+        { error: "Đơn này đã được hoàn tiền rồi, không thể hoàn lần nữa." },
         { status: 409 },
       );
     }

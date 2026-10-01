@@ -71,7 +71,7 @@ export function productJsonLd(product: ProductLdInput) {
   return {
     "@context": "https://schema.org",
     "@type": "Product",
-    name: `Tài khoản ${product.categoryName} ${product.code} — Rank ${product.rank}, ${product.weaponSkins} skin`,
+    name: `Tài khoản ${product.categoryName} ${product.code}, Rank ${product.rank}, ${product.weaponSkins} skin`,
     description:
       `Tài khoản mã ${product.code}, rank ${product.rank}, ${product.weaponSkins} skin súng. ` +
       `Thuộc danh mục ${product.categoryName} tại ${SITE_NAME}.`,
@@ -227,7 +227,7 @@ export function faqJsonLd(entries: { q: string; a: string }[]) {
  * it did for a month while the page above it said hack game.
  */
 export function siteDescription(brandName: string): string {
-  return `${brandName} — shop hack game và tài khoản game uy tín. Hack Valorant, CS2, PUBG, Liên Quân: key bản quyền giao tự động, cập nhật liên tục, hỗ trợ 24/7.`;
+  return `${brandName} là shop hack game và tài khoản game uy tín. Hack Valorant, CS2, PUBG, Liên Quân: key bản quyền giao tự động, cập nhật liên tục, hỗ trợ 24/7.`;
 }
 
 /** schema.org/Organization for the homepage. */

@@ -148,7 +148,7 @@ export default async function AdminProductsPage() {
   return (
     <AdminShell
       title="Sản phẩm"
-      subtitle="Danh mục, tài khoản, phần mềm và kho ảnh — mỗi thứ một thẻ"
+      subtitle="Danh mục, tài khoản, phần mềm và kho ảnh, mỗi thứ một thẻ"
       username={admin.username}
     >
       <div className="mb-5 grid grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4">
@@ -240,7 +240,7 @@ export default async function AdminProductsPage() {
         <section className="flex flex-col gap-4">
           <p className={SECTION_NOTE}>
             Cùng bảng sản phẩm với tài khoản, chỉ khác loại. Mỗi phần mềm bán
-            theo gói thời hạn — thêm gói ở ngay dưới từng sản phẩm.
+            theo gói thời hạn, thêm gói ở ngay dưới từng sản phẩm.
           </p>
           <AdminSoftware
             software={softwareRows.map((s) => ({
@@ -269,7 +269,7 @@ export default async function AdminProductsPage() {
         <section className="flex flex-col gap-4">
           <p className={SECTION_NOTE}>
             Mỗi vật phẩm (súng, nhân vật, trang bị) một ảnh, dùng chung cho mọi
-            tài khoản có nó — tìm ảnh một lần, không phải làm lại theo từng acc.
+            tài khoản có nó, tìm ảnh một lần, không phải làm lại theo từng acc.
             Card nào chưa có ảnh thì hiện tên súng, vẫn bán bình thường.
           </p>
           <AdminWeaponImages

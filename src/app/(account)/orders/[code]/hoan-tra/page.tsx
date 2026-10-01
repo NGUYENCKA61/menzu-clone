@@ -89,7 +89,7 @@ export default async function RefundRequestPage({
   return (
     <AccountPageFrame
       title="Hoàn trả"
-      subtitle={`Đơn ${order.code} — các yêu cầu hoàn tiền đã gửi trước đây`}
+      subtitle={`Đơn ${order.code}, các yêu cầu hoàn tiền đã gửi trước đây`}
       crumb="Hoàn trả"
       action={
         <Link

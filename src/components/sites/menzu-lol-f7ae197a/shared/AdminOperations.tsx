@@ -49,11 +49,11 @@ const HINT = "mt-1.5 text-[11px] text-neutral-500";
 const REJECT_REASONS: Record<"BANK" | "CARD", readonly string[]> = {
   BANK: [
     "Không tìm thấy giao dịch chuyển khoản nào khớp với mã lệnh này.",
-    "Nội dung chuyển khoản sai — vui lòng nạp lại và ghi đúng nội dung.",
+    "Nội dung chuyển khoản sai, vui lòng nạp lại và ghi đúng nội dung.",
     "Số tiền chuyển không khớp với lệnh nạp.",
   ],
   CARD: [
-    "Thẻ sai số seri hoặc mã thẻ — kiểm tra lại rồi gửi lệnh mới.",
+    "Thẻ sai số seri hoặc mã thẻ, kiểm tra lại rồi gửi lệnh mới.",
     "Thẻ đã được sử dụng trước đó.",
     "Sai mệnh giá thẻ so với số tiền của lệnh nạp.",
   ],
@@ -811,7 +811,7 @@ export function AdminOperations({
             <p className={HINT}>
               {receivedAmount === confirming.amount
                 ? "Đúng số lệnh ghi. Sửa nếu sao kê báo số khác."
-                : `Khác lệnh ghi ${formatVnd(confirming.amount)}đ — ví cộng đúng số này, lệnh được ghi lại theo số này.`}
+                : `Khác lệnh ghi ${formatVnd(confirming.amount)}đ, ví cộng đúng số này, lệnh được ghi lại theo số này.`}
             </p>
           </div>
         ) : null}

@@ -121,7 +121,7 @@ export async function creditTopUp(
       return {
         ok: false,
         reason: "AMOUNT_SUSPECT",
-        detail: `nhận ${options.expectAmount.toLocaleString("vi-VN")}đ cho lệnh ${requested.toLocaleString("vi-VN")}đ — ${
+        detail: `nhận ${options.expectAmount.toLocaleString("vi-VN")}đ cho lệnh ${requested.toLocaleString("vi-VN")}đ: ${
           verdict === "too-small" ? "quá nhỏ" : "quá lớn"
         }, cần người duyệt`,
         held: {

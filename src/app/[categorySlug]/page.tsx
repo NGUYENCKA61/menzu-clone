@@ -85,7 +85,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     ? written.length > 160
       ? `${written.slice(0, 157).trimEnd()}…`
       : written
-    : `${name} tại THICHTHIHACK${kinds ? ` — ${kinds}` : ""}: giá tốt, giao dịch tự động, uy tín.`;
+    : `${name} tại THICHTHIHACK${kinds ? ` - ${kinds}` : ""}: giá tốt, giao dịch tự động, uy tín.`;
   return {
     title: `Danh mục ${name}`,
     description,

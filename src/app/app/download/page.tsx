@@ -27,7 +27,7 @@ const SCREENSHOTS = [11, 22, 33, 44, 55, 66].map((n) => `${IMAGES}/app/wlist${n}
 export const metadata: Metadata = {
   title: "Tải App THICHTHIHACK",
   description:
-    "Tải ứng dụng THICHTHIHACK cho Android và iOS — theo dõi Daily Shop, nhận thông báo đẩy khi skin yêu thích xuất hiện, quản lý kho đồ và số dư VP/RP.",
+    "Tải ứng dụng THICHTHIHACK cho Android và iOS, theo dõi Daily Shop, nhận thông báo đẩy khi skin yêu thích xuất hiện, quản lý kho đồ và số dư VP/RP.",
   alternates: { canonical: "/app/download" },
   // Out of the index until the shop ships a build: a search result promising
   // an app that ends on two "chưa có bản tải" buttons is worse than none.
@@ -122,7 +122,7 @@ export default async function AppDownloadPage() {
 
   const released = release
     ? new Intl.DateTimeFormat("en-CA", { timeZone: "UTC" }).format(release.releasedAt)
-    : "—";
+    : "-";
 
   return (
     <div className="min-h-screen flex flex-col text-white overflow-x-clip selection:bg-[var(--menzu-accent)]/30">
@@ -167,7 +167,7 @@ export default async function AppDownloadPage() {
                       <DownloadButton
                         href={release?.androidUrl ?? null}
                         label="Tải Android (.apk)"
-                        note="★ Khuyên dùng — xem hướng dẫn cài đặt"
+                        note="★ Khuyên dùng, xem hướng dẫn cài đặt"
                         tone="android"
                       />
                       <DownloadButton
@@ -187,7 +187,7 @@ export default async function AppDownloadPage() {
                     <div className="flex flex-col gap-1 border-r border-zinc-800/50">
                       <span className={STAT_LABEL}>Phiên bản</span>
                       <span className="text-white">
-                        {release ? `v${release.version} (${release.buildNumber})` : "—"}
+                        {release ? `v${release.version} (${release.buildNumber})` : "-"}
                       </span>
                     </div>
                     <div className="flex flex-col gap-1 border-r border-zinc-800/50">
@@ -196,7 +196,7 @@ export default async function AppDownloadPage() {
                     </div>
                     <div className="flex flex-col gap-1">
                       <span className={STAT_LABEL}>Dung lượng</span>
-                      <span className="text-white">{release?.sizeLabel ?? "—"}</span>
+                      <span className="text-white">{release?.sizeLabel ?? "-"}</span>
                     </div>
                   </div>
                 </div>
@@ -259,7 +259,7 @@ export default async function AppDownloadPage() {
                     <Smartphone size={18} className="text-emerald-500" />
                     <h3 className="text-sm font-black uppercase tracking-wider text-white">Cài Đặt Android</h3>
                     <span className="ml-auto text-[10px] font-bold text-neutral-500">
-                      {release?.minAndroid ?? "—"}
+                      {release?.minAndroid ?? "-"}
                     </span>
                   </div>
 
@@ -283,7 +283,7 @@ export default async function AppDownloadPage() {
                     <Apple size={18} className="text-neutral-300" />
                     <h3 className="text-sm font-black uppercase tracking-wider text-white">Cài Đặt iOS</h3>
                     <span className="ml-auto text-[10px] font-bold text-neutral-500">
-                      {release?.minIos ?? "—"}
+                      {release?.minIos ?? "-"}
                     </span>
                   </div>
 
@@ -365,7 +365,7 @@ function DownloadButton({
           className="w-full py-2.5 px-4 rounded-xl bg-white/[0.03] border border-white/10 text-neutral-500 text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 cursor-not-allowed"
         >
           <Download size={14} />
-          <span>{label} — chưa có bản tải</span>
+          <span>{label}, chưa có bản tải</span>
         </span>
       )}
 

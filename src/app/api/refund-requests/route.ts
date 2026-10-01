@@ -13,7 +13,7 @@ export async function POST() {
   return NextResponse.json(
     {
       error:
-        "Hoàn tiền giờ do shop xử lý qua yêu cầu bảo hành — bạn gửi yêu cầu bảo hành cho đơn này nhé.",
+        "Hoàn tiền giờ do shop xử lý qua yêu cầu bảo hành, bạn gửi yêu cầu bảo hành cho đơn này nhé.",
     },
     { status: 410 },
   );

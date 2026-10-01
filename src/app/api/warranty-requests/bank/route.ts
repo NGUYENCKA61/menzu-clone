@@ -76,7 +76,7 @@ export async function POST(request: Request) {
   });
   if (saved.count === 0) {
     return NextResponse.json(
-      { error: "Yêu cầu này vừa được shop xử lý — bạn tải lại trang nhé." },
+      { error: "Yêu cầu này vừa được shop xử lý, bạn tải lại trang nhé." },
       { status: 409 },
     );
   }
@@ -86,7 +86,7 @@ export async function POST(request: Request) {
   await announceToAdmins({
     title: "Khách đã gửi số tài khoản hoàn tiền",
     body:
-      `${user.username} · đơn ${code}: ${details.bankName} ${details.bankAccount} — ` +
+      `${user.username} · đơn ${code}: ${details.bankName} ${details.bankAccount} - ` +
       `${details.accountHolder}. Chuyển ${amount} rồi bấm "Đã chuyển khoản".`,
     priority: "HIGH",
     cta: { label: "Xem ngay", href: "/admin/warranty" },
@@ -95,7 +95,7 @@ export async function POST(request: Request) {
     [
       "🏦 <b>Khách đã gửi số tài khoản hoàn tiền</b>",
       `${escapeTelegramHtml(user.username)} · đơn ${escapeTelegramHtml(code)} · ${amount}`,
-      escapeTelegramHtml(`${details.bankName} ${details.bankAccount} — ${details.accountHolder}`),
+      escapeTelegramHtml(`${details.bankName} ${details.bankAccount} - ${details.accountHolder}`),
       `🔗 ${absoluteUrl("/admin/warranty")}`,
     ].join("\n"),
   );

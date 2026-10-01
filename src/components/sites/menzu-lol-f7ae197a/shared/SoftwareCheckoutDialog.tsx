@@ -339,7 +339,7 @@ export function SoftwareCheckoutDialog({
         </PriceList>
         {purchase.keysPending > 0 ? (
           <p className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-2.5 text-[12px] font-semibold text-amber-300">
-            Còn {purchase.keysPending} key chờ shop bàn giao — theo dõi trong Đơn
+            Còn {purchase.keysPending} key chờ shop bàn giao, theo dõi trong Đơn
             hàng của bạn.
           </p>
         ) : (
@@ -361,7 +361,7 @@ export function SoftwareCheckoutDialog({
       // TOÁN", a red XÁC NHẬN — and pressing it dropped them on a bare login
       // page with no word about the order. Now the card says what will
       // happen and the button says where it goes.
-      subtitle={guest ? "Đăng nhập để hoàn tất đơn này — gói và số lượng sẽ được giữ nguyên." : undefined}
+      subtitle={guest ? "Đăng nhập để hoàn tất đơn này, gói và số lượng sẽ được giữ nguyên." : undefined}
       footer={
         <ConfirmFooter
           onCancel={onClose}
@@ -389,7 +389,7 @@ export function SoftwareCheckoutDialog({
               />
               <span className="text-[12px] leading-relaxed text-orange-200">
                 Tool này đang ở trạng thái{" "}
-                <span className="font-black">Rủi ro</span> — có khả năng bị phát hiện. Tôi
+                <span className="font-black">Rủi ro</span>, có khả năng bị phát hiện. Tôi
                 hiểu và vẫn muốn mua.
               </span>
             </label>

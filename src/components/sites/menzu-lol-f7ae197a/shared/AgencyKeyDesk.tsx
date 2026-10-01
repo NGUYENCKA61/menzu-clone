@@ -86,7 +86,7 @@ export function AgencyKeyDesk({
           title: "Mua key thất bại",
           message:
             data?.shortfall !== undefined
-              ? `Số dư không đủ — cần nạp thêm ${formatVnd(data.shortfall)}đ.`
+              ? `Số dư không đủ, cần nạp thêm ${formatVnd(data.shortfall)}đ.`
               : (data?.error ?? "Không kết nối được máy chủ"),
         });
         return;
@@ -148,7 +148,7 @@ export function AgencyKeyDesk({
           >
             {product.packages.map((p) => (
               <option key={p.id} value={p.id} className="bg-[#111]">
-                {p.label} — {formatVnd(p.price)}đ
+                {p.label} - {formatVnd(p.price)}đ
               </option>
             ))}
           </select>
