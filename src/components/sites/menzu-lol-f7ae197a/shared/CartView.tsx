@@ -34,6 +34,13 @@ import {
 import { SUPPORT_WINDOW } from "@/lib/supportHours";
 
 import { formatVnd } from "./productData";
+import {
+  VOUCHER_APPLIED,
+  VOUCHER_ICON,
+  VOUCHER_LABEL,
+  voucherButtonClass,
+  voucherInputClass,
+} from "./voucherLook";
 
 /** What the basket does on a press, before the server has heard of it. */
 type CartAction =
@@ -745,14 +752,13 @@ export function CartView({
                 >
                   {line.name}
                 </Link>
+                {/* The same neutral chip the orders list, the receipt and the
+                    warranty desk use for a tier — alone: the "N đ / bản" beside
+                    it came off on the owner's word (01/10/2026), the line's
+                    total on the right says the money. */}
                 <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                  {/* The same neutral chip the orders list, the receipt and the
-                      warranty desk use for a tier. */}
                   <span className="whitespace-nowrap rounded-md border border-white/15 bg-white/10 px-2 py-0.5 text-[9px] font-black uppercase tracking-widest text-neutral-300">
                     {line.packageLabel}
-                  </span>
-                  <span className="text-[11px] tabular-nums text-neutral-400 sm:text-xs">
-                    {formatVnd(line.unitPrice)}đ / bản
                   </span>
                 </div>
 
@@ -837,9 +843,10 @@ export function CartView({
         </h2>
 
         {/* VOUCHER */}
+        {/* The same voucher box as the product page's buy dialogs. */}
         <div className="relative mt-4">
-          <span className={`${LABEL} mb-2 flex items-center gap-1.5`}>
-            <Ticket className="h-3 w-3" />
+          <span className={`mb-2 ${VOUCHER_LABEL}`}>
+            <Ticket className={VOUCHER_ICON} />
             Mã giảm giá
           </span>
           <div className="flex gap-2">
@@ -857,13 +864,13 @@ export function CartView({
               }}
               placeholder="Nhập mã"
               aria-label="Mã giảm giá"
-              className="h-10 min-w-0 flex-1 rounded-lg border border-white/10 bg-neutral-950/60 px-3 font-mono text-[13px] font-bold uppercase tracking-wider text-white outline-none transition-colors placeholder:font-sans placeholder:font-normal placeholder:normal-case placeholder:tracking-normal placeholder:text-neutral-500 focus:border-[var(--menzu-accent)]/60"
+              className={voucherInputClass(voucher.trim().length > 0)}
             />
             <button
               type="button"
               onClick={applyVoucher}
               disabled={checking || !voucher.trim()}
-              className="h-10 shrink-0 rounded-lg border border-white/10 bg-white/5 px-4 text-[10px] font-black uppercase tracking-widest text-neutral-300 transition-colors hover:bg-white/10 hover:text-white disabled:opacity-40"
+              className={voucherButtonClass(voucher.trim().length > 0 && applied === null)}
             >
               {checking ? "Đang kiểm…" : "Áp dụng"}
             </button>
@@ -874,9 +881,7 @@ export function CartView({
             </p>
           ) : null}
           {applied ? (
-            <p className="mt-2 text-[11px] font-semibold text-emerald-400">
-              Đã áp dụng — giảm {formatVnd(applied.cut)}đ
-            </p>
+            <p className={VOUCHER_APPLIED}>Đã áp dụng — giảm {formatVnd(applied.cut)}đ</p>
           ) : null}
         </div>
 
@@ -964,17 +969,15 @@ export function CartView({
         </span>
 
         {/* Three short lines under the button, the way lmarket closes its
-            summary (the owner, 01/10/2026), in place of one grey sentence. */}
+            summary (the owner, 01/10/2026), in place of one grey sentence —
+            plain, without the ticks ("bỏ 3 dấu tick"). */}
         <ul className="relative mt-4 flex flex-col items-center gap-1 text-[11.5px] text-neutral-500">
           {[
             "Trừ thẳng vào số dư ví",
             "Giao key ngay sau khi thanh toán",
             `Hỗ trợ bảo hành ${SUPPORT_WINDOW} mỗi ngày`,
           ].map((promise) => (
-            <li key={promise} className="inline-flex items-center gap-1.5">
-              <Check className="h-3 w-3 text-neutral-400" strokeWidth={2.5} aria-hidden />
-              {promise}
-            </li>
+            <li key={promise}>{promise}</li>
           ))}
         </ul>
       </aside>

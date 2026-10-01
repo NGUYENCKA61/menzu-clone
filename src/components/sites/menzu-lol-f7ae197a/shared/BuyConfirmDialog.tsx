@@ -16,6 +16,13 @@ import { createPortal } from "react-dom";
 import { lockScroll, trapTab, unlockScroll } from "./modalChrome";
 import { useOverlayPresence } from "./useOverlayPresence";
 import { formatVnd } from "./productData";
+import {
+  VOUCHER_APPLIED,
+  VOUCHER_ICON,
+  VOUCHER_LABEL,
+  voucherButtonClass,
+  voucherInputClass,
+} from "./voucherLook";
 
 /*
  * The buy-confirm dialog the account page and the software page share.
@@ -327,8 +334,9 @@ export function VoucherField({
   const ready = !checking && value.trim().length > 0;
   return (
     <div className={`p-3 ${TILE}`}>
-      <label htmlFor={id} className={`mb-2 text-neutral-500 ${LABEL}`}>
-        <Ticket className="h-3.5 w-3.5" />
+      {/* The basket's summary wears the same box (voucherLook). */}
+      <label htmlFor={id} className={`mb-2 ${VOUCHER_LABEL}`}>
+        <Ticket className={VOUCHER_ICON} />
         Mã giảm giá
       </label>
       <div className="flex gap-2">
@@ -351,13 +359,13 @@ export function VoucherField({
           autoCapitalize="characters"
           autoComplete="off"
           spellCheck={false}
-          className="h-10 min-w-0 flex-1 rounded-xl border border-white/10 bg-white/5 px-3 text-sm font-semibold uppercase tracking-wide text-white outline-none transition-colors placeholder:font-normal placeholder:normal-case placeholder:tracking-normal placeholder:text-neutral-500 focus:border-[var(--menzu-accent)]/60"
+          className={voucherInputClass(value.trim().length > 0)}
         />
         <button
           type="button"
           disabled={!ready}
           onClick={onApply}
-          className="h-10 shrink-0 rounded-xl border border-white/10 bg-white/5 px-4 text-[10px] font-black uppercase tracking-widest text-neutral-300 transition-colors hover:bg-white/10 hover:text-white disabled:opacity-40 disabled:hover:bg-white/5"
+          className={voucherButtonClass(value.trim().length > 0 && applied === null)}
         >
           {checking ? "Đang kiểm…" : "Áp dụng"}
         </button>
@@ -368,10 +376,7 @@ export function VoucherField({
         </p>
       ) : null}
       {applied ? (
-        <p className="mt-2 flex items-center gap-1.5 text-[11px] font-semibold text-emerald-400">
-          <Check className="h-3.5 w-3.5" />
-          Đã áp dụng — giảm {formatVnd(applied.cut)}đ
-        </p>
+        <p className={VOUCHER_APPLIED}>Đã áp dụng — giảm {formatVnd(applied.cut)}đ</p>
       ) : null}
     </div>
   );
