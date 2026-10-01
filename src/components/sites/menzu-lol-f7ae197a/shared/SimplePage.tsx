@@ -1,3 +1,4 @@
+import type { LucideIcon } from "lucide-react";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
@@ -11,10 +12,13 @@ interface SimplePageProps {
   title: string;
   crumb: string;
   children: ReactNode;
+  /** A red icon in front of the title, as the account pages wear one, in
+   *  place of the row-heading bar. */
+  icon?: LucideIcon;
 }
 
 /** Standard inner-page chrome: header, breadcrumb, heading, footer. */
-export function SimplePage({ title, crumb, children }: SimplePageProps) {
+export function SimplePage({ title, crumb, children, icon: Icon }: SimplePageProps) {
   return (
     // Opaque site-black, covering the fixed PageBackdrop artwork — the
     // original keeps its utility pages (wiki, cart, trade…) on plain black.
@@ -33,7 +37,11 @@ export function SimplePage({ title, crumb, children }: SimplePageProps) {
                 rule under it — the same opening every home-page row makes. */}
             <div className="flex items-center justify-between mb-8 pb-4 border-b border-white/10">
               <div className="flex items-center gap-3">
-                <span aria-hidden className="h-6 w-[3px] shrink-0 rounded-full bg-[var(--menzu-accent)]" />
+                {Icon ? (
+                  <Icon size={28} className="shrink-0 text-[var(--menzu-accent)]" aria-hidden />
+                ) : (
+                  <span aria-hidden className="h-6 w-[3px] shrink-0 rounded-full bg-[var(--menzu-accent)]" />
+                )}
                 <h1 className="text-2xl sm:text-3xl font-black uppercase tracking-wider text-white">
                   {title}
                 </h1>

@@ -50,7 +50,9 @@ export function evaluateVoucher(
   target?: VoucherTarget,
 ): VoucherResult {
   if (!voucher || !voucher.active) {
-    return { ok: false, error: "Mã giảm giá không tồn tại hoặc đã tắt" };
+    // "đã tắt" was the desk's word for a code switched off; to a shopper it
+    // is simply over (the owner, 01/10/2026).
+    return { ok: false, error: "Mã giảm giá không tồn tại hoặc đã hết hạn" };
   }
   // A code can be created ahead of a campaign; null means live now.
   if (voucher.startsAt && voucher.startsAt.getTime() > now.getTime()) {

@@ -12,7 +12,6 @@ import {
 } from "react";
 import {
   ArrowRight,
-  BadgePercent,
   Check,
   KeyRound,
   Loader2,
@@ -32,6 +31,7 @@ import {
   tierDiscountFor,
   type MemberTierValue,
 } from "@/lib/memberTiers";
+import { SUPPORT_WINDOW } from "@/lib/supportHours";
 
 import { formatVnd } from "./productData";
 
@@ -146,7 +146,10 @@ function SumRow({
 }) {
   return (
     <div className="flex items-baseline justify-between gap-4 text-[13px]">
-      <span className="text-neutral-400">{label}</span>
+      {/* Money off is green from its name to its figure. */}
+      <span className={tone === "ok" ? "font-semibold text-emerald-400" : "text-neutral-400"}>
+        {label}
+      </span>
       <span
         className={`shrink-0 tabular-nums ${
           tone === "ok" ? "font-bold text-emerald-400" : "font-semibold text-white"
@@ -570,27 +573,19 @@ export function CartView({
           {saved > 0 ? (
             <div className="space-y-2.5">
               <SumRow label="Tạm tính" value={`${formatVnd(done.listTotal)}đ`} />
+              {/* The basket's own wording, green and without icons. */}
               {done.agencyCut > 0 ? (
                 <SumRow
-                  label={
-                    <span className="inline-flex items-center gap-1.5">
-                      <BadgePercent className="h-3.5 w-3.5" />
-                      Giá đại lý −{done.agencyPercent}%
-                    </span>
-                  }
+                  label={`Giảm giá đại lý −${done.agencyPercent}%`}
                   value={`−${formatVnd(done.agencyCut)}đ`}
                   tone="ok"
                 />
               ) : null}
               {done.tierCut > 0 ? (
                 <SumRow
-                  label={
-                    <span className="inline-flex items-center gap-1.5">
-                      <BadgePercent className="h-3.5 w-3.5" />
-                      Hạng {done.tierLabel}
-                      {done.tierPercent > 0 ? ` −${formatTierPercent(done.tierPercent)}%` : ""}
-                    </span>
-                  }
+                  label={`Giảm giá hạng ${done.tierLabel}${
+                    done.tierPercent > 0 ? ` −${formatTierPercent(done.tierPercent)}%` : ""
+                  }`}
                   value={`−${formatVnd(done.tierCut)}đ`}
                   tone="ok"
                 />
@@ -598,19 +593,14 @@ export function CartView({
               {done.voucherCut > 0 ? (
                 <SumRow
                   label={
-                    <span className="inline-flex items-center gap-1.5">
-                      <Ticket className="h-3.5 w-3.5" />
-                      {done.voucherCode ? (
-                        <>
-                          Mã{" "}
-                          <span className="font-mono font-bold tracking-wider text-neutral-300">
-                            {done.voucherCode}
-                          </span>
-                        </>
-                      ) : (
-                        "Mã giảm giá"
-                      )}
-                    </span>
+                    done.voucherCode ? (
+                      <>
+                        Mã giảm giá{" "}
+                        <span className="font-mono font-bold tracking-wider">{done.voucherCode}</span>
+                      </>
+                    ) : (
+                      "Mã giảm giá"
+                    )
                   }
                   value={`−${formatVnd(done.voucherCut)}đ`}
                   tone="ok"
@@ -718,111 +708,97 @@ export function CartView({
   // with it — the shopper paid and saw only an empty cart.
   if (lines.length === 0) return <CartEmpty signedIn />;
 
-  const count = kept.reduce((sum, l) => sum + l.quantity, 0);
-
   return (
     <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start">
-      {/* LINES */}
-      <div className="min-w-0">
-        <div className="mb-3 flex items-center justify-between gap-3">
-          <span className={LABEL}>
-            {kept.length} sản phẩm · {count} bản
-          </span>
-          <button
-            type="button"
-            disabled={busy || isPending}
-            onClick={() => send({ kind: "clear" }, "DELETE", null, "?all=1")}
-            className="-my-2 px-1 py-2 text-[11px] font-bold text-neutral-500 transition-colors hover:text-red-400 disabled:opacity-40"
+      {/* LINES — each one the orders list's card: its picture, its 16px name,
+          its price column behind a hairline (the owner, 01/10/2026: "đồng bộ
+          card sản phẩm … lịch sử mua"), with the stepper under the name on
+          the left as lmarket has it. No count and no "Xoá hết" over them. */}
+      <ul className="flex min-w-0 flex-col gap-3">
+        {shown.map((line) => (
+          <li
+            key={line.id}
+            inert={line.leaving}
+            aria-busy={line.pending}
+            className={`group flex flex-col gap-3 rounded-2xl border border-white/5 bg-white/[0.02] p-3.5 transition-colors hover:border-white/10 hover:bg-white/[0.04] sm:flex-row sm:items-center sm:gap-5 sm:p-4${line.leaving ? " cart-line-out" : ""}`}
           >
-            Xoá hết
-          </button>
-        </div>
-
-        <ul className="flex flex-col gap-3">
-          {shown.map((line) => (
-            <li
-              key={line.id}
-              inert={line.leaving}
-              aria-busy={line.pending}
-              /* Two rows of three on a phone — picture, name and bin above,
-                 stepper and total below — and one row of five on a desk. One
-                 DOM for both; only where each cell lands changes. A single
-                 flex row wrapped here before, and at phone width the name
-                 was the thing squeezed to nothing. */
-              className={`group grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-x-3 gap-y-3 rounded-2xl border border-white/5 bg-white/[0.02] p-3.5 transition-colors hover:border-white/10 hover:bg-white/[0.04] sm:grid-cols-[auto_minmax(0,1fr)_auto_6rem_auto] sm:gap-4 sm:p-4${line.leaving ? " cart-line-out" : ""}`}
-            >
+            <div className="flex min-w-0 flex-1 items-start gap-3 sm:items-center sm:gap-5">
               <Link
                 href={line.href}
-                className="relative col-start-1 row-span-2 row-start-1 h-14 w-20 shrink-0 self-start overflow-hidden rounded-xl border border-white/10 bg-neutral-950 transition-colors group-hover:border-white/20 sm:row-span-1 sm:h-16 sm:w-24 sm:self-center"
+                className="relative aspect-[3/2] w-24 shrink-0 overflow-hidden rounded-lg border border-white/5 bg-neutral-900 sm:aspect-video sm:w-36 sm:rounded-xl"
               >
                 {line.imageUrl ? (
                   <Image
                     src={line.imageUrl}
                     alt={line.name}
                     fill
-                    sizes="192px"
-                    className="object-cover object-[85%_center]"
+                    sizes="(min-width: 640px) 288px, 192px"
+                    className="object-cover transition-transform duration-300 group-hover:scale-105"
                   />
                 ) : null}
               </Link>
 
-              <div className="min-w-0 flex-1">
+              <div className="flex min-w-0 flex-1 flex-col gap-1.5">
                 <Link
                   href={line.href}
-                  className="line-clamp-2 text-sm font-black leading-snug text-white transition-colors hover:text-[var(--menzu-accent)]"
+                  className="line-clamp-2 text-sm font-black leading-snug text-white transition-colors hover:text-[var(--menzu-accent)] sm:text-base"
                 >
                   {line.name}
                 </Link>
-                <div className="mt-1.5 flex flex-wrap items-center gap-2">
+                <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
                   {/* The same neutral chip the orders list, the receipt and the
                       warranty desk use for a tier. */}
                   <span className="whitespace-nowrap rounded-md border border-white/15 bg-white/10 px-2 py-0.5 text-[9px] font-black uppercase tracking-widest text-neutral-300">
                     {line.packageLabel}
                   </span>
-                  <span className="text-[11px] font-semibold tabular-nums text-neutral-400">
+                  <span className="text-[11px] tabular-nums text-neutral-400 sm:text-xs">
                     {formatVnd(line.unitPrice)}đ / bản
                   </span>
                 </div>
-              </div>
 
-              <div className="col-start-2 flex items-center gap-1.5 sm:col-start-3 sm:row-start-1">
-                <button
-                  type="button"
-                  aria-label={`Giảm số lượng ${line.name}`}
-                  disabled={line.pending || line.quantity <= 1}
-                  onClick={() =>
-                    send(
-                      { kind: "quantity", id: line.id, quantity: line.quantity - 1 },
-                      "PATCH",
-                      { id: line.id, quantity: line.quantity - 1 },
-                    )
-                  }
-                  className={STEP_BUTTON}
-                >
-                  <Minus size={14} />
-                </button>
-                <span className="w-8 text-center text-sm font-black tabular-nums text-white">
-                  {line.quantity}
-                </span>
-                <button
-                  type="button"
-                  aria-label={`Tăng số lượng ${line.name}`}
-                  disabled={line.pending || line.quantity >= 99}
-                  onClick={() =>
-                    send(
-                      { kind: "quantity", id: line.id, quantity: line.quantity + 1 },
-                      "PATCH",
-                      { id: line.id, quantity: line.quantity + 1 },
-                    )
-                  }
-                  className={STEP_BUTTON}
-                >
-                  <Plus size={14} />
-                </button>
+                <div className="mt-1 flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    aria-label={`Giảm số lượng ${line.name}`}
+                    disabled={line.pending || line.quantity <= 1}
+                    onClick={() =>
+                      send(
+                        { kind: "quantity", id: line.id, quantity: line.quantity - 1 },
+                        "PATCH",
+                        { id: line.id, quantity: line.quantity - 1 },
+                      )
+                    }
+                    className={STEP_BUTTON}
+                  >
+                    <Minus size={14} />
+                  </button>
+                  <span className="w-8 text-center text-sm font-black tabular-nums text-white">
+                    {line.quantity}
+                  </span>
+                  <button
+                    type="button"
+                    aria-label={`Tăng số lượng ${line.name}`}
+                    disabled={line.pending || line.quantity >= 99}
+                    onClick={() =>
+                      send(
+                        { kind: "quantity", id: line.id, quantity: line.quantity + 1 },
+                        "PATCH",
+                        { id: line.id, quantity: line.quantity + 1 },
+                      )
+                    }
+                    className={STEP_BUTTON}
+                  >
+                    <Plus size={14} />
+                  </button>
+                </div>
               </div>
+            </div>
 
-              {/* White, like a price on the orders list. */}
-              <span className="col-start-3 inline-flex items-center justify-end gap-1.5 justify-self-end text-right text-sm font-black tabular-nums text-white sm:col-start-4 sm:row-start-1">
+            {/* The orders list's price column behind a hairline — beside the
+                card from sm up, under it on a phone — with "Xoá" where the
+                list has "Chi tiết". */}
+            <div className="flex shrink-0 items-center justify-between gap-3 border-t border-white/5 pt-3 sm:flex-col sm:items-end sm:justify-center sm:gap-2.5 sm:border-t-0 sm:border-l sm:border-white/10 sm:pt-0 sm:pl-5">
+              <span className="inline-flex items-center gap-1.5 text-base font-black tabular-nums text-white">
                 {/* The figure is already the new one; the spinner says the
                     server has not confirmed it yet. */}
                 {line.pending ? (
@@ -830,7 +806,6 @@ export function CartView({
                 ) : null}
                 {formatVnd(line.unitPrice * line.quantity)}đ
               </span>
-
               <button
                 type="button"
                 aria-label={`Xoá ${line.name}`}
@@ -843,20 +818,21 @@ export function CartView({
                     `?id=${encodeURIComponent(line.id)}`,
                   )
                 }
-                className="col-start-3 row-start-1 self-start justify-self-end rounded-lg p-2 text-neutral-500 transition-colors hover:bg-red-500/10 hover:text-red-400 disabled:opacity-40 sm:col-start-5 sm:self-center"
+                className="inline-flex h-8 items-center gap-1.5 rounded-lg px-2.5 text-xs font-semibold text-neutral-400 transition-colors hover:bg-red-500/10 hover:text-red-400 disabled:opacity-40"
               >
-                <Trash2 size={14} />
+                <Trash2 size={13} aria-hidden />
+                Xoá
               </button>
-            </li>
-          ))}
-        </ul>
-      </div>
+            </div>
+          </li>
+        ))}
+      </ul>
 
       {/* SUMMARY */}
       {/* Flat, like the panels on the account pages: no warm tint, no glow,
           no red bar — the red left in here is the button's. */}
       <aside className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02] p-5 lg:sticky lg:top-28">
-        <h2 className="relative text-sm font-black uppercase tracking-wider text-white">
+        <h2 className="relative text-lg font-black uppercase tracking-wider text-white">
           Tóm tắt đơn hàng
         </h2>
 
@@ -907,26 +883,18 @@ export function CartView({
         {/* FIGURES */}
         <div className="relative mt-5 space-y-2.5 border-t border-white/[0.06] pt-4">
           <SumRow label="Tạm tính" value={`${formatVnd(listTotal)}đ`} />
+          {/* Money off reads green from label to figure, no icon, as lmarket
+              writes it (the owner, 01/10/2026). */}
           {agencyCut > 0 ? (
             <SumRow
-              label={
-                <span className="inline-flex items-center gap-1.5">
-                  <BadgePercent className="h-3.5 w-3.5" />
-                  Giá đại lý −{viewer.agencyPercent}%
-                </span>
-              }
+              label={`Giảm giá đại lý −${viewer.agencyPercent}%`}
               value={`−${formatVnd(agencyCut)}đ`}
               tone="ok"
             />
           ) : null}
           {tierCut > 0 ? (
             <SumRow
-              label={
-                <span className="inline-flex items-center gap-1.5">
-                  <BadgePercent className="h-3.5 w-3.5" />
-                  Hạng {viewer.tierLabel} −{formatTierPercent(viewer.tierPercent)}%
-                </span>
-              }
+              label={`Giảm giá hạng ${viewer.tierLabel} −${formatTierPercent(viewer.tierPercent)}%`}
               value={`−${formatVnd(tierCut)}đ`}
               tone="ok"
             />
@@ -941,27 +909,16 @@ export function CartView({
         </div>
 
         <div className="relative mt-4 border-t border-white/10 pt-4">
+          {/* The figure the whole page is about: its name in white rather
+              than a grey caption, and the sum a step larger ("tăng sáng tổng
+              thanh toán"). The wallet's balance is not printed — the header
+              carries it, and a shortfall says itself just below. */}
           <div className="flex items-baseline justify-between gap-4">
-            <span className={LABEL}>Tổng thanh toán</span>
-            {/* The figure the whole page is about — large, and white like the
-                receipt's total. */}
-            <span className="text-xl font-black tabular-nums text-white">
+            <span className="text-sm font-black uppercase tracking-wider text-white">
+              Tổng thanh toán
+            </span>
+            <span className="text-2xl font-black tabular-nums text-white">
               {formatVnd(payable)}đ
-            </span>
-          </div>
-          <div className="mt-2.5 flex items-baseline justify-between gap-4 text-[12px]">
-            <span className="inline-flex items-center gap-1.5 text-neutral-500">
-              <Wallet className="h-3.5 w-3.5" />
-              Số dư ví
-            </span>
-            {/* Green when the wallet covers it — the answer to "can I press the
-                button" is worth reading without doing the subtraction. */}
-            <span
-              className={`tabular-nums font-semibold ${
-                shortfall > 0 ? "text-neutral-300" : "text-emerald-400"
-              }`}
-            >
-              {formatVnd(viewer.balance)}đ
             </span>
           </div>
           {shortfall > 0 ? (
@@ -1006,9 +963,20 @@ export function CartView({
           {busy ? "Đang xử lý" : isPending ? "Đang cập nhật giỏ" : ""}
         </span>
 
-        <p className="relative mt-3 text-[11px] leading-relaxed text-neutral-500">
-          Trừ thẳng vào số dư ví. Key được giao ngay sau khi thanh toán.
-        </p>
+        {/* Three short lines under the button, the way lmarket closes its
+            summary (the owner, 01/10/2026), in place of one grey sentence. */}
+        <ul className="relative mt-4 flex flex-col items-center gap-1 text-[11.5px] text-neutral-500">
+          {[
+            "Trừ thẳng vào số dư ví",
+            "Giao key ngay sau khi thanh toán",
+            `Hỗ trợ bảo hành ${SUPPORT_WINDOW} mỗi ngày`,
+          ].map((promise) => (
+            <li key={promise} className="inline-flex items-center gap-1.5">
+              <Check className="h-3 w-3 text-neutral-400" strokeWidth={2.5} aria-hidden />
+              {promise}
+            </li>
+          ))}
+        </ul>
       </aside>
     </div>
   );

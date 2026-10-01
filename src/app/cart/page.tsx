@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { ShoppingCart } from "lucide-react";
+
 import { CartEmpty, CartView } from "@/components/sites/menzu-lol-f7ae197a/shared/CartView";
 import { SimplePage } from "@/components/sites/menzu-lol-f7ae197a/shared/SimplePage";
 import { clampAgencyPercent } from "@/lib/agency";
@@ -29,7 +31,7 @@ export default async function CartPage() {
   // Signed out there is no basket to read, only the invitation to sign in.
   if (!user) {
     return (
-      <SimplePage title="Giỏ Hàng Của Bạn" crumb="Giỏ hàng">
+      <SimplePage title="Giỏ Hàng Của Bạn" crumb="Giỏ hàng" icon={ShoppingCart}>
         <CartEmpty signedIn={false} />
       </SimplePage>
     );
@@ -67,7 +69,7 @@ export default async function CartPage() {
     agencyPercent === 0 ? TIER_RULES[memberTier].discountPercent : 0;
 
   return (
-    <SimplePage title="Giỏ Hàng Của Bạn" crumb="Giỏ hàng">
+    <SimplePage title="Giỏ Hàng Của Bạn" crumb="Giỏ hàng" icon={ShoppingCart}>
       <CartView
         viewer={{
           balance: user.balance,
