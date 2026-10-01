@@ -194,8 +194,8 @@ export function StatusSubscribeSearch({
   loginNext: string;
 }) {
   const [query, setQuery] = useState("");
-  // "Chỉ tool đang theo dõi": the reader's own list, for checking it over
-  // without scrolling every shelf.
+  // The filter's "Đang theo dõi" answer: the reader's own list, for checking
+  // it over without scrolling every shelf.
   const [onlyFollowed, setOnlyFollowed] = useState(false);
 
   const shelves = useMemo(
@@ -243,22 +243,40 @@ export function StatusSubscribeSearch({
             className="h-full w-full bg-transparent text-sm font-semibold text-white outline-none placeholder:text-neutral-500"
           />
         </label>
+        {/* One filter with two answers, each carrying its count — the
+            followed count lives here rather than in a chip of its own (the
+            owner, 01/10/2026: "cho vào phần lọc đi với phần tất cả"). The
+            lit answer wears the accent's tint, a step under the page's solid
+            red tabs above it. */}
         {signedIn ? (
-          <>
-            <button
-              type="button"
-              onClick={() => setOnlyFollowed((value) => !value)}
-              aria-pressed={onlyFollowed}
-              className={`${CHIP} ${onlyFollowed ? CHIP_ON : CHIP_OFF}`}
-            >
-              Chỉ tool đang theo dõi
-            </button>
-            <span className={`${CHIP} ml-auto border-white/10 bg-white/5 text-neutral-400`}>
-              <BellRing size={13} aria-hidden className="text-[var(--menzu-accent)]" />
-              Đang theo dõi
-              <span className="text-[var(--menzu-accent)]">{following}</span>/{tools.length}
-            </span>
-          </>
+          <div
+            role="group"
+            aria-label="Lọc tool"
+            className="inline-flex h-9 shrink-0 items-center gap-0.5 rounded-lg border border-white/10 bg-white/5 p-0.5"
+          >
+            {[
+              { followedOnly: false, label: "Tất cả", count: tools.length },
+              { followedOnly: true, label: "Đang theo dõi", count: following },
+            ].map((option) => {
+              const lit = onlyFollowed === option.followedOnly;
+              return (
+                <button
+                  key={option.label}
+                  type="button"
+                  onClick={() => setOnlyFollowed(option.followedOnly)}
+                  aria-pressed={lit}
+                  className={`inline-flex h-full items-center gap-1.5 rounded-md px-3 text-[10px] font-black uppercase tracking-widest transition-colors ${
+                    lit
+                      ? "bg-[var(--menzu-accent)]/15 text-[var(--menzu-accent)]"
+                      : "text-neutral-400 hover:text-white"
+                  }`}
+                >
+                  {option.label}
+                  <span className="rounded bg-black/25 px-1.5 py-0.5 tabular-nums">{option.count}</span>
+                </button>
+              );
+            })}
+          </div>
         ) : null}
       </div>
 
