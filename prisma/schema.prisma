@@ -1042,11 +1042,19 @@ enum WarrantyIssue {
 }
 
 /// Where a warranty report stands. OPEN is the buyer's to create; the desk
-/// moves it on, and RESOLVED is final.
+/// moves it on. RESOLVED (fixed) and REFUNDED are final.
+///
+/// Refunds come out of the ticket, never from a buyer's own request (the
+/// owner, 01/10/2026): when the shop cannot fix the order it refunds it —
+/// straight to the buyer's balance (REFUNDED at once), or over a bank
+/// transfer, which waits in REFUNDING for the buyer's account and then for
+/// the shop's transfer.
 enum WarrantyStatus {
   OPEN
   IN_PROGRESS
   RESOLVED
+  REFUNDING
+  REFUNDED
 }
 
 /// A buyer reporting that one order is not working — the step before a refund.
@@ -1069,6 +1077,17 @@ model WarrantyRequest {
   adminNote   String?
   createdAt   DateTime       @default(now())
   resolvedAt  DateTime?
+
+  /// Set when the shop turns the ticket into a refund: how much, and how it
+  /// goes back — WALLET to the buyer's balance, MANUAL over a bank transfer.
+  refundAmount    BigInt?
+  refundMethod    RefundMethod?
+  /// The buyer's account for a bank refund, typed twice on the status page.
+  /// Shown whole to the desk, masked to the buyer.
+  bankName        String?
+  bankAccount     String?
+  accountHolder   String?
+  bankSubmittedAt DateTime?
 
   @@index([userId, createdAt])
   @@index([status, createdAt])

@@ -9,6 +9,7 @@ import { storeUpload } from "@/lib/blobStore";
 import { db } from "@/lib/db";
 import { absoluteUrl } from "@/lib/seo";
 import { escapeTelegramHtml, notifyTelegramAdmins } from "@/lib/telegramNotify";
+import { notifyWarranty } from "@/lib/warrantyNotify";
 import { getCurrentUser } from "@/lib/session";
 import {
   readDescription,
@@ -169,6 +170,12 @@ export async function POST(request: Request) {
       `🔗 ${absoluteUrl("/admin/warranty")}`,
     ].join("\n"),
   );
+  // And the buyer, on the bell and by email: the first step of the ticket
+  // they will follow from here.
+  await notifyWarranty(user.id, code, {
+    title: "Shop đã nhận yêu cầu bảo hành",
+    body: `Đơn ${code}: shop đã nhận báo lỗi "${WARRANTY_ISSUE[picked.issue].label}" và sẽ xử lý sớm.`,
+  });
 
   return NextResponse.json({ ok: true });
 }

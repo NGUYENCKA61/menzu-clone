@@ -68,6 +68,17 @@ export const WARRANTY_REPLIES: Record<WarrantyIssue, readonly string[]> = {
 };
 
 /** The chosen issue, or the sentence to show instead of accepting it. */
+/**
+ * The reasons a shop gives when it turns a ticket into a refund — tapped in,
+ * then edited, like the replies above. A refund has to say why too: "shop
+ * hoàn tiền" alone reads like the shop gave up without looking.
+ */
+export const WARRANTY_REFUND_REPLIES: readonly string[] = [
+  "Tool đang bị phát hiện và chưa có bản mới trong thời gian gói của bạn, shop hoàn tiền cho bạn.",
+  "Shop đã thử nhiều cách nhưng không khắc phục được lỗi trên máy của bạn, shop xin hoàn tiền cho bạn.",
+  "Key bị lỗi phía nhà cung cấp và shop không cấp lại được, shop hoàn tiền cho đơn này.",
+];
+
 export function readIssue(
   value: unknown,
 ): { ok: true; issue: WarrantyIssue } | { ok: false; error: string } {
@@ -78,7 +89,7 @@ export function readIssue(
   return { ok: false, error: "Chọn loại lỗi bạn gặp." };
 }
 
-export type WarrantyStatus = "OPEN" | "IN_PROGRESS" | "RESOLVED";
+export type WarrantyStatus = "OPEN" | "IN_PROGRESS" | "RESOLVED" | "REFUNDING" | "REFUNDED";
 
 export const WARRANTY_STATUS: Record<
   WarrantyStatus,
@@ -99,11 +110,44 @@ export const WARRANTY_STATUS: Record<
     tile: "border-emerald-500/30 bg-emerald-500/10 text-emerald-400",
     dot: "bg-emerald-500",
   },
+  // The shop could not fix it and is paying it back over a bank transfer:
+  // waiting for the buyer's account, then for the shop's transfer.
+  REFUNDING: {
+    label: "Đang hoàn tiền",
+    tile: "border-orange-500/30 bg-orange-500/10 text-orange-400",
+    dot: "bg-orange-500",
+  },
+  REFUNDED: {
+    label: "Đã hoàn tiền",
+    tile: "border-rose-500/30 bg-rose-500/10 text-rose-400",
+    dot: "bg-rose-500",
+  },
 };
 
-/** A ticket the shop has not closed yet. */
+/**
+ * A ticket the shop has not closed yet. Fixed (RESOLVED) and paid back
+ * (REFUNDED) are the two ways a ticket ends; a refund still waiting on a bank
+ * transfer is not over.
+ */
 export function warrantyOpen(status: string): boolean {
-  return status !== "RESOLVED";
+  return status !== "RESOLVED" && status !== "REFUNDED";
+}
+
+/**
+ * The receipt's warranty button for the order's newest report (the owner,
+ * 01/10/2026): "Yêu cầu bảo hành" until one is sent, "Xem trạng thái" after —
+ * the buyer only follows the ticket, the shop decides a refund — and
+ * "Nhập số tài khoản" while a bank refund waits on the buyer's account, the
+ * one step that is theirs to take.
+ */
+export function warrantyButton(
+  latest: { status: WarrantyStatus; needsBank: boolean } | null,
+): { kind: "request" | "status" | "bank"; label: string } {
+  if (!latest) return { kind: "request", label: "Yêu cầu bảo hành" };
+  if (latest.status === "REFUNDING" && latest.needsBank) {
+    return { kind: "bank", label: "Nhập số tài khoản" };
+  }
+  return { kind: "status", label: "Xem trạng thái" };
 }
 
 /**
@@ -137,16 +181,27 @@ export function readDescription(
  * back, has nothing under warranty. One with a report still open should not
  * collect a second while the shop is working the first — the answer goes on
  * the ticket that exists. No clock: the shop closes what it has dealt with.
+ *
+ * `refunding` — the shop has already answered with a refund that is still on
+ * its way (a bank refund); "the shop will reply" would be stale by then.
  */
 export function warrantyBlockedReason({
   orderStatus,
   openRequest,
+  refunding = false,
 }: {
   orderStatus: string;
   openRequest: boolean;
+  refunding?: boolean;
 }): string | null {
+  if (orderStatus === "REFUNDED") {
+    return "Đơn này đã được hoàn tiền.";
+  }
   if (orderStatus !== "PAID") {
     return "Chỉ đơn đã thanh toán mới yêu cầu bảo hành được.";
+  }
+  if (refunding) {
+    return "Đơn này đang được hoàn tiền — bạn theo dõi tiến độ ở yêu cầu phía trên.";
   }
   if (openRequest) {
     return "Đơn này đang có một yêu cầu bảo hành chưa xử lý xong — shop sẽ trả lời trên yêu cầu đó.";

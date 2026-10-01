@@ -3,65 +3,20 @@ import { describe, expect, it } from "vitest";
 import {
   promisedRefund,
   readRefundAmount,
-  readReason,
   REFUND_METHOD,
   REFUND_METHOD_KEYS,
-  REASON_MAX,
-  REASON_MIN,
-  REASON_TOO_LONG,
-  REASON_TOO_SHORT,
-  refundBlockedReason,
   refundDeadline,
-  refundWindow,
   refundWindowClosed,
-  REFUND_NEEDS_WARRANTY,
   REFUND_STATUS,
   REFUND_WINDOW_DAYS,
 } from "@/lib/refundRequests";
 
 /**
- * The refund form and the route it posts to both read these, so what matters
- * is that neither can be talked into accepting something the other refuses —
- * and that the two reasons an order is off-limits stay distinguishable, since
- * "you were never charged" and "we are already looking at it" need different
- * answers.
+ * Since 01/10/2026 buyers never ask for refunds themselves — the warranty desk
+ * refunds from a ticket — so what is left to pin down here is what that desk
+ * reads: the window it shows beside a report, the states and labels a refund
+ * wears, the figure it suggests and the figure it accepts.
  */
-describe("readReason", () => {
-  it("takes a real sentence", () => {
-    const said = "Key mua xong dùng được 2 tiếng thì bị khoá tài khoản game.";
-    expect(readReason(said)).toEqual({ ok: true, reason: said });
-  });
-
-  it("trims before it measures", () => {
-    const said = "  " + "x".repeat(REASON_MIN) + "  ";
-    expect(readReason(said)).toEqual({ ok: true, reason: "x".repeat(REASON_MIN) });
-    // Padding must not carry a too-short reason over the line.
-    expect(readReason("  " + "x".repeat(REASON_MIN - 1) + "   ")).toEqual({
-      ok: false,
-      error: REASON_TOO_SHORT,
-    });
-  });
-
-  it("refuses a word where a sentence belongs", () => {
-    expect(readReason("loi")).toEqual({ ok: false, error: REASON_TOO_SHORT });
-    expect(readReason("")).toEqual({ ok: false, error: REASON_TOO_SHORT });
-  });
-
-  it("refuses an essay", () => {
-    expect(readReason("x".repeat(REASON_MAX + 1))).toEqual({
-      ok: false,
-      error: REASON_TOO_LONG,
-    });
-    expect(readReason("x".repeat(REASON_MAX)).ok).toBe(true);
-  });
-
-  it("refuses anything that is not text at all", () => {
-    expect(readReason(undefined).ok).toBe(false);
-    expect(readReason(null).ok).toBe(false);
-    expect(readReason(42).ok).toBe(false);
-    expect(readReason({ reason: "a".repeat(50) }).ok).toBe(false);
-  });
-});
 
 describe("the three-day window", () => {
   const bought = new Date("2026-09-01T10:00:00Z");
@@ -85,139 +40,6 @@ describe("the three-day window", () => {
   it("lands the deadline exactly three days on", () => {
     expect(refundDeadline(bought).toISOString()).toBe("2026-09-04T10:00:00.000Z");
     expect(REFUND_WINDOW_DAYS).toBe(3);
-  });
-});
-
-describe("refundWindow (warranty first)", () => {
-  const bought = new Date("2026-09-01T10:00:00Z");
-  const day = (d: number) => new Date(bought.getTime() + d * 24 * 60 * 60 * 1000);
-
-  it("asks for a report while none was sent in time", () => {
-    expect(refundWindow(bought, [])).toEqual({ kind: "needs-warranty", sendBy: day(3) });
-  });
-
-  it("ignores a report sent after the three days", () => {
-    const window = refundWindow(bought, [{ status: "OPEN", createdAt: day(4), resolvedAt: null }]);
-    expect(window.kind).toBe("needs-warranty");
-  });
-
-  it("counts a report sent on the deadline itself", () => {
-    const window = refundWindow(bought, [{ status: "OPEN", createdAt: day(3), resolvedAt: null }]);
-    expect(window.kind).toBe("held");
-  });
-
-  it("holds the right while any report sent in time is still open", () => {
-    const window = refundWindow(bought, [
-      { status: "RESOLVED", createdAt: day(1), resolvedAt: day(2) },
-      { status: "IN_PROGRESS", createdAt: day(2), resolvedAt: null },
-    ]);
-    expect(window.kind).toBe("held");
-  });
-
-  it("runs three days from the last close once every report is closed", () => {
-    const window = refundWindow(bought, [
-      { status: "RESOLVED", createdAt: day(1), resolvedAt: day(2) },
-      { status: "RESOLVED", createdAt: day(2), resolvedAt: day(6) },
-    ]);
-    expect(window).toEqual({ kind: "until", deadline: day(9) });
-  });
-});
-
-describe("refundBlockedReason", () => {
-  const bought = new Date("2026-09-01T10:00:00Z");
-  const day = (d: number) => new Date(bought.getTime() + d * 24 * 60 * 60 * 1000);
-  /** Inside the window: a day after the sale. */
-  const soon = new Date("2026-09-02T10:00:00Z");
-  /** Outside it: a week after. */
-  const late = new Date("2026-09-08T10:00:00Z");
-  /** A warranty report sent on day one, still being worked on. */
-  const reported = [{ status: "OPEN", createdAt: day(1), resolvedAt: null }];
-  const paid = {
-    orderStatus: "PAID",
-    openRequest: false,
-    reviewed: false,
-    purchasedAt: bought,
-    warranties: reported,
-  };
-
-  it("lets a paid order with a report sent in time through", () => {
-    expect(refundBlockedReason({ ...paid, now: soon })).toBeNull();
-  });
-
-  it("asks for a warranty report first", () => {
-    expect(refundBlockedReason({ ...paid, warranties: [], now: soon })).toBe(
-      REFUND_NEEDS_WARRANTY,
-    );
-  });
-
-  it("keeps the right while the shop works on a report sent in time, however long", () => {
-    expect(refundBlockedReason({ ...paid, now: day(20) })).toBeNull();
-  });
-
-  it("gives three days after the shop closes the report, and no more", () => {
-    const closed = [{ status: "RESOLVED", createdAt: day(1), resolvedAt: day(5) }];
-    expect(refundBlockedReason({ ...paid, warranties: closed, now: day(7) })).toBeNull();
-    expect(refundBlockedReason({ ...paid, warranties: closed, now: day(9) })).toMatch(
-      /xử lý xong bảo hành/,
-    );
-  });
-
-  it("does not reopen refunds for a report sent after the three days", () => {
-    const tooLate = [{ status: "OPEN", createdAt: day(5), resolvedAt: null }];
-    expect(refundBlockedReason({ ...paid, warranties: tooLate, now: day(6) })).toMatch(
-      /quá 3 ngày kể từ lúc mua/,
-    );
-  });
-
-  it("refuses an order that was never charged", () => {
-    for (const orderStatus of ["PENDING", "CANCELLED", "REFUNDED"]) {
-      expect(
-        refundBlockedReason({ ...paid, orderStatus, now: soon }),
-      ).toMatch(/đã thanh toán/);
-    }
-  });
-
-  it("refuses a second request while the first is still open", () => {
-    expect(
-      refundBlockedReason({ ...paid, openRequest: true, now: soon }),
-    ).toMatch(/đang chờ/);
-  });
-
-  it("refuses an order the buyer has already reviewed", () => {
-    expect(refundBlockedReason({ ...paid, reviewed: true, now: soon })).toMatch(
-      /đã được đánh giá/,
-    );
-  });
-
-  it("refuses once three days have passed with no report sent", () => {
-    expect(refundBlockedReason({ ...paid, warranties: [], now: late })).toMatch(/quá 3 ngày/);
-  });
-
-  it("says the money reason first when both are true", () => {
-    // An unpaid order is the more basic refusal; telling the buyer to wait for
-    // a decision on an order that was never charged would be nonsense.
-    expect(
-      refundBlockedReason({
-        ...paid,
-        orderStatus: "CANCELLED",
-        openRequest: true,
-        now: late,
-      }),
-    ).toMatch(/đã thanh toán/);
-  });
-
-  it("does not tell somebody who asked in time that they are late", () => {
-    // The request is open because they made it on day one; the shop is simply
-    // still deciding. "Quá hạn" here would blame them for the wait.
-    expect(
-      refundBlockedReason({ ...paid, openRequest: true, now: late }),
-    ).toMatch(/đang chờ/);
-  });
-
-  it("allows another round after a decision, while the window lasts", () => {
-    // Only an OPEN request bars the way — the caller passes false once the
-    // shop has answered, so a rejection can be replied to.
-    expect(refundBlockedReason({ ...paid, now: soon })).toBeNull();
   });
 });
 
@@ -292,6 +114,9 @@ describe("readRefundAmount", () => {
 describe("REFUND_METHOD", () => {
   it("offers both ways out, each with a word about what it does", () => {
     expect(REFUND_METHOD_KEYS).toEqual(["WALLET", "MANUAL"]);
+    // The owner's two options (01/10/2026).
+    expect(REFUND_METHOD.WALLET.label).toBe("Hoàn qua tài khoản");
+    expect(REFUND_METHOD.MANUAL.label).toBe("Hoàn qua ngân hàng");
     for (const key of REFUND_METHOD_KEYS) {
       expect(REFUND_METHOD[key].label.length).toBeGreaterThan(0);
       expect(REFUND_METHOD[key].hint.length).toBeGreaterThan(0);

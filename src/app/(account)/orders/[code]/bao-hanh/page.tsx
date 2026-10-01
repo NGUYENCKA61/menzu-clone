@@ -2,11 +2,13 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { ArrowLeft, Clock, Info } from "lucide-react";
+import { ArrowLeft, Banknote, Clock, Info, Landmark } from "lucide-react";
 
 import { AccountPageFrame } from "@/components/sites/menzu-lol-f7ae197a/shared/AccountPageFrame";
 import { formatVnd } from "@/components/sites/menzu-lol-f7ae197a/shared/productData";
+import { WarrantyBankForm } from "@/components/sites/menzu-lol-f7ae197a/shared/WarrantyBankForm";
 import { WarrantyRequestForm } from "@/components/sites/menzu-lol-f7ae197a/shared/WarrantyRequestForm";
+import { maskAccount } from "@/lib/bankRefund";
 import { db } from "@/lib/db";
 import { ORDER_STATUS_LABELS, type OrderStatus } from "@/lib/orders";
 import { dayTime } from "@/lib/dayGroups";
@@ -78,6 +80,11 @@ export default async function WarrantyRequestPage({
           imageUrl: true,
           adminNote: true,
           createdAt: true,
+          refundAmount: true,
+          refundMethod: true,
+          bankName: true,
+          bankAccount: true,
+          accountHolder: true,
         },
       },
     },
@@ -87,14 +94,23 @@ export default async function WarrantyRequestPage({
   const blocked = warrantyBlockedReason({
     orderStatus: order.status,
     openRequest: order.warrantyRequests.some((r) => warrantyOpen(r.status)),
+    refunding: order.warrantyRequests.some((r) => r.status === "REFUNDING"),
   });
   const productName = order.product.name ?? order.product.code;
+  // Once a report exists this is where the buyer follows it — the receipt's
+  // button reads "Xem trạng thái" — so the page says so in its title.
+  const following = order.warrantyRequests.length > 0;
+  const heading = following ? "Trạng thái bảo hành" : "Yêu cầu bảo hành";
 
   return (
     <AccountPageFrame
-      title="Yêu cầu bảo hành"
-      subtitle={`Đơn ${order.code} — báo lỗi để shop kiểm tra và xử lý`}
-      crumb="Yêu cầu bảo hành"
+      title={heading}
+      subtitle={
+        following
+          ? `Đơn ${order.code} — theo dõi yêu cầu bảo hành của bạn`
+          : `Đơn ${order.code} — báo lỗi để shop kiểm tra và xử lý`
+      }
+      crumb={heading}
       action={
         <Link
           href="/orders"
@@ -196,6 +212,78 @@ export default async function WarrantyRequestPage({
                       <p className="mt-3 rounded-r-lg border-l-2 border-[var(--menzu-accent)] bg-[var(--menzu-accent)]/[0.06] px-3.5 py-2.5 text-[12.5px] leading-relaxed text-neutral-300">
                         <span className="font-bold text-white">Shop trả lời:</span> {r.adminNote}
                       </p>
+                    ) : null}
+                    {/* The refund, when the shop could not fix it: settled to
+                        the site account, sent to a bank, or waiting on the
+                        buyer's account — the one step that is theirs. */}
+                    {(r.status === "REFUNDING" || r.status === "REFUNDED") && r.refundAmount !== null ? (
+                      <div className="mt-3 rounded-lg border border-white/10 bg-white/[0.03] px-3.5 py-3 text-[12.5px] leading-relaxed text-neutral-300">
+                        <p className="flex items-start gap-2">
+                          {r.refundMethod === "MANUAL" ? (
+                            <Landmark className="mt-0.5 h-4 w-4 shrink-0 text-neutral-400" />
+                          ) : (
+                            <Banknote className="mt-0.5 h-4 w-4 shrink-0 text-neutral-400" />
+                          )}
+                          <span>
+                            {r.status === "REFUNDED" ? (
+                              r.refundMethod === "MANUAL" ? (
+                                <>
+                                  Shop đã chuyển{" "}
+                                  <span className="font-bold text-white">
+                                    {formatVnd(Number(r.refundAmount))}đ
+                                  </span>{" "}
+                                  về tài khoản {r.bankName}{" "}
+                                  {r.bankAccount ? maskAccount(r.bankAccount) : ""}.
+                                </>
+                              ) : (
+                                <>
+                                  Shop đã hoàn{" "}
+                                  <span className="font-bold text-white">
+                                    {formatVnd(Number(r.refundAmount))}đ
+                                  </span>{" "}
+                                  vào tài khoản của bạn trên web.{" "}
+                                  <Link
+                                    href="/transactions"
+                                    className="font-bold text-white underline underline-offset-2 hover:text-[var(--menzu-accent)]"
+                                  >
+                                    Xem giao dịch
+                                  </Link>
+                                </>
+                              )
+                            ) : r.bankAccount ? (
+                              <>
+                                Shop đã nhận số tài khoản{" "}
+                                <span className="font-bold text-white">
+                                  {r.bankName} {maskAccount(r.bankAccount)}
+                                </span>{" "}
+                                ({r.accountHolder}) và sẽ chuyển{" "}
+                                <span className="font-bold text-white">
+                                  {formatVnd(Number(r.refundAmount))}đ
+                                </span>{" "}
+                                cho bạn sớm.
+                              </>
+                            ) : (
+                              <>
+                                Shop sẽ hoàn{" "}
+                                <span className="font-bold text-white">
+                                  {formatVnd(Number(r.refundAmount))}đ
+                                </span>{" "}
+                                qua ngân hàng — bạn nhập số tài khoản để nhận tiền.
+                              </>
+                            )}
+                          </span>
+                        </p>
+                        {r.status === "REFUNDING" && r.refundMethod === "MANUAL" ? (
+                          <WarrantyBankForm
+                            ticketId={r.id}
+                            submitted={
+                              r.bankAccount && r.bankName && r.accountHolder
+                                ? { bankName: r.bankName, accountHolder: r.accountHolder }
+                                : null
+                            }
+                          />
+                        ) : null}
+                      </div>
                     ) : null}
                   </li>
                 );

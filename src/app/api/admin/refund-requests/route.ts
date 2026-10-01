@@ -4,11 +4,7 @@ import { getAdmin } from "@/lib/admin";
 import { announceToUser } from "@/lib/announcementStore";
 import { db } from "@/lib/db";
 import { readRefundAmount } from "@/lib/refundRequests";
-import { absoluteUrl } from "@/lib/seo";
-import { pointsForSpend } from "@/lib/spin";
-import { escapeTelegramHtml, notifyTelegramAdmins } from "@/lib/telegramNotify";
-import { makeCode } from "@/lib/topupStore";
-import { creditWallet } from "@/lib/wallet";
+import { settleRefund, warnRefundedAccount } from "@/lib/refundSettle";
 
 /** The two answers the desk can give. PENDING is the buyer's to create, not
  *  the shop's to restore — reopening a decided request would leave the buyer
@@ -144,50 +140,15 @@ export async function PATCH(request: Request) {
       });
       if (claimed.count === 0) throw new Error("ALREADY_HANDLED");
 
-      // The order stops reading "Đã thanh toán" the moment the shop agrees to
-      // give the money back, whichever way it goes back. Both halves in one
-      // transaction: an order still marked paid beside an approved refund is
-      // the pair of facts that starts an argument.
-      //
-      // Conditional, like the claim above it: an order that is already
-      // REFUNDED has had its money back once, and a second approval — of a
-      // second request opened on the same order — must not pay it again.
-      const settled = await tx.order.updateMany({
-        where: { id: found.orderId, status: "PAID" },
-        data: { status: "REFUNDED" },
-      });
-      if (settled.count === 0) throw new Error("ALREADY_REFUNDED");
-
-      // The spins that spending bought go back with the money. Otherwise a
-      // buy-and-refund is a free wheel: 100.000đ spent and refunded still
-      // earned a spin, and the shop pays the prize out of nothing.
-      //
-      // GREATEST rather than a plain decrement: the points may already have
-      // been spun away, and an account holding minus fifty points would be
-      // barred from spinning until it bought its way back to zero. Written as
-      // one statement so a spin settling at the same instant cannot slip
-      // between a read and a write.
-      const earned = pointsForSpend(Number(found.order.total));
-      if (earned > 0) {
-        await tx.$executeRaw`UPDATE "users" SET "points" = GREATEST("points" - ${earned}, 0) WHERE "id" = ${found.userId}`;
-      }
-
-      if (method !== "WALLET") return;
-
-      // Incremented by the database rather than computed from a figure read a
-      // moment ago, so a purchase settling at the same instant is not lost.
-      const balanceAfter = await creditWallet(tx, found.userId, amount);
-      await tx.transaction.create({
-        data: {
-          code: makeCode("GD"),
-          userId: found.userId,
-          kind: "REFUND",
-          status: "SUCCESS",
-          delta: amount,
-          balanceAfter,
-          description: `Hoàn tiền đơn ${found.order.code}`,
-          method: "Hoàn vào ví",
-        },
+      // The order, the spins and the wallet, settled the one way the warranty
+      // desk settles them too.
+      await settleRefund(tx, {
+        orderId: found.orderId,
+        orderCode: found.order.code,
+        orderTotal: Number(found.order.total),
+        userId: found.userId,
+        amount,
+        method: method as "MANUAL" | "WALLET",
       });
     });
   } catch (error) {
@@ -222,22 +183,7 @@ export async function PATCH(request: Request) {
       : {}),
   });
 
-  // One account, sold once, refunded, and still marked sold. Nobody can buy
-  // it and nothing says so, which is how an account quietly leaves the shelf
-  // for good. It is not put back automatically on purpose: the buyer has seen
-  // the password, so relisting is a decision with a password change in front
-  // of it — this only makes sure somebody is asked to make it.
-  const sold = found.order.product;
-  if (sold.productType === "ACCOUNT_GAME" && !sold.accountPool && sold.status === "SOLD") {
-    await notifyTelegramAdmins(
-      [
-        "♻️ <b>Acc đã hoàn tiền, vẫn đang “Đã bán”</b>",
-        escapeTelegramHtml(`#${sold.code} — ${sold.name ?? sold.code} · đơn ${found.order.code}`),
-        "Khách đã biết mật khẩu: đổi mật khẩu rồi mới mở bán lại.",
-        `🔗 ${absoluteUrl(`/admin/products/${sold.code}`)}`,
-      ].join("\n"),
-    );
-  }
+  await warnRefundedAccount(found.order.product, found.order.code);
 
   return NextResponse.json({ ok: true });
 }

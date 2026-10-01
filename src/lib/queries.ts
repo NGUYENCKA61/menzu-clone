@@ -12,11 +12,11 @@ import { poolStock } from "@/lib/accountPool";
 import { db } from "@/lib/db";
 import { docHtmlToPlainText } from "@/lib/docHtml";
 import { parseBadges } from "@/lib/productBadges";
-import { refundBlockedReason, REFUND_NEEDS_WARRANTY } from "@/lib/refundRequests";
 import { showsStatusPill } from "@/lib/statusPill";
 import { isSalesLocked } from "@/lib/softwareStatus";
 import { parseFeatures } from "@/lib/productFeatures";
 import { productHref } from "@/lib/routes";
+import type { WarrantyStatus } from "@/lib/warrantyRequests";
 import { weaponKey } from "@/lib/weaponImages";
 import type { AccountDetail } from "@/components/sites/menzu-lol-f7ae197a/shared/AccountBuyPanel";
 import type { SoftwareDetail } from "@/components/sites/menzu-lol-f7ae197a/shared/SoftwareBuyPanel";
@@ -902,17 +902,16 @@ export interface OrderRow {
    * waiting on. "none" for software and for orders that were never paid.
    */
   login: LoginHandover;
-  /**
-   * Whether "Yêu cầu hoàn trả" is still open on this order, and why not when
-   * it is not — resolved here so the row, the receipt and the refund page all
-   * read one answer rather than three copies of the rule.
-   */
-  canRefund: boolean;
-  refundBlockedReason: string | null;
-  /** A warranty report the shop has not closed yet. */
+  /** A warranty report the shop is still working on. */
   warrantyOpen: boolean;
-  /** Refunds wait for a warranty report first (the receipt says so). */
-  refundNeedsWarranty: boolean;
+  /** The shop is paying this order back over a bank transfer. */
+  warrantyRefunding: boolean;
+  /**
+   * The newest warranty ticket, for the receipt's button: "Yêu cầu bảo hành"
+   * with none, "Xem trạng thái" after, "Nhập số tài khoản" while a bank
+   * refund waits on the buyer's account.
+   */
+  latestWarranty: { status: WarrantyStatus; needsBank: boolean } | null;
   /** The newest refund round on this order was turned down. The order itself
    *  is untouched — still paid, key still valid — but the row says so, because
    *  a buyer who asked and was refused should not have to open the receipt to
@@ -976,10 +975,11 @@ export async function getOrders(userId: string): Promise<OrderRow[]> {
         take: 1,
       },
       feedback: { select: { id: true } },
-      // Every round: an open one gives the row its badge, and all of them
-      // set the warranty-first refund clock.
+      // Every ticket, newest first: an open one gives the row its badge, and
+      // the newest decides the receipt's warranty button.
       warrantyRequests: {
-        select: { status: true, createdAt: true, resolvedAt: true },
+        orderBy: { createdAt: "desc" },
+        select: { status: true, refundMethod: true, bankAccount: true },
       },
     },
   });
@@ -987,7 +987,17 @@ export async function getOrders(userId: string): Promise<OrderRow[]> {
     id: o.id,
     code: o.code,
     reviewed: o.feedback !== null,
-    warrantyOpen: o.warrantyRequests.some((w) => w.status !== "RESOLVED"),
+    warrantyOpen: o.warrantyRequests.some((w) => w.status === "OPEN" || w.status === "IN_PROGRESS"),
+    warrantyRefunding: o.warrantyRequests.some((w) => w.status === "REFUNDING"),
+    latestWarranty: o.warrantyRequests[0]
+      ? {
+          status: o.warrantyRequests[0].status,
+          needsBank:
+            o.warrantyRequests[0].status === "REFUNDING" &&
+            o.warrantyRequests[0].refundMethod === "MANUAL" &&
+            !o.warrantyRequests[0].bankAccount,
+        }
+      : null,
     status: o.status,
     total: Number(o.total),
     createdAt: o.createdAt,
@@ -1040,22 +1050,11 @@ export async function getOrders(userId: string): Promise<OrderRow[]> {
       tag: tagOf(o.product),
     }),
     ...(() => {
+      // Older, buyer-made refund rounds still say where they stand. Only the
+      // newest counts: a refusal since answered with a second request is
+      // history, and the row should say what is true now.
       const latest = o.refundRequests[0]?.status ?? null;
-      const blocked = refundBlockedReason({
-        orderStatus: o.status,
-        openRequest: latest === "PENDING",
-        reviewed: o.feedback !== null,
-        purchasedAt: o.createdAt,
-        warranties: o.warrantyRequests,
-        now,
-      });
       return {
-        canRefund: blocked === null,
-        refundBlockedReason: blocked,
-        refundNeedsWarranty: blocked === REFUND_NEEDS_WARRANTY,
-        // Only the newest round counts: a refusal the buyer has since answered
-        // with a second request is history, and the row should say what is
-        // true now.
         refundRejected: latest === "REJECTED",
         refundPending: latest === "PENDING",
       };

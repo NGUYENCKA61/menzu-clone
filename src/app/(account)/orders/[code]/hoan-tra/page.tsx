@@ -5,18 +5,11 @@ import { notFound, redirect } from "next/navigation";
 import { ArrowLeft, Info, ShieldCheck } from "lucide-react";
 
 import { AccountPageFrame } from "@/components/sites/menzu-lol-f7ae197a/shared/AccountPageFrame";
-import { RefundRequestForm } from "@/components/sites/menzu-lol-f7ae197a/shared/RefundRequestForm";
 import { formatVnd } from "@/components/sites/menzu-lol-f7ae197a/shared/productData";
 import { db } from "@/lib/db";
 import { ORDER_STATUS_LABELS, type OrderStatus } from "@/lib/orders";
 import { dayTime } from "@/lib/dayGroups";
-import {
-  refundBlockedReason,
-  refundWindow,
-  REFUND_NEEDS_WARRANTY,
-  REFUND_STATUS,
-  REFUND_WINDOW_DAYS,
-} from "@/lib/refundRequests";
+import { REFUND_STATUS } from "@/lib/refundRequests";
 import { getCurrentUser } from "@/lib/session";
 
 export const metadata: Metadata = {
@@ -77,7 +70,6 @@ export default async function RefundRequestPage({
       },
       package: { select: { label: true } },
       feedback: { select: { id: true } },
-      warrantyRequests: { select: { status: true, createdAt: true, resolvedAt: true } },
       refundRequests: {
         orderBy: { createdAt: "desc" },
         select: {
@@ -92,23 +84,13 @@ export default async function RefundRequestPage({
   });
   if (!order) notFound();
 
-  const open = order.refundRequests.some((r) => r.status === "PENDING");
-  const blocked = refundBlockedReason({
-    orderStatus: order.status,
-    openRequest: open,
-    reviewed: order.feedback !== null,
-    purchasedAt: order.createdAt,
-    warranties: order.warrantyRequests,
-    now: new Date(),
-  });
-  const window = refundWindow(order.createdAt, order.warrantyRequests);
   const productName = order.product.name ?? order.product.code;
 
   return (
     <AccountPageFrame
-      title="Yêu cầu hoàn trả"
-      subtitle={`Đơn ${order.code} — mô tả sự cố để shop xem xét hoàn tiền`}
-      crumb="Yêu cầu hoàn trả"
+      title="Hoàn trả"
+      subtitle={`Đơn ${order.code} — các yêu cầu hoàn tiền đã gửi trước đây`}
+      crumb="Hoàn trả"
       action={
         <Link
           href="/orders"
@@ -170,25 +152,6 @@ export default async function RefundRequestPage({
                 </span>
               </span>
             ) : null}
-            {/* Warranty first: the deadline the buyer is up against depends
-                on where the warranty report stands. */}
-            <span className="text-[12px] text-neutral-400">
-              Hạn yêu cầu:{" "}
-              {window.kind === "held" ? (
-                <span className="font-bold text-neutral-200">
-                  giữ nguyên trong lúc shop xử lý bảo hành
-                </span>
-              ) : (
-                <>
-                  <span className="font-bold text-neutral-200">
-                    {stamp(window.kind === "until" ? window.deadline : window.sendBy)}
-                  </span>{" "}
-                  {window.kind === "until"
-                    ? `(${REFUND_WINDOW_DAYS} ngày kể từ khi shop xử lý xong bảo hành)`
-                    : `(${REFUND_WINDOW_DAYS} ngày kể từ lúc mua — gửi yêu cầu bảo hành trước hạn này)`}
-                </>
-              )}
-            </span>
           </div>
         </section>
 
@@ -230,29 +193,23 @@ export default async function RefundRequestPage({
           </section>
         ) : null}
 
-        {/* THE FORM, OR WHY THERE IS NONE */}
+        {/* No form any more (01/10/2026): the buyer reports the order for
+            warranty and follows the ticket, and the shop refunds from there
+            when it cannot fix it. This page keeps the older rounds readable. */}
         <section className={CARD}>
-          {blocked ? (
-            <div className="flex items-start gap-3 rounded-r-xl border-l-[3px] border-[var(--menzu-accent)] bg-[var(--menzu-accent)]/5 px-4 py-3.5 text-[13px] leading-relaxed text-neutral-300">
-              <Info className="mt-0.5 h-4 w-4 shrink-0 text-[var(--menzu-accent)]" />
-              <span>
-                {blocked}
-                {blocked === REFUND_NEEDS_WARRANTY ? (
-                  <>
-                    {" "}
-                    <Link
-                      href={`/orders/${order.code}/bao-hanh`}
-                      className="font-bold text-white underline underline-offset-2 hover:text-[var(--menzu-accent)]"
-                    >
-                      Gửi yêu cầu bảo hành
-                    </Link>
-                  </>
-                ) : null}
-              </span>
-            </div>
-          ) : (
-            <RefundRequestForm code={order.code} onDone="/orders" />
-          )}
+          <div className="flex items-start gap-3 rounded-r-xl border-l-[3px] border-[var(--menzu-accent)] bg-[var(--menzu-accent)]/5 px-4 py-3.5 text-[13px] leading-relaxed text-neutral-300">
+            <Info className="mt-0.5 h-4 w-4 shrink-0 text-[var(--menzu-accent)]" />
+            <span>
+              Hoàn tiền giờ do shop xử lý qua yêu cầu bảo hành: bạn báo lỗi, shop
+              không khắc phục được sẽ hoàn tiền cho bạn.{" "}
+              <Link
+                href={`/orders/${order.code}/bao-hanh`}
+                className="font-bold text-white underline underline-offset-2 hover:text-[var(--menzu-accent)]"
+              >
+                Đến trang bảo hành
+              </Link>
+            </span>
+          </div>
         </section>
       </div>
     </AccountPageFrame>

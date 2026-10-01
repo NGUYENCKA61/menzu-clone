@@ -23,7 +23,6 @@ export interface OrderCardView {
   /** Open this one's receipt on arrival (`?don=<mã đơn>`). */
   autoOpen: boolean;
   supportHref: string;
-  refundHref: string;
   /** The product's name for a tool, "#CODE" for an account. */
   title: string;
   /** The tier bought (a tool) or the rank (an account), when there is one. */
@@ -259,7 +258,6 @@ export function OrdersList({ orders }: { orders: OrderCardView[] }) {
                           order={order.detail}
                           autoOpen={order.autoOpen}
                           supportHref={order.supportHref}
-                          refundHref={order.refundHref}
                           // Reviews are off for now (30/09/2026: "tạm thời xóa bỏ cái
                           // đánh giá đi"). To bring the receipt's button back:
                           // reviewHref={order.review?.href ?? null}

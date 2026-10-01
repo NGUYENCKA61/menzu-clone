@@ -4,6 +4,8 @@ import {
   ArrowRight,
   CalendarDays,
   Check,
+  CheckCircle2,
+  Clock,
   Copy,
   Download,
   Eye,
@@ -12,6 +14,7 @@ import {
   Hash,
   Info,
   KeyRound,
+  Landmark,
   Lock,
   MessageCircle,
   Package,
@@ -30,6 +33,7 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 
 import type { LoginHandover } from "@/lib/accountLogin";
+import { warrantyButton, type WarrantyStatus } from "@/lib/warrantyRequests";
 
 import { lockScroll, trapTab, unlockScroll } from "./modalChrome";
 import { useOverlayPresence } from "./useOverlayPresence";
@@ -98,16 +102,11 @@ export interface OrderDetailData {
   /** Accounts: the sign-in, or the word that the shop hands it over itself. */
   login: LoginHandover;
   /**
-   * Whether "Yêu cầu hoàn trả" is still live on this order — decided by the
-   * page, which knows when it was bought and how long the window is.
+   * The order's newest warranty ticket, or null. The footer's one button
+   * follows it (warrantyButton): "Yêu cầu bảo hành", then "Xem trạng thái",
+   * or "Nhập số tài khoản" while a bank refund waits on the buyer.
    */
-  canRefund: boolean;
-  /** Why not, when it is not: shown on the dead button so the buyer learns
-   *  the window existed rather than pressing a thing that ignores them. */
-  refundBlockedReason: string | null;
-  /** Refunds wait for a warranty report first: the line under the buttons
-   *  points the buyer there rather than calling it a refusal. */
-  refundNeedsWarranty?: boolean;
+  warranty: { status: WarrantyStatus; needsBank: boolean } | null;
 }
 
 /*
@@ -376,7 +375,6 @@ function OverviewCell({
 export function OrderDetailModal({
   order,
   supportHref,
-  refundHref = supportHref,
   reviewHref = null,
   autoOpen = false,
   children,
@@ -391,12 +389,6 @@ export function OrderDetailModal({
    * copes with an opener that was never pressed.
    */
   autoOpen?: boolean;
-  /**
-   * Where "Yêu cầu hoàn trả" goes. Defaults to the support destination, which
-   * is where the request is handled by hand today; the caller can point it at
-   * a form of its own the day there is one, without this card knowing.
-   */
-  refundHref?: string;
   /**
    * Where "Đánh giá" leads, while the order is one worth asking about — paid,
    * with no refund or warranty report open. Null or absent: no review here.
@@ -463,6 +455,24 @@ export function OrderDetailModal({
 
   // A review is asked for until it is given; after that one quiet line.
   const askReview = reviewHref !== null && !order.reviewed;
+  // One way forward (the owner, 01/10/2026): report the order for warranty,
+  // then follow the ticket — the shop decides a refund, the buyer never asks
+  // for one. Red where the next step is the buyer's (sending the report,
+  // giving a bank account), an outline where they only watch.
+  const warrantyAction = warrantyButton(order.warranty);
+  const ticketStatus = order.warranty?.status;
+  const WarrantyIcon =
+    warrantyAction.kind === "request"
+      ? Wrench
+      : warrantyAction.kind === "bank"
+        ? Landmark
+        : ticketStatus === "REFUNDING" || ticketStatus === "REFUNDED"
+          ? RotateCcw
+          : ticketStatus === "RESOLVED"
+            ? CheckCircle2
+            : Clock;
+  // A refunded or unpaid order with no ticket has nothing to report or follow.
+  const showWarranty = order.paid || order.warranty !== null;
 
   return (
     <>
@@ -982,64 +992,36 @@ export function OrderDetailModal({
                       {order.code}
                     </span>
                   </span>
-                  {/* Two ways out of this card, and the quieter one first:
-                      asking for money back is the rarer errand, so it gets the
-                      outline while "liên hệ hỗ trợ" keeps the filled button.
-                      Only offered on a paid order — there is nothing to refund
-                      on one that was never charged or was refunded already. */}
-                  {/* On a phone the two ways out sit side by side, each
-                      filling half the width; on a desk they keep their own
-                      widths at the right. A control that cannot be pressed is
-                      no longer drawn as a grey button - its reason used to
-                      live in a hover title, which a phone cannot hover - but
-                      as a line that says why, under the buttons. */}
+                  {/* The warranty button, and the review beside it when that
+                      is switched on. On a phone they share a row, or the one
+                      button fills it. */}
                   <div className="flex w-full flex-col gap-2 sm:w-auto">
                     <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto sm:flex-wrap sm:items-center sm:gap-2.5">
-                      {order.paid && order.canRefund ? (
-                        <Link
-                          href={refundHref}
-                          className="press inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-white/12 bg-white/[0.04] px-4 text-xs font-bold text-neutral-300 hover:border-[var(--menzu-accent)]/50 hover:bg-[var(--menzu-accent)]/10 hover:text-[var(--menzu-accent)] sm:h-10"
-                        >
-                          <RotateCcw className="h-4 w-4" />
-                          Yêu cầu hoàn trả
-                        </Link>
-                      ) : null}
-                      {order.paid ? (
+                      {showWarranty ? (
                         <Link
                           href={supportHref}
-                          className={`press group inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[var(--menzu-accent)] px-3 text-xs font-bold text-white hover:bg-[var(--menzu-accent-dark)] sm:h-10 sm:px-5${
-                            order.canRefund || askReview ? "" : " col-span-2"
+                          className={`press group inline-flex h-11 items-center justify-center gap-2 rounded-xl px-3 text-xs font-bold sm:h-10 sm:px-5${
+                            askReview ? "" : " col-span-2"
+                          } ${
+                            warrantyAction.kind === "status"
+                              ? "border border-white/12 bg-white/[0.04] text-neutral-200 hover:border-white/25 hover:text-white"
+                              : "bg-[var(--menzu-accent)] text-white hover:bg-[var(--menzu-accent-dark)]"
                           }`}
                         >
-                          {/* A wrench, "sửa lỗi": the shield already marks the
-                              Trạng thái cell above, with another meaning. */}
-                          <Wrench className="h-4 w-4" />
-                          Yêu cầu bảo hành
+                          <WarrantyIcon className="h-4 w-4" />
+                          {warrantyAction.label}
                         </Link>
                       ) : null}
-                      {/* The review, drawn like "Yêu cầu hoàn trả": an outline
-                          beside the filled warranty button. On a phone it
-                          takes its own row when the refund button is there. */}
                       {askReview ? (
                         <Link
                           href={reviewHref}
-                          className={`press inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-white/12 bg-white/[0.04] px-4 text-xs font-bold text-neutral-300 hover:border-[var(--menzu-accent)]/50 hover:bg-[var(--menzu-accent)]/10 hover:text-[var(--menzu-accent)] sm:h-10${
-                            order.canRefund ? " col-span-2" : ""
-                          }`}
+                          className="press inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-white/12 bg-white/[0.04] px-4 text-xs font-bold text-neutral-300 hover:border-[var(--menzu-accent)]/50 hover:bg-[var(--menzu-accent)]/10 hover:text-[var(--menzu-accent)] sm:h-10"
                         >
                           <Star className="h-4 w-4" />
                           Đánh giá
                         </Link>
                       ) : null}
                     </div>
-                    {order.paid && !order.canRefund && order.refundBlockedReason ? (
-                      <p className="text-[11px] leading-snug text-neutral-500">
-                        <RotateCcw className="mr-1 inline h-3 w-3 align-[-2px]" aria-hidden />
-                        {order.refundNeedsWarranty
-                          ? "Gặp lỗi? Gửi yêu cầu bảo hành trước — shop không khắc phục được thì bạn yêu cầu hoàn trả."
-                          : `Không hoàn trả được: ${order.refundBlockedReason}`}
-                      </p>
-                    ) : null}
                     {reviewHref && order.reviewed ? (
                       <p className="text-[11px] leading-snug text-neutral-500">
                         <Star
@@ -1049,7 +1031,7 @@ export function OrderDetailModal({
                         Bạn đã đánh giá đơn này.
                       </p>
                     ) : null}
-                    {!order.paid ? (
+                    {!showWarranty ? (
                       <p className="text-[11px] leading-snug text-neutral-500">
                         <Wrench className="mr-1 inline h-3 w-3 align-[-2px]" aria-hidden />
                         {order.refunded

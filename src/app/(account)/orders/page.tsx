@@ -56,10 +56,13 @@ function orderBadge(o: {
   refundRejected: boolean;
   refundPending: boolean;
   warrantyOpen: boolean;
+  warrantyRefunding: boolean;
 }): { label: string; tone: string } | null {
   if (o.status === "PAID") {
     if (o.refundPending) return { label: "Chờ duyệt hoàn tiền", tone: TONE.amber };
     if (o.refundRejected) return { label: "Từ chối hoàn tiền", tone: TONE.rose };
+    // The shop could not fix it and is paying it back over a bank transfer.
+    if (o.warrantyRefunding) return { label: "Đang hoàn tiền", tone: TONE.amber };
     // A report the shop is still working: the order is paid and stays so, but
     // the buyer is waiting on a fix, and the card should say that.
     if (o.warrantyOpen) return { label: "Đang bảo hành", tone: TONE.amber };
@@ -108,7 +111,11 @@ export default async function OrdersPage({
           // open: the product was trouble, and that is no moment to ask for
           // stars.
           const settled =
-            o.status === "PAID" && !o.refundPending && !o.refundRejected && !o.warrantyOpen;
+            o.status === "PAID" &&
+            !o.refundPending &&
+            !o.refundRejected &&
+            !o.warrantyOpen &&
+            !o.warrantyRefunding;
           // One status for the card and the receipt: a warranty report or a
           // refund in flight shows on both, and a plain paid order reads
           // "Đã thanh toán" inside while its card stays bare.
@@ -144,13 +151,10 @@ export default async function OrdersPage({
               downloadUrl: o.downloadUrl,
               docsUrl: o.docsUrl,
               login: o.login,
-              canRefund: o.canRefund,
-              refundBlockedReason: o.refundBlockedReason,
-              refundNeedsWarranty: o.refundNeedsWarranty,
+              warranty: o.latestWarranty,
             },
             autoOpen: don === o.code,
             supportHref: `/orders/${o.code}/bao-hanh`,
-            refundHref: `/orders/${o.code}/hoan-tra`,
             title: o.isSoftware ? o.productName : `#${o.productCode}`,
             chip: o.packageLabel ?? (o.productRank || null),
             isSoftware: o.isSoftware,
