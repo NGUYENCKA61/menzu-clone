@@ -913,15 +913,16 @@ export function CartView({
         </div>
 
         <div className="relative mt-4 border-t border-white/10 pt-4">
-          {/* The figure the whole page is about: its name in white rather
-              than a grey caption, and the sum a step larger ("tăng sáng tổng
-              thanh toán"). The wallet's balance is not printed — the header
-              carries it, and a shortfall says itself just below. */}
+          {/* The figure the whole page is about, still the largest one, but
+              toned down from white: its name in the rows' grey and the sum
+              off-white (the owner, 01/10/2026: "hạ độ sáng", option 2). The
+              wallet's balance is not printed — the header carries it, and a
+              shortfall says itself just below. */}
           <div className="flex items-baseline justify-between gap-4">
-            <span className="text-sm font-black uppercase tracking-wider text-white">
+            <span className="text-sm font-black uppercase tracking-wider text-neutral-400">
               Tổng thanh toán
             </span>
-            <span className="text-2xl font-black tabular-nums text-white">
+            <span className="text-2xl font-black tabular-nums text-neutral-200">
               {formatVnd(payable)}đ
             </span>
           </div>
