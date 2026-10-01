@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import type { ComponentType } from "react";
-import { Phone, ShieldAlert } from "lucide-react";
+import { Phone, ShieldAlert, Users } from "lucide-react";
 
 import {
   DiscordGlyph,
@@ -38,6 +38,11 @@ interface Channel {
   href: string;
   /** A phone number is dialled, not opened; it gets a tel: link. */
   phone?: boolean;
+  /** The mark in the brand's own colour and the tile's hover tint — the way
+   *  the security page draws Discord and Telegram (the owner, 01/10/2026:
+   *  "màu icon logo không đồng bộ với trang bảo mật"). Written out whole,
+   *  because Tailwind reads class strings, not templates. */
+  tone: { mark: string; tile: string };
 }
 
 /** The address as a reader should check it: no scheme, no trailing slash. */
@@ -51,48 +56,56 @@ export default async function OfficialChannelsPage() {
   const channels: Channel[] = [
     {
       icon: TelegramGlyph,
+      tone: { mark: "text-[#29a9eb]", tile: "group-hover:border-[#29a9eb]/30 group-hover:bg-[#29a9eb]/10" },
       label: "Telegram",
       note: "Kênh thông báo và hỗ trợ nhanh nhất",
       href: settings.contactTelegram,
     },
     {
       icon: ZaloGlyph,
+      tone: { mark: "text-[#0068FF]", tile: "group-hover:border-[#0068FF]/30 group-hover:bg-[#0068FF]/10" },
       label: "Zalo",
       note: "Nhắn tin trực tiếp với shop",
       href: settings.contactZalo,
     },
     {
       icon: ZaloGlyph,
+      tone: { mark: "text-[#0068FF]", tile: "group-hover:border-[#0068FF]/30 group-hover:bg-[#0068FF]/10" },
       label: "Nhóm Zalo",
       note: "Nhóm chung, hỏi đáp và thông báo",
       href: settings.contactZaloGroup,
     },
     {
       icon: FacebookGlyph,
+      tone: { mark: "text-[#1877F2]", tile: "group-hover:border-[#1877F2]/30 group-hover:bg-[#1877F2]/10" },
       label: "Facebook",
       note: "Trang chính thức của shop",
       href: settings.contactFacebook,
     },
     {
       icon: FacebookGlyph,
+      tone: { mark: "text-[#1877F2]", tile: "group-hover:border-[#1877F2]/30 group-hover:bg-[#1877F2]/10" },
       label: "Nhóm Facebook",
       note: "Cộng đồng người dùng",
       href: settings.contactFacebookGroup,
     },
     {
       icon: DiscordGlyph,
+      tone: { mark: "text-[#5865F2]", tile: "group-hover:border-[#5865F2]/30 group-hover:bg-[#5865F2]/10" },
       label: "Discord",
       note: "Máy chủ cộng đồng",
       href: settings.contactDiscord,
     },
     {
       icon: TiktokGlyph,
+      tone: { mark: "text-white", tile: "group-hover:border-white/25 group-hover:bg-white/10" },
       label: "TikTok",
       note: "Video hướng dẫn và cập nhật",
       href: settings.contactTiktok,
     },
     {
       icon: Phone,
+      tone: { mark: "text-white", tile: "group-hover:border-white/25 group-hover:bg-white/10" },
       label: "Hotline",
       note: "Gọi trong giờ hỗ trợ",
       href: settings.contactHotline,
@@ -101,32 +114,18 @@ export default async function OfficialChannelsPage() {
   ].filter((channel) => channel.href.trim().length > 0);
 
   return (
-    <SimplePage title="Kênh chính thức & liên hệ" crumb="Liên hệ">
-      {/* The warning first, and in the shop's own red: somebody who has just
-          been messaged by a fake account is reading this page for one reason,
-          and it is not the TikTok link. */}
-      <div className="mb-8 flex gap-3.5 rounded-2xl border border-rose-500/25 bg-rose-500/[0.06] p-5">
-        <ShieldAlert size={20} className="mt-0.5 shrink-0 text-rose-400" />
-        <div className="flex flex-col gap-2 text-[13px] leading-relaxed text-neutral-300">
-          <p className="text-sm font-black text-white">
-            Chỉ những địa chỉ trong trang này là của shop
-          </p>
-          <p>
-            Mọi tài khoản khác nhận là nhân viên, đại lý hay &ldquo;shop phụ&rdquo; đều là
-            giả mạo. Shop{" "}
-            <span className="font-bold text-white">không bao giờ hỏi mật khẩu</span> tài
-            khoản của bạn, không hỏi mã OTP, và{" "}
-            <span className="font-bold text-white">
-              không nhận thanh toán ngoài trang nạp tiền
-            </span>{" "}
-            trên website.
-          </p>
-          <p>
-            Trước khi nạp, kiểm tra thanh địa chỉ đúng{" "}
-            <span className="font-mono font-bold text-white">{bare(SITE_URL)}</span> — một
-            chữ khác là một trang khác.
-          </p>
-        </div>
+    <SimplePage title="Kênh chính thức & liên hệ" crumb="Liên hệ" icon={Users}>
+      {/* The warning first, and in the shop's own red — somebody who has just
+          been messaged by a fake account reads this page for that — but one
+          short paragraph now (the owner, 01/10/2026: "thu gọn cái cảnh báo giả
+          mạo thay nội dung"). */}
+      <div className="mb-6 flex items-start gap-3 rounded-xl border border-rose-500/25 bg-rose-500/[0.06] px-4 py-3">
+        <ShieldAlert size={18} className="mt-0.5 shrink-0 text-rose-400" />
+        <p className="text-[13px] leading-relaxed text-neutral-300">
+          <span className="font-bold text-white">Chỉ các kênh dưới đây là của shop.</span>{" "}
+          Shop không bao giờ hỏi mật khẩu hay mã OTP, và chỉ nhận tiền qua trang Nạp tiền trên{" "}
+          <span className="font-mono font-bold text-white">{bare(SITE_URL)}</span>.
+        </p>
       </div>
 
       {channels.length > 0 ? (
@@ -138,7 +137,9 @@ export default async function OfficialChannelsPage() {
               {...(channel.phone ? {} : { target: "_blank", rel: "noopener noreferrer" })}
               className="group flex items-center gap-4 rounded-2xl border border-white/10 bg-white/[0.02] p-4 transition-colors hover:border-white/25 hover:bg-white/[0.04]"
             >
-              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-[var(--menzu-accent)]/25 bg-[var(--menzu-accent)]/10 text-[var(--menzu-accent)]">
+              <span
+                className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] transition-colors ${channel.tone.mark} ${channel.tone.tile}`}
+              >
                 <channel.icon className="h-[18px] w-[18px]" />
               </span>
               <span className="flex min-w-0 flex-col gap-0.5">
@@ -147,7 +148,7 @@ export default async function OfficialChannelsPage() {
                 {/* The address itself, wrapped rather than cut: half an
                     address is worse than none for checking one against
                     another. */}
-                <span className="mt-1 break-all font-mono text-[11px] text-neutral-400 transition-colors group-hover:text-[var(--menzu-accent)]">
+                <span className="mt-1 break-all font-mono text-[11px] text-neutral-400 transition-colors group-hover:text-white">
                   {channel.phone ? channel.href : bare(channel.href)}
                 </span>
               </span>
@@ -160,9 +161,9 @@ export default async function OfficialChannelsPage() {
         </p>
       )}
 
-      <p className="mt-6 max-w-[760px] text-[13px] leading-relaxed text-neutral-500">
-        Gặp tài khoản mạo danh shop? Chụp lại màn hình rồi gửi vào kênh Telegram ở trên —
-        shop báo cho cả nhóm để không ai bị lừa thêm.
+      {/* The owner, 01/10/2026: "gặp tài khoản mạo danh thì liên hệ shop". */}
+      <p className="mt-6 text-[13px] leading-relaxed text-neutral-500">
+        Gặp tài khoản mạo danh? Liên hệ ngay với shop qua một trong các kênh trên.
       </p>
     </SimplePage>
   );
