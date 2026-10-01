@@ -34,37 +34,37 @@ export const SOFTWARE_STATUS: Record<
     label: "Chưa phát hiện",
     dot: "bg-emerald-500",
     text: "text-emerald-400",
-    tile: "border-emerald-400/15 bg-emerald-400/[0.07] text-emerald-300/75",
+    tile: "border-emerald-400/25 bg-emerald-400/10 text-emerald-300",
   },
   DETECTED: {
     label: "Đã phát hiện",
     dot: "bg-red-500",
     text: "text-red-400",
-    tile: "border-red-400/15 bg-red-400/[0.07] text-red-300/75",
+    tile: "border-red-400/25 bg-red-400/10 text-red-300",
   },
   UPDATING: {
     label: "Đang cập nhật",
     dot: "bg-amber-500",
     text: "text-amber-400",
-    tile: "border-amber-400/15 bg-amber-400/[0.07] text-amber-300/75",
+    tile: "border-amber-400/25 bg-amber-400/10 text-amber-300",
   },
   STABLE: {
     label: "Ổn định",
     dot: "bg-sky-500",
     text: "text-sky-400",
-    tile: "border-sky-400/15 bg-sky-400/[0.07] text-sky-300/75",
+    tile: "border-sky-400/25 bg-sky-400/10 text-sky-300",
   },
   UPDATED: {
     label: "Cập nhật mới",
     dot: "bg-violet-500",
     text: "text-violet-400",
-    tile: "border-violet-400/15 bg-violet-400/[0.07] text-violet-300/75",
+    tile: "border-violet-400/25 bg-violet-400/10 text-violet-300",
   },
   RISKY: {
     label: "Rủi ro",
     dot: "bg-orange-500",
     text: "text-orange-400",
-    tile: "border-orange-400/15 bg-orange-400/[0.07] text-orange-300/75",
+    tile: "border-orange-400/25 bg-orange-400/10 text-orange-300",
   },
 };
 
