@@ -200,7 +200,9 @@ export function ReceiptTick({ code }: { code: string }) {
             style={{ "--spark-angle": `${angle}deg` } as CSSProperties}
           />
         ))}
-        <span className="tick-badge grid h-14 w-14 place-items-center rounded-full border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 shadow-[0_0_32px_rgba(16,185,129,0.25)]">
+        {/* No halo around it (the owner, 01/10/2026: "bỏ đi") — the basket's
+            own receipt tick lost its glow the same day. */}
+        <span className="tick-badge grid h-14 w-14 place-items-center rounded-full border border-emerald-500/30 bg-emerald-500/10 text-emerald-400">
           <Check className="h-7 w-7" strokeWidth={2.5} aria-hidden />
         </span>
       </span>
