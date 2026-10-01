@@ -23,6 +23,9 @@ export const STATUS_TAB_HREF = "/thong-bao?tab=trang-thai";
  *  history is long enough to bury a search box put above it. */
 export const STATUS_SUBSCRIBE_HREF = "/thong-bao?tab=dang-ky";
 
+/** Each state's label, dot and colours. The pills (`tile`) are muted on
+ *  purpose: six of them run down the status history, and at full strength
+ *  they read as neon (the owner, 02/10/2026: "bớt neon lại thử"). */
 export const SOFTWARE_STATUS: Record<
   SoftwareStatusValue,
   { label: string; dot: string; text: string; tile: string }
@@ -31,37 +34,37 @@ export const SOFTWARE_STATUS: Record<
     label: "Chưa phát hiện",
     dot: "bg-emerald-500",
     text: "text-emerald-400",
-    tile: "border-emerald-500/30 bg-emerald-500/10 text-emerald-400",
+    tile: "border-emerald-400/15 bg-emerald-400/[0.07] text-emerald-300/75",
   },
   DETECTED: {
     label: "Đã phát hiện",
     dot: "bg-red-500",
     text: "text-red-400",
-    tile: "border-red-500/30 bg-red-500/10 text-red-400",
+    tile: "border-red-400/15 bg-red-400/[0.07] text-red-300/75",
   },
   UPDATING: {
     label: "Đang cập nhật",
     dot: "bg-amber-500",
     text: "text-amber-400",
-    tile: "border-amber-500/30 bg-amber-500/10 text-amber-400",
+    tile: "border-amber-400/15 bg-amber-400/[0.07] text-amber-300/75",
   },
   STABLE: {
     label: "Ổn định",
     dot: "bg-sky-500",
     text: "text-sky-400",
-    tile: "border-sky-500/30 bg-sky-500/10 text-sky-400",
+    tile: "border-sky-400/15 bg-sky-400/[0.07] text-sky-300/75",
   },
   UPDATED: {
     label: "Cập nhật mới",
     dot: "bg-violet-500",
     text: "text-violet-400",
-    tile: "border-violet-500/30 bg-violet-500/10 text-violet-400",
+    tile: "border-violet-400/15 bg-violet-400/[0.07] text-violet-300/75",
   },
   RISKY: {
     label: "Rủi ro",
     dot: "bg-orange-500",
     text: "text-orange-400",
-    tile: "border-orange-500/30 bg-orange-500/10 text-orange-400",
+    tile: "border-orange-400/15 bg-orange-400/[0.07] text-orange-300/75",
   },
 };
 
