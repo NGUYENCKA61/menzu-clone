@@ -2,17 +2,16 @@ import { NextResponse } from "next/server";
 
 import { FORBIDDEN, getAdmin } from "@/lib/admin";
 import { db } from "@/lib/db";
+import { isArticleShelf, type ArticleShelf } from "@/lib/docCategories";
 import { docHtmlIsEmpty, isHtmlBody, sanitizeDocHtml } from "@/lib/docHtml";
-
-const DOC_CATEGORIES = ["FAQ", "WARRANTY", "GUIDE"] as const;
-type DocCategoryValue = (typeof DOC_CATEGORIES)[number];
 
 /** New articles borrow their shelf's stock picture — the editor has no
  *  thumbnail uploader, and the column is required. */
-const DEFAULT_THUMB: Record<DocCategoryValue, string> = {
-  FAQ: "/sites/menzu-lol-f7ae197a/root-8a5edab2/images/docs/fa.webp",
-  WARRANTY: "/sites/menzu-lol-f7ae197a/root-8a5edab2/images/docs/CSBHMENZU.webp",
+const DEFAULT_THUMB: Record<ArticleShelf, string> = {
+  GLOSSARY: "/sites/menzu-lol-f7ae197a/root-8a5edab2/images/docs/fa.webp",
   GUIDE: "/sites/menzu-lol-f7ae197a/root-8a5edab2/images/docs/checkwc.webp",
+  WARRANTY: "/sites/menzu-lol-f7ae197a/root-8a5edab2/images/docs/CSBHMENZU.webp",
+  TERMS: "/sites/menzu-lol-f7ae197a/root-8a5edab2/images/docs/CSBHMENZU.webp",
 };
 
 /** "Chính Sách Đổi Trả" → "chinh-sach-doi-tra". */
@@ -49,11 +48,12 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Tiêu đề tối đa 150 ký tự" }, { status: 400 });
   }
 
-  const category = payload?.category;
-  if (!DOC_CATEGORIES.includes(category as DocCategoryValue)) {
+  // FAQ is not on offer: that shelf is the shop's questions, not articles.
+  const category = payload?.category ?? "";
+  if (!isArticleShelf(category)) {
     return NextResponse.json({ error: "Chọn nhóm bài viết" }, { status: 400 });
   }
-  const kind = category as DocCategoryValue;
+  const kind = category;
 
   // Mint a unique slug: the title's slug, then -2, -3… if the shelf already
   // holds that name.

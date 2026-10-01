@@ -20,6 +20,9 @@ interface SimplePageProps {
    *  The basket wears it (the owner, 01/10/2026: "màu nền trang giỏ hàng đồng
    *  bộ với trang chủ"). */
   ground?: "black" | "home";
+  /** Something at the far end of the title row — the wiki's search box. It
+   *  drops under the title on a phone. */
+  action?: ReactNode;
 }
 
 /** Standard inner-page chrome: header, breadcrumb, heading, footer. */
@@ -29,6 +32,7 @@ export function SimplePage({
   children,
   icon: Icon,
   ground = "black",
+  action,
 }: SimplePageProps) {
   return (
     // Opaque, covering the fixed PageBackdrop artwork — the original keeps its
@@ -51,7 +55,7 @@ export function SimplePage({
 
             {/* The row headings' red mark in front of the title, and a neutral
                 rule under it — the same opening every home-page row makes. */}
-            <div className="flex items-center justify-between mb-8 pb-4 border-b border-white/10">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-8 pb-4 border-b border-white/10">
               <div className="flex items-center gap-3">
                 {Icon ? (
                   <Icon size={28} className="shrink-0 text-[var(--menzu-accent)]" aria-hidden />
@@ -62,6 +66,7 @@ export function SimplePage({
                   {title}
                 </h1>
               </div>
+              {action}
             </div>
 
             {children}

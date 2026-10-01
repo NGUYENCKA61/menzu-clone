@@ -179,10 +179,11 @@ export async function SiteFooter() {
     .map((c) => ({ label: c.name, href: categoryHref(c.slug) }));
 
   // "Nổi bật" measured rather than chosen: the most-read guides, which also
-  // keeps half-written drafts with no readers out of the footer. Warranty
-  // articles are left to the support column so neither shelf repeats the other.
+  // keeps half-written drafts with no readers out of the footer. Policies and
+  // the general terms are left to the support column so neither shelf repeats
+  // the other.
   const guideLinks = [...articles]
-    .filter((a) => a.category !== "WARRANTY")
+    .filter((a) => a.category !== "WARRANTY" && a.category !== "TERMS")
     .sort((a, b) => b.views - a.views)
     .slice(0, WIKI_SHELF)
     .map((a) => ({ label: a.title, href: `/docs/${a.slug}` }));

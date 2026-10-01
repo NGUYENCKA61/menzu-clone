@@ -2,6 +2,8 @@ import { ArrowRight, Eye } from "lucide-react";
 import { CardImage } from "@/components/sites/menzu-lol-f7ae197a/shared/CardImage";
 import Link from "next/link";
 
+import { DOC_SHELF_LABEL } from "@/lib/docCategories";
+
 /** What a card needs, which is less than a whole article row. */
 export interface DocCard {
   slug: string;
@@ -12,11 +14,8 @@ export interface DocCard {
   views: number;
 }
 
-const CATEGORY_LABELS: Record<string, string> = {
-  FAQ: "FAQ",
-  WARRANTY: "Chính sách bảo hành",
-  GUIDE: "Hướng dẫn",
-};
+/** The wiki's own shelf names (lib/docCategories). */
+const CATEGORY_LABELS: Record<string, string> = DOC_SHELF_LABEL;
 
 /**
  * "Xem hướng dẫn" — the wiki articles, on the home page.

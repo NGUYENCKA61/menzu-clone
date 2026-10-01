@@ -1,8 +1,11 @@
 import type { Metadata } from "next";
+import { BookOpen } from "lucide-react";
 
 import { DEFAULT_FAQ } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/FaqSection";
 import {
   DocsHelpCenter,
+  DocsSearchBox,
+  DocsSearchProvider,
   type DocCard,
 } from "@/components/sites/menzu-lol-f7ae197a/shared/DocsHelpCenter";
 import { SimplePage } from "@/components/sites/menzu-lol-f7ae197a/shared/SimplePage";
@@ -43,18 +46,22 @@ export default async function DocsPage() {
   }));
 
   return (
-    <SimplePage title="Wiki & Hướng Dẫn" crumb="Wiki & Hướng dẫn">
-      <DocsHelpCenter
-        articles={articles}
-        // The same questions the home page answers, from the same setting;
-        // the stock five until the shop writes its own.
-        faq={settings.seoFaq.length > 0 ? settings.seoFaq : DEFAULT_FAQ}
-        contact={{
-          facebook: settings.contactFacebook,
-          zalo: settings.contactZalo,
-          telegram: settings.contactTelegram,
-        }}
-      />
-    </SimplePage>
+    // The search box sits in the title row and filters the list below it, so
+    // one provider holds the query for both.
+    <DocsSearchProvider>
+      <SimplePage title="Wiki & Hướng Dẫn" crumb="Wiki & Hướng dẫn" icon={BookOpen} action={<DocsSearchBox />}>
+        <DocsHelpCenter
+          articles={articles}
+          // The same questions the home page answers, from the same setting;
+          // the stock five until the shop writes its own.
+          faq={settings.seoFaq.length > 0 ? settings.seoFaq : DEFAULT_FAQ}
+          contact={{
+            facebook: settings.contactFacebook,
+            zalo: settings.contactZalo,
+            telegram: settings.contactTelegram,
+          }}
+        />
+      </SimplePage>
+    </DocsSearchProvider>
   );
 }

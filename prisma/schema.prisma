@@ -219,10 +219,15 @@ model TradeRequest {
   @@map("trade_requests")
 }
 
+/// The wiki's shelves. Since 01/10/2026 (the owner: "FAQ, Khái niệm và thuật
+/// ngữ, Hướng dẫn, Chính sách, Các điều khoản chung") FAQ holds no articles —
+/// it is the settings' questions — and WARRANTY is shown as "Chính sách".
 enum DocCategory {
   FAQ
   WARRANTY
   GUIDE
+  GLOSSARY
+  TERMS
 }
 
 /// A wiki article listed on /docs and rendered at /docs/[slug].

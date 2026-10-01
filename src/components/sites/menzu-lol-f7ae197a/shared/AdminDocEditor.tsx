@@ -2,18 +2,10 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import {
-  BookOpen,
-  Check,
-  CircleHelp,
-  ExternalLink,
-  Eye,
-  FileText,
-  ShieldCheck,
-  type LucideIcon,
-} from "lucide-react";
+import { Check, ExternalLink, Eye, FileText } from "lucide-react";
 
 import { AdminError } from "./AdminStates";
+import { DOC_SHELF_META } from "./docShelfMeta";
 import { RichTextEditor } from "./RichTextEditor";
 
 export interface DocEditorView {
@@ -28,23 +20,8 @@ export interface DocEditorView {
   featured: boolean;
 }
 
-const CATEGORY_META: Record<string, { label: string; icon: LucideIcon; tint: string }> = {
-  FAQ: {
-    label: "FAQ",
-    icon: CircleHelp,
-    tint: "border-indigo-500/25 bg-indigo-500/10 text-indigo-400",
-  },
-  GUIDE: {
-    label: "Hướng dẫn",
-    icon: BookOpen,
-    tint: "border-violet-500/25 bg-violet-500/10 text-violet-400",
-  },
-  WARRANTY: {
-    label: "Chính sách bảo hành",
-    icon: ShieldCheck,
-    tint: "border-emerald-500/25 bg-emerald-500/10 text-emerald-400",
-  },
-};
+const CATEGORY_META: Record<string, (typeof DOC_SHELF_META)[keyof typeof DOC_SHELF_META]> =
+  DOC_SHELF_META;
 
 const FIELD =
   "w-full rounded-xl border border-white/10 bg-neutral-950/60 px-3 py-2.5 text-sm text-white outline-none focus:border-[var(--brand)]/60 transition-colors placeholder-neutral-600";

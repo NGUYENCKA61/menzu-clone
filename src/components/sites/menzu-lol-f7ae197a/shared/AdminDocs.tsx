@@ -4,22 +4,22 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import {
-  BookOpen,
   BookOpenCheck,
-  CircleHelp,
   ExternalLink,
   Eye,
   FileText,
   PencilLine,
   Plus,
   Search,
-  ShieldCheck,
   Trash2,
   X,
   type LucideIcon,
 } from "lucide-react";
 
+import { ARTICLE_SHELVES } from "@/lib/docCategories";
+
 import { AdminEmpty, AdminError, ConfirmDialog } from "./AdminStates";
+import { DOC_SHELF_META } from "./docShelfMeta";
 
 export interface DocView {
   slug: string;
@@ -33,27 +33,13 @@ export interface DocView {
   publishedAt: string;
 }
 
-/** Each shelf of the wiki keeps its own glyph and hue. */
-const CATEGORY_META: Record<string, { label: string; icon: LucideIcon; tint: string }> = {
-  FAQ: {
-    label: "FAQ",
-    icon: CircleHelp,
-    tint: "border-indigo-500/25 bg-indigo-500/10 text-indigo-400",
-  },
-  GUIDE: {
-    label: "Hướng dẫn",
-    icon: BookOpen,
-    tint: "border-violet-500/25 bg-violet-500/10 text-violet-400",
-  },
-  WARRANTY: {
-    label: "Chính sách bảo hành",
-    icon: ShieldCheck,
-    tint: "border-emerald-500/25 bg-emerald-500/10 text-emerald-400",
-  },
-};
+/** Each shelf of the wiki keeps its own glyph and hue (shared with the editor). */
+const CATEGORY_META: Record<string, (typeof DOC_SHELF_META)[keyof typeof DOC_SHELF_META]> =
+  DOC_SHELF_META;
 
-/** The order the shelves are laid out in, whatever order rows arrive. */
-const CATEGORY_ORDER = ["FAQ", "GUIDE", "WARRANTY"];
+/** The order the shelves are laid out in, whatever order rows arrive — the
+ *  ones an article can be filed on; FAQ is the shop's questions, not articles. */
+const CATEGORY_ORDER: string[] = [...ARTICLE_SHELVES];
 
 const FIELD =
   "w-full rounded-xl border border-white/10 bg-neutral-950/60 px-3 py-2.5 text-sm text-white outline-none focus:border-[var(--brand)]/60 transition-colors placeholder-neutral-600";
@@ -108,7 +94,7 @@ export function AdminDocs({ docs }: { docs: DocView[] }) {
   const [query, setQuery] = useState("");
   const [creating, setCreating] = useState(false);
   const [newTitle, setNewTitle] = useState("");
-  const [newCategory, setNewCategory] = useState<string>("FAQ");
+  const [newCategory, setNewCategory] = useState<string>("GLOSSARY");
   /** "" = every shelf; otherwise only that category's shelf renders. */
   const [catFilter, setCatFilter] = useState("");
   const [removing, setRemoving] = useState<DocView | null>(null);
@@ -338,7 +324,7 @@ export function AdminDocs({ docs }: { docs: DocView[] }) {
               }`}
             >
               <Icon size={13} />
-              {value === "WARRANTY" ? "Chính sách" : meta.label}
+              {meta.label}
               <span
                 className={`rounded-md px-1.5 py-0.5 text-[10px] tabular-nums ${
                   on ? "bg-white/10" : "bg-white/[0.06] text-neutral-500"

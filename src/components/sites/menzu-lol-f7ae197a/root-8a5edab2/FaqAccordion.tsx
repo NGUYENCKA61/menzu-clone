@@ -39,10 +39,14 @@ const ICONS: LucideIcon[] = [ShieldCheck, Zap, CreditCard, Headphones, RefreshCw
 export function FaqAccordion({
   items,
   revealFrom = 0,
+  plain = false,
 }: {
   items: FaqEntry[];
   /** The --i seat of the first card; the caller's own reveals come before. */
   revealFrom?: number;
+  /** No icon tile before each question — the wiki's quieter list (the owner,
+   *  01/10/2026: "bỏ bớt icon"); the home page keeps its icons. */
+  plain?: boolean;
 }) {
   const [open, setOpen] = useState(0);
 
@@ -69,6 +73,7 @@ export function FaqAccordion({
               onClick={() => setOpen(isOpen ? -1 : index)}
               className="flex w-full items-center gap-4 px-5 py-4 text-left transition-colors hover:bg-white/[0.03]"
             >
+              {plain ? null : (
               <span
                 className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border transition-colors ${
                   isOpen
@@ -78,6 +83,7 @@ export function FaqAccordion({
               >
                 <Icon size={16} aria-hidden />
               </span>
+              )}
               <span
                 className={`flex-1 text-sm font-semibold transition-colors sm:text-[15px] ${
                   isOpen ? "text-[var(--menzu-accent)]" : "text-white"
@@ -101,7 +107,9 @@ export function FaqAccordion({
               }`}
             >
               <div className="overflow-hidden">
-                <p className="whitespace-pre-line pb-5 pl-[4.5rem] pr-5 text-sm leading-relaxed text-neutral-400">
+                <p
+                  className={`whitespace-pre-line pb-5 pr-5 text-sm leading-relaxed text-neutral-400 ${plain ? "pl-5" : "pl-[4.5rem]"}`}
+                >
                   {entry.a}
                 </p>
               </div>
