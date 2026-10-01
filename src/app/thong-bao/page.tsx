@@ -247,7 +247,13 @@ export default async function AnnouncementsPage({
               <div className="rounded-2xl border border-white/5 bg-white/[0.02] p-5 sm:p-6">
                 {groupByDay(events).map((group) => (
                   <div key={group.key} className="mb-6 last:mb-0">
-                    <p className={`mb-3 ${LABEL}`}>{dayLabel(group.key, now)}</p>
+                    {/* The day a step brighter than the section labels, and
+                        each change's time on a chip of its own (the owner,
+                        02/10/2026: "cái thời gian chắc phải highlight lên"),
+                        still under the tool's name in weight. */}
+                    <p className="mb-3 text-[10px] font-black uppercase tracking-widest text-neutral-300">
+                      {dayLabel(group.key, now)}
+                    </p>
                     {/* A line down the left with a dot per change, the colour
                         of the state it moved to — the same dot the pill on
                         the tool's card wears. */}
@@ -261,7 +267,7 @@ export default async function AnnouncementsPage({
                               className={`absolute -left-[31px] top-1 h-3 w-3 rounded-full ring-4 ring-[#141519] ${state.dot}`}
                             />
                             <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-                              <span className="text-[11px] font-semibold tabular-nums text-neutral-500">
+                              <span className="rounded-md bg-white/[0.07] px-1.5 py-0.5 text-[11px] font-bold tabular-nums text-neutral-200">
                                 {formatTime(event.at)}
                               </span>
                               <span
