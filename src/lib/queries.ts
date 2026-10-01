@@ -1214,11 +1214,29 @@ export interface ReviewRow {
   anonymous: boolean;
   verified: boolean;
   createdAt: Date;
+  /** What the review is about, when it was written from an order's receipt:
+   *  the tool (its "bản"), the tier bought and the game it is for (the owner,
+   *  01/10/2026: "bổ sung thông tin mua key bản gì game gì"). Null for a
+   *  free-form review, which names no purchase. */
+  purchase: { product: string; tier: string | null; game: string; href: string } | null;
 }
+
+/** The purchase behind an order-backed review. */
+const FEEDBACK_PURCHASE = {
+  order: {
+    select: {
+      product: {
+        select: { name: true, code: true, slug: true, category: { select: { name: true, slug: true } } },
+      },
+      package: { select: { label: true } },
+    },
+  },
+} satisfies Prisma.FeedbackInclude;
 
 /** Anonymous rows are masked here, once, rather than in every component
  *  that renders one. */
-function toReviewRow(f: Awaited<ReturnType<typeof db.feedback.findMany>>[number]): ReviewRow {
+function toReviewRow(f: Prisma.FeedbackGetPayload<{ include: typeof FEEDBACK_PURCHASE }>): ReviewRow {
+  const product = f.order?.product ?? null;
   return {
     name: f.anonymous ? "Khách hàng ẩn danh" : f.name,
     body: f.body,
@@ -1230,6 +1248,14 @@ function toReviewRow(f: Awaited<ReturnType<typeof db.feedback.findMany>>[number]
     anonymous: f.anonymous,
     verified: f.verified,
     createdAt: f.createdAt,
+    purchase: product
+      ? {
+          product: product.name ?? product.code,
+          tier: f.order?.package?.label ?? null,
+          game: product.category.name,
+          href: productHref(product.category.slug, product.slug),
+        }
+      : null,
   };
 }
 
@@ -1240,6 +1266,7 @@ export async function getFeedback(take = 20): Promise<ReviewRow[]> {
     where: { approved: true },
     orderBy: { createdAt: "desc" },
     take,
+    include: FEEDBACK_PURCHASE,
   });
   return rows.map(toReviewRow);
 }

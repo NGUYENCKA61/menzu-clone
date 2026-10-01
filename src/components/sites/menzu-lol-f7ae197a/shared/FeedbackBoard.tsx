@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useMemo, useState } from "react";
 import {
   ArrowDownWideNarrow,
@@ -29,6 +30,9 @@ export interface FeedbackItem {
   when: string;
   /** Epoch millis, for the sort toggle. */
   ts: number;
+  /** The tool, tier and game an order-backed review is about; null for a
+   *  free-form one. */
+  purchase: { product: string; tier: string | null; game: string; href: string } | null;
 }
 
 function formatVnd(n: number): string {
@@ -136,6 +140,26 @@ function ReviewCard({ item }: { item: FeedbackItem }) {
             </span>
           </div>
           <StarRow rating={item.rating} />
+          {/* What was bought, under the stars the way a marketplace prints
+              "phân loại hàng": the tool, the tier, the game (the owner,
+              01/10/2026: "bổ sung thông tin mua key bản gì game gì"). */}
+          {item.purchase ? (
+            <p className="mt-2 flex min-w-0 flex-wrap items-center gap-x-1.5 gap-y-1 text-[12px] text-neutral-500">
+              <span className="shrink-0">Đã mua</span>
+              <Link
+                href={item.purchase.href}
+                className="min-w-0 max-w-full truncate font-semibold text-neutral-200 transition-colors hover:text-white sm:max-w-[520px]"
+              >
+                {item.purchase.product}
+              </Link>
+              {item.purchase.tier ? (
+                <span className="shrink-0 rounded-md border border-white/15 bg-white/10 px-1.5 py-px text-[9px] font-black uppercase tracking-widest text-neutral-300">
+                  {item.purchase.tier}
+                </span>
+              ) : null}
+              <span className="min-w-0 truncate">· {item.purchase.game}</span>
+            </p>
+          ) : null}
         </div>
       </div>
 

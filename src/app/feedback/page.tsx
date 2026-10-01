@@ -45,6 +45,7 @@ export default async function FeedbackPage() {
     verified: r.verified,
     when: dayStamp(r.createdAt),
     ts: r.createdAt.getTime(),
+    purchase: r.purchase,
   }));
 
   return (
