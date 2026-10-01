@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { Radar } from "lucide-react";
+import { Bell, Radar } from "lucide-react";
 
 import { SimplePage } from "@/components/sites/menzu-lol-f7ae197a/shared/SimplePage";
 import { StatusSubscribeSearch } from "@/components/sites/menzu-lol-f7ae197a/shared/StatusSubscribeSearch";
+import { UrlPager } from "@/components/sites/menzu-lol-f7ae197a/shared/UrlPager";
 import { TYPE_TILE } from "@/components/sites/menzu-lol-f7ae197a/shared/announcementIcons";
-import { currentAnnouncements } from "@/lib/announcementStore";
+import { activeAnnouncements } from "@/lib/announcementStore";
 import { TYPE_LABELS } from "@/lib/announcements";
 import { getCurrentUser } from "@/lib/session";
 import {
@@ -31,6 +32,10 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 export const dynamic = "force-dynamic";
+
+/** Notices on one page, and how many the list reads at most. */
+const NOTICES_PER_PAGE = 10;
+const NOTICES_MAX = 100;
 
 /** The shop's clock, whatever machine renders the page. */
 const TZ = "Asia/Ho_Chi_Minh";
@@ -119,14 +124,17 @@ const TAB_OFF =
 export default async function AnnouncementsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ tab?: string }>;
+  searchParams: Promise<{ tab?: string; trang?: string }>;
 }) {
-  const { tab } = await searchParams;
+  const { tab, trang } = await searchParams;
   const statusTab = tab === "trang-thai";
   const subscribeTab = tab === "dang-ky";
   const user = await getCurrentUser();
   const [announcements, events, tools, followed] = await Promise.all([
-    currentAnnouncements(user?.id ?? null),
+    // The whole list, not the header's five: this page is where every
+    // notice can be read, ten to a page (the owner, 01/10/2026: "có phân
+    // trang?").
+    activeAnnouncements(user?.id ?? null, new Date(), NOTICES_MAX),
     listStatusEvents(),
     listSoftwareForStatus(),
     // A guest follows nothing; asking the database to confirm that costs a
@@ -134,6 +142,12 @@ export default async function AnnouncementsPage({
     user ? subscribedProductIds(user.id) : Promise.resolve(new Set<string>()),
   ]);
   const now = new Date();
+  const noticePages = Math.max(1, Math.ceil(announcements.length / NOTICES_PER_PAGE));
+  const noticePage = Math.min(Math.max(1, Number(trang) || 1), noticePages) - 1;
+  const pageOfNotices = announcements.slice(
+    noticePage * NOTICES_PER_PAGE,
+    noticePage * NOTICES_PER_PAGE + NOTICES_PER_PAGE,
+  );
 
   // Null rather than false for a guest: the chip has three faces, and "not
   // signed in" is the one that offers a sign-in instead of a silent no-op.
@@ -149,7 +163,7 @@ export default async function AnnouncementsPage({
   }));
 
   return (
-    <SimplePage title="Thông báo" crumb="Thông báo">
+    <SimplePage title="Thông báo" crumb="Thông báo" icon={Bell}>
       {/* On a phone the three tabs scroll as one row, bleeding to the
           screen's edges; stacked, they took three lines before a single
           notice was in view. */}
@@ -223,7 +237,7 @@ export default async function AnnouncementsPage({
                 </p>
               </div>
             ) : (
-              <div className="rounded-2xl border border-white/10 bg-neutral-900/50 p-5 sm:p-6">
+              <div className="rounded-2xl border border-white/5 bg-white/[0.02] p-5 sm:p-6">
                 {groupByDay(events).map((group) => (
                   <div key={group.key} className="mb-6 last:mb-0">
                     <p className={`mb-3 ${LABEL}`}>{dayLabel(group.key, now)}</p>
@@ -309,10 +323,11 @@ export default async function AnnouncementsPage({
         </div>
       ) : (
         <div className="flex flex-col gap-4">
-          {announcements.map((item) => (
+          {/* The security page's cards (white 2%, a hairline edge). */}
+          {pageOfNotices.map((item) => (
             <article
               key={item.id}
-              className="rounded-2xl border border-white/10 bg-neutral-900/50 p-5"
+              className="rounded-2xl border border-white/5 bg-white/[0.02] p-5 sm:p-6"
             >
               <div className="flex flex-wrap items-center gap-2">
                 {/* The word, not a glyph: the shop asked for the notice
@@ -385,6 +400,7 @@ export default async function AnnouncementsPage({
               ) : null}
             </article>
           ))}
+          <UrlPager base="/thong-bao" page={noticePage} pageCount={noticePages} />
         </div>
       )}
     </SimplePage>

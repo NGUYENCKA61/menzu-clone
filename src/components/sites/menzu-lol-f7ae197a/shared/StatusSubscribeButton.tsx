@@ -9,8 +9,10 @@ import { StatusToast } from "./StatusToast";
 
 // No dimming while busy: the chip has already shown its new state, and
 // dimming it would take the answer back for the length of the round trip.
+// A bell alone, the words in its title and its name for screen readers (the
+// owner, 01/10/2026: "bớt chữ nhận thông báo để icon chuông cho gọn thôi").
 const BASE =
-  "inline-flex h-8 shrink-0 items-center gap-1.5 rounded-lg border px-3 text-[10px] font-black uppercase tracking-widest transition-colors";
+  "inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border transition-colors";
 const OFF =
   "border-white/10 bg-white/5 text-neutral-300 hover:bg-white/10 hover:text-white";
 const ON =
@@ -45,9 +47,10 @@ export function StatusSubscribeButton({
       <Link
         href={`/login?next=${encodeURIComponent(loginNext)}`}
         className={`${BASE} ${OFF}`}
+        aria-label="Đăng nhập để nhận thông báo"
+        title="Nhận thông báo"
       >
-        <Bell size={12} />
-        Nhận thông báo
+        <Bell size={16} aria-hidden />
       </Link>
     );
   }
@@ -94,12 +97,11 @@ export function StatusSubscribeButton({
         onClick={toggle}
         disabled={busy}
         aria-pressed={on}
+        aria-label={on ? "Đang theo dõi — bấm để tắt thông báo" : "Nhận thông báo"}
+        title={on ? "Đang theo dõi — bấm để tắt" : "Nhận thông báo"}
         className={`${BASE} ${on ? ON : OFF}`}
       >
-        {on ? <BellRing size={12} /> : <Bell size={12} />}
-        {/* Two labels of nearly one width, so the chip does not stretch and
-            shrink under the finger as it flips. */}
-        {on ? "Đang theo dõi" : "Nhận thông báo"}
+        {on ? <BellRing size={16} aria-hidden /> : <Bell size={16} aria-hidden />}
       </button>
       {failed ? (
         <StatusToast

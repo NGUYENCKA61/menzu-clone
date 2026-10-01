@@ -184,7 +184,7 @@ export function StatusSubscribeSearch({
                     className={`flex items-center gap-3.5 rounded-2xl border p-3 transition-colors ${
                       on
                         ? "border-[var(--menzu-accent)]/35 bg-[var(--menzu-accent)]/[0.06]"
-                        : "border-white/10 bg-neutral-900/50 hover:border-white/20"
+                        : "border-white/5 bg-white/[0.02] hover:border-white/10"
                     }`}
                   >
                     <Link
