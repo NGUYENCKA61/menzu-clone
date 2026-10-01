@@ -35,3 +35,16 @@ export function voucherButtonClass(solid: boolean): string {
       : "border-[var(--menzu-accent)]/45 bg-[var(--menzu-accent)]/10 text-[var(--menzu-accent)] hover:bg-[var(--menzu-accent)]/20"
   }`;
 }
+
+/** The basket's apply button, calmer than the dialogs' one (the owner,
+ *  01/10/2026: "không nên chuyển đỏ đặc", on trial): grey while there is
+ *  nothing to apply — an empty box, or a code already applied — and the
+ *  light red of a live control once a fresh code is typed. The panel's one
+ *  solid red stays the pay button. */
+export function voucherApplyClass(ready: boolean): string {
+  return `h-10 shrink-0 rounded-xl border px-4 text-[10px] font-black uppercase tracking-widest transition-colors disabled:cursor-not-allowed ${
+    ready
+      ? "border-[var(--menzu-accent)]/45 bg-[var(--menzu-accent)]/10 text-[var(--menzu-accent)] hover:bg-[var(--menzu-accent)]/20"
+      : "border-white/[0.12] bg-white/[0.04] text-neutral-400 enabled:hover:text-neutral-200"
+  }`;
+}

@@ -34,7 +34,7 @@ import {
 import { formatVnd } from "./productData";
 import {
   VOUCHER_APPLIED,
-  voucherButtonClass,
+  voucherApplyClass,
   voucherInputClass,
 } from "./voucherLook";
 
@@ -866,7 +866,7 @@ export function CartView({
               type="button"
               onClick={applyVoucher}
               disabled={checking || !voucher.trim()}
-              className={voucherButtonClass(voucher.trim().length > 0 && applied === null)}
+              className={voucherApplyClass(voucher.trim().length > 0 && applied === null)}
             >
               {checking ? "Đang kiểm…" : "Áp dụng"}
             </button>
