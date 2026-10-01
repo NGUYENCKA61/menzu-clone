@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { Bell, Radar } from "lucide-react";
+import { Bell } from "lucide-react";
 
 import { SimplePage } from "@/components/sites/menzu-lol-f7ae197a/shared/SimplePage";
 import {
@@ -94,7 +94,6 @@ function groupByDay(events: StatusEventRow[]): { key: string; items: StatusEvent
   return groups;
 }
 
-const LABEL = "text-[10px] font-black uppercase tracking-widest text-neutral-500";
 /** The line under the tabs saying what the open one is for. Two tabs both
  *  about hack status need telling apart, and their names alone do not do it:
  *  one is everything that happened, the other is what to be told about next.
@@ -231,11 +230,10 @@ export default async function AnnouncementsPage({
             Tình trạng và tình hình cập nhật của tất cả các bản hack, xếp theo
             ngày.
           </p>
-          <section>
-            <div className="mb-4 flex items-center gap-2">
-              <Radar size={14} className="text-[var(--menzu-accent)]" />
-              <h2 className={LABEL}>Lịch sử trạng thái</h2>
-            </div>
+          {/* No visible heading: the lit tab and the line above already say
+              what this is (the owner, 02/10/2026: "bỏ đi" to "Lịch sử trạng
+              thái"); the name stays for screen readers. */}
+          <section aria-label="Lịch sử trạng thái">
             {events.length === 0 ? (
               <div className="rounded-2xl border border-dashed border-white/10 bg-white/[0.02] py-16 text-center">
                 <p className="text-sm font-bold text-white">Chưa có thay đổi nào</p>
