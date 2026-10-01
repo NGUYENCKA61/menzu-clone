@@ -280,24 +280,9 @@ export default async function AnnouncementsPage({
                                 {event.scope === "category" ? "Cả danh mục" : event.categoryName}
                               </span>
                             </div>
-                            <p className="mt-1.5 text-[13.5px] leading-relaxed text-neutral-300">
-                              <Link
-                                href={event.productHref}
-                                className="font-bold text-white transition-colors hover:text-[var(--menzu-accent)]"
-                              >
-                                {event.productName}
-                              </Link>{" "}
-                              {STATUS_EVENT_COPY[event.status]}
-                            </p>
-                            {/* The shop's own words for this particular
-                                change, when it wrote any — a patch note, a
-                                "wait 24h", something the state alone cannot
-                                say. */}
-                            {event.note ? (
-                              <div className="mt-1.5 break-words rounded-xl border border-white/[0.06] bg-white/[0.02] px-3.5 py-2.5 text-[12.5px] leading-relaxed text-neutral-400">
-                                <StatusNote text={event.note} />
-                              </div>
-                            ) : null}
+                            {/* The picture first, the words under it, as a post
+                                with a photo reads (the owner, 02/10/2026: "cho
+                                ảnh ở trên chữ ở dưới"). */}
                             {event.imageUrl ? (
                               <a
                                 href={event.imageUrl}
@@ -317,6 +302,24 @@ export default async function AnnouncementsPage({
                                   className="max-h-[280px] w-full object-cover"
                                 />
                               </a>
+                            ) : null}
+                            <p className="mt-2 text-[13.5px] leading-relaxed text-neutral-300">
+                              <Link
+                                href={event.productHref}
+                                className="font-bold text-white transition-colors hover:text-[var(--menzu-accent)]"
+                              >
+                                {event.productName}
+                              </Link>{" "}
+                              {STATUS_EVENT_COPY[event.status]}
+                            </p>
+                            {/* The shop's own words for this particular
+                                change, when it wrote any — a patch note, a
+                                "wait 24h", something the state alone cannot
+                                say. */}
+                            {event.note ? (
+                              <div className="mt-1.5 break-words rounded-xl border border-white/[0.06] bg-white/[0.02] px-3.5 py-2.5 text-[12.5px] leading-relaxed text-neutral-400">
+                                <StatusNote text={event.note} />
+                              </div>
                             ) : null}
                           </li>
                         );
