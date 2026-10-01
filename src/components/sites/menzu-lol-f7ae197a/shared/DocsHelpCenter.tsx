@@ -31,8 +31,125 @@ export interface DocCard {
   views: number;
   /** ISO string — a Date cannot cross the server/client boundary. */
   publishedAt: string;
-  /** Pinned onto the featured card from admin; at most one article is. */
+  /** Pinned onto the featured card from admin; any number may be. */
   featured: boolean;
+}
+
+/** How long a featured article holds before the next fades in: longer than
+ *  the home page's pictures (4s), as these carry words to read. */
+const FEATURED_HOLD_MS = 6000;
+/** The featured card turns through at least this many articles when the shop
+ *  has them (pins topped up by the most-read), and never more than the max. */
+const FEATURED_MIN = 3;
+const FEATURED_MAX = 6;
+
+/**
+ * "Nội dung nổi bật", taking turns (the owner, 02/10/2026: "có nhiều bài viết
+ * đổi qua bằng hiệu ứng như ảnh", "mấy cái chấm thanh nọ đó"): the home
+ * page's picture carousel, for articles — each fades into the next, and the
+ * dots in the corner, the open one a red bar, jump straight to one. A hand
+ * on the card (hover or focus) holds the turn so its words can be read; a
+ * reader who asks for less motion gets no turning at all, only the dots.
+ */
+function FeaturedCarousel({ items }: { items: DocCard[] }) {
+  const [active, setActive] = useState(0);
+  /** Bumped by a dot press, so the clock restarts instead of firing early. */
+  const [turn, setTurn] = useState(0);
+  const [still, setStill] = useState(false);
+  const [held, setHeld] = useState(false);
+
+  useEffect(() => {
+    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const sync = () => setStill(media.matches);
+    sync();
+    media.addEventListener("change", sync);
+    return () => media.removeEventListener("change", sync);
+  }, []);
+
+  useEffect(() => {
+    if (still || held || items.length < 2) return;
+    const timer = window.setInterval(
+      () => setActive((current) => (current + 1) % items.length),
+      FEATURED_HOLD_MS,
+    );
+    return () => window.clearInterval(timer);
+  }, [still, held, items.length, turn]);
+
+  const shown = Math.min(active, items.length - 1);
+
+  return (
+    <div
+      className="group relative isolate overflow-hidden rounded-2xl border border-[var(--menzu-accent)]/25 bg-gradient-to-br from-[var(--menzu-accent)]/[0.10] via-[#121216] to-[#121216] lift-card hover:-translate-y-1 hover:border-[var(--menzu-accent)]/50 hover:shadow-xl hover:shadow-black/40"
+      onMouseEnter={() => setHeld(true)}
+      onMouseLeave={() => setHeld(false)}
+      onFocusCapture={() => setHeld(true)}
+      onBlurCapture={() => setHeld(false)}
+    >
+      {/* All the articles stacked in one cell, so the card is as tall as the
+          tallest and does not jump as they change. */}
+      <div className="grid">
+        {items.map((item, index) => {
+          const on = index === shown;
+          return (
+            <Link
+              key={item.slug}
+              href={`/docs/${item.slug}`}
+              aria-hidden={on ? undefined : true}
+              tabIndex={on ? undefined : -1}
+              className={`relative isolate block p-6 [grid-area:1/1] transition-opacity duration-[900ms] ease-out motion-reduce:transition-none ${
+                on ? "opacity-100" : "pointer-events-none opacity-0"
+              }`}
+            >
+              {/* The article's own picture, faded towards the text, so the
+                  card reads as that article and not a box. */}
+              <div className="pointer-events-none absolute inset-y-0 right-0 -z-10 w-3/5 opacity-25 [mask-image:linear-gradient(to_left,black,transparent)]">
+                <Image src={item.thumbnailUrl} alt="" fill sizes="40vw" className="object-cover" />
+              </div>
+              <span className="inline-flex rounded-md border border-[var(--menzu-accent)]/40 bg-[var(--menzu-accent)]/10 px-2 py-1 text-[9px] font-black uppercase tracking-widest text-[var(--menzu-accent)]">
+                Nội dung nổi bật
+              </span>
+              <h2 className="mt-3 text-xl font-black leading-tight text-white transition-colors group-hover:text-[var(--menzu-accent)]">
+                {item.title}
+              </h2>
+              {item.excerpt ? (
+                <p className="mt-2 max-w-xl text-sm leading-relaxed text-neutral-400">{item.excerpt}</p>
+              ) : null}
+              <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
+                <span className="inline-flex items-center gap-2 rounded-lg bg-[var(--menzu-accent)] px-4 py-2.5 text-[10px] font-black uppercase tracking-widest text-white transition-colors group-hover:bg-[var(--menzu-accent-dark)]">
+                  Xem chi tiết
+                  <ArrowRight size={12} aria-hidden />
+                </span>
+                <span className="text-[11px] font-semibold text-neutral-500">
+                  {formatViews(item.views)} lượt xem · {formatDate(item.publishedAt)}
+                </span>
+              </div>
+            </Link>
+          );
+        })}
+      </div>
+      {items.length > 1 ? (
+        <div className="absolute right-5 top-5 z-10 flex items-center gap-1.5 rounded-full border border-white/10 bg-black/40 px-2 py-1.5 backdrop-blur-md">
+          {items.map((item, index) => (
+            <button
+              key={item.slug}
+              type="button"
+              aria-label={`Bài ${index + 1} trên ${items.length}: ${item.title}`}
+              aria-current={index === shown ? "true" : undefined}
+              onClick={() => {
+                setActive(index);
+                setTurn((count) => count + 1);
+              }}
+              className={`h-1.5 rounded-full transition-all duration-300 motion-reduce:transition-none ${
+                index === shown
+                  ? "w-[18px] bg-[var(--menzu-accent)]"
+                  : "w-1.5 bg-white/40 hover:bg-white/70"
+              }`}
+            />
+          ))}
+        </div>
+      ) : null}
+    </div>
+  );
 }
 
 export interface HelpContact {
@@ -174,14 +291,23 @@ export function DocsHelpCenter({
   const page = paging.key === listKey ? Math.min(paging.page, pageCount - 1) : 0;
   const shown = list.slice(page * PER_PAGE, page * PER_PAGE + PER_PAGE);
 
-  // The pinned article leads (admin: "Ghim lên Nội dung nổi bật"); with none
-  // pinned the most-read guide does, and a shop with no guides yet leads with
-  // its most-read article of any kind.
-  const guides = articles.filter((a) => a.category === "GUIDE");
-  const featured =
-    articles.find((a) => a.featured) ??
-    (guides.length > 0 ? guides : articles).slice().sort((a, b) => b.views - a.views)[0] ??
-    null;
+  // The featured card's turn: every pinned article (admin: "Ghim lên Nội dung
+  // nổi bật"), newest first, topped up with the most-read guides and then
+  // the most-read of the rest until it has FEATURED_MIN to turn through.
+  const featured = useMemo(() => {
+    const byViews = (list: DocCard[]) => list.slice().sort((a, b) => b.views - a.views);
+    const pinned = articles
+      .filter((a) => a.featured)
+      .sort((a, b) => b.publishedAt.localeCompare(a.publishedAt));
+    const rest = [
+      ...byViews(articles.filter((a) => !a.featured && a.category === "GUIDE")),
+      ...byViews(articles.filter((a) => !a.featured && a.category !== "GUIDE")),
+    ];
+    return [...pinned, ...rest.slice(0, Math.max(0, FEATURED_MIN - pinned.length))].slice(
+      0,
+      FEATURED_MAX,
+    );
+  }, [articles]);
 
   function openShelf(key: DocShelf) {
     setChosen(key);
@@ -193,39 +319,10 @@ export function DocsHelpCenter({
 
   return (
     <div className="space-y-8">
-      {/* The featured article first, where the introduction used to be (the
-          owner: "cái nội dung nổi bật quăng lên trên"). Out of the way while
-          a search is showing its results. */}
-      {featured && !searching ? (
-        <Link
-          href={`/docs/${featured.slug}`}
-          className="group relative isolate block overflow-hidden rounded-2xl border border-[var(--menzu-accent)]/25 bg-gradient-to-br from-[var(--menzu-accent)]/[0.10] via-[#121216] to-[#121216] p-6 lift-card hover:-translate-y-1 hover:border-[var(--menzu-accent)]/50 hover:shadow-xl hover:shadow-black/40"
-        >
-          {/* The article's own picture, faded towards the text, so the card
-              reads as that article and not a box. */}
-          <div className="pointer-events-none absolute inset-y-0 right-0 -z-10 w-3/5 opacity-25 [mask-image:linear-gradient(to_left,black,transparent)]">
-            <Image src={featured.thumbnailUrl} alt="" fill sizes="40vw" className="object-cover" />
-          </div>
-          <span className="inline-flex rounded-md border border-[var(--menzu-accent)]/40 bg-[var(--menzu-accent)]/10 px-2 py-1 text-[9px] font-black uppercase tracking-widest text-[var(--menzu-accent)]">
-            Nội dung nổi bật
-          </span>
-          <h2 className="mt-3 text-xl font-black leading-tight text-white transition-colors group-hover:text-[var(--menzu-accent)]">
-            {featured.title}
-          </h2>
-          {featured.excerpt ? (
-            <p className="mt-2 max-w-xl text-sm leading-relaxed text-neutral-400">{featured.excerpt}</p>
-          ) : null}
-          <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
-            <span className="inline-flex items-center gap-2 rounded-lg bg-[var(--menzu-accent)] px-4 py-2.5 text-[10px] font-black uppercase tracking-widest text-white transition-colors group-hover:bg-[var(--menzu-accent-dark)]">
-              Xem chi tiết
-              <ArrowRight size={12} aria-hidden />
-            </span>
-            <span className="text-[11px] font-semibold text-neutral-500">
-              {formatViews(featured.views)} lượt xem · {formatDate(featured.publishedAt)}
-            </span>
-          </div>
-        </Link>
-      ) : null}
+      {/* The featured articles first, where the introduction used to be (the
+          owner: "cái nội dung nổi bật quăng lên trên"), taking turns. Out of
+          the way while a search is showing its results. */}
+      {featured.length > 0 && !searching ? <FeaturedCarousel items={featured} /> : null}
 
       <div className="grid gap-6 lg:grid-cols-[240px_minmax(0,1fr)] lg:items-start">
         {/* Left rail: the shelves, each with its icon in front, grey and red

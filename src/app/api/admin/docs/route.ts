@@ -63,9 +63,9 @@ export async function POST(request: Request) {
     slug = `${base}-${n}`;
   }
 
-  // One featured card, one article: pinning this one unpins whichever held it.
+  // Any number may be pinned: the wiki's featured card turns through them
+  // (the owner, 02/10/2026: "nội dung nổi bật có nhiều bài viết đổi qua").
   const featured = payload?.featured === true;
-  if (featured) await db.docArticle.updateMany({ data: { featured: false } });
 
   const created = await db.docArticle.create({
     data: {
@@ -127,11 +127,6 @@ export async function PATCH(request: Request) {
         })()
       : rawProse;
   const excerpt = body?.excerpt?.trim();
-
-  // One featured card, one article: pinning this one unpins whichever held it.
-  if (body?.featured === true) {
-    await db.docArticle.updateMany({ where: { slug: { not: slug } }, data: { featured: false } });
-  }
 
   const updated = await db.docArticle.update({
     where: { slug },

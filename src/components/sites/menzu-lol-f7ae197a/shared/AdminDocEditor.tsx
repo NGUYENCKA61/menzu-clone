@@ -191,7 +191,7 @@ export function AdminDocEditor({
           <span>
             <span className="block text-sm font-bold text-white">Ghim lên Nội dung nổi bật</span>
             <span className="block text-[11px] text-neutral-500">
-              Bài này lên card đầu trang Wiki. Chỉ một bài được ghim; ghim bài này sẽ bỏ ghim bài khác. Không ghim bài nào thì card lấy bài Hướng dẫn xem nhiều nhất.
+              Bài này lên khung Nội dung nổi bật đầu trang Wiki. Ghim nhiều bài thì khung lần lượt chuyển qua từng bài. Không ghim bài nào thì khung lấy các bài xem nhiều nhất.
             </span>
           </span>
         </label>
