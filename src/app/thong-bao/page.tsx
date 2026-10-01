@@ -4,6 +4,12 @@ import Link from "next/link";
 import { Bell, Radar } from "lucide-react";
 
 import { SimplePage } from "@/components/sites/menzu-lol-f7ae197a/shared/SimplePage";
+import {
+  NOTICE_TAB,
+  NOTICE_TAB_COUNT,
+  NOTICE_TAB_OFF,
+  NOTICE_TAB_ON,
+} from "@/components/sites/menzu-lol-f7ae197a/shared/noticeTabLook";
 import { StatusNote } from "@/components/sites/menzu-lol-f7ae197a/shared/StatusNote";
 import { StatusSubscribeSearch } from "@/components/sites/menzu-lol-f7ae197a/shared/StatusSubscribeSearch";
 import { UrlPager } from "@/components/sites/menzu-lol-f7ae197a/shared/UrlPager";
@@ -99,11 +105,6 @@ const LABEL = "text-[10px] font-black uppercase tracking-widest text-neutral-500
  *  tab and starts reading as the page opening with a paragraph. A phone still
  *  wraps it, which is fine: there it is the only thing on its line. */
 const TAB_NOTE = "mb-5 text-[13px] leading-relaxed text-neutral-400";
-const TAB =
-  "inline-flex h-10 shrink-0 items-center gap-2 rounded-xl border px-4 text-[11px] font-black uppercase tracking-widest transition-colors";
-const TAB_ON = "border-[var(--menzu-accent)] bg-[var(--menzu-accent)] text-white";
-const TAB_OFF =
-  "border-white/10 bg-white/5 text-neutral-300 hover:bg-white/10 hover:text-white";
 
 /**
  * Where "Xem tất cả thông báo" lands, in three tabs.
@@ -177,16 +178,16 @@ export default async function AnnouncementsPage({
       >
         <Link
           href="/thong-bao"
-          className={`${TAB} ${statusTab || subscribeTab ? TAB_OFF : TAB_ON}`}
+          className={`${NOTICE_TAB} ${statusTab || subscribeTab ? NOTICE_TAB_OFF : NOTICE_TAB_ON}`}
         >
           Thông báo hệ thống
-          <span className="rounded-md bg-black/20 px-1.5 py-0.5 text-[10px]">
+          <span className={NOTICE_TAB_COUNT}>
             {announcements.length}
           </span>
         </Link>
-        <Link href={STATUS_TAB_HREF} className={`${TAB} ${statusTab ? TAB_ON : TAB_OFF}`}>
+        <Link href={STATUS_TAB_HREF} className={`${NOTICE_TAB} ${statusTab ? NOTICE_TAB_ON : NOTICE_TAB_OFF}`}>
           Trạng thái hack chung
-          <span className="rounded-md bg-black/20 px-1.5 py-0.5 text-[10px]">
+          <span className={NOTICE_TAB_COUNT}>
             {events.length}
           </span>
         </Link>
@@ -195,10 +196,10 @@ export default async function AnnouncementsPage({
             reader follows none. */}
         <Link
           href={STATUS_SUBSCRIBE_HREF}
-          className={`${TAB} ${subscribeTab ? TAB_ON : TAB_OFF}`}
+          className={`${NOTICE_TAB} ${subscribeTab ? NOTICE_TAB_ON : NOTICE_TAB_OFF}`}
         >
           Đăng ký nhận thông báo
-          <span className="rounded-md bg-black/20 px-1.5 py-0.5 text-[10px]">
+          <span className={NOTICE_TAB_COUNT}>
             {followed.size}
           </span>
         </Link>

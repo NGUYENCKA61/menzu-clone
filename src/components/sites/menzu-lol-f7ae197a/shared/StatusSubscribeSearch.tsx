@@ -10,6 +10,7 @@ import { categoryHref } from "@/lib/routes";
 import { matchesSearch } from "@/lib/searchText";
 import { SOFTWARE_STATUS, type SoftwareStatusValue } from "@/lib/softwareStatus";
 
+import { NOTICE_TAB, NOTICE_TAB_COUNT, NOTICE_TAB_OFF, NOTICE_TAB_ON } from "./noticeTabLook";
 import { StatusSubscribeButton } from "./StatusSubscribeButton";
 import { StatusToast } from "./StatusToast";
 
@@ -238,7 +239,7 @@ export function StatusSubscribeSearch({
         {/* w-full and no flex-1 on purpose: flex-1 would set the basis to zero
             and let the field squeeze down to share a phone's line with the
             chips beside it, instead of taking the line and pushing them under. */}
-        <label className="flex h-11 w-full max-w-md items-center gap-2.5 rounded-xl border border-white/10 bg-[#101114] px-4 transition-colors focus-within:border-[var(--menzu-accent)]/60">
+        <label className="flex h-10 w-full max-w-md items-center gap-2.5 rounded-xl border border-white/10 bg-[#101114] px-4 transition-colors focus-within:border-[var(--menzu-accent)]/60">
           <Search size={15} aria-hidden className="shrink-0 text-neutral-500" />
           <input
             type="search"
@@ -251,15 +252,11 @@ export function StatusSubscribeSearch({
         </label>
         {/* One filter with two answers, each carrying its count — the
             followed count lives here rather than in a chip of its own (the
-            owner, 01/10/2026: "cho vào phần lọc đi với phần tất cả"). The
-            lit answer wears the accent's tint, a step under the page's solid
-            red tabs above it. */}
+            owner, 01/10/2026: "cho vào phần lọc đi với phần tất cả") — in
+            the page's own tab buttons, so the row under the tabs reads as
+            the same set ("cái phần lọc cảm giác chưa đồng bộ"). */}
         {signedIn ? (
-          <div
-            role="group"
-            aria-label="Lọc tool"
-            className="inline-flex h-9 shrink-0 items-center gap-0.5 rounded-lg border border-white/10 bg-white/5 p-0.5"
-          >
+          <div role="group" aria-label="Lọc tool" className="flex shrink-0 flex-wrap gap-2">
             {[
               { followedOnly: false, label: "Tất cả", count: tools.length },
               { followedOnly: true, label: "Đang theo dõi", count: following },
@@ -271,14 +268,10 @@ export function StatusSubscribeSearch({
                   type="button"
                   onClick={() => setOnlyFollowed(option.followedOnly)}
                   aria-pressed={lit}
-                  className={`inline-flex h-full items-center gap-1.5 rounded-md px-3 text-[10px] font-black uppercase tracking-widest transition-colors ${
-                    lit
-                      ? "bg-[var(--menzu-accent)]/15 text-[var(--menzu-accent)]"
-                      : "text-neutral-400 hover:text-white"
-                  }`}
+                  className={`${NOTICE_TAB} ${lit ? NOTICE_TAB_ON : NOTICE_TAB_OFF}`}
                 >
                   {option.label}
-                  <span className="rounded bg-black/25 px-1.5 py-0.5 tabular-nums">{option.count}</span>
+                  <span className={`${NOTICE_TAB_COUNT} tabular-nums`}>{option.count}</span>
                 </button>
               );
             })}
