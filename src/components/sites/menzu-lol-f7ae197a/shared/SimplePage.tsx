@@ -15,14 +15,30 @@ interface SimplePageProps {
   /** A red icon in front of the title, as the account pages wear one, in
    *  place of the row-heading bar. */
   icon?: LucideIcon;
+  /** "home": the home page's flat #0f1015 (the header's tone, under the
+   *  shelves and product pages too) instead of the utility pages' near-black.
+   *  The basket wears it (the owner, 01/10/2026: "màu nền trang giỏ hàng đồng
+   *  bộ với trang chủ"). */
+  ground?: "black" | "home";
 }
 
 /** Standard inner-page chrome: header, breadcrumb, heading, footer. */
-export function SimplePage({ title, crumb, children, icon: Icon }: SimplePageProps) {
+export function SimplePage({
+  title,
+  crumb,
+  children,
+  icon: Icon,
+  ground = "black",
+}: SimplePageProps) {
   return (
-    // Opaque site-black, covering the fixed PageBackdrop artwork — the
-    // original keeps its utility pages (wiki, cart, trade…) on plain black.
-    <div className="min-h-screen flex flex-col text-white overflow-x-clip selection:bg-[var(--menzu-accent)]/30 bg-[#050508]">
+    // Opaque, covering the fixed PageBackdrop artwork — the original keeps its
+    // utility pages (wiki, cart, trade…) on plain black; a page can take the
+    // home page's tone instead.
+    <div
+      className={`min-h-screen flex flex-col text-white overflow-x-clip selection:bg-[var(--menzu-accent)]/30 ${
+        ground === "home" ? "bg-[#0f1015]" : "bg-[#050508]"
+      }`}
+    >
       <div className="w-full shrink-0 h-[104px]" />
       <SiteHeader />
 
