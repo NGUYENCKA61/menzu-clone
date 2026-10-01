@@ -29,7 +29,6 @@ import {
   subscribedProductIds,
   type StatusEventRow,
 } from "@/lib/statusEvents";
-import { clauseAsSentence } from "@/lib/statusNote";
 import { shareCard } from "@/lib/shareCard";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -215,7 +214,7 @@ export default async function AnnouncementsPage({
               a followed tool's change arrives as a notice that opens on the
               reader's next page (lib/statusFollowers). */}
           <p className={TAB_NOTE}>
-            Bấm chuông để theo dõi từng bản hack, khi bản đó đổi trạng thái,
+            Bấm chuông để theo dõi từng bản hack. Khi bản đó đổi trạng thái,
             thông báo sẽ hiện lên ở lần tới bạn vào web.
           </p>
           <StatusSubscribeSearch
@@ -245,80 +244,73 @@ export default async function AnnouncementsPage({
                 </p>
               </div>
             ) : (
-              // A channel feed, the way the shop's customers read status on
-              // Telegram (the owner, 01/10/2026: "theo kiểu telegram cho dễ
-              // nhìn", on trial): one card per change, the day as a chip
-              // between them, the time in the card's corner. Each card says
-              // its change once — the state's pill, then the shop's note or,
-              // when there is none, the sentence the state implies — and
-              // carries one colour, the pill's.
-              <div className="max-w-3xl">
+              <div className="rounded-2xl border border-white/5 bg-white/[0.02] p-5 sm:p-6">
                 {groupByDay(events).map((group) => (
-                  <div key={group.key} className="mt-5 first:mt-0">
-                    <div className="mb-3 flex justify-center">
-                      <span className="rounded-full bg-white/[0.06] px-3 py-1 text-[11px] font-bold text-neutral-300">
-                        {dayLabel(group.key, now)}
-                      </span>
-                    </div>
-                    <ol className="flex flex-col gap-2.5">
+                  <div key={group.key} className="mb-6 last:mb-0">
+                    <p className={`mb-3 ${LABEL}`}>{dayLabel(group.key, now)}</p>
+                    {/* A line down the left with a dot per change, the colour
+                        of the state it moved to — the same dot the pill on
+                        the tool's card wears. */}
+                    <ol className="relative ml-1.5 border-l border-white/10 pl-6">
                       {group.items.map((event) => {
                         const state = SOFTWARE_STATUS[event.status];
                         return (
-                          <li
-                            key={event.id}
-                            className="rounded-2xl border border-white/[0.06] bg-white/[0.03] px-4 py-3"
-                          >
-                            <div className="flex min-w-0 items-center gap-2.5">
+                          <li key={event.id} className="relative pb-5 last:pb-0">
+                            <span
+                              aria-hidden
+                              className={`absolute -left-[31px] top-1 h-3 w-3 rounded-full ring-4 ring-[#141519] ${state.dot}`}
+                            />
+                            <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                              <span className="text-[11px] font-semibold tabular-nums text-neutral-500">
+                                {formatTime(event.at)}
+                              </span>
                               <span
-                                className={`inline-flex shrink-0 items-center rounded-md border px-2 py-0.5 text-[10px] font-black uppercase tracking-wider ${state.tile}`}
+                                className={`inline-flex items-center rounded-md border px-2 py-0.5 text-[10px] font-black uppercase tracking-wider ${state.tile}`}
                               >
                                 {state.label}
                               </span>
-                              {/* One line: a long name ends in "…", and the
-                                  whole of it is in the tooltip and on the
-                                  tool's own page. */}
+                              <span className="text-[11px] font-semibold text-neutral-500">
+                                {event.scope === "category" ? "Cả danh mục" : event.categoryName}
+                              </span>
+                            </div>
+                            <p className="mt-1.5 text-[13.5px] leading-relaxed text-neutral-300">
                               <Link
                                 href={event.productHref}
-                                title={event.productName}
-                                className="min-w-0 truncate text-[13.5px] font-bold text-neutral-100 transition-colors hover:text-[var(--menzu-accent)]"
+                                className="font-bold text-white transition-colors hover:text-[var(--menzu-accent)]"
                               >
                                 {event.productName}
-                              </Link>
-                            </div>
+                              </Link>{" "}
+                              {STATUS_EVENT_COPY[event.status]}
+                            </p>
+                            {/* The shop's own words for this particular
+                                change, when it wrote any — a patch note, a
+                                "wait 24h", something the state alone cannot
+                                say. */}
+                            {event.note ? (
+                              <div className="mt-1.5 break-words rounded-xl border border-white/[0.06] bg-white/[0.02] px-3.5 py-2.5 text-[12.5px] leading-relaxed text-neutral-400">
+                                <StatusNote text={event.note} />
+                              </div>
+                            ) : null}
                             {event.imageUrl ? (
                               <a
                                 href={event.imageUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="mt-2.5 block w-full max-w-[360px] overflow-hidden rounded-xl border border-white/10 bg-neutral-950 transition-colors hover:border-white/25"
+                                className="mt-2.5 block w-full max-w-[420px] overflow-hidden rounded-xl border border-white/10 bg-neutral-950 transition-colors hover:border-white/25"
                               >
                                 <Image
                                   src={event.imageUrl}
                                   alt={`Ảnh kèm thông báo ${event.productName}`}
-                                  width={720}
-                                  height={405}
-                                  // Capped: a portrait phone screenshot would
-                                  // otherwise stretch the card down the page.
-                                  // The whole picture is one click away.
-                                  className="max-h-[220px] w-full object-cover"
+                                  width={840}
+                                  height={472}
+                                  // Capped: a screenshot taken on a phone is
+                                  // portrait and would otherwise push the next
+                                  // change a screen and a half down. The whole
+                                  // picture is one click away.
+                                  className="max-h-[280px] w-full object-cover"
                                 />
                               </a>
                             ) : null}
-                            <div className="mt-1.5 flex items-end gap-3">
-                              <div className="min-w-0 flex-1 break-words text-[13px] leading-relaxed text-neutral-400">
-                                {event.note ? (
-                                  <StatusNote text={event.note} />
-                                ) : (
-                                  <p>{clauseAsSentence(STATUS_EVENT_COPY[event.status])}</p>
-                                )}
-                              </div>
-                              <time
-                                dateTime={event.at.toISOString()}
-                                className="shrink-0 text-[11px] tabular-nums text-neutral-500"
-                              >
-                                {formatTime(event.at)}
-                              </time>
-                            </div>
                           </li>
                         );
                       })}
