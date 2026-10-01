@@ -152,8 +152,10 @@ function SumRow({
 }) {
   return (
     <div className="flex items-baseline justify-between gap-4 text-[13px]">
-      {/* Money off is green from its name to its figure. */}
-      <span className={tone === "ok" ? "font-semibold text-emerald-400" : "text-neutral-400"}>
+      {/* Money off is green from its name to its figure, the name a step
+          softer (emerald-500) so it sits at the brightness of "Tạm tính" (the
+          owner, 01/10/2026: option 1, on trial). */}
+      <span className={tone === "ok" ? "font-semibold text-emerald-500" : "text-neutral-400"}>
         {label}
       </span>
       <span
