@@ -254,9 +254,10 @@ export default async function AnnouncementsPage({
                     <p className="mb-3 text-[10px] font-black uppercase tracking-widest text-neutral-300">
                       {dayLabel(group.key, now)}
                     </p>
-                    {/* A line down the left with a light grey dot per change;
-                        the state's colour stays on its pill (the owner,
-                        02/10/2026: "đổi chấm tròn sang xám nhạt"). */}
+                    {/* A line down the left with a grey dot per change; the
+                        state's colour stays on its pill (the owner,
+                        02/10/2026: "đổi chấm tròn sang xám nhạt", then a step
+                        darker on trial so the dot sits behind the time). */}
                     <ol className="relative ml-1.5 border-l border-white/10 pl-6">
                       {group.items.map((event) => {
                         const state = SOFTWARE_STATUS[event.status];
@@ -264,7 +265,7 @@ export default async function AnnouncementsPage({
                           <li key={event.id} className="relative pb-5 last:pb-0">
                             <span
                               aria-hidden
-                              className="absolute -left-[31px] top-1 h-3 w-3 rounded-full bg-neutral-400 ring-4 ring-[#141519]"
+                              className="absolute -left-[31px] top-1 h-3 w-3 rounded-full bg-neutral-500 ring-4 ring-[#141519]"
                             />
                             <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
                               <span className="rounded-md bg-white/[0.07] px-1.5 py-0.5 text-[11px] font-bold tabular-nums text-neutral-200">
