@@ -79,75 +79,81 @@ function FeaturedCarousel({ items }: { items: DocCard[] }) {
 
   return (
     <div
-      className="group relative isolate overflow-hidden rounded-2xl border border-[var(--menzu-accent)]/25 bg-gradient-to-br from-[var(--menzu-accent)]/[0.10] via-[#121216] to-[#121216] lift-card hover:-translate-y-1 hover:border-[var(--menzu-accent)]/50 hover:shadow-xl hover:shadow-black/40"
       onMouseEnter={() => setHeld(true)}
       onMouseLeave={() => setHeld(false)}
       onFocusCapture={() => setHeld(true)}
       onBlurCapture={() => setHeld(false)}
     >
-      {/* All the articles stacked in one cell, so the card is as tall as the
-          tallest and does not jump as they change. */}
-      <div className="grid">
-        {items.map((item, index) => {
-          const on = index === shown;
-          return (
-            <Link
-              key={item.slug}
-              href={`/docs/${item.slug}`}
-              aria-hidden={on ? undefined : true}
-              tabIndex={on ? undefined : -1}
-              className={`relative isolate block p-6 [grid-area:1/1] transition-opacity duration-[900ms] ease-out motion-reduce:transition-none ${
-                on ? "opacity-100" : "pointer-events-none opacity-0"
-              }`}
-            >
-              {/* The article's own picture, faded towards the text, so the
-                  card reads as that article and not a box. */}
-              <div className="pointer-events-none absolute inset-y-0 right-0 -z-10 w-3/5 opacity-25 [mask-image:linear-gradient(to_left,black,transparent)]">
-                <Image src={item.thumbnailUrl} alt="" fill sizes="40vw" className="object-cover" />
-              </div>
-              <span className="inline-flex rounded-md border border-[var(--menzu-accent)]/40 bg-[var(--menzu-accent)]/10 px-2 py-1 text-[9px] font-black uppercase tracking-widest text-[var(--menzu-accent)]">
-                Nội dung nổi bật
-              </span>
-              <h2 className="mt-3 text-xl font-black leading-tight text-white transition-colors group-hover:text-[var(--menzu-accent)]">
-                {item.title}
-              </h2>
-              {item.excerpt ? (
-                <p className="mt-2 max-w-xl text-sm leading-relaxed text-neutral-400">{item.excerpt}</p>
-              ) : null}
-              <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
-                <span className="inline-flex items-center gap-2 rounded-lg bg-[var(--menzu-accent)] px-4 py-2.5 text-[10px] font-black uppercase tracking-widest text-white transition-colors group-hover:bg-[var(--menzu-accent-dark)]">
-                  Xem chi tiết
-                  <ArrowRight size={12} aria-hidden />
+      <div
+        className="group relative isolate overflow-hidden rounded-2xl border border-[var(--menzu-accent)]/25 bg-gradient-to-br from-[var(--menzu-accent)]/[0.10] via-[#121216] to-[#121216] lift-card hover:-translate-y-1 hover:border-[var(--menzu-accent)]/50 hover:shadow-xl hover:shadow-black/40"
+      >
+        {/* All the articles stacked in one cell, so the card is as tall as the
+            tallest and does not jump as they change. */}
+        <div className="grid">
+          {items.map((item, index) => {
+            const on = index === shown;
+            return (
+              <Link
+                key={item.slug}
+                href={`/docs/${item.slug}`}
+                aria-hidden={on ? undefined : true}
+                tabIndex={on ? undefined : -1}
+                className={`relative isolate block p-6 [grid-area:1/1] ${items.length > 1 ? "pb-12" : ""} transition-opacity duration-[900ms] ease-out motion-reduce:transition-none ${
+                  on ? "opacity-100" : "pointer-events-none opacity-0"
+                }`}
+              >
+                {/* The article's own picture, faded towards the text, so the
+                    card reads as that article and not a box. */}
+                <div className="pointer-events-none absolute inset-y-0 right-0 -z-10 w-3/5 opacity-25 [mask-image:linear-gradient(to_left,black,transparent)]">
+                  <Image src={item.thumbnailUrl} alt="" fill sizes="40vw" className="object-cover" />
+                </div>
+                <span className="inline-flex rounded-md border border-[var(--menzu-accent)]/40 bg-[var(--menzu-accent)]/10 px-2 py-1 text-[9px] font-black uppercase tracking-widest text-[var(--menzu-accent)]">
+                  Nội dung nổi bật
                 </span>
-                <span className="text-[11px] font-semibold text-neutral-500">
-                  {formatViews(item.views)} lượt xem · {formatDate(item.publishedAt)}
-                </span>
-              </div>
-            </Link>
-          );
-        })}
-      </div>
-      {items.length > 1 ? (
-        <div className="absolute right-5 top-5 z-10 flex items-center gap-1.5 rounded-full border border-white/10 bg-black/40 px-2 py-1.5 backdrop-blur-md">
-          {items.map((item, index) => (
-            <button
-              key={item.slug}
-              type="button"
-              aria-label={`Bài ${index + 1} trên ${items.length}: ${item.title}`}
-              aria-current={index === shown ? "true" : undefined}
-              onClick={() => {
-                setActive(index);
-                setTurn((count) => count + 1);
-              }}
-              className={`h-1.5 rounded-full transition-all duration-300 motion-reduce:transition-none ${
-                index === shown
-                  ? "w-[18px] bg-[var(--menzu-accent)]"
-                  : "w-1.5 bg-white/40 hover:bg-white/70"
-              }`}
-            />
-          ))}
+                <h2 className="mt-3 text-xl font-black leading-tight text-white transition-colors group-hover:text-[var(--menzu-accent)]">
+                  {item.title}
+                </h2>
+                {item.excerpt ? (
+                  <p className="mt-2 max-w-xl text-sm leading-relaxed text-neutral-400">{item.excerpt}</p>
+                ) : null}
+                <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
+                  <span className="inline-flex items-center gap-2 rounded-lg bg-[var(--menzu-accent)] px-4 py-2.5 text-[10px] font-black uppercase tracking-widest text-white transition-colors group-hover:bg-[var(--menzu-accent-dark)]">
+                    Xem chi tiết
+                    <ArrowRight size={12} aria-hidden />
+                  </span>
+                  <span className="text-[11px] font-semibold text-neutral-500">
+                    {formatViews(item.views)} lượt xem · {formatDate(item.publishedAt)}
+                  </span>
+                </div>
+              </Link>
+            );
+          })}
         </div>
-      ) : null}
+        {/* The dots centred on the card's foot (the owner, 02/10/2026: "mấy cái
+            chấm đó nằm giữa", "nằm trong card"), on room the slides leave
+            for them so they never sit on the button or the line beside it. */}
+        {items.length > 1 ? (
+          <div className="absolute bottom-4 left-1/2 z-10 flex -translate-x-1/2 items-center gap-1.5 rounded-full border border-white/10 bg-black/40 px-2 py-1.5 backdrop-blur-md">
+            {items.map((item, index) => (
+              <button
+                key={item.slug}
+                type="button"
+                aria-label={`Bài ${index + 1} trên ${items.length}: ${item.title}`}
+                aria-current={index === shown ? "true" : undefined}
+                onClick={() => {
+                  setActive(index);
+                  setTurn((count) => count + 1);
+                }}
+                className={`h-1.5 rounded-full transition-all duration-300 motion-reduce:transition-none ${
+                  index === shown
+                    ? "w-[18px] bg-[var(--menzu-accent)]"
+                    : "w-1.5 bg-white/40 hover:bg-white/70"
+                }`}
+              />
+            ))}
+          </div>
+        ) : null}
+      </div>
     </div>
   );
 }
