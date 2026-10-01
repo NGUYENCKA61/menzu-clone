@@ -5,6 +5,7 @@ import { randomBytes } from "node:crypto";
 import { BODY_MAX, TITLE_MAX, TYPE_LABELS, type AnnouncementType } from "@/lib/announcements";
 import { db } from "@/lib/db";
 import { SOFTWARE_STATUS, type SoftwareStatusValue } from "@/lib/softwareStatus";
+import { notifyStatusFollowers } from "@/lib/statusFollowers";
 import { escapeTelegramHtml, NOTICE_EMOJI, STATUS_EMOJI } from "@/lib/telegramNotify";
 
 /**
@@ -498,6 +499,14 @@ export async function setCategoryStatus(
         })),
       }),
     ]);
+    // The followers of any tool that moved, told once for the whole shelf.
+    await notifyStatusFollowers({
+      productIds: stale,
+      status,
+      note,
+      imageUrl,
+      category: { name: category.name, slug: category.slug },
+    });
   }
   return { name: category.name, slug: category.slug, changed: stale.length, total: tools.length };
 }
@@ -567,6 +576,7 @@ export async function setStatus(
       data: { productId: product.id, status, note, imageUrl, source: "telegram" },
     }),
   ]);
+  await notifyStatusFollowers({ productIds: [product.id], status, note, imageUrl });
   return "changed";
 }
 

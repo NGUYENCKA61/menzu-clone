@@ -23,6 +23,7 @@ import {
   subscribedProductIds,
   type StatusEventRow,
 } from "@/lib/statusEvents";
+import { clauseAsSentence } from "@/lib/statusNote";
 import { shareCard } from "@/lib/shareCard";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -74,12 +75,6 @@ function dayLabel(key: string, now: Date): string {
   if (key === dayKey(now)) return "Hôm nay";
   if (key === dayKey(new Date(now.getTime() - 24 * 3600000))) return "Hôm qua";
   return key;
-}
-
-/** A state's clause ("đang được cập nhật, …"), written to follow a tool's
- *  name, as a sentence of its own. */
-function sentence(clause: string): string {
-  return clause.charAt(0).toUpperCase() + clause.slice(1);
 }
 
 /** The history in day groups, newest day first, order within a day kept. */
@@ -213,14 +208,21 @@ export default async function AnnouncementsPage({
         // mistake rather than as structure. The line below is not the heading
         // again — it says what this tab does that the other one does not.
         <>
+          {/* Said as it now works: the bell came off the header (25/09), and
+              a followed tool's change arrives as a notice that opens on the
+              reader's next page (lib/statusFollowers). */}
           <p className={TAB_NOTE}>
-            Nhận thông báo cho riêng từng bản hack — chỉ bản bạn chọn mới báo về
-            chuông.
+            Bấm chuông để theo dõi từng bản hack — khi bản đó đổi trạng thái,
+            thông báo sẽ hiện lên ở lần tới bạn vào web.
           </p>
-          <StatusSubscribeSearch
-            tools={subscribeList}
-            loginNext={STATUS_SUBSCRIBE_HREF}
-          />
+          {/* One column, the width of the other two tabs, so switching tabs
+              does not move the page's edges. */}
+          <div className="max-w-3xl">
+            <StatusSubscribeSearch
+              tools={subscribeList}
+              loginNext={STATUS_SUBSCRIBE_HREF}
+            />
+          </div>
         </>
       ) : statusTab ? (
         // No flex column around these two: its gap stacked on top of the
@@ -237,7 +239,7 @@ export default async function AnnouncementsPage({
               <h2 className={LABEL}>Lịch sử trạng thái</h2>
             </div>
             {events.length === 0 ? (
-              <div className="rounded-2xl border border-dashed border-white/10 bg-white/[0.02] py-16 text-center">
+              <div className="max-w-3xl rounded-2xl border border-dashed border-white/10 bg-white/[0.02] py-16 text-center">
                 <p className="text-sm font-bold text-white">Chưa có thay đổi nào</p>
                 <p className="mt-1.5 text-[13px] text-neutral-400">
                   Mỗi lần shop đổi trạng thái một tool sẽ hiện ở đây.
@@ -308,7 +310,7 @@ export default async function AnnouncementsPage({
                                 {event.note ? (
                                   <StatusNote text={event.note} />
                                 ) : (
-                                  <p>{sentence(STATUS_EVENT_COPY[event.status])}</p>
+                                  <p>{clauseAsSentence(STATUS_EVENT_COPY[event.status])}</p>
                                 )}
                               </div>
                               <time
@@ -329,19 +331,20 @@ export default async function AnnouncementsPage({
           </section>
         </>
       ) : announcements.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-white/10 bg-white/[0.02] py-16 text-center">
+        <div className="max-w-3xl rounded-2xl border border-dashed border-white/10 bg-white/[0.02] py-16 text-center">
           <p className="text-sm font-bold text-white">Chưa có thông báo nào</p>
           <p className="mt-1.5 text-[13px] text-neutral-400">
             Thông báo từ shop sẽ hiện ở đây.
           </p>
         </div>
       ) : (
-        <div className="flex flex-col gap-4">
-          {/* The security page's cards (white 2%, a hairline edge). */}
+        <div className="flex max-w-3xl flex-col gap-4">
+          {/* The status feed's cards (white 3%, a hairline edge) in the same
+              column, so the three tabs read as one page. */}
           {pageOfNotices.map((item) => (
             <article
               key={item.id}
-              className="rounded-2xl border border-white/5 bg-white/[0.02] p-5 sm:p-6"
+              className="rounded-2xl border border-white/[0.06] bg-white/[0.03] p-5 sm:p-6"
             >
               <div className="flex flex-wrap items-center gap-2">
                 {/* The word, not a glyph: the shop asked for the notice

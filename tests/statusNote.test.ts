@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
 
-import { noteSpans, parseStatusNote, statusNoteToTelegramHtml } from "@/lib/statusNote";
+import {
+  clauseAsSentence,
+  noteSpans,
+  parseStatusNote,
+  statusNoteToPlainText,
+  statusNoteToTelegramHtml,
+} from "@/lib/statusNote";
 
 const escape = (text: string) =>
   text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -43,6 +49,22 @@ describe("parseStatusNote", () => {
 
   it("reads Windows line breaks", () => {
     expect(parseStatusNote("a\r\n- b").map((b) => b.kind)).toEqual(["lines", "list"]);
+  });
+});
+
+describe("statusNoteToPlainText", () => {
+  it("drops the bold markers and draws bullets", () => {
+    expect(statusNoteToPlainText("**Xong rồi**\n- tải lại loader\n\nhết")).toBe(
+      "Xong rồi\n• tải lại loader\n\nhết",
+    );
+  });
+});
+
+describe("clauseAsSentence", () => {
+  it("capitalises the clause's first letter, đ included", () => {
+    expect(clauseAsSentence("đã an toàn, dùng lại bình thường.")).toBe(
+      "Đã an toàn, dùng lại bình thường.",
+    );
   });
 });
 

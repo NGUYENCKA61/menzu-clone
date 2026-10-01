@@ -35,6 +35,7 @@ import {
   toolsScreen,
   type MenuScreen,
 } from "@/lib/telegramMenu";
+import { notifyStatusFollowers } from "@/lib/statusFollowers";
 import {
   escapeTelegramHtml,
   postAnnouncementToTelegram,
@@ -622,6 +623,12 @@ export async function POST(request: Request) {
   // Announce it back out to the channel the customers watch — after the change
   // is saved, and never blocking the webhook's reply to Telegram.
   await postStatusToTelegram(product.id, command.status, command.note || null, imageUrl);
+  await notifyStatusFollowers({
+    productIds: [product.id],
+    status: command.status,
+    note: command.note || null,
+    imageUrl,
+  });
   if (!fromChannel) {
     await reply(
       `✅ ${command.productCode} → <b>${SOFTWARE_STATUS[command.status].label}</b>. Đã đăng lên kênh.`,

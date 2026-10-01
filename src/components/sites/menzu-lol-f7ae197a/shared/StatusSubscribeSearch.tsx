@@ -174,7 +174,10 @@ export function StatusSubscribeSearch({
               <span aria-hidden className="h-px min-w-6 flex-1 bg-white/[0.08]" />
             </div>
 
-            <ul className="grid gap-3 sm:grid-cols-2">
+            {/* One column of the status feed's cards (white 3%, a hairline
+                edge), in the page's shared column (the owner, 01/10/2026:
+                "thử đi" to the three tabs matching). */}
+            <ul className="flex flex-col gap-2.5">
               {shelf.tools.map((tool) => {
                 const state = tool.status ? SOFTWARE_STATUS[tool.status] : null;
                 const on = tool.subscribed === true;
@@ -184,7 +187,7 @@ export function StatusSubscribeSearch({
                     className={`flex items-center gap-3.5 rounded-2xl border p-3 transition-colors ${
                       on
                         ? "border-[var(--menzu-accent)]/35 bg-[var(--menzu-accent)]/[0.06]"
-                        : "border-white/5 bg-white/[0.02] hover:border-white/10"
+                        : "border-white/[0.06] bg-white/[0.03] hover:border-white/10"
                     }`}
                   >
                     <Link
@@ -214,17 +217,19 @@ export function StatusSubscribeSearch({
                     <div className="min-w-0 flex-1">
                       <Link
                         href={tool.href}
-                        // Two lines rather than an ellipsis: on a phone the
-                        // text column is narrow enough that half these names
-                        // would end in "…" and stop telling the reader which
-                        // tool it is.
-                        className="line-clamp-2 text-[13.5px] font-bold leading-snug text-white transition-colors hover:text-[var(--menzu-accent)]"
+                        title={tool.name}
+                        // Two lines on a phone rather than an ellipsis: there
+                        // the text column is narrow enough that half these
+                        // names would end in "…" and stop telling the reader
+                        // which tool it is. One line from sm up, as the status
+                        // feed's names sit, with the whole name on hover.
+                        className="line-clamp-2 text-[13.5px] font-bold leading-snug text-neutral-100 transition-colors hover:text-[var(--menzu-accent)] sm:line-clamp-1"
                       >
                         {tool.name}
                       </Link>
                       {state ? (
                         <span
-                          className={`mt-1.5 inline-flex items-center rounded-md border px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider ${state.tile}`}
+                          className={`mt-1.5 inline-flex items-center rounded-md border px-2 py-0.5 text-[10px] font-black uppercase tracking-wider ${state.tile}`}
                         >
                           {state.label}
                         </span>

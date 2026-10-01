@@ -72,6 +72,32 @@ export function parseStatusNote(note: string): NoteBlock[] {
 }
 
 /**
+ * The same note as plain text, for a notice body (announcements are plain
+ * text by design): the bold markers dropped, bullets drawn as "• ", line
+ * breaks kept.
+ */
+export function statusNoteToPlainText(note: string): string {
+  return note
+    .replace(/\r\n?/g, "\n")
+    .split("\n")
+    .map((raw) => {
+      const bullet = BULLET.test(raw);
+      const line = (bullet ? raw.replace(BULLET, "") : raw).trimEnd();
+      const text = noteSpans(line)
+        .map((span) => span.text)
+        .join("");
+      return bullet ? `• ${text}` : text;
+    })
+    .join("\n");
+}
+
+/** A state's clause ("đang được cập nhật, …"), written to follow a tool's
+ *  name, as a sentence of its own. */
+export function clauseAsSentence(clause: string): string {
+  return clause.charAt(0).toUpperCase() + clause.slice(1);
+}
+
+/**
  * The same note for a Telegram post in HTML parse mode: escaped by the
  * caller's escaper, bold as <b>, bullets as "• ", blank lines kept.
  * Telegram makes the web addresses into links by itself.

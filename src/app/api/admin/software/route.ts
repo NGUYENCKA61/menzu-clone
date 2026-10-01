@@ -20,6 +20,7 @@ import { PILL_ABSENT, PILL_BAD, readStatusPill } from "@/lib/statusPill";
 import { uniqueProductSlug } from "@/lib/routes";
 import { slugify } from "@/lib/slug";
 import { forgetSlug, rememberSlugOps } from "@/lib/slugHistory";
+import { notifyStatusFollowers } from "@/lib/statusFollowers";
 import { postStatusToTelegram } from "@/lib/telegramNotify";
 
 const STATUSES = ["UNDETECTED", "STABLE", "UPDATED", "RISKY", "UPDATING", "DETECTED"] as const;
@@ -392,6 +393,13 @@ export async function PATCH(request: Request) {
       body?.statusNote?.trim() || null,
       body?.statusImageUrl?.trim() || null,
     );
+    // …and the customers following the tool, on the site itself.
+    await notifyStatusFollowers({
+      productIds: [product.id],
+      status: nextStatus,
+      note: body?.statusNote?.trim() || null,
+      imageUrl: body?.statusImageUrl?.trim() || null,
+    });
   }
 
   return NextResponse.json({ ok: true });
