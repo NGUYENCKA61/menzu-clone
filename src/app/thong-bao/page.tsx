@@ -29,6 +29,7 @@ import {
   subscribedProductIds,
   type StatusEventRow,
 } from "@/lib/statusEvents";
+import { clauseAsSentence } from "@/lib/statusNote";
 import { shareCard } from "@/lib/shareCard";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -254,19 +255,23 @@ export default async function AnnouncementsPage({
                     <p className="mb-3 text-[10px] font-black uppercase tracking-widest text-neutral-300">
                       {dayLabel(group.key, now)}
                     </p>
-                    {/* A line down the left with a dot per change, the colour
-                        of the state it moved to — the same dot the pill on
-                        the tool's card wears. */}
+                    {/* A line down the left with a quiet dot per change. Each
+                        change says itself once (the owner, 02/10/2026: "sửa
+                        sao mà rõ đồng bộ không rối là ok"): the time and the
+                        state's pill — the one colour on the row — then the
+                        tool, then the shop's note or, without one, the
+                        sentence the state implies. A whole category moving
+                        names itself in the tool's place ("· cả danh mục"). */}
                     <ol className="relative ml-1.5 border-l border-white/10 pl-6">
                       {group.items.map((event) => {
                         const state = SOFTWARE_STATUS[event.status];
                         return (
-                          <li key={event.id} className="relative pb-5 last:pb-0">
+                          <li key={event.id} className="relative pb-6 last:pb-0">
                             <span
                               aria-hidden
-                              className={`absolute -left-[31px] top-1 h-3 w-3 rounded-full ring-4 ring-[#141519] ${state.dot}`}
+                              className="absolute -left-[30px] top-1.5 h-2.5 w-2.5 rounded-full bg-neutral-500 ring-4 ring-[#141519]"
                             />
-                            <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                            <div className="flex flex-wrap items-center gap-2">
                               <span className="rounded-md bg-white/[0.07] px-1.5 py-0.5 text-[11px] font-bold tabular-nums text-neutral-200">
                                 {formatTime(event.at)}
                               </span>
@@ -275,45 +280,40 @@ export default async function AnnouncementsPage({
                               >
                                 {state.label}
                               </span>
-                              <span className="text-[11px] font-semibold text-neutral-500">
-                                {event.scope === "category" ? "Cả danh mục" : event.categoryName}
-                              </span>
                             </div>
-                            <p className="mt-1.5 text-[13.5px] leading-relaxed text-neutral-300">
-                              <Link
-                                href={event.productHref}
-                                className="font-bold text-white transition-colors hover:text-[var(--menzu-accent)]"
-                              >
-                                {event.productName}
-                              </Link>{" "}
-                              {STATUS_EVENT_COPY[event.status]}
-                            </p>
-                            {/* The shop's own words for this particular
-                                change, when it wrote any — a patch note, a
-                                "wait 24h", something the state alone cannot
-                                say. */}
-                            {event.note ? (
-                              <div className="mt-1.5 break-words rounded-xl border border-white/[0.06] bg-white/[0.02] px-3.5 py-2.5 text-[12.5px] leading-relaxed text-neutral-400">
+                            {/* One line from sm up, the whole name on hover and
+                                on the tool's page; two on a phone, as the
+                                subscribe tab's names sit. */}
+                            <Link
+                              href={event.productHref}
+                              title={event.productName}
+                              className="mt-2 line-clamp-2 text-[13.5px] font-bold leading-snug text-white transition-colors hover:text-[var(--menzu-accent)] sm:line-clamp-1"
+                            >
+                              {event.productName}
+                            </Link>
+                            <div className="mt-1 break-words text-[13px] leading-relaxed text-neutral-400">
+                              {event.note ? (
                                 <StatusNote text={event.note} />
-                              </div>
-                            ) : null}
+                              ) : (
+                                <p>{clauseAsSentence(STATUS_EVENT_COPY[event.status])}</p>
+                              )}
+                            </div>
                             {event.imageUrl ? (
                               <a
                                 href={event.imageUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="mt-2.5 block w-full max-w-[420px] overflow-hidden rounded-xl border border-white/10 bg-neutral-950 transition-colors hover:border-white/25"
+                                className="mt-2.5 block w-full max-w-[360px] overflow-hidden rounded-xl border border-white/10 bg-neutral-950 transition-colors hover:border-white/25"
                               >
                                 <Image
                                   src={event.imageUrl}
                                   alt={`Ảnh kèm thông báo ${event.productName}`}
-                                  width={840}
-                                  height={472}
-                                  // Capped: a screenshot taken on a phone is
-                                  // portrait and would otherwise push the next
-                                  // change a screen and a half down. The whole
-                                  // picture is one click away.
-                                  className="max-h-[280px] w-full object-cover"
+                                  width={720}
+                                  height={405}
+                                  // Capped: a portrait phone screenshot would
+                                  // otherwise stretch the entry down the page.
+                                  // The whole picture is one click away.
+                                  className="max-h-[220px] w-full object-cover"
                                 />
                               </a>
                             ) : null}
