@@ -5,11 +5,7 @@ import { AdminShell } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminSh
 import { AdminWarranty } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminWarranty";
 import { getAdmin } from "@/lib/admin";
 import { db } from "@/lib/db";
-import { promisedRefund, refundWindowClosed } from "@/lib/refundRequests";
-import { mailEnabled } from "@/lib/settings";
-import { getShopSettings } from "@/lib/settingsStore";
-import { awaitingShop } from "@/lib/warrantyChat";
-import { MESSAGE_SELECT, toChatMessage } from "@/lib/warrantyThread";
+import { awaitingShop, messagePreview } from "@/lib/warrantyChat";
 
 export const metadata: Metadata = { title: "Bảo hành | Quản trị" };
 export const dynamic = "force-dynamic";
@@ -25,12 +21,12 @@ function stamp(date: Date): string {
   });
 }
 
-const DAY_MS = 24 * 60 * 60 * 1000;
-
 /**
- * The warranty desk: every report, the open ones first — and, since
- * 01/10/2026, where refunds are decided: a report the shop cannot fix is
- * refunded from its card, to the buyer's account on the site or over a bank.
+ * The warranty queue: one line per ticket, the ones that need the shop on
+ * top, each opening its own page (/admin/warranty/[id]) where the
+ * conversation, the moves and the refund live (the owner, 01/10/2026: "sửa
+ * lại trong Dashboard admin bảo hành sao cho đỡ rối dễ thao tác với khách
+ * hàng").
  */
 export default async function AdminWarrantyPage() {
   const admin = await getAdmin();
@@ -39,86 +35,60 @@ export default async function AdminWarrantyPage() {
   if (!admin) notFound();
 
   // Taken before the read, so anything landing while it runs still counts as
-  // news for the desk's "có cập nhật mới".
+  // news for the queue's "có cập nhật mới".
   const loadedAt = new Date().toISOString();
-  const [settings, rows] = await Promise.all([
-    getShopSettings(),
-    db.warrantyRequest.findMany({
-      orderBy: [{ createdAt: "desc" }],
-      take: 300,
-      select: {
-        id: true,
-        status: true,
-        issue: true,
-        description: true,
-        imageUrl: true,
-        createdAt: true,
-        resolvedAt: true,
-        refundAmount: true,
-        refundMethod: true,
-        bankName: true,
-        bankAccount: true,
-        accountHolder: true,
-        bankSubmittedAt: true,
-        user: { select: { username: true, uid: true } },
-        order: {
-          select: {
-            code: true,
-            total: true,
-            status: true,
-            createdAt: true,
-            product: { select: { name: true, code: true, refundRate: true } },
-            package: { select: { label: true } },
-          },
+  const rows = await db.warrantyRequest.findMany({
+    orderBy: [{ createdAt: "desc" }],
+    take: 300,
+    select: {
+      id: true,
+      status: true,
+      issue: true,
+      description: true,
+      createdAt: true,
+      bankAccount: true,
+      refundMethod: true,
+      user: { select: { username: true } },
+      order: {
+        select: {
+          code: true,
+          product: { select: { name: true, code: true } },
+          package: { select: { label: true } },
         },
-        messages: { orderBy: { createdAt: "asc" }, select: MESSAGE_SELECT },
       },
-    }),
-  ]);
+      // The last word only — the queue shows who had it and what it said.
+      messages: { orderBy: { createdAt: "desc" }, take: 1, select: { fromShop: true, body: true, createdAt: true } },
+    },
+  });
 
   return (
     <AdminShell
       title="Bảo hành"
-      subtitle="Khách báo lỗi theo từng đơn — nhận, xử lý, trả lời, hoặc hoàn tiền"
+      subtitle="Khách báo lỗi theo từng đơn — bấm vào một yêu cầu để trao đổi, xử lý hoặc hoàn tiền"
       username={admin.username}
     >
       <AdminWarranty
+        loadedAt={loadedAt}
         rows={rows.map((r) => {
-          const total = Number(r.order.total);
-          const afterDays = Math.floor((r.createdAt.getTime() - r.order.createdAt.getTime()) / DAY_MS);
+          const last = r.messages[0] ?? null;
+          const bankRefund = r.status === "REFUNDING" && r.refundMethod === "MANUAL";
           return {
             id: r.id,
             status: r.status,
             issue: r.issue,
-            description: r.description,
-            imageUrl: r.imageUrl,
-            createdAt: stamp(r.createdAt),
-            resolvedAt: r.resolvedAt ? stamp(r.resolvedAt) : null,
-            username: r.user.username,
-            uid: r.user.uid,
-            orderCode: r.order.code,
-            orderPaid: r.order.status === "PAID",
             productName: r.order.product.name ?? r.order.product.code,
             packageLabel: r.order.package?.label ?? null,
-            orderTotal: total,
-            // The published rate is a starting figure; the desk can type any
-            // amount up to the order total.
-            suggestedRefund: promisedRefund(total, r.order.product.refundRate) ?? total,
-            purchasedAt: stamp(r.order.createdAt),
-            reportedAfter: afterDays <= 0 ? "trong ngày mua" : `sau ${afterDays} ngày`,
-            reportedInWindow: !refundWindowClosed(r.order.createdAt, r.createdAt),
-            refundAmount: r.refundAmount === null ? null : Number(r.refundAmount),
-            refundMethod: r.refundMethod,
-            bankName: r.bankName,
-            bankAccount: r.bankAccount,
-            accountHolder: r.accountHolder,
-            bankSubmittedAt: r.bankSubmittedAt ? stamp(r.bankSubmittedAt) : null,
-            messages: r.messages.map(toChatMessage),
-            awaitingShop: awaitingShop(r.status, r.messages.at(-1)?.fromShop ?? null),
+            username: r.user.username,
+            orderCode: r.order.code,
+            awaitingShop: awaitingShop(r.status, last?.fromShop ?? null),
+            transferDue: bankRefund && r.bankAccount !== null,
+            bankAwaited: bankRefund && r.bankAccount === null,
+            lastAt: stamp(last?.createdAt ?? r.createdAt),
+            lastTs: (last?.createdAt ?? r.createdAt).getTime(),
+            lastFromShop: last ? last.fromShop : null,
+            preview: messagePreview(last ? last.body : r.description, 160),
           };
         })}
-        mailOn={mailEnabled(settings)}
-        loadedAt={loadedAt}
       />
     </AdminShell>
   );

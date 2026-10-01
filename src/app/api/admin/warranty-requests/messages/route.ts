@@ -5,9 +5,52 @@ import { db } from "@/lib/db";
 import { messagePreview, readMessage } from "@/lib/warrantyChat";
 import { notifyWarranty } from "@/lib/warrantyNotify";
 import { warrantyOpen } from "@/lib/warrantyRequests";
+import { MESSAGE_SELECT, toChatMessage } from "@/lib/warrantyThread";
 
 /** The desk's reply box holds this much, like an action's note. */
 const NOTE_MAX = 500;
+
+/**
+ * The ticket page's poll (/admin/warranty/[id]): the ticket's state and the
+ * messages after a moment the page already has, so a buyer's answer shows
+ * while the admin is still on the page.
+ */
+export async function GET(request: Request) {
+  const admin = await getAdmin();
+  if (!admin) {
+    return NextResponse.json({ error: "Không có quyền" }, { status: 403 });
+  }
+  const url = new URL(request.url);
+  const id = url.searchParams.get("id")?.trim() ?? "";
+  const after = new Date(url.searchParams.get("after") ?? "");
+  if (!id) return NextResponse.json({ error: "Thiếu mã yêu cầu" }, { status: 400 });
+
+  const ticket = await db.warrantyRequest.findUnique({
+    where: { id },
+    select: {
+      status: true,
+      bankSubmittedAt: true,
+      messages: {
+        where: Number.isNaN(after.getTime()) ? {} : { createdAt: { gt: after } },
+        orderBy: { createdAt: "asc" },
+        take: 100,
+        select: MESSAGE_SELECT,
+      },
+    },
+  });
+  if (!ticket) return NextResponse.json({ error: "Không tìm thấy yêu cầu" }, { status: 404 });
+
+  return NextResponse.json(
+    {
+      status: ticket.status,
+      // A bank account arriving changes what the page offers ("Đã chuyển
+      // khoản" wakes up), so it is news too.
+      bankSubmittedAt: ticket.bankSubmittedAt?.toISOString() ?? null,
+      messages: ticket.messages.map(toChatMessage),
+    },
+    { headers: { "Cache-Control": "no-store" } },
+  );
+}
 
 /**
  * The shop says something on a ticket without moving it — a question, a step
