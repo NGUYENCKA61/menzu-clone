@@ -948,7 +948,7 @@ export function CartView({
             href="/wallet"
             className="relative mt-4 flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[var(--menzu-accent)] text-[12px] font-black uppercase tracking-widest text-white transition-colors hover:bg-[var(--menzu-accent-dark)]"
           >
-            Nạp tiền
+            Nạp tiền ngay
             <ArrowRight className="h-4 w-4" />
           </Link>
         ) : (
