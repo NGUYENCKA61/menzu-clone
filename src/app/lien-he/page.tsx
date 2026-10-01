@@ -114,7 +114,7 @@ export default async function OfficialChannelsPage() {
   ].filter((channel) => channel.href.trim().length > 0);
 
   return (
-    <SimplePage title="Kênh chính thức & liên hệ" crumb="Liên hệ" icon={Users}>
+    <SimplePage title="Kênh chính thức & liên hệ" crumb="Liên hệ" icon={Users} ground="home">
       {/* The warning first, and in the shop's own red — somebody who has just
           been messaged by a fake account reads this page for that — but one
           short paragraph now (the owner, 01/10/2026: "thu gọn cái cảnh báo giả

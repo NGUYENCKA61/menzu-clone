@@ -67,6 +67,7 @@ export default async function DocArticlePage({ params }: PageProps) {
       crumb="Wiki & Hướng dẫn"
       crumbs={[{ label: "Wiki & Hướng dẫn", href: "/docs" }, { label: article.title }]}
       titleCase="normal"
+      ground="home"
       subtitle={
         <p className="flex flex-wrap items-center gap-x-2 gap-y-1.5 text-[12px] font-semibold text-neutral-500">
           <Link

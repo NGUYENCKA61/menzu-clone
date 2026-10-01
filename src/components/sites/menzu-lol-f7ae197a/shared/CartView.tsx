@@ -562,11 +562,12 @@ export function CartView({
         ) : null}
 
         {/* TEAR LINE — the goods above, the money below. The two notches
-            are page-coloured discs sitting on the card's edge; the card
-            clips their outer halves, so what is left reads as a punch. */}
+            are page-coloured discs sitting on the card's edge (the basket's
+            #0f1015 ground, not --menzu-bg's near-black); the card clips
+            their outer halves, so what is left reads as a punch. */}
         <div aria-hidden className="relative mt-2 border-t border-dashed border-white/10">
-          <span className="absolute -left-[9px] -top-[9px] h-[18px] w-[18px] rounded-full border border-white/10 bg-[var(--menzu-bg)]" />
-          <span className="absolute -right-[9px] -top-[9px] h-[18px] w-[18px] rounded-full border border-white/10 bg-[var(--menzu-bg)]" />
+          <span className="absolute -left-[9px] -top-[9px] h-[18px] w-[18px] rounded-full border border-white/10 bg-[#0f1015]" />
+          <span className="absolute -right-[9px] -top-[9px] h-[18px] w-[18px] rounded-full border border-white/10 bg-[#0f1015]" />
         </div>
 
         {/* FIGURES — the same rows the basket quoted, now as what was

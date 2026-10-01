@@ -49,7 +49,13 @@ export default async function DocsPage() {
     // The search box sits in the title row and filters the list below it, so
     // one provider holds the query for both.
     <DocsSearchProvider>
-      <SimplePage title="Wiki & Hướng Dẫn" crumb="Wiki & Hướng dẫn" icon={BookOpen} action={<DocsSearchBox />}>
+      <SimplePage
+        title="Wiki & Hướng Dẫn"
+        crumb="Wiki & Hướng dẫn"
+        icon={BookOpen}
+        action={<DocsSearchBox />}
+        ground="home"
+      >
         <DocsHelpCenter
           articles={articles}
           // The same questions the home page answers, from the same setting;

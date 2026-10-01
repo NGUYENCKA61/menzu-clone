@@ -163,7 +163,7 @@ export default async function AnnouncementsPage({
   }));
 
   return (
-    <SimplePage title="Thông báo" crumb="Thông báo" icon={Bell}>
+    <SimplePage title="Thông báo" crumb="Thông báo" icon={Bell} ground="home">
       {/* On a phone the three tabs scroll as one row, bleeding to the
           screen's edges; stacked, they took three lines before a single
           notice was in view. */}
