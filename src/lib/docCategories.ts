@@ -16,11 +16,13 @@ export type DocShelf = (typeof DOC_SHELVES)[number];
 export const ARTICLE_SHELVES = ["GLOSSARY", "GUIDE", "WARRANTY", "TERMS"] as const;
 export type ArticleShelf = (typeof ARTICLE_SHELVES)[number];
 
+/** In full words, each a phrase like its neighbours (the owner, 02/10/2026:
+ *  "Câu hỏi thường gặp, hướng dẫn chung, các chính sách chung"). */
 export const DOC_SHELF_LABEL: Record<DocShelf, string> = {
-  FAQ: "FAQ",
+  FAQ: "Câu hỏi thường gặp",
   GLOSSARY: "Khái niệm và thuật ngữ",
-  GUIDE: "Hướng dẫn",
-  WARRANTY: "Chính sách",
+  GUIDE: "Hướng dẫn chung",
+  WARRANTY: "Các chính sách chung",
   TERMS: "Các điều khoản chung",
 };
 

@@ -15,6 +15,7 @@ import { ArrowRight, ChevronRight, Search } from "lucide-react";
 
 import { FaqAccordion } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/FaqAccordion";
 import { ListPager } from "@/components/sites/menzu-lol-f7ae197a/shared/AccountListChrome";
+import { DOC_SHELF_META } from "@/components/sites/menzu-lol-f7ae197a/shared/docShelfMeta";
 import { DOC_SHELF_LABEL, DOC_SHELVES, isDocShelf, type DocShelf } from "@/lib/docCategories";
 import type { FaqEntry } from "@/lib/settings";
 
@@ -186,11 +187,7 @@ export function DocsHelpCenter({
     setJump((j) => j + 1);
   }
 
-  const heading = searching
-    ? `Kết quả cho “${query.trim()}”`
-    : tab === "FAQ"
-      ? "Câu hỏi thường gặp"
-      : DOC_SHELF_LABEL[tab];
+  const heading = searching ? `Kết quả cho “${query.trim()}”` : DOC_SHELF_LABEL[tab];
   const nothing = searching ? foundFaq.length === 0 && list.length === 0 : tab !== "FAQ" && list.length === 0;
 
   return (
@@ -230,9 +227,11 @@ export function DocsHelpCenter({
       ) : null}
 
       <div className="grid gap-6 lg:grid-cols-[240px_minmax(0,1fr)] lg:items-start">
-        {/* Left rail: the shelves, by name only. A row of chips below lg, a
-            column above. min-w-0: the chip row counts every button towards
-            the column's minimum and pushed a phone's page past its edge. */}
+        {/* Left rail: the shelves, each with its icon in front, grey and red
+            when open, as the account pages' rail draws its items (the owner,
+            02/10/2026: "thêm icon"). A row of chips below lg, a column above.
+            min-w-0: the chip row counts every button towards the column's
+            minimum and pushed a phone's page past its edge. */}
         <aside className="min-w-0 lg:sticky lg:top-[120px]">
           <div className="rounded-2xl border border-white/10 bg-[#121216] p-3">
             <p className="mb-2 px-2 text-[10px] font-black uppercase tracking-widest text-neutral-500">
@@ -241,13 +240,14 @@ export function DocsHelpCenter({
             <div className="flex gap-1.5 overflow-x-auto [scrollbar-width:none] lg:flex-col lg:overflow-visible [&::-webkit-scrollbar]:hidden">
               {DOC_SHELVES.map((key) => {
                 const on = key === tab && !searching;
+                const Icon = DOC_SHELF_META[key].icon;
                 return (
                   <button
                     key={key}
                     type="button"
                     onClick={() => openShelf(key)}
                     aria-pressed={on}
-                    className={`relative shrink-0 whitespace-nowrap rounded-xl border px-3 py-2.5 text-left text-sm font-bold transition-colors lg:shrink lg:whitespace-normal ${
+                    className={`relative flex shrink-0 items-center gap-2.5 whitespace-nowrap rounded-xl border px-3 py-2.5 text-left text-sm font-bold transition-colors lg:shrink lg:whitespace-normal ${
                       on
                         ? "border-[var(--menzu-accent)]/25 bg-[var(--menzu-accent)]/10 text-white"
                         : "border-transparent text-neutral-400 hover:bg-white/5 hover:text-white"
@@ -256,6 +256,11 @@ export function DocsHelpCenter({
                     {on ? (
                       <span className="absolute bottom-2 left-0 top-2 w-0.5 rounded-full bg-[var(--menzu-accent)]" />
                     ) : null}
+                    <Icon
+                      size={16}
+                      aria-hidden
+                      className={`shrink-0 ${on ? "text-[var(--menzu-accent)]" : "text-neutral-500"}`}
+                    />
                     {DOC_SHELF_LABEL[key]}
                   </button>
                 );
