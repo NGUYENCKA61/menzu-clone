@@ -122,9 +122,9 @@ const GHOST_BTN =
   "inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-3.5 text-xs font-semibold text-neutral-300 transition-colors hover:bg-white/10 hover:text-white";
 const CELL =
   "border-t border-white/[0.06] px-4 py-4 text-sm text-neutral-200 sm:px-5";
-/** Money as the /orders list and /transactions write it. */
+/** "280.000đ", like the /orders list, /transactions and every price on the site. */
 function money(value: number): string {
-  return `${formatVnd(value)} ₫`;
+  return `${formatVnd(value)}đ`;
 }
 /** One value with its copy button; the password variant starts masked. */
 function HandoverBox({

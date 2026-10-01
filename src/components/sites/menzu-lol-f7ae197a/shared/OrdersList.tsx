@@ -84,8 +84,9 @@ const SORTS: Record<string, (a: OrderCardView, b: OrderCardView) => number> = {
   price_low: (a, b) => a.total - b.total,
 };
 
+/** "280.000đ", the way every price on the site is written. */
 function money(value: number): string {
-  return `${formatVnd(value)} ₫`;
+  return `${formatVnd(value)}đ`;
 }
 
 /**

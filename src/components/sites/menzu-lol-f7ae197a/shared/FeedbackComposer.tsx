@@ -208,7 +208,7 @@ export function FeedbackComposer({ user, today }: { user: ComposerUser; today: s
             Trị giá giao dịch
           </span>
           <span className="text-2xl font-black text-[var(--menzu-accent)] tabular-nums leading-none">
-            {formatVnd(amountNumber)}&nbsp;₫
+            {formatVnd(amountNumber)}đ
           </span>
         </div>
       ) : null}

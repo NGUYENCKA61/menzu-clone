@@ -172,7 +172,7 @@ function ReviewCard({ item }: { item: FeedbackItem }) {
               Trị giá giao dịch
             </span>
             <span className="text-2xl font-black text-emerald-400 tabular-nums leading-none">
-              {formatVnd(item.amount)}&nbsp;₫
+              {formatVnd(item.amount)}đ
             </span>
           </div>
         ) : null}

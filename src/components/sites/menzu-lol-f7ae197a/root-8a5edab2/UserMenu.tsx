@@ -180,7 +180,7 @@ export function UserMenu({ user }: { user: HeaderUser }) {
             <span className="text-[11px] font-bold text-white leading-none truncate mb-[4px]">
               {user.username}
             </span>
-            <span className="text-[9px] font-black uppercase tracking-widest leading-none truncate text-emerald-400">
+            <span className="text-[9px] font-black tracking-widest leading-none truncate text-emerald-400">
               {formatVnd(user.balance)}đ
             </span>
           </span>

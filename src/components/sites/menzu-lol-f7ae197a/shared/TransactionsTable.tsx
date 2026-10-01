@@ -80,8 +80,9 @@ function methodChip(row: LedgerView): string {
   return method || KIND_LABEL[row.kind] || row.kind;
 }
 
+/** "280.000đ", the way every price on the site is written. */
 function money(value: number): string {
-  return `${formatVnd(value)} ₫`;
+  return `${formatVnd(value)}đ`;
 }
 
 /** The figure, and for money that moved the balance on either side of it. */
