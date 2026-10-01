@@ -20,7 +20,6 @@ import {
   Receipt,
   ShieldCheck,
   ShoppingCart,
-  Ticket,
   Trash2,
   Wallet,
 } from "lucide-react";
@@ -35,8 +34,6 @@ import {
 import { formatVnd } from "./productData";
 import {
   VOUCHER_APPLIED,
-  VOUCHER_ICON,
-  VOUCHER_LABEL,
   voucherButtonClass,
   voucherInputClass,
 } from "./voucherLook";
@@ -844,12 +841,10 @@ export function CartView({
         </h2>
 
         {/* VOUCHER */}
-        {/* The same voucher box as the product page's buy dialogs. */}
+        {/* The product page's voucher box without its caption and ticket
+            icon: the field says what it is (the owner, 01/10/2026; the buy
+            dialogs follow later, "để sau"). */}
         <div className="relative mt-4">
-          <span className={`mb-2 ${VOUCHER_LABEL}`}>
-            <Ticket className={VOUCHER_ICON} />
-            Mã giảm giá
-          </span>
           <div className="flex gap-2">
             <input
               value={voucher}
@@ -863,7 +858,7 @@ export function CartView({
                   void applyVoucher();
                 }
               }}
-              placeholder="Nhập mã"
+              placeholder="Nhập mã giảm giá"
               aria-label="Mã giảm giá"
               className={voucherInputClass(voucher.trim().length > 0)}
             />
