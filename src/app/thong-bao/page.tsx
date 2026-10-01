@@ -160,6 +160,7 @@ export default async function AnnouncementsPage({
     categoryName: tool.categoryName,
     categorySlug: tool.categorySlug,
     categoryImageUrl: tool.categoryImageUrl,
+    categoryLogoUrl: tool.categoryLogoUrl,
     imageUrl: tool.imageUrl,
     status: tool.status,
     subscribed: user ? followed.has(tool.id) : null,

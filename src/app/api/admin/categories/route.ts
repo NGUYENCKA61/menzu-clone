@@ -98,6 +98,8 @@ export async function PATCH(request: Request) {
     imageUrl?: string;
     /** The category page's wide header picture; "" clears it. */
     bannerUrl?: string;
+    /** The game's square logo; "" clears it, falling back to the tile. */
+    logoUrl?: string;
     /** "PC" / "MOBILE" / "SPOOFER"; "" clears. See src/lib/categoryPlatform.ts. */
     platform?: string;
     soldCount?: number;
@@ -188,6 +190,11 @@ export async function PATCH(request: Request) {
       // Cleared, the category page falls back to the tile picture above.
       ...(body?.bannerUrl !== undefined
         ? { bannerUrl: body.bannerUrl.trim() || null }
+        : {}),
+      // Cleared, the small mark beside the category's name is the tile
+      // picture again.
+      ...(body?.logoUrl !== undefined
+        ? { logoUrl: body.logoUrl.trim() || null }
         : {}),
       // Sent as "" to clear it, which takes the line off the home page tile.
       ...(body?.description !== undefined

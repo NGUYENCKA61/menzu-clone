@@ -52,6 +52,8 @@ export interface StatusTool {
   /** The category's own tile picture: the stand-in for a tool with no cover,
    *  and the mark beside the shelf's name on the subscribe tab. */
   categoryImageUrl: string | null;
+  /** The category's square game logo, when the shop has uploaded one. */
+  categoryLogoUrl: string | null;
   imageUrl: string | null;
   status: SoftwareStatusValue | null;
   /** When the state last changed; null for a tool with no history yet. */
@@ -216,7 +218,7 @@ export async function listSoftwareForStatus(): Promise<StatusTool[]> {
       slug: true,
       imageUrl: true,
       softwareStatus: true,
-      category: { select: { name: true, slug: true, imageUrl: true } },
+      category: { select: { name: true, slug: true, imageUrl: true, logoUrl: true } },
       images: { orderBy: { sortOrder: "asc" }, take: 1, select: { url: true } },
       statusEvents: {
         orderBy: { createdAt: "desc" },
@@ -233,6 +235,7 @@ export async function listSoftwareForStatus(): Promise<StatusTool[]> {
     categoryName: p.category.name,
     categorySlug: p.category.slug,
     categoryImageUrl: p.category.imageUrl,
+    categoryLogoUrl: p.category.logoUrl,
     imageUrl: p.images[0]?.url ?? p.imageUrl,
     status: readSoftwareStatus(p.softwareStatus),
     changedAt: p.statusEvents[0]?.createdAt ?? null,

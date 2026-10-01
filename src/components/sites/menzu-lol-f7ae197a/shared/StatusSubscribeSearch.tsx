@@ -22,6 +22,9 @@ export interface StatusToolView {
   /** The category's tile picture: the stand-in for a tool with no cover of
    *  its own, and the mark beside the shelf's name. */
   categoryImageUrl: string | null;
+  /** The category's square game logo, uploaded in the desk; the shelf's
+   *  mark when set, drawn whole rather than cropped. */
+  categoryLogoUrl: string | null;
   /** The tool's cover, as the shop set it. Null falls back to the
    *  category's picture, then to the empty tile. */
   imageUrl: string | null;
@@ -33,6 +36,8 @@ export interface StatusToolView {
 interface Shelf {
   slug: string;
   name: string;
+  /** The game's logo, or null to use the cover below in its place. */
+  logoUrl: string | null;
   imageUrl: string | null;
   tools: StatusToolView[];
   following: number;
@@ -151,6 +156,7 @@ function shelve(tools: StatusToolView[]): Shelf[] {
       shelf = {
         slug: tool.categorySlug,
         name: tool.categoryName,
+        logoUrl: tool.categoryLogoUrl,
         imageUrl: tool.categoryImageUrl,
         tools: [],
         following: 0,
@@ -305,9 +311,15 @@ export function StatusSubscribeSearch({
                 rule fills the rest of the line so the shelves read as bands
                 rather than as headings floating over a grid. */}
             <div className="mb-3 flex flex-wrap items-center gap-x-3 gap-y-1.5">
-              {/* The game's own picture beside its name: a mark the eye can
-                  stop on while the shelves scroll past. */}
-              {shelf.imageUrl ? (
+              {/* The game's own logo beside its name: a mark the eye can stop
+                  on while the shelves scroll past. Drawn whole on a quiet
+                  tile; until the shop uploads one, the cover stands in,
+                  cropped square (the owner: "hiện tạm ảnh danh mục"). */}
+              {shelf.logoUrl ? (
+                <span className="relative h-7 w-7 shrink-0 overflow-hidden rounded-lg border border-white/10 bg-white/[0.06]">
+                  <Image src={shelf.logoUrl} alt="" fill sizes="28px" className="object-contain p-0.5" />
+                </span>
+              ) : shelf.imageUrl ? (
                 <span className="relative h-7 w-7 shrink-0 overflow-hidden rounded-lg border border-white/10">
                   <Image src={shelf.imageUrl} alt="" fill sizes="28px" className="object-cover" />
                 </span>

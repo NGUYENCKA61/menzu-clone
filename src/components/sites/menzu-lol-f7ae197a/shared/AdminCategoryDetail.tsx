@@ -18,6 +18,8 @@ export interface AdminCategoryDetailView {
   imageUrl: string;
   /** The category page's wide header picture; "" uses imageUrl there. */
   bannerUrl: string;
+  /** The game's square logo; "" uses imageUrl, cropped, where it is drawn. */
+  logoUrl: string;
   soldCount: string;
   stockCount: string;
   /** How many products actually sit in it, for the note under the two counters. */
@@ -54,22 +56,28 @@ export function AdminCategoryDetail({
   const [platform, setPlatform] = useState(category.platform);
   const [imageUrl, setImageUrl] = useState(category.imageUrl);
   const [bannerUrl, setBannerUrl] = useState(category.bannerUrl);
+  const [logoUrl, setLogoUrl] = useState(category.logoUrl);
   const [soldCount, setSoldCount] = useState(category.soldCount);
   const [stockCount, setStockCount] = useState(category.stockCount);
 
   const [busy, setBusy] = useState(false);
-  /** Which of the two pictures is uploading, so only its button waits. */
-  const [uploading, setUploading] = useState<"tile" | "banner" | null>(null);
+  /** Which of the three pictures is uploading, so only its button waits. */
+  const [uploading, setUploading] = useState<"tile" | "banner" | "logo" | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [ok, setOk] = useState<string | null>(null);
 
-  async function uploadImage(file: File, slot: "tile" | "banner"): Promise<string | null> {
+  async function uploadImage(
+    file: File,
+    slot: "tile" | "banner" | "logo",
+  ): Promise<string | null> {
     setUploading(slot);
     setError(null);
     setOk(null);
     try {
       const form = new FormData();
       form.append("file", file);
+      // The logo is a small square: the server takes a smaller file for it.
+      form.append("slot", slot);
       const res = await fetch("/api/admin/categories/image", {
         method: "POST",
         body: form,
@@ -110,6 +118,7 @@ export function AdminCategoryDetail({
           platform,
           imageUrl,
           bannerUrl,
+          logoUrl,
           // Typed as text so a half-deleted number does not become NaN under
           // the cursor; the digits are what the server is sent.
           soldCount: Number(soldCount.replace(/\D/g, "")),
@@ -266,6 +275,32 @@ export function AdminCategoryDetail({
               onPick={async (file) => {
                 const url = await uploadImage(file, "banner");
                 if (url) setBannerUrl(url);
+              }}
+            />
+          </section>
+
+          {/* The game's own logo, drawn small beside the category's name
+              (the subscribe tab's shelves). Left empty, the cover above
+              stands in, cropped square. */}
+          <section className={CARD}>
+            <span className={CARD_HEAD}>Logo game</span>
+            <p className="-mt-2 text-[11px] text-neutral-500">
+              Logo vuông của game, hiện nhỏ cạnh tên danh mục. Nên dùng PNG nền
+              trong, từ 128×128px. Để trống thì dùng ảnh bìa ở trên.
+            </p>
+            <input
+              value={logoUrl}
+              onChange={(event) => setLogoUrl(event.target.value)}
+              placeholder="Để trống: dùng ảnh bìa"
+              aria-label="Đường dẫn logo game"
+              className={FIELD}
+            />
+            <AdminImagePicker
+              uploading={uploading === "logo"}
+              value={logoUrl}
+              onPick={async (file) => {
+                const url = await uploadImage(file, "logo");
+                if (url) setLogoUrl(url);
               }}
             />
           </section>

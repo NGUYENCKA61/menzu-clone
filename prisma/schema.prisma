@@ -503,6 +503,11 @@ model Category {
   /// back to imageUrl, the home tile's picture, which is small and cropped
   /// hard when stretched that wide.
   bannerUrl String?
+  /// The game's own logo, square, uploaded by the shop: the mark beside the
+  /// category's name where a small picture stands for it (the shelves on
+  /// /thong-bao's subscribe tab). Null falls back to imageUrl, the tile
+  /// picture, cropped (the owner, 01/10/2026: "hiện tạm ảnh danh mục").
+  logoUrl   String?
   soldCount Int       @default(0)
   stockCount Int      @default(0)
   /// Feeds sitemap.xml's <lastmod>. Stamping every entry with "now" instead

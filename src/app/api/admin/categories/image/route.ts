@@ -17,6 +17,8 @@ const MAX_BYTES = 8 * 1024 * 1024;
 const MIN_WIDTH = 320;
 const MIN_HEIGHT = 180;
 const MAX_SIDE = 8000;
+/** A logo is drawn small and square, so a small square file is enough. */
+const LOGO_MIN_SIDE = 64;
 
 /**
  * Takes a cover image and answers with the path to store.
@@ -66,10 +68,15 @@ export async function POST(request: Request) {
       { status: 400 },
     );
   }
-  if (size.width < MIN_WIDTH || size.height < MIN_HEIGHT) {
+  // The "Logo game" slot sends slot=logo and takes a small square file; the
+  // cover and the banner keep the cover's floor.
+  const logo = form?.get("slot") === "logo";
+  const minWidth = logo ? LOGO_MIN_SIDE : MIN_WIDTH;
+  const minHeight = logo ? LOGO_MIN_SIDE : MIN_HEIGHT;
+  if (size.width < minWidth || size.height < minHeight) {
     return NextResponse.json(
       {
-        error: `Ảnh tối thiểu ${MIN_WIDTH}×${MIN_HEIGHT}px. Ảnh này ${size.width}×${size.height}px.`,
+        error: `Ảnh tối thiểu ${minWidth}×${minHeight}px. Ảnh này ${size.width}×${size.height}px.`,
       },
       { status: 400 },
     );
