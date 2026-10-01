@@ -203,6 +203,14 @@ export default async function AnnouncementsPage({
         </Link>
       </nav>
 
+      {/* The notices tab says what it holds, as its two neighbours do (the
+          owner, 02/10/2026: "thêm dòng mô tả cho đồng bộ"). */}
+      {!subscribeTab && !statusTab ? (
+        <p className={TAB_NOTE}>
+          Tin chung từ shop: bảo trì, khuyến mãi, cập nhật tính năng mới.
+        </p>
+      ) : null}
+
       {subscribeTab ? (
         // No heading of its own: the tab above it is lit and says the same
         // four words, and printing them twice a centimetre apart reads as a
