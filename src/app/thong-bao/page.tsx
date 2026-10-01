@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import type { ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Bell, Radar } from "lucide-react";
@@ -79,6 +80,38 @@ function dayLabel(key: string, now: Date): string {
  *  name, as a sentence of its own. */
 function sentence(clause: string): string {
   return clause.charAt(0).toUpperCase() + clause.slice(1);
+}
+
+const URL_IN_TEXT = /https?:\/\/[^\s<>"']+/g;
+
+/**
+ * The shop's note with its web addresses made pressable, as a Telegram post
+ * shows them. Only http(s) addresses are matched, so nothing but a web page
+ * can come of a press; a full stop or bracket closing the sentence stays
+ * text. The links wear the wiki's link red.
+ */
+function withLinks(text: string): ReactNode[] {
+  const parts: ReactNode[] = [];
+  let last = 0;
+  for (const match of text.matchAll(URL_IN_TEXT)) {
+    const start = match.index ?? 0;
+    const href = match[0].replace(/[.,;:!?)\]}»"']+$/, "");
+    if (start > last) parts.push(text.slice(last, start));
+    parts.push(
+      <a
+        key={start}
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer nofollow"
+        className="break-all text-[#ff6c88] underline underline-offset-2 transition-colors hover:text-white"
+      >
+        {href}
+      </a>,
+    );
+    last = start + href.length;
+  }
+  if (last < text.length) parts.push(text.slice(last));
+  return parts;
 }
 
 /** The history in day groups, newest day first, order within a day kept. */
@@ -261,7 +294,9 @@ export default async function AnnouncementsPage({
                     <ol className="flex flex-col gap-2.5">
                       {group.items.map((event) => {
                         const state = SOFTWARE_STATUS[event.status];
-                        const said = event.note ?? sentence(STATUS_EVENT_COPY[event.status]);
+                        const said = event.note
+                          ? withLinks(event.note)
+                          : sentence(STATUS_EVENT_COPY[event.status]);
                         return (
                           <li
                             key={event.id}
