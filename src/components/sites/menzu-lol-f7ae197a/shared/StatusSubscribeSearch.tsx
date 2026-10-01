@@ -2,7 +2,8 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, Search, ShieldQuestion } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { ArrowRight, Bell, BellRing, Search, ShieldQuestion } from "lucide-react";
 import { useMemo, useState } from "react";
 
 import { categoryHref } from "@/lib/routes";
@@ -10,6 +11,7 @@ import { matchesSearch } from "@/lib/searchText";
 import { SOFTWARE_STATUS, type SoftwareStatusValue } from "@/lib/softwareStatus";
 
 import { StatusSubscribeButton } from "./StatusSubscribeButton";
+import { StatusToast } from "./StatusToast";
 
 export interface StatusToolView {
   code: string;
@@ -17,7 +19,11 @@ export interface StatusToolView {
   href: string;
   categoryName: string;
   categorySlug: string;
-  /** The tool's cover, as the shop set it. Null draws the fallback tile. */
+  /** The category's tile picture: the stand-in for a tool with no cover of
+   *  its own, and the mark beside the shelf's name. */
+  categoryImageUrl: string | null;
+  /** The tool's cover, as the shop set it. Null falls back to the
+   *  category's picture, then to the empty tile. */
   imageUrl: string | null;
   status: SoftwareStatusValue | null;
   /** Following it now; null for a guest, who is offered a sign-in instead. */
@@ -27,8 +33,106 @@ export interface StatusToolView {
 interface Shelf {
   slug: string;
   name: string;
+  imageUrl: string | null;
   tools: StatusToolView[];
   following: number;
+}
+
+/** The small chips beside the search: the followed-only filter, the count,
+ *  and each shelf's "follow it all". One height, the tool bells' radius. */
+const CHIP =
+  "inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg border px-3 text-[10px] font-black uppercase tracking-widest transition-colors";
+const CHIP_OFF = "border-white/10 bg-white/5 text-neutral-300 hover:bg-white/10 hover:text-white";
+const CHIP_ON =
+  "border-[var(--menzu-accent)]/30 bg-[var(--menzu-accent)]/10 text-[var(--menzu-accent)] hover:bg-[var(--menzu-accent)]/15";
+
+/**
+ * "Theo dõi cả danh mục": every tool on the shelf, followed or let go at
+ * once (the owner, 01/10/2026: "thử hết đi"). Lit while every tool on it is
+ * followed. The press shows its answer straight away and the server catches
+ * up, as the tool bells do; the bells below follow once the refresh lands.
+ */
+function ShelfFollowButton({
+  slug,
+  name,
+  allOn,
+  signedIn,
+  loginNext,
+}: {
+  slug: string;
+  name: string;
+  allOn: boolean;
+  signedIn: boolean;
+  loginNext: string;
+}) {
+  const router = useRouter();
+  // The answer this press gave, shown until the refreshed list agrees.
+  const [pending, setPending] = useState<boolean | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [failed, setFailed] = useState(false);
+  const on = pending !== null && pending !== allOn ? pending : allOn;
+
+  if (!signedIn) {
+    return (
+      <Link
+        href={`/login?next=${encodeURIComponent(loginNext)}`}
+        className={`${CHIP} ${CHIP_OFF}`}
+        title={`Đăng nhập để theo dõi cả ${name}`}
+      >
+        <Bell size={13} aria-hidden />
+        Cả danh mục
+      </Link>
+    );
+  }
+
+  async function toggle() {
+    if (busy) return;
+    const next = !on;
+    setBusy(true);
+    setFailed(false);
+    setPending(next);
+    try {
+      const res = await fetch("/api/status-subscriptions", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ categorySlug: slug, subscribed: next }),
+      });
+      if (!res.ok) {
+        setPending(null);
+        setFailed(true);
+        return;
+      }
+      router.refresh();
+    } catch {
+      setPending(null);
+      setFailed(true);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={toggle}
+        disabled={busy}
+        aria-pressed={on}
+        title={on ? `Đang theo dõi cả ${name} — bấm để bỏ` : `Theo dõi cả ${name}`}
+        className={`${CHIP} ${on ? CHIP_ON : CHIP_OFF}`}
+      >
+        {on ? <BellRing size={13} aria-hidden /> : <Bell size={13} aria-hidden />}
+        Cả danh mục
+      </button>
+      {failed ? (
+        <StatusToast
+          title="Chưa lưu được"
+          message="Không đổi được theo dõi cả danh mục. Thử lại sau một lát."
+          onClose={() => setFailed(false)}
+        />
+      ) : null}
+    </>
+  );
 }
 
 /**
@@ -47,6 +151,7 @@ function shelve(tools: StatusToolView[]): Shelf[] {
       shelf = {
         slug: tool.categorySlug,
         name: tool.categoryName,
+        imageUrl: tool.categoryImageUrl,
         tools: [],
         following: 0,
       };
@@ -89,16 +194,29 @@ export function StatusSubscribeSearch({
   loginNext: string;
 }) {
   const [query, setQuery] = useState("");
+  // "Chỉ tool đang theo dõi": the reader's own list, for checking it over
+  // without scrolling every shelf.
+  const [onlyFollowed, setOnlyFollowed] = useState(false);
 
   const shelves = useMemo(
     () =>
       shelve(
-        tools.filter((tool) =>
-          matchesSearch(query, [tool.name, tool.categoryName, tool.code]),
+        tools.filter(
+          (tool) =>
+            (!onlyFollowed || tool.subscribed === true) &&
+            matchesSearch(query, [tool.name, tool.categoryName, tool.code]),
         ),
       ),
-    [tools, query],
+    [tools, query, onlyFollowed],
   );
+  // "Lit" for a shelf means every tool it lists, whatever the search shows.
+  const allFollowedBySlug = useMemo(() => {
+    const all = new Map<string, boolean>();
+    for (const tool of tools) {
+      all.set(tool.categorySlug, (all.get(tool.categorySlug) ?? true) && tool.subscribed === true);
+    }
+    return all;
+  }, [tools]);
 
   // Null on every card means nobody is signed in, and a "0 / 7" for a reader
   // who cannot follow anything yet is a scold rather than a summary.
@@ -107,10 +225,13 @@ export function StatusSubscribeSearch({
 
   return (
     <div className="flex flex-col gap-5">
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      {/* Stays under the header while the shelves scroll by (58px is the
+          header once scrolled), on the page's own ground so the cards pass
+          beneath it rather than through it. */}
+      <div className="sticky top-[58px] z-20 -mx-4 flex flex-wrap items-center gap-3 bg-[#0f1015]/95 px-4 py-3 backdrop-blur lg:-mx-6 lg:px-6">
         {/* w-full and no flex-1 on purpose: flex-1 would set the basis to zero
             and let the field squeeze down to share a phone's line with the
-            count beside it, instead of taking the line and pushing it under. */}
+            chips beside it, instead of taking the line and pushing them under. */}
         <label className="flex h-11 w-full max-w-md items-center gap-2.5 rounded-xl border border-white/10 bg-[#101114] px-4 transition-colors focus-within:border-[var(--menzu-accent)]/60">
           <Search size={15} aria-hidden className="shrink-0 text-neutral-500" />
           <input
@@ -123,17 +244,34 @@ export function StatusSubscribeSearch({
           />
         </label>
         {signedIn ? (
-          <p className="text-[11px] font-black uppercase tracking-widest text-neutral-500">
-            Đang theo dõi{" "}
-            <span className="text-[var(--menzu-accent)]">{following}</span> /{" "}
-            {tools.length} tool
-          </p>
+          <>
+            <button
+              type="button"
+              onClick={() => setOnlyFollowed((value) => !value)}
+              aria-pressed={onlyFollowed}
+              className={`${CHIP} ${onlyFollowed ? CHIP_ON : CHIP_OFF}`}
+            >
+              Chỉ tool đang theo dõi
+            </button>
+            <span className={`${CHIP} ml-auto border-white/10 bg-white/5 text-neutral-400`}>
+              <BellRing size={13} aria-hidden className="text-[var(--menzu-accent)]" />
+              Đang theo dõi
+              <span className="text-[var(--menzu-accent)]">{following}</span>/{tools.length}
+            </span>
+          </>
         ) : null}
       </div>
 
       {tools.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-white/10 bg-white/[0.02] py-12 text-center">
           <p className="text-sm font-bold text-white">Chưa có tool nào đang bán</p>
+        </div>
+      ) : onlyFollowed && following === 0 ? (
+        <div className="rounded-2xl border border-dashed border-white/10 bg-white/[0.02] py-12 text-center">
+          <p className="text-sm font-bold text-white">Bạn chưa theo dõi tool nào</p>
+          <p className="mt-1.5 text-[13px] text-neutral-400">
+            Bấm chuông ở một tool, hoặc &quot;Cả danh mục&quot; ở đầu mỗi nhóm.
+          </p>
         </div>
       ) : shelves.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-white/10 bg-white/[0.02] py-12 text-center">
@@ -149,6 +287,13 @@ export function StatusSubscribeSearch({
                 rule fills the rest of the line so the shelves read as bands
                 rather than as headings floating over a grid. */}
             <div className="mb-3 flex flex-wrap items-center gap-x-3 gap-y-1.5">
+              {/* The game's own picture beside its name: a mark the eye can
+                  stop on while the shelves scroll past. */}
+              {shelf.imageUrl ? (
+                <span className="relative h-7 w-7 shrink-0 overflow-hidden rounded-lg border border-white/10">
+                  <Image src={shelf.imageUrl} alt="" fill sizes="28px" className="object-cover" />
+                </span>
+              ) : null}
               <Link
                 href={categoryHref(shelf.slug)}
                 className="group inline-flex items-center gap-1.5 text-[11px] font-black uppercase tracking-widest text-white transition-colors hover:text-[var(--menzu-accent)]"
@@ -172,12 +317,22 @@ export function StatusSubscribeSearch({
                 ) : null}
               </span>
               <span aria-hidden className="h-px min-w-6 flex-1 bg-white/[0.08]" />
+              <ShelfFollowButton
+                slug={shelf.slug}
+                name={shelf.name}
+                allOn={allFollowedBySlug.get(shelf.slug) === true}
+                signedIn={signedIn}
+                loginNext={loginNext}
+              />
             </div>
 
             <ul className="grid gap-3 sm:grid-cols-2">
               {shelf.tools.map((tool) => {
                 const state = tool.status ? SOFTWARE_STATUS[tool.status] : null;
                 const on = tool.subscribed === true;
+                // A tool with no cover wears its category's picture rather
+                // than an empty tile that reads as a broken image.
+                const cover = tool.imageUrl ?? tool.categoryImageUrl;
                 return (
                   <li
                     key={tool.code}
@@ -192,9 +347,9 @@ export function StatusSubscribeSearch({
                       aria-label={tool.name}
                       className="relative grid aspect-[16/9] w-[92px] shrink-0 place-items-center overflow-hidden rounded-xl border border-white/10 bg-[linear-gradient(135deg,#171922,#36151e,#0d0e12)]"
                     >
-                      {tool.imageUrl ? (
+                      {cover ? (
                         <Image
-                          src={tool.imageUrl}
+                          src={cover}
                           alt=""
                           fill
                           sizes="92px"
@@ -224,7 +379,7 @@ export function StatusSubscribeSearch({
                       </Link>
                       {state ? (
                         <span
-                          className={`mt-1.5 inline-flex items-center rounded-md border px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider ${state.tile}`}
+                          className={`mt-1.5 inline-flex items-center rounded-md border px-2 py-0.5 text-[10px] font-black uppercase tracking-wider ${state.tile}`}
                         >
                           {state.label}
                         </span>
@@ -232,6 +387,10 @@ export function StatusSubscribeSearch({
                     </div>
 
                     <StatusSubscribeButton
+                      // Keyed by what the server says, so a "Cả danh mục"
+                      // press re-draws every bell on the shelf once the
+                      // refreshed list arrives.
+                      key={`${tool.code}:${tool.subscribed}`}
                       productCode={tool.code}
                       initial={tool.subscribed}
                       loginNext={loginNext}

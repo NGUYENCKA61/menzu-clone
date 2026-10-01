@@ -49,6 +49,9 @@ export interface StatusTool {
   categoryName: string;
   /** Its category's half of the address — the shelf this tool sits on. */
   categorySlug: string;
+  /** The category's own tile picture: the stand-in for a tool with no cover,
+   *  and the mark beside the shelf's name on the subscribe tab. */
+  categoryImageUrl: string | null;
   imageUrl: string | null;
   status: SoftwareStatusValue | null;
   /** When the state last changed; null for a tool with no history yet. */
@@ -213,7 +216,7 @@ export async function listSoftwareForStatus(): Promise<StatusTool[]> {
       slug: true,
       imageUrl: true,
       softwareStatus: true,
-      category: { select: { name: true, slug: true } },
+      category: { select: { name: true, slug: true, imageUrl: true } },
       images: { orderBy: { sortOrder: "asc" }, take: 1, select: { url: true } },
       statusEvents: {
         orderBy: { createdAt: "desc" },
@@ -229,6 +232,7 @@ export async function listSoftwareForStatus(): Promise<StatusTool[]> {
     href: productHref(p.category.slug, p.slug),
     categoryName: p.category.name,
     categorySlug: p.category.slug,
+    categoryImageUrl: p.category.imageUrl,
     imageUrl: p.images[0]?.url ?? p.imageUrl,
     status: readSoftwareStatus(p.softwareStatus),
     changedAt: p.statusEvents[0]?.createdAt ?? null,
