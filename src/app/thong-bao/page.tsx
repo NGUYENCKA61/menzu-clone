@@ -33,7 +33,7 @@ import { shareCard } from "@/lib/shareCard";
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
-    title: "Thông báo",
+    title: "Thông báo & trạng thái",
     alternates: { canonical: "/thong-bao" },
     ...(await shareCard({ url: "/thong-bao" })),
   };
@@ -166,7 +166,9 @@ export default async function AnnouncementsPage({
   }));
 
   return (
-    <SimplePage title="Thông báo" crumb="Thông báo" icon={Bell} ground="home">
+    // Named for both of its errands, so the menu's "Xem trạng thái" lands on a
+    // page that says so (the owner, 02/10/2026: "làm hết thử").
+    <SimplePage title="Thông báo & trạng thái" crumb="Thông báo & trạng thái" icon={Bell} ground="home">
       {/* On a phone the three tabs scroll as one row, bleeding to the
           screen's edges; stacked, they took three lines before a single
           notice was in view. */}
