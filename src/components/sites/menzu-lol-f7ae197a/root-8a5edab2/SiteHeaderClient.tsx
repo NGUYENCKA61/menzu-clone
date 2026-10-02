@@ -48,7 +48,9 @@ const LINK_HREFS: Record<string, string> = {
   // channels.
   "HACK PHẦN MỀM": "/categories",
   "Sự Kiện Tặng Hack": "/thong-bao",
-  "CỘNG ĐỒNG": "/lien-he",
+  // "LIÊN HỆ", once "CỘNG ĐỒNG": the menu, the page's breadcrumb and its
+  // title now say the same thing (the owner, 02/10/2026: "làm hết thử").
+  "LIÊN HỆ": "/lien-he",
   "XEM TRẠNG THÁI": STATUS_TAB_HREF,
   "WIKI & HƯỚNG DẪN": "/docs",
   "Nạp Qua Ngân Hàng": "/wallet",
@@ -74,7 +76,7 @@ const QUICK_LINKS = [
   "XEM TRẠNG THÁI",
   "WIKI & HƯỚNG DẪN",
   "ĐÁNH GIÁ",
-  "CỘNG ĐỒNG",
+  "LIÊN HỆ",
 ]
 
 // Nav text sits at neutral-200 rather than the captured neutral-400: at 10-11px
@@ -129,7 +131,7 @@ const QUICK_LINK_ITEMS: DropdownItem[] = [
   { label: "XEM TRẠNG THÁI", icon: Activity },
   { label: "WIKI & HƯỚNG DẪN", icon: BookOpen },
   { label: "ĐÁNH GIÁ", icon: Star },
-  { label: "CỘNG ĐỒNG", icon: Users },
+  { label: "LIÊN HỆ", icon: Users },
 ]
 
 // Each row goes where its desktop twin goes: the same label lookup, so a
