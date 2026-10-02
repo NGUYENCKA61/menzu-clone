@@ -703,7 +703,12 @@ export function OrderDetailModal({
                           ].map((head) => (
                             <th
                               key={head}
-                              className="whitespace-nowrap bg-white/[0.03] px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-neutral-500 sm:px-5"
+                              // The quantity is a single digit under a long
+                              // heading; centred, it sits under the word
+                              // instead of looking pushed to its left edge
+                              // (the owner, 02/10/2026: "số lượng 1 cái đó có
+                              // hơi bị lệch không" → "làm 1").
+                              className={`whitespace-nowrap bg-white/[0.03] px-4 py-3 ${head === "Số lượng" ? "text-center" : "text-left"} text-[10px] font-black uppercase tracking-widest text-neutral-500 sm:px-5`}
                             >
                               {head}
                             </th>
@@ -757,7 +762,7 @@ export function OrderDetailModal({
                               <span className="text-neutral-500">-</span>
                             )}
                           </td>
-                          <td className={`${CELL} tabular-nums`}>
+                          <td className={`${CELL} text-center tabular-nums`}>
                             {order.quantity}
                           </td>
                           <td className={`${CELL} tabular-nums`}>
