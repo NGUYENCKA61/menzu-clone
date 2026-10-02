@@ -357,7 +357,7 @@ export function StatusSubscribeSearch({
                         // text column is narrow enough that half these names
                         // would end in "…" and stop telling the reader which
                         // tool it is.
-                        className="line-clamp-2 text-[13.5px] font-bold leading-snug text-white transition-colors hover:text-[var(--menzu-accent)]"
+                        className="line-clamp-2 text-[15px] font-bold leading-snug text-white transition-colors hover:text-[var(--menzu-accent)]"
                       >
                         {tool.name}
                       </Link>

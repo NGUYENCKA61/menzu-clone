@@ -286,7 +286,7 @@ export default async function AnnouncementsPage({
                                 {event.scope === "category" ? "Cả danh mục" : event.categoryName}
                               </span>
                             </div>
-                            <p className="mt-1.5 text-[13.5px] leading-relaxed text-neutral-300">
+                            <p className="mt-1.5 text-[15px] leading-relaxed text-neutral-300">
                               <Link
                                 href={event.productHref}
                                 className="font-bold text-white transition-colors hover:text-[var(--menzu-accent)]"
@@ -323,7 +323,7 @@ export default async function AnnouncementsPage({
                                 "wait 24h", something the state alone cannot
                                 say. */}
                             {event.note ? (
-                              <div className="mt-2 break-words rounded-xl border border-white/[0.06] bg-white/[0.02] px-3.5 py-2.5 text-[12.5px] leading-relaxed text-neutral-400">
+                              <div className="mt-2 break-words rounded-xl border border-white/[0.06] bg-white/[0.02] px-3.5 py-2.5 text-sm leading-relaxed text-neutral-400">
                                 <StatusNote text={event.note} />
                               </div>
                             ) : null}
@@ -365,7 +365,7 @@ export default async function AnnouncementsPage({
                 </span>
               </div>
 
-              <h2 className="mt-3 text-[17px] font-bold leading-snug text-white">
+              <h2 className="mt-3 text-base font-bold leading-snug text-white">
                 {item.title}
               </h2>
 
@@ -391,7 +391,7 @@ export default async function AnnouncementsPage({
 
               {/* Plain text, rendered as text — the same rule the modal keeps.
                   whitespace-pre-line preserves the shop's own line breaks. */}
-              <p className="mt-2 whitespace-pre-line text-[13.5px] leading-relaxed text-neutral-300">
+              <p className="mt-2 whitespace-pre-line text-sm leading-relaxed text-neutral-300">
                 {item.body}
               </p>
 
@@ -403,7 +403,7 @@ export default async function AnnouncementsPage({
                         aria-hidden
                         className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--menzu-accent)]"
                       />
-                      <span className="text-[13.5px] leading-relaxed text-neutral-300">
+                      <span className="text-sm leading-relaxed text-neutral-300">
                         {line}
                       </span>
                     </li>
