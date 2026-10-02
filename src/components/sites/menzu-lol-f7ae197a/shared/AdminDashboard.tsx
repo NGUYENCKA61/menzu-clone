@@ -170,7 +170,10 @@ export function AdminDashboard({
           is waiting on the shop, each card opening the screen where it is
           done. Every card stays even at zero, so each errand keeps its place. */}
       <Section title="Việc cần xử lý">
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
+        {/* Five cards: one row on a desktop, where three columns left two
+            cards and a hole on the second row. On a phone the odd one out
+            takes the whole last row rather than leaving half of it empty. */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-5 gap-3 sm:gap-4 [&>*:last-child:nth-child(odd)]:col-span-2 sm:[&>*:last-child:nth-child(odd)]:col-span-1">
           {todo.map((item) => (
             <TodoCard key={item.label} {...item} />
           ))}
@@ -276,7 +279,9 @@ function TodoCard({ label, count, sub, subWarn, href, icon: Icon }: TodoItem) {
   const body = (
     <>
       <div className="flex items-center justify-between gap-3">
-        <span className={CAP}>{label}</span>
+        {/* Balanced, so a label that wraps breaks "BẢO HÀNH / CHỜ TRẢ LỜI"
+            rather than leaving a single word on a line of its own. */}
+        <span className={`${CAP} text-balance`}>{label}</span>
         <span
           className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border ${
             waiting
@@ -295,7 +300,11 @@ function TodoCard({ label, count, sub, subWarn, href, icon: Icon }: TodoItem) {
         {count}
       </span>
       <span className="flex items-center justify-between gap-2 text-[11px]">
-        <span className={subWarn ? "font-semibold text-amber-400" : "text-neutral-500"}>{sub}</span>
+        <span
+          className={`text-pretty ${subWarn ? "font-semibold text-amber-400" : "text-neutral-500"}`}
+        >
+          {sub}
+        </span>
         <ChevronRight
           size={14}
           aria-hidden

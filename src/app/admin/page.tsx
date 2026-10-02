@@ -13,7 +13,6 @@ import {
   TrendingUp,
   UserRoundPlus,
   Users,
-  Wallet,
 } from "lucide-react";
 
 import { AdminDashboard } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminDashboard";
@@ -31,7 +30,6 @@ import {
 import { db } from "@/lib/db";
 import { getShopSettings } from "@/lib/settingsStore";
 import { startOfDayVn } from "@/lib/time";
-import { expireStaleTopUps } from "@/lib/topupStore";
 import { awaitingShop, needsShop, transferDue } from "@/lib/warrantyChat";
 
 export const metadata: Metadata = { title: "Tổng quan | Quản trị" };
@@ -75,10 +73,6 @@ export default async function AdminHome() {
   const weekStart = days[0]!.start;
   const prevWeekStart = new Date(weekStart.getTime() - 7 * DAY_MS);
 
-  // Retired first, as the top-up queue does on opening: a request nobody paid
-  // within the window would be counted here and then be missing from the
-  // queue the card opens.
-  await expireStaleTopUps();
   const settings = await getShopSettings();
 
   const [
@@ -96,7 +90,6 @@ export default async function AdminHome() {
     recentTopUps,
     recentOrders,
     recentSignUps,
-    topUpsWaiting,
     openTickets,
     reviewsWaiting,
     parcelsWaiting,
@@ -168,17 +161,10 @@ export default async function AdminHome() {
       take: 5,
       select: { id: true, username: true, avatarUrl: true, createdAt: true },
     }),
-    // What waits on the shop, for the to-do cards. With automatic top-up on,
-    // a bank request credits itself the moment the transfer lands; only a
-    // scratch card waits for a person.
-    db.topUp.count({
-      where: {
-        status: "PENDING",
-        ...(settings.autoTopUpEnabled ? { method: "CARD" as const } : {}),
-      },
-    }),
-    // Every ticket still open, with the last word on it: the desk's "Cần xử
-    // lý" is decided per ticket, from these three facts.
+    // What waits on the shop, for the to-do cards. No top-up card: the shop
+    // tops up automatically (the owner, 02/10/2026: "không cần vì tự động
+    // nạp mà"). First every ticket still open, with the last word on it: the
+    // desk's "Cần xử lý" is decided per ticket, from these three facts.
     db.warrantyRequest.findMany({
       where: { status: { in: ["OPEN", "IN_PROGRESS", "REFUNDING"] } },
       select: {
@@ -332,13 +318,6 @@ export default async function AdminHome() {
     >
       <AdminDashboard
         todo={[
-          {
-            label: "Nạp tiền chờ duyệt",
-            count: topUpsWaiting,
-            sub: settings.autoTopUpEnabled ? "thẻ cào khách đã gửi" : "thẻ cào và chuyển khoản",
-            href: "/admin/operations?tab=topups",
-            icon: Wallet,
-          },
           {
             label: "Bảo hành chờ trả lời",
             count: repliesDue,
