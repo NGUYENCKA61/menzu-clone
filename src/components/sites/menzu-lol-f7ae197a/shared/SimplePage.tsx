@@ -31,6 +31,9 @@ interface SimplePageProps {
   /** "normal": the title as written, not in capitals — an article's title is
    *  a sentence ("Menzu Mail Là Gì ?"), as menzu prints it. */
   titleCase?: "upper" | "normal";
+  /** False: no red bar in front of the title. A wiki article's heading
+   *  stands alone, as menzu sets one (the owner, 02/10/2026: "bỏ dấu |"). */
+  titleBar?: boolean;
 }
 
 /** Standard inner-page chrome: header, breadcrumb, heading, footer. */
@@ -44,6 +47,7 @@ export function SimplePage({
   crumbs,
   subtitle,
   titleCase = "upper",
+  titleBar = true,
 }: SimplePageProps) {
   return (
     // Opaque, covering the fixed PageBackdrop artwork — the original keeps its
@@ -71,9 +75,9 @@ export function SimplePage({
                 <div className="flex items-center gap-3">
                   {Icon ? (
                     <Icon size={28} className="shrink-0 text-[var(--menzu-accent)]" aria-hidden />
-                  ) : (
+                  ) : titleBar ? (
                     <span aria-hidden className="h-6 w-[3px] shrink-0 rounded-full bg-[var(--menzu-accent)]" />
-                  )}
+                  ) : null}
                   <h1
                     className={`text-2xl sm:text-3xl font-black text-white ${
                       titleCase === "upper" ? "uppercase tracking-wider" : "leading-tight"

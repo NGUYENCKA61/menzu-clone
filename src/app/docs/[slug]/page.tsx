@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ChevronRight, FileText } from "lucide-react";
+import { Calendar, ChevronRight, Clock, Eye, FileText } from "lucide-react";
 
 import { SimplePage } from "@/components/sites/menzu-lol-f7ae197a/shared/SimplePage";
 import { DOC_SHELF_LABEL, isDocShelf } from "@/lib/docCategories";
@@ -67,24 +67,33 @@ export default async function DocArticlePage({ params }: PageProps) {
       crumb="Wiki & Hướng dẫn"
       crumbs={[{ label: "Wiki & Hướng dẫn", href: "/docs" }, { label: article.title }]}
       titleCase="normal"
+      titleBar={false}
       ground="home"
       subtitle={
-        <p className="flex flex-wrap items-center gap-x-2 gap-y-1.5 text-[12px] font-semibold text-neutral-500">
+        // Each fact behind its own icon, spaced rather than dotted apart, as
+        // menzu prints the line (the owner, 02/10/2026: "icon mắt lịch đồng
+        // hồ").
+        <p className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[12px] font-medium text-neutral-400">
           <Link
             href={`/docs#${article.category}`}
             className="rounded-md border border-white/15 bg-white/10 px-2 py-0.5 text-[9px] font-black uppercase tracking-widest text-neutral-300 transition-colors hover:text-white"
           >
             {shelf}
           </Link>
-          <span>Đăng ngày {dateFormat.format(article.publishedAt)}</span>
+          <span className="inline-flex items-center gap-1.5">
+            <Calendar size={13} aria-hidden className="shrink-0 text-neutral-500" />
+            Đăng ngày: {dateFormat.format(article.publishedAt)}
+          </span>
           {updated ? (
-            <>
-              <span aria-hidden>·</span>
-              <span>Cập nhật {dateFormat.format(updated)}</span>
-            </>
+            <span className="inline-flex items-center gap-1.5">
+              <Clock size={13} aria-hidden className="shrink-0 text-neutral-500" />
+              Cập nhật: {dateFormat.format(updated)}
+            </span>
           ) : null}
-          <span aria-hidden>·</span>
-          <span>{article.views.toLocaleString("vi-VN")} lượt xem</span>
+          <span className="inline-flex items-center gap-1.5">
+            <Eye size={13} aria-hidden className="shrink-0 text-neutral-500" />
+            Lượt xem: {article.views.toLocaleString("vi-VN")}
+          </span>
         </p>
       }
     >
