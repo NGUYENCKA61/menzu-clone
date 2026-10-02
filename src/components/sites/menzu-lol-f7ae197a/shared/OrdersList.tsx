@@ -259,10 +259,10 @@ export function OrdersList({ orders }: { orders: OrderCardView[] }) {
                           order={order.detail}
                           autoOpen={order.autoOpen}
                           supportHref={order.supportHref}
-                          // Reviews are off for now (30/09/2026: "tạm thời xóa bỏ cái
-                          // đánh giá đi"). To bring the receipt's button back:
-                          // reviewHref={order.review?.href ?? null}
-                          reviewHref={null}
+                          // Reviews back on, asked for in the receipt's footer
+                          // (02/10/2026: "là khách hàng đánh giá bằng chỗ đó");
+                          // off since 30/09 ("tạm thời xóa bỏ cái đánh giá đi").
+                          reviewHref={order.review?.href ?? null}
                           className="group flex cursor-pointer flex-col gap-3 rounded-2xl border border-white/5 bg-white/[0.02] p-3.5 outline-none transition-colors hover:border-white/10 hover:bg-white/[0.04] focus-visible:ring-2 focus-visible:ring-[var(--menzu-accent)]/60 sm:flex-row sm:items-center sm:gap-5 sm:p-4"
                         >
                           <div className="flex min-w-0 flex-1 items-start gap-3 sm:items-center sm:gap-5">
