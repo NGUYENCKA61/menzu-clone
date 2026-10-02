@@ -31,6 +31,11 @@ interface SimplePageProps {
   /** "normal": the title as written, not in capitals — an article's title is
    *  a sentence ("Menzu Mail Là Gì ?"), as menzu prints it. */
   titleCase?: "upper" | "normal";
+  /** A reading page: the breadcrumb and heading sit in a centred column the
+   *  width of an article (max-w-3xl) rather than across the whole page, so
+   *  a wiki article no longer leaves its right half empty (the owner,
+   *  02/10/2026). The page centres its own body to match. */
+  narrow?: boolean;
 }
 
 /** Standard inner-page chrome: header, breadcrumb, heading, footer. */
@@ -44,6 +49,7 @@ export function SimplePage({
   crumbs,
   subtitle,
   titleCase = "upper",
+  narrow = false,
 }: SimplePageProps) {
   return (
     // Opaque, covering the fixed PageBackdrop artwork — the original keeps its
@@ -60,31 +66,33 @@ export function SimplePage({
       <main className="flex-1 relative z-20 w-full flex flex-col">
         <div className="w-full">
           <div className="max-w-[1320px] mx-auto px-4 lg:px-6 py-12">
-            <Breadcrumb
-              items={[{ label: "Trang chủ", href: "/" }, ...(crumbs ?? [{ label: crumb }])]}
-            />
+            <div className={narrow ? "mx-auto max-w-3xl" : undefined}>
+              <Breadcrumb
+                items={[{ label: "Trang chủ", href: "/" }, ...(crumbs ?? [{ label: crumb }])]}
+              />
 
-            {/* The row headings' red mark in front of the title, and a neutral
-                rule under it — the same opening every home-page row makes. */}
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-8 pb-4 border-b border-white/10">
-              <div className="min-w-0">
-                <div className="flex items-center gap-3">
-                  {Icon ? (
-                    <Icon size={28} className="shrink-0 text-[var(--menzu-accent)]" aria-hidden />
-                  ) : (
-                    <span aria-hidden className="h-6 w-[3px] shrink-0 rounded-full bg-[var(--menzu-accent)]" />
-                  )}
-                  <h1
-                    className={`text-2xl sm:text-3xl font-black text-white ${
-                      titleCase === "upper" ? "uppercase tracking-wider" : "leading-tight"
-                    }`}
-                  >
-                    {title}
-                  </h1>
+              {/* The row headings' red mark in front of the title, and a neutral
+                  rule under it — the same opening every home-page row makes. */}
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-8 pb-4 border-b border-white/10">
+                <div className="min-w-0">
+                  <div className="flex items-center gap-3">
+                    {Icon ? (
+                      <Icon size={28} className="shrink-0 text-[var(--menzu-accent)]" aria-hidden />
+                    ) : (
+                      <span aria-hidden className="h-6 w-[3px] shrink-0 rounded-full bg-[var(--menzu-accent)]" />
+                    )}
+                    <h1
+                      className={`text-2xl sm:text-3xl font-black text-white ${
+                        titleCase === "upper" ? "uppercase tracking-wider" : "leading-tight"
+                      }`}
+                    >
+                      {title}
+                    </h1>
+                  </div>
+                  {subtitle ? <div className="mt-3">{subtitle}</div> : null}
                 </div>
-                {subtitle ? <div className="mt-3">{subtitle}</div> : null}
+                {action}
               </div>
-              {action}
             </div>
 
             {children}

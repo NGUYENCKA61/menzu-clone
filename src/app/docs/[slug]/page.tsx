@@ -68,6 +68,9 @@ export default async function DocArticlePage({ params }: PageProps) {
       crumbs={[{ label: "Wiki & Hướng dẫn", href: "/docs" }, { label: article.title }]}
       titleCase="normal"
       ground="home"
+      // Breadcrumb, title and body in one centred reading column; the related
+      // cards below keep the page's full width.
+      narrow
       subtitle={
         <p className="flex flex-wrap items-center gap-x-2 gap-y-1.5 text-[12px] font-semibold text-neutral-500">
           <Link
@@ -88,7 +91,7 @@ export default async function DocArticlePage({ params }: PageProps) {
         </p>
       }
     >
-      <article className="max-w-3xl">
+      <article className="mx-auto max-w-3xl">
         <div className="relative mb-8 aspect-[16/9] overflow-hidden rounded-2xl border border-white/10 bg-black/40">
           <Image
             src={article.thumbnailUrl}
