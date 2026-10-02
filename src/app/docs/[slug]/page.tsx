@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Calendar, ChevronRight, Clock, Eye, FileText } from "lucide-react";
+import { BookOpen, Calendar, ChevronRight, Clock, Eye, FileText } from "lucide-react";
 
 import { SimplePage } from "@/components/sites/menzu-lol-f7ae197a/shared/SimplePage";
 import { DOC_SHELF_LABEL, isDocShelf } from "@/lib/docCategories";
@@ -131,12 +131,25 @@ export default async function DocArticlePage({ params }: PageProps) {
           — cards in the site's own dress, each with its "Chi tiết". */}
       {related.length > 0 ? (
         <section className="mt-14 border-t border-white/10 pt-10">
-          {/* The wiki's shelf heading, size for size (16px since 02/10/2026). */}
-          <h2 className="flex items-center gap-2.5 text-base font-black uppercase tracking-widest text-white">
-            <span aria-hidden className="h-4 w-0.5 rounded-full bg-[var(--menzu-accent)]" />
-            Các bài viết liên quan
-          </h2>
-          <p className="mt-1.5 text-[12px] text-neutral-500">Cùng mục {shelf}</p>
+          {/* As menzu heads it (the owner, 02/10/2026: "1 đó đi", "bỏ |"):
+              an open book in a tinted square instead of the bar, the
+              heading, and which shelf the cards come from under it. */}
+          <div className="flex items-center gap-3">
+            <span
+              aria-hidden
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[var(--menzu-accent)]/25 bg-[var(--menzu-accent)]/10 text-[var(--menzu-accent)]"
+            >
+              <BookOpen size={17} />
+            </span>
+            <div className="min-w-0">
+              <h2 className="text-lg font-black uppercase leading-tight tracking-wide text-white">
+                Cùng chuyên mục
+              </h2>
+              <p className="mt-0.5 text-[13px] text-neutral-400">
+                Các bài viết khác thuộc danh mục {shelf}
+              </p>
+            </div>
+          </div>
           <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {related.map((item) => (
               <Link
@@ -158,8 +171,18 @@ export default async function DocArticlePage({ params }: PageProps) {
                     {item.title}
                   </h3>
                   <div className="mt-auto flex items-center justify-between gap-3">
-                    <span className="text-[11px] tabular-nums text-neutral-500 sm:text-xs">
-                      {dateFormat.format(item.publishedAt)} · {item.views.toLocaleString("vi-VN")} lượt xem
+                    {/* The head's calendar and eye, so the cards read the
+                        facts the way the article above them does (the
+                        owner, 02/10/2026: "cho nó đồng bộ"). */}
+                    <span className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1 text-[11px] tabular-nums text-neutral-500 sm:text-xs">
+                      <span className="inline-flex items-center gap-1.5">
+                        <Calendar size={12} aria-hidden className="shrink-0" />
+                        {dateFormat.format(item.publishedAt)}
+                      </span>
+                      <span className="inline-flex items-center gap-1.5">
+                        <Eye size={12} aria-hidden className="shrink-0" />
+                        {item.views.toLocaleString("vi-VN")}
+                      </span>
                     </span>
                     <span className="flex h-8 shrink-0 items-center gap-1 rounded-lg bg-white/10 px-3 text-xs font-bold text-white transition-colors group-hover:bg-white/20">
                       Chi tiết
