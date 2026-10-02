@@ -11,7 +11,7 @@ import {
   useSyncExternalStore,
   type ReactNode,
 } from "react";
-import { ArrowRight, ChevronRight, Search } from "lucide-react";
+import { ArrowRight, Calendar, ChevronRight, Eye, Search } from "lucide-react";
 
 import { FaqAccordion } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/FaqAccordion";
 import { ListPager } from "@/components/sites/menzu-lol-f7ae197a/shared/AccountListChrome";
@@ -116,13 +116,26 @@ function FeaturedCarousel({ items }: { items: DocCard[] }) {
                 {item.excerpt ? (
                   <p className="mt-2 max-w-xl text-sm leading-relaxed text-neutral-400">{item.excerpt}</p>
                 ) : null}
-                {/* The button alone: the card's date and reads were taken off
-                    (the owner, 02/10/2026: "bỏ hết thử"); the article page
-                    and the shelf cards still carry them. */}
+                {/* Reads and date right beside the button, on the text's side:
+                    pushed to the far edge they sat on the picture's logo
+                    (the owner, 02/10/2026: "làm cái 9"). */}
                 <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-3">
                   <span className="inline-flex items-center gap-2 rounded-lg bg-[var(--menzu-accent)] px-4 py-2.5 text-[10px] font-black uppercase tracking-widest text-white transition-colors group-hover:bg-[var(--menzu-accent-dark)]">
                     Xem chi tiết
                     <ArrowRight size={12} aria-hidden />
+                  </span>
+                  {/* The calendar and eye the article page and its related
+                      cards use, date first (the owner, 02/10/2026: "thêm
+                      icon đó đi"). */}
+                  <span className="flex items-center gap-3 text-[11px] font-semibold tabular-nums text-neutral-500">
+                    <span className="inline-flex items-center gap-1.5">
+                      <Calendar size={12} aria-hidden className="shrink-0" />
+                      {formatDate(item.publishedAt)}
+                    </span>
+                    <span className="inline-flex items-center gap-1.5">
+                      <Eye size={12} aria-hidden className="shrink-0" />
+                      {formatViews(item.views)}
+                    </span>
                   </span>
                 </div>
               </Link>
