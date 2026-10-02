@@ -595,14 +595,20 @@ export function OrderDetailModal({
                       label="Ngày mua"
                       className="border-b border-white/[0.06] lg:border-b-0 lg:border-r"
                     >
-                      <span className="text-[15px] font-bold tabular-nums text-white">
-                        {order.date}
-                      </span>
-                      {order.time ? (
-                        <span className="ml-1.5 text-xs font-semibold tabular-nums text-neutral-400">
-                          {order.time}
+                      {/* The time behind its own clock, beside the day (the
+                          owner, 02/10/2026: "giờ cho icon đồng hồ đi"); the
+                          list's cards dropped it, the receipt keeps it. */}
+                      <span className="inline-flex flex-wrap items-center gap-x-2 gap-y-1">
+                        <span className="text-[15px] font-bold tabular-nums text-white">
+                          {order.date}
                         </span>
-                      ) : null}
+                        {order.time ? (
+                          <span className="inline-flex items-center gap-1 text-xs font-semibold tabular-nums text-neutral-400">
+                            <Clock className="h-3 w-3 shrink-0" aria-hidden />
+                            {order.time}
+                          </span>
+                        ) : null}
+                      </span>
                     </OverviewCell>
                     <OverviewCell
                       icon={<Wallet className={iconClass} />}
