@@ -1012,12 +1012,13 @@ export function OrderDetailModal({
                 {/* FOOTER */}
                 <div className="flex flex-col gap-3 border-t border-white/[0.06] bg-white/[0.02] px-5 py-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:px-6">
                   {/* The owner's own words (02/10/2026), where "Cần hỗ trợ về
-                      đơn hàng này? Gửi kèm mã đơn …" stood. The ask, a step
-                      brighter than the question and with no underline ("bỏ
-                      dấu gạch dưới đi"), is the press that opens the review
-                      popup; it whitens under the pointer. The question itself
-                      one step up from neutral-500, readable at 12px yet still
-                      below the ask (trial, "có cần tăng sáng" → "thử đi"). */}
+                      đơn hàng này? Gửi kèm mã đơn …" stood, less the "Hãy"
+                      the ask first opened with ("bỏ chữ Hãy đi"). The ask, a
+                      step brighter than the question and with no underline
+                      ("bỏ dấu gạch dưới đi"), is the press that opens the
+                      review popup; it whitens under the pointer. The question
+                      itself one step up from neutral-500, readable at 12px yet
+                      still below the ask (trial, "có cần tăng sáng" → "thử đi"). */}
                   <span className="text-xs text-neutral-400">
                     Bạn thấy sao về sản phẩm này?{" "}
                     <button
@@ -1025,7 +1026,7 @@ export function OrderDetailModal({
                       onClick={() => setReviewOpen(true)}
                       className="text-neutral-300 transition-colors hover:text-white"
                     >
-                      Hãy đánh giá mã đơn <span className="font-bold">{order.code}</span>
+                      Đánh giá mã đơn <span className="font-bold">{order.code}</span>
                     </button>
                   </span>
                   {/* The warranty button, and the review beside it when that
