@@ -116,7 +116,10 @@ function FeaturedCarousel({ items }: { items: DocCard[] }) {
                 {item.excerpt ? (
                   <p className="mt-2 max-w-xl text-sm leading-relaxed text-neutral-400">{item.excerpt}</p>
                 ) : null}
-                <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
+                {/* Reads and date right beside the button, on the text's side:
+                    pushed to the far edge they sat on the picture's logo
+                    (the owner, 02/10/2026: "làm cái 9"). */}
+                <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-3">
                   <span className="inline-flex items-center gap-2 rounded-lg bg-[var(--menzu-accent)] px-4 py-2.5 text-[10px] font-black uppercase tracking-widest text-white transition-colors group-hover:bg-[var(--menzu-accent-dark)]">
                     Xem chi tiết
                     <ArrowRight size={12} aria-hidden />
