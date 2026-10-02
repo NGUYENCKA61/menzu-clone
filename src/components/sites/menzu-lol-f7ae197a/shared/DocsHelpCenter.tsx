@@ -11,7 +11,7 @@ import {
   useSyncExternalStore,
   type ReactNode,
 } from "react";
-import { ArrowRight, ChevronRight, Search } from "lucide-react";
+import { ArrowRight, Calendar, ChevronRight, Eye, Search } from "lucide-react";
 
 import { FaqAccordion } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/FaqAccordion";
 import { ListPager } from "@/components/sites/menzu-lol-f7ae197a/shared/AccountListChrome";
@@ -453,8 +453,18 @@ function ArticleCard({ article, shelf }: { article: DocCard; shelf: boolean }) {
                 {DOC_SHELF_LABEL[article.category]}
               </span>
             ) : null}
-            <p className="text-[11px] tabular-nums text-neutral-400 sm:text-xs">
-              {formatDate(article.publishedAt)} · {formatViews(article.views)} lượt xem
+            {/* The calendar and eye an article's own page and its related
+                cards wear (the owner, 02/10/2026: "mấy card bài viết chưa
+                thêm icon lịch với mắt xem"). */}
+            <p className="flex items-center gap-3 text-[11px] tabular-nums text-neutral-400 sm:text-xs">
+              <span className="inline-flex items-center gap-1.5">
+                <Calendar size={12} aria-hidden className="shrink-0" />
+                {formatDate(article.publishedAt)}
+              </span>
+              <span className="inline-flex items-center gap-1.5">
+                <Eye size={12} aria-hidden className="shrink-0" />
+                {formatViews(article.views)}
+              </span>
             </p>
           </div>
         </div>
