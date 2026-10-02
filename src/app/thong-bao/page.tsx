@@ -19,7 +19,6 @@ import { TYPE_LABELS } from "@/lib/announcements";
 import { getCurrentUser } from "@/lib/session";
 import {
   SOFTWARE_STATUS,
-  STATUS_EVENT_COPY,
   STATUS_SUBSCRIBE_HREF,
   STATUS_TAB_HREF,
 } from "@/lib/softwareStatus";
@@ -288,14 +287,18 @@ export default async function AnnouncementsPage({
                                 {event.scope === "category" ? "Cả danh mục" : event.categoryName}
                               </span>
                             </div>
-                            <p className="mt-1.5 text-[15px] leading-relaxed text-neutral-300">
+                            {/* The tool's name alone: the stock sentence that
+                                followed it ("vừa cập nhật xong, có bản mới…")
+                                is gone, the pill says the state and the shop
+                                writes the rest in the note (the owner,
+                                02/10/2026: "bỏ … cái đó tự ghi được"). */}
+                            <p className="mt-1.5 text-[15px] leading-relaxed">
                               <Link
                                 href={event.productHref}
                                 className="font-bold text-white transition-colors hover:text-[var(--menzu-accent)]"
                               >
                                 {event.productName}
-                              </Link>{" "}
-                              {STATUS_EVENT_COPY[event.status]}
+                              </Link>
                             </p>
                             {/* The title, then the picture, then the shop's
                                 words under it (the owner, 02/10/2026: "tiêu đề
