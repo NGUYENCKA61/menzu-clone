@@ -152,13 +152,16 @@ export default async function OfficialChannelsPage() {
               >
                 <channel.icon className="h-[18px] w-[18px]" />
               </span>
+              {/* Sized as the other pages' cards are: a 16px name, a 13px
+                  line under it, and the address in the page's own font, not
+                  monospace (the owner, 02/10/2026: "làm hết thử"). */}
               <span className="flex min-w-0 flex-col gap-0.5">
-                <span className="text-sm font-black text-white">{channel.label}</span>
-                <span className="text-[11px] text-neutral-500">{channel.note}</span>
+                <span className="text-base font-black text-white">{channel.label}</span>
+                <span className="text-[13px] text-neutral-500">{channel.note}</span>
                 {/* The address itself, wrapped rather than cut: half an
                     address is worse than none for checking one against
                     another. */}
-                <span className="mt-1 break-all font-mono text-[11px] text-neutral-400 transition-colors group-hover:text-white">
+                <span className="mt-1 break-all text-xs font-semibold text-neutral-400 transition-colors group-hover:text-white">
                   {channel.phone ? channel.href : bare(channel.href)}
                 </span>
               </span>
