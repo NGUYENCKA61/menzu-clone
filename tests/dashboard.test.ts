@@ -5,7 +5,9 @@ import {
   lastDays,
   linePoints,
   percentChange,
+  shelvesToRestock,
   txState,
+  type Shelf,
 } from "@/lib/dashboard";
 import { startOfDayVn } from "@/lib/time";
 
@@ -98,5 +100,63 @@ describe("txState", () => {
     expect(txState("order", "PENDING")).toBe("PENDING");
     expect(txState("order", "CANCELLED")).toBe("FAILED");
     expect(txState("order", "REFUNDED")).toBe("FAILED");
+  });
+});
+
+describe("shelvesToRestock", () => {
+  const shelf = (over: Partial<Shelf>): Shelf => ({
+    packageId: over.name ?? "x",
+    productCode: "HACK1",
+    name: "Tool",
+    tier: "1 day",
+    pool: false,
+    left: 10,
+    stocked: true,
+    waitingOrders: 0,
+    ...over,
+  });
+
+  it("keeps stocked shelves at or under the threshold and drops the rest", () => {
+    const out = shelvesToRestock(
+      [shelf({ name: "A", left: 3 }), shelf({ name: "B", left: 4 }), shelf({ name: "C", left: 0 })],
+      3,
+    );
+    expect(out.map((s) => s.name)).toEqual(["C", "A"]);
+  });
+
+  it("never lists a tier the shop has not stocked, unless a buyer waits on it", () => {
+    const out = shelvesToRestock(
+      [
+        shelf({ name: "Never", left: 0, stocked: false }),
+        shelf({ name: "Owed", left: 0, stocked: false, waitingOrders: 2 }),
+      ],
+      3,
+    );
+    expect(out.map((s) => s.name)).toEqual(["Owed"]);
+  });
+
+  it("lists a waiting buyer whatever is on the shelf, and puts it first", () => {
+    const out = shelvesToRestock(
+      [shelf({ name: "Empty", left: 0 }), shelf({ name: "Busy", left: 9, waitingOrders: 1 })],
+      3,
+    );
+    expect(out.map((s) => s.name)).toEqual(["Busy", "Empty"]);
+  });
+
+  it("still lists an empty shelf with the warnings switched off", () => {
+    const out = shelvesToRestock([shelf({ name: "Empty", left: 0 }), shelf({ name: "One", left: 1 })], 0);
+    expect(out.map((s) => s.name)).toEqual(["Empty"]);
+  });
+
+  it("orders ties by name, then tier, so the list holds still", () => {
+    const out = shelvesToRestock(
+      [
+        shelf({ packageId: "1", name: "B", tier: "7 days", left: 1 }),
+        shelf({ packageId: "2", name: "A", tier: "7 days", left: 1 }),
+        shelf({ packageId: "3", name: "A", tier: "1 day", left: 1 }),
+      ],
+      3,
+    );
+    expect(out.map((s) => s.packageId)).toEqual(["3", "2", "1"]);
   });
 });

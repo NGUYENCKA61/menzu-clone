@@ -133,3 +133,45 @@ export function txState(kind: "topup" | "order", status: string): TxState {
   // not the everyday case this split was made for.
   return "FAILED";
 }
+
+/** One tier's shelf, as the overview's restock list reads it. */
+export interface Shelf {
+  packageId: string;
+  productCode: string;
+  name: string;
+  /** The tier's label; null on an "acc random" listing, which has only the one. */
+  tier: string | null;
+  /** An "acc random" listing: its shelf holds sign-ins, not keys. */
+  pool: boolean;
+  /** What is still on the shelf. */
+  left: number;
+  /**
+   * Whether anything was ever put on it. A tool the shop sells without keys
+   * never had a shelf, and listing it as empty would bury the real ones.
+   */
+  stocked: boolean;
+  /** Paid orders still waiting on this tier. */
+  waitingOrders: number;
+}
+
+/**
+ * The shelves the desk should restock, most urgent first.
+ *
+ * A shelf counts when a paid buyer is waiting on it, or when it is stocked
+ * and down to the low-stock threshold the warnings use. An empty shelf
+ * always counts, even with the warnings switched off (a threshold of 0):
+ * the warning is a message, the empty shelf is a fact. Buyers waiting come
+ * first, then the emptiest, then by name so the list holds still.
+ */
+export function shelvesToRestock(shelves: Shelf[], threshold: number): Shelf[] {
+  const line = Number.isFinite(threshold) ? Math.max(0, Math.floor(threshold)) : 0;
+  return shelves
+    .filter((s) => s.waitingOrders > 0 || (s.stocked && s.left <= line))
+    .sort(
+      (a, b) =>
+        b.waitingOrders - a.waitingOrders ||
+        a.left - b.left ||
+        a.name.localeCompare(b.name, "vi") ||
+        (a.tier ?? "").localeCompare(b.tier ?? "", "vi"),
+    );
+}

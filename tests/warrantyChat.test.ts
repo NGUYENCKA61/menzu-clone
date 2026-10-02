@@ -7,8 +7,10 @@ import {
   mergeMessages,
   MESSAGE_MAX,
   messagePreview,
+  needsShop,
   readMessage,
   sendingTooFast,
+  transferDue,
   type ChatMessage,
 } from "@/lib/warrantyChat";
 
@@ -101,5 +103,36 @@ describe("messagePreview", () => {
 
   it("names a picture sent on its own", () => {
     expect(messagePreview("")).toBe("(ảnh)");
+  });
+});
+
+describe("transferDue", () => {
+  it("is a bank refund whose account has arrived", () => {
+    expect(transferDue("REFUNDING", "MANUAL", "0123456789")).toBe(true);
+  });
+
+  it("waits on the buyer while the account is missing", () => {
+    expect(transferDue("REFUNDING", "MANUAL", null)).toBe(false);
+  });
+
+  it("is never a wallet refund, nor a ticket that is not refunding", () => {
+    expect(transferDue("REFUNDING", "WALLET", "0123456789")).toBe(false);
+    expect(transferDue("REFUNDED", "MANUAL", "0123456789")).toBe(false);
+  });
+});
+
+describe("needsShop", () => {
+  const row = (status: "OPEN" | "IN_PROGRESS" | "REFUNDING" | "RESOLVED", awaiting = false, due = false) =>
+    needsShop({ status, awaitingShop: awaiting, transferDue: due });
+
+  it("takes a new report, the buyer's last word, or a transfer to make", () => {
+    expect(row("OPEN")).toBe(true);
+    expect(row("IN_PROGRESS", true)).toBe(true);
+    expect(row("REFUNDING", false, true)).toBe(true);
+  });
+
+  it("leaves a ticket where the shop spoke last", () => {
+    expect(row("IN_PROGRESS")).toBe(false);
+    expect(row("RESOLVED")).toBe(false);
   });
 });

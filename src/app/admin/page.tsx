@@ -1,12 +1,19 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import type { Prisma } from "@prisma/client";
 import {
+  Banknote,
   CircleDollarSign,
   CreditCard,
+  Gift,
+  KeyRound,
   Landmark,
+  ShieldCheck,
+  Star,
   TrendingUp,
   UserRoundPlus,
   Users,
+  Wallet,
 } from "lucide-react";
 
 import { AdminDashboard } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminDashboard";
@@ -14,14 +21,39 @@ import { AdminShell } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminSh
 import { formatVnd } from "@/components/sites/menzu-lol-f7ae197a/shared/productData";
 import { getAdmin } from "@/lib/admin";
 import { relativeTime } from "@/lib/announcements";
-import { lastDays, percentChange, formatPercent, txState } from "@/lib/dashboard";
+import {
+  lastDays,
+  percentChange,
+  formatPercent,
+  shelvesToRestock,
+  txState,
+} from "@/lib/dashboard";
 import { db } from "@/lib/db";
+import { getShopSettings } from "@/lib/settingsStore";
 import { startOfDayVn } from "@/lib/time";
+import { expireStaleTopUps } from "@/lib/topupStore";
+import { awaitingShop, needsShop, transferDue } from "@/lib/warrantyChat";
 
 export const metadata: Metadata = { title: "Tổng quan | Quản trị" };
 export const dynamic = "force-dynamic";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
+
+/** How many shelves the restock list names; the card counts them all. */
+const RESTOCK_SHOWN = 6;
+
+/** A tier's shelf: whose it is and what is left on it. */
+function readShelves(where: Prisma.ProductPackageWhereInput) {
+  return db.productPackage.findMany({
+    where,
+    select: {
+      id: true,
+      label: true,
+      product: { select: { code: true, name: true, accountPool: true } },
+      _count: { select: { licenseKeys: { where: { status: "AVAILABLE" } } } },
+    },
+  });
+}
 
 /** "14:42" in the shop's timezone, decided here so both renders agree. */
 function clockVn(date: Date): string {
@@ -43,6 +75,12 @@ export default async function AdminHome() {
   const weekStart = days[0]!.start;
   const prevWeekStart = new Date(weekStart.getTime() - 7 * DAY_MS);
 
+  // Retired first, as the top-up queue does on opening: a request nobody paid
+  // within the window would be counted here and then be missing from the
+  // queue the card opens.
+  await expireStaleTopUps();
+  const settings = await getShopSettings();
+
   const [
     users,
     newUsersToday,
@@ -58,6 +96,12 @@ export default async function AdminHome() {
     recentTopUps,
     recentOrders,
     recentSignUps,
+    topUpsWaiting,
+    openTickets,
+    reviewsWaiting,
+    parcelsWaiting,
+    stockedShelves,
+    waitingByTierRows,
   ] = await Promise.all([
     db.user.count(),
     db.user.count({ where: today }),
@@ -124,12 +168,94 @@ export default async function AdminHome() {
       take: 5,
       select: { id: true, username: true, avatarUrl: true, createdAt: true },
     }),
+    // What waits on the shop, for the to-do cards. With automatic top-up on,
+    // a bank request credits itself the moment the transfer lands; only a
+    // scratch card waits for a person.
+    db.topUp.count({
+      where: {
+        status: "PENDING",
+        ...(settings.autoTopUpEnabled ? { method: "CARD" as const } : {}),
+      },
+    }),
+    // Every ticket still open, with the last word on it: the desk's "Cần xử
+    // lý" is decided per ticket, from these three facts.
+    db.warrantyRequest.findMany({
+      where: { status: { in: ["OPEN", "IN_PROGRESS", "REFUNDING"] } },
+      select: {
+        status: true,
+        refundMethod: true,
+        bankAccount: true,
+        messages: { orderBy: { createdAt: "desc" }, take: 1, select: { fromShop: true } },
+      },
+    }),
+    db.feedback.count({ where: { approved: false } }),
+    // The "Gửi quà" tab's badge counts the same rows.
+    db.spinWin.count({ where: { status: "PENDING" } }),
+    // The shelves the shop keeps: tiers on sale with at least one key (or
+    // sign-in) ever put on them.
+    readShelves({
+      product: { deletedAt: null, status: "AVAILABLE" },
+      licenseKeys: { some: {} },
+    }),
+    // Paid orders still owed something, per tier. In SQL because "owed more
+    // than was handed over" compares a column with a count, which Prisma's
+    // where cannot say.
+    db.$queryRaw<{ packageId: string; orders: number }[]>`
+      SELECT o."packageId" AS "packageId", COUNT(*)::int AS orders
+      FROM orders o
+      WHERE o.status = 'PAID'
+        AND o."packageId" IS NOT NULL
+        AND o."keysOwed" > 0
+        AND o."keysOwed" > (SELECT COUNT(*) FROM license_keys k WHERE k."orderId" = o.id)
+      GROUP BY o."packageId"
+    `,
   ]);
 
   const weekChange = percentChange(
     Number(thisWeek._sum.total ?? 0),
     Number(lastWeek._sum.total ?? 0),
   );
+
+  // Split the desk's "Cần xử lý" in two: a transfer to make is a different
+  // errand from a buyer to answer, though both open the same filtered list.
+  let transfersDue = 0;
+  let repliesDue = 0;
+  for (const ticket of openTickets) {
+    const due = transferDue(ticket.status, ticket.refundMethod, ticket.bankAccount);
+    const needs = needsShop({
+      status: ticket.status,
+      awaitingShop: awaitingShop(ticket.status, ticket.messages[0]?.fromShop ?? null),
+      transferDue: due,
+    });
+    if (due) transfersDue += 1;
+    else if (needs) repliesDue += 1;
+  }
+
+  // A tier owed keys but not among the kept shelves (never stocked, or since
+  // taken off sale) still has a paid buyer waiting on it: read apart, and
+  // only when there is one.
+  const waitingByTier = new Map(waitingByTierRows.map((row) => [row.packageId, row.orders]));
+  const kept = new Set(stockedShelves.map((shelf) => shelf.id));
+  const strays = [...waitingByTier.keys()].filter((id) => !kept.has(id));
+  const strayShelves = strays.length > 0 ? await readShelves({ id: { in: strays } }) : [];
+  const threshold = Math.floor(settings.lowStockThreshold);
+  const shelves = shelvesToRestock(
+    [
+      ...stockedShelves.map((shelf) => ({ shelf, stocked: true })),
+      ...strayShelves.map((shelf) => ({ shelf, stocked: false })),
+    ].map(({ shelf, stocked }) => ({
+      packageId: shelf.id,
+      productCode: shelf.product.code,
+      name: shelf.product.name ?? shelf.product.code,
+      tier: shelf.product.accountPool ? null : shelf.label,
+      pool: shelf.product.accountPool,
+      left: shelf._count.licenseKeys,
+      stocked,
+      waitingOrders: waitingByTier.get(shelf.id) ?? 0,
+    })),
+    threshold,
+  );
+  const ordersWaiting = shelves.reduce((sum, shelf) => sum + shelf.waitingOrders, 0);
 
   // Both ledgers on one timeline. Merged here rather than in the browser so
   // the list is already the shop's, not something assembled from two lists a
@@ -205,6 +331,70 @@ export default async function AdminHome() {
       username={admin.username}
     >
       <AdminDashboard
+        todo={[
+          {
+            label: "Nạp tiền chờ duyệt",
+            count: topUpsWaiting,
+            sub: settings.autoTopUpEnabled ? "thẻ cào khách đã gửi" : "thẻ cào và chuyển khoản",
+            href: "/admin/operations?tab=topups",
+            icon: Wallet,
+          },
+          {
+            label: "Bảo hành chờ trả lời",
+            count: repliesDue,
+            sub: "yêu cầu mới hoặc khách vừa nhắn",
+            href: "/admin/warranty?filter=todo",
+            icon: ShieldCheck,
+          },
+          {
+            label: "Hoàn tiền chờ chuyển khoản",
+            count: transfersDue,
+            sub: "khách đã gửi số tài khoản",
+            href: "/admin/warranty?filter=todo",
+            icon: Banknote,
+          },
+          {
+            label: "Kho sắp hết hàng",
+            count: shelves.length,
+            sub:
+              ordersWaiting > 0
+                ? `${ordersWaiting} đơn đã trả tiền chờ giao`
+                : `gói còn từ ${Math.max(0, threshold)} trở xuống`,
+            subWarn: ordersWaiting > 0,
+            href: shelves.length > 0 ? "#kho-key" : "/admin/products",
+            icon: KeyRound,
+          },
+          {
+            label: "Quà chờ gửi",
+            count: parcelsWaiting,
+            sub: "quà vòng quay chưa gửi đi",
+            href: "/admin/operations?tab=parcels",
+            icon: Gift,
+          },
+          {
+            label: "Đánh giá chờ duyệt",
+            count: reviewsWaiting,
+            sub: "chưa hiện cho khách xem",
+            href: "/admin/operations?tab=feedback",
+            icon: Star,
+          },
+        ]}
+        restock={{
+          lines: shelves.slice(0, RESTOCK_SHOWN).map((shelf) => ({
+            id: shelf.packageId,
+            name: shelf.name,
+            tier: shelf.tier,
+            word: shelf.pool ? "tài khoản" : "key",
+            left: shelf.left,
+            waitingOrders: shelf.waitingOrders,
+            // Where more goes in: an "acc random" listing takes its sign-ins
+            // on its own page, a tool's tier on the tier's key desk.
+            href: shelf.pool
+              ? `/admin/products/${encodeURIComponent(shelf.productCode)}`
+              : `/admin/packages/${encodeURIComponent(shelf.packageId)}`,
+          })),
+          more: Math.max(0, shelves.length - RESTOCK_SHOWN),
+        }}
         todayStats={[
           {
             label: "Doanh thu hôm nay",

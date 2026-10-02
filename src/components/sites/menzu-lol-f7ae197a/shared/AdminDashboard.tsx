@@ -1,7 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
 import {
+  ChevronRight,
   CreditCard,
+  KeyRound,
   Landmark,
   ShoppingBag,
   UserRoundPlus,
@@ -22,6 +24,32 @@ export interface StatItem {
   icon: LucideIcon;
   /** Chip classes for the badge — border, background and text share a hue. */
   tint: string;
+}
+
+/** One errand waiting on the shop, and the screen where it is done. */
+export interface TodoItem {
+  label: string;
+  count: number;
+  /** What is counted, in a few words. */
+  sub: string;
+  /** Tints the sub-line amber: a paid buyer is already waiting. */
+  subWarn?: boolean;
+  /** A screen, or "#kho-key" for the restock list under the cards. */
+  href: string;
+  icon: LucideIcon;
+}
+
+/** One shelf to restock, under the to-do cards. */
+export interface RestockLine {
+  id: string;
+  name: string;
+  /** Null on an "acc random" listing, which has only the one shelf. */
+  tier: string | null;
+  /** "key", or "tài khoản" on an "acc random" listing. */
+  word: string;
+  left: number;
+  waitingOrders: number;
+  href: string;
 }
 
 export interface ChartPoint {
@@ -120,12 +148,16 @@ function Avatar({
  * timezone, instead of being sent as instants for a browser to disagree about.
  */
 export function AdminDashboard({
+  todo,
+  restock,
   todayStats,
   totals,
   chart,
   activity,
   transactions,
 }: {
+  todo: TodoItem[];
+  restock: { lines: RestockLine[]; more: number };
   todayStats: StatItem[];
   totals: StatItem[];
   chart: ChartPoint[];
@@ -134,6 +166,18 @@ export function AdminDashboard({
 }) {
   return (
     <div className="flex flex-col gap-7">
+      {/* First, above the figures (the owner, 02/10/2026: "Làm 1 đi"): what
+          is waiting on the shop, each card opening the screen where it is
+          done. Every card stays even at zero, so each errand keeps its place. */}
+      <Section title="Việc cần xử lý">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
+          {todo.map((item) => (
+            <TodoCard key={item.label} {...item} />
+          ))}
+        </div>
+        {restock.lines.length > 0 ? <RestockList {...restock} /> : null}
+      </Section>
+
       <Section title="Hôm nay" note="00:00–23:59 giờ Việt Nam">
         <div className="grid grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4">
           {todayStats.map((stat) => (
@@ -215,6 +259,121 @@ function StatCard({ label, value, sub, tone, icon: Icon, tint }: StatItem) {
       >
         {sub}
       </span>
+    </div>
+  );
+}
+
+/** A stat card that is also a door: the count of one errand, opening its screen. */
+function TodoCard({ label, count, sub, subWarn, href, icon: Icon }: TodoItem) {
+  // Amber is the shop's "đang chờ" everywhere in this area; a card at zero
+  // steps back to grey like a quiet stat does.
+  const waiting = count > 0;
+  const className = `group flex flex-col gap-3 rounded-xl border bg-[#0e0e11] p-5 transition-colors ${
+    waiting
+      ? "border-amber-500/25 hover:border-amber-500/50"
+      : "border-white/[0.08] hover:border-white/20"
+  }`;
+  const body = (
+    <>
+      <div className="flex items-center justify-between gap-3">
+        <span className={CAP}>{label}</span>
+        <span
+          className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border ${
+            waiting
+              ? "border-amber-500/25 bg-amber-500/10 text-amber-400"
+              : "border-white/[0.08] bg-white/[0.03] text-neutral-600"
+          }`}
+        >
+          <Icon size={15} />
+        </span>
+      </div>
+      <span
+        className={`text-[20px] font-black leading-none tabular-nums sm:text-[26px] ${
+          waiting ? "text-white" : "text-neutral-600"
+        }`}
+      >
+        {count}
+      </span>
+      <span className="flex items-center justify-between gap-2 text-[11px]">
+        <span className={subWarn ? "font-semibold text-amber-400" : "text-neutral-500"}>{sub}</span>
+        <ChevronRight
+          size={14}
+          aria-hidden
+          className="shrink-0 text-neutral-600 transition-colors group-hover:text-white"
+        />
+      </span>
+    </>
+  );
+
+  // The restock card points down the page, which is an anchor, not a route.
+  return href.startsWith("#") ? (
+    <a href={href} className={className}>
+      {body}
+    </a>
+  ) : (
+    <Link href={href} className={className}>
+      {body}
+    </Link>
+  );
+}
+
+/**
+ * The shelves behind the restock card, each opening the page where keys (or
+ * an "acc random" listing's sign-ins) are pasted in. Only drawn when there is
+ * one; the card says how many in all, the list the first few.
+ */
+function RestockList({ lines, more }: { lines: RestockLine[]; more: number }) {
+  return (
+    <div id="kho-key" className={`${CARD} scroll-mt-20 overflow-hidden`}>
+      <div className="flex items-center justify-between gap-3 px-5 py-3.5">
+        <h3 className={CAP}>Gói sắp hết hàng</h3>
+        <span className="text-[11px] text-neutral-600">Bấm vào gói để nhập thêm</span>
+      </div>
+      <ul className="border-t border-white/[0.06]">
+        {lines.map((line) => (
+          <li key={line.id} className="border-b border-white/[0.04] last:border-0">
+            <Link
+              href={line.href}
+              className="group flex items-center gap-3 px-5 py-2.5 transition-colors hover:bg-white/[0.02]"
+            >
+              <KeyRound size={13} aria-hidden className="shrink-0 text-neutral-500" />
+              {/* The tier on a line of its own: product names here run to a
+                  hundred characters, and on one line the truncation ate the
+                  tier, which is the part that says which shelf is empty. */}
+              <span className="min-w-0 flex-1">
+                <span className="block truncate text-[13px] text-white">{line.name}</span>
+                {line.tier ? (
+                  <span className="mt-0.5 block truncate text-[11px] text-neutral-500">
+                    Gói {line.tier}
+                  </span>
+                ) : null}
+              </span>
+              {line.waitingOrders > 0 ? (
+                <span className="shrink-0 text-[11px] font-bold tabular-nums text-amber-400">
+                  {line.waitingOrders} đơn chờ giao
+                </span>
+              ) : null}
+              <span
+                className={`shrink-0 text-[11px] font-bold tabular-nums ${
+                  line.left === 0 ? "text-rose-400" : "text-amber-400"
+                }`}
+              >
+                {line.left === 0 ? `Hết ${line.word}` : `Còn ${line.left} ${line.word}`}
+              </span>
+              <ChevronRight
+                size={14}
+                aria-hidden
+                className="shrink-0 text-neutral-600 transition-colors group-hover:text-white"
+              />
+            </Link>
+          </li>
+        ))}
+      </ul>
+      {more > 0 ? (
+        <p className="border-t border-white/[0.06] px-5 py-2.5 text-[11px] text-neutral-500">
+          Và {more} gói khác
+        </p>
+      ) : null}
     </div>
   );
 }

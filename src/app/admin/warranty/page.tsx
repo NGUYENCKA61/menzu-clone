@@ -5,7 +5,7 @@ import { AdminShell } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminSh
 import { AdminWarranty } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminWarranty";
 import { getAdmin } from "@/lib/admin";
 import { db } from "@/lib/db";
-import { awaitingShop, messagePreview } from "@/lib/warrantyChat";
+import { awaitingShop, messagePreview, transferDue } from "@/lib/warrantyChat";
 
 export const metadata: Metadata = { title: "Bảo hành | Quản trị" };
 export const dynamic = "force-dynamic";
@@ -28,7 +28,12 @@ function stamp(date: Date): string {
  * lại trong Dashboard admin bảo hành sao cho đỡ rối dễ thao tác với khách
  * hàng").
  */
-export default async function AdminWarrantyPage() {
+export default async function AdminWarrantyPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ filter?: string }>;
+}) {
+  const { filter } = await searchParams;
   const admin = await getAdmin();
   // notFound, not a redirect to /login: a 404 does not tell an unauthenticated
   // visitor that an admin area exists here at all.
@@ -69,6 +74,8 @@ export default async function AdminWarrantyPage() {
     >
       <AdminWarranty
         loadedAt={loadedAt}
+        // The overview's to-do cards land here on "Cần xử lý".
+        initialFilter={filter === "todo" ? "TODO" : "ALL"}
         rows={rows.map((r) => {
           const last = r.messages[0] ?? null;
           const bankRefund = r.status === "REFUNDING" && r.refundMethod === "MANUAL";
@@ -81,7 +88,7 @@ export default async function AdminWarrantyPage() {
             username: r.user.username,
             orderCode: r.order.code,
             awaitingShop: awaitingShop(r.status, last?.fromShop ?? null),
-            transferDue: bankRefund && r.bankAccount !== null,
+            transferDue: transferDue(r.status, r.refundMethod, r.bankAccount),
             bankAwaited: bankRefund && r.bankAccount === null,
             lastAt: stamp(last?.createdAt ?? r.createdAt),
             lastTs: (last?.createdAt ?? r.createdAt).getTime(),

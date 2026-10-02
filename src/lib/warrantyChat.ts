@@ -70,6 +70,28 @@ export function awaitingShop(status: WarrantyStatus, lastFromShop: boolean | nul
   return warrantyOpen(status) && lastFromShop === false;
 }
 
+/** A bank refund whose account has arrived: the transfer is the shop's move. */
+export function transferDue(
+  status: WarrantyStatus,
+  refundMethod: string | null,
+  bankAccount: string | null,
+): boolean {
+  return status === "REFUNDING" && refundMethod === "MANUAL" && bankAccount !== null;
+}
+
+/**
+ * Something on this ticket is the shop's move now: a new report, the buyer's
+ * last word, or a transfer to make. The desk's "Cần xử lý" and the overview's
+ * to-do cards both count with this, so the two figures never disagree.
+ */
+export function needsShop(row: {
+  status: WarrantyStatus;
+  awaitingShop: boolean;
+  transferDue: boolean;
+}): boolean {
+  return row.awaitingShop || row.status === "OPEN" || row.transferDue;
+}
+
 /**
  * The thread as rendered by the server, plus what this tab sent or fetched
  * since — once each, in the order they were written. A message the tab sent

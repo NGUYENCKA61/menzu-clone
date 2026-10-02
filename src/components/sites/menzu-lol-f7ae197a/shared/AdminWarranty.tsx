@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import { ChevronRight, MessageCircle, Search, Wrench } from "lucide-react";
 
 import { ListPager } from "@/components/sites/menzu-lol-f7ae197a/shared/AccountListChrome";
-import { DESK_POLL_MS } from "@/lib/warrantyChat";
+import { DESK_POLL_MS, needsShop } from "@/lib/warrantyChat";
 import {
   WARRANTY_ISSUE,
   WARRANTY_STATUS,
@@ -60,20 +60,24 @@ const RANK: Record<WarrantyStatus, number> = {
 
 const PER_PAGE = 20;
 
-/** Something on this ticket is the shop's move now. */
-function needsShop(row: WarrantyListRow): boolean {
-  return row.awaitingShop || row.status === "OPEN" || row.transferDue;
-}
-
 /**
  * The warranty queue (the owner, 01/10/2026: "sửa lại … sao cho đỡ rối dễ
  * thao tác với khách hàng"): one line per ticket — its state, what was
  * bought, who and which order, and the last word said — and the ticket's own
  * page for everything else (/admin/warranty/[id]). What needs the shop sits
  * on top and has its own filter; a search finds an order, a buyer or a tool.
+ * The overview's to-do cards open it on that filter (?filter=todo).
  */
-export function AdminWarranty({ rows, loadedAt }: { rows: WarrantyListRow[]; loadedAt: string }) {
-  const [filter, setFilter] = useState<Filter>("ALL");
+export function AdminWarranty({
+  rows,
+  loadedAt,
+  initialFilter = "ALL",
+}: {
+  rows: WarrantyListRow[];
+  loadedAt: string;
+  initialFilter?: "ALL" | "TODO";
+}) {
+  const [filter, setFilter] = useState<Filter>(initialFilter);
   const [query, setQuery] = useState("");
 
   const count = (key: Filter) =>
