@@ -1018,16 +1018,32 @@ export function OrderDetailModal({
                       ("bỏ dấu gạch dưới đi"), is the press that opens the
                       review popup; it whitens under the pointer. The question
                       itself one step up from neutral-500, readable at 12px yet
-                      still below the ask (trial, "có cần tăng sáng" → "thử đi"). */}
+                      still below the ask (trial, "có cần tăng sáng" → "thử đi").
+                      Once reviewed, no question: "Xem đánh giá mã đơn …" alone,
+                      a link straight to the shop's review page ("nếu đã đánh
+                      giá rồi thì … chỉ hiện xem đánh giá mã đơn", "bấm vô là
+                      nhảy tới trang đánh giá luôn đi", "trang này đi …
+                      /feedback"). */}
                   <span className="text-xs text-neutral-400">
-                    Bạn thấy sao về sản phẩm này?{" "}
-                    <button
-                      type="button"
-                      onClick={() => setReviewOpen(true)}
-                      className="text-neutral-300 transition-colors hover:text-white"
-                    >
-                      Đánh giá mã đơn <span className="font-bold">{order.code}</span>
-                    </button>
+                    {order.reviewed ? (
+                      <Link
+                        href="/feedback"
+                        className="text-neutral-300 transition-colors hover:text-white"
+                      >
+                        Xem đánh giá mã đơn <span className="font-bold">{order.code}</span>
+                      </Link>
+                    ) : (
+                      <>
+                        Bạn thấy sao về sản phẩm này?{" "}
+                        <button
+                          type="button"
+                          onClick={() => setReviewOpen(true)}
+                          className="text-neutral-300 transition-colors hover:text-white"
+                        >
+                          Đánh giá mã đơn <span className="font-bold">{order.code}</span>
+                        </button>
+                      </>
+                    )}
                   </span>
                   {/* The warranty button, and the review beside it when that
                       is switched on. On a phone they share a row, or the one
