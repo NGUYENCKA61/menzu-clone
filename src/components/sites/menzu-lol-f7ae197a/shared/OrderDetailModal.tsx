@@ -999,34 +999,12 @@ export function OrderDetailModal({
 
                 {/* FOOTER */}
                 <div className="flex flex-col gap-3 border-t border-white/[0.06] bg-white/[0.02] px-5 py-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:px-6">
-                  {/* The footer asks for the review when the order can take
-                      one, and thanks once it has (the owner, 02/10/2026:
-                      "đổi thành câu đánh giá bản hack đơn này", "là khách hàng
-                      đánh giá bằng chỗ đó"); an order still being looked
-                      after keeps the support line. */}
-                  {askReview ? (
-                    <span className="text-xs text-neutral-500">
-                      <span className="font-bold text-neutral-300">
-                        Bạn thấy {order.isSoftware ? "bản hack" : "tài khoản"} này thế nào?
-                      </span>{" "}
-                      Đánh giá để người mua sau tham khảo.
+                  <span className="text-xs text-neutral-500">
+                    Cần hỗ trợ về đơn hàng này? Gửi kèm mã đơn{" "}
+                    <span className="font-bold text-neutral-300">
+                      {order.code}
                     </span>
-                  ) : reviewHref && order.reviewed ? (
-                    <span className="text-xs text-neutral-500">
-                      <Star
-                        className="mr-1 inline h-3 w-3 fill-current align-[-2px] text-amber-400"
-                        aria-hidden
-                      />
-                      Cảm ơn bạn đã đánh giá {order.isSoftware ? "bản hack" : "tài khoản"} này.
-                    </span>
-                  ) : (
-                    <span className="text-xs text-neutral-500">
-                      Cần hỗ trợ về đơn hàng này? Gửi kèm mã đơn{" "}
-                      <span className="font-bold text-neutral-300">
-                        {order.code}
-                      </span>
-                    </span>
-                  )}
+                  </span>
                   {/* The warranty button, and the review beside it when that
                       is switched on. On a phone they share a row, or the one
                       button fills it. */}
@@ -1057,6 +1035,15 @@ export function OrderDetailModal({
                         </Link>
                       ) : null}
                     </div>
+                    {reviewHref && order.reviewed ? (
+                      <p className="text-[11px] leading-snug text-neutral-500">
+                        <Star
+                          className="mr-1 inline h-3 w-3 fill-current align-[-2px] text-amber-400"
+                          aria-hidden
+                        />
+                        Bạn đã đánh giá đơn này.
+                      </p>
+                    ) : null}
                     {!showWarranty ? (
                       <p className="text-[11px] leading-snug text-neutral-500">
                         <Wrench className="mr-1 inline h-3 w-3 align-[-2px]" aria-hidden />
