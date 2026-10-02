@@ -623,10 +623,14 @@ export function OrderDetailModal({
                       icon={<ShieldCheck className={iconClass} />}
                       label="Trạng thái"
                     >
-                      {/* The list row's chip, verbatim — the same order wears
-                          the same badge on both sides of the button. */}
+                      {/* The list row's chip colours, in /transactions'
+                          StatusPill shape, class for class: 9px bold, 4px
+                          corners, tighter on a phone (the owner, 02/10/2026:
+                          "đồng bộ với lịch sử giao dịch card thành công").
+                          That page is the owner's "đừng đụng", so the match
+                          is made from this side. */}
                       <span
-                        className={`inline-flex whitespace-nowrap rounded-lg border px-2 py-1 text-[10px] font-black uppercase tracking-wider ${order.statusClass}`}
+                        className={`inline-block whitespace-nowrap rounded border px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest sm:px-2.5 sm:py-1 ${order.statusClass}`}
                       >
                         {order.statusLabel}
                       </span>

@@ -24,12 +24,14 @@ const STATUS_LABEL: Record<string, string> = {
   REFUNDED: "Đã hoàn tiền",
 };
 
-// The receipt's own pill. Colour follows meaning, same palette as the ledgers.
+// The receipt's own pill. Colour follows meaning, same palette as the ledgers,
+// and the same 20% rim as /transactions' "Thành công" (the owner, 02/10/2026:
+// "card đã thanh toán … đồng bộ với lịch sử giao dịch card thành công").
 const STATUS_CLASS: Record<string, string> = {
-  PAID: "border-emerald-500/30 bg-emerald-500/10 text-emerald-400",
-  PENDING: "border-amber-500/30 bg-amber-500/10 text-amber-400",
+  PAID: "border-emerald-500/20 bg-emerald-500/10 text-emerald-400",
+  PENDING: "border-amber-500/20 bg-amber-500/10 text-amber-400",
   CANCELLED: "border-white/10 bg-white/5 text-neutral-400",
-  REFUNDED: "border-rose-500/30 bg-rose-500/10 text-rose-400",
+  REFUNDED: "border-rose-500/20 bg-rose-500/10 text-rose-400",
 };
 
 /* The card's pill, in menzu's weight. */
