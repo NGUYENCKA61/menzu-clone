@@ -1012,26 +1012,18 @@ export function OrderDetailModal({
                 {/* FOOTER */}
                 <div className="flex flex-col gap-3 border-t border-white/[0.06] bg-white/[0.02] px-5 py-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:px-6">
                   {/* The owner's own words (02/10/2026), where "Cần hỗ trợ về
-                      đơn hàng này? Gửi kèm mã đơn …" stood; the code is the
-                      way in, underlined, and opens the review popup. */}
+                      đơn hàng này? Gửi kèm mã đơn …" stood. The ask, a step
+                      brighter than the question and with no underline ("bỏ
+                      dấu gạch dưới đi"), is the press that opens the review
+                      popup; it whitens under the pointer. */}
                   <span className="text-xs text-neutral-500">
                     Bạn thấy sao về sản phẩm này?{" "}
-                    {/* The whole ask underlined and pressable, not only the
-                        code (the owner, 02/10/2026: "gạch dưới đủ đi", "hãy
-                        đánh giá mã đơn"). */}
-                    {/* The rule under the words only, up to "mã đơn"; the code
-                        beside them stays bold and unruled, still part of the
-                        press (the owner, 02/10/2026: "chắc gạch tới mã đơn
-                        thôi"). */}
                     <button
                       type="button"
                       onClick={() => setReviewOpen(true)}
-                      className="group text-neutral-300 transition-colors hover:text-white"
+                      className="text-neutral-300 transition-colors hover:text-white"
                     >
-                      <span className="underline decoration-neutral-500 underline-offset-[3px] group-hover:decoration-white">
-                        Hãy đánh giá mã đơn
-                      </span>{" "}
-                      <span className="font-bold">{order.code}</span>
+                      Hãy đánh giá mã đơn <span className="font-bold">{order.code}</span>
                     </button>
                   </span>
                   {/* The warranty button, and the review beside it when that
