@@ -745,11 +745,14 @@ export function OrderDetailModal({
                               </div>
                             </div>
                           </td>
+                          {/* Plain text like its neighbours, under the
+                              column's own heading: as a 9px capped chip it was
+                              the one boxed cell in the row (trial, the owner,
+                              02/10/2026: "nhìn nó AI quá" → "thử đi"). The
+                              list's cards keep their chip. */}
                           <td className={CELL}>
                             {chip ? (
-                              <span className="inline-flex whitespace-nowrap rounded-md border border-white/15 bg-white/10 px-2 py-0.5 text-[9px] font-black uppercase tracking-widest text-neutral-300">
-                                {chip}
-                              </span>
+                              <span className="whitespace-nowrap">{chip}</span>
                             ) : (
                               <span className="text-neutral-500">-</span>
                             )}
