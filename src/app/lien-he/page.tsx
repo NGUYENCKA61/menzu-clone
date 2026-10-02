@@ -10,6 +10,12 @@ import {
   ZaloGlyph,
 } from "@/components/sites/menzu-lol-f7ae197a/shared/BrandGlyphs";
 import { SimplePage } from "@/components/sites/menzu-lol-f7ae197a/shared/SimplePage";
+import {
+  TRUST_NOTE,
+  TRUST_NOTE_ICON,
+  TRUST_NOTE_LEAD,
+  TRUST_NOTE_TEXT,
+} from "@/components/sites/menzu-lol-f7ae197a/shared/trustNoteLook";
 import { SITE_URL } from "@/lib/seo";
 import { getShopSettings } from "@/lib/settingsStore";
 
@@ -119,16 +125,16 @@ export default async function OfficialChannelsPage() {
           been messaged by a fake account reads this page for that — but one
           short paragraph now (the owner, 01/10/2026: "thu gọn cái cảnh báo giả
           mạo thay nội dung"). The alert circle rather than the shield (the
-          owner, 02/10/2026: "cái khiên ! kia mới đổi thành alert"). Coloured
-          as the reviews page's "100% đánh giá" note is: the shop's accent at
-          5% / 20%, the lead phrase in it (the owner, 02/10/2026: "cho màu
-          giống"). */}
-      <div className="mb-6 flex items-start gap-3 rounded-xl border border-[var(--menzu-accent)]/20 bg-[var(--menzu-accent)]/5 px-4 py-3">
-        <CircleAlert size={18} className="mt-0.5 shrink-0 text-[var(--menzu-accent)]" />
-        <p className="text-[13px] leading-relaxed text-neutral-300">
-          <span className="font-black text-[var(--menzu-accent)]">Chỉ các kênh dưới đây là của shop.</span>{" "}
+          owner, 02/10/2026: "cái khiên ! kia mới đổi thành alert"). The same
+          note as the reviews page's "100% đánh giá", colour, size and font,
+          from trustNoteLook (the owner, 02/10/2026: "cho màu giống", "coi có
+          đồng bộ không vậy", "cỡ chữ kích thước", "font"). */}
+      <div className={TRUST_NOTE}>
+        <CircleAlert size={16} className={TRUST_NOTE_ICON} />
+        <p className={TRUST_NOTE_TEXT}>
+          <span className={TRUST_NOTE_LEAD}>Chỉ các kênh dưới đây là của shop.</span>{" "}
           Shop không bao giờ hỏi mật khẩu hay mã OTP, và chỉ nhận tiền qua trang Nạp tiền trên{" "}
-          <span className="font-mono font-bold text-white">{bare(SITE_URL)}</span>.
+          <span className="font-bold text-white">{bare(SITE_URL)}</span>.
         </p>
       </div>
 

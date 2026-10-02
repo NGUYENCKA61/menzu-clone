@@ -8,6 +8,12 @@ import { SiteHeader } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/
 import { ConnectRailSection } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/ConnectRailSection";
 import { Breadcrumb } from "@/components/sites/menzu-lol-f7ae197a/shared/Breadcrumb";
 import {
+  TRUST_NOTE,
+  TRUST_NOTE_ICON,
+  TRUST_NOTE_LEAD,
+  TRUST_NOTE_TEXT,
+} from "@/components/sites/menzu-lol-f7ae197a/shared/trustNoteLook";
+import {
   FeedbackBoard,
   type FeedbackItem,
 } from "@/components/sites/menzu-lol-f7ae197a/shared/FeedbackBoard";
@@ -83,10 +89,10 @@ export default async function FeedbackPage() {
               </Link>
             </div>
 
-            <div className="flex items-center gap-2 sm:gap-2.5 bg-[var(--menzu-accent)]/5 border border-[var(--menzu-accent)]/20 rounded-2xl px-3 py-2.5 sm:px-4 sm:py-3 mb-6">
-              <ShieldCheck size={16} className="text-[var(--menzu-accent)] shrink-0" />
-              <p className="text-[11px] sm:text-sm text-neutral-300 leading-normal">
-                <span className="font-black text-[var(--menzu-accent)]">100% đánh giá</span> được tổng
+            <div className={TRUST_NOTE}>
+              <ShieldCheck size={16} className={TRUST_NOTE_ICON} />
+              <p className={TRUST_NOTE_TEXT}>
+                <span className={TRUST_NOTE_LEAD}>100% đánh giá</span> được tổng
                 hợp từ khách đã giao dịch. Có thể yêu cầu đối chiếu lịch sử giao dịch để xác
                 minh.
               </p>
