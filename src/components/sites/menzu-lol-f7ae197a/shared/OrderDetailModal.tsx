@@ -1016,16 +1016,22 @@ export function OrderDetailModal({
                       way in, underlined, and opens the review popup. */}
                   <span className="text-xs text-neutral-500">
                     Bạn thấy sao về sản phẩm này?{" "}
-                    {/* The words plain, the order code underlined and bold:
-                        the code is the press that opens the popup (the owner,
-                        02/10/2026: "gạch dưới chỗ mã đơn thôi"). */}
-                    Hãy đánh giá mã đơn{" "}
+                    {/* The whole ask underlined and pressable, not only the
+                        code (the owner, 02/10/2026: "gạch dưới đủ đi", "hãy
+                        đánh giá mã đơn"). */}
+                    {/* The rule under the words only, up to "mã đơn"; the code
+                        beside them stays bold and unruled, still part of the
+                        press (the owner, 02/10/2026: "chắc gạch tới mã đơn
+                        thôi"). */}
                     <button
                       type="button"
                       onClick={() => setReviewOpen(true)}
-                      className="font-bold text-neutral-300 underline decoration-neutral-500 underline-offset-[3px] transition-colors hover:text-white hover:decoration-white"
+                      className="group text-neutral-300 transition-colors hover:text-white"
                     >
-                      {order.code}
+                      <span className="underline decoration-neutral-500 underline-offset-[3px] group-hover:decoration-white">
+                        Hãy đánh giá mã đơn
+                      </span>{" "}
+                      <span className="font-bold">{order.code}</span>
                     </button>
                   </span>
                   {/* The warranty button, and the review beside it when that
