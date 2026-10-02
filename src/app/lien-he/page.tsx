@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import type { ComponentType } from "react";
-import { Phone, ShieldAlert, Users } from "lucide-react";
+import { CircleAlert, Phone, ShieldAlert } from "lucide-react";
 
 import {
   DiscordGlyph,
@@ -114,7 +114,9 @@ export default async function OfficialChannelsPage() {
   ].filter((channel) => channel.href.trim().length > 0);
 
   return (
-    <SimplePage title="Kênh chính thức & liên hệ" crumb="Liên hệ" icon={Users} ground="home">
+    // The alert circle at the title (the owner, 02/10/2026: "kênh chính thức
+    // liên hệ xài /circle-alert"): the page exists to tell real from fake.
+    <SimplePage title="Kênh chính thức & liên hệ" crumb="Liên hệ" icon={CircleAlert} ground="home">
       {/* The warning first, and in the shop's own red — somebody who has just
           been messaged by a fake account reads this page for that — but one
           short paragraph now (the owner, 01/10/2026: "thu gọn cái cảnh báo giả
