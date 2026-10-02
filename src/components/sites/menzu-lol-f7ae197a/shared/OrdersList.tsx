@@ -291,10 +291,13 @@ export function OrdersList({ orders }: { orders: OrderCardView[] }) {
                                   old list's bordered chip, so two orders of one
                                   tool tell apart at a glance ("cái gói 1 ngày có
                                   nên card bo như cũ" → "thử đi"); then the facts
-                                  on one quiet line. The time alone under its
-                                  day's heading, the whole stamp when a price sort
-                                  drops the headings. Each fact holds together, so
-                                  a narrow card breaks at a " · ". */}
+                                  on one quiet line. Under a day's heading the
+                                  order's time is left off (trial, the owner,
+                                  02/10/2026: "bỏ cái thời gian thử"): the
+                                  heading already says the day. A price sort drops
+                                  the headings, so the whole stamp stays there.
+                                  Each fact holds together, so a narrow card
+                                  breaks at a " · ". */}
                               <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
                                 {order.chip ? (
                                   <span className="rounded-md border border-white/15 bg-white/10 px-2 py-0.5 text-[9px] font-black uppercase tracking-widest text-neutral-300">
@@ -306,10 +309,12 @@ export function OrdersList({ orders }: { orders: OrderCardView[] }) {
                                   <span className="whitespace-nowrap">
                                     <span className="text-neutral-500">Mã đơn</span> {order.detail.code}
                                   </span>
-                                  {" · "}
-                                  <span className="whitespace-nowrap">
-                                    {byDay ? order.clock : order.stamp}
-                                  </span>
+                                  {byDay ? null : (
+                                    <>
+                                      {" · "}
+                                      <span className="whitespace-nowrap">{order.stamp}</span>
+                                    </>
+                                  )}
                                 </p>
                               </div>
                               {/* The status, only when there is something to
