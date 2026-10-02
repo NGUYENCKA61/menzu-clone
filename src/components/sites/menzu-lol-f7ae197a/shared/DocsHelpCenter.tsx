@@ -11,7 +11,7 @@ import {
   useSyncExternalStore,
   type ReactNode,
 } from "react";
-import { ArrowRight, ChevronRight, Search } from "lucide-react";
+import { ArrowRight, Calendar, ChevronRight, Eye, Search } from "lucide-react";
 
 import { FaqAccordion } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/FaqAccordion";
 import { ListPager } from "@/components/sites/menzu-lol-f7ae197a/shared/AccountListChrome";
@@ -124,8 +124,18 @@ function FeaturedCarousel({ items }: { items: DocCard[] }) {
                     Xem chi tiết
                     <ArrowRight size={12} aria-hidden />
                   </span>
-                  <span className="text-[11px] font-semibold text-neutral-500">
-                    {formatViews(item.views)} lượt xem · {formatDate(item.publishedAt)}
+                  {/* The calendar and eye the article page and its related
+                      cards use, date first (the owner, 02/10/2026: "thêm
+                      icon đó đi"). */}
+                  <span className="flex items-center gap-3 text-[11px] font-semibold tabular-nums text-neutral-500">
+                    <span className="inline-flex items-center gap-1.5">
+                      <Calendar size={12} aria-hidden className="shrink-0" />
+                      {formatDate(item.publishedAt)}
+                    </span>
+                    <span className="inline-flex items-center gap-1.5">
+                      <Eye size={12} aria-hidden className="shrink-0" />
+                      {formatViews(item.views)}
+                    </span>
                   </span>
                 </div>
               </Link>
