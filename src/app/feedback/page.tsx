@@ -2,11 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ShieldCheck, Star } from "lucide-react";
 
-import { MobileBottomNav } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/MobileBottomNav";
-import { SiteFooter } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/SiteFooter";
-import { SiteHeader } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/SiteHeader";
-import { ConnectRailSection } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/ConnectRailSection";
-import { Breadcrumb } from "@/components/sites/menzu-lol-f7ae197a/shared/Breadcrumb";
+import { SimplePage } from "@/components/sites/menzu-lol-f7ae197a/shared/SimplePage";
 import {
   TRUST_NOTE,
   TRUST_NOTE_ICON,
@@ -31,10 +27,13 @@ export async function generateMetadata(): Promise<Metadata> {
 export const dynamic = "force-dynamic";
 
 /**
- * The customer-reviews wall, rebuilt from the original: emerald header with
- * the review count and the write button, the "100% từ khách đã giao dịch"
- * pledge, then the filterable list. This page runs emerald where the rest of
- * the shop runs red — the original paints its trust surfaces green.
+ * The customer-reviews wall: the review count and the write button, the
+ * "100% từ khách đã giao dịch" pledge, then the filterable list.
+ *
+ * The opening is SimplePage's, as on the status, wiki and community pages
+ * (the owner, 02/10/2026: "đồng bộ về cỡ chữ và kích thước … làm hết thử"):
+ * the same breadcrumb, title, rule under it and caption size, the write
+ * button where the wiki keeps its search box.
  */
 export default async function FeedbackPage() {
   const reviews = await getFeedback(500);
@@ -55,57 +54,34 @@ export default async function FeedbackPage() {
   }));
 
   return (
-    <div className="min-h-screen flex flex-col text-white overflow-x-clip selection:bg-[var(--menzu-accent)]/30 bg-[#0f1015]">
-      <div className="w-full shrink-0 h-[104px]" />
-      <SiteHeader />
+    <SimplePage
+      title="Đánh giá"
+      crumb="Đánh giá"
+      icon={Star}
+      ground="home"
+      subtitle={
+        <p className="text-[13px] text-neutral-400">{items.length} lượt đánh giá từ khách hàng</p>
+      }
+      action={
+        <Link
+          href="/feedback/submit"
+          className="inline-flex items-center gap-1.5 sm:gap-2 bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] text-white font-black px-3.5 py-2 sm:px-5 sm:py-2.5 rounded-xl whitespace-nowrap text-[10px] sm:text-xs uppercase tracking-wider w-fit transition-colors"
+        >
+          <Star size={13} className="fill-white sm:w-3.5 sm:h-3.5" />
+          Viết đánh giá
+        </Link>
+      }
+    >
+      <div className={TRUST_NOTE}>
+        <ShieldCheck size={16} className={TRUST_NOTE_ICON} />
+        <p className={TRUST_NOTE_TEXT}>
+          <span className={TRUST_NOTE_LEAD}>100% đánh giá</span> được tổng
+          hợp từ khách đã giao dịch. Có thể yêu cầu đối chiếu lịch sử giao dịch để xác
+          minh.
+        </p>
+      </div>
 
-      <main className="flex-1 relative z-20 w-full flex flex-col">
-        <div className="w-full">
-          <div className="max-w-[1320px] mx-auto px-4 lg:px-6 py-12">
-            <Breadcrumb
-              items={[{ label: "Trang chủ", href: "/" }, { label: "Đánh giá khách hàng" }]}
-            />
-
-            <div className="flex items-start justify-between gap-3 mb-6">
-              <div className="flex items-start gap-3">
-                {/* A bare red mark before the title, as the other pages now
-                    wear theirs — not a tile around it. */}
-                <Star size={28} className="mt-0.5 shrink-0 text-[var(--menzu-accent)] sm:mt-1" aria-hidden />
-                <div>
-                  <h1 className="text-2xl sm:text-3xl font-black uppercase tracking-wider text-white">
-                    Đánh Giá
-                  </h1>
-                  <p className="text-neutral-500 text-[10px] mt-1">
-                    {items.length} lượt đánh giá từ khách hàng
-                  </p>
-                </div>
-              </div>
-              <Link
-                href="/feedback/submit"
-                className="inline-flex items-center gap-1.5 sm:gap-2 bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] text-white font-black px-3.5 py-2 sm:px-5 sm:py-2.5 rounded-xl whitespace-nowrap text-[10px] sm:text-xs uppercase tracking-wider w-fit mt-0.5 transition-colors"
-              >
-                <Star size={13} className="fill-white sm:w-3.5 sm:h-3.5" />
-                Viết đánh giá
-              </Link>
-            </div>
-
-            <div className={TRUST_NOTE}>
-              <ShieldCheck size={16} className={TRUST_NOTE_ICON} />
-              <p className={TRUST_NOTE_TEXT}>
-                <span className={TRUST_NOTE_LEAD}>100% đánh giá</span> được tổng
-                hợp từ khách đã giao dịch. Có thể yêu cầu đối chiếu lịch sử giao dịch để xác
-                minh.
-              </p>
-            </div>
-
-            <FeedbackBoard items={items} />
-          </div>
-        </div>
-        <SiteFooter />
-      </main>
-
-      <ConnectRailSection />
-      <MobileBottomNav />
-    </div>
+      <FeedbackBoard items={items} />
+    </SimplePage>
   );
 }
