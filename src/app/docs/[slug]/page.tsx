@@ -122,7 +122,8 @@ export default async function DocArticlePage({ params }: PageProps) {
           — cards in the site's own dress, each with its "Chi tiết". */}
       {related.length > 0 ? (
         <section className="mt-14 border-t border-white/10 pt-10">
-          <h2 className="flex items-center gap-2.5 text-sm font-black uppercase tracking-widest text-white">
+          {/* The wiki's shelf heading, size for size (16px since 02/10/2026). */}
+          <h2 className="flex items-center gap-2.5 text-base font-black uppercase tracking-widest text-white">
             <span aria-hidden className="h-4 w-0.5 rounded-full bg-[var(--menzu-accent)]" />
             Các bài viết liên quan
           </h2>

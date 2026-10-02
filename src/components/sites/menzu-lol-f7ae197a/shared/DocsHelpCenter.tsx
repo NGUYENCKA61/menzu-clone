@@ -374,7 +374,9 @@ export function DocsHelpCenter({
         </aside>
 
         <section id={LIST_ID} className="min-w-0 scroll-mt-[120px] space-y-3">
-          <h2 className="flex items-center gap-2.5 text-sm font-black uppercase tracking-widest text-white">
+          {/* 16px, a step above the 15px questions it heads (the owner,
+              02/10/2026): at 14px it read as a caption, not the list's title. */}
+          <h2 className="flex items-center gap-2.5 text-base font-black uppercase tracking-widest text-white">
             <span aria-hidden className="h-4 w-0.5 rounded-full bg-[var(--menzu-accent)]" />
             {heading}
           </h2>
