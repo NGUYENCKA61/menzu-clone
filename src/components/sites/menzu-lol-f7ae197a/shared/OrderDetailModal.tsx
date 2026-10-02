@@ -36,6 +36,7 @@ import type { LoginHandover } from "@/lib/accountLogin";
 import { warrantyButton, type WarrantyStatus } from "@/lib/warrantyRequests";
 
 import { lockScroll, trapTab, unlockScroll } from "./modalChrome";
+import { OrderReviewForm } from "./OrderReview";
 import { useOverlayPresence } from "./useOverlayPresence";
 import { formatVnd } from "./productData";
 
@@ -405,6 +406,15 @@ export function OrderDetailModal({
   className?: string;
 }) {
   const [open, setOpen] = useState(autoOpen);
+  // The review popup over the receipt, opened from the order code in its
+  // footer (the owner, 02/10/2026: "gạch dưới cái mã đơn", "khi mà ấn vô nó
+  // popup"). While it is up, the receipt's own keys stand aside.
+  const [reviewOpen, setReviewOpen] = useState(false);
+  const [reviewSent, setReviewSent] = useState(false);
+  const reviewOpenRef = useRef(false);
+  useEffect(() => {
+    reviewOpenRef.current = reviewOpen;
+  }, [reviewOpen]);
   const triggerRef = useRef<HTMLElement | null>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   // A drag that starts on a key and ends past the card's edge is a
@@ -421,6 +431,8 @@ export function OrderDetailModal({
     lockScroll();
 
     const onKey = (event: KeyboardEvent) => {
+      // The review popup on top handles its own Escape and Tab.
+      if (reviewOpenRef.current) return;
       if (event.key === "Escape") {
         event.preventDefault();
         setOpen(false);
@@ -999,11 +1011,21 @@ export function OrderDetailModal({
 
                 {/* FOOTER */}
                 <div className="flex flex-col gap-3 border-t border-white/[0.06] bg-white/[0.02] px-5 py-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:px-6">
+                  {/* The owner's own words (02/10/2026), where "Cần hỗ trợ về
+                      đơn hàng này? Gửi kèm mã đơn …" stood; the code is the
+                      way in, underlined, and opens the review popup. */}
                   <span className="text-xs text-neutral-500">
-                    Cần hỗ trợ về đơn hàng này? Gửi kèm mã đơn{" "}
-                    <span className="font-bold text-neutral-300">
-                      {order.code}
-                    </span>
+                    Bạn thấy sao về sản phẩm này?{" "}
+                    {/* The whole ask underlined and pressable, not only the
+                        code (the owner, 02/10/2026: "gạch dưới đủ đi", "hãy
+                        đánh giá mã đơn"). */}
+                    <button
+                      type="button"
+                      onClick={() => setReviewOpen(true)}
+                      className="text-neutral-300 underline decoration-neutral-500 underline-offset-[3px] transition-colors hover:text-white hover:decoration-white"
+                    >
+                      Hãy đánh giá mã đơn <span className="font-bold">{order.code}</span>
+                    </button>
                   </span>
                   {/* The warranty button, and the review beside it when that
                       is switched on. On a phone they share a row, or the one
@@ -1073,6 +1095,144 @@ export function OrderDetailModal({
             document.body,
           )
         : null}
+      {reviewOpen && mounted
+        ? createPortal(
+            <OrderReviewPopup
+              order={order}
+              sent={reviewSent}
+              onSent={() => setReviewSent(true)}
+              onClose={() => setReviewOpen(false)}
+            />,
+            document.body,
+          )
+        : null}
     </>
+  );
+}
+
+/**
+ * The review, asked for over the receipt (the owner, 02/10/2026: "khi mà ấn
+ * vô nó popup"): the same form as the order's own review page, in a card one
+ * layer above the receipt. Escape, the cross or a press outside closes it and
+ * leaves the receipt as it was; a sent review thanks the buyer in place.
+ */
+function OrderReviewPopup({
+  order,
+  sent,
+  onSent,
+  onClose,
+}: {
+  order: OrderDetailData;
+  sent: boolean;
+  onSent: () => void;
+  onClose: () => void;
+}) {
+  const panelRef = useRef<HTMLDivElement>(null);
+  const pressedBackdrop = useRef(false);
+
+  useEffect(() => {
+    const panel = panelRef.current;
+    const opener = document.activeElement as HTMLElement | null;
+    panel?.focus();
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        onClose();
+        return;
+      }
+      if (event.key === "Tab" && panel) trapTab(panel, event);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      opener?.focus();
+    };
+  }, [onClose]);
+
+  const what = order.isSoftware ? "bản hack" : "tài khoản";
+
+  return (
+    <div
+      className="fixed inset-0 z-[10000] flex items-end justify-center bg-black/70 p-0 backdrop-blur-sm animate-in fade-in duration-150 sm:items-center sm:p-6"
+      onPointerDown={(event) => {
+        pressedBackdrop.current = event.target === event.currentTarget;
+      }}
+      onClick={(event) => {
+        if (pressedBackdrop.current && event.target === event.currentTarget) onClose();
+        pressedBackdrop.current = false;
+      }}
+    >
+      <div
+        ref={panelRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="order-review-title"
+        tabIndex={-1}
+        className="relative max-h-[92vh] w-full overflow-y-auto rounded-t-2xl border border-white/10 bg-[#121216] shadow-2xl outline-none animate-in fade-in zoom-in-95 duration-150 sm:max-w-lg sm:rounded-2xl"
+      >
+        <div className="flex items-start justify-between gap-4 border-b border-white/[0.06] px-5 py-4 sm:px-6">
+          <div className="min-w-0">
+            <h2
+              id="order-review-title"
+              className="flex items-center gap-2.5 text-lg font-black uppercase tracking-wider text-white"
+            >
+              <Star className="h-5 w-5 shrink-0 text-[var(--menzu-accent)]" aria-hidden />
+              Đánh giá đơn hàng
+            </h2>
+            <p className="mt-1 truncate text-xs text-neutral-500">
+              Đơn <span className="font-bold text-neutral-300">{order.code}</span> ·{" "}
+              {order.isSoftware ? order.productName : `#${order.productCode}`}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Đóng"
+            className="group grid h-10 w-10 shrink-0 place-items-center rounded-full border border-white/10 bg-white/5 text-neutral-300 transition-colors hover:bg-white/15 hover:text-white"
+          >
+            <X className="h-4 w-4 transition-transform duration-300 group-hover:rotate-90" />
+          </button>
+        </div>
+
+        <div className="px-5 py-5 sm:px-6">
+          {sent ? (
+            <div className="flex flex-col items-start gap-4">
+              <p className="flex items-start gap-2.5 text-sm leading-relaxed text-neutral-300">
+                <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-400" aria-hidden />
+                Cảm ơn bạn đã đánh giá {what} này. Đánh giá sẽ hiện ở trang Đánh giá sau khi
+                shop duyệt.
+              </p>
+              <button
+                type="button"
+                onClick={onClose}
+                className="press h-10 rounded-xl border border-white/10 bg-white/[0.04] px-5 text-xs font-bold text-neutral-200 transition-colors hover:bg-white/[0.08]"
+              >
+                Đóng
+              </button>
+            </div>
+          ) : order.reviewed ? (
+            <p className="flex items-start gap-2.5 text-sm leading-relaxed text-neutral-300">
+              <Star className="mt-0.5 h-4 w-4 shrink-0 fill-current text-amber-400" aria-hidden />
+              <span>
+                Bạn đã đánh giá đơn này.{" "}
+                <Link
+                  href={`/orders/${order.code}/danh-gia`}
+                  className="font-bold text-white underline underline-offset-[3px] hover:text-[var(--menzu-accent)]"
+                >
+                  Xem đánh giá của bạn
+                </Link>
+              </span>
+            </p>
+          ) : !order.paid ? (
+            <p className="flex items-start gap-2.5 text-sm leading-relaxed text-neutral-300">
+              <Info className="mt-0.5 h-4 w-4 shrink-0 text-[var(--menzu-accent)]" aria-hidden />
+              Chỉ đánh giá được đơn đã thanh toán.
+            </p>
+          ) : (
+            <OrderReviewForm orderId={order.id} onDone="/orders" onSent={onSent} />
+          )}
+        </div>
+      </div>
+    </div>
   );
 }
