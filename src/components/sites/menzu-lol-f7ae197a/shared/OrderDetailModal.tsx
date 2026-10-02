@@ -1015,8 +1015,10 @@ export function OrderDetailModal({
                       đơn hàng này? Gửi kèm mã đơn …" stood. The ask, a step
                       brighter than the question and with no underline ("bỏ
                       dấu gạch dưới đi"), is the press that opens the review
-                      popup; it whitens under the pointer. */}
-                  <span className="text-xs text-neutral-500">
+                      popup; it whitens under the pointer. The question itself
+                      one step up from neutral-500, readable at 12px yet still
+                      below the ask (trial, "có cần tăng sáng" → "thử đi"). */}
+                  <span className="text-xs text-neutral-400">
                     Bạn thấy sao về sản phẩm này?{" "}
                     <button
                       type="button"
