@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import type { ComponentType } from "react";
-import { CircleAlert, Phone, ShieldAlert } from "lucide-react";
+import { CircleAlert, Phone, Users } from "lucide-react";
 
 import {
   DiscordGlyph,
@@ -114,15 +114,14 @@ export default async function OfficialChannelsPage() {
   ].filter((channel) => channel.href.trim().length > 0);
 
   return (
-    // The alert circle at the title (the owner, 02/10/2026: "kênh chính thức
-    // liên hệ xài /circle-alert"): the page exists to tell real from fake.
-    <SimplePage title="Kênh chính thức & liên hệ" crumb="Liên hệ" icon={CircleAlert} ground="home">
+    <SimplePage title="Kênh chính thức & liên hệ" crumb="Liên hệ" icon={Users} ground="home">
       {/* The warning first, and in the shop's own red — somebody who has just
           been messaged by a fake account reads this page for that — but one
           short paragraph now (the owner, 01/10/2026: "thu gọn cái cảnh báo giả
-          mạo thay nội dung"). */}
+          mạo thay nội dung"). The alert circle rather than the shield (the
+          owner, 02/10/2026: "cái khiên ! kia mới đổi thành alert"). */}
       <div className="mb-6 flex items-start gap-3 rounded-xl border border-rose-500/25 bg-rose-500/[0.06] px-4 py-3">
-        <ShieldAlert size={18} className="mt-0.5 shrink-0 text-rose-400" />
+        <CircleAlert size={18} className="mt-0.5 shrink-0 text-rose-400" />
         <p className="text-[13px] leading-relaxed text-neutral-300">
           <span className="font-bold text-white">Chỉ các kênh dưới đây là của shop.</span>{" "}
           Shop không bao giờ hỏi mật khẩu hay mã OTP, và chỉ nhận tiền qua trang Nạp tiền trên{" "}
