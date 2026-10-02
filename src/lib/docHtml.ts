@@ -28,6 +28,10 @@ const SIDE_MARGIN = [/^(?:0(?:px)?|auto|\d{1,2}(?:\.\d+)?%)$/];
  *  editor writes, and the hook a phone uses to drop the push. */
 const OFFSET_SIDE = { name: "data-offset", multiple: false, values: ["left", "right"] };
 
+/** A picture set to sharp corners in the editor ("Vuông"); without it the
+ *  picture keeps the house rounding. */
+const CORNER = { name: "data-corner", multiple: false, values: ["square"] };
+
 /**
  * Whether an inline colour would vanish on the shop's near-black page.
  *
@@ -116,7 +120,7 @@ export function sanitizeDocHtml(html: string): string {
     ],
     allowedAttributes: {
       a: ["href", "rel", "target"],
-      img: ["src", "alt", "style", OFFSET_SIDE],
+      img: ["src", "alt", "style", OFFSET_SIDE, CORNER],
       span: ["style"],
       p: ["style"],
       h2: ["style"],

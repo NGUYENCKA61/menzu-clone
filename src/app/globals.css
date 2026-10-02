@@ -954,6 +954,12 @@ body.lightbox-open .site-nav {
   object-fit: cover;
 }
 
+/* A picture set to "Vuông" in the editor: sharp corners instead of the
+   house rounding, its thin frame kept. */
+.doc-prose img[data-corner="square"] {
+  border-radius: 0;
+}
+
 /* Captioned illustrations. The figure spans the column; the image inside
    keeps its own width and alignment, the caption whispers underneath. */
 .doc-prose figure {

@@ -67,3 +67,23 @@ describe("sanitizeDocHtml font sizes", () => {
     expect(out).not.toContain("28px");
   });
 });
+
+describe("sanitizeDocHtml picture corners", () => {
+  it("keeps a picture set to square corners", () => {
+    expect(sanitizeDocHtml('<img src="/uploads/docs/a.png" data-corner="square" />')).toContain(
+      'data-corner="square"',
+    );
+  });
+
+  it("empties any other corner value, leaving the house rounding", () => {
+    // sanitize-html keeps the attribute but strips a value not on its list;
+    // the stylesheet only squares data-corner="square".
+    const out = sanitizeDocHtml('<img src="/uploads/docs/a.png" data-corner="round" />');
+    expect(out).toContain('src="/uploads/docs/a.png"');
+    expect(out).not.toContain('data-corner="');
+  });
+
+  it("does not let the corner mark onto anything but a picture", () => {
+    expect(sanitizeDocHtml('<p data-corner="square">A</p>')).toBe("<p>A</p>");
+  });
+});

@@ -71,6 +71,11 @@ function offsetFrom(element: HTMLElement): string | null {
   return null;
 }
 
+/** A picture's corners: "square" when it was set sharp, null for rounded. */
+function cornerFrom(element: HTMLElement): "square" | null {
+  return element.getAttribute("data-corner") === "square" ? "square" : null;
+}
+
 /**
  * Width, side and push, shared by pictures and video blocks — all written as
  * the inline styles the sanitizer's `width: N%` and side-margin allowances
@@ -167,6 +172,14 @@ const SizedImage = Image.extend({
       },
       offset: SIZE_AND_ALIGN.offset,
       align: SIZE_AND_ALIGN.align,
+      /** "square": sharp corners (the owner, 02/10/2026: "bo góc hoặc vuông
+       *  vức"); null is the house look, rounded. */
+      corner: {
+        default: null,
+        parseHTML: (element: HTMLElement) => cornerFrom(element),
+        renderHTML: (attributes: { corner?: string | null }) =>
+          attributes.corner === "square" ? { "data-corner": "square" } : {},
+      },
       // Lives in the <figcaption>, never on the img tag itself.
       caption: {
         default: null,
@@ -197,6 +210,7 @@ const SizedImage = Image.extend({
             height: img.style.height || null,
             align: alignFrom(img),
             offset: offsetFrom(img),
+            corner: cornerFrom(img),
             caption: element.querySelector("figcaption")?.textContent?.trim() || null,
             captionItalic:
               element.querySelector("figcaption")?.style.fontStyle !== "normal",
@@ -427,6 +441,7 @@ function ImagePanelInner({ editor }: { editor: Editor }) {
   const height = (attrs.height as string | null) ?? null;
   const align = (attrs.align as string | null) ?? null;
   const offset = (attrs.offset as string | null) ?? null;
+  const corner = (attrs.corner as string | null) ?? null;
   const caption = (attrs.caption as string | null) ?? "";
   const captionItalic = (attrs.captionItalic as boolean) !== false;
 
@@ -573,6 +588,39 @@ function ImagePanelInner({ editor }: { editor: Editor }) {
         align={align}
         offset={offset}
       />
+
+      {/* Rounded is the house look and the default; "Vuông" leaves this one
+          picture's corners sharp, its thin frame kept. */}
+      <span aria-hidden className="h-4 w-px bg-white/[0.08]" />
+      <span className={PANEL_LABEL}>Góc</span>
+      {(
+        [
+          [null, "Bo góc", "Ảnh bo góc (mặc định)"],
+          ["square", "Vuông", "Ảnh góc vuông"],
+        ] as const
+      ).map(([value, text, label]) => {
+        const on = corner === value;
+        return (
+          <button
+            key={text}
+            type="button"
+            title={label}
+            aria-label={label}
+            aria-pressed={on}
+            onMouseDown={(event) => event.preventDefault()}
+            onClick={() =>
+              editor.chain().focus().updateAttributes("image", { corner: value }).run()
+            }
+            className={`h-7 rounded-md px-1.5 text-[10px] font-black transition-colors ${
+              on
+                ? "bg-[var(--brand)]/25 text-white"
+                : "text-neutral-400 hover:bg-white/[0.08] hover:text-white"
+            }`}
+          >
+            {text}
+          </button>
+        );
+      })}
 
       <span aria-hidden className="h-4 w-px bg-white/[0.08]" />
       <span className={PANEL_LABEL}>Chú thích</span>
