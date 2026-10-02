@@ -97,16 +97,13 @@ export default async function DocArticlePage({ params }: PageProps) {
         </p>
       }
     >
-      {/* Pictures at the page's full width, as big as menzu's (the owner,
-          02/10/2026: "ảnh to bự cỡ menzu ấy"); the text inside keeps its
-          48rem reading measure (.doc-prose-wide). */}
-      <article>
+      <article className="max-w-3xl">
         <div className="relative mb-8 aspect-[16/9] overflow-hidden rounded-2xl border border-white/10 bg-black/40">
           <Image
             src={article.thumbnailUrl}
             alt=""
             fill
-            sizes="(min-width: 1320px) 1272px, 100vw"
+            sizes="(min-width: 768px) 768px, 100vw"
             priority
             className="object-cover"
           />
@@ -116,15 +113,13 @@ export default async function DocArticlePage({ params }: PageProps) {
           // Editor-era bodies are HTML, sanitized inside DocHtml before they
           // reach the reader; legacy plain-text bodies keep the old renderer.
           isHtmlBody(article.body) ? (
-            <DocHtml body={article.body} wide />
+            <DocHtml body={article.body} />
           ) : (
-            <div className="max-w-3xl">
-              <DocBody body={article.body} />
-            </div>
+            <DocBody body={article.body} />
           )
         ) : (
           // Said to the reader, not to whoever runs the database.
-          <div className="max-w-3xl space-y-2 rounded-2xl border border-dashed border-white/10 bg-white/[0.02] p-8 text-center">
+          <div className="space-y-2 rounded-2xl border border-dashed border-white/10 bg-white/[0.02] p-8 text-center">
             <FileText size={24} className="mx-auto text-neutral-600" aria-hidden />
             <p className="text-sm font-bold text-white">Bài viết đang được cập nhật</p>
             <p className="text-xs text-neutral-400">Shop đang soạn nội dung cho bài này, bạn quay lại sau nhé.</p>

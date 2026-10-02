@@ -159,12 +159,10 @@ function renderBlock(block: string, key: number): ReactNode {
  * let through. YouTube videos then become their players (embedVideos):
  * the editor's video block, or a link alone on its line.
  */
-export function DocHtml({ body, wide = false }: { body: string; wide?: boolean }) {
+export function DocHtml({ body }: { body: string }) {
   return (
     <div
-      // `wide`: a wiki article, whose pictures take the page's full width as
-      // menzu's do while the text keeps its reading measure (.doc-prose-wide).
-      className={wide ? "doc-prose doc-prose-wide" : "doc-prose"}
+      className="doc-prose"
       dangerouslySetInnerHTML={{ __html: embedVideos(sanitizeDocHtml(body)) }}
     />
   );

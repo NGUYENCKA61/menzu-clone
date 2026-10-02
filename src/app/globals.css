@@ -960,14 +960,6 @@ body.lightbox-open .site-nav {
   border-radius: 0;
 }
 
-/* A wiki article (DocHtml wide): pictures, captioned pictures and videos
-   take the page's full width, as big as menzu's (the owner, 02/10/2026:
-   "ảnh to bự cỡ menzu ấy"), while running text keeps the 48rem measure it
-   always had; a line the width of the page is too long to read. */
-.doc-prose-wide > :not(img, figure, .doc-video) {
-  max-width: 48rem;
-}
-
 /* Captioned illustrations. The figure spans the column; the image inside
    keeps its own width and alignment, the caption whispers underneath. */
 .doc-prose figure {
