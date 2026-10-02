@@ -97,8 +97,12 @@ export default async function DocArticlePage({ params }: PageProps) {
         </p>
       }
     >
-      <article className="max-w-3xl">
-        <div className="relative mb-8 aspect-[16/9] overflow-hidden rounded-2xl border border-white/10 bg-black/40">
+      {/* The body as wide as a product page's description (the owner,
+          02/10/2026: "nó phải đồng bộ giống với trang sản phẩm chứ"), so a
+          picture set to 100% in the editor is the same size on both. The
+          cover keeps its own 768px. */}
+      <article>
+        <div className="relative mb-8 aspect-[16/9] max-w-3xl overflow-hidden rounded-2xl border border-white/10 bg-black/40">
           <Image
             src={article.thumbnailUrl}
             alt=""
@@ -119,7 +123,7 @@ export default async function DocArticlePage({ params }: PageProps) {
           )
         ) : (
           // Said to the reader, not to whoever runs the database.
-          <div className="space-y-2 rounded-2xl border border-dashed border-white/10 bg-white/[0.02] p-8 text-center">
+          <div className="max-w-3xl space-y-2 rounded-2xl border border-dashed border-white/10 bg-white/[0.02] p-8 text-center">
             <FileText size={24} className="mx-auto text-neutral-600" aria-hidden />
             <p className="text-sm font-bold text-white">Bài viết đang được cập nhật</p>
             <p className="text-xs text-neutral-400">Shop đang soạn nội dung cho bài này, bạn quay lại sau nhé.</p>
