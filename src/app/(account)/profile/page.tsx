@@ -396,8 +396,10 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
               whole width under them. */}
           <section className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02]">
             <div className="flex items-center justify-between gap-3 border-b border-white/[0.06] px-5 py-3.5">
-              <span className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-neutral-400">
-                <Bell size={13} className="shrink-0 text-neutral-300" />
+              {/* In the shop's red, bell and words (the owner, 03/10/2026:
+                  "Thông báo hệ thống chắc cho màu đỏ quá"). */}
+              <span className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-[var(--menzu-accent)]">
+                <Bell size={13} className="shrink-0" />
                 Thông báo hệ thống
               </span>
               <Link
