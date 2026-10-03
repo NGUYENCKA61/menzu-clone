@@ -54,17 +54,7 @@ const MAX_BYTES = 5 * 1024 * 1024;
  * was paid — so nothing is asked twice. One review per order, enforced by
  * the API.
  */
-export function OrderReviewForm({
-  orderId,
-  onDone,
-  onSent,
-}: {
-  orderId: string;
-  onDone: string;
-  /** Given, a sent review stays where it was written (the receipt's popup)
-   *  and reports back instead of going to `onDone`. */
-  onSent?: () => void;
-}) {
+export function OrderReviewForm({ orderId, onDone }: { orderId: string; onDone: string }) {
   const router = useRouter();
   const [rating, setRating] = useState(5);
   const [hover, setHover] = useState(0);
@@ -125,14 +115,6 @@ export function OrderReviewForm({
         setError(data?.error ?? "Không gửi được, thử lại sau.");
         setSubmitting(false);
         setProgress(null);
-        return;
-      }
-      // In the receipt's popup the review is done where it was written: the
-      // list refreshes (so the order now reads as reviewed) and the popup
-      // thanks the buyer. The button stays spent, the form is about to go.
-      if (onSent) {
-        router.refresh();
-        onSent();
         return;
       }
       // Only a failure gives the button back. On success the page is about to
