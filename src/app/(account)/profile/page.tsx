@@ -165,285 +165,290 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
               words sit: a soft wash off the left edge, and a stronger one rising
               from the bottom. The tier card and the doors live inside it. */}
           <section className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#111111]">
-            <BannerUploader hasOwn={Boolean(user.bannerUrl)} />
+            {/* The hero: the art covers this much and no more, so the notice
+                band under it sits on the card's plain #111. */}
+            <div className="relative">
+              <BannerUploader hasOwn={Boolean(user.bannerUrl)} />
 
-            {/* On a phone the card is ~3x taller than the art is wide-shaped
-                for, so filling it blew a quarter of the picture up 3.3x into
-                a green blur. There the art heads the card, behind the avatar
-                and name, and the foot wash fades it into the card's #111. */}
-            <div className="absolute inset-x-0 top-0 h-56 sm:inset-0 sm:h-auto">
-              <Image
-                src={bannerArt}
-                alt=""
-                fill
-                priority
-                sizes="(max-width: 1280px) 100vw, 960px"
-                className="object-cover object-[60%_28%] opacity-95"
-              />
-              {/* Left wash: enough to seat the name, gone by a third across. */}
-              <div className="absolute inset-0 bg-gradient-to-r from-[#111111] via-[#111111]/45 to-transparent" />
-              {/* Foot wash: the band the tier card and the doors sit on. */}
-              <div className="absolute inset-0 bg-gradient-to-t from-[#111111] via-[#111111]/50 to-transparent" />
-            </div>
-
-            <div className="relative flex flex-col gap-4 p-5 pt-14 sm:gap-6 sm:p-7">
-              {/* Who — avatar, name, role, when they joined. */}
-              <div className="flex items-center gap-4 sm:gap-5">
-                <AvatarUploader avatarUrl={user.avatarUrl} username={user.username} />
-                <div className="flex min-w-0 flex-col gap-2">
-                  <div className="flex min-w-0 flex-wrap items-center gap-2.5">
-                    {/* A card title under the page's h1, so one step below it:
-                        18/20px under the 20/24px title, as /wallet's card
-                        titles are. It was 30px, bigger than the title. */}
-                    <span className="truncate text-lg font-black uppercase tracking-wide leading-none text-white sm:text-xl">
-                      {user.username}
-                    </span>
-                    <BadgeCheck size={18} className="shrink-0 fill-emerald-500 text-white" />
-                    <SkewPlate
-                      className={
-                        isAdmin
-                          ? "bg-[var(--menzu-accent)] text-white"
-                          : user.role === "AGENCY"
-                            ? "bg-gradient-to-r from-[#b45309] to-[#d97706] text-white"
-                            : "bg-gradient-to-r from-neutral-600 to-neutral-700 text-white"
-                      }
-                    >
-                      {isAdmin ? "Admin" : user.role === "AGENCY" ? "Đại lý" : "Member"}
-                    </SkewPlate>
-                  </div>
-                  <span className="text-[12px] font-semibold text-neutral-300">
-                    UID {user.uid}
-                    <span className="mx-2 text-neutral-600">·</span>
-                    Tham gia từ{" "}
-                    {user.createdAt.toLocaleDateString("vi-VN", {
-                      timeZone: SHOP_TZ,
-                      day: "2-digit",
-                      month: "2-digit",
-                      year: "numeric",
-                    })}
-                  </span>
-                </div>
+              {/* On a phone the card is ~3x taller than the art is wide-shaped
+                  for, so filling it blew a quarter of the picture up 3.3x into
+                  a green blur. There the art heads the card, behind the avatar
+                  and name, and the foot wash fades it into the card's #111. */}
+              <div className="absolute inset-x-0 top-0 h-56 sm:inset-0 sm:h-auto">
+                <Image
+                  src={bannerArt}
+                  alt=""
+                  fill
+                  priority
+                  sizes="(max-width: 1280px) 100vw, 960px"
+                  className="object-cover object-[60%_28%] opacity-95"
+                />
+                {/* Left wash: enough to seat the name, gone by a third across. */}
+                <div className="absolute inset-0 bg-gradient-to-r from-[#111111] via-[#111111]/45 to-transparent" />
+                {/* Foot wash: the band the tier card and the doors sit on. */}
+                <div className="absolute inset-0 bg-gradient-to-t from-[#111111] via-[#111111]/50 to-transparent" />
               </div>
 
-              {/* The tier card and the doors, side by side from xl. At lg the
-                  sidebar is already beside the panel, and the 240px door
-                  column squeezed the tier card to ~276px, cutting its figures
-                  to "Giảm …"; below xl the doors make one row under it. */}
-              <div className="grid grid-cols-1 gap-4 sm:mt-5 xl:grid-cols-[minmax(0,1fr)_240px]">
-                <div className="flex flex-col gap-2 rounded-xl border border-white/10 bg-[#111111]/60 p-5 backdrop-blur-md">
-                  <div className="flex flex-wrap items-center justify-between gap-3">
-                    <span className="text-[10px] font-black uppercase tracking-widest text-neutral-400">
-                      Cấp bậc
-                    </span>
-                    <span className={`text-sm font-bold ${tier.text}`}>
-                      {TIER_RULES[memberTier].label}
-                    </span>
-                  </div>
-
-                  <div>
-                    <div className="h-2 overflow-hidden rounded-full border border-white/5 bg-black/60">
-                      <div
-                        className={`h-full rounded-full ${tier.bar}`}
-                        style={{ width: `${progress.percent}%` }}
-                      />
+              <div className="relative flex flex-col gap-4 p-5 pt-14 sm:gap-6 sm:p-7">
+                {/* Who — avatar, name, role, when they joined. */}
+                <div className="flex items-center gap-4 sm:gap-5">
+                  <AvatarUploader avatarUrl={user.avatarUrl} username={user.username} />
+                  <div className="flex min-w-0 flex-col gap-2">
+                    <div className="flex min-w-0 flex-wrap items-center gap-2.5">
+                      {/* A card title under the page's h1, so one step below it:
+                          18/20px under the 20/24px title, as /wallet's card
+                          titles are. It was 30px, bigger than the title. */}
+                      <span className="truncate text-lg font-black uppercase tracking-wide leading-none text-white sm:text-xl">
+                        {user.username}
+                      </span>
+                      <BadgeCheck size={18} className="shrink-0 fill-emerald-500 text-white" />
+                      <SkewPlate
+                        className={
+                          isAdmin
+                            ? "bg-[var(--menzu-accent)] text-white"
+                            : user.role === "AGENCY"
+                              ? "bg-gradient-to-r from-[#b45309] to-[#d97706] text-white"
+                              : "bg-gradient-to-r from-neutral-600 to-neutral-700 text-white"
+                        }
+                      >
+                        {isAdmin ? "Admin" : user.role === "AGENCY" ? "Đại lý" : "Member"}
+                      </SkewPlate>
                     </div>
-                    <p className="mt-2 text-[12px] text-neutral-400">
-                      {nextRule && progress.next ? (
-                        <>
-                          Tích lũy thêm để nhận những đặc quyền{" "}
-                          <Link
-                            href="/cap-bac"
-                            className="font-bold text-white underline-offset-2 transition-colors hover:underline"
+                    <span className="text-[12px] font-semibold text-neutral-300">
+                      UID {user.uid}
+                      <span className="mx-2 text-neutral-600">·</span>
+                      Tham gia từ{" "}
+                      {user.createdAt.toLocaleDateString("vi-VN", {
+                        timeZone: SHOP_TZ,
+                        day: "2-digit",
+                        month: "2-digit",
+                        year: "numeric",
+                      })}
+                    </span>
+                  </div>
+                </div>
+
+                {/* The tier card and the doors, side by side from xl. At lg the
+                    sidebar is already beside the panel, and the 240px door
+                    column squeezed the tier card to ~276px, cutting its figures
+                    to "Giảm …"; below xl the doors make one row under it. */}
+                <div className="grid grid-cols-1 gap-4 sm:mt-5 xl:grid-cols-[minmax(0,1fr)_240px]">
+                  <div className="flex flex-col gap-2 rounded-xl border border-white/10 bg-[#111111]/60 p-5 backdrop-blur-md">
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <span className="text-[10px] font-black uppercase tracking-widest text-neutral-400">
+                        Cấp bậc
+                      </span>
+                      <span className={`text-sm font-bold ${tier.text}`}>
+                        {TIER_RULES[memberTier].label}
+                      </span>
+                    </div>
+
+                    <div>
+                      <div className="h-2 overflow-hidden rounded-full border border-white/5 bg-black/60">
+                        <div
+                          className={`h-full rounded-full ${tier.bar}`}
+                          style={{ width: `${progress.percent}%` }}
+                        />
+                      </div>
+                      <p className="mt-2 text-[12px] text-neutral-400">
+                        {nextRule && progress.next ? (
+                          <>
+                            Tích lũy thêm để nhận những đặc quyền{" "}
+                            <Link
+                              href="/cap-bac"
+                              className="font-bold text-white underline-offset-2 transition-colors hover:underline"
+                            >
+                              ưu đãi
+                            </Link>{" "}
+                            dành riêng cho khách hàng
+                          </>
+                        ) : (
+                          "Bạn đang ở hạng cao nhất"
+                        )}
+                      </p>
+                    </div>
+
+                    {/* What the rank is worth today, what the points are, and what
+                        the next rank would pay — the last one is the only place on
+                        the site that answers "why keep topping up". */}
+                    <div className="mt-auto grid grid-cols-3 gap-2 border-t border-white/[0.06] pt-1.5 sm:gap-3">
+                      {[
+                        {
+                          label: "Ưu đãi mua tool",
+                          value: `Giảm ${formatTierPercent(TIER_RULES[memberTier].discountPercent)}%`,
+                          tone: tier.text,
+                        },
+                        {
+                          label: "Điểm thưởng",
+                          value: `${user.points.toLocaleString("vi-VN")} điểm`,
+                          tone: "text-white",
+                        },
+                        nextRule && progress.next
+                          ? {
+                              label: `Lên ${nextRule.label} được`,
+                              value: `Giảm ${formatTierPercent(nextRule.discountPercent)}%`,
+                              tone: "text-white",
+                            }
+                          : {
+                              label: "Hạng hiện tại",
+                              value: TIER_RULES[memberTier].label,
+                              tone: "text-white",
+                            },
+                      ].map(({ label, value, tone }, index) => (
+                        <div key={label} className="flex min-w-0 flex-col gap-0.5">
+                          {/* 10px like every other label on the card, and allowed
+                              to wrap: at 9px with truncate a phone read "ƯU ĐÃI
+                              MU…". mt-auto keeps the three values level when only
+                              some labels take two lines. */}
+                          <span className="text-[10px] font-black uppercase leading-tight tracking-widest text-neutral-500">
+                            {label}
+                          </span>
+                          <span
+                            className={`mt-auto flex min-w-0 items-center gap-1 text-[13px] font-bold leading-none ${tone}`}
                           >
-                            ưu đãi
-                          </Link>{" "}
-                          dành riêng cho khách hàng
-                        </>
-                      ) : (
-                        "Bạn đang ở hạng cao nhất"
-                      )}
-                    </p>
+                            {index === 0 ? (
+                              <Check size={13} strokeWidth={3} className={`shrink-0 ${tier.text}`} />
+                            ) : null}
+                            <span className="truncate">{value}</span>
+                          </span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
 
-                  {/* What the rank is worth today, what the points are, and what
-                      the next rank would pay — the last one is the only place on
-                      the site that answers "why keep topping up". */}
-                  <div className="mt-auto grid grid-cols-3 gap-2 border-t border-white/[0.06] pt-1.5 sm:gap-3">
-                    {[
-                      {
-                        label: "Ưu đãi mua tool",
-                        value: `Giảm ${formatTierPercent(TIER_RULES[memberTier].discountPercent)}%`,
-                        tone: tier.text,
-                      },
-                      {
-                        label: "Điểm thưởng",
-                        value: `${user.points.toLocaleString("vi-VN")} điểm`,
-                        tone: "text-white",
-                      },
-                      nextRule && progress.next
-                        ? {
-                            label: `Lên ${nextRule.label} được`,
-                            value: `Giảm ${formatTierPercent(nextRule.discountPercent)}%`,
-                            tone: "text-white",
-                          }
-                        : {
-                            label: "Hạng hiện tại",
-                            value: TIER_RULES[memberTier].label,
-                            tone: "text-white",
-                          },
-                    ].map(({ label, value, tone }, index) => (
-                      <div key={label} className="flex min-w-0 flex-col gap-0.5">
-                        {/* 10px like every other label on the card, and allowed
-                            to wrap: at 9px with truncate a phone read "ƯU ĐÃI
-                            MU…". mt-auto keeps the three values level when only
-                            some labels take two lines. */}
-                        <span className="text-[10px] font-black uppercase leading-tight tracking-widest text-neutral-500">
-                          {label}
-                        </span>
-                        <span
-                          className={`mt-auto flex min-w-0 items-center gap-1 text-[13px] font-bold leading-none ${tone}`}
-                        >
-                          {index === 0 ? (
-                            <Check size={13} strokeWidth={3} className={`shrink-0 ${tier.text}`} />
-                          ) : null}
-                          <span className="truncate">{value}</span>
-                        </span>
-                      </div>
+                  {/* Phone: Nạp tiền across, the other two side by side under
+                      it (three stacked bars pushed the balance off the first
+                      screen). sm–lg: one row of three. xl: the column. */}
+                  <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 xl:flex xl:flex-col">
+                    {QUICK_ACTIONS.map(({ label, href, icon: Icon, primary }) => (
+                      <Link
+                        key={href}
+                        href={href}
+                        // Flat, as every other red button in the account area is
+                        // (the agency desk's own Nạp tiền, /security's submit):
+                        // the accent glow under it was the only one of its kind.
+                        className={`inline-flex h-11 items-center justify-center gap-2 rounded-xl border text-[11px] font-black uppercase tracking-widest transition-colors ${
+                          primary
+                            ? "col-span-2 sm:col-span-1 border-[var(--menzu-accent)] bg-[var(--menzu-accent)] text-white hover:bg-[var(--menzu-accent-dark)]"
+                            : "border-white/15 bg-black/35 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] backdrop-blur-md hover:border-white/35 hover:bg-black/50"
+                        }`}
+                      >
+                        <Icon size={14} />
+                        {label}
+                      </Link>
                     ))}
                   </div>
                 </div>
 
-                {/* Phone: Nạp tiền across, the other two side by side under
-                    it (three stacked bars pushed the balance off the first
-                    screen). sm–lg: one row of three. xl: the column. */}
-                <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 xl:flex xl:flex-col">
-                  {QUICK_ACTIONS.map(({ label, href, icon: Icon, primary }) => (
-                    <Link
-                      key={href}
-                      href={href}
-                      // Flat, as every other red button in the account area is
-                      // (the agency desk's own Nạp tiền, /security's submit):
-                      // the accent glow under it was the only one of its kind.
-                      className={`inline-flex h-11 items-center justify-center gap-2 rounded-xl border text-[11px] font-black uppercase tracking-widest transition-colors ${
-                        primary
-                          ? "col-span-2 sm:col-span-1 border-[var(--menzu-accent)] bg-[var(--menzu-accent)] text-white hover:bg-[var(--menzu-accent-dark)]"
-                          : "border-white/15 bg-black/35 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] backdrop-blur-md hover:border-white/35 hover:bg-black/50"
-                      }`}
-                    >
-                      <Icon size={14} />
-                      {label}
-                    </Link>
-                  ))}
-                </div>
-              </div>
-
-              {/* THE ACCOUNT IN NUMBERS — inside the card rather than a strip of
-                  its own below it, so the page is one block instead of two.
-                  Four across from xl, the order count giving width to the
-                  commission cell: in equal quarters "Rút tiền" dropped under
-                  any commission from 10.000đ and the strip grew 117→161px. */}
-              <div className="-mx-5 -mb-5 grid grid-cols-2 border-t border-white/10 bg-[#111111]/70 backdrop-blur-sm sm:-mx-7 sm:-mb-7 xl:grid-cols-[1fr_1fr_0.7fr_1.3fr] xl:divide-x xl:divide-white/[0.06]">
-                {[
-                  { icon: Wallet, label: "Số dư khả dụng", value: formatVnd(user.balance), unit: "đ", tone: "text-emerald-400" },
-                  { icon: Receipt, label: "Tổng chi tiêu", value: formatVnd(spent), unit: "đ", tone: "text-white" },
-                  { icon: ShoppingBag, label: "Đơn hàng", value: String(paidOrders), unit: "", tone: "text-white" },
-                ].map(({ icon: Icon, label, value, unit, tone }) => (
-                  // Label over figure the way /vong-quay builds its stat tiles:
-                  // a bare 13px icon (no 28px box), the unit at text-sm, and
-                  // the figure a step smaller on phones, where 24px ran past
-                  // a 2x2 cell.
-                  <div key={label} className="flex flex-col gap-2 px-5 py-4 sm:gap-3">
-                    <span className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-neutral-400">
-                      <Icon size={13} className="shrink-0 text-neutral-300" />
-                      {label}
-                    </span>
-                    <span className="flex min-h-9 items-center">
-                      <span className={`text-xl font-black tabular-nums leading-none sm:text-2xl ${tone}`}>
-                        {value}
-                        {unit ? (
-                          <span className="ml-1 text-sm font-bold text-neutral-500">{unit}</span>
-                        ) : null}
+                {/* THE ACCOUNT IN NUMBERS — inside the card rather than a strip of
+                    its own below it, so the page is one block instead of two.
+                    Four across from xl, the order count giving width to the
+                    commission cell: in equal quarters "Rút tiền" dropped under
+                    any commission from 10.000đ and the strip grew 117→161px. */}
+                <div className="-mx-5 -mb-5 grid grid-cols-2 border-t border-white/10 bg-[#111111]/70 backdrop-blur-sm sm:-mx-7 sm:-mb-7 xl:grid-cols-[1fr_1fr_0.7fr_1.3fr] xl:divide-x xl:divide-white/[0.06]">
+                  {[
+                    { icon: Wallet, label: "Số dư khả dụng", value: formatVnd(user.balance), unit: "đ", tone: "text-emerald-400" },
+                    { icon: Receipt, label: "Tổng chi tiêu", value: formatVnd(spent), unit: "đ", tone: "text-white" },
+                    { icon: ShoppingBag, label: "Đơn hàng", value: String(paidOrders), unit: "", tone: "text-white" },
+                  ].map(({ icon: Icon, label, value, unit, tone }) => (
+                    // Label over figure the way /vong-quay builds its stat tiles:
+                    // a bare 13px icon (no 28px box), the unit at text-sm, and
+                    // the figure a step smaller on phones, where 24px ran past
+                    // a 2x2 cell.
+                    <div key={label} className="flex flex-col gap-2 px-5 py-4 sm:gap-3">
+                      <span className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-neutral-400">
+                        <Icon size={13} className="shrink-0 text-neutral-300" />
+                        {label}
                       </span>
-                    </span>
-                  </div>
-                ))}
-                <div className="flex flex-col gap-2 px-5 py-4 sm:gap-3">
-                  <span className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-neutral-400">
-                    <HandCoins size={13} className="shrink-0 text-neutral-300" />
-                    Hoa hồng khả dụng
-                  </span>
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <span className="flex min-h-9 items-center">
-                      <span className="text-xl font-black tabular-nums leading-none text-white sm:text-2xl">
-                        {formatVnd(user.commissionBalance)}
-                        <span className="ml-1 text-sm font-bold text-neutral-500">đ</span>
-                      </span>
-                    </span>
-                    <WithdrawCommission amount={user.commissionBalance} />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          {/* SYSTEM NOTICES: the three newest, in the band of nothing the
-              panel's 750px floor left under the card (the owner, 03/10/2026:
-              "có nên thêm phần thông báo hệ thống dưới chân card tổng quan",
-              "tại còn thừa khá nhiều" → "thử"). Each row wears /thong-bao's
-              type chip, a word rather than a glyph, and opens that page. On a
-              phone the chip and the day head the row and the title gets the
-              whole width under them. */}
-          <section className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02]">
-            <div className="flex items-center justify-between gap-3 border-b border-white/[0.06] px-5 py-3.5">
-              {/* The page title's own pairing: a red icon, white words (the
-                  owner, 03/10/2026: "chắc cho màu đỏ quá", then "hay cho icon
-                  đỏ thôi còn chữ vẫn trắng"). At 14px, the receipt's "Sản phẩm
-                  đã mua", so the card's title leads what it holds: page title
-                  24px, this 14px, the rows 13px ("chắc cho tiêu đề card lớn
-                  hơn thành phần trong đó", "đỡ rối" → "thử đi"). */}
-              <span className="inline-flex items-center gap-2 text-sm font-black uppercase tracking-wider text-white">
-                <Bell size={16} className="shrink-0 text-[var(--menzu-accent)]" />
-                Thông báo hệ thống
-              </span>
-              <Link
-                href="/thong-bao"
-                className="inline-flex items-center gap-1 text-[11px] font-black uppercase tracking-widest text-neutral-400 transition-colors hover:text-white"
-              >
-                Xem tất cả
-                <ArrowRight size={12} />
-              </Link>
-            </div>
-            {notices.length === 0 ? (
-              <p className="px-5 py-4 text-[13px] text-neutral-500">Chưa có thông báo mới.</p>
-            ) : (
-              <ul className="divide-y divide-white/[0.06]">
-                {notices.slice(0, 3).map((item) => (
-                  <li key={item.id}>
-                    <Link
-                      href="/thong-bao"
-                      className="group flex flex-col gap-1.5 px-5 py-3 transition-colors hover:bg-white/[0.03] sm:flex-row sm:items-center sm:gap-3"
-                    >
-                      <span className="flex items-center gap-2 sm:contents">
-                        <NoticeTypeChip type={item.type} />
-                        <span className="text-[11px] tabular-nums text-neutral-500 sm:order-last sm:shrink-0">
-                          {item.startAt.toLocaleDateString("vi-VN", {
-                            timeZone: SHOP_TZ,
-                            day: "2-digit",
-                            month: "2-digit",
-                            year: "numeric",
-                          })}
+                      <span className="flex min-h-9 items-center">
+                        <span className={`text-xl font-black tabular-nums leading-none sm:text-2xl ${tone}`}>
+                          {value}
+                          {unit ? (
+                            <span className="ml-1 text-sm font-bold text-neutral-500">{unit}</span>
+                          ) : null}
                         </span>
                       </span>
-                      {/* A step under the card's title: 13px, semibold, light
-                          grey, white under the pointer. */}
-                      <span className="min-w-0 truncate text-[13px] font-semibold text-neutral-200 transition-colors group-hover:text-white sm:flex-1">
-                        {item.title}
+                    </div>
+                  ))}
+                  <div className="flex flex-col gap-2 px-5 py-4 sm:gap-3">
+                    <span className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-neutral-400">
+                      <HandCoins size={13} className="shrink-0 text-neutral-300" />
+                      Hoa hồng khả dụng
+                    </span>
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <span className="flex min-h-9 items-center">
+                        <span className="text-xl font-black tabular-nums leading-none text-white sm:text-2xl">
+                          {formatVnd(user.commissionBalance)}
+                          <span className="ml-1 text-sm font-bold text-neutral-500">đ</span>
+                        </span>
                       </span>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            )}
+                      <WithdrawCommission amount={user.commissionBalance} />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* SYSTEM NOTICES: the three newest, as the card's last band, the
+                way the numbers above are a band of the card rather than a box
+                of their own (the owner, 03/10/2026: "có nên thêm phần thông báo
+                hệ thống dưới chân card tổng quan", "tại còn thừa khá nhiều" →
+                "thử"; it was a card of its own until "gộp đi như trước đi").
+                Each row wears /thong-bao's type chip and opens that page. On a
+                phone the chip and the day head the row and the title gets the
+                whole width under them. */}
+            <div className="border-t border-white/10">
+              <div className="flex items-center justify-between gap-3 border-b border-white/[0.06] px-5 py-3.5">
+                {/* The page title's own pairing: a red icon, white words (the
+                    owner, 03/10/2026: "chắc cho màu đỏ quá", then "hay cho icon
+                    đỏ thôi còn chữ vẫn trắng"). At 14px, the receipt's "Sản phẩm
+                    đã mua", so the card's title leads what it holds: page title
+                    24px, this 14px, the rows 13px ("chắc cho tiêu đề card lớn
+                    hơn thành phần trong đó", "đỡ rối" → "thử đi"). */}
+                <span className="inline-flex items-center gap-2 text-sm font-black uppercase tracking-wider text-white">
+                  <Bell size={16} className="shrink-0 text-[var(--menzu-accent)]" />
+                  Thông báo hệ thống
+                </span>
+                <Link
+                  href="/thong-bao"
+                  className="inline-flex items-center gap-1 text-[11px] font-black uppercase tracking-widest text-neutral-400 transition-colors hover:text-white"
+                >
+                  Xem tất cả
+                  <ArrowRight size={12} />
+                </Link>
+              </div>
+              {notices.length === 0 ? (
+                <p className="px-5 py-4 text-[13px] text-neutral-500">Chưa có thông báo mới.</p>
+              ) : (
+                <ul className="divide-y divide-white/[0.06]">
+                  {notices.slice(0, 3).map((item) => (
+                    <li key={item.id}>
+                      <Link
+                        href="/thong-bao"
+                        className="group flex flex-col gap-1.5 px-5 py-3 transition-colors hover:bg-white/[0.03] sm:flex-row sm:items-center sm:gap-3"
+                      >
+                        <span className="flex items-center gap-2 sm:contents">
+                          <NoticeTypeChip type={item.type} />
+                          <span className="text-[11px] tabular-nums text-neutral-500 sm:order-last sm:shrink-0">
+                            {item.startAt.toLocaleDateString("vi-VN", {
+                              timeZone: SHOP_TZ,
+                              day: "2-digit",
+                              month: "2-digit",
+                              year: "numeric",
+                            })}
+                          </span>
+                        </span>
+                        {/* A step under the card's title: 13px, semibold, light
+                            grey, white under the pointer. */}
+                        <span className="min-w-0 truncate text-[13px] font-semibold text-neutral-200 transition-colors group-hover:text-white sm:flex-1">
+                          {item.title}
+                        </span>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
           </section>
         </div>
       </AccountPanel>
