@@ -4,7 +4,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import {
+  ArrowRight,
   BadgeCheck,
+  Bell,
   Check,
   Gift,
   HandCoins,
@@ -16,10 +18,13 @@ import {
 
 import { AccountPageFrame } from "@/components/sites/menzu-lol-f7ae197a/shared/AccountPageFrame";
 import { AccountPanel } from "@/components/sites/menzu-lol-f7ae197a/shared/AccountPanel";
+import { TYPE_TILE } from "@/components/sites/menzu-lol-f7ae197a/shared/announcementIcons";
 import { AvatarUploader } from "@/components/sites/menzu-lol-f7ae197a/shared/AvatarUploader";
 import { BannerUploader } from "@/components/sites/menzu-lol-f7ae197a/shared/BannerUploader";
 import { WithdrawCommission } from "@/components/sites/menzu-lol-f7ae197a/shared/WithdrawCommission";
 import { formatVnd } from "@/components/sites/menzu-lol-f7ae197a/shared/productData";
+import { TYPE_LABELS } from "@/lib/announcements";
+import { currentAnnouncements } from "@/lib/announcementStore";
 import { SHOP_TZ } from "@/lib/dayGroups";
 import { db } from "@/lib/db";
 import {
@@ -95,7 +100,7 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
   const user = await getCurrentUser();
   if (!user) redirect("/login?next=%2Fprofile");
 
-  const [settings, query, toppedUpRow, spentRow, paidOrders, cover] = await Promise.all([
+  const [settings, query, toppedUpRow, spentRow, paidOrders, cover, notices] = await Promise.all([
     getShopSettings(),
     searchParams,
     // Lifetime completed top-ups: what the tier is earned from.
@@ -116,6 +121,9 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
       orderBy: { sortOrder: "asc" },
       select: { imageUrl: true },
     }),
+    // The notices this account can read, newest first: the list the header's
+    // popup has already loaded for this request, so no second query.
+    currentAnnouncements(user.id),
   ]);
   // The member's own choice first — this is their page — then the shop's,
   // then the catalogue's lead cover, then the site backdrop, so the card is
@@ -379,6 +387,61 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
             </div>
           </section>
 
+          {/* SYSTEM NOTICES: the three newest, in the band of nothing the
+              panel's 750px floor left under the card (the owner, 03/10/2026:
+              "có nên thêm phần thông báo hệ thống dưới chân card tổng quan",
+              "tại còn thừa khá nhiều" → "thử"). Each row wears /thong-bao's
+              type chip, a word rather than a glyph, and opens that page. On a
+              phone the chip and the day head the row and the title gets the
+              whole width under them. */}
+          <section className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02]">
+            <div className="flex items-center justify-between gap-3 border-b border-white/[0.06] px-5 py-3.5">
+              <span className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-neutral-400">
+                <Bell size={13} className="shrink-0 text-neutral-300" />
+                Thông báo hệ thống
+              </span>
+              <Link
+                href="/thong-bao"
+                className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-widest text-neutral-400 transition-colors hover:text-white"
+              >
+                Xem tất cả
+                <ArrowRight size={12} />
+              </Link>
+            </div>
+            {notices.length === 0 ? (
+              <p className="px-5 py-4 text-[13px] text-neutral-500">Chưa có thông báo mới.</p>
+            ) : (
+              <ul className="divide-y divide-white/[0.06]">
+                {notices.slice(0, 3).map((item) => (
+                  <li key={item.id}>
+                    <Link
+                      href="/thong-bao"
+                      className="flex flex-col gap-1.5 px-5 py-3 transition-colors hover:bg-white/[0.03] sm:flex-row sm:items-center sm:gap-3"
+                    >
+                      <span className="flex items-center gap-2 sm:contents">
+                        <span
+                          className={`inline-flex shrink-0 items-center rounded-md border px-2 py-0.5 text-[11px] font-medium ${TYPE_TILE}`}
+                        >
+                          {TYPE_LABELS[item.type]}
+                        </span>
+                        <span className="text-[11px] tabular-nums text-neutral-500 sm:order-last sm:shrink-0">
+                          {item.startAt.toLocaleDateString("vi-VN", {
+                            timeZone: SHOP_TZ,
+                            day: "2-digit",
+                            month: "2-digit",
+                            year: "numeric",
+                          })}
+                        </span>
+                      </span>
+                      <span className="min-w-0 truncate text-sm font-bold text-white sm:flex-1">
+                        {item.title}
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
         </div>
       </AccountPanel>
     </AccountPageFrame>
