@@ -52,13 +52,11 @@ const NAV_GROUPS: AccountNavItem[][] = [
 
 // Tailwind can't see dynamically-composed class names, so the link's active
 // and inactive states are always emitted as complete literal strings.
-// `relative` so the pending wash has something to fill. 12px corners: the
-// card's 24px less its 12px padding, so a lit row follows the card's curve
-// (the owner, 03/10/2026, the sidebar's sizes "cho đồng bộ" → "làm đi").
+// `relative` so the pending wash has something to fill.
 const LINK_ACTIVE =
-  "relative flex items-center gap-3 py-2.5 px-3 rounded-[12px] text-sm font-bold transition-colors bg-[var(--menzu-accent)]/10 text-white";
+  "relative flex items-center gap-3 py-2.5 px-3 rounded-lg text-sm font-bold transition-colors bg-[var(--menzu-accent)]/10 text-white";
 const LINK_INACTIVE =
-  "relative flex items-center gap-3 py-2.5 px-3 rounded-[12px] text-sm font-bold transition-colors text-neutral-300 hover:text-white hover:bg-white/5";
+  "relative flex items-center gap-3 py-2.5 px-3 rounded-lg text-sm font-bold transition-colors text-neutral-300 hover:text-white hover:bg-white/5";
 
 /**
  * Authenticated account sidebar navigation. The live /profile "tab bar" is
@@ -107,10 +105,7 @@ export function AccountSidebar({
               <span className="truncate text-sm font-bold leading-none text-white">
                 {user.username}
               </span>
-              {/* 10px and neutral-400, the size and tone of every other small
-                  label on the account pages; at 9px it was the smallest type
-                  on the site. */}
-              <span className="text-[10px] font-black uppercase tracking-widest leading-none text-neutral-400">
+              <span className="text-[9px] font-black uppercase tracking-widest leading-none text-neutral-500">
                 {user.role === "ADMIN"
                   ? "Admin"
                   : user.role === "AGENCY"
@@ -123,17 +118,17 @@ export function AccountSidebar({
 
         {/* A single link above the account items. The admin area has its own
             sidebar once you are inside it, so listing all eight screens here
-            duplicated a menu two clicks away. Written like the rows under it
-            (14px bold, its own case) and told apart by its red alone: in
-            capitals at black weight it outshouted the page's own title. */}
+            duplicated a menu two clicks away. */}
         {isAdmin ? (
           <div className="mb-2 pb-2 border-b border-white/5">
             <Link
               href="/admin"
-              className="flex items-center gap-3 py-2.5 px-3 rounded-[12px] text-[var(--menzu-accent)] hover:text-white hover:bg-[var(--menzu-accent)]/10 transition-colors"
+              className="flex items-center gap-3 py-2.5 px-3 rounded-lg text-[var(--menzu-accent)] hover:text-white hover:bg-[var(--menzu-accent)]/10 transition-colors"
             >
               <Shield size={16} className="shrink-0" />
-              <span className="text-sm font-bold">Dashboard quản lý</span>
+              <span className="text-sm font-black uppercase tracking-wider">
+                Dashboard quản lý
+              </span>
             </Link>
           </div>
         ) : null}
@@ -143,10 +138,12 @@ export function AccountSidebar({
           <div className="mb-2 pb-2 border-b border-white/5">
             <Link
               href="/agency/dashboard"
-              className="flex items-center gap-3 py-2.5 px-3 rounded-[12px] text-amber-400 hover:text-white hover:bg-amber-500/10 transition-colors"
+              className="flex items-center gap-3 py-2.5 px-3 rounded-lg text-amber-400 hover:text-white hover:bg-amber-500/10 transition-colors"
             >
               <KeyRound size={16} className="shrink-0" />
-              <span className="text-sm font-bold">Bàn đại lý</span>
+              <span className="text-sm font-black uppercase tracking-wider">
+                Bàn đại lý
+              </span>
             </Link>
           </div>
         ) : null}
@@ -170,12 +167,7 @@ export function AccountSidebar({
                   className={isActive ? LINK_ACTIVE : LINK_INACTIVE}
                 >
                   <LinkPending />
-                  {/* The lit row's icon in the accent, as the same icon
-                      heads the page beside it. */}
-                  <Icon
-                    size={16}
-                    className={isActive ? "text-[var(--menzu-accent)]" : undefined}
-                  />
+                  <Icon size={16} />
                   {label}
                 </Link>
               );
