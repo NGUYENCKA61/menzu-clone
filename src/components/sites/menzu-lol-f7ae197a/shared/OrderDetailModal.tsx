@@ -1028,6 +1028,13 @@ export function OrderDetailModal({
                         className="text-neutral-300 transition-colors hover:text-white"
                       >
                         Xem đánh giá mã đơn <span className="font-bold">{order.code}</span>
+                        {/* The filled amber star a given review wears on the
+                            list's tag (the owner, 03/10/2026: "chắc thêm icon
+                            sao vàng bên phải quá"). */}
+                        <Star
+                          className="ml-1 inline h-3 w-3 fill-current align-[-2px] text-amber-400"
+                          aria-hidden
+                        />
                       </Link>
                     ) : (
                       <>
