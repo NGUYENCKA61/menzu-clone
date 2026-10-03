@@ -398,14 +398,17 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
             <div className="flex items-center justify-between gap-3 border-b border-white/[0.06] px-5 py-3.5">
               {/* The page title's own pairing: a red icon, white words (the
                   owner, 03/10/2026: "chắc cho màu đỏ quá", then "hay cho icon
-                  đỏ thôi còn chữ vẫn trắng"). */}
-              <span className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-white">
-                <Bell size={13} className="shrink-0 text-[var(--menzu-accent)]" />
+                  đỏ thôi còn chữ vẫn trắng"). At 14px, the receipt's "Sản phẩm
+                  đã mua", so the card's title leads what it holds: page title
+                  24px, this 14px, the rows 13px ("chắc cho tiêu đề card lớn
+                  hơn thành phần trong đó", "đỡ rối" → "thử đi"). */}
+              <span className="inline-flex items-center gap-2 text-sm font-black uppercase tracking-wider text-white">
+                <Bell size={16} className="shrink-0 text-[var(--menzu-accent)]" />
                 Thông báo hệ thống
               </span>
               <Link
                 href="/thong-bao"
-                className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-widest text-neutral-400 transition-colors hover:text-white"
+                className="inline-flex items-center gap-1 text-[11px] font-black uppercase tracking-widest text-neutral-400 transition-colors hover:text-white"
               >
                 Xem tất cả
                 <ArrowRight size={12} />
@@ -419,7 +422,7 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                   <li key={item.id}>
                     <Link
                       href="/thong-bao"
-                      className="flex flex-col gap-1.5 px-5 py-3 transition-colors hover:bg-white/[0.03] sm:flex-row sm:items-center sm:gap-3"
+                      className="group flex flex-col gap-1.5 px-5 py-3 transition-colors hover:bg-white/[0.03] sm:flex-row sm:items-center sm:gap-3"
                     >
                       <span className="flex items-center gap-2 sm:contents">
                         <span
@@ -436,7 +439,9 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                           })}
                         </span>
                       </span>
-                      <span className="min-w-0 truncate text-sm font-bold text-white sm:flex-1">
+                      {/* A step under the card's title: 13px, semibold, light
+                          grey, white under the pointer. */}
+                      <span className="min-w-0 truncate text-[13px] font-semibold text-neutral-200 transition-colors group-hover:text-white sm:flex-1">
                         {item.title}
                       </span>
                     </Link>
