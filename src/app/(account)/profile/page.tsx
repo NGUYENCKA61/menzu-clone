@@ -268,7 +268,18 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                   {/* What the rank is worth today, what the points are, and what
                       the next rank would pay — the last one is the only place on
                       the site that answers "why keep topping up". */}
-                  <div className="mt-auto grid grid-cols-3 gap-2 border-t border-white/[0.06] pt-1.5 sm:gap-3">
+                  {/* At the top rank there is no next one, and the third cell
+                      only repeated the rank the card's head already names
+                      ("Hạng hiện tại: Elite" under "Cấp bậc: Elite"), so it
+                      goes and the two left share the row, which also stops
+                      their labels wrapping on a phone (the owner, 03/10/2026:
+                      "coi lại trang tổng quan xem có rối quá không" → "thử
+                      đi"). */}
+                  <div
+                    className={`mt-auto grid gap-2 border-t border-white/[0.06] pt-1.5 sm:gap-3 ${
+                      nextRule && progress.next ? "grid-cols-3" : "grid-cols-2"
+                    }`}
+                  >
                     {[
                       {
                         label: "Ưu đãi mua tool",
@@ -280,17 +291,15 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                         value: `${user.points.toLocaleString("vi-VN")} điểm`,
                         tone: "text-white",
                       },
-                      nextRule && progress.next
-                        ? {
-                            label: `Lên ${nextRule.label} được`,
-                            value: `Giảm ${formatTierPercent(nextRule.discountPercent)}%`,
-                            tone: "text-white",
-                          }
-                        : {
-                            label: "Hạng hiện tại",
-                            value: TIER_RULES[memberTier].label,
-                            tone: "text-white",
-                          },
+                      ...(nextRule && progress.next
+                        ? [
+                            {
+                              label: `Lên ${nextRule.label} được`,
+                              value: `Giảm ${formatTierPercent(nextRule.discountPercent)}%`,
+                              tone: "text-white",
+                            },
+                          ]
+                        : []),
                     ].map(({ label, value, tone }, index) => (
                       <div key={label} className="flex min-w-0 flex-col gap-0.5">
                         {/* 10px like every other label on the card, and allowed
@@ -352,12 +361,17 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                   // a bare 13px icon (no 28px box), the unit at text-sm, and
                   // the figure a step smaller on phones, where 24px ran past
                   // a 2x2 cell.
+                  // mt-auto on the figure: on a phone "Hoa hồng khả dụng"
+                  // takes two lines and pushed its figure 14px below the
+                  // order count beside it; level at the cell's foot, the
+                  // figures of a row line up (the owner, 03/10/2026: "đỡ
+                  // rối" → "thử đi").
                   <div key={label} className="flex flex-col gap-2 px-5 py-4 sm:gap-3">
                     <span className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-neutral-400">
                       <Icon size={13} className="shrink-0 text-neutral-300" />
                       {label}
                     </span>
-                    <span className="flex min-h-9 items-center">
+                    <span className="mt-auto flex min-h-9 items-center">
                       <span className={`text-xl font-black tabular-nums leading-none sm:text-2xl ${tone}`}>
                         {value}
                         {unit ? (
@@ -372,7 +386,7 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                     <HandCoins size={13} className="shrink-0 text-neutral-300" />
                     Hoa hồng khả dụng
                   </span>
-                  <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="mt-auto flex flex-wrap items-center justify-between gap-2">
                     <span className="flex min-h-9 items-center">
                       <span className="text-xl font-black tabular-nums leading-none text-white sm:text-2xl">
                         {formatVnd(user.commissionBalance)}
