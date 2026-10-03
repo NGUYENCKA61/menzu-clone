@@ -13,9 +13,8 @@ import {
 import { StatusNote } from "@/components/sites/menzu-lol-f7ae197a/shared/StatusNote";
 import { StatusSubscribeSearch } from "@/components/sites/menzu-lol-f7ae197a/shared/StatusSubscribeSearch";
 import { UrlPager } from "@/components/sites/menzu-lol-f7ae197a/shared/UrlPager";
-import { TYPE_TILE } from "@/components/sites/menzu-lol-f7ae197a/shared/announcementIcons";
+import { NoticeTypeChip } from "@/components/sites/menzu-lol-f7ae197a/shared/NoticeTypeChip";
 import { activeAnnouncements } from "@/lib/announcementStore";
-import { TYPE_LABELS } from "@/lib/announcements";
 import { getCurrentUser } from "@/lib/session";
 import {
   SOFTWARE_STATUS,
@@ -358,13 +357,9 @@ export default async function AnnouncementsPage({
               className="rounded-2xl border border-white/5 bg-white/[0.02] p-5 sm:p-6"
             >
               <div className="flex flex-wrap items-center gap-2">
-                {/* The word, not a glyph: the shop asked for the notice
-                    icons to come off the storefront. */}
-                <span
-                  className={`inline-flex items-center rounded-md border px-2 py-0.5 text-[11px] font-medium ${TYPE_TILE}`}
-                >
-                  {TYPE_LABELS[item.type]}
-                </span>
+                {/* The word with its small glyph, the same chip the account
+                    overview lists notices with. */}
+                <NoticeTypeChip type={item.type} />
                 <span className="text-[11px] text-neutral-500">
                   {formatWhen(item.startAt)}
                 </span>

@@ -18,12 +18,11 @@ import {
 
 import { AccountPageFrame } from "@/components/sites/menzu-lol-f7ae197a/shared/AccountPageFrame";
 import { AccountPanel } from "@/components/sites/menzu-lol-f7ae197a/shared/AccountPanel";
-import { TYPE_TILE } from "@/components/sites/menzu-lol-f7ae197a/shared/announcementIcons";
 import { AvatarUploader } from "@/components/sites/menzu-lol-f7ae197a/shared/AvatarUploader";
 import { BannerUploader } from "@/components/sites/menzu-lol-f7ae197a/shared/BannerUploader";
+import { NoticeTypeChip } from "@/components/sites/menzu-lol-f7ae197a/shared/NoticeTypeChip";
 import { WithdrawCommission } from "@/components/sites/menzu-lol-f7ae197a/shared/WithdrawCommission";
 import { formatVnd } from "@/components/sites/menzu-lol-f7ae197a/shared/productData";
-import { TYPE_LABELS } from "@/lib/announcements";
 import { currentAnnouncements } from "@/lib/announcementStore";
 import { SHOP_TZ } from "@/lib/dayGroups";
 import { db } from "@/lib/db";
@@ -425,11 +424,7 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                       className="group flex flex-col gap-1.5 px-5 py-3 transition-colors hover:bg-white/[0.03] sm:flex-row sm:items-center sm:gap-3"
                     >
                       <span className="flex items-center gap-2 sm:contents">
-                        <span
-                          className={`inline-flex shrink-0 items-center rounded-md border px-2 py-0.5 text-[11px] font-medium ${TYPE_TILE}`}
-                        >
-                          {TYPE_LABELS[item.type]}
-                        </span>
+                        <NoticeTypeChip type={item.type} />
                         <span className="text-[11px] tabular-nums text-neutral-500 sm:order-last sm:shrink-0">
                           {item.startAt.toLocaleDateString("vi-VN", {
                             timeZone: SHOP_TZ,
