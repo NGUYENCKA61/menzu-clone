@@ -74,7 +74,11 @@ export function AccountSidebar({
 
   return (
     <div className="hidden lg:block w-full lg:w-[280px] shrink-0 sticky top-[88px]">
-      <nav className="bg-neutral-900/60 border border-white/10 rounded-2xl p-3">
+      {/* The account panel's own plate (AccountPanel): solid #111, a 5% rim,
+          24px corners, so the two cards of an account page match (the owner,
+          03/10/2026: "màu card trái và card phải đồng bộ chưa" → "rồi làm
+          đi"). It was neutral-900 at 60%, a 10% rim and 18px. */}
+      <nav className="bg-[#111111] border border-white/5 rounded-[24px] p-3">
         {/* The face on top, as the captured sidebar has it: avatar, name, and
             the role in a whisper underneath. */}
         {user ? (

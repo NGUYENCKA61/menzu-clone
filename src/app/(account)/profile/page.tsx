@@ -170,8 +170,10 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
 
         {/* BANNER — game art across the whole card, darkened only where the
             words sit: a soft wash off the left edge, and a stronger one rising
-            from the bottom. The tier card and the doors live inside it. */}
-        <section className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#111111]">
+            from the bottom. The tier card and the doors live inside it. The
+            frame is the account panel's and the sidebar's: a 5% rim, 24px
+            corners (03/10/2026: "màu card trái và card phải đồng bộ"). */}
+        <section className="relative overflow-hidden rounded-[24px] border border-white/5 bg-[#111111]">
           <BannerUploader hasOwn={Boolean(user.bannerUrl)} />
 
           {/* On a phone the card is ~3x taller than the art is wide-shaped
