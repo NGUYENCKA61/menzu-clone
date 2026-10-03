@@ -123,9 +123,10 @@ export function AccountSidebar({
 
         {/* A single link above the account items. The admin area has its own
             sidebar once you are inside it, so listing all eight screens here
-            duplicated a menu two clicks away. Written like the rows under it
-            (14px bold, its own case) and told apart by its red alone: in
-            capitals at black weight it outshouted the page's own title. */}
+            duplicated a menu two clicks away. In capitals, red, at the rows'
+            14px bold (the owner, 03/10/2026, after trying it in its own case:
+            "dashboard quản lý chữ in đi"); black weight on top of that had
+            outshouted the page's own title. */}
         {isAdmin ? (
           <div className="mb-2 pb-2 border-b border-white/5">
             <Link
@@ -133,7 +134,7 @@ export function AccountSidebar({
               className="flex items-center gap-3 py-2.5 px-3 rounded-[12px] text-[var(--menzu-accent)] hover:text-white hover:bg-[var(--menzu-accent)]/10 transition-colors"
             >
               <Shield size={16} className="shrink-0" />
-              <span className="text-sm font-bold">Dashboard quản lý</span>
+              <span className="text-sm font-bold uppercase tracking-wider">Dashboard quản lý</span>
             </Link>
           </div>
         ) : null}
@@ -146,7 +147,7 @@ export function AccountSidebar({
               className="flex items-center gap-3 py-2.5 px-3 rounded-[12px] text-amber-400 hover:text-white hover:bg-amber-500/10 transition-colors"
             >
               <KeyRound size={16} className="shrink-0" />
-              <span className="text-sm font-bold">Bàn đại lý</span>
+              <span className="text-sm font-bold uppercase tracking-wider">Bàn đại lý</span>
             </Link>
           </div>
         ) : null}
