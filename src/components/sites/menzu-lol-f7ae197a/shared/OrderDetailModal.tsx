@@ -346,11 +346,17 @@ function OverviewCell({
 }) {
   return (
     <div className={`p-4 sm:p-5 ${className}`}>
-      <span className={`${LABEL} mb-2.5`}>
+      <span className={`${LABEL} mb-1.5`}>
         {icon}
         {label}
       </span>
-      {children}
+      {/* One line box for every value, sized on the total's 20px: the code,
+          the date, the total and the status chip then share a baseline
+          rather than a top edge, where the bigger total sat 3px low (the
+          owner, 03/10/2026: "có cần căn lại cho ngay" → "thử đi"). Only the
+          size is set, so what sits inside keeps its own leading; the label's
+          margin gives back the 4px the taller line adds. */}
+      <div className="text-[20px]">{children}</div>
     </div>
   );
 }
