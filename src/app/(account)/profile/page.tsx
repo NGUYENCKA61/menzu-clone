@@ -15,7 +15,6 @@ import {
 } from "lucide-react";
 
 import { AccountPageFrame } from "@/components/sites/menzu-lol-f7ae197a/shared/AccountPageFrame";
-import { AccountPanel } from "@/components/sites/menzu-lol-f7ae197a/shared/AccountPanel";
 import { AvatarUploader } from "@/components/sites/menzu-lol-f7ae197a/shared/AvatarUploader";
 import { BannerUploader } from "@/components/sites/menzu-lol-f7ae197a/shared/BannerUploader";
 import { WithdrawCommission } from "@/components/sites/menzu-lol-f7ae197a/shared/WithdrawCommission";
@@ -87,6 +86,21 @@ function SkewPlate({
   );
 }
 
+/** The page's title and its line, the way every account page prints them. */
+function OverviewTitle({ className }: { className: string }) {
+  return (
+    <div className={className}>
+      <h1 className="text-xl sm:text-2xl font-black text-white uppercase tracking-wider mb-2 flex items-center gap-3">
+        <LayoutDashboard size={24} className="shrink-0 text-[var(--menzu-accent)]" aria-hidden />
+        Tổng quan tài khoản
+      </h1>
+      <p className="text-xs sm:text-sm text-neutral-400 leading-relaxed">
+        Quản lý tài khoản, số dư và các dịch vụ của bạn.
+      </p>
+    </div>
+  );
+}
+
 interface ProfilePageProps {
   searchParams: Promise<{ linked?: string; linkError?: string }>;
 }
@@ -132,255 +146,257 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
   const nextRule = progress.next ? TIER_RULES[progress.next] : null;
 
   return (
-    // The title sits inside menzu's #111 panel, as on /wallet, /transactions
-    // and /orders; the layout inside is this shop's own (the owner, 29/09:
-    // "bố cục theo web mình").
+    // One card, the page's title inside it, the way /orders draws "Lịch sử
+    // mua hàng" inside its own panel, rather than a #111 panel holding a
+    // card (the owner, 03/10/2026: "hay nhét tổng quan tài khoản vô dồn về 1
+    // card thôi"). On a phone, where that panel never drew a plate, the title
+    // stays above the card: inside it, beside the banner menu's button, it
+    // broke onto two lines. The layout inside is this shop's own (29/09: "bố
+    // cục theo web mình").
     <AccountPageFrame crumb="Tổng quan tài khoản">
-      <AccountPanel
-        icon={LayoutDashboard}
-        title="Tổng quan tài khoản"
-        subtitle="Quản lý tài khoản, số dư và các dịch vụ của bạn."
-      >
-        <div className="flex flex-col gap-4">
-          {query.linked && PROVIDER_NAMES[query.linked] ? (
-            <div className="rounded-xl border border-emerald-500/25 bg-emerald-500/10 px-4 py-3 text-sm font-bold text-emerald-300">
-              Đã liên kết {PROVIDER_NAMES[query.linked]} vào tài khoản của bạn.
-            </div>
-          ) : null}
-          {query.linkError && PROVIDER_NAMES[query.linkError] ? (
-            <div className="rounded-xl border border-red-500/25 bg-red-500/10 px-4 py-3 text-sm font-bold text-red-300">
-              Tài khoản {PROVIDER_NAMES[query.linkError]} này đang liên kết với một
-              người dùng khác.
-            </div>
-          ) : null}
+      <div className="flex flex-col gap-4">
+        <OverviewTitle className="mb-2 sm:hidden" />
+        {query.linked && PROVIDER_NAMES[query.linked] ? (
+          <div className="rounded-xl border border-emerald-500/25 bg-emerald-500/10 px-4 py-3 text-sm font-bold text-emerald-300">
+            Đã liên kết {PROVIDER_NAMES[query.linked]} vào tài khoản của bạn.
+          </div>
+        ) : null}
+        {query.linkError && PROVIDER_NAMES[query.linkError] ? (
+          <div className="rounded-xl border border-red-500/25 bg-red-500/10 px-4 py-3 text-sm font-bold text-red-300">
+            Tài khoản {PROVIDER_NAMES[query.linkError]} này đang liên kết với một
+            người dùng khác.
+          </div>
+        ) : null}
 
-          {/* BANNER — game art across the whole card, darkened only where the
-              words sit: a soft wash off the left edge, and a stronger one rising
-              from the bottom. The tier card and the doors live inside it. */}
-          <section className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#111111]">
-            <BannerUploader hasOwn={Boolean(user.bannerUrl)} />
+        {/* BANNER — game art across the whole card, darkened only where the
+            words sit: a soft wash off the left edge, and a stronger one rising
+            from the bottom. The tier card and the doors live inside it. */}
+        <section className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#111111]">
+          <BannerUploader hasOwn={Boolean(user.bannerUrl)} />
 
-            {/* On a phone the card is ~3x taller than the art is wide-shaped
-                for, so filling it blew a quarter of the picture up 3.3x into
-                a green blur. There the art heads the card, behind the avatar
-                and name, and the foot wash fades it into the card's #111. */}
-            <div className="absolute inset-x-0 top-0 h-56 sm:inset-0 sm:h-auto">
-              <Image
-                src={bannerArt}
-                alt=""
-                fill
-                priority
-                sizes="(max-width: 1280px) 100vw, 960px"
-                className="object-cover object-[60%_28%] opacity-95"
-              />
-              {/* Left wash: enough to seat the name, gone by a third across. */}
-              <div className="absolute inset-0 bg-gradient-to-r from-[#111111] via-[#111111]/45 to-transparent" />
-              {/* Foot wash: the band the tier card and the doors sit on. */}
-              <div className="absolute inset-0 bg-gradient-to-t from-[#111111] via-[#111111]/50 to-transparent" />
+          {/* On a phone the card is ~3x taller than the art is wide-shaped
+              for, so filling it blew a quarter of the picture up 3.3x into
+              a green blur. There the art heads the card, behind the avatar
+              and name, and the foot wash fades it into the card's #111. */}
+          <div className="absolute inset-x-0 top-0 h-56 sm:inset-0 sm:h-auto">
+            <Image
+              src={bannerArt}
+              alt=""
+              fill
+              priority
+              sizes="(max-width: 1280px) 100vw, 960px"
+              className="object-cover object-[60%_28%] opacity-95"
+            />
+            {/* Left wash: enough to seat the name, gone by a third across. */}
+            <div className="absolute inset-0 bg-gradient-to-r from-[#111111] via-[#111111]/45 to-transparent" />
+            {/* Foot wash: the band the tier card and the doors sit on. */}
+            <div className="absolute inset-0 bg-gradient-to-t from-[#111111] via-[#111111]/50 to-transparent" />
+          </div>
+
+          <div className="relative flex flex-col gap-4 p-5 pt-14 sm:gap-6 sm:p-7">
+            {/* From sm the title sits inside the card (see the note at the
+                return); pr-12 keeps it clear of the banner menu's button. */}
+            <OverviewTitle className="hidden pr-12 sm:block" />
+            {/* Who — avatar, name, role, when they joined. */}
+            <div className="flex items-center gap-4 sm:gap-5">
+              <AvatarUploader avatarUrl={user.avatarUrl} username={user.username} />
+              <div className="flex min-w-0 flex-col gap-2">
+                <div className="flex min-w-0 flex-wrap items-center gap-2.5">
+                  {/* A card title under the page's h1, so one step below it:
+                      18/20px under the 20/24px title, as /wallet's card
+                      titles are. It was 30px, bigger than the title. */}
+                  <span className="truncate text-lg font-black uppercase tracking-wide leading-none text-white sm:text-xl">
+                    {user.username}
+                  </span>
+                  <BadgeCheck size={18} className="shrink-0 fill-emerald-500 text-white" />
+                  <SkewPlate
+                    className={
+                      isAdmin
+                        ? "bg-[var(--menzu-accent)] text-white"
+                        : user.role === "AGENCY"
+                          ? "bg-gradient-to-r from-[#b45309] to-[#d97706] text-white"
+                          : "bg-gradient-to-r from-neutral-600 to-neutral-700 text-white"
+                    }
+                  >
+                    {isAdmin ? "Admin" : user.role === "AGENCY" ? "Đại lý" : "Member"}
+                  </SkewPlate>
+                </div>
+                <span className="text-[12px] font-semibold text-neutral-300">
+                  UID {user.uid}
+                  <span className="mx-2 text-neutral-600">·</span>
+                  Tham gia từ{" "}
+                  {user.createdAt.toLocaleDateString("vi-VN", {
+                    timeZone: SHOP_TZ,
+                    day: "2-digit",
+                    month: "2-digit",
+                    year: "numeric",
+                  })}
+                </span>
+              </div>
             </div>
 
-            <div className="relative flex flex-col gap-4 p-5 pt-14 sm:gap-6 sm:p-7">
-              {/* Who — avatar, name, role, when they joined. */}
-              <div className="flex items-center gap-4 sm:gap-5">
-                <AvatarUploader avatarUrl={user.avatarUrl} username={user.username} />
-                <div className="flex min-w-0 flex-col gap-2">
-                  <div className="flex min-w-0 flex-wrap items-center gap-2.5">
-                    {/* A card title under the page's h1, so one step below it:
-                        18/20px under the 20/24px title, as /wallet's card
-                        titles are. It was 30px, bigger than the title. */}
-                    <span className="truncate text-lg font-black uppercase tracking-wide leading-none text-white sm:text-xl">
-                      {user.username}
-                    </span>
-                    <BadgeCheck size={18} className="shrink-0 fill-emerald-500 text-white" />
-                    <SkewPlate
-                      className={
-                        isAdmin
-                          ? "bg-[var(--menzu-accent)] text-white"
-                          : user.role === "AGENCY"
-                            ? "bg-gradient-to-r from-[#b45309] to-[#d97706] text-white"
-                            : "bg-gradient-to-r from-neutral-600 to-neutral-700 text-white"
-                      }
-                    >
-                      {isAdmin ? "Admin" : user.role === "AGENCY" ? "Đại lý" : "Member"}
-                    </SkewPlate>
-                  </div>
-                  <span className="text-[12px] font-semibold text-neutral-300">
-                    UID {user.uid}
-                    <span className="mx-2 text-neutral-600">·</span>
-                    Tham gia từ{" "}
-                    {user.createdAt.toLocaleDateString("vi-VN", {
-                      timeZone: SHOP_TZ,
-                      day: "2-digit",
-                      month: "2-digit",
-                      year: "numeric",
-                    })}
+            {/* The tier card and the doors, side by side from xl. At lg the
+                sidebar is already beside the panel, and the 240px door
+                column squeezed the tier card to ~276px, cutting its figures
+                to "Giảm …"; below xl the doors make one row under it. */}
+            <div className="grid grid-cols-1 gap-4 sm:mt-5 xl:grid-cols-[minmax(0,1fr)_240px]">
+              <div className="flex flex-col gap-2 rounded-xl border border-white/10 bg-[#111111]/60 p-5 backdrop-blur-md">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <span className="text-[10px] font-black uppercase tracking-widest text-neutral-400">
+                    Cấp bậc
+                  </span>
+                  <span className={`text-sm font-bold ${tier.text}`}>
+                    {TIER_RULES[memberTier].label}
                   </span>
                 </div>
-              </div>
 
-              {/* The tier card and the doors, side by side from xl. At lg the
-                  sidebar is already beside the panel, and the 240px door
-                  column squeezed the tier card to ~276px, cutting its figures
-                  to "Giảm …"; below xl the doors make one row under it. */}
-              <div className="grid grid-cols-1 gap-4 sm:mt-5 xl:grid-cols-[minmax(0,1fr)_240px]">
-                <div className="flex flex-col gap-2 rounded-xl border border-white/10 bg-[#111111]/60 p-5 backdrop-blur-md">
-                  <div className="flex flex-wrap items-center justify-between gap-3">
-                    <span className="text-[10px] font-black uppercase tracking-widest text-neutral-400">
-                      Cấp bậc
-                    </span>
-                    <span className={`text-sm font-bold ${tier.text}`}>
-                      {TIER_RULES[memberTier].label}
-                    </span>
+                <div>
+                  <div className="h-2 overflow-hidden rounded-full border border-white/5 bg-black/60">
+                    <div
+                      className={`h-full rounded-full ${tier.bar}`}
+                      style={{ width: `${progress.percent}%` }}
+                    />
                   </div>
-
-                  <div>
-                    <div className="h-2 overflow-hidden rounded-full border border-white/5 bg-black/60">
-                      <div
-                        className={`h-full rounded-full ${tier.bar}`}
-                        style={{ width: `${progress.percent}%` }}
-                      />
-                    </div>
-                    <p className="mt-2 text-[12px] text-neutral-400">
-                      {nextRule && progress.next ? (
-                        <>
-                          Tích lũy thêm để nhận những đặc quyền{" "}
-                          <Link
-                            href="/cap-bac"
-                            className="font-bold text-white underline-offset-2 transition-colors hover:underline"
-                          >
-                            ưu đãi
-                          </Link>{" "}
-                          dành riêng cho khách hàng
-                        </>
-                      ) : (
-                        "Bạn đang ở hạng cao nhất"
-                      )}
-                    </p>
-                  </div>
-
-                  {/* What the rank is worth today, what the points are, and what
-                      the next rank would pay — the last one is the only place on
-                      the site that answers "why keep topping up". */}
-                  <div className="mt-auto grid grid-cols-3 gap-2 border-t border-white/[0.06] pt-1.5 sm:gap-3">
-                    {[
-                      {
-                        label: "Ưu đãi mua tool",
-                        value: `Giảm ${formatTierPercent(TIER_RULES[memberTier].discountPercent)}%`,
-                        tone: tier.text,
-                      },
-                      {
-                        label: "Điểm thưởng",
-                        value: `${user.points.toLocaleString("vi-VN")} điểm`,
-                        tone: "text-white",
-                      },
-                      nextRule && progress.next
-                        ? {
-                            label: `Lên ${nextRule.label} được`,
-                            value: `Giảm ${formatTierPercent(nextRule.discountPercent)}%`,
-                            tone: "text-white",
-                          }
-                        : {
-                            label: "Hạng hiện tại",
-                            value: TIER_RULES[memberTier].label,
-                            tone: "text-white",
-                          },
-                    ].map(({ label, value, tone }, index) => (
-                      <div key={label} className="flex min-w-0 flex-col gap-0.5">
-                        {/* 10px like every other label on the card, and allowed
-                            to wrap: at 9px with truncate a phone read "ƯU ĐÃI
-                            MU…". mt-auto keeps the three values level when only
-                            some labels take two lines. */}
-                        <span className="text-[10px] font-black uppercase leading-tight tracking-widest text-neutral-500">
-                          {label}
-                        </span>
-                        <span
-                          className={`mt-auto flex min-w-0 items-center gap-1 text-[13px] font-bold leading-none ${tone}`}
+                  <p className="mt-2 text-[12px] text-neutral-400">
+                    {nextRule && progress.next ? (
+                      <>
+                        Tích lũy thêm để nhận những đặc quyền{" "}
+                        <Link
+                          href="/cap-bac"
+                          className="font-bold text-white underline-offset-2 transition-colors hover:underline"
                         >
-                          {index === 0 ? (
-                            <Check size={13} strokeWidth={3} className={`shrink-0 ${tier.text}`} />
-                          ) : null}
-                          <span className="truncate">{value}</span>
-                        </span>
-                      </div>
-                    ))}
-                  </div>
+                          ưu đãi
+                        </Link>{" "}
+                        dành riêng cho khách hàng
+                      </>
+                    ) : (
+                      "Bạn đang ở hạng cao nhất"
+                    )}
+                  </p>
                 </div>
 
-                {/* Phone: Nạp tiền across, the other two side by side under
-                    it (three stacked bars pushed the balance off the first
-                    screen). sm–lg: one row of three. xl: the column. */}
-                <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 xl:flex xl:flex-col">
-                  {QUICK_ACTIONS.map(({ label, href, icon: Icon, primary }) => (
-                    <Link
-                      key={href}
-                      href={href}
-                      // Flat, as every other red button in the account area is
-                      // (the agency desk's own Nạp tiền, /security's submit):
-                      // the accent glow under it was the only one of its kind.
-                      className={`inline-flex h-11 items-center justify-center gap-2 rounded-xl border text-[11px] font-black uppercase tracking-widest transition-colors ${
-                        primary
-                          ? "col-span-2 sm:col-span-1 border-[var(--menzu-accent)] bg-[var(--menzu-accent)] text-white hover:bg-[var(--menzu-accent-dark)]"
-                          : "border-white/15 bg-black/35 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] backdrop-blur-md hover:border-white/35 hover:bg-black/50"
-                      }`}
-                    >
-                      <Icon size={14} />
-                      {label}
-                    </Link>
+                {/* What the rank is worth today, what the points are, and what
+                    the next rank would pay — the last one is the only place on
+                    the site that answers "why keep topping up". */}
+                <div className="mt-auto grid grid-cols-3 gap-2 border-t border-white/[0.06] pt-1.5 sm:gap-3">
+                  {[
+                    {
+                      label: "Ưu đãi mua tool",
+                      value: `Giảm ${formatTierPercent(TIER_RULES[memberTier].discountPercent)}%`,
+                      tone: tier.text,
+                    },
+                    {
+                      label: "Điểm thưởng",
+                      value: `${user.points.toLocaleString("vi-VN")} điểm`,
+                      tone: "text-white",
+                    },
+                    nextRule && progress.next
+                      ? {
+                          label: `Lên ${nextRule.label} được`,
+                          value: `Giảm ${formatTierPercent(nextRule.discountPercent)}%`,
+                          tone: "text-white",
+                        }
+                      : {
+                          label: "Hạng hiện tại",
+                          value: TIER_RULES[memberTier].label,
+                          tone: "text-white",
+                        },
+                  ].map(({ label, value, tone }, index) => (
+                    <div key={label} className="flex min-w-0 flex-col gap-0.5">
+                      {/* 10px like every other label on the card, and allowed
+                          to wrap: at 9px with truncate a phone read "ƯU ĐÃI
+                          MU…". mt-auto keeps the three values level when only
+                          some labels take two lines. */}
+                      <span className="text-[10px] font-black uppercase leading-tight tracking-widest text-neutral-500">
+                        {label}
+                      </span>
+                      <span
+                        className={`mt-auto flex min-w-0 items-center gap-1 text-[13px] font-bold leading-none ${tone}`}
+                      >
+                        {index === 0 ? (
+                          <Check size={13} strokeWidth={3} className={`shrink-0 ${tier.text}`} />
+                        ) : null}
+                        <span className="truncate">{value}</span>
+                      </span>
+                    </div>
                   ))}
                 </div>
               </div>
 
-              {/* THE ACCOUNT IN NUMBERS — inside the card rather than a strip of
-                  its own below it, so the page is one block instead of two.
-                  Four across from xl, the order count giving width to the
-                  commission cell: in equal quarters "Rút tiền" dropped under
-                  any commission from 10.000đ and the strip grew 117→161px. */}
-              <div className="-mx-5 -mb-5 grid grid-cols-2 border-t border-white/10 bg-[#111111]/70 backdrop-blur-sm sm:-mx-7 sm:-mb-7 xl:grid-cols-[1fr_1fr_0.7fr_1.3fr] xl:divide-x xl:divide-white/[0.06]">
-                {[
-                  { icon: Wallet, label: "Số dư khả dụng", value: formatVnd(user.balance), unit: "đ", tone: "text-emerald-400" },
-                  { icon: Receipt, label: "Tổng chi tiêu", value: formatVnd(spent), unit: "đ", tone: "text-white" },
-                  { icon: ShoppingBag, label: "Đơn hàng", value: String(paidOrders), unit: "", tone: "text-white" },
-                ].map(({ icon: Icon, label, value, unit, tone }) => (
-                  // Label over figure the way /vong-quay builds its stat tiles:
-                  // a bare 13px icon (no 28px box), the unit at text-sm, and
-                  // the figure a step smaller on phones, where 24px ran past
-                  // a 2x2 cell.
-                  <div key={label} className="flex flex-col gap-2 px-5 py-4 sm:gap-3">
-                    <span className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-neutral-400">
-                      <Icon size={13} className="shrink-0 text-neutral-300" />
-                      {label}
-                    </span>
-                    <span className="flex min-h-9 items-center">
-                      <span className={`text-xl font-black tabular-nums leading-none sm:text-2xl ${tone}`}>
-                        {value}
-                        {unit ? (
-                          <span className="ml-1 text-sm font-bold text-neutral-500">{unit}</span>
-                        ) : null}
-                      </span>
-                    </span>
-                  </div>
+              {/* Phone: Nạp tiền across, the other two side by side under
+                  it (three stacked bars pushed the balance off the first
+                  screen). sm–lg: one row of three. xl: the column. */}
+              <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 xl:flex xl:flex-col">
+                {QUICK_ACTIONS.map(({ label, href, icon: Icon, primary }) => (
+                  <Link
+                    key={href}
+                    href={href}
+                    // Flat, as every other red button in the account area is
+                    // (the agency desk's own Nạp tiền, /security's submit):
+                    // the accent glow under it was the only one of its kind.
+                    className={`inline-flex h-11 items-center justify-center gap-2 rounded-xl border text-[11px] font-black uppercase tracking-widest transition-colors ${
+                      primary
+                        ? "col-span-2 sm:col-span-1 border-[var(--menzu-accent)] bg-[var(--menzu-accent)] text-white hover:bg-[var(--menzu-accent-dark)]"
+                        : "border-white/15 bg-black/35 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] backdrop-blur-md hover:border-white/35 hover:bg-black/50"
+                    }`}
+                  >
+                    <Icon size={14} />
+                    {label}
+                  </Link>
                 ))}
-                <div className="flex flex-col gap-2 px-5 py-4 sm:gap-3">
+              </div>
+            </div>
+
+            {/* THE ACCOUNT IN NUMBERS — inside the card rather than a strip of
+                its own below it, so the page is one block instead of two.
+                Four across from xl, the order count giving width to the
+                commission cell: in equal quarters "Rút tiền" dropped under
+                any commission from 10.000đ and the strip grew 117→161px. */}
+            <div className="-mx-5 -mb-5 grid grid-cols-2 border-t border-white/10 bg-[#111111]/70 backdrop-blur-sm sm:-mx-7 sm:-mb-7 xl:grid-cols-[1fr_1fr_0.7fr_1.3fr] xl:divide-x xl:divide-white/[0.06]">
+              {[
+                { icon: Wallet, label: "Số dư khả dụng", value: formatVnd(user.balance), unit: "đ", tone: "text-emerald-400" },
+                { icon: Receipt, label: "Tổng chi tiêu", value: formatVnd(spent), unit: "đ", tone: "text-white" },
+                { icon: ShoppingBag, label: "Đơn hàng", value: String(paidOrders), unit: "", tone: "text-white" },
+              ].map(({ icon: Icon, label, value, unit, tone }) => (
+                // Label over figure the way /vong-quay builds its stat tiles:
+                // a bare 13px icon (no 28px box), the unit at text-sm, and
+                // the figure a step smaller on phones, where 24px ran past
+                // a 2x2 cell.
+                <div key={label} className="flex flex-col gap-2 px-5 py-4 sm:gap-3">
                   <span className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-neutral-400">
-                    <HandCoins size={13} className="shrink-0 text-neutral-300" />
-                    Hoa hồng khả dụng
+                    <Icon size={13} className="shrink-0 text-neutral-300" />
+                    {label}
                   </span>
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <span className="flex min-h-9 items-center">
-                      <span className="text-xl font-black tabular-nums leading-none text-white sm:text-2xl">
-                        {formatVnd(user.commissionBalance)}
-                        <span className="ml-1 text-sm font-bold text-neutral-500">đ</span>
-                      </span>
+                  <span className="flex min-h-9 items-center">
+                    <span className={`text-xl font-black tabular-nums leading-none sm:text-2xl ${tone}`}>
+                      {value}
+                      {unit ? (
+                        <span className="ml-1 text-sm font-bold text-neutral-500">{unit}</span>
+                      ) : null}
                     </span>
-                    <WithdrawCommission amount={user.commissionBalance} />
-                  </div>
+                  </span>
+                </div>
+              ))}
+              <div className="flex flex-col gap-2 px-5 py-4 sm:gap-3">
+                <span className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-neutral-400">
+                  <HandCoins size={13} className="shrink-0 text-neutral-300" />
+                  Hoa hồng khả dụng
+                </span>
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <span className="flex min-h-9 items-center">
+                    <span className="text-xl font-black tabular-nums leading-none text-white sm:text-2xl">
+                      {formatVnd(user.commissionBalance)}
+                      <span className="ml-1 text-sm font-bold text-neutral-500">đ</span>
+                    </span>
+                  </span>
+                  <WithdrawCommission amount={user.commissionBalance} />
                 </div>
               </div>
             </div>
-          </section>
+          </div>
+        </section>
 
-        </div>
-      </AccountPanel>
+      </div>
     </AccountPageFrame>
   );
 }
