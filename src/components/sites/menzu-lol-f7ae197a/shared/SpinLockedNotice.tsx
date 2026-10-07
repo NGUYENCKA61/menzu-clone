@@ -46,8 +46,11 @@ export function SpinLockedNotice() {
 
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center p-4" inert={leaving}>
+      {/* The whole screen behind frosted, header and wheel alike, with a
+          lighter tint so the blur reads as blur rather than black (the
+          owner, 07/10/2026: "cho thông báo tạm ngưng sự kiện -> full mờ"). */}
       <div
-        className={`error-modal-backdrop absolute inset-0 bg-black/75${leaving ? " order-modal-backdrop-out" : ""}`}
+        className={`error-modal-backdrop absolute inset-0 bg-black/55 backdrop-blur-md${leaving ? " order-modal-backdrop-out" : ""}`}
         onClick={leave}
       />
 
@@ -68,11 +71,11 @@ export function SpinLockedNotice() {
           id="spin-locked-title"
           className="mt-5 text-[17px] font-black uppercase tracking-wide text-white"
         >
-          Đổi thưởng tạm đóng
+          Tạm ngưng sự kiện
         </h2>
 
         <p id="spin-locked-message" className="mt-3 text-[13px] leading-relaxed text-neutral-300">
-          Vòng quay đổi thưởng sẽ sớm được mở. Điểm thưởng của bạn vẫn được giữ nguyên.
+          Sự kiện vòng quay đổi thưởng đang tạm ngưng. Điểm thưởng của bạn vẫn được giữ nguyên.
         </p>
 
         <button
