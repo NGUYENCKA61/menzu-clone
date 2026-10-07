@@ -17,18 +17,18 @@ export const metadata: Metadata = {
 };
 export const dynamic = "force-dynamic";
 
+// Only the two states an order can reach here: it is born paid, out of the
+// wallet at the moment of buying, and the one way it ever moves is to
+// refunded. "Chờ xử lý" and "Đã hủy" came off with the cases that could never
+// happen (the owner, 07/10/2026: "vậy ko gặp thì bỏ đi").
 const STATUS_LABEL: Record<string, string> = {
   PAID: "Đã thanh toán",
-  PENDING: "Chờ xử lý",
-  CANCELLED: "Đã hủy",
   REFUNDED: "Đã hoàn tiền",
 };
 
 // The receipt's own pill. Colour follows meaning, same palette as the ledgers.
 const STATUS_CLASS: Record<string, string> = {
   PAID: "border-emerald-500/30 bg-emerald-500/10 text-emerald-400",
-  PENDING: "border-amber-500/30 bg-amber-500/10 text-amber-400",
-  CANCELLED: "border-white/10 bg-white/5 text-neutral-400",
   REFUNDED: "border-rose-500/30 bg-rose-500/10 text-rose-400",
 };
 
@@ -68,9 +68,7 @@ function orderBadge(o: {
     if (o.warrantyOpen) return { label: "Đang bảo hành", tone: TONE.amber };
     return null;
   }
-  if (o.status === "PENDING") return { label: "Chờ xử lý", tone: TONE.amber };
   if (o.status === "REFUNDED") return { label: "Đã hoàn tiền", tone: TONE.rose };
-  if (o.status === "CANCELLED") return { label: "Đã hủy", tone: TONE.grey };
   return { label: STATUS_LABEL[o.status] ?? o.status, tone: TONE.grey };
 }
 
