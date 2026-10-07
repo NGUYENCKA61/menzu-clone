@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowRight, ChevronDown } from "lucide-react";
+import { ArrowRight, ChevronDown, Download } from "lucide-react";
 import { CardImage } from "@/components/sites/menzu-lol-f7ae197a/shared/CardImage";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
@@ -112,6 +112,18 @@ export function SoftwareCard({
   const minPrice = software.packages.length
     ? Math.min(...software.packages.map((p) => p.price))
     : null;
+  /**
+   * A free tool (the shop's 1đ placeholder tier) gets its own card (the
+   * owner, 07/10/2026: "thiết kế card cho phần mềm thuộc dạng miễn phí" →
+   * "b"): a green "Miễn phí" mark on the picture and one green "Nhận miễn
+   * phí" that opens the tool's download link straight away, in place of a
+   * tier list reading "999999999 giờ - 1đ" and a "Thuê ngay" that charged 1đ.
+   * No link set yet: the button leads to the tool's page instead.
+   */
+  const free = isFreeTool(software.packages);
+  const freeHref = software.downloadUrl ?? detailHref;
+  const FREE_BUTTON =
+    "flex h-[42px] items-center justify-center gap-2 rounded-[9px] bg-emerald-500 px-5 text-[11px] font-extrabold uppercase tracking-wide text-white transition-colors hover:bg-emerald-600";
 
   // One dropdown row. Same 11px/Inter as the trigger and the buttons, so the
   // open list matches the card exactly (the whole reason for a custom picker
@@ -165,6 +177,12 @@ export function SoftwareCard({
             </span>
           )}
 
+          {free ? (
+            <span className="absolute left-3 top-3 z-20 rounded-full border border-emerald-300/40 bg-emerald-500 px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-white">
+              Miễn phí
+            </span>
+          ) : null}
+
           {status ? (
             <span className="absolute right-3 top-3 z-20 inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-[#0d0d12]/88 px-2.5 py-1">
               <span aria-hidden className={`h-1.5 w-1.5 rounded-full ${status.dot}`} />
@@ -194,10 +212,14 @@ export function SoftwareCard({
         {variant === "compact" ? (
           <div className="mt-auto flex items-end justify-between gap-3 pt-3">
             <div className="min-w-0">
-              <span className="block text-[10px] font-black uppercase tracking-[0.18em] text-[#8a8c94]">
-                Chỉ từ
-              </span>
-              {minPrice !== null && !isFreeTool(software.packages) ? (
+              {/* "Chỉ từ Miễn phí" read as nothing: a free tool's figure
+                  stands alone. */}
+              {free ? null : (
+                <span className="block text-[10px] font-black uppercase tracking-[0.18em] text-[#8a8c94]">
+                  Chỉ từ
+                </span>
+              )}
+              {minPrice !== null && !free ? (
                 <span className="mt-1 flex items-baseline gap-1">
                   <span className="text-[22px] font-black leading-none tracking-tight text-white">
                     {formatVnd(minPrice)}
@@ -210,16 +232,38 @@ export function SoftwareCard({
                 </span>
               )}
             </div>
-            <Link
-              href={detailHref}
-              className="inline-flex h-[42px] shrink-0 items-center gap-2 rounded-[9px] bg-[var(--menzu-accent)] px-5 text-[11px] font-extrabold uppercase tracking-wide text-white transition-colors hover:bg-[var(--menzu-accent-dark)]"
-            >
-              Thuê ngay
-              <ArrowRight size={14} strokeWidth={2.75} aria-hidden />
-            </Link>
+            {free ? (
+              <a
+                href={freeHref}
+                {...(software.downloadUrl ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                className={`${FREE_BUTTON} shrink-0`}
+              >
+                <Download size={14} strokeWidth={2.75} aria-hidden />
+                Nhận miễn phí
+              </a>
+            ) : (
+              <Link
+                href={detailHref}
+                className="inline-flex h-[42px] shrink-0 items-center gap-2 rounded-[9px] bg-[var(--menzu-accent)] px-5 text-[11px] font-extrabold uppercase tracking-wide text-white transition-colors hover:bg-[var(--menzu-accent-dark)]"
+              >
+                Thuê ngay
+                <ArrowRight size={14} strokeWidth={2.75} aria-hidden />
+              </Link>
+            )}
           </div>
         ) : (
         <div className="mt-auto flex flex-col gap-2">
+          {free ? (
+            <a
+              href={freeHref}
+              {...(software.downloadUrl ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+              className={`${FREE_BUTTON} w-full`}
+            >
+              <Download size={14} strokeWidth={2.75} aria-hidden />
+              Nhận miễn phí
+            </a>
+          ) : (
+          <>
           <div className="grid grid-cols-2 gap-2">
             {/* Custom picker: a native <select>'s open list is drawn by the OS
                 in its own font and size, so it never matches the card. This one
@@ -328,6 +372,8 @@ export function SoftwareCard({
               </p>
             ) : null}
           </div>
+          </>
+          )}
 
           <Link
             href={detailHref}
