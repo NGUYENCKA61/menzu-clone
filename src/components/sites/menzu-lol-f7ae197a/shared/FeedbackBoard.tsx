@@ -140,24 +140,21 @@ function ReviewCard({ item }: { item: FeedbackItem }) {
             </span>
           </div>
           <StarRow rating={item.rating} />
-          {/* What was bought, under the stars the way a marketplace prints
-              "phân loại hàng": the tool, the tier, the game (the owner,
-              01/10/2026: "bổ sung thông tin mua key bản gì game gì"). */}
+          {/* What was bought, under the stars: "Đã mua" and the tool, on one
+              line, cut short with an ellipsis when the name runs long (the
+              owner, 01/10/2026: "bổ sung thông tin mua key bản gì game gì";
+              07/10/2026: "bỏ nhãn 30 ngày và dấu ." → "đã mua hack valorant
+              bản ..."). The tier chip and the game after a dot came off: the
+              tool's own name already says the game. */}
           {item.purchase ? (
-            <p className="mt-2 flex min-w-0 flex-wrap items-center gap-x-1.5 gap-y-1 text-[12px] text-neutral-500">
+            <p className="mt-2 flex min-w-0 items-center gap-1.5 text-[12px] text-neutral-500">
               <span className="shrink-0">Đã mua</span>
               <Link
                 href={item.purchase.href}
-                className="min-w-0 max-w-full truncate font-semibold text-neutral-200 transition-colors hover:text-white sm:max-w-[520px]"
+                className="min-w-0 truncate font-semibold text-neutral-200 transition-colors hover:text-white sm:max-w-[520px]"
               >
                 {item.purchase.product}
               </Link>
-              {item.purchase.tier ? (
-                <span className="shrink-0 rounded-md border border-white/15 bg-white/10 px-1.5 py-px text-[9px] font-black uppercase tracking-widest text-neutral-300">
-                  {item.purchase.tier}
-                </span>
-              ) : null}
-              <span className="min-w-0 truncate">· {item.purchase.game}</span>
             </p>
           ) : null}
         </div>
