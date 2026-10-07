@@ -1216,10 +1216,8 @@ export interface ReviewRow {
   createdAt: Date;
   /** What the review is about, when it was written from an order's receipt:
    *  the tool (its "bản"), the tier bought and the game it is for (the owner,
-   *  01/10/2026: "bổ sung thông tin mua key bản gì game gì"). An account
-   *  game's "tier" is "Vĩnh viễn": it has no package and does not run out
-   *  (07/10/2026: "còn acc thì vĩnh viễn"). Null for a free-form review,
-   *  which names no purchase. */
+   *  01/10/2026: "bổ sung thông tin mua key bản gì game gì"). Null for a
+   *  free-form review, which names no purchase. */
   purchase: { product: string; tier: string | null; game: string; href: string } | null;
 }
 
@@ -1228,13 +1226,7 @@ const FEEDBACK_PURCHASE = {
   order: {
     select: {
       product: {
-        select: {
-          name: true,
-          code: true,
-          slug: true,
-          productType: true,
-          category: { select: { name: true, slug: true } },
-        },
+        select: { name: true, code: true, slug: true, category: { select: { name: true, slug: true } } },
       },
       package: { select: { label: true } },
     },
@@ -1259,10 +1251,7 @@ function toReviewRow(f: Prisma.FeedbackGetPayload<{ include: typeof FEEDBACK_PUR
     purchase: product
       ? {
           product: product.name ?? product.code,
-          tier:
-            product.productType === "ACCOUNT_GAME"
-              ? "Vĩnh viễn"
-              : (f.order?.package?.label ?? null),
+          tier: f.order?.package?.label ?? null,
           game: product.category.name,
           href: productHref(product.category.slug, product.slug),
         }
