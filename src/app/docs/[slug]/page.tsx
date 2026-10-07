@@ -47,8 +47,8 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 
 /**
  * One wiki article, the way menzu lays one out: the breadcrumb through the
- * wiki, the title as written (not in capitals), one line of its shelf, dates
- * and reads, the article itself, and the shelf's other articles at the end.
+ * wiki, the title as written (not in capitals), one line of dates and reads,
+ * the article itself, and the shelf's other articles at the end.
  */
 export default async function DocArticlePage({ params }: PageProps) {
   const { slug } = await params;
@@ -73,13 +73,10 @@ export default async function DocArticlePage({ params }: PageProps) {
         // Each fact behind its own icon, spaced rather than dotted apart, as
         // menzu prints the line (the owner, 02/10/2026: "icon mắt lịch đồng
         // hồ").
+        // No shelf chip ahead of them any more (the owner, 07/10/2026: "bỏ
+        // nhãn ... dư thừa"): the shelf is named again at the foot, over the
+        // articles it shares.
         <p className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[12px] font-medium text-neutral-400">
-          <Link
-            href={`/docs#${article.category}`}
-            className="rounded-md border border-white/15 bg-white/10 px-2 py-0.5 text-[9px] font-black uppercase tracking-widest text-neutral-300 transition-colors hover:text-white"
-          >
-            {shelf}
-          </Link>
           <span className="inline-flex items-center gap-1.5">
             <Calendar size={13} aria-hidden className="shrink-0 text-neutral-500" />
             Đăng ngày: {dateFormat.format(article.publishedAt)}
