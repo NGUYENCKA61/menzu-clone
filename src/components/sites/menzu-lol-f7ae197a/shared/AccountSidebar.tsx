@@ -107,10 +107,16 @@ export function AccountSidebar({
               <span className="truncate text-sm font-bold leading-none text-white">
                 {user.username}
               </span>
-              {/* 10px and neutral-400, the size and tone of every other small
-                  label on the account pages; at 9px it was the smallest type
-                  on the site. */}
-              <span className="text-[10px] font-black uppercase tracking-widest leading-none text-neutral-400">
+              {/* 10px, the size of every other small label on the account
+                  pages; at 9px it was the smallest type on the site. An admin
+                  reads in the shop's red, the colour of the ADMIN plate on the
+                  overview (the owner, 07/10/2026: "admin cho chữ đỏ đi");
+                  everyone else in neutral-400. */}
+              <span
+                className={`text-[10px] font-black uppercase tracking-widest leading-none ${
+                  user.role === "ADMIN" ? "text-[var(--menzu-accent)]" : "text-neutral-400"
+                }`}
+              >
                 {user.role === "ADMIN"
                   ? "Admin"
                   : user.role === "AGENCY"
