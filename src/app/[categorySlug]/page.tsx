@@ -23,6 +23,7 @@ import { getShopSettings } from "@/lib/settingsStore";
 import { weaponKey } from "@/lib/weaponImages";
 import { shareCard } from "@/lib/shareCard";
 import { categoryBehindOldSlug } from "@/lib/slugHistory";
+import { launcherFromParam, runsOnFromParam } from "@/lib/toolFilters";
 
 interface PageProps {
   params: Promise<{ categorySlug: string }>;
@@ -37,6 +38,10 @@ interface PageProps {
     cn?: string;
     tt?: string;
     pmsort?: string;
+    /** "Hoạt động": nha | net. */
+    hd?: string;
+    /** "Nền tảng": a launcher key, lower case. */
+    nt?: string;
   }>;
 }
 
@@ -118,6 +123,8 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
     softwareSort: SORTS.has(query.pmsort ?? "")
       ? (query.pmsort as "newest" | "price-asc" | "price-desc")
       : undefined,
+    softwareRunsOn: runsOnFromParam(query.hd),
+    softwareLauncher: launcherFromParam(query.nt),
   });
   if (!data) {
     // Nothing lives here now; maybe something used to. A renamed category
@@ -221,6 +228,7 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
                     and says its sentence. It keeps the outline h1 → h2. */}
                 <h2 className="sr-only">Danh mục {data.name}</h2>
                 <SoftwareFilterPanel
+                  launchers={data.softwareLaunchers}
                   hint={softwareSearchHint(
                     data.name,
                     data.software.map((s) => s.name),

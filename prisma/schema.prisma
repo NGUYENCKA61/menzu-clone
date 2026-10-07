@@ -628,6 +628,15 @@ model Product {
   // --- SOFTWARE_GAME ---------------------------------------------------
   /// Null on accounts, where the idea does not apply.
   softwareStatus SoftwareStatus?
+  /// Where the tool runs: "HOME" (a home PC), "NET" (a net café's) or
+  /// "BOTH". Null reads as HOME, the shop's default ("Net nhà"). The
+  /// category page's "Hoạt động" chips filter on it; the words live in
+  /// src/lib/toolFilters.ts, text rather than an enum like `platform`.
+  runsOn         String?
+  /// The game launchers the tool is for ("STEAM", "EPIC", … keys in
+  /// src/lib/toolFilters.ts). Empty until the desk picks them; the category
+  /// page's "Nền tảng" chips list only launchers a tool there carries.
+  launchers      String[]       @default([])
   /// Where "Tải tool và hướng dẫn sử dụng" points — an installer, a Drive
   /// folder, a guide, whatever the shop hands out. Null hides the button
   /// rather than rendering one that goes nowhere.

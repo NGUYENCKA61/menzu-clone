@@ -16,6 +16,7 @@ import { parseRequirements } from "@/lib/productRequirements";
 import { guideToEditorHtml } from "@/lib/productGuide";
 import { productHref } from "@/lib/routes";
 import { statusPillMode } from "@/lib/statusPill";
+import { readLaunchers, readRunsOn } from "@/lib/toolFilters";
 
 export const metadata: Metadata = { title: "Chi tiết sản phẩm | Quản trị" };
 export const dynamic = "force-dynamic";
@@ -119,6 +120,8 @@ export default async function AdminAccountDetailPage({
             name: software.name ?? software.code,
             categoryName: software.category.name,
             softwareStatus: software.softwareStatus,
+            runsOn: readRunsOn(software.runsOn),
+            launchers: readLaunchers(software.launchers),
             statusPill: statusPillMode(software.showStatus),
             status: software.status,
             price: Number(software.price),

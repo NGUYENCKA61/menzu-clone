@@ -22,6 +22,7 @@ import { slugify } from "@/lib/slug";
 import { forgetSlug, rememberSlugOps } from "@/lib/slugHistory";
 import { notifyStatusFollowers } from "@/lib/statusFollowers";
 import { postStatusToTelegram } from "@/lib/telegramNotify";
+import { readLaunchers, readRunsOn } from "@/lib/toolFilters";
 
 const STATUSES = ["UNDETECTED", "STABLE", "UPDATED", "RISKY", "UPDATING", "DETECTED"] as const;
 type SoftwareStatusValue = (typeof STATUSES)[number];
@@ -222,6 +223,10 @@ export async function PATCH(request: Request) {
     videoUrl?: string;
     /** "Mô tả ngắn", plain text; "" clears it. */
     summary?: string;
+    /** Where the tool runs: "HOME" | "NET" | "BOTH" (src/lib/toolFilters.ts). */
+    runsOn?: unknown;
+    /** The launchers it is for, sent whole; unknown keys are dropped. */
+    launchers?: unknown;
   } | null;
 
   const code = body?.code?.trim();
@@ -334,6 +339,11 @@ export async function PATCH(request: Request) {
         ? { description: cleanDescription(body.description) }
         : {}),
       ...(nextStatus ? { softwareStatus: nextStatus } : {}),
+      // The category page's "Hoạt động" and "Nền tảng" chips read these. Both
+      // pass through the same readers the page uses, so nothing the chips
+      // cannot name is stored.
+      ...(body?.runsOn !== undefined ? { runsOn: readRunsOn(body.runsOn) } : {}),
+      ...(body?.launchers !== undefined ? { launchers: readLaunchers(body.launchers) } : {}),
       ...(stockStatus ? { status: stockStatus } : {}),
       ...(price !== undefined ? { price } : {}),
       // Sent as "" to clear it, which is how the admin removes a dead link and

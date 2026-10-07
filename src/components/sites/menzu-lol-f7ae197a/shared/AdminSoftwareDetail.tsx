@@ -47,6 +47,13 @@ import {
   type ProductRequirement,
 } from "@/lib/productRequirements";
 import { SUMMARY_MAX_LENGTH } from "@/lib/productSummary";
+import {
+  LAUNCHERS,
+  RUNS_ON,
+  RUNS_ON_LABELS,
+  type LauncherKey,
+  type RunsOn,
+} from "@/lib/toolFilters";
 
 import { AdminError } from "./AdminStates";
 import { BadgeIcon } from "./BadgeIcon";
@@ -91,6 +98,10 @@ export interface SoftwareDetailView {
   name: string;
   categoryName: string;
   softwareStatus: string | null;
+  /** Where it runs, for the category page's "Hoạt động" chips. */
+  runsOn: RunsOn;
+  /** The launchers it is for, for the category page's "Nền tảng" chips. */
+  launchers: LauncherKey[];
   /** Whether that state shows on the product's own page — "auto" leaves it to
    *  whether a badge is already speaking for the tool. */
   statusPill: StatusPillMode;
@@ -327,6 +338,8 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
   const [softwareStatus, setSoftwareStatus] = useState(
     software.softwareStatus ?? "UNDETECTED",
   );
+  const [runsOn, setRunsOn] = useState<RunsOn>(software.runsOn);
+  const [launchers, setLaunchers] = useState<LauncherKey[]>(software.launchers);
   /** Ride along with the NEXT status change, then reset. Not stored on the
    *  product: each change keeps its own picture and its own words. */
   const [statusImageUrl, setStatusImageUrl] = useState("");
@@ -495,6 +508,8 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
       code: software.code,
       status,
       softwareStatus,
+      runsOn,
+      launchers,
       statusPill,
       // Only mean anything when the detection state actually moves; the route
       // ignores them otherwise, and they are cleared here either way so the
@@ -907,10 +922,59 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
                   ))}
                 </select>
               </div>
+              {/* Where it runs: the category page's "Hoạt động" chips. Unmarked
+                  reads as Máy nhà, the shop's default "Net nhà". */}
+              <div>
+                <label htmlFor="sw-runs-on" className={LABEL}>
+                  Hoạt động trên
+                </label>
+                <select
+                  id="sw-runs-on"
+                  value={runsOn}
+                  onChange={(event) => setRunsOn(event.target.value as RunsOn)}
+                  className={`${FIELD} w-32`}
+                >
+                  {RUNS_ON.map((value) => (
+                    <option key={value} value={value} className="bg-neutral-900">
+                      {RUNS_ON_LABELS[value]}
+                    </option>
+                  ))}
+                </select>
+              </div>
               <button type="button" disabled={busy} onClick={savePricing} className={ACTION}>
                 <Save size={12} />
                 Lưu
               </button>
+            </div>
+            {/* The launchers it is for: the category page's "Nền tảng" chips,
+                which list only launchers some tool there carries. Saved with
+                the row above. */}
+            <div>
+              <span className={LABEL}>Nền tảng (launcher)</span>
+              <div className="flex flex-wrap gap-2">
+                {LAUNCHERS.map(({ key, label }) => {
+                  const on = launchers.includes(key);
+                  return (
+                    <button
+                      key={key}
+                      type="button"
+                      aria-pressed={on}
+                      onClick={() =>
+                        setLaunchers((current) =>
+                          on ? current.filter((k) => k !== key) : [...current, key],
+                        )
+                      }
+                      className={`rounded-lg border px-3 py-1.5 text-[11px] font-bold transition-colors ${
+                        on
+                          ? "border-[var(--menzu-accent)]/50 bg-[var(--menzu-accent)]/15 text-white"
+                          : "border-white/10 bg-white/[0.03] text-neutral-400 hover:text-white"
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
             <p className="text-[11px] text-neutral-500">
               Trạng thái hack hiện thành pill trên card ngoài cửa hàng, khách nhìn nó để

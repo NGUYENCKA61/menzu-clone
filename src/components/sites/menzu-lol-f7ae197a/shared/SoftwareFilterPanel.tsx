@@ -4,12 +4,18 @@ import { ChevronDown, Crosshair, Loader2, Search, SlidersHorizontal } from "luci
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useOptimistic, useState, useTransition } from "react";
 
+import { launcherLabel } from "@/lib/toolFilters";
+
 import {
-  CHIP_ACTIVE,
-  CHIP_INACTIVE,
+  GROUP_DIVIDER,
   GROUP_LABEL_CLASS,
   PANEL_CLASS,
+  PILL,
+  PILL_ACTIVE,
   SEARCH_SHELL_CLASS,
+  SEGMENT,
+  SEGMENT_ACTIVE,
+  SEGMENTS,
 } from "./filterChrome";
 import { ScopeSearchField } from "./ScopeSearchField";
 
@@ -30,8 +36,16 @@ const SORT_OPTIONS = [
   { value: "price-desc", label: "Giá ↓" },
 ] as const;
 
+/** "Hoạt động" (the owner, 07/10/2026: "máy nhà, máy nét, tất cả"). */
+const RUNS_OPTIONS = [
+  { value: "all", label: "Tất cả" },
+  { value: "nha", label: "Máy nhà" },
+  { value: "net", label: "Máy nét" },
+] as const;
+
 type StatusValue = (typeof STATUS_OPTIONS)[number]["value"];
 type SortValue = (typeof SORT_OPTIONS)[number]["value"];
+type RunsValue = (typeof RUNS_OPTIONS)[number]["value"];
 
 /**
  * Search + filter panel above the software grid, sibling to the account one
@@ -55,9 +69,12 @@ type SortValue = (typeof SORT_OPTIONS)[number]["value"];
  */
 export function SoftwareFilterPanel({
   hint = "Tìm tool theo tên…",
+  launchers = [],
 }: {
   /** The example in the name box, built from this category's own tools. */
   hint?: string;
+  /** The launcher keys this category's tools carry; none hides "Nền tảng". */
+  launchers?: string[];
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -67,6 +84,9 @@ export function SoftwareFilterPanel({
   const [featureQuery, setFeatureQuery] = useState(params.get("cn") ?? "");
   const status = (params.get("tt") as StatusValue) ?? "all";
   const sort = (params.get("pmsort") as SortValue) ?? "newest";
+  const runs = (params.get("hd") as RunsValue) ?? "all";
+  /** A launcher key in lower case, as the URL carries it; "" is all. */
+  const launcher = params.get("nt") ?? "";
 
   // Same arrangement as the account panel above it: optimistic copies of the
   // URL's two chip values, a transition around the push, and the grid told
@@ -74,9 +94,12 @@ export function SoftwareFilterPanel({
   const [isPending, startTransition] = useTransition();
   const [shownStatus, showStatus] = useOptimistic(status);
   const [shownSort, showSort] = useOptimistic(sort);
+  const [shownRuns, showRuns] = useOptimistic(runs);
+  const [shownLauncher, showLauncher] = useOptimistic(launcher);
   /** The chip groups, on a phone: folded until asked for. */
   const [filtersOpen, setFiltersOpen] = useState(false);
-  const filtering = shownStatus !== "all" || shownSort !== "newest";
+  const filtering =
+    shownStatus !== "all" || shownSort !== "newest" || shownRuns !== "all" || shownLauncher !== "";
 
   useEffect(() => {
     document.documentElement.toggleAttribute("data-filtering", isPending);
@@ -174,7 +197,12 @@ export function SoftwareFilterPanel({
       </button>
       <div className={filtersOpen || filtering ? "" : "hidden md:block"}>
       <div className={PANEL_CLASS}>
-        <div className="flex flex-col lg:flex-row lg:flex-wrap lg:items-end gap-2.5 w-full">
+        {/* The groups on one row from lg, a hairline between each two, the
+            way the original lays out its panel (the owner, 07/10/2026: "theo
+            menzu có đường kẻ | giữa"); stacked on narrower screens. Pills
+            for the open-ended lists, a segmented well for the short
+            either-or ones. */}
+        <div className="flex w-full flex-col gap-3 lg:flex-row lg:flex-wrap lg:items-end lg:gap-x-4">
           <div>
             {/* First, because it is the one thing a tool is bought or
                 abandoned on — the card leads with the same pill. */}
@@ -190,7 +218,7 @@ export function SoftwareFilterPanel({
                       apply({ tt: option.value === "all" ? "" : option.value });
                     })
                   }
-                  className={shownStatus === option.value ? CHIP_ACTIVE : CHIP_INACTIVE}
+                  className={shownStatus === option.value ? PILL_ACTIVE : PILL}
                 >
                   {option.label}
                 </button>
@@ -198,20 +226,76 @@ export function SoftwareFilterPanel({
             </div>
           </div>
 
+          <span aria-hidden className={GROUP_DIVIDER} />
+
+          <div>
+            <span className={GROUP_LABEL_CLASS}>Hoạt động</span>
+            <div className={SEGMENTS}>
+              {RUNS_OPTIONS.map((option) => (
+                <button
+                  key={option.value}
+                  type="button"
+                  aria-pressed={shownRuns === option.value}
+                  onClick={() =>
+                    startTransition(() => {
+                      showRuns(option.value);
+                      apply({ hd: option.value === "all" ? "" : option.value });
+                    })
+                  }
+                  className={shownRuns === option.value ? SEGMENT_ACTIVE : SEGMENT}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Only the launchers some tool here carries; none set yet on any
+              of them, no group at all rather than a row that filters out
+              everything. */}
+          {launchers.length > 0 ? (
+            <>
+              <span aria-hidden className={GROUP_DIVIDER} />
+              <div>
+                <span className={GROUP_LABEL_CLASS}>Nền tảng</span>
+                <div className="flex flex-wrap gap-2">
+                  {["", ...launchers.map((key) => key.toLowerCase())].map((value) => (
+                    <button
+                      key={value || "all"}
+                      type="button"
+                      onClick={() =>
+                        startTransition(() => {
+                          showLauncher(value);
+                          apply({ nt: value });
+                        })
+                      }
+                      className={shownLauncher === value ? PILL_ACTIVE : PILL}
+                    >
+                      {value ? launcherLabel(value.toUpperCase()) : "Tất cả"}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </>
+          ) : null}
+
+          <span aria-hidden className={GROUP_DIVIDER} />
+
           <div>
             <span className={GROUP_LABEL_CLASS}>Sắp xếp</span>
-            <div className="flex flex-wrap gap-2">
+            <div className={SEGMENTS}>
               {SORT_OPTIONS.map((option) => (
                 <button
                   key={option.value}
                   type="button"
+                  aria-pressed={shownSort === option.value}
                   onClick={() =>
                     startTransition(() => {
                       showSort(option.value);
                       apply({ pmsort: option.value === "newest" ? "" : option.value });
                     })
                   }
-                  className={shownSort === option.value ? CHIP_ACTIVE : CHIP_INACTIVE}
+                  className={shownSort === option.value ? SEGMENT_ACTIVE : SEGMENT}
                 >
                   {option.label}
                 </button>

@@ -19,6 +19,34 @@ export const CHIP_ACTIVE =
 export const CHIP_DISABLED =
   "px-3 py-1.5 rounded-lg text-[11px] font-bold border border-neutral-800/60 bg-neutral-950/40 text-neutral-600 cursor-not-allowed whitespace-nowrap";
 
+/**
+ * The tool filter's own chips, measured off the original's category panel
+ * (the owner, 07/10/2026: "sửa lại phần lọc … theo menzu có đường kẻ |
+ * giữa"): a quick-pick pill 40px tall at a 14px radius, and a segmented
+ * choice — options side by side in one rounded well, 32px segments at 10px
+ * black — for the short either-or groups. The lit state wears the shop's
+ * red where the original wears its violet.
+ */
+export const PILL =
+  "press h-10 px-3.5 rounded-[14px] text-[11px] font-bold border border-neutral-700/40 bg-neutral-800/40 text-neutral-400 transition-colors hover:text-white hover:border-neutral-600 whitespace-nowrap";
+
+export const PILL_ACTIVE =
+  "press h-10 px-3.5 rounded-[14px] text-[11px] font-bold border border-[var(--menzu-accent)]/50 bg-[var(--menzu-accent)]/15 text-[var(--menzu-accent)] whitespace-nowrap";
+
+/** The rounded well a segmented choice sits in. */
+export const SEGMENTS =
+  "inline-flex h-10 items-center gap-1 rounded-[14px] border border-neutral-700/40 bg-neutral-800/40 p-1";
+
+export const SEGMENT =
+  "press h-8 px-3 rounded-[10px] border border-transparent text-[10px] font-black text-neutral-400 transition-colors hover:text-white whitespace-nowrap";
+
+export const SEGMENT_ACTIVE =
+  "press h-8 px-3 rounded-[10px] border border-[var(--menzu-accent)]/50 bg-[var(--menzu-accent)]/20 text-[10px] font-black text-[var(--menzu-accent)] whitespace-nowrap";
+
+/** The hairline between two groups sharing a row ("đường kẻ | giữa"). Only
+ *  where they do share one; stacked on a phone, the gap is enough. */
+export const GROUP_DIVIDER = "hidden lg:block w-px self-stretch bg-white/10";
+
 /** The small grey caption over each group of chips. */
 export const GROUP_LABEL_CLASS =
   "text-[10px] font-black uppercase tracking-widest text-neutral-500 mb-1.5 block";

@@ -29,6 +29,7 @@ import {
 } from "@/components/sites/menzu-lol-f7ae197a/shared/productData";
 import type { FlashSaleItem } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/flashSaleData";
 import type { ContentTier, DocCategory } from "@prisma/client";
+import { readLaunchers } from "@/lib/toolFilters";
 
 /**
  * Data access for the server components.
@@ -222,6 +223,12 @@ export interface CategoryPageData {
    */
   softwareTotal: number;
   /**
+   * The launchers the category's tools carry between them, unfiltered, in
+   * the list's own order: the "Nền tảng" chips offer only these, and none
+   * at all while no tool here has been given one.
+   */
+  softwareLaunchers: string[];
+  /**
    * Whether a search engine should list this page: true once the category
    * holds at least one product a visitor can open. An empty category is
    * noindex and stays out of the sitemap until its first product arrives,
@@ -353,6 +360,11 @@ export interface CategoryFilters {
   softwareFeature?: string;
   softwareStatus?: "UNDETECTED" | "STABLE" | "UPDATED" | "RISKY" | "UPDATING" | "DETECTED";
   softwareSort?: "newest" | "price-asc" | "price-desc";
+  /** "HOME": tools for a home PC, unmarked ones included (they read as home).
+   *  "NET": tools marked for a net café, alone or as well. */
+  softwareRunsOn?: "HOME" | "NET";
+  /** One launcher key: only tools that carry it. */
+  softwareLauncher?: string;
 }
 
 /**
@@ -370,40 +382,52 @@ export interface CategoryFilters {
 function softwareWhere(categoryId: string, filters: CategoryFilters) {
   const name = filters.software?.trim();
   const feature = filters.softwareFeature?.trim();
+  // Every narrowing below is one more condition that must hold. Gathered in a
+  // single AND rather than spread as keys: two of them are ORs, and a second
+  // `OR` key would silently replace the first.
+  const and: Prisma.ProductWhereInput[] = [];
+  if (name) {
+    and.push({
+      OR: [
+        { name: { contains: name, mode: "insensitive" } },
+        { code: { contains: name, mode: "insensitive" } },
+      ],
+    });
+  }
+  // "Tìm chức năng": every word typed must appear somewhere the tool
+  // describes itself — its name, its short or long description, its own
+  // feature list (the JSON text of titles and bodies) or the note under it.
+  // Word by word, so "aimbot esp" finds a tool that lists the two on
+  // separate lines.
+  if (feature) {
+    for (const word of feature.split(/[\s,]+/).filter(Boolean)) {
+      and.push({
+        OR: [
+          { name: { contains: word, mode: "insensitive" } },
+          { summary: { contains: word, mode: "insensitive" } },
+          { description: { contains: word, mode: "insensitive" } },
+          { features: { contains: word, mode: "insensitive" } },
+          { featuresNote: { contains: word, mode: "insensitive" } },
+        ],
+      });
+    }
+  }
+  // "Hoạt động": a tool nobody has marked runs on a home PC.
+  if (filters.softwareRunsOn === "HOME") {
+    and.push({ OR: [{ runsOn: null }, { runsOn: { in: ["HOME", "BOTH"] } }] });
+  } else if (filters.softwareRunsOn === "NET") {
+    and.push({ runsOn: { in: ["NET", "BOTH"] } });
+  }
+  // "Nền tảng": one launcher, among the ones the tool is for.
+  if (filters.softwareLauncher) {
+    and.push({ launchers: { has: filters.softwareLauncher } });
+  }
   return {
     categoryId,
     productType: "SOFTWARE_GAME" as const,
     status: "AVAILABLE" as const,
     deletedAt: null,
-    ...(name
-      ? {
-          OR: [
-            { name: { contains: name, mode: "insensitive" as const } },
-            { code: { contains: name, mode: "insensitive" as const } },
-          ],
-        }
-      : {}),
-    // "Tìm chức năng": every word typed must appear somewhere the tool
-    // describes itself — its name, its short or long description, its own
-    // feature list (the JSON text of titles and bodies) or the note under it.
-    // Word by word, so "aimbot esp" finds a tool that lists the two on
-    // separate lines.
-    ...(feature
-      ? {
-          AND: feature
-            .split(/[\s,]+/)
-            .filter(Boolean)
-            .map((word) => ({
-              OR: [
-                { name: { contains: word, mode: "insensitive" as const } },
-                { summary: { contains: word, mode: "insensitive" as const } },
-                { description: { contains: word, mode: "insensitive" as const } },
-                { features: { contains: word, mode: "insensitive" as const } },
-                { featuresNote: { contains: word, mode: "insensitive" as const } },
-              ],
-            })),
-        }
-      : {}),
+    ...(and.length > 0 ? { AND: and } : {}),
     ...(filters.softwareStatus ? { softwareStatus: filters.softwareStatus } : {}),
   };
 }
@@ -466,7 +490,7 @@ export async function getCategoryPage(
 
   const where = categoryWhere(category.id, filters);
 
-  const [total, rows, softwareRows, accountTotal, softwareTotal, listedTotal] = await Promise.all([
+  const [total, rows, softwareRows, accountTotal, softwareTotal, listedTotal, launcherRows] = await Promise.all([
     db.product.count({ where }),
     db.product.findMany({
       where,
@@ -498,7 +522,12 @@ export async function getCategoryPage(
     db.product.count({ where: categoryWhere(category.id, {}) }),
     db.product.count({ where: softwareWhere(category.id, {}) }),
     db.product.count({ where: { categoryId: category.id, ...LISTED_PRODUCT } }),
+    // Unfiltered, like the counts: the "Nền tảng" chips offer what the shelf
+    // holds, not what the current search left of it.
+    db.product.findMany({ where: softwareWhere(category.id, {}), select: { launchers: true } }),
   ]);
+  const carried = new Set(launcherRows.flatMap((row) => row.launchers));
+  const softwareLaunchers = readLaunchers([...carried]);
 
   const [sale, images, stock, tierSale] = await Promise.all([
     runningSalePrices(rows.map((p) => p.id)),
@@ -558,6 +587,7 @@ export async function getCategoryPage(
     total,
     accountTotal,
     softwareTotal,
+    softwareLaunchers,
     listed: listedTotal > 0,
     page,
     totalPages: Math.max(1, Math.ceil(total / PAGE_SIZE)),
