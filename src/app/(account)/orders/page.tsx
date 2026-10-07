@@ -36,6 +36,8 @@ const STATUS_CLASS: Record<string, string> = {
 const TONE = {
   amber: "bg-amber-500/10 text-amber-400 border-amber-500/20",
   rose: "bg-rose-500/10 text-rose-400 border-rose-500/20",
+  // The ledger's "Thất bại" red, for an answer that went against the buyer.
+  red: "bg-red-500/10 text-red-400 border-red-500/20",
   grey: "bg-white/5 text-neutral-400 border-white/10",
 } as const;
 
@@ -60,7 +62,10 @@ function orderBadge(o: {
 }): { label: string; tone: string } | null {
   if (o.status === "PAID") {
     if (o.refundPending) return { label: "Chờ duyệt hoàn tiền", tone: TONE.amber };
-    if (o.refundRejected) return { label: "Từ chối hoàn tiền", tone: TONE.rose };
+    // Red, not the refunded rose: the two answers are opposites and wore one
+    // colour (the owner, 07/10/2026: "từ chối hoàn tiền có nên màu đỏ không"
+    // → "rồi làm đi").
+    if (o.refundRejected) return { label: "Từ chối hoàn tiền", tone: TONE.red };
     // The shop could not fix it and is paying it back over a bank transfer.
     if (o.warrantyRefunding) return { label: "Đang hoàn tiền", tone: TONE.amber };
     // A report the shop is still working: the order is paid and stays so, but
