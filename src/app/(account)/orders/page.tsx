@@ -29,13 +29,16 @@ const STATUS_LABEL: Record<string, string> = {
 // The receipt's own pill. Colour follows meaning, same palette as the ledgers.
 const STATUS_CLASS: Record<string, string> = {
   PAID: "border-emerald-500/30 bg-emerald-500/10 text-emerald-400",
-  REFUNDED: "border-rose-500/30 bg-rose-500/10 text-rose-400",
+  REFUNDED: "border-emerald-500/30 bg-emerald-500/10 text-emerald-400",
 };
 
-/* The card's pill, in menzu's weight. */
+/* The card's pill, in menzu's weight. A refund reads like a traffic light:
+   amber while it waits, green once the money is back, red when refused (the
+   owner, 07/10/2026: "đã hoàn tiền có nên màu xanh lá" → "rồi làm đi"). */
 const TONE = {
   amber: "bg-amber-500/10 text-amber-400 border-amber-500/20",
-  rose: "bg-rose-500/10 text-rose-400 border-rose-500/20",
+  // The ledger's "Thành công" green, the colour the same refund wears there.
+  green: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
   // The ledger's "Thất bại" red, for an answer that went against the buyer.
   red: "bg-red-500/10 text-red-400 border-red-500/20",
   grey: "bg-white/5 text-neutral-400 border-white/10",
@@ -62,9 +65,8 @@ function orderBadge(o: {
 }): { label: string; tone: string } | null {
   if (o.status === "PAID") {
     if (o.refundPending) return { label: "Chờ duyệt hoàn tiền", tone: TONE.amber };
-    // Red, not the refunded rose: the two answers are opposites and wore one
-    // colour (the owner, 07/10/2026: "từ chối hoàn tiền có nên màu đỏ không"
-    // → "rồi làm đi").
+    // Red: the opposite answer to a refund paid back (the owner, 07/10/2026:
+    // "từ chối hoàn tiền có nên màu đỏ không" → "rồi làm đi").
     if (o.refundRejected) return { label: "Từ chối hoàn tiền", tone: TONE.red };
     // The shop could not fix it and is paying it back over a bank transfer.
     if (o.warrantyRefunding) return { label: "Đang hoàn tiền", tone: TONE.amber };
@@ -73,7 +75,7 @@ function orderBadge(o: {
     if (o.warrantyOpen) return { label: "Đang bảo hành", tone: TONE.amber };
     return null;
   }
-  if (o.status === "REFUNDED") return { label: "Đã hoàn tiền", tone: TONE.rose };
+  if (o.status === "REFUNDED") return { label: "Đã hoàn tiền", tone: TONE.green };
   return { label: STATUS_LABEL[o.status] ?? o.status, tone: TONE.grey };
 }
 
