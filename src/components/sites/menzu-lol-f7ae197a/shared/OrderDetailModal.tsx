@@ -4,7 +4,6 @@ import {
   ArrowRight,
   CalendarDays,
   Check,
-  CheckCircle2,
   Clock,
   Copy,
   Download,
@@ -19,7 +18,6 @@ import {
   MessageCircle,
   Package,
   Receipt,
-  RotateCcw,
   ShieldCheck,
   Star,
   User,
@@ -466,17 +464,13 @@ export function OrderDetailModal({
   // for one. Red where the next step is the buyer's (sending the report,
   // giving a bank account), an outline where they only watch.
   const warrantyAction = warrantyButton(order.warranty);
-  const ticketStatus = order.warranty?.status;
+  // "Xem trạng thái" wears the eye, the site's "open and look" (the ledger's
+  // eye opens a top-up's invoice): the ticket's state is already named in the
+  // receipt's own status cell, and a clock / turning arrow / tick that changed
+  // under an unchanging label said it a second time, less clearly (the
+  // owner, 07/10/2026: "thay icon con mắt cho xem trạng thái" → "đổi").
   const WarrantyIcon =
-    warrantyAction.kind === "request"
-      ? Wrench
-      : warrantyAction.kind === "bank"
-        ? Landmark
-        : ticketStatus === "REFUNDING" || ticketStatus === "REFUNDED"
-          ? RotateCcw
-          : ticketStatus === "RESOLVED"
-            ? CheckCircle2
-            : Clock;
+    warrantyAction.kind === "request" ? Wrench : warrantyAction.kind === "bank" ? Landmark : Eye;
   // A refunded or unpaid order with no ticket has nothing to report or follow.
   const showWarranty = order.paid || order.warranty !== null;
 
