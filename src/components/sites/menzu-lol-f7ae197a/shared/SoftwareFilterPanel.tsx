@@ -157,7 +157,7 @@ export function SoftwareFilterPanel({
 
         <button
           type="submit"
-          className="hidden md:flex bg-[var(--brand)] hover:bg-[var(--brand-dark)] active:scale-95 text-white font-black rounded-xl px-6 transition items-center gap-2 shrink-0"
+          className="hidden md:flex bg-[var(--brand)] hover:bg-[var(--brand-dark)] active:scale-95 text-white font-black rounded-3xl px-6 transition items-center gap-2 shrink-0"
         >
           {isPending ? (
             <Loader2 size={16} aria-hidden className="animate-spin motion-reduce:animate-none" />

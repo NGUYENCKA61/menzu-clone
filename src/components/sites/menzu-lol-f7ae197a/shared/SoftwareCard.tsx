@@ -115,15 +115,16 @@ export function SoftwareCard({
   /**
    * A free tool (the shop's 1đ placeholder tier) gets its own card (the
    * owner, 07/10/2026: "thiết kế card cho phần mềm thuộc dạng miễn phí" →
-   * "b"): a green "Miễn phí" mark on the picture and one green "Nhận miễn
-   * phí" that opens the tool's download link straight away, in place of a
-   * tier list reading "999999999 giờ - 1đ" and a "Thuê ngay" that charged 1đ.
+   * "b"): a green "Miễn phí" mark on the picture and one "Nhận miễn phí" in
+   * the shop's red (a green one glared: "xanh lá chói quá… đỏ hoặc tím")
+   * that opens the tool's download link straight away, in place of a tier
+   * list reading "999999999 giờ - 1đ" and a "Thuê ngay" that charged 1đ.
    * No link set yet: the button leads to the tool's page instead.
    */
   const free = isFreeTool(software.packages);
   const freeHref = software.downloadUrl ?? detailHref;
   const FREE_BUTTON =
-    "flex h-[42px] items-center justify-center gap-2 rounded-[9px] bg-emerald-500 px-5 text-[11px] font-extrabold uppercase tracking-wide text-white transition-colors hover:bg-emerald-600";
+    "flex h-[42px] items-center justify-center gap-2 rounded-[9px] bg-[var(--menzu-accent)] px-5 text-[11px] font-extrabold uppercase tracking-wide text-white transition-colors hover:bg-[var(--menzu-accent-dark)]";
 
   // One dropdown row. Same 11px/Inter as the trigger and the buttons, so the
   // open list matches the card exactly (the whole reason for a custom picker
@@ -198,7 +199,7 @@ export function SoftwareCard({
         {/* Title with the red marker bar, left-aligned. */}
         <Link href={detailHref} className="flex items-center gap-2.5">
           <span aria-hidden className="h-4 w-[3px] shrink-0 rounded-full bg-[var(--menzu-accent)]" />
-          <h3 className="truncate text-[17px] font-black uppercase tracking-wide text-white transition-colors hover:text-[var(--menzu-accent)]">
+          <h3 className="truncate text-base font-black uppercase tracking-wide text-white transition-colors hover:text-[var(--menzu-accent)]">
             {software.name}
           </h3>
         </Link>
