@@ -1,19 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useRef, useState } from "react";
-import {
-  ChevronRight,
-  Headphones,
-  Loader2,
-  Minus,
-  Plus,
-  RefreshCw,
-  ShieldCheck,
-  Star,
-  Zap,
-} from "lucide-react";
+import { Headphones, Loader2, Minus, Plus, RefreshCw, ShieldCheck, Zap } from "lucide-react";
 
 import {
   badgePillClass,
@@ -31,7 +20,6 @@ import { StickyBuyBar } from "./StickyBuyBar";
 import { StatusToast } from "./StatusToast";
 import { StockLine } from "./StockLine";
 import { isSalesLocked, salesLockReason } from "@/lib/softwareStatus";
-import { REVIEW_POINTS } from "@/lib/spin";
 
 export interface SoftwarePackageView {
   id: string;
@@ -135,7 +123,6 @@ export function SoftwareBuyPanel({
   software,
   initialPackageId,
   initialQuantity,
-  reviewHref = null,
 }: {
   software: SoftwareDetail;
   /** From `?pkg=` — the tier a listing card was already showing. */
@@ -145,9 +132,6 @@ export function SoftwareBuyPanel({
   /** Following this tool's status; null for a guest. Still threaded down from
    *  the route, unread while "Nhận thông báo" is off the page. */
   statusSubscribed: boolean | null;
-  /** The review page of the reader's newest paid, unreviewed order of this
-   *  tool; null for everyone else, who sees no "Viết đánh giá". */
-  reviewHref?: string | null;
 }) {
   const router = useRouter();
 
@@ -419,29 +403,6 @@ export function SoftwareBuyPanel({
           {busy ? "Đang thêm…" : "Thêm vào giỏ"}
         </button>
       </div>
-
-      {/* For a buyer only: one quiet row under the buttons that leads to the
-          review page of their own order, so a review from here is still tied
-          to the purchase (the owner, 07/10/2026: "nhảy tới trang viết đánh
-          giá khỏi làm trang mới", "chỉ đánh giá khi mua xong mới được cộng
-          điểm"). The wheel page's amber row for a prize waiting, in dress. */}
-      {reviewHref ? (
-        <Link
-          href={reviewHref}
-          className="group flex items-center gap-3 rounded-2xl border border-amber-500/30 bg-amber-500/[0.07] px-4 py-3 transition-colors hover:border-amber-500/60"
-        >
-          <Star size={16} className="shrink-0 text-amber-400" aria-hidden />
-          <span className="flex-1 text-[13px] leading-snug text-neutral-300">
-            Bạn đã mua tool này. <span className="font-bold text-white">Viết đánh giá</span>,
-            được duyệt cộng {REVIEW_POINTS} điểm thưởng.
-          </span>
-          <ChevronRight
-            size={16}
-            className="shrink-0 text-neutral-500 transition-colors group-hover:text-white"
-            aria-hidden
-          />
-        </Link>
-      ) : null}
 
       <div className="grid grid-cols-2 sm:grid-cols-4 rounded-2xl border border-white/10 bg-white/[0.02] overflow-hidden">
         {TRUST.map((t, index) => {

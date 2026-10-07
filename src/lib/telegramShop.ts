@@ -780,30 +780,6 @@ export async function notifyTopUpOnTelegram(
   }
 }
 
-/** Told once a review written from an order is approved and paid its points.
- *  Only to a buyer who linked Telegram; the web notice says it to everyone. */
-export async function notifyReviewRewardOnTelegram(
-  userId: string,
-  points: number,
-  orderCode: string,
-): Promise<void> {
-  try {
-    const user = await db.user.findUnique({ where: { id: userId }, select: { telegramId: true } });
-    if (!user?.telegramId) return;
-    const settings = await getShopSettings();
-    const token = settings.telegramShopToken.trim();
-    if (!token) return;
-    await telegramCall(token, "sendMessage", {
-      chat_id: user.telegramId,
-      text: `⭐ Đánh giá đơn <b>${orderCode}</b> đã được duyệt. Bạn được cộng <b>${points} điểm thưởng</b>, cảm ơn bạn!`,
-      parse_mode: "HTML",
-      reply_markup: { inline_keyboard: [[HOME_BUTTON]] },
-    });
-  } catch (error) {
-    console.error("[telegram-shop] review reward notice failed", error);
-  }
-}
-
 // --- orders and status ------------------------------------------------------
 
 export async function ordersScreen(user: ShopUser): Promise<MenuScreen> {

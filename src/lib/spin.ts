@@ -23,14 +23,6 @@ export const SPIN_COST = 100;
 export const VND_PER_SPIN = 100_000;
 
 /**
- * The points an approved review earns: one spin. Only a review written from
- * an order (so the shop knows it was bought) earns them, paid once when an
- * admin approves it (the owner, 07/10/2026: "chỉ đánh giá khi mua xong mới
- * được cộng điểm"). A free-form review on /feedback earns nothing.
- */
-export const REVIEW_POINTS = SPIN_COST;
-
-/**
  * The points a purchase earns.
  *
  * Proportional rather than a whole spin per 100.000đ: a 250.000đ order would
