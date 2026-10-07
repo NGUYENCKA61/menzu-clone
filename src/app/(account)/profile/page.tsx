@@ -30,6 +30,7 @@ import {
 } from "@/lib/memberTiers";
 import { getCurrentUser } from "@/lib/session";
 import { getShopSettings } from "@/lib/settingsStore";
+import { SPIN_LOCKED } from "@/lib/spin";
 
 export const metadata: Metadata = {
   title: "Tổng quan tài khoản",
@@ -63,6 +64,11 @@ const QUICK_ACTIONS = [
   { label: "Lịch sử mua", href: "/orders", icon: ShoppingBag, primary: false },
   { label: "Đổi thưởng", href: "/vong-quay", icon: Gift, primary: false },
 ] as const;
+
+/** The doors drawn: while the wheel's event is suspended its door comes off,
+ *  rather than leading to the "Tạm ngưng sự kiện" sheet (the owner,
+ *  07/10/2026: "trong trang tổng quan tài khoản ẩn luôn đi"). */
+const DOORS = QUICK_ACTIONS.filter((door) => !(SPIN_LOCKED && door.href === "/vong-quay"));
 
 /** Behind the banner when no category has a cover: the shop's own backdrop. */
 const BANNER_FALLBACK = "/sites/menzu-lol-f7ae197a/root-8a5edab2/images/behance/f945cb242281183.696998e170840.webp";
@@ -327,9 +333,14 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
 
               {/* Phone: Nạp tiền across, the other two side by side under
                   it (three stacked bars pushed the balance off the first
-                  screen). sm–lg: one row of three. xl: the column. */}
-              <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 xl:flex xl:flex-col">
-                {QUICK_ACTIONS.map(({ label, href, icon: Icon, primary }) => (
+                  screen). sm–lg: one row of three. xl: the column. With only
+                  two doors (the wheel's off), the two share one row below xl. */}
+              <div
+                className={`grid grid-cols-2 gap-2.5 xl:flex xl:flex-col${
+                  DOORS.length > 2 ? " sm:grid-cols-3" : ""
+                }`}
+              >
+                {DOORS.map(({ label, href, icon: Icon, primary }) => (
                   <Link
                     key={href}
                     href={href}
@@ -338,7 +349,7 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                     // the accent glow under it was the only one of its kind.
                     className={`inline-flex h-11 items-center justify-center gap-2 rounded-xl border text-[11px] font-black uppercase tracking-widest transition-colors ${
                       primary
-                        ? "col-span-2 sm:col-span-1 border-[var(--menzu-accent)] bg-[var(--menzu-accent)] text-white hover:bg-[var(--menzu-accent-dark)]"
+                        ? `${DOORS.length > 2 ? "col-span-2 sm:col-span-1 " : ""}border-[var(--menzu-accent)] bg-[var(--menzu-accent)] text-white hover:bg-[var(--menzu-accent-dark)]`
                         : "border-white/15 bg-black/35 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] backdrop-blur-md hover:border-white/35 hover:bg-black/50"
                     }`}
                   >
