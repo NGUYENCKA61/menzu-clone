@@ -13,14 +13,15 @@ import {
 } from "./filterChrome";
 import { ScopeSearchField } from "./ScopeSearchField";
 
+// The states a buyer shops by. "Rủi ro", "Đang cập nhật" and "Đã phát hiện"
+// came off the chips (the owner, 07/10/2026: "bỏ 3 cái rủi ro đang cập nhật
+// đã phát hiện đi"); an old link carrying one of them still filters, it just
+// lights no chip.
 const STATUS_OPTIONS = [
   { value: "all", label: "Tất cả" },
   { value: "undetected", label: "Chưa phát hiện" },
   { value: "stable", label: "Ổn định" },
   { value: "updated", label: "Cập nhật mới" },
-  { value: "risky", label: "Rủi ro" },
-  { value: "updating", label: "Đang cập nhật" },
-  { value: "detected", label: "Đã phát hiện" },
 ] as const;
 
 const SORT_OPTIONS = [
