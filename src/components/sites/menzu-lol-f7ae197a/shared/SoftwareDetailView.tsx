@@ -26,6 +26,7 @@ export function SoftwareDetailView({
   initialQuantity,
   setupGuideAccess,
   statusSubscribed,
+  reviewHref = null,
   similar,
 }: {
   software: SoftwareDetail;
@@ -36,6 +37,9 @@ export function SoftwareDetailView({
   setupGuideAccess: SetupGuideAccess;
   /** Following this tool's status; null for a guest. */
   statusSubscribed: boolean | null;
+  /** Where this reader can review the tool from their own order; null for
+   *  anyone with nothing to review. */
+  reviewHref?: string | null;
   /** Other tools for the row at the foot of the page; empty draws no row. */
   similar: SoftwareCardView[];
 }) {
@@ -90,6 +94,7 @@ export function SoftwareDetailView({
                 initialPackageId={initialPackageId}
                 initialQuantity={initialQuantity}
                 statusSubscribed={statusSubscribed}
+                reviewHref={reviewHref}
               />
             </div>
 

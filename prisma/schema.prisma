@@ -1577,6 +1577,11 @@ model Feedback {
   orderId   String?  @unique
   order     Order?   @relation(fields: [orderId], references: [id], onDelete: SetNull)
   createdAt DateTime @default(now())
+  /// When this review's points were paid: stamped once, the first time an
+  /// admin approves an order-backed review, so approving it again (or two
+  /// admins at once) cannot pay twice. Null for every review not yet paid,
+  /// and for free-form ones, which never earn points.
+  rewardedAt DateTime?
 
   @@map("feedback")
 }

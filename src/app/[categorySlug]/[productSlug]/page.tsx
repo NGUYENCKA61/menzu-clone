@@ -12,6 +12,7 @@ import {
   listSimilarSoftware,
   hasPaidOrderFor,
   resolveProduct,
+  unreviewedOrderFor,
 } from "@/lib/queries";
 import { productHref } from "@/lib/routes";
 import { JsonLd, softwareJsonLd } from "@/lib/seo";
@@ -161,13 +162,15 @@ export default async function ProductPage({ params, searchParams }: PageProps) {
     // the view receives rather than hidden by it, and the HTML a browser gets
     // never carries a guide its reader has not paid for.
     const user = await getCurrentUser();
-    const [[bought, statusSubscribed], similar] = await Promise.all([
+    const [[bought, statusSubscribed, toReview], similar] = await Promise.all([
       user
         ? Promise.all([
             hasPaidOrderFor(user.id, software.code),
             isStatusSubscribed(user.id, software.code),
+            // A buyer with an order not yet reviewed gets "Viết đánh giá".
+            unreviewedOrderFor(user.id, software.code),
           ])
-        : Promise.resolve([false, null] as const),
+        : Promise.resolve([false, null, null] as const),
       // Twelve, so that nine remain once free tools are set aside below:
       // three show at once on a desktop, the arrows bring in the rest.
       listSimilarSoftware(software.code, software.categorySlug, 12),
@@ -224,6 +227,7 @@ export default async function ProductPage({ params, searchParams }: PageProps) {
           initialQuantity={readQuantity(sl)}
           setupGuideAccess={setupGuideAccess}
           statusSubscribed={statusSubscribed}
+          reviewHref={toReview ? `/orders/${toReview}/danh-gia` : null}
           similar={similarShown}
         />
       </>

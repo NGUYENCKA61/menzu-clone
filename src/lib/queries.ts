@@ -715,6 +715,25 @@ export async function hasPaidOrderFor(
 }
 
 /**
+ * The order a buyer can still review this product from: their newest paid
+ * one with no review yet, or null. Behind the product page's "Viết đánh giá",
+ * which leads to that order's own review page, so every review written from
+ * a product page is still tied to a real purchase (the owner, 07/10/2026:
+ * "nhảy tới trang viết đánh giá khỏi làm trang mới").
+ */
+export async function unreviewedOrderFor(
+  userId: string,
+  productCode: string,
+): Promise<string | null> {
+  const order = await db.order.findFirst({
+    where: { userId, status: "PAID", product: { code: productCode }, feedback: null },
+    orderBy: { createdAt: "desc" },
+    select: { code: true },
+  });
+  return order?.code ?? null;
+}
+
+/**
  * A software product and everything its page prints.
  *
  * Found by slug, which is what the address carries: the code is what the shop

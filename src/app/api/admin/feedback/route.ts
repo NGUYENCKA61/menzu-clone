@@ -1,7 +1,11 @@
 import { NextResponse } from "next/server";
 
 import { FORBIDDEN, getAdmin } from "@/lib/admin";
+import { announceToUser } from "@/lib/announcementStore";
 import { db } from "@/lib/db";
+import { rewardApprovedReview } from "@/lib/reviewReward";
+import { REVIEW_POINTS } from "@/lib/spin";
+import { notifyReviewRewardOnTelegram } from "@/lib/telegramShop";
 
 /**
  * Moderates a customer review: mark it verified, or remove it.
@@ -39,7 +43,24 @@ export async function PATCH(request: Request) {
       where: { id },
       data: { approved: body.approved },
     });
-    return NextResponse.json({ id: updated.id, approved: updated.approved });
+    // An approved review written from an order earns its points, once (the
+    // owner, 07/10/2026: "chỉ đánh giá khi mua xong mới được cộng điểm").
+    // The buyer hears it quietly: a notice in their list, and Telegram if
+    // linked. Neither can fail the approval, which has already happened.
+    const reward = updated.approved ? await rewardApprovedReview(id) : null;
+    if (reward) {
+      await announceToUser(reward.userId, {
+        title: "Đánh giá của bạn đã được duyệt",
+        body: `Cảm ơn bạn đã đánh giá đơn ${reward.orderCode}. Bạn được cộng ${REVIEW_POINTS} điểm thưởng.`,
+        type: "GIFT",
+      });
+      await notifyReviewRewardOnTelegram(reward.userId, REVIEW_POINTS, reward.orderCode);
+    }
+    return NextResponse.json({
+      id: updated.id,
+      approved: updated.approved,
+      rewarded: reward ? REVIEW_POINTS : 0,
+    });
   }
 
   const updated = await db.feedback.update({

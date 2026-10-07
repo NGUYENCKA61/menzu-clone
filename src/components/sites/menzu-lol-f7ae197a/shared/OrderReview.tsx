@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
+import { REVIEW_POINTS } from "@/lib/spin";
+
 import { postFormWithProgress } from "./uploadForm";
 
 /**
@@ -253,8 +255,11 @@ export function OrderReviewForm({ orderId, onDone }: { orderId: string; onDone: 
                 : "Đang xử lý ảnh…"
             : "Gửi đánh giá"}
         </button>
+        {/* Said once, here, in the form's own small print: no banner and no
+            nudge elsewhere (the owner did not want buyers pressed for stars). */}
         <span className="text-[11px] text-neutral-500">
-          Admin duyệt xong sẽ hiện ngoài trang đánh giá, kèm dấu đã mua.
+          Admin duyệt xong sẽ hiện ngoài trang đánh giá, kèm dấu đã mua, và bạn được cộng{" "}
+          {REVIEW_POINTS} điểm thưởng.
         </span>
       </div>
       {progress !== null ? (
