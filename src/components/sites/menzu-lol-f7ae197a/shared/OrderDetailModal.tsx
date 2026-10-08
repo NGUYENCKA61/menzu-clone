@@ -814,10 +814,7 @@ export function OrderDetailModal({
                         // An account's sign-in not yet taken: the "Lấy thông
                         // tin" card, a random listing's and a single account's
                         // alike (the owner, 08/10/2026, after menzu).
-                        <LockedLogin
-                          onTake={() => setRevealOpen(true)}
-                          count={order.isPool ? order.quantity : 1}
-                        />
+                        <LockedLogin onTake={() => setRevealOpen(true)} />
                       ) : order.isPool ? (
                         // Each key is one sign-in; shown as the pair it is,
                         // not as a key, with the password behind a reveal
@@ -1149,39 +1146,43 @@ export function OrderDetailModal({
 }
 
 /**
- * An account's sign-in not yet taken (the owner, 08/10/2026, after menzu's
- * "Nhận thông tin đăng nhập"; layout B of two, "gọn" and in the receipt's own
- * colours, picked over A's masked boxes with "b đi"): one row in the
- * receipt's box frame, a lock, what is locked, the filming rule in one line,
- * and the button that opens the steps. The popup holds the full rules, so
- * nothing here repeats them. Lock and button wear the accent red of the
- * receipt's other action; amber means "waiting" on this site.
+ * An account's sign-in not yet taken, as menzu's "Nhận thông tin đăng nhập"
+ * card has it (the owner, 08/10/2026): the warning that the take must be
+ * filmed, and the one button that opens the steps. Without menzu's "Web
+ * Riot": the buyer is asked to sign in to the game itself ("bỏ cái nút web
+ * riot đi yêu cầu người dùng đăng nhập vào game thôi"). The compact A and B
+ * layouts were tried and dropped for this one ("Sửa lại như này đi", with a
+ * picture of this card).
  */
-function LockedLogin({ onTake, count }: { onTake: () => void; count: number }) {
+function LockedLogin({ onTake }: { onTake: () => void }) {
   return (
-    <div className="flex flex-col gap-4 rounded-xl border border-white/[0.06] bg-white/[0.02] p-4 sm:flex-row sm:items-center">
-      <div className="flex min-w-0 flex-1 items-start gap-3">
-        {/* One glyph for the row: the warning triangle in the tile, none on
-            the line under the title ("nhiều logo quá… bỏ bớt logo ổ khóa"). */}
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-[var(--menzu-accent)]/25 bg-[var(--menzu-accent)]/15 text-[var(--menzu-accent)]">
-          <TriangleAlert className="h-4 w-4" aria-hidden />
-        </span>
-        <div className="min-w-0">
-          <p className="text-sm font-bold text-white">
-            {count > 1 ? `${count} tài khoản đang khóa` : "Thông tin đăng nhập đang khóa"}
-          </p>
-          <p className="mt-1 text-xs font-semibold leading-relaxed text-red-400">
-            Bắt buộc quay video khi lấy, thiếu video shop từ chối bảo hành.
-          </p>
-        </div>
+    <div className="flex flex-col items-center gap-4 rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-6 text-center sm:px-6">
+      <span className="flex h-12 w-12 items-center justify-center rounded-xl border border-amber-500/30 bg-amber-500/10 text-amber-400">
+        <KeyRound className="h-5 w-5" aria-hidden />
+      </span>
+      <div>
+        <p className="text-base font-black uppercase tracking-wide text-white">
+          Nhận thông tin đăng nhập
+        </p>
+        <p className="mx-auto mt-1.5 max-w-md text-[13px] leading-relaxed text-neutral-400">
+          Tài khoản này chưa được nhận. Khi bạn bấm nhận, hệ thống sẽ mở khóa thông tin, vui
+          lòng tự bảo mật tài khoản.
+        </p>
+      </div>
+      <div className="w-full max-w-md rounded-xl border border-red-500/25 bg-red-500/[0.07] px-4 py-3 text-left">
+        <p className="flex items-center gap-2 text-[12px] font-black uppercase tracking-wide text-red-400">
+          <TriangleAlert className="h-4 w-4 shrink-0" aria-hidden />
+          Bắt buộc quay video
+        </p>
+        <p className="mt-1.5 text-[12px] leading-relaxed text-neutral-300">
+          Quay màn hình liên tục từ lúc bấm lấy thông tin đến khi đăng nhập thành công vào
+          game. Shop từ chối hỗ trợ bảo hành nếu thiếu video này.
+        </p>
       </div>
       <button
         type="button"
         onClick={onTake}
-        // The receipt's "Yêu cầu bảo hành" exactly: sentence case, 12px bold,
-        // 44px on a phone and 40 from sm, darker red on hover (the owner,
-        // 08/10/2026: "khác cỡ chữ chữ hoa" → "sửa đi").
-        className="press inline-flex h-11 w-full shrink-0 items-center justify-center rounded-xl bg-[var(--menzu-accent)] px-5 text-xs font-bold text-white transition-colors hover:bg-[var(--menzu-accent-dark)] sm:h-10 sm:w-auto"
+        className="press h-11 rounded-xl bg-amber-500 px-8 text-[12px] font-black uppercase tracking-widest text-neutral-950 transition-colors hover:bg-amber-400"
       >
         Lấy thông tin
       </button>
