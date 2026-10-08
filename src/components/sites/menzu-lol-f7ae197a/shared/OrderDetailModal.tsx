@@ -1341,7 +1341,7 @@ function LoginRevealDialog({ code, onClose }: { code: string; onClose: () => voi
           <span
             aria-hidden
             className={`relative h-6 w-11 shrink-0 rounded-full transition-colors ${
-              recording ? "bg-amber-500" : "bg-white/15"
+              recording ? "bg-[var(--menzu-accent)]" : "bg-white/15"
             }`}
           >
             <span
