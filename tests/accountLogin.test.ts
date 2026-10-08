@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   currentOrderIdOf,
   deliversAutomatically,
+  gatedHandover,
   LOGIN_NOTE_MAX,
   LOGIN_PASSWORD_MAX,
   LOGIN_USERNAME_MAX,
@@ -134,6 +135,28 @@ describe("loginHandover", () => {
     expect(loginHandover(paid, { ...bare, productType: "SOFTWARE_GAME" })).toEqual({
       state: "none",
     });
+  });
+});
+
+describe("gatedHandover", () => {
+  const paid = { id: "order-1", status: "PAID" };
+
+  it("locks a ready sign-in until the buyer takes it", () => {
+    // The receipt's "Lấy thông tin": nothing of the sign-in leaves the server
+    // before the buyer has confirmed they are recording.
+    const ready = loginHandover(paid, account);
+    expect(gatedHandover(ready, null)).toEqual({ state: "locked" });
+    expect(gatedHandover(ready, new Date("2026-10-08T11:19:00Z"))).toEqual(ready);
+  });
+
+  it("leaves every other state as it was", () => {
+    // Nothing to take, so nothing to lock: a "get in touch" line stays one,
+    // and a row that is not the buyer's stays hidden.
+    const manual = loginHandover(paid, { ...account, tag: null });
+    const none = loginHandover(paid, { ...account, currentOrderId: "order-2" });
+    expect(manual.state).toBe("manual");
+    expect(gatedHandover(manual, null)).toEqual(manual);
+    expect(gatedHandover(none, null)).toEqual({ state: "none" });
   });
 });
 

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { currentOrderIdOf, loginHandover, tagOf } from "@/lib/accountLogin";
+import { currentOrderIdOf, gatedHandover, loginHandover, tagOf } from "@/lib/accountLogin";
 import { checkoutFailure, placeOrder } from "@/lib/checkout";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/session";
@@ -95,11 +95,16 @@ export async function GET() {
       product: { code: o.product.code, imageUrl: o.product.imageUrl, rank: o.product.rank },
       // The buyer's own orders only, and nothing unless the order is PAID and
       // still the latest sale of that account — the same gate the page applies.
-      login: loginHandover(o, {
-        ...o.product,
-        currentOrderId: currentOrderIdOf(o.product),
-        tag: tagOf(o.product),
-      }),
+      // Held back until the buyer takes it through the receipt's "Lấy
+      // thông tin" (they confirm they are recording the screen first).
+      login: gatedHandover(
+        loginHandover(o, {
+          ...o.product,
+          currentOrderId: currentOrderIdOf(o.product),
+          tag: tagOf(o.product),
+        }),
+        o.loginRevealedAt,
+      ),
     })),
   });
 }

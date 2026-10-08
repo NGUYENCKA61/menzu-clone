@@ -4,6 +4,7 @@ import type { Prisma } from "@prisma/client";
 
 import {
   currentOrderIdOf,
+  gatedHandover,
   loginHandover,
   tagOf,
   type LoginHandover,
@@ -938,6 +939,15 @@ export interface OrderRow {
    * waiting on. "none" for software and for orders that were never paid.
    */
   login: LoginHandover;
+  /**
+   * Accounts only: there is a sign-in to hand over (a random listing's
+   * delivered accounts, or an NFA account's own), and the buyer has not yet
+   * taken it through the receipt's "Lấy thông tin". While true the sign-in is
+   * withheld from `keys` and `login` alike.
+   */
+  loginLocked: boolean;
+  /** When the buyer first took it; null until then. */
+  loginRevealedAt: Date | null;
   /** A warranty report the shop is still working on. */
   warrantyOpen: boolean;
   /** The shop is paying this order back over a bank transfer. */
@@ -1057,8 +1067,10 @@ export async function getOrders(userId: string): Promise<OrderRow[]> {
     // and a licence that keeps working after that is the tool sold for
     // nothing — the sign-in of an account order has always been withdrawn the
     // same way, and the key was the one thing left behind.
+    // A random listing's keys are its accounts' sign-ins: held back, like a
+    // single account's, until the buyer takes them through "Lấy thông tin".
     keys:
-      o.status === "PAID"
+      o.status === "PAID" && !(o.product.accountPool && o.loginRevealedAt === null)
         ? o.licenseKeys.map((k) => ({
             value: k.value,
             expiresAt: k.expiresAt,
@@ -1080,11 +1092,23 @@ export async function getOrders(userId: string): Promise<OrderRow[]> {
       o.status === "PAID" && o.product.productType === "SOFTWARE_GAME"
         ? o.product.docsUrl
         : null,
-    login: loginHandover(o, {
-      ...o.product,
-      currentOrderId: currentOrderIdOf(o.product),
-      tag: tagOf(o.product),
-    }),
+    ...(() => {
+      const handover = loginHandover(o, {
+        ...o.product,
+        currentOrderId: currentOrderIdOf(o.product),
+        tag: tagOf(o.product),
+      });
+      const unrevealed = o.status === "PAID" && o.loginRevealedAt === null;
+      return {
+        login: gatedHandover(handover, o.loginRevealedAt),
+        loginLocked:
+          unrevealed &&
+          (o.product.accountPool
+            ? o.product.productType === "ACCOUNT_GAME" && o.licenseKeys.length > 0
+            : handover.state === "ready"),
+        loginRevealedAt: o.loginRevealedAt,
+      };
+    })(),
     ...(() => {
       // Older, buyer-made refund rounds still say where they stand. Only the
       // newest counts: a refusal since answered with a second request is

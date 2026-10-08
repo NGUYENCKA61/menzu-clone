@@ -76,7 +76,22 @@ export type LoginHandover =
    * its sign-in.
    */
   | { state: "manual" }
+  /**
+   * A sign-in waiting for the buyer to take it: shown only after the
+   * receipt's "Lấy thông tin", once they confirm they are recording the
+   * screen (the owner, 08/10/2026, after menzu's "Nhận thông tin đăng nhập").
+   * The sign-in itself is not in this state at all, so it is not in the page.
+   */
+  | { state: "locked" }
   | { state: "ready"; login: AccountLogin };
+
+/**
+ * What the buyer is shown: a sign-in they have not yet asked for stays
+ * locked. Every buyer-facing reader passes through this; the desk does not.
+ */
+export function gatedHandover(handover: LoginHandover, revealedAt: Date | null): LoginHandover {
+  return handover.state === "ready" && revealedAt === null ? { state: "locked" } : handover;
+}
 
 /**
  * Decides the handover for one order against the product it bought.

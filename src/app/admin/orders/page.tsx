@@ -59,6 +59,26 @@ const METHOD_ICON: Record<string, LucideIcon> = {
   PAY_LATER: Clock,
 };
 
+/**
+ * Whether an account order's buyer has taken the sign-in through the
+ * receipt's "Lấy thông tin", and when: what the desk checks first on a
+ * warranty claim (the owner, 08/10/2026). Paid account orders only.
+ */
+function RevealNote({
+  order,
+}: {
+  order: { status: string; loginRevealedAt: Date | null; product: { productType: string } };
+}) {
+  if (order.status !== "PAID" || order.product.productType !== "ACCOUNT_GAME") return null;
+  return order.loginRevealedAt ? (
+    <span className="text-[10px] font-bold text-neutral-400">
+      Khách mở TK lúc {dayStamp(order.loginRevealedAt)}
+    </span>
+  ) : (
+    <span className="text-[10px] font-bold text-amber-400">Khách chưa mở TK</span>
+  );
+}
+
 export default async function AdminOrdersPage({
   searchParams,
 }: {
@@ -264,6 +284,7 @@ export default async function AdminOrdersPage({
                     <KeyRound size={10} /> Bàn giao tay
                   </span>
                 ) : null}
+                <RevealNote order={o} />
               </div>
               <div className="mt-3 flex items-center justify-between gap-3 border-t border-white/[0.06] pt-3">
                 <div className="flex flex-col">
@@ -389,6 +410,7 @@ export default async function AdminOrdersPage({
                           Bàn giao tay
                         </span>
                       ) : null}
+                      <RevealNote order={o} />
                     </div>
                   </td>
                   <td className="px-5 py-3 whitespace-nowrap">

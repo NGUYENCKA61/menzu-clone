@@ -1014,6 +1014,11 @@ model Order {
   /// nothing, and deriving the entitlement from quantity would put all of
   /// them in the queue the first time a tier was stocked.
   keysOwed    Int            @default(0)
+  /// When the buyer of an account first opened its sign-in, through the
+  /// receipt's "Lấy thông tin" (after confirming they are recording the
+  /// screen). Null until then: the sign-in stays locked on the page. The
+  /// shop reads it when a warranty claim asks what happened first.
+  loginRevealedAt DateTime?
   /// The keys handed over. Fewer than `keysOwed` while the tier is out of
   /// stock — that shortfall IS the shop's to-do list.
   licenseKeys LicenseKey[]

@@ -20,6 +20,7 @@ import {
   Receipt,
   ShieldCheck,
   Star,
+  TriangleAlert,
   User,
   Wallet,
   Wrench,
@@ -27,6 +28,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 
@@ -99,6 +101,10 @@ export interface OrderDetailData {
   docsUrl: string | null;
   /** Accounts: the sign-in, or the word that the shop hands it over itself. */
   login: LoginHandover;
+  /** Accounts: a sign-in waiting behind "Lấy thông tin", not yet taken. */
+  loginLocked: boolean;
+  /** When the buyer took it, "15:48 08/10/2026"; null before. */
+  loginRevealedAt: string | null;
   /**
    * The order's newest warranty ticket, or null. The footer's one button
    * follows it (warrantyButton): "Yêu cầu bảo hành", then "Xem trạng thái",
@@ -409,6 +415,14 @@ export function OrderDetailModal({
   className?: string;
 }) {
   const [open, setOpen] = useState(autoOpen);
+  // "Lấy thông tin": the popup over the receipt that hands an account's
+  // sign-in over once the buyer confirms they are recording the screen.
+  // While it is up, the receipt's own keys stand aside.
+  const [revealOpen, setRevealOpen] = useState(false);
+  const revealOpenRef = useRef(false);
+  useEffect(() => {
+    revealOpenRef.current = revealOpen;
+  }, [revealOpen]);
   const triggerRef = useRef<HTMLElement | null>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   // A drag that starts on a key and ends past the card's edge is a
@@ -425,6 +439,8 @@ export function OrderDetailModal({
     lockScroll();
 
     const onKey = (event: KeyboardEvent) => {
+      // The "Lấy thông tin" popup on top handles its own Escape and Tab.
+      if (revealOpenRef.current) return;
       if (event.key === "Escape") {
         event.preventDefault();
         setOpen(false);
@@ -794,7 +810,12 @@ export function OrderDetailModal({
                     </div>
 
                     <div className="relative">
-                      {order.isPool ? (
+                      {order.loginLocked ? (
+                        // An account's sign-in not yet taken: the "Lấy thông
+                        // tin" card, a random listing's and a single account's
+                        // alike (the owner, 08/10/2026, after menzu).
+                        <LockedLogin onTake={() => setRevealOpen(true)} />
+                      ) : order.isPool ? (
                         // Each key is one sign-in; shown as the pair it is,
                         // not as a key, with the password behind a reveal
                         // like the single account's.
@@ -849,6 +870,9 @@ export function OrderDetailModal({
                                 ? "Đơn đã được hoàn tiền, thông tin đăng nhập đã thu hồi."
                                 : "Đơn này chưa có tài khoản để hiển thị."}
                             </p>
+                          ) : null}
+                          {order.keys.length > 0 && order.loginRevealedAt ? (
+                            <RevealedLine at={order.loginRevealedAt} />
                           ) : null}
                         </div>
                       ) : order.isSoftware ? (
@@ -936,6 +960,9 @@ export function OrderDetailModal({
                             <p className="whitespace-pre-line break-words rounded-xl border border-white/[0.06] bg-white/[0.03] px-4 py-3 text-xs leading-relaxed text-neutral-300">
                               {order.login.login.note}
                             </p>
+                          ) : null}
+                          {order.loginRevealedAt ? (
+                            <RevealedLine at={order.loginRevealedAt} />
                           ) : null}
                         </div>
                       ) : order.login.state === "manual" ? (
@@ -1110,6 +1137,260 @@ export function OrderDetailModal({
             document.body,
           )
         : null}
+      {revealOpen && mounted
+        ? createPortal(
+            <LoginRevealDialog code={order.code} onClose={() => setRevealOpen(false)} />,
+            document.body,
+          )
+        : null}
     </>
+  );
+}
+
+/**
+ * An account's sign-in not yet taken, as menzu's "Nhận thông tin đăng nhập"
+ * card has it (the owner, 08/10/2026): the warning that the take must be
+ * filmed, and the one button that opens the steps. Without menzu's "Web
+ * Riot": the buyer is asked to sign in to the game itself ("bỏ cái nút web
+ * riot đi yêu cầu người dùng đăng nhập vào game thôi").
+ */
+function LockedLogin({ onTake }: { onTake: () => void }) {
+  return (
+    <div className="flex flex-col items-center gap-4 rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-6 text-center sm:px-6">
+      <span className="flex h-12 w-12 items-center justify-center rounded-xl border border-amber-500/30 bg-amber-500/10 text-amber-400">
+        <KeyRound className="h-5 w-5" aria-hidden />
+      </span>
+      <div>
+        <p className="text-base font-black uppercase tracking-wide text-white">
+          Nhận thông tin đăng nhập
+        </p>
+        <p className="mx-auto mt-1.5 max-w-md text-[13px] leading-relaxed text-neutral-400">
+          Tài khoản này chưa được nhận. Khi bạn bấm nhận, hệ thống sẽ mở khóa thông tin, vui
+          lòng tự bảo mật tài khoản.
+        </p>
+      </div>
+      <div className="w-full max-w-md rounded-xl border border-red-500/25 bg-red-500/[0.07] px-4 py-3 text-left">
+        <p className="flex items-center gap-2 text-[12px] font-black uppercase tracking-wide text-red-400">
+          <TriangleAlert className="h-4 w-4 shrink-0" aria-hidden />
+          Bắt buộc quay video
+        </p>
+        <p className="mt-1.5 text-[12px] leading-relaxed text-neutral-300">
+          Quay màn hình liên tục từ lúc bấm lấy thông tin đến khi đăng nhập thành công vào
+          game. Shop từ chối hỗ trợ bảo hành nếu thiếu video này.
+        </p>
+      </div>
+      <button
+        type="button"
+        onClick={onTake}
+        className="press h-11 rounded-xl bg-amber-500 px-8 text-[12px] font-black uppercase tracking-widest text-neutral-950 transition-colors hover:bg-amber-400"
+      >
+        Lấy thông tin
+      </button>
+    </div>
+  );
+}
+
+/** Under a sign-in once taken: when, for the buyer's own record. */
+function RevealedLine({ at }: { at: string }) {
+  return <p className="text-[11px] text-neutral-500">Đã nhận thông tin lúc {at}.</p>;
+}
+
+const REVEAL_STEPS = [
+  {
+    title: "Bật quay toàn màn hình",
+    body: "Bắt đầu quay màn hình từ bây giờ, trước khi mở thông tin.",
+  },
+  {
+    title: "Mở khóa thông tin",
+    body: "Bấm nút xác nhận bên dưới để hiện tài khoản và mật khẩu.",
+  },
+  { title: "Đăng nhập vào game", body: "Mở game và đăng nhập để kiểm tra tài khoản." },
+] as const;
+
+/**
+ * The steps before an account's sign-in is shown, menzu's "Bắt buộc quay màn
+ * hình" (the owner, 08/10/2026): film from here, take the sign-in, sign in to
+ * the game. The confirm button stays off until the buyer switches on "Xác
+ * nhận đang quay màn hình". On success the route stamps the moment and the
+ * receipt refreshes with the sign-in in it.
+ */
+function LoginRevealDialog({ code, onClose }: { code: string; onClose: () => void }) {
+  const router = useRouter();
+  const panelRef = useRef<HTMLDivElement>(null);
+  const pressedBackdrop = useRef(false);
+  const [recording, setRecording] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const panel = panelRef.current;
+    const opener = document.activeElement as HTMLElement | null;
+    panel?.focus();
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        onClose();
+        return;
+      }
+      if (event.key === "Tab" && panel) trapTab(panel, event);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      opener?.focus();
+    };
+  }, [onClose]);
+
+  async function take() {
+    if (!recording || busy) return;
+    setBusy(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/orders/reveal-login", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ code, recording: true }),
+      });
+      const data = (await res.json().catch(() => null)) as { error?: string } | null;
+      if (!res.ok) {
+        setError(data?.error ?? "Chưa mở được thông tin, thử lại sau.");
+        setBusy(false);
+        return;
+      }
+      router.refresh();
+      onClose();
+    } catch {
+      setError("Chưa mở được thông tin, thử lại sau.");
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div
+      className="fixed inset-0 z-[10000] flex items-end justify-center bg-black/70 p-0 backdrop-blur-sm animate-in fade-in duration-150 sm:items-center sm:p-6"
+      onPointerDown={(event) => {
+        pressedBackdrop.current = event.target === event.currentTarget;
+      }}
+      onClick={(event) => {
+        if (pressedBackdrop.current && event.target === event.currentTarget) onClose();
+        pressedBackdrop.current = false;
+      }}
+    >
+      <div
+        ref={panelRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="login-reveal-title"
+        tabIndex={-1}
+        className="relative max-h-[92vh] w-full overflow-y-auto rounded-t-2xl border border-white/10 bg-[#121216] p-5 shadow-2xl outline-none animate-in fade-in zoom-in-95 duration-150 sm:max-w-md sm:rounded-2xl sm:p-6"
+      >
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Đóng"
+          className="absolute right-4 top-4 grid h-8 w-8 place-items-center rounded-full text-neutral-400 transition-colors hover:bg-white/10 hover:text-white"
+        >
+          <X className="h-4 w-4" />
+        </button>
+
+        <div className="flex flex-col items-center text-center">
+          <span
+            id="login-reveal-title"
+            className="inline-flex items-center gap-2 rounded-full border border-red-500/30 bg-red-500/10 px-4 py-1.5 text-[13px] font-black text-red-400"
+          >
+            <TriangleAlert className="h-4 w-4" aria-hidden />
+            Bắt buộc quay màn hình
+          </span>
+          <p className="mt-3 text-[13px] leading-relaxed text-neutral-400">
+            Thực hiện đúng quy trình để được hỗ trợ bảo hành ngay nếu tài khoản phát sinh lỗi.
+          </p>
+        </div>
+
+        <ol className="mt-5 divide-y divide-white/[0.06] rounded-xl border border-white/10 bg-white/[0.02]">
+          {REVEAL_STEPS.map((step, index) => (
+            <li key={step.title} className="flex items-start gap-3 px-4 py-3">
+              <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-amber-500/40 text-[10px] font-black text-amber-400">
+                {index + 1}
+              </span>
+              <p className="text-[13px] leading-relaxed text-neutral-300">
+                <strong className="text-white">{step.title}:</strong> {step.body}
+              </p>
+            </li>
+          ))}
+        </ol>
+
+        <div className="mt-4 flex flex-col gap-1.5 rounded-xl border border-red-500/25 bg-red-500/[0.07] px-4 py-3 text-[12px] leading-relaxed text-neutral-300">
+          <p className="flex gap-2">
+            <TriangleAlert className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-400" aria-hidden />
+            <span>
+              <strong className="text-red-400">Bắt buộc 1 video liền mạch:</strong> quay liên tục
+              từ lúc lấy mật khẩu đến khi đăng nhập xong vào game.
+            </span>
+          </p>
+          <p className="flex gap-2">
+            <TriangleAlert className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-400" aria-hidden />
+            <span>
+              Video ngắt quãng, quay 2 lượt hoặc cắt ghép sẽ{" "}
+              <strong className="text-red-400">bị từ chối bảo hành</strong>.
+            </span>
+          </p>
+        </div>
+
+        <button
+          type="button"
+          role="switch"
+          aria-checked={recording}
+          onClick={() => setRecording((on) => !on)}
+          className="mt-4 flex w-full items-center justify-between gap-4 rounded-xl border border-white/10 bg-white/[0.02] px-4 py-3 text-left transition-colors hover:bg-white/[0.04]"
+        >
+          <span>
+            <span className="block text-[13px] font-bold text-white">
+              Xác nhận đang quay màn hình
+            </span>
+            <span className="mt-0.5 block text-[11px] text-neutral-400">
+              Tôi cam kết đang quay video và đồng ý với điều khoản trên.
+            </span>
+          </span>
+          <span
+            aria-hidden
+            className={`relative h-6 w-11 shrink-0 rounded-full transition-colors ${
+              recording ? "bg-amber-500" : "bg-white/15"
+            }`}
+          >
+            <span
+              className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${
+                recording ? "translate-x-[22px]" : "translate-x-0.5"
+              }`}
+            />
+          </span>
+        </button>
+
+        {error ? (
+          <p role="alert" className="mt-3 text-[12px] font-semibold text-[var(--menzu-accent)]">
+            {error}
+          </p>
+        ) : null}
+
+        {/* The confirm gets the wider share: its label is the long one. On a
+            phone the two stack, confirm on top. */}
+        <div className="mt-5 flex flex-col-reverse gap-3 border-t border-white/[0.06] pt-4 sm:grid sm:grid-cols-[2fr_3fr]">
+          <button
+            type="button"
+            onClick={onClose}
+            className="press h-11 rounded-xl border border-white/10 bg-white/[0.03] px-4 text-[12px] font-black uppercase tracking-widest text-neutral-200 transition-colors hover:bg-white/[0.07]"
+          >
+            Hủy bỏ
+          </button>
+          <button
+            type="button"
+            onClick={take}
+            disabled={!recording || busy}
+            className="press h-11 rounded-xl bg-amber-500 px-4 text-[12px] font-black uppercase tracking-widest text-neutral-950 transition-colors hover:bg-amber-400 disabled:cursor-not-allowed disabled:bg-white/[0.06] disabled:text-neutral-500"
+          >
+            {busy ? "Đang mở…" : "Xác nhận lấy thông tin"}
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }

@@ -156,6 +156,12 @@ export default async function OrdersPage({
               downloadUrl: o.downloadUrl,
               docsUrl: o.docsUrl,
               login: o.login,
+              loginLocked: o.loginLocked,
+              // "15:48 08/10/2026" on the shop clock, as the receipt prints
+              // its own times.
+              loginRevealedAt: o.loginRevealedAt
+                ? `${dayTime(o.loginRevealedAt)} ${shortDate(o.loginRevealedAt)}`
+                : null,
               warranty: o.latestWarranty,
             },
             autoOpen: don === o.code,
