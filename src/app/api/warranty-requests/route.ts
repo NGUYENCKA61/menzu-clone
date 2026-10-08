@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { announceToAdmins } from "@/lib/announcementStore";
 import { db } from "@/lib/db";
+import { LOGIN_ORDER_SELECT, signInHold } from "@/lib/loginReveal";
 import { absoluteUrl } from "@/lib/seo";
 import { escapeTelegramHtml, notifyTelegramAdmins } from "@/lib/telegramNotify";
 import { storeWarrantyImage } from "@/lib/warrantyImage";
@@ -10,8 +11,10 @@ import { getCurrentUser } from "@/lib/session";
 import {
   readDescription,
   readIssue,
+  readVideoUrl,
   WARRANTY_ISSUE,
   warrantyBlockedReason,
+  warrantyKind,
 } from "@/lib/warrantyRequests";
 
 /**
@@ -36,23 +39,18 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Thiếu mã đơn" }, { status: 400 });
   }
 
-  const picked = readIssue(form.get("issue"));
-  if (!picked.ok) {
-    return NextResponse.json({ error: picked.error }, { status: 400 });
-  }
   const said = readDescription(form.get("description"));
   if (!said.ok) {
     return NextResponse.json({ error: said.error }, { status: 400 });
   }
 
   // Scoped to this buyer, so a guessed order code belonging to somebody else
-  // answers 404 rather than confirming it exists.
+  // answers 404 rather than confirming it exists. With what an account's
+  // sign-in state needs: no report before the sign-in has been taken.
   const order = await db.order.findFirst({
     where: { code, userId: user.id },
     select: {
-      id: true,
-      status: true,
-      product: { select: { name: true, code: true } },
+      ...LOGIN_ORDER_SELECT,
       warrantyRequests: {
         where: { status: { not: "RESOLVED" } },
         select: { id: true },
@@ -64,11 +62,28 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Không tìm thấy đơn hàng" }, { status: 404 });
   }
 
+  // A tool's report and an account's offer different faults, and an
+  // account's must carry the screen recording.
+  const kind = warrantyKind(order.product.productType);
+  const picked = readIssue(form.get("issue"), kind);
+  if (!picked.ok) {
+    return NextResponse.json({ error: picked.error }, { status: 400 });
+  }
+  let videoUrl: string | null = null;
+  if (kind === "account") {
+    const video = readVideoUrl(form.get("videoUrl"));
+    if (!video.ok) {
+      return NextResponse.json({ error: video.error }, { status: 400 });
+    }
+    videoUrl = video.url;
+  }
+
   // Checked here and not only in the form: a rule enforced by a disabled
   // button is not enforced.
   const blocked = warrantyBlockedReason({
     orderStatus: order.status,
     openRequest: order.warrantyRequests.length > 0,
+    signIn: kind === "account" ? signInHold(order) : null,
   });
   if (blocked) {
     return NextResponse.json({ error: blocked }, { status: 400 });
@@ -86,6 +101,7 @@ export async function POST(request: Request) {
       issue: picked.issue,
       description: said.description,
       imageUrl: image.url,
+      videoUrl,
     },
     select: { id: true },
   });

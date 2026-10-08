@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { ArrowLeft, Banknote, Clock, Info, Landmark } from "lucide-react";
+import { ArrowLeft, Banknote, Clock, Info, KeyRound, Landmark, Video } from "lucide-react";
 
 import { AccountPageFrame } from "@/components/sites/menzu-lol-f7ae197a/shared/AccountPageFrame";
 import { formatVnd } from "@/components/sites/menzu-lol-f7ae197a/shared/productData";
@@ -11,6 +11,7 @@ import { WarrantyChat } from "@/components/sites/menzu-lol-f7ae197a/shared/Warra
 import { WarrantyRequestForm } from "@/components/sites/menzu-lol-f7ae197a/shared/WarrantyRequestForm";
 import { maskAccount } from "@/lib/bankRefund";
 import { db } from "@/lib/db";
+import { LOGIN_ORDER_SELECT, signInHold } from "@/lib/loginReveal";
 import { ORDER_STATUS_LABELS, type OrderStatus } from "@/lib/orders";
 import { dayStamp, dayTime } from "@/lib/dayGroups";
 import { getCurrentUser } from "@/lib/session";
@@ -19,6 +20,7 @@ import {
   WARRANTY_ISSUE,
   WARRANTY_STATUS,
   warrantyBlockedReason,
+  warrantyKind,
   warrantyOpen,
 } from "@/lib/warrantyRequests";
 import { MESSAGE_SELECT, toChatMessage } from "@/lib/warrantyThread";
@@ -62,15 +64,16 @@ export default async function WarrantyRequestPage({
 
   // Scoped to this buyer: somebody else's order code answers 404 rather than
   // confirming it exists.
+  // With what an account's sign-in state needs: an account is reported on
+  // only once its sign-in has been taken.
   const order = await db.order.findFirst({
     where: { code, userId: user.id },
     select: {
-      code: true,
-      status: true,
+      ...LOGIN_ORDER_SELECT,
       total: true,
       quantity: true,
       createdAt: true,
-      product: { select: { name: true, code: true, imageUrl: true } },
+      product: { select: { ...LOGIN_ORDER_SELECT.product.select, imageUrl: true } },
       package: { select: { label: true } },
       warrantyRequests: {
         orderBy: { createdAt: "desc" },
@@ -80,6 +83,7 @@ export default async function WarrantyRequestPage({
           issue: true,
           description: true,
           imageUrl: true,
+          videoUrl: true,
           createdAt: true,
           refundAmount: true,
           refundMethod: true,
@@ -93,10 +97,14 @@ export default async function WarrantyRequestPage({
   });
   if (!order) notFound();
 
+  // A tool's report and an account's ask about different faults, and an
+  // account's waits until its sign-in has been taken (the owner, 08/10/2026).
+  const kind = warrantyKind(order.product.productType);
   const blocked = warrantyBlockedReason({
     orderStatus: order.status,
     openRequest: order.warrantyRequests.some((r) => warrantyOpen(r.status)),
     refunding: order.warrantyRequests.some((r) => r.status === "REFUNDING"),
+    signIn: kind === "account" ? signInHold(order) : null,
   });
   const productName = order.product.name ?? order.product.code;
   // Once a report exists this is where the buyer follows it — the receipt's
@@ -165,6 +173,14 @@ export default async function WarrantyRequestPage({
               Shop xử lý bảo hành {SUPPORT_WINDOW} mỗi ngày; ngoài giờ cứ gửi, sáng shop
               làm ngay.
             </span>
+            {/* When the buyer took the sign-in: where the recording an
+                account's warranty rests on starts. */}
+            {kind === "account" && order.loginRevealedAt ? (
+              <span className="inline-flex items-center gap-2 text-[12px] text-neutral-400">
+                <KeyRound className="h-4 w-4 text-[var(--menzu-accent)]" />
+                Đã nhận thông tin đăng nhập lúc {dayStamp(order.loginRevealedAt)}
+              </span>
+            ) : null}
           </div>
         </section>
 
@@ -189,6 +205,18 @@ export default async function WarrantyRequestPage({
                       <span className="text-[11px] font-semibold text-neutral-500">
                         {stamp(r.createdAt)}
                       </span>
+                      {/* An account's report: the recording it was sent with. */}
+                      {r.videoUrl ? (
+                        <a
+                          href={r.videoUrl}
+                          target="_blank"
+                          rel="noopener noreferrer nofollow"
+                          className="inline-flex items-center gap-1.5 text-[11px] font-bold text-neutral-300 underline-offset-2 hover:text-white hover:underline"
+                        >
+                          <Video className="h-3.5 w-3.5" aria-hidden />
+                          Video quay màn hình
+                        </a>
+                      ) : null}
                     </div>
                     {/* The refund, when the shop could not fix it: settled to
                         the site account, sent to a bank, or waiting on the
@@ -290,7 +318,7 @@ export default async function WarrantyRequestPage({
               <span>{blocked}</span>
             </div>
           ) : (
-            <WarrantyRequestForm code={order.code} onDone="/orders" />
+            <WarrantyRequestForm code={order.code} kind={kind} onDone="/orders" />
           )}
         </section>
       </div>

@@ -63,6 +63,18 @@ export function loginStanding(order: LoginOrder): {
   return { handover, toTake, locked: toTake && order.loginRevealedAt === null };
 }
 
+/**
+ * What stands between an account order and a warranty report: a sign-in not
+ * taken yet ("locked"), one the shop has not typed yet ("pending"), or
+ * nothing (null), which is also every tool's answer.
+ */
+export function signInHold(order: LoginOrder): "locked" | "pending" | null {
+  const standing = loginStanding(order);
+  if (standing.locked) return "locked";
+  if (standing.handover.state === "pending") return "pending";
+  return null;
+}
+
 /** The buyer's own order, by code, with what its sign-in state needs. */
 export function findLoginOrder(userId: string, code: string): Promise<LoginOrder | null> {
   return db.order.findFirst({ where: { code, userId }, select: LOGIN_ORDER_SELECT });

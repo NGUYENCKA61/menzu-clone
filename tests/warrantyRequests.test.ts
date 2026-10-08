@@ -5,10 +5,17 @@ import {
   DESCRIPTION_MIN,
   readDescription,
   readIssue,
+  readVideoUrl,
+  VIDEO_URL_MAX,
+  WARRANTY_ISSUE,
   WARRANTY_ISSUE_KEYS,
+  WARRANTY_ISSUES_FOR,
+  WARRANTY_REFUND_REPLIES,
+  WARRANTY_REPLIES,
   WARRANTY_STATUS,
   warrantyBlockedReason,
   warrantyButton,
+  warrantyKind,
   warrantyOpen,
 } from "@/lib/warrantyRequests";
 
@@ -128,5 +135,73 @@ describe("warrantyButton (the receipt)", () => {
     });
     // Account sent: back to watching.
     expect(warrantyButton({ status: "REFUNDING", needsBank: false }).kind).toBe("status");
+  });
+});
+
+describe("warranty by kind", () => {
+  it("offers each kind its own faults, and only those", () => {
+    // The owner, 08/10/2026: a tool's and an account's reports differ. A key
+    // or an install means nothing on an account, and the other way round.
+    expect(warrantyKind("ACCOUNT_GAME")).toBe("account");
+    expect(warrantyKind("SOFTWARE_GAME")).toBe("software");
+    for (const key of WARRANTY_ISSUES_FOR.software) {
+      expect(readIssue(key, "software").ok).toBe(true);
+    }
+    for (const key of WARRANTY_ISSUES_FOR.account) {
+      expect(readIssue(key, "account").ok).toBe(true);
+    }
+    expect(readIssue("KEY_INVALID", "account").ok).toBe(false);
+    expect(readIssue("INSTALL", "account").ok).toBe(false);
+    expect(readIssue("ACC_LOCKED", "software").ok).toBe(false);
+    // "Lỗi khác" belongs to both.
+    expect(readIssue("OTHER", "account").ok).toBe(true);
+    expect(readIssue("OTHER", "software").ok).toBe(true);
+  });
+
+  it("labels every fault, and each kind has its quick replies", () => {
+    for (const key of WARRANTY_ISSUE_KEYS) {
+      expect(WARRANTY_ISSUE[key].label.length).toBeGreaterThan(0);
+      expect(WARRANTY_REPLIES[key].length).toBeGreaterThan(0);
+    }
+    expect(WARRANTY_REFUND_REPLIES.account.length).toBeGreaterThan(0);
+    expect(WARRANTY_REFUND_REPLIES.software.length).toBeGreaterThan(0);
+  });
+});
+
+describe("readVideoUrl", () => {
+  it("wants a link the desk can open", () => {
+    expect(readVideoUrl("  https://youtu.be/abc123  ")).toEqual({
+      ok: true,
+      url: "https://youtu.be/abc123",
+    });
+    expect(readVideoUrl("http://drive.google.com/file/d/x/view").ok).toBe(true);
+  });
+
+  it("refuses nothing, words, and other schemes", () => {
+    for (const bad of ["", "   ", "video của em", "youtu.be/abc", "javascript:alert(1)", "ftp://x.y/z", 42, null]) {
+      expect(readVideoUrl(bad).ok).toBe(false);
+    }
+    expect(readVideoUrl(`https://x.y/${"a".repeat(VIDEO_URL_MAX)}`).ok).toBe(false);
+  });
+});
+
+describe("warrantyBlockedReason, accounts", () => {
+  it("waits until the sign-in has been taken", () => {
+    // Nothing has been handed over yet, and the recording starts at the take.
+    expect(
+      warrantyBlockedReason({ orderStatus: "PAID", openRequest: false, signIn: "locked" }),
+    ).toMatch(/Lấy thông tin/);
+    expect(
+      warrantyBlockedReason({ orderStatus: "PAID", openRequest: false, signIn: "pending" }),
+    ).toMatch(/đang được chuẩn bị/);
+    expect(
+      warrantyBlockedReason({ orderStatus: "PAID", openRequest: false, signIn: null }),
+    ).toBeNull();
+  });
+
+  it("still says the money reason first", () => {
+    expect(
+      warrantyBlockedReason({ orderStatus: "REFUNDED", openRequest: false, signIn: "locked" }),
+    ).toMatch(/đã được hoàn tiền/);
   });
 });

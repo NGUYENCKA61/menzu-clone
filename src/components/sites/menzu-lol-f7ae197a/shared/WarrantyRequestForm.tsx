@@ -2,15 +2,18 @@
 
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { ImagePlus, Loader2, Send, X } from "lucide-react";
+import { ImagePlus, Loader2, Send, Video, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 import {
   DESCRIPTION_MAX,
   DESCRIPTION_MIN,
+  readVideoUrl,
+  VIDEO_URL_MAX,
   WARRANTY_ISSUE,
-  WARRANTY_ISSUE_KEYS,
+  WARRANTY_ISSUES_FOR,
   type WarrantyIssue,
+  type WarrantyKind,
 } from "@/lib/warrantyRequests";
 
 const FIELD =
@@ -19,22 +22,36 @@ const LABEL =
   "mb-2 block text-[10px] font-black uppercase tracking-widest text-neutral-500";
 const TYPES = ["image/png", "image/jpeg", "image/webp"];
 
+/** What the description box suggests, per kind of order. */
+const PLACEHOLDER: Record<WarrantyKind, string> = {
+  software:
+    "Lỗi xuất hiện lúc nào, thông báo hiện ra là gì, đã thử cách gì chưa (cài lại, tắt antivirus, đổi mạng…). Càng rõ shop xử lý càng nhanh.",
+  account:
+    "Lỗi xuất hiện lúc nào (khi đăng nhập, khi vào game…), game báo gì, đã thử cách gì chưa. Càng rõ shop xử lý càng nhanh.",
+};
+
 /**
  * The form on the warranty page: what kind of trouble, what happened, and the
  * picture that shows it. The kind is a row of tiles rather than a select so
- * the four choices are read before one is picked.
+ * the choices are read before one is picked. A tool's and an account's
+ * choices differ (the owner, 08/10/2026), and an account's report also needs
+ * the link to the screen recording its warranty rests on.
  */
 export function WarrantyRequestForm({
   code,
+  kind,
   onDone,
 }: {
   code: string;
+  /** The order's kind: which faults to offer, and whether a video is due. */
+  kind: WarrantyKind;
   /** Where to send the buyer once it lands. */
   onDone: string;
 }) {
   const router = useRouter();
   const [issue, setIssue] = useState<WarrantyIssue | null>(null);
   const [description, setDescription] = useState("");
+  const [videoUrl, setVideoUrl] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -59,7 +76,9 @@ export function WarrantyRequestForm({
 
   const short = description.trim().length < DESCRIPTION_MIN;
   const left = DESCRIPTION_MIN - description.trim().length;
-  const ready = issue !== null && !short;
+  const needsVideo = kind === "account";
+  const video = readVideoUrl(videoUrl);
+  const ready = issue !== null && !short && (!needsVideo || video.ok);
 
   async function submit() {
     if (busy || !ready || issue === null) return;
@@ -70,6 +89,7 @@ export function WarrantyRequestForm({
       form.set("code", code);
       form.set("issue", issue);
       form.set("description", description);
+      if (needsVideo) form.set("videoUrl", videoUrl.trim());
       if (file) form.set("image", file);
       const res = await fetch("/api/warranty-requests", { method: "POST", body: form });
       const data = (await res.json().catch(() => ({}))) as { error?: string };
@@ -96,7 +116,7 @@ export function WarrantyRequestForm({
       <div>
         <span className={LABEL}>Bạn gặp lỗi gì?</span>
         <div className="grid gap-2 sm:grid-cols-2">
-          {WARRANTY_ISSUE_KEYS.map((key) => {
+          {WARRANTY_ISSUES_FOR[kind].map((key) => {
             const on = issue === key;
             return (
               <button
@@ -134,7 +154,7 @@ export function WarrantyRequestForm({
           value={description}
           onChange={(event) => setDescription(event.target.value.slice(0, DESCRIPTION_MAX))}
           rows={6}
-          placeholder="Lỗi xuất hiện lúc nào, thông báo hiện ra là gì, đã thử cách gì chưa (cài lại, tắt antivirus, đổi mạng…). Càng rõ shop xử lý càng nhanh."
+          placeholder={PLACEHOLDER[kind]}
           className={`${FIELD} resize-y leading-relaxed`}
         />
         <div className="mt-2 flex flex-wrap items-center justify-between gap-2 text-[11px] font-semibold">
@@ -146,6 +166,41 @@ export function WarrantyRequestForm({
           </span>
         </div>
       </div>
+
+      {needsVideo ? (
+        <div>
+          <label htmlFor="warranty-video" className={LABEL}>
+            Link video quay màn hình (bắt buộc)
+          </label>
+          <div className="relative">
+            <Video
+              className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-500"
+              aria-hidden
+            />
+            <input
+              id="warranty-video"
+              type="url"
+              inputMode="url"
+              value={videoUrl}
+              onChange={(event) => {
+                setVideoUrl(event.target.value.slice(0, VIDEO_URL_MAX));
+                setError(null);
+              }}
+              placeholder="https://youtube.com/… hoặc https://drive.google.com/…"
+              className={`${FIELD} pl-11`}
+            />
+          </div>
+          <p
+            className={`mt-2 text-[11px] font-semibold ${
+              videoUrl.trim() && !video.ok ? "text-rose-300" : "text-neutral-500"
+            }`}
+          >
+            {videoUrl.trim() && !video.ok
+              ? video.error
+              : "Video quay liền mạch từ lúc bấm Lấy thông tin đến khi đăng nhập vào game. Thiếu video, shop từ chối bảo hành."}
+          </p>
+        </div>
+      ) : null}
 
       <div>
         <span className={LABEL}>Ảnh chụp lỗi (không bắt buộc)</span>
@@ -189,8 +244,10 @@ export function WarrantyRequestForm({
           </label>
         )}
         <p className="mt-2 text-[11px] text-neutral-500">
-          PNG, JPG hoặc WebP · tối đa 5MB. Ảnh thông báo lỗi hoặc màn hình tool
-          giúp shop xử lý nhanh hơn nhiều.
+          PNG, JPG hoặc WebP · tối đa 5MB.{" "}
+          {kind === "account"
+            ? "Ảnh màn hình báo lỗi khi đăng nhập giúp shop xử lý nhanh hơn nhiều."
+            : "Ảnh thông báo lỗi hoặc màn hình tool giúp shop xử lý nhanh hơn nhiều."}
         </p>
       </div>
 

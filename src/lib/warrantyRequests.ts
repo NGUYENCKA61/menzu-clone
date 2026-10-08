@@ -1,13 +1,33 @@
 /**
- * A buyer's report that a tool they paid for is not working.
+ * A buyer's report that something they paid for is not working: a tool, or
+ * an account.
  *
  * Warranty is the promise before a refund: the shop fixes the thing — a fresh
- * key, an update, a hand with the install — and only when it cannot does money
- * come into it. The rules here are shared by the form, the page and the route,
- * so none of them can promise what another refuses.
+ * key, an update, a hand with the install, another account — and only when it
+ * cannot does money come into it. The rules here are shared by the form, the
+ * page and the route, so none of them can promise what another refuses.
+ *
+ * The two kinds report different faults (the owner, 08/10/2026: "trang chi
+ * tiết bảo hành tài khoản và phần mềm khác nhau"), and an account's report
+ * carries the screen recording its warranty depends on.
  */
 
-export type WarrantyIssue = "KEY_INVALID" | "DETECTED" | "INSTALL" | "OTHER";
+export type WarrantyIssue =
+  | "KEY_INVALID"
+  | "DETECTED"
+  | "INSTALL"
+  | "OTHER"
+  | "ACC_WRONG_LOGIN"
+  | "ACC_LOCKED"
+  | "ACC_RECLAIMED"
+  | "ACC_NOT_AS_DESCRIBED";
+
+/** Which form a report comes from: a tool's, or an account's. */
+export type WarrantyKind = "software" | "account";
+
+export function warrantyKind(productType: string): WarrantyKind {
+  return productType === "ACCOUNT_GAME" ? "account" : "software";
+}
 
 /** What can go wrong, in the buyer's words, with a line to help them pick. */
 export const WARRANTY_ISSUE: Record<WarrantyIssue, { label: string; hint: string }> = {
@@ -27,9 +47,31 @@ export const WARRANTY_ISSUE: Record<WarrantyIssue, { label: string; hint: string
     label: "Lỗi khác",
     hint: "Mô tả rõ ở phần bên dưới.",
   },
+  ACC_WRONG_LOGIN: {
+    label: "Sai tài khoản / mật khẩu",
+    hint: "Đăng nhập lần đầu đã báo sai thông tin.",
+  },
+  ACC_LOCKED: {
+    label: "Tài khoản bị khóa / bị cấm",
+    hint: "Vào game báo khóa, cấm hoặc tạm ngưng tài khoản.",
+  },
+  ACC_RECLAIMED: {
+    label: "Bị đổi mật khẩu, mất quyền truy cập",
+    hint: "Đang dùng thì bị đổi mật khẩu hoặc bị lấy lại tài khoản.",
+  },
+  ACC_NOT_AS_DESCRIBED: {
+    label: "Không đúng mô tả",
+    hint: "Rank, tướng, skin… khác với lúc mua.",
+  },
 };
 
 export const WARRANTY_ISSUE_KEYS = Object.keys(WARRANTY_ISSUE) as WarrantyIssue[];
+
+/** The choices each form offers, in the order the tiles show them. */
+export const WARRANTY_ISSUES_FOR: Record<WarrantyKind, readonly WarrantyIssue[]> = {
+  software: ["KEY_INVALID", "DETECTED", "INSTALL", "OTHER"],
+  account: ["ACC_WRONG_LOGIN", "ACC_LOCKED", "ACC_RECLAIMED", "ACC_NOT_AS_DESCRIBED", "OTHER"],
+};
 
 /**
  * The answers the desk actually gives, one tap each, per kind of fault.
@@ -65,6 +107,26 @@ export const WARRANTY_REPLIES: Record<WarrantyIssue, readonly string[]> = {
     "Shop đã cấp lại sản phẩm cho đơn này, bạn xem trong Lịch sử mua hàng nhé.",
     "Trường hợp này ngoài phạm vi bảo hành nên shop chưa hỗ trợ đổi/cấp lại được. Bạn nhắn shop qua kênh hỗ trợ để shop xem thêm giúp bạn.",
   ],
+  ACC_WRONG_LOGIN: [
+    "Shop đã cập nhật lại thông tin đăng nhập, bạn xem lại trong đơn ở Lịch sử mua hàng nhé.",
+    "Shop đã đổi tài khoản khác cho bạn, bạn xem trong đơn ở Lịch sử mua hàng nhé.",
+    "Video của bạn chưa quay liền mạch từ lúc lấy thông tin đến khi đăng nhập nên shop chưa bảo hành được. Bạn nhắn shop qua kênh hỗ trợ để shop xem thêm giúp bạn.",
+  ],
+  ACC_LOCKED: [
+    "Shop đã đổi tài khoản khác cho bạn, bạn xem trong đơn ở Lịch sử mua hàng nhé.",
+    "Shop đang liên hệ nhà phát hành để mở khóa, có kết quả shop báo bạn ngay.",
+    "Tài khoản bị khóa sau khi bạn đã nhận và sử dụng nên nằm ngoài phạm vi bảo hành. Bạn nhắn shop qua kênh hỗ trợ để shop xem thêm giúp bạn.",
+  ],
+  ACC_RECLAIMED: [
+    "Shop đã lấy lại quyền truy cập và đặt mật khẩu mới, bạn xem lại thông tin đăng nhập trong đơn nhé.",
+    "Shop đã đổi tài khoản khác cho bạn, bạn xem trong đơn ở Lịch sử mua hàng nhé.",
+    "Video của bạn chưa cho thấy tài khoản bị lấy lại nên shop chưa bảo hành được. Bạn nhắn shop qua kênh hỗ trợ để shop xem thêm giúp bạn.",
+  ],
+  ACC_NOT_AS_DESCRIBED: [
+    "Shop đã đổi tài khoản đúng mô tả cho bạn, bạn xem trong đơn ở Lịch sử mua hàng nhé.",
+    "Shop đã cập nhật lại mô tả và bù phần chênh lệch cho bạn.",
+    "Shop đã kiểm tra, tài khoản đúng với mô tả lúc mua nên shop chưa đổi được. Bạn nhắn shop qua kênh hỗ trợ nếu cần xem thêm.",
+  ],
 };
 
 /** The chosen issue, or the sentence to show instead of accepting it. */
@@ -73,17 +135,47 @@ export const WARRANTY_REPLIES: Record<WarrantyIssue, readonly string[]> = {
  * then edited, like the replies above. A refund has to say why too: "shop
  * hoàn tiền" alone reads like the shop gave up without looking.
  */
-export const WARRANTY_REFUND_REPLIES: readonly string[] = [
-  "Tool đang bị phát hiện và chưa có bản mới trong thời gian gói của bạn, shop hoàn tiền cho bạn.",
-  "Shop đã thử nhiều cách nhưng không khắc phục được lỗi trên máy của bạn, shop xin hoàn tiền cho bạn.",
-  "Key bị lỗi phía nhà cung cấp và shop không cấp lại được, shop hoàn tiền cho đơn này.",
-];
+export const WARRANTY_REFUND_REPLIES: Record<WarrantyKind, readonly string[]> = {
+  software: [
+    "Tool đang bị phát hiện và chưa có bản mới trong thời gian gói của bạn, shop hoàn tiền cho bạn.",
+    "Shop đã thử nhiều cách nhưng không khắc phục được lỗi trên máy của bạn, shop xin hoàn tiền cho bạn.",
+    "Key bị lỗi phía nhà cung cấp và shop không cấp lại được, shop hoàn tiền cho đơn này.",
+  ],
+  account: [
+    "Tài khoản bị khóa và shop không còn tài khoản tương tự để đổi, shop hoàn tiền cho bạn.",
+    "Shop không lấy lại được quyền truy cập tài khoản, shop hoàn tiền cho đơn này.",
+    "Tài khoản không đúng mô tả lúc mua, shop hoàn tiền cho bạn.",
+  ],
+};
+
+/**
+ * Where an account's screen recording lives: a link, not an upload (minutes
+ * of video do not belong on the shop's disk). YouTube, Google Drive or any
+ * other address the desk can open.
+ */
+export const VIDEO_URL_MAX = 500;
+
+export function readVideoUrl(
+  value: unknown,
+): { ok: true; url: string } | { ok: false; error: string } {
+  const url = typeof value === "string" ? value.trim() : "";
+  if (!url) {
+    return { ok: false, error: "Dán link video quay màn hình (YouTube, Google Drive…)." };
+  }
+  if (url.length > VIDEO_URL_MAX || !/^https?:\/\/[^\s/$.?#][^\s]*$/i.test(url)) {
+    return { ok: false, error: "Link video không hợp lệ, link phải bắt đầu bằng https://" };
+  }
+  return { ok: true, url };
+}
 
 export function readIssue(
   value: unknown,
+  /** The order's kind: only that form's choices are accepted. */
+  kind?: WarrantyKind,
 ): { ok: true; issue: WarrantyIssue } | { ok: false; error: string } {
   const issue = typeof value === "string" ? value.trim() : "";
-  if ((WARRANTY_ISSUE_KEYS as string[]).includes(issue)) {
+  const allowed: readonly string[] = kind ? WARRANTY_ISSUES_FOR[kind] : WARRANTY_ISSUE_KEYS;
+  if (allowed.includes(issue)) {
     return { ok: true, issue: issue as WarrantyIssue };
   }
   return { ok: false, error: "Chọn loại lỗi bạn gặp." };
@@ -189,10 +281,18 @@ export function warrantyBlockedReason({
   orderStatus,
   openRequest,
   refunding = false,
+  signIn = null,
 }: {
   orderStatus: string;
   openRequest: boolean;
   refunding?: boolean;
+  /**
+   * An account whose sign-in the buyer has not taken yet: still "locked"
+   * behind "Lấy thông tin", or "pending" while the shop types it. Nothing
+   * has been handed over, so there is nothing to report on yet, and the
+   * recording an account's warranty rests on starts at the take.
+   */
+  signIn?: "locked" | "pending" | null;
 }): string | null {
   if (orderStatus === "REFUNDED") {
     return "Đơn này đã được hoàn tiền.";
@@ -205,6 +305,12 @@ export function warrantyBlockedReason({
   }
   if (openRequest) {
     return "Đơn này đang có một yêu cầu bảo hành chưa xử lý xong, bạn trao đổi với shop ngay trong yêu cầu đó.";
+  }
+  if (signIn === "locked") {
+    return "Bạn chưa nhận thông tin đăng nhập. Mở đơn trong Lịch sử mua, bấm Lấy thông tin (nhớ quay màn hình) rồi mới gửi bảo hành được.";
+  }
+  if (signIn === "pending") {
+    return "Thông tin đăng nhập của đơn này đang được chuẩn bị, shop sẽ giao trong ít phút. Nhận xong mà có lỗi thì bạn gửi bảo hành tại đây.";
   }
   return null;
 }

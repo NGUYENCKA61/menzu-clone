@@ -14,6 +14,7 @@ import {
   MessageCircle,
   RotateCcw,
   Send,
+  Video,
   Wrench,
 } from "lucide-react";
 
@@ -36,6 +37,12 @@ export interface WarrantyTicketView {
   issue: WarrantyIssue;
   description: string;
   imageUrl: string | null;
+  /** An account's report: the buyer's screen recording, a link. */
+  videoUrl: string | null;
+  /** An account order: its quick replies and refund reasons are its own. */
+  isAccount: boolean;
+  /** When the buyer took the account's sign-in, "07:10 01/10/2026". */
+  loginTakenAt: string | null;
   /** "07:10 01/10/2026" */
   createdAt: string;
   /** ISO — where the poll starts when nothing follows the report yet. */
@@ -107,7 +114,10 @@ export function AdminWarrantyDetail({ ticket, mailOn }: { ticket: WarrantyTicket
   const open = warrantyOpen(ticket.status);
   const working = ticket.status === "OPEN" || ticket.status === "IN_PROGRESS";
   const refundDue = ticket.refundAmount ?? ticket.suggestedRefund;
-  const replies = refunding || ticket.status === "REFUNDING" ? WARRANTY_REFUND_REPLIES : WARRANTY_REPLIES[ticket.issue];
+  const replies =
+    refunding || ticket.status === "REFUNDING"
+      ? WARRANTY_REFUND_REPLIES[ticket.isAccount ? "account" : "software"]
+      : WARRANTY_REPLIES[ticket.issue];
   const amountNumber = Number(amount);
   const amountOk = Number.isInteger(amountNumber) && amountNumber > 0 && amountNumber <= ticket.orderTotal;
   const messages = useMemo(() => mergeMessages(ticket.messages, extra), [ticket.messages, extra]);
@@ -246,6 +256,18 @@ export function AdminWarrantyDetail({ ticket, mailOn }: { ticket: WarrantyTicket
           <span className="inline-flex items-center rounded-md border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-neutral-300">
             {WARRANTY_ISSUE[ticket.issue].label}
           </span>
+          {/* An account's claim rests on the buyer's recording: one tap to it. */}
+          {ticket.videoUrl ? (
+            <a
+              href={ticket.videoUrl}
+              target="_blank"
+              rel="noopener noreferrer nofollow"
+              className="inline-flex items-center gap-1.5 rounded-md border border-[var(--brand)]/50 bg-[var(--brand)]/15 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-white transition-colors hover:bg-[var(--brand)]/25"
+            >
+              <Video className="h-3 w-3" aria-hidden />
+              Xem video khách quay
+            </a>
+          ) : null}
           <span className="text-[11px] font-semibold text-neutral-500">
             Báo lỗi {ticket.createdAt}
             {ticket.resolvedAt ? ` · xong ${ticket.resolvedAt}` : ""}
@@ -553,6 +575,14 @@ export function AdminWarrantyDetail({ ticket, mailOn }: { ticket: WarrantyTicket
               <dd className="text-right font-semibold tabular-nums text-white">{money(ticket.orderTotal)}</dd>
               <dt className="text-neutral-500">Ngày mua</dt>
               <dd className="text-right text-neutral-300">{ticket.purchasedAt}</dd>
+              {ticket.isAccount ? (
+                <>
+                  <dt className="text-neutral-500">Nhận TK</dt>
+                  <dd className="text-right text-neutral-300">
+                    {ticket.loginTakenAt ?? "chưa nhận"}
+                  </dd>
+                </>
+              ) : null}
               <dt className="text-neutral-500">Báo lỗi</dt>
               <dd className="text-right text-neutral-300">
                 {ticket.reportedAfter}{" "}

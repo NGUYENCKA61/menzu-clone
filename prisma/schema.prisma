@@ -1055,7 +1055,9 @@ enum RefundMethod {
   WALLET
 }
 
-/// What a buyer says is wrong with a tool they paid for.
+/// What a buyer says is wrong with what they paid for. A tool's buyer picks
+/// from the first three and OTHER, an account's from the ACC_ ones and OTHER
+/// (the owner, 08/10/2026: the two kinds report different faults).
 enum WarrantyIssue {
   /// The key is refused, expired early, or will not activate.
   KEY_INVALID
@@ -1064,6 +1066,14 @@ enum WarrantyIssue {
   /// It will not install, will not open, or crashes.
   INSTALL
   OTHER
+  /// The sign-in was refused from the very first try.
+  ACC_WRONG_LOGIN
+  /// The game reports the account locked, banned or suspended.
+  ACC_LOCKED
+  /// Somebody changed the password or took the account back.
+  ACC_RECLAIMED
+  /// Rank, champions, skins… not what the listing said.
+  ACC_NOT_AS_DESCRIBED
 }
 
 /// Where a warranty report stands. OPEN is the buyer's to create; the desk
@@ -1097,6 +1107,10 @@ model WarrantyRequest {
   issue       WarrantyIssue
   description String
   imageUrl    String?
+  /// An account's report carries the link to the buyer's screen recording,
+  /// from "Lấy thông tin" to signing in to the game: required for accounts,
+  /// whose warranty is refused without it. Null on a tool's report.
+  videoUrl    String?
   status      WarrantyStatus @default(OPEN)
   /// What the shop did or asked, shown to the buyer under the report.
   adminNote   String?

@@ -49,6 +49,7 @@ export default async function AdminWarrantyTicketPage({ params }: { params: Prom
         issue: true,
         description: true,
         imageUrl: true,
+        videoUrl: true,
         createdAt: true,
         resolvedAt: true,
         refundAmount: true,
@@ -64,7 +65,10 @@ export default async function AdminWarrantyTicketPage({ params }: { params: Prom
             total: true,
             status: true,
             createdAt: true,
-            product: { select: { name: true, code: true, imageUrl: true, refundRate: true } },
+            loginRevealedAt: true,
+            product: {
+              select: { name: true, code: true, imageUrl: true, refundRate: true, productType: true },
+            },
             package: { select: { label: true } },
           },
         },
@@ -91,6 +95,11 @@ export default async function AdminWarrantyTicketPage({ params }: { params: Prom
           issue: ticket.issue,
           description: ticket.description,
           imageUrl: ticket.imageUrl,
+          videoUrl: ticket.videoUrl,
+          isAccount: ticket.order.product.productType === "ACCOUNT_GAME",
+          // What the desk checks first on an account's claim: when the buyer
+          // took the sign-in, where their recording should start.
+          loginTakenAt: ticket.order.loginRevealedAt ? stamp(ticket.order.loginRevealedAt) : null,
           createdAt: stamp(ticket.createdAt),
           createdAtIso: ticket.createdAt.toISOString(),
           resolvedAt: ticket.resolvedAt ? stamp(ticket.resolvedAt) : null,
