@@ -1150,67 +1150,37 @@ export function OrderDetailModal({
 
 /**
  * An account's sign-in not yet taken (the owner, 08/10/2026, after menzu's
- * "Nhận thông tin đăng nhập"; layout A of two, "gọn" and in the receipt's own
- * colours): the two boxes the sign-in will fill, masked, and one line with
- * the filming rule beside the button that opens the steps. The popup holds
- * the full rules, so nothing here repeats them. The button is the accent
- * red of the receipt's other action; amber means "waiting" on this site.
+ * "Nhận thông tin đăng nhập"; layout B of two, "gọn" and in the receipt's own
+ * colours, picked over A's masked boxes with "b đi"): one row in the
+ * receipt's box frame, a lock, what is locked, the filming rule in one line,
+ * and the button that opens the steps. The popup holds the full rules, so
+ * nothing here repeats them. Lock and button wear the accent red of the
+ * receipt's other action; amber means "waiting" on this site.
  */
 function LockedLogin({ onTake, count }: { onTake: () => void; count: number }) {
   return (
-    <div className="flex flex-col gap-4">
-      <div>
-        {/* A random listing's several sign-ins: counted here, laid out one
-            pair each once taken, as the ordinals above them say then. */}
-        {count > 1 ? (
-          <span className="mb-2 block text-[10px] font-black uppercase tracking-widest text-neutral-500">
-            {count} tài khoản
-          </span>
-        ) : null}
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-          <MaskedBox icon={<User className="h-3 w-3" />} label="Tài khoản" />
-          <MaskedBox icon={<Lock className="h-3 w-3" />} label="Mật khẩu" />
+    <div className="flex flex-col gap-4 rounded-xl border border-white/[0.06] bg-white/[0.02] p-4 sm:flex-row sm:items-center">
+      <div className="flex min-w-0 flex-1 items-start gap-3">
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-[var(--menzu-accent)]/25 bg-[var(--menzu-accent)]/15 text-[var(--menzu-accent)]">
+          <Lock className="h-4 w-4" aria-hidden />
+        </span>
+        <div className="min-w-0">
+          <p className="text-sm font-bold text-white">
+            {count > 1 ? `${count} tài khoản đang khóa` : "Thông tin đăng nhập đang khóa"}
+          </p>
+          <p className="mt-1 flex items-start gap-1.5 text-xs font-semibold leading-relaxed text-red-400">
+            <TriangleAlert className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden />
+            Bắt buộc quay video khi lấy, thiếu video shop từ chối bảo hành.
+          </p>
         </div>
       </div>
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <p className="flex items-start gap-2 text-xs font-semibold leading-relaxed text-red-400">
-          <TriangleAlert className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden />
-          Bắt buộc quay màn hình khi lấy thông tin, thiếu video shop từ chối bảo hành.
-        </p>
-        <button
-          type="button"
-          onClick={onTake}
-          className="press h-10 w-full shrink-0 rounded-xl bg-[var(--menzu-accent)] px-6 text-[12px] font-black uppercase tracking-widest text-white transition hover:brightness-110 sm:w-auto"
-        >
-          Lấy thông tin
-        </button>
-      </div>
-    </div>
-  );
-}
-
-/**
- * A sign-in box before the take: HandoverBox's frame with nothing in it yet,
- * so taking it fills the same two boxes and nothing on the page moves.
- */
-function MaskedBox({ icon, label }: { icon: ReactNode; label: string }) {
-  return (
-    <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
-      <span className={`${LABEL} mb-2`}>
-        {icon}
-        {label}
-      </span>
-      {/* One row even on a phone: the dots and the chip are short, unlike a
-          real value beside its two buttons. */}
-      <div className="flex items-center justify-between gap-3">
-        <span aria-hidden className="font-mono text-sm font-bold tracking-wide text-neutral-600">
-          ••••••••
-        </span>
-        <span className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-white/[0.06] bg-white/[0.03] px-3.5 text-xs font-semibold text-neutral-500">
-          <Lock className="h-3 w-3" aria-hidden />
-          Đang khóa
-        </span>
-      </div>
+      <button
+        type="button"
+        onClick={onTake}
+        className="press h-10 w-full shrink-0 rounded-xl bg-[var(--menzu-accent)] px-6 text-[12px] font-black uppercase tracking-widest text-white transition hover:brightness-110 sm:w-auto"
+      >
+        Lấy thông tin
+      </button>
     </div>
   );
 }
