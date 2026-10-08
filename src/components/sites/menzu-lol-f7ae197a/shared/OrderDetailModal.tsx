@@ -1178,7 +1178,10 @@ function LockedLogin({ onTake, count }: { onTake: () => void; count: number }) {
       <button
         type="button"
         onClick={onTake}
-        className="press h-10 w-full shrink-0 rounded-xl bg-[var(--menzu-accent)] px-6 text-[12px] font-black uppercase tracking-widest text-white transition hover:brightness-110 sm:w-auto"
+        // The receipt's "Yêu cầu bảo hành" exactly: sentence case, 12px bold,
+        // 44px on a phone and 40 from sm, darker red on hover (the owner,
+        // 08/10/2026: "khác cỡ chữ chữ hoa" → "sửa đi").
+        className="press inline-flex h-11 w-full shrink-0 items-center justify-center rounded-xl bg-[var(--menzu-accent)] px-5 text-xs font-bold text-white transition-colors hover:bg-[var(--menzu-accent-dark)] sm:h-10 sm:w-auto"
       >
         Lấy thông tin
       </button>
@@ -1356,12 +1359,14 @@ function LoginRevealDialog({ code, onClose }: { code: string; onClose: () => voi
         ) : null}
 
         {/* The confirm gets the wider share: its label is the long one. On a
-            phone the two stack, confirm on top. */}
+            phone the two stack, confirm on top. Both in the receipt's own
+            button dress, the outline and the red of its footer, so the
+            whole "Lấy thông tin" flow reads alike. */}
         <div className="mt-5 flex flex-col-reverse gap-3 border-t border-white/[0.06] pt-4 sm:grid sm:grid-cols-[2fr_3fr]">
           <button
             type="button"
             onClick={onClose}
-            className="press h-11 rounded-xl border border-white/10 bg-white/[0.03] px-4 text-[12px] font-black uppercase tracking-widest text-neutral-200 transition-colors hover:bg-white/[0.07]"
+            className="press h-11 rounded-xl border border-white/12 bg-white/[0.04] px-4 text-xs font-bold text-neutral-200 transition-colors hover:border-white/25 hover:text-white sm:h-10"
           >
             Hủy bỏ
           </button>
@@ -1369,7 +1374,7 @@ function LoginRevealDialog({ code, onClose }: { code: string; onClose: () => voi
             type="button"
             onClick={take}
             disabled={!recording || busy}
-            className="press h-11 rounded-xl bg-amber-500 px-4 text-[12px] font-black uppercase tracking-widest text-neutral-950 transition-colors hover:bg-amber-400 disabled:cursor-not-allowed disabled:bg-white/[0.06] disabled:text-neutral-500"
+            className="press h-11 rounded-xl bg-[var(--menzu-accent)] px-4 text-xs font-bold text-white transition-colors hover:bg-[var(--menzu-accent-dark)] disabled:cursor-not-allowed disabled:bg-white/[0.06] disabled:text-neutral-500 sm:h-10"
           >
             {busy ? "Đang mở…" : "Xác nhận lấy thông tin"}
           </button>
