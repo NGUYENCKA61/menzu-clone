@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { currentOrderIdOf, gatedHandover, loginHandover, tagOf } from "@/lib/accountLogin";
+import { currentOrderIdOf, gatedHandover, loginHandover } from "@/lib/accountLogin";
 import { checkoutFailure, placeOrder } from "@/lib/checkout";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/session";
@@ -71,6 +71,7 @@ export async function GET() {
           imageUrl: true,
           rank: true,
           productType: true,
+          accountPool: true,
           loginUsername: true,
           loginPassword: true,
           loginNote: true,
@@ -80,7 +81,6 @@ export async function GET() {
             take: 1,
             select: { id: true },
           },
-          tags: { select: { label: true }, take: 1 },
         },
       },
     },
@@ -101,7 +101,6 @@ export async function GET() {
         loginHandover(o, {
           ...o.product,
           currentOrderId: currentOrderIdOf(o.product),
-          tag: tagOf(o.product),
         }),
         o.loginRevealedAt,
       ),

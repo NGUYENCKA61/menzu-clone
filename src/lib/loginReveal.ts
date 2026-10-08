@@ -6,7 +6,6 @@ import {
   currentOrderIdOf,
   hasLoginToTake,
   loginHandover,
-  tagOf,
   type LoginHandover,
 } from "@/lib/accountLogin";
 import { db } from "@/lib/db";
@@ -40,7 +39,6 @@ export const LOGIN_ORDER_SELECT = {
         take: 1,
         select: { id: true },
       },
-      tags: { select: { label: true }, take: 1 },
     },
   },
 } satisfies Prisma.OrderSelect;
@@ -60,7 +58,6 @@ export function loginStanding(order: LoginOrder): {
   const handover = loginHandover(order, {
     ...order.product,
     currentOrderId: currentOrderIdOf(order.product),
-    tag: tagOf(order.product),
   });
   const toTake = hasLoginToTake(order, order.product, order.licenseKeys.length, handover);
   return { handover, toTake, locked: toTake && order.loginRevealedAt === null };

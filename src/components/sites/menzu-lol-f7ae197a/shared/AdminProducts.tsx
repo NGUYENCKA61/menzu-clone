@@ -5,7 +5,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import { deliversAutomatically } from "@/lib/accountLogin";
 
 import { AdminImagePicker } from "./AdminImagePicker";
 import { AdminSearch, ConfirmDialog } from "./AdminStates";
@@ -470,10 +469,10 @@ export function AdminProducts({
               {p.accountPool ? (
                 <span className="text-sky-400"> · acc random · còn {p.poolAvailable}</span>
               ) : null}
-              {/* Said on the shelf, not only on the detail page: an NFA
-                  account sold without this hands its buyer nothing. Other
-                  tags are handed over in person and need no line here. */}
-              {deliversAutomatically(p.tag) && !p.hasLogin ? (
+              {/* Said on the shelf, not only on the detail page: an account
+                  sold without this hands its buyer nothing until the shop
+                  types it. A random listing hands over its stock instead. */}
+              {!p.accountPool && !p.hasLogin ? (
                 <span className="text-amber-400"> · chưa có TK đăng nhập</span>
               ) : null}
             </p>

@@ -2,7 +2,6 @@ import { describe, expect, it } from "vitest";
 
 import {
   currentOrderIdOf,
-  deliversAutomatically,
   gatedHandover,
   hasLoginToTake,
   LOGIN_NOTE_MAX,
@@ -21,8 +20,8 @@ import {
  */
 const account = {
   productType: "ACCOUNT_GAME",
+  accountPool: false,
   currentOrderId: "order-1",
-  tag: "NFA",
   loginUsername: "riot_user",
   loginPassword: "S3cret!",
   loginNote: "Đổi mật khẩu ngay sau khi nhận",
@@ -30,8 +29,8 @@ const account = {
 
 const bare = {
   productType: "ACCOUNT_GAME",
+  accountPool: false,
   currentOrderId: "order-1",
-  tag: "NFA",
   loginUsername: null,
   loginPassword: null,
   loginNote: null,
@@ -70,9 +69,11 @@ describe("loginHandover", () => {
     const resold = { ...account, currentOrderId: "order-2" };
     expect(loginHandover(paid, resold)).toEqual({ state: "none" });
     expect(loginHandover({ ...paid, id: "order-2" }, resold).state).toBe("ready");
-    // Not even a "get in touch" line: the row is nobody's business but the
+    // Not even a "being prepared" line: the row is nobody's business but the
     // latest buyer's.
-    expect(loginHandover(paid, { ...resold, tag: null })).toEqual({ state: "none" });
+    expect(loginHandover(paid, { ...bare, currentOrderId: "order-2" })).toEqual({
+      state: "none",
+    });
   });
 
   it("treats an order as current when the caller looked nothing up", () => {
@@ -84,7 +85,10 @@ describe("loginHandover", () => {
     expect(currentOrderIdOf({ orders: [] })).toBeNull();
   });
 
-  it("hands a paid account order its sign-in", () => {
+  it("hands a paid account order its sign-in, whatever the card's tag", () => {
+    // No in-person handover any more (the owner, 08/10/2026): NFA, FULL
+    // THÔNG TIN and an untagged account all go out by themselves. The tag is
+    // not even an input.
     expect(loginHandover(paid, account)).toEqual({
       state: "ready",
       login: {
@@ -95,26 +99,13 @@ describe("loginHandover", () => {
     });
   });
 
-  it("sends the buyer to the shop when an NFA row carries no sign-in", () => {
-    // No queue: the buyer is told to get in touch. A sign-in typed onto the
-    // row later still shows up, because the page reads the row live.
-    expect(loginHandover(paid, bare)).toEqual({ state: "manual" });
+  it("tells the buyer it is coming when the row carries no sign-in yet", () => {
+    // A sign-in typed onto the row later shows up, because the page reads
+    // the row live; until then the buyer is told the shop is preparing it.
+    expect(loginHandover(paid, bare)).toEqual({ state: "pending" });
   });
 
-  it("hands anything that is not NFA over in person, sign-in or not", () => {
-    // FULL THÔNG TIN comes with a mailbox to change hands; an untagged
-    // account is not known to be NFA. Neither prints what is on the row.
-    for (const tag of ["FULL THÔNG TIN", "", null]) {
-      expect(loginHandover(paid, { ...account, tag })).toEqual({ state: "manual" });
-      expect(loginHandover(paid, { ...bare, tag })).toEqual({ state: "manual" });
-    }
-  });
-
-  it("reads the tag case-blind and off the one-row include", () => {
-    expect(deliversAutomatically("nfa")).toBe(true);
-    expect(deliversAutomatically(" NFA ")).toBe(true);
-    expect(deliversAutomatically("FULL THÔNG TIN")).toBe(false);
-    expect(deliversAutomatically(null)).toBe(false);
+  it("reads the tag off the one-row include, for the card", () => {
     expect(tagOf({ tags: [{ label: "NFA" }] })).toBe("NFA");
     expect(tagOf({ tags: [] })).toBeNull();
   });
@@ -137,6 +128,13 @@ describe("loginHandover", () => {
       state: "none",
     });
   });
+
+  it("never applies to a random listing, whose sign-ins are its keys", () => {
+    // The row's own columns are not what its buyers get, and an empty row
+    // must not read as "being prepared" on every pool order.
+    expect(loginHandover(paid, { ...bare, accountPool: true })).toEqual({ state: "none" });
+    expect(loginHandover(paid, { ...account, accountPool: true })).toEqual({ state: "none" });
+  });
 });
 
 describe("gatedHandover", () => {
@@ -151,12 +149,12 @@ describe("gatedHandover", () => {
   });
 
   it("leaves every other state as it was", () => {
-    // Nothing to take, so nothing to lock: a "get in touch" line stays one,
-    // and a row that is not the buyer's stays hidden.
-    const manual = loginHandover(paid, { ...account, tag: null });
+    // Nothing to take, so nothing to lock: a "being prepared" line stays
+    // one, and a row that is not the buyer's stays hidden.
+    const pending = loginHandover(paid, bare);
     const none = loginHandover(paid, { ...account, currentOrderId: "order-2" });
-    expect(manual.state).toBe("manual");
-    expect(gatedHandover(manual, null)).toEqual(manual);
+    expect(pending.state).toBe("pending");
+    expect(gatedHandover(pending, null)).toEqual(pending);
     expect(gatedHandover(none, null)).toEqual({ state: "none" });
   });
 });
@@ -168,10 +166,8 @@ describe("hasLoginToTake", () => {
 
   it("asks a single account for its sign-in, ready", () => {
     expect(hasLoginToTake(paid, single, 0, loginHandover(paid, account))).toBe(true);
-    // Handed over in person: nothing behind the button.
-    expect(hasLoginToTake(paid, single, 0, loginHandover(paid, { ...account, tag: null }))).toBe(
-      false,
-    );
+    // Not typed yet: nothing behind the button until the shop types it.
+    expect(hasLoginToTake(paid, single, 0, loginHandover(paid, bare))).toBe(false);
   });
 
   it("asks a random listing for delivered sign-ins", () => {

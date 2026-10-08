@@ -965,18 +965,16 @@ export function OrderDetailModal({
                             <RevealedLine at={order.loginRevealedAt} />
                           ) : null}
                         </div>
-                      ) : order.login.state === "manual" ? (
-                        <div className="flex items-start gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
-                          <MessageCircle className="mt-0.5 h-4 w-4 shrink-0 text-neutral-400" />
-                          <p className="text-xs leading-relaxed text-neutral-300">
-                            Tài khoản này được bàn giao trực tiếp, liên hệ shop
-                            kèm mã đơn{" "}
-                            <strong className="text-white">
-                              {order.code}
-                            </strong>{" "}
-                            để nhận thông tin đăng nhập.
-                          </p>
-                        </div>
+                      ) : order.login.state === "pending" ? (
+                        // Sold before the shop typed the sign-in. No "liên hệ
+                        // shop" any more: every account hands itself over
+                        // (the owner, 08/10/2026: "loại bỏ cái bàn giao trực
+                        // tiếp đi"), so this one is on its way, worded as a
+                        // random listing's sign-ins still on their way are.
+                        <p className="text-xs font-semibold text-amber-400">
+                          Thông tin đăng nhập đang được chuẩn bị, shop sẽ giao trong ít
+                          phút, sẽ hiện ngay tại đây.
+                        </p>
                       ) : order.paid ? (
                         // Paid, yet no handover: the shop has since put this
                         // account back on the shelf and handed it to a later

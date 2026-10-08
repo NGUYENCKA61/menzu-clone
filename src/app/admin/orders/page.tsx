@@ -18,7 +18,7 @@ import {
 import { AdminOrderFilters } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminOrderFilters";
 import { AdminShell } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminShell";
 import { formatVnd } from "@/components/sites/menzu-lol-f7ae197a/shared/productData";
-import { currentOrderIdOf, loginHandover, tagOf } from "@/lib/accountLogin";
+import { currentOrderIdOf, loginHandover } from "@/lib/accountLogin";
 import { getAdmin } from "@/lib/admin";
 import { dayStamp } from "@/lib/dayGroups";
 import { db } from "@/lib/db";
@@ -130,6 +130,7 @@ export default async function AdminOrdersPage({
           code: true,
           slug: true,
           productType: true,
+          accountPool: true,
           category: { select: { slug: true } },
           // Only to say whether a sign-in went out with the order; the values
           // themselves are not printed on this list.
@@ -144,7 +145,6 @@ export default async function AdminOrdersPage({
             take: 1,
             select: { id: true },
           },
-          tags: { select: { label: true }, take: 1 },
         },
       },
       voucher: { select: { code: true } },
@@ -172,7 +172,6 @@ export default async function AdminOrdersPage({
     login: loginHandover(o, {
       ...o.product,
       currentOrderId: currentOrderIdOf(o.product),
-      tag: tagOf(o.product),
     }),
   }));
 
@@ -279,9 +278,9 @@ export default async function AdminOrdersPage({
                   <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-400">
                     <KeyRound size={10} /> Đã giao TK tự động
                   </span>
-                ) : login.state === "manual" ? (
-                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-indigo-400">
-                    <KeyRound size={10} /> Bàn giao tay
+                ) : login.state === "pending" ? (
+                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-400">
+                    <KeyRound size={10} /> Chưa nhập TK
                   </span>
                 ) : null}
                 <RevealNote order={o} />
@@ -396,18 +395,20 @@ export default async function AdminOrdersPage({
                       <span className="font-mono text-xs font-bold text-white">
                         #{o.product.code}
                       </span>
-                      {/* How the account reached its buyer: by itself (NFA
-                          with a sign-in on the row) or by the shop's hand.
-                          Neither is a to-do — the buyer gets in touch. */}
+                      {/* Whether the account's sign-in went out with the
+                          order. Every account hands it over by itself now
+                          (no more in-person handover, the owner 08/10/2026),
+                          so one sold before the shop typed its sign-in is
+                          the desk's to-do: the buyer is told it is coming. */}
                       {login.state === "ready" ? (
                         <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-400">
                           <KeyRound size={10} />
                           Đã giao TK tự động
                         </span>
-                      ) : login.state === "manual" ? (
-                        <span className="inline-flex items-center gap-1 text-[10px] font-bold text-indigo-400">
+                      ) : login.state === "pending" ? (
+                        <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-400">
                           <KeyRound size={10} />
-                          Bàn giao tay
+                          Chưa nhập TK
                         </span>
                       ) : null}
                       <RevealNote order={o} />

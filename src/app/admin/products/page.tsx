@@ -14,7 +14,7 @@ import { AdminProductTabs } from "@/components/sites/menzu-lol-f7ae197a/shared/A
 import { AdminShell } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminShell";
 import { AdminSoftware } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminSoftware";
 import { AdminWeaponImages } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminWeaponImages";
-import { deliversAutomatically, readLogin, tagOf } from "@/lib/accountLogin";
+import { readLogin } from "@/lib/accountLogin";
 import { poolStock } from "@/lib/accountPool";
 import { getAdmin } from "@/lib/admin";
 import { db } from "@/lib/db";
@@ -136,13 +136,14 @@ export default async function AdminProductsPage() {
 
   const softwarePackages = softwareRows.reduce((sum, s) => sum + s.packages.length, 0);
 
-  // NFA accounts on the shelf that would sell with nothing to hand over by
-  // themselves. Other tags are handed over in person and need no sign-in on
-  // the row; this is the list to fix before the next sale, not after it.
+  // Accounts on the shelf that would sell with nothing to hand over: every
+  // account hands its sign-in over by itself now, whatever its tag (no more
+  // in-person handover, 08/10/2026). A random listing hands over its stock
+  // instead. This is the list to fix before the next sale, not after it.
   const stock = await poolStock(rows.filter((p) => p.accountPool).map((p) => p.id));
   const forSale = rows.filter((p) => p.status === "AVAILABLE");
   const unlistedLogins = forSale.filter(
-    (p) => deliversAutomatically(tagOf(p)) && readLogin(p) === null,
+    (p) => !p.accountPool && readLogin(p) === null,
   ).length;
 
   return (
@@ -163,7 +164,7 @@ export default async function AdminProductsPage() {
           label="Tài khoản game"
           value={String(rows.length)}
           sub={`${forSale.length} đang bán · ${removedCount} đã gỡ${
-            unlistedLogins > 0 ? ` · ${unlistedLogins} NFA chưa có TK đăng nhập` : ""
+            unlistedLogins > 0 ? ` · ${unlistedLogins} acc chưa có TK đăng nhập` : ""
           }`}
           icon={Boxes}
           tint={

@@ -7,7 +7,6 @@ import {
   gatedHandover,
   hasLoginToTake,
   loginHandover,
-  tagOf,
   type LoginHandover,
 } from "@/lib/accountLogin";
 import { poolStock } from "@/lib/accountPool";
@@ -1000,8 +999,6 @@ export async function getOrders(userId: string): Promise<OrderRow[]> {
             take: 1,
             select: { id: true },
           },
-          // NFA goes out by itself; anything else is handed over in person.
-          tags: { select: { label: true }, take: 1 },
         },
       },
       package: { select: { label: true } },
@@ -1097,7 +1094,6 @@ export async function getOrders(userId: string): Promise<OrderRow[]> {
       const handover = loginHandover(o, {
         ...o.product,
         currentOrderId: currentOrderIdOf(o.product),
-        tag: tagOf(o.product),
       });
       return {
         login: gatedHandover(handover, o.loginRevealedAt),

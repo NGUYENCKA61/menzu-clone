@@ -529,7 +529,7 @@ export function AccountBuyPanel({ account, initialQuantity }: AccountBuyPanelPro
                 ? `${bought} tài khoản đã sẵn trong Lịch sử mua.`
                 : loginReady
                   ? "Tài khoản và mật khẩu đăng nhập đã sẵn trong Lịch sử mua."
-                  : "Tài khoản bàn giao trực tiếp, liên hệ shop kèm mã đơn để nhận."}
+                  : "Thông tin đăng nhập đang được chuẩn bị, sẽ hiện trong Lịch sử mua."}
             </DialogAlert>
           </div>
         </BuyConfirmDialog>

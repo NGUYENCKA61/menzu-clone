@@ -10,11 +10,7 @@
  * status, so the API route and the bot say the same thing about the same
  * refusal.
  */
-import {
-  deliversAutomatically,
-  readLogin,
-  tagOf,
-} from "@/lib/accountLogin";
+import { readLogin } from "@/lib/accountLogin";
 import { agencyCutFor, clampAgencyPercent } from "@/lib/agency";
 import { db } from "@/lib/db";
 import { deliverKeys } from "@/lib/licenseKeys";
@@ -94,10 +90,7 @@ export async function placeOrder(input: CheckoutInput): Promise<CheckoutResult> 
       throw new Error(`LOCKED:${locked[0].softwareStatus}`);
     }
 
-    const product = await tx.product.findUniqueOrThrow({
-      where: { code },
-      include: { tags: { select: { label: true }, take: 1 } },
-    });
+    const product = await tx.product.findUniqueOrThrow({ where: { code } });
     const now = new Date();
     const sale = await tx.flashSale.findFirst({
       where: {
@@ -314,7 +307,9 @@ export async function placeOrder(input: CheckoutInput): Promise<CheckoutResult> 
       quantity,
       isSoftware,
       isPool,
-      loginReady: deliversAutomatically(tagOf(product)) && readLogin(product) !== null,
+      // Every account hands its sign-in over by itself now, whatever its tag
+      // (the owner, 08/10/2026: no more in-person handover).
+      loginReady: !isPool && readLogin(product) !== null,
       productName: product.name ?? product.code,
       packageLabel: chosenPackage?.label ?? null,
     };

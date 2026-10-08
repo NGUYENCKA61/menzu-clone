@@ -578,8 +578,15 @@ async function handover(result: CheckoutResult): Promise<{ lines: string[]; lock
   if (!order) return { lines: [], locked: false };
   const standing = loginStanding(order);
   if (standing.locked) return { lines: LOCKED_LINES, locked: true };
-  if (!order.product.accountPool && standing.handover.state === "manual") {
-    return { lines: ["Shop sẽ gửi thông tin đăng nhập cho bạn tại đây trong ít phút."], locked: false };
+  // Sold before the shop typed the sign-in: on its way, then taken from the
+  // orders list like any other (no more in-person handover, 08/10/2026).
+  if (standing.handover.state === "pending") {
+    return {
+      lines: [
+        "⏳ Thông tin đăng nhập đang được chuẩn bị, shop sẽ giao trong ít phút. Khi có, vào 📦 Đơn hàng để nhận.",
+      ],
+      locked: false,
+    };
   }
   return { lines: signInLines(order, standing.handover), locked: false };
 }

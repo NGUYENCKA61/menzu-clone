@@ -6,13 +6,13 @@
  * which orders got theirs. None of them should be able to disagree about what
  * "handed over" means.
  *
- * The tag on the card decides how the account is delivered. An NFA account
- * is nothing but its username and password, so those go out by themselves
- * the moment the sale goes through. Anything else — FULL THÔNG TIN, or no
- * tag at all — comes with a mailbox and a history to change hands, and the
- * shop hands that over in person: the buyer is told to get in touch. There
- * is no queue and no to-do for the shop either way; the shop decided that a
- * buyer who needs more asks for it.
+ * Every account hands its sign-in over the same way, whatever its tag: the
+ * buyer takes it from their order through "Lấy thông tin", having confirmed
+ * they are recording the screen. The tag used to decide (NFA by itself,
+ * FULL THÔNG TIN and untagged accounts in person) until the owner dropped
+ * the in-person handover (08/10/2026: "loại bỏ cái bàn giao trực tiếp đi").
+ * An account sold before the shop typed its sign-in tells the buyer the shop
+ * is preparing it, and shows it the moment the shop types it in.
  */
 
 export const LOGIN_USERNAME_MAX = 120;
@@ -48,34 +48,19 @@ export function readLogin(row: LoginColumns): AccountLogin | null {
   return { username, password, note: row.loginNote?.trim() || null };
 }
 
-/** The card tag that sells on automatic delivery. Compared case-blind. */
-export const AUTO_DELIVERY_TAG = "NFA";
-
-/**
- * Whether an account with this tag hands its sign-in over by itself.
- *
- * NFA is the only such tag: the account is its username and password and
- * nothing more. FULL THÔNG TIN carries a mailbox to change hands, and an
- * untagged account is not known to be either — so both are handed over by
- * the shop in person.
- */
-export function deliversAutomatically(tag: string | null | undefined): boolean {
-  return (tag ?? "").trim().toUpperCase() === AUTO_DELIVERY_TAG;
-}
-
 /** What an order's buyer sees about the sign-in. */
 export type LoginHandover =
   /**
    * Nothing to show: not an account, an order that was never paid or was
-   * reversed, or one whose account has since been sold on to somebody else.
+   * reversed, one whose account has since been sold on to somebody else, or
+   * a random listing, whose sign-ins are its delivered keys.
    */
   | { state: "none" }
   /**
-   * The shop hands this one over in person and the buyer is told to get in
-   * touch: every account that is not NFA, and an NFA account listed without
-   * its sign-in.
+   * Sold before the shop typed the sign-in: the buyer is told the shop is
+   * preparing it, and it shows the moment the shop types it in.
    */
-  | { state: "manual" }
+  | { state: "pending" }
   /**
    * A sign-in waiting for the buyer to take it: shown only after the
    * receipt's "Lấy thông tin", once they confirm they are recording the
@@ -139,29 +124,25 @@ export const REVEAL_STEPS = [
  * reading it — so `currentOrderId`, the latest paid order the caller looked
  * up, is what says whose the row is now. A caller that did not look it up
  * passes null and the order is taken to be current. Software has keys
- * instead and never shows anything here, however its row happens to look.
- *
- * Whether the sign-in is then printed is the tag's call, not the row's: a
- * FULL THÔNG TIN account with a sign-in typed on it still reads "manual",
- * because the shop wants to hand that kind over itself.
+ * instead and never shows anything here, however its row happens to look,
+ * and so does a random listing: its sign-ins are the keys delivered to the
+ * order, not the columns on the row.
  */
 export function loginHandover(
   order: { id: string; status: string },
   product: LoginColumns & {
     productType: string;
+    accountPool: boolean;
     currentOrderId: string | null;
-    /** The card's corner pill; null when the account wears none. */
-    tag: string | null;
   },
 ): LoginHandover {
-  if (product.productType !== "ACCOUNT_GAME") return { state: "none" };
+  if (product.productType !== "ACCOUNT_GAME" || product.accountPool) return { state: "none" };
   if (order.status !== "PAID") return { state: "none" };
   if (product.currentOrderId !== null && product.currentOrderId !== order.id) {
     return { state: "none" };
   }
-  if (!deliversAutomatically(product.tag)) return { state: "manual" };
   const login = readLogin(product);
-  return login ? { state: "ready", login } : { state: "manual" };
+  return login ? { state: "ready", login } : { state: "pending" };
 }
 
 /** The `tag` a product row carries, off the one-row `tags` include. */

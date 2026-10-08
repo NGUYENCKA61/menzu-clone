@@ -20,7 +20,6 @@ import {
   Wallet,
 } from "lucide-react";
 
-import { deliversAutomatically } from "@/lib/accountLogin";
 
 import { AdminError } from "./AdminStates";
 import { RichTextEditor } from "./RichTextEditor";
@@ -372,36 +371,29 @@ export function AdminAccountDetail({ account }: { account: AccountDetailView }) 
   /** Whether the row holds a sign-in a buyer could use — both halves. */
   const loginStored = loginBaseline.username !== "" && loginBaseline.password !== "";
 
-  // What the sign-in card says above its fields. The saved tag decides the
-  // mode: NFA goes out by itself, anything else the shop hands over in person
-  // and the fields here are its own record. Within NFA, the four combinations
-  // of "is there one" and "is anyone holding the account" — never a to-do,
-  // only what the buyer did and did not get.
-  const autoDelivery = deliversAutomatically(account.tag);
-  const loginStatus = !autoDelivery
-    ? {
-        tone: "border-indigo-500/25 bg-indigo-500/10 text-indigo-300",
-        text: `Tag ${account.tag || "trống"}, bàn giao tay: khách được báo liên hệ shop, thông tin ở đây chỉ để shop tra cứu. Gắn tag NFA nếu muốn giao tự động.`,
-      }
-    : loginStored
-      ? account.buyer
-        ? {
-            tone: "border-emerald-500/30 bg-emerald-500/10 text-emerald-400",
-            text: `Đã giao tự động cho ${account.buyer.username} (đơn ${account.buyer.orderCode}), khách thấy trong Lịch sử mua.`,
-          }
-        : {
-            tone: "border-white/10 bg-white/[0.03] text-neutral-300",
-            text: "NFA, sẵn sàng: bán xong là khách nhận ngay trong Lịch sử mua, không cần bàn giao tay.",
-          }
-      : account.buyer
-        ? {
-            tone: "border-white/10 bg-white/[0.03] text-neutral-300",
-            text: `Đã bán cho ${account.buyer.username} (đơn ${account.buyer.orderCode}) khi chưa có thông tin đăng nhập, nhập vào thì khách thấy trong Lịch sử mua.`,
-          }
-        : {
-            tone: "border-amber-500/30 bg-amber-500/10 text-amber-400",
-            text: "NFA chưa có thông tin đăng nhập, bán xong khách sẽ không nhận được gì tự động, phải liên hệ shop.",
-          };
+  // What the sign-in card says above its fields: the four combinations of
+  // "is there one" and "is anyone holding the account". Every account hands
+  // its sign-in over by itself, whatever its tag; the in-person handover is
+  // gone (the owner, 08/10/2026: "loại bỏ cái bàn giao trực tiếp đi").
+  const loginStatus = loginStored
+    ? account.buyer
+      ? {
+          tone: "border-emerald-500/30 bg-emerald-500/10 text-emerald-400",
+          text: `Đã giao tự động cho ${account.buyer.username} (đơn ${account.buyer.orderCode}), khách nhận qua nút Lấy thông tin trong Lịch sử mua.`,
+        }
+      : {
+          tone: "border-white/10 bg-white/[0.03] text-neutral-300",
+          text: "Sẵn sàng: bán xong khách nhận qua nút Lấy thông tin trong Lịch sử mua (bắt buộc quay màn hình).",
+        }
+    : account.buyer
+      ? {
+          tone: "border-amber-500/30 bg-amber-500/10 text-amber-400",
+          text: `Đã bán cho ${account.buyer.username} (đơn ${account.buyer.orderCode}) khi chưa có thông tin đăng nhập: khách đang thấy "đang được chuẩn bị", nhập vào là khách nhận được.`,
+        }
+      : {
+          tone: "border-amber-500/30 bg-amber-500/10 text-amber-400",
+          text: "Chưa có thông tin đăng nhập: bán ra lúc này khách sẽ phải chờ shop nhập.",
+        };
 
   return (
     <div className="flex flex-col gap-5">
@@ -862,9 +854,10 @@ export function AdminAccountDetail({ account }: { account: AccountDetailView }) 
               ) : null}
             </div>
             <p className="text-[11px] text-neutral-500">
-              Acc tag NFA giao tự động: khách thanh toán xong là thấy ngay trong Lịch
-              sử mua của họ. Tag khác bàn giao tay. Trang sản phẩm ngoài kệ không
-              hiện. Cần cả tên đăng nhập lẫn mật khẩu; để trống cả hai rồi lưu để xoá.
+              Mọi acc đều giao tự động: khách thanh toán xong bấm Lấy thông tin trong
+              Lịch sử mua (bắt buộc quay màn hình) là thấy. Trang sản phẩm ngoài kệ
+              không hiện. Cần cả tên đăng nhập lẫn mật khẩu; để trống cả hai rồi lưu
+              để xoá.
             </p>
           </section>
 
