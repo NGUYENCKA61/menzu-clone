@@ -4,6 +4,7 @@ import {
   currentOrderIdOf,
   deliversAutomatically,
   gatedHandover,
+  hasLoginToTake,
   LOGIN_NOTE_MAX,
   LOGIN_PASSWORD_MAX,
   LOGIN_USERNAME_MAX,
@@ -157,6 +158,36 @@ describe("gatedHandover", () => {
     expect(manual.state).toBe("manual");
     expect(gatedHandover(manual, null)).toEqual(manual);
     expect(gatedHandover(none, null)).toEqual({ state: "none" });
+  });
+});
+
+describe("hasLoginToTake", () => {
+  const paid = { id: "order-1", status: "PAID" };
+  const single = { productType: "ACCOUNT_GAME", accountPool: false };
+  const pool = { productType: "ACCOUNT_GAME", accountPool: true };
+
+  it("asks a single account for its sign-in, ready", () => {
+    expect(hasLoginToTake(paid, single, 0, loginHandover(paid, account))).toBe(true);
+    // Handed over in person: nothing behind the button.
+    expect(hasLoginToTake(paid, single, 0, loginHandover(paid, { ...account, tag: null }))).toBe(
+      false,
+    );
+  });
+
+  it("asks a random listing for delivered sign-ins", () => {
+    const none = { state: "none" } as const;
+    expect(hasLoginToTake(paid, pool, 2, none)).toBe(true);
+    // Still waiting on stock: the take comes once something is delivered.
+    expect(hasLoginToTake(paid, pool, 0, none)).toBe(false);
+  });
+
+  it("has nothing for an order that does not stand, or for a tool", () => {
+    expect(hasLoginToTake({ status: "REFUNDED" }, pool, 2, { state: "none" })).toBe(false);
+    expect(
+      hasLoginToTake(paid, { productType: "SOFTWARE_GAME", accountPool: false }, 3, {
+        state: "none",
+      }),
+    ).toBe(false);
   });
 });
 

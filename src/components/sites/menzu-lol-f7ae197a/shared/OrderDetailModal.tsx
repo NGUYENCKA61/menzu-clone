@@ -32,7 +32,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 
-import type { LoginHandover } from "@/lib/accountLogin";
+import { REVEAL_STEPS, type LoginHandover } from "@/lib/accountLogin";
 import { warrantyButton, type WarrantyStatus } from "@/lib/warrantyRequests";
 
 import { lockScroll, trapTab, unlockScroll } from "./modalChrome";
@@ -1194,18 +1194,6 @@ function LockedLogin({ onTake }: { onTake: () => void }) {
 function RevealedLine({ at }: { at: string }) {
   return <p className="text-[11px] text-neutral-500">Đã nhận thông tin lúc {at}.</p>;
 }
-
-const REVEAL_STEPS = [
-  {
-    title: "Bật quay toàn màn hình",
-    body: "Bắt đầu quay màn hình từ bây giờ, trước khi mở thông tin.",
-  },
-  {
-    title: "Mở khóa thông tin",
-    body: "Bấm nút xác nhận bên dưới để hiện tài khoản và mật khẩu.",
-  },
-  { title: "Đăng nhập vào game", body: "Mở game và đăng nhập để kiểm tra tài khoản." },
-] as const;
 
 /**
  * The steps before an account's sign-in is shown, menzu's "Bắt buộc quay màn

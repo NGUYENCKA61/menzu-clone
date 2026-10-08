@@ -11,6 +11,7 @@ import {
   categoryScreen,
   confirmAccountScreen,
   confirmKeysScreen,
+  confirmLoginScreen,
   confirmPoolScreen,
   createTopUp,
   displayName,
@@ -23,6 +24,7 @@ import {
   readLinkToken,
   shopUserForTelegram,
   statusScreen,
+  takeLoginScreen,
   topupScreen,
   walletScreen,
   type ShopUser,
@@ -252,6 +254,12 @@ async function handleCallback(token: string, query: TelegramCallback) {
       break;
     case "status":
       await redraw(token, chat, messageId, await statusScreen());
+      break;
+    case "takeLogin":
+      await redraw(token, chat, messageId, await takeLoginScreen(user, action.code));
+      break;
+    case "confirmLogin":
+      await redraw(token, chat, messageId, await confirmLoginScreen(user, action.code));
       break;
   }
   await answer();

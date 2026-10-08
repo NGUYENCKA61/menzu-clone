@@ -5,6 +5,7 @@ import type { Prisma } from "@prisma/client";
 import {
   currentOrderIdOf,
   gatedHandover,
+  hasLoginToTake,
   loginHandover,
   tagOf,
   type LoginHandover,
@@ -1098,14 +1099,11 @@ export async function getOrders(userId: string): Promise<OrderRow[]> {
         currentOrderId: currentOrderIdOf(o.product),
         tag: tagOf(o.product),
       });
-      const unrevealed = o.status === "PAID" && o.loginRevealedAt === null;
       return {
         login: gatedHandover(handover, o.loginRevealedAt),
         loginLocked:
-          unrevealed &&
-          (o.product.accountPool
-            ? o.product.productType === "ACCOUNT_GAME" && o.licenseKeys.length > 0
-            : handover.state === "ready"),
+          o.loginRevealedAt === null &&
+          hasLoginToTake(o, o.product, o.licenseKeys.length, handover),
         loginRevealedAt: o.loginRevealedAt,
       };
     })(),

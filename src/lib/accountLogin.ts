@@ -94,6 +94,42 @@ export function gatedHandover(handover: LoginHandover, revealedAt: Date | null):
 }
 
 /**
+ * Whether a paid account order has a sign-in for "Lấy thông tin" to hand
+ * over: a random listing's delivered accounts, or an account's own sign-in
+ * that the shop delivers automatically. The receipt, the route that stamps
+ * the take and the Telegram bot all ask this one question.
+ */
+export function hasLoginToTake(
+  order: { status: string },
+  product: { productType: string; accountPool: boolean },
+  /** Sign-ins delivered to the order, for a random listing. */
+  keysDelivered: number,
+  /** The order's handover before gating, for a single account. */
+  handover: LoginHandover,
+): boolean {
+  if (order.status !== "PAID" || product.productType !== "ACCOUNT_GAME") return false;
+  return product.accountPool ? keysDelivered > 0 : handover.state === "ready";
+}
+
+/**
+ * The steps before an account's sign-in is shown, menzu's "Bắt buộc quay màn
+ * hình" without its Web Riot: the buyer signs in to the game itself ("bỏ
+ * cái nút web riot đi yêu cầu người dùng đăng nhập vào game thôi"). Shared
+ * by the receipt's popup and the Telegram bot, so both say the same.
+ */
+export const REVEAL_STEPS = [
+  {
+    title: "Bật quay toàn màn hình",
+    body: "Bắt đầu quay màn hình từ bây giờ, trước khi mở thông tin.",
+  },
+  {
+    title: "Mở khóa thông tin",
+    body: "Bấm nút xác nhận bên dưới để hiện tài khoản và mật khẩu.",
+  },
+  { title: "Đăng nhập vào game", body: "Mở game và đăng nhập để kiểm tra tài khoản." },
+] as const;
+
+/**
  * Decides the handover for one order against the product it bought.
  *
  * Only a PAID order sees anything, and only the product's latest PAID order

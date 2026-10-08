@@ -19,7 +19,7 @@
  */
 import { createHmac, timingSafeEqual } from "node:crypto";
 
-import { deliversAutomatically, readLogin, tagOf } from "@/lib/accountLogin";
+import { REVEAL_STEPS, type LoginHandover } from "@/lib/accountLogin";
 import { poolStock, splitCredential } from "@/lib/accountPool";
 import { checkoutFailure, placeOrder, type CheckoutResult } from "@/lib/checkout";
 import { runningPackageSales, tierPriceNow } from "@/lib/queries";
@@ -37,7 +37,14 @@ import {
   TELEGRAM_API_BASE,
   telegramCall,
 } from "@/lib/telegramNotify";
-import { dayKey, dayTime } from "@/lib/dayGroups";
+import { dayKey, dayStamp, dayTime } from "@/lib/dayGroups";
+import {
+  findLoginOrder,
+  LOGIN_ORDER_SELECT,
+  loginStanding,
+  takeLogin,
+  type LoginOrder,
+} from "@/lib/loginReveal";
 import { makeTopUpCode, topUpExpiresAt, transferNoteFor } from "@/lib/topup";
 import { openBankTopUp } from "@/lib/topupOpen";
 
@@ -177,7 +184,10 @@ export type ShopAction =
   | { kind: "topup"; shortfall?: number }
   | { kind: "topupAmount"; amount: number }
   | { kind: "orders" }
-  | { kind: "status" };
+  | { kind: "status" }
+  /** An account order's "Lấy thông tin": the steps first, then the take. */
+  | { kind: "takeLogin"; code: string }
+  | { kind: "confirmLogin"; code: string };
 
 const qty = (raw: string | undefined) => Math.min(999, Math.max(1, Number(raw) || 1));
 
@@ -213,6 +223,10 @@ export function parseShopCallback(data: string | undefined): ShopAction | null {
       return { kind: "orders" };
     case "s":
       return { kind: "status" };
+    case "lg":
+      return a ? { kind: "takeLogin", code: a } : null;
+    case "lc":
+      return a ? { kind: "confirmLogin", code: a } : null;
     default:
       return null;
   }
@@ -535,21 +549,19 @@ export async function confirmAccountScreen(
 
 // --- the sale ---------------------------------------------------------------
 
-/** What was handed over, as lines for the chat. */
-async function handoverLines(result: CheckoutResult): Promise<string[]> {
-  if (result.isSoftware || result.isPool) {
+/**
+ * What was handed over, as lines for the chat, and whether it is an account's
+ * sign-in still locked behind "Lấy thông tin" (the owner, 08/10/2026: "khóa
+ * bên bot"), the same gate as the website's receipt.
+ */
+async function handover(result: CheckoutResult): Promise<{ lines: string[]; locked: boolean }> {
+  if (result.isSoftware) {
     const keys = await db.licenseKey.findMany({
       where: { orderId: result.orderId },
       orderBy: { deliveredAt: "asc" },
       select: { value: true, expiresAt: true },
     });
-    if (result.isPool) {
-      return keys.map((k) => {
-        const { username, password } = splitCredential(k.value);
-        return `👤 <code>${esc(username)}</code>  🔑 <code>${esc(password)}</code>`;
-      });
-    }
-    return keys.map(
+    const lines = keys.map(
       (k) =>
         `🔑 <code>${esc(k.value)}</code>${
           k.expiresAt && !Number.isNaN(k.expiresAt.getTime())
@@ -557,30 +569,114 @@ async function handoverLines(result: CheckoutResult): Promise<string[]> {
             : ""
         }`,
     );
+    return { lines, locked: false };
   }
   const order = await db.order.findUnique({
     where: { id: result.orderId },
-    select: {
-      product: {
-        select: {
-          loginUsername: true,
-          loginPassword: true,
-          loginNote: true,
-          tags: { select: { label: true }, take: 1 },
-        },
-      },
-    },
+    select: LOGIN_ORDER_SELECT,
   });
-  const product = order?.product;
-  const login = product && deliversAutomatically(tagOf(product)) ? readLogin(product) : null;
-  if (!login) {
-    return ["Shop sẽ gửi thông tin đăng nhập cho bạn tại đây trong ít phút."];
+  if (!order) return { lines: [], locked: false };
+  const standing = loginStanding(order);
+  if (standing.locked) return { lines: LOCKED_LINES, locked: true };
+  if (!order.product.accountPool && standing.handover.state === "manual") {
+    return { lines: ["Shop sẽ gửi thông tin đăng nhập cho bạn tại đây trong ít phút."], locked: false };
   }
+  return { lines: signInLines(order, standing.handover), locked: false };
+}
+
+// --- an account's sign-in, behind "Lấy thông tin" ---------------------------
+
+/** What stands in for a sign-in not yet taken, as the receipt's card says it. */
+const LOCKED_LINES = [
+  "🔒 <b>Thông tin đăng nhập đang khóa.</b> Bấm <b>Lấy thông tin</b> để nhận.",
+  "🎥 <b>Bắt buộc quay video:</b> quay màn hình liên tục từ lúc bấm lấy thông tin đến khi đăng nhập thành công vào game. Shop từ chối hỗ trợ bảo hành nếu thiếu video này.",
+];
+
+const takeButton = (code: string, label = "🔓 Lấy thông tin"): InlineButton => ({
+  text: label,
+  callback_data: `lg:${code}`,
+});
+
+/** A taken sign-in as chat lines: a random listing's accounts, or the one. */
+function signInLines(order: LoginOrder, handover: LoginHandover): string[] {
+  if (order.product.accountPool) {
+    return order.licenseKeys.map((k) => {
+      const { username, password } = splitCredential(k.value);
+      return `👤 <code>${esc(username)}</code>  🔑 <code>${esc(password)}</code>`;
+    });
+  }
+  if (handover.state !== "ready") return [];
+  const { login } = handover;
   return [
     `👤 Tài khoản: <code>${esc(login.username)}</code>`,
     `🔑 Mật khẩu: <code>${esc(login.password)}</code>`,
     ...(login.note ? [`📝 ${esc(login.note)}`] : []),
   ];
+}
+
+function signInScreen(order: LoginOrder, handover: LoginHandover, at: Date): MenuScreen {
+  const text = [
+    `🔓 <b>Thông tin đăng nhập</b> · đơn <code>${esc(order.code)}</code>`,
+    esc(order.product.name ?? order.product.code),
+    "",
+    ...signInLines(order, handover),
+    "",
+    `Đã nhận thông tin lúc ${dayStamp(at)}.`,
+  ].join("\n");
+  return {
+    text,
+    keyboard: [
+      [{ text: "📦 Đơn hàng của tôi", callback_data: "o" }],
+      [{ text: "🛒 Mua tiếp", callback_data: "c" }, HOME_BUTTON],
+    ],
+  };
+}
+
+const NOTHING_TO_TAKE: MenuScreen = {
+  text: "Đơn này không có thông tin đăng nhập để nhận.",
+  keyboard: [[{ text: "📦 Đơn hàng", callback_data: "o" }, HOME_BUTTON]],
+};
+
+/**
+ * The steps before a sign-in is shown, as the receipt's popup has them. The
+ * bot has no switch, so the confirm button is the pledge itself. A sign-in
+ * already taken is simply shown again.
+ */
+export async function takeLoginScreen(user: ShopUser, code: string): Promise<MenuScreen> {
+  const order = await findLoginOrder(user.id, code);
+  if (!order) return NOTHING_TO_TAKE;
+  const standing = loginStanding(order);
+  if (!standing.toTake) return NOTHING_TO_TAKE;
+  if (!standing.locked && order.loginRevealedAt) {
+    return signInScreen(order, standing.handover, order.loginRevealedAt);
+  }
+  const text = [
+    `🎥 <b>Bắt buộc quay màn hình</b> · đơn <code>${esc(order.code)}</code>`,
+    "Thực hiện đúng quy trình để được hỗ trợ bảo hành ngay nếu tài khoản phát sinh lỗi.",
+    "",
+    ...REVEAL_STEPS.map((step, index) => `${index + 1}. <b>${esc(step.title)}:</b> ${esc(step.body)}`),
+    "",
+    "⚠️ <b>Bắt buộc 1 video liền mạch:</b> quay liên tục từ lúc lấy mật khẩu đến khi đăng nhập xong vào game.",
+    "⚠️ Video ngắt quãng, quay 2 lượt hoặc cắt ghép sẽ <b>bị từ chối bảo hành</b>.",
+    "",
+    "Bấm nút bên dưới là bạn cam kết đang quay video và đồng ý với điều khoản trên.",
+  ].join("\n");
+  return {
+    text,
+    keyboard: [
+      [{ text: "✅ Đang quay màn hình, lấy thông tin", callback_data: `lc:${order.code}` }],
+      [{ text: "↩ Hủy bỏ", callback_data: "o" }, HOME_BUTTON],
+    ],
+  };
+}
+
+/** The pledge pressed: stamp the take and show the sign-in. */
+export async function confirmLoginScreen(user: ShopUser, code: string): Promise<MenuScreen> {
+  const taken = await takeLogin(user.id, code);
+  if (!taken.ok) {
+    return { ...NOTHING_TO_TAKE, text: `❌ ${esc(taken.error)}` };
+  }
+  return signInScreen(taken.order, loginStanding(taken.order).handover, taken.revealedAt);
 }
 
 /**
@@ -594,8 +690,11 @@ export async function buy(
 ): Promise<MenuScreen> {
   try {
     const result = await placeOrder({ userId: user.id, ...input });
-    const goods = await handoverLines(result);
-    const pending = result.quantity - result.delivered;
+    const goods = await handover(result);
+    // Keys and a random listing's sign-ins can run short; a single account
+    // is handed over whole, so it never waits on stock.
+    const pending =
+      result.isSoftware || result.isPool ? result.quantity - result.delivered : 0;
     const text = [
       `✅ <b>Mua thành công</b> · đơn <code>${result.orderCode}</code>`,
       `${esc(result.productName)}${result.packageLabel ? ` - ${esc(result.packageLabel)}` : ""}${
@@ -603,7 +702,7 @@ export async function buy(
       }`,
       `Đã trừ ${vnd(result.total)} · số dư còn ${vnd(result.balanceAfter)}`,
       "",
-      ...goods,
+      ...goods.lines,
       ...(pending > 0
         ? ["", `⏳ Còn ${pending} chưa giao, shop sẽ gửi tại đây khi có hàng.`]
         : []),
@@ -613,6 +712,7 @@ export async function buy(
     return {
       text,
       keyboard: [
+        ...(goods.locked ? [[takeButton(result.orderCode)]] : []),
         [{ text: "📦 Đơn hàng của tôi", callback_data: "o" }],
         [{ text: "🛒 Mua tiếp", callback_data: "c" }, HOME_BUTTON],
       ],
@@ -788,13 +888,11 @@ export async function ordersScreen(user: ShopUser): Promise<MenuScreen> {
     orderBy: { createdAt: "desc" },
     take: 5,
     select: {
-      code: true,
+      ...LOGIN_ORDER_SELECT,
       total: true,
       quantity: true,
       createdAt: true,
-      product: { select: { name: true, code: true, productType: true, accountPool: true } },
       package: { select: { label: true } },
-      licenseKeys: { orderBy: { deliveredAt: "asc" }, select: { value: true } },
     },
   });
   if (orders.length === 0) {
@@ -803,12 +901,18 @@ export async function ordersScreen(user: ShopUser): Promise<MenuScreen> {
       keyboard: [[{ text: "🛒 Mua hack", callback_data: "c" }, HOME_BUTTON]],
     };
   }
+  // Accounts whose sign-in still waits behind "Lấy thông tin", one button each.
+  const locked: string[] = [];
   const blocks = orders.map((o) => {
     const head = `<b>${o.code}</b> · ${dayKey(o.createdAt)} · ${vnd(o.total)}\n${esc(
       o.product.name ?? o.product.code,
     )}${o.package && !o.product.accountPool ? ` - ${esc(o.package.label)}` : ""}${
       o.quantity > 1 ? ` × ${o.quantity}` : ""
     }`;
+    if (loginStanding(o).locked) {
+      locked.push(o.code);
+      return [head, "  🔒 Chưa nhận thông tin đăng nhập"].join("\n");
+    }
     const keys = o.licenseKeys.slice(0, 10).map((k) => {
       if (o.product.accountPool) {
         const { username, password } = splitCredential(k.value);
@@ -821,7 +925,10 @@ export async function ordersScreen(user: ShopUser): Promise<MenuScreen> {
   });
   return {
     text: ["📦 <b>5 đơn gần nhất</b>", "", ...blocks, "", `Đầy đủ tại ${WEB_URL()}orders`].join("\n\n").replace(/\n\n\n/g, "\n\n"),
-    keyboard: [[{ text: "🛒 Mua tiếp", callback_data: "c" }, HOME_BUTTON]],
+    keyboard: [
+      ...locked.map((code) => [takeButton(code, `🔓 Lấy thông tin · ${code}`)]),
+      [{ text: "🛒 Mua tiếp", callback_data: "c" }, HOME_BUTTON],
+    ],
   };
 }
 
