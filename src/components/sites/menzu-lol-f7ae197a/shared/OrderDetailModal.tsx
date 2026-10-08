@@ -1161,15 +1161,16 @@ function LockedLogin({ onTake, count }: { onTake: () => void; count: number }) {
   return (
     <div className="flex flex-col gap-4 rounded-xl border border-white/[0.06] bg-white/[0.02] p-4 sm:flex-row sm:items-center">
       <div className="flex min-w-0 flex-1 items-start gap-3">
+        {/* One glyph for the row: the warning triangle in the tile, none on
+            the line under the title ("nhiều logo quá… bỏ bớt logo ổ khóa"). */}
         <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-[var(--menzu-accent)]/25 bg-[var(--menzu-accent)]/15 text-[var(--menzu-accent)]">
-          <Lock className="h-4 w-4" aria-hidden />
+          <TriangleAlert className="h-4 w-4" aria-hidden />
         </span>
         <div className="min-w-0">
           <p className="text-sm font-bold text-white">
             {count > 1 ? `${count} tài khoản đang khóa` : "Thông tin đăng nhập đang khóa"}
           </p>
-          <p className="mt-1 flex items-start gap-1.5 text-xs font-semibold leading-relaxed text-red-400">
-            <TriangleAlert className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden />
+          <p className="mt-1 text-xs font-semibold leading-relaxed text-red-400">
             Bắt buộc quay video khi lấy, thiếu video shop từ chối bảo hành.
           </p>
         </div>
