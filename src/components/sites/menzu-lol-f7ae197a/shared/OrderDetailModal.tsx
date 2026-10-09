@@ -264,7 +264,9 @@ function DownloadCard({
         <FileRow
           icon={<FileText className="h-3 w-3" />}
           eyebrow="Tài liệu hướng dẫn"
-          title="Cài đặt & sử dụng"
+          // The owner's words (09/10/2026: "cài đặt & sử dụng -> Thiết lập &
+          // sử dụng chi tiết").
+          title="Thiết lập & sử dụng chi tiết"
           href={docsUrl}
           action="Xem ngay"
           // Grey like "Sao chép" and "Tải về" (the owner, 09/10/2026: violet,
