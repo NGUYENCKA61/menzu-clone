@@ -1090,16 +1090,14 @@ export function OrderDetailModal({
                           className={`press group inline-flex h-11 items-center justify-center gap-2 rounded-xl px-3 text-xs font-bold sm:h-10 sm:px-5${
                             askReview ? "" : " col-span-2"
                           } ${
-                            // "Yêu cầu bảo hành" in the deep violet the owner
-                            // picked for "Xem ngay", on trial (09/10/2026: "yêu
-                            // cầu bảo hành màu tím thử", then "chữ đen đi",
-                            // lighter on hover so the dark lettering keeps its
-                            // contrast); "Xem trạng thái" keeps
-                            // the grey outline, and red stays for "Nhập số tài
-                            // khoản", the one step a refund waits on the buyer
-                            // for.
+                            // "Yêu cầu bảo hành" in white with dark lettering,
+                            // on trial (the owner, 09/10/2026: violet, then
+                            // "chữ đen đi", then "màu trắng"); "Xem trạng thái"
+                            // keeps the grey outline, and red stays for "Nhập
+                            // số tài khoản", the one step a refund waits on the
+                            // buyer for.
                             warrantyAction.kind === "request"
-                              ? "bg-violet-600 text-neutral-950 hover:bg-violet-500"
+                              ? "bg-white text-neutral-950 hover:bg-neutral-200"
                               : warrantyAction.kind === "status"
                                 ? "border border-white/12 bg-white/[0.04] text-neutral-200 hover:border-white/25 hover:text-white"
                                 : "bg-[var(--menzu-accent)] text-white hover:bg-[var(--menzu-accent-dark)]"
