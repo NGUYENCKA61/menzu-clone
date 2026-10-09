@@ -903,7 +903,7 @@ export function OrderDetailModal({
                                     className="flex flex-col gap-1.5"
                                   >
                                     <HandoverBox
-                                      icon={<KeyRound className="h-3 w-3 text-[var(--menzu-accent)]" />}
+                                      icon={<KeyRound className="h-3 w-3 text-white" />}
                                       label={
                                         order.keys.length > 1
                                           ? `Key ${index + 1}`
