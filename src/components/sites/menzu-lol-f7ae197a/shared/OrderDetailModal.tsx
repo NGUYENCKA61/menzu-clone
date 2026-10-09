@@ -1155,9 +1155,11 @@ export function OrderDetailModal({
 function LockedLogin({ onTake }: { onTake: () => void }) {
   return (
     // No key tile of its own: the section heading right above already wears
-    // the red key, and two keys stacked said the same thing twice (the
-    // owner, 09/10/2026: keep the red one, "rồi làm đi").
-    <div className="flex flex-col items-center gap-4 rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-6 text-center sm:px-6">
+    // the red tile, and two stacked said the same thing twice (the owner,
+    // 09/10/2026: keep the red one, "rồi làm đi"). No frame of its own
+    // either: it was the only thing inside the handover's frame, a box in a
+    // box ("có nên bỏ bớt card nền nó không" → "bỏ thử").
+    <div className="flex flex-col items-center gap-4 py-2 text-center">
       <div>
         <p className="text-sm font-black uppercase tracking-wider text-white">
           Nhận thông tin đăng nhập
