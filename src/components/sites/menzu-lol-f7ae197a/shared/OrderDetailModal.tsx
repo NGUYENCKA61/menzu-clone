@@ -4,15 +4,14 @@ import {
   ArrowRight,
   CalendarDays,
   Check,
+  ChevronRight,
   Clock,
   Copy,
   Download,
-  Eye,
   FileText,
   Hash,
   Info,
   KeyRound,
-  Landmark,
   Lock,
   MessageCircle,
   Package,
@@ -124,6 +123,10 @@ export interface OrderDetailData {
  */
 const LABEL =
   "flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-neutral-500";
+/** A link inside the receipt's red note: bold accent red that whitens under
+ *  the pointer, like the footer's review ask, and no underline. */
+const NOTE_LINK =
+  "font-bold text-[var(--menzu-accent)] transition-colors hover:text-white";
 const GHOST_BTN =
   "inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-3.5 text-xs font-bold text-neutral-300 transition-colors hover:bg-white/10 hover:text-white";
 const CELL =
@@ -480,17 +483,12 @@ export function OrderDetailModal({
   // A review is asked for until it is given; after that one quiet line.
   const askReview = reviewHref !== null && !order.reviewed;
   // One way forward (the owner, 01/10/2026): report the order for warranty,
-  // then follow the ticket — the shop decides a refund, the buyer never asks
-  // for one. Red where the next step is the buyer's (sending the report,
-  // giving a bank account), an outline where they only watch.
+  // then follow the ticket; the shop decides a refund, the buyer never asks
+  // for one. No button for it since 09/10/2026: the order-code note says
+  // where the ticket stands and links on ("có nên bỏ nút yêu cầu bảo hành …
+  // ghi vào dòng vui lòng lưu mã đơn hàng", then "đơn bảo hành bạn đang xử
+  // lý. bấm vào đây để xem chi tiết >").
   const warrantyAction = warrantyButton(order.warranty);
-  // "Xem trạng thái" wears the eye, the site's "open and look" (the ledger's
-  // eye opens a top-up's invoice): the ticket's state is already named in the
-  // receipt's own status cell, and a clock / turning arrow / tick that changed
-  // under an unchanging label said it a second time, less clearly (the
-  // owner, 07/10/2026: "thay icon con mắt cho xem trạng thái" → "đổi").
-  const WarrantyIcon =
-    warrantyAction.kind === "request" ? Wrench : warrantyAction.kind === "bank" ? Landmark : Eye;
   // A refunded or unpaid order with no ticket has nothing to report or follow.
   const showWarranty = order.paid || order.warranty !== null;
 
@@ -1026,10 +1024,50 @@ export function OrderDetailModal({
                       "thêm lại icon chỗ vui lòng lưu lại mã đơn hàng đi"). */}
                   <div className="mt-4 flex items-start gap-3 rounded-r-xl border-l-[3px] border-[var(--menzu-accent)] bg-[var(--menzu-accent)]/5 px-4 py-3.5 text-xs leading-relaxed text-neutral-400">
                     <Info className="mt-0.5 h-4 w-4 shrink-0 text-[var(--menzu-accent)]" />
+                    {/* Worded for where the warranty stands, each with its way
+                        on; the next step is the buyer's whenever a link shows. */}
                     <span>
-                      Vui lòng lưu lại mã đơn hàng để được hỗ trợ khi cần thiết.
-                      Không chia sẻ thông tin tài khoản hoặc dữ liệu bàn giao
-                      cho người khác.
+                      {showWarranty && warrantyAction.kind === "status" ? (
+                        <>
+                          Đơn bảo hành của bạn đang được xử lý.{" "}
+                          <Link href={supportHref} className={NOTE_LINK}>
+                            Bấm vào đây để xem chi tiết
+                            <ChevronRight
+                              className="ml-0.5 inline h-3 w-3 align-[-2px]"
+                              aria-hidden
+                            />
+                          </Link>
+                        </>
+                      ) : showWarranty && warrantyAction.kind === "bank" ? (
+                        <>
+                          Shop cần số tài khoản của bạn để hoàn tiền.{" "}
+                          <Link href={supportHref} className={NOTE_LINK}>
+                            Bấm vào đây để nhập
+                            <ChevronRight
+                              className="ml-0.5 inline h-3 w-3 align-[-2px]"
+                              aria-hidden
+                            />
+                          </Link>
+                        </>
+                      ) : (
+                        <>
+                          Vui lòng lưu lại mã đơn hàng để được hỗ trợ khi cần
+                          thiết.
+                          {showWarranty ? (
+                            <>
+                              {" "}
+                              Gặp lỗi?{" "}
+                              <Link href={supportHref} className={NOTE_LINK}>
+                                Gửi yêu cầu bảo hành
+                                <ChevronRight
+                                  className="ml-0.5 inline h-3 w-3 align-[-2px]"
+                                  aria-hidden
+                                />
+                              </Link>
+                            </>
+                          ) : null}
+                        </>
+                      )}
                     </span>
                   </div>
                 </div>
@@ -1079,40 +1117,20 @@ export function OrderDetailModal({
                       </>
                     )}
                   </span>
-                  {/* The warranty button, and the review beside it when that
-                      is switched on. On a phone they share a row, or the one
-                      button fills it. */}
-                  <div className="flex w-full flex-col gap-2 sm:w-auto">
-                    <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto sm:flex-wrap sm:items-center sm:gap-2.5">
-                      {showWarranty ? (
-                        <Link
-                          href={supportHref}
-                          className={`press group inline-flex h-11 items-center justify-center gap-2 rounded-xl px-3 text-xs font-bold sm:h-10 sm:px-5${
-                            askReview ? "" : " col-span-2"
-                          } ${
-                            // Red for "Yêu cầu bảo hành" and "Nhập số tài
-                            // khoản" (the owner, 09/10/2026: "yêu cầu bảo hành
-                            // màu đỏ", after grey, violet and white were
-                            // tried); "Xem trạng thái" keeps the grey outline.
-                            warrantyAction.kind === "status"
-                              ? "border border-white/12 bg-white/[0.04] text-neutral-200 hover:border-white/25 hover:text-white"
-                              : "bg-[var(--menzu-accent)] text-white hover:bg-[var(--menzu-accent-dark)]"
-                          }`}
-                        >
-                          <WarrantyIcon className="h-4 w-4" />
-                          {warrantyAction.label}
-                        </Link>
-                      ) : null}
-                      {askReview ? (
-                        <Link
-                          href={reviewHref}
-                          className="press inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-white/12 bg-white/[0.04] px-4 text-xs font-bold text-neutral-300 hover:border-[var(--menzu-accent)]/50 hover:bg-[var(--menzu-accent)]/10 hover:text-[var(--menzu-accent)] sm:h-10"
-                        >
-                          <Star className="h-4 w-4" />
-                          Đánh giá
-                        </Link>
-                      ) : null}
-                    </div>
+                  {/* The review button alone: the warranty's way in moved to
+                      the note above (the owner, 09/10/2026). On a phone it
+                      fills the row; with nothing to show the column folds
+                      away rather than leave a gap. */}
+                  <div className="flex w-full flex-col gap-2 empty:hidden sm:w-auto">
+                    {askReview ? (
+                      <Link
+                        href={reviewHref}
+                        className="press inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-white/12 bg-white/[0.04] px-4 text-xs font-bold text-neutral-300 hover:border-[var(--menzu-accent)]/50 hover:bg-[var(--menzu-accent)]/10 hover:text-[var(--menzu-accent)] sm:h-10 sm:w-auto"
+                      >
+                        <Star className="h-4 w-4" />
+                        Đánh giá
+                      </Link>
+                    ) : null}
                     {reviewHref && order.reviewed ? (
                       <p className="text-[11px] leading-snug text-neutral-500">
                         <Star
