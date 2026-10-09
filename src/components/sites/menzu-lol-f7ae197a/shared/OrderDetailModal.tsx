@@ -238,18 +238,19 @@ function DownloadCard({
   downloadUrl: string | null;
   docsUrl: string | null;
 }) {
-  // The tiles keep their colours, amber for the download and violet for the
-  // manual: neutral ones were tried and looked washed out (the owner,
-  // 09/10/2026: "thêm lại icon màu đi thấy nhạt nhòa quá"). The download
-  // row's name is a short fixed one: the tool's full name sits in "Sản phẩm
-  // đã mua" just above, and here it only repeated itself, cut short.
+  // Both tiles wear the accent red of the heading's tile (the owner,
+  // 09/10/2026: "icon link tải và tài liệu màu đỏ đi"), after neutral ones
+  // looked washed out and amber/violet were tried. The download row's name
+  // is a short fixed one: the tool's full name sits in "Sản phẩm đã mua"
+  // just above, and here it only repeated itself, cut short.
   return (
     <div className="flex flex-col gap-2.5">
       {downloadUrl ? (
         <FileRow
           icon={<Download className="h-3.5 w-3.5" />}
-          // Amber like its button (the owner, 09/10/2026: "icon màu vàng đi").
-          tint="border-amber-500/30 bg-amber-500/10 text-amber-400"
+          // Red, as the manual's (the owner, 09/10/2026: amber, then "icon
+          // link tải và tài liệu màu đỏ đi").
+          tint="border-[var(--menzu-accent)]/25 bg-[var(--menzu-accent)]/15 text-[var(--menzu-accent)]"
           eyebrow="Link tải hack"
           title="Bộ cài đặt mới nhất"
           href={downloadUrl}
@@ -263,7 +264,7 @@ function DownloadCard({
       {docsUrl ? (
         <FileRow
           icon={<FileText className="h-3.5 w-3.5" />}
-          tint="border-violet-500/25 bg-violet-500/15 text-violet-300"
+          tint="border-[var(--menzu-accent)]/25 bg-[var(--menzu-accent)]/15 text-[var(--menzu-accent)]"
           eyebrow="Tài liệu hướng dẫn"
           title="Cài đặt & sử dụng"
           href={docsUrl}
