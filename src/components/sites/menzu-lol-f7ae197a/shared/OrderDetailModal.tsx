@@ -266,7 +266,9 @@ function DownloadCard({
           eyebrow="Tài liệu hướng dẫn"
           title="Thiết lập & sử dụng chi tiết"
           href={docsUrl}
-          action="Xem ngay"
+          // One word, to keep it short (the owner, 09/10/2026: "xem ngay
+          // thành xem cho nó gọn lại thử").
+          action="Xem"
           // Grey, the same ghost as "Sao chép" (the owner, 09/10/2026: "xem
           // ngay màu xám đi"), after white.
           actionClass="border border-white/10 bg-white/5 text-neutral-300 hover:bg-white/10 hover:text-white"
@@ -318,8 +320,9 @@ function FileRow({
         target="_blank"
         rel="noopener noreferrer"
         // One size for both file buttons, the height of "Sao chép" and a
-        // width that holds "Xem ngay →", so they line up in their column (the
-        // owner, 09/10/2026: "tải về xem ngay sửa lại cho đồng bộ").
+        // width that holds either label and its arrow, so they line up in
+        // their column (the owner, 09/10/2026: "tải về xem ngay sửa lại cho
+        // đồng bộ").
         className={`inline-flex h-9 w-28 shrink-0 items-center justify-center gap-1.5 rounded-lg px-3.5 text-xs font-bold transition-colors ${actionClass}`}
       >
         {action}
