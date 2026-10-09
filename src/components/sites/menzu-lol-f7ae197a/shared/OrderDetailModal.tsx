@@ -293,7 +293,9 @@ function DownloadCard({
  * Two lines rather than three. The third was a sentence that said nothing the
  * eyebrow had not already said — "Hướng dẫn chi tiết sản phẩm" under "Tài liệu
  * hướng dẫn" — and it cost the whole handover block thirty pixels of height.
- * The glyph rides in the label, and the 16px inset matches the key box's.
+ * Built like the key box beside it (the owner, 09/10/2026: "đồng bộ với card
+ * key"): the same 16px inset, the label on top, then the name and its button
+ * on one row, so the two cards line up label for label and button for button.
  */
 function FileRow({
   icon,
@@ -313,29 +315,31 @@ function FileRow({
   arrow: ReactNode;
 }) {
   return (
-    <div className="flex flex-1 items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3 transition-colors hover:border-white/[0.12] lg:col-start-2">
-      {/* min-w-0 so a long name truncates instead of pushing the button off
-          the card. */}
-      <div className="min-w-0 flex-1">
-        <span className={LABEL}>
-          {icon}
-          {eyebrow}
-        </span>
-        <p className="mt-1 truncate text-sm font-bold text-white">{title}</p>
+    <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4 transition-colors hover:border-white/[0.12] lg:col-start-2">
+      <span className={`${LABEL} mb-2`}>
+        {icon}
+        {eyebrow}
+      </span>
+      <div className="flex items-center justify-between gap-3">
+        {/* min-w-0 so a long name truncates instead of pushing the button
+            off the card. */}
+        <p className="min-w-0 flex-1 truncate text-sm font-bold text-white">
+          {title}
+        </p>
+        <a
+          href={href}
+          target="_blank"
+          rel="noopener noreferrer"
+          // One size for both file buttons, the height of "Sao chép" and a
+          // width that holds either label and its arrow, so they line up in
+          // their column (the owner, 09/10/2026: "tải về xem ngay sửa lại
+          // cho đồng bộ").
+          className={`inline-flex h-9 w-28 shrink-0 items-center justify-center gap-1.5 rounded-lg px-3.5 text-xs font-bold transition-colors ${actionClass}`}
+        >
+          {action}
+          {arrow}
+        </a>
       </div>
-      <a
-        href={href}
-        target="_blank"
-        rel="noopener noreferrer"
-        // One size for both file buttons, the height of "Sao chép" and a
-        // width that holds either label and its arrow, so they line up in
-        // their column (the owner, 09/10/2026: "tải về xem ngay sửa lại cho
-        // đồng bộ").
-        className={`inline-flex h-9 w-28 shrink-0 items-center justify-center gap-1.5 rounded-lg px-3.5 text-xs font-bold transition-colors ${actionClass}`}
-      >
-        {action}
-        {arrow}
-      </a>
     </div>
   );
 }
