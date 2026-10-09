@@ -120,8 +120,10 @@ export interface OrderDetailData {
  */
 const LABEL =
   "flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-neutral-500";
-const GHOST_BTN =
-  "inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-3.5 text-xs font-bold text-neutral-300 transition-colors hover:bg-white/10 hover:text-white";
+/** "Sao chép": the shape of the receipt's small buttons, red on trial (the
+    owner, 09/10/2026: "sao chép màu đỏ thử"); green once it has copied. */
+const COPY_BTN =
+  "inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg px-3.5 text-xs font-bold transition-colors";
 const CELL =
   "border-t border-white/[0.06] px-4 py-4 text-sm text-neutral-200 sm:px-5";
 /** "280.000đ", like the /orders list, /transactions and every price on the site. */
@@ -195,10 +197,10 @@ function HandoverBox({
             type="button"
             onClick={copy}
             aria-label={copied ? `Đã chép ${name}` : `Sao chép ${name}`}
-            className={`${GHOST_BTN} ${
+            className={`${COPY_BTN} ${
               copied
-                ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/10 hover:text-emerald-400"
-                : ""
+                ? "border border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
+                : "bg-[var(--menzu-accent)] text-white hover:bg-[var(--menzu-accent-dark)]"
             }`}
           >
             {copied ? (
