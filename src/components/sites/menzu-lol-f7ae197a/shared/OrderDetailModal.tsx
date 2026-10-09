@@ -791,10 +791,10 @@ export function OrderDetailModal({
 
                   {/* HANDOVER */}
                   {/* The heading stands outside, exactly as "Sản phẩm đã mua"
-                      stands above its table: plain text, no tile, and no frame
-                      wraps the cards under it, which are cards already (the
-                      owner, 09/10/2026: "bỏ thông tin chi tiết sản phẩm ra
-                      ngoài card đi", then "rồi bỏ card bao luôn"). */}
+                      stands above its table: plain text, no tile. The frame
+                      around the cards stays (the owner, 09/10/2026: "bỏ thông
+                      tin chi tiết sản phẩm ra ngoài card đi", "rồi bỏ card
+                      bao luôn", then "thêm lại khung lồng"). */}
                   <div className="mt-6">
                     {/* A tool hands over keys and files, not a sign-in, so its
                         heading is its own (the owner, 09/10/2026: "Key & tải
@@ -803,6 +803,7 @@ export function OrderDetailModal({
                     <h3 className="mb-4 text-sm font-black uppercase tracking-wider text-white">
                       {order.isSoftware ? "Thông tin chi tiết sản phẩm" : "Thông tin đăng nhập / bàn giao"}
                     </h3>
+                    <div className="relative overflow-hidden rounded-xl border border-white/10 bg-white/[0.02] p-4 sm:p-5">
                     <div className="relative">
                       {order.loginLocked ? (
                         // An account's sign-in not yet taken: the "Lấy thông
@@ -996,6 +997,7 @@ export function OrderDetailModal({
                           Dữ liệu bàn giao hiện khi đơn đã thanh toán.
                         </p>
                       )}
+                    </div>
                     </div>
                   </div>
 
