@@ -784,27 +784,19 @@ export function OrderDetailModal({
                   </div>
 
                   {/* HANDOVER */}
-                  <div className="relative mt-6 overflow-hidden rounded-xl border border-white/10 bg-white/[0.02] p-4 sm:p-5">
-                    {/* One line. The sentence under it — "Thông tin được cung
-                        cấp sau khi thanh toán" — was telling a reader who is
-                        looking straight at their key that they will get it
-                        once they pay. */}
-                    <div className="relative mb-4 flex items-center gap-2.5">
-                      {/* An info glyph in the red tile (the owner, 09/10/2026:
-                          "dùng icon info thay cho chìa khóa đỏ"): the keys
-                          inside already wear theirs. */}
-                      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[var(--menzu-accent)]/25 bg-[var(--menzu-accent)]/15 text-[var(--menzu-accent)]">
-                        <Info className="h-3.5 w-3.5" />
-                      </span>
-                      {/* A tool hands over keys and files, not a sign-in, so
-                          its heading is its own (the owner, 09/10/2026: "Key &
-                          tải về", then "Thông tin sản phẩm", "/ bàn giao"
-                          tried and dropped, and at last "Thông tin chi tiết
-                          sản phẩm"; the info glyph beside it). */}
-                      <h3 className="text-sm font-black uppercase tracking-wider text-white">
-                        {order.isSoftware ? "Thông tin chi tiết sản phẩm" : "Thông tin đăng nhập / bàn giao"}
-                      </h3>
-                    </div>
+                  {/* Its heading stands outside, in the same place and type
+                      as "Sản phẩm đã mua" above, and no frame wraps the boxes
+                      under it: they are cards already (the owner, 09/10/2026:
+                      "có nên tách ra ngoài" → "thử xem"). The red tile went
+                      with the frame, as "Sản phẩm đã mua" wears none. */}
+                  <div className="mt-6">
+                    {/* A tool hands over keys and files, not a sign-in, so its
+                        heading is its own (the owner, 09/10/2026: "Key & tải
+                        về", then "Thông tin sản phẩm", "/ bàn giao" tried and
+                        dropped, and at last "Thông tin chi tiết sản phẩm"). */}
+                    <h3 className="mb-4 text-sm font-black uppercase tracking-wider text-white">
+                      {order.isSoftware ? "Thông tin chi tiết sản phẩm" : "Thông tin đăng nhập / bàn giao"}
+                    </h3>
 
                     <div className="relative">
                       {order.loginLocked ? (
