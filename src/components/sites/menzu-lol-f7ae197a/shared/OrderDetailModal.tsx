@@ -257,7 +257,9 @@ function DownloadCard({
       ) : null}
       {docsUrl ? (
         <FileRow
-          icon={<FileText className="h-3 w-3 text-[var(--menzu-accent)]" />}
+          // White on trial (the owner, 09/10/2026: "cho phần tài liệu icon màu
+          // trắng thử"); the key's and the download's stay red.
+          icon={<FileText className="h-3 w-3 text-white" />}
           eyebrow="Tài liệu hướng dẫn"
           title="Thiết lập & sử dụng chi tiết"
           href={docsUrl}
