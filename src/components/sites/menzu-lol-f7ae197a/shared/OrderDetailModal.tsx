@@ -781,23 +781,17 @@ export function OrderDetailModal({
                   </div>
 
                   {/* HANDOVER */}
-                  {/* The heading row, its red info tile with it, stands above
-                      the section's frame (the owner, 09/10/2026: "đem thông
-                      tin chi tiết sản phẩm ra ngoài đi"); the frame keeps the
-                      cards. */}
+                  {/* The heading stands above the section's frame (the owner,
+                      09/10/2026: "đem thông tin chi tiết sản phẩm ra ngoài
+                      đi"); the frame keeps the cards. */}
                   <div className="mt-6">
                     {/* One line. The sentence under it — "Thông tin được cung
                         cấp sau khi thanh toán" — was telling a reader who is
                         looking straight at their key that they will get it
                         once they pay. */}
                     <div className="mb-4 flex items-center gap-2.5">
-                      {/* The red tile of the first layout (the owner,
-                          09/10/2026: "làm thử bố cục như trước này"), with the
-                          info glyph instead of the key ("icon key thành icon
-                          information"). */}
-                      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[var(--menzu-accent)]/25 bg-[var(--menzu-accent)]/15 text-[var(--menzu-accent)]">
-                        <Info className="h-3.5 w-3.5" />
-                      </span>
+                      {/* No tile beside it (the owner, 09/10/2026: "bỏ icon
+                          thông tin"), plain text like "Sản phẩm đã mua". */}
                       {/* A tool hands over keys and files, not a sign-in, so
                           its heading is its own (the owner, 09/10/2026: "Key &
                           tải về", then "Thông tin sản phẩm", "/ bàn giao"
