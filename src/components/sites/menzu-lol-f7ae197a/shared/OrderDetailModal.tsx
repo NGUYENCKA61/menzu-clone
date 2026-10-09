@@ -267,9 +267,9 @@ function DownloadCard({
           title="Thiết lập & sử dụng chi tiết"
           href={docsUrl}
           action="Xem ngay"
-          // The bright purple with dark lettering (the owner, 09/10/2026: "xem
-          // ngay tím chữ đen đi").
-          actionClass="bg-purple-500 text-neutral-950 hover:bg-purple-400"
+          // White (the owner, 09/10/2026: "tải về tím xem ngay trắng"), dark
+          // lettering.
+          actionClass="bg-white text-neutral-950 hover:bg-neutral-200"
           arrow={<ArrowRight className="h-3 w-3 shrink-0" />}
         />
       ) : null}
