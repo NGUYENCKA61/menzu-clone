@@ -265,9 +265,9 @@ function DownloadCard({
           title="Cài đặt & sử dụng"
           href={docsUrl}
           action="Xem ngay"
-          // Violet (the owner, 09/10/2026: "xem ngay màu tím"): 600 under
-          // white lettering, which reads at 12px where 500 is too light.
-          actionClass="bg-violet-600 text-white hover:bg-violet-500"
+          // Orange (the owner, 09/10/2026: "xem ngay màu tím", then "màu
+          // cam"), with dark lettering: white on orange is hard to read at 12px.
+          actionClass="bg-orange-500 text-neutral-950 hover:bg-orange-400"
           // The arrow again after an eye was tried (the owner, 09/10/2026: "con
           // mắt thành mũi tên như cũ"); the label became "Xem ngay".
           arrow={<ArrowRight className="h-3 w-3 shrink-0" />}
