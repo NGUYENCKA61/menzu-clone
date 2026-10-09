@@ -319,11 +319,12 @@ function FileRow({
         href={href}
         target="_blank"
         rel="noopener noreferrer"
-        // One size for both file buttons, the height of "Sao chép" and a
-        // width that holds either label and its arrow, so they line up in
-        // their column (the owner, 09/10/2026: "tải về xem ngay sửa lại cho
-        // đồng bộ").
-        className={`inline-flex h-9 w-28 shrink-0 items-center justify-center gap-1.5 rounded-lg px-3.5 text-xs font-bold transition-colors ${actionClass}`}
+        // One size for both file buttons, the height of "Sao chép" and the
+        // least width that holds "Tải về" and its arrow, so they still line
+        // up in their column (the owner, 09/10/2026: "tải về xem ngay sửa lại
+        // cho đồng bộ", then "tải về với nút xem thu gọn lại thử"). A floor,
+        // not a fixed width, so a wider font grows the button, never clips it.
+        className={`inline-flex h-9 min-w-20 shrink-0 items-center justify-center gap-1.5 rounded-lg px-3 text-xs font-bold transition-colors ${actionClass}`}
       >
         {action}
         {arrow}
