@@ -798,10 +798,10 @@ export function OrderDetailModal({
                       </span>
                       {/* A tool hands over keys and files, not a sign-in, so
                           its heading is its own (the owner, 09/10/2026: "Key &
-                          tải về" first, then "Thông tin sản phẩm / bàn giao"
-                          with the info glyph). */}
+                          tải về" first, then "Thông tin sản phẩm" with the
+                          info glyph; "/ bàn giao" was tried and dropped). */}
                       <h3 className="text-sm font-black uppercase tracking-wider text-white">
-                        {order.isSoftware ? "Thông tin sản phẩm / bàn giao" : "Thông tin đăng nhập / bàn giao"}
+                        {order.isSoftware ? "Thông tin sản phẩm" : "Thông tin đăng nhập / bàn giao"}
                       </h3>
                     </div>
 
