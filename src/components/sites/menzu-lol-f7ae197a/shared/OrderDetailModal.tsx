@@ -185,7 +185,9 @@ function HandoverBox({
       <div className="flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
         <span
           ref={valueRef}
-          className="min-w-0 max-w-full truncate font-mono text-sm font-bold tracking-wide text-white"
+          // Wrapped, not cut: a long key read "…5T8W3…" on a phone, and the
+          // buyer could copy it but not read it through (the owner, 09/10/2026).
+          className="min-w-0 max-w-full break-all font-mono text-sm font-bold tracking-wide text-white"
         >
           {value}
         </span>
@@ -232,21 +234,23 @@ function HandoverBox({
 function DownloadCard({
   downloadUrl,
   docsUrl,
-  productName,
 }: {
   downloadUrl: string | null;
   docsUrl: string | null;
-  /** The tool's own name, so the row says what is being downloaded. */
-  productName: string;
 }) {
+  // Neutral tiles, so the one red in each row is the button that acts; the
+  // violet was the only hue on the receipt outside the site's own (the owner,
+  // 09/10/2026: "làm thử hết đi"). The download row's name is a short fixed
+  // one: the tool's full name sits in "Sản phẩm đã mua" just above, and here
+  // it only repeated itself, cut short.
   return (
     <div className="flex flex-col gap-2.5">
       {downloadUrl ? (
         <FileRow
           icon={<Download className="h-3.5 w-3.5" />}
-          tint="border-[var(--menzu-accent)]/25 bg-[var(--menzu-accent)]/15 text-[var(--menzu-accent)]"
+          tint="border-white/10 bg-white/5 text-neutral-300"
           eyebrow="Link tải hack"
-          title={productName}
+          title="Bộ cài đặt mới nhất"
           href={downloadUrl}
           action="Tải về"
           actionClass="bg-[var(--menzu-accent)] text-white hover:bg-[var(--menzu-accent-dark)]"
@@ -256,7 +260,7 @@ function DownloadCard({
       {docsUrl ? (
         <FileRow
           icon={<FileText className="h-3.5 w-3.5" />}
-          tint="border-violet-500/25 bg-violet-500/15 text-violet-300"
+          tint="border-white/10 bg-white/5 text-neutral-300"
           eyebrow="Tài liệu hướng dẫn"
           title="Cài đặt & sử dụng"
           href={docsUrl}
@@ -789,8 +793,14 @@ export function OrderDetailModal({
                       <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[var(--menzu-accent)]/25 bg-[var(--menzu-accent)]/15 text-[var(--menzu-accent)]">
                         <KeyRound className="h-3.5 w-3.5" />
                       </span>
+                      {/* A tool hands over keys and files, not a sign-in:
+                          its heading says so (the owner, 09/10/2026). */}
                       <h3 className="text-sm font-black uppercase tracking-wider text-white">
-                        Thông tin đăng nhập / bàn giao
+                        {order.isSoftware
+                          ? hasFiles
+                            ? "Key & tải về"
+                            : "Key"
+                          : "Thông tin đăng nhập / bàn giao"}
                       </h3>
                     </div>
 
@@ -921,7 +931,6 @@ export function OrderDetailModal({
                             <DownloadCard
                               downloadUrl={order.downloadUrl}
                               docsUrl={order.docsUrl}
-                              productName={order.productName}
                             />
                           ) : null}
                         </div>
