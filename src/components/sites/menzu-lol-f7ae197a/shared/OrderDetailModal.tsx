@@ -268,9 +268,9 @@ function DownloadCard({
           // Dành riêng cho khách hàng đi".
           title="Dành riêng cho khách hàng"
           href={docsUrl}
-          // One word, to keep it short (the owner, 09/10/2026: "xem ngay
-          // thành xem cho nó gọn lại thử").
-          action="Xem"
+          // Two words again (the owner, 09/10/2026: "xem thành xem ngay đi"),
+          // after a try with "Xem" alone.
+          action="Xem ngay"
           // Grey, the same ghost as "Sao chép" (the owner, 09/10/2026: "xem
           // ngay màu xám đi"), after white.
           actionClass="border border-white/10 bg-white/5 text-neutral-300 hover:bg-white/10 hover:text-white"
