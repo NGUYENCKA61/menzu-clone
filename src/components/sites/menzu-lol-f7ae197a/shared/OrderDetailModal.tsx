@@ -786,11 +786,11 @@ export function OrderDetailModal({
                   </div>
 
                   {/* HANDOVER */}
-                  {/* The heading stands outside (the owner, 09/10/2026: "đem
-                      thông tin chi tiết sản phẩm ra ngoài đi") and no frame
-                      wraps the cards ("bỏ card bao ngoài"); each card keeps
-                      its own. */}
-                  <div className="mt-6">
+                  {/* One frame around the heading and the cards alike, as it
+                      first was (the owner, 09/10/2026: "thêm card lồng như cũ
+                      bao cả thông tin chi tiết sản phẩm"), the heading plain
+                      text with no tile; each card keeps its own frame. */}
+                  <div className="relative mt-6 overflow-hidden rounded-xl border border-white/10 bg-white/[0.02] p-4 sm:p-5">
                     {/* One line. The sentence under it — "Thông tin được cung
                         cấp sau khi thanh toán" — was telling a reader who is
                         looking straight at their key that they will get it
