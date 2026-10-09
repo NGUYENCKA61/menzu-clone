@@ -238,17 +238,16 @@ function DownloadCard({
   downloadUrl: string | null;
   docsUrl: string | null;
 }) {
-  // The first layout again, square coloured tiles and all (the owner,
-  // 09/10/2026: "làm thử bố cục như trước này thử", with a picture of it),
-  // keeping the words chosen since: "Bản Loader mới nhất" for the tool's
-  // name, which sits in "Sản phẩm đã mua" just above anyway, "Thiết lập & sử
-  // dụng chi tiết" and "Xem ngay".
+  // No square tile: a small red glyph sits in each label, as "KEY" wears its
+  // key (the owner, 09/10/2026: "lùi về phiên bản link tải hack và tài liệu
+  // hướng dẫn là icon nhỏ ấy", after the tiled first layout was tried again).
+  // The download row's name is a short fixed one: the tool's full name sits
+  // in "Sản phẩm đã mua" just above.
   return (
     <div className="flex flex-col gap-2.5">
       {downloadUrl ? (
         <FileRow
-          icon={<Download className="h-3.5 w-3.5" />}
-          tint="border-[var(--menzu-accent)]/25 bg-[var(--menzu-accent)]/15 text-[var(--menzu-accent)]"
+          icon={<Download className="h-3 w-3 text-[var(--menzu-accent)]" />}
           eyebrow="Link tải hack"
           title="Bản Loader mới nhất"
           href={downloadUrl}
@@ -259,8 +258,7 @@ function DownloadCard({
       ) : null}
       {docsUrl ? (
         <FileRow
-          icon={<FileText className="h-3.5 w-3.5" />}
-          tint="border-violet-500/25 bg-violet-500/15 text-violet-300"
+          icon={<FileText className="h-3 w-3 text-[var(--menzu-accent)]" />}
           eyebrow="Tài liệu hướng dẫn"
           title="Thiết lập & sử dụng chi tiết"
           href={docsUrl}
@@ -279,10 +277,10 @@ function DownloadCard({
  * Two lines rather than three. The third was a sentence that said nothing the
  * eyebrow had not already said — "Hướng dẫn chi tiết sản phẩm" under "Tài liệu
  * hướng dẫn" — and it cost the whole handover block thirty pixels of height.
+ * The glyph rides in the label, and the 16px inset matches the key box's.
  */
 function FileRow({
   icon,
-  tint,
   eyebrow,
   title,
   href,
@@ -291,8 +289,6 @@ function FileRow({
   arrow,
 }: {
   icon: ReactNode;
-  /** Border, fill and glyph colour for the square badge. */
-  tint: string;
   eyebrow: string;
   title: string;
   href: string;
@@ -301,17 +297,15 @@ function FileRow({
   arrow: ReactNode;
 }) {
   return (
-    <div className="flex flex-1 items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] p-3 transition-colors hover:border-white/[0.12]">
-      <span
-        className={`grid h-8 w-8 shrink-0 place-items-center rounded-lg border ${tint}`}
-      >
-        {icon}
-      </span>
+    <div className="flex flex-1 items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3 transition-colors hover:border-white/[0.12]">
       {/* min-w-0 so a long name truncates instead of pushing the button off
           the card. */}
       <div className="min-w-0 flex-1">
-        <span className={LABEL}>{eyebrow}</span>
-        <p className="mt-0.5 truncate text-sm font-bold text-white">{title}</p>
+        <span className={LABEL}>
+          {icon}
+          {eyebrow}
+        </span>
+        <p className="mt-1 truncate text-sm font-bold text-white">{title}</p>
       </div>
       <a
         href={href}
@@ -909,7 +903,7 @@ export function OrderDetailModal({
                                     className="flex flex-col gap-1.5"
                                   >
                                     <HandoverBox
-                                      icon={<KeyRound className="h-3 w-3" />}
+                                      icon={<KeyRound className="h-3 w-3 text-[var(--menzu-accent)]" />}
                                       label={
                                         order.keys.length > 1
                                           ? `Key ${index + 1}`
