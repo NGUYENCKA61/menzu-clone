@@ -1074,7 +1074,11 @@ export function OrderDetailModal({
                           className={`press group inline-flex h-11 items-center justify-center gap-2 rounded-xl px-3 text-xs font-bold sm:h-10 sm:px-5${
                             askReview ? "" : " col-span-2"
                           } ${
-                            warrantyAction.kind === "status"
+                            // Grey for "Yêu cầu bảo hành" too, on trial (the
+                            // owner, 09/10/2026: "yêu cầu bảo hành cho màu xám
+                            // thử"); red stays for "Nhập số tài khoản", the one
+                            // step a refund waits on the buyer for.
+                            warrantyAction.kind !== "bank"
                               ? "border border-white/12 bg-white/[0.04] text-neutral-200 hover:border-white/25 hover:text-white"
                               : "bg-[var(--menzu-accent)] text-white hover:bg-[var(--menzu-accent-dark)]"
                           }`}
