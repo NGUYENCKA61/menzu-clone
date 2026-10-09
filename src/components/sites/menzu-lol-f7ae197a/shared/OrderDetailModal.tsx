@@ -1092,12 +1092,14 @@ export function OrderDetailModal({
                           } ${
                             // "Yêu cầu bảo hành" in the deep violet the owner
                             // picked for "Xem ngay", on trial (09/10/2026: "yêu
-                            // cầu bảo hành màu tím thử"); "Xem trạng thái" keeps
+                            // cầu bảo hành màu tím thử", then "chữ đen đi",
+                            // lighter on hover so the dark lettering keeps its
+                            // contrast); "Xem trạng thái" keeps
                             // the grey outline, and red stays for "Nhập số tài
                             // khoản", the one step a refund waits on the buyer
                             // for.
                             warrantyAction.kind === "request"
-                              ? "bg-violet-600 text-white hover:bg-violet-700"
+                              ? "bg-violet-600 text-neutral-950 hover:bg-violet-500"
                               : warrantyAction.kind === "status"
                                 ? "border border-white/12 bg-white/[0.04] text-neutral-200 hover:border-white/25 hover:text-white"
                                 : "bg-[var(--menzu-accent)] text-white hover:bg-[var(--menzu-accent-dark)]"
