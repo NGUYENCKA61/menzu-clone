@@ -259,8 +259,7 @@ function DownloadCard({
           href={downloadUrl}
           action="Tải về"
           // The accent red with white lettering (the owner, 09/10/2026: "tải về
-          // màu đỏ", after amber), no fixed width: it hugs its words ("thu
-          // gọn nút tải về").
+          // màu đỏ", after amber).
           actionClass="bg-[var(--menzu-accent)] text-white hover:bg-[var(--menzu-accent-dark)]"
           arrow={<Download className="h-3 w-3 shrink-0" />}
         />
@@ -280,7 +279,7 @@ function DownloadCard({
           action="Xem"
           // Grey, the same ghost as "Sao chép" (the owner, 09/10/2026: "xem
           // ngay màu xám đi"), after white.
-          actionClass="w-28 border border-white/10 bg-white/5 text-neutral-300 hover:bg-white/10 hover:text-white"
+          actionClass="border border-white/10 bg-white/5 text-neutral-300 hover:bg-white/10 hover:text-white"
           arrow={<ArrowRight className="h-3 w-3 shrink-0" />}
         />
       ) : null}
@@ -328,11 +327,12 @@ function FileRow({
         href={href}
         target="_blank"
         rel="noopener noreferrer"
-        // The height of "Sao chép" for both file buttons (the owner,
-        // 09/10/2026: "tải về xem ngay sửa lại cho đồng bộ"); the width comes
-        // with each button's colours, since "Tải về" now hugs its words
-        // ("thu gọn nút tải về") while "Xem ngay" keeps 112px.
-        className={`inline-flex h-9 shrink-0 items-center justify-center gap-1.5 rounded-lg px-3.5 text-xs font-bold transition-colors ${actionClass}`}
+        // One size for both file buttons, the height of "Sao chép" and the
+        // least width that holds "Tải về" and its arrow (the owner,
+        // 09/10/2026: "thu gọn nút tải về", then "nút xem thu gọn đi cho
+        // đồng bộ nút tải về"). A floor, not a fixed width, so a wider font
+        // grows a button rather than clipping it.
+        className={`inline-flex h-9 min-w-20 shrink-0 items-center justify-center gap-1.5 rounded-lg px-3 text-xs font-bold transition-colors ${actionClass}`}
       >
         {action}
         {arrow}
