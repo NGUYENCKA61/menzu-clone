@@ -796,14 +796,12 @@ export function OrderDetailModal({
                       <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[var(--menzu-accent)]/25 bg-[var(--menzu-accent)]/15 text-[var(--menzu-accent)]">
                         <Info className="h-3.5 w-3.5" />
                       </span>
-                      {/* A tool hands over keys and files, not a sign-in:
-                          its heading says so (the owner, 09/10/2026). */}
+                      {/* A tool hands over keys and files, not a sign-in, so
+                          its heading is its own (the owner, 09/10/2026: "Key &
+                          tải về" first, then "Thông tin sản phẩm" with the
+                          info glyph). */}
                       <h3 className="text-sm font-black uppercase tracking-wider text-white">
-                        {order.isSoftware
-                          ? hasFiles
-                            ? "Key & tải về"
-                            : "Key"
-                          : "Thông tin đăng nhập / bàn giao"}
+                        {order.isSoftware ? "Thông tin sản phẩm" : "Thông tin đăng nhập / bàn giao"}
                       </h3>
                     </div>
 
