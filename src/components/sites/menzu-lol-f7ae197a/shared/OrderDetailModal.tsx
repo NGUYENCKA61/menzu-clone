@@ -317,7 +317,10 @@ function FileRow({
         href={href}
         target="_blank"
         rel="noopener noreferrer"
-        className={`inline-flex h-8 shrink-0 items-center gap-1.5 rounded-lg px-3.5 text-xs font-bold transition-colors ${actionClass}`}
+        // One size for both file buttons, the height of "Sao chép" and a
+        // width that holds "Xem ngay →", so they line up in their column (the
+        // owner, 09/10/2026: "tải về xem ngay sửa lại cho đồng bộ").
+        className={`inline-flex h-9 w-28 shrink-0 items-center justify-center gap-1.5 rounded-lg px-3.5 text-xs font-bold transition-colors ${actionClass}`}
       >
         {action}
         {arrow}
