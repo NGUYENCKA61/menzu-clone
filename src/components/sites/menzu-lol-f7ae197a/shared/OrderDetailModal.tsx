@@ -266,9 +266,9 @@ function DownloadCard({
           title="Thiết lập & sử dụng chi tiết"
           href={docsUrl}
           action="Xem ngay"
-          // White (the owner, 09/10/2026: "xem ngay màu trắng"), dark
-          // lettering.
-          actionClass="bg-white text-neutral-950 hover:bg-neutral-200"
+          // Sea blue on trial (the owner, 09/10/2026: white, then "xanh biển
+          // thử"): blue-600 under white lettering, which reads at 12px.
+          actionClass="bg-blue-600 text-white hover:bg-blue-500"
           arrow={<ArrowRight className="h-3 w-3 shrink-0" />}
         />
       ) : null}
