@@ -277,9 +277,9 @@ function DownloadCard({
           // One word (the owner, 09/10/2026: "xem ngay thành xem"), after
           // "Xem ngay" came and went twice.
           action="Xem"
-          // The deep violet the owner picked earlier (#7F22FE), white
-          // lettering (09/10/2026: "nút xem màu tím").
-          actionClass="bg-violet-600 text-white hover:bg-violet-700"
+          // White, so dark lettering, on trial (the owner, 09/10/2026: "xem
+          // màu trắng thử"), after deep violet.
+          actionClass="bg-white text-neutral-950 hover:bg-neutral-200"
           arrow={<ArrowRight className="h-3 w-3 shrink-0" />}
         />
       ) : null}
