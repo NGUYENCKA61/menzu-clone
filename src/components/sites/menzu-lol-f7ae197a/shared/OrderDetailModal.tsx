@@ -781,15 +781,16 @@ export function OrderDetailModal({
                   </div>
 
                   {/* HANDOVER */}
-                  {/* The section's frame, back after a frameless trial (the
-                      owner, 09/10/2026: "bỏ các bao ngoài thử", then "thêm
-                      card lồng lại"). */}
-                  <div className="relative mt-6 overflow-hidden rounded-xl border border-white/10 bg-white/[0.02] p-4 sm:p-5">
+                  {/* The heading row, its red info tile with it, stands above
+                      the section's frame (the owner, 09/10/2026: "đem thông
+                      tin chi tiết sản phẩm ra ngoài đi"); the frame keeps the
+                      cards. */}
+                  <div className="mt-6">
                     {/* One line. The sentence under it — "Thông tin được cung
                         cấp sau khi thanh toán" — was telling a reader who is
                         looking straight at their key that they will get it
                         once they pay. */}
-                    <div className="relative mb-4 flex items-center gap-2.5">
+                    <div className="mb-4 flex items-center gap-2.5">
                       {/* The red tile of the first layout (the owner,
                           09/10/2026: "làm thử bố cục như trước này"), with the
                           info glyph instead of the key ("icon key thành icon
@@ -807,6 +808,7 @@ export function OrderDetailModal({
                       </h3>
                     </div>
 
+                    <div className="relative overflow-hidden rounded-xl border border-white/10 bg-white/[0.02] p-4 sm:p-5">
                     <div className="relative">
                       {order.loginLocked ? (
                         // An account's sign-in not yet taken: the "Lấy thông
@@ -1000,6 +1002,7 @@ export function OrderDetailModal({
                           Dữ liệu bàn giao hiện khi đơn đã thanh toán.
                         </p>
                       )}
+                    </div>
                     </div>
                   </div>
 
