@@ -264,7 +264,9 @@ function DownloadCard({
           // the white button); the key's and the download's stay red.
           icon={<FileText className="h-3 w-3 text-violet-400" />}
           eyebrow="Tài liệu hướng dẫn"
-          title="Thiết lập & sử dụng chi tiết"
+          // The owner, 09/10/2026: "Thiết lập & sử dụng chi tiết đổi lại thành
+          // Dành riêng cho khách hàng đi".
+          title="Dành riêng cho khách hàng"
           href={docsUrl}
           // One word, to keep it short (the owner, 09/10/2026: "xem ngay
           // thành xem cho nó gọn lại thử").
