@@ -251,8 +251,9 @@ function DownloadCard({
           title="Bản Loader mới nhất"
           href={downloadUrl}
           action="Tải về"
-          // White (the owner, 09/10/2026: "tải về màu trắng"), dark lettering.
-          actionClass="bg-white text-neutral-950 hover:bg-neutral-200"
+          // Grey like "Sao chép" (the owner, 09/10/2026: "tải về xem ngay màu
+          // xám luôn đi"), all three buttons of the block alike.
+          actionClass="border border-white/10 bg-white/5 text-neutral-300 hover:bg-white/10 hover:text-white"
           arrow={<Download className="h-3 w-3 shrink-0" />}
         />
       ) : null}
@@ -265,8 +266,8 @@ function DownloadCard({
           title="Thiết lập & sử dụng chi tiết"
           href={docsUrl}
           action="Xem ngay"
-          // White like "Tải về" (the owner, 09/10/2026: "xem ngay màu trắng").
-          actionClass="bg-white text-neutral-950 hover:bg-neutral-200"
+          // Grey like "Sao chép" and "Tải về" (the owner, 09/10/2026).
+          actionClass="border border-white/10 bg-white/5 text-neutral-300 hover:bg-white/10 hover:text-white"
           arrow={<ArrowRight className="h-3 w-3 shrink-0" />}
         />
       ) : null}
