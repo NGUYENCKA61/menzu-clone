@@ -271,9 +271,9 @@ function DownloadCard({
           title="Thiết lập & sử dụng chi tiết"
           href={docsUrl}
           action="Xem ngay"
-          // Amber on trial (the owner, 09/10/2026: red, violet, then "màu vàng
-          // thử"), the "Lấy thông tin" amber with dark lettering.
-          actionClass="bg-amber-500 text-neutral-950 hover:bg-amber-400"
+          // White (the owner, 09/10/2026: red, violet, amber, then "màu
+          // trắng"), dark lettering.
+          actionClass="bg-white text-neutral-950 hover:bg-neutral-200"
           // The arrow again after an eye was tried (the owner, 09/10/2026: "con
           // mắt thành mũi tên như cũ"); the label became "Xem ngay".
           arrow={<ArrowRight className="h-3 w-3 shrink-0" />}
