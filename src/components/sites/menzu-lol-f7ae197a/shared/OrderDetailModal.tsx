@@ -266,9 +266,10 @@ function DownloadCard({
           // Two words again (the owner, 09/10/2026: "xem thành xem ngay đi"),
           // after a try with "Xem" alone.
           action="Xem ngay"
-          // Purple with white lettering (the owner, 09/10/2026: "xem ngay màu
-          // tím"), the purple and lettering of the earlier "tím chữ trắng".
-          actionClass="bg-purple-500 text-white hover:bg-purple-600"
+          // Violet, the docs glyph's own hue, deep enough for white lettering
+          // (the owner, 09/10/2026: "xem ngay màu tím", then picked 1 of the
+          // purples offered, #7F22FE).
+          actionClass="bg-violet-600 text-white hover:bg-violet-700"
           arrow={<ArrowRight className="h-3 w-3 shrink-0" />}
         />
       ) : null}
