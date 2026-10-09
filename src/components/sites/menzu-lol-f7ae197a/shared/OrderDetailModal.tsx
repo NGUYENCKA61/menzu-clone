@@ -266,9 +266,10 @@ function DownloadCard({
           eyebrow="Tài liệu hướng dẫn"
           title="Cài đặt & sử dụng"
           href={docsUrl}
-          action="Xem"
+          action="Xem ngay"
           actionClass="border border-white/10 bg-white/5 text-neutral-300 hover:bg-white/10 hover:text-white"
-          // An eye for "Xem" (the owner, 09/10/2026: "xem có icon con mắt đi").
+          // An eye for "Xem ngay" (the owner, 09/10/2026: "xem có icon con mắt
+          // đi", then "xem ngay đi").
           arrow={<Eye className="h-3 w-3 shrink-0" />}
         />
       ) : null}
