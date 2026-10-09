@@ -252,9 +252,9 @@ function DownloadCard({
           title="Bộ cài đặt mới nhất"
           href={downloadUrl}
           action="Tải về"
-          // White on trial (the owner, 09/10/2026: orange, amber, orange,
-          // silver, then "màu trắng thử"), dark lettering.
-          actionClass="bg-white text-neutral-950 hover:bg-neutral-200"
+          // Grey like "Sao chép", on trial (the owner, 09/10/2026: orange,
+          // amber, orange, silver, white, then "màu xám giống sao chép thử").
+          actionClass="border border-white/10 bg-white/5 text-neutral-300 hover:bg-white/10 hover:text-white"
           arrow={<Download className="h-3 w-3 shrink-0" />}
         />
       ) : null}
@@ -265,9 +265,9 @@ function DownloadCard({
           title="Cài đặt & sử dụng"
           href={docsUrl}
           action="Xem ngay"
-          // White like "Tải về" (the owner, 09/10/2026: violet, orange, then
-          // "xem ngay cùng màu đi"), dark lettering.
-          actionClass="bg-white text-neutral-950 hover:bg-neutral-200"
+          // Grey like "Sao chép" and "Tải về" (the owner, 09/10/2026: violet,
+          // orange, white, then "màu xám giống sao chép thử").
+          actionClass="border border-white/10 bg-white/5 text-neutral-300 hover:bg-white/10 hover:text-white"
           // The arrow again after an eye was tried (the owner, 09/10/2026: "con
           // mắt thành mũi tên như cũ"); the label became "Xem ngay".
           arrow={<ArrowRight className="h-3 w-3 shrink-0" />}
@@ -317,7 +317,7 @@ function FileRow({
         href={href}
         target="_blank"
         rel="noopener noreferrer"
-        className={`inline-flex h-8 shrink-0 items-center gap-1.5 rounded-lg px-3.5 text-xs font-bold transition-colors ${actionClass}`}
+        className={`inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg px-3.5 text-xs font-bold transition-colors ${actionClass}`}
       >
         {action}
         {arrow}
