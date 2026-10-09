@@ -247,7 +247,9 @@ function DownloadCard({
     <div className="flex flex-col gap-2.5">
       {downloadUrl ? (
         <FileRow
-          icon={<Download className="h-3 w-3" />}
+          // The three label glyphs in the accent red, the labels' words still
+          // grey (the owner, 09/10/2026: "đổi màu 3 icon thử").
+          icon={<Download className="h-3 w-3 text-[var(--menzu-accent)]" />}
           eyebrow="Link tải hack"
           // The owner's words for it (09/10/2026: "Bộ cài đặt mới nhất" →
           // "Loader mới nhất" → "Bản Loader mới nhất").
@@ -262,7 +264,7 @@ function DownloadCard({
       ) : null}
       {docsUrl ? (
         <FileRow
-          icon={<FileText className="h-3 w-3" />}
+          icon={<FileText className="h-3 w-3 text-[var(--menzu-accent)]" />}
           eyebrow="Tài liệu hướng dẫn"
           // The owner's words (09/10/2026: "cài đặt & sử dụng -> Thiết lập &
           // sử dụng chi tiết").
@@ -897,7 +899,7 @@ export function OrderDetailModal({
                                     className="flex flex-col gap-1.5"
                                   >
                                     <HandoverBox
-                                      icon={<KeyRound className="h-3 w-3" />}
+                                      icon={<KeyRound className="h-3 w-3 text-[var(--menzu-accent)]" />}
                                       label={
                                         order.keys.length > 1
                                           ? `Key ${index + 1}`
