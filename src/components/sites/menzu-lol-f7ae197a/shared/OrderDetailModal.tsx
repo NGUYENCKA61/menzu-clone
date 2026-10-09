@@ -252,9 +252,9 @@ function DownloadCard({
           title="Bản Loader mới nhất"
           href={downloadUrl}
           action="Tải về"
-          // The accent red with dark lettering (the owner, 09/10/2026: "tải về
-          // đỏ chữ đen").
-          actionClass="bg-[var(--menzu-accent)] text-neutral-950 hover:bg-[var(--menzu-accent-dark)]"
+          // The accent red with white lettering (the owner, 09/10/2026: "tải về
+          // chữ trắng đi", then "cả 2 chữ trắng hết đi").
+          actionClass="bg-[var(--menzu-accent)] text-white hover:bg-[var(--menzu-accent-dark)]"
           arrow={<Download className="h-3 w-3 shrink-0" />}
         />
       ) : null}
@@ -267,9 +267,9 @@ function DownloadCard({
           title="Thiết lập & sử dụng chi tiết"
           href={docsUrl}
           action="Xem ngay"
-          // White (the owner, 09/10/2026: "tải về tím xem ngay trắng"), dark
-          // lettering.
-          actionClass="bg-white text-neutral-950 hover:bg-neutral-200"
+          // Purple with white lettering (the owner, 09/10/2026: "tím chữ trắng
+          // đi", then "cả 2 chữ trắng hết đi").
+          actionClass="bg-purple-500 text-white hover:bg-purple-600"
           arrow={<ArrowRight className="h-3 w-3 shrink-0" />}
         />
       ) : null}
