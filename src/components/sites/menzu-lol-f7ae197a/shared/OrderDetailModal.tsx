@@ -8,7 +8,6 @@ import {
   Copy,
   Download,
   Eye,
-  EyeOff,
   FileText,
   Hash,
   Info,
@@ -130,19 +129,21 @@ const CELL =
 function money(value: number): string {
   return `${formatVnd(value)}đ`;
 }
-/** One value with its copy button; the password variant starts masked. */
+/**
+ * One value with its copy button. A password reads in the clear like the
+ * rest (the owner, 09/10/2026: "phần mật khẩu khỏi ẩn mà cho hiện luôn"): the
+ * buyer took it on camera through "Lấy thông tin", so a mask and a "Hiện"
+ * button only stood between them and typing it in.
+ */
 function HandoverBox({
   label,
   icon,
   value,
-  secret = false,
 }: {
   label: string;
   icon: ReactNode;
   value: string;
-  secret?: boolean;
 }) {
-  const [shown, setShown] = useState(!secret);
   const [copied, setCopied] = useState(false);
   const valueRef = useRef<HTMLSpanElement>(null);
 
@@ -157,9 +158,8 @@ function HandoverBox({
       await navigator.clipboard.writeText(value);
       setCopied(true);
     } catch {
-      // Refused clipboard: show the value and leave it selected, so one
-      // Ctrl+C finishes what the button could not.
-      setShown(true);
+      // Refused clipboard: leave the value selected, so one Ctrl+C finishes
+      // what the button could not.
       requestAnimationFrame(() => {
         const node = valueRef.current;
         const selection = window.getSelection();
@@ -187,24 +187,9 @@ function HandoverBox({
           ref={valueRef}
           className="min-w-0 max-w-full truncate font-mono text-sm font-bold tracking-wide text-white"
         >
-          {shown ? value : "•".repeat(Math.min(Math.max(value.length, 8), 18))}
+          {value}
         </span>
         <span className="flex shrink-0 items-center gap-2">
-          {secret ? (
-            <button
-              type="button"
-              onClick={() => setShown((s) => !s)}
-              className={GHOST_BTN}
-              aria-label={shown ? `Ẩn ${name}` : `Hiện ${name}`}
-            >
-              {shown ? (
-                <EyeOff className="h-3 w-3" />
-              ) : (
-                <Eye className="h-3 w-3" />
-              )}
-              {shown ? "Ẩn" : "Hiện"}
-            </button>
-          ) : null}
           <button
             type="button"
             onClick={copy}
@@ -817,8 +802,8 @@ export function OrderDetailModal({
                         <LockedLogin onTake={() => setRevealOpen(true)} />
                       ) : order.isPool ? (
                         // Each key is one sign-in; shown as the pair it is,
-                        // not as a key, with the password behind a reveal
-                        // like the single account's.
+                        // not as a key, the password in the clear like the
+                        // single account's.
                         <div className="flex flex-col gap-4">
                           {order.keys.length > 0 ? (
                             <div className="flex flex-col gap-4">
@@ -850,7 +835,6 @@ export function OrderDetailModal({
                                         icon={<Lock className="h-3 w-3" />}
                                         label="Mật khẩu"
                                         value={password}
-                                        secret
                                       />
                                     </div>
                                   </div>
@@ -953,7 +937,6 @@ export function OrderDetailModal({
                               icon={<Lock className="h-3 w-3" />}
                               label="Mật khẩu"
                               value={order.login.login.password}
-                              secret
                             />
                           </div>
                           {order.login.login.note ? (
