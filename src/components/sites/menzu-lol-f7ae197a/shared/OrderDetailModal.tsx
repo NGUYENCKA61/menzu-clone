@@ -251,9 +251,9 @@ function DownloadCard({
           title="Bản Loader mới nhất"
           href={downloadUrl}
           action="Tải về"
-          // White on trial (the owner, 09/10/2026: "tải về màu trắng thử"),
-          // dark lettering.
-          actionClass="bg-white text-neutral-950 hover:bg-neutral-200"
+          // The bright purple (the owner, 09/10/2026: "tải về tím xem ngay
+          // trắng"), white lettering.
+          actionClass="bg-purple-500 text-white hover:bg-purple-400"
           arrow={<Download className="h-3 w-3 shrink-0" />}
         />
       ) : null}
@@ -266,9 +266,9 @@ function DownloadCard({
           title="Thiết lập & sử dụng chi tiết"
           href={docsUrl}
           action="Xem ngay"
-          // A bright purple on trial (the owner, 09/10/2026: "màu tím mà nó
-          // tươi thử"), brighter than the earlier violet-600, white lettering.
-          actionClass="bg-purple-500 text-white hover:bg-purple-400"
+          // White (the owner, 09/10/2026: "tải về tím xem ngay trắng"), dark
+          // lettering.
+          actionClass="bg-white text-neutral-950 hover:bg-neutral-200"
           arrow={<ArrowRight className="h-3 w-3 shrink-0" />}
         />
       ) : null}
