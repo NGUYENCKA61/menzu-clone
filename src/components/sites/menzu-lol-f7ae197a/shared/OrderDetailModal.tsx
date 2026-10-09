@@ -1156,10 +1156,10 @@ export function OrderDetailModal({
  */
 function LockedLogin({ onTake }: { onTake: () => void }) {
   return (
+    // No key tile of its own: the section heading right above already wears
+    // the red key, and two keys stacked said the same thing twice (the
+    // owner, 09/10/2026: keep the red one, "rồi làm đi").
     <div className="flex flex-col items-center gap-4 rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-6 text-center sm:px-6">
-      <span className="flex h-12 w-12 items-center justify-center rounded-xl border border-amber-500/30 bg-amber-500/10 text-amber-400">
-        <KeyRound className="h-5 w-5" aria-hidden />
-      </span>
       <div>
         <p className="text-base font-black uppercase tracking-wide text-white">
           Nhận thông tin đăng nhập
