@@ -122,7 +122,7 @@ export interface OrderDetailData {
 const LABEL =
   "flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-neutral-500";
 const GHOST_BTN =
-  "inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-3.5 text-xs font-semibold text-neutral-300 transition-colors hover:bg-white/10 hover:text-white";
+  "inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-3.5 text-xs font-bold text-neutral-300 transition-colors hover:bg-white/10 hover:text-white";
 const CELL =
   "border-t border-white/[0.06] px-4 py-4 text-sm text-neutral-200 sm:px-5";
 /** "280.000đ", like the /orders list, /transactions and every price on the site. */
@@ -307,7 +307,7 @@ function FileRow({
           off the card. */}
       <div className="min-w-0 flex-1">
         <span className={LABEL}>{eyebrow}</span>
-        <p className="mt-0.5 truncate text-[13px] font-black text-white">{title}</p>
+        <p className="mt-0.5 truncate text-sm font-bold text-white">{title}</p>
       </div>
       <a
         href={href}
@@ -1144,10 +1144,10 @@ function LockedLogin({ onTake }: { onTake: () => void }) {
     // owner, 09/10/2026: keep the red one, "rồi làm đi").
     <div className="flex flex-col items-center gap-4 rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-6 text-center sm:px-6">
       <div>
-        <p className="text-base font-black uppercase tracking-wide text-white">
+        <p className="text-sm font-black uppercase tracking-wider text-white">
           Nhận thông tin đăng nhập
         </p>
-        <p className="mx-auto mt-1.5 max-w-md text-[13px] leading-relaxed text-neutral-400">
+        <p className="mx-auto mt-1.5 max-w-md text-xs leading-relaxed text-neutral-400">
           Tài khoản này chưa được nhận. Khi bạn bấm nhận, hệ thống sẽ mở khóa thông tin, vui
           lòng tự bảo mật tài khoản.
         </p>
@@ -1354,7 +1354,7 @@ function LoginRevealDialog({ code, onClose }: { code: string; onClose: () => voi
           <button
             type="button"
             onClick={onClose}
-            className="press h-11 rounded-xl border border-white/12 bg-white/[0.04] px-4 text-xs font-bold text-neutral-200 transition-colors hover:border-white/25 hover:text-white sm:h-10"
+            className="press h-11 rounded-xl border border-white/12 bg-white/[0.04] px-4 text-xs font-bold text-neutral-300 transition-colors hover:border-white/25 hover:text-white sm:h-10"
           >
             Hủy bỏ
           </button>
