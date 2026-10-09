@@ -248,9 +248,9 @@ function DownloadCard({
       {downloadUrl ? (
         <FileRow
           icon={<Download className="h-3.5 w-3.5" />}
-          // Red, as the manual's (the owner, 09/10/2026: amber, then "icon
-          // link tải và tài liệu màu đỏ đi").
-          tint="border-[var(--menzu-accent)]/25 bg-[var(--menzu-accent)]/15 text-[var(--menzu-accent)]"
+          // Colourless, on trial (the owner, 09/10/2026: "bỏ màu thử"), after
+          // red, amber and red again.
+          tint="border-white/10 bg-white/5 text-neutral-300"
           eyebrow="Link tải hack"
           title="Bộ cài đặt mới nhất"
           href={downloadUrl}
@@ -264,7 +264,7 @@ function DownloadCard({
       {docsUrl ? (
         <FileRow
           icon={<FileText className="h-3.5 w-3.5" />}
-          tint="border-[var(--menzu-accent)]/25 bg-[var(--menzu-accent)]/15 text-[var(--menzu-accent)]"
+          tint="border-white/10 bg-white/5 text-neutral-300"
           eyebrow="Tài liệu hướng dẫn"
           title="Cài đặt & sử dụng"
           href={docsUrl}
