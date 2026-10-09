@@ -808,16 +808,13 @@ export function OrderDetailModal({
                         looking straight at their key that they will get it
                         once they pay. */}
                     <div className="mb-4 flex items-center gap-2.5">
-                      {/* The red info tile beside it again (the owner,
-                          09/10/2026: "thêm icon thông tin đi"). */}
-                      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[var(--menzu-accent)]/25 bg-[var(--menzu-accent)]/15 text-[var(--menzu-accent)]">
-                        <Info className="h-3.5 w-3.5" />
-                      </span>
+                      {/* No tile beside it, as "Sản phẩm đã mua" above has
+                          none (the owner, 09/10/2026: "bỏ đi"). */}
                       {/* A tool hands over keys and files, not a sign-in, so
                           its heading is its own (the owner, 09/10/2026: "Key &
                           tải về", then "Thông tin sản phẩm", "/ bàn giao"
                           tried and dropped, and at last "Thông tin chi tiết
-                          sản phẩm"; the info glyph beside it). */}
+                          sản phẩm"). */}
                       <h3 className="text-sm font-black uppercase tracking-wider text-white">
                         {order.isSoftware ? "Thông tin chi tiết sản phẩm" : "Thông tin đăng nhập / bàn giao"}
                       </h3>
@@ -1023,10 +1020,11 @@ export function OrderDetailModal({
                   {/* NOTE */}
                   {/* Red on purpose: the owner wants this reminder as the
                       sheet's one accent ("đỏ cho có điểm nhấn"), after a grey
-                      version was tried in 4bd4ac0. No glyph: the red rule on
-                      its left says enough (the owner, 09/10/2026: "bỏ cái icon
-                      information ở Vui lòng lưu lại mã đơn hàng"). */}
+                      version was tried in 4bd4ac0. The info glyph is back now
+                      the handover heading has none (the owner, 09/10/2026:
+                      "thêm lại icon chỗ vui lòng lưu lại mã đơn hàng đi"). */}
                   <div className="mt-4 flex items-start gap-3 rounded-r-xl border-l-[3px] border-[var(--menzu-accent)] bg-[var(--menzu-accent)]/5 px-4 py-3.5 text-xs leading-relaxed text-neutral-400">
+                    <Info className="mt-0.5 h-4 w-4 shrink-0 text-[var(--menzu-accent)]" />
                     <span>
                       Vui lòng lưu lại mã đơn hàng để được hỗ trợ khi cần thiết.
                       Không chia sẻ thông tin tài khoản hoặc dữ liệu bàn giao
