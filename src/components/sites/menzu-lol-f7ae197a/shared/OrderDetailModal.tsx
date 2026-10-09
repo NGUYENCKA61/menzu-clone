@@ -243,6 +243,10 @@ function HandoverBox({
  *
  * Either link may be missing, and when both are the card is not drawn at all,
  * so a shop that has uploaded neither sees exactly what it saw before.
+ *
+ * One card for both, in the key box's frame, the rows parted by a hairline
+ * (the owner, 09/10/2026: "nhập link tải hack và tài liệu thành 1 card thử");
+ * they were two cards stacked.
  */
 function DownloadCard({
   downloadUrl,
@@ -255,7 +259,7 @@ function DownloadCard({
   productName: string;
 }) {
   return (
-    <div className="flex flex-col gap-2.5">
+    <div className="divide-y divide-white/[0.06] rounded-xl border border-white/[0.06] bg-white/[0.02] transition-colors hover:border-white/[0.12]">
       {downloadUrl ? (
         <FileRow
           icon={<Download className="h-3.5 w-3.5" />}
@@ -312,7 +316,9 @@ function FileRow({
   arrow: ReactNode;
 }) {
   return (
-    <div className="flex flex-1 items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] p-3 transition-colors hover:border-white/[0.12]">
+    // A row of DownloadCard's one card: the frame is the card's, and the
+    // 16px inset matches the key box beside it.
+    <div className="flex items-center gap-3 px-4 py-3">
       <span
         className={`grid h-8 w-8 shrink-0 place-items-center rounded-lg border ${tint}`}
       >
