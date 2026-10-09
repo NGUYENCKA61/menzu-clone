@@ -793,10 +793,10 @@ export function OrderDetailModal({
                   </div>
 
                   {/* HANDOVER */}
-                  {/* No frame around the section, on trial (the owner,
-                      09/10/2026: "bỏ các bao ngoài thử"): the heading and the
-                      cards stand on the sheet, the cards keeping their own. */}
-                  <div className="relative mt-6">
+                  {/* The section's frame, back after a frameless trial (the
+                      owner, 09/10/2026: "bỏ các bao ngoài thử", then "thêm
+                      card lồng lại"). */}
+                  <div className="relative mt-6 overflow-hidden rounded-xl border border-white/10 bg-white/[0.02] p-4 sm:p-5">
                     {/* One line. The sentence under it — "Thông tin được cung
                         cấp sau khi thanh toán" — was telling a reader who is
                         looking straight at their key that they will get it
