@@ -266,9 +266,9 @@ function DownloadCard({
           // Two words again (the owner, 09/10/2026: "xem thành xem ngay đi"),
           // after a try with "Xem" alone.
           action="Xem ngay"
-          // White, so dark lettering (the owner, 09/10/2026: "xem ngay màu
-          // trắng"), after grey.
-          actionClass="bg-white text-neutral-950 hover:bg-neutral-200"
+          // Purple with white lettering (the owner, 09/10/2026: "xem ngay màu
+          // tím"), the purple and lettering of the earlier "tím chữ trắng".
+          actionClass="bg-purple-500 text-white hover:bg-purple-600"
           arrow={<ArrowRight className="h-3 w-3 shrink-0" />}
         />
       ) : null}
