@@ -261,9 +261,9 @@ function DownloadCard({
           title={downloadName ?? DEFAULT_DOWNLOAD_NAME}
           href={downloadUrl}
           action="Tải về"
-          // Grey, the same ghost as "Sao chép" (the owner, 09/10/2026: "tải
-          // về và nút xem màu xám đi").
-          actionClass="border border-white/10 bg-white/5 text-neutral-300 hover:bg-white/10 hover:text-white"
+          // The accent red with white lettering (the owner, 09/10/2026: "tải
+          // về màu đỏ nút xem màu trắng đi").
+          actionClass="bg-[var(--menzu-accent)] text-white hover:bg-[var(--menzu-accent-dark)]"
           arrow={<Download className="h-3 w-3 shrink-0" />}
         />
       ) : null}
@@ -280,9 +280,9 @@ function DownloadCard({
           // One word (the owner, 09/10/2026: "xem ngay thành xem"), after
           // "Xem ngay" came and went twice.
           action="Xem"
-          // Grey like "Tải về" above (the owner, 09/10/2026: "tải về và nút
-          // xem màu xám đi").
-          actionClass="border border-white/10 bg-white/5 text-neutral-300 hover:bg-white/10 hover:text-white"
+          // White, so dark lettering (the owner, 09/10/2026: "tải về màu đỏ
+          // nút xem màu trắng đi").
+          actionClass="bg-white text-neutral-950 hover:bg-neutral-200"
           arrow={<ArrowRight className="h-3 w-3 shrink-0" />}
         />
       ) : null}
