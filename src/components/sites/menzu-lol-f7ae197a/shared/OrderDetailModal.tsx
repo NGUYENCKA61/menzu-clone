@@ -10,6 +10,7 @@ import {
   Eye,
   FileText,
   Hash,
+  Info,
   KeyRound,
   Landmark,
   Lock,
@@ -796,8 +797,11 @@ export function OrderDetailModal({
                         looking straight at their key that they will get it
                         once they pay. */}
                     <div className="mb-4 flex items-center gap-2.5">
-                      {/* No tile beside it (the owner, 09/10/2026: "bỏ icon
-                          thông tin"), plain text like "Sản phẩm đã mua". */}
+                      {/* The red info tile beside it again (the owner,
+                          09/10/2026: "thêm icon thông tin đi"). */}
+                      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[var(--menzu-accent)]/25 bg-[var(--menzu-accent)]/15 text-[var(--menzu-accent)]">
+                        <Info className="h-3.5 w-3.5" />
+                      </span>
                       {/* A tool hands over keys and files, not a sign-in, so
                           its heading is its own (the owner, 09/10/2026: "Key &
                           tải về", then "Thông tin sản phẩm", "/ bàn giao"
