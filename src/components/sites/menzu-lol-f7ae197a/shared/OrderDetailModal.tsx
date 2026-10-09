@@ -249,9 +249,9 @@ function DownloadCard({
         <FileRow
           icon={<Download className="h-3 w-3" />}
           eyebrow="Link tải hack"
-          // The owner's word for it (09/10/2026: "Bộ cài đặt mới nhất thành
-          // Loader mới nhất").
-          title="Loader mới nhất"
+          // The owner's words for it (09/10/2026: "Bộ cài đặt mới nhất" →
+          // "Loader mới nhất" → "Bản Loader mới nhất").
+          title="Bản Loader mới nhất"
           href={downloadUrl}
           action="Tải về"
           // Grey like "Sao chép", on trial (the owner, 09/10/2026: orange,
