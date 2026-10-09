@@ -238,17 +238,17 @@ function DownloadCard({
   downloadUrl: string | null;
   docsUrl: string | null;
 }) {
-  // Neutral tiles, so the one red in each row is the button that acts; the
-  // violet was the only hue on the receipt outside the site's own (the owner,
-  // 09/10/2026: "làm thử hết đi"). The download row's name is a short fixed
-  // one: the tool's full name sits in "Sản phẩm đã mua" just above, and here
-  // it only repeated itself, cut short.
+  // The tiles keep their colours, red for the download and violet for the
+  // manual: neutral ones were tried and looked washed out (the owner,
+  // 09/10/2026: "thêm lại icon màu đi thấy nhạt nhòa quá"). The download
+  // row's name is a short fixed one: the tool's full name sits in "Sản phẩm
+  // đã mua" just above, and here it only repeated itself, cut short.
   return (
     <div className="flex flex-col gap-2.5">
       {downloadUrl ? (
         <FileRow
           icon={<Download className="h-3.5 w-3.5" />}
-          tint="border-white/10 bg-white/5 text-neutral-300"
+          tint="border-[var(--menzu-accent)]/25 bg-[var(--menzu-accent)]/15 text-[var(--menzu-accent)]"
           eyebrow="Link tải hack"
           title="Bộ cài đặt mới nhất"
           href={downloadUrl}
@@ -260,7 +260,7 @@ function DownloadCard({
       {docsUrl ? (
         <FileRow
           icon={<FileText className="h-3.5 w-3.5" />}
-          tint="border-white/10 bg-white/5 text-neutral-300"
+          tint="border-violet-500/25 bg-violet-500/15 text-violet-300"
           eyebrow="Tài liệu hướng dẫn"
           title="Cài đặt & sử dụng"
           href={docsUrl}
