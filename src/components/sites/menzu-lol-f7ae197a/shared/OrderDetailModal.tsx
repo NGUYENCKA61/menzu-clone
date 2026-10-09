@@ -253,7 +253,10 @@ function DownloadCard({
           title="Bộ cài đặt mới nhất"
           href={downloadUrl}
           action="Tải về"
-          actionClass="bg-[var(--menzu-accent)] text-white hover:bg-[var(--menzu-accent-dark)]"
+          // Orange (the owner, 09/10/2026: "nút tải về màu cam đi"), with
+          // dark lettering as the amber "Lấy thông tin" has: white on orange
+          // is hard to read at 12px.
+          actionClass="bg-orange-500 text-neutral-950 hover:bg-orange-400"
           arrow={<Download className="h-3 w-3 shrink-0" />}
         />
       ) : null}
