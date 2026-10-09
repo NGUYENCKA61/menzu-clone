@@ -266,9 +266,10 @@ function DownloadCard({
           title="Thiết lập & sử dụng chi tiết"
           href={docsUrl}
           action="Xem ngay"
-          // Sea blue on trial (the owner, 09/10/2026: white, then "xanh biển
-          // thử"): blue-600 under white lettering, which reads at 12px.
-          actionClass="bg-blue-600 text-white hover:bg-blue-500"
+          // A brighter sea blue on trial (the owner, 09/10/2026: "xanh biển
+          // nào mà nó tươi hơn xíu"): sky-500, with dark lettering as the
+          // bright buttons have, since white on it is hard to read at 12px.
+          actionClass="bg-sky-500 text-neutral-950 hover:bg-sky-400"
           arrow={<ArrowRight className="h-3 w-3 shrink-0" />}
         />
       ) : null}
