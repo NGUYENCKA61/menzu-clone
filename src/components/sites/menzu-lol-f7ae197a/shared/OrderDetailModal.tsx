@@ -10,7 +10,6 @@ import {
   Eye,
   FileText,
   Hash,
-  Info,
   KeyRound,
   Landmark,
   Lock,
