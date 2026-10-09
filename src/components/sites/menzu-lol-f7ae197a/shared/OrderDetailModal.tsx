@@ -1182,7 +1182,11 @@ function LockedLogin({ onTake }: { onTake: () => void }) {
       <button
         type="button"
         onClick={onTake}
-        className="press h-11 rounded-xl bg-amber-500 px-8 text-[12px] font-black uppercase tracking-widest text-neutral-950 transition-colors hover:bg-amber-400"
+        // Sentence case, 12px bold, 44px on a phone and 40 from sm: the
+        // lettering of "Yêu cầu bảo hành" and the popup's buttons, in the
+        // card's own amber (the owner, 09/10/2026: "làm nút lấy thông tin
+        // trước"). The card's title stays in capitals; it is a heading.
+        className="press inline-flex h-11 items-center justify-center rounded-xl bg-amber-500 px-8 text-xs font-bold text-neutral-950 transition-colors hover:bg-amber-400 sm:h-10"
       >
         Lấy thông tin
       </button>
