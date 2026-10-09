@@ -137,14 +137,21 @@ function money(value: number): string {
  * rest (the owner, 09/10/2026: "phần mật khẩu khỏi ẩn mà cho hiện luôn"): the
  * buyer took it on camera through "Lấy thông tin", so a mask and a "Hiện"
  * button only stood between them and typing it in.
+ *
+ * With `tint` the glyph sits in a 32px tile, the file rows' shape (the key,
+ * since the owner's "icon key sửa theo thử", 09/10/2026); without it the
+ * glyph rides in the label, as on the sign-in's two boxes.
  */
 function HandoverBox({
   label,
   icon,
+  tint,
   value,
 }: {
   label: string;
   icon: ReactNode;
+  /** Border, fill and glyph colour for the square badge. */
+  tint?: string;
   value: string;
 }) {
   const [copied, setCopied] = useState(false);
@@ -177,6 +184,62 @@ function HandoverBox({
 
   const name = label.toLowerCase();
 
+  const text = (
+    <span
+      ref={valueRef}
+      // Wrapped, not cut: a long key read "…5T8W3…" on a phone, and the
+      // buyer could copy it but not read it through (the owner, 09/10/2026).
+      className="min-w-0 max-w-full break-all font-mono text-sm font-bold tracking-wide text-white"
+    >
+      {value}
+    </span>
+  );
+  const actions = (
+    <span className="flex shrink-0 items-center gap-2">
+      <button
+        type="button"
+        onClick={copy}
+        aria-label={copied ? `Đã chép ${name}` : `Sao chép ${name}`}
+        className={`${GHOST_BTN} ${
+          copied
+            ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/10 hover:text-emerald-400"
+            : ""
+        }`}
+      >
+        {copied ? (
+          <Check className="h-3 w-3" />
+        ) : (
+          <Copy className="h-3 w-3" />
+        )}
+        {copied ? "Đã chép" : "Sao chép"}
+      </button>
+      <span role="status" className="sr-only">
+        {copied ? `Đã sao chép ${name}` : ""}
+      </span>
+    </span>
+  );
+
+  if (tint) {
+    // Tile, label over value, button at the end, as a file row. On a phone
+    // the button drops under the value, which needs the width more.
+    return (
+      <div className="flex items-start gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] p-3 transition-colors hover:border-white/[0.12] sm:items-center">
+        <span
+          className={`grid h-8 w-8 shrink-0 place-items-center rounded-lg border ${tint}`}
+        >
+          {icon}
+        </span>
+        <div className="flex min-w-0 flex-1 flex-col items-start gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
+          <div className="min-w-0 max-w-full">
+            <span className={LABEL}>{label}</span>
+            <p className="mt-0.5">{text}</p>
+          </div>
+          {actions}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4 transition-colors hover:border-white/[0.12]">
       <span className={`${LABEL} mb-2`}>
@@ -186,36 +249,8 @@ function HandoverBox({
       {/* Value above the buttons on a phone; the pair would otherwise leave
           the value a few characters of room. */}
       <div className="flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
-        <span
-          ref={valueRef}
-          // Wrapped, not cut: a long key read "…5T8W3…" on a phone, and the
-          // buyer could copy it but not read it through (the owner, 09/10/2026).
-          className="min-w-0 max-w-full break-all font-mono text-sm font-bold tracking-wide text-white"
-        >
-          {value}
-        </span>
-        <span className="flex shrink-0 items-center gap-2">
-          <button
-            type="button"
-            onClick={copy}
-            aria-label={copied ? `Đã chép ${name}` : `Sao chép ${name}`}
-            className={`${GHOST_BTN} ${
-              copied
-                ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/10 hover:text-emerald-400"
-                : ""
-            }`}
-          >
-            {copied ? (
-              <Check className="h-3 w-3" />
-            ) : (
-              <Copy className="h-3 w-3" />
-            )}
-            {copied ? "Đã chép" : "Sao chép"}
-          </button>
-          <span role="status" className="sr-only">
-            {copied ? `Đã sao chép ${name}` : ""}
-          </span>
-        </span>
+        {text}
+        {actions}
       </div>
     </div>
   );
@@ -926,7 +961,11 @@ export function OrderDetailModal({
                                     className="flex flex-col gap-1.5"
                                   >
                                     <HandoverBox
-                                      icon={<KeyRound className="h-3 w-3 text-[var(--menzu-accent)]" />}
+                                      // The download row's red tile (the
+                                      // owner, 09/10/2026: "icon key sửa
+                                      // theo thử").
+                                      icon={<KeyRound className="h-3.5 w-3.5" />}
+                                      tint="border-[var(--menzu-accent)]/25 bg-[var(--menzu-accent)]/15 text-[var(--menzu-accent)]"
                                       label={
                                         order.keys.length > 1
                                           ? `Key ${index + 1}`
