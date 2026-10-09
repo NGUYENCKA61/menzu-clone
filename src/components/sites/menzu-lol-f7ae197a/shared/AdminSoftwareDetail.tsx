@@ -47,6 +47,7 @@ import {
   type ProductRequirement,
 } from "@/lib/productRequirements";
 import { SUMMARY_MAX_LENGTH } from "@/lib/productSummary";
+import { DEFAULT_DOWNLOAD_NAME, DOWNLOAD_NAME_MAX_LENGTH } from "@/lib/downloadName";
 import {
   LAUNCHERS,
   RUNS_ON,
@@ -111,6 +112,9 @@ export interface SoftwareDetailView {
    *  plain text arrives already converted. */
   descriptionHtml: string;
   downloadUrl: string;
+  /** "Tên bản tải": what the receipt calls that download; "" prints the
+   *  default. */
+  downloadName: string;
   /** "Link tài liệu sử dụng" — the manual handed over beside the installer. */
   docsUrl: string;
   /** The refund promise as a whole percent, or "" where none is set. Typed as
@@ -313,6 +317,7 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
   /** What the database holds; advanced on every successful save. */
   const [descBaseline, setDescBaseline] = useState(software.descriptionHtml);
   const [downloadUrl, setDownloadUrl] = useState(software.downloadUrl);
+  const [downloadName, setDownloadName] = useState(software.downloadName);
   const [docsUrl, setDocsUrl] = useState(software.docsUrl);
   const [refundRate, setRefundRate] = useState(software.refundRate);
   const [badge1, setBadge1] = useState(software.badges[0]?.label ?? "");
@@ -387,6 +392,7 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
       name,
       slug,
       downloadUrl,
+      downloadName,
       docsUrl,
       refundRate: refundRate.trim(),
       // Sent as a pair; the server drops the blanks, so clearing the first box
@@ -717,7 +723,27 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
                   className={FIELD}
                 />
               </div>
+              {/* Beside its link, since it names what the link hands over. */}
               <div>
+                <label htmlFor="sw-download-name" className={LABEL}>
+                  Tên bản tải
+                </label>
+                <input
+                  id="sw-download-name"
+                  value={downloadName}
+                  onChange={(event) => setDownloadName(event.target.value)}
+                  maxLength={DOWNLOAD_NAME_MAX_LENGTH}
+                  placeholder={DEFAULT_DOWNLOAD_NAME}
+                  className={FIELD}
+                />
+                <p className="mt-1.5 text-[11px] text-neutral-500">
+                  Hiện dưới &ldquo;Link tải hack&rdquo; trong đơn hàng của khách.
+                  Để trống thì hiện &ldquo;{DEFAULT_DOWNLOAD_NAME}&rdquo;.
+                </p>
+              </div>
+              {/* The whole row: a link wants the width, and the pairs below
+                  stay as they were. */}
+              <div className="sm:col-span-2">
                 <label htmlFor="sw-docs" className={LABEL}>
                   Link tài liệu sử dụng
                 </label>

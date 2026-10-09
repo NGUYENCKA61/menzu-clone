@@ -15,6 +15,7 @@ import {
 import { serializeBadges } from "@/lib/productBadges";
 import { cleanGuideHtml } from "@/lib/productGuide";
 import { SUMMARY_MAX_LENGTH } from "@/lib/productSummary";
+import { DOWNLOAD_NAME_MAX_LENGTH } from "@/lib/downloadName";
 import { RATE_ABSENT, RATE_BAD, readRefundRate } from "@/lib/refundRate";
 import { PILL_ABSENT, PILL_BAD, readStatusPill } from "@/lib/statusPill";
 import { uniqueProductSlug } from "@/lib/routes";
@@ -209,6 +210,8 @@ export async function PATCH(request: Request) {
     setupGuide?: string;
     price?: number;
     downloadUrl?: string;
+    /** "Tên bản tải", plain text; "" puts the default name back. */
+    downloadName?: string;
     docsUrl?: string;
     /** Whole percent 0–100; "" clears the promise back to "not set". */
     refundRate?: number | string | null;
@@ -255,6 +258,16 @@ export async function PATCH(request: Request) {
   if (summary !== undefined && summary.length > SUMMARY_MAX_LENGTH) {
     return NextResponse.json(
       { error: `Mô tả ngắn tối đa ${SUMMARY_MAX_LENGTH} ký tự` },
+      { status: 400 },
+    );
+  }
+
+  // Refused rather than cut, for the same reason as the blurb above.
+  const downloadName =
+    typeof body?.downloadName === "string" ? body.downloadName.trim() : undefined;
+  if (downloadName !== undefined && downloadName.length > DOWNLOAD_NAME_MAX_LENGTH) {
+    return NextResponse.json(
+      { error: `Tên bản tải tối đa ${DOWNLOAD_NAME_MAX_LENGTH} ký tự` },
       { status: 400 },
     );
   }
@@ -351,6 +364,8 @@ export async function PATCH(request: Request) {
       ...(body?.downloadUrl !== undefined
         ? { downloadUrl: body.downloadUrl.trim() || null }
         : {}),
+      // "" clears it, which puts "Bản Loader mới nhất" back on the receipt.
+      ...(downloadName !== undefined ? { downloadName: downloadName || null } : {}),
       // Same convention as the others: "" clears the link and hides its button.
       ...(body?.docsUrl !== undefined ? { docsUrl: body.docsUrl.trim() || null } : {}),
       // "" clears it, which takes the "Tỷ lệ hoàn trả" line off the policy

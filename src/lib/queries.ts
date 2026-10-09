@@ -933,6 +933,8 @@ export interface OrderRow {
    *  carries them today. Null hides that button; null for both hides the
    *  whole card. Withheld unless the order is a settled software order. */
   downloadUrl: string | null;
+  /** The shop's name for that download; null prints the default. */
+  downloadName: string | null;
   docsUrl: string | null;
   /**
    * Accounts only: the sign-in the buyer was handed, or that they are still
@@ -983,6 +985,7 @@ export async function getOrders(userId: string): Promise<OrderRow[]> {
           productType: true,
           accountPool: true,
           downloadUrl: true,
+          downloadName: true,
           docsUrl: true,
           category: { select: { slug: true, name: true } },
           // The one storefront read of these three columns, and it is scoped
@@ -1085,6 +1088,10 @@ export async function getOrders(userId: string): Promise<OrderRow[]> {
     downloadUrl:
       o.status === "PAID" && o.product.productType === "SOFTWARE_GAME"
         ? o.product.downloadUrl
+        : null,
+    downloadName:
+      o.status === "PAID" && o.product.productType === "SOFTWARE_GAME"
+        ? o.product.downloadName
         : null,
     docsUrl:
       o.status === "PAID" && o.product.productType === "SOFTWARE_GAME"

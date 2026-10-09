@@ -32,6 +32,7 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 
 import { REVEAL_STEPS, type LoginHandover } from "@/lib/accountLogin";
+import { DEFAULT_DOWNLOAD_NAME } from "@/lib/downloadName";
 import { warrantyButton, type WarrantyStatus } from "@/lib/warrantyRequests";
 
 import { lockScroll, trapTab, unlockScroll } from "./modalChrome";
@@ -97,6 +98,8 @@ export interface OrderDetailData {
   /** Software: the installer and the manual. Null hides that one button;
    *  null for both leaves the keys the full width they had before. */
   downloadUrl: string | null;
+  /** The shop's name for that download; null prints DEFAULT_DOWNLOAD_NAME. */
+  downloadName: string | null;
   docsUrl: string | null;
   /** Accounts: the sign-in, or the word that the shop hands it over itself. */
   login: LoginHandover;
@@ -233,23 +236,26 @@ function HandoverBox({
  */
 function DownloadCard({
   downloadUrl,
+  downloadName,
   docsUrl,
 }: {
   downloadUrl: string | null;
+  downloadName: string | null;
   docsUrl: string | null;
 }) {
   // No square tile: a small red glyph sits in each label, as "KEY" wears its
   // key (the owner, 09/10/2026: "lùi về phiên bản link tải hack và tài liệu
   // hướng dẫn là icon nhỏ ấy", after the tiled first layout was tried again).
-  // The download row's name is a short fixed one: the tool's full name sits
-  // in "Sản phẩm đã mua" just above.
+  // The download row's name is the shop's own for this tool, typed beside
+  // the link in the admin, and "Bản Loader mới nhất" until it types one (the
+  // owner, 09/10/2026: "Bản Loader mới nhất có thể tùy chỉnh tên đi").
   return (
     <div className="flex flex-col gap-2.5">
       {downloadUrl ? (
         <FileRow
           icon={<Download className="h-3 w-3 text-[var(--menzu-accent)]" />}
           eyebrow="Link tải hack"
-          title="Bản Loader mới nhất"
+          title={downloadName ?? DEFAULT_DOWNLOAD_NAME}
           href={downloadUrl}
           action="Tải về"
           // The accent red with white lettering (the owner, 09/10/2026: "tải về
@@ -943,6 +949,7 @@ export function OrderDetailModal({
                           {hasFiles ? (
                             <DownloadCard
                               downloadUrl={order.downloadUrl}
+                              downloadName={order.downloadName}
                               docsUrl={order.docsUrl}
                             />
                           ) : null}

@@ -133,6 +133,7 @@ export default async function AdminAccountDetailPage({
                 : plainToDocHtml(software.description)
               : "",
             downloadUrl: software.downloadUrl ?? "",
+            downloadName: software.downloadName ?? "",
             docsUrl: software.docsUrl ?? "",
             // "" rather than "0": the form has to be able to tell "no promise
             // set" from "we refund nothing".

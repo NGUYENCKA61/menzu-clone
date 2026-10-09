@@ -641,6 +641,10 @@ model Product {
   /// folder, a guide, whatever the shop hands out. Null hides the button
   /// rather than rendering one that goes nowhere.
   downloadUrl    String?
+  /// What the buyer's receipt calls that download, under "Link tải hack":
+  /// "Loader v2.4", "Bản Steam", whatever the shop wants said for this tool.
+  /// Null prints "Bản Loader mới nhất" (src/lib/downloadName.ts).
+  downloadName   String?
   /// Where the buyer's "Tài liệu sử dụng" button points — a PDF, a Drive doc,
   /// a wiki page. Separate from `downloadUrl` because the tool and its manual
   /// are handed over as two different links; null hides the button.

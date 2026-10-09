@@ -154,6 +154,7 @@ export default async function OrdersPage({
               keys: o.keys.map((key) => ({ value: key.value })),
               keysPending: o.keysPending,
               downloadUrl: o.downloadUrl,
+              downloadName: o.downloadName,
               docsUrl: o.docsUrl,
               login: o.login,
               loginLocked: o.loginLocked,
