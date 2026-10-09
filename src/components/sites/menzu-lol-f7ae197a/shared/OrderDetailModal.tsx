@@ -238,19 +238,16 @@ function DownloadCard({
   downloadUrl: string | null;
   docsUrl: string | null;
 }) {
-  // Both tiles wear the accent red of the heading's tile (the owner,
-  // 09/10/2026: "icon link tải và tài liệu màu đỏ đi"), after neutral ones
-  // looked washed out and amber/violet were tried. The download row's name
-  // is a short fixed one: the tool's full name sits in "Sản phẩm đã mua"
-  // just above, and here it only repeated itself, cut short.
+  // No square tile: a small glyph sits in each label, as "KEY" wears its key
+  // (the owner, 09/10/2026: "đổi sang icon nhỏ bỏ trên link tải hack, tài
+  // liệu cũng vậy"), after red, amber, violet and grey tiles were tried. The
+  // download row's name is a short fixed one: the tool's full name sits in
+  // "Sản phẩm đã mua" just above, and here it only repeated itself, cut short.
   return (
     <div className="flex flex-col gap-2.5">
       {downloadUrl ? (
         <FileRow
-          icon={<Download className="h-3.5 w-3.5" />}
-          // Colourless, on trial (the owner, 09/10/2026: "bỏ màu thử"), after
-          // red, amber and red again.
-          tint="border-white/10 bg-white/5 text-neutral-300"
+          icon={<Download className="h-3 w-3" />}
           eyebrow="Link tải hack"
           title="Bộ cài đặt mới nhất"
           href={downloadUrl}
@@ -263,8 +260,7 @@ function DownloadCard({
       ) : null}
       {docsUrl ? (
         <FileRow
-          icon={<FileText className="h-3.5 w-3.5" />}
-          tint="border-white/10 bg-white/5 text-neutral-300"
+          icon={<FileText className="h-3 w-3" />}
           eyebrow="Tài liệu hướng dẫn"
           title="Cài đặt & sử dụng"
           href={docsUrl}
@@ -285,10 +281,10 @@ function DownloadCard({
  * Two lines rather than three. The third was a sentence that said nothing the
  * eyebrow had not already said — "Hướng dẫn chi tiết sản phẩm" under "Tài liệu
  * hướng dẫn" — and it cost the whole handover block thirty pixels of height.
+ * The glyph rides in the label, and the 16px inset matches the key box's.
  */
 function FileRow({
   icon,
-  tint,
   eyebrow,
   title,
   href,
@@ -297,8 +293,6 @@ function FileRow({
   arrow,
 }: {
   icon: ReactNode;
-  /** Border, fill and glyph colour for the square badge. */
-  tint: string;
   eyebrow: string;
   title: string;
   href: string;
@@ -307,17 +301,15 @@ function FileRow({
   arrow: ReactNode;
 }) {
   return (
-    <div className="flex flex-1 items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] p-3 transition-colors hover:border-white/[0.12]">
-      <span
-        className={`grid h-8 w-8 shrink-0 place-items-center rounded-lg border ${tint}`}
-      >
-        {icon}
-      </span>
-      {/* min-w-0 so a long tool name truncates instead of pushing the button
-          off the card. */}
+    <div className="flex flex-1 items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3 transition-colors hover:border-white/[0.12]">
+      {/* min-w-0 so a long name truncates instead of pushing the button off
+          the card. */}
       <div className="min-w-0 flex-1">
-        <span className={LABEL}>{eyebrow}</span>
-        <p className="mt-0.5 truncate text-sm font-bold text-white">{title}</p>
+        <span className={LABEL}>
+          {icon}
+          {eyebrow}
+        </span>
+        <p className="mt-1 truncate text-sm font-bold text-white">{title}</p>
       </div>
       <a
         href={href}
