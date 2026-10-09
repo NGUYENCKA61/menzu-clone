@@ -266,9 +266,9 @@ function DownloadCard({
           // Two words again (the owner, 09/10/2026: "xem thành xem ngay đi"),
           // after a try with "Xem" alone.
           action="Xem ngay"
-          // Dark green with white lettering (the owner, 09/10/2026: "màu xanh
-          // lá cây đậm"), after deep violet. green-700, #008236, about 5:1.
-          actionClass="bg-green-700 text-white hover:bg-green-800"
+          // White, so dark lettering (the owner, 09/10/2026: "trắng đi"),
+          // after dark green.
+          actionClass="bg-white text-neutral-950 hover:bg-neutral-200"
           arrow={<ArrowRight className="h-3 w-3 shrink-0" />}
         />
       ) : null}
