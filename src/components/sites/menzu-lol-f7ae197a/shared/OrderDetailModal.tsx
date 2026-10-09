@@ -266,10 +266,9 @@ function DownloadCard({
           title="Thiết lập & sử dụng chi tiết"
           href={docsUrl}
           action="Xem ngay"
-          // A brighter sea blue on trial (the owner, 09/10/2026: "xanh biển
-          // nào mà nó tươi hơn xíu"): sky-500, with dark lettering as the
-          // bright buttons have, since white on it is hard to read at 12px.
-          actionClass="bg-sky-500 text-neutral-950 hover:bg-sky-400"
+          // A bright purple on trial (the owner, 09/10/2026: "màu tím mà nó
+          // tươi thử"), brighter than the earlier violet-600, white lettering.
+          actionClass="bg-purple-500 text-white hover:bg-purple-400"
           arrow={<ArrowRight className="h-3 w-3 shrink-0" />}
         />
       ) : null}
