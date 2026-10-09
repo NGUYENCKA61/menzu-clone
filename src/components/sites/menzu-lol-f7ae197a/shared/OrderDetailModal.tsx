@@ -238,7 +238,7 @@ function DownloadCard({
   downloadUrl: string | null;
   docsUrl: string | null;
 }) {
-  // The tiles keep their colours, red for the download and violet for the
+  // The tiles keep their colours, amber for the download and violet for the
   // manual: neutral ones were tried and looked washed out (the owner,
   // 09/10/2026: "thêm lại icon màu đi thấy nhạt nhòa quá"). The download
   // row's name is a short fixed one: the tool's full name sits in "Sản phẩm
@@ -248,7 +248,8 @@ function DownloadCard({
       {downloadUrl ? (
         <FileRow
           icon={<Download className="h-3.5 w-3.5" />}
-          tint="border-[var(--menzu-accent)]/25 bg-[var(--menzu-accent)]/15 text-[var(--menzu-accent)]"
+          // Amber like its button (the owner, 09/10/2026: "icon màu vàng đi").
+          tint="border-amber-500/30 bg-amber-500/10 text-amber-400"
           eyebrow="Link tải hack"
           title="Bộ cài đặt mới nhất"
           href={downloadUrl}
