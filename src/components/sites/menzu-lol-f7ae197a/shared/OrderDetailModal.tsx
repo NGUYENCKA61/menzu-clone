@@ -252,9 +252,9 @@ function DownloadCard({
           title="Bộ cài đặt mới nhất"
           href={downloadUrl}
           action="Tải về"
-          // Orange on trial, like "Xem ngay" below it (the owner, 09/10/2026:
-          // orange, amber, then "tải về màu cam thử"); dark lettering.
-          actionClass="bg-orange-500 text-neutral-950 hover:bg-orange-400"
+          // White on trial (the owner, 09/10/2026: orange, amber, orange,
+          // silver, then "màu trắng thử"), dark lettering.
+          actionClass="bg-white text-neutral-950 hover:bg-neutral-200"
           arrow={<Download className="h-3 w-3 shrink-0" />}
         />
       ) : null}
