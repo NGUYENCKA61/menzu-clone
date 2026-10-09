@@ -280,10 +280,9 @@ function DownloadCard({
           // One word (the owner, 09/10/2026: "xem ngay thành xem"), after
           // "Xem ngay" came and went twice.
           action="Xem"
-          // Amber, the yellow of "Lấy thông tin", with dark lettering (the
-          // owner, 09/10/2026: "xem màu vàng đi"); white on amber would not
-          // read.
-          actionClass="bg-amber-500 text-neutral-950 hover:bg-amber-400"
+          // Grey, the same ghost as "Sao chép" (the owner, 09/10/2026: "xem
+          // màu xám đi").
+          actionClass="border border-white/10 bg-white/5 text-neutral-300 hover:bg-white/10 hover:text-white"
           arrow={<ArrowRight className="h-3 w-3 shrink-0" />}
         />
       ) : null}
