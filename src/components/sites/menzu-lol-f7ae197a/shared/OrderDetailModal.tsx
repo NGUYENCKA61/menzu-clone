@@ -260,16 +260,17 @@ function DownloadCard({
       ) : null}
       {docsUrl ? (
         <FileRow
-          // Violet (the owner, 09/10/2026: white tried, then "icon tài liệu
-          // màu tím"); the key's and the download's stay red.
-          icon={<FileText className="h-3 w-3 text-violet-400" />}
+          // White, like its button (the owner, 09/10/2026: "xem ngay màu trắng
+          // icon tài liệu màu trắng luôn đi"); the key's and the download's
+          // stay red.
+          icon={<FileText className="h-3 w-3 text-white" />}
           eyebrow="Tài liệu hướng dẫn"
           title="Thiết lập & sử dụng chi tiết"
           href={docsUrl}
           action="Xem ngay"
-          // Purple with white lettering (the owner, 09/10/2026: "tím chữ trắng
-          // đi", then "cả 2 chữ trắng hết đi").
-          actionClass="bg-purple-500 text-white hover:bg-purple-600"
+          // White, so dark lettering (the owner, 09/10/2026: "xem ngay màu
+          // trắng"), after purple with white lettering.
+          actionClass="bg-white text-neutral-950 hover:bg-neutral-200"
           arrow={<ArrowRight className="h-3 w-3 shrink-0" />}
         />
       ) : null}
