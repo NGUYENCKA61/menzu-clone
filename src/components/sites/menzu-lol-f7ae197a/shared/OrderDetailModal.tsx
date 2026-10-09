@@ -260,9 +260,7 @@ function DownloadCard({
       {docsUrl ? (
         <FileRow
           icon={<FileText className="h-3.5 w-3.5" />}
-          // Red like the download's, on trial (the owner, 09/10/2026: "icon
-          // tài liệu màu đỏ thử").
-          tint="border-[var(--menzu-accent)]/25 bg-[var(--menzu-accent)]/15 text-[var(--menzu-accent)]"
+          tint="border-violet-500/25 bg-violet-500/15 text-violet-300"
           eyebrow="Tài liệu hướng dẫn"
           title="Thiết lập & sử dụng chi tiết"
           href={docsUrl}
