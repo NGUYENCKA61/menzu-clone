@@ -271,9 +271,9 @@ function DownloadCard({
           title="Thiết lập & sử dụng chi tiết"
           href={docsUrl}
           action="Xem ngay"
-          // Red like "Tải về" (the owner, 09/10/2026: after violet, amber and
-          // white, "xem ngay màu đỏ luôn đi").
-          actionClass="bg-[var(--menzu-accent)] text-white hover:bg-[var(--menzu-accent-dark)]"
+          // Grey like "Sao chép" (the owner, 09/10/2026: after violet, amber,
+          // white and red, "xem ngay màu xám đi").
+          actionClass="border border-white/10 bg-white/5 text-neutral-300 hover:bg-white/10 hover:text-white"
           // The arrow again after an eye was tried (the owner, 09/10/2026: "con
           // mắt thành mũi tên như cũ"); the label became "Xem ngay".
           arrow={<ArrowRight className="h-3 w-3 shrink-0" />}
