@@ -1012,9 +1012,10 @@ export function OrderDetailModal({
                   {/* NOTE */}
                   {/* Red on purpose: the owner wants this reminder as the
                       sheet's one accent ("đỏ cho có điểm nhấn"), after a grey
-                      version was tried in 4bd4ac0. */}
+                      version was tried in 4bd4ac0. No glyph: the red rule on
+                      its left says enough (the owner, 09/10/2026: "bỏ cái icon
+                      information ở Vui lòng lưu lại mã đơn hàng"). */}
                   <div className="mt-4 flex items-start gap-3 rounded-r-xl border-l-[3px] border-[var(--menzu-accent)] bg-[var(--menzu-accent)]/5 px-4 py-3.5 text-xs leading-relaxed text-neutral-400">
-                    <Info className="mt-0.5 h-4 w-4 shrink-0 text-[var(--menzu-accent)]" />
                     <span>
                       Vui lòng lưu lại mã đơn hàng để được hỗ trợ khi cần thiết.
                       Không chia sẻ thông tin tài khoản hoặc dữ liệu bàn giao
