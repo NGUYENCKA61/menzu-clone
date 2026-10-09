@@ -323,7 +323,10 @@ function FileRow({
         href={href}
         target="_blank"
         rel="noopener noreferrer"
-        className={`inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg px-3.5 text-xs font-bold transition-colors ${actionClass}`}
+        // One width for both file buttons, so the two stacked cards' buttons
+        // line up (the owner, 09/10/2026: "kích thước 2 nút đó có nên cho bằng
+        // nhau không" → "thử"); 112px holds "Xem ngay →".
+        className={`inline-flex h-9 w-28 shrink-0 items-center justify-center gap-1.5 rounded-lg px-3.5 text-xs font-bold transition-colors ${actionClass}`}
       >
         {action}
         {arrow}
