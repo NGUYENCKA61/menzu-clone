@@ -250,7 +250,7 @@ function DownloadCard({
   // the link in the admin, and "Bản Loader mới nhất" until it types one (the
   // owner, 09/10/2026: "Bản Loader mới nhất có thể tùy chỉnh tên đi").
   return (
-    <div className="flex flex-col gap-2.5 lg:contents">
+    <div className="flex flex-col gap-2.5">
       {downloadUrl ? (
         <FileRow
           icon={<Download className="h-3 w-3 text-[var(--menzu-accent)]" />}
@@ -313,7 +313,7 @@ function FileRow({
   arrow: ReactNode;
 }) {
   return (
-    <div className="flex flex-1 items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3 transition-colors hover:border-white/[0.12] lg:col-start-2">
+    <div className="flex flex-1 items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3 transition-colors hover:border-white/[0.12]">
       {/* min-w-0 so a long name truncates instead of pushing the button off
           the card. */}
       <div className="min-w-0 flex-1">
@@ -889,12 +889,8 @@ export function OrderDetailModal({
                         // With files to offer, the keys take the left half and
                         // the download rows the right — the card is one hand-
                         // over, and the empty space beside a single key is
-                        // where they belong. On a wide screen both columns
-                        // melt into one grid (display: contents), so the first
-                        // key and the download row share a row and its height
-                        // (the owner, 09/10/2026: "cho độ dài card link tải
-                        // hack bằng card key đi"); dense flow lifts the file
-                        // rows back to the top of the right column.
+                        // where they belong. Top-aligned so the shorter side
+                        // does not stretch.
                         <div
                           // grid-cols-1 spelled out: an implicit track is
                           // sized by its content, and the download row's
@@ -902,30 +898,22 @@ export function OrderDetailModal({
                           // card on a phone; minmax(0, 1fr) is what lets the
                           // name truncate instead.
                           className={`grid grid-cols-1 gap-4 ${
-                            hasFiles
-                              ? "lg:grid-flow-row-dense lg:grid-cols-2 lg:gap-y-2.5"
-                              : ""
+                            hasFiles ? "lg:grid-cols-2 lg:items-start" : ""
                           }`}
                         >
-                          <div
-                            className={`flex flex-col gap-4 ${
-                              hasFiles ? "lg:contents" : ""
-                            }`}
-                          >
+                          <div className="flex flex-col gap-4">
                             {order.keys.length > 0 ? (
                               <div
                                 className={`grid gap-4 ${
                                   hasFiles
-                                    ? "grid-cols-1 lg:contents"
+                                    ? "grid-cols-1"
                                     : "grid-cols-1 lg:grid-cols-2"
                                 }`}
                               >
                                 {order.keys.map((key, index) => (
                                   <div
                                     key={`${index}-${key.value}`}
-                                    className={`flex flex-col gap-1.5 ${
-                                      hasFiles ? "lg:col-start-1" : ""
-                                    }`}
+                                    className="flex flex-col gap-1.5"
                                   >
                                     <HandoverBox
                                       icon={<KeyRound className="h-3 w-3 text-[var(--menzu-accent)]" />}
@@ -941,22 +929,14 @@ export function OrderDetailModal({
                               </div>
                             ) : null}
                             {order.keysPending > 0 ? (
-                              <p
-                                className={`text-xs font-semibold text-amber-400 ${
-                                  hasFiles ? "lg:col-start-1" : ""
-                                }`}
-                              >
+                              <p className="text-xs font-semibold text-amber-400">
                                 {order.keysPending} key đang được chuẩn bị, shop sẽ giao trong ít phút, key sẽ hiện ngay tại
                                 đây.
                               </p>
                             ) : null}
                             {order.keys.length === 0 &&
                             order.keysPending === 0 ? (
-                              <p
-                                className={`text-xs text-neutral-400 ${
-                                  hasFiles ? "lg:col-start-1" : ""
-                                }`}
-                              >
+                              <p className="text-xs text-neutral-400">
                                 {order.refunded
                                   ? "Đơn đã được hoàn tiền, key đã thu hồi."
                                   : "Đơn này chưa có key để hiển thị."}
