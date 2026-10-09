@@ -246,24 +246,13 @@ function DownloadCard({
   // No square tile: a small red glyph sits in each label, as "KEY" wears its
   // key (the owner, 09/10/2026: "lùi về phiên bản link tải hack và tài liệu
   // hướng dẫn là icon nhỏ ấy", after the tiled first layout was tried again).
+  // The manual on top, the download under it (the owner, 09/10/2026: "cho
+  // tài liệu hướng dẫn lên trên đảo vị trí với link tải hack").
   // The download row's name is the shop's own for this tool, typed beside
   // the link in the admin, and "Bản Loader mới nhất" until it types one (the
   // owner, 09/10/2026: "Bản Loader mới nhất có thể tùy chỉnh tên đi").
   return (
     <div className="flex flex-col gap-2.5">
-      {downloadUrl ? (
-        <FileRow
-          icon={<Download className="h-3 w-3 text-[var(--menzu-accent)]" />}
-          eyebrow="Link tải hack"
-          title={downloadName ?? DEFAULT_DOWNLOAD_NAME}
-          href={downloadUrl}
-          action="Tải về"
-          // The accent red with white lettering (the owner, 09/10/2026: "tải về
-          // chữ trắng đi", then "cả 2 chữ trắng hết đi").
-          actionClass="bg-[var(--menzu-accent)] text-white hover:bg-[var(--menzu-accent-dark)]"
-          arrow={<Download className="h-3 w-3 shrink-0" />}
-        />
-      ) : null}
       {docsUrl ? (
         <FileRow
           // Violet (the owner, 09/10/2026: "icon tím đi", after white beside
@@ -281,6 +270,19 @@ function DownloadCard({
           // trắng"), after grey.
           actionClass="bg-white text-neutral-950 hover:bg-neutral-200"
           arrow={<ArrowRight className="h-3 w-3 shrink-0" />}
+        />
+      ) : null}
+      {downloadUrl ? (
+        <FileRow
+          icon={<Download className="h-3 w-3 text-[var(--menzu-accent)]" />}
+          eyebrow="Link tải hack"
+          title={downloadName ?? DEFAULT_DOWNLOAD_NAME}
+          href={downloadUrl}
+          action="Tải về"
+          // The accent red with white lettering (the owner, 09/10/2026: "tải về
+          // chữ trắng đi", then "cả 2 chữ trắng hết đi").
+          actionClass="bg-[var(--menzu-accent)] text-white hover:bg-[var(--menzu-accent-dark)]"
+          arrow={<Download className="h-3 w-3 shrink-0" />}
         />
       ) : null}
     </div>
