@@ -854,12 +854,12 @@ export function OrderDetailModal({
                                     ) : null}
                                     <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
                                       <HandoverBox
-                                        icon={<User className="h-3 w-3" />}
+                                        icon={<User className="h-3 w-3 text-[var(--menzu-accent)]" />}
                                         label="Tài khoản"
                                         value={username}
                                       />
                                       <HandoverBox
-                                        icon={<Lock className="h-3 w-3" />}
+                                        icon={<Lock className="h-3 w-3 text-[var(--menzu-accent)]" />}
                                         label="Mật khẩu"
                                         value={password}
                                       />
@@ -956,12 +956,12 @@ export function OrderDetailModal({
                         <div className="flex flex-col gap-4">
                           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
                             <HandoverBox
-                              icon={<User className="h-3 w-3" />}
+                              icon={<User className="h-3 w-3 text-[var(--menzu-accent)]" />}
                               label="Tài khoản"
                               value={order.login.login.username}
                             />
                             <HandoverBox
-                              icon={<Lock className="h-3 w-3" />}
+                              icon={<Lock className="h-3 w-3 text-[var(--menzu-accent)]" />}
                               label="Mật khẩu"
                               value={order.login.login.password}
                             />
