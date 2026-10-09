@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  ArrowRight,
   CalendarDays,
   Check,
   Clock,
@@ -269,7 +268,8 @@ function DownloadCard({
           href={docsUrl}
           action="Xem"
           actionClass="border border-white/10 bg-white/5 text-neutral-300 hover:bg-white/10 hover:text-white"
-          arrow={<ArrowRight className="h-3 w-3 shrink-0" />}
+          // An eye for "Xem" (the owner, 09/10/2026: "xem có icon con mắt đi").
+          arrow={<Eye className="h-3 w-3 shrink-0" />}
         />
       ) : null}
     </div>
