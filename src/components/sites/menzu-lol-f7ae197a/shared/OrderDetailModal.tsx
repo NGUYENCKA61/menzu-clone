@@ -251,7 +251,9 @@ function DownloadCard({
           title="Bản Loader mới nhất"
           href={downloadUrl}
           action="Tải về"
-          actionClass="bg-[var(--menzu-accent)] text-white hover:bg-[var(--menzu-accent-dark)]"
+          // Dark lettering on the red, on trial (the owner, 09/10/2026: "tải về
+          // chữ đen thử").
+          actionClass="bg-[var(--menzu-accent)] text-neutral-950 hover:bg-[var(--menzu-accent-dark)]"
           arrow={<Download className="h-3 w-3 shrink-0" />}
         />
       ) : null}
