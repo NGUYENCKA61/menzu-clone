@@ -1090,17 +1090,13 @@ export function OrderDetailModal({
                           className={`press group inline-flex h-11 items-center justify-center gap-2 rounded-xl px-3 text-xs font-bold sm:h-10 sm:px-5${
                             askReview ? "" : " col-span-2"
                           } ${
-                            // "Yêu cầu bảo hành" in white with dark lettering,
-                            // on trial (the owner, 09/10/2026: violet, then
-                            // "chữ đen đi", then "màu trắng"); "Xem trạng thái"
-                            // keeps the grey outline, and red stays for "Nhập
-                            // số tài khoản", the one step a refund waits on the
-                            // buyer for.
-                            warrantyAction.kind === "request"
-                              ? "bg-white text-neutral-950 hover:bg-neutral-200"
-                              : warrantyAction.kind === "status"
-                                ? "border border-white/12 bg-white/[0.04] text-neutral-200 hover:border-white/25 hover:text-white"
-                                : "bg-[var(--menzu-accent)] text-white hover:bg-[var(--menzu-accent-dark)]"
+                            // Grey for "Yêu cầu bảo hành" too (the owner,
+                            // 09/10/2026: "màu xám đi", after violet and white
+                            // were tried); red stays for "Nhập số tài khoản",
+                            // the one step a refund waits on the buyer for.
+                            warrantyAction.kind !== "bank"
+                              ? "border border-white/12 bg-white/[0.04] text-neutral-200 hover:border-white/25 hover:text-white"
+                              : "bg-[var(--menzu-accent)] text-white hover:bg-[var(--menzu-accent-dark)]"
                           }`}
                         >
                           <WarrantyIcon className="h-4 w-4" />
