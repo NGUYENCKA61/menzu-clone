@@ -244,9 +244,9 @@ function HandoverBox({
  * Either link may be missing, and when both are the card is not drawn at all,
  * so a shop that has uploaded neither sees exactly what it saw before.
  *
- * One card for both, in the key box's frame, the rows parted by a hairline
- * (the owner, 09/10/2026: "nhập link tải hack và tài liệu thành 1 card thử");
- * they were two cards stacked.
+ * One card for both, in the key box's frame (the owner, 09/10/2026: "nhập
+ * link tải hack và tài liệu thành 1 card thử"); they were two cards stacked.
+ * No rule between the two rows ("bỏ đường mảnh").
  */
 function DownloadCard({
   downloadUrl,
@@ -259,7 +259,7 @@ function DownloadCard({
   productName: string;
 }) {
   return (
-    <div className="divide-y divide-white/[0.06] rounded-xl border border-white/[0.06] bg-white/[0.02] transition-colors hover:border-white/[0.12]">
+    <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] transition-colors hover:border-white/[0.12]">
       {downloadUrl ? (
         <FileRow
           icon={<Download className="h-3.5 w-3.5" />}
