@@ -124,8 +124,11 @@ export interface OrderDetailData {
  */
 const LABEL =
   "flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-neutral-500";
-const GHOST_BTN =
-  "inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-3.5 text-xs font-bold text-neutral-300 transition-colors hover:bg-white/10 hover:text-white";
+/** The copy button: a 36px square with the glyph alone, its name kept in
+ *  aria-label and title (the owner, 09/10/2026: "bỏ chữ sao chép giữ lại
+ *  icon thôi"). */
+const COPY_BTN =
+  "inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-neutral-300 transition-colors hover:bg-white/10 hover:text-white";
 const CELL =
   "border-t border-white/[0.06] px-4 py-4 text-sm text-neutral-200 sm:px-5";
 /** "280.000đ", like the /orders list, /transactions and every price on the site. */
@@ -183,14 +186,14 @@ function HandoverBox({
         {icon}
         {label}
       </span>
-      {/* Value above the buttons on a phone; the pair would otherwise leave
-          the value a few characters of room. */}
-      <div className="flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
+      {/* One row at every width now the button is a 36px square: the value
+          takes the rest and wraps rather than pushing the square off. */}
+      <div className="flex items-center justify-between gap-3">
         <span
           ref={valueRef}
           // Wrapped, not cut: a long key read "…5T8W3…" on a phone, and the
           // buyer could copy it but not read it through (the owner, 09/10/2026).
-          className="min-w-0 max-w-full break-all font-mono text-sm font-bold tracking-wide text-white"
+          className="min-w-0 flex-1 break-all font-mono text-sm font-bold tracking-wide text-white"
         >
           {value}
         </span>
@@ -199,18 +202,18 @@ function HandoverBox({
             type="button"
             onClick={copy}
             aria-label={copied ? `Đã chép ${name}` : `Sao chép ${name}`}
-            className={`${GHOST_BTN} ${
+            title={copied ? "Đã chép" : "Sao chép"}
+            className={`${COPY_BTN} ${
               copied
                 ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/10 hover:text-emerald-400"
                 : ""
             }`}
           >
             {copied ? (
-              <Check className="h-3 w-3" />
+              <Check className="h-3.5 w-3.5" />
             ) : (
-              <Copy className="h-3 w-3" />
+              <Copy className="h-3.5 w-3.5" />
             )}
-            {copied ? "Đã chép" : "Sao chép"}
           </button>
           <span role="status" className="sr-only">
             {copied ? `Đã sao chép ${name}` : ""}
