@@ -258,9 +258,9 @@ function DownloadCard({
           title={downloadName ?? DEFAULT_DOWNLOAD_NAME}
           href={downloadUrl}
           action="Tải về"
-          // The accent red with white lettering (the owner, 09/10/2026: "tải về
-          // màu đỏ", after amber).
-          actionClass="bg-[var(--menzu-accent)] text-white hover:bg-[var(--menzu-accent-dark)]"
+          // The accent red with dark lettering, on trial (the owner,
+          // 09/10/2026: "tải về chữ đen thử").
+          actionClass="bg-[var(--menzu-accent)] text-neutral-950 hover:bg-[var(--menzu-accent-dark)]"
           arrow={<Download className="h-3 w-3 shrink-0" />}
         />
       ) : null}
