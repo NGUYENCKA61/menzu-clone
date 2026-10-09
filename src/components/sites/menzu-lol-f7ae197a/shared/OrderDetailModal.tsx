@@ -280,9 +280,9 @@ function DownloadCard({
           // One word (the owner, 09/10/2026: "xem ngay thành xem"), after
           // "Xem ngay" came and went twice.
           action="Xem"
-          // Grey, the same ghost as "Sao chép" (the owner, 09/10/2026: "xem
-          // màu xám đi").
-          actionClass="border border-white/10 bg-white/5 text-neutral-300 hover:bg-white/10 hover:text-white"
+          // The accent red with white lettering, like "Tải về", on trial (the
+          // owner, 09/10/2026: "xem màu đỏ thử").
+          actionClass="bg-[var(--menzu-accent)] text-white hover:bg-[var(--menzu-accent-dark)]"
           arrow={<ArrowRight className="h-3 w-3 shrink-0" />}
         />
       ) : null}
