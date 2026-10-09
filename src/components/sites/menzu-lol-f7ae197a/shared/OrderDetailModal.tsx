@@ -265,7 +265,9 @@ function DownloadCard({
           title="Thiết lập & sử dụng chi tiết"
           href={docsUrl}
           action="Xem ngay"
-          actionClass="border border-white/10 bg-white/5 text-neutral-300 hover:bg-white/10 hover:text-white"
+          // Violet like its tile (the owner, 09/10/2026: "xem ngay màu tím
+          // đi"): 600 under white lettering, which reads at 12px.
+          actionClass="bg-violet-600 text-white hover:bg-violet-500"
           arrow={<ArrowRight className="h-3 w-3 shrink-0" />}
         />
       ) : null}
