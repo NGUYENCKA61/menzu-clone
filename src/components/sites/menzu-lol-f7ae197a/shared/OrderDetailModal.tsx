@@ -256,9 +256,9 @@ function DownloadCard({
           title="Bản Loader mới nhất"
           href={downloadUrl}
           action="Tải về"
-          // Grey like "Sao chép", on trial (the owner, 09/10/2026: orange,
-          // amber, orange, silver, white, then "màu xám giống sao chép thử").
-          actionClass="border border-white/10 bg-white/5 text-neutral-300 hover:bg-white/10 hover:text-white"
+          // The accent red of "Yêu cầu bảo hành" (the owner, 09/10/2026: after
+          // orange, amber, silver, white and grey, "tải về xem ngay cho màu đỏ").
+          actionClass="bg-[var(--menzu-accent)] text-white hover:bg-[var(--menzu-accent-dark)]"
           arrow={<Download className="h-3 w-3 shrink-0" />}
         />
       ) : null}
@@ -271,9 +271,8 @@ function DownloadCard({
           title="Thiết lập & sử dụng chi tiết"
           href={docsUrl}
           action="Xem ngay"
-          // Grey like "Sao chép" and "Tải về" (the owner, 09/10/2026: violet,
-          // orange, white, then "màu xám giống sao chép thử").
-          actionClass="border border-white/10 bg-white/5 text-neutral-300 hover:bg-white/10 hover:text-white"
+          // Red like "Tải về" (the owner, 09/10/2026).
+          actionClass="bg-[var(--menzu-accent)] text-white hover:bg-[var(--menzu-accent-dark)]"
           // The arrow again after an eye was tried (the owner, 09/10/2026: "con
           // mắt thành mũi tên như cũ"); the label became "Xem ngay".
           arrow={<ArrowRight className="h-3 w-3 shrink-0" />}
