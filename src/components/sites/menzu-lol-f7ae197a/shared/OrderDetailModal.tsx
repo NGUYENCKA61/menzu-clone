@@ -796,12 +796,8 @@ export function OrderDetailModal({
                         looking straight at their key that they will get it
                         once they pay. */}
                     <div className="relative mb-4 flex items-center gap-2.5">
-                      {/* An info glyph in the red tile (the owner, 09/10/2026:
-                          "dùng icon info thay cho chìa khóa đỏ"): the keys
-                          inside already wear theirs. */}
-                      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[var(--menzu-accent)]/25 bg-[var(--menzu-accent)]/15 text-[var(--menzu-accent)]">
-                        <Info className="h-3.5 w-3.5" />
-                      </span>
+                      {/* No tile beside it any more (the owner, 09/10/2026:
+                          a key, then an info glyph, then "bỏ icon đi"). */}
                       {/* A tool hands over keys and files, not a sign-in, so
                           its heading is its own (the owner, 09/10/2026: "Key &
                           tải về", then "Thông tin sản phẩm", "/ bàn giao"
