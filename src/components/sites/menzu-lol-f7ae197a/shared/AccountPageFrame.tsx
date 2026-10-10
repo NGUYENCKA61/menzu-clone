@@ -1,3 +1,4 @@
+import type { LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
 
 import { getCurrentUser } from "@/lib/session";
@@ -12,6 +13,8 @@ interface AccountPageFrameProps {
   action?: ReactNode;
   /** Off for a page with one job, which then loses the nav column. */
   sidebar?: boolean;
+  /** A red glyph in front of the title, as the public pages wear one. */
+  icon?: LucideIcon;
   children: ReactNode;
 }
 
@@ -32,6 +35,7 @@ export async function AccountPageFrame({
   crumb,
   action,
   sidebar = true,
+  icon,
   children,
 }: AccountPageFrameProps) {
   const user = await getCurrentUser();
@@ -45,6 +49,7 @@ export async function AccountPageFrame({
       isAdmin={isAdmin}
       action={action}
       sidebar={sidebar}
+      icon={icon}
       user={
         user
           ? {

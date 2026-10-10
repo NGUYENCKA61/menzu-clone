@@ -1,3 +1,4 @@
+import type { LucideIcon } from "lucide-react";
 import Link from "next/link";
 
 import { AccountSidebar, type SidebarUser } from "./AccountSidebar";
@@ -19,6 +20,9 @@ export interface AccountShellProps {
    *  same column, same air, a red bar at the title and a rule under it (the
    *  owner, 10/10/2026, about the warranty page). */
   sidebar?: boolean;
+  /** A red glyph in front of the title, as the public pages wear one, in
+   *  place of the red bar. Only read when `sidebar` is off. */
+  icon?: LucideIcon;
   children: React.ReactNode;
 }
 
@@ -36,6 +40,7 @@ export function AccountShell({
   user = null,
   action = null,
   sidebar = true,
+  icon: Icon,
   children,
 }: AccountShellProps) {
   // flex-1, not min-h-screen: the header sits above this and the footer
@@ -81,10 +86,17 @@ export function AccountShell({
               <div className="mb-8 flex flex-col gap-4 border-b border-white/10 pb-4 sm:flex-row sm:items-center sm:justify-between">
                 <div className="min-w-0">
                   <div className="flex items-center gap-3">
-                    <span
-                      aria-hidden
-                      className="h-6 w-[3px] shrink-0 rounded-full bg-[var(--menzu-accent)]"
-                    />
+                    {/* The page's own glyph where the public pages put
+                        theirs, the red bar only when none is given (the
+                        owner, 10/10/2026: "icon cờ lê thay cho dấu gạch"). */}
+                    {Icon ? (
+                      <Icon size={28} className="shrink-0 text-[var(--menzu-accent)]" aria-hidden />
+                    ) : (
+                      <span
+                        aria-hidden
+                        className="h-6 w-[3px] shrink-0 rounded-full bg-[var(--menzu-accent)]"
+                      />
+                    )}
                     <h1 className="text-2xl sm:text-3xl font-black uppercase tracking-wider text-white">
                       {title}
                     </h1>

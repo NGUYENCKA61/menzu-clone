@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { ArrowLeft, Banknote, Clock, Info, KeyRound, Landmark, Video } from "lucide-react";
+import { ArrowLeft, Banknote, Clock, Info, KeyRound, Landmark, Video, Wrench } from "lucide-react";
 
 import { AccountPageFrame } from "@/components/sites/menzu-lol-f7ae197a/shared/AccountPageFrame";
 import { formatVnd } from "@/components/sites/menzu-lol-f7ae197a/shared/productData";
@@ -117,6 +117,9 @@ export default async function WarrantyRequestPage({
       // One job on this page, so no nav column beside it (the owner,
       // 10/10/2026); "Lịch sử mua" in the corner is the way back.
       sidebar={false}
+      // The wrench the receipt's button wears, where the public pages put
+      // their own glyph (the owner, 10/10/2026).
+      icon={Wrench}
       title={heading}
       subtitle={
         following
