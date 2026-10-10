@@ -144,22 +144,17 @@ function KeyHint() {
       <ol className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[11px] font-semibold text-neutral-400">
         {["Tải loader", "Chạy loader", "Dán key để kích hoạt"].map((step, index) => (
           <li key={step} className="flex items-center gap-1.5">
-            {/* The arrow leads the step it points at, not trails the one
-                before (the owner, 10/10/2026: "cho mũi tên trỏ nhau thử đi"),
-                so a step that wraps to the next line takes its arrow along
-                instead of leaving one hanging at the end of a line. */}
+            {/* No numbers: the arrows already say the order (the owner,
+                10/10/2026: "có nên bỏ mấy cái ô tròn đó không" → "thử đi").
+                The arrow leads the step it points at, so a step that wraps
+                to the next line takes its arrow along instead of leaving one
+                hanging at the end of a line. */}
             {index > 0 ? (
               <ChevronRight
                 className="h-3 w-3 shrink-0 text-neutral-600"
                 aria-hidden
               />
             ) : null}
-            {/* The accent, lightly (the owner, 10/10/2026: "thử tô xem", after
-                I argued against a solid fill): the rule, the wash and the
-                figure in red, as the key glyph above them. */}
-            <span className="grid h-4 w-4 shrink-0 place-items-center rounded-full border border-[var(--menzu-accent)]/30 bg-[var(--menzu-accent)]/15 text-[9px] font-black text-[var(--menzu-accent)]">
-              {index + 1}
-            </span>
             {step}
           </li>
         ))}
