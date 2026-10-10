@@ -233,15 +233,10 @@ function HandoverBox({
         tall ? " flex h-full flex-col justify-between" : ""
       }`}
     >
-      {/* A hairline under the label where the card carries more than a
-          value (the owner, 10/10/2026: "thêm đường kẻ ở dưới key kích hoạt
-          thử", "kẻ ngang"): it parts the name of the card from the steps.
-          The sign-in's two boxes, which carry no hint, keep theirs plain. */}
-      <span
-        className={`${LABEL} mb-2${
-          hint ? " border-b border-white/[0.06] pb-2" : ""
-        }`}
-      >
+      {/* A hairline under every label (the owner, 10/10/2026: "thêm đường kẻ
+          ở dưới key kích hoạt thử", "kẻ ngang", then "kẻ hết luôn"): the name
+          of the card is parted from what it hands over. */}
+      <span className={`${LABEL} mb-2 border-b border-white/[0.06] pb-2`}>
         {icon}
         {label}
       </span>
@@ -381,8 +376,12 @@ function FileRow({
       {/* min-w-0 so a long name truncates instead of pushing the glyph off
           the card. */}
       <div className="min-w-0 flex-1">
-        <span className={LABEL}>{eyebrow}</span>
-        <p className="mt-0.5 truncate text-sm font-bold text-white">{title}</p>
+        {/* The same hairline the key card wears, here only as wide as the
+            words beside the tile. */}
+        <span className={`${LABEL} border-b border-white/[0.06] pb-1.5`}>
+          {eyebrow}
+        </span>
+        <p className="mt-1.5 truncate text-sm font-bold text-white">{title}</p>
       </div>
     </a>
   );
