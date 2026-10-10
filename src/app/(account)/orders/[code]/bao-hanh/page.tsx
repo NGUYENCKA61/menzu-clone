@@ -285,13 +285,12 @@ export default async function WarrantyRequestPage({
             </div>
           </div>
 
-          {/* Plain, not amber: on this site amber means something needs
-              attention (a key still coming, a sign-in not taken), and the
-              opening hours need none (the owner, 10/10/2026: "màu chỗ nào
-              chưa đồng bộ thì sửa lại"). */}
-          <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-2 rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3">
+          {/* No box around it, just a rule and the lines (the owner,
+              10/10/2026: "bỏ cái card bọc chỗ shop xử lý bảo hành đi"); the
+              glyphs take the accent ("icon màu đỏ cho đồng hồ"). */}
+          <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-2 border-t border-white/[0.06] pt-4">
             <span className="inline-flex items-center gap-2 text-[12px] text-neutral-300">
-              <Clock className="h-4 w-4 shrink-0 text-neutral-400" />
+              <Clock className="h-4 w-4 shrink-0 text-[var(--menzu-accent)]" />
               Shop xử lý bảo hành {SUPPORT_WINDOW} mỗi ngày; ngoài giờ cứ gửi, sáng shop
               làm ngay.
             </span>
@@ -299,7 +298,7 @@ export default async function WarrantyRequestPage({
                 account's warranty rests on starts. */}
             {kind === "account" && order.loginRevealedAt ? (
               <span className="inline-flex items-center gap-2 text-[12px] text-neutral-300">
-                <KeyRound className="h-4 w-4 shrink-0 text-neutral-400" />
+                <KeyRound className="h-4 w-4 shrink-0 text-[var(--menzu-accent)]" />
                 Đã nhận thông tin đăng nhập lúc {dayStamp(order.loginRevealedAt)}
               </span>
             ) : null}
