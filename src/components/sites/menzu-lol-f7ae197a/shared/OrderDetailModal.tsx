@@ -175,19 +175,57 @@ function KeyHint() {
 function HandoverBox({
   label,
   icon,
-  value,
+  values,
   hint = null,
   tall = false,
 }: {
   label: string;
   icon: ReactNode;
-  value: string;
-  /** Lines between the label and the value; the key's own notes use it. */
+  /** One row each, with its own copy button. An order with several keys
+   *  keeps them in this one card rather than a card apiece (the owner,
+   *  10/10/2026: "khách mua từ 2 key trở lên thì cứ dồn vào 1 card đi đừng
+   *  tách"). */
+  values: string[];
+  /** Lines between the label and the values; the key's own notes use it. */
   hint?: ReactNode;
   /** Fill the height the row gives it: the label stays at the top and the
-   *  value drops to the bottom, so both line up with the cards beside it. */
+   *  values drop to the bottom, so both line up with the cards beside it. */
   tall?: boolean;
 }) {
+  return (
+    <div
+      // Pushed apart when tall (the owner, 09/10/2026: "làm lại sao cho nhìn
+      // đồng bộ hơn thử"): the label keeps its place beside "LINK TẢI HACK"
+      // and the values with their buttons sink to the card's foot, level with
+      // the last file row's own name and button.
+      className={`rounded-xl border border-white/[0.06] bg-white/[0.02] p-4 transition-colors hover:border-white/[0.12]${
+        tall ? " flex h-full flex-col justify-between" : ""
+      }`}
+    >
+      <span className={`${LABEL} mb-2`}>
+        {icon}
+        {label}
+      </span>
+      {hint}
+      <div className="flex flex-col gap-3">
+        {values.map((value, index) => (
+          <CopyRow
+            key={`${index}-${value}`}
+            value={value}
+            name={
+              values.length > 1
+                ? `${label.toLowerCase()} ${index + 1}`
+                : label.toLowerCase()
+            }
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/** One value and the button that copies it. */
+function CopyRow({ value, name }: { value: string; name: string }) {
   const [copied, setCopied] = useState(false);
   const valueRef = useRef<HTMLSpanElement>(null);
 
@@ -216,57 +254,40 @@ function HandoverBox({
     }
   }
 
-  const name = label.toLowerCase();
-
   return (
-    <div
-      // Pushed apart when tall (the owner, 09/10/2026: "làm lại sao cho nhìn
-      // đồng bộ hơn thử"): the label keeps its place beside "LINK TẢI HACK"
-      // and the value with its button sinks to the card's foot, level with
-      // the last file row's own name and button.
-      className={`rounded-xl border border-white/[0.06] bg-white/[0.02] p-4 transition-colors hover:border-white/[0.12]${
-        tall ? " flex h-full flex-col justify-between" : ""
-      }`}
-    >
-      <span className={`${LABEL} mb-2`}>
-        {icon}
-        {label}
+    // Value above the button on a phone; the pair would otherwise leave the
+    // value a few characters of room.
+    <div className="flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
+      <span
+        ref={valueRef}
+        // Wrapped, not cut: a long key read "…5T8W3…" on a phone, and the
+        // buyer could copy it but not read it through (the owner, 09/10/2026).
+        className="min-w-0 max-w-full break-all font-mono text-sm font-bold tracking-wide text-white"
+      >
+        {value}
       </span>
-      {hint}
-      {/* Value above the buttons on a phone; the pair would otherwise leave
-          the value a few characters of room. */}
-      <div className="flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
-        <span
-          ref={valueRef}
-          // Wrapped, not cut: a long key read "…5T8W3…" on a phone, and the
-          // buyer could copy it but not read it through (the owner, 09/10/2026).
-          className="min-w-0 max-w-full break-all font-mono text-sm font-bold tracking-wide text-white"
+      <span className="flex shrink-0 items-center gap-2">
+        <button
+          type="button"
+          onClick={copy}
+          aria-label={copied ? `Đã chép ${name}` : `Sao chép ${name}`}
+          className={`${GHOST_BTN} ${
+            copied
+              ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/10 hover:text-emerald-400"
+              : ""
+          }`}
         >
-          {value}
+          {copied ? (
+            <Check className="h-3 w-3" />
+          ) : (
+            <Copy className="h-3 w-3" />
+          )}
+          {copied ? "Đã chép" : "Sao chép"}
+        </button>
+        <span role="status" className="sr-only">
+          {copied ? `Đã sao chép ${name}` : ""}
         </span>
-        <span className="flex shrink-0 items-center gap-2">
-          <button
-            type="button"
-            onClick={copy}
-            aria-label={copied ? `Đã chép ${name}` : `Sao chép ${name}`}
-            className={`${GHOST_BTN} ${
-              copied
-                ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/10 hover:text-emerald-400"
-                : ""
-            }`}
-          >
-            {copied ? (
-              <Check className="h-3 w-3" />
-            ) : (
-              <Copy className="h-3 w-3" />
-            )}
-            {copied ? "Đã chép" : "Sao chép"}
-          </button>
-          <span role="status" className="sr-only">
-            {copied ? `Đã sao chép ${name}` : ""}
-          </span>
-        </span>
-      </div>
+      </span>
     </div>
   );
 }
@@ -898,12 +919,12 @@ export function OrderDetailModal({
                                       <HandoverBox
                                         icon={<User className="h-3 w-3 text-[var(--menzu-accent)]" />}
                                         label="Tài khoản"
-                                        value={username}
+                                        values={[username]}
                                       />
                                       <HandoverBox
                                         icon={<Lock className="h-3 w-3 text-[var(--menzu-accent)]" />}
                                         label="Mật khẩu"
-                                        value={password}
+                                        values={[password]}
                                       />
                                     </div>
                                   </div>
@@ -955,37 +976,24 @@ export function OrderDetailModal({
                         >
                           <div className="flex flex-col gap-4">
                             {order.keys.length > 0 ? (
-                              <div
-                                className={`grid gap-4 ${
-                                  hasFiles
-                                    ? "grid-cols-1 lg:flex-1"
-                                    : "grid-cols-1 lg:grid-cols-2"
-                                }`}
-                              >
-                                {order.keys.map((key, index) => (
-                                  <div
-                                    key={`${index}-${key.value}`}
-                                    className="flex flex-col gap-1.5"
-                                  >
-                                    <HandoverBox
-                                      tall={hasFiles}
-                                      hint={hasFiles ? <KeyHint /> : null}
-                                      icon={<KeyRound className="h-3 w-3 text-[var(--menzu-accent)]" />}
-                                      // Named for what the card hands over,
-                                      // as "Link tải hack" and "Tài liệu
-                                      // hướng dẫn" are (the owner asked which
-                                      // name was best, 10/10/2026, and took
-                                      // this one). Numbered only when the
-                                      // order carries more than one.
-                                      label={
-                                        order.keys.length > 1
-                                          ? `Key kích hoạt ${index + 1}`
-                                          : "Key kích hoạt"
-                                      }
-                                      value={key.value}
-                                    />
-                                  </div>
-                                ))}
+                              <div className={hasFiles ? "lg:flex-1" : ""}>
+                                <HandoverBox
+                                  tall={hasFiles}
+                                  hint={hasFiles ? <KeyHint /> : null}
+                                  icon={<KeyRound className="h-3 w-3 text-[var(--menzu-accent)]" />}
+                                  // Named for what the card hands over, as
+                                  // "Link tải hack" and "Tài liệu hướng dẫn"
+                                  // are (the owner asked which name was best,
+                                  // 10/10/2026, and took this one). Plural
+                                  // when the order carries more than one, and
+                                  // they are all in this card.
+                                  label={
+                                    order.keys.length > 1
+                                      ? `Key kích hoạt (${order.keys.length})`
+                                      : "Key kích hoạt"
+                                  }
+                                  values={order.keys.map((key) => key.value)}
+                                />
                               </div>
                             ) : null}
                             {order.keysPending > 0 ? (
@@ -1017,12 +1025,12 @@ export function OrderDetailModal({
                             <HandoverBox
                               icon={<User className="h-3 w-3 text-[var(--menzu-accent)]" />}
                               label="Tài khoản"
-                              value={order.login.login.username}
+                              values={[order.login.login.username]}
                             />
                             <HandoverBox
                               icon={<Lock className="h-3 w-3 text-[var(--menzu-accent)]" />}
                               label="Mật khẩu"
-                              value={order.login.login.password}
+                              values={[order.login.login.password]}
                             />
                           </div>
                           {order.login.login.note ? (
