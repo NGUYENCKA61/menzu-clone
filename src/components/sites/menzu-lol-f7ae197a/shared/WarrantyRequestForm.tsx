@@ -70,21 +70,19 @@ function Step({
 }
 
 /**
- * A glyph per fault, and a colour for it (the owner, 10/10/2026: "mấy icon
- * key tool bị khóa không cài được lỗi khác thêm màu cho nó đi"). Three hues
- * only, each meaning what it means everywhere else on the site: the shop's
- * red for the key, amber where something is blocked, sky where it is a
- * mismatch, and grey for "something else".
+ * A glyph per fault, all in the same grey (the owner, 10/10/2026: colour
+ * first, then "4 icon bỏ màu hết đi"); the tile the buyer picks is the only
+ * thing on the row that carries any.
  */
-const ISSUE_LOOK: Record<string, { icon: LucideIcon; tint: string }> = {
-  KEY_INVALID: { icon: KeyRound, tint: "bg-[var(--menzu-accent)]/12 text-[var(--menzu-accent)]" },
-  DETECTED: { icon: ShieldAlert, tint: "bg-amber-500/12 text-amber-400" },
-  INSTALL: { icon: CloudDownload, tint: "bg-sky-500/12 text-sky-400" },
-  ACC_WRONG_LOGIN: { icon: KeyRound, tint: "bg-[var(--menzu-accent)]/12 text-[var(--menzu-accent)]" },
-  ACC_LOCKED: { icon: ShieldAlert, tint: "bg-amber-500/12 text-amber-400" },
-  ACC_RECLAIMED: { icon: UserX, tint: "bg-amber-500/12 text-amber-400" },
-  ACC_NOT_AS_DESCRIBED: { icon: CircleHelp, tint: "bg-sky-500/12 text-sky-400" },
-  OTHER: { icon: CircleHelp, tint: "bg-white/[0.06] text-neutral-400" },
+const ISSUE_ICON: Record<string, LucideIcon> = {
+  KEY_INVALID: KeyRound,
+  DETECTED: ShieldAlert,
+  INSTALL: CloudDownload,
+  ACC_WRONG_LOGIN: KeyRound,
+  ACC_LOCKED: ShieldAlert,
+  ACC_RECLAIMED: UserX,
+  ACC_NOT_AS_DESCRIBED: CircleHelp,
+  OTHER: CircleHelp,
 };
 
 
@@ -190,8 +188,7 @@ export function WarrantyRequestForm({
             // An odd count leaves the last tile half a row wide beside
             // nothing; it spans both columns instead (the owner, 10/10/2026).
             const wide = all.length % 2 === 1 && index === all.length - 1;
-            const look = ISSUE_LOOK[key] ?? ISSUE_LOOK.OTHER;
-            const Glyph = look.icon;
+            const Glyph = ISSUE_ICON[key] ?? CircleHelp;
             return (
               <button
                 key={key}
@@ -210,7 +207,7 @@ export function WarrantyRequestForm({
                 }`}
               >
                 <span
-                  className={`mt-0.5 grid h-9 w-9 shrink-0 place-items-center rounded-lg ${look.tint}`}
+                  className="mt-0.5 grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-white/[0.06] text-neutral-400"
                 >
                   <Glyph className="h-4 w-4" />
                 </span>
