@@ -348,8 +348,7 @@ function DownloadCard({
     <div className="flex flex-col gap-2.5">
       {downloadUrl ? (
         <FileRow
-          icon={<Download className="h-3.5 w-3.5" />}
-          tint="border-[var(--menzu-accent)]/25 bg-[var(--menzu-accent)]/15 text-[var(--menzu-accent)]"
+          icon={<Download className="h-3 w-3 text-[var(--menzu-accent)]" />}
           eyebrow="Link tải hack"
           title={downloadName ?? DEFAULT_DOWNLOAD_NAME}
           href={downloadUrl}
@@ -359,8 +358,7 @@ function DownloadCard({
         <FileRow
           // Violet (the owner, 09/10/2026: "icon tím đi"); the download's
           // tile stays red.
-          icon={<FileText className="h-3.5 w-3.5" />}
-          tint="border-violet-500/25 bg-violet-500/15 text-violet-300"
+          icon={<FileText className="h-3 w-3 text-violet-400" />}
           eyebrow="Tài liệu hướng dẫn"
           // The owner, 09/10/2026: "Thiết lập & sử dụng chi tiết đổi lại thành
           // Dành riêng cho khách hàng đi".
@@ -386,14 +384,11 @@ function DownloadCard({
  */
 function FileRow({
   icon,
-  tint,
   eyebrow,
   title,
   href,
 }: {
   icon: ReactNode;
-  /** Border, fill and glyph colour for the square badge. */
-  tint: string;
   eyebrow: string;
   title: string;
   href: string;
@@ -403,18 +398,17 @@ function FileRow({
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className="flex flex-1 items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] p-3 transition-colors hover:border-white/[0.12] hover:bg-white/[0.04]"
+      className="flex flex-1 items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3 transition-colors hover:border-white/[0.12] hover:bg-white/[0.04]"
     >
-      <span
-        className={`grid h-8 w-8 shrink-0 place-items-center rounded-lg border ${tint}`}
-      >
-        {icon}
-      </span>
-      {/* min-w-0 so a long name truncates instead of pushing the glyph off
-          the card. */}
+      {/* min-w-0 so a long name truncates instead of running off the card.
+          The glyph rides in the label, no tile (the owner, 10/10/2026: "xài
+          icon nhỏ thử"). */}
       <div className="min-w-0 flex-1">
-        <span className={LABEL}>{eyebrow}</span>
-        <p className="mt-0.5 truncate text-sm font-bold text-white">{title}</p>
+        <span className={LABEL}>
+          {icon}
+          {eyebrow}
+        </span>
+        <p className="mt-1 truncate text-sm font-bold text-white">{title}</p>
       </div>
     </a>
   );
