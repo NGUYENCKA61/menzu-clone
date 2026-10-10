@@ -348,7 +348,7 @@ function DownloadCard({
     <div className="flex flex-col gap-2.5">
       {downloadUrl ? (
         <FileRow
-          icon={<Download className="h-3.5 w-3.5 text-[var(--menzu-accent)]" />}
+          icon={<Download className="h-3 w-3 text-[var(--menzu-accent)]" />}
           eyebrow="Link tải hack"
           title={downloadName ?? DEFAULT_DOWNLOAD_NAME}
           href={downloadUrl}
@@ -358,7 +358,7 @@ function DownloadCard({
         <FileRow
           // Violet (the owner, 09/10/2026: "icon tím đi"); the download's
           // tile stays red.
-          icon={<FileText className="h-3.5 w-3.5 text-violet-400" />}
+          icon={<FileText className="h-3 w-3 text-violet-400" />}
           eyebrow="Tài liệu hướng dẫn"
           // The owner, 09/10/2026: "Thiết lập & sử dụng chi tiết đổi lại thành
           // Dành riêng cho khách hàng đi".
@@ -1003,7 +1003,7 @@ export function OrderDetailModal({
                                 <HandoverBox
                                   tall={hasFiles}
                                   hint={hasFiles ? <KeyHint /> : null}
-                                  icon={<KeyRound className="h-3.5 w-3.5 text-[var(--menzu-accent)]" />}
+                                  icon={<KeyRound className="h-3 w-3 text-[var(--menzu-accent)]" />}
                                   // Named for what the card hands over, as
                                   // "Link tải hack" and "Tài liệu hướng dẫn"
                                   // are (the owner asked which name was best,
