@@ -136,6 +136,32 @@ function money(value: number): string {
   return `${formatVnd(value)}đ`;
 }
 /**
+ * What to do with the key, in the room the tall card leaves between its
+ * label and its value: the three moves a buyer makes, pointing straight at
+ * the two buttons in the column beside it, then the two things they ask
+ * afterwards — when the clock starts, and who else may have the key.
+ */
+function KeyHint() {
+  return (
+    <div className="flex flex-col gap-2">
+      <ol className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[11px] font-semibold text-neutral-400">
+        {["Tải loader", "Chạy loader", "Dán key để kích hoạt"].map((step, index) => (
+          <li key={step} className="flex items-center gap-1.5">
+            <span className="grid h-4 w-4 shrink-0 place-items-center rounded-full border border-white/10 bg-white/[0.04] text-[9px] font-black text-neutral-400">
+              {index + 1}
+            </span>
+            {step}
+          </li>
+        ))}
+      </ol>
+      <p className="text-[11px] leading-snug text-neutral-500">
+        Hạn gói tính từ lúc kích hoạt key. Không chia sẻ key cho người khác.
+      </p>
+    </div>
+  );
+}
+
+/**
  * One value with its copy button. A password reads in the clear like the
  * rest (the owner, 09/10/2026: "phần mật khẩu khỏi ẩn mà cho hiện luôn"): the
  * buyer took it on camera through "Lấy thông tin", so a mask and a "Hiện"
@@ -145,11 +171,14 @@ function HandoverBox({
   label,
   icon,
   value,
+  hint = null,
   tall = false,
 }: {
   label: string;
   icon: ReactNode;
   value: string;
+  /** Lines between the label and the value; the key's own notes use it. */
+  hint?: ReactNode;
   /** Fill the height the row gives it: the label stays at the top and the
    *  value drops to the bottom, so both line up with the cards beside it. */
   tall?: boolean;
@@ -198,6 +227,7 @@ function HandoverBox({
         {icon}
         {label}
       </span>
+      {hint}
       {/* Value above the buttons on a phone; the pair would otherwise leave
           the value a few characters of room. */}
       <div className="flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
@@ -932,6 +962,7 @@ export function OrderDetailModal({
                                   >
                                     <HandoverBox
                                       tall={hasFiles}
+                                      hint={hasFiles ? <KeyHint /> : null}
                                       icon={<KeyRound className="h-3 w-3 text-[var(--menzu-accent)]" />}
                                       label={
                                         order.keys.length > 1
