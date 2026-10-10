@@ -116,8 +116,11 @@ export function WarrantyRequestForm({
       <div>
         <span className={LABEL}>Bạn gặp lỗi gì?</span>
         <div className="grid gap-2 sm:grid-cols-2">
-          {WARRANTY_ISSUES_FOR[kind].map((key) => {
+          {WARRANTY_ISSUES_FOR[kind].map((key, index, all) => {
             const on = issue === key;
+            // An odd count leaves the last tile half a row wide beside
+            // nothing; it spans both columns instead (the owner, 10/10/2026).
+            const wide = all.length % 2 === 1 && index === all.length - 1;
             return (
               <button
                 key={key}
@@ -128,6 +131,8 @@ export function WarrantyRequestForm({
                 }}
                 aria-pressed={on}
                 className={`rounded-xl border px-4 py-3 text-left transition-colors ${
+                  wide ? "sm:col-span-2" : ""
+                } ${
                   on
                     ? "border-[var(--menzu-accent)]/60 bg-[var(--menzu-accent)]/10"
                     : "border-white/10 bg-neutral-950/60 hover:border-white/25"

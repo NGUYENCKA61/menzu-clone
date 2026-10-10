@@ -32,8 +32,12 @@ export function AccountShell({
   action = null,
   children,
 }: AccountShellProps) {
+  // flex-1, not min-h-screen: the header sits above this and the footer
+  // below, so a whole screen of its own left a short page (the profile, a
+  // warranty form) with hundreds of pixels of nothing before the footer
+  // (the owner, 10/10/2026, reviewing the warranty page).
   return (
-    <div className="w-full max-w-[1320px] mx-auto px-4 lg:px-6 py-8 flex flex-col min-h-screen">
+    <div className="w-full max-w-[1320px] mx-auto px-4 lg:px-6 py-8 flex flex-1 flex-col">
       {/* The box keeps the 24px, as on menzu; the pill's own margin used to
           ride inside it and doubled the gap on every account page. */}
       <div className="mb-6">

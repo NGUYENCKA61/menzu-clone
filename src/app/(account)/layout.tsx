@@ -29,7 +29,9 @@ export default function AccountLayout({ children }: { children: ReactNode }) {
       <SiteHeader />
 
       <main className="flex-1 relative z-20 w-full flex flex-col">
-        <div className="w-full">{children}</div>
+        {/* Grows, so the shell inside can fill what is left and the
+            footer sits under it rather than a screen below it. */}
+        <div className="flex w-full flex-1 flex-col">{children}</div>
         <SiteFooter />
       </main>
 
