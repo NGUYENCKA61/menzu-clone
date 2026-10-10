@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  ArrowRight,
   CalendarDays,
   Check,
   Clock,
@@ -300,7 +299,6 @@ function DownloadCard({
           eyebrow="Link tải hack"
           title={downloadName ?? DEFAULT_DOWNLOAD_NAME}
           href={downloadUrl}
-          arrow={<Download className="h-4 w-4 shrink-0" />}
         />
       ) : null}
       {docsUrl ? (
@@ -314,7 +312,6 @@ function DownloadCard({
           // Dành riêng cho khách hàng đi".
           title="Dành riêng cho khách hàng"
           href={docsUrl}
-          arrow={<ArrowRight className="h-4 w-4 shrink-0" />}
         />
       ) : null}
     </div>
@@ -328,9 +325,10 @@ function DownloadCard({
  * eyebrow had not already said — "Hướng dẫn chi tiết sản phẩm" under "Tài liệu
  * hướng dẫn" — and it cost the whole handover block thirty pixels of height.
  * The glyph sits in a 32px tinted tile ahead of the words, and the whole
- * card is the link: the owner took the buttons off (10/10/2026: "xóa nút tải
- * về và nút xem"), so the row itself opens the file and the glyph at its
- * right edge says there is somewhere to go.
+ * card is the link: the owner took the buttons off, then the glyph at the
+ * right edge too (10/10/2026: "xóa nút tải về và nút xem", "khách hàng
+ * chuyển qua bấm vào card", "bỏ cái icon luôn đi"), so the row carries only
+ * its tile and its words, and the whole of it opens the file.
  */
 function FileRow({
   icon,
@@ -338,7 +336,6 @@ function FileRow({
   eyebrow,
   title,
   href,
-  arrow,
 }: {
   icon: ReactNode;
   /** Border, fill and glyph colour for the square badge. */
@@ -346,14 +343,13 @@ function FileRow({
   eyebrow: string;
   title: string;
   href: string;
-  arrow: ReactNode;
 }) {
   return (
     <a
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className="group flex flex-1 items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] p-3 transition-colors hover:border-white/[0.12] hover:bg-white/[0.04]"
+      className="flex flex-1 items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] p-3 transition-colors hover:border-white/[0.12] hover:bg-white/[0.04]"
     >
       <span
         className={`grid h-8 w-8 shrink-0 place-items-center rounded-lg border ${tint}`}
@@ -366,9 +362,6 @@ function FileRow({
         <span className={LABEL}>{eyebrow}</span>
         <p className="mt-0.5 truncate text-sm font-bold text-white">{title}</p>
       </div>
-      <span className="shrink-0 text-neutral-500 transition-colors group-hover:text-white">
-        {arrow}
-      </span>
     </a>
   );
 }
