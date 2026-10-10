@@ -207,25 +207,35 @@ function HandoverBox({
         {label}
       </span>
       {hint}
-      <div className="flex flex-col gap-3">
-        {values.map((value, index) => (
-          <CopyRow
-            key={`${index}-${value}`}
-            value={value}
-            name={
-              values.length > 1
-                ? `${label.toLowerCase()} ${index + 1}`
-                : label.toLowerCase()
-            }
-          />
-        ))}
-      </div>
+      {/* One line and one button, however many keys there are (the owner,
+          10/10/2026: "đừng xuống hàng và 1 nút sao chép thôi"): the values
+          read side by side, parted by a dot, and the button hands over all
+          of them, one to a line, which is how they are pasted. */}
+      <CopyRow
+        value={values.join("\n")}
+        display={values.join("  ·  ")}
+        name={
+          values.length > 1
+            ? `${values.length} ${label.toLowerCase()}`
+            : label.toLowerCase()
+        }
+      />
     </div>
   );
 }
 
-/** One value and the button that copies it. */
-function CopyRow({ value, name }: { value: string; name: string }) {
+/** What the card hands over, and the button that copies it. */
+function CopyRow({
+  value,
+  display,
+  name,
+}: {
+  /** What lands on the clipboard. */
+  value: string;
+  /** What is printed, where that differs: several keys read on one line. */
+  display?: string;
+  name: string;
+}) {
   const [copied, setCopied] = useState(false);
   const valueRef = useRef<HTMLSpanElement>(null);
 
@@ -264,7 +274,7 @@ function CopyRow({ value, name }: { value: string; name: string }) {
         // buyer could copy it but not read it through (the owner, 09/10/2026).
         className="min-w-0 max-w-full break-all font-mono text-sm font-bold tracking-wide text-white"
       >
-        {value}
+        {display ?? value}
       </span>
       <span className="flex shrink-0 items-center gap-2">
         <button
