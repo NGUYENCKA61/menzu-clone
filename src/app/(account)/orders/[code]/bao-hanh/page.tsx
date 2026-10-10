@@ -258,18 +258,22 @@ export default async function WarrantyRequestPage({
               <p className="mt-1.5 flex flex-wrap gap-x-5 gap-y-1 text-[11px] font-semibold text-neutral-500">
                 <span>
                   Ngày mua:{" "}
-                  <span className="text-neutral-200">{stamp(order.createdAt)}</span>
+                  <span className="font-bold tabular-nums text-neutral-200">
+                    {stamp(order.createdAt)}
+                  </span>
                 </span>
                 {order.package ? (
                   <span>
                     Gói dịch vụ:{" "}
-                    <span className="text-neutral-200">{order.package.label}</span>
+                    <span className="font-bold text-neutral-200">{order.package.label}</span>
                   </span>
                 ) : null}
                 {order.quantity > 1 ? (
                   <span>
                     Số lượng:{" "}
-                    <span className="text-neutral-200">{order.quantity}</span>
+                    <span className="font-bold tabular-nums text-neutral-200">
+                      {order.quantity}
+                    </span>
                   </span>
                 ) : null}
               </p>
