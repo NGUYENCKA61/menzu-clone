@@ -303,10 +303,10 @@ function DownloadCard({
           title={downloadName ?? DEFAULT_DOWNLOAD_NAME}
           href={downloadUrl}
           action="Tải về"
-          // The rose of the picture the owner sent, sampled off it (10/10/2026:
-          // "tải về màu này thử"): #F04C67, pinker than the shop's own red,
-          // white lettering, a step darker on hover.
-          actionClass="bg-[#F04C67] text-white hover:bg-[#DD3451]"
+          // The outlined button of the picture, measured off it (10/10/2026:
+          // "tải về và nút xem cho màu viền này thử"): the rose #F04C67 as
+          // rule and lettering over a thin wash of itself, brighter on hover.
+          actionClass="border border-[#F04C67]/55 bg-[#F04C67]/15 text-[#F04C67] hover:border-[#F04C67]/80 hover:bg-[#F04C67]/25 hover:text-[#FF7A90]"
           arrow={<Download className="h-3 w-3 shrink-0" />}
         />
       ) : null}
@@ -323,9 +323,10 @@ function DownloadCard({
           // One word (the owner, 09/10/2026: "xem ngay thành xem"), after
           // "Xem ngay" came and went twice.
           action="Xem"
-          // The filled violet of the second picture the owner sent (10/10/2026:
-          // "màu này thử"), white lettering, after the outline.
-          actionClass="bg-violet-500 text-white hover:bg-violet-600"
+          // The same outline in violet, the hue its glyph already wears (the
+          // owner, 10/10/2026: "xem viền tím"); the opacities match "Tải về"
+          // so the pair reads as one set.
+          actionClass="border border-violet-500/55 bg-violet-500/15 text-violet-400 hover:border-violet-400/80 hover:bg-violet-500/25 hover:text-violet-300"
           arrow={<ArrowRight className="h-3 w-3 shrink-0" />}
         />
       ) : null}
