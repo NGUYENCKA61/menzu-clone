@@ -943,9 +943,14 @@ export function OrderDetailModal({
                           // sized by its content, and the download row's
                           // one-line name pushed the block 160px past the
                           // card on a phone; minmax(0, 1fr) is what lets the
-                          // name truncate instead.
+                          // name truncate instead, and why the 3:2 the key
+                          // column takes (the owner, 10/10/2026: "cho card
+                          // key dài hơn và 2 card còn lại thì gọn lại thử")
+                          // is spelled with minmax too.
                           className={`grid grid-cols-1 gap-4 ${
-                            hasFiles ? "lg:grid-cols-2" : ""
+                            hasFiles
+                              ? "lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]"
+                              : ""
                           }`}
                         >
                           <div className="flex flex-col gap-4">
