@@ -207,7 +207,11 @@ export function WarrantyRequestForm({
                 }`}
               >
                 <span
-                  className="mt-0.5 grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-white/[0.06] text-neutral-400"
+                  className={`mt-0.5 grid h-9 w-9 shrink-0 place-items-center rounded-lg ${
+                    on
+                      ? "bg-[var(--menzu-accent)]/15 text-[var(--menzu-accent)]"
+                      : "bg-white/[0.06] text-neutral-400"
+                  }`}
                 >
                   <Glyph className="h-4 w-4" />
                 </span>

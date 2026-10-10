@@ -143,10 +143,9 @@ export default async function WarrantyRequestPage({
       title={heading}
       subtitle={
         <>
-          {/* The code in the accent, the comma after it left alone (the
-              owner, 10/10/2026: "tô đỏ đơn DHTESTPC01", "bỏ tô đỏ dấu ,"). */}
-          Đơn{" "}
-          <span className="font-bold text-[var(--menzu-accent)]">{order.code}</span>
+          {/* The code bold but not red (the owner, 10/10/2026: red first,
+              then "DHTESTPC03 bỏ màu đỏ đi"). */}
+          Đơn <span className="font-bold text-neutral-200">{order.code}</span>
           {following
             ? ", theo dõi yêu cầu bảo hành của bạn"
             : ", báo lỗi để shop kiểm tra và xử lý"}
