@@ -135,10 +135,8 @@ function money(value: number): string {
 /**
  * What to do with the key, in the room the tall card leaves between its
  * label and its value: the three moves a buyer makes, pointing straight at
- * the two buttons in the column beside it, then the thing they ask
- * afterwards: when the clock starts. The warning about passing the key on
- * left this line when the red note below took it back (the owner,
- * 10/10/2026: "thu gọn đi"), so neither says it twice.
+ * the two buttons in the column beside it, then the two things they ask
+ * afterwards — when the clock starts, and who else may have the key.
  */
 function KeyHint() {
   return (
@@ -162,7 +160,7 @@ function KeyHint() {
         ))}
       </ol>
       <p className="text-[11px] leading-snug text-neutral-500">
-        Hạn gói tính từ lúc kích hoạt key.
+        Hạn gói tính từ lúc kích hoạt key. Không chia sẻ key cho người khác.
       </p>
     </div>
   );
