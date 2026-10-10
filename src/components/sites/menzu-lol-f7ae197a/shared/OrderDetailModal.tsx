@@ -712,7 +712,11 @@ export function OrderDetailModal({
                       label="Tổng thanh toán"
                       className="border-r border-white/[0.06]"
                     >
-                      <span className="text-xl font-black tabular-nums text-white">
+                      {/* The size of the code and the date beside it (the
+                          owner, 10/10/2026: "hạ về 15 thử"), a nudge below
+                          the 17px I argued for; the black weight is what
+                          keeps it the heaviest of the four. */}
+                      <span className="text-[15px] font-black tabular-nums text-white">
                         {money(order.total)}
                       </span>
                     </OverviewCell>
