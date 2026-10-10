@@ -3,6 +3,7 @@
 import {
   CalendarDays,
   Check,
+  ChevronRight,
   Clock,
   Copy,
   Download,
@@ -140,12 +141,22 @@ function money(value: number): string {
 function KeyHint() {
   return (
     <div className="flex flex-col gap-2">
-      {/* One step to a line (the owner, 10/10/2026, who wrote the three out
-          stacked), so the order is read down the card rather than across it;
-          no numbers and no arrows, the places say it. */}
-      <ol className="flex flex-col gap-1 text-[11px] font-semibold text-neutral-400">
-        {["Tải loader", "Chạy loader", "Dán key để kích hoạt"].map((step) => (
-          <li key={step}>{step}</li>
+      <ol className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[11px] font-semibold text-neutral-400">
+        {["Tải loader", "Chạy loader", "Dán key để kích hoạt"].map((step, index) => (
+          <li key={step} className="flex items-center gap-1.5">
+            {/* No numbers: the arrows already say the order (the owner,
+                10/10/2026: "có nên bỏ mấy cái ô tròn đó không" → "thử đi").
+                The arrow leads the step it points at, so a step that wraps
+                to the next line takes its arrow along instead of leaving one
+                hanging at the end of a line. */}
+            {index > 0 ? (
+              <ChevronRight
+                className="h-3 w-3 shrink-0 text-neutral-600"
+                aria-hidden
+              />
+            ) : null}
+            {step}
+          </li>
         ))}
       </ol>
       <p className="text-[11px] leading-snug text-neutral-500">
