@@ -44,7 +44,7 @@ export const WARRANTY_ISSUE: Record<WarrantyIssue, { label: string; hint: string
     hint: "Lỗi lúc cài, mở không lên, crash, thiếu file.",
   },
   OTHER: {
-    label: "Lỗi khác",
+    label: "Gặp lỗi khác",
     hint: "Mô tả rõ ở phần bên dưới.",
   },
   ACC_WRONG_LOGIN: {
