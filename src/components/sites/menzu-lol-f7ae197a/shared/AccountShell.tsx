@@ -9,7 +9,7 @@ export interface AccountShellProps {
   /** Left out by a page that draws its own title inside its panel, as
    *  menzu's /wallet does. */
   title?: string;
-  subtitle?: string;
+  subtitle?: React.ReactNode;
   crumb: string;
   isAdmin?: boolean;
   user?: SidebarUser | null;

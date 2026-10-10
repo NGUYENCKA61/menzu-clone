@@ -128,9 +128,15 @@ export default async function WarrantyRequestPage({
       ground="home"
       title={heading}
       subtitle={
-        following
-          ? `Đơn ${order.code}, theo dõi yêu cầu bảo hành của bạn`
-          : `Đơn ${order.code}, báo lỗi để shop kiểm tra và xử lý`
+        <>
+          {/* The code in the accent, the comma after it left alone (the
+              owner, 10/10/2026: "tô đỏ đơn DHTESTPC01", "bỏ tô đỏ dấu ,"). */}
+          Đơn{" "}
+          <span className="font-bold text-[var(--menzu-accent)]">{order.code}</span>
+          {following
+            ? ", theo dõi yêu cầu bảo hành của bạn"
+            : ", báo lỗi để shop kiểm tra và xử lý"}
+        </>
       }
       crumb={heading}
       action={
