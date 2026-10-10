@@ -138,8 +138,9 @@ export default async function WarrantyRequestPage({
       // The wrench the receipt's button wears, where the public pages put
       // their own glyph (the owner, 10/10/2026).
       icon={Wrench}
-      // The wiki's and Liên hệ's ground, not the account area's near-black.
-      ground="home"
+      // Back on the account area's near-black, on trial (the owner,
+      // 10/10/2026: "cho nền màu đen như cũ thử"); the wiki's #0f1015 is one
+      // word away again.
       title={heading}
       subtitle={
         <>
