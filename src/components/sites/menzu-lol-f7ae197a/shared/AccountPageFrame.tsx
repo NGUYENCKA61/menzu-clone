@@ -10,6 +10,8 @@ interface AccountPageFrameProps {
   crumb: string;
   /** Optional control rendered to the right of the title, header-level. */
   action?: ReactNode;
+  /** Off for a page with one job, which then loses the nav column. */
+  sidebar?: boolean;
   children: ReactNode;
 }
 
@@ -29,6 +31,7 @@ export async function AccountPageFrame({
   subtitle,
   crumb,
   action,
+  sidebar = true,
   children,
 }: AccountPageFrameProps) {
   const user = await getCurrentUser();
@@ -41,6 +44,7 @@ export async function AccountPageFrame({
       crumb={crumb}
       isAdmin={isAdmin}
       action={action}
+      sidebar={sidebar}
       user={
         user
           ? {

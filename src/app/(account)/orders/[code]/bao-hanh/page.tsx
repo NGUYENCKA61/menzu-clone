@@ -114,6 +114,9 @@ export default async function WarrantyRequestPage({
 
   return (
     <AccountPageFrame
+      // One job on this page, so no nav column beside it (the owner,
+      // 10/10/2026); "Lịch sử mua" in the corner is the way back.
+      sidebar={false}
       title={heading}
       subtitle={
         following

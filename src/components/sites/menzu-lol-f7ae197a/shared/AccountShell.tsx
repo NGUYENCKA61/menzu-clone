@@ -14,6 +14,10 @@ export interface AccountShellProps {
   user?: SidebarUser | null;
   /** Optional control rendered to the right of the title, header-level. */
   action?: React.ReactNode;
+  /** Off for a page the buyer came to do one thing on: the nav column goes
+   *  and the content centres in a narrower column (the owner, 10/10/2026,
+   *  about the warranty page). */
+  sidebar?: boolean;
   children: React.ReactNode;
 }
 
@@ -30,6 +34,7 @@ export function AccountShell({
   isAdmin = false,
   user = null,
   action = null,
+  sidebar = true,
   children,
 }: AccountShellProps) {
   // flex-1, not min-h-screen: the header sits above this and the footer
@@ -37,7 +42,11 @@ export function AccountShell({
   // warranty form) with hundreds of pixels of nothing before the footer
   // (the owner, 10/10/2026, reviewing the warranty page).
   return (
-    <div className="w-full max-w-[1320px] mx-auto px-4 lg:px-6 py-8 flex flex-1 flex-col">
+    <div
+      className={`w-full mx-auto px-4 lg:px-6 py-8 flex flex-1 flex-col ${
+        sidebar ? "max-w-[1320px]" : "max-w-[960px]"
+      }`}
+    >
       {/* The box keeps the 24px, as on menzu; the pill's own margin used to
           ride inside it and doubled the gap on every account page. */}
       <div className="mb-6">
@@ -45,7 +54,7 @@ export function AccountShell({
       </div>
 
       <div className="flex flex-col lg:flex-row gap-6 items-start">
-        <AccountSidebar isAdmin={isAdmin} user={user} />
+        {sidebar ? <AccountSidebar isAdmin={isAdmin} user={user} /> : null}
 
         <div className="flex-1 w-full min-w-0">
           {title ? (
