@@ -882,10 +882,11 @@ export function OrderDetailModal({
                       itself rather than in a box inside a box. A rule above
                       it instead (the owner, 10/10/2026: "thêm đường kẻ ngang
                       cạnh trên chỗ thông tin chi tiết sản phẩm thử"), the
-                      hairline the footer already uses, and one below it too,
-                      between the cards and the note ("1 đường kẻ ở dưới card
-                      key ngăn cách với vui lòng luôn"). */}
-                  <div className="relative mt-6 border-y border-white/[0.06] py-6">
+                      hairline the footer already uses, and one below it too
+                      ("1 đường kẻ ở dưới card key ngăn cách với vui lòng
+                      luôn"); both gone again on trial (10/10/2026: "bỏ cái
+                      đường kẻ trên dưới thông tin chi tiết sản phẩm thử"). */}
+                  <div className="relative mt-6">
                     {/* One line. The sentence under it — "Thông tin được cung
                         cấp sau khi thanh toán" — was telling a reader who is
                         looking straight at their key that they will get it
