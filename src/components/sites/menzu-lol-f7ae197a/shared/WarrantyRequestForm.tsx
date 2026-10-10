@@ -47,10 +47,15 @@ function Step({
 }) {
   return (
     <div className="mb-3">
-      {/* The word, not a red dot nothing on the page explains (the owner,
-          10/10/2026); the video field has always said it this way. */}
+      {/* A red star and the word together (the owner, 10/10/2026: "bắt buộc
+          thì có * đỏ nữa"); a star on its own explains nothing. */}
       <h2 className="flex flex-wrap items-center gap-1.5 text-[12px] font-black uppercase tracking-widest text-neutral-300">
         {n}. {title}
+        {need ? (
+          <span aria-hidden className="text-[var(--menzu-accent)]">
+            *
+          </span>
+        ) : null}
         {need || note ? (
           <span className="font-bold normal-case tracking-normal text-neutral-500">
             ({need ? "bắt buộc" : note})
@@ -227,7 +232,7 @@ export function WarrantyRequestForm({
         </div>
       </div>
 
-      <div>
+      <div className="border-t border-white/[0.06] pt-5">
         <Step n={2} title="Mô tả chi tiết lỗi" need />
         <label htmlFor="warranty-description" className="sr-only">
           Mô tả lỗi
@@ -236,7 +241,7 @@ export function WarrantyRequestForm({
           id="warranty-description"
           value={description}
           onChange={(event) => setDescription(event.target.value.slice(0, DESCRIPTION_MAX))}
-          rows={6}
+          rows={5}
           placeholder={PLACEHOLDER[kind]}
           className={`${FIELD} resize-y leading-relaxed`}
         />
@@ -251,7 +256,7 @@ export function WarrantyRequestForm({
       </div>
 
       {needsVideo ? (
-        <div>
+        <div className="border-t border-white/[0.06] pt-5">
           <Step n={3} title="Link video quay màn hình" need />
           <label htmlFor="warranty-video" className="sr-only">
             Link video quay màn hình
@@ -286,7 +291,7 @@ export function WarrantyRequestForm({
         </div>
       ) : null}
 
-      <div>
+      <div className="border-t border-white/[0.06] pt-5">
         <Step n={needsVideo ? 4 : 3} title="Ảnh chụp màn hình lỗi" note="khuyến dùng để được duyệt nhanh" />
         {preview ? (
           <div className="relative w-full max-w-sm overflow-hidden rounded-xl border border-white/10 bg-neutral-950">
@@ -313,7 +318,7 @@ export function WarrantyRequestForm({
         ) : (
           // A whole panel to aim at, not a small button: the picture is
           // what gets a report approved fastest (the owner, 10/10/2026).
-          <label className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-white/15 bg-white/[0.02] px-4 py-8 text-center transition-colors hover:border-[var(--menzu-accent)]/50 hover:bg-white/[0.04]">
+          <label className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-white/15 bg-white/[0.02] px-4 py-6 text-center transition-colors hover:border-[var(--menzu-accent)]/50 hover:bg-white/[0.04]">
             <span className="grid h-10 w-10 place-items-center rounded-xl border border-white/10 bg-white/[0.04] text-neutral-300">
               <ImagePlus className="h-5 w-5" />
             </span>
@@ -350,9 +355,14 @@ export function WarrantyRequestForm({
       {/* The promise on the left, the send on the right, parted from the
           form by a rule, as the owner drew it. */}
       <div className="flex flex-wrap items-center justify-between gap-3 border-t border-white/[0.06] pt-5">
-        <span className="inline-flex items-center gap-2 text-[11.5px] text-neutral-400">
-          <BadgeCheck className="h-4 w-4 shrink-0 text-neutral-500" />
-          Shop cam kết đổi key hoặc hoàn tiền nếu lỗi từ phía shop.
+        <span className="flex flex-col gap-1">
+          <span className="inline-flex items-center gap-2 text-[11.5px] text-neutral-400">
+            <BadgeCheck className="h-4 w-4 shrink-0 text-neutral-500" />
+            Shop cam kết đổi key hoặc hoàn tiền nếu lỗi từ phía shop.
+          </span>
+          <span className="pl-6 text-[11px] text-neutral-500">
+            Shop trả lời trên chuông thông báo và trong lịch sử mua hàng.
+          </span>
         </span>
         <button
           type="button"
@@ -363,9 +373,6 @@ export function WarrantyRequestForm({
           {busy ? <Loader2 className="h-4 w-4 animate-spin motion-reduce:animate-none" /> : <Send className="h-4 w-4" />}
           {busy ? "Đang gửi…" : "Gửi yêu cầu bảo hành"}
         </button>
-        <span className="w-full text-[11px] text-neutral-500">
-          Shop trả lời trên chuông thông báo và trong lịch sử mua hàng.
-        </span>
       </div>
     </div>
   );
