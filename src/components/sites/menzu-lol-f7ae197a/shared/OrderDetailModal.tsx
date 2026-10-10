@@ -229,8 +229,12 @@ function HandoverBox({
       // đồng bộ hơn thử"): the label keeps its place beside "LINK TẢI HACK"
       // and the value with its button sinks to the card's foot, level with
       // the last file row's own name and button.
-      className={`overflow-hidden rounded-xl border border-white/[0.06] bg-white/[0.02] transition-colors hover:border-white/[0.12]${
-        hint ? "" : " p-4"
+      // The banded card is the table's own make: a bordered box with no
+      // fill of its own, so the lighter strip reads against the sheet as the
+      // table's header does (the owner, 10/10/2026: "màu nền đó"). The plain
+      // boxes keep the wash they have always had.
+      className={`overflow-hidden rounded-xl border border-white/[0.06] transition-colors hover:border-white/[0.12]${
+        hint ? "" : " bg-white/[0.02] p-4"
       }${tall ? " flex h-full flex-col" : ""}`}
     >
       {/* Where the card carries more than a value, its label sits on the
