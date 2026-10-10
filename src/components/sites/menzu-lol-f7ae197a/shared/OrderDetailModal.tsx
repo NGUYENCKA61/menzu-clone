@@ -145,10 +145,13 @@ function HandoverBox({
   label,
   icon,
   value,
+  tall = false,
 }: {
   label: string;
   icon: ReactNode;
   value: string;
+  /** Fill the height the row gives it, rather than hugging its two lines. */
+  tall?: boolean;
 }) {
   const [copied, setCopied] = useState(false);
   const valueRef = useRef<HTMLSpanElement>(null);
@@ -181,7 +184,11 @@ function HandoverBox({
   const name = label.toLowerCase();
 
   return (
-    <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4 transition-colors hover:border-white/[0.12]">
+    <div
+      className={`rounded-xl border border-white/[0.06] bg-white/[0.02] p-4 transition-colors hover:border-white/[0.12]${
+        tall ? " h-full" : ""
+      }`}
+    >
       <span className={`${LABEL} mb-2`}>
         {icon}
         {label}
@@ -888,8 +895,12 @@ export function OrderDetailModal({
                         // With files to offer, the keys take the left half and
                         // the download rows the right — the card is one hand-
                         // over, and the empty space beside a single key is
-                        // where they belong. Top-aligned so the shorter side
-                        // does not stretch.
+                        // where they belong. The row is not top-aligned: the
+                        // key card grows to the height of both file rows and
+                        // the gap between them (the owner, 09/10/2026: "cho
+                        // độ dài card key cao bằng 2 card bên phải gộp lại
+                        // thử"), with its words still at the top, level with
+                        // "LINK TẢI HACK".
                         <div
                           // grid-cols-1 spelled out: an implicit track is
                           // sized by its content, and the download row's
@@ -897,7 +908,7 @@ export function OrderDetailModal({
                           // card on a phone; minmax(0, 1fr) is what lets the
                           // name truncate instead.
                           className={`grid grid-cols-1 gap-4 ${
-                            hasFiles ? "lg:grid-cols-2 lg:items-start" : ""
+                            hasFiles ? "lg:grid-cols-2" : ""
                           }`}
                         >
                           <div className="flex flex-col gap-4">
@@ -905,7 +916,7 @@ export function OrderDetailModal({
                               <div
                                 className={`grid gap-4 ${
                                   hasFiles
-                                    ? "grid-cols-1"
+                                    ? "grid-cols-1 lg:flex-1"
                                     : "grid-cols-1 lg:grid-cols-2"
                                 }`}
                               >
@@ -915,6 +926,7 @@ export function OrderDetailModal({
                                     className="flex flex-col gap-1.5"
                                   >
                                     <HandoverBox
+                                      tall={hasFiles}
                                       icon={<KeyRound className="h-3 w-3 text-[var(--menzu-accent)]" />}
                                       label={
                                         order.keys.length > 1
