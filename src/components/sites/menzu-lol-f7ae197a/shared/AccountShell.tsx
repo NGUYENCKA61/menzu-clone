@@ -15,8 +15,9 @@ export interface AccountShellProps {
   /** Optional control rendered to the right of the title, header-level. */
   action?: React.ReactNode;
   /** Off for a page the buyer came to do one thing on: the nav column goes
-   *  and the content centres in a narrower column (the owner, 10/10/2026,
-   *  about the warranty page). */
+   *  and the page is set like the public ones (Liên hệ, Đánh giá, Wiki) —
+   *  same column, same air, a red bar at the title and a rule under it (the
+   *  owner, 10/10/2026, about the warranty page). */
   sidebar?: boolean;
   children: React.ReactNode;
 }
@@ -43,30 +44,58 @@ export function AccountShell({
   // (the owner, 10/10/2026, reviewing the warranty page).
   return (
     <div
-      className={`w-full mx-auto px-4 lg:px-6 py-8 flex flex-1 flex-col ${
-        sidebar ? "max-w-[1320px]" : "max-w-[960px]"
+      className={`w-full max-w-[1320px] mx-auto px-4 lg:px-6 flex flex-1 flex-col ${
+        sidebar ? "py-8" : "py-12"
       }`}
     >
       {/* The box keeps the 24px, as on menzu; the pill's own margin used to
-          ride inside it and doubled the gap on every account page. */}
-      <div className="mb-6">
-        <Breadcrumb margin="mb-0" items={[{ label: "Trang chủ", href: "/" }, { label: crumb }]} />
-      </div>
+          ride inside it and doubled the gap on every account page. A page
+          without the nav column lets the trail keep its own margin, as the
+          public pages do. */}
+      {sidebar ? (
+        <div className="mb-6">
+          <Breadcrumb margin="mb-0" items={[{ label: "Trang chủ", href: "/" }, { label: crumb }]} />
+        </div>
+      ) : (
+        <Breadcrumb items={[{ label: "Trang chủ", href: "/" }, { label: crumb }]} />
+      )}
 
       <div className="flex flex-col lg:flex-row gap-6 items-start">
         {sidebar ? <AccountSidebar isAdmin={isAdmin} user={user} /> : null}
 
         <div className="flex-1 w-full min-w-0">
           {title ? (
-            <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
-              <div>
-                <h1 className="text-2xl sm:text-3xl font-black uppercase tracking-wider text-white">
-                  {title}
-                </h1>
-                <p className="text-sm text-neutral-400 mt-1.5">{subtitle}</p>
+            sidebar ? (
+              <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
+                <div>
+                  <h1 className="text-2xl sm:text-3xl font-black uppercase tracking-wider text-white">
+                    {title}
+                  </h1>
+                  <p className="text-sm text-neutral-400 mt-1.5">{subtitle}</p>
+                </div>
+                {action ? <div className="shrink-0">{action}</div> : null}
               </div>
-              {action ? <div className="shrink-0">{action}</div> : null}
-            </div>
+            ) : (
+              // The public pages' opening: the red mark, the title, a rule
+              // under the row.
+              <div className="mb-8 flex flex-col gap-4 border-b border-white/10 pb-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="min-w-0">
+                  <div className="flex items-center gap-3">
+                    <span
+                      aria-hidden
+                      className="h-6 w-[3px] shrink-0 rounded-full bg-[var(--menzu-accent)]"
+                    />
+                    <h1 className="text-2xl sm:text-3xl font-black uppercase tracking-wider text-white">
+                      {title}
+                    </h1>
+                  </div>
+                  {subtitle ? (
+                    <p className="mt-3 text-sm text-neutral-400">{subtitle}</p>
+                  ) : null}
+                </div>
+                {action ? <div className="shrink-0">{action}</div> : null}
+              </div>
+            )
           ) : null}
 
           {children}
