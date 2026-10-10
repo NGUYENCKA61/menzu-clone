@@ -204,15 +204,21 @@ export const WARRANTY_STATUS: Record<
   },
   // The shop could not fix it and is paying it back over a bank transfer:
   // waiting for the buyer's account, then for the shop's transfer.
+  // Waiting on someone, as "Mới gửi" is: the buyer's account number, then
+  // the shop's transfer.
   REFUNDING: {
     label: "Đang hoàn tiền",
-    tile: "border-orange-500/30 bg-orange-500/10 text-orange-400",
-    dot: "bg-orange-500",
+    tile: "border-amber-500/30 bg-amber-500/10 text-amber-400",
+    dot: "bg-amber-500",
   },
+  // Closed, as "Đã xử lý" is. Three colours for three kinds of state, not
+  // five for five labels: amber was a shade from orange and rose a shade
+  // from the shop's own red (the owner, 10/10/2026: "chỗ nào bất hợp lý thì
+  // sửa lại đi").
   REFUNDED: {
     label: "Đã hoàn tiền",
-    tile: "border-rose-500/30 bg-rose-500/10 text-rose-400",
-    dot: "bg-rose-500",
+    tile: "border-emerald-500/30 bg-emerald-500/10 text-emerald-400",
+    dot: "bg-emerald-500",
   },
 };
 

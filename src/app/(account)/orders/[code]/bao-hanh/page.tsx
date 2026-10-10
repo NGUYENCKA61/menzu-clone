@@ -268,7 +268,10 @@ export default async function WarrantyRequestPage({
             </div>
             <div className="shrink-0 text-right">
               <p className={LABEL}>Tổng tiền</p>
-              <p className="mt-1 text-lg font-black text-[var(--menzu-accent)]">
+              {/* White, as the receipt prints the same figure; red on this
+                  page belongs to the shop's marks and the send button (the
+                  owner, 10/10/2026). */}
+              <p className="mt-1 text-lg font-black text-white">
                 {formatVnd(Number(order.total))}đ
               </p>
             </div>
