@@ -251,19 +251,27 @@ export default async function WarrantyRequestPage({
               <p className="mt-2 text-sm font-black uppercase leading-snug text-white">
                 {productName}
               </p>
+              {/* The receipt's own words for the same three facts: "Ngày
+                  mua", "Gói dịch vụ", and a plain count, which it prints
+                  without an x. One of a thing is not worth a line (the
+                  owner, 10/10/2026). */}
               <p className="mt-1.5 flex flex-wrap gap-x-5 gap-y-1 text-[11px] font-semibold text-neutral-500">
                 <span>
-                  Thời gian:{" "}
+                  Ngày mua:{" "}
                   <span className="text-neutral-200">{stamp(order.createdAt)}</span>
                 </span>
                 {order.package ? (
                   <span>
-                    Gói: <span className="text-neutral-200">{order.package.label}</span>
+                    Gói dịch vụ:{" "}
+                    <span className="text-neutral-200">{order.package.label}</span>
                   </span>
                 ) : null}
-                <span>
-                  Số lượng: <span className="text-neutral-200">x{order.quantity}</span>
-                </span>
+                {order.quantity > 1 ? (
+                  <span>
+                    Số lượng:{" "}
+                    <span className="text-neutral-200">{order.quantity}</span>
+                  </span>
+                ) : null}
               </p>
             </div>
             <div className="shrink-0 text-right">
