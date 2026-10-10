@@ -981,16 +981,16 @@ export function OrderDetailModal({
                                       tall={hasFiles}
                                       hint={hasFiles ? <KeyHint /> : null}
                                       icon={<KeyRound className="h-3 w-3 text-[var(--menzu-accent)]" />}
-                                      // The owner, 10/10/2026: "key của bạn",
-                                      // then "thông tin về key, ví dụ z" —
-                                      // the card holds the steps and the
-                                      // notes too, so it is named for all of
-                                      // it. Numbered only when the order
-                                      // carries more than one.
+                                      // Named for what the card hands over,
+                                      // as "Link tải hack" and "Tài liệu
+                                      // hướng dẫn" are (the owner asked which
+                                      // name was best, 10/10/2026, and took
+                                      // this one). Numbered only when the
+                                      // order carries more than one.
                                       label={
                                         order.keys.length > 1
-                                          ? `Thông tin về key ${index + 1}`
-                                          : "Thông tin về key"
+                                          ? `Key kích hoạt ${index + 1}`
+                                          : "Key kích hoạt"
                                       }
                                       value={key.value}
                                     />
