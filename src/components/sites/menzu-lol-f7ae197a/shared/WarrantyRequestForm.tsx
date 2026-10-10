@@ -78,14 +78,14 @@ function Step({
  * mismatch, and grey for "something else".
  */
 const ISSUE_LOOK: Record<string, { icon: LucideIcon; tint: string }> = {
-  KEY_INVALID: { icon: KeyRound, tint: "border-[var(--menzu-accent)]/25 bg-[var(--menzu-accent)]/12 text-[var(--menzu-accent)]" },
-  DETECTED: { icon: ShieldAlert, tint: "border-amber-500/25 bg-amber-500/12 text-amber-400" },
-  INSTALL: { icon: CloudDownload, tint: "border-sky-500/25 bg-sky-500/12 text-sky-400" },
-  ACC_WRONG_LOGIN: { icon: KeyRound, tint: "border-[var(--menzu-accent)]/25 bg-[var(--menzu-accent)]/12 text-[var(--menzu-accent)]" },
-  ACC_LOCKED: { icon: ShieldAlert, tint: "border-amber-500/25 bg-amber-500/12 text-amber-400" },
-  ACC_RECLAIMED: { icon: UserX, tint: "border-amber-500/25 bg-amber-500/12 text-amber-400" },
-  ACC_NOT_AS_DESCRIBED: { icon: CircleHelp, tint: "border-sky-500/25 bg-sky-500/12 text-sky-400" },
-  OTHER: { icon: CircleHelp, tint: "border-white/10 bg-white/[0.04] text-neutral-400" },
+  KEY_INVALID: { icon: KeyRound, tint: "bg-[var(--menzu-accent)]/12 text-[var(--menzu-accent)]" },
+  DETECTED: { icon: ShieldAlert, tint: "bg-amber-500/12 text-amber-400" },
+  INSTALL: { icon: CloudDownload, tint: "bg-sky-500/12 text-sky-400" },
+  ACC_WRONG_LOGIN: { icon: KeyRound, tint: "bg-[var(--menzu-accent)]/12 text-[var(--menzu-accent)]" },
+  ACC_LOCKED: { icon: ShieldAlert, tint: "bg-amber-500/12 text-amber-400" },
+  ACC_RECLAIMED: { icon: UserX, tint: "bg-amber-500/12 text-amber-400" },
+  ACC_NOT_AS_DESCRIBED: { icon: CircleHelp, tint: "bg-sky-500/12 text-sky-400" },
+  OTHER: { icon: CircleHelp, tint: "bg-white/[0.06] text-neutral-400" },
 };
 
 
@@ -211,7 +211,7 @@ export function WarrantyRequestForm({
                 }`}
               >
                 <span
-                  className={`mt-0.5 grid h-9 w-9 shrink-0 place-items-center rounded-lg border ${look.tint}`}
+                  className={`mt-0.5 grid h-9 w-9 shrink-0 place-items-center rounded-lg ${look.tint}`}
                 >
                   <Glyph className="h-4 w-4" />
                 </span>
