@@ -303,9 +303,10 @@ function DownloadCard({
           title={downloadName ?? DEFAULT_DOWNLOAD_NAME}
           href={downloadUrl}
           action="Tải về"
-          // The accent red with white lettering (the owner, 09/10/2026: "tải
-          // về màu đỏ nút xem màu trắng đi").
-          actionClass="bg-[var(--menzu-accent)] text-white hover:bg-[var(--menzu-accent-dark)]"
+          // The rose of the picture the owner sent, sampled off it (10/10/2026:
+          // "tải về màu này thử"): #F04C67, pinker than the shop's own red,
+          // white lettering, a step darker on hover.
+          actionClass="bg-[#F04C67] text-white hover:bg-[#DD3451]"
           arrow={<Download className="h-3 w-3 shrink-0" />}
         />
       ) : null}
