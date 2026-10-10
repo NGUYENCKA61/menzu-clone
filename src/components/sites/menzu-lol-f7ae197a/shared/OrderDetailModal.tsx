@@ -1134,7 +1134,7 @@ export function OrderDetailModal({
                         ? "Đơn bảo hành của bạn đang được xử lý, bấm Xem trạng thái ở dưới để theo dõi."
                         : showWarranty && warrantyAction.kind === "bank"
                           ? "Shop cần số tài khoản của bạn để hoàn tiền, bấm Nhập số tài khoản ở dưới."
-                          : "Lưu lại mã đơn hàng để được hỗ trợ. Không chia sẻ dữ liệu bàn giao cho người khác."}
+                          : "Vui lòng lưu lại mã đơn hàng để được hỗ trợ. Không chia sẻ dữ liệu bàn giao cho người khác."}
                     </span>
                   </div>
                 </div>
