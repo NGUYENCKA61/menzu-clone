@@ -3,7 +3,6 @@
 import {
   CalendarDays,
   Check,
-  ChevronRight,
   Clock,
   Copy,
   Download,
@@ -133,36 +132,16 @@ function money(value: number): string {
   return `${formatVnd(value)}đ`;
 }
 /**
- * What to do with the key, in the room the tall card leaves between its
- * label and its value: the three moves a buyer makes, pointing straight at
- * the two buttons in the column beside it, then the two things they ask
- * afterwards — when the clock starts, and who else may have the key.
+ * The two things a buyer asks after they have the key: when the clock
+ * starts, and who else may have it. The three steps that stood above these
+ * lines are gone (the owner, 10/10/2026: "bỏ n thử"), and so is the card's
+ * stretch, so nothing is left standing in a hole.
  */
 function KeyHint() {
   return (
-    <div className="flex flex-col gap-2">
-      <ol className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[11px] font-semibold text-neutral-400">
-        {["Tải loader", "Chạy loader", "Dán key để kích hoạt"].map((step, index) => (
-          <li key={step} className="flex items-center gap-1.5">
-            {/* No numbers: the arrows already say the order (the owner,
-                10/10/2026: "có nên bỏ mấy cái ô tròn đó không" → "thử đi").
-                The arrow leads the step it points at, so a step that wraps
-                to the next line takes its arrow along instead of leaving one
-                hanging at the end of a line. */}
-            {index > 0 ? (
-              <ChevronRight
-                className="h-3 w-3 shrink-0 text-neutral-600"
-                aria-hidden
-              />
-            ) : null}
-            {step}
-          </li>
-        ))}
-      </ol>
-      <p className="text-[11px] leading-snug text-neutral-500">
-        Hạn gói tính từ lúc kích hoạt key. Không chia sẻ key cho người khác.
-      </p>
-    </div>
+    <p className="text-[11px] leading-snug text-neutral-500">
+      Hạn gói tính từ lúc kích hoạt key. Không chia sẻ key cho người khác.
+    </p>
   );
 }
 
@@ -177,16 +156,12 @@ function HandoverBox({
   icon,
   value,
   hint = null,
-  tall = false,
 }: {
   label: string;
   icon: ReactNode;
   value: string;
-  /** Lines between the label and the value; the key's own notes use it. */
+  /** A line between the label and the value; the key's own note uses it. */
   hint?: ReactNode;
-  /** Fill the height the row gives it: the label stays at the top and the
-   *  value drops to the bottom, so both line up with the cards beside it. */
-  tall?: boolean;
 }) {
   const [copied, setCopied] = useState(false);
   const valueRef = useRef<HTMLSpanElement>(null);
@@ -220,13 +195,7 @@ function HandoverBox({
 
   return (
     <div
-      // Pushed apart when tall (the owner, 09/10/2026: "làm lại sao cho nhìn
-      // đồng bộ hơn thử"): the label keeps its place beside "LINK TẢI HACK"
-      // and the value with its button sinks to the card's foot, level with
-      // the last file row's own name and button.
-      className={`rounded-xl border border-white/[0.06] bg-white/[0.02] p-4 transition-colors hover:border-white/[0.12]${
-        tall ? " flex h-full flex-col justify-between" : ""
-      }`}
+      className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4 transition-colors hover:border-white/[0.12]"
     >
       <span className={`${LABEL} mb-2`}>
         {icon}
@@ -932,12 +901,10 @@ export function OrderDetailModal({
                         // With files to offer, the keys take the left half and
                         // the download rows the right — the card is one hand-
                         // over, and the empty space beside a single key is
-                        // where they belong. The row is not top-aligned: the
-                        // key card grows to the height of both file rows and
-                        // the gap between them (the owner, 09/10/2026: "cho
-                        // độ dài card key cao bằng 2 card bên phải gộp lại
-                        // thử"), with its words still at the top, level with
-                        // "LINK TẢI HACK".
+                        // where they belong. Top-aligned: each card is as
+                        // tall as what it holds (the owner, 10/10/2026, who
+                        // dropped the steps that filled the stretched key
+                        // card).
                         <div
                           // grid-cols-1 spelled out: an implicit track is
                           // sized by its content, and the download row's
@@ -949,7 +916,7 @@ export function OrderDetailModal({
                           // is spelled with minmax too.
                           className={`grid grid-cols-1 gap-4 ${
                             hasFiles
-                              ? "lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]"
+                              ? "lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] lg:items-start"
                               : ""
                           }`}
                         >
@@ -958,7 +925,7 @@ export function OrderDetailModal({
                               <div
                                 className={`grid gap-4 ${
                                   hasFiles
-                                    ? "grid-cols-1 lg:flex-1"
+                                    ? "grid-cols-1"
                                     : "grid-cols-1 lg:grid-cols-2"
                                 }`}
                               >
@@ -968,7 +935,6 @@ export function OrderDetailModal({
                                     className="flex flex-col gap-1.5"
                                   >
                                     <HandoverBox
-                                      tall={hasFiles}
                                       hint={hasFiles ? <KeyHint /> : null}
                                       icon={<KeyRound className="h-3 w-3 text-[var(--menzu-accent)]" />}
                                       // Named for what the card hands over,
