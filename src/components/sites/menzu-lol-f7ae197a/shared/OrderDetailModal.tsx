@@ -322,9 +322,10 @@ function DownloadCard({
           // One word (the owner, 09/10/2026: "xem ngay thành xem"), after
           // "Xem ngay" came and went twice.
           action="Xem"
-          // Grey, the same ghost as "Sao chép" (the owner, 09/10/2026: "xem
-          // màu xám đi"), after a red trial.
-          actionClass="border border-white/10 bg-white/5 text-neutral-300 hover:bg-white/10 hover:text-white"
+          // The outline from the picture the owner sent (10/10/2026: "nút xem
+          // đổi sang màu này thử"): a violet rule and violet lettering over a
+          // thin violet wash, the hue its own glyph already wears.
+          actionClass="border border-violet-500/50 bg-violet-500/10 text-violet-300 hover:border-violet-400/70 hover:bg-violet-500/20 hover:text-violet-200"
           arrow={<ArrowRight className="h-3 w-3 shrink-0" />}
         />
       ) : null}
