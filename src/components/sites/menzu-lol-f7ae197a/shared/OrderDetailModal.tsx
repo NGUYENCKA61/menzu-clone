@@ -233,7 +233,15 @@ function HandoverBox({
         tall ? " flex h-full flex-col justify-between" : ""
       }`}
     >
-      <span className={`${LABEL} mb-2`}>
+      {/* A hairline under the label where the card carries more than a
+          value (the owner, 10/10/2026: "thêm đường kẻ ở dưới key kích hoạt
+          thử", "kẻ ngang"): it parts the name of the card from the steps.
+          The sign-in's two boxes, which carry no hint, keep theirs plain. */}
+      <span
+        className={`${LABEL} mb-2${
+          hint ? " border-b border-white/[0.06] pb-2" : ""
+        }`}
+      >
         {icon}
         {label}
       </span>
