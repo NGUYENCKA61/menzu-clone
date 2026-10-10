@@ -142,7 +142,7 @@ export function WarrantyRequestForm({
   const left = DESCRIPTION_MIN - description.trim().length;
   const needsVideo = kind === "account";
   const video = readVideoUrl(videoUrl);
-  const ready = issue !== null && !short && (!needsVideo || video.ok);
+  const ready = issue !== null && !short && file !== null && (!needsVideo || video.ok);
 
   async function submit() {
     if (busy || !ready || issue === null) return;
@@ -289,7 +289,7 @@ export function WarrantyRequestForm({
       ) : null}
 
       <div className="border-t border-white/[0.06] pt-5">
-        <Step n={needsVideo ? 4 : 3} title="Ảnh chụp màn hình lỗi" note="khuyến dùng để được duyệt nhanh" />
+        <Step n={needsVideo ? 4 : 3} title="Ảnh chụp màn hình lỗi" need />
         {preview ? (
           <div className="relative w-full max-w-sm overflow-hidden rounded-xl border border-white/10 bg-neutral-950">
             <Image
@@ -342,6 +342,13 @@ export function WarrantyRequestForm({
           </label>
         )}
       </div>
+
+      {/* Said once, where the eye lands after the drop zone. */}
+      {!file ? (
+        <p className="-mt-2 text-[11px] text-neutral-500">
+          Thiếu ảnh thì shop không có căn cứ kiểm tra, nên ảnh là bắt buộc.
+        </p>
+      ) : null}
 
       {error ? (
         <p className="rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-[13px] font-semibold text-rose-300">

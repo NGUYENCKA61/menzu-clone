@@ -93,6 +93,14 @@ export async function POST(request: Request) {
   if (!image.ok) {
     return NextResponse.json({ error: image.error }, { status: 400 });
   }
+  // The picture is required (the owner, 10/10/2026): the form asks for one,
+  // and a report sent any other way must carry one too.
+  if (!image.url) {
+    return NextResponse.json(
+      { error: "Vui lòng đính kèm ảnh chụp màn hình lỗi" },
+      { status: 400 },
+    );
+  }
 
   const ticket = await db.warrantyRequest.create({
     data: {
