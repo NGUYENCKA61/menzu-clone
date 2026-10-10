@@ -47,18 +47,22 @@ function Step({
 }) {
   return (
     <div className="mb-3">
-      {/* A red star and the word together (the owner, 10/10/2026: "bắt buộc
-          thì có * đỏ nữa"); a star on its own explains nothing. */}
+      {/* The star alone (the owner, 10/10/2026: "bỏ đi"), with the word
+          kept for a reader who cannot see it. The one section that is not
+          required says so in its own note. */}
       <h2 className="flex flex-wrap items-center gap-1.5 text-[12px] font-black uppercase tracking-widest text-neutral-300">
         {n}. {title}
         {need ? (
-          <span aria-hidden className="text-[var(--menzu-accent)]">
-            *
-          </span>
+          <>
+            <span aria-hidden className="text-[var(--menzu-accent)]">
+              *
+            </span>
+            <span className="sr-only">(bắt buộc)</span>
+          </>
         ) : null}
-        {need || note ? (
+        {note ? (
           <span className="font-bold normal-case tracking-normal text-neutral-500">
-            ({need ? "bắt buộc" : note})
+            ({note})
           </span>
         ) : null}
       </h2>
