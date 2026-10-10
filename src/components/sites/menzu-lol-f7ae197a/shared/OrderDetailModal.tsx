@@ -300,12 +300,7 @@ function DownloadCard({
           eyebrow="Link tải hack"
           title={downloadName ?? DEFAULT_DOWNLOAD_NAME}
           href={downloadUrl}
-          action="Tải về"
-          // The outlined button of the picture, measured off it (10/10/2026:
-          // "tải về và nút xem cho màu viền này thử"): the rose #F04C67 as
-          // rule and lettering over a thin wash of itself, brighter on hover.
-          actionClass="border border-[#F04C67]/55 bg-[#F04C67]/15 text-[#F04C67] hover:border-[#F04C67]/80 hover:bg-[#F04C67]/25 hover:text-[#FF7A90]"
-          arrow={<Download className="h-3 w-3 shrink-0" />}
+          arrow={<Download className="h-4 w-4 shrink-0" />}
         />
       ) : null}
       {docsUrl ? (
@@ -319,14 +314,7 @@ function DownloadCard({
           // Dành riêng cho khách hàng đi".
           title="Dành riêng cho khách hàng"
           href={docsUrl}
-          // One word (the owner, 09/10/2026: "xem ngay thành xem"), after
-          // "Xem ngay" came and went twice.
-          action="Xem"
-          // The same outline in violet, the hue its glyph already wears (the
-          // owner, 10/10/2026: "xem viền tím"); the opacities match "Tải về"
-          // so the pair reads as one set.
-          actionClass="border border-violet-500/55 bg-violet-500/15 text-violet-400 hover:border-violet-400/80 hover:bg-violet-500/25 hover:text-violet-300"
-          arrow={<ArrowRight className="h-3 w-3 shrink-0" />}
+          arrow={<ArrowRight className="h-4 w-4 shrink-0" />}
         />
       ) : null}
     </div>
@@ -339,7 +327,10 @@ function DownloadCard({
  * Two lines rather than three. The third was a sentence that said nothing the
  * eyebrow had not already said — "Hướng dẫn chi tiết sản phẩm" under "Tài liệu
  * hướng dẫn" — and it cost the whole handover block thirty pixels of height.
- * The glyph sits in a 32px tinted tile ahead of the words.
+ * The glyph sits in a 32px tinted tile ahead of the words, and the whole
+ * card is the link: the owner took the buttons off (10/10/2026: "xóa nút tải
+ * về và nút xem"), so the row itself opens the file and the glyph at its
+ * right edge says there is somewhere to go.
  */
 function FileRow({
   icon,
@@ -347,8 +338,6 @@ function FileRow({
   eyebrow,
   title,
   href,
-  action,
-  actionClass,
   arrow,
 }: {
   icon: ReactNode;
@@ -357,38 +346,30 @@ function FileRow({
   eyebrow: string;
   title: string;
   href: string;
-  action: string;
-  actionClass: string;
   arrow: ReactNode;
 }) {
   return (
-    <div className="flex flex-1 items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] p-3 transition-colors hover:border-white/[0.12]">
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="group flex flex-1 items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] p-3 transition-colors hover:border-white/[0.12] hover:bg-white/[0.04]"
+    >
       <span
         className={`grid h-8 w-8 shrink-0 place-items-center rounded-lg border ${tint}`}
       >
         {icon}
       </span>
-      {/* min-w-0 so a long name truncates instead of pushing the button off
+      {/* min-w-0 so a long name truncates instead of pushing the glyph off
           the card. */}
       <div className="min-w-0 flex-1">
         <span className={LABEL}>{eyebrow}</span>
         <p className="mt-0.5 truncate text-sm font-bold text-white">{title}</p>
       </div>
-      <a
-        href={href}
-        target="_blank"
-        rel="noopener noreferrer"
-        // One size for both file buttons, the height of "Sao chép" and the
-        // least width that holds "Tải về" and its arrow (the owner,
-        // 09/10/2026: "thu gọn nút tải về", then "nút xem thu gọn đi cho
-        // đồng bộ nút tải về"). A floor, not a fixed width, so a wider font
-        // grows a button rather than clipping it.
-        className={`inline-flex h-9 min-w-20 shrink-0 items-center justify-center gap-1.5 rounded-lg px-3 text-xs font-bold transition-colors ${actionClass}`}
-      >
-        {action}
+      <span className="shrink-0 text-neutral-500 transition-colors group-hover:text-white">
         {arrow}
-      </a>
-    </div>
+      </span>
+    </a>
   );
 }
 
