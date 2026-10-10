@@ -164,7 +164,10 @@ export default async function WarrantyRequestPage({
       }
     >
       <div className="flex flex-col gap-5">
-        {/* WHERE THE REPORT STANDS — the three moves, the one in hand lit. */}
+        {/* WHERE THE REPORT STANDS — the three moves, the one in hand lit.
+            Only once a report exists: before that it said "Đang thực hiện"
+            over a form nobody had filled in (the owner, 10/10/2026). */}
+        {following ? (
         <section className={`${CARD} !p-3 sm:!p-3`}>
           <ol className="grid gap-2 sm:grid-cols-3">
             {STEPS.map((step, index) => {
@@ -211,6 +214,7 @@ export default async function WarrantyRequestPage({
             })}
           </ol>
         </section>
+        ) : null}
 
         {/* THE ORDER BEING REPORTED */}
         <section className={CARD}>
@@ -270,9 +274,13 @@ export default async function WarrantyRequestPage({
             </div>
           </div>
 
-          <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-2 rounded-xl border border-amber-500/20 bg-amber-500/[0.06] px-4 py-3">
+          {/* Plain, not amber: on this site amber means something needs
+              attention (a key still coming, a sign-in not taken), and the
+              opening hours need none (the owner, 10/10/2026: "màu chỗ nào
+              chưa đồng bộ thì sửa lại"). */}
+          <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-2 rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3">
             <span className="inline-flex items-center gap-2 text-[12px] text-neutral-300">
-              <Clock className="h-4 w-4 shrink-0 text-amber-400" />
+              <Clock className="h-4 w-4 shrink-0 text-neutral-400" />
               Shop xử lý bảo hành {SUPPORT_WINDOW} mỗi ngày; ngoài giờ cứ gửi, sáng shop
               làm ngay.
             </span>
@@ -280,7 +288,7 @@ export default async function WarrantyRequestPage({
                 account's warranty rests on starts. */}
             {kind === "account" && order.loginRevealedAt ? (
               <span className="inline-flex items-center gap-2 text-[12px] text-neutral-300">
-                <KeyRound className="h-4 w-4 shrink-0 text-amber-400" />
+                <KeyRound className="h-4 w-4 shrink-0 text-neutral-400" />
                 Đã nhận thông tin đăng nhập lúc {dayStamp(order.loginRevealedAt)}
               </span>
             ) : null}

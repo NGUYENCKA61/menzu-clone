@@ -47,16 +47,13 @@ function Step({
 }) {
   return (
     <div className="mb-3">
-      <h2 className="flex items-center gap-1.5 text-[12px] font-black uppercase tracking-widest text-neutral-300">
+      {/* The word, not a red dot nothing on the page explains (the owner,
+          10/10/2026); the video field has always said it this way. */}
+      <h2 className="flex flex-wrap items-center gap-1.5 text-[12px] font-black uppercase tracking-widest text-neutral-300">
         {n}. {title}
-        {need ? (
-          <span aria-hidden className="text-[var(--menzu-accent)]">
-            •
-          </span>
-        ) : null}
-        {note ? (
+        {need || note ? (
           <span className="font-bold normal-case tracking-normal text-neutral-500">
-            ({note})
+            ({need ? "bắt buộc" : note})
           </span>
         ) : null}
       </h2>
@@ -80,11 +77,6 @@ const ISSUE_ICON: Record<string, LucideIcon> = {
   OTHER: CircleHelp,
 };
 
-/** Phrases the buyer would type anyway; a chip drops one in. */
-const QUICK: Record<WarrantyKind, string[]> = {
-  software: ["Key báo sai / hết hạn", "Bị crash game", "Không hiện menu"],
-  account: ["Sai mật khẩu", "Bị khóa khi vào game", "Không đúng mô tả"],
-};
 
 /** What the description box suggests, per kind of order. */
 const PLACEHOLDER: Record<WarrantyKind, string> = {
@@ -238,25 +230,6 @@ export function WarrantyRequestForm({
 
       <div>
         <Step n={2} title="Mô tả chi tiết lỗi" need />
-        <div className="-mt-1 mb-3 flex flex-wrap items-center gap-2">
-          <span className="text-[11.5px] text-neutral-500">Gợi ý nhập nhanh:</span>
-          {QUICK[kind].map((phrase) => (
-            <button
-              key={phrase}
-              type="button"
-              onClick={() => {
-                setDescription((now) => {
-                  const next = now.trim() ? `${now.trim()} ${phrase}.` : `${phrase}.`;
-                  return next.slice(0, DESCRIPTION_MAX);
-                });
-                setError(null);
-              }}
-              className="inline-flex h-7 items-center rounded-lg border border-white/10 bg-white/[0.04] px-2.5 text-[11px] font-semibold text-neutral-300 transition-colors hover:border-white/25 hover:text-white"
-            >
-              + {phrase}
-            </button>
-          ))}
-        </div>
         <label htmlFor="warranty-description" className="sr-only">
           Mô tả lỗi
         </label>
@@ -346,10 +319,7 @@ export function WarrantyRequestForm({
               <ImagePlus className="h-5 w-5" />
             </span>
             <span className="text-[12.5px] font-bold text-neutral-200">
-              Kéo và thả ảnh chụp màn hình vào đây, hoặc{" "}
-              <span className="text-[var(--menzu-accent)] underline underline-offset-2">
-                bấm để tải ảnh
-              </span>
+              Kéo và thả ảnh chụp màn hình vào đây, hoặc bấm để chọn ảnh
             </span>
             <span className="text-[11px] text-neutral-500">
               PNG, JPG hoặc WebP, tối đa 5MB.{" "}
@@ -382,7 +352,7 @@ export function WarrantyRequestForm({
           form by a rule, as the owner drew it. */}
       <div className="flex flex-wrap items-center justify-between gap-3 border-t border-white/[0.06] pt-5">
         <span className="inline-flex items-center gap-2 text-[11.5px] text-neutral-400">
-          <BadgeCheck className="h-4 w-4 shrink-0 text-emerald-400" />
+          <BadgeCheck className="h-4 w-4 shrink-0 text-neutral-500" />
           Shop cam kết đổi key hoặc hoàn tiền nếu lỗi từ phía shop.
         </span>
         <button
