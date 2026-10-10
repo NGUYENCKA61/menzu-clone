@@ -39,6 +39,12 @@ export const dynamic = "force-dynamic";
 // trang kia chưa").
 const CARD = "rounded-2xl border border-white/10 bg-white/[0.02] p-5 sm:p-6";
 const LABEL = "text-[10px] font-black uppercase tracking-widest text-neutral-500";
+/** The three moves a report makes, as the owner drew them (10/10/2026). */
+const STEPS = [
+  { title: "Gửi thông tin", now: "Đang thực hiện", note: "Đã gửi" },
+  { title: "Shop tiếp nhận", now: "Đang xử lý", note: `Xử lý ${SUPPORT_WINDOW}` },
+  { title: "Hoàn tất / Đổi key", now: "Đã xong", note: "Thông báo qua web" },
+];
 
 function stamp(date: Date): string {
   return `${date.toLocaleDateString("vi-VN", {
@@ -114,6 +120,14 @@ export default async function WarrantyRequestPage({
   // Once a report exists this is where the buyer follows it — the receipt's
   // button reads "Xem trạng thái" — so the page says so in its title.
   const following = order.warrantyRequests.length > 0;
+  // Where the strip's light sits: nothing sent yet, a report the shop has,
+  // or one it has finished with.
+  const latest = order.warrantyRequests[0] ?? null;
+  const stepNow = !latest
+    ? 0
+    : latest.status === "OPEN" || latest.status === "IN_PROGRESS" || latest.status === "REFUNDING"
+      ? 1
+      : 2;
   const heading = following ? "Trạng thái bảo hành" : "Yêu cầu bảo hành";
 
   return (
@@ -142,60 +156,131 @@ export default async function WarrantyRequestPage({
       action={
         <Link
           href="/orders"
-          className="inline-flex items-center gap-1.5 text-[11px] font-black uppercase tracking-widest text-neutral-400 transition-colors hover:text-white"
+          className="inline-flex h-9 items-center gap-2 rounded-xl border border-white/12 bg-white/[0.04] px-4 text-[11px] font-black uppercase tracking-widest text-neutral-300 transition-colors hover:border-white/25 hover:text-white"
         >
           <ArrowLeft className="h-3.5 w-3.5" />
-          Lịch sử mua
+          Lịch sử mua hàng
         </Link>
       }
     >
       <div className="flex flex-col gap-5">
+        {/* WHERE THE REPORT STANDS — the three moves, the one in hand lit. */}
+        <section className={`${CARD} !p-3 sm:!p-3`}>
+          <ol className="grid gap-2 sm:grid-cols-3">
+            {STEPS.map((step, index) => {
+              const here = index === stepNow;
+              const done = index < stepNow;
+              return (
+                <li
+                  key={step.title}
+                  className={`flex items-center gap-3 rounded-xl border px-3.5 py-3 ${
+                    here
+                      ? "border-[var(--menzu-accent)]/40 bg-[var(--menzu-accent)]/10"
+                      : "border-white/[0.06] bg-white/[0.02]"
+                  }`}
+                >
+                  <span
+                    className={`grid h-7 w-7 shrink-0 place-items-center rounded-lg text-[12px] font-black ${
+                      here
+                        ? "bg-[var(--menzu-accent)] text-white"
+                        : done
+                          ? "bg-white/10 text-neutral-200"
+                          : "bg-white/[0.06] text-neutral-500"
+                    }`}
+                  >
+                    {index + 1}
+                  </span>
+                  <span className="min-w-0">
+                    <span
+                      className={`block truncate text-[12.5px] font-bold ${
+                        here || done ? "text-white" : "text-neutral-400"
+                      }`}
+                    >
+                      {step.title}
+                    </span>
+                    <span
+                      className={`block truncate text-[11px] ${
+                        here ? "text-[var(--menzu-accent)]" : "text-neutral-500"
+                      }`}
+                    >
+                      {here ? step.now : step.note}
+                    </span>
+                  </span>
+                </li>
+              );
+            })}
+          </ol>
+        </section>
+
         {/* THE ORDER BEING REPORTED */}
         <section className={CARD}>
-          <span className={LABEL}>Đơn hàng</span>
-          <div className="mt-3 flex flex-wrap items-center gap-4">
-            <div className="relative h-16 w-24 shrink-0 overflow-hidden rounded-xl border border-white/10 bg-neutral-950">
+          <div className="flex flex-wrap items-start gap-4">
+            <div className="relative h-[72px] w-28 shrink-0 overflow-hidden rounded-xl border border-white/10 bg-neutral-950">
               {order.product.imageUrl ? (
                 <Image
                   src={order.product.imageUrl}
                   alt=""
                   fill
-                  sizes="192px"
+                  sizes="224px"
                   className="object-cover object-[85%_center]"
                 />
               ) : null}
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-black text-white">{productName}</p>
-              <p className="mt-1 text-[11px] font-semibold text-neutral-500">
-                Đơn {order.code} · {stamp(order.createdAt)}
-                {order.package ? ` · ${order.package.label}` : ""}
-                {order.quantity > 1 ? ` · ×${order.quantity}` : ""}
+              <div className="flex flex-wrap items-center gap-2.5">
+                {/* The order's real state, from the one table that names
+                    them: an order that was refunded must not read "Đã thanh
+                    toán" a few centimetres above the refusal. */}
+                <span
+                  className={`inline-flex items-center rounded-md border px-2 py-0.5 text-[10px] font-black uppercase tracking-wider ${
+                    order.status === "PAID"
+                      ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
+                      : "border-white/10 bg-white/5 text-neutral-300"
+                  }`}
+                >
+                  {ORDER_STATUS_LABELS[order.status as OrderStatus] ?? order.status}
+                </span>
+                <span className="text-[11px] font-semibold text-neutral-500">
+                  Đơn: <span className="font-bold text-neutral-200">{order.code}</span>
+                </span>
+              </div>
+              <p className="mt-2 text-sm font-black uppercase leading-snug text-white">
+                {productName}
+              </p>
+              <p className="mt-1.5 flex flex-wrap gap-x-5 gap-y-1 text-[11px] font-semibold text-neutral-500">
+                <span>
+                  Thời gian:{" "}
+                  <span className="text-neutral-200">{stamp(order.createdAt)}</span>
+                </span>
+                {order.package ? (
+                  <span>
+                    Gói: <span className="text-neutral-200">{order.package.label}</span>
+                  </span>
+                ) : null}
+                <span>
+                  Số lượng: <span className="text-neutral-200">x{order.quantity}</span>
+                </span>
               </p>
             </div>
             <div className="shrink-0 text-right">
-              <p className="text-lg font-black text-white">{formatVnd(Number(order.total))}đ</p>
-              {/* The order’s real state, from the one table that names them.
-                  Written out as "Đã thanh toán" whatever it was, this line
-                  contradicted the refusal printed a few centimetres below it
-                  on an order that had been refunded. */}
-              <p className={LABEL}>
-                {ORDER_STATUS_LABELS[order.status as OrderStatus] ?? order.status}
+              <p className={LABEL}>Tổng tiền</p>
+              <p className="mt-1 text-lg font-black text-[var(--menzu-accent)]">
+                {formatVnd(Number(order.total))}đ
               </p>
             </div>
           </div>
 
-          <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-2 border-t border-white/[0.06] pt-4">
-            <span className="inline-flex items-center gap-2 text-[12px] text-neutral-400">
-              <Clock className="h-4 w-4 text-[var(--menzu-accent)]" />
+          <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-2 rounded-xl border border-amber-500/20 bg-amber-500/[0.06] px-4 py-3">
+            <span className="inline-flex items-center gap-2 text-[12px] text-neutral-300">
+              <Clock className="h-4 w-4 shrink-0 text-amber-400" />
               Shop xử lý bảo hành {SUPPORT_WINDOW} mỗi ngày; ngoài giờ cứ gửi, sáng shop
               làm ngay.
             </span>
             {/* When the buyer took the sign-in: where the recording an
                 account's warranty rests on starts. */}
             {kind === "account" && order.loginRevealedAt ? (
-              <span className="inline-flex items-center gap-2 text-[12px] text-neutral-400">
-                <KeyRound className="h-4 w-4 text-[var(--menzu-accent)]" />
+              <span className="inline-flex items-center gap-2 text-[12px] text-neutral-300">
+                <KeyRound className="h-4 w-4 shrink-0 text-amber-400" />
                 Đã nhận thông tin đăng nhập lúc {dayStamp(order.loginRevealedAt)}
               </span>
             ) : null}
