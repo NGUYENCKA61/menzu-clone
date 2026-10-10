@@ -348,9 +348,7 @@ function DownloadCard({
     <div className="flex flex-col gap-2.5">
       {downloadUrl ? (
         <FileRow
-          // Amber, the yellow of "Lấy thông tin" (the owner, 10/10/2026:
-          // "link tải hack icon màu cam thử", then "màu vàng").
-          icon={<Download className="h-3 w-3 text-amber-400" />}
+          icon={<Download className="h-3 w-3 text-[var(--menzu-accent)]" />}
           eyebrow="Link tải hack"
           title={downloadName ?? DEFAULT_DOWNLOAD_NAME}
           href={downloadUrl}
