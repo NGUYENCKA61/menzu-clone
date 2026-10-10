@@ -23,6 +23,11 @@ export interface AccountShellProps {
   /** A red glyph in front of the title, as the public pages wear one, in
    *  place of the red bar. Only read when `sidebar` is off. */
   icon?: LucideIcon;
+  /** "home": the #0f1015 the wiki, Liên hệ, Đánh giá and Thông báo sit on,
+   *  painted over the account area's near-black (the owner, 10/10/2026:
+   *  "sao trang bảo hành và trang xem trạng thái wiki đánh giá màu nền khác
+   *  vậy"). */
+  ground?: "black" | "home";
   children: React.ReactNode;
 }
 
@@ -41,6 +46,7 @@ export function AccountShell({
   action = null,
   sidebar = true,
   icon: Icon,
+  ground = "black",
   children,
 }: AccountShellProps) {
   // flex-1, not min-h-screen: the header sits above this and the footer
@@ -48,6 +54,13 @@ export function AccountShell({
   // warranty form) with hundreds of pixels of nothing before the footer
   // (the owner, 10/10/2026, reviewing the warranty page).
   return (
+    <>
+      {/* Fixed and behind the page, inside <main>, so it covers the account
+          layout's own near-black for the whole scroll without the layout
+          having to know which page is open. */}
+      {ground === "home" ? (
+        <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 bg-[#0f1015]" />
+      ) : null}
     <div
       className={`w-full max-w-[1320px] mx-auto px-4 lg:px-6 flex flex-1 flex-col ${
         sidebar ? "py-8" : "py-12"
@@ -114,6 +127,7 @@ export function AccountShell({
         </div>
       </div>
     </div>
+    </>
   );
 }
 

@@ -33,7 +33,11 @@ export const metadata: Metadata = {
 };
 export const dynamic = "force-dynamic";
 
-const CARD = "rounded-2xl border border-white/10 bg-neutral-900/50 p-5 sm:p-6";
+// The site's own card, the one the receipt and Thông báo wear, rather than
+// the grey fill this page used to have: on the #0f1015 ground it read lighter
+// than every card beside it (the owner, 10/10/2026: "màu card đồng bộ mấy
+// trang kia chưa").
+const CARD = "rounded-2xl border border-white/10 bg-white/[0.02] p-5 sm:p-6";
 const LABEL = "text-[10px] font-black uppercase tracking-widest text-neutral-500";
 
 function stamp(date: Date): string {
@@ -120,6 +124,8 @@ export default async function WarrantyRequestPage({
       // The wrench the receipt's button wears, where the public pages put
       // their own glyph (the owner, 10/10/2026).
       icon={Wrench}
+      // The wiki's and Liên hệ's ground, not the account area's near-black.
+      ground="home"
       title={heading}
       subtitle={
         following

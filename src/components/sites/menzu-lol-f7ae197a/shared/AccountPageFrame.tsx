@@ -15,6 +15,8 @@ interface AccountPageFrameProps {
   sidebar?: boolean;
   /** A red glyph in front of the title, as the public pages wear one. */
   icon?: LucideIcon;
+  /** "home": the ground the wiki and Liên hệ sit on. */
+  ground?: "black" | "home";
   children: ReactNode;
 }
 
@@ -36,6 +38,7 @@ export async function AccountPageFrame({
   action,
   sidebar = true,
   icon,
+  ground = "black",
   children,
 }: AccountPageFrameProps) {
   const user = await getCurrentUser();
@@ -50,6 +53,7 @@ export async function AccountPageFrame({
       action={action}
       sidebar={sidebar}
       icon={icon}
+      ground={ground}
       user={
         user
           ? {
