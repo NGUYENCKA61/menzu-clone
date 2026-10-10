@@ -849,8 +849,13 @@ export function OrderDetailModal({
                   {/* One frame fewer, on trial (the owner, 10/10/2026: "bỏ bớt
                       card lồng thử"): the frame that held the heading and the
                       cards is gone, so the three cards stand on the sheet
-                      itself rather than in a box inside a box. */}
-                  <div className="relative mt-6">
+                      itself rather than in a box inside a box. A rule above
+                      it instead (the owner, 10/10/2026: "thêm đường kẻ ngang
+                      cạnh trên chỗ thông tin chi tiết sản phẩm thử"), the
+                      hairline the footer already uses, and one below it too,
+                      between the cards and the note ("1 đường kẻ ở dưới card
+                      key ngăn cách với vui lòng luôn"). */}
+                  <div className="relative mt-6 border-y border-white/[0.06] py-6">
                     {/* One line. The sentence under it — "Thông tin được cung
                         cấp sau khi thanh toán" — was telling a reader who is
                         looking straight at their key that they will get it
