@@ -229,72 +229,48 @@ function HandoverBox({
       // đồng bộ hơn thử"): the label keeps its place beside "LINK TẢI HACK"
       // and the value with its button sinks to the card's foot, level with
       // the last file row's own name and button.
-      // The banded card is the table's own make: a bordered box with no
-      // fill of its own, so the lighter strip reads against the sheet as the
-      // table's header does (the owner, 10/10/2026: "màu nền đó"). The plain
-      // boxes keep the wash they have always had.
-      className={`overflow-hidden rounded-xl border border-white/[0.06] transition-colors hover:border-white/[0.12]${
-        hint ? "" : " bg-white/[0.02] p-4"
-      }${tall ? " flex h-full flex-col" : ""}`}
+      className={`rounded-xl border border-white/[0.06] bg-white/[0.02] p-4 transition-colors hover:border-white/[0.12]${
+        tall ? " flex h-full flex-col justify-between" : ""
+      }`}
     >
-      {/* Where the card carries more than a value, its label sits on the
-          header band of "Sản phẩm đã mua" above (the owner, 10/10/2026:
-          "giống như card sản phẩm đã mua ở trên ấy", then "chỉ kẻ ở chỗ key
-          kích hoạt thôi"); the sign-in's boxes keep a plain label. */}
-      <span
-        className={`${LABEL} ${
-          hint
-            ? "border-b border-white/[0.06] bg-white/[0.03] px-4 py-3 sm:px-5"
-            : "mb-2"
-        }`}
-      >
+      <span className={`${LABEL} mb-2`}>
         {icon}
         {label}
       </span>
-      <div
-        // Under the rule, the table's own body cell: px-4 py-4, px-5 from
-        // sm (the owner, 10/10/2026: "ở dưới đường kẻ ngang làm cho đồng bộ
-        // giống sản phẩm thử").
-        className={`${hint ? "flex flex-col gap-2 px-4 py-4 sm:px-5" : ""}${
-          hint && tall ? " flex-1 justify-between" : ""
-        }`}
-      >
-        {hint}
-        {/* Value above the buttons on a phone; the pair would otherwise
-            leave the value a few characters of room. */}
-        <div className="flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
-          <span
-            ref={valueRef}
-            // Wrapped, not cut: a long key read "…5T8W3…" on a phone, and
-            // the buyer could copy it but not read it through (the owner,
-            // 09/10/2026).
-            className="min-w-0 max-w-full break-all font-mono text-sm font-bold tracking-wide text-white"
+      {hint}
+      {/* Value above the buttons on a phone; the pair would otherwise leave
+          the value a few characters of room. */}
+      <div className="flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
+        <span
+          ref={valueRef}
+          // Wrapped, not cut: a long key read "…5T8W3…" on a phone, and the
+          // buyer could copy it but not read it through (the owner, 09/10/2026).
+          className="min-w-0 max-w-full break-all font-mono text-sm font-bold tracking-wide text-white"
+        >
+          {value}
+        </span>
+        <span className="flex shrink-0 items-center gap-2">
+          <button
+            type="button"
+            onClick={copy}
+            aria-label={copied ? `Đã chép ${name}` : `Sao chép ${name}`}
+            className={`${GHOST_BTN} ${
+              copied
+                ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/10 hover:text-emerald-400"
+                : ""
+            }`}
           >
-            {value}
+            {copied ? (
+              <Check className="h-3 w-3" />
+            ) : (
+              <Copy className="h-3 w-3" />
+            )}
+            {copied ? "Đã chép" : "Sao chép"}
+          </button>
+          <span role="status" className="sr-only">
+            {copied ? `Đã sao chép ${name}` : ""}
           </span>
-          <span className="flex shrink-0 items-center gap-2">
-            <button
-              type="button"
-              onClick={copy}
-              aria-label={copied ? `Đã chép ${name}` : `Sao chép ${name}`}
-              className={`${GHOST_BTN} ${
-                copied
-                  ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/10 hover:text-emerald-400"
-                  : ""
-              }`}
-            >
-              {copied ? (
-                <Check className="h-3 w-3" />
-              ) : (
-                <Copy className="h-3 w-3" />
-              )}
-              {copied ? "Đã chép" : "Sao chép"}
-            </button>
-            <span role="status" className="sr-only">
-              {copied ? `Đã sao chép ${name}` : ""}
-            </span>
-          </span>
-        </div>
+        </span>
       </div>
     </div>
   );
