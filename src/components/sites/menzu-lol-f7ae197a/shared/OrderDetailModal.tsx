@@ -851,8 +851,11 @@ export function OrderDetailModal({
                         looking straight at their key that they will get it
                         once they pay. */}
                     <div className="mb-4 flex items-center gap-2.5">
-                      {/* No tile beside it, as "Sản phẩm đã mua" above has
-                          none (the owner, 09/10/2026: "bỏ đi"). */}
+                      {/* The red info glyph beside it again, on trial (the
+                          owner, 10/10/2026: "thêm icon thông tin thử"), bare
+                          rather than in a tile: "Sản phẩm đã mua" above wears
+                          none and the block's own rule already parts it. */}
+                      <Info className="h-4 w-4 shrink-0 text-[var(--menzu-accent)]" aria-hidden />
                       {/* A tool hands over keys and files, not a sign-in, so
                           its heading is its own (the owner, 09/10/2026: "Key &
                           tải về", then "Thông tin sản phẩm", "/ bàn giao"
