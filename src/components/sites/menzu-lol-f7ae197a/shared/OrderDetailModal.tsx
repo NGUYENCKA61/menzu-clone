@@ -1111,7 +1111,12 @@ export function OrderDetailModal({
                       version was tried in 4bd4ac0. The info glyph is back now
                       the handover heading has none (the owner, 09/10/2026:
                       "thêm lại icon chỗ vui lòng lưu lại mã đơn hàng đi"). */}
-                  <div className="mt-4 flex items-start gap-3 rounded-r-xl border-l-[3px] border-[var(--menzu-accent)] bg-[var(--menzu-accent)]/5 px-4 py-3.5 text-xs leading-relaxed text-neutral-400">
+                  {/* 24px above it, the gap every section of the sheet
+                      keeps: with the rules gone the old 16px left it sitting
+                      on the cards (the owner, 10/10/2026: "không kẻ thì
+                      khoảng cách giữa card key kích hoạt và cái vui lòng nó
+                      hơi sát"). */}
+                  <div className="mt-6 flex items-start gap-3 rounded-r-xl border-l-[3px] border-[var(--menzu-accent)] bg-[var(--menzu-accent)]/5 px-4 py-3.5 text-xs leading-relaxed text-neutral-400">
                     <Info className="mt-0.5 h-4 w-4 shrink-0 text-[var(--menzu-accent)]" />
                     {/* Where the ticket stands, in words; the button in the
                         footer is the way on, so the line carries no link. */}
