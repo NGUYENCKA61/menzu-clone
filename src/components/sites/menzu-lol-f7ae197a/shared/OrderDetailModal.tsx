@@ -140,7 +140,9 @@ function money(value: number): string {
  */
 function KeyHint() {
   return (
-    <div className="flex flex-col gap-2">
+    // Air under the note (the owner, 10/10/2026: "cho cách cái Hạn gói tính
+    // từ lúc kích hoạt key…"), so the keys below it start clear of it.
+    <div className="mb-3 flex flex-col gap-2">
       <ol className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[11px] font-semibold text-neutral-400">
         {["Tải loader", "Chạy loader", "Dán key để kích hoạt"].map((step, index) => (
           <li key={step} className="flex items-center gap-1.5">
