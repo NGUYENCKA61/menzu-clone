@@ -207,13 +207,22 @@ function HandoverBox({
         {label}
       </span>
       {hint}
-      {/* One line and one button, however many keys there are (the owner,
-          10/10/2026: "đừng xuống hàng và 1 nút sao chép thôi"): the values
-          read side by side, parted by a dot, and the button hands over all
-          of them, one to a line, which is how they are pasted. */}
+      {/* One button however many keys there are, and the keys under one
+          another with no air between the lines (the owner, 10/10/2026:
+          "đừng xuống hàng và 1 nút sao chép thôi", then "xuống hàng nhưng
+          đừng có cách dòng trống"). The clipboard gets them one to a line,
+          which is how they are pasted. */}
       <CopyRow
         value={values.join("\n")}
-        display={values.join("  ·  ")}
+        display={
+          values.length > 1 ? (
+            <span className="flex flex-col leading-snug">
+              {values.map((value, index) => (
+                <span key={`${index}-${value}`}>{value}</span>
+              ))}
+            </span>
+          ) : undefined
+        }
         name={
           values.length > 1
             ? `${values.length} ${label.toLowerCase()}`
@@ -232,8 +241,8 @@ function CopyRow({
 }: {
   /** What lands on the clipboard. */
   value: string;
-  /** What is printed, where that differs: several keys read on one line. */
-  display?: string;
+  /** What is printed, where that differs: several keys read one to a line. */
+  display?: ReactNode;
   name: string;
 }) {
   const [copied, setCopied] = useState(false);
