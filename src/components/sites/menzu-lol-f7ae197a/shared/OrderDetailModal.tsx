@@ -4,6 +4,7 @@ import {
   CalendarDays,
   ChevronRight,
   Clock,
+  Check,
   Copy,
   Download,
   Eye,
@@ -291,12 +292,20 @@ function CopyRow({
           type="button"
           onClick={copy}
           aria-label={copied ? `Đã chép ${name}` : `Sao chép ${name}`}
-          className={GHOST_BTN}
+          className={`${GHOST_BTN} ${
+            copied
+              ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/10 hover:text-emerald-400"
+              : ""
+          }`}
         >
-          {/* The button never changes (the owner, 10/10/2026: "bỏ cái đã chép
-              đi ngầm tự hiểu được mà", then "bỏ tích xanh đi k cần đâu"); a
-              reader still hears that it landed, through the line below. */}
-          <Copy className="h-3 w-3" />
+          {/* The glyph turns to a tick and the button to green for a moment
+              (the owner, 10/10/2026: "thêm tick đã copy đi"), while the word
+              stays "Sao chép" so nothing shifts under the pointer. */}
+          {copied ? (
+            <Check className="h-3 w-3" />
+          ) : (
+            <Copy className="h-3 w-3" />
+          )}
           Sao chép
         </button>
         <span role="status" className="sr-only">
