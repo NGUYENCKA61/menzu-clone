@@ -4,6 +4,7 @@ import { Check, Copy, KeyRound, ShieldCheck } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { TOTP_PERIOD, generateTotp, secondsRemaining } from "@/lib/totp";
+import { copyText } from "@/lib/clipboard";
 
 /**
  * Generates Riot 2FA codes from a base32 secret.
@@ -60,13 +61,12 @@ export function TotpTool() {
 
   async function copyCode() {
     if (!code) return;
-    try {
-      await navigator.clipboard.writeText(code);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch {
+    if (!(await copyText(code))) {
       setError("Trình duyệt chặn truy cập clipboard");
+      return;
     }
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   }
 
   return (

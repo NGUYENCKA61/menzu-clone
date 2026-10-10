@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 
 import { WarrantyThread } from "@/components/sites/menzu-lol-f7ae197a/shared/WarrantyThread";
+import { copyText } from "@/lib/clipboard";
 import { REFUND_METHOD, REFUND_METHOD_KEYS, type RefundMethod } from "@/lib/refundRequests";
 import { mergeMessages, POLL_MS, type ChatMessage } from "@/lib/warrantyChat";
 import {
@@ -220,13 +221,10 @@ export function AdminWarrantyDetail({ ticket, mailOn }: { ticket: WarrantyTicket
 
   async function copyAccount() {
     if (!ticket.bankAccount) return;
-    try {
-      await navigator.clipboard.writeText(ticket.bankAccount);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1500);
-    } catch {
-      // The number is on screen to copy by hand.
-    }
+    // The number is on screen to copy by hand if both ways are refused.
+    if (!(await copyText(ticket.bankAccount))) return;
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1500);
   }
 
   return (

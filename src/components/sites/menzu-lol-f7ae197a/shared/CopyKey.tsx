@@ -2,6 +2,7 @@
 
 import { Check, Copy, Eye, EyeOff, KeyRound, Lock, User } from "lucide-react";
 import { useEffect, useId, useState } from "react";
+import { copyText } from "@/lib/clipboard";
 
 /** What the row is holding, which decides the glyph in front of it. */
 const ICONS = { key: KeyRound, user: User, lock: Lock } as const;
@@ -54,24 +55,22 @@ export function CopyKey({
   }, [copied]);
 
   async function copy() {
-    try {
-      await navigator.clipboard.writeText(value);
+    if (await copyText(value)) {
       setCopied(true);
-    } catch {
-      // Clipboard access can be refused outright — an insecure origin, a
-      // browser setting. Selecting the text is then the honest fallback, and
-      // saying nothing is better than a success message that was not one.
-      // A masked value is unmasked first: selecting a row of dots would copy
-      // the dots.
-      setRevealed(true);
-      const selection = window.getSelection();
-      const node = document.getElementById(valueId);
-      if (selection && node) {
-        const range = document.createRange();
-        range.selectNodeContents(node);
-        selection.removeAllRanges();
-        selection.addRange(range);
-      }
+      return;
+    }
+    // Refused both the modern way and the old one, which a browser setting
+    // can do. Selecting the text is then the honest fallback, and saying
+    // nothing is better than a success message that was not one. A masked
+    // value is unmasked first: selecting a row of dots would copy the dots.
+    setRevealed(true);
+    const selection = window.getSelection();
+    const node = document.getElementById(valueId);
+    if (selection && node) {
+      const range = document.createRange();
+      range.selectNodeContents(node);
+      selection.removeAllRanges();
+      selection.addRange(range);
     }
   }
 

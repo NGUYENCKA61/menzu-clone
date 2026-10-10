@@ -2,6 +2,7 @@
 
 import { Check, Copy } from "lucide-react";
 import { useRef, useState } from "react";
+import { copyText } from "@/lib/clipboard";
 
 /**
  * The referral link with its copy button. The link arrives fully built from
@@ -13,12 +14,9 @@ export function ReferralLinkBox({ link }: { link: string }) {
   const timer = useRef<number | null>(null);
 
   async function copy() {
-    try {
-      await navigator.clipboard.writeText(link);
-    } catch {
-      // Clipboard can be denied; selecting the text still works by hand.
-      return;
-    }
+    // Clipboard can be denied even with the textarea behind it; selecting
+    // the text still works by hand.
+    if (!(await copyText(link))) return;
     setCopied(true);
     if (timer.current) window.clearTimeout(timer.current);
     timer.current = window.setTimeout(() => setCopied(false), 1600);

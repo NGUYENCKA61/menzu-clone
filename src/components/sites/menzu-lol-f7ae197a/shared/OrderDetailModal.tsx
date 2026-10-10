@@ -32,6 +32,7 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 
 import { REVEAL_STEPS, type LoginHandover } from "@/lib/accountLogin";
+import { copyText } from "@/lib/clipboard";
 import { DEFAULT_DOWNLOAD_NAME } from "@/lib/downloadName";
 import { warrantyButton, type WarrantyStatus } from "@/lib/warrantyRequests";
 
@@ -257,22 +258,21 @@ function CopyRow({
   }, [copied]);
 
   async function copy() {
-    try {
-      await navigator.clipboard.writeText(value);
+    if (await copyText(value)) {
       setCopied(true);
-    } catch {
-      // Refused clipboard: leave the value selected, so one Ctrl+C finishes
-      // what the button could not.
-      requestAnimationFrame(() => {
-        const node = valueRef.current;
-        const selection = window.getSelection();
-        if (!node || !selection) return;
-        const range = document.createRange();
-        range.selectNodeContents(node);
-        selection.removeAllRanges();
-        selection.addRange(range);
-      });
+      return;
     }
+    // Refused both ways: leave the value selected, so one Ctrl+C finishes
+    // what the button could not.
+    requestAnimationFrame(() => {
+      const node = valueRef.current;
+      const selection = window.getSelection();
+      if (!node || !selection) return;
+      const range = document.createRange();
+      range.selectNodeContents(node);
+      selection.removeAllRanges();
+      selection.addRange(range);
+    });
   }
 
   return (

@@ -24,6 +24,7 @@ import { useRouter } from "next/navigation";
 
 import { useState, type ReactNode } from "react";
 
+import { copyText } from "@/lib/clipboard";
 import { formatCountdown } from "@/lib/topup";
 
 import { BankAppPicker } from "./BankAppPicker";
@@ -263,14 +264,11 @@ export function TopUpInvoice({
     timeLeft === null ? ["--", "--"] : formatCountdown(timeLeft).split(":");
 
   async function copy(label: string, value: string) {
-    try {
-      await navigator.clipboard.writeText(value);
-      setCopied(label);
-      window.setTimeout(() => setCopied((now) => (now === label ? null : now)), 1500);
-    } catch {
-      // Clipboard is blocked on insecure origins; the value is on screen to
-      // read anyway, so this is not worth an error message.
-    }
+    // The value is on screen to read anyway, so a refusal is not worth an
+    // error message.
+    if (!(await copyText(value))) return;
+    setCopied(label);
+    window.setTimeout(() => setCopied((now) => (now === label ? null : now)), 1500);
   }
 
   /**
