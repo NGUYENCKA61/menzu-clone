@@ -4,7 +4,6 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import {
   BadgeCheck,
-  Check,
   CircleHelp,
   CloudDownload,
   ImagePlus,
@@ -223,13 +222,6 @@ export function WarrantyRequestForm({
                     {WARRANTY_ISSUE[key].hint}
                   </span>
                 </span>
-                {/* The tick only on the one chosen, so the row reads at a
-                    glance which it is. */}
-                {on ? (
-                  <span className="mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full bg-[var(--menzu-accent)] text-white">
-                    <Check className="h-3 w-3" />
-                  </span>
-                ) : null}
               </button>
             );
           })}
