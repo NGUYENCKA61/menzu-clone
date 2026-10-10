@@ -727,7 +727,11 @@ export function OrderDetailModal({
                       {/* The list row's chip, verbatim — the same order wears
                           the same badge on both sides of the button. */}
                       <span
-                        className={`inline-flex whitespace-nowrap rounded-lg border px-2 py-1 text-[10px] font-black uppercase tracking-wider ${order.statusClass}`}
+                        // Sentence case, on trial (the owner, 10/10/2026: "đã
+                        // thanh toán viết chữ thường thử"): a step larger and
+                        // without the wide tracking, which was there to hold
+                        // capitals apart.
+                        className={`inline-flex whitespace-nowrap rounded-lg border px-2 py-1 text-[11px] font-bold ${order.statusClass}`}
                       >
                         {order.statusLabel}
                       </span>
