@@ -2,7 +2,6 @@
 
 import {
   CalendarDays,
-  Check,
   ChevronRight,
   Clock,
   Copy,
@@ -292,20 +291,12 @@ function CopyRow({
           type="button"
           onClick={copy}
           aria-label={copied ? `Đã chép ${name}` : `Sao chép ${name}`}
-          className={`${GHOST_BTN} ${
-            copied
-              ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/10 hover:text-emerald-400"
-              : ""
-          }`}
+          className={GHOST_BTN}
         >
-          {copied ? (
-            <Check className="h-3 w-3" />
-          ) : (
-            <Copy className="h-3 w-3" />
-          )}
-          {/* One word, whatever the state (the owner, 10/10/2026: "bỏ cái đã
-              chép đi ngầm tự hiểu được mà"): the tick and the green say it
-              landed, and the word no longer jumps a few pixels wider. */}
+          {/* The button never changes (the owner, 10/10/2026: "bỏ cái đã chép
+              đi ngầm tự hiểu được mà", then "bỏ tích xanh đi k cần đâu"); a
+              reader still hears that it landed, through the line below. */}
+          <Copy className="h-3 w-3" />
           Sao chép
         </button>
         <span role="status" className="sr-only">
@@ -1134,7 +1125,7 @@ export function OrderDetailModal({
                         ? "Đơn bảo hành của bạn đang được xử lý, bấm Xem trạng thái ở dưới để theo dõi."
                         : showWarranty && warrantyAction.kind === "bank"
                           ? "Shop cần số tài khoản của bạn để hoàn tiền, bấm Nhập số tài khoản ở dưới."
-                          : "Lưu lại mã đơn hàng để được hỗ trợ. Không chia sẻ dữ liệu bàn giao cho người khác."}
+                          : "Vui lòng lưu lại mã đơn hàng để được hỗ trợ. Không chia sẻ dữ liệu bàn giao cho người khác."}
                     </span>
                   </div>
                 </div>
