@@ -150,7 +150,8 @@ function HandoverBox({
   label: string;
   icon: ReactNode;
   value: string;
-  /** Fill the height the row gives it, rather than hugging its two lines. */
+  /** Fill the height the row gives it: the label stays at the top and the
+   *  value drops to the bottom, so both line up with the cards beside it. */
   tall?: boolean;
 }) {
   const [copied, setCopied] = useState(false);
@@ -185,8 +186,12 @@ function HandoverBox({
 
   return (
     <div
+      // Pushed apart when tall (the owner, 09/10/2026: "làm lại sao cho nhìn
+      // đồng bộ hơn thử"): the label keeps its place beside "LINK TẢI HACK"
+      // and the value with its button sinks to the card's foot, level with
+      // the last file row's own name and button.
       className={`rounded-xl border border-white/[0.06] bg-white/[0.02] p-4 transition-colors hover:border-white/[0.12]${
-        tall ? " h-full" : ""
+        tall ? " flex h-full flex-col justify-between" : ""
       }`}
     >
       <span className={`${LABEL} mb-2`}>
