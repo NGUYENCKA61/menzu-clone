@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { ImagePlus, Loader2, Send, X } from "lucide-react";
+import { ImagePlus, Info, Loader2, Send, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 import {
@@ -112,6 +112,28 @@ export function WarrantyDetailsForm({
 
   return (
     <div className="flex flex-col gap-5">
+      <div className="flex flex-wrap items-start justify-between gap-3 border-b border-white/[0.06] pb-4">
+        <div>
+          <h2 className="flex items-center gap-2.5 text-base font-black uppercase tracking-wider text-white">
+            <Info className="h-5 w-5 shrink-0 text-[var(--menzu-accent)]" aria-hidden />
+            Bổ sung thông tin
+          </h2>
+          <p className="mt-1.5 text-[12px] leading-relaxed text-neutral-400">
+            Shop chỉ bắt đầu kiểm tra khi đủ các mục dưới đây. Trả lời một lần
+            rồi gửi, khỏi phải chờ shop hỏi lại từng câu.
+          </p>
+        </div>
+        <span
+          className={`inline-flex items-center rounded-lg border px-2.5 py-1 text-[12px] font-black tabular-nums ${
+            ready
+              ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
+              : "border-white/10 bg-white/[0.04] text-neutral-400"
+          }`}
+        >
+          {done}/{questions.length}
+        </span>
+      </div>
+
       {questions.map((q, index) => {
         const value = values[q.key] ?? "";
         const preview = previews[q.key];
@@ -166,7 +188,7 @@ export function WarrantyDetailsForm({
                   setError(null);
                 }}
                 placeholder={q.placeholder ?? "Ghi ngắn gọn"}
-                className={FIELD}
+                className={`${FIELD} max-w-md`}
               />
             )}
 
@@ -198,15 +220,17 @@ export function WarrantyDetailsForm({
                 ) : (
                   // The first round's panel, so both rounds take a picture
                   // the same way.
-                  <label className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-white/15 bg-white/[0.02] px-4 py-6 text-center transition-colors hover:border-[var(--menzu-accent)]/50 hover:bg-white/[0.04]">
-                    <span className="grid h-10 w-10 place-items-center rounded-xl border border-white/10 bg-white/[0.04] text-neutral-300">
-                      <ImagePlus className="h-5 w-5" />
+                  <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-dashed border-white/15 bg-white/[0.02] px-4 py-3 transition-colors hover:border-[var(--menzu-accent)]/50 hover:bg-white/[0.04]">
+                    <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-white/[0.06] text-neutral-300">
+                      <ImagePlus className="h-4 w-4" />
                     </span>
-                    <span className="text-[12.5px] font-bold text-neutral-200">
-                      Kéo và thả ảnh vào đây, hoặc bấm để chọn ảnh
-                    </span>
-                    <span className="text-[11px] text-neutral-500">
-                      PNG, JPG hoặc WebP, tối đa 5MB.
+                    <span className="min-w-0">
+                      <span className="block text-[12.5px] font-bold text-neutral-200">
+                        Kéo và thả ảnh vào đây, hoặc bấm để chọn ảnh
+                      </span>
+                      <span className="block text-[11px] text-neutral-500">
+                        PNG, JPG hoặc WebP, tối đa 5MB.
+                      </span>
                     </span>
                     <input
                       ref={(node) => {
