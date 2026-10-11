@@ -132,7 +132,9 @@ export function WarrantyDetailsForm({
             <p className="-mt-2 mb-3 text-[11.5px] text-neutral-500">{q.hint}</p>
 
             {q.options.length > 0 ? (
-              <div className="grid gap-2 sm:grid-cols-3">
+              // An answer of one word takes the room of one word (the
+              // owner, 11/10/2026: "bớt rối").
+              <div className="flex flex-wrap gap-2">
                 {q.options.map((option) => {
                   const on = value === option;
                   return (
@@ -144,7 +146,7 @@ export function WarrantyDetailsForm({
                         setError(null);
                       }}
                       aria-pressed={on}
-                      className={`rounded-xl border px-4 py-3 text-left text-[13px] font-bold transition-colors ${
+                      className={`inline-flex h-10 items-center rounded-xl border px-4 text-[13px] font-bold transition-colors ${
                         on
                           ? "border-[var(--menzu-accent)]/60 bg-[var(--menzu-accent)]/10 text-white"
                           : "border-white/10 bg-neutral-950/60 text-neutral-200 hover:border-white/25"
@@ -163,7 +165,7 @@ export function WarrantyDetailsForm({
                   setValues((now) => ({ ...now, [q.key]: next }));
                   setError(null);
                 }}
-                placeholder="Ghi ngắn gọn, ví dụ Windows 11 24H2"
+                placeholder={q.placeholder ?? "Ghi ngắn gọn"}
                 className={FIELD}
               />
             )}

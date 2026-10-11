@@ -20,6 +20,8 @@ export interface DetailQuestion {
   hint: string;
   /** The answers offered; an empty list means they type one. */
   options: readonly string[];
+  /** The example under a typed answer; each question has its own. */
+  placeholder?: string;
   /** A screenshot is due with the answer. */
   photo?: boolean;
 }
@@ -33,6 +35,7 @@ const SOFTWARE_QUESTIONS: readonly DetailQuestion[] = [
     label: "Phiên bản Windows",
     hint: "Bấm Windows + R, gõ winver, chụp lại cửa sổ hiện ra.",
     options: [],
+    placeholder: "Ví dụ: Windows 11 24H2",
     photo: true,
   },
   {
@@ -82,6 +85,7 @@ const ACCOUNT_QUESTIONS: readonly DetailQuestion[] = [
     label: "Màn hình báo lỗi khi đăng nhập",
     hint: "Chụp đúng lúc game hoặc launcher báo lỗi.",
     options: [],
+    placeholder: "Ví dụ: sai mật khẩu, tài khoản bị khóa",
     photo: true,
   },
   {

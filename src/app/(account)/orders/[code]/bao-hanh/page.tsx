@@ -320,19 +320,16 @@ export default async function WarrantyRequestPage({
             11/10/2026), and only while a report is waiting on it. */}
         {latest && awaitingDetails ? (
           <section className={CARD}>
-            <div className="mb-5 flex flex-wrap items-start justify-between gap-3 border-b border-white/[0.06] pb-4">
-              <div>
-                <h2 className="text-sm font-black uppercase tracking-wider text-white">
-                  Bổ sung thông tin
-                </h2>
-                <p className="mt-1 text-[11.5px] leading-relaxed text-neutral-500">
-                  Shop chỉ bắt đầu kiểm tra khi đủ các mục dưới đây. Trả lời một
-                  lần rồi gửi, khỏi phải chờ shop hỏi lại từng câu.
-                </p>
-              </div>
-              <span className="inline-flex items-center rounded-md border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-amber-400">
-                Chờ bổ sung
-              </span>
+            {/* No chip here: the strip above and the ticket below already
+                say the report is waiting on these answers. */}
+            <div className="mb-5 border-b border-white/[0.06] pb-4">
+              <h2 className="text-sm font-black uppercase tracking-wider text-white">
+                Bổ sung thông tin
+              </h2>
+              <p className="mt-1 text-[11.5px] leading-relaxed text-neutral-500">
+                Shop chỉ bắt đầu kiểm tra khi đủ các mục dưới đây. Trả lời một
+                lần rồi gửi, khỏi phải chờ shop hỏi lại từng câu.
+              </p>
             </div>
             <WarrantyDetailsForm ticketId={latest.id} kind={kind} />
           </section>
@@ -511,7 +508,10 @@ export default async function WarrantyRequestPage({
           </section>
         ) : null}
 
-        {/* THE FORM, OR WHY THERE IS NONE */}
+        {/* THE FORM, OR WHY THERE IS NONE. While the second round is on
+            screen the reason is already plain, so the card goes (the owner,
+            11/10/2026). */}
+        {blocked && awaitingDetails ? null : (
         <section className={CARD}>
           {blocked ? (
             <div className="flex items-start gap-3 rounded-r-xl border-l-[3px] border-[var(--menzu-accent)] bg-[var(--menzu-accent)]/5 px-4 py-3.5 text-[13px] leading-relaxed text-neutral-300">
@@ -522,6 +522,7 @@ export default async function WarrantyRequestPage({
             <WarrantyRequestForm code={order.code} kind={kind} onDone="/orders" />
           )}
         </section>
+        )}
       </div>
     </AccountPageFrame>
   );
