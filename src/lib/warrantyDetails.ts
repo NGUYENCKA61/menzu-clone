@@ -36,16 +36,30 @@ export interface DetailQuestion {
   photoWhen?: string;
 }
 
-const DONE = "Rồi";
-
-/** The four ways a buyer can answer "have you switched it off yet". */
-function switched(thing: string): readonly DetailOption[] {
-  return [
-    { value: DONE, hint: `Đã ${thing} xong, gửi kèm ảnh cho shop xem.` },
-    { value: "Chưa", hint: "Chưa làm bước này bao giờ." },
-    { value: "Đã thử nhưng không được", hint: "Làm theo hướng dẫn mà vẫn không tắt được." },
-    { value: "Không rõ", hint: "Không tìm thấy chỗ chỉnh, cần shop chỉ." },
+/**
+ * One of the "have you switched it off yet" questions.
+ *
+ * The answers are sentences, not the word "Rồi" (the owner, 11/10/2026:
+ * "mấy câu rồi hay chưa ngắn quá, phải ghi dài ra, tôi đã cài rồi… hay gì
+ * đó chi tiết hơn chứ vậy cọc cằn"), and the first of them is the one that
+ * opens the uploader.
+ */
+function offQuestion(
+  key: string,
+  label: string,
+  hint: string,
+  thing: string,
+): DetailQuestion {
+  const options: readonly DetailOption[] = [
+    { value: `Tôi đã tắt ${thing} rồi`, hint: "Tắt xong rồi, gửi kèm ảnh cho shop xem." },
+    { value: `Tôi chưa tắt ${thing}`, hint: "Chưa làm bước này bao giờ." },
+    {
+      value: "Tôi đã thử nhưng không tắt được",
+      hint: "Làm theo hướng dẫn mà máy vẫn bật lại.",
+    },
+    { value: "Tôi không rõ cái này", hint: "Không tìm thấy chỗ chỉnh, cần shop chỉ giúp." },
   ];
+  return { key, label, hint, options, photo: true, photoWhen: options[0].value };
 }
 
 /** A tool's report: the machine, what is switched off, and the game. */
@@ -54,8 +68,15 @@ const SOFTWARE_QUESTIONS: readonly DetailQuestion[] = [
     key: "WINVER",
     label: "Phiên bản Windows",
     hint: "Bấm Windows + R, gõ winver, chụp lại cửa sổ hiện ra.",
-    options: [],
-    placeholder: "Ví dụ: Windows 11 24H2",
+    // Four tiles here too (the owner, 11/10/2026: "phiên bản win chưa có
+    // kìa, tạo câu trả lời đi"). The picture stays due whichever is picked:
+    // it carries the build number, which is what the desk reads.
+    options: [
+      { value: "Tôi dùng Windows 11", hint: "Bản 11, bất kể 22H2, 23H2 hay 24H2." },
+      { value: "Tôi dùng Windows 10", hint: "Bản 10, thường là 21H2 hoặc 22H2." },
+      { value: "Tôi dùng bản cũ hơn", hint: "Windows 8.1, 8 hoặc 7." },
+      { value: "Tôi không rõ bản nào", hint: "Chưa xem winver, gửi ảnh để shop đọc giúp." },
+    ],
     photo: true,
   },
   {
@@ -63,55 +84,47 @@ const SOFTWARE_QUESTIONS: readonly DetailQuestion[] = [
     label: "Đã cài đủ bộ yêu cầu chưa",
     hint: "Visual C++, .NET Framework và DirectX theo trang hướng dẫn.",
     options: [
-      { value: DONE, hint: "Cài đủ cả ba, gửi kèm ảnh Apps & features." },
-      { value: "Chưa", hint: "Chưa cài, hoặc không biết cài cái nào." },
-      { value: "Cài thiếu một phần", hint: "Có cái cài được, có cái báo lỗi." },
-      { value: "Không rõ", hint: "Không chắc máy đã có sẵn hay chưa." },
+      { value: "Tôi đã cài đủ cả ba", hint: "Cài xong hết, gửi kèm ảnh Apps & features." },
+      { value: "Tôi chưa cài cái nào", hint: "Chưa cài, hoặc không biết cài cái nào." },
+      { value: "Tôi cài thiếu một phần", hint: "Có cái cài được, có cái báo lỗi." },
+      { value: "Tôi không rõ cái này", hint: "Không chắc máy đã có sẵn hay chưa." },
     ],
     photo: true,
-    photoWhen: DONE,
+    photoWhen: "Tôi đã cài đủ cả ba",
   },
-  {
-    key: "ANTIVIRUS",
-    label: "Đã tắt diệt virus chưa",
-    hint: "Cả Windows Defender lẫn phần mềm diệt virus ngoài.",
-    options: switched("tắt"),
-    photo: true,
-    photoWhen: DONE,
-  },
-  {
-    key: "SECURE_BOOT",
-    label: "Đã tắt Secure Boot chưa",
-    hint: "Bấm Windows + R, gõ msinfo32, xem dòng Secure Boot State.",
-    options: switched("tắt"),
-    photo: true,
-    photoWhen: DONE,
-  },
-  {
-    key: "VIRTUALIZATION",
-    label: "Đã tắt ảo hoá chưa",
-    hint: "Hyper-V, Virtual Machine Platform, Windows Sandbox.",
-    options: switched("tắt"),
-    photo: true,
-    photoWhen: DONE,
-  },
-  {
-    key: "CORE_ISOLATION",
-    label: "Đã tắt Core Isolation chưa",
-    hint: "Windows Security, Device security, Core isolation, Memory integrity.",
-    options: switched("tắt"),
-    photo: true,
-    photoWhen: DONE,
-  },
+  offQuestion(
+    "ANTIVIRUS",
+    "Đã tắt diệt virus chưa",
+    "Cả Windows Defender lẫn phần mềm diệt virus ngoài.",
+    "diệt virus",
+  ),
+  offQuestion(
+    "SECURE_BOOT",
+    "Đã tắt Secure Boot chưa",
+    "Bấm Windows + R, gõ msinfo32, xem dòng Secure Boot State.",
+    "Secure Boot",
+  ),
+  offQuestion(
+    "VIRTUALIZATION",
+    "Đã tắt ảo hoá chưa",
+    "Hyper-V, Virtual Machine Platform, Windows Sandbox.",
+    "ảo hoá",
+  ),
+  offQuestion(
+    "CORE_ISOLATION",
+    "Đã tắt Core Isolation chưa",
+    "Windows Security, Device security, Core isolation, Memory integrity.",
+    "Core Isolation",
+  ),
   {
     key: "DISPLAY_MODE",
     label: "Game đang để chế độ hiển thị nào",
     hint: "Hầu hết tool cần cửa sổ không viền để vẽ được lên game.",
     options: [
-      { value: "Không viền", hint: "Borderless, cửa sổ tràn màn hình, không khung." },
-      { value: "Toàn màn hình", hint: "Fullscreen, game chiếm riêng màn hình." },
-      { value: "Cửa sổ", hint: "Windowed, có khung và thanh tiêu đề." },
-      { value: "Không rõ", hint: "Không nhớ đang để chế độ nào." },
+      { value: "Đang để không viền", hint: "Borderless, cửa sổ tràn màn hình, không khung." },
+      { value: "Đang để toàn màn hình", hint: "Fullscreen, game chiếm riêng màn hình." },
+      { value: "Đang để cửa sổ", hint: "Windowed, có khung và thanh tiêu đề." },
+      { value: "Tôi không nhớ", hint: "Chưa vào phần cài đặt hiển thị của game." },
     ],
   },
 ];
@@ -131,10 +144,10 @@ const ACCOUNT_QUESTIONS: readonly DetailQuestion[] = [
     label: "Đăng nhập trên thiết bị nào",
     hint: "Máy tính, điện thoại hay giả lập.",
     options: [
-      { value: "Máy tính", hint: "Windows hoặc macOS." },
-      { value: "Điện thoại", hint: "Android hoặc iPhone." },
-      { value: "Giả lập", hint: "LDPlayer, BlueStacks, NoxPlayer…" },
-      { value: "Khác", hint: "Máy chơi game, web, thiết bị khác." },
+      { value: "Trên máy tính", hint: "Windows hoặc macOS." },
+      { value: "Trên điện thoại", hint: "Android hoặc iPhone." },
+      { value: "Trên giả lập", hint: "LDPlayer, BlueStacks, NoxPlayer…" },
+      { value: "Trên thiết bị khác", hint: "Máy chơi game, trình duyệt web…" },
     ],
   },
   {
@@ -142,13 +155,13 @@ const ACCOUNT_QUESTIONS: readonly DetailQuestion[] = [
     label: "Đã đổi mật khẩu sau khi nhận chưa",
     hint: "Đổi mật khẩu trước khi báo lỗi làm shop không kiểm tra được.",
     options: [
-      { value: DONE, hint: "Đã đổi, gửi kèm ảnh màn hình đổi mật khẩu." },
-      { value: "Chưa", hint: "Giữ nguyên mật khẩu shop giao." },
-      { value: "Đã thử nhưng không được", hint: "Bấm đổi nhưng hệ thống không cho." },
-      { value: "Không rõ", hint: "Không nhớ có đổi hay không." },
+      { value: "Tôi đã đổi mật khẩu", hint: "Đổi rồi, gửi kèm ảnh màn hình đổi mật khẩu." },
+      { value: "Tôi chưa đổi", hint: "Giữ nguyên mật khẩu shop giao." },
+      { value: "Tôi đã thử nhưng không đổi được", hint: "Bấm đổi nhưng hệ thống không cho." },
+      { value: "Tôi không nhớ", hint: "Không nhớ có đổi hay không." },
     ],
     photo: true,
-    photoWhen: DONE,
+    photoWhen: "Tôi đã đổi mật khẩu",
   },
 ];
 

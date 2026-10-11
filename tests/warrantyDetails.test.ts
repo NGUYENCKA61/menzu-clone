@@ -62,21 +62,36 @@ describe("warranty details, the second round", () => {
   });
 
   it("takes a typed answer where no choices are offered", () => {
-    const winver = questionFor("software", "WINVER");
-    expect(winver?.options).toHaveLength(0);
-    expect(winver?.photo).toBe(true);
+    const login = questionFor("account", "LOGIN_ERROR");
+    expect(login?.options).toHaveLength(0);
+    expect(login?.photo).toBe(true);
     // Nothing to choose, so the picture is always due.
-    expect(wantsPhoto(winver!, "Windows 11")).toBe(true);
+    expect(wantsPhoto(login!, "Sai mật khẩu")).toBe(true);
+  });
+
+  it("offers four versions of Windows, and wants the picture either way", () => {
+    const winver = questionFor("software", "WINVER");
+    expect(winver?.options.map((o) => o.value)).toEqual([
+      "Tôi dùng Windows 11",
+      "Tôi dùng Windows 10",
+      "Tôi dùng bản cũ hơn",
+      "Tôi không rõ bản nào",
+    ]);
+    expect(wantsPhoto(winver!, "Tôi dùng Windows 11")).toBe(true);
+    expect(wantsPhoto(winver!, "Tôi không rõ bản nào")).toBe(true);
   });
 
   it("asks for a picture only on the answer that says it was done", () => {
     const secureBoot = questionFor("software", "SECURE_BOOT");
     expect(secureBoot?.options).toHaveLength(4);
-    expect(wantsPhoto(secureBoot!, "Rồi")).toBe(true);
-    expect(wantsPhoto(secureBoot!, "Chưa")).toBe(false);
-    // So a "Chưa" with no picture is a complete answer.
+    // The answers read as sentences, not as the word "Rồi" (the owner).
+    const [done, notYet] = secureBoot!.options;
+    expect(done.value).toBe("Tôi đã tắt Secure Boot rồi");
+    expect(wantsPhoto(secureBoot!, done.value)).toBe(true);
+    expect(wantsPhoto(secureBoot!, notYet.value)).toBe(false);
+    // So "chưa tắt" with no picture is a complete answer.
     const round = fullRound("software").map((a) =>
-      a.key === "SECURE_BOOT" ? { key: a.key, value: "Chưa", imageUrl: null } : a,
+      a.key === "SECURE_BOOT" ? { key: a.key, value: notYet.value, imageUrl: null } : a,
     );
     expect(detailsComplete("software", round)).toBe(true);
   });
