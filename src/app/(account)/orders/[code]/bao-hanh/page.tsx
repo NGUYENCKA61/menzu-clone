@@ -199,7 +199,18 @@ export default async function WarrantyRequestPage({
                   {index > 0 ? (
                     <ChevronRight className="h-3.5 w-3.5 shrink-0 text-neutral-700" aria-hidden />
                   ) : null}
-                  <span className={here ? "text-white" : done ? "text-neutral-400" : "text-neutral-600"}>
+                  {/* The step in hand in the accent, as the account nav
+                      marks the page you are on; white alone was the colour
+                      of every heading around it (the owner, 11/10/2026). */}
+                  <span
+                    className={
+                      here
+                        ? "text-[var(--menzu-accent)]"
+                        : done
+                          ? "text-neutral-400"
+                          : "text-neutral-600"
+                    }
+                  >
                     {step.title}
                   </span>
                 </li>
