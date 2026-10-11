@@ -73,8 +73,14 @@ const SOFTWARE_QUESTIONS: readonly DetailQuestion[] = [
     // it carries the build number, which is what the desk reads.
     options: [
       { value: "Tôi dùng Windows 11", hint: "Bản 11, bất kể 22H2, 23H2 hay 24H2." },
-      { value: "Tôi dùng Windows 10", hint: "Bản 10, thường là 21H2 hoặc 22H2." },
-      { value: "Tôi dùng bản cũ hơn", hint: "Windows 8.1, 8 hoặc 7." },
+      { value: "Tôi dùng Windows 10", hint: "Bản 10 từ 2004 trở lên, ví dụ 20H2, 21H2, 22H2." },
+      {
+        value: "Tôi dùng bản cũ hơn",
+        // A 1909 machine is a Windows 10 machine, so it would land on the
+        // tile above and the desk would never know (the owner, 11/10/2026:
+        // "bổ sung trường hợp là win 10 bản cũ như 1909 trở xuống").
+        hint: "Windows 10 bản 1909 trở xuống, hoặc Windows 8.1, 8, 7.",
+      },
       { value: "Tôi không rõ bản nào", hint: "Chưa xem winver, gửi ảnh để shop đọc giúp." },
     ],
     photo: true,
