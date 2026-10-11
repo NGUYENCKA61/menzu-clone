@@ -8,16 +8,20 @@ import {
   missingDetails,
   questionFor,
   readDetails,
+  wantsPhoto,
   type DetailAnswer,
 } from "@/lib/warrantyDetails";
 
 /** A full round for a kind, so a test can take one thing away from it. */
 function fullRound(kind: "software" | "account"): DetailAnswer[] {
-  return DETAIL_QUESTIONS[kind].map((q) => ({
-    key: q.key,
-    value: q.options.length > 0 ? q.options[0] : "Windows 11 24H2",
-    imageUrl: q.photo ? "/uploads/warranty/x.webp" : null,
-  }));
+  return DETAIL_QUESTIONS[kind].map((q) => {
+    const value = q.options.length > 0 ? q.options[0].value : "Windows 11 24H2";
+    return {
+      key: q.key,
+      value,
+      imageUrl: wantsPhoto(q, value) ? "/uploads/warranty/x.webp" : null,
+    };
+  });
 }
 
 describe("warranty details, the second round", () => {
@@ -61,6 +65,20 @@ describe("warranty details, the second round", () => {
     const winver = questionFor("software", "WINVER");
     expect(winver?.options).toHaveLength(0);
     expect(winver?.photo).toBe(true);
+    // Nothing to choose, so the picture is always due.
+    expect(wantsPhoto(winver!, "Windows 11")).toBe(true);
+  });
+
+  it("asks for a picture only on the answer that says it was done", () => {
+    const secureBoot = questionFor("software", "SECURE_BOOT");
+    expect(secureBoot?.options).toHaveLength(4);
+    expect(wantsPhoto(secureBoot!, "Rồi")).toBe(true);
+    expect(wantsPhoto(secureBoot!, "Chưa")).toBe(false);
+    // So a "Chưa" with no picture is a complete answer.
+    const round = fullRound("software").map((a) =>
+      a.key === "SECURE_BOOT" ? { key: a.key, value: "Chưa", imageUrl: null } : a,
+    );
+    expect(detailsComplete("software", round)).toBe(true);
   });
 
   it("reads back what was stored and shrugs off anything else", () => {

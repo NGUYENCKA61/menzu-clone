@@ -9,24 +9,44 @@ import { WARRANTY_ISSUE_KEYS, type WarrantyKind } from "@/lib/warrantyRequests";
  * tiếp và gửi kèm ảnh từng câu hỏi kỹ hơn"). It is required: until it is
  * answered the ticket reads "Chờ bổ sung" and the desk leaves it alone.
  *
- * A question is either a choice from a short list or a line the buyer types,
- * and some of them want a screenshot with the answer, because an answer the
- * buyer is sure of is often wrong (Secure Boot above all).
+ * An answer is one of four tiles, each written out the way the first round
+ * writes its faults (the owner, 11/10/2026: "làm mô tả nó dài ra như đợt 1,
+ * đủ 4 ô cho 1 câu trả lời"), or a line the buyer types. The screenshot only
+ * appears once they say they did the thing, because that is the answer worth
+ * a picture ("khi chọn vào tôi đã làm rồi thì sẽ mở ra chỗ upload hình").
  */
+export interface DetailOption {
+  value: string;
+  /** The line under it, as a fault tile has one. */
+  hint: string;
+}
+
 export interface DetailQuestion {
   key: string;
   label: string;
   /** What to look at, in the buyer's words. */
   hint: string;
   /** The answers offered; an empty list means they type one. */
-  options: readonly string[];
+  options: readonly DetailOption[];
   /** The example under a typed answer; each question has its own. */
   placeholder?: string;
-  /** A screenshot is due with the answer. */
+  /** A screenshot can come with the answer. */
   photo?: boolean;
+  /** …and is only asked for when this answer is the one chosen. */
+  photoWhen?: string;
 }
 
-const YES_NO = ["Rồi", "Chưa", "Không rõ"] as const;
+const DONE = "Rồi";
+
+/** The four ways a buyer can answer "have you switched it off yet". */
+function switched(thing: string): readonly DetailOption[] {
+  return [
+    { value: DONE, hint: `Đã ${thing} xong, gửi kèm ảnh cho shop xem.` },
+    { value: "Chưa", hint: "Chưa làm bước này bao giờ." },
+    { value: "Đã thử nhưng không được", hint: "Làm theo hướng dẫn mà vẫn không tắt được." },
+    { value: "Không rõ", hint: "Không tìm thấy chỗ chỉnh, cần shop chỉ." },
+  ];
+}
 
 /** A tool's report: the machine, what is switched off, and the game. */
 const SOFTWARE_QUESTIONS: readonly DetailQuestion[] = [
@@ -42,39 +62,57 @@ const SOFTWARE_QUESTIONS: readonly DetailQuestion[] = [
     key: "REQUIREMENTS",
     label: "Đã cài đủ bộ yêu cầu chưa",
     hint: "Visual C++, .NET Framework và DirectX theo trang hướng dẫn.",
-    options: YES_NO,
+    options: [
+      { value: DONE, hint: "Cài đủ cả ba, gửi kèm ảnh Apps & features." },
+      { value: "Chưa", hint: "Chưa cài, hoặc không biết cài cái nào." },
+      { value: "Cài thiếu một phần", hint: "Có cái cài được, có cái báo lỗi." },
+      { value: "Không rõ", hint: "Không chắc máy đã có sẵn hay chưa." },
+    ],
+    photo: true,
+    photoWhen: DONE,
   },
   {
     key: "ANTIVIRUS",
     label: "Đã tắt diệt virus chưa",
     hint: "Cả Windows Defender lẫn phần mềm diệt virus ngoài.",
-    options: YES_NO,
+    options: switched("tắt"),
+    photo: true,
+    photoWhen: DONE,
   },
   {
     key: "SECURE_BOOT",
     label: "Đã tắt Secure Boot chưa",
-    hint: "Bấm Windows + R, gõ msinfo32, chụp dòng Secure Boot State.",
-    options: YES_NO,
+    hint: "Bấm Windows + R, gõ msinfo32, xem dòng Secure Boot State.",
+    options: switched("tắt"),
     photo: true,
+    photoWhen: DONE,
   },
   {
     key: "VIRTUALIZATION",
     label: "Đã tắt ảo hoá chưa",
     hint: "Hyper-V, Virtual Machine Platform, Windows Sandbox.",
-    options: YES_NO,
+    options: switched("tắt"),
+    photo: true,
+    photoWhen: DONE,
   },
   {
     key: "CORE_ISOLATION",
     label: "Đã tắt Core Isolation chưa",
     hint: "Windows Security, Device security, Core isolation, Memory integrity.",
-    options: YES_NO,
+    options: switched("tắt"),
     photo: true,
+    photoWhen: DONE,
   },
   {
     key: "DISPLAY_MODE",
     label: "Game đang để chế độ hiển thị nào",
     hint: "Hầu hết tool cần cửa sổ không viền để vẽ được lên game.",
-    options: ["Không viền", "Toàn màn hình", "Cửa sổ", "Không rõ"],
+    options: [
+      { value: "Không viền", hint: "Borderless, cửa sổ tràn màn hình, không khung." },
+      { value: "Toàn màn hình", hint: "Fullscreen, game chiếm riêng màn hình." },
+      { value: "Cửa sổ", hint: "Windowed, có khung và thanh tiêu đề." },
+      { value: "Không rõ", hint: "Không nhớ đang để chế độ nào." },
+    ],
   },
 ];
 
@@ -92,13 +130,25 @@ const ACCOUNT_QUESTIONS: readonly DetailQuestion[] = [
     key: "DEVICE",
     label: "Đăng nhập trên thiết bị nào",
     hint: "Máy tính, điện thoại hay giả lập.",
-    options: ["Máy tính", "Điện thoại", "Giả lập", "Khác"],
+    options: [
+      { value: "Máy tính", hint: "Windows hoặc macOS." },
+      { value: "Điện thoại", hint: "Android hoặc iPhone." },
+      { value: "Giả lập", hint: "LDPlayer, BlueStacks, NoxPlayer…" },
+      { value: "Khác", hint: "Máy chơi game, web, thiết bị khác." },
+    ],
   },
   {
     key: "CHANGED_PASSWORD",
     label: "Đã đổi mật khẩu sau khi nhận chưa",
     hint: "Đổi mật khẩu trước khi báo lỗi làm shop không kiểm tra được.",
-    options: YES_NO,
+    options: [
+      { value: DONE, hint: "Đã đổi, gửi kèm ảnh màn hình đổi mật khẩu." },
+      { value: "Chưa", hint: "Giữ nguyên mật khẩu shop giao." },
+      { value: "Đã thử nhưng không được", hint: "Bấm đổi nhưng hệ thống không cho." },
+      { value: "Không rõ", hint: "Không nhớ có đổi hay không." },
+    ],
+    photo: true,
+    photoWhen: DONE,
   },
 ];
 
@@ -115,6 +165,13 @@ export interface DetailAnswer {
 }
 
 export const ANSWER_MAX = 200;
+
+/** Whether this answer is the one that asks for a screenshot. */
+export function wantsPhoto(q: DetailQuestion, value: string): boolean {
+  if (!q.photo) return false;
+  if (!q.photoWhen) return true;
+  return value === q.photoWhen;
+}
 
 /**
  * The answers as the ticket keeps them: a list, in the order the questions
@@ -153,9 +210,9 @@ export function questionFor(kind: WarrantyKind, key: string): DetailQuestion | n
 }
 
 /**
- * What is still missing: every question wants an answer, and the ones that
- * ask for a screenshot want that too. The count is what the receipt and the
- * desk both print ("đã bổ sung 4/7").
+ * What is still missing: every question wants an answer, and the ones whose
+ * answer asks for a screenshot want that too. The count is what the round's
+ * heading prints ("4/7").
  */
 export function missingDetails(
   kind: WarrantyKind,
@@ -165,8 +222,8 @@ export function missingDetails(
   return DETAIL_QUESTIONS[kind].filter((q) => {
     const answer = by.get(q.key);
     if (!answer) return true;
-    if (q.options.length > 0 && !q.options.includes(answer.value)) return true;
-    if (q.photo && !answer.imageUrl) return true;
+    if (q.options.length > 0 && !q.options.some((o) => o.value === answer.value)) return true;
+    if (wantsPhoto(q, answer.value) && !answer.imageUrl) return true;
     return false;
   });
 }

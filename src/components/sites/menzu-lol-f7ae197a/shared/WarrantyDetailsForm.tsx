@@ -8,6 +8,7 @@ import { useEffect, useRef, useState } from "react";
 import {
   ANSWER_MAX,
   DETAIL_QUESTIONS,
+  wantsPhoto,
   type DetailQuestion,
 } from "@/lib/warrantyDetails";
 import type { WarrantyKind } from "@/lib/warrantyRequests";
@@ -73,8 +74,9 @@ export function WarrantyDetailsForm({
   function answered(q: DetailQuestion): boolean {
     const value = (values[q.key] ?? "").trim();
     if (!value) return false;
-    if (q.options.length > 0 && !q.options.includes(value)) return false;
-    if (q.photo && !files[q.key]) return false;
+    if (q.options.length > 0 && !q.options.some((o) => o.value === value)) return false;
+    // A picture only where the answer calls for one.
+    if (wantsPhoto(q, value) && !files[q.key]) return false;
     return true;
   }
 
@@ -156,25 +158,30 @@ export function WarrantyDetailsForm({
             {q.options.length > 0 ? (
               // An answer of one word takes the room of one word (the
               // owner, 11/10/2026: "bớt rối").
-              <div className="flex flex-wrap gap-2">
+              <div className="grid gap-2 sm:grid-cols-2">
                 {q.options.map((option) => {
-                  const on = value === option;
+                  const on = value === option.value;
                   return (
                     <button
-                      key={option}
+                      key={option.value}
                       type="button"
                       onClick={() => {
-                        setValues((now) => ({ ...now, [q.key]: option }));
+                        setValues((now) => ({ ...now, [q.key]: option.value }));
                         setError(null);
                       }}
                       aria-pressed={on}
-                      className={`inline-flex h-10 items-center rounded-xl border px-4 text-[13px] font-bold transition-colors ${
+                      className={`rounded-xl border px-4 py-3 text-left transition-colors ${
                         on
-                          ? "border-[var(--menzu-accent)]/60 bg-[var(--menzu-accent)]/10 text-white"
-                          : "border-white/10 bg-neutral-950/60 text-neutral-200 hover:border-white/25"
+                          ? "border-[var(--menzu-accent)]/60 bg-[var(--menzu-accent)]/10"
+                          : "border-white/10 bg-neutral-950/60 hover:border-white/25"
                       }`}
                     >
-                      {option}
+                      <span className={`block text-[13px] font-bold ${on ? "text-white" : "text-neutral-200"}`}>
+                        {option.value}
+                      </span>
+                      <span className="mt-0.5 block text-[11px] leading-relaxed text-neutral-500">
+                        {option.hint}
+                      </span>
                     </button>
                   );
                 })}
@@ -192,7 +199,7 @@ export function WarrantyDetailsForm({
               />
             )}
 
-            {q.photo ? (
+            {wantsPhoto(q, value) ? (
               <div className="mt-3">
                 {preview ? (
                   <div className="relative w-full max-w-sm overflow-hidden rounded-xl border border-white/10 bg-neutral-950">
