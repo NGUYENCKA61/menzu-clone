@@ -208,7 +208,11 @@ export default async function WarrantyRequestPage({
           </ol>
         ) : null}
 
-        {/* THE ORDER BEING REPORTED */}
+        {/* THE ORDER BEING REPORTED. Not while the second round is on
+            screen: the title already names the order, and the questions are
+            what the buyer is there for (the owner, 11/10/2026: "chắc bỏ luôn
+            card trên ở trang bổ sung chi tiết"). */}
+        {awaitingDetails ? null : (
         <section className={CARD}>
           <div className="flex flex-wrap items-start gap-4">
             <div className="relative h-[72px] w-28 shrink-0 overflow-hidden rounded-xl border border-white/10 bg-neutral-950">
@@ -300,6 +304,7 @@ export default async function WarrantyRequestPage({
             ) : null}
           </div>
         </section>
+        )}
 
         {/* THE SECOND ROUND — the questions the desk would otherwise ask one
             at a time. Its own card, set like the first round's (the owner,
