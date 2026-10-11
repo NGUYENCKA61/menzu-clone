@@ -51,11 +51,16 @@ export const dynamic = "force-dynamic";
 // trang kia chưa").
 const CARD = "rounded-2xl border border-white/10 bg-white/[0.02] p-5 sm:p-6";
 const LABEL = "text-[10px] font-black uppercase tracking-widest text-neutral-500";
-/** The three moves a report makes, as the owner drew them (10/10/2026). */
+/**
+ * The three moves a report makes, as the owner drew them (10/10/2026).
+ * Sending the report and answering the second round are one move, not two
+ * (the owner, 11/10/2026: "khúc gửi thông tin gộp chung với bổ sung đi"), and
+ * the step in hand is bright, so it needs no word beside it.
+ */
 const STEPS = [
-  { title: "Gửi thông tin", now: "Cần bổ sung thêm", note: "Đã gửi" },
-  { title: "Shop tiếp nhận", now: "Đang xử lý", note: `Xử lý ${SUPPORT_WINDOW}` },
-  { title: "Hoàn tất / Đổi key", now: "Đã xong", note: "Thông báo qua web" },
+  { title: "Gửi thông tin" },
+  { title: "Shop tiếp nhận" },
+  { title: "Hoàn tất / Đổi key" },
 ];
 
 function stamp(date: Date): string {
@@ -197,9 +202,6 @@ export default async function WarrantyRequestPage({
                   <span className={here ? "text-white" : done ? "text-neutral-400" : "text-neutral-600"}>
                     {step.title}
                   </span>
-                  {here ? (
-                    <span className="text-[var(--menzu-accent)]">· {step.now}</span>
-                  ) : null}
                 </li>
               );
             })}
@@ -503,7 +505,14 @@ export default async function WarrantyRequestPage({
               <span>{blocked}</span>
             </div>
           ) : (
-            <WarrantyRequestForm code={order.code} kind={kind} onDone="/orders" />
+            // Straight on to the second round, which is this same page
+            // with the questions on it (the owner, 11/10/2026: "người dùng
+            // gửi bảo hành xong là nhảy qua trang bổ sung thông tin").
+            <WarrantyRequestForm
+              code={order.code}
+              kind={kind}
+              onDone={`/orders/${order.code}/bao-hanh`}
+            />
           )}
         </section>
         )}
