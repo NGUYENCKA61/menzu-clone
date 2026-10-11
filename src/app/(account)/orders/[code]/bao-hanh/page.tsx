@@ -2,7 +2,17 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { ArrowLeft, Banknote, Clock, Info, KeyRound, Landmark, Video, Wrench } from "lucide-react";
+import {
+  ArrowLeft,
+  Banknote,
+  ChevronRight,
+  Clock,
+  Info,
+  KeyRound,
+  Landmark,
+  Video,
+  Wrench,
+} from "lucide-react";
 
 import { AccountPageFrame } from "@/components/sites/menzu-lol-f7ae197a/shared/AccountPageFrame";
 import { formatVnd } from "@/components/sites/menzu-lol-f7ae197a/shared/productData";
@@ -170,56 +180,30 @@ export default async function WarrantyRequestPage({
       }
     >
       <div className="flex flex-col gap-5">
-        {/* WHERE THE REPORT STANDS — the three moves, the one in hand lit.
-            Only once a report exists: before that it said "Đang thực hiện"
-            over a form nobody had filled in (the owner, 10/10/2026). */}
+        {/* WHERE THE REPORT STANDS — one line, the step in hand bright and
+            the rest grey (the owner, 11/10/2026: "cái ô giai đoạn nhìn AI
+            quá", then A of the three ways offered). The boxes it replaces
+            took 90px to say this. */}
         {following ? (
-        <section className={`${CARD} !p-3 sm:!p-3`}>
-          <ol className="grid gap-2 sm:grid-cols-3">
+          <ol className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[12px] font-bold">
             {STEPS.map((step, index) => {
               const here = index === stepNow;
               const done = index < stepNow;
               return (
-                <li
-                  key={step.title}
-                  className={`flex items-center gap-3 rounded-xl border px-3.5 py-3 ${
-                    here
-                      ? "border-[var(--menzu-accent)]/40 bg-[var(--menzu-accent)]/10"
-                      : "border-white/[0.06] bg-white/[0.02]"
-                  }`}
-                >
-                  <span
-                    className={`grid h-7 w-7 shrink-0 place-items-center rounded-lg text-[12px] font-black ${
-                      here
-                        ? "bg-[var(--menzu-accent)] text-white"
-                        : done
-                          ? "bg-white/10 text-neutral-200"
-                          : "bg-white/[0.06] text-neutral-500"
-                    }`}
-                  >
-                    {index + 1}
+                <li key={step.title} className="flex items-center gap-2">
+                  {index > 0 ? (
+                    <ChevronRight className="h-3.5 w-3.5 shrink-0 text-neutral-700" aria-hidden />
+                  ) : null}
+                  <span className={here ? "text-white" : done ? "text-neutral-400" : "text-neutral-600"}>
+                    {step.title}
                   </span>
-                  <span className="min-w-0">
-                    <span
-                      className={`block truncate text-[12.5px] font-bold ${
-                        here || done ? "text-white" : "text-neutral-400"
-                      }`}
-                    >
-                      {step.title}
-                    </span>
-                    <span
-                      className={`block truncate text-[11px] ${
-                        here ? "text-[var(--menzu-accent)]" : "text-neutral-500"
-                      }`}
-                    >
-                      {here ? step.now : step.note}
-                    </span>
-                  </span>
+                  {here ? (
+                    <span className="text-[var(--menzu-accent)]">· {step.now}</span>
+                  ) : null}
                 </li>
               );
             })}
           </ol>
-        </section>
         ) : null}
 
         {/* THE ORDER BEING REPORTED */}
