@@ -17,12 +17,15 @@ const FIELD =
 const TYPES = ["image/png", "image/jpeg", "image/webp"];
 
 /**
- * The second round of a warranty report: the questions the desk would
- * otherwise ask one at a time, each with the screenshot that settles it.
+ * The second round of a warranty report, set exactly as the first one is
+ * (the owner, 11/10/2026: "đợt 2 giao diện cũng y chang đợt 1 đi"): numbered
+ * sections parted by hairlines, a red star where an answer is due, choices
+ * as tiles, and a picture dropped on a panel rather than picked with a
+ * small button. It has no description box; the first round already took one.
  *
- * Every question is answered in one go and sent in one post, because a ticket
- * half-answered is a ticket the desk still cannot act on (the owner,
- * 10/10/2026: "đợt 2 bắt buộc vì cần phải kỹ hơn").
+ * Every question is answered in one go and sent in one post, because a
+ * ticket half-answered is a ticket the desk still cannot act on (the owner:
+ * "đợt 2 bắt buộc vì cần phải kỹ hơn").
  */
 export function WarrantyDetailsForm({
   ticketId,
@@ -109,23 +112,6 @@ export function WarrantyDetailsForm({
 
   return (
     <div className="flex flex-col gap-5">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <h2 className="flex items-center gap-1.5 text-[12px] font-black uppercase tracking-widest text-neutral-300">
-          Bổ sung thông tin
-          <span aria-hidden className="text-[var(--menzu-accent)]">
-            *
-          </span>
-          <span className="sr-only">(bắt buộc)</span>
-        </h2>
-        <span className="text-[11px] font-semibold tabular-nums text-neutral-500">
-          Đã trả lời {done}/{questions.length}
-        </span>
-      </div>
-      <p className="-mt-3 text-[11.5px] leading-relaxed text-neutral-500">
-        Shop chỉ bắt đầu kiểm tra khi đủ các mục dưới đây. Trả lời một lần rồi
-        gửi, khỏi phải chờ shop hỏi lại từng câu.
-      </p>
-
       {questions.map((q, index) => {
         const value = values[q.key] ?? "";
         const preview = previews[q.key];
@@ -134,13 +120,19 @@ export function WarrantyDetailsForm({
             key={q.key}
             className={index === 0 ? "" : "border-t border-white/[0.06] pt-5"}
           >
-            <h3 className="text-[12.5px] font-bold text-neutral-200">
-              {index + 1}. {q.label}
-            </h3>
-            <p className="mt-0.5 text-[11px] leading-relaxed text-neutral-500">{q.hint}</p>
+            <div className="mb-3">
+              <h2 className="flex flex-wrap items-center gap-1.5 text-[12px] font-black uppercase tracking-widest text-neutral-300">
+                {index + 1}. {q.label}
+                <span aria-hidden className="text-[var(--menzu-accent)]">
+                  *
+                </span>
+                <span className="sr-only">(bắt buộc)</span>
+              </h2>
+            </div>
+            <p className="-mt-2 mb-3 text-[11.5px] text-neutral-500">{q.hint}</p>
 
             {q.options.length > 0 ? (
-              <div className="mt-2.5 flex flex-wrap gap-2">
+              <div className="grid gap-2 sm:grid-cols-3">
                 {q.options.map((option) => {
                   const on = value === option;
                   return (
@@ -152,10 +144,10 @@ export function WarrantyDetailsForm({
                         setError(null);
                       }}
                       aria-pressed={on}
-                      className={`inline-flex h-9 items-center rounded-xl border px-3.5 text-[12px] font-bold transition-colors ${
+                      className={`rounded-xl border px-4 py-3 text-left text-[13px] font-bold transition-colors ${
                         on
                           ? "border-[var(--menzu-accent)]/60 bg-[var(--menzu-accent)]/10 text-white"
-                          : "border-white/10 bg-neutral-950/60 text-neutral-300 hover:border-white/25 hover:text-white"
+                          : "border-white/10 bg-neutral-950/60 text-neutral-200 hover:border-white/25"
                       }`}
                     >
                       {option}
@@ -172,21 +164,21 @@ export function WarrantyDetailsForm({
                   setError(null);
                 }}
                 placeholder="Ghi ngắn gọn, ví dụ Windows 11 24H2"
-                className={`${FIELD} mt-2.5`}
+                className={FIELD}
               />
             )}
 
             {q.photo ? (
-              <div className="mt-2.5">
+              <div className="mt-3">
                 {preview ? (
-                  <div className="relative w-full max-w-xs overflow-hidden rounded-xl border border-white/10 bg-neutral-950">
+                  <div className="relative w-full max-w-sm overflow-hidden rounded-xl border border-white/10 bg-neutral-950">
                     <Image
                       src={preview}
                       alt={`Ảnh cho ${q.label}`}
-                      width={640}
-                      height={360}
+                      width={800}
+                      height={450}
                       unoptimized
-                      className="max-h-[200px] w-full object-cover"
+                      className="max-h-[220px] w-full object-cover"
                     />
                     <button
                       type="button"
@@ -202,9 +194,18 @@ export function WarrantyDetailsForm({
                     </button>
                   </div>
                 ) : (
-                  <label className="inline-flex h-10 cursor-pointer items-center gap-2 rounded-xl border border-dashed border-white/15 bg-white/[0.02] px-4 text-[11.5px] font-bold text-neutral-300 transition-colors hover:border-[var(--menzu-accent)]/50 hover:text-white">
-                    <ImagePlus className="h-4 w-4" />
-                    Thêm ảnh cho mục này
+                  // The first round's panel, so both rounds take a picture
+                  // the same way.
+                  <label className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-white/15 bg-white/[0.02] px-4 py-6 text-center transition-colors hover:border-[var(--menzu-accent)]/50 hover:bg-white/[0.04]">
+                    <span className="grid h-10 w-10 place-items-center rounded-xl border border-white/10 bg-white/[0.04] text-neutral-300">
+                      <ImagePlus className="h-5 w-5" />
+                    </span>
+                    <span className="text-[12.5px] font-bold text-neutral-200">
+                      Kéo và thả ảnh vào đây, hoặc bấm để chọn ảnh
+                    </span>
+                    <span className="text-[11px] text-neutral-500">
+                      PNG, JPG hoặc WebP, tối đa 5MB.
+                    </span>
                     <input
                       ref={(node) => {
                         inputs.current[q.key] = node;
@@ -229,10 +230,15 @@ export function WarrantyDetailsForm({
       ) : null}
 
       <div className="flex flex-wrap items-center justify-between gap-3 border-t border-white/[0.06] pt-5">
-        <span className="text-[11.5px] text-neutral-500">
-          {ready
-            ? "Đủ rồi, gửi để shop bắt đầu kiểm tra."
-            : `Còn ${questions.length - done} mục chưa trả lời.`}
+        <span className="flex flex-col gap-1">
+          <span className="text-[11.5px] text-neutral-400">
+            {ready
+              ? "Đủ rồi, gửi để shop bắt đầu kiểm tra."
+              : `Còn ${questions.length - done} mục chưa trả lời.`}
+          </span>
+          <span className="text-[11px] tabular-nums text-neutral-500">
+            Đã trả lời {done}/{questions.length}
+          </span>
         </span>
         <button
           type="button"

@@ -315,6 +315,29 @@ export default async function WarrantyRequestPage({
           </div>
         </section>
 
+        {/* THE SECOND ROUND — the questions the desk would otherwise ask one
+            at a time. Its own card, set like the first round's (the owner,
+            11/10/2026), and only while a report is waiting on it. */}
+        {latest && awaitingDetails ? (
+          <section className={CARD}>
+            <div className="mb-5 flex flex-wrap items-start justify-between gap-3 border-b border-white/[0.06] pb-4">
+              <div>
+                <h2 className="text-sm font-black uppercase tracking-wider text-white">
+                  Bổ sung thông tin
+                </h2>
+                <p className="mt-1 text-[11.5px] leading-relaxed text-neutral-500">
+                  Shop chỉ bắt đầu kiểm tra khi đủ các mục dưới đây. Trả lời một
+                  lần rồi gửi, khỏi phải chờ shop hỏi lại từng câu.
+                </p>
+              </div>
+              <span className="inline-flex items-center rounded-md border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-amber-400">
+                Chờ bổ sung
+              </span>
+            </div>
+            <WarrantyDetailsForm ticketId={latest.id} kind={kind} />
+          </section>
+        ) : null}
+
         {/* PAST REPORTS, IF ANY */}
         {order.warrantyRequests.length > 0 ? (
           <section className={CARD}>
@@ -427,13 +450,9 @@ export default async function WarrantyRequestPage({
                         ) : null}
                       </div>
                     ) : null}
-                    {/* The second round: the form while it is missing, the
-                        answers once they are in (the owner, 10/10/2026). */}
-                    {waiting ? (
-                      <div className="mt-4 rounded-xl border border-[var(--menzu-accent)]/30 bg-[var(--menzu-accent)]/[0.06] p-4">
-                        <WarrantyDetailsForm ticketId={r.id} kind={kind} />
-                      </div>
-                    ) : answers.length > 0 ? (
+                    {/* The answers once they are in; while they are missing
+                        the round has a card of its own above this one. */}
+                    {!waiting && answers.length > 0 ? (
                       <div className="mt-4 rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
                         <span className={LABEL}>Thông tin đã bổ sung</span>
                         <dl className="mt-3 flex flex-col gap-3">
