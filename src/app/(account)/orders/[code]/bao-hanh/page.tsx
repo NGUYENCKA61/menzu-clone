@@ -199,7 +199,7 @@ export default async function WarrantyRequestPage({
               return (
                 <li key={step.title} className="flex items-center gap-2">
                   {index > 0 ? (
-                    <ChevronRight className="h-3.5 w-3.5 shrink-0 text-neutral-700" aria-hidden />
+                    <ChevronRight className="h-3.5 w-3.5 shrink-0 text-neutral-600" aria-hidden />
                   ) : null}
                   {/* The step in hand in the accent, as the account nav
                       marks the page you are on; white alone was the colour
@@ -210,7 +210,7 @@ export default async function WarrantyRequestPage({
                         ? "text-[var(--menzu-accent)]"
                         : done
                           ? "text-neutral-400"
-                          : "text-neutral-600"
+                          : "text-neutral-500"
                     }
                   >
                     {step.title}
@@ -253,7 +253,7 @@ export default async function WarrantyRequestPage({
                 >
                   {ORDER_STATUS_LABELS[order.status as OrderStatus] ?? order.status}
                 </span>
-                <span className="text-[11px] font-semibold text-neutral-500">
+                <span className="text-[12px] font-semibold text-neutral-500">
                   Đơn: <span className="font-bold text-neutral-200">{order.code}</span>
                 </span>
               </div>
@@ -264,7 +264,7 @@ export default async function WarrantyRequestPage({
                   mua", "Gói dịch vụ", and a plain count, which it prints
                   without an x. One of a thing is not worth a line (the
                   owner, 10/10/2026). */}
-              <p className="mt-1.5 flex flex-wrap gap-x-5 gap-y-1 text-[11px] font-semibold text-neutral-500">
+              <p className="mt-1.5 flex flex-wrap gap-x-5 gap-y-1 text-[12px] font-semibold text-neutral-500">
                 <span>
                   Ngày mua:{" "}
                   <span className="font-bold tabular-nums text-neutral-200">
@@ -356,7 +356,7 @@ export default async function WarrantyRequestPage({
                       <span className="inline-flex items-center rounded-md border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-neutral-300">
                         {WARRANTY_ISSUE[r.issue].label}
                       </span>
-                      <span className="text-[11px] font-semibold text-neutral-500">
+                      <span className="text-[12px] font-semibold text-neutral-500">
                         {stamp(r.createdAt)}
                       </span>
                       {/* An account's report: the recording it was sent with. */}
@@ -365,7 +365,7 @@ export default async function WarrantyRequestPage({
                           href={r.videoUrl}
                           target="_blank"
                           rel="noopener noreferrer nofollow"
-                          className="inline-flex items-center gap-1.5 text-[11px] font-bold text-neutral-300 underline-offset-2 hover:text-white hover:underline"
+                          className="inline-flex items-center gap-1.5 text-[12px] font-bold text-neutral-300 underline-offset-2 hover:text-white hover:underline"
                         >
                           <Video className="h-3.5 w-3.5" aria-hidden />
                           Video quay màn hình
@@ -376,7 +376,7 @@ export default async function WarrantyRequestPage({
                         the site account, sent to a bank, or waiting on the
                         buyer's account — the one step that is theirs. */}
                     {(r.status === "REFUNDING" || r.status === "REFUNDED") && r.refundAmount !== null ? (
-                      <div className="mt-3 rounded-lg border border-white/10 bg-white/[0.03] px-3.5 py-3 text-[12.5px] leading-relaxed text-neutral-300">
+                      <div className="mt-3 rounded-lg border border-white/10 bg-white/[0.03] px-3.5 py-3 text-[13px] leading-relaxed text-neutral-300">
                         <p className="flex items-start gap-2">
                           {r.refundMethod === "MANUAL" ? (
                             <Landmark className="mt-0.5 h-4 w-4 shrink-0 text-neutral-400" />
@@ -454,10 +454,10 @@ export default async function WarrantyRequestPage({
                             const question = questionFor(kind, answer.key);
                             return (
                               <div key={answer.key} className="flex flex-col gap-1">
-                                <dt className="text-[11px] font-semibold text-neutral-500">
+                                <dt className="text-[12px] font-semibold text-neutral-500">
                                   {question?.label ?? answer.key}
                                 </dt>
-                                <dd className="text-[12.5px] font-bold text-neutral-200">
+                                <dd className="text-[13px] font-bold text-neutral-200">
                                   {answer.value}
                                 </dd>
                                 {answer.imageUrl ? (

@@ -49,7 +49,7 @@ function Step({
       {/* The star alone (the owner, 10/10/2026: "bỏ đi"), with the word
           kept for a reader who cannot see it. The one section that is not
           required says so in its own note. */}
-      <h2 className="flex flex-wrap items-center gap-1.5 text-[12px] font-black uppercase tracking-widest text-neutral-300">
+      <h2 className="flex flex-wrap items-center gap-1.5 text-[13px] font-black uppercase tracking-widest text-white">
         {n}. {title}
         {need ? (
           <>
@@ -179,7 +179,7 @@ export function WarrantyRequestForm({
     <div className="flex flex-col gap-5">
       <div>
         <Step n={1} title="Bạn gặp lỗi gì?" need />
-        <p className="-mt-2 mb-3 text-[11.5px] text-neutral-500">
+        <p className="-mt-2 mb-3 text-[13px] text-neutral-400">
           Chọn loại sự cố gần nhất để shop xử lý đúng quy trình.
         </p>
         <div className="grid gap-2 sm:grid-cols-2">
@@ -219,7 +219,7 @@ export function WarrantyRequestForm({
                   <span className={`block text-[13px] font-bold ${on ? "text-white" : "text-neutral-200"}`}>
                     {WARRANTY_ISSUE[key].label}
                   </span>
-                  <span className="mt-0.5 block text-[11px] leading-relaxed text-neutral-500">
+                  <span className="mt-0.5 block text-[12px] leading-relaxed text-neutral-400">
                     {WARRANTY_ISSUE[key].hint}
                   </span>
                 </span>
@@ -242,11 +242,11 @@ export function WarrantyRequestForm({
           placeholder={PLACEHOLDER[kind]}
           className={`${FIELD} resize-y leading-relaxed`}
         />
-        <div className="mt-2 flex flex-wrap items-center justify-between gap-2 text-[11px] font-semibold">
+        <div className="mt-2 flex flex-wrap items-center justify-between gap-2 text-[12px] font-semibold">
           <span className={short ? "text-neutral-500" : "text-emerald-400"}>
             {short ? `Cần thêm ${left} ký tự` : "Đủ rồi, gửi được"}
           </span>
-          <span className="tabular-nums text-neutral-600">
+          <span className="tabular-nums text-neutral-500">
             {description.trim().length}/{DESCRIPTION_MAX}
           </span>
         </div>
@@ -277,7 +277,7 @@ export function WarrantyRequestForm({
             />
           </div>
           <p
-            className={`mt-2 text-[11px] font-semibold ${
+            className={`mt-2 text-[12px] font-semibold ${
               videoUrl.trim() && !video.ok ? "text-rose-300" : "text-neutral-500"
             }`}
           >
@@ -319,10 +319,10 @@ export function WarrantyRequestForm({
             <span className="grid h-10 w-10 place-items-center rounded-xl border border-white/10 bg-white/[0.04] text-neutral-300">
               <ImagePlus className="h-5 w-5" />
             </span>
-            <span className="text-[12.5px] font-bold text-neutral-200">
+            <span className="text-[13px] font-bold text-neutral-200">
               Kéo và thả ảnh chụp màn hình vào đây, hoặc bấm để chọn ảnh
             </span>
-            <span className="text-[11px] text-neutral-500">
+            <span className="text-[12px] text-neutral-500">
               PNG, JPG hoặc WebP, tối đa 5MB.{" "}
               {kind === "account"
                 ? "Ảnh màn hình báo lỗi khi đăng nhập giúp shop xử lý nhanh hơn nhiều."
@@ -345,7 +345,7 @@ export function WarrantyRequestForm({
 
       {/* Said once, where the eye lands after the drop zone. */}
       {!file ? (
-        <p className="-mt-2 text-[11px] text-neutral-500">
+        <p className="-mt-2 text-[12px] text-neutral-400">
           Thiếu ảnh thì shop không có căn cứ kiểm tra, nên ảnh là bắt buộc.
         </p>
       ) : null}
@@ -360,11 +360,11 @@ export function WarrantyRequestForm({
           form by a rule, as the owner drew it. */}
       <div className="flex flex-wrap items-center justify-between gap-3 border-t border-white/[0.06] pt-5">
         <span className="flex flex-col gap-1">
-          <span className="inline-flex items-center gap-2 text-[11.5px] text-neutral-400">
+          <span className="inline-flex items-center gap-2 text-[13px] text-neutral-400">
             <BadgeCheck className="h-4 w-4 shrink-0 text-neutral-500" />
             Shop cam kết đổi key hoặc hoàn tiền nếu lỗi từ phía shop.
           </span>
-          <span className="pl-6 text-[11px] text-neutral-500">
+          <span className="pl-6 text-[12px] text-neutral-500">
             Shop trả lời trên chuông thông báo và trong lịch sử mua hàng.
           </span>
         </span>

@@ -120,7 +120,7 @@ export function WarrantyDetailsForm({
             <Info className="h-5 w-5 shrink-0 text-[var(--menzu-accent)]" aria-hidden />
             Bổ sung thông tin
           </h2>
-          <p className="mt-1.5 text-[12px] leading-relaxed text-neutral-400">
+          <p className="mt-1.5 text-[13px] leading-relaxed text-neutral-400">
             Shop chỉ bắt đầu kiểm tra khi đủ các mục dưới đây. Trả lời một lần
             rồi gửi, khỏi phải chờ shop hỏi lại từng câu.
           </p>
@@ -145,7 +145,7 @@ export function WarrantyDetailsForm({
             className={index === 0 ? "" : "border-t border-white/[0.06] pt-5"}
           >
             <div className="mb-3">
-              <h2 className="flex flex-wrap items-center gap-1.5 text-[12px] font-black uppercase tracking-widest text-neutral-300">
+              <h2 className="flex flex-wrap items-center gap-1.5 text-[13px] font-black uppercase tracking-widest text-white">
                 {index + 1}. {q.label}
                 <span aria-hidden className="text-[var(--menzu-accent)]">
                   *
@@ -153,7 +153,7 @@ export function WarrantyDetailsForm({
                 <span className="sr-only">(bắt buộc)</span>
               </h2>
             </div>
-            <p className="-mt-2 mb-3 text-[11.5px] text-neutral-500">{q.hint}</p>
+            <p className="-mt-2 mb-3 text-[13px] text-neutral-400">{q.hint}</p>
 
             {q.options.length > 0 ? (
               // An answer of one word takes the room of one word (the
@@ -179,7 +179,7 @@ export function WarrantyDetailsForm({
                       <span className={`block text-[13px] font-bold ${on ? "text-white" : "text-neutral-200"}`}>
                         {option.value}
                       </span>
-                      <span className="mt-0.5 block text-[11px] leading-relaxed text-neutral-500">
+                      <span className="mt-0.5 block text-[12px] leading-relaxed text-neutral-400">
                         {option.hint}
                       </span>
                     </button>
@@ -232,10 +232,10 @@ export function WarrantyDetailsForm({
                       <ImagePlus className="h-4 w-4" />
                     </span>
                     <span className="min-w-0">
-                      <span className="block text-[12.5px] font-bold text-neutral-200">
+                      <span className="block text-[13px] font-bold text-neutral-200">
                         Kéo và thả ảnh vào đây, hoặc bấm để chọn ảnh
                       </span>
-                      <span className="block text-[11px] text-neutral-500">
+                      <span className="block text-[12px] text-neutral-500">
                         PNG, JPG hoặc WebP, tối đa 5MB.
                       </span>
                     </span>
@@ -264,12 +264,12 @@ export function WarrantyDetailsForm({
 
       <div className="flex flex-wrap items-center justify-between gap-3 border-t border-white/[0.06] pt-5">
         <span className="flex flex-col gap-1">
-          <span className="text-[11.5px] text-neutral-400">
+          <span className="text-[13px] text-neutral-400">
             {ready
               ? "Đủ rồi, gửi để shop bắt đầu kiểm tra."
               : `Còn ${questions.length - done} mục chưa trả lời.`}
           </span>
-          <span className="text-[11px] tabular-nums text-neutral-500">
+          <span className="text-[12px] tabular-nums text-neutral-500">
             Đã trả lời {done}/{questions.length}
           </span>
         </span>
