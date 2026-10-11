@@ -185,9 +185,16 @@ export interface DetailAnswer {
 
 export const ANSWER_MAX = 200;
 
-/** Whether this answer is the one that asks for a screenshot. */
+/**
+ * Whether this answer is the one that asks for a screenshot.
+ *
+ * Nothing is asked for before an answer is picked: the uploader opens on the
+ * press, not on the question (the owner, 11/10/2026: "ấn vô nút chọn câu trả
+ * lời mới hiện chỗ đính kèm ảnh").
+ */
 export function wantsPhoto(q: DetailQuestion, value: string): boolean {
   if (!q.photo) return false;
+  if (!value.trim()) return false;
   if (!q.photoWhen) return true;
   return value === q.photoWhen;
 }

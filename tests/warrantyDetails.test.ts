@@ -79,6 +79,9 @@ describe("warranty details, the second round", () => {
     ]);
     expect(wantsPhoto(winver!, "Tôi dùng Windows 11")).toBe(true);
     expect(wantsPhoto(winver!, "Tôi không rõ bản nào")).toBe(true);
+    // …but only once one of them is pressed: no answer, no uploader.
+    expect(wantsPhoto(winver!, "")).toBe(false);
+    expect(wantsPhoto(questionFor("account", "LOGIN_ERROR")!, "  ")).toBe(false);
   });
 
   it("asks for a picture only on the answer that says it was done", () => {
