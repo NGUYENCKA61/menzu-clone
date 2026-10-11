@@ -8,8 +8,10 @@ import { AccountPageFrame } from "@/components/sites/menzu-lol-f7ae197a/shared/A
 import { formatVnd } from "@/components/sites/menzu-lol-f7ae197a/shared/productData";
 import { WarrantyBankForm } from "@/components/sites/menzu-lol-f7ae197a/shared/WarrantyBankForm";
 import { WarrantyChat } from "@/components/sites/menzu-lol-f7ae197a/shared/WarrantyChat";
+import { WarrantyDetailsForm } from "@/components/sites/menzu-lol-f7ae197a/shared/WarrantyDetailsForm";
 import { WarrantyRequestForm } from "@/components/sites/menzu-lol-f7ae197a/shared/WarrantyRequestForm";
 import { maskAccount } from "@/lib/bankRefund";
+import { questionFor, readDetails } from "@/lib/warrantyDetails";
 import { db } from "@/lib/db";
 import { LOGIN_ORDER_SELECT, signInHold } from "@/lib/loginReveal";
 import { ORDER_STATUS_LABELS, type OrderStatus } from "@/lib/orders";
@@ -41,7 +43,7 @@ const CARD = "rounded-2xl border border-white/10 bg-white/[0.02] p-5 sm:p-6";
 const LABEL = "text-[10px] font-black uppercase tracking-widest text-neutral-500";
 /** The three moves a report makes, as the owner drew them (10/10/2026). */
 const STEPS = [
-  { title: "Gửi thông tin", now: "Đang thực hiện", note: "Đã gửi" },
+  { title: "Gửi thông tin", now: "Cần bổ sung thêm", note: "Đã gửi" },
   { title: "Shop tiếp nhận", now: "Đang xử lý", note: `Xử lý ${SUPPORT_WINDOW}` },
   { title: "Hoàn tất / Đổi key", now: "Đã xong", note: "Thông báo qua web" },
 ];
@@ -94,6 +96,8 @@ export default async function WarrantyRequestPage({
           description: true,
           imageUrl: true,
           videoUrl: true,
+          details: true,
+          detailsDoneAt: true,
           createdAt: true,
           refundAmount: true,
           refundMethod: true,
@@ -123,7 +127,10 @@ export default async function WarrantyRequestPage({
   // Where the strip's light sits: nothing sent yet, a report the shop has,
   // or one it has finished with.
   const latest = order.warrantyRequests[0] ?? null;
-  const stepNow = !latest
+  // A report whose second round is still missing has not reached the desk:
+  // the strip stays on the buyer's own step (the owner, 10/10/2026).
+  const awaitingDetails = Boolean(latest && warrantyOpen(latest.status) && !latest.detailsDoneAt);
+  const stepNow = !latest || awaitingDetails
     ? 0
     : latest.status === "OPEN" || latest.status === "IN_PROGRESS" || latest.status === "REFUNDING"
       ? 1
@@ -315,13 +322,19 @@ export default async function WarrantyRequestPage({
             <ul className="mt-3 flex flex-col gap-3">
               {order.warrantyRequests.map((r) => {
                 const state = WARRANTY_STATUS[r.status];
+                // Until the second round is in, the ticket is the buyer's,
+                // not the desk's, and its chip says so.
+                const waiting = warrantyOpen(r.status) && !r.detailsDoneAt;
+                const answers = readDetails(r.details);
                 return (
                   <li key={r.id} className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
                     <div className="flex flex-wrap items-center gap-2.5">
                       <span
-                        className={`inline-flex items-center rounded-md border px-2 py-0.5 text-[10px] font-black uppercase tracking-wider ${state.tile}`}
+                        className={`inline-flex items-center rounded-md border px-2 py-0.5 text-[10px] font-black uppercase tracking-wider ${
+                          waiting ? "border-amber-500/30 bg-amber-500/10 text-amber-400" : state.tile
+                        }`}
                       >
-                        {state.label}
+                        {waiting ? "Chờ bổ sung" : state.label}
                       </span>
                       <span className="inline-flex items-center rounded-md border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-neutral-300">
                         {WARRANTY_ISSUE[r.issue].label}
@@ -414,6 +427,51 @@ export default async function WarrantyRequestPage({
                         ) : null}
                       </div>
                     ) : null}
+                    {/* The second round: the form while it is missing, the
+                        answers once they are in (the owner, 10/10/2026). */}
+                    {waiting ? (
+                      <div className="mt-4 rounded-xl border border-[var(--menzu-accent)]/30 bg-[var(--menzu-accent)]/[0.06] p-4">
+                        <WarrantyDetailsForm ticketId={r.id} kind={kind} />
+                      </div>
+                    ) : answers.length > 0 ? (
+                      <div className="mt-4 rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
+                        <span className={LABEL}>Thông tin đã bổ sung</span>
+                        <dl className="mt-3 flex flex-col gap-3">
+                          {answers.map((answer) => {
+                            const question = questionFor(kind, answer.key);
+                            return (
+                              <div key={answer.key} className="flex flex-col gap-1">
+                                <dt className="text-[11px] font-semibold text-neutral-500">
+                                  {question?.label ?? answer.key}
+                                </dt>
+                                <dd className="text-[12.5px] font-bold text-neutral-200">
+                                  {answer.value}
+                                </dd>
+                                {answer.imageUrl ? (
+                                  <dd>
+                                    <a
+                                      href={answer.imageUrl}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="relative mt-1 block w-full max-w-xs overflow-hidden rounded-lg border border-white/10 bg-neutral-950"
+                                    >
+                                      <Image
+                                        src={answer.imageUrl}
+                                        alt={question?.label ?? "Ảnh bổ sung"}
+                                        width={640}
+                                        height={360}
+                                        className="max-h-[180px] w-full object-cover"
+                                      />
+                                    </a>
+                                  </dd>
+                                ) : null}
+                              </div>
+                            );
+                          })}
+                        </dl>
+                      </div>
+                    ) : null}
+
                     {/* The report and everything said since — open until the
                         shop marks it done (the owner, 01/10/2026). */}
                     <WarrantyChat

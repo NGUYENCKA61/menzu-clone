@@ -1116,6 +1116,15 @@ model WarrantyRequest {
   /// whose warranty is refused without it. Null on a tool's report.
   videoUrl    String?
   status      WarrantyStatus @default(OPEN)
+  /// The second round of the report, as a JSON list of {key, value,
+  /// imageUrl}: the questions the desk would otherwise ask one at a time
+  /// (Windows, Secure Boot, Core Isolation, the game's display mode…). Null
+  /// on a ticket from before this was asked for.
+  /// See src/lib/warrantyDetails.ts.
+  details     String?
+  /// When the buyer finished that round. Null means the desk is still
+  /// waiting and the ticket reads "Chờ bổ sung".
+  detailsDoneAt DateTime?
   /// What the shop did or asked, shown to the buyer under the report.
   adminNote   String?
   createdAt   DateTime       @default(now())
