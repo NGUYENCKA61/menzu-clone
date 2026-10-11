@@ -60,7 +60,9 @@ const LABEL = "text-[10px] font-black uppercase tracking-widest text-neutral-500
 const STEPS = [
   { title: "Gửi thông tin" },
   { title: "Shop tiếp nhận" },
-  { title: "Hoàn tất / Đổi key" },
+  // Not "Đổi key": a report ends in a new key, a repair or the money back,
+  // and naming one of the three promises it (the owner, 11/10/2026).
+  { title: "Kết quả xử lý" },
 ];
 
 function stamp(date: Date): string {
