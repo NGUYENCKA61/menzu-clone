@@ -10,7 +10,6 @@ import {
   Info,
   KeyRound,
   Landmark,
-  ListChecks,
   Video,
   Wrench,
 } from "lucide-react";
@@ -329,7 +328,9 @@ export default async function WarrantyRequestPage({
                 say the report is waiting on these answers. */}
             <div className="mb-5 border-b border-white/[0.06] pb-4">
               <h2 className="flex items-center gap-2.5 text-base font-black uppercase tracking-wider text-white">
-                <ListChecks className="h-5 w-5 shrink-0 text-[var(--menzu-accent)]" aria-hidden />
+                {/* The info glyph (the owner, 11/10/2026: "icon thông tin
+                    đi"), where the checklist one stood. */}
+                <Info className="h-5 w-5 shrink-0 text-[var(--menzu-accent)]" aria-hidden />
                 Bổ sung thông tin
               </h2>
               <p className="mt-1.5 text-[12px] leading-relaxed text-neutral-400">
