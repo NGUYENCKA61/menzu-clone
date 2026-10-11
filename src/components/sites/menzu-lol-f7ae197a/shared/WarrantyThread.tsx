@@ -51,7 +51,7 @@ export function WarrantyThread({
         const moved = line.status ? WARRANTY_STATUS[line.status] : null;
         return (
           <li key={line.id} className={`flex flex-col ${mine ? "items-end" : "items-start"}`}>
-            <span className="mb-1 px-1 text-[10.5px] font-semibold text-neutral-500">
+            <span className="mb-1 px-1 text-[11px] font-semibold text-neutral-500">
               <span className="text-neutral-300">{who}</span> · {line.at}
             </span>
             <div
@@ -79,7 +79,7 @@ export function WarrantyThread({
               ) : null}
             </div>
             {moved ? (
-              <span className="mt-1 inline-flex items-center gap-1.5 px-1 text-[10.5px] text-neutral-500">
+              <span className="mt-1 inline-flex items-center gap-1.5 px-1 text-[11px] text-neutral-500">
                 Chuyển sang
                 <span
                   className={`inline-flex items-center rounded-md border px-1.5 py-px text-[9.5px] font-black uppercase tracking-wider ${moved.tile}`}

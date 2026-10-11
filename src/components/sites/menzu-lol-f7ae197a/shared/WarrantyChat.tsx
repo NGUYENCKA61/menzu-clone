@@ -142,7 +142,7 @@ export function WarrantyChat({
       {open ? (
         <div className="mt-4">
           {file ? (
-            <div className="mb-2 inline-flex max-w-full items-center gap-2 rounded-lg border border-white/10 bg-white/[0.04] px-2.5 py-1.5 text-[11.5px] text-neutral-300">
+            <div className="mb-2 inline-flex max-w-full items-center gap-2 rounded-lg border border-white/10 bg-white/[0.04] px-2.5 py-1.5 text-[12px] text-neutral-300">
               <ImagePlus className="h-3.5 w-3.5 shrink-0 text-neutral-400" />
               <span className="truncate">{file.name}</span>
               <button
