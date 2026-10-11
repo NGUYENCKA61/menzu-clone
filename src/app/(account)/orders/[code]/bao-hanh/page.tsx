@@ -10,6 +10,7 @@ import {
   Info,
   KeyRound,
   Landmark,
+  ListChecks,
   Video,
   Wrench,
 } from "lucide-react";
@@ -321,14 +322,17 @@ export default async function WarrantyRequestPage({
             at a time. Its own card, set like the first round's (the owner,
             11/10/2026), and only while a report is waiting on it. */}
         {latest && awaitingDetails ? (
-          <section className={CARD}>
+          // The card wears the accent rule while it is the one thing to do
+          // (the owner, 11/10/2026: "nhìn nó không nổi bật gì").
+          <section className={`${CARD} border-[var(--menzu-accent)]/30`}>
             {/* No chip here: the strip above and the ticket below already
                 say the report is waiting on these answers. */}
             <div className="mb-5 border-b border-white/[0.06] pb-4">
-              <h2 className="text-sm font-black uppercase tracking-wider text-white">
+              <h2 className="flex items-center gap-2.5 text-base font-black uppercase tracking-wider text-white">
+                <ListChecks className="h-5 w-5 shrink-0 text-[var(--menzu-accent)]" aria-hidden />
                 Bổ sung thông tin
               </h2>
-              <p className="mt-1 text-[11.5px] leading-relaxed text-neutral-500">
+              <p className="mt-1.5 text-[12px] leading-relaxed text-neutral-400">
                 Shop chỉ bắt đầu kiểm tra khi đủ các mục dưới đây. Trả lời một
                 lần rồi gửi, khỏi phải chờ shop hỏi lại từng câu.
               </p>
