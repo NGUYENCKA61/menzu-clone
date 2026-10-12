@@ -692,7 +692,9 @@ export default async function WarrantyRequestPage({
             11/10/2026). */}
         {/* After a finished report, a fresh start is one press away: the
             form waits behind "Tạo đơn mới", and pressing it takes the old
-            report off the page (the owner, 12/10/2026). */}
+            report off the page (the owner, 12/10/2026). White, the site's
+            other "start here" buttons' colour, not the red of a step the
+            buyer must take ("tạo đơn mới màu trắng đi"). */}
         {latest !== null &&
         !warrantyOpen(latest.status) &&
         !startingOver &&
@@ -700,7 +702,7 @@ export default async function WarrantyRequestPage({
           <div className="flex justify-end">
             <Link
               href={`/orders/${order.code}/bao-hanh?moi=1`}
-              className="inline-flex h-11 items-center gap-2 rounded-xl bg-[var(--menzu-accent)] px-6 text-[11px] font-black uppercase tracking-widest text-white transition-colors hover:bg-[var(--menzu-accent-dark)]"
+              className="inline-flex h-11 items-center gap-2 rounded-xl bg-white px-6 text-[11px] font-black uppercase tracking-widest text-black transition-colors hover:bg-neutral-200"
             >
               <Plus className="h-4 w-4" />
               Tạo đơn mới
