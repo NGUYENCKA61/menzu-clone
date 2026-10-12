@@ -380,10 +380,14 @@ export default async function WarrantyRequestPage({
                           {state.label}
                         </span>
                       ) : null}
-                      <span className="text-[12px] font-semibold text-neutral-400">
+                      {/* What broke is the report's first fact, so it reads
+                          at body size and brightness; the time is the small
+                          print beside it (the owner, 12/10/2026). */}
+                      <span className="text-[13px] font-bold text-neutral-200">
                         {WARRANTY_ISSUE[r.issue].label}
-                        <span className="text-neutral-600"> · </span>
-                        <span className="text-neutral-500">{stamp(r.createdAt)}</span>
+                      </span>
+                      <span className="text-[12px] font-semibold text-neutral-500">
+                        {stamp(r.createdAt)}
                       </span>
                       {/* An account's report: the recording it was sent with. */}
                       {r.videoUrl ? (
@@ -477,13 +481,16 @@ export default async function WarrantyRequestPage({
                       // Open, one line per answer, question on the left,
                       // answer and its pictures on the right.
                       <details className="group mt-4 border-t border-white/[0.06] pt-4">
-                        <summary className="flex cursor-pointer list-none items-center gap-2 text-[10px] font-black uppercase tracking-widest text-neutral-500 transition-colors hover:text-neutral-300 [&::-webkit-details-marker]:hidden">
+                        {/* A control, not a label: the size and brightness
+                            of a button's text, so it reads as something to
+                            press (the owner, 12/10/2026). */}
+                        <summary className="flex cursor-pointer list-none items-center gap-2 text-[12px] font-black uppercase tracking-wider text-neutral-300 transition-colors hover:text-white [&::-webkit-details-marker]:hidden">
                           <ChevronRight
-                            className="h-3.5 w-3.5 shrink-0 transition-transform group-open:rotate-90"
+                            className="h-4 w-4 shrink-0 transition-transform group-open:rotate-90"
                             aria-hidden
                           />
                           Thông tin đã bổ sung
-                          <span className="font-semibold normal-case tracking-normal text-neutral-600">
+                          <span className="font-semibold normal-case tracking-normal text-neutral-500">
                             ({answers.length} mục)
                           </span>
                         </summary>

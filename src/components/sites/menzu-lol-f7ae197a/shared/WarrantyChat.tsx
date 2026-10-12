@@ -144,20 +144,14 @@ export function WarrantyChat({
         // Who the buyer is talking to, and whether the line is still open
         // (the owner, 12/10/2026, after a support widget whose frame he
         // liked: a title bar, a pane that scrolls, the composer docked).
-        <div className="mb-4 flex flex-wrap items-center justify-between gap-3 border-b border-white/[0.06] pb-4">
+        // No open/closed chip beside it: the composer below says open, and
+        // the line that replaces it says closed (the owner, 12/10/2026:
+        // two lit chips in two title bars read as neon).
+        <div className="mb-4 border-b border-white/[0.06] pb-4">
           <h2 className="flex items-center gap-2.5 text-base font-black uppercase tracking-wider text-white">
             <LifeBuoy className="h-5 w-5 shrink-0 text-[var(--menzu-accent)]" aria-hidden />
             {shopName} hỗ trợ
           </h2>
-          <span
-            className={`inline-flex items-center rounded-md border px-2 py-0.5 text-[10px] font-black uppercase tracking-wider ${
-              open
-                ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
-                : "border-white/10 bg-white/5 text-neutral-400"
-            }`}
-          >
-            {open ? "Đang mở" : "Đã đóng"}
-          </span>
         </div>
       ) : (
         <span className="mb-3 block text-[10px] font-black uppercase tracking-widest text-neutral-500">
