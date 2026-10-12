@@ -21,7 +21,7 @@ import { WarrantyChat } from "@/components/sites/menzu-lol-f7ae197a/shared/Warra
 import { WarrantyDetailsForm } from "@/components/sites/menzu-lol-f7ae197a/shared/WarrantyDetailsForm";
 import { WarrantyRequestForm } from "@/components/sites/menzu-lol-f7ae197a/shared/WarrantyRequestForm";
 import { maskAccount } from "@/lib/bankRefund";
-import { resolveQuestions } from "@/lib/warrantyDetails";
+import { answerLabel, answerShort, readDetails, resolveQuestions } from "@/lib/warrantyDetails";
 import { db } from "@/lib/db";
 import { LOGIN_ORDER_SELECT, signInHold } from "@/lib/loginReveal";
 import { dayStamp, dayTime } from "@/lib/dayGroups";
@@ -388,6 +388,7 @@ export default async function WarrantyRequestPage({
             <ul className="mt-4 flex flex-col gap-5">
               {sentReports.map((r, index) => {
                 const state = WARRANTY_STATUS[r.status];
+                const answers = readDetails(r.details);
                 return (
                   <li key={r.id} className={index === 0 ? "" : "border-t border-white/[0.06] pt-5"}>
                     {/* The fault and the time as one grey line. The latest
@@ -497,6 +498,70 @@ export default async function WarrantyRequestPage({
                       </div>
                     ) : null}
                     {/* The answers, as the desk reads them. */}
+                    {/* Not once the money is on its way: the buyer's own
+                        answers are the desk's reading, and beside a bank
+                        form they are noise (the owner, 12/10/2026). */}
+                    {answers.length > 0 && r.status !== "REFUNDING" && r.status !== "REFUNDED" ? (
+                      // Folded by default: the buyer wrote these and reads
+                      // them once; the desk reads them on its own screen.
+                      // Open, one line per answer, question on the left,
+                      // answer and its pictures on the right.
+                      <details className="group mt-4 border-t border-white/[0.06] pt-4">
+                        {/* A control, not a label: the size and brightness
+                            of a button's text, so it reads as something to
+                            press (the owner, 12/10/2026). */}
+                        <summary className="flex cursor-pointer list-none items-center gap-2 text-[12px] font-black uppercase tracking-wider text-neutral-300 transition-colors hover:text-white [&::-webkit-details-marker]:hidden">
+                          <ChevronRight
+                            className="h-4 w-4 shrink-0 transition-transform group-open:rotate-90"
+                            aria-hidden
+                          />
+                          Thông tin đã bổ sung
+                          <span className="font-semibold normal-case tracking-normal text-neutral-500">
+                            ({answers.length} mục)
+                          </span>
+                        </summary>
+                        <dl className="mt-3 flex flex-col gap-2.5">
+                          {answers.map((answer) => {
+                            return (
+                              <div
+                                key={answer.key}
+                                className="grid gap-x-6 gap-y-1 sm:grid-cols-[minmax(0,240px)_minmax(0,260px)_1fr]"
+                              >
+                                <dt className="text-[12px] font-semibold text-neutral-500 sm:pt-0.5">
+                                  {answerShort(answer, questions)}
+                                </dt>
+                                <dd className="text-[13px] font-bold text-neutral-200 sm:pt-0.5">
+                                  {answer.value}
+                                </dd>
+                                {/* Their own column, so the pictures line up
+                                    down the card whatever the answer's
+                                    length. Small, since they open full size
+                                    on a click; one answer can carry several. */}
+                                <dd className="flex flex-wrap items-center gap-2">
+                                  {answer.imageUrls.map((url, index) => (
+                                    <a
+                                      key={url}
+                                      href={url}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="block h-10 w-[60px] overflow-hidden rounded-md border border-white/10 bg-neutral-950"
+                                    >
+                                      <Image
+                                        src={url}
+                                        alt={`${answerLabel(answer, questions)} ${index + 1}`}
+                                        width={120}
+                                        height={80}
+                                        className="h-full w-full object-cover"
+                                      />
+                                    </a>
+                                  ))}
+                                </dd>
+                              </div>
+                            );
+                          })}
+                        </dl>
+                      </details>
+                    ) : null}
                   </li>
                 );
               })}
