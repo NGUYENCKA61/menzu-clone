@@ -21,7 +21,12 @@ import { WarrantyChat } from "@/components/sites/menzu-lol-f7ae197a/shared/Warra
 import { WarrantyDetailsForm } from "@/components/sites/menzu-lol-f7ae197a/shared/WarrantyDetailsForm";
 import { WarrantyRequestForm } from "@/components/sites/menzu-lol-f7ae197a/shared/WarrantyRequestForm";
 import { maskAccount } from "@/lib/bankRefund";
-import { answerLabel, answerShort, readDetails, resolveQuestions } from "@/lib/warrantyDetails";
+import {
+  answerLabel,
+  answerShort,
+  readDetails,
+  resolveQuestions,
+} from "@/lib/warrantyDetails";
 import { db } from "@/lib/db";
 import { LOGIN_ORDER_SELECT, signInHold } from "@/lib/loginReveal";
 import { dayStamp, dayTime } from "@/lib/dayGroups";
@@ -203,7 +208,9 @@ export default async function WarrantyRequestPage({
   const latest = order.warrantyRequests[0] ?? null;
   // A report whose second round is still missing has not reached the desk:
   // the strip stays on the buyer's own step (the owner, 10/10/2026).
-  const awaitingDetails = Boolean(latest && warrantyOpen(latest.status) && !latest.detailsDoneAt);
+  const awaitingDetails = Boolean(
+    latest && warrantyOpen(latest.status) && !latest.detailsDoneAt,
+  );
   // A report still waiting on its second round is not listed below: the
   // round's card is the whole of it until the answers are in (the owner,
   // 12/10/2026: "đợi người dùng bổ sung đầy đủ thông tin cái đi").
@@ -221,11 +228,14 @@ export default async function WarrantyRequestPage({
     sentReports[0].status === "REFUNDING" &&
     sentReports[0].refundMethod === "MANUAL" &&
     !sentReports[0].bankAccount;
-  const stepNow = !latest || awaitingDetails
-    ? 0
-    : latest.status === "OPEN" || latest.status === "IN_PROGRESS" || latest.status === "REFUNDING"
-      ? 1
-      : 2;
+  const stepNow =
+    !latest || awaitingDetails
+      ? 0
+      : latest.status === "OPEN" ||
+          latest.status === "IN_PROGRESS" ||
+          latest.status === "REFUNDING"
+        ? 1
+        : 2;
   const heading = following ? "Trạng thái bảo hành" : "Yêu cầu bảo hành";
 
   return (
@@ -273,7 +283,10 @@ export default async function WarrantyRequestPage({
               return (
                 <li key={step.title} className="flex items-center gap-2">
                   {index > 0 ? (
-                    <ChevronRight className="h-3.5 w-3.5 shrink-0 text-neutral-600" aria-hidden />
+                    <ChevronRight
+                      className="h-3.5 w-3.5 shrink-0 text-neutral-600"
+                      aria-hidden
+                    />
                   ) : null}
                   {/* The step in hand in the accent, as the account nav
                       marks the page you are on; white alone was the colour
@@ -295,7 +308,9 @@ export default async function WarrantyRequestPage({
           </ol>
         ) : null}
         {latest && !awaitingDetails ? (
-          <p className="-mt-2 text-[14px] leading-relaxed text-neutral-200">{standingOf(latest)}</p>
+          <p className="-mt-2 text-[14px] leading-relaxed text-neutral-200">
+            {standingOf(latest)}
+          </p>
         ) : null}
 
         {/* THE ORDER BEING REPORTED. Not while the second round is on
@@ -303,56 +318,69 @@ export default async function WarrantyRequestPage({
             what the buyer is there for (the owner, 11/10/2026: "chắc bỏ luôn
             card trên ở trang bổ sung chi tiết"). */}
         {awaitingDetails ? null : (
-        <section className={CARD}>
-          {/* One line: the receipt already has the price and the paid chip,
+          <section className={CARD}>
+            {/* One line: the receipt already has the price and the paid chip,
               and this page is about the report (the owner, 12/10/2026). */}
-          <div className="flex flex-wrap items-center gap-4">
-            <div className="relative h-12 w-20 shrink-0 overflow-hidden rounded-lg border border-white/10 bg-neutral-950">
-              {order.product.imageUrl ? (
-                <Image
-                  src={order.product.imageUrl}
-                  alt=""
-                  fill
-                  sizes="160px"
-                  className="object-cover object-[85%_center]"
-                />
+            <div className="flex flex-wrap items-center gap-4">
+              <div className="relative h-12 w-20 shrink-0 overflow-hidden rounded-lg border border-white/10 bg-neutral-950">
+                {order.product.imageUrl ? (
+                  <Image
+                    src={order.product.imageUrl}
+                    alt=""
+                    fill
+                    sizes="160px"
+                    className="object-cover object-[85%_center]"
+                  />
+                ) : null}
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-black uppercase leading-snug text-white">
+                  {productName}
+                </p>
+                {/* Parted by space, as the receipt parts the same facts, not
+                  by dots (the owner, 12/10/2026). */}
+                <p className="mt-1 flex flex-wrap gap-x-5 gap-y-1 text-[12px] font-semibold text-neutral-500">
+                  <span>
+                    Đơn{" "}
+                    <span className="font-bold text-neutral-200">
+                      {order.code}
+                    </span>
+                  </span>
+                  <span>
+                    Ngày mua{" "}
+                    <span className="font-bold tabular-nums text-neutral-200">
+                      {stamp(order.createdAt)}
+                    </span>
+                  </span>
+                  {order.package ? (
+                    <span>
+                      Gói{" "}
+                      <span className="font-bold text-neutral-200">
+                        {order.package.label}
+                      </span>
+                    </span>
+                  ) : null}
+                  {order.quantity > 1 ? (
+                    <span>
+                      Số lượng{" "}
+                      <span className="font-bold tabular-nums text-neutral-200">
+                        {order.quantity}
+                      </span>
+                    </span>
+                  ) : null}
+                </p>
+              </div>
+              {/* When the buyer took the sign-in: where the recording an
+                account's warranty rests on starts. */}
+              {kind === "account" && order.loginRevealedAt ? (
+                <span className="inline-flex items-center gap-2 text-[12px] text-neutral-300">
+                  <KeyRound className="h-4 w-4 shrink-0 text-[var(--menzu-accent)]" />
+                  Đã nhận thông tin đăng nhập lúc{" "}
+                  {dayStamp(order.loginRevealedAt)}
+                </span>
               ) : null}
             </div>
-            <div className="min-w-0 flex-1">
-              <p className="text-sm font-black uppercase leading-snug text-white">{productName}</p>
-              {/* Parted by space, as the receipt parts the same facts, not
-                  by dots (the owner, 12/10/2026). */}
-              <p className="mt-1 flex flex-wrap gap-x-5 gap-y-1 text-[12px] font-semibold text-neutral-500">
-                <span>
-                  Đơn <span className="font-bold text-neutral-200">{order.code}</span>
-                </span>
-                <span>
-                  Ngày mua{" "}
-                  <span className="font-bold tabular-nums text-neutral-200">{stamp(order.createdAt)}</span>
-                </span>
-                {order.package ? (
-                  <span>
-                    Gói <span className="font-bold text-neutral-200">{order.package.label}</span>
-                  </span>
-                ) : null}
-                {order.quantity > 1 ? (
-                  <span>
-                    Số lượng{" "}
-                    <span className="font-bold tabular-nums text-neutral-200">{order.quantity}</span>
-                  </span>
-                ) : null}
-              </p>
-            </div>
-            {/* When the buyer took the sign-in: where the recording an
-                account's warranty rests on starts. */}
-            {kind === "account" && order.loginRevealedAt ? (
-              <span className="inline-flex items-center gap-2 text-[12px] text-neutral-300">
-                <KeyRound className="h-4 w-4 shrink-0 text-[var(--menzu-accent)]" />
-                Đã nhận thông tin đăng nhập lúc {dayStamp(order.loginRevealedAt)}
-              </span>
-            ) : null}
-          </div>
-        </section>
+          </section>
         )}
 
         {/* THE SECOND ROUND — the questions the desk would otherwise ask one
@@ -382,11 +410,21 @@ export default async function WarrantyRequestPage({
                     card is that form and nothing else (the owner, 12/10/2026:
                     "chỗ đó chỉ để nhập tiền thôi"). */}
                 {awaitingBank ? (
-                  <CreditCard className="h-5 w-5 shrink-0 text-[var(--menzu-accent)]" aria-hidden />
+                  <CreditCard
+                    className="h-5 w-5 shrink-0 text-[var(--menzu-accent)]"
+                    aria-hidden
+                  />
                 ) : (
-                  <LifeBuoy className="h-5 w-5 shrink-0 text-[var(--menzu-accent)]" aria-hidden />
+                  <LifeBuoy
+                    className="h-5 w-5 shrink-0 text-[var(--menzu-accent)]"
+                    aria-hidden
+                  />
                 )}
-                {awaitingBank ? "Nhập số tài khoản nhận tiền" : `${brandName} hỗ trợ`}
+                {awaitingBank
+                  ? sentReports[0].refundAmount !== null
+                    ? `Nhập số tài khoản nhận ${formatVnd(Number(sentReports[0].refundAmount))}đ`
+                    : "Nhập số tài khoản nhận tiền"
+                  : `${brandName} hỗ trợ`}
               </h2>
               {/* The dot the desk's list wears, so both sides read one chip
                   (the owner, 12/10/2026: "bên khách hàng cũng có chấm đỏ"). */}
@@ -405,107 +443,137 @@ export default async function WarrantyRequestPage({
                 const state = WARRANTY_STATUS[r.status];
                 const answers = readDetails(r.details);
                 return (
-                  <li key={r.id} className={index === 0 ? "" : "border-t border-white/[0.06] pt-5"}>
+                  <li
+                    key={r.id}
+                    className={
+                      index === 0 ? "" : "border-t border-white/[0.06] pt-5"
+                    }
+                  >
                     {/* The fault and the time as one grey line. The latest
                         report's chip is in the title bar; an older one keeps
-                        its own. */}
-                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
-                      {index > 0 ? (
-                        <span
-                          className={`inline-flex items-center gap-1.5 rounded-md border px-2 py-0.5 text-[10px] font-black uppercase tracking-wider ${state.tile}`}
-                        >
-                          <span aria-hidden className={`h-1.5 w-1.5 rounded-full ${state.dot}`} />
-                          {state.label}
-                        </span>
-                      ) : null}
-                      {/* What broke is the report's first fact, so it reads
+                        its own. Not while the bank form is up: that card is
+                        the form and nothing else (the owner, 12/10/2026). */}
+                    {awaitingBank ? null : (
+                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
+                        {index > 0 ? (
+                          <span
+                            className={`inline-flex items-center gap-1.5 rounded-md border px-2 py-0.5 text-[10px] font-black uppercase tracking-wider ${state.tile}`}
+                          >
+                            <span
+                              aria-hidden
+                              className={`h-1.5 w-1.5 rounded-full ${state.dot}`}
+                            />
+                            {state.label}
+                          </span>
+                        ) : null}
+                        {/* What broke is the report's first fact, so it reads
                           at body size and brightness; the time is the small
                           print beside it (the owner, 12/10/2026). */}
-                      <span className="text-[13px] font-bold text-neutral-200">
-                        {WARRANTY_ISSUE[r.issue].label}
-                      </span>
-                      <span className="text-[12px] font-semibold text-neutral-500">
-                        {stamp(r.createdAt)}
-                      </span>
-                      {/* An account's report: the recording it was sent with. */}
-                      {r.videoUrl ? (
-                        <a
-                          href={r.videoUrl}
-                          target="_blank"
-                          rel="noopener noreferrer nofollow"
-                          className="inline-flex items-center gap-1.5 text-[12px] font-bold text-neutral-300 underline-offset-2 hover:text-white hover:underline"
-                        >
-                          <Video className="h-3.5 w-3.5" aria-hidden />
-                          Video quay màn hình
-                        </a>
-                      ) : null}
-                    </div>
+                        <span className="text-[13px] font-bold text-neutral-200">
+                          {WARRANTY_ISSUE[r.issue].label}
+                        </span>
+                        <span className="text-[12px] font-semibold text-neutral-500">
+                          {stamp(r.createdAt)}
+                        </span>
+                        {/* An account's report: the recording it was sent with. */}
+                        {r.videoUrl ? (
+                          <a
+                            href={r.videoUrl}
+                            target="_blank"
+                            rel="noopener noreferrer nofollow"
+                            className="inline-flex items-center gap-1.5 text-[12px] font-bold text-neutral-300 underline-offset-2 hover:text-white hover:underline"
+                          >
+                            <Video className="h-3.5 w-3.5" aria-hidden />
+                            Video quay màn hình
+                          </a>
+                        ) : null}
+                      </div>
+                    )}
                     {/* The refund, when the shop could not fix it: settled to
                         the site account, sent to a bank, or waiting on the
                         buyer's account — the one step that is theirs. */}
-                    {(r.status === "REFUNDING" || r.status === "REFUNDED") && r.refundAmount !== null ? (
-                      <div className="mt-4 border-t border-white/[0.06] pt-4 text-[13px] leading-relaxed text-neutral-300">
-                        <p className="flex items-start gap-2">
-                          {r.refundMethod === "MANUAL" ? (
-                            <CreditCard className="mt-0.5 h-4 w-4 shrink-0 text-neutral-400" />
-                          ) : (
-                            <Banknote className="mt-0.5 h-4 w-4 shrink-0 text-neutral-400" />
-                          )}
-                          <span>
-                            {r.status === "REFUNDED" ? (
-                              r.refundMethod === "MANUAL" ? (
+                    {(r.status === "REFUNDING" || r.status === "REFUNDED") &&
+                    r.refundAmount !== null ? (
+                      <div
+                        className={
+                          awaitingBank
+                            ? "text-[13px] leading-relaxed text-neutral-300"
+                            : "mt-4 border-t border-white/[0.06] pt-4 text-[13px] leading-relaxed text-neutral-300"
+                        }
+                      >
+                        {/* Kept beside the form too, in the owner's words
+                            (12/10/2026: "cứ thêm mô tả"). */}
+                        {
+                          <p className="flex items-start gap-2">
+                            {r.refundMethod === "MANUAL" ? (
+                              <CreditCard className="mt-0.5 h-4 w-4 shrink-0 text-neutral-400" />
+                            ) : (
+                              <Banknote className="mt-0.5 h-4 w-4 shrink-0 text-neutral-400" />
+                            )}
+                            <span>
+                              {r.status === "REFUNDED" ? (
+                                r.refundMethod === "MANUAL" ? (
+                                  <>
+                                    Shop đã chuyển{" "}
+                                    <span className="font-bold text-white">
+                                      {formatVnd(Number(r.refundAmount))}đ
+                                    </span>{" "}
+                                    về tài khoản {r.bankName}{" "}
+                                    {r.bankAccount
+                                      ? maskAccount(r.bankAccount)
+                                      : ""}
+                                    .
+                                  </>
+                                ) : (
+                                  <>
+                                    Shop đã hoàn{" "}
+                                    <span className="font-bold text-white">
+                                      {formatVnd(Number(r.refundAmount))}đ
+                                    </span>{" "}
+                                    vào tài khoản của bạn trên web.{" "}
+                                    <Link
+                                      href="/transactions"
+                                      className="font-bold text-white underline underline-offset-2 hover:text-[var(--menzu-accent)]"
+                                    >
+                                      Xem giao dịch
+                                    </Link>
+                                  </>
+                                )
+                              ) : r.bankAccount ? (
                                 <>
-                                  Shop đã chuyển{" "}
+                                  Shop đã nhận số tài khoản{" "}
+                                  <span className="font-bold text-white">
+                                    {r.bankName} {maskAccount(r.bankAccount)}
+                                  </span>{" "}
+                                  ({r.accountHolder}) và sẽ chuyển{" "}
                                   <span className="font-bold text-white">
                                     {formatVnd(Number(r.refundAmount))}đ
                                   </span>{" "}
-                                  về tài khoản {r.bankName}{" "}
-                                  {r.bankAccount ? maskAccount(r.bankAccount) : ""}.
+                                  cho bạn sớm.
                                 </>
                               ) : (
                                 <>
-                                  Shop đã hoàn{" "}
+                                  Shop sẽ hoàn{" "}
                                   <span className="font-bold text-white">
                                     {formatVnd(Number(r.refundAmount))}đ
                                   </span>{" "}
-                                  vào tài khoản của bạn trên web.{" "}
-                                  <Link
-                                    href="/transactions"
-                                    className="font-bold text-white underline underline-offset-2 hover:text-[var(--menzu-accent)]"
-                                  >
-                                    Xem giao dịch
-                                  </Link>
+                                  qua ngân hàng, bạn nhập số tài khoản bên dưới
+                                  để nhận.
                                 </>
-                              )
-                            ) : r.bankAccount ? (
-                              <>
-                                Shop đã nhận số tài khoản{" "}
-                                <span className="font-bold text-white">
-                                  {r.bankName} {maskAccount(r.bankAccount)}
-                                </span>{" "}
-                                ({r.accountHolder}) và sẽ chuyển{" "}
-                                <span className="font-bold text-white">
-                                  {formatVnd(Number(r.refundAmount))}đ
-                                </span>{" "}
-                                cho bạn sớm.
-                              </>
-                            ) : (
-                              <>
-                                Shop sẽ hoàn{" "}
-                                <span className="font-bold text-white">
-                                  {formatVnd(Number(r.refundAmount))}đ
-                                </span>{" "}
-                                qua ngân hàng, bạn nhập số tài khoản để nhận tiền.
-                              </>
-                            )}
-                          </span>
-                        </p>
-                        {r.status === "REFUNDING" && r.refundMethod === "MANUAL" ? (
+                              )}
+                            </span>
+                          </p>
+                        }
+                        {r.status === "REFUNDING" &&
+                        r.refundMethod === "MANUAL" ? (
                           <WarrantyBankForm
                             ticketId={r.id}
                             submitted={
                               r.bankAccount && r.bankName && r.accountHolder
-                                ? { bankName: r.bankName, accountHolder: r.accountHolder }
+                                ? {
+                                    bankName: r.bankName,
+                                    accountHolder: r.accountHolder,
+                                  }
                                 : null
                             }
                           />
@@ -606,23 +674,23 @@ export default async function WarrantyRequestPage({
             screen the reason is already plain, so the card goes (the owner,
             11/10/2026). */}
         {blocked && (awaitingDetails || openListed) ? null : (
-        <section className={CARD}>
-          {blocked ? (
-            <div className="flex items-start gap-3 rounded-r-xl border-l-[3px] border-[var(--menzu-accent)] bg-[var(--menzu-accent)]/5 px-4 py-3.5 text-[13px] leading-relaxed text-neutral-300">
-              <Info className="mt-0.5 h-4 w-4 shrink-0 text-[var(--menzu-accent)]" />
-              <span>{blocked}</span>
-            </div>
-          ) : (
-            // Straight on to the second round, which is this same page
-            // with the questions on it (the owner, 11/10/2026: "người dùng
-            // gửi bảo hành xong là nhảy qua trang bổ sung thông tin").
-            <WarrantyRequestForm
-              code={order.code}
-              kind={kind}
-              onDone={`/orders/${order.code}/bao-hanh`}
-            />
-          )}
-        </section>
+          <section className={CARD}>
+            {blocked ? (
+              <div className="flex items-start gap-3 rounded-r-xl border-l-[3px] border-[var(--menzu-accent)] bg-[var(--menzu-accent)]/5 px-4 py-3.5 text-[13px] leading-relaxed text-neutral-300">
+                <Info className="mt-0.5 h-4 w-4 shrink-0 text-[var(--menzu-accent)]" />
+                <span>{blocked}</span>
+              </div>
+            ) : (
+              // Straight on to the second round, which is this same page
+              // with the questions on it (the owner, 11/10/2026: "người dùng
+              // gửi bảo hành xong là nhảy qua trang bổ sung thông tin").
+              <WarrantyRequestForm
+                code={order.code}
+                kind={kind}
+                onDone={`/orders/${order.code}/bao-hanh`}
+              />
+            )}
+          </section>
         )}
       </div>
     </AccountPageFrame>

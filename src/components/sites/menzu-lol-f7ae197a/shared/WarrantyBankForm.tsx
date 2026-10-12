@@ -4,11 +4,11 @@ import { CreditCard, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { BankPicker } from "@/components/sites/menzu-lol-f7ae197a/shared/BankPicker";
 import {
   normaliseAccount,
   normaliseHolder,
   readBankDetails,
-  REFUND_BANKS,
 } from "@/lib/bankRefund";
 
 const FIELD =
@@ -119,19 +119,11 @@ export function WarrantyBankForm({
           <label htmlFor={`bank-${ticketId}`} className={LABEL}>
             Ngân hàng
           </label>
-          <select
+          <BankPicker
             id={`bank-${ticketId}`}
             value={bankName}
-            onChange={(event) => setBankName(event.target.value)}
-            className={FIELD}
-          >
-            <option value="">Chọn ngân hàng</option>
-            {REFUND_BANKS.map((bank) => (
-              <option key={bank} value={bank}>
-                {bank}
-              </option>
-            ))}
-          </select>
+            onChange={setBankName}
+          />
         </div>
         <div>
           <label htmlFor={`account-${ticketId}`} className={LABEL}>
@@ -180,7 +172,7 @@ export function WarrantyBankForm({
             value={accountHolder}
             onChange={(event) => setAccountHolder(event.target.value)}
             onBlur={() => setAccountHolder(normaliseHolder(accountHolder))}
-            placeholder="NGUYEN VAN A, in hoa không dấu như trên thẻ"
+            placeholder="NGUYEN VAN A"
             className={`${FIELD} uppercase placeholder:normal-case`}
           />
         </div>
@@ -206,6 +198,11 @@ export function WarrantyBankForm({
           </button>
         ) : null}
       </div>
+
+      <p className="text-[12px] text-neutral-500">
+        Tên in hoa không dấu như trên thẻ. Kiểm tra kỹ, tiền chuyển sai số không
+        lấy lại được.
+      </p>
 
       {error ? (
         <p className="text-[13px] font-semibold text-rose-300">{error}</p>
