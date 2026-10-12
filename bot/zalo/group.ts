@@ -115,6 +115,22 @@ function allowedHostsOf(settings: ShopSettings, siteHost: string | null): string
   return [...hosts];
 }
 
+/**
+ * The words of a message: its text, or for a link card (Zalo turns a pasted
+ * address into one) its title, description and address. A picture or sticker
+ * has no words, which still counts towards a flood, never towards a repeat.
+ */
+function textOf(content: unknown): string {
+  if (typeof content === "string") return content;
+  if (content && typeof content === "object") {
+    const card = content as { title?: unknown; description?: unknown; href?: unknown };
+    return [card.title, card.description, card.href]
+      .filter((part): part is string => typeof part === "string" && part.length > 0)
+      .join(" ");
+  }
+  return "";
+}
+
 export function createGroupManager(deps: {
   api: GroupApi;
   db: PrismaClient;
@@ -267,9 +283,9 @@ export function createGroupManager(deps: {
     const s = await currentSettings();
     const groupId = message.threadId;
     if (!s.zaloGroupIds.includes(groupId)) return;
-    const text = typeof message.data.content === "string" ? message.data.content : "";
+    const text = textOf(message.data.content);
     const uid = message.data.uidFrom;
-    if (!text || !uid) return;
+    if (!uid) return;
     // The group's creator is never policed by the bot; its deputies only
     // while Cấu hình spares them (the owner may switch that off to test).
     if (creators.get(groupId) === uid) return;

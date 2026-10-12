@@ -224,6 +224,31 @@ describe("what the bot does about spam", () => {
     expect(lenient.calls.sent).toEqual([]);
   });
 
+  it("reads a link card like text, and counts stickers towards a flood", async () => {
+    const { manager, calls, events } = fakes(GROUP);
+    await manager.tick();
+    calls.sent.length = 0;
+    await manager.onMessage({
+      ...msg("u-c", "", "Card"),
+      data: {
+        uidFrom: "u-c",
+        dName: "Card",
+        content: { title: "Shop khac", description: "", href: "https://shopkhac.vn/sale" },
+      },
+    });
+    expect(calls.sent).toHaveLength(1);
+    for (let i = 0; i < 6; i += 1) {
+      await manager.onMessage({
+        ...msg("u-s", "", "Sticker"),
+        data: { uidFrom: "u-s", dName: "Sticker", content: { id: i } },
+      });
+    }
+    expect(events.filter((e) => e.kind === "WARNED").map((e) => [e.zaloId, e.note])).toEqual([
+      ["u-c", "link"],
+      ["u-s", "flood"],
+    ]);
+  });
+
   it("does nothing at all while no group is named", async () => {
     const { manager, calls } = fakes({ ...GROUP, "integrations.zalo.group.id": "" });
     await manager.tick();
