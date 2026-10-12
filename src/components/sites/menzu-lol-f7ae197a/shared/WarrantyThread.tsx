@@ -79,10 +79,14 @@ export function WarrantyThread({
       : "border-[var(--brand)]/25 bg-[var(--brand)]/10";
 
   return (
+    // Grows with the thread, then scrolls: up to 440px on a phone, where that
+    // is already more than half the screen, and 600px from tablet width up,
+    // where the page has the room and scrolling twice is the annoyance (the
+    // owner, 12/10/2026: "cho thoải mái", "máy tính kìa").
     <div
       ref={pane}
       data-pane
-      className="max-h-[440px] min-h-[160px] overflow-y-auto rounded-xl border border-white/[0.06] bg-black/30 p-4"
+      className="max-h-[440px] min-h-[160px] overflow-y-auto rounded-xl border border-white/[0.06] bg-black/30 p-4 sm:max-h-[600px]"
     >
       <ol className="flex flex-col gap-3">
         {lines.map((line, index) => {
@@ -182,7 +186,10 @@ export function WarrantyThread({
                     <span
                       className={`inline-flex items-center gap-1 rounded-md border px-1.5 py-px text-[9.5px] font-black uppercase tracking-wider ${moved.tile}`}
                     >
-                      <span aria-hidden className={`h-1 w-1 rounded-full ${moved.dot}`} />
+                      <span
+                        aria-hidden
+                        className={`h-1 w-1 rounded-full ${moved.dot}`}
+                      />
                       {moved.label}
                     </span>
                   </span>
