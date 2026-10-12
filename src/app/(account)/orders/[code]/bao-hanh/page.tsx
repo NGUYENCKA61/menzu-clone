@@ -7,6 +7,7 @@ import {
   Banknote,
   ChevronRight,
   LifeBuoy,
+  Plus,
   Info,
   KeyRound,
   CreditCard,
@@ -128,10 +129,14 @@ function stamp(date: Date): string {
  */
 export default async function WarrantyRequestPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ code: string }>;
+  /** ?moi=1: "Tạo đơn mới" was pressed on a finished report. */
+  searchParams: Promise<{ moi?: string }>;
 }) {
   const { code } = await params;
+  const fresh = (await searchParams).moi === "1";
   const user = await getCurrentUser();
   if (!user) {
     redirect(`/login?next=${encodeURIComponent(`/orders/${code}/bao-hanh`)}`);
@@ -202,10 +207,15 @@ export default async function WarrantyRequestPage({
   const { brandName } = await getShopSettings();
   // Once a report exists this is where the buyer follows it — the receipt's
   // button reads "Xem trạng thái" — so the page says so in its title.
-  const following = order.warrantyRequests.length > 0;
   // Where the strip's light sits: nothing sent yet, a report the shop has,
   // or one it has finished with.
   const latest = order.warrantyRequests[0] ?? null;
+  // "Tạo đơn mới" on a finished report: the page starts over as if nothing
+  // had been sent, the old report out of sight (the owner, 12/10/2026:
+  // "đã xử lý cũ bị xóa đi để bắt đầu cho đơn xử lý bảo hành mới").
+  const startingOver =
+    fresh && latest !== null && !warrantyOpen(latest.status) && !blocked;
+  const following = order.warrantyRequests.length > 0 && !startingOver;
   // A report whose second round is still missing has not reached the desk:
   // the strip stays on the buyer's own step (the owner, 10/10/2026).
   const awaitingDetails = Boolean(
@@ -214,9 +224,13 @@ export default async function WarrantyRequestPage({
   // A report still waiting on its second round is not listed below: the
   // round's card is the whole of it until the answers are in (the owner,
   // 12/10/2026: "đợi người dùng bổ sung đầy đủ thông tin cái đi").
-  const sentReports = order.warrantyRequests.filter(
-    (r) => r.detailsDoneAt || !warrantyOpen(r.status),
-  );
+  // Only the latest: an older report is the desk's history, not the
+  // buyer's page (the owner, 12/10/2026). None at all while starting over.
+  const sentReports = startingOver
+    ? []
+    : order.warrantyRequests
+        .filter((r) => r.detailsDoneAt || !warrantyOpen(r.status))
+        .slice(0, 1);
   // An open report listed below carries its own chat, so the card saying
   // "this order already has one" would only repeat it.
   const openListed = sentReports.some((r) => warrantyOpen(r.status));
@@ -307,7 +321,7 @@ export default async function WarrantyRequestPage({
             })}
           </ol>
         ) : null}
-        {latest && !awaitingDetails ? (
+        {latest && !awaitingDetails && !startingOver ? (
           <p className="-mt-2 text-[14px] leading-relaxed text-neutral-200">
             {standingOf(latest)}
           </p>
@@ -676,7 +690,23 @@ export default async function WarrantyRequestPage({
         {/* THE FORM, OR WHY THERE IS NONE. While the second round is on
             screen the reason is already plain, so the card goes (the owner,
             11/10/2026). */}
-        {blocked && (awaitingDetails || openListed) ? null : (
+        {/* After a finished report, a fresh start is one press away: the
+            form waits behind "Tạo đơn mới", and pressing it takes the old
+            report off the page (the owner, 12/10/2026). */}
+        {latest !== null &&
+        !warrantyOpen(latest.status) &&
+        !startingOver &&
+        !blocked ? (
+          <div className="flex justify-end">
+            <Link
+              href={`/orders/${order.code}/bao-hanh?moi=1`}
+              className="inline-flex h-11 items-center gap-2 rounded-xl bg-[var(--menzu-accent)] px-6 text-[11px] font-black uppercase tracking-widest text-white transition-colors hover:bg-[var(--menzu-accent-dark)]"
+            >
+              <Plus className="h-4 w-4" />
+              Tạo đơn mới
+            </Link>
+          </div>
+        ) : blocked && (awaitingDetails || openListed) ? null : (
           <section className={CARD}>
             {blocked ? (
               <div className="flex items-start gap-3 rounded-r-xl border-l-[3px] border-[var(--menzu-accent)] bg-[var(--menzu-accent)]/5 px-4 py-3.5 text-[13px] leading-relaxed text-neutral-300">
