@@ -505,9 +505,10 @@ export default async function WarrantyRequestPage({
                             (12/10/2026: "cứ thêm mô tả"). */}
                         {
                           <p className="flex items-start gap-2">
-                            {r.refundMethod === "MANUAL" ? (
-                              <CreditCard className="mt-0.5 h-4 w-4 shrink-0 text-neutral-400" />
-                            ) : (
+                            {/* No glyph on the bank line: the card's title
+                                already wears the card (the owner, 12/10/2026:
+                                "bỏ icon credit card chỗ đó"). */}
+                            {r.refundMethod === "MANUAL" ? null : (
                               <Banknote className="mt-0.5 h-4 w-4 shrink-0 text-neutral-400" />
                             )}
                             <span>
@@ -552,7 +553,18 @@ export default async function WarrantyRequestPage({
                                   cho bạn sớm.
                                 </>
                               ) : (
-                                <>Vui lòng nhập chính xác thông tin.</>
+                                <>
+                                  Vui lòng nhập{" "}
+                                  <span className="font-bold text-white">
+                                    chính xác
+                                  </span>{" "}
+                                  thông tin tài khoản ngân hàng của bạn, shop sẽ
+                                  chuyển{" "}
+                                  <span className="font-bold text-white">
+                                    {formatVnd(Number(r.refundAmount))}đ
+                                  </span>{" "}
+                                  theo đúng thông tin này.
+                                </>
                               )}
                             </span>
                           </p>
