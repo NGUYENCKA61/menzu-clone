@@ -48,18 +48,10 @@ export function WarrantyBankForm({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  if (!editing) {
-    return (
-      <button
-        type="button"
-        onClick={() => setEditing(true)}
-        className="mt-3 inline-flex h-9 items-center gap-2 rounded-xl border border-white/12 bg-white/[0.04] px-4 text-xs font-bold text-neutral-300 transition-colors hover:border-white/25 hover:text-white"
-      >
-        <CreditCard className="h-3.5 w-3.5" />
-        Sửa số tài khoản
-      </button>
-    );
-  }
+  // Sent once, and that is that: no "Sửa" afterwards (the owner, 12/10/2026:
+  // "không được sửa số tài khoản"). A wrong number is the shop's to sort
+  // out in the thread before it transfers.
+  if (!editing) return null;
 
   const both =
     normaliseAccount(bankAccount) && normaliseAccount(bankAccountConfirm);

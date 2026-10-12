@@ -52,6 +52,7 @@ export async function POST(request: Request) {
       status: true,
       refundMethod: true,
       refundAmount: true,
+      bankAccount: true,
       order: { select: { code: true } },
     },
   });
@@ -62,11 +63,20 @@ export async function POST(request: Request) {
       { status: 400 },
     );
   }
+  // Once, not twice (the owner, 12/10/2026: "không được sửa số tài khoản"):
+  // a change goes through the shop in the thread, where it is seen before
+  // the transfer.
+  if (ticket.bankAccount) {
+    return NextResponse.json(
+      { error: "Số tài khoản đã gửi rồi. Cần đổi thì nhắn cho shop trong khung trao đổi." },
+      { status: 400 },
+    );
+  }
 
   // Guarded by the same state, so an account cannot land on a ticket the shop
   // closed a moment ago.
   const saved = await db.warrantyRequest.updateMany({
-    where: { id, userId: user.id, status: "REFUNDING" },
+    where: { id, userId: user.id, status: "REFUNDING", bankAccount: null },
     data: {
       bankName: details.bankName,
       bankAccount: details.bankAccount,
