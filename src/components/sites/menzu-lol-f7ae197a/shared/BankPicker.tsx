@@ -50,6 +50,21 @@ const BANK_CODES: Record<(typeof REFUND_BANKS)[number], string> = {
   HSBC: "HSBC",
   "Standard Chartered": "SCVN",
   UOB: "UOB",
+  "DongA Bank": "DOB",
+  "Co-opBank": "COOPBANK",
+  GPBank: "GPB",
+  "MBV (OceanBank cũ)": "OCEANBANK",
+  CBBank: "CBB",
+  VRB: "VRB",
+  "Public Bank Vietnam": "PBVN",
+  "Indovina Bank": "IVB",
+  "Hong Leong Bank": "HLBVN",
+  CIMB: "CIMB",
+  "Nonghyup Bank": "NHB",
+  "Kookmin Bank": "KBHCM",
+  "KEB Hana Bank": "KEBHANAHCM",
+  IBK: "IBKHCM",
+  "Ubank by VPBank": "UBANK",
 };
 
 export function bankLogoUrl(name: string): string | null {

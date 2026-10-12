@@ -51,6 +51,24 @@ export const REFUND_BANKS = [
   "HSBC",
   "Standard Chartered",
   "UOB",
+  // The rest of the banks VietQR routes to (the owner, 12/10/2026: "bổ sung
+  // đầy đủ ngân hàng chưa"): the small and the foreign ones a buyer may
+  // still be paid through.
+  "DongA Bank",
+  "Co-opBank",
+  "GPBank",
+  "MBV (OceanBank cũ)",
+  "CBBank",
+  "VRB",
+  "Public Bank Vietnam",
+  "Indovina Bank",
+  "Hong Leong Bank",
+  "CIMB",
+  "Nonghyup Bank",
+  "Kookmin Bank",
+  "KEB Hana Bank",
+  "IBK",
+  "Ubank by VPBank",
 ] as const;
 
 export type RefundBank = (typeof REFUND_BANKS)[number];
