@@ -44,6 +44,7 @@ import {
   sendTelegramMessage,
   telegramCall,
 } from "@/lib/telegramNotify";
+import { postAnnouncementToZaloGroup } from "@/lib/zaloGroupPost";
 
 /**
  * Telegram's webhook: the shop's own channel drives the detection state.
@@ -482,6 +483,7 @@ export async function POST(request: Request) {
       imageUrl,
     });
     await postAnnouncementToTelegram(id);
+    await postAnnouncementToZaloGroup(id);
     await reply(
       `✅ Đã đăng thông báo <b>${escapeTelegramHtml(draft.title)}</b> lên web${
         imageUrl ? " kèm ảnh" : ""

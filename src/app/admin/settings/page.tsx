@@ -24,7 +24,7 @@ export default async function AdminSettingsPage() {
 
   // The home-page tab pins categories and guides by slug, so it needs the
   // lists to pick from rather than a free-text box.
-  const [settings, categories, docs, partners, zaloStateRow] =
+  const [settings, categories, docs, partners, zaloStateRow, zaloGroupEvents] =
     await Promise.all([
       getShopSettings(),
       listAdminCategories(),
@@ -32,6 +32,12 @@ export default async function AdminSettingsPage() {
       getPartners(),
       // What the Zalo bot last said about itself: a QR to scan, or alive.
       db.setting.findUnique({ where: { key: ZALO_STATE_KEY } }),
+    // What the bot did in the group lately, for the block under its standing.
+    db.zaloGroupEvent.findMany({
+      orderBy: { createdAt: "desc" },
+      take: 15,
+      select: { id: true, kind: true, name: true, note: true, createdAt: true },
+    }),
     ]);
 
   return (
@@ -46,6 +52,19 @@ export default async function AdminSettingsPage() {
         docs={docs.map((d) => ({ slug: d.slug, name: d.title }))}
         partners={partners}
         zaloBotState={settleZaloBotState(readZaloBotState(zaloStateRow?.value))}
+        zaloGroupEvents={zaloGroupEvents.map((row) => ({
+          id: row.id,
+          kind: row.kind,
+          name: row.name,
+          note: row.note,
+          at: row.createdAt.toLocaleString("vi-VN", {
+            timeZone: "Asia/Ho_Chi_Minh",
+            hour: "2-digit",
+            minute: "2-digit",
+            day: "2-digit",
+            month: "2-digit",
+          }),
+        }))}
       />
     </AdminShell>
   );

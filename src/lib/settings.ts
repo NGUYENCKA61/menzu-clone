@@ -1,4 +1,5 @@
 import { parseCardRates, serializeCardRates, type CardRate } from "@/lib/topup";
+import { readZaloJoinMode, type ZaloJoinMode } from "@/lib/zaloGroupRules";
 
 /**
  * Shop settings that used to be constants in the code.
@@ -107,6 +108,20 @@ export interface ShopSettings {
   zaloBotPhone: string;
   /** How that account is named on the card; blank shows the number. */
   zaloBotName: string;
+
+  // --- Nhóm Zalo của shop (bot quản lý) --------------------------------------
+  /** The group the bot minds; blank is none. The bot lists the ids it sees. */
+  zaloGroupId: string;
+  /** Who the bot lets in when somebody asks to join. */
+  zaloGroupJoin: ZaloJoinMode;
+  /** Whether shop notices are posted into the group. */
+  zaloGroupPost: boolean;
+  /** The welcome after an approval, with {name} and {shop}; blank is none. */
+  zaloGroupWelcome: string;
+  /** Words that earn a warning, comma-separated. */
+  zaloGroupBadWords: string;
+  /** Whether a link to anywhere but the shop earns a warning. */
+  zaloGroupBlockLinks: boolean;
 
   // --- Link rút gọn có tiền (key miễn phí) ----------------------------------
   /**
@@ -366,6 +381,12 @@ export const DEFAULT_SETTINGS: ShopSettings = {
   telegramShopUsername: "",
   zaloBotPhone: "",
   zaloBotName: "",
+  zaloGroupId: "",
+  zaloGroupJoin: "off",
+  zaloGroupPost: false,
+  zaloGroupWelcome: "",
+  zaloGroupBadWords: "",
+  zaloGroupBlockLinks: true,
   shortlinkApiTemplate: "",
   shortlinkApiKey: "",
   // Three is a shelf that can still serve today's buyers while the shop
@@ -490,6 +511,12 @@ export const SETTING_KEYS: Record<keyof ShopSettings, string> = {
   telegramShopUsername: "integrations.telegramShop.username",
   zaloBotPhone: "integrations.zalo.phone",
   zaloBotName: "integrations.zalo.name",
+  zaloGroupId: "integrations.zalo.group.id",
+  zaloGroupJoin: "integrations.zalo.group.join",
+  zaloGroupPost: "integrations.zalo.group.post",
+  zaloGroupWelcome: "integrations.zalo.group.welcome",
+  zaloGroupBadWords: "integrations.zalo.group.badwords",
+  zaloGroupBlockLinks: "integrations.zalo.group.links",
   shortlinkApiTemplate: "integrations.shortlink.template",
   shortlinkApiKey: "integrations.shortlink.key",
   lowStockThreshold: "stock.lowThreshold",
@@ -954,6 +981,27 @@ export function parseSettings(
       stored.get(SETTING_KEYS.zaloBotName),
       DEFAULT_SETTINGS.zaloBotName,
     ),
+    zaloGroupId: toOptionalText(
+      stored.get(SETTING_KEYS.zaloGroupId),
+      DEFAULT_SETTINGS.zaloGroupId,
+    ),
+    zaloGroupJoin: readZaloJoinMode(stored.get(SETTING_KEYS.zaloGroupJoin)),
+    zaloGroupPost: toBoolean(
+      stored.get(SETTING_KEYS.zaloGroupPost),
+      DEFAULT_SETTINGS.zaloGroupPost,
+    ),
+    zaloGroupWelcome: toOptionalText(
+      stored.get(SETTING_KEYS.zaloGroupWelcome),
+      DEFAULT_SETTINGS.zaloGroupWelcome,
+    ),
+    zaloGroupBadWords: toOptionalText(
+      stored.get(SETTING_KEYS.zaloGroupBadWords),
+      DEFAULT_SETTINGS.zaloGroupBadWords,
+    ),
+    zaloGroupBlockLinks: toBoolean(
+      stored.get(SETTING_KEYS.zaloGroupBlockLinks),
+      DEFAULT_SETTINGS.zaloGroupBlockLinks,
+    ),
     shortlinkApiTemplate: toOptionalText(
       stored.get(SETTING_KEYS.shortlinkApiTemplate),
       DEFAULT_SETTINGS.shortlinkApiTemplate,
@@ -1225,6 +1273,12 @@ export function serializeSettings(
       .replace(/^@/, ""),
     zaloBotPhone: settings.zaloBotPhone.replace(/\D/g, ""),
     zaloBotName: settings.zaloBotName.trim(),
+    zaloGroupId: settings.zaloGroupId.trim(),
+    zaloGroupJoin: settings.zaloGroupJoin,
+    zaloGroupPost: String(settings.zaloGroupPost),
+    zaloGroupWelcome: settings.zaloGroupWelcome.trim(),
+    zaloGroupBadWords: settings.zaloGroupBadWords.trim(),
+    zaloGroupBlockLinks: String(settings.zaloGroupBlockLinks),
     shortlinkApiTemplate: settings.shortlinkApiTemplate.trim(),
     shortlinkApiKey: settings.shortlinkApiKey.trim(),
     lowStockThreshold: String(Math.floor(settings.lowStockThreshold)),
@@ -1371,6 +1425,12 @@ export function normalizeSettings(
       .replace(/^@/, ""),
     zaloBotPhone: String(raw?.zaloBotPhone ?? "").replace(/\D/g, ""),
     zaloBotName: String(raw?.zaloBotName ?? "").trim(),
+    zaloGroupId: String(raw?.zaloGroupId ?? "").trim(),
+    zaloGroupJoin: readZaloJoinMode(raw?.zaloGroupJoin),
+    zaloGroupPost: Boolean(raw?.zaloGroupPost),
+    zaloGroupWelcome: String(raw?.zaloGroupWelcome ?? "").trim(),
+    zaloGroupBadWords: String(raw?.zaloGroupBadWords ?? "").trim(),
+    zaloGroupBlockLinks: raw?.zaloGroupBlockLinks !== false,
     shortlinkApiTemplate: String(raw?.shortlinkApiTemplate ?? "").trim(),
     shortlinkApiKey: String(raw?.shortlinkApiKey ?? "").trim(),
     lowStockThreshold: (() => {

@@ -40,6 +40,7 @@ import {
   ZALO_STATE_KEY,
   type ZaloBotState,
 } from "../../src/lib/zaloShared";
+import { createGroupManager, type GroupMessage } from "./group";
 
 const DATABASE_URL = process.env.DATABASE_URL;
 if (!DATABASE_URL) throw new Error("DATABASE_URL is not set");
@@ -68,6 +69,18 @@ const log = (...parts: unknown[]) =>
 
 let api: API | null = null;
 let ownName: string | null = null;
+/** The group minder, alive while the session is. */
+let group: ReturnType<typeof createGroupManager> | null = null;
+/** The shop's own hostname, so its links in the group are never spam. */
+const SITE_HOST = (() => {
+  try {
+    return process.env.NEXT_PUBLIC_SITE_URL
+      ? new URL(process.env.NEXT_PUBLIC_SITE_URL).hostname
+      : null;
+  } catch {
+    return null;
+  }
+})();
 let stopping = false;
 const lastHelpAt = new Map<string, number>();
 
@@ -83,6 +96,7 @@ async function report(
     name: extra.name ?? ownName,
     at: new Date().toISOString(),
     note: extra.note ?? null,
+    groups: extra.groups ?? group?.snapshot(),
   };
   try {
     await db.setting.upsert({
@@ -218,7 +232,13 @@ async function send(threadId: string, text: string): Promise<void> {
 }
 
 async function onMessage(message: Incoming): Promise<void> {
-  if (message.isSelf || message.type !== ThreadType.User) return;
+  if (message.isSelf) return;
+  // The group's messages go to the minder; this function is the inbox.
+  if (message.type === ThreadType.Group) {
+    await group?.onMessage(message as GroupMessage);
+    return;
+  }
+  if (message.type !== ThreadType.User) return;
   if (typeof message.data.content !== "string") return;
   const threadId = message.threadId;
   const zaloId = message.data.uidFrom || threadId;
@@ -331,7 +351,12 @@ async function drainOutbox(): Promise<void> {
           continue;
         }
       }
-      await api.sendMessage(item.text, item.zaloId, ThreadType.User);
+      if (item.kind === "GROUP_POST") {
+        if (!group) throw new Error("group minder not ready");
+        await group.post(item.zaloId, item.text);
+      } else {
+        await api.sendMessage(item.text, item.zaloId, ThreadType.User);
+      }
       await db.zaloOutbox.update({
         where: { id: item.id },
         data: {
@@ -374,6 +399,13 @@ async function run(): Promise<void> {
         // The name is a nicety for the admin page.
       }
       backoff = 15_000;
+      group = createGroupManager({
+        api,
+        db,
+        log,
+        siteHost: SITE_HOST,
+        brand: brandName,
+      });
       await report("online");
       log("online as", ownName ?? api.getOwnId());
 
@@ -391,11 +423,19 @@ async function run(): Promise<void> {
       api.listener.on("error", (error) =>
         log("listener error:", (error as Error)?.message ?? error),
       );
+      api.listener.on("group_event", (ev) => {
+        group?.onGroupEvent(
+          ev as unknown as { type: string; data: { groupId?: string } },
+        );
+      });
       api.listener.start();
 
       let lastBeat = 0;
       while (!stopping && !closed) {
         await drainOutbox();
+        await group
+          ?.tick()
+          .catch((error: Error) => log("group tick failed:", error.message));
         if (Date.now() - lastBeat > HEARTBEAT_MS) {
           await report("online");
           lastBeat = Date.now();
@@ -408,6 +448,7 @@ async function run(): Promise<void> {
         // Already gone.
       }
       api = null;
+      group = null;
       if (closed) {
         log(closeNote);
         await report("offline", { note: closeNote });

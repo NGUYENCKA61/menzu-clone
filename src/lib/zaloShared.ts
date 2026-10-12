@@ -73,6 +73,8 @@ export type ZaloBotState = {
   /** ISO time of this report. */
   at: string;
   note: string | null;
+  /** The groups the account is in, for Cấu hình to name the one to mind. */
+  groups?: { id: string; name: string; members: number; admin: boolean }[];
 };
 
 export function readZaloBotState(
@@ -94,6 +96,19 @@ export function readZaloBotState(
         name: typeof value.name === "string" ? value.name : null,
         at: value.at,
         note: typeof value.note === "string" ? value.note : null,
+        groups: Array.isArray(value.groups)
+          ? value.groups
+              .filter(
+                (g): g is NonNullable<ZaloBotState["groups"]>[number] =>
+                  !!g && typeof g.id === "string" && typeof g.name === "string",
+              )
+              .map((g) => ({
+                id: g.id,
+                name: g.name,
+                members: Number(g.members) || 0,
+                admin: g.admin === true,
+              }))
+          : undefined,
       };
     }
   } catch {

@@ -16,6 +16,7 @@ import {
 import { db } from "@/lib/db";
 import { openGiftParcels } from "@/lib/giftParcelStore";
 import { postAnnouncementToTelegram } from "@/lib/telegramNotify";
+import { postAnnouncementToZaloGroup } from "@/lib/zaloGroupPost";
 import {
   GIFT_PARCEL_HREF,
   GIFT_PARCEL_LABEL,
@@ -242,6 +243,7 @@ export async function POST(request: Request) {
   // Out to the channel too, when it was published on the spot; the helper
   // itself leaves drafts, scheduled and per-customer notices alone.
   await postAnnouncementToTelegram(announcement.id);
+  await postAnnouncementToZaloGroup(announcement.id);
 
   return NextResponse.json({ id: announcement.id });
 }
@@ -279,6 +281,7 @@ export async function PATCH(request: Request) {
     if (body.action === "publish") {
       await openGiftParcels(id);
       await postAnnouncementToTelegram(id);
+      await postAnnouncementToZaloGroup(id);
     }
     return NextResponse.json({ ok: true });
   }

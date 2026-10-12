@@ -1979,6 +1979,8 @@ model FreeKeyClaim {
 enum ZaloOutboxKind {
   NOTICE
   PHONE_OTP
+  /// A shop notice for the group; the row's zaloId is the group's id.
+  GROUP_POST
 }
 
 enum VerificationStatus {
@@ -2037,4 +2039,29 @@ model PhoneVerification {
 
   @@index([userId, createdAt])
   @@map("phone_verifications")
+}
+
+enum ZaloGroupEventKind {
+  JOIN_APPROVED
+  JOIN_REFUSED
+  WARNED
+  REMOVED
+  POSTED
+}
+
+/// What the Zalo bot did in the shop's group (the owner, 12/10/2026): a join
+/// approved or refused, a member warned or removed, a notice posted. Cấu hình
+/// shows the latest; the warnings also count a member's strikes.
+model ZaloGroupEvent {
+  id        String             @id @default(cuid())
+  groupId   String
+  kind      ZaloGroupEventKind
+  zaloId    String?
+  name      String?
+  note      String?
+  createdAt DateTime           @default(now())
+
+  @@index([groupId, createdAt])
+  @@index([zaloId, kind, createdAt])
+  @@map("zalo_group_events")
 }
