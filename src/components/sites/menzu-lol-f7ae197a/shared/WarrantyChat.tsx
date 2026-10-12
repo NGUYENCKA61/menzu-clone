@@ -5,6 +5,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { ImagePlus, Lock, Send, X } from "lucide-react";
 
 import { WarrantyThread, type ThreadOpening } from "@/components/sites/menzu-lol-f7ae197a/shared/WarrantyThread";
+import { SUPPORT_WINDOW } from "@/lib/supportHours";
 import {
   mergeMessages,
   MESSAGE_MAX,
@@ -141,6 +142,13 @@ export function WarrantyChat({
       <div className="mt-3">
         <WarrantyThread viewer="buyer" buyerName="Bạn" opening={opening} messages={messages} />
       </div>
+      {/* Said plainly while it is so, or the buyer stares at their own
+          message wondering whether anyone reads it. */}
+      {open && !messages.some((m) => m.fromShop) ? (
+        <p className="mt-3 text-[12px] text-neutral-500">
+          Shop chưa trả lời. Giờ làm việc {SUPPORT_WINDOW}, ngoài giờ cứ nhắn, sáng shop đọc.
+        </p>
+      ) : null}
 
       {open ? (
         <div className="mt-4">

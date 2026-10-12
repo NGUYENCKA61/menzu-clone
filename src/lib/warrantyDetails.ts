@@ -24,6 +24,8 @@ export interface DetailOption {
 export interface DetailQuestion {
   key: string;
   label: string;
+  /** The subject alone, for a list read at a glance: "Diệt virus". */
+  short: string;
   /** What to look at, in the buyer's words. */
   hint: string;
   /** The answers offered; an empty list means they type one. */
@@ -59,7 +61,15 @@ function offQuestion(
     },
     { value: "Tôi không rõ cái này", hint: "Không tìm thấy chỗ chỉnh, cần shop chỉ giúp." },
   ];
-  return { key, label, hint, options, photo: true, photoWhen: options[0].value };
+  return {
+    key,
+    label,
+    short: thing.charAt(0).toUpperCase() + thing.slice(1),
+    hint,
+    options,
+    photo: true,
+    photoWhen: options[0].value,
+  };
 }
 
 /** A tool's report: the machine, what is switched off, and the game. */
@@ -67,6 +77,7 @@ const SOFTWARE_QUESTIONS: readonly DetailQuestion[] = [
   {
     key: "WINVER",
     label: "Phiên bản Windows",
+    short: "Windows",
     hint: "Bấm Windows + R, gõ winver, chụp lại cửa sổ hiện ra.",
     // Four tiles here too (the owner, 11/10/2026: "phiên bản win chưa có
     // kìa, tạo câu trả lời đi"). The picture stays due whichever is picked:
@@ -88,6 +99,7 @@ const SOFTWARE_QUESTIONS: readonly DetailQuestion[] = [
   {
     key: "REQUIREMENTS",
     label: "Đã cài đủ bộ yêu cầu chưa",
+    short: "Bộ cài",
     hint: "Visual C++, .NET Framework và DirectX theo trang hướng dẫn.",
     options: [
       { value: "Tôi đã cài đủ cả ba", hint: "Cài xong hết, gửi kèm ảnh Apps & features." },
@@ -125,6 +137,7 @@ const SOFTWARE_QUESTIONS: readonly DetailQuestion[] = [
   {
     key: "DISPLAY_MODE",
     label: "Game đang để chế độ hiển thị nào",
+    short: "Chế độ hiển thị",
     hint: "Hầu hết tool cần cửa sổ không viền để vẽ được lên game.",
     options: [
       { value: "Đang để không viền", hint: "Borderless, cửa sổ tràn màn hình, không khung." },
@@ -140,6 +153,7 @@ const ACCOUNT_QUESTIONS: readonly DetailQuestion[] = [
   {
     key: "LOGIN_ERROR",
     label: "Màn hình báo lỗi khi đăng nhập",
+    short: "Lỗi đăng nhập",
     hint: "Chụp đúng lúc game hoặc launcher báo lỗi.",
     options: [],
     placeholder: "Ví dụ: sai mật khẩu, tài khoản bị khóa",
@@ -148,6 +162,7 @@ const ACCOUNT_QUESTIONS: readonly DetailQuestion[] = [
   {
     key: "DEVICE",
     label: "Đăng nhập trên thiết bị nào",
+    short: "Thiết bị",
     hint: "Máy tính, điện thoại hay giả lập.",
     options: [
       { value: "Trên máy tính", hint: "Windows hoặc macOS." },
@@ -159,6 +174,7 @@ const ACCOUNT_QUESTIONS: readonly DetailQuestion[] = [
   {
     key: "CHANGED_PASSWORD",
     label: "Đã đổi mật khẩu sau khi nhận chưa",
+    short: "Mật khẩu",
     hint: "Đổi mật khẩu trước khi báo lỗi làm shop không kiểm tra được.",
     options: [
       { value: "Tôi đã đổi mật khẩu", hint: "Đổi rồi, gửi kèm ảnh màn hình đổi mật khẩu." },

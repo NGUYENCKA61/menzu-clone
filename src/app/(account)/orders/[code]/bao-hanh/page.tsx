@@ -6,7 +6,6 @@ import {
   ArrowLeft,
   Banknote,
   ChevronRight,
-  Clock,
   Info,
   KeyRound,
   Landmark,
@@ -24,7 +23,6 @@ import { maskAccount } from "@/lib/bankRefund";
 import { questionFor, readDetails } from "@/lib/warrantyDetails";
 import { db } from "@/lib/db";
 import { LOGIN_ORDER_SELECT, signInHold } from "@/lib/loginReveal";
-import { ORDER_STATUS_LABELS, type OrderStatus } from "@/lib/orders";
 import { dayStamp, dayTime } from "@/lib/dayGroups";
 import { getCurrentUser } from "@/lib/session";
 import { SUPPORT_WINDOW } from "@/lib/supportHours";
@@ -64,6 +62,48 @@ const STEPS = [
   // and naming one of the three promises it (the owner, 11/10/2026).
   { title: "Kết quả xử lý" },
 ];
+
+/** "09:14 ngày 12/10/2026", for a sentence. */
+function when(date: Date): string {
+  return `${dayTime(date)} ngày ${date.toLocaleDateString("vi-VN", {
+    timeZone: "Asia/Ho_Chi_Minh",
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  })}`;
+}
+
+/**
+ * The strip in words: what is happening to the latest report now and what
+ * comes next, one sentence per state (the owner, 12/10/2026: "rõ hơn").
+ * Nothing while the second round is still open; its card says so itself.
+ */
+function standingOf(r: {
+  status: string;
+  createdAt: Date;
+  resolvedAt: Date | null;
+  refundMethod: string | null;
+  bankAccount: string | null;
+}): string {
+  if (r.status === "OPEN") {
+    return `Shop đã nhận yêu cầu lúc ${when(r.createdAt)}, sẽ trả lời trong giờ làm việc ${SUPPORT_WINDOW}.`;
+  }
+  if (r.status === "IN_PROGRESS") {
+    return `Shop đang kiểm tra yêu cầu của bạn, trả lời trong giờ làm việc ${SUPPORT_WINDOW}.`;
+  }
+  if (r.status === "REFUNDING") {
+    if (r.refundMethod !== "MANUAL") {
+      return "Shop không khắc phục được và đang hoàn tiền vào tài khoản của bạn trên web.";
+    }
+    return r.bankAccount
+      ? "Shop đã nhận số tài khoản của bạn và sẽ chuyển tiền hoàn sớm."
+      : "Shop không khắc phục được và sẽ hoàn tiền qua ngân hàng, bạn nhập số tài khoản bên dưới để nhận.";
+  }
+  const at = r.resolvedAt ? ` lúc ${when(r.resolvedAt)}` : "";
+  return r.status === "REFUNDED"
+    ? `Shop đã hoàn tiền xong${at}.`
+    : `Shop đã xử lý xong yêu cầu này${at}.`;
+}
 
 function stamp(date: Date): string {
   return `${date.toLocaleDateString("vi-VN", {
@@ -116,6 +156,7 @@ export default async function WarrantyRequestPage({
           details: true,
           detailsDoneAt: true,
           createdAt: true,
+          resolvedAt: true,
           refundAmount: true,
           refundMethod: true,
           bankName: true,
@@ -229,6 +270,9 @@ export default async function WarrantyRequestPage({
             })}
           </ol>
         ) : null}
+        {latest && !awaitingDetails ? (
+          <p className="-mt-2 text-[14px] leading-relaxed text-neutral-200">{standingOf(latest)}</p>
+        ) : null}
 
         {/* THE ORDER BEING REPORTED. Not while the second round is on
             screen: the title already names the order, and the questions are
@@ -236,86 +280,42 @@ export default async function WarrantyRequestPage({
             card trên ở trang bổ sung chi tiết"). */}
         {awaitingDetails ? null : (
         <section className={CARD}>
-          <div className="flex flex-wrap items-start gap-4">
-            <div className="relative h-[72px] w-28 shrink-0 overflow-hidden rounded-xl border border-white/10 bg-neutral-950">
+          {/* One line: the receipt already has the price and the paid chip,
+              and this page is about the report (the owner, 12/10/2026). */}
+          <div className="flex flex-wrap items-center gap-4">
+            <div className="relative h-12 w-20 shrink-0 overflow-hidden rounded-lg border border-white/10 bg-neutral-950">
               {order.product.imageUrl ? (
                 <Image
                   src={order.product.imageUrl}
                   alt=""
                   fill
-                  sizes="224px"
+                  sizes="160px"
                   className="object-cover object-[85%_center]"
                 />
               ) : null}
             </div>
             <div className="min-w-0 flex-1">
-              <div className="flex flex-wrap items-center gap-2.5">
-                {/* The order's real state, from the one table that names
-                    them: an order that was refunded must not read "Đã thanh
-                    toán" a few centimetres above the refusal. */}
-                <span
-                  className={`inline-flex items-center rounded-md border px-2 py-0.5 text-[10px] font-black uppercase tracking-wider ${
-                    order.status === "PAID"
-                      ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
-                      : "border-white/10 bg-white/5 text-neutral-300"
-                  }`}
-                >
-                  {ORDER_STATUS_LABELS[order.status as OrderStatus] ?? order.status}
-                </span>
-                <span className="text-[12px] font-semibold text-neutral-500">
-                  Đơn: <span className="font-bold text-neutral-200">{order.code}</span>
-                </span>
-              </div>
-              <p className="mt-2 text-sm font-black uppercase leading-snug text-white">
-                {productName}
-              </p>
-              {/* The receipt's own words for the same three facts: "Ngày
-                  mua", "Gói dịch vụ", and a plain count, which it prints
-                  without an x. One of a thing is not worth a line (the
-                  owner, 10/10/2026). */}
-              <p className="mt-1.5 flex flex-wrap gap-x-5 gap-y-1 text-[12px] font-semibold text-neutral-500">
-                <span>
-                  Ngày mua:{" "}
-                  <span className="font-bold tabular-nums text-neutral-200">
-                    {stamp(order.createdAt)}
-                  </span>
-                </span>
+              <p className="text-sm font-black uppercase leading-snug text-white">{productName}</p>
+              <p className="mt-1 text-[12px] font-semibold text-neutral-500">
+                Đơn <span className="font-bold text-neutral-200">{order.code}</span>
+                <span className="text-neutral-600"> · </span>
+                mua{" "}
+                <span className="font-bold tabular-nums text-neutral-200">{stamp(order.createdAt)}</span>
                 {order.package ? (
-                  <span>
-                    Gói dịch vụ:{" "}
-                    <span className="font-bold text-neutral-200">{order.package.label}</span>
-                  </span>
+                  <>
+                    <span className="text-neutral-600"> · </span>
+                    gói <span className="font-bold text-neutral-200">{order.package.label}</span>
+                  </>
                 ) : null}
                 {order.quantity > 1 ? (
-                  <span>
-                    Số lượng:{" "}
-                    <span className="font-bold tabular-nums text-neutral-200">
-                      {order.quantity}
-                    </span>
-                  </span>
+                  <>
+                    <span className="text-neutral-600"> · </span>
+                    số lượng{" "}
+                    <span className="font-bold tabular-nums text-neutral-200">{order.quantity}</span>
+                  </>
                 ) : null}
               </p>
             </div>
-            <div className="shrink-0 text-right">
-              <p className={LABEL}>Tổng tiền</p>
-              {/* White, as the receipt prints the same figure; red on this
-                  page belongs to the shop's marks and the send button (the
-                  owner, 10/10/2026). */}
-              <p className="mt-1 text-lg font-black text-white">
-                {formatVnd(Number(order.total))}đ
-              </p>
-            </div>
-          </div>
-
-          {/* No box around it, just a rule and the lines (the owner,
-              10/10/2026: "bỏ cái card bọc chỗ shop xử lý bảo hành đi"); the
-              glyphs take the accent ("icon màu đỏ cho đồng hồ"). */}
-          <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-2 border-t border-white/[0.06] pt-4">
-            <span className="inline-flex items-center gap-2 text-[12px] text-neutral-300">
-              <Clock className="h-4 w-4 shrink-0 text-[var(--menzu-accent)]" />
-              Shop xử lý bảo hành {SUPPORT_WINDOW} mỗi ngày; ngoài giờ cứ gửi, sáng shop
-              làm ngay.
-            </span>
             {/* When the buyer took the sign-in: where the recording an
                 account's warranty rests on starts. */}
             {kind === "account" && order.loginRevealedAt ? (
@@ -468,7 +468,7 @@ export default async function WarrantyRequestPage({
                                 className="grid gap-x-6 gap-y-1 sm:grid-cols-[minmax(0,240px)_minmax(0,260px)_1fr]"
                               >
                                 <dt className="text-[12px] font-semibold text-neutral-500 sm:pt-0.5">
-                                  {question?.label ?? answer.key}
+                                  {question?.short ?? answer.key}
                                 </dt>
                                 <dd className="text-[13px] font-bold text-neutral-200 sm:pt-0.5">
                                   {answer.value}
