@@ -1,6 +1,6 @@
 import { currentAnnouncements } from "@/lib/announcementStore";
 import { db } from "@/lib/db";
-import { dayKey } from "@/lib/dayGroups";
+import { dayKey, dayTime } from "@/lib/dayGroups";
 import { getCurrentUser } from "@/lib/session";
 import { getShopSettings } from "@/lib/settingsStore";
 
@@ -16,19 +16,26 @@ import { SiteHeaderClient } from "./SiteHeaderClient";
 export async function SiteHeader() {
   // The reader has to be known before the notices can be: a targeted notice is
   // fetched by matching their account, so this cannot be one Promise.all.
-  const [user, settings] = await Promise.all([getCurrentUser(), getShopSettings()]);
+  const [user, settings] = await Promise.all([
+    getCurrentUser(),
+    getShopSettings(),
+  ]);
   const [announcements, cartCount] = await Promise.all([
     currentAnnouncements(user?.id ?? null),
     // Lines, not units: the badge answers "how many things are waiting",
     // which is what the basket page then lists. A guest has no basket.
-    user ? db.cartItem.count({ where: { userId: user.id } }) : Promise.resolve(0),
+    user
+      ? db.cartItem.count({ where: { userId: user.id } })
+      : Promise.resolve(0),
   ]);
 
   return (
     <SiteHeaderClient
       brand={{ name: settings.brandName, logo: settings.brandLogo }}
       telegramShopUrl={
-        settings.telegramShopUsername ? `https://t.me/${settings.telegramShopUsername}` : null
+        settings.telegramShopUsername
+          ? `https://t.me/${settings.telegramShopUsername}`
+          : null
       }
       // "5 phút trước" goes over as ISO, because it has to be measured against
       // the reader's clock; the update date is formatted here, on the shop's
@@ -49,6 +56,10 @@ export async function SiteHeader() {
         startAt: a.startAt.toISOString(),
         updatedLabel: dayKey(a.updatedAt),
         silent: a.silent,
+        // Named on the notice rather than reached by audience ALL: written
+        // for this reader, so the sheet drops the snooze and says when.
+        personal: a.audience === "USERS",
+        sentLabel: `${dayTime(a.startAt)}, ${dayKey(a.startAt)}`,
       }))}
       cartCount={cartCount}
       user={

@@ -55,6 +55,14 @@ export interface AnnouncementItem {
    *  happened to them — a warranty answer, a refund — not composed by the
    *  shop for everyone. */
   silent?: boolean;
+  /**
+   * Addressed to this reader alone (a reply, a credit, a gift of theirs),
+   * not a notice the shop posted for everyone. The sheet dresses the two
+   * differently (the owner, 12/10/2026).
+   */
+  personal?: boolean;
+  /** "14:58, 12/10/2026": when a personal notice was sent, on the shop's clock. */
+  sentLabel?: string;
 }
 
 /**
