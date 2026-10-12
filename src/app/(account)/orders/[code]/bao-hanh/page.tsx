@@ -6,6 +6,7 @@ import {
   ArrowLeft,
   Banknote,
   ChevronRight,
+  ClipboardList,
   Info,
   KeyRound,
   Landmark,
@@ -49,7 +50,6 @@ export const dynamic = "force-dynamic";
 // than every card beside it (the owner, 10/10/2026: "màu card đồng bộ mấy
 // trang kia chưa").
 const CARD = "rounded-2xl border border-white/10 bg-white/[0.02] p-5 sm:p-6";
-const LABEL = "text-[10px] font-black uppercase tracking-widest text-neutral-500";
 /**
  * The three moves a report makes, as the owner drew them (10/10/2026).
  * Sending the report and answering the second round are one move, not two
@@ -349,21 +349,37 @@ export default async function WarrantyRequestPage({
             AI"). */}
         {sentReports.length > 0 ? (
           <section className={CARD}>
-            <span className={LABEL}>Yêu cầu đã gửi</span>
-            <ul className="mt-3 flex flex-col gap-5">
+            {/* The same title bar as the conversation's card beneath: the
+                name, an icon, the latest report's state on the right (the
+                owner, 12/10/2026: "sửa lại cho đồng bộ"). */}
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/[0.06] pb-4">
+              <h2 className="flex items-center gap-2.5 text-base font-black uppercase tracking-wider text-white">
+                <ClipboardList className="h-5 w-5 shrink-0 text-[var(--menzu-accent)]" aria-hidden />
+                Yêu cầu đã gửi
+              </h2>
+              <span
+                className={`inline-flex items-center rounded-md border px-2 py-0.5 text-[10px] font-black uppercase tracking-wider ${WARRANTY_STATUS[sentReports[0].status].tile}`}
+              >
+                {WARRANTY_STATUS[sentReports[0].status].label}
+              </span>
+            </div>
+            <ul className="mt-4 flex flex-col gap-5">
               {sentReports.map((r, index) => {
                 const state = WARRANTY_STATUS[r.status];
                 const answers = readDetails(r.details);
                 return (
                   <li key={r.id} className={index === 0 ? "" : "border-t border-white/[0.06] pt-5"}>
-                    {/* The fault and the time as one grey line; only the
-                        status wears a chip. */}
+                    {/* The fault and the time as one grey line. The latest
+                        report's chip is in the title bar; an older one keeps
+                        its own. */}
                     <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
-                      <span
-                        className={`inline-flex items-center rounded-md border px-2 py-0.5 text-[10px] font-black uppercase tracking-wider ${state.tile}`}
-                      >
-                        {state.label}
-                      </span>
+                      {index > 0 ? (
+                        <span
+                          className={`inline-flex items-center rounded-md border px-2 py-0.5 text-[10px] font-black uppercase tracking-wider ${state.tile}`}
+                        >
+                          {state.label}
+                        </span>
+                      ) : null}
                       <span className="text-[12px] font-semibold text-neutral-400">
                         {WARRANTY_ISSUE[r.issue].label}
                         <span className="text-neutral-600"> · </span>
@@ -456,11 +472,21 @@ export default async function WarrantyRequestPage({
                     ) : null}
                     {/* The answers, as the desk reads them. */}
                     {answers.length > 0 ? (
-                      // No box: a rule, the label, and one line per answer,
-                      // question on the left, answer and its pictures on the
-                      // right. Seven lines instead of seven blocks.
-                      <div className="mt-4 border-t border-white/[0.06] pt-4">
-                        <span className={LABEL}>Thông tin đã bổ sung</span>
+                      // Folded by default: the buyer wrote these and reads
+                      // them once; the desk reads them on its own screen.
+                      // Open, one line per answer, question on the left,
+                      // answer and its pictures on the right.
+                      <details className="group mt-4 border-t border-white/[0.06] pt-4">
+                        <summary className="flex cursor-pointer list-none items-center gap-2 text-[10px] font-black uppercase tracking-widest text-neutral-500 transition-colors hover:text-neutral-300 [&::-webkit-details-marker]:hidden">
+                          <ChevronRight
+                            className="h-3.5 w-3.5 shrink-0 transition-transform group-open:rotate-90"
+                            aria-hidden
+                          />
+                          Thông tin đã bổ sung
+                          <span className="font-semibold normal-case tracking-normal text-neutral-600">
+                            ({answers.length} mục)
+                          </span>
+                        </summary>
                         <dl className="mt-3 flex flex-col gap-2.5">
                           {answers.map((answer) => {
                             const question = questionFor(kind, answer.key);
@@ -502,9 +528,8 @@ export default async function WarrantyRequestPage({
                             );
                           })}
                         </dl>
-                      </div>
+                      </details>
                     ) : null}
-
                   </li>
                 );
               })}
