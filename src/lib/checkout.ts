@@ -76,9 +76,15 @@ export async function placeOrder(input: CheckoutInput): Promise<CheckoutResult> 
 
   const result = await db.$transaction(async (tx) => {
     const locked = await tx.$queryRaw<
-      { id: string; status: string; productType: string; softwareStatus: string | null }[]
+      {
+        id: string;
+        status: string;
+        productType: string;
+        softwareStatus: string | null;
+        verifiedOnly: boolean;
+      }[]
     >`
-      SELECT id, status, "productType", "softwareStatus" FROM products
+      SELECT id, status, "productType", "softwareStatus", "verifiedOnly" FROM products
       WHERE code = ${code} AND "deletedAt" IS NULL
       FOR UPDATE
     `;
@@ -88,6 +94,16 @@ export async function placeOrder(input: CheckoutInput): Promise<CheckoutResult> 
     }
     if (locked[0].productType === "SOFTWARE_GAME" && isSalesLocked(locked[0].softwareStatus)) {
       throw new Error(`LOCKED:${locked[0].softwareStatus}`);
+    }
+    // Sold to level 2 only (the owner, 12/10/2026): the buyer's level is read
+    // here, not from the session, so a revocation bites at once. The shop's
+    // own admins pass, as they do for the setup guide.
+    if (locked[0].verifiedOnly) {
+      const level = await tx.user.findUnique({
+        where: { id: input.userId },
+        select: { verifiedAt: true, role: true },
+      });
+      if (!level?.verifiedAt && level?.role !== "ADMIN") throw new Error("VERIFIED_ONLY");
     }
 
     const product = await tx.product.findUniqueOrThrow({ where: { code } });
@@ -345,6 +361,12 @@ export function checkoutFailure(error: unknown): CheckoutFailure {
     return {
       status: 409,
       error: `Tool này ${salesLockReason(message.slice(7))}, shop tạm khóa mua key cho đến khi có bản an toàn`,
+    };
+  }
+  if (message === "VERIFIED_ONLY") {
+    return {
+      status: 403,
+      error: "Bản này chỉ bán cho tài khoản xác thực cấp 2. Vào Bảo mật → Xác thực cấp 2 để đăng ký.",
     };
   }
   if (message === "PACKAGE_REQUIRED") return { status: 400, error: "Hãy chọn gói trước khi mua" };

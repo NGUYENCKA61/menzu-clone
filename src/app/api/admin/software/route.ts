@@ -219,6 +219,8 @@ export async function PATCH(request: Request) {
     /** "Tên bản tải", plain text; "" puts the default name back. */
     downloadName?: string;
     docsUrl?: string;
+    /** Sold to level-2 ("xác thực cấp 2") accounts only. */
+    verifiedOnly?: boolean;
     /** This tool's own second-round warranty questions: a list
      *  (src/lib/warrantyDetails.ts), or null to inherit the game's. */
     warrantyQuestions?: unknown;
@@ -381,6 +383,7 @@ export async function PATCH(request: Request) {
       ...(downloadName !== undefined ? { downloadName: downloadName || null } : {}),
       // Same convention as the others: "" clears the link and hides its button.
       ...(body?.docsUrl !== undefined ? { docsUrl: body.docsUrl.trim() || null } : {}),
+      ...(typeof body?.verifiedOnly === "boolean" ? { verifiedOnly: body.verifiedOnly } : {}),
       // null clears it, which hands the second round back to the game's set.
       ...(questions !== undefined ? { warrantyQuestions: questions ?? Prisma.DbNull } : {}),
       // "" clears it, which takes the "Tỷ lệ hoàn trả" line off the policy

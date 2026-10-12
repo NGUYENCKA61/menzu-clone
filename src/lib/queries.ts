@@ -834,6 +834,7 @@ export async function getSoftwareDetail(
     // Null when the shop has promised no figure; the policy block prints the
     // line only when there is one to print.
     refundRate: p.refundRate,
+    verifiedOnly: p.verifiedOnly,
     // Empty draws no pills at all.
     badges,
     images:

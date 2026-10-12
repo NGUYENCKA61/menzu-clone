@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useRef, useState } from "react";
 import { Headphones, Loader2, Minus, Plus, RefreshCw, ShieldCheck, Zap } from "lucide-react";
@@ -34,6 +35,9 @@ export interface SoftwarePackageView {
   durationHours: number | null;
 }
 
+/** Who is looking at a buy panel: a guest, a member, or a level-2 account. */
+export type BuyerLevel = "guest" | "member" | "verified";
+
 export interface SoftwareDetail {
   code: string;
   /** The product half of its address: /{category-slug}/{slug}. */
@@ -61,6 +65,8 @@ export interface SoftwareDetail {
   /** What share of the price comes back if the tool fails, as a whole percent.
    *  Null means the shop has set none and the policy block stays silent. */
   refundRate: number | null;
+  /** Sold to level-2 ("xác thực cấp 2") accounts only. */
+  verifiedOnly: boolean;
   /** The shop's own pills beside the detection state — "TOP #1 BÁN CHẠY",
    *  "MỚI RA MẮT". Up to two, each with its own colour; empty draws none. */
   badges: ProductBadge[];
@@ -123,6 +129,7 @@ export function SoftwareBuyPanel({
   software,
   initialPackageId,
   initialQuantity,
+  viewer,
 }: {
   software: SoftwareDetail;
   /** From `?pkg=` — the tier a listing card was already showing. */
@@ -132,6 +139,8 @@ export function SoftwareBuyPanel({
   /** Following this tool's status; null for a guest. Still threaded down from
    *  the route, unread while "Nhận thông báo" is off the page. */
   statusSubscribed: boolean | null;
+  /** Who is looking, for a tool sold to level 2 only. */
+  viewer: BuyerLevel;
 }) {
   const router = useRouter();
 
@@ -215,6 +224,9 @@ export function SoftwareBuyPanel({
   // with no reason reads as a broken page. The server refuses the order and
   // the basket line either way; this only spares the shopper the round trip.
   const locked = isSalesLocked(software.softwareStatus);
+  // Sold to level 2 only (the owner, 12/10/2026): said here, and refused by
+  // the server either way.
+  const gated = software.verifiedOnly && viewer !== "verified";
 
   return (
     <div className="flex flex-col gap-6">
@@ -368,6 +380,20 @@ export function SoftwareBuyPanel({
           Tool {salesLockReason(software.softwareStatus)}, shop tạm khóa mua key. Theo dõi kênh
           thông báo để biết khi có bản mới.
         </p>
+      ) : gated ? (
+        <p className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-[13px] leading-relaxed text-amber-300">
+          Bản này chỉ bán cho tài khoản xác thực cấp 2.{" "}
+          {viewer === "guest" ? (
+            "Đăng nhập rồi vào Bảo mật → Xác thực cấp 2 để đăng ký."
+          ) : (
+            <Link
+              href="/security?tab=verify"
+              className="font-bold text-white underline underline-offset-2"
+            >
+              Xác thực ngay
+            </Link>
+          )}
+        </p>
       ) : software.packages.length === 0 ? (
         // A tool the shop has listed but not priced yet. Both buttons are
         // already dead in that case — there is no tier to put in a basket —
@@ -386,7 +412,7 @@ export function SoftwareBuyPanel({
       <div ref={buyRef} className="space-y-3">
         <button
           type="button"
-          disabled={busy || !chosen || !software.inStock || locked}
+          disabled={busy || !chosen || !software.inStock || locked || gated}
           onClick={() => setConfirming(true)}
           className="press w-full h-14 rounded-2xl bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] disabled:opacity-50 text-[13px] font-black uppercase tracking-widest text-white"
         >
@@ -394,7 +420,7 @@ export function SoftwareBuyPanel({
         </button>
         <button
           type="button"
-          disabled={busy || !chosen || !software.inStock || locked}
+          disabled={busy || !chosen || !software.inStock || locked || gated}
           onClick={addToCart}
           aria-busy={busy}
           className="press flex w-full h-14 items-center justify-center gap-2 rounded-2xl border border-[var(--menzu-accent)]/70 bg-white/[0.02] hover:bg-white/[0.06] disabled:opacity-50 text-[13px] font-black uppercase tracking-widest text-white"
@@ -430,7 +456,7 @@ export function SoftwareBuyPanel({
         label={chosen ? `${software.name} · ${chosen.label}` : software.name}
         price={`${formatVnd(total)}đ`}
         cta="Mua ngay"
-        disabled={busy || !chosen || !software.inStock || locked}
+        disabled={busy || !chosen || !software.inStock || locked || gated}
         onPress={() => setConfirming(true)}
       />
 

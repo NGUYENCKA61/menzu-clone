@@ -117,6 +117,8 @@ export interface SoftwareDetailView {
   downloadName: string;
   /** "Link tài liệu sử dụng" — the manual handed over beside the installer. */
   docsUrl: string;
+  /** Sold to level-2 ("xác thực cấp 2") accounts only. */
+  verifiedOnly: boolean;
   /** The refund promise as a whole percent, or "" where none is set. Typed as
    *  a string because that is what the input holds, and "" has to survive the
    *  round trip as "not set" rather than becoming a zero. */
@@ -319,6 +321,7 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
   const [downloadUrl, setDownloadUrl] = useState(software.downloadUrl);
   const [downloadName, setDownloadName] = useState(software.downloadName);
   const [docsUrl, setDocsUrl] = useState(software.docsUrl);
+  const [verifiedOnly, setVerifiedOnly] = useState(software.verifiedOnly);
   const [refundRate, setRefundRate] = useState(software.refundRate);
   const [badge1, setBadge1] = useState(software.badges[0]?.label ?? "");
   const [badge2, setBadge2] = useState(software.badges[1]?.label ?? "");
@@ -394,6 +397,7 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
       downloadUrl,
       downloadName,
       docsUrl,
+      verifiedOnly,
       refundRate: refundRate.trim(),
       // Sent as a pair; the server drops the blanks, so clearing the first box
       // and leaving the second promotes it rather than leaving a hole.
@@ -758,6 +762,27 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
                   Hiện cùng &ldquo;Link tải&rdquo; trong đơn hàng của khách, ngay
                   cạnh key. Để trống nếu chưa có.
                 </p>
+              </div>
+              <div className="sm:col-span-2">
+                <label className="flex cursor-pointer items-start gap-3">
+                  <input
+                    type="checkbox"
+                    checked={verifiedOnly}
+                    onChange={(event) => setVerifiedOnly(event.target.checked)}
+                    className="mt-0.5 h-4 w-4 shrink-0 accent-[var(--brand)]"
+                  />
+                  <span>
+                    <span className="block text-xs font-bold text-white">
+                      Chỉ bán cho tài khoản xác thực cấp 2
+                    </span>
+                    <span className="mt-0.5 block text-[11px] text-neutral-500">
+                      Bản đặc biệt: trang khách báo &ldquo;chỉ bán cho tài khoản
+                      xác thực cấp 2&rdquo;, máy chủ từ chối đơn của tài khoản chưa
+                      duyệt (kể cả qua giỏ hàng và bot Telegram). Khách lên cấp 2
+                      ở Bảo mật → Xác thực cấp 2, bạn duyệt ở mục Xác thực.
+                    </span>
+                  </span>
+                </label>
               </div>
               <div>
                 <span className={LABEL}>Nhãn nổi bật (tối đa 2)</span>

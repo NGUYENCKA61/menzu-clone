@@ -7,7 +7,11 @@ import { Breadcrumb } from "./Breadcrumb";
 import { FreeKeyPanel } from "./FreeKeyPanel";
 import { SimilarSoftwareStrip } from "./SimilarSoftwareStrip";
 import { type SoftwareCardView } from "./SoftwareCard";
-import { SoftwareBuyPanel, type SoftwareDetail } from "./SoftwareBuyPanel";
+import {
+  type BuyerLevel,
+  SoftwareBuyPanel,
+  type SoftwareDetail,
+} from "./SoftwareBuyPanel";
 import {
   SoftwareDescription,
   type SetupGuideAccess,
@@ -30,6 +34,7 @@ export function SoftwareDetailView({
   statusSubscribed,
   similar,
   free = null,
+  viewer,
 }: {
   software: SoftwareDetail;
   initialPackageId?: string;
@@ -47,6 +52,8 @@ export function SoftwareDetailView({
    * reader and the shop's shortlink setup.
    */
   free?: FreeToolPanel | null;
+  /** Who is looking, for a tool sold to level 2 only. */
+  viewer: BuyerLevel;
 }) {
   // The long write-up belongs to the description section alone: the rich HTML
   // (if the admin wrote one) in full, or the plain sentence behind the name.
@@ -109,6 +116,7 @@ export function SoftwareDetailView({
                   initialPackageId={initialPackageId}
                   initialQuantity={initialQuantity}
                   statusSubscribed={statusSubscribed}
+                  viewer={viewer}
                 />
               )}
             </div>

@@ -142,6 +142,7 @@ export default async function AdminAccountDetailPage({
             downloadUrl: software.downloadUrl ?? "",
             downloadName: software.downloadName ?? "",
             docsUrl: software.docsUrl ?? "",
+            verifiedOnly: software.verifiedOnly,
             // "" rather than "0": the form has to be able to tell "no promise
             // set" from "we refund nothing".
             refundRate:

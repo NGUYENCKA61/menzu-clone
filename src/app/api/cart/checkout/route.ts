@@ -66,6 +66,7 @@ export async function POST(request: Request) {
               status: true,
               productType: true,
               softwareStatus: true,
+              verifiedOnly: true,
               deletedAt: true,
               // For the voucher's scope test, line by line.
               categoryId: true,
@@ -114,6 +115,13 @@ export async function POST(request: Request) {
       // wholesale percent and the member tier must follow what the row says
       // now, not what the session cached.
       const buyer = await tx.user.findUniqueOrThrow({ where: { id: user.id } });
+
+      // A line sold to level 2 only stops a level-1 basket, named, like a
+      // caught tool does; the buyer's level is the row's, not the session's.
+      const gated = items.find((i) => i.product.verifiedOnly);
+      if (gated && !buyer.verifiedAt && buyer.role !== "ADMIN") {
+        throw new Error(`VERIFIED_ONLY:${gated.product.name ?? gated.product.code}`);
+      }
 
       // Đại lý pricing beats everything else and does not stack — wholesale is
       // already the deal — so a code supplied alongside it is ignored rather
@@ -394,6 +402,14 @@ export async function POST(request: Request) {
           error: `"${message.slice(7)}" đang tạm khóa mua key (bị phát hiện hoặc đang cập nhật), hãy xoá khỏi giỏ rồi thử lại`,
         },
         { status: 409 },
+      );
+    }
+    if (message.startsWith("VERIFIED_ONLY:")) {
+      return NextResponse.json(
+        {
+          error: `"${message.slice(14)}" chỉ bán cho tài khoản xác thực cấp 2. Vào Bảo mật → Xác thực cấp 2 để đăng ký, hoặc xoá khỏi giỏ rồi thử lại`,
+        },
+        { status: 403 },
       );
     }
     if (message.startsWith("GONE:")) {

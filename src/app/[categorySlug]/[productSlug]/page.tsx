@@ -234,6 +234,9 @@ export default async function ProductPage({ params, searchParams }: PageProps) {
           statusSubscribed={statusSubscribed}
           similar={similarShown}
           free={free}
+          viewer={
+            !user ? "guest" : user.verifiedAt || user.role === "ADMIN" ? "verified" : "member"
+          }
         />
       </>
     );
