@@ -552,14 +552,7 @@ export default async function WarrantyRequestPage({
                                   cho bạn sớm.
                                 </>
                               ) : (
-                                <>
-                                  Shop sẽ hoàn{" "}
-                                  <span className="font-bold text-white">
-                                    {formatVnd(Number(r.refundAmount))}đ
-                                  </span>{" "}
-                                  qua ngân hàng, bạn nhập số tài khoản bên dưới
-                                  để nhận.
-                                </>
+                                <>Vui lòng nhập chính xác thông tin.</>
                               )}
                             </span>
                           </p>
