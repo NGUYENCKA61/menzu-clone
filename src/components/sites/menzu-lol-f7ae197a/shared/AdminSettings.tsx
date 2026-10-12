@@ -26,6 +26,7 @@ import {
 } from "@/lib/settings";
 import type { ZaloBotState } from "@/lib/zaloShared";
 import {
+  parseZaloGroupIds,
   readZaloJoinMode,
   ZALO_JOIN_MODE_LABEL,
   ZALO_JOIN_MODES,
@@ -192,6 +193,8 @@ function formatVnd(n: number): string {
 export interface ZaloGroupEventRow {
   id: string;
   kind: string;
+  /** The group it happened in: its name when the bot knows it, else the id. */
+  group: string;
   name: string | null;
   note: string | null;
   /** "14:02 13/10" in the shop's clock. */
@@ -315,7 +318,13 @@ export function AdminSettings({
   );
   const [zaloPhone, setZaloPhone] = useState(settings.zaloBotPhone);
   const [zaloName, setZaloName] = useState(settings.zaloBotName);
-  const [zaloGroupId, setZaloGroupId] = useState(settings.zaloGroupId);
+  // The chosen groups as typed, one comma-separated line; the buttons on the
+  // group rows edit the same line. Parsed for the payload and for which row
+  // reads "Đang dùng".
+  const [zaloGroupIdsText, setZaloGroupIdsText] = useState(
+    settings.zaloGroupIds.join(", "),
+  );
+  const zaloGroupIds = parseZaloGroupIds(zaloGroupIdsText);
   const [zaloGroupJoin, setZaloGroupJoin] = useState<ZaloJoinMode>(
     settings.zaloGroupJoin,
   );
@@ -788,7 +797,7 @@ export function AdminSettings({
           telegramShopUsername: shopUsername,
           zaloBotPhone: zaloPhone,
           zaloBotName: zaloName,
-          zaloGroupId,
+          zaloGroupIds,
           zaloGroupJoin,
           zaloGroupPost,
           zaloGroupWelcome,
@@ -1809,56 +1818,80 @@ export function AdminSettings({
             <div className="border-t border-white/5 pt-5">
               <span className={LABEL}>Nhóm Zalo của shop (bot quản lý)</span>
               <p className={HINT}>
-                Thêm tài khoản bot vào nhóm và cho làm quản trị viên, rồi dán ID
-                nhóm ở đây (bot liệt kê các nhóm nó đang ở bên dưới). Bot sẽ
-                duyệt người xin vào theo chế độ bạn chọn, nhắc rồi mời ra khỏi
-                nhóm người gửi link ngoài, từ bị cấm, lặp tin hay dội tin, và
-                đăng thông báo của shop vào nhóm nếu bật.
+                Thêm tài khoản bot vào nhóm và cho làm quản trị viên, rồi bấm
+                “Dùng nhóm này” ở những nhóm muốn bot quản (chọn được nhiều
+                nhóm, cùng một luật). Bot sẽ duyệt người xin vào theo chế độ bạn
+                chọn, nhắc rồi mời ra khỏi nhóm người gửi link ngoài, từ bị cấm,
+                lặp tin hay dội tin, và đăng thông báo của shop vào các nhóm đã
+                chọn nếu bật.
               </p>
               {zaloBotState?.groups && zaloBotState.groups.length > 0 ? (
                 <ul className="mt-3 flex flex-col gap-1.5">
-                  {zaloBotState.groups.map((group) => (
-                    <li
-                      key={group.id}
-                      className="flex flex-wrap items-center gap-2 rounded-xl border border-white/5 bg-white/[0.02] px-3 py-2 text-[12px]"
-                    >
-                      <span className="font-bold text-white">{group.name}</span>
-                      <span className="text-neutral-500">
-                        {group.members} thành viên · ID{" "}
-                        <span className="font-mono text-neutral-300">
-                          {group.id}
+                  {zaloBotState.groups.map((group) => {
+                    const used = zaloGroupIds.includes(group.id);
+                    return (
+                      <li
+                        key={group.id}
+                        className={`flex flex-wrap items-center gap-2 rounded-xl border px-3 py-2 text-[12px] ${
+                          used
+                            ? "border-emerald-500/30 bg-emerald-500/[0.06]"
+                            : "border-white/5 bg-white/[0.02]"
+                        }`}
+                      >
+                        <span className="font-bold text-white">
+                          {group.name}
                         </span>
-                      </span>
-                      <span
-                        className={
-                          group.admin ? "text-emerald-400" : "text-amber-300"
-                        }
-                      >
-                        {group.admin
-                          ? "bot là quản trị"
-                          : "bot chưa là quản trị"}
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => setZaloGroupId(group.id)}
-                        className="ml-auto rounded-lg border border-white/10 px-2.5 py-1 text-[10px] font-black uppercase tracking-widest text-neutral-300 hover:text-white"
-                      >
-                        Dùng nhóm này
-                      </button>
-                    </li>
-                  ))}
+                        <span className="text-neutral-500">
+                          {group.members} thành viên · ID{" "}
+                          <span className="font-mono text-neutral-300">
+                            {group.id}
+                          </span>
+                        </span>
+                        <span
+                          className={
+                            group.admin ? "text-emerald-400" : "text-amber-300"
+                          }
+                        >
+                          {group.admin
+                            ? "bot là quản trị"
+                            : "bot chưa là quản trị"}
+                        </span>
+                        <button
+                          type="button"
+                          aria-pressed={used}
+                          onClick={() =>
+                            setZaloGroupIdsText(
+                              (used
+                                ? zaloGroupIds.filter((id) => id !== group.id)
+                                : [...zaloGroupIds, group.id]
+                              ).join(", "),
+                            )
+                          }
+                          className={`ml-auto rounded-lg border px-2.5 py-1 text-[10px] font-black uppercase tracking-widest ${
+                            used
+                              ? "border-emerald-500/40 text-emerald-300 hover:text-white"
+                              : "border-white/10 text-neutral-300 hover:text-white"
+                          }`}
+                        >
+                          {used ? "Đang dùng · Bỏ" : "Dùng nhóm này"}
+                        </button>
+                      </li>
+                    );
+                  })}
                 </ul>
               ) : null}
               <div className="grid gap-3 md:grid-cols-2 mt-3">
                 <div>
                   <label htmlFor="zalo-group-id" className={LABEL}>
-                    ID nhóm
+                    ID nhóm (nhiều nhóm cách nhau bằng dấu phẩy)
                   </label>
                   <input
                     id="zalo-group-id"
                     autoComplete="off"
-                    value={zaloGroupId}
-                    onChange={(event) => setZaloGroupId(event.target.value)}
+                    value={zaloGroupIdsText}
+                    onChange={(event) =>
+                      setZaloGroupIdsText(event.target.value)
+                    }
                     placeholder="để trống là không quản lý nhóm nào"
                     className={`${FIELD} font-mono`}
                   />
@@ -1926,7 +1959,7 @@ export function AdminSettings({
                   checked={zaloGroupPost}
                   onChange={setZaloGroupPost}
                   label="Đăng thông báo của shop vào nhóm"
-                  hint="Thông báo đăng ở mục Thông báo (toàn shop) được bot gửi vào nhóm, cùng lúc với kênh Telegram."
+                  hint="Thông báo đăng ở mục Thông báo (toàn shop) được bot gửi vào các nhóm đã chọn, cùng lúc với kênh Telegram."
                 />
               </div>
               {zaloGroupEvents.length > 0 ? (
@@ -1941,6 +1974,9 @@ export function AdminSettings({
                         <span className="font-mono text-neutral-500">
                           {row.at}
                         </span>
+                        {zaloGroupIds.length !== 1 ? (
+                          <span className="text-neutral-400">{row.group}</span>
+                        ) : null}
                         <span
                           className={`font-bold ${
                             row.kind === "REMOVED"

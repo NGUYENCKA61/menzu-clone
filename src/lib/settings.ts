@@ -1,5 +1,9 @@
 import { parseCardRates, serializeCardRates, type CardRate } from "@/lib/topup";
-import { readZaloJoinMode, type ZaloJoinMode } from "@/lib/zaloGroupRules";
+import {
+  parseZaloGroupIds,
+  readZaloJoinMode,
+  type ZaloJoinMode,
+} from "@/lib/zaloGroupRules";
 
 /**
  * Shop settings that used to be constants in the code.
@@ -110,8 +114,12 @@ export interface ShopSettings {
   zaloBotName: string;
 
   // --- Nhóm Zalo của shop (bot quản lý) --------------------------------------
-  /** The group the bot minds; blank is none. The bot lists the ids it sees. */
-  zaloGroupId: string;
+  /**
+   * The groups the bot minds; empty is none. The bot lists the ids it sees.
+   * Kept at one key, comma-separated, so the first version's single id reads
+   * on as a list of one.
+   */
+  zaloGroupIds: string[];
   /** Who the bot lets in when somebody asks to join. */
   zaloGroupJoin: ZaloJoinMode;
   /** Whether shop notices are posted into the group. */
@@ -381,7 +389,7 @@ export const DEFAULT_SETTINGS: ShopSettings = {
   telegramShopUsername: "",
   zaloBotPhone: "",
   zaloBotName: "",
-  zaloGroupId: "",
+  zaloGroupIds: [],
   zaloGroupJoin: "off",
   zaloGroupPost: false,
   zaloGroupWelcome: "",
@@ -511,7 +519,7 @@ export const SETTING_KEYS: Record<keyof ShopSettings, string> = {
   telegramShopUsername: "integrations.telegramShop.username",
   zaloBotPhone: "integrations.zalo.phone",
   zaloBotName: "integrations.zalo.name",
-  zaloGroupId: "integrations.zalo.group.id",
+  zaloGroupIds: "integrations.zalo.group.id",
   zaloGroupJoin: "integrations.zalo.group.join",
   zaloGroupPost: "integrations.zalo.group.post",
   zaloGroupWelcome: "integrations.zalo.group.welcome",
@@ -981,10 +989,7 @@ export function parseSettings(
       stored.get(SETTING_KEYS.zaloBotName),
       DEFAULT_SETTINGS.zaloBotName,
     ),
-    zaloGroupId: toOptionalText(
-      stored.get(SETTING_KEYS.zaloGroupId),
-      DEFAULT_SETTINGS.zaloGroupId,
-    ),
+    zaloGroupIds: parseZaloGroupIds(stored.get(SETTING_KEYS.zaloGroupIds)),
     zaloGroupJoin: readZaloJoinMode(stored.get(SETTING_KEYS.zaloGroupJoin)),
     zaloGroupPost: toBoolean(
       stored.get(SETTING_KEYS.zaloGroupPost),
@@ -1273,7 +1278,7 @@ export function serializeSettings(
       .replace(/^@/, ""),
     zaloBotPhone: settings.zaloBotPhone.replace(/\D/g, ""),
     zaloBotName: settings.zaloBotName.trim(),
-    zaloGroupId: settings.zaloGroupId.trim(),
+    zaloGroupIds: settings.zaloGroupIds.join(","),
     zaloGroupJoin: settings.zaloGroupJoin,
     zaloGroupPost: String(settings.zaloGroupPost),
     zaloGroupWelcome: settings.zaloGroupWelcome.trim(),
@@ -1425,7 +1430,12 @@ export function normalizeSettings(
       .replace(/^@/, ""),
     zaloBotPhone: String(raw?.zaloBotPhone ?? "").replace(/\D/g, ""),
     zaloBotName: String(raw?.zaloBotName ?? "").trim(),
-    zaloGroupId: String(raw?.zaloGroupId ?? "").trim(),
+    // A Cấu hình tab opened before the list existed still sends one id under
+    // the old name; a save from it must not wipe the groups.
+    zaloGroupIds: parseZaloGroupIds(
+      raw?.zaloGroupIds ??
+        (raw as { zaloGroupId?: unknown } | null)?.zaloGroupId,
+    ),
     zaloGroupJoin: readZaloJoinMode(raw?.zaloGroupJoin),
     zaloGroupPost: Boolean(raw?.zaloGroupPost),
     zaloGroupWelcome: String(raw?.zaloGroupWelcome ?? "").trim(),

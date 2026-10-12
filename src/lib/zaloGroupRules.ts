@@ -24,6 +24,24 @@ export function readZaloJoinMode(value: unknown): ZaloJoinMode {
     : "off";
 }
 
+/**
+ * The groups the bot minds, as Cấu hình keeps them at one key: ids separated
+ * by commas, spaces or line breaks (the form may send them as an array).
+ * Blank is none; a repeated id counts once; the order typed is kept.
+ */
+export function parseZaloGroupIds(raw: unknown): string[] {
+  const text = Array.isArray(raw)
+    ? raw.map((v) => String(v)).join(",")
+    : typeof raw === "string"
+      ? raw
+      : "";
+  const ids: string[] = [];
+  for (const part of text.split(/[\s,;]+/)) {
+    if (part && !ids.includes(part)) ids.push(part);
+  }
+  return ids;
+}
+
 /** "approve" / "refuse" the request, or "leave" it for a human admin. */
 export function joinDecision(
   mode: ZaloJoinMode,

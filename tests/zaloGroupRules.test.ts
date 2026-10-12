@@ -6,6 +6,7 @@ import {
   joinDecision,
   outsideLinkIn,
   parseBadWords,
+  parseZaloGroupIds,
   readZaloJoinMode,
   spamReason,
   strikeAction,
@@ -92,5 +93,14 @@ describe("what a strike earns", () => {
       "Chào An, đây là nhóm THICHTHIHACK",
     );
     expect(welcomeText("   ", "An", "X")).toBeNull();
+  });
+});
+
+describe("the group ids at one setting key", () => {
+  it("reads them however they were typed, once each, in order", () => {
+    expect(parseZaloGroupIds("")).toEqual([]);
+    expect(parseZaloGroupIds(undefined)).toEqual([]);
+    expect(parseZaloGroupIds("111, 222\n333;111")).toEqual(["111", "222", "333"]);
+    expect(parseZaloGroupIds(["111", " 222 ", 333])).toEqual(["111", "222", "333"]);
   });
 });

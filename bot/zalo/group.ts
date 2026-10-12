@@ -1,12 +1,13 @@
 /**
- * The shop's Zalo group, minded by the notice bot (the owner, 12/10/2026:
+ * The shop's Zalo groups, minded by the notice bot (the owner, 12/10/2026:
  * "bot quản lý nhóm zalo, duyệt thêm thành viên, xóa thành viên cảnh báo
  * nếu thành viên spam, thông báo đăng vào nhóm").
  *
- * The bot account sits in the group as an admin. Every twenty seconds it
- * reads Cấu hình, approves or refuses whoever asked to join (by the mode
- * the shop set), and keeps a snapshot of the groups it is in for the admin
- * page. Every group message is weighed against the rules in
+ * The bot account sits in each chosen group as an admin (Cấu hình may name
+ * several). Every twenty seconds it reads Cấu hình, approves or refuses
+ * whoever asked to join any of them (by the mode the shop set), and keeps a
+ * snapshot of the groups it is in for the admin page. Every message in a
+ * chosen group is weighed against the rules in
  * src/lib/zaloGroupRules.ts: a first offence is a warning in the group, a
  * second within a week is the door. Everything it does lands in
  * zalo_group_events, which Cấu hình shows and the strike count reads.
@@ -175,10 +176,19 @@ export function createGroupManager(deps: {
     groupsAt = Date.now();
   }
 
-  /** Whoever asked to join, decided by the mode the shop set. */
+  /** Whoever asked to join any chosen group, decided by the mode the shop set. */
   async function approvePending(s: ShopSettings): Promise<void> {
-    const groupId = s.zaloGroupId.trim();
-    if (!groupId || s.zaloGroupJoin === "off") return;
+    if (s.zaloGroupJoin === "off") return;
+    // One group's failure (the bot demoted there, say) must not cost the others
+    // their approvals.
+    for (const groupId of s.zaloGroupIds) {
+      await approvePendingIn(groupId, s).catch((error: Error) =>
+        log("approvals failed in", groupId, error.message),
+      );
+    }
+  }
+
+  async function approvePendingIn(groupId: string, s: ShopSettings): Promise<void> {
     const { users } = await api.getPendingGroupMembers(groupId);
     if (!users || users.length === 0) return;
     const brand = await deps.brand();
@@ -232,12 +242,12 @@ export function createGroupManager(deps: {
     }
   }
 
-  /** A message in the group: weighed, and answered when it is spam. */
+  /** A message in a chosen group: weighed, and answered when it is spam. */
   async function onMessage(message: GroupMessage): Promise<void> {
     if (message.isSelf || message.type !== ThreadType.Group) return;
     const s = await currentSettings();
-    const groupId = s.zaloGroupId.trim();
-    if (!groupId || message.threadId !== groupId) return;
+    const groupId = message.threadId;
+    if (!s.zaloGroupIds.includes(groupId)) return;
     const text = typeof message.data.content === "string" ? message.data.content : "";
     const uid = message.data.uidFrom;
     if (!text || !uid) return;
@@ -294,7 +304,7 @@ export function createGroupManager(deps: {
     if (now - groupsAt > GROUPS_REFRESH_MS) {
       await refreshGroups().catch((error: Error) => log("groups refresh failed:", error.message));
     }
-    if (!s.zaloGroupId.trim()) return;
+    if (s.zaloGroupIds.length === 0) return;
     await approvePending(s).catch((error: Error) => log("approvals failed:", error.message));
   }
 

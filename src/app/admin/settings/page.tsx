@@ -32,13 +32,25 @@ export default async function AdminSettingsPage() {
       getPartners(),
       // What the Zalo bot last said about itself: a QR to scan, or alive.
       db.setting.findUnique({ where: { key: ZALO_STATE_KEY } }),
-    // What the bot did in the group lately, for the block under its standing.
+    // What the bot did in the groups lately, for the block under its standing.
     db.zaloGroupEvent.findMany({
       orderBy: { createdAt: "desc" },
       take: 15,
-      select: { id: true, kind: true, name: true, note: true, createdAt: true },
+      select: {
+        id: true,
+        groupId: true,
+        kind: true,
+        name: true,
+        note: true,
+        createdAt: true,
+      },
     }),
     ]);
+
+  const zaloBotState = settleZaloBotState(readZaloBotState(zaloStateRow?.value));
+  // An event names its group by id; the bot's own snapshot knows the name.
+  const groupName = (id: string): string =>
+    zaloBotState?.groups?.find((g) => g.id === id)?.name ?? id;
 
   return (
     <AdminShell
@@ -51,9 +63,10 @@ export default async function AdminSettingsPage() {
         categories={categories.map((c) => ({ slug: c.slug, name: c.name }))}
         docs={docs.map((d) => ({ slug: d.slug, name: d.title }))}
         partners={partners}
-        zaloBotState={settleZaloBotState(readZaloBotState(zaloStateRow?.value))}
+        zaloBotState={zaloBotState}
         zaloGroupEvents={zaloGroupEvents.map((row) => ({
           id: row.id,
+          group: groupName(row.groupId),
           kind: row.kind,
           name: row.name,
           note: row.note,

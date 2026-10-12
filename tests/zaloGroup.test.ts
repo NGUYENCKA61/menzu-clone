@@ -13,8 +13,15 @@ import { createGroupManager, type GroupApi } from "../bot/zalo/group";
 type Row = { key: string; value: string };
 
 function fakes(settings: Record<string, string>) {
-  const calls: { review: unknown[]; removed: string[]; sent: unknown[] } = {
+  const calls: {
+    review: unknown[];
+    /** The group each review was sent to, in order. */
+    reviewIn: string[];
+    removed: string[];
+    sent: unknown[];
+  } = {
     review: [],
+    reviewIn: [],
     removed: [],
     sent: [],
   };
@@ -44,8 +51,9 @@ function fakes(settings: Record<string, string>) {
         ],
       };
     },
-    reviewPendingMemberRequest: async (payload) => {
+    reviewPendingMemberRequest: async (payload, groupId) => {
       calls.review.push(payload);
+      calls.reviewIn.push(groupId);
       return {};
     },
     removeUserFromGroup: async (memberId) => {
@@ -165,6 +173,23 @@ describe("what the bot does about spam", () => {
     await manager.onMessage({ ...msg("u-y", "spam spam"), threadId: "g-other" });
     expect(calls.sent).toEqual([]);
     expect(calls.removed).toEqual([]);
+  });
+
+  it("minds every chosen group, and only those", async () => {
+    const { manager, calls, events } = fakes({
+      ...GROUP,
+      "integrations.zalo.group.id": "g1, g2",
+    });
+    await manager.tick();
+    expect(calls.reviewIn).toEqual(["g1", "g1", "g2", "g2"]);
+    expect(
+      events.filter((e) => e.kind === "JOIN_APPROVED").map((e) => e.groupId),
+    ).toEqual(["g1", "g2"]);
+    calls.sent.length = 0;
+    await manager.onMessage({ ...msg("u-z", "xem shopkhac.vn", "Zed"), threadId: "g2" });
+    await manager.onMessage({ ...msg("u-z", "xem shopkhac.vn", "Zed"), threadId: "g-other" });
+    expect(calls.sent).toHaveLength(1);
+    expect(events.filter((e) => e.kind === "WARNED").map((e) => e.groupId)).toEqual(["g2"]);
   });
 
   it("does nothing at all while no group is named", async () => {
