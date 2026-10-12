@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowRight, X } from "lucide-react";
+import { ArrowRight, Bell, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -24,6 +24,7 @@ import {
   type AnnouncementType,
 } from "@/lib/announcements";
 
+import { TYPE_ICONS } from "./announcementIcons";
 import { useClientNow } from "./useClientClock";
 import { lockScroll, unlockScroll } from "./modalChrome";
 import { useLeave } from "./useOverlayPresence";
@@ -405,6 +406,7 @@ export function AnnouncementModal({
   // on a phone (the owner, 12/10/2026, review item 1). The sheet only ever
   // renders in the browser (nothing is unread until localStorage is read),
   // so document is there.
+  const HeadingIcon = item.personal ? Bell : TYPE_ICONS[item.type];
   if (typeof document === "undefined") return null;
   return createPortal(
     <div
@@ -434,10 +436,16 @@ export function AnnouncementModal({
           className="absolute inset-x-0 top-0 h-px bg-[var(--menzu-accent)]/70"
         />
 
-        {/* No glyph beside the heading: the shop asked for the notice icons
-            to come off the storefront. The accent rule above and the heading
-            say what this is. */}
-        <header className="flex shrink-0 items-center gap-3 border-b border-white/[0.07] px-5 py-4">
+        {/* The kind's glyph in the accent, then the heading in white: the
+            pairing the notices card and /thong-bao already wear since 03/10,
+            so the sheet is no longer the one place without it (the owner,
+            12/10/2026, review item 10). A personal notice wears the bell. */}
+        <header className="flex shrink-0 items-center gap-2.5 border-b border-white/[0.07] px-5 py-4">
+          <HeadingIcon
+            size={16}
+            className="shrink-0 text-[var(--menzu-accent)]"
+            aria-hidden
+          />
           <h2 className="text-[15px] font-semibold text-white">
             {/* A reply to this reader is not system news (the owner,
                 12/10/2026, review item 3). */}
