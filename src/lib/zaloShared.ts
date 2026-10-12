@@ -101,3 +101,24 @@ export function readZaloBotState(
   }
   return null;
 }
+
+/**
+ * A "waiting for a scan" report older than this is a bot that stopped
+ * without saying so: a QR expires and is reported anew within two minutes.
+ */
+export const QR_REPORT_FRESH_MS = 10 * 60 * 1000;
+
+/** The bot's standing as Cấu hình should read it: a stale scan wait is a loss. */
+export function settleZaloBotState(
+  state: ZaloBotState | null,
+  now = Date.now(),
+): ZaloBotState | null {
+  if (!state || state.state !== "qr") return state;
+  if (now - new Date(state.at).getTime() <= QR_REPORT_FRESH_MS) return state;
+  return {
+    ...state,
+    state: "offline",
+    qrUrl: null,
+    note: "bot không chạy, không báo về nữa",
+  };
+}

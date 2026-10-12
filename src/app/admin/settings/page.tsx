@@ -11,7 +11,7 @@ import {
 } from "@/lib/queries";
 import { db } from "@/lib/db";
 import { getShopSettings } from "@/lib/settingsStore";
-import { readZaloBotState, ZALO_STATE_KEY } from "@/lib/zaloShared";
+import { readZaloBotState, settleZaloBotState, ZALO_STATE_KEY } from "@/lib/zaloShared";
 
 export const metadata: Metadata = { title: "Cấu hình | Quản trị" };
 export const dynamic = "force-dynamic";
@@ -45,7 +45,7 @@ export default async function AdminSettingsPage() {
         categories={categories.map((c) => ({ slug: c.slug, name: c.name }))}
         docs={docs.map((d) => ({ slug: d.slug, name: d.title }))}
         partners={partners}
-        zaloBotState={readZaloBotState(zaloStateRow?.value)}
+        zaloBotState={settleZaloBotState(readZaloBotState(zaloStateRow?.value))}
       />
     </AdminShell>
   );

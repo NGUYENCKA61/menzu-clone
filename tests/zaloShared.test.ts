@@ -8,6 +8,7 @@ import {
   noticeText,
   readLinkMessage,
   readZaloBotState,
+  settleZaloBotState,
 } from "@/lib/zaloShared";
 
 /**
@@ -78,5 +79,28 @@ describe("the bot's reported standing", () => {
       at: "2026-10-12T10:00:00Z",
       note: null,
     });
+  });
+});
+
+describe("the bot's standing as Cấu hình reads it", () => {
+  it("keeps a fresh scan wait, and reads a stale one as lost", () => {
+    const at = new Date("2026-10-12T10:00:00Z");
+    const qr = {
+      state: "qr" as const,
+      qrUrl: "/uploads/zalo/qr-1.png",
+      name: null,
+      at: at.toISOString(),
+      note: null,
+    };
+    expect(settleZaloBotState(qr, at.getTime() + 5 * 60 * 1000)).toEqual(qr);
+    const stale = settleZaloBotState(qr, at.getTime() + 11 * 60 * 1000);
+    expect(stale?.state).toBe("offline");
+    expect(stale?.qrUrl).toBeNull();
+    expect(stale?.note).toMatch(/không chạy/);
+    expect(settleZaloBotState(null)).toBeNull();
+    const online = { ...qr, state: "online" as const };
+    expect(settleZaloBotState(online, at.getTime() + 60 * 60 * 1000)).toEqual(
+      online,
+    );
   });
 });
