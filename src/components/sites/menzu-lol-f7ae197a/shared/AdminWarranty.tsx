@@ -42,7 +42,7 @@ type Filter = "ALL" | "TODO" | WarrantyStatus;
 const FILTERS: { key: Filter; label: string }[] = [
   { key: "ALL", label: "Tất cả" },
   { key: "TODO", label: "Cần xử lý" },
-  { key: "OPEN", label: "Mới gửi" },
+  { key: "OPEN", label: "Chờ xử lý" },
   { key: "IN_PROGRESS", label: "Đang xử lý" },
   { key: "REFUNDING", label: "Đang hoàn tiền" },
   { key: "RESOLVED", label: "Đã xử lý" },

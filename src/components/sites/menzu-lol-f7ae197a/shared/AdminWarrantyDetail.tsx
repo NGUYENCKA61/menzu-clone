@@ -458,7 +458,7 @@ export function AdminWarrantyDetail({ ticket, mailOn }: { ticket: WarrantyTicket
                         className={`${BTN} border border-emerald-500/40 bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/20`}
                       >
                         <CheckCircle2 className="h-3.5 w-3.5" aria-hidden />
-                        {busy === "RESOLVED" ? "Đang lưu…" : "Đã khắc phục"}
+                        {busy === "RESOLVED" ? "Đang lưu…" : "Đã xử lý"}
                       </button>
                       {ticket.orderPaid ? (
                         <button

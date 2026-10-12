@@ -191,8 +191,11 @@ export const WARRANTY_STATUS: Record<
   // tinted chips "phát neon hơi sáng", then "chữ trắng viền màu đi"). New
   // is grey, since nothing has happened to it yet; being worked on is
   // amber; closed is green.
+  // One family of words, the shop's side of it throughout: chờ xử lý, đang
+  // xử lý, đã xử lý (the owner, 12/10/2026: "sửa lại sao cho hợp lý và
+  // đồng bộ"). "Mới gửi" was the buyer's side of the same moment.
   OPEN: {
-    label: "Mới gửi",
+    label: "Chờ xử lý",
     // The shop's red: new is the one that wants the desk's eye ("mới gửi
     // viền đỏ đi").
     tile: "border-[var(--menzu-accent)]/60 bg-transparent text-white",
@@ -210,7 +213,7 @@ export const WARRANTY_STATUS: Record<
   },
   // The shop could not fix it and is paying it back over a bank transfer:
   // waiting for the buyer's account, then for the shop's transfer.
-  // Waiting on someone, as "Mới gửi" is: the buyer's account number, then
+  // Waiting on someone, as "Chờ xử lý" is: the buyer's account number, then
   // the shop's transfer.
   REFUNDING: {
     label: "Đang hoàn tiền",
