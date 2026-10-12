@@ -2,9 +2,12 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ImagePlus, Lock, Send, X } from "lucide-react";
+import { ChevronRight, ImagePlus, Send, X } from "lucide-react";
 
-import { WarrantyThread, type ThreadOpening } from "@/components/sites/menzu-lol-f7ae197a/shared/WarrantyThread";
+import {
+  WarrantyThread,
+  type ThreadOpening,
+} from "@/components/sites/menzu-lol-f7ae197a/shared/WarrantyThread";
 import {
   mergeMessages,
   MESSAGE_MAX,
@@ -50,7 +53,10 @@ export function WarrantyChat({
   const [error, setError] = useState<string | null>(null);
   const fileInput = useRef<HTMLInputElement>(null);
   const open = warrantyOpen(status);
-  const messages = useMemo(() => mergeMessages(initial, extra), [initial, extra]);
+  const messages = useMemo(
+    () => mergeMessages(initial, extra),
+    [initial, extra],
+  );
 
   const cursor = useRef(opening.sentAt);
   useEffect(() => {
@@ -67,7 +73,10 @@ export function WarrantyChat({
           { cache: "no-store" },
         );
         if (!res.ok) return;
-        const data = (await res.json()) as { status?: WarrantyStatus; messages?: ChatMessage[] };
+        const data = (await res.json()) as {
+          status?: WarrantyStatus;
+          messages?: ChatMessage[];
+        };
         const fresh = data.messages ?? [];
         if (fresh.length > 0) setExtra((prev) => mergeMessages(prev, fresh));
         if (data.status && data.status !== status) router.refresh();
@@ -86,7 +95,9 @@ export function WarrantyChat({
       return;
     }
     if (chosen.size > IMAGE_MAX) {
-      setError(`Ảnh tối đa 5MB. File này ${(chosen.size / 1024 / 1024).toFixed(1)}MB.`);
+      setError(
+        `Ảnh tối đa 5MB. File này ${(chosen.size / 1024 / 1024).toFixed(1)}MB.`,
+      );
       return;
     }
     setError(null);
@@ -118,8 +129,14 @@ export function WarrantyChat({
       form.set("ticket", ticketId);
       form.set("body", said.body);
       if (sentFile) form.set("image", sentFile);
-      const res = await fetch("/api/warranty-requests/messages", { method: "POST", body: form });
-      const data = (await res.json().catch(() => ({}))) as { message?: ChatMessage; error?: string };
+      const res = await fetch("/api/warranty-requests/messages", {
+        method: "POST",
+        body: form,
+      });
+      const data = (await res.json().catch(() => ({}))) as {
+        message?: ChatMessage;
+        error?: string;
+      };
       if (!res.ok || !data.message) {
         setError(data.error ?? "Không gửi được tin nhắn");
         giveBack();
@@ -133,6 +150,46 @@ export function WarrantyChat({
     } finally {
       setBusy(false);
     }
+  }
+
+  if (!open) {
+    // Done with: folded to one line, since nobody needs ten old messages
+    // on every visit, but never gone, since this is where the buyer reads
+    // back what the shop said, the new key or the refund among it (the
+    // owner, 12/10/2026). Opening it scrolls the pane to its last line.
+    return (
+      <div className="mt-4 border-t border-white/[0.06] pt-4">
+        <details
+          className="group"
+          onToggle={(event) => {
+            const pane =
+              event.currentTarget.querySelector<HTMLElement>("[data-pane]");
+            if (pane) pane.scrollTop = pane.scrollHeight;
+          }}
+        >
+          <summary className="flex cursor-pointer list-none items-center gap-2 text-[12px] font-black uppercase tracking-wider text-neutral-300 transition-colors hover:text-white [&::-webkit-details-marker]:hidden">
+            <ChevronRight
+              className="h-4 w-4 shrink-0 transition-transform group-open:rotate-90"
+              aria-hidden
+            />
+            Trao đổi với shop
+            <span className="font-semibold normal-case tracking-normal text-neutral-500">
+              ({messages.length + 1} tin, đã đóng)
+            </span>
+          </summary>
+          <div className="mt-3">
+            <WarrantyThread
+              viewer="buyer"
+              buyerName="Bạn"
+              buyerAvatar={buyerAvatar}
+              buyerInitial={buyerInitial}
+              opening={opening}
+              messages={messages}
+            />
+          </div>
+        </details>
+      </div>
+    );
   }
 
   return (
@@ -153,85 +210,82 @@ export function WarrantyChat({
         messages={messages}
         // Said plainly while it is so, or the buyer stares at their own
         // message wondering whether anyone reads it.
-        footer={open && !messages.some((m) => m.fromShop) ? "Shop chưa trả lời." : null}
+        footer={messages.some((m) => m.fromShop) ? null : "Shop chưa trả lời."}
       />
 
-      {open ? (
-        <div className="mt-4">
-          {file ? (
-            <div className="mb-2 inline-flex max-w-full items-center gap-2 rounded-lg border border-white/10 bg-white/[0.04] px-2.5 py-1.5 text-[12px] text-neutral-300">
-              <ImagePlus className="h-3.5 w-3.5 shrink-0 text-neutral-400" />
-              <span className="truncate">{file.name}</span>
-              <button
-                type="button"
-                onClick={() => setFile(null)}
-                aria-label="Bỏ ảnh"
-                className="shrink-0 text-neutral-500 hover:text-white"
-              >
-                <X className="h-3.5 w-3.5" />
-              </button>
-            </div>
-          ) : null}
-          <div className="flex items-end gap-2">
+      <div className="mt-4">
+        {file ? (
+          <div className="mb-2 inline-flex max-w-full items-center gap-2 rounded-lg border border-white/10 bg-white/[0.04] px-2.5 py-1.5 text-[12px] text-neutral-300">
+            <ImagePlus className="h-3.5 w-3.5 shrink-0 text-neutral-400" />
+            <span className="truncate">{file.name}</span>
             <button
               type="button"
-              onClick={() => fileInput.current?.click()}
-              aria-label="Gửi ảnh"
-              title="Gửi ảnh"
-              className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] text-neutral-300 transition-colors hover:border-white/25 hover:text-white"
+              onClick={() => setFile(null)}
+              aria-label="Bỏ ảnh"
+              className="shrink-0 text-neutral-500 hover:text-white"
             >
-              <ImagePlus className="h-4 w-4" />
-            </button>
-            <input
-              ref={fileInput}
-              type="file"
-              accept={IMAGE_TYPES.join(",")}
-              className="hidden"
-              onChange={(event) => pick(event.target.files?.[0])}
-            />
-            <textarea
-              value={text}
-              onChange={(event) => setText(event.target.value)}
-              onKeyDown={(event) => {
-                // Enter sends where there is a keyboard; on a phone it is a
-                // new line and the button sends. Never mid-composition — a
-                // Vietnamese keyboard is still building the letter.
-                if (
-                  event.key === "Enter" &&
-                  !event.shiftKey &&
-                  !event.nativeEvent.isComposing &&
-                  !window.matchMedia("(pointer: coarse)").matches
-                ) {
-                  event.preventDefault();
-                  void send();
-                }
-              }}
-              rows={Math.min(5, Math.max(1, text.split("\n").length))}
-              maxLength={MESSAGE_MAX}
-              placeholder="Nhắn cho shop…"
-              aria-label="Nhắn cho shop"
-              className="min-h-10 flex-1 resize-none rounded-xl border border-white/10 bg-neutral-950/60 px-3 py-2.5 text-sm leading-snug text-white placeholder-neutral-600 outline-none transition-colors focus:border-[var(--menzu-accent)]/60"
-            />
-            <button
-              type="button"
-              onClick={() => void send()}
-              disabled={busy || (!text.trim() && !file)}
-              className="inline-flex h-10 shrink-0 items-center gap-2 rounded-xl bg-[var(--menzu-accent)] px-3.5 text-[12px] font-bold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              <Send className="h-4 w-4" />
-              <span className="hidden sm:inline">{busy ? "Đang gửi…" : "Gửi"}</span>
+              <X className="h-3.5 w-3.5" />
             </button>
           </div>
-          {error ? (
-            <p className="mt-2 text-[12px] font-semibold text-rose-300">{error}</p>
-          ) : null}
+        ) : null}
+        <div className="flex items-end gap-2">
+          <button
+            type="button"
+            onClick={() => fileInput.current?.click()}
+            aria-label="Gửi ảnh"
+            title="Gửi ảnh"
+            className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] text-neutral-300 transition-colors hover:border-white/25 hover:text-white"
+          >
+            <ImagePlus className="h-4 w-4" />
+          </button>
+          <input
+            ref={fileInput}
+            type="file"
+            accept={IMAGE_TYPES.join(",")}
+            className="hidden"
+            onChange={(event) => pick(event.target.files?.[0])}
+          />
+          <textarea
+            value={text}
+            onChange={(event) => setText(event.target.value)}
+            onKeyDown={(event) => {
+              // Enter sends where there is a keyboard; on a phone it is a
+              // new line and the button sends. Never mid-composition — a
+              // Vietnamese keyboard is still building the letter.
+              if (
+                event.key === "Enter" &&
+                !event.shiftKey &&
+                !event.nativeEvent.isComposing &&
+                !window.matchMedia("(pointer: coarse)").matches
+              ) {
+                event.preventDefault();
+                void send();
+              }
+            }}
+            rows={Math.min(5, Math.max(1, text.split("\n").length))}
+            maxLength={MESSAGE_MAX}
+            placeholder="Nhắn cho shop…"
+            aria-label="Nhắn cho shop"
+            className="min-h-10 flex-1 resize-none rounded-xl border border-white/10 bg-neutral-950/60 px-3 py-2.5 text-sm leading-snug text-white placeholder-neutral-600 outline-none transition-colors focus:border-[var(--menzu-accent)]/60"
+          />
+          <button
+            type="button"
+            onClick={() => void send()}
+            disabled={busy || (!text.trim() && !file)}
+            className="inline-flex h-10 shrink-0 items-center gap-2 rounded-xl bg-[var(--menzu-accent)] px-3.5 text-[12px] font-bold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            <Send className="h-4 w-4" />
+            <span className="hidden sm:inline">
+              {busy ? "Đang gửi…" : "Gửi"}
+            </span>
+          </button>
         </div>
-      ) : (
-        <p className="mt-4 flex items-center gap-2 text-[12px] text-neutral-500">
-          <Lock className="h-3.5 w-3.5 shrink-0" />
-          Yêu cầu đã xử lý xong nên khung trao đổi đã đóng.
-        </p>
-      )}
+        {error ? (
+          <p className="mt-2 text-[12px] font-semibold text-rose-300">
+            {error}
+          </p>
+        ) : null}
+      </div>
     </div>
   );
 }

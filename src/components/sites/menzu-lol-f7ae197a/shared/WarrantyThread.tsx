@@ -81,6 +81,7 @@ export function WarrantyThread({
   return (
     <div
       ref={pane}
+      data-pane
       className="max-h-[440px] min-h-[160px] overflow-y-auto rounded-xl border border-white/[0.06] bg-black/30 p-4"
     >
       <ol className="flex flex-col gap-3">
