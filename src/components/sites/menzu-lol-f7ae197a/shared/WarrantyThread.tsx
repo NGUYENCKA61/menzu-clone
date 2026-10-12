@@ -29,7 +29,6 @@ export function WarrantyThread({
   buyerName,
   opening,
   messages,
-  startedOn,
   footer,
   buyerAvatar = null,
   buyerInitial,
@@ -42,8 +41,6 @@ export function WarrantyThread({
   /** The buyer's picture beside their lines, or the initial drawn instead. */
   buyerAvatar?: string | null;
   buyerInitial?: string;
-  /** "12/10/2026": the faint first line of the pane. */
-  startedOn?: string;
   /** A faint last line, for what the thread is waiting on. */
   footer?: ReactNode;
 }) {
@@ -56,6 +53,7 @@ export function WarrantyThread({
             body: opening.body,
             imageUrl: opening.imageUrl,
             at: opening.at,
+            sentAt: opening.sentAt,
             status: null,
             author: null,
             authorAvatar: null,
@@ -85,14 +83,19 @@ export function WarrantyThread({
       ref={pane}
       className="max-h-[440px] min-h-[160px] overflow-y-auto rounded-xl border border-white/[0.06] bg-black/30 p-4"
     >
-      {startedOn ? (
-        <p className="mb-4 text-center text-[11px] text-neutral-500">
-          Bắt đầu {startedOn}
-        </p>
-      ) : null}
       <ol className="flex flex-col gap-3">
-        {lines.map((line) => {
+        {lines.map((line, index) => {
           const mine = (viewer === "shop") === line.fromShop;
+          // Lines from the same writer within five minutes run on under
+          // one name and one picture, as any chat does (the owner,
+          // 12/10/2026: the same avatar three times in a row read as
+          // clutter).
+          const prev = index > 0 ? lines[index - 1] : null;
+          const grouped =
+            prev !== null &&
+            prev.fromShop === line.fromShop &&
+            (prev.author ?? null) === (line.author ?? null) &&
+            Date.parse(line.sentAt) - Date.parse(prev.sentAt) < 5 * 60 * 1000;
           // The shop's lines are signed by the admin who wrote them.
           const who = line.fromShop
             ? (line.author ?? "Shop")
@@ -113,11 +116,13 @@ export function WarrantyThread({
           return (
             <li
               key={line.id}
-              className={`flex items-start gap-2.5 ${mine ? "flex-row-reverse" : ""}`}
+              className={`flex items-start gap-2.5 ${mine ? "flex-row-reverse" : ""} ${grouped ? "-mt-1.5" : ""}`}
             >
               <span
                 aria-hidden
-                className="mt-[18px] flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-full border border-white/10 bg-black/40 text-[11px] font-black uppercase text-neutral-300"
+                className={`flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-full border border-white/10 bg-black/40 text-[11px] font-black uppercase text-neutral-300 ${
+                  grouped ? "invisible" : "mt-[18px]"
+                }`}
               >
                 {avatar ? (
                   <Image
@@ -135,9 +140,11 @@ export function WarrantyThread({
               <div
                 className={`flex min-w-0 flex-col ${mine ? "items-end" : "items-start"}`}
               >
-                <span className="mb-1 px-1 text-[11px] font-semibold text-neutral-500">
-                  <span className="text-neutral-300">{who}</span> · {line.at}
-                </span>
+                {grouped ? null : (
+                  <span className="mb-1 px-1 text-[11px] font-semibold text-neutral-500">
+                    <span className="text-neutral-300">{who}</span> · {line.at}
+                  </span>
+                )}
                 <div
                   className={`max-w-[88%] rounded-2xl border px-3.5 py-2.5 text-[13px] leading-relaxed text-neutral-100 sm:max-w-[75%] ${
                     mine

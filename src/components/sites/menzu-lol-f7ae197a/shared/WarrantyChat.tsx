@@ -5,7 +5,6 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { ImagePlus, Lock, Send, X } from "lucide-react";
 
 import { WarrantyThread, type ThreadOpening } from "@/components/sites/menzu-lol-f7ae197a/shared/WarrantyThread";
-import { SUPPORT_WINDOW } from "@/lib/supportHours";
 import {
   mergeMessages,
   MESSAGE_MAX,
@@ -141,9 +140,10 @@ export function WarrantyChat({
     // owner, 12/10/2026: "gộp lại trong phần chat cho gọn"). The pane
     // scrolls, the composer stays docked beneath it.
     <div className="mt-4 border-t border-white/[0.06] pt-4">
-      <span className="mb-3 block text-[10px] font-black uppercase tracking-widest text-neutral-500">
-        Trao đổi với shop
-      </span>
+      {/* No label and no "started" line: the card is titled, the report
+          line above carries the time, and the hours are in the status
+          sentence at the top of the page (the owner, 12/10/2026: "nhìn có
+          bị rối không"). */}
       <WarrantyThread
         viewer="buyer"
         buyerName="Bạn"
@@ -151,14 +151,9 @@ export function WarrantyChat({
         buyerInitial={buyerInitial}
         opening={opening}
         messages={messages}
-        startedOn={opening.at.split(" ").pop()}
         // Said plainly while it is so, or the buyer stares at their own
         // message wondering whether anyone reads it.
-        footer={
-          open && !messages.some((m) => m.fromShop)
-            ? `Shop chưa trả lời. Giờ làm việc ${SUPPORT_WINDOW}, ngoài giờ cứ nhắn, sáng shop đọc.`
-            : null
-        }
+        footer={open && !messages.some((m) => m.fromShop) ? "Shop chưa trả lời." : null}
       />
 
       {open ? (

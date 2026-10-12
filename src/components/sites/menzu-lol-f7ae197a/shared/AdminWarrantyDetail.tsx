@@ -288,7 +288,6 @@ export function AdminWarrantyDetail({ ticket, mailOn }: { ticket: WarrantyTicket
               buyerInitial={ticket.username.slice(0, 1)}
               opening={opening}
               messages={messages}
-              startedOn={opening.at.split(" ").pop()}
             />
           </div>
 

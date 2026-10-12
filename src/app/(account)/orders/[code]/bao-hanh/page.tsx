@@ -298,23 +298,26 @@ export default async function WarrantyRequestPage({
             </div>
             <div className="min-w-0 flex-1">
               <p className="text-sm font-black uppercase leading-snug text-white">{productName}</p>
-              <p className="mt-1 text-[12px] font-semibold text-neutral-500">
-                Đơn <span className="font-bold text-neutral-200">{order.code}</span>
-                <span className="text-neutral-600"> · </span>
-                mua{" "}
-                <span className="font-bold tabular-nums text-neutral-200">{stamp(order.createdAt)}</span>
+              {/* Parted by space, as the receipt parts the same facts, not
+                  by dots (the owner, 12/10/2026). */}
+              <p className="mt-1 flex flex-wrap gap-x-5 gap-y-1 text-[12px] font-semibold text-neutral-500">
+                <span>
+                  Đơn <span className="font-bold text-neutral-200">{order.code}</span>
+                </span>
+                <span>
+                  Ngày mua{" "}
+                  <span className="font-bold tabular-nums text-neutral-200">{stamp(order.createdAt)}</span>
+                </span>
                 {order.package ? (
-                  <>
-                    <span className="text-neutral-600"> · </span>
-                    gói <span className="font-bold text-neutral-200">{order.package.label}</span>
-                  </>
+                  <span>
+                    Gói <span className="font-bold text-neutral-200">{order.package.label}</span>
+                  </span>
                 ) : null}
                 {order.quantity > 1 ? (
-                  <>
-                    <span className="text-neutral-600"> · </span>
-                    số lượng{" "}
+                  <span>
+                    Số lượng{" "}
                     <span className="font-bold tabular-nums text-neutral-200">{order.quantity}</span>
-                  </>
+                  </span>
                 ) : null}
               </p>
             </div>
