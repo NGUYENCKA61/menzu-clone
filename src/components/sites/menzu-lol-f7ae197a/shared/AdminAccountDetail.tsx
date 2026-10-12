@@ -63,6 +63,8 @@ export interface AccountDetailView {
   buyer: { username: string; orderCode: string } | null;
   /** "Acc random": sold by the piece from the shelf below. */
   accountPool: boolean;
+  /** Sold to level-2 ("xác thực cấp 2") accounts only. */
+  verifiedOnly: boolean;
   pool: PoolView | null;
 }
 
@@ -132,6 +134,7 @@ export function AdminAccountDetail({ account }: { account: AccountDetailView }) 
   });
 
   const [poolOn, setPoolOn] = useState(account.accountPool);
+  const [verifiedOnly, setVerifiedOnly] = useState(account.verifiedOnly);
   const [poolText, setPoolText] = useState("");
 
   const coverRef = useRef<HTMLInputElement>(null);
@@ -227,6 +230,18 @@ export function AdminAccountDetail({ account }: { account: AccountDetailView }) 
       return null;
     } finally {
       setBusy(false);
+    }
+  }
+
+  /** Saved on the spot, like the pool switch: a toggle, not a form. */
+  async function saveVerifiedOnly(next: boolean) {
+    const data = await api("PATCH", { code: account.code, verifiedOnly: next });
+    if (data) {
+      setVerifiedOnly(next);
+      setMsg({
+        tone: "ok",
+        text: next ? "Chỉ bán cho tài khoản xác thực cấp 2" : "Bán cho mọi tài khoản",
+      });
     }
   }
 
@@ -537,6 +552,24 @@ export function AdminAccountDetail({ account }: { account: AccountDetailView }) 
               &ldquo;Đã ẩn&rdquo; rút tài khoản khỏi kệ nhưng giữ nguyên link; &ldquo;Đã
               bán&rdquo; hiện nhãn hết hàng trên trang khách.
             </p>
+            <label className="flex cursor-pointer items-start gap-3">
+              <input
+                type="checkbox"
+                checked={verifiedOnly}
+                disabled={busy}
+                onChange={(event) => void saveVerifiedOnly(event.target.checked)}
+                className="mt-0.5 h-4 w-4 shrink-0 accent-[var(--brand)]"
+              />
+              <span>
+                <span className="block text-xs font-bold text-white">
+                  Chỉ bán cho tài khoản xác thực cấp 2
+                </span>
+                <span className="mt-0.5 block text-[11px] text-neutral-500">
+                  Trang khách báo rõ, máy chủ từ chối đơn của tài khoản chưa duyệt
+                  (kể cả qua giỏ hàng và bot Telegram). Lưu ngay khi bật/tắt.
+                </span>
+              </span>
+            </label>
           </section>
 
           <section className={CARD}>

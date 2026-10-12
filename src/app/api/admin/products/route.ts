@@ -244,6 +244,8 @@ export async function PATCH(request: Request) {
     loginNote?: string;
     /** "Acc random": sold by the piece from a shelf of sign-ins. */
     accountPool?: boolean;
+    /** Sold to level-2 ("xác thực cấp 2") accounts only. */
+    verifiedOnly?: boolean;
   } | null;
 
   const code = body?.code;
@@ -320,6 +322,7 @@ export async function PATCH(request: Request) {
     body?.rank === undefined &&
     body?.name === undefined &&
     body?.accountPool === undefined &&
+    body?.verifiedOnly === undefined &&
     login.kind === "untouched"
   ) {
     return NextResponse.json({ error: "Không có thay đổi" }, { status: 400 });
@@ -366,6 +369,7 @@ export async function PATCH(request: Request) {
     where: { code },
     data: {
       ...(status ? { status } : {}),
+      ...(typeof body?.verifiedOnly === "boolean" ? { verifiedOnly: body.verifiedOnly } : {}),
       ...(price !== undefined ? { price } : {}),
       ...(imageUrl !== undefined ? { imageUrl } : {}),
       ...(vip !== undefined ? { vip } : {}),

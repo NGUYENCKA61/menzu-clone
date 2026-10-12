@@ -238,6 +238,7 @@ export default async function AdminAccountDetailPage({
           name: product.name ?? "",
           rank: product.rank,
           status: product.status,
+          verifiedOnly: product.verifiedOnly,
           price: Number(product.price),
           oldPrice: Number(product.oldPrice),
           categoryName: product.category.name,

@@ -571,6 +571,7 @@ export async function getCategoryPage(
     // tool's page prints under its title; none leaves them blank.
     description: s.summary ?? "",
     status: s.softwareStatus,
+    verifiedOnly: s.verifiedOnly,
     // Cheapest first by what they cost today: a sale can take a tier below
     // the one that led.
     packages: s.packages
@@ -726,6 +727,7 @@ export async function getAccountDetail(
     images: p.images.map((i) => i.url),
     rank: p.rank,
     lastRank: p.lastRank,
+    verifiedOnly: p.verifiedOnly,
     weaponSkins: countKind(p.skins, "WEAPON_SKIN"),
     // Scraped totals win; counting rows is the fallback for products that
     // scripts/scrape-inventory.mjs has not reached yet.
@@ -2010,6 +2012,7 @@ export async function listSimilarSoftware(
       imageUrl: true,
       summary: true,
       softwareStatus: true,
+      verifiedOnly: true,
       category: { select: { slug: true, name: true } },
       packages: {
         orderBy: { price: "asc" },
@@ -2029,6 +2032,7 @@ export async function listSimilarSoftware(
     // The "Mô tả ngắn", as on the category grid's cards.
     description: s.summary ?? "",
     status: s.softwareStatus,
+    verifiedOnly: s.verifiedOnly,
     packages: s.packages
       .map((p) => tierView(p, tierSale))
       .sort((a, b) => a.price - b.price),

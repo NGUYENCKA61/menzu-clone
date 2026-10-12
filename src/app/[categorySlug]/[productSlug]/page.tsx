@@ -255,5 +255,15 @@ export default async function ProductPage({ params, searchParams }: PageProps) {
   const account = await getAccountDetail(slug);
   if (!account) notFound();
   const { sl } = await searchParams;
-  return <AccountDetailView account={account} initialQuantity={readQuantity(sl)} />;
+  // Who is looking, for an account sold to level 2 only.
+  const user = await getCurrentUser();
+  return (
+    <AccountDetailView
+      account={account}
+      initialQuantity={readQuantity(sl)}
+      viewer={
+        !user ? "guest" : user.verifiedAt || user.role === "ADMIN" ? "verified" : "member"
+      }
+    />
+  );
 }

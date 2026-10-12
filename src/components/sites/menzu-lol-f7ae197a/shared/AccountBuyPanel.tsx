@@ -22,6 +22,7 @@ import {
 } from "./BuyConfirmDialog";
 import { formatVnd, productImage } from "./productData";
 import { StickyBuyBar } from "./StickyBuyBar";
+import type { BuyerLevel } from "./SoftwareBuyPanel";
 import { StockLine } from "./StockLine";
 
 export interface AccountDetail {
@@ -57,6 +58,8 @@ export interface AccountDetail {
   viewers: number;
   /** Sold accounts keep their page so crawled links stay valid. */
   sold: boolean;
+  /** Sold to level-2 ("xác thực cấp 2") accounts only. */
+  verifiedOnly: boolean;
   /** Set on an "acc random" listing: how many sign-ins are left to sell. */
   pool: { available: number } | null;
 }
@@ -65,6 +68,8 @@ export interface AccountBuyPanelProps {
   account: AccountDetail;
   /** From `?sl=` — the quantity a guest had set before the login gate. */
   initialQuantity?: number;
+  /** Who is looking, for an account sold to level 2 only. */
+  viewer: BuyerLevel;
 }
 
 /** The software panel's four reassurances, with the delivery line made ours. */
@@ -88,7 +93,11 @@ const STAT_VALUE_CLASS = "text-sm font-bold text-white";
  * button that posts to /api/orders, a short balance shows "Cần nạp thêm" and a
  * link to /wallet with no confirm button at all, exactly as the live one does.
  */
-export function AccountBuyPanel({ account, initialQuantity }: AccountBuyPanelProps) {
+export function AccountBuyPanel({
+  account,
+  initialQuantity,
+  viewer,
+}: AccountBuyPanelProps) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [voucher, setVoucher] = useState("");
@@ -125,6 +134,9 @@ export function AccountBuyPanel({ account, initialQuantity }: AccountBuyPanelPro
   )}`;
   const guest = signedIn === false;
   const soldOut = pool ? pool.available <= 0 : account.sold;
+  // Sold to level 2 only (the owner, 12/10/2026): said here, and refused by
+  // the server either way.
+  const gated = account.verifiedOnly && viewer !== "verified";
   const stockText = pool
     ? pool.available > 0
       ? `Còn ${pool.available} acc`
@@ -432,10 +444,25 @@ export function AccountBuyPanel({ account, initialQuantity }: AccountBuyPanelPro
         </div>
       ) : null}
 
+      {gated ? (
+        <p className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-[13px] leading-relaxed text-amber-300">
+          Tài khoản này chỉ bán cho tài khoản xác thực cấp 2.{" "}
+          {viewer === "guest" ? (
+            "Đăng nhập rồi vào Bảo mật → Xác thực cấp 2 để đăng ký."
+          ) : (
+            <Link
+              href="/security?tab=verify"
+              className="font-bold text-white underline underline-offset-2"
+            >
+              Xác thực ngay
+            </Link>
+          )}
+        </p>
+      ) : null}
       <div ref={buyRef} className="space-y-3">
         <button
           type="button"
-          disabled={soldOut}
+          disabled={soldOut || gated}
           onClick={openDialog}
           className="press w-full h-14 rounded-2xl bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] disabled:opacity-50 text-[13px] font-black uppercase tracking-widest text-white"
         >
@@ -477,7 +504,7 @@ export function AccountBuyPanel({ account, initialQuantity }: AccountBuyPanelPro
         label={account.name || `Mã #${account.code}`}
         price={`${formatVnd(account.price * unitCount)}đ`}
         cta="Mua ngay"
-        disabled={soldOut}
+        disabled={soldOut || gated}
         onPress={openDialog}
       />
 

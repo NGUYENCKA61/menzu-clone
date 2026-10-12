@@ -3,6 +3,7 @@ import { categoryHref, productHref } from "@/lib/routes";
 import { breadcrumbJsonLd, JsonLd, productJsonLd } from "@/lib/seo";
 
 import { AccountBuyPanel, type AccountDetail } from "./AccountBuyPanel";
+import type { BuyerLevel } from "./SoftwareBuyPanel";
 import { AccountGallery } from "./AccountGallery";
 import { AccountInventory } from "./AccountInventory";
 import { Breadcrumb } from "./Breadcrumb";
@@ -15,10 +16,13 @@ import { ProductCard } from "./ProductCard";
 export async function AccountDetailView({
   account,
   initialQuantity,
+  viewer,
 }: {
   account: AccountDetail;
   /** From `?sl=` — the quantity a guest had set before the login gate. */
   initialQuantity?: number;
+  /** Who is looking, for an account sold to level 2 only. */
+  viewer: BuyerLevel;
 }) {
   const [related, inventory] = await Promise.all([
     // Three, matching the grid's columns — a fourth would sit alone on row two.
@@ -75,7 +79,11 @@ export async function AccountDetailView({
                   images={account.images}
                   viewers={account.viewers}
                 />
-                <AccountBuyPanel account={account} initialQuantity={initialQuantity} />
+                <AccountBuyPanel
+                  account={account}
+                  initialQuantity={initialQuantity}
+                  viewer={viewer}
+                />
               </div>
 
               <AccountInventory account={account} items={inventory} />

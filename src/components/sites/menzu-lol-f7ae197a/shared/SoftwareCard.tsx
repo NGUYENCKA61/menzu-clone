@@ -31,6 +31,8 @@ export interface SoftwareCardView {
   description: string;
   status: "UNDETECTED" | "STABLE" | "UPDATED" | "RISKY" | "UPDATING" | "DETECTED" | null;
   packages: SoftwareCardPackage[];
+  /** Sold to level-2 ("xác thực cấp 2") accounts only: the card says so. */
+  verifiedOnly: boolean;
 }
 
 /**
@@ -180,6 +182,12 @@ export function SoftwareCard({
           {free ? (
             <span className="absolute left-3 top-3 z-20 rounded-full border border-emerald-300/40 bg-emerald-500 px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-white">
               Miễn phí
+            </span>
+          ) : software.verifiedOnly ? (
+            // Sold to level 2 only (the owner, 12/10/2026): the buyer learns it
+            // on the card, not after the click.
+            <span className="absolute left-3 top-3 z-20 inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-[#0d0d12]/88 px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-amber-300">
+              Cấp 2
             </span>
           ) : null}
 
