@@ -16,6 +16,7 @@ import { parseBadges } from "@/lib/productBadges";
 import { showsStatusPill } from "@/lib/statusPill";
 import { isSalesLocked } from "@/lib/softwareStatus";
 import { parseFeatures } from "@/lib/productFeatures";
+import { legacyRefundCurrent } from "@/lib/refundRequests";
 import { productHref } from "@/lib/routes";
 import type { WarrantyStatus } from "@/lib/warrantyRequests";
 import { weaponKey } from "@/lib/weaponImages";
@@ -54,7 +55,6 @@ const TIER_COLOR: Record<ContentTier, TierColor> = {
 
 /** Order the card renders its tier counters in. */
 const TIER_ORDER: TierColor[] = ["yellow", "orange", "pink", "cyan", "blue"];
-
 
 interface SkinRow {
   kind: string;
@@ -120,7 +120,9 @@ function toProductCard(
     imageUrl: row.imageUrl,
     // The card's two-line blurb: this account's own words when the shop wrote
     // some, reduced to running text — the card clamps to two lines either way.
-    description: row.description ? docHtmlToPlainText(row.description, 200) : "",
+    description: row.description
+      ? docHtmlToPlainText(row.description, 200)
+      : "",
     rank: row.rank,
     // The card's two labelled numbers. Zero means "not filled in" and the
     // card hides the entry.
@@ -309,7 +311,8 @@ export async function runningPackageSales(
 
   const prices = new Map<string, bigint>();
   for (const sale of sales) {
-    if (sale.packageId && !prices.has(sale.packageId)) prices.set(sale.packageId, sale.salePrice);
+    if (sale.packageId && !prices.has(sale.packageId))
+      prices.set(sale.packageId, sale.salePrice);
   }
   return prices;
 }
@@ -360,7 +363,8 @@ export interface CategoryFilters {
   software?: string;
   /** Matches a tool by the feature line under its name. */
   softwareFeature?: string;
-  softwareStatus?: "UNDETECTED" | "STABLE" | "UPDATED" | "RISKY" | "UPDATING" | "DETECTED";
+  softwareStatus?:
+    "UNDETECTED" | "STABLE" | "UPDATED" | "RISKY" | "UPDATING" | "DETECTED";
   softwareSort?: "newest" | "price-asc" | "price-desc";
   /** "HOME": tools for a home PC, unmarked ones included (they read as home).
    *  "NET": tools marked for a net café, alone or as well. */
@@ -430,7 +434,9 @@ function softwareWhere(categoryId: string, filters: CategoryFilters) {
     status: "AVAILABLE" as const,
     deletedAt: null,
     ...(and.length > 0 ? { AND: and } : {}),
-    ...(filters.softwareStatus ? { softwareStatus: filters.softwareStatus } : {}),
+    ...(filters.softwareStatus
+      ? { softwareStatus: filters.softwareStatus }
+      : {}),
   };
 }
 
@@ -492,7 +498,15 @@ export async function getCategoryPage(
 
   const where = categoryWhere(category.id, filters);
 
-  const [total, rows, softwareRows, accountTotal, softwareTotal, listedTotal, launcherRows] = await Promise.all([
+  const [
+    total,
+    rows,
+    softwareRows,
+    accountTotal,
+    softwareTotal,
+    listedTotal,
+    launcherRows,
+  ] = await Promise.all([
     db.product.count({ where }),
     db.product.findMany({
       where,
@@ -526,7 +540,10 @@ export async function getCategoryPage(
     db.product.count({ where: { categoryId: category.id, ...LISTED_PRODUCT } }),
     // Unfiltered, like the counts: the "Nền tảng" chips offer what the shelf
     // holds, not what the current search left of it.
-    db.product.findMany({ where: softwareWhere(category.id, {}), select: { launchers: true } }),
+    db.product.findMany({
+      where: softwareWhere(category.id, {}),
+      select: { launchers: true },
+    }),
   ]);
   const carried = new Set(launcherRows.flatMap((row) => row.launchers));
   const softwareLaunchers = readLaunchers([...carried]);
@@ -535,7 +552,9 @@ export async function getCategoryPage(
     runningSalePrices(rows.map((p) => p.id)),
     weaponImages(rows),
     poolStock(rows.filter((p) => p.accountPool).map((p) => p.id)),
-    runningPackageSales(softwareRows.flatMap((s) => s.packages.map((p) => p.id))),
+    runningPackageSales(
+      softwareRows.flatMap((s) => s.packages.map((p) => p.id)),
+    ),
   ]);
 
   // Cheapest tier first, which is the order the card's dropdown reads in. No
@@ -572,7 +591,10 @@ export async function getCategoryPage(
   // ordering by a related minimum would need. Tools priced at nothing — none
   // yet, but a tool can exist before its packages do — go last either way,
   // rather than leading the ascending list at zero.
-  if (filters.softwareSort === "price-asc" || filters.softwareSort === "price-desc") {
+  if (
+    filters.softwareSort === "price-asc" ||
+    filters.softwareSort === "price-desc"
+  ) {
     const direction = filters.softwareSort === "price-asc" ? 1 : -1;
     software.sort((a, b) => {
       const left = a.packages[0]?.price;
@@ -635,7 +657,12 @@ export async function listCategories() {
 export async function resolveProduct(where: {
   slug?: string;
   code?: string;
-}): Promise<{ slug: string; code: string; categorySlug: string; isSoftware: boolean } | null> {
+}): Promise<{
+  slug: string;
+  code: string;
+  categorySlug: string;
+  isSoftware: boolean;
+} | null> {
   if (!where.slug && !where.code) return null;
   const p = await db.product.findFirst({
     where: {
@@ -689,14 +716,18 @@ export async function getAccountDetail(
 
   const [sale, stock] = await Promise.all([
     runningSalePrices([p.id]),
-    p.accountPool ? poolStock([p.id]) : Promise.resolve(new Map<string, number>()),
+    p.accountPool
+      ? poolStock([p.id])
+      : Promise.resolve(new Map<string, number>()),
   ]);
 
   return {
     code: p.code,
     name: p.name ?? "",
     // The write-up, as running text, for the buy panel's blurb.
-    descriptionText: p.description ? docHtmlToPlainText(p.description, 260) : "",
+    descriptionText: p.description
+      ? docHtmlToPlainText(p.description, 260)
+      : "",
     slug: p.slug,
     imageUrl: p.imageUrl,
     images: p.images.map((i) => i.url),
@@ -759,7 +790,9 @@ export async function hasPaidOrderFor(
  * the type as well, so an account's slug answers null here rather than
  * rendering a tool page whose every field would be blank.
  */
-export async function getSoftwareDetail(slug: string): Promise<SoftwareDetail | null> {
+export async function getSoftwareDetail(
+  slug: string,
+): Promise<SoftwareDetail | null> {
   const p = await db.product.findFirst({
     where: {
       slug,
@@ -810,7 +843,12 @@ export async function getSoftwareDetail(slug: string): Promise<SoftwareDetail | 
     refundRate: p.refundRate,
     // Empty draws no pills at all.
     badges,
-    images: p.images.length > 0 ? p.images.map((i) => i.url) : p.imageUrl ? [p.imageUrl] : [],
+    images:
+      p.images.length > 0
+        ? p.images.map((i) => i.url)
+        : p.imageUrl
+          ? [p.imageUrl]
+          : [],
     videoUrl: p.videoUrl,
     // In the shop's own order: the buy panel lists the tiers as arranged.
     packages: p.packages.map((pk) => ({
@@ -877,7 +915,10 @@ export interface LedgerRow {
 }
 
 /** The account's newest `limit` ledger lines, newest first. */
-export async function getTransactions(userId: string, limit: number): Promise<LedgerRow[]> {
+export async function getTransactions(
+  userId: string,
+  limit: number,
+): Promise<LedgerRow[]> {
   const rows = await db.transaction.findMany({
     where: { userId },
     orderBy: { createdAt: "desc" },
@@ -963,7 +1004,8 @@ export interface OrderRow {
   /** The newest refund round on this order was turned down. The order itself
    *  is untouched — still paid, key still valid — but the row says so, because
    *  a buyer who asked and was refused should not have to open the receipt to
-   *  find out. */
+   *  find out. Off once a warranty report follows it: the ticket is the newer
+   *  word (legacyRefundCurrent). */
   refundRejected: boolean;
   /** …or is still being looked at. */
   refundPending: boolean;
@@ -1018,15 +1060,21 @@ export async function getOrders(userId: string): Promise<OrderRow[]> {
       // and asking twice would be two queries for one fact.
       refundRequests: {
         orderBy: { createdAt: "desc" },
-        select: { status: true },
+        select: { status: true, createdAt: true },
         take: 1,
       },
       feedback: { select: { id: true } },
-      // Every ticket, newest first: an open one gives the row its badge, and
-      // the newest decides the receipt's warranty button.
+      // Every ticket, newest first: an open one gives the row its badge, the
+      // newest decides the receipt's warranty button and whether an older
+      // refund round is still worth a chip.
       warrantyRequests: {
         orderBy: { createdAt: "desc" },
-        select: { status: true, refundMethod: true, bankAccount: true },
+        select: {
+          status: true,
+          refundMethod: true,
+          bankAccount: true,
+          createdAt: true,
+        },
       },
     },
   });
@@ -1034,7 +1082,9 @@ export async function getOrders(userId: string): Promise<OrderRow[]> {
     id: o.id,
     code: o.code,
     reviewed: o.feedback !== null,
-    warrantyOpen: o.warrantyRequests.some((w) => w.status === "OPEN" || w.status === "IN_PROGRESS"),
+    warrantyOpen: o.warrantyRequests.some(
+      (w) => w.status === "OPEN" || w.status === "IN_PROGRESS",
+    ),
     warrantyRefunding: o.warrantyRequests.some((w) => w.status === "REFUNDING"),
     latestWarranty: o.warrantyRequests[0]
       ? {
@@ -1071,7 +1121,8 @@ export async function getOrders(userId: string): Promise<OrderRow[]> {
     // A random listing's keys are its accounts' sign-ins: held back, like a
     // single account's, until the buyer takes them through "Lấy thông tin".
     keys:
-      o.status === "PAID" && !(o.product.accountPool && o.loginRevealedAt === null)
+      o.status === "PAID" &&
+      !(o.product.accountPool && o.loginRevealedAt === null)
         ? o.licenseKeys.map((k) => ({
             value: k.value,
             expiresAt: k.expiresAt,
@@ -1113,11 +1164,15 @@ export async function getOrders(userId: string): Promise<OrderRow[]> {
     ...(() => {
       // Older, buyer-made refund rounds still say where they stand. Only the
       // newest counts: a refusal since answered with a second request is
-      // history, and the row should say what is true now.
-      const latest = o.refundRequests[0]?.status ?? null;
+      // history, and the row should say what is true now. So is one the buyer
+      // has since reported for warranty: the ticket is their later move, and
+      // the red chip was hiding it (the owner, 12/10/2026: "Từ chối hoàn tiền
+      // sẽ mất luôn yêu cầu bảo hành").
+      const legacy = o.refundRequests[0];
+      const current = legacyRefundCurrent(legacy, o.warrantyRequests[0]);
       return {
-        refundRejected: latest === "REJECTED",
-        refundPending: latest === "PENDING",
+        refundRejected: current && legacy?.status === "REJECTED",
+        refundPending: current && legacy?.status === "PENDING",
       };
     })(),
   }));
@@ -1142,8 +1197,12 @@ export async function getFlashSaleItems(take = 20): Promise<FlashSaleItem[]> {
     where: { active: true, startsAt: { lte: now }, endsAt: { gte: now } },
     select: { productId: true, packageId: true },
   });
-  const accountIds = scheduled.filter((s) => s.packageId === null).map((s) => s.productId);
-  const tierIds = scheduled.flatMap((s) => (s.packageId === null ? [] : [s.packageId]));
+  const accountIds = scheduled
+    .filter((s) => s.packageId === null)
+    .map((s) => s.productId);
+  const tierIds = scheduled.flatMap((s) =>
+    s.packageId === null ? [] : [s.packageId],
+  );
 
   // Both branches exclude removed products: a sale scheduled before the shop
   // took the account down must not resurrect it on the home page.
@@ -1178,7 +1237,11 @@ export async function getFlashSaleItems(take = 20): Promise<FlashSaleItem[]> {
       ? await db.productPackage.findMany({
           where: {
             id: { in: tierIds },
-            product: { status: "AVAILABLE", deletedAt: null, productType: "SOFTWARE_GAME" },
+            product: {
+              status: "AVAILABLE",
+              deletedAt: null,
+              productType: "SOFTWARE_GAME",
+            },
           },
           select: {
             id: true,
@@ -1205,9 +1268,11 @@ export async function getFlashSaleItems(take = 20): Promise<FlashSaleItem[]> {
     runningSalePrices(rows.map((p) => p.id)),
     runningPackageSales(tiers.map((t) => t.id)),
   ]);
-  const priceOf = (p: { id: string; price: bigint }) => sale.get(p.id) ?? p.price;
+  const priceOf = (p: { id: string; price: bigint }) =>
+    sale.get(p.id) ?? p.price;
   const cutOf = (price: bigint, was: bigint) => 1 - Number(price) / Number(was);
-  const percent = (price: bigint, was: bigint) => Math.round(cutOf(price, was) * 100);
+  const percent = (price: bigint, was: bigint) =>
+    Math.round(cutOf(price, was) * 100);
 
   const accounts = rows
     .filter((p) => priceOf(p) < p.oldPrice)
@@ -1225,7 +1290,10 @@ export async function getFlashSaleItems(take = 20): Promise<FlashSaleItem[]> {
         oldPrice: `${formatVndString(Number(p.oldPrice))} VND`,
         newPrice: `${formatVndString(Number(price))} VND`,
         skins: countKind(p.skins, "WEAPON_SKIN"),
-        tiers: toTiers(p.skins).map((t) => ({ color: t.color, count: t.count })),
+        tiers: toTiers(p.skins).map((t) => ({
+          color: t.color,
+          count: t.count,
+        })),
       };
       return { cut: cutOf(price, p.oldPrice), item };
     });
@@ -1279,7 +1347,12 @@ export interface ReviewRow {
    *  the tool (its "bản"), the tier bought and the game it is for (the owner,
    *  01/10/2026: "bổ sung thông tin mua key bản gì game gì"). Null for a
    *  free-form review, which names no purchase. */
-  purchase: { product: string; tier: string | null; game: string; href: string } | null;
+  purchase: {
+    product: string;
+    tier: string | null;
+    game: string;
+    href: string;
+  } | null;
 }
 
 /** The purchase behind an order-backed review. */
@@ -1287,7 +1360,12 @@ const FEEDBACK_PURCHASE = {
   order: {
     select: {
       product: {
-        select: { name: true, code: true, slug: true, category: { select: { name: true, slug: true } } },
+        select: {
+          name: true,
+          code: true,
+          slug: true,
+          category: { select: { name: true, slug: true } },
+        },
       },
       package: { select: { label: true } },
     },
@@ -1296,7 +1374,9 @@ const FEEDBACK_PURCHASE = {
 
 /** Anonymous rows are masked here, once, rather than in every component
  *  that renders one. */
-function toReviewRow(f: Prisma.FeedbackGetPayload<{ include: typeof FEEDBACK_PURCHASE }>): ReviewRow {
+function toReviewRow(
+  f: Prisma.FeedbackGetPayload<{ include: typeof FEEDBACK_PURCHASE }>,
+): ReviewRow {
   const product = f.order?.product ?? null;
   return {
     name: f.anonymous ? "Khách hàng ẩn danh" : f.name,
@@ -1331,7 +1411,6 @@ export async function getFeedback(take = 20): Promise<ReviewRow[]> {
   });
   return rows.map(toReviewRow);
 }
-
 
 // ---------------------------------------------------------------------------
 // Partners
@@ -1389,12 +1468,22 @@ export async function getDocArticle(slug: string) {
 /** Up to `take` other articles on the same shelf, most read first — the
  *  article page's "Các bài viết liên quan", as menzu closes an article with
  *  "Cùng chuyên mục". */
-export async function listRelatedDocs(slug: string, category: DocCategory, take = 3) {
+export async function listRelatedDocs(
+  slug: string,
+  category: DocCategory,
+  take = 3,
+) {
   return db.docArticle.findMany({
     where: { category, slug: { not: slug } },
     orderBy: [{ views: "desc" }, { publishedAt: "desc" }],
     take,
-    select: { slug: true, title: true, thumbnailUrl: true, views: true, publishedAt: true },
+    select: {
+      slug: true,
+      title: true,
+      thumbnailUrl: true,
+      views: true,
+      publishedAt: true,
+    },
   });
 }
 
@@ -1457,7 +1546,10 @@ export interface TopUpRow {
 }
 
 /** "Thẻ nạp gần đây" on /wallet. */
-export async function getTopUps(userId: string, take = 10): Promise<TopUpRow[]> {
+export async function getTopUps(
+  userId: string,
+  take = 10,
+): Promise<TopUpRow[]> {
   const rows = await db.topUp.findMany({
     where: { userId },
     orderBy: { createdAt: "desc" },
@@ -1534,14 +1626,18 @@ export async function listUsers(
     _sum: { amount: true },
     where: { status: "COMPLETED", userId: { in: ids } },
   });
-  const toppedByUser = new Map(topped.map((row) => [row.userId, Number(row._sum.amount ?? 0)]));
+  const toppedByUser = new Map(
+    topped.map((row) => [row.userId, Number(row._sum.amount ?? 0)]),
+  );
 
   const spend = await db.order.groupBy({
     by: ["userId"],
     _sum: { total: true },
     where: { status: "PAID", userId: { in: ids } },
   });
-  const spentByUser = new Map(spend.map((row) => [row.userId, Number(row._sum.total ?? 0)]));
+  const spentByUser = new Map(
+    spend.map((row) => [row.userId, Number(row._sum.total ?? 0)]),
+  );
 
   return users.map((u) => ({
     id: u.id,
@@ -1599,7 +1695,8 @@ export async function listFlashSales(take = 100): Promise<AdminFlashSaleRow[]> {
     },
   });
   return rows.map((r) => ({
-    running: r.active && r.startsAt.getTime() <= now && r.endsAt.getTime() >= now,
+    running:
+      r.active && r.startsAt.getTime() <= now && r.endsAt.getTime() >= now,
     id: r.id,
     productCode: r.product.code,
     productRank: r.product.rank,
@@ -1748,7 +1845,10 @@ export async function listAdminGroups() {
   const rows = await db.group.findMany({
     orderBy: { sortOrder: "asc" },
     include: {
-      categories: { orderBy: { sortOrder: "asc" }, select: { categoryId: true } },
+      categories: {
+        orderBy: { sortOrder: "asc" },
+        select: { categoryId: true },
+      },
     },
   });
   return rows.map((group) => ({
@@ -1771,7 +1871,10 @@ export async function listProductPicks() {
       name: true,
       productType: true,
       category: { select: { name: true } },
-      packages: { orderBy: { sortOrder: "asc" }, select: { id: true, label: true, price: true } },
+      packages: {
+        orderBy: { sortOrder: "asc" },
+        select: { id: true, label: true, price: true },
+      },
     },
   });
   return rows.map((p) => ({
@@ -1782,7 +1885,11 @@ export async function listProductPicks() {
     // its pool shelf rather than a tier on offer, so it lists none.
     packages:
       p.productType === "SOFTWARE_GAME"
-        ? p.packages.map((k) => ({ id: k.id, label: k.label, price: Number(k.price) }))
+        ? p.packages.map((k) => ({
+            id: k.id,
+            label: k.label,
+            price: Number(k.price),
+          }))
         : [],
   }));
 }
@@ -1877,7 +1984,9 @@ export async function listSimilarSoftware(
       },
     },
   });
-  const tierSale = await runningPackageSales(rows.flatMap((s) => s.packages.map((p) => p.id)));
+  const tierSale = await runningPackageSales(
+    rows.flatMap((s) => s.packages.map((p) => p.id)),
+  );
   return rows.map((s) => ({
     code: s.code,
     href: productHref(s.category.slug, s.slug),

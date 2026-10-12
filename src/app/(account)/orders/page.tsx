@@ -64,18 +64,24 @@ function orderBadge(o: {
   warrantyRefunding: boolean;
 }): { label: string; tone: string } | null {
   if (o.status === "PAID") {
-    if (o.refundPending) return { label: "Chờ duyệt hoàn tiền", tone: TONE.amber };
-    // Red: the opposite answer to a refund paid back (the owner, 07/10/2026:
-    // "từ chối hoàn tiền có nên màu đỏ không" → "rồi làm đi").
-    if (o.refundRejected) return { label: "Từ chối hoàn tiền", tone: TONE.red };
+    // The ticket first: a report the shop is working on is what the buyer is
+    // waiting on today, whatever an older refund round said (the owner,
+    // 12/10/2026: "Từ chối hoàn tiền sẽ mất luôn yêu cầu bảo hành").
     // The shop could not fix it and is paying it back over a bank transfer.
-    if (o.warrantyRefunding) return { label: "Đang hoàn tiền", tone: TONE.amber };
+    if (o.warrantyRefunding)
+      return { label: "Đang hoàn tiền", tone: TONE.amber };
     // A report the shop is still working: the order is paid and stays so, but
     // the buyer is waiting on a fix, and the card should say that.
     if (o.warrantyOpen) return { label: "Đang bảo hành", tone: TONE.amber };
+    if (o.refundPending)
+      return { label: "Chờ duyệt hoàn tiền", tone: TONE.amber };
+    // Red: the opposite answer to a refund paid back (the owner, 07/10/2026:
+    // "từ chối hoàn tiền có nên màu đỏ không" → "rồi làm đi").
+    if (o.refundRejected) return { label: "Từ chối hoàn tiền", tone: TONE.red };
     return null;
   }
-  if (o.status === "REFUNDED") return { label: "Đã hoàn tiền", tone: TONE.green };
+  if (o.status === "REFUNDED")
+    return { label: "Đã hoàn tiền", tone: TONE.green };
   return { label: STATUS_LABEL[o.status] ?? o.status, tone: TONE.grey };
 }
 
@@ -132,7 +138,9 @@ export default async function OrdersPage({
               code: o.code,
               statusLabel: badge?.label ?? STATUS_LABEL[o.status] ?? o.status,
               statusClass:
-                badge?.tone ?? STATUS_CLASS[o.status] ?? "border-white/10 bg-white/5 text-neutral-400",
+                badge?.tone ??
+                STATUS_CLASS[o.status] ??
+                "border-white/10 bg-white/5 text-neutral-400",
               paid: o.status === "PAID",
               refunded: o.status === "REFUNDED",
               date: shortDate(o.createdAt),
@@ -180,7 +188,9 @@ export default async function OrdersPage({
             total: o.total,
             status: o.status,
             badge,
-            review: settled ? { href: `/orders/${o.code}/danh-gia`, reviewed: o.reviewed } : null,
+            review: settled
+              ? { href: `/orders/${o.code}/danh-gia`, reviewed: o.reviewed }
+              : null,
             // Searched by order code, product code, name and rank — what a
             // buyer actually has to hand when hunting for a past purchase.
             haystack: [o.code, o.productCode, o.productName, o.productRank],

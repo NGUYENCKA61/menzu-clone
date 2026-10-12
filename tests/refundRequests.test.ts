@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  legacyRefundCurrent,
   promisedRefund,
   readRefundAmount,
   REFUND_METHOD,
@@ -27,18 +28,26 @@ describe("the three-day window", () => {
     // A boundary that refuses the millisecond it names is one somebody will
     // hit and not believe.
     expect(
-      refundWindowClosed(bought, new Date(refundDeadline(bought).getTime() - 1)),
+      refundWindowClosed(
+        bought,
+        new Date(refundDeadline(bought).getTime() - 1),
+      ),
     ).toBe(false);
   });
 
   it("is closed a millisecond after", () => {
     expect(
-      refundWindowClosed(bought, new Date(refundDeadline(bought).getTime() + 1)),
+      refundWindowClosed(
+        bought,
+        new Date(refundDeadline(bought).getTime() + 1),
+      ),
     ).toBe(true);
   });
 
   it("lands the deadline exactly three days on", () => {
-    expect(refundDeadline(bought).toISOString()).toBe("2026-09-04T10:00:00.000Z");
+    expect(refundDeadline(bought).toISOString()).toBe(
+      "2026-09-04T10:00:00.000Z",
+    );
     expect(REFUND_WINDOW_DAYS).toBe(3);
   });
 });
@@ -81,8 +90,14 @@ describe("promisedRefund", () => {
 
 describe("readRefundAmount", () => {
   it("takes a figure inside the order", () => {
-    expect(readRefundAmount("32200", 46_000)).toEqual({ ok: true, amount: 32_200 });
-    expect(readRefundAmount(46_000, 46_000)).toEqual({ ok: true, amount: 46_000 });
+    expect(readRefundAmount("32200", 46_000)).toEqual({
+      ok: true,
+      amount: 32_200,
+    });
+    expect(readRefundAmount(46_000, 46_000)).toEqual({
+      ok: true,
+      amount: 46_000,
+    });
   });
 
   it("refuses more than was paid", () => {
@@ -121,5 +136,43 @@ describe("REFUND_METHOD", () => {
       expect(REFUND_METHOD[key].label.length).toBeGreaterThan(0);
       expect(REFUND_METHOD[key].hint.length).toBeGreaterThan(0);
     }
+  });
+});
+
+describe("legacyRefundCurrent", () => {
+  // The orders list used to let an old, refused refund round outrank the
+  // warranty ticket that followed it, so an order under warranty read "Từ chối
+  // hoàn tiền" (the owner, 12/10/2026: "Từ chối hoàn tiền sẽ mất luôn yêu cầu
+  // bảo hành").
+  const refund = { createdAt: new Date("2026-09-20T10:00:00Z") };
+
+  it("is nothing without a refund round", () => {
+    expect(legacyRefundCurrent(null, null)).toBe(false);
+    expect(legacyRefundCurrent(undefined, { createdAt: new Date() })).toBe(
+      false,
+    );
+  });
+
+  it("stands while no warranty report has followed it", () => {
+    expect(legacyRefundCurrent(refund, null)).toBe(true);
+    expect(legacyRefundCurrent(refund, undefined)).toBe(true);
+    // A report made before the refund round is the older move.
+    expect(
+      legacyRefundCurrent(refund, {
+        createdAt: new Date("2026-09-19T10:00:00Z"),
+      }),
+    ).toBe(true);
+  });
+
+  it("gives way to a warranty report made after it", () => {
+    expect(
+      legacyRefundCurrent(refund, {
+        createdAt: new Date("2026-10-12T05:00:00Z"),
+      }),
+    ).toBe(false);
+    // The same instant is not "after": the refund round keeps its word.
+    expect(
+      legacyRefundCurrent(refund, { createdAt: new Date(refund.createdAt) }),
+    ).toBe(true);
   });
 });

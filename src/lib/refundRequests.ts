@@ -32,6 +32,24 @@ export const REFUND_STATUS: Record<
   },
 };
 
+/**
+ * Whether an older, buyer-made refund round is still the newest word on its
+ * order, and so still owed a chip on the orders list.
+ *
+ * A warranty report made after it is the buyer's later move: the ticket's
+ * state is what is true now, and the old refusal or wait is history. Until
+ * then the red "Từ chối hoàn tiền" chip outranked the ticket's, and an order
+ * under warranty read as refused (the owner, 12/10/2026: "Từ chối hoàn tiền
+ * sẽ mất luôn yêu cầu bảo hành").
+ */
+export function legacyRefundCurrent(
+  refund: { createdAt: Date } | null | undefined,
+  newestTicket: { createdAt: Date } | null | undefined,
+): boolean {
+  if (!refund) return false;
+  return !newestTicket || refund.createdAt > newestTicket.createdAt;
+}
+
 export type RefundMethod = "MANUAL" | "WALLET";
 
 /** The owner's two options (01/10/2026): to the site account, or to a bank. */
