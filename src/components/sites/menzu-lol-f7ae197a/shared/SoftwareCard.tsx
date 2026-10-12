@@ -31,8 +31,6 @@ export interface SoftwareCardView {
   description: string;
   status: "UNDETECTED" | "STABLE" | "UPDATED" | "RISKY" | "UPDATING" | "DETECTED" | null;
   packages: SoftwareCardPackage[];
-  /** Null hides the download button rather than pointing it nowhere. */
-  downloadUrl: string | null;
 }
 
 /**
@@ -117,12 +115,13 @@ export function SoftwareCard({
    * owner, 07/10/2026: "thiết kế card cho phần mềm thuộc dạng miễn phí" →
    * "b"): a green "Miễn phí" mark on the picture and one "Nhận miễn phí" in
    * the shop's red (a green one glared: "xanh lá chói quá… đỏ hoặc tím")
-   * that opens the tool's download link straight away, in place of a tier
-   * list reading "999999999 giờ - 1đ" and a "Thuê ngay" that charged 1đ.
-   * No link set yet: the button leads to the tool's page instead.
+   * that leads to the tool's own page, where the key is handed out behind
+   * the shop's shortlink (12/10/2026; until then it opened the download
+   * link), in place of a tier list reading "999999999 giờ - 1đ" and a
+   * "Thuê ngay" that charged 1đ.
    */
   const free = isFreeTool(software.packages);
-  const freeHref = software.downloadUrl ?? detailHref;
+  const freeHref = detailHref;
   const FREE_BUTTON =
     "flex h-[42px] items-center justify-center gap-2 rounded-[9px] bg-[var(--menzu-accent)] px-5 text-[11px] font-extrabold uppercase tracking-wide text-white transition-colors hover:bg-[var(--menzu-accent-dark)]";
 
@@ -236,7 +235,6 @@ export function SoftwareCard({
             {free ? (
               <a
                 href={freeHref}
-                {...(software.downloadUrl ? { target: "_blank", rel: "noopener noreferrer" } : {})}
                 className={`${FREE_BUTTON} shrink-0`}
               >
                 <Download size={14} strokeWidth={2.75} aria-hidden />
@@ -257,7 +255,6 @@ export function SoftwareCard({
           {free ? (
             <a
               href={freeHref}
-              {...(software.downloadUrl ? { target: "_blank", rel: "noopener noreferrer" } : {})}
               className={`${FREE_BUTTON} w-full`}
             >
               <Download size={14} strokeWidth={2.75} aria-hidden />

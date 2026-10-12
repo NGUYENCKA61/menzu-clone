@@ -25,7 +25,6 @@ import type { SoftwareDetail } from "@/components/sites/menzu-lol-f7ae197a/share
 import { parseRequirements } from "@/lib/productRequirements";
 import type { SoftwareCardView } from "@/components/sites/menzu-lol-f7ae197a/shared/SoftwareCard";
 import {
-  isFreeTool,
   SKIN_CHIP_COUNT,
   type Product,
   type TierColor,
@@ -577,12 +576,6 @@ export async function getCategoryPage(
     packages: s.packages
       .map((p) => tierView(p, tierSale))
       .sort((a, b) => a.price - b.price),
-    // Only a free tool's installer rides on its card ("Nhận miễn phí" opens
-    // it, the owner, 07/10/2026). A paid tool's stays off a page anyone can
-    // read; it is handed over with the order.
-    downloadUrl: isFreeTool(s.packages.map((p) => ({ price: Number(p.price) })))
-      ? s.downloadUrl
-      : null,
   }));
 
   // Sorted here rather than in SQL: what a tool costs is the cheapest of its
@@ -1976,7 +1969,6 @@ export async function listSimilarSoftware(
       imageUrl: true,
       summary: true,
       softwareStatus: true,
-      downloadUrl: true,
       category: { select: { slug: true, name: true } },
       packages: {
         orderBy: { price: "asc" },
@@ -1999,11 +1991,5 @@ export async function listSimilarSoftware(
     packages: s.packages
       .map((p) => tierView(p, tierSale))
       .sort((a, b) => a.price - b.price),
-    // Only a free tool's installer rides on its card ("Nhận miễn phí" opens
-    // it, the owner, 07/10/2026). A paid tool's stays off a page anyone can
-    // read; it is handed over with the order.
-    downloadUrl: isFreeTool(s.packages.map((p) => ({ price: Number(p.price) })))
-      ? s.downloadUrl
-      : null,
   }));
 }
