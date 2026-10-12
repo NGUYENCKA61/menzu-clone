@@ -147,6 +147,12 @@ export default async function WarrantyRequestPage({
   // A report whose second round is still missing has not reached the desk:
   // the strip stays on the buyer's own step (the owner, 10/10/2026).
   const awaitingDetails = Boolean(latest && warrantyOpen(latest.status) && !latest.detailsDoneAt);
+  // A report still waiting on its second round is not listed below: the
+  // round's card is the whole of it until the answers are in (the owner,
+  // 12/10/2026: "đợi người dùng bổ sung đầy đủ thông tin cái đi").
+  const sentReports = order.warrantyRequests.filter(
+    (r) => r.detailsDoneAt || !warrantyOpen(r.status),
+  );
   const stepNow = !latest || awaitingDetails
     ? 0
     : latest.status === "OPEN" || latest.status === "IN_PROGRESS" || latest.status === "REFUNDING"
@@ -333,25 +339,20 @@ export default async function WarrantyRequestPage({
         ) : null}
 
         {/* PAST REPORTS, IF ANY */}
-        {order.warrantyRequests.length > 0 ? (
+        {sentReports.length > 0 ? (
           <section className={CARD}>
             <span className={LABEL}>Yêu cầu đã gửi</span>
             <ul className="mt-3 flex flex-col gap-3">
-              {order.warrantyRequests.map((r) => {
+              {sentReports.map((r) => {
                 const state = WARRANTY_STATUS[r.status];
-                // Until the second round is in, the ticket is the buyer's,
-                // not the desk's, and its chip says so.
-                const waiting = warrantyOpen(r.status) && !r.detailsDoneAt;
                 const answers = readDetails(r.details);
                 return (
                   <li key={r.id} className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
                     <div className="flex flex-wrap items-center gap-2.5">
                       <span
-                        className={`inline-flex items-center rounded-md border px-2 py-0.5 text-[10px] font-black uppercase tracking-wider ${
-                          waiting ? "border-amber-500/30 bg-amber-500/10 text-amber-400" : state.tile
-                        }`}
+                        className={`inline-flex items-center rounded-md border px-2 py-0.5 text-[10px] font-black uppercase tracking-wider ${state.tile}`}
                       >
-                        {waiting ? "Chờ bổ sung" : state.label}
+                        {state.label}
                       </span>
                       <span className="inline-flex items-center rounded-md border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-neutral-300">
                         {WARRANTY_ISSUE[r.issue].label}
@@ -444,9 +445,8 @@ export default async function WarrantyRequestPage({
                         ) : null}
                       </div>
                     ) : null}
-                    {/* The answers once they are in; while they are missing
-                        the round has a card of its own above this one. */}
-                    {!waiting && answers.length > 0 ? (
+                    {/* The answers, as the desk reads them. */}
+                    {answers.length > 0 ? (
                       <div className="mt-4 rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
                         <span className={LABEL}>Thông tin đã bổ sung</span>
                         <dl className="mt-3 flex flex-col gap-3">
