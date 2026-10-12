@@ -5,6 +5,7 @@ import {
   DETAIL_KEYS_ARE_DISTINCT,
   DETAIL_QUESTIONS,
   detailsComplete,
+  IMAGES_PER_ANSWER,
   missingDetails,
   questionFor,
   readDetails,
@@ -19,7 +20,7 @@ function fullRound(kind: "software" | "account"): DetailAnswer[] {
     return {
       key: q.key,
       value,
-      imageUrl: wantsPhoto(q, value) ? "/uploads/warranty/x.webp" : null,
+      imageUrls: wantsPhoto(q, value) ? ["/uploads/warranty/x.webp"] : [],
     };
   });
 }
@@ -45,7 +46,7 @@ describe("warranty details, the second round", () => {
     expect(detailsComplete("software", round)).toBe(true);
 
     const noPicture = round.map((a) =>
-      a.key === "SECURE_BOOT" ? { ...a, imageUrl: null } : a,
+      a.key === "SECURE_BOOT" ? { ...a, imageUrls: [] } : a,
     );
     expect(detailsComplete("software", noPicture)).toBe(false);
     expect(missingDetails("software", noPicture).map((q) => q.key)).toEqual(["SECURE_BOOT"]);
@@ -94,7 +95,7 @@ describe("warranty details, the second round", () => {
     expect(wantsPhoto(secureBoot!, notYet.value)).toBe(false);
     // So "chưa tắt" with no picture is a complete answer.
     const round = fullRound("software").map((a) =>
-      a.key === "SECURE_BOOT" ? { key: a.key, value: notYet.value, imageUrl: null } : a,
+      a.key === "SECURE_BOOT" ? { key: a.key, value: notYet.value, imageUrls: [] } : a,
     );
     expect(detailsComplete("software", round)).toBe(true);
   });
@@ -111,7 +112,26 @@ describe("warranty details, the second round", () => {
           { nope: true },
         ]),
       ),
-    ).toEqual([{ key: "ANTIVIRUS", value: "Rồi", imageUrl: null }]);
+    ).toEqual([{ key: "ANTIVIRUS", value: "Rồi", imageUrls: [] }]);
+  });
+
+  it("takes several pictures on one answer, and the old single one as a list", () => {
+    const [many, legacy, junk] = readDetails(
+      JSON.stringify([
+        { key: "WINVER", value: "Tôi dùng Windows 11", imageUrls: ["/a.webp", "/b.webp"] },
+        { key: "ANTIVIRUS", value: "Rồi", imageUrl: "/old.webp" },
+        {
+          key: "SECURE_BOOT",
+          value: "Rồi",
+          imageUrls: ["/1.webp", 7, "", "/2.webp", "/3.webp", "/4.webp", "/5.webp", "/6.webp"],
+        },
+      ]),
+    );
+    expect(many.imageUrls).toEqual(["/a.webp", "/b.webp"]);
+    expect(legacy.imageUrls).toEqual(["/old.webp"]);
+    // Not strings are dropped, and the list stops at the limit.
+    expect(junk.imageUrls).toEqual(["/1.webp", "/2.webp", "/3.webp", "/4.webp", "/5.webp"]);
+    expect(junk.imageUrls).toHaveLength(IMAGES_PER_ANSWER);
   });
 
   it("cuts an answer at its limit rather than storing an essay", () => {

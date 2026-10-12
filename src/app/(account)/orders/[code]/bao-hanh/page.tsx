@@ -460,22 +460,27 @@ export default async function WarrantyRequestPage({
                                 <dd className="text-[13px] font-bold text-neutral-200">
                                   {answer.value}
                                 </dd>
-                                {answer.imageUrl ? (
-                                  <dd>
-                                    <a
-                                      href={answer.imageUrl}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="relative mt-1 block w-full max-w-xs overflow-hidden rounded-lg border border-white/10 bg-neutral-950"
-                                    >
-                                      <Image
-                                        src={answer.imageUrl}
-                                        alt={question?.label ?? "Ảnh bổ sung"}
-                                        width={640}
-                                        height={360}
-                                        className="max-h-[180px] w-full object-cover"
-                                      />
-                                    </a>
+                                {answer.imageUrls.length > 0 ? (
+                                  // Each picture opens on its own; a row of
+                                  // them, since one answer can carry several.
+                                  <dd className="mt-1 flex flex-wrap gap-2">
+                                    {answer.imageUrls.map((url, index) => (
+                                      <a
+                                        key={url}
+                                        href={url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="relative block w-40 overflow-hidden rounded-lg border border-white/10 bg-neutral-950"
+                                      >
+                                        <Image
+                                          src={url}
+                                          alt={`${question?.label ?? "Ảnh bổ sung"} ${index + 1}`}
+                                          width={320}
+                                          height={180}
+                                          className="h-[90px] w-full object-cover"
+                                        />
+                                      </a>
+                                    ))}
                                   </dd>
                                 ) : null}
                               </div>

@@ -9,6 +9,7 @@ import {
   ANSWER_MAX,
   DETAIL_QUESTIONS,
   detailsComplete,
+  IMAGES_PER_ANSWER,
   missingDetails,
   type DetailAnswer,
 } from "@/lib/warrantyDetails";
@@ -74,17 +75,23 @@ export async function POST(request: Request) {
   for (const question of DETAIL_QUESTIONS[kind]) {
     const raw = form.get(`value-${question.key}`);
     const value = typeof raw === "string" ? raw.trim().slice(0, ANSWER_MAX) : "";
-    // The picture is stored before the round is judged complete, so a
+    // The pictures are stored before the round is judged complete, so a
     // refusal names the question rather than a file the buyer cannot see.
-    const picture = await storeWarrantyImage(form.get(`image-${question.key}`), user.uid);
-    if (!picture.ok) {
-      return NextResponse.json(
-        { error: `${question.label}: ${picture.error}` },
-        { status: 400 },
-      );
+    // A question takes several at once; anything past the limit is dropped
+    // rather than refused, since the buyer has already sent enough.
+    const imageUrls: string[] = [];
+    for (const entry of form.getAll(`image-${question.key}`).slice(0, IMAGES_PER_ANSWER)) {
+      const picture = await storeWarrantyImage(entry, user.uid);
+      if (!picture.ok) {
+        return NextResponse.json(
+          { error: `${question.label}: ${picture.error}` },
+          { status: 400 },
+        );
+      }
+      if (picture.url) imageUrls.push(picture.url);
     }
-    if (!value && !picture.url) continue;
-    answers.push({ key: question.key, value, imageUrl: picture.url });
+    if (!value && imageUrls.length === 0) continue;
+    answers.push({ key: question.key, value, imageUrls });
   }
 
   const missing = missingDetails(kind, answers);

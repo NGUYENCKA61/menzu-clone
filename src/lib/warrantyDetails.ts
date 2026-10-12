@@ -176,14 +176,21 @@ export const DETAIL_QUESTIONS: Record<WarrantyKind, readonly DetailQuestion[]> =
   account: ACCOUNT_QUESTIONS,
 };
 
-/** One answer as it is stored: what was picked or typed, and its picture. */
+/** One answer as it is stored: what was picked or typed, and its pictures. */
 export interface DetailAnswer {
   key: string;
   value: string;
-  imageUrl: string | null;
+  /**
+   * Every screenshot sent with this answer, in the order they were picked.
+   * One fault often takes more than one window to show (the owner,
+   * 11/10/2026: "ảnh đính kèm có thể gửi nhiều ảnh 1 lần").
+   */
+  imageUrls: string[];
 }
 
 export const ANSWER_MAX = 200;
+/** A handful per question, not an album. */
+export const IMAGES_PER_ANSWER = 5;
 
 /**
  * Whether this answer is the one that asks for a screenshot.
@@ -221,10 +228,15 @@ export function readDetails(raw: string | null): DetailAnswer[] {
     const key = typeof row.key === "string" ? row.key : null;
     const value = typeof row.value === "string" ? row.value.trim() : "";
     if (!key || !value) continue;
+    // A round answered before pictures came in bunches kept a single
+    // imageUrl; it reads as a list of one.
+    const list = Array.isArray(row.imageUrls) ? row.imageUrls : [row.imageUrl];
     out.push({
       key,
       value: value.slice(0, ANSWER_MAX),
-      imageUrl: typeof row.imageUrl === "string" && row.imageUrl ? row.imageUrl : null,
+      imageUrls: list
+        .filter((url): url is string => typeof url === "string" && url.length > 0)
+        .slice(0, IMAGES_PER_ANSWER),
     });
   }
   return out;
@@ -249,7 +261,7 @@ export function missingDetails(
     const answer = by.get(q.key);
     if (!answer) return true;
     if (q.options.length > 0 && !q.options.some((o) => o.value === answer.value)) return true;
-    if (wantsPhoto(q, answer.value) && !answer.imageUrl) return true;
+    if (wantsPhoto(q, answer.value) && answer.imageUrls.length === 0) return true;
     return false;
   });
 }
