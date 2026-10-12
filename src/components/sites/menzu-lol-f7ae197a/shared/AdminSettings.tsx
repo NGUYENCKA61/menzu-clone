@@ -338,6 +338,9 @@ export function AdminSettings({
   const [zaloGroupBlockLinks, setZaloGroupBlockLinks] = useState(
     settings.zaloGroupBlockLinks,
   );
+  const [zaloGroupExemptDeputies, setZaloGroupExemptDeputies] = useState(
+    settings.zaloGroupExemptDeputies,
+  );
   const [shortTemplate, setShortTemplate] = useState(
     settings.shortlinkApiTemplate,
   );
@@ -803,6 +806,7 @@ export function AdminSettings({
           zaloGroupWelcome,
           zaloGroupBadWords,
           zaloGroupBlockLinks,
+          zaloGroupExemptDeputies,
           shortlinkApiTemplate: shortTemplate,
           shortlinkApiKey: shortKey,
           lowStockThreshold: Number(lowStock.replace(/\D/g, "")),
@@ -1954,6 +1958,12 @@ export function AdminSettings({
                   onChange={setZaloGroupBlockLinks}
                   label="Nhắc người gửi link ngoài"
                   hint="Link của shop và các kênh trong Liên hệ thì cho qua. Lần đầu nhắc, lần hai trong 7 ngày thì mời ra khỏi nhóm."
+                />
+                <Toggle
+                  checked={zaloGroupExemptDeputies}
+                  onChange={setZaloGroupExemptDeputies}
+                  label="Miễn phó nhóm khỏi luật chống spam"
+                  hint="Trưởng nhóm luôn được miễn. Tắt thì phó nhóm cũng bị nhắc như thành viên; bot thường không mời được phó nhóm ra khỏi nhóm."
                 />
                 <Toggle
                   checked={zaloGroupPost}

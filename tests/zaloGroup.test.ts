@@ -39,7 +39,7 @@ function fakes(settings: Record<string, string>) {
     getAllGroups: async () => ({ gridVerMap: { g1: "1" } }),
     getGroupInfo: async () => ({
       gridInfoMap: {
-        g1: { name: "Nhóm shop", totalMember: 12, adminIds: ["bot"], creatorId: "owner" },
+        g1: { name: "Nhóm shop", totalMember: 12, adminIds: ["bot", "dep"], creatorId: "owner" },
       },
     }),
     getPendingGroupMembers: async () => {
@@ -206,6 +206,22 @@ describe("what the bot does about spam", () => {
     await manager.onMessage({ ...msg("u-z", "xem shopkhac.vn", "Zed"), threadId: "g-other" });
     expect(calls.sent).toHaveLength(1);
     expect(events.filter((e) => e.kind === "WARNED").map((e) => e.groupId)).toEqual(["g2"]);
+  });
+
+  it("spares the deputies only while Cấu hình says so; the creator always", async () => {
+    const strict = fakes({ ...GROUP, "integrations.zalo.group.exemptDeputies": "false" });
+    await strict.manager.tick();
+    strict.calls.sent.length = 0;
+    await strict.manager.onMessage(msg("dep", "xem shopkhac.vn", "Dep"));
+    await strict.manager.onMessage(msg("owner", "xem shopkhac.vn", "Owner"));
+    expect(strict.calls.sent).toHaveLength(1);
+    expect(strict.events.filter((e) => e.kind === "WARNED").map((e) => e.zaloId)).toEqual(["dep"]);
+
+    const lenient = fakes(GROUP);
+    await lenient.manager.tick();
+    lenient.calls.sent.length = 0;
+    await lenient.manager.onMessage(msg("dep", "xem shopkhac.vn", "Dep"));
+    expect(lenient.calls.sent).toEqual([]);
   });
 
   it("does nothing at all while no group is named", async () => {

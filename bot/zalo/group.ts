@@ -128,7 +128,9 @@ export function createGroupManager(deps: {
   const { api, db, log } = deps;
   const gap = deps.gapMs ?? ACTION_GAP_MS;
   const recent = new RecentMessages();
-  const admins = new Map<string, Set<string>>();
+  /** Per group: the deputies Zalo lists, and the creator (trưởng nhóm). */
+  const deputies = new Map<string, Set<string>>();
+  const creators = new Map<string, string | null>();
   let groups: GroupSnapshot[] = [];
   let groupsAt = 0;
   let settings: ShopSettings | null = null;
@@ -172,7 +174,8 @@ export function createGroupManager(deps: {
     groups = ids.map((id) => {
       const g = info.gridInfoMap[id];
       const adminIds = new Set([...(g?.adminIds ?? []), ...(g?.creatorId ? [g.creatorId] : [])]);
-      admins.set(id, adminIds);
+      deputies.set(id, new Set(g?.adminIds ?? []));
+      creators.set(id, g?.creatorId ?? null);
       return {
         id,
         name: g?.name ?? id,
@@ -267,8 +270,10 @@ export function createGroupManager(deps: {
     const text = typeof message.data.content === "string" ? message.data.content : "";
     const uid = message.data.uidFrom;
     if (!text || !uid) return;
-    // The group's own admins are never policed by the bot.
-    if (admins.get(groupId)?.has(uid)) return;
+    // The group's creator is never policed by the bot; its deputies only
+    // while Cấu hình spares them (the owner may switch that off to test).
+    if (creators.get(groupId) === uid) return;
+    if (s.zaloGroupExemptDeputies && deputies.get(groupId)?.has(uid)) return;
     const reason = spamReason(text, recent, uid, Date.now(), {
       blockLinks: s.zaloGroupBlockLinks,
       allowedHosts: allowedHostsOf(s, deps.siteHost),

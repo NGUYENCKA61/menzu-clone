@@ -130,6 +130,12 @@ export interface ShopSettings {
   zaloGroupBadWords: string;
   /** Whether a link to anywhere but the shop earns a warning. */
   zaloGroupBlockLinks: boolean;
+  /**
+   * Whether the deputy admins (phó nhóm) are spared the spam rules the way
+   * the group's creator always is. Off, for a test or a strict group, a
+   * deputy is warned like any member.
+   */
+  zaloGroupExemptDeputies: boolean;
 
   // --- Link rút gọn có tiền (key miễn phí) ----------------------------------
   /**
@@ -395,6 +401,7 @@ export const DEFAULT_SETTINGS: ShopSettings = {
   zaloGroupWelcome: "",
   zaloGroupBadWords: "",
   zaloGroupBlockLinks: true,
+  zaloGroupExemptDeputies: true,
   shortlinkApiTemplate: "",
   shortlinkApiKey: "",
   // Three is a shelf that can still serve today's buyers while the shop
@@ -525,6 +532,7 @@ export const SETTING_KEYS: Record<keyof ShopSettings, string> = {
   zaloGroupWelcome: "integrations.zalo.group.welcome",
   zaloGroupBadWords: "integrations.zalo.group.badwords",
   zaloGroupBlockLinks: "integrations.zalo.group.links",
+  zaloGroupExemptDeputies: "integrations.zalo.group.exemptDeputies",
   shortlinkApiTemplate: "integrations.shortlink.template",
   shortlinkApiKey: "integrations.shortlink.key",
   lowStockThreshold: "stock.lowThreshold",
@@ -1007,6 +1015,10 @@ export function parseSettings(
       stored.get(SETTING_KEYS.zaloGroupBlockLinks),
       DEFAULT_SETTINGS.zaloGroupBlockLinks,
     ),
+    zaloGroupExemptDeputies: toBoolean(
+      stored.get(SETTING_KEYS.zaloGroupExemptDeputies),
+      DEFAULT_SETTINGS.zaloGroupExemptDeputies,
+    ),
     shortlinkApiTemplate: toOptionalText(
       stored.get(SETTING_KEYS.shortlinkApiTemplate),
       DEFAULT_SETTINGS.shortlinkApiTemplate,
@@ -1284,6 +1296,7 @@ export function serializeSettings(
     zaloGroupWelcome: settings.zaloGroupWelcome.trim(),
     zaloGroupBadWords: settings.zaloGroupBadWords.trim(),
     zaloGroupBlockLinks: String(settings.zaloGroupBlockLinks),
+    zaloGroupExemptDeputies: String(settings.zaloGroupExemptDeputies),
     shortlinkApiTemplate: settings.shortlinkApiTemplate.trim(),
     shortlinkApiKey: settings.shortlinkApiKey.trim(),
     lowStockThreshold: String(Math.floor(settings.lowStockThreshold)),
@@ -1441,6 +1454,7 @@ export function normalizeSettings(
     zaloGroupWelcome: String(raw?.zaloGroupWelcome ?? "").trim(),
     zaloGroupBadWords: String(raw?.zaloGroupBadWords ?? "").trim(),
     zaloGroupBlockLinks: raw?.zaloGroupBlockLinks !== false,
+    zaloGroupExemptDeputies: raw?.zaloGroupExemptDeputies !== false,
     shortlinkApiTemplate: String(raw?.shortlinkApiTemplate ?? "").trim(),
     shortlinkApiKey: String(raw?.shortlinkApiKey ?? "").trim(),
     lowStockThreshold: (() => {

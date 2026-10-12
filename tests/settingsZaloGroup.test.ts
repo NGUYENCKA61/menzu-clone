@@ -16,6 +16,7 @@ describe("the Zalo group settings", () => {
     expect(s.zaloGroupJoin).toBe("off");
     expect(s.zaloGroupPost).toBe(false);
     expect(s.zaloGroupBlockLinks).toBe(true);
+    expect(s.zaloGroupExemptDeputies).toBe(true);
     expect(s.zaloGroupWelcome).toBe("");
     expect(s.zaloGroupBadWords).toBe("");
   });
@@ -27,6 +28,7 @@ describe("the Zalo group settings", () => {
       zaloGroupJoin: "buyers",
       zaloGroupPost: true,
       zaloGroupBlockLinks: false,
+      zaloGroupExemptDeputies: false,
       zaloGroupWelcome: " @{name} chào ",
       zaloGroupBadWords: "scam, lừa",
     });
@@ -36,6 +38,7 @@ describe("the Zalo group settings", () => {
     expect(back.zaloGroupJoin).toBe("buyers");
     expect(back.zaloGroupPost).toBe(true);
     expect(back.zaloGroupBlockLinks).toBe(false);
+    expect(back.zaloGroupExemptDeputies).toBe(false);
     expect(back.zaloGroupWelcome).toBe("@{name} chào");
     expect(back.zaloGroupBadWords).toBe("scam, lừa");
 
