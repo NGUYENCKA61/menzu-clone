@@ -410,7 +410,9 @@ export function AnnouncementModal({
             say what this is. */}
         <header className="flex shrink-0 items-center gap-3 border-b border-white/[0.07] px-5 py-4">
           <h2 className="text-[15px] font-semibold text-white">
-            {TYPE_HEADINGS[item.type]}
+            {/* A reply to this reader is not system news (the owner,
+                12/10/2026, review item 3). */}
+            {item.personal ? "Thông báo của bạn" : TYPE_HEADINGS[item.type]}
           </h2>
           <button
             type="button"
