@@ -8,8 +8,10 @@ import {
   AssistantUpstreamError,
 } from "@/lib/assistant";
 import { MAX_QUESTION, sanitizeHistory } from "@/lib/assistantPrompt";
+import { DAY_MS, HOUR_MS, throttleReason } from "@/lib/assistantThrottle";
 import { clientIp } from "@/lib/clientIp";
 import { db } from "@/lib/db";
+import { crossSiteRequest } from "@/lib/sameOrigin";
 import { getCurrentUser } from "@/lib/session";
 import { getShopSettings } from "@/lib/settingsStore";
 
@@ -18,22 +20,27 @@ import { getShopSettings } from "@/lib/settingsStore";
  *
  * Every call here costs the shop money or free allowance, and the page it is
  * reached from is public, so the throttle is not a nicety — it is the only
- * thing between the shop and somebody holding down a send button. Two
- * windows, both hourly: one per address, one per account, and a signed-in
- * visitor must pass both.
+ * thing between the shop and somebody holding down a send button. Four
+ * windows: an hour per address, an hour per account, and an hour and a day
+ * for the whole shop (the numbers live in assistantThrottle). Only the shop's
+ * own pages may call: another site's page would spend the allowance under
+ * its visitors' addresses.
  */
 
 export const dynamic = "force-dynamic";
 /** The SDK is a Node client, not an edge one. */
 export const runtime = "nodejs";
 
-const WINDOW_MS = 60 * 60 * 1000;
-/** A visitor with a real question asks a handful; this is well past that. */
-const MAX_PER_IP = 25;
-/** Looser for a signed-in customer: they have paid, or are about to. */
-const MAX_PER_USER = 60;
-
 export async function POST(request: Request) {
+  // The same door the sign-in and warranty routes use: a page elsewhere must
+  // not be able to spend the allowance through its visitors' browsers.
+  if (crossSiteRequest(request)) {
+    return NextResponse.json(
+      { error: "Yêu cầu không hợp lệ" },
+      { status: 403 },
+    );
+  }
+
   if (!assistantConfigured(await getShopSettings())) {
     // Not an error the visitor caused: the shop has not set a key. The widget
     // hides the chat when this is the case, so this is the belt to that brace.
@@ -47,7 +54,10 @@ export async function POST(request: Request) {
   try {
     body = await request.json();
   } catch {
-    return NextResponse.json({ error: "Yêu cầu không hợp lệ" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Yêu cầu không hợp lệ" },
+      { status: 400 },
+    );
   }
 
   const history = sanitizeHistory((body as { messages?: unknown })?.messages);
@@ -60,16 +70,31 @@ export async function POST(request: Request) {
 
   const ip = clientIp(request);
   const user = await getCurrentUser();
-  const since = { gte: new Date(Date.now() - WINDOW_MS) };
+  const now = Date.now();
+  const hour = { gte: new Date(now - HOUR_MS) };
+  const day = { gte: new Date(now - DAY_MS) };
 
-  const [byIp, byUser] = await Promise.all([
-    db.assistantHit.count({ where: { ip, createdAt: since } }),
+  const [byIp, byUser, shopHour, shopDay] = await Promise.all([
+    db.assistantHit.count({ where: { ip, createdAt: hour } }),
     user
-      ? db.assistantHit.count({ where: { userId: user.id, createdAt: since } })
-      : Promise.resolve(0),
+      ? db.assistantHit.count({ where: { userId: user.id, createdAt: hour } })
+      : Promise.resolve(null),
+    db.assistantHit.count({ where: { createdAt: hour } }),
+    db.assistantHit.count({ where: { createdAt: day } }),
   ]);
 
-  if (byIp >= MAX_PER_IP || (user && byUser >= MAX_PER_USER)) {
+  const refused = throttleReason({ byIp, byUser, shopHour, shopDay });
+  if (refused === "shop") {
+    return NextResponse.json(
+      {
+        error:
+          "Trợ lý đang bận vì nhiều người hỏi cùng lúc. Bạn thử lại sau, " +
+          "hoặc nhắn thẳng cho admin qua kênh hỗ trợ nhé.",
+      },
+      { status: 429 },
+    );
+  }
+  if (refused === "visitor") {
     return NextResponse.json(
       {
         error:
@@ -85,8 +110,9 @@ export async function POST(request: Request) {
   // throttle an attacker can walk through by making every call fail.
   await db.assistantHit.create({ data: { ip, userId: user?.id ?? null } });
   try {
+    // A day's rows are kept for the shop's daily window; older ones go.
     await db.assistantHit.deleteMany({
-      where: { createdAt: { lt: new Date(Date.now() - WINDOW_MS) } },
+      where: { createdAt: { lt: new Date(now - DAY_MS) } },
     });
   } catch {
     // Housekeeping; the visitor's answer does not depend on it.
@@ -118,7 +144,9 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json(
-      { error: "Trợ lý đang bận, bạn thử lại sau ít phút hoặc nhắn admin nhé." },
+      {
+        error: "Trợ lý đang bận, bạn thử lại sau ít phút hoặc nhắn admin nhé.",
+      },
       { status: 502 },
     );
   }
