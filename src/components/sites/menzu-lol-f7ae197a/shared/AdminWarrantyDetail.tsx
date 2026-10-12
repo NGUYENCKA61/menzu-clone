@@ -50,6 +50,7 @@ export interface WarrantyTicketView {
   createdAtIso: string;
   resolvedAt: string | null;
   username: string;
+  avatarUrl: string | null;
   uid: number;
   email: string | null;
   orderCode: string;
@@ -283,6 +284,8 @@ export function AdminWarrantyDetail({ ticket, mailOn }: { ticket: WarrantyTicket
             <WarrantyThread
               viewer="shop"
               buyerName={ticket.username}
+              buyerAvatar={ticket.avatarUrl}
+              buyerInitial={ticket.username.slice(0, 1)}
               opening={opening}
               messages={messages}
               startedOn={opening.at.split(" ").pop()}

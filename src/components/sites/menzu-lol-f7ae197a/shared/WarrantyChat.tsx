@@ -32,11 +32,16 @@ export function WarrantyChat({
   initial,
   own = false,
   shopName = "Shop",
+  buyerAvatar = null,
+  buyerInitial,
 }: {
   ticketId: string;
   status: WarrantyStatus;
   opening: ThreadOpening;
   initial: ChatMessage[];
+  /** The buyer's own picture beside their lines, or their initial. */
+  buyerAvatar?: string | null;
+  buyerInitial?: string;
   /** A card of its own: it wears a title bar naming the shop instead of a
    *  label, and no rule parts it from what is above. */
   own?: boolean;
@@ -161,6 +166,8 @@ export function WarrantyChat({
       <WarrantyThread
         viewer="buyer"
         buyerName="Bạn"
+        buyerAvatar={buyerAvatar}
+        buyerInitial={buyerInitial}
         opening={opening}
         messages={messages}
         startedOn={opening.at.split(" ").pop()}

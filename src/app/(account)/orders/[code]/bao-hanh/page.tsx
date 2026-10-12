@@ -554,6 +554,8 @@ export default async function WarrantyRequestPage({
             <WarrantyChat
               own
               shopName={brandName}
+              buyerAvatar={user.avatarUrl}
+              buyerInitial={user.username.slice(0, 1)}
               ticketId={sentReports[0].id}
               status={sentReports[0].status}
               opening={{

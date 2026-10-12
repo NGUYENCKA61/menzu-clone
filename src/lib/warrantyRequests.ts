@@ -187,19 +187,25 @@ export const WARRANTY_STATUS: Record<
   WarrantyStatus,
   { label: string; tile: string; dot: string }
 > = {
+  // White text, a coloured border and no fill (the owner, 12/10/2026: the
+  // tinted chips "phát neon hơi sáng", then "chữ trắng viền màu đi"). New
+  // is grey, since nothing has happened to it yet; being worked on is
+  // amber; closed is green.
   OPEN: {
     label: "Mới gửi",
-    tile: "border-amber-500/30 bg-amber-500/10 text-amber-400",
-    dot: "bg-amber-500",
+    // The shop's red: new is the one that wants the desk's eye ("mới gửi
+    // viền đỏ đi").
+    tile: "border-[var(--menzu-accent)]/60 bg-transparent text-white",
+    dot: "bg-[var(--menzu-accent)]",
   },
   IN_PROGRESS: {
     label: "Đang xử lý",
-    tile: "border-sky-500/30 bg-sky-500/10 text-sky-400",
-    dot: "bg-sky-500",
+    tile: "border-amber-500/60 bg-transparent text-white",
+    dot: "bg-amber-500",
   },
   RESOLVED: {
     label: "Đã xử lý",
-    tile: "border-emerald-500/30 bg-emerald-500/10 text-emerald-400",
+    tile: "border-emerald-500/60 bg-transparent text-white",
     dot: "bg-emerald-500",
   },
   // The shop could not fix it and is paying it back over a bank transfer:
@@ -208,7 +214,7 @@ export const WARRANTY_STATUS: Record<
   // the shop's transfer.
   REFUNDING: {
     label: "Đang hoàn tiền",
-    tile: "border-amber-500/30 bg-amber-500/10 text-amber-400",
+    tile: "border-amber-500/60 bg-transparent text-white",
     dot: "bg-amber-500",
   },
   // Closed, as "Đã xử lý" is. Three colours for three kinds of state, not
@@ -217,7 +223,7 @@ export const WARRANTY_STATUS: Record<
   // sửa lại đi").
   REFUNDED: {
     label: "Đã hoàn tiền",
-    tile: "border-emerald-500/30 bg-emerald-500/10 text-emerald-400",
+    tile: "border-emerald-500/60 bg-transparent text-white",
     dot: "bg-emerald-500",
   },
 };

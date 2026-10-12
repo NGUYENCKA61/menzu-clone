@@ -29,6 +29,11 @@ export interface ChatMessage {
   fromShop: boolean;
   body: string;
   imageUrl: string | null;
+  /** The admin who wrote a shop line, by name; null for the buyer's lines
+   *  and for a line whose admin account is gone. */
+  author?: string | null;
+  /** That admin's picture, when they have one. */
+  authorAvatar?: string | null;
   /** The status a desk action moved the ticket to with this note. */
   status: WarrantyStatus | null;
   /** "17:56 08/09/2026", written on the server so the page and the poll agree. */

@@ -58,7 +58,7 @@ export default async function AdminWarrantyTicketPage({ params }: { params: Prom
         bankAccount: true,
         accountHolder: true,
         bankSubmittedAt: true,
-        user: { select: { username: true, uid: true, email: true } },
+        user: { select: { username: true, uid: true, email: true, avatarUrl: true } },
         order: {
           select: {
             code: true,
@@ -104,6 +104,7 @@ export default async function AdminWarrantyTicketPage({ params }: { params: Prom
           createdAtIso: ticket.createdAt.toISOString(),
           resolvedAt: ticket.resolvedAt ? stamp(ticket.resolvedAt) : null,
           username: ticket.user.username,
+          avatarUrl: ticket.user.avatarUrl,
           uid: ticket.user.uid,
           email: ticket.user.email,
           orderCode: ticket.order.code,
