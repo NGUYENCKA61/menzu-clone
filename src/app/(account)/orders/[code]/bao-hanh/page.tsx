@@ -498,7 +498,10 @@ export default async function WarrantyRequestPage({
                       </div>
                     ) : null}
                     {/* The answers, as the desk reads them. */}
-                    {answers.length > 0 ? (
+                    {/* Not once the money is on its way: the buyer's own
+                        answers are the desk's reading, and beside a bank
+                        form they are noise (the owner, 12/10/2026). */}
+                    {answers.length > 0 && r.status !== "REFUNDING" && r.status !== "REFUNDED" ? (
                       // Folded by default: the buyer wrote these and reads
                       // them once; the desk reads them on its own screen.
                       // Open, one line per answer, question on the left,
