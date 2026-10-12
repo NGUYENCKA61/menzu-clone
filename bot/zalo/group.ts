@@ -84,6 +84,13 @@ const TICK_MS = 20_000;
 const GROUPS_REFRESH_MS = 10 * 60_000;
 const SETTINGS_FRESH_MS = 30_000;
 const ACTION_GAP_MS = 1500;
+/**
+ * An approval Zalo accepts but never carries out (a deactivated account, say)
+ * leaves the request in the queue; without this the bot would approve it again
+ * on every tick and write a log line each time. Someone approved, gone and
+ * back within the day waits for a human admin instead.
+ */
+const APPROVAL_MEMORY_MS = 24 * 60 * 60_000;
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 /** The hostnames a message may link to without being spam: the shop's own. */
@@ -193,6 +200,15 @@ export function createGroupManager(deps: {
     if (!users || users.length === 0) return;
     const brand = await deps.brand();
     for (const user of users) {
+      const approvedBefore = await db.zaloGroupEvent.count({
+        where: {
+          groupId,
+          zaloId: user.uid,
+          kind: "JOIN_APPROVED",
+          createdAt: { gte: new Date(Date.now() - APPROVAL_MEMORY_MS) },
+        },
+      });
+      if (approvedBefore > 0) continue;
       const linked = await db.user.findUnique({
         where: { zaloId: user.uid },
         select: { id: true, username: true },

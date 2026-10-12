@@ -81,8 +81,14 @@ function fakes(settings: Record<string, string>) {
       count: async ({
         where,
       }: {
-        where: { zaloId: string; kind: string };
-      }) => events.filter((e) => e.zaloId === where.zaloId && e.kind === where.kind).length,
+        where: { groupId?: string; zaloId: string; kind: string };
+      }) =>
+        events.filter(
+          (e) =>
+            e.zaloId === where.zaloId &&
+            e.kind === where.kind &&
+            (!where.groupId || e.groupId === where.groupId),
+        ).length,
     },
   } as unknown as PrismaClient;
   const manager = createGroupManager({
@@ -173,6 +179,16 @@ describe("what the bot does about spam", () => {
     await manager.onMessage({ ...msg("u-y", "spam spam"), threadId: "g-other" });
     expect(calls.sent).toEqual([]);
     expect(calls.removed).toEqual([]);
+  });
+
+  it("approves a request that will not take once, not on every tick", async () => {
+    const { manager, calls, events } = fakes({ ...GROUP, "integrations.zalo.group.join": "all" });
+    await manager.tick();
+    manager.onGroupEvent({ type: "join_request", data: { groupId: "g1" } });
+    await manager.tick();
+    // The fake queue still lists both users; neither is approved a second time.
+    expect(calls.review.filter((r) => (r as { isApprove: boolean }).isApprove)).toHaveLength(2);
+    expect(events.filter((e) => e.kind === "JOIN_APPROVED")).toHaveLength(2);
   });
 
   it("minds every chosen group, and only those", async () => {
