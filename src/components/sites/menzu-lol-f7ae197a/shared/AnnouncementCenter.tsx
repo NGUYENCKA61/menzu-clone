@@ -4,6 +4,7 @@ import { ArrowRight, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { createPortal } from "react-dom";
 
 import {
   useCallback,
@@ -96,7 +97,10 @@ function subscribeSeen(listener: () => void): () => void {
 function writeSeen(keys: Set<string>) {
   try {
     // Bounded: a shop running for years would otherwise grow this forever.
-    window.localStorage.setItem(SEEN_KEY, JSON.stringify([...keys].slice(-100)));
+    window.localStorage.setItem(
+      SEEN_KEY,
+      JSON.stringify([...keys].slice(-100)),
+    );
   } catch {
     // Nothing to do — the notice reappears next visit, which is harmless.
   }
@@ -150,7 +154,11 @@ function useSnoozes(): Record<string, number> | null {
   }, [raw]);
 }
 
-function writeSnooze(current: Record<string, number>, key: string, until: number) {
+function writeSnooze(
+  current: Record<string, number>,
+  key: string,
+  until: number,
+) {
   // Expired entries are dropped on the way past, so this cannot grow without
   // bound on a shop that posts often.
   const now = Date.now();
@@ -173,7 +181,9 @@ function useSeen(): Set<string> | null {
     if (raw === null) return null;
     try {
       const list = raw ? (JSON.parse(raw) as unknown) : [];
-      return new Set(Array.isArray(list) ? list.filter((k) => typeof k === "string") : []);
+      return new Set(
+        Array.isArray(list) ? list.filter((k) => typeof k === "string") : [],
+      );
     } catch {
       return new Set<string>();
     }
@@ -189,7 +199,11 @@ function useSeen(): Set<string> | null {
  * bar both reach; this only decides whether an unread notice opens by
  * itself, once per page load.
  */
-export function AnnouncementCenter({ announcements }: { announcements: AnnouncementItem[] }) {
+export function AnnouncementCenter({
+  announcements,
+}: {
+  announcements: AnnouncementItem[];
+}) {
   const now = useClientNow();
   const seen = useSeen();
   const snoozes = useSnoozes();
@@ -202,7 +216,9 @@ export function AnnouncementCenter({ announcements }: { announcements: Announcem
     () =>
       seen === null
         ? []
-        : announcements.filter((a) => !seen.has(dismissalKey(a.id, a.revision))),
+        : announcements.filter(
+            (a) => !seen.has(dismissalKey(a.id, a.revision)),
+          ),
     [announcements, seen],
   );
   // A notice the site wrote for this reader whose button leads to the page
@@ -212,7 +228,10 @@ export function AnnouncementCenter({ announcements }: { announcements: Announcem
   // site's own notices — one the shop composed for everyone and pointed at
   // the home page must still be seen there.
   const here = useMemo(
-    () => unread.filter((a) => a.silent && a.ctaHref !== null && a.ctaHref === pathname),
+    () =>
+      unread.filter(
+        (a) => a.silent && a.ctaHref !== null && a.ctaHref === pathname,
+      ),
     [unread, pathname],
   );
   useEffect(() => {
@@ -229,7 +248,8 @@ export function AnnouncementCenter({ announcements }: { announcements: Announcem
     return (
       unread.find(
         (a) =>
-          !here.includes(a) && !isSnoozed(snoozes[dismissalKey(a.id, a.revision)] ?? null, now),
+          !here.includes(a) &&
+          !isSnoozed(snoozes[dismissalKey(a.id, a.revision)] ?? null, now),
       ) ?? null
     );
   }, [unread, here, snoozes, seen, now]);
@@ -343,9 +363,21 @@ export function AnnouncementModal({
     };
   }, [item.id, item.revision, leave]);
 
-  return (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4" inert={leaving}>
-      <div className={`order-modal-backdrop absolute inset-0 bg-black/75${leaving ? " order-modal-backdrop-out" : ""}`} onClick={leave} />
+  // Into <body>, past the header's own stacking context: drawn inside the
+  // header, the sheet sat under the support bubble, which covered its Đóng
+  // on a phone (the owner, 12/10/2026, review item 1). The sheet only ever
+  // renders in the browser (nothing is unread until localStorage is read),
+  // so document is there.
+  if (typeof document === "undefined") return null;
+  return createPortal(
+    <div
+      className="fixed inset-0 z-[200] flex items-center justify-center p-4"
+      inert={leaving}
+    >
+      <div
+        className={`order-modal-backdrop absolute inset-0 bg-black/75${leaving ? " order-modal-backdrop-out" : ""}`}
+        onClick={leave}
+      />
 
       <div
         ref={panel}
@@ -360,7 +392,10 @@ export function AnnouncementModal({
       >
         {/* A single accent rule along the top edge — the one piece of colour
             the frame gets, so the eye lands on the sheet before the words. */}
-        <span aria-hidden className="absolute inset-x-0 top-0 h-px bg-[var(--menzu-accent)]/70" />
+        <span
+          aria-hidden
+          className="absolute inset-x-0 top-0 h-px bg-[var(--menzu-accent)]/70"
+        />
 
         {/* No glyph beside the heading: the shop asked for the notice icons
             to come off the storefront. The accent rule above and the heading
@@ -426,7 +461,9 @@ export function AnnouncementModal({
 
           {item.bullets.length > 0 ? (
             <>
-              <p className="mt-5 text-[13px] font-semibold text-white">Lưu ý:</p>
+              <p className="mt-5 text-[13px] font-semibold text-white">
+                Lưu ý:
+              </p>
               <ul className="mt-2.5 flex flex-col gap-2">
                 {item.bullets.map((line, index) => (
                   <li key={index} className="flex gap-2.5">
@@ -447,7 +484,9 @@ export function AnnouncementModal({
             // A left rule rather than a full border: it marks the passage as
             // set apart without drawing a second box inside the sheet.
             <div className="mt-5 rounded-r-lg border-l-2 border-[var(--menzu-accent)] bg-[var(--menzu-accent)]/[0.06] px-4 py-3">
-              <p className="text-[13px] font-semibold text-[var(--menzu-accent)]">{item.noticeTitle}</p>
+              <p className="text-[13px] font-semibold text-[var(--menzu-accent)]">
+                {item.noticeTitle}
+              </p>
               <p className="mt-1 whitespace-pre-line text-[13px] leading-relaxed text-neutral-300">
                 {item.noticeBody}
               </p>
@@ -494,7 +533,7 @@ export function AnnouncementModal({
           </button>
         </footer>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
-
