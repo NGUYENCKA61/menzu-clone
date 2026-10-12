@@ -1,8 +1,10 @@
 import { docHtmlToPlainText, isHtmlBody } from "@/lib/docHtml";
 import { breadcrumbJsonLd, JsonLd } from "@/lib/seo";
+import type { FreeToolPanel } from "@/lib/freeKeyRules";
 import { categoryHref, productHref } from "@/lib/routes";
 
 import { Breadcrumb } from "./Breadcrumb";
+import { FreeKeyPanel } from "./FreeKeyPanel";
 import { SimilarSoftwareStrip } from "./SimilarSoftwareStrip";
 import { type SoftwareCardView } from "./SoftwareCard";
 import { SoftwareBuyPanel, type SoftwareDetail } from "./SoftwareBuyPanel";
@@ -27,6 +29,7 @@ export function SoftwareDetailView({
   setupGuideAccess,
   statusSubscribed,
   similar,
+  free = null,
 }: {
   software: SoftwareDetail;
   initialPackageId?: string;
@@ -38,6 +41,12 @@ export function SoftwareDetailView({
   statusSubscribed: boolean | null;
   /** Other tools for the row at the foot of the page; empty draws no row. */
   similar: SoftwareCardView[];
+  /**
+   * Set for a free tool: the panel then hands out a key instead of selling
+   * tiers (the owner, 12/10/2026). Decided by the route, which knows the
+   * reader and the shop's shortlink setup.
+   */
+  free?: FreeToolPanel | null;
 }) {
   // The long write-up belongs to the description section alone: the rich HTML
   // (if the admin wrote one) in full, or the plain sentence behind the name.
@@ -85,12 +94,23 @@ export function SoftwareDetailView({
                 images={software.images}
                 videoUrl={software.videoUrl}
               />
-              <SoftwareBuyPanel
-                software={software}
-                initialPackageId={initialPackageId}
-                initialQuantity={initialQuantity}
-                statusSubscribed={statusSubscribed}
-              />
+              {free ? (
+                <FreeKeyPanel
+                  software={software}
+                  signedIn={free.signedIn}
+                  loginHref={free.loginHref}
+                  gated={free.gated}
+                  downloadUrl={free.downloadUrl}
+                  today={free.today}
+                />
+              ) : (
+                <SoftwareBuyPanel
+                  software={software}
+                  initialPackageId={initialPackageId}
+                  initialQuantity={initialQuantity}
+                  statusSubscribed={statusSubscribed}
+                />
+              )}
             </div>
 
             <SoftwareDescription

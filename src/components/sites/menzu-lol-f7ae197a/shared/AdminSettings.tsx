@@ -288,6 +288,10 @@ export function AdminSettings({
   );
   const [zaloPhone, setZaloPhone] = useState(settings.zaloBotPhone);
   const [zaloName, setZaloName] = useState(settings.zaloBotName);
+  const [shortTemplate, setShortTemplate] = useState(
+    settings.shortlinkApiTemplate,
+  );
+  const [shortKey, setShortKey] = useState(settings.shortlinkApiKey);
   const [statOrders, setStatOrders] = useState(settings.statOrders);
   const [statCustomers, setStatCustomers] = useState(settings.statCustomers);
   const [statStartYear, setStatStartYear] = useState(settings.statStartYear);
@@ -743,6 +747,8 @@ export function AdminSettings({
           telegramShopUsername: shopUsername,
           zaloBotPhone: zaloPhone,
           zaloBotName: zaloName,
+          shortlinkApiTemplate: shortTemplate,
+          shortlinkApiKey: shortKey,
           lowStockThreshold: Number(lowStock.replace(/\D/g, "")),
           lowStockEmail: lowStockMail,
           warrantyAlertEmail: warrantyMail,
@@ -1749,6 +1755,53 @@ export function AdminSettings({
                       </span>
                     </p>
                   )}
+                </div>
+              </div>
+            </div>
+
+            <div className="border-t border-white/5 pt-5">
+              <span className={LABEL}>Link rút gọn có tiền (key miễn phí)</span>
+              <p className={HINT}>
+                Tool miễn phí (gói 1đ) phát key qua link rút gọn: khách bấm Lấy
+                key, vượt link, nhận key vào Lịch sử mua. Dán địa chỉ API tạo
+                link từ mục API trong tài khoản dịch vụ (link4m, yeumoney…),
+                thay chỗ điền key bằng{" "}
+                <span className="font-mono text-neutral-300">{"{api}"}</span> và
+                chỗ điền link bằng{" "}
+                <span className="font-mono text-neutral-300">{"{url}"}</span>.
+                Ví dụ:{" "}
+                <span className="font-mono text-neutral-300">
+                  https://link4m.co/api-shorten/v2?api={"{api}"}&url={"{url}"}
+                </span>
+                . Để trống thì key phát thẳng, không qua link.
+              </p>
+              <div className="grid gap-3 md:grid-cols-3 mt-3">
+                <div className="md:col-span-2">
+                  <label htmlFor="shortlink-template" className={LABEL}>
+                    Địa chỉ API tạo link
+                  </label>
+                  <input
+                    id="shortlink-template"
+                    autoComplete="off"
+                    value={shortTemplate}
+                    onChange={(event) => setShortTemplate(event.target.value)}
+                    placeholder="https://…/api?api={api}&url={url}"
+                    className={`${FIELD} font-mono`}
+                  />
+                </div>
+                <div>
+                  <label htmlFor="shortlink-key" className={LABEL}>
+                    API key
+                  </label>
+                  <input
+                    id="shortlink-key"
+                    type="password"
+                    autoComplete="off"
+                    value={shortKey}
+                    onChange={(event) => setShortKey(event.target.value)}
+                    placeholder="•••"
+                    className={`${FIELD} font-mono`}
+                  />
                 </div>
               </div>
             </div>

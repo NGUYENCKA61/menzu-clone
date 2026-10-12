@@ -108,6 +108,15 @@ export interface ShopSettings {
   /** How that account is named on the card; blank shows the number. */
   zaloBotName: string;
 
+  // --- Link rút gọn có tiền (key miễn phí) ----------------------------------
+  /**
+   * The shortlink service's API address, pasted from its member area, with
+   * {api} and {url} where the key and the long URL go. Blank: free keys are
+   * handed out at once, no link to pass.
+   */
+  shortlinkApiTemplate: string;
+  shortlinkApiKey: string;
+
   // --- Cảnh báo sắp hết hàng ------------------------------------------------
   /**
    * How few keys (or pooled sign-ins) a tier may hold before the desk is told.
@@ -357,6 +366,8 @@ export const DEFAULT_SETTINGS: ShopSettings = {
   telegramShopUsername: "",
   zaloBotPhone: "",
   zaloBotName: "",
+  shortlinkApiTemplate: "",
+  shortlinkApiKey: "",
   // Three is a shelf that can still serve today's buyers while the shop
   // pastes more in — not a number anybody has to think about on install.
   lowStockThreshold: 3,
@@ -479,6 +490,8 @@ export const SETTING_KEYS: Record<keyof ShopSettings, string> = {
   telegramShopUsername: "integrations.telegramShop.username",
   zaloBotPhone: "integrations.zalo.phone",
   zaloBotName: "integrations.zalo.name",
+  shortlinkApiTemplate: "integrations.shortlink.template",
+  shortlinkApiKey: "integrations.shortlink.key",
   lowStockThreshold: "stock.lowThreshold",
   lowStockEmail: "stock.lowEmail",
   warrantyAlertEmail: "warranty.alertEmail",
@@ -941,6 +954,14 @@ export function parseSettings(
       stored.get(SETTING_KEYS.zaloBotName),
       DEFAULT_SETTINGS.zaloBotName,
     ),
+    shortlinkApiTemplate: toOptionalText(
+      stored.get(SETTING_KEYS.shortlinkApiTemplate),
+      DEFAULT_SETTINGS.shortlinkApiTemplate,
+    ),
+    shortlinkApiKey: toOptionalText(
+      stored.get(SETTING_KEYS.shortlinkApiKey),
+      DEFAULT_SETTINGS.shortlinkApiKey,
+    ),
     lowStockThreshold: toNumber(
       stored.get(SETTING_KEYS.lowStockThreshold),
       DEFAULT_SETTINGS.lowStockThreshold,
@@ -1204,6 +1225,8 @@ export function serializeSettings(
       .replace(/^@/, ""),
     zaloBotPhone: settings.zaloBotPhone.replace(/\D/g, ""),
     zaloBotName: settings.zaloBotName.trim(),
+    shortlinkApiTemplate: settings.shortlinkApiTemplate.trim(),
+    shortlinkApiKey: settings.shortlinkApiKey.trim(),
     lowStockThreshold: String(Math.floor(settings.lowStockThreshold)),
     lowStockEmail: settings.lowStockEmail.trim(),
     warrantyAlertEmail: settings.warrantyAlertEmail.trim(),
@@ -1348,6 +1371,8 @@ export function normalizeSettings(
       .replace(/^@/, ""),
     zaloBotPhone: String(raw?.zaloBotPhone ?? "").replace(/\D/g, ""),
     zaloBotName: String(raw?.zaloBotName ?? "").trim(),
+    shortlinkApiTemplate: String(raw?.shortlinkApiTemplate ?? "").trim(),
+    shortlinkApiKey: String(raw?.shortlinkApiKey ?? "").trim(),
     lowStockThreshold: (() => {
       const value = Math.floor(Number(raw?.lowStockThreshold));
       return Number.isFinite(value) ? value : Number.NaN;

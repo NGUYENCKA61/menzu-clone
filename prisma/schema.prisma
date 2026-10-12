@@ -65,6 +65,7 @@ model User {
   zaloId          String?        @unique
   zaloName        String?
   zaloLinkCodes   ZaloLinkCode[]
+  freeKeyClaims   FreeKeyClaim[]
   avatarUrl       String?
 
   /// The cover picture on this member's own overview page, chosen by them.
@@ -785,6 +786,7 @@ model Product {
   tags              ProductTag[]
   skins             ProductSkin[]
   orders            Order[]
+  freeKeyClaims     FreeKeyClaim[]
   flashSales        FlashSale[]
   packages          ProductPackage[]
   images            ProductImage[]
@@ -1030,12 +1032,14 @@ model Order {
   /// order and every software order placed before the shop kept keys owe
   /// nothing, and deriving the entitlement from quantity would put all of
   /// them in the queue the first time a tier was stocked.
-  keysOwed        Int          @default(0)
+  keysOwed        Int           @default(0)
   /// When the buyer of an account first opened its sign-in, through the
   /// receipt's "Lấy thông tin" (after confirming they are recording the
   /// screen). Null until then: the sign-in stays locked on the page. The
   /// shop reads it when a warranty claim asks what happened first.
   loginRevealedAt DateTime?
+  /// The free-key ticket this order was claimed from, for a free tool. */
+  freeKeyClaim    FreeKeyClaim?
   /// The keys handed over. Fewer than `keysOwed` while the tier is out of
   /// stock — that shortfall IS the shop's to-do list.
   licenseKeys     LicenseKey[]
@@ -1937,4 +1941,25 @@ model ZaloOutbox {
 
   @@index([status, createdAt])
   @@map("zalo_outbox")
+}
+
+/// A free tool's key, earned by passing the shop's paid shortlink (the owner,
+/// 12/10/2026): one ticket per press of "Lấy key", its id the secret the
+/// shortlink leads to; claimed once, into an order like any other.
+model FreeKeyClaim {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  /// The short link minted for this ticket; null while no shortlink is set up.
+  shortUrl  String?
+  createdAt DateTime  @default(now())
+  expiresAt DateTime
+  claimedAt DateTime?
+  orderId   String?   @unique
+  order     Order?    @relation(fields: [orderId], references: [id], onDelete: SetNull)
+
+  @@index([userId, productId, createdAt])
+  @@map("free_key_claims")
 }

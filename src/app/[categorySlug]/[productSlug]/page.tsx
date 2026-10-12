@@ -6,6 +6,7 @@ import { isFreeTool } from "@/components/sites/menzu-lol-f7ae197a/shared/product
 import { SoftwareDetailView } from "@/components/sites/menzu-lol-f7ae197a/shared/SoftwareDetailView";
 import { formatVnd } from "@/components/sites/menzu-lol-f7ae197a/shared/productData";
 import { docHtmlToPlainText, isHtmlBody } from "@/lib/docHtml";
+import { freeToolPanel } from "@/lib/freeKey";
 import {
   getAccountDetail,
   getSoftwareDetail,
@@ -173,7 +174,7 @@ export default async function ProductPage({ params, searchParams }: PageProps) {
       listSimilarSoftware(software.code, software.categorySlug, 12),
     ]);
     // A free tool is not offered beside a paid one: its page is its own
-    // thing, still to come. Beside another free tool it stays.
+    // thing (FreeKeyPanel). Beside another free tool it stays.
     const similarShown = (
       isFreeTool(software.packages) ? similar : similar.filter((s) => !isFreeTool(s.packages))
     ).slice(0, 9);
@@ -190,7 +191,14 @@ export default async function ProductPage({ params, searchParams }: PageProps) {
         ? software
         : { ...software, setupGuideHtml: "" };
 
+    // A free tool's page hands out a key instead of selling tiers (the owner,
+    // 12/10/2026). Whether a shortlink stands in the way, where the tool
+    // downloads from and whether this reader took today's key already are
+    // the server's to know; the panel only draws what it is told.
     const href = productHref(software.categorySlug, software.slug);
+    const free = isFreeTool(software.packages)
+      ? await freeToolPanel(software.code, href, user?.id ?? null)
+      : null;
     return (
       <>
         {/* What a crawler reads instead of the prose: the tool, its shelf and
@@ -225,6 +233,7 @@ export default async function ProductPage({ params, searchParams }: PageProps) {
           setupGuideAccess={setupGuideAccess}
           statusSubscribed={statusSubscribed}
           similar={similarShown}
+          free={free}
         />
       </>
     );

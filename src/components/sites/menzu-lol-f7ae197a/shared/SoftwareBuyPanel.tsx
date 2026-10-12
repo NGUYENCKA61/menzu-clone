@@ -79,7 +79,7 @@ export interface SoftwareDetail {
  * The detection pill. Colour carries the meaning here, so the three states are
  * written out as whole class strings — Tailwind cannot see a composed one.
  */
-const STATUS_STYLE: Record<
+export const STATUS_STYLE: Record<
   string,
   { dot: string; text: string; label: string }
 > = {
