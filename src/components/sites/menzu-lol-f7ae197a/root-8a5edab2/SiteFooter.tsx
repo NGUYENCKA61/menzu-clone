@@ -26,11 +26,13 @@ interface FooterLink {
   href: string;
 }
 
-/** The bar under the rule: the four places a reader might still be looking for. */
+/** The bar under the rule: the places a reader might still be looking for. */
 const BOTTOM_LINKS: FooterLink[] = [
   { label: "Trang chủ", href: "/" },
   { label: "Sản phẩm", href: "/categories" },
   { label: "Wiki", href: "/docs" },
+  // The per-tool documentation (12/10/2026), beside the wiki it grew out of.
+  { label: "Tài liệu", href: "/tai-lieu" },
   { label: "Sitemap", href: "/sitemap.xml" },
 ];
 
