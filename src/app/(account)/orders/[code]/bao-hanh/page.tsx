@@ -314,11 +314,16 @@ export default async function WarrantyRequestPage({
                   ) : null}
                   {/* The step in hand in the accent, as the account nav
                       marks the page you are on; white alone was the colour
-                      of every heading around it (the owner, 11/10/2026). */}
+                      of every heading around it (the owner, 11/10/2026).
+                      Green once the report is closed: the last step is not
+                      in hand but done, and the chip under it is green (the
+                      owner, 12/10/2026, review item 1). */}
                   <span
                     className={
                       here
-                        ? "text-[var(--menzu-accent)]"
+                        ? stepNow === 2
+                          ? "text-emerald-400"
+                          : "text-[var(--menzu-accent)]"
                         : done
                           ? "text-neutral-400"
                           : "text-neutral-500"
