@@ -1,4 +1,4 @@
-import { Lock } from "lucide-react";
+import { FileText, Lock } from "lucide-react";
 import Link from "next/link";
 
 import { DocHtml } from "@/lib/docFormat";
@@ -49,7 +49,8 @@ export interface SoftwareDescriptionProps {
   loginHref: string;
 }
 
-const SUB_HEADING = "mt-10 text-[17px] font-black uppercase tracking-wider text-white";
+const SUB_HEADING =
+  "mt-10 text-[17px] font-black uppercase tracking-wider text-white";
 /**
  * Body text in this section, set to the same values `.doc-prose` gives the
  * rich editor's output: neutral-300 is #d4d4d4, text-sm is its 0.875rem, and
@@ -173,8 +174,8 @@ export function SoftwareDescription({
               Mở khoá sau khi thuê key
             </p>
             <p className={`mt-1 ${BODY}`}>
-              <Hi>Nội dung chỉ hiển thị</Hi> sau khi bạn đã <Hi>thuê key</Hi> của
-              tool này. <Hi>Chọn gói</Hi> ở trên và bấm <Hi>Mua ngay</Hi> -{" "}
+              <Hi>Nội dung chỉ hiển thị</Hi> sau khi bạn đã <Hi>thuê key</Hi>{" "}
+              của tool này. <Hi>Chọn gói</Hi> ở trên và bấm <Hi>Mua ngay</Hi> -{" "}
               <Hi>thanh toán xong</Hi>, quay lại trang này là xem được.
               {setupGuideAccess === "guest" ? (
                 <>
@@ -262,9 +263,9 @@ export function SoftwareDescription({
           box in the announcement sheet uses, so the two read as one idea. */}
       <div className="mt-4 mb-4 rounded-r-lg border-l-2 border-[var(--menzu-accent)] bg-white/[0.02] px-5 py-4">
         <p className={BODY}>
-          <span className="font-bold text-white">Lưu ý:</span> Chính sách bảo hành
-          và hoàn tiền được áp dụng theo từng sản phẩm và gói dịch vụ. Vui lòng
-          xem đầy đủ chính sách trước khi mua.
+          <span className="font-bold text-white">Lưu ý:</span> Chính sách bảo
+          hành và hoàn tiền được áp dụng theo từng sản phẩm và gói dịch vụ. Vui
+          lòng xem đầy đủ chính sách trước khi mua.
         </p>
         {/* The figure the sentence above stops short of. Printed only when the
             shop has set one: a made-up number here is a promise a buyer would
@@ -275,7 +276,8 @@ export function SoftwareDescription({
             <span className="font-bold text-white">Tỷ lệ hoàn trả:</span>{" "}
             <span className="font-black text-[var(--menzu-accent)]">
               {refundRate}%
-            </span>{" "}, mức bảo hành và hoàn trả khách hàng được nhận nếu sản phẩm xảy ra
+            </span>{" "}
+            , mức bảo hành và hoàn trả khách hàng được nhận nếu sản phẩm xảy ra
             sự cố, lỗi ngoài ý muốn.
           </p>
         ) : null}
@@ -292,7 +294,12 @@ export function SoftwareDescription({
         id={DESCRIPTION_SECTION_ID}
         className="mt-14 scroll-mt-[120px] border-t border-white/10 pt-12 pb-14"
       >
-        <h2 className="text-[26px] sm:text-3xl font-black uppercase tracking-wider text-white">
+        <h2 className="flex items-center gap-3 text-[26px] sm:text-3xl font-black uppercase tracking-wider text-white">
+          <FileText
+            size={26}
+            aria-hidden
+            className="shrink-0 text-[var(--menzu-accent)]"
+          />
           Mô tả sản phẩm
         </h2>
         <div className="mt-5">
@@ -321,7 +328,15 @@ export function SoftwareDescription({
       id={DESCRIPTION_SECTION_ID}
       className="mt-14 scroll-mt-[120px] border-t border-white/10 pt-12 pb-14"
     >
-      <h2 className="text-[26px] sm:text-3xl font-black uppercase tracking-wider text-white">
+      <h2 className="flex items-center gap-3 text-[26px] sm:text-3xl font-black uppercase tracking-wider text-white">
+        {/* The accent glyph before the white heading, as "Sản phẩm tương tự"
+            below and every page title already wear (the owner, 12/10/2026:
+            "chỗ nào chưa đồng bộ sửa luôn"). */}
+        <FileText
+          size={26}
+          aria-hidden
+          className="shrink-0 text-[var(--menzu-accent)]"
+        />
         Mô tả sản phẩm
       </h2>
 
