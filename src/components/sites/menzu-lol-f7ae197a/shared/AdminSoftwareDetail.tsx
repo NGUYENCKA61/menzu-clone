@@ -872,7 +872,7 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
                   id="sw-video"
                   value={videoUrl}
                   onChange={(event) => setVideoUrl(event.target.value)}
-                  placeholder="https://youtube.com/…"
+                  placeholder="https://youtube.com/… hoặc https://kinescope.io/…"
                   className={FIELD}
                 />
               </div>
