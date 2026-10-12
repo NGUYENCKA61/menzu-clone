@@ -150,7 +150,7 @@ export function WarrantyBankForm({
             value={bankAccountConfirm}
             onChange={(event) => setBankAccountConfirm(event.target.value)}
             onPaste={(event) => event.preventDefault()}
-            placeholder="Gõ lại, không dán"
+            placeholder="Nhập lại số tài khoản"
             className={`${FIELD} tabular-nums ${mismatch ? "border-rose-500/50" : ""}`}
           />
           {mismatch ? (
