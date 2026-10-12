@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { announceToAdmins } from "@/lib/announcementStore";
+import { mailWarrantyAlert } from "@/lib/warrantyAlerts";
 import { db } from "@/lib/db";
 import { LOGIN_ORDER_SELECT, signInHold } from "@/lib/loginReveal";
 import { absoluteUrl } from "@/lib/seo";
@@ -138,6 +139,18 @@ export async function POST(request: Request) {
       `🔗 ${absoluteUrl("/admin/warranty")}`,
     ].join("\n"),
   );
+  // And the shop's mailbox (VĐ 31): the same facts, with the ticket's link.
+  await mailWarrantyAlert({
+    subject: `Yêu cầu bảo hành mới: đơn ${code} (${user.username})`,
+    lines: [
+      `Khách ${user.username} vừa báo lỗi đơn ${code}.`,
+      `Sản phẩm: ${order.product.name ?? order.product.code}`,
+      `Lỗi: ${WARRANTY_ISSUE[picked.issue].label}`,
+      `Mô tả: ${said.description}`,
+      "Khách còn phải trả lời đợt 2 (bổ sung thông tin) trước khi shop kiểm tra.",
+    ],
+    href: absoluteUrl(`/admin/warranty/${ticket.id}`),
+  });
   // And the buyer, on the bell and by email: the first step of the ticket
   // they will follow from here.
   await notifyWarranty(

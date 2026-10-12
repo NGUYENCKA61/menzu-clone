@@ -261,6 +261,7 @@ export function AdminSettings({
   const [tgChat, setTgChat] = useState(settings.telegramChatId);
   const [lowStock, setLowStock] = useState(String(settings.lowStockThreshold));
   const [lowStockMail, setLowStockMail] = useState(settings.lowStockEmail);
+  const [warrantyMail, setWarrantyMail] = useState(settings.warrantyAlertEmail);
   const [shopToken, setShopToken] = useState(settings.telegramShopToken);
   const [shopSecret, setShopSecret] = useState(settings.telegramShopSecret);
   const [shopUsername, setShopUsername] = useState(settings.telegramShopUsername);
@@ -630,6 +631,7 @@ export function AdminSettings({
           telegramShopUsername: shopUsername,
           lowStockThreshold: Number(lowStock.replace(/\D/g, "")),
           lowStockEmail: lowStockMail,
+          warrantyAlertEmail: warrantyMail,
           statOrders,
           statCustomers,
           statStartYear,
@@ -1401,6 +1403,28 @@ export function AdminSettings({
                   <p className={HINT}>
                     Nhiều địa chỉ thì ngăn nhau bằng dấu phẩy. Bỏ trống là chỉ
                     báo qua Telegram.
+                  </p>
+                </div>
+                {/* VĐ 31 (the owner, 12/10/2026): the mailbox that hears a
+                    warranty report land and its second round finish. */}
+                <div className="sm:col-span-2">
+                  <label htmlFor="warranty-mail" className={LABEL}>
+                    Email nhận báo bảo hành
+                  </label>
+                  <input
+                    id="warranty-mail"
+                    type="text"
+                    inputMode="email"
+                    autoComplete="off"
+                    value={warrantyMail}
+                    onChange={(event) => setWarrantyMail(event.target.value)}
+                    placeholder="shop@gmail.com"
+                    className={FIELD}
+                  />
+                  <p className={HINT}>
+                    Gửi khi khách gửi yêu cầu bảo hành và khi khách bổ sung xong
+                    thông tin. Nhiều địa chỉ thì ngăn nhau bằng dấu phẩy. Bỏ
+                    trống là chỉ báo qua chuông và Telegram.
                   </p>
                 </div>
               </div>

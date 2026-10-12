@@ -114,6 +114,13 @@ export interface ShopSettings {
    * routes that fail for different reasons.
    */
   lowStockEmail: string;
+  /**
+   * Who is emailed when a buyer sends a warranty report or finishes its
+   * second round (the owner, 12/10/2026, VĐ 31: "gửi về gmail thông báo khi
+   * có khách hàng gửi bảo hành"). Same shape as lowStockEmail: one address
+   * or several, blank sends none; Telegram is told regardless.
+   */
+  warrantyAlertEmail: string;
 
   // --- Số liệu tin cậy (dải số trên phần Đánh giá) ---------------------------
   /** Typed figures; "" means "what the database can vouch for". See lib/trustStats.ts. */
@@ -340,6 +347,7 @@ export const DEFAULT_SETTINGS: ShopSettings = {
   // pastes more in — not a number anybody has to think about on install.
   lowStockThreshold: 3,
   lowStockEmail: "",
+  warrantyAlertEmail: "",
   statOrders: "",
   statCustomers: "",
   statStartYear: "",
@@ -457,6 +465,7 @@ export const SETTING_KEYS: Record<keyof ShopSettings, string> = {
   telegramShopUsername: "integrations.telegramShop.username",
   lowStockThreshold: "stock.lowThreshold",
   lowStockEmail: "stock.lowEmail",
+  warrantyAlertEmail: "warranty.alertEmail",
   statOrders: "trust.orders",
   statCustomers: "trust.customers",
   statStartYear: "trust.startYear",
@@ -716,6 +725,14 @@ export function lowStockRecipients(settings: ShopSettings): string[] {
     .filter(Boolean);
 }
 
+/** The addresses a warranty report is emailed to, split the same way. */
+export function warrantyAlertRecipients(settings: ShopSettings): string[] {
+  return settings.warrantyAlertEmail
+    .split(/[,;]/)
+    .map((address) => address.trim())
+    .filter(Boolean);
+}
+
 /** Enough SMTP to actually hand a message to a relay. */
 export function mailEnabled(settings: ShopSettings): boolean {
   return Boolean(
@@ -870,6 +887,10 @@ export function parseSettings(rows: Iterable<{ key: string; value: string }>): S
     lowStockEmail: toOptionalText(
       stored.get(SETTING_KEYS.lowStockEmail),
       DEFAULT_SETTINGS.lowStockEmail,
+    ),
+    warrantyAlertEmail: toOptionalText(
+      stored.get(SETTING_KEYS.warrantyAlertEmail),
+      DEFAULT_SETTINGS.warrantyAlertEmail,
     ),
     statOrders: toOptionalText(stored.get(SETTING_KEYS.statOrders), DEFAULT_SETTINGS.statOrders),
     statCustomers: toOptionalText(
@@ -1057,6 +1078,7 @@ export function serializeSettings(settings: ShopSettings): { key: string; value:
     telegramShopUsername: settings.telegramShopUsername.trim().replace(/^@/, ""),
     lowStockThreshold: String(Math.floor(settings.lowStockThreshold)),
     lowStockEmail: settings.lowStockEmail.trim(),
+    warrantyAlertEmail: settings.warrantyAlertEmail.trim(),
     statOrders: settings.statOrders.trim(),
     statCustomers: settings.statCustomers.trim(),
     statStartYear: settings.statStartYear.trim(),
@@ -1194,6 +1216,7 @@ export function normalizeSettings(raw: Partial<ShopSettings> | null): ShopSettin
       return Number.isFinite(value) ? value : Number.NaN;
     })(),
     lowStockEmail: String(raw?.lowStockEmail ?? "").trim(),
+    warrantyAlertEmail: String(raw?.warrantyAlertEmail ?? "").trim(),
     statOrders: String(raw?.statOrders ?? "").trim(),
     statCustomers: String(raw?.statCustomers ?? "").trim(),
     statStartYear: String(raw?.statStartYear ?? "").trim(),
