@@ -347,7 +347,9 @@ export function WarrantyRequestForm({
         <span className="flex flex-col gap-1">
           <span className="inline-flex items-center gap-2 text-[13px] text-neutral-400">
             <BadgeCheck className="h-4 w-4 shrink-0 text-neutral-500" />
-            Shop cam kết đổi key hoặc hoàn tiền nếu lỗi từ phía shop.
+            {kind === "account"
+              ? "Shop cam kết đổi tài khoản hoặc hoàn tiền nếu lỗi từ phía shop."
+              : "Shop cam kết đổi key hoặc hoàn tiền nếu lỗi từ phía shop."}
           </span>
           <span className="pl-6 text-[12px] text-neutral-500">
             Shop trả lời trên chuông thông báo và trong lịch sử mua hàng.
