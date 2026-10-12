@@ -359,9 +359,15 @@ export default async function WarrantyRequestPage({
                 <LifeBuoy className="h-5 w-5 shrink-0 text-[var(--menzu-accent)]" aria-hidden />
                 {brandName} hỗ trợ
               </h2>
+              {/* The dot the desk's list wears, so both sides read one chip
+                  (the owner, 12/10/2026: "bên khách hàng cũng có chấm đỏ"). */}
               <span
-                className={`inline-flex items-center rounded-md border px-2 py-0.5 text-[10px] font-black uppercase tracking-wider ${WARRANTY_STATUS[sentReports[0].status].tile}`}
+                className={`inline-flex items-center gap-1.5 rounded-md border px-2 py-0.5 text-[10px] font-black uppercase tracking-wider ${WARRANTY_STATUS[sentReports[0].status].tile}`}
               >
+                <span
+                  aria-hidden
+                  className={`h-1.5 w-1.5 rounded-full ${WARRANTY_STATUS[sentReports[0].status].dot}`}
+                />
                 {WARRANTY_STATUS[sentReports[0].status].label}
               </span>
             </div>
@@ -377,8 +383,9 @@ export default async function WarrantyRequestPage({
                     <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
                       {index > 0 ? (
                         <span
-                          className={`inline-flex items-center rounded-md border px-2 py-0.5 text-[10px] font-black uppercase tracking-wider ${state.tile}`}
+                          className={`inline-flex items-center gap-1.5 rounded-md border px-2 py-0.5 text-[10px] font-black uppercase tracking-wider ${state.tile}`}
                         >
+                          <span aria-hidden className={`h-1.5 w-1.5 rounded-full ${state.dot}`} />
                           {state.label}
                         </span>
                       ) : null}

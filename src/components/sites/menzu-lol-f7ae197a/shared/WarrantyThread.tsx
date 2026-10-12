@@ -180,8 +180,9 @@ export function WarrantyThread({
                   <span className="mt-1 inline-flex items-center gap-1.5 px-1 text-[11px] text-neutral-500">
                     Chuyển sang
                     <span
-                      className={`inline-flex items-center rounded-md border px-1.5 py-px text-[9.5px] font-black uppercase tracking-wider ${moved.tile}`}
+                      className={`inline-flex items-center gap-1 rounded-md border px-1.5 py-px text-[9.5px] font-black uppercase tracking-wider ${moved.tile}`}
                     >
+                      <span aria-hidden className={`h-1 w-1 rounded-full ${moved.dot}`} />
                       {moved.label}
                     </span>
                   </span>
