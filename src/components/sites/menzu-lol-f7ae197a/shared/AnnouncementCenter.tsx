@@ -249,32 +249,52 @@ export function AnnouncementCenter({
     writeSeen(next);
   }, [here, seen]);
 
-  // A snoozed notice is still unread; all that is held back is the sheet
-  // opening by itself.
-  const autoTarget = useMemo(() => {
-    if (seen === null || snoozes === null || now === null) return null;
-    return (
-      unread.find(
-        (a) =>
-          !here.includes(a) &&
-          !isSnoozed(snoozes[dismissalKey(a.id, a.revision)] ?? null, now),
-      ) ?? null
+  // Every unread notice this page load may open, in order. A snoozed notice
+  // is still unread; all that is held back is the sheet opening by itself.
+  // The sheet shows the first and offers the rest one "Tiếp theo" at a
+  // time, instead of one per page visited (the owner, 12/10/2026, review
+  // item 6).
+  const queue = useMemo(() => {
+    if (seen === null || snoozes === null || now === null) return [];
+    return unread.filter(
+      (a) =>
+        !here.includes(a) &&
+        !isSnoozed(snoozes[dismissalKey(a.id, a.revision)] ?? null, now),
     );
   }, [unread, here, snoozes, seen, now]);
 
   // Derived rather than stored: the first unread notice is showing precisely
-  // because it is unread, so closing it — which marks it read — closes it. No
-  // effect has to notice and no second copy of the truth can drift from it.
-  const reading = autoDone ? null : autoTarget;
+  // because it is unread, so closing it — which marks it read — closes it or
+  // brings up the next. No effect has to notice and no second copy of the
+  // truth can drift from it.
+  const reading = autoDone ? null : (queue[0] ?? null);
+  const remaining = Math.max(0, queue.length - 1);
 
-  const dismiss = useCallback(
+  const markRead = useCallback(
     (item: AnnouncementItem) => {
       const next = new Set(seen ?? []);
       next.add(dismissalKey(item.id, item.revision));
       writeSeen(next);
-      setAutoDone(true);
     },
     [seen],
+  );
+
+  /** The sheet's own button: read, and on to the next while there is one. */
+  const dismissNext = useCallback(
+    (item: AnnouncementItem) => {
+      markRead(item);
+      if (remaining === 0) setAutoDone(true);
+    },
+    [markRead, remaining],
+  );
+
+  /** The cross, the backdrop, Escape: read, and nothing more this page load. */
+  const dismissStop = useCallback(
+    (item: AnnouncementItem) => {
+      markRead(item);
+      setAutoDone(true);
+    },
+    [markRead],
   );
 
   const snooze = useCallback(
@@ -284,9 +304,9 @@ export function AnnouncementCenter({
         dismissalKey(item.id, item.revision),
         Date.now() + SNOOZE_MS,
       );
-      setAutoDone(true);
+      if (remaining === 0) setAutoDone(true);
     },
-    [snoozes],
+    [snoozes, remaining],
   );
 
   // Nothing of its own in the header any more — the bell and its dropdown
@@ -296,7 +316,9 @@ export function AnnouncementCenter({
   return reading ? (
     <AnnouncementModal
       item={reading}
-      onClose={() => dismiss(reading)}
+      remaining={remaining}
+      onClose={() => dismissStop(reading)}
+      onNext={() => dismissNext(reading)}
       onSnooze={() => snooze(reading)}
     />
   ) : null;
@@ -316,11 +338,18 @@ export function AnnouncementCenter({
  */
 export function AnnouncementModal({
   item,
+  remaining = 0,
   onClose,
+  onNext = onClose,
   onSnooze,
 }: {
   item: AnnouncementItem;
+  /** How many more unread notices wait behind this one. */
+  remaining?: number;
+  /** The cross, the backdrop, Escape: done for this page load. */
   onClose: () => void;
+  /** The button: done with this one, the next may follow. */
+  onNext?: () => void;
   onSnooze: () => void;
 }) {
   const panel = useRef<HTMLDivElement>(null);
@@ -543,14 +572,16 @@ export function AnnouncementModal({
           ) : null}
           <button
             type="button"
-            onClick={leave}
+            // The last one leaves with the exit; an earlier one gives way to
+            // the next in place.
+            onClick={remaining > 0 ? onNext : leave}
             className={
               item.ctaLabel && item.ctaHref
                 ? "h-10 rounded-lg border border-white/10 bg-white/[0.03] px-4 text-[13px] font-medium text-neutral-300 transition-colors hover:bg-white/[0.07] hover:text-white"
                 : "h-10 rounded-lg bg-[var(--menzu-accent)] px-6 text-[13px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent-dark)]"
             }
           >
-            Đóng
+            {remaining > 0 ? `Tiếp theo (${remaining})` : "Đóng"}
           </button>
         </footer>
       </div>
