@@ -24,6 +24,11 @@ import {
   type FaqEntry,
   type ShopSettings,
 } from "@/lib/settings";
+import {
+  ASSISTANT_PRESETS,
+  readAssistantProvider,
+  type AssistantProvider,
+} from "@/lib/assistantProviders";
 import type { ZaloBotState } from "@/lib/zaloShared";
 import {
   parseZaloGroupIds,
@@ -345,6 +350,20 @@ export function AdminSettings({
     settings.shortlinkApiTemplate,
   );
   const [shortKey, setShortKey] = useState(settings.shortlinkApiKey);
+  const [assistantProvider, setAssistantProvider] = useState<AssistantProvider>(
+    settings.assistantProvider,
+  );
+  const [assistantBaseUrl, setAssistantBaseUrl] = useState(
+    settings.assistantBaseUrl,
+  );
+  const [assistantModel, setAssistantModel] = useState(settings.assistantModel);
+  const [assistantApiKey, setAssistantApiKey] = useState(
+    settings.assistantApiKey,
+  );
+  // The preset whose address is in the field, so its key page can be linked.
+  const assistantPreset = ASSISTANT_PRESETS.find(
+    (preset) => preset.baseUrl === assistantBaseUrl.trim().replace(/\/+$/, ""),
+  );
   const [statOrders, setStatOrders] = useState(settings.statOrders);
   const [statCustomers, setStatCustomers] = useState(settings.statCustomers);
   const [statStartYear, setStatStartYear] = useState(settings.statStartYear);
@@ -809,6 +828,10 @@ export function AdminSettings({
           zaloGroupExemptDeputies,
           shortlinkApiTemplate: shortTemplate,
           shortlinkApiKey: shortKey,
+          assistantProvider,
+          assistantBaseUrl,
+          assistantModel,
+          assistantApiKey,
           lowStockThreshold: Number(lowStock.replace(/\D/g, "")),
           lowStockEmail: lowStockMail,
           warrantyAlertEmail: warrantyMail,
@@ -2055,6 +2078,120 @@ export function AdminSettings({
                     placeholder="•••"
                     className={`${FIELD} font-mono`}
                   />
+                </div>
+              </div>
+            </div>
+
+            <div className="border-t border-white/5 pt-5">
+              <span className={LABEL}>Trợ lý AI (ô chat hỗ trợ trên web)</span>
+              <p className={HINT}>
+                Ô chat ở góc trang chỉ hiện khi có model trả lời. Claude dùng
+                key đặt trên máy chủ (trả phí). Muốn dùng model miễn phí thì
+                chọn một dịch vụ bên dưới, lấy key ở trang của họ rồi dán vào;
+                đổi lúc nào cũng được, không cần chạy lại gì. Gói miễn phí có
+                giới hạn số câu mỗi phút và mỗi ngày, quá hạn thì trợ lý báo
+                bận.
+              </p>
+              <div className="grid gap-3 md:grid-cols-3 mt-3">
+                <div>
+                  <label htmlFor="assistant-provider" className={LABEL}>
+                    Trả lời bằng
+                  </label>
+                  <select
+                    id="assistant-provider"
+                    value={assistantProvider}
+                    onChange={(event) =>
+                      setAssistantProvider(
+                        readAssistantProvider(event.target.value),
+                      )
+                    }
+                    className={FIELD}
+                  >
+                    <option value="claude">Claude (key trên máy chủ)</option>
+                    <option value="compatible">
+                      Dịch vụ khác, có gói miễn phí
+                    </option>
+                  </select>
+                </div>
+                <div className="md:col-span-2">
+                  <span className={LABEL}>Điền nhanh</span>
+                  <div className="flex flex-wrap gap-2">
+                    {ASSISTANT_PRESETS.map((preset) => (
+                      <button
+                        key={preset.id}
+                        type="button"
+                        onClick={() => {
+                          setAssistantProvider("compatible");
+                          setAssistantBaseUrl(preset.baseUrl);
+                          setAssistantModel(preset.model);
+                        }}
+                        className={`rounded-lg border px-2.5 py-1.5 text-[11px] font-bold ${
+                          assistantPreset?.id === preset.id
+                            ? "border-emerald-500/40 text-emerald-300"
+                            : "border-white/10 text-neutral-300 hover:text-white"
+                        }`}
+                      >
+                        {preset.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div className="md:col-span-2">
+                  <label htmlFor="assistant-base" className={LABEL}>
+                    Địa chỉ API (chuẩn OpenAI)
+                  </label>
+                  <input
+                    id="assistant-base"
+                    autoComplete="off"
+                    value={assistantBaseUrl}
+                    onChange={(event) =>
+                      setAssistantBaseUrl(event.target.value)
+                    }
+                    placeholder="https://…/v1"
+                    className={`${FIELD} font-mono`}
+                  />
+                </div>
+                <div>
+                  <label htmlFor="assistant-model" className={LABEL}>
+                    Model
+                  </label>
+                  <input
+                    id="assistant-model"
+                    autoComplete="off"
+                    value={assistantModel}
+                    onChange={(event) => setAssistantModel(event.target.value)}
+                    placeholder="gemini-2.5-flash"
+                    className={`${FIELD} font-mono`}
+                  />
+                </div>
+                <div className="md:col-span-3">
+                  <label htmlFor="assistant-key" className={LABEL}>
+                    API key
+                  </label>
+                  <input
+                    id="assistant-key"
+                    type="password"
+                    autoComplete="off"
+                    value={assistantApiKey}
+                    onChange={(event) => setAssistantApiKey(event.target.value)}
+                    placeholder="•••"
+                    className={`${FIELD} font-mono`}
+                  />
+                  {assistantPreset ? (
+                    <p className={HINT}>
+                      Lấy key tại{" "}
+                      <a
+                        href={assistantPreset.keyUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-neutral-300 underline"
+                      >
+                        {assistantPreset.keyUrl}
+                      </a>
+                      . Tên model có thể đổi theo thời gian, kiểm tra lại trong
+                      trang của họ nếu trợ lý báo lỗi.
+                    </p>
+                  ) : null}
                 </div>
               </div>
             </div>

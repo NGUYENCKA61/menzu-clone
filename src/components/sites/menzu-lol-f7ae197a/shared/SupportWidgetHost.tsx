@@ -12,8 +12,9 @@ import { SupportWidget } from "./SupportWidget";
  * one-to-one support and would make the widget a list of chatrooms.
  *
  * Whether the assistant answers is decided here rather than in the browser:
- * it turns on the moment the shop puts a key in the environment, and the key
- * itself never leaves the server.
+ * it turns on the moment the shop puts a Claude key in the environment or a
+ * free service's key into Cấu hình, and the key itself never leaves the
+ * server.
  */
 export async function SupportWidgetHost() {
   const [profile, settings] = await Promise.all([getBioProfile(), getShopSettings()]);
@@ -27,7 +28,7 @@ export async function SupportWidgetHost() {
         iconUrl: link.iconUrl,
       })) ?? [];
 
-  const assistant = assistantConfigured();
+  const assistant = assistantConfigured(settings);
 
   // Nothing to offer: no assistant to ask and nobody to message. A tab that
   // opens an empty panel is worse than no tab.

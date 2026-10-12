@@ -1,3 +1,7 @@
+import {
+  readAssistantProvider,
+  type AssistantProvider,
+} from "@/lib/assistantProviders";
 import { parseCardRates, serializeCardRates, type CardRate } from "@/lib/topup";
 import {
   parseZaloGroupIds,
@@ -145,6 +149,17 @@ export interface ShopSettings {
    */
   shortlinkApiTemplate: string;
   shortlinkApiKey: string;
+
+  // --- Trợ lý AI ---------------------------------------------------------------
+  /**
+   * Which door the assistant answers through: "claude" by the Anthropic key in
+   * the environment, "compatible" by any OpenAI-dialect service named in the
+   * three fields below (Gemini, Groq, OpenRouter, Mistral have free allowances).
+   */
+  assistantProvider: AssistantProvider;
+  assistantBaseUrl: string;
+  assistantModel: string;
+  assistantApiKey: string;
 
   // --- Cảnh báo sắp hết hàng ------------------------------------------------
   /**
@@ -404,6 +419,10 @@ export const DEFAULT_SETTINGS: ShopSettings = {
   zaloGroupExemptDeputies: true,
   shortlinkApiTemplate: "",
   shortlinkApiKey: "",
+  assistantProvider: "claude",
+  assistantBaseUrl: "",
+  assistantModel: "",
+  assistantApiKey: "",
   // Three is a shelf that can still serve today's buyers while the shop
   // pastes more in — not a number anybody has to think about on install.
   lowStockThreshold: 3,
@@ -535,6 +554,10 @@ export const SETTING_KEYS: Record<keyof ShopSettings, string> = {
   zaloGroupExemptDeputies: "integrations.zalo.group.exemptDeputies",
   shortlinkApiTemplate: "integrations.shortlink.template",
   shortlinkApiKey: "integrations.shortlink.key",
+  assistantProvider: "integrations.assistant.provider",
+  assistantBaseUrl: "integrations.assistant.baseUrl",
+  assistantModel: "integrations.assistant.model",
+  assistantApiKey: "integrations.assistant.key",
   lowStockThreshold: "stock.lowThreshold",
   lowStockEmail: "stock.lowEmail",
   warrantyAlertEmail: "warranty.alertEmail",
@@ -1027,6 +1050,21 @@ export function parseSettings(
       stored.get(SETTING_KEYS.shortlinkApiKey),
       DEFAULT_SETTINGS.shortlinkApiKey,
     ),
+    assistantProvider: readAssistantProvider(
+      stored.get(SETTING_KEYS.assistantProvider),
+    ),
+    assistantBaseUrl: toOptionalText(
+      stored.get(SETTING_KEYS.assistantBaseUrl),
+      DEFAULT_SETTINGS.assistantBaseUrl,
+    ),
+    assistantModel: toOptionalText(
+      stored.get(SETTING_KEYS.assistantModel),
+      DEFAULT_SETTINGS.assistantModel,
+    ),
+    assistantApiKey: toOptionalText(
+      stored.get(SETTING_KEYS.assistantApiKey),
+      DEFAULT_SETTINGS.assistantApiKey,
+    ),
     lowStockThreshold: toNumber(
       stored.get(SETTING_KEYS.lowStockThreshold),
       DEFAULT_SETTINGS.lowStockThreshold,
@@ -1299,6 +1337,10 @@ export function serializeSettings(
     zaloGroupExemptDeputies: String(settings.zaloGroupExemptDeputies),
     shortlinkApiTemplate: settings.shortlinkApiTemplate.trim(),
     shortlinkApiKey: settings.shortlinkApiKey.trim(),
+    assistantProvider: settings.assistantProvider,
+    assistantBaseUrl: settings.assistantBaseUrl.trim(),
+    assistantModel: settings.assistantModel.trim(),
+    assistantApiKey: settings.assistantApiKey.trim(),
     lowStockThreshold: String(Math.floor(settings.lowStockThreshold)),
     lowStockEmail: settings.lowStockEmail.trim(),
     warrantyAlertEmail: settings.warrantyAlertEmail.trim(),
@@ -1457,6 +1499,10 @@ export function normalizeSettings(
     zaloGroupExemptDeputies: raw?.zaloGroupExemptDeputies !== false,
     shortlinkApiTemplate: String(raw?.shortlinkApiTemplate ?? "").trim(),
     shortlinkApiKey: String(raw?.shortlinkApiKey ?? "").trim(),
+    assistantProvider: readAssistantProvider(raw?.assistantProvider),
+    assistantBaseUrl: String(raw?.assistantBaseUrl ?? "").trim(),
+    assistantModel: String(raw?.assistantModel ?? "").trim(),
+    assistantApiKey: String(raw?.assistantApiKey ?? "").trim(),
     lowStockThreshold: (() => {
       const value = Math.floor(Number(raw?.lowStockThreshold));
       return Number.isFinite(value) ? value : Number.NaN;
@@ -1676,6 +1722,15 @@ export function validateSettings(settings: ShopSettings): string | null {
   }
   if (settings.seoFaq.length > 20) {
     return "Tối đa 20 câu hỏi trong phần SEO Content";
+  }
+  // Fetched as "<address>/chat/completions"; anything but a URL would be a
+  // request to nowhere, answered as "trợ lý đang bận" with no clue why.
+  if (
+    settings.assistantProvider === "compatible" &&
+    settings.assistantBaseUrl &&
+    !/^https?:\/\//.test(settings.assistantBaseUrl)
+  ) {
+    return "Địa chỉ API của trợ lý AI phải bắt đầu bằng http:// hoặc https://";
   }
   return null;
 }

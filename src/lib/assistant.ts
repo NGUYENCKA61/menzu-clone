@@ -10,12 +10,20 @@ import {
   type CatalogueSoftware,
   type ChatTurn,
 } from "@/lib/assistantPrompt";
+import {
+  chatCompletionsUrl,
+  compatibleFailure,
+  compatibleReady,
+  readChatCompletion,
+} from "@/lib/assistantProviders";
 import { db } from "@/lib/db";
 import { docHtmlToPlainText } from "@/lib/docHtml";
 import { featuresOrDefault, parseFeatures } from "@/lib/productFeatures";
 import { DEFAULT_GUIDE } from "@/lib/productGuide";
 import { productHref } from "@/lib/routes";
 import { runningPackageSales, tierPriceNow } from "@/lib/queries";
+import type { ShopSettings } from "@/lib/settings";
+import { getShopSettings } from "@/lib/settingsStore";
 
 /**
  * The shop's assistant: the half that talks to the database and to the model.
@@ -25,18 +33,38 @@ import { runningPackageSales, tierPriceNow } from "@/lib/queries";
  * the catalogue is read fresh on each request rather than written into the
  * prompt by hand: a price typed into a prompt is a price that goes stale the
  * first time the shop edits a product.
+ *
+ * Two doors to a model: Claude through the key in the environment, or any
+ * service speaking the OpenAI dialect through the address, model and key the
+ * shop pastes into Cấu hình (the free allowances of Gemini, Groq, OpenRouter,
+ * Mistral). Cấu hình says which; the catalogue and the rules are the same.
  */
 
-/** The model. Overridable, because the bill for this lands on the shop. */
+/** The Claude model. Overridable, because the bill for this lands on the shop. */
 export const ASSISTANT_MODEL = process.env.ASSISTANT_MODEL ?? "claude-opus-5";
 
-/** Whether the shop has given the site a key to answer with. */
-export function assistantConfigured(): boolean {
+/** Whether the shop has given the site a way to answer. */
+export function assistantConfigured(settings: ShopSettings): boolean {
+  if (settings.assistantProvider === "compatible") return compatibleReady(settings);
   return Boolean(process.env.ANTHROPIC_API_KEY?.trim());
+}
+
+/** A refusal from the model's side, with what the log should say about it. */
+export class AssistantUpstreamError extends Error {
+  constructor(
+    readonly kind: "auth" | "rate" | "other",
+    detail: string,
+  ) {
+    super(detail);
+    this.name = "AssistantUpstreamError";
+  }
 }
 
 /** How many account listings are worth carrying; the cheapest are the ones asked about. */
 const ACCOUNTS_SHOWN = 20;
+
+/** A free service that has not answered in this long is not going to. */
+const COMPATIBLE_TIMEOUT_MS = 60_000;
 
 /** Reads the catalogue and hands it to the writer in `assistantPrompt`. */
 export async function buildCatalogue(): Promise<string> {
@@ -112,8 +140,18 @@ export async function buildCatalogue(): Promise<string> {
   return catalogueToText(tools, listings);
 }
 
+/** One answer, through whichever door Cấu hình names. */
+export async function askAssistant(history: ChatTurn[]): Promise<string> {
+  const settings = await getShopSettings();
+  const catalogue = await buildCatalogue();
+  const system = `${SYSTEM_RULES}\n\n# DỮ LIỆU SHOP\n${catalogue}`;
+  return settings.assistantProvider === "compatible"
+    ? askCompatible(settings, system, history)
+    : askClaude(system, history);
+}
+
 /**
- * One answer.
+ * Claude.
  *
  * The rules and the catalogue go in the system block behind a cache
  * breakpoint: they are identical for every visitor and change only when the
@@ -124,9 +162,8 @@ export async function buildCatalogue(): Promise<string> {
  * default, disabling it invites tool-call text and stray tags into the visible
  * answer, and a support reply does not need deep reasoning anyway.
  */
-export async function askAssistant(history: ChatTurn[]): Promise<string> {
+async function askClaude(system: string, history: ChatTurn[]): Promise<string> {
   const client = new Anthropic();
-  const catalogue = await buildCatalogue();
 
   const response = await client.messages.create({
     model: ASSISTANT_MODEL,
@@ -135,7 +172,7 @@ export async function askAssistant(history: ChatTurn[]): Promise<string> {
     system: [
       {
         type: "text",
-        text: `${SYSTEM_RULES}\n\n# DỮ LIỆU SHOP\n${catalogue}`,
+        text: system,
         cache_control: { type: "ephemeral" },
       },
     ],
@@ -155,4 +192,47 @@ export async function askAssistant(history: ChatTurn[]): Promise<string> {
     .trim();
 
   return text || "Mình chưa hiểu ý bạn, bạn nói rõ hơn giúp mình nhé.";
+}
+
+/**
+ * Any service in the OpenAI dialect. No caching to lean on, so the whole
+ * prompt is paid for each time; the free allowances are counted in requests
+ * and tokens per minute, and a refusal for that comes back as a 429, which
+ * the route turns into "trợ lý đang bận".
+ */
+async function askCompatible(
+  settings: ShopSettings,
+  system: string,
+  history: ChatTurn[],
+): Promise<string> {
+  const res = await fetch(chatCompletionsUrl(settings.assistantBaseUrl), {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      authorization: `Bearer ${settings.assistantApiKey.trim()}`,
+    },
+    body: JSON.stringify({
+      model: settings.assistantModel.trim(),
+      max_tokens: MAX_ANSWER_TOKENS,
+      temperature: 0.3,
+      messages: [
+        { role: "system", content: system },
+        ...history.map((turn) => ({ role: turn.role, content: turn.content })),
+      ],
+    }),
+    signal: AbortSignal.timeout(COMPATIBLE_TIMEOUT_MS),
+  });
+
+  const body = await res.text();
+  if (!res.ok) {
+    const failure = compatibleFailure(res.status, body);
+    throw new AssistantUpstreamError(failure.kind, failure.detail);
+  }
+  let json: unknown;
+  try {
+    json = JSON.parse(body);
+  } catch {
+    throw new AssistantUpstreamError("other", `không phải JSON: ${body.slice(0, 120)}`);
+  }
+  return readChatCompletion(json) ?? "Mình chưa hiểu ý bạn, bạn nói rõ hơn giúp mình nhé.";
 }

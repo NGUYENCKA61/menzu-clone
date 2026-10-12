@@ -2,19 +2,25 @@ import { NextResponse } from "next/server";
 
 import Anthropic from "@anthropic-ai/sdk";
 
-import { askAssistant, assistantConfigured } from "@/lib/assistant";
+import {
+  askAssistant,
+  assistantConfigured,
+  AssistantUpstreamError,
+} from "@/lib/assistant";
 import { MAX_QUESTION, sanitizeHistory } from "@/lib/assistantPrompt";
 import { clientIp } from "@/lib/clientIp";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/session";
+import { getShopSettings } from "@/lib/settingsStore";
 
 /**
  * The AI assistant's one endpoint: a question in, an answer out.
  *
- * Every call here costs the shop money, and the page it is reached from is
- * public, so the throttle is not a nicety — it is the only thing between the
- * shop and somebody holding down a send button. Two windows, both hourly:
- * one per address, one per account, and a signed-in visitor must pass both.
+ * Every call here costs the shop money or free allowance, and the page it is
+ * reached from is public, so the throttle is not a nicety — it is the only
+ * thing between the shop and somebody holding down a send button. Two
+ * windows, both hourly: one per address, one per account, and a signed-in
+ * visitor must pass both.
  */
 
 export const dynamic = "force-dynamic";
@@ -28,7 +34,7 @@ const MAX_PER_IP = 25;
 const MAX_PER_USER = 60;
 
 export async function POST(request: Request) {
-  if (!assistantConfigured()) {
+  if (!assistantConfigured(await getShopSettings())) {
     // Not an error the visitor caused: the shop has not set a key. The widget
     // hides the chat when this is the case, so this is the belt to that brace.
     return NextResponse.json(
@@ -93,7 +99,15 @@ export async function POST(request: Request) {
     // The visitor gets one sentence and somewhere else to go; the detail goes
     // to the server log, where the shop can see whether it is a bad key, a
     // rate limit at the model, or something else.
-    if (error instanceof Anthropic.AuthenticationError) {
+    if (error instanceof AssistantUpstreamError) {
+      const what =
+        error.kind === "auth"
+          ? "API key bị từ chối"
+          : error.kind === "rate"
+            ? "bị giới hạn tốc độ phía model"
+            : "dịch vụ model trả lỗi";
+      console.error(`[assistant] ${what}: ${error.message}`);
+    } else if (error instanceof Anthropic.AuthenticationError) {
       console.error("[assistant] API key bị từ chối");
     } else if (error instanceof Anthropic.RateLimitError) {
       console.error("[assistant] bị giới hạn tốc độ phía model");
