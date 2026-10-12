@@ -489,8 +489,9 @@ export default async function WarrantyRequestPage({
                           </span>
                         ) : null}
                         {/* What broke is the report's first fact, so it reads
-                          at body size and brightness; the time is the small
-                          print beside it (the owner, 12/10/2026). */}
+                          at body size and brightness. No time beside it: the
+                          sentence under the strip and the thread's first line
+                          already carry it (the owner, 12/10/2026: "bỏ đi"). */}
                         <span className="inline-flex items-center gap-1.5 text-[13px] font-bold text-neutral-200">
                           {/* The fault's glyph, the one its tile wore on the
                               form (the owner, 12/10/2026). */}
@@ -499,9 +500,6 @@ export default async function WarrantyRequestPage({
                             className="h-4 w-4 shrink-0 text-neutral-400"
                           />
                           {WARRANTY_ISSUE[r.issue].label}
-                        </span>
-                        <span className="text-[12px] font-semibold text-neutral-500">
-                          {stamp(r.createdAt)}
                         </span>
                         {/* An account's report: the recording it was sent with. */}
                         {r.videoUrl ? (
