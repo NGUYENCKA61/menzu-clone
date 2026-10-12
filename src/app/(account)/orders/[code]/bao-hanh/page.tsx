@@ -6,7 +6,6 @@ import {
   ArrowLeft,
   Banknote,
   ChevronRight,
-  LifeBuoy,
   Plus,
   Info,
   KeyRound,
@@ -440,9 +439,14 @@ export default async function WarrantyRequestPage({
                     aria-hidden
                   />
                 ) : (
-                  <LifeBuoy
-                    className="h-5 w-5 shrink-0 text-[var(--menzu-accent)]"
-                    aria-hidden
+                  // The shop's own mark, cut from its logo, in the slot a
+                  // life buoy held (the owner, 12/10/2026: "xài logo shop thử").
+                  <Image
+                    src="/images/brand/thichthihack-mark.png"
+                    alt=""
+                    width={24}
+                    height={24}
+                    className="h-6 w-6 shrink-0"
                   />
                 )}
                 {awaitingBank
