@@ -9,7 +9,7 @@ import {
   LifeBuoy,
   Info,
   KeyRound,
-  Landmark,
+  CreditCard,
   Video,
   Wrench,
 } from "lucide-react";
@@ -432,7 +432,7 @@ export default async function WarrantyRequestPage({
                       <div className="mt-4 border-t border-white/[0.06] pt-4 text-[13px] leading-relaxed text-neutral-300">
                         <p className="flex items-start gap-2">
                           {r.refundMethod === "MANUAL" ? (
-                            <Landmark className="mt-0.5 h-4 w-4 shrink-0 text-neutral-400" />
+                            <CreditCard className="mt-0.5 h-4 w-4 shrink-0 text-neutral-400" />
                           ) : (
                             <Banknote className="mt-0.5 h-4 w-4 shrink-0 text-neutral-400" />
                           )}

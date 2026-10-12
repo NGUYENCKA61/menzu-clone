@@ -1,6 +1,6 @@
 "use client";
 
-import { Landmark, Loader2 } from "lucide-react";
+import { CreditCard, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -55,7 +55,7 @@ export function WarrantyBankForm({
         onClick={() => setEditing(true)}
         className="mt-3 inline-flex h-9 items-center gap-2 rounded-xl border border-white/12 bg-white/[0.04] px-4 text-xs font-bold text-neutral-300 transition-colors hover:border-white/25 hover:text-white"
       >
-        <Landmark className="h-3.5 w-3.5" />
+        <CreditCard className="h-3.5 w-3.5" />
         Sửa số tài khoản
       </button>
     );
@@ -192,7 +192,7 @@ export function WarrantyBankForm({
           {busy ? (
             <Loader2 className="h-4 w-4 animate-spin motion-reduce:animate-none" />
           ) : (
-            <Landmark className="h-4 w-4" />
+            <CreditCard className="h-4 w-4" />
           )}
           Gửi số tài khoản
         </button>
