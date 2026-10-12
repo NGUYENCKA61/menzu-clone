@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ImagePlus, LifeBuoy, Lock, Send, X } from "lucide-react";
+import { ImagePlus, Lock, Send, X } from "lucide-react";
 
 import { WarrantyThread, type ThreadOpening } from "@/components/sites/menzu-lol-f7ae197a/shared/WarrantyThread";
 import { SUPPORT_WINDOW } from "@/lib/supportHours";
@@ -30,8 +30,6 @@ export function WarrantyChat({
   status,
   opening,
   initial,
-  own = false,
-  shopName = "Shop",
   buyerAvatar = null,
   buyerInitial,
 }: {
@@ -42,11 +40,6 @@ export function WarrantyChat({
   /** The buyer's own picture beside their lines, or their initial. */
   buyerAvatar?: string | null;
   buyerInitial?: string;
-  /** A card of its own: it wears a title bar naming the shop instead of a
-   *  label, and no rule parts it from what is above. */
-  own?: boolean;
-  /** The shop as the title bar names it. */
-  shopName?: string;
 }) {
   const router = useRouter();
   // What this tab sent or fetched since the page was drawn; shown merged with
@@ -144,25 +137,13 @@ export function WarrantyChat({
   }
 
   return (
-    <div className={own ? "" : "mt-4 border-t border-white/[0.06] pt-4"}>
-      {own ? (
-        // Who the buyer is talking to, and whether the line is still open
-        // (the owner, 12/10/2026, after a support widget whose frame he
-        // liked: a title bar, a pane that scrolls, the composer docked).
-        // No open/closed chip beside it: the composer below says open, and
-        // the line that replaces it says closed (the owner, 12/10/2026:
-        // two lit chips in two title bars read as neon).
-        <div className="mb-4 border-b border-white/[0.06] pb-4">
-          <h2 className="flex items-center gap-2.5 text-base font-black uppercase tracking-wider text-white">
-            <LifeBuoy className="h-5 w-5 shrink-0 text-[var(--menzu-accent)]" aria-hidden />
-            {shopName} hỗ trợ
-          </h2>
-        </div>
-      ) : (
-        <span className="mb-3 block text-[10px] font-black uppercase tracking-widest text-neutral-500">
-          Trao đổi với shop
-        </span>
-      )}
+    // Under a rule inside the report's card, which wears the title bar (the
+    // owner, 12/10/2026: "gộp lại trong phần chat cho gọn"). The pane
+    // scrolls, the composer stays docked beneath it.
+    <div className="mt-4 border-t border-white/[0.06] pt-4">
+      <span className="mb-3 block text-[10px] font-black uppercase tracking-widest text-neutral-500">
+        Trao đổi với shop
+      </span>
       <WarrantyThread
         viewer="buyer"
         buyerName="Bạn"

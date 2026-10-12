@@ -6,7 +6,7 @@ import {
   ArrowLeft,
   Banknote,
   ChevronRight,
-  ClipboardList,
+  LifeBuoy,
   Info,
   KeyRound,
   Landmark,
@@ -343,19 +343,18 @@ export default async function WarrantyRequestPage({
           </section>
         ) : null}
 
-        {/* PAST REPORTS, IF ANY. One frame, not a box per report inside the
-            box: the card is the report, and a second one is parted from the
-            first by a rule (the owner, 12/10/2026: "đỡ rối, hợp lý, không
-            AI"). */}
+        {/* THE REPORT AND ITS CONVERSATION, one card (the owner, 12/10/2026:
+            "gộp lại trong phần chat cho gọn"): the shop's name and the latest
+            report's state in the title bar, the report in a few lines, a
+            second report parted from the first by a rule, and the thread
+            under a rule of its own. Folded, the report is three lines; a
+            card of its own was a frame around almost nothing. */}
         {sentReports.length > 0 ? (
           <section className={CARD}>
-            {/* The same title bar as the conversation's card beneath: the
-                name, an icon, the latest report's state on the right (the
-                owner, 12/10/2026: "sửa lại cho đồng bộ"). */}
             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/[0.06] pb-4">
               <h2 className="flex items-center gap-2.5 text-base font-black uppercase tracking-wider text-white">
-                <ClipboardList className="h-5 w-5 shrink-0 text-[var(--menzu-accent)]" aria-hidden />
-                Yêu cầu đã gửi
+                <LifeBuoy className="h-5 w-5 shrink-0 text-[var(--menzu-accent)]" aria-hidden />
+                {brandName} hỗ trợ
               </h2>
               <span
                 className={`inline-flex items-center rounded-md border px-2 py-0.5 text-[10px] font-black uppercase tracking-wider ${WARRANTY_STATUS[sentReports[0].status].tile}`}
@@ -541,19 +540,10 @@ export default async function WarrantyRequestPage({
                 );
               })}
             </ul>
-          </section>
-        ) : null}
-
-        {/* THE CONVERSATION, a card of its own (the owner, 12/10/2026: "tách
-            yêu cầu đã gửi và chat với shop 2 card riêng"): the facts above
-            are read once, this is what the buyer comes back to. Only the
-            latest report's thread; an older one is closed anyway. It stays
-            open until the shop marks the report done (the owner, 01/10/2026). */}
-        {sentReports[0] ? (
-          <section className={CARD}>
+            {/* The thread of the latest report; an older one is closed
+                anyway. Open until the shop marks the report done (the
+                owner, 01/10/2026). */}
             <WarrantyChat
-              own
-              shopName={brandName}
               buyerAvatar={user.avatarUrl}
               buyerInitial={user.username.slice(0, 1)}
               ticketId={sentReports[0].id}
