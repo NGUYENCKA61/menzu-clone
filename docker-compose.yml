@@ -107,6 +107,37 @@ services:
       retries: 3
       start_period: 20s
 
+  # The Zalo notice bot (bot/zalo/main.ts, Dockerfile.zalo): a spare personal
+  # Zalo account signed in through the unofficial web client, draining the
+  # notices the app writes to zalo_outbox and linking customers who send it a
+  # code. Its session lives in a named volume so a rebuild does not ask for a
+  # new QR scan; the QR picture, when one is needed, is written into the
+  # uploads directory so Admin → Cấu hình can show it.
+  zalo-bot:
+    build:
+      context: .
+      dockerfile: Dockerfile.zalo
+    image: menzu-zalo-bot:latest
+    container_name: menzu-zalo-bot
+    restart: unless-stopped
+    logging: *bounded-logs
+    env_file:
+      - path: .env
+        required: true
+    environment:
+      - NODE_ENV=production
+      - ZALO_DATA_DIR=/data
+      - ZALO_QR_DIR=/app/public/uploads/zalo
+    volumes:
+      - zalo-data:/data
+      - ${UPLOADS_DIR:-./uploads}:/app/public/uploads
+    depends_on:
+      postgres:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+
 volumes:
   pgdata:
   image-cache:
+  zalo-data:

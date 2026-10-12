@@ -1,0 +1,32 @@
+# The Zalo notice bot (bot/zalo/main.ts): a long-running Node process beside
+# the app, sharing the database. Built from the same package manifest so the
+# Prisma client matches the schema the migrator applied.
+ARG NODE_VERSION=24.14.1-slim
+
+FROM node:${NODE_VERSION}
+
+WORKDIR /app
+
+# The root package's postinstall runs `prisma generate`, which needs the
+# schema and prisma.config.ts before a single dependency is usable.
+COPY package.json package-lock.json* ./
+COPY prisma ./prisma
+COPY prisma.config.ts ./
+RUN --mount=type=cache,target=/root/.npm npm ci --no-audit --no-fund
+
+# Only what the bot runs: its own file and the shared vocabulary.
+COPY tsconfig.json ./
+COPY src/lib/zaloShared.ts ./src/lib/zaloShared.ts
+COPY bot ./bot
+
+ENV NODE_ENV=production
+ENV ZALO_DATA_DIR=/data
+ENV ZALO_QR_DIR=/app/public/uploads/zalo
+
+# /data keeps the signed-in session across restarts (a named volume in
+# docker-compose); the uploads mount is where the QR picture is written so
+# Admin → Cấu hình can show it.
+RUN mkdir -p /data /app/public/uploads && chown -R node:node /data /app
+USER node
+
+CMD ["node", "--import", "tsx", "bot/zalo/main.ts"]

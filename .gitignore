@@ -70,3 +70,6 @@ private/
 *.sql.gz
 *.sql.zip
 !prisma/migrations/**/*.sql
+
+# The Zalo bot's signed-in session (bot/zalo), local runs only
+/.zalo/
