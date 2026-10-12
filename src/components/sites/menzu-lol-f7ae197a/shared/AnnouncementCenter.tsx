@@ -523,10 +523,10 @@ export function AnnouncementModal({
               Không hiện lại trong 2 giờ
             </button>
           )}
-          {/* A gift notice says "Nhận quà" per the reference. It does what
-              "Đóng" does — closes and marks read. The claiming itself is
-              whatever the shop wrote in the body, because nothing in the
-              codebase grants anything. */}
+          {/* "Nhận quà" went: it only closed the sheet, and a button that
+              names an action should do one. A gift with somewhere to go
+              carries that as its CTA; the rest close (the owner, 12/10/2026,
+              review item 5). */}
           {/* When the notice is about something with an address, the way there
               is the primary button and closing becomes the quiet one: a notice
               that names a screen and then leaves the reader to go find it has
@@ -550,7 +550,7 @@ export function AnnouncementModal({
                 : "h-10 rounded-lg bg-[var(--menzu-accent)] px-6 text-[13px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent-dark)]"
             }
           >
-            {item.type === "GIFT" ? "Nhận quà" : "Đóng"}
+            Đóng
           </button>
         </footer>
       </div>
