@@ -29,11 +29,14 @@ export function WarrantyChat({
   status,
   opening,
   initial,
+  own = false,
 }: {
   ticketId: string;
   status: WarrantyStatus;
   opening: ThreadOpening;
   initial: ChatMessage[];
+  /** A card of its own, so no rule parts it from what is above. */
+  own?: boolean;
 }) {
   const router = useRouter();
   // What this tab sent or fetched since the page was drawn; shown merged with
@@ -131,7 +134,7 @@ export function WarrantyChat({
   }
 
   return (
-    <div className="mt-4 border-t border-white/[0.06] pt-4">
+    <div className={own ? "" : "mt-4 border-t border-white/[0.06] pt-4"}>
       <span className="text-[10px] font-black uppercase tracking-widest text-neutral-500">
         Trao đổi với shop
       </span>

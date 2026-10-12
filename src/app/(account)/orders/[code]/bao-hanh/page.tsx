@@ -503,23 +503,32 @@ export default async function WarrantyRequestPage({
                       </div>
                     ) : null}
 
-                    {/* The report and everything said since — open until the
-                        shop marks it done (the owner, 01/10/2026). */}
-                    <WarrantyChat
-                      ticketId={r.id}
-                      status={r.status}
-                      opening={{
-                        body: r.description,
-                        imageUrl: r.imageUrl,
-                        at: dayStamp(r.createdAt),
-                        sentAt: r.createdAt.toISOString(),
-                      }}
-                      initial={r.messages.map(toChatMessage)}
-                    />
                   </li>
                 );
               })}
             </ul>
+          </section>
+        ) : null}
+
+        {/* THE CONVERSATION, a card of its own (the owner, 12/10/2026: "tách
+            yêu cầu đã gửi và chat với shop 2 card riêng"): the facts above
+            are read once, this is what the buyer comes back to. Only the
+            latest report's thread; an older one is closed anyway. It stays
+            open until the shop marks the report done (the owner, 01/10/2026). */}
+        {sentReports[0] ? (
+          <section className={CARD}>
+            <WarrantyChat
+              own
+              ticketId={sentReports[0].id}
+              status={sentReports[0].status}
+              opening={{
+                body: sentReports[0].description,
+                imageUrl: sentReports[0].imageUrl,
+                at: dayStamp(sentReports[0].createdAt),
+                sentAt: sentReports[0].createdAt.toISOString(),
+              }}
+              initial={sentReports[0].messages.map(toChatMessage)}
+            />
           </section>
         ) : null}
 
