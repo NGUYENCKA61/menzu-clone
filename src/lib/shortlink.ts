@@ -100,11 +100,20 @@ export async function shortenUrl(
       signal: AbortSignal.timeout(SHORTLINK_TIMEOUT_MS),
       headers: { accept: "application/json, text/plain;q=0.9, */*;q=0.5" },
       cache: "no-store",
+      // A redirect is a refusal, not a link: link4m answers a localhost
+      // address by bouncing to it, which would otherwise be followed.
+      redirect: "manual",
     });
     const body = await res.text();
     const url = readShortlinkResponse(body);
-    if (!res.ok || !url)
-      return { ok: false, error: `BAD_RESPONSE:${res.status}` };
+    // The service's own words ride along, for the log: "Invalid API key",
+    // a refused address, a quota, each reads differently.
+    if (!res.ok || !url) {
+      return {
+        ok: false,
+        error: `BAD_RESPONSE:${res.status}:${body.replace(/\s+/g, " ").slice(0, 160)}`,
+      };
+    }
     // An error answer that echoes the address it was given is not a link.
     if (url === longUrl) return { ok: false, error: "UNSHORTENED" };
     return { ok: true, url };

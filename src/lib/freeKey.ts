@@ -241,7 +241,11 @@ export async function startFreeClaim(
     absoluteUrl(`/free-key/${claim.id}`),
     settings,
   );
-  if (!shortened.ok) throw new Error(`SHORTLINK:${shortened.error}`);
+  if (!shortened.ok) {
+    // The customer reads one sentence; the log keeps the reason.
+    console.error("[free-key] shortlink refused:", shortened.error);
+    throw new Error(`SHORTLINK:${shortened.error}`);
+  }
   await db.freeKeyClaim.update({
     where: { id: claim.id },
     data: { shortUrl: shortened.url },
