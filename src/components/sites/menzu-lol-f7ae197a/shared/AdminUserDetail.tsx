@@ -1,9 +1,11 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import {
+  BadgeCheck,
   BadgePercent,
   Ban,
   KeyRound,
@@ -286,6 +288,16 @@ export function AdminUserDetail({
                 <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-current" />
                 {user.tier}
               </span>
+              {user.verifiedAt ? (
+                // "Xác thực cấp 2" (12/10/2026): the desk that granted it is a click away.
+                <Link
+                  href="/admin/verifications?filter=all"
+                  className="inline-flex items-center gap-1 rounded-md border border-emerald-500/30 bg-emerald-500/10 px-2 py-1 text-[10px] font-black uppercase tracking-wider text-emerald-300 transition-colors hover:text-white"
+                >
+                  <BadgeCheck size={11} aria-hidden />
+                  Cấp 2 · {user.verifiedAt}
+                </Link>
+              ) : null}
             </div>
             <p className="mt-2 text-[12px] text-neutral-500 tabular-nums">
               UID {user.uid} · Tham gia {user.createdAt}

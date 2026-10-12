@@ -87,6 +87,7 @@ export default async function AdminUserDetailPage({
           lastIp: user.lastIp,
           blockedAt: formatDate(user.blockedAt),
           blockedReason: user.blockedReason,
+          verifiedAt: formatDate(user.verifiedAt),
           createdAt: formatDate(user.createdAt) ?? "",
         }}
       />

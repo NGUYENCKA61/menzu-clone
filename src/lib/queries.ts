@@ -1624,6 +1624,8 @@ export interface AdminUserRow {
   totalToppedUp: number;
   /** The đại lý's negotiated percent; 0 unless role is AGENCY. */
   agencyPercent: number;
+  /** When the shop granted "xác thực cấp 2"; null is level 1. */
+  verifiedAt: Date | null;
 }
 
 /**
@@ -1695,6 +1697,7 @@ export async function listUsers(
     lastLoginAt: u.lastLoginAt,
     totalToppedUp: toppedByUser.get(u.id) ?? 0,
     agencyPercent: u.agencyPercent,
+    verifiedAt: u.verifiedAt,
   }));
 }
 

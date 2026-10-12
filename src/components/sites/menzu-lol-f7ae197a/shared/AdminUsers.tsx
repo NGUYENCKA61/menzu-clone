@@ -29,6 +29,8 @@ export interface AdminUserView {
   blockedAt: string | null;
   blockedReason: string | null;
   createdAt: string;
+  /** When the shop granted "xác thực cấp 2"; null or absent is level 1. */
+  verifiedAt?: string | null;
 }
 
 /** Quick moderation from the row. Anything with a form lives on the user's
