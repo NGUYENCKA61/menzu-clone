@@ -421,9 +421,7 @@ export default async function WarrantyRequestPage({
                   />
                 )}
                 {awaitingBank
-                  ? sentReports[0].refundAmount !== null
-                    ? `Nhập số tài khoản nhận ${formatVnd(Number(sentReports[0].refundAmount))}đ`
-                    : "Nhập số tài khoản nhận tiền"
+                  ? "Điền thông tin hoàn tiền"
                   : `${brandName} hỗ trợ`}
               </h2>
               {/* The dot the desk's list wears, so both sides read one chip
