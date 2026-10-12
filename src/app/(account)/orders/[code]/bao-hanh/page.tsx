@@ -378,8 +378,15 @@ export default async function WarrantyRequestPage({
           <section className={CARD}>
             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/[0.06] pb-4">
               <h2 className="flex items-center gap-2.5 text-base font-black uppercase tracking-wider text-white">
-                <LifeBuoy className="h-5 w-5 shrink-0 text-[var(--menzu-accent)]" aria-hidden />
-                {brandName} hỗ trợ
+                {/* Named for what it holds: while the bank form is up the
+                    card is that form and nothing else (the owner, 12/10/2026:
+                    "chỗ đó chỉ để nhập tiền thôi"). */}
+                {awaitingBank ? (
+                  <CreditCard className="h-5 w-5 shrink-0 text-[var(--menzu-accent)]" aria-hidden />
+                ) : (
+                  <LifeBuoy className="h-5 w-5 shrink-0 text-[var(--menzu-accent)]" aria-hidden />
+                )}
+                {awaitingBank ? "Nhập số tài khoản nhận tiền" : `${brandName} hỗ trợ`}
               </h2>
               {/* The dot the desk's list wears, so both sides read one chip
                   (the owner, 12/10/2026: "bên khách hàng cũng có chấm đỏ"). */}
