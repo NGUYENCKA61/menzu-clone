@@ -1197,7 +1197,7 @@ export function OrderDetailModal({
                             warrantyAction.kind === "status"
                               ? "border border-white/12 bg-white/[0.04] text-neutral-200 hover:border-white/25 hover:text-white"
                               : warrantyAction.kind === "bank"
-                                ? "border border-[var(--menzu-accent)]/70 bg-transparent text-white hover:bg-[var(--menzu-accent)]/10"
+                                ? "border border-violet-500/70 bg-transparent text-white hover:bg-violet-500/10"
                                 : "bg-[var(--menzu-accent)] text-white hover:bg-[var(--menzu-accent-dark)]"
                           }`}
                         >
