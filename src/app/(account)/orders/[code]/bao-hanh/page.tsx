@@ -486,10 +486,12 @@ export default async function WarrantyRequestPage({
                       </span>
                     ) : null}
                     {/* What broke is the report's first fact, so it reads at
-                        body size and brightness. No time beside it: the
-                        sentence under the strip and the thread's first line
-                        already carry it (the owner, 12/10/2026: "bỏ đi"). */}
-                    <span className="inline-flex items-center gap-1.5 text-[13px] font-bold text-neutral-200">
+                        body size, one shade under the title and one over the
+                        fold's word beside it (the owner, 12/10/2026: "giảm độ
+                        sáng", a trial). No time beside it: the sentence under
+                        the strip and the thread's first line already carry it
+                        (the owner, 12/10/2026: "bỏ đi"). */}
+                    <span className="inline-flex items-center gap-1.5 text-[13px] font-bold text-neutral-300">
                       <WarrantyIssueGlyph
                         issue={r.issue}
                         className="h-4 w-4 shrink-0 text-neutral-400"
