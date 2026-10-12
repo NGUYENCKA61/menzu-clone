@@ -300,7 +300,7 @@ export default async function WarrantyRequestPage({
                           : "text-neutral-500"
                     }
                   >
-                    {index + 1}. {step.title}
+                    {step.title}
                   </span>
                 </li>
               );
