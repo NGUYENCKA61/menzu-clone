@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ImagePlus, Lock, Send, X } from "lucide-react";
+import { ImagePlus, LifeBuoy, Lock, Send, X } from "lucide-react";
 
 import { WarrantyThread, type ThreadOpening } from "@/components/sites/menzu-lol-f7ae197a/shared/WarrantyThread";
 import { SUPPORT_WINDOW } from "@/lib/supportHours";
@@ -31,13 +31,17 @@ export function WarrantyChat({
   opening,
   initial,
   own = false,
+  shopName = "Shop",
 }: {
   ticketId: string;
   status: WarrantyStatus;
   opening: ThreadOpening;
   initial: ChatMessage[];
-  /** A card of its own, so no rule parts it from what is above. */
+  /** A card of its own: it wears a title bar naming the shop instead of a
+   *  label, and no rule parts it from what is above. */
   own?: boolean;
+  /** The shop as the title bar names it. */
+  shopName?: string;
 }) {
   const router = useRouter();
   // What this tab sent or fetched since the page was drawn; shown merged with
@@ -136,19 +140,44 @@ export function WarrantyChat({
 
   return (
     <div className={own ? "" : "mt-4 border-t border-white/[0.06] pt-4"}>
-      <span className="text-[10px] font-black uppercase tracking-widest text-neutral-500">
-        Trao đổi với shop
-      </span>
-      <div className="mt-3">
-        <WarrantyThread viewer="buyer" buyerName="Bạn" opening={opening} messages={messages} />
-      </div>
-      {/* Said plainly while it is so, or the buyer stares at their own
-          message wondering whether anyone reads it. */}
-      {open && !messages.some((m) => m.fromShop) ? (
-        <p className="mt-3 text-[12px] text-neutral-500">
-          Shop chưa trả lời. Giờ làm việc {SUPPORT_WINDOW}, ngoài giờ cứ nhắn, sáng shop đọc.
-        </p>
-      ) : null}
+      {own ? (
+        // Who the buyer is talking to, and whether the line is still open
+        // (the owner, 12/10/2026, after a support widget whose frame he
+        // liked: a title bar, a pane that scrolls, the composer docked).
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3 border-b border-white/[0.06] pb-4">
+          <h2 className="flex items-center gap-2.5 text-base font-black uppercase tracking-wider text-white">
+            <LifeBuoy className="h-5 w-5 shrink-0 text-[var(--menzu-accent)]" aria-hidden />
+            {shopName} hỗ trợ
+          </h2>
+          <span
+            className={`inline-flex items-center rounded-md border px-2 py-0.5 text-[10px] font-black uppercase tracking-wider ${
+              open
+                ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
+                : "border-white/10 bg-white/5 text-neutral-400"
+            }`}
+          >
+            {open ? "Đang mở" : "Đã đóng"}
+          </span>
+        </div>
+      ) : (
+        <span className="mb-3 block text-[10px] font-black uppercase tracking-widest text-neutral-500">
+          Trao đổi với shop
+        </span>
+      )}
+      <WarrantyThread
+        viewer="buyer"
+        buyerName="Bạn"
+        opening={opening}
+        messages={messages}
+        startedOn={opening.at.split(" ").pop()}
+        // Said plainly while it is so, or the buyer stares at their own
+        // message wondering whether anyone reads it.
+        footer={
+          open && !messages.some((m) => m.fromShop)
+            ? `Shop chưa trả lời. Giờ làm việc ${SUPPORT_WINDOW}, ngoài giờ cứ nhắn, sáng shop đọc.`
+            : null
+        }
+      />
 
       {open ? (
         <div className="mt-4">

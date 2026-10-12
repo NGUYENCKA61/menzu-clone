@@ -1,4 +1,7 @@
+"use client";
+
 import Image from "next/image";
+import { useEffect, useRef, type ReactNode } from "react";
 
 import type { ChatMessage } from "@/lib/warrantyChat";
 import { WARRANTY_STATUS } from "@/lib/warrantyRequests";
@@ -16,18 +19,28 @@ export interface ThreadOpening {
  * A warranty ticket's conversation, the same on both screens: the viewer's
  * own lines on the right in the accent, the other side's on the left. A desk
  * action's note carries the status it moved the ticket to, under the bubble.
+ *
+ * The lines sit in a pane of fixed height that scrolls, newest at the
+ * bottom, so a long thread never pushes the composer down the page (the
+ * owner, 12/10/2026, from a support widget he liked the frame of).
  */
 export function WarrantyThread({
   viewer,
   buyerName,
   opening,
   messages,
+  startedOn,
+  footer,
 }: {
   viewer: "buyer" | "shop";
   /** The buyer as the desk knows them; on their own page they are "Bạn". */
   buyerName: string;
   opening: ThreadOpening | null;
   messages: ChatMessage[];
+  /** "12/10/2026": the faint first line of the pane. */
+  startedOn?: string;
+  /** A faint last line, for what the thread is waiting on. */
+  footer?: ReactNode;
 }) {
   const lines = [
     ...(opening
@@ -35,6 +48,14 @@ export function WarrantyThread({
       : []),
     ...messages,
   ];
+  const pane = useRef<HTMLDivElement | null>(null);
+
+  // The newest line is the one wanted: on first paint and on every arrival.
+  useEffect(() => {
+    const el = pane.current;
+    if (el) el.scrollTop = el.scrollHeight;
+  }, [lines.length]);
+
   if (lines.length === 0) return null;
 
   // The buyer's pages and the desk each keep their own red.
@@ -44,53 +65,62 @@ export function WarrantyThread({
       : "border-[var(--brand)]/25 bg-[var(--brand)]/10";
 
   return (
-    <ol className="flex flex-col gap-3">
-      {lines.map((line) => {
-        const mine = (viewer === "shop") === line.fromShop;
-        const who = line.fromShop ? "Shop" : viewer === "buyer" ? "Bạn" : buyerName;
-        const moved = line.status ? WARRANTY_STATUS[line.status] : null;
-        return (
-          <li key={line.id} className={`flex flex-col ${mine ? "items-end" : "items-start"}`}>
-            <span className="mb-1 px-1 text-[11px] font-semibold text-neutral-500">
-              <span className="text-neutral-300">{who}</span> · {line.at}
-            </span>
-            <div
-              className={`max-w-[88%] rounded-2xl border px-3.5 py-2.5 text-[13px] leading-relaxed text-neutral-100 sm:max-w-[75%] ${
-                mine ? `rounded-tr-md ${mineTone}` : "rounded-tl-md border-white/10 bg-white/[0.04]"
-              }`}
-            >
-              {line.body ? <p className="whitespace-pre-line break-words">{line.body}</p> : null}
-              {line.imageUrl ? (
-                <a
-                  href={line.imageUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className={`block overflow-hidden rounded-lg border border-white/10 ${line.body ? "mt-2" : ""}`}
-                >
-                  <Image
-                    src={line.imageUrl}
-                    alt="Ảnh đính kèm"
-                    width={480}
-                    height={270}
-                    unoptimized
-                    className="max-h-[220px] w-full max-w-[280px] object-cover"
-                  />
-                </a>
-              ) : null}
-            </div>
-            {moved ? (
-              <span className="mt-1 inline-flex items-center gap-1.5 px-1 text-[11px] text-neutral-500">
-                Chuyển sang
-                <span
-                  className={`inline-flex items-center rounded-md border px-1.5 py-px text-[9.5px] font-black uppercase tracking-wider ${moved.tile}`}
-                >
-                  {moved.label}
-                </span>
+    <div
+      ref={pane}
+      className="max-h-[440px] min-h-[160px] overflow-y-auto rounded-xl border border-white/[0.06] bg-black/30 p-4"
+    >
+      {startedOn ? (
+        <p className="mb-4 text-center text-[11px] text-neutral-500">Bắt đầu {startedOn}</p>
+      ) : null}
+      <ol className="flex flex-col gap-3">
+        {lines.map((line) => {
+          const mine = (viewer === "shop") === line.fromShop;
+          const who = line.fromShop ? "Shop" : viewer === "buyer" ? "Bạn" : buyerName;
+          const moved = line.status ? WARRANTY_STATUS[line.status] : null;
+          return (
+            <li key={line.id} className={`flex flex-col ${mine ? "items-end" : "items-start"}`}>
+              <span className="mb-1 px-1 text-[11px] font-semibold text-neutral-500">
+                <span className="text-neutral-300">{who}</span> · {line.at}
               </span>
-            ) : null}
-          </li>
-        );
-      })}
-    </ol>
+              <div
+                className={`max-w-[88%] rounded-2xl border px-3.5 py-2.5 text-[13px] leading-relaxed text-neutral-100 sm:max-w-[75%] ${
+                  mine ? `rounded-tr-md ${mineTone}` : "rounded-tl-md border-white/10 bg-white/[0.04]"
+                }`}
+              >
+                {line.body ? <p className="whitespace-pre-line break-words">{line.body}</p> : null}
+                {line.imageUrl ? (
+                  <a
+                    href={line.imageUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className={`block overflow-hidden rounded-lg border border-white/10 ${line.body ? "mt-2" : ""}`}
+                  >
+                    <Image
+                      src={line.imageUrl}
+                      alt="Ảnh đính kèm"
+                      width={480}
+                      height={270}
+                      unoptimized
+                      className="max-h-[220px] w-full max-w-[280px] object-cover"
+                    />
+                  </a>
+                ) : null}
+              </div>
+              {moved ? (
+                <span className="mt-1 inline-flex items-center gap-1.5 px-1 text-[11px] text-neutral-500">
+                  Chuyển sang
+                  <span
+                    className={`inline-flex items-center rounded-md border px-1.5 py-px text-[9.5px] font-black uppercase tracking-wider ${moved.tile}`}
+                  >
+                    {moved.label}
+                  </span>
+                </span>
+              ) : null}
+            </li>
+          );
+        })}
+      </ol>
+      {footer ? <div className="mt-4 text-center text-[11px] text-neutral-500">{footer}</div> : null}
+    </div>
   );
 }

@@ -25,6 +25,7 @@ import { db } from "@/lib/db";
 import { LOGIN_ORDER_SELECT, signInHold } from "@/lib/loginReveal";
 import { dayStamp, dayTime } from "@/lib/dayGroups";
 import { getCurrentUser } from "@/lib/session";
+import { getShopSettings } from "@/lib/settingsStore";
 import { SUPPORT_WINDOW } from "@/lib/supportHours";
 import {
   WARRANTY_ISSUE,
@@ -179,6 +180,7 @@ export default async function WarrantyRequestPage({
     signIn: kind === "account" ? signInHold(order) : null,
   });
   const productName = order.product.name ?? order.product.code;
+  const { brandName } = await getShopSettings();
   // Once a report exists this is where the buyer follows it — the receipt's
   // button reads "Xem trạng thái" — so the page says so in its title.
   const following = order.warrantyRequests.length > 0;
@@ -519,6 +521,7 @@ export default async function WarrantyRequestPage({
           <section className={CARD}>
             <WarrantyChat
               own
+              shopName={brandName}
               ticketId={sentReports[0].id}
               status={sentReports[0].status}
               opening={{

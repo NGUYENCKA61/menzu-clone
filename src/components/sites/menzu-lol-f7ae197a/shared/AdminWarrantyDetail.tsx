@@ -280,7 +280,13 @@ export function AdminWarrantyDetail({ ticket, mailOn }: { ticket: WarrantyTicket
             <h2 className="text-sm font-black uppercase tracking-wider text-white">Trao đổi với khách</h2>
           </div>
           <div className="p-4 sm:p-5">
-            <WarrantyThread viewer="shop" buyerName={ticket.username} opening={opening} messages={messages} />
+            <WarrantyThread
+              viewer="shop"
+              buyerName={ticket.username}
+              opening={opening}
+              messages={messages}
+              startedOn={opening.at.split(" ").pop()}
+            />
           </div>
 
           {open ? (
