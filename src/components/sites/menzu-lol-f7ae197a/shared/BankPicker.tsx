@@ -73,7 +73,7 @@ export function BankMark({ name, size = 28 }: { name: string; size?: number }) {
     // page was the one thing that stood out.
     <span
       className="flex shrink-0 items-center justify-center overflow-hidden rounded-md"
-      style={{ width: size, height: size }}
+      style={{ width: Math.round(size * 2.2), height: size }}
     >
       {url && !broken ? (
         // A third-party picture: a plain img, as the top-up invoice draws its
@@ -82,7 +82,7 @@ export function BankMark({ name, size = 28 }: { name: string; size?: number }) {
         <img
           src={url}
           alt=""
-          width={size}
+          width={Math.round(size * 2.2)}
           height={size}
           loading="lazy"
           onError={() => setBroken(true)}
