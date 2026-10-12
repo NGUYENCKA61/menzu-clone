@@ -128,6 +128,9 @@ export function BankPicker({
 }) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
+  // Opens upward when the field sits low on the screen, so the list is not
+  // cut off at the bottom (the owner, 12/10/2026: "ở dưới thì hơi hụt").
+  const [above, setAbove] = useState(false);
   const root = useRef<HTMLDivElement | null>(null);
   const search = useRef<HTMLInputElement | null>(null);
 
@@ -161,7 +164,11 @@ export function BankPicker({
         type="button"
         aria-haspopup="listbox"
         aria-expanded={open}
-        onClick={() => setOpen((now) => !now)}
+        onClick={() => {
+          const r = root.current?.getBoundingClientRect();
+          if (r) setAbove(window.innerHeight - r.bottom < 340 && r.top > 340);
+          setOpen((now) => !now);
+        }}
         className={`flex h-[46px] w-full items-center gap-2.5 rounded-xl border bg-neutral-950/60 px-3 text-left text-sm outline-none transition-colors ${
           open
             ? "border-[var(--menzu-accent)]/60"
@@ -185,7 +192,11 @@ export function BankPicker({
       </button>
 
       {open ? (
-        <div className="absolute left-0 right-0 z-20 mt-1.5 overflow-hidden rounded-xl border border-white/10 bg-[#121317]/85 shadow-2xl shadow-black/60 backdrop-blur-md">
+        <div
+          className={`absolute left-0 right-0 z-20 overflow-hidden rounded-xl border border-white/10 bg-[#121317]/85 shadow-2xl shadow-black/60 backdrop-blur-md ${
+            above ? "bottom-full mb-1.5" : "top-full mt-1.5"
+          }`}
+        >
           <div className="flex items-center gap-2 border-b border-white/[0.06] px-3">
             <Search
               className="h-3.5 w-3.5 shrink-0 text-neutral-500"
