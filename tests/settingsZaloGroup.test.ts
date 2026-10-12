@@ -5,6 +5,7 @@ import {
   normalizeSettings,
   parseSettings,
   serializeSettings,
+  type ShopSettings,
 } from "@/lib/settings";
 
 /** The group bot's six settings survive the round trip through the table. */
@@ -40,7 +41,7 @@ describe("the Zalo group settings", () => {
 
     const odd = normalizeSettings({
       ...DEFAULT_SETTINGS,
-      zaloGroupJoin: "everyone",
+      zaloGroupJoin: "everyone" as unknown as ShopSettings["zaloGroupJoin"],
     });
     expect(odd.zaloGroupJoin).toBe("off");
   });
