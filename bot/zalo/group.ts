@@ -314,8 +314,11 @@ export function createGroupManager(deps: {
         log("remove failed for", uid, (error as Error).message);
         return;
       }
-      recent.forget(uid);
     }
+    // The burst that earned this is forgotten either way: a warning must be
+    // readable before the next message of the same flood can count as a
+    // second offence (seen live: warned and removed within one second).
+    recent.forget(uid);
     await api
       .sendMessage(
         { msg: say, mentions: [{ pos: 0, len: name.length + 1, uid }] },

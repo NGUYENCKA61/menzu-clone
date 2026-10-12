@@ -249,6 +249,17 @@ describe("what the bot does about spam", () => {
     ]);
   });
 
+  it("forgets the burst it warned about, so the warning comes before the door", async () => {
+    const { manager, calls, events } = fakes(GROUP);
+    await manager.tick();
+    calls.sent.length = 0;
+    for (let i = 0; i < 9; i += 1) await manager.onMessage(msg("u-f", "tin " + i, "Flood"));
+    expect(calls.removed).toEqual([]);
+    expect(events.filter((e) => e.zaloId === "u-f").map((e) => e.kind)).toEqual(["WARNED"]);
+    for (let i = 0; i < 6; i += 1) await manager.onMessage(msg("u-f", "nua " + i, "Flood"));
+    expect(calls.removed).toEqual(["u-f"]);
+  });
+
   it("does nothing at all while no group is named", async () => {
     const { manager, calls } = fakes({ ...GROUP, "integrations.zalo.group.id": "" });
     await manager.tick();
