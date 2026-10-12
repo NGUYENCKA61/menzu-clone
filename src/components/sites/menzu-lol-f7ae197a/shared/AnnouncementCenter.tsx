@@ -503,13 +503,19 @@ export function AnnouncementModal({
         </div>
 
         <footer className="flex shrink-0 flex-wrap justify-end gap-2.5 border-t border-white/[0.07] px-5 py-4">
-          <button
-            type="button"
-            onClick={onSnooze}
-            className="h-10 rounded-lg border border-white/10 bg-white/[0.03] px-4 text-[13px] font-medium text-neutral-300 transition-colors hover:bg-white/[0.07] hover:text-white"
-          >
-            Không hiện lại trong 2 giờ
-          </button>
+          {/* Only a notice the shop posted for everyone can be put off: a
+              reply or a credit addressed to this reader is read once, and a
+              third button only crowded the row on a phone (the owner,
+              12/10/2026, review item 2). */}
+          {item.personal ? null : (
+            <button
+              type="button"
+              onClick={onSnooze}
+              className="h-10 rounded-lg border border-white/10 bg-white/[0.03] px-4 text-[13px] font-medium text-neutral-300 transition-colors hover:bg-white/[0.07] hover:text-white"
+            >
+              Không hiện lại trong 2 giờ
+            </button>
+          )}
           {/* A gift notice says "Nhận quà" per the reference. It does what
               "Đóng" does — closes and marks read. The claiming itself is
               whatever the shop wrote in the body, because nothing in the
