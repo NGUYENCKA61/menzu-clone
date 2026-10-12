@@ -170,9 +170,10 @@ describe("legacyRefundCurrent", () => {
         createdAt: new Date("2026-10-12T05:00:00Z"),
       }),
     ).toBe(false);
-    // The same instant is not "after": the refund round keeps its word.
+    // A tie goes to the ticket: what the shop is working on outranks an old
+    // answer given at the same moment.
     expect(
       legacyRefundCurrent(refund, { createdAt: new Date(refund.createdAt) }),
-    ).toBe(true);
+    ).toBe(false);
   });
 });
