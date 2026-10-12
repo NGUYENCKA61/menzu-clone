@@ -105,7 +105,10 @@ function standingOf(r: {
       return "Shop không khắc phục được và đang hoàn tiền vào tài khoản của bạn trên web.";
     }
     return r.bankAccount
-      ? "Shop đã nhận số tài khoản của bạn và sẽ chuyển tiền hoàn sớm."
+      ? // The card under it names the bank, the masked number and the sum;
+        // this line only says what is happening (the owner, 12/10/2026,
+        // review item 3: the two said the same thing).
+        "Shop đang chuyển tiền hoàn qua ngân hàng cho bạn."
       : "Shop không khắc phục được và sẽ hoàn tiền qua ngân hàng, bạn nhập số tài khoản bên dưới để nhận.";
   }
   const at = r.resolvedAt ? ` lúc ${when(r.resolvedAt)}` : "";
