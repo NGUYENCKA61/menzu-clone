@@ -213,6 +213,14 @@ export default async function WarrantyRequestPage({
   // An open report listed below carries its own chat, so the card saying
   // "this order already has one" would only repeat it.
   const openListed = sentReports.some((r) => warrantyOpen(r.status));
+  // While the shop waits on the buyer's account number, the card holds the
+  // bank form and nothing else: the answers and the thread come back once
+  // the number is in (the owner, 12/10/2026: "chỉ hiện chỗ nhập stk thuần").
+  const awaitingBank =
+    sentReports[0] !== undefined &&
+    sentReports[0].status === "REFUNDING" &&
+    sentReports[0].refundMethod === "MANUAL" &&
+    !sentReports[0].bankAccount;
   const stepNow = !latest || awaitingDetails
     ? 0
     : latest.status === "OPEN" || latest.status === "IN_PROGRESS" || latest.status === "REFUNDING"
@@ -501,7 +509,7 @@ export default async function WarrantyRequestPage({
                     {/* Not once the money is on its way: the buyer's own
                         answers are the desk's reading, and beside a bank
                         form they are noise (the owner, 12/10/2026). */}
-                    {answers.length > 0 && r.status !== "REFUNDING" && r.status !== "REFUNDED" ? (
+                    {answers.length > 0 && !awaitingBank ? (
                       // Folded by default: the buyer wrote these and reads
                       // them once; the desk reads them on its own screen.
                       // Open, one line per answer, question on the left,
@@ -568,20 +576,22 @@ export default async function WarrantyRequestPage({
             </ul>
             {/* The thread of the latest report; an older one is closed
                 anyway. Open until the shop marks the report done (the
-                owner, 01/10/2026). */}
-            <WarrantyChat
-              buyerAvatar={user.avatarUrl}
-              buyerInitial={user.username.slice(0, 1)}
-              ticketId={sentReports[0].id}
-              status={sentReports[0].status}
-              opening={{
-                body: sentReports[0].description,
-                imageUrl: sentReports[0].imageUrl,
-                at: dayStamp(sentReports[0].createdAt),
-                sentAt: sentReports[0].createdAt.toISOString(),
-              }}
-              initial={sentReports[0].messages.map(toChatMessage)}
-            />
+                owner, 01/10/2026). Not while the bank form is up. */}
+            {awaitingBank ? null : (
+              <WarrantyChat
+                buyerAvatar={user.avatarUrl}
+                buyerInitial={user.username.slice(0, 1)}
+                ticketId={sentReports[0].id}
+                status={sentReports[0].status}
+                opening={{
+                  body: sentReports[0].description,
+                  imageUrl: sentReports[0].imageUrl,
+                  at: dayStamp(sentReports[0].createdAt),
+                  sentAt: sentReports[0].createdAt.toISOString(),
+                }}
+                initial={sentReports[0].messages.map(toChatMessage)}
+              />
+            )}
           </section>
         ) : null}
 
