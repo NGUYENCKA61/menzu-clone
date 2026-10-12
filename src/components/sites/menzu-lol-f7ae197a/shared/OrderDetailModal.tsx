@@ -12,7 +12,7 @@ import {
   Hash,
   Info,
   KeyRound,
-  Landmark,
+  CreditCard,
   Lock,
   MessageCircle,
   Package,
@@ -566,7 +566,7 @@ export function OrderDetailModal({
   // under an unchanging label said it a second time, less clearly (the
   // owner, 07/10/2026: "thay icon con mắt cho xem trạng thái" → "đổi").
   const WarrantyIcon =
-    warrantyAction.kind === "request" ? Wrench : warrantyAction.kind === "bank" ? Landmark : Eye;
+    warrantyAction.kind === "request" ? Wrench : warrantyAction.kind === "bank" ? CreditCard : Eye;
   // A refunded or unpaid order with no ticket has nothing to report or follow.
   const showWarranty = order.paid || order.warranty !== null;
 
