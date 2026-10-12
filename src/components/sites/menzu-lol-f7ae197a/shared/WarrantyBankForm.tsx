@@ -135,7 +135,7 @@ export function WarrantyBankForm({
             autoComplete="off"
             value={bankAccount}
             onChange={(event) => setBankAccount(event.target.value)}
-            placeholder="0123456789"
+            placeholder="Nhập số tài khoản"
             className={`${FIELD} tabular-nums`}
           />
         </div>
