@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  BadgeCheck,
   Bell,
   Boxes,
   FileText,
@@ -30,6 +31,7 @@ const NAV: { label: string; href: string; icon: LucideIcon }[] = [
   { label: "Bảo hành", href: "/admin/warranty", icon: ShieldCheck },
   { label: "Marketing", href: "/admin/marketing", icon: Ticket },
   { label: "Người dùng", href: "/admin/users", icon: Users },
+  { label: "Xác thực", href: "/admin/verifications", icon: BadgeCheck },
   { label: "Bài viết", href: "/admin/docs", icon: FileText },
   { label: "Vận hành", href: "/admin/operations", icon: MessageSquare },
   { label: "Thông báo", href: "/admin/announcements", icon: Bell },
@@ -52,6 +54,7 @@ const PHONE_ORDER: Record<string, string> = {
   "/admin/docs": "order-9",
   "/admin/announcements": "order-10",
   "/admin/settings": "order-11",
+  "/admin/verifications": "order-12",
 };
 
 // The active row carries a left rule as well as the tint: on a list this long

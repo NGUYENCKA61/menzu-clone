@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import type { Prisma } from "@prisma/client";
 import {
+  BadgeCheck,
   Banknote,
   CircleDollarSign,
   CreditCard,
@@ -95,6 +96,7 @@ export default async function AdminHome() {
     parcelsWaiting,
     stockedShelves,
     waitingByTierRows,
+    verificationsWaiting,
   ] = await Promise.all([
     db.user.count(),
     db.user.count({ where: today }),
@@ -195,6 +197,8 @@ export default async function AdminHome() {
         AND o."keysOwed" > (SELECT COUNT(*) FROM license_keys k WHERE k."orderId" = o.id)
       GROUP BY o."packageId"
     `,
+    // Bids for "xác thực cấp 2" the shop has not read yet.
+    db.accountVerification.count({ where: { status: "PENDING" } }),
   ]);
 
   const weekChange = percentChange(
@@ -331,6 +335,13 @@ export default async function AdminHome() {
             sub: "khách đã gửi số tài khoản",
             href: "/admin/warranty?filter=todo",
             icon: Banknote,
+          },
+          {
+            label: "Xác thực chờ duyệt",
+            count: verificationsWaiting,
+            sub: "hồ sơ lên cấp 2 khách vừa gửi",
+            href: "/admin/verifications",
+            icon: BadgeCheck,
           },
           {
             label: "Kho sắp hết hàng",

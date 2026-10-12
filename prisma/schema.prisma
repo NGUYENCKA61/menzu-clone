@@ -64,6 +64,9 @@ model User {
   /// account: a notice to this member is also sent to that chat.
   zaloId          String?        @unique
   zaloName        String?
+  /// "Xác thực cấp 2" granted by the shop (the owner, 12/10/2026); null is
+  /// level 1. Products flagged verifiedOnly sell to level 2 alone.
+  verifiedAt      DateTime?
   zaloLinkCodes   ZaloLinkCode[]
   freeKeyClaims   FreeKeyClaim[]
   avatarUrl       String?
@@ -131,6 +134,8 @@ model User {
   refundRequests      RefundRequest[]
   warrantyRequests    WarrantyRequest[]
   warrantyMessages    WarrantyMessage[]
+  verifications       AccountVerification[]
+  phoneVerifications  PhoneVerification[]
 
   /// The admin list sorts newest-first and pages through; at 8k+ accounts an
   /// unindexed createdAt means a full sort on every page.
@@ -679,6 +684,9 @@ model Product {
   /// print the line: an unanswered question is better than a made-up figure a
   /// buyer would hold them to.
   refundRate        Int?
+  /// Sold to accounts the shop has verified ("xác thực cấp 2") and nobody
+  /// else: the buy panel says so and the checkout refuses the rest.
+  verifiedOnly      Boolean         @default(false)
   /// The pill beside the detection state — "TOP #1 BÁN CHẠY", "MỚI RA MẮT",
   /// whatever the shop wants said about this tool this week.
   ///
@@ -1933,6 +1941,10 @@ model ZaloOutbox {
   id        String           @id @default(cuid())
   zaloId    String
   text      String
+  /// A notice, or a phone code for "xác thực cấp 2", which the bot sends
+  /// only after checking the number is this Zalo's (phone).
+  kind      ZaloOutboxKind   @default(NOTICE)
+  phone     String?
   status    ZaloOutboxStatus @default(PENDING)
   attempts  Int              @default(0)
   lastError String?
@@ -1962,4 +1974,67 @@ model FreeKeyClaim {
 
   @@index([userId, productId, createdAt])
   @@map("free_key_claims")
+}
+
+enum ZaloOutboxKind {
+  NOTICE
+  PHONE_OTP
+}
+
+enum VerificationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+/// A customer's bid for "xác thực cấp 2" (the owner, 12/10/2026): the
+/// Facebook they go by, the Zalo already linked through the bot, a phone
+/// proved by a code sent to that Zalo, and the bank account they pay from.
+/// The shop reads it beside the account's history and decides by hand;
+/// approved, the account may buy what is sold to level 2 only.
+model AccountVerification {
+  id              String             @id @default(cuid())
+  userId          String
+  user            User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status          VerificationStatus @default(PENDING)
+  facebookUrl     String
+  facebookName    String
+  phone           String
+  phoneVerifiedAt DateTime
+  /// The Zalo the account had linked when it applied, as the bot saw it.
+  zaloId          String?
+  zaloName        String?
+  bankName        String
+  bankAccount     String
+  accountHolder   String
+  /// The shop's word on its decision, shown to the customer when refused.
+  note            String?
+  createdAt       DateTime           @default(now())
+  reviewedAt      DateTime?
+  reviewedBy      String?
+
+  @@index([userId, createdAt])
+  @@index([status, createdAt])
+  @@map("account_verifications")
+}
+
+/// A code on its way to a phone's Zalo for "xác thực cấp 2": the bot looks
+/// the number up, checks it is the linked account's, and sends the code.
+/// Typed back right, the row is stamped consumed and the number counts as
+/// proved for a while.
+model PhoneVerification {
+  id         String    @id @default(cuid())
+  userId     String
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  phone      String
+  codeHash   String
+  expiresAt  DateTime
+  attempts   Int       @default(0)
+  /// The outbox row carrying the code; its status says whether it went.
+  outboxId   String?
+  consumedAt DateTime?
+  createdAt  DateTime  @default(now())
+
+  @@index([userId, createdAt])
+  @@map("phone_verifications")
 }

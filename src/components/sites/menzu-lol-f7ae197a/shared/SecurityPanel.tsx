@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  BadgeCheck,
   Check,
   CircleAlert,
   CircleCheck,
@@ -17,8 +18,11 @@ import {
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
+import type { VerificationView } from "@/lib/verificationRules";
+
 import { DiscordMark, GoogleMark } from "./OAuthButtons";
 import { TelegramGlyph } from "./BrandGlyphs";
+import { VerificationCard } from "./VerificationCard";
 import { ZaloLinkCard } from "./ZaloLinkCard";
 
 /*
@@ -39,7 +43,7 @@ import { ZaloLinkCard } from "./ZaloLinkCard";
  * /wallet's 48px, and the sidebar's shield on the first tab.
  */
 
-type Tab = "security" | "linked" | "devices";
+type Tab = "security" | "linked" | "devices" | "verify";
 
 const TABS: {
   id: Tab;
@@ -55,6 +59,9 @@ const TABS: {
   },
   { id: "linked", short: "Liên kết", long: "Liên kết nền tảng", icon: Globe },
   { id: "devices", short: "Thiết bị", long: "Quản lý thiết bị", icon: Monitor },
+  // "Xác thực cấp 2" (the owner, 12/10/2026): the level, and the form to
+  // earn it.
+  { id: "verify", short: "Xác thực", long: "Xác thực cấp 2", icon: BadgeCheck },
 ];
 
 const TAB_BASE =
@@ -133,6 +140,8 @@ export interface SecurityPanelProps {
   sessions: SessionView[];
   /** The OAuth callback lands with ?linked= — open on that tab. */
   initialTab?: Tab;
+  /** Bảo mật › Xác thực cấp 2: the reader's level and latest bid. */
+  verification: VerificationView;
   linkNotice?: { tone: "ok" | "err"; text: string } | null;
 }
 
@@ -158,6 +167,7 @@ export function SecurityPanel({
   sessions,
   initialTab = "security",
   linkNotice = null,
+  verification,
 }: SecurityPanelProps) {
   const router = useRouter();
   const [tab, setTab] = useState<Tab>(initialTab);
@@ -762,6 +772,18 @@ export function SecurityPanel({
                 linkedName={zaloLinkedName}
               />
             ) : null}
+          </div>
+        ) : tab === "verify" ? (
+          <div className="flex flex-col gap-8">
+            {header(
+              "Xác thực cấp 2",
+              BadgeCheck,
+              "Xác minh bạn là chính chủ để thuê những bản hack đặc biệt chỉ dành cho tài khoản đã xác thực.",
+            )}
+            <VerificationCard
+              view={verification}
+              onGoLinked={() => setTab("linked")}
+            />
           </div>
         ) : (
           <div className="flex flex-col gap-8">

@@ -26,6 +26,8 @@ export interface CurrentUser {
   /** Zalo peer id and the name the notice bot saw, once linked from Bảo mật. */
   zaloId: string | null;
   zaloName: string | null;
+  /** When the shop granted "xác thực cấp 2"; null is level 1. */
+  verifiedAt: Date | null;
   createdAt: Date;
 }
 
@@ -78,6 +80,7 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
     telegramId: u.telegramId,
     zaloId: u.zaloId,
     zaloName: u.zaloName,
+    verifiedAt: u.verifiedAt,
     agencyPercent: u.agencyPercent,
     createdAt: u.createdAt,
   };

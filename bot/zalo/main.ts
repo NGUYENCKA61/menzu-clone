@@ -305,6 +305,32 @@ async function drainOutbox(): Promise<void> {
   for (const item of pending) {
     if (stopping || !api) return;
     try {
+      if (item.kind === "PHONE_OTP") {
+        // The code goes only to the number's own Zalo, and only when that is
+        // the account linked here: a stranger's number earns nothing. Zalo
+        // answers 216 for an unknown number, which the client hands back as
+        // an empty result.
+        const found = await api.findUser(item.phone ?? "").catch(() => null);
+        const owner = found?.uid ? String(found.uid) : null;
+        const refusal = !owner
+          ? "Số này chưa đăng ký Zalo"
+          : owner !== item.zaloId
+            ? "Số này không phải số của tài khoản Zalo đã liên kết"
+            : null;
+        if (refusal) {
+          log("phone code refused", item.id, refusal);
+          await db.zaloOutbox.update({
+            where: { id: item.id },
+            data: {
+              status: "FAILED",
+              attempts: { increment: 1 },
+              lastError: refusal,
+            },
+          });
+          await sleep(SEND_GAP_MS);
+          continue;
+        }
+      }
       await api.sendMessage(item.text, item.zaloId, ThreadType.User);
       await db.zaloOutbox.update({
         where: { id: item.id },

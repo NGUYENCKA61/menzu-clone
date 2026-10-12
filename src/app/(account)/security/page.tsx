@@ -12,6 +12,7 @@ import { getCurrentUser } from "@/lib/session";
 import { discordOauthEnabled, googleOauthEnabled } from "@/lib/settings";
 import { linkUrl as telegramLinkUrl } from "@/lib/telegramShop";
 import { getShopSettings } from "@/lib/settingsStore";
+import { verificationView } from "@/lib/verification";
 
 export const metadata: Metadata = {
   title: "Bảo mật tài khoản",
@@ -34,7 +35,7 @@ function deviceWhen(date: Date): string {
 }
 
 interface SecurityPageProps {
-  searchParams: Promise<{ linked?: string; linkError?: string }>;
+  searchParams: Promise<{ linked?: string; linkError?: string; tab?: string }>;
 }
 
 export default async function SecurityPage({
@@ -75,6 +76,9 @@ export default async function SecurityPage({
     searchParams,
   ]);
   const token = store.get(SESSION_COOKIE)?.value ?? "";
+  // Bảo mật › Xác thực cấp 2: the level and the latest bid, read here so
+  // the panel opens on it without a second round trip.
+  const verification = await verificationView(user.id);
   const linkedSet = new Set(linkedRows.map((row) => row.provider));
 
   // The OAuth callback lands back here with the outcome in the query; the
@@ -111,7 +115,10 @@ export default async function SecurityPage({
         zaloName={settings.zaloBotName}
         zaloLinked={Boolean(user.zaloId)}
         zaloLinkedName={user.zaloName ?? null}
-        initialTab={linkNotice ? "linked" : "security"}
+        initialTab={
+          linkNotice ? "linked" : query.tab === "verify" ? "verify" : "security"
+        }
+        verification={verification}
         linkNotice={linkNotice}
         sessions={sessions.map((session) => ({
           // Never the token itself — it IS the login. The tail is enough to
