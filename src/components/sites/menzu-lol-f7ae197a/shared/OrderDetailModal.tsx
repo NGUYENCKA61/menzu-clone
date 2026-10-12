@@ -1189,16 +1189,15 @@ export function OrderDetailModal({
                           className={`press group inline-flex h-11 items-center justify-center gap-2 rounded-xl px-3 text-xs font-bold sm:h-10 sm:px-5${
                             askReview ? "" : " col-span-2"
                           } ${
-                            // Red for "Yêu cầu bảo hành", the step the buyer
-                            // takes; "Nhập số tài khoản" white on a red
-                            // border, as the status chips are (the owner,
-                            // 12/10/2026: "chữ trắng viền đỏ thử"); "Xem
-                            // trạng thái" keeps the grey outline.
+                            // Solid red is a step the buyer must take, "Yêu
+                            // cầu bảo hành" and "Nhập số tài khoản" alike;
+                            // "Xem trạng thái" asks nothing of them and keeps
+                            // the grey outline "Đánh giá" wears (settled with
+                            // the owner, 12/10/2026, after red and violet
+                            // borders were tried).
                             warrantyAction.kind === "status"
-                              ? "border border-[var(--menzu-accent)]/70 bg-transparent text-white hover:bg-[var(--menzu-accent)]/10"
-                              : warrantyAction.kind === "bank"
-                                ? "border border-violet-500/70 bg-transparent text-white hover:bg-violet-500/10"
-                                : "bg-[var(--menzu-accent)] text-white hover:bg-[var(--menzu-accent-dark)]"
+                              ? "border border-white/12 bg-white/[0.04] text-neutral-200 hover:border-white/25 hover:text-white"
+                              : "bg-[var(--menzu-accent)] text-white hover:bg-[var(--menzu-accent-dark)]"
                           }`}
                         >
                           <WarrantyIcon className="h-4 w-4" />
