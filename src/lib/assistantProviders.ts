@@ -17,14 +17,16 @@ export function readAssistantProvider(value: unknown): AssistantProvider {
 /**
  * Services with a free allowance, as Cấu hình offers them. The address and
  * the model are starting points the admin may edit: a model name is retired
- * every few months, the address almost never.
+ * every few months, the address almost never. Gemini's lite model is the one
+ * named on purpose: tried 13/10/2026, gemini-3.8-flash took 20 s and refused
+ * to write hack-shop copy, the lite model answered in 3 s and did not.
  */
 export const ASSISTANT_PRESETS = [
   {
     id: "gemini",
     name: "Google Gemini (AI Studio)",
     baseUrl: "https://generativelanguage.googleapis.com/v1beta/openai",
-    model: "gemini-2.5-flash",
+    model: "gemini-3.5-flash-lite",
     keyUrl: "https://aistudio.google.com/apikey",
   },
   {

@@ -2160,7 +2160,7 @@ export function AdminSettings({
                     autoComplete="off"
                     value={assistantModel}
                     onChange={(event) => setAssistantModel(event.target.value)}
-                    placeholder="gemini-2.5-flash"
+                    placeholder="gemini-3.5-flash-lite"
                     className={`${FIELD} font-mono`}
                   />
                 </div>
