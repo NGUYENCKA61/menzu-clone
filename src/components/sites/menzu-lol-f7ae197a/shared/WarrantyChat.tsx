@@ -167,13 +167,16 @@ export function WarrantyChat({
             if (pane) pane.scrollTop = pane.scrollHeight;
           }}
         >
-          <summary className="flex cursor-pointer list-none items-center gap-2 text-[12px] font-black uppercase tracking-wider text-neutral-300 transition-colors hover:text-white [&::-webkit-details-marker]:hidden">
+          {/* The same quiet word as the answers fold on the fault line, so
+              one card does not carry two kinds of fold (the owner,
+              12/10/2026, review item 2). */}
+          <summary className="flex cursor-pointer list-none items-center gap-1 text-[12px] font-semibold text-neutral-400 transition-colors hover:text-white [&::-webkit-details-marker]:hidden">
             <ChevronRight
-              className="h-4 w-4 shrink-0 transition-transform group-open:rotate-90"
+              className="h-3.5 w-3.5 shrink-0 transition-transform group-open:rotate-90"
               aria-hidden
             />
             Trao đổi với shop
-            <span className="font-semibold normal-case tracking-normal text-neutral-500">
+            <span className="text-neutral-500">
               ({messages.length + 1} tin, đã đóng)
             </span>
           </summary>
