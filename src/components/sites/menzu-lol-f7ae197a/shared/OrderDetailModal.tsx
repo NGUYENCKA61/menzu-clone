@@ -1194,8 +1194,11 @@ export function OrderDetailModal({
                             // border, as the status chips are (the owner,
                             // 12/10/2026: "chữ trắng viền đỏ thử"); "Xem
                             // trạng thái" keeps the grey outline.
+                            // Red text on a faint red fill with a red border,
+                            // after a "Features" pill the owner sent
+                            // (12/10/2026: "style màu này thử").
                             warrantyAction.kind === "status"
-                              ? "border border-[var(--menzu-accent)]/70 bg-transparent text-white hover:bg-[var(--menzu-accent)]/10"
+                              ? "border border-[var(--menzu-accent)]/50 bg-[var(--menzu-accent)]/10 text-[var(--menzu-accent)] hover:bg-[var(--menzu-accent)]/20"
                               : warrantyAction.kind === "bank"
                                 ? "border border-violet-500/70 bg-transparent text-white hover:bg-violet-500/10"
                                 : "bg-[var(--menzu-accent)] text-white hover:bg-[var(--menzu-accent-dark)]"
