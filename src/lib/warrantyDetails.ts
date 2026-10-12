@@ -189,57 +189,27 @@ const SOFTWARE_QUESTIONS: readonly DetailQuestion[] = [
   },
 ];
 
-/** An account's report: where the sign-in was tried, and what it said. */
-const ACCOUNT_QUESTIONS: readonly DetailQuestion[] = [
-  {
-    key: "LOGIN_ERROR",
-    label: "Màn hình báo lỗi khi đăng nhập",
-    short: "Lỗi đăng nhập",
-    hint: "Chụp đúng lúc game hoặc launcher báo lỗi.",
-    options: [],
-    placeholder: "Ví dụ: sai mật khẩu, tài khoản bị khóa",
-    photo: true,
-  },
-  {
-    key: "DEVICE",
-    label: "Đăng nhập trên thiết bị nào",
-    short: "Thiết bị",
-    hint: "Máy tính, điện thoại hay giả lập.",
-    options: [
-      { value: "Trên máy tính", hint: "Windows hoặc macOS." },
-      { value: "Trên điện thoại", hint: "Android hoặc iPhone." },
-      { value: "Trên giả lập", hint: "LDPlayer, BlueStacks, NoxPlayer…" },
-      { value: "Trên thiết bị khác", hint: "Máy chơi game, trình duyệt web…" },
-    ],
-  },
-  {
-    key: "CHANGED_PASSWORD",
-    label: "Đã đổi mật khẩu sau khi nhận chưa",
-    short: "Mật khẩu",
-    hint: "Đổi mật khẩu trước khi báo lỗi làm shop không kiểm tra được.",
-    options: [
-      {
-        value: "Tôi đã đổi mật khẩu",
-        hint: "Đổi rồi, gửi kèm ảnh màn hình đổi mật khẩu.",
-      },
-      { value: "Tôi chưa đổi", hint: "Giữ nguyên mật khẩu shop giao." },
-      {
-        value: "Tôi đã thử nhưng không đổi được",
-        hint: "Bấm đổi nhưng hệ thống không cho.",
-      },
-      { value: "Tôi không nhớ", hint: "Không nhớ có đổi hay không." },
-    ],
-    photo: true,
-    photoWhen: "Tôi đã đổi mật khẩu",
-  },
-];
+/** No second round at all: the empty set, one instance so callers can compare. */
+const NO_QUESTIONS: readonly DetailQuestion[] = [];
+
+/**
+ * Whether a kind of product has a second round at all. A tool's report does:
+ * the desk cannot judge a tool without knowing the machine it ran on. An
+ * account's does not: its report already carries the screen recording the
+ * warranty rests on, and the sign-in either works or it does not (the owner,
+ * 12/10/2026: "bảo hành đối với tài khoản không cần phải bổ sung thêm thông
+ * tin đợt 2"). An account's ticket reaches the desk the moment it is made.
+ */
+export function hasSecondRound(kind: WarrantyKind): boolean {
+  return kind === "software";
+}
 
 /** The default set for each kind of product: what a report asks unless the
- *  game or the product says otherwise. */
+ *  game or the product says otherwise. Empty for a kind with no second round. */
 export const DETAIL_QUESTIONS: Record<WarrantyKind, readonly DetailQuestion[]> =
   {
     software: SOFTWARE_QUESTIONS,
-    account: ACCOUNT_QUESTIONS,
+    account: NO_QUESTIONS,
   };
 
 // ---- a set the shop writes --------------------------------------------------
@@ -328,13 +298,16 @@ export function parseQuestionSet(raw: unknown): DetailQuestion[] | null {
 
 /**
  * The questions a product's report asks: the product's own set, else its
- * game's, else the default for its kind.
+ * game's, else the default for its kind. None for a kind with no second
+ * round (hasSecondRound), whatever a game or product has written: the sets
+ * are a tool's affair.
  */
 export function resolveQuestions(
   kind: WarrantyKind,
   product: unknown,
   category: unknown,
 ): readonly DetailQuestion[] {
+  if (!hasSecondRound(kind)) return NO_QUESTIONS;
   return (
     parseQuestionSet(product) ??
     parseQuestionSet(category) ??

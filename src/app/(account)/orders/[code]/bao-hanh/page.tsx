@@ -25,6 +25,7 @@ import { maskAccount } from "@/lib/bankRefund";
 import {
   answerLabel,
   answerShort,
+  hasSecondRound,
   readDetails,
   resolveQuestions,
 } from "@/lib/warrantyDetails";
@@ -218,8 +219,13 @@ export default async function WarrantyRequestPage({
   const following = order.warrantyRequests.length > 0 && !startingOver;
   // A report whose second round is still missing has not reached the desk:
   // the strip stays on the buyer's own step (the owner, 10/10/2026).
+  // Only for a kind that has a second round: an account's report is the
+  // desk's from the moment it is made (hasSecondRound).
   const awaitingDetails = Boolean(
-    latest && warrantyOpen(latest.status) && !latest.detailsDoneAt,
+    latest &&
+    warrantyOpen(latest.status) &&
+    !latest.detailsDoneAt &&
+    hasSecondRound(kind),
   );
   // A report still waiting on its second round is not listed below: the
   // round's card is the whole of it until the answers are in (the owner,
@@ -229,7 +235,10 @@ export default async function WarrantyRequestPage({
   const sentReports = startingOver
     ? []
     : order.warrantyRequests
-        .filter((r) => r.detailsDoneAt || !warrantyOpen(r.status))
+        .filter(
+          (r) =>
+            r.detailsDoneAt || !warrantyOpen(r.status) || !hasSecondRound(kind),
+        )
         .slice(0, 1);
   // An open report listed below carries its own chat, so the card saying
   // "this order already has one" would only repeat it.

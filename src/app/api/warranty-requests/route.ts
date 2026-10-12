@@ -6,6 +6,7 @@ import { db } from "@/lib/db";
 import { LOGIN_ORDER_SELECT, signInHold } from "@/lib/loginReveal";
 import { absoluteUrl } from "@/lib/seo";
 import { escapeTelegramHtml, notifyTelegramAdmins } from "@/lib/telegramNotify";
+import { hasSecondRound } from "@/lib/warrantyDetails";
 import { storeWarrantyImage } from "@/lib/warrantyImage";
 import { notifyWarranty } from "@/lib/warrantyNotify";
 import { getCurrentUser } from "@/lib/session";
@@ -32,7 +33,10 @@ export async function POST(request: Request) {
 
   const form = await request.formData().catch(() => null);
   if (!form) {
-    return NextResponse.json({ error: "Dữ liệu không hợp lệ" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Dữ liệu không hợp lệ" },
+      { status: 400 },
+    );
   }
 
   const code = String(form.get("code") ?? "").trim();
@@ -60,7 +64,10 @@ export async function POST(request: Request) {
     },
   });
   if (!order) {
-    return NextResponse.json({ error: "Không tìm thấy đơn hàng" }, { status: 404 });
+    return NextResponse.json(
+      { error: "Không tìm thấy đơn hàng" },
+      { status: 404 },
+    );
   }
 
   // A tool's report and an account's offer different faults, and an
@@ -103,6 +110,10 @@ export async function POST(request: Request) {
     );
   }
 
+  // Whether a second round follows. A tool's report waits on the desk's
+  // questions; an account's has none and is the desk's from this moment
+  // (hasSecondRound).
+  const secondRound = hasSecondRound(kind);
   const ticket = await db.warrantyRequest.create({
     data: {
       orderId: order.id,
@@ -111,6 +122,7 @@ export async function POST(request: Request) {
       description: said.description,
       imageUrl: image.url,
       videoUrl,
+      detailsDoneAt: secondRound ? null : new Date(),
     },
     select: { id: true },
   });
@@ -147,7 +159,9 @@ export async function POST(request: Request) {
       `Sản phẩm: ${order.product.name ?? order.product.code}`,
       `Lỗi: ${WARRANTY_ISSUE[picked.issue].label}`,
       `Mô tả: ${said.description}`,
-      "Khách còn phải trả lời đợt 2 (bổ sung thông tin) trước khi shop kiểm tra.",
+      secondRound
+        ? "Khách còn phải trả lời đợt 2 (bổ sung thông tin) trước khi shop kiểm tra."
+        : "Đơn tài khoản không có đợt 2: kiểm tra được ngay.",
     ],
     href: absoluteUrl(`/admin/warranty/${ticket.id}`),
   });

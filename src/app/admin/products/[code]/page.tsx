@@ -268,23 +268,8 @@ export default async function AdminAccountDetailPage({
           pool,
         }}
       />
-      <div className="mt-5">
-        <WarrantyQuestionsEditor
-          endpoint="/api/admin/products"
-          ident={{ code: product.code }}
-          initial={product.warrantyQuestions}
-          bank={resolveQuestions(
-            "account",
-            null,
-            product.category.warrantyQuestions,
-          )}
-          inheritName={
-            parseQuestionSet(product.category.warrantyQuestions)
-              ? `bộ của ${product.category.name}`
-              : "bộ mặc định"
-          }
-        />
-      </div>
+      {/* No second-round editor for an account: its report has no second
+          round (hasSecondRound; the owner, 12/10/2026). */}
     </AdminShell>
   );
 }

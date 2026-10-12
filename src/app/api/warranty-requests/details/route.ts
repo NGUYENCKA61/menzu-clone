@@ -12,6 +12,7 @@ import {
   detailsComplete,
   IMAGES_PER_ANSWER,
   missingDetails,
+  hasSecondRound,
   resolveQuestions,
   type DetailAnswer,
 } from "@/lib/warrantyDetails";
@@ -93,6 +94,14 @@ export async function POST(request: Request) {
   }
 
   const kind = warrantyKind(ticket.order.product.productType);
+  // An account's report has no second round to answer (hasSecondRound); its
+  // ticket was the desk's from the moment it was made.
+  if (!hasSecondRound(kind)) {
+    return NextResponse.json(
+      { error: "Đơn tài khoản không có đợt bổ sung thông tin." },
+      { status: 400 },
+    );
+  }
   // The product's own questions, its game's, or the default set.
   const questions = resolveQuestions(
     kind,
