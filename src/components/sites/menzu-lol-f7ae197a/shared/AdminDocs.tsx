@@ -28,6 +28,8 @@ export interface DocView {
   excerpt: string | null;
   /** Pinned onto the wiki's featured card; at most one article is. */
   featured: boolean;
+  /** The tool this article documents; null for a wiki article. */
+  productCode: string | null;
   body: string | null;
   views: number;
   publishedAt: string;
@@ -205,6 +207,11 @@ export function AdminDocs({ docs }: { docs: DocView[] }) {
               {doc.featured ? (
                 <span className="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded border border-[var(--menzu-accent)]/40 bg-[var(--menzu-accent)]/10 text-[var(--menzu-accent)]">
                   Nổi bật
+                </span>
+              ) : null}
+              {doc.productCode ? (
+                <span className="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded border border-sky-500/40 bg-sky-500/10 text-sky-300">
+                  Tài liệu tool {doc.productCode}
                 </span>
               ) : null}
             </div>

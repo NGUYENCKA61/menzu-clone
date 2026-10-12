@@ -4,12 +4,16 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { BookOpen, Calendar, ChevronRight, Clock, Eye, FileText } from "lucide-react";
 
+import { DocsLockPanel } from "@/components/sites/menzu-lol-f7ae197a/shared/DocsLockPanel";
 import { SimplePage } from "@/components/sites/menzu-lol-f7ae197a/shared/SimplePage";
 import { DOC_SHELF_LABEL, isDocShelf } from "@/lib/docCategories";
 import { DocBody, DocHtml } from "@/lib/docFormat";
 import { isHtmlBody } from "@/lib/docHtml";
-import { getDocArticle, listRelatedDocs } from "@/lib/queries";
+import { getDocArticle, listRelatedDocs, listToolArticles } from "@/lib/queries";
+import { productHref, toolDocsHref } from "@/lib/routes";
+import { getCurrentUser } from "@/lib/session";
 import { shareCard } from "@/lib/shareCard";
+import { toolDocsAccess } from "@/lib/toolDocs";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -38,8 +42,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       image: { url: article.thumbnailUrl, alt: article.title },
     })),
     // An article with no body has nothing to rank for, and indexing empty
-    // pages costs crawl budget that the catalogue needs.
-    ...(article.body ? {} : { robots: { index: false, follow: true } }),
+    // pages costs crawl budget that the catalogue needs. A tool's article is
+    // behind a key, so it is not offered to crawlers either.
+    ...(article.body && !article.productId ? {} : { robots: { index: false, follow: true } }),
   };
 }
 
@@ -54,7 +59,17 @@ export default async function DocArticlePage({ params }: PageProps) {
   const { slug } = await params;
   const article = await getDocArticle(slug);
   if (!article) notFound();
-  const related = await listRelatedDocs(article.slug, article.category);
+  // A tool's article: the body opens for as long as the reader's key says
+  // (lib/docsAccess.ts), and the neighbours are the tool's other pages.
+  const tool = article.product;
+  const user = tool ? await getCurrentUser() : null;
+  const access = tool
+    ? await toolDocsAccess(user ? { id: user.id, role: user.role } : null, tool.code)
+    : null;
+  const locked = tool !== null && access !== null && access.state !== "open";
+  const related = tool
+    ? await listToolArticles(tool.id, article.slug)
+    : await listRelatedDocs(article.slug, article.category);
 
   const shelf = isDocShelf(article.category) ? DOC_SHELF_LABEL[article.category] : article.category;
   // An edit the day it went up is not news; a later one is worth saying.
@@ -65,7 +80,15 @@ export default async function DocArticlePage({ params }: PageProps) {
     <SimplePage
       title={article.title}
       crumb="Wiki & Hướng dẫn"
-      crumbs={[{ label: "Wiki & Hướng dẫn", href: "/docs" }, { label: article.title }]}
+      crumbs={
+        tool
+          ? [
+              { label: "Tài liệu", href: "/tai-lieu" },
+              { label: tool.name ?? tool.code, href: toolDocsHref(tool.slug) },
+              { label: article.title },
+            ]
+          : [{ label: "Wiki & Hướng dẫn", href: "/docs" }, { label: article.title }]
+      }
       titleCase="normal"
       titleBar={false}
       ground="home"
@@ -110,7 +133,16 @@ export default async function DocArticlePage({ params }: PageProps) {
           />
         </div>
 
-        {article.body ? (
+        {locked && tool && access ? (
+          <div className="max-w-3xl">
+            <DocsLockPanel
+              access={access}
+              productHref={productHref(tool.category.slug, tool.slug)}
+              loginHref={`/login?next=${encodeURIComponent(`/docs/${article.slug}`)}`}
+              what="Bài viết này"
+            />
+          </div>
+        ) : article.body ? (
           // Editor-era bodies are HTML, sanitized inside DocHtml before they
           // reach the reader; legacy plain-text bodies keep the old renderer.
           isHtmlBody(article.body) ? (
@@ -144,10 +176,12 @@ export default async function DocArticlePage({ params }: PageProps) {
             </span>
             <div className="min-w-0">
               <h2 className="text-lg font-black uppercase leading-tight tracking-wide text-white">
-                Cùng chuyên mục
+                {tool ? "Cùng tài liệu tool" : "Cùng chuyên mục"}
               </h2>
               <p className="mt-0.5 text-[13px] text-neutral-400">
-                Các bài viết khác thuộc danh mục {shelf}
+                {tool
+                  ? `Các trang khác trong tài liệu ${tool.name ?? tool.code}`
+                  : `Các bài viết khác thuộc danh mục ${shelf}`}
               </p>
             </div>
           </div>

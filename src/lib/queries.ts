@@ -1451,14 +1451,52 @@ export async function getBioProfile() {
 }
 
 /** Wiki articles for /docs, grouped by section in display order. */
-export async function listDocArticles() {
+/**
+ * The wiki's articles. "public" (the default) leaves out the ones attached
+ * to a tool: those are pages of that tool's documentation, not the wiki's.
+ * The admin desk asks for "all".
+ */
+export async function listDocArticles(scope: "public" | "all" = "public") {
   return db.docArticle.findMany({
+    where: scope === "public" ? { productId: null } : {},
     orderBy: [{ category: "asc" }, { sortOrder: "asc" }],
+    include: { product: { select: { code: true } } },
   });
 }
 
 export async function getDocArticle(slug: string) {
-  return db.docArticle.findUnique({ where: { slug } });
+  return db.docArticle.findUnique({
+    where: { slug },
+    include: {
+      // The tool it documents, if one: the page then gates the body by the
+      // reader's key and breadcrumbs through the tool's documentation.
+      product: {
+        select: {
+          id: true,
+          code: true,
+          slug: true,
+          name: true,
+          category: { select: { slug: true } },
+        },
+      },
+    },
+  });
+}
+
+/** The other pages of one tool's documentation, in the shop's order. */
+export async function listToolArticles(productId: string, exceptSlug?: string) {
+  return db.docArticle.findMany({
+    where: { productId, ...(exceptSlug ? { slug: { not: exceptSlug } } : {}) },
+    orderBy: [{ sortOrder: "asc" }, { publishedAt: "desc" }],
+    select: {
+      slug: true,
+      title: true,
+      excerpt: true,
+      thumbnailUrl: true,
+      views: true,
+      publishedAt: true,
+    },
+  });
 }
 
 /** Up to `take` other articles on the same shelf, most read first — the
@@ -1470,7 +1508,7 @@ export async function listRelatedDocs(
   take = 3,
 ) {
   return db.docArticle.findMany({
-    where: { category, slug: { not: slug } },
+    where: { category, slug: { not: slug }, productId: null },
     orderBy: [{ views: "desc" }, { publishedAt: "desc" }],
     take,
     select: {

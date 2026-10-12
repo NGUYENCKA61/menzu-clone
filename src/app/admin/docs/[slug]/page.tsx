@@ -8,6 +8,7 @@ import { AdminShell } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminSh
 import { getAdmin } from "@/lib/admin";
 import { db } from "@/lib/db";
 import { isHtmlBody, plainToDocHtml } from "@/lib/docHtml";
+import { LISTED_PRODUCT } from "@/lib/queries";
 
 export const metadata: Metadata = { title: "Soạn bài viết | Quản trị" };
 export const dynamic = "force-dynamic";
@@ -34,8 +35,17 @@ export default async function AdminDocEditorPage({
   if (!admin) notFound();
 
   const slug = decodeSlug((await params).slug);
-  const doc = await db.docArticle.findUnique({ where: { slug } });
+  const doc = await db.docArticle.findUnique({
+    where: { slug },
+    include: { product: { select: { code: true } } },
+  });
   if (!doc) notFound();
+  // The tools an article can be attached to: a page of that tool's docs.
+  const tools = await db.product.findMany({
+    where: { ...LISTED_PRODUCT, productType: "SOFTWARE_GAME" },
+    orderBy: { name: "asc" },
+    select: { code: true, name: true },
+  });
 
   // Legacy plain-text bodies are lifted to editor HTML here, on the server —
   // the client bundle never carries the converter or the sanitizer.
@@ -62,6 +72,7 @@ export default async function AdminDocEditorPage({
     >
       <AdminDocEditor
         initialHtml={initialHtml}
+        tools={tools.map((t) => ({ code: t.code, name: t.name ?? t.code }))}
         doc={{
           slug: doc.slug,
           title: doc.title,
@@ -70,6 +81,7 @@ export default async function AdminDocEditorPage({
           body: doc.body,
           views: doc.views,
           featured: doc.featured,
+          productCode: doc.product?.code ?? null,
           publishedAt: doc.publishedAt.toLocaleDateString("vi-VN", {
             day: "2-digit",
             month: "2-digit",

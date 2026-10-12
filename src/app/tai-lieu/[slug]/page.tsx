@@ -5,6 +5,7 @@ import {
   Download,
   ExternalLink,
   LifeBuoy,
+  Lock,
   Unlock,
 } from "lucide-react";
 import Link from "next/link";
@@ -127,6 +128,7 @@ export default async function ToolDocsPage({ params }: PageProps) {
           kind: "tool",
           slug: tool.slug,
           categorySlug: tool.categorySlug,
+          articles: tool.articles,
         }}
       >
         <div className="flex flex-col gap-8">
@@ -330,6 +332,54 @@ export default async function ToolDocsPage({ params }: PageProps) {
               />
             )}
           </section>
+
+          {/* Bài viết thêm: the wiki articles the shop attached to this tool */}
+          {tool.articles.length > 0 ? (
+            <section id="bai-viet" className="flex flex-col gap-4">
+              <h2 className={H2}>{label("bai-viet")}</h2>
+              <ul
+                className={`${CARD} flex flex-col divide-y divide-white/5 !p-0`}
+              >
+                {tool.articles.map((article) => (
+                  <li key={article.slug}>
+                    <Link
+                      href={`/docs/${article.slug}`}
+                      className="group flex items-start gap-3 px-5 py-4 transition-colors hover:bg-white/[0.03]"
+                    >
+                      {open ? (
+                        <BookOpen
+                          size={16}
+                          className="mt-0.5 shrink-0 text-[var(--menzu-accent)]"
+                          aria-hidden
+                        />
+                      ) : (
+                        <Lock
+                          size={16}
+                          className="mt-0.5 shrink-0 text-neutral-500"
+                          aria-hidden
+                        />
+                      )}
+                      <span className="min-w-0">
+                        <span className="block text-[14px] font-bold text-white group-hover:text-[var(--menzu-accent)]">
+                          {article.title}
+                        </span>
+                        {article.excerpt ? (
+                          <span className="mt-0.5 block text-[12px] text-neutral-400">
+                            {article.excerpt}
+                          </span>
+                        ) : null}
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+              {!open ? (
+                <p className="text-[12px] text-neutral-500">
+                  Nội dung các bài này mở cùng lúc với phần tải về và thiết lập.
+                </p>
+              ) : null}
+            </section>
+          ) : null}
 
           {/* Lỗi thường gặp & hỗ trợ */}
           <section id="loi-thuong-gap" className="flex flex-col gap-4">

@@ -15,7 +15,7 @@ export default async function AdminDocsPage() {
   // visitor that an admin area exists here at all.
   if (!admin) notFound();
 
-  const docs = await listDocArticles();
+  const docs = await listDocArticles("all");
 
   return (
     <AdminShell
@@ -30,6 +30,7 @@ export default async function AdminDocsPage() {
           category: doc.category,
           excerpt: doc.excerpt,
           featured: doc.featured,
+          productCode: doc.product?.code ?? null,
           body: doc.body,
           views: doc.views,
           publishedAt: doc.publishedAt.toLocaleDateString("vi-VN", {

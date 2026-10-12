@@ -74,7 +74,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // Only articles that have been written: the empty ones are noindex, and
     // listing a noindex page here sends crawlers two contradictory signals.
     db.docArticle.findMany({
-      where: { body: { not: null } },
+      // Tool articles are left out with the empty ones: their bodies are
+      // behind a key, and the page says noindex.
+      where: { body: { not: null }, productId: null },
       select: { slug: true, updatedAt: true },
     }),
   ]);

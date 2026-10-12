@@ -156,6 +156,8 @@ export interface ToolDocs {
   docsUrl: string | null;
   /** The tiers and their lengths, so the page can say what each one opens. */
   packages: { label: string; durationHours: number | null }[];
+  /** The wiki articles attached to this tool: its further pages. */
+  articles: { slug: string; title: string; excerpt: string | null }[];
 }
 
 /** One tool's page, by its slug; null for anything not a listed tool. */
@@ -181,6 +183,10 @@ export async function getToolDocs(slug: string): Promise<ToolDocs | null> {
         orderBy: { sortOrder: "asc" },
         select: { label: true, durationHours: true },
       },
+      docArticles: {
+        orderBy: [{ sortOrder: "asc" }, { publishedAt: "desc" }],
+        select: { slug: true, title: true, excerpt: true },
+      },
     },
   });
   if (!p) return null;
@@ -201,5 +207,6 @@ export async function getToolDocs(slug: string): Promise<ToolDocs | null> {
     downloadName: p.downloadName,
     docsUrl: p.docsUrl,
     packages: p.packages,
+    articles: p.docArticles,
   };
 }

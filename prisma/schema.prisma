@@ -263,8 +263,13 @@ model DocArticle {
   /// article (02/10/2026), topped up with the most-read ones to at least 3.
   featured     Boolean     @default(false)
   updatedAt    DateTime    @default(now()) @updatedAt
+  /// The tool this article documents, if one (the owner, 12/10/2026): then it
+  /// is a page of that tool's docs, open as long as the key, and off the wiki.
+  productId    String?
+  product      Product?    @relation(fields: [productId], references: [id], onDelete: SetNull)
 
   @@index([category, sortOrder])
+  @@index([productId, sortOrder])
   @@map("doc_articles")
 }
 
@@ -795,6 +800,7 @@ model Product {
   skins             ProductSkin[]
   orders            Order[]
   freeKeyClaims     FreeKeyClaim[]
+  docArticles       DocArticle[]
   flashSales        FlashSale[]
   packages          ProductPackage[]
   images            ProductImage[]

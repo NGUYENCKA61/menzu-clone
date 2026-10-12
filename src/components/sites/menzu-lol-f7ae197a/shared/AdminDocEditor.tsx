@@ -18,6 +18,8 @@ export interface DocEditorView {
   publishedAt: string;
   /** Pinned onto the wiki's featured card; at most one article is. */
   featured: boolean;
+  /** The tool this article documents; null for a wiki article. */
+  productCode: string | null;
 }
 
 const CATEGORY_META: Record<string, (typeof DOC_SHELF_META)[keyof typeof DOC_SHELF_META]> =
@@ -37,8 +39,11 @@ const LABEL =
 export function AdminDocEditor({
   doc,
   initialHtml,
+  tools,
 }: {
   doc: DocEditorView;
+  /** The tools an article can be attached to. */
+  tools: { code: string; name: string }[];
   /** doc.body lifted to editor HTML on the server — legacy plain text arrives
    *  already converted, so this component never needs the converter. */
   initialHtml: string;
@@ -47,6 +52,7 @@ export function AdminDocEditor({
   const [title, setTitle] = useState(doc.title);
   const [excerpt, setExcerpt] = useState(doc.excerpt ?? "");
   const [featured, setFeatured] = useState(doc.featured);
+  const [productCode, setProductCode] = useState(doc.productCode ?? "");
   const [html, setHtml] = useState(initialHtml);
   /** What the database currently holds, advanced on every successful save. */
   const [baseline, setBaseline] = useState({
@@ -54,6 +60,7 @@ export function AdminDocEditor({
     excerpt: doc.excerpt ?? "",
     html: initialHtml,
     featured: doc.featured,
+    productCode: doc.productCode ?? "",
   });
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -65,7 +72,8 @@ export function AdminDocEditor({
     title !== baseline.title ||
     excerpt !== baseline.excerpt ||
     html !== baseline.html ||
-    featured !== baseline.featured;
+    featured !== baseline.featured ||
+    productCode !== baseline.productCode;
   const hasBody = html !== "";
 
   async function save() {
@@ -76,14 +84,21 @@ export function AdminDocEditor({
       const response = await fetch("/api/admin/docs", {
         method: "PATCH",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ slug: doc.slug, title, excerpt, body: html, featured }),
+        body: JSON.stringify({
+          slug: doc.slug,
+          title,
+          excerpt,
+          body: html,
+          featured,
+          productCode: productCode || null,
+        }),
       });
       const data = (await response.json().catch(() => ({}))) as { error?: string };
       if (!response.ok) {
         setError(data.error ?? "Lưu thất bại");
         return;
       }
-      setBaseline({ title, excerpt, html, featured });
+      setBaseline({ title, excerpt, html, featured, productCode });
       setSaved(true);
       router.refresh();
     } catch {
@@ -195,6 +210,34 @@ export function AdminDocEditor({
             </span>
           </span>
         </label>
+
+        <div>
+          <label htmlFor="doc-tool" className={LABEL}>
+            Gắn với tool{" "}
+            <span className="text-neutral-600">(tài liệu riêng của tool)</span>
+          </label>
+          <select
+            id="doc-tool"
+            value={productCode}
+            onChange={(e) => {
+              setProductCode(e.target.value);
+              setSaved(false);
+            }}
+            className={FIELD}
+          >
+            <option value="">Không gắn (bài Wiki công khai)</option>
+            {tools.map((tool) => (
+              <option key={tool.code} value={tool.code}>
+                {tool.code} · {tool.name}
+              </option>
+            ))}
+          </select>
+          <p className="mt-1.5 text-[11px] text-neutral-500">
+            Gắn thì bài này rời khỏi Wiki công khai, hiện trong trang tài liệu
+            của tool (/tai-lieu) và chỉ khách đang trong hạn xem theo key mới
+            đọc được nội dung.
+          </p>
+        </div>
 
         <div>
           <span className={LABEL}>Nội dung</span>

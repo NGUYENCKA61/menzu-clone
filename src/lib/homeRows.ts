@@ -113,7 +113,7 @@ export async function getHomeDocCards(slugs: string[]): Promise<DocCard[]> {
     slugs.length > 0
       ? orderBySlugs(await db.docArticle.findMany({ where: { slug: { in: slugs } } }), slugs)
       : await db.docArticle.findMany({
-          where: { category: "GUIDE" },
+          where: { category: "GUIDE", productId: null },
           orderBy: { sortOrder: "asc" },
           take: 4,
         });

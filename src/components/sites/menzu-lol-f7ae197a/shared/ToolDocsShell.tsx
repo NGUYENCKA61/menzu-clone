@@ -9,7 +9,13 @@ import type { ToolDocsIndexCategory } from "@/lib/toolDocs";
 /** Where the reader is, so the sidebar can say so and open the right game. */
 export type ToolDocsPlace =
   | { kind: "home" }
-  | { kind: "tool"; slug: string; categorySlug: string }
+  | {
+      kind: "tool";
+      slug: string;
+      categorySlug: string;
+      /** The tool's attached articles, listed under its sections. */
+      articles?: { slug: string; title: string }[];
+    }
   | { kind: "setup"; slug: string };
 
 /** The sections a tool's page is cut into, in order, by their anchors. */
@@ -19,6 +25,7 @@ export const TOOL_DOCS_SECTIONS: { id: string; label: string }[] = [
   { id: "cai-dat", label: "Cài đặt" },
   { id: "tai-ve", label: "Tải về" },
   { id: "thiet-lap", label: "Thiết lập & sử dụng" },
+  { id: "bai-viet", label: "Bài viết thêm" },
   { id: "loi-thuong-gap", label: "Lỗi thường gặp & hỗ trợ" },
 ];
 
@@ -108,7 +115,11 @@ function Nav({
                       </Row>
                       {now ? (
                         <div className="ml-2.5 mt-0.5 flex flex-col border-l border-white/10 pl-2">
-                          {TOOL_DOCS_SECTIONS.map((section) => (
+                          {TOOL_DOCS_SECTIONS.filter(
+                            (section) =>
+                              section.id !== "bai-viet" ||
+                              (place.articles?.length ?? 0) > 0,
+                          ).map((section) => (
                             <a
                               key={section.id}
                               href={`#${section.id}`}
@@ -116,6 +127,15 @@ function Nav({
                             >
                               {section.label}
                             </a>
+                          ))}
+                          {place.articles?.map((article) => (
+                            <Link
+                              key={article.slug}
+                              href={`/docs/${article.slug}`}
+                              className="rounded-md px-2 py-1 pl-4 text-[11px] text-neutral-400 hover:text-white"
+                            >
+                              {article.title}
+                            </Link>
                           ))}
                         </div>
                       ) : null}

@@ -100,6 +100,8 @@ export async function PATCH(request: Request) {
     excerpt?: string;
     body?: string;
     featured?: boolean;
+    /** The tool to attach the article to by code; null or "" detaches it. */
+    productCode?: string | null;
   } | null;
 
   const slug = body?.slug?.trim();
@@ -128,6 +130,21 @@ export async function PATCH(request: Request) {
       : rawProse;
   const excerpt = body?.excerpt?.trim();
 
+  // The tool, by code: a page of that tool's documentation from now on.
+  let productId: string | null | undefined;
+  if (body?.productCode !== undefined) {
+    const code = (body.productCode ?? "").trim().toUpperCase();
+    if (!code) productId = null;
+    else {
+      const tool = await db.product.findFirst({
+        where: { code, deletedAt: null, productType: "SOFTWARE_GAME" },
+        select: { id: true },
+      });
+      if (!tool) return NextResponse.json({ error: "Không thấy tool này" }, { status: 400 });
+      productId = tool.id;
+    }
+  }
+
   const updated = await db.docArticle.update({
     where: { slug },
     data: {
@@ -135,6 +152,7 @@ export async function PATCH(request: Request) {
       ...(body?.excerpt !== undefined ? { excerpt: excerpt || null } : {}),
       ...(body?.body !== undefined ? { body: prose || null } : {}),
       ...(body?.featured !== undefined ? { featured: body.featured === true } : {}),
+      ...(productId !== undefined ? { productId } : {}),
     },
   });
 
