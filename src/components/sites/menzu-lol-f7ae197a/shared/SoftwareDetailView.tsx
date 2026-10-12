@@ -1,7 +1,7 @@
 import { docHtmlToPlainText, isHtmlBody } from "@/lib/docHtml";
 import { breadcrumbJsonLd, JsonLd } from "@/lib/seo";
 import type { FreeToolPanel } from "@/lib/freeKeyRules";
-import { categoryHref, productHref } from "@/lib/routes";
+import { categoryHref, productHref, toolDocsHref } from "@/lib/routes";
 
 import { Breadcrumb } from "./Breadcrumb";
 import { FreeKeyPanel } from "./FreeKeyPanel";
@@ -131,6 +131,7 @@ export function SoftwareDetailView({
               guideHtml={software.guideHtml}
               setupGuideHtml={software.setupGuideHtml}
               setupGuideAccess={setupGuideAccess}
+              docsHref={toolDocsHref(software.slug)}
               refundRate={software.refundRate}
               loginHref={`/login?next=${encodeURIComponent(productHref(software.categorySlug, software.slug))}`}
             />

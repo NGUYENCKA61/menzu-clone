@@ -16,6 +16,11 @@ export function categoryHref(categorySlug: string): string {
 }
 
 /** /hack-pubg/hack-pubg-ban-desync — the product's one canonical address. */
+/** A tool's documentation: /tai-lieu/{product-slug} (the owner, 12/10/2026). */
+export function toolDocsHref(productSlug: string): string {
+  return `/tai-lieu/${productSlug}`;
+}
+
 export function productHref(categorySlug: string, productSlug: string): string {
   return `/${categorySlug}/${productSlug}`;
 }
@@ -61,6 +66,7 @@ export const RESERVED_SLUGS: ReadonlySet<string> = new Set([
   "signup",
   "sitemap.xml",
   "software",
+  "tai-lieu",
   "thong-bao",
   "transactions",
   "vong-quay",

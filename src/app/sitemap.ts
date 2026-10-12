@@ -3,7 +3,8 @@ import type { MetadataRoute } from "next";
 import { db } from "@/lib/db";
 import { LISTED_PRODUCT } from "@/lib/queries";
 import { SITE_URL } from "@/lib/seo";
-import { categoryHref, productHref } from "@/lib/routes";
+import { PC_SETUP_PAGES, pcSetupHref } from "@/lib/pcSetup";
+import { categoryHref, productHref, toolDocsHref } from "@/lib/routes";
 
 /**
  * Sitemap built from the live catalogue, not a hand-written list — stock turns
@@ -21,6 +22,7 @@ const STATIC_ROUTES: [path: string, priority: number, freq: Frequency][] = [
   // No /news: the live site links "TIN TỨC" from its header but the route
   // 404s there, so this clone 404s too rather than inventing a section.
   ["/docs", 0.4, "monthly"],
+  ["/tai-lieu", 0.5, "weekly"],
   ["/thong-bao", 0.4, "daily"],
   ["/cap-bac", 0.4, "monthly"],
   // Worth indexing on its own: somebody who has just been messaged by a fake
@@ -56,6 +58,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       select: {
         slug: true,
         updatedAt: true,
+        productType: true,
         category: { select: { slug: true } },
       },
     }),
@@ -114,6 +117,22 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: doc.updatedAt,
       changeFrequency: "monthly" as const,
       priority: 0.5,
+    })),
+    // The documentation area: one page per tool (its open parts), and the
+    // machine-preparation pages, which change with Windows, not the shop.
+    ...products
+      .filter((product) => product.productType === "SOFTWARE_GAME")
+      .map((product) => ({
+        url: `${SITE_URL}${toolDocsHref(product.slug)}`,
+        lastModified: product.updatedAt,
+        changeFrequency: "weekly" as const,
+        priority: 0.5,
+      })),
+    ...PC_SETUP_PAGES.map((page) => ({
+      url: `${SITE_URL}${pcSetupHref(page.slug)}`,
+      lastModified: shopChanged,
+      changeFrequency: "monthly" as const,
+      priority: 0.4,
     })),
   ];
 }

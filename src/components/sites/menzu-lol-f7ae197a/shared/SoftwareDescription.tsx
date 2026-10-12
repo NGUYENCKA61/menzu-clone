@@ -20,7 +20,9 @@ export const DESCRIPTION_SECTION_ID = "mo-ta-san-pham";
  * who has not bought it, or nobody signed in at all. The route decides; the
  * text itself only arrives for "unlocked".
  */
-export type SetupGuideAccess = "unlocked" | "locked" | "guest";
+// "expired": a buyer whose reading window has run out (the owner, 12/10/2026:
+// a day key reads two days, a week key a week, a month key a month).
+export type SetupGuideAccess = "unlocked" | "locked" | "expired" | "guest";
 
 export interface SoftwareDescriptionProps {
   name: string;
@@ -47,6 +49,8 @@ export interface SoftwareDescriptionProps {
   refundRate: number | null;
   /** Where a guest who has already bought goes to prove it. */
   loginHref: string;
+  /** The tool's full documentation (/tai-lieu/<slug>). */
+  docsHref: string;
 }
 
 const SUB_HEADING =
@@ -90,6 +94,7 @@ export function SoftwareDescription({
   setupGuideAccess,
   refundRate,
   loginHref,
+  docsHref,
 }: SoftwareDescriptionProps) {
   /**
    * The product's own highlights, or the shop's default list where it has none.
@@ -164,6 +169,16 @@ export function SoftwareDescription({
   const setupGuideBlock = (
     <>
       <h3 className={SUB_HEADING}>Hướng dẫn thiết lập &amp; sử dụng</h3>
+      <p className="mt-2 text-[12px] text-neutral-500">
+        Tài liệu đầy đủ của tool (cài đặt, tải về, thiết lập, lỗi thường gặp) ở{" "}
+        <Link
+          href={docsHref}
+          className="font-bold text-neutral-300 underline underline-offset-2 hover:text-white"
+        >
+          trang tài liệu
+        </Link>
+        .
+      </p>
       {setupGuideAccess !== "unlocked" ? (
         <div className="mt-4 flex items-start gap-4 rounded-2xl border border-white/10 bg-white/[0.02] px-5 py-4 sm:px-6">
           <span className="mt-0.5 grid h-9 w-9 shrink-0 place-items-center rounded-full border border-white/10 bg-white/5 text-[var(--menzu-accent)]">
@@ -171,12 +186,26 @@ export function SoftwareDescription({
           </span>
           <div className="min-w-0">
             <p className="text-sm font-black uppercase tracking-wider text-white">
-              Mở khoá sau khi thuê key
+              {setupGuideAccess === "expired"
+                ? "Hết hạn xem theo key"
+                : "Mở khoá sau khi thuê key"}
             </p>
             <p className={`mt-1 ${BODY}`}>
-              <Hi>Nội dung chỉ hiển thị</Hi> sau khi bạn đã <Hi>thuê key</Hi>{" "}
-              của tool này. <Hi>Chọn gói</Hi> ở trên và bấm <Hi>Mua ngay</Hi> -{" "}
-              <Hi>thanh toán xong</Hi>, quay lại trang này là xem được.
+              {setupGuideAccess === "expired" ? (
+                <>
+                  Thời hạn xem theo key của bạn đã hết: <Hi>key ngày</Hi> xem
+                  được <Hi>2 ngày</Hi>, <Hi>key tuần</Hi> 1 tuần,{" "}
+                  <Hi>key tháng</Hi> 1 tháng. <Hi>Thuê key mới</Hi> là mở lại
+                  ngay.
+                </>
+              ) : (
+                <>
+                  <Hi>Nội dung chỉ hiển thị</Hi> sau khi bạn đã{" "}
+                  <Hi>thuê key</Hi> của tool này. <Hi>Chọn gói</Hi> ở trên và
+                  bấm <Hi>Mua ngay</Hi> - <Hi>thanh toán xong</Hi>, quay lại
+                  trang này là xem được.
+                </>
+              )}
               {setupGuideAccess === "guest" ? (
                 <>
                   {" "}

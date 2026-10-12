@@ -6,12 +6,12 @@ import { isFreeTool } from "@/components/sites/menzu-lol-f7ae197a/shared/product
 import { SoftwareDetailView } from "@/components/sites/menzu-lol-f7ae197a/shared/SoftwareDetailView";
 import { formatVnd } from "@/components/sites/menzu-lol-f7ae197a/shared/productData";
 import { docHtmlToPlainText, isHtmlBody } from "@/lib/docHtml";
+import { type DocsAccess } from "@/lib/docsAccess";
 import { freeToolPanel } from "@/lib/freeKey";
 import {
   getAccountDetail,
   getSoftwareDetail,
   listSimilarSoftware,
-  hasPaidOrderFor,
   resolveProduct,
 } from "@/lib/queries";
 import { productHref } from "@/lib/routes";
@@ -20,6 +20,7 @@ import { getCurrentUser } from "@/lib/session";
 import { isStatusSubscribed } from "@/lib/statusEvents";
 import { shareCard } from "@/lib/shareCard";
 import { productBehindOldSlug } from "@/lib/slugHistory";
+import { toolDocsAccess } from "@/lib/toolDocs";
 
 /**
  * The quantity a guest had set before the login gate, carried back through
@@ -30,6 +31,9 @@ function readQuantity(raw: string | undefined): number | undefined {
   const value = Number(raw);
   return Number.isInteger(value) && value > 1 && value <= 99 ? value : undefined;
 }
+
+/** What a guest gets of a tool's docs: the open parts and a sign-in cue. */
+const GUEST_DOCS: DocsAccess = { state: "guest", until: null };
 
 interface PageProps {
   params: Promise<{ categorySlug: string; productSlug: string }>;
@@ -162,13 +166,13 @@ export default async function ProductPage({ params, searchParams }: PageProps) {
     // the view receives rather than hidden by it, and the HTML a browser gets
     // never carries a guide its reader has not paid for.
     const user = await getCurrentUser();
-    const [[bought, statusSubscribed], similar] = await Promise.all([
+    const [[docsAccess, statusSubscribed], similar] = await Promise.all([
       user
         ? Promise.all([
-            hasPaidOrderFor(user.id, software.code),
+            toolDocsAccess({ id: user.id, role: user.role }, software.code),
             isStatusSubscribed(user.id, software.code),
           ])
-        : Promise.resolve([false, null] as const),
+        : Promise.resolve([GUEST_DOCS, null] as const),
       // Twelve, so that nine remain once free tools are set aside below:
       // three show at once on a desktop, the arrows bring in the rest.
       listSimilarSoftware(software.code, software.categorySlug, 12),
@@ -181,11 +185,15 @@ export default async function ProductPage({ params, searchParams }: PageProps) {
     // The shop's own admins read it too: they wrote it, and checking a guide —
     // the video in it above all — should not take buying a key from their own
     // shop. The role comes from the database row, not the cookie.
+    // Open for as long as the key says (lib/docsAccess.ts): a day key two
+    // days, a week key a week, a month key a month, a new key a new window.
     const setupGuideAccess = !user
       ? "guest"
-      : bought || user.role === "ADMIN"
+      : docsAccess.state === "open"
         ? "unlocked"
-        : "locked";
+        : docsAccess.state === "expired"
+          ? "expired"
+          : "locked";
     const shown =
       setupGuideAccess === "unlocked"
         ? software

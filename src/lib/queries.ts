@@ -17,7 +17,7 @@ import { showsStatusPill } from "@/lib/statusPill";
 import { isSalesLocked } from "@/lib/softwareStatus";
 import { parseFeatures } from "@/lib/productFeatures";
 import { legacyRefundCurrent } from "@/lib/refundRequests";
-import { productHref } from "@/lib/routes";
+import { productHref, toolDocsHref } from "@/lib/routes";
 import type { WarrantyStatus } from "@/lib/warrantyRequests";
 import { weaponKey } from "@/lib/weaponImages";
 import type { AccountDetail } from "@/components/sites/menzu-lol-f7ae197a/shared/AccountBuyPanel";
@@ -1138,9 +1138,11 @@ export async function getOrders(userId: string): Promise<OrderRow[]> {
       o.status === "PAID" && o.product.productType === "SOFTWARE_GAME"
         ? o.product.downloadName
         : null,
+    // The shop's outside manual when it pasted one, else the tool's own
+    // documentation here (the owner, 12/10/2026), open as long as the key.
     docsUrl:
       o.status === "PAID" && o.product.productType === "SOFTWARE_GAME"
-        ? o.product.docsUrl
+        ? (o.product.docsUrl ?? toolDocsHref(o.product.slug))
         : null,
     ...(() => {
       const handover = loginHandover(o, {

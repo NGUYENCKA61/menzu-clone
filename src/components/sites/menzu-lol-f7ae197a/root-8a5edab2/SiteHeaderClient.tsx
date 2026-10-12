@@ -11,6 +11,7 @@ import {
   CreditCard,
   Gift,
   KeyRound,
+  Library,
   Menu,
   Send,
   Ticket,
@@ -53,6 +54,8 @@ const LINK_HREFS: Record<string, string> = {
   "LIÊN HỆ": "/lien-he",
   "XEM TRẠNG THÁI": STATUS_TAB_HREF,
   "WIKI & HƯỚNG DẪN": "/docs",
+  // The documentation area, per tool, open as long as the key (12/10/2026).
+  "TÀI LIỆU": "/tai-lieu",
   "Nạp Qua Ngân Hàng": "/wallet",
   // menzu's own address for the card desk: the wallet opens on its Thẻ cào tab.
   "Nạp Thẻ Cào": "/wallet?method=card",
@@ -75,6 +78,7 @@ const QUICK_LINKS = [
   TELEGRAM_SHOP_LINK,
   "XEM TRẠNG THÁI",
   "WIKI & HƯỚNG DẪN",
+  "TÀI LIỆU",
   "ĐÁNH GIÁ",
   "LIÊN HỆ",
 ]
@@ -130,6 +134,7 @@ const QUICK_LINK_ITEMS: DropdownItem[] = [
   { label: TELEGRAM_SHOP_LINK, icon: Send },
   { label: "XEM TRẠNG THÁI", icon: Activity },
   { label: "WIKI & HƯỚNG DẪN", icon: BookOpen },
+  { label: "TÀI LIỆU", icon: Library },
   { label: "ĐÁNH GIÁ", icon: Star },
   { label: "LIÊN HỆ", icon: Users },
 ]
