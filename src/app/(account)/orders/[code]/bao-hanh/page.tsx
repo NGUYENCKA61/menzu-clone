@@ -22,6 +22,7 @@ import { WarrantyChat } from "@/components/sites/menzu-lol-f7ae197a/shared/Warra
 import { WarrantyDetailsForm } from "@/components/sites/menzu-lol-f7ae197a/shared/WarrantyDetailsForm";
 import { WarrantyRequestForm } from "@/components/sites/menzu-lol-f7ae197a/shared/WarrantyRequestForm";
 import { WarrantyIssueGlyph } from "@/components/sites/menzu-lol-f7ae197a/shared/warrantyIssueIcon";
+import { WarrantyAnswersFold } from "@/components/sites/menzu-lol-f7ae197a/shared/WarrantyAnswersFold";
 import { maskAccount } from "@/lib/bankRefund";
 import {
   answerLabel,
@@ -464,6 +465,93 @@ export default async function WarrantyRequestPage({
               {sentReports.map((r, index) => {
                 const state = WARRANTY_STATUS[r.status];
                 const answers = readDetails(r.details);
+                // The report's one line: the fault with its glyph, an older
+                // report's chip (the latest one's is in the title bar), an
+                // account's recording.
+                const faultLine = (
+                  <>
+                    {index > 0 ? (
+                      <span
+                        className={`inline-flex items-center gap-1.5 rounded-md border px-2 py-0.5 text-[10px] font-black uppercase tracking-wider ${state.tile}`}
+                      >
+                        <span
+                          aria-hidden
+                          className={`h-1.5 w-1.5 rounded-full ${state.dot}`}
+                        />
+                        {state.label}
+                      </span>
+                    ) : null}
+                    {/* What broke is the report's first fact, so it reads at
+                        body size and brightness. No time beside it: the
+                        sentence under the strip and the thread's first line
+                        already carry it (the owner, 12/10/2026: "bỏ đi"). */}
+                    <span className="inline-flex items-center gap-1.5 text-[13px] font-bold text-neutral-200">
+                      <WarrantyIssueGlyph
+                        issue={r.issue}
+                        className="h-4 w-4 shrink-0 text-neutral-400"
+                      />
+                      {WARRANTY_ISSUE[r.issue].label}
+                    </span>
+                    {r.videoUrl ? (
+                      <a
+                        href={r.videoUrl}
+                        target="_blank"
+                        rel="noopener noreferrer nofollow"
+                        className="inline-flex items-center gap-1.5 text-[12px] font-bold text-neutral-300 underline-offset-2 hover:text-white hover:underline"
+                      >
+                        <Video className="h-3.5 w-3.5" aria-hidden />
+                        Video quay màn hình
+                      </a>
+                    ) : null}
+                  </>
+                );
+                // The second round's answers, as the desk reads them: one
+                // line per answer, question on the left, answer and its
+                // pictures on the right. Shown only on request, behind a word
+                // at the end of the fault's own line (WarrantyAnswersFold).
+                const answersPanel =
+                  answers.length > 0 ? (
+                    <dl className="flex flex-col gap-2.5">
+                      {answers.map((answer) => {
+                        return (
+                          <div
+                            key={answer.key}
+                            className="grid gap-x-6 gap-y-1 sm:grid-cols-[minmax(0,240px)_minmax(0,260px)_1fr]"
+                          >
+                            <dt className="text-[12px] font-semibold text-neutral-500 sm:pt-0.5">
+                              {answerShort(answer, questions)}
+                            </dt>
+                            <dd className="text-[13px] font-bold text-neutral-200 sm:pt-0.5">
+                              {answer.value}
+                            </dd>
+                            {/* Their own column, so the pictures line up down
+                                the card whatever the answer's length. Small,
+                                since they open full size on a click; one
+                                answer can carry several. */}
+                            <dd className="flex flex-wrap items-center gap-2">
+                              {answer.imageUrls.map((url, index) => (
+                                <a
+                                  key={url}
+                                  href={url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="block h-10 w-[60px] overflow-hidden rounded-md border border-white/10 bg-neutral-950"
+                                >
+                                  <Image
+                                    src={url}
+                                    alt={`${answerLabel(answer, questions)} ${index + 1}`}
+                                    width={120}
+                                    height={80}
+                                    className="h-full w-full object-cover"
+                                  />
+                                </a>
+                              ))}
+                            </dd>
+                          </div>
+                        );
+                      })}
+                    </dl>
+                  ) : null;
                 return (
                   <li
                     key={r.id}
@@ -471,48 +559,22 @@ export default async function WarrantyRequestPage({
                       index === 0 ? "" : "border-t border-white/[0.06] pt-5"
                     }
                   >
-                    {/* The fault and the time as one grey line. The latest
-                        report's chip is in the title bar; an older one keeps
-                        its own. Not while the bank form is up: that card is
-                        the form and nothing else (the owner, 12/10/2026). */}
-                    {awaitingBank ? null : (
+                    {/* The report's line. With answers to show, the fold's
+                        word sits at its right end and they open under it, so
+                        the card's head is one line where it was three (the
+                        owner, 12/10/2026: "nhìn có rối quá không" → "làm
+                        thử"). Not while the bank form is up: that card is the
+                        form and nothing else (the owner, 12/10/2026). */}
+                    {awaitingBank ? null : answersPanel ? (
+                      <WarrantyAnswersFold
+                        count={answers.length}
+                        lead={faultLine}
+                      >
+                        {answersPanel}
+                      </WarrantyAnswersFold>
+                    ) : (
                       <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
-                        {index > 0 ? (
-                          <span
-                            className={`inline-flex items-center gap-1.5 rounded-md border px-2 py-0.5 text-[10px] font-black uppercase tracking-wider ${state.tile}`}
-                          >
-                            <span
-                              aria-hidden
-                              className={`h-1.5 w-1.5 rounded-full ${state.dot}`}
-                            />
-                            {state.label}
-                          </span>
-                        ) : null}
-                        {/* What broke is the report's first fact, so it reads
-                          at body size and brightness. No time beside it: the
-                          sentence under the strip and the thread's first line
-                          already carry it (the owner, 12/10/2026: "bỏ đi"). */}
-                        <span className="inline-flex items-center gap-1.5 text-[13px] font-bold text-neutral-200">
-                          {/* The fault's glyph, the one its tile wore on the
-                              form (the owner, 12/10/2026). */}
-                          <WarrantyIssueGlyph
-                            issue={r.issue}
-                            className="h-4 w-4 shrink-0 text-neutral-400"
-                          />
-                          {WARRANTY_ISSUE[r.issue].label}
-                        </span>
-                        {/* An account's report: the recording it was sent with. */}
-                        {r.videoUrl ? (
-                          <a
-                            href={r.videoUrl}
-                            target="_blank"
-                            rel="noopener noreferrer nofollow"
-                            className="inline-flex items-center gap-1.5 text-[12px] font-bold text-neutral-300 underline-offset-2 hover:text-white hover:underline"
-                          >
-                            <Video className="h-3.5 w-3.5" aria-hidden />
-                            Video quay màn hình
-                          </a>
-                        ) : null}
+                        {faultLine}
                       </div>
                     )}
                     {/* The refund, when the shop could not fix it: settled to
@@ -610,71 +672,6 @@ export default async function WarrantyRequestPage({
                           />
                         ) : null}
                       </div>
-                    ) : null}
-                    {/* The answers, as the desk reads them. */}
-                    {/* Not once the money is on its way: the buyer's own
-                        answers are the desk's reading, and beside a bank
-                        form they are noise (the owner, 12/10/2026). */}
-                    {answers.length > 0 && !awaitingBank ? (
-                      // Folded by default: the buyer wrote these and reads
-                      // them once; the desk reads them on its own screen.
-                      // Open, one line per answer, question on the left,
-                      // answer and its pictures on the right.
-                      <details className="group mt-4 border-t border-white/[0.06] pt-4">
-                        {/* A control, not a label: the size and brightness
-                            of a button's text, so it reads as something to
-                            press (the owner, 12/10/2026). */}
-                        <summary className="flex cursor-pointer list-none items-center gap-2 text-[12px] font-black uppercase tracking-wider text-neutral-300 transition-colors hover:text-white [&::-webkit-details-marker]:hidden">
-                          <ChevronRight
-                            className="h-4 w-4 shrink-0 transition-transform group-open:rotate-90"
-                            aria-hidden
-                          />
-                          Thông tin đã bổ sung
-                          <span className="font-semibold normal-case tracking-normal text-neutral-500">
-                            ({answers.length} mục)
-                          </span>
-                        </summary>
-                        <dl className="mt-3 flex flex-col gap-2.5">
-                          {answers.map((answer) => {
-                            return (
-                              <div
-                                key={answer.key}
-                                className="grid gap-x-6 gap-y-1 sm:grid-cols-[minmax(0,240px)_minmax(0,260px)_1fr]"
-                              >
-                                <dt className="text-[12px] font-semibold text-neutral-500 sm:pt-0.5">
-                                  {answerShort(answer, questions)}
-                                </dt>
-                                <dd className="text-[13px] font-bold text-neutral-200 sm:pt-0.5">
-                                  {answer.value}
-                                </dd>
-                                {/* Their own column, so the pictures line up
-                                    down the card whatever the answer's
-                                    length. Small, since they open full size
-                                    on a click; one answer can carry several. */}
-                                <dd className="flex flex-wrap items-center gap-2">
-                                  {answer.imageUrls.map((url, index) => (
-                                    <a
-                                      key={url}
-                                      href={url}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="block h-10 w-[60px] overflow-hidden rounded-md border border-white/10 bg-neutral-950"
-                                    >
-                                      <Image
-                                        src={url}
-                                        alt={`${answerLabel(answer, questions)} ${index + 1}`}
-                                        width={120}
-                                        height={80}
-                                        className="h-full w-full object-cover"
-                                      />
-                                    </a>
-                                  ))}
-                                </dd>
-                              </div>
-                            );
-                          })}
-                        </dl>
-                      </details>
                     ) : null}
                   </li>
                 );
