@@ -19,6 +19,7 @@ import { useEffect, useState } from "react";
 
 import { DiscordMark, GoogleMark } from "./OAuthButtons";
 import { TelegramGlyph } from "./BrandGlyphs";
+import { ZaloLinkCard } from "./ZaloLinkCard";
 
 /*
  * menzu's /security, measured off the live page on 29/09/2026 at the owner's
@@ -40,8 +41,18 @@ import { TelegramGlyph } from "./BrandGlyphs";
 
 type Tab = "security" | "linked" | "devices";
 
-const TABS: { id: Tab; short: string; long: string; icon: typeof ShieldCheck }[] = [
-  { id: "security", short: "Bảo mật", long: "Bảo mật tài khoản", icon: ShieldCheck },
+const TABS: {
+  id: Tab;
+  short: string;
+  long: string;
+  icon: typeof ShieldCheck;
+}[] = [
+  {
+    id: "security",
+    short: "Bảo mật",
+    long: "Bảo mật tài khoản",
+    icon: ShieldCheck,
+  },
   { id: "linked", short: "Liên kết", long: "Liên kết nền tảng", icon: Globe },
   { id: "devices", short: "Thiết bị", long: "Quản lý thiết bị", icon: Monitor },
 ];
@@ -54,7 +65,8 @@ const TAB_INACTIVE = `${TAB_BASE} bg-white/[0.02] text-neutral-400 hover:text-wh
 const TITLE =
   "text-xl sm:text-2xl font-black text-white uppercase tracking-wider mb-2 flex items-center gap-3";
 const SUBTITLE = "text-xs sm:text-sm text-neutral-400 leading-relaxed";
-const CARD = "relative bg-white/[0.02] border border-white/5 rounded-2xl p-5 sm:p-6 overflow-hidden group";
+const CARD =
+  "relative bg-white/[0.02] border border-white/5 rounded-2xl p-5 sm:p-6 overflow-hidden group";
 const CARD_TITLE = "text-sm font-black uppercase tracking-wider text-white";
 const FIELD =
   "w-full rounded-xl border border-white/10 bg-black/20 px-4 py-3 text-white text-sm outline-none placeholder:text-neutral-600 focus:border-[var(--menzu-accent)]/50 transition-colors disabled:opacity-50";
@@ -113,6 +125,11 @@ export interface SecurityPanelProps {
    */
   telegramUrl?: string | null;
   telegramLinked?: boolean;
+  /** The Zalo notice bot's number from Cấu hình; blank hides the Zalo card. */
+  zaloPhone?: string | null;
+  zaloName?: string;
+  zaloLinked?: boolean;
+  zaloLinkedName?: string | null;
   sessions: SessionView[];
   /** The OAuth callback lands with ?linked= — open on that tab. */
   initialTab?: Tab;
@@ -134,6 +151,10 @@ export function SecurityPanel({
   discordEnabled,
   telegramUrl = null,
   telegramLinked = false,
+  zaloPhone = null,
+  zaloName = "",
+  zaloLinked = false,
+  zaloLinkedName = null,
   sessions,
   initialTab = "security",
   linkNotice = null,
@@ -151,27 +172,39 @@ export function SecurityPanel({
   const [emailBusy, setEmailBusy] = useState<"send" | "verify" | null>(null);
   /** Seconds until "Gửi lại mã" works again. */
   const [cooldown, setCooldown] = useState(0);
-  const [emailMsg, setEmailMsg] = useState<{ tone: "ok" | "err"; text: string } | null>(
-    null,
-  );
+  const [emailMsg, setEmailMsg] = useState<{
+    tone: "ok" | "err";
+    text: string;
+  } | null>(null);
   useEffect(() => {
     if (cooldown <= 0) return;
-    const timer = window.setTimeout(() => setCooldown((left) => left - 1), 1000);
+    const timer = window.setTimeout(
+      () => setCooldown((left) => left - 1),
+      1000,
+    );
     return () => window.clearTimeout(timer);
   }, [cooldown]);
   const onFile = (email ?? "").toLowerCase();
-  const alreadyProved = emailVerified && emailValue.trim().toLowerCase() === onFile;
-  const needsPassword = hasPassword && sentTo !== null && sentTo.toLowerCase() !== onFile;
+  const alreadyProved =
+    emailVerified && emailValue.trim().toLowerCase() === onFile;
+  const needsPassword =
+    hasPassword && sentTo !== null && sentTo.toLowerCase() !== onFile;
 
   const [current, setCurrent] = useState("");
   const [next, setNext] = useState("");
   const [confirm, setConfirm] = useState("");
   const [pwBusy, setPwBusy] = useState(false);
-  const [pwMsg, setPwMsg] = useState<{ tone: "ok" | "err"; text: string } | null>(null);
+  const [pwMsg, setPwMsg] = useState<{
+    tone: "ok" | "err";
+    text: string;
+  } | null>(null);
 
   /** "all" while "Đăng xuất phiên khác" runs, else the row being signed out. */
   const [devBusy, setDevBusy] = useState<string | null>(null);
-  const [devMsg, setDevMsg] = useState<{ tone: "ok" | "err"; text: string } | null>(null);
+  const [devMsg, setDevMsg] = useState<{
+    tone: "ok" | "err";
+    text: string;
+  } | null>(null);
 
   /** "Gửi mã OTP": a six-digit code to the address typed. */
   async function sendOtp(event: React.FormEvent) {
@@ -193,7 +226,10 @@ export function SecurityPanel({
       };
       if (data.retryAfter) setCooldown(data.retryAfter);
       if (!res.ok || !data.email) {
-        setEmailMsg({ tone: "err", text: data.error ?? "Không gửi được mã xác minh" });
+        setEmailMsg({
+          tone: "err",
+          text: data.error ?? "Không gửi được mã xác minh",
+        });
         return;
       }
       setSentTo(data.email);
@@ -220,9 +256,15 @@ export function SecurityPanel({
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ code: otp, password: emailPassword }),
       });
-      const data = (await res.json().catch(() => ({}))) as { error?: string; email?: string };
+      const data = (await res.json().catch(() => ({}))) as {
+        error?: string;
+        email?: string;
+      };
       if (!res.ok) {
-        setEmailMsg({ tone: "err", text: data.error ?? "Không xác minh được email" });
+        setEmailMsg({
+          tone: "err",
+          text: data.error ?? "Không xác minh được email",
+        });
         return;
       }
       setSentTo(null);
@@ -257,7 +299,10 @@ export function SecurityPanel({
       const data = (await res.json().catch(() => ({}))) as { error?: string };
 
       if (!res.ok) {
-        setPwMsg({ tone: "err", text: data.error ?? "Không đổi được mật khẩu" });
+        setPwMsg({
+          tone: "err",
+          text: data.error ?? "Không đổi được mật khẩu",
+        });
         return;
       }
 
@@ -364,7 +409,11 @@ export function SecurityPanel({
     },
   ];
 
-  const header = (title: string, Icon: typeof ShieldCheck, subtitle: string) => (
+  const header = (
+    title: string,
+    Icon: typeof ShieldCheck,
+    subtitle: string,
+  ) => (
     <div className="mb-2 relative z-10">
       <h1 className={TITLE}>
         <Icon className="text-[var(--menzu-accent)]" aria-hidden />
@@ -376,7 +425,11 @@ export function SecurityPanel({
 
   return (
     <div className="w-full flex flex-col pb-6 min-h-[70vh]">
-      <div role="tablist" aria-label="Bảo mật" className="flex w-full gap-2 pb-4 mb-6 border-b border-white/5">
+      <div
+        role="tablist"
+        aria-label="Bảo mật"
+        className="flex w-full gap-2 pb-4 mb-6 border-b border-white/5"
+      >
         {TABS.map(({ id, short, long, icon: Icon }) => (
           <button
             key={id}
@@ -447,11 +500,20 @@ export function SecurityPanel({
                   />
                   <button
                     type="submit"
-                    disabled={emailBusy !== null || cooldown > 0 || !emailValue.trim() || alreadyProved}
+                    disabled={
+                      emailBusy !== null ||
+                      cooldown > 0 ||
+                      !emailValue.trim() ||
+                      alreadyProved
+                    }
                     className="flex items-center justify-center gap-2 rounded-xl bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] disabled:bg-white/5 text-white text-[11px] font-black uppercase tracking-widest px-5 py-3 whitespace-nowrap transition-colors disabled:text-neutral-500"
                   >
                     {emailBusy === "send" ? (
-                      <Loader2 size={16} className="animate-spin motion-reduce:animate-none" aria-hidden />
+                      <Loader2
+                        size={16}
+                        className="animate-spin motion-reduce:animate-none"
+                        aria-hidden
+                      />
                     ) : (
                       <Send size={16} aria-hidden />
                     )}
@@ -474,7 +536,9 @@ export function SecurityPanel({
                       autoComplete="one-time-code"
                       maxLength={6}
                       value={otp}
-                      onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                      onChange={(e) =>
+                        setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))
+                      }
                       placeholder="Nhập mã OTP 6 số"
                       // The digits spaced out once typed; the placeholder reads normally.
                       className={`flex-1 ${FIELD} ${otp ? "font-mono tracking-[0.3em]" : ""}`}
@@ -502,7 +566,11 @@ export function SecurityPanel({
                       className="flex items-center justify-center gap-2 rounded-xl bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] disabled:bg-white/5 text-white text-[11px] font-black uppercase tracking-widest px-5 py-3 whitespace-nowrap transition-colors disabled:text-neutral-500"
                     >
                       {emailBusy === "verify" ? (
-                        <Loader2 size={16} className="animate-spin motion-reduce:animate-none" aria-hidden />
+                        <Loader2
+                          size={16}
+                          className="animate-spin motion-reduce:animate-none"
+                          aria-hidden
+                        />
                       ) : (
                         <Check size={16} aria-hidden />
                       )}
@@ -511,13 +579,17 @@ export function SecurityPanel({
                   </div>
                 ) : null}
 
-                {emailMsg ? <Notice tone={emailMsg.tone}>{emailMsg.text}</Notice> : null}
+                {emailMsg ? (
+                  <Notice tone={emailMsg.tone}>{emailMsg.text}</Notice>
+                ) : null}
               </div>
             </form>
 
             <form onSubmit={submitPassword} className={CARD}>
               <div className="flex flex-col gap-5">
-                <h3 className={CARD_TITLE}>{hasPassword ? "Đổi Mật Khẩu" : "Đặt Mật Khẩu"}</h3>
+                <h3 className={CARD_TITLE}>
+                  {hasPassword ? "Đổi Mật Khẩu" : "Đặt Mật Khẩu"}
+                </h3>
                 {/* Every field carries its own label, visually hidden: the
                     design shows only placeholders, and a placeholder is not a
                     label — it disappears the moment you start typing. */}
@@ -542,8 +614,8 @@ export function SecurityPanel({
                     // Asking for a current password here was a door with no
                     // key: the field could never be filled.
                     <p className="rounded-xl border border-white/10 bg-black/20 px-4 py-3 text-[13px] leading-relaxed text-neutral-400">
-                      Tài khoản này đăng nhập bằng Google/Discord nên chưa có mật khẩu. Đặt một mật
-                      khẩu để đăng nhập được cả hai cách.
+                      Tài khoản này đăng nhập bằng Google/Discord nên chưa có
+                      mật khẩu. Đặt một mật khẩu để đăng nhập được cả hai cách.
                     </p>
                   )}
                   <label htmlFor="sec-next" className="sr-only">
@@ -578,9 +650,17 @@ export function SecurityPanel({
                   className="w-full h-12 bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] disabled:bg-[var(--menzu-accent)]/50 text-white font-black rounded-xl text-sm transition-colors flex items-center justify-center gap-2"
                 >
                   {pwBusy ? (
-                    <Loader2 size={16} className="animate-spin motion-reduce:animate-none" aria-hidden />
+                    <Loader2
+                      size={16}
+                      className="animate-spin motion-reduce:animate-none"
+                      aria-hidden
+                    />
                   ) : null}
-                  {pwBusy ? "Đang xử lý…" : hasPassword ? "Đổi Mật Khẩu" : "Đặt Mật Khẩu"}
+                  {pwBusy
+                    ? "Đang xử lý…"
+                    : hasPassword
+                      ? "Đổi Mật Khẩu"
+                      : "Đặt Mật Khẩu"}
                 </button>
               </div>
             </form>
@@ -593,7 +673,9 @@ export function SecurityPanel({
               "Quản lý các tài khoản mạng xã hội được liên kết với hồ sơ của bạn để đăng nhập nhanh chóng.",
             )}
 
-            {linkNotice ? <Notice tone={linkNotice.tone}>{linkNotice.text}</Notice> : null}
+            {linkNotice ? (
+              <Notice tone={linkNotice.tone}>{linkNotice.text}</Notice>
+            ) : null}
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {platforms.map((platform) => {
@@ -633,16 +715,23 @@ export function SecurityPanel({
                             : "bg-white/5 text-neutral-600"
                       }`}
                     >
-                      {platform.linked ? <Check size={16} aria-hidden /> : <Plus size={16} aria-hidden />}
+                      {platform.linked ? (
+                        <Check size={16} aria-hidden />
+                      ) : (
+                        <Plus size={16} aria-hidden />
+                      )}
                     </div>
                   </div>
                 );
-                const shell = "flex flex-col gap-4 p-5 rounded-2xl bg-white/[0.02] border border-white/5";
+                const shell =
+                  "flex flex-col gap-4 p-5 rounded-2xl bg-white/[0.02] border border-white/5";
                 return door ? (
                   <a
                     key={platform.key}
                     href={platform.href!}
-                    {...(platform.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                    {...(platform.external
+                      ? { target: "_blank", rel: "noopener noreferrer" }
+                      : {})}
                     className={`${shell} hover:border-white/10 group`}
                   >
                     {body}
@@ -662,6 +751,17 @@ export function SecurityPanel({
                 );
               })}
             </div>
+
+            {/* Zalo is a code, not a door: its own card under the grid (the
+                owner, 12/10/2026). Only while the shop has a bot number. */}
+            {zaloPhone ? (
+              <ZaloLinkCard
+                phone={zaloPhone}
+                name={zaloName}
+                linked={zaloLinked}
+                linkedName={zaloLinkedName}
+              />
+            ) : null}
           </div>
         ) : (
           <div className="flex flex-col gap-8">
@@ -672,7 +772,8 @@ export function SecurityPanel({
                   Thiết bị hoạt động
                 </h1>
                 <p className={SUBTITLE}>
-                  Kiểm tra các phiên đăng nhập, địa chỉ IP và đăng xuất khỏi các thiết bị đáng ngờ.
+                  Kiểm tra các phiên đăng nhập, địa chỉ IP và đăng xuất khỏi các
+                  thiết bị đáng ngờ.
                 </p>
               </div>
               {/* Only has work to do once a second session exists. */}
@@ -683,7 +784,11 @@ export function SecurityPanel({
                 className="bg-white/[0.02] hover:bg-red-500/10 text-neutral-300 hover:text-red-400 border border-white/5 hover:border-red-500/30 px-5 py-3 rounded-xl text-[11px] font-black uppercase tracking-widest flex items-center gap-2 shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {devBusy === "all" ? (
-                  <Loader2 size={16} className="animate-spin motion-reduce:animate-none" aria-hidden />
+                  <Loader2
+                    size={16}
+                    className="animate-spin motion-reduce:animate-none"
+                    aria-hidden
+                  />
                 ) : (
                   <LogOut size={16} aria-hidden />
                 )}
@@ -695,7 +800,9 @@ export function SecurityPanel({
 
             <div className="flex flex-col gap-3">
               {sessions.map((session) => {
-                const DeviceIcon = isPhone(session.device) ? Smartphone : Laptop;
+                const DeviceIcon = isPhone(session.device)
+                  ? Smartphone
+                  : Laptop;
                 return (
                   <div
                     key={session.key}
@@ -731,12 +838,21 @@ export function SecurityPanel({
                         <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-1 sm:gap-2 text-[11px] sm:text-xs text-neutral-500 mt-0.5">
                           {[
                             session.ip ? (
-                              <span key="ip" className="flex items-center gap-1.5 font-medium text-neutral-400">
-                                <Globe size={12} className="shrink-0" aria-hidden />
+                              <span
+                                key="ip"
+                                className="flex items-center gap-1.5 font-medium text-neutral-400"
+                              >
+                                <Globe
+                                  size={12}
+                                  className="shrink-0"
+                                  aria-hidden
+                                />
                                 {session.ip}
                               </span>
                             ) : null,
-                            session.location ? <span key="place">{session.location}</span> : null,
+                            session.location ? (
+                              <span key="place">{session.location}</span>
+                            ) : null,
                             <span key="when">{session.when}</span>,
                           ]
                             .filter(Boolean)
@@ -764,7 +880,11 @@ export function SecurityPanel({
                         className="px-4 py-3 bg-white/5 hover:bg-red-500/10 text-neutral-400 hover:text-red-400 rounded-xl shrink-0 disabled:opacity-50 flex items-center justify-center gap-2 text-[11px] font-black uppercase tracking-widest"
                       >
                         {devBusy === session.key ? (
-                          <Loader2 size={16} className="animate-spin motion-reduce:animate-none" aria-hidden />
+                          <Loader2
+                            size={16}
+                            className="animate-spin motion-reduce:animate-none"
+                            aria-hidden
+                          />
                         ) : (
                           <LogOut size={16} aria-hidden />
                         )}

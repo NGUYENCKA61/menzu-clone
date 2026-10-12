@@ -37,7 +37,9 @@ interface SecurityPageProps {
   searchParams: Promise<{ linked?: string; linkError?: string }>;
 }
 
-export default async function SecurityPage({ searchParams }: SecurityPageProps) {
+export default async function SecurityPage({
+  searchParams,
+}: SecurityPageProps) {
   const user = await getCurrentUser();
   if (!user) redirect("/login?next=%2Fsecurity");
 
@@ -105,6 +107,10 @@ export default async function SecurityPage({ searchParams }: SecurityPageProps) 
         discordEnabled={discordOauthEnabled(settings)}
         telegramUrl={telegramLinkUrl(settings, user.id)}
         telegramLinked={Boolean(user.telegramId)}
+        zaloPhone={settings.zaloBotPhone || null}
+        zaloName={settings.zaloBotName}
+        zaloLinked={Boolean(user.zaloId)}
+        zaloLinkedName={user.zaloName ?? null}
         initialTab={linkNotice ? "linked" : "security"}
         linkNotice={linkNotice}
         sessions={sessions.map((session) => ({

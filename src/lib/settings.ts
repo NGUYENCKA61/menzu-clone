@@ -99,6 +99,15 @@ export interface ShopSettings {
   /** The bot's @handle, read from Telegram when the token is saved. */
   telegramShopUsername: string;
 
+  // --- Bot thông báo Zalo (tài khoản phụ) -----------------------------------
+  /**
+   * The phone number of the spare Zalo account the notice bot (bot/zalo) is
+   * signed in as. Blank hides the Zalo card on Bảo mật and sends nothing.
+   */
+  zaloBotPhone: string;
+  /** How that account is named on the card; blank shows the number. */
+  zaloBotName: string;
+
   // --- Cảnh báo sắp hết hàng ------------------------------------------------
   /**
    * How few keys (or pooled sign-ins) a tier may hold before the desk is told.
@@ -300,8 +309,10 @@ export const HOME_BLOCKS: { id: string; label: string }[] = [
   { id: "seo", label: "SEO Content" },
 ];
 
-const LOGO = "/sites/menzu-lol-f7ae197a/root-8a5edab2/images/site/logos/menzu-logo.webp";
-const BANNER = "/sites/menzu-lol-f7ae197a/root-8a5edab2/images/upload/bannermung9-7-26.webp";
+const LOGO =
+  "/sites/menzu-lol-f7ae197a/root-8a5edab2/images/site/logos/menzu-logo.webp";
+const BANNER =
+  "/sites/menzu-lol-f7ae197a/root-8a5edab2/images/upload/bannermung9-7-26.webp";
 /** The captured artwork behind the sign-in card, and what "khôi phục" returns to. */
 export const AUTH_PANEL =
   "/sites/menzu-lol-f7ae197a/root-8a5edab2/images/valorant-api/bundles/cb572643-4ce2-b10a-bb56-7c90cc09b19c.webp";
@@ -313,7 +324,8 @@ export const DEFAULT_SETTINGS: ShopSettings = {
   topUpMin: 10_000,
   topUpPresets: [50_000, 200_000, 500_000, 1_000_000, 2_000_000, 5_000_000],
   topUpCardPresets: [
-    10_000, 20_000, 30_000, 50_000, 100_000, 200_000, 300_000, 500_000, 1_000_000,
+    10_000, 20_000, 30_000, 50_000, 100_000, 200_000, 300_000, 500_000,
+    1_000_000,
   ],
   // Nothing kept until the shop says so: a rate that appeared by itself would
   // be money quietly taken off a customer's card.
@@ -343,6 +355,8 @@ export const DEFAULT_SETTINGS: ShopSettings = {
   telegramShopToken: "",
   telegramShopSecret: "",
   telegramShopUsername: "",
+  zaloBotPhone: "",
+  zaloBotName: "",
   // Three is a shelf that can still serve today's buyers while the shop
   // pastes more in — not a number anybody has to think about on install.
   lowStockThreshold: 3,
@@ -463,6 +477,8 @@ export const SETTING_KEYS: Record<keyof ShopSettings, string> = {
   telegramShopToken: "integrations.telegramShop.botToken",
   telegramShopSecret: "integrations.telegramShop.secret",
   telegramShopUsername: "integrations.telegramShop.username",
+  zaloBotPhone: "integrations.zalo.phone",
+  zaloBotName: "integrations.zalo.name",
   lowStockThreshold: "stock.lowThreshold",
   lowStockEmail: "stock.lowEmail",
   warrantyAlertEmail: "warranty.alertEmail",
@@ -581,7 +597,10 @@ export const SLIDE_SECONDS_MAX = 60;
 
 export function clampSlideSeconds(value: number): number {
   if (!Number.isFinite(value)) return DEFAULT_SETTINGS.authSlideSeconds;
-  return Math.min(SLIDE_SECONDS_MAX, Math.max(SLIDE_SECONDS_MIN, Math.round(value)));
+  return Math.min(
+    SLIDE_SECONDS_MAX,
+    Math.max(SLIDE_SECONDS_MIN, Math.round(value)),
+  );
 }
 
 function toSlideSeconds(raw: string | undefined): number {
@@ -612,7 +631,10 @@ export function cleanHeroImages(value: unknown): string[] {
   const list = Array.isArray(value)
     ? value.filter((item): item is string => typeof item === "string")
     : [];
-  return list.map((item) => item.trim()).filter(Boolean).slice(0, HERO_IMAGES_MAX);
+  return list
+    .map((item) => item.trim())
+    .filter(Boolean)
+    .slice(0, HERO_IMAGES_MAX);
 }
 
 function toHeroImages(raw: string | undefined): string[] {
@@ -624,7 +646,10 @@ function toHeroImages(raw: string | undefined): string[] {
   }
 }
 
-function toImageList(raw: string | undefined, legacy: string | undefined): string[] {
+function toImageList(
+  raw: string | undefined,
+  legacy: string | undefined,
+): string[] {
   if (raw === undefined) {
     return legacy?.trim() ? [legacy.trim()] : DEFAULT_SETTINGS.authPanelImages;
   }
@@ -656,19 +681,26 @@ function toBlockList(raw: string | undefined, fallback: string[]): string[] {
     .filter((id) => known.has(id.replace(/^-/, "")));
 
   const seen = new Set(stored.map((id) => id.replace(/^-/, "")));
-  const missing = HOME_BLOCKS.filter((block) => !seen.has(block.id)).map((b) => b.id);
+  const missing = HOME_BLOCKS.filter((block) => !seen.has(block.id)).map(
+    (b) => b.id,
+  );
   return [...stored, ...missing];
 }
 
 function toFaq(raw: unknown): FaqEntry[] {
   if (!Array.isArray(raw)) return [];
-  return raw
-    .map((row) => {
-      const entry = (row ?? {}) as Record<string, unknown>;
-      return { q: String(entry.q ?? "").trim(), a: String(entry.a ?? "").trim() };
-    })
-    // A question with no answer is a half-typed row, not an FAQ entry.
-    .filter((entry) => entry.q && entry.a);
+  return (
+    raw
+      .map((row) => {
+        const entry = (row ?? {}) as Record<string, unknown>;
+        return {
+          q: String(entry.q ?? "").trim(),
+          a: String(entry.a ?? "").trim(),
+        };
+      })
+      // A question with no answer is a half-typed row, not an FAQ entry.
+      .filter((entry) => entry.q && entry.a)
+  );
 }
 
 function toFaqStored(raw: string | undefined): FaqEntry[] {
@@ -703,12 +735,16 @@ export function bankReady(settings: ShopSettings): boolean {
 
 /** Both halves present — the Google button may become a real door. */
 export function googleOauthEnabled(settings: ShopSettings): boolean {
-  return Boolean(settings.googleClientId.trim() && settings.googleClientSecret.trim());
+  return Boolean(
+    settings.googleClientId.trim() && settings.googleClientSecret.trim(),
+  );
 }
 
 /** Both halves present — the Discord button may become a real door. */
 export function discordOauthEnabled(settings: ShopSettings): boolean {
-  return Boolean(settings.discordClientId.trim() && settings.discordClientSecret.trim());
+  return Boolean(
+    settings.discordClientId.trim() && settings.discordClientSecret.trim(),
+  );
 }
 
 /**
@@ -737,9 +773,9 @@ export function warrantyAlertRecipients(settings: ShopSettings): string[] {
 export function mailEnabled(settings: ShopSettings): boolean {
   return Boolean(
     settings.smtpHost.trim() &&
-      settings.smtpUser.trim() &&
-      settings.smtpPass &&
-      settings.mailFrom.trim(),
+    settings.smtpUser.trim() &&
+    settings.smtpPass &&
+    settings.mailFrom.trim(),
   );
 }
 
@@ -749,7 +785,9 @@ function toAccount(raw: unknown): BankAccountConfig | null {
   const row = raw as Record<string, unknown>;
 
   const account: BankAccountConfig = {
-    code: String(row.code ?? "").trim().toUpperCase(),
+    code: String(row.code ?? "")
+      .trim()
+      .toUpperCase(),
     name: String(row.name ?? "").trim(),
     account: String(row.account ?? "").replace(/[^0-9]/g, ""),
     holder: String(row.holder ?? "").trim(),
@@ -776,7 +814,9 @@ function toAccounts(
     try {
       const parsed = JSON.parse(raw) as unknown;
       if (Array.isArray(parsed)) {
-        return parsed.map(toAccount).filter((a): a is BankAccountConfig => a !== null);
+        return parsed
+          .map(toAccount)
+          .filter((a): a is BankAccountConfig => a !== null);
       }
     } catch {
       // Corrupt JSON falls through to the legacy keys, then to the default.
@@ -802,12 +842,17 @@ export function visibleBlocks(settings: ShopSettings): string[] {
  * Builds the settings object from whatever rows exist, filling every unwritten
  * or unparseable key from the defaults.
  */
-export function parseSettings(rows: Iterable<{ key: string; value: string }>): ShopSettings {
+export function parseSettings(
+  rows: Iterable<{ key: string; value: string }>,
+): ShopSettings {
   const stored = new Map<string, string>();
   for (const row of rows) stored.set(row.key, row.value);
 
   return {
-    topUpMin: toNumber(stored.get(SETTING_KEYS.topUpMin), DEFAULT_SETTINGS.topUpMin),
+    topUpMin: toNumber(
+      stored.get(SETTING_KEYS.topUpMin),
+      DEFAULT_SETTINGS.topUpMin,
+    ),
     topUpPresets: toNumberList(
       stored.get(SETTING_KEYS.topUpPresets),
       DEFAULT_SETTINGS.topUpPresets,
@@ -816,8 +861,13 @@ export function parseSettings(rows: Iterable<{ key: string; value: string }>): S
       stored.get(SETTING_KEYS.topUpCardPresets),
       DEFAULT_SETTINGS.topUpCardPresets,
     ),
-    topUpCardRates: parseCardRates(stored.get(SETTING_KEYS.topUpCardRates) ?? ""),
-    topUpCardFee: toNumber(stored.get(SETTING_KEYS.topUpCardFee), DEFAULT_SETTINGS.topUpCardFee),
+    topUpCardRates: parseCardRates(
+      stored.get(SETTING_KEYS.topUpCardRates) ?? "",
+    ),
+    topUpCardFee: toNumber(
+      stored.get(SETTING_KEYS.topUpCardFee),
+      DEFAULT_SETTINGS.topUpCardFee,
+    ),
     bankTopUpEnabled: toBoolean(
       stored.get(SETTING_KEYS.bankTopUpEnabled),
       DEFAULT_SETTINGS.bankTopUpEnabled,
@@ -831,7 +881,10 @@ export function parseSettings(rows: Iterable<{ key: string; value: string }>): S
       stored.get(SETTING_KEYS.autoTopUpEnabled),
       DEFAULT_SETTINGS.autoTopUpEnabled,
     ),
-    topUpApiKey: toOptionalText(stored.get(SETTING_KEYS.topUpApiKey), DEFAULT_SETTINGS.topUpApiKey),
+    topUpApiKey: toOptionalText(
+      stored.get(SETTING_KEYS.topUpApiKey),
+      DEFAULT_SETTINGS.topUpApiKey,
+    ),
     topUpCronKey: toOptionalText(
       stored.get(SETTING_KEYS.topUpCronKey),
       DEFAULT_SETTINGS.topUpCronKey,
@@ -880,6 +933,14 @@ export function parseSettings(rows: Iterable<{ key: string; value: string }>): S
       stored.get(SETTING_KEYS.telegramShopUsername),
       DEFAULT_SETTINGS.telegramShopUsername,
     ),
+    zaloBotPhone: toOptionalText(
+      stored.get(SETTING_KEYS.zaloBotPhone),
+      DEFAULT_SETTINGS.zaloBotPhone,
+    ),
+    zaloBotName: toOptionalText(
+      stored.get(SETTING_KEYS.zaloBotName),
+      DEFAULT_SETTINGS.zaloBotName,
+    ),
     lowStockThreshold: toNumber(
       stored.get(SETTING_KEYS.lowStockThreshold),
       DEFAULT_SETTINGS.lowStockThreshold,
@@ -892,7 +953,10 @@ export function parseSettings(rows: Iterable<{ key: string; value: string }>): S
       stored.get(SETTING_KEYS.warrantyAlertEmail),
       DEFAULT_SETTINGS.warrantyAlertEmail,
     ),
-    statOrders: toOptionalText(stored.get(SETTING_KEYS.statOrders), DEFAULT_SETTINGS.statOrders),
+    statOrders: toOptionalText(
+      stored.get(SETTING_KEYS.statOrders),
+      DEFAULT_SETTINGS.statOrders,
+    ),
     statCustomers: toOptionalText(
       stored.get(SETTING_KEYS.statCustomers),
       DEFAULT_SETTINGS.statCustomers,
@@ -901,27 +965,58 @@ export function parseSettings(rows: Iterable<{ key: string; value: string }>): S
       stored.get(SETTING_KEYS.statStartYear),
       DEFAULT_SETTINGS.statStartYear,
     ),
-    statRating: toOptionalText(stored.get(SETTING_KEYS.statRating), DEFAULT_SETTINGS.statRating),
+    statRating: toOptionalText(
+      stored.get(SETTING_KEYS.statRating),
+      DEFAULT_SETTINGS.statRating,
+    ),
     discordClientSecret: toOptionalText(
       stored.get(SETTING_KEYS.discordClientSecret),
       DEFAULT_SETTINGS.discordClientSecret,
     ),
-    smtpHost: toOptionalText(stored.get(SETTING_KEYS.smtpHost), DEFAULT_SETTINGS.smtpHost),
-    smtpPort: toNumber(stored.get(SETTING_KEYS.smtpPort), DEFAULT_SETTINGS.smtpPort),
-    smtpUser: toOptionalText(stored.get(SETTING_KEYS.smtpUser), DEFAULT_SETTINGS.smtpUser),
-    smtpPass: toOptionalText(stored.get(SETTING_KEYS.smtpPass), DEFAULT_SETTINGS.smtpPass),
-    mailFrom: toOptionalText(stored.get(SETTING_KEYS.mailFrom), DEFAULT_SETTINGS.mailFrom),
+    smtpHost: toOptionalText(
+      stored.get(SETTING_KEYS.smtpHost),
+      DEFAULT_SETTINGS.smtpHost,
+    ),
+    smtpPort: toNumber(
+      stored.get(SETTING_KEYS.smtpPort),
+      DEFAULT_SETTINGS.smtpPort,
+    ),
+    smtpUser: toOptionalText(
+      stored.get(SETTING_KEYS.smtpUser),
+      DEFAULT_SETTINGS.smtpUser,
+    ),
+    smtpPass: toOptionalText(
+      stored.get(SETTING_KEYS.smtpPass),
+      DEFAULT_SETTINGS.smtpPass,
+    ),
+    mailFrom: toOptionalText(
+      stored.get(SETTING_KEYS.mailFrom),
+      DEFAULT_SETTINGS.mailFrom,
+    ),
     purchasesEnabled: toBoolean(
       stored.get(SETTING_KEYS.purchasesEnabled),
       DEFAULT_SETTINGS.purchasesEnabled,
     ),
     closedMessage:
-      stored.get(SETTING_KEYS.closedMessage)?.trim() || DEFAULT_SETTINGS.closedMessage,
+      stored.get(SETTING_KEYS.closedMessage)?.trim() ||
+      DEFAULT_SETTINGS.closedMessage,
 
-    brandName: toText(stored.get(SETTING_KEYS.brandName), DEFAULT_SETTINGS.brandName),
-    brandLogo: toText(stored.get(SETTING_KEYS.brandLogo), DEFAULT_SETTINGS.brandLogo),
-    brandColor: toText(stored.get(SETTING_KEYS.brandColor), DEFAULT_SETTINGS.brandColor),
-    heroBanner: toText(stored.get(SETTING_KEYS.heroBanner), DEFAULT_SETTINGS.heroBanner),
+    brandName: toText(
+      stored.get(SETTING_KEYS.brandName),
+      DEFAULT_SETTINGS.brandName,
+    ),
+    brandLogo: toText(
+      stored.get(SETTING_KEYS.brandLogo),
+      DEFAULT_SETTINGS.brandLogo,
+    ),
+    brandColor: toText(
+      stored.get(SETTING_KEYS.brandColor),
+      DEFAULT_SETTINGS.brandColor,
+    ),
+    heroBanner: toText(
+      stored.get(SETTING_KEYS.heroBanner),
+      DEFAULT_SETTINGS.heroBanner,
+    ),
     siteBackground: toText(
       stored.get(SETTING_KEYS.siteBackground),
       DEFAULT_SETTINGS.siteBackground,
@@ -930,7 +1025,10 @@ export function parseSettings(rows: Iterable<{ key: string; value: string }>): S
       stored.get(SETTING_KEYS.flashSaleBackground),
       DEFAULT_SETTINGS.flashSaleBackground,
     ),
-    profileBanner: toText(stored.get(SETTING_KEYS.profileBanner), DEFAULT_SETTINGS.profileBanner),
+    profileBanner: toText(
+      stored.get(SETTING_KEYS.profileBanner),
+      DEFAULT_SETTINGS.profileBanner,
+    ),
     hotPickSkin: toText(
       stored.get(SETTING_KEYS.hotPickSkin),
       DEFAULT_SETTINGS.hotPickSkin,
@@ -992,7 +1090,10 @@ export function parseSettings(rows: Iterable<{ key: string; value: string }>): S
       DEFAULT_SETTINGS.contactTelegram,
     ),
 
-    homeBlocks: toBlockList(stored.get(SETTING_KEYS.homeBlocks), DEFAULT_SETTINGS.homeBlocks),
+    homeBlocks: toBlockList(
+      stored.get(SETTING_KEYS.homeBlocks),
+      DEFAULT_SETTINGS.homeBlocks,
+    ),
     homeValorantSlugs: toSlugList(
       stored.get(SETTING_KEYS.homeValorantSlugs),
       DEFAULT_SETTINGS.homeValorantSlugs,
@@ -1002,8 +1103,14 @@ export function parseSettings(rows: Iterable<{ key: string; value: string }>): S
       DEFAULT_SETTINGS.homeTftSlugs,
     ),
 
-    heroBadge: toOptionalText(stored.get(SETTING_KEYS.heroBadge), DEFAULT_SETTINGS.heroBadge),
-    heroTitle: toText(stored.get(SETTING_KEYS.heroTitle), DEFAULT_SETTINGS.heroTitle),
+    heroBadge: toOptionalText(
+      stored.get(SETTING_KEYS.heroBadge),
+      DEFAULT_SETTINGS.heroBadge,
+    ),
+    heroTitle: toText(
+      stored.get(SETTING_KEYS.heroTitle),
+      DEFAULT_SETTINGS.heroTitle,
+    ),
     heroSubtitle: toOptionalText(
       stored.get(SETTING_KEYS.heroSubtitle),
       DEFAULT_SETTINGS.heroSubtitle,
@@ -1024,8 +1131,12 @@ export function parseSettings(rows: Iterable<{ key: string; value: string }>): S
       stored.get(SETTING_KEYS.heroSecondaryHref),
       DEFAULT_SETTINGS.heroSecondaryHref,
     ),
-    heroVideo: toOptionalText(stored.get(SETTING_KEYS.heroVideo), DEFAULT_SETTINGS.heroVideo),
-    heroMedia: stored.get(SETTING_KEYS.heroMedia) === "image" ? "image" : "video",
+    heroVideo: toOptionalText(
+      stored.get(SETTING_KEYS.heroVideo),
+      DEFAULT_SETTINGS.heroVideo,
+    ),
+    heroMedia:
+      stored.get(SETTING_KEYS.heroMedia) === "image" ? "image" : "video",
     heroImages: toHeroImages(stored.get(SETTING_KEYS.heroImages)),
     heroShootingStars: toBoolean(
       stored.get(SETTING_KEYS.heroShootingStars),
@@ -1036,23 +1147,36 @@ export function parseSettings(rows: Iterable<{ key: string; value: string }>): S
       stored.get(SETTING_KEYS.homeCategorySlugs),
       DEFAULT_SETTINGS.homeCategorySlugs,
     ),
-    homeDocSlugs: toSlugList(stored.get(SETTING_KEYS.homeDocSlugs), DEFAULT_SETTINGS.homeDocSlugs),
+    homeDocSlugs: toSlugList(
+      stored.get(SETTING_KEYS.homeDocSlugs),
+      DEFAULT_SETTINGS.homeDocSlugs,
+    ),
     homeRowCount:
       stored.get(SETTING_KEYS.homeRowCount) === undefined
         ? DEFAULT_SETTINGS.homeRowCount
         : clampRowCount(Number(stored.get(SETTING_KEYS.homeRowCount))),
 
-    seoHeading: toOptionalText(stored.get(SETTING_KEYS.seoHeading), DEFAULT_SETTINGS.seoHeading),
-    seoBody: toOptionalText(stored.get(SETTING_KEYS.seoBody), DEFAULT_SETTINGS.seoBody),
+    seoHeading: toOptionalText(
+      stored.get(SETTING_KEYS.seoHeading),
+      DEFAULT_SETTINGS.seoHeading,
+    ),
+    seoBody: toOptionalText(
+      stored.get(SETTING_KEYS.seoBody),
+      DEFAULT_SETTINGS.seoBody,
+    ),
     seoFaq: toFaqStored(stored.get(SETTING_KEYS.seoFaq)),
   };
 }
 
 /** The rows to write for a settings object, in key order. */
-export function serializeSettings(settings: ShopSettings): { key: string; value: string }[] {
+export function serializeSettings(
+  settings: ShopSettings,
+): { key: string; value: string }[] {
   const values: Record<keyof ShopSettings, string> = {
     topUpMin: String(Math.floor(settings.topUpMin)),
-    topUpPresets: settings.topUpPresets.map((preset) => Math.floor(preset)).join(","),
+    topUpPresets: settings.topUpPresets
+      .map((preset) => Math.floor(preset))
+      .join(","),
     topUpCardPresets: settings.topUpCardPresets
       .map((preset) => Math.floor(preset))
       .join(","),
@@ -1075,7 +1199,11 @@ export function serializeSettings(settings: ShopSettings): { key: string; value:
     telegramChatId: settings.telegramChatId.trim(),
     telegramShopToken: settings.telegramShopToken.trim(),
     telegramShopSecret: settings.telegramShopSecret.trim(),
-    telegramShopUsername: settings.telegramShopUsername.trim().replace(/^@/, ""),
+    telegramShopUsername: settings.telegramShopUsername
+      .trim()
+      .replace(/^@/, ""),
+    zaloBotPhone: settings.zaloBotPhone.replace(/\D/g, ""),
+    zaloBotName: settings.zaloBotName.trim(),
     lowStockThreshold: String(Math.floor(settings.lowStockThreshold)),
     lowStockEmail: settings.lowStockEmail.trim(),
     warrantyAlertEmail: settings.warrantyAlertEmail.trim(),
@@ -1153,11 +1281,10 @@ export function serializeSettings(settings: ShopSettings): { key: string; value:
  * happened to contain, so a malformed request cannot write a half-typed value
  * into the shop's configuration.
  */
-export function normalizeSettings(raw: Partial<ShopSettings> | null): ShopSettings {
-  const readPresets = (
-    value: unknown,
-    fallback: number[],
-  ): number[] =>
+export function normalizeSettings(
+  raw: Partial<ShopSettings> | null,
+): ShopSettings {
+  const readPresets = (value: unknown, fallback: number[]): number[] =>
     Array.isArray(value)
       ? value
           .map((preset) => Math.floor(Number(preset)))
@@ -1168,7 +1295,9 @@ export function normalizeSettings(raw: Partial<ShopSettings> | null): ShopSettin
   // Re-parsed rather than trusted: the field arrives as whatever the browser
   // sent, and a percent of 120 would hand the customer a negative wallet.
   const cardRates = parseCardRates(
-    Array.isArray(raw?.topUpCardRates) ? serializeCardRates(raw.topUpCardRates as CardRate[]) : "",
+    Array.isArray(raw?.topUpCardRates)
+      ? serializeCardRates(raw.topUpCardRates as CardRate[])
+      : "",
   );
   const cardPresets = readPresets(
     raw?.topUpCardPresets,
@@ -1186,7 +1315,9 @@ export function normalizeSettings(raw: Partial<ShopSettings> | null): ShopSettin
     topUpCardRates: cardRates,
     topUpCardFee: (() => {
       const fee = Number(raw?.topUpCardFee);
-      return Number.isFinite(fee) && fee >= 0 && fee < 100 ? fee : DEFAULT_SETTINGS.topUpCardFee;
+      return Number.isFinite(fee) && fee >= 0 && fee < 100
+        ? fee
+        : DEFAULT_SETTINGS.topUpCardFee;
     })(),
     bankTopUpEnabled: Boolean(raw?.bankTopUpEnabled),
     cardTopUpEnabled: Boolean(raw?.cardTopUpEnabled),
@@ -1194,7 +1325,9 @@ export function normalizeSettings(raw: Partial<ShopSettings> | null): ShopSettin
     // number cannot receive anything, and printing one under a QR would be
     // worse than showing nothing.
     bankAccounts: Array.isArray(raw?.bankAccounts)
-      ? raw.bankAccounts.map(toAccount).filter((a): a is BankAccountConfig => a !== null)
+      ? raw.bankAccounts
+          .map(toAccount)
+          .filter((a): a is BankAccountConfig => a !== null)
       : DEFAULT_SETTINGS.bankAccounts,
     autoTopUpEnabled: Boolean(raw?.autoTopUpEnabled),
     topUpApiKey: String(raw?.topUpApiKey ?? "").trim(),
@@ -1210,7 +1343,11 @@ export function normalizeSettings(raw: Partial<ShopSettings> | null): ShopSettin
     telegramChatId: String(raw?.telegramChatId ?? "").trim(),
     telegramShopToken: String(raw?.telegramShopToken ?? "").trim(),
     telegramShopSecret: String(raw?.telegramShopSecret ?? "").trim(),
-    telegramShopUsername: String(raw?.telegramShopUsername ?? "").trim().replace(/^@/, ""),
+    telegramShopUsername: String(raw?.telegramShopUsername ?? "")
+      .trim()
+      .replace(/^@/, ""),
+    zaloBotPhone: String(raw?.zaloBotPhone ?? "").replace(/\D/g, ""),
+    zaloBotName: String(raw?.zaloBotName ?? "").trim(),
     lowStockThreshold: (() => {
       const value = Math.floor(Number(raw?.lowStockThreshold));
       return Number.isFinite(value) ? value : Number.NaN;
@@ -1235,13 +1372,20 @@ export function normalizeSettings(raw: Partial<ShopSettings> | null): ShopSettin
 
     // Identity falls back to the default when blank: a shop with no name in
     // the header looks broken, and blank is never a deliberate choice here.
-    brandName: String(raw?.brandName ?? "").trim() || DEFAULT_SETTINGS.brandName,
-    brandLogo: String(raw?.brandLogo ?? "").trim() || DEFAULT_SETTINGS.brandLogo,
-    brandColor: String(raw?.brandColor ?? "").trim() || DEFAULT_SETTINGS.brandColor,
-    heroBanner: String(raw?.heroBanner ?? "").trim() || DEFAULT_SETTINGS.heroBanner,
-    siteBackground: String(raw?.siteBackground ?? "").trim() || DEFAULT_SETTINGS.siteBackground,
+    brandName:
+      String(raw?.brandName ?? "").trim() || DEFAULT_SETTINGS.brandName,
+    brandLogo:
+      String(raw?.brandLogo ?? "").trim() || DEFAULT_SETTINGS.brandLogo,
+    brandColor:
+      String(raw?.brandColor ?? "").trim() || DEFAULT_SETTINGS.brandColor,
+    heroBanner:
+      String(raw?.heroBanner ?? "").trim() || DEFAULT_SETTINGS.heroBanner,
+    siteBackground:
+      String(raw?.siteBackground ?? "").trim() ||
+      DEFAULT_SETTINGS.siteBackground,
     flashSaleBackground:
-      String(raw?.flashSaleBackground ?? "").trim() || DEFAULT_SETTINGS.flashSaleBackground,
+      String(raw?.flashSaleBackground ?? "").trim() ||
+      DEFAULT_SETTINGS.flashSaleBackground,
     // Empty is a real value here: it hands the banner back to the catalogue.
     profileBanner: String(raw?.profileBanner ?? "").trim(),
     // No `||` fallback: blank is a real choice here — it means "no chip" —
@@ -1280,11 +1424,15 @@ export function normalizeSettings(raw: Partial<ShopSettings> | null): ShopSettin
     // words and a button with no label are broken, never a choice. The rest
     // may be emptied on purpose: no second button.
     heroBadge: String(raw?.heroBadge ?? "").trim(),
-    heroTitle: String(raw?.heroTitle ?? "").trim() || DEFAULT_SETTINGS.heroTitle,
+    heroTitle:
+      String(raw?.heroTitle ?? "").trim() || DEFAULT_SETTINGS.heroTitle,
     heroSubtitle: String(raw?.heroSubtitle ?? "").trim(),
     heroPrimaryLabel:
-      String(raw?.heroPrimaryLabel ?? "").trim() || DEFAULT_SETTINGS.heroPrimaryLabel,
-    heroPrimaryHref: String(raw?.heroPrimaryHref ?? "").trim() || DEFAULT_SETTINGS.heroPrimaryHref,
+      String(raw?.heroPrimaryLabel ?? "").trim() ||
+      DEFAULT_SETTINGS.heroPrimaryLabel,
+    heroPrimaryHref:
+      String(raw?.heroPrimaryHref ?? "").trim() ||
+      DEFAULT_SETTINGS.heroPrimaryHref,
     heroSecondaryLabel: String(raw?.heroSecondaryLabel ?? "").trim(),
     heroSecondaryHref: String(raw?.heroSecondaryHref ?? "").trim(),
     heroVideo: String(raw?.heroVideo ?? "").trim(),
@@ -1334,7 +1482,9 @@ export function validateSettings(settings: ShopSettings): string | null {
   }
   // A preset under the minimum renders a button that always fails — the
   // customer sees the shop reject an amount the shop itself offered.
-  const belowMin = settings.topUpPresets.find((preset) => preset < settings.topUpMin);
+  const belowMin = settings.topUpPresets.find(
+    (preset) => preset < settings.topUpMin,
+  );
   if (belowMin !== undefined) {
     return `Mệnh giá ${belowMin.toLocaleString("vi-VN")}đ thấp hơn mức nạp tối thiểu`;
   }
@@ -1347,7 +1497,11 @@ export function validateSettings(settings: ShopSettings): string | null {
   // pushing provider must present. The webhook stays shut without a key
   // regardless, so it can never be an open endpoint.
   const polled = settings.bankAccounts.filter((account) => account.apiUrl);
-  if (settings.autoTopUpEnabled && !settings.topUpApiKey && polled.length === 0) {
+  if (
+    settings.autoTopUpEnabled &&
+    !settings.topUpApiKey &&
+    polled.length === 0
+  ) {
     return "Bật nạp tự động thì cần địa chỉ API đối soát ở ít nhất một tài khoản, hoặc API key cho webhook";
   }
 
@@ -1369,7 +1523,8 @@ export function validateSettings(settings: ShopSettings): string | null {
   const duplicate = settings.bankAccounts.find(
     (account, index) =>
       settings.bankAccounts.findIndex(
-        (other) => other.code === account.code && other.account === account.account,
+        (other) =>
+          other.code === account.code && other.account === account.account,
       ) !== index,
   );
   if (duplicate) {
@@ -1388,8 +1543,11 @@ export function validateSettings(settings: ShopSettings): string | null {
       return `${label} phải là đường dẫn bắt đầu bằng / hoặc http`;
     }
   }
-  if (settings.heroVideo && !settings.heroVideo.startsWith("/") &&
-      !/^https?:\/\//.test(settings.heroVideo)) {
+  if (
+    settings.heroVideo &&
+    !settings.heroVideo.startsWith("/") &&
+    !/^https?:\/\//.test(settings.heroVideo)
+  ) {
     return "Video hero phải là đường dẫn bắt đầu bằng / hoặc http";
   }
   for (const path of settings.heroImages) {

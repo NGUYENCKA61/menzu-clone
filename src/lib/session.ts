@@ -23,6 +23,9 @@ export interface CurrentUser {
   agencyPercent: number;
   /** Telegram user id when the account is reachable through the shop bot. */
   telegramId: string | null;
+  /** Zalo peer id and the name the notice bot saw, once linked from Bảo mật. */
+  zaloId: string | null;
+  zaloName: string | null;
   createdAt: Date;
 }
 
@@ -53,7 +56,9 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
   // valid session would otherwise keep spending and buying until it expired.
   // Their sessions are dropped so the block survives a page reload.
   if (session.user.blockedAt) {
-    await db.session.deleteMany({ where: { userId: session.userId } }).catch(() => {});
+    await db.session
+      .deleteMany({ where: { userId: session.userId } })
+      .catch(() => {});
     return null;
   }
 
@@ -71,6 +76,8 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
     points: u.points,
     commissionBalance: Number(u.commissionBalance),
     telegramId: u.telegramId,
+    zaloId: u.zaloId,
+    zaloName: u.zaloName,
     agencyPercent: u.agencyPercent,
     createdAt: u.createdAt,
   };

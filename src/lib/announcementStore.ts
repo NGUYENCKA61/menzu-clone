@@ -3,6 +3,7 @@ import "server-only";
 import { cache } from "react";
 
 import { db } from "@/lib/db";
+import { deliverNotice } from "@/lib/noticeChannels";
 import type {
   AnnouncementAudience,
   AnnouncementPriority,
@@ -75,7 +76,9 @@ function toRow(row: RawRow): AnnouncementRow {
 }
 
 /** Everything, newest first — the admin table shows drafts and dead notices too. */
-export async function listAnnouncements(take = 100): Promise<AnnouncementRow[]> {
+export async function listAnnouncements(
+  take = 100,
+): Promise<AnnouncementRow[]> {
   const rows = await db.announcement.findMany({
     orderBy: { createdAt: "desc" },
     take,
@@ -194,7 +197,9 @@ export async function announceToAdmins(input: {
         status: "PUBLISHED",
         audience: "USERS",
         bullets: [],
-        ...(input.cta ? { ctaLabel: input.cta.label, ctaHref: input.cta.href } : {}),
+        ...(input.cta
+          ? { ctaLabel: input.cta.label, ctaHref: input.cta.href }
+          : {}),
         endAt: new Date(Date.now() + (input.days ?? 7) * 24 * 3600 * 1000),
         recipients: {
           createMany: { data: admins.map((a) => ({ userId: a.id })) },
@@ -242,10 +247,19 @@ export async function announceToUser(
         audience: "USERS",
         bullets: [],
         silent: input.silent ?? true,
-        ...(input.cta ? { ctaLabel: input.cta.label, ctaHref: input.cta.href } : {}),
+        ...(input.cta
+          ? { ctaLabel: input.cta.label, ctaHref: input.cta.href }
+          : {}),
         endAt: new Date(Date.now() + (input.days ?? 30) * 24 * 3600 * 1000),
         recipients: { create: { userId } },
       },
+    });
+    // And to wherever the reader has linked (Telegram, Zalo): the bell is
+    // only seen on the next visit (the owner, 12/10/2026).
+    await deliverNotice(userId, {
+      title: input.title,
+      body: input.body,
+      cta: input.cta,
     });
   } catch {
     // Left unsaid rather than failing the action that earned it.

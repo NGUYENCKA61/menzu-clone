@@ -24,14 +24,18 @@ import {
   type FaqEntry,
   type ShopSettings,
 } from "@/lib/settings";
+import type { ZaloBotState } from "@/lib/zaloShared";
 import { AdminPartners, type AdminPartnerRow } from "./AdminPartners";
 import { AdminError } from "./AdminStates";
 
 const FIELD =
   "w-full rounded-lg border border-white/10 bg-neutral-950/60 px-3 py-2 text-xs text-white outline-none focus:border-[var(--brand)]/60 transition-colors placeholder-neutral-600";
-const LABEL = "block text-[10px] font-black uppercase tracking-widest text-neutral-500 mb-1.5";
-const CARD = "rounded-xl border border-white/[0.08] bg-[#0e0e11] p-5 flex flex-col gap-4";
-const HEADING = "text-[10px] font-black uppercase tracking-widest text-neutral-500";
+const LABEL =
+  "block text-[10px] font-black uppercase tracking-widest text-neutral-500 mb-1.5";
+const CARD =
+  "rounded-xl border border-white/[0.08] bg-[#0e0e11] p-5 flex flex-col gap-4";
+const HEADING =
+  "text-[10px] font-black uppercase tracking-widest text-neutral-500";
 const HINT = "mt-1.5 text-[11px] text-neutral-500";
 
 /**
@@ -129,7 +133,9 @@ function SlugPicker({
               </button>
               <button
                 type="button"
-                onClick={() => onChange(selected.filter((entry) => entry !== slug))}
+                onClick={() =>
+                  onChange(selected.filter((entry) => entry !== slug))
+                }
                 aria-label={`Bỏ ${bySlug.get(slug) ?? slug}`}
                 className={ICON_BUTTON}
               >
@@ -198,7 +204,9 @@ function Toggle({
       <span>
         <span className="block text-xs font-bold text-white">{label}</span>
         {hint ? (
-          <span className="block text-[11px] text-neutral-500 mt-0.5">{hint}</span>
+          <span className="block text-[11px] text-neutral-500 mt-0.5">
+            {hint}
+          </span>
         ) : null}
       </span>
     </label>
@@ -218,11 +226,14 @@ export function AdminSettings({
   categories,
   docs,
   partners,
+  zaloBotState = null,
 }: {
   settings: ShopSettings;
   categories: SettingsCategory[];
   docs: SettingsCategory[];
   partners: AdminPartnerRow[];
+  /** What the Zalo bot last reported about itself; null until it has run. */
+  zaloBotState?: ZaloBotState | null;
 }) {
   const router = useRouter();
   const [tab, setTab] = useState<Tab>(TABS[0]);
@@ -232,20 +243,28 @@ export function AdminSettings({
 
   const [topUpMin, setTopUpMin] = useState(String(settings.topUpMin));
   const [presets, setPresets] = useState(settings.topUpPresets.join(", "));
-  const [cardPresets, setCardPresets] = useState(settings.topUpCardPresets.join(", "));
+  const [cardPresets, setCardPresets] = useState(
+    settings.topUpCardPresets.join(", "),
+  );
   const [cardFee, setCardFee] = useState(String(settings.topUpCardFee));
   const [cardRates, setCardRates] = useState(
-    settings.topUpCardRates.map((rate) => `${rate.amount}:${rate.percent}`).join(", "),
+    settings.topUpCardRates
+      .map((rate) => `${rate.amount}:${rate.percent}`)
+      .join(", "),
   );
   const [bank, setBank] = useState(settings.bankTopUpEnabled);
   const [card, setCard] = useState(settings.cardTopUpEnabled);
   const [purchases, setPurchases] = useState(settings.purchasesEnabled);
   const [closedMessage, setClosedMessage] = useState(settings.closedMessage);
 
-  const [accounts, setAccounts] = useState<BankAccountConfig[]>(settings.bankAccounts);
+  const [accounts, setAccounts] = useState<BankAccountConfig[]>(
+    settings.bankAccounts,
+  );
 
   function updateAccount(index: number, patch: Partial<BankAccountConfig>) {
-    setAccounts(accounts.map((row, i) => (i === index ? { ...row, ...patch } : row)));
+    setAccounts(
+      accounts.map((row, i) => (i === index ? { ...row, ...patch } : row)),
+    );
   }
 
   const [auto, setAuto] = useState(settings.autoTopUpEnabled);
@@ -264,7 +283,11 @@ export function AdminSettings({
   const [warrantyMail, setWarrantyMail] = useState(settings.warrantyAlertEmail);
   const [shopToken, setShopToken] = useState(settings.telegramShopToken);
   const [shopSecret, setShopSecret] = useState(settings.telegramShopSecret);
-  const [shopUsername, setShopUsername] = useState(settings.telegramShopUsername);
+  const [shopUsername, setShopUsername] = useState(
+    settings.telegramShopUsername,
+  );
+  const [zaloPhone, setZaloPhone] = useState(settings.zaloBotPhone);
+  const [zaloName, setZaloName] = useState(settings.zaloBotName);
   const [statOrders, setStatOrders] = useState(settings.statOrders);
   const [statCustomers, setStatCustomers] = useState(settings.statCustomers);
   const [statStartYear, setStatStartYear] = useState(settings.statStartYear);
@@ -280,7 +303,10 @@ export function AdminSettings({
   useEffect(() => setOrigin(window.location.origin), []);
 
   const [testing, setTesting] = useState(false);
-  const [testResult, setTestResult] = useState<{ ok: boolean; text: string } | null>(null);
+  const [testResult, setTestResult] = useState<{
+    ok: boolean;
+    text: string;
+  } | null>(null);
 
   /**
    * Calls the provider once and reports what came back. Saves nothing and
@@ -290,7 +316,9 @@ export function AdminSettings({
     setTesting(true);
     setTestResult(null);
     try {
-      const response = await fetch("/api/admin/topups/test", { method: "POST" });
+      const response = await fetch("/api/admin/topups/test", {
+        method: "POST",
+      });
       const data = (await response.json().catch(() => ({}))) as {
         error?: string;
         ok?: boolean;
@@ -318,16 +346,30 @@ export function AdminSettings({
   const [brandColor, setBrandColor] = useState(settings.brandColor);
   const [heroBanner, setHeroBanner] = useState(settings.heroBanner);
   const [heroBannerUploading, setHeroBannerUploading] = useState(false);
-  const [heroBannerMsg, setHeroBannerMsg] = useState<{ tone: "ok" | "err"; text: string } | null>(null);
+  const [heroBannerMsg, setHeroBannerMsg] = useState<{
+    tone: "ok" | "err";
+    text: string;
+  } | null>(null);
   const [siteBackground, setSiteBackground] = useState(settings.siteBackground);
-  const [flashSaleBackground, setFlashSaleBackground] = useState(settings.flashSaleBackground);
+  const [flashSaleBackground, setFlashSaleBackground] = useState(
+    settings.flashSaleBackground,
+  );
   const [flashBgUploading, setFlashBgUploading] = useState(false);
-  const [flashBgMsg, setFlashBgMsg] = useState<{ tone: "ok" | "err"; text: string } | null>(null);
+  const [flashBgMsg, setFlashBgMsg] = useState<{
+    tone: "ok" | "err";
+    text: string;
+  } | null>(null);
   const [profileBanner, setProfileBanner] = useState(settings.profileBanner);
   const [bannerUploading, setBannerUploading] = useState(false);
-  const [bannerMsg, setBannerMsg] = useState<{ tone: "ok" | "err"; text: string } | null>(null);
+  const [bannerMsg, setBannerMsg] = useState<{
+    tone: "ok" | "err";
+    text: string;
+  } | null>(null);
   const [siteBgUploading, setSiteBgUploading] = useState(false);
-  const [siteBgMsg, setSiteBgMsg] = useState<{ tone: "ok" | "err"; text: string } | null>(null);
+  const [siteBgMsg, setSiteBgMsg] = useState<{
+    tone: "ok" | "err";
+    text: string;
+  } | null>(null);
 
   /**
    * Uploads the picked file and drops the stored path into the field. Upload
@@ -340,8 +382,14 @@ export function AdminSettings({
     try {
       const form = new FormData();
       form.append("file", file);
-      const res = await fetch("/api/admin/site/background", { method: "POST", body: form });
-      const data = (await res.json().catch(() => ({}))) as { url?: string; error?: string };
+      const res = await fetch("/api/admin/site/background", {
+        method: "POST",
+        body: form,
+      });
+      const data = (await res.json().catch(() => ({}))) as {
+        url?: string;
+        error?: string;
+      };
       if (!res.ok || !data.url) {
         setFlashBgMsg({ tone: "err", text: data.error ?? "Tải ảnh thất bại" });
         return;
@@ -362,8 +410,14 @@ export function AdminSettings({
     try {
       const form = new FormData();
       form.append("file", file);
-      const res = await fetch("/api/admin/site/background", { method: "POST", body: form });
-      const data = (await res.json().catch(() => ({}))) as { url?: string; error?: string };
+      const res = await fetch("/api/admin/site/background", {
+        method: "POST",
+        body: form,
+      });
+      const data = (await res.json().catch(() => ({}))) as {
+        url?: string;
+        error?: string;
+      };
       if (!res.ok || !data.url) {
         setBannerMsg({ tone: "err", text: data.error ?? "Tải ảnh thất bại" });
         return;
@@ -383,8 +437,14 @@ export function AdminSettings({
     try {
       const form = new FormData();
       form.append("file", file);
-      const res = await fetch("/api/admin/site/background", { method: "POST", body: form });
-      const data = (await res.json().catch(() => ({}))) as { url?: string; error?: string };
+      const res = await fetch("/api/admin/site/background", {
+        method: "POST",
+        body: form,
+      });
+      const data = (await res.json().catch(() => ({}))) as {
+        url?: string;
+        error?: string;
+      };
       if (!res.ok || !data.url) {
         setSiteBgMsg({ tone: "err", text: data.error ?? "Tải ảnh thất bại" });
         return;
@@ -406,14 +466,26 @@ export function AdminSettings({
     try {
       const form = new FormData();
       form.append("file", file);
-      const res = await fetch("/api/admin/site/background", { method: "POST", body: form });
-      const data = (await res.json().catch(() => ({}))) as { url?: string; error?: string };
+      const res = await fetch("/api/admin/site/background", {
+        method: "POST",
+        body: form,
+      });
+      const data = (await res.json().catch(() => ({}))) as {
+        url?: string;
+        error?: string;
+      };
       if (!res.ok || !data.url) {
-        setHeroBannerMsg({ tone: "err", text: data.error ?? "Tải ảnh thất bại" });
+        setHeroBannerMsg({
+          tone: "err",
+          text: data.error ?? "Tải ảnh thất bại",
+        });
         return;
       }
       setHeroBanner(data.url);
-      setHeroBannerMsg({ tone: "ok", text: "Đã tải ảnh, nhớ bấm Lưu để áp dụng" });
+      setHeroBannerMsg({
+        tone: "ok",
+        text: "Đã tải ảnh, nhớ bấm Lưu để áp dụng",
+      });
     } catch {
       setHeroBannerMsg({ tone: "err", text: "Không kết nối được máy chủ" });
     } finally {
@@ -421,12 +493,18 @@ export function AdminSettings({
     }
   }
 
-  const [panelImages, setPanelImages] = useState<string[]>(settings.authPanelImages);
+  const [panelImages, setPanelImages] = useState<string[]>(
+    settings.authPanelImages,
+  );
   const [slideOn, setSlideOn] = useState(settings.authSlideEnabled);
-  const [slideSeconds, setSlideSeconds] = useState(String(settings.authSlideSeconds));
+  const [slideSeconds, setSlideSeconds] = useState(
+    String(settings.authSlideSeconds),
+  );
   // Which picture the preview is showing. Also what the reorder buttons act on.
   const [picked, setPicked] = useState(0);
-  const [panelSubtitle, setPanelSubtitle] = useState(settings.authPanelSubtitle);
+  const [panelSubtitle, setPanelSubtitle] = useState(
+    settings.authPanelSubtitle,
+  );
   const [loginTitle, setLoginTitle] = useState(settings.authLoginTitle);
   const [signupTitle, setSignupTitle] = useState(settings.authSignupTitle);
   const [uploading, setUploading] = useState(false);
@@ -444,7 +522,9 @@ export function AdminSettings({
   // No longer edited here — the groups table replaced these two rows. They are
   // still sent back untouched so saving this form does not wipe the lists that
   // the group migration reads if it ever has to be run again.
-  const [categorySlugs, setCategorySlugs] = useState(settings.homeCategorySlugs);
+  const [categorySlugs, setCategorySlugs] = useState(
+    settings.homeCategorySlugs,
+  );
   const [docSlugs, setDocSlugs] = useState(settings.homeDocSlugs);
   const [rowCount, setRowCount] = useState(String(settings.homeRowCount));
 
@@ -455,12 +535,19 @@ export function AdminSettings({
   const [heroCtaHref, setHeroCtaHref] = useState(settings.heroPrimaryHref);
   const [heroAltLabel, setHeroAltLabel] = useState(settings.heroSecondaryLabel);
   const [heroAltHref, setHeroAltHref] = useState(settings.heroSecondaryHref);
-  const [shootingStars, setShootingStars] = useState(settings.heroShootingStars);
+  const [shootingStars, setShootingStars] = useState(
+    settings.heroShootingStars,
+  );
   const [heroVideo, setHeroVideo] = useState(settings.heroVideo);
-  const [heroMedia, setHeroMedia] = useState<"video" | "image">(settings.heroMedia);
+  const [heroMedia, setHeroMedia] = useState<"video" | "image">(
+    settings.heroMedia,
+  );
   const [heroImages, setHeroImages] = useState<string[]>(settings.heroImages);
   const [heroImgUploading, setHeroImgUploading] = useState(false);
-  const [heroImgMsg, setHeroImgMsg] = useState<{ tone: "ok" | "err"; text: string } | null>(null);
+  const [heroImgMsg, setHeroImgMsg] = useState<{
+    tone: "ok" | "err";
+    text: string;
+  } | null>(null);
 
   /** Adds a picture to the hero's list; like every picker here, Lưu applies it. */
   async function uploadHeroImage(file: File) {
@@ -469,14 +556,23 @@ export function AdminSettings({
     try {
       const form = new FormData();
       form.append("file", file);
-      const res = await fetch("/api/admin/site/background", { method: "POST", body: form });
-      const data = (await res.json().catch(() => ({}))) as { url?: string; error?: string };
+      const res = await fetch("/api/admin/site/background", {
+        method: "POST",
+        body: form,
+      });
+      const data = (await res.json().catch(() => ({}))) as {
+        url?: string;
+        error?: string;
+      };
       if (!res.ok || !data.url) {
         setHeroImgMsg({ tone: "err", text: data.error ?? "Tải ảnh thất bại" });
         return;
       }
       setHeroImages((list) => [...list, data.url!].slice(0, HERO_IMAGES_MAX));
-      setHeroImgMsg({ tone: "ok", text: "Đã thêm ảnh, nhớ bấm Lưu để áp dụng" });
+      setHeroImgMsg({
+        tone: "ok",
+        text: "Đã thêm ảnh, nhớ bấm Lưu để áp dụng",
+      });
     } catch {
       setHeroImgMsg({ tone: "err", text: "Không kết nối được máy chủ" });
     } finally {
@@ -500,7 +596,10 @@ export function AdminSettings({
     try {
       const form = new FormData();
       form.append("file", file);
-      const res = await fetch("/api/admin/hero/video", { method: "POST", body: form });
+      const res = await fetch("/api/admin/hero/video", {
+        method: "POST",
+        body: form,
+      });
       const data = (await res.json().catch(() => ({}))) as {
         url?: string;
         error?: string;
@@ -509,7 +608,10 @@ export function AdminSettings({
         outBytes?: number;
       };
       if (!res.ok || !data.url) {
-        setHeroVideoMsg({ tone: "err", text: data.error ?? "Tải video thất bại" });
+        setHeroVideoMsg({
+          tone: "err",
+          text: data.error ?? "Tải video thất bại",
+        });
         return;
       }
       setHeroVideo(data.url);
@@ -549,7 +651,9 @@ export function AdminSettings({
 
   function toggleBlock(index: number) {
     const next = [...blocks];
-    next[index] = next[index].startsWith("-") ? next[index].slice(1) : `-${next[index]}`;
+    next[index] = next[index].startsWith("-")
+      ? next[index].slice(1)
+      : `-${next[index]}`;
     setBlocks(next);
   }
 
@@ -561,7 +665,9 @@ export function AdminSettings({
 
   function setBlockOn(id: string, on: boolean) {
     setBlocks(
-      blocks.map((entry) => (entry.replace(/^-/, "") === id ? (on ? id : `-${id}`) : entry)),
+      blocks.map((entry) =>
+        entry.replace(/^-/, "") === id ? (on ? id : `-${id}`) : entry,
+      ),
     );
   }
 
@@ -601,14 +707,20 @@ export function AdminSettings({
             .split(",")
             .map((part) => Number(part.replace(/\D/g, "")))
             .filter((value) => value > 0),
-          topUpCardFee: Number(cardFee.replace(",", ".").replace(/[^0-9.]/g, "")),
+          topUpCardFee: Number(
+            cardFee.replace(",", ".").replace(/[^0-9.]/g, ""),
+          ),
           topUpCardRates: cardRates
             .split(",")
             .map((part) => {
               const [left, right] = part.split(":");
               return {
                 amount: Number(String(left ?? "").replace(/\D/g, "")),
-                percent: Number(String(right ?? "").trim().replace(",", ".")),
+                percent: Number(
+                  String(right ?? "")
+                    .trim()
+                    .replace(",", "."),
+                ),
               };
             })
             .filter((rate) => rate.amount > 0 && Number.isFinite(rate.percent)),
@@ -629,6 +741,8 @@ export function AdminSettings({
           telegramShopToken: shopToken,
           telegramShopSecret: shopSecret,
           telegramShopUsername: shopUsername,
+          zaloBotPhone: zaloPhone,
+          zaloBotName: zaloName,
           lowStockThreshold: Number(lowStock.replace(/\D/g, "")),
           lowStockEmail: lowStockMail,
           warrantyAlertEmail: warrantyMail,
@@ -702,10 +816,16 @@ export function AdminSettings({
       // The server sorts and de-duplicates the presets, so show back what was
       // actually stored rather than what was typed.
       if (data.topUpPresets) setPresets(data.topUpPresets.join(", "));
-      if (data.topUpCardPresets) setCardPresets(data.topUpCardPresets.join(", "));
-      if (typeof data.topUpCardFee === "number") setCardFee(String(data.topUpCardFee));
+      if (data.topUpCardPresets)
+        setCardPresets(data.topUpCardPresets.join(", "));
+      if (typeof data.topUpCardFee === "number")
+        setCardFee(String(data.topUpCardFee));
       if (data.topUpCardRates) {
-        setCardRates(data.topUpCardRates.map((rate) => `${rate.amount}:${rate.percent}`).join(", "));
+        setCardRates(
+          data.topUpCardRates
+            .map((rate) => `${rate.amount}:${rate.percent}`)
+            .join(", "),
+        );
       }
       setSaved(true);
       router.refresh();
@@ -758,7 +878,8 @@ export function AdminSettings({
                   className={`${FIELD} tabular-nums`}
                 />
                 <p className={HINT}>
-                  Hiện tại: nạp từ {formatVnd(Number(topUpMin.replace(/\D/g, "")) || 0)}đ trở
+                  Hiện tại: nạp từ{" "}
+                  {formatVnd(Number(topUpMin.replace(/\D/g, "")) || 0)}đ trở
                   lên. Máy chủ từ chối mọi hóa đơn thấp hơn mức này.
                 </p>
               </div>
@@ -774,8 +895,8 @@ export function AdminSettings({
                   className={`${FIELD} tabular-nums`}
                 />
                 <p className={HINT}>
-                  Các nút số tiền ở tab Ngân hàng, cách nhau bằng dấu phẩy. Mệnh giá
-                  thấp hơn mức tối thiểu sẽ bị từ chối khi lưu.
+                  Các nút số tiền ở tab Ngân hàng, cách nhau bằng dấu phẩy. Mệnh
+                  giá thấp hơn mức tối thiểu sẽ bị từ chối khi lưu.
                 </p>
               </div>
 
@@ -791,8 +912,8 @@ export function AdminSettings({
                   className={`${FIELD} tabular-nums`}
                 />
                 <p className={HINT}>
-                  Chỉ những mệnh giá nhà mạng thật sự in trên thẻ. Đưa ra một mệnh
-                  giá không tồn tại là mời khách khai sai và mất thẻ.
+                  Chỉ những mệnh giá nhà mạng thật sự in trên thẻ. Đưa ra một
+                  mệnh giá không tồn tại là mời khách khai sai và mất thẻ.
                 </p>
               </div>
 
@@ -809,8 +930,8 @@ export function AdminSettings({
                 />
                 <p className={HINT}>
                   Phần shop giữ lại của mọi mệnh giá thẻ. Bên gạch thẻ thu
-                  khoảng 15 đến 22% tùy mệnh giá, nên 20 là mức an toàn. Để 0
-                  là cộng đủ 100%.
+                  khoảng 15 đến 22% tùy mệnh giá, nên 20 là mức an toàn. Để 0 là
+                  cộng đủ 100%.
                 </p>
               </div>
 
@@ -828,9 +949,9 @@ export function AdminSettings({
                 <p className={HINT}>
                   Chỉ khai khi một mệnh giá cần mức khác mức chung, viết theo
                   dạng mệnh giá:phần trăm, cách nhau bằng dấu phẩy. Thẻ 50.000đ
-                  với 15.5 nghĩa là ví khách nhận 42.250đ. Mệnh giá không khai
-                  ở đây dùng mức chung phía trên, và trang nạp hiện đúng con số
-                  đó trước khi khách gửi thẻ.
+                  với 15.5 nghĩa là ví khách nhận 42.250đ. Mệnh giá không khai ở
+                  đây dùng mức chung phía trên, và trang nạp hiện đúng con số đó
+                  trước khi khách gửi thẻ.
                 </p>
               </div>
             </div>
@@ -850,7 +971,8 @@ export function AdminSettings({
               />
               {!bank && !card ? (
                 <p className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-2.5 text-[11px] font-semibold text-amber-400">
-                  Tắt cả hai nghĩa là khách không nạp được tiền vào ví bằng cách nào, trang Nạp thẻ sẽ chỉ còn thông báo tạm ngưng.
+                  Tắt cả hai nghĩa là khách không nạp được tiền vào ví bằng cách
+                  nào, trang Nạp thẻ sẽ chỉ còn thông báo tạm ngưng.
                 </p>
               ) : null}
             </div>
@@ -859,14 +981,16 @@ export function AdminSettings({
           <section className={CARD}>
             <span className={HEADING}>Tài khoản nhận chuyển khoản</span>
             <p className="text-[11px] text-neutral-500">
-              Khai bao nhiêu ngân hàng cũng được. Khách chọn một bên để chuyển, còn hệ
-              thống đối soát tất cả, tiền về bên nào cũng khớp được lệnh nạp.
+              Khai bao nhiêu ngân hàng cũng được. Khách chọn một bên để chuyển,
+              còn hệ thống đối soát tất cả, tiền về bên nào cũng khớp được lệnh
+              nạp.
             </p>
 
             {accounts.length === 0 ? (
               <p className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-2.5 text-[11px] font-semibold text-amber-400">
-                Chưa có tài khoản nào, tab Ngân Hàng của khách sẽ báo tạm chưa nhận
-                chuyển khoản, và máy chủ từ chối tạo lệnh nạp qua ngân hàng.
+                Chưa có tài khoản nào, tab Ngân Hàng của khách sẽ báo tạm chưa
+                nhận chuyển khoản, và máy chủ từ chối tạo lệnh nạp qua ngân
+                hàng.
               </p>
             ) : null}
 
@@ -881,7 +1005,9 @@ export function AdminSettings({
                   </span>
                   <button
                     type="button"
-                    onClick={() => setAccounts(accounts.filter((_, i) => i !== index))}
+                    onClick={() =>
+                      setAccounts(accounts.filter((_, i) => i !== index))
+                    }
                     className="h-7 px-3 rounded-lg border border-red-500/30 bg-red-500/10 hover:bg-red-500/20 text-[10px] font-black uppercase tracking-widest text-red-400 transition-colors"
                   >
                     Xóa
@@ -897,7 +1023,9 @@ export function AdminSettings({
                       id={`bank-code-${index}`}
                       value={account.code}
                       onChange={(event) =>
-                        updateAccount(index, { code: event.target.value.toUpperCase() })
+                        updateAccount(index, {
+                          code: event.target.value.toUpperCase(),
+                        })
                       }
                       placeholder="VCB / OCB"
                       className={`${FIELD} font-mono uppercase`}
@@ -910,7 +1038,9 @@ export function AdminSettings({
                     <input
                       id={`bank-name-${index}`}
                       value={account.name}
-                      onChange={(event) => updateAccount(index, { name: event.target.value })}
+                      onChange={(event) =>
+                        updateAccount(index, { name: event.target.value })
+                      }
                       placeholder="Vietcombank"
                       className={FIELD}
                     />
@@ -938,7 +1068,9 @@ export function AdminSettings({
                       id={`bank-holder-${index}`}
                       value={account.holder}
                       onChange={(event) =>
-                        updateAccount(index, { holder: event.target.value.toUpperCase() })
+                        updateAccount(index, {
+                          holder: event.target.value.toUpperCase(),
+                        })
                       }
                       placeholder="NGUYEN VAN A"
                       className={`${FIELD} uppercase`}
@@ -953,13 +1085,15 @@ export function AdminSettings({
                   <input
                     id={`bank-api-${index}`}
                     value={account.apiUrl}
-                    onChange={(event) => updateAccount(index, { apiUrl: event.target.value })}
+                    onChange={(event) =>
+                      updateAccount(index, { apiUrl: event.target.value })
+                    }
                     placeholder="https://api.sieuthicode.vn/..."
                     className={`${FIELD} font-mono`}
                   />
                   <p className={HINT}>
-                    Mỗi ngân hàng một đường riêng, token trong đó chỉ đọc được đúng tài
-                    khoản này. Dán nguyên cả URL kèm token.
+                    Mỗi ngân hàng một đường riêng, token trong đó chỉ đọc được
+                    đúng tài khoản này. Dán nguyên cả URL kèm token.
                   </p>
                 </div>
               </div>
@@ -1003,9 +1137,10 @@ export function AdminSettings({
                 className={`${FIELD} font-mono`}
               />
               <p className={HINT}>
-                Vừa là chìa khóa để gọi API đối soát, vừa là mật khẩu mà bên trung gian
-                phải gửi kèm khi bắn dữ liệu sang. Không có key thì nạp tự động không bật
-                được, nếu không ai cũng gọi được vào và tự cộng tiền.
+                Vừa là chìa khóa để gọi API đối soát, vừa là mật khẩu mà bên
+                trung gian phải gửi kèm khi bắn dữ liệu sang. Không có key thì
+                nạp tự động không bật được, nếu không ai cũng gọi được vào và tự
+                cộng tiền.
               </p>
             </div>
 
@@ -1032,18 +1167,21 @@ export function AdminSettings({
               </div>
               <p className={HINT}>
                 Key riêng cho địa chỉ chạy nền bên dưới, để{" "}
-                <span className="font-bold text-white">không phải đem API key đi dán</span>{" "}
-                vào web hẹn giờ của người khác. Key này chỉ khiến shop tự đọc lại sao kê
-                của chính mình, lộ ra cũng không ai cộng tiền được. API key thì khác: ai
-                có nó là bắn được danh sách giao dịch giả vào webhook. Để trống thì địa chỉ
-                dưới vẫn dùng API key như trước.
+                <span className="font-bold text-white">
+                  không phải đem API key đi dán
+                </span>{" "}
+                vào web hẹn giờ của người khác. Key này chỉ khiến shop tự đọc
+                lại sao kê của chính mình, lộ ra cũng không ai cộng tiền được.
+                API key thì khác: ai có nó là bắn được danh sách giao dịch giả
+                vào webhook. Để trống thì địa chỉ dưới vẫn dùng API key như
+                trước.
               </p>
             </div>
 
             <div>
               <p className="text-[11px] text-neutral-500">
-                Địa chỉ đối soát khai riêng ở từng ngân hàng phía trên. Nút dưới đây gọi
-                thử tất cả và cho biết đọc được giao dịch hay không.
+                Địa chỉ đối soát khai riêng ở từng ngân hàng phía trên. Nút dưới
+                đây gọi thử tất cả và cho biết đọc được giao dịch hay không.
               </p>
 
               <div className="mt-2.5 flex flex-wrap items-center gap-3">
@@ -1056,8 +1194,8 @@ export function AdminSettings({
                   {testing ? "Đang gọi…" : "Kiểm tra kết nối"}
                 </button>
                 <span className="text-[11px] text-neutral-500">
-                  Lưu cấu hình trước rồi bấm, máy chủ gọi thử và cho biết có đọc được
-                  giao dịch không.
+                  Lưu cấu hình trước rồi bấm, máy chủ gọi thử và cho biết có đọc
+                  được giao dịch không.
                 </span>
               </div>
 
@@ -1086,11 +1224,13 @@ export function AdminSettings({
                 {cronKey.trim() ? cronKey.trim() : <>&lt;API-KEY&gt;</>}
               </p>
               <p className="mt-1.5 text-[11px] text-neutral-500">
-                Dán vào một dịch vụ hẹn giờ miễn phí (cron-job.org…) và cho chạy mỗi phút.
+                Dán vào một dịch vụ hẹn giờ miễn phí (cron-job.org…) và cho chạy
+                mỗi phút.
                 {cronKey.trim()
                   ? " Nhớ bấm Lưu trước, key mới có hiệu lực."
                   : " Nên bấm Tạo key ở trên rồi lưu, dán API key vào web của người khác là rủi ro không cần thiết."}{" "}
-                Không có cái này thì web chỉ đối soát lúc có khách đang mở màn hình chờ, khách chuyển tiền xong tắt trang là phải đợi rất lâu.
+                Không có cái này thì web chỉ đối soát lúc có khách đang mở màn
+                hình chờ, khách chuyển tiền xong tắt trang là phải đợi rất lâu.
               </p>
             </div>
 
@@ -1100,25 +1240,32 @@ export function AdminSettings({
                 {origin}/api/wallet/webhook
               </p>
               <p className="mt-1.5 text-[11px] text-neutral-500">
-                Dành cho dịch vụ tự bắn dữ liệu sang (Casso, SePay). Chúng gửi kèm header{" "}
-                <span className="font-mono">Authorization: Apikey &lt;key&gt;</span>, đúng
-                key ở trên là chạy.
+                Dành cho dịch vụ tự bắn dữ liệu sang (Casso, SePay). Chúng gửi
+                kèm header{" "}
+                <span className="font-mono">
+                  Authorization: Apikey &lt;key&gt;
+                </span>
+                , đúng key ở trên là chạy.
               </p>
             </div>
 
             {auto && !apiKey && !accounts.some((account) => account.apiUrl) ? (
               <p className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-2.5 text-[11px] font-semibold text-amber-400">
-                Bật nạp tự động thì cần địa chỉ API đối soát ở ít nhất một ngân hàng,
-                hoặc API key cho webhook, lưu sẽ bị từ chối.
+                Bật nạp tự động thì cần địa chỉ API đối soát ở ít nhất một ngân
+                hàng, hoặc API key cho webhook, lưu sẽ bị từ chối.
               </p>
             ) : null}
 
             <div className="border-t border-white/5 pt-5">
-              <span className={LABEL}>CAPTCHA đăng nhập (Cloudflare Turnstile)</span>
+              <span className={LABEL}>
+                CAPTCHA đăng nhập (Cloudflare Turnstile)
+              </span>
               <p className={HINT}>
-                Lấy hai khóa ở dash.cloudflare.com → Turnstile → Add site. Phải điền
-                <span className="font-bold text-neutral-300"> cả hai</span> thì CAPTCHA
-                mới bật; để trống một ô là coi như tắt, trang đăng nhập giữ nguyên như cũ.
+                Lấy hai khóa ở dash.cloudflare.com → Turnstile → Add site. Phải
+                điền
+                <span className="font-bold text-neutral-300"> cả hai</span> thì
+                CAPTCHA mới bật; để trống một ô là coi như tắt, trang đăng nhập
+                giữ nguyên như cũ.
               </p>
 
               <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -1134,7 +1281,9 @@ export function AdminSettings({
                     placeholder="0x4AAAAAAA…"
                     className={`${FIELD} font-mono`}
                   />
-                  <p className={HINT}>Công khai, nằm trong mã nguồn trang đăng nhập.</p>
+                  <p className={HINT}>
+                    Công khai, nằm trong mã nguồn trang đăng nhập.
+                  </p>
                 </div>
                 <div>
                   <label htmlFor="ts-secret" className={LABEL}>
@@ -1150,14 +1299,16 @@ export function AdminSettings({
                     className={`${FIELD} font-mono`}
                   />
                   <p className={HINT}>
-                    Bí mật, chỉ máy chủ dùng để hỏi Cloudflare. Đừng dán ra ngoài.
+                    Bí mật, chỉ máy chủ dùng để hỏi Cloudflare. Đừng dán ra
+                    ngoài.
                   </p>
                 </div>
               </div>
 
               {Boolean(tsSite) !== Boolean(tsSecret) ? (
                 <p className="mt-3 rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-2.5 text-[11px] font-semibold text-amber-400">
-                  Mới có một khóa. CAPTCHA vẫn đang tắt cho tới khi điền đủ cả hai.
+                  Mới có một khóa. CAPTCHA vẫn đang tắt cho tới khi điền đủ cả
+                  hai.
                 </p>
               ) : null}
             </div>
@@ -1165,12 +1316,19 @@ export function AdminSettings({
             <div className="border-t border-white/5 pt-5">
               <span className={LABEL}>Đăng nhập Google / Discord (OAuth)</span>
               <p className={HINT}>
-                Google: console.cloud.google.com → APIs &amp; Services → Credentials →
-                OAuth client ID (Web), khai Redirect URI
-                <span className="font-mono text-neutral-300"> /api/auth/google/callback</span>.
-                Discord: discord.com/developers → New Application → OAuth2, khai
-                <span className="font-mono text-neutral-300"> /api/auth/discord/callback</span>.
-                Mỗi bên phải đủ cả hai ô thì nút mới bật.
+                Google: console.cloud.google.com → APIs &amp; Services →
+                Credentials → OAuth client ID (Web), khai Redirect URI
+                <span className="font-mono text-neutral-300">
+                  {" "}
+                  /api/auth/google/callback
+                </span>
+                . Discord: discord.com/developers → New Application → OAuth2,
+                khai
+                <span className="font-mono text-neutral-300">
+                  {" "}
+                  /api/auth/discord/callback
+                </span>
+                . Mỗi bên phải đủ cả hai ô thì nút mới bật.
               </p>
 
               <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -1232,12 +1390,15 @@ export function AdminSettings({
             </div>
 
             <div className="border-t border-white/5 pt-5">
-              <span className={LABEL}>Số liệu tin cậy, dải số trên phần Đánh giá</span>
+              <span className={LABEL}>
+                Số liệu tin cậy, dải số trên phần Đánh giá
+              </span>
               <p className={HINT}>
-                Để trống ô nào thì lấy số thật từ hệ thống: đơn đã giao = đơn đã thanh toán trên
-                site này, khách hàng = số tài khoản, năm bắt đầu = năm của tài khoản cũ nhất,
-                điểm = trung bình đánh giá đã duyệt. Điền số của site cũ vào để cộng dồn lịch sử.
-                Số hiện dạng làm tròn xuống trăm kèm dấu +, ví dụ 8.400+.
+                Để trống ô nào thì lấy số thật từ hệ thống: đơn đã giao = đơn đã
+                thanh toán trên site này, khách hàng = số tài khoản, năm bắt đầu
+                = năm của tài khoản cũ nhất, điểm = trung bình đánh giá đã
+                duyệt. Điền số của site cũ vào để cộng dồn lịch sử. Số hiện dạng
+                làm tròn xuống trăm kèm dấu +, ví dụ 8.400+.
               </p>
               <div className="grid gap-3 sm:grid-cols-4">
                 <div>
@@ -1298,14 +1459,24 @@ export function AdminSettings({
             <div className="border-t border-white/5 pt-5">
               <span className={LABEL}>Đồng bộ trạng thái hack từ Telegram</span>
               <p className={HINT}>
-                Nhắn trong kênh của shop là trạng thái tự đổi, kèm ảnh và ghi chú.
-                Cú pháp: <span className="font-mono text-neutral-300">MÃ_TOOL trạng_thái ghi chú</span>, ví dụ <span className="font-mono text-neutral-300">VALTOOL01 die Đang vá, chờ 24h</span>.
-                Nhận các từ: undetected/ok/ngon/an toàn · detected/die/dính · updating/bảo trì/đang cập nhật.
-                Gửi ảnh thì viết cú pháp vào phần chú thích ảnh.
+                Nhắn trong kênh của shop là trạng thái tự đổi, kèm ảnh và ghi
+                chú. Cú pháp:{" "}
+                <span className="font-mono text-neutral-300">
+                  MÃ_TOOL trạng_thái ghi chú
+                </span>
+                , ví dụ{" "}
+                <span className="font-mono text-neutral-300">
+                  VALTOOL01 die Đang vá, chờ 24h
+                </span>
+                . Nhận các từ: undetected/ok/ngon/an toàn · detected/die/dính ·
+                updating/bảo trì/đang cập nhật. Gửi ảnh thì viết cú pháp vào
+                phần chú thích ảnh.
                 <br />
                 Cách bật: nhắn @BotFather lấy token → thêm bot vào kênh → mở
                 <span className="font-mono text-neutral-300">
-                  {" "}https://api.telegram.org/bot&lt;TOKEN&gt;/setWebhook?url=&lt;tên miền&gt;/api/integrations/telegram&amp;secret_token=&lt;secret&gt;
+                  {" "}
+                  https://api.telegram.org/bot&lt;TOKEN&gt;/setWebhook?url=&lt;tên
+                  miền&gt;/api/integrations/telegram&amp;secret_token=&lt;secret&gt;
                 </span>
                 . Bỏ trống bất kỳ ô nào là tắt đồng bộ.
               </p>
@@ -1433,9 +1604,10 @@ export function AdminSettings({
             <div className="border-t border-white/5 pt-5">
               <span className={LABEL}>Bot bán hàng Telegram</span>
               <p className={HINT}>
-                Bot thứ hai, dành cho khách: xem hàng, mua bằng ví, nhận key trong chat, nạp tiền
-                bằng mã chuyển khoản như trên web. Tạo bot mới trong @BotFather rồi dán token;
-                secret là chuỗi ngẫu nhiên bất kỳ. Lưu xong shop tự trỏ webhook và tự đọc tên bot.
+                Bot thứ hai, dành cho khách: xem hàng, mua bằng ví, nhận key
+                trong chat, nạp tiền bằng mã chuyển khoản như trên web. Tạo bot
+                mới trong @BotFather rồi dán token; secret là chuỗi ngẫu nhiên
+                bất kỳ. Lưu xong shop tự trỏ webhook và tự đọc tên bot.
               </p>
               <div className="grid gap-3 md:grid-cols-3 mt-3">
                 <div>
@@ -1483,13 +1655,119 @@ export function AdminSettings({
             </div>
 
             <div className="border-t border-white/5 pt-5">
+              <span className={LABEL}>Bot thông báo Zalo (tài khoản phụ)</span>
+              <p className={HINT}>
+                Một tài khoản Zalo phụ do bot trên VPS đăng nhập, gửi thông báo
+                bảo hành, đơn hàng, nạp tiền cho khách đã liên kết ở Bảo mật.
+                Điền số điện thoại của tài khoản đó để trang Bảo mật hiện thẻ
+                liên kết; để trống là tắt. Bot đăng nhập bằng mã QR: khi cần
+                quét, ảnh QR hiện ở đây. Đây là tài khoản cá nhân chạy tự động,
+                Zalo có thể khoá, nên chỉ dùng số phụ.
+              </p>
+              <div className="grid gap-3 md:grid-cols-3 mt-3">
+                <div>
+                  <label htmlFor="zalo-phone" className={LABEL}>
+                    Số Zalo của bot
+                  </label>
+                  <input
+                    id="zalo-phone"
+                    autoComplete="off"
+                    inputMode="numeric"
+                    value={zaloPhone}
+                    onChange={(event) => setZaloPhone(event.target.value)}
+                    placeholder="09xxxxxxxx"
+                    className={`${FIELD} font-mono`}
+                  />
+                </div>
+                <div>
+                  <label htmlFor="zalo-name" className={LABEL}>
+                    Tên hiển thị
+                  </label>
+                  <input
+                    id="zalo-name"
+                    autoComplete="off"
+                    value={zaloName}
+                    onChange={(event) => setZaloName(event.target.value)}
+                    placeholder="THICHTHIHACK Thông báo"
+                    className={FIELD}
+                  />
+                </div>
+                <div>
+                  <span className={LABEL}>Trạng thái bot</span>
+                  {zaloBotState === null ? (
+                    <p className="mt-2 text-[12px] text-neutral-500">
+                      Bot chưa chạy hoặc chưa báo về. Trên VPS: docker compose
+                      up -d zalo-bot.
+                    </p>
+                  ) : zaloBotState.state === "qr" ? (
+                    <div className="mt-2 flex flex-col gap-2">
+                      <p className="text-[12px] font-semibold text-amber-300">
+                        Đang chờ quét mã QR
+                        {zaloBotState.note ? (
+                          <span className="block font-normal text-neutral-400">
+                            {zaloBotState.note}
+                          </span>
+                        ) : null}
+                      </p>
+                      {zaloBotState.qrUrl ? (
+                        <a
+                          href={zaloBotState.qrUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          {/* The bot's own file, replaced on every expiry; next/image
+                              would cache a dead one. */}
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={`${zaloBotState.qrUrl}?t=${encodeURIComponent(zaloBotState.at)}`}
+                            alt="Mã QR đăng nhập Zalo"
+                            className="h-40 w-40 rounded-lg border border-white/10 bg-white"
+                          />
+                        </a>
+                      ) : null}
+                    </div>
+                  ) : zaloBotState.state === "online" ? (
+                    <p className="mt-2 text-[12px] font-semibold text-emerald-400">
+                      Đang chạy
+                      {zaloBotState.name ? ` (${zaloBotState.name})` : ""}
+                      <span className="block font-normal text-neutral-500">
+                        Báo về lúc{" "}
+                        {new Date(zaloBotState.at).toLocaleString("vi-VN", {
+                          timeZone: "Asia/Ho_Chi_Minh",
+                        })}
+                      </span>
+                    </p>
+                  ) : (
+                    <p className="mt-2 text-[12px] font-semibold text-red-400">
+                      Mất kết nối
+                      <span className="block font-normal text-neutral-500">
+                        {zaloBotState.note ?? ""} (
+                        {new Date(zaloBotState.at).toLocaleString("vi-VN", {
+                          timeZone: "Asia/Ho_Chi_Minh",
+                        })}
+                        )
+                      </span>
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="border-t border-white/5 pt-5">
               <span className={LABEL}>Gửi email, quên mật khẩu (SMTP)</span>
               <p className={HINT}>
-                Dùng Gmail: host <span className="font-mono text-neutral-300">smtp.gmail.com</span>,
-                port 587, user là địa chỉ Gmail, pass là
-                <span className="font-bold text-neutral-300"> App Password</span> (tạo ở
-                myaccount.google.com → Security → 2-Step Verification → App passwords).
-                Thiếu ô nào thì trang quên mật khẩu tự chuyển sang hướng dẫn liên hệ admin.
+                Dùng Gmail: host{" "}
+                <span className="font-mono text-neutral-300">
+                  smtp.gmail.com
+                </span>
+                , port 587, user là địa chỉ Gmail, pass là
+                <span className="font-bold text-neutral-300">
+                  {" "}
+                  App Password
+                </span>{" "}
+                (tạo ở myaccount.google.com → Security → 2-Step Verification →
+                App passwords). Thiếu ô nào thì trang quên mật khẩu tự chuyển
+                sang hướng dẫn liên hệ admin.
               </p>
 
               <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -1564,9 +1842,9 @@ export function AdminSettings({
             </div>
 
             <p className="text-[11px] text-neutral-500">
-              Nút Xác nhận / Từ chối ở mục Vận hành vẫn còn để xử lý các ca lệch: khách
-              quên ghi nội dung, ghi sai, hoặc chuyển thiếu tiền. Bật auto rồi thì bình
-              thường bạn không phải đụng tới nó.
+              Nút Xác nhận / Từ chối ở mục Vận hành vẫn còn để xử lý các ca
+              lệch: khách quên ghi nội dung, ghi sai, hoặc chuyển thiếu tiền.
+              Bật auto rồi thì bình thường bạn không phải đụng tới nó.
             </p>
           </section>
 
@@ -1591,8 +1869,8 @@ export function AdminSettings({
                 className={FIELD}
               />
               <p className={HINT}>
-                Câu này hiện ra ngay chỗ khách bấm mua. Nói rõ khi nào bán lại thì khách
-                còn quay lại, còn im lặng thì khách nghĩ shop hỏng.
+                Câu này hiện ra ngay chỗ khách bấm mua. Nói rõ khi nào bán lại
+                thì khách còn quay lại, còn im lặng thì khách nghĩ shop hỏng.
               </p>
             </div>
           </section>
@@ -1616,8 +1894,9 @@ export function AdminSettings({
                   className={FIELD}
                 />
                 <p className={HINT}>
-                  Hiện ở logo góc trái, chân trang và tiêu đề tab trình duyệt. Từ đầu
-                  tiên là dòng chữ lớn, phần còn lại là dòng nhỏ màu đỏ bên dưới.
+                  Hiện ở logo góc trái, chân trang và tiêu đề tab trình duyệt.
+                  Từ đầu tiên là dòng chữ lớn, phần còn lại là dòng nhỏ màu đỏ
+                  bên dưới.
                 </p>
               </div>
               <div>
@@ -1635,14 +1914,20 @@ export function AdminSettings({
                   <input
                     type="color"
                     aria-label="Chọn màu chủ đạo"
-                    value={/^#[0-9a-fA-F]{6}$/.test(brandColor) ? brandColor : DEFAULT_BRAND_COLOR}
-                    onChange={(event) => setBrandColor(event.target.value.toUpperCase())}
+                    value={
+                      /^#[0-9a-fA-F]{6}$/.test(brandColor)
+                        ? brandColor
+                        : DEFAULT_BRAND_COLOR
+                    }
+                    onChange={(event) =>
+                      setBrandColor(event.target.value.toUpperCase())
+                    }
                     className="h-9 w-10 shrink-0 rounded-lg border border-white/10 bg-neutral-950/60 cursor-pointer"
                   />
                 </div>
                 <p className={HINT}>
-                  Màu của mọi nút bấm, viền đang chọn và nhãn nổi bật trên toàn site.
-                  Sắc đậm hơn khi rê chuột được tính tự động từ màu này.
+                  Màu của mọi nút bấm, viền đang chọn và nhãn nổi bật trên toàn
+                  site. Sắc đậm hơn khi rê chuột được tính tự động từ màu này.
                 </p>
               </div>
             </div>
@@ -1658,8 +1943,9 @@ export function AdminSettings({
                 className={`${FIELD} font-mono`}
               />
               <p className={HINT}>
-                Đường dẫn ảnh, bắt đầu bằng / nếu nằm trong thư mục public. Dùng cho
-                logo header, chân trang và icon khi khách thêm shop vào màn hình chính.
+                Đường dẫn ảnh, bắt đầu bằng / nếu nằm trong thư mục public. Dùng
+                cho logo header, chân trang và icon khi khách thêm shop vào màn
+                hình chính.
               </p>
             </div>
 
@@ -1695,11 +1981,15 @@ export function AdminSettings({
                   <div className="flex flex-wrap items-center gap-3">
                     <label
                       className={`inline-flex h-9 cursor-pointer items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 text-[10px] font-black uppercase tracking-widest text-neutral-200 transition-colors hover:bg-white/10 ${
-                        heroBannerUploading ? "pointer-events-none opacity-60" : ""
+                        heroBannerUploading
+                          ? "pointer-events-none opacity-60"
+                          : ""
                       }`}
                     >
                       <Upload size={13} />
-                      {heroBannerUploading ? "Đang tải lên…" : "Chọn ảnh từ máy"}
+                      {heroBannerUploading
+                        ? "Đang tải lên…"
+                        : "Chọn ảnh từ máy"}
                       <input
                         type="file"
                         accept="image/png,image/jpeg,image/webp"
@@ -1712,7 +2002,8 @@ export function AdminSettings({
                       />
                     </label>
                     <span className="text-[10px] text-neutral-600">
-                      PNG / JPG / WebP · nên khổ 16:9, vd 1920×1080 · tối thiểu 960×540
+                      PNG / JPG / WebP · nên khổ 16:9, vd 1920×1080 · tối thiểu
+                      960×540
                     </span>
                   </div>
                   {heroBannerMsg ? (
@@ -1730,9 +2021,10 @@ export function AdminSettings({
                 </div>
               </div>
               <p className={HINT}>
-                Ảnh lớn trên cùng trang chủ, cũng là ảnh hiện ra khi ai đó chia sẻ link
-                shop lên Facebook hay Zalo. Khi đã có video hero, đây là khung chờ lúc
-                video đang tải và là ảnh hiện thay khi video không chạy được.
+                Ảnh lớn trên cùng trang chủ, cũng là ảnh hiện ra khi ai đó chia
+                sẻ link shop lên Facebook hay Zalo. Khi đã có video hero, đây là
+                khung chờ lúc video đang tải và là ảnh hiện thay khi video không
+                chạy được.
               </p>
             </div>
 
@@ -1800,13 +2092,15 @@ export function AdminSettings({
                 </div>
               </div>
               <p className={HINT}>
-                Ảnh cố định phía sau mọi trang, đã phủ tối 70% để chữ dễ đọc. Để trống thì
-                dùng lại ảnh mặc định.
+                Ảnh cố định phía sau mọi trang, đã phủ tối 70% để chữ dễ đọc. Để
+                trống thì dùng lại ảnh mặc định.
               </p>
             </div>
 
             <div>
-              <span className={LABEL}>Ảnh banner trang Tổng quan tài khoản</span>
+              <span className={LABEL}>
+                Ảnh banner trang Tổng quan tài khoản
+              </span>
               <div className="flex flex-col gap-3 sm:flex-row">
                 {/* The banner's own wide shape; no dim, the page fades it
                     itself along the left and the bottom. */}
@@ -1879,8 +2173,8 @@ export function AdminSettings({
                 </div>
               </div>
               <p className={HINT}>
-                Ảnh game phía sau đầu trang Tổng quan tài khoản của khách. Để trống thì lấy
-                ảnh bìa của danh mục đầu tiên.
+                Ảnh game phía sau đầu trang Tổng quan tài khoản của khách. Để
+                trống thì lấy ảnh bìa của danh mục đầu tiên.
               </p>
             </div>
 
@@ -1903,7 +2197,9 @@ export function AdminSettings({
                 <div className="flex min-w-0 flex-1 flex-col gap-2">
                   <input
                     value={flashSaleBackground}
-                    onChange={(event) => setFlashSaleBackground(event.target.value)}
+                    onChange={(event) =>
+                      setFlashSaleBackground(event.target.value)
+                    }
                     className={`${FIELD} font-mono`}
                     placeholder="/uploads/site/… hoặc đường dẫn ảnh"
                   />
@@ -1945,11 +2241,11 @@ export function AdminSettings({
                 </div>
               </div>
               <p className={HINT}>
-                Vân nền mờ bên trong khung “Khuyến mãi hôm nay” ở trang chủ (hiện ở mức
-                10%). Nên chọn ảnh có hoạ tiết rõ; để trống thì dùng lại ảnh mặc định.
+                Vân nền mờ bên trong khung “Khuyến mãi hôm nay” ở trang chủ
+                (hiện ở mức 10%). Nên chọn ảnh có hoạ tiết rõ; để trống thì dùng
+                lại ảnh mặc định.
               </p>
             </div>
-
           </section>
 
           <section className={CARD}>
@@ -2018,7 +2314,10 @@ export function AdminSettings({
                           aria-label="Đưa lên trên"
                           onClick={() => {
                             const next = [...panelImages];
-                            [next[index - 1], next[index]] = [next[index]!, next[index - 1]!];
+                            [next[index - 1], next[index]] = [
+                              next[index]!,
+                              next[index - 1]!,
+                            ];
                             setPanelImages(next);
                             setPicked(index - 1);
                           }}
@@ -2032,7 +2331,10 @@ export function AdminSettings({
                           aria-label="Đưa xuống dưới"
                           onClick={() => {
                             const next = [...panelImages];
-                            [next[index], next[index + 1]] = [next[index + 1]!, next[index]!];
+                            [next[index], next[index + 1]] = [
+                              next[index + 1]!,
+                              next[index]!,
+                            ];
                             setPanelImages(next);
                             setPicked(index + 1);
                           }}
@@ -2052,7 +2354,9 @@ export function AdminSettings({
                           }
                           aria-label="Xóa ảnh"
                           onClick={() => {
-                            setPanelImages(panelImages.filter((_, i) => i !== index));
+                            setPanelImages(
+                              panelImages.filter((_, i) => i !== index),
+                            );
                             setPicked(0);
                           }}
                           className="h-7 w-7 rounded-lg border border-red-500/30 bg-red-500/10 text-red-400 transition-colors hover:bg-red-500/20 disabled:opacity-30 disabled:hover:bg-red-500/10 inline-flex items-center justify-center"
@@ -2063,9 +2367,9 @@ export function AdminSettings({
                     ))}
                   </div>
                   <p className={HINT}>
-                    JPG, PNG hoặc WebP · tối thiểu 600×600px · tối đa 5MB. Ảnh dọc hợp
-                    hơn vì khung bên trái cao gấp đôi chiều ngang. Thứ tự ở đây là thứ
-                    tự chạy.
+                    JPG, PNG hoặc WebP · tối thiểu 600×600px · tối đa 5MB. Ảnh
+                    dọc hợp hơn vì khung bên trái cao gấp đôi chiều ngang. Thứ
+                    tự ở đây là thứ tự chạy.
                   </p>
                 </div>
 
@@ -2093,16 +2397,23 @@ export function AdminSettings({
                         try {
                           const body = new FormData();
                           body.append("file", file);
-                          const response = await fetch("/api/admin/auth-panel", {
-                            method: "POST",
-                            body,
-                          });
-                          const data = (await response.json().catch(() => ({}))) as {
+                          const response = await fetch(
+                            "/api/admin/auth-panel",
+                            {
+                              method: "POST",
+                              body,
+                            },
+                          );
+                          const data = (await response
+                            .json()
+                            .catch(() => ({}))) as {
                             url?: string;
                             error?: string;
                           };
                           if (!response.ok || !data.url) {
-                            setUploadError(data.error ?? "Không tải được ảnh lên");
+                            setUploadError(
+                              data.error ?? "Không tải được ảnh lên",
+                            );
                             return;
                           }
                           // Appended rather than replacing: adding a second
@@ -2140,7 +2451,10 @@ export function AdminSettings({
                     hint="Chỉ chạy khi có từ 2 ảnh trở lên. Một ảnh thì panel đứng yên."
                   />
                   <div className="flex items-center gap-2">
-                    <label htmlFor="slide-seconds" className="text-[11px] text-neutral-400">
+                    <label
+                      htmlFor="slide-seconds"
+                      className="text-[11px] text-neutral-400"
+                    >
                       Mỗi ảnh giữ
                     </label>
                     <input
@@ -2153,7 +2467,9 @@ export function AdminSettings({
                       disabled={!slideOn}
                       className={`${FIELD} w-20 disabled:opacity-40`}
                     />
-                    <span className="text-[11px] text-neutral-400">giây (2–60)</span>
+                    <span className="text-[11px] text-neutral-400">
+                      giây (2–60)
+                    </span>
                   </div>
                 </div>
 
@@ -2193,7 +2509,9 @@ export function AdminSettings({
                   onChange={(event) => setLoginTitle(event.target.value)}
                   className={`${FIELD} resize-y`}
                 />
-                <p className={HINT}>Mỗi dòng xuống hàng là một dòng chữ trên ảnh.</p>
+                <p className={HINT}>
+                  Mỗi dòng xuống hàng là một dòng chữ trên ảnh.
+                </p>
               </div>
               <div>
                 <label htmlFor="auth-signup-title" className={LABEL}>
@@ -2218,8 +2536,8 @@ export function AdminSettings({
             <div>
               <span className={HEADING}>Đối tác uy tín</span>
               <p className="mt-1 text-[11px] text-neutral-500">
-                Dải logo chạy dưới phần đánh giá khách hàng trên trang chủ. Trống thì
-                mục tự ẩn.
+                Dải logo chạy dưới phần đánh giá khách hàng trên trang chủ.
+                Trống thì mục tự ẩn.
               </p>
             </div>
             <AdminPartners partners={partners} />
@@ -2328,10 +2646,10 @@ export function AdminSettings({
             </div>
 
             <p className={HINT}>
-              Năm ô trên cùng nuôi dải “Theo dõi &amp; kết nối” dưới chân trang; ba ô
-              nhóm nuôi thanh “KẾT NỐI” dán ở mép trái mọi trang. Để trống ô nào thì
-              dòng đó không hiện, không còn kiểu icon bấm vào không đi đâu như bản
-              gốc. Trống hết thì thanh KẾT NỐI biến mất luôn.
+              Năm ô trên cùng nuôi dải “Theo dõi &amp; kết nối” dưới chân trang;
+              ba ô nhóm nuôi thanh “KẾT NỐI” dán ở mép trái mọi trang. Để trống
+              ô nào thì dòng đó không hiện, không còn kiểu icon bấm vào không đi
+              đâu như bản gốc. Trống hết thì thanh KẾT NỐI biến mất luôn.
             </p>
           </section>
         </>
@@ -2342,8 +2660,8 @@ export function AdminSettings({
           <section className={CARD}>
             <span className={HEADING}>Các khối trên trang chủ</span>
             <p className="text-[11px] text-neutral-500">
-              Bỏ tick để ẩn một khối, mũi tên để đổi thứ tự. Trang chủ hiển thị đúng
-              theo thứ tự trong danh sách này.
+              Bỏ tick để ẩn một khối, mũi tên để đổi thứ tự. Trang chủ hiển thị
+              đúng theo thứ tự trong danh sách này.
             </p>
 
             <div className="flex flex-col gap-1.5">
@@ -2400,11 +2718,15 @@ export function AdminSettings({
 
           <section className={CARD}>
             <span className={HEADING}>Hero</span>
-            {sectionSwitch("hero", "Tắt thì trang chủ bắt đầu thẳng từ khối kế tiếp.")}
+            {sectionSwitch(
+              "hero",
+              "Tắt thì trang chủ bắt đầu thẳng từ khối kế tiếp.",
+            )}
 
             <div>
               <span className={LABEL}>
-                Thẻ trên tiêu đề <span className="text-neutral-600">(trống = ẩn)</span>
+                Thẻ trên tiêu đề{" "}
+                <span className="text-neutral-600">(trống = ẩn)</span>
               </span>
               <input
                 value={heroBadge}
@@ -2413,7 +2735,8 @@ export function AdminSettings({
                 className={FIELD}
               />
               <p className={HINT}>
-                Viên thuốc nhỏ có dấu tick đỏ, nằm trên dòng &ldquo;We are&rdquo;.
+                Viên thuốc nhỏ có dấu tick đỏ, nằm trên dòng &ldquo;We
+                are&rdquo;.
               </p>
             </div>
 
@@ -2426,7 +2749,8 @@ export function AdminSettings({
                 className={`${FIELD} resize-y`}
               />
               <p className={HINT}>
-                Mỗi dòng ở đây là một dòng trên trang chủ. Thiết kế dựng cho hai dòng.
+                Mỗi dòng ở đây là một dòng trên trang chủ. Thiết kế dựng cho hai
+                dòng.
               </p>
             </div>
 
@@ -2483,8 +2807,17 @@ export function AdminSettings({
                 address again. */}
             <div>
               <span className={LABEL}>Hero hiển thị</span>
-              <div role="radiogroup" aria-label="Hero hiển thị" className="inline-flex rounded-lg border border-white/10 bg-neutral-950/60 p-1">
-                {([["video", "Video"], ["image", "Ảnh"]] as const).map(([value, label]) => (
+              <div
+                role="radiogroup"
+                aria-label="Hero hiển thị"
+                className="inline-flex rounded-lg border border-white/10 bg-neutral-950/60 p-1"
+              >
+                {(
+                  [
+                    ["video", "Video"],
+                    ["image", "Ảnh"],
+                  ] as const
+                ).map(([value, label]) => (
                   <button
                     key={value}
                     type="button"
@@ -2520,7 +2853,9 @@ export function AdminSettings({
                     }`}
                   >
                     <Upload size={13} />
-                    {heroVideoUploading ? "Đang tải & nén video…" : "Chọn video từ máy"}
+                    {heroVideoUploading
+                      ? "Đang tải & nén video…"
+                      : "Chọn video từ máy"}
                     <input
                       type="file"
                       accept="video/mp4,video/webm"
@@ -2536,8 +2871,8 @@ export function AdminSettings({
                     />
                   </label>
                   <span className="text-[10px] text-neutral-600">
-                    MP4 / WebM · tối đa 200MB · server tự nén sau khi tải lên, file nặng
-                    chờ 1–3 phút
+                    MP4 / WebM · tối đa 200MB · server tự nén sau khi tải lên,
+                    file nặng chờ 1–3 phút
                   </span>
                 </div>
 
@@ -2555,14 +2890,16 @@ export function AdminSettings({
                 ) : null}
 
                 <p className={HINT}>
-                  Có video thì video thay chỗ ảnh, ảnh banner ở thẻ Nhận diện thành khung
-                  chờ trong lúc video tải. Video chạy tự động, lặp lại và luôn tắt tiếng.
+                  Có video thì video thay chỗ ảnh, ảnh banner ở thẻ Nhận diện
+                  thành khung chờ trong lúc video tải. Video chạy tự động, lặp
+                  lại và luôn tắt tiếng.
                 </p>
               </div>
-
             ) : (
               <div>
-                <span className={LABEL}>Ảnh hero ({heroImages.length}/{HERO_IMAGES_MAX})</span>
+                <span className={LABEL}>
+                  Ảnh hero ({heroImages.length}/{HERO_IMAGES_MAX})
+                </span>
                 {heroImages.length > 0 ? (
                   <div className="flex flex-col gap-1.5">
                     {heroImages.map((src, index) => (
@@ -2572,7 +2909,11 @@ export function AdminSettings({
                       >
                         <div className="relative aspect-[16/9] w-20 shrink-0 overflow-hidden rounded-md bg-[#111111]">
                           {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img src={src} alt="" className="absolute inset-0 h-full w-full object-cover" />
+                          <img
+                            src={src}
+                            alt=""
+                            className="absolute inset-0 h-full w-full object-cover"
+                          />
                         </div>
                         <span className="flex-1 min-w-0 truncate font-mono text-[11px] text-neutral-300">
                           {index + 1}. {src}
@@ -2584,7 +2925,10 @@ export function AdminSettings({
                           aria-label="Đưa lên trên"
                           onClick={() => {
                             const next = [...heroImages];
-                            [next[index - 1], next[index]] = [next[index]!, next[index - 1]!];
+                            [next[index - 1], next[index]] = [
+                              next[index]!,
+                              next[index - 1]!,
+                            ];
                             setHeroImages(next);
                           }}
                         >
@@ -2597,7 +2941,10 @@ export function AdminSettings({
                           aria-label="Đưa xuống dưới"
                           onClick={() => {
                             const next = [...heroImages];
-                            [next[index], next[index + 1]] = [next[index + 1]!, next[index]!];
+                            [next[index], next[index + 1]] = [
+                              next[index + 1]!,
+                              next[index]!,
+                            ];
                             setHeroImages(next);
                           }}
                         >
@@ -2607,7 +2954,11 @@ export function AdminSettings({
                           type="button"
                           aria-label="Xóa ảnh"
                           title="Xóa ảnh này"
-                          onClick={() => setHeroImages(heroImages.filter((_, i) => i !== index))}
+                          onClick={() =>
+                            setHeroImages(
+                              heroImages.filter((_, i) => i !== index),
+                            )
+                          }
                           className="h-7 w-7 rounded-lg border border-red-500/30 bg-red-500/10 text-red-400 transition-colors hover:bg-red-500/20 inline-flex items-center justify-center"
                         >
                           <Trash2 size={13} />
@@ -2624,7 +2975,9 @@ export function AdminSettings({
                 <div className="mt-2 flex flex-wrap items-center gap-3">
                   <label
                     className={`inline-flex h-9 cursor-pointer items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 text-[10px] font-black uppercase tracking-widest text-neutral-200 transition-colors hover:bg-white/10 ${
-                      heroImgUploading || heroImages.length >= HERO_IMAGES_MAX ? "pointer-events-none opacity-60" : ""
+                      heroImgUploading || heroImages.length >= HERO_IMAGES_MAX
+                        ? "pointer-events-none opacity-60"
+                        : ""
                     }`}
                   >
                     <Upload size={13} />
@@ -2641,7 +2994,8 @@ export function AdminSettings({
                     />
                   </label>
                   <span className="text-[10px] text-neutral-600">
-                    PNG / JPG / WebP · nên khổ 16:9, vd 1920×1080 · tối thiểu 960×540
+                    PNG / JPG / WebP · nên khổ 16:9, vd 1920×1080 · tối thiểu
+                    960×540
                   </span>
                 </div>
 
@@ -2659,9 +3013,10 @@ export function AdminSettings({
                 ) : null}
 
                 <p className={HINT}>
-                  Một ảnh thì đứng yên. Từ hai ảnh trở lên thì tự chuyển, 4 giây một ảnh,
-                  có chấm tròn ở góc để khách bấm qua lại, như gachatool. Thứ tự ở đây
-                  là thứ tự chạy. Video đã tải lên vẫn được giữ, đổi lại “Video” là dùng lại.
+                  Một ảnh thì đứng yên. Từ hai ảnh trở lên thì tự chuyển, 4 giây
+                  một ảnh, có chấm tròn ở góc để khách bấm qua lại, như
+                  gachatool. Thứ tự ở đây là thứ tự chạy. Video đã tải lên vẫn
+                  được giữ, đổi lại “Video” là dùng lại.
                 </p>
               </div>
             )}
@@ -2684,8 +3039,8 @@ export function AdminSettings({
               empty="Chưa chọn danh mục nào, trang chủ giữ 4 thẻ mặc định như hiện tại."
             />
             <p className={HINT}>
-              Thẻ lấy ảnh và tên từ chính danh mục. Danh mục chưa có ảnh sẽ bị bỏ qua vì
-              thẻ gần như toàn là ảnh.
+              Thẻ lấy ảnh và tên từ chính danh mục. Danh mục chưa có ảnh sẽ bị
+              bỏ qua vì thẻ gần như toàn là ảnh.
             </p>
           </section>
 
@@ -2714,29 +3069,37 @@ export function AdminSettings({
                 className={FIELD}
               />
               <p className={HINT}>
-                Áp dụng cho cả bốn hàng thẻ. Cắt bớt chứ không bỏ chọn, nên tăng lại là
-                các mục cũ quay về.
+                Áp dụng cho cả bốn hàng thẻ. Cắt bớt chứ không bỏ chọn, nên tăng
+                lại là các mục cũ quay về.
               </p>
             </div>
 
             <div className="border-t border-white/[0.07] pt-4">
               <span className={LABEL}>Các nhóm danh mục</span>
-              {sectionSwitch("groups", "Toàn bộ hàng nhóm, theo thứ tự đã sắp.")}
+              {sectionSwitch(
+                "groups",
+                "Toàn bộ hàng nhóm, theo thứ tự đã sắp.",
+              )}
               <p className={HINT}>
                 Tên nhóm và danh mục trong từng nhóm nằm ở{" "}
-                <Link href="/admin/groups" className="font-bold text-[var(--menzu-accent)] underline">
+                <Link
+                  href="/admin/groups"
+                  className="font-bold text-[var(--menzu-accent)] underline"
+                >
                   Nhóm danh mục
                 </Link>
-                . Một danh mục nằm được trong nhiều nhóm mà vẫn chỉ là một bản ghi, nên sửa
-                tên hay ảnh một lần là mọi nhóm cùng đổi.
+                . Một danh mục nằm được trong nhiều nhóm mà vẫn chỉ là một bản
+                ghi, nên sửa tên hay ảnh một lần là mọi nhóm cùng đổi.
               </p>
             </div>
           </section>
 
-
           <section className={CARD}>
             <span className={HEADING}>SEO Content</span>
-            {sectionSwitch("seo", "Đoạn chữ ở cuối trang chủ. FAQ hiện ở cuối trang chủ và trang Wiki & Hướng dẫn.")}
+            {sectionSwitch(
+              "seo",
+              "Đoạn chữ ở cuối trang chủ. FAQ hiện ở cuối trang chủ và trang Wiki & Hướng dẫn.",
+            )}
 
             <div>
               <span className={LABEL}>Tiêu đề</span>
@@ -2757,8 +3120,8 @@ export function AdminSettings({
                 className={`${FIELD} resize-y`}
               />
               <p className={HINT}>
-                Cách một dòng trống để sang đoạn mới. Nội dung hiện ra đúng như chữ bạn
-                gõ, thẻ HTML sẽ không chạy.
+                Cách một dòng trống để sang đoạn mới. Nội dung hiện ra đúng như
+                chữ bạn gõ, thẻ HTML sẽ không chạy.
               </p>
             </div>
 
@@ -2773,14 +3136,18 @@ export function AdminSettings({
                     <div className="flex items-center gap-2">
                       <input
                         value={entry.q}
-                        onChange={(event) => updateFaq(index, { q: event.target.value })}
+                        onChange={(event) =>
+                          updateFaq(index, { q: event.target.value })
+                        }
                         aria-label={`Câu hỏi ${index + 1}`}
                         className={FIELD}
                         placeholder="Câu hỏi"
                       />
                       <button
                         type="button"
-                        onClick={() => setFaq(faq.filter((_, i) => i !== index))}
+                        onClick={() =>
+                          setFaq(faq.filter((_, i) => i !== index))
+                        }
                         aria-label={`Xóa câu hỏi ${index + 1}`}
                         className={ICON_BUTTON}
                       >
@@ -2789,7 +3156,9 @@ export function AdminSettings({
                     </div>
                     <textarea
                       value={entry.a}
-                      onChange={(event) => updateFaq(index, { a: event.target.value })}
+                      onChange={(event) =>
+                        updateFaq(index, { a: event.target.value })
+                      }
                       aria-label={`Trả lời ${index + 1}`}
                       rows={2}
                       className={`${FIELD} resize-y`}
@@ -2806,15 +3175,17 @@ export function AdminSettings({
                 + Thêm câu hỏi
               </button>
               <p className={HINT}>
-                Câu hỏi thiếu phần trả lời sẽ bị bỏ khi lưu. Danh sách này cũng được gắn
-                dữ liệu FAQ cho Google đọc.
+                Câu hỏi thiếu phần trả lời sẽ bị bỏ khi lưu. Danh sách này cũng
+                được gắn dữ liệu FAQ cho Google đọc.
               </p>
             </div>
           </section>
         </>
       ) : null}
 
-      {error ? <AdminError message={error} onRetry={() => setError(null)} /> : null}
+      {error ? (
+        <AdminError message={error} onRetry={() => setError(null)} />
+      ) : null}
 
       {saved ? (
         <p
