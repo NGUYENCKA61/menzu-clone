@@ -20,7 +20,11 @@ import {
 
 import { WarrantyThread } from "@/components/sites/menzu-lol-f7ae197a/shared/WarrantyThread";
 import { copyText } from "@/lib/clipboard";
-import { REFUND_METHOD, REFUND_METHOD_KEYS, type RefundMethod } from "@/lib/refundRequests";
+import {
+  REFUND_METHOD,
+  REFUND_METHOD_KEYS,
+  type RefundMethod,
+} from "@/lib/refundRequests";
 import { mergeMessages, POLL_MS, type ChatMessage } from "@/lib/warrantyChat";
 import {
   WARRANTY_ISSUE,
@@ -51,6 +55,14 @@ export interface WarrantyTicketView {
   resolvedAt: string | null;
   username: string;
   avatarUrl: string | null;
+  /** The second round's answers, each under the subject it was asked
+   *  about; empty on a ticket from before the round, or one still waiting. */
+  answers: {
+    short: string;
+    label: string;
+    value: string;
+    imageUrls: string[];
+  }[];
   uid: number;
   email: string | null;
   orderCode: string;
@@ -81,10 +93,12 @@ export interface WarrantyTicketView {
 type Move = "IN_PROGRESS" | "RESOLVED" | "REFUND" | "TRANSFERRED";
 
 const CARD = "rounded-xl border border-white/[0.08] bg-[#0e0e11]";
-const LABEL = "text-[10px] font-black uppercase tracking-widest text-neutral-500";
+const LABEL =
+  "text-[10px] font-black uppercase tracking-widest text-neutral-500";
 const FIELD =
   "w-full rounded-xl border border-white/10 bg-neutral-950/60 px-3 py-2.5 text-sm text-white outline-none focus:border-[var(--brand)]/60 transition-colors placeholder-neutral-600";
-const BTN = "inline-flex h-9 items-center gap-2 rounded-lg px-3.5 text-[11px] font-black uppercase tracking-wider transition-colors disabled:cursor-not-allowed disabled:opacity-40";
+const BTN =
+  "inline-flex h-9 items-center gap-2 rounded-lg px-3.5 text-[11px] font-black uppercase tracking-wider transition-colors disabled:cursor-not-allowed disabled:opacity-40";
 
 function money(amount: number): string {
   return `${amount.toLocaleString("vi-VN")}đ`;
@@ -98,17 +112,27 @@ function money(amount: number): string {
  * one, the refund. The page asks every few seconds for the buyer's new
  * messages, so a conversation can be had without reloading.
  */
-export function AdminWarrantyDetail({ ticket, mailOn }: { ticket: WarrantyTicketView; mailOn: boolean }) {
+export function AdminWarrantyDetail({
+  ticket,
+  mailOn,
+}: {
+  ticket: WarrantyTicketView;
+  mailOn: boolean;
+}) {
   const router = useRouter();
   const [note, setNote] = useState("");
   const [busy, setBusy] = useState<Move | "MESSAGE" | null>(null);
   const [error, setError] = useState<string | null>(null);
   /** The refund panel, opened by "Hoàn tiền". */
   const [refunding, setRefunding] = useState(false);
-  const [amount, setAmount] = useState(String(ticket.refundAmount ?? ticket.suggestedRefund));
+  const [amount, setAmount] = useState(
+    String(ticket.refundAmount ?? ticket.suggestedRefund),
+  );
   const [method, setMethod] = useState<RefundMethod>("WALLET");
   /** A bank refund's last step, waiting for its second press. */
-  const [confirming, setConfirming] = useState<"TRANSFERRED" | "WALLET" | null>(null);
+  const [confirming, setConfirming] = useState<"TRANSFERRED" | "WALLET" | null>(
+    null,
+  );
   const [copied, setCopied] = useState(false);
   const [extra, setExtra] = useState<ChatMessage[]>([]);
 
@@ -121,8 +145,14 @@ export function AdminWarrantyDetail({ ticket, mailOn }: { ticket: WarrantyTicket
       ? WARRANTY_REFUND_REPLIES[ticket.isAccount ? "account" : "software"]
       : WARRANTY_REPLIES[ticket.issue];
   const amountNumber = Number(amount);
-  const amountOk = Number.isInteger(amountNumber) && amountNumber > 0 && amountNumber <= ticket.orderTotal;
-  const messages = useMemo(() => mergeMessages(ticket.messages, extra), [ticket.messages, extra]);
+  const amountOk =
+    Number.isInteger(amountNumber) &&
+    amountNumber > 0 &&
+    amountNumber <= ticket.orderTotal;
+  const messages = useMemo(
+    () => mergeMessages(ticket.messages, extra),
+    [ticket.messages, extra],
+  );
   // Worked out from what is on screen, so a buyer's message that arrives by
   // the poll lights it as well as one that came with the page.
   const awaiting = open && messages.at(-1)?.fromShop === false;
@@ -169,7 +199,10 @@ export function AdminWarrantyDetail({ ticket, mailOn }: { ticket: WarrantyTicket
     return () => window.clearInterval(timer);
   }, [open, ticket.id, ticket.status, ticket.bankSubmittedIso, router]);
 
-  async function move(status: Move, more: { method?: RefundMethod; amount?: string } = {}) {
+  async function move(
+    status: Move,
+    more: { method?: RefundMethod; amount?: string } = {},
+  ) {
     if (busy) return;
     setBusy(status);
     setError(null);
@@ -243,12 +276,18 @@ export function AdminWarrantyDetail({ ticket, mailOn }: { ticket: WarrantyTicket
           <span
             className={`inline-flex items-center gap-1.5 rounded-md border px-2 py-0.5 text-[10px] font-black uppercase tracking-wider ${state.tile}`}
           >
-            <span aria-hidden className={`h-1.5 w-1.5 rounded-full ${state.dot}`} />
+            <span
+              aria-hidden
+              className={`h-1.5 w-1.5 rounded-full ${state.dot}`}
+            />
             {state.label}
           </span>
           {awaiting ? (
             <span className="inline-flex items-center gap-1.5 rounded-md border border-[var(--brand)]/50 bg-[var(--brand)]/15 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-white">
-              <MessageCircle className="h-3 w-3 text-[var(--brand)]" aria-hidden />
+              <MessageCircle
+                className="h-3 w-3 text-[var(--brand)]"
+                aria-hidden
+              />
               Khách nhắn mới
             </span>
           ) : null}
@@ -278,7 +317,9 @@ export function AdminWarrantyDetail({ ticket, mailOn }: { ticket: WarrantyTicket
         {/* THE CONVERSATION */}
         <section className={`${CARD} min-w-0`}>
           <div className="border-b border-white/[0.06] px-4 py-3 sm:px-5">
-            <h2 className="text-sm font-black uppercase tracking-wider text-white">Trao đổi với khách</h2>
+            <h2 className="text-sm font-black uppercase tracking-wider text-white">
+              Trao đổi với khách
+            </h2>
           </div>
           <div className="p-4 sm:p-5">
             <WarrantyThread
@@ -294,7 +335,9 @@ export function AdminWarrantyDetail({ ticket, mailOn }: { ticket: WarrantyTicket
           {open ? (
             <div className="flex flex-col gap-3 border-t border-white/[0.06] p-4 sm:p-5">
               <div className="flex flex-wrap items-center justify-between gap-2">
-                <span className={LABEL}>{refunding ? "Lý do hoàn tiền" : "Trả lời khách"}</span>
+                <span className={LABEL}>
+                  {refunding ? "Lý do hoàn tiền" : "Trả lời khách"}
+                </span>
                 {/* The answers this kind of fault gets — or, with a refund on
                     the table, the reasons for one — tucked into one menu
                     rather than a wall of chips. */}
@@ -319,7 +362,12 @@ export function AdminWarrantyDetail({ ticket, mailOn }: { ticket: WarrantyTicket
                 onChange={(event) => setNote(event.target.value.slice(0, 500))}
                 onKeyDown={(event) => {
                   // Ctrl/⌘+Enter sends; a plain Enter is a new line.
-                  if (event.key === "Enter" && (event.ctrlKey || event.metaKey) && !refunding && !confirming) {
+                  if (
+                    event.key === "Enter" &&
+                    (event.ctrlKey || event.metaKey) &&
+                    !refunding &&
+                    !confirming
+                  ) {
                     event.preventDefault();
                     void sendMessage();
                   }
@@ -336,7 +384,9 @@ export function AdminWarrantyDetail({ ticket, mailOn }: { ticket: WarrantyTicket
               {refunding ? (
                 <div className="flex flex-col gap-3 rounded-xl border border-white/10 bg-white/[0.02] p-3.5">
                   <label className="flex flex-col gap-1.5">
-                    <span className={LABEL}>Số tiền hoàn (tối đa {money(ticket.orderTotal)})</span>
+                    <span className={LABEL}>
+                      Số tiền hoàn (tối đa {money(ticket.orderTotal)})
+                    </span>
                     <input
                       type="number"
                       inputMode="numeric"
@@ -365,7 +415,9 @@ export function AdminWarrantyDetail({ ticket, mailOn }: { ticket: WarrantyTicket
                           className="mt-0.5 accent-[var(--brand)]"
                         />
                         <span>
-                          <span className="block text-[12.5px] font-bold text-white">{REFUND_METHOD[key].label}</span>
+                          <span className="block text-[12.5px] font-bold text-white">
+                            {REFUND_METHOD[key].label}
+                          </span>
                           <span className="mt-0.5 block text-[11px] leading-snug text-neutral-500">
                             {REFUND_METHOD[key].hint}
                           </span>
@@ -391,7 +443,9 @@ export function AdminWarrantyDetail({ ticket, mailOn }: { ticket: WarrantyTicket
                     <>
                       <button
                         type="button"
-                        disabled={busy !== null || note.trim().length === 0 || !amountOk}
+                        disabled={
+                          busy !== null || note.trim().length === 0 || !amountOk
+                        }
                         onClick={() => move("REFUND", { method, amount })}
                         className={`${BTN} bg-[var(--brand)] text-white hover:bg-[var(--brand-dark)]`}
                       >
@@ -414,11 +468,17 @@ export function AdminWarrantyDetail({ ticket, mailOn }: { ticket: WarrantyTicket
                     <>
                       <button
                         type="button"
-                        disabled={busy !== null || (confirming === "WALLET" && note.trim().length === 0)}
+                        disabled={
+                          busy !== null ||
+                          (confirming === "WALLET" && note.trim().length === 0)
+                        }
                         onClick={() =>
                           confirming === "TRANSFERRED"
                             ? move("TRANSFERRED")
-                            : move("REFUND", { method: "WALLET", amount: String(refundDue) })
+                            : move("REFUND", {
+                                method: "WALLET",
+                                amount: String(refundDue),
+                              })
                         }
                         className={`${BTN} bg-emerald-600 text-white hover:bg-emerald-500`}
                       >
@@ -484,7 +544,11 @@ export function AdminWarrantyDetail({ ticket, mailOn }: { ticket: WarrantyTicket
                         type="button"
                         disabled={busy !== null || !ticket.bankAccount}
                         onClick={() => setConfirming("TRANSFERRED")}
-                        title={ticket.bankAccount ? undefined : "Khách chưa gửi số tài khoản"}
+                        title={
+                          ticket.bankAccount
+                            ? undefined
+                            : "Khách chưa gửi số tài khoản"
+                        }
                         className={`${BTN} border border-emerald-500/40 bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/20`}
                       >
                         <CheckCircle2 className="h-3.5 w-3.5" aria-hidden />
@@ -533,14 +597,20 @@ export function AdminWarrantyDetail({ ticket, mailOn }: { ticket: WarrantyTicket
         <aside className="flex flex-col gap-4 lg:sticky lg:top-6">
           <section className={`${CARD} p-4`}>
             <span className={LABEL}>Khách hàng</span>
-            <Link href={`/admin/users/${ticket.uid}`} className="group mt-3 flex items-center gap-3">
+            <Link
+              href={`/admin/users/${ticket.uid}`}
+              className="group mt-3 flex items-center gap-3"
+            >
               <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/10 bg-neutral-900 text-sm font-black uppercase text-neutral-400">
                 {ticket.username.slice(0, 1)}
               </span>
               <span className="min-w-0">
                 <span className="flex items-center gap-1.5 truncate text-sm font-bold text-white group-hover:text-[var(--brand)]">
                   {ticket.username}
-                  <ExternalLink className="h-3 w-3 shrink-0 text-neutral-500" aria-hidden />
+                  <ExternalLink
+                    className="h-3 w-3 shrink-0 text-neutral-500"
+                    aria-hidden
+                  />
                 </span>
                 <span className="block truncate text-[11px] text-neutral-500">
                   UID {ticket.uid}
@@ -550,16 +620,70 @@ export function AdminWarrantyDetail({ ticket, mailOn }: { ticket: WarrantyTicket
             </Link>
           </section>
 
+          {/* What the buyer answered in the second round: the desk reads
+              these before anything else (the owner, 12/10/2026). */}
+          {ticket.answers.length > 0 ? (
+            <section className={`${CARD} p-4`}>
+              <span className={LABEL}>
+                Khách bổ sung ({ticket.answers.length} mục)
+              </span>
+              <dl className="mt-3 flex flex-col gap-2.5">
+                {ticket.answers.map((answer, index) => (
+                  <div key={index} className="flex flex-col gap-1">
+                    <dt
+                      className="text-[11px] font-semibold text-neutral-500"
+                      title={answer.label}
+                    >
+                      {answer.short}
+                    </dt>
+                    <dd className="text-[12px] font-bold text-neutral-200">
+                      {answer.value}
+                    </dd>
+                    {answer.imageUrls.length > 0 ? (
+                      <dd className="flex flex-wrap gap-1.5">
+                        {answer.imageUrls.map((url, i) => (
+                          <a
+                            key={url}
+                            href={url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="block h-10 w-[60px] overflow-hidden rounded-md border border-white/10 bg-neutral-950"
+                          >
+                            <Image
+                              src={url}
+                              alt={`${answer.label} ${i + 1}`}
+                              width={120}
+                              height={80}
+                              className="h-full w-full object-cover"
+                            />
+                          </a>
+                        ))}
+                      </dd>
+                    ) : null}
+                  </div>
+                ))}
+              </dl>
+            </section>
+          ) : null}
+
           <section className={`${CARD} p-4`}>
             <span className={LABEL}>Đơn hàng</span>
             <div className="mt-3 flex items-start gap-3">
               <div className="relative aspect-video w-24 shrink-0 overflow-hidden rounded-lg border border-white/5 bg-neutral-900">
                 {ticket.productImage ? (
-                  <Image src={ticket.productImage} alt="" fill sizes="192px" className="object-cover" />
+                  <Image
+                    src={ticket.productImage}
+                    alt=""
+                    fill
+                    sizes="192px"
+                    className="object-cover"
+                  />
                 ) : null}
               </div>
               <div className="min-w-0">
-                <p className="line-clamp-2 text-[13px] font-bold leading-snug text-white">{ticket.productName}</p>
+                <p className="line-clamp-2 text-[13px] font-bold leading-snug text-white">
+                  {ticket.productName}
+                </p>
                 {ticket.packageLabel ? (
                   <span className="mt-1.5 inline-flex rounded-md border border-white/15 bg-white/10 px-2 py-0.5 text-[9px] font-black uppercase tracking-widest text-neutral-300">
                     {ticket.packageLabel}
@@ -578,9 +702,13 @@ export function AdminWarrantyDetail({ ticket, mailOn }: { ticket: WarrantyTicket
                 </Link>
               </dd>
               <dt className="text-neutral-500">Tổng tiền</dt>
-              <dd className="text-right font-semibold tabular-nums text-white">{money(ticket.orderTotal)}</dd>
+              <dd className="text-right font-semibold tabular-nums text-white">
+                {money(ticket.orderTotal)}
+              </dd>
               <dt className="text-neutral-500">Ngày mua</dt>
-              <dd className="text-right text-neutral-300">{ticket.purchasedAt}</dd>
+              <dd className="text-right text-neutral-300">
+                {ticket.purchasedAt}
+              </dd>
               {ticket.isAccount ? (
                 <>
                   <dt className="text-neutral-500">Nhận TK</dt>
@@ -592,18 +720,31 @@ export function AdminWarrantyDetail({ ticket, mailOn }: { ticket: WarrantyTicket
               <dt className="text-neutral-500">Báo lỗi</dt>
               <dd className="text-right text-neutral-300">
                 {ticket.reportedAfter}{" "}
-                <span className={ticket.reportedInWindow ? "text-emerald-400" : "text-neutral-500"}>
-                  ({ticket.reportedInWindow ? "trong 3 ngày đầu" : "sau 3 ngày đầu"})
+                <span
+                  className={
+                    ticket.reportedInWindow
+                      ? "text-emerald-400"
+                      : "text-neutral-500"
+                  }
+                >
+                  (
+                  {ticket.reportedInWindow
+                    ? "trong 3 ngày đầu"
+                    : "sau 3 ngày đầu"}
+                  )
                 </span>
               </dd>
               <dt className="text-neutral-500">Trạng thái đơn</dt>
-              <dd className="text-right text-neutral-300">{ticket.orderStatusLabel}</dd>
+              <dd className="text-right text-neutral-300">
+                {ticket.orderStatusLabel}
+              </dd>
             </dl>
           </section>
 
           {/* The refund, once there is one: settled, or a bank transfer
               waiting on the buyer's account and then on the shop. */}
-          {ticket.refundAmount !== null && (ticket.status === "REFUNDING" || ticket.status === "REFUNDED") ? (
+          {ticket.refundAmount !== null &&
+          (ticket.status === "REFUNDING" || ticket.status === "REFUNDED") ? (
             <section className={`${CARD} p-4`}>
               <span className={LABEL}>Hoàn tiền</span>
               <p className="mt-3 flex items-center gap-2 text-sm font-bold text-white">
@@ -612,14 +753,22 @@ export function AdminWarrantyDetail({ ticket, mailOn }: { ticket: WarrantyTicket
                 ) : (
                   <Banknote className="h-4 w-4 text-neutral-400" aria-hidden />
                 )}
-                {ticket.status === "REFUNDED" ? "Đã hoàn" : "Hoàn"} {money(ticket.refundAmount)}{" "}
-                {ticket.refundMethod ? REFUND_METHOD[ticket.refundMethod].label.replace("Hoàn ", "") : ""}
+                {ticket.status === "REFUNDED" ? "Đã hoàn" : "Hoàn"}{" "}
+                {money(ticket.refundAmount)}{" "}
+                {ticket.refundMethod
+                  ? REFUND_METHOD[ticket.refundMethod].label.replace(
+                      "Hoàn ",
+                      "",
+                    )
+                  : ""}
               </p>
               {ticket.refundMethod === "MANUAL" ? (
                 ticket.bankAccount ? (
                   <dl className="mt-3 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1.5 text-[12px]">
                     <dt className="text-neutral-500">Ngân hàng</dt>
-                    <dd className="font-semibold text-white">{ticket.bankName}</dd>
+                    <dd className="font-semibold text-white">
+                      {ticket.bankName}
+                    </dd>
                     <dt className="text-neutral-500">Số tài khoản</dt>
                     <dd className="flex flex-wrap items-center gap-2 font-mono font-semibold text-white">
                       {ticket.bankAccount}
@@ -635,12 +784,18 @@ export function AdminWarrantyDetail({ ticket, mailOn }: { ticket: WarrantyTicket
                       ) : null}
                     </dd>
                     <dt className="text-neutral-500">Chủ tài khoản</dt>
-                    <dd className="font-semibold text-white">{ticket.accountHolder}</dd>
+                    <dd className="font-semibold text-white">
+                      {ticket.accountHolder}
+                    </dd>
                     <dt className="text-neutral-500">Khách gửi lúc</dt>
-                    <dd className="text-neutral-400">{ticket.bankSubmittedAt}</dd>
+                    <dd className="text-neutral-400">
+                      {ticket.bankSubmittedAt}
+                    </dd>
                   </dl>
                 ) : (
-                  <p className="mt-2 text-[12px] text-amber-300">Đang chờ khách nhập số tài khoản.</p>
+                  <p className="mt-2 text-[12px] text-amber-300">
+                    Đang chờ khách nhập số tài khoản.
+                  </p>
                 )
               ) : null}
             </section>

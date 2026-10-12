@@ -9,6 +9,13 @@ import { ORDER_STATUS_LABELS, type OrderStatus } from "@/lib/orders";
 import { promisedRefund, refundWindowClosed } from "@/lib/refundRequests";
 import { mailEnabled } from "@/lib/settings";
 import { getShopSettings } from "@/lib/settingsStore";
+import {
+  answerLabel,
+  answerShort,
+  readDetails,
+  resolveQuestions,
+} from "@/lib/warrantyDetails";
+import { warrantyKind } from "@/lib/warrantyRequests";
 import { MESSAGE_SELECT, toChatMessage } from "@/lib/warrantyThread";
 
 export const metadata: Metadata = { title: "Chi tiết bảo hành | Quản trị" };
@@ -32,7 +39,11 @@ function stamp(date: Date): string {
  * chi tiết bảo hành trong Dashboard admin để dễ thao tác"): the conversation
  * with its reply box and moves, beside the buyer, the order and the refund.
  */
-export default async function AdminWarrantyTicketPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function AdminWarrantyTicketPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const admin = await getAdmin();
   // notFound, not a redirect to /login: a 404 does not tell an unauthenticated
   // visitor that an admin area exists here at all.
@@ -58,7 +69,10 @@ export default async function AdminWarrantyTicketPage({ params }: { params: Prom
         bankAccount: true,
         accountHolder: true,
         bankSubmittedAt: true,
-        user: { select: { username: true, uid: true, email: true, avatarUrl: true } },
+        details: true,
+        user: {
+          select: { username: true, uid: true, email: true, avatarUrl: true },
+        },
         order: {
           select: {
             code: true,
@@ -67,7 +81,15 @@ export default async function AdminWarrantyTicketPage({ params }: { params: Prom
             createdAt: true,
             loginRevealedAt: true,
             product: {
-              select: { name: true, code: true, imageUrl: true, refundRate: true, productType: true },
+              select: {
+                name: true,
+                code: true,
+                imageUrl: true,
+                refundRate: true,
+                productType: true,
+                warrantyQuestions: true,
+                category: { select: { warrantyQuestions: true } },
+              },
             },
             package: { select: { label: true } },
           },
@@ -77,9 +99,16 @@ export default async function AdminWarrantyTicketPage({ params }: { params: Prom
     }),
   ]);
   if (!ticket) notFound();
+  const questions = resolveQuestions(
+    warrantyKind(ticket.order.product.productType),
+    ticket.order.product.warrantyQuestions,
+    ticket.order.product.category.warrantyQuestions,
+  );
 
   const total = Number(ticket.order.total);
-  const afterDays = Math.floor((ticket.createdAt.getTime() - ticket.order.createdAt.getTime()) / DAY_MS);
+  const afterDays = Math.floor(
+    (ticket.createdAt.getTime() - ticket.order.createdAt.getTime()) / DAY_MS,
+  );
 
   return (
     <AdminShell
@@ -99,34 +128,53 @@ export default async function AdminWarrantyTicketPage({ params }: { params: Prom
           isAccount: ticket.order.product.productType === "ACCOUNT_GAME",
           // What the desk checks first on an account's claim: when the buyer
           // took the sign-in, where their recording should start.
-          loginTakenAt: ticket.order.loginRevealedAt ? stamp(ticket.order.loginRevealedAt) : null,
+          loginTakenAt: ticket.order.loginRevealedAt
+            ? stamp(ticket.order.loginRevealedAt)
+            : null,
           createdAt: stamp(ticket.createdAt),
           createdAtIso: ticket.createdAt.toISOString(),
           resolvedAt: ticket.resolvedAt ? stamp(ticket.resolvedAt) : null,
           username: ticket.user.username,
           avatarUrl: ticket.user.avatarUrl,
+          // The second round, under the words the buyer was asked with; a
+          // ticket from before the round has none.
+          answers: readDetails(ticket.details).map((answer) => ({
+            short: answerShort(answer, questions),
+            label: answerLabel(answer, questions),
+            value: answer.value,
+            imageUrls: answer.imageUrls,
+          })),
           uid: ticket.user.uid,
           email: ticket.user.email,
           orderCode: ticket.order.code,
           orderPaid: ticket.order.status === "PAID",
           orderStatusLabel:
-            ORDER_STATUS_LABELS[ticket.order.status as OrderStatus] ?? ticket.order.status,
+            ORDER_STATUS_LABELS[ticket.order.status as OrderStatus] ??
+            ticket.order.status,
           productName: ticket.order.product.name ?? ticket.order.product.code,
           productImage: ticket.order.product.imageUrl,
           packageLabel: ticket.order.package?.label ?? null,
           orderTotal: total,
           // The published rate is a starting figure; the desk can type any
           // amount up to the order total.
-          suggestedRefund: promisedRefund(total, ticket.order.product.refundRate) ?? total,
+          suggestedRefund:
+            promisedRefund(total, ticket.order.product.refundRate) ?? total,
           purchasedAt: stamp(ticket.order.createdAt),
-          reportedAfter: afterDays <= 0 ? "trong ngày mua" : `sau ${afterDays} ngày`,
-          reportedInWindow: !refundWindowClosed(ticket.order.createdAt, ticket.createdAt),
-          refundAmount: ticket.refundAmount === null ? null : Number(ticket.refundAmount),
+          reportedAfter:
+            afterDays <= 0 ? "trong ngày mua" : `sau ${afterDays} ngày`,
+          reportedInWindow: !refundWindowClosed(
+            ticket.order.createdAt,
+            ticket.createdAt,
+          ),
+          refundAmount:
+            ticket.refundAmount === null ? null : Number(ticket.refundAmount),
           refundMethod: ticket.refundMethod,
           bankName: ticket.bankName,
           bankAccount: ticket.bankAccount,
           accountHolder: ticket.accountHolder,
-          bankSubmittedAt: ticket.bankSubmittedAt ? stamp(ticket.bankSubmittedAt) : null,
+          bankSubmittedAt: ticket.bankSubmittedAt
+            ? stamp(ticket.bankSubmittedAt)
+            : null,
           bankSubmittedIso: ticket.bankSubmittedAt?.toISOString() ?? null,
           messages: ticket.messages.map(toChatMessage),
         }}

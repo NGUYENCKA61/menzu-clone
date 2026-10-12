@@ -7,12 +7,10 @@ import { useEffect, useRef, useState } from "react";
 
 import {
   ANSWER_MAX,
-  DETAIL_QUESTIONS,
   IMAGES_PER_ANSWER,
   wantsPhoto,
   type DetailQuestion,
 } from "@/lib/warrantyDetails";
-import type { WarrantyKind } from "@/lib/warrantyRequests";
 
 const FIELD =
   "w-full rounded-xl border border-white/10 bg-neutral-950/60 px-4 py-3 text-sm text-white outline-none transition-colors placeholder-neutral-500 focus:border-[var(--menzu-accent)]/60";
@@ -38,14 +36,14 @@ const PRIMARY =
  */
 export function WarrantyDetailsForm({
   ticketId,
-  kind,
+  questions,
 }: {
   ticketId: string;
-  /** Which set of questions: a tool's machine, or an account's sign-in. */
-  kind: WarrantyKind;
+  /** The set this product asks: its own, its game's, or the default
+   *  (resolveQuestions on the server). */
+  questions: readonly DetailQuestion[];
 }) {
   const router = useRouter();
-  const questions = DETAIL_QUESTIONS[kind];
   const [values, setValues] = useState<Record<string, string>>({});
   const [files, setFiles] = useState<Record<string, File[]>>({});
   const [previews, setPreviews] = useState<Record<string, string[]>>({});

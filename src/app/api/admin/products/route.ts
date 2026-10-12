@@ -1,6 +1,12 @@
+import { Prisma } from "@prisma/client";
 import { NextResponse } from "next/server";
 
 import { parseLoginInput } from "@/lib/accountLogin";
+import {
+  QUESTIONS_BAD,
+  QUESTIONS_BAD_MESSAGE,
+  readQuestionSet,
+} from "@/lib/warrantyQuestionsInput";
 import { ensurePoolPackage } from "@/lib/accountPool";
 import { FORBIDDEN, getAdmin } from "@/lib/admin";
 import { db } from "@/lib/db";
@@ -218,6 +224,9 @@ export async function PATCH(request: Request) {
 
   const body = (await request.json().catch(() => null)) as {
     code?: string;
+    /** This account's own second-round warranty questions: a list
+     *  (src/lib/warrantyDetails.ts), or null to inherit the game's. */
+    warrantyQuestions?: unknown;
     status?: string;
     price?: number;
     imageUrl?: string;
@@ -239,6 +248,11 @@ export async function PATCH(request: Request) {
 
   const code = body?.code;
   if (!code) return NextResponse.json({ error: "Thiếu mã" }, { status: 400 });
+
+  const questions = readQuestionSet(body?.warrantyQuestions);
+  if (questions === QUESTIONS_BAD) {
+    return NextResponse.json({ error: QUESTIONS_BAD_MESSAGE }, { status: 400 });
+  }
 
   const login = parseLoginInput(body);
   if (login.kind === "invalid") {
@@ -362,6 +376,8 @@ export async function PATCH(request: Request) {
       ...(slug ? { slug } : {}),
       ...(typeof body?.accountPool === "boolean" ? { accountPool: body.accountPool } : {}),
       ...(login.kind === "set" ? login.value : {}),
+      // null clears it, which hands the second round back to the game's set.
+      ...(questions !== undefined ? { warrantyQuestions: questions ?? Prisma.DbNull } : {}),
     },
   });
   // The address it was born with keeps answering, redirecting to the new

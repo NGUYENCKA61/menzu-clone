@@ -6,6 +6,8 @@ import { ArrowLeft } from "lucide-react";
 import { AdminAccountDetail } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminAccountDetail";
 import { AdminShell } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminShell";
 import { AdminSoftwareDetail } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminSoftwareDetail";
+import { WarrantyQuestionsEditor } from "@/components/sites/menzu-lol-f7ae197a/shared/WarrantyQuestionsEditor";
+import { parseQuestionSet, resolveQuestions } from "@/lib/warrantyDetails";
 import { getAdmin } from "@/lib/admin";
 import { db } from "@/lib/db";
 import { isHtmlBody, plainToDocHtml } from "@/lib/docHtml";
@@ -45,10 +47,13 @@ export default async function AdminAccountDetailPage({
   const product = await db.product.findFirst({
     where: { code, deletedAt: null, productType: "ACCOUNT_GAME" },
     include: {
-      category: { select: { name: true, slug: true } },
+      category: { select: { name: true, slug: true, warrantyQuestions: true } },
       _count: { select: { orders: true } },
       tags: { select: { label: true } },
-      images: { select: { id: true, url: true }, orderBy: { sortOrder: "asc" } },
+      images: {
+        select: { id: true, url: true },
+        orderBy: { sortOrder: "asc" },
+      },
       skins: {
         where: { kind: { in: ["WEAPON_SKIN", "AGENT", "BUDDY"] } },
         select: { kind: true, name: true },
@@ -73,7 +78,9 @@ export default async function AdminAccountDetailPage({
     const software = await db.product.findFirst({
       where: { code, deletedAt: null, productType: "SOFTWARE_GAME" },
       include: {
-        category: { select: { name: true, slug: true } },
+        category: {
+          select: { name: true, slug: true, warrantyQuestions: true },
+        },
         packages: {
           orderBy: { price: "asc" },
           include: { _count: { select: { orders: true } } },
@@ -153,6 +160,25 @@ export default async function AdminAccountDetailPage({
             })),
           }}
         />
+        {/* This tool's own second-round questions; the game's set, where
+            the game has one, is what it starts from and falls back to. */}
+        <div className="mt-5">
+          <WarrantyQuestionsEditor
+            endpoint="/api/admin/software"
+            ident={{ code: software.code }}
+            initial={software.warrantyQuestions}
+            bank={resolveQuestions(
+              "software",
+              null,
+              software.category.warrantyQuestions,
+            )}
+            inheritName={
+              parseQuestionSet(software.category.warrantyQuestions)
+                ? `bộ của ${software.category.name}`
+                : "bộ mặc định"
+            }
+          />
+        </div>
       </AdminShell>
     );
   }
@@ -226,17 +252,39 @@ export default async function AdminAccountDetailPage({
           characterNames: product.skins
             .filter((s) => s.kind === "AGENT")
             .map((s) => s.name),
-          gearNames: product.skins.filter((s) => s.kind === "BUDDY").map((s) => s.name),
+          gearNames: product.skins
+            .filter((s) => s.kind === "BUDDY")
+            .map((s) => s.name),
           loginUsername: product.loginUsername ?? "",
           loginPassword: product.loginPassword ?? "",
           loginNote: product.loginNote ?? "",
           buyer: product.orders[0]
-            ? { username: product.orders[0].user.username, orderCode: product.orders[0].code }
+            ? {
+                username: product.orders[0].user.username,
+                orderCode: product.orders[0].code,
+              }
             : null,
           accountPool: product.accountPool,
           pool,
         }}
       />
+      <div className="mt-5">
+        <WarrantyQuestionsEditor
+          endpoint="/api/admin/products"
+          ident={{ code: product.code }}
+          initial={product.warrantyQuestions}
+          bank={resolveQuestions(
+            "account",
+            null,
+            product.category.warrantyQuestions,
+          )}
+          inheritName={
+            parseQuestionSet(product.category.warrantyQuestions)
+              ? `bộ của ${product.category.name}`
+              : "bộ mặc định"
+          }
+        />
+      </div>
     </AdminShell>
   );
 }

@@ -21,7 +21,7 @@ import { WarrantyChat } from "@/components/sites/menzu-lol-f7ae197a/shared/Warra
 import { WarrantyDetailsForm } from "@/components/sites/menzu-lol-f7ae197a/shared/WarrantyDetailsForm";
 import { WarrantyRequestForm } from "@/components/sites/menzu-lol-f7ae197a/shared/WarrantyRequestForm";
 import { maskAccount } from "@/lib/bankRefund";
-import { questionFor, readDetails } from "@/lib/warrantyDetails";
+import { answerLabel, answerShort, readDetails, resolveQuestions } from "@/lib/warrantyDetails";
 import { db } from "@/lib/db";
 import { LOGIN_ORDER_SELECT, signInHold } from "@/lib/loginReveal";
 import { dayStamp, dayTime } from "@/lib/dayGroups";
@@ -143,7 +143,14 @@ export default async function WarrantyRequestPage({
       total: true,
       quantity: true,
       createdAt: true,
-      product: { select: { ...LOGIN_ORDER_SELECT.product.select, imageUrl: true } },
+      product: {
+        select: {
+          ...LOGIN_ORDER_SELECT.product.select,
+          imageUrl: true,
+          warrantyQuestions: true,
+          category: { select: { warrantyQuestions: true } },
+        },
+      },
       package: { select: { label: true } },
       warrantyRequests: {
         orderBy: { createdAt: "desc" },
@@ -173,6 +180,13 @@ export default async function WarrantyRequestPage({
   // A tool's report and an account's ask about different faults, and an
   // account's waits until its sign-in has been taken (the owner, 08/10/2026).
   const kind = warrantyKind(order.product.productType);
+  // The second round's questions: the product's own, its game's, or the
+  // default set for its kind (the owner, 12/10/2026).
+  const questions = resolveQuestions(
+    kind,
+    order.product.warrantyQuestions,
+    order.product.category.warrantyQuestions,
+  );
   const blocked = warrantyBlockedReason({
     orderStatus: order.status,
     openRequest: order.warrantyRequests.some((r) => warrantyOpen(r.status)),
@@ -342,7 +356,7 @@ export default async function WarrantyRequestPage({
           <section className={`${CARD} border-[var(--menzu-accent)]/30`}>
             {/* The heading lives in the form, where the count of answers
                 can sit beside it. */}
-            <WarrantyDetailsForm ticketId={latest.id} kind={kind} />
+            <WarrantyDetailsForm ticketId={latest.id} questions={questions} />
           </section>
         ) : null}
 
@@ -505,14 +519,13 @@ export default async function WarrantyRequestPage({
                         </summary>
                         <dl className="mt-3 flex flex-col gap-2.5">
                           {answers.map((answer) => {
-                            const question = questionFor(kind, answer.key);
                             return (
                               <div
                                 key={answer.key}
                                 className="grid gap-x-6 gap-y-1 sm:grid-cols-[minmax(0,240px)_minmax(0,260px)_1fr]"
                               >
                                 <dt className="text-[12px] font-semibold text-neutral-500 sm:pt-0.5">
-                                  {question?.short ?? answer.key}
+                                  {answerShort(answer, questions)}
                                 </dt>
                                 <dd className="text-[13px] font-bold text-neutral-200 sm:pt-0.5">
                                   {answer.value}
@@ -532,7 +545,7 @@ export default async function WarrantyRequestPage({
                                     >
                                       <Image
                                         src={url}
-                                        alt={`${question?.label ?? "Ảnh bổ sung"} ${index + 1}`}
+                                        alt={`${answerLabel(answer, questions)} ${index + 1}`}
                                         width={120}
                                         height={80}
                                         className="h-full w-full object-cover"

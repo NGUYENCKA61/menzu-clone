@@ -14,6 +14,11 @@ import { WARRANTY_ISSUE_KEYS, type WarrantyKind } from "@/lib/warrantyRequests";
  * đủ 4 ô cho 1 câu trả lời"), or a line the buyer types. The screenshot only
  * appears once they say they did the thing, because that is the answer worth
  * a picture ("khi chọn vào tôi đã làm rồi thì sẽ mở ra chỗ upload hình").
+ *
+ * The set below is the default. A game (category) or a product can carry a
+ * set of its own, written in the admin and stored as JSON (the owner,
+ * 12/10/2026: "không phải game nào cũng giống game nào", "mặc định cứ theo
+ * mẫu hiện tại"); parseQuestionSet reads one back, resolveQuestions picks.
  */
 export interface DetailOption {
   value: string;
@@ -53,13 +58,19 @@ function offQuestion(
   thing: string,
 ): DetailQuestion {
   const options: readonly DetailOption[] = [
-    { value: `Tôi đã tắt ${thing} rồi`, hint: "Tắt xong rồi, gửi kèm ảnh cho shop xem." },
+    {
+      value: `Tôi đã tắt ${thing} rồi`,
+      hint: "Tắt xong rồi, gửi kèm ảnh cho shop xem.",
+    },
     { value: `Tôi chưa tắt ${thing}`, hint: "Chưa làm bước này bao giờ." },
     {
       value: "Tôi đã thử nhưng không tắt được",
       hint: "Làm theo hướng dẫn mà máy vẫn bật lại.",
     },
-    { value: "Tôi không rõ cái này", hint: "Không tìm thấy chỗ chỉnh, cần shop chỉ giúp." },
+    {
+      value: "Tôi không rõ cái này",
+      hint: "Không tìm thấy chỗ chỉnh, cần shop chỉ giúp.",
+    },
   ];
   return {
     key,
@@ -83,8 +94,14 @@ const SOFTWARE_QUESTIONS: readonly DetailQuestion[] = [
     // kìa, tạo câu trả lời đi"). The picture stays due whichever is picked:
     // it carries the build number, which is what the desk reads.
     options: [
-      { value: "Tôi dùng Windows 11", hint: "Bản 11, bất kể 22H2, 23H2 hay 24H2." },
-      { value: "Tôi dùng Windows 10", hint: "Bản 10 từ 2004 trở lên, ví dụ 20H2, 21H2, 22H2." },
+      {
+        value: "Tôi dùng Windows 11",
+        hint: "Bản 11, bất kể 22H2, 23H2 hay 24H2.",
+      },
+      {
+        value: "Tôi dùng Windows 10",
+        hint: "Bản 10 từ 2004 trở lên, ví dụ 20H2, 21H2, 22H2.",
+      },
       {
         value: "Tôi dùng bản cũ hơn",
         // A 1909 machine is a Windows 10 machine, so it would land on the
@@ -92,7 +109,10 @@ const SOFTWARE_QUESTIONS: readonly DetailQuestion[] = [
         // "bổ sung trường hợp là win 10 bản cũ như 1909 trở xuống").
         hint: "Windows 10 bản 1909 trở xuống, hoặc Windows 8.1, 8, 7.",
       },
-      { value: "Tôi không rõ bản nào", hint: "Chưa xem winver, gửi ảnh để shop đọc giúp." },
+      {
+        value: "Tôi không rõ bản nào",
+        hint: "Chưa xem winver, gửi ảnh để shop đọc giúp.",
+      },
     ],
     photo: true,
   },
@@ -102,10 +122,22 @@ const SOFTWARE_QUESTIONS: readonly DetailQuestion[] = [
     short: "Bộ cài",
     hint: "Visual C++, .NET Framework và DirectX theo trang hướng dẫn.",
     options: [
-      { value: "Tôi đã cài đủ cả ba", hint: "Cài xong hết, gửi kèm ảnh Apps & features." },
-      { value: "Tôi chưa cài cái nào", hint: "Chưa cài, hoặc không biết cài cái nào." },
-      { value: "Tôi cài thiếu một phần", hint: "Có cái cài được, có cái báo lỗi." },
-      { value: "Tôi không rõ cái này", hint: "Không chắc máy đã có sẵn hay chưa." },
+      {
+        value: "Tôi đã cài đủ cả ba",
+        hint: "Cài xong hết, gửi kèm ảnh Apps & features.",
+      },
+      {
+        value: "Tôi chưa cài cái nào",
+        hint: "Chưa cài, hoặc không biết cài cái nào.",
+      },
+      {
+        value: "Tôi cài thiếu một phần",
+        hint: "Có cái cài được, có cái báo lỗi.",
+      },
+      {
+        value: "Tôi không rõ cái này",
+        hint: "Không chắc máy đã có sẵn hay chưa.",
+      },
     ],
     photo: true,
     photoWhen: "Tôi đã cài đủ cả ba",
@@ -140,10 +172,19 @@ const SOFTWARE_QUESTIONS: readonly DetailQuestion[] = [
     short: "Chế độ hiển thị",
     hint: "Hầu hết tool cần cửa sổ không viền để vẽ được lên game.",
     options: [
-      { value: "Đang để không viền", hint: "Borderless, cửa sổ tràn màn hình, không khung." },
-      { value: "Đang để toàn màn hình", hint: "Fullscreen, game chiếm riêng màn hình." },
+      {
+        value: "Đang để không viền",
+        hint: "Borderless, cửa sổ tràn màn hình, không khung.",
+      },
+      {
+        value: "Đang để toàn màn hình",
+        hint: "Fullscreen, game chiếm riêng màn hình.",
+      },
       { value: "Đang để cửa sổ", hint: "Windowed, có khung và thanh tiêu đề." },
-      { value: "Tôi không nhớ", hint: "Chưa vào phần cài đặt hiển thị của game." },
+      {
+        value: "Tôi không nhớ",
+        hint: "Chưa vào phần cài đặt hiển thị của game.",
+      },
     ],
   },
 ];
@@ -177,9 +218,15 @@ const ACCOUNT_QUESTIONS: readonly DetailQuestion[] = [
     short: "Mật khẩu",
     hint: "Đổi mật khẩu trước khi báo lỗi làm shop không kiểm tra được.",
     options: [
-      { value: "Tôi đã đổi mật khẩu", hint: "Đổi rồi, gửi kèm ảnh màn hình đổi mật khẩu." },
+      {
+        value: "Tôi đã đổi mật khẩu",
+        hint: "Đổi rồi, gửi kèm ảnh màn hình đổi mật khẩu.",
+      },
       { value: "Tôi chưa đổi", hint: "Giữ nguyên mật khẩu shop giao." },
-      { value: "Tôi đã thử nhưng không đổi được", hint: "Bấm đổi nhưng hệ thống không cho." },
+      {
+        value: "Tôi đã thử nhưng không đổi được",
+        hint: "Bấm đổi nhưng hệ thống không cho.",
+      },
       { value: "Tôi không nhớ", hint: "Không nhớ có đổi hay không." },
     ],
     photo: true,
@@ -187,10 +234,115 @@ const ACCOUNT_QUESTIONS: readonly DetailQuestion[] = [
   },
 ];
 
-export const DETAIL_QUESTIONS: Record<WarrantyKind, readonly DetailQuestion[]> = {
-  software: SOFTWARE_QUESTIONS,
-  account: ACCOUNT_QUESTIONS,
-};
+/** The default set for each kind of product: what a report asks unless the
+ *  game or the product says otherwise. */
+export const DETAIL_QUESTIONS: Record<WarrantyKind, readonly DetailQuestion[]> =
+  {
+    software: SOFTWARE_QUESTIONS,
+    account: ACCOUNT_QUESTIONS,
+  };
+
+// ---- a set the shop writes --------------------------------------------------
+
+export const QUESTIONS_MAX = 12;
+export const QUESTION_LABEL_MAX = 80;
+export const QUESTION_SHORT_MAX = 30;
+export const QUESTION_HINT_MAX = 160;
+export const OPTIONS_MAX = 6;
+export const OPTION_MAX = 80;
+export const OPTION_HINT_MAX = 120;
+export const PLACEHOLDER_MAX = 80;
+
+/** A key as the editor writes one: letters, digits, underscores. */
+const KEY = /^[A-Z][A-Z0-9_]{0,31}$/;
+
+function text(value: unknown, max: number): string {
+  return typeof value === "string" ? value.trim().slice(0, max) : "";
+}
+
+/** The answers of one question, or null where the list is not usable. */
+function parseOptions(raw: unknown): DetailOption[] | null {
+  if (raw === undefined || raw === null) return [];
+  if (!Array.isArray(raw)) return null;
+  // One answer is no choice; none means the buyer types.
+  if (raw.length === 1 || raw.length > OPTIONS_MAX) return null;
+  const out: DetailOption[] = [];
+  for (const item of raw) {
+    if (!item || typeof item !== "object") return null;
+    const row = item as Record<string, unknown>;
+    const value = text(row.value, OPTION_MAX);
+    if (!value || out.some((o) => o.value === value)) return null;
+    out.push({ value, hint: text(row.hint, OPTION_HINT_MAX) });
+  }
+  return out;
+}
+
+/**
+ * A question set as a category or a product stores it: the shape of the
+ * default set, checked field by field. Anything that is not a usable set
+ * (not a list, empty, a bad key, a question with one answer…) reads as
+ * null, which is "inherit", so a broken save can never leave a product
+ * with no questions at all.
+ */
+export function parseQuestionSet(raw: unknown): DetailQuestion[] | null {
+  if (!Array.isArray(raw) || raw.length === 0 || raw.length > QUESTIONS_MAX)
+    return null;
+  const out: DetailQuestion[] = [];
+  const keys = new Set<string>();
+  for (const item of raw) {
+    if (!item || typeof item !== "object") return null;
+    const row = item as Record<string, unknown>;
+    const key = text(row.key, 32).toUpperCase();
+    if (
+      !KEY.test(key) ||
+      keys.has(key) ||
+      WARRANTY_ISSUE_KEYS.includes(key as never)
+    )
+      return null;
+    const label = text(row.label, QUESTION_LABEL_MAX);
+    if (!label) return null;
+    const options = parseOptions(row.options);
+    if (options === null) return null;
+    const short =
+      text(row.short, QUESTION_SHORT_MAX) || label.slice(0, QUESTION_SHORT_MAX);
+    const placeholder = text(row.placeholder, PLACEHOLDER_MAX);
+    const photo = row.photo === true;
+    // An answer that is not one of the options means "whichever is picked".
+    const when = photo ? text(row.photoWhen, OPTION_MAX) : "";
+    const photoWhen =
+      when && options.some((o) => o.value === when) ? when : undefined;
+    keys.add(key);
+    out.push({
+      key,
+      label,
+      short,
+      hint: text(row.hint, QUESTION_HINT_MAX),
+      options,
+      ...(placeholder ? { placeholder } : {}),
+      ...(photo ? { photo: true } : {}),
+      ...(photoWhen ? { photoWhen } : {}),
+    });
+  }
+  return out;
+}
+
+/**
+ * The questions a product's report asks: the product's own set, else its
+ * game's, else the default for its kind.
+ */
+export function resolveQuestions(
+  kind: WarrantyKind,
+  product: unknown,
+  category: unknown,
+): readonly DetailQuestion[] {
+  return (
+    parseQuestionSet(product) ??
+    parseQuestionSet(category) ??
+    DETAIL_QUESTIONS[kind]
+  );
+}
+
+// ---- the answers ------------------------------------------------------------
 
 /** One answer as it is stored: what was picked or typed, and its pictures. */
 export interface DetailAnswer {
@@ -202,6 +354,12 @@ export interface DetailAnswer {
    * 11/10/2026: "ảnh đính kèm có thể gửi nhiều ảnh 1 lần").
    */
   imageUrls: string[];
+  /**
+   * The question's words at the time of answering, kept with the answer so
+   * a set the shop rewrites later does not change what an old ticket says.
+   */
+  label?: string;
+  short?: string;
 }
 
 export const ANSWER_MAX = 200;
@@ -247,20 +405,49 @@ export function readDetails(raw: string | null): DetailAnswer[] {
     // A round answered before pictures came in bunches kept a single
     // imageUrl; it reads as a list of one.
     const list = Array.isArray(row.imageUrls) ? row.imageUrls : [row.imageUrl];
+    const label = text(row.label, QUESTION_LABEL_MAX);
+    const short = text(row.short, QUESTION_SHORT_MAX);
     out.push({
       key,
       value: value.slice(0, ANSWER_MAX),
       imageUrls: list
-        .filter((url): url is string => typeof url === "string" && url.length > 0)
+        .filter(
+          (url): url is string => typeof url === "string" && url.length > 0,
+        )
         .slice(0, IMAGES_PER_ANSWER),
+      ...(label ? { label } : {}),
+      ...(short ? { short } : {}),
     });
   }
   return out;
 }
 
-/** The label a key was asked under, for reading an answer back. */
-export function questionFor(kind: WarrantyKind, key: string): DetailQuestion | null {
-  return DETAIL_QUESTIONS[kind].find((q) => q.key === key) ?? null;
+/** The question an answer was given to, in the set the report asked. */
+export function questionFor(
+  questions: readonly DetailQuestion[],
+  key: string,
+): DetailQuestion | null {
+  return questions.find((q) => q.key === key) ?? null;
+}
+
+/** The subject an answer is listed under: its own words first, then the
+ *  set's, then the bare key of a set that has since changed. */
+export function answerShort(
+  answer: DetailAnswer,
+  questions: readonly DetailQuestion[],
+): string {
+  return (
+    answer.short ?? questionFor(questions, answer.key)?.short ?? answer.key
+  );
+}
+
+export function answerLabel(
+  answer: DetailAnswer,
+  questions: readonly DetailQuestion[],
+): string {
+  return (
+    answer.label ?? questionFor(questions, answer.key)?.label ?? answer.key
+  );
 }
 
 /**
@@ -269,26 +456,36 @@ export function questionFor(kind: WarrantyKind, key: string): DetailQuestion | n
  * heading prints ("4/7").
  */
 export function missingDetails(
-  kind: WarrantyKind,
+  questions: readonly DetailQuestion[],
   answers: DetailAnswer[],
 ): DetailQuestion[] {
   const by = new Map(answers.map((a) => [a.key, a]));
-  return DETAIL_QUESTIONS[kind].filter((q) => {
+  return questions.filter((q) => {
     const answer = by.get(q.key);
     if (!answer) return true;
-    if (q.options.length > 0 && !q.options.some((o) => o.value === answer.value)) return true;
-    if (wantsPhoto(q, answer.value) && answer.imageUrls.length === 0) return true;
+    if (
+      q.options.length > 0 &&
+      !q.options.some((o) => o.value === answer.value)
+    )
+      return true;
+    if (wantsPhoto(q, answer.value) && answer.imageUrls.length === 0)
+      return true;
     return false;
   });
 }
 
-export function detailsComplete(kind: WarrantyKind, answers: DetailAnswer[]): boolean {
-  return missingDetails(kind, answers).length === 0;
+export function detailsComplete(
+  questions: readonly DetailQuestion[],
+  answers: DetailAnswer[],
+): boolean {
+  return missingDetails(questions, answers).length === 0;
 }
 
-/** Guard: every question key is one of a kind's own, and unique. */
-export function knownDetailKeys(kind: WarrantyKind): Set<string> {
-  return new Set(DETAIL_QUESTIONS[kind].map((q) => q.key));
+/** Guard: every question key is one of the set's own, and unique. */
+export function knownDetailKeys(
+  questions: readonly DetailQuestion[],
+): Set<string> {
+  return new Set(questions.map((q) => q.key));
 }
 
 /** Nothing here may collide with an issue key; they travel in the same form. */

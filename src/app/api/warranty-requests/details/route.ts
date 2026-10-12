@@ -7,10 +7,10 @@ import { getCurrentUser } from "@/lib/session";
 import { escapeTelegramHtml, notifyTelegramAdmins } from "@/lib/telegramNotify";
 import {
   ANSWER_MAX,
-  DETAIL_QUESTIONS,
   detailsComplete,
   IMAGES_PER_ANSWER,
   missingDetails,
+  resolveQuestions,
   type DetailAnswer,
 } from "@/lib/warrantyDetails";
 import { storeWarrantyImage } from "@/lib/warrantyImage";
@@ -51,7 +51,15 @@ export async function POST(request: Request) {
       order: {
         select: {
           code: true,
-          product: { select: { name: true, code: true, productType: true } },
+          product: {
+            select: {
+              name: true,
+              code: true,
+              productType: true,
+              warrantyQuestions: true,
+              category: { select: { warrantyQuestions: true } },
+            },
+          },
         },
       },
     },
@@ -71,8 +79,14 @@ export async function POST(request: Request) {
   }
 
   const kind = warrantyKind(ticket.order.product.productType);
+  // The product's own questions, its game's, or the default set.
+  const questions = resolveQuestions(
+    kind,
+    ticket.order.product.warrantyQuestions,
+    ticket.order.product.category.warrantyQuestions,
+  );
   const answers: DetailAnswer[] = [];
-  for (const question of DETAIL_QUESTIONS[kind]) {
+  for (const question of questions) {
     const raw = form.get(`value-${question.key}`);
     const value = typeof raw === "string" ? raw.trim().slice(0, ANSWER_MAX) : "";
     // The pictures are stored before the round is judged complete, so a
@@ -91,17 +105,25 @@ export async function POST(request: Request) {
       if (picture.url) imageUrls.push(picture.url);
     }
     if (!value && imageUrls.length === 0) continue;
-    answers.push({ key: question.key, value, imageUrls });
+    // The question's words travel with the answer, so a set the shop
+    // rewrites later does not change what this ticket says.
+    answers.push({
+      key: question.key,
+      value,
+      imageUrls,
+      label: question.label,
+      short: question.short,
+    });
   }
 
-  const missing = missingDetails(kind, answers);
+  const missing = missingDetails(questions, answers);
   if (missing.length > 0) {
     return NextResponse.json(
       { error: `Còn thiếu: ${missing.map((q) => q.label).join(", ")}` },
       { status: 400 },
     );
   }
-  if (!detailsComplete(kind, answers)) {
+  if (!detailsComplete(questions, answers)) {
     return NextResponse.json({ error: "Thông tin bổ sung chưa hợp lệ" }, { status: 400 });
   }
 

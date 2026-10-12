@@ -1,7 +1,13 @@
+import { Prisma } from "@prisma/client";
 import { NextResponse } from "next/server";
 
 import { FORBIDDEN, getAdmin } from "@/lib/admin";
 import { db } from "@/lib/db";
+import {
+  QUESTIONS_BAD,
+  QUESTIONS_BAD_MESSAGE,
+  readQuestionSet,
+} from "@/lib/warrantyQuestionsInput";
 import { docHtmlIsEmpty, isHtmlBody, sanitizeDocHtml } from "@/lib/docHtml";
 import {
   cleanFeaturesNote,
@@ -213,6 +219,9 @@ export async function PATCH(request: Request) {
     /** "Tên bản tải", plain text; "" puts the default name back. */
     downloadName?: string;
     docsUrl?: string;
+    /** This tool's own second-round warranty questions: a list
+     *  (src/lib/warrantyDetails.ts), or null to inherit the game's. */
+    warrantyQuestions?: unknown;
     /** Whole percent 0–100; "" clears the promise back to "not set". */
     refundRate?: number | string | null;
     /** The pills beside the detection state, sent whole. An empty list takes
@@ -270,6 +279,10 @@ export async function PATCH(request: Request) {
       { error: `Tên bản tải tối đa ${DOWNLOAD_NAME_MAX_LENGTH} ký tự` },
       { status: 400 },
     );
+  }
+  const questions = readQuestionSet(body?.warrantyQuestions);
+  if (questions === QUESTIONS_BAD) {
+    return NextResponse.json({ error: QUESTIONS_BAD_MESSAGE }, { status: 400 });
   }
 
   const product = await db.product.findFirst({
@@ -368,6 +381,8 @@ export async function PATCH(request: Request) {
       ...(downloadName !== undefined ? { downloadName: downloadName || null } : {}),
       // Same convention as the others: "" clears the link and hides its button.
       ...(body?.docsUrl !== undefined ? { docsUrl: body.docsUrl.trim() || null } : {}),
+      // null clears it, which hands the second round back to the game's set.
+      ...(questions !== undefined ? { warrantyQuestions: questions ?? Prisma.DbNull } : {}),
       // "" clears it, which takes the "Tỷ lệ hoàn trả" line off the policy
       // block rather than printing a promise of zero.
       ...(refundRate !== RATE_ABSENT ? { refundRate } : {}),

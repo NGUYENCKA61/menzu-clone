@@ -4,14 +4,21 @@ import {
   ANSWER_MAX,
   DETAIL_KEYS_ARE_DISTINCT,
   DETAIL_QUESTIONS,
+  answerShort,
   detailsComplete,
   IMAGES_PER_ANSWER,
   missingDetails,
+  parseQuestionSet,
   questionFor,
+  QUESTIONS_MAX,
   readDetails,
+  resolveQuestions,
   wantsPhoto,
   type DetailAnswer,
 } from "@/lib/warrantyDetails";
+
+const SOFTWARE = DETAIL_QUESTIONS.software;
+const ACCOUNT = DETAIL_QUESTIONS.account;
 
 /** A full round for a kind, so a test can take one thing away from it. */
 function fullRound(kind: "software" | "account"): DetailAnswer[] {
@@ -27,11 +34,11 @@ function fullRound(kind: "software" | "account"): DetailAnswer[] {
 
 describe("warranty details, the second round", () => {
   it("asks about the machine for a tool and the sign-in for an account", () => {
-    const software = DETAIL_QUESTIONS.software.map((q) => q.key);
+    const software = SOFTWARE.map((q) => q.key);
     expect(software).toContain("SECURE_BOOT");
     expect(software).toContain("CORE_ISOLATION");
     expect(software).toContain("DISPLAY_MODE");
-    expect(DETAIL_QUESTIONS.account.map((q) => q.key)).toContain("LOGIN_ERROR");
+    expect(ACCOUNT.map((q) => q.key)).toContain("LOGIN_ERROR");
     // Nothing is asked twice, and no key clashes with a fault's.
     for (const kind of ["software", "account"] as const) {
       const keys = DETAIL_QUESTIONS[kind].map((q) => q.key);
@@ -42,28 +49,28 @@ describe("warranty details, the second round", () => {
 
   it("counts a round complete only when every answer and picture is there", () => {
     const round = fullRound("software");
-    expect(missingDetails("software", round)).toHaveLength(0);
-    expect(detailsComplete("software", round)).toBe(true);
+    expect(missingDetails(SOFTWARE, round)).toHaveLength(0);
+    expect(detailsComplete(SOFTWARE, round)).toBe(true);
 
     const noPicture = round.map((a) =>
       a.key === "SECURE_BOOT" ? { ...a, imageUrls: [] } : a,
     );
-    expect(detailsComplete("software", noPicture)).toBe(false);
-    expect(missingDetails("software", noPicture).map((q) => q.key)).toEqual(["SECURE_BOOT"]);
+    expect(detailsComplete(SOFTWARE, noPicture)).toBe(false);
+    expect(missingDetails(SOFTWARE, noPicture).map((q) => q.key)).toEqual(["SECURE_BOOT"]);
 
     const short = round.filter((a) => a.key !== "ANTIVIRUS");
-    expect(missingDetails("software", short).map((q) => q.key)).toEqual(["ANTIVIRUS"]);
+    expect(missingDetails(SOFTWARE, short).map((q) => q.key)).toEqual(["ANTIVIRUS"]);
   });
 
   it("refuses an answer that is not one of the choices", () => {
     const round = fullRound("software").map((a) =>
       a.key === "ANTIVIRUS" ? { ...a, value: "có lẽ vậy" } : a,
     );
-    expect(detailsComplete("software", round)).toBe(false);
+    expect(detailsComplete(SOFTWARE, round)).toBe(false);
   });
 
   it("takes a typed answer where no choices are offered", () => {
-    const login = questionFor("account", "LOGIN_ERROR");
+    const login = questionFor(ACCOUNT, "LOGIN_ERROR");
     expect(login?.options).toHaveLength(0);
     expect(login?.photo).toBe(true);
     // Nothing to choose, so the picture is always due.
@@ -71,7 +78,7 @@ describe("warranty details, the second round", () => {
   });
 
   it("offers four versions of Windows, and wants the picture either way", () => {
-    const winver = questionFor("software", "WINVER");
+    const winver = questionFor(SOFTWARE, "WINVER");
     expect(winver?.options.map((o) => o.value)).toEqual([
       "Tôi dùng Windows 11",
       "Tôi dùng Windows 10",
@@ -82,11 +89,11 @@ describe("warranty details, the second round", () => {
     expect(wantsPhoto(winver!, "Tôi không rõ bản nào")).toBe(true);
     // …but only once one of them is pressed: no answer, no uploader.
     expect(wantsPhoto(winver!, "")).toBe(false);
-    expect(wantsPhoto(questionFor("account", "LOGIN_ERROR")!, "  ")).toBe(false);
+    expect(wantsPhoto(questionFor(ACCOUNT, "LOGIN_ERROR")!, "  ")).toBe(false);
   });
 
   it("asks for a picture only on the answer that says it was done", () => {
-    const secureBoot = questionFor("software", "SECURE_BOOT");
+    const secureBoot = questionFor(SOFTWARE, "SECURE_BOOT");
     expect(secureBoot?.options).toHaveLength(4);
     // The answers read as sentences, not as the word "Rồi" (the owner).
     const [done, notYet] = secureBoot!.options;
@@ -97,7 +104,7 @@ describe("warranty details, the second round", () => {
     const round = fullRound("software").map((a) =>
       a.key === "SECURE_BOOT" ? { key: a.key, value: notYet.value, imageUrls: [] } : a,
     );
-    expect(detailsComplete("software", round)).toBe(true);
+    expect(detailsComplete(SOFTWARE, round)).toBe(true);
   });
 
   it("reads back what was stored and shrugs off anything else", () => {
@@ -138,5 +145,100 @@ describe("warranty details, the second round", () => {
     const long = "x".repeat(ANSWER_MAX + 50);
     const [row] = readDetails(JSON.stringify([{ key: "WINVER", value: long }]));
     expect(row.value).toHaveLength(ANSWER_MAX);
+  });
+
+  it("lists an answer under the words it was asked with, even once the set has changed", () => {
+    const [kept, bare] = readDetails(
+      JSON.stringify([
+        { key: "OLD_Q", value: "Có", label: "Đã cắm tay cầm chưa", short: "Tay cầm" },
+        { key: "GONE", value: "Có" },
+      ]),
+    );
+    // Its own words first, since the shop may have rewritten the set since.
+    expect(answerShort(kept, SOFTWARE)).toBe("Tay cầm");
+    // Nothing stored and nothing in the set: the key is all there is.
+    expect(answerShort(bare, SOFTWARE)).toBe("GONE");
+    // A default-set answer without stored words still reads from the set.
+    expect(answerShort({ key: "ANTIVIRUS", value: "x", imageUrls: [] }, SOFTWARE)).toBe(
+      "Diệt virus",
+    );
+  });
+});
+
+describe("a question set the shop writes", () => {
+  const valorant = [
+    {
+      key: "vanguard",
+      label: "Vanguard đang bật hay tắt",
+      hint: "Biểu tượng Vanguard ở khay hệ thống.",
+      options: [
+        { value: "Đang bật", hint: "Có biểu tượng ở khay." },
+        { value: "Đã tắt", hint: "Không thấy biểu tượng." },
+      ],
+      photo: true,
+      photoWhen: "Đang bật",
+    },
+    { key: "WINVER", label: "Phiên bản Windows", short: "Windows", options: [], photo: true },
+  ];
+
+  it("reads a set back with its keys upper-cased and its words trimmed", () => {
+    const set = parseQuestionSet(valorant);
+    expect(set?.map((q) => q.key)).toEqual(["VANGUARD", "WINVER"]);
+    expect(set?.[0].short).toBe("Vanguard đang bật hay tắt");
+    expect(set?.[0].photoWhen).toBe("Đang bật");
+    expect(wantsPhoto(set![0], "Đã tắt")).toBe(false);
+    // Typed, with the picture due whatever is written.
+    expect(set?.[1].options).toEqual([]);
+    expect(wantsPhoto(set![1], "11")).toBe(true);
+  });
+
+  it("reads as inherit when the set is not usable", () => {
+    expect(parseQuestionSet(null)).toBeNull();
+    expect(parseQuestionSet([])).toBeNull();
+    expect(parseQuestionSet("x")).toBeNull();
+    // A question with one answer is no choice.
+    expect(parseQuestionSet([{ key: "A", label: "x", options: [{ value: "only" }] }])).toBeNull();
+    // Two answers the same, a blank label, a key used twice, a fault's key.
+    expect(
+      parseQuestionSet([{ key: "A", label: "x", options: [{ value: "a" }, { value: "a" }] }]),
+    ).toBeNull();
+    expect(parseQuestionSet([{ key: "A", label: " ", options: [] }])).toBeNull();
+    expect(
+      parseQuestionSet([
+        { key: "A", label: "x", options: [] },
+        { key: "a", label: "y", options: [] },
+      ]),
+    ).toBeNull();
+    expect(parseQuestionSet([{ key: "KEY_INVALID", label: "x", options: [] }])).toBeNull();
+    // Too many.
+    const many = Array.from({ length: QUESTIONS_MAX + 1 }, (_, i) => ({
+      key: `Q${i}`,
+      label: "x",
+      options: [],
+    }));
+    expect(parseQuestionSet(many)).toBeNull();
+  });
+
+  it("drops a photoWhen that names no answer, which means whichever is picked", () => {
+    const [q] = parseQuestionSet([
+      {
+        key: "A",
+        label: "x",
+        options: [{ value: "a" }, { value: "b" }],
+        photo: true,
+        photoWhen: "zzz",
+      },
+    ])!;
+    expect(q.photoWhen).toBeUndefined();
+    expect(wantsPhoto(q, "b")).toBe(true);
+  });
+
+  it("asks the product's set, then the game's, then the default", () => {
+    expect(resolveQuestions("software", null, null)).toBe(SOFTWARE);
+    expect(resolveQuestions("account", undefined, "junk")).toBe(ACCOUNT);
+    const game = resolveQuestions("software", null, valorant);
+    expect(game.map((q) => q.key)).toEqual(["VANGUARD", "WINVER"]);
+    const own = resolveQuestions("software", [{ key: "ONLY", label: "x", options: [] }], valorant);
+    expect(own.map((q) => q.key)).toEqual(["ONLY"]);
   });
 });

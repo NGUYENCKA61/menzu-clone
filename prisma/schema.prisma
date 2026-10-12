@@ -510,6 +510,10 @@ model Category {
   logoUrl   String?
   soldCount Int       @default(0)
   stockCount Int      @default(0)
+  /// The second-round warranty questions for every tool of this game, as a
+  /// list (src/lib/warrantyDetails.ts, parseQuestionSet). Null asks the
+  /// default set.
+  warrantyQuestions Json?
   /// Feeds sitemap.xml's <lastmod>. Stamping every entry with "now" instead
   /// teaches crawlers the field is noise and they stop honouring it.
   updatedAt DateTime  @updatedAt @default(now())
@@ -645,6 +649,9 @@ model Product {
   /// "Loader v2.4", "Bản Steam", whatever the shop wants said for this tool.
   /// Null prints "Bản Loader mới nhất" (src/lib/downloadName.ts).
   downloadName   String?
+  /// This product's own second-round warranty questions; null falls back to
+  /// its category's, then to the default set (src/lib/warrantyDetails.ts).
+  warrantyQuestions Json?
   /// Where the buyer's "Tài liệu sử dụng" button points — a PDF, a Drive doc,
   /// a wiki page. Separate from `downloadUrl` because the tool and its manual
   /// are handed over as two different links; null hides the button.

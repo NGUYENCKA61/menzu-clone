@@ -1,3 +1,4 @@
+import { Prisma } from "@prisma/client";
 import { NextResponse } from "next/server";
 
 import { FORBIDDEN, getAdmin } from "@/lib/admin";
@@ -6,6 +7,11 @@ import { db } from "@/lib/db";
 import { isReservedSlug } from "@/lib/routes";
 import { slugify } from "@/lib/slug";
 import { forgetSlug, rememberCategorySlug } from "@/lib/slugHistory";
+import {
+  QUESTIONS_BAD,
+  QUESTIONS_BAD_MESSAGE,
+  readQuestionSet,
+} from "@/lib/warrantyQuestionsInput";
 
 function count(value: unknown, fallback = 0): number {
   const n = Number(value);
@@ -104,10 +110,20 @@ export async function PATCH(request: Request) {
     platform?: string;
     soldCount?: number;
     stockCount?: number;
+    /** The second-round warranty questions for this game's tools: a list
+     *  (src/lib/warrantyDetails.ts), or null to ask the default set. */
+    warrantyQuestions?: unknown;
   } | null;
 
   const id = body?.id?.trim();
   if (!id) return NextResponse.json({ error: "Thiếu danh mục" }, { status: 400 });
+
+  // Refused rather than silently inherited: a set that does not read back
+  // is a mistake the admin should see, not a product quietly on defaults.
+  const questions = readQuestionSet(body?.warrantyQuestions);
+  if (questions === QUESTIONS_BAD) {
+    return NextResponse.json({ error: QUESTIONS_BAD_MESSAGE }, { status: 400 });
+  }
 
   const platform = parsePlatform(body?.platform);
   if (!platform.ok) {
@@ -207,6 +223,7 @@ export async function PATCH(request: Request) {
       ...(body?.stockCount !== undefined
         ? { stockCount: count(body.stockCount, category.stockCount) }
         : {}),
+      ...(questions !== undefined ? { warrantyQuestions: questions ?? Prisma.DbNull } : {}),
     },
   });
   // The old address keeps answering, with a permanent redirect to the new

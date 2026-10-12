@@ -4,6 +4,8 @@ import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 
 import { AdminCategoryDetail } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminCategoryDetail";
+import { WarrantyQuestionsEditor } from "@/components/sites/menzu-lol-f7ae197a/shared/WarrantyQuestionsEditor";
+import { DETAIL_QUESTIONS } from "@/lib/warrantyDetails";
 import { AdminShell } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminShell";
 import { getAdmin } from "@/lib/admin";
 import { db } from "@/lib/db";
@@ -40,7 +42,9 @@ export default async function AdminCategoryDetailPage({
   const slug = decodeSlug((await params).slug);
   const category = await db.category.findUnique({
     where: { slug },
-    include: { _count: { select: { products: { where: { deletedAt: null } } } } },
+    include: {
+      _count: { select: { products: { where: { deletedAt: null } } } },
+    },
   });
   if (!category) notFound();
 
@@ -75,6 +79,17 @@ export default async function AdminCategoryDetailPage({
           productCount: category._count.products,
         }}
       />
+      {/* The second round's questions for every tool of this game; a
+          product can still override them on its own screen. */}
+      <div className="mt-5">
+        <WarrantyQuestionsEditor
+          endpoint="/api/admin/categories"
+          ident={{ id: category.id }}
+          initial={category.warrantyQuestions}
+          bank={DETAIL_QUESTIONS.software}
+          inheritName="bộ mặc định"
+        />
+      </div>
     </AdminShell>
   );
 }
