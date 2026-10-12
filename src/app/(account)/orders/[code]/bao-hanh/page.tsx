@@ -153,6 +153,9 @@ export default async function WarrantyRequestPage({
   const sentReports = order.warrantyRequests.filter(
     (r) => r.detailsDoneAt || !warrantyOpen(r.status),
   );
+  // An open report listed below carries its own chat, so the card saying
+  // "this order already has one" would only repeat it.
+  const openListed = sentReports.some((r) => warrantyOpen(r.status));
   const stepNow = !latest || awaitingDetails
     ? 0
     : latest.status === "OPEN" || latest.status === "IN_PROGRESS" || latest.status === "REFUNDING"
@@ -338,27 +341,31 @@ export default async function WarrantyRequestPage({
           </section>
         ) : null}
 
-        {/* PAST REPORTS, IF ANY */}
+        {/* PAST REPORTS, IF ANY. One frame, not a box per report inside the
+            box: the card is the report, and a second one is parted from the
+            first by a rule (the owner, 12/10/2026: "đỡ rối, hợp lý, không
+            AI"). */}
         {sentReports.length > 0 ? (
           <section className={CARD}>
             <span className={LABEL}>Yêu cầu đã gửi</span>
-            <ul className="mt-3 flex flex-col gap-3">
-              {sentReports.map((r) => {
+            <ul className="mt-3 flex flex-col gap-5">
+              {sentReports.map((r, index) => {
                 const state = WARRANTY_STATUS[r.status];
                 const answers = readDetails(r.details);
                 return (
-                  <li key={r.id} className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
-                    <div className="flex flex-wrap items-center gap-2.5">
+                  <li key={r.id} className={index === 0 ? "" : "border-t border-white/[0.06] pt-5"}>
+                    {/* The fault and the time as one grey line; only the
+                        status wears a chip. */}
+                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
                       <span
                         className={`inline-flex items-center rounded-md border px-2 py-0.5 text-[10px] font-black uppercase tracking-wider ${state.tile}`}
                       >
                         {state.label}
                       </span>
-                      <span className="inline-flex items-center rounded-md border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-neutral-300">
+                      <span className="text-[12px] font-semibold text-neutral-400">
                         {WARRANTY_ISSUE[r.issue].label}
-                      </span>
-                      <span className="text-[12px] font-semibold text-neutral-500">
-                        {stamp(r.createdAt)}
+                        <span className="text-neutral-600"> · </span>
+                        <span className="text-neutral-500">{stamp(r.createdAt)}</span>
                       </span>
                       {/* An account's report: the recording it was sent with. */}
                       {r.videoUrl ? (
@@ -377,7 +384,7 @@ export default async function WarrantyRequestPage({
                         the site account, sent to a bank, or waiting on the
                         buyer's account — the one step that is theirs. */}
                     {(r.status === "REFUNDING" || r.status === "REFUNDED") && r.refundAmount !== null ? (
-                      <div className="mt-3 rounded-lg border border-white/10 bg-white/[0.03] px-3.5 py-3 text-[13px] leading-relaxed text-neutral-300">
+                      <div className="mt-4 border-t border-white/[0.06] pt-4 text-[13px] leading-relaxed text-neutral-300">
                         <p className="flex items-start gap-2">
                           {r.refundMethod === "MANUAL" ? (
                             <Landmark className="mt-0.5 h-4 w-4 shrink-0 text-neutral-400" />
@@ -447,42 +454,48 @@ export default async function WarrantyRequestPage({
                     ) : null}
                     {/* The answers, as the desk reads them. */}
                     {answers.length > 0 ? (
-                      <div className="mt-4 rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
+                      // No box: a rule, the label, and one line per answer,
+                      // question on the left, answer and its pictures on the
+                      // right. Seven lines instead of seven blocks.
+                      <div className="mt-4 border-t border-white/[0.06] pt-4">
                         <span className={LABEL}>Thông tin đã bổ sung</span>
-                        <dl className="mt-3 flex flex-col gap-3">
+                        <dl className="mt-3 flex flex-col gap-2.5">
                           {answers.map((answer) => {
                             const question = questionFor(kind, answer.key);
                             return (
-                              <div key={answer.key} className="flex flex-col gap-1">
-                                <dt className="text-[12px] font-semibold text-neutral-500">
+                              <div
+                                key={answer.key}
+                                className="grid gap-x-6 gap-y-1 sm:grid-cols-[minmax(0,240px)_minmax(0,260px)_1fr]"
+                              >
+                                <dt className="text-[12px] font-semibold text-neutral-500 sm:pt-0.5">
                                   {question?.label ?? answer.key}
                                 </dt>
-                                <dd className="text-[13px] font-bold text-neutral-200">
+                                <dd className="text-[13px] font-bold text-neutral-200 sm:pt-0.5">
                                   {answer.value}
                                 </dd>
-                                {answer.imageUrls.length > 0 ? (
-                                  // Each picture opens on its own; a row of
-                                  // them, since one answer can carry several.
-                                  <dd className="mt-1 flex flex-wrap gap-2">
-                                    {answer.imageUrls.map((url, index) => (
-                                      <a
-                                        key={url}
-                                        href={url}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="relative block w-40 overflow-hidden rounded-lg border border-white/10 bg-neutral-950"
-                                      >
-                                        <Image
-                                          src={url}
-                                          alt={`${question?.label ?? "Ảnh bổ sung"} ${index + 1}`}
-                                          width={320}
-                                          height={180}
-                                          className="h-[90px] w-full object-cover"
-                                        />
-                                      </a>
-                                    ))}
-                                  </dd>
-                                ) : null}
+                                {/* Their own column, so the pictures line up
+                                    down the card whatever the answer's
+                                    length. Small, since they open full size
+                                    on a click; one answer can carry several. */}
+                                <dd className="flex flex-wrap items-center gap-2">
+                                  {answer.imageUrls.map((url, index) => (
+                                    <a
+                                      key={url}
+                                      href={url}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="block h-10 w-[60px] overflow-hidden rounded-md border border-white/10 bg-neutral-950"
+                                    >
+                                      <Image
+                                        src={url}
+                                        alt={`${question?.label ?? "Ảnh bổ sung"} ${index + 1}`}
+                                        width={120}
+                                        height={80}
+                                        className="h-full w-full object-cover"
+                                      />
+                                    </a>
+                                  ))}
+                                </dd>
                               </div>
                             );
                           })}
@@ -513,7 +526,7 @@ export default async function WarrantyRequestPage({
         {/* THE FORM, OR WHY THERE IS NONE. While the second round is on
             screen the reason is already plain, so the card goes (the owner,
             11/10/2026). */}
-        {blocked && awaitingDetails ? null : (
+        {blocked && (awaitingDetails || openListed) ? null : (
         <section className={CARD}>
           {blocked ? (
             <div className="flex items-start gap-3 rounded-r-xl border-l-[3px] border-[var(--menzu-accent)] bg-[var(--menzu-accent)]/5 px-4 py-3.5 text-[13px] leading-relaxed text-neutral-300">
