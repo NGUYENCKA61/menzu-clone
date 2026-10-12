@@ -1,21 +1,9 @@
 "use client";
 
+import { WARRANTY_ISSUE_ICON } from "./warrantyIssueIcon";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import {
-  BadgeCheck,
-  CircleHelp,
-  CloudDownload,
-  ImagePlus,
-  KeyRound,
-  Loader2,
-  Send,
-  ShieldAlert,
-  UserX,
-  Video,
-  X,
-  type LucideIcon,
-} from "lucide-react";
+import { BadgeCheck, ImagePlus, Loader2, Send, Video, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 import {
@@ -69,23 +57,6 @@ function Step({
   );
 }
 
-/**
- * A glyph per fault, all in the same grey (the owner, 10/10/2026: colour
- * first, then "4 icon bỏ màu hết đi"); the tile the buyer picks is the only
- * thing on the row that carries any.
- */
-const ISSUE_ICON: Record<string, LucideIcon> = {
-  KEY_INVALID: KeyRound,
-  DETECTED: ShieldAlert,
-  INSTALL: CloudDownload,
-  ACC_WRONG_LOGIN: KeyRound,
-  ACC_LOCKED: ShieldAlert,
-  ACC_RECLAIMED: UserX,
-  ACC_NOT_AS_DESCRIBED: CircleHelp,
-  OTHER: CircleHelp,
-};
-
-
 /** What the description box suggests, per kind of order. */
 const PLACEHOLDER: Record<WarrantyKind, string> = {
   software:
@@ -133,16 +104,20 @@ export function WarrantyRequestForm({
     });
     setFile(next);
   };
-  useEffect(() => () => {
-    if (preview) URL.revokeObjectURL(preview);
+  useEffect(
+    () => () => {
+      if (preview) URL.revokeObjectURL(preview);
+    },
     // eslint-disable-next-line react-hooks/exhaustive-deps -- unmount only
-  }, []);
+    [],
+  );
 
   const short = description.trim().length < DESCRIPTION_MIN;
   const left = DESCRIPTION_MIN - description.trim().length;
   const needsVideo = kind === "account";
   const video = readVideoUrl(videoUrl);
-  const ready = issue !== null && !short && file !== null && (!needsVideo || video.ok);
+  const ready =
+    issue !== null && !short && file !== null && (!needsVideo || video.ok);
 
   async function submit() {
     if (busy || !ready || issue === null) return;
@@ -155,7 +130,10 @@ export function WarrantyRequestForm({
       form.set("description", description);
       if (needsVideo) form.set("videoUrl", videoUrl.trim());
       if (file) form.set("image", file);
-      const res = await fetch("/api/warranty-requests", { method: "POST", body: form });
+      const res = await fetch("/api/warranty-requests", {
+        method: "POST",
+        body: form,
+      });
       const data = (await res.json().catch(() => ({}))) as { error?: string };
       if (!res.ok) {
         setError(data.error ?? "Không gửi được yêu cầu");
@@ -188,7 +166,8 @@ export function WarrantyRequestForm({
             // An odd count leaves the last tile half a row wide beside
             // nothing; it spans both columns instead (the owner, 10/10/2026).
             const wide = all.length % 2 === 1 && index === all.length - 1;
-            const Glyph = ISSUE_ICON[key] ?? CircleHelp;
+            // The fault's glyph, the same one the report wears afterwards.
+            const Glyph = WARRANTY_ISSUE_ICON[key];
             return (
               <button
                 key={key}
@@ -216,7 +195,9 @@ export function WarrantyRequestForm({
                   <Glyph className="h-4 w-4" />
                 </span>
                 <span className="min-w-0 flex-1">
-                  <span className={`block text-[13px] font-bold ${on ? "text-white" : "text-neutral-200"}`}>
+                  <span
+                    className={`block text-[13px] font-bold ${on ? "text-white" : "text-neutral-200"}`}
+                  >
                     {WARRANTY_ISSUE[key].label}
                   </span>
                   <span className="mt-0.5 block text-[12px] leading-relaxed text-neutral-400">
@@ -237,7 +218,9 @@ export function WarrantyRequestForm({
         <textarea
           id="warranty-description"
           value={description}
-          onChange={(event) => setDescription(event.target.value.slice(0, DESCRIPTION_MAX))}
+          onChange={(event) =>
+            setDescription(event.target.value.slice(0, DESCRIPTION_MAX))
+          }
           rows={5}
           placeholder={PLACEHOLDER[kind]}
           className={`${FIELD} resize-y leading-relaxed`}
@@ -278,7 +261,9 @@ export function WarrantyRequestForm({
           </div>
           <p
             className={`mt-2 text-[12px] font-semibold ${
-              videoUrl.trim() && !video.ok ? "text-rose-300" : "text-neutral-500"
+              videoUrl.trim() && !video.ok
+                ? "text-rose-300"
+                : "text-neutral-500"
             }`}
           >
             {videoUrl.trim() && !video.ok
@@ -374,7 +359,11 @@ export function WarrantyRequestForm({
           disabled={busy || !ready}
           className="inline-flex h-11 items-center gap-2 rounded-xl bg-[var(--menzu-accent)] px-6 text-[11px] font-black uppercase tracking-widest text-white transition-colors hover:bg-[var(--menzu-accent-dark)] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-[var(--menzu-accent)]"
         >
-          {busy ? <Loader2 className="h-4 w-4 animate-spin motion-reduce:animate-none" /> : <Send className="h-4 w-4" />}
+          {busy ? (
+            <Loader2 className="h-4 w-4 animate-spin motion-reduce:animate-none" />
+          ) : (
+            <Send className="h-4 w-4" />
+          )}
           {busy ? "Đang gửi…" : "Gửi yêu cầu bảo hành"}
         </button>
       </div>

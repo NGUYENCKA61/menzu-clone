@@ -1,5 +1,6 @@
 "use client";
 
+import { WarrantyIssueGlyph } from "./warrantyIssueIcon";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -291,7 +292,11 @@ export function AdminWarrantyDetail({
               Khách nhắn mới
             </span>
           ) : null}
-          <span className="inline-flex items-center rounded-md border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-neutral-300">
+          <span className="inline-flex items-center gap-1.5 rounded-md border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-neutral-300">
+            <WarrantyIssueGlyph
+              issue={ticket.issue}
+              className="h-3 w-3 shrink-0 text-neutral-400"
+            />
             {WARRANTY_ISSUE[ticket.issue].label}
           </span>
           {/* An account's claim rests on the buyer's recording: one tap to it. */}

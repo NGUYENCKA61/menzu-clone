@@ -1,5 +1,6 @@
 "use client";
 
+import { WarrantyIssueGlyph } from "./warrantyIssueIcon";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -89,7 +90,13 @@ export function AdminWarranty({
 
   const q = query.trim().toLowerCase();
   const shown = rows
-    .filter((r) => (filter === "ALL" ? true : filter === "TODO" ? needsShop(r) : r.status === filter))
+    .filter((r) =>
+      filter === "ALL"
+        ? true
+        : filter === "TODO"
+          ? needsShop(r)
+          : r.status === filter,
+    )
     .filter(
       (r) =>
         q === "" ||
@@ -108,7 +115,8 @@ export function AdminWarranty({
   const listKey = `${filter}:${q}`;
   const [paging, setPaging] = useState({ key: listKey, page: 0 });
   const pageCount = Math.max(1, Math.ceil(shown.length / PER_PAGE));
-  const page = paging.key === listKey ? Math.min(paging.page, pageCount - 1) : 0;
+  const page =
+    paging.key === listKey ? Math.min(paging.page, pageCount - 1) : 0;
   const pageRows = shown.slice(page * PER_PAGE, page * PER_PAGE + PER_PAGE);
 
   return (
@@ -134,7 +142,9 @@ export function AdminWarranty({
                 {f.label}
                 <span
                   className={`rounded-full px-1.5 text-[10px] tabular-nums ${
-                    f.key === "TODO" && count("TODO") > 0 ? "bg-[var(--brand)] text-white" : "bg-white/10 text-neutral-300"
+                    f.key === "TODO" && count("TODO") > 0
+                      ? "bg-[var(--brand)] text-white"
+                      : "bg-white/10 text-neutral-300"
                   }`}
                 >
                   {count(f.key)}
@@ -164,7 +174,9 @@ export function AdminWarranty({
         <div className="rounded-2xl border border-dashed border-white/10 p-10 text-center">
           <Wrench className="mx-auto h-8 w-8 text-neutral-600" aria-hidden />
           <p className="mt-3 text-sm font-bold text-white">
-            {rows.length === 0 ? "Chưa có yêu cầu bảo hành nào" : "Không có yêu cầu nào khớp"}
+            {rows.length === 0
+              ? "Chưa có yêu cầu bảo hành nào"
+              : "Không có yêu cầu nào khớp"}
           </p>
           <p className="mt-1 text-[12px] text-neutral-500">
             {rows.length === 0
@@ -180,7 +192,11 @@ export function AdminWarranty({
         </div>
       )}
 
-      <ListPager page={page} pageCount={pageCount} onSelect={(next) => setPaging({ key: listKey, page: next })} />
+      <ListPager
+        page={page}
+        pageCount={pageCount}
+        onSelect={(next) => setPaging({ key: listKey, page: next })}
+      />
     </div>
   );
 }
@@ -198,12 +214,18 @@ function TicketRow({ row }: { row: WarrantyListRow }) {
           <span
             className={`inline-flex shrink-0 items-center gap-1.5 rounded-md border px-2 py-0.5 text-[10px] font-black uppercase tracking-wider ${state.tile}`}
           >
-            <span aria-hidden className={`h-1.5 w-1.5 rounded-full ${state.dot}`} />
+            <span
+              aria-hidden
+              className={`h-1.5 w-1.5 rounded-full ${state.dot}`}
+            />
             {state.label}
           </span>
           {row.awaitingShop ? (
             <span className="inline-flex shrink-0 items-center gap-1 rounded-md border border-[var(--brand)]/50 bg-[var(--brand)]/15 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-white">
-              <MessageCircle className="h-3 w-3 text-[var(--brand)]" aria-hidden />
+              <MessageCircle
+                className="h-3 w-3 text-[var(--brand)]"
+                aria-hidden
+              />
               Khách nhắn mới
             </span>
           ) : null}
@@ -216,7 +238,9 @@ function TicketRow({ row }: { row: WarrantyListRow }) {
               Chờ khách nhập STK
             </span>
           ) : null}
-          <span className="min-w-0 truncate text-[13px] font-bold text-white">{row.productName}</span>
+          <span className="min-w-0 truncate text-[13px] font-bold text-white">
+            {row.productName}
+          </span>
           {row.packageLabel ? (
             <span className="shrink-0 rounded-md border border-white/15 bg-white/10 px-1.5 py-px text-[9px] font-black uppercase tracking-widest text-neutral-300">
               {row.packageLabel}
@@ -224,16 +248,27 @@ function TicketRow({ row }: { row: WarrantyListRow }) {
           ) : null}
         </div>
         <p className="mt-1 truncate text-[12px] text-neutral-500">
-          <span className="font-semibold text-neutral-300">{row.username}</span> · {row.orderCode} ·{" "}
+          <span className="font-semibold text-neutral-300">{row.username}</span>{" "}
+          · {row.orderCode} ·{" "}
+          <WarrantyIssueGlyph
+            issue={row.issue}
+            className="-mt-0.5 mr-1 inline-block h-3.5 w-3.5 align-middle text-neutral-500"
+          />
           {WARRANTY_ISSUE[row.issue].label}
         </p>
         <p className="mt-0.5 truncate text-[12px] text-neutral-400">
-          {row.lastFromShop === true ? <span className="text-neutral-500">Shop: </span> : null}
-          {row.lastFromShop === false ? <span className="text-neutral-500">Khách: </span> : null}
+          {row.lastFromShop === true ? (
+            <span className="text-neutral-500">Shop: </span>
+          ) : null}
+          {row.lastFromShop === false ? (
+            <span className="text-neutral-500">Khách: </span>
+          ) : null}
           {row.preview}
         </p>
       </div>
-      <span className="hidden shrink-0 text-[11px] tabular-nums text-neutral-500 sm:block">{row.lastAt}</span>
+      <span className="hidden shrink-0 text-[11px] tabular-nums text-neutral-500 sm:block">
+        {row.lastAt}
+      </span>
       <ChevronRight
         className="h-4 w-4 shrink-0 text-neutral-600 transition-transform group-hover:translate-x-0.5 group-hover:text-white"
         aria-hidden
@@ -255,9 +290,12 @@ function DeskPulse({ since }: { since: string }) {
     const timer = window.setInterval(async () => {
       if (document.visibilityState !== "visible") return;
       try {
-        const res = await fetch(`/api/admin/warranty-requests/pulse?since=${encodeURIComponent(since)}`, {
-          cache: "no-store",
-        });
+        const res = await fetch(
+          `/api/admin/warranty-requests/pulse?since=${encodeURIComponent(since)}`,
+          {
+            cache: "no-store",
+          },
+        );
         if (!res.ok) return;
         const data = (await res.json()) as { fresh?: number };
         setFresh(data.fresh ?? 0);

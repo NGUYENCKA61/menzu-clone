@@ -21,6 +21,7 @@ import { WarrantyBankForm } from "@/components/sites/menzu-lol-f7ae197a/shared/W
 import { WarrantyChat } from "@/components/sites/menzu-lol-f7ae197a/shared/WarrantyChat";
 import { WarrantyDetailsForm } from "@/components/sites/menzu-lol-f7ae197a/shared/WarrantyDetailsForm";
 import { WarrantyRequestForm } from "@/components/sites/menzu-lol-f7ae197a/shared/WarrantyRequestForm";
+import { WarrantyIssueGlyph } from "@/components/sites/menzu-lol-f7ae197a/shared/warrantyIssueIcon";
 import { maskAccount } from "@/lib/bankRefund";
 import {
   answerLabel,
@@ -490,7 +491,13 @@ export default async function WarrantyRequestPage({
                         {/* What broke is the report's first fact, so it reads
                           at body size and brightness; the time is the small
                           print beside it (the owner, 12/10/2026). */}
-                        <span className="text-[13px] font-bold text-neutral-200">
+                        <span className="inline-flex items-center gap-1.5 text-[13px] font-bold text-neutral-200">
+                          {/* The fault's glyph, the one its tile wore on the
+                              form (the owner, 12/10/2026). */}
+                          <WarrantyIssueGlyph
+                            issue={r.issue}
+                            className="h-4 w-4 shrink-0 text-neutral-400"
+                          />
                           {WARRANTY_ISSUE[r.issue].label}
                         </span>
                         <span className="text-[12px] font-semibold text-neutral-500">
