@@ -1196,7 +1196,7 @@ export function OrderDetailModal({
                             // the owner, 12/10/2026, after red and violet
                             // borders were tried).
                             warrantyAction.kind === "status"
-                              ? "border border-white/12 bg-white/[0.04] text-neutral-200 hover:border-white/25 hover:text-white"
+                              ? "border border-violet-500/70 bg-transparent text-white hover:bg-violet-500/10"
                               : "bg-[var(--menzu-accent)] text-white hover:bg-[var(--menzu-accent-dark)]"
                           }`}
                         >
