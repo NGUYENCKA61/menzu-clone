@@ -352,7 +352,7 @@ export function WarrantyRequestForm({
               : "Shop cam kết đổi key hoặc hoàn tiền nếu lỗi từ phía shop."}
           </span>
           <span className="pl-6 text-[12px] text-neutral-500">
-            Shop trả lời trên chuông thông báo và trong lịch sử mua hàng.
+            Shop trả lời ngay trên trang này, có thông báo khi shop phản hồi.
           </span>
         </span>
         <button
