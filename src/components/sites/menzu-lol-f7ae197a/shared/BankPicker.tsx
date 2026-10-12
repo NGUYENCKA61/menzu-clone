@@ -155,7 +155,7 @@ export function BankPicker({
       >
         {value ? (
           <>
-            <BankMark name={value} size={26} />
+            <BankMark name={value} size={28} />
             <span className="min-w-0 flex-1 truncate font-semibold text-white">
               {value}
             </span>
@@ -205,7 +205,7 @@ export function BankPicker({
                       on ? "text-white" : "text-neutral-200"
                     }`}
                   >
-                    <BankMark name={bank} size={26} />
+                    <BankMark name={bank} size={28} />
                     <span className="min-w-0 flex-1 truncate">{bank}</span>
                     {on ? (
                       <Check
