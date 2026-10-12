@@ -117,7 +117,10 @@ export function WarrantyBankForm({
       <div className="grid gap-3 sm:grid-cols-3">
         <div>
           <label htmlFor={`bank-${ticketId}`} className={LABEL}>
-            Ngân hàng
+            Ngân hàng{" "}
+            <span aria-hidden className="text-[var(--menzu-accent)]">
+              *
+            </span>
           </label>
           <BankPicker
             id={`bank-${ticketId}`}
@@ -127,7 +130,10 @@ export function WarrantyBankForm({
         </div>
         <div>
           <label htmlFor={`account-${ticketId}`} className={LABEL}>
-            Số tài khoản
+            Số tài khoản{" "}
+            <span aria-hidden className="text-[var(--menzu-accent)]">
+              *
+            </span>
           </label>
           <input
             id={`account-${ticketId}`}
@@ -141,7 +147,10 @@ export function WarrantyBankForm({
         </div>
         <div>
           <label htmlFor={`confirm-${ticketId}`} className={LABEL}>
-            Nhập lại số tài khoản
+            Nhập lại số tài khoản{" "}
+            <span aria-hidden className="text-[var(--menzu-accent)]">
+              *
+            </span>
           </label>
           <input
             id={`confirm-${ticketId}`}
@@ -164,7 +173,10 @@ export function WarrantyBankForm({
       <div className="flex flex-wrap items-end gap-3">
         <div className="min-w-0 flex-1 sm:max-w-md">
           <label htmlFor={`holder-${ticketId}`} className={LABEL}>
-            Tên chủ tài khoản
+            Tên chủ tài khoản{" "}
+            <span aria-hidden className="text-[var(--menzu-accent)]">
+              *
+            </span>
           </label>
           <input
             id={`holder-${ticketId}`}
