@@ -433,8 +433,13 @@ export function AnnouncementModal({
           >
             {item.title}
           </h3>
+          {/* A personal notice says when it was sent, to the minute: for a
+              reply the hour is the fact (the owner, 12/10/2026, review
+              item 4). A shop notice keeps the day it was last edited. */}
           <p className="mt-1.5 text-[12px] text-neutral-500">
-            Cập nhật: {item.updatedLabel}
+            {item.personal && item.sentLabel
+              ? `Gửi lúc ${item.sentLabel}`
+              : `Cập nhật: ${item.updatedLabel}`}
           </p>
 
           {item.imageUrl ? (
