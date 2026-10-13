@@ -22,6 +22,7 @@ import type { VerificationView } from "@/lib/verificationRules";
 
 import { DiscordMark, GoogleMark } from "./OAuthButtons";
 import { TelegramGlyph } from "./BrandGlyphs";
+import { PILL_TAB_FACE, PILL_TAB_OFF, PILL_TAB_ON } from "./pillTab";
 import { VerificationCard } from "./VerificationCard";
 import { ZaloLinkCard } from "./ZaloLinkCard";
 
@@ -41,6 +42,10 @@ import { ZaloLinkCard } from "./ZaloLinkCard";
  * 11–12px black caps, the active tab tinted like the sidebar's active row,
  * cards at the inner-card padding with caps titles, the full-width submit at
  * /wallet's 48px, and the sidebar's shield on the first tab.
+ *
+ * The tabs then took the site's tab pill (shared/pillTab), solid red when
+ * lit, in place of the sidebar's pink tint (the owner, 13/10/2026, UI
+ * consistency review), so they light the way /thong-bao's do.
  */
 
 type Tab = "security" | "linked" | "devices" | "verify";
@@ -64,10 +69,17 @@ const TABS: {
   { id: "verify", short: "Xác thực", long: "Xác thực cấp 2", icon: BadgeCheck },
 ];
 
-const TAB_BASE =
-  "flex-1 flex flex-col lg:flex-row justify-center items-center gap-1.5 lg:gap-2 p-2 sm:py-3 rounded-xl transition-colors";
-const TAB_ACTIVE = `${TAB_BASE} bg-[var(--menzu-accent)]/10 text-white border border-[var(--menzu-accent)]/30`;
-const TAB_INACTIVE = `${TAB_BASE} bg-white/[0.02] text-neutral-400 hover:text-white hover:bg-white/5 border border-white/5`;
+/*
+ * Still four tabs sharing the row's width. From sm each is the /thong-bao
+ * pill: 40px, the icon beside the word. On a phone the icon sits over a
+ * short word instead, so all four stay in view at once; a row of four
+ * side-by-side pills would push "Xác thực" off the screen, and that is the
+ * tab the verified-only sale gate sends people to. The full names wait for
+ * xl: beside the sidebar at lg they would not fit on one line.
+ */
+const TAB = `${PILL_TAB_FACE} flex-1 flex-col justify-center gap-1 rounded-xl px-1.5 py-2 text-[11px] sm:h-10 sm:flex-row sm:gap-2 sm:px-4 sm:py-0`;
+const TAB_ACTIVE = `${TAB} ${PILL_TAB_ON}`;
+const TAB_INACTIVE = `${TAB} ${PILL_TAB_OFF}`;
 
 const TITLE =
   "text-xl sm:text-2xl font-black text-white uppercase tracking-wider mb-2 flex items-center gap-3";
@@ -435,30 +447,35 @@ export function SecurityPanel({
 
   return (
     <div className="w-full flex flex-col pb-6 min-h-[70vh]">
-      <div
-        role="tablist"
-        aria-label="Bảo mật"
-        className="flex w-full gap-2 pb-4 mb-6 border-b border-white/5"
-      >
-        {TABS.map(({ id, short, long, icon: Icon }) => (
-          <button
-            key={id}
-            type="button"
-            role="tab"
-            aria-selected={tab === id}
-            onClick={() => setTab(id)}
-            className={tab === id ? TAB_ACTIVE : TAB_INACTIVE}
-          >
-            <Icon
-              className={`w-5 h-5 lg:w-4 lg:h-4 ${tab === id ? "text-[var(--menzu-accent)]" : ""}`}
-              aria-hidden
-            />
-            <span className="text-[11px] sm:text-xs font-black uppercase tracking-widest whitespace-nowrap">
-              <span className="lg:hidden">{short}</span>
-              <span className="hidden lg:inline">{long}</span>
-            </span>
-          </button>
-        ))}
+      {/* The rule under the tabs sits on this wrapper, not on the row: on a
+          phone the row bleeds to the screen's edges so it can scroll on a
+          screen too narrow for all four, and the rule should not. The row's
+          4px of padding is room for a focus ring the scroll would clip. */}
+      <div className="mb-6 border-b border-white/5 pb-3">
+        <div
+          role="tablist"
+          aria-label="Bảo mật"
+          className="hide-scrollbar -mx-4 -mt-1 flex gap-2 overflow-x-auto px-4 py-1 sm:-mx-1 sm:px-1"
+        >
+          {TABS.map(({ id, short, long, icon: Icon }) => (
+            <button
+              key={id}
+              type="button"
+              role="tab"
+              aria-selected={tab === id}
+              onClick={() => setTab(id)}
+              className={tab === id ? TAB_ACTIVE : TAB_INACTIVE}
+            >
+              {/* White on the lit tab like its word: the red the icon wore
+                  over the old pink tint would vanish on a red fill. */}
+              <Icon className="h-5 w-5 shrink-0 sm:h-4 sm:w-4" aria-hidden />
+              <span className="whitespace-nowrap">
+                <span className="xl:hidden">{short}</span>
+                <span className="hidden xl:inline">{long}</span>
+              </span>
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="w-full bg-transparent sm:bg-[#111111] border-none sm:border sm:border-white/5 rounded-none sm:rounded-[24px] p-0 sm:p-8 lg:p-10 relative min-h-0 sm:min-h-[500px]">
