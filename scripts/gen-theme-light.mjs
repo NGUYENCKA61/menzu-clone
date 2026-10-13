@@ -733,6 +733,30 @@ const smallText = [...tokens]
     return px >= 9 && px < 12;
   })
   .sort();
+// The raise is for the phone size only: a size written for a wider screen
+// beside a small one (TRUST_NOTE_TEXT's "text-[11px] sm:text-sm", 14px on a
+// desktop) must still win there. So the raise sits in the utilities layer at
+// Tailwind's specificity, and after it every breakpoint size found in the
+// source is written again for those same elements, inside its own media
+// query and in breakpoint order, at its own value (or 12px where that value
+// is smaller too, as in "text-[9px] sm:text-[10px]").
+const TEXT_SIZE = new Map(
+  [...THEME.matchAll(/--text-([a-z0-9]+):\s*([^;]+);/g)].map((m) => [m[1], m[2].trim()]),
+);
+/** "40rem" or "360px" → px. */
+const toPx = (length) => parseFloat(length) * (length.endsWith("rem") ? 16 : 1);
+const sizeAtBreakpoint = [];
+for (const token of [...tokens].sort()) {
+  const m = token.match(
+    /^(sm|md|lg|xl|2xl|min-\[(\d+(?:\.\d+)?(?:px|rem))\]):text-(xs|sm|base|lg|[2-9]?xl|\[(\d+(?:\.\d+)?(?:px|rem))\])$/,
+  );
+  if (!m) continue;
+  const min = m[2] ?? BREAKPOINTS[m[1]];
+  const size = m[4] ?? TEXT_SIZE.get(m[3]);
+  if (!size) throw new Error(`nike: no --text-${m[3]} in tailwindcss/theme.css`);
+  sizeAtBreakpoint.push({ token, min, px: toPx(min), size: toPx(size) < 12 ? "12px" : size });
+}
+sizeAtBreakpoint.sort((a, b) => a.px - b.px || a.token.localeCompare(b.token));
 const wideTracking = [...tokens]
   .filter((t) => /^(?:[a-z0-9-]+:)*tracking-(?:wide|wider|widest|\[0?\.\d+em\])$/.test(t))
   .sort();
@@ -740,9 +764,38 @@ const wideTracking = [...tokens]
 const accentTints = ["menzu-accent", "brand"].flatMap((n) => alphaFamily("", `bg-[var(--${n})]`, 1, 69));
 const accentTintHovers = ["menzu-accent", "brand"].flatMap((n) => alphaFamily("hover:", `bg-[var(--${n})]`, 1, 69));
 const accentLines = ["menzu-accent", "brand"].flatMap((n) => alphaFamily("", `border-[var(--${n})]`, 1, 69));
-for (const [name, list] of Object.entries({ smallText, wideTracking, accentTints, accentTintHovers, accentLines })) {
+for (const [name, list] of Object.entries({
+  smallText,
+  sizeAtBreakpoint,
+  wideTracking,
+  accentTints,
+  accentTintHovers,
+  accentLines,
+})) {
   if (!list.length) throw new Error(`nike: no ${name} tokens found in src`);
 }
+// Grey 700 is a step a dark site uses for its dimmest words; on Nike's scale
+// it is #cacacb, 1.6:1 on white. As text (an empty gallery's label, the pager's
+// ellipsis, the footer's dots) it takes the secondary grey; a control drawn
+// as inactive keeps its faint grey, as WCAG allows.
+const dimText = [...tokens].filter((t) => /^text-(?:neutral|zinc|gray|slate|stone)-700$/.test(t)).sort();
+
+const SMALL_TEXT_EX = unless(...LOCKUP, '[aria-hidden="true"]') + NOT_ISLAND;
+const SMALL_TEXT_ONLY = `:where(${smallText.map(cls).join(", ")})`;
+const smallTextCss = [
+  `  ${NIKE_W} ${anyOf(smallText)}${SMALL_TEXT_EX} {\n    font-size: 12px;\n  }`,
+  ...[...Map.groupBy(sizeAtBreakpoint, (s) => s.min)].map(
+    ([min, list]) =>
+      `  @media (width >= ${min}) {\n` +
+      [...Map.groupBy(list, (s) => s.size)]
+        .map(
+          ([size, same]) =>
+            `    ${NIKE_W} ${anyOf(same.map((s) => s.token))}${SMALL_TEXT_ONLY}${SMALL_TEXT_EX} {\n      font-size: ${size};\n    }`,
+        )
+        .join("\n") +
+      "\n  }",
+  ),
+].join("\n");
 
 const ACCENT_FILL = String.raw`:is(.bg-\[var\(--menzu-accent\)\], .bg-\[var\(--brand\)\])`;
 const SELECTED_STATE = `:is([aria-pressed="true"], [aria-selected="true"], [aria-current="page"], [aria-current="true"])`;
@@ -799,7 +852,9 @@ ${NIKE} {
   --light-ink: #111111;
   --light-ink-2: #111111;
   --light-ink-3: #707072;
-  --light-ink-4: #9e9ea0; /* decoration only (separators), Nike's disabled grey */
+  /* The dimmest step still paints words (a dim hex grey, list numbers), so it
+     is the secondary grey too, not Nike's #9e9ea0 (2.7:1). */
+  --light-ink-4: #707072;
   --nike-well: #f5f5f5; /* behind pictures, fields, quiet chips */
   --nike-well-hover: #e5e5e5;
   /* The accent is black; hover #3a3a3a (white on it 11.4:1). */
@@ -825,14 +880,20 @@ ${nikeFlipLines}
 }
 
 /* Islands keep their dark palette; the accent there is white, and a white
-   fill carries black words (Nike's white pill over a picture). */
+   fill carries black words (Nike's white pill over a picture). The sale
+   signals turn the accent back to red on themselves, so they keep white
+   words. */
 ${NIKE} .keep-dark {
   --menzu-accent: #ffffff;
   --brand: #ffffff;
   --menzu-accent-dark: #e5e5e5;
   --brand-dark: #e5e5e5;
 }
-${NIKE} .keep-dark ${ACCENT_FILL}[class] {
+${NIKE} .keep-dark ${ACCENT_FILL}[class]${unless(
+  ".-rotate-45",
+  ".line-through + *",
+  String.raw`.from-\[var\(--menzu-accent\)\]`,
+)} {
   --color-white: #111111;
   color: #111111;
 }
@@ -856,6 +917,18 @@ ${NIKE} .keep-dark ${ACCENT_FILL}[class] {
   ${NIKE_W} ${anyOf(accentLines)}${NOT_ISLAND} {
     border-color: var(--light-line);
   }
+  ${NIKE_W} ${anyOf(dimText)}${unless(
+    ":disabled",
+    '[aria-disabled="true"]',
+    ".cursor-default",
+    ".cursor-not-allowed",
+  )}${NOT_ISLAND} {
+    color: #707072;
+  }
+
+  /* Small UI words are 12px at least, on a phone only where a wider screen
+     has its own size (see sizeAtBreakpoint in the script). */
+${smallTextCss}
 }
 
 /* Decoration off: the accent bars before headings and card titles, the accent
@@ -865,9 +938,10 @@ ${NIKE} .rounded-full[class*="border-[var(--menzu-accent)]"]${NOT_DARK} { border
 ${NIKE} [class*="0_0_140px_30px"]${NOT_DARK} { box-shadow: none; }
 ${NIKE} .lift-card${NOT_DARK} { translate: none; }
 
-/* Type: small UI words lose the caps and the tracking, weigh 600 and are 12px
-   at least. Page titles (h1) keep their caps, like Nike's campaign lines;
-   section headings are sentence case, bold, tracked in a hair. */
+/* Type: small UI words lose the caps and the tracking and weigh 600 (their
+   12px floor is in the utilities layer above). Page titles (h1) keep their
+   caps, like Nike's campaign lines; section headings are sentence case, bold,
+   tracked in a hair. */
 ${NIKE} .uppercase${TYPE_EX} {
   text-transform: none;
 }
@@ -876,9 +950,6 @@ ${NIKE} ${anyOf(wideTracking)}${unless("h1", "h2", ...LOCKUP)}${NOT_DARK} {
 }
 ${NIKE} .uppercase:is(.font-black, .font-extrabold, .font-bold)${unless("h1", "h2", ...LOCKUP)}${NOT_DARK} {
   font-weight: 600;
-}
-${NIKE} ${anyOf(smallText)}${unless(...LOCKUP, '[aria-hidden="true"]')}${NOT_DARK} {
-  font-size: 12px;
 }
 ${NIKE} :is(h1, h2)${unless('[class*="tracking-tight"]', '[class*="tracking-[-"]')}${NOT_DARK} {
   letter-spacing: -0.01em;
@@ -993,9 +1064,20 @@ ${NIKE} button.bg-\[\#111216\]${NOT_DARK} {
 }
 
 /* Header: white, one hairline, black words; the strip a #f5f5f5 band; the
-   cart a round icon. The three menu triggers are typed in capitals, so they
-   are lowered and their first letter raised (sentence case). */
-${NIKE} .site-nav > div:first-child a { color: var(--light-ink); font-weight: 500; }
+   cart a round icon. The strip's links and the three menu triggers are typed
+   in capitals, so they are lowered and their first letter raised (sentence
+   case). A first letter needs a block box, so a strip link is a block (its
+   words still centred in the 40px strip) instead of a flex box; a brand name
+   inside one (.brand-word, "Telegram") is written as typed. */
+${NIKE} .site-nav > div:first-child a {
+  color: var(--light-ink);
+  font-weight: 500;
+  display: inline-block;
+  align-content: center;
+  text-transform: lowercase;
+}
+${NIKE} .site-nav > div:first-child a::first-letter { text-transform: uppercase; }
+${NIKE} .site-nav > div:first-child a .brand-word { text-transform: none; }
 ${NIKE} .site-nav > div:first-child a:hover { text-decoration: underline; text-underline-offset: 3px; }
 ${NIKE} .site-nav button[aria-haspopup="true"].uppercase {
   display: block;

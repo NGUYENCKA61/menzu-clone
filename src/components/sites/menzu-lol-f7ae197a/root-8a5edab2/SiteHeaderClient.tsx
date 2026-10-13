@@ -75,6 +75,20 @@ function hrefFor(label: string): string {
  */
 const TELEGRAM_SHOP_LINK = "MUA TRÊN TELEGRAM"
 
+/**
+ * A strip link's words. The Telegram one carries its brand name in a span of
+ * its own: the strip's capitals cover it here, and the Nike trial (which sets
+ * the strip in sentence case) writes it as typed, "Telegram", not "telegram".
+ */
+function quickLinkLabel(link: string) {
+  if (link !== TELEGRAM_SHOP_LINK) return link
+  return (
+    <>
+      MUA TRÊN <span className="brand-word">Telegram</span>
+    </>
+  )
+}
+
 // "GÓP Ý" used to sit fourth and went to the same page as "ĐÁNH GIÁ"; the
 // reviews took its slot and the Telegram shop took the front.
 const QUICK_LINKS = [
@@ -300,7 +314,7 @@ export function SiteHeaderClient({
           <div className="xl:hidden flex h-full min-w-0 items-center gap-5 overflow-x-auto whitespace-nowrap [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             {quickLinks.map((link) => (
               <SiteLink key={link} href={linkFor(link)} className={QUICK_LINK_CLASS}>
-                {link}
+                {quickLinkLabel(link)}
               </SiteLink>
             ))}
           </div>
@@ -308,7 +322,7 @@ export function SiteHeaderClient({
           <div className="hidden xl:flex items-center gap-5 h-full">
             {quickLinks.map((link) => (
               <SiteLink key={link} href={linkFor(link)} className={QUICK_LINK_CLASS}>
-                {link}
+                {quickLinkLabel(link)}
               </SiteLink>
             ))}
           </div>

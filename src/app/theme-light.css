@@ -1037,7 +1037,9 @@ html[data-theme="light"][data-variant="nike"] {
   --light-ink: #111111;
   --light-ink-2: #111111;
   --light-ink-3: #707072;
-  --light-ink-4: #9e9ea0; /* decoration only (separators), Nike's disabled grey */
+  /* The dimmest step still paints words (a dim hex grey, list numbers), so it
+     is the secondary grey too, not Nike's #9e9ea0 (2.7:1). */
+  --light-ink-4: #707072;
   --nike-well: #f5f5f5; /* behind pictures, fields, quiet chips */
   --nike-well-hover: #e5e5e5;
   /* The accent is black; hover #3a3a3a (white on it 11.4:1). */
@@ -1106,14 +1108,16 @@ html[data-theme="light"][data-variant="nike"] {
 }
 
 /* Islands keep their dark palette; the accent there is white, and a white
-   fill carries black words (Nike's white pill over a picture). */
+   fill carries black words (Nike's white pill over a picture). The sale
+   signals turn the accent back to red on themselves, so they keep white
+   words. */
 html[data-theme="light"][data-variant="nike"] .keep-dark {
   --menzu-accent: #ffffff;
   --brand: #ffffff;
   --menzu-accent-dark: #e5e5e5;
   --brand-dark: #e5e5e5;
 }
-html[data-theme="light"][data-variant="nike"] .keep-dark :is(.bg-\[var\(--menzu-accent\)\], .bg-\[var\(--brand\)\])[class] {
+html[data-theme="light"][data-variant="nike"] .keep-dark :is(.bg-\[var\(--menzu-accent\)\], .bg-\[var\(--brand\)\])[class]:where(:not(.-rotate-45, .line-through + *, .from-\[var\(--menzu-accent\)\])) {
   --color-white: #111111;
   color: #111111;
 }
@@ -1137,6 +1141,133 @@ html[data-theme="light"][data-variant="nike"] .keep-dark :is(.bg-\[var\(--menzu-
   :where(html[data-theme="light"][data-variant="nike"]) :is(.border-\[var\(--menzu-accent\)\]\/20, .border-\[var\(--menzu-accent\)\]\/25, .border-\[var\(--menzu-accent\)\]\/30, .border-\[var\(--menzu-accent\)\]\/35, .border-\[var\(--menzu-accent\)\]\/40, .border-\[var\(--menzu-accent\)\]\/45, .border-\[var\(--menzu-accent\)\]\/50, .border-\[var\(--menzu-accent\)\]\/60, .border-\[var\(--brand\)\]\/25, .border-\[var\(--brand\)\]\/30, .border-\[var\(--brand\)\]\/40, .border-\[var\(--brand\)\]\/50, .border-\[var\(--brand\)\]\/60):where(:not(.keep-dark, .keep-dark *)) {
     border-color: var(--light-line);
   }
+  :where(html[data-theme="light"][data-variant="nike"]) :is(.text-neutral-700):where(:not(:disabled, [aria-disabled="true"], .cursor-default, .cursor-not-allowed)):where(:not(.keep-dark, .keep-dark *)) {
+    color: #707072;
+  }
+
+  /* Small UI words are 12px at least, on a phone only where a wider screen
+     has its own size (see sizeAtBreakpoint in the script). */
+  :where(html[data-theme="light"][data-variant="nike"]) :is(.text-\[10\.5px\], .text-\[10px\], .text-\[11\.5px\], .text-\[11px\], .text-\[9\.5px\], .text-\[9px\]):where(:not(a[href="/"] .text-red-500, .-rotate-45, [aria-hidden="true"])):where(:not(.keep-dark, .keep-dark *)) {
+    font-size: 12px;
+  }
+  @media (width >= 360px) {
+    :where(html[data-theme="light"][data-variant="nike"]) :is(.min-\[360px\]\:text-\[11px\]):where(.text-\[10\.5px\], .text-\[10px\], .text-\[11\.5px\], .text-\[11px\], .text-\[9\.5px\], .text-\[9px\]):where(:not(a[href="/"] .text-red-500, .-rotate-45, [aria-hidden="true"])):where(:not(.keep-dark, .keep-dark *)) {
+      font-size: 12px;
+    }
+    :where(html[data-theme="light"][data-variant="nike"]) :is(.min-\[360px\]\:text-xl):where(.text-\[10\.5px\], .text-\[10px\], .text-\[11\.5px\], .text-\[11px\], .text-\[9\.5px\], .text-\[9px\]):where(:not(a[href="/"] .text-red-500, .-rotate-45, [aria-hidden="true"])):where(:not(.keep-dark, .keep-dark *)) {
+      font-size: 1.25rem;
+    }
+  }
+  @media (width >= 40rem) {
+    :where(html[data-theme="light"][data-variant="nike"]) :is(.sm\:text-\[10px\], .sm\:text-\[11px\], .sm\:text-\[12px\], .sm\:text-\[9\.5px\]):where(.text-\[10\.5px\], .text-\[10px\], .text-\[11\.5px\], .text-\[11px\], .text-\[9\.5px\], .text-\[9px\]):where(:not(a[href="/"] .text-red-500, .-rotate-45, [aria-hidden="true"])):where(:not(.keep-dark, .keep-dark *)) {
+      font-size: 12px;
+    }
+    :where(html[data-theme="light"][data-variant="nike"]) :is(.sm\:text-\[13px\]):where(.text-\[10\.5px\], .text-\[10px\], .text-\[11\.5px\], .text-\[11px\], .text-\[9\.5px\], .text-\[9px\]):where(:not(a[href="/"] .text-red-500, .-rotate-45, [aria-hidden="true"])):where(:not(.keep-dark, .keep-dark *)) {
+      font-size: 13px;
+    }
+    :where(html[data-theme="light"][data-variant="nike"]) :is(.sm\:text-\[15px\]):where(.text-\[10\.5px\], .text-\[10px\], .text-\[11\.5px\], .text-\[11px\], .text-\[9\.5px\], .text-\[9px\]):where(:not(a[href="/"] .text-red-500, .-rotate-45, [aria-hidden="true"])):where(:not(.keep-dark, .keep-dark *)) {
+      font-size: 15px;
+    }
+    :where(html[data-theme="light"][data-variant="nike"]) :is(.sm\:text-\[17px\]):where(.text-\[10\.5px\], .text-\[10px\], .text-\[11\.5px\], .text-\[11px\], .text-\[9\.5px\], .text-\[9px\]):where(:not(a[href="/"] .text-red-500, .-rotate-45, [aria-hidden="true"])):where(:not(.keep-dark, .keep-dark *)) {
+      font-size: 17px;
+    }
+    :where(html[data-theme="light"][data-variant="nike"]) :is(.sm\:text-\[22px\]):where(.text-\[10\.5px\], .text-\[10px\], .text-\[11\.5px\], .text-\[11px\], .text-\[9\.5px\], .text-\[9px\]):where(:not(a[href="/"] .text-red-500, .-rotate-45, [aria-hidden="true"])):where(:not(.keep-dark, .keep-dark *)) {
+      font-size: 22px;
+    }
+    :where(html[data-theme="light"][data-variant="nike"]) :is(.sm\:text-\[24px\]):where(.text-\[10\.5px\], .text-\[10px\], .text-\[11\.5px\], .text-\[11px\], .text-\[9\.5px\], .text-\[9px\]):where(:not(a[href="/"] .text-red-500, .-rotate-45, [aria-hidden="true"])):where(:not(.keep-dark, .keep-dark *)) {
+      font-size: 24px;
+    }
+    :where(html[data-theme="light"][data-variant="nike"]) :is(.sm\:text-\[26px\]):where(.text-\[10\.5px\], .text-\[10px\], .text-\[11\.5px\], .text-\[11px\], .text-\[9\.5px\], .text-\[9px\]):where(:not(a[href="/"] .text-red-500, .-rotate-45, [aria-hidden="true"])):where(:not(.keep-dark, .keep-dark *)) {
+      font-size: 26px;
+    }
+    :where(html[data-theme="light"][data-variant="nike"]) :is(.sm\:text-\[28px\]):where(.text-\[10\.5px\], .text-\[10px\], .text-\[11\.5px\], .text-\[11px\], .text-\[9\.5px\], .text-\[9px\]):where(:not(a[href="/"] .text-red-500, .-rotate-45, [aria-hidden="true"])):where(:not(.keep-dark, .keep-dark *)) {
+      font-size: 28px;
+    }
+    :where(html[data-theme="light"][data-variant="nike"]) :is(.sm\:text-\[36px\]):where(.text-\[10\.5px\], .text-\[10px\], .text-\[11\.5px\], .text-\[11px\], .text-\[9\.5px\], .text-\[9px\]):where(:not(a[href="/"] .text-red-500, .-rotate-45, [aria-hidden="true"])):where(:not(.keep-dark, .keep-dark *)) {
+      font-size: 36px;
+    }
+    :where(html[data-theme="light"][data-variant="nike"]) :is(.sm\:text-\[48px\]):where(.text-\[10\.5px\], .text-\[10px\], .text-\[11\.5px\], .text-\[11px\], .text-\[9\.5px\], .text-\[9px\]):where(:not(a[href="/"] .text-red-500, .-rotate-45, [aria-hidden="true"])):where(:not(.keep-dark, .keep-dark *)) {
+      font-size: 48px;
+    }
+    :where(html[data-theme="light"][data-variant="nike"]) :is(.sm\:text-2xl):where(.text-\[10\.5px\], .text-\[10px\], .text-\[11\.5px\], .text-\[11px\], .text-\[9\.5px\], .text-\[9px\]):where(:not(a[href="/"] .text-red-500, .-rotate-45, [aria-hidden="true"])):where(:not(.keep-dark, .keep-dark *)) {
+      font-size: 1.5rem;
+    }
+    :where(html[data-theme="light"][data-variant="nike"]) :is(.sm\:text-3xl):where(.text-\[10\.5px\], .text-\[10px\], .text-\[11\.5px\], .text-\[11px\], .text-\[9\.5px\], .text-\[9px\]):where(:not(a[href="/"] .text-red-500, .-rotate-45, [aria-hidden="true"])):where(:not(.keep-dark, .keep-dark *)) {
+      font-size: 1.875rem;
+    }
+    :where(html[data-theme="light"][data-variant="nike"]) :is(.sm\:text-4xl):where(.text-\[10\.5px\], .text-\[10px\], .text-\[11\.5px\], .text-\[11px\], .text-\[9\.5px\], .text-\[9px\]):where(:not(a[href="/"] .text-red-500, .-rotate-45, [aria-hidden="true"])):where(:not(.keep-dark, .keep-dark *)) {
+      font-size: 2.25rem;
+    }
+    :where(html[data-theme="light"][data-variant="nike"]) :is(.sm\:text-5xl):where(.text-\[10\.5px\], .text-\[10px\], .text-\[11\.5px\], .text-\[11px\], .text-\[9\.5px\], .text-\[9px\]):where(:not(a[href="/"] .text-red-500, .-rotate-45, [aria-hidden="true"])):where(:not(.keep-dark, .keep-dark *)) {
+      font-size: 3rem;
+    }
+    :where(html[data-theme="light"][data-variant="nike"]) :is(.sm\:text-7xl):where(.text-\[10\.5px\], .text-\[10px\], .text-\[11\.5px\], .text-\[11px\], .text-\[9\.5px\], .text-\[9px\]):where(:not(a[href="/"] .text-red-500, .-rotate-45, [aria-hidden="true"])):where(:not(.keep-dark, .keep-dark *)) {
+      font-size: 4.5rem;
+    }
+    :where(html[data-theme="light"][data-variant="nike"]) :is(.sm\:text-base):where(.text-\[10\.5px\], .text-\[10px\], .text-\[11\.5px\], .text-\[11px\], .text-\[9\.5px\], .text-\[9px\]):where(:not(a[href="/"] .text-red-500, .-rotate-45, [aria-hidden="true"])):where(:not(.keep-dark, .keep-dark *)) {
+      font-size: 1rem;
+    }
+    :where(html[data-theme="light"][data-variant="nike"]) :is(.sm\:text-lg):where(.text-\[10\.5px\], .text-\[10px\], .text-\[11\.5px\], .text-\[11px\], .text-\[9\.5px\], .text-\[9px\]):where(:not(a[href="/"] .text-red-500, .-rotate-45, [aria-hidden="true"])):where(:not(.keep-dark, .keep-dark *)) {
+      font-size: 1.125rem;
+    }
+    :where(html[data-theme="light"][data-variant="nike"]) :is(.sm\:text-sm):where(.text-\[10\.5px\], .text-\[10px\], .text-\[11\.5px\], .text-\[11px\], .text-\[9\.5px\], .text-\[9px\]):where(:not(a[href="/"] .text-red-500, .-rotate-45, [aria-hidden="true"])):where(:not(.keep-dark, .keep-dark *)) {
+      font-size: 0.875rem;
+    }
+    :where(html[data-theme="light"][data-variant="nike"]) :is(.sm\:text-xl):where(.text-\[10\.5px\], .text-\[10px\], .text-\[11\.5px\], .text-\[11px\], .text-\[9\.5px\], .text-\[9px\]):where(:not(a[href="/"] .text-red-500, .-rotate-45, [aria-hidden="true"])):where(:not(.keep-dark, .keep-dark *)) {
+      font-size: 1.25rem;
+    }
+    :where(html[data-theme="light"][data-variant="nike"]) :is(.sm\:text-xs):where(.text-\[10\.5px\], .text-\[10px\], .text-\[11\.5px\], .text-\[11px\], .text-\[9\.5px\], .text-\[9px\]):where(:not(a[href="/"] .text-red-500, .-rotate-45, [aria-hidden="true"])):where(:not(.keep-dark, .keep-dark *)) {
+      font-size: 0.75rem;
+    }
+  }
+  @media (width >= 48rem) {
+    :where(html[data-theme="light"][data-variant="nike"]) :is(.md\:text-3xl):where(.text-\[10\.5px\], .text-\[10px\], .text-\[11\.5px\], .text-\[11px\], .text-\[9\.5px\], .text-\[9px\]):where(:not(a[href="/"] .text-red-500, .-rotate-45, [aria-hidden="true"])):where(:not(.keep-dark, .keep-dark *)) {
+      font-size: 1.875rem;
+    }
+    :where(html[data-theme="light"][data-variant="nike"]) :is(.md\:text-5xl):where(.text-\[10\.5px\], .text-\[10px\], .text-\[11\.5px\], .text-\[11px\], .text-\[9\.5px\], .text-\[9px\]):where(:not(a[href="/"] .text-red-500, .-rotate-45, [aria-hidden="true"])):where(:not(.keep-dark, .keep-dark *)) {
+      font-size: 3rem;
+    }
+  }
+  @media (width >= 64rem) {
+    :where(html[data-theme="light"][data-variant="nike"]) :is(.lg\:text-\[11px\]):where(.text-\[10\.5px\], .text-\[10px\], .text-\[11\.5px\], .text-\[11px\], .text-\[9\.5px\], .text-\[9px\]):where(:not(a[href="/"] .text-red-500, .-rotate-45, [aria-hidden="true"])):where(:not(.keep-dark, .keep-dark *)) {
+      font-size: 12px;
+    }
+    :where(html[data-theme="light"][data-variant="nike"]) :is(.lg\:text-\[17px\]):where(.text-\[10\.5px\], .text-\[10px\], .text-\[11\.5px\], .text-\[11px\], .text-\[9\.5px\], .text-\[9px\]):where(:not(a[href="/"] .text-red-500, .-rotate-45, [aria-hidden="true"])):where(:not(.keep-dark, .keep-dark *)) {
+      font-size: 17px;
+    }
+    :where(html[data-theme="light"][data-variant="nike"]) :is(.lg\:text-\[18px\]):where(.text-\[10\.5px\], .text-\[10px\], .text-\[11\.5px\], .text-\[11px\], .text-\[9\.5px\], .text-\[9px\]):where(:not(a[href="/"] .text-red-500, .-rotate-45, [aria-hidden="true"])):where(:not(.keep-dark, .keep-dark *)) {
+      font-size: 18px;
+    }
+    :where(html[data-theme="light"][data-variant="nike"]) :is(.lg\:text-\[20px\]):where(.text-\[10\.5px\], .text-\[10px\], .text-\[11\.5px\], .text-\[11px\], .text-\[9\.5px\], .text-\[9px\]):where(:not(a[href="/"] .text-red-500, .-rotate-45, [aria-hidden="true"])):where(:not(.keep-dark, .keep-dark *)) {
+      font-size: 20px;
+    }
+    :where(html[data-theme="light"][data-variant="nike"]) :is(.lg\:text-\[25px\]):where(.text-\[10\.5px\], .text-\[10px\], .text-\[11\.5px\], .text-\[11px\], .text-\[9\.5px\], .text-\[9px\]):where(:not(a[href="/"] .text-red-500, .-rotate-45, [aria-hidden="true"])):where(:not(.keep-dark, .keep-dark *)) {
+      font-size: 25px;
+    }
+    :where(html[data-theme="light"][data-variant="nike"]) :is(.lg\:text-\[28px\]):where(.text-\[10\.5px\], .text-\[10px\], .text-\[11\.5px\], .text-\[11px\], .text-\[9\.5px\], .text-\[9px\]):where(:not(a[href="/"] .text-red-500, .-rotate-45, [aria-hidden="true"])):where(:not(.keep-dark, .keep-dark *)) {
+      font-size: 28px;
+    }
+    :where(html[data-theme="light"][data-variant="nike"]) :is(.lg\:text-\[34px\]):where(.text-\[10\.5px\], .text-\[10px\], .text-\[11\.5px\], .text-\[11px\], .text-\[9\.5px\], .text-\[9px\]):where(:not(a[href="/"] .text-red-500, .-rotate-45, [aria-hidden="true"])):where(:not(.keep-dark, .keep-dark *)) {
+      font-size: 34px;
+    }
+    :where(html[data-theme="light"][data-variant="nike"]) :is(.lg\:text-\[40px\]):where(.text-\[10\.5px\], .text-\[10px\], .text-\[11\.5px\], .text-\[11px\], .text-\[9\.5px\], .text-\[9px\]):where(:not(a[href="/"] .text-red-500, .-rotate-45, [aria-hidden="true"])):where(:not(.keep-dark, .keep-dark *)) {
+      font-size: 40px;
+    }
+    :where(html[data-theme="light"][data-variant="nike"]) :is(.lg\:text-\[64px\]):where(.text-\[10\.5px\], .text-\[10px\], .text-\[11\.5px\], .text-\[11px\], .text-\[9\.5px\], .text-\[9px\]):where(:not(a[href="/"] .text-red-500, .-rotate-45, [aria-hidden="true"])):where(:not(.keep-dark, .keep-dark *)) {
+      font-size: 64px;
+    }
+    :where(html[data-theme="light"][data-variant="nike"]) :is(.lg\:text-4xl):where(.text-\[10\.5px\], .text-\[10px\], .text-\[11\.5px\], .text-\[11px\], .text-\[9\.5px\], .text-\[9px\]):where(:not(a[href="/"] .text-red-500, .-rotate-45, [aria-hidden="true"])):where(:not(.keep-dark, .keep-dark *)) {
+      font-size: 2.25rem;
+    }
+    :where(html[data-theme="light"][data-variant="nike"]) :is(.lg\:text-lg):where(.text-\[10\.5px\], .text-\[10px\], .text-\[11\.5px\], .text-\[11px\], .text-\[9\.5px\], .text-\[9px\]):where(:not(a[href="/"] .text-red-500, .-rotate-45, [aria-hidden="true"])):where(:not(.keep-dark, .keep-dark *)) {
+      font-size: 1.125rem;
+    }
+  }
+  @media (width >= 80rem) {
+    :where(html[data-theme="light"][data-variant="nike"]) :is(.xl\:text-\[46px\]):where(.text-\[10\.5px\], .text-\[10px\], .text-\[11\.5px\], .text-\[11px\], .text-\[9\.5px\], .text-\[9px\]):where(:not(a[href="/"] .text-red-500, .-rotate-45, [aria-hidden="true"])):where(:not(.keep-dark, .keep-dark *)) {
+      font-size: 46px;
+    }
+  }
 }
 
 /* Decoration off: the accent bars before headings and card titles, the accent
@@ -1146,9 +1277,10 @@ html[data-theme="light"][data-variant="nike"] .rounded-full[class*="border-[var(
 html[data-theme="light"][data-variant="nike"] [class*="0_0_140px_30px"]:not(.keep-dark, .keep-dark *) { box-shadow: none; }
 html[data-theme="light"][data-variant="nike"] .lift-card:not(.keep-dark, .keep-dark *) { translate: none; }
 
-/* Type: small UI words lose the caps and the tracking, weigh 600 and are 12px
-   at least. Page titles (h1) keep their caps, like Nike's campaign lines;
-   section headings are sentence case, bold, tracked in a hair. */
+/* Type: small UI words lose the caps and the tracking and weigh 600 (their
+   12px floor is in the utilities layer above). Page titles (h1) keep their
+   caps, like Nike's campaign lines; section headings are sentence case, bold,
+   tracked in a hair. */
 html[data-theme="light"][data-variant="nike"] .uppercase:where(:not(h1, a[href="/"] .text-red-500, .-rotate-45)):not(.keep-dark, .keep-dark *) {
   text-transform: none;
 }
@@ -1157,9 +1289,6 @@ html[data-theme="light"][data-variant="nike"] :is(.md\:tracking-widest, .sm\:tra
 }
 html[data-theme="light"][data-variant="nike"] .uppercase:is(.font-black, .font-extrabold, .font-bold):where(:not(h1, h2, a[href="/"] .text-red-500, .-rotate-45)):not(.keep-dark, .keep-dark *) {
   font-weight: 600;
-}
-html[data-theme="light"][data-variant="nike"] :is(.text-\[10\.5px\], .text-\[10px\], .text-\[11\.5px\], .text-\[11px\], .text-\[9\.5px\], .text-\[9px\]):where(:not(a[href="/"] .text-red-500, .-rotate-45, [aria-hidden="true"])):not(.keep-dark, .keep-dark *) {
-  font-size: 12px;
 }
 html[data-theme="light"][data-variant="nike"] :is(h1, h2):where(:not([class*="tracking-tight"], [class*="tracking-[-"])):not(.keep-dark, .keep-dark *) {
   letter-spacing: -0.01em;
@@ -1274,9 +1403,20 @@ html[data-theme="light"][data-variant="nike"] button.bg-\[\#111216\]:not(.keep-d
 }
 
 /* Header: white, one hairline, black words; the strip a #f5f5f5 band; the
-   cart a round icon. The three menu triggers are typed in capitals, so they
-   are lowered and their first letter raised (sentence case). */
-html[data-theme="light"][data-variant="nike"] .site-nav > div:first-child a { color: var(--light-ink); font-weight: 500; }
+   cart a round icon. The strip's links and the three menu triggers are typed
+   in capitals, so they are lowered and their first letter raised (sentence
+   case). A first letter needs a block box, so a strip link is a block (its
+   words still centred in the 40px strip) instead of a flex box; a brand name
+   inside one (.brand-word, "Telegram") is written as typed. */
+html[data-theme="light"][data-variant="nike"] .site-nav > div:first-child a {
+  color: var(--light-ink);
+  font-weight: 500;
+  display: inline-block;
+  align-content: center;
+  text-transform: lowercase;
+}
+html[data-theme="light"][data-variant="nike"] .site-nav > div:first-child a::first-letter { text-transform: uppercase; }
+html[data-theme="light"][data-variant="nike"] .site-nav > div:first-child a .brand-word { text-transform: none; }
 html[data-theme="light"][data-variant="nike"] .site-nav > div:first-child a:hover { text-decoration: underline; text-underline-offset: 3px; }
 html[data-theme="light"][data-variant="nike"] .site-nav button[aria-haspopup="true"].uppercase {
   display: block;
