@@ -485,22 +485,25 @@ export function AnnouncementModal({
             // The height is still capped, cropped rather than letterboxed (a
             // black band above a screenshot reads as a broken image), and the
             // whole picture is one click away.
+            // The box has a fixed 16:9 shape of its own: sized by the file, a
+            // square picture grew the box from 172px to 300px tall when it
+            // arrived and pushed the sheet's text down under the reader (SEO
+            // review, 13/10/2026). Now any file is cropped into the same box.
             <a
               href={item.imageUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-4 block w-full overflow-hidden rounded-xl border border-white/10 bg-neutral-950 transition-colors hover:border-white/25"
+              className="relative mt-4 block aspect-video max-h-[300px] w-full overflow-hidden rounded-xl border border-white/10 bg-neutral-950 transition-colors hover:border-white/25"
             >
               <Image
                 src={item.imageUrl}
                 alt=""
-                width={1120}
-                height={630}
+                fill
                 // Without this the optimizer offered "w=3840 2x" and every
                 // phone took the full 1600px original (92 KB, the largest
                 // response on a shelf page) for a box about 306px wide.
                 sizes="(max-width: 640px) calc(100vw - 84px), 480px"
-                className="max-h-[300px] w-full object-cover"
+                className="object-cover"
               />
             </a>
           ) : null}

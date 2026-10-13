@@ -7,11 +7,16 @@ import { SiteLink } from "../shared/SiteLink";
 // The display face for the two big words on each card, declared here and
 // nowhere else: on <html> it was preloaded by every page of the site (77 KB
 // of TTF) for a block only the home page draws.
+// A woff2 cut down to Latin and Vietnamese (about 21 KB; the TTF it comes
+// from stays beside it, scripts/subset-heading-font.mjs makes the cut) and
+// not preloaded: the tiles sit below the fold, swap covers a late arrival,
+// and a preload at High raced the hero picture (SEO review, 13/10/2026).
 const headingNow = localFont({
-  src: "../../../../../public/sites/menzu-lol-f7ae197a/shared/fonts/headingnow-extrabold.ttf",
+  src: "../../../../../public/sites/menzu-lol-f7ae197a/shared/fonts/headingnow-extrabold-subset.woff2",
   variable: "--font-headingnow",
   weight: "800",
   display: "swap",
+  preload: false,
 });
 
 export interface CategoryCard {
