@@ -1,4 +1,4 @@
-import { FileText, Lock } from "lucide-react";
+import { Lock } from "lucide-react";
 import Link from "next/link";
 
 import { DocHtml } from "@/lib/docFormat";
@@ -8,6 +8,8 @@ import {
   requirementsOrDefault,
   type ProductRequirement,
 } from "@/lib/productRequirements";
+
+import { SectionHeading } from "./SectionHeading";
 
 /**
  * Where the "Xem chi tiết" cue lands, and the id this section wears. Shared so
@@ -323,14 +325,7 @@ export function SoftwareDescription({
         id={DESCRIPTION_SECTION_ID}
         className="mt-14 scroll-mt-[120px] border-t border-white/10 pt-12 pb-14"
       >
-        <h2 className="flex items-center gap-3 text-[26px] sm:text-3xl font-black uppercase tracking-wider text-white">
-          <FileText
-            size={26}
-            aria-hidden
-            className="shrink-0 text-[var(--menzu-accent)]"
-          />
-          Mô tả sản phẩm
-        </h2>
+        <SectionHeading>Mô tả sản phẩm</SectionHeading>
         <div className="mt-5">
           <DocHtml body={richHtml} />
         </div>
@@ -357,17 +352,10 @@ export function SoftwareDescription({
       id={DESCRIPTION_SECTION_ID}
       className="mt-14 scroll-mt-[120px] border-t border-white/10 pt-12 pb-14"
     >
-      <h2 className="flex items-center gap-3 text-[26px] sm:text-3xl font-black uppercase tracking-wider text-white">
-        {/* The accent glyph before the white heading, as "Sản phẩm tương tự"
-            below and every page title already wear (the owner, 12/10/2026:
-            "chỗ nào chưa đồng bộ sửa luôn"). */}
-        <FileText
-          size={26}
-          aria-hidden
-          className="shrink-0 text-[var(--menzu-accent)]"
-        />
-        Mô tả sản phẩm
-      </h2>
+      {/* The red bar the home rows open with, as "Sản phẩm tương tự" below
+          now wears too; the accent glyph stays with the page titles (the
+          owner, 13/10/2026, UI consistency review). */}
+      <SectionHeading>Mô tả sản phẩm</SectionHeading>
 
       {/* The name opens the paragraph in bold, as the brief's sample does, but
           joined by a dash rather than run straight on: the same `description`
