@@ -16,6 +16,15 @@ import { ArrowRight, Calendar, ChevronRight, Eye, Search } from "lucide-react";
 import { FaqAccordion } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/FaqAccordion";
 import { ListPager } from "@/components/sites/menzu-lol-f7ae197a/shared/AccountListChrome";
 import { DOC_SHELF_META } from "@/components/sites/menzu-lol-f7ae197a/shared/docShelfMeta";
+import {
+  DOCS_RAIL_BAR,
+  DOCS_RAIL_BOX,
+  DOCS_RAIL_LABEL,
+  DOCS_RAIL_ROW,
+  DOCS_RAIL_ROW_OFF,
+  DOCS_RAIL_ROW_ON,
+  docsRailIcon,
+} from "@/components/sites/menzu-lol-f7ae197a/shared/docsRail";
 import { DOC_SHELF_LABEL, DOC_SHELVES, isDocShelf, type DocShelf } from "@/lib/docCategories";
 import type { FaqEntry } from "@/lib/settings";
 
@@ -336,11 +345,12 @@ export function DocsHelpCenter({
             02/10/2026: "thêm icon"). A row of chips below lg, a column above.
             min-w-0: the chip row counts every button towards the column's
             minimum and pushed a phone's page past its edge. */}
+        {/* Its box, label, rows and open state come from docsRail, which
+            Tài liệu's menu draws too (the owner, 13/10/2026, UI consistency
+            review). */}
         <aside className="min-w-0 lg:sticky lg:top-[120px]">
-          <div className="rounded-2xl border border-white/10 bg-[#121216] p-3">
-            <p className="mb-2 px-2 text-[10px] font-black uppercase tracking-widest text-neutral-500">
-              Danh mục
-            </p>
+          <div className={DOCS_RAIL_BOX}>
+            <p className={DOCS_RAIL_LABEL}>Danh mục</p>
             <div className="flex gap-1.5 overflow-x-auto [scrollbar-width:none] lg:flex-col lg:overflow-visible [&::-webkit-scrollbar]:hidden">
               {DOC_SHELVES.map((key) => {
                 const on = key === tab && !searching;
@@ -351,20 +361,12 @@ export function DocsHelpCenter({
                     type="button"
                     onClick={() => openShelf(key)}
                     aria-pressed={on}
-                    className={`relative flex shrink-0 items-center gap-2.5 whitespace-nowrap rounded-xl border px-3 py-2.5 text-left text-sm font-bold transition-colors lg:shrink lg:whitespace-normal ${
-                      on
-                        ? "border-[var(--menzu-accent)]/25 bg-[var(--menzu-accent)]/10 text-white"
-                        : "border-transparent text-neutral-400 hover:bg-white/5 hover:text-white"
+                    className={`${DOCS_RAIL_ROW} shrink-0 whitespace-nowrap lg:shrink lg:whitespace-normal ${
+                      on ? DOCS_RAIL_ROW_ON : DOCS_RAIL_ROW_OFF
                     }`}
                   >
-                    {on ? (
-                      <span className="absolute bottom-2 left-0 top-2 w-0.5 rounded-full bg-[var(--menzu-accent)]" />
-                    ) : null}
-                    <Icon
-                      size={16}
-                      aria-hidden
-                      className={`shrink-0 ${on ? "text-[var(--menzu-accent)]" : "text-neutral-500"}`}
-                    />
+                    {on ? <span className={DOCS_RAIL_BAR} /> : null}
+                    <Icon size={16} aria-hidden className={docsRailIcon(on)} />
                     {DOC_SHELF_LABEL[key]}
                   </button>
                 );

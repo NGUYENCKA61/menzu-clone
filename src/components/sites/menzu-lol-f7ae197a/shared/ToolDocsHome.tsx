@@ -1,6 +1,7 @@
 "use client";
 
-import { ChevronRight, Lock, Search, Unlock } from "lucide-react";
+import { ChevronRight, Gamepad2, Lock, Search, Unlock } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -17,7 +18,48 @@ export interface DocsHomeCategory {
   slug: string;
   name: string;
   logoUrl: string | null;
+  /** The category's tile picture, standing in while it has no logo. */
+  imageUrl: string | null;
   tools: DocsHomeTool[];
+}
+
+/**
+ * The game's mark beside its name on its card. Only some games have a logo
+ * uploaded, and the cards of the others stood bare beside them (the owner,
+ * 13/10/2026, UI consistency review). Until a logo is uploaded the
+ * category's own picture stands in, cropped to a rounded square at the
+ * logo's size, as on /thong-bao's shelves; a game with neither gets a quiet
+ * gamepad in the same square, so every name starts at the same place.
+ */
+function GameMark({
+  logoUrl,
+  imageUrl,
+}: {
+  logoUrl: string | null;
+  imageUrl: string | null;
+}) {
+  const src = logoUrl || imageUrl;
+  if (src) {
+    return (
+      <span className="relative h-7 w-7 shrink-0 overflow-hidden rounded-md">
+        <Image
+          src={src}
+          alt=""
+          fill
+          sizes="28px"
+          className={logoUrl ? "object-contain" : "object-cover"}
+        />
+      </span>
+    );
+  }
+  return (
+    <span
+      aria-hidden
+      className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-white/10 bg-white/[0.06] text-neutral-500"
+    >
+      <Gamepad2 size={15} />
+    </span>
+  );
 }
 
 const FIELD =
@@ -100,14 +142,10 @@ export function ToolDocsHome({
               className="rounded-2xl border border-white/10 bg-white/[0.02] p-5"
             >
               <h3 className="flex items-center gap-3 text-[13px] font-black uppercase tracking-wider text-white">
-                {category.logoUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={category.logoUrl}
-                    alt=""
-                    className="h-7 w-7 rounded-md object-contain"
-                  />
-                ) : null}
+                <GameMark
+                  logoUrl={category.logoUrl}
+                  imageUrl={category.imageUrl}
+                />
                 {category.name}
                 <span className="ml-auto text-[10px] font-black text-neutral-500">
                   {category.tools.length} tool
