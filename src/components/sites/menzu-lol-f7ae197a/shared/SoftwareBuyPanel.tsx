@@ -21,6 +21,7 @@ import { StickyBuyBar } from "./StickyBuyBar";
 import { StatusToast } from "./StatusToast";
 import { StockLine } from "./StockLine";
 import { isSalesLocked, salesLockReason } from "@/lib/softwareStatus";
+import { softwareBuyable, softwareStockLabel } from "@/lib/softwareStock";
 
 export interface SoftwarePackageView {
   id: string;
@@ -334,9 +335,12 @@ export function SoftwareBuyPanel({
         </p>
         {/* A per-day figure ("≈ 64.286đ/ngày") stood under the price until
             the shop asked for it off the page. */}
+        {/* One rule with the page's Product markup (lib/softwareStock.ts):
+            a locked or unpriced tool no longer reads "Còn hàng" right under
+            the sentence saying it cannot be bought. */}
         <StockLine
-          inStock={software.inStock}
-          label={software.inStock ? "Còn hàng" : "Tạm hết hàng"}
+          inStock={softwareBuyable(software)}
+          label={softwareStockLabel(software)}
         />
       </div>
 

@@ -16,13 +16,19 @@ import {
   tierRank,
 } from "@/lib/memberTiers";
 import { getCurrentUser } from "@/lib/session";
+import { shareCard } from "@/lib/shareCard";
 
-export const metadata: Metadata = {
-  title: "Cấp bậc thành viên",
-  description:
-    "Năm hạng thành viên của shop, mốc nạp tiền để lên hạng và ưu đãi giảm giá khi mua tool ở mỗi hạng.",
-  alternates: { canonical: "/cap-bac" },
-};
+// The card spread in for og:url beside the canonical (the owner's SEO
+// review, 13/10/2026).
+export async function generateMetadata(): Promise<Metadata> {
+  return {
+    title: "Cấp bậc thành viên",
+    description:
+      "Năm hạng thành viên của shop, mốc nạp tiền để lên hạng và ưu đãi giảm giá khi mua tool ở mỗi hạng.",
+    alternates: { canonical: "/cap-bac" },
+    ...(await shareCard({ url: "/cap-bac" })),
+  };
+}
 export const dynamic = "force-dynamic";
 
 const LABEL = "text-[10px] font-black uppercase tracking-widest text-neutral-500";

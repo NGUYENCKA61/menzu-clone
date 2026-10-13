@@ -4,15 +4,21 @@ import { notFound } from "next/navigation";
 
 import { BioCard } from "@/components/sites/menzu-lol-f7ae197a/shared/BioCard";
 import { getBioProfile } from "@/lib/queries";
+import { shareCard } from "@/lib/shareCard";
 
 const BACKDROP =
   "/sites/menzu-lol-f7ae197a/root-8a5edab2/images/behance/e4307d166239615.6418bdb0084a4.webp";
 
-export const metadata: Metadata = {
-  title: "Thông tin liên hệ",
-  description: "Các kênh liên hệ và cộng đồng chính thức của THICHTHIHACK.",
-  alternates: { canonical: "/bio" },
-};
+// The card spread in for og:url beside the canonical (the owner's SEO
+// review, 13/10/2026).
+export async function generateMetadata(): Promise<Metadata> {
+  return {
+    title: "Thông tin liên hệ",
+    description: "Các kênh liên hệ và cộng đồng chính thức của THICHTHIHACK.",
+    alternates: { canonical: "/bio" },
+    ...(await shareCard({ url: "/bio" })),
+  };
+}
 
 /**
  * Standalone contact card — no site header, footer or rails, matching the

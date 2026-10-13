@@ -11,13 +11,19 @@ import {
 import { SimplePage } from "@/components/sites/menzu-lol-f7ae197a/shared/SimplePage";
 import { listDocArticles } from "@/lib/queries";
 import { getShopSettings } from "@/lib/settingsStore";
+import { shareCard } from "@/lib/shareCard";
 
-export const metadata: Metadata = {
-  title: "Wiki & Hướng Dẫn",
-  description:
-    "Tổng hợp hướng dẫn mua acc, chính sách bảo hành đổi trả và các câu hỏi thường gặp khi giao dịch tại THICHTHIHACK.",
-  alternates: { canonical: "/docs" },
-};
+// The card spread in for og:url beside the canonical (the owner's SEO
+// review, 13/10/2026).
+export async function generateMetadata(): Promise<Metadata> {
+  return {
+    title: "Wiki & Hướng Dẫn",
+    description:
+      "Tổng hợp hướng dẫn mua acc, chính sách bảo hành đổi trả và các câu hỏi thường gặp khi giao dịch tại THICHTHIHACK.",
+    alternates: { canonical: "/docs" },
+    ...(await shareCard({ url: "/docs" })),
+  };
+}
 
 /**
  * The featured card wants a sentence. Articles written before the excerpt

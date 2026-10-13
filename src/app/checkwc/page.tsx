@@ -4,13 +4,19 @@ import { MailCheck } from "lucide-react";
 import { SimplePage } from "@/components/sites/menzu-lol-f7ae197a/shared/SimplePage";
 import { WelcomeMailChecker } from "@/components/sites/menzu-lol-f7ae197a/shared/WelcomeMailChecker";
 import { getShopSettings } from "@/lib/settingsStore";
+import { shareCard } from "@/lib/shareCard";
 
-export const metadata: Metadata = {
-  title: "Check Thư Welcome",
-  description:
-    "Kiểm tra thư welcome gốc của Riot Games từ mã nguồn email, xác minh chữ ký DKIM, SPF và DMARC. Xử lý hoàn toàn trên trình duyệt.",
-  alternates: { canonical: "/checkwc" },
-};
+// The card spread in for og:url beside the canonical (the owner's SEO
+// review, 13/10/2026).
+export async function generateMetadata(): Promise<Metadata> {
+  return {
+    title: "Check Thư Welcome",
+    description:
+      "Kiểm tra thư welcome gốc của Riot Games từ mã nguồn email, xác minh chữ ký DKIM, SPF và DMARC. Xử lý hoàn toàn trên trình duyệt.",
+    alternates: { canonical: "/checkwc" },
+    ...(await shareCard({ url: "/checkwc" })),
+  };
+}
 
 export default async function CheckWelcomePage() {
   const { brandName } = await getShopSettings();

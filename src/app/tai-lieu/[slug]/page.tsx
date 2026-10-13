@@ -29,8 +29,11 @@ import { pcSetupHref, PC_SETUP_PAGES } from "@/lib/pcSetup";
 import { DEFAULT_GUIDE, DEFAULT_SETUP_GUIDE } from "@/lib/productGuide";
 import { requirementsOrDefault } from "@/lib/productRequirements";
 import { productHref, toolDocsHref } from "@/lib/routes";
+import { breadcrumbJsonLd, JsonLd } from "@/lib/seo";
 import { getCurrentUser } from "@/lib/session";
+import { shareCard } from "@/lib/shareCard";
 import { getToolDocs, listToolDocsIndex, toolDocsAccess } from "@/lib/toolDocs";
+import { hasOwnToolDoc } from "@/lib/toolDocsContent";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -44,10 +47,21 @@ export async function generateMetadata({
   const { slug } = await params;
   const tool = await getToolDocs(slug);
   if (!tool) return { title: "Không tìm thấy tài liệu" };
+  const canonical = toolDocsHref(tool.slug);
   return {
     title: `${tool.name} | Tài liệu`,
     description: `Hướng dẫn cài đặt, thiết lập và sử dụng ${tool.name}.`,
-    alternates: { canonical: toolDocsHref(tool.slug) },
+    alternates: { canonical },
+    // A tool with no guide or requirements of its own prints the defaults,
+    // the same page as every other such tool: kept out of the index (and of
+    // the sitemap, by the same predicate) until the shop writes one (the
+    // owner's SEO review, 13/10/2026).
+    ...(hasOwnToolDoc(tool) ? {} : { robots: { index: false, follow: true } }),
+    // The tool's own picture on the card, as its shop page has, and og:url
+    // beside the canonical; it shared the site banner with no og:url (the
+    // owner's SEO review, 13/10/2026). An upload's size is not known here,
+    // so none is declared.
+    ...(await shareCard({ url: canonical, image: tool.picture || undefined })),
   };
 }
 
@@ -122,6 +136,16 @@ export default async function ToolDocsPage({ params }: PageProps) {
         </p>
       }
     >
+      {/* The visible trail, for crawlers: this page sits under the docs
+          area, a level the URL alone does not name (the owner's SEO review,
+          13/10/2026). */}
+      <JsonLd
+        data={breadcrumbJsonLd([
+          { name: "Trang chủ", path: "/" },
+          { name: "Tài liệu", path: "/tai-lieu" },
+          { name: tool.name },
+        ])}
+      />
       <ToolDocsShell
         index={index}
         place={{

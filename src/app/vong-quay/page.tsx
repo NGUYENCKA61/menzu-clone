@@ -13,13 +13,19 @@ import { getCurrentUser } from "@/lib/session";
 import { getShopSettings } from "@/lib/settingsStore";
 import { readWedgeColor, SPIN_COST, SPIN_LOCKED, WEDGE_COLORS, type Prize } from "@/lib/spin";
 import { listSpinPrizes } from "@/lib/spinPrizes";
+import { shareCard } from "@/lib/shareCard";
 
-export const metadata: Metadata = {
-  title: "Vòng quay đổi thưởng",
-  description:
-    "Dùng điểm thưởng tích được sau mỗi đơn hàng để quay nhận tiền vào ví và điểm thưởng.",
-  alternates: { canonical: "/vong-quay" },
-};
+// The card spread in for og:url beside the canonical (the owner's SEO
+// review, 13/10/2026).
+export async function generateMetadata(): Promise<Metadata> {
+  return {
+    title: "Vòng quay đổi thưởng",
+    description:
+      "Dùng điểm thưởng tích được sau mỗi đơn hàng để quay nhận tiền vào ví và điểm thưởng.",
+    alternates: { canonical: "/vong-quay" },
+    ...(await shareCard({ url: "/vong-quay" })),
+  };
+}
 export const dynamic = "force-dynamic";
 
 

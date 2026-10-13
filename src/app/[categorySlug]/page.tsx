@@ -70,9 +70,23 @@ function toAmount(raw: string | undefined): number | undefined {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { categorySlug: slug } = await params;
   const data = await getCategoryPage(slug);
+  if (data) return categoryMetadata(slug, data);
+  // A renamed category's old address: the page redirects to the new one, and
+  // until the redirect lands (a meta refresh, since loading.tsx has already
+  // sent the 200) the document carries the shelf's real title and canonical
+  // rather than "Không tìm thấy" (the owner's SEO review, 13/10/2026).
+  const moved = await categoryBehindOldSlug(slug);
+  const target = moved ? await getCategoryPage(moved.slug) : null;
+  if (moved && target) return categoryMetadata(moved.slug, target);
   // No shelf by that name: the body answers 404, and the tab, the crawler
   // and the share card must not be handed a made-up "Danh mục <slug>" first.
-  if (!data) return { title: "Không tìm thấy trang", robots: { index: false, follow: true } };
+  return { title: "Không tìm thấy trang", robots: { index: false, follow: true } };
+}
+
+async function categoryMetadata(
+  slug: string,
+  data: NonNullable<Awaited<ReturnType<typeof getCategoryPage>>>,
+): Promise<Metadata> {
   const name = data.name;
   const canonical = categoryHref(slug);
   // A real sentence for the search snippet and the social card, built from what
@@ -92,7 +106,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       : written
     : `${name} tại THICHTHIHACK${kinds ? ` - ${kinds}` : ""}: giá tốt, giao dịch tự động, uy tín.`;
   return {
-    title: `Danh mục ${name}`,
+    // The shelf's own name leads the tab and the search result: a leading
+    // "Danh mục " spent the front of the title, where the words weigh most,
+    // on a word every category page shares (the owner's SEO review,
+    // 13/10/2026).
+    title: name,
     description,
     // The category sits at the root and is reached from several groups; the
     // canonical says which of those addresses is the page itself.
@@ -100,7 +118,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     // An empty category has nothing to rank for and is left out of the
     // sitemap; it is indexed again the day its first product appears.
     ...(data && !data.listed ? { robots: { index: false, follow: true } } : {}),
-    ...(await shareCard({ url: canonical })),
+    // The shelf's own picture on the card rather than the site banner every
+    // category shared (the owner's SEO review, 13/10/2026). Its size is not
+    // known here, so none is declared.
+    ...(await shareCard({ url: canonical, image: data.heroImageUrl || undefined })),
   };
 }
 

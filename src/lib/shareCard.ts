@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import { getShopSettings } from "@/lib/settingsStore";
+import { SHARE_CARD_HEIGHT, SHARE_CARD_WIDTH, shareCardHref } from "@/lib/shareCardImage";
 
 type ShareImage = string | { url: string; alt?: string; width?: number; height?: number };
 
@@ -21,7 +22,7 @@ export async function shareCard(page: {
   url?: string;
   /** Article pages say so; everything else is a website. */
   type?: "website" | "article";
-  /** The picture on the card; the shop's hero banner when the page has none. */
+  /** The picture on the card; the hero banner's 1200x630 crop when the page has none. */
   image?: ShareImage;
   /** Only when the card should read differently from the browser tab. */
   title?: string;
@@ -29,10 +30,14 @@ export async function shareCard(page: {
   publishedTime?: string;
 }): Promise<Pick<Metadata, "openGraph" | "twitter">> {
   const { brandName, heroBanner } = await getShopSettings();
+  // Not the banner itself: a 5120x2851, 4.8 MB file declared as 1200x630.
+  // The crop route serves it at exactly the size declared here, and the ?v=
+  // in its address changes with the banner (lib/shareCardImage.ts; the
+  // owner's SEO review, 13/10/2026).
   const image: ShareImage = page.image ?? {
-    url: heroBanner,
-    width: 1200,
-    height: 630,
+    url: shareCardHref(heroBanner),
+    width: SHARE_CARD_WIDTH,
+    height: SHARE_CARD_HEIGHT,
     alt: `${brandName}, shop hack game và tài khoản game`,
   };
   const imageUrl = typeof image === "string" ? image : image.url;

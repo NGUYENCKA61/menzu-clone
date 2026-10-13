@@ -143,6 +143,12 @@ export interface ToolDocs {
   name: string;
   summary: string;
   imageUrl: string | null;
+  /**
+   * The picture the tool's shop page leads with (the gallery's first, else
+   * the card picture), for the share card: the docs page shared the site
+   * banner instead (the owner's SEO review, 13/10/2026).
+   */
+  picture: string | null;
   softwareStatus: string | null;
   categorySlug: string;
   categoryName: string;
@@ -171,6 +177,7 @@ export async function getToolDocs(slug: string): Promise<ToolDocs | null> {
       name: true,
       summary: true,
       imageUrl: true,
+      images: { orderBy: { sortOrder: "asc" }, take: 1, select: { url: true } },
       softwareStatus: true,
       requirements: true,
       guide: true,
@@ -197,6 +204,7 @@ export async function getToolDocs(slug: string): Promise<ToolDocs | null> {
     name: p.name ?? p.code,
     summary: p.summary ?? "",
     imageUrl: p.imageUrl,
+    picture: p.images[0]?.url ?? p.imageUrl,
     softwareStatus: p.softwareStatus,
     categorySlug: p.category.slug,
     categoryName: p.category.name,

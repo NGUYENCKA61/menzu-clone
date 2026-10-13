@@ -51,12 +51,24 @@ export function absoluteUrl(path: string): string {
 
 interface ProductLdInput {
   code: string;
+  /**
+   * The listing as its heading names it, and its write-up or figures: see
+   * lib/accountSeo.ts. Both came from a Valorant template ("Rank , 0 skin")
+   * that matched nothing on a LoL or CFVN page (the owner's SEO review,
+   * 13/10/2026).
+   */
+  name: string;
+  description: string;
   price: number;
-  imageUrl: string;
+  /** The listing's pictures, the main one first; duplicates are dropped. */
+  images: string[];
   categoryName: string;
-  rank: string;
-  weaponSkins: number;
   available: boolean;
+  /**
+   * A random listing ("acc random") sells from a pile that the shop refills,
+   * so an empty pile is OutOfStock, not SoldOut.
+   */
+  restockable?: boolean;
   /** The product's own address — /{category}/{slug}. */
   href: string;
 }
@@ -65,18 +77,21 @@ interface ProductLdInput {
  * schema.org/Product for an account listing.
  *
  * Every account is one-of-a-kind, so `sku` is the shop code and availability
- * flips to SoldOut the moment it sells rather than tracking a quantity.
+ * flips to SoldOut the moment it sells rather than tracking a quantity. A
+ * random listing is the exception: it is out of stock while its pile is
+ * empty and back the day the shop refills it.
  */
 export function productJsonLd(product: ProductLdInput) {
+  const images = [
+    ...new Set(product.images.map((src) => src.trim()).filter(Boolean).map(absoluteUrl)),
+  ];
   return {
     "@context": "https://schema.org",
     "@type": "Product",
-    name: `Tài khoản ${product.categoryName} ${product.code}, Rank ${product.rank}, ${product.weaponSkins} skin`,
-    description:
-      `Tài khoản mã ${product.code}, rank ${product.rank}, ${product.weaponSkins} skin súng. ` +
-      `Thuộc danh mục ${product.categoryName} tại ${SITE_NAME}.`,
+    name: product.name,
+    description: product.description,
     sku: product.code,
-    image: absoluteUrl(product.imageUrl),
+    ...(images.length > 1 ? { image: images } : images.length === 1 ? { image: images[0] } : {}),
     category: product.categoryName,
     offers: {
       "@type": "Offer",
@@ -88,7 +103,9 @@ export function productJsonLd(product: ProductLdInput) {
       price: product.price,
       availability: product.available
         ? "https://schema.org/InStock"
-        : "https://schema.org/SoldOut",
+        : product.restockable
+          ? "https://schema.org/OutOfStock"
+          : "https://schema.org/SoldOut",
       seller: { "@type": "Organization", name: SITE_NAME },
     },
   };
@@ -98,27 +115,36 @@ interface SoftwareLdInput {
   code: string;
   name: string;
   description: string;
+  /** "" when the tool has no picture yet: the property is then left out. */
   imageUrl: string;
   categoryName: string;
   href: string;
+  /** Buyable now: on the shelf, not sales-locked, with a tier to buy. */
   available: boolean;
-  /** Every duration on sale, so the range shows rather than one figure. */
+  /** Every tier's price; the cheapest positive one is the offer. */
   prices: number[];
+  /** A free tool (its tiers cost 1đ or less): one Offer at price 0. */
+  free?: boolean;
 }
 
 /**
- * schema.org/Product for a tool.
+ * schema.org/Product for a tool, or null when there is nothing to offer.
  *
- * A tool is not one-of-a-kind and is sold in several durations at several
- * prices, so it carries an AggregateOffer with the range rather than the
- * single Offer an account gets. Without this the software pages — which are
- * most of the shop now — offered a crawler nothing but prose.
+ * One Offer at the cheapest tier, the same "Từ X đ" the title quotes. The
+ * tiers are durations of one product from one shop, and Google asks that
+ * variants not be described as an AggregateOffer, which this used to emit.
+ * A free tool says price 0, Google's way of marking a product free, rather
+ * than the 1đ placeholder its tiers carry. A tool with no priced tier is not
+ * on sale at all, and a Product with price 0 would claim it is free, so no
+ * block is emitted (the owner's SEO review, 13/10/2026).
  */
 export function softwareJsonLd(software: SoftwareLdInput) {
-  const prices = software.prices.filter((p) => p > 0).sort((a, b) => a - b);
-  const availability = software.available
-    ? "https://schema.org/InStock"
-    : "https://schema.org/OutOfStock";
+  const cheapest = software.prices
+    .filter((p) => p > 0)
+    .reduce<number | null>((min, p) => (min === null || p < min ? p : min), null);
+  const price = software.free ? 0 : cheapest;
+  if (price === null) return null;
+  const image = software.imageUrl.trim();
 
   return {
     "@context": "https://schema.org",
@@ -126,28 +152,60 @@ export function softwareJsonLd(software: SoftwareLdInput) {
     name: software.name,
     description: software.description,
     sku: software.code,
-    image: absoluteUrl(software.imageUrl),
+    // absoluteUrl("") is the home page, which is not a picture of the tool.
+    ...(image ? { image: absoluteUrl(image) } : {}),
     category: software.categoryName,
-    offers:
-      prices.length > 1
-        ? {
-            "@type": "AggregateOffer",
-            url: absoluteUrl(software.href),
-            priceCurrency: "VND",
-            lowPrice: prices[0],
-            highPrice: prices[prices.length - 1],
-            offerCount: prices.length,
-            availability,
-            seller: { "@type": "Organization", name: SITE_NAME },
-          }
-        : {
-            "@type": "Offer",
-            url: absoluteUrl(software.href),
-            priceCurrency: "VND",
-            price: prices[0] ?? 0,
-            availability,
-            seller: { "@type": "Organization", name: SITE_NAME },
-          },
+    offers: {
+      "@type": "Offer",
+      url: absoluteUrl(software.href),
+      priceCurrency: "VND",
+      price,
+      availability: software.available
+        ? "https://schema.org/InStock"
+        : "https://schema.org/OutOfStock",
+      seller: { "@type": "Organization", name: SITE_NAME },
+    },
+  };
+}
+
+/**
+ * schema.org/BlogPosting for a wiki article.
+ *
+ * The article pages carried og:type article and nothing structured, so a
+ * crawler had to guess the dates and the author from the prose (the owner's
+ * SEO review, 13/10/2026). Google's Article markup has no required fields;
+ * these are the ones it recommends. The shop is author and publisher alike:
+ * the articles are written as the shop, not under a person's name.
+ */
+export function articleJsonLd(article: {
+  headline: string;
+  description?: string | null;
+  image?: string | null;
+  datePublished: Date;
+  dateModified: Date;
+  /** The article's own address. */
+  path: string;
+  brandName: string;
+}) {
+  const shop = { "@type": "Organization", name: article.brandName, url: SITE_URL };
+  const description = article.description?.trim() ?? "";
+  const image = article.image?.trim() ?? "";
+  // An edit is never older than the publication it edits.
+  const modified =
+    article.dateModified.getTime() > article.datePublished.getTime()
+      ? article.dateModified
+      : article.datePublished;
+  return {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    headline: article.headline,
+    ...(description ? { description } : {}),
+    ...(image ? { image: absoluteUrl(image) } : {}),
+    datePublished: article.datePublished.toISOString(),
+    dateModified: modified.toISOString(),
+    mainEntityOfPage: absoluteUrl(article.path),
+    author: shop,
+    publisher: shop,
   };
 }
 
@@ -230,16 +288,67 @@ export function siteDescription(brandName: string): string {
   return `${brandName} là shop hack game và tài khoản game uy tín. Hack Valorant, CS2, PUBG, Liên Quân: key bản quyền giao tự động, cập nhật liên tục, hỗ trợ 24/7.`;
 }
 
-/** schema.org/Organization for the homepage. */
-export function organizationJsonLd(brandName: string) {
+/**
+ * The shop's own profile pages, for `sameAs`: the addresses that are the shop
+ * itself on another site. A group, an invite or a chat link is a place to talk
+ * rather than the shop's profile, so those are left out, and so is anything
+ * that is not a full http(s) address (a bare handle or a phone number).
+ */
+export function profileLinks(candidates: (string | null | undefined)[]): string[] {
+  const NOT_A_PROFILE = [
+    /^https?:\/\/(?:www\.|m\.)?facebook\.com\/groups\//i,
+    /^https?:\/\/(?:www\.)?(?:m\.me|zalo\.me|discord\.gg|discord\.com\/invite)\b/i,
+    /^https?:\/\/(?:www\.)?t\.me\/(?:\+|joinchat\/)/i,
+  ];
+  const out: string[] = [];
+  for (const raw of candidates) {
+    const url = raw?.trim() ?? "";
+    if (!/^https?:\/\/[^\s/]+\.[^\s]+$/i.test(url)) continue;
+    if (NOT_A_PROFILE.some((re) => re.test(url))) continue;
+    if (!out.includes(url)) out.push(url);
+  }
+  return out;
+}
+
+/**
+ * schema.org/Organization (as an OnlineStore) for the homepage.
+ *
+ * The logo is the one Cấu hình → Nhận diện sets, the same file the header
+ * draws: it was a fixed path to the cloned shop's file, so a new logo reached
+ * the header and never the markup (the owner's SEO review, 13/10/2026).
+ * `sameAs` names the shop's profiles elsewhere, which is how a search engine
+ * ties the TikTok, the fanpage and the channel to this site.
+ */
+export function organizationJsonLd(org: {
+  brandName: string;
+  brandLogo: string;
+  sameAs?: string[];
+}) {
+  const logo = org.brandLogo.trim();
   return {
     "@context": "https://schema.org",
     "@type": "OnlineStore",
-    name: brandName,
+    name: org.brandName,
     url: SITE_URL,
-    logo: absoluteUrl("/sites/menzu-lol-f7ae197a/root-8a5edab2/images/site/logos/menzu-logo.webp"),
-    description: siteDescription(brandName),
+    ...(logo ? { logo: absoluteUrl(logo) } : {}),
+    description: siteDescription(org.brandName),
     areaServed: "VN",
+    ...(org.sameAs && org.sameAs.length > 0 ? { sameAs: org.sameAs } : {}),
+  };
+}
+
+/**
+ * schema.org/WebSite for the homepage: Google's main source for the site name
+ * it prints over a result, which matters here because the brand is spelled
+ * differently from the domain. No SearchAction: Google retired the sitelinks
+ * search box in November 2024.
+ */
+export function websiteJsonLd(brandName: string) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: brandName,
+    url: `${SITE_URL}/`,
   };
 }
 

@@ -5,6 +5,7 @@ import { AccountDetailView } from "@/components/sites/menzu-lol-f7ae197a/shared/
 import { isFreeTool } from "@/components/sites/menzu-lol-f7ae197a/shared/productData";
 import { SoftwareDetailView } from "@/components/sites/menzu-lol-f7ae197a/shared/SoftwareDetailView";
 import { formatVnd } from "@/components/sites/menzu-lol-f7ae197a/shared/productData";
+import { accountMetaDescription, accountMetaTitle } from "@/lib/accountSeo";
 import { docHtmlToPlainText, isHtmlBody } from "@/lib/docHtml";
 import { type DocsAccess } from "@/lib/docsAccess";
 import { freeToolPanel } from "@/lib/freeKey";
@@ -20,6 +21,7 @@ import { getCurrentUser } from "@/lib/session";
 import { isStatusSubscribed } from "@/lib/statusEvents";
 import { shareCard } from "@/lib/shareCard";
 import { productBehindOldSlug } from "@/lib/slugHistory";
+import { softwareBuyable } from "@/lib/softwareStock";
 import { toolDocsAccess } from "@/lib/toolDocs";
 
 /**
@@ -49,6 +51,20 @@ function decodeSegment(raw: string): string {
   }
 }
 
+/**
+ * The tab and the robots tag for an address with no product behind it.
+ *
+ * The body answers 404, but the segment's loading.tsx has already sent a 200
+ * by the time it does, so Next can only add a "noindex" of its own (see
+ * streaming.md, "HTTP contract"). With a bare title the page then carried
+ * that noindex beside the layout's "index, follow"; saying noindex here
+ * leaves one instruction (the owner's SEO review, 13/10/2026).
+ */
+const NOT_FOUND_METADATA: Metadata = {
+  title: "Không tìm thấy sản phẩm",
+  robots: { index: false, follow: true },
+};
+
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   // Only the product half is read here. The category in the address is not
   // consulted at all: whether it is the right one is the page's business, and
@@ -56,8 +72,21 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { productSlug } = await params;
   const slug = decodeSegment(productSlug);
   const found = await resolveProduct({ slug });
-  if (!found) return { title: "Không tìm thấy sản phẩm" };
+  if (found) return productMetadata(slug, found);
 
+  // A renamed product's old address: the page redirects to the new one, and
+  // until the redirect lands (a meta refresh, for the same streaming reason)
+  // the document carries the product's real title and its canonical, not
+  // "Không tìm thấy".
+  const moved = await productBehindOldSlug(slug);
+  const target = moved ? await resolveProduct({ slug: moved.slug }) : null;
+  return target ? productMetadata(target.slug, target) : NOT_FOUND_METADATA;
+}
+
+async function productMetadata(
+  slug: string,
+  found: NonNullable<Awaited<ReturnType<typeof resolveProduct>>>,
+): Promise<Metadata> {
   // The canonical is always the product's own category, never the one in the
   // address bar: a category may stand on several home-page groups, and a
   // product must not gain an address per shelf it is displayed on.
@@ -65,7 +94,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   if (found.isSoftware) {
     const software = await getSoftwareDetail(slug);
-    if (!software) return { title: "Không tìm thấy sản phẩm" };
+    if (!software) return NOT_FOUND_METADATA;
 
     // The cheapest tier is the honest headline: it is what the buyer can
     // enter at, and quoting the lifetime price in a search result would read
@@ -85,7 +114,14 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
         : software.description);
 
     return {
-      title: from === null ? software.name : `${software.name} | Từ ${formatVnd(from)}đ`,
+      // A free tool's tiers carry a 1đ placeholder, and "Từ 1đ" over a page
+      // that says "Miễn phí" twice read as a typo (the owner's SEO review,
+      // 13/10/2026).
+      title: isFreeTool(software.packages)
+        ? `${software.name} | Miễn phí`
+        : from === null
+          ? software.name
+          : `${software.name} | Từ ${formatVnd(from)}đ`,
       description:
         description ||
         `${software.name}: phần mềm hỗ trợ gaming, giao key tự động, bảo hành trong suốt thời gian sử dụng.`,
@@ -97,17 +133,16 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 
   const account = await getAccountDetail(slug);
-  if (!account) return { title: "Không tìm thấy sản phẩm" };
+  if (!account) return NOT_FOUND_METADATA;
 
-  // The live site puts the price in the <title>; kept as-is because it is the
-  // single strongest click signal on a shop listing in search results.
-  const title = `Mã ${account.code} - ${account.code.replace(/^([A-Z]+)/, "$1#")} | Giá bán: ${formatVnd(
-    account.price,
-  )}đ`;
-  const description =
-    `Account ${account.categoryName} mã ${account.code}, rank ${account.rank}, ` +
-    `${account.weaponSkins} skin súng, ${account.agents} agent, level ${account.level}. ` +
-    `Giá ${formatVnd(account.price)}đ. Bàn giao ngay sau khi thanh toán.`;
+  // The listing's own name leads, then its code once and the price, which
+  // stays because it is the strongest click signal on a shop listing. The
+  // description is the shop's write-up, or else only the figures that have a
+  // value for this game: it printed "Mã ACC77 - ACC#77" and "rank , 0 skin
+  // súng, 0 agent, level 0" on LoL and CFVN accounts (the owner's SEO review,
+  // 13/10/2026; lib/accountSeo.ts).
+  const title = accountMetaTitle(account);
+  const description = accountMetaDescription(account);
   const image =
     account.imageUrl ??
     `/sites/menzu-lol-f7ae197a/root-8a5edab2/images/account/${account.code}.webp`;
@@ -204,34 +239,37 @@ export default async function ProductPage({ params, searchParams }: PageProps) {
     // downloads from and whether this reader took today's key already are
     // the server's to know; the panel only draws what it is told.
     const href = productHref(software.categorySlug, software.slug);
-    const free = isFreeTool(software.packages)
+    const freeTool = isFreeTool(software.packages);
+    const free = freeTool
       ? await freeToolPanel(software.code, href, user?.id ?? null)
       : null;
+    // What a crawler reads instead of the prose: the tool, its shelf and the
+    // price it starts at. It says what the page says (the owner's SEO review,
+    // 13/10/2026): out of stock while sales are locked or no tier is set up,
+    // the same rule as the buy panel's stock line; price 0 for a free tool;
+    // and no block at all for a tool with no priced tier, which is not on
+    // sale and would otherwise read as free.
+    const productLd = softwareJsonLd({
+      code: software.code,
+      name: software.name,
+      // Plain text either way: an empty editor body is "<p></p>", which
+      // is truthy and would otherwise reach the crawler as markup.
+      description:
+        software.summary ||
+        (isHtmlBody(software.description)
+          ? docHtmlToPlainText(software.description, 300)
+          : software.description) ||
+        `${software.name} - ${software.categoryName}`,
+      imageUrl: software.images[0] ?? "",
+      categoryName: software.categoryName,
+      href,
+      available: softwareBuyable(software),
+      prices: software.packages.map((p) => p.price),
+      free: freeTool,
+    });
     return (
       <>
-        {/* What a crawler reads instead of the prose: the tool, its shelf and
-            the range of durations it sells in. Without it the software pages
-            — most of the shop — offered a search engine nothing structured at
-            all, so none of them could show a price in results. */}
-        <JsonLd
-          data={softwareJsonLd({
-            code: software.code,
-            name: software.name,
-            // Plain text either way: an empty editor body is "<p></p>", which
-            // is truthy and would otherwise reach the crawler as markup.
-            description:
-              software.summary ||
-              (isHtmlBody(software.description)
-                ? docHtmlToPlainText(software.description, 300)
-                : software.description) ||
-              `${software.name} - ${software.categoryName}`,
-            imageUrl: software.images[0] ?? "",
-            categoryName: software.categoryName,
-            href,
-            available: software.inStock,
-            prices: software.packages.map((p) => p.price),
-          })}
-        />
+        {productLd ? <JsonLd data={productLd} /> : null}
         {/* The breadcrumb list is the view's own — emitting a second one here
             would tell a crawler the page has two different trails. */}
         <SoftwareDetailView

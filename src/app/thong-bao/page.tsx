@@ -29,9 +29,13 @@ import {
 } from "@/lib/statusEvents";
 import { shareCard } from "@/lib/shareCard";
 
+// A description of its own rather than the home page's inherited one (the
+// owner's SEO review, 13/10/2026).
 export async function generateMetadata(): Promise<Metadata> {
   return {
     title: "Thông báo & trạng thái",
+    description:
+      "Trạng thái hack theo từng game: an toàn, đang cập nhật hay đã bị phát hiện, cập nhật liên tục.",
     alternates: { canonical: "/thong-bao" },
     ...(await shareCard({ url: "/thong-bao" })),
   };
