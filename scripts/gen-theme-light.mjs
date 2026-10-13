@@ -1105,6 +1105,48 @@ ${NIKE} .site-nav a.bg-\[\#17171c\]:hover { background-color: var(--nike-well-ho
   ${NIKE} .site-nav a[href="/"].origin-left > div.relative { display: none; }
 }
 
+/* Black navbar (the owner, 14/10/2026: "navbar đen đi chứ"): the bar and its
+   strip are black with white words, the Nike white page under it. Inside the
+   bar the dark palette comes back and the light tokens take dark values, so
+   every rule above that paints with a token (the strip's links, the menu
+   triggers, the logo's tail, fields, hairlines, the cart, the dropdowns)
+   turns dark without a rule of its own. The accent there is white, and a
+   white fill carries black words, as on Nike's black pages. */
+${NIKE} .site-nav {
+${restoreLines}
+  --light-page: #111111;
+  --light-surface: #111111;
+  --light-surface-hover: #1f1f1f;
+  --light-band: #000000;
+  --light-line: rgb(255 255 255 / 0.12);
+  --light-line-strong: rgb(255 255 255 / 0.22);
+  --light-ink: #ffffff;
+  --light-ink-2: #ffffff;
+  --light-ink-3: #b5b5b8;
+  --light-ink-4: #b5b5b8;
+  --nike-well: #222222;
+  --nike-well-hover: #2e2e2e;
+  --ocean: #ffffff;
+  --ocean-dark: #e5e5e5;
+  --ocean-soft: #222222;
+  --ocean-line: rgb(255 255 255 / 0.22);
+  --brand: #ffffff;
+  --brand-dark: #e5e5e5;
+  --menzu-accent: #ffffff;
+  --menzu-accent-dark: #e5e5e5;
+  color-scheme: dark;
+  background-color: #111111;
+  box-shadow: none;
+}
+${NIKE} .site-nav > div:first-child {
+  background-color: #000000;
+  border-color: rgb(255 255 255 / 0.08);
+}
+${NIKE} .site-nav ${ACCENT_FILL}[class] {
+  --color-white: #111111;
+  color: #111111;
+}
+
 /* Footer: white with one line on top; black column titles, grey links. */
 ${NIKE} ${FOOTER} { background-color: #ffffff; border-top-color: var(--light-line); }
 ${NIKE} ${FOOTER} h2${NOT_DARK} { font-size: 14px; font-weight: 600; color: var(--light-ink); }
