@@ -20,6 +20,7 @@ import { getCurrentUser } from "@/lib/session";
 import { isStatusSubscribed } from "@/lib/statusEvents";
 import { shareCard } from "@/lib/shareCard";
 import { productBehindOldSlug } from "@/lib/slugHistory";
+import { softwareBuyable } from "@/lib/softwareStock";
 import { toolDocsAccess } from "@/lib/toolDocs";
 
 /**
@@ -85,7 +86,14 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
         : software.description);
 
     return {
-      title: from === null ? software.name : `${software.name} | Từ ${formatVnd(from)}đ`,
+      // A free tool's tiers carry a 1đ placeholder, and "Từ 1đ" over a page
+      // that says "Miễn phí" twice read as a typo (the owner's SEO review,
+      // 13/10/2026).
+      title: isFreeTool(software.packages)
+        ? `${software.name} | Miễn phí`
+        : from === null
+          ? software.name
+          : `${software.name} | Từ ${formatVnd(from)}đ`,
       description:
         description ||
         `${software.name}: phần mềm hỗ trợ gaming, giao key tự động, bảo hành trong suốt thời gian sử dụng.`,
@@ -204,34 +212,37 @@ export default async function ProductPage({ params, searchParams }: PageProps) {
     // downloads from and whether this reader took today's key already are
     // the server's to know; the panel only draws what it is told.
     const href = productHref(software.categorySlug, software.slug);
-    const free = isFreeTool(software.packages)
+    const freeTool = isFreeTool(software.packages);
+    const free = freeTool
       ? await freeToolPanel(software.code, href, user?.id ?? null)
       : null;
+    // What a crawler reads instead of the prose: the tool, its shelf and the
+    // price it starts at. It says what the page says (the owner's SEO review,
+    // 13/10/2026): out of stock while sales are locked or no tier is set up,
+    // the same rule as the buy panel's stock line; price 0 for a free tool;
+    // and no block at all for a tool with no priced tier, which is not on
+    // sale and would otherwise read as free.
+    const productLd = softwareJsonLd({
+      code: software.code,
+      name: software.name,
+      // Plain text either way: an empty editor body is "<p></p>", which
+      // is truthy and would otherwise reach the crawler as markup.
+      description:
+        software.summary ||
+        (isHtmlBody(software.description)
+          ? docHtmlToPlainText(software.description, 300)
+          : software.description) ||
+        `${software.name} - ${software.categoryName}`,
+      imageUrl: software.images[0] ?? "",
+      categoryName: software.categoryName,
+      href,
+      available: softwareBuyable(software),
+      prices: software.packages.map((p) => p.price),
+      free: freeTool,
+    });
     return (
       <>
-        {/* What a crawler reads instead of the prose: the tool, its shelf and
-            the range of durations it sells in. Without it the software pages
-            — most of the shop — offered a search engine nothing structured at
-            all, so none of them could show a price in results. */}
-        <JsonLd
-          data={softwareJsonLd({
-            code: software.code,
-            name: software.name,
-            // Plain text either way: an empty editor body is "<p></p>", which
-            // is truthy and would otherwise reach the crawler as markup.
-            description:
-              software.summary ||
-              (isHtmlBody(software.description)
-                ? docHtmlToPlainText(software.description, 300)
-                : software.description) ||
-              `${software.name} - ${software.categoryName}`,
-            imageUrl: software.images[0] ?? "",
-            categoryName: software.categoryName,
-            href,
-            available: software.inStock,
-            prices: software.packages.map((p) => p.price),
-          })}
-        />
+        {productLd ? <JsonLd data={productLd} /> : null}
         {/* The breadcrumb list is the view's own — emitting a second one here
             would tell a crawler the page has two different trails. */}
         <SoftwareDetailView

@@ -74,7 +74,11 @@ export async function AccountDetailView({
           categoryName: account.categoryName,
           rank: account.rank,
           weaponSkins: account.weaponSkins,
-          available: !account.sold,
+          // The buy panel's own soldOut rule: a random listing is never
+          // "sold", so its pile decides. It said InStock over "Tạm hết hàng"
+          // (the owner's SEO review, 13/10/2026).
+          available: account.pool ? account.pool.available > 0 : !account.sold,
+          restockable: account.pool !== null,
           // The offer used to point at /account/<code>, an address the shop
           // stopped serving — every offer led a crawler to a 404.
           href: productHref(account.categorySlug, account.slug),
