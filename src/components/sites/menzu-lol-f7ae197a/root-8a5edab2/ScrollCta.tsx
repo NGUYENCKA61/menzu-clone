@@ -54,7 +54,9 @@ export function ScrollCta({
     // Placement on the wrapper, motion on the link inside it: the hero's
     // placement centres the pill with -translate-x-1/2, and a bounce transform
     // on the same element would overwrite that and shove it off-centre.
-    <div className={placement}>
+    // scroll-cta is a hook for the light trial "moi", which drops the hero's
+    // cue (theme-light.css, part 6); it carries no style of its own.
+    <div className={`scroll-cta ${placement}`}>
       <a
         href={`#${targetId}`}
         onClick={(event) => {

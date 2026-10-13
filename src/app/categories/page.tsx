@@ -3,6 +3,7 @@ import { LayoutGrid } from "lucide-react";
 
 import { getCatalogueTiles } from "@/lib/homeRows";
 import { Breadcrumb } from "@/components/sites/menzu-lol-f7ae197a/shared/Breadcrumb";
+import { CaseText } from "@/components/sites/menzu-lol-f7ae197a/shared/CaseText";
 import { MobileBottomNav } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/MobileBottomNav";
 import { RowTile } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/ProductRow";
 import { SiteFooter } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/SiteFooter";
@@ -62,7 +63,7 @@ export default async function CategoriesPage() {
                 <div className="flex items-center gap-3">
                   <LayoutGrid size={28} className="shrink-0 text-[var(--menzu-accent)]" aria-hidden />
                   <h1 className="text-2xl sm:text-3xl font-black text-white uppercase tracking-wider">
-                    DANH SÁCH DANH MỤC
+                    <CaseText text="DANH SÁCH DANH MỤC" />
                   </h1>
                 </div>
               </div>

@@ -24,6 +24,7 @@ import {
 import { isSalesLocked, salesLockReason } from "@/lib/softwareStatus";
 
 import { BadgeIcon } from "./BadgeIcon";
+import { CaseText } from "./CaseText";
 import { type SoftwareDetail, STATUS_STYLE } from "./SoftwareBuyPanel";
 import { StockLine } from "./StockLine";
 
@@ -260,7 +261,7 @@ export function FreeKeyPanel({
 
       <div className="space-y-3">
         <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-white">
-          {software.name}
+          <CaseText text={software.name} />
         </h1>
         {software.summary ? (
           <p className="text-sm leading-relaxed text-neutral-400 max-w-[560px]">

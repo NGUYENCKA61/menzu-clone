@@ -2,6 +2,7 @@ import type { CSSProperties } from "react";
 import Image from "next/image";
 import localFont from "next/font/local";
 
+import { CaseText } from "../shared/CaseText";
 import { SiteLink } from "../shared/SiteLink";
 
 // The display face for the two big words on each card, declared here and
@@ -81,17 +82,19 @@ export function FeaturedCategories({ cards }: { cards?: CategoryCard[] }) {
             // href — "DỊCH VỤ VALORANT" and "ACC VALORANT" collided here.
             key={`${card.href}|${card.line1}|${card.line2}`}
             href={card.href}
-            className="keep-dark group relative w-full pt-16 flex flex-col items-center"
+            // featured-* are hooks for the light trial "moi"
+            // (theme-light.css, part 6); they carry no style of their own.
+            className="featured-tile keep-dark group relative w-full pt-16 flex flex-col items-center"
           >
             <div
-              className="relative w-full aspect-[3/4] flex flex-col items-center justify-end p-2 pb-2 sm:p-4 transition-all duration-300"
+              className="featured-frame relative w-full aspect-[3/4] flex flex-col items-center justify-end p-2 pb-2 sm:p-4 transition-all duration-300"
               style={CARD_THEME}
             >
               {/* [1] Octagon border layer */}
-              <div className="absolute inset-0 bg-[var(--theme-border)] group-hover:bg-[var(--theme-hover)] transition-colors duration-500 [clip-path:polygon(16px_0,calc(100%-16px)_0,100%_16px,100%_calc(100%-16px),calc(100%-16px)_100%,16px_100%,0_calc(100%-16px),0_16px)]" />
+              <div className="featured-edge absolute inset-0 bg-[var(--theme-border)] group-hover:bg-[var(--theme-hover)] transition-colors duration-500 [clip-path:polygon(16px_0,calc(100%-16px)_0,100%_16px,100%_calc(100%-16px),calc(100%-16px)_100%,16px_100%,0_calc(100%-16px),0_16px)]" />
 
               {/* [2] Octagon inner fill */}
-              <div className="absolute inset-[1.5px] overflow-hidden [clip-path:polygon(15px_0,calc(100%-15px)_0,100%_15px,100%_calc(100%-15px),calc(100%-15px)_100%,15px_100%,0_calc(100%-15px),0_15px)] bg-[#0d0d12]">
+              <div className="featured-fill absolute inset-[1.5px] overflow-hidden [clip-path:polygon(15px_0,calc(100%-15px)_0,100%_15px,100%_calc(100%-15px),calc(100%-15px)_100%,15px_100%,0_calc(100%-15px),0_15px)] bg-[#0d0d12]">
                 <Image
                   src={BACKCARD_SRC}
                   alt=""
@@ -125,7 +128,7 @@ export function FeaturedCategories({ cards }: { cards?: CategoryCard[] }) {
               </div>
 
               {/* [4] Text block */}
-              <div className="relative z-30 flex flex-col items-center w-full text-center mt-auto pb-0 sm:pb-1">
+              <div className="featured-caption relative z-30 flex flex-col items-center w-full text-center mt-auto pb-0 sm:pb-1">
                 <div className={`${headingNow.variable} mb-3 sm:mb-4 flex flex-col items-center w-full font-[family-name:var(--font-headingnow)]`}>
                   <span className="text-[18px] sm:text-[22px] lg:text-[28px] font-black uppercase tracking-normal leading-none mb-1 whitespace-nowrap">
                     {card.line1}
@@ -135,11 +138,11 @@ export function FeaturedCategories({ cards }: { cards?: CategoryCard[] }) {
                   </span>
                 </div>
 
-                <div className="relative w-fit min-w-[100px] sm:min-w-[140px] mb-0 sm:mb-2 cursor-pointer mt-1 sm:mt-2">
+                <div className="featured-cta relative w-fit min-w-[100px] sm:min-w-[140px] mb-0 sm:mb-2 cursor-pointer mt-1 sm:mt-2">
                   <div className="relative w-full p-[2px] transition-all duration-300 group-hover:scale-[1.05] group-hover:drop-shadow-[0_0_15px_var(--theme-hover)] [clip-path:polygon(12px_0,100%_0,100%_calc(100%-12px),calc(100%-12px)_100%,0_100%,0_12px)] bg-[var(--theme-border)]">
                     <div className="relative w-full h-full bg-transparent group-hover:bg-white transition-colors duration-300 flex items-center justify-center px-3 sm:px-6 py-2 sm:py-3 [clip-path:polygon(11px_0,100%_0,100%_calc(100%-11px),calc(100%-11px)_100%,0_100%,0_11px)]">
                       <span className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-white group-hover:text-[#0d0d12] transition-colors duration-300 whitespace-nowrap">
-                        XEM CHI TIẾT
+                        <CaseText text="XEM CHI TIẾT" />
                       </span>
                     </div>
                   </div>

@@ -5,6 +5,7 @@ import { CardImage } from "@/components/sites/menzu-lol-f7ae197a/shared/CardImag
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
+import { CaseText } from "./CaseText";
 import { formatVnd, isFreeTool } from "./productData";
 import { SoftwareCheckoutDialog } from "./SoftwareCheckoutDialog";
 
@@ -159,8 +160,10 @@ export function SoftwareCard({
     // context: the open tier list, however high its z-index, could never rise
     // above the cards and sections drawn after this one. While the list is
     // open the whole card steps up a layer instead.
+    // tool-card, tool-status, tool-status-line and tool-more are hooks for the
+    // light trial "moi" (theme-light.css, part 6); no style of their own.
     <div
-      className={`group relative flex h-full w-full flex-col rounded-[15px] border border-[#24252a] bg-[#101114] lift-card hover:-translate-y-1 hover:border-[var(--menzu-accent)]/50 hover:shadow-[0_15px_40px_#00000088] ${open ? "z-40" : ""}`}
+      className={`tool-card group relative flex h-full w-full flex-col rounded-[15px] border border-[#24252a] bg-[#101114] lift-card hover:-translate-y-1 hover:border-[var(--menzu-accent)]/50 hover:shadow-[0_15px_40px_#00000088] ${open ? "z-40" : ""}`}
     >
       {/* Picture flush to the card's edges. The shop's image when set; otherwise
           the reference's dark gradient with the tool's name centred over it. */}
@@ -204,7 +207,7 @@ export function SoftwareCard({
           ) : null}
 
           {status ? (
-            <span className="absolute right-3 top-3 z-20 inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-[#0d0d12]/88 px-2.5 py-1">
+            <span className="tool-status absolute right-3 top-3 z-20 inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-[#0d0d12]/88 px-2.5 py-1">
               <span aria-hidden className={`h-1.5 w-1.5 rounded-full ${status.dot}`} />
               <span className={`text-[10px] font-black uppercase tracking-wide ${status.text}`}>
                 {status.label}
@@ -215,11 +218,21 @@ export function SoftwareCard({
       </Link>
 
       <div className="flex flex-1 flex-col p-4">
+        {/* The status again as a small coloured line over the name, for the
+            light trial "moi" only, which takes the pill off the picture
+            (judge's graft, 14/10/2026). Hidden everywhere else, so the other
+            dresses read the pill once and this never. */}
+        {status ? (
+          <p className={`tool-status-line hidden ${status.text}`}>
+            <span aria-hidden className={`h-1.5 w-1.5 rounded-full ${status.dot}`} />
+            {status.label}
+          </p>
+        ) : null}
         {/* Title with the red marker bar, left-aligned. */}
         <Link href={detailHref} className="flex items-center gap-2.5">
           <span aria-hidden className="h-4 w-[3px] shrink-0 rounded-full bg-[var(--menzu-accent)]" />
           <h3 className="truncate text-base font-black uppercase tracking-wide text-white transition-colors hover:text-[var(--menzu-accent)]">
-            {software.name}
+            <CaseText text={software.name} />
           </h3>
         </Link>
 
@@ -395,7 +408,7 @@ export function SoftwareCard({
 
           <Link
             href={detailHref}
-            className="flex h-[42px] w-full items-center justify-center rounded-[9px] border border-[var(--menzu-accent)]/40 bg-transparent text-[11px] font-extrabold uppercase tracking-wide text-[#ddd] transition-colors hover:bg-[var(--menzu-accent)]/10"
+            className="tool-more flex h-[42px] w-full items-center justify-center rounded-[9px] border border-[var(--menzu-accent)]/40 bg-transparent text-[11px] font-extrabold uppercase tracking-wide text-[#ddd] transition-colors hover:bg-[var(--menzu-accent)]/10"
           >
             Xem chi tiết
           </Link>

@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 
 import { CardImage } from "@/components/sites/menzu-lol-f7ae197a/shared/CardImage";
+import { CaseText } from "@/components/sites/menzu-lol-f7ae197a/shared/CaseText";
 
 /**
  * The top of a category page, built the way menzu.lol heads its own: the
@@ -30,9 +31,11 @@ export function CategoryHero({
     // Pulled up under the 104px the layout keeps for the header, so the
     // picture starts at the top of the window; the padding brings the words
     // back below the header (64px tall on a phone, 104px from sm up).
-    <section className="relative isolate -mt-[104px] flex min-h-[30vh] w-full flex-col justify-start overflow-hidden pt-[96px] pb-12 sm:min-h-[35vh] sm:pt-[136px]">
+    // category-hero and category-hero-art are hooks for the light trial
+    // "moi" (theme-light.css, part 6); they carry no style of their own.
+    <section className="category-hero relative isolate -mt-[104px] flex min-h-[30vh] w-full flex-col justify-start overflow-hidden pt-[96px] pb-12 sm:min-h-[35vh] sm:pt-[136px]">
       {imageUrl ? (
-        <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
+        <div aria-hidden className="category-hero-art pointer-events-none absolute inset-0 -z-10">
           <CardImage
             src={imageUrl}
             alt=""
@@ -59,7 +62,7 @@ export function CategoryHero({
       <div className="relative z-10 mx-auto w-full max-w-[1320px] px-4 lg:px-6">
         {breadcrumb}
         <h1 className="mb-4 py-1 text-3xl font-black uppercase leading-tight text-white sm:text-4xl md:text-5xl">
-          {name}
+          <CaseText text={name} />
         </h1>
         {description.trim() ? (
           <p className="max-w-[640px] text-[13px] leading-relaxed text-neutral-400 sm:text-sm">
