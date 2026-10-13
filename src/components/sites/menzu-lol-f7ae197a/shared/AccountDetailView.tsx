@@ -1,3 +1,4 @@
+import { accountDisplayName, accountLdDescription } from "@/lib/accountSeo";
 import { DocHtml } from "@/lib/docFormat";
 import {
   type AccountPageDetail,
@@ -67,13 +68,18 @@ export async function AccountDetailView({
       <JsonLd
         data={productJsonLd({
           code: account.code,
+          // The heading's name and the write-up, or only the figures that
+          // have a value (lib/accountSeo.ts), as the title and the meta
+          // description say.
+          name: accountDisplayName(account),
+          description: accountLdDescription(account),
           price: account.price,
-          imageUrl:
+          images: [
             account.imageUrl ??
-            `/sites/menzu-lol-f7ae197a/root-8a5edab2/images/account/${account.code}.webp`,
+              `/sites/menzu-lol-f7ae197a/root-8a5edab2/images/account/${account.code}.webp`,
+            ...account.images,
+          ],
           categoryName: account.categoryName,
-          rank: account.rank,
-          weaponSkins: account.weaponSkins,
           // The buy panel's own soldOut rule: a random listing is never
           // "sold", so its pile decides. It said InStock over "Tạm hết hàng"
           // (the owner's SEO review, 13/10/2026).

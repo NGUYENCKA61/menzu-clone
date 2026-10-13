@@ -56,16 +56,36 @@ describe("softwareJsonLd", () => {
   });
 });
 
-describe("productJsonLd availability", () => {
+describe("productJsonLd", () => {
   const account = {
     code: "ACC71",
+    name: "ACC RÁC CFVN",
+    description: "Acc rác CFVN.",
     price: 70000,
-    imageUrl: "/a.webp",
+    images: ["/a.webp"],
     categoryName: "CFVN",
-    rank: "",
-    weaponSkins: 0,
     href: "/cfvn/acc71",
   };
+
+  it("carries the given name and description", () => {
+    const ld = productJsonLd({ ...account, available: true });
+    expect(ld.name).toBe("ACC RÁC CFVN");
+    expect(ld.description).toBe("Acc rác CFVN.");
+    expect(ld).toMatchObject({ image: `${SITE_URL}/a.webp` });
+  });
+
+  it("lists several pictures as an array, without duplicates or blanks", () => {
+    const ld = productJsonLd({
+      ...account,
+      images: ["/a.webp", "/b.webp", "/a.webp", ""],
+      available: true,
+    });
+    expect(ld).toMatchObject({ image: [`${SITE_URL}/a.webp`, `${SITE_URL}/b.webp`] });
+  });
+
+  it("leaves image out when there is no picture", () => {
+    expect("image" in productJsonLd({ ...account, images: [], available: true })).toBe(false);
+  });
 
   it("is SoldOut for a sold one-of-a-kind account", () => {
     expect(productJsonLd({ ...account, available: false }).offers.availability).toBe(

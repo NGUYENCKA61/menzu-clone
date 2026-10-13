@@ -5,6 +5,7 @@ import { AccountDetailView } from "@/components/sites/menzu-lol-f7ae197a/shared/
 import { isFreeTool } from "@/components/sites/menzu-lol-f7ae197a/shared/productData";
 import { SoftwareDetailView } from "@/components/sites/menzu-lol-f7ae197a/shared/SoftwareDetailView";
 import { formatVnd } from "@/components/sites/menzu-lol-f7ae197a/shared/productData";
+import { accountMetaDescription, accountMetaTitle } from "@/lib/accountSeo";
 import { docHtmlToPlainText, isHtmlBody } from "@/lib/docHtml";
 import { type DocsAccess } from "@/lib/docsAccess";
 import { freeToolPanel } from "@/lib/freeKey";
@@ -107,15 +108,14 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const account = await getAccountDetail(slug);
   if (!account) return { title: "Không tìm thấy sản phẩm" };
 
-  // The live site puts the price in the <title>; kept as-is because it is the
-  // single strongest click signal on a shop listing in search results.
-  const title = `Mã ${account.code} - ${account.code.replace(/^([A-Z]+)/, "$1#")} | Giá bán: ${formatVnd(
-    account.price,
-  )}đ`;
-  const description =
-    `Account ${account.categoryName} mã ${account.code}, rank ${account.rank}, ` +
-    `${account.weaponSkins} skin súng, ${account.agents} agent, level ${account.level}. ` +
-    `Giá ${formatVnd(account.price)}đ. Bàn giao ngay sau khi thanh toán.`;
+  // The listing's own name leads, then its code once and the price, which
+  // stays because it is the strongest click signal on a shop listing. The
+  // description is the shop's write-up, or else only the figures that have a
+  // value for this game: it printed "Mã ACC77 - ACC#77" and "rank , 0 skin
+  // súng, 0 agent, level 0" on LoL and CFVN accounts (the owner's SEO review,
+  // 13/10/2026; lib/accountSeo.ts).
+  const title = accountMetaTitle(account);
+  const description = accountMetaDescription(account);
   const image =
     account.imageUrl ??
     `/sites/menzu-lol-f7ae197a/root-8a5edab2/images/account/${account.code}.webp`;

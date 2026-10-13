@@ -51,11 +51,18 @@ export function absoluteUrl(path: string): string {
 
 interface ProductLdInput {
   code: string;
+  /**
+   * The listing as its heading names it, and its write-up or figures: see
+   * lib/accountSeo.ts. Both came from a Valorant template ("Rank , 0 skin")
+   * that matched nothing on a LoL or CFVN page (the owner's SEO review,
+   * 13/10/2026).
+   */
+  name: string;
+  description: string;
   price: number;
-  imageUrl: string;
+  /** The listing's pictures, the main one first; duplicates are dropped. */
+  images: string[];
   categoryName: string;
-  rank: string;
-  weaponSkins: number;
   available: boolean;
   /**
    * A random listing ("acc random") sells from a pile that the shop refills,
@@ -75,15 +82,16 @@ interface ProductLdInput {
  * empty and back the day the shop refills it.
  */
 export function productJsonLd(product: ProductLdInput) {
+  const images = [
+    ...new Set(product.images.map((src) => src.trim()).filter(Boolean).map(absoluteUrl)),
+  ];
   return {
     "@context": "https://schema.org",
     "@type": "Product",
-    name: `Tài khoản ${product.categoryName} ${product.code}, Rank ${product.rank}, ${product.weaponSkins} skin`,
-    description:
-      `Tài khoản mã ${product.code}, rank ${product.rank}, ${product.weaponSkins} skin súng. ` +
-      `Thuộc danh mục ${product.categoryName} tại ${SITE_NAME}.`,
+    name: product.name,
+    description: product.description,
     sku: product.code,
-    image: absoluteUrl(product.imageUrl),
+    ...(images.length > 1 ? { image: images } : images.length === 1 ? { image: images[0] } : {}),
     category: product.categoryName,
     offers: {
       "@type": "Offer",
