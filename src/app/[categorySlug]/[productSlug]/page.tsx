@@ -51,6 +51,20 @@ function decodeSegment(raw: string): string {
   }
 }
 
+/**
+ * The tab and the robots tag for an address with no product behind it.
+ *
+ * The body answers 404, but the segment's loading.tsx has already sent a 200
+ * by the time it does, so Next can only add a "noindex" of its own (see
+ * streaming.md, "HTTP contract"). With a bare title the page then carried
+ * that noindex beside the layout's "index, follow"; saying noindex here
+ * leaves one instruction (the owner's SEO review, 13/10/2026).
+ */
+const NOT_FOUND_METADATA: Metadata = {
+  title: "Không tìm thấy sản phẩm",
+  robots: { index: false, follow: true },
+};
+
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   // Only the product half is read here. The category in the address is not
   // consulted at all: whether it is the right one is the page's business, and
@@ -58,8 +72,21 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { productSlug } = await params;
   const slug = decodeSegment(productSlug);
   const found = await resolveProduct({ slug });
-  if (!found) return { title: "Không tìm thấy sản phẩm" };
+  if (found) return productMetadata(slug, found);
 
+  // A renamed product's old address: the page redirects to the new one, and
+  // until the redirect lands (a meta refresh, for the same streaming reason)
+  // the document carries the product's real title and its canonical, not
+  // "Không tìm thấy".
+  const moved = await productBehindOldSlug(slug);
+  const target = moved ? await resolveProduct({ slug: moved.slug }) : null;
+  return target ? productMetadata(target.slug, target) : NOT_FOUND_METADATA;
+}
+
+async function productMetadata(
+  slug: string,
+  found: NonNullable<Awaited<ReturnType<typeof resolveProduct>>>,
+): Promise<Metadata> {
   // The canonical is always the product's own category, never the one in the
   // address bar: a category may stand on several home-page groups, and a
   // product must not gain an address per shelf it is displayed on.
@@ -67,7 +94,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   if (found.isSoftware) {
     const software = await getSoftwareDetail(slug);
-    if (!software) return { title: "Không tìm thấy sản phẩm" };
+    if (!software) return NOT_FOUND_METADATA;
 
     // The cheapest tier is the honest headline: it is what the buyer can
     // enter at, and quoting the lifetime price in a search result would read
@@ -106,7 +133,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 
   const account = await getAccountDetail(slug);
-  if (!account) return { title: "Không tìm thấy sản phẩm" };
+  if (!account) return NOT_FOUND_METADATA;
 
   // The listing's own name leads, then its code once and the price, which
   // stays because it is the strongest click signal on a shop listing. The

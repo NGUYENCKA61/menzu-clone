@@ -70,9 +70,23 @@ function toAmount(raw: string | undefined): number | undefined {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { categorySlug: slug } = await params;
   const data = await getCategoryPage(slug);
+  if (data) return categoryMetadata(slug, data);
+  // A renamed category's old address: the page redirects to the new one, and
+  // until the redirect lands (a meta refresh, since loading.tsx has already
+  // sent the 200) the document carries the shelf's real title and canonical
+  // rather than "Không tìm thấy" (the owner's SEO review, 13/10/2026).
+  const moved = await categoryBehindOldSlug(slug);
+  const target = moved ? await getCategoryPage(moved.slug) : null;
+  if (moved && target) return categoryMetadata(moved.slug, target);
   // No shelf by that name: the body answers 404, and the tab, the crawler
   // and the share card must not be handed a made-up "Danh mục <slug>" first.
-  if (!data) return { title: "Không tìm thấy trang", robots: { index: false, follow: true } };
+  return { title: "Không tìm thấy trang", robots: { index: false, follow: true } };
+}
+
+async function categoryMetadata(
+  slug: string,
+  data: NonNullable<Awaited<ReturnType<typeof getCategoryPage>>>,
+): Promise<Metadata> {
   const name = data.name;
   const canonical = categoryHref(slug);
   // A real sentence for the search snippet and the social card, built from what
