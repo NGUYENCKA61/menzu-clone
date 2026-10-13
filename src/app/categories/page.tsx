@@ -8,12 +8,18 @@ import { RowTile } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/Pro
 import { SiteFooter } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/SiteFooter";
 import { SiteHeader } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/SiteHeader";
 import { ConnectRailSection } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/ConnectRailSection";
+import { getShopSettings } from "@/lib/settingsStore";
 import { shareCard } from "@/lib/shareCard";
 
-// The layout's template appends the shop's name.
+// The layout's template appends the shop's name. The description is the
+// page's own: it used to inherit the home page's sentence, one of twenty
+// pages telling a search engine the same thing (the owner's SEO review,
+// 13/10/2026).
 export async function generateMetadata(): Promise<Metadata> {
+  const { brandName } = await getShopSettings();
   return {
     title: "Danh sách danh mục",
+    description: `Tất cả danh mục hack game và tài khoản game đang bán tại ${brandName}, chọn game để xem tool và giá.`,
     alternates: { canonical: "/categories" },
     ...(await shareCard({ url: "/categories" })),
   };

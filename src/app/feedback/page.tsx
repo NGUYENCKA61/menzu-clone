@@ -15,11 +15,16 @@ import {
 } from "@/components/sites/menzu-lol-f7ae197a/shared/FeedbackBoard";
 import { dayStamp } from "@/lib/dayGroups";
 import { getFeedback } from "@/lib/queries";
+import { getShopSettings } from "@/lib/settingsStore";
 import { shareCard } from "@/lib/shareCard";
 
+// A description of its own rather than the home page's inherited one (the
+// owner's SEO review, 13/10/2026).
 export async function generateMetadata(): Promise<Metadata> {
+  const { brandName } = await getShopSettings();
   return {
     title: "Đánh giá khách hàng",
+    description: `Đánh giá thật từ khách đã mua tool và tài khoản tại ${brandName}.`,
     alternates: { canonical: "/feedback" },
     ...(await shareCard({ url: "/feedback" })),
   };

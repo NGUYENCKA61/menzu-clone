@@ -92,7 +92,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       : written
     : `${name} tại THICHTHIHACK${kinds ? ` - ${kinds}` : ""}: giá tốt, giao dịch tự động, uy tín.`;
   return {
-    title: `Danh mục ${name}`,
+    // The shelf's own name leads the tab and the search result: a leading
+    // "Danh mục " spent the front of the title, where the words weigh most,
+    // on a word every category page shares (the owner's SEO review,
+    // 13/10/2026).
+    title: name,
     description,
     // The category sits at the root and is reached from several groups; the
     // canonical says which of those addresses is the page itself.
