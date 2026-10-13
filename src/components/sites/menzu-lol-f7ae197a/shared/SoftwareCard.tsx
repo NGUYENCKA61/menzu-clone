@@ -180,8 +180,14 @@ export function SoftwareCard({
           )}
 
           {free ? (
-            <span className="absolute left-3 top-3 z-20 rounded-full border border-emerald-300/40 bg-emerald-500 px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-white">
-              Miễn phí
+            // A red ribbon across the picture's corner in place of the green
+            // pill (the owner, 14/10/2026: "thay vì ghi miễn phí có cái tag
+            // chéo góc bìa card đỏ"): a strip turned 45° and clipped to a
+            // square at the corner, the word running along the diagonal.
+            <span className="pointer-events-none absolute left-0 top-0 z-20 block h-[92px] w-[92px] overflow-hidden rounded-tl-[14px]">
+              <span className="absolute left-[-40px] top-[22px] block w-[150px] -rotate-45 bg-[var(--menzu-accent)] py-[5px] text-center text-[10px] font-black uppercase leading-none tracking-[0.2em] text-white shadow-[0_2px_10px_rgba(0,0,0,0.5)]">
+                Miễn phí
+              </span>
             </span>
           ) : software.verifiedOnly ? (
             // Sold to level 2 only (the owner, 12/10/2026): the buyer learns it
