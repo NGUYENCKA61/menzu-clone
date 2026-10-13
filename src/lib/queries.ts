@@ -11,7 +11,13 @@ import {
 } from "@/lib/accountLogin";
 import { poolStock } from "@/lib/accountPool";
 import { db } from "@/lib/db";
-import { docHtmlToPlainText } from "@/lib/docHtml";
+import {
+  docHtmlIsEmpty,
+  docHtmlToPlainText,
+  isHtmlBody,
+  plainToDocHtml,
+  stripNewlineArtifacts,
+} from "@/lib/docHtml";
 import { parseBadges } from "@/lib/productBadges";
 import { showsStatusPill } from "@/lib/statusPill";
 import { isSalesLocked } from "@/lib/softwareStatus";
@@ -680,9 +686,36 @@ export async function resolveProduct(where: {
   };
 }
 
+/**
+ * An account's page data: what the buy panel draws, plus the shop's own
+ * write-up for the "Mô tả sản phẩm" section under it. The write-up is kept off
+ * AccountDetail on purpose: that object is handed to client components, and
+ * the page strips this field before it does, so a long description is drawn
+ * once as markup on the server instead of also riding along in their props.
+ */
+export interface AccountPageDetail extends AccountDetail {
+  /** The admin's "Mô tả sản phẩm" as editor HTML; "" when there is none. */
+  descriptionHtml: string;
+}
+
+/**
+ * The stored description as editor HTML for the account page, or "" when it
+ * says nothing. Legacy rows hold plain text (with the old site's lost line
+ * breaks as "rn"); those are lifted into the editor's dialect so one renderer
+ * draws both. TipTap's empty "<p></p>" counts as nothing, so the section is
+ * dropped rather than drawn around a blank.
+ */
+function accountDescriptionHtml(stored: string | null): string {
+  if (!stored?.trim()) return "";
+  const html = isHtmlBody(stored)
+    ? stored
+    : plainToDocHtml(stripNewlineArtifacts(stored));
+  return docHtmlIsEmpty(html) ? "" : html;
+}
+
 export async function getAccountDetail(
   slug: string,
-): Promise<AccountDetail | null> {
+): Promise<AccountPageDetail | null> {
   // findFirst, not findUnique: `deletedAt` is not part of a unique key, and a
   // removed account has to read as gone from here — the caller turns null into
   // a 404, which is what a stale link or a search engine should meet.
@@ -722,6 +755,10 @@ export async function getAccountDetail(
     descriptionText: p.description
       ? docHtmlToPlainText(p.description, 260)
       : "",
+    // The write-up whole, for the section under the buy area (the owner,
+    // 13/10/2026, UI consistency review: the account page ended at the buy
+    // box). The admin's "Mô tả sản phẩm" field saves to this same column.
+    descriptionHtml: accountDescriptionHtml(p.description),
     slug: p.slug,
     imageUrl: p.imageUrl,
     images: p.images.map((i) => i.url),
@@ -858,7 +895,11 @@ export async function getSoftwareDetail(
   };
 }
 
-/** "Tài Khoản Tương Tự" — same category, excluding the one being viewed. */
+/**
+ * "Acc tương tự": other accounts on the shelf in the same category, newest
+ * first, excluding the one being viewed. Only AVAILABLE, not deleted
+ * ACCOUNT_GAME rows, so a sold, hidden or removed listing never shows.
+ */
 export async function getRelatedProducts(
   code: string,
   categorySlug: string,

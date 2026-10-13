@@ -299,9 +299,14 @@ export function AccountBuyPanel({
   // voucher that brings the price under the balance unlocks the button.
   const canAfford = balance === null || balance >= payable;
 
-  // VIP and VIP INGAME always print their labels, matching the card's strip:
-  // an unfilled one simply has nothing after it. Level and KC still leave the
-  // page at zero — "Level 0" would be noise dressed as a fact.
+  // A row prints only with a value after its label (the owner, 13/10/2026, UI
+  // consistency review: a "RANK" with nothing beside it read as a broken
+  // page). Rank shows if either the current or the last rank was typed; the
+  // skins count, like Level and KC, leaves the page at zero.
+  const rank = account.rank.trim();
+  const lastRank = account.lastRank?.trim() || null;
+  const showRank = rank !== "" || lastRank !== null;
+  const showSkins = account.weaponSkins > 0;
   const numericStats = [
     { label: "Level", value: String(account.level), show: account.level > 0 },
     // Shown only with a figure: a label with nothing after it, twice in a
@@ -310,6 +315,7 @@ export function AccountBuyPanel({
     { label: "VIP Ingame", value: String(account.vipIngame), show: account.vipIngame > 0 },
     { label: "KC", value: formatVnd(account.kc), show: account.kc > 0 },
   ].filter((s) => s.show);
+  const hasStats = showRank || showSkins || numericStats.length > 0;
 
   return (
     <div className="flex flex-col gap-6">
@@ -349,36 +355,42 @@ export function AccountBuyPanel({
         </p>
       </div>
 
-      <div className="flex flex-col">
-        <span className="pb-1 text-[10px] font-black uppercase tracking-widest text-neutral-500">
-          Thông tin tài khoản:
-        </span>
-        {/* The Rank row always prints its label, like the card's strip — an
-            account with no rank yet just shows nothing beside it. */}
-        <div className={STAT_ROW_CLASS}>
-          <span className={STAT_LABEL_CLASS}>Rank</span>
-          <div className="flex flex-col items-end gap-1">
-            <span className={STAT_VALUE_CLASS}>{account.rank}</span>
-            {account.lastRank !== null && (
-              <span className="text-[10px] text-neutral-500 font-bold uppercase tracking-wider">
-                LAST: {account.lastRank}
-              </span>
-            )}
-          </div>
-        </div>
+      {/* The heading goes with its rows: an account with nothing typed in
+          any of them shows no "Thông tin tài khoản:" over an empty list. */}
+      {hasStats ? (
+        <div className="flex flex-col">
+          <span className="pb-1 text-[10px] font-black uppercase tracking-widest text-neutral-500">
+            Thông tin tài khoản:
+          </span>
+          {showRank ? (
+            <div className={STAT_ROW_CLASS}>
+              <span className={STAT_LABEL_CLASS}>Rank</span>
+              <div className="flex flex-col items-end gap-1">
+                {rank ? <span className={STAT_VALUE_CLASS}>{rank}</span> : null}
+                {lastRank !== null && (
+                  <span className="text-[10px] text-neutral-500 font-bold uppercase tracking-wider">
+                    LAST: {lastRank}
+                  </span>
+                )}
+              </div>
+            </div>
+          ) : null}
 
-        <div className={STAT_ROW_CLASS}>
-          <span className={STAT_LABEL_CLASS}>Skins</span>
-          <span className={STAT_VALUE_CLASS}>{account.weaponSkins} Skins</span>
-        </div>
+          {showSkins ? (
+            <div className={STAT_ROW_CLASS}>
+              <span className={STAT_LABEL_CLASS}>Skins</span>
+              <span className={STAT_VALUE_CLASS}>{account.weaponSkins} Skins</span>
+            </div>
+          ) : null}
 
-        {numericStats.map((stat) => (
-          <div key={stat.label} className={STAT_ROW_CLASS}>
-            <span className={STAT_LABEL_CLASS}>{stat.label}</span>
-            <span className={STAT_VALUE_CLASS}>{stat.value}</span>
-          </div>
-        ))}
-      </div>
+          {numericStats.map((stat) => (
+            <div key={stat.label} className={STAT_ROW_CLASS}>
+              <span className={STAT_LABEL_CLASS}>{stat.label}</span>
+              <span className={STAT_VALUE_CLASS}>{stat.value}</span>
+            </div>
+          ))}
+        </div>
+      ) : null}
 
       <div className="space-y-2">
         {pct > 0 ? (
@@ -535,7 +547,7 @@ export function AccountBuyPanel({
               imageUrl={account.imageUrl ?? productImage(account.code)}
               imageClassName="object-cover object-[85%_center]"
               name={account.name || `Mã #${account.code}`}
-              chip={account.rank || null}
+              chip={rank || null}
               meta={`#${account.code} · ${account.categoryName}`}
             />
             <PriceList>
@@ -583,7 +595,7 @@ export function AccountBuyPanel({
           imageUrl={account.imageUrl ?? productImage(account.code)}
           imageClassName="object-cover object-[85%_center]"
           name={account.name || `Mã #${account.code}`}
-          chip={account.rank || null}
+          chip={rank || null}
           meta={`#${account.code} · ${account.categoryName}`}
         />
         <PriceList>
