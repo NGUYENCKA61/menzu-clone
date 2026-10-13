@@ -90,11 +90,29 @@ function scrollMotion(): ScrollBehavior {
 }
 
 /** The red ring a :target card wears, for the landings that are not a
- *  navigation to the hash (a ?q= link, a jump out of a search). */
+ *  navigation to the hash (a ?q= link, a #word that a ?q= came along with). */
 function flash(element: HTMLElement) {
   const card = element.closest<HTMLElement>("[data-term]") ?? element;
   card.setAttribute("data-flash", "");
   window.setTimeout(() => card.removeAttribute("data-flash"), FLASH_MS);
+}
+
+/**
+ * The address an in-page link would have made, once a search is dropped:
+ * ?q= leaves through the history API Next knows about, then the hash is set
+ * the way the link would have set it. A real fragment navigation moves
+ * :target, so a word the page was opened at (#fov) gives up its ring; a
+ * pushed hash would leave that one ringed for good. Next's popstate handler
+ * skips the null-state entry this adds.
+ */
+function goToAnchor(id: string) {
+  const url = new URL(window.location.href);
+  if (url.searchParams.has("q")) {
+    url.searchParams.delete("q");
+    window.history.replaceState(null, "", `${url.pathname}${url.search}${url.hash}`);
+  }
+  window.location.hash = id;
+  document.getElementById(id)?.scrollIntoView({ block: "start" });
 }
 
 /** Typing in a field: "/" is a character there, not the search shortcut. */
@@ -257,19 +275,7 @@ export function GlossaryBrowser({
     if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
     event.preventDefault();
     flushSync(() => setQuery(""));
-    // The address the link would have made, through the history API Next
-    // knows about; a pushed hash sets no :target, so the ring is lent.
-    const url = new URL(window.location.href);
-    url.searchParams.delete("q");
-    url.hash = id;
-    if (url.href !== window.location.href) {
-      window.history.pushState(null, "", `${url.pathname}${url.search}${url.hash}`);
-    }
-    const target = document.getElementById(id);
-    if (target) {
-      target.scrollIntoView({ block: "start" });
-      flash(target);
-    }
+    goToAnchor(id);
   }
 
   function onSearchKey(event: KeyboardEvent<HTMLInputElement>) {
