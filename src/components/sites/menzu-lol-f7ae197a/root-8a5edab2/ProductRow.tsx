@@ -1,5 +1,6 @@
 import { CardImage } from "@/components/sites/menzu-lol-f7ae197a/shared/CardImage";
 import { formatVnd } from "@/components/sites/menzu-lol-f7ae197a/shared/productData";
+import { sentenceCase } from "@/lib/displayCase";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -326,14 +327,14 @@ function RowCard({
 
       <h3
         className={cn(
-          "text-sm font-black uppercase text-white transition-colors tracking-wide",
+          "text-sm font-black text-white transition-colors",
           wide
             ? "px-3 pt-3 mb-1.5 text-left sm:px-4 sm:pt-3.5 sm:text-[15px]"
             : "text-center mb-2 sm:text-base",
           t.title,
         )}
       >
-        {card.title}
+        {sentenceCase(card.title)}
       </h3>
 
       {/* Clamped at two lines rather than trusted to be short: the text
@@ -515,11 +516,11 @@ function BentoTile({
         ) : null}
         <h3
           className={cn(
-            "font-black uppercase leading-tight text-white",
+            "font-black leading-tight text-white",
             lead ? "text-lg sm:text-[28px] sm:leading-[1.08]" : "text-xs sm:text-sm",
           )}
         >
-          {card.title}
+          {sentenceCase(card.title)}
         </h3>
         {lead && card.description ? (
           <p className="hidden max-w-[78%] text-[13px] leading-relaxed text-[#c7c9d1] line-clamp-2 sm:block">
@@ -627,11 +628,11 @@ function RowTile({
           />
           <h3
             className={cn(
-              "absolute inset-x-3.5 bottom-3 text-[13px] font-black uppercase leading-tight tracking-wide text-white sm:text-sm",
-              big && "lg:inset-x-5 lg:bottom-4 lg:text-base",
+              "absolute inset-x-3.5 bottom-3 text-[14px] font-black leading-tight text-white sm:text-[15px]",
+              big && "lg:inset-x-5 lg:bottom-4 lg:text-[17px]",
             )}
           >
-            {card.title}
+            {sentenceCase(card.title)}
           </h3>
         </>
       ) : null}
@@ -665,8 +666,8 @@ function TileDress({ card, style, big }: { card: ProductCard; style: TileStyle; 
           className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-[var(--menzu-accent)]/70 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"
         />
         <span className={cn("absolute inset-x-3.5 bottom-3 flex flex-col gap-1", big && "lg:inset-x-5 lg:bottom-4")}>
-          <h3 className={cn("text-[15px] font-black uppercase leading-[1.1] tracking-wide text-white sm:text-base", big && "lg:text-[19px]")}>
-            {card.title}
+          <h3 className={cn("text-[16px] font-black leading-[1.15] text-white sm:text-[17px]", big && "lg:text-[20px]")}>
+            {sentenceCase(card.title)}
           </h3>
           {line ? (
             <span className="text-[11px] font-semibold leading-snug text-neutral-200">
@@ -692,7 +693,7 @@ function TileDress({ card, style, big }: { card: ProductCard; style: TileStyle; 
             {platformWord(card.platform)}
           </span>
           <h3 className={cn("text-[14px] font-bold leading-tight tracking-wide text-white sm:text-[15px]", big && "lg:text-[18px]")}>
-            {card.title}
+            {sentenceCase(card.title)}
           </h3>
           {line ? (
             <span className="text-[11px] font-medium leading-snug text-neutral-400">
@@ -706,7 +707,7 @@ function TileDress({ card, style, big }: { card: ProductCard; style: TileStyle; 
   return (
     <span className="absolute inset-x-0 bottom-0 flex items-center gap-2.5 border-t border-white/[0.07] bg-[#0b0b0f]/92 px-3.5 py-2.5 backdrop-blur-[2px]">
       <span className="flex min-w-0 flex-1 flex-col">
-        <h3 className="truncate text-[13px] font-black uppercase tracking-wide text-white sm:text-sm">{card.title}</h3>
+        <h3 className="truncate text-[14px] font-black text-white sm:text-[15px]">{sentenceCase(card.title)}</h3>
         {card.count != null && card.count > 0 ? (
           <span className="truncate text-[10.5px] text-neutral-400">{card.count} sản phẩm</span>
         ) : card.description ? (
@@ -762,8 +763,8 @@ function RowList({ cards, ranked }: { cards: ProductCard[]; ranked: boolean }) {
                 Top tháng
               </span>
             ) : null}
-            <h3 className="truncate text-sm font-black uppercase tracking-[0.02em] text-white">
-              {card.title}
+            <h3 className="truncate text-[15px] font-black text-white">
+              {sentenceCase(card.title)}
             </h3>
             {card.description ? (
               <p className="truncate text-xs text-[#8a8c95]">{card.description}</p>
