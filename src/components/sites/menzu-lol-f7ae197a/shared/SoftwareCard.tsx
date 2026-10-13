@@ -115,7 +115,8 @@ export function SoftwareCard({
   /**
    * A free tool (the shop's 1đ placeholder tier) gets its own card (the
    * owner, 07/10/2026: "thiết kế card cho phần mềm thuộc dạng miễn phí" →
-   * "b"): a green "Miễn phí" mark on the picture and one "Nhận miễn phí" in
+   * "b"): a red ribbon across the picture's corner (14/10/2026) and one
+   * "Tải ngay" (14/10/2026, was "Nhận miễn phí") in
    * the shop's red (a green one glared: "xanh lá chói quá… đỏ hoặc tím")
    * that leads to the tool's own page, where the key is handed out behind
    * the shop's shortlink (12/10/2026; until then it opened the download
@@ -252,7 +253,7 @@ export function SoftwareCard({
                 className={`${FREE_BUTTON} shrink-0`}
               >
                 <Download size={14} strokeWidth={2.75} aria-hidden />
-                Nhận miễn phí
+                Tải ngay
               </a>
             ) : (
               <Link
@@ -272,7 +273,7 @@ export function SoftwareCard({
               className={`${FREE_BUTTON} w-full`}
             >
               <Download size={14} strokeWidth={2.75} aria-hidden />
-              Nhận miễn phí
+              Tải ngay
             </a>
           ) : (
           <>
