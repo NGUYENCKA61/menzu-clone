@@ -26,6 +26,7 @@ import {
   docsRailIcon,
 } from "@/components/sites/menzu-lol-f7ae197a/shared/docsRail";
 import { DOC_SHELF_LABEL, DOC_SHELVES, isDocShelf, type DocShelf } from "@/lib/docCategories";
+import { docHref } from "@/lib/routes";
 import type { FaqEntry } from "@/lib/settings";
 
 export type DocCategoryKey = DocShelf;
@@ -104,7 +105,7 @@ function FeaturedCarousel({ items }: { items: DocCard[] }) {
             return (
               <Link
                 key={item.slug}
-                href={`/docs/${item.slug}`}
+                href={docHref(item.slug)}
                 aria-hidden={on ? undefined : true}
                 tabIndex={on ? undefined : -1}
                 className={`relative isolate block p-6 [grid-area:1/1] ${items.length > 1 ? "pb-12" : ""} transition-opacity duration-[900ms] ease-out motion-reduce:transition-none ${
@@ -452,7 +453,7 @@ export function DocsHelpCenter({
 function ArticleCard({ article, shelf }: { article: DocCard; shelf: boolean }) {
   return (
     <Link
-      href={`/docs/${article.slug}`}
+      href={docHref(article.slug)}
       className="group flex flex-col gap-3 rounded-2xl border border-white/5 bg-white/[0.02] p-3.5 outline-none transition-colors hover:border-white/10 hover:bg-white/[0.04] focus-visible:ring-2 focus-visible:ring-[var(--menzu-accent)]/60 sm:flex-row sm:items-center sm:gap-5 sm:p-4"
     >
       <div className="flex min-w-0 flex-1 items-start gap-3 sm:items-center sm:gap-5">

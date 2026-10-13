@@ -4,7 +4,7 @@ import { db } from "@/lib/db";
 import { LISTED_PRODUCT } from "@/lib/queries";
 import { SITE_URL } from "@/lib/seo";
 import { PC_SETUP_PAGES, pcSetupHref } from "@/lib/pcSetup";
-import { categoryHref, productHref, toolDocsHref } from "@/lib/routes";
+import { categoryHref, GLOSSARY_LEGACY_SLUG, productHref, toolDocsHref } from "@/lib/routes";
 import { hasOwnToolDoc } from "@/lib/toolDocsContent";
 
 /**
@@ -37,7 +37,11 @@ const STATIC_ROUTES: [path: string, priority: number, freq: Frequency, lastmod: 
   ["/feedback", 0.5, "weekly", "2026-10-02"],
   // No /news: the live site links "TIN TỨC" from its header but the route
   // 404s there, so this clone 404s too rather than inventing a section.
-  ["/docs", 0.4, "monthly", "2026-10-01"],
+  // /docs moved on 13/10: the glossary card leads the shelf with a new title.
+  ["/docs", 0.4, "monthly", "2026-10-13"],
+  // The glossary, a page of its own rather than an article (13/10/2026). Its
+  // words live in src/lib/glossary/terms.ts: bump this when they change.
+  ["/docs/thuat-ngu", 0.5, "monthly", "2026-10-13"],
   ["/tai-lieu", 0.5, "weekly", "2026-10-13"],
   ["/thong-bao", 0.4, "daily", "2026-10-13"],
   ["/cap-bac", 0.4, "monthly", "2026-10-13"],
@@ -153,12 +157,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "weekly" as const,
       priority: 0.7,
     })),
-    ...docs.map((doc) => ({
-      url: `${SITE_URL}/docs/${doc.slug}`,
-      lastModified: doc.updatedAt,
-      changeFrequency: "monthly" as const,
-      priority: 0.5,
-    })),
+    // The old glossary article answers with a redirect to /docs/thuat-ngu
+    // now, and a sitemap lists only addresses that answer 200.
+    ...docs
+      .filter((doc) => doc.slug !== GLOSSARY_LEGACY_SLUG)
+      .map((doc) => ({
+        url: `${SITE_URL}/docs/${doc.slug}`,
+        lastModified: doc.updatedAt,
+        changeFrequency: "monthly" as const,
+        priority: 0.5,
+      })),
     // The documentation area: one page per tool that says something of its own
     // (the same hasOwnToolDoc the page's robots tag uses, so a thin page is
     // never both noindex and in the sitemap; the owner's SEO review,

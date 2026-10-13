@@ -3,7 +3,7 @@ import { prepareDestination } from "next/dist/shared/lib/router/utils/prepare-de
 import { describe, expect, it } from "vitest";
 
 import nextConfig from "../next.config";
-import { isReservedSlug } from "@/lib/routes";
+import { GLOSSARY_LEGACY_SLUG, GLOSSARY_SLUG, isReservedSlug } from "@/lib/routes";
 
 /**
  * The redirects in next.config.ts, run through the same matcher and
@@ -126,8 +126,21 @@ describe("renamed wiki articles", () => {
       for (const old of article.replaces ?? []) {
         expect((await follow(`/docs/${old}`))?.to).toBe(`/docs/${article.slug}`);
       }
-      // A live article is never redirected away from.
+      // A live article is never redirected away from, save the old glossary
+      // article, whose row stays on the shelf while its address moved.
+      if (article.slug === GLOSSARY_LEGACY_SLUG) continue;
       expect(await follow(`/docs/${article.slug}`)).toBeNull();
     }
+  });
+});
+
+describe("the glossary page", () => {
+  it("sends the old glossary article to its own page", async () => {
+    expect(await follow(`/docs/${GLOSSARY_LEGACY_SLUG}`)).toEqual({
+      to: `/docs/${GLOSSARY_SLUG}`,
+      permanent: true,
+    });
+    // The page itself answers; nothing sends it on again.
+    expect(await follow(`/docs/${GLOSSARY_SLUG}`)).toBeNull();
   });
 });

@@ -4,7 +4,7 @@ import { ArrowRight, Phone } from "lucide-react";
 import { listCategories, listDocArticles } from "@/lib/queries";
 import { ThemeToggle } from "../shared/ThemeToggle";
 import { getShopSettings } from "@/lib/settingsStore";
-import { categoryHref } from "@/lib/routes";
+import { categoryHref, docHref } from "@/lib/routes";
 import {
   DiscordGlyph,
   FacebookGlyph,
@@ -189,13 +189,13 @@ export async function SiteFooter() {
     .filter((a) => a.category !== "WARRANTY" && a.category !== "TERMS")
     .sort((a, b) => b.views - a.views)
     .slice(0, WIKI_SHELF)
-    .map((a) => ({ label: a.title, href: `/docs/${a.slug}` }));
+    .map((a) => ({ label: a.title, href: docHref(a.slug) }));
 
   /** A policy gets its own page once the shop writes one; until then the wiki
    *  index is the honest destination — never a 404. */
   const policyHref = (pattern: RegExp): string => {
     const hit = articles.find((a) => pattern.test(a.title) || pattern.test(a.slug));
-    return hit ? `/docs/${hit.slug}` : "/docs";
+    return hit ? docHref(hit.slug) : "/docs";
   };
 
   const supportLinks: FooterLink[] = [
