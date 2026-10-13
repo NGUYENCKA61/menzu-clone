@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { MailCheck } from "lucide-react";
 
 import { SimplePage } from "@/components/sites/menzu-lol-f7ae197a/shared/SimplePage";
 import { WelcomeMailChecker } from "@/components/sites/menzu-lol-f7ae197a/shared/WelcomeMailChecker";
@@ -14,7 +15,13 @@ export const metadata: Metadata = {
 export default async function CheckWelcomePage() {
   const { brandName } = await getShopSettings();
   return (
-    <SimplePage title="Check Thư Welcome" crumb={`${brandName} Mail Checker`}>
+    <SimplePage
+      title="Check Thư Welcome"
+      crumb={`${brandName} Mail Checker`}
+      // A glyph of its own where the red bar stood, as every standalone page
+      // wears one (the owner, 13/10/2026, UI consistency review).
+      icon={MailCheck}
+    >
       <WelcomeMailChecker />
     </SimplePage>
   );

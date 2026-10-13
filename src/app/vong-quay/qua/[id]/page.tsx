@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { ArrowLeft, Gift, PackageCheck, Truck } from "lucide-react";
+import { ArrowLeft, Gift, PackageCheck, Trophy, Truck } from "lucide-react";
 
 import { SimplePage } from "@/components/sites/menzu-lol-f7ae197a/shared/SimplePage";
 import { SpinPrizeClaim } from "@/components/sites/menzu-lol-f7ae197a/shared/SpinPrizeClaim";
@@ -74,7 +74,13 @@ export default async function SpinPrizePage({
   const prize = prizes.find((p) => p.id === win.prizeId);
 
   return (
-    <SimplePage title="Phần quà đã trúng" crumb="Phần quà đã trúng">
+    <SimplePage
+      title="Phần quà đã trúng"
+      crumb="Phần quà đã trúng"
+      // A glyph of its own where the red bar stood, as every standalone page
+      // wears one (the owner, 13/10/2026, UI consistency review).
+      icon={Trophy}
+    >
       <div className="flex max-w-3xl flex-col gap-5">
         <Link
           href="/vong-quay"

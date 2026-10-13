@@ -71,7 +71,13 @@ export default async function SpinPage() {
           stacking context under the header, so a sheet in there left the
           header sharp over the frost (the owner, 07/10/2026: "full mờ"). */}
       {SPIN_LOCKED ? <SpinLockedNotice /> : null}
-      <SimplePage title="Vòng quay đổi thưởng" crumb="Vòng quay đổi thưởng">
+      <SimplePage
+        title="Vòng quay đổi thưởng"
+        crumb="Vòng quay đổi thưởng"
+        // The gift the account menu shows beside this page, where the red bar
+        // stood (the owner, 13/10/2026, UI consistency review).
+        icon={Gift}
+      >
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_320px] lg:gap-10">
           {/* The wheel leads and takes the width; the numbers read beside it on a
               wide screen and under it on a phone. */}

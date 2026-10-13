@@ -1,11 +1,10 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { LayoutGrid } from "lucide-react";
 
-import { categoryHref } from "@/lib/routes";
-import { listCategories } from "@/lib/queries";
+import { getCatalogueTiles } from "@/lib/homeRows";
 import { Breadcrumb } from "@/components/sites/menzu-lol-f7ae197a/shared/Breadcrumb";
-import { LinkPending } from "@/components/sites/menzu-lol-f7ae197a/shared/LinkPending";
 import { MobileBottomNav } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/MobileBottomNav";
+import { RowTile } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/ProductRow";
 import { SiteFooter } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/SiteFooter";
 import { SiteHeader } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/SiteHeader";
 import { ConnectRailSection } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/ConnectRailSection";
@@ -27,7 +26,7 @@ export async function generateMetadata(): Promise<Metadata> {
 export const dynamic = "force-dynamic";
 
 export default async function CategoriesPage() {
-  const categories = await listCategories();
+  const tiles = await getCatalogueTiles();
 
   return (
     <div className="min-h-screen flex flex-col text-white overflow-x-clip selection:bg-[var(--menzu-accent)]/30 transition-colors duration-300">
@@ -36,7 +35,11 @@ export default async function CategoriesPage() {
 
       <main className="flex-1 relative z-20 w-full flex flex-col">
         <div className="w-full">
-          <div className="w-full max-w-[1320px] mx-auto px-4 lg:px-6 py-6 lg:py-10 space-y-8">
+          {/* SimplePage's column and padding, so the title sits where every
+              other page's does (the owner, 13/10/2026, UI consistency
+              review). The page keeps its own shell for the backdrop artwork
+              that shows through it. */}
+          <div className="max-w-[1320px] mx-auto px-4 lg:px-6 py-12">
             <Breadcrumb
               items={[
                 { label: "Trang chủ", href: "/" },
@@ -44,31 +47,39 @@ export default async function CategoriesPage() {
               ]}
             />
 
-            <div className="flex items-center justify-between mb-8 pb-4 border-b border-white/10">
-              <div className="flex items-center gap-3">
-                <span aria-hidden className="h-6 w-[3px] shrink-0 rounded-full bg-[var(--menzu-accent)]" />
-                <h1 className="text-2xl sm:text-3xl font-black uppercase tracking-wider text-white">
-                  DANH SÁCH DANH MỤC
-                </h1>
+            {/* SimplePage's heading, mark for mark: the page's own glyph in
+                the accent where the red bar was, the grid the bottom nav's
+                "Danh mục" wears (the owner, 13/10/2026, UI consistency
+                review). */}
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-8 pb-4 border-b border-white/10">
+              <div className="min-w-0">
+                <div className="flex items-center gap-3">
+                  <LayoutGrid size={28} className="shrink-0 text-[var(--menzu-accent)]" aria-hidden />
+                  <h1 className="text-2xl sm:text-3xl font-black text-white uppercase tracking-wider">
+                    DANH SÁCH DANH MỤC
+                  </h1>
+                </div>
               </div>
             </div>
 
-            {categories.length > 0 ? (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-6">
-                {categories.map((c) => (
-                  <Link
-                    key={c.slug}
-                    href={categoryHref(c.slug)}
-                    className="group relative flex flex-col justify-between gap-3 bg-[#101114] rounded-[15px] overflow-hidden border border-white/[0.08] hover:border-[var(--menzu-accent)]/50 hover:-translate-y-1 hover:shadow-[0_15px_40px_#00000088] lift-card p-5 min-h-[120px]"
+            {tiles.length > 0 ? (
+              // The home page's game list, tile for tile: the same picture
+              // tiles in RowSearch's grid, two a line on a phone, three from
+              // md, four from lg (the owner, 13/10/2026, UI consistency
+              // review). A game with nothing on sale comes last, faded but
+              // still a link, and lights up under the pointer.
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+                {tiles.map(({ card, onSale }) => (
+                  <div
+                    key={card.href}
+                    className={
+                      onSale
+                        ? undefined
+                        : "opacity-45 transition-opacity hover:opacity-90 focus-within:opacity-90"
+                    }
                   >
-                    <LinkPending />
-                    <span className="text-sm font-black uppercase text-white group-hover:text-[var(--menzu-accent)] transition-colors tracking-widest leading-snug">
-                      {c.name}
-                    </span>
-                    <span className="text-[11px] font-bold uppercase tracking-widest text-neutral-500">
-                      {c.productCount} sản phẩm
-                    </span>
-                  </Link>
+                    <RowTile card={card} />
+                  </div>
                 ))}
               </div>
             ) : (

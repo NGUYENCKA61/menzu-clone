@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { BadgePercent, ShieldCheck } from "lucide-react";
+import { BadgePercent, Crown, ShieldCheck } from "lucide-react";
 
 import { SimplePage } from "@/components/sites/menzu-lol-f7ae197a/shared/SimplePage";
 import { TierBadge } from "@/components/sites/menzu-lol-f7ae197a/shared/TierBadge";
@@ -45,7 +45,13 @@ export default async function MemberTiersPage() {
   const progress = mine ? tierProgress(toppedUp, mine) : null;
 
   return (
-    <SimplePage title="Cấp bậc thành viên" crumb="Cấp bậc">
+    <SimplePage
+      title="Cấp bậc thành viên"
+      crumb="Cấp bậc"
+      // A glyph of its own where the red bar stood, as every standalone page
+      // wears one (the owner, 13/10/2026, UI consistency review).
+      icon={Crown}
+    >
       <p className="max-w-[720px] text-sm leading-relaxed text-neutral-400">
         Hạng được tính theo <span className="font-bold text-white">tổng tiền đã nạp</span>{" "}
         vào ví, lên hạng ngay khi lệnh nạp chạm mốc được duyệt và{" "}

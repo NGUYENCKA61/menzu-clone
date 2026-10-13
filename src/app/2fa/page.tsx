@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { ShieldCheck } from "lucide-react";
 
 import { SimplePage } from "@/components/sites/menzu-lol-f7ae197a/shared/SimplePage";
 import { TotpTool } from "@/components/sites/menzu-lol-f7ae197a/shared/TotpTool";
@@ -18,7 +19,13 @@ export const metadata: Metadata = {
 export default async function TwoFactorPage() {
   const { brandName } = await getShopSettings();
   return (
-    <SimplePage title="Trình Tạo Mã 2FA" crumb={`${brandName} 2FA`}>
+    <SimplePage
+      title="Trình Tạo Mã 2FA"
+      crumb={`${brandName} 2FA`}
+      // A glyph of its own where the red bar stood, as every standalone page
+      // wears one (the owner, 13/10/2026, UI consistency review).
+      icon={ShieldCheck}
+    >
       <TotpTool />
     </SimplePage>
   );

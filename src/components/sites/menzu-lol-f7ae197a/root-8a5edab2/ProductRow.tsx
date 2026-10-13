@@ -552,6 +552,14 @@ function BentoTile({
  */
 export type TileStyle = "classic" | "a" | "b" | "c";
 
+/**
+ * The dress the game tiles wear unless a row asks for another. One constant
+ * so /categories, which draws the same tiles, follows the home page's game
+ * list when the owner picks a dress (the owner, 13/10/2026, UI consistency
+ * review).
+ */
+export const DEFAULT_TILE_STYLE: TileStyle = "classic";
+
 /** The eyebrow a tile wears in style b, from the category's platform tag. */
 function platformWord(platform: string | null | undefined): string {
   const p = (platform ?? "").toUpperCase();
@@ -567,12 +575,13 @@ function platformWord(platform: string | null | undefined): string {
  * so the list no longer runs a red bar under every game. 4:3 in the game
  * list; `pick` is the sliding row's wider 16:10 tile, with the month's pill;
  * `big` is a tile a third of the row wide on a desktop rather than a quarter.
+ * Exported for /categories, which lists every game in the same tiles.
  */
-function RowTile({
+export function RowTile({
   card,
   pick = false,
   big = false,
-  style = "classic",
+  style = DEFAULT_TILE_STYLE,
 }: {
   card: ProductCard;
   pick?: boolean;
@@ -796,7 +805,7 @@ export function ProductRow({
   tiles = false,
   bigPicks = false,
   bigTiles = false,
-  tileStyle = "classic",
+  tileStyle = DEFAULT_TILE_STYLE,
   list = false,
   quiet = false,
   rows = 1,
