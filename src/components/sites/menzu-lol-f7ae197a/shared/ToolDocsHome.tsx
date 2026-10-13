@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 
+import { sentenceCase } from "@/lib/displayCase";
 import type { DocsAccess } from "@/lib/docsAccess";
 import { toolDocsHref } from "@/lib/routes";
 
@@ -42,11 +43,16 @@ function GameMark({
   if (src) {
     return (
       <span className="relative h-7 w-7 shrink-0 overflow-hidden rounded-md">
+        {/* The admin's "Logo game" is a free URL. Pictures from the shop's own
+            /uploads go through the optimiser; one pasted from another site is
+            drawn as is, since next.config lists no remote hosts and the
+            optimiser would refuse it and break the page. */}
         <Image
           src={src}
           alt=""
           fill
           sizes="28px"
+          unoptimized={!src.startsWith("/")}
           className={logoUrl ? "object-contain" : "object-cover"}
         />
       </span>
@@ -141,12 +147,15 @@ export function ToolDocsHome({
               key={category.slug}
               className="rounded-2xl border border-white/10 bg-white/[0.02] p-5"
             >
-              <h3 className="flex items-center gap-3 text-[13px] font-black uppercase tracking-wider text-white">
+              {/* The game's name as the menu beside it prints it, first letter
+                  capital only (sentenceCase), so one game never reads two ways
+                  on one screen. */}
+              <h3 className="flex items-center gap-3 text-[14px] font-black tracking-wide text-white">
                 <GameMark
                   logoUrl={category.logoUrl}
                   imageUrl={category.imageUrl}
                 />
-                {category.name}
+                {sentenceCase(category.name)}
                 <span className="ml-auto text-[10px] font-black text-neutral-500">
                   {category.tools.length} tool
                 </span>

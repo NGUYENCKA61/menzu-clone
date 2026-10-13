@@ -267,8 +267,9 @@ html[data-theme="light"] .keep-dark {
   color-scheme: dark;
 }
 
-/* A modal's scrim stays a scrim. */
-html[data-theme="light"] [class*="fixed"][class*="inset-0"][class*="bg-black/"] {
+/* A modal's scrim stays a scrim. A picture viewer (keep-dark) keeps its own
+   near-black: its close button and counter are drawn for it. */
+html[data-theme="light"] [class*="fixed"][class*="inset-0"][class*="bg-black/"]:not(.keep-dark) {
   background-color: rgb(12 12 16 / 0.45);
 }
 

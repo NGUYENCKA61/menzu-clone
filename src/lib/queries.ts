@@ -707,9 +707,19 @@ export interface AccountPageDetail extends AccountDetail {
  */
 function accountDescriptionHtml(stored: string | null): string {
   if (!stored?.trim()) return "";
-  const html = isHtmlBody(stored)
-    ? stored
-    : plainToDocHtml(stripNewlineArtifacts(stored));
+  // The lost breaks come off before asking whether the row is HTML: ACC71's
+  // write-up opens " rnrn<p>…", which isHtmlBody reads as plain text, and the
+  // page then printed its tags as words.
+  const cleaned = stripNewlineArtifacts(stored);
+  // Plain text keeps every lost break ("rnrn" is a blank line, so a paragraph
+  // break for plainToDocHtml), where stripNewlineArtifacts folds a run into one.
+  const html = isHtmlBody(cleaned)
+    ? cleaned
+    : plainToDocHtml(
+        stored.replace(/(?<![\p{L}\p{N}])((?:rn)+)(?![\p{L}\p{N}])/gu, (run) =>
+          "\n".repeat(run.length / 2),
+        ),
+      );
   return docHtmlIsEmpty(html) ? "" : html;
 }
 
