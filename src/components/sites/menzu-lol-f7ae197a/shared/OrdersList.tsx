@@ -111,7 +111,14 @@ export function OrdersList({ orders }: { orders: OrderCardView[] }) {
   const [status, setStatus] = useState("ALL");
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
-  const [page, setPage] = useState(0);
+  // Opens on the page holding the order ?don= asked for, under the default
+  // newest-first order: its receipt only opens if its card is drawn, and the
+  // warranty page's breadcrumb now links an order of any age here (the owner,
+  // 13/10/2026, UI consistency review). Page one when nothing was asked.
+  const [page, setPage] = useState(() => {
+    const at = [...orders].sort(SORTS.newest).findIndex((order) => order.autoOpen);
+    return at < 0 ? 0 : Math.floor(at / PAGE_SIZE);
+  });
   const top = useRef<HTMLDivElement>(null);
 
   const filtered = useMemo(() => {

@@ -3,12 +3,15 @@ import type { ReactNode } from "react";
 
 import { getCurrentUser } from "@/lib/session";
 import { AccountShell } from "./AccountShell";
+import type { Crumb } from "./Breadcrumb";
 
 interface AccountPageFrameProps {
   /** Left out by a page that draws its own title inside its panel. */
   title?: string;
   subtitle?: ReactNode;
   crumb: string;
+  /** Linked steps between "Trang chủ" and `crumb`. */
+  trail?: Crumb[];
   /** Optional control rendered to the right of the title, header-level. */
   action?: ReactNode;
   /** Off for a page with one job, which then loses the nav column. */
@@ -35,6 +38,7 @@ export async function AccountPageFrame({
   title,
   subtitle,
   crumb,
+  trail,
   action,
   sidebar = true,
   icon,
@@ -49,6 +53,7 @@ export async function AccountPageFrame({
       title={title}
       subtitle={subtitle}
       crumb={crumb}
+      trail={trail}
       isAdmin={isAdmin}
       action={action}
       sidebar={sidebar}

@@ -3,7 +3,7 @@ import Link from "next/link";
 
 import { AccountSidebar, type SidebarUser } from "./AccountSidebar";
 import { LinkPending } from "./LinkPending";
-import { Breadcrumb } from "./Breadcrumb";
+import { Breadcrumb, type Crumb } from "./Breadcrumb";
 
 export interface AccountShellProps {
   /** Left out by a page that draws its own title inside its panel, as
@@ -11,6 +11,10 @@ export interface AccountShellProps {
   title?: string;
   subtitle?: React.ReactNode;
   crumb: string;
+  /** Linked steps between "Trang chủ" and `crumb`, for a page that sits
+   *  under another one: the warranty form under its order (the owner,
+   *  13/10/2026, UI consistency review). */
+  trail?: Crumb[];
   isAdmin?: boolean;
   user?: SidebarUser | null;
   /** Optional control rendered to the right of the title, header-level. */
@@ -41,6 +45,7 @@ export function AccountShell({
   title,
   subtitle,
   crumb,
+  trail = [],
   isAdmin = false,
   user = null,
   action = null,
@@ -49,6 +54,8 @@ export function AccountShell({
   ground = "black",
   children,
 }: AccountShellProps) {
+  const crumbs: Crumb[] = [{ label: "Trang chủ", href: "/" }, ...trail, { label: crumb }];
+
   // flex-1, not min-h-screen: the header sits above this and the footer
   // below, so a whole screen of its own left a short page (the profile, a
   // warranty form) with hundreds of pixels of nothing before the footer
@@ -72,10 +79,10 @@ export function AccountShell({
           public pages do. */}
       {sidebar ? (
         <div className="mb-6">
-          <Breadcrumb margin="mb-0" items={[{ label: "Trang chủ", href: "/" }, { label: crumb }]} />
+          <Breadcrumb margin="mb-0" items={crumbs} />
         </div>
       ) : (
-        <Breadcrumb items={[{ label: "Trang chủ", href: "/" }, { label: crumb }]} />
+        <Breadcrumb items={crumbs} />
       )}
 
       <div className="flex flex-col lg:flex-row gap-6 items-start">
