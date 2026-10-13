@@ -28,6 +28,11 @@
 //     blurs and in-flow shadows go. Sale signals (the MIỄN PHÍ ribbon, the -N%
 //     chips, the flash-sale button) and error lines keep the shop red, and
 //     Tailwind's red, rose, emerald and amber keep meaning what they mean.
+//  5. A second TRIAL on top (13/10/2026, "style trắng đen đi làm sao giống
+//     nike thử"): black and white after Nike, under
+//     html[data-theme="light"][data-variant="nike"] only (?giao-dien=nike).
+//     Mostly the tokens above turned to Nike's greys and black, plus a few
+//     broad rules: pills, sentence case, no decoration, boxless cards.
 //
 // Classes are matched as whole tokens. A substring match once caught
 // "selection:bg-[var(--menzu-accent)]/30" on every page wrapper and put the
@@ -680,6 +685,393 @@ html[data-theme="light"] .opacity-45.transition-opacity:not(.keep-dark *):is(:ho
 */
 `;
 
+// ---- 5. The Nike variant (TRIAL) ------------------------------------------
+// The owner (13/10/2026): "style trắng đen đi làm sao giống nike thử", black
+// and white, as close to Nike as can be, as a trial. A third dress on top of
+// the light one: ?giao-dien=nike sets data-theme="light" AND
+// data-variant="nike" on <html>, so every rule here sits under both and the
+// dark site and the ocean dress never see it. It is mostly tokens: the ocean
+// dress already paints from --light-* and --ocean, and those turn to Nike's
+// greys (#111 ink, #707072 secondary, #e5e5e5 hairline, #f5f5f5 wells) and
+// black. The rest is a few broad rules for what Nike does differently: pills,
+// sentence case, no decoration, product cards with no box.
+
+const NIKE = `html[data-theme="light"][data-variant="nike"]`;
+const NIKE_W = `:where(${NIKE})`;
+/** Exclusions that add no specificity, so the order of the rules decides. */
+const unless = (...selectors) => `:where(:not(${selectors.join(", ")}))`;
+// Out of the islands, at one class of specificity: the weight the ocean
+// rules carry (":not(.keep-dark *)"), so where a Nike rule and an ocean rule
+// tie, the Nike one, written later, wins.
+const NOT_DARK = ":not(.keep-dark, .keep-dark *)";
+// The logo's tagline keeps its letter-spaced capitals: it is the lockup, not
+// UI text. The free-tool ribbon (-rotate-45) keeps its look and its red.
+const LOCKUP = ['a[href="/"] .text-red-500', ".-rotate-45"];
+
+// Nike's grey scale (Podium CDS): grey-50 #fafafa … grey-900 #1f1f21, black
+// #111111. Every grey family the dark site uses mirrors onto it, so the greys
+// are neutral like Nike's instead of the ocean's slate. 500 and 600 (muted and
+// dim words) both land on Nike's secondary #707072: 4.94:1 on white, 4.53:1
+// on the #f5f5f5 well, the quietest step that still reads.
+const NIKE_GREY = {
+  50: "#111111", 100: "#1f1f21", 200: "#28282a", 300: "#39393b", 400: "#4b4b4d",
+  500: "#707072", 600: "#707072", 700: "#cacacb", 800: "#e5e5e5", 900: "#f5f5f5", 950: "#fafafa",
+};
+const nikeFlipLines = [...flips.keys()]
+  .filter((name) => GREYS.some((family) => name.startsWith(`${family}-`)))
+  .map((name) => `  --color-${name}: ${NIKE_GREY[name.split("-")[1]]};`)
+  .join("\n");
+
+const cls = (token) => `.${esc(token)}`;
+// Small UI text (9-11.5px, as typed without a variant) rises to 12px, Nike's
+// smallest; wide tracking (any positive tracking class, variants included)
+// goes to 0.
+const smallText = [...tokens]
+  .filter((t) => /^text-\[(\d+(?:\.\d+)?)px\]$/.test(t))
+  .filter((t) => {
+    const px = Number(t.match(/\[(\d+(?:\.\d+)?)px/)[1]);
+    return px >= 9 && px < 12;
+  })
+  .sort();
+const wideTracking = [...tokens]
+  .filter((t) => /^(?:[a-z0-9-]+:)*tracking-(?:wide|wider|widest|\[0?\.\d+em\])$/.test(t))
+  .sort();
+// Accent tints and faint accent outlines, at any alpha below the islands' 70%.
+const accentTints = ["menzu-accent", "brand"].flatMap((n) => alphaFamily("", `bg-[var(--${n})]`, 1, 69));
+const accentTintHovers = ["menzu-accent", "brand"].flatMap((n) => alphaFamily("hover:", `bg-[var(--${n})]`, 1, 69));
+const accentLines = ["menzu-accent", "brand"].flatMap((n) => alphaFamily("", `border-[var(--${n})]`, 1, 69));
+for (const [name, list] of Object.entries({ smallText, wideTracking, accentTints, accentTintHovers, accentLines })) {
+  if (!list.length) throw new Error(`nike: no ${name} tokens found in src`);
+}
+
+const ACCENT_FILL = String.raw`:is(.bg-\[var\(--menzu-accent\)\], .bg-\[var\(--brand\)\])`;
+const SELECTED_STATE = `:is([aria-pressed="true"], [aria-selected="true"], [aria-current="page"], [aria-current="true"])`;
+// The solid accent buttons: Mua ngay, Thuê ngay, Tìm kiếm, Đăng nhập, Nạp tiền.
+const PRIMARY = `:is(a, button, [role="button"])${ACCENT_FILL}${unless(
+  '[aria-pressed="true"]',
+  '[aria-selected="true"]',
+  "[aria-current]",
+  String.raw`.border-\[var\(--menzu-accent\)\]`,
+)}${NOT_DARK}`;
+// The quiet CTAs beside them: an outline or a faint fill, in the shop's caps.
+const quietFillTokens = alphaFamily("", "bg-white", 7, 10);
+const SECONDARY = `:is(a, button).uppercase:is([class*="border-white/"], [class*="border-[var(--menzu-accent)]/"]${quietFillTokens
+  .map((t) => `, ${cls(t)}`)
+  .join("")})${unless("[aria-pressed]", "[aria-selected]")}${NOT_DARK}`;
+// Round icon buttons: arrows, steppers, social marks.
+const ICON_BUTTON = `:is(a, button)[class*="border-white/"]:is(.h-9.w-9, .h-10.w-10, .h-11.w-11)${NOT_DARK}`;
+// Chips not picked: the pressed=false toggles and pillTab's grey well.
+const CHIP_OFF = String.raw`:is([aria-pressed="false"], .border-white\/10.bg-white\/5.uppercase)` + NOT_DARK;
+// Chips, tabs, packages and pages that are picked.
+const CHIP_ON = `:is(${SELECTED_STATE}:is(${ACCENT_FILL.slice(4, -1)}, [class*="bg-[var(--menzu-accent)]/"]), ${String.raw`.border-\[var\(--menzu-accent\)\].bg-\[var\(--menzu-accent\)\]`})${NOT_DARK}`;
+// Search shells (the parent of an input) and the header's search label.
+const FIELD_SHELL = `:is(${SHELLS.slice(4, -1)}, ${String.raw`.border-\[rgba\(239\,68\,68\,0\.2\)\]`})`;
+const HEADER_FIELD = String.raw`label:has(input):is(.bg-white\/\[0\.07\], .bg-\[\#17171c\])`;
+const FIELD = `:is(input:not([type="checkbox"], [type="radio"], [type="range"], [type="file"]), textarea, select)${unless('[class*="bg-transparent"]')}${NOT_DARK}`;
+// The product and account cards (SoftwareCard, ProductCard).
+const CARD = String.raw`.lift-card.border-\[\#24252a\]` + NOT_DARK;
+const FOOTER = String.raw`footer.bg-\[\#0f1015\]`;
+const TYPE_EX = unless("h1", ...LOCKUP) + NOT_DARK;
+// The old site's write-ups paint warnings in pure red (#ff0000, 4.0:1 on
+// white); Nike's critical red #d30005 reads (5.86:1) and is still red.
+const nikeInlineCss = Object.entries({ "#ff0000": "#d30005" })
+  .map(([hex, value]) => {
+    const rgb = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16)).join(", ");
+    const selectors = [`color: ${hex}`, `color:${hex}`, `color: rgb(${rgb})`, `color:rgb(${rgb})`].map(
+      (needle) => `${NIKE} .doc-prose${unless(".keep-dark *")} [style*="${needle}" i]`,
+    );
+    return `${selectors.join(",\n")} {\n  color: ${value} !important;\n}`;
+  })
+  .join("\n");
+
+const nikeCss = String.raw`/* 5. NIKE (TRIAL, 13/10/2026): black and white, as close to Nike as can be.
+   On only under html[data-variant="nike"] (?giao-dien=nike); the dark site and
+   the ocean dress never match these rules. */
+${NIKE} {
+  /* One white page and surface, #f5f5f5 wells, one #e5e5e5 hairline. */
+  --light-page: #ffffff;
+  --light-surface: #ffffff;
+  --light-surface-hover: #f5f5f5;
+  --light-line: #e5e5e5;
+  --light-line-strong: #cacacb; /* field outlines, secondary buttons */
+  --light-band: #f5f5f5; /* the top strip */
+  /* Two inks and one grey: #111 18.9:1, #707072 4.94:1 on white. */
+  --light-ink: #111111;
+  --light-ink-2: #111111;
+  --light-ink-3: #707072;
+  --light-ink-4: #9e9ea0; /* decoration only (separators), Nike's disabled grey */
+  --nike-well: #f5f5f5; /* behind pictures, fields, quiet chips */
+  --nike-well-hover: #e5e5e5;
+  /* The accent is black; hover #3a3a3a (white on it 11.5:1). */
+  --ocean: #111111;
+  --ocean-dark: #3a3a3a;
+  --ocean-soft: #f5f5f5;
+  --ocean-line: #cacacb;
+  --ocean-ring: rgb(17 17 17 / 0.12);
+  --brand: #111111;
+  --brand-dark: #3a3a3a;
+  --menzu-accent: #111111;
+  --menzu-accent-dark: #3a3a3a;
+  --primary: #111111;
+  --ring: #111111;
+  --menzu-backdrop-dim: rgb(255 255 255 / 0.72);
+  --menzu-scroll-thumb: #cacacb;
+  --menzu-scroll-thumb-hover: #9e9ea0;
+  --menzu-scroll-thumb-active: #111111;
+  --float-shadow: 0 2px 6px rgb(0 0 0 / 0.05), 0 18px 44px -18px rgb(0 0 0 / 0.22);
+
+  /* Every grey on Nike's neutral scale. */
+${nikeFlipLines}
+}
+
+/* Islands keep their dark palette; the accent there is white, and a white
+   fill carries black words (Nike's white pill over a picture). */
+${NIKE} .keep-dark {
+  --menzu-accent: #ffffff;
+  --brand: #ffffff;
+  --menzu-accent-dark: #e5e5e5;
+  --brand-dark: #e5e5e5;
+}
+${NIKE} .keep-dark ${ACCENT_FILL}[class] {
+  --color-white: #111111;
+  color: #111111;
+}
+
+@layer base {
+  ${NIKE} :not(.keep-dark, .keep-dark *) {
+    --tw-shadow-color: rgb(0 0 0 / 0.08);
+  }
+}
+
+/* Accent tints are the quiet grey well; faint accent outlines one hairline.
+   In the utilities layer at Tailwind's specificity, so a hover written beside
+   the class still wins. */
+@layer utilities {
+  ${NIKE_W} ${anyOf(accentTints)}${NOT_ISLAND} {
+    background-color: var(--nike-well);
+  }
+  ${NIKE_W} ${anyOf(accentTintHovers, ":hover")}${NOT_ISLAND} {
+    background-color: var(--nike-well-hover);
+  }
+  ${NIKE_W} ${anyOf(accentLines)}${NOT_ISLAND} {
+    border-color: var(--light-line);
+  }
+}
+
+/* Decoration off: the accent bars before headings and card titles, the accent
+   ring round avatars, the hero video's drop. */
+${NIKE} :is([class*="w-[3px]"], [class*="w-[2px]"])${ACCENT_FILL}${NOT_DARK} { display: none; }
+${NIKE} .rounded-full[class*="border-[var(--menzu-accent)]"]${NOT_DARK} { border-color: var(--light-line); }
+${NIKE} [class*="0_0_140px_30px"]${NOT_DARK} { box-shadow: none; }
+${NIKE} .lift-card${NOT_DARK} { translate: none; }
+
+/* Type: small UI words lose the caps and the tracking, weigh 600 and are 12px
+   at least. Page titles (h1) keep their caps, like Nike's campaign lines;
+   section headings are sentence case, bold, tracked in a hair. */
+${NIKE} .uppercase${TYPE_EX} {
+  text-transform: none;
+}
+${NIKE} ${anyOf(wideTracking)}${unless("h1", "h2", ...LOCKUP)}${NOT_DARK} {
+  letter-spacing: 0;
+}
+${NIKE} .uppercase:is(.font-black, .font-extrabold, .font-bold)${unless("h1", "h2", ...LOCKUP)}${NOT_DARK} {
+  font-weight: 600;
+}
+${NIKE} ${anyOf(smallText)}${unless(...LOCKUP, '[aria-hidden="true"]')}${NOT_DARK} {
+  font-size: 12px;
+}
+${NIKE} :is(h1, h2)${unless('[class*="tracking-tight"]', '[class*="tracking-[-"]')}${NOT_DARK} {
+  letter-spacing: -0.01em;
+}
+${NIKE} h2${NOT_DARK} {
+  font-weight: 700;
+}
+/* A product's name over its buy panel: bold, not black, a size down. */
+${NIKE} h1.tracking-tight.lg\:text-4xl${NOT_DARK} {
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+@media (width >= 64rem) {
+  ${NIKE} h1.tracking-tight.lg\:text-4xl${NOT_DARK} {
+    font-size: 30px;
+    line-height: 1.2;
+  }
+}
+
+/* Primary: a black pill, white words, no caps. */
+${NIKE} ${PRIMARY} {
+  border-radius: 9999px;
+  color: #ffffff;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+}
+${NIKE} ${PRIMARY} * {
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+}
+/* Secondary: a white pill on a 1.5px grey line that turns black under the
+   pointer. */
+${NIKE} ${SECONDARY} {
+  background-color: #ffffff;
+  border: 1.5px solid var(--light-line-strong);
+  border-radius: 9999px;
+  box-shadow: none;
+  color: var(--light-ink);
+  font-weight: 600;
+}
+${NIKE} ${SECONDARY}:hover {
+  border-color: var(--light-ink);
+}
+/* The tall buy buttons (56px) carry Nike's 16px words, not 13px caps. */
+${NIKE} :is(${PRIMARY}, ${SECONDARY}).h-14 {
+  font-size: 16px;
+}
+${NIKE} ${ICON_BUTTON} {
+  background-color: var(--nike-well);
+  border-color: transparent;
+  border-radius: 9999px;
+  box-shadow: none;
+}
+${NIKE} ${ICON_BUTTON}:hover {
+  background-color: var(--nike-well-hover);
+}
+
+/* Chips: a grey well when not picked; picked, white with a 1.5px black line,
+   black bold words. */
+${NIKE} ${CHIP_OFF} {
+  background-color: var(--nike-well);
+  border-color: transparent;
+  border-radius: 9999px;
+  box-shadow: none;
+  color: var(--light-ink);
+  font-weight: 500;
+}
+${NIKE} ${CHIP_OFF}:hover {
+  background-color: var(--nike-well-hover);
+}
+${NIKE} ${CHIP_ON} {
+  --color-white: #111111;
+  background-color: #ffffff;
+  border-color: transparent;
+  border-radius: 9999px;
+  box-shadow: inset 0 0 0 1.5px #111111;
+  color: #111111;
+  font-weight: 700;
+}
+
+/* Fields and searches: grey wells with no line, pill-round; a black line
+   while typing. */
+${NIKE} ${FIELD_SHELL}:has(> input, > textarea)${NOT_DARK},
+${NIKE} ${HEADER_FIELD}${NOT_DARK} {
+  background-color: var(--nike-well);
+  border-color: transparent;
+  border-radius: 9999px;
+  box-shadow: none;
+}
+${NIKE} ${FIELD_SHELL}:has(> input:focus, > textarea:focus)${NOT_DARK}[class],
+${NIKE} ${HEADER_FIELD}:has(input:focus)${NOT_DARK} {
+  border-color: transparent;
+  box-shadow: inset 0 0 0 1.5px #111111;
+}
+${NIKE} ${FIELD} {
+  background-color: var(--nike-well);
+  border-color: transparent;
+}
+${NIKE} ${FIELD}:focus {
+  border-color: transparent;
+  box-shadow: inset 0 0 0 1.5px #111111;
+}
+${NIKE} :is(input, textarea)${NOT_DARK}::placeholder { color: #707072; }
+/* The tool card's package picker reads as a field. */
+${NIKE} button.bg-\[\#111216\]${NOT_DARK} {
+  background-color: var(--nike-well);
+  border-color: transparent;
+  border-radius: 9999px;
+  color: var(--light-ink);
+}
+
+/* Header: white, one hairline, black words; the strip a #f5f5f5 band; the
+   cart a round icon. The three menu triggers are typed in capitals, so they
+   are lowered and their first letter raised (sentence case). */
+${NIKE} .site-nav > div:first-child a { color: var(--light-ink); font-weight: 500; }
+${NIKE} .site-nav > div:first-child a:hover { text-decoration: underline; text-underline-offset: 3px; }
+${NIKE} .site-nav button[aria-haspopup="true"].uppercase {
+  display: block;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--light-ink);
+  text-transform: lowercase;
+}
+${NIKE} .site-nav button[aria-haspopup="true"].uppercase::first-letter { text-transform: uppercase; }
+${NIKE} .site-nav button[aria-haspopup="true"].uppercase > svg {
+  display: inline-block;
+  vertical-align: -2px;
+  margin-left: 6px;
+}
+${NIKE} .menzu-scroll-x button[aria-expanded].uppercase > span:first-child {
+  display: inline-block;
+  text-transform: lowercase;
+}
+${NIKE} .menzu-scroll-x button[aria-expanded].uppercase > span:first-child::first-letter { text-transform: uppercase; }
+${NIKE} a[href="/"] .text-red-500 { color: var(--light-ink); }
+${NIKE} .site-nav a.bg-\[\#17171c\] { background-color: transparent; border-color: transparent; border-radius: 9999px; }
+${NIKE} .site-nav a.bg-\[\#17171c\]:hover { background-color: var(--nike-well-hover); }
+/* On a phone the bar has no room for the 28px mark: it shrank to a sliver. */
+@media (width < 40rem) {
+  ${NIKE} .site-nav a[href="/"].origin-left > div.relative { display: none; }
+}
+
+/* Footer: white with one line on top; black column titles, grey links. */
+${NIKE} ${FOOTER} { background-color: #ffffff; border-top-color: var(--light-line); }
+${NIKE} ${FOOTER} h2${NOT_DARK} { font-size: 14px; font-weight: 600; color: var(--light-ink); }
+${NIKE} ${FOOTER} a${unless('[class*="text-[var(--menzu-accent)]"]')}${NOT_DARK} { color: var(--light-ink-3); }
+${NIKE} ${FOOTER} a${NOT_DARK}:hover { color: var(--light-ink); }
+
+/* Links: black, underlined under the pointer. */
+${NIKE} a:is([class*="text-[var(--menzu-accent)]"], [class*="hover:text-white"], ${FOOTER} a):hover${NOT_DARK} {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* Product cards: no box, no lift; the picture square on a grey well, the
+   words flush with it. Names may take two lines. */
+${NIKE} ${CARD} {
+  background-color: transparent;
+  border-color: transparent;
+  border-radius: 0;
+  box-shadow: none;
+}
+${NIKE} ${CARD} :is(.aspect-\[16\/9\], .aspect-\[16\/10\]) {
+  border-radius: 0;
+  background: var(--nike-well);
+}
+${NIKE} ${CARD} > div.p-4 {
+  padding-left: 0;
+  padding-right: 0;
+}
+${NIKE} ${CARD} h3.truncate {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  white-space: normal;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+/* Rating stars in black, as Nike draws them. */
+${NIKE} .fill-amber-400${NOT_DARK} { color: #111111; fill: #111111; }
+
+/* Write-ups: links black and underlined (inline, they need more than colour);
+   numbers in the secondary grey; a quote on the well with a black rule. */
+${NIKE} .doc-prose${unless(".keep-dark *")} a { color: #111111; text-decoration: underline; text-underline-offset: 3px; }
+${NIKE} .doc-prose${unless(".keep-dark *")} a:hover { color: #707072; }
+${NIKE} .doc-prose${unless(".keep-dark *")} li::marker { color: #707072; }
+${NIKE} .doc-prose${unless(".keep-dark *")} blockquote { border-left-color: #111111; background-color: var(--nike-well); }
+${nikeInlineCss}
+`;
+
 // ---- Output -------------------------------------------------------------
 
 const css = `/*
@@ -690,6 +1082,11 @@ const css = `/*
  * while the owner decides. The switch is the footer's "Giao diện sáng" link,
  * or ?giao-dien=sang / ?giao-dien=toi on any page; the choice is kept in this
  * browser (localStorage "ttt-theme").
+ *
+ * A second TRIAL rides on it: ?giao-dien=nike, black and white as close to
+ * Nike as can be (the owner, 13/10: "style trắng đen đi làm sao giống nike
+ * thử"). It adds data-variant="nike" beside data-theme="light"; its rules are
+ * part 5 at the end and match nothing without that attribute.
  *
  * Generated by scripts/gen-theme-light.mjs; regenerate rather than hand-edit.
  */
@@ -858,7 +1255,8 @@ ${hexCss}
 ${wellCss}
 }
 
-${oceanCss}`;
+${oceanCss}
+${nikeCss}`;
 
 fs.writeFileSync(OUT, css);
 console.log(`${OUT}: ${flips.size} palette flips, ${islands.length} islands, ${hexCount} hex tokens`);
