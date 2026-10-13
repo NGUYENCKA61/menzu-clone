@@ -5,6 +5,7 @@ import { LISTED_PRODUCT } from "@/lib/queries";
 import { SITE_URL } from "@/lib/seo";
 import { PC_SETUP_PAGES, pcSetupHref } from "@/lib/pcSetup";
 import { categoryHref, productHref, toolDocsHref } from "@/lib/routes";
+import { hasOwnToolDoc } from "@/lib/toolDocsContent";
 
 /**
  * Sitemap built from the live catalogue, not a hand-written list — stock turns
@@ -95,6 +96,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         updatedAt: true,
         productType: true,
         accountPool: true,
+        // For the documentation block below: a tool page lists only when it
+        // has a guide or requirements of its own (hasOwnToolDoc).
+        guide: true,
+        requirements: true,
         category: { select: { slug: true } },
       },
     }),
@@ -154,10 +159,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "monthly" as const,
       priority: 0.5,
     })),
-    // The documentation area: one page per tool (its open parts), and the
-    // machine-preparation pages, which change with Windows, not the shop.
+    // The documentation area: one page per tool that says something of its own
+    // (the same hasOwnToolDoc the page's robots tag uses, so a thin page is
+    // never both noindex and in the sitemap; the owner's SEO review,
+    // 13/10/2026), and the machine-preparation pages, which change with
+    // Windows, not the shop.
     ...products
-      .filter((product) => product.productType === "SOFTWARE_GAME")
+      .filter((product) => product.productType === "SOFTWARE_GAME" && hasOwnToolDoc(product))
       .map((product) => ({
         url: `${SITE_URL}${toolDocsHref(product.slug)}`,
         changeFrequency: "weekly" as const,
