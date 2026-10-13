@@ -1,15 +1,27 @@
+import { getAdmin } from "@/lib/admin";
 import { assistantConfigured } from "@/lib/assistant";
 import { getBioProfile } from "@/lib/queries";
 import { getShopSettings } from "@/lib/settingsStore";
+import { loadWarrantyInbox } from "@/lib/warrantyInboxStore";
 
+import { AdminWarrantyInbox } from "./AdminWarrantyInbox";
 import { SupportWidget } from "./SupportWidget";
 
 /**
- * Server wrapper that feeds the support widget.
+ * Server wrapper that feeds the bottom-right widget.
  *
- * Only the first /bio panel's links are used — those are the direct-contact
- * rows. The second panel holds community group invites, which are not
- * one-to-one support and would make the widget a list of chatrooms.
+ * An admin gets the warranty inbox instead of customer care (the owner,
+ * 13/10/2026: "Với tài khoản admin bỏ qua phần chăm sóc khách hàng chat mà
+ * thay vào đó là phần nhắn tin trao đổi khách hàng về bảo hành"): nobody at
+ * the shop's own desk needs the shop's support channels, and the buyers'
+ * warranty messages are what they want within reach on every page. Decided
+ * with the same check every admin route makes (getAdmin reads the role from
+ * the database), and the session read is shared with the header's.
+ *
+ * Everyone else gets the support widget exactly as before. Only the first
+ * /bio panel's links are used — those are the direct-contact rows. The second
+ * panel holds community group invites, which are not one-to-one support and
+ * would make the widget a list of chatrooms.
  *
  * Whether the assistant answers is decided here rather than in the browser:
  * it turns on the moment the shop puts a Claude key in the environment or a
@@ -17,6 +29,17 @@ import { SupportWidget } from "./SupportWidget";
  * server.
  */
 export async function SupportWidgetHost() {
+  const admin = await getAdmin();
+  if (admin) {
+    // A failed read must not take the storefront down with it: the widget
+    // starts empty and asks the route itself on its first refresh.
+    const inbox = await loadWarrantyInbox().catch((error: unknown) => {
+      console.error("[warranty inbox] server read failed", error);
+      return null;
+    });
+    return <AdminWarrantyInbox initial={inbox} />;
+  }
+
   const [profile, settings] = await Promise.all([getBioProfile(), getShopSettings()]);
   const channels =
     profile?.links

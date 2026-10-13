@@ -1,6 +1,7 @@
 import "server-only";
 
 import { cookies } from "next/headers";
+import { cache } from "react";
 
 import { SESSION_COOKIE } from "@/lib/auth";
 import { db } from "@/lib/db";
@@ -37,8 +38,16 @@ export interface CurrentUser {
  * Expired rows are treated as absent and deleted on sight, so a stale cookie
  * can never authenticate. Session ids are opaque random tokens stored as the
  * primary key — there is nothing in the cookie to forge.
+ *
+ * Memoised per request, as getShopSettings is: the header, the page, the
+ * account frame and the floating widget each ask who is signed in, and one
+ * page view should cost one session read, not four. The memo lives for one
+ * request only, so a sign-in or a block is seen on the very next one; outside
+ * a render (a script, a test) `cache` is a plain call.
  */
-export async function getCurrentUser(): Promise<CurrentUser | null> {
+export const getCurrentUser = cache(readCurrentUser);
+
+async function readCurrentUser(): Promise<CurrentUser | null> {
   const store = await cookies();
   const token = store.get(SESSION_COOKIE)?.value;
   if (!token) return null;

@@ -16,6 +16,14 @@ export interface ThreadOpening {
 }
 
 /**
+ * Grows with the thread, then scrolls: up to 440px on a phone, where that is
+ * already more than half the screen, and 600px from tablet width up, where
+ * the page has the room and scrolling twice is the annoyance (the owner,
+ * 12/10/2026: "cho thoải mái", "máy tính kìa").
+ */
+const PAGE_PANE = "max-h-[440px] min-h-[160px] sm:max-h-[600px]";
+
+/**
  * A warranty ticket's conversation, the same on both screens: the viewer's
  * own lines on the right in the accent, the other side's on the left. A desk
  * action's note carries the status it moved the ticket to, under the bubble.
@@ -32,6 +40,7 @@ export function WarrantyThread({
   footer,
   buyerAvatar = null,
   buyerInitial,
+  size = PAGE_PANE,
 }: {
   viewer: "buyer" | "shop";
   /** The buyer as the desk knows them; on their own page they are "Bạn". */
@@ -43,6 +52,11 @@ export function WarrantyThread({
   buyerInitial?: string;
   /** A faint last line, for what the thread is waiting on. */
   footer?: ReactNode;
+  /**
+   * The pane's height rule. The pages let it grow to a fixed ceiling; the
+   * admin's floating inbox has a panel of its own height to fill instead.
+   */
+  size?: string;
 }) {
   const lines = [
     ...(opening
@@ -79,14 +93,10 @@ export function WarrantyThread({
       : "border-[var(--brand)]/25 bg-[var(--brand)]/10";
 
   return (
-    // Grows with the thread, then scrolls: up to 440px on a phone, where that
-    // is already more than half the screen, and 600px from tablet width up,
-    // where the page has the room and scrolling twice is the annoyance (the
-    // owner, 12/10/2026: "cho thoải mái", "máy tính kìa").
     <div
       ref={pane}
       data-pane
-      className="max-h-[440px] min-h-[160px] overflow-y-auto rounded-xl border border-white/[0.06] bg-black/30 p-4 sm:max-h-[600px]"
+      className={`${size} overflow-y-auto rounded-xl border border-white/[0.06] bg-black/30 p-4`}
     >
       <ol className="flex flex-col gap-3">
         {lines.map((line, index) => {
