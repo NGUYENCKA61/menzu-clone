@@ -917,6 +917,9 @@ html[data-theme="light"] .text-\[\#ef4444\]\/80:not(.keep-dark *) { color: var(-
   :where(html[data-theme="light"]) :is(.border-white\/10, .border-white\/12, .border-white\/5, .border-white\/\[0\.04\], .border-white\/\[0\.05\], .border-white\/\[0\.06\], .border-white\/\[0\.07\], .border-white\/\[0\.08\], .border-white\/\[0\.09\], .border-white\/\[0\.12\], .border-neutral-800, .border-neutral-800\/40, .border-neutral-800\/60, .border-neutral-800\/80):where(:not(.keep-dark, .keep-dark *)) {
     border-color: var(--light-line);
   }
+  :where(html[data-theme="light"]) :is(.text-neutral-700):where(:not(:disabled, [aria-disabled="true"], .cursor-default, .cursor-not-allowed)):where(:not(.keep-dark, .keep-dark *)) {
+    color: var(--light-ink-3);
+  }
   :where(html[data-theme="light"]) :is(.bg-neutral-900\/60, .bg-white\/\[0\.07\], .bg-white\/\[0\.08\], .bg-white\/5, .bg-white\/\[0\.04\]):where(:has(> input, > textarea)):where(:not(.keep-dark, .keep-dark *)) {
     background-color: var(--light-surface);
     border-color: var(--light-line-strong);
@@ -1674,6 +1677,11 @@ html[data-theme="light"][data-variant="moi"] .case-typed[data-soft] > .case-text
 html[data-theme="light"][data-variant="moi"] .case-typed[data-soft]::after { content: attr(data-soft); text-transform: none; }
 html[data-theme="light"][data-variant="moi"] :has(> .case-typed[data-soft]) { text-transform: none; }
 html[data-theme="light"][data-variant="moi"] h1:has(> .case-typed[data-soft]) { letter-spacing: -0.02em; }
+
+/* Grey 700 as text (the "VNĐ" beside an empty top-up amount, a pager's dots):
+   the light flip makes it a hairline grey, 1.5:1 on white, so as words it
+   takes the dim grey (5.0:1 on white); an inactive control keeps its own. */
+html[data-theme="light"][data-variant="moi"] :is(.text-neutral-700):where(:not(:disabled, [aria-disabled="true"], .cursor-default, .cursor-not-allowed)):where(:not(.keep-dark, .keep-dark *)) { color: var(--light-ink-4); }
 
 /* Crisper type: the dark site's 900 weight and spaced capitals turn into bold
    sentence-case UI words. Page titles and the logo keep theirs. */

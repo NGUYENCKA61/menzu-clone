@@ -483,6 +483,7 @@ const tintCss = ["menzu-accent", "brand"]
   .filter(Boolean)
   .join("\n");
 
+const baseDimText = [...tokens].filter((t) => /^text-(?:neutral|zinc|gray|slate|stone)-700$/.test(t)).sort();
 const surfaceCss = [
   panels &&
     `  ${LIGHT} ${panels}:where([class*="border"])${NOT_ISLAND} {\n    background-color: var(--light-surface);\n  }`,
@@ -490,6 +491,11 @@ const surfaceCss = [
     `  ${LIGHT} ${quietFills}:where(button, a, label, [role="button"], [role="tab"])${NOT_ISLAND} {\n    background-color: var(--light-surface);\n    box-shadow: inset 0 0 0 1px var(--light-line-strong);\n  }`,
   quietHovers && `  ${LIGHT} ${quietHovers}${NOT_ISLAND} {\n    background-color: var(--light-surface-hover);\n  }`,
   hairlines && `  ${LIGHT} ${hairlines}${NOT_ISLAND} {\n    border-color: var(--light-line);\n  }`,
+  // Grey 700 as words (the "VNĐ" beside an empty top-up amount): the flip
+  // above makes it a hairline grey, 1.5:1 on white, so as text it takes the
+  // muted ink; an inactive control keeps its faint grey, as WCAG allows.
+  baseDimText.length &&
+    `  ${LIGHT} ${anyOf(baseDimText)}:where(:not(:disabled, [aria-disabled="true"], .cursor-default, .cursor-not-allowed))${NOT_ISLAND} {\n    color: var(--light-ink-3);\n  }`,
 ]
   .filter(Boolean)
   .join("\n");
@@ -1341,6 +1347,11 @@ ${MOI} .case-typed[data-soft] > .case-text { display: none; }
 ${MOI} .case-typed[data-soft]::after { content: attr(data-soft); text-transform: none; }
 ${MOI} :has(> .case-typed[data-soft]) { text-transform: none; }
 ${MOI} h1:has(> .case-typed[data-soft]) { letter-spacing: -0.02em; }
+
+/* Grey 700 as text (the "VNĐ" beside an empty top-up amount, a pager's dots):
+   the light flip makes it a hairline grey, 1.5:1 on white, so as words it
+   takes the dim grey (5.0:1 on white); an inactive control keeps its own. */
+${MOI} ${anyOf(dimText)}${unless(":disabled", '[aria-disabled="true"]', ".cursor-default", ".cursor-not-allowed")}${NOT_ISLAND} { color: var(--light-ink-4); }
 
 /* Crisper type: the dark site's 900 weight and spaced capitals turn into bold
    sentence-case UI words. Page titles and the logo keep theirs. */
