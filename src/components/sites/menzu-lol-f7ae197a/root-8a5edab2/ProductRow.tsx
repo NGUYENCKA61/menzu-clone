@@ -81,6 +81,8 @@ export interface ProductRowProps {
    * four, each a third of the row, so the covers show larger (option B2).
    */
   bigTiles?: boolean;
+  /** How the picture tiles dress their covers (see TileStyle). */
+  tileStyle?: TileStyle;
   /**
    * The picks as rows instead of cards — a small cover, the pill, the name
    * and one line of blurb, two columns from md. Hot trending's, when the
@@ -535,6 +537,29 @@ function BentoTile({
 }
 
 /**
+ * How a picture tile dresses its cover (the owner, 14/10/2026: "giữ nguyên
+ * kích thước chỉ thêm chữ và giảm độ sáng ảnh", three versions to compare):
+ *
+ *  - classic: the fade at the foot and the name, as before.
+ *  - a: elitehacks' tile — the cover dimmed and faded deeper, the name set
+ *    larger with the category's one-line blurb under it.
+ *  - b: unnamedtech's tile — the whole cover dimmed evenly, a small eyebrow
+ *    naming the platform ("HACK PC") over a quieter name.
+ *  - c: lmarket's tile — the cover slightly dimmed above a solid caption bar
+ *    holding the name and the blurb, with a platform chip at the end.
+ */
+export type TileStyle = "classic" | "a" | "b" | "c";
+
+/** The eyebrow a tile wears in style b, from the category's platform tag. */
+function platformWord(platform: string | null | undefined): string {
+  const p = (platform ?? "").toUpperCase();
+  if (p === "PC") return "Hack PC";
+  if (p === "MOBILE") return "Hack Mobile";
+  if (p === "SPOOFER") return "Spoofer";
+  return "Hack game";
+}
+
+/**
  * A game as a picture tile, on lmarket's pattern: the cover fills the tile
  * and the name sits over its foot on a dark fade. The whole tile is the link,
  * so the list no longer runs a red bar under every game. 4:3 in the game
@@ -545,10 +570,12 @@ function RowTile({
   card,
   pick = false,
   big = false,
+  style = "classic",
 }: {
   card: ProductCard;
   pick?: boolean;
   big?: boolean;
+  style?: TileStyle;
 }) {
   return (
     <Link
@@ -556,6 +583,7 @@ function RowTile({
       className={cn(
         "group relative isolate block overflow-hidden rounded-[14px] border border-white/[0.06] bg-[#0c0d10] transition-colors hover:border-white/20",
         pick ? "aspect-[16/10]" : "aspect-[4/3]",
+        style === "a" && "hover:border-[var(--menzu-accent)]/40",
       )}
     >
       {card.image ? (
@@ -568,8 +596,16 @@ function RowTile({
               ? "(min-width: 1320px) 420px, (min-width: 768px) 33vw, 50vw"
               : "(min-width: 1320px) 310px, (min-width: 1024px) 25vw, (min-width: 768px) 33vw, 50vw"
           }
-          className="object-cover transition-transform duration-500 group-hover:scale-105 motion-reduce:transform-none"
+          className={cn(
+            "object-cover transition-transform duration-500 group-hover:scale-105 motion-reduce:transform-none",
+            style === "a" && "brightness-[.72] saturate-[.9] group-hover:brightness-[.85]",
+            style === "b" && "brightness-[.55] group-hover:brightness-[.7]",
+            style === "c" && "brightness-[.82] group-hover:brightness-95",
+          )}
         />
+      ) : null}
+      {style !== "classic" ? (
+        <TileDress card={card} style={style} big={big} />
       ) : null}
       {pick ? (
         <span
@@ -582,19 +618,83 @@ function RowTile({
           Top tháng
         </span>
       ) : null}
-      <span
-        aria-hidden
-        className="absolute inset-0 bg-gradient-to-t from-[#08080b]/95 via-[#08080b]/45 via-40% to-transparent to-65%"
-      />
-      <h3
-        className={cn(
-          "absolute inset-x-3.5 bottom-3 text-[13px] font-black uppercase leading-tight tracking-wide text-white sm:text-sm",
-          big && "lg:inset-x-5 lg:bottom-4 lg:text-base",
-        )}
-      >
-        {card.title}
-      </h3>
+      {style === "classic" ? (
+        <>
+          <span
+            aria-hidden
+            className="absolute inset-0 bg-gradient-to-t from-[#08080b]/95 via-[#08080b]/45 via-40% to-transparent to-65%"
+          />
+          <h3
+            className={cn(
+              "absolute inset-x-3.5 bottom-3 text-[13px] font-black uppercase leading-tight tracking-wide text-white sm:text-sm",
+              big && "lg:inset-x-5 lg:bottom-4 lg:text-base",
+            )}
+          >
+            {card.title}
+          </h3>
+        </>
+      ) : null}
     </Link>
+  );
+}
+
+/** The words and shade a tile wears in styles a, b and c (see TileStyle). */
+function TileDress({ card, style, big }: { card: ProductCard; style: TileStyle; big: boolean }) {
+  if (style === "a") {
+    return (
+      <>
+        <span
+          aria-hidden
+          className="absolute inset-0 bg-gradient-to-t from-[#07070a] via-[#07070a]/60 via-35% to-[#07070a]/10"
+        />
+        <span
+          aria-hidden
+          className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-[var(--menzu-accent)]/70 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+        />
+        <span className={cn("absolute inset-x-3.5 bottom-3 flex flex-col gap-1", big && "lg:inset-x-5 lg:bottom-4")}>
+          <h3 className={cn("text-[15px] font-black uppercase leading-[1.1] tracking-wide text-white sm:text-base", big && "lg:text-[19px]")}>
+            {card.title}
+          </h3>
+          {card.description ? (
+            <span className="line-clamp-1 text-[11px] leading-snug text-neutral-300/90">{card.description}</span>
+          ) : null}
+        </span>
+      </>
+    );
+  }
+  if (style === "b") {
+    return (
+      <>
+        <span aria-hidden className="absolute inset-0 bg-[#07070a]/25" />
+        <span
+          aria-hidden
+          className="absolute inset-x-0 bottom-0 h-[55%] bg-gradient-to-t from-[#07070a]/90 to-transparent"
+        />
+        <span className={cn("absolute inset-x-3.5 bottom-3 flex flex-col gap-1", big && "lg:inset-x-5 lg:bottom-4")}>
+          <span className="text-[9px] font-extrabold uppercase tracking-[0.22em] text-[var(--menzu-accent)]">
+            {platformWord(card.platform)}
+          </span>
+          <h3 className={cn("text-[14px] font-bold leading-tight tracking-wide text-white sm:text-[15px]", big && "lg:text-[18px]")}>
+            {card.title}
+          </h3>
+        </span>
+      </>
+    );
+  }
+  return (
+    <span className="absolute inset-x-0 bottom-0 flex items-center gap-2.5 border-t border-white/[0.07] bg-[#0b0b0f]/92 px-3.5 py-2.5 backdrop-blur-[2px]">
+      <span className="flex min-w-0 flex-1 flex-col">
+        <h3 className="truncate text-[13px] font-black uppercase tracking-wide text-white sm:text-sm">{card.title}</h3>
+        {card.description ? (
+          <span className="truncate text-[10.5px] text-neutral-400">{card.description}</span>
+        ) : null}
+      </span>
+      {card.platform ? (
+        <span className="shrink-0 rounded-md border border-white/10 bg-white/[0.04] px-1.5 py-0.5 text-[9px] font-extrabold uppercase tracking-wider text-neutral-300">
+          {card.platform}
+        </span>
+      ) : null}
+    </span>
   );
 }
 
@@ -667,6 +767,7 @@ export function ProductRow({
   tiles = false,
   bigPicks = false,
   bigTiles = false,
+  tileStyle = "classic",
   list = false,
   quiet = false,
   rows = 1,
@@ -727,7 +828,7 @@ export function ProductRow({
           {cards.map((card) => (
             <div key={card.href} className="w-[var(--tile-w)] shrink-0 snap-start">
               {tiles ? (
-                <RowTile card={card} pick={ranked} big={bigPicks} />
+                <RowTile card={card} pick={ranked} big={bigPicks} style={tileStyle} />
               ) : (
                 <RowCard card={card} t={t} top={ranked} quiet={quiet} />
               )}
@@ -747,7 +848,7 @@ export function ProductRow({
             title: card.title,
             platform: card.platform ?? null,
             node: tiles ? (
-              <RowTile card={card} big={bigTiles} />
+              <RowTile card={card} big={bigTiles} style={tileStyle} />
             ) : (
               <RowCard card={card} t={t} top={ranked} wide quiet={quiet} />
             ),
