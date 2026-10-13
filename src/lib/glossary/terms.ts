@@ -923,7 +923,7 @@ export const GLOSSARY_TERMS: readonly GlossaryTerm[] = [
     term: "AVX",
     group: "may",
     short: "Tập lệnh của CPU mà nhiều tool cần.",
-    detail: "Gần như mọi CPU Intel, AMD từ khoảng 2012 trở lại đây đều có.",
+    detail: "Hầu hết CPU Core i3/i5/i7 và Ryzen từ khoảng 2012 trở lại đây đều có. Riêng Intel Pentium và Celeron đời cũ (trước khoảng năm 2020) thường không có, hay gặp ở máy văn phòng giá rẻ.",
     related: ["runtime"],
   },
   {

@@ -45,10 +45,15 @@ export default async function GlossaryPage({ searchParams }: PageProps) {
   const [{ q }, settings] = await Promise.all([searchParams, getShopSettings()]);
   const initialQuery = (Array.isArray(q) ? (q[0] ?? "") : (q ?? "")).trim().slice(0, MAX_QUERY);
 
+  // contactZalo holds a phone number, not a link: it becomes zalo.me/<digits>
+  // as in the footer and the FAQ (it used to be printed as a bare href).
+  const zaloDigits = settings.contactZalo.replace(/\D/g, "");
   const contacts = [
-    { href: settings.contactZalo.trim(), label: "Nhắn Zalo", Glyph: ZaloGlyph },
-    { href: settings.contactFacebook.trim(), label: "Nhắn Facebook", Glyph: FacebookGlyph },
-  ].filter((contact) => contact.href.length > 0);
+    zaloDigits ? { href: `https://zalo.me/${zaloDigits}`, label: "Nhắn Zalo", glyph: "zalo" as const } : null,
+    settings.contactFacebook.trim()
+      ? { href: settings.contactFacebook.trim(), label: "Nhắn Facebook", glyph: "facebook" as const }
+      : null,
+  ].filter((contact) => contact !== null);
 
   return (
     <>
@@ -76,38 +81,54 @@ export default async function GlossaryPage({ searchParams }: PageProps) {
         <GlossaryBrowser
           terms={GLOSSARY_TERMS}
           initialQuery={initialQuery}
-          footer={
-            // unnamedtech's "Still have questions?", pointing at the shop's
-            // own Zalo and Facebook rather than a Discord.
-            <aside className="mt-10 rounded-2xl border border-white/[0.06] bg-white/[0.02] p-5">
-              <div className="flex items-start gap-3">
-                <CircleHelp size={18} aria-hidden className="mt-0.5 shrink-0 text-[var(--menzu-accent)]" />
-                <div className="min-w-0">
-                  <h2 className="text-sm font-bold text-white">Vẫn chưa rõ?</h2>
-                  <p className="mt-1 text-[13px] leading-relaxed text-neutral-400">
-                    Nhắn shop kèm từ bạn đang thắc mắc và tên tool, shop sẽ giải thích và bổ sung vào
-                    trang này.
-                  </p>
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    {contacts.length > 0 ? (
-                      contacts.map(({ href, label, Glyph }) => (
-                        <a key={label} href={href} target="_blank" rel="noreferrer" className={CONTACT_BUTTON}>
-                          <Glyph className="h-4 w-4 shrink-0" />
-                          {label}
-                        </a>
-                      ))
-                    ) : (
-                      <Link href="/lien-he" className={CONTACT_BUTTON}>
-                        Kênh liên hệ của shop
-                      </Link>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </aside>
-          }
+          footer={<GlossaryFooter contacts={contacts} />}
         />
       </SimplePage>
     </>
+  );
+}
+
+/**
+ * unnamedtech's "Still have questions?", pointing at the shop's own Zalo and
+ * Facebook rather than a Discord. Its own component, so the contact buttons
+ * are rendered here and reach the client glossary as finished markup: built
+ * inline in the page's props, React flagged the list for a missing key.
+ */
+function GlossaryFooter({
+  contacts,
+}: {
+  contacts: { href: string; label: string; glyph: "zalo" | "facebook" }[];
+}) {
+  return (
+    <aside className="mt-10 rounded-2xl border border-white/[0.06] bg-white/[0.02] p-5">
+      <div className="flex items-start gap-3">
+        <CircleHelp size={18} aria-hidden className="mt-0.5 shrink-0 text-[var(--menzu-accent)]" />
+        <div className="min-w-0">
+          <h2 className="text-sm font-bold text-white">Vẫn chưa rõ?</h2>
+          <p className="mt-1 text-[13px] leading-relaxed text-neutral-400">
+            Nhắn shop kèm từ bạn đang thắc mắc và tên tool, shop sẽ giải thích và bổ sung vào trang
+            này.
+          </p>
+          <div className="mt-4 flex flex-wrap gap-2">
+            {contacts.length > 0 ? (
+              contacts.map(({ href, label, glyph }) => (
+                <a key={label} href={href} target="_blank" rel="noreferrer" className={CONTACT_BUTTON}>
+                  {glyph === "zalo" ? (
+                    <ZaloGlyph className="h-4 w-4 shrink-0" />
+                  ) : (
+                    <FacebookGlyph className="h-4 w-4 shrink-0" />
+                  )}
+                  {label}
+                </a>
+              ))
+            ) : (
+              <Link href="/lien-he" className={CONTACT_BUTTON}>
+                Kênh liên hệ của shop
+              </Link>
+            )}
+          </div>
+        </div>
+      </div>
+    </aside>
   );
 }
