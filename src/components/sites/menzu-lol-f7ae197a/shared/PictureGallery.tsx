@@ -10,10 +10,173 @@ import {
   X,
   ZoomIn,
 } from "lucide-react";
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 
-import { lockScroll, unlockScroll } from "./modalChrome";
+import { lockScroll, trapTab, unlockScroll } from "./modalChrome";
 import { useOverlayPresence } from "./useOverlayPresence";
+
+/**
+ * The picture, near full-screen, over everything: the detail pages' gallery
+ * opens it, and so do the review thumbnails on /feedback, so a picture
+ * enlarges the same way wherever it is pressed.
+ *
+ * The owner holds the index; the lightbox only asks to step or to close.
+ * While it is up it owns the keyboard (Escape closes, the arrow keys page,
+ * Tab stays inside), the page cannot scroll behind it, and the body carries
+ * a class the fixed header hides behind: even under the backdrop it glows
+ * through over the picture. Focus lands on the close button and goes back to
+ * whatever opened it, all handed back the moment the exit starts.
+ *
+ * Drawn into <body> rather than in place: the public pages' <main> is its
+ * own stacking layer (relative z-20), and inside it even z-[300] sat under
+ * the floating support button.
+ *
+ * `plain` draws a bare <img> rather than next/image: a review's attachment
+ * already went through sharp on the way in, and may live on the bucket's
+ * host, which the image optimiser does not serve.
+ */
+export function PictureLightbox({
+  open,
+  onClose,
+  pictures,
+  index,
+  onStep,
+  alt,
+  plain = false,
+}: {
+  open: boolean;
+  onClose: () => void;
+  pictures: string[];
+  index: number;
+  onStep: (delta: number) => void;
+  /** What the pictures are of; each one reads "<alt>, ảnh N". */
+  alt: string;
+  plain?: boolean;
+}) {
+  const { mounted, leaving } = useOverlayPresence(open);
+  const dialog = useRef<HTMLDivElement>(null);
+  const closeButton = useRef<HTMLButtonElement>(null);
+  // The latest handlers, read when a key lands, so the listener below binds
+  // once per opening rather than once per render.
+  const handlers = useRef({ onClose, onStep });
+  useEffect(() => {
+    handlers.current = { onClose, onStep };
+  });
+  const paged = pictures.length > 1;
+  const src = pictures[index] ?? pictures[0];
+
+  useEffect(() => {
+    if (!open) return;
+    const opener = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") handlers.current.onClose();
+      if (e.key === "ArrowLeft") handlers.current.onStep(-1);
+      if (e.key === "ArrowRight") handlers.current.onStep(1);
+      if (e.key === "Tab" && dialog.current) trapTab(dialog.current, e);
+    };
+    window.addEventListener("keydown", onKey);
+    document.body.classList.add("lightbox-open");
+    lockScroll();
+    closeButton.current?.focus({ preventScroll: true });
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      document.body.classList.remove("lightbox-open");
+      unlockScroll();
+      opener?.focus({ preventScroll: true });
+    };
+  }, [open]);
+
+  // Never on the server: `mounted` starts false and only turns on after a
+  // press, so document is always there by the time this portals.
+  if (!mounted || src === undefined) return null;
+
+  return createPortal(
+    <div
+      ref={dialog}
+      role="dialog"
+      aria-modal="true"
+      aria-label={`Ảnh ${alt}`}
+      onClick={onClose}
+      inert={leaving}
+      // keep-dark: white controls over a picture keep their dark palette in
+      // the light-theme trial.
+      className={`keep-dark order-modal-backdrop fixed inset-0 z-[300] flex items-center justify-center bg-black/90 p-4 sm:p-8${
+        leaving ? " order-modal-backdrop-out" : ""
+      }`}
+    >
+      <button
+        ref={closeButton}
+        type="button"
+        aria-label="Đóng"
+        onClick={onClose}
+        className="absolute right-4 top-4 z-10 grid h-10 w-10 place-items-center rounded-full border border-white/10 bg-white/5 text-neutral-300 transition-colors hover:bg-white/15 hover:text-white"
+      >
+        <X size={18} />
+      </button>
+
+      {/* The rise is on a wrapper rather than on the picture's own box:
+          that box is the containing block for the filled <Image>, and
+          a transform on it would move the picture's frame of reference
+          mid-animation. */}
+      <div
+        className={`order-modal-card flex h-full max-h-[85vh] w-full max-w-[1280px]${
+          leaving ? " order-modal-card-out" : ""
+        }`}
+      >
+        <div className="relative h-full w-full" onClick={(e) => e.stopPropagation()}>
+          {plain ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={src}
+              alt={`${alt}, ảnh ${index + 1}`}
+              className="h-full w-full object-contain"
+            />
+          ) : (
+            <Image
+              src={src}
+              alt={`${alt}, ảnh ${index + 1}`}
+              fill
+              sizes="100vw"
+              className="object-contain"
+            />
+          )}
+        </div>
+      </div>
+
+      {paged ? (
+        <>
+          <button
+            type="button"
+            aria-label="Ảnh trước"
+            onClick={(e) => {
+              e.stopPropagation();
+              onStep(-1);
+            }}
+            className="absolute left-3 top-1/2 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full border border-white/10 bg-black/60 text-white backdrop-blur-md transition-colors hover:bg-black/85 sm:left-6"
+          >
+            <ChevronLeft size={20} />
+          </button>
+          <button
+            type="button"
+            aria-label="Ảnh sau"
+            onClick={(e) => {
+              e.stopPropagation();
+              onStep(1);
+            }}
+            className="absolute right-3 top-1/2 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full border border-white/10 bg-black/60 text-white backdrop-blur-md transition-colors hover:bg-black/85 sm:right-6"
+          >
+            <ChevronRight size={20} />
+          </button>
+          <span className="absolute bottom-5 left-1/2 -translate-x-1/2 rounded-full border border-white/10 bg-black/70 px-3 py-1 text-[11px] font-bold text-neutral-200">
+            {index + 1}/{pictures.length}
+          </span>
+        </>
+      ) : null}
+    </div>,
+    document.body,
+  );
+}
 
 /**
  * The detail pages' picture frame: one 16/9 box that pages through every
@@ -51,33 +214,10 @@ export function PictureGallery({
   const [index, setIndex] = useState(0);
   const paged = pictures.length > 1;
   const [lightbox, setLightbox] = useState(false);
-  const { mounted, leaving } = useOverlayPresence(lightbox);
 
   function step(delta: number) {
     setIndex((i) => (i + delta + pictures.length) % pictures.length);
   }
-
-  // While the lightbox is up it owns the keyboard — Escape closes, the arrow
-  // keys page — and the body carries a class the fixed header hides behind:
-  // even under the backdrop it glows through over the picture. Both bound
-  // only then, and both handed back the moment the exit starts.
-  useEffect(() => {
-    if (!lightbox) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setLightbox(false);
-      if (e.key === "ArrowLeft") step(-1);
-      if (e.key === "ArrowRight") step(1);
-    };
-    window.addEventListener("keydown", onKey);
-    document.body.classList.add("lightbox-open");
-    lockScroll();
-    return () => {
-      window.removeEventListener("keydown", onKey);
-      document.body.classList.remove("lightbox-open");
-      unlockScroll();
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [lightbox]);
 
   // A product with no pictures yet still renders a frame, because an empty
   // column would read as a broken page rather than as a missing picture.
@@ -176,78 +316,16 @@ export function PictureGallery({
         ) : null}
       </div>
 
-      {/* The lightbox: the picture, near full-screen, over everything. */}
-      {mounted ? (
-        <div
-          role="dialog"
-          aria-modal="true"
-          aria-label={`Ảnh ${alt}`}
-          onClick={() => setLightbox(false)}
-          inert={leaving}
-          className={`order-modal-backdrop fixed inset-0 z-[300] flex items-center justify-center bg-black/90 p-4 sm:p-8${
-            leaving ? " order-modal-backdrop-out" : ""
-          }`}
-        >
-          <button
-            type="button"
-            aria-label="Đóng"
-            onClick={() => setLightbox(false)}
-            className="absolute right-4 top-4 z-10 grid h-10 w-10 place-items-center rounded-full border border-white/10 bg-white/5 text-neutral-300 transition-colors hover:bg-white/15 hover:text-white"
-          >
-            <X size={18} />
-          </button>
-
-          {/* The rise is on a wrapper rather than on the picture's own box:
-              that box is the containing block for the filled <Image>, and
-              a transform on it would move the picture's frame of reference
-              mid-animation. */}
-          <div
-            className={`order-modal-card flex h-full max-h-[85vh] w-full max-w-[1280px]${
-              leaving ? " order-modal-card-out" : ""
-            }`}
-          >
-            <div className="relative h-full w-full" onClick={(e) => e.stopPropagation()}>
-              <Image
-                src={pictures[index]!}
-                alt={`${alt}, ảnh ${index + 1}`}
-                fill
-                sizes="100vw"
-                className="object-contain"
-              />
-            </div>
-          </div>
-
-          {paged ? (
-            <>
-              <button
-                type="button"
-                aria-label="Ảnh trước"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  step(-1);
-                }}
-                className="absolute left-3 top-1/2 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full border border-white/10 bg-black/60 text-white backdrop-blur-md transition-colors hover:bg-black/85 sm:left-6"
-              >
-                <ChevronLeft size={20} />
-              </button>
-              <button
-                type="button"
-                aria-label="Ảnh sau"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  step(1);
-                }}
-                className="absolute right-3 top-1/2 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full border border-white/10 bg-black/60 text-white backdrop-blur-md transition-colors hover:bg-black/85 sm:right-6"
-              >
-                <ChevronRight size={20} />
-              </button>
-              <span className="absolute bottom-5 left-1/2 -translate-x-1/2 rounded-full border border-white/10 bg-black/70 px-3 py-1 text-[11px] font-bold text-neutral-200">
-                {index + 1}/{pictures.length}
-              </span>
-            </>
-          ) : null}
-        </div>
-      ) : null}
+      {/* The lightbox shares the frame's index, so paging in there moves
+          the frame too and closing lands where the reader left off. */}
+      <PictureLightbox
+        open={lightbox}
+        onClose={() => setLightbox(false)}
+        pictures={pictures}
+        index={index}
+        onStep={step}
+        alt={alt}
+      />
     </>
   );
 }

@@ -13,7 +13,7 @@ import {
   UserRound,
   X,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { pickMessenger, pickZalo } from "@/lib/messenger";
 import { SUPPORT_WINDOW, supportStatus } from "@/lib/supportHours";
@@ -47,6 +47,53 @@ function NAME_DOT(status: { open: boolean } | null): string {
 
 /** Which of the two the visitor last picked, so the choice survives a reload. */
 const MODE_KEY = "menzu-support-mode";
+
+/** How long the phone's button stays tucked after the last scroll event. */
+const TUCK_SETTLE_MS = 800;
+
+/** Below Tailwind's sm, the only width the round button floats over content. */
+const PHONE = "(max-width: 639.98px)";
+
+/**
+ * Whether the page is being scrolled right now on a phone: true from the
+ * first scroll event until TUCK_SETTLE_MS after the last one.
+ *
+ * On a phone the round chat button floats over whatever is scrolling under
+ * it, a price or a button half the time (the owner, 13/10/2026, UI
+ * consistency review). While the reader scrolls it steps half out of the
+ * way, and comes back once they stop. Passive listener, one timer, and no
+ * state change at all on wider screens, where the tab sits on the window's
+ * edge and covers nothing that matters.
+ */
+function useScrollingOnPhone(): boolean {
+  const [scrolling, setScrolling] = useState(false);
+
+  useEffect(() => {
+    const phone = window.matchMedia(PHONE);
+    let timer: number | undefined;
+    // Mirrors the state, so a fling's hundred events set it once.
+    let on = false;
+    const onScroll = () => {
+      if (!phone.matches) return;
+      if (!on) {
+        on = true;
+        setScrolling(true);
+      }
+      window.clearTimeout(timer);
+      timer = window.setTimeout(() => {
+        on = false;
+        setScrolling(false);
+      }, TUCK_SETTLE_MS);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.clearTimeout(timer);
+    };
+  }, []);
+
+  return scrolling;
+}
 
 export interface SupportChannel {
   id: string;
@@ -176,6 +223,8 @@ export function SupportWidget({
 }) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
+  // Never while the panel or the fan is open: the reader is using it.
+  const tucked = useScrollingOnPhone() && !open;
 
   // The shop's Facebook row, read as an inbox rather than a page to look at.
   // Null when the shop has no Facebook link, and then there is simply no
@@ -467,7 +516,16 @@ export function SupportWidget({
           ) : null}
         </div>
       ) : null}
-      <div className="pointer-events-auto">
+      {/* Tucked while the phone scrolls: slid right by half its 56px plus
+          the frame's 12px inset, so half the circle stays on screen to tap,
+          and dimmed. Translate and opacity only, so nothing around it moves;
+          a reader who asked for less motion gets the dimming without the
+          slide. max-sm on both, so a wide screen never tucks. */}
+      <div
+        className={`pointer-events-auto transition-[translate,opacity] duration-300 ease-out ${
+          tucked ? "max-sm:opacity-60 max-sm:motion-safe:translate-x-[calc(50%+0.75rem)]" : ""
+        }`}
+      >
         <button
           type="button"
           onClick={toggle}

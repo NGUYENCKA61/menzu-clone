@@ -15,6 +15,8 @@ import {
 
 import { GAP, pageCount, pageStrip, PER_PAGE } from "@/lib/paging";
 
+import { PictureLightbox } from "./PictureGallery";
+
 /** One review, dates preformatted on the server so both renders agree. */
 export interface FeedbackItem {
   name: string;
@@ -122,6 +124,65 @@ export function ReviewAvatar({
   );
 }
 
+/**
+ * A review's pictures as a row of equal square thumbnails, each opening the
+ * full picture in the gallery's own lightbox.
+ *
+ * They were drawn at their natural size: a landscape shot took half the
+ * page, a portrait one stood ~500px tall, and no two reviews were the same
+ * height (the owner, 13/10/2026, UI consistency review). A thumbnail is a
+ * crop, so the whole picture is one press away rather than a new tab.
+ *
+ * Plain <img>: the file already went through sharp on the way in, and
+ * next/image would re-run it. Lazy, since the wall lists hundreds.
+ */
+function ReviewPictures({ pictures, reviewer }: { pictures: string[]; reviewer: string }) {
+  const [open, setOpen] = useState(false);
+  const [index, setIndex] = useState(0);
+
+  if (pictures.length === 0) return null;
+
+  return (
+    <>
+      <ul className="mt-4 flex flex-wrap gap-2">
+        {pictures.map((src, i) => (
+          <li key={`${i}-${src}`}>
+            <button
+              type="button"
+              onClick={() => {
+                setIndex(i);
+                setOpen(true);
+              }}
+              aria-label={
+                pictures.length > 1 ? `Phóng to ảnh đính kèm ${i + 1}` : "Phóng to ảnh đính kèm"
+              }
+              className="group/img block h-24 w-24 cursor-zoom-in overflow-hidden rounded-xl border border-neutral-800 bg-neutral-900 transition-colors hover:border-[var(--menzu-accent)]/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--menzu-accent)] sm:h-28 sm:w-28"
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={src}
+                alt=""
+                loading="lazy"
+                decoding="async"
+                className="h-full w-full object-cover transition-transform duration-500 group-hover/img:scale-105 motion-reduce:transition-none"
+              />
+            </button>
+          </li>
+        ))}
+      </ul>
+      <PictureLightbox
+        open={open}
+        onClose={() => setOpen(false)}
+        pictures={pictures}
+        index={index}
+        onStep={(delta) => setIndex((i) => (i + delta + pictures.length) % pictures.length)}
+        alt={`đánh giá của ${reviewer}`}
+        plain
+      />
+    </>
+  );
+}
+
 /** One full-width review card, matching the captured markup piece for piece. */
 function ReviewCard({ item }: { item: FeedbackItem }) {
   return (
@@ -170,21 +231,7 @@ function ReviewCard({ item }: { item: FeedbackItem }) {
         )}
 
         {item.imageUrl ? (
-          <a
-            href={item.imageUrl}
-            target="_blank"
-            rel="noreferrer"
-            className="mt-4 block rounded-2xl overflow-hidden border border-neutral-800 w-fit max-w-2xl cursor-zoom-in hover:border-[var(--menzu-accent)]/50 transition-colors group/img"
-          >
-            {/* Plain img: attachment sizes vary and the file already went
-                through sharp on the way in — next/image would re-run it. */}
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={item.imageUrl}
-              alt="Ảnh đính kèm"
-              className="w-full h-auto object-cover max-h-[500px] group-hover/img:scale-105 transition-transform duration-500"
-            />
-          </a>
+          <ReviewPictures pictures={[item.imageUrl]} reviewer={item.name} />
         ) : null}
 
         {item.amount > 0 ? (

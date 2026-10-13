@@ -288,7 +288,16 @@ export default async function WarrantyRequestPage({
             : ", báo lỗi để shop kiểm tra và xử lý"}
         </>
       }
-      crumb={heading}
+      // Where this page sits, step by step: the purchase list, the order
+      // (its own receipt, which /orders?don= opens on arrival; there is no
+      // separate order page), then this form. It read "Trang chủ > Trạng
+      // thái bảo hành", which said nothing about which order (the owner,
+      // 13/10/2026, UI consistency review).
+      trail={[
+        { label: "Lịch sử mua", href: "/orders" },
+        { label: order.code, href: `/orders?don=${encodeURIComponent(order.code)}` },
+      ]}
+      crumb="Bảo hành"
       action={
         <Link
           href="/orders"
