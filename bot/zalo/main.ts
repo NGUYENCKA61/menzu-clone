@@ -37,10 +37,16 @@ import {
 import {
   linkMessage,
   readLinkMessage,
+  readZaloStyles,
   ZALO_STATE_KEY,
   type ZaloBotState,
 } from "../../src/lib/zaloShared";
 import { createGroupManager, type GroupMessage } from "./group";
+
+/** zca-js's style range, which its index does not export by name. */
+type Style = NonNullable<
+  Exclude<Parameters<API["sendMessage"]>[0], string>["styles"]
+>[number];
 
 const DATABASE_URL = process.env.DATABASE_URL;
 if (!DATABASE_URL) throw new Error("DATABASE_URL is not set");
@@ -355,7 +361,13 @@ async function drainOutbox(): Promise<void> {
         if (!group) throw new Error("group minder not ready");
         await group.post(item.zaloId, item.text);
       } else {
-        await api.sendMessage(item.text, item.zaloId, ThreadType.User);
+        // Styled when the web wrote styles (the receipt), plain otherwise.
+        const styles = readZaloStyles(item.styles, item.text.length);
+        await api.sendMessage(
+          styles ? { msg: item.text, styles: styles as Style[] } : item.text,
+          item.zaloId,
+          ThreadType.User,
+        );
       }
       await db.zaloOutbox.update({
         where: { id: item.id },

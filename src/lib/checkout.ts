@@ -14,6 +14,7 @@ import { readLogin } from "@/lib/accountLogin";
 import { agencyCutFor, clampAgencyPercent } from "@/lib/agency";
 import { db } from "@/lib/db";
 import { deliverKeys } from "@/lib/licenseKeys";
+import { sendOrderReceipt } from "@/lib/orderReceipt";
 import { alertLowStock } from "@/lib/stockAlerts";
 import { readMemberTier, TIER_RULES, tierDiscountFor } from "@/lib/memberTiers";
 import { runningPackageSales, tierPriceNow } from "@/lib/queries";
@@ -335,6 +336,9 @@ export async function placeOrder(input: CheckoutInput): Promise<CheckoutResult> 
   // shelf is thin can take a round trip to Telegram and an SMTP handshake.
   // alertLowStock swallows its own failures, so nothing here can reject.
   void alertLowStock(soldFrom);
+  // The buyer's mailbox and Zalo hear about it the same way: after the
+  // commit, never awaited, failures swallowed inside.
+  void sendOrderReceipt([result.orderId]);
 
   return result;
 }

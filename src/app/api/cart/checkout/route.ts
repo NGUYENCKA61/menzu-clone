@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { agencyCutFor, clampAgencyPercent } from "@/lib/agency";
 import { db } from "@/lib/db";
 import { deliverKeys } from "@/lib/licenseKeys";
+import { sendOrderReceipt } from "@/lib/orderReceipt";
 import { alertLowStock } from "@/lib/stockAlerts";
 import { readMemberTier, TIER_RULES, tierDiscountFor } from "@/lib/memberTiers";
 import { getCurrentUser } from "@/lib/session";
@@ -204,6 +205,7 @@ export async function POST(request: Request) {
       }
 
       const orderCodes: string[] = [];
+      const orderIds: string[] = [];
       /** Lines the shelf could not cover, named so the reply can say which. */
       // The basket is charged once but recorded as one order per line, so the
       // discount has to be shared out. Every line takes its proportional part
@@ -255,6 +257,7 @@ export async function POST(request: Request) {
           },
         });
         orderCodes.push(order.code);
+        orderIds.push(order.id);
 
         // Keys move in the same transaction as the money, per line — and a
         // line the shelf cannot cover refuses the whole basket, the way "Mua
@@ -334,6 +337,7 @@ export async function POST(request: Request) {
 
       return {
         orderCodes,
+        orderIds,
         total,
         listTotal,
         agencyCut,
@@ -347,6 +351,8 @@ export async function POST(request: Request) {
     // take a round trip to Telegram and an SMTP handshake. alertLowStock
     // swallows its own failures, so nothing here can reject.
     void alertLowStock(soldFrom);
+    // One receipt for the whole basket, to the buyer's mailbox and Zalo.
+    void sendOrderReceipt(result.orderIds);
 
     return NextResponse.json({
       orderCodes: result.orderCodes,

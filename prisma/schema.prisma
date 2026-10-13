@@ -1947,6 +1947,9 @@ model ZaloOutbox {
   id        String           @id @default(cuid())
   zaloId    String
   text      String
+  /// Style ranges over `text` (src/lib/zaloShared.ts ZaloStyleRange[]): the
+  /// receipt's title bold and big, a key bold red. Null sends it plain.
+  styles    Json?
   /// A notice, or a phone code for "xác thực cấp 2", which the bot sends
   /// only after checking the number is this Zalo's (phone).
   kind      ZaloOutboxKind   @default(NOTICE)
