@@ -55,7 +55,13 @@ export default async function ParcelsNeedingAddressPage() {
   // rather than a bare redirect that looks like the link was broken.
   if (waiting.length === 0) {
     return (
-      <SimplePage title="Quà cần điền địa chỉ" crumb="Quà cần điền địa chỉ">
+      <SimplePage
+        title="Quà cần điền địa chỉ"
+        crumb="Quà cần điền địa chỉ"
+        // A glyph of its own where the red bar stood, as every standalone
+        // page wears one (the owner, 13/10/2026, UI consistency review).
+        icon={MapPin}
+      >
         <div className={`${CARD} text-center`}>
           <span className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-neutral-400">
             <Gift size={20} />
@@ -80,7 +86,7 @@ export default async function ParcelsNeedingAddressPage() {
   }
 
   return (
-    <SimplePage title="Quà cần điền địa chỉ" crumb="Quà cần điền địa chỉ">
+    <SimplePage title="Quà cần điền địa chỉ" crumb="Quà cần điền địa chỉ" icon={MapPin}>
       <div className={`${CARD} flex flex-col gap-3`}>
         <p className="text-[12.5px] leading-relaxed text-neutral-400">
           Có {waiting.length} phần quà đang chờ địa chỉ nhận hàng. Chọn từng

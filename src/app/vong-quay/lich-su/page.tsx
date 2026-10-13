@@ -6,6 +6,7 @@ import {
   ArrowRight,
   Coins,
   Gift,
+  History,
   Star,
   Ticket,
   Truck,
@@ -172,7 +173,13 @@ export default async function SpinHistoryPage({
   const shown = pageRange(page, PER_PAGE, total);
 
   return (
-    <SimplePage title="Lịch sử nhận thưởng" crumb="Lịch sử nhận thưởng">
+    <SimplePage
+      title="Lịch sử nhận thưởng"
+      crumb="Lịch sử nhận thưởng"
+      // A glyph of its own where the red bar stood, as every standalone page
+      // wears one (the owner, 13/10/2026, UI consistency review).
+      icon={History}
+    >
       <div className="flex max-w-3xl flex-col gap-6">
         <Link
           href="/vong-quay"

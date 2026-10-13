@@ -144,6 +144,32 @@ export async function getHomeGroups(
     .filter((group) => group.cards.length > 0);
 }
 
+/** One category's tile on /categories, and whether anything in it is on sale. */
+export interface CatalogueTile {
+  card: ProductCard;
+  onSale: boolean;
+}
+
+/**
+ * Every category as the home page's game list draws it, for /categories (the
+ * owner, 13/10/2026, UI consistency review): the same card from the same
+ * toCard and figures, so a game reads the same on both pages.
+ *
+ * In the admin's order, except that a category with nothing on sale goes to
+ * the end; the page dims those rather than hiding them, so a game the shop
+ * is restocking still has its page. A category without a picture is kept,
+ * as the game list keeps it: its tile draws the frame and the name.
+ */
+export async function getCatalogueTiles(): Promise<CatalogueTile[]> {
+  const categories = await db.category.findMany({ orderBy: { sortOrder: "asc" } });
+  const figures = await categoryFigures(categories.map((category) => category.id));
+  const tiles = categories.map((category) => {
+    const shelf = figures.get(category.id);
+    return { card: toCard(category, shelf), onSale: (shelf?.count ?? 0) > 0 };
+  });
+  return [...tiles.filter((tile) => tile.onSale), ...tiles.filter((tile) => !tile.onSale)];
+}
+
 /** The tiles for "Danh mục sản phẩm", from the categories the admin pinned. */
 export async function getHomeCategoryCards(slugs: string[]): Promise<CategoryCard[]> {
   if (slugs.length === 0) return [];
