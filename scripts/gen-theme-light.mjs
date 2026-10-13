@@ -33,6 +33,12 @@
 //     html[data-theme="light"][data-variant="nike"] only (?giao-dien=nike).
 //     Mostly the tokens above turned to Nike's greys and black, plus a few
 //     broad rules: pills, sentence case, no decoration, boxless cards.
+//  6. A third TRIAL (14/10/2026, "Biến tấu sao cho đẹp hơn đi ở bản sáng"):
+//     white and ocean blue with a near-black navbar and calm white cards,
+//     under html[data-theme="light"][data-variant="moi"] only
+//     (?giao-dien=moi). Blocks are reached through hook classes the
+//     components carry (home-hero, row-tile, tool-card...), not Tailwind
+//     strings.
 //
 // Classes are matched as whole tokens. A substring match once caught
 // "selection:bg-[var(--menzu-accent)]/30" on every page wrapper and put the
@@ -1198,6 +1204,789 @@ ${NIKE} .doc-prose${unless(".keep-dark *")} blockquote { border-left-color: #111
 ${nikeInlineCss}
 `;
 
+// ---- 6. The "moi" variant (TRIAL) -----------------------------------------
+// The owner (14/10/2026): "Biến tấu sao cho đẹp hơn đi ở bản sáng", "Má xấu
+// quá nhìn khó chịu thiệt đó", and before that "đẹp hiện đại chuyên nghiệp
+// không có rối", "làm sao bớt chói đi", "tone trắng kết hợp xanh biển" and
+// "navbar đen đi chứ". The earlier light dresses repainted a dark design; this
+// one changes how the blocks are built on a light page: picture tiles become
+// white cards with the picture on top and the name in a caption bar under it,
+// the hero loses its empty band, product cards lose the clutter on the
+// picture, the type is sentence case and bold instead of spaced black
+// capitals, and the navbar is near-black. It is the "d2" design picked from
+// three (clean SaaS-commerce: Linear, Vercel, Stripe), with the judge's grafts.
+//
+// ?giao-dien=moi sets data-theme="light" AND data-variant="moi" on <html>, so
+// every rule sits under both and the dark site, the ocean dress and the Nike
+// trial never match one. ?giao-dien=moi-den adds data-footer="den": the same
+// dress with the near-black footer in place of the soft band, for the owner
+// to compare.
+//
+// Blocks are reached through hook classes the components carry for this
+// (home-hero, hero-sky, scroll-cta, category-hero, category-hero-art,
+// row-tile, bento-tile, featured-*, tile-pill, tile-scrim, tile-caption,
+// row-heading, row-view-all, tool-card, acc-card, tool-status,
+// tool-status-line, tool-more, nav-item-label, product-top, crumb-current,
+// crumb-sep), not through their Tailwind strings. Names typed in capitals get
+// their sentence-case form in data-soft from CaseText (case-typed), which only
+// this dress draws; the helper keeps CS2, ESP, PC, MS, HVH and the other acronyms.
+
+const MOI = `html[data-theme="light"][data-variant="moi"]`;
+// The near-black bar (and the near-black footer of ?giao-dien=moi-den): the
+// dark palette restored inside, the light tokens given dark values, so every
+// rule above that paints with a token turns dark there without a rule of its
+// own. The accent stays the ocean blue for the solid buttons (Đăng nhập);
+// words and links in the accent take a light blue that reads on black.
+const MOI_DARK = `${restoreLines}
+  /* Dim words (the dark site's 500 and 600 greys) on the near-black: 7.9:1. */
+  --color-neutral-500: #9aa7ba;
+  --color-neutral-600: #9aa7ba;
+  --color-zinc-500: #9aa7ba;
+  --color-zinc-600: #9aa7ba;
+  --color-gray-500: #9aa7ba;
+  --color-gray-600: #9aa7ba;
+  --color-slate-500: #9aa7ba;
+  --color-slate-600: #9aa7ba;
+  --light-page: #0b0f17;
+  --light-surface: #121826;
+  --light-surface-hover: #182032;
+  --light-band: #07090e;
+  --light-line: rgb(255 255 255 / 0.09);
+  --light-line-strong: rgb(255 255 255 / 0.16);
+  --light-ink: #ffffff;
+  --light-ink-2: #e6edf7;
+  --light-ink-3: #a9b6c9; /* 9.3:1 on the bar, 9.7:1 on the strip */
+  --light-ink-4: #a9b6c9;
+  --ocean: #7cbcff; /* 9.6:1 on the bar */
+  --ocean-dark: #a6d2ff;
+  --ocean-soft: #182032;
+  --ocean-line: rgb(124 188 255 / 0.35);
+  --menzu-accent: #0b63b6;
+  --menzu-accent-dark: #084f93;
+  --brand: #0b63b6;
+  --brand-dark: #084f93;
+  color-scheme: dark;`;
+// Inside a picture tile (a .keep-dark island) the light palette comes back:
+// the tile is a white card now, so its words are ink, not white. One class
+// more than the islands rule, which it must outrank.
+const MOI_TILES = String.raw`:is(.row-tile, .bento-tile, .featured-tile).keep-dark[class]`;
+const MOI_CARDS = ":is(.tool-card, .acc-card)";
+const moiInlineCss = Object.entries({ "#ff0000": "#d30005", red: "#d30005", "#ffff00": "#92400e" })
+  .map(([color, value]) => {
+    const needles =
+      color === "red"
+        ? ["color: red", "color:red"]
+        : (() => {
+            const rgb = [1, 3, 5].map((i) => parseInt(color.slice(i, i + 2), 16)).join(", ");
+            return [`color: ${color}`, `color:${color}`, `color: rgb(${rgb})`, `color:rgb(${rgb})`];
+          })();
+    const selectors = needles.map((needle) => `${MOI} .doc-prose${unless(".keep-dark *")} [style*="${needle}" i]`);
+    return `${selectors.join(",\n")} {\n  color: ${value} !important;\n}`;
+  })
+  .join("\n");
+
+const moiCss = String.raw`/* 6. MOI (TRIAL, 14/10/2026): white and ocean blue, a near-black navbar,
+   calm cards (the owner: "đẹp hiện đại chuyên nghiệp không có rối"). On only
+   under html[data-variant="moi"] (?giao-dien=moi); the dark site, the ocean
+   dress and the Nike trial never match these rules. */
+
+/* ---- Tokens: a soft cool page (not pure white, "bớt chói"), white cards,
+   one hairline, navy ink, one blue. ---- */
+${MOI} {
+  --light-page: #f4f6fa;
+  --light-surface: #ffffff;
+  --light-surface-hover: #f1f5fa;
+  --light-line: #e3e8ef;
+  --light-line-strong: #cfd8e3;
+  --light-band: #ffffff;
+  --light-ink: #0b1526;
+  --light-ink-2: #334155;
+  --light-ink-3: #5a6577; /* 5.45:1 on the page, 5.89:1 on white */
+  --light-ink-4: #627084; /* 4.65:1 on the page */
+  --ocean: #0b63b6;
+  --ocean-dark: #084f93;
+  --ocean-soft: #ebf4fd;
+  --ocean-line: #bfd8f2;
+  --ocean-ring: rgb(11 99 182 / 0.16);
+  --brand: #0b63b6;
+  --brand-dark: #084f93;
+  --menzu-accent: #0b63b6;
+  --menzu-accent-dark: #084f93;
+  --moi-black: #0b0f17; /* the navbar */
+  --moi-black-2: #07090e; /* its top strip */
+  --moi-band: #eef2f7; /* the footer */
+  --moi-grad: linear-gradient(135deg, #0b63b6 0%, #0a6aa8 55%, #0e7490 100%);
+  --moi-grad-hover: linear-gradient(135deg, #084f93 0%, #0a5b8f 55%, #0b5f77 100%);
+  --moi-shadow-xs: 0 1px 2px rgb(11 21 38 / 0.05);
+  --moi-shadow-sm: 0 1px 2px rgb(11 21 38 / 0.04), 0 2px 6px -2px rgb(11 21 38 / 0.06);
+  --moi-shadow-lift: 0 1px 2px rgb(11 21 38 / 0.05), 0 16px 32px -18px rgb(11 50 100 / 0.32);
+  --moi-radius: 16px;
+  --float-shadow: 0 2px 6px rgb(11 21 38 / 0.06), 0 18px 44px -18px rgb(11 21 38 / 0.24);
+  /* Muted greys that still read on the page grey. */
+  --color-neutral-500: #5a6577;
+  --color-zinc-500: #5a6577;
+  --color-gray-500: #5a6577;
+  --color-slate-500: #5a6577;
+  --color-neutral-600: #627084;
+  --color-zinc-600: #627084;
+  --color-gray-600: #627084;
+  --color-slate-600: #627084;
+}
+${MOI} body { background-color: var(--light-page); }
+
+/* Names typed in capitals: their sentence-case form (CaseText's data-soft) is
+   drawn here in place of the typed name, and whatever holds one is not set in
+   capitals by CSS (a page title included). */
+${MOI} .case-typed[data-soft] > .case-text { display: none; }
+${MOI} .case-typed[data-soft]::after { content: attr(data-soft); text-transform: none; }
+${MOI} :has(> .case-typed[data-soft]) { text-transform: none; }
+${MOI} h1:has(> .case-typed[data-soft]) { letter-spacing: -0.02em; }
+
+/* Crisper type: the dark site's 900 weight and spaced capitals turn into bold
+   sentence-case UI words. Page titles and the logo keep theirs. */
+${MOI} .font-black:not(h1, .keep-dark *, a[href="/"].group *) { font-weight: 700; }
+${MOI} .font-extrabold:not(h1, .keep-dark *, a[href="/"].group *) { font-weight: 650; }
+${MOI} .uppercase:not(h1, .keep-dark *, a[href="/"].group *, .-rotate-45, .site-nav *) {
+  text-transform: none;
+  letter-spacing: 0;
+}
+${MOI} :is(.tracking-widest, .tracking-wider, .tracking-wide, [class*="tracking-[0."]):not(h1, .keep-dark *, a[href="/"].group *, .-rotate-45, .site-nav *) {
+  letter-spacing: 0;
+}
+
+/* ---- Header: near-black (the owner: "navbar đen đi chứ"), the dark palette
+   inside, the blue Đăng nhập kept. ---- */
+${MOI} .site-nav {
+${MOI_DARK}
+  color: #e6edf7;
+  background-color: var(--moi-black);
+  box-shadow: 0 1px 0 rgb(255 255 255 / 0.04), 0 10px 28px -16px rgb(0 0 0 / 0.55);
+  backdrop-filter: none;
+}
+${MOI} .site-nav > div:first-child {
+  background-color: var(--moi-black-2);
+  border-bottom-color: rgb(255 255 255 / 0.06);
+}
+${MOI} .site-nav > div:first-child a { color: #a9b6c9; }
+${MOI} .site-nav > div:first-child a:hover { color: #ffffff; }
+${MOI} .site-nav a[href="/"] .text-red-500 { color: #7cbcff; }
+${MOI} .site-nav .text-\[var\(--menzu-accent\)\] { color: #7cbcff; }
+${MOI} .site-nav button[aria-haspopup="true"] { color: #e6edf7; }
+/* The strip and the three menus in sentence case. Their words are typed in
+   capitals in the source, so they are lowered and the first letter raised (a
+   first letter needs a block box); a brand name (.brand-word) as typed. */
+${MOI} .site-nav > div:first-child a {
+  display: inline-block;
+  align-content: center;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: lowercase;
+}
+${MOI} .site-nav > div:first-child a::first-letter { text-transform: uppercase; }
+${MOI} .site-nav > div:first-child a .brand-word { text-transform: none; }
+${MOI} .site-nav button[aria-haspopup="true"].uppercase {
+  display: block;
+  font-size: 14px;
+  font-weight: 550;
+  letter-spacing: 0;
+  text-transform: lowercase;
+}
+${MOI} .site-nav button[aria-haspopup="true"].uppercase::first-letter { text-transform: uppercase; }
+${MOI} .site-nav button[aria-haspopup="true"].uppercase > svg { display: inline-block; vertical-align: -3px; margin-left: 6px; }
+${MOI} .site-nav button[aria-haspopup="true"].uppercase:hover { color: #ffffff; background-color: rgb(255 255 255 / 0.06); }
+/* The dropdowns' rows: the sentence-case twins, 13px. */
+${MOI} .site-nav .nav-item-label {
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+}
+${MOI} .site-nav a.bg-\[var\(--brand\)\] { border-radius: 10px; box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.14); }
+${MOI} .site-nav a.bg-\[var\(--brand\)\] * { text-transform: none; letter-spacing: 0; font-weight: 600; font-size: 13px; }
+${MOI} .site-nav a.bg-\[\#17171c\] { background-color: rgb(255 255 255 / 0.06); border-color: rgb(255 255 255 / 0.1); }
+
+/* ---- Home hero: a compact split, a soft blue wash behind the video. No
+   starfield and no scroll cue (they come out of the component when this
+   dress ships). ---- */
+${MOI} .home-hero {
+  min-height: 0;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  overflow: visible;
+}
+${MOI} .home-hero > .hero-sky,
+${MOI} .home-hero .scroll-cta { display: none; }
+${MOI} .home-hero::before {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  pointer-events: none;
+  inset: -60px -12vw -40px 30%;
+  background:
+    radial-gradient(50% 58% at 60% 46%, rgb(11 99 182 / 0.22), rgb(11 99 182 / 0) 72%),
+    radial-gradient(34% 42% at 86% 78%, rgb(14 140 170 / 0.18), rgb(14 140 170 / 0) 72%);
+}
+${MOI} .home-hero > .relative.z-10 { align-items: center; }
+${MOI} .home-hero [class*="0_0_140px_30px"] {
+  border-radius: 20px;
+  border-color: rgb(11 21 38 / 0.08);
+  box-shadow: 0 0 0 6px rgb(255 255 255 / 0.85), 0 0 0 7px var(--light-line), 0 40px 70px -40px rgb(11 60 120 / 0.45);
+}
+${MOI} .home-hero .animate-fade-up.rounded-full {
+  margin-left: 0;
+  background-color: var(--ocean-soft);
+  border-color: var(--ocean-line);
+  color: #084f93;
+  font-size: 12px;
+  font-weight: 600;
+  backdrop-filter: none;
+}
+${MOI} .home-hero span.animate-fade-up.block {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--ocean);
+  margin-top: 4px;
+}
+${MOI} .home-hero h1 {
+  color: var(--light-ink);
+  font-weight: 800;
+  letter-spacing: -0.035em;
+}
+${MOI} .home-hero p {
+  color: var(--light-ink-3);
+  font-size: 16px;
+  line-height: 1.65;
+}
+${MOI} .home-hero .mt-8 > a {
+  height: 48px;
+  border-radius: 12px;
+  padding: 0 22px;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+/* ---- Primary buttons: the one gradient. ---- */
+${MOI} :is(a, button):is(.bg-\[var\(--menzu-accent\)\], .bg-\[var\(--brand\)\]):not([aria-pressed], [aria-selected], [aria-current], .keep-dark *, .-rotate-45, .site-nav *) {
+  background-image: var(--moi-grad);
+  border-color: transparent;
+  box-shadow: 0 1px 2px rgb(11 21 38 / 0.12), 0 6px 16px -8px rgb(11 99 182 / 0.55), inset 0 1px 0 rgb(255 255 255 / 0.14);
+}
+${MOI} :is(a, button):is(.bg-\[var\(--menzu-accent\)\], .bg-\[var\(--brand\)\]):not([aria-pressed], [aria-selected], [aria-current], .keep-dark *, .-rotate-45, .site-nav *):hover {
+  background-image: var(--moi-grad-hover);
+}
+/* Quiet buttons: white, hairline, ink words. */
+${MOI} :is(a, button):is(.bg-white\/\[0\.04\], .bg-white\/\[0\.07\], .bg-white\/\[0\.08\]):not(.keep-dark *, .site-nav *) {
+  background-color: #ffffff;
+  border: 1px solid var(--light-line-strong);
+  box-shadow: var(--moi-shadow-xs);
+  color: var(--light-ink);
+}
+${MOI} :is(a, button):is(.bg-white\/\[0\.04\], .bg-white\/\[0\.07\], .bg-white\/\[0\.08\]):not(.keep-dark *, .site-nav *):hover {
+  background-color: var(--light-surface-hover);
+  border-color: #b8c4d4;
+}
+
+/* ---- Row headings: no accent bar, sentence case (CaseText), bold. ---- */
+${MOI} :is(div, span).w-\[3px\].bg-\[var\(--menzu-accent\)\] { display: none; }
+${MOI} .row-heading {
+  font-size: 26px;
+  font-weight: 750;
+  letter-spacing: -0.025em;
+  text-transform: none;
+  color: var(--light-ink);
+}
+${MOI} .row-view-all {
+  border-bottom: 0;
+  color: var(--ocean);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+}
+${MOI} .row-view-all:hover { color: var(--ocean-dark); }
+
+/* ---- Picture tiles (RowTile in every style, BentoTile): the picture on
+   top, a white caption bar under it, no scrim, no words over the picture. ---- */
+${MOI} ${MOI_TILES} {
+${flipLines}
+  --menzu-accent: var(--ocean);
+  --menzu-accent-dark: var(--ocean-dark);
+  --brand: var(--ocean);
+  --brand-dark: var(--ocean-dark);
+  color-scheme: light;
+}
+${MOI} :is(.row-tile, .bento-tile) {
+  aspect-ratio: auto;
+  height: 100%; /* tiles in one row end level, whatever their caption holds */
+  display: flex;
+  flex-direction: column;
+  background-color: #ffffff;
+  border: 1px solid var(--light-line);
+  border-radius: var(--moi-radius);
+  box-shadow: var(--moi-shadow-sm);
+  transition: box-shadow 0.2s ease, border-color 0.2s ease, translate 0.2s ease;
+}
+${MOI} :is(.row-tile, .bento-tile):hover {
+  border-color: #c7d4e5;
+  box-shadow: var(--moi-shadow-lift);
+  translate: 0 -2px;
+}
+${MOI} :is(.row-tile, .bento-tile) > .card-image-in {
+  position: relative;
+  inset: auto;
+  flex: none;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  background-color: #e9eef5;
+}
+/* A bento tile's height is set by its grid (or its own 16:11 on a phone):
+   the picture takes what the caption leaves. */
+${MOI} .bento-tile > .card-image-in {
+  flex: 1 1 auto;
+  min-height: 0;
+  aspect-ratio: auto;
+}
+/* Styles a, b and c dim the cover; on a white card it stays clear. */
+${MOI} :is(.row-tile, .bento-tile) > .card-image-in > img { filter: none; }
+${MOI} :is(.row-tile, .bento-tile) > .tile-scrim { display: none; }
+${MOI} :is(.row-tile, .bento-tile) > .tile-caption {
+  position: static;
+  inset: auto;
+  padding: 12px 14px 13px;
+  background-color: transparent;
+  border: 0;
+  backdrop-filter: none;
+}
+${MOI} :is(.row-tile, .bento-tile) > .tile-caption :is(h3, span, p) { letter-spacing: 0; text-transform: none; }
+/* The name: ink, 15px, bold; one line in a caption bar. */
+${MOI} :is(.row-tile > h3.tile-caption, :is(.row-tile, .bento-tile) > .tile-caption h3) {
+  color: var(--light-ink);
+  font-size: 15px;
+  font-weight: 650;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+}
+/* Its quiet line (the price, the count, the blurb) and the style-b eyebrow. */
+${MOI} :is(.row-tile, .bento-tile) > .tile-caption :is(span, p):not(.case-typed, .case-text, [class*="bg-"]) {
+  color: var(--light-ink-3);
+  font-size: 12px;
+  font-weight: 500;
+}
+${MOI} .row-tile > .tile-caption > span.text-\[var\(--menzu-accent\)\] { color: var(--ocean); font-weight: 600; }
+/* The classic caption is the name alone: an arrow at its end. */
+${MOI} .row-tile > h3.tile-caption {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+${MOI} .row-tile > h3.tile-caption::after {
+  content: "";
+  flex: none;
+  width: 16px;
+  height: 16px;
+  background-color: #8a96a8; /* decoration, the name carries the link */
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12h14M13 6l6 6-6 6'/%3E%3C/svg%3E") center / contain no-repeat;
+          mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12h14M13 6l6 6-6 6'/%3E%3C/svg%3E") center / contain no-repeat;
+  transition: background-color 0.2s ease, translate 0.2s ease;
+}
+${MOI} .row-tile:hover > h3.tile-caption::after { background-color: var(--ocean); translate: 2px 0; }
+/* The large bento tile: a bigger name, its blurb, the small blue button. */
+@media (width >= 40rem) {
+  ${MOI} .bento-tile.col-span-2 > .tile-caption { padding: 18px 20px 20px; gap: 8px; }
+  ${MOI} .bento-tile.col-span-2 > .tile-caption h3 { font-size: 22px; line-height: 1.2; }
+}
+${MOI} .bento-tile > .tile-caption > span[class*="bg-[var(--menzu-accent)]"] {
+  padding: 8px 14px;
+  border-radius: 10px;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 600;
+}
+/* The month's pill over the picture: a white chip. */
+${MOI} .row-tile > .tile-pill {
+  background-color: rgb(255 255 255 / 0.94);
+  color: var(--light-ink);
+  --tw-ring-color: rgb(11 21 38 / 0.06);
+  font-size: 11px;
+  font-weight: 650;
+  letter-spacing: 0;
+  text-transform: none;
+  border-radius: 999px;
+  padding: 4px 9px;
+  backdrop-filter: none;
+}
+${MOI} .row-tile > .tile-pill svg { color: #e8920a; }
+
+/* Featured categories (the character cards, off on the home page today): a
+   white card, a soft blue ground behind the art instead of the dark one, the
+   names in ink on a white caption band, a plain "Xem chi tiết" link. */
+${MOI} .featured-tile :is(.featured-edge, .featured-fill) { clip-path: none; border-radius: 16px; }
+${MOI} .featured-tile .featured-fill { border-radius: 14.5px; }
+${MOI} .featured-tile .featured-edge { background-color: var(--light-line); }
+${MOI} .featured-tile:hover .featured-edge { background-color: var(--ocean-line); }
+${MOI} .featured-tile .featured-fill { background: linear-gradient(180deg, #f3f8fe 0%, #dcebfb 100%); }
+${MOI} .featured-tile .featured-fill > * { display: none; }
+${MOI} .featured-tile .featured-frame { padding: 0 1.5px 1.5px; }
+${MOI} .featured-tile .featured-caption {
+  padding: 12px 10px 14px;
+  background-color: #ffffff;
+  border-top: 1px solid var(--light-line);
+  border-radius: 0 0 14px 14px;
+  color: var(--light-ink);
+}
+${MOI} .featured-tile .featured-caption > div:first-child { margin-bottom: 6px; }
+${MOI} .featured-tile .featured-caption > div:first-child > span:first-child {
+  color: var(--ocean);
+  font-size: 12px;
+  margin-bottom: 4px;
+}
+${MOI} .featured-tile .featured-caption > div:first-child > span:last-child {
+  font-size: clamp(22px, 3vw, 30px);
+  color: var(--light-ink);
+}
+${MOI} .featured-tile .featured-cta,
+${MOI} .featured-tile .featured-cta > div,
+${MOI} .featured-tile .featured-cta > div > div {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  background: none;
+  clip-path: none;
+  filter: none;
+  scale: none;
+}
+${MOI} .featured-tile .featured-cta span {
+  color: var(--ocean);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+/* The sliding row (Hot trending) fades out on the right only: a fade on the
+   left ate the first letters of a caption. */
+${MOI} .row-slider-viewport {
+  mask-image: linear-gradient(to right, #000 calc(100% - 72px), transparent);
+}
+
+/* ---- Stats strip. ---- */
+${MOI} [aria-label="Số liệu của shop"] > div {
+  background-color: #ffffff;
+  border-color: var(--light-line);
+  border-radius: var(--moi-radius);
+  box-shadow: var(--moi-shadow-sm);
+}
+${MOI} [aria-label="Số liệu của shop"] > div > div { border-color: var(--light-line); }
+${MOI} [aria-label="Số liệu của shop"] span.font-black.text-white { color: var(--light-ink); font-weight: 750; letter-spacing: -0.03em; }
+${MOI} [aria-label="Số liệu của shop"] span.uppercase {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--light-ink-3);
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+/* ---- Search field, platform segmented control, counters. ---- */
+${MOI} label.group\/search {
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: inset 0 0 0 1px var(--light-line-strong), var(--moi-shadow-xs);
+}
+${MOI} label.group\/search:focus-within {
+  box-shadow: inset 0 0 0 1px var(--ocean), 0 0 0 3px var(--ocean-ring);
+}
+${MOI} [role="group"][aria-label="Phân loại"] {
+  display: inline-flex;
+  align-self: flex-start;
+  gap: 2px;
+  padding: 4px;
+  border-radius: 12px;
+  background-color: #e9eef5;
+  box-shadow: inset 0 0 0 1px var(--light-line);
+}
+${MOI} [role="group"][aria-label="Phân loại"] > button {
+  height: 34px;
+  min-width: 0;
+  padding: 0 16px;
+  border-radius: 9px;
+  background: transparent;
+  box-shadow: none;
+  color: var(--light-ink-3);
+  font-size: 13px;
+  font-weight: 600;
+}
+${MOI} [role="group"][aria-label="Phân loại"] > button:hover { color: var(--light-ink); background: rgb(255 255 255 / 0.6); }
+${MOI} [role="group"][aria-label="Phân loại"] > button[aria-pressed="true"] {
+  --color-white: var(--light-ink);
+  background-color: #ffffff;
+  border-color: transparent;
+  color: var(--light-ink);
+  box-shadow: 0 1px 2px rgb(11 21 38 / 0.08), 0 0 0 1px rgb(11 21 38 / 0.04);
+}
+${MOI} p[aria-live="polite"].uppercase {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--light-ink-3);
+}
+
+/* ---- Footer: a soft cool band, so the page has a clear end (not white on
+   white). ?giao-dien=moi-den draws it near-black like the navbar instead. ---- */
+${MOI} ${FOOTER} {
+  background-color: var(--moi-band);
+  border-top-color: var(--light-line);
+}
+${MOI} ${FOOTER} h2 {
+  font-size: 14px;
+  font-weight: 650;
+  color: var(--light-ink);
+}
+${MOI} ${FOOTER} :is(.text-neutral-600, .text-zinc-600, .text-slate-600, .text-gray-600) {
+  color: var(--light-ink-3); /* 5.2:1 on the band */
+}
+${MOI}[data-footer="den"] ${FOOTER} {
+${MOI_DARK}
+  color: #e6edf7;
+  background-color: var(--moi-black);
+  border-top-color: rgb(255 255 255 / 0.06);
+}
+${MOI}[data-footer="den"] ${FOOTER} h2 { color: #ffffff; }
+${MOI}[data-footer="den"] ${FOOTER} .text-\[var\(--menzu-accent\)\] { color: #7cbcff; }
+${MOI}[data-footer="den"] ${FOOTER} a:hover { color: #ffffff; }
+
+/* Games with nothing on sale (/categories): the card stays crisp, the
+   picture goes quiet, full colour under the pointer. */
+${MOI} .opacity-45.transition-opacity { opacity: 1; }
+${MOI} .opacity-45.transition-opacity .row-tile > .card-image-in { opacity: 0.5; filter: grayscale(0.7); transition: opacity 0.2s ease, filter 0.2s ease; }
+${MOI} .opacity-45.transition-opacity .row-tile:hover > .card-image-in { opacity: 1; filter: none; }
+${MOI} .opacity-45.transition-opacity .row-tile > h3.tile-caption { color: var(--light-ink-3); font-weight: 600; }
+
+/* ---- Home rhythm: no hairline dividers, even section beats. ---- */
+${MOI} section.before\:w-screen { padding-top: 0; }
+${MOI} section.before\:w-screen::before { display: none; }
+@media (width >= 40rem) {
+  ${MOI} .space-y-12.sm\:space-y-20 > :not(:last-child) { margin-block-end: 88px; }
+}
+${MOI} section.before\:w-screen h2 {
+  font-weight: 750;
+  letter-spacing: -0.025em;
+  color: var(--light-ink);
+}
+
+/* ---- Category header: the title left, the game's art as a framed card on
+   the right (from 1024px), a soft blue wash. ---- */
+${MOI} .category-hero {
+  min-height: 0;
+  padding-bottom: 28px;
+  overflow: visible;
+}
+${MOI} .category-hero > .category-hero-art,
+${MOI} .category-hero > .category-hero-art > div { display: none; }
+${MOI} .category-hero::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  pointer-events: none;
+  inset: 0 0 -60px 0;
+  background:
+    radial-gradient(40% 70% at 82% 40%, rgb(11 99 182 / 0.13), rgb(11 99 182 / 0) 72%),
+    radial-gradient(30% 50% at 98% 90%, rgb(14 140 170 / 0.12), rgb(14 140 170 / 0) 72%);
+}
+@media (width >= 64rem) {
+  ${MOI} .category-hero > .category-hero-art {
+    display: block;
+    z-index: 1;
+    inset: auto;
+    top: 128px;
+    right: max(24px, calc((100% - 1272px) / 2));
+    width: 340px;
+    aspect-ratio: 16 / 9;
+    border-radius: 16px;
+    overflow: hidden;
+    background-color: #e9eef5;
+    box-shadow: 0 0 0 5px rgb(255 255 255 / 0.9), 0 0 0 6px var(--light-line), 0 30px 50px -30px rgb(11 60 120 / 0.45);
+  }
+  ${MOI} .category-hero > .category-hero-art img { object-position: center; }
+  ${MOI} .category-hero > .relative.z-10 { padding-right: calc(340px + 64px); min-height: 200px; }
+}
+${MOI} .category-hero h1 {
+  color: var(--light-ink);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  text-transform: none;
+}
+${MOI} .category-hero p { color: var(--light-ink-3); font-size: 15px; line-height: 1.65; }
+
+/* Breadcrumb pill: a quiet white chip. */
+${MOI} nav.rounded-full[class*="bg-[#111111]"] {
+  background-color: #ffffff;
+  border-color: var(--light-line);
+  box-shadow: var(--moi-shadow-xs);
+  font-weight: 500;
+}
+
+/* ---- Tool and account cards: white, hairline; a tool card has one action
+   row, its status as a small coloured line over the name (not a pill on the
+   picture), and no "Xem chi tiết" (the picture and the name already open the
+   page; the button comes out of the component when this dress ships). ---- */
+${MOI} ${MOI_CARDS} {
+  background-color: #ffffff;
+  border-color: var(--light-line);
+  border-radius: var(--moi-radius);
+  box-shadow: var(--moi-shadow-sm);
+}
+${MOI} ${MOI_CARDS}:hover {
+  translate: 0 -2px;
+  border-color: #c7d4e5;
+  box-shadow: var(--moi-shadow-lift);
+}
+${MOI} .tool-card .rounded-t-\[14px\] { border-radius: 15px 15px 0 0; }
+${MOI} .tool-card .tool-status { display: none; }
+${MOI} .tool-card .tool-status-line {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 6px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+${MOI} .tool-card .tool-status-line > span { width: 7px; height: 7px; }
+${MOI} .tool-card h3 {
+  white-space: normal;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  font-size: 14px;
+  font-weight: 650;
+  line-height: 1.4;
+  letter-spacing: 0.005em;
+  color: var(--light-ink);
+}
+${MOI} .tool-card h3:hover { color: var(--ocean); }
+${MOI} .tool-card p.min-h-\[37px\] { min-height: 0; margin-bottom: 12px; color: var(--light-ink-3); }
+${MOI} .tool-card p.min-h-\[37px\]:empty { display: none; }
+${MOI} .tool-card .tool-more { display: none; }
+${MOI} .tool-card :is(button, a).h-\[42px\] { height: 40px; border-radius: 10px; font-size: 13px; font-weight: 600; }
+${MOI} .tool-card button.bg-\[\#111216\] {
+  background-color: #ffffff;
+  border-color: var(--light-line-strong);
+  color: var(--light-ink-2);
+  font-size: 13px;
+  font-weight: 500;
+}
+${MOI} .tool-card button.bg-\[\#111216\]:hover { border-color: var(--ocean-line); background-color: var(--light-surface-hover); }
+/* Room between a card's name and its actions. */
+${MOI} .tool-card > div.p-4 { padding: 14px 16px 16px; }
+${MOI} .tool-card > div.p-4 > .mt-auto { padding-top: 14px; }
+
+/* ---- Tool page: the write-up in a white sheet. ---- */
+${MOI} section.mt-14.scroll-mt-\[120px\] {
+  margin-top: 48px;
+  margin-bottom: 56px;
+  padding: 36px 40px 40px;
+  background-color: #ffffff;
+  border: 1px solid var(--light-line);
+  border-radius: 20px;
+  box-shadow: var(--moi-shadow-sm);
+}
+${MOI} section.mt-14.scroll-mt-\[120px\] h2 { font-size: 24px; font-weight: 750; letter-spacing: -0.02em; color: var(--light-ink); }
+/* Its subheads are typed in sentence case: the capitals were CSS. */
+${MOI} section.mt-14.scroll-mt-\[120px\] h3.uppercase {
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--light-ink);
+}
+${MOI} section.mt-14.scroll-mt-\[120px\] .doc-prose { max-width: 820px; }
+@media (width < 40rem) {
+  ${MOI} section.mt-14.scroll-mt-\[120px\] { padding: 24px 18px 28px; border-radius: 16px; }
+}
+${MOI} h1.tracking-tight.lg\:text-4xl {
+  color: var(--light-ink);
+  font-weight: 750;
+  letter-spacing: -0.02em;
+}
+@media (width >= 64rem) {
+  ${MOI} h1.tracking-tight.lg\:text-4xl { font-size: 30px; line-height: 1.22; }
+}
+/* The tall buy buttons carry 15px words. */
+${MOI} :is(a, button):is(.h-12, .h-14):is(.bg-\[var\(--menzu-accent\)\], .bg-\[var\(--brand\)\], [class*="border-[var(--menzu-accent)]"]):not(.keep-dark *) {
+  font-size: 15px;
+  font-weight: 600;
+  border-radius: 12px;
+}
+
+/* ---- Articles: breadcrumb and title on a 960px column; the body on a white
+   sheet, read in a 760px measure at 16px / 1.75, screenshots rounded,
+   captions centred. ---- */
+${MOI} .max-w-\[1320px\].py-12:has(> article) { max-width: 960px; }
+${MOI} .max-w-\[1320px\].py-12 > article {
+  padding: 40px 48px 48px;
+  background-color: #ffffff;
+  border: 1px solid var(--light-line);
+  border-radius: 20px;
+  box-shadow: var(--moi-shadow-sm);
+}
+${MOI} .max-w-\[1320px\].py-12 > article > :is(.doc-prose, .max-w-3xl, .aspect-\[16\/9\]) {
+  max-width: 760px;
+  margin-inline: auto;
+}
+${MOI} .max-w-\[1320px\].py-12 > article > .aspect-\[16\/9\] { border: 0; border-radius: 14px; }
+${MOI} .max-w-\[1320px\].py-12 > article > .doc-prose { font-size: 16px; line-height: 1.75; }
+${MOI} .max-w-\[1320px\].py-12 > article > .doc-prose :is(p, li) { font-size: 16px; line-height: 1.75; }
+${MOI} .max-w-\[1320px\].py-12 > article > .doc-prose figcaption { font-size: 13px; text-align: center; }
+@media (width < 40rem) {
+  ${MOI} .max-w-\[1320px\].py-12 > article { padding: 22px 16px 28px; border-radius: 16px; }
+}
+${MOI} .doc-prose { font-size: 15px; line-height: 1.75; }
+${MOI} .doc-prose h2 { letter-spacing: -0.02em; }
+${MOI} .doc-prose img { border-radius: 12px; }
+
+/* ---- Phones. ---- */
+@media (width < 40rem) {
+  /* The bar is 64px there (the strip hides), but every page kept 104px for
+     it: a 40px empty band. The category header was pulled up by the same
+     104px, so it follows. */
+  ${MOI} div.w-full.shrink-0.h-\[104px\] { height: 64px; }
+  ${MOI} .category-hero { margin-top: -64px; padding-top: 112px; }
+  /* Two equal hero buttons on one row. */
+  ${MOI} .home-hero .mt-8 { flex-wrap: nowrap; width: 100%; gap: 10px; margin-top: 24px; }
+  ${MOI} .home-hero .mt-8 > a { flex: 1 1 0; justify-content: center; padding: 0 12px; font-size: 14px; }
+  ${MOI} .home-hero p { font-size: 15px; }
+  /* The platform control stays one row. */
+  ${MOI} [role="group"][aria-label="Phân loại"] { flex-wrap: nowrap; align-self: stretch; }
+  ${MOI} [role="group"][aria-label="Phân loại"] > button { flex: 1 1 auto; padding: 0 8px; gap: 6px; }
+  ${MOI} :is(.row-heading, section.before\:w-screen h2) { font-size: 22px; }
+  ${MOI} .row-view-all { font-size: 13px; white-space: nowrap; }
+  /* Two tiles a row: a size down and a little less padding, fewer wraps. */
+  ${MOI} :is(.row-tile, .bento-tile) > .tile-caption { padding: 10px 12px 11px; }
+  ${MOI} :is(.row-tile > h3.tile-caption, :is(.row-tile, .bento-tile) > .tile-caption h3) { font-size: 14px; }
+  /* A product page's crumb trail drops the page itself: the title right
+     under it names it. */
+  ${MOI} .product-top :is(.crumb-current, .crumb-sep:has(+ .crumb-current)) { display: none; }
+}
+/* Below 360px the two hero labels would wrap: one button a row. */
+@media (width < 22.5rem) {
+  ${MOI} .home-hero .mt-8 { flex-direction: column; }
+  ${MOI} .home-hero .mt-8 > a { flex: none; width: 100%; }
+}
+
+/* ---- Sale ribbon and old write-ups. The ribbon is the shop red one step
+   deeper, so its 10px word reads (white on it 4.79:1). The old write-ups'
+   pure red (#ff0000, 4.0:1 on white) becomes #d30005 (5.57:1), their yellow
+   (#ffff00) a deep amber #92400e (7.09:1 on white). ---- */
+${MOI} .-rotate-45.bg-\[var\(--menzu-accent\)\] { background-color: #d4363a; }
+${moiInlineCss}
+`;
+
 // ---- Output -------------------------------------------------------------
 
 const css = `/*
@@ -1212,7 +2001,13 @@ const css = `/*
  * A second TRIAL rides on it: ?giao-dien=nike, black and white as close to
  * Nike as can be (the owner, 13/10: "style trắng đen đi làm sao giống nike
  * thử"). It adds data-variant="nike" beside data-theme="light"; its rules are
- * part 5 at the end and match nothing without that attribute.
+ * part 5 and match nothing without that attribute.
+ *
+ * A third TRIAL the same way: ?giao-dien=moi (14/10/2026, "Biến tấu sao cho
+ * đẹp hơn đi ở bản sáng", "đẹp hiện đại chuyên nghiệp không có rối"),
+ * white and ocean blue with a near-black navbar, data-variant="moi"; its
+ * rules are part 6 at the end. ?giao-dien=moi-den is the same dress with a
+ * near-black footer (data-footer="den").
  *
  * Generated by scripts/gen-theme-light.mjs; regenerate rather than hand-edit.
  */
@@ -1382,7 +2177,8 @@ ${wellCss}
 }
 
 ${oceanCss}
-${nikeCss}`;
+${nikeCss}
+${moiCss}`;
 
 fs.writeFileSync(OUT, css);
 console.log(`${OUT}: ${flips.size} palette flips, ${islands.length} islands, ${hexCount} hex tokens`);

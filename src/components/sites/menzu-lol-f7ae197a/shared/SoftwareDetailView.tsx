@@ -82,8 +82,9 @@ export function SoftwareDetailView({
               header ends, with nothing between them. The gap goes on the
               container rather than on Breadcrumb itself, which is shared with
               every other page and should not gain a margin because this one
-              wanted air. */}
-          <div className="max-w-[1320px] mx-auto px-4 lg:px-6 pt-8">
+              wanted air. product-top is a hook for the light trial "moi"
+              (theme-light.css, part 6); it carries no style of its own. */}
+          <div className="product-top max-w-[1320px] mx-auto px-4 lg:px-6 pt-8">
             <Breadcrumb
               items={[
                 { label: "Trang chủ", href: "/" },

@@ -1,6 +1,7 @@
 import { Fragment } from "react";
 import { ChevronRight, House } from "lucide-react";
 
+import { CaseText } from "./CaseText";
 import { SiteLink } from "./SiteLink";
 
 export interface Crumb {
@@ -13,8 +14,11 @@ const CRUMB_LINK_CLASS =
 // The page you are on reads in white, the way a current tab does; the trail
 // behind it stays grey. It used to be indigo, the one place that colour was
 // left on the storefront.
+// crumb-current and crumb-sep are hooks for the light trial "moi"
+// (theme-light.css, part 6), which drops the current crumb on a phone
+// product page; they carry no style of their own.
 const CRUMB_CURRENT_CLASS =
-  "text-white transition-colors font-black max-w-[300px] md:max-w-[400px] truncate";
+  "crumb-current text-white transition-colors font-black max-w-[300px] md:max-w-[400px] truncate";
 
 function BreadcrumbTrail({ items }: { items: Crumb[] }) {
   return (
@@ -28,15 +32,15 @@ function BreadcrumbTrail({ items }: { items: Crumb[] }) {
             {item.href ? (
               <SiteLink href={item.href} className={CRUMB_LINK_CLASS}>
                 {isFirst && <House size={12} />}
-                {item.label}
+                <CaseText text={item.label} />
               </SiteLink>
             ) : (
               <span className={CRUMB_CURRENT_CLASS}>
                 {isFirst && <House size={12} />}
-                {item.label}
+                <CaseText text={item.label} />
               </span>
             )}
-            {!isLast && <ChevronRight size={12} className="text-neutral-600 shrink-0" />}
+            {!isLast && <ChevronRight size={12} className="crumb-sep text-neutral-600 shrink-0" />}
           </Fragment>
         );
       })}

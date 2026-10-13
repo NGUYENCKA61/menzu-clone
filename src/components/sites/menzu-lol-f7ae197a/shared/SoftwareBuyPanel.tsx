@@ -15,6 +15,7 @@ import type { ProductRequirement } from "@/lib/productRequirements";
 import { productHref } from "@/lib/routes";
 
 import { BadgeIcon } from "./BadgeIcon";
+import { CaseText } from "./CaseText";
 import { formatVnd } from "./productData";
 import { SoftwareCheckoutDialog } from "./SoftwareCheckoutDialog";
 import { StickyBuyBar } from "./StickyBuyBar";
@@ -266,7 +267,7 @@ export function SoftwareBuyPanel({
 
       <div className="space-y-3">
         <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-white">
-          {software.name}
+          <CaseText text={software.name} />
         </h1>
         {/* The shop's own "Mô tả ngắn", or nothing: no opening lines lifted
             from the long write-up, and no stock sentence in its place. */}

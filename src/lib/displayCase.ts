@@ -29,6 +29,22 @@ const KEEP_UPPER = new Set([
   "VIP",
   "OBS",
   "RCS",
+  // Tool and build names in the shop's product titles (14/10/2026, the light
+  // trial "moi" prints product names through this): "BẢN MS RAGE",
+  // "CS2 HVH SPIN BOT", "BẢN OBV PRIVATE", "BẢN VAC AIM", "CFVN PRV",
+  // "BẢN PV TK", "BẢN AC PRIVATE", "BẢN VS FULL", "CN MEMORY", and the
+  // shop's own name.
+  "MS",
+  "HVH",
+  "OBV",
+  "VAC",
+  "PRV",
+  "PV",
+  "TK",
+  "AC",
+  "VS",
+  "CN",
+  "THICHTHIHACK",
 ]);
 
 const SPECIAL: Record<string, string> = { IOS: "iOS" };

@@ -109,12 +109,14 @@ export function HeroBanners({
     // fold; sideways stays visible because the reseller pill above the eyebrow
     // is pulled 14px left of the copy edge (into the page padding) and a full
     // clip took its rounded corner off. The sky layer clips itself.
-    <section className="relative isolate flex w-full flex-col justify-center overflow-x-visible overflow-y-clip min-h-[calc(100svh-128px)] pt-6 pb-20 sm:pt-10 lg:min-h-[calc(100svh-144px)] lg:pt-0 lg:pb-[93px]">
+    // home-hero and hero-sky are hooks for the light trial "moi"
+    // (theme-light.css, part 6); they carry no style of their own.
+    <section className="home-hero relative isolate flex w-full flex-col justify-center overflow-x-visible overflow-y-clip min-h-[calc(100svh-128px)] pt-6 pb-20 sm:pt-10 lg:min-h-[calc(100svh-144px)] lg:pt-0 lg:pb-[93px]">
       {/* A field of faint, slowly twinkling stars over the page's own black,
           plus three shooting stars on long offset timers so one crosses now
           and then rather than all at once. Decoration only — aria-hidden, no
           pointer target. */}
-      <div aria-hidden className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
+      <div aria-hidden className="hero-sky pointer-events-none absolute inset-0 z-0 overflow-hidden">
         <div className="hero-starfield" />
         {shootingStars ? (
           <>

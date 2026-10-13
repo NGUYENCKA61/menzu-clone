@@ -1,4 +1,5 @@
 import { CardImage } from "@/components/sites/menzu-lol-f7ae197a/shared/CardImage";
+import { CaseText } from "@/components/sites/menzu-lol-f7ae197a/shared/CaseText";
 import { formatVnd } from "@/components/sites/menzu-lol-f7ae197a/shared/productData";
 import { sentenceCase } from "@/lib/displayCase";
 import Link from "next/link";
@@ -476,8 +477,10 @@ function BentoTile({
   return (
     <Link
       href={card.href}
+      // bento-tile, tile-scrim and tile-caption are hooks for the light trial
+      // "moi" (theme-light.css, part 6); they carry no style of their own.
       className={cn(
-        "keep-dark group relative isolate overflow-hidden rounded-2xl border border-white/[0.07] bg-[#0c0d10] transition-colors hover:border-white/20",
+        "bento-tile keep-dark group relative isolate overflow-hidden rounded-2xl border border-white/[0.07] bg-[#0c0d10] transition-colors hover:border-white/20",
         // A phone stacks the lead across both columns over a 2×2 of the rest;
         // from md the grid's own rows give every tile its height.
         lead
@@ -500,11 +503,11 @@ function BentoTile({
       ) : null}
       <span
         aria-hidden
-        className="absolute inset-0 bg-gradient-to-t from-[#08080b]/95 via-[#08080b]/30 via-50% to-transparent to-75%"
+        className="tile-scrim absolute inset-0 bg-gradient-to-t from-[#08080b]/95 via-[#08080b]/30 via-50% to-transparent to-75%"
       />
       <span
         className={cn(
-          "absolute inset-x-3.5 bottom-3 flex flex-col gap-1.5",
+          "tile-caption absolute inset-x-3.5 bottom-3 flex flex-col gap-1.5",
           lead && "sm:inset-x-6 sm:bottom-6 sm:gap-2.5",
         )}
       >
@@ -591,8 +594,10 @@ export function RowTile({
   return (
     <Link
       href={card.href}
+      // row-tile, tile-pill, tile-scrim and tile-caption are hooks for the
+      // light trial "moi" (theme-light.css, part 6); no style of their own.
       className={cn(
-        "keep-dark group relative isolate block overflow-hidden rounded-[14px] border border-white/[0.06] bg-[#0c0d10] transition-colors hover:border-white/20",
+        "row-tile keep-dark group relative isolate block overflow-hidden rounded-[14px] border border-white/[0.06] bg-[#0c0d10] transition-colors hover:border-white/20",
         pick ? "aspect-[16/10]" : "aspect-[4/3]",
         style === "a" && "hover:border-[var(--menzu-accent)]/40",
       )}
@@ -630,7 +635,7 @@ export function RowTile({
       {pick ? (
         <span
           className={cn(
-            "absolute left-2.5 top-2.5 z-10 inline-flex items-center gap-1 rounded-md bg-[#0a0a0d]/70 px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-white ring-1 ring-inset ring-white/15 backdrop-blur-[6px]",
+            "tile-pill absolute left-2.5 top-2.5 z-10 inline-flex items-center gap-1 rounded-md bg-[#0a0a0d]/70 px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-white ring-1 ring-inset ring-white/15 backdrop-blur-[6px]",
             big && "lg:left-3.5 lg:top-3.5 lg:text-[11px]",
           )}
         >
@@ -642,11 +647,11 @@ export function RowTile({
         <>
           <span
             aria-hidden
-            className="absolute inset-0 bg-gradient-to-t from-[#08080b]/95 via-[#08080b]/45 via-40% to-transparent to-65%"
+            className="tile-scrim absolute inset-0 bg-gradient-to-t from-[#08080b]/95 via-[#08080b]/45 via-40% to-transparent to-65%"
           />
           <h3
             className={cn(
-              "absolute inset-x-3.5 bottom-3 text-[14px] font-black leading-tight text-white sm:text-[15px]",
+              "tile-caption absolute inset-x-3.5 bottom-3 text-[14px] font-black leading-tight text-white sm:text-[15px]",
               big && "lg:inset-x-5 lg:bottom-4 lg:text-[17px]",
             )}
           >
@@ -677,13 +682,13 @@ function TileDress({ card, style, big }: { card: ProductCard; style: TileStyle; 
       <>
         <span
           aria-hidden
-          className="absolute inset-0 bg-gradient-to-t from-[#07070a] via-[#07070a]/60 via-35% to-[#07070a]/10"
+          className="tile-scrim absolute inset-0 bg-gradient-to-t from-[#07070a] via-[#07070a]/60 via-35% to-[#07070a]/10"
         />
         <span
           aria-hidden
-          className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-[var(--menzu-accent)]/70 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+          className="tile-scrim absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-[var(--menzu-accent)]/70 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"
         />
-        <span className={cn("absolute inset-x-3.5 bottom-3 flex flex-col gap-1", big && "lg:inset-x-5 lg:bottom-4")}>
+        <span className={cn("tile-caption absolute inset-x-3.5 bottom-3 flex flex-col gap-1", big && "lg:inset-x-5 lg:bottom-4")}>
           <h3 className={cn("text-[16px] font-black leading-[1.15] text-white sm:text-[17px]", big && "lg:text-[20px]")}>
             {sentenceCase(card.title)}
           </h3>
@@ -701,12 +706,12 @@ function TileDress({ card, style, big }: { card: ProductCard; style: TileStyle; 
   if (style === "b") {
     return (
       <>
-        <span aria-hidden className="absolute inset-0 bg-[#07070a]/25" />
+        <span aria-hidden className="tile-scrim absolute inset-0 bg-[#07070a]/25" />
         <span
           aria-hidden
-          className="absolute inset-x-0 bottom-0 h-[55%] bg-gradient-to-t from-[#07070a]/90 to-transparent"
+          className="tile-scrim absolute inset-x-0 bottom-0 h-[55%] bg-gradient-to-t from-[#07070a]/90 to-transparent"
         />
-        <span className={cn("absolute inset-x-3.5 bottom-3 flex flex-col gap-1", big && "lg:inset-x-5 lg:bottom-4")}>
+        <span className={cn("tile-caption absolute inset-x-3.5 bottom-3 flex flex-col gap-1", big && "lg:inset-x-5 lg:bottom-4")}>
           <span className="text-[9px] font-extrabold uppercase tracking-[0.22em] text-[var(--menzu-accent)]">
             {platformWord(card.platform)}
           </span>
@@ -723,7 +728,7 @@ function TileDress({ card, style, big }: { card: ProductCard; style: TileStyle; 
     );
   }
   return (
-    <span className="absolute inset-x-0 bottom-0 flex items-center gap-2.5 border-t border-white/[0.07] bg-[#0b0b0f]/92 px-3.5 py-2.5 backdrop-blur-[2px]">
+    <span className="tile-caption absolute inset-x-0 bottom-0 flex items-center gap-2.5 border-t border-white/[0.07] bg-[#0b0b0f]/92 px-3.5 py-2.5 backdrop-blur-[2px]">
       <span className="flex min-w-0 flex-1 flex-col">
         <h3 className="truncate text-[14px] font-black text-white sm:text-[15px]">{sentenceCase(card.title)}</h3>
         {card.count != null && card.count > 0 ? (
@@ -828,11 +833,13 @@ export function ProductRow({
   // need it: a short row that glided would be motion for its own sake.
   const marquee = runs && cards.length >= MARQUEE_FROM;
 
+  // row-heading and row-view-all are hooks for the light trial "moi"
+  // (theme-light.css, part 6); they carry no style of their own.
   const title = (
     <div className="flex items-center gap-2.5">
       <div className="w-[3px] h-5 bg-[var(--menzu-accent)] rounded-full shrink-0" />
-      <h2 className="text-xl sm:text-2xl font-black uppercase tracking-wider text-white">
-        {heading}
+      <h2 className="row-heading text-xl sm:text-2xl font-black uppercase tracking-wider text-white">
+        <CaseText text={heading} />
       </h2>
       {headingSuffix}
     </div>
@@ -840,10 +847,10 @@ export function ProductRow({
   const viewAll = (
     <Link
       href={viewAllHref}
-      className="group flex items-center gap-1 text-[10px] sm:text-xs font-bold text-neutral-400 hover:text-white transition-colors uppercase tracking-widest border-b border-neutral-700 hover:border-[var(--menzu-accent)]"
+      className="row-view-all group flex items-center gap-1 text-[10px] sm:text-xs font-bold text-neutral-400 hover:text-white transition-colors uppercase tracking-widest border-b border-neutral-700 hover:border-[var(--menzu-accent)]"
     >
-      <span className="hidden sm:inline">XEM TẤT CẢ</span>
-      <span className="sm:hidden">XEM THÊM</span>
+      <span className="hidden sm:inline"><CaseText text="XEM TẤT CẢ" /></span>
+      <span className="sm:hidden"><CaseText text="XEM THÊM" /></span>
       <ArrowRight size={14} />
     </Link>
   );

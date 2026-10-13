@@ -127,7 +127,9 @@ export function ProductCard({ product, priority = false, eager = false }: Produc
         setHovering(false);
         setOffset(0);
       }}
-      className="group flex h-full w-full flex-col overflow-hidden rounded-[15px] border border-[#24252a] bg-[#101114] lift-card hover:-translate-y-1 hover:border-[var(--menzu-accent)]/50 hover:shadow-[0_15px_40px_#00000088]"
+      // acc-card is a hook for the light trial "moi" (theme-light.css,
+      // part 6); it carries no style of its own.
+      className="acc-card group flex h-full w-full flex-col overflow-hidden rounded-[15px] border border-[#24252a] bg-[#101114] lift-card hover:-translate-y-1 hover:border-[var(--menzu-accent)]/50 hover:shadow-[0_15px_40px_#00000088]"
     >
       <div className="relative aspect-[16/10] w-full overflow-hidden bg-[#17181b]">
         <CardImage

@@ -22,4 +22,15 @@ describe("sentenceCase", () => {
     expect(sentenceCase("Hack Freefire")).toBe("Hack Freefire");
     expect(sentenceCase("  hack   valorant ")).toBe("Hack valorant");
   });
+
+  it("keeps the build names in the shop's product titles", () => {
+    expect(sentenceCase("HACK CS2 BẢN MS RAGE SIÊU BÁ")).toBe("Hack CS2 bản MS rage siêu bá");
+    expect(sentenceCase("BẢN AIMWARE - CS2 HVH SPIN BOT")).toBe("Bản aimware - CS2 HVH spin bot");
+    expect(sentenceCase("HACK TRUY KÍCH PC - TRUY KÍCH 2 BẢN PV TK - PV x THICHTHIHACK")).toBe(
+      "Hack truy kích PC - truy kích 2 bản PV TK - PV x THICHTHIHACK",
+    );
+    expect(sentenceCase("HACK DELTA FORCE BẢN VS FULL GIÁ RẺ - ESP + AIMBOT + ITEM !!!")).toBe(
+      "Hack delta force bản VS full giá rẻ - ESP + aimbot + item !!!",
+    );
+  });
 });

@@ -13,6 +13,13 @@ import { useSyncExternalStore } from "react";
  * ?giao-dien=nike only. It is the light dress plus data-variant="nike" on
  * <html>, so this switch reads it as light: the link offers "Giao diện tối",
  * and pressing it goes back to the dark site, variant and all.
+ *
+ * A third TRIAL the same way (14/10/2026, the owner: "Biến tấu sao cho đẹp
+ * hơn đi ở bản sáng", "đẹp hiện đại chuyên nghiệp không có rối"): a calm
+ * white and ocean-blue light dress with a near-black navbar, reached by
+ * ?giao-dien=moi (data-variant="moi"). ?giao-dien=moi-den is the same dress
+ * with the near-black footer instead of the soft band (data-footer="den"), so
+ * the owner can compare the two endings.
  */
 
 const KEY = "ttt-theme";
@@ -23,7 +30,7 @@ function subscribe(onChange: () => void): () => void {
   return () => window.removeEventListener(EVENT, onChange);
 }
 
-/** Light, the Nike variant included (it sets data-theme="light" too). */
+/** Light, the Nike and moi variants included (they set data-theme="light" too). */
 function isLight(): boolean {
   return document.documentElement.dataset.theme === "light";
 }
@@ -41,9 +48,11 @@ export function ThemeToggle({ className }: { className?: string }) {
     const root = document.documentElement;
     if (next) root.dataset.theme = "light";
     else delete root.dataset.theme;
-    // Either way the Nike variant is left behind: the link toggles the dark
-    // site and the plain light dress, and from Nike it means "back to dark".
+    // Either way a variant (nike, moi) is left behind: the link toggles the
+    // dark site and the plain light dress, and from a variant it means "back
+    // to dark".
     delete root.dataset.variant;
+    delete root.dataset.footer;
     window.dispatchEvent(new Event(EVENT));
   }
 
@@ -55,10 +64,11 @@ export function ThemeToggle({ className }: { className?: string }) {
 }
 
 /**
- * Runs first in <body>, before anything paints. ?giao-dien=sang|toi|nike sets
- * the choice (stored as "light", "dark" or "nike"); without one, the stored
- * choice is applied. "nike" is the light dress plus data-variant="nike";
- * sang clears the variant, toi clears both. A query still applies for the page
- * when storage is blocked.
+ * Runs first in <body>, before anything paints. ?giao-dien=sang|toi|nike|moi|
+ * moi-den sets the choice (stored as "light", "dark", "nike", "moi" or
+ * "moi-den"); without one, the stored choice is applied. "nike" and "moi" are
+ * the light dress plus data-variant="nike" or "moi"; "moi-den" is "moi" plus
+ * data-footer="den". sang clears the variant, toi clears both. A query still
+ * applies for the page when storage is blocked.
  */
-export const THEME_BOOT_SCRIPT = `(function(){var d=document.documentElement,k="${KEY}",v=null;try{var q=new URLSearchParams(location.search).get("giao-dien");v=q==="sang"?"light":q==="toi"?"dark":q==="nike"?"nike":null;if(v){try{localStorage.setItem(k,v)}catch(e){}}else{v=localStorage.getItem(k)}}catch(e){}if(v==="light"||v==="nike"){d.setAttribute("data-theme","light")}else if(v==="dark"){d.removeAttribute("data-theme")}if(v==="nike"){d.setAttribute("data-variant","nike")}else{d.removeAttribute("data-variant")}})();`;
+export const THEME_BOOT_SCRIPT = `(function(){var d=document.documentElement,k="${KEY}",v=null;try{var q=new URLSearchParams(location.search).get("giao-dien");v=q==="sang"?"light":q==="toi"?"dark":q==="nike"||q==="moi"||q==="moi-den"?q:null;if(v){try{localStorage.setItem(k,v)}catch(e){}}else{v=localStorage.getItem(k)}}catch(e){}var m=v==="moi"||v==="moi-den";if(v==="light"||v==="nike"||m){d.setAttribute("data-theme","light")}else if(v==="dark"){d.removeAttribute("data-theme")}if(v==="nike"){d.setAttribute("data-variant","nike")}else if(m){d.setAttribute("data-variant","moi")}else{d.removeAttribute("data-variant")}if(v==="moi-den"){d.setAttribute("data-footer","den")}else{d.removeAttribute("data-footer")}})();`;

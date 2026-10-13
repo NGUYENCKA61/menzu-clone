@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowRight, Phone } from "lucide-react";
 
 import { listCategories, listDocArticles } from "@/lib/queries";
+import { CaseText } from "../shared/CaseText";
 import { ThemeToggle } from "../shared/ThemeToggle";
 import { getShopSettings } from "@/lib/settingsStore";
 import { categoryHref, docHref } from "@/lib/routes";
@@ -91,15 +92,22 @@ function socialLinks(contact: FooterContact) {
   ].filter((entry) => entry !== null);
 }
 
-/** A shelf of links under a heading, optionally closed by a "see all" line. */
+/**
+ * A shelf of links under a heading, optionally closed by a "see all" line.
+ * `soft` gives each label a sentence-case twin (CaseText) for the light
+ * trial "moi"; only the category names, which the admin types in capitals,
+ * ask for it (a support link such as "DMCA & Bản quyền" must keep its caps).
+ */
 function Column({
   heading,
   links,
   seeAll,
+  soft = false,
 }: {
   heading: string;
   links: FooterLink[];
   seeAll?: FooterLink;
+  soft?: boolean;
 }) {
   return (
     <div className="flex flex-col gap-3.5">
@@ -113,7 +121,7 @@ function Column({
         {links.map((link) => (
           <li key={`${link.href}-${link.label}`}>
             <Link href={link.href} className={ROW}>
-              {link.label}
+              {soft ? <CaseText text={link.label} /> : link.label}
             </Link>
           </li>
         ))}
@@ -270,6 +278,7 @@ export async function SiteFooter() {
           <Column
             heading="Danh mục"
             links={shopLinks}
+            soft
             seeAll={{ label: "Xem tất cả danh mục", href: "/categories" }}
           />
 

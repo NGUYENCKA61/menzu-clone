@@ -2,6 +2,8 @@
 
 import { useEffect, useState, type RefObject } from "react";
 
+import { CaseText } from "./CaseText";
+
 /**
  * A phone-only bar pinned just above the bottom nav, carrying what is being
  * bought, its price and the buy button.
@@ -80,7 +82,9 @@ export function StickyBuyBar({
       }`}
     >
       <div className="min-w-0 flex-1">
-        <p className="truncate text-[11px] font-semibold text-neutral-400">{label}</p>
+        <p className="truncate text-[11px] font-semibold text-neutral-400">
+          <CaseText text={label} />
+        </p>
         <p className="text-base font-black tabular-nums leading-tight text-white">{price}</p>
       </div>
       <button
