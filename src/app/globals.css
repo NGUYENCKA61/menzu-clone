@@ -1682,3 +1682,27 @@ html[data-admin-filtering] .admin-list {
   opacity: 0.6;
   pointer-events: none;
 }
+
+/* The first-load cover (Preloader) leaves on its own clock, with or without
+   JavaScript. It used to go only from a React effect, so on a slow phone it
+   sat over a page that had painted underneath it for ten seconds or more
+   while the scripts arrived (SEO review, 13/10/2026). Now it fades by itself
+   1.1s after it first paints and is gone by about 1.5s; the script can still
+   take it off sooner, and does on a normal load. visibility and
+   pointer-events go with the fade, so a cover that is done never swallows a
+   tap. A reader who asked for less motion is not shown it at all. */
+#menzu-preloader {
+  animation: preloader-out 0.35s ease 1.1s forwards;
+}
+@keyframes preloader-out {
+  to {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  #menzu-preloader {
+    display: none;
+  }
+}

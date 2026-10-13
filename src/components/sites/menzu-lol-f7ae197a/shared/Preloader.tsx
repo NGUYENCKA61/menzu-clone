@@ -13,8 +13,9 @@ import { useEffect, useState } from "react";
 let hasCompleted = false;
 
 /**
- * Longest any visitor sees the cover, counted from navigation start. Past
- * this the page is usable enough that hiding it costs more than it hides.
+ * When the script takes the cover out of the page at the latest, counted
+ * from navigation start. By then the CSS fade in globals.css has long since
+ * hidden it; this only removes the spent node.
  */
 const MAX_COVER_MS = 2500;
 
@@ -23,15 +24,19 @@ const MAX_COVER_MS = 2500;
  * centered, a red ring and ĐANG TẢI… under it.
  *
  * Server-rendered visible, so it is on screen from the first paint — before
- * any JS arrives, which is the whole point of a preloader. It leaves once the
- * document is parsed and the web fonts are in, with a hard cap counted from
- * navigation start so nothing can hold the shop hostage, and a noscript
- * escape so a browser without JS is not left staring at it forever.
+ * any JS arrives, which is the whole point of a preloader. Its exit does not
+ * depend on the script: a CSS animation on #menzu-preloader (globals.css)
+ * fades it out 1.1s after it paints, so a slow phone that is still
+ * downloading JavaScript is not left staring at it over a page that has
+ * already drawn underneath (the owner's SEO review, 13/10/2026). The script
+ * only takes it off sooner, as soon as the document is parsed. Without JS a
+ * noscript rule hides it at once, and under reduced motion it never shows.
  *
  * Not on window load: that waits for every image and the hero video, and on
  * a phone it kept the cover up for seconds over a page that was already
- * readable underneath. The one thing worth waiting for is the fonts, so the
- * wordmark does not flash from fallback to brand face as the cover lifts.
+ * readable underneath. No longer on the web fonts either: every face is
+ * display: swap, and waiting for them also waited for the home page's
+ * display face, a below-the-fold file.
  */
 export function Preloader({ brand }: { brand: { name: string } }) {
   const [phase, setPhase] = useState<"covering" | "fading" | "gone">(
@@ -41,18 +46,11 @@ export function Preloader({ brand }: { brand: { name: string } }) {
   useEffect(() => {
     if (phase === "covering") {
       const begin = () => setPhase("fading");
-      const whenFontsIn = () => {
-        // Guarded: an old WebView without the Font Loading API must still
-        // get its page back, and the cap below covers it either way.
-        const fonts = (document as { fonts?: FontFaceSet }).fonts;
-        if (fonts) fonts.ready.then(begin, begin);
-        else begin();
-      };
-      if (document.readyState !== "loading") whenFontsIn();
-      else document.addEventListener("DOMContentLoaded", whenFontsIn);
+      if (document.readyState !== "loading") begin();
+      else document.addEventListener("DOMContentLoaded", begin);
       const cap = window.setTimeout(begin, Math.max(0, MAX_COVER_MS - performance.now()));
       return () => {
-        document.removeEventListener("DOMContentLoaded", whenFontsIn);
+        document.removeEventListener("DOMContentLoaded", begin);
         window.clearTimeout(cap);
       };
     }
@@ -80,8 +78,9 @@ export function Preloader({ brand }: { brand: { name: string } }) {
         phase === "fading" ? "pointer-events-none opacity-0" : "opacity-100"
       }`}
     >
-      {/* Without JS nothing ever calls setPhase, so the cover must remove
-          itself: this style applies only when scripting is off. */}
+      {/* Without JS there is nothing to wait for, so the cover does not
+          even sit out its CSS fade: this style applies only when scripting
+          is off and hides it at once. */}
       <noscript>
         <style>{`#menzu-preloader{display:none}`}</style>
       </noscript>
