@@ -1,8 +1,10 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import "./theme-light.css";
 import { SITE_URL, siteDescription } from "@/lib/seo";
 import { PageBackdrop } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/PageBackdrop";
+import { THEME_BOOT_SCRIPT } from "@/components/sites/menzu-lol-f7ae197a/shared/ThemeToggle";
 import { Preloader } from "@/components/sites/menzu-lol-f7ae197a/shared/Preloader";
 import { SupportWidgetHost } from "@/components/sites/menzu-lol-f7ae197a/shared/SupportWidgetHost";
 import { DEFAULT_SETTINGS } from "@/lib/settings";
@@ -115,8 +117,11 @@ export default async function RootLayout({
     <html
       lang="vi"
       className={`${inter.variable} h-full antialiased overflow-y-scroll dark`}
+      // The light-dress trial sets data-theme before React hydrates.
+      suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col">
+        <script dangerouslySetInnerHTML={{ __html: THEME_BOOT_SCRIPT }} />
         {brandOverride ? <style>{brandOverride}</style> : null}
         {/* Fixed behind every page (z-[-1]); each shop's own picture, dimmed.
             Site-wide here rather than per-page so it covers the whole app. */}

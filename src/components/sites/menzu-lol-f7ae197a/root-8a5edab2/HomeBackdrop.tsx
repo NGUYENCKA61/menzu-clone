@@ -14,11 +14,11 @@ import { CardImage } from "@/components/sites/menzu-lol-f7ae197a/shared/CardImag
 export function HomeBackdrop({ src }: { src?: string }) {
   return (
     <>
-      <div aria-hidden className="pointer-events-none fixed inset-0 z-[-1] bg-[#0f1015]" />
+      <div aria-hidden className="site-backdrop pointer-events-none fixed inset-0 z-[-1] bg-[#0f1015]" />
       {src ? (
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-x-0 top-0 z-[-1] h-[100svh] overflow-hidden [mask-image:linear-gradient(to_bottom,black_70%,transparent)]"
+          className="site-backdrop pointer-events-none absolute inset-x-0 top-0 z-[-1] h-[100svh] overflow-hidden [mask-image:linear-gradient(to_bottom,black_70%,transparent)]"
         >
           <CardImage src={src} alt="" fill priority sizes="100vw" className="object-cover object-center" />
           <div className="absolute inset-0 bg-[#0a0a0d]/70" />

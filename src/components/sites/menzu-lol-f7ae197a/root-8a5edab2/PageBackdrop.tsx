@@ -21,7 +21,7 @@ import { CardImage } from "@/components/sites/menzu-lol-f7ae197a/shared/CardImag
 export function PageBackdrop({ src, soft = false }: { src?: string; soft?: boolean }) {
   return (
     <div
-      className={`fixed top-0 left-0 w-full h-[100vh] z-[-1] overflow-hidden pointer-events-none ${
+      className={`site-backdrop fixed top-0 left-0 w-full h-[100vh] z-[-1] overflow-hidden pointer-events-none ${
         soft ? "bg-[#08080b]" : ""
       }`}
     >

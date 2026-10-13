@@ -103,7 +103,7 @@ export function AdminShell({
   }, [pathname]);
 
   return (
-    <div className="min-h-screen bg-[#08080a] text-white lg:flex">
+    <div className="keep-dark min-h-screen bg-[#08080a] text-white lg:flex">
       {/* Full height and flush to the edge on a desktop. On a phone it is one
           row — the name, then the links scrolling sideways — and it stays at
           the top of the screen: the owner used to scroll up 5.000px of

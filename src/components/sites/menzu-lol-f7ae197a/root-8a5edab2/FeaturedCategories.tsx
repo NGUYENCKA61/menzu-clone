@@ -76,7 +76,7 @@ export function FeaturedCategories({ cards }: { cards?: CategoryCard[] }) {
             // href — "DỊCH VỤ VALORANT" and "ACC VALORANT" collided here.
             key={`${card.href}|${card.line1}|${card.line2}`}
             href={card.href}
-            className="group relative w-full pt-16 flex flex-col items-center"
+            className="keep-dark group relative w-full pt-16 flex flex-col items-center"
           >
             <div
               className="relative w-full aspect-[3/4] flex flex-col items-center justify-end p-2 pb-2 sm:p-4 transition-all duration-300"

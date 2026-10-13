@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowRight, Phone } from "lucide-react";
 
 import { listCategories, listDocArticles } from "@/lib/queries";
+import { ThemeToggle } from "../shared/ThemeToggle";
 import { getShopSettings } from "@/lib/settingsStore";
 import { categoryHref } from "@/lib/routes";
 import {
@@ -318,6 +319,7 @@ export async function SiteFooter() {
                 {link.label}
               </Link>
             ))}
+            <ThemeToggle className="text-[12px] text-neutral-500 hover:text-white transition-colors" />
           </nav>
         </div>
       </div>

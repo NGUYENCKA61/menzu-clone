@@ -477,7 +477,7 @@ function BentoTile({
     <Link
       href={card.href}
       className={cn(
-        "group relative isolate overflow-hidden rounded-2xl border border-white/[0.07] bg-[#0c0d10] transition-colors hover:border-white/20",
+        "keep-dark group relative isolate overflow-hidden rounded-2xl border border-white/[0.07] bg-[#0c0d10] transition-colors hover:border-white/20",
         // A phone stacks the lead across both columns over a 2×2 of the rest;
         // from md the grid's own rows give every tile its height.
         lead
@@ -583,7 +583,7 @@ function RowTile({
     <Link
       href={card.href}
       className={cn(
-        "group relative isolate block overflow-hidden rounded-[14px] border border-white/[0.06] bg-[#0c0d10] transition-colors hover:border-white/20",
+        "keep-dark group relative isolate block overflow-hidden rounded-[14px] border border-white/[0.06] bg-[#0c0d10] transition-colors hover:border-white/20",
         pick ? "aspect-[16/10]" : "aspect-[4/3]",
         style === "a" && "hover:border-[var(--menzu-accent)]/40",
       )}
