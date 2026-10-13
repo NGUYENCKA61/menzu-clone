@@ -180,6 +180,15 @@
     "replaces": []
   },
   {
+    "slug": "chinh-sach-ho-tro-doi-may",
+    "category": "WARRANTY",
+    "title": "Chính sách hỗ trợ đổi máy (reset HWID cho key)",
+    "excerpt": "Key gắn máy đầu tiên dùng nó. Đổi máy, thay linh kiện, cài lại Windows hay spoof xong được shop reset miễn phí trong thời hạn gói, theo các điều kiện này.",
+    "featured": false,
+    "sortOrder": 3,
+    "replaces": []
+  },
+  {
     "slug": "dieu-khoan-su-dung",
     "category": "TERMS",
     "title": "Điều khoản sử dụng",
