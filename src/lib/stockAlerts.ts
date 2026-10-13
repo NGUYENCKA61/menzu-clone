@@ -1,6 +1,8 @@
 import "server-only";
 
 import { db } from "@/lib/db";
+import { emailBrand } from "@/lib/emailBrand";
+import { adminAlertMail, escapeHtml, type EmailBrand } from "@/lib/emailTemplates";
 import { sendMail } from "@/lib/mailer";
 import { absoluteUrl } from "@/lib/seo";
 import { lowStockRecipients, mailEnabled, type ShopSettings } from "@/lib/settings";
@@ -66,7 +68,11 @@ function telegramText(warnings: Warning[], threshold: number): string {
 }
 
 /** The same news as an email, for whoever reads a mailbox rather than a chat. */
-function mailBody(warnings: Warning[], threshold: number): { text: string; html: string } {
+function mailBody(
+  warnings: Warning[],
+  threshold: number,
+  brand: EmailBrand,
+): { text: string; html: string } {
   const intro =
     warnings.length === 1
       ? "Một gói trong kho vừa xuống dưới ngưỡng cảnh báo."
@@ -81,21 +87,25 @@ function mailBody(warnings: Warning[], threshold: number): { text: string; html:
     "Nhập thêm hàng là cảnh báo tự đặt lại.",
   ].join("\n");
 
-  const escapeHtml = (value: string) =>
-    value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  // One row per shelf: what ran low, and the page that restocks it.
   const rows = warnings
     .map(
       (warning) =>
-        `<li style="margin:0 0 10px"><strong>${escapeHtml(describe(warning))}</strong><br>` +
-        `<a href="${escapeHtml(warning.href)}">Nhập thêm</a></li>`,
+        `<tr><td style="padding:12px 14px;border:1px solid #ebebef;border-radius:10px;font:400 14px/1.5 'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#16161b;">` +
+        `<strong>${escapeHtml(describe(warning))}</strong><br>` +
+        `<a href="${escapeHtml(warning.href)}" style="color:#E13D3F;font-weight:700;text-decoration:none;">Nhập thêm</a></td></tr>` +
+        `<tr><td style="height:8px;line-height:8px;font-size:0;">&nbsp;</td></tr>`,
     )
     .join("");
-  const html = [
-    `<p>${escapeHtml(intro)}</p>`,
-    `<p>Ngưỡng đang đặt: còn ${threshold} trở xuống thì báo.</p>`,
-    `<ul style="padding-left:18px">${rows}</ul>`,
-    `<p style="color:#666;font-size:13px">Tin này gửi một lần cho mỗi gói, và một lần nữa khi gói hết sạch. Nhập thêm hàng là cảnh báo tự đặt lại.</p>`,
-  ].join("");
+  const html = adminAlertMail({
+    brand,
+    subject: mailSubject(warnings),
+    title: warnings.some((warning) => warning.left === 0) ? "Kho có gói đã hết" : "Kho sắp hết hàng",
+    lines: [intro, `Ngưỡng đang đặt: còn ${threshold} trở xuống thì báo.`],
+    bodyHtml: `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">${rows}</table>`,
+    cta: { href: absoluteUrl("/admin/products"), label: "Mở kho trong admin" },
+    note: "Tin này gửi một lần cho mỗi gói, và một lần nữa khi gói hết sạch. Nhập thêm hàng là cảnh báo tự đặt lại.",
+  });
   return { text, html };
 }
 
@@ -129,7 +139,7 @@ async function deliver(
 
   const recipients = lowStockRecipients(settings);
   if (recipients.length > 0 && mailEnabled(settings)) {
-    const body = mailBody(warnings, threshold);
+    const body = mailBody(warnings, threshold, emailBrand(settings));
     try {
       await sendMail(
         settings,

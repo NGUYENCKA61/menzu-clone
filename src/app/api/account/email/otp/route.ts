@@ -11,6 +11,8 @@ import {
   hashCode,
 } from "@/lib/emailOtp";
 import { trimmed } from "@/lib/jsonField";
+import { emailBrand } from "@/lib/emailBrand";
+import { emailCodeMail } from "@/lib/emailTemplates";
 import { sendMail } from "@/lib/mailer";
 import { getCurrentUser } from "@/lib/session";
 import { mailEnabled } from "@/lib/settings";
@@ -93,19 +95,13 @@ export async function POST(request: Request) {
   });
 
   try {
-    await sendMail(
-      settings,
-      email,
-      `${settings.brandName} | Mã xác minh email: ${code}`,
-      [
-        `Xin chào ${account.username},`,
-        "",
-        `Mã xác minh email của bạn là: ${code}`,
-        `Mã có hiệu lực trong ${OTP_TTL_MINUTES} phút. Nhập mã này ở trang Bảo mật tài khoản.`,
-        "",
-        "Nếu không phải bạn yêu cầu, cứ bỏ qua email này, tài khoản của bạn không thay đổi gì.",
-      ].join("\n"),
-    );
+    const mail = emailCodeMail({
+      brand: emailBrand(settings),
+      username: account.username,
+      code,
+      ttlMinutes: OTP_TTL_MINUTES,
+    });
+    await sendMail(settings, email, mail.subject, mail.text, mail.html);
   } catch {
     // Not counted against them: nothing reached anyone.
     await db.emailVerification.delete({ where: { id: row.id } }).catch(() => {});

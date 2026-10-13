@@ -137,3 +137,56 @@ export function settleZaloBotState(
     note: "bot không chạy, không báo về nữa",
   };
 }
+
+/**
+ * The text styles a Zalo message can carry, as zca-js names them (its
+ * TextStyle enum), for messages written on the web and sent by the bot: the
+ * receipt's title in bold and big, a key in bold red.
+ */
+export const ZALO_STYLE = {
+  bold: "b",
+  italic: "i",
+  underline: "u",
+  red: "c_db342e",
+  green: "c_15a85f",
+  orange: "c_f27806",
+  small: "f_13",
+  big: "f_18",
+} as const;
+
+/** One styled range of a message, in UTF-16 units of its text. */
+export type ZaloStyleRange = { start: number; len: number; st: string };
+
+const KNOWN_STYLES = new Set<string>(Object.values(ZALO_STYLE));
+
+/**
+ * The style ranges stored with an outbox row, checked before the bot hands
+ * them to Zalo: known styles only, inside the text, at most 200 of them. Null
+ * when there are none worth sending, and the message goes out plain.
+ */
+export function readZaloStyles(
+  raw: unknown,
+  textLength: number,
+): ZaloStyleRange[] | null {
+  if (!Array.isArray(raw)) return null;
+  const ranges: ZaloStyleRange[] = [];
+  for (const item of raw.slice(0, 200)) {
+    if (!item || typeof item !== "object") continue;
+    const { start, len, st } = item as Record<string, unknown>;
+    if (
+      typeof start !== "number" ||
+      typeof len !== "number" ||
+      typeof st !== "string" ||
+      !Number.isInteger(start) ||
+      !Number.isInteger(len) ||
+      start < 0 ||
+      len <= 0 ||
+      start + len > textLength ||
+      !KNOWN_STYLES.has(st)
+    ) {
+      continue;
+    }
+    ranges.push({ start, len, st });
+  }
+  return ranges.length > 0 ? ranges : null;
+}

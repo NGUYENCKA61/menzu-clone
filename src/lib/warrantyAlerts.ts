@@ -1,5 +1,7 @@
 import "server-only";
 
+import { emailBrand } from "@/lib/emailBrand";
+import { adminAlertMail } from "@/lib/emailTemplates";
 import { sendMail } from "@/lib/mailer";
 import { mailEnabled, warrantyAlertRecipients } from "@/lib/settings";
 import { getShopSettings } from "@/lib/settingsStore";
@@ -30,7 +32,13 @@ export async function mailWarrantyAlert({
     const recipients = warrantyAlertRecipients(settings);
     if (recipients.length === 0 || !mailEnabled(settings)) return;
     const text = [...lines, "", `Mở trong admin: ${href}`].join("\n");
-    const html = `<p>${lines.map(escapeHtml).join("<br>")}</p><p><a href="${escapeHtml(href)}">Mở trong admin</a></p>`;
+    const html = adminAlertMail({
+      brand: emailBrand(settings),
+      subject,
+      title: subject,
+      lines,
+      cta: { href, label: "Mở trong admin" },
+    });
     await Promise.all(
       recipients.map((to) =>
         sendMail(settings, to, subject, text, html).catch((error: unknown) => {
@@ -41,12 +49,4 @@ export async function mailWarrantyAlert({
   } catch (error) {
     console.error("[warranty] alert mail failed:", error);
   }
-}
-
-function escapeHtml(value: string): string {
-  return value
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
 }

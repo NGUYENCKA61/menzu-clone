@@ -5,6 +5,8 @@ import { NextResponse } from "next/server";
 import { clientIp } from "@/lib/clientIp";
 import { trimmed } from "@/lib/jsonField";
 import { db } from "@/lib/db";
+import { emailBrand } from "@/lib/emailBrand";
+import { passwordResetMail } from "@/lib/emailTemplates";
 import { sendMail } from "@/lib/mailer";
 import { checkResetRate, recordAttempt } from "@/lib/rateLimit";
 import { SITE_URL } from "@/lib/seo";
@@ -104,21 +106,13 @@ export async function POST(request: Request) {
     const origin = configured ?? new URL(request.url).origin;
     const link = `${origin}/reset-password?token=${token}`;
     try {
-      await sendMail(
-        settings,
-        user.email,
-        `${settings.brandName} | Đặt lại mật khẩu`,
-        [
-          `Xin chào ${user.username},`,
-          "",
-          "Ai đó (hy vọng là bạn) vừa yêu cầu đặt lại mật khẩu cho tài khoản này.",
-          `Nhấn vào đường dẫn sau trong vòng 30 phút để đặt mật khẩu mới:`,
-          "",
-          link,
-          "",
-          "Nếu không phải bạn, cứ bỏ qua email này, mật khẩu hiện tại vẫn nguyên.",
-        ].join("\n"),
-      );
+      const mail = passwordResetMail({
+        brand: emailBrand(settings, origin),
+        username: user.username,
+        link,
+        ttlMinutes: Math.round(RESET_TTL_MS / 60_000),
+      });
+      await sendMail(settings, user.email, mail.subject, mail.text, mail.html);
     } catch {
       // The relay refused or timed out. This too must not become an oracle,
       // but a swallowed failure here means a customer waiting on mail that
