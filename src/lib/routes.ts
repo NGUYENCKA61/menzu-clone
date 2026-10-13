@@ -26,6 +26,27 @@ export function productHref(categorySlug: string, productSlug: string): string {
 }
 
 /**
+ * The glossary's own page, /docs/thuat-ngu (the owner, 13/10/2026: the
+ * terminology page after unnamedtech's wiki). A static segment, so it is
+ * matched before docs/[slug] and no article may ever take this slug: the
+ * admin's slug minting treats it as taken.
+ */
+export const GLOSSARY_SLUG = "thuat-ngu";
+
+/**
+ * The article the glossary used to be. Its row stays, so it still stands on
+ * the GLOSSARY shelf and in the featured cards, but its address now answers
+ * with a permanent redirect to the page (next.config.ts).
+ */
+export const GLOSSARY_LEGACY_SLUG = "thuat-ngu-chuc-nang-hack";
+
+/** A wiki article's public address; the old glossary article goes straight
+ *  to the glossary page instead of through its redirect. */
+export function docHref(slug: string): string {
+  return slug === GLOSSARY_LEGACY_SLUG ? `/docs/${GLOSSARY_SLUG}` : `/docs/${slug}`;
+}
+
+/**
  * Every first segment the application already answers on.
  *
  * Categories live at the root, so a category slugged "cart" or "login" would

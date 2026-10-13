@@ -28,7 +28,7 @@ import { DEFAULT_DOWNLOAD_NAME } from "@/lib/downloadName";
 import { pcSetupHref, PC_SETUP_PAGES } from "@/lib/pcSetup";
 import { DEFAULT_GUIDE, DEFAULT_SETUP_GUIDE } from "@/lib/productGuide";
 import { requirementsOrDefault } from "@/lib/productRequirements";
-import { productHref, toolDocsHref } from "@/lib/routes";
+import { docHref, productHref, toolDocsHref } from "@/lib/routes";
 import { breadcrumbJsonLd, JsonLd } from "@/lib/seo";
 import { getCurrentUser } from "@/lib/session";
 import { shareCard } from "@/lib/shareCard";
@@ -367,7 +367,7 @@ export default async function ToolDocsPage({ params }: PageProps) {
                 {tool.articles.map((article) => (
                   <li key={article.slug}>
                     <Link
-                      href={`/docs/${article.slug}`}
+                      href={docHref(article.slug)}
                       className="group flex items-start gap-3 px-5 py-4 transition-colors hover:bg-white/[0.03]"
                     >
                       {open ? (

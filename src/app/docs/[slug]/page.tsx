@@ -10,7 +10,7 @@ import { DOC_SHELF_LABEL, isDocShelf } from "@/lib/docCategories";
 import { DocBody, DocHtml } from "@/lib/docFormat";
 import { isHtmlBody } from "@/lib/docHtml";
 import { getDocArticle, listRelatedDocs, listToolArticles } from "@/lib/queries";
-import { productHref, toolDocsHref } from "@/lib/routes";
+import { docHref, productHref, toolDocsHref } from "@/lib/routes";
 import { articleJsonLd, breadcrumbJsonLd, JsonLd } from "@/lib/seo";
 import { getCurrentUser } from "@/lib/session";
 import { getShopSettings } from "@/lib/settingsStore";
@@ -221,7 +221,7 @@ export default async function DocArticlePage({ params }: PageProps) {
             {related.map((item) => (
               <Link
                 key={item.slug}
-                href={`/docs/${item.slug}`}
+                href={docHref(item.slug)}
                 className="group flex flex-col overflow-hidden rounded-2xl border border-white/5 bg-white/[0.02] transition-colors hover:border-white/10 hover:bg-white/[0.04]"
               >
                 <div className="relative aspect-video overflow-hidden bg-neutral-900">

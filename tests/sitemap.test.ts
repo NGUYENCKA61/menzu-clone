@@ -46,6 +46,8 @@ vi.mock("@/lib/db", () => ({
     docArticle: {
       findMany: async () => [
         { slug: "spoofer-la-gi", updatedAt: new Date("2026-10-05T00:00:00Z") },
+        // The old glossary article: its row stays, its address redirects.
+        { slug: "thuat-ngu-chuc-nang-hack", updatedAt: new Date("2026-10-13T00:00:00Z") },
       ],
     },
   },
@@ -88,6 +90,12 @@ describe("sitemap lastmod", () => {
     expect(map.get("/acc-valorant/acc-vlr-1")).toEqual(new Date("2026-10-01T00:00:00Z"));
     expect(map.get("/hack-valorant-moi")).toEqual(new Date("2026-09-20T00:00:00Z"));
     expect(map.get("/docs/spoofer-la-gi")).toEqual(new Date("2026-10-05T00:00:00Z"));
+  });
+
+  it("lists the glossary page, not the article address that redirects to it", async () => {
+    const map = await lastmods();
+    expect(map.get("/docs/thuat-ngu")).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    expect(map.has("/docs/thuat-ngu-chuc-nang-hack")).toBe(false);
   });
 
   it("writes every hand-kept date as a calendar day", async () => {

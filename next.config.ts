@@ -42,6 +42,23 @@ const LEGACY_PHP_REDIRECTS: PermanentRedirect[] = [
 ];
 
 /**
+ * The glossary was one wiki article until it became its own page
+ * (13/10/2026); 308 keeps the old links and search results working, and the
+ * browser carries a #word across the redirect.
+ *
+ * The one deliberate exception to "a live article is never redirected away
+ * from" (wikiRenameRedirects below): the old article keeps its row so it
+ * still stands on the GLOSSARY shelf and in the featured cards, which link
+ * straight to the page through docHref, and only its own address is retired.
+ * The strings are written out because this file loads before the app's path
+ * aliases exist; they mirror GLOSSARY_LEGACY_SLUG and GLOSSARY_SLUG in
+ * src/lib/routes.ts.
+ */
+const GLOSSARY_REDIRECTS: PermanentRedirect[] = [
+  { source: "/docs/thuat-ngu-chuc-nang-hack", destination: "/docs/thuat-ngu", permanent: true },
+];
+
+/**
  * Old wiki slugs, sent to the article that took their place.
  *
  * scripts/seed-wiki.mjs renames an article in place when its "replaces" slug
@@ -167,7 +184,7 @@ const nextConfig: NextConfig = {
   },
 
   async redirects() {
-    return [...LEGACY_PHP_REDIRECTS, ...wikiRenameRedirects()];
+    return [...LEGACY_PHP_REDIRECTS, ...wikiRenameRedirects(), ...GLOSSARY_REDIRECTS];
   },
 
   async headers() {

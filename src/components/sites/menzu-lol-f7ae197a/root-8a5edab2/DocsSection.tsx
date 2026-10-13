@@ -3,6 +3,7 @@ import { CardImage } from "@/components/sites/menzu-lol-f7ae197a/shared/CardImag
 import Link from "next/link";
 
 import { DOC_SHELF_LABEL } from "@/lib/docCategories";
+import { docHref } from "@/lib/routes";
 
 /** What a card needs, which is less than a whole article row. */
 export interface DocCard {
@@ -51,7 +52,7 @@ export function DocsSection({ articles }: { articles: DocCard[] }) {
         {articles.map((article) => (
           <Link
             key={article.slug}
-            href={`/docs/${article.slug}`}
+            href={docHref(article.slug)}
             className="group flex flex-col overflow-hidden rounded-2xl border border-white/[0.07] bg-white/[0.02] transition-colors hover:border-white/15 hover:bg-white/[0.04]"
           >
             <div className="relative aspect-[16/9] w-full overflow-hidden bg-[#0a0a0c]">

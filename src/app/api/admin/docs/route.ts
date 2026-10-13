@@ -4,6 +4,7 @@ import { FORBIDDEN, getAdmin } from "@/lib/admin";
 import { db } from "@/lib/db";
 import { isArticleShelf, type ArticleShelf } from "@/lib/docCategories";
 import { docHtmlIsEmpty, isHtmlBody, sanitizeDocHtml } from "@/lib/docHtml";
+import { GLOSSARY_SLUG } from "@/lib/routes";
 
 /** New articles borrow their shelf's stock picture — the editor has no
  *  thumbnail uploader, and the column is required. */
@@ -56,10 +57,16 @@ export async function POST(request: Request) {
   const kind = category;
 
   // Mint a unique slug: the title's slug, then -2, -3… if the shelf already
-  // holds that name.
+  // holds that name. "thuat-ngu" counts as taken: /docs/thuat-ngu is the
+  // glossary's own page, matched before any article, so an article minted
+  // onto it could never be opened.
   const base = slugify(title) || "bai-viet";
   let slug = base;
-  for (let n = 2; await db.docArticle.findUnique({ where: { slug } }); n++) {
+  for (
+    let n = 2;
+    slug === GLOSSARY_SLUG || (await db.docArticle.findUnique({ where: { slug } }));
+    n++
+  ) {
     slug = `${base}-${n}`;
   }
 

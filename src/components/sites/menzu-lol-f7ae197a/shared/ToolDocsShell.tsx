@@ -29,7 +29,7 @@ import {
 } from "@/components/sites/menzu-lol-f7ae197a/shared/docsRail";
 import { sentenceCase } from "@/lib/displayCase";
 import { PC_SETUP_PAGES, pcSetupHref } from "@/lib/pcSetup";
-import { toolDocsHref } from "@/lib/routes";
+import { docHref, toolDocsHref } from "@/lib/routes";
 import type { ToolDocsIndexCategory } from "@/lib/toolDocs";
 
 /** Where the reader is, so the sidebar can say so and open the right game. */
@@ -192,7 +192,7 @@ function Nav({
                           {place.articles?.map((article) => (
                             <Link
                               key={article.slug}
-                              href={`/docs/${article.slug}`}
+                              href={docHref(article.slug)}
                               className={`${SUB} pl-5`}
                             >
                               {article.title}

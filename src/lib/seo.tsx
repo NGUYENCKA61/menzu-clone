@@ -6,6 +6,8 @@
  * its image if the origin is missing.
  */
 
+import { GLOSSARY_PATH, termHref, type GlossaryTerm } from "@/lib/glossary/terms";
+
 /**
  * Canonical origin, without a trailing slash.
  *
@@ -273,6 +275,34 @@ export function faqJsonLd(entries: { q: string; a: string }[]) {
       "@type": "Question",
       name: entry.q,
       acceptedAnswer: { "@type": "Answer", text: entry.a },
+    })),
+  };
+}
+
+/**
+ * schema.org/DefinedTermSet for the glossary page (/docs/thuat-ngu).
+ *
+ * Every word the page shows, each with its own address (#id), so a search
+ * engine can answer "silent aim là gì" with the card itself rather than the
+ * top of a long page. Built from the same list the page draws, so the record
+ * never names a word the reader cannot find.
+ */
+export function glossaryJsonLd(terms: readonly GlossaryTerm[]) {
+  const setUrl = absoluteUrl(GLOSSARY_PATH);
+  return {
+    "@context": "https://schema.org",
+    "@type": "DefinedTermSet",
+    "@id": setUrl,
+    name: "Thuật ngữ hack game",
+    inLanguage: "vi",
+    hasDefinedTerm: terms.map((term) => ({
+      "@type": "DefinedTerm",
+      "@id": absoluteUrl(termHref(term.id)),
+      name: term.term,
+      ...(term.aliases?.length ? { alternateName: term.aliases } : {}),
+      description: `${term.short} ${term.detail}`,
+      url: absoluteUrl(termHref(term.id)),
+      inDefinedTermSet: setUrl,
     })),
   };
 }
