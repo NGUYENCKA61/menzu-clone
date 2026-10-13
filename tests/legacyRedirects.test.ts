@@ -105,3 +105,29 @@ describe("the old PHP shop's addresses", () => {
     expect(isReservedSlug("huong-dan")).toBe(true);
   });
 });
+
+describe("renamed wiki articles", () => {
+  it("sends the two indexed slugs the seed renames to their new articles", async () => {
+    expect(await follow("/docs/acc-full-access-fa-la-gi")).toEqual({
+      to: "/docs/acc-full-thong-tin-la-gi",
+      permanent: true,
+    });
+    expect((await follow("/docs/acc-non-full-access-nfa-la-gi"))?.to).toBe(
+      "/docs/acc-nfa-acc-rac-la-gi",
+    );
+  });
+
+  it("covers every slug articles.json says was replaced", async () => {
+    const articles = (await import("../content/wiki/articles.json")).default as {
+      slug: string;
+      replaces?: string[];
+    }[];
+    for (const article of articles) {
+      for (const old of article.replaces ?? []) {
+        expect((await follow(`/docs/${old}`))?.to).toBe(`/docs/${article.slug}`);
+      }
+      // A live article is never redirected away from.
+      expect(await follow(`/docs/${article.slug}`)).toBeNull();
+    }
+  });
+});

@@ -1,3 +1,6 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+
 import type { NextConfig } from "next";
 
 type PermanentRedirect = { source: string; destination: string; permanent: true };
@@ -37,6 +40,60 @@ const LEGACY_PHP_REDIRECTS: PermanentRedirect[] = [
   { source: "/recharge/:path*", destination: "/wallet", permanent: true },
   { source: "/index.php", destination: "/", permanent: true },
 ];
+
+/**
+ * Old wiki slugs, sent to the article that took their place.
+ *
+ * scripts/seed-wiki.mjs renames an article in place when its "replaces" slug
+ * exists, and the docs route keeps no slug history, so without these the two
+ * live, indexed articles it renames (acc-full-access-fa-la-gi and
+ * acc-non-full-access-nfa-la-gi) would turn into 404s on the day the seed runs.
+ * Read from the same articles.json the seed reads, so a rename added there
+ * brings its redirect with it.
+ *
+ * Read with fs rather than imported: next.config is loaded outside the app
+ * bundle, where JSON imports behave differently between Node's own loader and
+ * Next's. A slug that some article answers on today is never redirected away,
+ * because a config redirect runs before the page and would hide it forever.
+ */
+function wikiRenameRedirects(): PermanentRedirect[] {
+  let articles: unknown;
+  try {
+    articles = JSON.parse(
+      readFileSync(join(process.cwd(), "content", "wiki", "articles.json"), "utf8"),
+    );
+  } catch (error) {
+    // Losing two redirects is better than failing a deploy over a content
+    // file, but it is said out loud in the build log.
+    console.warn("next.config: content/wiki/articles.json unreadable, no wiki redirects", error);
+    return [];
+  }
+  if (!Array.isArray(articles)) return [];
+
+  // Plain kebab-case only: a source is a path pattern, where ( : * + ? mean
+  // something, and one malformed entry would fail the whole build.
+  const isSlug = (value: unknown): value is string =>
+    typeof value === "string" && /^[a-z0-9]+(?:-[a-z0-9]*)*$/i.test(value);
+
+  const entries = articles.flatMap((article: unknown) => {
+    if (typeof article !== "object" || article === null) return [];
+    const { slug, replaces } = article as { slug?: unknown; replaces?: unknown };
+    if (!isSlug(slug)) return [];
+    return [{ slug, olds: Array.isArray(replaces) ? replaces.filter(isSlug) : [] }];
+  });
+  const live = new Set(entries.map((entry) => entry.slug));
+
+  const redirects: PermanentRedirect[] = [];
+  const claimed = new Set<string>();
+  for (const { slug, olds } of entries) {
+    for (const old of olds) {
+      if (live.has(old) || claimed.has(old)) continue;
+      claimed.add(old);
+      redirects.push({ source: `/docs/${old}`, destination: `/docs/${slug}`, permanent: true });
+    }
+  }
+  return redirects;
+}
 
 /**
  * Security headers applied to every response.
@@ -110,7 +167,7 @@ const nextConfig: NextConfig = {
   },
 
   async redirects() {
-    return LEGACY_PHP_REDIRECTS;
+    return [...LEGACY_PHP_REDIRECTS, ...wikiRenameRedirects()];
   },
 
   async headers() {
