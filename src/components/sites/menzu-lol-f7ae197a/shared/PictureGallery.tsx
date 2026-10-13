@@ -197,7 +197,11 @@ export function PictureGallery({
   slides,
   alt,
   badge,
-  sizes = "(min-width: 1024px) 50vw, 100vw",
+  // Both product pages put the gallery in the left half of a two-column grid
+  // from md, inside the 1320px row: 612px at most (608 on the tool page), and
+  // a little under half the viewport below that. "100vw" up to 1023px asked a
+  // tablet for a file twice the size it drew.
+  sizes = "(min-width: 1320px) 612px, (min-width: 768px) 50vw, 100vw",
   empty = "Chưa có ảnh",
 }: {
   /** In order; a repeated path shows once. */

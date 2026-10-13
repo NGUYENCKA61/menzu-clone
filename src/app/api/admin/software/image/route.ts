@@ -10,12 +10,15 @@ const TYPES = new Set(["image/png", "image/jpeg", "image/webp"]);
 const MAX_BYTES = 8 * 1024 * 1024;
 
 /**
- * Floors, not targets. The listing card draws the picture in a 4:3 box a few
- * hundred pixels wide, so anything under this is visibly soft; the sign-in
- * panel's 600² minimum would reject perfectly good product art.
+ * Floors, not targets. The listing card and the gallery draw the picture in a
+ * 16:9 frame a few hundred pixels wide, so anything under this is visibly
+ * soft; the sign-in panel's 600² minimum would reject perfectly good product
+ * art. 320×180 is 16:9 at the floor, the same as the category covers: at 240
+ * a 16:9 cover had to be 427px wide to pass, while the picker promised 320.
+ * The picker now recommends 1920×1080 and warns softly under 1280px wide.
  */
 const MIN_WIDTH = 320;
-const MIN_HEIGHT = 240;
+const MIN_HEIGHT = 180;
 const MAX_SIDE = 8000;
 
 /**

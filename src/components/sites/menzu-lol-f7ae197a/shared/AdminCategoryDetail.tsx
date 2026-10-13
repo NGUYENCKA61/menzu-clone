@@ -269,9 +269,13 @@ export function AdminCategoryDetail({
               aria-label="Đường dẫn ảnh đầu trang danh mục"
               className={FIELD}
             />
+            {/* Full page width, so it is held to the 1920px it is drawn at,
+                not to the cover's 1280px. */}
             <AdminImagePicker
               uploading={uploading === "banner"}
               value={bannerUrl}
+              hint="Nên từ 1920×600 trở lên · PNG / JPG / WebP · tối đa 8MB"
+              warnBelow={1920}
               onPick={async (file) => {
                 const url = await uploadImage(file, "banner");
                 if (url) setBannerUrl(url);
@@ -295,9 +299,13 @@ export function AdminCategoryDetail({
               aria-label="Đường dẫn logo game"
               className={FIELD}
             />
+            {/* A logo is square and small: the 16:9 cover advice does not
+                apply, and the route's own floor is 64×64. */}
             <AdminImagePicker
               uploading={uploading === "logo"}
               value={logoUrl}
+              hint="Vuông, từ 128×128 trở lên · PNG / JPG / WebP · tối đa 8MB"
+              warnBelow={128}
               onPick={async (file) => {
                 const url = await uploadImage(file, "logo");
                 if (url) setLogoUrl(url);

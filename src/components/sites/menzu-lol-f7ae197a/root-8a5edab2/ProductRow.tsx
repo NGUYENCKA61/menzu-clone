@@ -602,10 +602,19 @@ export function RowTile({
           src={card.image}
           alt={card.title}
           fill
+          // The width the picture is DRAWN at, not the tile's. Covers are
+          // 16:9 and object-cover crops them by height, so in a 4:3 tile the
+          // picture runs 4/3 of the tile's width (a 300px tile draws it 400px
+          // wide), and in the 16:10 pick tile about 10/9 of it. Asked for at
+          // the tile's own width, a sharp screen got a file smaller than what
+          // it painted, and the tiles looked soft (the owner's card picture
+          // question, 13/10/2026). Widths follow the grid: 1272px of row at
+          // 1320px+, four across from lg, three from md, two below; the pick
+          // tiles slide three to a view.
           sizes={
             big
-              ? "(min-width: 1320px) 420px, (min-width: 768px) 33vw, 50vw"
-              : "(min-width: 1320px) 310px, (min-width: 1024px) 25vw, (min-width: 768px) 33vw, 50vw"
+              ? "(min-width: 1320px) 440px, (min-width: 768px) 33vw, 50vw"
+              : "(min-width: 1320px) 400px, (min-width: 1024px) 34vw, (min-width: 768px) 45vw, 67vw"
           }
           className={cn(
             "object-cover transition-transform duration-500 group-hover:scale-105 motion-reduce:transform-none",
