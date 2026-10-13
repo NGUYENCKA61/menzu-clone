@@ -296,11 +296,17 @@ export function warrantyBlockedReason({
   orderStatus,
   openRequest,
   refunding = false,
+  free = false,
   signIn = null,
 }: {
   orderStatus: string;
   openRequest: boolean;
   refunding?: boolean;
+  /**
+   * A free tool (its order's list price is nothing): handed out, not sold,
+   * so there is no warranty to claim (the owner, 14/10/2026).
+   */
+  free?: boolean;
   /**
    * An account whose sign-in the buyer has not taken yet: still "locked"
    * behind "Lấy thông tin", or "pending" while the shop types it. Nothing
@@ -314,6 +320,9 @@ export function warrantyBlockedReason({
   }
   if (orderStatus !== "PAID") {
     return "Chỉ đơn đã thanh toán mới yêu cầu bảo hành được.";
+  }
+  if (free) {
+    return "Tool miễn phí không có bảo hành.";
   }
   if (refunding) {
     return "Đơn này đang được hoàn tiền, bạn theo dõi tiến độ ở yêu cầu phía trên.";

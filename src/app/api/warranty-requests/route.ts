@@ -56,6 +56,7 @@ export async function POST(request: Request) {
     where: { code, userId: user.id },
     select: {
       ...LOGIN_ORDER_SELECT,
+      listPrice: true,
       warrantyRequests: {
         where: { status: { not: "RESOLVED" } },
         select: { id: true },
@@ -91,6 +92,7 @@ export async function POST(request: Request) {
   const blocked = warrantyBlockedReason({
     orderStatus: order.status,
     openRequest: order.warrantyRequests.length > 0,
+    free: kind === "software" && order.listPrice === 0n,
     signIn: kind === "account" ? signInHold(order) : null,
   });
   if (blocked) {

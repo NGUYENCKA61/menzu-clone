@@ -567,8 +567,10 @@ export function OrderDetailModal({
   // owner, 07/10/2026: "thay icon con mắt cho xem trạng thái" → "đổi").
   const WarrantyIcon =
     warrantyAction.kind === "request" ? Wrench : warrantyAction.kind === "bank" ? CreditCard : Eye;
-  // A refunded or unpaid order with no ticket has nothing to report or follow.
-  const showWarranty = order.paid || order.warranty !== null;
+  // A refunded or unpaid order with no ticket has nothing to report or follow,
+  // and neither has a free tool (list price nothing; the owner, 14/10/2026):
+  // the button only stays where a ticket already exists to follow.
+  const showWarranty = (order.paid && order.listPrice > 0) || order.warranty !== null;
 
   return (
     <>

@@ -156,6 +156,7 @@ export default async function WarrantyRequestPage({
     select: {
       ...LOGIN_ORDER_SELECT,
       total: true,
+      listPrice: true,
       quantity: true,
       createdAt: true,
       product: {
@@ -206,6 +207,7 @@ export default async function WarrantyRequestPage({
     orderStatus: order.status,
     openRequest: order.warrantyRequests.some((r) => warrantyOpen(r.status)),
     refunding: order.warrantyRequests.some((r) => r.status === "REFUNDING"),
+    free: kind === "software" && order.listPrice === 0n,
     signIn: kind === "account" ? signInHold(order) : null,
   });
   const productName = order.product.name ?? order.product.code;

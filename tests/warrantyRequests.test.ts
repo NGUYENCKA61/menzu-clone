@@ -68,6 +68,15 @@ describe("warrantyBlockedReason", () => {
     );
   });
 
+  it("refuses a free tool, which has no warranty to claim", () => {
+    expect(
+      warrantyBlockedReason({ orderStatus: "PAID", openRequest: false, free: true }),
+    ).toMatch(/miễn phí/);
+    expect(
+      warrantyBlockedReason({ orderStatus: "PAID", openRequest: false, free: false }),
+    ).toBeNull();
+  });
+
   it("refuses a second report while the first is still open", () => {
     expect(warrantyBlockedReason({ orderStatus: "PAID", openRequest: true })).toMatch(
       /chưa xử lý xong/,
