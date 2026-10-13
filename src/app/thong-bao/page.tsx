@@ -5,11 +5,11 @@ import { Bell } from "lucide-react";
 
 import { SimplePage } from "@/components/sites/menzu-lol-f7ae197a/shared/SimplePage";
 import {
-  NOTICE_TAB,
-  NOTICE_TAB_COUNT,
-  NOTICE_TAB_OFF,
-  NOTICE_TAB_ON,
-} from "@/components/sites/menzu-lol-f7ae197a/shared/noticeTabLook";
+  PILL_TAB,
+  PILL_TAB_COUNT,
+  PILL_TAB_OFF,
+  PILL_TAB_ON,
+} from "@/components/sites/menzu-lol-f7ae197a/shared/pillTab";
 import { StatusNote } from "@/components/sites/menzu-lol-f7ae197a/shared/StatusNote";
 import { StatusSubscribeSearch } from "@/components/sites/menzu-lol-f7ae197a/shared/StatusSubscribeSearch";
 import { UrlPager } from "@/components/sites/menzu-lol-f7ae197a/shared/UrlPager";
@@ -169,23 +169,25 @@ export default async function AnnouncementsPage({
     <SimplePage title="Thông báo & trạng thái" crumb="Thông báo & trạng thái" icon={Bell} ground="home">
       {/* On a phone the three tabs scroll as one row, bleeding to the
           screen's edges; stacked, they took three lines before a single
-          notice was in view. */}
+          notice was in view. Their pill is the site's tab button now
+          (shared/pillTab), the same one /security and the category filter
+          light (the owner, 13/10/2026, UI consistency review). */}
       <nav
         aria-label="Loại thông báo"
         className="hide-scrollbar -mx-4 mb-6 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:flex-wrap sm:px-0 sm:pb-0"
       >
         <Link
           href="/thong-bao"
-          className={`${NOTICE_TAB} ${statusTab || subscribeTab ? NOTICE_TAB_OFF : NOTICE_TAB_ON}`}
+          className={`${PILL_TAB} ${statusTab || subscribeTab ? PILL_TAB_OFF : PILL_TAB_ON}`}
         >
           Thông báo hệ thống
-          <span className={NOTICE_TAB_COUNT}>
+          <span className={PILL_TAB_COUNT}>
             {announcements.length}
           </span>
         </Link>
-        <Link href={STATUS_TAB_HREF} className={`${NOTICE_TAB} ${statusTab ? NOTICE_TAB_ON : NOTICE_TAB_OFF}`}>
+        <Link href={STATUS_TAB_HREF} className={`${PILL_TAB} ${statusTab ? PILL_TAB_ON : PILL_TAB_OFF}`}>
           Trạng thái hack chung
-          <span className={NOTICE_TAB_COUNT}>
+          <span className={PILL_TAB_COUNT}>
             {events.length}
           </span>
         </Link>
@@ -194,10 +196,10 @@ export default async function AnnouncementsPage({
             reader follows none. */}
         <Link
           href={STATUS_SUBSCRIBE_HREF}
-          className={`${NOTICE_TAB} ${subscribeTab ? NOTICE_TAB_ON : NOTICE_TAB_OFF}`}
+          className={`${PILL_TAB} ${subscribeTab ? PILL_TAB_ON : PILL_TAB_OFF}`}
         >
           Đăng ký nhận thông báo
-          <span className={NOTICE_TAB_COUNT}>
+          <span className={PILL_TAB_COUNT}>
             {followed.size}
           </span>
         </Link>

@@ -10,14 +10,28 @@ import {
   GROUP_DIVIDER,
   GROUP_LABEL_CLASS,
   PANEL_CLASS,
-  PILL,
-  PILL_ACTIVE,
   SEARCH_SHELL_CLASS,
-  SEGMENT,
-  SEGMENT_ACTIVE,
-  SEGMENTS,
 } from "./filterChrome";
+import { PILL_TAB_OFF, PILL_TAB_ON, PILL_TAB_SM } from "./pillTab";
 import { ScopeSearchField } from "./ScopeSearchField";
+
+/*
+ * The chips light as the /thong-bao tabs and the home filter do: the small
+ * tab pill, solid red when picked, grey when not (the owner, 13/10/2026, UI
+ * consistency review), where they used to wear a pale pink tint. The
+ * either-or groups keep their well, now in the idle pill's grey, its
+ * segments the same small pill without a fill of their own; 3px of padding
+ * fits a 32px segment exactly inside the 40px well. The pill rows carry 4px
+ * above and below so they stand as tall as a well, and each group's caption
+ * still lines up with its neighbours' on the lg row.
+ */
+const PILL = `press ${PILL_TAB_SM} ${PILL_TAB_OFF}`;
+const PILL_ACTIVE = `press ${PILL_TAB_SM} ${PILL_TAB_ON}`;
+const PILL_ROW = "flex flex-wrap gap-2 py-1";
+const SEGMENTS =
+  "inline-flex h-10 items-center gap-1 rounded-xl border border-white/10 bg-white/5 p-[3px]";
+const SEGMENT = `press ${PILL_TAB_SM} border-transparent text-neutral-300 hover:bg-white/10 hover:text-white`;
+const SEGMENT_ACTIVE = `press ${PILL_TAB_SM} ${PILL_TAB_ON}`;
 
 // The states a buyer shops by. "Rủi ro", "Đang cập nhật" and "Đã phát hiện"
 // came off the chips (the owner, 07/10/2026: "bỏ 3 cái rủi ro đang cập nhật
@@ -207,11 +221,12 @@ export function SoftwareFilterPanel({
             {/* First, because it is the one thing a tool is bought or
                 abandoned on — the card leads with the same pill. */}
             <span className={GROUP_LABEL_CLASS}>Trạng thái</span>
-            <div className="flex flex-wrap gap-2">
+            <div className={PILL_ROW}>
               {STATUS_OPTIONS.map((option) => (
                 <button
                   key={option.value}
                   type="button"
+                  aria-pressed={shownStatus === option.value}
                   onClick={() =>
                     startTransition(() => {
                       showStatus(option.value);
@@ -258,11 +273,12 @@ export function SoftwareFilterPanel({
               <span aria-hidden className={GROUP_DIVIDER} />
               <div>
                 <span className={GROUP_LABEL_CLASS}>Nền tảng</span>
-                <div className="flex flex-wrap gap-2">
+                <div className={PILL_ROW}>
                   {["", ...launchers.map((key) => key.toLowerCase())].map((value) => (
                     <button
                       key={value || "all"}
                       type="button"
+                      aria-pressed={shownLauncher === value}
                       onClick={() =>
                         startTransition(() => {
                           showLauncher(value);
