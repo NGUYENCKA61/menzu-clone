@@ -841,26 +841,28 @@ const nikeCss = String.raw`/* 5. NIKE (TRIAL, 13/10/2026): black and white, as c
    On only under html[data-variant="nike"] (?giao-dien=nike); the dark site and
    the ocean dress never match these rules. */
 ${NIKE} {
-  /* One white page and surface, #f5f5f5 wells, one #e5e5e5 hairline. */
-  --light-page: #ffffff;
-  --light-surface: #ffffff;
-  --light-surface-hover: #f5f5f5;
-  --light-line: #e5e5e5;
+  /* Not pure white (the owner, 14/10/2026: "làm sao bớt chói đi", "màu sáng
+     nó chói"): a soft off-white page, panels one step lighter, wells and the
+     line one step darker, so nothing glares and the layers still separate. */
+  --light-page: #f4f4f2;
+  --light-surface: #fbfbfa;
+  --light-surface-hover: #efeeeb;
+  --light-line: #e2e1dd;
   --light-line-strong: #cacacb; /* field outlines, secondary buttons */
-  --light-band: #f5f5f5; /* the top strip */
-  /* Two inks and one grey: #111 18.9:1, #707072 4.94:1 on white. */
+  --light-band: #ecebe8; /* bands (footer) */
+  /* Two inks and one grey: #111, and #666668 (5.2:1 on the page, 4.8:1 on a well). */
   --light-ink: #111111;
   --light-ink-2: #111111;
-  --light-ink-3: #707072;
+  --light-ink-3: #666668; /* 5.2:1 on the page, 4.8:1 on a well */
   /* The dimmest step still paints words (a dim hex grey, list numbers), so it
      is the secondary grey too, not Nike's #9e9ea0 (2.7:1). */
-  --light-ink-4: #707072;
-  --nike-well: #f5f5f5; /* behind pictures, fields, quiet chips */
-  --nike-well-hover: #e5e5e5;
+  --light-ink-4: #666668;
+  --nike-well: #ecebe8; /* behind pictures, fields, quiet chips */
+  --nike-well-hover: #e2e1dd;
   /* The accent is black; hover #3a3a3a (white on it 11.4:1). */
   --ocean: #111111;
   --ocean-dark: #3a3a3a;
-  --ocean-soft: #f5f5f5;
+  --ocean-soft: #ecebe8;
   --ocean-line: #cacacb;
   --ocean-ring: rgb(17 17 17 / 0.12);
   --brand: #111111;
@@ -869,7 +871,7 @@ ${NIKE} {
   --menzu-accent-dark: #3a3a3a;
   --primary: #111111;
   --ring: #111111;
-  --menzu-backdrop-dim: rgb(255 255 255 / 0.72);
+  --menzu-backdrop-dim: rgb(244 244 242 / 0.72);
   --menzu-scroll-thumb: #cacacb;
   --menzu-scroll-thumb-hover: #9e9ea0;
   --menzu-scroll-thumb-active: #111111;
@@ -985,7 +987,7 @@ ${NIKE} ${PRIMARY} * {
 /* Secondary: a white pill on a 1.5px grey line that turns black under the
    pointer. */
 ${NIKE} ${SECONDARY} {
-  background-color: #ffffff;
+  background-color: var(--light-surface);
   border: 1.5px solid var(--light-line-strong);
   border-radius: 9999px;
   box-shadow: none;
@@ -1024,7 +1026,7 @@ ${NIKE} ${CHIP_OFF}:hover {
 }
 ${NIKE} ${CHIP_ON} {
   --color-white: #111111;
-  background-color: #ffffff;
+  background-color: var(--light-surface);
   border-color: transparent;
   border-radius: 9999px;
   box-shadow: inset 0 0 0 1.5px #111111;
@@ -1148,7 +1150,7 @@ ${NIKE} .site-nav ${ACCENT_FILL}[class] {
 }
 
 /* Footer: white with one line on top; black column titles, grey links. */
-${NIKE} ${FOOTER} { background-color: #ffffff; border-top-color: var(--light-line); }
+${NIKE} ${FOOTER} { background-color: var(--light-band); border-top-color: var(--light-line); }
 ${NIKE} ${FOOTER} h2${NOT_DARK} { font-size: 14px; font-weight: 600; color: var(--light-ink); }
 ${NIKE} ${FOOTER} a${unless('[class*="text-[var(--menzu-accent)]"]')}${NOT_DARK} { color: var(--light-ink-3); }
 ${NIKE} ${FOOTER} a${NOT_DARK}:hover { color: var(--light-ink); }
