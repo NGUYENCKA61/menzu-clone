@@ -773,7 +773,7 @@ const CARD = String.raw`.lift-card.border-\[\#24252a\]` + NOT_DARK;
 const FOOTER = String.raw`footer.bg-\[\#0f1015\]`;
 const TYPE_EX = unless("h1", ...LOCKUP) + NOT_DARK;
 // The old site's write-ups paint warnings in pure red (#ff0000, 4.0:1 on
-// white); Nike's critical red #d30005 reads (5.86:1) and is still red.
+// white); Nike's critical red #d30005 reads (5.58:1) and is still red.
 const nikeInlineCss = Object.entries({ "#ff0000": "#d30005" })
   .map(([hex, value]) => {
     const rgb = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16)).join(", ");
@@ -802,7 +802,7 @@ ${NIKE} {
   --light-ink-4: #9e9ea0; /* decoration only (separators), Nike's disabled grey */
   --nike-well: #f5f5f5; /* behind pictures, fields, quiet chips */
   --nike-well-hover: #e5e5e5;
-  /* The accent is black; hover #3a3a3a (white on it 11.5:1). */
+  /* The accent is black; hover #3a3a3a (white on it 11.4:1). */
   --ocean: #111111;
   --ocean-dark: #3a3a3a;
   --ocean-soft: #f5f5f5;

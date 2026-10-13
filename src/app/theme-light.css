@@ -1040,7 +1040,7 @@ html[data-theme="light"][data-variant="nike"] {
   --light-ink-4: #9e9ea0; /* decoration only (separators), Nike's disabled grey */
   --nike-well: #f5f5f5; /* behind pictures, fields, quiet chips */
   --nike-well-hover: #e5e5e5;
-  /* The accent is black; hover #3a3a3a (white on it 11.5:1). */
+  /* The accent is black; hover #3a3a3a (white on it 11.4:1). */
   --ocean: #111111;
   --ocean-dark: #3a3a3a;
   --ocean-soft: #f5f5f5;
