@@ -47,7 +47,7 @@ function toCard(
 }
 
 /** What a category's tile says about its shelf: the cheapest paid price and
- *  how many products are on sale (the owner, 14/10/2026: "chỉ từ bao nhiêu
+ *  how many products are on sale (the owner, 13/10/2026: "chỉ từ bao nhiêu
  *  tiền cho card"). */
 interface CategoryFigures {
   fromPrice: number | null;

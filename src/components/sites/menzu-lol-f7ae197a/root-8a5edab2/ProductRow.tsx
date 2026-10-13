@@ -539,7 +539,7 @@ function BentoTile({
 }
 
 /**
- * How a picture tile dresses its cover (the owner, 14/10/2026: "giữ nguyên
+ * How a picture tile dresses its cover (the owner, 13/10/2026: "giữ nguyên
  * kích thước chỉ thêm chữ và giảm độ sáng ảnh", three versions to compare):
  *
  *  - classic: the fade at the foot and the name, as before.

@@ -1,6 +1,6 @@
 /**
  * A name typed in capitals, shown with only its first letter capital (the
- * owner, 14/10/2026: "mấy cái card trang chủ bỏ in hoa thử… chỉ in hoa chữ
+ * owner, 13/10/2026: "mấy cái card trang chủ bỏ in hoa thử… chỉ in hoa chữ
  * đầu"): "HACK ĐỘT KÍCH CFVN - CF4VN" reads "Hack đột kích CFVN - CF4VN".
  *
  * Only words typed wholly in capitals are lowered, so a word the admin typed

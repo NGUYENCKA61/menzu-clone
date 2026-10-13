@@ -115,8 +115,8 @@ export function SoftwareCard({
   /**
    * A free tool (the shop's 1đ placeholder tier) gets its own card (the
    * owner, 07/10/2026: "thiết kế card cho phần mềm thuộc dạng miễn phí" →
-   * "b"): a red ribbon across the picture's corner (14/10/2026) and one
-   * "Tải ngay" (14/10/2026, was "Nhận miễn phí") in
+   * "b"): a red ribbon across the picture's corner (13/10/2026) and one
+   * "Tải ngay" (13/10/2026, was "Nhận miễn phí") in
    * the shop's red (a green one glared: "xanh lá chói quá… đỏ hoặc tím")
    * that leads to the tool's own page, where the key is handed out behind
    * the shop's shortlink (12/10/2026; until then it opened the download
@@ -182,7 +182,7 @@ export function SoftwareCard({
 
           {free ? (
             // A red ribbon across the picture's corner in place of the green
-            // pill (the owner, 14/10/2026: "thay vì ghi miễn phí có cái tag
+            // pill (the owner, 13/10/2026: "thay vì ghi miễn phí có cái tag
             // chéo góc bìa card đỏ"): a strip turned 45° and clipped to a
             // square at the corner, the word running along the diagonal.
             <span className="pointer-events-none absolute left-0 top-0 z-20 block h-[92px] w-[92px] overflow-hidden rounded-tl-[14px]">

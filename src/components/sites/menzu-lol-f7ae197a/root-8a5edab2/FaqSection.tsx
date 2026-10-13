@@ -10,7 +10,7 @@ import { RevealGrid } from "./RevealGrid";
 
 /**
  * The five questions a buyer has left after the proof, in the owner's own
- * words (14/10/2026, "sửa lại 5 card cũ faq"): safety, the main account,
+ * words (13/10/2026, "sửa lại 5 card cũ faq"): safety, the main account,
  * payment, refunds, support. Shown until the shop writes its own in Cấu
  * hình → Cấu hình trang chủ → FAQ, which replaces the whole list.
  */

@@ -30,7 +30,7 @@ export interface ProductCard {
   platform?: string | null;
   /**
    * The cheapest paid price in the category, in đồng, for a "Chỉ từ 39.000đ"
-   * line on the tile (the owner, 14/10/2026); null when nothing paid is on
+   * line on the tile (the owner, 13/10/2026); null when nothing paid is on
    * sale. A free tool's 1đ placeholder tier is not a price.
    */
   fromPrice?: number | null;

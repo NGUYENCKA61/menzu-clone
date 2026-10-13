@@ -304,7 +304,7 @@ export function warrantyBlockedReason({
   refunding?: boolean;
   /**
    * A free tool (its order's list price is nothing): handed out, not sold,
-   * so there is no warranty to claim (the owner, 14/10/2026).
+   * so there is no warranty to claim (the owner, 13/10/2026).
    */
   free?: boolean;
   /**

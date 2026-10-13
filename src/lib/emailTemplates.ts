@@ -1,6 +1,6 @@
 /**
  * The shop's emails, drawn the way mail clients can actually show them (the
- * owner, 14/10/2026: "gmail tự động nội dung mình làm nó đẹp được không"):
+ * owner, 13/10/2026: "gmail tự động nội dung mình làm nó đẹp được không"):
  * tables for layout, every style inline, a system font stack and no pictures
  * to be blocked, a white card under a dark band in the shop's red, so it reads
  * the same with images off and in Gmail's dark mode.
@@ -75,7 +75,7 @@ function shopParts(date: Date): Record<string, string> {
   );
 }
 
-/** "14/10/2026 21:30", on the shop's clock whatever the server's says. */
+/** "13/10/2026 21:30", on the shop's clock whatever the server's says. */
 export function shopDateTime(date: Date): string {
   const p = shopParts(date);
   return `${p.day}/${p.month}/${p.year} ${p.hour}:${p.minute}`;
