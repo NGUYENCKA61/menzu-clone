@@ -28,4 +28,12 @@ export interface ProductCard {
    * on categories nobody has tagged yet.
    */
   platform?: string | null;
+  /**
+   * The cheapest paid price in the category, in đồng, for a "Chỉ từ 39.000đ"
+   * line on the tile (the owner, 14/10/2026); null when nothing paid is on
+   * sale. A free tool's 1đ placeholder tier is not a price.
+   */
+  fromPrice?: number | null;
+  /** How many products the category has on sale; null on service tiles. */
+  count?: number | null;
 }

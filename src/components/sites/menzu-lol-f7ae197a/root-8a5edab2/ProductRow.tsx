@@ -1,4 +1,5 @@
 import { CardImage } from "@/components/sites/menzu-lol-f7ae197a/shared/CardImage";
+import { formatVnd } from "@/components/sites/menzu-lol-f7ae197a/shared/productData";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -638,8 +639,20 @@ function RowTile({
   );
 }
 
+/**
+ * "Chỉ từ 39.000đ · 12 sản phẩm", or whichever half the category has; null
+ * when it has neither (a service tile), so the blurb can stand in.
+ */
+function priceLine(card: ProductCard, lead = "Chỉ từ"): string | null {
+  const parts: string[] = [];
+  if (card.fromPrice != null) parts.push(`${lead} ${formatVnd(card.fromPrice)}đ`);
+  if (card.count != null && card.count > 0) parts.push(`${card.count} sản phẩm`);
+  return parts.length > 0 ? parts.join(" · ") : null;
+}
+
 /** The words and shade a tile wears in styles a, b and c (see TileStyle). */
 function TileDress({ card, style, big }: { card: ProductCard; style: TileStyle; big: boolean }) {
+  const line = priceLine(card);
   if (style === "a") {
     return (
       <>
@@ -655,7 +668,11 @@ function TileDress({ card, style, big }: { card: ProductCard; style: TileStyle; 
           <h3 className={cn("text-[15px] font-black uppercase leading-[1.1] tracking-wide text-white sm:text-base", big && "lg:text-[19px]")}>
             {card.title}
           </h3>
-          {card.description ? (
+          {line ? (
+            <span className="text-[11px] font-semibold leading-snug text-neutral-200">
+              {line}
+            </span>
+          ) : card.description ? (
             <span className="line-clamp-1 text-[11px] leading-snug text-neutral-300/90">{card.description}</span>
           ) : null}
         </span>
@@ -677,6 +694,11 @@ function TileDress({ card, style, big }: { card: ProductCard; style: TileStyle; 
           <h3 className={cn("text-[14px] font-bold leading-tight tracking-wide text-white sm:text-[15px]", big && "lg:text-[18px]")}>
             {card.title}
           </h3>
+          {line ? (
+            <span className="text-[11px] font-medium leading-snug text-neutral-400">
+              {priceLine(card, "Từ")}
+            </span>
+          ) : null}
         </span>
       </>
     );
@@ -685,11 +707,17 @@ function TileDress({ card, style, big }: { card: ProductCard; style: TileStyle; 
     <span className="absolute inset-x-0 bottom-0 flex items-center gap-2.5 border-t border-white/[0.07] bg-[#0b0b0f]/92 px-3.5 py-2.5 backdrop-blur-[2px]">
       <span className="flex min-w-0 flex-1 flex-col">
         <h3 className="truncate text-[13px] font-black uppercase tracking-wide text-white sm:text-sm">{card.title}</h3>
-        {card.description ? (
+        {card.count != null && card.count > 0 ? (
+          <span className="truncate text-[10.5px] text-neutral-400">{card.count} sản phẩm</span>
+        ) : card.description ? (
           <span className="truncate text-[10.5px] text-neutral-400">{card.description}</span>
         ) : null}
       </span>
-      {card.platform ? (
+      {card.fromPrice != null ? (
+        <span className="shrink-0 rounded-md bg-[var(--menzu-accent)]/15 px-2 py-1 text-[10px] font-black tracking-wide text-[var(--menzu-accent)]">
+          từ {formatVnd(card.fromPrice)}đ
+        </span>
+      ) : card.platform ? (
         <span className="shrink-0 rounded-md border border-white/10 bg-white/[0.04] px-1.5 py-0.5 text-[9px] font-extrabold uppercase tracking-wider text-neutral-300">
           {card.platform}
         </span>

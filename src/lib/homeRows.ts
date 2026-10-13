@@ -17,20 +17,25 @@ import { categoryHref } from "@/lib/routes";
 
 /** One category as a tile. The single place a category becomes a card, so a
  *  category shown in three groups is described identically in all three. */
-function toCard(c: {
-  imageUrl: string | null;
-  name: string;
-  slug: string;
-  description: string | null;
-  platform: string | null;
-  soldCount: number;
-  stockCount: number;
-}): ProductCard {
+function toCard(
+  c: {
+    imageUrl: string | null;
+    name: string;
+    slug: string;
+    description: string | null;
+    platform: string | null;
+    soldCount: number;
+    stockCount: number;
+  },
+  figures?: CategoryFigures,
+): ProductCard {
   return {
     image: c.imageUrl ?? "",
     title: c.name,
     description: c.description,
     platform: c.platform,
+    fromPrice: figures?.fromPrice ?? null,
+    count: figures?.count ?? null,
     href: categoryHref(c.slug),
     // Both stat labels drive colour in ProductRow's tone lookup, so they stay
     // exactly as the live site words them.
@@ -39,6 +44,51 @@ function toCard(c: {
       { label: "Đang Bán", value: String(c.stockCount) },
     ] as [{ label: string; value: string }, { label: string; value: string }],
   };
+}
+
+/** What a category's tile says about its shelf: the cheapest paid price and
+ *  how many products are on sale (the owner, 14/10/2026: "chỉ từ bao nhiêu
+ *  tiền cho card"). */
+interface CategoryFigures {
+  fromPrice: number | null;
+  count: number;
+}
+
+/**
+ * The figures for every category named, in one query over the products on
+ * sale. A tool's price is its cheapest tier; an account's is its own price;
+ * a free tool's 1đ placeholder tier is not a price and is left out, so a
+ * category of free tools reads as having a count and no "từ".
+ */
+async function categoryFigures(
+  categoryIds: readonly string[],
+): Promise<Map<string, CategoryFigures>> {
+  const figures = new Map<string, CategoryFigures>();
+  if (categoryIds.length === 0) return figures;
+  const products = await db.product.findMany({
+    where: { deletedAt: null, status: "AVAILABLE", categoryId: { in: [...categoryIds] } },
+    select: {
+      categoryId: true,
+      productType: true,
+      price: true,
+      packages: { select: { price: true } },
+    },
+  });
+  for (const p of products) {
+    const row = figures.get(p.categoryId) ?? { fromPrice: null, count: 0 };
+    row.count += 1;
+    const prices =
+      p.productType === "SOFTWARE_GAME" && p.packages.length > 0
+        ? p.packages.map((tier) => Number(tier.price))
+        : [Number(p.price)];
+    const paid = prices.filter((value) => value > 1);
+    if (paid.length > 0) {
+      const min = Math.min(...paid);
+      row.fromPrice = row.fromPrice === null ? min : Math.min(row.fromPrice, min);
+    }
+    figures.set(p.categoryId, row);
+  }
+  return figures;
 }
 
 /** A group and the tiles it shows, ready to render. */
@@ -77,6 +127,10 @@ export async function getHomeGroups(
     },
   });
 
+  const figures = await categoryFigures(
+    [...new Set(groups.flatMap((group) => group.categories.map((link) => link.category.id)))],
+  );
+
   return groups
     .map((group) => ({
       id: group.id,
@@ -85,7 +139,7 @@ export async function getHomeGroups(
       cards: (unlimited.includes(group.slug)
         ? group.categories
         : group.categories.slice(0, count)
-      ).map((link) => toCard(link.category)),
+      ).map((link) => toCard(link.category, figures.get(link.category.id))),
     }))
     .filter((group) => group.cards.length > 0);
 }
