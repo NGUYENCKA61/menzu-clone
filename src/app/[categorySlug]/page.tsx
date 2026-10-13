@@ -241,8 +241,13 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
                       // costs that tile, not the shelf.
                       <CardBoundary key={s.code}>
                         <SoftwareCard
-                          priority={index === 0}
-                          eager={index > 0 && index < 3}
+                          // The hero picture above is the page's LCP image
+                          // when there is one; only without it is the first
+                          // card the one fetched at High. Two cards eager:
+                          // the third already sat below a phone's fold
+                          // (SEO review, 13/10/2026).
+                          priority={!data.heroImageUrl && index === 0}
+                          eager={index < 2}
                           // A rich-editor description is HTML; the card prints a
                           // sentence, so it gets the prose without the tags.
                           software={
@@ -288,11 +293,12 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
                         <ProductCard
                           key={product.code}
                           product={product}
-                          // Only when no tool grid sits above: the first
-                          // picture the reader sees is the one to preload,
-                          // and there is one preload per page.
-                          priority={data.softwareTotal === 0 && index === 0}
-                          eager={index < 3}
+                          // Only when neither a hero picture nor a tool grid
+                          // sits above: the first picture the reader sees is
+                          // the one to fetch at High, one per page. Under a
+                          // tool grid none of these is near the fold.
+                          priority={!data.heroImageUrl && data.softwareTotal === 0 && index === 0}
+                          eager={data.softwareTotal === 0 && index < 2}
                         />
                       ))}
                     </div>

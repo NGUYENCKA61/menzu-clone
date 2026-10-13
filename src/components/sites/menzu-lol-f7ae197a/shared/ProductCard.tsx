@@ -16,9 +16,11 @@ import {
 
 export interface ProductCardProps {
   product: Product;
-  /** First in its grid: preloaded. One per page, since each is a <link rel=preload>. */
+  /** The page's LCP image (first in its grid, nothing drawn above it):
+   *  preloaded and fetched at High. One per page, since each is a
+   *  <link rel=preload>. */
   priority?: boolean;
-  /** Second and third: fetched before the rest, no preload. */
+  /** Also above the fold: fetched before the rest, at no raised priority. */
   eager?: boolean;
 }
 
@@ -142,10 +144,15 @@ export function ProductCard({ product, priority = false, eager = false }: Produc
           }
           fill
           sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-          // The first card of a grid is preloaded, the next two fetched
-          // eagerly; the rest wait their turn. Never both on one picture —
-          // Next warns, and priority already implies eager.
-          {...(priority ? { priority: true } : eager ? { loading: "eager" as const } : {})}
+          // The page's LCP card is preloaded and fetched at High (Next 16's
+          // `priority` only preloads), the other cards above the fold are
+          // fetched eagerly, the rest wait their turn. Never both on one
+          // picture: preload already implies eager.
+          {...(priority
+            ? { preload: true, fetchPriority: "high" as const }
+            : eager
+              ? { loading: "eager" as const }
+              : {})}
           className="object-cover object-[85%_center] transition-transform duration-500 group-hover:scale-105"
         />
         {/* A fade along the bottom edge so the picture hands off to the body

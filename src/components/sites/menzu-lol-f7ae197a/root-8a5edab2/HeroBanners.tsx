@@ -245,7 +245,11 @@ export function HeroBanners({
               fill
               sizes="(max-width: 1024px) 100vw, 620px"
               className="select-none object-cover"
-              priority
+              // The home page's LCP image. In Next 16 `priority` only
+              // preloads; fetchPriority is what lifts it to High (SEO
+              // review, 13/10/2026).
+              preload
+              fetchPriority="high"
             />
           )}
         </div>

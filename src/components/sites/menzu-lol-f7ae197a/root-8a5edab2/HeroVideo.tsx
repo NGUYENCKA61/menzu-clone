@@ -81,7 +81,10 @@ export function HeroVideo({ src, poster }: { src: string; poster: string }) {
         fill
         sizes="(max-width: 1024px) 100vw, 620px"
         className="select-none object-cover"
-        priority
+        // The still is the LCP image, the clip only fades in over it, so
+        // the still is the one fetched at High.
+        preload
+        fetchPriority="high"
       />
       <video
         ref={ref}

@@ -128,7 +128,9 @@ export default async function DocArticlePage({ params }: PageProps) {
             alt=""
             fill
             sizes="(min-width: 768px) 768px, 100vw"
-            priority
+            // The article's LCP image, so the one fetched at High.
+            preload
+            fetchPriority="high"
             className="object-cover"
           />
         </div>

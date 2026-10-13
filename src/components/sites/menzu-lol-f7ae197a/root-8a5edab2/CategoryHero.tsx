@@ -37,7 +37,9 @@ export function CategoryHero({
             src={imageUrl}
             alt=""
             fill
-            priority
+            // The category page's LCP image, so the one fetched at High.
+            preload
+            fetchPriority="high"
             sizes="100vw"
             // Anchored to the picture's top edge rather than its middle, as
             // the shop asked: faces and logos tend to sit high in these
