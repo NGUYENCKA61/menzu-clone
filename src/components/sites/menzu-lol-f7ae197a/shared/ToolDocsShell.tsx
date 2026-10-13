@@ -1,7 +1,33 @@
-import { BookOpen, ChevronRight, ListTree, Wrench } from "lucide-react";
+import {
+  Ban,
+  BookOpen,
+  ChevronRight,
+  Cpu,
+  Gamepad2,
+  ListTree,
+  LockOpen,
+  Microchip,
+  Package,
+  RotateCcw,
+  ShieldCheck,
+  ShieldOff,
+  Users,
+  Wrench,
+  type LucideIcon,
+} from "lucide-react";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
+import {
+  DOCS_RAIL_BAR,
+  DOCS_RAIL_BOX,
+  DOCS_RAIL_LABEL,
+  DOCS_RAIL_ROW,
+  DOCS_RAIL_ROW_OFF,
+  DOCS_RAIL_ROW_ON,
+  docsRailIcon,
+} from "@/components/sites/menzu-lol-f7ae197a/shared/docsRail";
+import { sentenceCase } from "@/lib/displayCase";
 import { PC_SETUP_PAGES, pcSetupHref } from "@/lib/pcSetup";
 import { toolDocsHref } from "@/lib/routes";
 import type { ToolDocsIndexCategory } from "@/lib/toolDocs";
@@ -29,30 +55,54 @@ export const TOOL_DOCS_SECTIONS: { id: string; label: string }[] = [
   { id: "loi-thuong-gap", label: "Lỗi thường gặp & hỗ trợ" },
 ];
 
-const GROUP =
-  "text-[10px] font-black uppercase tracking-widest text-neutral-500";
-const ROW =
-  "flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-[12px] font-semibold transition-colors";
-const ROW_IDLE = `${ROW} text-neutral-300 hover:bg-white/5 hover:text-white`;
-const ROW_NOW = `${ROW} bg-[var(--menzu-accent)]/10 text-white`;
+/** Each machine-preparation page's glyph; a page added later gets the wrench. */
+const SETUP_ICON: Record<string, LucideIcon> = {
+  "tat-windows-defender": ShieldOff,
+  "tat-secure-boot": LockOpen,
+  "tat-core-isolation": Cpu,
+  "tat-tpm": Microchip,
+  "tat-anti-cheat-khac": Ban,
+  "cai-runtime": Package,
+  "reset-hwid": RotateCcw,
+};
+
+/** The line down the left of a game's tools, and of the open tool's parts,
+ *  starting under the glyph of the row above. */
+const BRANCH = "ml-5 mt-1 flex flex-col border-l border-white/10 pl-2";
+const SUB =
+  "rounded-lg px-2.5 py-1.5 text-[13px] font-semibold text-neutral-400 transition-colors hover:bg-white/5 hover:text-white";
 
 function Row({
   href,
   now,
+  icon: Icon,
   children,
 }: {
   href: string;
   now: boolean;
+  /** Left out for a tool under its game: the game's glyph stands for it. */
+  icon?: LucideIcon;
   children: ReactNode;
 }) {
   return (
     <Link
       href={href}
       aria-current={now ? "page" : undefined}
-      className={now ? ROW_NOW : ROW_IDLE}
+      className={`${DOCS_RAIL_ROW} ${now ? DOCS_RAIL_ROW_ON : DOCS_RAIL_ROW_OFF}`}
     >
-      {children}
+      {now ? <span aria-hidden className={DOCS_RAIL_BAR} /> : null}
+      {Icon ? <Icon size={16} aria-hidden className={docsRailIcon(now)} /> : null}
+      <span className="min-w-0 flex-1 leading-snug">{children}</span>
     </Link>
+  );
+}
+
+function Group({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <div>
+      <span className={DOCS_RAIL_LABEL}>{label}</span>
+      <div className="flex flex-col gap-1.5">{children}</div>
+    </div>
   );
 }
 
@@ -61,6 +111,13 @@ function Row({
  * with its tools, then the machine-preparation pages. The game being read
  * opens; the others fold. Drawn once for a desktop column and once inside a
  * fold for a phone, where it would otherwise push the page down.
+ *
+ * Drawn as the Wiki draws its menu (the owner, 13/10/2026, UI consistency
+ * review: the two looked like two different sites): the same box, 14px bold
+ * rows each with a glyph, the page being read in the red tint with its red
+ * bar, and the games named in sentence case, not small capitals, with their
+ * counts kept. The game holding the page being read keeps its glyph red, so
+ * the way down to it shows.
  */
 function Nav({
   index,
@@ -70,51 +127,55 @@ function Nav({
   place: ToolDocsPlace;
 }) {
   return (
-    <nav aria-label="Tài liệu" className="flex flex-col gap-6">
-      <div className="flex flex-col gap-1">
-        <span className={`${GROUP} mb-1 px-2.5`}>Bắt đầu</span>
-        <Row href="/tai-lieu" now={place.kind === "home"}>
-          <BookOpen size={14} aria-hidden />
+    <nav aria-label="Tài liệu" className="flex flex-col gap-5">
+      <Group label="Bắt đầu">
+        <Row href="/tai-lieu" now={place.kind === "home"} icon={BookOpen}>
           Tài liệu hướng dẫn
         </Row>
-        <Row href="/lien-he" now={false}>
+        <Row href="/lien-he" now={false} icon={Users}>
           Liên hệ hỗ trợ
         </Row>
-        <Row href="/docs" now={false}>
+        <Row href="/docs" now={false} icon={ShieldCheck}>
           Bảo hành & câu hỏi thường gặp
         </Row>
-      </div>
+      </Group>
 
-      <div className="flex flex-col gap-1">
-        <span className={`${GROUP} mb-1 px-2.5`}>Sản phẩm</span>
+      <Group label="Sản phẩm">
         {index.map((category) => {
           const open =
             place.kind === "tool" && place.categorySlug === category.slug;
           return (
-            <details key={category.slug} open={open} className="group">
-              <summary className="flex cursor-pointer list-none items-center gap-2 rounded-lg px-2.5 py-1.5 text-[12px] font-bold text-neutral-200 hover:bg-white/5 hover:text-white [&::-webkit-details-marker]:hidden">
-                <ChevronRight
-                  size={14}
-                  className="shrink-0 text-neutral-500 transition-transform group-open:rotate-90"
-                  aria-hidden
-                />
-                <span className="min-w-0 flex-1 truncate">{category.name}</span>
-                <span className="text-[10px] font-black text-neutral-500">
+            <details key={category.slug} open={open} className="group/game">
+              <summary
+                className={`${DOCS_RAIL_ROW} cursor-pointer list-none [&::-webkit-details-marker]:hidden ${
+                  open
+                    ? "border-transparent text-white hover:bg-white/5"
+                    : DOCS_RAIL_ROW_OFF
+                }`}
+              >
+                <Gamepad2 size={16} aria-hidden className={docsRailIcon(open)} />
+                <span className="min-w-0 flex-1 truncate">
+                  {sentenceCase(category.name)}
+                </span>
+                <span className="text-[11px] font-black tabular-nums text-neutral-500">
                   {category.tools.length}
                 </span>
+                <ChevronRight
+                  size={14}
+                  className="shrink-0 text-neutral-500 transition-transform group-open/game:rotate-90"
+                  aria-hidden
+                />
               </summary>
-              <div className="ml-3 mt-0.5 flex flex-col gap-0.5 border-l border-white/10 pl-2">
+              <div className={`${BRANCH} gap-1`}>
                 {category.tools.map((tool) => {
                   const now = place.kind === "tool" && place.slug === tool.slug;
                   return (
                     <div key={tool.slug}>
                       <Row href={toolDocsHref(tool.slug)} now={now}>
-                        <span className="line-clamp-2 leading-snug">
-                          {tool.name}
-                        </span>
+                        <span className="line-clamp-2">{tool.name}</span>
                       </Row>
                       {now ? (
-                        <div className="ml-2.5 mt-0.5 flex flex-col border-l border-white/10 pl-2">
+                        <div className={`${BRANCH} gap-0.5`}>
                           {TOOL_DOCS_SECTIONS.filter(
                             (section) =>
                               section.id !== "bai-viet" ||
@@ -123,7 +184,7 @@ function Nav({
                             <a
                               key={section.id}
                               href={`#${section.id}`}
-                              className="rounded-md px-2 py-1 text-[11px] text-neutral-400 hover:text-white"
+                              className={SUB}
                             >
                               {section.label}
                             </a>
@@ -132,7 +193,7 @@ function Nav({
                             <Link
                               key={article.slug}
                               href={`/docs/${article.slug}`}
-                              className="rounded-md px-2 py-1 pl-4 text-[11px] text-neutral-400 hover:text-white"
+                              className={`${SUB} pl-5`}
                             >
                               {article.title}
                             </Link>
@@ -146,21 +207,20 @@ function Nav({
             </details>
           );
         })}
-      </div>
+      </Group>
 
-      <div className="flex flex-col gap-1">
-        <span className={`${GROUP} mb-1 px-2.5`}>Chuẩn bị máy</span>
+      <Group label="Chuẩn bị máy">
         {PC_SETUP_PAGES.map((page) => (
           <Row
             key={page.slug}
             href={pcSetupHref(page.slug)}
             now={place.kind === "setup" && place.slug === page.slug}
+            icon={SETUP_ICON[page.slug] ?? Wrench}
           >
-            <Wrench size={13} className="shrink-0" aria-hidden />
-            <span className="leading-snug">{page.title}</span>
+            {page.title}
           </Row>
         ))}
-      </div>
+      </Group>
     </nav>
   );
 }
@@ -177,21 +237,27 @@ export function ToolDocsShell({
 }) {
   return (
     <div className="grid gap-8 lg:grid-cols-[260px_minmax(0,1fr)] lg:gap-10">
-      <details className="rounded-2xl border border-white/10 bg-white/[0.02] p-3 lg:hidden">
-        <summary className="flex cursor-pointer list-none items-center gap-2 px-1 text-[11px] font-black uppercase tracking-widest text-white [&::-webkit-details-marker]:hidden">
-          <ListTree
-            size={15}
-            className="text-[var(--menzu-accent)]"
+      {/* A phone folds the menu away behind one row in the menu's own look. */}
+      <details className={`${DOCS_RAIL_BOX} group/fold lg:hidden`}>
+        <summary
+          className={`${DOCS_RAIL_ROW} cursor-pointer list-none border-transparent text-white hover:bg-white/5 [&::-webkit-details-marker]:hidden`}
+        >
+          <ListTree size={16} aria-hidden className={docsRailIcon(true)} />
+          <span className="min-w-0 flex-1">Mục lục tài liệu</span>
+          <ChevronRight
+            size={14}
+            className="shrink-0 text-neutral-500 transition-transform group-open/fold:rotate-90"
             aria-hidden
           />
-          Mục lục tài liệu
         </summary>
         <div className="mt-3 border-t border-white/5 pt-3">
           <Nav index={index} place={place} />
         </div>
       </details>
       <aside className="hidden lg:block">
-        <div className="sticky top-28 max-h-[calc(100vh-8rem)] overflow-y-auto rounded-2xl border border-white/10 bg-white/[0.02] p-3 pr-2">
+        <div
+          className={`${DOCS_RAIL_BOX} sticky top-28 max-h-[calc(100vh-8rem)] overflow-y-auto pr-2`}
+        >
           <Nav index={index} place={place} />
         </div>
       </aside>

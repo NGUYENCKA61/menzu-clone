@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
-import { BookOpen, CheckSquare, LifeBuoy, Wrench } from "lucide-react";
+import { BookOpen, CheckSquare } from "lucide-react";
 import Link from "next/link";
+import type { ReactNode } from "react";
 
 import { SimplePage } from "@/components/sites/menzu-lol-f7ae197a/shared/SimplePage";
 import {
@@ -22,9 +23,28 @@ export const metadata: Metadata = {
 };
 export const dynamic = "force-dynamic";
 
-const H2 =
-  "flex items-center gap-3 text-[15px] font-black uppercase tracking-wider text-white";
 const CARD = "rounded-2xl border border-white/10 bg-white/[0.02] p-5 sm:p-6";
+
+/**
+ * A section's heading as the home page's rows draw theirs: a 3px red bar
+ * before the words in capitals, at the same sizes. It used to lead with an
+ * icon, a look no other section heading on the site has (the owner,
+ * 13/10/2026, UI consistency review). Inlined here for now; it is the same
+ * markup as ProductRow's heading.
+ */
+function SectionTitle({ children }: { children: ReactNode }) {
+  return (
+    <div className="flex items-center gap-2.5">
+      <div
+        aria-hidden
+        className="w-[3px] h-5 bg-[var(--menzu-accent)] rounded-full shrink-0"
+      />
+      <h2 className="text-xl sm:text-2xl font-black uppercase tracking-wider text-white">
+        {children}
+      </h2>
+    </div>
+  );
+}
 
 const GUEST: DocsAccess = { state: "guest", until: null };
 const NEVER: DocsAccess = { state: "never", until: null };
@@ -56,6 +76,7 @@ export default async function ToolDocsHomePage() {
     slug: category.slug,
     name: category.name,
     logoUrl: category.logoUrl,
+    imageUrl: category.imageUrl,
     tools: category.tools.map((tool) => ({
       slug: tool.slug,
       name: tool.name,
@@ -91,14 +112,7 @@ export default async function ToolDocsHomePage() {
           </section>
 
           <section className="flex flex-col gap-4">
-            <h2 className={H2}>
-              <BookOpen
-                size={18}
-                className="text-[var(--menzu-accent)]"
-                aria-hidden
-              />
-              Chọn game
-            </h2>
+            <SectionTitle>Chọn game</SectionTitle>
             {categories.length === 0 ? (
               <p className="text-sm text-neutral-400">Shop chưa có tool nào.</p>
             ) : (
@@ -107,14 +121,7 @@ export default async function ToolDocsHomePage() {
           </section>
 
           <section id="chuan-bi" className="flex flex-col gap-4">
-            <h2 className={H2}>
-              <Wrench
-                size={18}
-                className="text-[var(--menzu-accent)]"
-                aria-hidden
-              />
-              Trước khi cài bất cứ tool nào
-            </h2>
+            <SectionTitle>Trước khi cài bất cứ tool nào</SectionTitle>
             <ol className={`${CARD} flex flex-col gap-2`}>
               {PC_SETUP_PAGES.map((page, index) => (
                 <li key={page.slug}>
@@ -142,14 +149,7 @@ export default async function ToolDocsHomePage() {
           </section>
 
           <section className="flex flex-col gap-4">
-            <h2 className={H2}>
-              <LifeBuoy
-                size={18}
-                className="text-[var(--menzu-accent)]"
-                aria-hidden
-              />
-              Kẹt ở đâu đó?
-            </h2>
+            <SectionTitle>Kẹt ở đâu đó?</SectionTitle>
             <div
               className={`${CARD} flex flex-col gap-3 text-sm text-neutral-300`}
             >
