@@ -18,13 +18,19 @@ import {
 } from "@/components/sites/menzu-lol-f7ae197a/shared/trustNoteLook";
 import { SITE_URL } from "@/lib/seo";
 import { getShopSettings } from "@/lib/settingsStore";
+import { shareCard } from "@/lib/shareCard";
 
-export const metadata: Metadata = {
-  title: "Kênh chính thức & liên hệ",
-  description:
-    "Toàn bộ kênh liên hệ chính thức của THICHTHIHACK: Telegram, Zalo, Facebook, Discord, TikTok. Ngoài những địa chỉ trong trang này đều là giả mạo.",
-  alternates: { canonical: "/lien-he" },
-};
+// The card spread in for og:url beside the canonical (the owner's SEO
+// review, 13/10/2026).
+export async function generateMetadata(): Promise<Metadata> {
+  return {
+    title: "Kênh chính thức & liên hệ",
+    description:
+      "Toàn bộ kênh liên hệ chính thức của THICHTHIHACK: Telegram, Zalo, Facebook, Discord, TikTok. Ngoài những địa chỉ trong trang này đều là giả mạo.",
+    alternates: { canonical: "/lien-he" },
+    ...(await shareCard({ url: "/lien-he" })),
+  };
+}
 export const dynamic = "force-dynamic";
 
 /**

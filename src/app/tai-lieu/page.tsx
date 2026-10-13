@@ -13,14 +13,20 @@ import { DOCS_RULE_SENTENCE, type DocsAccess } from "@/lib/docsAccess";
 import { PC_SETUP_PAGES, pcSetupHref } from "@/lib/pcSetup";
 import { getCurrentUser } from "@/lib/session";
 import { getShopSettings } from "@/lib/settingsStore";
+import { shareCard } from "@/lib/shareCard";
 import { listToolDocsIndex, toolDocsAccessMap } from "@/lib/toolDocs";
 
-export const metadata: Metadata = {
-  title: "Tài liệu hướng dẫn",
-  description:
-    "Hướng dẫn cài đặt, thiết lập và xử lý lỗi cho từng tool, mở theo thời hạn key đã thuê.",
-  alternates: { canonical: "/tai-lieu" },
-};
+// The card spread in for og:url beside the canonical (the owner's SEO
+// review, 13/10/2026).
+export async function generateMetadata(): Promise<Metadata> {
+  return {
+    title: "Tài liệu hướng dẫn",
+    description:
+      "Hướng dẫn cài đặt, thiết lập và xử lý lỗi cho từng tool, mở theo thời hạn key đã thuê.",
+    alternates: { canonical: "/tai-lieu" },
+    ...(await shareCard({ url: "/tai-lieu" })),
+  };
+}
 export const dynamic = "force-dynamic";
 
 const CARD = "rounded-2xl border border-white/10 bg-white/[0.02] p-5 sm:p-6";

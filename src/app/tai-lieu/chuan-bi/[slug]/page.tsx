@@ -12,6 +12,7 @@ import { notFound } from "next/navigation";
 import { SimplePage } from "@/components/sites/menzu-lol-f7ae197a/shared/SimplePage";
 import { ToolDocsShell } from "@/components/sites/menzu-lol-f7ae197a/shared/ToolDocsShell";
 import { PC_SETUP_PAGES, pcSetupHref, pcSetupPage } from "@/lib/pcSetup";
+import { shareCard } from "@/lib/shareCard";
 import { listToolDocsIndex } from "@/lib/toolDocs";
 
 interface PageProps {
@@ -24,10 +25,14 @@ export async function generateMetadata({
   const { slug } = await params;
   const page = pcSetupPage(slug);
   if (!page) return { title: "Không tìm thấy trang" };
+  const canonical = pcSetupHref(page.slug);
   return {
     title: `${page.title} | Tài liệu`,
     description: page.short,
-    alternates: { canonical: pcSetupHref(page.slug) },
+    alternates: { canonical },
+    // og:url beside the canonical, with the full card (the owner's SEO
+    // review, 13/10/2026).
+    ...(await shareCard({ url: canonical })),
   };
 }
 

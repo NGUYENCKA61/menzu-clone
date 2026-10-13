@@ -118,7 +118,10 @@ async function categoryMetadata(
     // An empty category has nothing to rank for and is left out of the
     // sitemap; it is indexed again the day its first product appears.
     ...(data && !data.listed ? { robots: { index: false, follow: true } } : {}),
-    ...(await shareCard({ url: canonical })),
+    // The shelf's own picture on the card rather than the site banner every
+    // category shared (the owner's SEO review, 13/10/2026). Its size is not
+    // known here, so none is declared.
+    ...(await shareCard({ url: canonical, image: data.heroImageUrl || undefined })),
   };
 }
 
