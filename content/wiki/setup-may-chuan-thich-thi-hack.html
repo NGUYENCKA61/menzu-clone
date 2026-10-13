@@ -1,0 +1,39 @@
+<p>Hơn một nửa yêu cầu bảo hành shop nhận được là máy chưa chuẩn bị đúng: Defender xoá file, Secure Boot còn bật, thiếu runtime. Đây là danh sách chuẩn của THÍCH THÌ HACK, làm một lần cho mọi tool. Mỗi mục có trang hướng dẫn riêng kèm cách kiểm tra, trong mục <a href="/tai-lieu">Tài liệu</a>.</p>
+<h2>Yêu cầu máy</h2>
+<ul>
+<li><strong>Hệ điều hành:</strong> Windows 10 hoặc Windows 11 nguyên gốc, cập nhật mới. Không dùng bản ghost, bản lite, không dùng Windows 7.</li>
+<li><strong>BIOS:</strong> chế độ UEFI, Secure Boot tắt, ảo hoá (Intel VT-x hoặc AMD SVM) bật.</li>
+<li><strong>CPU:</strong> Intel hoặc AMD có tập lệnh AVX (gần như mọi CPU từ 2012 trở lại đây).</li>
+<li><strong>Mạng:</strong> mạng nhà, ổn định. Hạn chế 4G phát wifi và mạng quán, hay rớt kết nối tới máy chủ tool.</li>
+<li><strong>Màn hình:</strong> game chạy ở chế độ <strong>cửa sổ không viền</strong> (Borderless / Windowed Fullscreen) để overlay của tool hiện được.</li>
+<li><strong>Nền tảng:</strong> game bản Steam với các tool ghi "Nền tảng: Steam". Bản của launcher khác có thể không tương thích.</li>
+</ul>
+<h2>Danh sách chuẩn bị, làm theo thứ tự</h2>
+<ol>
+<li><strong>Tắt Windows Defender</strong> (bảo vệ thời gian thực, bảo vệ đám mây, gửi mẫu) và gỡ phần mềm diệt virus khác. Thêm thư mục chứa tool vào Exclusions. Hướng dẫn: <a href="/tai-lieu/chuan-bi/tat-windows-defender">Tắt Windows Defender</a>.</li>
+<li><strong>Tắt Secure Boot</strong> trong BIOS. Hướng dẫn theo từng hãng mainboard: <a href="/tai-lieu/chuan-bi/tat-secure-boot">Tắt Secure Boot</a>.</li>
+<li><strong>Tắt Core Isolation (Memory integrity)</strong> trong Windows Security. Hướng dẫn: <a href="/tai-lieu/chuan-bi/tat-core-isolation">Tắt Core Isolation</a>.</li>
+<li><strong>Tắt TPM</strong> nếu tool yêu cầu (một số spoofer). Hướng dẫn: <a href="/tai-lieu/chuan-bi/tat-tpm">Tắt TPM</a>.</li>
+<li><strong>Bật ảo hoá trong BIOS, tắt ảo hoá của Windows</strong> (Hyper-V, Windows Sandbox, Virtual Machine Platform). Chi tiết ở bài <a href="/docs/tat-secure-boot-va-ao-hoa">Tắt Secure Boot và bật ảo hoá</a>.</li>
+<li><strong>Tắt các anti-cheat khác</strong> đang chạy nền (FACEIT, Vanguard khi chơi game khác, ESEA). Hướng dẫn: <a href="/tai-lieu/chuan-bi/tat-anti-cheat-khac">Tắt các anti-cheat khác</a>.</li>
+<li><strong>Cài runtime:</strong> Visual C++ Redistributable (2015 đến 2022, cả x64 và x86), .NET Desktop Runtime, DirectX. Hướng dẫn: <a href="/tai-lieu/chuan-bi/cai-runtime">Cài runtime cần thiết</a>.</li>
+<li><strong>Tắt overlay</strong> của Discord, GeForce Experience, MSI Afterburner, RivaTuner, Steam overlay nếu tài liệu tool yêu cầu. Chúng tranh nhau vẽ lên game và làm ESP không hiện.</li>
+</ol>
+<figure><img src="/images/docs/shots/chuan-bi.webp" alt="Một trang chuẩn bị máy trong mục Tài liệu" data-corner="square"><figcaption style="font-style: italic">Mỗi bước chuẩn bị có trang riêng trong Tài liệu, kèm cách kiểm tra đã làm đúng chưa.</figcaption></figure>
+<h2>Kiểm tra trước khi mở tool</h2>
+<ul>
+<li>Bấm Start, gõ <code>msinfo32</code>: <strong>BIOS Mode</strong> ghi UEFI, <strong>Secure Boot State</strong> ghi Off, <strong>Virtualization-based security</strong> ghi Not enabled.</li>
+<li>Mở Task Manager, thẻ Performance, mục CPU: <strong>Virtualization: Enabled</strong>.</li>
+<li>Windows Security không còn chấm đỏ về bảo vệ thời gian thực.</li>
+<li>Game mở được ở chế độ cửa sổ không viền, đúng độ phân giải màn hình.</li>
+</ul>
+<blockquote>Cài lại Windows sạch rồi làm danh sách này một lần là cách nhanh nhất với máy đã cài nhiều thứ, xem <a href="/docs/cai-windows-bang-usb">Cài Windows bằng USB</a>.</blockquote>
+<h2>Thứ tự chạy tool mỗi lần chơi</h2>
+<ol>
+<li>Khởi động máy, chưa mở game.</li>
+<li>Nếu dùng spoofer tạm thời: chạy spoofer trước.</li>
+<li>Mở loader bằng Run as administrator, nhập key, chờ loader báo sẵn sàng.</li>
+<li>Mở game theo đúng thứ tự tài liệu của tool ghi (trước hoặc sau khi inject).</li>
+<li>Vào trận, mở menu bằng phím ghi trong tài liệu, nạp config.</li>
+</ol>
+<p>Khi gửi bảo hành, shop sẽ hỏi lại từng mục trong danh sách này và xin ảnh chụp, nên làm đủ trước sẽ được xử lý nhanh hơn nhiều. Chi tiết ở <a href="/docs/quy-trinh-bao-hanh">quy trình bảo hành</a>.</p>

@@ -1,0 +1,36 @@
+<p>Spoofer là phần mềm đổi định danh phần cứng (HWID) của máy: số serial ổ cứng, mainboard, card mạng, GPU và một số mã khác mà anti-cheat đọc để nhận ra "đúng cái máy này". Khi game khoá máy chứ không chỉ khoá tài khoản, spoofer làm máy bạn hiện ra như một máy khác, nhờ đó tài khoản mới chơi được bình thường.</p>
+<h2>Khi nào bạn cần spoofer</h2>
+<ul>
+<li><strong>Tạo acc mới vẫn bị khoá ngay khi vào game</strong> hoặc sau vài trận: dấu hiệu rõ nhất của HWID ban.</li>
+<li><strong>Muốn tách acc phụ dùng tool khỏi acc chính</strong> trên cùng một máy, để nếu acc phụ bị ban thì máy và acc chính không bị liên luỵ.</li>
+<li><strong>Tool bạn mua yêu cầu spoof trước khi inject</strong>, một số bản ghi rõ điều này trong tài liệu.</li>
+</ul>
+<h2>Khi nào không cần</h2>
+<ul>
+<li>Máy chưa từng bị ban, chỉ bị ban tài khoản: anti-cheat không khoá máy thì không có gì để đổi.</li>
+<li>Tool bạn dùng đã có spoofer tích hợp (trang tool ghi "kèm spoofer").</li>
+<li>Game bạn chơi không khoá theo phần cứng. Hỏi shop nếu không chắc, nhắn kèm tên game.</li>
+</ul>
+<h2>Chọn spoofer phù hợp</h2>
+<ol>
+<li><strong>Theo game và anti-cheat.</strong> Mỗi anti-cheat đọc một bộ mã khác nhau: Vanguard (Valorant), Ricochet (Call of Duty), EAC và BattlEye (nhiều game sinh tồn), Ace và các hệ của game Trung Quốc (Delta Force, Naraka). Spoofer của game này thường không dùng cho game khác. Shop xếp spoofer theo từng game, ví dụ <a href="/hack-valorant-moi/spoofer-valorant-">Spoofer Valorant</a> và <a href="/hack-delta-force-moi/spoof-delta-force-fix-loi-bi-khoa-hwid-khong-can-cai-win">Spoof Delta Force</a>; danh mục chung ở <a href="/hwid-spoofer">HWID Spoofer</a>.</li>
+<li><strong>Tạm thời hay vĩnh viễn.</strong> Spoofer tạm thời (temp) đổi mã trong phiên, khởi động lại là về như cũ nên phải spoof lại mỗi lần chơi, đổi lại an toàn cho phần cứng. Spoofer vĩnh viễn (perm) ghi đè serial, không cần chạy lại nhưng sai một bước có thể hỏng ổ cứng hoặc mainboard. Người mới nên dùng temp.</li>
+<li><strong>Có cần cài lại Windows không.</strong> Một số game lưu dấu vết trong Windows, nên spoofer tốt phải kèm cleaner xoá dấu vết, hoặc tài liệu ghi rõ phải cài Win mới. Trang sản phẩm ghi "không cần cài Win" là bản có cleaner.</li>
+<li><strong>Máy bạn có được hỗ trợ không.</strong> Laptop, máy dùng CPU đời rất mới hoặc rất cũ, máy có BitLocker, máy đang bật Secure Boot: đọc phần yêu cầu trên trang tool. Spoofer gần như luôn cần tắt Secure Boot và Core Isolation, xem <a href="/docs/setup-may-chuan-thich-thi-hack">Setup máy chuẩn</a>.</li>
+<li><strong>Trạng thái trên bảng Trạng thái.</strong> Spoofer cũng bị phát hiện như tool. Chỉ mua khi đang Chưa phát hiện hoặc Ổn định, xem <a href="/thong-bao">Trạng thái hack</a>.</li>
+</ol>
+<h2>Quy trình dùng đúng</h2>
+<ol>
+<li>Gỡ tool cũ, xoá tài khoản game cũ khỏi máy, chạy cleaner nếu spoofer có.</li>
+<li>Chạy spoofer bằng Run as administrator, bấm Spoof, khởi động lại máy nếu được yêu cầu.</li>
+<li>Kiểm tra: spoofer báo thành công, hoặc mở Command Prompt gõ <code>wmic diskdrive get serialnumber</code> thấy serial đã khác.</li>
+<li>Đăng nhập <strong>acc mới</strong> và chơi. Không đăng nhập lại acc đã bị ban trên máy vừa spoof, anti-cheat sẽ nối hai định danh lại với nhau.</li>
+</ol>
+<blockquote>Spoofer không gỡ ban cho tài khoản đã bị khoá. Nó chỉ cho tài khoản mới chơi được trên máy từng bị khoá.</blockquote>
+<h2>Lỗi hay gặp</h2>
+<ul>
+<li><strong>Spoof báo thất bại:</strong> thường do Secure Boot còn bật, Core Isolation còn bật, hoặc Defender xoá file spoofer. Làm lại các bước chuẩn bị máy.</li>
+<li><strong>Spoof xong vẫn bị ban:</strong> còn dấu vết trong Windows (chưa chạy cleaner, chưa xoá acc cũ), hoặc đăng nhập lại acc cũ. Trường hợp nặng thì cài lại Windows, xem <a href="/docs/cai-windows-bang-usb">Cài Windows bằng USB</a>.</li>
+<li><strong>Mất kết nối mạng sau khi spoof:</strong> spoofer đổi địa chỉ MAC, khởi động lại máy hoặc đặt lại card mạng.</li>
+</ul>
+<p>Hướng dẫn từng bước cài và chạy ở bài <a href="/docs/cai-spoofer-tai-nha">Cài và chạy spoofer tại nhà</a>. Spoofer mua ở shop được bảo hành như tool, xem <a href="/docs/chinh-sach-bao-hanh-hoan-tien-phan-mem">chính sách bảo hành và hoàn tiền</a>.</p>

@@ -1,0 +1,47 @@
+<p>Cài lại Windows là cách sạch nhất để bắt đầu với tool: hết xung đột phần mềm, hết dấu vết tool cũ, và các bước chuẩn bị máy làm một lần là xong. Bài này hướng dẫn tự cài Windows 10 hoặc 11 tại nhà bằng USB, mất khoảng 30 đến 45 phút. Đọc hết một lượt trước khi làm.</p>
+<h2>Chuẩn bị</h2>
+<ul>
+<li>USB trống dung lượng từ 8 GB. Mọi dữ liệu trong USB sẽ bị xoá.</li>
+<li>Một máy đang chạy Windows để tạo USB cài (có thể là chính máy cần cài).</li>
+<li>Sao lưu dữ liệu ở ổ C ra ổ khác hoặc lên mây: Desktop, Documents, Downloads, ảnh, file game lưu.</li>
+<li>Ghi lại key Windows nếu bạn mua bản quyền riêng. Máy hãng có sẵn bản quyền trong BIOS, cài xong tự kích hoạt.</li>
+<li>Biết phím vào Boot Menu của máy: thường là F12, F11, F8 hoặc Esc; vào BIOS là Delete hoặc F2.</li>
+</ul>
+<h2>Bước 1: tạo USB cài Windows</h2>
+<ol>
+<li>Vào trang tải Windows của Microsoft, chọn <strong>Windows 11</strong> (hoặc Windows 10) và tải <strong>Media Creation Tool</strong>. Chỉ tải từ microsoft.com, không dùng bản ghost hay bản "lite" vì tool cần Windows nguyên gốc.</li>
+<li>Chạy Media Creation Tool, chọn <strong>Create installation media</strong>, ngôn ngữ và phiên bản để mặc định, chọn <strong>USB flash drive</strong>, chọn đúng USB của bạn và chờ tải xong.</li>
+<li>Nếu máy không đạt yêu cầu Windows 11 (không có TPM 2.0), dùng <strong>Rufus</strong>: chọn file ISO Windows 11, ở hộp thoại tuỳ chọn tích "Remove requirement for 4GB+ RAM, Secure Boot and TPM 2.0", partition scheme chọn <strong>GPT</strong>, target system <strong>UEFI</strong>.</li>
+</ol>
+<h2>Bước 2: khởi động từ USB</h2>
+<ol>
+<li>Cắm USB, khởi động lại máy, bấm liên tục phím Boot Menu khi vừa hiện logo hãng.</li>
+<li>Chọn dòng có chữ <strong>UEFI</strong> và tên USB. Không chọn dòng Legacy, vì tool yêu cầu máy chạy ở chế độ UEFI.</li>
+<li>Nếu không thấy USB, vào BIOS tắt Secure Boot tạm thời và bật chế độ UEFI, xem <a href="/docs/tat-secure-boot-va-ao-hoa">Tắt Secure Boot và bật ảo hoá</a>.</li>
+</ol>
+<h2>Bước 3: cài đặt</h2>
+<ol>
+<li>Chọn ngôn ngữ, bấm <strong>Install now</strong>. Hỏi key thì chọn <strong>I don't have a product key</strong>, máy sẽ tự kích hoạt sau nếu từng có bản quyền.</li>
+<li>Chọn phiên bản (Home hoặc Pro, trùng với bản cũ để giữ bản quyền), đồng ý điều khoản.</li>
+<li>Chọn <strong>Custom: Install Windows only</strong>.</li>
+<li>Ở danh sách phân vùng, chọn lần lượt các phân vùng của ổ cài Windows cũ (ổ C, phân vùng System, Reserved, Recovery của cùng ổ đó) và bấm <strong>Delete</strong> cho tới khi còn một vùng <strong>Unallocated</strong>. <strong>Không đụng ổ D, E</strong> chứa dữ liệu.</li>
+<li>Chọn vùng Unallocated, bấm <strong>Next</strong>. Máy tự chia phân vùng, chép file và khởi động lại vài lần. Khi máy khởi động lại, rút USB ra hoặc đừng bấm phím gì để máy vào ổ cứng.</li>
+<li>Thiết lập ban đầu: khu vực, bàn phím, mạng, tài khoản. Windows 11 Home đòi tài khoản Microsoft; muốn tài khoản cục bộ thì rút mạng ở bước này rồi làm theo gợi ý trên màn hình.</li>
+</ol>
+<h2>Bước 4: sau khi cài xong</h2>
+<ol>
+<li>Cài driver: vào trang hãng mainboard hoặc laptop tải driver chipset, mạng, âm thanh; driver card đồ hoạ tải từ NVIDIA hoặc AMD.</li>
+<li>Chạy Windows Update một lượt rồi khởi động lại.</li>
+<li>Cài runtime cần cho tool: Visual C++ Redistributable, .NET Desktop Runtime, DirectX, xem <a href="/tai-lieu/chuan-bi/cai-runtime">Cài runtime cần thiết</a>.</li>
+<li>Làm các bước chuẩn bị máy: tắt Windows Defender, Core Isolation, Secure Boot và các anti-cheat khác theo <a href="/docs/setup-may-chuan-thich-thi-hack">Setup máy chuẩn</a>.</li>
+<li>Không cài phần mềm diệt virus bên thứ ba. Chúng xoá file tool và bắt bạn cài lại từ đầu.</li>
+<li>Cài game và nền tảng (Steam) trước, tool sau.</li>
+</ol>
+<blockquote>Cài lại Windows không gỡ khoá máy (HWID ban). Nếu máy đã bị khoá, bạn vẫn cần <a href="/docs/spoofer-la-gi">spoofer</a>. Nhiều spoofer trên shop ghi "không cần cài Win" vì đã có cleaner.</blockquote>
+<h2>Gặp lỗi thì sao</h2>
+<ul>
+<li><strong>"Windows cannot be installed to this disk. The selected disk is of the GPT partition style":</strong> USB đang boot kiểu Legacy. Khởi động lại và chọn dòng UEFI của USB.</li>
+<li><strong>Không tìm thấy ổ cứng lúc cài:</strong> máy dùng Intel RST/VMD. Tải driver IRST từ trang hãng, giải nén vào USB, bấm <strong>Load driver</strong> ở màn hình chọn ổ.</li>
+<li><strong>BitLocker đòi key khôi phục:</strong> lấy key ở account.microsoft.com/devices/recoverykey trên điện thoại.</li>
+</ul>
+<p>Không tự tin làm một mình, nhắn shop qua nút hỗ trợ ở góc phải màn hình, shop hướng dẫn qua chat trong giờ hỗ trợ 8:00 đến 23:00.</p>

@@ -1,0 +1,43 @@
+<p>Spoofer đổi định danh phần cứng để máy từng bị khoá chơi lại được bằng acc mới. Bài này đi từ lúc chuẩn bị máy tới lúc kiểm tra spoof thành công, theo đúng thứ tự, vì hầu hết lỗi "spoof không ăn" đến từ việc làm thiếu một bước phía trước. Nếu chưa rõ spoofer là gì và có cần không, đọc trước bài <a href="/docs/spoofer-la-gi">Spoofer là gì</a>.</p>
+<h2>Bước 1: chuẩn bị máy</h2>
+<ol>
+<li>Tắt Windows Defender và mọi phần mềm diệt virus khác, kể cả bảo vệ thời gian thực, xem <a href="/tai-lieu/chuan-bi/tat-windows-defender">Tắt Windows Defender</a>.</li>
+<li>Tắt Secure Boot trong BIOS, xem <a href="/docs/tat-secure-boot-va-ao-hoa">Tắt Secure Boot và bật ảo hoá</a>.</li>
+<li>Tắt Core Isolation (Memory integrity), xem <a href="/tai-lieu/chuan-bi/tat-core-isolation">Tắt Core Isolation</a>. Một số spoofer đòi tắt cả TPM, trang sản phẩm sẽ ghi.</li>
+<li>Tạm ngưng BitLocker nếu ổ C đang mã hoá, vì spoofer đổi mã phần cứng sẽ làm BitLocker hỏi key khôi phục.</li>
+<li>Cài runtime: Visual C++ Redistributable và .NET theo <a href="/tai-lieu/chuan-bi/cai-runtime">Cài runtime cần thiết</a>.</li>
+</ol>
+<h2>Bước 2: dọn dấu vết của lần ban</h2>
+<ol>
+<li>Gỡ tool cũ và xoá thư mục của nó.</li>
+<li>Xoá tài khoản game đã bị khoá khỏi máy: đăng xuất, xoá thư mục game trong <code>%LOCALAPPDATA%</code> và <code>%APPDATA%</code>, xoá cả launcher nếu tài liệu spoofer yêu cầu.</li>
+<li>Chạy <strong>Cleaner</strong> của spoofer nếu có. Với game khoá nặng (Valorant, một số game Trung Quốc), tài liệu có thể yêu cầu cài lại Windows, xem <a href="/docs/cai-windows-bang-usb">Cài Windows bằng USB</a>.</li>
+</ol>
+<h2>Bước 3: mua và tải spoofer</h2>
+<ol>
+<li>Chọn spoofer đúng game ở danh mục <a href="/hwid-spoofer">HWID Spoofer</a> hoặc trong danh mục của game đó. Xem trạng thái ở <a href="/thong-bao">bảng Trạng thái</a> trước khi mua.</li>
+<li>Mua xong, vào <a href="/orders">Lịch sử mua</a>, mở đơn: key nằm ngay trong đơn, bấm <strong>Link tải hack</strong> để tải loader và <strong>Tài liệu hướng dẫn</strong> để xem hướng dẫn riêng của bản đó.</li>
+</ol>
+<figure><img src="/images/docs/shots/orders.webp" alt="Đơn hàng trong Lịch sử mua với key, link tải và tài liệu" data-corner="square"><figcaption style="font-style: italic">Key, link tải và tài liệu của spoofer đều nằm trong đơn ở Lịch sử mua.</figcaption></figure>
+<h2>Bước 4: chạy spoofer</h2>
+<ol>
+<li>Giải nén vào một thư mục riêng, ví dụ <code>D:\spoof</code>. Không để trong Downloads hay Desktop.</li>
+<li>Chuột phải loader, chọn <strong>Run as administrator</strong>. Dán key vào ô key.</li>
+<li>Chọn <strong>Clean</strong> trước (nếu có), rồi <strong>Spoof</strong>. Chờ báo thành công, không tắt cửa sổ giữa chừng.</li>
+<li>Khởi động lại máy nếu spoofer yêu cầu. Spoofer tạm thời (temp) cần chạy lại sau mỗi lần khởi động, trước khi mở game.</li>
+</ol>
+<h2>Bước 5: kiểm tra</h2>
+<ul>
+<li>Spoofer báo serial mới, hoặc mở Command Prompt gõ <code>wmic diskdrive get serialnumber</code> và <code>wmic baseboard get serialnumber</code>, so với lúc chưa spoof.</li>
+<li>Vào game bằng <strong>acc mới</strong>. Không đăng nhập acc đã bị khoá trên máy vừa spoof.</li>
+<li>Nếu dùng kèm tool, spoof xong rồi mới nhập key tool. Nhập key trước sẽ bị khoá key vào định danh cũ, phải xin reset HWID, xem <a href="/docs/hwid-la-gi-reset-hwid">HWID là gì</a>.</li>
+</ul>
+<h2>Lỗi thường gặp</h2>
+<ul>
+<li><strong>Loader mở không lên, hoặc biến mất sau khi giải nén:</strong> Defender đã xoá. Tắt Defender, thêm thư mục spoof vào Exclusions, tải lại.</li>
+<li><strong>Spoof báo lỗi driver, lỗi "failed to load":</strong> Secure Boot hoặc Core Isolation còn bật. Kiểm tra lại bằng <code>msinfo32</code>: Secure Boot State phải là Off.</li>
+<li><strong>Spoof thành công nhưng acc mới vẫn bị khoá:</strong> còn dấu vết (chưa cleaner, chưa xoá acc cũ, đăng nhập lại acc cũ). Làm lại Bước 2, nặng thì cài lại Windows.</li>
+<li><strong>Mất mạng sau khi spoof:</strong> spoofer đổi MAC. Khởi động lại; vẫn mất thì vào Device Manager, Disable rồi Enable card mạng.</li>
+</ul>
+<blockquote>Dừng ngay và nhắn shop nếu spoofer báo lỗi liên quan tới ổ cứng hoặc mainboard mà bạn không hiểu. Spoofer vĩnh viễn ghi đè serial, làm sai có thể hỏng phần cứng.</blockquote>
+<p>Spoofer được bảo hành như tool trong thời hạn gói: gửi yêu cầu ngay trong đơn, xem <a href="/docs/quy-trinh-bao-hanh">quy trình bảo hành</a>.</p>

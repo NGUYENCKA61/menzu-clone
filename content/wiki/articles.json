@@ -1,0 +1,191 @@
+[
+  {
+    "slug": "thuat-ngu-chuc-nang-hack",
+    "category": "GLOSSARY",
+    "title": "Thuật ngữ chức năng hack: Aimbot, ESP, Spoofer và các từ hay gặp",
+    "excerpt": "Giải nghĩa các chức năng ghi trên trang tool theo từng nhóm: ngắm bắn, nhìn thấy, di chuyển, bảo vệ và giao diện, để bạn đọc mô tả là biết tool làm được gì.",
+    "featured": true,
+    "sortOrder": 1,
+    "replaces": []
+  },
+  {
+    "slug": "spoofer-la-gi",
+    "category": "GLOSSARY",
+    "title": "Spoofer là gì? Cách chọn spoofer phù hợp",
+    "excerpt": "Spoofer đổi định danh phần cứng để máy từng bị khoá chơi lại được. Khi nào cần, khi nào không, và chọn theo game, theo kiểu tạm thời hay vĩnh viễn.",
+    "featured": true,
+    "sortOrder": 2,
+    "replaces": ["thu-noi-bat-spoofer-la-gi"]
+  },
+  {
+    "slug": "acc-nfa-acc-rac-la-gi",
+    "category": "GLOSSARY",
+    "title": "Acc NFA (acc rác) là gì?",
+    "excerpt": "Acc NFA chỉ gồm tên đăng nhập và mật khẩu, không kèm email. Rẻ, hợp làm acc phụ dùng tool, nhưng cần hiểu ba rủi ro trước khi mua.",
+    "featured": false,
+    "sortOrder": 3,
+    "replaces": ["acc-non-full-access-nfa-la-gi"]
+  },
+  {
+    "slug": "acc-full-thong-tin-la-gi",
+    "category": "GLOSSARY",
+    "title": "Acc Full thông tin là gì và quy trình nhận",
+    "excerpt": "Acc full thông tin bàn giao kèm email, bạn đổi được mọi thứ. Quy trình nhận trên shop và những việc phải làm ngay trong vài giờ đầu.",
+    "featured": false,
+    "sortOrder": 4,
+    "replaces": ["acc-full-access-fa-la-gi"]
+  },
+  {
+    "slug": "hang-thanh-vien-ma-giam-gia-cong-tac-vien",
+    "category": "GLOSSARY",
+    "title": "Hạng thành viên, mã giảm giá và cộng tác viên",
+    "excerpt": "Ba cách mua rẻ hơn: lên hạng để được giảm tự động, dùng mã giảm giá ở giỏ hàng, và nhận 3% hoa hồng khi giới thiệu người khác nạp tiền.",
+    "featured": false,
+    "sortOrder": 5,
+    "replaces": ["thu-dinh-dang-uu-dai"]
+  },
+  {
+    "slug": "hwid-la-gi-reset-hwid",
+    "category": "GLOSSARY",
+    "title": "HWID là gì? Reset HWID khi đổi máy, thay phần cứng",
+    "excerpt": "Phân biệt key gắn máy với máy bị anti-cheat khoá, cách xin reset HWID cho key ngay trong đơn hàng, và khi nào mới cần spoofer.",
+    "featured": false,
+    "sortOrder": 6,
+    "replaces": ["thu-noi-bat-reset-hwid"]
+  },
+  {
+    "slug": "config-la-gi",
+    "category": "GLOSSARY",
+    "title": "Config là gì? Setting, save và load config",
+    "excerpt": "Config là file lưu thiết lập menu tool. Cách lưu, nạp, phân biệt legit với rage, tự chỉnh từ đầu và các lỗi hay gặp khi dùng config người khác.",
+    "featured": false,
+    "sortOrder": 7,
+    "replaces": []
+  },
+  {
+    "slug": "nap-tien-va-mua-tool-lan-dau",
+    "category": "GUIDE",
+    "title": "Hướng dẫn người mới: nạp tiền và mua tool lần đầu",
+    "excerpt": "Từ tạo tài khoản, nạp tiền bằng VietQR hoặc thẻ cào, chọn gói, tới lúc nhận key và tải tool trong Lịch sử mua. Kèm ảnh từng bước.",
+    "featured": true,
+    "sortOrder": 1,
+    "replaces": ["thu-dinh-dang-nap-tien-mua-tool"]
+  },
+  {
+    "slug": "setup-may-chuan-thich-thi-hack",
+    "category": "GUIDE",
+    "title": "Setup máy chuẩn THÍCH THÌ HACK trước khi dùng tool",
+    "excerpt": "Yêu cầu máy và danh sách chuẩn bị làm một lần cho mọi tool: Defender, Secure Boot, Core Isolation, TPM, ảo hoá, runtime, overlay, kèm cách kiểm tra.",
+    "featured": true,
+    "sortOrder": 2,
+    "replaces": []
+  },
+  {
+    "slug": "tat-secure-boot-va-ao-hoa",
+    "category": "GUIDE",
+    "title": "Tắt Secure Boot và bật ảo hoá trong BIOS",
+    "excerpt": "Tắt Secure Boot theo từng hãng mainboard, bật VT-x hoặc SVM trong BIOS nhưng tắt ảo hoá của Windows, và cách kiểm tra bằng msinfo32.",
+    "featured": false,
+    "sortOrder": 3,
+    "replaces": []
+  },
+  {
+    "slug": "cai-windows-bang-usb",
+    "category": "GUIDE",
+    "title": "Cài Windows tại nhà bằng USB",
+    "excerpt": "Tạo USB cài bằng Media Creation Tool hoặc Rufus, boot UEFI, xoá đúng phân vùng, cài driver và chuẩn bị máy sau khi cài. Khoảng 45 phút.",
+    "featured": false,
+    "sortOrder": 4,
+    "replaces": []
+  },
+  {
+    "slug": "cai-spoofer-tai-nha",
+    "category": "GUIDE",
+    "title": "Cài và chạy spoofer tại nhà",
+    "excerpt": "Chuẩn bị máy, dọn dấu vết, mua đúng spoofer, chạy loader và kiểm tra serial đã đổi. Các lỗi thường gặp và cách xử lý.",
+    "featured": false,
+    "sortOrder": 5,
+    "replaces": []
+  },
+  {
+    "slug": "quy-trinh-bao-hanh",
+    "category": "GUIDE",
+    "title": "Quy trình gửi yêu cầu và xử lý bảo hành",
+    "excerpt": "Gửi yêu cầu trong đơn, trả lời bảng câu hỏi bổ sung, trao đổi với shop và nhận kết quả: sửa, cấp key mới, cộng ngày hoặc hoàn tiền vào ví, qua ngân hàng.",
+    "featured": true,
+    "sortOrder": 6,
+    "replaces": ["thu-dinh-dang-bao-hanh"]
+  },
+  {
+    "slug": "xac-thuc-tai-khoan-cap-2",
+    "category": "GUIDE",
+    "title": "Xác thực tài khoản cấp 2: quy trình và lợi ích",
+    "excerpt": "Bốn bước liên kết Zalo, Facebook, số điện thoại và ngân hàng, shop duyệt, tài khoản mang nhãn Cấp 2 và mua được sản phẩm giới hạn.",
+    "featured": false,
+    "sortOrder": 7,
+    "replaces": []
+  },
+  {
+    "slug": "mua-tai-khoan-nfa",
+    "category": "GUIDE",
+    "title": "Quy trình mua tài khoản NFA trên shop",
+    "excerpt": "Chọn acc, trả bằng ví, bấm Lấy thông tin trong Lịch sử mua để nhận đăng nhập. Những việc nên làm ngay và cách bảo hành khi acc có vấn đề.",
+    "featured": false,
+    "sortOrder": 8,
+    "replaces": []
+  },
+  {
+    "slug": "dang-ky-nhan-thong-bao-trang-thai-hack",
+    "category": "GUIDE",
+    "title": "Đăng ký và xem thông báo trạng thái hack",
+    "excerpt": "Ý nghĩa từng trạng thái tool, cách xem lịch sử trên trang Thông báo, bấm chuông theo dõi và nhận báo qua Telegram hoặc Zalo.",
+    "featured": false,
+    "sortOrder": 9,
+    "replaces": ["thu-phan-trang-07"]
+  },
+  {
+    "slug": "xu-ly-khi-nap-tien-chua-cong",
+    "category": "GUIDE",
+    "title": "Xử lý khi nạp tiền chưa được cộng vào web",
+    "excerpt": "Năm bước kiểm tra trong 5 phút đầu, các trường hợp với thẻ cào, và ba thứ cần gửi shop để được cộng tay trong một lần.",
+    "featured": false,
+    "sortOrder": 10,
+    "replaces": ["thu-phan-trang-12"]
+  },
+  {
+    "slug": "nhan-thuong-vong-quay",
+    "category": "GUIDE",
+    "title": "Nhận phần thưởng sau khi quay trúng vòng quay",
+    "excerpt": "Điểm thưởng từ đâu ra, cách quay, và từng loại phần thưởng đi đâu: tiền vào ví, điểm, mã giảm giá riêng hay quà shop liên hệ gửi.",
+    "featured": false,
+    "sortOrder": 11,
+    "replaces": []
+  },
+  {
+    "slug": "chinh-sach-bao-hanh-hoan-tien-phan-mem",
+    "category": "WARRANTY",
+    "title": "Chính sách bảo hành và hoàn tiền với sản phẩm phần mềm",
+    "excerpt": "Phạm vi, trường hợp được và không được bảo hành, thứ tự xử lý, hai hình thức hoàn tiền và nghĩa vụ của người mua. Tool miễn phí không bảo hành.",
+    "featured": true,
+    "sortOrder": 1,
+    "replaces": ["thu-noi-bat-chinh-sach-hoan-tien"]
+  },
+  {
+    "slug": "chinh-sach-bao-hanh-hoan-tien-acc-nfa",
+    "category": "WARRANTY",
+    "title": "Chính sách bảo hành và hoàn tiền với acc rác NFA",
+    "excerpt": "Thời hạn tính từ lúc Lấy thông tin, các lỗi được bảo hành, cách đổi acc hoặc hoàn tiền, và những trường hợp shop không chịu trách nhiệm.",
+    "featured": false,
+    "sortOrder": 2,
+    "replaces": []
+  },
+  {
+    "slug": "dieu-khoan-su-dung",
+    "category": "TERMS",
+    "title": "Điều khoản sử dụng",
+    "excerpt": "Tài khoản, tiền nạp, key, rủi ro khi dùng hack, tư vấn trước khi dùng, hành vi bị cấm và kênh hỗ trợ của THÍCH THÌ HACK.",
+    "featured": true,
+    "sortOrder": 1,
+    "replaces": []
+  }
+]

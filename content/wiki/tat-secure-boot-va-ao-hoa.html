@@ -1,0 +1,34 @@
+<p>Hai thiết lập trong BIOS mà gần như tool nào cũng đụng tới. <strong>Secure Boot</strong> chỉ cho Windows nạp driver có chữ ký Microsoft, mà tool dùng driver riêng nên phải tắt. <strong>Ảo hoá</strong> thì ngược lại: tool cần ảo hoá phần cứng (Intel VT-x, AMD SVM) <strong>bật</strong> trong BIOS, nhưng các tính năng ảo hoá của Windows (Core Isolation, Hyper-V) phải <strong>tắt</strong>, vì chúng chiếm quyền ở tầng mà tool cần.</p>
+<h2>Phần 1: tắt Secure Boot</h2>
+<ol>
+<li>Nếu ổ C bật BitLocker, tạm ngưng trước: Start, gõ <strong>Manage BitLocker</strong>, chọn <strong>Suspend protection</strong>. Không làm bước này, Windows sẽ hỏi key khôi phục sau khi đổi BIOS.</li>
+<li>Khởi động lại máy, bấm liên tục phím vào BIOS khi vừa lên logo hãng: Delete hoặc F2 với máy bàn; F2, F10 hoặc Esc với laptop.</li>
+<li>Tìm mục Boot hoặc Security: ASUS: Boot, Secure Boot; MSI: Settings, Advanced, Windows OS Configuration; Gigabyte: BIOS, Secure Boot; ASRock: Security, Secure Boot. Laptop thường nằm trong Security hoặc Boot.</li>
+<li>Đặt <strong>Secure Boot = Disabled</strong>. Có máy bắt đổi <strong>OS Type</strong> sang Other OS, hoặc chọn <strong>Clear Secure Boot keys</strong> trước thì mới tắt được.</li>
+<li>Bấm F10 để lưu và khởi động lại.</li>
+</ol>
+<p><strong>Kiểm tra:</strong> Start, gõ <code>msinfo32</code>, dòng <strong>Secure Boot State</strong> ghi Off. Windows 11 vẫn chạy bình thường khi Secure Boot tắt, chỉ các bản cập nhật lớn mới nhắc.</p>
+<h2>Phần 2: bật ảo hoá trong BIOS</h2>
+<ol>
+<li>Vào lại BIOS như trên.</li>
+<li>Tìm mục CPU Configuration hoặc Advanced: với Intel là <strong>Intel Virtualization Technology (VT-x)</strong>, với AMD là <strong>SVM Mode</strong>. Đặt <strong>Enabled</strong>.</li>
+<li>Tuỳ tool, mục <strong>VT-d</strong> (Intel) hoặc <strong>IOMMU</strong> (AMD) để Disabled trừ khi tài liệu ghi khác.</li>
+<li>F10 lưu, khởi động lại.</li>
+</ol>
+<p><strong>Kiểm tra:</strong> mở Task Manager, thẻ Performance, mục CPU, dòng <strong>Virtualization: Enabled</strong>.</p>
+<h2>Phần 3: tắt ảo hoá của Windows</h2>
+<ol>
+<li><strong>Core Isolation:</strong> Windows Security, Device security, Core isolation details, tắt <strong>Memory integrity</strong>, khởi động lại. Chi tiết: <a href="/tai-lieu/chuan-bi/tat-core-isolation">Tắt Core Isolation</a>.</li>
+<li><strong>Hyper-V và các nền tảng ảo:</strong> Start, gõ <strong>Turn Windows features on or off</strong>, bỏ tích <strong>Hyper-V</strong>, <strong>Virtual Machine Platform</strong>, <strong>Windows Hypervisor Platform</strong>, <strong>Windows Sandbox</strong>, <strong>Windows Subsystem for Linux</strong>. Bấm OK và khởi động lại.</li>
+<li>Vẫn còn vướng, mở Command Prompt bằng quyền admin và chạy: <code>bcdedit /set hypervisorlaunchtype off</code>, rồi khởi động lại. Muốn bật lại sau này: <code>bcdedit /set hypervisorlaunchtype auto</code>.</li>
+</ol>
+<p><strong>Kiểm tra:</strong> trong <code>msinfo32</code>, dòng <strong>Virtualization-based security</strong> ghi Not enabled, và dòng <strong>A hypervisor has been detected</strong> không xuất hiện.</p>
+<blockquote>Tóm lại: BIOS bật ảo hoá, Windows tắt ảo hoá. Làm ngược lại là tool báo lỗi driver hoặc không inject được.</blockquote>
+<h2>Câu hỏi hay gặp</h2>
+<ul>
+<li><strong>Tắt Secure Boot có mất bản quyền Windows không?</strong> Không. Bản quyền gắn với tài khoản hoặc mainboard, không gắn với Secure Boot.</li>
+<li><strong>Chơi game khác có Vanguard (Valorant) thì sao?</strong> Vanguard đòi Secure Boot và TPM bật trên Windows 11. Khi chơi Valorant bằng tool của shop, làm theo tài liệu riêng của tool đó; khi không dùng tool, bật lại Secure Boot rồi khởi động lại.</li>
+<li><strong>Không thấy mục ảo hoá trong BIOS:</strong> cập nhật BIOS từ trang hãng, hoặc mục đó nằm trong Advanced Mode (bấm F7 trên ASUS).</li>
+<li><strong>Máy khởi động vào màn hình xanh sau khi đổi:</strong> vào BIOS đặt lại như cũ, kiểm tra chế độ SATA (AHCI) không bị đổi theo.</li>
+</ul>
+<p>Các bước còn lại để máy sẵn sàng (Defender, TPM, runtime, anti-cheat khác) ở bài <a href="/docs/setup-may-chuan-thich-thi-hack">Setup máy chuẩn THÍCH THÌ HACK</a>.</p>
