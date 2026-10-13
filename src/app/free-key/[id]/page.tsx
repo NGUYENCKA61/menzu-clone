@@ -1,4 +1,5 @@
 import { KeyRound } from "lucide-react";
+import type { Metadata } from "next";
 import Link from "next/link";
 
 import { SimplePage } from "@/components/sites/menzu-lol-f7ae197a/shared/SimplePage";
@@ -7,6 +8,18 @@ import { freeWaitWording } from "@/lib/freeKeyRules";
 import { getCurrentUser } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
+
+/**
+ * A one-time ticket, not a page for an index: each claim has its own random
+ * address, and opening it spends the claim. Without this it carried the home
+ * page's title and "index, follow" (the owner's SEO review, 13/10/2026).
+ * robots.txt also keeps compliant crawlers off /free-key altogether; this
+ * covers the ones that arrive anyway.
+ */
+export const metadata: Metadata = {
+  title: "Key miễn phí",
+  robots: { index: false, follow: false },
+};
 
 /**
  * Where the shop's shortlink lands: the ticket in the address is spent on a
