@@ -29,6 +29,7 @@ import { pcSetupHref, PC_SETUP_PAGES } from "@/lib/pcSetup";
 import { DEFAULT_GUIDE, DEFAULT_SETUP_GUIDE } from "@/lib/productGuide";
 import { requirementsOrDefault } from "@/lib/productRequirements";
 import { productHref, toolDocsHref } from "@/lib/routes";
+import { breadcrumbJsonLd, JsonLd } from "@/lib/seo";
 import { getCurrentUser } from "@/lib/session";
 import { shareCard } from "@/lib/shareCard";
 import { getToolDocs, listToolDocsIndex, toolDocsAccess } from "@/lib/toolDocs";
@@ -129,6 +130,16 @@ export default async function ToolDocsPage({ params }: PageProps) {
         </p>
       }
     >
+      {/* The visible trail, for crawlers: this page sits under the docs
+          area, a level the URL alone does not name (the owner's SEO review,
+          13/10/2026). */}
+      <JsonLd
+        data={breadcrumbJsonLd([
+          { name: "Trang chủ", path: "/" },
+          { name: "Tài liệu", path: "/tai-lieu" },
+          { name: tool.name },
+        ])}
+      />
       <ToolDocsShell
         index={index}
         place={{

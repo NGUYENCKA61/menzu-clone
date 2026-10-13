@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   SITE_URL,
+  articleJsonLd,
   organizationJsonLd,
   productJsonLd,
   profileLinks,
@@ -143,6 +144,45 @@ describe("organizationJsonLd", () => {
     const ld = organizationJsonLd({ brandName: "SHOP", brandLogo: " ", sameAs: [] });
     expect("logo" in ld).toBe(false);
     expect("sameAs" in ld).toBe(false);
+  });
+});
+
+describe("articleJsonLd", () => {
+  const base = {
+    headline: "Spoofer là gì?",
+    description: "Giải thích spoofer.",
+    image: "/images/docs/covers/spoofer-la-gi.webp",
+    datePublished: new Date("2026-09-23T00:00:00Z"),
+    dateModified: new Date("2026-10-13T00:00:00Z"),
+    path: "/docs/spoofer-la-gi",
+    brandName: "SHOP",
+  };
+
+  it("describes the article with absolute addresses and the shop as author", () => {
+    expect(articleJsonLd(base)).toEqual({
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      headline: "Spoofer là gì?",
+      description: "Giải thích spoofer.",
+      image: `${SITE_URL}/images/docs/covers/spoofer-la-gi.webp`,
+      datePublished: "2026-09-23T00:00:00.000Z",
+      dateModified: "2026-10-13T00:00:00.000Z",
+      mainEntityOfPage: `${SITE_URL}/docs/spoofer-la-gi`,
+      author: { "@type": "Organization", name: "SHOP", url: SITE_URL },
+      publisher: { "@type": "Organization", name: "SHOP", url: SITE_URL },
+    });
+  });
+
+  it("leaves out a missing excerpt or picture, and never dates an edit before publication", () => {
+    const ld = articleJsonLd({
+      ...base,
+      description: null,
+      image: "",
+      dateModified: new Date("2026-09-01T00:00:00Z"),
+    });
+    expect("description" in ld).toBe(false);
+    expect("image" in ld).toBe(false);
+    expect(ld.dateModified).toBe("2026-09-23T00:00:00.000Z");
   });
 });
 

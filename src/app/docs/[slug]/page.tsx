@@ -11,7 +11,9 @@ import { DocBody, DocHtml } from "@/lib/docFormat";
 import { isHtmlBody } from "@/lib/docHtml";
 import { getDocArticle, listRelatedDocs, listToolArticles } from "@/lib/queries";
 import { productHref, toolDocsHref } from "@/lib/routes";
+import { articleJsonLd, breadcrumbJsonLd, JsonLd } from "@/lib/seo";
 import { getCurrentUser } from "@/lib/session";
+import { getShopSettings } from "@/lib/settingsStore";
 import { shareCard } from "@/lib/shareCard";
 import { toolDocsAccess } from "@/lib/toolDocs";
 
@@ -75,6 +77,10 @@ export default async function DocArticlePage({ params }: PageProps) {
   // An edit the day it went up is not news; a later one is worth saying.
   const updated =
     article.updatedAt.getTime() - article.publishedAt.getTime() > DAY_MS ? article.updatedAt : null;
+  // The same test as the robots tag in generateMetadata: only a written,
+  // public article is offered to crawlers, so only it is described to them.
+  const indexable = Boolean(article.body) && !article.productId;
+  const { brandName } = indexable ? await getShopSettings() : { brandName: "" };
 
   return (
     <SimplePage
@@ -117,6 +123,30 @@ export default async function DocArticlePage({ params }: PageProps) {
         </p>
       }
     >
+      {/* The article and the trail above it, for crawlers (the owner's SEO
+          review, 13/10/2026): dates, author and the wiki it sits in. */}
+      {indexable ? (
+        <>
+          <JsonLd
+            data={articleJsonLd({
+              headline: article.title,
+              description: article.excerpt,
+              image: article.thumbnailUrl,
+              datePublished: article.publishedAt,
+              dateModified: article.updatedAt,
+              path: `/docs/${article.slug}`,
+              brandName,
+            })}
+          />
+          <JsonLd
+            data={breadcrumbJsonLd([
+              { name: "Trang chủ", path: "/" },
+              { name: "Wiki & Hướng dẫn", path: "/docs" },
+              { name: article.title },
+            ])}
+          />
+        </>
+      ) : null}
       {/* The body as wide as a product page's description (the owner,
           02/10/2026: "nó phải đồng bộ giống với trang sản phẩm chứ"), so a
           picture set to 100% in the editor is the same size on both. The

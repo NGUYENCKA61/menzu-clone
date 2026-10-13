@@ -168,6 +168,47 @@ export function softwareJsonLd(software: SoftwareLdInput) {
   };
 }
 
+/**
+ * schema.org/BlogPosting for a wiki article.
+ *
+ * The article pages carried og:type article and nothing structured, so a
+ * crawler had to guess the dates and the author from the prose (the owner's
+ * SEO review, 13/10/2026). Google's Article markup has no required fields;
+ * these are the ones it recommends. The shop is author and publisher alike:
+ * the articles are written as the shop, not under a person's name.
+ */
+export function articleJsonLd(article: {
+  headline: string;
+  description?: string | null;
+  image?: string | null;
+  datePublished: Date;
+  dateModified: Date;
+  /** The article's own address. */
+  path: string;
+  brandName: string;
+}) {
+  const shop = { "@type": "Organization", name: article.brandName, url: SITE_URL };
+  const description = article.description?.trim() ?? "";
+  const image = article.image?.trim() ?? "";
+  // An edit is never older than the publication it edits.
+  const modified =
+    article.dateModified.getTime() > article.datePublished.getTime()
+      ? article.dateModified
+      : article.datePublished;
+  return {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    headline: article.headline,
+    ...(description ? { description } : {}),
+    ...(image ? { image: absoluteUrl(image) } : {}),
+    datePublished: article.datePublished.toISOString(),
+    dateModified: modified.toISOString(),
+    mainEntityOfPage: absoluteUrl(article.path),
+    author: shop,
+    publisher: shop,
+  };
+}
+
 /** schema.org/BreadcrumbList — mirrors the visible breadcrumb on the page. */
 export function breadcrumbJsonLd(trail: { name: string; path?: string }[]) {
   return {
