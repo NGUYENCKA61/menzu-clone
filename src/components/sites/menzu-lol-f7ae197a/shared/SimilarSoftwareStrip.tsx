@@ -1,9 +1,10 @@
 "use client";
 
-import { ChevronLeft, ChevronRight, Layers } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { CardBoundary } from "./CardBoundary";
+import { SectionHeading } from "./SectionHeading";
 import { SoftwareCard, type SoftwareCardView } from "./SoftwareCard";
 
 /**
@@ -64,13 +65,12 @@ export function SimilarSoftwareStrip({ items }: { items: SoftwareCardView[] }) {
       className="mx-auto w-full max-w-[1320px] px-4 pb-16 lg:px-6"
     >
       <div className="mb-5 flex items-center justify-between gap-4">
-        <h2
-          id="similar-software-heading"
-          className="flex items-center gap-2.5 text-lg font-black uppercase tracking-wider text-white sm:text-xl"
-        >
-          <Layers size={22} aria-hidden className="shrink-0 text-[var(--menzu-accent)]" />
+        {/* The home rows' red bar in place of the accent glyph, so the
+            product page's sections are headed the way the home page's are
+            (the owner, 13/10/2026, UI consistency review). */}
+        <SectionHeading id="similar-software-heading">
           Sản phẩm tương tự
-        </h2>
+        </SectionHeading>
         <div className="flex items-center gap-2">
           <button
             type="button"
