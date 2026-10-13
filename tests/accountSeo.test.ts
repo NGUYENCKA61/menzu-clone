@@ -42,6 +42,10 @@ describe("accountMetaTitle", () => {
     expect(accountMetaTitle(lol)).toBe("ACC RÁC LOL - CÓ TƯỚNG + SKIN | ACC77 | 60.000đ");
   });
 
+  it("folds runs of spaces in the name, as the page draws it", () => {
+    expect(accountMetaTitle({ ...lol, name: "ACC RÁC   BAO   NGON " })).toBe("ACC RÁC BAO NGON | ACC77 | 60.000đ");
+  });
+
   it("falls back to the code alone, said once", () => {
     expect(accountMetaTitle(valorant)).toBe("Mã ACC12 | 1.250.000đ");
   });
@@ -87,6 +91,13 @@ describe("accountMetaDescription", () => {
     expect(text.length).toBeLessThanOrEqual(155);
     expect(text.endsWith("…")).toBe(true);
     expect(text.startsWith("Acc rác LOL có tướng và skin")).toBe(true);
+  });
+
+  it("keeps the built sentence after a write-up of a few words", () => {
+    expect(accountMetaDescription({ ...lol, descriptionText: "DEMO VÀI ACC NÈ" })).toBe(
+      "DEMO VÀI ACC NÈ. Tài khoản TOOL HACK + ACC LIÊN MINH HUYỀN THOẠI - LOL mã ACC77. Giá 60.000đ. Bàn giao ngay sau khi thanh toán.",
+    );
+    expect(accountMetaDescription({ ...lol, descriptionText: "Acc ngon!" })).toMatch(/^Acc ngon! Tài khoản/);
   });
 
   it("gives the markup more room than the meta tag", () => {

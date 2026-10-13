@@ -40,9 +40,14 @@ export function isValorantAccount(account: Pick<AccountSeoInput, "categoryName" 
   return /valorant/i.test(`${account.categorySlug} ${account.categoryName}`);
 }
 
+/** A name as the page draws it: HTML folds runs of spaces into one. */
+function tidy(text: string): string {
+  return text.replace(/\s+/g, " ").trim();
+}
+
 /** The listing as its heading names it, or by its code when it has no name. */
 export function accountDisplayName(account: Pick<AccountSeoInput, "name" | "code">): string {
-  return account.name.trim() || `Mã ${account.code}`;
+  return tidy(account.name) || `Mã ${account.code}`;
 }
 
 /**
@@ -66,9 +71,15 @@ export function accountStatParts(account: AccountSeoInput): string[] {
 /** "<name> | ACC77 | 60.000đ": the price kept, the code said once. */
 export function accountMetaTitle(account: AccountSeoInput): string {
   const price = `${formatVnd(account.price)}đ`;
-  const name = account.name.trim();
+  const name = tidy(account.name);
   return name ? `${name} | ${account.code} | ${price}` : `Mã ${account.code} | ${price}`;
 }
+
+/**
+ * A write-up shorter than this says too little to stand alone in a search
+ * result ("DEMO VÀI ACC NÈ"), so the built sentence follows it.
+ */
+const SHORT_WRITE_UP = 100;
 
 /** The sentence built from the figures, for a listing with no write-up. */
 function builtSentence(account: AccountSeoInput): string {
@@ -79,10 +90,17 @@ function builtSentence(account: AccountSeoInput): string {
   );
 }
 
-/** The meta description: the write-up when there is one, else the figures. */
+/**
+ * The meta description: the write-up when there is one, else the figures. A
+ * write-up of a few words keeps the built sentence after it, so the result
+ * still says what the listing is and what it costs.
+ */
 export function accountMetaDescription(account: AccountSeoInput, max = 155): string {
-  const written = account.descriptionText.trim();
-  return clampText(written || builtSentence(account), max);
+  const written = tidy(account.descriptionText);
+  if (!written) return clampText(builtSentence(account), max);
+  if (written.length >= SHORT_WRITE_UP) return clampText(written, max);
+  const stop = /[.!?…]$/.test(written) ? "" : ".";
+  return clampText(`${written}${stop} ${builtSentence(account)}`, max);
 }
 
 /** The Product markup's description: the same, with more room. */
