@@ -1667,12 +1667,13 @@ html[data-theme="light"][data-variant="moi"] {
 }
 html[data-theme="light"][data-variant="moi"] body { background-color: var(--light-page); }
 
-/* Names typed in capitals: the sentence-case twin (CaseText) shows here, and
-   whatever holds one is not set in capitals by CSS (a page title included). */
-html[data-theme="light"][data-variant="moi"] .case-typed { display: none; }
-html[data-theme="light"][data-variant="moi"] .case-soft { display: inline; }
-html[data-theme="light"][data-variant="moi"] :has(> .case-soft) { text-transform: none; }
-html[data-theme="light"][data-variant="moi"] h1:has(> .case-soft) { letter-spacing: -0.02em; }
+/* Names typed in capitals: their sentence-case form (CaseText's data-soft) is
+   drawn here in place of the typed name, and whatever holds one is not set in
+   capitals by CSS (a page title included). */
+html[data-theme="light"][data-variant="moi"] .case-typed[data-soft] > .case-text { display: none; }
+html[data-theme="light"][data-variant="moi"] .case-typed[data-soft]::after { content: attr(data-soft); text-transform: none; }
+html[data-theme="light"][data-variant="moi"] :has(> .case-typed[data-soft]) { text-transform: none; }
+html[data-theme="light"][data-variant="moi"] h1:has(> .case-typed[data-soft]) { letter-spacing: -0.02em; }
 
 /* Crisper type: the dark site's 900 weight and spaced capitals turn into bold
    sentence-case UI words. Page titles and the logo keep theirs. */
@@ -2075,7 +2076,7 @@ html[data-theme="light"][data-variant="moi"] :is(.row-tile > h3.tile-caption, :i
   letter-spacing: -0.01em;
 }
 /* Its quiet line (the price, the count, the blurb) and the style-b eyebrow. */
-html[data-theme="light"][data-variant="moi"] :is(.row-tile, .bento-tile) > .tile-caption :is(span, p):not(.case-typed, .case-soft, [class*="bg-"]) {
+html[data-theme="light"][data-variant="moi"] :is(.row-tile, .bento-tile) > .tile-caption :is(span, p):not(.case-typed, .case-text, [class*="bg-"]) {
   color: var(--light-ink-3);
   font-size: 12px;
   font-weight: 500;

@@ -1228,8 +1228,8 @@ ${nikeInlineCss}
 // row-heading, row-view-all, tool-card, acc-card, tool-status,
 // tool-status-line, tool-more, nav-item-label, product-top, crumb-current,
 // crumb-sep), not through their Tailwind strings. Names typed in capitals get
-// a sentence-case twin from CaseText (case-typed / case-soft), which only this
-// dress shows; the helper keeps CS2, ESP, PC, MS, HVH and the other acronyms.
+// their sentence-case form in data-soft from CaseText (case-typed), which only
+// this dress draws; the helper keeps CS2, ESP, PC, MS, HVH and the other acronyms.
 
 const MOI = `html[data-theme="light"][data-variant="moi"]`;
 // The near-black bar (and the near-black footer of ?giao-dien=moi-den): the
@@ -1334,12 +1334,13 @@ ${MOI} {
 }
 ${MOI} body { background-color: var(--light-page); }
 
-/* Names typed in capitals: the sentence-case twin (CaseText) shows here, and
-   whatever holds one is not set in capitals by CSS (a page title included). */
-${MOI} .case-typed { display: none; }
-${MOI} .case-soft { display: inline; }
-${MOI} :has(> .case-soft) { text-transform: none; }
-${MOI} h1:has(> .case-soft) { letter-spacing: -0.02em; }
+/* Names typed in capitals: their sentence-case form (CaseText's data-soft) is
+   drawn here in place of the typed name, and whatever holds one is not set in
+   capitals by CSS (a page title included). */
+${MOI} .case-typed[data-soft] > .case-text { display: none; }
+${MOI} .case-typed[data-soft]::after { content: attr(data-soft); text-transform: none; }
+${MOI} :has(> .case-typed[data-soft]) { text-transform: none; }
+${MOI} h1:has(> .case-typed[data-soft]) { letter-spacing: -0.02em; }
 
 /* Crisper type: the dark site's 900 weight and spaced capitals turn into bold
    sentence-case UI words. Page titles and the logo keep theirs. */
@@ -1572,7 +1573,7 @@ ${MOI} :is(.row-tile > h3.tile-caption, :is(.row-tile, .bento-tile) > .tile-capt
   letter-spacing: -0.01em;
 }
 /* Its quiet line (the price, the count, the blurb) and the style-b eyebrow. */
-${MOI} :is(.row-tile, .bento-tile) > .tile-caption :is(span, p):not(.case-typed, .case-soft, [class*="bg-"]) {
+${MOI} :is(.row-tile, .bento-tile) > .tile-caption :is(span, p):not(.case-typed, .case-text, [class*="bg-"]) {
   color: var(--light-ink-3);
   font-size: 12px;
   font-weight: 500;
