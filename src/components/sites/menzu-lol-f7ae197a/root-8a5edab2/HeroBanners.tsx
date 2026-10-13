@@ -25,6 +25,13 @@ const TYPE_STEP = 0.07;
 /** Seconds the heading waits before typing, so the "We are" line fades up first. */
 const HEADING_DELAY = 0.5;
 
+/**
+ * Said after the drawn title inside the h1, for screen readers and search
+ * engines only: the same words the home page's stand-in h1 uses when the
+ * hero is switched off (page.tsx).
+ */
+const H1_TOPIC = ": hack game và tài khoản game";
+
 interface HeroBannersProps {
   /** The still artwork, and the poster frame when a video is set. */
   banner?: string;
@@ -153,9 +160,11 @@ export function HeroBanners({
           {/* The heading types itself in — each character a span that pops on a
               staggered delay after the eyebrow, then a caret blinks at the end.
               aria-label carries the whole title so a screen reader reads it
-              once, not letter by letter. */}
+              once, not letter by letter. It also carries what the shop sells,
+              read and indexed but not drawn (H1_TOPIC): the drawn title is
+              the brand alone (SEO review, 13/10/2026). */}
           <h1
-            aria-label={title.replace(/\n/g, " ")}
+            aria-label={`${title.replace(/\n/g, " ")}${H1_TOPIC}`}
             // One unbreakable word in a column capped at 440px: at 46px it is
             // 485px wide and its last letters ran under the video card on
             // every screen from 1024 to 1279. 40px is 422px — inside the cap.
@@ -184,6 +193,7 @@ export function HeroBanners({
                 ) : null}
               </span>
             ))}
+            <span className="sr-only">{H1_TOPIC}</span>
           </h1>
 
           {subtitle ? (
@@ -245,7 +255,11 @@ export function HeroBanners({
               fill
               sizes="(max-width: 1024px) 100vw, 620px"
               className="select-none object-cover"
-              priority
+              // The home page's LCP image. In Next 16 `priority` only
+              // preloads; fetchPriority is what lifts it to High (SEO
+              // review, 13/10/2026).
+              preload
+              fetchPriority="high"
             />
           )}
         </div>

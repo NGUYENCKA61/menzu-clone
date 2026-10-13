@@ -30,7 +30,12 @@ export function PageBackdrop({ src, soft = false }: { src?: string; soft?: boole
           src={src}
           alt=""
           fill
-          priority
+          // Eager, as it is on screen from the start, but Low: it is
+          // decoration that Chrome never counts as the LCP, and preloaded at
+          // High it raced every page's real hero for the line (SEO review,
+          // 13/10/2026). "low" also keeps React from preloading it.
+          loading="eager"
+          fetchPriority="low"
           sizes="100vw"
           className={`object-cover object-center ${soft ? "scale-110 blur-[28px] saturate-70" : ""}`}
         />

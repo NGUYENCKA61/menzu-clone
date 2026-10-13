@@ -349,7 +349,8 @@ export function SiteHeaderClient({
                   alt={brandWord}
                   width={28}
                   height={28}
-                  priority
+                  // Not preloaded: a 28px mark has no business competing
+                  // with the page's LCP image for the line.
                   className="w-7 h-7 object-contain transition-transform duration-500 group-hover:scale-110"
                 />
                 <span className="navbar-spin-ring absolute inset-[-2px] rounded-full border border-transparent border-t-red-500 transition-transform duration-1000 group-hover:scale-110 animate-spin-slow" />

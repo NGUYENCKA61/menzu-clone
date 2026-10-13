@@ -70,9 +70,10 @@ export function SoftwareCard({
 }: {
   software: SoftwareCardView;
   variant?: "shelf" | "compact";
-  /** First in its grid: preloaded. One per page. */
+  /** The page's LCP image (first in its grid, nothing drawn above it):
+   *  preloaded and fetched at High. One per page. */
   priority?: boolean;
-  /** Second and third: fetched before the rest, no preload. */
+  /** Also above the fold: fetched before the rest, at no raised priority. */
   eager?: boolean;
 }) {
   const [packageId, setPackageId] = useState("");
@@ -171,7 +172,11 @@ export function SoftwareCard({
               alt={software.name}
               fill
               sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-              {...(priority ? { priority: true } : eager ? { loading: "eager" as const } : {})}
+              {...(priority
+                ? { preload: true, fetchPriority: "high" as const }
+                : eager
+                  ? { loading: "eager" as const }
+                  : {})}
               className="object-cover transition-transform duration-500 group-hover:scale-[1.025]"
             />
           ) : (

@@ -49,7 +49,9 @@ export function HeroImageCarousel({ images }: { images: string[] }) {
           // what the shop is.
           alt=""
           fill
-          priority={index === 0}
+          // Only the first picture is on screen at load: it is the LCP image
+          // and the one fetched at High; the rest wait their turn.
+          {...(index === 0 ? { preload: true, fetchPriority: "high" as const } : {})}
           sizes="(max-width: 1024px) 100vw, 690px"
           className={`select-none object-cover transition-opacity duration-[900ms] ease-out motion-reduce:transition-none ${
             index === active ? "opacity-100" : "opacity-0"

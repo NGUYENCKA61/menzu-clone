@@ -305,6 +305,14 @@ export function DocsHelpCenter({
   const pageCount = Math.max(1, Math.ceil(list.length / PER_PAGE));
   const page = paging.key === listKey ? Math.min(paging.page, pageCount - 1) : 0;
   const shown = list.slice(page * PER_PAGE, page * PER_PAGE + PER_PAGE);
+  // Every article the list is not showing right now stays in the markup,
+  // hidden: the shelves are buttons and the pager turns pages in place, so
+  // the server HTML (which opens on FAQ) used to link only the featured
+  // articles, and a crawler could reach most of the wiki through the sitemap
+  // alone (the owner's SEO review, 13/10/2026). They are the same cards a
+  // shelf press or a page turn brings up, so nothing is drawn differently.
+  const shownSlugs = new Set(shown.map((article) => article.slug));
+  const offscreen = articles.filter((article) => !shownSlugs.has(article.slug));
 
   // The featured card's turn: every pinned article (admin: "Ghim lên Nội dung
   // nổi bật"), newest first, topped up with the most-read guides and then
@@ -376,6 +384,18 @@ export function DocsHelpCenter({
         </aside>
 
         <section id={LIST_ID} className="min-w-0 scroll-mt-[120px] space-y-3">
+          {/* The cards not on screen (see `offscreen`). First in the section
+              on purpose: space-y spaces every child but the last, so a
+              hidden last child would push 12px under the visible one. Their
+              pictures are lazy and never load while hidden. */}
+          {offscreen.length > 0 ? (
+            <div hidden>
+              {offscreen.map((article) => (
+                <ArticleCard key={article.slug} article={article} shelf={false} />
+              ))}
+            </div>
+          ) : null}
+
           {/* 16px, a step above the 15px questions it heads (the owner,
               02/10/2026): at 14px it read as a caption, not the list's title. */}
           <h2 className="flex items-center gap-2.5 text-base font-black uppercase tracking-widest text-white">

@@ -260,7 +260,10 @@ export function PictureGallery({
                   fill
                   sizes={sizes}
                   className="block h-full w-full object-contain"
-                  priority={i === 0}
+                  // The first picture is the product page's LCP image: fetched
+                  // at High, not only preloaded (Next 16's `priority` does no
+                  // more than preload).
+                  {...(i === 0 ? { preload: true, fetchPriority: "high" as const } : {})}
                 />
               </div>
             ))}
