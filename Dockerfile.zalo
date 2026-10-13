@@ -16,7 +16,9 @@ RUN --mount=type=cache,target=/root/.npm npm ci --no-audit --no-fund
 
 # Only what the bot runs: its own file and the shared vocabulary.
 COPY tsconfig.json ./
-COPY src/lib/zaloShared.ts ./src/lib/zaloShared.ts
+# The bot imports a few of the website's modules (settings, the group rules,
+# the shop handshake), and they import others through "@/": all of src.
+COPY src ./src
 COPY bot ./bot
 
 ENV NODE_ENV=production

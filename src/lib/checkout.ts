@@ -37,6 +37,11 @@ export interface CheckoutInput {
   /** Keys for a tool, sign-ins for a random listing; one for anything else. */
   quantity?: number;
   voucher?: string | null;
+  /**
+   * The Zalo shop answers the buyer itself, in the same chat, so the receipt
+   * skips the Zalo copy (the email still goes).
+   */
+  quietZalo?: boolean;
 }
 
 export interface CheckoutResult {
@@ -338,7 +343,7 @@ export async function placeOrder(input: CheckoutInput): Promise<CheckoutResult> 
   void alertLowStock(soldFrom);
   // The buyer's mailbox and Zalo hear about it the same way: after the
   // commit, never awaited, failures swallowed inside.
-  void sendOrderReceipt([result.orderId]);
+  void sendOrderReceipt([result.orderId], { zalo: !input.quietZalo });
 
   return result;
 }

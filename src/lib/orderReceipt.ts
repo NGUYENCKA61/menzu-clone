@@ -19,7 +19,7 @@ const SETUP_GUIDE_PATH = "/docs/setup-may-chuan-thich-thi-hack";
 
 /**
  * A paid purchase, told to the buyer's mailbox and Zalo (the owner,
- * 14/10/2026: "khi khách hàng mua key thì cũng gửi về gmail khách hàng và
+ * 13/10/2026: "khi khách hàng mua key thì cũng gửi về gmail khách hàng và
  * zalo"). One message for one checkout, whether it was one order ("Mua
  * ngay", the Telegram bot) or a basket of several.
  *
@@ -32,71 +32,71 @@ const SETUP_GUIDE_PATH = "/docs/setup-may-chuan-thich-thi-hack";
  * email waits for the shop's SMTP in Cấu hình; the Zalo message waits in the
  * outbox until the bot drains it.
  */
-export async function sendOrderReceipt(
-  orderIds: readonly string[],
-): Promise<void> {
-  if (orderIds.length === 0) return;
-  try {
-    const orders = await db.order.findMany({
-      where: { id: { in: [...orderIds] }, status: "PAID" },
-      orderBy: { createdAt: "asc" },
-      select: {
-        code: true,
-        total: true,
-        createdAt: true,
-        user: { select: { username: true, email: true, zaloId: true } },
-        product: {
-          select: {
-            name: true,
-            code: true,
-            slug: true,
-            productType: true,
-            downloadUrl: true,
-            docsUrl: true,
-          },
-        },
-        package: { select: { label: true } },
-        licenseKeys: {
-          orderBy: { deliveredAt: "asc" },
-          select: { value: true, expiresAt: true },
+/** The receipt for these orders and where to send it, or null when none paid. */
+export async function receiptFor(orderIds: readonly string[]): Promise<{
+  data: ReceiptData;
+  email: string | null;
+  zaloId: string | null;
+} | null> {
+  if (orderIds.length === 0) return null;
+  const orders = await db.order.findMany({
+    where: { id: { in: [...orderIds] }, status: "PAID" },
+    orderBy: { createdAt: "asc" },
+    select: {
+      code: true,
+      total: true,
+      createdAt: true,
+      user: { select: { username: true, email: true, zaloId: true } },
+      product: {
+        select: {
+          name: true,
+          code: true,
+          slug: true,
+          productType: true,
+          downloadUrl: true,
+          docsUrl: true,
         },
       },
-    });
-    const first = orders[0];
-    if (!first) return;
-    const { user } = first;
-    if (!user.email && !user.zaloId) return;
-
-    const settings = await getShopSettings();
-    const lines: ReceiptLine[] = orders.map((order) => {
-      const software = order.product.productType === "SOFTWARE_GAME";
-      return {
-        orderCode: order.code,
-        productName: order.product.name ?? order.product.code,
-        packageLabel: software ? (order.package?.label ?? null) : null,
-        kind: software ? "software" : "account",
-        keys: software ? order.licenseKeys : [],
-        total: Number(order.total),
-        links: {
-          order: absoluteUrl(`/orders?don=${encodeURIComponent(order.code)}`),
-          download:
-            software && order.product.downloadUrl
-              ? absoluteUrl(order.product.downloadUrl)
-              : null,
-          docs: software
-            ? absoluteUrl(
-                order.product.docsUrl ?? toolDocsHref(order.product.slug),
-              )
+      package: { select: { label: true } },
+      licenseKeys: {
+        orderBy: { deliveredAt: "asc" },
+        select: { value: true, expiresAt: true },
+      },
+    },
+  });
+  const first = orders[0];
+  if (!first) return null;
+  const settings = await getShopSettings();
+  const lines: ReceiptLine[] = orders.map((order) => {
+    const software = order.product.productType === "SOFTWARE_GAME";
+    return {
+      orderCode: order.code,
+      productName: order.product.name ?? order.product.code,
+      packageLabel: software ? (order.package?.label ?? null) : null,
+      kind: software ? "software" : "account",
+      keys: software ? order.licenseKeys : [],
+      total: Number(order.total),
+      links: {
+        order: absoluteUrl(`/orders?don=${encodeURIComponent(order.code)}`),
+        download:
+          software && order.product.downloadUrl
+            ? absoluteUrl(order.product.downloadUrl)
             : null,
-          warranty: absoluteUrl(
-            `/orders/${encodeURIComponent(order.code)}/bao-hanh`,
-          ),
-        },
-      };
-    });
-    const data: ReceiptData = {
+        docs: software
+          ? absoluteUrl(
+              order.product.docsUrl ?? toolDocsHref(order.product.slug),
+            )
+          : null,
+        warranty: absoluteUrl(
+          `/orders/${encodeURIComponent(order.code)}/bao-hanh`,
+        ),
+      },
+    };
+  });
+  return {
+    data: {
       brand: emailBrand(settings),
-      username: user.username,
+      username: first.user.username,
       paidAt: first.createdAt,
       lines,
       ordersUrl: absoluteUrl(
@@ -105,13 +105,29 @@ export async function sendOrderReceipt(
           : "/orders",
       ),
       setupGuideUrl: absoluteUrl(SETUP_GUIDE_PATH),
-    };
+    },
+    email: first.user.email,
+    zaloId: first.user.zaloId,
+  };
+}
 
-    if (user.email && mailEnabled(settings)) {
-      const mail = orderReceiptEmail(data);
+export async function sendOrderReceipt(
+  orderIds: readonly string[],
+  options: {
+    /** False when the Zalo shop answers the buyer itself, in the same chat. */
+    zalo?: boolean;
+  } = {},
+): Promise<void> {
+  try {
+    const receipt = await receiptFor(orderIds);
+    if (!receipt) return;
+    const settings = await getShopSettings();
+
+    if (receipt.email && mailEnabled(settings)) {
+      const mail = orderReceiptEmail(receipt.data);
       await sendMail(
         settings,
-        user.email,
+        receipt.email,
         mail.subject,
         mail.text,
         mail.html,
@@ -120,11 +136,11 @@ export async function sendOrderReceipt(
       );
     }
 
-    if (user.zaloId) {
-      const message = zaloReceiptMessage(data);
+    if (receipt.zaloId && options.zalo !== false) {
+      const message = zaloReceiptMessage(receipt.data);
       await db.zaloOutbox.create({
         data: {
-          zaloId: user.zaloId,
+          zaloId: receipt.zaloId,
           text: message.text,
           styles: message.styles,
         },

@@ -41,6 +41,13 @@ import {
   ZALO_STATE_KEY,
   type ZaloBotState,
 } from "../../src/lib/zaloShared";
+import {
+  ZALO_INBOUND_HEADER,
+  ZALO_INBOUND_PATH,
+  zaloInboundSecret,
+  type ZaloInboundAnswer,
+  type ZaloShopReply,
+} from "../../src/lib/zaloInbound";
 import { createGroupManager, type GroupMessage } from "./group";
 
 /** zca-js's style range, which its index does not export by name. */
@@ -89,6 +96,20 @@ const SITE_HOST = (() => {
 })();
 let stopping = false;
 const lastHelpAt = new Map<string, number>();
+
+/**
+ * The website that runs the Zalo shop (src/lib/zaloShop.ts): the bot forwards
+ * a customer's words there and sends back what it answers. In Docker that is
+ * the app service; on a developer's machine the dev server on :3100.
+ */
+const SHOP_URL = (process.env.ZALO_APP_URL ?? "http://localhost:3100").replace(
+  /\/+$/,
+  "",
+);
+const SHOP_SECRET = zaloInboundSecret(DATABASE_URL);
+/** Where each chat stands in the shop (which numbered list it is looking at). */
+const shopChats = new Map<string, { state: unknown; at: number }>();
+const SHOP_CHAT_TTL_MS = 30 * 60 * 1000;
 
 // ---- standing, for Admin → Cấu hình -----------------------------------------
 
@@ -297,13 +318,24 @@ async function onMessage(message: Incoming): Promise<void> {
     log("linked", zaloId, "to", row.user.username);
     await send(
       threadId,
-      `✅ Đã liên kết với tài khoản ${row.user.username} trên ${brand}. Từ giờ thông báo bảo hành, đơn hàng và nạp tiền sẽ gửi vào đây. Bot chỉ gửi thông báo, không trả lời tin nhắn; cần hỗ trợ bạn nhắn shop qua kênh hỗ trợ trên web.`,
+      `✅ Đã liên kết với tài khoản ${row.user.username} trên ${brand}. Từ giờ thông báo bảo hành, đơn hàng và nạp tiền sẽ gửi vào đây. Gõ MENU để mua hack và nạp tiền ngay trong chat này.`,
     );
     return;
   }
 
-  // Anything else: one help text per chat per six hours, so a chatty
-  // stranger does not turn the bot into a spam source.
+  // Anything else is for the shop on the website, which answers in kind.
+  const answer = await askShop(
+    zaloId,
+    message.data.dName?.trim() || null,
+    text,
+  );
+  if (answer) {
+    await sendShopReplies(threadId, answer.replies);
+    return;
+  }
+
+  // The shop could not be reached: one help text per chat per six hours, so
+  // a chatty stranger does not turn the bot into a spam source.
   const last = lastHelpAt.get(threadId) ?? 0;
   if (Date.now() - last < HELP_GAP_MS) return;
   lastHelpAt.set(threadId, Date.now());
@@ -317,6 +349,121 @@ async function onMessage(message: Incoming): Promise<void> {
       ? `Đây là bot thông báo tự động của ${brand} (đang gửi cho tài khoản ${linked.username}). Bot không đọc tin nhắn; cần hỗ trợ bạn nhắn shop qua kênh hỗ trợ trên web.`
       : `Đây là bot thông báo tự động của ${brand}. Để nhận thông báo bảo hành, đơn hàng, nạp tiền: vào web → Bảo mật → Liên kết Zalo, lấy mã rồi gửi vào đây theo mẫu "${linkMessage("ABC234")}". Bot không trả lời tin nhắn khác.`,
   );
+}
+
+// ---- the shop ----------------------------------------------------------------
+
+/** The website's answer to what a customer typed, or null when it cannot be reached. */
+async function askShop(
+  zaloId: string,
+  name: string | null,
+  text: string,
+): Promise<ZaloInboundAnswer | null> {
+  const now = Date.now();
+  const held = shopChats.get(zaloId);
+  try {
+    const res = await fetch(`${SHOP_URL}${ZALO_INBOUND_PATH}`, {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        [ZALO_INBOUND_HEADER]: SHOP_SECRET,
+      },
+      body: JSON.stringify({
+        zaloId,
+        name,
+        text,
+        state: held && now - held.at < SHOP_CHAT_TTL_MS ? held.state : null,
+      }),
+      signal: AbortSignal.timeout(25_000),
+    });
+    if (!res.ok) {
+      log("shop answered", res.status);
+      return null;
+    }
+    const answer = (await res.json()) as ZaloInboundAnswer;
+    if (answer.state) shopChats.set(zaloId, { state: answer.state, at: now });
+    else shopChats.delete(zaloId);
+    if (shopChats.size > 2_000) {
+      for (const [id, chat] of shopChats)
+        if (now - chat.at > SHOP_CHAT_TTL_MS) shopChats.delete(id);
+    }
+    return Array.isArray(answer.replies) ? answer : null;
+  } catch (error) {
+    log("shop unreachable:", (error as Error).message);
+    return null;
+  }
+}
+
+/** Width and height from a PNG's or JPEG's own header, for Zalo's upload. */
+function imageSize(data: Buffer): { width?: number; height?: number } {
+  if (data.length > 24 && data.readUInt32BE(0) === 0x89504e47) {
+    return { width: data.readUInt32BE(16), height: data.readUInt32BE(20) };
+  }
+  let i = 2;
+  while (data[0] === 0xff && data[1] === 0xd8 && i + 9 < data.length) {
+    if (data[i] !== 0xff) break;
+    const marker = data[i + 1]!;
+    const length = data.readUInt16BE(i + 2);
+    if (marker >= 0xc0 && marker <= 0xc3) {
+      return {
+        height: data.readUInt16BE(i + 5),
+        width: data.readUInt16BE(i + 7),
+      };
+    }
+    i += 2 + length;
+  }
+  return {};
+}
+
+/** The picture behind a reply (the VietQR code), fetched for upload. */
+async function fetchImage(url: string) {
+  try {
+    const res = await fetch(url, { signal: AbortSignal.timeout(15_000) });
+    if (!res.ok) return null;
+    const data = Buffer.from(await res.arrayBuffer());
+    if (data.length === 0 || data.length > 5 * 1024 * 1024) return null;
+    const png = data.readUInt32BE(0) === 0x89504e47;
+    return {
+      data,
+      filename: (png ? "qr.png" : "qr.jpg") as `${string}.${string}`,
+      metadata: { totalSize: data.length, ...imageSize(data) },
+    };
+  } catch (error) {
+    log("image fetch failed:", (error as Error).message);
+    return null;
+  }
+}
+
+/** The shop's answer, a message at a time, with a breath between them. */
+async function sendShopReplies(
+  threadId: string,
+  replies: ZaloShopReply[],
+): Promise<void> {
+  if (!api) return;
+  for (const item of replies.slice(0, 5)) {
+    try {
+      if (item.imageUrl) {
+        const image = await fetchImage(item.imageUrl);
+        if (image) {
+          await api.sendMessage(
+            { msg: item.text ?? "", attachments: [image] },
+            threadId,
+            ThreadType.User,
+          );
+        }
+      } else if (item.text) {
+        const styles = readZaloStyles(item.styles, item.text.length);
+        await api.sendMessage(
+          styles ? { msg: item.text, styles: styles as Style[] } : item.text,
+          threadId,
+          ThreadType.User,
+        );
+      }
+    } catch (error) {
+      log("shop reply failed:", (error as Error).message);
+    }
+    await sleep(500);
+  }
 }
 
 // ---- the outbox ------------------------------------------------------------

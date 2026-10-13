@@ -128,6 +128,8 @@ services:
       - NODE_ENV=production
       - ZALO_DATA_DIR=/data
       - ZALO_QR_DIR=/app/public/uploads/zalo
+      # The shop on Zalo forwards customers' messages to the website here.
+      - ZALO_APP_URL=http://app:3000
     volumes:
       - zalo-data:/data
       - ${UPLOADS_DIR:-./uploads}:/app/public/uploads
