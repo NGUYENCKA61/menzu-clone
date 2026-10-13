@@ -1,24 +1,39 @@
-// Generates src/app/theme-light.css: the site in a light dress (TRIAL,
-// 13/10/2026, the owner: "làm thử web với giao diện trắng đi").
+// Generates src/app/theme-light.css: the site's light dress, in OCEAN BLUE
+// (TRIAL, 13/10/2026). The owner first asked for a white trial ("làm thử web
+// với giao diện trắng đi"), then for its colours: "Tone trắng kết hợp xanh
+// biển" and "Làm sao cho web clean hợp nhất đẹp", white with ocean blue,
+// clean, unified and good-looking.
 // Run from the repo root:  node scripts/gen-theme-light.mjs
 //
 // Every rule sits under html[data-theme="light"], so the dark site is left
-// exactly as it is. Three parts:
+// exactly as it is, red accent and all. Four parts:
 //  1. The palette turned over. Tailwind paints from CSS variables, so white
-//     becomes ink, the grey scales run the other way and the bright status
-//     shades become their deep ones.
+//     becomes navy ink, every grey scale runs the other way as slate (the
+//     blue-leaning grey, so the greys lean the way the accent does) and the
+//     bright status shades become their deep ones. The shop's accent
+//     variables (--menzu-accent, --brand and their -dark pair) become ocean
+//     blue #0b63b6; the accent is the only thing that turns blue.
 //  2. Islands that keep the original palette inside: .keep-dark (words over
 //     pictures, the admin) and every element whose own background is a solid
 //     colour (accent buttons, coloured badges, a white button with dark text).
+//     Inside .keep-dark the accent is one step lighter (#1f78d1), to read on
+//     black.
 //  3. The colours typed as hex, which no variable reaches: one rule per class
 //     token found in the source, its variants included, at the specificity of
 //     Tailwind's own rule and inside its utilities layer, so a hover written
 //     next to it still wins as it does on the dark site.
+//  4. The ocean finish: one white surface, one hairline, one blue. Faint
+//     panels become white cards, quiet buttons white with a firm line, hovers
+//     a cool tint, selected pills soft blue, accent tints solid; glows, beams,
+//     blurs and in-flow shadows go. Sale signals (the MIỄN PHÍ ribbon, the -N%
+//     chips, the flash-sale button) and error lines keep the shop red, and
+//     Tailwind's red, rose, emerald and amber keep meaning what they mean.
 //
 // Classes are matched as whole tokens. A substring match once caught
 // "selection:bg-[var(--menzu-accent)]/30" on every page wrapper and put the
 // white text back on the whole page.
 import fs from "node:fs";
+import { createRequire } from "node:module";
 import path from "node:path";
 
 const OUT = "src/app/theme-light.css";
@@ -43,7 +58,9 @@ for (const file of walk("src")) {
 }
 
 // Tailwind's palette as shipped, so a restored colour is the exact original.
-const THEME = fs.readFileSync("node_modules/tailwindcss/theme.css", "utf8");
+// Resolved the way Node finds a package (walking up), so the script also runs
+// in a git worktree that shares the main checkout's node_modules.
+const THEME = fs.readFileSync(createRequire(import.meta.url).resolve("tailwindcss/theme.css"), "utf8");
 const TW = new Map(
   [...THEME.matchAll(/--color-([a-z]+(?:-\d+)?):\s*([^;]+);/g)].map((m) => [m[1], m[2].trim()]),
 );
@@ -72,10 +89,17 @@ for (const token of tokens) {
   for (const m of token.matchAll(/-([a-z]+)-(\d{2,3})(?=$|\/|\])/g)) used.add(`${m[1]}-${m[2]}`);
 }
 
+// One cool grey family: neutral, zinc and gray mirrored as pure greys sat
+// beside a cool page and a blue accent, so every grey scale mirrors slate.
+// The two middle steps are set by hand so muted words read on white: 500 at
+// 5.25:1, and 600 (the dark site's dim grey: timestamps, captions) at 4.65:1
+// instead of 2.6:1, still the quietest text. The islands get the originals
+// back, 500s included.
+const GREY_MIDDLE = { 500: "#5f6d82", 600: "#6b7586" };
 const flips = new Map([["white", "var(--light-ink)"]]);
 for (const family of GREYS) {
   if (!SHADES.some((s) => used.has(`${family}-${s}`))) continue;
-  for (const s of SHADES) if (s !== "500") flips.set(`${family}-${s}`, tw(`${family}-${MIRROR[s]}`));
+  for (const s of SHADES) flips.set(`${family}-${s}`, GREY_MIDDLE[s] ?? tw(`slate-${MIRROR[s]}`));
 }
 for (const family of CHROMA) {
   for (const s of Object.keys(DEEP)) {
@@ -247,7 +271,12 @@ const TEXT_DEEP = {
 
 /** The grounds of the dark site, one step at a time, in light. */
 function ground(info, interactive, alpha) {
-  if (info.reddish && info.lum < 0.12) return interactive ? "#ffe4e6" : "#fff1f2";
+  // The accent's red-black grounds: a solid sheet is white (the package menu
+  // on a tool card); a see-through chip, or a row under the pointer, is the
+  // soft blue of a selected pill.
+  if (info.reddish && info.lum < 0.12) {
+    return interactive || alpha < 100 ? "var(--ocean-soft)" : "var(--light-surface)";
+  }
   if (interactive) return "var(--light-surface-hover)";
   // The darkest grounds are the page itself; translucent, they are sheets
   // and bars laid over it, which read as white.
@@ -381,14 +410,286 @@ const inlineCss = Object.entries(INLINE)
   })
   .join("\n\n");
 
+// ---- 4. The ocean finish --------------------------------------------------
+// The families of faint white and of accent tint are read from the source by
+// their alpha, so a new shade typed in a component joins its family without
+// an edit here. Only the bare class and its hover: are matched, as typed.
+
+const ALPHA_ONLY = new RegExp(`^${ALPHA}$`);
+/** The source's "<variant><base>/<alpha>" tokens whose alpha is lo..hi %. */
+function alphaFamily(variant, base, lo, hi) {
+  const head = `${variant}${base}/`;
+  return [...tokens]
+    .filter((t) => t.startsWith(head) && ALPHA_ONLY.test(t.slice(head.length - 1)))
+    .filter((t) => alphaOf(t) >= lo && alphaOf(t) <= hi)
+    .sort();
+}
+/** ":is(.a, .b)<suffix>" for a token list, or null when the list is empty. */
+function anyOf(list, suffix = "") {
+  return list.length ? `:is(${list.map((t) => `.${esc(t)}`).join(", ")})${suffix}` : null;
+}
+const LIGHT = `:where(html[data-theme="light"])`;
+const NOT_ISLAND = `:where(:not(.keep-dark, .keep-dark *))`;
+
+// A faint lifted panel on black (2-6% white, with a border) is a white card
+// on the grey page; a filled quiet button or chip (7-10%) is white with a
+// firm hairline; every hover of faint white (up to 10%) is a cool tint.
+const panels = anyOf(alphaFamily("", "bg-white", 2, 6));
+const quietFills = anyOf(alphaFamily("", "bg-white", 7, 10));
+const quietHovers = anyOf(alphaFamily("hover:", "bg-white", 1, 10), ":hover");
+// One hairline: the faint white borders (4-12%) and the neutral-800 ones all
+// draw the same line instead of five slightly different greys.
+const hairlines = anyOf([
+  ...alphaFamily("", "border-white", 4, 12),
+  ...(tokens.has("border-neutral-800") ? ["border-neutral-800"] : []),
+  ...alphaFamily("", "border-neutral-800", 40, 99),
+]);
+
+// Accent tints laid over black at 2-25% turn muddy over the grey page, so
+// each is a solid mix with white: crisp on any ground and never past 14%,
+// where ocean words still read 4.9:1. The mix reads the variable, so a tint
+// inside an error line ([role="alert"]) is red like its words.
+const TINTS = [
+  [1, 5, 4],
+  [6, 8, 6],
+  [9, 10, 9],
+  [11, 15, 12],
+  [16, 25, 14],
+];
+const tintCss = ["menzu-accent", "brand"]
+  .flatMap((name) =>
+    TINTS.map(([lo, hi, mix]) => {
+      const selectors = [
+        anyOf(alphaFamily("", `bg-[var(--${name})]`, lo, hi)),
+        anyOf(alphaFamily("hover:", `bg-[var(--${name})]`, lo, hi), ":hover"),
+      ]
+        .filter(Boolean)
+        .map((s) => `  ${LIGHT} ${s}${NOT_ISLAND}`);
+      if (!selectors.length) return null;
+      return `${selectors.join(",\n")} {\n    background-color: color-mix(in srgb, var(--${name}) ${mix}%, #ffffff);\n  }`;
+    }),
+  )
+  .filter(Boolean)
+  .join("\n");
+
+const surfaceCss = [
+  panels &&
+    `  ${LIGHT} ${panels}:where([class*="border"])${NOT_ISLAND} {\n    background-color: var(--light-surface);\n  }`,
+  quietFills &&
+    `  ${LIGHT} ${quietFills}:where(button, a, label, [role="button"], [role="tab"])${NOT_ISLAND} {\n    background-color: var(--light-surface);\n    box-shadow: inset 0 0 0 1px var(--light-line-strong);\n  }`,
+  quietHovers && `  ${LIGHT} ${quietHovers}${NOT_ISLAND} {\n    background-color: var(--light-surface-hover);\n  }`,
+  hairlines && `  ${LIGHT} ${hairlines}${NOT_ISLAND} {\n    border-color: var(--light-line);\n  }`,
+]
+  .filter(Boolean)
+  .join("\n");
+
+// The search shells (the parent of an input): white fields with one firm
+// hairline, their own border where they have one, an inset line where not.
+const SHELLS = String.raw`:is(.bg-neutral-900\/60, .bg-white\/\[0\.07\], .bg-white\/\[0\.08\], .bg-white\/5, .bg-white\/\[0\.04\])`;
+const SHELLS_BORDERLESS = String.raw`:is(.bg-white\/\[0\.07\], .bg-white\/\[0\.08\])`;
+
+const oceanCss = String.raw`/* 4. The ocean finish: one white surface, one hairline, one blue. */
+
+/* Brand hexes typed in the source read the accent variable, so inside an
+   island they take its lifted blue. */
+html[data-theme="light"] .bg-\[\#e13d3f\] { background-color: var(--menzu-accent); }
+html[data-theme="light"] .hover\:bg-\[\#c92f33\]:hover { background-color: var(--menzu-accent-dark); }
+html[data-theme="light"] .text-\[\#e13d3f\] { color: var(--menzu-accent); }
+html[data-theme="light"] .border-\[\#ff3158\] { border-color: var(--menzu-accent); }
+/* The package menu on a tool card was a red-black sheet; now a white one
+   (its ground comes from the hex rules above). */
+html[data-theme="light"] .bg-\[\#160b0e\]:not(.keep-dark *) { border-color: var(--light-line-strong); }
+
+/* Sale signals keep the shop red: the accent variable is turned back to red on
+   them alone (the free-tool corner ribbon, which the owner asked to keep red
+   on 13/10, the % chip after a struck price on a product card, and the
+   flash-sale price button). */
+html[data-theme="light"] :is(
+  .-rotate-45.bg-\[var\(--menzu-accent\)\],
+  .line-through + .bg-\[var\(--menzu-accent\)\],
+  .from-\[var\(--menzu-accent\)\].to-\[var\(--menzu-accent-dark\)\]
+) {
+  --menzu-accent: var(--sale-red);
+  --menzu-accent-dark: var(--sale-red-dark);
+}
+html[data-theme="light"] .-rotate-45.bg-\[var\(--menzu-accent\)\] { background-color: var(--sale-red); background-image: none; }
+/* The buy panel's "-N%" tint chip after a struck price: red tint, red words. */
+html[data-theme="light"] .line-through + .bg-\[var\(--menzu-accent\)\]\/15 {
+  background-color: color-mix(in srgb, var(--sale-red) 12%, #ffffff);
+  color: var(--sale-red-ink);
+}
+/* An error line written in the accent is still an error. */
+html[data-theme="light"] [role="alert"] {
+  --menzu-accent: #c62a2f;
+  --menzu-accent-dark: #a82226;
+  --brand: #c62a2f;
+  --brand-dark: #a82226;
+}
+
+/* Header, top strip, footer, separators. The header is solid white with one
+   line under it: no blur, no shadow when the page scrolls. */
+html[data-theme="light"] .site-nav {
+  background-color: #ffffff;
+  box-shadow: 0 1px 0 0 var(--light-line);
+  backdrop-filter: none;
+}
+html[data-theme="light"] .site-nav > div:first-child {
+  background-color: var(--light-band);
+  border-bottom-color: var(--light-line);
+}
+html[data-theme="light"] .site-nav > div:first-child a { color: var(--light-ink-3); }
+html[data-theme="light"] .site-nav > div:first-child a:hover { color: var(--ocean); }
+/* The logo picture stays red (it is a file). Its tagline joins the blue and
+   the spinning arc round it goes: one moving thing less in the header (and in
+   the phone drawer, where it spun loose beside the menu button). */
+html[data-theme="light"] a[href="/"] .text-red-500 { color: var(--ocean); }
+html[data-theme="light"] .navbar-spin-ring { display: none; }
+
+html[data-theme="light"] footer.bg-\[\#0f1015\] {
+  background-color: var(--light-band);
+  border-top-color: var(--light-line);
+}
+html[data-theme="light"] footer.bg-\[\#0f1015\] a:hover { color: var(--ocean); }
+/* The dim step (#6b7586) is 4.06:1 on the band: one step up inside the frame. */
+html[data-theme="light"] :is(footer.bg-\[\#0f1015\], .site-nav > div:first-child) :is(.text-neutral-600, .text-zinc-600, .text-slate-600, .text-gray-600) {
+  color: var(--light-ink-3);
+}
+html[data-theme="light"] footer.bg-\[\#0f1015\] .border-t { border-top-color: var(--light-line); }
+html[data-theme="light"] .before\:bg-white\/\[0\.06\]::before { background-color: var(--light-line); }
+
+/* Decorative effects, quiet in the light dress (the islands keep theirs). */
+html[data-theme="light"] :is(.blur-\[60px\], .blur-\[120px\], .blur-\[140px\], .blur-\[180px\], .blur-lg):not(.keep-dark *) { display: none; }
+html[data-theme="light"] :is(.spot-glow, .border-beam, .val-scan-line):not(.keep-dark *) { display: none; }
+html[data-theme="light"] .animate-ping:not(.keep-dark *) { display: none; }
+html[data-theme="light"] .rounded-full.animate-pulse:not(.keep-dark *) { animation: none; }
+html[data-theme="light"] :is(.search-glow, .search-glow-brand, .invoice-breathe):not(.keep-dark *) { animation: none; box-shadow: none; }
+html[data-theme="light"] .vip-text-glow:not(.keep-dark *) { animation: none; text-shadow: none; }
+html[data-theme="light"] [class*="drop-shadow-[0_0"]:not(.keep-dark *) { filter: none; }
+/* No glow anywhere outside the islands. */
+html[data-theme="light"] :is([class*="shadow-[0_0_"], [class*="shadow-[0_6px_22px"]):not(.keep-dark, .keep-dark *) { --tw-shadow: 0 0 #0000; }
+/* Hairlines instead of shadows on everything in the flow. Floating layers
+   (menus, sheets, toasts, dialogs) keep one soft cool shadow. */
+html[data-theme="light"] [class*="shadow"]:not([class*="absolute"], [class*="fixed"], [class*="sticky"], [class*="absolute"] > *, [class*="fixed"] > *, [role="dialog"], [role="listbox"], [role="menu"], .keep-dark, .keep-dark *) {
+  --tw-shadow: 0 0 #0000;
+}
+html[data-theme="light"] :is(.shadow-black\/30, .shadow-black\/40, .shadow-black\/60, .hover\:shadow-black\/40:hover):not(.keep-dark, .keep-dark *) {
+  --tw-shadow-color: rgb(15 27 45 / 0.1);
+}
+/* A card lit from one corner by an accent wash is a plain white card. */
+html[data-theme="light"] [class*="from-[var(--menzu-accent)]/"]:not(.keep-dark *) {
+  background-image: none;
+  background-color: var(--light-surface);
+}
+
+/* The scope search: red rim, red reticle, red spinner, now one quiet blue. */
+html[data-theme="light"] .border-\[rgba\(239\,68\,68\,0\.2\)\]:not(.keep-dark *) {
+  border-width: 1px;
+  border-color: var(--light-line-strong);
+}
+html[data-theme="light"] .border-\[rgba\(239\,68\,68\,0\.2\)\]:focus-within:not(.keep-dark *) {
+  border-color: var(--ocean);
+  box-shadow: 0 0 0 3px var(--ocean-ring);
+}
+html[data-theme="light"] :is([stroke="#ef4444"], [stroke="rgba(239,68,68,0.35)"]):not(.keep-dark *) { stroke: var(--ocean); }
+html[data-theme="light"] .val-cross-ring:not(.keep-dark *) { opacity: 0.45; animation: none; }
+html[data-theme="light"] .val-dot-blink:not(.keep-dark *) { fill: var(--ocean); animation: none; }
+html[data-theme="light"] .text-\[\#ef4444\]\/80:not(.keep-dark *) { color: var(--ocean); }
+
+/* Surfaces, quiet buttons, hairlines and accent tints, inside Tailwind's
+   utilities layer at its specificity, so the hover written beside each class
+   still wins. Base and hover classes sit in separate lists for that reason. */
+@layer utilities {
+${surfaceCss}
+  ${LIGHT} ${SHELLS}:where(:has(> input, > textarea))${NOT_ISLAND} {
+    background-color: var(--light-surface);
+    border-color: var(--light-line-strong);
+  }
+  ${LIGHT} ${SHELLS_BORDERLESS}:where(:has(> input, > textarea)):where(:not([class*="border"], .keep-dark, .keep-dark *)) {
+    box-shadow: inset 0 0 0 1px var(--light-line-strong);
+  }
+${tintCss}
+}
+/* A field being typed in: the blue line and a soft ring. */
+html[data-theme="light"] ${SHELLS}:has(> input:focus, > textarea:focus):not(.keep-dark, .keep-dark *) {
+  border-color: var(--ocean);
+  box-shadow: 0 0 0 3px var(--ocean-ring);
+}
+html[data-theme="light"] ${SHELLS_BORDERLESS}:not([class*="border"]):has(> input:focus, > textarea:focus):not(.keep-dark, .keep-dark *) {
+  box-shadow: inset 0 0 0 1px var(--ocean), 0 0 0 3px var(--ocean-ring);
+}
+
+/* Selected pills, chips and tabs: soft blue with a blue hairline (the
+   --color-white turn makes their white words blue). Solid blue is kept for
+   actions: Mua ngay, Thuê ngay, Tìm kiếm, Đăng nhập. */
+html[data-theme="light"] :is([aria-pressed="true"], [aria-selected="true"], [aria-current="page"])[class]:is(.bg-\[var\(--menzu-accent\)\], .bg-\[var\(--brand\)\]):not(.keep-dark, .keep-dark *) {
+  --color-white: var(--ocean);
+  background-color: var(--ocean-soft);
+  border-color: var(--ocean-line);
+  box-shadow: inset 0 0 0 1px var(--ocean-line);
+  color: var(--ocean);
+}
+
+/* Fields and focus. */
+html[data-theme="light"] :is(input, textarea):not(.keep-dark *)::placeholder { color: #6b7586; } /* 4.65:1 on white */
+html[data-theme="light"] :is(a, button, [role="button"], [role="tab"], summary):focus-visible:not([class*="focus-visible:ring"], [class*="focus:ring"], .keep-dark *) {
+  outline: 2px solid var(--ocean);
+  outline-offset: 2px;
+}
+
+/* The few places that need a hand. The support bubble and its panel
+   (supportChrome.ts): frosted dark glass over the hero video turned muddy on
+   a phone. Solid white, hairline, one float. */
+html[data-theme="light"] .bg-\[\#0b0b10\]\/70:not(.keep-dark *) {
+  background-color: rgb(255 255 255 / 0.97);
+  border-color: var(--light-line);
+  box-shadow: var(--float-shadow);
+}
+html[data-theme="light"] .bg-\[\#0b0b10\]\/70.hover\:bg-\[\#14141c\]\/80:hover:not(.keep-dark *) {
+  background-color: var(--light-surface-hover);
+}
+/* The category filter panel (filterChrome.ts) is white like the two search
+   fields above it, so the three read as one control block. */
+html[data-theme="light"] .bg-neutral-900\/35.border-neutral-800\/40:not(.keep-dark *) {
+  background-color: var(--light-surface);
+}
+/* The home hero video: its 140px black halo is gone with the in-flow shadows;
+   a soft navy drop keeps it lifted off the page. */
+html[data-theme="light"] [class*="0_0_140px_30px"]:not(.keep-dark *) {
+  box-shadow: 0 28px 56px -32px rgb(15 27 45 / 0.35);
+}
+/* Rating stars: warm gold with a deeper rim, not burnt orange. Decorative (the
+   rating is in the aria-label), so the 2.5:1 rim is fine. */
+html[data-theme="light"] .fill-amber-400:not(.keep-dark *) {
+  color: #e8920a;
+  fill: #fbb124;
+}
+
+/* OWNER'S CALL, off by default: /categories dims games with nothing on sale
+   to 45%, which goes milky on white. Greyscale at 82% (full colour under the
+   pointer) is crisp, but it changes the "not on sale" signal, so it ships
+   only on the owner's yes.
+html[data-theme="light"] .opacity-45.transition-opacity:not(.keep-dark *) {
+  opacity: 0.82;
+  filter: grayscale(1);
+  transition: opacity 0.2s ease, filter 0.2s ease;
+}
+html[data-theme="light"] .opacity-45.transition-opacity:not(.keep-dark *):is(:hover, :focus-within) {
+  opacity: 1;
+  filter: none;
+}
+*/
+`;
+
 // ---- Output -------------------------------------------------------------
 
 const css = `/*
- * TRIAL (13/10/2026, the owner: "làm thử web với giao diện trắng đi"): the site
- * in a light dress, switched by html[data-theme="light"] and nothing else, so
- * the dark site is untouched while the owner decides. The switch is the footer's
- * "Giao diện sáng" link, or ?giao-dien=sang / ?giao-dien=toi on any page; the
- * choice is kept in this browser (localStorage "ttt-theme").
+ * TRIAL (13/10/2026): the site in a light dress, white with ocean blue (the
+ * owner: "làm thử web với giao diện trắng đi", then "Tone trắng kết hợp xanh
+ * biển" and "Làm sao cho web clean hợp nhất đẹp"). Switched by
+ * html[data-theme="light"] and nothing else, so the dark site is untouched
+ * while the owner decides. The switch is the footer's "Giao diện sáng" link,
+ * or ?giao-dien=sang / ?giao-dien=toi on any page; the choice is kept in this
+ * browser (localStorage "ttt-theme").
  *
  * Generated by scripts/gen-theme-light.mjs; regenerate rather than hand-edit.
  */
@@ -398,38 +699,64 @@ const css = `/*
 
 html[data-theme="light"] {
   color-scheme: light;
-  --light-page: #f3f4f6;
+  /* A very light cool page, white surfaces, one hairline, navy ink. */
+  --light-page: #f4f6f9;
   --light-surface: #ffffff;
-  --light-surface-hover: #f1f2f5;
-  --light-line: #e4e5ea;
-  --light-ink: oklch(0.21 0.006 270);
-  --light-ink-2: #34353d;
-  --light-ink-3: #5d5e69;
-  --light-ink-4: #a1a3ad;
+  --light-surface-hover: #eef3f8; /* a row or a quiet button under the pointer */
+  --light-line: #e2e8f0; /* the one hairline */
+  --light-line-strong: #cbd5e1; /* field and quiet-button outlines */
+  --light-band: #eaf0f7; /* the top strip and the footer */
+  --light-ink: #0f1b2d; /* headings, primary words: 15.96:1 on the page */
+  --light-ink-2: #2d3a4e; /* body words: 11.5:1 on white */
+  --light-ink-3: #566173; /* muted words: 5.78:1 on the page */
+  --light-ink-4: #8a94a3; /* decoration only, never the sole carrier */
+
+  /* The accent. White on ocean and ocean on white both 6.04:1. */
+  --ocean: #0b63b6;
+  --ocean-dark: #084f93; /* hover, pressed: white on it 8.24:1 */
+  --ocean-soft: #eaf2fb; /* a selected pill's ground: ocean on it 5.35:1 */
+  --ocean-line: #b9d3ee; /* a selected pill's outline */
+  --ocean-ring: rgb(11 99 182 / 0.18); /* drawn as a 3px focus ring */
+  /* The shop red, for sale signals only: ribbon, % chips, flash sale. */
+  --sale-red: #e13d3f;
+  --sale-red-dark: #c92f33;
+  --sale-red-ink: #b8262b; /* red words on a red tint, 5.28:1 */
+  --float-shadow: 0 2px 6px rgb(15 27 45 / 0.06), 0 18px 44px -18px rgb(15 27 45 / 0.24);
+
+  /* The shop's accent variables. This selector outranks the :root values that
+     Cấu hình > Nhận diện writes from the root layout, so the light dress stays
+     ocean whatever colour is picked there. */
+  --brand: var(--ocean);
+  --brand-dark: var(--ocean-dark);
+  --menzu-accent: var(--ocean);
+  --menzu-accent-dark: var(--ocean-dark);
 
   --background: var(--light-page);
   --foreground: var(--light-ink);
   --menzu-bg: var(--light-page);
   --menzu-nav: #ffffff;
   --menzu-rail: #ffffff;
-  --menzu-backdrop-dim: rgb(243 244 246 / 0.7);
+  --menzu-backdrop-dim: rgb(244 246 249 / 0.72);
+  --menzu-scroll-thumb: #c5cfdc;
+  --menzu-scroll-thumb-hover: #a7b4c5;
+  --menzu-scroll-thumb-active: var(--ocean);
 
   /* shadcn's own light values, for the few primitives that read them. */
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
+  --primary: var(--ocean);
+  --primary-foreground: #ffffff;
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
   --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
+  --muted-foreground: var(--light-ink-3);
   --accent: oklch(0.97 0 0);
   --accent-foreground: oklch(0.205 0 0);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
+  --border: var(--light-line);
+  --input: var(--light-line-strong);
+  --ring: var(--ocean);
 
   /* 1. The palette, turned over. Black stays black: it is only ever an overlay. */
 ${flipLines}
@@ -455,6 +782,13 @@ ${restoreLines}
 
 html[data-theme="light"] .keep-dark {
   color-scheme: dark;
+  /* The accent one step lighter, so it still reads on black: white on it
+     4.50:1, it on #101114 4.19:1 (the dark site's red is 4.25:1). Hover goes
+     to the light dress's ocean. */
+  --menzu-accent: #1f78d1;
+  --brand: #1f78d1;
+  --menzu-accent-dark: #0b63b6;
+  --brand-dark: #0b63b6;
 }
 
 /* A modal's scrim stays a scrim. A picture viewer (keep-dark) keeps its own
@@ -470,11 +804,11 @@ html[data-theme="light"] :is(
   background-color: var(--light-page);
 }
 
-/* Shadows drawn for black are soft grey on white; a shadow given its own
-   colour keeps it (that utility wins over this base rule). */
+/* Shadows drawn for black are a soft cool navy on white; a shadow given its
+   own colour keeps it (that utility wins over this base rule). */
 @layer base {
   html[data-theme="light"] :not(.keep-dark, .keep-dark *) {
-    --tw-shadow-color: rgb(15 16 21 / 0.1);
+    --tw-shadow-color: rgb(15 27 45 / 0.08);
   }
 }
 
@@ -489,16 +823,21 @@ ${PROSE} li::marker {
   color: var(--light-ink-4);
 }
 ${PROSE} a {
-  color: ${tw("rose-600")};
+  color: var(--ocean);
 }
 ${PROSE} a:hover {
-  color: var(--light-ink);
+  color: var(--ocean-dark);
 }
 ${PROSE} :is(img, .doc-video) {
   border-color: var(--light-line);
 }
+/* A quote is a soft blue note with a blue rule; the padding gives the tint
+   room round the words. */
 ${PROSE} blockquote {
-  border-left-color: var(--light-line);
+  border-left-color: var(--ocean-line);
+  background-color: var(--ocean-soft);
+  padding: 0.55rem 0.9rem;
+  border-radius: 0 0.5rem 0.5rem 0;
   color: var(--light-ink-3);
 }
 ${PROSE} figcaption {
@@ -518,7 +857,8 @@ ${hexCss}
 
 ${wellCss}
 }
-`;
+
+${oceanCss}`;
 
 fs.writeFileSync(OUT, css);
 console.log(`${OUT}: ${flips.size} palette flips, ${islands.length} islands, ${hexCount} hex tokens`);
