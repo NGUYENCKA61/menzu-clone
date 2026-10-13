@@ -25,7 +25,7 @@ import { ConnectRailSection } from "@/components/sites/menzu-lol-f7ae197a/root-8
 import { FaqSection } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/FaqSection";
 import { formatVnd } from "@/components/sites/menzu-lol-f7ae197a/shared/productData";
 import { getFeedback, getFlashSaleItems } from "@/lib/queries";
-import { JsonLd, organizationJsonLd } from "@/lib/seo";
+import { JsonLd, organizationJsonLd, profileLinks, websiteJsonLd } from "@/lib/seo";
 import { visibleBlocks } from "@/lib/settings";
 import { getShopSettings } from "@/lib/settingsStore";
 import { getTrustStats } from "@/lib/trustStats";
@@ -175,7 +175,23 @@ export default async function Home() {
       {/* The artwork behind the first screen only, lmarket's flat dark tone
           under the rest; covers the root layout's full-page backdrop. */}
       <HomeBackdrop src={settings.siteBackground} />
-      <JsonLd data={organizationJsonLd(settings.brandName)} />
+      {/* The shop, with the logo the header draws and its profiles
+          elsewhere, and the site, whose name is what Google prints over a
+          result (the owner's SEO review, 13/10/2026). The groups and the
+          Discord invite are places to talk, not the shop's profile, so
+          only the TikTok, the fanpage and the channel are offered. */}
+      <JsonLd
+        data={organizationJsonLd({
+          brandName: settings.brandName,
+          brandLogo: settings.brandLogo,
+          sameAs: profileLinks([
+            settings.contactTiktok,
+            settings.contactFacebook,
+            settings.contactTelegram,
+          ]),
+        })}
+      />
+      <JsonLd data={websiteJsonLd(settings.brandName)} />
       {/* spacer reserving the fixed header's 104px */}
       <div className="w-full shrink-0 h-[104px]" />
       <SiteHeader />

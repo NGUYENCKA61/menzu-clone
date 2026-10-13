@@ -230,16 +230,67 @@ export function siteDescription(brandName: string): string {
   return `${brandName} là shop hack game và tài khoản game uy tín. Hack Valorant, CS2, PUBG, Liên Quân: key bản quyền giao tự động, cập nhật liên tục, hỗ trợ 24/7.`;
 }
 
-/** schema.org/Organization for the homepage. */
-export function organizationJsonLd(brandName: string) {
+/**
+ * The shop's own profile pages, for `sameAs`: the addresses that are the shop
+ * itself on another site. A group, an invite or a chat link is a place to talk
+ * rather than the shop's profile, so those are left out, and so is anything
+ * that is not a full http(s) address (a bare handle or a phone number).
+ */
+export function profileLinks(candidates: (string | null | undefined)[]): string[] {
+  const NOT_A_PROFILE = [
+    /^https?:\/\/(?:www\.|m\.)?facebook\.com\/groups\//i,
+    /^https?:\/\/(?:www\.)?(?:m\.me|zalo\.me|discord\.gg|discord\.com\/invite)\b/i,
+    /^https?:\/\/(?:www\.)?t\.me\/(?:\+|joinchat\/)/i,
+  ];
+  const out: string[] = [];
+  for (const raw of candidates) {
+    const url = raw?.trim() ?? "";
+    if (!/^https?:\/\/[^\s/]+\.[^\s]+$/i.test(url)) continue;
+    if (NOT_A_PROFILE.some((re) => re.test(url))) continue;
+    if (!out.includes(url)) out.push(url);
+  }
+  return out;
+}
+
+/**
+ * schema.org/Organization (as an OnlineStore) for the homepage.
+ *
+ * The logo is the one Cấu hình → Nhận diện sets, the same file the header
+ * draws: it was a fixed path to the cloned shop's file, so a new logo reached
+ * the header and never the markup (the owner's SEO review, 13/10/2026).
+ * `sameAs` names the shop's profiles elsewhere, which is how a search engine
+ * ties the TikTok, the fanpage and the channel to this site.
+ */
+export function organizationJsonLd(org: {
+  brandName: string;
+  brandLogo: string;
+  sameAs?: string[];
+}) {
+  const logo = org.brandLogo.trim();
   return {
     "@context": "https://schema.org",
     "@type": "OnlineStore",
-    name: brandName,
+    name: org.brandName,
     url: SITE_URL,
-    logo: absoluteUrl("/sites/menzu-lol-f7ae197a/root-8a5edab2/images/site/logos/menzu-logo.webp"),
-    description: siteDescription(brandName),
+    ...(logo ? { logo: absoluteUrl(logo) } : {}),
+    description: siteDescription(org.brandName),
     areaServed: "VN",
+    ...(org.sameAs && org.sameAs.length > 0 ? { sameAs: org.sameAs } : {}),
+  };
+}
+
+/**
+ * schema.org/WebSite for the homepage: Google's main source for the site name
+ * it prints over a result, which matters here because the brand is spelled
+ * differently from the domain. No SearchAction: Google retired the sitelinks
+ * search box in November 2024.
+ */
+export function websiteJsonLd(brandName: string) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: brandName,
+    url: `${SITE_URL}/`,
   };
 }
 
