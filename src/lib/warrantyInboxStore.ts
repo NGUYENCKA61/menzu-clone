@@ -23,16 +23,27 @@ const CANDIDATES = 300;
  */
 export async function loadWarrantyInbox(now: Date = new Date()): Promise<InboxView> {
   const since = new Date(now.getTime() - INBOX_RECENT_DAYS * DAY_MS);
+  // The tickets talked on this week, newest line first, picked by the line
+  // and not by the ticket's age: an old ticket whose buyer has just written
+  // must not fall outside a cut ordered by creation date.
+  const talked = await db.warrantyMessage.findMany({
+    where: { createdAt: { gte: since } },
+    orderBy: { createdAt: "desc" },
+    distinct: ["requestId"],
+    take: CANDIDATES,
+    select: { requestId: true },
+  });
   const rows = await db.warrantyRequest.findMany({
     where: {
       OR: [
         // Open, in warrantyOpen's words: anything not fixed and not paid back.
         { status: { notIn: ["RESOLVED", "REFUNDED"] } },
-        { messages: { some: { createdAt: { gte: since } } } },
+        { id: { in: talked.map((line) => line.requestId) } },
       ],
     },
     orderBy: { createdAt: "desc" },
-    take: CANDIDATES,
+    // Room for both reads in full: the open tickets and the ones talked on.
+    take: CANDIDATES * 2,
     select: {
       id: true,
       status: true,

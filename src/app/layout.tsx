@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { Suspense } from "react";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import "./theme-light.css";
@@ -132,8 +133,12 @@ export default async function RootLayout({
         <Preloader brand={{ name: brandName }} />
         {children}
         {/* Site-wide, as on the live site — outside {children} so it survives
-            navigation without remounting and losing its open state. */}
-        <SupportWidgetHost />
+            navigation without remounting and losing its open state. In its
+            own Suspense boundary: for an admin it reads the warranty inbox,
+            and that read must never hold back the page around it. */}
+        <Suspense fallback={null}>
+          <SupportWidgetHost />
+        </Suspense>
       </body>
     </html>
   );

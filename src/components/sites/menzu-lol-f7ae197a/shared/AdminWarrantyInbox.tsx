@@ -412,11 +412,14 @@ export function AdminWarrantyInbox({ initial }: { initial: InboxView | null }) {
   }
 
   function pick(ticket: InboxTicket) {
+    // A half-written reply survives a trip back to the list and into the
+    // same ticket; it is dropped only when another ticket is opened.
+    const sameAsBefore = lastPickedRef.current === ticket.id;
     lastPickedRef.current = ticket.id;
     setPicked(ticket);
     setSelectedId(ticket.id);
     setSendError(null);
-    setText((prev) => (selectedId === ticket.id ? prev : ""));
+    if (!sameAsBefore) setText("");
   }
 
   function back() {
@@ -506,11 +509,20 @@ export function AdminWarrantyInbox({ initial }: { initial: InboxView | null }) {
         setGone(true);
         return;
       }
+      // The admin may have moved to another ticket while this one was on its
+      // way: its outcome belongs to the ticket it was sent for, never to the
+      // draft or the error line of the one now open.
+      const stillHere = selectedRef.current === id;
       if (!res.ok) {
+        if (!stillHere) return;
         setSendError(data.error ?? "Không gửi được tin nhắn");
         // Refused because the ticket was closed meanwhile: the read brings
         // the new state, and the reply box gives way to the closed note.
         void pullThread(id, cursorRef.current);
+        return;
+      }
+      if (!stillHere) {
+        void refresh();
         return;
       }
       setText("");
@@ -518,7 +530,7 @@ export function AdminWarrantyInbox({ initial }: { initial: InboxView | null }) {
       // stops waiting: both reads, at once rather than at the next tick.
       await Promise.all([pullThread(id, cursorRef.current), refresh()]);
     } catch {
-      setSendError("Không kết nối được máy chủ");
+      if (selectedRef.current === id) setSendError("Không kết nối được máy chủ");
     } finally {
       setSending(false);
     }

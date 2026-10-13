@@ -80,6 +80,12 @@ export interface InboxSource {
  *
  * A closed ticket never waits: its thread takes no more messages, so a badge
  * counting it could never be cleared from the widget.
+ *
+ * Not the desk's rule (awaitingShop / needsShop in src/lib/warrantyChat.ts),
+ * on purpose: the desk also counts a refund transfer that falls due and only
+ * a ticket whose last line is the buyer's, because it lists work; the badge
+ * lists people waiting for an answer, so an untouched report counts too. The
+ * two figures can therefore differ by those cases.
  */
 export function waitingForShop(status: string, lastFromShop: boolean | null): boolean {
   if (!warrantyOpen(status)) return false;
