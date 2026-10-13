@@ -187,7 +187,11 @@ html[data-theme="light"] :is(
   .bg-black\/40[class*="absolute"]:not([class*="inset-"]),
   .bg-black\/50[class*="absolute"]:not([class*="inset-"]),
   .bg-black\/55[class*="absolute"]:not([class*="inset-"]),
-  .bg-black\/60[class*="absolute"]:not([class*="inset-"])
+  .bg-black\/60[class*="absolute"]:not([class*="inset-"]),
+  .bg-black\/70:not([class*="inset-"]),
+  .bg-black\/75:not([class*="inset-"]),
+  .bg-black\/80:not([class*="inset-"]),
+  .bg-black\/90:not([class*="inset-"])
 ) {
   --color-white: #fff;
   --color-neutral-50: oklch(98.5% 0 0);

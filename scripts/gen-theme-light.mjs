@@ -334,7 +334,13 @@ for (const token of [...tokens].sort()) {
   const t = target(token, splitVariants(m[1]));
   if (!t || t.media) continue;
   const alpha = alphaOf(token);
-  if (alpha >= 70) continue;
+  // Near-solid black is a dark surface in both dresses (the viewers pill on
+  // an account's picture): its words keep the dark palette. A full cover is
+  // a scrim whose dialog may sit inside it, so it is left alone.
+  if (alpha >= 70) {
+    if (!t.interactive) islands.push(`.${esc(token)}:not([class*="inset-"])`);
+    continue;
+  }
   const decl = `background-color: color-mix(in oklab, var(--light-ink) ${Math.max(2, Math.round(alpha / 8))}%, transparent);`;
   if (!wells.has(decl)) wells.set(decl, []);
   wells
