@@ -1,5 +1,43 @@
 import type { NextConfig } from "next";
 
+type PermanentRedirect = { source: string; destination: string; permanent: true };
+
+/**
+ * The old PHP shop's address shapes, sent to where the same thing lives here.
+ *
+ * Google holds years of links to the PHP site (/cate/<slug>, /auth/login,
+ * /recharge/card ...), and until these rules existed each of them fell through
+ * to [categorySlug]/[productSlug] and answered 200 "Không tìm thấy sản phẩm"
+ * with noindex, so the standing those URLs earned would be thrown away the day
+ * the old domain points at this app (the owner's SEO review, 13/10/2026).
+ * They cost nothing before that day: no page here links to these shapes.
+ *
+ * Config redirects run before any page renders, so the answer is a real 308
+ * rather than the meta refresh a streamed page falls back to, and the query
+ * string rides along on its own, which is what keeps a referral ?ref= alive
+ * through /auth/register. Order matters: the first rule that matches wins, so
+ * the two renamed categories sit above the general /cate/:slug.
+ *
+ * /huong-dan/<slug> is not here: it was the old buy page, and which category a
+ * product sits in is in the database, so src/app/huong-dan/[slug]/route.ts
+ * looks it up. Every first segment named here is also in RESERVED_SLUGS, so a
+ * category can never be created under an address these rules would steal.
+ */
+const LEGACY_PHP_REDIRECTS: PermanentRedirect[] = [
+  // Category slugs the old site retired but Google still lists: "hack-cs2" is
+  // the CS2 category, "hack-valorant-moi-" an earlier spelling of Valorant's.
+  { source: "/cate/hack-cs2", destination: "/hack-cs2-counter-strike-2", permanent: true },
+  { source: "/cate/hack-valorant-moi-", destination: "/hack-valorant-moi", permanent: true },
+  // Every other category kept its slug, trailing dash included.
+  { source: "/cate/:slug", destination: "/:slug", permanent: true },
+  { source: "/auth/login", destination: "/login", permanent: true },
+  { source: "/auth/register", destination: "/signup", permanent: true },
+  { source: "/auth/forgot", destination: "/forgot-password", permanent: true },
+  // /recharge/bank and /recharge/card were two tabs of one top-up page.
+  { source: "/recharge/:path*", destination: "/wallet", permanent: true },
+  { source: "/index.php", destination: "/", permanent: true },
+];
+
 /**
  * Security headers applied to every response.
  *
@@ -69,6 +107,10 @@ const nextConfig: NextConfig = {
     // A year — asset filenames carry the account code and are replaced, not
     // edited, so a stale cache entry cannot show the wrong image.
     minimumCacheTTL: 31536000,
+  },
+
+  async redirects() {
+    return LEGACY_PHP_REDIRECTS;
   },
 
   async headers() {

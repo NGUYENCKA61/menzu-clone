@@ -71,6 +71,18 @@ export const RESERVED_SLUGS: ReadonlySet<string> = new Set([
   "transactions",
   "vong-quay",
   "wallet",
+  // Pages added after this list was written, which it had not caught up with.
+  "free-key",
+  "lien-he",
+  "uploads",
+  // The old PHP shop's address shapes, which next.config.ts redirects and
+  // huong-dan/[slug]/route.ts answers (the owner's SEO review, 13/10/2026).
+  // A category under one of these would be unreachable at its own address.
+  "auth",
+  "cate",
+  "huong-dan",
+  "index.php",
+  "recharge",
   // Not routes today, but reserving them keeps the door open without a
   // migration later — and none reads as a category name anyone would want.
   "_next",
