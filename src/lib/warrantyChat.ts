@@ -13,6 +13,13 @@ import { warrantyOpen, type WarrantyStatus } from "@/lib/warrantyRequests";
 
 export const MESSAGE_MAX = 1000;
 
+/**
+ * The shop's own messages stop shorter, like a desk action's note: the admin
+ * messages route refuses more, and every box the desk types into (the ticket
+ * page, the floating inbox) stops here so nobody writes a reply that bounces.
+ */
+export const SHOP_MESSAGE_MAX = 500;
+
 /** A buyer's messages on one ticket: in any minute, and in any day. */
 export const BURST_LIMIT = 5;
 export const BURST_WINDOW_MS = 60_000;

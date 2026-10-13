@@ -2,13 +2,13 @@ import { NextResponse } from "next/server";
 
 import { getAdmin } from "@/lib/admin";
 import { db } from "@/lib/db";
-import { messagePreview, readMessage } from "@/lib/warrantyChat";
+import { messagePreview, readMessage, SHOP_MESSAGE_MAX } from "@/lib/warrantyChat";
 import { notifyWarranty } from "@/lib/warrantyNotify";
 import { warrantyOpen } from "@/lib/warrantyRequests";
 import { MESSAGE_SELECT, toChatMessage } from "@/lib/warrantyThread";
 
 /** The desk's reply box holds this much, like an action's note. */
-const NOTE_MAX = 500;
+const NOTE_MAX = SHOP_MESSAGE_MAX;
 
 /**
  * The ticket page's poll (/admin/warranty/[id]): the ticket's state and the

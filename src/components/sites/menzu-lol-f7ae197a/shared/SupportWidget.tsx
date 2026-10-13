@@ -13,23 +13,15 @@ import {
   UserRound,
   X,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { pickMessenger, pickZalo } from "@/lib/messenger";
 import { SUPPORT_WINDOW, supportStatus } from "@/lib/supportHours";
+import { floatingWidgetHidden } from "@/lib/supportWidgetRoutes";
 
 import { AssistantChat } from "./AssistantChat";
-
-/**
- * Glass, in one place.
- *
- * Both surfaces — the panel and the tab under it — are the same material, so
- * they read as one object that happens to be hinged. The blur is what makes it
- * glass; the inset white hairline along the top is what makes the blur look
- * like a pane rather than a smudge, and it is the piece most often left out.
- */
-const GLASS =
-  "border border-white/[0.12] bg-[#0b0b10]/70 backdrop-blur-2xl backdrop-saturate-150";
+import { FRAME, GLASS, LAUNCHER, PANEL_SHADOW } from "./supportChrome";
+import { useScrollingOnPhone } from "./useScrollingOnPhone";
 
 /**
  * The dot beside the status line.
@@ -47,53 +39,6 @@ function NAME_DOT(status: { open: boolean } | null): string {
 
 /** Which of the two the visitor last picked, so the choice survives a reload. */
 const MODE_KEY = "menzu-support-mode";
-
-/** How long the phone's button stays tucked after the last scroll event. */
-const TUCK_SETTLE_MS = 800;
-
-/** Below Tailwind's sm, the only width the round button floats over content. */
-const PHONE = "(max-width: 639.98px)";
-
-/**
- * Whether the page is being scrolled right now on a phone: true from the
- * first scroll event until TUCK_SETTLE_MS after the last one.
- *
- * On a phone the round chat button floats over whatever is scrolling under
- * it, a price or a button half the time (the owner, 13/10/2026, UI
- * consistency review). While the reader scrolls it steps half out of the
- * way, and comes back once they stop. Passive listener, one timer, and no
- * state change at all on wider screens, where the tab sits on the window's
- * edge and covers nothing that matters.
- */
-function useScrollingOnPhone(): boolean {
-  const [scrolling, setScrolling] = useState(false);
-
-  useEffect(() => {
-    const phone = window.matchMedia(PHONE);
-    let timer: number | undefined;
-    // Mirrors the state, so a fling's hundred events set it once.
-    let on = false;
-    const onScroll = () => {
-      if (!phone.matches) return;
-      if (!on) {
-        on = true;
-        setScrolling(true);
-      }
-      window.clearTimeout(timer);
-      timer = window.setTimeout(() => {
-        on = false;
-        setScrolling(false);
-      }, TUCK_SETTLE_MS);
-    };
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      window.clearTimeout(timer);
-    };
-  }, []);
-
-  return scrolling;
-}
 
 export interface SupportChannel {
   id: string;
@@ -286,20 +231,9 @@ export function SupportWidget({
   // that opens an empty panel is worse than no tab.
   if (!assistant && !canMessage) return null;
 
-  // /bio is a standalone link-in-bio card with no site chrome — the live page
-  // carries no widget, and these same channels are already its whole content.
-  if (pathname === "/bio") return null;
-
-  // The admin area is staff-side: nobody in there needs customer care, and the
-  // tab floats exactly over the bottom-right corner every admin table puts its
-  // paging controls in.
-  if (pathname.startsWith("/admin")) return null;
-
-  // The basket's summary column ends in the "Thanh toán" button, in the very
-  // corner the tab sits in — the one press the whole page exists for was
-  // landing on customer care instead. Support is a click away in the footer
-  // and on every product page; the checkout is not.
-  if (pathname === "/cart") return null;
+  // /bio, the admin area and the basket keep the corner clear; the reasons
+  // live beside the rule, which the admin's warranty inbox reads too.
+  if (floatingWidgetHidden(pathname)) return null;
 
   return (
     // pointer-events-none on the frame, restored on each real control below.
@@ -310,7 +244,7 @@ export function SupportWidget({
     // On a phone the bottom edge belongs to the bottom nav (h-16, sm:hidden),
     // so the whole thing lifts above it; from sm up it hinges on the window
     // edge as before.
-    <div className="support-frame pointer-events-none fixed bottom-[calc(4rem+0.75rem)] right-3 z-[101] flex flex-col items-end sm:bottom-0 sm:right-4">
+    <div className={FRAME}>
       <div
         className={`mb-0 w-[calc(100vw-2rem)] max-w-[340px] origin-bottom transition-all duration-300 ${
           canMessage ? "hidden sm:block " : ""
@@ -326,7 +260,7 @@ export function SupportWidget({
         inert={!open}
       >
         <div
-          className={`mb-2 overflow-hidden rounded-[20px] shadow-[0_30px_80px_-20px_rgba(0,0,0,0.95),inset_0_1px_0_rgba(255,255,255,0.14)] ${GLASS}`}
+          className={`mb-2 overflow-hidden rounded-[20px] ${PANEL_SHADOW} ${GLASS}`}
         >
           {/* The shop's own mark and name, not a product name for a chat
               widget: whoever opens this wants to know they are talking to
@@ -531,7 +465,7 @@ export function SupportWidget({
           onClick={toggle}
           aria-expanded={open}
           aria-label={assistant && !fanpage ? "Trợ lý AI" : "Hỗ trợ khách hàng"}
-          className={`group flex h-14 w-14 items-center justify-center rounded-full text-left shadow-[0_12px_40px_-10px_rgba(0,0,0,0.9),inset_0_1px_0_rgba(255,255,255,0.14)] transition-colors duration-200 hover:bg-[#14141c]/80 sm:h-auto sm:w-auto sm:min-w-[250px] sm:justify-start sm:gap-3 sm:rounded-none sm:rounded-t-[18px] sm:border-b-0 sm:px-3.5 sm:py-3 sm:shadow-[0_-12px_40px_-10px_rgba(0,0,0,0.9),inset_0_1px_0_rgba(255,255,255,0.14)] ${GLASS}`}
+          className={LAUNCHER}
         >
           {/* Bare, with no tile around it. The tab is already a lit pane, so a
               second pane behind the icon was a box inside a box — and the mark
