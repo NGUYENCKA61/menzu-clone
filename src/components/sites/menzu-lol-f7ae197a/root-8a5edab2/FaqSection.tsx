@@ -9,32 +9,31 @@ import { FaqAccordion } from "./FaqAccordion";
 import { RevealGrid } from "./RevealGrid";
 
 /**
- * The five questions a buyer has left after the proof, answered the way this
- * shop actually works: the status board, automatic bank top-ups, VietQR and
- * phone cards, the support hours, free updates within a key's term. Shown
- * until the shop writes its own in Cấu hình → Cấu hình trang chủ → FAQ,
- * which replaces the whole list.
+ * The five questions a buyer has left after the proof, in the owner's own
+ * words (14/10/2026, "sửa lại 5 card cũ faq"): safety, the main account,
+ * payment, refunds, support. Shown until the shop writes its own in Cấu
+ * hình → Cấu hình trang chủ → FAQ, which replaces the whole list.
  */
 export const DEFAULT_FAQ: FaqEntry[] = [
   {
     q: "Dùng tool có an toàn không?",
-    a: "Mọi tool trên shop được theo dõi liên tục. Trạng thái từng tool (Chưa phát hiện, Ổn định, Cập nhật mới, Rủi ro, Đang cập nhật, Đã phát hiện) hiện ở bảng Trạng thái và đổi ngay khi game vá; tool bị phát hiện sẽ khóa bán tới khi cập nhật xong. Nhiều danh mục có kèm HWID spoofer để bảo vệ thêm. Đọc kỹ hướng dẫn của từng tool trước khi dùng.",
+    a: "Mọi sản phẩm đều được theo dõi liên tục. Trạng thái được cập nhật tại bảng Trạng thái và thông báo ngay khi game cập nhật; sản phẩm bị phát hiện sẽ tạm dừng bán ngay lập tức cho đến khi được cập nhật. Nhiều danh mục có sẵn HWID Spoofer để tăng cường bảo vệ. Tuy nhiên, cũng như bất kỳ phần mềm bên thứ ba nào khác, luôn tồn tại một mức độ rủi ro nhất định.",
   },
   {
-    q: "Giao hàng nhanh không?",
-    a: "Nạp qua ngân hàng được cộng tự động 24/7, thường chỉ vài giây sau khi chuyển. Mua xong, key hiện ngay trong Lịch sử mua kèm hướng dẫn, không phải chờ duyệt. Nạp bằng thẻ cào thì gửi ảnh thẻ cho shop kiểm tra rồi cộng tiền.",
+    q: "Có thể chơi trên acc chính không?",
+    a: "Bạn có thể sử dụng, nhưng shop không bao giờ khuyến nghị mạo hiểm với một tài khoản giá trị cao mà bạn không thể chấp nhận mất. Không phần mềm nào có thể đảm bảo 100% không bị ban.",
   },
   {
     q: "Thanh toán bằng cách nào?",
-    a: "Chuyển khoản ngân hàng qua mã VietQR (quét bằng app ngân hàng hoặc ví điện tử bất kỳ) hoặc thẻ cào điện thoại. Tiền nạp vào ví trên shop, mua tool trừ thẳng từ số dư; mua trên bot Telegram cũng dùng chung ví này.",
+    a: "Chuyển khoản ngân hàng qua mã VietQR (quét bằng app ngân hàng hoặc ví điện tử bất kỳ) hoặc thẻ cào điện thoại, duyệt tự động 24/7. Bạn cũng có thể mua tự động trên bot Telegram. Mua xong, key hiện ngay trong Lịch sử mua kèm hướng dẫn và tài liệu dành riêng cho khách hàng.",
+  },
+  {
+    q: "Có được hoàn tiền khi sản phẩm gặp vấn đề không?",
+    a: "Yêu cầu hoàn tiền được xử lý nếu lỗi phát sinh từ phía shop, nhằm đảm bảo quyền lợi cho khách hàng. Có hai hình thức: hoàn tiền qua ngân hàng hoặc hoàn tiền trực tiếp trên website. Chọn hoàn trực tiếp trên web, bạn được hoàn lên đến 120% giá trị đã nạp ban đầu.",
   },
   {
     q: "Cần hỗ trợ thì liên hệ ở đâu?",
-    a: `Nhắn Facebook hoặc Zalo bằng nút hỗ trợ ở góc phải màn hình, hoặc qua kênh Telegram của shop. Giờ hỗ trợ ${SUPPORT_WINDOW} mỗi ngày; ngoài giờ cứ để lại tin nhắn, shop trả lời ngay khi mở lại.`,
-  },
-  {
-    q: "Có được cập nhật miễn phí không?",
-    a: "Có. Trong thời hạn của key, mọi bản cập nhật của tool đều miễn phí. Khi game vá, tool chuyển sang Đang cập nhật và mở lại khi xong; theo dõi ở bảng Trạng thái. Tool lỗi trong thời hạn thì xem chính sách bảo hành và hoàn tiền trong Wiki.",
+    a: `Nhắn Facebook hoặc Zalo bằng nút hỗ trợ ở góc phải màn hình. Giờ hỗ trợ ${SUPPORT_WINDOW} mỗi ngày; ngoài giờ cứ để lại tin nhắn, shop sẽ phản hồi ngay khi hoạt động trở lại.`,
   },
 ];
 

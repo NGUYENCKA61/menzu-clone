@@ -3,12 +3,12 @@
 import { useState } from "react";
 import {
   CreditCard,
+  Gamepad2,
   Headphones,
   HelpCircle,
   Plus,
-  RefreshCw,
+  RotateCcw,
   ShieldCheck,
-  Zap,
   type LucideIcon,
 } from "lucide-react";
 
@@ -16,11 +16,11 @@ import type { FaqEntry } from "@/lib/settings";
 
 /**
  * One icon per seat, in the order the shop's five stock questions come —
- * safety, speed, payment, support, updates — then a question mark for any
- * the admin adds past them. Icons follow position, not wording, so an
- * edited question keeps a sensible mark.
+ * safety, the main account, payment, refunds, support — then a question
+ * mark for any the admin adds past them. Icons follow position, not
+ * wording, so an edited question keeps a sensible mark.
  */
-const ICONS: LucideIcon[] = [ShieldCheck, Zap, CreditCard, Headphones, RefreshCw];
+const ICONS: LucideIcon[] = [ShieldCheck, Gamepad2, CreditCard, RotateCcw, Headphones];
 
 /**
  * The questions as lmarket.net stacks them: one card per question, the
