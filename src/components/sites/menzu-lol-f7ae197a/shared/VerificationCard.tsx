@@ -515,11 +515,12 @@ export function VerificationCard({
               ) : otp.state === "failed" ? (
                 <Line tone="err" text={otp.error} />
               ) : otp.state === "pending" ? (
-                <ol className="flex flex-col gap-3 rounded-xl border border-white/10 bg-neutral-950/40 p-4 text-[13px] leading-relaxed text-neutral-300">
-                  <li className="flex gap-3">
-                    <span className="font-black text-neutral-500">1.</span>
+                // One sentence and one waiting line, no numbers inside a
+                // numbered step (the owner, 15/10/2026: "mấy ô số có AI quá").
+                <div className="flex flex-col gap-3 rounded-xl border border-white/10 bg-neutral-950/40 p-4 text-[13px] leading-relaxed text-neutral-300">
+                  <p className="flex flex-wrap items-center gap-x-2 gap-y-2">
                     <span>
-                      Mở Zalo của số {maskPhone(otp.phone)} và nhắn cho{" "}
+                      Mở Zalo của số {maskPhone(otp.phone)}, nhắn cho{" "}
                       <a
                         href={`https://zalo.me/${botPhone ?? ""}`}
                         target="_blank"
@@ -530,47 +531,37 @@ export function VerificationCard({
                       </a>
                       {botName.trim() && botPhone ? (
                         <span className="text-neutral-500"> ({botPhone})</span>
-                      ) : null}
-                      .
+                      ) : null}{" "}
+                      đúng nội dung
                     </span>
-                  </li>
-                  <li className="flex gap-3">
-                    <span className="font-black text-neutral-500">2.</span>
-                    <span className="flex flex-wrap items-center gap-2">
-                      Gửi đúng nội dung
-                      <code className="rounded-lg border border-white/10 bg-neutral-950/60 px-2.5 py-1 font-mono text-sm font-bold tracking-widest text-white">
-                        {otp.message}
-                      </code>
-                      <button
-                        type="button"
-                        onClick={() => void copy()}
-                        className="inline-flex items-center gap-1 text-[12px] font-semibold text-neutral-400 transition-colors hover:text-white"
-                      >
-                        {copied ? (
-                          <Check size={14} aria-hidden />
-                        ) : (
-                          <Copy size={14} aria-hidden />
-                        )}
-                        {copied ? "Đã chép" : "Sao chép"}
-                      </button>
+                    <code className="rounded-lg border border-white/10 bg-neutral-950/60 px-2.5 py-1 font-mono text-sm font-bold tracking-widest text-white">
+                      {otp.message}
+                    </code>
+                    <button
+                      type="button"
+                      onClick={() => void copy()}
+                      className="inline-flex items-center gap-1 text-[12px] font-semibold text-neutral-400 transition-colors hover:text-white"
+                    >
+                      {copied ? (
+                        <Check size={14} aria-hidden />
+                      ) : (
+                        <Copy size={14} aria-hidden />
+                      )}
+                      {copied ? "Đã chép" : "Sao chép"}
+                    </button>
+                  </p>
+                  <p className="flex items-center gap-2 text-[12px] text-neutral-400">
+                    <Loader2
+                      size={14}
+                      className="shrink-0 animate-spin text-amber-200 motion-reduce:animate-none"
+                      aria-hidden
+                    />
+                    <span>
+                      Đang chờ bot trả lời, bước này sẽ tự xanh. Mã dùng đến{" "}
+                      {clock(otp.expiresAt)}, chỉ nhận từ Zalo đã liên kết.
                     </span>
-                  </li>
-                  <li className="flex gap-3">
-                    <span className="font-black text-neutral-500">3.</span>
-                    <span className="flex flex-wrap items-center gap-2">
-                      <Loader2
-                        size={14}
-                        className="animate-spin text-amber-200 motion-reduce:animate-none"
-                        aria-hidden
-                      />
-                      <span>
-                        Bot trả lời xong, bước này tự xanh. Mã dùng đến{" "}
-                        {clock(otp.expiresAt)}; bot chỉ nhận mã gửi từ Zalo đã
-                        liên kết.
-                      </span>
-                    </span>
-                  </li>
-                </ol>
+                  </p>
+                </div>
               ) : null}
             </div>
 
