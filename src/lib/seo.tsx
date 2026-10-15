@@ -7,38 +7,12 @@
  */
 
 import { GLOSSARY_PATH, termHref, type GlossaryTerm } from "@/lib/glossary/terms";
+import { SITE_URL, isShopUrl } from "@/lib/shopHosts";
 
-/**
- * Canonical origin, without a trailing slash.
- *
- * Set NEXT_PUBLIC_SITE_URL in production. Vercel exposes the deployment host
- * as VERCEL_URL (no scheme), which is the right fallback for preview builds;
- * localhost is the last resort so `next build` never fails on a fresh clone.
- */
-export const SITE_URL = (
-  process.env.NEXT_PUBLIC_SITE_URL ??
-  // Netlify names the deployed address itself, which is the right answer on
-  // the host this shop actually runs on — and without it a production build
-  // that forgot the variable published canonical tags, a sitemap and a robots
-  // file all pointing at localhost, which is an instruction to de-index the
-  // whole site.
-  process.env.URL ??
-  (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null) ??
-  "http://localhost:3000"
-).replace(/\/$/, "");
-
-// Said out loud once, at build time, because the symptom — every canonical
-// pointing at a machine nobody can reach — is invisible until a search engine
-// acts on it.
-if (
-  process.env.NODE_ENV === "production" &&
-  SITE_URL.startsWith("http://localhost")
-) {
-  console.warn(
-    "[seo] NEXT_PUBLIC_SITE_URL is not set: canonical tags, the sitemap and " +
-      "robots.txt will all point at localhost.",
-  );
-}
+// The origin and the shop's-own-host check live in lib/shopHosts.ts, a module
+// light enough for the write-up sanitizer to import on its own; they remain
+// part of this file's surface, so every caller keeps its import.
+export { SITE_URL, isShopUrl };
 
 /**
  * The shop's name for structured data, which is built in helpers that have no
@@ -320,34 +294,9 @@ export function siteDescription(brandName: string): string {
   // and Liên Quân, which it does not stock, and "hỗ trợ 24/7", which it does
   // not offer (the SEO review, round 2, T9). Measured against a 160-character
   // snippet with the 12-letter brand; the hours did not fit beside the games.
-  return `${brandName} thuê hack game PC và acc game: CS2, Valorant, Đột Kích CF, Delta Force, Truy Kích, Blood Strike, tool LoL. Key giao tự động, bảo hành đổi máy.`;
-}
-
-/** A host without its "www.", or null for anything that is not an address. */
-function hostOf(url: string): string | null {
-  try {
-    return new URL(url).hostname.toLowerCase().replace(/^www\./, "");
-  } catch {
-    return null;
-  }
-}
-
-/**
- * The hosts that are this shop itself: the domain the app runs on, the old
- * PHP shop's domain that still holds the rankings, and whatever SITE_URL
- * names. A link to one of these is never "elsewhere" (profileLinks) and
- * never "another site" (the write-ups' nofollow, lib/docHtml.ts).
- */
-const SHOP_HOSTS = new Set(
-  ["thichthihack.com", "thichthihackk.com", hostOf(SITE_URL)].filter(
-    (host): host is string => host !== null,
-  ),
-);
-
-/** Whether an absolute (or protocol-relative) address is the shop's own. */
-export function isShopUrl(url: string): boolean {
-  const host = hostOf(url.startsWith("//") ? `https:${url}` : url);
-  return host !== null && SHOP_HOSTS.has(host);
+  // "cho thuê", never a bare "thuê": with the shop as the subject, "thuê"
+  // says the shop is the one hiring hacks from somebody else.
+  return `${brandName} cho thuê hack game PC và acc game: CS2, Valorant, Đột Kích CF, Delta Force, Truy Kích, Blood Strike, tool LoL. Key giao tự động, bảo hành đổi máy.`;
 }
 
 /**

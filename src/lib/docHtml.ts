@@ -1,6 +1,6 @@
 import sanitizeHtml from "sanitize-html";
 
-import { isShopUrl } from "@/lib/seo";
+import { isShopUrl } from "@/lib/shopHosts";
 import { youtubeEmbedUrl, youtubeVideoId } from "@/lib/youtube";
 
 /**
@@ -87,7 +87,7 @@ function frameWords(frame: { text: string }): string {
 
 /**
  * An address on another site: absolute or protocol-relative, and not one of
- * the shop's own hosts (lib/seo.tsx). A root-relative link is the shop's.
+ * the shop's own hosts (lib/shopHosts.ts). A root-relative link is the shop's.
  */
 function isExternalHref(href: string | undefined): boolean {
   const url = (href ?? "").trim();

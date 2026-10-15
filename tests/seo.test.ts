@@ -163,6 +163,8 @@ describe("siteDescription", () => {
     }
     // Shelves the shop does not stock and a promise it does not make.
     expect(text).not.toMatch(/PUBG|Liên Quân|24\/7|[–—]/);
+    // The shop rents out; a bare "thuê" would have it hiring hacks itself.
+    expect(text).toContain("cho thuê");
     expect(text.startsWith("THICHTHIHACK")).toBe(true);
   });
 });

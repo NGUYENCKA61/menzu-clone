@@ -182,8 +182,13 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
       select: { name: true, url: true },
     }),
     // "Hướng dẫn liên quan" under the grids (lib/relatedGuides.ts), read
-    // only for page one, the only page that draws it.
-    data.page === 1 ? relatedGuidesForCategory(data.slug) : Promise.resolve(null),
+    // only for page one, the only page that draws it, and only for a shelf
+    // that sells something: under the empty-shelf box the key guides and the
+    // setup chips would be furniture round a blank, and those shelves are
+    // noindex anyway (the review of round 2).
+    data.page === 1 && data.accountTotal + data.softwareTotal > 0
+      ? relatedGuidesForCategory(data.slug)
+      : Promise.resolve(null),
   ]);
   const hotPickList: { name: string; imageUrl: string | null }[] = [
     ...(pinnedName ? [{ name: pinnedName, imageUrl: pinnedImage?.url ?? null }] : []),
