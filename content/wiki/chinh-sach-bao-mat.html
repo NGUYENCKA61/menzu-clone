@@ -1,0 +1,50 @@
+<p>Chính sách này cho biết THÍCH THÌ HACK lưu gì về bạn, ai xem được, giữ bao lâu và bạn có quyền gì với những thứ đó. Mỗi dòng dưới đây là việc hệ thống của shop đang làm thật, không có dòng nào viết cho đẹp. Đăng ký tài khoản, nạp tiền hoặc mua hàng nghĩa là bạn đã đọc và đồng ý.</p>
+<h2>1. Phạm vi</h2>
+<p>Áp dụng cho web THÍCH THÌ HACK, bot Telegram và bot Zalo của shop. Các trang bạn mở từ link ngoài (trang của nhà phát hành game, dịch vụ rút gọn link, ứng dụng ngân hàng) theo chính sách của bên đó.</p>
+<h2>2. Shop lưu gì</h2>
+<ul>
+<li><strong>Khi đăng ký:</strong> tên đăng nhập, mật khẩu (chỉ lưu dạng băm, không ai đọc lại được), email nếu bạn nhập và xác minh bằng mã gửi về hộp thư, ảnh đại diện và ảnh bìa bạn tải lên.</li>
+<li><strong>Đăng nhập bằng Google hoặc Discord:</strong> id tài khoản của bạn ở dịch vụ đó và email đã được dịch vụ đó xác minh. Shop không nhận và không lưu mật khẩu Google, Discord của bạn.</li>
+<li><strong>Liên kết Telegram, Zalo:</strong> id Telegram, id Zalo và tên hiển thị trên Zalo, để gửi thông báo trạng thái, biên lai và mã xác nhận. Nhắn với bot Telegram của shop lần đầu cũng tạo một tài khoản shop gắn với id Telegram đó.</li>
+<li><strong>Xác thực cấp 2:</strong> link và tên Facebook, số điện thoại (xác minh bằng mã gửi qua bot Zalo, shop chỉ lưu mã dạng băm), tên ngân hàng, số tài khoản, tên chủ tài khoản và ghi chú của bạn. Shop ghi lại ai duyệt và duyệt lúc nào.</li>
+<li><strong>Giao dịch:</strong> lịch sử nạp tiền (chuyển khoản VietQR hoặc thẻ cào, gồm nhà mạng, số serial và mã thẻ bạn nhập để shop đối soát), số dư ví, đơn hàng, key đã nhận, mã giảm giá đã dùng, điểm thưởng và hoa hồng giới thiệu.</li>
+<li><strong>Bảo hành và đánh giá:</strong> nội dung yêu cầu bảo hành, tin nhắn trao đổi với shop, ảnh hoặc video gửi kèm, thông tin ngân hàng bạn điền khi nhận hoàn tiền, và đánh giá sản phẩm (tên, ảnh, nội dung, số sao).</li>
+<li><strong>Trợ lý AI trên web:</strong> nội dung bạn gõ vào ô chat được gửi tới nhà cung cấp mô hình mà shop cấu hình (Gemini, Groq, OpenRouter hoặc Mistral) để trả lời. Shop đếm số lần hỏi theo địa chỉ IP và theo tài khoản để chặn spam. Đừng gõ mật khẩu, mã OTP hay số thẻ vào ô này.</li>
+<li><strong>Kỹ thuật:</strong> địa chỉ IP, trình duyệt và nơi đăng nhập (tra từ IP, tới mức thành phố) của mỗi phiên đăng nhập, để bạn xem và đăng xuất từng thiết bị trong Bảo mật; IP và thời điểm đăng nhập gần nhất; số lần đăng nhập sai, số lần đăng ký và đặt lại mật khẩu theo IP để chống dò mật khẩu và tạo tài khoản hàng loạt; lượt nhận key miễn phí (link rút gọn đã cấp, thời điểm nhận).</li>
+<li><strong>Nhóm Zalo của shop:</strong> bot ghi lại việc duyệt hoặc từ chối người vào nhóm, cảnh cáo, mời ra khỏi nhóm và các thông báo đã đăng, kèm id và tên Zalo của người liên quan.</li>
+</ul>
+<h2>3. Cookie và bộ nhớ trình duyệt</h2>
+<ul>
+<li>Shop chỉ đặt hai cookie của mình: <strong>menzu_session</strong> giữ đăng nhập (script trên trang không đọc được, hết hạn sau 30 ngày hoặc khi bạn đăng xuất) và <strong>menzu_oauth_state</strong> chỉ tồn tại trong lúc bạn đăng nhập bằng Google hoặc Discord.</li>
+<li>Web không dùng Google Analytics, Facebook Pixel hay bất kỳ cookie quảng cáo nào.</li>
+<li>Bộ nhớ trình duyệt (localStorage) giữ vài tuỳ chọn hiển thị: giao diện sáng hay tối, thông báo bạn đã đóng, chế độ của nút hỗ trợ. Những thứ này nằm trên máy bạn, không gửi về shop.</li>
+<li>Khi shop bật chống bot ở trang đăng ký, ô kiểm tra của Cloudflare Turnstile chạy trên trang đó theo chính sách của Cloudflare.</li>
+</ul>
+<h2>4. Ai xem được</h2>
+<ul>
+<li><strong>Admin của shop:</strong> để xử lý đơn, cộng tiền nạp, bảo hành, duyệt xác thực cấp 2 và chặn gian lận.</li>
+<li><strong>Các dịch vụ kỹ thuật shop dùng, mỗi bên chỉ thấy phần việc của mình:</strong> Cloudflare đứng trước máy chủ và thấy địa chỉ IP của mọi lượt truy cập; ip-api.com nhận IP của phiên đăng nhập để trả về tên thành phố; ngân hàng và dịch vụ đọc biến động số dư thấy nội dung chuyển khoản; Telegram và Zalo chuyển tin nhắn của bot; máy chủ email shop cấu hình gửi mã xác minh, link đặt lại mật khẩu và biên lai; nhà cung cấp AI nhận nội dung ô chat; dịch vụ rút gọn link cấp link nhận key miễn phí.</li>
+<li><strong>Công khai:</strong> đánh giá bạn gửi hiện trên trang Đánh giá với tên của bạn, hoặc ẩn danh nếu bạn chọn.</li>
+<li>Shop không bán, không cho thuê và không chia sẻ dữ liệu của bạn cho bên quảng cáo hay bất kỳ ai khác.</li>
+</ul>
+<h2>5. Giữ bao lâu</h2>
+<ul>
+<li>Phiên đăng nhập: tới khi hết hạn (30 ngày) hoặc khi bạn đăng xuất, kể cả đăng xuất một thiết bị trong Bảo mật. Phiên hết hạn bị xoá ngay khi gặp lại.</li>
+<li>Mã xác minh điện thoại và email: hết hạn sau 10 phút, chỉ lưu dạng băm; mã điện thoại chưa dùng bị xoá sau một giờ. Link đặt lại mật khẩu dùng được một lần.</li>
+<li>Lịch sử nạp tiền, đơn hàng, key, bảo hành và hoàn tiền: giữ chừng nào tài khoản còn, để đối soát, bảo hành và xử lý khiếu nại.</li>
+<li>Tài khoản bị khoá: lý do khoá chỉ admin xem được, không hiện ra ngoài.</li>
+</ul>
+<h2>6. Quyền của bạn</h2>
+<ul>
+<li>Xem và sửa thông tin của mình trong <a href="/profile">Tổng quan</a> (ảnh đại diện, ảnh bìa) và <a href="/security">Bảo mật</a> (email, mật khẩu, thiết bị đang đăng nhập, liên kết Google, Discord, Telegram, Zalo).</li>
+<li>Huỷ liên kết Zalo ngay trong Bảo mật, thông báo qua Zalo dừng từ lúc đó. Muốn gỡ liên kết Telegram, Google hoặc Discord, nhắn shop.</li>
+<li>Yêu cầu xoá tài khoản qua trang <a href="/lien-he">Liên hệ</a> hoặc kênh Telegram <a href="https://t.me/thichthihack">t.me/thichthihack</a>, từ chính tài khoản hoặc kênh đã liên kết để shop biết đúng là bạn. Shop xoá thông tin cá nhân (email, số điện thoại, liên kết, ảnh) và chỉ giữ lại bản ghi giao dịch cần cho đối soát và khiếu nại. Xử lý trong giờ hỗ trợ 8:00 đến 23:00.</li>
+</ul>
+<h2>7. Bảo mật phía bạn</h2>
+<ul>
+<li>Không đưa mã OTP, mật khẩu cho ai. Shop không bao giờ nhắn riêng xin mật khẩu, mã OTP hay yêu cầu chuyển khoản vào tài khoản cá nhân.</li>
+<li>Xác minh email và liên kết Telegram hoặc Zalo trong Bảo mật để nhận thông báo và lấy lại tài khoản khi cần; thấy thiết bị lạ trong danh sách thì đăng xuất nó và đổi mật khẩu.</li>
+</ul>
+<h2>8. Thay đổi chính sách</h2>
+<p>Như điều 8 của <a href="/docs/dieu-khoan-su-dung">Điều khoản sử dụng</a>: bản mới nhất luôn ở trang này, thay đổi lớn được thông báo trên web và kênh Telegram. Các bước và lợi ích của xác thực cấp 2 ở bài <a href="/docs/xac-thuc-tai-khoan-cap-2">Xác thực tài khoản cấp 2</a>.</p>
+<blockquote>Cảm ơn bạn đã tin tưởng THÍCH THÌ HACK. Shop chỉ giữ những gì cần để bán hàng và bảo hành cho bạn, không hơn.</blockquote>

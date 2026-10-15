@@ -196,5 +196,23 @@
     "featured": true,
     "sortOrder": 1,
     "replaces": []
+  },
+  {
+    "slug": "chinh-sach-bao-mat",
+    "category": "TERMS",
+    "title": "Chính sách bảo mật",
+    "excerpt": "Shop lưu gì khi bạn đăng ký, nạp tiền, mua tool, xác thực cấp 2 và liên kết Zalo, Telegram; ai xem được; giữ bao lâu; cách yêu cầu xoá.",
+    "featured": false,
+    "sortOrder": 2,
+    "replaces": []
+  },
+  {
+    "slug": "dmca-ban-quyen",
+    "category": "TERMS",
+    "title": "DMCA và bản quyền",
+    "excerpt": "Tên game và thương hiệu thuộc nhà phát hành, tool thuộc đội phát triển, bài viết và hình trên web là của shop. Cách gửi yêu cầu gỡ nội dung vi phạm.",
+    "featured": false,
+    "sortOrder": 3,
+    "replaces": []
   }
 ]
