@@ -46,6 +46,19 @@ export function linkMessage(code: string): string {
   return `${LINK_WORD} ${code}`;
 }
 
+/**
+ * The word before a phone code for "xác thực cấp 2" (the owner, 15/10/2026:
+ * "cái đảo chiều đc đó"): the customer sends the code TO the bot from the
+ * linked Zalo, the bot never writes first. The shop reads it in
+ * parseZaloCommand (src/lib/zaloShopRules.ts); the six digits alone also pass.
+ */
+export const VERIFY_WORD = "XACTHUC";
+
+/** What the customer sends to prove a phone, as the verification card shows it. */
+export function verifyMessage(code: string): string {
+  return `${VERIFY_WORD} ${code}`;
+}
+
 /** A notice as one Zalo message: the title, the body, the page to open. */
 export function noticeText(
   title: string,
@@ -123,19 +136,47 @@ export function readZaloBotState(
  */
 export const QR_REPORT_FRESH_MS = 10 * 60 * 1000;
 
-/** The bot's standing as Cấu hình should read it: a stale scan wait is a loss. */
+/**
+ * An "online" report older than this is a bot that died without its goodbye
+ * (killed outright, the machine off): it says so every minute while it
+ * lives. Read as offline, the web stops handing out phone codes nobody will
+ * read (the owner, 15/10/2026: "đang bảo trì, thử lại sau").
+ */
+export const ONLINE_REPORT_FRESH_MS = 5 * 60 * 1000;
+
+/**
+ * The bot's standing as Cấu hình and the web should read it: a stale scan
+ * wait or a stale heartbeat is a loss.
+ */
 export function settleZaloBotState(
   state: ZaloBotState | null,
   now = Date.now(),
 ): ZaloBotState | null {
-  if (!state || state.state !== "qr") return state;
-  if (now - new Date(state.at).getTime() <= QR_REPORT_FRESH_MS) return state;
-  return {
-    ...state,
-    state: "offline",
-    qrUrl: null,
-    note: "bot không chạy, không báo về nữa",
-  };
+  if (!state) return state;
+  const age = now - new Date(state.at).getTime();
+  if (state.state === "qr" && age > QR_REPORT_FRESH_MS) {
+    return {
+      ...state,
+      state: "offline",
+      qrUrl: null,
+      note: "bot không chạy, không báo về nữa",
+    };
+  }
+  if (state.state === "online" && age > ONLINE_REPORT_FRESH_MS) {
+    const since = new Date(state.at).toLocaleString("vi-VN", {
+      timeZone: "Asia/Ho_Chi_Minh",
+      hour: "2-digit",
+      minute: "2-digit",
+      day: "2-digit",
+      month: "2-digit",
+    });
+    return {
+      ...state,
+      state: "offline",
+      note: `bot không báo về từ ${since}, có thể đã dừng`,
+    };
+  }
+  return state;
 }
 
 /**

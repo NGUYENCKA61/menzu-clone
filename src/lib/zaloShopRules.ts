@@ -55,6 +55,12 @@ export type ZaloCommand =
   | { kind: "topup"; amount: number | null; raw: string }
   | { kind: "balance" }
   | { kind: "orders" }
+  /**
+   * A phone code for "xác thực cấp 2" sent to the bot: "XACTHUC 482913",
+   * "xác thực: 482913", or the six digits alone (`bare`), which the shop
+   * treats as a code only while one is waiting for this account.
+   */
+  | { kind: "verify"; code: string; bare: boolean }
   | { kind: "unknown" };
 
 const MENU =
@@ -72,6 +78,8 @@ export function parseZaloCommand(text: string): ZaloCommand {
   if (!s) return { kind: "unknown" };
   if (MENU.test(s)) return { kind: "menu" };
   if (SHOP.test(s)) return { kind: "shop" };
+  const verify = /^(?:(XAC ?THUC|OTP)[:\-]? ?)?(\d{6})$/.exec(s);
+  if (verify) return { kind: "verify", code: verify[2]!, bare: !verify[1] };
   if (/^\d{1,3}$/.test(s)) return { kind: "pick", n: Number(s) };
   if (OK.test(s)) return { kind: "ok" };
   if (CANCEL.test(s)) return { kind: "cancel" };

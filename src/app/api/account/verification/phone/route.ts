@@ -9,9 +9,10 @@ import {
 } from "@/lib/verification";
 
 /**
- * "Gửi mã qua Zalo": a code for the number typed, carried by the shop's Zalo
- * bot to that number's own Zalo once it has checked the number is the linked
- * account's. The form then polls GET ?id= until the bot has sent or refused.
+ * "Lấy mã": a code for the number typed, which the customer sends to the
+ * shop's Zalo bot from their linked Zalo (the bot never writes first); the
+ * bot only looks the number up to see it is that Zalo's. The form then polls
+ * GET ?id= until the code has come back right or the number was refused.
  */
 export async function POST(request: Request) {
   if (crossSiteRequest(request)) {

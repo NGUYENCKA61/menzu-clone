@@ -5,9 +5,10 @@ import {
   Check,
   CircleAlert,
   Clock,
+  Copy,
+  KeyRound,
   Loader2,
   MessageCircle,
-  Send,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -37,8 +38,15 @@ const QUIET = `${BUTTON} border border-white/10 bg-white/[0.04] text-neutral-300
 
 type Otp =
   | { state: "idle" }
-  | { state: "pending"; id: string; phone: string }
-  | { state: "sent"; id: string; phone: string }
+  /** A code issued: the customer is on Zalo sending it, and the form polls. */
+  | {
+      state: "pending";
+      id: string;
+      phone: string;
+      message: string;
+      expiresAt: string;
+    }
+  | { state: "verified"; phone: string }
   | { state: "failed"; phone: string; error: string };
 
 const POLL_MS = 3000;
@@ -51,6 +59,14 @@ function when(iso: string): string {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
+  });
+}
+
+function clock(iso: string): string {
+  return new Date(iso).toLocaleTimeString("vi-VN", {
+    timeZone: "Asia/Ho_Chi_Minh",
+    hour: "2-digit",
+    minute: "2-digit",
   });
 }
 
@@ -134,12 +150,24 @@ function Summary({
  * Zalo chính chủ và số điện thoại có otp và duyệt bởi admin kèm tk ngân
  * hàng khớp với tk chuyển và tên fb"). The level and the latest bid on top;
  * under it the form, in four steps, until a bid is waiting or approved.
+ *
+ * The phone step runs the other way round from a usual OTP (the owner,
+ * 15/10/2026: "cái đảo chiều đc đó"): the web shows the code and the customer
+ * sends it to the shop's Zalo bot from the linked Zalo, as the link code is
+ * sent. The bot never writes first, so the spare personal account it runs on
+ * is not seen messaging strangers; the form polls until the code has arrived.
  */
 export function VerificationCard({
   view,
+  botPhone,
+  botName,
   onGoLinked,
 }: {
   view: VerificationView;
+  /** The bot's own number from Cấu hình, where the customer sends the code. */
+  botPhone: string | null;
+  /** How the shop named that account; blank falls back to the number. */
+  botName: string;
   /** Opens the Liên kết tab, where Zalo is linked. */
   onGoLinked: () => void;
 }) {
@@ -150,17 +178,18 @@ export function VerificationCard({
   const [fbName, setFbName] = useState(again?.facebookName ?? "");
   const [phone, setPhone] = useState(again?.phone ?? "");
   const [otp, setOtp] = useState<Otp>({ state: "idle" });
-  const [code, setCode] = useState("");
+  const [copied, setCopied] = useState(false);
   /** The number the server has accepted a code for, if any. */
   const [proved, setProved] = useState<string | null>(null);
   const [bankName, setBankName] = useState(again?.bankName ?? "");
   const [bankAccount, setBankAccount] = useState("");
   const [holder, setHolder] = useState(again?.accountHolder ?? "");
-  const [busy, setBusy] = useState<"send" | "verify" | "submit" | null>(null);
+  const [busy, setBusy] = useState<"code" | "submit" | null>(null);
   const [cooldown, setCooldown] = useState(0);
   const [error, setError] = useState<string | null>(null);
 
-  // The wait on the bot: ask every few seconds whether the code went out.
+  // The wait on the customer and the bot: ask every few seconds whether the
+  // code has come back from the linked Zalo.
   useEffect(() => {
     if (otp.state !== "pending") return;
     const { id, phone: number } = otp;
@@ -174,13 +203,15 @@ export function VerificationCard({
           state?: string;
           error?: string | null;
         } | null;
-        if (data?.state === "sent")
-          setOtp({ state: "sent", id, phone: number });
-        else if (data?.state === "failed" || data?.state === "missing") {
+        if (data?.state === "verified") {
+          setProved(number);
+          setPhone(number);
+          setOtp({ state: "verified", phone: number });
+        } else if (data?.state === "failed" || data?.state === "missing") {
           setOtp({
             state: "failed",
             phone: number,
-            error: data.error ?? "Chưa gửi được mã, bấm Gửi mã lại.",
+            error: data.error ?? "Chưa xác minh được số, bấm Lấy mã khác.",
           });
         }
       } catch {
@@ -199,8 +230,8 @@ export function VerificationCard({
   const phoneNow = normalisePhone(phone);
   const phoneProved = proved !== null && proved === phoneNow;
 
-  async function sendCode() {
-    setBusy("send");
+  async function getCode() {
+    setBusy("code");
     setError(null);
     try {
       const res = await fetch("/api/account/verification/phone", {
@@ -211,15 +242,29 @@ export function VerificationCard({
       const data = (await res.json().catch(() => null)) as {
         id?: string;
         phone?: string;
+        message?: string;
+        expiresAt?: string;
         retryAfter?: number;
         error?: string;
       } | null;
-      if (!res.ok || !data?.id || !data.phone) {
-        setError(data?.error ?? "Không gửi được mã, thử lại sau.");
+      if (
+        !res.ok ||
+        !data?.id ||
+        !data.phone ||
+        !data.message ||
+        !data.expiresAt
+      ) {
+        setError(data?.error ?? "Không lấy được mã, thử lại sau.");
         return;
       }
-      setCode("");
-      setOtp({ state: "pending", id: data.id, phone: data.phone });
+      setCopied(false);
+      setOtp({
+        state: "pending",
+        id: data.id,
+        phone: data.phone,
+        message: data.message,
+        expiresAt: data.expiresAt,
+      });
       setCooldown(data.retryAfter ?? PHONE_OTP_COOLDOWN_SECONDS);
     } catch {
       setError("Mất kết nối, thử lại sau.");
@@ -228,30 +273,14 @@ export function VerificationCard({
     }
   }
 
-  async function confirmCode() {
-    setBusy("verify");
-    setError(null);
+  async function copy() {
+    if (otp.state !== "pending") return;
     try {
-      const res = await fetch("/api/account/verification/phone/verify", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ code }),
-      });
-      const data = (await res.json().catch(() => null)) as {
-        phone?: string;
-        error?: string;
-      } | null;
-      if (!res.ok || !data?.phone) {
-        setError(data?.error ?? "Mã không đúng.");
-        return;
-      }
-      setProved(data.phone);
-      setPhone(data.phone);
-      setOtp({ state: "idle" });
+      await navigator.clipboard.writeText(otp.message);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1500);
     } catch {
-      setError("Mất kết nối, thử lại sau.");
-    } finally {
-      setBusy(null);
+      // No clipboard: the code is on screen to type.
     }
   }
 
@@ -298,6 +327,7 @@ export function VerificationCard({
 
   const level2 = view.level === 2;
   const waiting = !level2 && last?.status === "PENDING";
+  const botLabel = botName.trim() || botPhone || "bot Zalo của shop";
 
   return (
     <div className="flex flex-col gap-6">
@@ -324,7 +354,7 @@ export function VerificationCard({
         <p className="mt-3 text-[13px] leading-relaxed text-neutral-400">
           {level2
             ? `Shop đã xác thực tài khoản của bạn${view.verifiedAt ? ` từ ${when(view.verifiedAt)}` : ""}. Bạn thuê được cả những bản hack chỉ dành cho tài khoản cấp 2.`
-            : "Một số bản hack đặc biệt chỉ bán cho tài khoản xác thực cấp 2. Để lên cấp 2 bạn cần: Zalo đã liên kết, Facebook chính chủ, số điện thoại nhận mã qua Zalo, và tài khoản ngân hàng đứng tên bạn (trùng với tài khoản bạn chuyển khoản nạp tiền). Shop duyệt tay, thường trong 24 giờ."}
+            : "Một số bản hack đặc biệt chỉ bán cho tài khoản xác thực cấp 2. Để lên cấp 2 bạn cần: Zalo đã liên kết, Facebook chính chủ, số điện thoại của Zalo đó (xác minh bằng một tin nhắn bạn gửi cho bot), và tài khoản ngân hàng đứng tên bạn (trùng với tài khoản bạn chuyển khoản nạp tiền). Shop duyệt tay, thường trong 24 giờ."}
         </p>
       </section>
 
@@ -365,8 +395,8 @@ export function VerificationCard({
               {view.zaloLinked ? (
                 <p className="flex items-center gap-2 text-[12px] text-emerald-400">
                   <MessageCircle size={14} aria-hidden />
-                  Đã liên kết{view.zaloName ? ` với ${view.zaloName}` : ""}. Mã
-                  xác thực số điện thoại gửi vào Zalo này.
+                  Đã liên kết{view.zaloName ? ` với ${view.zaloName}` : ""}. Số
+                  điện thoại được xác minh qua Zalo này.
                 </p>
               ) : (
                 <div className="flex flex-wrap items-center gap-3">
@@ -417,7 +447,7 @@ export function VerificationCard({
               </p>
             </div>
 
-            {/* 3. Phone */}
+            {/* 3. Phone: the code goes from the customer to the bot. */}
             <div className="flex flex-col gap-3">
               <Step index={3} title="Số điện thoại" done={phoneProved} />
               <div className="grid gap-4 sm:grid-cols-[1fr_auto] sm:items-end">
@@ -438,89 +468,109 @@ export function VerificationCard({
                 </div>
                 <button
                   type="button"
-                  onClick={() => void sendCode()}
+                  onClick={() => void getCode()}
                   disabled={
                     busy !== null ||
                     !view.zaloLinked ||
                     !view.botOnline ||
+                    !botPhone ||
                     phoneProved ||
                     cooldown > 0 ||
                     phoneNow.length < 10
                   }
                   className={QUIET}
                 >
-                  {busy === "send" ? (
+                  {busy === "code" ? (
                     <Loader2
                       size={14}
                       className="animate-spin motion-reduce:animate-none"
                       aria-hidden
                     />
                   ) : (
-                    <Send size={14} aria-hidden />
+                    <KeyRound size={14} aria-hidden />
                   )}
-                  {cooldown > 0 ? `Gửi lại (${cooldown}s)` : "Gửi mã qua Zalo"}
+                  {cooldown > 0
+                    ? `Lấy mã khác (${cooldown}s)`
+                    : otp.state === "idle"
+                      ? "Lấy mã"
+                      : "Lấy mã khác"}
                 </button>
               </div>
               {!view.botOnline && !phoneProved ? (
                 <Line
                   tone="wait"
-                  text="Bot Zalo của shop đang không chạy nên chưa gửi mã được lúc này. Bạn quay lại sau nhé."
+                  text="Kênh Zalo của shop đang bảo trì nên chưa xác minh số được lúc này. Bạn quay lại sau nhé."
+                />
+              ) : !botPhone && !phoneProved ? (
+                <Line
+                  tone="wait"
+                  text="Shop chưa cài số Zalo của bot nên chưa xác minh số được lúc này. Bạn quay lại sau nhé."
                 />
               ) : null}
               {phoneProved ? (
                 <Line
                   tone="ok"
-                  text={`Đã xác minh số ${maskPhone(phoneNow)}.`}
+                  text={`Đã xác minh số ${maskPhone(phoneNow)} qua Zalo.`}
                 />
-              ) : otp.state === "pending" ? (
-                <p className="flex items-center gap-2 text-[12px] text-amber-200">
-                  <Loader2
-                    size={14}
-                    className="animate-spin motion-reduce:animate-none"
-                    aria-hidden
-                  />
-                  Bot đang kiểm tra số {maskPhone(otp.phone)} và gửi mã vào
-                  Zalo…
-                </p>
               ) : otp.state === "failed" ? (
                 <Line tone="err" text={otp.error} />
-              ) : null}
-              {otp.state === "sent" || otp.state === "pending" ? (
-                <div className="grid gap-4 sm:grid-cols-[1fr_auto] sm:items-end">
-                  <div>
-                    <label htmlFor="verify-code" className={LABEL}>
-                      Mã 6 số từ Zalo
-                    </label>
-                    <input
-                      id="verify-code"
-                      value={code}
-                      onChange={(event) =>
-                        setCode(
-                          event.target.value.replace(/\D/g, "").slice(0, 6),
-                        )
-                      }
-                      placeholder="123456"
-                      inputMode="numeric"
-                      autoComplete="one-time-code"
-                      className={`${FIELD} font-mono tracking-[0.3em]`}
-                    />
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => void confirmCode()}
-                    disabled={busy !== null || code.length !== 6}
-                    className={PRIMARY}
-                  >
-                    {busy === "verify" ? (
+              ) : otp.state === "pending" ? (
+                <ol className="flex flex-col gap-3 rounded-xl border border-white/10 bg-neutral-950/40 p-4 text-[13px] leading-relaxed text-neutral-300">
+                  <li className="flex gap-3">
+                    <span className="font-black text-neutral-500">1.</span>
+                    <span>
+                      Mở Zalo của số {maskPhone(otp.phone)} và nhắn cho{" "}
+                      <a
+                        href={`https://zalo.me/${botPhone ?? ""}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="font-bold text-white underline underline-offset-2"
+                      >
+                        {botLabel}
+                      </a>
+                      {botName.trim() && botPhone ? (
+                        <span className="text-neutral-500"> ({botPhone})</span>
+                      ) : null}
+                      .
+                    </span>
+                  </li>
+                  <li className="flex gap-3">
+                    <span className="font-black text-neutral-500">2.</span>
+                    <span className="flex flex-wrap items-center gap-2">
+                      Gửi đúng nội dung
+                      <code className="rounded-lg border border-white/10 bg-neutral-950/60 px-2.5 py-1 font-mono text-sm font-bold tracking-widest text-white">
+                        {otp.message}
+                      </code>
+                      <button
+                        type="button"
+                        onClick={() => void copy()}
+                        className="inline-flex items-center gap-1 text-[12px] font-semibold text-neutral-400 transition-colors hover:text-white"
+                      >
+                        {copied ? (
+                          <Check size={14} aria-hidden />
+                        ) : (
+                          <Copy size={14} aria-hidden />
+                        )}
+                        {copied ? "Đã chép" : "Sao chép"}
+                      </button>
+                    </span>
+                  </li>
+                  <li className="flex gap-3">
+                    <span className="font-black text-neutral-500">3.</span>
+                    <span className="flex flex-wrap items-center gap-2">
                       <Loader2
                         size={14}
-                        className="animate-spin motion-reduce:animate-none"
+                        className="animate-spin text-amber-200 motion-reduce:animate-none"
                         aria-hidden
                       />
-                    ) : null}
-                    Xác nhận
-                  </button>
-                </div>
+                      <span>
+                        Bot trả lời xong, bước này tự xanh. Mã dùng đến{" "}
+                        {clock(otp.expiresAt)}; bot chỉ nhận mã gửi từ Zalo đã
+                        liên kết.
+                      </span>
+                    </span>
+                  </li>
+                </ol>
               ) : null}
             </div>
 

@@ -8,7 +8,11 @@
  * What it does, and nothing more:
  *   - drains zalo_outbox: one message every SEND_GAP_MS, three tries each;
  *   - answers "LIENKET <code>" by linking the sender to the code's account;
- *   - answers anything else with one short help text per chat per 6 hours;
+ *   - looks a phone number up for the web's "xác thực cấp 2" and records
+ *     whether it is the linked Zalo's (the customer sends the code to the bot
+ *     themselves; the bot writes nothing first);
+ *   - hands anything else to the shop on the website, which answers in kind,
+ *     else one short help text per chat per 6 hours;
  *   - reports its standing (waiting for a QR scan / online / offline) into
  *     the settings row Admin → Cấu hình reads.
  *
@@ -479,30 +483,45 @@ async function drainOutbox(): Promise<void> {
     if (stopping || !api) return;
     try {
       if (item.kind === "PHONE_OTP") {
-        // The code goes only to the number's own Zalo, and only when that is
-        // the account linked here: a stranger's number earns nothing. Zalo
-        // answers 216 for an unknown number, which the client hands back as
-        // an empty result.
-        const found = await api.findUser(item.phone ?? "").catch(() => null);
+        // "Xác thực cấp 2": the customer sends the code to this bot themselves
+        // (src/lib/verification.ts); what the web asks here is only whether
+        // the number they typed is the linked Zalo's. A lookup, never a
+        // message: a personal account that writes to strangers gets locked.
+        // Zalo answers 216 for an unknown number, which the client hands back
+        // as an empty result; a failed call is retried like a failed send.
+        // SENT means "looked up, it is theirs".
+        let found: Awaited<ReturnType<API["findUser"]>> | null = null;
+        try {
+          found = await api.findUser(item.phone ?? "");
+        } catch (error) {
+          throw new Error(
+            `tra số điện thoại lỗi: ${(error as Error).message ?? "unknown"}`,
+          );
+        }
         const owner = found?.uid ? String(found.uid) : null;
         const refusal = !owner
           ? "Số này chưa đăng ký Zalo"
           : owner !== item.zaloId
-            ? "Số này không phải số của tài khoản Zalo đã liên kết"
+            ? "Số này không phải số của Zalo đã liên kết"
             : null;
-        if (refusal) {
-          log("phone code refused", item.id, refusal);
-          await db.zaloOutbox.update({
-            where: { id: item.id },
-            data: {
-              status: "FAILED",
-              attempts: { increment: 1 },
-              lastError: refusal,
-            },
-          });
-          await sleep(SEND_GAP_MS);
-          continue;
-        }
+        log(
+          refusal ? "phone check refused" : "phone check passed",
+          item.id,
+          refusal ?? "",
+        );
+        await db.zaloOutbox.update({
+          where: { id: item.id },
+          data: refusal
+            ? { status: "FAILED", attempts: { increment: 1 }, lastError: refusal }
+            : {
+                status: "SENT",
+                sentAt: new Date(),
+                attempts: { increment: 1 },
+                lastError: null,
+              },
+        });
+        await sleep(SEND_GAP_MS);
+        continue;
       }
       if (item.kind === "GROUP_POST") {
         if (!group) throw new Error("group minder not ready");

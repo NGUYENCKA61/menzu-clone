@@ -1950,8 +1950,9 @@ model ZaloOutbox {
   /// Style ranges over `text` (src/lib/zaloShared.ts ZaloStyleRange[]): the
   /// receipt's title bold and big, a key bold red. Null sends it plain.
   styles    Json?
-  /// A notice, or a phone code for "xác thực cấp 2", which the bot sends
-  /// only after checking the number is this Zalo's (phone).
+  /// A notice, or a phone check for "xác thực cấp 2": the bot looks `phone`
+  /// up and marks the row SENT when it is this Zalo's, FAILED when not; its
+  /// text is never sent (the customer sends the code to the bot themselves).
   kind      ZaloOutboxKind   @default(NOTICE)
   phone     String?
   status    ZaloOutboxStatus @default(PENDING)
@@ -2029,10 +2030,11 @@ model AccountVerification {
   @@map("account_verifications")
 }
 
-/// A code on its way to a phone's Zalo for "xác thực cấp 2": the bot looks
-/// the number up, checks it is the linked account's, and sends the code.
-/// Typed back right, the row is stamped consumed and the number counts as
-/// proved for a while.
+/// A code for "xác thực cấp 2", shown on the web and sent by the customer TO
+/// the Zalo bot from the linked Zalo (the bot never writes first); the bot
+/// only looks the number up (the outbox row) to see it is that Zalo's.
+/// Received right from that Zalo once the number checks out, the row is
+/// stamped consumed and the number counts as proved for a while.
 model PhoneVerification {
   id         String    @id @default(cuid())
   userId     String
@@ -2041,7 +2043,8 @@ model PhoneVerification {
   codeHash   String
   expiresAt  DateTime
   attempts   Int       @default(0)
-  /// The outbox row carrying the code; its status says whether it went.
+  /// The outbox row asking the bot to look the number up; SENT = it is the
+  /// linked Zalo's, FAILED = it is not (lastError says why).
   outboxId   String?
   consumedAt DateTime?
   createdAt  DateTime  @default(now())

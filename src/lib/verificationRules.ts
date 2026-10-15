@@ -83,7 +83,7 @@ export const VERIFICATION_STATUS_LABEL: Record<VerificationStatus, string> = {
   REJECTED: "Từ chối",
 };
 
-/** How long a code sent to the phone's Zalo works. */
+/** How long a code shown on the web works once the customer sends it to the bot. */
 export const PHONE_OTP_TTL_MINUTES = 10;
 
 /** Between two codes to one account, so a finger on the button is not a flood. */

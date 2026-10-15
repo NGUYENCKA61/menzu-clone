@@ -98,9 +98,14 @@ describe("the bot's standing as Cấu hình reads it", () => {
     expect(stale?.qrUrl).toBeNull();
     expect(stale?.note).toMatch(/không chạy/);
     expect(settleZaloBotState(null)).toBeNull();
+    // A heartbeat is fresh for a few minutes; an hour-old "online" is a bot
+    // that died without its goodbye (tests/zaloBotStanding.test.ts).
     const online = { ...qr, state: "online" as const };
-    expect(settleZaloBotState(online, at.getTime() + 60 * 60 * 1000)).toEqual(
+    expect(settleZaloBotState(online, at.getTime() + 60 * 1000)).toEqual(
       online,
     );
+    expect(
+      settleZaloBotState(online, at.getTime() + 60 * 60 * 1000)?.state,
+    ).toBe("offline");
   });
 });

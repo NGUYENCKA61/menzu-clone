@@ -799,6 +799,8 @@ export function SecurityPanel({
             )}
             <VerificationCard
               view={verification}
+              botPhone={zaloPhone}
+              botName={zaloName}
               onGoLinked={() => setTab("linked")}
             />
           </div>

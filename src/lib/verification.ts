@@ -14,7 +14,6 @@ import {
 import { db } from "@/lib/db";
 import { hashCode, sameHash } from "@/lib/emailOtp";
 import { absoluteUrl } from "@/lib/seo";
-import { getShopSettings } from "@/lib/settingsStore";
 import { escapeTelegramHtml, notifyTelegramAdmins } from "@/lib/telegramNotify";
 import {
   NOTE_MAX,
@@ -35,16 +34,19 @@ import {
   ZALO_STATE_KEY,
   readZaloBotState,
   settleZaloBotState,
+  verifyMessage,
 } from "@/lib/zaloShared";
 
 /**
  * "Xác thực cấp 2" (the owner, 12/10/2026: "cần liên kết Facebook Zalo chính
  * chủ và số điện thoại có otp và duyệt bởi admin kèm tk ngân hàng khớp với
  * tk chuyển và tên fb"). The customer links Zalo through the bot first, proves
- * a phone with a code the bot sends to that number's own Zalo (so the number
- * and the Zalo are one person's), types their Facebook and the bank account
- * they pay from, and the shop decides by hand beside the account's history.
- * Approved, the account is level 2 and may buy what is flagged verifiedOnly.
+ * a phone by sending a code shown on the web TO the bot from that Zalo (the
+ * owner, 15/10/2026: "cái đảo chiều đc đó"; the bot only looks the number up
+ * to see it is that Zalo's, so the number and the Zalo are one person's),
+ * types their Facebook and the bank account they pay from, and the shop
+ * decides by hand beside the account's history. Approved, the account is
+ * level 2 and may buy what is flagged verifiedOnly.
  *
  * Every refusal is a coded Error for the routes to word (verificationFailure).
  */
@@ -128,9 +130,20 @@ export async function verificationView(
 }
 
 /**
- * "Gửi mã qua Zalo": a six-digit code queued for the bot, which looks the
- * number up on Zalo, checks it is the linked account's, and only then sends
- * it (bot/zalo/main.ts). Throttled per account like the email code.
+ * What the outbox row for a phone check says to anyone reading it. The bot
+ * never sends a PHONE_OTP row's text (bot/zalo/main.ts); the row exists so
+ * the bot looks the number up and records whether it is the linked Zalo's.
+ */
+const PHONE_CHECK_TEXT = "(kiểm tra số điện thoại, không gửi)";
+
+/**
+ * "Lấy mã": a six-digit code the customer SENDS to the shop's Zalo bot from
+ * the linked Zalo (the owner, 15/10/2026: "cái đảo chiều đc đó"). The bot
+ * only reads; it never messages a number first, which is what gets a
+ * personal account locked. The number typed is still tied to that Zalo: an
+ * outbox row asks the bot to look it up (a lookup, nothing sent) and record
+ * whether it is the linked account's; confirmPhoneOtpFromZalo reads that
+ * word when the code arrives. Throttled per account like the email code.
  */
 export async function startPhoneOtp(
   userId: string,
@@ -138,6 +151,10 @@ export async function startPhoneOtp(
 ): Promise<{
   id: string;
   phone: string;
+  /** The code and the message to send, shown to the customer to copy. */
+  code: string;
+  message: string;
+  expiresAt: string;
   retryAfter: number;
   ttlMinutes: number;
 }> {
@@ -172,17 +189,13 @@ export async function startPhoneOtp(
     where: { userId, createdAt: { lt: hourAgo }, consumedAt: null },
   });
 
-  const settings = await getShopSettings();
   const code = String(randomInt(0, 1_000_000)).padStart(6, "0");
   const outbox = await db.zaloOutbox.create({
     data: {
       zaloId: account.zaloId,
       kind: "PHONE_OTP",
       phone,
-      text:
-        `${settings.brandName}: mã xác thực số điện thoại của bạn là ${code}. ` +
-        `Mã dùng trong ${PHONE_OTP_TTL_MINUTES} phút, nhập ở Bảo mật → Xác thực cấp 2. ` +
-        "Không đưa mã này cho ai.",
+      text: PHONE_CHECK_TEXT,
     },
     select: { id: true },
   });
@@ -194,88 +207,167 @@ export async function startPhoneOtp(
       expiresAt: new Date(Date.now() + PHONE_OTP_TTL_MINUTES * 60 * 1000),
       outboxId: outbox.id,
     },
-    select: { id: true },
+    select: { id: true, expiresAt: true },
   });
   return {
     id: row.id,
     phone,
+    code,
+    message: verifyMessage(code),
+    expiresAt: row.expiresAt.toISOString(),
     retryAfter: PHONE_OTP_COOLDOWN_SECONDS,
     ttlMinutes: PHONE_OTP_TTL_MINUTES,
   };
 }
 
 export type PhoneOtpStatus = {
-  state: "pending" | "sent" | "failed" | "missing";
+  /**
+   * Waiting for the customer's message (and the bot's look at the number),
+   * proved, refused (the number is not that Zalo's, the code ran out), or
+   * gone.
+   */
+  state: "pending" | "verified" | "failed" | "missing";
   error: string | null;
 };
 
-/** Where the code stands, for the form that waits on the bot. */
+/** Where the code stands, for the form that polls while the customer is on Zalo. */
 export async function phoneOtpStatus(
   userId: string,
   id: string,
 ): Promise<PhoneOtpStatus> {
   const row = await db.phoneVerification.findFirst({
     where: { id, userId },
-    select: { outboxId: true, expiresAt: true, consumedAt: true },
+    select: { outboxId: true, expiresAt: true, consumedAt: true, attempts: true },
   });
   if (!row) return { state: "missing", error: null };
-  if (row.consumedAt) return { state: "sent", error: null };
+  if (row.consumedAt) return { state: "verified", error: null };
   const outbox = row.outboxId
     ? await db.zaloOutbox.findUnique({
         where: { id: row.outboxId },
         select: { status: true, lastError: true },
       })
     : null;
-  if (!outbox) return { state: "failed", error: "Chưa gửi được mã" };
-  if (outbox.status === "SENT") return { state: "sent", error: null };
-  if (outbox.status === "FAILED") {
-    return { state: "failed", error: outbox.lastError ?? "Chưa gửi được mã" };
+  if (!outbox) {
+    return { state: "failed", error: "Chưa kiểm tra được số, bấm Lấy mã khác" };
   }
-  if (row.expiresAt.getTime() <= Date.now()) {
+  if (outbox.status === "FAILED") {
     return {
       state: "failed",
-      error: "Mã hết hạn trước khi gửi được, bấm Gửi mã lại",
+      error: outbox.lastError ?? "Số này không phải số của Zalo đã liên kết",
     };
+  }
+  if (row.attempts >= PHONE_OTP_MAX_ATTEMPTS) {
+    return { state: "failed", error: "Gửi sai mã quá nhiều lần, bấm Lấy mã khác" };
+  }
+  if (row.expiresAt.getTime() <= Date.now()) {
+    return { state: "failed", error: "Mã đã hết hạn, bấm Lấy mã khác" };
   }
   return { state: "pending", error: null };
 }
 
-/** The code typed back: right, and the number counts as proved for a while. */
-export async function confirmPhoneOtp(
-  userId: string,
-  rawCode: unknown,
-): Promise<{ phone: string }> {
-  const code = String(rawCode ?? "").replace(/\D/g, "");
-  if (code.length !== 6) throw new Error("CODE_SHAPE");
-  const row = await db.phoneVerification.findFirst({
-    where: { userId, consumedAt: null },
-    orderBy: { createdAt: "desc" },
+/** What the shop answers on Zalo when a code arrives (worded in zaloShop.ts). */
+export type ZaloPhoneProof =
+  | { kind: "not_linked" }
+  | { kind: "already_verified"; username: string }
+  | { kind: "no_code"; username: string }
+  | { kind: "too_many"; username: string }
+  | { kind: "wrong"; left: number }
+  /** Right code, but the bot has not looked the number up yet. */
+  | { kind: "checking"; phone: string }
+  | { kind: "refused"; phone: string; reason: string }
+  | { kind: "proved"; phone: string; username: string };
+
+/**
+ * How long the shop waits for the bot's look at the number before asking the
+ * customer to send the code again: the bot drains its outbox every few
+ * seconds, and a customer who pastes the code the moment it shows can beat it.
+ */
+const PHONE_CHECK_WAIT_MS = 6_000;
+const PHONE_CHECK_POLL_MS = 750;
+
+/**
+ * The code, sent to the bot: it counts only from the Zalo linked to the
+ * account the code was issued to, while the code lives, and once the bot has
+ * found the number typed on the web to be that same Zalo's. Then the number
+ * is proved for a while (PHONE_PROOF_VALID_MS) and the form may be sent.
+ */
+export async function confirmPhoneOtpFromZalo(
+  zaloId: string,
+  code: string,
+): Promise<ZaloPhoneProof> {
+  const account = await db.user.findUnique({
+    where: { zaloId },
+    select: { id: true, username: true, verifiedAt: true },
   });
-  if (!row || row.expiresAt.getTime() <= Date.now()) throw new Error("NO_CODE");
-  if (row.attempts >= PHONE_OTP_MAX_ATTEMPTS) throw new Error("TOO_MANY_TRIES");
-  const outbox = row.outboxId
-    ? await db.zaloOutbox.findUnique({
-        where: { id: row.outboxId },
-        select: { status: true, lastError: true },
-      })
-    : null;
-  if (outbox?.status !== "SENT") {
-    throw new Error(
-      `NOT_SENT:${outbox?.status === "FAILED" ? (outbox.lastError ?? "") : ""}`,
-    );
+  if (!account) return { kind: "not_linked" };
+  if (account.verifiedAt) {
+    return { kind: "already_verified", username: account.username };
   }
-  if (!sameHash(row.codeHash, hashCode(userId, row.phone, code))) {
+  // Every live code, newest first: a customer who pressed "Lấy mã khác" and
+  // then sent the earlier code is still right.
+  const rows = await db.phoneVerification.findMany({
+    where: {
+      userId: account.id,
+      consumedAt: null,
+      expiresAt: { gt: new Date() },
+    },
+    orderBy: { createdAt: "desc" },
+    select: {
+      id: true,
+      phone: true,
+      codeHash: true,
+      attempts: true,
+      outboxId: true,
+    },
+  });
+  const latest = rows[0];
+  if (!latest) return { kind: "no_code", username: account.username };
+  if (latest.attempts >= PHONE_OTP_MAX_ATTEMPTS) {
+    return { kind: "too_many", username: account.username };
+  }
+  const match = rows.find((row) =>
+    sameHash(row.codeHash, hashCode(account.id, row.phone, code)),
+  );
+  if (!match) {
     await db.phoneVerification.update({
-      where: { id: row.id },
+      where: { id: latest.id },
       data: { attempts: { increment: 1 } },
     });
-    throw new Error(`WRONG:${PHONE_OTP_MAX_ATTEMPTS - row.attempts - 1}`);
+    return { kind: "wrong", left: PHONE_OTP_MAX_ATTEMPTS - latest.attempts - 1 };
+  }
+
+  const deadline = Date.now() + PHONE_CHECK_WAIT_MS;
+  for (;;) {
+    const outbox = match.outboxId
+      ? await db.zaloOutbox.findUnique({
+          where: { id: match.outboxId },
+          select: { status: true, lastError: true },
+        })
+      : null;
+    if (!outbox) {
+      return {
+        kind: "refused",
+        phone: match.phone,
+        reason: "Chưa kiểm tra được số điện thoại",
+      };
+    }
+    if (outbox.status === "SENT") break;
+    if (outbox.status === "FAILED") {
+      return {
+        kind: "refused",
+        phone: match.phone,
+        reason:
+          outbox.lastError ?? "Số này không phải số của Zalo đã liên kết",
+      };
+    }
+    if (Date.now() >= deadline) return { kind: "checking", phone: match.phone };
+    await new Promise((resolve) => setTimeout(resolve, PHONE_CHECK_POLL_MS));
   }
   await db.phoneVerification.update({
-    where: { id: row.id },
+    where: { id: match.id },
     data: { consumedAt: new Date() },
   });
-  return { phone: row.phone };
+  return { kind: "proved", phone: match.phone, username: account.username };
 }
 
 /** The form sent: a bid for the shop to read. */
@@ -553,30 +645,18 @@ export function verificationFailure(error: unknown): {
     case "ZALO_NOT_LINKED":
       return {
         error:
-          "Liên kết Zalo ở mục Liên kết nền tảng trước, mã xác thực gửi qua Zalo.",
+          "Liên kết Zalo ở mục Liên kết nền tảng trước, số điện thoại được xác minh qua Zalo đó.",
         status: 400,
       };
     case "BOT_OFFLINE":
       return {
         error:
-          "Bot Zalo của shop đang không chạy nên chưa gửi mã được. Thử lại sau hoặc nhắn shop.",
+          "Kênh Zalo của shop đang bảo trì nên chưa xác minh số được. Thử lại sau hoặc nhắn shop.",
         status: 503,
       };
     case "TOO_MANY":
       return {
-        error: "Bạn đã gửi mã quá nhiều lần. Thử lại sau 1 giờ.",
-        status: 429,
-      };
-    case "CODE_SHAPE":
-      return { error: "Nhập đủ 6 số của mã xác thực.", status: 400 };
-    case "NO_CODE":
-      return {
-        error: "Mã đã hết hạn hoặc chưa gửi. Bấm Gửi mã lại.",
-        status: 400,
-      };
-    case "TOO_MANY_TRIES":
-      return {
-        error: "Nhập sai quá nhiều lần. Hãy gửi lại mã mới.",
+        error: "Bạn đã lấy mã quá nhiều lần. Thử lại sau 1 giờ.",
         status: 429,
       };
     case "PENDING_EXISTS":
@@ -590,7 +670,7 @@ export function verificationFailure(error: unknown): {
       return { error: "Nhập tên hiển thị trên Facebook.", status: 400 };
     case "PHONE_UNPROVED":
       return {
-        error: "Xác minh số điện thoại bằng mã Zalo trước khi gửi hồ sơ.",
+        error: "Xác minh số điện thoại qua Zalo trước khi gửi hồ sơ.",
         status: 400,
       };
     case "BANK":
@@ -616,27 +696,8 @@ export function verificationFailure(error: unknown): {
   }
   if (message.startsWith("COOLDOWN:")) {
     return {
-      error: `Vui lòng đợi ${message.slice(9)} giây rồi gửi lại mã.`,
+      error: `Vui lòng đợi ${message.slice(9)} giây rồi lấy mã khác.`,
       status: 429,
-    };
-  }
-  if (message.startsWith("NOT_SENT:")) {
-    const reason = message.slice(9);
-    return {
-      error: reason
-        ? `Chưa gửi được mã: ${reason}. Kiểm tra số rồi bấm Gửi mã lại.`
-        : "Mã đang trên đường tới Zalo của bạn, chờ thêm chút rồi nhập.",
-      status: 409,
-    };
-  }
-  if (message.startsWith("WRONG:")) {
-    const left = Number(message.slice(6));
-    return {
-      error:
-        left > 0
-          ? `Mã không đúng (còn ${left} lần thử).`
-          : "Nhập sai quá nhiều lần. Hãy gửi lại mã mới.",
-      status: 400,
     };
   }
   console.error("verification failed", error);

@@ -23,6 +23,11 @@ import {
 } from "@/lib/softwareStatus";
 import { makeTopUpCode, topUpExpiresAt, transferNoteFor } from "@/lib/topup";
 import { openBankTopUp } from "@/lib/topupOpen";
+import {
+  confirmPhoneOtpFromZalo,
+  type ZaloPhoneProof,
+} from "@/lib/verification";
+import { maskPhone } from "@/lib/verificationRules";
 import type { ZaloInboundAnswer, ZaloShopReply } from "@/lib/zaloInbound";
 import { LINK_WORD, ZALO_STYLE } from "@/lib/zaloShared";
 import {
@@ -171,26 +176,92 @@ export async function handleZaloMessage(input: {
     case "orders":
       if (!buyer) return { replies: [linkFirst()], state };
       return orders(buyer, now);
-    case "unknown": {
-      const last = lastPuzzled.get(input.zaloId) ?? 0;
-      if (now - last < PUZZLED_GAP_MS) return { replies: [], state };
-      lastPuzzled.set(input.zaloId, now);
-      if (lastPuzzled.size > 5_000) lastPuzzled.clear();
-      return {
-        replies: [
-          reply(
-            new ZaloText()
-              .add("Mình chưa hiểu lệnh này. Gõ ")
-              .add("MENU", BOLD)
-              .add(" để xem các lệnh, hoặc ")
-              .add("SHOP", BOLD)
-              .add(" để xem hàng."),
-          ),
-        ],
-        state,
-      };
+    case "verify": {
+      const proof = await confirmPhoneOtpFromZalo(input.zaloId, command.code);
+      // Six digits alone, with no code waiting for them, are not a code at all.
+      if (
+        command.bare &&
+        (proof.kind === "not_linked" || proof.kind === "no_code")
+      ) {
+        return puzzled(input.zaloId, now, state);
+      }
+      return { replies: [phoneProofReply(proof)], state };
     }
+    case "unknown":
+      return puzzled(input.zaloId, now, state);
   }
+}
+
+/** "Not understood", once a minute per chat, so a chatty one is not answered on every line. */
+function puzzled(
+  zaloId: string,
+  now: number,
+  state: ZaloChatState | null,
+): ZaloInboundAnswer {
+  const last = lastPuzzled.get(zaloId) ?? 0;
+  if (now - last < PUZZLED_GAP_MS) return { replies: [], state };
+  lastPuzzled.set(zaloId, now);
+  if (lastPuzzled.size > 5_000) lastPuzzled.clear();
+  return {
+    replies: [
+      reply(
+        new ZaloText()
+          .add("Mình chưa hiểu lệnh này. Gõ ")
+          .add("MENU", BOLD)
+          .add(" để xem các lệnh, hoặc ")
+          .add("SHOP", BOLD)
+          .add(" để xem hàng."),
+      ),
+    ],
+    state,
+  };
+}
+
+/**
+ * The answer to a phone code for "xác thực cấp 2" (src/lib/verification.ts
+ * confirmPhoneOtpFromZalo): the customer sent it here from their linked Zalo,
+ * and this is the only message the bot writes about it.
+ */
+function phoneProofReply(proof: ZaloPhoneProof): ZaloShopReply {
+  const t = new ZaloText();
+  switch (proof.kind) {
+    case "not_linked":
+      t.add("Zalo này chưa liên kết với tài khoản web nào, nên chưa xác minh số điện thoại được.", BOLD);
+      t.line(`Liên kết trước: đăng nhập ${host()}, vào Bảo mật › Liên kết › Zalo, bấm lấy mã rồi gửi vào đây theo mẫu `).add(`${LINK_WORD} mã-của-bạn`, BOLD);
+      t.add(". Sau đó lấy mã xác minh số ở Bảo mật › Xác thực cấp 2 và gửi lại.");
+      break;
+    case "already_verified":
+      t.add(`Tài khoản ${proof.username} đã ở cấp 2 rồi, không cần xác minh lại.`);
+      break;
+    case "no_code":
+      t.add(`Chưa có mã nào đang chờ cho tài khoản ${proof.username}, hoặc mã đã hết hạn.`, BOLD);
+      t.line(`Vào ${host()} › Bảo mật › Xác thực cấp 2, bấm Lấy mã rồi gửi mã mới vào đây.`);
+      break;
+    case "too_many":
+      t.add("Gửi sai mã quá nhiều lần.", BOLD);
+      t.line("Vào web bấm Lấy mã khác rồi gửi mã mới vào đây.");
+      break;
+    case "wrong":
+      t.add(
+        proof.left > 0
+          ? `Mã không đúng, còn ${proof.left} lần thử. Gửi đúng mã đang hiện trên web.`
+          : "Mã không đúng và đã hết lượt thử. Vào web bấm Lấy mã khác.",
+      );
+      break;
+    case "checking":
+      t.add(`Shop đang kiểm tra số ${maskPhone(proof.phone)}.`, BOLD);
+      t.line("Bạn gửi lại mã này sau khoảng 10 giây nhé.");
+      break;
+    case "refused":
+      t.add(`${proof.reason.replace(/[.!]+$/, "")}.`, BOLD);
+      t.line(`Số bạn nhập: ${maskPhone(proof.phone)}. Vào web nhập đúng số điện thoại của Zalo đang nhắn rồi bấm Lấy mã khác.`);
+      break;
+    case "proved":
+      t.add(`✅ Đã xác minh số ${maskPhone(proof.phone)} cho tài khoản ${proof.username}.`, BOLD);
+      t.line("Quay lại web để gửi hồ sơ xác thực cấp 2; shop duyệt trong giờ hỗ trợ.");
+      break;
+  }
+  return reply(t);
 }
 
 // ---- the menu and the link ---------------------------------------------------------
