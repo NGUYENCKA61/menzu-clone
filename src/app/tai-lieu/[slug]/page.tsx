@@ -17,6 +17,7 @@ import {
   TOOL_DOCS_SECTIONS,
   ToolDocsShell,
 } from "@/components/sites/menzu-lol-f7ae197a/shared/ToolDocsShell";
+import { clampText } from "@/lib/accountSeo";
 import {
   DOCS_RULE_SENTENCE,
   docsUntilLabel,
@@ -30,10 +31,12 @@ import { DEFAULT_GUIDE, DEFAULT_SETUP_GUIDE } from "@/lib/productGuide";
 import { requirementsOrDefault } from "@/lib/productRequirements";
 import { docHref, productHref, toolDocsHref } from "@/lib/routes";
 import { breadcrumbJsonLd, JsonLd } from "@/lib/seo";
+import { toolSeoCopy } from "@/lib/seoCopy";
 import { getCurrentUser } from "@/lib/session";
 import { shareCard } from "@/lib/shareCard";
 import { getToolDocs, listToolDocsIndex, toolDocsAccess } from "@/lib/toolDocs";
 import { hasOwnToolDoc } from "@/lib/toolDocsContent";
+import { clampTitle, DOCS_TITLE_MAX, tidyToolName } from "@/lib/toolTitle";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -48,9 +51,21 @@ export async function generateMetadata({
   const tool = await getToolDocs(slug);
   if (!tool) return { title: "Không tìm thấy tài liệu" };
   const canonical = toolDocsHref(tool.slug);
+  // The name tidied, and cut at a word for the tab, as the shop page's title
+  // is (lib/toolTitle.ts); the description led by the tool's "Mô tả ngắn",
+  // or the written one from content/seo, when there is one: ten docs pages
+  // carried the same sentence around a 150-character name (the SEO review,
+  // round 2, T1 and T2).
+  const tidyName = tidyToolName(tool.name);
+  const summary = tool.summary || toolSeoCopy(tool.slug)?.summary || "";
   return {
-    title: `${tool.name} | Tài liệu`,
-    description: `Hướng dẫn cài đặt, thiết lập và sử dụng ${tool.name}.`,
+    title: `${clampTitle(tool.name, DOCS_TITLE_MAX)} | Tài liệu`,
+    description: clampText(
+      summary
+        ? `Hướng dẫn cài đặt và thiết lập ${tidyName}: ${summary}`
+        : `Hướng dẫn cài đặt, thiết lập và sử dụng ${tidyName}.`,
+      155,
+    ),
     alternates: { canonical },
     // A tool with no guide or requirements of its own prints the defaults,
     // the same page as every other such tool: kept out of the index (and of

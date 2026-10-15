@@ -24,6 +24,7 @@ import { isSalesLocked } from "@/lib/softwareStatus";
 import { parseFeatures } from "@/lib/productFeatures";
 import { legacyRefundCurrent } from "@/lib/refundRequests";
 import { productHref, toolDocsHref } from "@/lib/routes";
+import { toolSeoCopy } from "@/lib/seoCopy";
 import type { WarrantyStatus } from "@/lib/warrantyRequests";
 import { weaponKey } from "@/lib/weaponImages";
 import type { AccountDetail } from "@/components/sites/menzu-lol-f7ae197a/shared/AccountBuyPanel";
@@ -574,8 +575,10 @@ export async function getCategoryPage(
     categoryName: category.name,
     imageUrl: s.imageUrl,
     // The card's two lines are the shop's "Mô tả ngắn", the same sentence the
-    // tool's page prints under its title; none leaves them blank.
-    description: s.summary ?? "",
+    // tool's page prints under its title, or the written one from content/seo
+    // while the shop has not typed any (lib/seoCopy.ts); none leaves them
+    // blank.
+    description: s.summary || toolSeoCopy(s.slug)?.summary || "",
     status: s.softwareStatus,
     verifiedOnly: s.verifiedOnly,
     // Cheapest first by what they cost today: a sale can take a tier below
@@ -658,6 +661,8 @@ export async function resolveProduct(where: {
   slug?: string;
   code?: string;
 }): Promise<{
+  /** The row's id, for the tables that hang off a product (its doc articles). */
+  id: string;
   slug: string;
   code: string;
   categorySlug: string;
@@ -671,6 +676,7 @@ export async function resolveProduct(where: {
       ...(where.code ? { code: where.code } : {}),
     },
     select: {
+      id: true,
       slug: true,
       code: true,
       productType: true,
@@ -679,6 +685,7 @@ export async function resolveProduct(where: {
   });
   if (!p) return null;
   return {
+    id: p.id,
     slug: p.slug,
     code: p.code,
     categorySlug: p.category.slug,
@@ -2083,8 +2090,9 @@ export async function listSimilarSoftware(
     name: s.name ?? s.code,
     categoryName: s.category.name,
     imageUrl: s.imageUrl,
-    // The "Mô tả ngắn", as on the category grid's cards.
-    description: s.summary ?? "",
+    // The "Mô tả ngắn", as on the category grid's cards, with the same
+    // written stand-in while the shop has not typed one.
+    description: s.summary || toolSeoCopy(s.slug)?.summary || "",
     status: s.softwareStatus,
     verifiedOnly: s.verifiedOnly,
     packages: s.packages

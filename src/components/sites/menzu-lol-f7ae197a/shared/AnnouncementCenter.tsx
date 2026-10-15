@@ -489,10 +489,13 @@ export function AnnouncementModal({
             // square picture grew the box from 172px to 300px tall when it
             // arrived and pushed the sheet's text down under the reader (SEO
             // review, 13/10/2026). Now any file is cropped into the same box.
+            // The picture is decorative beside the title, so the link, not
+            // the picture, says what it opens (the SEO review, round 2, T16).
             <a
               href={item.imageUrl}
               target="_blank"
               rel="noopener noreferrer"
+              aria-label={`Xem ảnh: ${item.title}`}
               className="relative mt-4 block aspect-video max-h-[300px] w-full overflow-hidden rounded-xl border border-white/10 bg-neutral-950 transition-colors hover:border-white/25"
             >
               <Image

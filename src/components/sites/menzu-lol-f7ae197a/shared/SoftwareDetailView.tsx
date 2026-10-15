@@ -1,6 +1,7 @@
-import { docHtmlToPlainText, isHtmlBody } from "@/lib/docHtml";
+import { docHtmlIsEmpty, docHtmlToPlainText, isHtmlBody } from "@/lib/docHtml";
 import { breadcrumbJsonLd, JsonLd } from "@/lib/seo";
 import type { FreeToolPanel } from "@/lib/freeKeyRules";
+import type { RelatedGuides } from "@/lib/relatedGuides";
 import { categoryHref, productHref, toolDocsHref } from "@/lib/routes";
 
 import { Breadcrumb } from "./Breadcrumb";
@@ -33,6 +34,7 @@ export function SoftwareDetailView({
   setupGuideAccess,
   statusSubscribed,
   similar,
+  guides = null,
   free = null,
   viewer,
 }: {
@@ -46,6 +48,8 @@ export function SoftwareDetailView({
   statusSubscribed: boolean | null;
   /** Other tools for the row at the foot of the page; empty draws no row. */
   similar: SoftwareCardView[];
+  /** "Hướng dẫn liên quan" for the description section; null draws none. */
+  guides?: RelatedGuides | null;
   /**
    * Set for a free tool: the panel then hands out a key instead of selling
    * tiers (the owner, 12/10/2026). Decided by the route, which knows the
@@ -59,12 +63,19 @@ export function SoftwareDetailView({
   // (if the admin wrote one) in full, or the plain sentence behind the name.
   // The line under the title is the shop's own "Mô tả ngắn" (`summary`), and
   // is no longer lifted from the opening of this.
-  const richDescription = isHtmlBody(software.description)
-    ? software.description
-    : null;
+  // An empty editor body ("<p></p>", which 24 tools carry) is no write-up:
+  // it used to print as a blank rich section, and the opening line read the
+  // name alone. Now it falls through to the summary (the SEO review, round
+  // 2, T5).
+  const richDescription =
+    isHtmlBody(software.description) && !docHtmlIsEmpty(software.description)
+      ? software.description
+      : null;
   const plainDescription = richDescription
     ? docHtmlToPlainText(richDescription, 220)
-    : software.description;
+    : isHtmlBody(software.description)
+      ? ""
+      : software.description;
 
   return (
     <>
@@ -124,8 +135,9 @@ export function SoftwareDetailView({
 
             <SoftwareDescription
               name={software.name}
-              description={plainDescription}
+              description={plainDescription || software.summary}
               richHtml={richDescription}
+              guides={guides}
               features={software.features}
               requirements={software.requirements}
               featuresNote={software.featuresNote}

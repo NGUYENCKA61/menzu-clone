@@ -8,7 +8,9 @@ import {
   requirementsOrDefault,
   type ProductRequirement,
 } from "@/lib/productRequirements";
+import type { RelatedGuides as RelatedGuidesData } from "@/lib/relatedGuides";
 
+import { RelatedGuides } from "./RelatedGuides";
 import { SectionHeading } from "./SectionHeading";
 
 /**
@@ -53,6 +55,9 @@ export interface SoftwareDescriptionProps {
   loginHref: string;
   /** The tool's full documentation (/tai-lieu/<slug>). */
   docsHref: string;
+  /** "Hướng dẫn liên quan", between the setup guide and the warranty note;
+   *  absent or null draws none (lib/relatedGuides.ts). */
+  guides?: RelatedGuidesData | null;
 }
 
 const SUB_HEADING =
@@ -97,6 +102,7 @@ export function SoftwareDescription({
   refundRate,
   loginHref,
   docsHref,
+  guides = null,
 }: SoftwareDescriptionProps) {
   /**
    * The product's own highlights, or the shop's default list where it has none.
@@ -276,6 +282,14 @@ export function SoftwareDescription({
   );
 
   /**
+   * The guides a buyer of this tool reads next: its own docs, the shelf's
+   * articles and the setup pages. Between the setup guide and the warranty
+   * note in both branches, headed as the h3 siblings around it are, so the
+   * money page finally links the wiki (the SEO review, round 2, O12).
+   */
+  const guidesBlock = <RelatedGuides guides={guides} heading="sub" />;
+
+  /**
    * The warranty note that closes the section.
    *
    * Drawn in both branches. It used to sit only in the default one, so writing
@@ -339,6 +353,8 @@ export function SoftwareDescription({
 
         {setupGuideBlock}
 
+        {guidesBlock}
+
         {warrantyBlock}
       </section>
     );
@@ -374,6 +390,8 @@ export function SoftwareDescription({
       {guideBlock}
 
       {setupGuideBlock}
+
+      {guidesBlock}
 
       {warrantyBlock}
     </section>

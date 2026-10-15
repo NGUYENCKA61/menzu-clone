@@ -315,14 +315,48 @@ export function glossaryJsonLd(terms: readonly GlossaryTerm[]) {
  * it did for a month while the page above it said hack game.
  */
 export function siteDescription(brandName: string): string {
-  return `${brandName} là shop hack game và tài khoản game uy tín. Hack Valorant, CS2, PUBG, Liên Quân: key bản quyền giao tự động, cập nhật liên tục, hỗ trợ 24/7.`;
+  // The shelves that sell today, by the words buyers search ("hack cf" more
+  // than "hack Đột Kích"), and the two promises the shop keeps: it named PUBG
+  // and Liên Quân, which it does not stock, and "hỗ trợ 24/7", which it does
+  // not offer (the SEO review, round 2, T9). Measured against a 160-character
+  // snippet with the 12-letter brand; the hours did not fit beside the games.
+  return `${brandName} thuê hack game PC và acc game: CS2, Valorant, Đột Kích CF, Delta Force, Truy Kích, Blood Strike, tool LoL. Key giao tự động, bảo hành đổi máy.`;
+}
+
+/** A host without its "www.", or null for anything that is not an address. */
+function hostOf(url: string): string | null {
+  try {
+    return new URL(url).hostname.toLowerCase().replace(/^www\./, "");
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * The hosts that are this shop itself: the domain the app runs on, the old
+ * PHP shop's domain that still holds the rankings, and whatever SITE_URL
+ * names. A link to one of these is never "elsewhere" (profileLinks) and
+ * never "another site" (the write-ups' nofollow, lib/docHtml.ts).
+ */
+const SHOP_HOSTS = new Set(
+  ["thichthihack.com", "thichthihackk.com", hostOf(SITE_URL)].filter(
+    (host): host is string => host !== null,
+  ),
+);
+
+/** Whether an absolute (or protocol-relative) address is the shop's own. */
+export function isShopUrl(url: string): boolean {
+  const host = hostOf(url.startsWith("//") ? `https:${url}` : url);
+  return host !== null && SHOP_HOSTS.has(host);
 }
 
 /**
  * The shop's own profile pages, for `sameAs`: the addresses that are the shop
  * itself on another site. A group, an invite or a chat link is a place to talk
  * rather than the shop's profile, so those are left out, and so is anything
- * that is not a full http(s) address (a bare handle or a phone number).
+ * that is not a full http(s) address (a bare handle or a phone number). The
+ * shop's own domains are left out too: `sameAs` is for elsewhere, and the old
+ * PHP shop's address must never be named as this one's profile (T9).
  */
 export function profileLinks(candidates: (string | null | undefined)[]): string[] {
   const NOT_A_PROFILE = [
@@ -335,6 +369,7 @@ export function profileLinks(candidates: (string | null | undefined)[]): string[
     const url = raw?.trim() ?? "";
     if (!/^https?:\/\/[^\s/]+\.[^\s]+$/i.test(url)) continue;
     if (NOT_A_PROFILE.some((re) => re.test(url))) continue;
+    if (isShopUrl(url)) continue;
     if (!out.includes(url)) out.push(url);
   }
   return out;

@@ -9,11 +9,15 @@
 export interface PcSetupPage {
   slug: string;
   title: string;
-  /** The checklist line on the landing page. */
+  /** The checklist line on the landing page, and the page's meta
+   *  description: one whole sentence, 70 to 150 characters, that says what
+   *  the page does and why (the SEO review, round 2, T12). */
   short: string;
   intro: string;
   steps: string[];
   notes?: string[];
+  /** Pages on the shop the notes point at, drawn under them. */
+  links?: { label: string; href: string }[];
   /** How to see the step took. */
   check?: string;
 }
@@ -22,7 +26,8 @@ export const PC_SETUP_PAGES: readonly PcSetupPage[] = [
   {
     slug: "tat-windows-defender",
     title: "Tắt Windows Defender",
-    short: "Tắt bảo vệ thời gian thực và thêm thư mục tool vào loại trừ",
+    short:
+      "Tắt bảo vệ thời gian thực của Windows Defender và thêm thư mục tool vào loại trừ để loader không bị xoá khi tải và chạy.",
     intro:
       "Windows Defender coi loader của tool là phần mềm lạ và xoá hoặc chặn ngay khi giải nén. Tắt bảo vệ thời gian thực trước khi tải, rồi thêm thư mục chứa tool vào danh sách loại trừ để Defender không đụng tới sau này.",
     steps: [
@@ -43,7 +48,8 @@ export const PC_SETUP_PAGES: readonly PcSetupPage[] = [
   {
     slug: "tat-secure-boot",
     title: "Tắt Secure Boot",
-    short: "Tắt trong BIOS/UEFI khi tool yêu cầu",
+    short:
+      "Tắt Secure Boot trong BIOS/UEFI theo từng hãng mainboard khi hướng dẫn của tool yêu cầu, kèm cách kiểm tra bằng msinfo32.",
     intro:
       "Secure Boot chỉ cho Windows nạp driver có chữ ký Microsoft. Nhiều tool dùng driver riêng nên cần tắt nó trong BIOS/UEFI. Chỉ làm khi hướng dẫn của tool nói rõ, vì có game (Valorant với Vanguard) lại bắt buộc bật.",
     steps: [
@@ -61,7 +67,8 @@ export const PC_SETUP_PAGES: readonly PcSetupPage[] = [
   {
     slug: "tat-core-isolation",
     title: "Tắt Core Isolation (Memory integrity)",
-    short: "Tắt Memory integrity trong Windows Security rồi khởi động lại",
+    short:
+      "Tắt Memory integrity trong Windows Security, khởi động lại và kiểm tra Core Isolation đã tắt trước khi chạy tool.",
     intro:
       "Core Isolation (Memory integrity) chặn driver không có chữ ký nạp vào nhân Windows, nên loader của tool báo lỗi hoặc không chạy. Tắt nó trong Windows Security và khởi động lại.",
     steps: [
@@ -80,7 +87,8 @@ export const PC_SETUP_PAGES: readonly PcSetupPage[] = [
   {
     slug: "tat-tpm",
     title: "Tắt TPM",
-    short: "Chỉ khi hướng dẫn của tool yêu cầu, tắt fTPM/PTT trong BIOS",
+    short:
+      "Chỉ khi hướng dẫn của tool yêu cầu: tắt fTPM hoặc PTT trong BIOS, cách tìm mục này trên mainboard Intel và AMD.",
     intro:
       "Một số tool và spoofer yêu cầu tắt TPM (chip bảo mật) để che được định danh máy. Chỉ làm khi hướng dẫn của tool ghi rõ; đa số tool không cần.",
     steps: [
@@ -100,7 +108,7 @@ export const PC_SETUP_PAGES: readonly PcSetupPage[] = [
     slug: "tat-anti-cheat-khac",
     title: "Tắt các anti-cheat khác",
     short:
-      "Đóng FACEIT, Vanguard, EAC, BattlEye của game khác trước khi chạy tool",
+      "Tắt Vanguard, FACEIT, EasyAntiCheat, BattlEye của game khác đang chạy nền trước khi mở loader, vì chúng chặn hoặc ghi lại driver của tool.",
     intro:
       "Anti-cheat của game khác vẫn chạy nền sau khi thoát game, và chúng chặn hoặc ghi lại driver của tool. Trước khi chạy tool, tắt hết những thứ này; tool nào yêu cầu gỡ hẳn thì hướng dẫn của tool sẽ nói.",
     steps: [
@@ -120,7 +128,7 @@ export const PC_SETUP_PAGES: readonly PcSetupPage[] = [
     slug: "cai-runtime",
     title: "Cài runtime cần thiết",
     short:
-      "Visual C++ Redistributable, .NET và DirectX bản chính thức của Microsoft",
+      "Cài Visual C++ Redistributable 2015 đến 2022, .NET Desktop Runtime và DirectX để loader không báo thiếu file khi mở.",
     intro:
       'Lỗi "VCRUNTIME140.dll", "MSVCP140.dll", ".NET runtime not found" hay "d3dx9_43.dll" khi mở tool đều do thiếu runtime. Cài đủ ba bộ dưới đây, từ trang chính thức của Microsoft.',
     steps: [
@@ -139,7 +147,8 @@ export const PC_SETUP_PAGES: readonly PcSetupPage[] = [
   {
     slug: "reset-hwid",
     title: "Reset HWID",
-    short: "Khi nào cần đổi định danh máy và làm thế nào",
+    short:
+      "Phân biệt key gắn máy với máy bị khoá HWID, cách xin reset key qua yêu cầu bảo hành và khi nào mới cần spoofer.",
     intro:
       'HWID là định danh phần cứng của máy (ổ cứng, mainboard, card mạng…). Khi một tài khoản bị khoá, anti-cheat thường khoá luôn HWID, và tài khoản mới trên cùng máy cũng bị khoá theo. Lúc đó cần spoofer để đổi HWID, hoặc tool báo "HWID mismatch" khi bạn đổi máy.',
     steps: [
@@ -149,8 +158,15 @@ export const PC_SETUP_PAGES: readonly PcSetupPage[] = [
       "Vào game bằng tài khoản mới; không đăng nhập lại tài khoản đã bị khoá trên máy đã spoof.",
     ],
     notes: [
-      "Shop có bán spoofer theo từng game; xem mục danh mục trên trang chủ hoặc hỏi hỗ trợ để chọn đúng bản.",
+      "Shop có bán spoofer theo từng game: Valorant và Delta Force ở hai danh mục bên dưới; chưa chắc nên chọn bản nào thì hỏi hỗ trợ.",
       "Đổi HWID không gỡ khoá cho tài khoản đã bị khoá; nó chỉ cho tài khoản mới chơi được trên máy đó.",
+    ],
+    // The shelves the note means, as links: the note used to say "xem mục
+    // danh mục trên trang chủ" and linked nothing (the SEO review, round 2,
+    // O12).
+    links: [
+      { label: "Spoofer Valorant", href: "/hack-valorant-moi" },
+      { label: "Spoofer Delta Force", href: "/hack-delta-force-moi" },
     ],
     check:
       "Spoofer báo thành công và serial ổ cứng trong Command Prompt (gõ: wmic diskdrive get serialnumber) đã khác lúc trước.",

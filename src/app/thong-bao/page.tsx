@@ -379,10 +379,13 @@ export default async function AnnouncementsPage({
                   page: capped at 420 wide and 280 tall, the whole picture one
                   click away. Full-width it dwarfed the notice it illustrated. */}
               {item.imageUrl ? (
+                // The picture is decorative under the title, so the link
+                // says what it opens (the SEO review, round 2, T16).
                 <a
                   href={item.imageUrl}
                   target="_blank"
                   rel="noopener noreferrer"
+                  aria-label={`Xem ảnh: ${item.title}`}
                   className="mt-3 block w-full max-w-[420px] overflow-hidden rounded-xl border border-white/10 bg-neutral-950 transition-colors hover:border-white/25"
                 >
                   <Image
