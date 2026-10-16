@@ -331,11 +331,14 @@ export function OrdersList({ orders }: { orders: OrderCardView[] }) {
                                   (30/09/2026: "bỏ cái đánh giá ngoài card đi"). */}
                               {order.chip || order.badge ? (
                                 <div className="mt-0.5 flex flex-col items-start gap-1.5">
+                                  {/* The tier as a line like the code's, not a
+                                      chip (the owner, 16/10/2026: "nhãn 1 ngày đổi
+                                      thành chữ Gói:"). */}
                                   {order.chip ? (
-                                    <span className="rounded-md border border-white/15 bg-white/10 px-2 py-1 text-[9px] font-black uppercase tracking-widest text-neutral-300 sm:text-[10px]">
-                                      {order.chip}
+                                    <p className="text-[11px] tabular-nums text-neutral-400 sm:text-xs">
+                                      <span className="text-neutral-500">Gói:</span> {order.chip}
                                       {order.quantity > 1 ? ` ×${order.quantity}` : ""}
-                                    </span>
+                                    </p>
                                   ) : null}
                                   {order.badge ? (
                                     <span
