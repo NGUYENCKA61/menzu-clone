@@ -190,7 +190,7 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
             <div className="absolute inset-0 bg-gradient-to-t from-[#111111] via-[#111111]/50 to-transparent" />
           </div>
 
-          <div className="relative flex flex-col gap-4 p-5 pb-7 pt-14 sm:gap-6 sm:p-7 sm:pb-10">
+          <div className="relative flex flex-col gap-4 p-5 pt-14 sm:gap-6 sm:p-7">
             {/* Who — avatar, name, role, when they joined. */}
             <div className="flex items-center gap-4 sm:gap-5">
               <AvatarUploader avatarUrl={user.avatarUrl} username={user.username} />
