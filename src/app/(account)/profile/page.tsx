@@ -346,13 +346,8 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                 its own below it, so the page is one block instead of two.
                 Four across from xl, the order count giving width to the
                 commission cell: in equal quarters "Rút tiền" dropped under
-                any commission from 10.000đ and the strip grew 117→161px.
-                TRIAL 16/10/2026 ("sửa lại màu cụm này thử"): the strip is a
-                step lighter than the card (white 4% over #111) instead of
-                black 20% below it, so it reads as a plate of its own rather
-                than a heavy foot; the words and the figures keep their
-                colours. */}
-            <div className="-mx-5 -mb-5 grid grid-cols-2 border-t border-white/10 bg-white/[0.04] sm:-mx-7 sm:-mb-7 xl:grid-cols-[1fr_1fr_0.7fr_1.3fr] xl:divide-x xl:divide-white/[0.06]">
+                any commission from 10.000đ and the strip grew 117→161px. */}
+            <div className="-mx-5 -mb-5 grid grid-cols-2 border-t border-white/10 bg-black/20 sm:-mx-7 sm:-mb-7 xl:grid-cols-[1fr_1fr_0.7fr_1.3fr] xl:divide-x xl:divide-white/[0.06]">
               {[
                 { icon: Wallet, label: "Số dư khả dụng", value: formatVnd(user.balance), unit: "đ", tone: "text-emerald-400" },
                 { icon: Receipt, label: "Tổng chi tiêu", value: formatVnd(spent), unit: "đ", tone: "text-white" },
