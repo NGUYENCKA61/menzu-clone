@@ -266,9 +266,10 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                   </p>
                 </div>
 
-                {/* What the rank is worth today, what the points are, and what
-                    the next rank would pay — the last one is the only place on
-                    the site that answers "why keep topping up". */}
+                {/* What the rank is worth today, what the points are, and
+                    whether the account is verified (the owner, 16/10/2026:
+                    "Hạng hiện tại Elite đổi thành xác minh cấp 2"); the next
+                    rank's worth lives in the sentence under the bar. */}
                 <div className="mt-auto grid grid-cols-3 gap-2 border-t border-white/[0.06] pt-1.5 sm:gap-3">
                   {[
                     {
@@ -281,17 +282,11 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                       value: `${user.points.toLocaleString("vi-VN")} điểm`,
                       tone: "text-white",
                     },
-                    nextRule && progress.next
-                      ? {
-                          label: `Lên ${nextRule.label} được`,
-                          value: `Giảm ${formatTierPercent(nextRule.discountPercent)}%`,
-                          tone: "text-white",
-                        }
-                      : {
-                          label: "Hạng hiện tại",
-                          value: TIER_RULES[memberTier].label,
-                          tone: "text-white",
-                        },
+                    {
+                      label: "Xác minh cấp 2",
+                      value: user.verifiedAt ? "Đã xác minh" : "Chưa xác minh",
+                      tone: user.verifiedAt ? "text-emerald-400" : "text-neutral-300",
+                    },
                   ].map(({ label, value, tone }, index) => (
                     <div key={label} className="flex min-w-0 flex-col gap-0.5">
                       {/* 10px like every other label on the card, and allowed
