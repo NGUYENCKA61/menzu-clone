@@ -129,12 +129,8 @@ export function SoftwareCard({
     ? Math.min(...software.packages.map((p) => p.price))
     : null;
   const freeHref = detailHref;
-  // White with black type as a TRIAL, like the ribbon (the owner,
-  // 16/10/2026: "Nút tải ngay đổi thành màu trắng thử"); the hairline keeps
-  // it visible on the light dresses' white cards. The red was
-  // bg-[var(--menzu-accent)] text-white hover:bg-[var(--menzu-accent-dark)].
   const FREE_BUTTON =
-    "flex h-[42px] items-center justify-center gap-2 rounded-[9px] border border-black/10 bg-white px-5 text-[11px] font-extrabold uppercase tracking-wide text-black transition-colors hover:bg-neutral-200";
+    "flex h-[42px] items-center justify-center gap-2 rounded-[9px] bg-[var(--menzu-accent)] px-5 text-[11px] font-extrabold uppercase tracking-wide text-white transition-colors hover:bg-[var(--menzu-accent-dark)]";
 
   // One dropdown row. Same 11px/Inter as the trigger and the buttons, so the
   // open list matches the card exactly (the whole reason for a custom picker
@@ -195,15 +191,12 @@ export function SoftwareCard({
           )}
 
           {free ? (
-            // A ribbon across the picture's corner in place of the green pill
-            // (the owner, 13/10/2026: "thay vì ghi miễn phí có cái tag chéo
-            // góc bìa card đỏ"): a strip turned 45° and clipped to a square at
-            // the corner, the word running along the diagonal. White with
-            // black type as a TRIAL (the owner, 16/10/2026: "ruy băng đỏ chéo
-            // góc thành màu trắng chữ đen thử"); the red was
-            // bg-[var(--menzu-accent)] text-white.
+            // A red ribbon across the picture's corner in place of the green
+            // pill (the owner, 13/10/2026: "thay vì ghi miễn phí có cái tag
+            // chéo góc bìa card đỏ"): a strip turned 45° and clipped to a
+            // square at the corner, the word running along the diagonal.
             <span className="pointer-events-none absolute left-0 top-0 z-20 block h-[92px] w-[92px] overflow-hidden rounded-tl-[14px]">
-              <span className="absolute left-[-40px] top-[22px] block w-[150px] -rotate-45 bg-white py-[5px] text-center text-[10px] font-black uppercase leading-none tracking-[0.2em] text-black shadow-[0_2px_10px_rgba(0,0,0,0.5)]">
+              <span className="absolute left-[-40px] top-[22px] block w-[150px] -rotate-45 bg-[var(--menzu-accent)] py-[5px] text-center text-[10px] font-black uppercase leading-none tracking-[0.2em] text-white shadow-[0_2px_10px_rgba(0,0,0,0.5)]">
                 Miễn phí
               </span>
             </span>
