@@ -25,7 +25,7 @@ import { isSalesLocked, salesLockReason } from "@/lib/softwareStatus";
 
 import { BadgeIcon } from "./BadgeIcon";
 import { CaseText } from "./CaseText";
-import { type SoftwareDetail, STATUS_STYLE } from "./SoftwareBuyPanel";
+import { type SoftwareDetail } from "./SoftwareBuyPanel";
 import { StockLine } from "./StockLine";
 
 type Phase =
@@ -121,10 +121,9 @@ export function FreeKeyPanel({
   const timer = useRef<number | null>(null);
 
   const tier = freePackageOf(software.packages);
-  const status =
-    software.showStatus && software.softwareStatus
-      ? STATUS_STYLE[software.softwareStatus]
-      : null;
+  // The status still locks the key when the tool is detected or updating,
+  // but a free tool carries no status label (the owner, 16/10/2026: "Hack
+  // miễn phí nên bỏ cái nhãn chưa phát hiện").
   const locked = isSalesLocked(software.softwareStatus);
 
   // The wait on the shortlink: ask every few seconds whether the ticket was
@@ -238,16 +237,6 @@ export function FreeKeyPanel({
             Miễn phí
           </span>
         </span>
-        {status ? (
-          <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-3 py-1.5">
-            <span className={`h-1.5 w-1.5 rounded-full ${status.dot}`} />
-            <span
-              className={`text-[10px] font-black uppercase tracking-widest ${status.text}`}
-            >
-              {status.label}
-            </span>
-          </span>
-        ) : null}
         {software.badges.map((badge) => (
           <span
             key={badge.label}

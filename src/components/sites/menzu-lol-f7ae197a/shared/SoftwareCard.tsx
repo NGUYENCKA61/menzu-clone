@@ -107,17 +107,10 @@ export function SoftwareCard({
     };
   }, [open]);
 
-  const status = software.status ? STATUS[software.status] : null;
-  const chosen = software.packages.find((p) => p.id === packageId) ?? null;
-  const hasPackages = software.packages.length > 0;
-  const detailHref = software.href;
-  const minPrice = software.packages.length
-    ? Math.min(...software.packages.map((p) => p.price))
-    : null;
   /**
    * A free tool (the shop's 1đ placeholder tier) gets its own card (the
    * owner, 07/10/2026: "thiết kế card cho phần mềm thuộc dạng miễn phí" →
-   * "b"): a red ribbon across the picture's corner (13/10/2026) and one
+   * "b"): a ribbon across the picture's corner (13/10/2026) and one
    * "Tải ngay" (13/10/2026, was "Nhận miễn phí") in
    * the shop's red (a green one glared: "xanh lá chói quá… đỏ hoặc tím")
    * that leads to the tool's own page, where the key is handed out behind
@@ -126,6 +119,15 @@ export function SoftwareCard({
    * "Thuê ngay" that charged 1đ.
    */
   const free = isFreeTool(software.packages);
+  // No status label on a free tool (the owner, 16/10/2026: "Hack miễn phí
+  // nên bỏ cái nhãn chưa phát hiện"): it is a try-out, not a sold build.
+  const status = software.status && !free ? STATUS[software.status] : null;
+  const chosen = software.packages.find((p) => p.id === packageId) ?? null;
+  const hasPackages = software.packages.length > 0;
+  const detailHref = software.href;
+  const minPrice = software.packages.length
+    ? Math.min(...software.packages.map((p) => p.price))
+    : null;
   const freeHref = detailHref;
   const FREE_BUTTON =
     "flex h-[42px] items-center justify-center gap-2 rounded-[9px] bg-[var(--menzu-accent)] px-5 text-[11px] font-extrabold uppercase tracking-wide text-white transition-colors hover:bg-[var(--menzu-accent-dark)]";
