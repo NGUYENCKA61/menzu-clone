@@ -17,18 +17,19 @@ import { ScopeSearchField } from "./ScopeSearchField";
 /*
  * This panel's chips (the owner, 16/10/2026, with pictures: "sửa thanh lọc
  * lại như này", "mấy nút lọc đổi màu này đi", "như này"): the shared small
- * tab pill's 32px height and padding, but a full round, the word in
+ * tab pill's 32px height and padding, but a 12px corner (a full round was
+ * "tròn quá"), the word in
  * sentence case at 12px bold, and the red as a tint when picked (CHIP_ON)
  * with a white edge under the pointer when not (CHIP_OFF). The /thong-bao
  * tabs and the home filter keep the shared pill (./pillTab). The either-or
- * groups keep their well, round too, its segments the same chip without a
+ * groups keep their well, a 16px corner, its segments the same chip without a
  * fill of their own; 3px of padding fits a 32px segment exactly inside the
  * 40px well. The pill rows carry 4px above and below so they stand as tall
  * as a well, and each group's caption still lines up with its neighbours'
  * on the lg row.
  */
 const CHIP_SM =
-  "inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full border px-3 text-[12px] font-bold transition-colors";
+  "inline-flex h-8 shrink-0 items-center gap-1.5 rounded-xl border px-3 text-[12px] font-bold transition-colors";
 const CHIP_OFF =
   "border-white/10 bg-white/5 text-neutral-300 hover:border-white/50 hover:text-white";
 // The capture's picked chip: fill #271619 and edge #712628 on the #121216
@@ -39,7 +40,7 @@ const PILL = `press ${CHIP_SM} ${CHIP_OFF}`;
 const PILL_ACTIVE = `press ${CHIP_SM} ${CHIP_ON}`;
 const PILL_ROW = "flex flex-wrap gap-2 py-1";
 const SEGMENTS =
-  "inline-flex h-10 items-center gap-1 rounded-full border border-white/10 bg-white/5 p-[3px]";
+  "inline-flex h-10 items-center gap-1 rounded-2xl border border-white/10 bg-white/5 p-[3px]";
 const SEGMENT = `press ${CHIP_SM} border-transparent text-neutral-300 hover:bg-white/10 hover:text-white`;
 const SEGMENT_ACTIVE = `press ${CHIP_SM} ${CHIP_ON}`;
 
@@ -181,7 +182,9 @@ export function SoftwareFilterPanel({
 
         <button
           type="submit"
-          className="hidden md:flex bg-[var(--brand)] hover:bg-[var(--brand-dark)] active:scale-95 text-white font-black rounded-3xl px-6 transition items-center gap-2 shrink-0"
+          // A 12px corner like the chips below (the owner, 16/10/2026: "nút tìm
+          // kiếm cũng z", after "tròn quá" about the chips); was rounded-3xl.
+          className="hidden md:flex bg-[var(--brand)] hover:bg-[var(--brand-dark)] active:scale-95 text-white font-black rounded-xl px-6 transition items-center gap-2 shrink-0"
         >
           {isPending ? (
             <Loader2 size={16} aria-hidden className="animate-spin motion-reduce:animate-none" />
