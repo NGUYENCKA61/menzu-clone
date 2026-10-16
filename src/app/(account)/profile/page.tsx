@@ -362,12 +362,15 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
 
             {/* THE ACCOUNT IN NUMBERS — inside the card rather than a strip of
                 its own below it, so the page is one block instead of two.
-                Four across from xl, the order count giving width to the
-                commission cell: in equal quarters "Rút tiền" dropped under
-                any commission from 10.000đ and the strip grew 117→161px. */}
-            <div className="-mx-5 -mb-5 grid grid-cols-2 border-t border-white/10 bg-[#111111]/70 backdrop-blur-sm sm:-mx-7 sm:-mb-7 xl:grid-cols-[1fr_1fr_0.7fr_1.3fr] xl:divide-x xl:divide-white/[0.06]">
+                Three across from xl, the order count giving width to the
+                commission cell: in equal columns "Rút tiền" dropped under
+                any commission from 10.000đ and the strip grew 117→161px.
+                The balance cell came off as a TRIAL (the owner, 16/10/2026:
+                "bỏ bớt phần số dư khả dụng thử"); the figure still sits in
+                the header's account chip. It was
+                { icon: Wallet, label: "Số dư khả dụng", value: formatVnd(user.balance), unit: "đ", tone: "text-emerald-400" }. */}
+            <div className="-mx-5 -mb-5 grid grid-cols-2 border-t border-white/10 bg-[#111111]/70 backdrop-blur-sm sm:-mx-7 sm:-mb-7 xl:grid-cols-[1fr_0.7fr_1.3fr] xl:divide-x xl:divide-white/[0.06]">
               {[
-                { icon: Wallet, label: "Số dư khả dụng", value: formatVnd(user.balance), unit: "đ", tone: "text-emerald-400" },
                 { icon: Receipt, label: "Tổng chi tiêu", value: formatVnd(spent), unit: "đ", tone: "text-white" },
                 { icon: ShoppingBag, label: "Đơn hàng", value: String(paidOrders), unit: "", tone: "text-white" },
               ].map(({ icon: Icon, label, value, unit, tone }) => (
@@ -390,7 +393,9 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                   </span>
                 </div>
               ))}
-              <div className="flex flex-col gap-2 px-5 py-4 sm:gap-3">
+              {/* Three cells in a two-column strip: this one takes the whole
+                  second row below xl. */}
+              <div className="col-span-2 flex flex-col gap-2 border-t border-white/[0.06] px-5 py-4 sm:gap-3 xl:col-span-1 xl:border-t-0">
                 <span className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-neutral-400">
                   <HandCoins size={13} className="shrink-0 text-neutral-300" />
                   Hoa hồng khả dụng
