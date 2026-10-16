@@ -4,8 +4,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-import { SPIN_LOCKED } from "@/lib/spin";
-
 import { LinkPending } from "./LinkPending";
 import {
   ArrowLeftRight,
@@ -37,19 +35,18 @@ export interface SidebarUser {
 // Grouped the way the captured menzu sidebar rules its rows: the everyday
 // screens together, Bảo mật alone under a hairline. The partner pair is this
 // shop's own addition, kept below Bảo mật on the user's instruction.
-// The wheel's row is left out while the wheel is closed (SPIN_LOCKED): it
-// opened onto a "tạm ngưng" notice, a door to a shut room (the owner,
-// 13/10/2026, UI consistency review). The profile's quick actions already
-// drop it the same way; setting the flag back to false brings both back.
+// The wheel's row stays while the wheel is closed: it opens onto the
+// "tạm ngưng" notice. It was left out on 13/10/2026 (UI consistency review)
+// and came back with the header's ĐỔI THƯỞNG link on the owner's word
+// (16/10/2026: "hiện cái đổi thưởng lại đi"), as the overview's Đổi thưởng
+// door had that morning.
 const NAV_GROUPS: AccountNavItem[][] = [
   [
     { label: "Tổng quan", href: "/profile", icon: LayoutDashboard },
     { label: "Nạp tiền", href: "/wallet", icon: Wallet },
     { label: "Lịch sử giao dịch", href: "/transactions", icon: ArrowLeftRight },
     { label: "Lịch sử mua", href: "/orders", icon: ShoppingBag },
-    ...(SPIN_LOCKED
-      ? []
-      : [{ label: "Vòng quay đổi thưởng", href: "/vong-quay", icon: Gift }]),
+    { label: "Vòng quay đổi thưởng", href: "/vong-quay", icon: Gift },
   ],
   [{ label: "Bảo mật", href: "/security", icon: ShieldCheck }],
   [

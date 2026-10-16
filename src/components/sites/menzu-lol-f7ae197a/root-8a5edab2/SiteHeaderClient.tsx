@@ -25,7 +25,6 @@ import { CaseText } from "../shared/CaseText";
 import { STATUS_TAB_HREF } from "@/lib/softwareStatus";
 // A bare constant in a module with no imports of its own, so it is safe in
 // this client bundle (the wheel's client components read it already).
-import { SPIN_LOCKED } from "@/lib/spin";
 import { CartButton } from "./CartButton";
 import { HeaderSearch } from "./HeaderSearch"
 import { SiteLink } from "../shared/SiteLink";
@@ -399,14 +398,14 @@ export function SiteHeaderClient({
 
             {/* Shown to everyone, signed in or not: a visitor who does not know
                 the wheel exists never signs in for it. /vong-quay itself asks
-                for the login and comes back here after. Gone while the wheel
-                is closed (SPIN_LOCKED), since the page behind it only says
-                "tạm ngưng" (the owner, 13/10/2026, UI consistency review). */}
-            {SPIN_LOCKED ? null : (
-              <Link href="/vong-quay" className={NAV_LINK_CLASS}>
-                ĐỔI THƯỞNG
-              </Link>
-            )}
+                for the login and comes back here after. Shown while the wheel
+                is closed too: the page behind it carries the "tạm ngưng"
+                notice (hidden 13/10/2026 in the UI consistency review; back on
+                the owner's word, 16/10/2026: "hiện cái đổi thưởng lại đi", as
+                the overview's Đổi thưởng door came back the same morning). */}
+            <Link href="/vong-quay" className={NAV_LINK_CLASS}>
+              ĐỔI THƯỞNG
+            </Link>
           </div>
         </div>
 
