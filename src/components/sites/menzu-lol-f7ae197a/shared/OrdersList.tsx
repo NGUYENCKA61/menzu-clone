@@ -289,9 +289,15 @@ export function OrdersList({ orders }: { orders: OrderCardView[] }) {
                             </div>
 
                             <div className="flex min-w-0 flex-1 flex-col gap-1.5">
-                              {/* 16px on up to two lines, where menzu's 20px on
-                                  one cut the long names short. */}
-                              <h3 className="line-clamp-2 text-sm font-black leading-snug text-white transition-colors group-hover:text-[var(--menzu-accent)] sm:text-base">
+                              {/* One line, cut with an ellipsis: two lines of the
+                                  shelf's capitals per card made the list a wall
+                                  (the owner, 16/10/2026: "có nên đổi qua dấu ...",
+                                  "... được rồi"). The whole name sits in the tooltip
+                                  and on the order's own page. */}
+                              <h3
+                                title={order.title}
+                                className="truncate text-sm font-black leading-snug text-white transition-colors group-hover:text-[var(--menzu-accent)] sm:text-base"
+                              >
                                 {order.title}
                               </h3>
                               {/* The tier (a tool) or rank (an account) as the
