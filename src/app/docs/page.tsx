@@ -17,7 +17,7 @@ import { shareCard } from "@/lib/shareCard";
 // review, 13/10/2026).
 export async function generateMetadata(): Promise<Metadata> {
   return {
-    title: "Wiki & Hướng Dẫn",
+    title: "Wiki & hướng dẫn",
     description:
       "Tổng hợp hướng dẫn mua acc, chính sách bảo hành đổi trả và các câu hỏi thường gặp khi giao dịch tại THICHTHIHACK.",
     alternates: { canonical: "/docs" },
@@ -56,7 +56,7 @@ export default async function DocsPage() {
     // one provider holds the query for both.
     <DocsSearchProvider>
       <SimplePage
-        title="Wiki & Hướng Dẫn"
+        title="Wiki & hướng dẫn"
         crumb="Wiki & Hướng dẫn"
         icon={BookOpen}
         action={<DocsSearchBox />}

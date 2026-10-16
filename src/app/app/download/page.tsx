@@ -25,7 +25,7 @@ const APP_ICON = `${IMAGES}/app/iconapp.webp`;
 const SCREENSHOTS = [11, 22, 33, 44, 55, 66].map((n) => `${IMAGES}/app/wlist${n}.webp`);
 
 export const metadata: Metadata = {
-  title: "Tải App THICHTHIHACK",
+  title: "Tải app THICHTHIHACK",
   description:
     "Tải ứng dụng THICHTHIHACK cho Android và iOS, theo dõi Daily Shop, nhận thông báo đẩy khi skin yêu thích xuất hiện, quản lý kho đồ và số dư VP/RP.",
   alternates: { canonical: "/app/download" },
@@ -42,7 +42,7 @@ const FEATURES = [
   },
   {
     icon: Package,
-    title: "Quản Lý Kho Đồ Tự Động",
+    title: "Quản lý kho đồ tự động",
     body: "Quét và thống kê chi tiết kho đồ skin súng, xem số dư VP/RP, hiển thị xếp hạng rank với giao diện trực quan.",
   },
   {
@@ -247,7 +247,7 @@ export default async function AppDownloadPage() {
 
             <section id="detailed-guide" className="space-y-8 scroll-mt-28">
               <header className="text-center space-y-2">
-                <h2 className={SECTION_HEADING}>Hướng Dẫn Cài Đặt Chi Tiết</h2>
+                <h2 className={SECTION_HEADING}>Hướng dẫn cài đặt chi tiết</h2>
                 <p className="text-xs text-neutral-400">
                   Thực hiện theo các bước dưới đây để cài ứng dụng lên thiết bị.
                 </p>
