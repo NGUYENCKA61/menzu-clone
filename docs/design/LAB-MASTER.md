@@ -1,7 +1,8 @@
 # LAB-MASTER: the "Launcher" direction
 
 Branch `lab` only (worktree `D:\my-website-lab`, port 3200, database `menzu_clone_lab`).
-Round one covers the home page, a tool page and the account overview (`/profile`).
+Round one covers the home page, a tool page, the account overview (`/profile`)
+and, added on the owner's word the same day, the purchase history (`/orders`).
 Written 16/10/2026 with the `frontend-design` and `ui-ux-pro-max` skills.
 
 ## 1. Brief, in one paragraph
@@ -30,12 +31,15 @@ panels are plainly rounded, so the notch always means "this is a game".
 
 | Name | Hex | Role |
 |------|-----|------|
-| Graphite | `#0B0E13` | page ground (cool, launcher-like, not neutral black) |
-| Gunmetal | `#12161D` | header, footer, big panels |
-| Steel | `#1A1F28` | raised cards, inputs, chips, secondary buttons |
-| Line | `#252B36` | hairlines and borders (strong: `#343B48`) |
+| Graphite | `#07090D` | page ground (cool, launcher-like, not neutral black) |
+| Gunmetal | `#0D1015` | header, footer, big panels |
+| Steel | `#141820` | raised cards, inputs, chips, secondary buttons |
+| Line | `#1F242D` | hairlines and borders (strong: `#2C323D`) |
 | Frost | `#E8ECF2` | primary text (secondary `#A6AEBB`, tertiary `#727B8B`) |
 | Signal red | `#E13D3F` | the brand and the single primary action per screen |
+
+The surfaces were first one step lighter (#0B0E13, #12161D, #1A1F28, lines
+#252B36/#343B48); the owner asked for them darker ("hạ độ sáng cho nó thử").
 
 Functional only: online `#3DD68C`, notice `#F2B544`, error stays red. The tier
 metals keep their own colours. Tailwind's `neutral-*` scale is re-pointed to a cool
@@ -49,8 +53,9 @@ steel scale so the whole site follows without hunting every class.
   diacritics. Body 15 to 16px, line-height 1.55 to 1.65, lines under 75 characters.
 - **Scale (px):** 12, 13, 14, 16, 20, 24, 32, 44 (hero 52 on desktop).
 - **Case:** sentence case for labels, buttons, headings. No tracked all-caps.
-  Product names that arrive in capitals from the catalogue stay as typed, set in
-  the display face at a lighter weight so they stop shouting.
+  Game and product names that arrive in capitals from the catalogue go through
+  `sentenceCase` (src/lib/displayCase.ts), which keeps CS2, ESP, OBV, PUBG and
+  the shop's other acronyms; the typed name stays in tooltips and the page title.
 
 ### Shape, depth, motion
 
@@ -102,6 +107,12 @@ TOOL PAGE
 ACCOUNT OVERVIEW: same structure as master (approved by the owner), restyled:
 cover band, avatar, name in Chakra, rank as a notched badge in the tier's
 metal, doors in sentence case, figures in Chakra.
+
+PURCHASE HISTORY: panel head in Chakra; day headings as a display date with a
+plain count; each order a Steel card with the cover in a small notched frame,
+the name in the display face (one line, full name in the tooltip), tier and
+status chips in sentence case, the price as a display figure, "Chi tiết"
+without a chevron. The shared search and filter bar follows.
 ```
 
 ## 5. Review against the generic page
