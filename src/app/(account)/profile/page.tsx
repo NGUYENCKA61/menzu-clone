@@ -31,7 +31,6 @@ import {
 } from "@/lib/memberTiers";
 import { getCurrentUser } from "@/lib/session";
 import { getShopSettings } from "@/lib/settingsStore";
-import { SPIN_LOCKED } from "@/lib/spin";
 
 export const metadata: Metadata = {
   title: "Tổng quan tài khoản",
@@ -66,10 +65,10 @@ const QUICK_ACTIONS = [
   { label: "Đổi thưởng", href: "/vong-quay", icon: Gift, primary: false },
 ] as const;
 
-/** The doors drawn: while the wheel's event is suspended its door comes off,
- *  rather than leading to the "Tạm ngưng sự kiện" sheet (the owner,
- *  07/10/2026: "trong trang tổng quan tài khoản ẩn luôn đi"). */
-const DOORS = QUICK_ACTIONS.filter((door) => !(SPIN_LOCKED && door.href === "/vong-quay"));
+/** All three doors, the wheel's too while its event is suspended (the owner,
+ *  16/10/2026: "hiện đổi thưởng", undoing 07/10's "ẩn luôn đi"); that door
+ *  then opens the "Tạm ngưng sự kiện" sheet. */
+const DOORS = QUICK_ACTIONS;
 
 /** Behind the banner when no category has a cover: the shop's own backdrop. */
 const BANNER_FALLBACK = "/sites/menzu-lol-f7ae197a/root-8a5edab2/images/behance/f945cb242281183.696998e170840.webp";
