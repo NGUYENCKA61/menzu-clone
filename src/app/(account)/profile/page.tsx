@@ -183,7 +183,7 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
               fill
               priority
               sizes="(max-width: 1280px) 100vw, 960px"
-              className="object-cover object-[60%_28%] opacity-95"
+              className="object-cover object-top opacity-95"
             />
             {/* Left wash: enough to seat the name, gone by a third across. */}
             <div className="absolute inset-0 bg-gradient-to-r from-[#111111] via-[#111111]/45 to-transparent" />
