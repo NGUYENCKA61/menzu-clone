@@ -158,14 +158,15 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
           </div>
         ) : null}
 
-        {/* BANNER — game art across the top of the card only, behind the avatar
-            and the name; from the tier card down the ground is the card's own
-            #111 (the owner, 16/10/2026, TRIAL: "sao tui cảm giác rối quá",
-            "thử đi"). Before, the art filled the card, darkened only where the
+        {/* BANNER — game art across the whole card, darkened only where the
             words sit: a soft wash off the left edge, and a stronger one rising
-            from the bottom. The tier card and the doors live inside it. The
-            frame is the account panel's and the sidebar's: a 5% rim, 24px
-            corners (03/10/2026: "màu card trái và card phải đồng bộ"). */}
+            from the bottom. The card ends under the tier card and the doors;
+            the numbers live in tiles of their own below it, so the picture
+            no longer sits behind them (the owner, 16/10/2026, with a picture
+            of this layout: "thiết kế lại bố cục như này thử"; the top-band
+            trial of the same morning is undone by it). The frame is the
+            account panel's and the sidebar's: a 5% rim, 24px corners
+            (03/10/2026: "màu card trái và card phải đồng bộ"). */}
         <section className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#111111]">
           <BannerUploader hasOwn={Boolean(user.bannerUrl)} />
 
@@ -173,7 +174,7 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
               for, so filling it blew a quarter of the picture up 3.3x into
               a green blur. There the art heads the card, behind the avatar
               and name, and the foot wash fades it into the card's #111. */}
-          <div className="absolute inset-x-0 top-0 h-56 sm:h-60">
+          <div className="absolute inset-x-0 top-0 h-56 sm:inset-0 sm:h-auto">
             <Image
               src={bannerArt}
               alt=""
@@ -232,7 +233,7 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                 column squeezed the tier card to ~276px, cutting its figures
                 to "Giảm …"; below xl the doors make one row under it. */}
             <div className="grid grid-cols-1 gap-4 sm:mt-5 xl:grid-cols-[minmax(0,1fr)_240px]">
-              <div className="flex flex-col gap-2 rounded-xl border border-white/10 bg-white/[0.03] p-5">
+              <div className="flex flex-col gap-2 rounded-xl border border-white/10 bg-[#111111]/60 p-5 backdrop-blur-md">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <span className="text-xs font-semibold text-neutral-400">
                     Cấp bậc
@@ -334,7 +335,7 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                     className={`inline-flex h-11 items-center justify-center gap-2 rounded-xl border text-[11px] font-black uppercase tracking-widest transition-colors ${
                       primary
                         ? `${DOORS.length > 2 ? "col-span-2 sm:col-span-1 " : ""}border-[var(--menzu-accent)] bg-[var(--menzu-accent)] text-white hover:bg-[var(--menzu-accent-dark)]`
-                        : "border-white/10 bg-white/[0.04] text-white hover:border-white/25 hover:bg-white/[0.08]"
+                        : "border-white/15 bg-black/35 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] backdrop-blur-md hover:border-white/35 hover:bg-black/50"
                     }`}
                   >
                     <Icon size={14} />
@@ -343,56 +344,56 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                 ))}
               </div>
             </div>
-
-            {/* THE ACCOUNT IN NUMBERS (16/10/2026 TRIAL, "làm sao bớt rối thử": the labels are
-                12px sentence case with no icon, and the hairlines between the
-                cells are gone, so the band reads as one quiet row of figures)
-                — inside the card rather than a strip of
-                its own below it, so the page is one block instead of two.
-                Four across from xl, the order count giving width to the
-                commission cell: in equal quarters "Rút tiền" dropped under
-                any commission from 10.000đ and the strip grew 117→161px. */}
-            <div className="-mx-5 -mb-5 grid grid-cols-2 border-t border-white/10 bg-black/20 sm:-mx-7 sm:-mb-7 xl:grid-cols-[1fr_1fr_0.7fr_1.3fr]">
-              {[
-                { label: "Số dư khả dụng", value: formatVnd(user.balance), unit: "đ", tone: "text-emerald-400" },
-                { label: "Tổng chi tiêu", value: formatVnd(spent), unit: "đ", tone: "text-white" },
-                { label: "Đơn hàng", value: String(paidOrders), unit: "", tone: "text-white" },
-              ].map(({ label, value, unit, tone }) => (
-                // Label over figure the way /vong-quay builds its stat tiles:
-                // no icon and a 12px sentence-case label (16/10/2026 trial), the unit at text-sm, and
-                // the figure a step smaller on phones, where 24px ran past
-                // a 2x2 cell.
-                <div key={label} className="flex flex-col gap-2 px-5 py-4 sm:gap-3">
-                  <span className="text-xs font-semibold text-neutral-400">
-                    {label}
-                  </span>
-                  <span className="flex min-h-9 items-center">
-                    <span className={`text-xl font-black tabular-nums leading-none sm:text-2xl ${tone}`}>
-                      {value}
-                      {unit ? (
-                        <span className="ml-1 text-sm font-bold text-neutral-500">{unit}</span>
-                      ) : null}
-                    </span>
-                  </span>
-                </div>
-              ))}
-              <div className="flex flex-col gap-2 px-5 py-4 sm:gap-3">
-                <span className="text-xs font-semibold text-neutral-400">
-                  Hoa hồng khả dụng
-                </span>
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <span className="flex min-h-9 items-center">
-                    <span className="text-xl font-black tabular-nums leading-none text-white sm:text-2xl">
-                      {formatVnd(user.commissionBalance)}
-                      <span className="ml-1 text-sm font-bold text-neutral-500">đ</span>
-                    </span>
-                  </span>
-                  <WithdrawCommission amount={user.commissionBalance} />
-                </div>
-              </div>
-            </div>
           </div>
         </section>
+
+        {/* THE ACCOUNT IN NUMBERS — four tiles of their own under the art card
+            (the owner, 16/10/2026, with a picture of this layout: "thiết kế
+            lại bố cục như này thử"; before, a strip across the foot of the
+            card). Each tile wears the card's frame. Four across from xl, the
+            order count giving width to the commission cell: in equal
+            quarters "Rút tiền" dropped under any commission from 10.000đ.
+            Labels 12px sentence case, no icons (same day: "làm sao bớt rối
+            thử"). */}
+        <div className="grid grid-cols-2 gap-3 sm:mt-2 sm:gap-4 xl:grid-cols-[1fr_1fr_0.7fr_1.3fr]">
+          {[
+            { label: "Số dư khả dụng", value: formatVnd(user.balance), unit: "đ", tone: "text-emerald-400" },
+            { label: "Tổng chi tiêu", value: formatVnd(spent), unit: "đ", tone: "text-white" },
+            { label: "Đơn hàng", value: String(paidOrders), unit: "", tone: "text-white" },
+          ].map(({ label, value, unit, tone }) => (
+            // Label over figure the way /vong-quay builds its stat tiles:
+            // no icon and a 12px sentence-case label (16/10/2026 trial), the unit at text-sm, and
+            // the figure a step smaller on phones, where 24px ran past
+            // a 2x2 cell.
+            <div key={label} className="flex flex-col gap-2 rounded-2xl border border-white/10 bg-[#111111] px-5 py-4 sm:gap-3">
+              <span className="text-xs font-semibold text-neutral-400">
+                {label}
+              </span>
+              <span className="flex min-h-9 items-center">
+                <span className={`text-xl font-black tabular-nums leading-none sm:text-2xl ${tone}`}>
+                  {value}
+                  {unit ? (
+                    <span className="ml-1 text-sm font-bold text-neutral-500">{unit}</span>
+                  ) : null}
+                </span>
+              </span>
+            </div>
+          ))}
+          <div className="flex flex-col gap-2 rounded-2xl border border-white/10 bg-[#111111] px-5 py-4 sm:gap-3">
+            <span className="text-xs font-semibold text-neutral-400">
+              Hoa hồng khả dụng
+            </span>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <span className="flex min-h-9 items-center">
+                <span className="text-xl font-black tabular-nums leading-none text-white sm:text-2xl">
+                  {formatVnd(user.commissionBalance)}
+                  <span className="ml-1 text-sm font-bold text-neutral-500">đ</span>
+                </span>
+              </span>
+              <WithdrawCommission amount={user.commissionBalance} />
+            </div>
+          </div>
+        </div>
       </div>
       </AccountPanel>
     </AccountPageFrame>
