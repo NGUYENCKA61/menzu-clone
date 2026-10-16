@@ -341,55 +341,57 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                 ))}
               </div>
             </div>
-
-            {/* THE ACCOUNT IN NUMBERS — inside the card rather than a strip of
-                its own below it, so the page is one block instead of two.
-                Four across from xl, the order count giving width to the
-                commission cell: in equal quarters "Rút tiền" dropped under
-                any commission from 10.000đ and the strip grew 117→161px. */}
-            <div className="-mx-5 -mb-5 grid grid-cols-2 border-t border-white/10 bg-black/20 sm:-mx-7 sm:-mb-7 xl:grid-cols-[1fr_1fr_0.7fr_1.3fr] xl:divide-x xl:divide-white/[0.06]">
-              {[
-                { icon: Wallet, label: "Số dư khả dụng", value: formatVnd(user.balance), unit: "đ", tone: "text-emerald-400" },
-                { icon: Receipt, label: "Tổng chi tiêu", value: formatVnd(spent), unit: "đ", tone: "text-white" },
-                { icon: ShoppingBag, label: "Đơn hàng", value: String(paidOrders), unit: "", tone: "text-white" },
-              ].map(({ icon: Icon, label, value, unit, tone }) => (
-                // Label over figure the way /vong-quay builds its stat tiles:
-                // a bare 13px icon (no 28px box), the unit at text-sm, and
-                // the figure a step smaller on phones, where 24px ran past
-                // a 2x2 cell.
-                <div key={label} className="flex flex-col gap-2 px-5 py-4 sm:gap-3">
-                  <span className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-neutral-400">
-                    <Icon size={13} className="shrink-0 text-neutral-300" />
-                    {label}
-                  </span>
-                  <span className="flex min-h-9 items-center">
-                    <span className={`text-xl font-black tabular-nums leading-none sm:text-2xl ${tone}`}>
-                      {value}
-                      {unit ? (
-                        <span className="ml-1 text-sm font-bold text-neutral-500">{unit}</span>
-                      ) : null}
-                    </span>
-                  </span>
-                </div>
-              ))}
-              <div className="flex flex-col gap-2 px-5 py-4 sm:gap-3">
-                <span className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-neutral-400">
-                  <HandCoins size={13} className="shrink-0 text-neutral-300" />
-                  Hoa hồng khả dụng
-                </span>
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <span className="flex min-h-9 items-center">
-                    <span className="text-xl font-black tabular-nums leading-none text-white sm:text-2xl">
-                      {formatVnd(user.commissionBalance)}
-                      <span className="ml-1 text-sm font-bold text-neutral-500">đ</span>
-                    </span>
-                  </span>
-                  <WithdrawCommission amount={user.commissionBalance} />
-                </div>
-              </div>
-            </div>
           </div>
         </section>
+
+        {/* THE ACCOUNT IN NUMBERS — the same four cells as the strip across the
+            foot of the card, each now a card of its own under it (the owner,
+            16/10/2026, with a capture of the strip after a mocked-up page of
+            separate cards: "cỡ này thử"; nothing in the cells changes). Four
+            across from xl, the order count giving width to the commission
+            cell: in equal quarters "Rút tiền" dropped under any commission from
+            10.000đ. */}
+        <div className="grid grid-cols-2 gap-3 sm:mt-2 sm:gap-4 xl:grid-cols-[1fr_1fr_0.7fr_1.3fr]">
+          {[
+            { icon: Wallet, label: "Số dư khả dụng", value: formatVnd(user.balance), unit: "đ", tone: "text-emerald-400" },
+            { icon: Receipt, label: "Tổng chi tiêu", value: formatVnd(spent), unit: "đ", tone: "text-white" },
+            { icon: ShoppingBag, label: "Đơn hàng", value: String(paidOrders), unit: "", tone: "text-white" },
+          ].map(({ icon: Icon, label, value, unit, tone }) => (
+            // Label over figure the way /vong-quay builds its stat tiles:
+            // a bare 13px icon (no 28px box), the unit at text-sm, and
+            // the figure a step smaller on phones, where 24px ran past
+            // a 2x2 cell.
+            <div key={label} className="flex flex-col gap-2 rounded-2xl border border-white/10 bg-[#111111] px-5 py-4 sm:gap-3">
+              <span className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-neutral-400">
+                <Icon size={13} className="shrink-0 text-neutral-300" />
+                {label}
+              </span>
+              <span className="flex min-h-9 items-center">
+                <span className={`text-xl font-black tabular-nums leading-none sm:text-2xl ${tone}`}>
+                  {value}
+                  {unit ? (
+                    <span className="ml-1 text-sm font-bold text-neutral-500">{unit}</span>
+                  ) : null}
+                </span>
+              </span>
+            </div>
+          ))}
+          <div className="flex flex-col gap-2 rounded-2xl border border-white/10 bg-[#111111] px-5 py-4 sm:gap-3">
+            <span className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-neutral-400">
+              <HandCoins size={13} className="shrink-0 text-neutral-300" />
+              Hoa hồng khả dụng
+            </span>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <span className="flex min-h-9 items-center">
+                <span className="text-xl font-black tabular-nums leading-none text-white sm:text-2xl">
+                  {formatVnd(user.commissionBalance)}
+                  <span className="ml-1 text-sm font-bold text-neutral-500">đ</span>
+                </span>
+              </span>
+              <WithdrawCommission amount={user.commissionBalance} />
+            </div>
+          </div>
+        </div>
       </div>
       </AccountPanel>
     </AccountPageFrame>
