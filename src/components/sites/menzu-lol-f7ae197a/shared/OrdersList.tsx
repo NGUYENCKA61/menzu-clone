@@ -311,7 +311,7 @@ export function OrdersList({ orders }: { orders: OrderCardView[] }) {
                                   the headings, so the whole stamp stays there.
                                   Each fact holds together, so a narrow card
                                   breaks at a " · ". The tier chip moved under
-                                  the code, beside the status (the owner,
+                                  the code, the status under the chip (the owner,
                                   16/10/2026: "cho nhãn key ngày ở dưới mã đơn đi"). */}
                               <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
                                 <p className="text-[11px] tabular-nums text-neutral-400 sm:text-xs">
@@ -330,7 +330,7 @@ export function OrdersList({ orders }: { orders: OrderCardView[] }) {
                                   know. "Đánh giá" moved into the receipt
                                   (30/09/2026: "bỏ cái đánh giá ngoài card đi"). */}
                               {order.chip || order.badge ? (
-                                <div className="mt-0.5 flex flex-wrap items-center gap-2">
+                                <div className="mt-0.5 flex flex-col items-start gap-1.5">
                                   {order.chip ? (
                                     <span className="rounded-md border border-white/15 bg-white/10 px-2 py-1 text-[9px] font-black uppercase tracking-widest text-neutral-300 sm:text-[10px]">
                                       {order.chip}
