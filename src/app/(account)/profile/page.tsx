@@ -336,7 +336,7 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                     href={href}
                     // Flat, as every other red button in the account area is
                     // (the agency desk's own Nạp tiền, /security's submit).
-                    className={`inline-flex h-11 items-center justify-center gap-2 rounded-xl border px-3 text-[11px] font-black uppercase tracking-widest transition-colors ${
+                    className={`inline-flex h-11 items-center justify-center gap-2 rounded-xl border px-3 text-[12px] font-bold transition-colors ${
                       primary
                         ? `${DOORS.length > 2 ? "col-span-2 sm:col-span-1 " : ""}border-[var(--menzu-accent)] bg-[var(--menzu-accent)] text-white hover:bg-[var(--menzu-accent-dark)]`
                         : "border-white/10 bg-white/[0.04] text-white hover:border-white/25 hover:bg-white/[0.08]"
