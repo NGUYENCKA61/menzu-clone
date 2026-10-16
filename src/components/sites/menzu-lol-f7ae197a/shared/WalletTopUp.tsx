@@ -450,12 +450,13 @@ export function WalletTopUp({
                   onSubmit={handleSubmit}
                   className="sm:bg-white/[0.02] sm:border sm:border-white/5 rounded-2xl p-0 sm:p-6 transition-all"
                 >
-                  {/* A card header the way Bảo mật's cards read: title and
-                      hint on one line, no icon tile (the page title carries
-                      the Wallet mark now). */}
-                  <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 mb-5">
+                  {/* A card header the way Bảo mật's cards read, the hint on
+                      its own line under the title (the owner, 16/10/2026:
+                      "ghi dưới số tiền nạp"); no icon tile, the page title
+                      carries the Wallet mark. */}
+                  <div className="mb-5">
                     <h3 className="text-sm font-black uppercase tracking-wider text-white">Số tiền nạp</h3>
-                    <p className="text-xs text-neutral-500">
+                    <p className="mt-1 text-xs text-neutral-500">
                       Nạp từ {formatVnd(minAmount)}đ trở lên. Miễn phí giao dịch.
                     </p>
                   </div>
