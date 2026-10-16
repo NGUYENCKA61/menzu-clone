@@ -27,7 +27,7 @@ export function AccountPanel({ icon: Icon, title, subtitle, action, children }: 
     <div className="w-full bg-transparent sm:bg-panel border-0 sm:border sm:border-line rounded-none sm:rounded-[20px] p-0 sm:p-8 lg:p-10 relative min-h-0 sm:min-h-[750px]">
       <div className="mb-6 sm:mb-8 relative z-10 flex flex-wrap items-start justify-between gap-4">
         <div className="min-w-0">
-          <h1 className="mb-2 flex items-center gap-3 font-display text-[24px] font-bold leading-tight text-frost sm:text-[30px]">
+          <h1 className="mb-2 flex items-center gap-3 text-[24px] font-black leading-tight text-frost sm:text-[30px]">
             <Icon size={24} className="shrink-0 text-[var(--menzu-accent)]" aria-hidden />
             {title}
           </h1>

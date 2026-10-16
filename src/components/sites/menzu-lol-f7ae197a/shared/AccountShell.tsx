@@ -91,7 +91,7 @@ export function AccountShell({
             sidebar ? (
               <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
                 <div>
-                  <h1 className="text-2xl sm:text-3xl font-black text-white">
+                  <h1 className="text-[24px] font-black leading-tight text-frost sm:text-[30px]">
                     {title}
                   </h1>
                   <p className="text-sm text-neutral-400 mt-1.5">{subtitle}</p>
@@ -110,7 +110,7 @@ export function AccountShell({
                     {Icon ? (
                       <Icon size={28} className="shrink-0 text-[var(--menzu-accent)]" aria-hidden />
                     ) : null}
-                    <h1 className="text-2xl sm:text-3xl font-black text-white">
+                    <h1 className="text-[24px] font-black leading-tight text-frost sm:text-[30px]">
                       {title}
                     </h1>
                   </div>

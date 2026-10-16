@@ -76,7 +76,7 @@ export function SimplePage({
                     <Icon size={28} className="shrink-0 text-[var(--menzu-accent)]" aria-hidden />
                   ) : null}
                   <h1
-                    className={`text-2xl sm:text-3xl font-black text-white ${
+                    className={`text-[24px] font-black text-frost sm:text-[30px] ${
                       // LAB: sentence case for every page title.
                       titleCase === "upper" ? "leading-tight" : "leading-tight"
                     }`}

@@ -82,13 +82,13 @@ const TAB_ACTIVE = `${TAB} ${PILL_TAB_ON}`;
 const TAB_INACTIVE = `${TAB} ${PILL_TAB_OFF}`;
 
 const TITLE =
-  "text-xl sm:text-2xl font-black text-white mb-2 flex items-center gap-3";
+  "text-[24px] sm:text-[30px] font-black leading-tight text-frost mb-2 flex items-center gap-3";
 const SUBTITLE = "text-xs sm:text-sm text-neutral-400 leading-relaxed";
 const CARD =
-  "relative bg-white/[0.02] border border-white/5 rounded-2xl p-5 sm:p-6 overflow-hidden group";
-const CARD_TITLE = "text-[15px] font-semibold text-white";
+  "relative bg-raise/40 border border-line rounded-[14px] p-5 sm:p-6 overflow-hidden group";
+const CARD_TITLE = "text-[17px] font-bold text-frost";
 const FIELD =
-  "w-full rounded-xl border border-white/10 bg-black/20 px-4 py-3 text-white text-sm outline-none placeholder:text-neutral-600 focus:border-[var(--menzu-accent)]/50 transition-colors disabled:opacity-50";
+  "w-full rounded-[10px] border border-line bg-raise px-4 py-3 text-frost text-[15px] outline-none placeholder:text-dim focus:border-white/40 transition-colors disabled:opacity-50";
 
 function Notice({ tone, children }: { tone: "ok" | "err"; children: string }) {
   return (

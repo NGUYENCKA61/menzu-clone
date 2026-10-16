@@ -83,7 +83,7 @@ export default async function TopUpInvoicePage({
       {/* Titled like every other account page (the owner, 29/09: restyle to
           our site, not menzu's white-to-grey title). */}
       <div className="mb-6 px-2 sm:px-0 relative z-10">
-        <h1 className="text-xl sm:text-2xl font-black text-white flex items-center gap-3">
+        <h1 className="flex items-center gap-3 text-[24px] font-black leading-tight text-frost sm:text-[30px]">
           <Receipt size={24} className="shrink-0 text-[var(--menzu-accent)]" aria-hidden />
           Thanh toán hóa đơn
         </h1>

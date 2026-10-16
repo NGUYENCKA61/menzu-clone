@@ -45,6 +45,10 @@ const KEEP_UPPER = new Set([
   "VS",
   "CN",
   "THICHTHIHACK",
+  // LAB: hardware and service acronyms that appear in titles and guides.
+  "BIOS", "UEFI", "TPM", "CPU", "GPU", "RAM", "SSD", "HDD", "USB", "AMD", "SVM", "VT",
+  "OTP", "VPN", "IP", "QR", "DMCA", "FAQ", "CTV", "SMS", "API", "URL", "ID", "UID", "VNĐ",
+  "HUD", "FOV", "PVP", "PVE", "MMR", "NPC", "EAC",
 ]);
 
 const SPECIAL: Record<string, string> = { IOS: "iOS" };

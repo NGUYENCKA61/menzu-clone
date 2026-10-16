@@ -24,17 +24,17 @@ import {
 import { BankPicker } from "./BankPicker";
 
 const CARD =
-  "relative bg-white/[0.02] border border-white/5 rounded-2xl p-5 sm:p-6 overflow-hidden";
-const CARD_TITLE = "text-[15px] font-semibold text-white";
+  "relative bg-raise/40 border border-line rounded-[14px] p-5 sm:p-6 overflow-hidden";
+const CARD_TITLE = "text-[17px] font-bold text-frost";
 const FIELD =
-  "w-full rounded-xl border border-white/10 bg-neutral-950/60 px-4 py-3 text-sm text-white outline-none transition-colors placeholder-neutral-500 focus:border-[var(--menzu-accent)]/60 disabled:opacity-60";
+  "w-full rounded-[10px] border border-line bg-raise px-4 py-3 text-[15px] text-frost outline-none transition-colors placeholder:text-dim focus:border-white/40 disabled:opacity-60";
 const LABEL =
-  "mb-2 block text-[12px] font-semibold text-neutral-500";
-const HINT = "mt-1.5 text-[11px] leading-relaxed text-neutral-500";
+  "mb-2 block text-[13px] font-medium text-mist";
+const HINT = "mt-1.5 text-[13px] leading-relaxed text-dim";
 const BUTTON =
-  "inline-flex h-11 items-center justify-center gap-2 rounded-xl px-5 text-[13px] font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50";
+  "inline-flex h-11 items-center justify-center gap-2 rounded-[10px] px-5 text-[15px] font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50";
 const PRIMARY = `${BUTTON} bg-[var(--menzu-accent)] text-white hover:bg-[var(--menzu-accent-dark)]`;
-const QUIET = `${BUTTON} border border-white/10 bg-white/[0.04] text-neutral-300 hover:border-white/25 hover:text-white`;
+const QUIET = `${BUTTON} border border-line bg-raise text-frost hover:border-line-strong`;
 
 type Otp =
   | { state: "idle" }
@@ -86,12 +86,12 @@ function Step({
         className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[11px] font-black ${
           done
             ? "bg-emerald-500/15 text-emerald-400"
-            : "bg-[var(--menzu-accent)]/15 text-[var(--menzu-accent)]"
+            : "bg-raise text-frost ring-1 ring-inset ring-line"
         }`}
       >
         {done ? <Check size={13} aria-hidden /> : index}
       </span>
-      <span className="text-[13px] font-bold text-white">{title}</span>
+      <span className="text-[15px] font-semibold text-frost">{title}</span>
     </div>
   );
 }
@@ -351,7 +351,7 @@ export function VerificationCard({
             </span>
           ) : null}
         </div>
-        <p className="mt-3 text-[13px] leading-relaxed text-neutral-400">
+        <p className="mt-3 max-w-[72ch] text-[15px] leading-relaxed text-mist">
           {level2
             ? `Shop đã xác thực tài khoản của bạn${view.verifiedAt ? ` từ ${when(view.verifiedAt)}` : ""}. Bạn thuê được cả những bản hack chỉ dành cho tài khoản cấp 2.`
             : "Một số bản hack đặc biệt chỉ bán cho tài khoản xác thực cấp 2. Để lên cấp 2 bạn cần: Zalo đã liên kết, Facebook chính chủ, số điện thoại của Zalo đó (xác minh bằng một tin nhắn bạn gửi cho bot), và tài khoản ngân hàng đứng tên bạn (trùng với tài khoản bạn chuyển khoản nạp tiền). Shop duyệt tay, thường trong 24 giờ."}
@@ -517,7 +517,7 @@ export function VerificationCard({
               ) : otp.state === "pending" ? (
                 // One sentence and one waiting line, no numbers inside a
                 // numbered step (the owner, 15/10/2026: "mấy ô số có AI quá").
-                <div className="flex flex-col gap-3 rounded-xl border border-white/10 bg-neutral-950/40 p-4 text-[13px] leading-relaxed text-neutral-300">
+                <div className="flex flex-col gap-3 rounded-[12px] border border-line bg-panel p-4 text-[14px] leading-relaxed text-neutral-300">
                   <p className="flex flex-wrap items-center gap-x-2 gap-y-2">
                     <span>
                       Mở Zalo của số {maskPhone(otp.phone)}, nhắn cho{" "}

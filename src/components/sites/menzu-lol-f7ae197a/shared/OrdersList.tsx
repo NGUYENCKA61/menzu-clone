@@ -164,7 +164,7 @@ export function OrdersList({ orders }: { orders: OrderCardView[] }) {
     >
       <div className="flex flex-col gap-6 relative z-10">
         <div className="mb-2 relative z-10">
-          <h1 className="mb-2 flex items-center gap-3 font-display text-[24px] font-bold leading-tight text-frost sm:text-[30px]">
+          <h1 className="mb-2 flex items-center gap-3 text-[24px] font-black leading-tight text-frost sm:text-[30px]">
             <ShoppingBag size={24} className="shrink-0 text-[var(--menzu-accent)]" aria-hidden />
             Lịch sử mua hàng
           </h1>

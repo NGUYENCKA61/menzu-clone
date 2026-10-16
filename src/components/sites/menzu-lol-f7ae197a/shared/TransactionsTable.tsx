@@ -196,7 +196,7 @@ export function TransactionsTable({ rows }: { rows: LedgerView[] }) {
     >
       <div>
         <div className="mb-8 relative z-10">
-          <h1 className="text-xl sm:text-2xl font-black text-white mb-2 flex items-center gap-3">
+          <h1 className="mb-2 flex items-center gap-3 text-[24px] font-black leading-tight text-frost sm:text-[30px]">
             <History size={24} className="shrink-0 text-[var(--menzu-accent)]" aria-hidden />
             Lịch sử giao dịch
           </h1>

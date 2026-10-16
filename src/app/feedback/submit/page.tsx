@@ -48,7 +48,7 @@ export default async function FeedbackSubmitPage() {
                 <Star className="w-5 h-5 text-[var(--menzu-accent)] fill-[var(--menzu-accent)]" />
               </div>
               <div>
-                <h1 className="text-2xl sm:text-3xl font-black text-white">
+                <h1 className="text-[24px] font-black leading-tight text-frost sm:text-[30px]">
                   Viết Đánh Giá
                 </h1>
                 <p className="text-neutral-500 text-xs mt-1">
