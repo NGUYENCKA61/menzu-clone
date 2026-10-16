@@ -271,7 +271,7 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                     whether the account is verified (the owner, 16/10/2026:
                     "Hạng hiện tại Elite đổi thành xác minh cấp 2"); the next
                     rank's worth lives in the sentence under the bar. */}
-                <div className="mt-auto grid grid-cols-3 gap-2 border-t border-white/[0.06] pt-1.5 sm:gap-3">
+                <div className="mt-auto grid grid-cols-1 gap-1.5 border-t border-white/[0.06] pt-2 sm:grid-cols-3 sm:gap-3 sm:pt-1.5">
                   {[
                     {
                       label: "Ưu đãi mua tool",
@@ -289,8 +289,11 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                       tone: user.verifiedAt ? "text-emerald-400" : "text-neutral-300",
                     },
                   ].map(({ label, value, tone }, index) => (
-                    <div key={label} className="flex min-w-0 flex-col gap-0.5">
-                      {/* 12px sentence case like every other label on the card (16/10/2026
+                    <div key={label} className="flex min-w-0 items-center justify-between gap-3 sm:flex-col sm:items-stretch sm:justify-start sm:gap-0.5">
+                      {/* On a phone the three are rows, label left and value right: as
+                          three columns in a 390px card "Chưa xác minh" cut to
+                          "Chưa xác …" (16/10/2026). From sm up, three columns.
+                          12px sentence case like every other label on the card (16/10/2026
                           trial: the 10px black uppercase read as noise), and allowed
                           to wrap: at 9px with truncate a phone read "ƯU ĐÃI
                           MU…". mt-auto keeps the three values level when only
