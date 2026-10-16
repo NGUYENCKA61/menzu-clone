@@ -162,21 +162,21 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
           </div>
         ) : null}
 
-        {/* BANNER — the cover fills the card from sm (on a phone it heads it),
-            laid out to the owner's reference card (16/10/2026, "hay theo bố cục
-            này thử"): a tall band of picture above the avatar and the name, a
-            soft wash off the left edge and a strong one rising from the foot,
-            which the tier card and the doors sit on. The frame is the account
+        {/* BANNER — the cover heads the card and ends before the tier card: a tall
+            band of picture above the avatar and the name (the owner's reference
+            card, 16/10/2026, "hay theo bố cục này thử"), fading to the card's #111
+            by its own edge, so the tier card and the doors sit on flat ground
+            and owe the picture nothing (16/10/2026: "từ khúc nạp tiền cấp bậc là
+            không liên quan gì tới cái ảnh nền nữa"). The frame is the account
             panel's and the sidebar's: a 5% rim, 24px corners (03/10/2026:
             "màu card trái và card phải đồng bộ"). */}
         <section className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#111111]">
           <BannerUploader hasOwn={Boolean(user.bannerUrl)} />
 
-          {/* On a phone the card is ~3x taller than the art is wide-shaped
-              for, so filling it blew a quarter of the picture up 3.3x into
-              a green blur. There the art heads the card, behind the avatar
-              and name, and the foot wash fades it into the card's #111. */}
-          <div className="absolute inset-x-0 top-0 h-56 sm:inset-0 sm:h-auto">
+          {/* 160px on a phone, 192px from sm: under the avatar and the name,
+              gone before the tier card (which starts at ~156px / ~208px). The
+              foot wash reaches full #111 at the band's own edge. */}
+          <div className="absolute inset-x-0 top-0 h-40 sm:h-48">
             <Image
               src={bannerArt}
               alt=""
@@ -239,7 +239,7 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                 before the reference trial (the owner, 16/10/2026: "chỗ bố cục
                 card cấp bậc quay về như nãy"). */}
             <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_200px]">
-              <div className="flex flex-col gap-2 rounded-xl border border-white/10 bg-[#111111]/60 p-5 backdrop-blur-md">
+              <div className="flex flex-col gap-2 rounded-xl border border-white/10 bg-white/[0.03] p-5">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <span className="text-[10px] font-black uppercase tracking-widest text-neutral-400">
                     Cấp bậc
@@ -339,7 +339,7 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                     className={`inline-flex h-11 items-center justify-center gap-2 rounded-xl border px-3 text-[11px] font-black uppercase tracking-widest transition-colors ${
                       primary
                         ? `${DOORS.length > 2 ? "col-span-2 sm:col-span-1 " : ""}border-[var(--menzu-accent)] bg-[var(--menzu-accent)] text-white hover:bg-[var(--menzu-accent-dark)]`
-                        : "border-white/15 bg-black/35 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] backdrop-blur-md hover:border-white/35 hover:bg-black/50"
+                        : "border-white/10 bg-white/[0.04] text-white hover:border-white/25 hover:bg-white/[0.08]"
                     }`}
                   >
                     <Icon size={14} />
