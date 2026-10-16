@@ -80,7 +80,8 @@ export function SimplePage({
                   ) : null}
                   <h1
                     className={`text-2xl sm:text-3xl font-black text-white ${
-                      titleCase === "upper" ? "uppercase tracking-wider" : "leading-tight"
+                      // LAB: sentence case for every page title.
+                      titleCase === "upper" ? "leading-tight" : "leading-tight"
                     }`}
                   >
                     {title}

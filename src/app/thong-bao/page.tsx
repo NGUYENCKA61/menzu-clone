@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { Bell } from "lucide-react";
+import { sentenceCase } from "@/lib/displayCase";
 
 import { SimplePage } from "@/components/sites/menzu-lol-f7ae197a/shared/SimplePage";
 import {
@@ -104,7 +105,7 @@ function groupByDay(events: StatusEventRow[]): { key: string; items: StatusEvent
  *  enough to fit — because at two lines it stops reading as a caption on the
  *  tab and starts reading as the page opening with a paragraph. A phone still
  *  wraps it, which is fine: there it is the only thing on its line. */
-const TAB_NOTE = "mb-5 text-[13px] leading-relaxed text-neutral-400";
+const TAB_NOTE = "mb-5 text-[15px] leading-relaxed text-mist";
 
 /**
  * Where "Xem tất cả thông báo" lands, in three tabs.
@@ -249,108 +250,101 @@ export default async function AnnouncementsPage({
               thái"); the name stays for screen readers. */}
           <section aria-label="Lịch sử trạng thái">
             {events.length === 0 ? (
-              <div className="rounded-2xl border border-dashed border-white/10 bg-white/[0.02] py-16 text-center">
-                <p className="text-sm font-bold text-white">Chưa có thay đổi nào</p>
-                <p className="mt-1.5 text-[13px] text-neutral-400">
+              <div className="rounded-[14px] border border-dashed border-line bg-raise/40 py-16 text-center">
+                <p className="text-[15px] font-semibold text-frost">Chưa có thay đổi nào</p>
+                <p className="mt-1.5 text-[14px] text-mist">
                   Mỗi lần shop đổi trạng thái một tool sẽ hiện ở đây.
                 </p>
               </div>
             ) : (
-              <div className="rounded-2xl border border-white/5 bg-white/[0.02] p-5 sm:p-6">
+              // LAB (Launcher): each change is one compact card in its day: the
+              // picture as a small notched cover beside the words (a full-width
+              // screenshot per change made the history screens long), the time,
+              // the state and the game on one line, the tool's name in sentence
+              // case, the shop's note under it. The rail and dots are gone; the
+              // times already say the order.
+              <div className="flex flex-col gap-8">
                 {groupByDay(events).map((group) => (
-                  <div key={group.key} className="mb-6 last:mb-0">
-                    {/* The day a step brighter than the section labels, and
-                        each change's time on a chip of its own (the owner,
-                        02/10/2026: "cái thời gian chắc phải highlight lên"),
-                        still under the tool's name in weight. */}
-                    <p className="mb-3 text-[10px] font-black uppercase tracking-widest text-neutral-300">
-                      {dayLabel(group.key, now)}
-                    </p>
-                    {/* A line down the left with a grey dot per change; the
-                        state's colour stays on its pill (the owner,
-                        02/10/2026: "đổi chấm tròn sang xám nhạt", then a step
-                        darker on trial so the dot sits behind the time). */}
-                    <ol className="relative ml-1.5 border-l border-white/10 pl-6">
+                  <section key={group.key} aria-label={dayLabel(group.key, now)}>
+                    <div className="mb-3 flex items-center gap-3">
+                      <h3 className="lab-figure shrink-0 text-[15px] font-semibold text-frost">
+                        {dayLabel(group.key, now)}
+                      </h3>
+                      <span aria-hidden className="h-px flex-1 bg-line" />
+                      <span className="shrink-0 text-[13px] text-dim">
+                        {group.items.length} thay đổi
+                      </span>
+                    </div>
+                    <ol className="flex flex-col gap-3">
                       {group.items.map((event) => {
                         const state = SOFTWARE_STATUS[event.status];
+                        const name = sentenceCase(event.productName);
                         return (
-                          <li key={event.id} className="relative pb-5 last:pb-0">
-                            <span
-                              aria-hidden
-                              className="absolute -left-[31px] top-1 h-3 w-3 rounded-full bg-neutral-500 ring-4 ring-[#141519]"
-                            />
-                            <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-                              <span className="rounded-md bg-white/[0.07] px-1.5 py-0.5 text-[11px] font-bold tabular-nums text-neutral-200">
-                                {formatTime(event.at)}
-                              </span>
-                              <span
-                                className={`inline-flex items-center rounded-md border px-2 py-0.5 text-[10px] font-black uppercase tracking-wider ${state.tile}`}
-                              >
-                                {state.label}
-                              </span>
-                              <span className="text-[11px] font-semibold text-neutral-500">
-                                {event.scope === "category" ? "Cả danh mục" : event.categoryName}
-                              </span>
-                            </div>
-                            {/* The tool's name alone: the stock sentence that
-                                followed it ("vừa cập nhật xong, có bản mới…")
-                                is gone, the pill says the state and the shop
-                                writes the rest in the note (the owner,
-                                02/10/2026: "bỏ … cái đó tự ghi được"). */}
-                            <p className="mt-1.5 text-[15px] leading-relaxed">
-                              <Link
-                                href={event.productHref}
-                                className="font-bold text-white transition-colors hover:text-[var(--menzu-accent)]"
-                              >
-                                {event.productName}
-                              </Link>
-                            </p>
-                            {/* The title, then the picture, then the shop's
-                                words under it (the owner, 02/10/2026: "tiêu đề
-                                ở trên ảnh, nội dung thì dưới ảnh"). */}
+                          <li
+                            key={event.id}
+                            className="flex flex-col gap-3 rounded-[14px] border border-line bg-raise/40 p-3.5 sm:flex-row sm:gap-4 sm:p-4"
+                          >
                             {event.imageUrl ? (
                               <a
                                 href={event.imageUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="mt-2.5 block w-full max-w-[420px] overflow-hidden rounded-xl border border-white/10 bg-neutral-950 transition-colors hover:border-white/25"
+                                className="lab-notch-sm relative block aspect-video w-full shrink-0 self-start overflow-hidden border border-line bg-raise transition-colors hover:border-line-strong sm:w-[168px]"
                               >
                                 <Image
                                   src={event.imageUrl}
                                   alt={`Ảnh kèm thông báo ${event.productName}`}
-                                  width={840}
-                                  height={472}
-                                  // Capped: a screenshot taken on a phone is
-                                  // portrait and would otherwise push the next
-                                  // change a screen and a half down. The whole
-                                  // picture is one click away.
-                                  className="max-h-[280px] w-full object-cover"
+                                  fill
+                                  sizes="(min-width: 640px) 168px, 100vw"
+                                  className="object-cover"
                                 />
                               </a>
                             ) : null}
-                            {/* The shop's own words for this particular
-                                change, when it wrote any — a patch note, a
-                                "wait 24h", something the state alone cannot
-                                say. */}
-                            {event.note ? (
-                              <div className="mt-2 break-words rounded-xl border border-white/[0.06] bg-white/[0.02] px-3.5 py-2.5 text-sm leading-relaxed text-neutral-400">
-                                <StatusNote text={event.note} />
+                            <div className="min-w-0 flex-1">
+                              <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1.5">
+                                <time
+                                  dateTime={event.at.toISOString()}
+                                  className="lab-figure text-[14px] font-semibold text-frost"
+                                >
+                                  {formatTime(event.at)}
+                                </time>
+                                <span
+                                  className={`inline-flex items-center gap-1.5 rounded-md border px-2 py-0.5 text-[12px] font-semibold ${state.tile}`}
+                                >
+                                  <span aria-hidden className={`h-1.5 w-1.5 rounded-full ${state.dot}`} />
+                                  {state.label}
+                                </span>
+                                <span className="text-[13px] text-dim">
+                                  {event.scope === "category" ? "Cả danh mục" : sentenceCase(event.categoryName)}
+                                </span>
                               </div>
-                            ) : null}
+                              <Link
+                                href={event.productHref}
+                                title={name}
+                                className="mt-1.5 line-clamp-2 block text-[16px] font-semibold leading-snug text-frost transition-colors hover:text-white"
+                              >
+                                {name}
+                              </Link>
+                              {event.note ? (
+                                <div className="mt-2.5 break-words rounded-[10px] border border-line bg-panel px-3.5 py-2.5 text-[14px] leading-relaxed text-mist">
+                                  <StatusNote text={event.note} />
+                                </div>
+                              ) : null}
+                            </div>
                           </li>
                         );
                       })}
                     </ol>
-                  </div>
+                  </section>
                 ))}
               </div>
             )}
           </section>
         </>
       ) : announcements.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-white/10 bg-white/[0.02] py-16 text-center">
-          <p className="text-sm font-bold text-white">Chưa có thông báo nào</p>
-          <p className="mt-1.5 text-[13px] text-neutral-400">
+        <div className="rounded-[14px] border border-dashed border-line bg-raise/40 py-16 text-center">
+          <p className="text-[15px] font-semibold text-frost">Chưa có thông báo nào</p>
+          <p className="mt-1.5 text-[14px] text-mist">
             Thông báo từ shop sẽ hiện ở đây.
           </p>
         </div>
@@ -360,18 +354,18 @@ export default async function AnnouncementsPage({
           {pageOfNotices.map((item) => (
             <article
               key={item.id}
-              className="rounded-2xl border border-white/5 bg-white/[0.02] p-5 sm:p-6"
+              className="rounded-[14px] border border-line bg-raise/40 p-5 sm:p-6"
             >
               <div className="flex flex-wrap items-center gap-2">
                 {/* The word with its small glyph, the same chip the account
                     overview lists notices with. */}
                 <NoticeTypeChip type={item.type} />
-                <span className="text-[11px] text-neutral-500">
+                <span className="lab-figure text-[13px] text-dim">
                   {formatWhen(item.startAt)}
                 </span>
               </div>
 
-              <h2 className="mt-3 text-base font-bold leading-snug text-white">
+              <h2 className="mt-3 text-[17px] font-semibold leading-snug text-frost">
                 {item.title}
               </h2>
 
@@ -386,7 +380,7 @@ export default async function AnnouncementsPage({
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label={`Xem ảnh: ${item.title}`}
-                  className="mt-3 block w-full max-w-[420px] overflow-hidden rounded-xl border border-white/10 bg-neutral-950 transition-colors hover:border-white/25"
+                  className="mt-3 block w-full max-w-[420px] overflow-hidden rounded-[12px] border border-line bg-raise transition-colors hover:border-line-strong"
                 >
                   <Image
                     src={item.imageUrl}
@@ -400,7 +394,7 @@ export default async function AnnouncementsPage({
 
               {/* Plain text, rendered as text — the same rule the modal keeps.
                   whitespace-pre-line preserves the shop's own line breaks. */}
-              <p className="mt-2 whitespace-pre-line text-sm leading-relaxed text-neutral-300">
+              <p className="mt-2 max-w-[72ch] whitespace-pre-line text-[15px] leading-relaxed text-neutral-300">
                 {item.body}
               </p>
 

@@ -16,20 +16,20 @@
 
 /** Everything but the size: the shape, the type and the fade between states. */
 export const PILL_TAB_FACE =
-  "inline-flex shrink-0 items-center border font-black uppercase tracking-widest transition-colors";
+  "inline-flex shrink-0 items-center border font-semibold transition-colors";
 
 /** The /thong-bao size: 40px tall, 11px caps. */
-export const PILL_TAB = `${PILL_TAB_FACE} h-10 gap-2 rounded-xl px-4 text-[11px]`;
+export const PILL_TAB = `${PILL_TAB_FACE} h-10 gap-2 rounded-[10px] px-4 text-[14px]`;
 
 /** The small size, for chips in a filter panel: 32px tall, 10px caps. */
-export const PILL_TAB_SM = `${PILL_TAB_FACE} h-8 gap-1.5 rounded-lg px-3 text-[10px]`;
+export const PILL_TAB_SM = `${PILL_TAB_FACE} h-8 gap-1.5 rounded-lg px-3 text-[13px]`;
 
 /** Lit: the accent, filled, white words. */
-export const PILL_TAB_ON = "border-[var(--menzu-accent)] bg-[var(--menzu-accent)] text-white";
+export const PILL_TAB_ON = "border-white/25 bg-white/[0.12] text-frost";
 
 /** Not lit: a grey well that brightens under the pointer. */
 export const PILL_TAB_OFF =
-  "border-white/10 bg-white/5 text-neutral-300 hover:bg-white/10 hover:text-white";
+  "border-line bg-raise text-mist hover:border-line-strong hover:text-frost";
 
 /** A count inside a tab; dark enough to read on the red and on the grey. */
-export const PILL_TAB_COUNT = "rounded-md bg-black/20 px-1.5 py-0.5 text-[10px]";
+export const PILL_TAB_COUNT = "lab-figure rounded-md bg-black/30 px-1.5 py-0.5 text-[12px] font-semibold";
