@@ -5,8 +5,6 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import {
   BadgeCheck,
-  Check,
-  Gift,
   HandCoins,
   LayoutDashboard,
   Receipt,
@@ -30,7 +28,6 @@ import {
 } from "@/lib/memberTiers";
 import { getCurrentUser } from "@/lib/session";
 import { getShopSettings } from "@/lib/settingsStore";
-import { SPIN_LOCKED } from "@/lib/spin";
 
 export const metadata: Metadata = {
   title: "Tổng quan tài khoản",
@@ -42,10 +39,9 @@ export const metadata: Metadata = {
 export const dynamic = "force-dynamic";
 
 /**
- * Laid out to the user's mockup, dressed in this site's own components: a
- * two-column grid — the identity-and-tier card on the left; balance, the
- * commission card, and quick actions on the right — with the account-link
- * rows full-width underneath and an edit button at header level.
+ * One flat card in the account panel's own dress (16/10/2026): the title,
+ * the member's cover as a band, who they are beside one Nạp tiền door, the
+ * tier in a line, and the account's numbers along the foot.
  *
  * The commission card reads the wallet's own commission balance, so a referrer
  * with nothing earned sees a truthful zero and Rút tiền stays locked.
@@ -55,20 +51,6 @@ const PROVIDER_NAMES: Record<string, string> = {
   google: "Google",
   discord: "Discord",
 };
-
-/** The column of doors beside the tier card; the first is the red one.
- *  Three, named the way the sidebar names them. Bảo mật is one click away in
- *  that sidebar already, and Discord belongs with the other links. */
-const QUICK_ACTIONS = [
-  { label: "Nạp tiền", href: "/wallet", icon: Wallet, primary: true },
-  { label: "Lịch sử mua", href: "/orders", icon: ShoppingBag, primary: false },
-  { label: "Đổi thưởng", href: "/vong-quay", icon: Gift, primary: false },
-] as const;
-
-/** The doors drawn: while the wheel's event is suspended its door comes off,
- *  rather than leading to the "Tạm ngưng sự kiện" sheet (the owner,
- *  07/10/2026: "trong trang tổng quan tài khoản ẩn luôn đi"). */
-const DOORS = QUICK_ACTIONS.filter((door) => !(SPIN_LOCKED && door.href === "/vong-quay"));
 
 /** Behind the banner when no category has a cover: the shop's own backdrop. */
 const BANNER_FALLBACK = "/sites/menzu-lol-f7ae197a/root-8a5edab2/images/behance/f945cb242281183.696998e170840.webp";
@@ -174,45 +156,41 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
           </div>
         ) : null}
 
-        {/* BANNER — game art across the whole card, darkened only where the
-            words sit: a soft wash off the left edge, and a stronger one rising
-            from the bottom. The tier card and the doors live inside it. The
-            frame is the account panel's and the sidebar's: a 5% rim, 24px
-            corners (03/10/2026: "màu card trái và card phải đồng bộ"). */}
-        <section className="relative overflow-hidden rounded-[24px] border border-white/5 bg-[#111111]">
-          <BannerUploader hasOwn={Boolean(user.bannerUrl)} />
+        {/* ONE FLAT CARD, like /wallet's and /security's panels (the owner,
+            16/10/2026: "chỉ sửa cái card tổng quan tài khoản", after asking
+            for it "không rối" and "đồng bộ với những trang khác"): the title,
+            the member's cover as a slim band, who they are with one red door,
+            the tier in one line, and the numbers. Until then the art filled
+            the whole card behind glass boxes and two more doors. The frame is
+            the account panel's and the sidebar's: a 5% rim, 24px corners. */}
+        <section className="overflow-hidden rounded-[24px] border border-white/5 bg-[#111111]">
+          <div className="flex flex-col gap-5 p-5 sm:gap-6 sm:p-7">
+            <OverviewTitle className="hidden sm:block" />
 
-          {/* On a phone the card is ~3x taller than the art is wide-shaped
-              for, so filling it blew a quarter of the picture up 3.3x into
-              a green blur. There the art heads the card, behind the avatar
-              and name, and the foot wash fades it into the card's #111. */}
-          <div className="absolute inset-x-0 top-0 h-56 sm:inset-0 sm:h-auto">
-            <Image
-              src={bannerArt}
-              alt=""
-              fill
-              priority
-              sizes="(max-width: 1280px) 100vw, 960px"
-              className="object-cover object-[60%_28%] opacity-95"
-            />
-            {/* Left wash: enough to seat the name, gone by a third across. */}
-            <div className="absolute inset-0 bg-gradient-to-r from-[#111111] via-[#111111]/45 to-transparent" />
-            {/* Foot wash: the band the tier card and the doors sit on. */}
-            <div className="absolute inset-0 bg-gradient-to-t from-[#111111] via-[#111111]/50 to-transparent" />
-          </div>
+            {/* The cover: the member's own picture (else the shop's, else the
+                catalogue's), a band rather than a backdrop, its menu in the
+                corner (BannerUploader positions itself top right). */}
+            <div className="relative h-24 overflow-hidden rounded-xl border border-white/5 sm:h-28">
+              <Image
+                src={bannerArt}
+                alt=""
+                fill
+                priority
+                sizes="(max-width: 1280px) 100vw, 960px"
+                className="object-cover object-[60%_28%]"
+              />
+              <BannerUploader hasOwn={Boolean(user.bannerUrl)} />
+            </div>
 
-          <div className="relative flex flex-col gap-4 p-5 pt-14 sm:gap-6 sm:p-7">
-            {/* From sm the title sits inside the card (see the note at the
-                return); pr-12 keeps it clear of the banner menu's button. */}
-            <OverviewTitle className="hidden pr-12 sm:block" />
-            {/* Who — avatar, name, role, when they joined. */}
-            <div className="flex items-center gap-4 sm:gap-5">
+            {/* Who, and the one door worth repeating: Nạp tiền. Lịch sử mua
+                and the rest are one click away in the sidebar. */}
+            <div className="flex flex-wrap items-center gap-4 sm:gap-5">
               <AvatarUploader avatarUrl={user.avatarUrl} username={user.username} />
-              <div className="flex min-w-0 flex-col gap-2">
+              <div className="flex min-w-0 flex-1 flex-col gap-2">
                 <div className="flex min-w-0 flex-wrap items-center gap-2.5">
                   {/* A card title under the page's h1, so one step below it:
                       18/20px under the 20/24px title, as /wallet's card
-                      titles are. It was 30px, bigger than the title. */}
+                      titles are. */}
                   <span className="truncate text-lg font-black uppercase tracking-wide leading-none text-white sm:text-xl">
                     {user.username}
                   </span>
@@ -241,135 +219,54 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                   })}
                 </span>
               </div>
-            </div>
-
-            {/* The tier card and the doors, side by side from xl. At lg the
-                sidebar is already beside the panel, and the 240px door
-                column squeezed the tier card to ~276px, cutting its figures
-                to "Giảm …"; below xl the doors make one row under it. */}
-            <div className="grid grid-cols-1 gap-4 sm:mt-5 xl:grid-cols-[minmax(0,1fr)_240px]">
-              <div className="flex flex-col gap-2 rounded-xl border border-white/10 bg-[#111111]/60 p-5 backdrop-blur-md">
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <span className="text-[10px] font-black uppercase tracking-widest text-neutral-400">
-                    Cấp bậc
-                  </span>
-                  <span className={`text-sm font-bold ${tier.text}`}>
-                    {TIER_RULES[memberTier].label}
-                  </span>
-                </div>
-
-                <div>
-                  <div className="h-2 overflow-hidden rounded-full border border-white/5 bg-black/60">
-                    <div
-                      className={`h-full rounded-full ${tier.bar}`}
-                      style={{ width: `${progress.percent}%` }}
-                    />
-                  </div>
-                  <p className="mt-2 text-[12px] text-neutral-400">
-                    {nextRule && progress.next ? (
-                      <>
-                        Tích lũy thêm để nhận những đặc quyền{" "}
-                        <Link
-                          href="/cap-bac"
-                          className="font-bold text-white underline-offset-2 transition-colors hover:underline"
-                        >
-                          ưu đãi
-                        </Link>{" "}
-                        dành riêng cho khách hàng
-                      </>
-                    ) : (
-                      "Bạn đang ở hạng cao nhất"
-                    )}
-                  </p>
-                </div>
-
-                {/* What the rank is worth today, what the points are, and what
-                    the next rank would pay — the last one is the only place on
-                    the site that answers "why keep topping up". */}
-                <div className="mt-auto grid grid-cols-3 gap-2 border-t border-white/[0.06] pt-1.5 sm:gap-3">
-                  {[
-                    {
-                      label: "Ưu đãi mua tool",
-                      value: `Giảm ${formatTierPercent(TIER_RULES[memberTier].discountPercent)}%`,
-                      tone: tier.text,
-                    },
-                    {
-                      label: "Điểm thưởng",
-                      value: `${user.points.toLocaleString("vi-VN")} điểm`,
-                      tone: "text-white",
-                    },
-                    nextRule && progress.next
-                      ? {
-                          label: `Lên ${nextRule.label} được`,
-                          value: `Giảm ${formatTierPercent(nextRule.discountPercent)}%`,
-                          tone: "text-white",
-                        }
-                      : {
-                          label: "Hạng hiện tại",
-                          value: TIER_RULES[memberTier].label,
-                          tone: "text-white",
-                        },
-                  ].map(({ label, value, tone }, index) => (
-                    <div key={label} className="flex min-w-0 flex-col gap-0.5">
-                      {/* 10px like every other label on the card, and allowed
-                          to wrap: at 9px with truncate a phone read "ƯU ĐÃI
-                          MU…". mt-auto keeps the three values level when only
-                          some labels take two lines. */}
-                      <span className="text-[10px] font-black uppercase leading-tight tracking-widest text-neutral-500">
-                        {label}
-                      </span>
-                      <span
-                        className={`mt-auto flex min-w-0 items-center gap-1 text-[13px] font-bold leading-none ${tone}`}
-                      >
-                        {index === 0 ? (
-                          <Check size={13} strokeWidth={3} className={`shrink-0 ${tier.text}`} />
-                        ) : null}
-                        <span className="truncate">{value}</span>
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Phone: Nạp tiền across, the other two side by side under
-                  it (three stacked bars pushed the balance off the first
-                  screen). sm–lg: one row of three. xl: the column. With only
-                  two doors (the wheel's off), the two share one row below xl. */}
-              <div
-                className={`grid grid-cols-2 gap-2.5 xl:flex xl:flex-col${
-                  DOORS.length > 2 ? " sm:grid-cols-3" : ""
-                }`}
+              <Link
+                href="/wallet"
+                // Flat, as every other red button in the account area is.
+                className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-[var(--menzu-accent)] bg-[var(--menzu-accent)] px-5 text-[11px] font-black uppercase tracking-widest text-white transition-colors hover:bg-[var(--menzu-accent-dark)] sm:w-auto"
               >
-                {DOORS.map(({ label, href, icon: Icon, primary }) => (
-                  <Link
-                    key={href}
-                    href={href}
-                    // Flat, as every other red button in the account area is
-                    // (the agency desk's own Nạp tiền, /security's submit):
-                    // the accent glow under it was the only one of its kind.
-                    className={`inline-flex h-11 items-center justify-center gap-2 rounded-xl border text-[11px] font-black uppercase tracking-widest transition-colors ${
-                      primary
-                        ? `${DOORS.length > 2 ? "col-span-2 sm:col-span-1 " : ""}border-[var(--menzu-accent)] bg-[var(--menzu-accent)] text-white hover:bg-[var(--menzu-accent-dark)]`
-                        : "border-white/15 bg-black/35 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] backdrop-blur-md hover:border-white/35 hover:bg-black/50"
-                    }`}
-                  >
-                    <Icon size={14} />
-                    {label}
-                  </Link>
-                ))}
-              </div>
+                <Wallet size={14} />
+                Nạp tiền
+              </Link>
             </div>
 
-            {/* THE ACCOUNT IN NUMBERS — inside the card rather than a strip of
-                its own below it, so the page is one block instead of two.
-                Three across from xl, the order count giving width to the
-                commission cell: in equal columns "Rút tiền" dropped under
-                any commission from 10.000đ and the strip grew 117→161px.
-                The balance cell came off as a TRIAL (the owner, 16/10/2026:
-                "bỏ bớt phần số dư khả dụng thử"); the figure still sits in
-                the header's account chip. It was
-                { icon: Wallet, label: "Số dư khả dụng", value: formatVnd(user.balance), unit: "đ", tone: "text-emerald-400" }. */}
-            <div className="-mx-5 -mb-5 grid grid-cols-2 border-t border-white/10 bg-[#111111]/70 backdrop-blur-sm sm:-mx-7 sm:-mb-7 xl:grid-cols-[1fr_0.7fr_1.3fr] xl:divide-x xl:divide-white/[0.06]">
+            {/* The tier in one line, the row a door to /cap-bac, with a slim
+                bar underneath while there is a rank left to reach. It was a
+                glass box with a bar, a sentence and three small figures. */}
+            <Link
+              href="/cap-bac"
+              className="group flex flex-col gap-3 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3.5 transition-colors hover:border-white/25"
+            >
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[13px]">
+                <span className="text-[10px] font-black uppercase tracking-widest text-neutral-400">
+                  Cấp bậc
+                </span>
+                <span className={`font-bold ${tier.text}`}>{TIER_RULES[memberTier].label}</span>
+                <span className="text-neutral-600" aria-hidden>·</span>
+                <span className="text-neutral-200">
+                  Giảm {formatTierPercent(TIER_RULES[memberTier].discountPercent)}%<span className="hidden sm:inline"> khi mua tool</span>
+                </span>
+                <span className="text-neutral-600" aria-hidden>·</span>
+                <span className="text-neutral-200">{user.points.toLocaleString("vi-VN")} điểm</span>
+                <span className="ml-auto text-[11px] font-bold text-neutral-400 transition-colors group-hover:text-white">
+                  {nextRule
+                    ? `Lên ${nextRule.label}: giảm ${formatTierPercent(nextRule.discountPercent)}%`
+                    : "Hạng cao nhất"}
+                </span>
+              </div>
+              {nextRule ? (
+                <div className="h-1.5 overflow-hidden rounded-full bg-black/60">
+                  <div
+                    className={`h-full rounded-full ${tier.bar}`}
+                    style={{ width: `${progress.percent}%` }}
+                  />
+                </div>
+              ) : null}
+            </Link>
+
+            {/* THE ACCOUNT IN NUMBERS, a flat band at the card's foot: three
+                across from xl, the order count giving width to the commission
+                cell so "Rút tiền" stays beside its figure. */}
+            <div className="-mx-5 -mb-5 grid grid-cols-2 border-t border-white/10 bg-black/20 sm:-mx-7 sm:-mb-7 xl:grid-cols-[1fr_0.7fr_1.3fr] xl:divide-x xl:divide-white/[0.06]">
               {[
                 { icon: Receipt, label: "Tổng chi tiêu", value: formatVnd(spent), unit: "đ", tone: "text-white" },
                 { icon: ShoppingBag, label: "Đơn hàng", value: String(paidOrders), unit: "", tone: "text-white" },
