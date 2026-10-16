@@ -46,7 +46,6 @@ export async function AccountPageFrame({
   children,
 }: AccountPageFrameProps) {
   const user = await getCurrentUser();
-  const isAdmin = user?.role === "ADMIN";
 
   return (
     <AccountShell
@@ -54,7 +53,6 @@ export async function AccountPageFrame({
       subtitle={subtitle}
       crumb={crumb}
       trail={trail}
-      isAdmin={isAdmin}
       action={action}
       sidebar={sidebar}
       icon={icon}

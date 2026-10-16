@@ -15,7 +15,6 @@ export interface AccountShellProps {
    *  under another one: the warranty form under its order (the owner,
    *  13/10/2026, UI consistency review). */
   trail?: Crumb[];
-  isAdmin?: boolean;
   user?: SidebarUser | null;
   /** Optional control rendered to the right of the title, header-level. */
   action?: React.ReactNode;
@@ -46,7 +45,6 @@ export function AccountShell({
   subtitle,
   crumb,
   trail = [],
-  isAdmin = false,
   user = null,
   action = null,
   sidebar = true,
@@ -86,7 +84,7 @@ export function AccountShell({
       )}
 
       <div className="flex flex-col lg:flex-row gap-6 items-start">
-        {sidebar ? <AccountSidebar isAdmin={isAdmin} user={user} /> : null}
+        {sidebar ? <AccountSidebar user={user} /> : null}
 
         <div className="flex-1 w-full min-w-0">
           {title ? (

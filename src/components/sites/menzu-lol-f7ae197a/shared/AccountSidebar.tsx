@@ -12,7 +12,6 @@ import {
   Handshake,
   KeyRound,
   LayoutDashboard,
-  Shield,
   ShieldCheck,
   ShoppingBag,
   Wallet,
@@ -71,10 +70,8 @@ const LINK_INACTIVE =
  * plain links and highlights whichever one matches the current pathname.
  */
 export function AccountSidebar({
-  isAdmin = false,
   user = null,
 }: {
-  isAdmin?: boolean;
   user?: SidebarUser | null;
 }) {
   const pathname = usePathname();
