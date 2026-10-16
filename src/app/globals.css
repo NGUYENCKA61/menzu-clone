@@ -52,35 +52,24 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
-/* LAB: the Launcher palette (docs/design/LAB-MASTER.md), dimmed a step on
-   16/10/2026 (the owner: "hạ độ sáng cho nó thử"). Named surfaces for
-   new markup (bg-ground, bg-panel, bg-raise, border-line, text-frost ...), and
-   Tailwind's neutral scale re-pointed to a cool steel so every existing
-   text-neutral-* and bg-neutral-* class follows without a hunt. */
+/* LAB: the Launcher palette (docs/design/LAB-MASTER.md) at the current site's
+   brightness (the owner, 16/10/2026: "cho cái màu nó sáng cỡ màu hiện tại",
+   "thấy chói quá"): the live site's own neutral values for the ground, panels
+   and lines, Tailwind's default neutral scale (the cool steel override is
+   gone), and text at the greys the site already uses. Named surfaces stay for
+   new markup (bg-ground, bg-panel, bg-raise, border-line, text-frost ...). */
 @theme {
-  --color-ground: #07090d;
-  --color-panel: #0d1015;
-  --color-raise: #141820;
-  --color-line: #1f242d;
-  --color-line-strong: #2c323d;
-  --color-frost: #e8ecf2;
-  --color-mist: #a6aebb;
-  --color-dim: #727b8b;
-  --color-scrim: #06080b;
-  --color-online: #3dd68c;
-  --color-notice: #f2b544;
-
-  --color-neutral-50: #f4f6f9;
-  --color-neutral-100: #e8ecf2;
-  --color-neutral-200: #d2d8e1;
-  --color-neutral-300: #b3bbc7;
-  --color-neutral-400: #8e98a7;
-  --color-neutral-500: #6e7787;
-  --color-neutral-600: #535b69;
-  --color-neutral-700: #3b424e;
-  --color-neutral-800: #272d37;
-  --color-neutral-900: #181c23;
-  --color-neutral-950: #0f1217;
+  --color-ground: #050508;
+  --color-panel: #111111;
+  --color-raise: #17171c;
+  --color-line: #222228;
+  --color-line-strong: #2f2f36;
+  --color-frost: #f5f5f5;
+  --color-mist: #a3a3a3;
+  --color-dim: #737373;
+  --color-scrim: #08080b;
+  --color-online: #34d399;
+  --color-notice: #fbbf24;
 }
 
 :root {
@@ -185,15 +174,15 @@
 
 .dark {
   /* body/page surface — live value lab(2.75381 0 0) */
-  --background: #07090d;
+  --background: #050508;
   --foreground: #ffffff;
 }
 
 :root {
-  --menzu-bg: #07090d;
-  --menzu-nav: #0d1015;
-  --menzu-rail: #0a0c10;
-  --menzu-backdrop-dim: rgb(7 9 13 / 0.76);
+  --menzu-bg: #050508;
+  --menzu-nav: #0f1015;
+  --menzu-rail: #0c0d12;
+  --menzu-backdrop-dim: rgb(10 10 13 / 0.7);
   --menzu-container: 1320px;
 
   /* The shop's accent, used by every button, badge and active state. The

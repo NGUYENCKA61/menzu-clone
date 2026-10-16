@@ -31,19 +31,21 @@ panels are plainly rounded, so the notch always means "this is a game".
 
 | Name | Hex | Role |
 |------|-----|------|
-| Graphite | `#07090D` | page ground (cool, launcher-like, not neutral black) |
-| Gunmetal | `#0D1015` | header, footer, big panels |
-| Steel | `#141820` | raised cards, inputs, chips, secondary buttons |
-| Line | `#1F242D` | hairlines and borders (strong: `#2C323D`) |
-| Frost | `#E8ECF2` | primary text (secondary `#A6AEBB`, tertiary `#727B8B`) |
+| Ground | `#050508` | page ground, the live site's own black |
+| Panel | `#111111` | header, footer, big panels |
+| Raise | `#17171C` | raised cards, inputs, chips, secondary buttons |
+| Line | `#222228` | hairlines and borders (strong: `#2F2F36`) |
+| Frost | `#F5F5F5` | primary text (secondary `#A3A3A3`, tertiary `#737373`) |
 | Signal red | `#E13D3F` | the brand and the single primary action per screen |
 
-The surfaces were first one step lighter (#0B0E13, #12161D, #1A1F28, lines
-#252B36/#343B48); the owner asked for them darker ("hạ độ sáng cho nó thử").
+History: the round started on a cool Graphite (#0B0E13, #12161D, #1A1F28),
+was dimmed a step ("hạ độ sáng cho nó thử"), then set to the live site's own
+neutral values and greys ("cho cái màu nó sáng cỡ màu hiện tại", "thấy chói
+quá"). Lit states (the chosen chip, package and page) are a lighter well with
+a rim, never a white block. Tailwind's neutral scale is the default again.
 
 Functional only: online `#3DD68C`, notice `#F2B544`, error stays red. The tier
-metals keep their own colours. Tailwind's `neutral-*` scale is re-pointed to a cool
-steel scale so the whole site follows without hunting every class.
+metals keep their own colours. (See the history note below for the cool steel scale that was tried first.)
 
 ### Type
 

@@ -297,7 +297,7 @@ export function SoftwareBuyPanel({
                   aria-pressed={selected}
                   className={
                     selected
-                      ? "flex flex-col items-start gap-1.5 rounded-[12px] border border-frost bg-raise px-4 py-3 text-left transition-colors"
+                      ? "flex flex-col items-start gap-1.5 rounded-[12px] border border-white/45 bg-raise px-4 py-3 text-left transition-colors"
                       : "flex flex-col items-start gap-1.5 rounded-[12px] border border-line bg-panel px-4 py-3 text-left hover:border-line-strong transition-colors"
                   }
                 >

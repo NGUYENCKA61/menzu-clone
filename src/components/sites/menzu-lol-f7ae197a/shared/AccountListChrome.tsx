@@ -278,7 +278,7 @@ export function ListPager({
                 aria-current={n - 1 === page ? "page" : undefined}
                 className={`${PAGE_NUMBER} ${
                   n - 1 === page
-                    ? "bg-frost text-ground border border-frost"
+                    ? "bg-white/[0.12] text-frost border border-white/25"
                     : "bg-white/5 border border-white/5 text-neutral-400 hover:text-white hover:bg-white/10"
                 }`}
               >
