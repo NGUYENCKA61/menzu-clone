@@ -7,38 +7,12 @@
  */
 
 import { GLOSSARY_PATH, termHref, type GlossaryTerm } from "@/lib/glossary/terms";
+import { SITE_URL, isShopUrl } from "@/lib/shopHosts";
 
-/**
- * Canonical origin, without a trailing slash.
- *
- * Set NEXT_PUBLIC_SITE_URL in production. Vercel exposes the deployment host
- * as VERCEL_URL (no scheme), which is the right fallback for preview builds;
- * localhost is the last resort so `next build` never fails on a fresh clone.
- */
-export const SITE_URL = (
-  process.env.NEXT_PUBLIC_SITE_URL ??
-  // Netlify names the deployed address itself, which is the right answer on
-  // the host this shop actually runs on — and without it a production build
-  // that forgot the variable published canonical tags, a sitemap and a robots
-  // file all pointing at localhost, which is an instruction to de-index the
-  // whole site.
-  process.env.URL ??
-  (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null) ??
-  "http://localhost:3000"
-).replace(/\/$/, "");
-
-// Said out loud once, at build time, because the symptom — every canonical
-// pointing at a machine nobody can reach — is invisible until a search engine
-// acts on it.
-if (
-  process.env.NODE_ENV === "production" &&
-  SITE_URL.startsWith("http://localhost")
-) {
-  console.warn(
-    "[seo] NEXT_PUBLIC_SITE_URL is not set: canonical tags, the sitemap and " +
-      "robots.txt will all point at localhost.",
-  );
-}
+// The origin and the shop's-own-host check live in lib/shopHosts.ts, a module
+// light enough for the write-up sanitizer to import on its own; they remain
+// part of this file's surface, so every caller keeps its import.
+export { SITE_URL, isShopUrl };
 
 /**
  * The shop's name for structured data, which is built in helpers that have no
@@ -315,14 +289,23 @@ export function glossaryJsonLd(terms: readonly GlossaryTerm[]) {
  * it did for a month while the page above it said hack game.
  */
 export function siteDescription(brandName: string): string {
-  return `${brandName} là shop hack game và tài khoản game uy tín. Hack Valorant, CS2, PUBG, Liên Quân: key bản quyền giao tự động, cập nhật liên tục, hỗ trợ 24/7.`;
+  // The shelves that sell today, by the words buyers search ("hack cf" more
+  // than "hack Đột Kích"), and the two promises the shop keeps: it named PUBG
+  // and Liên Quân, which it does not stock, and "hỗ trợ 24/7", which it does
+  // not offer (the SEO review, round 2, T9). Measured against a 160-character
+  // snippet with the 12-letter brand; the hours did not fit beside the games.
+  // "cho thuê", never a bare "thuê": with the shop as the subject, "thuê"
+  // says the shop is the one hiring hacks from somebody else.
+  return `${brandName} cho thuê hack game PC và acc game: CS2, Valorant, Đột Kích CF, Delta Force, Truy Kích, Blood Strike, tool LoL. Key giao tự động, bảo hành đổi máy.`;
 }
 
 /**
  * The shop's own profile pages, for `sameAs`: the addresses that are the shop
  * itself on another site. A group, an invite or a chat link is a place to talk
  * rather than the shop's profile, so those are left out, and so is anything
- * that is not a full http(s) address (a bare handle or a phone number).
+ * that is not a full http(s) address (a bare handle or a phone number). The
+ * shop's own domains are left out too: `sameAs` is for elsewhere, and the old
+ * PHP shop's address must never be named as this one's profile (T9).
  */
 export function profileLinks(candidates: (string | null | undefined)[]): string[] {
   const NOT_A_PROFILE = [
@@ -335,6 +318,7 @@ export function profileLinks(candidates: (string | null | undefined)[]): string[
     const url = raw?.trim() ?? "";
     if (!/^https?:\/\/[^\s/]+\.[^\s]+$/i.test(url)) continue;
     if (NOT_A_PROFILE.some((re) => re.test(url))) continue;
+    if (isShopUrl(url)) continue;
     if (!out.includes(url)) out.push(url);
   }
   return out;

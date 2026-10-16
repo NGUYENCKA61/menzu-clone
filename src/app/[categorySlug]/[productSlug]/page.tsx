@@ -5,7 +5,7 @@ import { AccountDetailView } from "@/components/sites/menzu-lol-f7ae197a/shared/
 import { isFreeTool } from "@/components/sites/menzu-lol-f7ae197a/shared/productData";
 import { SoftwareDetailView } from "@/components/sites/menzu-lol-f7ae197a/shared/SoftwareDetailView";
 import { formatVnd } from "@/components/sites/menzu-lol-f7ae197a/shared/productData";
-import { accountMetaDescription, accountMetaTitle } from "@/lib/accountSeo";
+import { accountMetaDescription, accountMetaTitle, clampText } from "@/lib/accountSeo";
 import { docHtmlToPlainText, isHtmlBody } from "@/lib/docHtml";
 import { type DocsAccess } from "@/lib/docsAccess";
 import { freeToolPanel } from "@/lib/freeKey";
@@ -15,14 +15,17 @@ import {
   listSimilarSoftware,
   resolveProduct,
 } from "@/lib/queries";
+import { relatedGuidesForAccount, relatedGuidesForTool } from "@/lib/relatedGuides";
 import { productHref } from "@/lib/routes";
 import { JsonLd, softwareJsonLd } from "@/lib/seo";
+import { toolSeoCopy } from "@/lib/seoCopy";
 import { getCurrentUser } from "@/lib/session";
 import { isStatusSubscribed } from "@/lib/statusEvents";
 import { shareCard } from "@/lib/shareCard";
 import { productBehindOldSlug } from "@/lib/slugHistory";
 import { softwareBuyable } from "@/lib/softwareStock";
 import { toolDocsAccess } from "@/lib/toolDocs";
+import { toolPageTitle } from "@/lib/toolTitle";
 
 /**
  * The quantity a guest had set before the login gate, carried back through
@@ -103,28 +106,38 @@ async function productMetadata(
       (min, p) => (min === null || p.price < min ? p.price : min),
       null as number | null,
     );
-    // The shop's "Mô tả ngắn" first: a sentence written to stand alone is what
-    // a search result wants. Failing that, the long description — which is
-    // HTML from the rich editor, so search results get its prose, not its
-    // tags, and never more than a sentence or two of it.
-    const description =
-      software.summary ||
-      (isHtmlBody(software.description)
-        ? docHtmlToPlainText(software.description, 160)
-        : software.description);
+    // The shop's "Mô tả ngắn" first, or the written one from content/seo
+    // while the shop has not typed any (lib/seoCopy.ts): a sentence written
+    // to stand alone is what a search result wants. Failing both, the long
+    // description — which is HTML from the rich editor, so search results
+    // get its prose, not its tags — and never more than a snippet of it.
+    const summary = software.summary || toolSeoCopy(software.slug)?.summary || "";
+    const plainDescription = isHtmlBody(software.description)
+      ? docHtmlToPlainText(software.description)
+      : software.description;
+    const description = clampText(
+      summary ||
+        plainDescription ||
+        `${software.name}: phần mềm hỗ trợ gaming, giao key tự động, bảo hành trong suốt thời gian sử dụng.`,
+      155,
+    );
 
     return {
-      // A free tool's tiers carry a 1đ placeholder, and "Từ 1đ" over a page
-      // that says "Miễn phí" twice read as a typo (the owner's SEO review,
+      // The name as typed runs to 158 characters on one tool, so the tab and
+      // the search result get it tidied and cut at a word (lib/toolTitle.ts;
+      // the SEO review, round 2, T1); the h1 keeps the typed name. A free
+      // tool's tiers carry a 1đ placeholder, and "Từ 1đ" over a page that
+      // says "Miễn phí" twice read as a typo (the owner's SEO review,
       // 13/10/2026).
-      title: isFreeTool(software.packages)
-        ? `${software.name} | Miễn phí`
-        : from === null
-          ? software.name
-          : `${software.name} | Từ ${formatVnd(from)}đ`,
-      description:
-        description ||
-        `${software.name}: phần mềm hỗ trợ gaming, giao key tự động, bảo hành trong suốt thời gian sử dụng.`,
+      title: toolPageTitle(
+        software.name,
+        isFreeTool(software.packages)
+          ? "Miễn phí"
+          : from === null
+            ? null
+            : `Từ ${formatVnd(from)}đ`,
+      ),
+      description,
       alternates: { canonical },
       // The card carries the bare name: the price-from suffix belongs in a
       // search result, not on a picture shared into a chat.
@@ -201,7 +214,7 @@ export default async function ProductPage({ params, searchParams }: PageProps) {
     // the view receives rather than hidden by it, and the HTML a browser gets
     // never carries a guide its reader has not paid for.
     const user = await getCurrentUser();
-    const [[docsAccess, statusSubscribed], similar] = await Promise.all([
+    const [[docsAccess, statusSubscribed], similar, guides] = await Promise.all([
       user
         ? Promise.all([
             toolDocsAccess({ id: user.id, role: user.role }, software.code),
@@ -211,6 +224,9 @@ export default async function ProductPage({ params, searchParams }: PageProps) {
       // Twelve, so that nine remain once free tools are set aside below:
       // three show at once on a desktop, the arrows bring in the rest.
       listSimilarSoftware(software.code, software.categorySlug, 12),
+      // "Hướng dẫn liên quan" inside the description: the tool's own docs,
+      // the shelf's articles and the setup pages (lib/relatedGuides.ts).
+      relatedGuidesForTool({ id: found.id, categorySlug: software.categorySlug }),
     ]);
     // A free tool is not offered beside a paid one: its page is its own
     // thing (FreeKeyPanel). Beside another free tool it stays.
@@ -229,10 +245,14 @@ export default async function ProductPage({ params, searchParams }: PageProps) {
         : docsAccess.state === "expired"
           ? "expired"
           : "locked";
-    const shown =
-      setupGuideAccess === "unlocked"
-        ? software
-        : { ...software, setupGuideHtml: "" };
+    // The line under the title and the card's two lines: the shop's "Mô tả
+    // ngắn", or the written one from content/seo while the shop has not
+    // typed any (lib/seoCopy.ts; the SEO review, round 2, O8).
+    const summaryShown = software.summary || toolSeoCopy(software.slug)?.summary || "";
+    const shown = {
+      ...(setupGuideAccess === "unlocked" ? software : { ...software, setupGuideHtml: "" }),
+      summary: summaryShown,
+    };
 
     // A free tool's page hands out a key instead of selling tiers (the owner,
     // 12/10/2026). Whether a shortlink stands in the way, where the tool
@@ -255,7 +275,7 @@ export default async function ProductPage({ params, searchParams }: PageProps) {
       // Plain text either way: an empty editor body is "<p></p>", which
       // is truthy and would otherwise reach the crawler as markup.
       description:
-        software.summary ||
+        summaryShown ||
         (isHtmlBody(software.description)
           ? docHtmlToPlainText(software.description, 300)
           : software.description) ||
@@ -279,6 +299,7 @@ export default async function ProductPage({ params, searchParams }: PageProps) {
           setupGuideAccess={setupGuideAccess}
           statusSubscribed={statusSubscribed}
           similar={similarShown}
+          guides={guides}
           free={free}
           viewer={
             !user ? "guest" : user.verifiedAt || user.role === "ADMIN" ? "verified" : "member"
@@ -293,12 +314,17 @@ export default async function ProductPage({ params, searchParams }: PageProps) {
   const account = await getAccountDetail(slug);
   if (!account) notFound();
   const { sl } = await searchParams;
-  // Who is looking, for an account sold to level 2 only.
-  const user = await getCurrentUser();
+  // Who is looking, for an account sold to level 2 only; and the NFA guides
+  // under the panel (lib/relatedGuides.ts).
+  const [user, guides] = await Promise.all([
+    getCurrentUser(),
+    relatedGuidesForAccount(account.categorySlug),
+  ]);
   return (
     <AccountDetailView
       account={account}
       initialQuantity={readQuantity(sl)}
+      guides={guides}
       viewer={
         !user ? "guest" : user.verifiedAt || user.role === "ADMIN" ? "verified" : "member"
       }

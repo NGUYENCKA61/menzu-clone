@@ -7,7 +7,9 @@ import { CategoryHero } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab
 import { CategoryFilterPanel } from "@/components/sites/menzu-lol-f7ae197a/shared/CategoryFilterPanel";
 import { ProductCard } from "@/components/sites/menzu-lol-f7ae197a/shared/ProductCard";
 import { CardBoundary } from "@/components/sites/menzu-lol-f7ae197a/shared/CardBoundary";
+import { CategorySeoSection } from "@/components/sites/menzu-lol-f7ae197a/shared/CategorySeoSection";
 import { LinkPending } from "@/components/sites/menzu-lol-f7ae197a/shared/LinkPending";
+import { RelatedGuides } from "@/components/sites/menzu-lol-f7ae197a/shared/RelatedGuides";
 import { SoftwareCard } from "@/components/sites/menzu-lol-f7ae197a/shared/SoftwareCard";
 import { SoftwareFilterPanel } from "@/components/sites/menzu-lol-f7ae197a/shared/SoftwareFilterPanel";
 import { db } from "@/lib/db";
@@ -16,7 +18,9 @@ import Link from "next/link";
 
 import { pageHrefFor } from "@/lib/paging";
 import { getCategoryPage } from "@/lib/queries";
+import { relatedGuidesForCategory } from "@/lib/relatedGuides";
 import { breadcrumbJsonLd, itemListJsonLd, JsonLd } from "@/lib/seo";
+import { categorySeoCopy } from "@/lib/seoCopy";
 import { softwareSearchHint } from "@/lib/searchHint";
 import { categoryHref } from "@/lib/routes";
 import { getShopSettings } from "@/lib/settingsStore";
@@ -89,6 +93,10 @@ async function categoryMetadata(
 ): Promise<Metadata> {
   const name = data.name;
   const canonical = categoryHref(slug);
+  // The written title and description for this shelf, when content/seo has
+  // them (lib/seoCopy.ts; the SEO review, round 2, O9). The built ones
+  // below stay for every shelf the file does not cover.
+  const copy = categorySeoCopy(slug);
   // A real sentence for the search snippet and the social card, built from what
   // the category actually holds rather than left blank.
   const kinds = data
@@ -110,8 +118,8 @@ async function categoryMetadata(
     // "Danh mục " spent the front of the title, where the words weigh most,
     // on a word every category page shares (the owner's SEO review,
     // 13/10/2026).
-    title: name,
-    description,
+    title: copy?.metaTitle ?? name,
+    description: copy?.metaDescription ?? description,
     // The category sits at the root and is reached from several groups; the
     // canonical says which of those addresses is the page itself.
     alternates: { canonical },
@@ -164,7 +172,7 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
   const settings = await getShopSettings();
   const pinnedName = settings.hotPickSkin.trim();
   const pinnedKey = pinnedName ? weaponKey(pinnedName) : null;
-  const [pinnedImage, libraryPicks] = await Promise.all([
+  const [pinnedImage, libraryPicks, guides] = await Promise.all([
     pinnedKey
       ? db.weaponImage.findUnique({ where: { key: pinnedKey }, select: { url: true } })
       : Promise.resolve(null),
@@ -173,6 +181,14 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
       take: HOT_PICK_ROTATION,
       select: { name: true, url: true },
     }),
+    // "Hướng dẫn liên quan" under the grids (lib/relatedGuides.ts), read
+    // only for page one, the only page that draws it, and only for a shelf
+    // that sells something: under the empty-shelf box the key guides and the
+    // setup chips would be furniture round a blank, and those shelves are
+    // noindex anyway (the review of round 2).
+    data.page === 1 && data.accountTotal + data.softwareTotal > 0
+      ? relatedGuidesForCategory(data.slug)
+      : Promise.resolve(null),
   ]);
   const hotPickList: { name: string; imageUrl: string | null }[] = [
     ...(pinnedName ? [{ name: pinnedName, imageUrl: pinnedImage?.url ?? null }] : []),
@@ -370,6 +386,18 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
                 title="Chưa có sản phẩm nào"
                 note="Hiện tại danh mục này đang trống hoặc đã bán hết. Vui lòng quay lại sau!"
               />
+            ) : null}
+
+            {/* Page one only: the shelf's written intro and FAQ, from
+                content/seo (lib/seoCopy.ts), then the guides. On page two of
+                the accounts the reader is paging, not arriving. The hero
+                above keeps the owner's own line about the shelf (the SEO
+                review, round 2, O9 and O12). */}
+            {data.page === 1 ? (
+              <>
+                <CategorySeoSection copy={categorySeoCopy(data.slug)} categoryName={data.name} />
+                <RelatedGuides guides={guides} />
+              </>
             ) : null}
           </div>
     </>

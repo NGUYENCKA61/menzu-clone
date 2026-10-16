@@ -3,9 +3,11 @@ import { describe, expect, it } from "vitest";
 import {
   SITE_URL,
   articleJsonLd,
+  isShopUrl,
   organizationJsonLd,
   productJsonLd,
   profileLinks,
+  siteDescription,
   softwareJsonLd,
   websiteJsonLd,
 } from "@/lib/seo";
@@ -125,6 +127,45 @@ describe("profileLinks", () => {
     expect(
       profileLinks(["", "  ", null, undefined, "@thichthihack", "0900000000", "https://t.me/a", " https://t.me/a "]),
     ).toEqual(["https://t.me/a"]);
+  });
+
+  it("never names the shop's own domains, the old PHP one included", () => {
+    expect(
+      profileLinks([
+        "https://thichthihack.com",
+        "https://www.thichthihackk.com/",
+        "http://thichthihack.com/bio",
+        `${SITE_URL}/bio`,
+        "https://t.me/thichthihack",
+      ]),
+    ).toEqual(["https://t.me/thichthihack"]);
+  });
+});
+
+describe("isShopUrl", () => {
+  it("knows both domains, with or without www, and the configured origin", () => {
+    expect(isShopUrl("https://thichthihack.com/x")).toBe(true);
+    expect(isShopUrl("https://www.thichthihackk.com/")).toBe(true);
+    expect(isShopUrl("//thichthihackk.com/docs")).toBe(true);
+    expect(isShopUrl(`${SITE_URL}/docs`)).toBe(true);
+    expect(isShopUrl("https://obvhax.com/")).toBe(false);
+    expect(isShopUrl("/docs/x")).toBe(false);
+    expect(isShopUrl("not a url")).toBe(false);
+  });
+});
+
+describe("siteDescription", () => {
+  it("fits a snippet and names the shelves the shop sells today", () => {
+    const text = siteDescription("THICHTHIHACK");
+    expect(text.length).toBeLessThanOrEqual(160);
+    for (const game of ["CS2", "Valorant", "Đột Kích CF", "Delta Force", "Truy Kích", "Blood Strike", "LoL"]) {
+      expect(text).toContain(game);
+    }
+    // Shelves the shop does not stock and a promise it does not make.
+    expect(text).not.toMatch(/PUBG|Liên Quân|24\/7|[–—]/);
+    // The shop rents out; a bare "thuê" would have it hiring hacks itself.
+    expect(text).toContain("cho thuê");
+    expect(text.startsWith("THICHTHIHACK")).toBe(true);
   });
 });
 

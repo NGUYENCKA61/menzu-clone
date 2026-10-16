@@ -135,6 +135,23 @@ export default async function PcSetupPageRoute({ params }: PageProps) {
             </div>
           ) : null}
 
+          {/* The shop pages a note points at, where the body cannot carry a
+              link of its own. */}
+          {page.links && page.links.length > 0 ? (
+            <p className={`${BODY} flex flex-wrap items-center gap-x-4 gap-y-1`}>
+              <span className="font-bold text-white">Trên shop:</span>
+              {page.links.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="font-semibold text-white underline underline-offset-2 hover:text-[var(--menzu-accent)]"
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </p>
+          ) : null}
+
           {page.check ? (
             <div className="flex items-start gap-3 rounded-2xl border border-emerald-500/20 bg-emerald-500/[0.06] p-5">
               <CheckCircle2

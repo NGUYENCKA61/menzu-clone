@@ -29,13 +29,19 @@ function BreadcrumbTrail({ items }: { items: Crumb[] }) {
 
         return (
           <Fragment key={`${item.label}-${index}`}>
+            {/* aria-current marks the page the reader is on, which the
+                white crumb only shows (the SEO review, round 2, C12). */}
             {item.href ? (
-              <SiteLink href={item.href} className={CRUMB_LINK_CLASS}>
+              <SiteLink
+                href={item.href}
+                className={CRUMB_LINK_CLASS}
+                aria-current={isLast ? "page" : undefined}
+              >
                 {isFirst && <House size={12} />}
                 <CaseText text={item.label} />
               </SiteLink>
             ) : (
-              <span className={CRUMB_CURRENT_CLASS}>
+              <span className={CRUMB_CURRENT_CLASS} aria-current={isLast ? "page" : undefined}>
                 {isFirst && <House size={12} />}
                 <CaseText text={item.label} />
               </span>
@@ -65,11 +71,20 @@ export function Breadcrumb({
 }) {
   return (
     <>
-      <nav className={`hidden sm:inline-flex items-center flex-wrap gap-x-3 gap-y-2 px-4 py-2.5 bg-[#111111]/80 border border-white/10 hover:border-white/20 shadow-lg rounded-full text-xs font-black uppercase tracking-widest text-neutral-300 leading-normal backdrop-blur-md transition-all group/nav w-fit ${margin}`}>
+      {/* Named for assistive tech on both, as the ARIA pattern asks; only
+          the one the breakpoint shows is announced (the SEO review, round
+          2, C12). */}
+      <nav
+        aria-label="Breadcrumb"
+        className={`hidden sm:inline-flex items-center flex-wrap gap-x-3 gap-y-2 px-4 py-2.5 bg-[#111111]/80 border border-white/10 hover:border-white/20 shadow-lg rounded-full text-xs font-black uppercase tracking-widest text-neutral-300 leading-normal backdrop-blur-md transition-all group/nav w-fit ${margin}`}
+      >
         <BreadcrumbTrail items={items} />
       </nav>
 
-      <nav className={`flex sm:hidden flex-wrap items-center gap-x-2 gap-y-2.5 text-[10px] font-black uppercase tracking-widest leading-normal transition-all w-fit ${margin}`}>
+      <nav
+        aria-label="Breadcrumb"
+        className={`flex sm:hidden flex-wrap items-center gap-x-2 gap-y-2.5 text-[10px] font-black uppercase tracking-widest leading-normal transition-all w-fit ${margin}`}
+      >
         <BreadcrumbTrail items={items} />
       </nav>
     </>

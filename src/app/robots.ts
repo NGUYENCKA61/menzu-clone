@@ -22,7 +22,9 @@ const PRIVATE_PREFIXES = [
   "/orders",
   "/transactions",
   "/security",
-  "/affiliate",
+  // No /affiliate: it answers noindex and sends a guest to sign in, so it
+  // belongs with the public pages above, whose noindex only works if a
+  // crawler may fetch it (the SEO review, round 2, T11).
   "/agency/dashboard",
   // The one exception to the rule above: /free-key/<id> also says noindex,
   // but opening it spends a free-key claim, and its addresses are only ever

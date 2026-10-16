@@ -68,6 +68,45 @@ describe("sanitizeDocHtml font sizes", () => {
   });
 });
 
+describe("sanitizeDocHtml links", () => {
+  it("marks a link to another site nofollow and keeps target=_blank", () => {
+    const out = sanitizeDocHtml('<p><a href="https://obvhax.com/cs2">OBV</a></p>');
+    expect(out).toContain('rel="nofollow noopener noreferrer"');
+    expect(out).toContain('target="_blank"');
+    expect(sanitizeDocHtml('<p><a href="//beasthax.com/">B</a></p>')).toContain("nofollow");
+  });
+
+  it("leaves the shop's own addresses, old domain included, without nofollow", () => {
+    for (const own of [
+      "/docs/spoofer-la-gi",
+      "https://thichthihackk.com/docs/x",
+      "https://www.thichthihack.com/",
+      "http://thichthihack.com/huong-dan/x",
+    ]) {
+      const out = sanitizeDocHtml(`<p><a href="${own}">Bài</a></p>`);
+      expect(out, own).toContain('rel="noopener noreferrer"');
+      expect(out, own).not.toContain("nofollow");
+    }
+  });
+
+  it("drops a link with nothing in it, and keeps one around a picture", () => {
+    expect(sanitizeDocHtml('<p><a href="https://beasthax.com/"></a>B</p>')).toBe("<p>B</p>");
+    expect(sanitizeDocHtml('<p><a href="/x"> </a>B</p>')).toBe("<p>B</p>");
+    expect(sanitizeDocHtml('<p><a href="/x"><img src="/uploads/docs/a.png" /></a></p>')).toContain(
+      "<a ",
+    );
+    expect(sanitizeDocHtml('<p><a href="/x"><strong>Đậm</strong></a></p>')).toContain("<a ");
+  });
+});
+
+describe("sanitizeDocHtml empty headings", () => {
+  it("drops a heading with no words and keeps one with", () => {
+    expect(sanitizeDocHtml("<h3></h3><p>A</p>")).toBe("<p>A</p>");
+    expect(sanitizeDocHtml("<h2> &nbsp; </h2><p>A</p>")).toBe("<p>A</p>");
+    expect(sanitizeDocHtml("<h3>Cài đặt</h3>")).toBe("<h3>Cài đặt</h3>");
+  });
+});
+
 describe("sanitizeDocHtml picture corners", () => {
   it("keeps a picture set to square corners", () => {
     expect(sanitizeDocHtml('<img src="/uploads/docs/a.png" data-corner="square" />')).toContain(

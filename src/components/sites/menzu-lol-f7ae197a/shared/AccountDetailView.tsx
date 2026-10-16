@@ -5,6 +5,7 @@ import {
   getInventory,
   getRelatedProducts,
 } from "@/lib/queries";
+import type { RelatedGuides as RelatedGuidesData } from "@/lib/relatedGuides";
 import { categoryHref, productHref } from "@/lib/routes";
 import { breadcrumbJsonLd, JsonLd, productJsonLd } from "@/lib/seo";
 
@@ -14,6 +15,7 @@ import { AccountGallery } from "./AccountGallery";
 import { AccountInventory } from "./AccountInventory";
 import { Breadcrumb } from "./Breadcrumb";
 import { ProductCard } from "./ProductCard";
+import { RelatedGuides } from "./RelatedGuides";
 
 /**
  * The section heading the home rows wear (ProductRow): a 3px accent bar before
@@ -42,6 +44,7 @@ function SectionTitle({ id, children }: { id: string; children: React.ReactNode 
 export async function AccountDetailView({
   account: { descriptionHtml, ...account },
   initialQuantity,
+  guides = null,
   viewer,
 }: {
   /**
@@ -52,6 +55,9 @@ export async function AccountDetailView({
   account: AccountPageDetail;
   /** From `?sl=` — the quantity a guest had set before the login gate. */
   initialQuantity?: number;
+  /** "Hướng dẫn liên quan" under the panel: the NFA articles and the buying
+   *  guides (lib/relatedGuides.ts); null draws none. */
+  guides?: RelatedGuidesData | null;
   /** Who is looking, for an account sold to level 2 only. */
   viewer: BuyerLevel;
 }) {
@@ -133,6 +139,11 @@ export async function AccountDetailView({
               </div>
 
               <AccountInventory account={account} items={inventory} />
+
+              {/* What an NFA account is, how it is bought and warranted,
+                  under the panel and the inventory: the listing never linked
+                  the wiki (the SEO review, round 2, O12). */}
+              <RelatedGuides guides={guides} />
             </div>
 
             {/* The shop's own write-up for this account, from the admin's

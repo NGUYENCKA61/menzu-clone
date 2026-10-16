@@ -23,6 +23,10 @@ export async function generateMetadata(): Promise<Metadata> {
     description:
       "Dùng điểm thưởng tích được sau mỗi đơn hàng để quay nhận tiền vào ví và điểm thưởng.",
     alternates: { canonical: "/vong-quay" },
+    // A closed wheel is a notice over a page that pays nothing: out of the
+    // index while the switch is on, back the day it turns (the SEO review,
+    // round 2, T7).
+    ...(SPIN_LOCKED ? { robots: { index: false, follow: true } } : {}),
     ...(await shareCard({ url: "/vong-quay" })),
   };
 }

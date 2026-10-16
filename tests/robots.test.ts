@@ -17,7 +17,9 @@ function disallowed(): string[] {
 describe("robots.txt", () => {
   it("lets crawlers read the noindex on the public sign-in and cart pages", () => {
     const list = disallowed();
-    for (const page of ["/login", "/signup", "/forgot-password", "/reset-password", "/cart", "/2fa"]) {
+    // /affiliate joined them in round 2: it says noindex and redirects a
+    // guest, which a disallowed crawler would never see.
+    for (const page of ["/login", "/signup", "/forgot-password", "/reset-password", "/cart", "/2fa", "/affiliate"]) {
       expect(list).not.toContain(page);
     }
   });
@@ -32,7 +34,6 @@ describe("robots.txt", () => {
       "/orders",
       "/transactions",
       "/security",
-      "/affiliate",
       "/agency/dashboard",
     ]) {
       expect(list).toContain(area);

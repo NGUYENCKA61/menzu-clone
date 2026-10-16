@@ -1,5 +1,6 @@
 import sanitizeHtml from "sanitize-html";
 
+import { isShopUrl } from "@/lib/shopHosts";
 import { youtubeEmbedUrl, youtubeVideoId } from "@/lib/youtube";
 
 /**
@@ -77,6 +78,20 @@ function dropDarkInk(style: string | undefined): string | undefined {
 
 export function isHtmlBody(body: string | null | undefined): body is string {
   return typeof body === "string" && body.trimStart().startsWith("<");
+}
+
+/** The words a frame holds, spaces and non-breaking spaces taken out. */
+function frameWords(frame: { text: string }): string {
+  return frame.text.replace(/&nbsp;|[\s ]/g, "");
+}
+
+/**
+ * An address on another site: absolute or protocol-relative, and not one of
+ * the shop's own hosts (lib/shopHosts.ts). A root-relative link is the shop's.
+ */
+function isExternalHref(href: string | undefined): boolean {
+  const url = (href ?? "").trim();
+  return /^(?:https?:)?\/\//i.test(url) && !isShopUrl(url);
 }
 
 /**
@@ -160,9 +175,29 @@ export function sanitizeDocHtml(html: string): string {
       (frame.tag === "img" && !String(frame.attribs?.src ?? "").startsWith("/")) ||
       (frame.tag === "div" &&
         frame.attribs?.["data-youtube"] !== undefined &&
-        youtubeVideoId(frame.attribs["data-youtube"]) !== frame.attribs["data-youtube"]),
+        youtubeVideoId(frame.attribs["data-youtube"]) !== frame.attribs["data-youtube"]) ||
+      // A link with no words and no picture in it, and a heading with no
+      // words: leftovers of the old site's editor ('<a href="https://
+      // beasthax.com/"></a>', "<h3></h3>"), nothing to click or read, and a
+      // crawler counts both (the SEO review, round 2, T3 and C9).
+      (frame.tag === "a" && !frameWords(frame) && frame.mediaChildren.length === 0) ||
+      ((frame.tag === "h2" || frame.tag === "h3") && !frameWords(frame)),
     transformTags: {
-      a: sanitizeHtml.simpleTransform("a", { rel: "noopener noreferrer", target: "_blank" }),
+      // Every link opens in a new tab with noopener, as before. One to
+      // another site also carries nofollow: the write-ups name vendors'
+      // pages, and the shop's standing should not flow to them (the SEO
+      // review, round 2, T3). The shop's own addresses, the old domain
+      // included, keep plain noopener.
+      a: (tagName, attribs) => ({
+        tagName,
+        attribs: {
+          ...attribs,
+          target: "_blank",
+          rel: isExternalHref(attribs.href)
+            ? "nofollow noopener noreferrer"
+            : "noopener noreferrer",
+        },
+      }),
       // Runs before the style filter, so it sees the raw attribute and can
       // take the black ink out while leaving a font-size beside it alone.
       span: (tagName, attribs) => {
