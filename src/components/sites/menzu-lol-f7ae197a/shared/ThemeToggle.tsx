@@ -56,9 +56,15 @@ export function ThemeToggle({ className }: { className?: string }) {
     window.dispatchEvent(new Event(EVENT));
   }
 
+  // The light dresses are parked (the owner, 16/10/2026: "Làm web đen trước,
+  // web trắng tui để sau"): the dark site offers no way into them, so a
+  // customer never meets an unfinished look. Whoever is in one (a
+  // ?giao-dien= trial link, a stored choice) still gets the way back.
+  if (!light) return null;
+
   return (
     <button type="button" onClick={flip} className={className}>
-      {light ? "Giao diện tối" : "Giao diện sáng"}
+      Giao diện tối
     </button>
   );
 }
