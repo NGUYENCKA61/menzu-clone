@@ -284,7 +284,7 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                     },
                     {
                       label: "Xác minh cấp 2",
-                      value: user.verifiedAt ? "Đã xác minh" : "Chưa xác minh",
+                      value: user.verifiedAt ? "Đã xác minh" : "Chưa",
                       tone: user.verifiedAt ? "text-emerald-400" : "text-neutral-300",
                     },
                   ].map(({ label, value, tone }, index) => (
