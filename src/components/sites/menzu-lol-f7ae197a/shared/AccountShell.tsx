@@ -64,7 +64,7 @@ export function AccountShell({
           layout's own near-black for the whole scroll without the layout
           having to know which page is open. */}
       {ground === "home" ? (
-        <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 bg-[#0f1015]" />
+        <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 bg-panel" />
       ) : null}
     <div
       className={`w-full max-w-[1320px] mx-auto px-4 lg:px-6 flex flex-1 flex-col ${

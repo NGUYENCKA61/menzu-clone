@@ -170,7 +170,7 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
             không liên quan gì tới cái ảnh nền nữa"). The frame is the account
             panel's and the sidebar's: a 5% rim, 24px corners (03/10/2026:
             "màu card trái và card phải đồng bộ"). */}
-        <section className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#111111]">
+        <section className="relative overflow-hidden rounded-2xl border border-white/10 bg-panel">
           <BannerUploader hasOwn={Boolean(user.bannerUrl)} />
 
           {/* 160px on a phone, 192px from sm: under the avatar and the name,
@@ -186,9 +186,9 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
               className="object-cover object-top opacity-95"
             />
             {/* Left wash: enough to seat the name, gone by a third across. */}
-            <div className="absolute inset-0 bg-gradient-to-r from-[#111111] via-[#111111]/45 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-r from-panel via-panel/45 to-transparent" />
             {/* Foot wash: the band the tier card and the doors sit on. */}
-            <div className="absolute inset-0 bg-gradient-to-t from-[#111111] via-[#111111]/55 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-panel via-panel/55 to-transparent" />
           </div>
 
           {/* 96px of cover above the avatar from sm, 32px of padding around,
@@ -359,7 +359,7 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
             the order count giving width to the commission
             cell: in equal quarters "Rút tiền" dropped under any commission from
             10.000đ. */}
-        <div className="grid grid-cols-2 overflow-hidden rounded-2xl border border-white/10 bg-[#111111] sm:mt-2 xl:grid-cols-[1fr_1fr_0.7fr_1.3fr] xl:divide-x xl:divide-white/[0.06]">
+        <div className="grid grid-cols-2 overflow-hidden rounded-2xl border border-white/10 bg-panel sm:mt-2 xl:grid-cols-[1fr_1fr_0.7fr_1.3fr] xl:divide-x xl:divide-white/[0.06]">
           {[
             { icon: Wallet, label: "Số dư khả dụng", value: formatVnd(user.balance), unit: "đ", tone: "text-white" },
             { icon: Receipt, label: "Tổng chi tiêu", value: formatVnd(spent), unit: "đ", tone: "text-white" },

@@ -90,8 +90,8 @@ export function MobileDrawer({ open, onClose, groups, brandName, brandLogo, user
         inert={!open}
         className={
           open
-            ? "fixed inset-y-0 left-0 z-[9999] w-72 bg-[#111111] shadow-2xl flex flex-col transition-transform duration-300 transform-gpu xl:hidden translate-x-0"
-            : "fixed inset-y-0 left-0 z-[9999] w-72 bg-[#111111] shadow-none flex flex-col transition-transform duration-300 transform-gpu xl:hidden -translate-x-full"
+            ? "fixed inset-y-0 left-0 z-[9999] w-72 bg-panel shadow-2xl flex flex-col transition-transform duration-300 transform-gpu xl:hidden translate-x-0"
+            : "fixed inset-y-0 left-0 z-[9999] w-72 bg-panel shadow-none flex flex-col transition-transform duration-300 transform-gpu xl:hidden -translate-x-full"
         }
       >
         <div className="p-5 flex items-center justify-between">

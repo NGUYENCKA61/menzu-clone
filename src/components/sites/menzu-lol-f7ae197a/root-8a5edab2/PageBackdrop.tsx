@@ -16,13 +16,13 @@ import { CardImage } from "@/components/sites/menzu-lol-f7ae197a/shared/CardImag
  *
  * Live site: `div.fixed.top-0.left-0.w-full.h-[100vh].z-[-1].overflow-hidden.pointer-events-none`
  * containing an `img.object-cover.object-center.transition-all.duration-700` and a
- * `div.absolute.inset-0.bg-[#0a0a0d]/70` dim overlay.
+ * `div.absolute.inset-0.bg-scrim/70` dim overlay.
  */
 export function PageBackdrop({ src, soft = false }: { src?: string; soft?: boolean }) {
   return (
     <div
       className={`site-backdrop fixed top-0 left-0 w-full h-[100vh] z-[-1] overflow-hidden pointer-events-none ${
-        soft ? "bg-[#08080b]" : ""
+        soft ? "bg-scrim" : ""
       }`}
     >
       {src ? (
@@ -40,7 +40,7 @@ export function PageBackdrop({ src, soft = false }: { src?: string; soft?: boole
           className={`object-cover object-center ${soft ? "scale-110 blur-[28px] saturate-70" : ""}`}
         />
       ) : null}
-      <div className={`absolute inset-0 ${soft ? "bg-[#08080b]/94" : "bg-[#0a0a0d]/70"}`} />
+      <div className={`absolute inset-0 ${soft ? "bg-scrim/94" : "bg-scrim/70"}`} />
     </div>
   );
 }

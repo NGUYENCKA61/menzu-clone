@@ -14,7 +14,7 @@ import { CardImage } from "@/components/sites/menzu-lol-f7ae197a/shared/CardImag
 export function HomeBackdrop({ src }: { src?: string }) {
   return (
     <>
-      <div aria-hidden className="site-backdrop pointer-events-none fixed inset-0 z-[-1] bg-[#0f1015]" />
+      <div aria-hidden className="site-backdrop pointer-events-none fixed inset-0 z-[-1] bg-panel" />
       {src ? (
         <div
           aria-hidden
@@ -31,7 +31,7 @@ export function HomeBackdrop({ src }: { src?: string }) {
             sizes="100vw"
             className="object-cover object-center"
           />
-          <div className="absolute inset-0 bg-[#0a0a0d]/70" />
+          <div className="absolute inset-0 bg-scrim/70" />
         </div>
       ) : null}
     </>

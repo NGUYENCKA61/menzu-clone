@@ -76,7 +76,7 @@ export function Breadcrumb({
           2, C12). */}
       <nav
         aria-label="Breadcrumb"
-        className={`hidden sm:inline-flex items-center flex-wrap gap-x-3 gap-y-2 px-4 py-2.5 bg-[#111111]/80 border border-white/10 hover:border-white/20 shadow-lg rounded-full text-xs font-black uppercase tracking-widest text-neutral-300 leading-normal backdrop-blur-md transition-all group/nav w-fit ${margin}`}
+        className={`hidden sm:inline-flex items-center flex-wrap gap-x-3 gap-y-2 px-4 py-2.5 bg-panel/80 border border-white/10 hover:border-white/20 shadow-lg rounded-full text-xs font-black uppercase tracking-widest text-neutral-300 leading-normal backdrop-blur-md transition-all group/nav w-fit ${margin}`}
       >
         <BreadcrumbTrail items={items} />
       </nav>

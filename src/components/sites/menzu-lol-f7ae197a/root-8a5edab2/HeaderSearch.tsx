@@ -141,7 +141,7 @@ export function HeaderSearch() {
             and only the hairline was holding its shape. White at 5% over
             white at 10% read as decoration and sat at the wrong radius from
             the button beside it. */}
-        <label className="relative flex h-9 items-center rounded-[10px] border border-[#2b2b31] bg-[#17171c] text-neutral-300 transition-colors focus-within:border-[var(--menzu-accent)]/70 focus-within:ring-[3px] focus-within:ring-[var(--menzu-accent)]/15">
+        <label className="relative flex h-9 items-center rounded-[10px] border border-[#2b2b31] bg-raise text-neutral-300 transition-colors focus-within:border-[var(--menzu-accent)]/70 focus-within:ring-[3px] focus-within:ring-[var(--menzu-accent)]/15">
           {/* The magnifier itself turns while a search or a pick is on its
               way — where the eye already looks for it, not at the far end,
               which keeps the clear button. */}
@@ -187,7 +187,7 @@ export function HeaderSearch() {
         </label>
 
         {showList ? (
-          <div className="drop-in absolute right-0 top-[42px] z-50 w-52 lg:w-64 xl:w-80 max-w-[calc(100vw-2rem)] overflow-hidden rounded-[10px] border border-[#2b2b31] bg-[#0b0b0f]/97 shadow-2xl backdrop-blur-xl">
+          <div className="drop-in absolute right-0 top-[42px] z-50 w-52 lg:w-64 xl:w-80 max-w-[calc(100vw-2rem)] overflow-hidden rounded-[10px] border border-[#2b2b31] bg-scrim/97 shadow-2xl backdrop-blur-xl">
             {shown.length === 0 ? (
               <p className="px-4 py-3 text-[12px] text-neutral-500">
                 Không thấy gì khớp “{term}”.

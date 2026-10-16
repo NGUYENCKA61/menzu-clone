@@ -165,7 +165,7 @@ export function SoftwareCard({
     // tool-card, tool-status, tool-status-line and tool-more are hooks for the
     // light trial "moi" (theme-light.css, part 6); no style of their own.
     <div
-      className={`tool-card group relative flex h-full w-full flex-col rounded-[15px] border border-[#24252a] bg-[#101114] lift-card hover:-translate-y-1 hover:border-[var(--menzu-accent)]/50 hover:shadow-[0_15px_40px_#00000088] ${open ? "z-40" : ""}`}
+      className={`tool-card group relative flex h-full w-full flex-col rounded-[15px] border border-[#24252a] bg-panel lift-card hover:-translate-y-1 hover:border-[var(--menzu-accent)]/50 hover:shadow-[0_15px_40px_#00000088] ${open ? "z-40" : ""}`}
     >
       {/* Picture flush to the card's edges. The shop's image when set; otherwise
           the reference's dark gradient with the tool's name centred over it. */}
@@ -203,13 +203,13 @@ export function SoftwareCard({
           ) : software.verifiedOnly ? (
             // Sold to level 2 only (the owner, 12/10/2026): the buyer learns it
             // on the card, not after the click.
-            <span className="absolute left-3 top-3 z-20 inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-[#0d0d12]/88 px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-amber-300">
+            <span className="absolute left-3 top-3 z-20 inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-panel/88 px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-amber-300">
               Cấp 2
             </span>
           ) : null}
 
           {status ? (
-            <span className="tool-status absolute right-3 top-3 z-20 inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-[#0d0d12]/88 px-2.5 py-1">
+            <span className="tool-status absolute right-3 top-3 z-20 inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-panel/88 px-2.5 py-1">
               <span aria-hidden className={`h-1.5 w-1.5 rounded-full ${status.dot}`} />
               <span className={`text-[10px] font-black uppercase tracking-wide ${status.text}`}>
                 {status.label}
@@ -321,7 +321,7 @@ export function SoftwareCard({
                       : "Chưa có gói"
                 } - ${software.name}`}
                 onClick={() => hasPackages && setOpen((o) => !o)}
-                className={`flex h-[42px] w-full items-center justify-between gap-1 rounded-[9px] border bg-[#111216] px-2.5 text-[11px] font-extrabold outline-none transition-colors duration-200 hover:border-[var(--menzu-accent)]/45 hover:text-white focus-visible:ring-2 focus-visible:ring-[var(--menzu-accent)]/40 aria-expanded:border-[var(--menzu-accent)]/45 aria-expanded:text-white disabled:opacity-50 ${
+                className={`flex h-[42px] w-full items-center justify-between gap-1 rounded-[9px] border bg-panel px-2.5 text-[11px] font-extrabold outline-none transition-colors duration-200 hover:border-[var(--menzu-accent)]/45 hover:text-white focus-visible:ring-2 focus-visible:ring-[var(--menzu-accent)]/40 aria-expanded:border-[var(--menzu-accent)]/45 aria-expanded:text-white disabled:opacity-50 ${
                   chosen
                     ? "border-[var(--menzu-accent)]/45 text-white"
                     : "border-[#292a30] text-[#aaa]"

@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Suspense } from "react";
-import { Inter } from "next/font/google";
+import { Be_Vietnam_Pro, Chakra_Petch } from "next/font/google";
 import "./globals.css";
 import "./theme-light.css";
 import { SITE_URL, siteDescription } from "@/lib/seo";
@@ -23,12 +23,24 @@ import { shareCard } from "@/lib/shareCard";
  */
 export const dynamic = "force-dynamic";
 
-const inter = Inter({
-  variable: "--font-inter",
-  // latin-ext too: its unicode-range overlaps the Vietnamese one and is
-  // declared after it, so the browser fetched that file anyway for Đ, ư, ơ —
-  // but only after layout. Listed here, it preloads with the others.
+/**
+ * LAB (Launcher direction, docs/design/LAB-MASTER.md): Be Vietnam Pro for the
+ * interface and body, drawn for Vietnamese diacritics; Chakra Petch for
+ * display (game names, section titles, prices, figures). Both carry a
+ * Vietnamese subset; latin-ext too, for the reason Inter had it (its range
+ * overlaps Vietnamese and was fetched late otherwise).
+ */
+const beVietnam = Be_Vietnam_Pro({
+  variable: "--font-bvp",
   subsets: ["latin", "vietnamese", "latin-ext"],
+  weight: ["400", "500", "600", "700", "800", "900"],
+  display: "swap",
+});
+
+const chakra = Chakra_Petch({
+  variable: "--font-chakra",
+  subsets: ["latin", "vietnamese", "latin-ext"],
+  weight: ["500", "600", "700"],
   display: "swap",
 });
 
@@ -117,7 +129,7 @@ export default async function RootLayout({
   return (
     <html
       lang="vi"
-      className={`${inter.variable} h-full antialiased overflow-y-scroll dark`}
+      className={`${beVietnam.variable} ${chakra.variable} h-full antialiased overflow-y-scroll dark`}
       // The light-dress trial sets data-theme before React hydrates.
       suppressHydrationWarning
     >
