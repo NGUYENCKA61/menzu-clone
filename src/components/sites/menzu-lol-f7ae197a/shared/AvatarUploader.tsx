@@ -55,7 +55,7 @@ export function AvatarUploader({ avatarUrl, username }: AvatarUploaderProps) {
 
   return (
     <div className="relative shrink-0">
-      <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-full border border-white/10 bg-black/50">
+      <div className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-full border border-white/10 bg-black/50">
         {avatarUrl ? (
           <Image
             src={avatarUrl}
