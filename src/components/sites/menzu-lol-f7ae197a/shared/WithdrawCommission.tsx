@@ -82,7 +82,7 @@ export function WithdrawCommission({ amount }: { amount: number }) {
         // to move, the same well with grey words when there is not. It was a
         // red-tinted ghost, a pair the account area's buttons never use (the
         // owner, 16/10/2026: "cái nút rút tiền đó có đồng bộ màu hay chưa").
-        className={`inline-flex h-9 shrink-0 items-center rounded-lg border px-4 text-[10px] font-black uppercase tracking-widest transition-colors disabled:cursor-not-allowed ${
+        className={`inline-flex h-9 shrink-0 items-center rounded-lg border px-4 text-[12px] font-bold transition-colors disabled:cursor-not-allowed ${
           amount > 0
             ? "border-white/10 bg-white/[0.04] text-white hover:border-white/25 hover:bg-white/[0.08]"
             : "border-white/10 bg-white/[0.03] text-neutral-500"
