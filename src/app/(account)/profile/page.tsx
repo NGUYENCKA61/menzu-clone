@@ -5,12 +5,15 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import {
   BadgeCheck,
-  Check,
+  BadgePercent,
+  ChevronRight,
   Gift,
   HandCoins,
   LayoutDashboard,
   Receipt,
+  ShieldCheck,
   ShoppingBag,
+  Sparkles,
   Wallet,
 } from "lucide-react";
 
@@ -57,13 +60,13 @@ const PROVIDER_NAMES: Record<string, string> = {
 };
 
 /** The column of doors beside the tier card; the first is the red one.
- *  Three, named the way the sidebar names them. Bảo mật is one click away in
- *  that sidebar already (a fourth door for it was tried with the reference
- *  layout on 16/10/2026 and turned down: "có 3 card ... như nãy thôi"), and
- *  Discord belongs with the other links. */
+ *  Four, named the way the sidebar names them: Bảo mật joined with the
+ *  owner's reference layout (16/10/2026, "thêm 4 nút"), which stacks four
+ *  beside the tall tier card. Discord belongs with the other links. */
 const QUICK_ACTIONS = [
   { label: "Nạp tiền", href: "/wallet", icon: Wallet, primary: true },
   { label: "Lịch sử mua", href: "/orders", icon: ShoppingBag, primary: false },
+  { label: "Bảo mật", href: "/security", icon: ShieldCheck, primary: false },
   { label: "Đổi thưởng", href: "/vong-quay", icon: Gift, primary: false },
 ] as const;
 
@@ -235,22 +238,42 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
 
             {/* The tier card and the doors, side by side from xl: the card
                 takes the width, the doors a 200px column. Below xl the doors
-                make a row under the card. The card's content is the one from
-                before the reference trial (the owner, 16/10/2026: "chỗ bố cục
-                card cấp bậc quay về như nãy"). */}
+                make a row under the card. The card is the tall one of the
+                reference layout, at the page's own sizes (the owner,
+                16/10/2026: "thêm 4 nút đồng thời card cấp bậc sửa lại cao như nãy"). */}
             <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_200px]">
-              <div className="flex flex-col gap-2 rounded-xl border border-white/10 bg-white/[0.03] p-5">
+              <div className="flex flex-col gap-4 rounded-xl border border-white/10 bg-white/[0.03] p-5">
+                {/* The rank, and the one after it in its own metal. */}
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <span className="text-[10px] font-black uppercase tracking-widest text-neutral-400">
                     Cấp bậc
                   </span>
-                  <span className={`text-sm font-bold ${tier.text}`}>
-                    {TIER_RULES[memberTier].label}
+                  <span className="flex items-center gap-1.5 text-sm font-bold">
+                    {nextRule ? (
+                      <>
+                        <span className="text-neutral-400">{TIER_RULES[memberTier].label}</span>
+                        <ChevronRight size={14} className="text-neutral-500" aria-hidden />
+                        <span className={tier.text}>{nextRule.label}</span>
+                      </>
+                    ) : (
+                      <span className={tier.text}>{TIER_RULES[memberTier].label}</span>
+                    )}
                   </span>
                 </div>
 
+                {/* What the rank is earned from, in the open: the lifetime
+                    top-ups against the next rank's line (20/24px, the row's
+                    figure size), then the bar, then how much is left. */}
                 <div>
-                  <div className="h-2 overflow-hidden rounded-full border border-white/5 bg-black/60">
+                  <div className="flex flex-wrap items-baseline gap-x-1.5 gap-y-1">
+                    <span className="text-xl font-black tabular-nums leading-none text-white sm:text-2xl">
+                      {formatVnd(toppedUp)}
+                    </span>
+                    <span className="text-sm font-semibold text-neutral-400">
+                      {progress.to !== null ? `/ ${formatVnd(progress.to)} đ đã nạp` : "đ đã nạp"}
+                    </span>
+                  </div>
+                  <div className="mt-3 h-2 overflow-hidden rounded-full border border-white/5 bg-black/60">
                     <div
                       className={`h-full rounded-full ${tier.bar}`}
                       style={{ width: `${progress.percent}%` }}
@@ -259,14 +282,15 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                   <p className="mt-2 text-[12px] text-neutral-400">
                     {nextRule && progress.next ? (
                       <>
-                        Tích lũy thêm để nhận những đặc quyền{" "}
+                        Còn{" "}
+                        <span className="font-bold text-white">{formatVnd(progress.remaining)} đ</span>{" "}
+                        để lên{" "}
                         <Link
                           href="/cap-bac"
-                          className="font-bold text-white underline-offset-2 transition-colors hover:underline"
+                          className={`font-bold underline-offset-2 transition-colors hover:underline ${tier.text}`}
                         >
-                          ưu đãi
-                        </Link>{" "}
-                        dành riêng cho khách hàng
+                          {nextRule.label}
+                        </Link>
                       </>
                     ) : (
                       "Bạn đang ở hạng cao nhất"
@@ -274,62 +298,55 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                   </p>
                 </div>
 
-                {/* What the rank is worth today, what the points are, and
-                    whether the account is verified (the owner, 16/10/2026:
-                    "Hạng hiện tại Elite đổi thành xác minh cấp 2"). Rows on a phone
-                    (label left, value right: as three columns in a 390px card
-                    "Chưa xác minh" cut to "Chưa xác …"), three columns from sm. */}
-                <div className="mt-auto grid grid-cols-1 gap-1.5 border-t border-white/[0.06] pt-2 sm:grid-cols-3 sm:gap-3 sm:pt-1.5">
+                {/* What the rank is worth today, the points, and whether the
+                    account is verified (16/10/2026: "Hạng hiện tại Elite đổi thành
+                    xác minh cấp 2"), each behind a round badge as the reference
+                    draws its three. Rows on a phone, three cells from sm. */}
+                <div className="mt-auto grid grid-cols-1 gap-3 border-t border-white/[0.06] pt-4 sm:grid-cols-3 sm:gap-0 sm:divide-x sm:divide-white/[0.06]">
                   {[
                     {
+                      icon: BadgePercent,
                       label: "Ưu đãi mua tool",
                       value: `Giảm ${formatTierPercent(TIER_RULES[memberTier].discountPercent)}%`,
                       tone: tier.text,
                     },
                     {
+                      icon: Sparkles,
                       label: "Điểm thưởng",
                       value: `${user.points.toLocaleString("vi-VN")} điểm`,
                       tone: "text-white",
                     },
                     {
+                      icon: ShieldCheck,
                       label: "Xác minh cấp 2",
                       value: user.verifiedAt ? "Đã xác minh" : "Chưa xác minh",
                       tone: user.verifiedAt ? "text-emerald-400" : "text-neutral-300",
                     },
-                  ].map(({ label, value, tone }, index) => (
+                  ].map(({ icon: Icon, label, value, tone }, index) => (
                     <div
                       key={label}
-                      className="flex min-w-0 items-center justify-between gap-3 sm:flex-col sm:items-stretch sm:justify-start sm:gap-0.5"
+                      className={`flex min-w-0 items-center gap-3 ${index > 0 ? "sm:pl-4" : ""} ${index < 2 ? "sm:pr-4" : ""}`}
                     >
-                      {/* 10px like every other label on the card, and allowed
-                          to wrap from sm; mt-auto keeps the three values level
-                          when only some labels take two lines. */}
-                      <span className="text-[10px] font-black uppercase leading-tight tracking-widest text-neutral-500">
-                        {label}
-                      </span>
                       <span
-                        className={`mt-auto flex min-w-0 items-center gap-1 text-[13px] font-bold leading-none ${tone}`}
+                        className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] ${tone}`}
+                        aria-hidden
                       >
-                        {index === 0 ? (
-                          <Check size={13} strokeWidth={3} className={`shrink-0 ${tier.text}`} />
-                        ) : null}
-                        <span className="truncate">{value}</span>
+                        <Icon size={16} />
+                      </span>
+                      <span className="flex min-w-0 flex-col gap-1">
+                        <span className="text-[10px] font-black uppercase leading-tight tracking-widest text-neutral-500">
+                          {label}
+                        </span>
+                        <span className={`truncate text-[13px] font-bold leading-none ${tone}`}>{value}</span>
                       </span>
                     </div>
                   ))}
                 </div>
               </div>
 
-              {/* Phone: Nạp tiền across, the other two side by side under
-                  it. sm–lg: one row of three. xl: the column, the three
-                  spread over the tier card's height (a one-column grid; the
-                  class must not touch the ${ that follows, or Tailwind never
-                  sees it). */}
-              <div
-                className={`grid grid-cols-2 gap-2.5 xl:grid-cols-1 xl:content-between ${
-                  DOORS.length > 2 ? " sm:grid-cols-3" : ""
-                }`}
-              >
+              {/* Phone: 2x2. sm–lg: one row of four. xl: the column, the four
+                  spread over the tier card's height. */}
+              <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4 xl:grid-cols-1 xl:content-between">
                 {DOORS.map(({ label, href, icon: Icon, primary }) => (
                   <Link
                     key={href}
@@ -338,7 +355,7 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                     // (the agency desk's own Nạp tiền, /security's submit).
                     className={`inline-flex h-11 items-center justify-center gap-2 rounded-xl border px-3 text-[11px] font-black uppercase tracking-widest transition-colors ${
                       primary
-                        ? `${DOORS.length > 2 ? "col-span-2 sm:col-span-1 " : ""}border-[var(--menzu-accent)] bg-[var(--menzu-accent)] text-white hover:bg-[var(--menzu-accent-dark)]`
+                        ? "border-[var(--menzu-accent)] bg-[var(--menzu-accent)] text-white hover:bg-[var(--menzu-accent-dark)]"
                         : "border-white/10 bg-white/[0.04] text-white hover:border-white/25 hover:bg-white/[0.08]"
                     }`}
                   >
