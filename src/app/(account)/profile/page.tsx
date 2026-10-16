@@ -317,10 +317,11 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
 
               {/* Phone: Nạp tiền across, the other two side by side under
                   it (three stacked bars pushed the balance off the first
-                  screen). sm–lg: one row of three. xl: the column. With only
+                  screen). sm–lg: one row of three. xl: the column (a one-column grid; the
+                  flex-col variant never took, the doors sat in a row). With only
                   two doors (the wheel's off), the two share one row below xl. */}
               <div
-                className={`grid grid-cols-2 gap-2.5 xl:flex xl:flex-col${
+                className={`grid grid-cols-2 gap-2.5 xl:grid-cols-1${
                   DOORS.length > 2 ? " sm:grid-cols-3" : ""
                 }`}
               >
