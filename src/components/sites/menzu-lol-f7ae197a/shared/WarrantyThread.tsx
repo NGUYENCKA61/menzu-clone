@@ -96,7 +96,7 @@ export function WarrantyThread({
     <div
       ref={pane}
       data-pane
-      className={`${size} overflow-y-auto rounded-xl border border-white/[0.06] bg-black/30 p-4`}
+      className={`${size} overflow-y-auto rounded-xl border border-line bg-black/30 p-4`}
     >
       <ol className="flex flex-col gap-3">
         {lines.map((line, index) => {
@@ -135,7 +135,7 @@ export function WarrantyThread({
             >
               <span
                 aria-hidden
-                className={`flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-full border border-white/10 bg-black/40 text-[13px] font-semibold text-neutral-300 ${
+                className={`flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-full border border-white/10 bg-black/40 text-[14px] font-semibold text-neutral-300 ${
                   grouped ? "invisible" : "mt-[18px]"
                 }`}
               >
@@ -156,12 +156,12 @@ export function WarrantyThread({
                 className={`flex min-w-0 flex-col ${mine ? "items-end" : "items-start"}`}
               >
                 {grouped ? null : (
-                  <span className="mb-1 px-1 text-[11px] font-semibold text-neutral-500">
+                  <span className="mb-1 px-1 text-[13px] font-semibold text-neutral-500">
                     <span className="text-neutral-300">{who}</span> · {line.at}
                   </span>
                 )}
                 <div
-                  className={`max-w-[88%] rounded-2xl border px-3.5 py-2.5 text-[13px] leading-relaxed text-neutral-100 sm:max-w-[75%] ${
+                  className={`max-w-[88%] rounded-2xl border px-3.5 py-2.5 text-[14px] leading-relaxed text-neutral-100 sm:max-w-[75%] ${
                     mine
                       ? `rounded-tr-md ${mineTone}`
                       : "rounded-tl-md border-white/10 bg-white/[0.04]"
@@ -191,10 +191,10 @@ export function WarrantyThread({
                   ) : null}
                 </div>
                 {moved ? (
-                  <span className="mt-1 inline-flex items-center gap-1.5 px-1 text-[11px] text-neutral-500">
+                  <span className="mt-1 inline-flex items-center gap-1.5 px-1 text-[13px] text-neutral-500">
                     Chuyển sang
                     <span
-                      className={`inline-flex items-center gap-1 rounded-md border px-1.5 py-px text-[9.5px] font-semibold ${moved.tile}`}
+                      className={`inline-flex items-center gap-1 rounded-md border px-1.5 py-px text-[12px] font-semibold ${moved.tile}`}
                     >
                       <span
                         aria-hidden
@@ -210,7 +210,7 @@ export function WarrantyThread({
         })}
       </ol>
       {footer ? (
-        <div className="mt-4 text-center text-[11px] text-neutral-500">
+        <div className="mt-4 text-center text-[13px] text-neutral-500">
           {footer}
         </div>
       ) : null}

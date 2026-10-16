@@ -92,8 +92,8 @@ function ContactRow({
         />
       </span>
       <span className="min-w-0 flex-1">
-        <span className="block truncate text-[12.5px] font-bold text-white">{action}</span>
-        <span className="block truncate text-[11px] text-neutral-500">{note}</span>
+        <span className="block truncate text-[14px] font-bold text-white">{action}</span>
+        <span className="block truncate text-[13px] text-neutral-500">{note}</span>
       </span>
       <ChevronRight
         aria-hidden
@@ -129,7 +129,7 @@ function DirectChannel({
       target="_blank"
       rel="noopener noreferrer"
       aria-label={label}
-      className="flex h-12 w-[168px] items-center gap-3 whitespace-nowrap rounded-full border border-white/[0.14] bg-[#0c0d12] pl-3 pr-4 shadow-[0_12px_40px_-10px_rgba(0,0,0,0.9),inset_0_1px_0_rgba(255,255,255,0.14)] transition-colors duration-200 active:bg-[#14141c]"
+      className="flex h-12 w-[168px] items-center gap-3 whitespace-nowrap rounded-full border border-white/[0.14] bg-[#0c0d12] pl-3 pr-4 shadow-[0_12px_40px_-10px_rgba(0,0,0,0.9)] transition-colors duration-200 active:bg-[#14141c]"
     >
       <Image
         src={iconUrl}
@@ -138,7 +138,7 @@ function DirectChannel({
         height={26}
         className="h-[26px] w-[26px] shrink-0 object-contain"
       />
-      <span className="text-[13px] font-bold leading-none text-white">{name}</span>
+      <span className="text-[14px] font-bold leading-none text-white">{name}</span>
     </a>
   );
 }
@@ -267,8 +267,8 @@ export function SupportWidget({
               THICHTHIHACK, and the line under it is the one promise the panel
               makes — kept honest by the clock rather than always claiming five
               minutes. */}
-          <div className="flex items-center gap-3 border-b border-white/[0.07] bg-gradient-to-b from-white/[0.06] to-transparent px-4 py-3.5">
-            <span className="relative grid h-10 w-10 shrink-0 place-items-center overflow-hidden rounded-2xl border border-white/[0.14] bg-white/[0.06] shadow-[inset_0_1px_0_rgba(255,255,255,0.18)]">
+          <div className="flex items-center gap-3 border-b border-line px-4 py-3.5">
+            <span className="relative grid h-10 w-10 shrink-0 place-items-center overflow-hidden rounded-full border border-line bg-raise">
               <Image
                 src={brand.logo}
                 alt=""
@@ -278,10 +278,10 @@ export function SupportWidget({
               />
             </span>
             <span className="min-w-0 flex-1">
-              <span className="block truncate text-[13.5px] font-semibold text-white">
+              <span className="block truncate text-[15px] font-semibold text-white">
                 {brand.name}
               </span>
-              <span className="mt-0.5 flex items-center gap-1.5 text-[11px] text-neutral-400">
+              <span className="mt-0.5 flex items-center gap-1.5 text-[13px] text-neutral-400">
                 <span aria-hidden className={NAME_DOT(status)} />
                 <span className="truncate">{status?.label ?? "Hỗ trợ khách hàng"}</span>
               </span>
@@ -302,12 +302,12 @@ export function SupportWidget({
               than a block of colour: on glass, weight comes from the light
               catching an edge, not from filling a shape in. */}
           {assistant && canMessage ? (
-            <div className="flex gap-1 border-b border-white/[0.07] bg-white/[0.03] p-1.5">
+            <div className="flex gap-1 border-b border-line p-1.5">
               <button
                 type="button"
                 onClick={() => choose("ai")}
                 aria-pressed={showing === "ai"}
-                className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl border px-3 py-2 text-[12px] font-bold transition-colors ${
+                className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl border px-3 py-2 text-[13px] font-bold transition-colors ${
                   showing === "ai"
                     ? "border-white/[0.14] bg-white/[0.10] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.16)]"
                     : "border-transparent text-neutral-400 hover:bg-white/[0.05] hover:text-white"
@@ -323,7 +323,7 @@ export function SupportWidget({
                 type="button"
                 onClick={() => choose("fanpage")}
                 aria-pressed={showing === "fanpage"}
-                className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl border px-3 py-2 text-[12px] font-bold transition-colors ${
+                className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl border px-3 py-2 text-[13px] font-bold transition-colors ${
                   showing === "fanpage"
                     ? "border-white/[0.14] bg-white/[0.10] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.16)]"
                     : "border-transparent text-neutral-400 hover:bg-white/[0.05] hover:text-white"
@@ -347,7 +347,7 @@ export function SupportWidget({
                   answers 500 today. Zalo has never offered one at all. So the
                   panel does the honest thing instead: it says who is on the
                   other end, and opens the app the customer already has. */}
-              <p className="px-1 pt-0.5 text-[12px] leading-relaxed text-neutral-400">
+              <p className="px-1 pt-0.5 text-[13px] leading-relaxed text-neutral-400">
                 Chọn kênh bạn hay dùng, tin nhắn vào thẳng hộp thư của shop.
                 Admin tư vấn chọn hack, xử lý đơn hàng và hướng dẫn cài đặt.
               </p>
@@ -379,14 +379,14 @@ export function SupportWidget({
                   href={fanpage.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-white/[0.12] bg-white/[0.05] px-4 py-2 text-[12px] font-bold text-neutral-300 transition-colors hover:bg-white/[0.09] hover:text-white"
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-white/[0.12] bg-white/[0.05] px-4 py-2 text-[13px] font-bold text-neutral-300 transition-colors hover:bg-white/[0.09] hover:text-white"
                 >
                   <ExternalLink size={14} />
                   Xem fanpage
                 </a>
               ) : null}
 
-              <p className="px-1 text-center text-[10.5px] leading-relaxed text-neutral-500">
+              <p className="px-1 text-center text-[12px] leading-relaxed text-neutral-500">
                 Mở ở tab mới, trang shop vẫn giữ nguyên.
               </p>
             </div>
@@ -396,7 +396,7 @@ export function SupportWidget({
 
           {/* True whichever half is showing, and the reason the header can
               afford to promise minutes at all. */}
-          <p className="flex items-center justify-center gap-1.5 border-t border-white/[0.07] bg-white/[0.02] px-3 py-2 text-[12px] font-bold text-neutral-500">
+          <p className="flex items-center justify-center gap-1.5 border-t border-line px-3 py-2 text-[13px] font-bold text-neutral-500">
             <Clock size={11} />
             Hỗ trợ {SUPPORT_WINDOW} hằng ngày
           </p>
@@ -495,14 +495,14 @@ export function SupportWidget({
           )}
 
           <span className="hidden min-w-0 flex-1 sm:block">
-            <span className="block text-[13px] font-bold leading-tight tracking-tight text-white">
+            <span className="block text-[14px] font-bold leading-tight text-white">
               {assistant && !fanpage ? "Trợ lý AI" : "Hỗ trợ khách hàng"}
             </span>
             {/* The hours, not a status: this tab is server-rendered and can be
                 served from a cache, and a green "online" frozen into a cached
                 page would be lying at two in the morning. The live status is
                 read from the browser's own clock when the panel opens. */}
-            <span className="mt-0.5 block text-[10.5px] leading-tight text-neutral-500">
+            <span className="mt-0.5 block text-[12px] leading-tight text-neutral-500">
               Hỗ trợ {SUPPORT_WINDOW} hằng ngày
             </span>
           </span>

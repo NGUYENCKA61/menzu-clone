@@ -94,14 +94,14 @@ export function AssistantChat() {
         ))}
 
         {busy ? (
-          <span className="inline-flex items-center gap-2 self-start rounded-2xl rounded-bl-sm bg-white/[0.04] px-3 py-2 text-[12px] text-neutral-400">
+          <span className="inline-flex items-center gap-2 self-start rounded-2xl rounded-bl-sm bg-white/[0.04] px-3 py-2 text-[13px] text-neutral-400">
             <Loader2 size={13} className="animate-spin" />
             Đang trả lời…
           </span>
         ) : null}
 
         {error ? (
-          <p className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-[11px] leading-relaxed text-red-300">
+          <p className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-[13px] leading-relaxed text-red-300">
             {error}
           </p>
         ) : null}
@@ -115,7 +115,7 @@ export function AssistantChat() {
                 key={prompt}
                 type="button"
                 onClick={() => void send(prompt)}
-                className="self-start rounded-full border border-white/10 bg-white/[0.03] px-3 py-1.5 text-left text-[11px] text-neutral-300 transition-colors hover:border-[var(--brand)]/50 hover:text-white"
+                className="self-start rounded-full border border-white/10 px-3 py-1.5 text-left text-[13px] text-neutral-300 transition-colors hover:border-[var(--brand)]/50 hover:text-white"
               >
                 {prompt}
               </button>
@@ -138,7 +138,7 @@ export function AssistantChat() {
           disabled={busy}
           placeholder="Nhập câu hỏi…"
           aria-label="Câu hỏi cho trợ lý"
-          className="min-w-0 flex-1 rounded-xl border border-white/10 bg-neutral-950/60 px-3 py-2 text-[12px] text-white outline-none transition-colors placeholder-neutral-500 focus:border-[var(--brand)]/60 disabled:opacity-60"
+          className="min-w-0 flex-1 rounded-xl border border-white/10 bg-neutral-950/60 px-3 py-2 text-[13px] text-white outline-none transition-colors placeholder-neutral-500 focus:border-[var(--brand)]/60 disabled:opacity-60"
         />
         <button
           type="submit"
@@ -154,7 +154,7 @@ export function AssistantChat() {
           thing answering is a machine reading the shop's catalogue, and it
           cannot see anybody's order. A customer who knows that asks the admin
           for the things only the admin can do. */}
-      <p className="flex items-start gap-1.5 px-3 pb-2.5 text-[10px] leading-relaxed text-neutral-500">
+      <p className="flex items-start gap-1.5 px-3 pb-2.5 text-[12px] leading-relaxed text-neutral-500">
         <Sparkles size={11} className="mt-[1px] shrink-0" />
         Trợ lý AI tư vấn sản phẩm và hướng dẫn cài đặt. Không xem được đơn hàng hay
         số dư, việc đó bấm &quot;Nhắn admin&quot; ở trên.
@@ -168,7 +168,7 @@ function Bubble({ role, children }: { role: Turn["role"]; children: React.ReactN
   const mine = role === "user";
   return (
     <p
-      className={`max-w-[85%] whitespace-pre-wrap rounded-2xl px-3 py-2 text-[12px] leading-relaxed ${
+      className={`max-w-[85%] whitespace-pre-wrap rounded-2xl px-3 py-2 text-[13px] leading-relaxed ${
         mine
           ? "self-end rounded-br-sm bg-[var(--brand)]/20 text-white"
           : "self-start rounded-bl-sm bg-white/[0.04] text-neutral-200"

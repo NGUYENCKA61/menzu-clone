@@ -24,6 +24,7 @@ import {
 } from "react";
 
 import { relativeTime } from "@/lib/announcements";
+import { sentenceCase } from "@/lib/displayCase";
 import { floatingWidgetHidden } from "@/lib/supportWidgetRoutes";
 import { mergeMessages, POLL_MS, SHOP_MESSAGE_MAX, type ChatMessage } from "@/lib/warrantyChat";
 import { INBOX_POLL_MS, INBOX_RECENT_DAYS, type InboxTicket, type InboxView } from "@/lib/warrantyInbox";
@@ -103,7 +104,7 @@ function StatusChip({ status }: { status: WarrantyStatus }) {
   const state = WARRANTY_STATUS[status];
   return (
     <span
-      className={`inline-flex shrink-0 items-center gap-1 rounded-md border px-1.5 py-px text-[9.5px] font-semibold ${state.tile}`}
+      className={`inline-flex shrink-0 items-center gap-1 rounded-md border px-1.5 py-px text-[12px] font-semibold ${state.tile}`}
     >
       <span aria-hidden className={`h-1 w-1 rounded-full ${state.dot}`} />
       {state.label}
@@ -140,15 +141,15 @@ function TicketRow({
         id={domId}
         type="button"
         onClick={() => onPick(ticket)}
-        className="flex w-full items-start gap-3 border-b border-white/[0.05] px-4 py-3 text-left transition-colors hover:bg-white/[0.04] focus-visible:bg-white/[0.06] focus-visible:outline-none"
+        className="flex w-full items-start gap-3 border-b border-line px-4 py-3 text-left transition-colors hover:bg-white/[0.04] focus-visible:bg-white/[0.06] focus-visible:outline-none"
       >
         <BuyerMark name={ticket.buyerName} src={ticket.buyerAvatar} />
         <span className="min-w-0 flex-1">
           <span className="flex items-center gap-2">
-            <span className="min-w-0 flex-1 truncate text-[12.5px] font-bold text-white">
+            <span className="min-w-0 flex-1 truncate text-[14px] font-bold text-white">
               {ticket.buyerName}
             </span>
-            <span className="shrink-0 text-[10.5px] tabular-nums text-neutral-500">
+            <span className="shrink-0 text-[12px] tabular-nums text-neutral-500">
               <Ago iso={ticket.last.sentAt} stamp={ticket.last.at} />
             </span>
             {ticket.waitingForShop ? (
@@ -157,14 +158,14 @@ function TicketRow({
               </span>
             ) : null}
           </span>
-          <span className="mt-0.5 block truncate text-[11px] text-neutral-500">
-            <span className="font-semibold text-neutral-300">{ticket.orderCode}</span> ·{" "}
-            {ticket.productName}
+          <span className="mt-0.5 block truncate text-[13px] text-neutral-500">
+            <span className="font-semibold text-neutral-300">{ticket.orderCode}</span>,{" "}
+            {sentenceCase(ticket.productName)}
           </span>
           <span className="mt-1 flex min-w-0 items-center gap-1.5">
             <StatusChip status={ticket.status} />
             <span
-              className={`min-w-0 truncate text-[11.5px] ${
+              className={`min-w-0 truncate text-[13px] ${
                 ticket.waitingForShop ? "font-semibold text-neutral-200" : "text-neutral-400"
               }`}
             >
@@ -562,7 +563,7 @@ export function AdminWarrantyInbox({ initial }: { initial: InboxView | null }) {
               <>
                 {/* THE THREAD: who, which order, its state, the way back and
                     the way to the full ticket page. */}
-                <div className="flex shrink-0 items-center gap-2.5 border-b border-white/[0.07] bg-gradient-to-b from-white/[0.06] to-transparent px-2.5 py-2.5">
+                <div className="flex shrink-0 items-center gap-2.5 border-b border-line px-2.5 py-2.5">
                   <button
                     ref={backRef}
                     type="button"
@@ -574,12 +575,12 @@ export function AdminWarrantyInbox({ initial }: { initial: InboxView | null }) {
                   </button>
                   <BuyerMark name={selected.buyerName} src={selected.buyerAvatar} />
                   <span className="min-w-0 flex-1">
-                    <span className="block truncate text-[13px] font-bold text-white">
+                    <span className="block truncate text-[14px] font-bold text-white">
                       {selected.buyerName}
                     </span>
-                    <span className="block truncate text-[11px] text-neutral-500">
-                      <span className="font-semibold text-neutral-300">{selected.orderCode}</span> ·{" "}
-                      {selected.productName}
+                    <span className="block truncate text-[13px] text-neutral-500">
+                      <span className="font-semibold text-neutral-300">{selected.orderCode}</span>,{" "}
+                      {sentenceCase(selected.productName)}
                     </span>
                   </span>
                   <button
@@ -591,12 +592,12 @@ export function AdminWarrantyInbox({ initial }: { initial: InboxView | null }) {
                     <X size={16} aria-hidden />
                   </button>
                 </div>
-                <div className="flex shrink-0 items-center justify-between gap-2 border-b border-white/[0.07] bg-white/[0.03] px-4 py-2">
+                <div className="flex shrink-0 items-center justify-between gap-2 border-b border-line px-4 py-2">
                   {status ? <StatusChip status={status} /> : <span />}
                   <Link
                     href={`/admin/warranty/${selected.id}`}
                     onClick={() => close(false)}
-                    className="inline-flex items-center gap-1 text-[11px] font-bold text-neutral-400 transition-colors hover:text-white"
+                    className="inline-flex items-center gap-1 text-[13px] font-bold text-neutral-400 transition-colors hover:text-white"
                   >
                     Mở trang đầy đủ
                     <ExternalLink size={12} aria-hidden />
@@ -627,7 +628,7 @@ export function AdminWarrantyInbox({ initial }: { initial: InboxView | null }) {
                 </div>
 
                 {canReply ? (
-                  <div className="shrink-0 border-t border-white/[0.07] bg-white/[0.02] p-3">
+                  <div className="shrink-0 border-t border-line p-3">
                     <div className="flex items-end gap-2">
                       {/* 16px on a phone: below that, iOS zooms the whole
                           sheet in on focus. */}
@@ -654,31 +655,31 @@ export function AdminWarrantyInbox({ initial }: { initial: InboxView | null }) {
                         maxLength={SHOP_MESSAGE_MAX}
                         placeholder="Nhắn cho khách…"
                         aria-label="Trả lời khách"
-                        className="max-h-32 min-h-10 flex-1 resize-none rounded-xl border border-white/10 bg-neutral-950/60 px-3 py-2.5 text-base leading-snug sm:text-[13px] text-white placeholder-neutral-600 outline-none transition-colors focus:border-[var(--menzu-accent)]/60"
+                        className="max-h-32 min-h-10 flex-1 resize-none rounded-xl border border-white/10 bg-neutral-950/60 px-3 py-2.5 text-base leading-snug sm:text-[14px] text-white placeholder-neutral-600 outline-none transition-colors focus:border-[var(--menzu-accent)]/60"
                       />
                       <button
                         type="button"
                         onClick={() => void send()}
                         disabled={sending || text.trim().length === 0}
-                        className="inline-flex h-10 shrink-0 items-center gap-1.5 rounded-xl bg-[var(--menzu-accent)] px-3 text-[12px] font-bold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+                        className="inline-flex h-10 shrink-0 items-center gap-1.5 rounded-xl bg-[var(--menzu-accent)] px-3 text-[13px] font-bold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
                       >
                         <Send size={15} aria-hidden />
                         {sending ? "Đang gửi…" : "Gửi"}
                       </button>
                     </div>
                     {sendError ? (
-                      <p role="alert" className="mt-2 text-[12px] font-semibold text-rose-300">
+                      <p role="alert" className="mt-2 text-[13px] font-semibold text-rose-300">
                         {sendError}
                       </p>
                     ) : null}
                     {text.length > SHOP_MESSAGE_MAX - 100 ? (
-                      <p className="mt-1 text-right text-[10.5px] tabular-nums text-neutral-500">
+                      <p className="mt-1 text-right text-[12px] tabular-nums text-neutral-500">
                         {text.length}/{SHOP_MESSAGE_MAX}
                       </p>
                     ) : null}
                   </div>
                 ) : (
-                  <p className="shrink-0 border-t border-white/[0.07] bg-white/[0.02] px-4 py-3 text-[12px] text-neutral-500">
+                  <p className="shrink-0 border-t border-line px-4 py-3 text-[13px] text-neutral-500">
                     Yêu cầu đã xong, khung trao đổi đã đóng.
                   </p>
                 )}
@@ -687,15 +688,15 @@ export function AdminWarrantyInbox({ initial }: { initial: InboxView | null }) {
               <>
                 {/* THE LIST: what the panel is, how many are waiting, and
                     the way out. */}
-                <div className="flex shrink-0 items-center gap-3 border-b border-white/[0.07] bg-gradient-to-b from-white/[0.06] to-transparent px-4 py-3.5">
-                  <span className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl border border-white/[0.14] bg-white/[0.06] shadow-[inset_0_1px_0_rgba(255,255,255,0.18)]">
+                <div className="flex shrink-0 items-center gap-3 border-b border-line px-4 py-3.5">
+                  <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-line bg-raise">
                     <MessagesSquare size={18} aria-hidden className="text-[var(--menzu-accent)]" />
                   </span>
                   <span className="min-w-0 flex-1">
-                    <span className="block truncate text-[13.5px] font-black text-white">
+                    <span className="block truncate text-[15px] font-bold text-white">
                       Tin nhắn bảo hành
                     </span>
-                    <span className="mt-0.5 flex items-center gap-1.5 text-[11px] text-neutral-400">
+                    <span className="mt-0.5 flex items-center gap-1.5 text-[13px] text-neutral-400">
                       <span
                         aria-hidden
                         className={`h-1.5 w-1.5 shrink-0 rounded-full ${
@@ -720,7 +721,7 @@ export function AdminWarrantyInbox({ initial }: { initial: InboxView | null }) {
                 <div
                   role="tablist"
                   aria-label="Lọc yêu cầu bảo hành"
-                  className="flex shrink-0 gap-1 border-b border-white/[0.07] bg-white/[0.03] p-1.5"
+                  className="flex shrink-0 gap-1 border-b border-line p-1.5"
                 >
                   {(
                     [
@@ -743,7 +744,7 @@ export function AdminWarrantyInbox({ initial }: { initial: InboxView | null }) {
                         tabIndex={on ? 0 : -1}
                         onClick={() => setTab(item.key)}
                         onKeyDown={onTabKey}
-                        className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl border px-3 py-2 text-[12px] font-bold transition-colors ${
+                        className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl border px-3 py-2 text-[13px] font-bold transition-colors ${
                           on
                             ? "border-white/[0.14] bg-white/[0.10] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.16)]"
                             : "border-transparent text-neutral-400 hover:bg-white/[0.05] hover:text-white"
@@ -751,7 +752,7 @@ export function AdminWarrantyInbox({ initial }: { initial: InboxView | null }) {
                       >
                         {item.label}
                         <span
-                          className={`rounded-full px-1.5 text-[10px] tabular-nums ${
+                          className={`rounded-full px-1.5 text-[12px] tabular-nums ${
                             item.key === "waiting" && item.count > 0
                               ? "bg-[var(--menzu-accent)] text-white"
                               : "bg-white/10 text-neutral-300"
@@ -773,12 +774,12 @@ export function AdminWarrantyInbox({ initial }: { initial: InboxView | null }) {
                   {listed.length === 0 ? (
                     <div className="flex flex-col items-center px-6 py-10 text-center">
                       <Inbox size={28} aria-hidden className="text-neutral-600" />
-                      <p className="mt-3 text-[13px] font-bold text-white">
+                      <p className="mt-3 text-[14px] font-bold text-white">
                         {tab === "waiting"
                           ? "Không có khách nào chờ trả lời"
                           : "Không có yêu cầu bảo hành nào đang mở"}
                       </p>
-                      <p className="mt-1 text-[11.5px] leading-relaxed text-neutral-500">
+                      <p className="mt-1 text-[13px] leading-relaxed text-neutral-500">
                         {inbox === null
                           ? "Đang tải danh sách…"
                           : "Tin mới của khách sẽ hiện ở đây."}
@@ -800,7 +801,7 @@ export function AdminWarrantyInbox({ initial }: { initial: InboxView | null }) {
                       open ones: read-only, for the context of a recent fix. */}
                   {tab === "open" && closedList.length > 0 ? (
                     <>
-                      <p className="border-b border-white/[0.05] bg-white/[0.02] px-4 py-1.5 text-[12px] font-bold text-neutral-500">
+                      <p className="border-b border-line px-4 py-1.5 text-[13px] font-bold text-neutral-500">
                         Đã xong trong {INBOX_RECENT_DAYS} ngày qua
                       </p>
                       <ul>
@@ -820,7 +821,7 @@ export function AdminWarrantyInbox({ initial }: { initial: InboxView | null }) {
                 <Link
                   href="/admin/warranty"
                   onClick={() => close(false)}
-                  className="flex shrink-0 items-center justify-center gap-1.5 border-t border-white/[0.07] bg-white/[0.02] px-3 py-2.5 text-[12px] font-bold text-neutral-500 transition-colors hover:text-white"
+                  className="flex shrink-0 items-center justify-center gap-1.5 border-t border-line px-3 py-2.5 text-[13px] font-bold text-neutral-500 transition-colors hover:text-white"
                 >
                   Xem tất cả yêu cầu
                   <ChevronRight size={12} aria-hidden />
@@ -858,10 +859,10 @@ export function AdminWarrantyInbox({ initial }: { initial: InboxView | null }) {
           />
 
           <span className="hidden min-w-0 flex-1 sm:block">
-            <span className="block text-[13px] font-bold leading-tight tracking-tight text-white">
+            <span className="block text-[14px] font-bold leading-tight text-white">
               Tin nhắn bảo hành
             </span>
-            <span className="mt-0.5 block text-[10.5px] leading-tight text-neutral-500">
+            <span className="mt-0.5 block text-[12px] leading-tight text-neutral-500">
               {summary}
             </span>
           </span>
@@ -870,7 +871,7 @@ export function AdminWarrantyInbox({ initial }: { initial: InboxView | null }) {
           {waitingCount > 0 ? (
             <span
               aria-hidden
-              className="absolute -right-1 -top-1 grid h-5 min-w-5 place-items-center rounded-full bg-[var(--menzu-accent)] px-1 text-[10px] font-black tabular-nums leading-none text-white shadow-[0_0_0_2px_rgba(0,0,0,0.35)] sm:static sm:shrink-0"
+              className="absolute -right-1 -top-1 grid h-5 min-w-5 place-items-center rounded-full bg-[var(--menzu-accent)] px-1 text-[12px] font-bold tabular-nums leading-none text-white shadow-[0_0_0_2px_rgba(0,0,0,0.35)] sm:static sm:shrink-0"
             >
               {badge}
             </span>

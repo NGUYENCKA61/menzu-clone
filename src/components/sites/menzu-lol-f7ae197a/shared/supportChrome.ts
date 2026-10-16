@@ -16,8 +16,10 @@
  * glass; the inset white hairline along the top is what makes the blur look
  * like a pane rather than a smudge, and it is the piece most often left out.
  */
-export const GLASS =
-  "border border-white/[0.12] bg-[#0b0b10]/70 backdrop-blur-2xl backdrop-saturate-150";
+// LAB (the owner, 16/10/2026: "làm lại phần chat sao cho đẹp hơn"): a solid
+// panel in the shop's own grey; the glass let the page behind show through
+// the words.
+export const GLASS = "border border-line bg-panel";
 
 /**
  * The frame both widgets hang from.
@@ -33,11 +35,10 @@ export const FRAME =
   "support-frame pointer-events-none fixed bottom-[calc(4rem+0.75rem)] right-3 z-[101] flex flex-col items-end sm:bottom-0 sm:right-4";
 
 /** The panel's drop shadow and top hairline, over GLASS. */
-export const PANEL_SHADOW =
-  "shadow-[0_30px_80px_-20px_rgba(0,0,0,0.95),inset_0_1px_0_rgba(255,255,255,0.14)]";
+export const PANEL_SHADOW = "shadow-[0_24px_64px_-16px_rgba(0,0,0,0.9)]";
 
 /**
  * The launcher: a round button the size of a thumb on a phone, a tab hinged
  * on the window's bottom edge from sm up. Wears GLASS.
  */
-export const LAUNCHER = `group flex h-14 w-14 items-center justify-center rounded-full text-left shadow-[0_12px_40px_-10px_rgba(0,0,0,0.9),inset_0_1px_0_rgba(255,255,255,0.14)] transition-colors duration-200 hover:bg-[#14141c]/80 sm:h-auto sm:w-auto sm:min-w-[250px] sm:justify-start sm:gap-3 sm:rounded-none sm:rounded-t-[18px] sm:border-b-0 sm:px-3.5 sm:py-3 sm:shadow-[0_-12px_40px_-10px_rgba(0,0,0,0.9),inset_0_1px_0_rgba(255,255,255,0.14)] ${GLASS}`;
+export const LAUNCHER = `group flex h-14 w-14 items-center justify-center rounded-full text-left shadow-[0_12px_40px_-10px_rgba(0,0,0,0.9)] transition-colors duration-200 hover:bg-raise sm:h-auto sm:w-auto sm:min-w-[250px] sm:justify-start sm:gap-3 sm:rounded-none sm:rounded-t-[18px] sm:border-b-0 sm:px-3.5 sm:py-3 sm:shadow-[0_-12px_40px_-10px_rgba(0,0,0,0.9)] ${GLASS}`;
