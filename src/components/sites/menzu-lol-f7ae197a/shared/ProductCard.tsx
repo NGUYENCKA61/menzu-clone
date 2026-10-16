@@ -5,6 +5,7 @@ import { CardImage } from "@/components/sites/menzu-lol-f7ae197a/shared/CardImag
 import { SiteLink } from "./SiteLink";
 import { Lock } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { sentenceCase } from "@/lib/displayCase";
 import {
   discountPct,
   formatVnd,
@@ -129,9 +130,9 @@ export function ProductCard({ product, priority = false, eager = false }: Produc
       }}
       // acc-card is a hook for the light trial "moi" (theme-light.css,
       // part 6); it carries no style of its own.
-      className="acc-card group flex h-full w-full flex-col overflow-hidden rounded-[15px] border border-[#24252a] bg-[#101114] lift-card hover:-translate-y-1 hover:border-[var(--menzu-accent)]/50 hover:shadow-[0_15px_40px_#00000088]"
+      className="acc-card lab-notch group flex h-full w-full flex-col overflow-hidden border border-line bg-panel transition-colors hover:border-line-strong"
     >
-      <div className="relative aspect-[16/10] w-full overflow-hidden bg-[#17181b]">
+      <div className="lab-notch-top relative aspect-[16/10] w-full overflow-hidden bg-raise">
         <CardImage
           src={product.imageUrl ?? productImage(product.code)}
           // A stock code is not a description. Somebody hearing this read out
@@ -201,8 +202,8 @@ export function ProductCard({ product, priority = false, eager = false }: Produc
       <div className="flex flex-1 flex-col p-4">
         {/* Title with the red marker bar, same as the software card's. */}
         <div className="flex items-center gap-2.5">
-          <h3 className="truncate text-[17px] font-black text-white">
-            {product.name ||
+          <h3 className="truncate text-[17px] font-semibold text-frost">
+            {(product.name ? sentenceCase(product.name) : "") ||
               [product.rank, product.skins > 0 ? `${product.skins} Skins` : ""]
                 .filter(Boolean)
                 .join(" - ") ||

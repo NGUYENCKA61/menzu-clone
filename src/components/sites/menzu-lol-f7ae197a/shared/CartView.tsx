@@ -32,6 +32,7 @@ import {
 } from "@/lib/memberTiers";
 
 import { formatVnd } from "./productData";
+import { sentenceCase } from "@/lib/displayCase";
 import {
   VOUCHER_APPLIED,
   voucherApplyClass,
@@ -191,9 +192,10 @@ function ReceiptLine({ line }: { line: CartLine }) {
       <div className="min-w-0 flex-1">
         <Link
           href={line.href}
-          className="block truncate text-sm font-black text-white transition-colors hover:text-[var(--menzu-accent)]"
+          title={sentenceCase(line.name)}
+          className="block truncate text-[15px] font-semibold text-frost transition-colors hover:text-white"
         >
-          {line.name}
+          {sentenceCase(line.name)}
         </Link>
         <div className="mt-1 flex flex-wrap items-center gap-1.5">
           {/* Neutral here, not the accent: nothing on a receipt is left to
@@ -746,9 +748,9 @@ export function CartView({
               <div className="flex min-w-0 flex-1 flex-col gap-1.5">
                 <Link
                   href={line.href}
-                  className="line-clamp-2 text-sm font-black leading-snug text-white transition-colors hover:text-[var(--menzu-accent)] sm:text-base"
+                  className="line-clamp-2 text-[15px] font-semibold leading-snug text-frost transition-colors hover:text-white sm:text-[17px]"
                 >
-                  {line.name}
+                  {sentenceCase(line.name)}
                 </Link>
                 {/* The same neutral chip the orders list, the receipt and the
                     warranty desk use for a tier — alone: the "N đ / bản" beside

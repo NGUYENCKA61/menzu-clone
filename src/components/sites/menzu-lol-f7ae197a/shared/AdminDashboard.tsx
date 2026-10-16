@@ -13,6 +13,7 @@ import {
 import { formatVnd } from "./productData";
 
 import { linePoints, TX_STATE_LABELS, type TxState } from "@/lib/dashboard";
+import { sentenceCase } from "@/lib/displayCase";
 
 export interface StatItem {
   label: string;
@@ -80,8 +81,8 @@ export interface TransactionRow {
   state: TxState;
 }
 
-const CARD = "rounded-xl border border-white/[0.08] bg-[#0e0e11]";
-const CAP = "text-[10px] font-black uppercase tracking-widest text-neutral-500";
+const CARD = "rounded-[14px] border border-line bg-raise/40";
+const CAP = "text-[13px] font-medium text-mist";
 
 const STATE_TINT: Record<TxState, string> = {
   SUCCESS: "border-emerald-500/25 bg-emerald-500/10 text-emerald-400",
@@ -132,7 +133,7 @@ function Avatar({
           className="h-full w-full object-cover"
         />
       ) : (
-        <span aria-hidden className="text-[11px] font-black uppercase text-neutral-500">
+        <span aria-hidden className="text-[13px] font-semibold text-neutral-500">
           {username.slice(0, 1)}
         </span>
       )}
@@ -173,7 +174,7 @@ export function AdminDashboard({
         {/* Five cards: one row on a desktop, where three columns left two
             cards and a hole on the second row. On a phone the odd one out
             takes the whole last row rather than leaving half of it empty. */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-5 gap-3 sm:gap-4 [&>*:last-child:nth-child(odd)]:col-span-2 sm:[&>*:last-child:nth-child(odd)]:col-span-1">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 [&>*:last-child:nth-child(odd)]:col-span-2 sm:[&>*:last-child:nth-child(odd)]:col-span-1">
           {todo.map((item) => (
             <TodoCard key={item.label} {...item} />
           ))}
@@ -219,11 +220,11 @@ function Section({
   return (
     <section className="flex flex-col gap-4">
       <div className="flex items-center gap-3">
-        <h2 className="text-[13px] font-black uppercase tracking-widest text-white whitespace-nowrap">
+        <h2 className="text-[19px] font-black text-frost whitespace-nowrap">
           {title}
         </h2>
         <div className="flex-1 h-px bg-white/[0.08]" />
-        {note ? <span className="text-[11px] text-neutral-600">{note}</span> : null}
+        {note ? <span className="text-[13px] text-dim">{note}</span> : null}
       </div>
       {children}
     </section>
@@ -271,7 +272,7 @@ function TodoCard({ label, count, sub, subWarn, href, icon: Icon }: TodoItem) {
   // Amber is the shop's "đang chờ" everywhere in this area; a card at zero
   // steps back to grey like a quiet stat does.
   const waiting = count > 0;
-  const className = `group flex flex-col gap-3 rounded-xl border bg-[#0e0e11] p-5 transition-colors ${
+  const className = `group flex flex-col gap-3 rounded-[14px] border bg-raise/40 p-5 transition-colors ${
     waiting
       ? "border-amber-500/25 hover:border-amber-500/50"
       : "border-white/[0.08] hover:border-white/20"
@@ -336,7 +337,7 @@ function RestockList({ lines, more }: { lines: RestockLine[]; more: number }) {
     <div id="kho-key" className={`${CARD} scroll-mt-20 overflow-hidden`}>
       <div className="flex items-center justify-between gap-3 px-5 py-3.5">
         <h3 className={CAP}>Gói sắp hết hàng</h3>
-        <span className="text-[11px] text-neutral-600">Bấm vào gói để nhập thêm</span>
+        <span className="text-[13px] text-dim">Bấm vào gói để nhập thêm</span>
       </div>
       <ul className="border-t border-white/[0.06]">
         {lines.map((line) => (
@@ -350,7 +351,7 @@ function RestockList({ lines, more }: { lines: RestockLine[]; more: number }) {
                   hundred characters, and on one line the truncation ate the
                   tier, which is the part that says which shelf is empty. */}
               <span className="min-w-0 flex-1">
-                <span className="block truncate text-[13px] text-white">{line.name}</span>
+                <span title={line.name} className="block truncate text-[14px] font-medium text-frost">{sentenceCase(line.name)}</span>
                 {line.tier ? (
                   <span className="mt-0.5 block truncate text-[11px] text-neutral-500">
                     Gói {line.tier}
@@ -501,7 +502,7 @@ function ActivityFeed({ items }: { items: ActivityItem[] }) {
     <div className={`${CARD} p-5 flex flex-col`}>
       <div className="flex items-center justify-between gap-3">
         <h3 className={CAP}>Hoạt động gần đây</h3>
-        <span className="text-[10px] font-bold uppercase tracking-widest text-neutral-600">
+        <span className="text-[12px] font-bold text-neutral-600">
           Mới nhất
         </span>
       </div>
@@ -590,7 +591,7 @@ function TransactionTable({ rows }: { rows: TransactionRow[] }) {
                       {KindIcon ? <KindIcon size={12} className="shrink-0" /> : null}
                       {row.kind} · {row.time}
                     </span>
-                    <span className={`shrink-0 rounded-md border px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider ${STATE_TINT[row.state]}`}>
+                    <span className={`shrink-0 rounded-md border px-1.5 py-0.5 text-[12px] font-semibold ${STATE_TINT[row.state]}`}>
                       {TX_STATE_LABELS[row.state]}
                     </span>
                   </div>
@@ -656,7 +657,7 @@ function TransactionTable({ rows }: { rows: TransactionRow[] }) {
                     </td>
                     <td className="px-5 py-3">
                       <span
-                        className={`inline-block rounded-md border px-2 py-1 text-[10px] font-black uppercase tracking-wider whitespace-nowrap ${STATE_TINT[row.state]}`}
+                        className={`inline-block rounded-md border px-2 py-1 text-[12px] font-semibold whitespace-nowrap ${STATE_TINT[row.state]}`}
                       >
                         {TX_STATE_LABELS[row.state]}
                       </span>

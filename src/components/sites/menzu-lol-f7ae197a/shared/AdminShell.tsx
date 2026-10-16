@@ -117,10 +117,10 @@ export function AdminShell({
               brand is a setting the admin pages do not fetch, so the default
               stands in here; the storefront header reads the stored one. */}
           <Link href="/admin" className="block">
-            <span className="block text-sm lg:text-lg font-black uppercase tracking-wider text-white">
+            <span className="block text-sm lg:text-lg font-black text-white">
               {DEFAULT_SETTINGS.brandName}
             </span>
-            <span className="hidden lg:block text-[9px] font-black uppercase tracking-[0.25em] text-rose-500">
+            <span className="hidden lg:block text-[12px] font-semibold text-rose-500">
               Quản trị
             </span>
           </Link>
@@ -144,7 +144,7 @@ export function AdminShell({
         </nav>
 
         <div className="hidden lg:flex flex-col gap-2 border-t border-white/[0.06] px-5 py-4">
-          <span className="text-[10px] font-black uppercase tracking-widest text-neutral-600">
+          <span className="text-[12px] font-semibold text-neutral-600">
             Đăng nhập bởi
           </span>
           <span className="truncate text-[13px] font-semibold text-neutral-300">
@@ -162,7 +162,7 @@ export function AdminShell({
       <main className="flex-1 min-w-0 px-5 lg:px-8 py-7">
         <div className="mb-6 flex flex-wrap items-end justify-between gap-x-6 gap-y-2">
           <div>
-            <h1 className="text-[26px] font-black uppercase tracking-wide text-white">
+            <h1 className="text-[24px] font-black leading-tight text-frost sm:text-[30px]">
               {title}
             </h1>
             <p className="mt-1 text-[13px] text-neutral-500">{subtitle}</p>

@@ -12,6 +12,7 @@ import { SOFTWARE_STATUS, type SoftwareStatusValue } from "@/lib/softwareStatus"
 
 import { StatusSubscribeButton } from "./StatusSubscribeButton";
 import { StatusToast } from "./StatusToast";
+import { sentenceCase } from "@/lib/displayCase";
 
 export interface StatusToolView {
   code: string;
@@ -155,7 +156,7 @@ function shelve(tools: StatusToolView[]): Shelf[] {
     if (!shelf) {
       shelf = {
         slug: tool.categorySlug,
-        name: tool.categoryName,
+        name: sentenceCase(tool.categoryName),
         logoUrl: tool.categoryLogoUrl,
         imageUrl: tool.categoryImageUrl,
         tools: [],
@@ -357,9 +358,9 @@ export function StatusSubscribeSearch({
                         // text column is narrow enough that half these names
                         // would end in "…" and stop telling the reader which
                         // tool it is.
-                        className="line-clamp-2 text-[15px] font-bold leading-snug text-white transition-colors hover:text-[var(--menzu-accent)]"
+                        className="line-clamp-2 text-[15px] font-semibold leading-snug text-frost transition-colors hover:text-white"
                       >
-                        {tool.name}
+                        {sentenceCase(tool.name)}
                       </Link>
                       {state ? (
                         <span

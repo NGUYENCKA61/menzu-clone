@@ -24,6 +24,7 @@ import { formatVnd, productImage } from "./productData";
 import { StickyBuyBar } from "./StickyBuyBar";
 import type { BuyerLevel } from "./SoftwareBuyPanel";
 import { StockLine } from "./StockLine";
+import { sentenceCase } from "@/lib/displayCase";
 
 export interface AccountDetail {
   code: string;
@@ -346,10 +347,10 @@ export function AccountBuyPanel({
       )}
 
       <div className="space-y-3">
-        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-white">
-          {account.name || `Mã #${account.code}`}
+        <h1 className="text-[26px] font-bold leading-[1.15] text-frost sm:text-[30px] lg:text-[34px]">
+          {account.name ? sentenceCase(account.name) : `Mã #${account.code}`}
         </h1>
-        <p className="text-sm leading-relaxed text-neutral-400 max-w-[560px]">
+        <p className="max-w-[60ch] text-[15px] leading-[1.65] text-mist">
           {account.descriptionText ||
             "Tài khoản game nhiều vật phẩm, inventory đẹp và sẵn sàng giao ngay. Thông tin tài khoản được kiểm tra trước khi bàn giao."}
         </p>

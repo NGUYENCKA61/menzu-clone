@@ -29,13 +29,13 @@ import { ScopeSearchField } from "./ScopeSearchField";
  * on the lg row.
  */
 const CHIP_SM =
-  "inline-flex h-8 shrink-0 items-center gap-1.5 rounded-xl border px-3 text-[12px] font-bold transition-colors";
+  "inline-flex h-9 shrink-0 items-center gap-1.5 rounded-[10px] border px-3 text-[13px] font-semibold transition-colors";
 const CHIP_OFF =
-  "border-white/10 bg-white/5 text-neutral-300 hover:border-white/50 hover:text-white";
+  "border-line bg-raise text-mist hover:border-line-strong hover:text-frost";
 // The capture's picked chip: fill #271619 and edge #712628 on the #121216
 // ground are the accent at about 12% and 45%, the word in the accent itself.
 const CHIP_ON =
-  "border-[var(--menzu-accent)]/45 bg-[var(--menzu-accent)]/12 text-[var(--menzu-accent)]";
+  "border-white/25 bg-white/[0.12] text-frost";
 const PILL = `press ${CHIP_SM} ${CHIP_OFF}`;
 const PILL_ACTIVE = `press ${CHIP_SM} ${CHIP_ON}`;
 const PILL_ROW = "flex flex-wrap gap-2 py-1";
