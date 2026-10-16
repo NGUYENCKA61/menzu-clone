@@ -352,7 +352,7 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
         </section>
 
         {/* THE ACCOUNT IN NUMBERS (dimmed 16/10/2026 on "hạ độ sáng thử": a plate a
-            shade under the panel, figures neutral-300, labels and icons
+            shade under the panel, figures neutral-200 (300 was a shade too dim: "sáng hơn 1 xíu thử"), labels and icons
             neutral-500, units neutral-600) — the same four cells as the strip across the
             foot of the card, now one framed row of their own under it (the owner,
             16/10/2026, with a capture of the strip after a mocked-up page of
@@ -363,9 +363,9 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
             10.000đ. */}
         <div className="grid grid-cols-2 overflow-hidden rounded-2xl border border-white/10 bg-[#0d0d0d] sm:mt-2 xl:grid-cols-[1fr_1fr_0.7fr_1.3fr] xl:divide-x xl:divide-white/[0.06]">
           {[
-            { icon: Wallet, label: "Số dư khả dụng", value: formatVnd(user.balance), unit: "đ", tone: "text-neutral-300" },
-            { icon: Receipt, label: "Tổng chi tiêu", value: formatVnd(spent), unit: "đ", tone: "text-neutral-300" },
-            { icon: ShoppingBag, label: "Đơn hàng", value: String(paidOrders), unit: "", tone: "text-neutral-300" },
+            { icon: Wallet, label: "Số dư khả dụng", value: formatVnd(user.balance), unit: "đ", tone: "text-neutral-200" },
+            { icon: Receipt, label: "Tổng chi tiêu", value: formatVnd(spent), unit: "đ", tone: "text-neutral-200" },
+            { icon: ShoppingBag, label: "Đơn hàng", value: String(paidOrders), unit: "", tone: "text-neutral-200" },
           ].map(({ icon: Icon, label, value, unit, tone }) => (
             // Label over figure the way /vong-quay builds its stat tiles:
             // a bare 13px icon (no 28px box), the unit at text-sm, and
@@ -393,7 +393,7 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
             </span>
             <div className="flex flex-wrap items-center justify-between gap-2">
               <span className="flex min-h-9 items-center">
-                <span className="text-xl font-black tabular-nums leading-none text-neutral-300 sm:text-2xl">
+                <span className="text-xl font-black tabular-nums leading-none text-neutral-200 sm:text-2xl">
                   {formatVnd(user.commissionBalance)}
                   <span className="ml-1 text-sm font-bold text-neutral-600">đ</span>
                 </span>
