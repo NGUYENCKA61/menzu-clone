@@ -67,3 +67,7 @@ scripts/            # Asset download scripts
 - After editing `.claude/skills/clone-website/SKILL.md`, run `node scripts/sync-skills.mjs` to regenerate the skill for all platforms.
 
 @docs/research/INSPECTION_GUIDE.md
+
+# DESIGN LAB (branch `lab`, worktree D:\my-website-lab, port 3200, database menzu_clone_lab)
+
+This worktree is the owner's design laboratory (16/10/2026, "Làm lab 3 trang trước"). Here, and only here, the design skills under `.claude/skills/` (ui-ux-pro-max with design-system and ui-styling, and frontend-design) may restyle the site freely: layout, typography, spacing, colour. The "pixel-perfect emulation" rule above does not apply on this branch. The owner's hard rules still do: Vietnamese copy in sentence case, no em dash in site text, the dark site first, real content from the database, nothing deployed from here, never pay a top-up, never touch the main checkout on :3100 or its database menzu_clone. Scope of round one: the home page, the product page and the account overview (/profile). Nothing is merged to master from here except by cherry-pick on the owner's word.
