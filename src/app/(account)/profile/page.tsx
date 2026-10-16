@@ -375,7 +375,7 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                 {label}
               </span>
               <span className="flex min-h-9 items-center">
-                <span className={`text-xl font-black tabular-nums leading-none sm:text-2xl ${tone}`}>
+                <span className={`text-xl font-extrabold tabular-nums leading-none sm:text-2xl ${tone}`}>
                   {value}
                   {unit ? (
                     <span className="ml-1 text-sm font-bold text-neutral-500">{unit}</span>
@@ -391,7 +391,7 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
             </span>
             <div className="flex flex-wrap items-center justify-between gap-2">
               <span className="flex min-h-9 items-center">
-                <span className="text-xl font-black tabular-nums leading-none text-white sm:text-2xl">
+                <span className="text-xl font-extrabold tabular-nums leading-none text-white sm:text-2xl">
                   {formatVnd(user.commissionBalance)}
                   <span className="ml-1 text-sm font-bold text-neutral-500">đ</span>
                 </span>
