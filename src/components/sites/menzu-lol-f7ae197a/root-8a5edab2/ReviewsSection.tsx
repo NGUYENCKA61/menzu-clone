@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, BadgeCheck, Star } from "lucide-react";
+import { BadgeCheck, Star } from "lucide-react";
 
 import { RevealGrid } from "./RevealGrid";
 
@@ -88,7 +88,7 @@ export function ReviewCard({ review, index }: { review: Review; index: number })
             {review.avatar ? (
               <Image src={review.avatar} alt="" fill sizes="40px" className="object-cover" />
             ) : (
-              <span className="text-sm font-black uppercase text-neutral-400">
+              <span className="font-display text-sm font-bold text-mist">
                 {review.name.trim().charAt(0) || "?"}
               </span>
             )}
@@ -154,15 +154,16 @@ export function ReviewsSection({
       aria-labelledby="reviews-heading"
       className="relative w-full pt-12 lg:pt-16 before:absolute before:left-1/2 before:top-0 before:h-px before:w-screen before:-translate-x-1/2 before:bg-white/[0.06]"
     >
-      <div className="mx-auto flex max-w-2xl flex-col items-center gap-3 text-center">
+      {/* LAB (Launcher): left aligned like every section title, one colour in
+          the display face (frontend-design: no accented half-headline). */}
+      <div className="flex max-w-2xl flex-col items-start gap-2">
         <h2
           id="reviews-heading"
-          className="text-2xl font-black uppercase leading-tight tracking-wider sm:text-3xl"
+          className="font-display text-[22px] font-bold leading-tight text-frost sm:text-[28px]"
         >
-          <span className="text-white">Chiến thắng </span>
-          <span className="text-[var(--menzu-accent)]">trong tầm tay bạn</span>
+          Chiến thắng trong tầm tay bạn
         </h2>
-        <p className="text-[13px] text-neutral-400">
+        <p className="text-[15px] text-mist">
           Đánh giá thật từ khách hàng đã giao dịch, admin duyệt trước khi hiện.
         </p>
       </div>
@@ -187,8 +188,8 @@ export function ReviewsSection({
               })}
               <span className="text-neutral-500">/5</span>
             </span>
-            <span className="text-[11px] font-bold uppercase tracking-widest text-neutral-500">
-              · {summary.count} đánh giá
+            <span className="text-[13px] text-mist">
+              {summary.count} đánh giá
             </span>
           </div>
         ) : (
@@ -196,10 +197,9 @@ export function ReviewsSection({
         )}
         <Link
           href="/feedback"
-          className="group inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-neutral-400 transition-colors hover:text-white"
+          className="text-[14px] font-medium text-mist underline-offset-4 transition-colors hover:text-frost hover:underline"
         >
           Xem tất cả đánh giá
-          <ArrowRight size={14} className="transition-transform group-hover:translate-x-0.5" />
         </Link>
       </div>
     </section>

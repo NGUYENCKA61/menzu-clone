@@ -92,7 +92,7 @@ export function ScrollCta({
           const latest = window.setTimeout(arrive, SCROLL_AT_MOST_MS);
           window.addEventListener("scrollend", arrive);
         }}
-        className={`${animated ? "animate-bounce-subtle " : ""}${tone} inline-flex items-center gap-2 whitespace-nowrap rounded-full border bg-[#0d0d12]/85 px-4 py-2 text-[10px] font-black uppercase tracking-[0.14em] backdrop-blur-md transition-colors`}
+        className={`${animated ? "animate-bounce-subtle " : ""}${tone} inline-flex items-center gap-2 whitespace-nowrap rounded-full border bg-panel/85 px-4 py-2 text-[13px] font-medium backdrop-blur-md transition-colors`}
       >
         {label}
         {/* The hero keeps its bouncing arrow, the pull it exists for. The quiet

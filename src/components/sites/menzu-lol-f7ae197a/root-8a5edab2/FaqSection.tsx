@@ -47,7 +47,7 @@ export interface FaqContact {
 }
 
 const BUTTON =
-  "inline-flex h-11 items-center justify-center gap-2 rounded-xl px-4 text-[12px] font-black uppercase tracking-wider transition-colors";
+  "inline-flex h-11 items-center justify-center gap-2 rounded-[10px] px-4 text-[14px] font-semibold transition-colors";
 
 /**
  * "Câu hỏi thường gặp" — the FAQ block lmarket.net closes its home page
@@ -104,15 +104,12 @@ export function FaqSection({ faq, contact }: { faq: FaqEntry[]; contact: FaqCont
       <RevealGrid className="grid items-start gap-10 lg:grid-cols-12 lg:gap-12">
         <div className="lg:col-span-7">
           <div className="reveal-card mb-8" style={{ ["--i" as string]: 0 }}>
-            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-neutral-400">
-              FAQ
-            </div>
+            {/* LAB (Launcher): no eyebrow pill, one colour in the display face. */}
             <h2
               id="faq-heading"
-              className="text-2xl font-black uppercase leading-tight tracking-wider sm:text-3xl"
+              className="font-display text-[22px] font-bold leading-tight text-frost sm:text-[28px]"
             >
-              <span className="text-white">Câu hỏi </span>
-              <span className="text-[var(--menzu-accent)]">thường gặp</span>
+              Câu hỏi thường gặp
             </h2>
             <p className="mt-3 max-w-xl text-[13.5px] leading-relaxed text-neutral-400">
               Thắc mắc trước khi mua? Câu trả lời ở ngay đây. Không thấy điều cần
@@ -138,7 +135,7 @@ export function FaqSection({ faq, contact }: { faq: FaqEntry[]; contact: FaqCont
               </span>
               Hỗ trợ {SUPPORT_WINDOW} mỗi ngày
             </div>
-            <h3 className="text-xl font-black tracking-tight text-white">Vẫn còn thắc mắc?</h3>
+            <h3 className="font-display text-xl font-bold text-frost">Vẫn còn thắc mắc?</h3>
             <p className="mt-2 text-sm leading-relaxed text-neutral-400">
               Không thấy câu trả lời? Nhắn cho shop, đội hỗ trợ trực trong giờ và trả lời
               ngay khi thấy tin.

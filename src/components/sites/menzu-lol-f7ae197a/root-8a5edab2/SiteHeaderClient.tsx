@@ -21,7 +21,7 @@ import {
   type LucideIcon,
 } from "lucide-react"
 import { AnnouncementCenter, type AnnouncementItem } from "../shared/AnnouncementCenter";
-import { CaseText } from "../shared/CaseText";
+import { sentenceCase } from "@/lib/displayCase";
 import { STATUS_TAB_HREF } from "@/lib/softwareStatus";
 // A bare constant in a module with no imports of its own, so it is safe in
 // this client bundle (the wheel's client components read it already).
@@ -80,11 +80,15 @@ const TELEGRAM_SHOP_LINK = "MUA TRÊN TELEGRAM"
  * its own: the strip's capitals cover it here, and the Nike trial (which sets
  * the strip in sentence case) writes it as typed, "Telegram", not "telegram".
  */
+// LAB: sentence case, and a real space before the brand word (the caps
+// version printed "MUA TRÊNTELEGRAM": the link is inline-flex, so the text and
+// the span were two flex items and the space between them collapsed; one
+// wrapping span keeps it).
 function quickLinkLabel(link: string) {
-  if (link !== TELEGRAM_SHOP_LINK) return link
+  if (link !== TELEGRAM_SHOP_LINK) return sentenceCase(link)
   return (
     <>
-      MUA TRÊN <span className="brand-word">Telegram</span>
+      <span>Mua trên <span className="brand-word">Telegram</span></span>
     </>
   )
 }
@@ -108,13 +112,13 @@ const QUICK_LINKS = [
 // boxes with no padding — the only nav a tablet shows, and a thumb missed
 // them. One size up too; 10px was the cloned desktop setting.
 const QUICK_LINK_CLASS =
-  "inline-flex h-full items-center text-[11px] font-bold uppercase tracking-widest text-neutral-300 hover:text-white transition-colors"
+  "inline-flex h-full items-center text-[13px] font-medium text-mist hover:text-frost transition-colors"
 
 // A rung of the main bar that opens a page rather than a panel. Written once
 // because there are two of them now, and a nav where one rung underlines on
 // hover and its neighbour does not reads as a bug rather than as a variant.
 const NAV_LINK_CLASS =
-  "relative flex items-center gap-1.5 whitespace-nowrap px-3 py-2 rounded-lg text-[11px] font-extrabold uppercase tracking-widest text-neutral-200 hover:text-[var(--menzu-accent)] transition-colors duration-200 ease-[ease] after:absolute after:bottom-1.5 after:inset-x-3 after:h-[2px] after:origin-left after:scale-x-0 after:rounded-full after:bg-[var(--menzu-accent)] after:transition-transform after:duration-200 hover:after:scale-x-100"
+  "relative flex items-center gap-1.5 whitespace-nowrap px-3 py-2 rounded-lg text-[14px] font-semibold text-frost/90 hover:text-white transition-colors duration-200 ease-[ease] after:absolute after:bottom-1.5 after:inset-x-3 after:h-[2px] after:origin-left after:scale-x-0 after:rounded-full after:bg-[var(--menzu-accent)] after:transition-transform after:duration-200 hover:after:scale-x-100"
 
 // The two ways the shop sells a hack: a board you plug in, and a file you run.
 // Labels only for now — neither has a page in this clone, so both fall to "#"
@@ -191,9 +195,9 @@ function NavDropdown({ label, items }: { label: string; items: DropdownItem[] })
       <button
         type="button"
         aria-haspopup="true"
-        className="relative flex items-center gap-2 whitespace-nowrap px-3 py-2 rounded-lg text-[11px] font-extrabold uppercase tracking-widest text-neutral-200 group-hover:text-[var(--menzu-accent)] group-focus-within:text-[var(--menzu-accent)] transition-colors duration-200 ease-[ease] after:absolute after:bottom-1.5 after:inset-x-3 after:h-[2px] after:origin-left after:scale-x-0 after:rounded-full after:bg-[var(--menzu-accent)] after:transition-transform after:duration-200 group-hover:after:scale-x-100 group-focus-within:after:scale-x-100"
+        className="relative flex items-center gap-2 whitespace-nowrap px-3 py-2 rounded-lg text-[14px] font-semibold text-frost/90 group-hover:text-white group-focus-within:text-white transition-colors duration-200 ease-[ease] after:absolute after:bottom-1.5 after:inset-x-3 after:h-[2px] after:origin-left after:scale-x-0 after:rounded-full after:bg-[var(--menzu-accent)] after:transition-transform after:duration-200 group-hover:after:scale-x-100 group-focus-within:after:scale-x-100"
       >
-        {label}
+        {sentenceCase(label)}
         <ChevronDown size={14} />
       </button>
       {/* Also on focus-within: a keyboard reached the trigger and then
@@ -203,7 +207,7 @@ function NavDropdown({ label, items }: { label: string; items: DropdownItem[] })
       <div className="absolute top-full left-0 pt-1 transition-all duration-300 z-[110] w-56 opacity-0 translate-y-1 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto group-focus-within:opacity-100 group-focus-within:translate-y-0 group-focus-within:pointer-events-auto">
         {/* The same corner, hairline and ground as the search results panel:
             two lists hanging off one bar should not be two designs. */}
-        <div className="rounded-[10px] border border-[#2b2b31] bg-[#0b0b0f]/97 backdrop-blur-xl p-2 shadow-xl">
+        <div className="rounded-[12px] border border-line bg-panel/97 backdrop-blur-xl p-2 shadow-xl">
           {items.map((item) => {
             const Icon = item.icon
             return (
@@ -221,8 +225,8 @@ function NavDropdown({ label, items }: { label: string; items: DropdownItem[] })
                 />
                 {/* nav-item-label is a hook for the light trial "moi"
                     (theme-light.css, part 6); no style of its own. */}
-                <span className="nav-item-label text-[10px] font-bold text-neutral-200 group-hover/item:text-[var(--menzu-accent)] uppercase tracking-wider transition-colors duration-200 ease-[ease]">
-                  <CaseText text={item.label} />
+                <span className="nav-item-label text-[14px] font-medium text-frost/90 group-hover/item:text-white transition-colors duration-200 ease-[ease]">
+                  {sentenceCase(item.label)}
                 </span>
               </SiteLink>
             )
@@ -297,15 +301,15 @@ export function SiteHeaderClient({
     <nav
       className={`site-nav fixed top-0 left-0 right-0 z-[100] transition-all duration-300 flex flex-col ${
         scrolled
-          ? "bg-[#0c0d11]/97 shadow-lg shadow-black/30 sm:bg-[#0f1015]/80 sm:backdrop-blur-xl"
-          : "bg-[#0f1015]"
+          ? "bg-[#0c0d11]/97 shadow-lg shadow-black/30 sm:bg-panel/80 sm:backdrop-blur-xl"
+          : "bg-panel"
       }`}
     >
       {/* Not on a phone: the bottom bar holds the first-rank links there,
           and the strip's own five sit in the menu under LIÊN KẾT NHANH, so
           this row would only push the page down 40px for a second copy. */}
       <div
-        className={`hidden w-full overflow-hidden border-b bg-[#0f1015] transition-all duration-300 sm:flex ${
+        className={`hidden w-full overflow-hidden border-b bg-panel transition-all duration-300 sm:flex ${
           scrolled ? "h-0 opacity-0 border-transparent" : "h-[40px] opacity-100 border-white/5"
         }`}
       >
@@ -404,7 +408,7 @@ export function SiteHeaderClient({
                 the owner's word, 16/10/2026: "hiện cái đổi thưởng lại đi", as
                 the overview's Đổi thưởng door came back the same morning). */}
             <Link href="/vong-quay" className={NAV_LINK_CLASS}>
-              ĐỔI THƯỞNG
+              Đổi thưởng
             </Link>
           </div>
         </div>
@@ -433,7 +437,7 @@ export function SiteHeaderClient({
               {/* Under 360px the header has no room for the word: with the
                   menu, the logo, the basket and the bell it ran 13px past the
                   edge. The icon and the label carry it there. */}
-              <span className="text-[10px] sm:text-[11px] font-black uppercase tracking-widest text-white whitespace-nowrap max-[359px]:hidden">
+              <span className="text-[14px] font-semibold text-white whitespace-nowrap max-[359px]:hidden">
                 Đăng nhập
               </span>
             </Link>

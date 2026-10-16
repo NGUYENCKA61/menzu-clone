@@ -64,6 +64,17 @@ export default async function Home() {
     visibleBlocks(settings).includes("groups") &&
     homeGroups.some((group) => group.slug === "hot-trending");
 
+  // LAB (Launcher): the shop's figures ride in the hero as one quiet line,
+  // so the strip after Hot trending is not drawn (LAB-MASTER section 5).
+  const roundDown = (n: number) => (n >= 1000 ? Math.floor(n / 100) * 100 : n);
+  const heroFacts = [
+    trust.orders ? { value: `${roundDown(trust.orders).toLocaleString("vi-VN")}+`, label: "đơn đã giao" } : null,
+    trust.customers ? { value: `${roundDown(trust.customers).toLocaleString("vi-VN")}+`, label: "khách hàng" } : null,
+    trust.rating
+      ? { value: `${trust.rating.toLocaleString("vi-VN", { minimumFractionDigits: 1, maximumFractionDigits: 1 })}/5`, label: "đánh giá" }
+      : null,
+  ].filter((fact): fact is { value: string; label: string } => fact !== null);
+
   // Each block is built once and picked out by id below, so the order on the
   // page is the order the admin arranged and nothing renders twice.
   const blocks: Record<string, React.ReactNode> = {
@@ -82,6 +93,7 @@ export default async function Home() {
         secondaryLabel={settings.heroSecondaryLabel}
         secondaryHref={settings.heroSecondaryHref}
         shootingStars={settings.heroShootingStars}
+        facts={heroFacts}
       />
     ),
     flash: (
@@ -123,9 +135,7 @@ export default async function Home() {
               bigPicks={group.slug === "hot-trending"}
               rows={group.slug === GAME_LIST_SLUG ? 3 : 1}
             />
-            {statsAfterTrending && group.slug === "hot-trending" ? (
-              <TrustStatsStrip stats={trust} slim />
-            ) : null}
+            {/* LAB: the figures moved into the hero (heroFacts). */}
           </Fragment>
         ))}
       </div>

@@ -1,10 +1,8 @@
 import { CardImage } from "@/components/sites/menzu-lol-f7ae197a/shared/CardImage";
-import { CaseText } from "@/components/sites/menzu-lol-f7ae197a/shared/CaseText";
 import { formatVnd } from "@/components/sites/menzu-lol-f7ae197a/shared/productData";
 import { sentenceCase } from "@/lib/displayCase";
 import Link from "next/link";
 import {
-  ArrowRight,
   Boxes,
   ChevronRight,
   CircleCheck,
@@ -136,7 +134,7 @@ const TONES: Record<
     title: "group-hover:text-[var(--menzu-accent)]",
     buttonEdge:
       "bg-[var(--menzu-accent)]/50 group-hover:bg-[var(--menzu-accent)]",
-    buttonFace: "bg-[#101114] group-hover:bg-[var(--menzu-accent)]",
+    buttonFace: "bg-panel group-hover:bg-[var(--menzu-accent)]",
   },
   // A neutral ring at rest, the accent only under the pointer — the same
   // chrome the product and software cards wear, so the four kinds of tile on
@@ -266,7 +264,7 @@ function RowCard({
       className={cn(
         // The product cards' surface, radius and lift, so a category
         // tile and an account tile in the next row read as one family.
-        "group flex h-full flex-col bg-[#101114] rounded-[15px] overflow-hidden border lift-card hover:-translate-y-1 hover:shadow-[0_15px_40px_#00000088]",
+        "group flex h-full flex-col bg-panel rounded-[15px] overflow-hidden border lift-card hover:-translate-y-1 hover:shadow-[0_15px_40px_#00000088]",
         // The game list's wider tile runs its cover to the card's edges, the
         // way lmarket and elitehacks do, and sets its words in a padded block
         // under it; every other row keeps the inset frame.
@@ -317,7 +315,7 @@ function RowCard({
           <span
             className={cn(
               "absolute left-1.5 top-1.5 z-10 inline-flex items-center gap-1 rounded-md bg-amber-500/90 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-amber-950 sm:left-2.5 sm:top-2.5 sm:px-2 sm:py-1 sm:text-[10px]",
-              quiet && "border border-white/10 bg-[#0a0a0d]/70 text-neutral-100",
+              quiet && "border border-white/10 bg-scrim/70 text-neutral-100",
             )}
           >
             <Star size={10} className={cn("shrink-0 fill-current", quiet && "text-amber-400")} aria-hidden />
@@ -367,7 +365,7 @@ function RowCard({
             return (
               <div
                 key={stat.label}
-                className="bg-[#0a0a0d] rounded-lg p-1 sm:p-2 xl:p-2.5 flex flex-col xl:flex-row items-center justify-center xl:justify-start gap-1 xl:gap-2.5 border border-white/[0.06] relative overflow-hidden group-hover:border-white/[0.12]"
+                className="bg-scrim rounded-lg p-1 sm:p-2 xl:p-2.5 flex flex-col xl:flex-row items-center justify-center xl:justify-start gap-1 xl:gap-2.5 border border-white/[0.06] relative overflow-hidden group-hover:border-white/[0.12]"
               >
                 <div className="absolute top-0 left-0 w-1.5 h-1.5 border-t border-l border-[var(--menzu-accent)]/50 hidden sm:block" />
                 <div className="absolute bottom-0 right-0 w-1.5 h-1.5 border-b border-r border-[var(--menzu-accent)]/50 hidden sm:block" />
@@ -480,7 +478,7 @@ function BentoTile({
       // bento-tile, tile-scrim and tile-caption are hooks for the light trial
       // "moi" (theme-light.css, part 6); they carry no style of their own.
       className={cn(
-        "bento-tile keep-dark group relative isolate overflow-hidden rounded-2xl border border-white/[0.07] bg-[#0c0d10] transition-colors hover:border-white/20",
+        "bento-tile keep-dark group relative isolate overflow-hidden rounded-2xl border border-white/[0.07] bg-panel transition-colors hover:border-white/20",
         // A phone stacks the lead across both columns over a 2×2 of the rest;
         // from md the grid's own rows give every tile its height.
         lead
@@ -503,7 +501,7 @@ function BentoTile({
       ) : null}
       <span
         aria-hidden
-        className="tile-scrim absolute inset-0 bg-gradient-to-t from-[#08080b]/95 via-[#08080b]/30 via-50% to-transparent to-75%"
+        className="tile-scrim absolute inset-0 bg-gradient-to-t from-scrim/95 via-scrim/30 via-50% to-transparent to-75%"
       />
       <span
         className={cn(
@@ -591,13 +589,69 @@ export function RowTile({
   big?: boolean;
   style?: TileStyle;
 }) {
+  // LAB (Launcher): the notched cover, the one memorable element. The
+  // picture sits in a frame with a bevelled top-right corner (lab-notch) and
+  // the name and the figures sit under it, not over a darkened picture.
+  if (style === "classic") {
+    const price = card.fromPrice != null ? `từ ${formatVnd(card.fromPrice)}đ` : null;
+    const count = card.count != null && card.count > 0 ? `${card.count} sản phẩm` : null;
+    const name = sentenceCase(card.title);
+    return (
+      <Link
+        href={card.href}
+        className="row-tile group flex flex-col gap-3 rounded-[12px] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--menzu-accent)]"
+      >
+        <span className="lab-notch relative block aspect-[16/10] overflow-hidden border border-white/[0.07] bg-raise transition-colors duration-200 group-hover:border-white/25">
+          {card.image ? (
+            <CardImage
+              src={card.image}
+              alt={card.title}
+              fill
+              sizes={
+                big
+                  ? "(min-width: 1320px) 440px, (min-width: 768px) 33vw, 50vw"
+                  : "(min-width: 1320px) 330px, (min-width: 1024px) 26vw, (min-width: 768px) 34vw, 50vw"
+              }
+              className="object-cover brightness-[.92] transition-[filter] duration-200 group-hover:brightness-110"
+            />
+          ) : null}
+          {pick ? (
+            <span className="tile-pill absolute left-3 top-3 z-10 inline-flex items-center gap-1.5 rounded-md bg-scrim/80 px-2 py-1 text-[12px] font-semibold text-frost ring-1 ring-inset ring-white/10 backdrop-blur-[6px]">
+              <Star size={11} className="shrink-0 fill-current text-notice" aria-hidden />
+              Top tháng
+            </span>
+          ) : null}
+        </span>
+        <span className="flex min-w-0 flex-col gap-1.5">
+          <h3
+            title={name}
+            className={cn(
+              "truncate font-display text-[16px] font-semibold leading-snug text-frost transition-colors group-hover:text-white sm:text-[17px]",
+              big && "lg:text-[19px]",
+            )}
+          >
+            {name}
+          </h3>
+          {price || count ? (
+            <span className="flex min-w-0 items-center gap-2.5 overflow-hidden whitespace-nowrap text-[13px] leading-none">
+              {price ? <span className="lab-figure font-semibold text-frost">{price}</span> : null}
+              {price && count ? <span aria-hidden className="h-3 w-px bg-line-strong" /> : null}
+              {count ? <span className="truncate text-mist">{count}</span> : null}
+            </span>
+          ) : card.description ? (
+            <span className="truncate text-[13px] text-mist">{sentenceCase(card.description)}</span>
+          ) : null}
+        </span>
+      </Link>
+    );
+  }
   return (
     <Link
       href={card.href}
       // row-tile, tile-pill, tile-scrim and tile-caption are hooks for the
       // light trial "moi" (theme-light.css, part 6); no style of their own.
       className={cn(
-        "row-tile keep-dark group relative isolate block overflow-hidden rounded-[14px] border border-white/[0.06] bg-[#0c0d10] transition-colors hover:border-white/20",
+        "row-tile keep-dark group relative isolate block overflow-hidden rounded-[14px] border border-white/[0.06] bg-panel transition-colors hover:border-white/20",
         pick ? "aspect-[16/10]" : "aspect-[4/3]",
         style === "a" && "hover:border-[var(--menzu-accent)]/40",
       )}
@@ -629,35 +683,17 @@ export function RowTile({
           )}
         />
       ) : null}
-      {style !== "classic" ? (
-        <TileDress card={card} style={style} big={big} />
-      ) : null}
+      <TileDress card={card} style={style} big={big} />
       {pick ? (
         <span
           className={cn(
-            "tile-pill absolute left-2.5 top-2.5 z-10 inline-flex items-center gap-1 rounded-md bg-[#0a0a0d]/70 px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-white ring-1 ring-inset ring-white/15 backdrop-blur-[6px]",
+            "tile-pill absolute left-2.5 top-2.5 z-10 inline-flex items-center gap-1 rounded-md bg-scrim/70 px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-white ring-1 ring-inset ring-white/15 backdrop-blur-[6px]",
             big && "lg:left-3.5 lg:top-3.5 lg:text-[11px]",
           )}
         >
           <Star size={10} className="shrink-0 fill-current text-[var(--menzu-accent)]" aria-hidden />
           Top tháng
         </span>
-      ) : null}
-      {style === "classic" ? (
-        <>
-          <span
-            aria-hidden
-            className="tile-scrim absolute inset-0 bg-gradient-to-t from-[#08080b]/95 via-[#08080b]/45 via-40% to-transparent to-65%"
-          />
-          <h3
-            className={cn(
-              "tile-caption absolute inset-x-3.5 bottom-3 text-[14px] font-black leading-tight text-white sm:text-[15px]",
-              big && "lg:inset-x-5 lg:bottom-4 lg:text-[17px]",
-            )}
-          >
-            {sentenceCase(card.title)}
-          </h3>
-        </>
       ) : null}
     </Link>
   );
@@ -682,7 +718,7 @@ function TileDress({ card, style, big }: { card: ProductCard; style: TileStyle; 
       <>
         <span
           aria-hidden
-          className="tile-scrim absolute inset-0 bg-gradient-to-t from-[#07070a] via-[#07070a]/60 via-35% to-[#07070a]/10"
+          className="tile-scrim absolute inset-0 bg-gradient-to-t from-scrim via-scrim/60 via-35% to-scrim/10"
         />
         <span
           aria-hidden
@@ -706,10 +742,10 @@ function TileDress({ card, style, big }: { card: ProductCard; style: TileStyle; 
   if (style === "b") {
     return (
       <>
-        <span aria-hidden className="tile-scrim absolute inset-0 bg-[#07070a]/25" />
+        <span aria-hidden className="tile-scrim absolute inset-0 bg-scrim/25" />
         <span
           aria-hidden
-          className="tile-scrim absolute inset-x-0 bottom-0 h-[55%] bg-gradient-to-t from-[#07070a]/90 to-transparent"
+          className="tile-scrim absolute inset-x-0 bottom-0 h-[55%] bg-gradient-to-t from-scrim/90 to-transparent"
         />
         <span className={cn("tile-caption absolute inset-x-3.5 bottom-3 flex flex-col gap-1", big && "lg:inset-x-5 lg:bottom-4")}>
           <span className="text-[9px] font-extrabold uppercase tracking-[0.22em] text-[var(--menzu-accent)]">
@@ -728,7 +764,7 @@ function TileDress({ card, style, big }: { card: ProductCard; style: TileStyle; 
     );
   }
   return (
-    <span className="tile-caption absolute inset-x-0 bottom-0 flex items-center gap-2.5 border-t border-white/[0.07] bg-[#0b0b0f]/92 px-3.5 py-2.5 backdrop-blur-[2px]">
+    <span className="tile-caption absolute inset-x-0 bottom-0 flex items-center gap-2.5 border-t border-white/[0.07] bg-scrim/92 px-3.5 py-2.5 backdrop-blur-[2px]">
       <span className="flex min-w-0 flex-1 flex-col">
         <h3 className="truncate text-[14px] font-black text-white sm:text-[15px]">{sentenceCase(card.title)}</h3>
         {card.count != null && card.count > 0 ? (
@@ -835,11 +871,12 @@ export function ProductRow({
 
   // row-heading and row-view-all are hooks for the light trial "moi"
   // (theme-light.css, part 6); they carry no style of their own.
+  // LAB (Launcher): the heading in the display face, sentence case, with no
+  // red bar before it; "Xem tất cả" is a plain link (LAB-MASTER section 3).
   const title = (
-    <div className="flex items-center gap-2.5">
-      <div className="w-[3px] h-5 bg-[var(--menzu-accent)] rounded-full shrink-0" />
-      <h2 className="row-heading text-xl sm:text-2xl font-black uppercase tracking-wider text-white">
-        <CaseText text={heading} />
+    <div className="flex min-w-0 items-center gap-3">
+      <h2 className="row-heading font-display text-[22px] font-bold leading-tight text-frost sm:text-[28px]">
+        {sentenceCase(heading)}
       </h2>
       {headingSuffix}
     </div>
@@ -847,11 +884,9 @@ export function ProductRow({
   const viewAll = (
     <Link
       href={viewAllHref}
-      className="row-view-all group flex items-center gap-1 text-[10px] sm:text-xs font-bold text-neutral-400 hover:text-white transition-colors uppercase tracking-widest border-b border-neutral-700 hover:border-[var(--menzu-accent)]"
+      className="row-view-all shrink-0 text-[14px] font-medium text-mist underline-offset-4 transition-colors hover:text-frost hover:underline"
     >
-      <span className="hidden sm:inline"><CaseText text="XEM TẤT CẢ" /></span>
-      <span className="sm:hidden"><CaseText text="XEM THÊM" /></span>
-      <ArrowRight size={14} />
+      Xem tất cả
     </Link>
   );
 
@@ -865,7 +900,7 @@ export function ProductRow({
         className,
       )}
     >
-      <div className={cn("flex flex-row items-center justify-between mb-8", panel && "mb-5 sm:mb-6")}>
+      <div className={cn("mb-6 flex flex-row items-end justify-between gap-4 sm:mb-7", panel && "mb-5 sm:mb-6")}>
         {title}
         {hideViewAll ? null : viewAll}
       </div>

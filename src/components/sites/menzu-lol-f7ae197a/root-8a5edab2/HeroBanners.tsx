@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { BadgeCheck, BookCheck, ShoppingBag } from "lucide-react";
 
+import { sentenceCase } from "@/lib/displayCase";
 import { DEFAULT_SETTINGS } from "@/lib/settings";
 import { HeroImageCarousel } from "./HeroImageCarousel";
 import { HeroVideo } from "./HeroVideo";
@@ -16,14 +17,15 @@ import { ScrollCta } from "./ScrollCta";
  */
 export const SCROLL_TARGET_ID = "danh-sach-hack-game";
 
+// LAB (Launcher): buttons in sentence case at 15px, 48px tall (touch target).
 const CTA =
-  "inline-flex items-center justify-center gap-2 rounded-[10px] px-6 py-3.5 text-[11px] font-black uppercase tracking-[0.14em] transition-colors";
+  "inline-flex h-12 items-center justify-center gap-2 rounded-[10px] px-6 text-[15px] font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-frost";
 
 /** Seconds between characters as the heading types itself in. */
 const TYPE_STEP = 0.07;
 
-/** Seconds the heading waits before typing, so the "We are" line fades up first. */
-const HEADING_DELAY = 0.5;
+/** Seconds the heading waits before typing. LAB: no eyebrow to wait for. */
+const HEADING_DELAY = 0.15;
 
 /**
  * Said after the drawn title inside the h1, for screen readers and search
@@ -50,8 +52,10 @@ interface HeroBannersProps {
   primaryHref?: string;
   secondaryLabel?: string;
   secondaryHref?: string;
-  /** Draw the shooting-star streaks. Off hides them; the starfield stays. */
+  /** Kept for the settings screen; LAB draws no sky (one moment: the typing). */
   shootingStars?: boolean;
+  /** LAB: the shop's figures as one quiet line under the buttons. */
+  facts?: { value: string; label: string }[];
 }
 
 /**
@@ -75,7 +79,7 @@ export function HeroBanners({
   primaryHref = DEFAULT_SETTINGS.heroPrimaryHref,
   secondaryLabel = DEFAULT_SETTINGS.heroSecondaryLabel,
   secondaryHref = DEFAULT_SETTINGS.heroSecondaryHref,
-  shootingStars = true,
+  facts = [],
 }: HeroBannersProps) {
   const lines = title.split("\n").filter((line) => line.trim());
   // "Ảnh" with nothing uploaded yet shows the banner, as the frame always did.
@@ -112,21 +116,6 @@ export function HeroBanners({
     // home-hero and hero-sky are hooks for the light trial "moi"
     // (theme-light.css, part 6); they carry no style of their own.
     <section className="home-hero relative isolate flex w-full flex-col justify-center overflow-x-visible overflow-y-clip min-h-[calc(100svh-128px)] pt-6 pb-20 sm:pt-10 lg:min-h-[calc(100svh-144px)] lg:pt-0 lg:pb-[93px]">
-      {/* A field of faint, slowly twinkling stars over the page's own black,
-          plus three shooting stars on long offset timers so one crosses now
-          and then rather than all at once. Decoration only — aria-hidden, no
-          pointer target. */}
-      <div aria-hidden className="hero-sky pointer-events-none absolute inset-0 z-0 overflow-hidden">
-        <div className="hero-starfield" />
-        {shootingStars ? (
-          <>
-            <span className="hero-shooting" style={{ top: "8%", left: "58%", animationDelay: "0s", animationDuration: "7s" }} />
-            <span className="hero-shooting" style={{ top: "2%", left: "82%", animationDelay: "3.5s", animationDuration: "8.5s" }} />
-            <span className="hero-shooting" style={{ top: "22%", left: "44%", animationDelay: "6s", animationDuration: "9.5s" }} />
-          </>
-        ) : null}
-      </div>
-
       {/* Stacked on phones; on desktop the copy and the artwork are pushed to
           the container's two edges with a wide empty gap between them, the way
           the reference spaces its hero. Each side is capped and allowed to
@@ -138,26 +127,18 @@ export function HeroBanners({
           the card was 365px tall — from 1024 to 1279, where the card shrinks,
           the copy stuck out 37px above it. */}
       <div className="relative z-10 flex flex-col gap-10 lg:flex-row lg:items-start lg:justify-between lg:gap-8">
-        <div className="flex w-full flex-col items-start lg:w-auto lg:min-w-0 lg:max-w-[440px] lg:flex-1">
+        <div className="flex w-full flex-col items-start lg:w-auto lg:min-w-0 lg:max-w-[500px] lg:flex-1">
           {/* The reseller pill: dark glass with a red check, the same chrome
               the listing cards' corner badges wear, so it reads as a badge
               and not as a third line of copy. Fades up with the eyebrow.
               Pulled left by its own padding so the check sits on the same
               edge as the "We are" below it, not one pad-width in. */}
           {badge ? (
-            <span className="animate-fade-up -ml-3.5 mb-4 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3.5 py-1.5 text-[10px] font-black uppercase tracking-[0.18em] text-neutral-200 backdrop-blur-md">
-              <BadgeCheck size={13} aria-hidden className="text-[var(--menzu-accent)]" />
-              {badge}
+            <span className="mb-5 inline-flex items-center gap-2 text-[14px] font-medium text-mist">
+              <BadgeCheck size={16} aria-hidden className="shrink-0 text-online" />
+              {sentenceCase(badge)}
             </span>
           ) : null}
-
-          {/* Eyebrow line: fades up first, then the heading types itself in
-              after it (HEADING_DELAY). */}
-          {/* The eyebrow in the accent, so the block opens the way every row
-              heading below it does — a red mark, then white type. */}
-          <span className="animate-fade-up block text-[13px] font-bold uppercase tracking-[0.3em] text-[var(--menzu-accent)] sm:text-sm">
-            We are
-          </span>
 
           {/* The heading types itself in — each character a span that pops on a
               staggered delay after the eyebrow, then a caret blinks at the end.
@@ -170,7 +151,7 @@ export function HeroBanners({
             // One unbreakable word in a column capped at 440px: at 46px it is
             // 485px wide and its last letters ran under the video card on
             // every screen from 1024 to 1279. 40px is 422px — inside the cap.
-            className="mt-2 text-[28px] font-black uppercase leading-[1.06] tracking-tight text-white sm:text-[36px] lg:text-[40px] xl:text-[46px]"
+            className="font-display text-[34px] font-bold leading-[1.04] tracking-[-0.01em] text-frost sm:text-[44px] lg:text-[46px] xl:text-[52px]"
           >
             {lines.map((line, li) => (
               <span key={li} className="block whitespace-nowrap" aria-hidden>
@@ -199,7 +180,7 @@ export function HeroBanners({
           </h1>
 
           {subtitle ? (
-            <p className="mt-5 max-w-[460px] text-[14px] leading-relaxed text-neutral-300">
+            <p className="mt-5 max-w-[52ch] text-[16px] leading-[1.65] text-mist sm:text-[17px]">
               {subtitle}
             </p>
           ) : null}
@@ -215,13 +196,28 @@ export function HeroBanners({
             {secondaryLabel && secondaryHref ? (
               <Link
                 href={secondaryHref}
-                className={`${CTA} border border-white/10 bg-white/[0.04] text-white hover:bg-white/[0.08]`}
+                className={`${CTA} bg-raise text-frost ring-1 ring-inset ring-line hover:ring-line-strong`}
               >
                 <BookCheck size={15} aria-hidden />
                 {secondaryLabel}
               </Link>
             ) : null}
           </div>
+
+          {/* LAB: the shop's figures, once, as a quiet line: figure in the
+              display face, word beside it, space between (no dots, and no
+              rules: one left at the start of a wrapped line read as a stray
+              mark). */}
+          {facts.length > 0 ? (
+            <ul aria-label="Số liệu của shop" className="mt-10 flex flex-wrap items-baseline gap-x-6 gap-y-3">
+              {facts.map((fact) => (
+                <li key={fact.label} className="flex items-baseline gap-2">
+                  <span className="lab-figure text-[20px] font-bold leading-none text-frost">{fact.value}</span>
+                  <span className="text-[13px] text-mist">{fact.label}</span>
+                </li>
+              ))}
+            </ul>
+          ) : null}
         </div>
 
         {/* The artwork in a wide 16/9 frame, the shape the shop's covers and
@@ -238,7 +234,7 @@ export function HeroBanners({
             margin, so it runs 40px past the header while its left edge gives
             20px back to the gap beside the copy.
             Below 1400 there is no side margin to spend and it stays flush. */}
-        <div className="relative aspect-[16/9] w-full overflow-hidden rounded-3xl border border-white/[0.08] bg-[#0a0a0c] shadow-[0_30px_80px_-30px_rgba(0,0,0,0.9),0_0_140px_30px_rgba(0,0,0,0.65)] lg:w-auto lg:min-w-0 lg:max-w-[650px] lg:flex-1 min-[87.5rem]:-mr-10 min-[87.5rem]:max-w-[670px]">
+        <div className="lab-notch-lg relative aspect-[16/9] w-full overflow-hidden border border-line bg-scrim shadow-[0_40px_90px_-40px_rgba(0,0,0,0.95)] lg:w-auto lg:min-w-0 lg:max-w-[650px] lg:flex-1 min-[87.5rem]:-mr-10 min-[87.5rem]:max-w-[670px]">
           {media === "video" && video ? (
             // Muted and inline, because a hero that makes noise or takes over
             // the screen on a phone is a hero people leave. The still is drawn

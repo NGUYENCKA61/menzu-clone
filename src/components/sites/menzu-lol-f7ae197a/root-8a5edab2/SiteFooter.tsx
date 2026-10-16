@@ -1,8 +1,8 @@
 import Link from "next/link";
-import { ArrowRight, Phone } from "lucide-react";
+import { Phone } from "lucide-react";
 
 import { listCategories, listDocArticles } from "@/lib/queries";
-import { CaseText } from "../shared/CaseText";
+import { sentenceCase } from "@/lib/displayCase";
 import { ThemeToggle } from "../shared/ThemeToggle";
 import { getShopSettings } from "@/lib/settingsStore";
 import { categoryHref, docHref } from "@/lib/routes";
@@ -43,13 +43,13 @@ const BOTTOM_LINKS: FooterLink[] = [
  * wordmark, heading, row. Carrying the hierarchy that way lets the type sit a
  * step smaller than a footer usually does and still read at a glance.
  */
-const HEADING = "text-[11px] font-black uppercase tracking-[0.16em] text-white";
+const HEADING = "font-display text-[15px] font-semibold text-frost";
 const ROW = "text-[13px] leading-[1.45] text-neutral-400 hover:text-white transition-colors";
 // The footer's one colour is the storefront's red accent, the same one the
 // section headings above it use — the shop tried the brand purple and plain
 // white in these three spots and came back to this.
 const SEE_ALL =
-  "group inline-flex items-center gap-1.5 text-[12px] font-bold uppercase tracking-wider text-[var(--menzu-accent)] hover:text-white transition-colors";
+  "group inline-flex items-center gap-1.5 text-[14px] font-semibold text-frost underline-offset-4 hover:underline transition-colors";
 
 interface FooterContact {
   zalo: string;
@@ -121,7 +121,7 @@ function Column({
         {links.map((link) => (
           <li key={`${link.href}-${link.label}`}>
             <Link href={link.href} className={ROW}>
-              {soft ? <CaseText text={link.label} /> : link.label}
+              {soft ? sentenceCase(link.label) : link.label}
             </Link>
           </li>
         ))}
@@ -129,14 +129,6 @@ function Column({
           <li className="pt-1.5">
             <Link href={seeAll.href} className={SEE_ALL}>
               {seeAll.label}
-              {/* The same icon and the same nudge the wiki cards' "Chi tiết"
-                  link gives — a drawn arrow keeps its weight next to the label,
-                  where the "→" character was whatever the system font had. */}
-              <ArrowRight
-                size={13}
-                aria-hidden
-                className="transition-transform group-hover:translate-x-0.5"
-              />
             </Link>
           </li>
         ) : null}
@@ -222,7 +214,7 @@ export async function SiteFooter() {
     // storefront's #0f1015 and the account and utility pages' darker
     // --menzu-bg — and a footer in the header's tone frames every page top and
     // bottom in the same colour, whichever ground sits between them.
-    <footer className="relative z-10 w-full bg-[#0f1015] border-t border-white/10 mt-auto">
+    <footer className="relative z-10 w-full bg-panel border-t border-white/10 mt-auto">
       {/* pb-28 on the narrow layout clears the fixed bottom navigation, which
           would otherwise sit on top of the copyright line. */}
       <div className="max-w-[1320px] mx-auto px-4 lg:px-6 pt-10 pb-24 sm:py-11">
@@ -248,7 +240,7 @@ export async function SiteFooter() {
                 is, what it sells, and how to reach it. */}
             {socials.length > 0 ? (
               <div className="flex flex-col gap-2.5">
-                <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-neutral-500 select-none">
+                <span className="text-[13px] text-dim select-none">
                   Theo dõi &amp; kết nối
                 </span>
                 <div className="flex flex-wrap items-center gap-2">

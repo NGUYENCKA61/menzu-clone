@@ -52,9 +52,10 @@ const ALL = "ALL";
 // Lettered like every small label on the site (12px black capitals, wide),
 // not like elitehacks, whose whole site is set in ordinary case.
 const CHIP =
-  "inline-flex h-10 items-center justify-center gap-2 rounded-[10px] px-4 text-xs font-black uppercase tracking-widest transition-colors lg:min-w-[150px]";
-const CHIP_IDLE = "bg-white/[0.07] text-neutral-400 hover:bg-white/[0.1] hover:text-white";
-const CHIP_ACTIVE = "bg-[var(--menzu-accent)] text-white";
+  "inline-flex h-10 items-center justify-center gap-2 rounded-[10px] px-4 text-[14px] font-semibold transition-colors lg:min-w-[120px]";
+// LAB: the lit chip is Frost on Graphite, so red stays the page's one action.
+const CHIP_IDLE = "bg-raise text-mist ring-1 ring-inset ring-line hover:text-frost hover:ring-line-strong";
+const CHIP_ACTIVE = "bg-frost text-ground";
 
 /**
  * What each chip shows: its word and the icon before it. "Tất cả" is a
@@ -273,7 +274,7 @@ export function RowSearch({
           the field and the tiles share their outer edges. */}
           <label
             htmlFor={inputId}
-            className="group/search relative isolate flex h-12 w-full items-center gap-3 rounded-[10px] bg-white/[0.07] px-4 transition-shadow focus-within:ring-1 focus-within:ring-[var(--menzu-accent)]/60"
+            className="group/search relative isolate flex h-12 w-full items-center gap-3 rounded-[10px] bg-raise px-4 ring-1 ring-inset ring-line transition-shadow focus-within:ring-[var(--menzu-accent)]/70"
           >
             <Search
               size={18}
@@ -291,7 +292,7 @@ export function RowSearch({
               onChange={(event) => ask({ query: event.target.value })}
               placeholder={placeholder}
               autoComplete="off"
-              className="relative min-w-0 flex-1 bg-transparent text-sm text-white outline-none placeholder:text-neutral-400 [&::-webkit-search-cancel-button]:hidden"
+              className="relative min-w-0 flex-1 bg-transparent text-[15px] text-frost outline-none placeholder:text-dim [&::-webkit-search-cancel-button]:hidden"
             />
             {query ? (
               <button
@@ -337,7 +338,7 @@ export function RowSearch({
               when nothing is left. */}
           <p
             aria-live="polite"
-            className="text-[11px] font-bold uppercase tracking-[0.2em] text-neutral-500"
+            className="text-[13px] text-dim"
           >
             {matched.length > 0 ? `${matched.length} danh mục` : null}
           </p>
@@ -348,7 +349,7 @@ export function RowSearch({
         <>
           <div
             ref={gridRef}
-            className={`grid grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 pt-1 ${wide ? "" : "lg:grid-cols-4"}`}
+            className={`grid grid-cols-2 md:grid-cols-3 gap-x-4 gap-y-7 sm:gap-x-6 sm:gap-y-9 pt-1 ${wide ? "" : "lg:grid-cols-4"}`}
           >
             {shown.map((item, index) => {
               // Tiles the press just opened rise in one after another, the
@@ -405,10 +406,10 @@ export function RowSearch({
               <button
                 type="button"
                 onClick={() => setExpanded(true)}
-                className="group inline-flex h-10 items-center gap-2 rounded-[10px] bg-white/[0.07] px-5 text-xs font-black uppercase tracking-widest text-neutral-200 transition-colors hover:bg-white/[0.1] hover:text-white"
+                className="group inline-flex h-11 items-center gap-2 rounded-[10px] bg-raise px-5 text-[14px] font-semibold text-frost ring-1 ring-inset ring-line transition-colors hover:ring-line-strong"
               >
                 Xem thêm
-                <span className="text-neutral-500">({hidden})</span>
+                <span className="lab-figure text-dim">({hidden})</span>
                 <ChevronDown
                   size={14}
                   aria-hidden
@@ -422,7 +423,7 @@ export function RowSearch({
                 type="button"
                 onClick={collapse}
                 disabled={closing}
-                className="inline-flex h-10 items-center gap-2 rounded-[10px] bg-white/[0.07] px-5 text-xs font-black uppercase tracking-widest text-neutral-400 transition-colors hover:bg-white/[0.1] hover:text-white disabled:opacity-60"
+                className="inline-flex h-11 items-center gap-2 rounded-[10px] bg-raise px-5 text-[14px] font-semibold text-mist ring-1 ring-inset ring-line transition-colors hover:text-frost hover:ring-line-strong disabled:opacity-60"
               >
                 Thu gọn
                 <ChevronUp size={14} aria-hidden />
@@ -444,7 +445,7 @@ export function RowSearch({
           </p>
           <Link
             href={viewAllHref}
-            className="mt-1 text-[11px] font-black uppercase tracking-widest text-[var(--menzu-accent)] hover:text-white transition-colors"
+            className="mt-1 text-[14px] font-semibold text-frost underline underline-offset-4 hover:text-white transition-colors"
           >
             Xem tất cả danh mục
           </Link>

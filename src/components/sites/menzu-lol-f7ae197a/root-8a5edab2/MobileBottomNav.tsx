@@ -50,7 +50,7 @@ export function MobileBottomNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="sm:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-white/[0.08] bg-[#0a0a0d]">
+    <nav className="sm:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-white/[0.08] bg-scrim">
       <div className="grid grid-cols-5 h-16">
         {NAV_ENTRIES.map(({ label, href, icon: Icon }) => {
           const current = isCurrent(href, pathname);
@@ -69,7 +69,7 @@ export function MobileBottomNav() {
                   its label move together, and the tab's own box stays put. */}
               <span className="flex flex-col items-center gap-1">
                 <Icon size={18} />
-                <span className="text-[9px] font-bold uppercase tracking-wider whitespace-nowrap">
+                <span className="text-[11px] font-medium whitespace-nowrap">
                   {label}
                 </span>
               </span>
