@@ -3,6 +3,7 @@
 import { Check, X } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { lockScroll, unlockScroll } from "./modalChrome";
+import { SHEET, SHEET_BUTTON, SHEET_TEXT, SHEET_TITLE } from "./noticeSheet";
 import { useLeave } from "./useOverlayPresence";
 
 export interface ErrorModalProps {
@@ -74,34 +75,22 @@ export function ErrorModal({ title, message, onClose, tone = "error" }: ErrorMod
         aria-modal="true"
         aria-labelledby="error-modal-title"
         aria-describedby="error-modal-message"
-        // A red outline instead of the house sheet's white hairline: the strip
-        // this replaced was drawn with the same red border, and it is the one
-        // cue that says "error" before a single word is read. 1.5px, as the
-        // category page's red-rimmed search field draws it.
-        className={`relative w-full max-w-[380px] rounded-xl border-[1.5px] bg-[#131316] px-7 py-8 text-center shadow-2xl ${
-          done
-            ? "notice-modal-card border-white/10 shadow-black/60"
-            : "error-modal-card border-red-500/40 shadow-red-950/40"
-        }${leaving ? " order-modal-card-out" : ""}`}
+        // LAB: the house notice sheet (noticeSheet.ts). The error keeps its
+        // shake and a red cross beside the title; the frame stays calm.
+        className={`${SHEET} max-w-[400px] px-6 py-6 ${done ? "notice-modal-card" : "error-modal-card"}${
+          leaving ? " order-modal-card-out" : ""
+        }`}
       >
-        <span
-          className={`mx-auto flex h-16 w-16 items-center justify-center rounded-full border-2 ${
-            done
-              ? "border-neutral-500 bg-white/5 text-neutral-200"
-              : "border-red-500 bg-red-500/15 text-red-500"
-          }`}
-        >
-          {done ? <Check size={30} strokeWidth={3} /> : <X size={30} strokeWidth={3} />}
-        </span>
-
-        <h2
-          id="error-modal-title"
-          className="mt-5 text-[17px] font-black text-white"
-        >
+        <h2 id="error-modal-title" className={SHEET_TITLE}>
+          {done ? (
+            <Check size={18} strokeWidth={2.5} aria-hidden className="shrink-0 text-mist" />
+          ) : (
+            <X size={18} strokeWidth={2.5} aria-hidden className="shrink-0 text-rose-400" />
+          )}
           {title}
         </h2>
 
-        <p id="error-modal-message" className="mt-3 text-[13px] leading-relaxed text-neutral-300">
+        <p id="error-modal-message" className={`mt-2 ${SHEET_TEXT}`}>
           {message}
         </p>
 
@@ -109,7 +98,7 @@ export function ErrorModal({ title, message, onClose, tone = "error" }: ErrorMod
           ref={confirm}
           type="button"
           onClick={leave}
-          className="mt-6 h-11 w-full rounded-lg bg-[var(--menzu-accent)] text-[15px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent-dark)]"
+          className={`mt-6 w-full ${SHEET_BUTTON}`}
         >
           {done ? "Đóng" : "Thử lại"}
         </button>

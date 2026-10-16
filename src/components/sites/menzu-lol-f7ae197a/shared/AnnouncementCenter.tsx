@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowRight, Bell, X } from "lucide-react";
+import { Bell, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -27,6 +27,7 @@ import {
 import { TYPE_ICONS } from "./announcementIcons";
 import { useClientNow } from "./useClientClock";
 import { lockScroll, unlockScroll } from "./modalChrome";
+import { SHEET, SHEET_BUTTON, SHEET_BUTTON_QUIET, SHEET_TEXT } from "./noticeSheet";
 import { useLeave } from "./useOverlayPresence";
 
 export interface AnnouncementItem {
@@ -427,26 +428,20 @@ export function AnnouncementModal({
         // The same short rise the receipt and the buy dialog make. This sheet
         // opens itself over the hero for a first-time visitor; appearing in
         // one frame read as a pop-up, not as the shop speaking.
-        className={`order-modal-card relative flex max-h-[86vh] w-full max-w-[560px] flex-col overflow-hidden rounded-xl border border-white/10 bg-[#0e0e11] shadow-2xl outline-none${leaving ? " order-modal-card-out" : ""}`}
+        className={`order-modal-card ${SHEET} flex max-h-[86vh] max-w-[560px] flex-col overflow-hidden outline-none${leaving ? " order-modal-card-out" : ""}`}
       >
-        {/* A single accent rule along the top edge — the one piece of colour
-            the frame gets, so the eye lands on the sheet before the words. */}
-        <span
-          aria-hidden
-          className="absolute inset-x-0 top-0 h-px bg-[var(--menzu-accent)]/70"
-        />
-
+        {/* LAB: the house notice sheet (noticeSheet.ts), the same family as
+            the error, done and closed-wheel sheets: no red rule on top, the
+            kind's glyph and heading in grey, red only on the button that acts
+            (the owner, 16/10/2026: "thiết kế lại cái modal thông báo cho đồng
+            bộ"). */}
         {/* The kind's glyph in the accent, then the heading in white: the
             pairing the notices card and /thong-bao already wear since 03/10,
             so the sheet is no longer the one place without it (the owner,
             12/10/2026, review item 10). A personal notice wears the bell. */}
-        <header className="flex shrink-0 items-center gap-2.5 border-b border-white/[0.07] px-5 py-4">
-          <HeadingIcon
-            size={16}
-            className="shrink-0 text-[var(--menzu-accent)]"
-            aria-hidden
-          />
-          <h2 className="text-[15px] font-semibold text-white">
+        <header className="flex shrink-0 items-center gap-2.5 border-b border-line px-5 py-4">
+          <HeadingIcon size={16} className="shrink-0 text-mist" aria-hidden />
+          <h2 className="text-[14px] font-semibold text-mist">
             {/* A reply to this reader is not system news (the owner,
                 12/10/2026, review item 3). */}
             {item.personal ? "Thông báo của bạn" : TYPE_HEADINGS[item.type]}
@@ -455,7 +450,7 @@ export function AnnouncementModal({
             type="button"
             onClick={leave}
             aria-label="Đóng"
-            className="ml-auto text-neutral-600 transition-colors hover:text-neutral-300"
+            className="ml-auto text-neutral-500 transition-colors hover:text-frost"
           >
             <X size={16} />
           </button>
@@ -466,14 +461,14 @@ export function AnnouncementModal({
         <div className="min-h-0 flex-1 overflow-y-auto px-6 py-5">
           <h3
             id="announcement-title"
-            className="text-[20px] font-bold leading-snug text-white"
+            className="text-[20px] font-bold leading-snug text-frost"
           >
             {item.title}
           </h3>
           {/* A personal notice says when it was sent, to the minute: for a
               reply the hour is the fact (the owner, 12/10/2026, review
               item 4). A shop notice keeps the day it was last edited. */}
-          <p className="mt-1.5 text-[12px] text-neutral-500">
+          <p className="mt-1.5 text-[13px] text-dim">
             {item.personal && item.sentLabel
               ? `Gửi lúc ${item.sentLabel}`
               : `Cập nhật: ${item.updatedLabel}`}
@@ -496,7 +491,7 @@ export function AnnouncementModal({
               target="_blank"
               rel="noopener noreferrer"
               aria-label={`Xem ảnh: ${item.title}`}
-              className="relative mt-4 block aspect-video max-h-[300px] w-full overflow-hidden rounded-xl border border-white/10 bg-neutral-950 transition-colors hover:border-white/25"
+              className="relative mt-4 block aspect-video max-h-[300px] w-full overflow-hidden rounded-xl border border-line bg-neutral-950 transition-colors hover:border-white/25"
             >
               <Image
                 src={item.imageUrl}
@@ -513,13 +508,13 @@ export function AnnouncementModal({
 
           {/* whitespace-pre-line keeps the shop's line breaks. It is still
               text: React escapes it, and nothing here renders HTML. */}
-          <p className="mt-4 whitespace-pre-line text-[13.5px] leading-relaxed text-neutral-300">
+          <p className={`mt-4 whitespace-pre-line ${SHEET_TEXT}`}>
             {item.body}
           </p>
 
           {item.bullets.length > 0 ? (
             <>
-              <p className="mt-5 text-[13px] font-semibold text-white">
+              <p className="mt-5 text-[15px] font-semibold text-frost">
                 Lưu ý:
               </p>
               <ul className="mt-2.5 flex flex-col gap-2">
@@ -527,9 +522,9 @@ export function AnnouncementModal({
                   <li key={index} className="flex gap-2.5">
                     <span
                       aria-hidden
-                      className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--menzu-accent)]"
+                      className="mt-[9px] h-1.5 w-1.5 shrink-0 rounded-full bg-neutral-500"
                     />
-                    <span className="text-[13.5px] leading-relaxed text-neutral-300">
+                    <span className={SHEET_TEXT}>
                       {line}
                     </span>
                   </li>
@@ -539,20 +534,19 @@ export function AnnouncementModal({
           ) : null}
 
           {item.noticeTitle && item.noticeBody ? (
-            // A left rule rather than a full border: it marks the passage as
-            // set apart without drawing a second box inside the sheet.
-            <div className="mt-5 rounded-r-lg border-l-2 border-[var(--menzu-accent)] bg-[var(--menzu-accent)]/[0.06] px-4 py-3">
-              <p className="text-[13px] font-semibold text-[var(--menzu-accent)]">
+            // A quiet raised box: set apart without a second colour.
+            <div className="mt-5 rounded-[10px] border border-line bg-raise px-4 py-3">
+              <p className="text-[15px] font-semibold text-frost">
                 {item.noticeTitle}
               </p>
-              <p className="mt-1 whitespace-pre-line text-[13px] leading-relaxed text-neutral-300">
+              <p className="mt-1 whitespace-pre-line text-[14px] leading-relaxed text-mist">
                 {item.noticeBody}
               </p>
             </div>
           ) : null}
         </div>
 
-        <footer className="flex shrink-0 flex-wrap justify-end gap-2.5 border-t border-white/[0.07] px-5 py-4">
+        <footer className="flex shrink-0 flex-wrap justify-end gap-2.5 border-t border-line px-5 py-4">
           {/* Only a notice the shop posted for everyone can be put off: a
               reply or a credit addressed to this reader is read once, and a
               third button only crowded the row on a phone (the owner,
@@ -561,7 +555,7 @@ export function AnnouncementModal({
             <button
               type="button"
               onClick={onSnooze}
-              className="h-10 rounded-lg border border-white/10 bg-white/[0.03] px-4 text-[13px] font-medium text-neutral-300 transition-colors hover:bg-white/[0.07] hover:text-white"
+              className={SHEET_BUTTON_QUIET}
             >
               Không hiện lại trong 2 giờ
             </button>
@@ -578,10 +572,9 @@ export function AnnouncementModal({
             <Link
               href={item.ctaHref}
               onClick={leave}
-              className="inline-flex h-10 items-center gap-1.5 rounded-lg bg-[var(--menzu-accent)] px-6 text-[13px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent-dark)]"
+              className={SHEET_BUTTON}
             >
               {item.ctaLabel}
-              <ArrowRight size={14} />
             </Link>
           ) : null}
           <button
@@ -590,9 +583,7 @@ export function AnnouncementModal({
             // the next in place.
             onClick={remaining > 0 ? onNext : leave}
             className={
-              item.ctaLabel && item.ctaHref
-                ? "h-10 rounded-lg border border-white/10 bg-white/[0.03] px-4 text-[13px] font-medium text-neutral-300 transition-colors hover:bg-white/[0.07] hover:text-white"
-                : "h-10 rounded-lg bg-[var(--menzu-accent)] px-6 text-[13px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent-dark)]"
+              item.ctaLabel && item.ctaHref ? SHEET_BUTTON_QUIET : SHEET_BUTTON
             }
           >
             {remaining > 0 ? `Tiếp theo (${remaining})` : "Đóng"}

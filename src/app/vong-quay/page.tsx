@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { ArrowRight, Coins, Gift, History, Ticket } from "lucide-react";
+import { ChevronRight, Gift } from "lucide-react";
 
 import Link from "next/link";
 
@@ -32,43 +32,37 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 export const dynamic = "force-dynamic";
 
-
-
 /**
  * The wheel on a page of its own.
  *
- * Not inside the account frame any more: that sidebar is for the screens a
- * customer goes to in order to *manage* something — wallet, orders, security —
- * and a game shown between them reads as another form to fill in. On its own
- * page the wheel gets the width to be the thing you came for, and the account
- * menu still names it, so nothing is lost by moving it out.
+ * LAB (the owner, 16/10/2026: "nhớ thiết kế lại đổi thưởng", after "bớt AI
+ * bớt rối"): the wheel with no box around it, and beside it one plain column
+ * read top to bottom: how points turn into spins, what is on the wheel, the
+ * history. The points were printed three times (two cards beside the wheel
+ * and the line under it); now only the line under the wheel says them, since
+ * it is the one that changes after a spin.
  *
  * The page draws nothing it does not know: points come from the reader's own
- * row, and the prize list beside the wheel is the same table the server draws
- * from — one source, so it cannot advertise a prize the wheel does not hold.
- * What it no longer prints is how often each one comes up; that is the shop's
- * own tuning and the shop asked for it off the page.
+ * row, and the prize list is the same table the server draws from, so it
+ * cannot advertise a prize the wheel does not hold. How often each one comes
+ * up is the shop's own tuning and stays off the page.
  */
 export default async function SpinPage() {
   const [user, settings] = await Promise.all([getCurrentUser(), getShopSettings()]);
-  // While the wheel is closed the page still draws it — the owner wants it
-  // seen — under a notice that sends the reader home. A closed wheel is not
+  // While the wheel is closed the page still draws it (the owner wants it
+  // seen) under a notice that sends the reader home. A closed wheel is not
   // worth signing in for, so a visitor sees it with no points of their own.
   if (!user && !SPIN_LOCKED) redirect("/login?next=%2Fvong-quay");
   const points = user?.points ?? 0;
 
-  const spinsAfforded = Math.floor(points / SPIN_COST);
   // The same switch that closes the shop closes the wheel: it pays out real
   // balance, so it has no business running while sales are stopped.
   const canSpin = settings.purchasesEnabled && !SPIN_LOCKED;
-  // One read for the drawing, the reward list and the prop the wheel spins on:
-  // a page that pictured one table and posted to another would be advertising
-  // prizes that are not on the wheel.
+  // One read for the drawing, the reward list and the prop the wheel spins on.
   const prizes = await listSpinPrizes();
 
   // Parcels won and not yet given an address. Only ITEM wins ever reach
-  // PENDING — money, points and codes settle inside the spin's own transaction
-  // and are nobody's errand.
+  // PENDING; money, points and codes settle inside the spin's own transaction.
   const unclaimed = !user ? [] : await db.spinWin.findMany({
     where: { userId: user.id, status: "PENDING", address: null },
     orderBy: { createdAt: "desc" },
@@ -81,30 +75,21 @@ export default async function SpinPage() {
           stacking context under the header, so a sheet in there left the
           header sharp over the frost (the owner, 07/10/2026: "full mờ"). */}
       {SPIN_LOCKED ? <SpinLockedNotice /> : null}
-      <SimplePage
-        title="Vòng quay đổi thưởng"
-        crumb="Vòng quay đổi thưởng"
-        // The gift the account menu shows beside this page, where the red bar
-        // stood (the owner, 13/10/2026, UI consistency review).
-        icon={Gift}
-      >
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_320px] lg:gap-10">
-          {/* The wheel leads and takes the width; the numbers read beside it on a
-              wide screen and under it on a phone. */}
-          <div className="flex flex-col gap-8 rounded-2xl border border-white/10 bg-neutral-900/40 px-6 py-10">
+      <SimplePage title="Vòng quay đổi thưởng" crumb="Vòng quay đổi thưởng" icon={Gift}>
+        <div className="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_340px] lg:gap-14">
+          <div className="flex min-w-0 flex-col gap-6">
             {!canSpin && !SPIN_LOCKED ? (
-              <p className="mx-auto max-w-[520px] rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-center text-[12px] font-semibold text-amber-300">
-                Shop đang tạm ngưng bán hàng nên vòng quay cũng tạm đóng. Điểm của bạn
-                vẫn giữ nguyên.
+              <p className="mx-auto max-w-[520px] text-center text-[14px] text-amber-300">
+                Shop đang tạm ngưng bán hàng nên vòng quay cũng tạm đóng. Điểm của bạn vẫn giữ
+                nguyên.
               </p>
             ) : null}
 
             <SpinWheel points={points} canSpin={canSpin} prizes={prizes} />
 
-            {/* One line, not one form per parcel. A reader who wins the same
-                prize five times was meeting five identical address forms stacked
-                down the page; the form itself lives on each parcel's own page,
-                which is also where the courier number comes back. */}
+            {/* One line, not one form per parcel: the form lives on each
+                parcel's own page, which is also where the courier number
+                comes back. */}
             {unclaimed.length > 0 ? (
               <Link
                 href={
@@ -112,115 +97,58 @@ export default async function SpinPage() {
                     ? `/vong-quay/qua/${unclaimed[0]!.id}`
                     : "/vong-quay/lich-su"
                 }
-                className="group flex flex-wrap items-center gap-3 rounded-xl border border-amber-500/30 bg-amber-500/[0.07] px-4 py-3.5 transition-colors hover:border-amber-500/60"
+                className="group mx-auto flex w-full max-w-[520px] items-center gap-3 rounded-[10px] border border-amber-500/30 px-4 py-3 transition-colors hover:border-amber-500/60"
               >
-                <Gift size={16} className="shrink-0 text-amber-400" />
-                <span className="flex-1 text-[13px] leading-relaxed text-amber-200">
+                <span className="flex-1 text-[14px] leading-relaxed text-amber-200">
                   {unclaimed.length === 1 ? (
                     <>
-                      Bạn trúng <b className="text-white">{unclaimed[0]!.label}</b>, điền địa chỉ để shop gửi tận nơi.
+                      Bạn trúng <b className="text-white">{unclaimed[0]!.label}</b>, điền địa chỉ để
+                      shop gửi tận nơi.
                     </>
                   ) : (
                     <>
-                      Bạn có{" "}
-                      <b className="text-white">{unclaimed.length} phần quà</b> chưa
-                      điền địa chỉ nhận.
+                      Bạn có <b className="text-white">{unclaimed.length} phần quà</b> chưa điền địa
+                      chỉ nhận.
                     </>
                   )}
                 </span>
-                <ArrowRight
-                  size={14}
-                  className="shrink-0 text-amber-400/70 transition-transform group-hover:translate-x-0.5"
-                />
+                <ChevronRight size={16} aria-hidden className="shrink-0 text-amber-400/70" />
               </Link>
             ) : null}
           </div>
 
-          <aside className="flex flex-col gap-4">
-            <div className="flex flex-col gap-3 rounded-2xl border border-[var(--menzu-violet)]/20 bg-[var(--menzu-violet)]/[0.05] p-5">
-              <span className="flex items-center gap-2 text-[12px] font-semibold text-neutral-300">
-                <Coins size={13} className="text-[#a78bfa]" />
-                Điểm thưởng của bạn
-              </span>
-              <span className="text-3xl font-black leading-none text-[#a78bfa]">
-                {formatVnd(points)}{" "}
-                <span className="text-sm font-bold text-[#a78bfa]/80">điểm</span>
-              </span>
-              <span className="text-xs text-neutral-500">
-                Điểm cộng theo mỗi đơn hàng thành công
-              </span>
-            </div>
+          <aside className="flex min-w-0 flex-col">
+            <section className="border-t border-line pt-4">
+              <h2 className="text-[16px] font-bold text-frost">Cách đổi điểm</h2>
+              <p className="mt-2 text-[14px] leading-relaxed text-mist">
+                {formatVnd(SPIN_COST)} điểm đổi một lượt quay. Điểm được cộng sau mỗi đơn hàng
+                thành công.
+              </p>
+            </section>
 
-            <div className="flex flex-col gap-3 rounded-2xl border border-white/10 bg-neutral-900/50 p-5">
-              <span className="flex items-center gap-2 text-[12px] font-semibold text-neutral-300">
-                <Ticket size={13} className="text-neutral-400" />
-                Lượt quay có thể đổi
-              </span>
-              <span className="text-3xl font-black leading-none text-white">
-                {spinsAfforded}{" "}
-                <span className="text-sm font-bold text-neutral-500">lượt</span>
-              </span>
-              <span className="text-xs text-neutral-500">
-                {formatVnd(SPIN_COST)} điểm đổi được 1 lượt quay
-              </span>
-            </div>
-
-            {/* Everything the wheel has already given this reader. Beside the
-                wheel rather than buried in the account menu: the moment somebody
-                wonders "mình trúng gì rồi" is the moment they are looking at
-                it. */}
-            <Link
-              href="/vong-quay/lich-su"
-              className="group flex items-center gap-3 rounded-2xl border border-white/10 bg-neutral-900/50 p-5 transition-colors hover:border-[var(--menzu-violet)]/40"
-            >
-              <History size={16} className="shrink-0 text-[#a78bfa]" />
-              <span className="flex-1 text-[13px] font-bold text-white">
-                Lịch sử nhận thưởng
-              </span>
-              <ArrowRight
-                size={14}
-                className="shrink-0 text-neutral-600 transition-transform group-hover:translate-x-0.5"
-              />
-            </Link>
-
-            <div className="rounded-2xl border border-white/10 bg-neutral-900/50 p-5">
-              <span className="block text-[12px] font-semibold text-neutral-500">
-                Các phần thưởng
-              </span>
-              {/* What is on the wheel, not how often it comes up. The odds were
-                  printed here and the shop asked for them off: a percentage
-                  beside every slice is the shop's own tuning, published. The
-                  names are still read from the table the server draws from, so
-                  nothing here can promise a prize the wheel does not hold.
-
-                  A losing slice is left out rather than listed: "Chúc may mắn
-                  lần sau" is not a reward, and printing it twice under a heading
-                  that says rewards reads as a joke at the reader's expense. */}
-              <ul className="mt-3 flex flex-col">
+            <section className="mt-8 border-t border-line pt-4">
+              <h2 className="text-[16px] font-bold text-frost">Phần thưởng</h2>
+              {/* What is on the wheel, not how often it comes up. A losing
+                  slice is left out: "Chúc may mắn lần sau" is not a reward. */}
+              <ul className="mt-2 flex flex-col">
                 {prizes
                   .filter((prize: Prize) => prize.kind !== "NOTHING")
                   .map((prize: Prize) => (
-                    <li
-                      key={prize.id}
-                      className="flex items-start gap-2.5 border-b border-white/5 py-2 text-[12px] last:border-0"
-                    >
+                    <li key={prize.id} className="flex items-start gap-3 py-2 text-[14px]">
                       {/* The colour its wedge is painted, so the list and the
-                          wheel are one picture: a reader finds the prize they
-                          saw go past by the colour, not by re-reading nine
-                          labels. "Auto" keeps the house violet. */}
+                          wheel are one picture. */}
                       <span
                         aria-hidden
-                        className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full"
+                        className="mt-[7px] h-2 w-2 shrink-0 rounded-full"
                         style={{
                           background:
-                            WEDGE_COLORS[readWedgeColor(prize.color)].fill ??
-                            "var(--menzu-violet)",
+                            WEDGE_COLORS[readWedgeColor(prize.color)].fill ?? "var(--menzu-violet)",
                         }}
                       />
                       <span className="min-w-0">
-                        <span className="text-neutral-300">{prize.label}</span>
+                        <span className="text-frost">{prize.label}</span>
                         {prize.description ? (
-                          <span className="mt-0.5 block text-[11px] leading-relaxed text-neutral-500">
+                          <span className="mt-0.5 block text-[13px] leading-relaxed text-dim">
                             {prize.description}
                           </span>
                         ) : null}
@@ -228,11 +156,24 @@ export default async function SpinPage() {
                     </li>
                   ))}
               </ul>
-              <p className="mt-3 text-[11px] leading-relaxed text-neutral-500">
-                Tiền trúng được cộng thẳng vào số dư ví và ghi lại ở mục Lịch sử giao
-                dịch.
+              <p className="mt-2 text-[13px] leading-relaxed text-dim">
+                Tiền trúng được cộng thẳng vào ví và ghi ở Lịch sử giao dịch.
               </p>
-            </div>
+            </section>
+
+            {/* Everything the wheel has already given this reader, beside the
+                wheel: "mình trúng gì rồi" is asked while looking at it. */}
+            <Link
+              href="/vong-quay/lich-su"
+              className="group mt-8 flex items-center justify-between gap-3 border-y border-line py-3.5 text-[15px] font-semibold text-frost transition-colors hover:text-white"
+            >
+              Lịch sử nhận thưởng
+              <ChevronRight
+                size={16}
+                aria-hidden
+                className="shrink-0 text-neutral-500 transition-colors group-hover:text-frost"
+              />
+            </Link>
           </aside>
         </div>
       </SimplePage>

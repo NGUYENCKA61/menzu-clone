@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useEffect, useRef, type ReactNode } from "react";
 
 import { lockScroll, unlockScroll } from "./modalChrome";
+import { SHEET, SHEET_BUTTON, SHEET_TEXT, SHEET_TITLE } from "./noticeSheet";
 import { formatVnd } from "./productData";
 import { useLeave } from "./useOverlayPresence";
 
@@ -20,18 +21,8 @@ export interface TopUpDialogProps {
 }
 
 const TONE = {
-  green: {
-    glow: "bg-emerald-500/10",
-    box: "bg-emerald-500/10 border-emerald-500/20",
-    icon: "text-emerald-500",
-    Icon: CircleCheck,
-  },
-  red: {
-    glow: "bg-red-500/10",
-    box: "bg-red-500/10 border-red-500/20",
-    icon: "text-red-500",
-    Icon: CircleX,
-  },
+  green: { icon: "text-emerald-400", Icon: CircleCheck },
+  red: { icon: "text-rose-400", Icon: CircleX },
 } as const;
 
 /**
@@ -48,21 +39,18 @@ export function CreditedLines({ credited, face }: { credited: number; face: numb
       </span>
       {face > credited ? (
         <span className="mt-1 block text-xs tabular-nums text-neutral-500">
-          Thẻ {formatVnd(face)}đ · phí {formatVnd(face - credited)}đ
+          Thẻ {formatVnd(face)}đ, phí {formatVnd(face - credited)}đ
         </span>
       ) : null}
     </>
   );
 }
 
-const ACTION =
-  "w-full flex items-center justify-center bg-white text-black font-bold text-sm sm:text-base py-4 rounded-2xl hover:bg-neutral-200 active:scale-95 transition-all relative z-10";
+const ACTION = `mt-6 w-full ${SHEET_BUTTON}`;
 
 /**
- * menzu's invoice sheet, measured off its "Giao dịch đã hủy": a #111 card,
- * 32px round, a faint grid, the icon in a rounded square with a glow behind
- * it, one sentence and a white button. The same sheet says "Nạp tiền thành
- * công" in green.
+ * The invoice sheet: "Giao dịch đã hủy" in red, "Nạp tiền thành công" in
+ * green, one sentence and one button (lab: the house notice sheet).
  *
  * Escape, the backdrop and the cross close it; Tab stays between the cross
  * and the button.
@@ -116,40 +104,26 @@ export function TopUpDialog({ tone, title, children, action, onClose }: TopUpDia
         tabIndex={-1}
         className={`notice-modal-card w-full max-w-md relative z-10 outline-none${leaving ? " order-modal-card-out" : ""}`}
       >
-        <div className="bg-[#111111] border border-white/5 shadow-none rounded-[32px] p-8 sm:p-10 flex flex-col items-center text-center relative overflow-hidden group">
+        {/* LAB: the house notice sheet (noticeSheet.ts), like the shop's
+            notices and the error sheet: no grid, no glow, the state's glyph
+            beside a left-aligned title, red on the one button (the owner,
+            16/10/2026: "thiết kế lại cái modal thông báo cho đồng bộ"). */}
+        <div className={`${SHEET} px-6 py-6`}>
           <button
             ref={close}
             type="button"
             onClick={leave}
             aria-label="Đóng"
-            className="absolute top-5 right-5 w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-neutral-400 hover:text-white hover:bg-white/10 transition-colors z-20"
+            className="absolute right-4 top-4 grid h-8 w-8 place-items-center rounded-lg text-neutral-500 transition-colors hover:bg-white/5 hover:text-frost"
           >
-            <X size={18} aria-hidden />
+            <X size={16} aria-hidden />
           </button>
-          <div
-            aria-hidden
-            className="absolute inset-0 bg-[linear-gradient(to_right,#80808008_1px,transparent_1px),linear-gradient(to_bottom,#80808008_1px,transparent_1px)] bg-[size:24px_24px]"
-          />
-          <div
-            aria-hidden
-            className={`absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 ${look.glow} blur-[60px] rounded-full pointer-events-none`}
-          />
 
-          <div
-            className={`w-20 h-20 ${look.box} border rounded-[24px] flex items-center justify-center mb-6 relative z-10`}
-          >
-            <look.Icon size={40} className={look.icon} aria-hidden />
-          </div>
-
-          <h2
-            id="topup-dialog-title"
-            className="text-2xl sm:text-3xl font-black text-white mb-2 relative z-10 tracking-tight"
-          >
+          <h2 id="topup-dialog-title" className={`${SHEET_TITLE} pr-10`}>
+            <look.Icon size={18} className={`shrink-0 ${look.icon}`} aria-hidden />
             {title}
           </h2>
-          <div className="text-neutral-500 mb-8 text-sm sm:text-base relative z-10 leading-relaxed px-4">
-            {children}
-          </div>
+          <div className={`mt-2 ${SHEET_TEXT}`}>{children}</div>
 
           {action.href ? (
             <Link

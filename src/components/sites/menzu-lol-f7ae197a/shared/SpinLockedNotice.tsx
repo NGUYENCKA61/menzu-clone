@@ -4,6 +4,7 @@ import { Lock } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef } from "react";
 import { lockScroll, unlockScroll } from "./modalChrome";
+import { SHEET, SHEET_BUTTON, SHEET_TEXT, SHEET_TITLE } from "./noticeSheet";
 import { useLeave } from "./useOverlayPresence";
 
 /**
@@ -59,30 +60,24 @@ export function SpinLockedNotice() {
         aria-modal="true"
         aria-labelledby="spin-locked-title"
         aria-describedby="spin-locked-message"
-        className={`notice-modal-card relative w-full max-w-[380px] rounded-xl border-[1.5px] border-white/10 bg-[#131316] px-7 py-8 text-center shadow-2xl shadow-black/60${
-          leaving ? " order-modal-card-out" : ""
-        }`}
+        // LAB: the house notice sheet (noticeSheet.ts): a small grey lock
+        // beside the title instead of the red ring; red stays for the button.
+        className={`${SHEET} notice-modal-card max-w-[400px] px-6 py-6${leaving ? " order-modal-card-out" : ""}`}
       >
-        <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border-2 border-[var(--menzu-accent)] bg-[var(--menzu-accent)]/15 text-[var(--menzu-accent)]">
-          <Lock size={28} strokeWidth={2.5} />
-        </span>
-
-        <h2
-          id="spin-locked-title"
-          className="mt-5 text-[17px] font-black text-white"
-        >
-          Tạm ngưng sự kiện
+        <h2 id="spin-locked-title" className={SHEET_TITLE}>
+          <Lock size={18} aria-hidden className="shrink-0 text-mist" />
+          Vòng quay đang tạm ngưng
         </h2>
 
-        <p id="spin-locked-message" className="mt-3 text-[13px] leading-relaxed text-neutral-300">
-          Sự kiện vòng quay đổi thưởng đang tạm ngưng. Điểm thưởng của bạn vẫn được giữ nguyên.
+        <p id="spin-locked-message" className={`mt-2 ${SHEET_TEXT}`}>
+          Điểm thưởng của bạn vẫn được giữ nguyên.
         </p>
 
         <button
           ref={confirm}
           type="button"
           onClick={leave}
-          className="mt-6 h-11 w-full rounded-lg bg-[var(--menzu-accent)] text-[15px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent-dark)]"
+          className={`mt-6 w-full ${SHEET_BUTTON}`}
         >
           Về trang chủ
         </button>

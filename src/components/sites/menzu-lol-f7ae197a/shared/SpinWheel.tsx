@@ -178,12 +178,13 @@ export function SpinWheel({
       <div className="relative w-full max-w-[520px] aspect-square">
         {/* The pointer, outside the rotating group so it stays at twelve. */}
         <div className="absolute left-1/2 top-[-6px] z-10 -translate-x-1/2">
-          <div className="h-0 w-0 border-x-[10px] border-t-[18px] border-x-transparent border-t-[var(--menzu-violet)]" />
+          {/* LAB: a white pointer and no glow round the wheel ("bớt AI bớt rối"). */}
+          <div className="h-0 w-0 border-x-[10px] border-t-[18px] border-x-transparent border-t-frost" />
         </div>
 
         <SpinWheelFace
           prizes={prizes}
-          className="h-full w-full rounded-full border-4 border-white/10 shadow-[0_0_60px_-15px_rgb(124_58_237_/_0.5)]"
+          className="h-full w-full rounded-full border-4 border-white/10"
           style={{
             transform: `rotate(${angle}deg)`,
             transition: `transform ${spinMs}ms cubic-bezier(0.16, 1, 0.3, 1)`,
@@ -196,7 +197,8 @@ export function SpinWheel({
           type="button"
           disabled={spinning || !affordable || !canSpin}
           onClick={spin}
-          className="absolute left-1/2 top-1/2 z-10 grid h-[27%] w-[27%] -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border-4 border-[#0b0b10] bg-[var(--menzu-violet)] text-white shadow-[0_0_30px_-4px_rgb(124_58_237_/_0.8)] transition-colors hover:bg-[var(--menzu-violet-dark)] disabled:bg-neutral-700 disabled:text-neutral-400 disabled:shadow-none"
+          // LAB: the hub is the page's one action, so it wears the shop's red.
+          className="absolute left-1/2 top-1/2 z-10 grid h-[27%] w-[27%] -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border-4 border-[#0b0b10] bg-[var(--menzu-accent)] text-white transition-colors hover:bg-[var(--menzu-accent-dark)] disabled:bg-neutral-700 disabled:text-neutral-400"
         >
           <span className="flex items-center justify-center text-[15px] font-semibold leading-none sm:text-[15px]">
             {spinning ? (
@@ -216,19 +218,17 @@ export function SpinWheel({
       </div>
 
       <div className="flex flex-col items-center gap-2">
-        <span className="text-[12px] text-neutral-400">
-          Còn lại{" "}
-          <span className="font-bold text-white">{formatVnd(balanceLeft)} điểm</span> ·
-          đổi được{" "}
-          <span className="font-bold text-white">
-            {Math.floor(balanceLeft / SPIN_COST)} lượt
-          </span>
+        {/* LAB: the one place the points are said; it changes after a spin. */}
+        <span className="text-[15px] text-mist">
+          Bạn có <span className="font-bold text-frost">{formatVnd(balanceLeft)} điểm</span>, đổi
+          được{" "}
+          <span className="font-bold text-frost">{Math.floor(balanceLeft / SPIN_COST)} lượt quay</span>
         </span>
 
         {!affordable && !spinning ? (
           <Link
             href="/categories"
-            className="text-[11px] font-bold text-[var(--menzu-violet)] hover:text-white transition-colors"
+            className="text-[14px] font-semibold text-mist underline-offset-4 transition-colors hover:text-frost hover:underline"
           >
             Mua sắm để tích thêm điểm
           </Link>
