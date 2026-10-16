@@ -235,7 +235,7 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                 to "Giảm …"; below xl the doors make one row under it. The column is
                 180px since 16/10/2026 (the owner: "kéo dài chiều ngang thanh cấp
                 bậc", the doors narrower so the tier card runs wider). */}
-            <div className="grid grid-cols-1 gap-4 sm:mt-5 xl:grid-cols-[minmax(0,1fr)_180px]">
+            <div className="grid grid-cols-1 gap-4 sm:mt-20 xl:grid-cols-[minmax(0,1fr)_180px]">
               <div className="flex flex-col gap-2 rounded-xl border border-white/10 bg-white/[0.03] p-5">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <span className="text-[10px] font-black uppercase tracking-widest text-neutral-400">
