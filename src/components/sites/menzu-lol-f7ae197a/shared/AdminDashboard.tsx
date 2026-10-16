@@ -166,71 +166,128 @@ export function AdminDashboard({
   transactions: TransactionRow[];
 }) {
   return (
-    <div className="flex flex-col gap-7">
-      {/* First, above the figures (the owner, 02/10/2026: "Làm 1 đi"): what
-          is waiting on the shop, each card opening the screen where it is
-          done. Every card stays even at zero, so each errand keeps its place. */}
-      <Section title="Việc cần xử lý">
-        {/* Five cards: one row on a desktop, where three columns left two
-            cards and a hole on the second row. On a phone the odd one out
-            takes the whole last row rather than leaving half of it empty. */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 [&>*:last-child:nth-child(odd)]:col-span-2 sm:[&>*:last-child:nth-child(odd)]:col-span-1">
-          {todo.map((item) => (
-            <TodoCard key={item.label} {...item} />
-          ))}
-        </div>
-        {restock.lines.length > 0 ? <RestockList {...restock} /> : null}
-      </Section>
+    // LAB (Launcher, the owner 16/10/2026: "Thiết kế lại"): what the shop
+    // must do first and how today is going sit on the first screen; the
+    // figures that only change slowly move down. Same data as before.
+    <div className="flex flex-col gap-6">
+      <TodayStrip stats={todayStats} />
 
-      <Section title="Hôm nay" note="00:00–23:59 giờ Việt Nam">
-        <div className="grid grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4">
-          {todayStats.map((stat) => (
-            <StatCard key={stat.label} {...stat} />
-          ))}
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1.55fr)_minmax(0,1fr)]">
+        <div className="flex min-w-0 flex-col gap-6">
+          <ActionInbox todo={todo} />
+          {restock.lines.length > 0 ? <RestockList {...restock} /> : null}
         </div>
-      </Section>
+        <div className="flex min-w-0 flex-col gap-6">
+          <RevenueChart points={chart} />
+          <ActivityFeed items={activity} />
+        </div>
+      </div>
 
-      <Section title="Thống kê">
-        <div className="grid grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4">
+      <section aria-label="Thống kê" className="flex flex-col gap-3">
+        <h2 className="text-[17px] font-black text-frost">Tổng từ trước đến nay</h2>
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
           {totals.map((stat) => (
             <StatCard key={stat.label} {...stat} />
           ))}
         </div>
-      </Section>
-
-      <div className="grid grid-cols-1 xl:grid-cols-[1.6fr_1fr] gap-4">
-        <RevenueChart points={chart} />
-        <ActivityFeed items={activity} />
-      </div>
+      </section>
 
       <TransactionTable rows={transactions} />
     </div>
   );
 }
-
-function Section({
-  title,
-  note,
-  children,
-}: {
-  title: string;
-  note?: string;
-  children: React.ReactNode;
-}) {
+/** Today's four figures as one strip, the first (revenue) the largest. */
+function TodayStrip({ stats }: { stats: StatItem[] }) {
   return (
-    <section className="flex flex-col gap-4">
-      <div className="flex items-center gap-3">
-        <h2 className="text-[19px] font-black text-frost whitespace-nowrap">
-          {title}
-        </h2>
-        <div className="flex-1 h-px bg-white/[0.08]" />
-        {note ? <span className="text-[13px] text-dim">{note}</span> : null}
+    <section aria-label="Hôm nay" className={`${CARD} overflow-hidden`}>
+      <div className="flex items-center justify-between gap-3 border-b border-line px-5 py-3">
+        <h2 className="text-[17px] font-black text-frost">Hôm nay</h2>
+        <span className="text-[13px] text-dim">00:00–23:59 giờ Việt Nam</span>
       </div>
-      {children}
+      <div className="grid grid-cols-2 xl:grid-cols-[1.4fr_1fr_1fr_1fr] xl:divide-x xl:divide-line">
+        {stats.map(({ label, value, sub, tone, icon: Icon }, index) => {
+          const idle = value === "0" || value === "0đ";
+          return (
+            <div key={label} className="flex min-w-0 flex-col gap-2 px-5 py-4">
+              <span className="flex items-center gap-2 text-[13px] font-medium text-mist">
+                <Icon size={14} aria-hidden className="shrink-0" />
+                {label}
+              </span>
+              <span
+                className={`break-all font-black leading-none tabular-nums ${
+                  index === 0 ? "text-[30px] sm:text-[36px]" : "text-[22px] sm:text-[26px]"
+                } ${idle ? "text-neutral-600" : "text-frost"}`}
+              >
+                {value}
+              </span>
+              <span
+                className={`text-[13px] ${
+                  tone === "up" ? "text-emerald-400" : tone === "down" ? "text-rose-400" : "text-dim"
+                }`}
+              >
+                {sub}
+              </span>
+            </div>
+          );
+        })}
+      </div>
     </section>
   );
 }
 
+/**
+ * The errands as an inbox: what is waiting gets a row with its count, the
+ * rest folds into one quiet line of links, so the eye lands on work.
+ */
+function ActionInbox({ todo }: { todo: TodoItem[] }) {
+  const open = todo.filter((item) => item.count > 0);
+  const quiet = todo.filter((item) => item.count === 0);
+  const waiting = open.reduce((sum, item) => sum + item.count, 0);
+  return (
+    <section aria-label="Việc cần xử lý" className={`${CARD} overflow-hidden`}>
+      <div className="flex items-center justify-between gap-3 border-b border-line px-5 py-3.5">
+        <h2 className="text-[17px] font-black text-frost">Việc cần xử lý</h2>
+        <span
+          className={`rounded-md px-2 py-0.5 text-[13px] font-semibold tabular-nums ${
+            waiting > 0 ? "bg-amber-500/15 text-amber-300" : "bg-white/[0.06] text-mist"
+          }`}
+        >
+          {waiting > 0 ? `${waiting} việc đang chờ` : "Không có việc chờ"}
+        </span>
+      </div>
+      {open.length > 0 ? (
+        <ul className="divide-y divide-line">
+          {open.map((item) => (
+            <li key={item.label}>
+              <TodoRow {...item} />
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="px-5 py-6 text-[14px] text-mist">Không còn việc nào đang chờ.</p>
+      )}
+      {quiet.length > 0 ? (
+        <p className="flex flex-wrap items-center gap-x-1.5 gap-y-1 border-t border-line bg-black/20 px-5 py-3 text-[13px] text-dim">
+          <span>Không có việc:</span>
+          {quiet.map((item, index) => (
+            <span key={item.label}>
+              {item.href.startsWith("#") ? (
+                <a href={item.href} className="text-mist underline-offset-4 hover:text-frost hover:underline">
+                  {item.label}
+                </a>
+              ) : (
+                <Link href={item.href} className="text-mist underline-offset-4 hover:text-frost hover:underline">
+                  {item.label}
+                </Link>
+              )}
+              {index < quiet.length - 1 ? "," : ""}
+            </span>
+          ))}
+        </p>
+      ) : null}
+    </section>
+  );
+}
 function StatCard({ label, value, sub, tone, icon: Icon, tint }: StatItem) {
   // A quiet day should look quiet: zeros step back so real figures stand out.
   const idle = value === "0" || value === "0đ";
@@ -267,55 +324,26 @@ function StatCard({ label, value, sub, tone, icon: Icon, tint }: StatItem) {
   );
 }
 
-/** A stat card that is also a door: the count of one errand, opening its screen. */
-function TodoCard({ label, count, sub, subWarn, href, icon: Icon }: TodoItem) {
-  // Amber is the shop's "đang chờ" everywhere in this area; a card at zero
-  // steps back to grey like a quiet stat does.
-  const waiting = count > 0;
-  const className = `group flex flex-col gap-3 rounded-[14px] border bg-raise/40 p-5 transition-colors ${
-    waiting
-      ? "border-amber-500/25 hover:border-amber-500/50"
-      : "border-white/[0.08] hover:border-white/20"
-  }`;
+/** One waiting errand as an inbox row, opening the screen where it is done. */
+function TodoRow({ label, count, sub, subWarn, href, icon: Icon }: TodoItem) {
+  const className = "group flex items-center gap-4 px-5 py-4 transition-colors hover:bg-white/[0.03]";
   const body = (
     <>
-      <div className="flex items-center justify-between gap-3">
-        {/* Balanced, so a label that wraps breaks "BẢO HÀNH / CHỜ TRẢ LỜI"
-            rather than leaving a single word on a line of its own. */}
-        <span className={`${CAP} text-balance`}>{label}</span>
-        <span
-          className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border ${
-            waiting
-              ? "border-amber-500/25 bg-amber-500/10 text-amber-400"
-              : "border-white/[0.08] bg-white/[0.03] text-neutral-600"
-          }`}
-        >
-          <Icon size={15} />
-        </span>
-      </div>
-      <span
-        className={`text-[20px] font-black leading-none tabular-nums sm:text-[26px] ${
-          waiting ? "text-white" : "text-neutral-600"
-        }`}
-      >
-        {count}
+      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[10px] border border-amber-500/25 bg-amber-500/10 text-amber-400">
+        <Icon size={17} aria-hidden />
       </span>
-      <span className="flex items-center justify-between gap-2 text-[11px]">
-        <span
-          className={`text-pretty ${subWarn ? "font-semibold text-amber-400" : "text-neutral-500"}`}
-        >
-          {sub}
-        </span>
-        <ChevronRight
-          size={14}
-          aria-hidden
-          className="shrink-0 text-neutral-600 transition-colors group-hover:text-white"
-        />
+      <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+        <span className="truncate text-[15px] font-semibold text-frost">{label}</span>
+        <span className={`truncate text-[13px] ${subWarn ? "font-semibold text-amber-400" : "text-mist"}`}>{sub}</span>
       </span>
+      <span className="shrink-0 text-[26px] font-black leading-none tabular-nums text-frost">{count}</span>
+      <ChevronRight
+        size={16}
+        aria-hidden
+        className="shrink-0 text-neutral-600 transition-colors group-hover:text-white"
+      />
     </>
   );
-
-  // The restock card points down the page, which is an anchor, not a route.
   return href.startsWith("#") ? (
     <a href={href} className={className}>
       {body}
@@ -326,7 +354,6 @@ function TodoCard({ label, count, sub, subWarn, href, icon: Icon }: TodoItem) {
     </Link>
   );
 }
-
 /**
  * The shelves behind the restock card, each opening the page where keys (or
  * an "acc random" listing's sign-ins) are pasted in. Only drawn when there is
