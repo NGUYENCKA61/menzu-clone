@@ -6,13 +6,16 @@ import { redirect } from "next/navigation";
 import {
   BadgeCheck,
   Check,
+  Gift,
   HandCoins,
   LayoutDashboard,
   Receipt,
   ShoppingBag,
+  Wallet,
 } from "lucide-react";
 
 import { AccountPageFrame } from "@/components/sites/menzu-lol-f7ae197a/shared/AccountPageFrame";
+import { AccountPanel } from "@/components/sites/menzu-lol-f7ae197a/shared/AccountPanel";
 import { AvatarUploader } from "@/components/sites/menzu-lol-f7ae197a/shared/AvatarUploader";
 import { BannerUploader } from "@/components/sites/menzu-lol-f7ae197a/shared/BannerUploader";
 import { WithdrawCommission } from "@/components/sites/menzu-lol-f7ae197a/shared/WithdrawCommission";
@@ -28,6 +31,7 @@ import {
 } from "@/lib/memberTiers";
 import { getCurrentUser } from "@/lib/session";
 import { getShopSettings } from "@/lib/settingsStore";
+import { SPIN_LOCKED } from "@/lib/spin";
 
 export const metadata: Metadata = {
   title: "Tổng quan tài khoản",
@@ -53,6 +57,20 @@ const PROVIDER_NAMES: Record<string, string> = {
   discord: "Discord",
 };
 
+/** The column of doors beside the tier card; the first is the red one.
+ *  Three, named the way the sidebar names them. Bảo mật is one click away in
+ *  that sidebar already, and Discord belongs with the other links. */
+const QUICK_ACTIONS = [
+  { label: "Nạp tiền", href: "/wallet", icon: Wallet, primary: true },
+  { label: "Lịch sử mua", href: "/orders", icon: ShoppingBag, primary: false },
+  { label: "Đổi thưởng", href: "/vong-quay", icon: Gift, primary: false },
+] as const;
+
+/** The doors drawn: while the wheel's event is suspended its door comes off,
+ *  rather than leading to the "Tạm ngưng sự kiện" sheet (the owner,
+ *  07/10/2026: "trong trang tổng quan tài khoản ẩn luôn đi"). */
+const DOORS = QUICK_ACTIONS.filter((door) => !(SPIN_LOCKED && door.href === "/vong-quay"));
+
 /** Behind the banner when no category has a cover: the shop's own backdrop. */
 const BANNER_FALLBACK = "/sites/menzu-lol-f7ae197a/root-8a5edab2/images/behance/f945cb242281183.696998e170840.webp";
 
@@ -72,21 +90,6 @@ function SkewPlate({
         {children}
       </span>
     </span>
-  );
-}
-
-/** The page's title and its line, the way every account page prints them. */
-function OverviewTitle({ className }: { className: string }) {
-  return (
-    <div className={className}>
-      <h1 className="text-xl sm:text-2xl font-black text-white uppercase tracking-wider mb-2 flex items-center gap-3">
-        <LayoutDashboard size={24} className="shrink-0 text-[var(--menzu-accent)]" aria-hidden />
-        Tổng quan tài khoản
-      </h1>
-      <p className="text-xs sm:text-sm text-neutral-400 leading-relaxed">
-        Quản lý tài khoản, số dư và các dịch vụ của bạn.
-      </p>
-    </div>
   );
 }
 
@@ -135,16 +138,17 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
   const nextRule = progress.next ? TIER_RULES[progress.next] : null;
 
   return (
-    // One card, the page's title inside it, the way /orders draws "Lịch sử
-    // mua hàng" inside its own panel, rather than a #111 panel holding a
-    // card (the owner, 03/10/2026: "hay nhét tổng quan tài khoản vô dồn về 1
-    // card thôi"). On a phone, where that panel never drew a plate, the title
-    // stays above the card: inside it, beside the banner menu's button, it
-    // broke onto two lines. The layout inside is this shop's own (29/09: "bố
-    // cục theo web mình").
+    // The account panel holding the art card, the way /wallet and /security
+    // hold theirs (the owner, 16/10/2026, with a picture of this layout: "sửa
+    // lại như này đi"; the one-card trial of 03/10 is undone). The layout
+    // inside is this shop's own (29/09: "bố cục theo web mình").
     <AccountPageFrame crumb="Tổng quan tài khoản">
+      <AccountPanel
+        icon={LayoutDashboard}
+        title="Tổng quan tài khoản"
+        subtitle="Quản lý tài khoản, số dư và các dịch vụ của bạn."
+      >
       <div className="flex flex-col gap-4">
-        <OverviewTitle className="mb-2 sm:hidden" />
         {query.linked && PROVIDER_NAMES[query.linked] ? (
           <div className="rounded-xl border border-emerald-500/25 bg-emerald-500/10 px-4 py-3 text-sm font-bold text-emerald-300">
             Đã liên kết {PROVIDER_NAMES[query.linked]} vào tài khoản của bạn.
@@ -162,7 +166,7 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
             from the bottom. The tier card and the doors live inside it. The
             frame is the account panel's and the sidebar's: a 5% rim, 24px
             corners (03/10/2026: "màu card trái và card phải đồng bộ"). */}
-        <section className="relative overflow-hidden rounded-[24px] border border-white/5 bg-[#111111]">
+        <section className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#111111]">
           <BannerUploader hasOwn={Boolean(user.bannerUrl)} />
 
           {/* On a phone the card is ~3x taller than the art is wide-shaped
@@ -185,9 +189,6 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
           </div>
 
           <div className="relative flex flex-col gap-4 p-5 pt-14 sm:gap-6 sm:p-7">
-            {/* From sm the title sits inside the card (see the note at the
-                return); pr-12 keeps it clear of the banner menu's button. */}
-            <OverviewTitle className="hidden pr-12 sm:block" />
             {/* Who — avatar, name, role, when they joined. */}
             <div className="flex items-center gap-4 sm:gap-5">
               <AvatarUploader avatarUrl={user.avatarUrl} username={user.username} />
@@ -226,10 +227,11 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
               </div>
             </div>
 
-            {/* The tier card alone across the width: its two doors, Nạp tiền and
-                Lịch sử mua, came off (the owner, 16/10/2026: "bỏ 2 nút nạp tiền lịch
-                sử mua đi"); the sidebar beside the card has both. */}
-            <div className="grid grid-cols-1 gap-4 sm:mt-5">
+            {/* The tier card and the doors, side by side from xl. At lg the
+                sidebar is already beside the panel, and the 240px door
+                column squeezed the tier card to ~276px, cutting its figures
+                to "Giảm …"; below xl the doors make one row under it. */}
+            <div className="grid grid-cols-1 gap-4 sm:mt-5 xl:grid-cols-[minmax(0,1fr)_240px]">
               <div className="flex flex-col gap-2 rounded-xl border border-white/10 bg-[#111111]/60 p-5 backdrop-blur-md">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <span className="text-[10px] font-black uppercase tracking-widest text-neutral-400">
@@ -312,19 +314,44 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                   ))}
                 </div>
               </div>
+
+              {/* Phone: Nạp tiền across, the other two side by side under
+                  it (three stacked bars pushed the balance off the first
+                  screen). sm–lg: one row of three. xl: the column. With only
+                  two doors (the wheel's off), the two share one row below xl. */}
+              <div
+                className={`grid grid-cols-2 gap-2.5 xl:flex xl:flex-col${
+                  DOORS.length > 2 ? " sm:grid-cols-3" : ""
+                }`}
+              >
+                {DOORS.map(({ label, href, icon: Icon, primary }) => (
+                  <Link
+                    key={href}
+                    href={href}
+                    // Flat, as every other red button in the account area is
+                    // (the agency desk's own Nạp tiền, /security's submit):
+                    // the accent glow under it was the only one of its kind.
+                    className={`inline-flex h-11 items-center justify-center gap-2 rounded-xl border text-[11px] font-black uppercase tracking-widest transition-colors ${
+                      primary
+                        ? `${DOORS.length > 2 ? "col-span-2 sm:col-span-1 " : ""}border-[var(--menzu-accent)] bg-[var(--menzu-accent)] text-white hover:bg-[var(--menzu-accent-dark)]`
+                        : "border-white/15 bg-black/35 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] backdrop-blur-md hover:border-white/35 hover:bg-black/50"
+                    }`}
+                  >
+                    <Icon size={14} />
+                    {label}
+                  </Link>
+                ))}
+              </div>
             </div>
 
             {/* THE ACCOUNT IN NUMBERS — inside the card rather than a strip of
                 its own below it, so the page is one block instead of two.
-                Three across from xl, the order count giving width to the
-                commission cell: in equal columns "Rút tiền" dropped under
-                any commission from 10.000đ and the strip grew 117→161px.
-                The balance cell came off as a TRIAL (the owner, 16/10/2026:
-                "bỏ bớt phần số dư khả dụng thử"); the figure still sits in
-                the header's account chip. It was
-                { icon: Wallet, label: "Số dư khả dụng", value: formatVnd(user.balance), unit: "đ", tone: "text-emerald-400" }. */}
-            <div className="-mx-5 -mb-5 grid grid-cols-2 border-t border-white/10 bg-[#111111]/70 backdrop-blur-sm sm:-mx-7 sm:-mb-7 xl:grid-cols-[1fr_0.7fr_1.3fr] xl:divide-x xl:divide-white/[0.06]">
+                Four across from xl, the order count giving width to the
+                commission cell: in equal quarters "Rút tiền" dropped under
+                any commission from 10.000đ and the strip grew 117→161px. */}
+            <div className="-mx-5 -mb-5 grid grid-cols-2 border-t border-white/10 bg-[#111111]/70 backdrop-blur-sm sm:-mx-7 sm:-mb-7 xl:grid-cols-[1fr_1fr_0.7fr_1.3fr] xl:divide-x xl:divide-white/[0.06]">
               {[
+                { icon: Wallet, label: "Số dư khả dụng", value: formatVnd(user.balance), unit: "đ", tone: "text-emerald-400" },
                 { icon: Receipt, label: "Tổng chi tiêu", value: formatVnd(spent), unit: "đ", tone: "text-white" },
                 { icon: ShoppingBag, label: "Đơn hàng", value: String(paidOrders), unit: "", tone: "text-white" },
               ].map(({ icon: Icon, label, value, unit, tone }) => (
@@ -347,9 +374,7 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                   </span>
                 </div>
               ))}
-              {/* Three cells in a two-column strip: this one takes the whole
-                  second row below xl. */}
-              <div className="col-span-2 flex flex-col gap-2 border-t border-white/[0.06] px-5 py-4 sm:gap-3 xl:col-span-1 xl:border-t-0">
+              <div className="flex flex-col gap-2 px-5 py-4 sm:gap-3">
                 <span className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-neutral-400">
                   <HandCoins size={13} className="shrink-0 text-neutral-300" />
                   Hoa hồng khả dụng
@@ -367,8 +392,8 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
             </div>
           </div>
         </section>
-
       </div>
+      </AccountPanel>
     </AccountPageFrame>
   );
 }
