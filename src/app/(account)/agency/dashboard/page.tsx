@@ -15,6 +15,7 @@ import { dayStamp } from "@/lib/dayGroups";
 import { db } from "@/lib/db";
 import { runningPackageSales, tierPriceNow } from "@/lib/queries";
 import { getCurrentUser } from "@/lib/session";
+import { sentenceCase } from "@/lib/displayCase";
 
 export const metadata: Metadata = {
   title: "Bàn đại lý",
@@ -237,7 +238,7 @@ export default async function AgencyDashboardPage() {
                     {order.code}
                   </span>
                   <span className="text-[11px] text-neutral-400">
-                    {order.product.name ?? order.product.code}
+                    {sentenceCase(order.product.name ?? order.product.code)}
                     {order.package ? ` - ${order.package.label}` : ""}
                     {order.quantity > 1 ? ` ×${order.quantity}` : ""}
                   </span>

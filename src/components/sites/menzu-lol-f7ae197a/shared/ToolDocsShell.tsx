@@ -172,7 +172,7 @@ function Nav({
                   return (
                     <div key={tool.slug}>
                       <Row href={toolDocsHref(tool.slug)} now={now}>
-                        <span className="line-clamp-2">{tool.name}</span>
+                        <span className="line-clamp-2" title={tool.name}>{sentenceCase(tool.name)}</span>
                       </Row>
                       {now ? (
                         <div className={`${BRANCH} gap-0.5`}>

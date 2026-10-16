@@ -44,6 +44,7 @@ import {
   warrantyOpen,
 } from "@/lib/warrantyRequests";
 import { MESSAGE_SELECT, toChatMessage } from "@/lib/warrantyThread";
+import { sentenceCase } from "@/lib/displayCase";
 
 export const metadata: Metadata = {
   title: "Yêu cầu bảo hành",
@@ -378,7 +379,7 @@ export default async function WarrantyRequestPage({
               </div>
               <div className="min-w-0 flex-1">
                 <p className="text-[15px] font-semibold leading-snug text-white">
-                  {productName}
+                  {sentenceCase(productName)}
                 </p>
                 {/* Parted by space, as the receipt parts the same facts, not
                   by dots (the owner, 12/10/2026). */}

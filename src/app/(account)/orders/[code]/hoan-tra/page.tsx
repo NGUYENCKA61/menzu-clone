@@ -11,6 +11,7 @@ import { ORDER_STATUS_LABELS, type OrderStatus } from "@/lib/orders";
 import { dayTime } from "@/lib/dayGroups";
 import { REFUND_STATUS } from "@/lib/refundRequests";
 import { getCurrentUser } from "@/lib/session";
+import { sentenceCase } from "@/lib/displayCase";
 
 export const metadata: Metadata = {
   title: "Yêu cầu hoàn trả",
@@ -118,7 +119,7 @@ export default async function RefundRequestPage({
               ) : null}
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-black text-white">{productName}</p>
+              <p className="text-sm font-black text-white" title={productName}>{sentenceCase(productName)}</p>
               <p className="mt-1 text-[11px] font-semibold text-neutral-500">
                 Đơn {order.code} · {stamp(order.createdAt)}
                 {order.package ? ` · ${order.package.label}` : ""}

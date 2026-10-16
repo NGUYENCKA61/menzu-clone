@@ -18,6 +18,7 @@ import {
   ToolDocsShell,
 } from "@/components/sites/menzu-lol-f7ae197a/shared/ToolDocsShell";
 import { clampText } from "@/lib/accountSeo";
+import { sentenceCase } from "@/lib/displayCase";
 import {
   DOCS_RULE_SENTENCE,
   docsUntilLabel,
@@ -133,9 +134,9 @@ export default async function ToolDocsPage({ params }: PageProps) {
 
   return (
     <SimplePage
-      title={tool.name}
+      title={sentenceCase(tool.name)}
       crumb="Tài liệu"
-      crumbs={[{ label: "Tài liệu", href: "/tai-lieu" }, { label: tool.name }]}
+      crumbs={[{ label: "Tài liệu", href: "/tai-lieu" }, { label: sentenceCase(tool.name) }]}
       titleCase="normal"
       titleBar={false}
       ground="home"

@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 
 import { GAP, pageCount, pageStrip, PER_PAGE } from "@/lib/paging";
+import { sentenceCase } from "@/lib/displayCase";
 
 import { PictureLightbox } from "./PictureGallery";
 
@@ -67,7 +68,7 @@ export function ServiceChip({ service, small = false }: { service: string; small
         small ? "text-[9px] px-1.5" : "text-[10px] px-2"
       } font-bold py-0.5 rounded border whitespace-nowrap shrink-0 text-[var(--menzu-accent)] bg-[var(--menzu-accent)]/10 border-[var(--menzu-accent)]/20`}
     >
-      {service}
+      {sentenceCase(service)}
     </span>
   );
 }
@@ -214,7 +215,7 @@ function ReviewCard({ item }: { item: FeedbackItem }) {
                 href={item.purchase.href}
                 className="min-w-0 truncate font-semibold text-neutral-200 transition-colors hover:text-white sm:max-w-[520px]"
               >
-                {item.purchase.product}
+                {sentenceCase(item.purchase.product)}
               </Link>
             </p>
           ) : null}

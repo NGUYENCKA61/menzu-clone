@@ -20,6 +20,9 @@ const eslintConfig = defineConfig([
     "**/.next/**",
     ".netlify/**",
     ".claude/worktrees/**",
+    // Scripts that ship with the design skills installed in the lab; tools,
+    // not app code.
+    ".claude/skills/**",
     // Raw browser captures from scripts/capture-page.mjs — third-party markup
     // with minified inline scripts, read as research input and never built.
     "docs/research/**/captures/**",

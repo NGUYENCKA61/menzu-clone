@@ -5,6 +5,7 @@ import { useState } from "react";
 
 import { StatusToast } from "./StatusToast";
 import { formatVnd } from "./productData";
+import { sentenceCase } from "@/lib/displayCase";
 
 export interface DeskPackage {
   id: string;
@@ -133,7 +134,7 @@ export function AgencyKeyDesk({
           >
             {products.map((p) => (
               <option key={p.code} value={p.code} className="bg-[#111]">
-                {p.name}
+                {sentenceCase(p.name)}
               </option>
             ))}
           </select>

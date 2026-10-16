@@ -172,8 +172,8 @@ export function ToolDocsHome({
                         className="shrink-0 text-neutral-600 group-hover:text-[var(--menzu-accent)]"
                         aria-hidden
                       />
-                      <span className="line-clamp-1 min-w-0 flex-1">
-                        {tool.name}
+                      <span className="line-clamp-1 min-w-0 flex-1" title={tool.name}>
+                        {sentenceCase(tool.name)}
                       </span>
                       <AccessChip access={tool.access} />
                     </Link>
