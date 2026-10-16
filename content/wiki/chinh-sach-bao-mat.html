@@ -18,12 +18,12 @@
 <li>Shop chỉ đặt hai cookie của mình: <strong>menzu_session</strong> giữ đăng nhập (script trên trang không đọc được, hết hạn sau 30 ngày hoặc khi bạn đăng xuất) và <strong>menzu_oauth_state</strong> chỉ tồn tại trong lúc bạn đăng nhập bằng Google hoặc Discord.</li>
 <li>Web không dùng Google Analytics, Facebook Pixel hay bất kỳ cookie quảng cáo nào.</li>
 <li>Bộ nhớ trình duyệt (localStorage) giữ vài tuỳ chọn hiển thị: giao diện sáng hay tối, thông báo bạn đã đóng, chế độ của nút hỗ trợ. Những thứ này nằm trên máy bạn, không gửi về shop.</li>
-<li>Khi shop bật chống bot ở trang đăng ký, ô kiểm tra của Cloudflare Turnstile chạy trên trang đó theo chính sách của Cloudflare.</li>
+<li>Khi shop bật chống bot ở trang đăng ký và đăng nhập, ô kiểm tra của Cloudflare Turnstile chạy trên các trang đó theo chính sách của Cloudflare.</li>
 </ul>
 <h2>4. Ai xem được</h2>
 <ul>
 <li><strong>Admin của shop:</strong> để xử lý đơn, cộng tiền nạp, bảo hành, duyệt xác thực cấp 2 và chặn gian lận.</li>
-<li><strong>Các dịch vụ kỹ thuật shop dùng, mỗi bên chỉ thấy phần việc của mình:</strong> Cloudflare đứng trước máy chủ và thấy địa chỉ IP của mọi lượt truy cập; ip-api.com nhận IP của phiên đăng nhập để trả về tên thành phố; ngân hàng và dịch vụ đọc biến động số dư thấy nội dung chuyển khoản; Telegram và Zalo chuyển tin nhắn của bot; máy chủ email shop cấu hình gửi mã xác minh, link đặt lại mật khẩu và biên lai; nhà cung cấp AI nhận nội dung ô chat; dịch vụ rút gọn link cấp link nhận key miễn phí.</li>
+<li><strong>Các dịch vụ kỹ thuật shop dùng, mỗi bên chỉ thấy phần việc của mình:</strong> Cloudflare đứng trước máy chủ và thấy địa chỉ IP của mọi lượt truy cập; ip-api.com nhận IP của phiên đăng nhập để trả về tên thành phố; ngân hàng và dịch vụ đọc biến động số dư thấy nội dung chuyển khoản; Telegram và Zalo chuyển tin nhắn của bot; máy chủ email shop cấu hình gửi mã xác minh, link đặt lại mật khẩu, biên lai và cập nhật bảo hành; nhà cung cấp AI nhận nội dung ô chat; dịch vụ rút gọn link cấp link nhận key miễn phí.</li>
 <li><strong>Công khai:</strong> đánh giá bạn gửi hiện trên trang Đánh giá với tên của bạn, hoặc ẩn danh nếu bạn chọn.</li>
 <li>Shop không bán, không cho thuê và không chia sẻ dữ liệu của bạn cho bên quảng cáo hay bất kỳ ai khác.</li>
 </ul>
