@@ -310,13 +310,17 @@ export function OrdersList({ orders }: { orders: OrderCardView[] }) {
                                   heading already says the day. A price sort drops
                                   the headings, so the whole stamp stays there.
                                   Each fact holds together, so a narrow card
-                                  breaks at a " · ". The tier chip moved under
-                                  the code, the status under the chip (the owner,
-                                  16/10/2026: "cho nhãn key ngày ở dưới mã đơn đi"). */}
+                                  breaks at a " · ". */}
                               <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                                {order.chip ? (
+                                  <span className="rounded-md border border-white/15 bg-white/10 px-2 py-0.5 text-[9px] font-black uppercase tracking-widest text-neutral-300">
+                                    {order.chip}
+                                    {order.quantity > 1 ? ` ×${order.quantity}` : ""}
+                                  </span>
+                                ) : null}
                                 <p className="text-[11px] tabular-nums text-neutral-400 sm:text-xs">
                                   <span className="whitespace-nowrap">
-                                    <span className="text-neutral-500">Mã đơn:</span> {order.detail.code}
+                                    <span className="text-neutral-500">Mã đơn</span> {order.detail.code}
                                   </span>
                                   {byDay ? null : (
                                     <>
@@ -329,24 +333,13 @@ export function OrdersList({ orders }: { orders: OrderCardView[] }) {
                               {/* The status, only when there is something to
                                   know. "Đánh giá" moved into the receipt
                                   (30/09/2026: "bỏ cái đánh giá ngoài card đi"). */}
-                              {order.chip || order.badge ? (
-                                <div className="mt-0.5 flex flex-col items-start gap-1.5">
-                                  {/* The tier as a line like the code's, not a
-                                      chip (the owner, 16/10/2026: "nhãn 1 ngày đổi
-                                      thành chữ Gói:"). */}
-                                  {order.chip ? (
-                                    <p className="text-[11px] tabular-nums text-neutral-400 sm:text-xs">
-                                      <span className="text-neutral-500">Gói:</span> {order.chip}
-                                      {order.quantity > 1 ? ` ×${order.quantity}` : ""}
-                                    </p>
-                                  ) : null}
-                                  {order.badge ? (
-                                    <span
-                                      className={`${order.badge.tone} rounded border px-2 py-1 text-[9px] font-black uppercase tracking-widest sm:text-[10px]`}
-                                    >
-                                      {order.badge.label}
-                                    </span>
-                                  ) : null}
+                              {order.badge ? (
+                                <div className="mt-0.5 flex items-center gap-2">
+                                  <span
+                                    className={`${order.badge.tone} rounded border px-2 py-1 text-[9px] font-black uppercase tracking-widest sm:text-[10px]`}
+                                  >
+                                    {order.badge.label}
+                                  </span>
                                 </div>
                               ) : null}
                             </div>
