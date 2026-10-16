@@ -160,7 +160,10 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
           </div>
         ) : null}
 
-        {/* BANNER — game art across the whole card, darkened only where the
+        {/* BANNER — game art across the top of the card only, behind the avatar
+            and the name; from the tier card down the ground is the card's own
+            #111 (the owner, 16/10/2026, TRIAL: "sao tui cảm giác rối quá",
+            "thử đi"). Before, the art filled the card, darkened only where the
             words sit: a soft wash off the left edge, and a stronger one rising
             from the bottom. The tier card and the doors live inside it. The
             frame is the account panel's and the sidebar's: a 5% rim, 24px
@@ -172,7 +175,7 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
               for, so filling it blew a quarter of the picture up 3.3x into
               a green blur. There the art heads the card, behind the avatar
               and name, and the foot wash fades it into the card's #111. */}
-          <div className="absolute inset-x-0 top-0 h-56 sm:inset-0 sm:h-auto">
+          <div className="absolute inset-x-0 top-0 h-56 sm:h-60">
             <Image
               src={bannerArt}
               alt=""
@@ -231,7 +234,7 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                 column squeezed the tier card to ~276px, cutting its figures
                 to "Giảm …"; below xl the doors make one row under it. */}
             <div className="grid grid-cols-1 gap-4 sm:mt-5 xl:grid-cols-[minmax(0,1fr)_240px]">
-              <div className="flex flex-col gap-2 rounded-xl border border-white/10 bg-[#111111]/60 p-5 backdrop-blur-md">
+              <div className="flex flex-col gap-2 rounded-xl border border-white/10 bg-white/[0.03] p-5">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <span className="text-[10px] font-black uppercase tracking-widest text-neutral-400">
                     Cấp bậc
@@ -329,7 +332,7 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                     className={`inline-flex h-11 items-center justify-center gap-2 rounded-xl border text-[11px] font-black uppercase tracking-widest transition-colors ${
                       primary
                         ? `${DOORS.length > 2 ? "col-span-2 sm:col-span-1 " : ""}border-[var(--menzu-accent)] bg-[var(--menzu-accent)] text-white hover:bg-[var(--menzu-accent-dark)]`
-                        : "border-white/15 bg-black/35 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] backdrop-blur-md hover:border-white/35 hover:bg-black/50"
+                        : "border-white/10 bg-white/[0.04] text-white hover:border-white/25 hover:bg-white/[0.08]"
                     }`}
                   >
                     <Icon size={14} />
@@ -344,7 +347,7 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                 Four across from xl, the order count giving width to the
                 commission cell: in equal quarters "Rút tiền" dropped under
                 any commission from 10.000đ and the strip grew 117→161px. */}
-            <div className="-mx-5 -mb-5 grid grid-cols-2 border-t border-white/10 bg-[#111111]/70 backdrop-blur-sm sm:-mx-7 sm:-mb-7 xl:grid-cols-[1fr_1fr_0.7fr_1.3fr] xl:divide-x xl:divide-white/[0.06]">
+            <div className="-mx-5 -mb-5 grid grid-cols-2 border-t border-white/10 bg-black/20 sm:-mx-7 sm:-mb-7 xl:grid-cols-[1fr_1fr_0.7fr_1.3fr] xl:divide-x xl:divide-white/[0.06]">
               {[
                 { icon: Wallet, label: "Số dư khả dụng", value: formatVnd(user.balance), unit: "đ", tone: "text-emerald-400" },
                 { icon: Receipt, label: "Tổng chi tiêu", value: formatVnd(spent), unit: "đ", tone: "text-white" },
