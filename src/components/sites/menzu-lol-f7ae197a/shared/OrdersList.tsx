@@ -1,6 +1,7 @@
 "use client";
 
-import { ChevronRight, ShoppingBag } from "lucide-react";
+import { ShoppingBag } from "lucide-react";
+import { sentenceCase } from "@/lib/displayCase";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -159,15 +160,15 @@ export function OrdersList({ orders }: { orders: OrderCardView[] }) {
   return (
     <div
       ref={top}
-      className="scroll-mt-28 w-full bg-[#111111] border border-white/5 rounded-2xl sm:rounded-[24px] p-4 sm:p-8 lg:p-10 relative min-h-[750px]"
+      className="scroll-mt-28 w-full bg-panel border border-line rounded-2xl sm:rounded-[20px] p-4 sm:p-8 lg:p-10 relative min-h-[750px]"
     >
       <div className="flex flex-col gap-6 relative z-10">
         <div className="mb-2 relative z-10">
-          <h1 className="text-xl sm:text-2xl font-black text-white uppercase tracking-wider mb-2 flex items-center gap-3">
+          <h1 className="mb-2 flex items-center gap-3 font-display text-[24px] font-bold leading-tight text-frost sm:text-[30px]">
             <ShoppingBag size={24} className="shrink-0 text-[var(--menzu-accent)]" aria-hidden />
             Lịch sử mua hàng
           </h1>
-          <p className="text-xs sm:text-sm text-neutral-400 leading-relaxed">
+          <p className="text-[14px] leading-relaxed text-mist sm:text-[15px]">
             Bấm vào đơn để xem key hoặc tài khoản đăng nhập.
           </p>
         </div>
@@ -246,11 +247,11 @@ export function OrdersList({ orders }: { orders: OrderCardView[] }) {
                       // The day once, over its orders: the same date on every
                       // card was the noisiest thing on the page.
                       <div className="flex items-center gap-3">
-                        <span className="shrink-0 text-[10px] font-black uppercase tracking-widest text-neutral-500">
+                        <span className="lab-figure shrink-0 text-[15px] font-semibold text-frost">
                           {run.group}
                         </span>
-                        <span aria-hidden className="h-px flex-1 bg-white/[0.07]" />
-                        <span className="shrink-0 text-[10px] font-black uppercase tracking-widest text-neutral-600">
+                        <span aria-hidden className="h-px flex-1 bg-line" />
+                        <span className="shrink-0 text-[13px] text-dim">
                           {perDay.get(run.group) ?? run.cards.length} đơn hàng
                         </span>
                       </div>
@@ -270,20 +271,20 @@ export function OrdersList({ orders }: { orders: OrderCardView[] }) {
                           // đánh giá đi"). To bring the receipt's button back:
                           // reviewHref={order.review?.href ?? null}
                           reviewHref={null}
-                          className="group flex cursor-pointer flex-col gap-3 rounded-2xl border border-white/5 bg-white/[0.02] p-3.5 outline-none transition-colors hover:border-white/10 hover:bg-white/[0.04] focus-visible:ring-2 focus-visible:ring-[var(--menzu-accent)]/60 sm:flex-row sm:items-center sm:gap-5 sm:p-4"
+                          className="group flex cursor-pointer flex-col gap-3 rounded-[14px] border border-line bg-raise/40 p-3.5 outline-none transition-colors hover:border-line-strong focus-visible:ring-2 focus-visible:ring-[var(--menzu-accent)]/60 sm:flex-row sm:items-center sm:gap-5 sm:p-4"
                         >
                           <div className="flex min-w-0 flex-1 items-start gap-3 sm:items-center sm:gap-5">
                             {/* menzu's 16:9 picture at 144px (theirs is 192),
                                 so the art is not cropped; the site's 96×64 on a
                                 phone, beside the text rather than across it. */}
-                            <div className="relative aspect-[3/2] w-24 shrink-0 overflow-hidden rounded-lg border border-white/5 bg-neutral-900 sm:aspect-video sm:w-36 sm:rounded-xl">
+                            <div className="lab-notch-sm relative aspect-[3/2] w-24 shrink-0 overflow-hidden border border-line bg-raise sm:aspect-video sm:w-36">
                               {order.imageUrl ? (
                                 <Image
                                   src={order.imageUrl}
                                   alt={order.title}
                                   fill
                                   sizes="(min-width: 640px) 288px, 192px"
-                                  className="object-cover transition-transform duration-300 group-hover:scale-105"
+                                  className="object-cover brightness-[.92] transition-[filter] duration-200 group-hover:brightness-110"
                                 />
                               ) : null}
                             </div>
@@ -296,9 +297,9 @@ export function OrdersList({ orders }: { orders: OrderCardView[] }) {
                                   and on the order's own page. */}
                               <h3
                                 title={order.title}
-                                className="truncate text-sm font-black leading-snug text-white transition-colors group-hover:text-[var(--menzu-accent)] sm:text-base"
+                                className="truncate font-display text-[15px] font-semibold leading-snug text-frost transition-colors group-hover:text-white sm:text-[17px]"
                               >
-                                {order.title}
+                                {sentenceCase(order.title)}
                               </h3>
                               {/* The tier (a tool) or rank (an account) as the
                                   old list's bordered chip, so two orders of one
@@ -313,14 +314,14 @@ export function OrdersList({ orders }: { orders: OrderCardView[] }) {
                                   breaks at a " · ". */}
                               <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
                                 {order.chip ? (
-                                  <span className="rounded-md border border-white/15 bg-white/10 px-2 py-0.5 text-[9px] font-black uppercase tracking-widest text-neutral-300">
+                                  <span className="rounded-md border border-line-strong bg-raise px-2 py-0.5 text-[12px] font-medium text-frost/90">
                                     {order.chip}
                                     {order.quantity > 1 ? ` ×${order.quantity}` : ""}
                                   </span>
                                 ) : null}
-                                <p className="text-[11px] tabular-nums text-neutral-400 sm:text-xs">
+                                <p className="text-[13px] tabular-nums text-mist">
                                   <span className="whitespace-nowrap">
-                                    <span className="text-neutral-500">Mã đơn</span> {order.detail.code}
+                                    <span className="text-dim">Mã đơn</span> {order.detail.code}
                                   </span>
                                   {byDay ? null : (
                                     <>
@@ -336,7 +337,7 @@ export function OrdersList({ orders }: { orders: OrderCardView[] }) {
                               {order.badge ? (
                                 <div className="mt-0.5 flex items-center gap-2">
                                   <span
-                                    className={`${order.badge.tone} rounded border px-2 py-1 text-[9px] font-black uppercase tracking-widest sm:text-[10px]`}
+                                    className={`${order.badge.tone} rounded-md border px-2 py-1 text-[12px] font-semibold`}
                                   >
                                     {order.badge.label}
                                   </span>
@@ -347,12 +348,12 @@ export function OrdersList({ orders }: { orders: OrderCardView[] }) {
 
                           {/* menzu's price column behind a hairline — beside the
                               card from sm up, under it on a phone. */}
-                          <div className="flex shrink-0 items-center justify-between gap-3 border-t border-white/5 pt-3 sm:flex-col sm:items-end sm:justify-center sm:gap-2.5 sm:border-t-0 sm:border-l sm:border-white/10 sm:pt-0 sm:pl-5">
+                          <div className="flex shrink-0 items-center justify-between gap-3 border-t border-white/5 pt-3 sm:flex-col sm:items-end sm:justify-center sm:gap-2.5 sm:border-t-0 sm:border-l sm:border-line sm:pt-0 sm:pl-5">
                             {/* White, not menzu's green: what was paid, said
                                 plainly. No "GIÁ MUA" over it — it is plainly
                                 the price. */}
                             <p
-                              className={`text-base font-black tabular-nums ${
+                              className={`lab-figure text-[17px] font-bold ${
                                 struck ? "text-neutral-500 line-through" : "text-white"
                               }`}
                             >
@@ -363,9 +364,8 @@ export function OrdersList({ orders }: { orders: OrderCardView[] }) {
                                 quieter than solid white, which on every card
                                 out-shouted the names. The card around it is
                                 what opens the receipt. */}
-                            <span className="flex h-8 shrink-0 items-center gap-1 whitespace-nowrap rounded-lg bg-white/10 px-3 text-xs font-bold text-white transition-colors group-hover:bg-white/20 sm:h-9 sm:px-3.5">
+                            <span className="flex h-9 shrink-0 items-center whitespace-nowrap rounded-[10px] bg-raise px-3.5 text-[13px] font-semibold text-frost ring-1 ring-inset ring-line transition-colors group-hover:ring-line-strong">
                               Chi tiết
-                              <ChevronRight className="h-3.5 w-3.5" aria-hidden />
                             </span>
                           </div>
                         </OrderDetailModal>

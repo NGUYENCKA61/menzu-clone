@@ -39,13 +39,13 @@ const TONE = {
 } as const;
 
 const FIELD =
-  "w-full bg-white/[0.03] border border-white/10 hover:border-white/20 text-white text-sm rounded-xl pl-3.5 pr-10 py-3 outline-none transition-colors appearance-none cursor-pointer";
-const FIELD_LABEL = "block text-[11px] font-bold text-neutral-500 mb-2 uppercase tracking-wider";
-const OPTION = "bg-[#111111] text-white";
+  "w-full bg-raise border border-line hover:border-line-strong text-frost text-[14px] rounded-[10px] pl-3.5 pr-10 py-3 outline-none transition-colors appearance-none cursor-pointer";
+const FIELD_LABEL = "block text-[13px] font-medium text-mist mb-2";
+const OPTION = "bg-panel text-frost";
 const PAGE_ARROW =
   "w-10 h-10 rounded-xl bg-white/5 border border-white/5 text-neutral-500 hover:text-white disabled:opacity-30 disabled:hover:bg-white/5 disabled:hover:text-neutral-500 flex items-center justify-center transition-all cursor-pointer disabled:cursor-not-allowed active:scale-95 hover:bg-white/10";
 const PAGE_NUMBER =
-  "w-10 h-10 rounded-xl text-sm font-black transition-all flex items-center justify-center cursor-pointer active:scale-95";
+  "lab-figure w-10 h-10 rounded-[10px] text-[15px] font-bold transition-all flex items-center justify-center cursor-pointer active:scale-95";
 
 /** Diacritic-insensitive, so "giao dich" finds "giao dịch". */
 export function normalise(value: string): string {
@@ -112,7 +112,7 @@ export function ListToolbar({
           onChange={(event) => onQuery(event.target.value)}
           placeholder={placeholder}
           aria-label={placeholder}
-          className={`w-full appearance-none bg-[#111111] border border-white/10 rounded-xl py-2.5 pl-10 pr-4 text-sm text-white placeholder-neutral-500 outline-none ${look.focus} transition-colors`}
+          className={`w-full appearance-none bg-raise border border-line rounded-[10px] py-3 pl-10 pr-4 text-[15px] text-frost placeholder:text-dim outline-none ${look.focus} transition-colors`}
         />
       </div>
 
@@ -125,16 +125,16 @@ export function ListToolbar({
           className={`flex items-center justify-center w-11 h-11 rounded-xl border transition-colors ${
             open || filtering
               ? look.open
-              : "bg-[#111111] border-white/10 text-neutral-400 hover:text-white hover:bg-white/5"
+              : "bg-raise border-line text-mist hover:text-frost hover:border-line-strong"
           }`}
         >
           <Funnel size={18} aria-hidden />
         </button>
 
         {open ? (
-          <div className="absolute top-full right-0 mt-2 w-[min(380px,calc(100vw-2rem))] bg-[#111111] border border-white/10 rounded-[24px] z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-300">
+          <div className="absolute top-full right-0 mt-2 w-[min(380px,calc(100vw-2rem))] bg-panel border border-line rounded-[20px] z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-300">
             <div className="p-6 pb-4 border-b border-white/5">
-              <h4 className="text-base font-black text-white uppercase tracking-widest flex items-center gap-2">
+              <h4 className="font-display text-[17px] font-bold text-frost flex items-center gap-2">
                 <ListFilter size={18} className={look.mark} aria-hidden />
                 Bộ Lọc
               </h4>
@@ -278,7 +278,7 @@ export function ListPager({
                 aria-current={n - 1 === page ? "page" : undefined}
                 className={`${PAGE_NUMBER} ${
                   n - 1 === page
-                    ? "bg-[var(--menzu-accent)] text-white border border-[var(--menzu-accent)]"
+                    ? "bg-frost text-ground border border-frost"
                     : "bg-white/5 border border-white/5 text-neutral-400 hover:text-white hover:bg-white/10"
                 }`}
               >
