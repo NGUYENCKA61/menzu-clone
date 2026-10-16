@@ -132,24 +132,6 @@ export function AccountSidebar({
           </div>
         ) : null}
 
-        {/* A single link above the account items. The admin area has its own
-            sidebar once you are inside it, so listing all eight screens here
-            duplicated a menu two clicks away. In capitals, red, at the rows'
-            14px bold (the owner, 03/10/2026, after trying it in its own case:
-            "dashboard quản lý chữ in đi"); black weight on top of that had
-            outshouted the page's own title. */}
-        {isAdmin ? (
-          <div className="mb-2 pb-2 border-b border-white/5">
-            <Link
-              href="/admin"
-              className="flex items-center gap-3 py-2.5 px-3 rounded-[12px] text-[var(--menzu-accent)] hover:text-white hover:bg-[var(--menzu-accent)]/10 transition-colors"
-            >
-              <Shield size={16} className="shrink-0" />
-              <span className="text-sm font-bold uppercase tracking-wider">Dashboard quản lý</span>
-            </Link>
-          </div>
-        ) : null}
-
         {/* The đại lý's own door — same privileged slot as the admin's. */}
         {user?.role === "AGENCY" ? (
           <div className="mb-2 pb-2 border-b border-white/5">
