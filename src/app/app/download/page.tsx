@@ -37,7 +37,7 @@ export const metadata: Metadata = {
 const FEATURES = [
   {
     icon: BellRing,
-    title: "Theo Dõi Cửa Hàng Ngày",
+    title: "Theo dõi cửa hàng ngày",
     body: "Nhận thông báo đẩy ngay lập tức khi skin yêu thích xuất hiện tại Daily Shop của bất kỳ tài khoản nào.",
   },
   {
@@ -47,7 +47,7 @@ const FEATURES = [
   },
   {
     icon: Zap,
-    title: "Giao Dịch Siêu Tốc",
+    title: "Giao dịch siêu tốc",
     body: "Hỗ trợ các giao dịch tự động nhanh chóng, bảo mật thông tin tối đa và xử lý tức thì chỉ trong vài giây.",
   },
 ];
@@ -223,7 +223,7 @@ export default async function AppDownloadPage() {
 
             <section className="space-y-8">
               <header className="text-center space-y-2">
-                <h2 className={SECTION_HEADING}>Tính Năng Nổi Bật</h2>
+                <h2 className={SECTION_HEADING}>Tính năng nổi bật</h2>
                 <p className="text-xs text-neutral-400">
                   Khám phá các tính năng được thiết kế tối ưu cho trải nghiệm của bạn.
                 </p>
@@ -257,7 +257,7 @@ export default async function AppDownloadPage() {
                 <div id="android-guide" className="p-6 rounded-2xl border border-zinc-800/80 bg-[#121216] space-y-5 scroll-mt-28">
                   <div className="flex items-center gap-3">
                     <Smartphone size={18} className="text-emerald-500" />
-                    <h3 className="text-[15px] font-semibold text-white">Cài Đặt Android</h3>
+                    <h3 className="text-[15px] font-semibold text-white">Cài đặt Android</h3>
                     <span className="ml-auto text-[10px] font-bold text-neutral-500">
                       {release?.minAndroid ?? "-"}
                     </span>
@@ -305,7 +305,7 @@ export default async function AppDownloadPage() {
 
             <section className="space-y-8 max-w-3xl mx-auto w-full">
               <header className="text-center space-y-2">
-                <h2 className={SECTION_HEADING}>Câu Hỏi Thường Gặp</h2>
+                <h2 className={SECTION_HEADING}>Câu hỏi thường gặp</h2>
                 <p className="text-xs text-neutral-400">
                   Giải đáp nhanh một số thắc mắc phổ biến.
                 </p>

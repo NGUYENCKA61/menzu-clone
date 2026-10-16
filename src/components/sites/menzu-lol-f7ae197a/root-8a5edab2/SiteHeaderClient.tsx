@@ -21,7 +21,7 @@ import {
   type LucideIcon,
 } from "lucide-react"
 import { AnnouncementCenter, type AnnouncementItem } from "../shared/AnnouncementCenter";
-import { sentenceCase } from "@/lib/displayCase";
+import { sentenceCase, softTitle } from "@/lib/displayCase";
 import { STATUS_TAB_HREF } from "@/lib/softwareStatus";
 // A bare constant in a module with no imports of its own, so it is safe in
 // this client bundle (the wheel's client components read it already).
@@ -226,7 +226,7 @@ function NavDropdown({ label, items }: { label: string; items: DropdownItem[] })
                 {/* nav-item-label is a hook for the light trial "moi"
                     (theme-light.css, part 6); no style of its own. */}
                 <span className="nav-item-label text-[14px] font-medium text-frost/90 group-hover/item:text-white transition-colors duration-200 ease-[ease]">
-                  {sentenceCase(item.label)}
+                  {softTitle(item.label)}
                 </span>
               </SiteLink>
             )

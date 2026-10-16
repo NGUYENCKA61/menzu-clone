@@ -77,7 +77,7 @@ export function WelcomeMailChecker() {
             {/* h2: the page frame already carries the h1, and two of them left
                 the document with no single statement of what the page is. */}
             <h2 className="text-lg font-black text-white">
-              Check Thư Welcome
+              Check thư Welcome
             </h2>
             <p className="text-[12px] font-bold text-[var(--menzu-accent)]">
               Riot Mail Checker

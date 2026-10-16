@@ -298,8 +298,8 @@ export function WalletTopUp({
   ) : null;
 
   const tabs: { value: Method; label: string; icon: typeof CreditCard }[] = [
-    ...(bankEnabled ? [{ value: "bank" as const, label: "Ngân Hàng", icon: CreditCard }] : []),
-    ...(cardEnabled ? [{ value: "card" as const, label: "Thẻ Cào", icon: QrCode }] : []),
+    ...(bankEnabled ? [{ value: "bank" as const, label: "Ngân hàng", icon: CreditCard }] : []),
+    ...(cardEnabled ? [{ value: "card" as const, label: "Thẻ cào", icon: QrCode }] : []),
   ];
 
   // No history lists here any more: every request — waiting, turned down,
@@ -657,7 +657,7 @@ export function WalletTopUp({
                       />
                       <CardNumberField
                         id="card-serial"
-                        label="Số Serial"
+                        label="Số serial"
                         placeholder="Nhập số serial..."
                         value={serial}
                         onChange={setSerial}

@@ -615,7 +615,7 @@ export function SecurityPanel({
             <form onSubmit={submitPassword} className={CARD}>
               <div className="flex flex-col gap-5">
                 <h3 className={CARD_TITLE}>
-                  {hasPassword ? "Đổi Mật Khẩu" : "Đặt Mật Khẩu"}
+                  {hasPassword ? "Đổi mật khẩu" : "Đặt mật khẩu"}
                 </h3>
                 {/* Every field carries its own label, visually hidden: the
                     design shows only placeholders, and a placeholder is not a
@@ -686,8 +686,8 @@ export function SecurityPanel({
                   {pwBusy
                     ? "Đang xử lý…"
                     : hasPassword
-                      ? "Đổi Mật Khẩu"
-                      : "Đặt Mật Khẩu"}
+                      ? "Đổi mật khẩu"
+                      : "Đặt mật khẩu"}
                 </button>
               </div>
             </form>

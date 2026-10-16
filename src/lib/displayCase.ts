@@ -75,3 +75,29 @@ export function sentenceCase(raw: string): string {
     })
     .join("");
 }
+
+/** Proper names that keep their capital inside a sentence. */
+const PROPER = new Set([
+  "Telegram", "Facebook", "Zalo", "Discord", "Android", "Windows", "Defender", "Secure",
+  "Boot", "Core", "Isolation", "Welcome", "VietQR", "Steam", "TikTok", "YouTube", "Valorant",
+]);
+
+/**
+ * LAB: a label typed in Title Case ("Nạp Qua Ngân Hàng") shown in sentence case
+ * ("Nạp qua ngân hàng"), proper names and acronyms kept. For display only:
+ * the typed label may be a key elsewhere.
+ */
+export function softTitle(raw: string): string {
+  const s = sentenceCase(raw);
+  const words = s.split(" ");
+  if (words.length < 2) return s;
+  const titled = words.every((w) => /^\p{Lu}/u.test(w) || !/\p{L}/u.test(w));
+  if (!titled) return s;
+  return words
+    .map((w, i) =>
+      i === 0 || PROPER.has(w) || KEEP_UPPER.has(w) || w === w.toLocaleUpperCase("vi-VN")
+        ? w
+        : w.charAt(0).toLocaleLowerCase("vi-VN") + w.slice(1),
+    )
+    .join(" ");
+}

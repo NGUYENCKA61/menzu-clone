@@ -136,7 +136,7 @@ export function ListToolbar({
             <div className="p-6 pb-4 border-b border-white/5">
               <h4 className="font-display text-[17px] font-bold text-frost flex items-center gap-2">
                 <ListFilter size={18} className={look.mark} aria-hidden />
-                Bộ Lọc
+                Bộ lọc
               </h4>
             </div>
             <div className="p-6 flex flex-col gap-5">{children}</div>

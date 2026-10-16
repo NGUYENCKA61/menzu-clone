@@ -9,7 +9,7 @@ export interface FaqEntry {
 }
 
 /**
- * Single-open accordion for the "Câu Hỏi Thường Gặp" block.
+ * Single-open accordion for the "Câu hỏi thường gặp" block.
  *
  * Built on buttons with aria-expanded rather than <details>, because the live
  * design animates the chevron and the panel together and only ever keeps one

@@ -7,6 +7,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 import { lockScroll, trapTab, unlockScroll } from "@/components/sites/menzu-lol-f7ae197a/shared/modalChrome";
+import { softTitle } from "@/lib/displayCase";
 
 export interface DrawerItem {
   label: string;
@@ -161,7 +162,7 @@ export function MobileDrawer({ open, onClose, groups, brandName, brandLogo, user
                   aria-expanded={isOpen}
                   className="w-full flex items-center justify-between py-3 px-6 text-neutral-200 hover:text-white hover:bg-white/[0.02] active:bg-white/[0.05] transition-all text-left text-[14px] font-bold "
                 >
-                  <span>{group.label}</span>
+                  <span>{softTitle(group.label)}</span>
                   <ChevronDown
                     size={14}
                     className={`shrink-0 transition-transform duration-200 ${
@@ -194,7 +195,7 @@ export function MobileDrawer({ open, onClose, groups, brandName, brandLogo, user
                         >
                           <Icon size={13} className="text-neutral-500 shrink-0" />
                           <span className="text-[11px] font-semibold tracking-wide">
-                            {label}
+                            {softTitle(label)}
                           </span>
                         </Link>
                       ))}

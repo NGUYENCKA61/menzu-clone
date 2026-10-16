@@ -532,7 +532,7 @@ export function TopUpInvoice({
               <Smartphone size={20} aria-hidden />
             </div>
             <div className="text-left">
-              <p className="text-white font-bold text-sm">Mở App Ngân Hàng</p>
+              <p className="text-white font-bold text-sm">Mở app ngân hàng</p>
               <p className="text-neutral-500 text-[10px]">Tự động điền số tiền &amp; nội dung</p>
             </div>
           </div>
@@ -577,12 +577,12 @@ export function TopUpInvoice({
     const Icon = kind === "paid" ? CircleCheck : kind === "gone" ? CircleX : LoaderCircle;
     const title =
       kind === "paid"
-        ? "Đã Thanh Toán"
+        ? "Đã thanh toán"
         : refused
-          ? "Bị Từ Chối"
+          ? "Bị từ chối"
           : kind === "gone"
-            ? "Đã Hủy"
-            : "Đang Kiểm Tra Thẻ";
+            ? "Đã hủy"
+            : "Đang kiểm tra thẻ";
     const line =
       kind === "paid"
         ? "Hóa đơn này đã được xử lý thành công."

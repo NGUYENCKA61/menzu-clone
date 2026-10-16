@@ -49,7 +49,7 @@ export default async function FeedbackSubmitPage() {
               </div>
               <div>
                 <h1 className="text-[24px] font-black leading-tight text-frost sm:text-[30px]">
-                  Viết Đánh Giá
+                  Viết đánh giá
                 </h1>
                 <p className="text-neutral-500 text-xs mt-1">
                   Chia sẻ trải nghiệm của bạn để giúp chất lượng dịch vụ ngày càng hoàn thiện
