@@ -52,20 +52,21 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
-/* LAB: the Launcher palette (docs/design/LAB-MASTER.md). Named surfaces for
+/* LAB: the Launcher palette (docs/design/LAB-MASTER.md), dimmed a step on
+   16/10/2026 (the owner: "hạ độ sáng cho nó thử"). Named surfaces for
    new markup (bg-ground, bg-panel, bg-raise, border-line, text-frost ...), and
    Tailwind's neutral scale re-pointed to a cool steel so every existing
    text-neutral-* and bg-neutral-* class follows without a hunt. */
 @theme {
-  --color-ground: #0b0e13;
-  --color-panel: #12161d;
-  --color-raise: #1a1f28;
-  --color-line: #252b36;
-  --color-line-strong: #343b48;
+  --color-ground: #07090d;
+  --color-panel: #0d1015;
+  --color-raise: #141820;
+  --color-line: #1f242d;
+  --color-line-strong: #2c323d;
   --color-frost: #e8ecf2;
   --color-mist: #a6aebb;
   --color-dim: #727b8b;
-  --color-scrim: #090c10;
+  --color-scrim: #06080b;
   --color-online: #3dd68c;
   --color-notice: #f2b544;
 
@@ -184,15 +185,15 @@
 
 .dark {
   /* body/page surface — live value lab(2.75381 0 0) */
-  --background: #0b0e13;
+  --background: #07090d;
   --foreground: #ffffff;
 }
 
 :root {
-  --menzu-bg: #0b0e13;
-  --menzu-nav: #12161d;
-  --menzu-rail: #0e1218;
-  --menzu-backdrop-dim: rgb(11 14 19 / 0.72);
+  --menzu-bg: #07090d;
+  --menzu-nav: #0d1015;
+  --menzu-rail: #0a0c10;
+  --menzu-backdrop-dim: rgb(7 9 13 / 0.76);
   --menzu-container: 1320px;
 
   /* The shop's accent, used by every button, badge and active state. The
@@ -1765,6 +1766,13 @@ html[data-admin-filtering] .admin-list {
 .lab-notch-lg {
   border-radius: 14px;
   border-top-right-radius: 28px;
+  corner-top-right-shape: bevel;
+}
+
+/* LAB: the notch at thumbnail size (order covers). */
+.lab-notch-sm {
+  border-radius: 8px;
+  border-top-right-radius: 14px;
   corner-top-right-shape: bevel;
 }
 
