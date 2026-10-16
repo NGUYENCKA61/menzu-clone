@@ -345,14 +345,13 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
         </section>
 
         {/* THE ACCOUNT IN NUMBERS — the same four cells as the strip across the
-            foot of the card, now one framed row of their own under it (the owner,
+            foot of the card, each now a card of its own under it (the owner,
             16/10/2026, with a capture of the strip after a mocked-up page of
-            separate cards: "cỡ này thử", then "gắn dính lại thử" on the four
-            loose cards; nothing in the cells changes). Four across from xl,
-            the order count giving width to the commission
+            separate cards: "cỡ này thử"; nothing in the cells changes). Four
+            across from xl, the order count giving width to the commission
             cell: in equal quarters "Rút tiền" dropped under any commission from
             10.000đ. */}
-        <div className="grid grid-cols-2 overflow-hidden rounded-2xl border border-white/10 bg-[#111111] sm:mt-2 xl:grid-cols-[1fr_1fr_0.7fr_1.3fr] xl:divide-x xl:divide-white/[0.06]">
+        <div className="grid grid-cols-2 gap-3 sm:mt-2 sm:gap-4 xl:grid-cols-[1fr_1fr_0.7fr_1.3fr]">
           {[
             { icon: Wallet, label: "Số dư khả dụng", value: formatVnd(user.balance), unit: "đ", tone: "text-emerald-400" },
             { icon: Receipt, label: "Tổng chi tiêu", value: formatVnd(spent), unit: "đ", tone: "text-white" },
@@ -362,7 +361,7 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
             // a bare 13px icon (no 28px box), the unit at text-sm, and
             // the figure a step smaller on phones, where 24px ran past
             // a 2x2 cell.
-            <div key={label} className="flex flex-col gap-2 px-5 py-4 sm:gap-3">
+            <div key={label} className="flex flex-col gap-2 rounded-2xl border border-white/10 bg-[#111111] px-5 py-4 sm:gap-3">
               <span className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-neutral-400">
                 <Icon size={13} className="shrink-0 text-neutral-300" />
                 {label}
@@ -377,7 +376,7 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
               </span>
             </div>
           ))}
-          <div className="flex flex-col gap-2 px-5 py-4 sm:gap-3">
+          <div className="flex flex-col gap-2 rounded-2xl border border-white/10 bg-[#111111] px-5 py-4 sm:gap-3">
             <span className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-neutral-400">
               <HandCoins size={13} className="shrink-0 text-neutral-300" />
               Hoa hồng khả dụng
