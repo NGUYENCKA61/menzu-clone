@@ -1,11 +1,11 @@
 "use client";
 
-import { ArrowRight, ChevronDown, Download } from "lucide-react";
+import { ChevronDown, Download } from "lucide-react";
 import { CardImage } from "@/components/sites/menzu-lol-f7ae197a/shared/CardImage";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
-import { CaseText } from "./CaseText";
+import { sentenceCase } from "@/lib/displayCase";
 import { formatVnd, isFreeTool } from "./productData";
 import { SoftwareCheckoutDialog } from "./SoftwareCheckoutDialog";
 
@@ -130,7 +130,7 @@ export function SoftwareCard({
     : null;
   const freeHref = detailHref;
   const FREE_BUTTON =
-    "flex h-[42px] items-center justify-center gap-2 rounded-[9px] bg-[var(--menzu-accent)] px-5 text-[11px] font-extrabold uppercase tracking-wide text-white transition-colors hover:bg-[var(--menzu-accent-dark)]";
+    "flex h-[42px] items-center justify-center gap-2 rounded-[10px] bg-[var(--menzu-accent)] px-5 text-[14px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent-dark)]";
 
   // One dropdown row. Same 11px/Inter as the trigger and the buttons, so the
   // open list matches the card exactly (the whole reason for a custom picker
@@ -165,12 +165,12 @@ export function SoftwareCard({
     // tool-card, tool-status, tool-status-line and tool-more are hooks for the
     // light trial "moi" (theme-light.css, part 6); no style of their own.
     <div
-      className={`tool-card group relative flex h-full w-full flex-col rounded-[15px] border border-[#24252a] bg-panel lift-card hover:-translate-y-1 hover:border-[var(--menzu-accent)]/50 hover:shadow-[0_15px_40px_#00000088] ${open ? "z-40" : ""}`}
+      className={`tool-card lab-notch group relative flex h-full w-full flex-col border border-line bg-panel transition-colors hover:border-line-strong ${open ? "z-40" : ""}`}
     >
       {/* Picture flush to the card's edges. The shop's image when set; otherwise
           the reference's dark gradient with the tool's name centred over it. */}
       <Link href={detailHref} className="block">
-        <div className="relative grid aspect-[16/9] w-full place-items-center overflow-hidden rounded-t-[14px] bg-[linear-gradient(135deg,#171922,#36151e,#0d0e12)]">
+        <div className="relative grid aspect-[16/9] w-full place-items-center overflow-hidden lab-notch-top bg-[linear-gradient(135deg,#171922,#36151e,#0d0e12)]">
           {software.imageUrl ? (
             <CardImage
               src={software.imageUrl}
@@ -203,7 +203,7 @@ export function SoftwareCard({
           ) : software.verifiedOnly ? (
             // Sold to level 2 only (the owner, 12/10/2026): the buyer learns it
             // on the card, not after the click.
-            <span className="absolute left-3 top-3 z-20 inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-panel/88 px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-amber-300">
+            <span className="absolute left-3 top-3 z-20 inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-panel/88 px-2.5 py-1 text-[12px] font-medium text-amber-300">
               Cấp 2
             </span>
           ) : null}
@@ -211,7 +211,7 @@ export function SoftwareCard({
           {status ? (
             <span className="tool-status absolute right-3 top-3 z-20 inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-panel/88 px-2.5 py-1">
               <span aria-hidden className={`h-1.5 w-1.5 rounded-full ${status.dot}`} />
-              <span className={`text-[10px] font-black uppercase tracking-wide ${status.text}`}>
+              <span className={`text-[12px] font-medium ${status.text}`}>
                 {status.label}
               </span>
             </span>
@@ -232,15 +232,17 @@ export function SoftwareCard({
         ) : null}
         {/* Title with the red marker bar, left-aligned. */}
         <Link href={detailHref} className="flex items-center gap-2.5">
-          <span aria-hidden className="h-4 w-[3px] shrink-0 rounded-full bg-[var(--menzu-accent)]" />
-          <h3 className="truncate text-base font-black uppercase tracking-wide text-white transition-colors hover:text-[var(--menzu-accent)]">
-            <CaseText text={software.name} />
+          <h3
+            title={sentenceCase(software.name)}
+            className="truncate font-display text-[17px] font-semibold text-frost transition-colors hover:text-white"
+          >
+            {sentenceCase(software.name)}
           </h3>
         </Link>
 
         {/* Two lines, held at that height so cards stay level whether the copy
             fills them or not. */}
-        <p className="mb-[14px] mt-2 line-clamp-2 min-h-[37px] text-[12px] leading-[1.55] text-[#9b9da5]">
+        <p className="mb-[14px] mt-2 line-clamp-2 min-h-[37px] text-[13px] leading-[1.55] text-mist">
           {software.description}
         </p>
 
@@ -250,19 +252,19 @@ export function SoftwareCard({
               {/* "Chỉ từ Miễn phí" read as nothing: a free tool's figure
                   stands alone. */}
               {free ? null : (
-                <span className="block text-[10px] font-black uppercase tracking-[0.18em] text-[#8a8c94]">
+                <span className="block text-[12px] text-dim">
                   Chỉ từ
                 </span>
               )}
               {minPrice !== null && !free ? (
                 <span className="mt-1 flex items-baseline gap-1">
-                  <span className="text-[22px] font-black leading-none tracking-tight text-white">
+                  <span className="lab-figure text-[22px] font-bold leading-none text-frost">
                     {formatVnd(minPrice)}
                   </span>
-                  <span className="text-[12px] font-bold text-[#9b9da5]">đ</span>
+                  <span className="text-[13px] font-semibold text-dim">đ</span>
                 </span>
               ) : (
-                <span className="mt-1 block text-[18px] font-black leading-none text-white">
+                <span className="mt-1 block font-display text-[19px] font-bold leading-none text-frost">
                   {minPrice === null ? "Liên hệ" : "Miễn phí"}
                 </span>
               )}
@@ -278,10 +280,9 @@ export function SoftwareCard({
             ) : (
               <Link
                 href={detailHref}
-                className="inline-flex h-[42px] shrink-0 items-center gap-2 rounded-[9px] bg-[var(--menzu-accent)] px-5 text-[11px] font-extrabold uppercase tracking-wide text-white transition-colors hover:bg-[var(--menzu-accent-dark)]"
+                className="inline-flex h-[42px] shrink-0 items-center gap-2 rounded-[10px] bg-[var(--menzu-accent)] px-5 text-[14px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent-dark)]"
               >
                 Thuê ngay
-                <ArrowRight size={14} strokeWidth={2.75} aria-hidden />
               </Link>
             )}
           </div>
@@ -321,7 +322,7 @@ export function SoftwareCard({
                       : "Chưa có gói"
                 } - ${software.name}`}
                 onClick={() => hasPackages && setOpen((o) => !o)}
-                className={`flex h-[42px] w-full items-center justify-between gap-1 rounded-[9px] border bg-panel px-2.5 text-[11px] font-extrabold outline-none transition-colors duration-200 hover:border-[var(--menzu-accent)]/45 hover:text-white focus-visible:ring-2 focus-visible:ring-[var(--menzu-accent)]/40 aria-expanded:border-[var(--menzu-accent)]/45 aria-expanded:text-white disabled:opacity-50 ${
+                className={`flex h-[42px] w-full items-center justify-between gap-1 rounded-[10px] border bg-panel px-2.5 text-[11px] font-extrabold outline-none transition-colors duration-200 hover:border-[var(--menzu-accent)]/45 hover:text-white focus-visible:ring-2 focus-visible:ring-[var(--menzu-accent)]/40 aria-expanded:border-[var(--menzu-accent)]/45 aria-expanded:text-white disabled:opacity-50 ${
                   chosen
                     ? "border-[var(--menzu-accent)]/45 text-white"
                     : "border-[#292a30] text-[#aaa]"
@@ -390,7 +391,7 @@ export function SoftwareCard({
               type="button"
               onClick={rentNow}
               disabled={!hasPackages}
-              className="h-[42px] rounded-[9px] bg-[var(--menzu-accent)] text-[11px] font-extrabold uppercase tracking-wide text-white transition-colors hover:bg-[var(--menzu-accent-dark)] disabled:opacity-50"
+              className="h-[42px] rounded-[10px] bg-[var(--menzu-accent)] text-[14px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent-dark)] disabled:opacity-50"
             >
               Thuê ngay
             </button>
@@ -410,7 +411,7 @@ export function SoftwareCard({
 
           <Link
             href={detailHref}
-            className="tool-more flex h-[42px] w-full items-center justify-center rounded-[9px] border border-[var(--menzu-accent)]/40 bg-transparent text-[11px] font-extrabold uppercase tracking-wide text-[#ddd] transition-colors hover:bg-[var(--menzu-accent)]/10"
+            className="tool-more flex h-[42px] w-full items-center justify-center rounded-[10px] border border-[var(--menzu-accent)]/40 bg-transparent text-[14px] font-semibold text-[#ddd] transition-colors hover:bg-[var(--menzu-accent)]/10"
           >
             Xem chi tiết
           </Link>

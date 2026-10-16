@@ -24,7 +24,7 @@ import {
 import { isSalesLocked, salesLockReason } from "@/lib/softwareStatus";
 
 import { BadgeIcon } from "./BadgeIcon";
-import { CaseText } from "./CaseText";
+import { sentenceCase } from "@/lib/displayCase";
 import { type SoftwareDetail } from "./SoftwareBuyPanel";
 import { StockLine } from "./StockLine";
 
@@ -231,9 +231,9 @@ export function FreeKeyPanel({
   return (
     <div className="space-y-7">
       <div className="flex flex-wrap items-center gap-2">
-        <span className="inline-flex items-center gap-2 rounded-full border border-emerald-500/40 bg-emerald-500/10 px-3 py-1.5">
-          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-          <span className="text-[10px] font-black uppercase tracking-widest text-emerald-300">
+        <span className="inline-flex items-center gap-2 rounded-full border border-line bg-raise px-3 py-1.5">
+          <span className="h-2 w-2 rounded-full bg-emerald-500" />
+          <span className="text-[13px] font-medium text-emerald-300">
             Miễn phí
           </span>
         </span>
@@ -249,11 +249,11 @@ export function FreeKeyPanel({
       </div>
 
       <div className="space-y-3">
-        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-white">
-          <CaseText text={software.name} />
+        <h1 className="font-display text-[26px] font-semibold leading-[1.15] text-frost sm:text-[30px] lg:text-[34px]">
+          {sentenceCase(software.name)}
         </h1>
         {software.summary ? (
-          <p className="text-sm leading-relaxed text-neutral-400 max-w-[560px]">
+          <p className="max-w-[60ch] text-[15px] leading-[1.65] text-mist">
             {software.summary}
           </p>
         ) : null}
@@ -261,11 +261,11 @@ export function FreeKeyPanel({
 
       <div className="space-y-2">
         <p className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-          <span className="text-3xl sm:text-4xl font-black text-white">
+          <span className="font-display text-[36px] font-bold leading-none text-frost sm:text-[42px]">
             Miễn phí
           </span>
           {tier ? (
-            <span className="text-sm font-semibold text-neutral-400">
+            <span className="text-[14px] font-medium text-mist">
               {tierWording(tier)}
             </span>
           ) : null}
@@ -276,8 +276,8 @@ export function FreeKeyPanel({
         />
       </div>
 
-      <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-5">
-        <span className="block text-[10px] font-black uppercase tracking-widest text-neutral-500">
+      <div className="rounded-[16px] border border-line bg-panel p-5">
+        <span className="block text-[14px] font-semibold text-frost">
           Cách nhận key
         </span>
         <ol className="mt-3 flex flex-col gap-2.5">
@@ -286,7 +286,7 @@ export function FreeKeyPanel({
               key={step}
               className="flex gap-3 text-[13px] leading-relaxed text-neutral-300"
             >
-              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[var(--menzu-accent)]/15 text-[11px] font-black text-[var(--menzu-accent)]">
+              <span className="lab-figure flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-raise text-[12px] font-bold text-frost ring-1 ring-inset ring-line">
                 {index + 1}
               </span>
               <span>{step}</span>
@@ -322,7 +322,7 @@ export function FreeKeyPanel({
 
       {phase.kind === "done" ? (
         <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3">
-          <p className="text-[12px] font-black uppercase tracking-wider text-emerald-300">
+          <p className="text-[13px] font-semibold text-emerald-300">
             Key của bạn · đơn {phase.orderCode}
           </p>
           <div className="mt-2 flex flex-wrap items-center gap-2">
@@ -381,7 +381,7 @@ export function FreeKeyPanel({
               !tier
             }
             onClick={() => void start()}
-            className="press flex w-full h-14 items-center justify-center gap-2 rounded-2xl bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] disabled:opacity-50 text-[13px] font-black uppercase tracking-widest text-white"
+            className="press flex w-full h-14 items-center justify-center gap-2 rounded-[12px] bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] disabled:opacity-50 text-[16px] font-semibold text-white"
           >
             {phase.kind === "busy" ? (
               <Loader2
@@ -401,7 +401,7 @@ export function FreeKeyPanel({
         ) : (
           <Link
             href={loginHref}
-            className="press flex w-full h-14 items-center justify-center gap-2 rounded-2xl bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] text-[13px] font-black uppercase tracking-widest text-white"
+            className="press flex w-full h-14 items-center justify-center gap-2 rounded-[12px] bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] text-[16px] font-semibold text-white"
           >
             <KeyRound size={16} aria-hidden />
             Đăng nhập để lấy key
@@ -412,7 +412,7 @@ export function FreeKeyPanel({
             href={downloadUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="press flex w-full h-14 items-center justify-center gap-2 rounded-2xl border border-[var(--menzu-accent)]/70 bg-white/[0.02] hover:bg-white/[0.06] text-[13px] font-black uppercase tracking-widest text-white"
+            className="press flex w-full h-14 items-center justify-center gap-2 rounded-[12px] border border-line-strong bg-raise hover:border-frost/40 text-[16px] font-semibold text-frost"
           >
             <Download size={16} aria-hidden />
             Tải tool
@@ -420,26 +420,17 @@ export function FreeKeyPanel({
         ) : null}
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-4 rounded-2xl border border-white/10 bg-white/[0.02] overflow-hidden">
-        {TRUST.map((t, index) => {
+      <ul className="grid grid-cols-2 gap-x-6 gap-y-3 border-t border-line pt-5">
+        {TRUST.map((t) => {
           const Icon = t.icon;
           return (
-            <div
-              key={t.label}
-              className={`flex flex-col items-center gap-2 px-3 py-5 text-center ${
-                index < TRUST.length - 1
-                  ? "sm:border-r border-white/[0.07]"
-                  : ""
-              }`}
-            >
-              <Icon size={18} className="text-[var(--menzu-accent)]" />
-              <span className="text-[11px] font-semibold text-neutral-400 leading-tight">
-                {t.label}
-              </span>
-            </div>
+            <li key={t.label} className="flex items-center gap-2.5">
+              <Icon size={16} aria-hidden className="shrink-0 text-mist" />
+              <span className="text-[13px] leading-tight text-mist">{t.label}</span>
+            </li>
           );
         })}
-      </div>
+      </ul>
     </div>
   );
 }

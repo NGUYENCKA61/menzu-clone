@@ -37,7 +37,7 @@ export function SoftwareGallery({
   return (
     <div className="space-y-4">
       {embed ? (
-        <div className="relative w-full aspect-[16/9] bg-neutral-900 rounded-3xl overflow-hidden border border-neutral-800">
+        <div className="lab-notch-lg relative w-full aspect-[16/9] overflow-hidden border border-line bg-raise">
           <iframe
             src={embed.src}
             title={name}

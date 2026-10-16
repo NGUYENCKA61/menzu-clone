@@ -2,7 +2,7 @@
 
 import { useEffect, useState, type RefObject } from "react";
 
-import { CaseText } from "./CaseText";
+import { sentenceCase } from "@/lib/displayCase";
 
 /**
  * A phone-only bar pinned just above the bottom nav, carrying what is being
@@ -77,21 +77,21 @@ export function StickyBuyBar({
     <div
       aria-hidden={!shown}
       inert={!shown}
-      className={`fixed bottom-16 left-0 right-0 z-[60] flex items-center gap-3 border-t border-white/[0.08] bg-[#0a0a0d]/[0.97] px-4 py-2.5 transition-[transform,opacity] duration-[220ms] ease-out motion-reduce:transition-none sm:hidden ${
+      className={`fixed bottom-16 left-0 right-0 z-[60] flex items-center gap-3 border-t border-line bg-panel/[0.97] px-4 py-2.5 transition-[transform,opacity] duration-[220ms] ease-out motion-reduce:transition-none sm:hidden ${
         shown ? "translate-y-0 opacity-100" : "pointer-events-none translate-y-full opacity-0"
       }`}
     >
       <div className="min-w-0 flex-1">
-        <p className="truncate text-[11px] font-semibold text-neutral-400">
-          <CaseText text={label} />
+        <p className="truncate text-[12px] font-medium text-mist">
+          {sentenceCase(label)}
         </p>
-        <p className="text-base font-black tabular-nums leading-tight text-white">{price}</p>
+        <p className="lab-figure text-[17px] font-bold leading-tight text-frost">{price}</p>
       </div>
       <button
         type="button"
         disabled={disabled}
         onClick={onPress}
-        className="press h-11 shrink-0 rounded-xl bg-[var(--menzu-accent)] px-6 text-[12px] font-black uppercase tracking-widest text-white hover:bg-[var(--menzu-accent-dark)] disabled:opacity-50"
+        className="press h-11 shrink-0 rounded-xl bg-[var(--menzu-accent)] px-6 text-[15px] font-semibold text-white hover:bg-[var(--menzu-accent-dark)] disabled:opacity-50"
       >
         {cta}
       </button>

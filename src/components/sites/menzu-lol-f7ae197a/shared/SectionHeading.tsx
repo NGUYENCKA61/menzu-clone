@@ -26,13 +26,9 @@ export function SectionHeading({
 }: SectionHeadingProps) {
   return (
     <div className={cn("flex items-center gap-2.5", className)}>
-      <div
-        aria-hidden
-        className="w-[3px] h-5 bg-[var(--menzu-accent)] rounded-full shrink-0"
-      />
       <Tag
         id={id}
-        className="text-xl sm:text-2xl font-black uppercase tracking-wider text-white"
+        className="font-display text-[22px] font-bold leading-tight text-frost sm:text-[28px]"
       >
         {children}
       </Tag>

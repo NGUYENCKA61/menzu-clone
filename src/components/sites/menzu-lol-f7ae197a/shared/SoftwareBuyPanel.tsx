@@ -15,7 +15,7 @@ import type { ProductRequirement } from "@/lib/productRequirements";
 import { productHref } from "@/lib/routes";
 
 import { BadgeIcon } from "./BadgeIcon";
-import { CaseText } from "./CaseText";
+import { sentenceCase } from "@/lib/displayCase";
 import { formatVnd } from "./productData";
 import { SoftwareCheckoutDialog } from "./SoftwareCheckoutDialog";
 import { StickyBuyBar } from "./StickyBuyBar";
@@ -115,7 +115,7 @@ const TRUST = [
 ];
 
 const STEP_BUTTON =
-  "h-11 w-11 shrink-0 flex items-center justify-center rounded-xl border border-white/10 bg-white/[0.03] text-neutral-300 hover:bg-white/[0.08] hover:text-white disabled:opacity-40 disabled:hover:bg-white/[0.03] transition-colors";
+  "h-11 w-11 shrink-0 flex items-center justify-center rounded-[10px] border border-line bg-raise text-mist hover:border-line-strong hover:text-frost disabled:opacity-40 disabled:hover:border-line transition-colors";
 
 const MAX_QUANTITY = 99;
 
@@ -244,10 +244,10 @@ export function SoftwareBuyPanel({
       {status || software.badges.length > 0 ? (
         <div className="flex flex-wrap items-center gap-2">
           {status ? (
-            <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-3 py-1.5">
-              <span className={`h-1.5 w-1.5 rounded-full ${status.dot}`} />
+            <span className="inline-flex items-center gap-2 rounded-full border border-line bg-raise px-3 py-1.5">
+              <span className={`h-2 w-2 rounded-full ${status.dot}`} />
               <span
-                className={`text-[10px] font-black uppercase tracking-widest ${status.text}`}
+                className={`text-[13px] font-medium ${status.text}`}
               >
                 {status.label}
               </span>
@@ -266,24 +266,27 @@ export function SoftwareBuyPanel({
       ) : null}
 
       <div className="space-y-3">
-        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-white">
-          <CaseText text={software.name} />
+        {/* LAB (Launcher): the name in the display face and sentence case
+            (displayCase keeps CS2, ESP, OBV ...); the full typed name is in
+            the breadcrumb's last crumb and the page title. */}
+        <h1 className="font-display text-[26px] font-semibold leading-[1.15] text-frost sm:text-[30px] lg:text-[34px]">
+          {sentenceCase(software.name)}
         </h1>
         {/* The shop's own "Mô tả ngắn", or nothing: no opening lines lifted
             from the long write-up, and no stock sentence in its place. */}
         {software.summary ? (
-          <p className="text-sm leading-relaxed text-neutral-400 max-w-[560px]">
+          <p className="max-w-[60ch] text-[15px] leading-[1.65] text-mist">
             {software.summary}
           </p>
         ) : null}
       </div>
 
       {software.packages.length > 0 ? (
-        <div className="space-y-2.5">
-          <span className="block text-[10px] font-black uppercase tracking-widest text-neutral-500">
-            Chọn gói:
+        <div className="space-y-3">
+          <span className="block text-[14px] font-medium text-mist">
+            Chọn gói
           </span>
-          <div className="flex flex-wrap gap-2.5">
+          <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3">
             {software.packages.map((p) => {
               const selected = p.id === packageId;
               return (
@@ -294,21 +297,21 @@ export function SoftwareBuyPanel({
                   aria-pressed={selected}
                   className={
                     selected
-                      ? "flex items-center gap-2.5 rounded-xl border border-[var(--menzu-accent)] bg-[var(--menzu-accent)]/[0.07] px-4 py-2.5 transition-colors"
-                      : "flex items-center gap-2.5 rounded-xl border border-white/10 bg-white/[0.02] px-4 py-2.5 hover:border-white/25 transition-colors"
+                      ? "flex flex-col items-start gap-1.5 rounded-[12px] border border-frost bg-raise px-4 py-3 text-left transition-colors"
+                      : "flex flex-col items-start gap-1.5 rounded-[12px] border border-line bg-panel px-4 py-3 text-left hover:border-line-strong transition-colors"
                   }
                 >
-                  <span className="text-[13px] font-bold text-white whitespace-nowrap">
+                  <span className="text-[14px] font-semibold text-frost whitespace-nowrap">
                     {p.label}
                   </span>
                   {/* A tier on flash sale: its shelf price crossed out, then
                       the price the buyer pays. */}
                   {p.listPrice ? (
-                    <span className="text-[11px] font-semibold text-neutral-500 line-through whitespace-nowrap">
+                    <span className="lab-figure text-[12px] font-medium text-dim line-through whitespace-nowrap">
                       {formatVnd(p.listPrice)}đ
                     </span>
                   ) : null}
-                  <span className="text-[13px] font-bold text-[var(--menzu-accent)] whitespace-nowrap">
+                  <span className={`lab-figure text-[16px] font-bold whitespace-nowrap ${selected ? "text-frost" : "text-mist"}`}>
                     {formatVnd(p.price)}đ
                   </span>
                 </button>
@@ -320,12 +323,12 @@ export function SoftwareBuyPanel({
 
       <div className="space-y-2">
         <p className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-          <span className="text-3xl sm:text-4xl font-black text-white">{formatVnd(total)}đ</span>
+          <span className="lab-figure text-[36px] font-bold leading-none text-frost sm:text-[42px]">{formatVnd(total)}đ</span>
           {chosen?.listPrice ? (
             // The tier is on flash sale: what it costs off sale, crossed out,
             // and the percent the sale takes off.
             <>
-              <span className="text-base sm:text-lg font-bold text-neutral-500 line-through">
+              <span className="lab-figure text-base font-semibold text-dim line-through sm:text-lg">
                 {formatVnd(chosen.listPrice * quantity)}đ
               </span>
               <span className="rounded-md bg-[var(--menzu-accent)]/15 px-2 py-0.5 text-[12px] font-black text-[var(--menzu-accent)]">
@@ -346,8 +349,8 @@ export function SoftwareBuyPanel({
       </div>
 
       <div className="flex items-center gap-3">
-        <span className="text-[13px] font-semibold text-neutral-400">
-          Số lượng:
+        <span className="text-[14px] font-medium text-mist">
+          Số lượng
         </span>
         <button
           type="button"
@@ -367,7 +370,7 @@ export function SoftwareBuyPanel({
             const n = Number(e.target.value.replace(/\D/g, ""));
             setQuantity(Math.min(MAX_QUANTITY, Math.max(1, n || 1)));
           }}
-          className="h-11 w-16 rounded-xl border border-white/10 bg-white/[0.03] text-center text-sm font-bold text-white outline-none focus:border-[var(--menzu-accent)]/60 transition-colors"
+          className="lab-figure h-11 w-16 rounded-[10px] border border-line bg-raise text-center text-[16px] font-semibold text-frost outline-none focus:border-frost/60 transition-colors"
         />
         <button
           type="button"
@@ -414,12 +417,12 @@ export function SoftwareBuyPanel({
           filled accent. The basket keeps the same size and position in the
           stack but drops to the outlined treatment — two solid red buttons
           stacked would leave neither of them reading as the main one. */}
-      <div ref={buyRef} className="space-y-3">
+      <div ref={buyRef} className="flex flex-col gap-3 sm:flex-row">
         <button
           type="button"
           disabled={busy || !chosen || !software.inStock || locked || gated}
           onClick={() => setConfirming(true)}
-          className="press w-full h-14 rounded-2xl bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] disabled:opacity-50 text-[13px] font-black uppercase tracking-widest text-white"
+          className="press h-14 w-full rounded-[12px] bg-[var(--menzu-accent)] text-[16px] font-semibold text-white hover:bg-[var(--menzu-accent-dark)] disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-frost sm:flex-1"
         >
           Mua ngay
         </button>
@@ -428,33 +431,24 @@ export function SoftwareBuyPanel({
           disabled={busy || !chosen || !software.inStock || locked || gated}
           onClick={addToCart}
           aria-busy={busy}
-          className="press flex w-full h-14 items-center justify-center gap-2 rounded-2xl border border-[var(--menzu-accent)]/70 bg-white/[0.02] hover:bg-white/[0.06] disabled:opacity-50 text-[13px] font-black uppercase tracking-widest text-white"
+          className="press flex h-14 w-full items-center justify-center gap-2 rounded-[12px] border border-line-strong bg-raise text-[16px] font-semibold text-frost hover:border-frost/40 disabled:opacity-50 sm:w-auto sm:px-7"
         >
           {busy ? <Loader2 size={14} className="animate-spin motion-reduce:animate-none" aria-hidden /> : null}
           {busy ? "Đang thêm…" : "Thêm vào giỏ"}
         </button>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-4 rounded-2xl border border-white/10 bg-white/[0.02] overflow-hidden">
-        {TRUST.map((t, index) => {
+      <ul className="grid grid-cols-2 gap-x-6 gap-y-3 border-t border-line pt-5">
+        {TRUST.map((t) => {
           const Icon = t.icon;
           return (
-            <div
-              key={t.label}
-              className={`flex flex-col items-center gap-2 px-3 py-5 text-center ${
-                index < TRUST.length - 1
-                  ? "sm:border-r border-white/[0.07]"
-                  : ""
-              }`}
-            >
-              <Icon size={18} className="text-[var(--menzu-accent)]" />
-              <span className="text-[11px] font-semibold text-neutral-400 leading-tight">
-                {t.label}
-              </span>
-            </div>
+            <li key={t.label} className="flex items-center gap-2.5">
+              <Icon size={16} aria-hidden className="shrink-0 text-mist" />
+              <span className="text-[13px] leading-tight text-mist">{t.label}</span>
+            </li>
           );
         })}
-      </div>
+      </ul>
 
       <StickyBuyBar
         anchorRef={buyRef}

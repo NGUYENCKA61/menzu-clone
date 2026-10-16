@@ -1,3 +1,4 @@
+import { sentenceCase } from "@/lib/displayCase";
 import { Lock } from "lucide-react";
 import Link from "next/link";
 
@@ -61,7 +62,7 @@ export interface SoftwareDescriptionProps {
 }
 
 const SUB_HEADING =
-  "mt-10 text-[17px] font-black uppercase tracking-wider text-white";
+  "mt-10 font-display text-[19px] font-semibold text-frost";
 /**
  * Body text in this section, set to the same values `.doc-prose` gives the
  * rich editor's output: neutral-300 is #d4d4d4, text-sm is its 0.875rem, and
@@ -73,7 +74,7 @@ const SUB_HEADING =
  * note under default bullets. Two greys there read as one of them being less
  * important rather than as one of them being editable.
  */
-const BODY = "text-sm leading-[1.65] text-neutral-300";
+const BODY = "max-w-[72ch] text-[15px] leading-[1.7] text-neutral-300";
 
 /** The words the locked panel sets in red: what happens, and what to press. */
 function Hi({ children }: { children: React.ReactNode }) {
@@ -193,7 +194,7 @@ export function SoftwareDescription({
             <Lock className="h-4 w-4" aria-hidden />
           </span>
           <div className="min-w-0">
-            <p className="text-sm font-black uppercase tracking-wider text-white">
+            <p className="text-[15px] font-semibold text-frost">
               {setupGuideAccess === "expired"
                 ? "Hết hạn xem theo key"
                 : "Mở khoá sau khi thuê key"}
@@ -337,7 +338,7 @@ export function SoftwareDescription({
     return (
       <section
         id={DESCRIPTION_SECTION_ID}
-        className="mt-14 scroll-mt-[120px] border-t border-white/10 pt-12 pb-14"
+        className="mt-14 scroll-mt-[120px] border-t border-line pt-12 pb-14"
       >
         <SectionHeading>Mô tả sản phẩm</SectionHeading>
         <div className="mt-5">
@@ -366,7 +367,7 @@ export function SoftwareDescription({
     // underneath the navigation bar.
     <section
       id={DESCRIPTION_SECTION_ID}
-      className="mt-14 scroll-mt-[120px] border-t border-white/10 pt-12 pb-14"
+      className="mt-14 scroll-mt-[120px] border-t border-line pt-12 pb-14"
     >
       {/* The red bar the home rows open with, as "Sản phẩm tương tự" below
           now wears too; the accent glyph stays with the page titles (the
@@ -378,7 +379,7 @@ export function SoftwareDescription({
           stands alone under the title in the buy panel, so it is written as a
           whole sentence and cannot double as this one's predicate. */}
       <p className={`mt-5 ${BODY}`}>
-        <span className="font-bold text-white">{name}</span>
+        <span className="font-semibold text-frost">{sentenceCase(name)}</span>
         {description ? ` - ${description}` : ""}
       </p>
 

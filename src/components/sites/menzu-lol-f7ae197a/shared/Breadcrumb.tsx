@@ -1,7 +1,7 @@
 import { Fragment } from "react";
 import { ChevronRight, House } from "lucide-react";
 
-import { CaseText } from "./CaseText";
+import { sentenceCase } from "@/lib/displayCase";
 import { SiteLink } from "./SiteLink";
 
 export interface Crumb {
@@ -18,7 +18,7 @@ const CRUMB_LINK_CLASS =
 // (theme-light.css, part 6), which drops the current crumb on a phone
 // product page; they carry no style of their own.
 const CRUMB_CURRENT_CLASS =
-  "crumb-current text-white transition-colors font-black max-w-[300px] md:max-w-[400px] truncate";
+  "crumb-current text-frost transition-colors font-semibold max-w-[300px] md:max-w-[440px] truncate";
 
 function BreadcrumbTrail({ items }: { items: Crumb[] }) {
   return (
@@ -38,12 +38,12 @@ function BreadcrumbTrail({ items }: { items: Crumb[] }) {
                 aria-current={isLast ? "page" : undefined}
               >
                 {isFirst && <House size={12} />}
-                <CaseText text={item.label} />
+                {sentenceCase(item.label)}
               </SiteLink>
             ) : (
               <span className={CRUMB_CURRENT_CLASS} aria-current={isLast ? "page" : undefined}>
                 {isFirst && <House size={12} />}
-                <CaseText text={item.label} />
+                {sentenceCase(item.label)}
               </span>
             )}
             {!isLast && <ChevronRight size={12} className="crumb-sep text-neutral-600 shrink-0" />}
@@ -76,14 +76,14 @@ export function Breadcrumb({
           2, C12). */}
       <nav
         aria-label="Breadcrumb"
-        className={`hidden sm:inline-flex items-center flex-wrap gap-x-3 gap-y-2 px-4 py-2.5 bg-panel/80 border border-white/10 hover:border-white/20 shadow-lg rounded-full text-xs font-black uppercase tracking-widest text-neutral-300 leading-normal backdrop-blur-md transition-all group/nav w-fit ${margin}`}
+        className={`hidden sm:inline-flex items-center flex-wrap gap-x-3 gap-y-2 px-4 py-2.5 bg-panel/80 border border-white/10 hover:border-white/20 shadow-lg rounded-full text-[13px] font-medium text-mist leading-normal backdrop-blur-md transition-all group/nav w-fit ${margin}`}
       >
         <BreadcrumbTrail items={items} />
       </nav>
 
       <nav
         aria-label="Breadcrumb"
-        className={`flex sm:hidden flex-wrap items-center gap-x-2 gap-y-2.5 text-[10px] font-black uppercase tracking-widest leading-normal transition-all w-fit ${margin}`}
+        className={`flex sm:hidden flex-wrap items-center gap-x-2 gap-y-2.5 text-[13px] font-medium text-mist leading-normal transition-all w-fit ${margin}`}
       >
         <BreadcrumbTrail items={items} />
       </nav>

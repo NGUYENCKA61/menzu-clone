@@ -227,8 +227,8 @@ export function PictureGallery({
   // column would read as a broken page rather than as a missing picture.
   if (pictures.length === 0) {
     return (
-      <div className="relative w-full aspect-[16/9] rounded-3xl overflow-hidden border border-neutral-800 bg-neutral-900">
-        <div className="absolute inset-0 flex items-center justify-center text-[11px] font-bold uppercase tracking-widest text-neutral-700">
+      <div className="lab-notch-lg relative w-full aspect-[16/9] overflow-hidden border border-line bg-raise">
+        <div className="absolute inset-0 flex items-center justify-center text-[13px] text-dim">
           {empty}
         </div>
         {badge}
@@ -241,7 +241,7 @@ export function PictureGallery({
       <div
         title="Bấm để phóng to"
         onClick={() => setLightbox(true)}
-        className="relative w-full aspect-[16/9] bg-neutral-900 rounded-3xl overflow-hidden border border-neutral-800 group cursor-zoom-in"
+        className="lab-notch-lg relative w-full aspect-[16/9] overflow-hidden border border-line bg-raise group cursor-zoom-in"
       >
         {/* All slides sit side by side on one track; paging slides the track
             a full frame, so next glides in from the right and previous from
@@ -347,18 +347,18 @@ export function WarrantyBar() {
   return (
     <Link
       href="/docs#WARRANTY"
-      className="flex w-full items-center justify-between gap-3 rounded-xl border border-white/10 bg-white/[0.02] px-4 py-3.5 hover:border-emerald-500/70 hover:bg-white/[0.05] transition-colors"
+      className="flex w-full items-center justify-between gap-3 rounded-[12px] border border-line bg-panel px-4 py-3.5 hover:border-emerald-500/70 hover:bg-white/[0.05] transition-colors"
     >
       <span className="flex min-w-0 items-center gap-2.5">
         {/* The same emerald the "Còn hàng" line and the detection pill use,
             so the reassurances on the page read as one voice. */}
         <ShieldCheck size={15} className="shrink-0 text-emerald-400" />
-        <span className="truncate text-[12px] font-bold uppercase tracking-widest text-white">
+        <span className="truncate text-[14px] font-semibold text-frost">
           Chính sách bảo hành
         </span>
       </span>
       <span className="flex shrink-0 items-center gap-1.5 text-neutral-500">
-        <span className="text-[10px] font-bold uppercase tracking-widest text-neutral-200">
+        <span className="text-[13px] font-medium text-mist">
           Xem ngay
         </span>
         <ExternalLink size={12} />
