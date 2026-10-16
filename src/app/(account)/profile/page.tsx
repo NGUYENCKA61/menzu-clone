@@ -6,12 +6,10 @@ import { redirect } from "next/navigation";
 import {
   BadgeCheck,
   Check,
-  Gift,
   HandCoins,
   LayoutDashboard,
   Receipt,
   ShoppingBag,
-  Wallet,
 } from "lucide-react";
 
 import { AccountPageFrame } from "@/components/sites/menzu-lol-f7ae197a/shared/AccountPageFrame";
@@ -30,7 +28,6 @@ import {
 } from "@/lib/memberTiers";
 import { getCurrentUser } from "@/lib/session";
 import { getShopSettings } from "@/lib/settingsStore";
-import { SPIN_LOCKED } from "@/lib/spin";
 
 export const metadata: Metadata = {
   title: "Tổng quan tài khoản",
@@ -55,20 +52,6 @@ const PROVIDER_NAMES: Record<string, string> = {
   google: "Google",
   discord: "Discord",
 };
-
-/** The column of doors beside the tier card; the first is the red one.
- *  Three, named the way the sidebar names them. Bảo mật is one click away in
- *  that sidebar already, and Discord belongs with the other links. */
-const QUICK_ACTIONS = [
-  { label: "Nạp tiền", href: "/wallet", icon: Wallet, primary: true },
-  { label: "Lịch sử mua", href: "/orders", icon: ShoppingBag, primary: false },
-  { label: "Đổi thưởng", href: "/vong-quay", icon: Gift, primary: false },
-] as const;
-
-/** The doors drawn: while the wheel's event is suspended its door comes off,
- *  rather than leading to the "Tạm ngưng sự kiện" sheet (the owner,
- *  07/10/2026: "trong trang tổng quan tài khoản ẩn luôn đi"). */
-const DOORS = QUICK_ACTIONS.filter((door) => !(SPIN_LOCKED && door.href === "/vong-quay"));
 
 /** Behind the banner when no category has a cover: the shop's own backdrop. */
 const BANNER_FALLBACK = "/sites/menzu-lol-f7ae197a/root-8a5edab2/images/behance/f945cb242281183.696998e170840.webp";
@@ -243,11 +226,10 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
               </div>
             </div>
 
-            {/* The tier card and the doors, side by side from xl. At lg the
-                sidebar is already beside the panel, and the 240px door
-                column squeezed the tier card to ~276px, cutting its figures
-                to "Giảm …"; below xl the doors make one row under it. */}
-            <div className="grid grid-cols-1 gap-4 sm:mt-5 xl:grid-cols-[minmax(0,1fr)_240px]">
+            {/* The tier card alone across the width: its two doors, Nạp tiền and
+                Lịch sử mua, came off (the owner, 16/10/2026: "bỏ 2 nút nạp tiền lịch
+                sử mua đi"); the sidebar beside the card has both. */}
+            <div className="grid grid-cols-1 gap-4 sm:mt-5">
               <div className="flex flex-col gap-2 rounded-xl border border-white/10 bg-[#111111]/60 p-5 backdrop-blur-md">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <span className="text-[10px] font-black uppercase tracking-widest text-neutral-400">
@@ -329,34 +311,6 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                     </div>
                   ))}
                 </div>
-              </div>
-
-              {/* Phone: Nạp tiền across, the other two side by side under
-                  it (three stacked bars pushed the balance off the first
-                  screen). sm–lg: one row of three. xl: the column. With only
-                  two doors (the wheel's off), the two share one row below xl. */}
-              <div
-                className={`grid grid-cols-2 gap-2.5 xl:flex xl:flex-col${
-                  DOORS.length > 2 ? " sm:grid-cols-3" : ""
-                }`}
-              >
-                {DOORS.map(({ label, href, icon: Icon, primary }) => (
-                  <Link
-                    key={href}
-                    href={href}
-                    // Flat, as every other red button in the account area is
-                    // (the agency desk's own Nạp tiền, /security's submit):
-                    // the accent glow under it was the only one of its kind.
-                    className={`inline-flex h-11 items-center justify-center gap-2 rounded-xl border text-[11px] font-black uppercase tracking-widest transition-colors ${
-                      primary
-                        ? `${DOORS.length > 2 ? "col-span-2 sm:col-span-1 " : ""}border-[var(--menzu-accent)] bg-[var(--menzu-accent)] text-white hover:bg-[var(--menzu-accent-dark)]`
-                        : "border-white/15 bg-black/35 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] backdrop-blur-md hover:border-white/35 hover:bg-black/50"
-                    }`}
-                  >
-                    <Icon size={14} />
-                    {label}
-                  </Link>
-                ))}
               </div>
             </div>
 
