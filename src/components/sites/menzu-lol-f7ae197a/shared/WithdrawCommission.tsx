@@ -77,9 +77,14 @@ export function WithdrawCommission({ amount }: { amount: number }) {
         onClick={() => setConfirming(true)}
         disabled={pending || amount <= 0}
         title={amount <= 0 ? "Chưa có hoa hồng để rút" : undefined}
+        // The plain door's colours, as Lịch sử mua and Đổi thưởng wear on the
+        // same card: a white-tinted well with white words when there is money
+        // to move, the same well with grey words when there is not. It was a
+        // red-tinted ghost, a pair the account area's buttons never use (the
+        // owner, 16/10/2026: "cái nút rút tiền đó có đồng bộ màu hay chưa").
         className={`inline-flex h-9 shrink-0 items-center rounded-lg border px-4 text-[10px] font-black uppercase tracking-widest transition-colors disabled:cursor-not-allowed ${
           amount > 0
-            ? "border-[var(--menzu-accent)]/40 bg-[var(--menzu-accent)]/10 text-[var(--menzu-accent)] hover:bg-[var(--menzu-accent)]/20"
+            ? "border-white/10 bg-white/[0.04] text-white hover:border-white/25 hover:bg-white/[0.08]"
             : "border-white/10 bg-white/[0.03] text-neutral-500"
         }`}
       >
