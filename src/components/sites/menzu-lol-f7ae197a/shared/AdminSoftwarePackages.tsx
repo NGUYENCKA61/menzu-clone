@@ -29,11 +29,11 @@ export interface PackageRowView {
 
 const CARD = "rounded-xl border border-white/[0.08] bg-[#0e0e11] p-5 flex flex-col gap-4";
 const CARD_HEAD =
-  "flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-neutral-500";
+  "flex items-center gap-2 text-[12px] font-semibold text-neutral-500";
 const FIELD =
   "w-full rounded-lg border border-white/10 bg-neutral-950/60 px-3 py-2 text-xs text-white outline-none focus:border-[var(--brand)]/60 transition-colors placeholder-neutral-600";
 const LABEL =
-  "block text-[10px] font-black uppercase tracking-widest text-neutral-500 mb-1.5";
+  "block text-[12px] font-semibold text-neutral-500 mb-1.5";
 
 function formatVnd(n: number): string {
   return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
@@ -260,7 +260,7 @@ export function AdminSoftwarePackages({
             // from — and durationValid above already guarantees there is.
             !(label.trim() || autoLabel(length, unit))
           }
-          className="self-start h-[34px] px-4 rounded-lg bg-[var(--brand)] hover:bg-[var(--brand-dark)] disabled:opacity-60 text-[10px] font-black uppercase tracking-widest text-white transition-colors inline-flex items-center gap-1.5"
+          className="self-start h-[34px] px-4 rounded-lg bg-[var(--brand)] hover:bg-[var(--brand-dark)] disabled:opacity-60 text-[12px] font-semibold text-white transition-colors inline-flex items-center gap-1.5"
         >
           <Plus size={12} />
           {busy ? "Đang thêm…" : "Thêm gói"}
@@ -348,14 +348,14 @@ export function AdminSoftwarePackages({
                       !durationValid(editLength, editUnit)
                     }
                     onClick={() => void saveEdit()}
-                    className="h-[30px] px-3 rounded-lg bg-[var(--brand)] hover:bg-[var(--brand-dark)] disabled:opacity-60 text-[10px] font-black uppercase tracking-widest text-white transition-colors"
+                    className="h-[30px] px-3 rounded-lg bg-[var(--brand)] hover:bg-[var(--brand-dark)] disabled:opacity-60 text-[12px] font-semibold text-white transition-colors"
                   >
                     Lưu
                   </button>
                   <button
                     type="button"
                     onClick={() => setEditing(null)}
-                    className="h-[30px] px-3 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 text-[10px] font-black uppercase tracking-widest text-neutral-300 transition-colors"
+                    className="h-[30px] px-3 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 text-[12px] font-semibold text-neutral-300 transition-colors"
                   >
                     Hủy
                   </button>
@@ -399,7 +399,7 @@ export function AdminSoftwarePackages({
                 </div>
                 <Link
                   href={`/admin/packages/${encodeURIComponent(pkg.id)}`}
-                  className="h-7 shrink-0 rounded-lg border border-white/10 bg-white/5 px-2.5 text-[10px] font-black uppercase tracking-widest text-neutral-300 transition-colors hover:bg-white/10 inline-flex items-center gap-1"
+                  className="h-7 shrink-0 rounded-lg border border-white/10 bg-white/5 px-2.5 text-[12px] font-semibold text-neutral-300 transition-colors hover:bg-white/10 inline-flex items-center gap-1"
                 >
                   <KeyRound size={10} aria-hidden />
                   Quản lý license

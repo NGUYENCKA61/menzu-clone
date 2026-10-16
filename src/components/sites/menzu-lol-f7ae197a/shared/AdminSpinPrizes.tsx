@@ -24,7 +24,7 @@ import {
 const ROW =
   "flex flex-wrap items-center gap-x-3 gap-y-2 rounded-xl border border-white/[0.08] bg-[#0e0e11] px-4 py-3 transition-colors hover:border-white/20";
 const ACTION =
-  "inline-flex h-9 items-center gap-1.5 rounded-lg px-3.5 text-[10px] font-black uppercase tracking-widest transition-colors disabled:cursor-not-allowed disabled:opacity-50";
+  "inline-flex h-9 items-center gap-1.5 rounded-lg px-3.5 text-[12px] font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50";
 const ICON_BTN =
   "grid h-7 w-7 place-items-center rounded-md border border-white/10 text-neutral-500 transition-colors hover:border-white/30 hover:text-white disabled:cursor-not-allowed disabled:opacity-30";
 
@@ -95,7 +95,7 @@ export function AdminSpinPrizes({
             </span>
           )}
         </p>
-        <span className="shrink-0 text-[11px] font-black uppercase tracking-widest text-neutral-500">
+        <span className="shrink-0 text-[13px] font-semibold text-neutral-500">
           {prizes.length}/{MAX_SLICES} ô
         </span>
       </div>

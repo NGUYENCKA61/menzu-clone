@@ -171,7 +171,7 @@ export function AdminUsers({
   /** The role/lock chip, shared by the card and the table row. */
   const statusPill = (user: AdminUserView) => (
         <span
-          className={`inline-block rounded-md border px-2 py-1 text-[10px] font-black uppercase tracking-wider whitespace-nowrap ${
+          className={`inline-block rounded-md border px-2 py-1 text-[12px] font-semibold whitespace-nowrap ${
             user.blockedAt
               ? "border-red-500/30 bg-red-500/10 text-red-400"
               : user.role === "ADMIN"
@@ -290,7 +290,7 @@ export function AdminUsers({
                       {user.avatarUrl ? (
                         <Image src={user.avatarUrl} alt="" width={36} height={36} className={`h-full w-full object-cover ${user.blockedAt ? "opacity-50 grayscale" : ""}`} />
                       ) : (
-                        <span aria-hidden className="text-[13px] font-black uppercase text-neutral-500">{user.username.slice(0, 1)}</span>
+                        <span aria-hidden className="text-[15px] font-semibold text-neutral-500">{user.username.slice(0, 1)}</span>
                       )}
                     </span>
                     <span className="min-w-0">
@@ -302,15 +302,15 @@ export function AdminUsers({
                 </div>
                 <dl className="mt-3 grid grid-cols-3 gap-2 text-[11px]">
                   <div>
-                    <dt className="text-[10px] font-black uppercase tracking-widest text-neutral-500">Số dư</dt>
+                    <dt className="text-[12px] font-semibold text-neutral-500">Số dư</dt>
                     <dd className={`mt-0.5 font-bold tabular-nums ${user.balance > 0 ? "text-emerald-400" : "text-neutral-500"}`}>{formatVnd(user.balance)}đ</dd>
                   </div>
                   <div>
-                    <dt className="text-[10px] font-black uppercase tracking-widest text-neutral-500">Hạng</dt>
-                    <dd className={`mt-0.5 font-black uppercase tracking-wider ${TIER_COLOR[user.tier] ?? "text-neutral-300"}`}>{user.tier}</dd>
+                    <dt className="text-[12px] font-semibold text-neutral-500">Hạng</dt>
+                    <dd className={`mt-0.5 font-semibold ${TIER_COLOR[user.tier] ?? "text-neutral-300"}`}>{user.tier}</dd>
                   </div>
                   <div>
-                    <dt className="text-[10px] font-black uppercase tracking-widest text-neutral-500">Đơn</dt>
+                    <dt className="text-[12px] font-semibold text-neutral-500">Đơn</dt>
                     <dd className="mt-0.5 tabular-nums text-neutral-300">{user.orderCount > 0 ? `${user.orderCount} · ${formatVnd(user.totalSpent)}đ` : "-"}</dd>
                   </div>
                 </dl>
@@ -336,7 +336,7 @@ export function AdminUsers({
                 ].map((head) => (
                   <th
                     key={head}
-                    className={`px-4 py-3.5 text-[10px] font-black uppercase tracking-widest text-neutral-500 whitespace-nowrap ${
+                    className={`px-4 py-3.5 text-[12px] font-semibold text-neutral-500 whitespace-nowrap ${
                       head === "Thao tác" ? STICKY_ACTIONS : ""
                     }`}
                   >
@@ -388,7 +388,7 @@ export function AdminUsers({
                         ) : (
                           <span
                             aria-hidden
-                            className="text-[13px] font-black uppercase text-neutral-500"
+                            className="text-[15px] font-semibold text-neutral-500"
                           >
                             {user.username.slice(0, 1)}
                           </span>
@@ -425,7 +425,7 @@ export function AdminUsers({
 
                   <td className="px-4 py-3 whitespace-nowrap">
                     <span
-                      className={`inline-flex items-center gap-1.5 text-[11px] font-black uppercase tracking-wider ${
+                      className={`inline-flex items-center gap-1.5 text-[13px] font-semibold ${
                         TIER_COLOR[user.tier] ?? "text-neutral-300"
                       }`}
                     >

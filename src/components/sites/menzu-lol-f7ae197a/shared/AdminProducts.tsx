@@ -56,7 +56,7 @@ export interface AdminCategoryOption {
 // detail screen changed the shape of every box on the way.
 const FIELD =
   "w-full rounded-lg border border-white/10 bg-neutral-950/60 px-3 py-2 text-xs text-white outline-none focus:border-[var(--brand)]/60 transition-colors placeholder-neutral-600";
-const LABEL = "block text-[10px] font-black uppercase tracking-widest text-neutral-500 mb-1.5";
+const LABEL = "block text-[12px] font-semibold text-neutral-500 mb-1.5";
 // The status pick on a shelf row - the same small select the software list uses.
 const MINI =
   "rounded-lg border border-white/10 bg-neutral-950 px-2 py-1 text-[11px] font-bold text-neutral-200";
@@ -231,7 +231,7 @@ export function AdminProducts({
         onSubmit={handleCreate}
         className="rounded-2xl border border-white/10 bg-neutral-900/50 p-5 flex flex-col gap-4"
       >
-        <span className="text-[10px] font-black uppercase tracking-widest text-neutral-500">
+        <span className="text-[12px] font-semibold text-neutral-500">
           Thêm sản phẩm
         </span>
 
@@ -375,7 +375,7 @@ export function AdminProducts({
         <button
           type="submit"
           disabled={busy}
-          className="self-start h-10 px-5 rounded-xl bg-[var(--brand)] hover:bg-[var(--brand-dark)] disabled:opacity-70 transition-colors text-[11px] font-black uppercase tracking-widest text-white"
+          className="self-start h-10 px-5 rounded-xl bg-[var(--brand)] hover:bg-[var(--brand-dark)] disabled:opacity-70 transition-colors text-[13px] font-semibold text-white"
         >
           {busy ? "Đang xử lý…" : "Thêm sản phẩm"}
         </button>
@@ -404,7 +404,7 @@ export function AdminProducts({
                 role="tab"
                 aria-selected={active}
                 onClick={() => setTab(t.value)}
-                className={`rounded-lg border px-3 py-1.5 text-[11px] font-black uppercase tracking-wider transition-colors ${
+                className={`rounded-lg border px-3 py-1.5 text-[13px] font-semibold transition-colors ${
                   active
                     ? "border-[var(--brand)]/60 bg-[var(--brand)]/15 text-white"
                     : "border-white/10 bg-white/[0.03] text-neutral-400 hover:text-white"
@@ -494,7 +494,7 @@ export function AdminProducts({
 
           <Link
             href={`/admin/products/${encodeURIComponent(p.code)}`}
-            className="h-8 px-3 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 text-[10px] font-black uppercase tracking-widest text-neutral-300 transition-colors inline-flex items-center"
+            className="h-8 px-3 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 text-[12px] font-semibold text-neutral-300 transition-colors inline-flex items-center"
           >
             Sửa
           </Link>

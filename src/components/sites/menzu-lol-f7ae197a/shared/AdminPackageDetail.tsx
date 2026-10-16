@@ -13,7 +13,7 @@ export interface AdminPackageDetailView {
 
 const CARD = "rounded-xl border border-white/[0.08] bg-[#0e0e11] p-5 flex flex-col gap-4";
 const CARD_HEAD =
-  "flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-neutral-500";
+  "flex items-center gap-2 text-[12px] font-semibold text-neutral-500";
 
 /**
  * One tier's own screen: its numbers, and its key store with room to breathe.
@@ -81,7 +81,7 @@ function Stat({
       >
         {value}
       </p>
-      <p className="mt-0.5 text-[10px] font-bold uppercase tracking-widest text-neutral-500">
+      <p className="mt-0.5 text-[12px] font-bold text-neutral-500">
         {label}
       </p>
     </div>

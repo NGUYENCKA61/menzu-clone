@@ -105,7 +105,7 @@ export function AdminUserFilters({ filters }: { filters: UserFilters }) {
               type="button"
               aria-pressed={on}
               onClick={() => go({ role: view.role, state: view.state })}
-              className={`h-10 shrink-0 rounded-lg border px-4 text-[11px] font-black uppercase tracking-widest transition-colors ${
+              className={`h-10 shrink-0 rounded-lg border px-4 text-[13px] font-semibold transition-colors ${
                 on
                   ? "border-rose-500/60 bg-rose-500/15 text-rose-400"
                   : "border-white/[0.08] bg-[#0e0e11] text-neutral-400 hover:text-white hover:bg-white/[0.05]"

@@ -11,9 +11,9 @@ export interface ProductTab {
 }
 
 const TAB_ON =
-  "relative px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest bg-[var(--brand)] text-white transition-colors inline-flex items-center gap-2";
+  "relative px-4 py-2 rounded-xl text-[14px] font-semibold bg-[var(--brand)] text-white transition-colors inline-flex items-center gap-2";
 const TAB_OFF =
-  "relative px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest border border-white/10 bg-white/[0.03] text-neutral-400 hover:text-white transition-colors inline-flex items-center gap-2";
+  "relative px-4 py-2 rounded-xl text-[14px] font-semibold border border-white/10 bg-white/[0.03] text-neutral-400 hover:text-white transition-colors inline-flex items-center gap-2";
 
 /**
  * The product desk's four rooms behind one row of tabs.

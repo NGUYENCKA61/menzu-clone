@@ -50,17 +50,17 @@ function formatVnd(n: number): string {
 
 const FIELD =
   "w-full rounded-xl border border-white/10 bg-neutral-950/60 px-3 py-2.5 text-sm text-white outline-none focus:border-[var(--brand)]/60 transition-colors placeholder-neutral-600";
-const LABEL = "block text-[10px] font-black uppercase tracking-widest text-neutral-500 mb-1.5";
+const LABEL = "block text-[12px] font-semibold text-neutral-500 mb-1.5";
 const TAB_ON =
-  "px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest bg-[var(--brand)] text-white transition-colors";
+  "px-4 py-2 rounded-xl text-[14px] font-semibold bg-[var(--brand)] text-white transition-colors";
 const TAB_OFF =
-  "px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest border border-white/10 bg-white/[0.03] text-neutral-400 hover:text-white transition-colors";
+  "px-4 py-2 rounded-xl text-[14px] font-semibold border border-white/10 bg-white/[0.03] text-neutral-400 hover:text-white transition-colors";
 
 /** Bật = go, Tắt = warn: the button's color says what pressing it does. */
 const BTN_ON =
-  "h-8 px-3 rounded-lg border border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 disabled:opacity-60 text-[10px] font-black uppercase tracking-widest text-emerald-400 transition-colors inline-flex items-center gap-1.5";
+  "h-8 px-3 rounded-lg border border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 disabled:opacity-60 text-[12px] font-semibold text-emerald-400 transition-colors inline-flex items-center gap-1.5";
 const BTN_OFF =
-  "h-8 px-3 rounded-lg border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 disabled:opacity-60 text-[10px] font-black uppercase tracking-widest text-amber-400 transition-colors inline-flex items-center gap-1.5";
+  "h-8 px-3 rounded-lg border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 disabled:opacity-60 text-[12px] font-semibold text-amber-400 transition-colors inline-flex items-center gap-1.5";
 
 function StatMini({
   label,
@@ -76,7 +76,7 @@ function StatMini({
   return (
     <div className="rounded-xl border border-white/[0.08] bg-[#0e0e11] p-5 flex flex-col gap-3">
       <div className="flex items-center justify-between gap-3">
-        <span className="text-[10px] font-black uppercase tracking-widest text-neutral-500">
+        <span className="text-[12px] font-semibold text-neutral-500">
           {label}
         </span>
         <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border ${tint}`}>
@@ -266,7 +266,7 @@ export function AdminMarketing({
             }}
             className="rounded-xl border border-white/[0.08] bg-[#0e0e11] p-5 grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-4"
           >
-            <div className="sm:col-span-3 lg:col-span-4 -mb-1 flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-neutral-500">
+            <div className="sm:col-span-3 lg:col-span-4 -mb-1 flex items-center gap-2 text-[12px] font-semibold text-neutral-500">
               <TicketPercent size={13} className="text-neutral-400" />
               Tạo voucher
             </div>
@@ -333,7 +333,7 @@ export function AdminMarketing({
               <div className="sm:col-span-2">
                 <div className="flex items-baseline justify-between gap-3">
                   <label htmlFor="v-product-search" className={LABEL}>Sản phẩm chỉ định</label>
-                  <span className="text-[10px] font-black uppercase tracking-widest text-neutral-500">
+                  <span className="text-[12px] font-semibold text-neutral-500">
                     Đã chọn {scopeProducts.length}
                   </span>
                 </div>
@@ -380,7 +380,7 @@ export function AdminMarketing({
               </div>
             ) : null}
             <div className="flex items-end">
-              <button type="submit" disabled={pending} className="w-full h-[42px] rounded-xl bg-[var(--brand)] hover:bg-[var(--brand-dark)] disabled:opacity-60 text-[11px] font-black uppercase tracking-widest text-white transition-colors inline-flex items-center justify-center gap-1.5">
+              <button type="submit" disabled={pending} className="w-full h-[42px] rounded-xl bg-[var(--brand)] hover:bg-[var(--brand-dark)] disabled:opacity-60 text-[13px] font-semibold text-white transition-colors inline-flex items-center justify-center gap-1.5">
                 <Plus size={14} />
                 Tạo mã
               </button>
@@ -395,7 +395,7 @@ export function AdminMarketing({
                 <thead>
                   <tr className="border-b border-white/10">
                     {["Mã", "Giảm", "Áp dụng", "Đơn tối thiểu", "Đã dùng", "Hiệu lực", "Trạng thái", ""].map((c) => (
-                      <th key={c} scope="col" className="px-5 py-3.5 text-[10px] font-black uppercase tracking-widest text-neutral-500 whitespace-nowrap">{c}</th>
+                      <th key={c} scope="col" className="px-5 py-3.5 text-[12px] font-semibold text-neutral-500 whitespace-nowrap">{c}</th>
                     ))}
                   </tr>
                 </thead>
@@ -430,7 +430,7 @@ export function AdminMarketing({
                         {v.startsAt ?? "ngay"} → {v.expiresAt ?? "không hạn"}
                       </td>
                       <td className="px-5 py-3">
-                        <span className={`inline-flex px-2 py-1 rounded-lg border text-[10px] font-black uppercase tracking-wider ${v.active ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400" : "border-white/10 bg-white/5 text-neutral-500"}`}>
+                        <span className={`inline-flex px-2 py-1 rounded-lg border text-[12px] font-semibold ${v.active ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400" : "border-white/10 bg-white/5 text-neutral-500"}`}>
                           {v.active ? "Bật" : "Tắt"}
                         </span>
                       </td>
@@ -474,7 +474,7 @@ export function AdminMarketing({
             }}
             className="rounded-xl border border-white/[0.08] bg-[#0e0e11] p-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4"
           >
-            <div className="sm:col-span-2 lg:col-span-6 -mb-1 flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-neutral-500">
+            <div className="sm:col-span-2 lg:col-span-6 -mb-1 flex items-center gap-2 text-[12px] font-semibold text-neutral-500">
               <Zap size={13} className="text-neutral-400" />
               Lên lịch flash sale
             </div>
@@ -541,7 +541,7 @@ export function AdminMarketing({
               <input id="s-end" type="datetime-local" required value={sEnd} onChange={(e) => setSEnd(e.target.value)} className={FIELD} />
             </div>
             <div className="flex items-end">
-              <button type="submit" disabled={pending} className="w-full h-[42px] rounded-xl bg-[var(--brand)] hover:bg-[var(--brand-dark)] disabled:opacity-60 text-[11px] font-black uppercase tracking-widest text-white transition-colors inline-flex items-center justify-center gap-1.5">
+              <button type="submit" disabled={pending} className="w-full h-[42px] rounded-xl bg-[var(--brand)] hover:bg-[var(--brand-dark)] disabled:opacity-60 text-[13px] font-semibold text-white transition-colors inline-flex items-center justify-center gap-1.5">
                 <Plus size={14} />
                 Lên lịch
               </button>
@@ -581,7 +581,7 @@ export function AdminMarketing({
                   <span className="text-[11px] text-neutral-500 tabular-nums">
                     {s.startsAt} → {s.endsAt}
                   </span>
-                  <span className={`text-[10px] font-black uppercase tracking-wider px-2 py-1 rounded-lg border ${s.running ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400" : s.active ? "border-amber-500/30 bg-amber-500/10 text-amber-400" : "border-white/10 bg-white/5 text-neutral-500"}`}>
+                  <span className={`text-[12px] font-semibold px-2 py-1 rounded-lg border ${s.running ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400" : s.active ? "border-amber-500/30 bg-amber-500/10 text-amber-400" : "border-white/10 bg-white/5 text-neutral-500"}`}>
                     {s.running ? "Đang chạy" : s.active ? "Chờ tới giờ" : "Tắt"}
                   </span>
                   <div className="flex items-center gap-2 ml-auto">

@@ -34,7 +34,7 @@ export interface AdminGroupRow {
 
 const FIELD =
   "w-full rounded-lg border border-white/10 bg-neutral-950/60 px-3 py-2 text-xs text-white outline-none focus:border-[var(--brand)]/60 transition-colors placeholder-neutral-600";
-const LABEL = "block text-[10px] font-black uppercase tracking-widest text-neutral-500 mb-1.5";
+const LABEL = "block text-[12px] font-semibold text-neutral-500 mb-1.5";
 const ICON_BUTTON =
   "h-7 w-7 rounded-lg border border-white/[0.07] bg-white/[0.03] hover:bg-white/[0.08] disabled:opacity-30 disabled:hover:bg-white/[0.03] text-neutral-400 hover:text-white transition-colors inline-flex items-center justify-center";
 /** The trash cans: quiet until hovered, then unmistakably red. */
@@ -58,7 +58,7 @@ function StatCard({
   return (
     <div className="rounded-xl border border-white/[0.08] bg-[#0e0e11] p-5 flex flex-col gap-3">
       <div className="flex items-center justify-between gap-3">
-        <span className="text-[10px] font-black uppercase tracking-widest text-neutral-500">
+        <span className="text-[12px] font-semibold text-neutral-500">
           {label}
         </span>
         <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border ${tint}`}>
@@ -225,7 +225,7 @@ export function AdminGroups({
               setNewName("");
             }
           }}
-          className="inline-flex h-10 items-center gap-1.5 rounded-lg bg-[var(--menzu-accent)] px-4 text-[11px] font-black uppercase tracking-widest text-white transition-colors hover:bg-[var(--menzu-accent-dark)] disabled:opacity-50"
+          className="inline-flex h-10 items-center gap-1.5 rounded-lg bg-[var(--menzu-accent)] px-4 text-[13px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent-dark)] disabled:opacity-50"
         >
           <Plus size={14} />
           Thêm nhóm
@@ -254,7 +254,7 @@ export function AdminGroups({
               <span className={LABEL}>
                 Nhóm #{index + 1}
                 <span
-                  className={`ml-2 inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider ${
+                  className={`ml-2 inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[12px] font-semibold ${
                     group.isActive
                       ? "border border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
                       : "border border-white/10 bg-white/5 text-neutral-500"
@@ -377,7 +377,7 @@ export function AdminGroups({
 
             {categories.some((category) => !group.categoryIds.includes(category.id)) ? (
               <div className="mt-3">
-                <span className="mb-1.5 block text-[10px] font-black uppercase tracking-widest text-neutral-600">
+                <span className="mb-1.5 block text-[12px] font-semibold text-neutral-600">
                   Thêm vào nhóm
                 </span>
                 <div className="flex flex-wrap gap-1.5">

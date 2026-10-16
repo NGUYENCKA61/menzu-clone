@@ -43,11 +43,11 @@ import { AdminError } from "./AdminStates";
 const FIELD =
   "w-full rounded-lg border border-white/10 bg-neutral-950/60 px-3 py-2 text-xs text-white outline-none focus:border-[var(--brand)]/60 transition-colors placeholder-neutral-600";
 const LABEL =
-  "block text-[10px] font-black uppercase tracking-widest text-neutral-500 mb-1.5";
+  "block text-[12px] font-semibold text-neutral-500 mb-1.5";
 const CARD =
   "rounded-xl border border-white/[0.08] bg-[#0e0e11] p-5 flex flex-col gap-4";
 const HEADING =
-  "text-[10px] font-black uppercase tracking-widest text-neutral-500";
+  "text-[12px] font-semibold text-neutral-500";
 const HINT = "mt-1.5 text-[11px] text-neutral-500";
 
 /**
@@ -119,7 +119,7 @@ function SlugPicker({
               key={slug}
               className="flex items-center gap-2 rounded-xl border border-white/5 bg-neutral-950/40 px-3 py-2"
             >
-              <span className="w-5 shrink-0 text-[10px] font-black uppercase tracking-widest text-neutral-600">
+              <span className="w-5 shrink-0 text-[12px] font-semibold text-neutral-600">
                 {index + 1}
               </span>
               <span className="flex-1 truncate text-xs font-bold text-white">
@@ -936,7 +936,7 @@ export function AdminSettings({
               type="button"
               onClick={() => setTab(option)}
               aria-pressed={tab === option}
-              className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-colors ${
+              className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-[14px] font-semibold transition-colors ${
                 tab === option
                   ? "bg-[var(--brand)] text-white"
                   : "border border-white/10 bg-white/[0.03] text-neutral-400 hover:text-white"
@@ -1089,7 +1089,7 @@ export function AdminSettings({
                 className="rounded-xl border border-white/5 bg-neutral-950/40 p-4 flex flex-col gap-3"
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-black uppercase tracking-widest text-neutral-500">
+                  <span className="text-[12px] font-semibold text-neutral-500">
                     Tài khoản {index + 1}
                   </span>
                   <button
@@ -1097,7 +1097,7 @@ export function AdminSettings({
                     onClick={() =>
                       setAccounts(accounts.filter((_, i) => i !== index))
                     }
-                    className="h-7 px-3 rounded-lg border border-red-500/30 bg-red-500/10 hover:bg-red-500/20 text-[10px] font-black uppercase tracking-widest text-red-400 transition-colors"
+                    className="h-7 px-3 rounded-lg border border-red-500/30 bg-red-500/10 hover:bg-red-500/20 text-[12px] font-semibold text-red-400 transition-colors"
                   >
                     Xóa
                   </button>
@@ -1117,7 +1117,7 @@ export function AdminSettings({
                         })
                       }
                       placeholder="VCB / OCB"
-                      className={`${FIELD} font-mono uppercase`}
+                      className={`${FIELD} font-mono `}
                     />
                   </div>
                   <div>
@@ -1196,7 +1196,7 @@ export function AdminSettings({
                   { code: "", name: "", account: "", holder: "", apiUrl: "" },
                 ])
               }
-              className="self-start h-8 px-3 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 text-[10px] font-black uppercase tracking-widest text-neutral-300 transition-colors"
+              className="self-start h-8 px-3 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 text-[12px] font-semibold text-neutral-300 transition-colors"
             >
               + Thêm ngân hàng
             </button>
@@ -1249,7 +1249,7 @@ export function AdminSettings({
                 <button
                   type="button"
                   onClick={() => setCronKey(randomKey())}
-                  className="h-11 shrink-0 rounded-xl border border-white/10 bg-white/5 px-3.5 text-[10px] font-black uppercase tracking-widest text-neutral-300 transition-colors hover:bg-white/10"
+                  className="h-11 shrink-0 rounded-xl border border-white/10 bg-white/5 px-3.5 text-[12px] font-semibold text-neutral-300 transition-colors hover:bg-white/10"
                 >
                   Tạo key
                 </button>
@@ -1278,7 +1278,7 @@ export function AdminSettings({
                   type="button"
                   disabled={testing}
                   onClick={handleTestConnection}
-                  className="h-8 px-3 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 disabled:opacity-50 text-[10px] font-black uppercase tracking-widest text-neutral-300 transition-colors"
+                  className="h-8 px-3 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 disabled:opacity-50 text-[12px] font-semibold text-neutral-300 transition-colors"
                 >
                   {testing ? "Đang gọi…" : "Kiểm tra kết nối"}
                 </button>
@@ -1894,7 +1894,7 @@ export function AdminSettings({
                               ).join(", "),
                             )
                           }
-                          className={`ml-auto rounded-lg border px-2.5 py-1 text-[10px] font-black uppercase tracking-widest ${
+                          className={`ml-auto rounded-lg border px-2.5 py-1 text-[12px] font-semibold ${
                             used
                               ? "border-emerald-500/40 text-emerald-300 hover:text-white"
                               : "border-white/10 text-neutral-300 hover:text-white"
@@ -2352,7 +2352,7 @@ export function AdminSettings({
                     value={brandColor}
                     onChange={(event) => setBrandColor(event.target.value)}
                     placeholder={DEFAULT_BRAND_COLOR}
-                    className={`${FIELD} font-mono uppercase`}
+                    className={`${FIELD} font-mono `}
                   />
                   <input
                     type="color"
@@ -2423,7 +2423,7 @@ export function AdminSettings({
                   />
                   <div className="flex flex-wrap items-center gap-3">
                     <label
-                      className={`inline-flex h-9 cursor-pointer items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 text-[10px] font-black uppercase tracking-widest text-neutral-200 transition-colors hover:bg-white/10 ${
+                      className={`inline-flex h-9 cursor-pointer items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 text-[12px] font-semibold text-neutral-200 transition-colors hover:bg-white/10 ${
                         heroBannerUploading
                           ? "pointer-events-none opacity-60"
                           : ""
@@ -2499,7 +2499,7 @@ export function AdminSettings({
                   />
                   <div className="flex flex-wrap items-center gap-3">
                     <label
-                      className={`inline-flex h-9 cursor-pointer items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 text-[10px] font-black uppercase tracking-widest text-neutral-200 transition-colors hover:bg-white/10 ${
+                      className={`inline-flex h-9 cursor-pointer items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 text-[12px] font-semibold text-neutral-200 transition-colors hover:bg-white/10 ${
                         siteBgUploading ? "pointer-events-none opacity-60" : ""
                       }`}
                     >
@@ -2556,7 +2556,7 @@ export function AdminSettings({
                       className="absolute inset-0 h-full w-full object-cover"
                     />
                   ) : (
-                    <span className="absolute inset-0 grid place-items-center text-[10px] font-black uppercase tracking-widest text-neutral-600">
+                    <span className="absolute inset-0 grid place-items-center text-[12px] font-semibold text-neutral-600">
                       Bìa danh mục đầu
                     </span>
                   )}
@@ -2571,7 +2571,7 @@ export function AdminSettings({
                   />
                   <div className="flex flex-wrap items-center gap-3">
                     <label
-                      className={`inline-flex h-9 cursor-pointer items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 text-[10px] font-black uppercase tracking-widest text-neutral-200 transition-colors hover:bg-white/10 ${
+                      className={`inline-flex h-9 cursor-pointer items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 text-[12px] font-semibold text-neutral-200 transition-colors hover:bg-white/10 ${
                         bannerUploading ? "pointer-events-none opacity-60" : ""
                       }`}
                     >
@@ -2592,7 +2592,7 @@ export function AdminSettings({
                       <button
                         type="button"
                         onClick={() => setProfileBanner("")}
-                        className="inline-flex h-9 items-center rounded-lg border border-white/10 bg-white/5 px-3 text-[10px] font-black uppercase tracking-widest text-neutral-400 transition-colors hover:bg-white/10 hover:text-white"
+                        className="inline-flex h-9 items-center rounded-lg border border-white/10 bg-white/5 px-3 text-[12px] font-semibold text-neutral-400 transition-colors hover:bg-white/10 hover:text-white"
                       >
                         Dùng bìa danh mục
                       </button>
@@ -2648,7 +2648,7 @@ export function AdminSettings({
                   />
                   <div className="flex flex-wrap items-center gap-3">
                     <label
-                      className={`inline-flex h-9 cursor-pointer items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 text-[10px] font-black uppercase tracking-widest text-neutral-200 transition-colors hover:bg-white/10 ${
+                      className={`inline-flex h-9 cursor-pointer items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 text-[12px] font-semibold text-neutral-200 transition-colors hover:bg-white/10 ${
                         flashBgUploading ? "pointer-events-none opacity-60" : ""
                       }`}
                     >
@@ -2714,10 +2714,10 @@ export function AdminSettings({
                 ) : null}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
                 <div className="absolute inset-x-0 bottom-0 p-3 text-center">
-                  <span className="block text-[7px] font-black uppercase tracking-[0.4em] text-[var(--menzu-accent)]">
+                  <span className="block text-[12px] font-semibold text-[var(--menzu-accent)]">
                     {panelSubtitle}
                   </span>
-                  <span className="mt-0.5 block text-[15px] font-black uppercase leading-none text-white">
+                  <span className="mt-0.5 block text-[15px] font-semibold leading-none text-white">
                     {loginTitle.split("\n").map((line, index) => (
                       <span key={index} className="block">
                         {line}
@@ -2818,7 +2818,7 @@ export function AdminSettings({
 
                 <div className="flex flex-wrap items-center gap-2">
                   <label
-                    className={`inline-flex h-9 cursor-pointer items-center rounded-lg bg-[var(--menzu-accent)] px-4 text-[11px] font-black uppercase tracking-widest text-white transition-colors hover:bg-[var(--menzu-accent-dark)] ${
+                    className={`inline-flex h-9 cursor-pointer items-center rounded-lg bg-[var(--menzu-accent)] px-4 text-[13px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent-dark)] ${
                       uploading ? "opacity-70 cursor-wait" : ""
                     }`}
                   >
@@ -2880,7 +2880,7 @@ export function AdminSettings({
                       setPicked(0);
                       setUploadError(null);
                     }}
-                    className="h-9 rounded-lg border border-white/10 bg-white/5 px-4 text-[11px] font-black uppercase tracking-widest text-neutral-300 transition-colors hover:bg-white/10"
+                    className="h-9 rounded-lg border border-white/10 bg-white/5 px-4 text-[13px] font-semibold text-neutral-300 transition-colors hover:bg-white/10"
                   >
                     Khôi phục ảnh mặc định
                   </button>
@@ -3132,7 +3132,7 @@ export function AdminSettings({
                     >
                       {label}
                     </span>
-                    <span className="text-[10px] font-black uppercase tracking-widest text-neutral-600">
+                    <span className="text-[12px] font-semibold text-neutral-600">
                       {index + 1}
                     </span>
                     <button
@@ -3291,7 +3291,7 @@ export function AdminSettings({
 
                 <div className="mt-2 flex flex-wrap items-center gap-3">
                   <label
-                    className={`inline-flex h-9 cursor-pointer items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 text-[10px] font-black uppercase tracking-widest text-neutral-200 transition-colors hover:bg-white/10 ${
+                    className={`inline-flex h-9 cursor-pointer items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 text-[12px] font-semibold text-neutral-200 transition-colors hover:bg-white/10 ${
                       heroVideoUploading ? "pointer-events-none opacity-60" : ""
                     }`}
                   >
@@ -3417,7 +3417,7 @@ export function AdminSettings({
 
                 <div className="mt-2 flex flex-wrap items-center gap-3">
                   <label
-                    className={`inline-flex h-9 cursor-pointer items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 text-[10px] font-black uppercase tracking-widest text-neutral-200 transition-colors hover:bg-white/10 ${
+                    className={`inline-flex h-9 cursor-pointer items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 text-[12px] font-semibold text-neutral-200 transition-colors hover:bg-white/10 ${
                       heroImgUploading || heroImages.length >= HERO_IMAGES_MAX
                         ? "pointer-events-none opacity-60"
                         : ""
@@ -3613,7 +3613,7 @@ export function AdminSettings({
               <button
                 type="button"
                 onClick={() => setFaq([...faq, { q: "", a: "" }])}
-                className="mt-2 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-[11px] font-black uppercase tracking-widest text-neutral-300 transition-colors hover:bg-white/10 hover:text-white"
+                className="mt-2 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-[13px] font-semibold text-neutral-300 transition-colors hover:bg-white/10 hover:text-white"
               >
                 + Thêm câu hỏi
               </button>
@@ -3645,7 +3645,7 @@ export function AdminSettings({
         <button
           type="submit"
           disabled={busy}
-          className="h-10 px-5 rounded-xl bg-[var(--brand)] hover:bg-[var(--brand-dark)] disabled:opacity-60 transition-colors text-[11px] font-black uppercase tracking-widest text-white"
+          className="h-10 px-5 rounded-xl bg-[var(--brand)] hover:bg-[var(--brand-dark)] disabled:opacity-60 transition-colors text-[13px] font-semibold text-white"
         >
           {busy ? "Đang lưu…" : "Lưu cấu hình"}
         </button>

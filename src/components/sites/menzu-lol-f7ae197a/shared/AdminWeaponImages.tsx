@@ -19,7 +19,7 @@ export interface AdminWeaponImageRow {
 // detail screen changed the shape of every box on the way.
 const FIELD =
   "w-full rounded-lg border border-white/10 bg-neutral-950/60 px-3 py-2 text-xs text-white outline-none focus:border-[var(--brand)]/60 transition-colors placeholder-neutral-600";
-const LABEL = "block text-[10px] font-black uppercase tracking-widest text-neutral-500 mb-1.5";
+const LABEL = "block text-[12px] font-semibold text-neutral-500 mb-1.5";
 
 /**
  * The shared weapon-picture library.
@@ -154,7 +154,7 @@ export function AdminWeaponImages({
         onSubmit={handleLink}
         className="rounded-2xl border border-white/10 bg-neutral-900/50 p-5 flex flex-col gap-4"
       >
-        <span className="text-[10px] font-black uppercase tracking-widest text-neutral-500">
+        <span className="text-[12px] font-semibold text-neutral-500">
           Thêm ảnh vật phẩm
         </span>
 
@@ -204,7 +204,7 @@ export function AdminWeaponImages({
           <button
             type="submit"
             disabled={busy}
-            className="h-10 px-5 rounded-xl bg-[var(--brand)] hover:bg-[var(--brand-dark)] disabled:opacity-70 transition-colors text-[11px] font-black uppercase tracking-widest text-white"
+            className="h-10 px-5 rounded-xl bg-[var(--brand)] hover:bg-[var(--brand-dark)] disabled:opacity-70 transition-colors text-[13px] font-semibold text-white"
           >
             {busy ? "Đang xử lý…" : "Tải từ link"}
           </button>
@@ -215,7 +215,7 @@ export function AdminWeaponImages({
             type="button"
             disabled={busy}
             onClick={() => fileRef.current?.click()}
-            className="inline-flex items-center gap-1.5 h-10 px-4 rounded-xl border border-white/10 hover:bg-white/5 disabled:opacity-50 transition-colors text-[11px] font-black uppercase tracking-widest text-neutral-200"
+            className="inline-flex items-center gap-1.5 h-10 px-4 rounded-xl border border-white/10 hover:bg-white/5 disabled:opacity-50 transition-colors text-[13px] font-semibold text-neutral-200"
           >
             <Upload size={13} />
             Chọn từ máy
@@ -239,7 +239,7 @@ export function AdminWeaponImages({
           off the accounts, so this is the actual worklist. */}
       {missing.length > 0 ? (
         <div className="rounded-2xl border border-white/10 bg-neutral-900/40 p-5">
-          <span className="text-[10px] font-black uppercase tracking-widest text-neutral-500">
+          <span className="text-[12px] font-semibold text-neutral-500">
             Chưa có ảnh ({missingTotal})
           </span>
           <p className="mt-1 text-[11px] text-neutral-500">
@@ -298,7 +298,7 @@ export function AdminWeaponImages({
             type="button"
             disabled={busy || pick === hotPickSkin}
             onClick={saveHotPick}
-            className="h-[34px] px-4 rounded-lg bg-[var(--brand)] hover:bg-[var(--brand-dark)] disabled:opacity-40 text-[10px] font-black uppercase tracking-widest text-white transition-colors"
+            className="h-[34px] px-4 rounded-lg bg-[var(--brand)] hover:bg-[var(--brand-dark)] disabled:opacity-40 text-[12px] font-semibold text-white transition-colors"
           >
             Lưu
           </button>
@@ -313,7 +313,7 @@ export function AdminWeaponImages({
       {images.length > 0 ? (
         <div className="rounded-2xl border border-white/10 bg-neutral-900/40 overflow-hidden">
           <div className="px-5 py-3.5 border-b border-white/10">
-            <span className="text-[10px] font-black uppercase tracking-widest text-neutral-500">
+            <span className="text-[12px] font-semibold text-neutral-500">
               Trong kho ({images.length})
             </span>
           </div>
@@ -344,14 +344,14 @@ export function AdminWeaponImages({
                       type="button"
                       disabled={busy}
                       onClick={() => handleDelete(row)}
-                      className="h-7 px-2.5 rounded-lg bg-red-500/90 hover:bg-red-500 disabled:opacity-60 transition-colors text-[10px] font-black uppercase tracking-widest text-white"
+                      className="h-7 px-2.5 rounded-lg bg-red-500/90 hover:bg-red-500 disabled:opacity-60 transition-colors text-[12px] font-semibold text-white"
                     >
                       Bỏ
                     </button>
                     <button
                       type="button"
                       onClick={() => setArming(null)}
-                      className="h-7 px-2.5 rounded-lg border border-white/10 hover:bg-white/5 transition-colors text-[10px] font-black uppercase tracking-widest text-neutral-300"
+                      className="h-7 px-2.5 rounded-lg border border-white/10 hover:bg-white/5 transition-colors text-[12px] font-semibold text-neutral-300"
                     >
                       Huỷ
                     </button>

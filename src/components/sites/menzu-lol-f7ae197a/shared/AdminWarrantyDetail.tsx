@@ -95,11 +95,11 @@ type Move = "IN_PROGRESS" | "RESOLVED" | "REFUND" | "TRANSFERRED";
 
 const CARD = "rounded-xl border border-white/[0.08] bg-[#0e0e11]";
 const LABEL =
-  "text-[10px] font-black uppercase tracking-widest text-neutral-500";
+  "text-[12px] font-semibold text-neutral-500";
 const FIELD =
   "w-full rounded-xl border border-white/10 bg-neutral-950/60 px-3 py-2.5 text-sm text-white outline-none focus:border-[var(--brand)]/60 transition-colors placeholder-neutral-600";
 const BTN =
-  "inline-flex h-9 items-center gap-2 rounded-lg px-3.5 text-[11px] font-black uppercase tracking-wider transition-colors disabled:cursor-not-allowed disabled:opacity-40";
+  "inline-flex h-9 items-center gap-2 rounded-lg px-3.5 text-[13px] font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-40";
 
 function money(amount: number): string {
   return `${amount.toLocaleString("vi-VN")}đ`;
@@ -268,14 +268,14 @@ export function AdminWarrantyDetail({
       <div className="flex flex-col gap-3">
         <Link
           href="/admin/warranty"
-          className="inline-flex w-fit items-center gap-1.5 text-[11px] font-black uppercase tracking-widest text-neutral-400 transition-colors hover:text-white"
+          className="inline-flex w-fit items-center gap-1.5 text-[13px] font-semibold text-neutral-400 transition-colors hover:text-white"
         >
           <ArrowLeft className="h-3.5 w-3.5" aria-hidden />
           Tất cả yêu cầu
         </Link>
         <div className="flex flex-wrap items-center gap-2.5">
           <span
-            className={`inline-flex items-center gap-1.5 rounded-md border px-2 py-0.5 text-[10px] font-black uppercase tracking-wider ${state.tile}`}
+            className={`inline-flex items-center gap-1.5 rounded-md border px-2 py-0.5 text-[12px] font-semibold ${state.tile}`}
           >
             <span
               aria-hidden
@@ -284,7 +284,7 @@ export function AdminWarrantyDetail({
             {state.label}
           </span>
           {awaiting ? (
-            <span className="inline-flex items-center gap-1.5 rounded-md border border-[var(--brand)]/50 bg-[var(--brand)]/15 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-white">
+            <span className="inline-flex items-center gap-1.5 rounded-md border border-[var(--brand)]/50 bg-[var(--brand)]/15 px-2 py-0.5 text-[12px] font-semibold text-white">
               <MessageCircle
                 className="h-3 w-3 text-[var(--brand)]"
                 aria-hidden
@@ -292,7 +292,7 @@ export function AdminWarrantyDetail({
               Khách nhắn mới
             </span>
           ) : null}
-          <span className="inline-flex items-center gap-1.5 rounded-md border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-neutral-300">
+          <span className="inline-flex items-center gap-1.5 rounded-md border border-white/10 bg-white/5 px-2 py-0.5 text-[12px] font-semibold text-neutral-300">
             <WarrantyIssueGlyph
               issue={ticket.issue}
               className="h-3 w-3 shrink-0 text-neutral-400"
@@ -305,7 +305,7 @@ export function AdminWarrantyDetail({
               href={ticket.videoUrl}
               target="_blank"
               rel="noopener noreferrer nofollow"
-              className="inline-flex items-center gap-1.5 rounded-md border border-[var(--brand)]/50 bg-[var(--brand)]/15 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-white transition-colors hover:bg-[var(--brand)]/25"
+              className="inline-flex items-center gap-1.5 rounded-md border border-[var(--brand)]/50 bg-[var(--brand)]/15 px-2 py-0.5 text-[12px] font-semibold text-white transition-colors hover:bg-[var(--brand)]/25"
             >
               <Video className="h-3 w-3" aria-hidden />
               Xem video khách quay
@@ -322,7 +322,7 @@ export function AdminWarrantyDetail({
         {/* THE CONVERSATION */}
         <section className={`${CARD} min-w-0`}>
           <div className="border-b border-white/[0.06] px-4 py-3 sm:px-5">
-            <h2 className="text-sm font-black uppercase tracking-wider text-white">
+            <h2 className="text-[15px] font-semibold text-white">
               Trao đổi với khách
             </h2>
           </div>
@@ -606,7 +606,7 @@ export function AdminWarrantyDetail({
               href={`/admin/users/${ticket.uid}`}
               className="group mt-3 flex items-center gap-3"
             >
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/10 bg-neutral-900 text-sm font-black uppercase text-neutral-400">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/10 bg-neutral-900 text-[15px] font-semibold text-neutral-400">
                 {ticket.username.slice(0, 1)}
               </span>
               <span className="min-w-0">
@@ -690,7 +690,7 @@ export function AdminWarrantyDetail({
                   {ticket.productName}
                 </p>
                 {ticket.packageLabel ? (
-                  <span className="mt-1.5 inline-flex rounded-md border border-white/15 bg-white/10 px-2 py-0.5 text-[9px] font-black uppercase tracking-widest text-neutral-300">
+                  <span className="mt-1.5 inline-flex rounded-md border border-white/15 bg-white/10 px-2 py-0.5 text-[12px] font-semibold text-neutral-300">
                     {ticket.packageLabel}
                   </span>
                 ) : null}

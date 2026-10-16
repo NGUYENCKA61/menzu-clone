@@ -37,7 +37,7 @@ export interface AdminSoftwareRow {
 // detail screen changed the shape of every box on the way.
 const FIELD =
   "w-full rounded-lg border border-white/10 bg-neutral-950/60 px-3 py-2 text-xs text-white outline-none focus:border-[var(--brand)]/60 transition-colors placeholder-neutral-600";
-const LABEL = "block text-[10px] font-black uppercase tracking-widest text-neutral-500 mb-1.5";
+const LABEL = "block text-[12px] font-semibold text-neutral-500 mb-1.5";
 const MINI =
   "rounded-lg border border-white/10 bg-neutral-950 px-2 py-1 text-[11px] font-bold text-neutral-200";
 
@@ -185,7 +185,7 @@ export function AdminSoftware({
         onSubmit={handleCreate}
         className="rounded-2xl border border-white/10 bg-neutral-900/50 p-5 flex flex-col gap-4"
       >
-        <span className="text-[10px] font-black uppercase tracking-widest text-neutral-500">
+        <span className="text-[12px] font-semibold text-neutral-500">
           Thêm phần mềm
         </span>
 
@@ -267,7 +267,7 @@ export function AdminSoftware({
         <button
           type="submit"
           disabled={busy}
-          className="self-start h-10 px-5 rounded-xl bg-[var(--brand)] hover:bg-[var(--brand-dark)] disabled:opacity-70 transition-colors text-[11px] font-black uppercase tracking-widest text-white"
+          className="self-start h-10 px-5 rounded-xl bg-[var(--brand)] hover:bg-[var(--brand-dark)] disabled:opacity-70 transition-colors text-[13px] font-semibold text-white"
         >
           {busy ? "Đang xử lý…" : "Thêm phần mềm"}
         </button>
@@ -380,7 +380,7 @@ export function AdminSoftware({
 
           <Link
             href={`/admin/products/${encodeURIComponent(s.code)}`}
-            className="h-8 px-3 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 text-[10px] font-black uppercase tracking-widest text-neutral-300 transition-colors inline-flex items-center gap-1.5"
+            className="h-8 px-3 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 text-[12px] font-semibold text-neutral-300 transition-colors inline-flex items-center gap-1.5"
           >
             Sửa
           </Link>
@@ -388,7 +388,7 @@ export function AdminSoftware({
           {/* The tier shelf as its own page — tiers and keys, nothing else. */}
           <Link
             href={`/admin/products/${encodeURIComponent(s.code)}/packages`}
-            className="h-8 px-3 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 text-[10px] font-black uppercase tracking-widest text-neutral-300 transition-colors inline-flex items-center gap-1.5"
+            className="h-8 px-3 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 text-[12px] font-semibold text-neutral-300 transition-colors inline-flex items-center gap-1.5"
           >
             Quản lý gói
           </Link>

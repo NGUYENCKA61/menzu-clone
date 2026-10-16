@@ -254,13 +254,13 @@ function BadgeField({
   );
 }
 const CARD_HEAD =
-  "flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-neutral-500";
+  "flex items-center gap-2 text-[12px] font-semibold text-neutral-500";
 const FIELD =
   "w-full rounded-lg border border-white/10 bg-neutral-950/60 px-3 py-2 text-xs text-white outline-none focus:border-[var(--brand)]/60 transition-colors placeholder-neutral-600";
 const LABEL =
-  "block text-[10px] font-black uppercase tracking-widest text-neutral-500 mb-1.5";
+  "block text-[12px] font-semibold text-neutral-500 mb-1.5";
 const ACTION =
-  "h-[34px] px-4 rounded-lg bg-[var(--brand)] hover:bg-[var(--brand-dark)] disabled:opacity-60 text-[10px] font-black uppercase tracking-widest text-white transition-colors inline-flex items-center gap-1.5";
+  "h-[34px] px-4 rounded-lg bg-[var(--brand)] hover:bg-[var(--brand-dark)] disabled:opacity-60 text-[12px] font-semibold text-white transition-colors inline-flex items-center gap-1.5";
 
 /** The detection pill customers see on the storefront card. */
 const SOFTWARE_STATUS: Record<string, { label: string; tint: string }> = {
@@ -610,12 +610,12 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
             <span className="text-base font-black text-white">{software.name}</span>
             <span className="font-mono text-[11px] text-neutral-500">#{software.code}</span>
             <span
-              className={`rounded-md border px-2 py-1 text-[10px] font-black uppercase tracking-wider ${detectMeta.tint}`}
+              className={`rounded-md border px-2 py-1 text-[12px] font-semibold ${detectMeta.tint}`}
             >
               {detectMeta.label}
             </span>
             <span
-              className={`rounded-md border px-2 py-1 text-[10px] font-black uppercase tracking-wider ${
+              className={`rounded-md border px-2 py-1 text-[12px] font-semibold ${
                 software.status === "AVAILABLE"
                   ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
                   : "border-white/10 bg-white/5 text-neutral-500"
@@ -636,7 +636,7 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
           href={software.publicHref}
           target="_blank"
           rel="noreferrer"
-          className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-white/[0.08] bg-white/[0.03] px-3.5 text-[10px] font-black uppercase tracking-widest text-neutral-300 transition-colors hover:bg-white/[0.08] hover:text-white"
+          className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-white/[0.08] bg-white/[0.03] px-3.5 text-[12px] font-semibold text-neutral-300 transition-colors hover:bg-white/[0.08] hover:text-white"
         >
           <ExternalLink size={13} />
           Xem trang khách
@@ -804,7 +804,7 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
                         onClick={() =>
                           badge1.trim() === "" ? setBadge1(preset) : setBadge2(preset)
                         }
-                        className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[10px] font-black uppercase tracking-widest text-neutral-400 transition-colors hover:border-[var(--brand)]/40 hover:bg-[var(--brand)]/10 hover:text-[var(--brand)] disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:border-white/10 disabled:hover:bg-white/[0.04] disabled:hover:text-neutral-400"
+                        className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[12px] font-semibold text-neutral-400 transition-colors hover:border-[var(--brand)]/40 hover:bg-[var(--brand)]/10 hover:text-[var(--brand)] disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:border-white/10 disabled:hover:bg-white/[0.04] disabled:hover:text-neutral-400"
                       >
                         + {preset}
                       </button>
@@ -843,7 +843,7 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
                 {/* What the customer will see, in the customer's colours. */}
                 {[badge1, badge2].some((b) => b.trim()) ? (
                   <div className="mt-2.5 flex flex-wrap items-center gap-2 rounded-lg border border-white/[0.06] bg-black/40 px-3 py-2.5">
-                    <span className="text-[9px] font-black uppercase tracking-widest text-neutral-600">
+                    <span className="text-[12px] font-semibold text-neutral-600">
                       Xem trước
                     </span>
                     {[

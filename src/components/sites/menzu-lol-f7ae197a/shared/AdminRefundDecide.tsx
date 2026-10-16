@@ -15,9 +15,9 @@ import {
 const FIELD =
   "w-full rounded-lg border border-white/10 bg-neutral-950/60 px-3 py-2 text-sm text-white outline-none transition-colors placeholder-neutral-600 focus:border-[var(--brand)]/60";
 const LABEL =
-  "mb-2 block text-[10px] font-black uppercase tracking-widest text-neutral-500";
+  "mb-2 block text-[12px] font-semibold text-neutral-500";
 const ACTION =
-  "inline-flex h-10 items-center gap-2 rounded-lg px-4 text-[11px] font-black uppercase tracking-widest transition-colors disabled:cursor-not-allowed disabled:opacity-50";
+  "inline-flex h-10 items-center gap-2 rounded-lg px-4 text-[13px] font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50";
 
 /**
  * The decision, on the detail page where the whole request is readable.
@@ -95,7 +95,7 @@ export function AdminRefundDecide({
               }`}
             >
               <span
-                className={`block text-[12px] font-black uppercase tracking-widest ${
+                className={`block text-[14px] font-semibold ${
                   method === key ? "text-[var(--brand)]" : "text-neutral-300"
                 }`}
               >

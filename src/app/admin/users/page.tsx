@@ -206,7 +206,7 @@ function StatCard({
 }) {
   return (
     <div className="rounded-xl border border-white/[0.08] bg-[#0e0e11] p-5 flex flex-col gap-2">
-      <span className="text-[10px] font-black uppercase tracking-widest text-neutral-500">
+      <span className="text-[12px] font-semibold text-neutral-500">
         {label}
       </span>
       <span className="min-w-0 break-all text-[20px] font-black leading-none text-white tabular-nums sm:text-[26px]">

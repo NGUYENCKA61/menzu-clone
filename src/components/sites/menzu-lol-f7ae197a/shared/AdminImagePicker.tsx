@@ -83,14 +83,14 @@ export function AdminImagePicker({
             className="h-full w-full object-cover"
           />
         ) : (
-          <span className="flex h-full w-full items-center justify-center text-[9px] font-bold uppercase tracking-widest text-neutral-700">
+          <span className="flex h-full w-full items-center justify-center text-[12px] font-bold text-neutral-700">
             Trống
           </span>
         )}
       </div>
 
       <label
-        className={`inline-flex h-9 cursor-pointer items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 text-[10px] font-black uppercase tracking-widest text-neutral-200 transition-colors hover:bg-white/10 ${
+        className={`inline-flex h-9 cursor-pointer items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 text-[12px] font-semibold text-neutral-200 transition-colors hover:bg-white/10 ${
           uploading ? "pointer-events-none opacity-60" : ""
         }`}
       >

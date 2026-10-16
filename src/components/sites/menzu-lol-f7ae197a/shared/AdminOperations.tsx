@@ -35,7 +35,7 @@ export interface FeedbackView {
  *  screen: the figure typed before a top-up is credited by hand. */
 const FIELD =
   "w-full rounded-lg border border-white/10 bg-neutral-950/60 px-3 py-2 text-xs text-white outline-none focus:border-[var(--brand)]/60 transition-colors placeholder-neutral-600";
-const LABEL = "block text-[10px] font-black uppercase tracking-widest text-neutral-500 mb-1.5";
+const LABEL = "block text-[12px] font-semibold text-neutral-500 mb-1.5";
 const HINT = "mt-1.5 text-[11px] text-neutral-500";
 
 /**
@@ -81,7 +81,7 @@ function MiniAvatar({ username, avatarUrl }: { username: string; avatarUrl: stri
       {avatarUrl ? (
         <Image src={avatarUrl} alt="" width={32} height={32} className="h-full w-full object-cover" />
       ) : (
-        <span aria-hidden className="text-[11px] font-black uppercase text-neutral-500">
+        <span aria-hidden className="text-[13px] font-semibold text-neutral-500">
           {username.slice(0, 1)}
         </span>
       )}
@@ -163,9 +163,9 @@ const TOPUP_STATUS: Record<string, { text: string; className: string }> = {
 };
 
 const TAB_ON =
-  "whitespace-nowrap px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest bg-[var(--brand)] text-white transition-colors";
+  "whitespace-nowrap px-4 py-2 rounded-xl text-[14px] font-semibold bg-[var(--brand)] text-white transition-colors";
 const TAB_OFF =
-  "whitespace-nowrap px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest border border-white/10 bg-white/[0.03] text-neutral-400 hover:text-white transition-colors";
+  "whitespace-nowrap px-4 py-2 rounded-xl text-[14px] font-semibold border border-white/10 bg-white/[0.03] text-neutral-400 hover:text-white transition-colors";
 
 function formatVnd(n: number): string {
   return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
@@ -397,7 +397,7 @@ export function AdminOperations({
                     ) : (
                       <span
                         aria-hidden
-                        className="text-sm font-black uppercase text-neutral-500"
+                        className="text-[15px] font-semibold text-neutral-500"
                       >
                         {row.name.slice(0, 1)}
                       </span>
@@ -413,7 +413,7 @@ export function AdminOperations({
                         <span className="text-[11px] text-neutral-500">@{row.username}</span>
                       ) : null}
                       {row.anonymous ? (
-                        <span className="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded border border-white/10 bg-white/5 text-neutral-400">
+                        <span className="text-[12px] font-semibold px-1.5 py-0.5 rounded border border-white/10 bg-white/5 text-neutral-400">
                           Ẩn danh
                         </span>
                       ) : null}
@@ -421,11 +421,11 @@ export function AdminOperations({
                         {row.service}
                       </span>
                       {!row.approved ? (
-                        <span className="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded border border-amber-500/30 bg-amber-500/10 text-amber-400">
+                        <span className="text-[12px] font-semibold px-1.5 py-0.5 rounded border border-amber-500/30 bg-amber-500/10 text-amber-400">
                           Chờ duyệt
                         </span>
                       ) : row.verified ? (
-                        <span className="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded border border-emerald-500/30 bg-emerald-500/10 text-emerald-400">
+                        <span className="text-[12px] font-semibold px-1.5 py-0.5 rounded border border-emerald-500/30 bg-emerald-500/10 text-emerald-400">
                           Đã xác minh
                         </span>
                       ) : null}
@@ -492,7 +492,7 @@ export function AdminOperations({
                         type="button"
                         disabled={pending}
                         onClick={() => call("/api/admin/feedback", { id: row.id, approved: true })}
-                        className="h-8 px-3 rounded-lg bg-emerald-500 hover:bg-emerald-400 disabled:opacity-60 text-[10px] font-black uppercase tracking-widest text-black transition-colors inline-flex items-center justify-center gap-1.5"
+                        className="h-8 px-3 rounded-lg bg-emerald-500 hover:bg-emerald-400 disabled:opacity-60 text-[12px] font-semibold text-black transition-colors inline-flex items-center justify-center gap-1.5"
                       >
                         <BadgeCheck size={12} />
                         Duyệt
@@ -502,7 +502,7 @@ export function AdminOperations({
                       type="button"
                       disabled={pending}
                       onClick={() => call("/api/admin/feedback", { id: row.id, verified: !row.verified })}
-                      className="h-8 px-3 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 disabled:opacity-60 text-[10px] font-black uppercase tracking-widest text-neutral-300 transition-colors inline-flex items-center justify-center gap-1.5 whitespace-nowrap"
+                      className="h-8 px-3 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 disabled:opacity-60 text-[12px] font-semibold text-neutral-300 transition-colors inline-flex items-center justify-center gap-1.5 whitespace-nowrap"
                     >
                       <BadgeCheck size={12} />
                       {row.verified ? "Bỏ xác minh" : "Xác minh"}
@@ -576,7 +576,7 @@ export function AdminOperations({
                     <span className="block font-mono text-xs font-black text-white">#{row.code}</span>
                     <span className="block text-[11px] text-neutral-500">{row.createdAt}</span>
                   </div>
-                  <span className={`shrink-0 text-[10px] font-black uppercase tracking-wider px-2 py-1 rounded-lg border whitespace-nowrap ${status.className}`}>
+                  <span className={`shrink-0 text-[12px] font-semibold px-2 py-1 rounded-lg border whitespace-nowrap ${status.className}`}>
                     {status.text}
                   </span>
                 </div>
@@ -621,7 +621,7 @@ export function AdminOperations({
                         setConfirming(row);
                         setReceived(String(row.amount));
                       }}
-                      className="press h-10 rounded-lg border border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 disabled:opacity-50 text-[11px] font-black uppercase tracking-widest text-emerald-400 transition-colors"
+                      className="press h-10 rounded-lg border border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 disabled:opacity-50 text-[13px] font-semibold text-emerald-400 transition-colors"
                     >
                       Xác nhận
                     </button>
@@ -632,7 +632,7 @@ export function AdminOperations({
                         setRejecting(row);
                         setRejectNote("");
                       }}
-                      className="press h-10 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 disabled:opacity-50 text-[11px] font-black uppercase tracking-widest text-neutral-400 transition-colors"
+                      className="press h-10 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 disabled:opacity-50 text-[13px] font-semibold text-neutral-400 transition-colors"
                     >
                       Từ chối
                     </button>
@@ -648,7 +648,7 @@ export function AdminOperations({
             <thead>
               <tr className="border-b border-white/10">
                 {["Mã", "Tài khoản", "Hình thức", "Số tiền", "Trạng thái", "Thời gian", ""].map((c) => (
-                  <th key={c} scope="col" className="px-5 py-3.5 text-[10px] font-black uppercase tracking-widest text-neutral-500 whitespace-nowrap">
+                  <th key={c} scope="col" className="px-5 py-3.5 text-[12px] font-semibold text-neutral-500 whitespace-nowrap">
                     {c}
                   </th>
                 ))}
@@ -712,7 +712,7 @@ export function AdminOperations({
                       const status = TOPUP_STATUS[row.status] ?? TOPUP_STATUS.PENDING!;
                       return (
                         <span
-                          className={`text-[10px] font-black uppercase tracking-wider px-2 py-1 rounded-lg border whitespace-nowrap ${status.className}`}
+                          className={`text-[12px] font-semibold px-2 py-1 rounded-lg border whitespace-nowrap ${status.className}`}
                         >
                           {status.text}
                         </span>
@@ -732,7 +732,7 @@ export function AdminOperations({
                             setConfirming(row);
                             setReceived(String(row.amount));
                           }}
-                          className="h-8 px-3 rounded-lg border border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 disabled:opacity-50 text-[10px] font-black uppercase tracking-widest text-emerald-400 transition-colors whitespace-nowrap"
+                          className="h-8 px-3 rounded-lg border border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 disabled:opacity-50 text-[12px] font-semibold text-emerald-400 transition-colors whitespace-nowrap"
                         >
                           Xác nhận
                         </button>
@@ -743,7 +743,7 @@ export function AdminOperations({
                             setRejecting(row);
                             setRejectNote("");
                           }}
-                          className="h-8 px-3 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 disabled:opacity-50 text-[10px] font-black uppercase tracking-widest text-neutral-400 transition-colors whitespace-nowrap"
+                          className="h-8 px-3 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 disabled:opacity-50 text-[12px] font-semibold text-neutral-400 transition-colors whitespace-nowrap"
                         >
                           Từ chối
                         </button>

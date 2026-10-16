@@ -28,7 +28,7 @@ export interface SpinWinRow {
 const CARD =
   "rounded-xl border border-white/[0.08] bg-[#0e0e11] p-5 flex flex-col gap-4";
 const HEAD =
-  "flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-neutral-500";
+  "flex items-center gap-2 text-[12px] font-semibold text-neutral-500";
 
 /**
  * The parcels the wheel owes.
@@ -148,7 +148,7 @@ export function AdminSpinWins({ wins }: { wins: SpinWinRow[] }) {
                   row says which of the two it is waiting on rather than
                   looking identical in both cases. */}
               {win.address ? null : (
-                <span className="shrink-0 rounded-md border border-white/10 bg-white/5 px-2 py-0.5 text-[9px] font-black uppercase tracking-wider text-neutral-500">
+                <span className="shrink-0 rounded-md border border-white/10 bg-white/5 px-2 py-0.5 text-[12px] font-semibold text-neutral-500">
                   Chờ khách điền địa chỉ
                 </span>
               )}
@@ -163,7 +163,7 @@ export function AdminSpinWins({ wins }: { wins: SpinWinRow[] }) {
                 type="button"
                 disabled={busy === win.id}
                 onClick={() => void mark(win.id, true)}
-                className="h-8 shrink-0 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 text-[10px] font-black uppercase tracking-widest text-emerald-400 transition-colors hover:bg-emerald-500/20 disabled:opacity-40 inline-flex items-center gap-1.5"
+                className="h-8 shrink-0 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 text-[12px] font-semibold text-emerald-400 transition-colors hover:bg-emerald-500/20 disabled:opacity-40 inline-flex items-center gap-1.5"
               >
                 <PackageCheck size={12} />
                 Đã gửi
@@ -220,7 +220,7 @@ export function AdminSpinWins({ wins }: { wins: SpinWinRow[] }) {
                       type="button"
                       disabled={busy === win.id}
                       onClick={() => void answer(win.id)}
-                      className="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-lg border border-[var(--brand)]/30 bg-[var(--brand)]/10 px-3 text-[10px] font-black uppercase tracking-widest text-[var(--brand)] transition-colors hover:bg-[var(--brand)]/20 disabled:opacity-40"
+                      className="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-lg border border-[var(--brand)]/30 bg-[var(--brand)]/10 px-3 text-[12px] font-semibold text-[var(--brand)] transition-colors hover:bg-[var(--brand)]/20 disabled:opacity-40"
                     >
                       Gửi cho khách
                     </button>
@@ -245,7 +245,7 @@ export function AdminSpinWins({ wins }: { wins: SpinWinRow[] }) {
           is answered from this list, and a wrong tick has to be undoable. */}
       {sent.length > 0 ? (
         <div className="flex flex-col gap-1.5 border-t border-white/[0.06] pt-3">
-          <span className="text-[10px] font-black uppercase tracking-widest text-neutral-600">
+          <span className="text-[12px] font-semibold text-neutral-600">
             Đã gửi gần đây
           </span>
           {sent.slice(0, 5).map((win) => (

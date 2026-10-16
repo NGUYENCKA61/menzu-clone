@@ -42,12 +42,12 @@ const TIER_COLOR: Record<string, string> = {
 
 const CARD = "rounded-xl border border-white/[0.08] bg-[#0e0e11] p-5 flex flex-col gap-4";
 const CARD_HEAD =
-  "flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-neutral-500";
+  "flex items-center gap-2 text-[12px] font-semibold text-neutral-500";
 const FIELD =
   "w-full rounded-lg border border-white/10 bg-neutral-950/60 px-3 py-2 text-xs text-white outline-none focus:border-[var(--brand)]/60 transition-colors placeholder-neutral-600";
-const LABEL = "block text-[10px] font-black uppercase tracking-widest text-neutral-500 mb-1.5";
+const LABEL = "block text-[12px] font-semibold text-neutral-500 mb-1.5";
 const ACTION =
-  "h-[34px] px-4 rounded-lg bg-[var(--brand)] hover:bg-[var(--brand-dark)] disabled:opacity-60 text-[10px] font-black uppercase tracking-widest text-white transition-colors";
+  "h-[34px] px-4 rounded-lg bg-[var(--brand)] hover:bg-[var(--brand-dark)] disabled:opacity-60 text-[12px] font-semibold text-white transition-colors";
 const HINT = "text-[11px] text-neutral-500 leading-relaxed";
 
 function formatVnd(n: number): string {
@@ -77,7 +77,7 @@ function StatCard({
 }) {
   return (
     <div className="rounded-xl border border-white/[0.08] bg-[#0e0e11] p-5 flex flex-col gap-2">
-      <span className="text-[10px] font-black uppercase tracking-widest text-neutral-500">
+      <span className="text-[12px] font-semibold text-neutral-500">
         {label}
       </span>
       <span className={`text-[22px] font-black leading-none tabular-nums ${tone}`}>{value}</span>
@@ -252,7 +252,7 @@ export function AdminUserDetail({
                 className={`h-full w-full object-cover ${user.blockedAt ? "opacity-50 grayscale" : ""}`}
               />
             ) : (
-              <span aria-hidden className="text-2xl font-black uppercase text-neutral-500">
+              <span aria-hidden className="text-2xl font-black text-neutral-500">
                 {user.username.slice(0, 1)}
               </span>
             )}
@@ -262,7 +262,7 @@ export function AdminUserDetail({
             <div className="flex flex-wrap items-center gap-2.5">
               <h2 className="text-xl font-black text-white">{user.username}</h2>
               <span
-                className={`inline-block rounded-md border px-2 py-1 text-[10px] font-black uppercase tracking-wider ${
+                className={`inline-block rounded-md border px-2 py-1 text-[12px] font-semibold ${
                   user.blockedAt
                     ? "border-red-500/30 bg-red-500/10 text-red-400"
                     : user.role === "ADMIN"
@@ -281,7 +281,7 @@ export function AdminUserDetail({
                       : "Hoạt động"}
               </span>
               <span
-                className={`inline-flex items-center gap-1.5 text-[11px] font-black uppercase tracking-wider ${
+                className={`inline-flex items-center gap-1.5 text-[13px] font-semibold ${
                   TIER_COLOR[user.tier] ?? "text-neutral-300"
                 }`}
               >
@@ -292,7 +292,7 @@ export function AdminUserDetail({
                 // "Xác thực cấp 2" (12/10/2026): the desk that granted it is a click away.
                 <Link
                   href="/admin/verifications?filter=all"
-                  className="inline-flex items-center gap-1 rounded-md border border-emerald-500/30 bg-emerald-500/10 px-2 py-1 text-[10px] font-black uppercase tracking-wider text-emerald-300 transition-colors hover:text-white"
+                  className="inline-flex items-center gap-1 rounded-md border border-emerald-500/30 bg-emerald-500/10 px-2 py-1 text-[12px] font-semibold text-emerald-300 transition-colors hover:text-white"
                 >
                   <BadgeCheck size={11} aria-hidden />
                   Cấp 2 · {user.verifiedAt}
@@ -473,7 +473,7 @@ export function AdminUserDetail({
                 }
                 title={user.role === "ADMIN" ? "Thu hồi quyền quản trị trước" : undefined}
                 onClick={() => setConfirming({ kind: "agency" })}
-                className="h-[34px] px-4 rounded-lg border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 disabled:opacity-40 disabled:hover:bg-amber-500/10 text-[10px] font-black uppercase tracking-widest text-amber-400 transition-colors"
+                className="h-[34px] px-4 rounded-lg border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 disabled:opacity-40 disabled:hover:bg-amber-500/10 text-[12px] font-semibold text-amber-400 transition-colors"
               >
                 {user.role === "AGENCY" ? "Đổi %" : "Cấp đại lý"}
               </button>
@@ -482,7 +482,7 @@ export function AdminUserDetail({
                   type="button"
                   disabled={busy}
                   onClick={() => setConfirming({ kind: "agencyRevoke" })}
-                  className="h-[34px] px-4 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 disabled:opacity-40 text-[10px] font-black uppercase tracking-widest text-neutral-300 transition-colors"
+                  className="h-[34px] px-4 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 disabled:opacity-40 text-[12px] font-semibold text-neutral-300 transition-colors"
                 >
                   Gỡ đại lý
                 </button>
@@ -520,7 +520,7 @@ export function AdminUserDetail({
                 type="button"
                 disabled={busy || password.length < 6}
                 onClick={() => setConfirming({ kind: "password" })}
-                className="h-[34px] px-4 rounded-lg border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 disabled:opacity-40 disabled:hover:bg-amber-500/10 text-[10px] font-black uppercase tracking-widest text-amber-400 transition-colors inline-flex items-center gap-1.5"
+                className="h-[34px] px-4 rounded-lg border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 disabled:opacity-40 disabled:hover:bg-amber-500/10 text-[12px] font-semibold text-amber-400 transition-colors inline-flex items-center gap-1.5"
               >
                 <KeyRound size={12} />
                 Đặt lại
@@ -575,7 +575,7 @@ export function AdminUserDetail({
                 type="button"
                 disabled={busy}
                 onClick={() => setConfirming({ kind: "role" })}
-                className="h-[34px] px-4 rounded-lg border border-rose-500/30 bg-rose-500/10 hover:bg-rose-500/20 disabled:opacity-40 text-[10px] font-black uppercase tracking-widest text-rose-400 transition-colors inline-flex items-center gap-1.5"
+                className="h-[34px] px-4 rounded-lg border border-rose-500/30 bg-rose-500/10 hover:bg-rose-500/20 disabled:opacity-40 text-[12px] font-semibold text-rose-400 transition-colors inline-flex items-center gap-1.5"
               >
                 <Shield size={12} />
                 {user.role === "ADMIN" ? "Thu hồi quyền admin" : "Cấp quyền admin"}
@@ -584,7 +584,7 @@ export function AdminUserDetail({
                 type="button"
                 disabled={busy}
                 onClick={() => setConfirming({ kind: "block" })}
-                className={`h-[34px] px-4 rounded-lg disabled:opacity-40 text-[10px] font-black uppercase tracking-widest transition-colors inline-flex items-center gap-1.5 ${
+                className={`h-[34px] px-4 rounded-lg disabled:opacity-40 text-[12px] font-semibold transition-colors inline-flex items-center gap-1.5 ${
                   user.blockedAt
                     ? "border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20"
                     : "border border-amber-500/30 bg-amber-500/10 text-amber-400 hover:bg-amber-500/20"
@@ -597,7 +597,7 @@ export function AdminUserDetail({
                 type="button"
                 disabled={busy}
                 onClick={() => setConfirming({ kind: "delete" })}
-                className="h-[34px] px-4 rounded-lg border border-red-500/30 bg-red-500/10 hover:bg-red-500/20 disabled:opacity-40 text-[10px] font-black uppercase tracking-widest text-red-400 transition-colors inline-flex items-center gap-1.5"
+                className="h-[34px] px-4 rounded-lg border border-red-500/30 bg-red-500/10 hover:bg-red-500/20 disabled:opacity-40 text-[12px] font-semibold text-red-400 transition-colors inline-flex items-center gap-1.5"
               >
                 <Trash2 size={12} />
                 Xóa vĩnh viễn

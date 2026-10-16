@@ -56,7 +56,7 @@ function StatCard({
   return (
     <div className="rounded-xl border border-white/[0.08] bg-[#0e0e11] p-5 flex flex-col gap-3">
       <div className="flex items-center justify-between gap-3">
-        <span className="text-[10px] font-black uppercase tracking-widest text-neutral-500">
+        <span className="text-[12px] font-semibold text-neutral-500">
           {label}
         </span>
         <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border ${tint}`}>

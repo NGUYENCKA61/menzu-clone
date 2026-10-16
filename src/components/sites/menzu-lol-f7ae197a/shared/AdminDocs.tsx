@@ -46,7 +46,7 @@ const CATEGORY_ORDER: string[] = [...ARTICLE_SHELVES];
 const FIELD =
   "w-full rounded-xl border border-white/10 bg-neutral-950/60 px-3 py-2.5 text-sm text-white outline-none focus:border-[var(--brand)]/60 transition-colors placeholder-neutral-600";
 const LABEL =
-  "block text-[10px] font-black uppercase tracking-widest text-neutral-500 mb-1.5";
+  "block text-[12px] font-semibold text-neutral-500 mb-1.5";
 
 function StatMini({
   label,
@@ -62,7 +62,7 @@ function StatMini({
   return (
     <div className="rounded-xl border border-white/[0.08] bg-[#0e0e11] p-5 flex flex-col gap-3">
       <div className="flex items-center justify-between gap-3">
-        <span className="text-[10px] font-black uppercase tracking-widest text-neutral-500">
+        <span className="text-[12px] font-semibold text-neutral-500">
           {label}
         </span>
         <span
@@ -196,7 +196,7 @@ export function AdminDocs({ docs }: { docs: DocView[] }) {
             <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
               <span className="text-sm font-black text-white">{doc.title}</span>
               <span
-                className={`text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded border ${
+                className={`text-[12px] font-semibold px-1.5 py-0.5 rounded border ${
                   doc.body
                     ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
                     : "border-amber-500/30 bg-amber-500/10 text-amber-400"
@@ -205,12 +205,12 @@ export function AdminDocs({ docs }: { docs: DocView[] }) {
                 {doc.body ? "Đã có nội dung" : "Đang biên soạn"}
               </span>
               {doc.featured ? (
-                <span className="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded border border-[var(--menzu-accent)]/40 bg-[var(--menzu-accent)]/10 text-[var(--menzu-accent)]">
+                <span className="text-[12px] font-semibold px-1.5 py-0.5 rounded border border-[var(--menzu-accent)]/40 bg-[var(--menzu-accent)]/10 text-[var(--menzu-accent)]">
                   Nổi bật
                 </span>
               ) : null}
               {doc.productCode ? (
-                <span className="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded border border-sky-500/40 bg-sky-500/10 text-sky-300">
+                <span className="text-[12px] font-semibold px-1.5 py-0.5 rounded border border-sky-500/40 bg-sky-500/10 text-sky-300">
                   Tài liệu tool {doc.productCode}
                 </span>
               ) : null}
@@ -240,7 +240,7 @@ export function AdminDocs({ docs }: { docs: DocView[] }) {
                 preview instead of a strip squeezed into the list. */}
             <Link
               href={`/admin/docs/${doc.slug}`}
-              className="h-8 px-3 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 text-neutral-300 text-[10px] font-black uppercase tracking-widest transition-colors inline-flex items-center gap-1.5"
+              className="h-8 px-3 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 text-neutral-300 text-[12px] font-semibold transition-colors inline-flex items-center gap-1.5"
             >
               <PencilLine size={12} />
               Sửa
@@ -298,7 +298,7 @@ export function AdminDocs({ docs }: { docs: DocView[] }) {
           type="button"
           aria-pressed={catFilter === ""}
           onClick={() => setCatFilter("")}
-          className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-[11px] font-black uppercase tracking-widest transition-colors ${
+          className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-[13px] font-semibold transition-colors ${
             catFilter === ""
               ? "bg-[var(--brand)] text-white"
               : "border border-white/10 bg-white/[0.03] text-neutral-400 hover:text-white"
@@ -324,7 +324,7 @@ export function AdminDocs({ docs }: { docs: DocView[] }) {
               type="button"
               aria-pressed={on}
               onClick={() => setCatFilter(on ? "" : value)}
-              className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl border text-[11px] font-black uppercase tracking-widest transition-colors ${
+              className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl border text-[13px] font-semibold transition-colors ${
                 on
                   ? meta.tint
                   : "border-white/10 bg-white/[0.03] text-neutral-400 hover:text-white"
@@ -367,7 +367,7 @@ export function AdminDocs({ docs }: { docs: DocView[] }) {
               setCreating((v) => !v);
               setError(null);
             }}
-            className={`h-10 px-4 rounded-xl text-[11px] font-black uppercase tracking-widest transition-colors inline-flex items-center gap-1.5 ${
+            className={`h-10 px-4 rounded-xl text-[13px] font-semibold transition-colors inline-flex items-center gap-1.5 ${
               creating
                 ? "border border-white/10 bg-white/5 text-neutral-300 hover:bg-white/10"
                 : "bg-[var(--brand)] hover:bg-[var(--brand-dark)] text-white"
@@ -381,7 +381,7 @@ export function AdminDocs({ docs }: { docs: DocView[] }) {
 
       {creating ? (
         <div className="rounded-xl border border-white/[0.08] bg-[#0e0e11] p-5 flex flex-col gap-4">
-          <span className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-neutral-500">
+          <span className="flex items-center gap-2 text-[12px] font-semibold text-neutral-500">
             <Plus size={13} className="text-neutral-400" />
             Bài viết mới
           </span>
@@ -429,7 +429,7 @@ export function AdminDocs({ docs }: { docs: DocView[] }) {
               type="button"
               disabled={pending || !newTitle.trim()}
               onClick={create}
-              className="h-[42px] px-5 rounded-xl bg-[var(--brand)] hover:bg-[var(--brand-dark)] disabled:opacity-60 text-[11px] font-black uppercase tracking-widest text-white transition-colors inline-flex items-center gap-1.5"
+              className="h-[42px] px-5 rounded-xl bg-[var(--brand)] hover:bg-[var(--brand-dark)] disabled:opacity-60 text-[13px] font-semibold text-white transition-colors inline-flex items-center gap-1.5"
             >
               <Plus size={14} />
               {pending ? "Đang tạo…" : "Tạo"}
@@ -460,7 +460,7 @@ export function AdminDocs({ docs }: { docs: DocView[] }) {
         return (
           <section key={category} className="flex flex-col gap-3">
             <div className="flex items-center gap-3">
-              <h2 className="flex items-center gap-2 text-[13px] font-black uppercase tracking-widest text-white whitespace-nowrap">
+              <h2 className="flex items-center gap-2 text-[15px] font-semibold text-white whitespace-nowrap">
                 <Icon size={14} className={meta.tint.split(" ").at(-1)} />
                 {meta.label}
               </h2>

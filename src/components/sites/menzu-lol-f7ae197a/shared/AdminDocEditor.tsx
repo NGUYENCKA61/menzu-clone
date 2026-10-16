@@ -28,7 +28,7 @@ const CATEGORY_META: Record<string, (typeof DOC_SHELF_META)[keyof typeof DOC_SHE
 const FIELD =
   "w-full rounded-xl border border-white/10 bg-neutral-950/60 px-3 py-2.5 text-sm text-white outline-none focus:border-[var(--brand)]/60 transition-colors placeholder-neutral-600";
 const LABEL =
-  "block text-[10px] font-black uppercase tracking-widest text-neutral-500 mb-1.5";
+  "block text-[12px] font-semibold text-neutral-500 mb-1.5";
 
 /**
  * One article, full page: papers on top, the shared TipTap desk below.
@@ -125,7 +125,7 @@ export function AdminDocEditor({
           <div className="flex flex-wrap items-center gap-2.5">
             <span className="text-sm font-black text-white">{doc.title}</span>
             <span
-              className={`text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded border ${
+              className={`text-[12px] font-semibold px-1.5 py-0.5 rounded border ${
                 hasBody
                   ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
                   : "border-amber-500/30 bg-amber-500/10 text-amber-400"
@@ -148,7 +148,7 @@ export function AdminDocEditor({
           href={`/docs/${doc.slug}`}
           target="_blank"
           rel="noreferrer"
-          className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-white/[0.08] bg-white/[0.03] px-3.5 text-[10px] font-black uppercase tracking-widest text-neutral-300 transition-colors hover:bg-white/[0.08] hover:text-white"
+          className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-white/[0.08] bg-white/[0.03] px-3.5 text-[12px] font-semibold text-neutral-300 transition-colors hover:bg-white/[0.08] hover:text-white"
         >
           <ExternalLink size={13} />
           Xem trang công khai
@@ -156,7 +156,7 @@ export function AdminDocEditor({
       </div>
 
       <div className="rounded-xl border border-white/[0.08] bg-[#0e0e11] p-5 flex flex-col gap-4">
-        <span className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-neutral-500">
+        <span className="flex items-center gap-2 text-[12px] font-semibold text-neutral-500">
           <FileText size={13} className="text-neutral-400" />
           Soạn nội dung
         </span>
@@ -260,7 +260,7 @@ export function AdminDocEditor({
             type="button"
             onClick={save}
             disabled={pending || !dirty}
-            className="h-10 px-5 rounded-xl bg-[var(--brand)] hover:bg-[var(--brand-dark)] disabled:opacity-60 text-[11px] font-black uppercase tracking-widest text-white transition-colors inline-flex items-center gap-2"
+            className="h-10 px-5 rounded-xl bg-[var(--brand)] hover:bg-[var(--brand-dark)] disabled:opacity-60 text-[13px] font-semibold text-white transition-colors inline-flex items-center gap-2"
           >
             <FileText size={14} />
             {pending ? "Đang lưu…" : "Lưu bài viết"}

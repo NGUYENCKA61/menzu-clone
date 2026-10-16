@@ -38,7 +38,7 @@ export interface PackageKeysView {
 
 const FIELD =
   "w-full rounded-lg border border-white/10 bg-neutral-950/60 px-3 py-2 text-xs text-white outline-none focus:border-[var(--brand)]/60 transition-colors placeholder-neutral-600";
-const HEAD = "text-[10px] font-black uppercase tracking-widest text-neutral-500";
+const HEAD = "text-[12px] font-semibold text-neutral-500";
 const KEY_TEXT = "flex-1 truncate font-mono text-[11px] text-neutral-200";
 
 /**
@@ -213,7 +213,7 @@ export function AdminPackageKeys({
               type="button"
               disabled={busy || uniquePending === 0}
               onClick={addKeys}
-              className="h-[34px] px-4 rounded-lg bg-[var(--brand)] hover:bg-[var(--brand-dark)] disabled:opacity-40 text-[10px] font-black uppercase tracking-widest text-white transition-colors inline-flex items-center gap-1.5"
+              className="h-[34px] px-4 rounded-lg bg-[var(--brand)] hover:bg-[var(--brand-dark)] disabled:opacity-40 text-[12px] font-semibold text-white transition-colors inline-flex items-center gap-1.5"
             >
               {busy ? <Loader2 size={12} className="animate-spin" /> : <Plus size={12} />}
               Thêm {uniquePending > 0 ? `${uniquePending} key` : "key"}
@@ -246,7 +246,7 @@ export function AdminPackageKeys({
             type="button"
             disabled={busy || !removePaste.trim()}
             onClick={() => void removeByValue()}
-            className="self-start h-[34px] px-4 rounded-lg border border-red-500/30 bg-red-500/10 hover:bg-red-500/20 disabled:opacity-40 text-[10px] font-black uppercase tracking-widest text-red-400 transition-colors inline-flex items-center gap-1.5"
+            className="self-start h-[34px] px-4 rounded-lg border border-red-500/30 bg-red-500/10 hover:bg-red-500/20 disabled:opacity-40 text-[12px] font-semibold text-red-400 transition-colors inline-flex items-center gap-1.5"
           >
             <Trash2 size={11} />
             Xoá key đã nhập
@@ -267,7 +267,7 @@ export function AdminPackageKeys({
                 type="button"
                 disabled={busy}
                 onClick={() => setClearing(true)}
-                className="rounded-md border border-red-500/25 bg-red-500/[0.06] px-2 py-1 text-[10px] font-black uppercase tracking-widest text-red-400/90 transition-colors hover:bg-red-500/15 disabled:opacity-40"
+                className="rounded-md border border-red-500/25 bg-red-500/[0.06] px-2 py-1 text-[12px] font-semibold text-red-400/90 transition-colors hover:bg-red-500/15 disabled:opacity-40"
               >
                 Xoá tất cả
               </button>

@@ -21,7 +21,7 @@ export interface AdminCategoryView {
 
 const FIELD =
   "w-full rounded-lg border border-white/10 bg-neutral-950/60 px-3 py-2 text-xs text-white outline-none focus:border-[var(--brand)]/60 transition-colors placeholder-neutral-600";
-const LABEL = "block text-[10px] font-black uppercase tracking-widest text-neutral-500 mb-1.5";
+const LABEL = "block text-[12px] font-semibold text-neutral-500 mb-1.5";
 const ICON_BUTTON =
   "h-8 w-8 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-white/5 text-neutral-300 transition-colors inline-flex items-center justify-center";
 
@@ -152,7 +152,7 @@ export function AdminCategories({ categories }: { categories: AdminCategoryView[
         onSubmit={handleCreate}
         className="rounded-2xl border border-white/10 bg-neutral-900/50 p-5 flex flex-col gap-4"
       >
-        <span className="text-[10px] font-black uppercase tracking-widest text-neutral-500">
+        <span className="text-[12px] font-semibold text-neutral-500">
           Thêm danh mục
         </span>
 
@@ -217,7 +217,7 @@ export function AdminCategories({ categories }: { categories: AdminCategoryView[
         <button
           type="submit"
           disabled={busy || !newName.trim()}
-          className="self-start h-10 px-5 rounded-xl bg-[var(--brand)] hover:bg-[var(--brand-dark)] disabled:opacity-50 transition-colors text-[11px] font-black uppercase tracking-widest text-white"
+          className="self-start h-10 px-5 rounded-xl bg-[var(--brand)] hover:bg-[var(--brand-dark)] disabled:opacity-50 transition-colors text-[13px] font-semibold text-white"
         >
           {busy ? "Đang xử lý…" : "Thêm danh mục"}
         </button>
@@ -332,7 +332,7 @@ export function AdminCategories({ categories }: { categories: AdminCategoryView[
                         row below it down the screen. */}
                     <Link
                       href={`/admin/categories/${encodeURIComponent(category.slug)}`}
-                      className="h-8 px-3 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 text-[10px] font-black uppercase tracking-widest text-neutral-300 transition-colors inline-flex items-center gap-1.5"
+                      className="h-8 px-3 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 text-[12px] font-semibold text-neutral-300 transition-colors inline-flex items-center gap-1.5"
                     >
                       Sửa
                     </Link>

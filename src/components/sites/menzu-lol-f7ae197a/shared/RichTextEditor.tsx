@@ -314,7 +314,7 @@ const IMAGE_SIZES = ["25%", "50%", "75%", "100%"];
 /** Quick stops for the push from the side, alongside its own typed box. */
 const OFFSETS = ["0%", "10%", "20%", "30%"];
 
-const PANEL_LABEL = "text-[9px] font-black uppercase tracking-widest text-neutral-500";
+const PANEL_LABEL = "text-[12px] font-semibold text-neutral-500";
 const PANEL_INPUT =
   "h-7 rounded-md border border-white/10 bg-neutral-950/60 px-1.5 text-[11px] font-bold tabular-nums text-white outline-none focus:border-[var(--brand)]/60 placeholder-neutral-500";
 
@@ -483,7 +483,7 @@ function ImagePanelInner({ editor }: { editor: Editor }) {
 
   return (
     <div className="mb-2 flex flex-wrap items-center gap-x-2.5 gap-y-2 rounded-lg border border-[var(--brand)]/30 bg-[var(--brand)]/[0.06] px-3 py-2">
-      <span className="text-[9px] font-black uppercase tracking-widest text-[#a78bfa]">
+      <span className="text-[12px] font-semibold text-[#a78bfa]">
         Ảnh đang chọn
       </span>
       <span aria-hidden className="h-4 w-px bg-white/[0.08]" />
@@ -715,7 +715,7 @@ function VideoPanelInner({ editor }: { editor: Editor }) {
 
   return (
     <div className="mb-2 flex flex-wrap items-center gap-x-2.5 gap-y-2 rounded-lg border border-[var(--brand)]/30 bg-[var(--brand)]/[0.06] px-3 py-2">
-      <span className="text-[9px] font-black uppercase tracking-widest text-[#a78bfa]">
+      <span className="text-[12px] font-semibold text-[#a78bfa]">
         Video đang chọn
       </span>
       <span aria-hidden className="h-4 w-px bg-white/[0.08]" />
@@ -1039,7 +1039,7 @@ function MoveHandle({ editor }: { editor: Editor }) {
       onPointerUp={end}
       onPointerCancel={end}
       onClick={(event) => event.stopPropagation()}
-      className="absolute z-10 inline-flex -translate-x-1/2 cursor-ew-resize touch-none select-none items-center gap-1.5 rounded-full border border-white/15 bg-neutral-900/90 px-2.5 py-1 text-[10px] font-black uppercase tracking-widest text-white shadow-lg transition-colors hover:border-[var(--brand)]/60"
+      className="absolute z-10 inline-flex -translate-x-1/2 cursor-ew-resize touch-none select-none items-center gap-1.5 rounded-full border border-white/15 bg-neutral-900/90 px-2.5 py-1 text-[12px] font-semibold text-white shadow-lg transition-colors hover:border-[var(--brand)]/60"
       style={{ left: left + width / 2 + (preview?.dx ?? 0), top: top + Math.max(height - 34, 4) }}
     >
       <MoveHorizontal size={13} aria-hidden />
@@ -1378,7 +1378,7 @@ export function RichTextEditor({
           disabled={uploading}
           onMouseDown={(event) => event.preventDefault()}
           onClick={() => imageRef.current?.click()}
-          className="h-8 px-2.5 rounded-lg border border-white/[0.07] bg-white/[0.03] text-neutral-400 hover:bg-white/[0.08] hover:text-white disabled:opacity-50 transition-colors inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest"
+          className="h-8 px-2.5 rounded-lg border border-white/[0.07] bg-white/[0.03] text-neutral-400 hover:bg-white/[0.08] hover:text-white disabled:opacity-50 transition-colors inline-flex items-center gap-1.5 text-[12px] font-semibold "
         >
           <ImagePlus size={14} />
           {uploading ? "Đang tải..." : "Ảnh"}
@@ -1404,7 +1404,7 @@ export function RichTextEditor({
             setVideoError(null);
             setVideoOpen((open) => !open);
           }}
-          className={`h-8 px-2.5 rounded-lg border transition-colors inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest ${
+          className={`h-8 px-2.5 rounded-lg border transition-colors inline-flex items-center gap-1.5 text-[12px] font-semibold ${
             videoOpen
               ? "border-[var(--brand)]/50 bg-[var(--brand)]/15 text-white"
               : "border-white/[0.07] bg-white/[0.03] text-neutral-400 hover:bg-white/[0.08] hover:text-white"
@@ -1448,14 +1448,14 @@ export function RichTextEditor({
           <button
             type="button"
             onClick={applyLink}
-            className="h-8 px-3.5 rounded-lg bg-[var(--brand)] hover:bg-[var(--brand-dark)] text-[10px] font-black uppercase tracking-widest text-white transition-colors"
+            className="h-8 px-3.5 rounded-lg bg-[var(--brand)] hover:bg-[var(--brand-dark)] text-[12px] font-semibold text-white transition-colors"
           >
             Gắn link
           </button>
           <button
             type="button"
             onClick={() => setLinkOpen(false)}
-            className="h-8 px-3 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 text-[10px] font-black uppercase tracking-widest text-neutral-300 transition-colors"
+            className="h-8 px-3 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 text-[12px] font-semibold text-neutral-300 transition-colors"
           >
             Đóng
           </button>
@@ -1485,14 +1485,14 @@ export function RichTextEditor({
           <button
             type="button"
             onClick={insertVideo}
-            className="h-8 px-3.5 rounded-lg bg-[var(--brand)] hover:bg-[var(--brand-dark)] text-[10px] font-black uppercase tracking-widest text-white transition-colors"
+            className="h-8 px-3.5 rounded-lg bg-[var(--brand)] hover:bg-[var(--brand-dark)] text-[12px] font-semibold text-white transition-colors"
           >
             Chèn video
           </button>
           <button
             type="button"
             onClick={() => setVideoOpen(false)}
-            className="h-8 px-3 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 text-[10px] font-black uppercase tracking-widest text-neutral-300 transition-colors"
+            className="h-8 px-3 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 text-[12px] font-semibold text-neutral-300 transition-colors"
           >
             Đóng
           </button>

@@ -21,7 +21,7 @@ export const metadata: Metadata = { title: "Chi tiết hoàn trả | Quản tr�
 export const dynamic = "force-dynamic";
 
 const CARD = "rounded-xl border border-white/[0.08] bg-[#0e0e11] p-5";
-const LABEL = "text-[10px] font-black uppercase tracking-widest text-neutral-500";
+const LABEL = "text-[12px] font-semibold text-neutral-500";
 
 function formatWhen(date: Date): string {
   return dayStamp(date);
@@ -125,7 +125,7 @@ export default async function AdminRefundDetailPage({
         <div className="grid grid-cols-2 divide-x divide-white/[0.06] sm:grid-cols-4">
           <Fact label="Trạng thái">
             <span
-              className={`inline-flex items-center rounded-md border px-2 py-0.5 text-[10px] font-black uppercase tracking-wider ${state.tile}`}
+              className={`inline-flex items-center rounded-md border px-2 py-0.5 text-[12px] font-semibold ${state.tile}`}
             >
               {state.label}
             </span>
@@ -167,7 +167,7 @@ export default async function AdminRefundDetailPage({
             {/* The one fact about the order that can decide this by itself: a
                 shop that never delivered the key has little to argue. */}
             {owed > 0 ? (
-              <p className="mt-1.5 inline-flex rounded-md border border-[var(--brand)]/30 bg-[var(--brand)]/10 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-[var(--brand)]">
+              <p className="mt-1.5 inline-flex rounded-md border border-[var(--brand)]/30 bg-[var(--brand)]/10 px-2 py-0.5 text-[12px] font-semibold text-[var(--brand)]">
                 Còn nợ {owed} key
               </p>
             ) : null}
@@ -231,7 +231,7 @@ export default async function AdminRefundDetailPage({
             <span className={LABEL}>Đã xử lý</span>
             <div className="mt-2.5 flex flex-wrap items-center gap-x-4 gap-y-2 text-[13px] text-neutral-300">
               <span
-                className={`inline-flex items-center rounded-md border px-2 py-0.5 text-[10px] font-black uppercase tracking-wider ${state.tile}`}
+                className={`inline-flex items-center rounded-md border px-2 py-0.5 text-[12px] font-semibold ${state.tile}`}
               >
                 {state.label}
               </span>

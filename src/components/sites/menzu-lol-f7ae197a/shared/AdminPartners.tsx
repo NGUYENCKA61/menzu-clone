@@ -14,7 +14,7 @@ export interface AdminPartnerRow {
 
 const FIELD =
   "w-full rounded-xl border border-white/5 bg-white/5 px-3 py-2.5 text-sm text-white outline-none focus:border-[var(--brand)]/60 transition-colors placeholder-neutral-600";
-const LABEL = "block text-[10px] font-black uppercase tracking-widest text-neutral-500 mb-1.5";
+const LABEL = "block text-[12px] font-semibold text-neutral-500 mb-1.5";
 const ICON_BUTTON =
   "h-8 w-8 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-white/5 text-neutral-300 transition-colors inline-flex items-center justify-center";
 
@@ -106,7 +106,7 @@ export function AdminPartners({ partners }: { partners: AdminPartnerRow[] }) {
         onSubmit={handleCreate}
         className="rounded-2xl border border-white/10 bg-neutral-900/50 p-5 flex flex-col gap-4"
       >
-        <span className="text-[10px] font-black uppercase tracking-widest text-neutral-500">
+        <span className="text-[12px] font-semibold text-neutral-500">
           Thêm đối tác
         </span>
 
@@ -156,13 +156,13 @@ export function AdminPartners({ partners }: { partners: AdminPartnerRow[] }) {
               // eslint-disable-next-line @next/next/no-img-element
               <img src={logoUrl} alt="" className="max-h-9 max-w-[96px] object-contain" />
             ) : (
-              <span className="text-[9px] font-bold uppercase tracking-widest text-neutral-700">
+              <span className="text-[12px] font-bold text-neutral-700">
                 Chưa có logo
               </span>
             )}
           </div>
           <label
-            className={`inline-flex h-9 cursor-pointer items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 text-[10px] font-black uppercase tracking-widest text-neutral-200 transition-colors hover:bg-white/10 ${
+            className={`inline-flex h-9 cursor-pointer items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 text-[12px] font-semibold text-neutral-200 transition-colors hover:bg-white/10 ${
               uploading ? "pointer-events-none opacity-60" : ""
             }`}
           >
@@ -200,7 +200,7 @@ export function AdminPartners({ partners }: { partners: AdminPartnerRow[] }) {
         <button
           type="submit"
           disabled={busy || !name.trim()}
-          className="self-start h-10 px-5 rounded-xl bg-[var(--brand)] hover:bg-[var(--brand-dark)] disabled:opacity-50 transition-colors text-[11px] font-black uppercase tracking-widest text-white"
+          className="self-start h-10 px-5 rounded-xl bg-[var(--brand)] hover:bg-[var(--brand-dark)] disabled:opacity-50 transition-colors text-[13px] font-semibold text-white"
         >
           {busy ? "Đang xử lý…" : "Thêm đối tác"}
         </button>
@@ -222,7 +222,7 @@ export function AdminPartners({ partners }: { partners: AdminPartnerRow[] }) {
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={p.logoUrl} alt="" className="max-h-7 max-w-[80px] object-contain" />
                 ) : (
-                  <span className="text-[9px] font-bold uppercase text-neutral-600">chữ</span>
+                  <span className="text-[12px] font-bold text-neutral-600">chữ</span>
                 )}
               </div>
 

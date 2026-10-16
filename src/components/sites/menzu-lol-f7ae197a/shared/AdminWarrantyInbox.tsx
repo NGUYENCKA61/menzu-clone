@@ -80,7 +80,7 @@ function BuyerMark({ name, src }: { name: string; src: string | null }) {
   return (
     <span
       aria-hidden
-      className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full border border-white/10 bg-black/40 text-[12px] font-black uppercase text-neutral-300"
+      className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full border border-white/10 bg-black/40 text-[14px] font-semibold text-neutral-300"
     >
       {src ? (
         <Image
@@ -103,7 +103,7 @@ function StatusChip({ status }: { status: WarrantyStatus }) {
   const state = WARRANTY_STATUS[status];
   return (
     <span
-      className={`inline-flex shrink-0 items-center gap-1 rounded-md border px-1.5 py-px text-[9.5px] font-black uppercase tracking-wider ${state.tile}`}
+      className={`inline-flex shrink-0 items-center gap-1 rounded-md border px-1.5 py-px text-[9.5px] font-semibold ${state.tile}`}
     >
       <span aria-hidden className={`h-1 w-1 rounded-full ${state.dot}`} />
       {state.label}
@@ -800,7 +800,7 @@ export function AdminWarrantyInbox({ initial }: { initial: InboxView | null }) {
                       open ones: read-only, for the context of a recent fix. */}
                   {tab === "open" && closedList.length > 0 ? (
                     <>
-                      <p className="border-b border-white/[0.05] bg-white/[0.02] px-4 py-1.5 text-[10px] font-bold uppercase tracking-widest text-neutral-500">
+                      <p className="border-b border-white/[0.05] bg-white/[0.02] px-4 py-1.5 text-[12px] font-bold text-neutral-500">
                         Đã xong trong {INBOX_RECENT_DAYS} ngày qua
                       </p>
                       <ul>
@@ -820,7 +820,7 @@ export function AdminWarrantyInbox({ initial }: { initial: InboxView | null }) {
                 <Link
                   href="/admin/warranty"
                   onClick={() => close(false)}
-                  className="flex shrink-0 items-center justify-center gap-1.5 border-t border-white/[0.07] bg-white/[0.02] px-3 py-2.5 text-[10.5px] font-bold uppercase tracking-widest text-neutral-500 transition-colors hover:text-white"
+                  className="flex shrink-0 items-center justify-center gap-1.5 border-t border-white/[0.07] bg-white/[0.02] px-3 py-2.5 text-[12px] font-bold text-neutral-500 transition-colors hover:text-white"
                 >
                   Xem tất cả yêu cầu
                   <ChevronRight size={12} aria-hidden />

@@ -133,7 +133,7 @@ export function AdminWarranty({
                 key={f.key}
                 type="button"
                 onClick={() => setFilter(f.key)}
-                className={`inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-[11px] font-black uppercase tracking-wider transition-colors ${
+                className={`inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-[13px] font-semibold transition-colors ${
                   on
                     ? "border-[var(--brand)]/50 bg-[var(--brand)]/15 text-white"
                     : "border-white/10 bg-white/[0.03] text-neutral-400 hover:border-white/25 hover:text-white"
@@ -212,7 +212,7 @@ function TicketRow({ row }: { row: WarrantyListRow }) {
       <div className="min-w-0 flex-1">
         <div className="flex min-w-0 flex-wrap items-center gap-2">
           <span
-            className={`inline-flex shrink-0 items-center gap-1.5 rounded-md border px-2 py-0.5 text-[10px] font-black uppercase tracking-wider ${state.tile}`}
+            className={`inline-flex shrink-0 items-center gap-1.5 rounded-md border px-2 py-0.5 text-[12px] font-semibold ${state.tile}`}
           >
             <span
               aria-hidden
@@ -221,7 +221,7 @@ function TicketRow({ row }: { row: WarrantyListRow }) {
             {state.label}
           </span>
           {row.awaitingShop ? (
-            <span className="inline-flex shrink-0 items-center gap-1 rounded-md border border-[var(--brand)]/50 bg-[var(--brand)]/15 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-white">
+            <span className="inline-flex shrink-0 items-center gap-1 rounded-md border border-[var(--brand)]/50 bg-[var(--brand)]/15 px-2 py-0.5 text-[12px] font-semibold text-white">
               <MessageCircle
                 className="h-3 w-3 text-[var(--brand)]"
                 aria-hidden
@@ -230,11 +230,11 @@ function TicketRow({ row }: { row: WarrantyListRow }) {
             </span>
           ) : null}
           {row.transferDue ? (
-            <span className="inline-flex shrink-0 rounded-md border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-amber-300">
+            <span className="inline-flex shrink-0 rounded-md border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-[12px] font-semibold text-amber-300">
               Chờ chuyển khoản
             </span>
           ) : row.bankAwaited ? (
-            <span className="inline-flex shrink-0 rounded-md border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-neutral-400">
+            <span className="inline-flex shrink-0 rounded-md border border-white/10 bg-white/5 px-2 py-0.5 text-[12px] font-semibold text-neutral-400">
               Chờ khách nhập STK
             </span>
           ) : null}
@@ -242,7 +242,7 @@ function TicketRow({ row }: { row: WarrantyListRow }) {
             {row.productName}
           </span>
           {row.packageLabel ? (
-            <span className="shrink-0 rounded-md border border-white/15 bg-white/10 px-1.5 py-px text-[9px] font-black uppercase tracking-widest text-neutral-300">
+            <span className="shrink-0 rounded-md border border-white/15 bg-white/10 px-1.5 py-px text-[12px] font-semibold text-neutral-300">
               {row.packageLabel}
             </span>
           ) : null}

@@ -38,7 +38,7 @@ const CHIP: Record<VerificationStatus, string> = {
 const PER_PAGE = 20;
 
 const LABEL =
-  "text-[10px] font-black uppercase tracking-widest text-neutral-500";
+  "text-[12px] font-semibold text-neutral-500";
 const FIELD =
   "w-full rounded-xl border border-white/10 bg-neutral-950/60 px-4 py-3 text-sm text-white outline-none transition-colors placeholder-neutral-500 focus:border-indigo-500/60";
 
@@ -165,7 +165,7 @@ export function AdminVerifications({
               role="tab"
               aria-selected={filter === key}
               onClick={() => setFilter(key)}
-              className={`h-9 rounded-xl border px-3 text-[11px] font-black uppercase tracking-widest transition-colors ${
+              className={`h-9 rounded-xl border px-3 text-[13px] font-semibold transition-colors ${
                 filter === key
                   ? "border-indigo-500/40 bg-indigo-500/10 text-white"
                   : "border-white/10 bg-white/[0.02] text-neutral-400 hover:text-white"
@@ -217,7 +217,7 @@ export function AdminVerifications({
                   {r.username}
                 </Link>
                 <span
-                  className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[10px] font-black uppercase tracking-widest ${CHIP[r.status]}`}
+                  className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[12px] font-semibold ${CHIP[r.status]}`}
                 >
                   {r.status === "APPROVED" ? (
                     <BadgeCheck size={12} aria-hidden />
@@ -314,14 +314,14 @@ export function AdminVerifications({
                     <button
                       type="button"
                       onClick={() => open(r, "approve")}
-                      className="h-10 rounded-xl bg-emerald-500 px-4 text-[11px] font-black uppercase tracking-widest text-white transition-colors hover:bg-emerald-400"
+                      className="h-10 rounded-xl bg-emerald-500 px-4 text-[13px] font-semibold text-white transition-colors hover:bg-emerald-400"
                     >
                       Duyệt
                     </button>
                     <button
                       type="button"
                       onClick={() => open(r, "reject")}
-                      className="h-10 rounded-xl border border-white/10 bg-white/[0.04] px-4 text-[11px] font-black uppercase tracking-widest text-neutral-300 transition-colors hover:border-red-500/40 hover:text-red-400"
+                      className="h-10 rounded-xl border border-white/10 bg-white/[0.04] px-4 text-[13px] font-semibold text-neutral-300 transition-colors hover:border-red-500/40 hover:text-red-400"
                     >
                       Từ chối
                     </button>
@@ -330,7 +330,7 @@ export function AdminVerifications({
                   <button
                     type="button"
                     onClick={() => open(r, "revoke")}
-                    className="h-10 rounded-xl border border-white/10 bg-white/[0.04] px-4 text-[11px] font-black uppercase tracking-widest text-neutral-300 transition-colors hover:border-red-500/40 hover:text-red-400"
+                    className="h-10 rounded-xl border border-white/10 bg-white/[0.04] px-4 text-[13px] font-semibold text-neutral-300 transition-colors hover:border-red-500/40 hover:text-red-400"
                   >
                     Thu hồi cấp 2
                   </button>

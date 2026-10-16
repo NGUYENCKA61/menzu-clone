@@ -70,13 +70,13 @@ export interface AccountDetailView {
 
 const CARD = "rounded-xl border border-white/[0.08] bg-[#0e0e11] p-5 flex flex-col gap-4";
 const CARD_HEAD =
-  "flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-neutral-500";
+  "flex items-center gap-2 text-[12px] font-semibold text-neutral-500";
 const FIELD =
   "w-full rounded-lg border border-white/10 bg-neutral-950/60 px-3 py-2 text-xs text-white outline-none focus:border-[var(--brand)]/60 transition-colors placeholder-neutral-600";
 const LABEL =
-  "block text-[10px] font-black uppercase tracking-widest text-neutral-500 mb-1.5";
+  "block text-[12px] font-semibold text-neutral-500 mb-1.5";
 const ACTION =
-  "h-[34px] px-4 rounded-lg bg-[var(--brand)] hover:bg-[var(--brand-dark)] disabled:opacity-60 text-[10px] font-black uppercase tracking-widest text-white transition-colors inline-flex items-center gap-1.5";
+  "h-[34px] px-4 rounded-lg bg-[var(--brand)] hover:bg-[var(--brand-dark)] disabled:opacity-60 text-[12px] font-semibold text-white transition-colors inline-flex items-center gap-1.5";
 
 const STATUS_META: Record<string, { label: string; tint: string }> = {
   AVAILABLE: {
@@ -440,12 +440,12 @@ export function AdminAccountDetail({ account }: { account: AccountDetailView }) 
           <div className="flex flex-wrap items-center gap-2.5">
             <span className="font-mono text-base font-black text-white">#{account.code}</span>
             <span
-              className={`rounded-md border px-2 py-1 text-[10px] font-black uppercase tracking-wider ${statusMeta.tint}`}
+              className={`rounded-md border px-2 py-1 text-[12px] font-semibold ${statusMeta.tint}`}
             >
               {statusMeta.label}
             </span>
             {account.tag ? (
-              <span className="rounded border border-indigo-500/25 bg-indigo-500/10 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider text-indigo-400">
+              <span className="rounded border border-indigo-500/25 bg-indigo-500/10 px-1.5 py-0.5 text-[12px] font-semibold text-indigo-400">
                 {account.tag}
               </span>
             ) : null}
@@ -468,7 +468,7 @@ export function AdminAccountDetail({ account }: { account: AccountDetailView }) 
           href={account.publicHref}
           target="_blank"
           rel="noreferrer"
-          className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-white/[0.08] bg-white/[0.03] px-3.5 text-[10px] font-black uppercase tracking-widest text-neutral-300 transition-colors hover:bg-white/[0.08] hover:text-white"
+          className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-white/[0.08] bg-white/[0.03] px-3.5 text-[12px] font-semibold text-neutral-300 transition-colors hover:bg-white/[0.08] hover:text-white"
         >
           <ExternalLink size={13} />
           Xem trang khách
@@ -933,7 +933,7 @@ export function AdminAccountDetail({ account }: { account: AccountDetailView }) 
                     const data = await api("PATCH", { code: account.code, imageUrl: "" });
                     if (data) setMsg({ tone: "ok", text: "Đã về ảnh mặc định theo mã" });
                   }}
-                  className="h-[34px] px-4 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 disabled:opacity-40 text-[10px] font-black uppercase tracking-widest text-neutral-300 transition-colors inline-flex items-center gap-1.5"
+                  className="h-[34px] px-4 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 disabled:opacity-40 text-[12px] font-semibold text-neutral-300 transition-colors inline-flex items-center gap-1.5"
                 >
                   <RotateCcw size={12} />
                   Về ảnh mặc định
@@ -993,7 +993,7 @@ export function AdminAccountDetail({ account }: { account: AccountDetailView }) 
               type="button"
               disabled={busy}
               onClick={() => galleryRef.current?.click()}
-              className="self-start h-[34px] px-4 rounded-lg border border-dashed border-white/15 bg-white/[0.02] hover:border-emerald-500/40 hover:bg-emerald-500/10 hover:text-emerald-400 disabled:opacity-40 text-[10px] font-black uppercase tracking-widest text-neutral-400 transition-colors inline-flex items-center gap-1.5"
+              className="self-start h-[34px] px-4 rounded-lg border border-dashed border-white/15 bg-white/[0.02] hover:border-emerald-500/40 hover:bg-emerald-500/10 hover:text-emerald-400 disabled:opacity-40 text-[12px] font-semibold text-neutral-400 transition-colors inline-flex items-center gap-1.5"
             >
               <ImagePlus size={12} />
               Thêm ảnh phụ

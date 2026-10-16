@@ -243,7 +243,7 @@ export default async function AdminOrdersPage({
                   <span className="block text-[11px] text-neutral-500 tabular-nums">{dayStamp(o.createdAt)}</span>
                 </div>
                 <span
-                  className={`inline-flex shrink-0 px-2 py-1 rounded-lg border text-[10px] font-black uppercase tracking-wider whitespace-nowrap ${
+                  className={`inline-flex shrink-0 px-2 py-1 rounded-lg border text-[12px] font-semibold whitespace-nowrap ${
                     STATUS_CLASS[o.status] ?? "text-neutral-400 bg-white/5 border-white/10"
                   }`}
                 >
@@ -258,7 +258,7 @@ export default async function AdminOrdersPage({
                   {o.user.avatarUrl ? (
                     <Image src={o.user.avatarUrl} alt="" width={32} height={32} className="h-full w-full object-cover" />
                   ) : (
-                    <span aria-hidden className="text-[11px] font-black uppercase text-neutral-500">
+                    <span aria-hidden className="text-[13px] font-semibold text-neutral-500">
                       {o.user.username.slice(0, 1)}
                     </span>
                   )}
@@ -322,7 +322,7 @@ export default async function AdminOrdersPage({
               ].map((h, index) => (
                 <th
                   key={h || `actions-${index}`}
-                  className={`px-5 py-3.5 text-[10px] font-black uppercase tracking-widest text-neutral-500 whitespace-nowrap ${
+                  className={`px-5 py-3.5 text-[12px] font-semibold text-neutral-500 whitespace-nowrap ${
                     index === 7 ? STICKY_ACTIONS : ""
                   }`}
                 >
@@ -374,7 +374,7 @@ export default async function AdminOrdersPage({
                         ) : (
                           <span
                             aria-hidden
-                            className="text-[11px] font-black uppercase text-neutral-500"
+                            className="text-[13px] font-semibold text-neutral-500"
                           >
                             {o.user.username.slice(0, 1)}
                           </span>
@@ -444,7 +444,7 @@ export default async function AdminOrdersPage({
                   </td>
                   <td className="px-5 py-3">
                     <span
-                      className={`inline-flex px-2 py-1 rounded-lg border text-[10px] font-black uppercase tracking-wider whitespace-nowrap ${
+                      className={`inline-flex px-2 py-1 rounded-lg border text-[12px] font-semibold whitespace-nowrap ${
                         STATUS_CLASS[o.status] ??
                         "text-neutral-400 bg-white/5 border-white/10"
                       }`}
@@ -538,7 +538,7 @@ function StatCard({
   return (
     <div className="rounded-xl border border-white/[0.08] bg-[#0e0e11] p-5 flex flex-col gap-3">
       <div className="flex items-center justify-between gap-3">
-        <span className="text-[10px] font-black uppercase tracking-widest text-neutral-500">
+        <span className="text-[12px] font-semibold text-neutral-500">
           {label}
         </span>
         <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border ${tint}`}>
