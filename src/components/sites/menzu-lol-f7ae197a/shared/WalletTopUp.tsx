@@ -477,10 +477,10 @@ export function WalletTopUp({
                         }
                         inputMode="numeric"
                         autoComplete="off"
-                        placeholder="Nhập số tiền..."
+                        placeholder="0"
                         // 36px at most, the size of a price on our product
                         // page, the biggest money figure the site shows.
-                        className="w-full bg-transparent border-b-2 border-white/10 hover:border-white/30 focus:border-white pb-3 pr-14 sm:pr-16 text-3xl sm:text-4xl font-black text-white focus:outline-none transition-colors tracking-tight placeholder:text-2xl placeholder:font-semibold placeholder:tracking-normal placeholder:text-neutral-600 sm:placeholder:text-3xl"
+                        className="w-full bg-transparent border-b-2 border-white/10 hover:border-white/30 focus:border-white pb-3 pr-14 sm:pr-16 text-3xl sm:text-4xl font-black text-white focus:outline-none transition-colors tracking-tight placeholder:text-neutral-800"
                       />
                       <div
                         className={`absolute right-0 bottom-4 font-bold text-base sm:text-lg transition-colors ${
