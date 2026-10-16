@@ -351,7 +351,9 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
           </div>
         </section>
 
-        {/* THE ACCOUNT IN NUMBERS — the same four cells as the strip across the
+        {/* THE ACCOUNT IN NUMBERS (dimmed 16/10/2026 on "hạ độ sáng thử": a plate a
+            shade under the panel, figures neutral-200 (300 was a shade too dim: "sáng hơn 1 xíu thử"), labels and icons
+            neutral-500, units neutral-600) — the same four cells as the strip across the
             foot of the card, now one framed row of their own under it (the owner,
             16/10/2026, with a capture of the strip after a mocked-up page of
             separate cards: "cỡ này thử", then "gắn dính lại thử" on the four
@@ -359,41 +361,41 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
             the order count giving width to the commission
             cell: in equal quarters "Rút tiền" dropped under any commission from
             10.000đ. */}
-        <div className="grid grid-cols-2 overflow-hidden rounded-2xl border border-white/10 bg-[#111111] sm:mt-2 xl:grid-cols-[1fr_1fr_0.7fr_1.3fr] xl:divide-x xl:divide-white/[0.06]">
+        <div className="grid grid-cols-2 overflow-hidden rounded-2xl border border-white/10 bg-[#0d0d0d] sm:mt-2 xl:grid-cols-[1fr_1fr_0.7fr_1.3fr] xl:divide-x xl:divide-white/[0.06]">
           {[
-            { icon: Wallet, label: "Số dư khả dụng", value: formatVnd(user.balance), unit: "đ", tone: "text-white" },
-            { icon: Receipt, label: "Tổng chi tiêu", value: formatVnd(spent), unit: "đ", tone: "text-white" },
-            { icon: ShoppingBag, label: "Đơn hàng", value: String(paidOrders), unit: "", tone: "text-white" },
+            { icon: Wallet, label: "Số dư khả dụng", value: formatVnd(user.balance), unit: "đ", tone: "text-neutral-200" },
+            { icon: Receipt, label: "Tổng chi tiêu", value: formatVnd(spent), unit: "đ", tone: "text-neutral-200" },
+            { icon: ShoppingBag, label: "Đơn hàng", value: String(paidOrders), unit: "", tone: "text-neutral-200" },
           ].map(({ icon: Icon, label, value, unit, tone }) => (
             // Label over figure the way /vong-quay builds its stat tiles:
             // a bare 13px icon (no 28px box), the unit at text-sm, and
             // the figure a step smaller on phones, where 24px ran past
             // a 2x2 cell.
             <div key={label} className="flex flex-col gap-2 px-5 py-4 sm:gap-3">
-              <span className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-neutral-400">
-                <Icon size={13} className="shrink-0 text-neutral-300" />
+              <span className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-neutral-500">
+                <Icon size={13} className="shrink-0 text-neutral-500" />
                 {label}
               </span>
               <span className="flex min-h-9 items-center">
                 <span className={`text-xl font-black tabular-nums leading-none sm:text-2xl ${tone}`}>
                   {value}
                   {unit ? (
-                    <span className="ml-1 text-sm font-bold text-neutral-500">{unit}</span>
+                    <span className="ml-1 text-sm font-bold text-neutral-600">{unit}</span>
                   ) : null}
                 </span>
               </span>
             </div>
           ))}
           <div className="flex flex-col gap-2 px-5 py-4 sm:gap-3">
-            <span className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-neutral-400">
-              <HandCoins size={13} className="shrink-0 text-neutral-300" />
+            <span className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-neutral-500">
+              <HandCoins size={13} className="shrink-0 text-neutral-500" />
               Hoa hồng khả dụng
             </span>
             <div className="flex flex-wrap items-center justify-between gap-2">
               <span className="flex min-h-9 items-center">
-                <span className="text-xl font-black tabular-nums leading-none text-white sm:text-2xl">
+                <span className="text-xl font-black tabular-nums leading-none text-neutral-200 sm:text-2xl">
                   {formatVnd(user.commissionBalance)}
-                  <span className="ml-1 text-sm font-bold text-neutral-500">đ</span>
+                  <span className="ml-1 text-sm font-bold text-neutral-600">đ</span>
                 </span>
               </span>
               <WithdrawCommission amount={user.commissionBalance} />
