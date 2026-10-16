@@ -12,26 +12,32 @@ import {
   PANEL_CLASS,
   SEARCH_SHELL_CLASS,
 } from "./filterChrome";
-import { PILL_TAB_OFF, PILL_TAB_ON, PILL_TAB_SM } from "./pillTab";
+import { PILL_TAB_OFF, PILL_TAB_ON } from "./pillTab";
 import { ScopeSearchField } from "./ScopeSearchField";
 
 /*
- * The chips light as the /thong-bao tabs and the home filter do: the small
- * tab pill, solid red when picked, grey when not (the owner, 13/10/2026, UI
- * consistency review), where they used to wear a pale pink tint. The
- * either-or groups keep their well, now in the idle pill's grey, its
- * segments the same small pill without a fill of their own; 3px of padding
- * fits a 32px segment exactly inside the 40px well. The pill rows carry 4px
- * above and below so they stand as tall as a well, and each group's caption
- * still lines up with its neighbours' on the lg row.
+ * The chips light as the /thong-bao tabs and the home filter do: solid red
+ * when picked, grey when not (the owner, 13/10/2026, UI consistency review),
+ * where they used to wear a pale pink tint. Their face is this panel's own
+ * since 16/10/2026 (the owner, with a picture: "sửa thanh lọc lại như này
+ * đi giữ nguyên kích thước chỉ đổi giao diện"): the same 32px height and
+ * padding as the shared small tab pill, but a full round and the word in
+ * sentence case at 12px bold instead of spaced capitals. The either-or
+ * groups keep their well, now round too, its segments the same chip without
+ * a fill of their own; 3px of padding fits a 32px segment exactly inside the
+ * 40px well. The pill rows carry 4px above and below so they stand as tall
+ * as a well, and each group's caption still lines up with its neighbours'
+ * on the lg row.
  */
-const PILL = `press ${PILL_TAB_SM} ${PILL_TAB_OFF}`;
-const PILL_ACTIVE = `press ${PILL_TAB_SM} ${PILL_TAB_ON}`;
+const CHIP_SM =
+  "inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full border px-3 text-[12px] font-bold transition-colors";
+const PILL = `press ${CHIP_SM} ${PILL_TAB_OFF}`;
+const PILL_ACTIVE = `press ${CHIP_SM} ${PILL_TAB_ON}`;
 const PILL_ROW = "flex flex-wrap gap-2 py-1";
 const SEGMENTS =
-  "inline-flex h-10 items-center gap-1 rounded-xl border border-white/10 bg-white/5 p-[3px]";
-const SEGMENT = `press ${PILL_TAB_SM} border-transparent text-neutral-300 hover:bg-white/10 hover:text-white`;
-const SEGMENT_ACTIVE = `press ${PILL_TAB_SM} ${PILL_TAB_ON}`;
+  "inline-flex h-10 items-center gap-1 rounded-full border border-white/10 bg-white/5 p-[3px]";
+const SEGMENT = `press ${CHIP_SM} border-transparent text-neutral-300 hover:bg-white/10 hover:text-white`;
+const SEGMENT_ACTIVE = `press ${CHIP_SM} ${PILL_TAB_ON}`;
 
 // The states a buyer shops by. "Rủi ro", "Đang cập nhật" and "Đã phát hiện"
 // came off the chips (the owner, 07/10/2026: "bỏ 3 cái rủi ro đang cập nhật
