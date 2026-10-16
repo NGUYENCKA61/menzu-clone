@@ -1768,6 +1768,13 @@ html[data-admin-filtering] .admin-list {
   corner-top-right-shape: bevel;
 }
 
+/* LAB: the notch at badge size (the rank on the account overview). */
+.lab-notch-xs {
+  border-radius: 5px;
+  border-top-right-radius: 10px;
+  corner-top-right-shape: bevel;
+}
+
 /* LAB: the notch on a cover flush with a card's top edge. */
 .lab-notch-top {
   border-radius: 9px 17px 0 0;

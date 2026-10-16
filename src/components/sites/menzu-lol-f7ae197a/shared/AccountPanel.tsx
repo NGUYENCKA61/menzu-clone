@@ -24,14 +24,14 @@ interface AccountPanelProps {
  */
 export function AccountPanel({ icon: Icon, title, subtitle, action, children }: AccountPanelProps) {
   return (
-    <div className="w-full bg-transparent sm:bg-panel border-0 sm:border sm:border-white/5 rounded-none sm:rounded-[24px] p-0 sm:p-8 lg:p-10 relative min-h-0 sm:min-h-[750px]">
+    <div className="w-full bg-transparent sm:bg-panel border-0 sm:border sm:border-line rounded-none sm:rounded-[20px] p-0 sm:p-8 lg:p-10 relative min-h-0 sm:min-h-[750px]">
       <div className="mb-6 sm:mb-8 relative z-10 flex flex-wrap items-start justify-between gap-4">
         <div className="min-w-0">
-          <h1 className="text-xl sm:text-2xl font-black text-white uppercase tracking-wider mb-2 flex items-center gap-3">
+          <h1 className="mb-2 flex items-center gap-3 font-display text-[24px] font-bold leading-tight text-frost sm:text-[30px]">
             <Icon size={24} className="shrink-0 text-[var(--menzu-accent)]" aria-hidden />
             {title}
           </h1>
-          <p className="text-xs sm:text-sm text-neutral-400 leading-relaxed">{subtitle}</p>
+          <p className="text-[14px] leading-relaxed text-mist sm:text-[15px]">{subtitle}</p>
         </div>
         {action ? <div className="shrink-0">{action}</div> : null}
       </div>

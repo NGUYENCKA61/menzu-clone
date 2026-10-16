@@ -87,7 +87,7 @@ function SkewPlate({
     // px-2 py-1: the same plate the header menu draws for the same role
     // (UserMenu.tsx), which calls them one badge.
     <span className={`inline-flex -skew-x-12 rounded-[4px] px-2 py-1 ${className}`}>
-      <span className="skew-x-12 text-[10px] font-black uppercase tracking-widest leading-none">
+      <span className="skew-x-12 text-[12px] font-semibold leading-none">
         {children}
       </span>
     </span>
@@ -203,7 +203,7 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                   {/* A card title under the page's h1, so one step below it:
                       18/20px under the 20/24px title, as /wallet's card
                       titles are (16/10/2026: "sửa lại cho đồng bộ kích thước"). */}
-                  <span className="truncate text-lg font-black uppercase tracking-wide leading-none text-white sm:text-xl">
+                  <span className="truncate font-display text-[22px] font-bold leading-none text-frost sm:text-[26px]">
                     {user.username}
                   </span>
                   <BadgeCheck size={18} className="shrink-0 fill-emerald-500 text-white" />
@@ -219,7 +219,7 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                     {isAdmin ? "Admin" : user.role === "AGENCY" ? "Đại lý" : "Member"}
                   </SkewPlate>
                 </div>
-                <span className="text-[12px] font-semibold text-neutral-300">
+                <span className="text-[13px] font-medium text-mist">
                   UID {user.uid}
                   <span className="mx-2 text-neutral-600">·</span>
                   Tham gia từ{" "}
@@ -241,10 +241,11 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
             <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_200px]">
               <div className="flex flex-col gap-2 rounded-xl border border-white/10 bg-white/[0.03] p-5">
                 <div className="flex flex-wrap items-center justify-between gap-3">
-                  <span className="text-[10px] font-black uppercase tracking-widest text-neutral-400">
+                  <span className="text-[13px] font-medium text-mist">
                     Cấp bậc
                   </span>
-                  <span className={`text-sm font-bold ${tier.text}`}>
+                  {/* LAB (Launcher): the rank as a notched badge in its own metal. */}
+                  <span className={`lab-notch-xs border px-2.5 py-1 font-display text-[15px] font-bold leading-none ${tier.tile}`}>
                     {TIER_RULES[memberTier].label}
                   </span>
                 </div>
@@ -256,7 +257,7 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                       style={{ width: `${progress.percent}%` }}
                     />
                   </div>
-                  <p className="mt-2 text-[12px] text-neutral-400">
+                  <p className="mt-2 text-[13px] text-mist">
                     {nextRule && progress.next ? (
                       <>
                         Tích lũy thêm để nhận những đặc quyền{" "}
@@ -304,11 +305,11 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                       {/* 10px like every other label on the card, and allowed
                           to wrap from sm; mt-auto keeps the three values level
                           when only some labels take two lines. */}
-                      <span className="text-[10px] font-black uppercase leading-tight tracking-widest text-neutral-500">
+                      <span className="text-[12px] leading-tight text-dim">
                         {label}
                       </span>
                       <span
-                        className={`mt-auto flex min-w-0 items-center gap-1 text-[13px] font-bold leading-none ${tone}`}
+                        className={`mt-auto flex min-w-0 items-center gap-1 text-[15px] font-semibold leading-none ${tone}`}
                       >
                         {index === 0 ? (
                           <Check size={13} strokeWidth={3} className={`shrink-0 ${tier.text}`} />
@@ -336,7 +337,7 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                     href={href}
                     // Flat, as every other red button in the account area is
                     // (the agency desk's own Nạp tiền, /security's submit).
-                    className={`inline-flex h-11 items-center justify-center gap-2 rounded-xl border px-3 text-[12px] font-bold transition-colors ${
+                    className={`inline-flex h-11 items-center justify-center gap-2 rounded-[10px] border px-3 text-[14px] font-semibold transition-colors ${
                       primary
                         ? `${DOORS.length > 2 ? "col-span-2 sm:col-span-1 " : ""}border-[var(--menzu-accent)] bg-[var(--menzu-accent)] text-white hover:bg-[var(--menzu-accent-dark)]`
                         : "border-white/10 bg-white/[0.04] text-white hover:border-white/25 hover:bg-white/[0.08]"
@@ -370,12 +371,12 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
             // the figure a step smaller on phones, where 24px ran past
             // a 2x2 cell.
             <div key={label} className="flex flex-col gap-2 px-5 py-4 sm:gap-3">
-              <span className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-neutral-400">
+              <span className="inline-flex items-center gap-2 text-[13px] font-medium text-mist">
                 <Icon size={13} className="shrink-0 text-neutral-300" />
                 {label}
               </span>
               <span className="flex min-h-9 items-center">
-                <span className={`text-xl font-black tabular-nums leading-none sm:text-2xl ${tone}`}>
+                <span className={`lab-figure text-[22px] font-bold leading-none sm:text-[26px] ${tone}`}>
                   {value}
                   {unit ? (
                     <span className="ml-1 text-sm font-bold text-neutral-500">{unit}</span>
@@ -385,13 +386,13 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
             </div>
           ))}
           <div className="flex flex-col gap-2 px-5 py-4 sm:gap-3">
-            <span className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-neutral-400">
+            <span className="inline-flex items-center gap-2 text-[13px] font-medium text-mist">
               <HandCoins size={13} className="shrink-0 text-neutral-300" />
               Hoa hồng khả dụng
             </span>
             <div className="flex flex-wrap items-center justify-between gap-2">
               <span className="flex min-h-9 items-center">
-                <span className="text-xl font-black tabular-nums leading-none text-white sm:text-2xl">
+                <span className="lab-figure text-[22px] font-bold leading-none text-frost sm:text-[26px]">
                   {formatVnd(user.commissionBalance)}
                   <span className="ml-1 text-sm font-bold text-neutral-500">đ</span>
                 </span>

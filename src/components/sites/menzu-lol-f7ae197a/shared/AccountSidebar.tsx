@@ -99,7 +99,7 @@ export function AccountSidebar({
               ) : (
                 <span
                   aria-hidden
-                  className="text-sm font-black uppercase text-neutral-400"
+                  className="font-display text-sm font-bold text-mist"
                 >
                   {user.username.slice(0, 1)}
                 </span>
@@ -115,7 +115,7 @@ export function AccountSidebar({
                   overview (the owner, 07/10/2026: "admin cho chữ đỏ đi");
                   everyone else in neutral-400. */}
               <span
-                className={`text-[10px] font-black uppercase tracking-widest leading-none ${
+                className={`text-[12px] font-semibold leading-none ${
                   user.role === "ADMIN" ? "text-[var(--menzu-accent)]" : "text-neutral-400"
                 }`}
               >
@@ -137,7 +137,7 @@ export function AccountSidebar({
               className="flex items-center gap-3 py-2.5 px-3 rounded-[12px] text-amber-400 hover:text-white hover:bg-amber-500/10 transition-colors"
             >
               <KeyRound size={16} className="shrink-0" />
-              <span className="text-sm font-bold uppercase tracking-wider">Bàn đại lý</span>
+              <span className="text-sm font-semibold">Bàn đại lý</span>
             </Link>
           </div>
         ) : null}
