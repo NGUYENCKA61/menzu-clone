@@ -317,11 +317,11 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
 
               {/* Phone: Nạp tiền across, the other two side by side under
                   it (three stacked bars pushed the balance off the first
-                  screen). sm–lg: one row of three. xl: the column (a one-column grid; the
-                  flex-col variant never took, the doors sat in a row). With only
+                  screen). sm–lg: one row of three. xl: the column (a one-column grid; the class
+                  must not touch the ${ that follows, or Tailwind never sees it). With only
                   two doors (the wheel's off), the two share one row below xl. */}
               <div
-                className={`grid grid-cols-2 gap-2.5 xl:grid-cols-1${
+                className={`grid grid-cols-2 gap-2.5 xl:grid-cols-1 xl:content-start ${
                   DOORS.length > 2 ? " sm:grid-cols-3" : ""
                 }`}
               >
