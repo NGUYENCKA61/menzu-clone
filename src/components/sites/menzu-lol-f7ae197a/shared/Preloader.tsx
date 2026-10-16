@@ -85,7 +85,7 @@ export function Preloader({ brand }: { brand: { name: string } }) {
         <style>{`#menzu-preloader{display:none}`}</style>
       </noscript>
 
-      <span className="text-4xl sm:text-5xl font-black uppercase leading-none tracking-tight">
+      <span className="text-4xl sm:text-5xl font-black leading-none tracking-tight">
         <span className="text-white">{word}</span>
         {tail ? <span className="text-[var(--menzu-accent)]">{tail}</span> : null}
       </span>
@@ -97,7 +97,7 @@ export function Preloader({ brand }: { brand: { name: string } }) {
         className="h-11 w-11 animate-spin rounded-full border-[3px] border-white/10 border-t-[var(--menzu-accent)] motion-reduce:animate-none"
       />
 
-      <span className="text-[11px] font-black uppercase tracking-[0.3em] text-neutral-400">
+      <span className="text-[13px] font-semibold text-neutral-400">
         ĐANG TẢI...
       </span>
     </div>

@@ -128,7 +128,7 @@ export function ConnectRail({ links }: { links: ConnectLinks }) {
           <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400/70 motion-reduce:animate-none" />
           <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.9)]" />
         </span>
-        <span className="text-[10px] font-black uppercase tracking-[0.18em] text-white">
+        <span className="text-[12px] font-semibold text-white">
           Kết nối
         </span>
       </div>
@@ -154,7 +154,7 @@ export function ConnectRail({ links }: { links: ConnectLinks }) {
               <Glyph className="h-[17px] w-[17px]" />
             </span>
             <span className="flex min-w-0 flex-col items-start justify-center text-left">
-              <span className="whitespace-nowrap text-[10px] font-black uppercase tracking-wider text-neutral-200 transition-colors group-hover:text-white">
+              <span className="whitespace-nowrap text-[12px] font-semibold text-neutral-200 transition-colors group-hover:text-white">
                 {title}
               </span>
               <span className="whitespace-nowrap text-[9px] text-neutral-500 transition-colors group-hover:text-neutral-400">

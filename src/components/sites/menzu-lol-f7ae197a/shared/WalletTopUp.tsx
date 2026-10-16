@@ -49,7 +49,7 @@ export interface TopUpHistoryRow {
  * denomination and the card button, and the white bank button — changing
  * them is the owner's call, still open.
  */
-const STEP = "text-xs text-neutral-400 font-bold uppercase tracking-wider";
+const STEP = "text-[14px] text-neutral-400 font-bold ";
 
 /** A fee as menzu prints it on the corner of a tile: "- 20.5 %". */
 function feeBadge(rate: number): string {
@@ -81,7 +81,7 @@ function CardNumberField({
   const short = value.length > 0 && value.length < CARD_DIGITS_MIN;
   return (
     <div>
-      <label htmlFor={id} className="text-[11px] text-neutral-500 font-bold uppercase mb-1.5 block ml-1">
+      <label htmlFor={id} className="text-[13px] text-neutral-500 font-bold mb-1.5 block ml-1">
         {label}
       </label>
       <div className="relative">
@@ -367,7 +367,7 @@ export function WalletTopUp({
                   >
                     <tab.icon size={16} className={tone} aria-hidden />
                     <span
-                      className={`text-xs font-black uppercase tracking-widest transition-colors duration-300 ${tone}`}
+                      className={`text-[14px] font-semibold transition-colors duration-300 ${tone}`}
                     >
                       {tab.label}
                     </span>
@@ -455,7 +455,7 @@ export function WalletTopUp({
                       "ghi dưới số tiền nạp"); no icon tile, the page title
                       carries the Wallet mark. */}
                   <div className="mb-5">
-                    <h3 className="text-sm font-black uppercase tracking-wider text-white">Số tiền nạp</h3>
+                    <h3 className="text-[15px] font-semibold text-white">Số tiền nạp</h3>
                     <p className="mt-1 text-xs text-neutral-500">
                       Nạp từ {formatVnd(minAmount)}đ trở lên. Miễn phí giao dịch.
                     </p>

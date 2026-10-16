@@ -83,7 +83,7 @@ const PANEL =
 const FIELD =
   "bg-white/[0.02] border border-white/5 rounded-2xl hover:bg-white/[0.04] transition-colors";
 const LABEL =
-  "text-neutral-500 text-[10px] sm:text-xs font-bold uppercase tracking-wider flex items-center gap-2 mb-1.5";
+  "text-neutral-500 text-[12px] sm:text-[14px] font-bold flex items-center gap-2 mb-1.5";
 const COPY =
   "flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-white transition-all active:scale-95 w-full sm:w-auto";
 const ROW =
@@ -177,7 +177,7 @@ function CopyButton({
       }`}
     >
       {done ? <Check size={16} strokeWidth={3} aria-hidden /> : <Copy size={16} aria-hidden />}
-      <span className="text-xs sm:text-sm font-bold uppercase tracking-wider">
+      <span className="text-[14px] sm:text-[15px] font-bold ">
         {done ? "Đã copy" : "Copy"}
       </span>
     </button>
@@ -338,7 +338,7 @@ export function TopUpInvoice({
           sits on a bank invoice. */}
       <div className="bg-gradient-to-r from-emerald-500/10 to-transparent border border-emerald-500/20 rounded-2xl p-5 sm:p-6 mb-8 sm:mb-10 relative overflow-hidden">
         <div aria-hidden className="absolute top-0 left-0 w-1 h-full bg-emerald-500" />
-        <span className="text-emerald-500/80 text-[10px] sm:text-xs font-bold uppercase tracking-wider flex items-center gap-2 mb-2">
+        <span className="text-emerald-500/80 text-[12px] sm:text-[14px] font-bold flex items-center gap-2 mb-2">
           <Wallet size={14} aria-hidden />
           Thực nhận về ví
         </span>
@@ -356,7 +356,7 @@ export function TopUpInvoice({
     <>
       {banks.length > 1 ? (
         <div className="mb-4 flex flex-wrap items-center gap-2">
-          <span className="text-neutral-500 text-[10px] sm:text-xs font-bold uppercase tracking-wider">
+          <span className="text-neutral-500 text-[12px] sm:text-[14px] font-bold ">
             Chuyển vào
           </span>
           {banks.map((option, index) => (
@@ -413,7 +413,7 @@ export function TopUpInvoice({
       <div className="bg-gradient-to-r from-[var(--menzu-accent)]/10 to-transparent border border-[var(--menzu-accent)]/20 rounded-2xl p-5 sm:p-6 mb-8 sm:mb-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative overflow-hidden">
         <div aria-hidden className="absolute top-0 left-0 w-1 h-full bg-[var(--menzu-accent)]" />
         <div className="min-w-0">
-          <span className="text-[var(--menzu-accent)]/80 text-[10px] sm:text-xs font-bold uppercase tracking-wider flex items-center gap-2 mb-2">
+          <span className="text-[var(--menzu-accent)]/80 text-[12px] sm:text-[14px] font-bold flex items-center gap-2 mb-2">
             <FileText size={14} aria-hidden />
             Nội dung nạp (bắt buộc)
           </span>
@@ -492,7 +492,7 @@ export function TopUpInvoice({
                     setQr("loading");
                     setQrTry((n) => n + 1);
                   }}
-                  className="rounded-lg bg-neutral-900 px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-white hover:bg-neutral-800"
+                  className="rounded-lg bg-neutral-900 px-3 py-1.5 text-[13px] font-bold text-white hover:bg-neutral-800"
                 >
                   Thử lại
                 </button>

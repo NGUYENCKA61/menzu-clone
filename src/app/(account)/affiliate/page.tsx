@@ -134,7 +134,7 @@ export default async function AffiliatePage() {
         <div className="flex flex-col gap-4">
           <section className="flex flex-col gap-4 rounded-2xl border border-white/5 bg-white/[0.02] p-5 sm:p-6">
             <div className="flex flex-wrap items-center justify-between gap-3">
-              <h3 className="text-sm font-black uppercase tracking-wider text-white">
+              <h3 className="text-[15px] font-semibold text-white">
                 Liên kết giới thiệu của bạn
               </h3>
               <span className="text-xs text-neutral-500">
@@ -156,7 +156,7 @@ export default async function AffiliatePage() {
                   <Icon size={18} />
                 </div>
                 <div className="flex min-w-0 flex-col gap-1.5">
-                  <span className="text-[10px] font-black uppercase tracking-widest text-neutral-300">
+                  <span className="text-[12px] font-semibold text-neutral-300">
                     {label}
                   </span>
                   <span className={`text-2xl font-black leading-none ${tone}`}>
@@ -170,7 +170,7 @@ export default async function AffiliatePage() {
 
           <section className="flex flex-col gap-4 rounded-2xl border border-white/5 bg-white/[0.02] p-5 sm:p-6">
             <div className="flex flex-wrap items-center justify-between gap-3">
-              <h3 className="text-sm font-black uppercase tracking-wider text-white">
+              <h3 className="text-[15px] font-semibold text-white">
                 Cách hoạt động
               </h3>
               <span className="text-xs text-neutral-500">
@@ -197,7 +197,7 @@ export default async function AffiliatePage() {
 
           <section className="flex flex-col gap-4 rounded-2xl border border-white/5 bg-white/[0.02] p-5 sm:p-6">
             <div className="flex flex-wrap items-center justify-between gap-3">
-              <h3 className="text-sm font-black uppercase tracking-wider text-white">
+              <h3 className="text-[15px] font-semibold text-white">
                 Hoa hồng gần đây
               </h3>
               <span className="text-xs text-neutral-500">
@@ -217,7 +217,7 @@ export default async function AffiliatePage() {
                         <th
                           key={column}
                           scope="col"
-                          className="px-5 py-3.5 text-[10px] font-black uppercase tracking-widest text-neutral-500 whitespace-nowrap"
+                          className="px-5 py-3.5 text-[12px] font-semibold text-neutral-500 whitespace-nowrap"
                         >
                           {column}
                         </th>
@@ -266,7 +266,7 @@ export default async function AffiliatePage() {
             Có đầu ra ổn định và muốn nhập theo lô?{" "}
             <Link
               href="/agency"
-              className="font-black uppercase tracking-wider text-[var(--menzu-accent)] transition-colors hover:text-white"
+              className="font-semibold text-[var(--menzu-accent)] transition-colors hover:text-white"
             >
               Nâng cấp đại lý
             </Link>{" "}

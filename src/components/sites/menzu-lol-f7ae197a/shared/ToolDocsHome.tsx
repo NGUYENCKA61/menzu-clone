@@ -75,7 +75,7 @@ const FIELD =
 function AccessChip({ access }: { access: DocsAccess }) {
   if (access.state === "open") {
     return (
-      <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-widest text-emerald-400">
+      <span className="inline-flex items-center gap-1 text-[12px] font-semibold text-emerald-400">
         <Unlock size={11} aria-hidden />
         {access.until ? "Đang mở" : "Mở"}
       </span>
@@ -83,13 +83,13 @@ function AccessChip({ access }: { access: DocsAccess }) {
   }
   if (access.state === "expired") {
     return (
-      <span className="text-[10px] font-black uppercase tracking-widest text-amber-300">
+      <span className="text-[12px] font-semibold text-amber-300">
         Hết hạn
       </span>
     );
   }
   return (
-    <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-widest text-neutral-600">
+    <span className="inline-flex items-center gap-1 text-[12px] font-semibold text-neutral-600">
       <Lock size={11} aria-hidden />
     </span>
   );

@@ -14,7 +14,7 @@ export const DOCS_RAIL_BOX = "rounded-2xl border border-white/10 bg-[#121216] p-
 
 /** The grey word over a group of rows ("Danh mục", "Bắt đầu", ...). */
 export const DOCS_RAIL_LABEL =
-  "mb-2 block px-2 text-[10px] font-black uppercase tracking-widest text-neutral-500";
+  "mb-2 block px-2 text-[12px] font-semibold text-neutral-500";
 
 /** Every row, open or not; add DOCS_RAIL_ROW_ON or DOCS_RAIL_ROW_OFF. */
 export const DOCS_RAIL_ROW =

@@ -124,7 +124,7 @@ export interface OrderDetailData {
  * status chip, and the primary/ghost button pair from the account pages.
  */
 const LABEL =
-  "flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-neutral-500";
+  "flex items-center gap-1.5 text-[12px] font-semibold text-neutral-500";
 const GHOST_BTN =
   "inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-3.5 text-xs font-bold text-neutral-300 transition-colors hover:bg-white/10 hover:text-white";
 const CELL =
@@ -655,7 +655,7 @@ export function OrderDetailModal({
                   <div>
                     <h2
                       id={`order-${order.code}-title`}
-                      className="flex items-center gap-2.5 text-lg font-black uppercase tracking-wider text-white sm:text-xl"
+                      className="flex items-center gap-2.5 text-lg font-black text-white sm:text-xl"
                     >
                       <Package className="h-5 w-5 shrink-0 text-[var(--menzu-accent)]" aria-hidden />
                       Chi tiết đơn hàng
@@ -728,7 +728,7 @@ export function OrderDetailModal({
                       {/* The list row's chip, verbatim — the same order wears
                           the same badge on both sides of the button. */}
                       <span
-                        className={`inline-flex whitespace-nowrap rounded-lg border px-2 py-1 text-[10px] font-black uppercase tracking-wider ${order.statusClass}`}
+                        className={`inline-flex whitespace-nowrap rounded-lg border px-2 py-1 text-[12px] font-semibold ${order.statusClass}`}
                       >
                         {order.statusLabel}
                       </span>
@@ -736,7 +736,7 @@ export function OrderDetailModal({
                   </div>
 
                   {/* PRODUCT */}
-                  <h3 className="mb-4 text-sm font-black uppercase tracking-wider text-white">
+                  <h3 className="mb-4 text-[15px] font-semibold text-white">
                     Sản phẩm đã mua
                   </h3>
                   {/* Below sm, one card instead of the table: five columns
@@ -765,7 +765,7 @@ export function OrderDetailModal({
                         </Link>
                         <div className="mt-1 flex min-w-0 items-center gap-2 text-[11px] font-semibold text-neutral-500">
                           {chip ? (
-                            <span className="inline-flex shrink-0 rounded-md border border-white/15 bg-white/10 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-widest text-neutral-300">
+                            <span className="inline-flex shrink-0 rounded-md border border-white/15 bg-white/10 px-1.5 py-0.5 text-[12px] font-semibold text-neutral-300">
                               {chip}
                             </span>
                           ) : null}
@@ -810,7 +810,7 @@ export function OrderDetailModal({
                               // instead of looking pushed to its left edge
                               // (the owner, 02/10/2026: "số lượng 1 cái đó có
                               // hơi bị lệch không" → "làm 1").
-                              className={`whitespace-nowrap bg-white/[0.03] px-4 py-3 ${head === "Số lượng" ? "text-center" : "text-left"} text-[10px] font-black uppercase tracking-widest text-neutral-500 sm:px-5`}
+                              className={`whitespace-nowrap bg-white/[0.03] px-4 py-3 ${head === "Số lượng" ? "text-center" : "text-left"} text-[12px] font-semibold text-neutral-500 sm:px-5`}
                             >
                               {head}
                             </th>
@@ -904,7 +904,7 @@ export function OrderDetailModal({
                           tải về", then "Thông tin sản phẩm", "/ bàn giao"
                           tried and dropped, and at last "Thông tin chi tiết
                           sản phẩm"). */}
-                      <h3 className="text-sm font-black uppercase tracking-wider text-white">
+                      <h3 className="text-[15px] font-semibold text-white">
                         {order.isSoftware ? "Thông tin chi tiết sản phẩm" : "Thông tin đăng nhập / bàn giao"}
                       </h3>
                     </div>
@@ -936,7 +936,7 @@ export function OrderDetailModal({
                                   // a box inside a box.
                                   <div key={`${index}-${key.value}`}>
                                     {order.keys.length > 1 ? (
-                                      <span className="mb-2 block text-[10px] font-black uppercase tracking-widest text-neutral-500">
+                                      <span className="mb-2 block text-[12px] font-semibold text-neutral-500">
                                         Tài khoản {index + 1}
                                       </span>
                                     ) : null}
@@ -1280,7 +1280,7 @@ function LockedLogin({ onTake }: { onTake: () => void }) {
     // owner, 09/10/2026: keep the red one, "rồi làm đi").
     <div className="flex flex-col items-center gap-4 rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-6 text-center sm:px-6">
       <div>
-        <p className="text-sm font-black uppercase tracking-wider text-white">
+        <p className="text-[15px] font-semibold text-white">
           Nhận thông tin đăng nhập
         </p>
         <p className="mx-auto mt-1.5 max-w-md text-xs leading-relaxed text-neutral-400">
@@ -1289,7 +1289,7 @@ function LockedLogin({ onTake }: { onTake: () => void }) {
         </p>
       </div>
       <div className="w-full max-w-md rounded-xl border border-red-500/25 bg-red-500/[0.07] px-4 py-3 text-left">
-        <p className="flex items-center gap-2 text-[12px] font-black uppercase tracking-wide text-red-400">
+        <p className="flex items-center gap-2 text-[14px] font-semibold text-red-400">
           <TriangleAlert className="h-4 w-4 shrink-0" aria-hidden />
           Bắt buộc quay video
         </p>

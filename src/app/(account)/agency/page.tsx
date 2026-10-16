@@ -85,14 +85,14 @@ export default async function AgencyPage() {
                 <KeyRound size={18} className="text-amber-400" />
               </span>
               <span className="flex min-w-0 flex-col gap-1">
-                <span className="text-sm font-black uppercase tracking-wider text-white">
+                <span className="text-[15px] font-semibold text-white">
                   Tài khoản của bạn là Đại lý
                 </span>
                 <span className="text-xs text-neutral-400">
                   Vào bàn mua key với mức chiết khấu riêng của bạn
                 </span>
               </span>
-              <span className="ml-auto inline-flex shrink-0 items-center gap-1.5 text-[11px] font-black uppercase tracking-widest text-amber-400">
+              <span className="ml-auto inline-flex shrink-0 items-center gap-1.5 text-[13px] font-semibold text-amber-400">
                 Vào bàn đại lý <ArrowRight size={13} />
               </span>
             </Link>
@@ -119,7 +119,7 @@ export default async function AgencyPage() {
                 className="rounded-2xl border border-white/5 bg-white/[0.02] p-5 flex flex-col gap-2.5"
               >
                 <Icon size={18} className="text-[var(--menzu-accent)]" />
-                <span className="text-[10px] font-black uppercase tracking-widest text-neutral-400">
+                <span className="text-[12px] font-semibold text-neutral-400">
                   {title}
                 </span>
                 <p className="text-sm text-neutral-300 leading-relaxed">{body}</p>
@@ -128,7 +128,7 @@ export default async function AgencyPage() {
           </div>
   
           <div className="rounded-2xl border border-white/5 bg-white/[0.02] p-5 sm:p-6 flex flex-col gap-4">
-            <span className="text-[10px] font-black uppercase tracking-widest text-neutral-500">
+            <span className="text-[12px] font-semibold text-neutral-500">
               Cách đăng ký
             </span>
             <ol className="flex flex-col gap-3">
@@ -155,7 +155,7 @@ export default async function AgencyPage() {
                     href={channel.href}
                     target="_blank"
                     rel="noreferrer"
-                    className="h-10 px-5 rounded-xl bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] transition-colors text-[10px] font-black uppercase tracking-widest text-white inline-flex items-center justify-center"
+                    className="h-10 px-5 rounded-xl bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] transition-colors text-[12px] font-semibold text-white inline-flex items-center justify-center"
                   >
                     {channel.label}
                   </a>
@@ -180,7 +180,7 @@ export default async function AgencyPage() {
             Muốn kiếm nhẹ nhàng hơn?{" "}
             <Link
               href="/affiliate"
-              className="font-black uppercase tracking-wider text-[var(--menzu-accent)] hover:text-white transition-colors"
+              className="font-semibold text-[var(--menzu-accent)] hover:text-white transition-colors"
             >
               Cộng tác viên
             </Link>{" "}, chia sẻ liên kết giới thiệu, nhận {REFERRAL_PERCENT}% mỗi giao dịch

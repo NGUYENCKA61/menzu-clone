@@ -28,7 +28,7 @@ export const GROUP_DIVIDER = "hidden lg:block w-px self-stretch bg-white/10";
 
 /** The small grey caption over each group of chips. */
 export const GROUP_LABEL_CLASS =
-  "text-[10px] font-black uppercase tracking-widest text-neutral-500 mb-1.5 block";
+  "text-[12px] font-semibold text-neutral-500 mb-1.5 block";
 
 /** The sunken card the chip rows sit in. */
 export const PANEL_CLASS =

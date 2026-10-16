@@ -278,7 +278,7 @@ export function SupportWidget({
               />
             </span>
             <span className="min-w-0 flex-1">
-              <span className="block truncate text-[13.5px] font-black uppercase tracking-wide text-white">
+              <span className="block truncate text-[13.5px] font-semibold text-white">
                 {brand.name}
               </span>
               <span className="mt-0.5 flex items-center gap-1.5 text-[11px] text-neutral-400">
@@ -396,7 +396,7 @@ export function SupportWidget({
 
           {/* True whichever half is showing, and the reason the header can
               afford to promise minutes at all. */}
-          <p className="flex items-center justify-center gap-1.5 border-t border-white/[0.07] bg-white/[0.02] px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-neutral-500">
+          <p className="flex items-center justify-center gap-1.5 border-t border-white/[0.07] bg-white/[0.02] px-3 py-2 text-[12px] font-bold text-neutral-500">
             <Clock size={11} />
             Hỗ trợ {SUPPORT_WINDOW} hằng ngày
           </p>

@@ -34,16 +34,16 @@ export function DocsSection({ articles }: { articles: DocCard[] }) {
       <div className="mb-8 flex flex-row items-center justify-between">
         <div className="flex items-center gap-2.5">
           <div className="h-5 w-[3px] shrink-0 rounded-full bg-[var(--brand)]" />
-          <h2 className="text-xl font-black uppercase tracking-wider text-white sm:text-2xl">
+          <h2 className="text-xl font-black text-white sm:text-2xl">
             Xem hướng dẫn
           </h2>
         </div>
         <Link
           href="/docs"
-          className="group flex items-center gap-1 border-b border-neutral-700 text-[10px] font-bold uppercase tracking-widest text-neutral-400 transition-colors hover:border-[var(--brand)] hover:text-white sm:text-xs"
+          className="group flex items-center gap-1 border-b border-neutral-700 text-[12px] font-bold text-neutral-400 transition-colors hover:border-[var(--brand)] hover:text-white sm:text-[14px]"
         >
-          <span className="hidden sm:inline">XEM TẤT CẢ</span>
-          <span className="sm:hidden">XEM THÊM</span>
+          <span className="hidden sm:inline">Xem tất cả</span>
+          <span className="sm:hidden">Xem thêm</span>
           <ArrowRight size={14} />
         </Link>
       </div>
@@ -66,7 +66,7 @@ export function DocsSection({ articles }: { articles: DocCard[] }) {
             </div>
 
             <div className="flex flex-1 flex-col gap-2 p-4">
-              <span className="text-[10px] font-black uppercase tracking-widest text-[var(--menzu-accent)]">
+              <span className="text-[12px] font-semibold text-[var(--menzu-accent)]">
                 {CATEGORY_LABELS[article.category] ?? article.category}
               </span>
               <h3 className="text-[13px] font-bold leading-snug text-white">{article.title}</h3>

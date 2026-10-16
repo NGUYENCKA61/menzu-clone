@@ -185,7 +185,7 @@ export function SoftwareCard({
               className="object-cover transition-transform duration-500 group-hover:scale-[1.025]"
             />
           ) : (
-            <span className="px-5 text-center text-2xl font-black uppercase leading-tight tracking-wide text-white/90">
+            <span className="px-5 text-center text-2xl font-black leading-tight text-white/90">
               {software.name}
             </span>
           )}
@@ -196,7 +196,7 @@ export function SoftwareCard({
             // chéo góc bìa card đỏ"): a strip turned 45° and clipped to a
             // square at the corner, the word running along the diagonal.
             <span className="pointer-events-none absolute left-0 top-0 z-20 block h-[92px] w-[92px] overflow-hidden rounded-tl-[14px]">
-              <span className="absolute left-[-40px] top-[22px] block w-[150px] -rotate-45 bg-[var(--menzu-accent)] py-[5px] text-center text-[10px] font-black uppercase leading-none tracking-[0.2em] text-white shadow-[0_2px_10px_rgba(0,0,0,0.5)]">
+              <span className="absolute left-[-40px] top-[22px] block w-[150px] -rotate-45 bg-[var(--menzu-accent)] py-[5px] text-center text-[12px] font-semibold leading-none text-white shadow-[0_2px_10px_rgba(0,0,0,0.5)]">
                 Miễn phí
               </span>
             </span>

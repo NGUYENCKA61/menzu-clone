@@ -119,7 +119,7 @@ export default async function PcSetupPageRoute({ params }: PageProps) {
 
           {page.notes && page.notes.length > 0 ? (
             <div className="rounded-2xl border border-amber-500/20 bg-amber-500/[0.06] p-5">
-              <p className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-amber-300">
+              <p className="flex items-center gap-2 text-[12px] font-semibold text-amber-300">
                 <Info size={13} aria-hidden />
                 Lưu ý
               </p>

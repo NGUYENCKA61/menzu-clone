@@ -18,11 +18,11 @@ import {
 
 const CARD =
   "rounded-xl border border-white/[0.08] bg-[#0e0e11] p-5 flex flex-col gap-4";
-const CARD_HEAD = "text-sm font-black uppercase tracking-wider text-white";
+const CARD_HEAD = "text-[15px] font-semibold text-white";
 const FIELD =
   "w-full rounded-lg border border-white/10 bg-neutral-950/60 px-3 py-2 text-xs text-white outline-none focus:border-[var(--brand)]/60 transition-colors placeholder-neutral-600";
 const LABEL =
-  "text-[10px] font-black uppercase tracking-widest text-neutral-500";
+  "text-[12px] font-semibold text-neutral-500";
 const GHOST =
   "inline-flex h-8 items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.04] px-3 text-[11px] font-bold text-neutral-300 transition-colors hover:border-white/25 hover:text-white disabled:cursor-not-allowed disabled:opacity-40";
 const ICON =
@@ -474,7 +474,7 @@ export function WarrantyQuestionsEditor({
             type="button"
             onClick={() => void save()}
             disabled={busy}
-            className="inline-flex h-9 items-center gap-2 rounded-lg bg-[var(--brand)] px-4 text-[11px] font-black uppercase tracking-wider text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+            className="inline-flex h-9 items-center gap-2 rounded-lg bg-[var(--brand)] px-4 text-[13px] font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
           >
             <Save className="h-3.5 w-3.5" />
             {busy ? "Đang lưu…" : "Lưu câu hỏi"}

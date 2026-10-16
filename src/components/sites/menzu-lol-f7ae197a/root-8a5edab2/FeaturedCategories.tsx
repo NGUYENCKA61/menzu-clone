@@ -65,7 +65,7 @@ export function FeaturedCategories({ cards }: { cards?: CategoryCard[] }) {
   return (
     <section className="w-full mb-12">
       <div className="flex flex-col items-center justify-center mb-10 text-center">
-        <h2 className="text-xl sm:text-2xl md:text-3xl font-black uppercase tracking-wider md:tracking-widest text-white whitespace-nowrap px-2">
+        <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-white whitespace-nowrap px-2">
           SẢN PHẨM NỔI BẬT
         </h2>
         <div className="flex items-center justify-center gap-2 mt-3 opacity-60">
@@ -130,10 +130,10 @@ export function FeaturedCategories({ cards }: { cards?: CategoryCard[] }) {
               {/* [4] Text block */}
               <div className="featured-caption relative z-30 flex flex-col items-center w-full text-center mt-auto pb-0 sm:pb-1">
                 <div className={`${headingNow.variable} mb-3 sm:mb-4 flex flex-col items-center w-full font-[family-name:var(--font-headingnow)]`}>
-                  <span className="text-[18px] sm:text-[22px] lg:text-[28px] font-black uppercase tracking-normal leading-none mb-1 whitespace-nowrap">
+                  <span className="text-[18px] sm:text-[22px] lg:text-[28px] font-black tracking-normal leading-none mb-1 whitespace-nowrap">
                     {card.line1}
                   </span>
-                  <span className="text-[36px] sm:text-[48px] lg:text-[64px] font-black uppercase tracking-normal leading-[0.9]">
+                  <span className="text-[36px] sm:text-[48px] lg:text-[64px] font-black tracking-normal leading-[0.9]">
                     {card.line2}
                   </span>
                 </div>
@@ -141,7 +141,7 @@ export function FeaturedCategories({ cards }: { cards?: CategoryCard[] }) {
                 <div className="featured-cta relative w-fit min-w-[100px] sm:min-w-[140px] mb-0 sm:mb-2 cursor-pointer mt-1 sm:mt-2">
                   <div className="relative w-full p-[2px] transition-all duration-300 group-hover:scale-[1.05] group-hover:drop-shadow-[0_0_15px_var(--theme-hover)] [clip-path:polygon(12px_0,100%_0,100%_calc(100%-12px),calc(100%-12px)_100%,0_100%,0_12px)] bg-[var(--theme-border)]">
                     <div className="relative w-full h-full bg-transparent group-hover:bg-white transition-colors duration-300 flex items-center justify-center px-3 sm:px-6 py-2 sm:py-3 [clip-path:polygon(11px_0,100%_0,100%_calc(100%-11px),calc(100%-11px)_100%,0_100%,0_11px)]">
-                      <span className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-white group-hover:text-[#0d0d12] transition-colors duration-300 whitespace-nowrap">
+                      <span className="text-[12px] sm:text-[14px] font-semibold text-white group-hover:text-[#0d0d12] transition-colors duration-300 whitespace-nowrap">
                         <CaseText text="XEM CHI TIẾT" />
                       </span>
                     </div>

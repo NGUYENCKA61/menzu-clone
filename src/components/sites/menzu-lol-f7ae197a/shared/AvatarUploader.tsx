@@ -67,7 +67,7 @@ export function AvatarUploader({ avatarUrl, username }: AvatarUploaderProps) {
         ) : (
           <span
             aria-hidden
-            className="text-2xl font-black uppercase text-neutral-500"
+            className="text-2xl font-black text-neutral-500"
           >
             {username.slice(0, 1)}
           </span>

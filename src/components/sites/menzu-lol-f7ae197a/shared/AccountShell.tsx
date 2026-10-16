@@ -91,7 +91,7 @@ export function AccountShell({
             sidebar ? (
               <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
                 <div>
-                  <h1 className="text-2xl sm:text-3xl font-black uppercase tracking-wider text-white">
+                  <h1 className="text-2xl sm:text-3xl font-black text-white">
                     {title}
                   </h1>
                   <p className="text-sm text-neutral-400 mt-1.5">{subtitle}</p>
@@ -109,13 +109,8 @@ export function AccountShell({
                         owner, 10/10/2026: "icon cờ lê thay cho dấu gạch"). */}
                     {Icon ? (
                       <Icon size={28} className="shrink-0 text-[var(--menzu-accent)]" aria-hidden />
-                    ) : (
-                      <span
-                        aria-hidden
-                        className="h-6 w-[3px] shrink-0 rounded-full bg-[var(--menzu-accent)]"
-                      />
-                    )}
-                    <h1 className="text-2xl sm:text-3xl font-black uppercase tracking-wider text-white">
+                    ) : null}
+                    <h1 className="text-2xl sm:text-3xl font-black text-white">
                       {title}
                     </h1>
                   </div>
@@ -156,7 +151,7 @@ export function AccountEmpty({ title, body, ctaLabel, ctaHref }: AccountEmptyPro
       {ctaLabel && ctaHref && (
         <Link
           href={ctaHref}
-          className="relative mt-5 inline-flex items-center gap-2 h-10 px-5 rounded-xl bg-[var(--brand)] hover:bg-[var(--brand-dark)] transition-colors text-[11px] font-black uppercase tracking-widest text-white"
+          className="relative mt-5 inline-flex items-center gap-2 h-10 px-5 rounded-xl bg-[var(--brand)] hover:bg-[var(--brand-dark)] transition-colors text-[13px] font-semibold text-white"
         >
           {ctaLabel}
           <LinkPending />

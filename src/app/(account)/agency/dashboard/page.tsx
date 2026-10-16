@@ -160,7 +160,7 @@ export default async function AgencyDashboardPage() {
       action={
         <Link
           href="/wallet"
-          className="inline-flex h-10 items-center gap-2 rounded-xl bg-[var(--menzu-accent)] px-4 text-[11px] font-black uppercase tracking-widest text-white transition-colors hover:bg-[var(--menzu-accent-dark)]"
+          className="inline-flex h-10 items-center gap-2 rounded-xl bg-[var(--menzu-accent)] px-4 text-[13px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent-dark)]"
         >
           <Wallet size={14} />
           Nạp tiền
@@ -180,7 +180,7 @@ export default async function AgencyDashboardPage() {
                 <Icon size={18} />
               </div>
               <div className="flex min-w-0 flex-col gap-1.5">
-                <span className="text-[10px] font-black uppercase tracking-widest text-neutral-300">
+                <span className="text-[12px] font-semibold text-neutral-300">
                   {label}
                 </span>
                 <span className={`text-2xl font-black leading-none ${tone}`}>
@@ -194,7 +194,7 @@ export default async function AgencyDashboardPage() {
 
         <section className="flex flex-col gap-4 rounded-2xl border border-white/10 bg-neutral-900/50 p-5">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <h3 className="text-sm font-black uppercase tracking-wider text-white">
+            <h3 className="text-[15px] font-semibold text-white">
               Mua key giá đại lý
             </h3>
             <span className="text-xs text-neutral-500">
@@ -203,7 +203,7 @@ export default async function AgencyDashboardPage() {
           </div>
           {percent === 0 ? (
             <p className="rounded-xl border border-amber-500/25 bg-amber-500/[0.06] px-4 py-3 text-xs leading-relaxed text-neutral-300">
-              <span className="font-black uppercase tracking-wider text-amber-400">
+              <span className="font-semibold text-amber-400">
                 Lưu ý:
               </span>{" "}
               Tài khoản chưa được gán mức chiết khấu, mua lúc này là giá niêm
@@ -215,7 +215,7 @@ export default async function AgencyDashboardPage() {
 
         <section className="flex flex-col gap-4 rounded-2xl border border-white/10 bg-neutral-900/50 p-5">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <h3 className="text-sm font-black uppercase tracking-wider text-white">
+            <h3 className="text-[15px] font-semibold text-white">
               Đơn key gần đây
             </h3>
             <span className="text-xs text-neutral-500">

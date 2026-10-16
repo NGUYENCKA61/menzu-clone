@@ -21,7 +21,7 @@ export const metadata: Metadata = {
 export const dynamic = "force-dynamic";
 
 const CARD = "rounded-2xl border border-white/10 bg-neutral-900/50 p-5 sm:p-6";
-const LABEL = "text-[10px] font-black uppercase tracking-widest text-neutral-500";
+const LABEL = "text-[12px] font-semibold text-neutral-500";
 
 function stamp(date: Date): string {
   return `${date.toLocaleDateString("vi-VN", {
@@ -77,7 +77,7 @@ export default async function OrderReviewPage({
       action={
         <Link
           href="/orders"
-          className="inline-flex items-center gap-1.5 text-[11px] font-black uppercase tracking-widest text-neutral-400 transition-colors hover:text-white"
+          className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-neutral-400 transition-colors hover:text-white"
         >
           <ArrowLeft className="h-3.5 w-3.5" />
           Lịch sử mua
@@ -126,7 +126,7 @@ export default async function OrderReviewPage({
               <div className="flex flex-wrap items-center gap-3">
                 <StarRow rating={order.feedback.rating} size={16} />
                 <span
-                  className={`inline-flex items-center gap-1.5 rounded-md border px-2 py-0.5 text-[10px] font-black uppercase tracking-wider ${
+                  className={`inline-flex items-center gap-1.5 rounded-md border px-2 py-0.5 text-[12px] font-semibold ${
                     order.feedback.approved
                       ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300"
                       : "border-amber-500/30 bg-amber-500/10 text-amber-300"

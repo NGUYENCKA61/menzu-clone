@@ -47,7 +47,6 @@ export function SimplePage({
   crumbs,
   subtitle,
   titleCase = "upper",
-  titleBar = true,
 }: SimplePageProps) {
   return (
     // Opaque, covering the fixed PageBackdrop artwork — the original keeps its
@@ -75,8 +74,6 @@ export function SimplePage({
                 <div className="flex items-center gap-3">
                   {Icon ? (
                     <Icon size={28} className="shrink-0 text-[var(--menzu-accent)]" aria-hidden />
-                  ) : titleBar ? (
-                    <span aria-hidden className="h-6 w-[3px] shrink-0 rounded-full bg-[var(--menzu-accent)]" />
                   ) : null}
                   <h1
                     className={`text-2xl sm:text-3xl font-black text-white ${
@@ -116,14 +113,14 @@ export function SimplePage({
 export function NotCapturedYet({ note }: { note?: string }) {
   return (
     <div className="w-full flex flex-col items-center justify-center py-20 text-center border border-dashed border-white/10 rounded-2xl bg-white/[0.02]">
-      <p className="text-xl font-bold text-white mb-2">TRANG ĐANG ĐƯỢC XÂY DỰNG</p>
+      <p className="text-xl font-bold text-white mb-2">Trang đang được xây dựng</p>
       <p className="text-neutral-400 max-w-[520px]">
         {note ??
           "Nội dung của trang này chưa được sao chép từ bản gốc. Vui lòng quay lại sau."}
       </p>
       <Link
         href="/"
-        className="mt-5 inline-flex items-center gap-2 h-10 px-5 rounded-xl bg-[var(--brand)] hover:bg-[var(--brand-dark)] transition-colors text-[11px] font-black uppercase tracking-widest text-white"
+        className="mt-5 inline-flex items-center gap-2 h-10 px-5 rounded-xl bg-[var(--brand)] hover:bg-[var(--brand-dark)] transition-colors text-[13px] font-semibold text-white"
       >
         Về trang chủ
       </Link>

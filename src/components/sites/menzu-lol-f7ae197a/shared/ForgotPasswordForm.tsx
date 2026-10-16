@@ -64,13 +64,13 @@ export function ForgotPasswordForm() {
         <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border-2 border-emerald-500 bg-emerald-500/15 text-emerald-400">
           <MailCheck size={28} strokeWidth={2.5} />
         </span>
-        <h2 className="mt-5 text-[17px] font-black uppercase tracking-wide text-white">
+        <h2 className="mt-5 text-[17px] font-black text-white">
           Đã gửi yêu cầu
         </h2>
         <p className="mt-3 text-[13px] leading-relaxed text-neutral-300">{sentMessage}</p>
         <Link
           href="/login"
-          className="mt-6 inline-flex h-11 w-full items-center justify-center rounded-2xl bg-[var(--menzu-accent)] text-[13px] font-black uppercase tracking-widest text-white transition-colors hover:bg-[var(--menzu-accent-dark)]"
+          className="mt-6 inline-flex h-11 w-full items-center justify-center rounded-2xl bg-[var(--menzu-accent)] text-[15px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent-dark)]"
         >
           Về trang đăng nhập
         </Link>
@@ -82,7 +82,7 @@ export function ForgotPasswordForm() {
     <form onSubmit={handleSubmit} noValidate>
       <label
         htmlFor="forgot-identifier"
-        className="block text-[11px] font-black uppercase tracking-widest text-neutral-400 mb-2.5 ml-1"
+        className="block text-[13px] font-semibold text-neutral-400 mb-2.5 ml-1"
       >
         Tên đăng nhập / Email
       </label>
@@ -104,14 +104,14 @@ export function ForgotPasswordForm() {
       <button
         type="submit"
         disabled={pending}
-        className="mt-6 w-full rounded-2xl bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] disabled:opacity-70 disabled:cursor-wait text-white font-black py-4 uppercase tracking-widest text-sm transition-colors"
+        className="mt-6 w-full rounded-2xl bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] disabled:opacity-70 disabled:cursor-wait text-white font-semibold py-4 text-[15px] transition-colors"
       >
         {pending ? "ĐANG GỬI…" : "GỬI ĐƯỜNG DẪN ĐẶT LẠI"}
       </button>
 
       <Link
         href="/login"
-        className="mt-6 flex items-center justify-center gap-2 text-xs font-black uppercase tracking-widest text-neutral-400 transition-colors hover:text-white"
+        className="mt-6 flex items-center justify-center gap-2 text-[14px] font-semibold text-neutral-400 transition-colors hover:text-white"
       >
         <ArrowLeft size={14} />
         Về trang đăng nhập

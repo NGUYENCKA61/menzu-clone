@@ -23,7 +23,7 @@ export function OrderReviewTag({ href, reviewed }: { href: string; reviewed: boo
   // form's own language: an outline while it is still to be given, filled
   // once it has been — two states told apart by shape, not only by colour.
   const pill =
-    "inline-flex items-center gap-1 rounded-lg border px-2 py-1 text-[10px] font-black uppercase tracking-wider";
+    "inline-flex items-center gap-1 rounded-lg border px-2 py-1 text-[12px] font-semibold ";
   if (reviewed) {
     return (
       <span className={`${pill} border-transparent bg-transparent text-neutral-500`}>
@@ -134,7 +134,7 @@ export function OrderReviewForm({ orderId, onDone }: { orderId: string; onDone: 
     }
   }
 
-  const LABEL = "text-[10px] font-black uppercase tracking-widest text-neutral-500";
+  const LABEL = "text-[12px] font-semibold text-neutral-500";
   const WORDS_MIN = 5;
 
   return (
@@ -205,7 +205,7 @@ export function OrderReviewForm({ orderId, onDone }: { orderId: string; onDone: 
             </button>
           </div>
         ) : (
-          <label className="mt-2 inline-flex h-10 cursor-pointer items-center gap-2 rounded-xl border border-white/12 bg-white/[0.04] px-4 text-[11px] font-black uppercase tracking-wider text-neutral-200 transition-colors hover:bg-white/[0.08]">
+          <label className="mt-2 inline-flex h-10 cursor-pointer items-center gap-2 rounded-xl border border-white/12 bg-white/[0.04] px-4 text-[13px] font-semibold text-neutral-200 transition-colors hover:bg-white/[0.08]">
             <ImagePlus className="h-4 w-4" />
             Chọn ảnh
             <input
@@ -240,7 +240,7 @@ export function OrderReviewForm({ orderId, onDone }: { orderId: string; onDone: 
           type="button"
           onClick={submit}
           disabled={submitting || body.trim().length < WORDS_MIN}
-          className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[var(--menzu-accent)] px-6 text-[11px] font-black uppercase tracking-wider text-white transition-colors hover:bg-[var(--menzu-accent-dark)] disabled:cursor-not-allowed disabled:opacity-50"
+          className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[var(--menzu-accent)] px-6 text-[13px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent-dark)] disabled:cursor-not-allowed disabled:opacity-50"
         >
           {submitting ? (
             <Loader2 size={14} className="animate-spin motion-reduce:animate-none" aria-hidden />

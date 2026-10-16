@@ -14,7 +14,7 @@ import { TurnstileBox } from "./TurnstileBox";
 const FIELD_CLASS =
   "w-full rounded-2xl border border-white/5 bg-white/5 pl-12 pr-4 py-4 text-sm text-white outline-none focus:border-[var(--menzu-accent)]/60 transition-colors placeholder-neutral-500";
 const LABEL_CLASS =
-  "block text-[11px] font-black uppercase tracking-widest text-neutral-400 mb-2.5 ml-1";
+  "block text-[13px] font-semibold text-neutral-400 mb-2.5 ml-1";
 
 /**
  * Back to wherever they came from, or the shop front if that was elsewhere.
@@ -171,7 +171,7 @@ export function RegisterForm({
           <button
             type="button"
             onClick={() => goBack((href) => router.push(href))}
-            className="inline-flex items-center gap-2 text-neutral-300 hover:text-white transition-colors duration-200 text-xs font-black uppercase tracking-widest px-4 py-2"
+            className="inline-flex items-center gap-2 text-neutral-300 hover:text-white transition-colors duration-200 text-[14px] font-semibold px-4 py-2"
           >
             <ArrowLeft size={14} />
             Quay lại
@@ -188,10 +188,10 @@ export function RegisterForm({
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
               <div className="relative z-10 p-12 text-center w-full">
-                <span className="text-[var(--menzu-accent)] font-black uppercase tracking-[0.5em] text-xs mb-2 drop-shadow-md block">
+                <span className="text-[var(--menzu-accent)] font-semibold text-[14px] mb-2 drop-shadow-md block">
                   {panelSubtitle}
                 </span>
-                <h2 className="text-5xl font-black text-white uppercase leading-none drop-shadow-lg">
+                <h2 className="text-5xl font-black text-white leading-none drop-shadow-lg">
                   {/* One row per line the shop typed, so a one-word or
                       three-word title renders as written. */}
                   {panelTitle.split("\n").map((line, index) => (
@@ -206,10 +206,10 @@ export function RegisterForm({
             <div className="flex-1 flex flex-col justify-center items-center p-6 sm:p-8 lg:py-14 lg:px-16 bg-neutral-950/60">
               <div className="w-full max-w-[420px]">
                 <div className="mb-8">
-                  <p className="text-[10px] uppercase tracking-[0.3em] text-[var(--menzu-accent)] mb-2 font-black lg:hidden">
+                  <p className="text-[12px] text-[var(--menzu-accent)] mb-2 font-semibold lg:hidden">
                     {brandName}
                   </p>
-                  <h1 className="text-4xl font-black text-white uppercase tracking-tight">
+                  <h1 className="text-4xl font-black text-white tracking-tight">
                     Đăng ký
                   </h1>
                   <p className="text-sm text-neutral-400 mt-2 font-medium">
@@ -367,7 +367,7 @@ export function RegisterForm({
                       pending ||
                       (Boolean(turnstileSiteKey) && captchaNeeded && !captcha)
                     }
-                    className="w-full rounded-2xl bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] disabled:opacity-70 disabled:cursor-not-allowed text-white font-black py-4 uppercase tracking-widest text-sm transition-colors mt-5"
+                    className="w-full rounded-2xl bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] disabled:opacity-70 disabled:cursor-not-allowed text-white font-semibold py-4 text-[15px] transition-colors mt-5"
                   >
                     {pending ? "ĐANG XỬ LÝ…" : "ĐĂNG KÝ"}
                   </button>

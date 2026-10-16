@@ -34,7 +34,7 @@ export default function GlobalError({
       <p className="text-6xl sm:text-7xl font-black tracking-tighter text-[var(--brand)] mb-3">
         500
       </p>
-      <p className="text-xl font-bold text-white mb-2">ĐÃ CÓ LỖI XẢY RA</p>
+      <p className="text-xl font-bold text-white mb-2">Đã có lỗi xảy ra</p>
       <p className="text-neutral-400 max-w-[520px]">
         Hệ thống gặp sự cố khi tải trang này. Bạn có thể thử lại, nếu vẫn lỗi,
         vui lòng quay lại sau ít phút.
@@ -43,7 +43,7 @@ export default function GlobalError({
       {error.digest ? (
         // Surfaced so a user can quote it in a support message; it is an opaque
         // hash, not internal detail.
-        <p className="mt-3 text-[11px] font-mono uppercase tracking-widest text-neutral-600">
+        <p className="mt-3 text-[13px] font-mono text-neutral-600">
           Mã lỗi: {error.digest}
         </p>
       ) : null}
@@ -54,14 +54,14 @@ export default function GlobalError({
           disabled={retrying}
           aria-busy={retrying}
           onClick={() => startRetry(() => reset())}
-          className="inline-flex items-center gap-2 h-10 px-5 rounded-xl bg-[var(--brand)] hover:bg-[var(--brand-dark)] transition-colors text-[11px] font-black uppercase tracking-widest text-white disabled:opacity-60"
+          className="inline-flex items-center gap-2 h-10 px-5 rounded-xl bg-[var(--brand)] hover:bg-[var(--brand-dark)] transition-colors text-[13px] font-semibold text-white disabled:opacity-60"
         >
           {retrying ? <Loader2 size={14} className="animate-spin motion-reduce:animate-none" aria-hidden /> : null}
           {retrying ? "Đang thử lại…" : "Thử lại"}
         </button>
         <Link
           href="/"
-          className="inline-flex items-center h-10 px-5 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 transition-colors text-[11px] font-black uppercase tracking-widest text-white"
+          className="inline-flex items-center h-10 px-5 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 transition-colors text-[13px] font-semibold text-white"
         >
           Về trang chủ
         </Link>

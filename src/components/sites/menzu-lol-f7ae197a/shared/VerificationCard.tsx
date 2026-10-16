@@ -25,14 +25,14 @@ import { BankPicker } from "./BankPicker";
 
 const CARD =
   "relative bg-white/[0.02] border border-white/5 rounded-2xl p-5 sm:p-6 overflow-hidden";
-const CARD_TITLE = "text-sm font-black uppercase tracking-wider text-white";
+const CARD_TITLE = "text-[15px] font-semibold text-white";
 const FIELD =
   "w-full rounded-xl border border-white/10 bg-neutral-950/60 px-4 py-3 text-sm text-white outline-none transition-colors placeholder-neutral-500 focus:border-[var(--menzu-accent)]/60 disabled:opacity-60";
 const LABEL =
-  "mb-2 block text-[10px] font-black uppercase tracking-widest text-neutral-500";
+  "mb-2 block text-[12px] font-semibold text-neutral-500";
 const HINT = "mt-1.5 text-[11px] leading-relaxed text-neutral-500";
 const BUTTON =
-  "inline-flex h-11 items-center justify-center gap-2 rounded-xl px-5 text-[11px] font-black uppercase tracking-widest transition-colors disabled:cursor-not-allowed disabled:opacity-50";
+  "inline-flex h-11 items-center justify-center gap-2 rounded-xl px-5 text-[13px] font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50";
 const PRIMARY = `${BUTTON} bg-[var(--menzu-accent)] text-white hover:bg-[var(--menzu-accent-dark)]`;
 const QUIET = `${BUTTON} border border-white/10 bg-white/[0.04] text-neutral-300 hover:border-white/25 hover:text-white`;
 
@@ -135,7 +135,7 @@ function Summary({
     <dl className="grid gap-x-6 gap-y-2.5 text-[13px] sm:grid-cols-[140px_1fr]">
       {rows.map(([k, v]) => (
         <div key={k} className="contents">
-          <dt className="text-[11px] font-black uppercase tracking-widest text-neutral-500 sm:pt-0.5">
+          <dt className="text-[13px] font-semibold text-neutral-500 sm:pt-0.5">
             {k}
           </dt>
           <dd className="break-all text-neutral-200">{v}</dd>
@@ -335,7 +335,7 @@ export function VerificationCard({
       <section className={CARD}>
         <div className="flex flex-wrap items-center gap-3">
           <span
-            className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[10px] font-black uppercase tracking-widest ${
+            className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[12px] font-semibold ${
               level2
                 ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-300"
                 : "border-white/10 bg-white/[0.04] text-neutral-300"
@@ -345,7 +345,7 @@ export function VerificationCard({
             {level2 ? "Cấp 2 · Đã xác thực" : "Cấp 1 · Chưa xác thực"}
           </span>
           {waiting ? (
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/40 bg-amber-500/10 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-amber-300">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/40 bg-amber-500/10 px-3 py-1 text-[12px] font-semibold text-amber-300">
               <Clock size={13} aria-hidden />
               {VERIFICATION_STATUS_LABEL.PENDING}
             </span>

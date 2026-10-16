@@ -138,7 +138,7 @@ export default async function SpinPage() {
 
           <aside className="flex flex-col gap-4">
             <div className="flex flex-col gap-3 rounded-2xl border border-[var(--menzu-violet)]/20 bg-[var(--menzu-violet)]/[0.05] p-5">
-              <span className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-neutral-300">
+              <span className="flex items-center gap-2 text-[12px] font-semibold text-neutral-300">
                 <Coins size={13} className="text-[#a78bfa]" />
                 Điểm thưởng của bạn
               </span>
@@ -152,7 +152,7 @@ export default async function SpinPage() {
             </div>
 
             <div className="flex flex-col gap-3 rounded-2xl border border-white/10 bg-neutral-900/50 p-5">
-              <span className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-neutral-300">
+              <span className="flex items-center gap-2 text-[12px] font-semibold text-neutral-300">
                 <Ticket size={13} className="text-neutral-400" />
                 Lượt quay có thể đổi
               </span>
@@ -184,7 +184,7 @@ export default async function SpinPage() {
             </Link>
 
             <div className="rounded-2xl border border-white/10 bg-neutral-900/50 p-5">
-              <span className="block text-[10px] font-black uppercase tracking-widest text-neutral-500">
+              <span className="block text-[12px] font-semibold text-neutral-500">
                 Các phần thưởng
               </span>
               {/* What is on the wheel, not how often it comes up. The odds were

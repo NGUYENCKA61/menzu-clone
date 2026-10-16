@@ -168,11 +168,11 @@ export function ProductCard({ product, priority = false, eager = false }: Produc
           {/* Same pill as the tag beside it — the two corner badges should
               weigh the same. White text: the code identifies, it does not
               warn or promise. */}
-          <span className="inline-flex items-center rounded-full border border-white/10 bg-[#0d0d12]/88 px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-white">
+          <span className="inline-flex items-center rounded-full border border-white/10 bg-[#0d0d12]/88 px-2.5 py-1 text-[12px] font-semibold text-white">
             #{product.code}
           </span>
           {product.stock !== undefined && product.stock !== null ? (
-            <span className="inline-flex items-center rounded-full border border-sky-500/30 bg-sky-500/10 px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-sky-400">
+            <span className="inline-flex items-center rounded-full border border-sky-500/30 bg-sky-500/10 px-2.5 py-1 text-[12px] font-semibold text-sky-400">
               Còn {product.stock} acc
             </span>
           ) : null}
@@ -181,7 +181,7 @@ export function ProductCard({ product, priority = false, eager = false }: Produc
                same type — minus the coloured dot; the text colour carries the
                meaning: NFA green, FULL THÔNG TIN (and anything else) red. */
             <span
-              className={`inline-flex items-center gap-1 rounded-full border border-white/10 bg-[#0d0d12]/88 px-2.5 py-1 text-[10px] font-black uppercase tracking-wide ${
+              className={`inline-flex items-center gap-1 rounded-full border border-white/10 bg-[#0d0d12]/88 px-2.5 py-1 text-[12px] font-semibold ${
                 product.tag.toUpperCase() === "NFA"
                   ? "text-emerald-400"
                   : "text-[#ff6c88]"
@@ -201,8 +201,7 @@ export function ProductCard({ product, priority = false, eager = false }: Produc
       <div className="flex flex-1 flex-col p-4">
         {/* Title with the red marker bar, same as the software card's. */}
         <div className="flex items-center gap-2.5">
-          <span aria-hidden className="h-4 w-[3px] shrink-0 rounded-full bg-[var(--menzu-accent)]" />
-          <h3 className="truncate text-[17px] font-black uppercase tracking-wide text-white">
+          <h3 className="truncate text-[17px] font-black text-white">
             {product.name ||
               [product.rank, product.skins > 0 ? `${product.skins} Skins` : ""]
                 .filter(Boolean)
@@ -232,7 +231,7 @@ export function ProductCard({ product, priority = false, eager = false }: Produc
             labels grey, RANK's value white — the headline stat — and the VIP
             numbers red; the entries spread across the card's full width. The
             skin total is not repeated here — the title already says it. */}
-        <div className="mb-3.5 flex w-full items-center justify-between gap-2 overflow-hidden rounded-[9px] border border-[#292a30] bg-[#111216] px-3 py-1.5 uppercase">
+        <div className="mb-3.5 flex w-full items-center justify-between gap-2 overflow-hidden rounded-[9px] border border-[#292a30] bg-[#111216] px-3 py-1.5 ">
           <span className="flex min-w-0 items-center gap-[5px] whitespace-nowrap text-[11px] font-extrabold text-[#c7c8cd]">
             <span aria-hidden className="text-[var(--menzu-accent)]">▲</span> Rank:
             <span className="truncate text-white">{product.rank}</span>
@@ -317,7 +316,7 @@ export function ProductCard({ product, priority = false, eager = false }: Produc
             </span>
             {/* The software card's primary button, worn here by the whole-card
                 link: the account page is where the purchase happens. */}
-            <span className="flex h-[42px] items-center rounded-[9px] bg-[var(--menzu-accent)] px-5 text-[11px] font-extrabold uppercase tracking-wide text-white transition-colors group-hover:bg-[var(--menzu-accent-dark)]">
+            <span className="flex h-[42px] items-center rounded-[9px] bg-[var(--menzu-accent)] px-5 text-[13px] font-semibold text-white transition-colors group-hover:bg-[var(--menzu-accent-dark)]">
               Mua ngay
             </span>
           </div>

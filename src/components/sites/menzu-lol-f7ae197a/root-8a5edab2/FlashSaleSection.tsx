@@ -162,13 +162,13 @@ export function FlashSaleSection({
                 <div className="flex items-center justify-center w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-[var(--menzu-accent)] text-white shrink-0">
                   <Zap className="w-5 h-5 sm:w-6 sm:h-6" />
                 </div>
-                <h2 className="text-lg min-[360px]:text-xl sm:text-2xl md:text-3xl font-black text-white uppercase drop-shadow-md text-center whitespace-nowrap">
+                <h2 className="text-lg min-[360px]:text-xl sm:text-2xl md:text-3xl font-black text-white drop-shadow-md text-center whitespace-nowrap">
                   KHUYẾN MÃI HÔM NAY
                 </h2>
               </div>
 
               <div className="flex flex-col sm:flex-row items-center gap-1.5 sm:gap-2.5 w-full lg:w-auto justify-center">
-                <span className="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-neutral-400 whitespace-nowrap">
+                <span className="text-[12px] sm:text-[14px] font-bold text-neutral-400 whitespace-nowrap">
                   Kết thúc trong
                 </span>
                 <div className="flex items-center gap-1">

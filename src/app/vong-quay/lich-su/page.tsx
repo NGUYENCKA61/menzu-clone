@@ -28,7 +28,7 @@ export const metadata: Metadata = {
 };
 export const dynamic = "force-dynamic";
 
-const LABEL = "text-[10px] font-black uppercase tracking-widest text-neutral-500";
+const LABEL = "text-[12px] font-semibold text-neutral-500";
 
 /**
  * How each kind of win is dressed, all in one place.
@@ -67,7 +67,7 @@ const KIND = {
 type WonKind = keyof typeof KIND;
 
 const PILL =
-  "inline-flex shrink-0 items-center rounded-md border px-2 py-0.5 text-[9px] font-black uppercase tracking-wider";
+  "inline-flex shrink-0 items-center rounded-md border px-2 py-0.5 text-[12px] font-semibold ";
 
 /** One figure in the strip across the top. */
 function Total({
@@ -83,7 +83,7 @@ function Total({
 }) {
   return (
     <div className={`rounded-2xl border p-4 ${tint}`}>
-      <span className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest opacity-80">
+      <span className="flex items-center gap-1.5 text-[12px] font-semibold opacity-80">
         <Icon className="h-3.5 w-3.5" />
         {label}
       </span>
@@ -183,7 +183,7 @@ export default async function SpinHistoryPage({
       <div className="flex max-w-3xl flex-col gap-6">
         <Link
           href="/vong-quay"
-          className="inline-flex w-fit items-center gap-1.5 text-[11px] font-black uppercase tracking-widest text-neutral-400 transition-colors hover:text-white"
+          className="inline-flex w-fit items-center gap-1.5 text-[13px] font-semibold text-neutral-400 transition-colors hover:text-white"
         >
           <ArrowLeft className="h-3.5 w-3.5" />
           Vòng quay
@@ -343,7 +343,7 @@ export default async function SpinHistoryPage({
                         ) : null}
                         <Link
                           href={`/vong-quay/qua/${win.id}`}
-                          className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.03] px-3 py-1.5 text-[10px] font-black uppercase tracking-widest text-neutral-300 transition-colors hover:border-[var(--menzu-violet)]/50 hover:text-white"
+                          className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.03] px-3 py-1.5 text-[12px] font-semibold text-neutral-300 transition-colors hover:border-[var(--menzu-violet)]/50 hover:text-white"
                         >
                           {win.address ? "Chi tiết" : "Điền địa chỉ"}
                           <ArrowRight className="h-3 w-3" />

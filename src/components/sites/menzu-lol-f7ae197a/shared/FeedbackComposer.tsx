@@ -42,7 +42,7 @@ const SERVICES: { value: string; icon: LucideIcon }[] = [
   { value: "KHÁC", icon: MessageSquare },
 ];
 
-const LABEL = "block text-xs font-black uppercase tracking-wider text-neutral-500 mb-2";
+const LABEL = "block text-[14px] font-semibold text-neutral-500 mb-2";
 const FIELD =
   "w-full bg-neutral-950/80 border border-neutral-800 rounded-xl px-4 py-3 text-white text-sm focus:border-[var(--menzu-accent)] focus:ring-1 focus:ring-[var(--menzu-accent)]/30 outline-none transition-all";
 
@@ -160,7 +160,7 @@ export function FeedbackComposer({ user, today }: { user: ComposerUser; today: s
   const previewCard = (
     <div className="bg-neutral-900/40 border border-neutral-800/60 p-6 rounded-3xl relative overflow-hidden">
       <div className="absolute top-0 right-0 p-3">
-        <div className="bg-neutral-800 border border-neutral-700 text-neutral-400 text-[8px] font-black px-2 py-1 rounded uppercase tracking-widest">
+        <div className="bg-neutral-800 border border-neutral-700 text-neutral-400 text-[12px] font-semibold px-2 py-1 rounded ">
           Bản nháp
         </div>
       </div>
@@ -204,7 +204,7 @@ export function FeedbackComposer({ user, today }: { user: ComposerUser; today: s
       ) : null}
       {amountNumber > 0 ? (
         <div className="mt-4 text-right flex flex-col items-end">
-          <span className="text-[10px] text-neutral-500 uppercase font-black tracking-[0.15em] mb-1">
+          <span className="text-[12px] text-neutral-500 font-semibold mb-1">
             Trị giá giao dịch
           </span>
           <span className="text-2xl font-black text-[var(--menzu-accent)] tabular-nums leading-none">
@@ -221,7 +221,7 @@ export function FeedbackComposer({ user, today }: { user: ComposerUser; today: s
         <div className="w-14 h-14 rounded-2xl bg-[var(--menzu-accent)]/10 border border-[var(--menzu-accent)]/20 flex items-center justify-center">
           <CircleCheckBig size={26} className="text-[var(--menzu-accent)]" />
         </div>
-        <h2 className="text-xl font-black uppercase tracking-wider text-white">
+        <h2 className="text-xl font-black text-white">
           Đã gửi đánh giá
         </h2>
         <p className="text-sm text-neutral-400 leading-relaxed">
@@ -231,13 +231,13 @@ export function FeedbackComposer({ user, today }: { user: ComposerUser; today: s
         <div className="flex flex-col sm:flex-row gap-3 pt-2">
           <Link
             href="/feedback"
-            className="h-10 px-6 rounded-xl bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] transition-colors text-[11px] font-black uppercase tracking-widest text-white inline-flex items-center justify-center"
+            className="h-10 px-6 rounded-xl bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] transition-colors text-[13px] font-semibold text-white inline-flex items-center justify-center"
           >
             Xem trang đánh giá
           </Link>
           <Link
             href="/"
-            className="h-10 px-6 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 transition-colors text-[11px] font-black uppercase tracking-widest text-neutral-300 inline-flex items-center justify-center"
+            className="h-10 px-6 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 transition-colors text-[13px] font-semibold text-neutral-300 inline-flex items-center justify-center"
           >
             Về trang chủ
           </Link>
@@ -346,7 +346,7 @@ export function FeedbackComposer({ user, today }: { user: ComposerUser; today: s
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <span aria-hidden className="text-sm font-black uppercase text-neutral-500">
+                  <span aria-hidden className="text-[15px] font-semibold text-neutral-500">
                     {user.username.slice(0, 1)}
                   </span>
                 )}
@@ -493,7 +493,7 @@ export function FeedbackComposer({ user, today }: { user: ComposerUser; today: s
           <button
             type="submit"
             disabled={submitting}
-            className="w-full bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] disabled:opacity-70 disabled:cursor-wait text-white font-black py-3.5 rounded-2xl mt-2 flex justify-center items-center gap-2 transition-colors uppercase tracking-wider text-sm"
+            className="w-full bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] disabled:opacity-70 disabled:cursor-wait text-white font-semibold py-3.5 rounded-2xl mt-2 flex justify-center items-center gap-2 transition-colors text-[15px]"
           >
             {submitting ? (
               <Loader2 size={14} className="animate-spin motion-reduce:animate-none" aria-hidden />
@@ -529,7 +529,7 @@ export function FeedbackComposer({ user, today }: { user: ComposerUser; today: s
       <div className="hidden lg:block lg:col-span-5 sticky top-28">
         <div className="mb-4 flex items-center gap-2">
           <div className="w-2 h-2 rounded-full bg-[var(--menzu-accent)] animate-pulse motion-reduce:animate-none" />
-          <span className="text-[10px] font-black text-neutral-500 uppercase tracking-[0.2em]">
+          <span className="text-[12px] font-semibold text-neutral-500 ">
             Preview
           </span>
         </div>
@@ -538,7 +538,7 @@ export function FeedbackComposer({ user, today }: { user: ComposerUser; today: s
         <div className="mt-6 bg-neutral-900/40 border border-neutral-800/60 rounded-3xl p-6">
           <div className="flex items-center gap-2 mb-4">
             <ShieldCheck size={15} className="text-[var(--menzu-accent)]" />
-            <span className="text-xs font-black uppercase tracking-wider text-white">
+            <span className="text-[14px] font-semibold text-white">
               Chính sách đánh giá
             </span>
           </div>

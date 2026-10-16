@@ -12,11 +12,7 @@ import { sentenceCase } from "@/lib/displayCase";
  * When a light dress ships for good this becomes a plain sentenceCase() call.
  */
 export function CaseText({ text }: { text: string }) {
-  const soft = sentenceCase(text);
-  if (soft === text) return <>{text}</>;
-  return (
-    <span className="case-typed" data-soft={soft}>
-      <span className="case-text">{text}</span>
-    </span>
-  );
+  // LAB (Launcher): every name prints in sentence case on the dark site too,
+  // acronyms kept (displayCase); the typed name stays in the database.
+  return <>{sentenceCase(text)}</>;
 }

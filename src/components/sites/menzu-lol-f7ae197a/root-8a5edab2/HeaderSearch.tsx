@@ -214,7 +214,7 @@ export function HeaderSearch() {
                       </span>
                       <span className="min-w-0 flex-1">
                         <span className="block truncate text-[12px] font-bold text-white">{hit.name}</span>
-                        <span className="block truncate text-[10px] font-semibold uppercase tracking-wider text-neutral-500">
+                        <span className="block truncate text-[12px] font-semibold text-neutral-500">
                           {hit.kind === "category"
                             ? "Danh mục"
                             : hit.kind === "software"

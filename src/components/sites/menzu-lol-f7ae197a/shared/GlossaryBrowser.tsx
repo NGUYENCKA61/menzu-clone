@@ -368,7 +368,7 @@ export function GlossaryBrowser({
               <div>
                 <p
                   aria-live="polite"
-                  className="mb-3 text-[11px] font-bold uppercase tracking-wider text-neutral-500"
+                  className="mb-3 text-[13px] font-bold text-neutral-500"
                 >
                   {results.length} thuật ngữ
                 </p>
@@ -408,7 +408,7 @@ export function GlossaryBrowser({
                       <div className="mb-3">
                         <h3
                           id={`${anchor}-title`}
-                          className="flex items-center gap-2 text-[12px] font-black uppercase tracking-[0.14em] text-[var(--menzu-accent)]"
+                          className="flex items-center gap-2 text-[14px] font-semibold text-[var(--menzu-accent)]"
                         >
                           <Icon size={14} aria-hidden className="shrink-0" />
                           {group.label}

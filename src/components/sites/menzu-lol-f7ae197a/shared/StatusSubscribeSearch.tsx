@@ -46,7 +46,7 @@ interface Shelf {
 /** The small chips beside the search: the followed-only filter, the count,
  *  and each shelf's "follow it all". One height, the tool bells' radius. */
 const CHIP =
-  "inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg border px-3 text-[10px] font-black uppercase tracking-widest transition-colors";
+  "inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg border px-3 text-[12px] font-semibold transition-colors";
 const CHIP_OFF = "border-white/10 bg-white/5 text-neutral-300 hover:bg-white/10 hover:text-white";
 const CHIP_ON =
   "border-[var(--menzu-accent)]/30 bg-[var(--menzu-accent)]/10 text-[var(--menzu-accent)] hover:bg-[var(--menzu-accent)]/15";
@@ -280,7 +280,7 @@ export function StatusSubscribeSearch({
               ) : null}
               <Link
                 href={categoryHref(shelf.slug)}
-                className="group inline-flex items-center gap-1.5 text-[11px] font-black uppercase tracking-widest text-white transition-colors hover:text-[var(--menzu-accent)]"
+                className="group inline-flex items-center gap-1.5 text-[13px] font-semibold text-white transition-colors hover:text-[var(--menzu-accent)]"
               >
                 {shelf.name}
                 <ArrowRight
@@ -289,7 +289,7 @@ export function StatusSubscribeSearch({
                   className="text-neutral-600 transition-colors group-hover:text-[var(--menzu-accent)]"
                 />
               </Link>
-              <span className="text-[10px] font-black uppercase tracking-widest text-neutral-500">
+              <span className="text-[12px] font-semibold text-neutral-500">
                 {shelf.tools.length} tool
                 {signedIn && shelf.following > 0 ? (
                   <>
@@ -363,7 +363,7 @@ export function StatusSubscribeSearch({
                       </Link>
                       {state ? (
                         <span
-                          className={`mt-1.5 inline-flex items-center rounded-md border px-2 py-0.5 text-[10px] font-black uppercase tracking-wider ${state.tile}`}
+                          className={`mt-1.5 inline-flex items-center rounded-md border px-2 py-0.5 text-[12px] font-semibold ${state.tile}`}
                         >
                           {state.label}
                         </span>

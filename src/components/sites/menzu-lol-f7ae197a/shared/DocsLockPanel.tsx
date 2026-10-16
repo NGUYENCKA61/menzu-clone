@@ -8,7 +8,7 @@ import {
 } from "@/lib/docsAccess";
 
 const BUTTON =
-  "inline-flex h-10 items-center justify-center gap-2 rounded-xl px-4 text-[11px] font-black uppercase tracking-widest transition-colors";
+  "inline-flex h-10 items-center justify-center gap-2 rounded-xl px-4 text-[13px] font-semibold transition-colors";
 const PRIMARY = `${BUTTON} bg-[var(--menzu-accent)] text-white hover:bg-[var(--menzu-accent-dark)]`;
 const QUIET = `${BUTTON} border border-white/10 bg-white/[0.04] text-neutral-300 hover:border-white/25 hover:text-white`;
 
@@ -47,7 +47,7 @@ export function DocsLockPanel({
         )}
       </span>
       <div className="min-w-0 flex-1">
-        <p className="text-sm font-black uppercase tracking-wider text-white">
+        <p className="text-[15px] font-semibold text-white">
           {expired
             ? "Hết hạn xem tài liệu"
             : access.state === "guest"

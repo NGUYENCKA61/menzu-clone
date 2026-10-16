@@ -82,11 +82,11 @@ const TAB_ACTIVE = `${TAB} ${PILL_TAB_ON}`;
 const TAB_INACTIVE = `${TAB} ${PILL_TAB_OFF}`;
 
 const TITLE =
-  "text-xl sm:text-2xl font-black text-white uppercase tracking-wider mb-2 flex items-center gap-3";
+  "text-xl sm:text-2xl font-black text-white mb-2 flex items-center gap-3";
 const SUBTITLE = "text-xs sm:text-sm text-neutral-400 leading-relaxed";
 const CARD =
   "relative bg-white/[0.02] border border-white/5 rounded-2xl p-5 sm:p-6 overflow-hidden group";
-const CARD_TITLE = "text-sm font-black uppercase tracking-wider text-white";
+const CARD_TITLE = "text-[15px] font-semibold text-white";
 const FIELD =
   "w-full rounded-xl border border-white/10 bg-black/20 px-4 py-3 text-white text-sm outline-none placeholder:text-neutral-600 focus:border-[var(--menzu-accent)]/50 transition-colors disabled:opacity-50";
 
@@ -533,7 +533,7 @@ export function SecurityPanel({
                       !emailValue.trim() ||
                       alreadyProved
                     }
-                    className="flex items-center justify-center gap-2 rounded-xl bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] disabled:bg-white/5 text-white text-[11px] font-black uppercase tracking-widest px-5 py-3 whitespace-nowrap transition-colors disabled:text-neutral-500"
+                    className="flex items-center justify-center gap-2 rounded-xl bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] disabled:bg-white/5 text-white text-[13px] font-semibold px-5 py-3 whitespace-nowrap transition-colors disabled:text-neutral-500"
                   >
                     {emailBusy === "send" ? (
                       <Loader2
@@ -590,7 +590,7 @@ export function SecurityPanel({
                       type="button"
                       onClick={verifyOtp}
                       disabled={emailBusy !== null || otp.length !== 6}
-                      className="flex items-center justify-center gap-2 rounded-xl bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] disabled:bg-white/5 text-white text-[11px] font-black uppercase tracking-widest px-5 py-3 whitespace-nowrap transition-colors disabled:text-neutral-500"
+                      className="flex items-center justify-center gap-2 rounded-xl bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] disabled:bg-white/5 text-white text-[13px] font-semibold px-5 py-3 whitespace-nowrap transition-colors disabled:text-neutral-500"
                     >
                       {emailBusy === "verify" ? (
                         <Loader2
@@ -822,7 +822,7 @@ export function SecurityPanel({
                 type="button"
                 onClick={() => signOut(null)}
                 disabled={devBusy !== null || sessions.length <= 1}
-                className="bg-white/[0.02] hover:bg-red-500/10 text-neutral-300 hover:text-red-400 border border-white/5 hover:border-red-500/30 px-5 py-3 rounded-xl text-[11px] font-black uppercase tracking-widest flex items-center gap-2 shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="bg-white/[0.02] hover:bg-red-500/10 text-neutral-300 hover:text-red-400 border border-white/5 hover:border-red-500/30 px-5 py-3 rounded-xl text-[13px] font-semibold flex items-center gap-2 shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {devBusy === "all" ? (
                   <Loader2
@@ -869,7 +869,7 @@ export function SecurityPanel({
                             {session.device}
                           </span>
                           {session.current ? (
-                            <span className="w-fit px-2 py-0.5 rounded-md bg-[var(--menzu-accent)]/20 text-[var(--menzu-accent)] text-[9px] sm:text-[10px] font-bold uppercase tracking-wider border border-[var(--menzu-accent)]/30">
+                            <span className="w-fit px-2 py-0.5 rounded-md bg-[var(--menzu-accent)]/20 text-[var(--menzu-accent)] text-[12px] sm:text-[12px] font-bold border border-[var(--menzu-accent)]/30">
                               Thiết bị hiện tại
                             </span>
                           ) : null}
@@ -918,7 +918,7 @@ export function SecurityPanel({
                         title="Đăng xuất thiết bị"
                         onClick={() => signOut(session.key)}
                         disabled={devBusy !== null}
-                        className="px-4 py-3 bg-white/5 hover:bg-red-500/10 text-neutral-400 hover:text-red-400 rounded-xl shrink-0 disabled:opacity-50 flex items-center justify-center gap-2 text-[11px] font-black uppercase tracking-widest"
+                        className="px-4 py-3 bg-white/5 hover:bg-red-500/10 text-neutral-400 hover:text-red-400 rounded-xl shrink-0 disabled:opacity-50 flex items-center justify-center gap-2 text-[13px] font-semibold "
                       >
                         {devBusy === session.key ? (
                           <Loader2

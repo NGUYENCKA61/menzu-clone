@@ -26,10 +26,9 @@ import { RelatedGuides } from "./RelatedGuides";
 function SectionTitle({ id, children }: { id: string; children: React.ReactNode }) {
   return (
     <div className="flex items-center gap-2.5">
-      <div className="w-[3px] h-5 bg-[var(--menzu-accent)] rounded-full shrink-0" />
       <h2
         id={id}
-        className="text-xl sm:text-2xl font-black uppercase tracking-wider text-white"
+        className="text-xl sm:text-2xl font-black text-white"
       >
         {children}
       </h2>

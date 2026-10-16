@@ -117,7 +117,7 @@ export function ScopeSearchField({
           <span className="badge-border-flow relative shrink-0 rounded-full p-[1.5px]">
             <span className="relative flex items-center justify-center gap-0.5 overflow-hidden rounded-full bg-[linear-gradient(135deg,#18130d_0%,#252015_55%,#18130d_100%)] px-[22px] py-1.5">
               <span className="vip-shimmer-bar pointer-events-none absolute inset-y-0 w-[60px] bg-[linear-gradient(90deg,transparent,rgba(252,186,3,0.07),transparent)]" />
-              <span className="vip-text-glow whitespace-nowrap text-[10px] font-black uppercase tracking-[0.16em] text-[#fcba03]">
+              <span className="vip-text-glow whitespace-nowrap text-[12px] font-semibold text-[#fcba03]">
                 {badge}
               </span>
             </span>
@@ -247,7 +247,7 @@ export function ScopeSearchField({
                 />
               ) : null}
             </span>
-            <span className="whitespace-nowrap text-[9px] font-black uppercase tracking-[0.14em] text-[#fcba03]">
+            <span className="whitespace-nowrap text-[12px] font-semibold text-[#fcba03]">
               Hot pick
             </span>
           </button>

@@ -39,7 +39,7 @@ export class CardBoundary extends Component<
         <button
           type="button"
           onClick={() => window.location.reload()}
-          className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-3.5 text-[10px] font-black uppercase tracking-widest text-neutral-300 transition-colors hover:bg-white/10 hover:text-white"
+          className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-3.5 text-[12px] font-semibold text-neutral-300 transition-colors hover:bg-white/10 hover:text-white"
         >
           <RefreshCw size={12} />
           Tải lại trang

@@ -136,14 +136,14 @@ export function MobileDrawer({ open, onClose, groups, brandName, brandLogo, user
             <Link
               href={`/login${back}`}
               onClick={onClose}
-              className="press flex h-10 items-center justify-center rounded-xl bg-[var(--brand)] text-[11px] font-black uppercase tracking-widest text-white hover:bg-[var(--brand-dark)]"
+              className="press flex h-10 items-center justify-center rounded-xl bg-[var(--brand)] text-[13px] font-semibold text-white hover:bg-[var(--brand-dark)]"
             >
               Đăng nhập
             </Link>
             <Link
               href={`/signup${back}`}
               onClick={onClose}
-              className="press flex h-10 items-center justify-center rounded-xl border border-white/15 bg-white/[0.04] text-[11px] font-black uppercase tracking-widest text-neutral-200 hover:bg-white/[0.08]"
+              className="press flex h-10 items-center justify-center rounded-xl border border-white/15 bg-white/[0.04] text-[13px] font-semibold text-neutral-200 hover:bg-white/[0.08]"
             >
               Tạo tài khoản
             </Link>
@@ -159,7 +159,7 @@ export function MobileDrawer({ open, onClose, groups, brandName, brandLogo, user
                   type="button"
                   onClick={() => setExpanded(isOpen ? null : group.label)}
                   aria-expanded={isOpen}
-                  className="w-full flex items-center justify-between py-3 px-6 text-neutral-200 hover:text-white hover:bg-white/[0.02] active:bg-white/[0.05] transition-all text-left text-xs font-bold uppercase tracking-wider"
+                  className="w-full flex items-center justify-between py-3 px-6 text-neutral-200 hover:text-white hover:bg-white/[0.02] active:bg-white/[0.05] transition-all text-left text-[14px] font-bold "
                 >
                   <span>{group.label}</span>
                   <ChevronDown

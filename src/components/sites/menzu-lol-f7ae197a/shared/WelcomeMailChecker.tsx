@@ -76,10 +76,10 @@ export function WelcomeMailChecker() {
           <div>
             {/* h2: the page frame already carries the h1, and two of them left
                 the document with no single statement of what the page is. */}
-            <h2 className="text-lg font-black uppercase tracking-wider text-white">
+            <h2 className="text-lg font-black text-white">
               Check Thư Welcome
             </h2>
-            <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--menzu-accent)]">
+            <p className="text-[12px] font-bold text-[var(--menzu-accent)]">
               Riot Mail Checker
             </p>
           </div>
@@ -88,7 +88,7 @@ export function WelcomeMailChecker() {
         <form onSubmit={handleSubmit} className="space-y-3">
           <label
             htmlFor="mail-source"
-            className="block text-[11px] font-black uppercase tracking-widest text-neutral-400"
+            className="block text-[13px] font-semibold text-neutral-400"
           >
             Dán mã nguồn email
           </label>
@@ -103,7 +103,7 @@ export function WelcomeMailChecker() {
           />
           <button
             type="submit"
-            className="w-full rounded-2xl bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] text-white font-black py-3.5 uppercase tracking-widest text-xs transition-colors"
+            className="w-full rounded-2xl bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] text-white font-semibold py-3.5 text-[14px] transition-colors"
           >
             Kiểm tra ngay
           </button>
@@ -114,7 +114,7 @@ export function WelcomeMailChecker() {
             <div className={`rounded-2xl border p-4 flex gap-3 ${verdict.className}`} role="status">
               <VerdictIcon size={20} className="shrink-0 mt-0.5" />
               <div className="space-y-1">
-                <p className="text-sm font-black uppercase tracking-wider">{verdict.title}</p>
+                <p className="text-[15px] font-semibold ">{verdict.title}</p>
                 <p className="text-xs text-neutral-400 leading-relaxed">{verdict.body}</p>
               </div>
             </div>
@@ -151,7 +151,7 @@ export function WelcomeMailChecker() {
                   ] as const
                 ).map(([label, value]) => (
                   <div key={label} className="rounded-xl border border-white/5 bg-white/[0.02] px-3 py-2">
-                    <dt className="text-neutral-500 font-bold uppercase tracking-wider text-[9px]">
+                    <dt className="text-neutral-500 font-bold text-[12px]">
                       {label}
                     </dt>
                     <dd className="text-neutral-200 font-mono truncate">{value ?? "-"}</dd>
@@ -164,7 +164,7 @@ export function WelcomeMailChecker() {
       </div>
 
       <section className="space-y-4">
-        <h2 className="text-sm font-black uppercase tracking-widest text-white text-center">
+        <h2 className="text-[15px] font-semibold text-white text-center">
           Hướng dẫn lấy mã nguồn email
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -172,7 +172,7 @@ export function WelcomeMailChecker() {
             <div key={title} className="rounded-2xl border border-zinc-800/80 bg-[#121216] p-5 space-y-3">
               <div className="flex items-center gap-2.5">
                 <Icon size={16} className="text-[var(--menzu-accent)]" />
-                <h3 className="text-xs font-black uppercase tracking-wider text-white">{title}</h3>
+                <h3 className="text-[14px] font-semibold text-white">{title}</h3>
               </div>
               <ol className="space-y-2">
                 {steps.map((step, index) => (

@@ -316,7 +316,7 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
                     comes off. It used to read /^hacks+/ — a lost backslash —
                     which matched "hacks" and never "HACK ", so every shelf
                     was headed "tài khoản game HACK …". */}
-                <h2 className="text-lg sm:text-xl font-black uppercase tracking-wider text-white mb-5">
+                <h2 className="text-lg sm:text-xl font-black text-white mb-5">
                   Danh mục tài khoản game{" "}
                   {data.name.replace(/^(tool\s+)?hack\s*\+?\s*/i, "").trim() || data.name}
                 </h2>
@@ -422,7 +422,7 @@ function EmptyPanel({ title, note }: { title: string; note: string }) {
         aria-hidden
         className="mb-5 text-neutral-600"
       />
-      <p className="text-[17px] font-black uppercase tracking-wide text-white">
+      <p className="text-[17px] font-black text-white">
         {title}
       </p>
       <p className="mt-2.5 max-w-[520px] text-[15px] text-neutral-400">{note}</p>

@@ -198,7 +198,7 @@ export function SpinWheel({
           onClick={spin}
           className="absolute left-1/2 top-1/2 z-10 grid h-[27%] w-[27%] -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border-4 border-[#0b0b10] bg-[var(--menzu-violet)] text-white shadow-[0_0_30px_-4px_rgb(124_58_237_/_0.8)] transition-colors hover:bg-[var(--menzu-violet-dark)] disabled:bg-neutral-700 disabled:text-neutral-400 disabled:shadow-none"
         >
-          <span className="flex items-center justify-center text-[13px] font-black uppercase tracking-widest leading-none sm:text-[15px]">
+          <span className="flex items-center justify-center text-[15px] font-semibold leading-none sm:text-[15px]">
             {spinning ? (
               <Loader2 size={16} className="animate-spin motion-reduce:animate-none" aria-label="Đang quay" />
             ) : affordable ? (
@@ -324,7 +324,7 @@ export function SpinWheel({
               </span>
             )}
 
-            <h2 className="relative mt-4 text-[15px] font-black uppercase tracking-wider text-white">
+            <h2 className="relative mt-4 text-[15px] font-semibold text-white">
               {won ? "Chúc mừng!" : "Chưa trúng lần này"}
             </h2>
 
@@ -364,7 +364,7 @@ export function SpinWheel({
               <button
                 type="button"
                 onClick={leave}
-                className="h-11 flex-1 rounded-xl border border-white/10 text-[11px] font-black uppercase tracking-widest text-neutral-300 transition-colors hover:bg-white/5"
+                className="h-11 flex-1 rounded-xl border border-white/10 text-[13px] font-semibold text-neutral-300 transition-colors hover:bg-white/5"
               >
                 Đóng
               </button>
@@ -375,7 +375,7 @@ export function SpinWheel({
                   setResult(null);
                   void spin();
                 }}
-                className="inline-flex h-11 flex-1 items-center justify-center gap-1.5 rounded-xl bg-[var(--menzu-violet)] text-[11px] font-black uppercase tracking-widest text-white transition-colors hover:bg-[var(--menzu-violet-dark)] disabled:opacity-50"
+                className="inline-flex h-11 flex-1 items-center justify-center gap-1.5 rounded-xl bg-[var(--menzu-violet)] text-[13px] font-semibold text-white transition-colors hover:bg-[var(--menzu-violet-dark)] disabled:opacity-50"
               >
                 <RotateCw size={13} />
                 Quay tiếp

@@ -81,7 +81,7 @@ const TRUST = [
 ];
 
 const STAT_ROW_CLASS = "flex items-center justify-between py-2.5 border-b border-white/5";
-const STAT_LABEL_CLASS = "text-[11px] font-black uppercase tracking-widest text-neutral-500";
+const STAT_LABEL_CLASS = "text-[13px] font-semibold text-neutral-500";
 const STAT_VALUE_CLASS = "text-sm font-bold text-white";
 
 /**
@@ -324,7 +324,7 @@ export function AccountBuyPanel({
       {account.tag !== null && (
         <span className="self-start inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-3 py-1.5">
           <span
-            className={`inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest ${
+            className={`inline-flex items-center gap-1.5 text-[12px] font-semibold ${
               account.tag.toUpperCase() === "NFA"
                 ? "text-emerald-400"
                 : "text-[#ff6c88]"
@@ -359,7 +359,7 @@ export function AccountBuyPanel({
           any of them shows no "Thông tin tài khoản:" over an empty list. */}
       {hasStats ? (
         <div className="flex flex-col">
-          <span className="pb-1 text-[10px] font-black uppercase tracking-widest text-neutral-500">
+          <span className="pb-1 text-[12px] font-semibold text-neutral-500">
             Thông tin tài khoản:
           </span>
           {showRank ? (
@@ -368,7 +368,7 @@ export function AccountBuyPanel({
               <div className="flex flex-col items-end gap-1">
                 {rank ? <span className={STAT_VALUE_CLASS}>{rank}</span> : null}
                 {lastRank !== null && (
-                  <span className="text-[10px] text-neutral-500 font-bold uppercase tracking-wider">
+                  <span className="text-[12px] text-neutral-500 font-bold ">
                     LAST: {lastRank}
                   </span>
                 )}
@@ -476,7 +476,7 @@ export function AccountBuyPanel({
           type="button"
           disabled={soldOut || gated}
           onClick={openDialog}
-          className="press w-full h-14 rounded-2xl bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] disabled:opacity-50 text-[13px] font-black uppercase tracking-widest text-white"
+          className="press w-full h-14 rounded-2xl bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] disabled:opacity-50 text-[15px] font-semibold text-white"
         >
           Mua ngay
         </button>
@@ -486,7 +486,7 @@ export function AccountBuyPanel({
             under MUA NGAY that answered a press with nothing. */}
         <Link
           href="/lien-he"
-          className="press flex w-full h-14 items-center justify-center rounded-2xl border border-[var(--menzu-accent)]/70 bg-white/[0.02] hover:bg-white/[0.06] text-[13px] font-black uppercase tracking-widest text-white"
+          className="press flex w-full h-14 items-center justify-center rounded-2xl border border-[var(--menzu-accent)]/70 bg-white/[0.02] hover:bg-white/[0.06] text-[15px] font-semibold text-white"
         >
           Thu cũ đổi mới
         </Link>

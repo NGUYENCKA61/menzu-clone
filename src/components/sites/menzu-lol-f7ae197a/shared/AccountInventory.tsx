@@ -62,7 +62,7 @@ const PAGE_SIZE = 15;
 // because Tailwind cannot see a composed class name. Type per the buy panel's
 // "Mua ngay" button.
 const TAB_BASE =
-  "flex-shrink-0 flex items-center justify-center gap-2 sm:gap-3 px-4 sm:px-6 py-2.5 rounded-2xl text-[13px] font-black uppercase tracking-widest transition-colors border";
+  "flex-shrink-0 flex items-center justify-center gap-2 sm:gap-3 px-4 sm:px-6 py-2.5 rounded-2xl text-[15px] font-semibold transition-colors border";
 const TAB_INACTIVE =
   "border-[#24252a] bg-[#101114] text-neutral-400 hover:border-neutral-600 hover:text-white";
 const FILTER_BASE =
@@ -277,7 +277,7 @@ export function AccountInventory({ account, items }: AccountInventoryProps) {
           <button
             type="button"
             onClick={() => setShown((count) => count + PAGE_SIZE)}
-            className="mx-auto mt-8 flex items-center gap-1.5 text-[12px] font-black uppercase tracking-widest text-neutral-500 transition-colors hover:text-white"
+            className="mx-auto mt-8 flex items-center gap-1.5 text-[14px] font-semibold text-neutral-500 transition-colors hover:text-white"
           >
             Xem thêm {remaining} món
             <ChevronDown size={14} aria-hidden />

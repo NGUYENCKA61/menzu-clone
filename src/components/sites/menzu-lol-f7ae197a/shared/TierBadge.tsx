@@ -142,7 +142,7 @@ export function TierName({
 }) {
   return (
     <span
-      className={`bg-clip-text font-black uppercase text-transparent ${METAL_TEXT[tier]} ${className}`}
+      className={`bg-clip-text font-semibold text-transparent ${METAL_TEXT[tier]} ${className}`}
     >
       {TIER_RULES[tier].label}
     </span>

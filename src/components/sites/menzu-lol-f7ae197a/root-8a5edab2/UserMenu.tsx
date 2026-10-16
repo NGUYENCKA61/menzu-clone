@@ -56,7 +56,7 @@ const GROUP = "border-t border-white/[0.07] py-1.5";
  *  above it and with the rows of the notification panel. */
 const ROW = "relative flex w-full items-center gap-3.5 rounded-lg px-2 py-3 transition-colors";
 /** ĐĂNG XUẤT and the admin link: same row, shouted. */
-const SHOUT = "text-[13px] font-black uppercase tracking-[0.12em]";
+const SHOUT = "text-[15px] font-semibold ";
 
 const AVATARS = {
   sm: { px: 28, frame: "h-7 w-7 rounded-[9px]", letter: "text-[11px]" },
@@ -82,7 +82,7 @@ function Avatar({ user, size }: { user: HeaderUser; size: keyof typeof AVATARS }
   return (
     <span
       aria-hidden
-      className={`${shell} flex items-center justify-center ${letter} font-black uppercase text-neutral-400`}
+      className={`${shell} flex items-center justify-center ${letter} font-semibold text-neutral-400`}
     >
       {user.username.slice(0, 1)}
     </span>
@@ -215,13 +215,13 @@ export function UserMenu({ user }: { user: HeaderUser }) {
                           : "bg-gradient-to-r from-neutral-600 to-neutral-700"
                     }`}
                   >
-                    <span className="skew-x-12 text-[10px] font-black uppercase leading-none tracking-widest text-white">
+                    <span className="skew-x-12 text-[12px] font-semibold leading-none text-white">
                       {isAdmin ? "Admin" : user.role === "AGENCY" ? "Đại lý" : "Member"}
                     </span>
                   </span>
                   {user.uid !== undefined ? (
                     <span className="inline-flex -skew-x-12 rounded-[4px] border border-white/10 bg-white/[0.07] px-2 py-1">
-                      <span className="skew-x-12 text-[10px] font-black uppercase leading-none tracking-widest text-neutral-300">
+                      <span className="skew-x-12 text-[12px] font-semibold leading-none text-neutral-300">
                         UID: {user.uid}
                       </span>
                     </span>

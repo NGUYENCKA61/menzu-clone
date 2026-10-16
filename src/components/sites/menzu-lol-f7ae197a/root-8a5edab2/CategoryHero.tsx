@@ -61,7 +61,7 @@ export function CategoryHero({
 
       <div className="relative z-10 mx-auto w-full max-w-[1320px] px-4 lg:px-6">
         {breadcrumb}
-        <h1 className="mb-4 py-1 text-3xl font-black uppercase leading-tight text-white sm:text-4xl md:text-5xl">
+        <h1 className="mb-4 py-1 text-3xl font-black leading-tight text-white sm:text-4xl md:text-5xl">
           <CaseText text={name} />
         </h1>
         {description.trim() ? (

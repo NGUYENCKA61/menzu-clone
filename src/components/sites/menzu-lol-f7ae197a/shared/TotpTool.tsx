@@ -79,8 +79,8 @@ export function TotpTool() {
           <div>
             {/* h2: the page frame already carries the h1, and two of them left the
                 document with no single statement of what the page is. */}
-            <h2 className="text-lg font-black uppercase tracking-wider text-white">THICHTHIHACK 2FA</h2>
-            <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--menzu-accent)]">
+            <h2 className="text-lg font-black text-white">THICHTHIHACK 2FA</h2>
+            <p className="text-[12px] font-bold text-[var(--menzu-accent)]">
               Valorant · Auto 2FA
             </p>
           </div>
@@ -89,7 +89,7 @@ export function TotpTool() {
         <form onSubmit={handleSubmit} className="space-y-3">
           <label
             htmlFor="totp-secret"
-            className="block text-[11px] font-black uppercase tracking-widest text-neutral-400"
+            className="block text-[13px] font-semibold text-neutral-400"
           >
             Paste secret key
           </label>
@@ -113,7 +113,7 @@ export function TotpTool() {
 
           <button
             type="submit"
-            className="w-full rounded-2xl bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] text-white font-black py-3.5 uppercase tracking-widest text-xs transition-colors"
+            className="w-full rounded-2xl bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] text-white font-semibold py-3.5 text-[14px] transition-colors"
           >
             Get OTP
           </button>
@@ -170,7 +170,7 @@ export function TotpTool() {
             </div>
 
             {copied ? (
-              <p className="text-[11px] font-black uppercase tracking-widest text-emerald-400">
+              <p className="text-[13px] font-semibold text-emerald-400">
                 ✓ Đã sao chép code!
               </p>
             ) : null}

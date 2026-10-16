@@ -106,8 +106,8 @@ const FAQ: FaqEntry[] = [
   },
 ];
 
-const SECTION_HEADING = "text-2xl sm:text-3xl font-black uppercase tracking-wider text-white";
-const STAT_LABEL = "text-neutral-500 uppercase text-[8px] tracking-wider font-extrabold";
+const SECTION_HEADING = "text-2xl sm:text-3xl font-black text-white";
+const STAT_LABEL = "text-neutral-500 text-[12px] font-semibold";
 
 export default async function AppDownloadPage() {
   const release = await getAppRelease();
@@ -238,7 +238,7 @@ export default async function AppDownloadPage() {
                     <div className="w-11 h-11 rounded-xl bg-white/[0.04] border border-white/[0.08] text-[var(--menzu-accent)] flex items-center justify-center">
                       <Icon size={20} />
                     </div>
-                    <h3 className="text-sm font-black uppercase tracking-wider text-white">{title}</h3>
+                    <h3 className="text-[15px] font-semibold text-white">{title}</h3>
                     <p className="text-xs text-neutral-400 leading-relaxed">{body}</p>
                   </div>
                 ))}
@@ -257,7 +257,7 @@ export default async function AppDownloadPage() {
                 <div id="android-guide" className="p-6 rounded-2xl border border-zinc-800/80 bg-[#121216] space-y-5 scroll-mt-28">
                   <div className="flex items-center gap-3">
                     <Smartphone size={18} className="text-emerald-500" />
-                    <h3 className="text-sm font-black uppercase tracking-wider text-white">Cài Đặt Android</h3>
+                    <h3 className="text-[15px] font-semibold text-white">Cài Đặt Android</h3>
                     <span className="ml-auto text-[10px] font-bold text-neutral-500">
                       {release?.minAndroid ?? "-"}
                     </span>
@@ -281,7 +281,7 @@ export default async function AppDownloadPage() {
                 <div id="ios-guide" className="p-6 rounded-2xl border border-zinc-800/80 bg-[#121216] space-y-5 scroll-mt-28">
                   <div className="flex items-center gap-3">
                     <Apple size={18} className="text-neutral-300" />
-                    <h3 className="text-sm font-black uppercase tracking-wider text-white">Cài Đặt iOS</h3>
+                    <h3 className="text-[15px] font-semibold text-white">Cài Đặt iOS</h3>
                     <span className="ml-auto text-[10px] font-bold text-neutral-500">
                       {release?.minIos ?? "-"}
                     </span>
@@ -354,7 +354,7 @@ function DownloadButton({
         <a
           href={href}
           download
-          className={`w-full py-2.5 px-4 rounded-xl text-xs font-black uppercase tracking-wider transition-colors flex items-center justify-center gap-2 ${enabled}`}
+          className={`w-full py-2.5 px-4 rounded-xl text-[14px] font-semibold transition-colors flex items-center justify-center gap-2 ${enabled}`}
         >
           <Download size={14} />
           <span>{label}</span>
@@ -362,7 +362,7 @@ function DownloadButton({
       ) : (
         <span
           aria-disabled="true"
-          className="w-full py-2.5 px-4 rounded-xl bg-white/[0.03] border border-white/10 text-neutral-500 text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 cursor-not-allowed"
+          className="w-full py-2.5 px-4 rounded-xl bg-white/[0.03] border border-white/10 text-neutral-500 text-[14px] font-semibold flex items-center justify-center gap-2 cursor-not-allowed"
         >
           <Download size={14} />
           <span>{label}, chưa có bản tải</span>

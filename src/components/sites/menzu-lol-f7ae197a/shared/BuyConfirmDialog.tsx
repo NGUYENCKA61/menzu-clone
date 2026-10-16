@@ -37,14 +37,14 @@ import {
  */
 
 const LABEL =
-  "flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest";
+  "flex items-center gap-1.5 text-[12px] font-semibold ";
 const TILE = "rounded-xl border border-white/[0.06] bg-white/[0.02]";
 /** The footer pair, exported so a view other than the confirm one — the
  *  "đã mua" view — can close with the same two buttons. */
 export const FOOTER_PRIMARY_BTN =
-  "inline-flex h-11 flex-1 items-center justify-center rounded-xl bg-[var(--menzu-accent)] text-[11px] font-black uppercase tracking-widest text-white transition-colors hover:bg-[var(--menzu-accent-dark)]";
+  "inline-flex h-11 flex-1 items-center justify-center rounded-xl bg-[var(--menzu-accent)] text-[13px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent-dark)]";
 export const FOOTER_GHOST_BTN =
-  "inline-flex h-11 flex-1 items-center justify-center rounded-xl border border-white/10 text-[11px] font-black uppercase tracking-widest text-neutral-300 transition-colors hover:bg-white/5";
+  "inline-flex h-11 flex-1 items-center justify-center rounded-xl border border-white/10 text-[13px] font-semibold text-neutral-300 transition-colors hover:bg-white/5";
 
 /**
  * The card over the backdrop, with the header and the footer strip.
@@ -147,7 +147,7 @@ export function BuyConfirmDialog({
             <div>
               <h2
                 id={titleId}
-                className="text-base font-black uppercase tracking-wider text-white"
+                className="text-base font-semibold text-white"
               >
                 {title}
               </h2>
@@ -213,7 +213,7 @@ export function ReceiptTick({ code }: { code: string }) {
           <Check className="h-7 w-7" strokeWidth={2.5} aria-hidden />
         </span>
       </span>
-      <p className="mt-3 text-[10px] font-black uppercase tracking-widest text-neutral-500">
+      <p className="mt-3 text-[12px] font-semibold text-neutral-500">
         Mã đơn hàng
       </p>
       <span className="mt-1.5 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 font-mono text-base font-bold tracking-wider text-white">
@@ -262,7 +262,7 @@ export function ProductTile({
         <p className="truncate text-sm font-black text-white">{name}</p>
         <div className="mt-1 flex flex-wrap items-center gap-1.5">
           {chip ? (
-            <span className="rounded-md border border-white/15 bg-white/10 px-2 py-0.5 text-[9px] font-black uppercase tracking-widest text-neutral-300">
+            <span className="rounded-md border border-white/15 bg-white/10 px-2 py-0.5 text-[12px] font-semibold text-neutral-300">
               {chip}
             </span>
           ) : null}

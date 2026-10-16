@@ -20,7 +20,7 @@ export interface DeskProduct {
 
 const FIELD =
   "w-full rounded-xl border border-white/5 bg-white/5 px-4 py-3 text-sm text-white outline-none focus:border-[var(--brand)]/60 transition-colors";
-const LABEL = "text-[10px] font-black uppercase tracking-widest text-neutral-300";
+const LABEL = "text-[12px] font-semibold text-neutral-300";
 
 /**
  * The đại lý buying desk: tool → tier → quantity, wholesale price quoted
@@ -195,7 +195,7 @@ export function AgencyKeyDesk({
         type="button"
         onClick={buy}
         disabled={pending}
-        className="w-full rounded-2xl bg-[var(--brand)] py-3.5 text-xs font-black uppercase tracking-widest text-white transition-colors hover:bg-[var(--brand-dark)] disabled:cursor-wait disabled:opacity-70"
+        className="w-full rounded-2xl bg-[var(--brand)] py-3.5 text-[14px] font-semibold text-white transition-colors hover:bg-[var(--brand-dark)] disabled:cursor-wait disabled:opacity-70"
       >
         {pending ? "Đang xử lý…" : "Mua key"}
       </button>

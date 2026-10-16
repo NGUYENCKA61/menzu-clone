@@ -9,9 +9,9 @@ import { ADDRESS_MIN, CLAIM_NOTE_MAX } from "@/lib/spin";
 const FIELD =
   "w-full rounded-lg border border-white/10 bg-neutral-950/60 px-3 py-2 text-sm text-white outline-none transition-colors placeholder-neutral-500 focus:border-[var(--menzu-violet)]/60";
 const LABEL =
-  "mb-1.5 block text-[10px] font-black uppercase tracking-widest text-neutral-500";
+  "mb-1.5 block text-[12px] font-semibold text-neutral-500";
 const ACTION =
-  "inline-flex h-10 items-center gap-2 rounded-lg px-4 text-[11px] font-black uppercase tracking-widest transition-colors disabled:cursor-not-allowed disabled:opacity-50";
+  "inline-flex h-10 items-center gap-2 rounded-lg px-4 text-[13px] font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50";
 
 /**
  * What happens after the wheel lands on something the shop has to post.

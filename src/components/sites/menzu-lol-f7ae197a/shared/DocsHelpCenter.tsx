@@ -117,7 +117,7 @@ function FeaturedCarousel({ items }: { items: DocCard[] }) {
                 <div className="pointer-events-none absolute inset-y-0 right-0 -z-10 w-3/5 opacity-25 [mask-image:linear-gradient(to_left,black,transparent)]">
                   <Image src={item.thumbnailUrl} alt="" fill sizes="40vw" className="object-cover" />
                 </div>
-                <span className="inline-flex rounded-md border border-[var(--menzu-accent)]/40 bg-[var(--menzu-accent)]/10 px-2 py-1 text-[9px] font-black uppercase tracking-widest text-[var(--menzu-accent)]">
+                <span className="inline-flex rounded-md border border-[var(--menzu-accent)]/40 bg-[var(--menzu-accent)]/10 px-2 py-1 text-[12px] font-semibold text-[var(--menzu-accent)]">
                   Nội dung nổi bật
                 </span>
                 <h2 className="mt-3 text-xl font-black leading-tight text-white transition-colors group-hover:text-[var(--menzu-accent)]">
@@ -130,7 +130,7 @@ function FeaturedCarousel({ items }: { items: DocCard[] }) {
                     (the owner, 02/10/2026: "bỏ hết thử"); the article page
                     and the shelf cards still carry them. */}
                 <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-3">
-                  <span className="inline-flex items-center gap-2 rounded-lg bg-[var(--menzu-accent)] px-4 py-2.5 text-[10px] font-black uppercase tracking-widest text-white transition-colors group-hover:bg-[var(--menzu-accent-dark)]">
+                  <span className="inline-flex items-center gap-2 rounded-lg bg-[var(--menzu-accent)] px-4 py-2.5 text-[12px] font-semibold text-white transition-colors group-hover:bg-[var(--menzu-accent-dark)]">
                     Xem chi tiết
                     <ArrowRight size={12} aria-hidden />
                   </span>
@@ -399,7 +399,7 @@ export function DocsHelpCenter({
 
           {/* 16px, a step above the 15px questions it heads (the owner,
               02/10/2026): at 14px it read as a caption, not the list's title. */}
-          <h2 className="flex items-center gap-2.5 text-base font-black uppercase tracking-widest text-white">
+          <h2 className="flex items-center gap-2.5 text-base font-semibold text-white">
             <span aria-hidden className="h-4 w-0.5 rounded-full bg-[var(--menzu-accent)]" />
             {heading}
           </h2>
@@ -472,7 +472,7 @@ function ArticleCard({ article, shelf }: { article: DocCard; shelf: boolean }) {
           </h3>
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
             {shelf ? (
-              <span className="rounded-md border border-white/15 bg-white/10 px-2 py-0.5 text-[9px] font-black uppercase tracking-widest text-neutral-300">
+              <span className="rounded-md border border-white/15 bg-white/10 px-2 py-0.5 text-[12px] font-semibold text-neutral-300">
                 {DOC_SHELF_LABEL[article.category]}
               </span>
             ) : null}

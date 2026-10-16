@@ -96,7 +96,7 @@ export function ErrorModal({ title, message, onClose, tone = "error" }: ErrorMod
 
         <h2
           id="error-modal-title"
-          className="mt-5 text-[17px] font-black uppercase tracking-wide text-white"
+          className="mt-5 text-[17px] font-black text-white"
         >
           {title}
         </h2>
@@ -109,7 +109,7 @@ export function ErrorModal({ title, message, onClose, tone = "error" }: ErrorMod
           ref={confirm}
           type="button"
           onClick={leave}
-          className="mt-6 h-11 w-full rounded-lg bg-[var(--menzu-accent)] text-[13px] font-black uppercase tracking-widest text-white transition-colors hover:bg-[var(--menzu-accent-dark)]"
+          className="mt-6 h-11 w-full rounded-lg bg-[var(--menzu-accent)] text-[15px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent-dark)]"
         >
           {done ? "Đóng" : "Thử lại"}
         </button>

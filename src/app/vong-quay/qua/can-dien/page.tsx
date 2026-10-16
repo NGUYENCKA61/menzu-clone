@@ -110,7 +110,7 @@ export default async function ParcelsNeedingAddressPage() {
                 {stamp(win.createdAt)}
               </span>
             </span>
-            <span className="ml-auto inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-amber-500/30 bg-amber-500/10 px-2.5 py-1.5 text-[10px] font-black uppercase tracking-widest text-amber-400">
+            <span className="ml-auto inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-amber-500/30 bg-amber-500/10 px-2.5 py-1.5 text-[12px] font-semibold text-amber-400">
               <MapPin size={12} />
               Điền địa chỉ
             </span>

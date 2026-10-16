@@ -314,7 +314,7 @@ function RowCard({
         {top ? (
           <span
             className={cn(
-              "absolute left-1.5 top-1.5 z-10 inline-flex items-center gap-1 rounded-md bg-amber-500/90 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-amber-950 sm:left-2.5 sm:top-2.5 sm:px-2 sm:py-1 sm:text-[10px]",
+              "absolute left-1.5 top-1.5 z-10 inline-flex items-center gap-1 rounded-md bg-amber-500/90 px-1.5 py-0.5 text-[12px] font-bold text-amber-950 sm:left-2.5 sm:top-2.5 sm:px-2 sm:py-1 sm:text-[12px]",
               quiet && "border border-white/10 bg-scrim/70 text-neutral-100",
             )}
           >
@@ -382,7 +382,7 @@ function RowCard({
                 </div>
 
                 <div className="flex flex-col items-center xl:items-start text-center xl:text-left">
-                  <span className="text-[7px] sm:text-[10px] text-gray-500 font-bold uppercase mb-0 sm:mb-0.5 whitespace-nowrap">
+                  <span className="text-[12px] sm:text-[12px] text-gray-500 font-bold mb-0 sm:mb-0.5 whitespace-nowrap">
                     {stat.label}
                   </span>
                   <span
@@ -425,7 +425,7 @@ function RowCard({
                 quiet && "hidden",
               )}
             />
-            <span className="relative text-white font-black text-[10px] sm:text-xs uppercase tracking-widest">
+            <span className="relative text-white font-semibold text-[12px] sm:text-[14px] ">
               XEM NGAY
             </span>
             <ChevronRight
@@ -510,7 +510,7 @@ function BentoTile({
         )}
       >
         {lead && ranked ? (
-          <span className="inline-flex items-center gap-1 self-start rounded-md bg-amber-500/90 px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-amber-950">
+          <span className="inline-flex items-center gap-1 self-start rounded-md bg-amber-500/90 px-2 py-1 text-[12px] font-bold text-amber-950">
             <Star size={10} className="shrink-0 fill-current" aria-hidden />
             Top tháng
           </span>
@@ -529,7 +529,7 @@ function BentoTile({
           </p>
         ) : null}
         {lead ? (
-          <span className="mt-1 inline-flex items-center gap-1 self-start rounded-[10px] bg-[var(--menzu-accent)] px-4 py-2.5 text-[11px] font-black uppercase tracking-[0.12em] text-white transition-colors group-hover:bg-[var(--menzu-accent-dark)]">
+          <span className="mt-1 inline-flex items-center gap-1 self-start rounded-[10px] bg-[var(--menzu-accent)] px-4 py-2.5 text-[13px] font-semibold text-white transition-colors group-hover:bg-[var(--menzu-accent-dark)]">
             Xem ngay
             <ChevronRight size={12} aria-hidden />
           </span>
@@ -687,7 +687,7 @@ export function RowTile({
       {pick ? (
         <span
           className={cn(
-            "tile-pill absolute left-2.5 top-2.5 z-10 inline-flex items-center gap-1 rounded-md bg-scrim/70 px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-white ring-1 ring-inset ring-white/15 backdrop-blur-[6px]",
+            "tile-pill absolute left-2.5 top-2.5 z-10 inline-flex items-center gap-1 rounded-md bg-scrim/70 px-2 py-1 text-[12px] font-bold text-white ring-1 ring-inset ring-white/15 backdrop-blur-[6px]",
             big && "lg:left-3.5 lg:top-3.5 lg:text-[11px]",
           )}
         >
@@ -748,7 +748,7 @@ function TileDress({ card, style, big }: { card: ProductCard; style: TileStyle; 
           className="tile-scrim absolute inset-x-0 bottom-0 h-[55%] bg-gradient-to-t from-scrim/90 to-transparent"
         />
         <span className={cn("tile-caption absolute inset-x-3.5 bottom-3 flex flex-col gap-1", big && "lg:inset-x-5 lg:bottom-4")}>
-          <span className="text-[9px] font-extrabold uppercase tracking-[0.22em] text-[var(--menzu-accent)]">
+          <span className="text-[12px] font-semibold text-[var(--menzu-accent)]">
             {platformWord(card.platform)}
           </span>
           <h3 className={cn("text-[14px] font-bold leading-tight tracking-wide text-white sm:text-[15px]", big && "lg:text-[18px]")}>
@@ -778,7 +778,7 @@ function TileDress({ card, style, big }: { card: ProductCard; style: TileStyle; 
           từ {formatVnd(card.fromPrice)}đ
         </span>
       ) : card.platform ? (
-        <span className="shrink-0 rounded-md border border-white/10 bg-white/[0.04] px-1.5 py-0.5 text-[9px] font-extrabold uppercase tracking-wider text-neutral-300">
+        <span className="shrink-0 rounded-md border border-white/10 bg-white/[0.04] px-1.5 py-0.5 text-[12px] font-semibold text-neutral-300">
           {card.platform}
         </span>
       ) : null}
@@ -817,7 +817,7 @@ function RowList({ cards, ranked }: { cards: ProductCard[]; ranked: boolean }) {
           </span>
           <span className="flex min-w-0 flex-1 flex-col gap-1">
             {ranked ? (
-              <span className="inline-flex items-center gap-1 text-[10px] font-extrabold uppercase tracking-[0.08em] text-amber-400">
+              <span className="inline-flex items-center gap-1 text-[12px] font-semibold text-amber-400">
                 <Star size={10} className="shrink-0 fill-current" aria-hidden />
                 Top tháng
               </span>

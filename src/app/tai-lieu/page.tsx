@@ -41,11 +41,7 @@ const CARD = "rounded-2xl border border-white/10 bg-white/[0.02] p-5 sm:p-6";
 function SectionTitle({ children }: { children: ReactNode }) {
   return (
     <div className="flex items-center gap-2.5">
-      <div
-        aria-hidden
-        className="w-[3px] h-5 bg-[var(--menzu-accent)] rounded-full shrink-0"
-      />
-      <h2 className="text-xl sm:text-2xl font-black uppercase tracking-wider text-white">
+      <h2 className="text-xl sm:text-2xl font-black text-white">
         {children}
       </h2>
     </div>
@@ -166,7 +162,7 @@ export default async function ToolDocsHomePage() {
               <div className="flex flex-wrap gap-2">
                 <Link
                   href="/orders"
-                  className="inline-flex h-10 items-center rounded-xl bg-[var(--menzu-accent)] px-4 text-[11px] font-black uppercase tracking-widest text-white hover:bg-[var(--menzu-accent-dark)]"
+                  className="inline-flex h-10 items-center rounded-xl bg-[var(--menzu-accent)] px-4 text-[13px] font-semibold text-white hover:bg-[var(--menzu-accent-dark)]"
                 >
                   Lịch sử mua & bảo hành
                 </Link>
@@ -175,7 +171,7 @@ export default async function ToolDocsHomePage() {
                     href={telegram}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex h-10 items-center rounded-xl border border-white/10 bg-white/[0.04] px-4 text-[11px] font-black uppercase tracking-widest text-neutral-300 hover:border-white/25 hover:text-white"
+                    className="inline-flex h-10 items-center rounded-xl border border-white/10 bg-white/[0.04] px-4 text-[13px] font-semibold text-neutral-300 hover:border-white/25 hover:text-white"
                   >
                     Telegram
                   </a>
@@ -185,14 +181,14 @@ export default async function ToolDocsHomePage() {
                     href={zalo}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex h-10 items-center rounded-xl border border-white/10 bg-white/[0.04] px-4 text-[11px] font-black uppercase tracking-widest text-neutral-300 hover:border-white/25 hover:text-white"
+                    className="inline-flex h-10 items-center rounded-xl border border-white/10 bg-white/[0.04] px-4 text-[13px] font-semibold text-neutral-300 hover:border-white/25 hover:text-white"
                   >
                     Zalo
                   </a>
                 ) : null}
                 <Link
                   href="/lien-he"
-                  className="inline-flex h-10 items-center rounded-xl border border-white/10 bg-white/[0.04] px-4 text-[11px] font-black uppercase tracking-widest text-neutral-300 hover:border-white/25 hover:text-white"
+                  className="inline-flex h-10 items-center rounded-xl border border-white/10 bg-white/[0.04] px-4 text-[13px] font-semibold text-neutral-300 hover:border-white/25 hover:text-white"
                 >
                   Mọi kênh liên hệ
                 </Link>

@@ -36,7 +36,7 @@ export default async function ForgotPasswordPage() {
       <main className="flex-1 relative z-20 w-full flex flex-col">
         <div className="min-h-[calc(100vh-100px)] flex items-center justify-center px-4 py-16">
           <div className="w-full max-w-[440px] rounded-[2rem] border border-white/10 bg-neutral-900/80 p-8 sm:p-10 shadow-2xl animate-[slideUpFade_0.5s_ease-out]">
-            <h1 className="text-3xl font-black uppercase tracking-wide text-white">
+            <h1 className="text-3xl font-black text-white">
               Quên mật khẩu
             </h1>
             <p className="mt-2 mb-8 text-sm font-medium text-neutral-400">
@@ -75,7 +75,7 @@ export default async function ForgotPasswordPage() {
                 </p>
                 <Link
                   href="/login"
-                  className="mt-2 text-center text-xs font-black uppercase tracking-widest text-[var(--menzu-accent)] transition-colors hover:text-[var(--menzu-accent-dark)]"
+                  className="mt-2 text-center text-[14px] font-semibold text-[var(--menzu-accent)] transition-colors hover:text-[var(--menzu-accent-dark)]"
                 >
                   Về trang đăng nhập
                 </Link>

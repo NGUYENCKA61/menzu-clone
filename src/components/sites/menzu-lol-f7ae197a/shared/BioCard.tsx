@@ -43,11 +43,11 @@ export function BioCard({ name, tagline, avatarUrl, links }: BioCardProps) {
             </div>
           </div>
 
-          <h1 className="text-sm font-extrabold text-white tracking-widest uppercase leading-none mb-1">
+          <h1 className="text-[15px] font-semibold text-white leading-none mb-1">
             {name}
           </h1>
           {tagline ? (
-            <p className="text-[10px] text-neutral-400 font-bold tracking-wider uppercase mb-4">
+            <p className="text-[12px] text-neutral-400 font-bold mb-4">
               {tagline}
             </p>
           ) : (
@@ -93,7 +93,7 @@ export function BioCard({ name, tagline, avatarUrl, links }: BioCardProps) {
                         />
                       </span>
                       <span className="text-left">
-                        <span className="block text-xs font-bold text-white uppercase tracking-wider">
+                        <span className="block text-[14px] font-bold text-white ">
                           {link.label}
                         </span>
                         {link.sublabel ? (

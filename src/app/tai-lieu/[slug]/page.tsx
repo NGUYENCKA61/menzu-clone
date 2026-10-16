@@ -82,10 +82,10 @@ export async function generateMetadata({
 
 const CARD = "rounded-2xl border border-white/10 bg-white/[0.02] p-5 sm:p-6";
 const H2 =
-  "scroll-mt-28 text-[15px] font-black uppercase tracking-wider text-white";
+  "scroll-mt-28 text-[15px] font-semibold text-white";
 const BODY = "text-sm leading-[1.65] text-neutral-300";
 const BUTTON =
-  "inline-flex h-11 items-center justify-center gap-2 rounded-xl px-5 text-[11px] font-black uppercase tracking-widest transition-colors";
+  "inline-flex h-11 items-center justify-center gap-2 rounded-xl px-5 text-[13px] font-semibold transition-colors";
 
 /** How long a tier opens the docs for, in the words of the tier table. */
 function windowLabel(durationHours: number | null): string {
@@ -241,7 +241,7 @@ export default async function ToolDocsPage({ params }: PageProps) {
             </div>
             {tool.packages.length > 0 ? (
               <div className={CARD}>
-                <p className="text-[10px] font-black uppercase tracking-widest text-neutral-500">
+                <p className="text-[12px] font-semibold text-neutral-500">
                   Thuê gói nào, xem tài liệu được bao lâu
                 </p>
                 <ul className="mt-3 grid gap-2 sm:grid-cols-2">
@@ -270,7 +270,7 @@ export default async function ToolDocsPage({ params }: PageProps) {
                   key={row.label}
                   className="grid gap-1 px-5 py-3 sm:grid-cols-[180px_1fr] sm:gap-4"
                 >
-                  <dt className="text-[11px] font-black uppercase tracking-widest text-neutral-500">
+                  <dt className="text-[13px] font-semibold text-neutral-500">
                     {row.label}
                   </dt>
                   <dd className="text-[13px] text-neutral-200">{row.value}</dd>

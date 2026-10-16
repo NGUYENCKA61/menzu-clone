@@ -135,7 +135,7 @@ export function WarrantyThread({
             >
               <span
                 aria-hidden
-                className={`flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-full border border-white/10 bg-black/40 text-[11px] font-black uppercase text-neutral-300 ${
+                className={`flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-full border border-white/10 bg-black/40 text-[13px] font-semibold text-neutral-300 ${
                   grouped ? "invisible" : "mt-[18px]"
                 }`}
               >
@@ -194,7 +194,7 @@ export function WarrantyThread({
                   <span className="mt-1 inline-flex items-center gap-1.5 px-1 text-[11px] text-neutral-500">
                     Chuyển sang
                     <span
-                      className={`inline-flex items-center gap-1 rounded-md border px-1.5 py-px text-[9.5px] font-black uppercase tracking-wider ${moved.tile}`}
+                      className={`inline-flex items-center gap-1 rounded-md border px-1.5 py-px text-[9.5px] font-semibold ${moved.tile}`}
                     >
                       <span
                         aria-hidden

@@ -143,7 +143,7 @@ export function ZaloLinkCard({
               type="button"
               onClick={() => void unlink()}
               disabled={busy !== null}
-              className="inline-flex h-9 items-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-3 text-[11px] font-black uppercase tracking-widest text-neutral-300 transition-colors hover:border-red-500/40 hover:text-red-400 disabled:opacity-50"
+              className="inline-flex h-9 items-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-3 text-[13px] font-semibold text-neutral-300 transition-colors hover:border-red-500/40 hover:text-red-400 disabled:opacity-50"
             >
               {busy === "unlink" ? (
                 <Loader2
@@ -161,7 +161,7 @@ export function ZaloLinkCard({
               type="button"
               onClick={() => void issue()}
               disabled={busy !== null}
-              className="inline-flex h-9 items-center gap-2 rounded-xl bg-[var(--menzu-accent)] px-4 text-[11px] font-black uppercase tracking-widest text-white transition-colors hover:bg-[var(--menzu-accent-dark)] disabled:opacity-50"
+              className="inline-flex h-9 items-center gap-2 rounded-xl bg-[var(--menzu-accent)] px-4 text-[13px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent-dark)] disabled:opacity-50"
             >
               {busy === "code" ? (
                 <Loader2
@@ -227,7 +227,7 @@ export function ZaloLinkCard({
                 type="button"
                 onClick={check}
                 disabled={busy !== null}
-                className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.04] px-3 text-[11px] font-black uppercase tracking-widest text-neutral-200 transition-colors hover:border-white/25 hover:text-white disabled:opacity-50"
+                className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.04] px-3 text-[13px] font-semibold text-neutral-200 transition-colors hover:border-white/25 hover:text-white disabled:opacity-50"
               >
                 {busy === "check" ? (
                   <Loader2

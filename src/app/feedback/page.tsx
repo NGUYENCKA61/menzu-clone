@@ -70,7 +70,7 @@ export default async function FeedbackPage() {
       action={
         <Link
           href="/feedback/submit"
-          className="inline-flex items-center gap-1.5 sm:gap-2 bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] text-white font-black px-3.5 py-2 sm:px-5 sm:py-2.5 rounded-xl whitespace-nowrap text-[10px] sm:text-xs uppercase tracking-wider w-fit transition-colors"
+          className="inline-flex items-center gap-1.5 sm:gap-2 bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] text-white font-semibold px-3.5 py-2 sm:px-5 sm:py-2.5 rounded-xl whitespace-nowrap text-[12px] sm:text-[14px] w-fit transition-colors"
         >
           <Star size={13} className="fill-white sm:w-3.5 sm:h-3.5" />
           Viết đánh giá

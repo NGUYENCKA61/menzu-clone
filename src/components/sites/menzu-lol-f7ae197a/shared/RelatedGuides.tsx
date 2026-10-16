@@ -18,7 +18,7 @@ const LINK =
   "text-sm text-neutral-300 underline-offset-2 transition-colors hover:text-white hover:underline";
 const CHIP =
   "inline-flex rounded-full border border-white/10 px-3 py-1 text-[12px] text-neutral-300 transition-colors hover:border-white/25 hover:text-white";
-const GROUP = "text-[11px] font-black uppercase tracking-widest text-neutral-500";
+const GROUP = "text-[13px] font-semibold text-neutral-500";
 
 /** The heading over the block. "section" is the red-bar h2 the storefront
  *  sections wear; "sub" is the h3 of the tool page's description, where
@@ -60,7 +60,7 @@ export function RelatedGuides({
       ) : (
         <h3
           id="related-guides-heading"
-          className="text-[17px] font-black uppercase tracking-wider text-white"
+          className="text-[17px] font-black text-white"
         >
           Hướng dẫn liên quan
         </h3>

@@ -115,7 +115,7 @@ export function ReviewAvatar({
         ) : avatarUrl ? (
           <Image src={avatarUrl} alt="" width={50} height={50} className="w-full h-full object-cover" />
         ) : (
-          <span aria-hidden className="text-base font-black uppercase text-neutral-400">
+          <span aria-hidden className="text-base font-semibold text-neutral-400">
             {name.slice(0, 1)}
           </span>
         )}
@@ -236,7 +236,7 @@ function ReviewCard({ item }: { item: FeedbackItem }) {
 
         {item.amount > 0 ? (
           <div className="mt-4 sm:mt-0 sm:absolute sm:bottom-6 sm:right-8 text-right flex flex-col items-end">
-            <span className="text-[10px] text-neutral-500 uppercase font-black tracking-[0.15em] mb-1">
+            <span className="text-[12px] text-neutral-500 font-semibold mb-1">
               Trị giá giao dịch
             </span>
             <span className="text-2xl font-black text-emerald-400 tabular-nums leading-none">
@@ -363,10 +363,10 @@ export function FeedbackBoard({ items }: { items: FeedbackItem[] }) {
         <div className="w-full bg-neutral-900/40 border border-neutral-800/60 p-4 rounded-2xl flex flex-wrap items-center justify-between gap-2 sm:hidden">
           <div className="flex items-center gap-3 bg-neutral-950/60 border border-neutral-800 px-3.5 py-2 rounded-xl shadow-inner shadow-black/40 shrink-0">
             <div className="flex flex-col mr-1 shrink-0 whitespace-nowrap">
-              <span className="text-[9px] font-black text-neutral-600 uppercase tracking-[0.2em] leading-none mb-1">
+              <span className="text-[12px] font-semibold text-neutral-600 leading-none mb-1">
                 Lọc theo
               </span>
-              <span className="text-xs font-black text-[var(--menzu-accent)] uppercase tracking-widest leading-none">
+              <span className="text-[14px] font-semibold text-[var(--menzu-accent)] leading-none">
                 Rating
               </span>
             </div>
@@ -377,23 +377,23 @@ export function FeedbackBoard({ items }: { items: FeedbackItem[] }) {
 
         {/* Desktop: label, capsule, sort pushed to the far edge. */}
         <div className="w-full bg-neutral-900/40 border border-neutral-800/60 p-4 rounded-2xl hidden sm:flex sm:items-center sm:gap-4">
-          <div className="flex items-center gap-2 text-neutral-400 text-xs font-black uppercase tracking-widest mr-2">
+          <div className="flex items-center gap-2 text-neutral-400 text-[14px] font-semibold mr-2">
             <Funnel size={14} className="text-[var(--menzu-accent)]" />
             <span>Bộ lọc:</span>
           </div>
           <div className="flex items-center gap-4 bg-neutral-950/60 border border-neutral-800 px-5 py-2.5 rounded-2xl shadow-inner shadow-black/40">
             <div className="flex flex-col mr-2">
-              <span className="text-[9px] font-black text-neutral-600 uppercase tracking-[0.2em] leading-none mb-1">
+              <span className="text-[12px] font-semibold text-neutral-600 leading-none mb-1">
                 Lọc theo
               </span>
-              <span className="text-xs font-black text-[var(--menzu-accent)] uppercase tracking-widest leading-none">
+              <span className="text-[14px] font-semibold text-[var(--menzu-accent)] leading-none">
                 Rating
               </span>
             </div>
             <RatingStars value={ratingFilter} onPick={pickRating} size={22} gap="gap-2" />
           </div>
           <div className="flex items-center gap-2 ml-auto">
-            <span className="text-[10px] font-black text-neutral-500 uppercase mr-1">Sắp xếp:</span>
+            <span className="text-[12px] font-semibold text-neutral-500 mr-1">Sắp xếp:</span>
             <SortToggle asc={asc} onChange={pickSort} />
           </div>
         </div>

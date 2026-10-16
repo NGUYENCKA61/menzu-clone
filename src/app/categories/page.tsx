@@ -62,7 +62,7 @@ export default async function CategoriesPage() {
               <div className="min-w-0">
                 <div className="flex items-center gap-3">
                   <LayoutGrid size={28} className="shrink-0 text-[var(--menzu-accent)]" aria-hidden />
-                  <h1 className="text-2xl sm:text-3xl font-black text-white uppercase tracking-wider">
+                  <h1 className="text-2xl sm:text-3xl font-black text-white ">
                     <CaseText text="DANH SÁCH DANH MỤC" />
                   </h1>
                 </div>

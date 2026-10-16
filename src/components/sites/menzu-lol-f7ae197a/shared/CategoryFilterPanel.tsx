@@ -206,7 +206,7 @@ export function CategoryFilterPanel({ hotPicks }: CategoryFilterPanelProps) {
           type="button"
           onClick={() => setFiltersOpen((o) => !o)}
           aria-expanded={filtersOpen || filtering}
-          className="md:hidden flex h-10 w-full items-center justify-between rounded-xl border border-white/10 bg-white/[0.03] px-3.5 text-[11px] font-black uppercase tracking-widest text-neutral-300"
+          className="md:hidden flex h-10 w-full items-center justify-between rounded-xl border border-white/10 bg-white/[0.03] px-3.5 text-[13px] font-semibold text-neutral-300"
         >
           <span className="flex items-center gap-2">
             <SlidersHorizontal size={14} aria-hidden />

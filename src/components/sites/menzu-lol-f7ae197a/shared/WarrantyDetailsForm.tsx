@@ -16,9 +16,9 @@ const FIELD =
   "w-full rounded-xl border border-white/10 bg-neutral-950/60 px-4 py-3 text-sm text-white outline-none transition-colors placeholder-neutral-500 focus:border-[var(--menzu-accent)]/60";
 const TYPES = ["image/png", "image/jpeg", "image/webp"];
 const GHOST =
-  "inline-flex h-11 items-center gap-2 rounded-xl border border-white/12 bg-white/[0.04] px-4 text-[11px] font-black uppercase tracking-widest text-neutral-300 transition-colors hover:border-white/25 hover:text-white";
+  "inline-flex h-11 items-center gap-2 rounded-xl border border-white/12 bg-white/[0.04] px-4 text-[13px] font-semibold text-neutral-300 transition-colors hover:border-white/25 hover:text-white";
 const PRIMARY =
-  "inline-flex h-11 items-center gap-2 rounded-xl bg-[var(--menzu-accent)] px-6 text-[11px] font-black uppercase tracking-widest text-white transition-colors hover:bg-[var(--menzu-accent-dark)] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-[var(--menzu-accent)]";
+  "inline-flex h-11 items-center gap-2 rounded-xl bg-[var(--menzu-accent)] px-6 text-[13px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent-dark)] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-[var(--menzu-accent)]";
 
 /**
  * The second round of a warranty report, one question at a time.
@@ -163,7 +163,7 @@ export function WarrantyDetailsForm({
     <div className="flex flex-col gap-5">
       <div className="flex flex-wrap items-start justify-between gap-3 border-b border-white/[0.06] pb-4">
         <div>
-          <h2 className="flex items-center gap-2.5 text-base font-black uppercase tracking-wider text-white">
+          <h2 className="flex items-center gap-2.5 text-base font-semibold text-white">
             <Info className="h-5 w-5 shrink-0 text-[var(--menzu-accent)]" aria-hidden />
             Bổ sung thông tin
           </h2>
@@ -187,7 +187,7 @@ export function WarrantyDetailsForm({
 
       <div>
         <div className="mb-3">
-          <h2 className="flex flex-wrap items-center gap-1.5 text-[13px] font-black uppercase tracking-widest text-white">
+          <h2 className="flex flex-wrap items-center gap-1.5 text-[15px] font-semibold text-white">
             {step + 1}. {q.label}
             <span aria-hidden className="text-[var(--menzu-accent)]">
               *

@@ -34,7 +34,7 @@ export function SeoContent({ heading, body, faq }: SeoContentProps) {
       {schema ? <JsonLd data={schema} /> : null}
 
       {heading ? (
-        <h2 className="text-lg font-black uppercase tracking-wider text-white sm:text-xl">
+        <h2 className="text-lg font-black text-white sm:text-xl">
           {heading}
         </h2>
       ) : null}

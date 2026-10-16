@@ -105,7 +105,7 @@ export function StatusToast({
             <look.Icon size={16} strokeWidth={3} />
           </span>
           <div className="min-w-0">
-            <p className="text-[13px] font-black uppercase tracking-wide text-white">
+            <p className="text-[15px] font-semibold text-white">
               {title}
             </p>
             <p className="mt-1 text-[12px] leading-relaxed text-neutral-300">

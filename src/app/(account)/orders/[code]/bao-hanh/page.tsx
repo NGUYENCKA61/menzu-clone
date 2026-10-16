@@ -301,7 +301,7 @@ export default async function WarrantyRequestPage({
       action={
         <Link
           href="/orders"
-          className="inline-flex h-9 items-center gap-2 rounded-xl border border-white/12 bg-white/[0.04] px-4 text-[11px] font-black uppercase tracking-widest text-neutral-300 transition-colors hover:border-white/25 hover:text-white"
+          className="inline-flex h-9 items-center gap-2 rounded-xl border border-white/12 bg-white/[0.04] px-4 text-[13px] font-semibold text-neutral-300 transition-colors hover:border-white/25 hover:text-white"
         >
           <ArrowLeft className="h-3.5 w-3.5" />
           Lịch sử mua hàng
@@ -377,7 +377,7 @@ export default async function WarrantyRequestPage({
                 ) : null}
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-black uppercase leading-snug text-white">
+                <p className="text-[15px] font-semibold leading-snug text-white">
                   {productName}
                 </p>
                 {/* Parted by space, as the receipt parts the same facts, not
@@ -448,7 +448,7 @@ export default async function WarrantyRequestPage({
         {sentReports.length > 0 ? (
           <section className={CARD}>
             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/[0.06] pb-4">
-              <h2 className="flex items-center gap-2.5 text-base font-black uppercase tracking-wider text-white">
+              <h2 className="flex items-center gap-2.5 text-base font-semibold text-white">
                 {/* Named for what it holds: while the bank form is up the
                     card is that form and nothing else (the owner, 12/10/2026:
                     "chỗ đó chỉ để nhập tiền thôi"). */}
@@ -475,7 +475,7 @@ export default async function WarrantyRequestPage({
               {/* The dot the desk's list wears, so both sides read one chip
                   (the owner, 12/10/2026: "bên khách hàng cũng có chấm đỏ"). */}
               <span
-                className={`inline-flex items-center gap-1.5 rounded-md border px-2 py-0.5 text-[10px] font-black uppercase tracking-wider ${WARRANTY_STATUS[sentReports[0].status].tile}`}
+                className={`inline-flex items-center gap-1.5 rounded-md border px-2 py-0.5 text-[12px] font-semibold ${WARRANTY_STATUS[sentReports[0].status].tile}`}
               >
                 <span
                   aria-hidden
@@ -495,7 +495,7 @@ export default async function WarrantyRequestPage({
                   <>
                     {index > 0 ? (
                       <span
-                        className={`inline-flex items-center gap-1.5 rounded-md border px-2 py-0.5 text-[10px] font-black uppercase tracking-wider ${state.tile}`}
+                        className={`inline-flex items-center gap-1.5 rounded-md border px-2 py-0.5 text-[12px] font-semibold ${state.tile}`}
                       >
                         <span
                           aria-hidden
@@ -738,7 +738,7 @@ export default async function WarrantyRequestPage({
           <div className="flex justify-end">
             <Link
               href={`/orders/${order.code}/bao-hanh?moi=1`}
-              className="inline-flex h-11 items-center gap-2 rounded-xl bg-white px-6 text-[11px] font-black uppercase tracking-widest text-black transition-colors hover:bg-neutral-200"
+              className="inline-flex h-11 items-center gap-2 rounded-xl bg-white px-6 text-[13px] font-semibold text-black transition-colors hover:bg-neutral-200"
             >
               <Plus className="h-4 w-4" />
               Tạo đơn mới

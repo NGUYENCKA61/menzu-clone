@@ -26,7 +26,7 @@
 
 /** The chrome both buttons share — the brand pieces slot inside it. */
 const SHELL =
-  "relative overflow-hidden transform-gpu flex items-center justify-center gap-3 rounded-2xl border border-white/10 bg-black/40 py-4 text-xs font-black uppercase tracking-widest text-neutral-300 transition-all duration-300 hover:-translate-y-1 hover:border-white/30 hover:bg-white/10 hover:text-white hover:shadow-[0_10px_20px_rgba(0,0,0,0.5)] active:translate-y-0 active:scale-95 group/btn";
+  "relative overflow-hidden transform-gpu flex items-center justify-center gap-3 rounded-2xl border border-white/10 bg-black/40 py-4 text-[14px] font-semibold text-neutral-300 transition-all duration-300 hover:-translate-y-1 hover:border-white/30 hover:bg-white/10 hover:text-white hover:shadow-[0_10px_20px_rgba(0,0,0,0.5)] active:translate-y-0 active:scale-95 group/btn";
 
 /** The band that sweeps across on hover; each brand tints it its own way. */
 const SHEEN =

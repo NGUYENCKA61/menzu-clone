@@ -38,7 +38,7 @@ export default async function FreeKeyPage({
   ]);
 
   const BUTTON =
-    "inline-flex h-11 items-center gap-2 rounded-xl px-5 text-[11px] font-black uppercase tracking-widest transition-colors";
+    "inline-flex h-11 items-center gap-2 rounded-xl px-5 text-[13px] font-semibold transition-colors";
   const PRIMARY = `${BUTTON} bg-[var(--menzu-accent)] text-white hover:bg-[var(--menzu-accent-dark)]`;
   const QUIET = `${BUTTON} border border-white/10 bg-white/[0.04] text-neutral-300 hover:border-white/25 hover:text-white`;
 
@@ -68,7 +68,7 @@ export default async function FreeKeyPage({
           </>
         ) : outcome.state === "claimed" && user?.id === outcome.userId ? (
           <>
-            <span className="inline-flex items-center gap-1.5 rounded-md border border-emerald-500/40 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-emerald-300">
+            <span className="inline-flex items-center gap-1.5 rounded-md border border-emerald-500/40 bg-emerald-500/10 px-2 py-0.5 text-[12px] font-semibold text-emerald-300">
               Đã nhận key
             </span>
             <h2 className="mt-3 text-lg font-black text-white">

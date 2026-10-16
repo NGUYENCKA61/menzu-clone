@@ -17,7 +17,7 @@ export const metadata: Metadata = {
 export const dynamic = "force-dynamic";
 
 const CARD = "rounded-2xl border border-white/10 bg-neutral-900/50 p-5 sm:p-6";
-const LABEL = "text-[10px] font-black uppercase tracking-widest text-neutral-500";
+const LABEL = "text-[12px] font-semibold text-neutral-500";
 
 function stamp(date: Date): string {
   return date.toLocaleString("vi-VN", {
@@ -84,7 +84,7 @@ export default async function SpinPrizePage({
       <div className="flex max-w-3xl flex-col gap-5">
         <Link
           href="/vong-quay"
-          className="inline-flex w-fit items-center gap-1.5 text-[11px] font-black uppercase tracking-widest text-neutral-400 transition-colors hover:text-white"
+          className="inline-flex w-fit items-center gap-1.5 text-[13px] font-semibold text-neutral-400 transition-colors hover:text-white"
         >
           <ArrowLeft className="h-3.5 w-3.5" />
           Vòng quay

@@ -56,7 +56,7 @@ export function NotFoundContent() {
           <h1 className="text-8xl font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-400 drop-shadow-[0_5px_15px_rgba(0,0,0,0.5)]">
             404
           </h1>
-          <h2 className="text-xl sm:text-2xl font-black uppercase text-white tracking-wider">
+          <h2 className="text-xl sm:text-2xl font-black text-white ">
             Không tìm thấy trang
           </h2>
           <p className="text-neutral-400 text-sm max-w-sm mx-auto leading-relaxed">
@@ -83,7 +83,7 @@ export function NotFoundContent() {
           >
             <div className="relative w-full bg-[#101114] group-hover:bg-[var(--menzu-accent)] transition-colors duration-300 flex items-center justify-center py-3 [clip-path:polygon(7px_0,100%_0,100%_calc(100%-7px),calc(100%-7px)_100%,0_100%,0_7px)] overflow-hidden">
               <House className="w-4 h-4 text-[var(--menzu-accent)] group-hover:text-white mr-2 transition-colors duration-300" />
-              <span className="text-white font-black text-xs uppercase tracking-widest">
+              <span className="text-white font-semibold text-[14px] ">
                 Quay lại trang chủ
               </span>
               <ArrowRight className="w-4 h-4 text-[var(--menzu-accent)] group-hover:text-white ml-2 group-hover:translate-x-1 transition-all duration-300" />

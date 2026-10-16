@@ -111,7 +111,7 @@ interface CheckoutReceipt {
 const STEP_BUTTON =
   "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/[0.03] text-neutral-300 transition-colors hover:border-[var(--menzu-accent)]/40 hover:bg-[var(--menzu-accent)]/10 hover:text-[var(--menzu-accent)] disabled:opacity-40 disabled:hover:border-white/10 disabled:hover:bg-white/[0.03] disabled:hover:text-neutral-300";
 const LABEL =
-  "text-[10px] font-black uppercase tracking-widest text-neutral-500";
+  "text-[12px] font-semibold text-neutral-500";
 
 /* The receipt prints top to bottom: each band rises into place a beat after
    the one above it (receipt-in, in globals.css). Written out in full because
@@ -198,7 +198,7 @@ function ReceiptLine({ line }: { line: CartLine }) {
         <div className="mt-1 flex flex-wrap items-center gap-1.5">
           {/* Neutral here, not the accent: nothing on a receipt is left to
               act on, so the chip only tells one line from the next. */}
-          <span className="rounded-md border border-white/15 bg-white/10 px-2 py-0.5 text-[9px] font-black uppercase tracking-widest text-neutral-300">
+          <span className="rounded-md border border-white/15 bg-white/10 px-2 py-0.5 text-[12px] font-semibold text-neutral-300">
             {line.packageLabel}
           </span>
           <span className="text-[11px] font-semibold tabular-nums text-neutral-500">
@@ -234,7 +234,7 @@ export function CartEmpty({ signedIn }: { signedIn: boolean }) {
 
       <Link
         href={signedIn ? "/categories" : "/login?next=/cart"}
-        className="mt-6 inline-flex items-center gap-2 h-10 px-5 rounded-xl bg-[var(--brand)] hover:bg-[var(--brand-dark)] transition-colors text-[11px] font-black uppercase tracking-widest text-white"
+        className="mt-6 inline-flex items-center gap-2 h-10 px-5 rounded-xl bg-[var(--brand)] hover:bg-[var(--brand-dark)] transition-colors text-[13px] font-semibold text-white"
       >
         {signedIn ? "Quay lại cửa hàng" : "Đăng nhập"}
         <ArrowRight size={14} />
@@ -516,7 +516,7 @@ export function CartView({
               </span>
             </span>
             <div className="min-w-0">
-              <h2 className="text-lg font-black uppercase tracking-wider text-white">
+              <h2 className="text-lg font-black text-white">
                 Thanh toán thành công
               </h2>
               {/* The two figures a buyer wants first, before the bands print. */}
@@ -678,14 +678,14 @@ export function CartView({
           <div className="mt-4 flex flex-col gap-2.5 sm:flex-row">
             <Link
               href="/orders"
-              className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[var(--menzu-accent)] px-6 sm:flex-1 text-[11px] font-black uppercase tracking-widest text-white transition-colors hover:bg-[var(--menzu-accent-dark)]"
+              className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[var(--menzu-accent)] px-6 sm:flex-1 text-[13px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent-dark)]"
             >
               <KeyRound className="h-4 w-4" aria-hidden />
               Lấy key trong đơn hàng
             </Link>
             <Link
               href="/categories"
-              className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-white/10 px-6 text-[11px] font-black uppercase tracking-widest text-neutral-300 transition-colors hover:bg-white/5 hover:text-white"
+              className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-white/10 px-6 text-[13px] font-semibold text-neutral-300 transition-colors hover:bg-white/5 hover:text-white"
             >
               Tiếp tục mua
               <ArrowRight className="h-4 w-4" aria-hidden />
@@ -755,7 +755,7 @@ export function CartView({
                     it came off on the owner's word (01/10/2026), the line's
                     total on the right says the money. */}
                 <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                  <span className="whitespace-nowrap rounded-md border border-white/15 bg-white/10 px-2 py-0.5 text-[9px] font-black uppercase tracking-widest text-neutral-300">
+                  <span className="whitespace-nowrap rounded-md border border-white/15 bg-white/10 px-2 py-0.5 text-[12px] font-semibold text-neutral-300">
                     {line.packageLabel}
                   </span>
                 </div>
@@ -836,7 +836,7 @@ export function CartView({
       {/* Flat, like the panels on the account pages: no warm tint, no glow,
           no red bar — the red left in here is the button's. */}
       <aside className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02] p-5 lg:sticky lg:top-28">
-        <h2 className="relative text-lg font-black uppercase tracking-wider text-white">
+        <h2 className="relative text-lg font-black text-white">
           Tóm tắt đơn hàng
         </h2>
 
@@ -916,7 +916,7 @@ export function CartView({
               wallet's balance is not printed — the header carries it, and a
               shortfall says itself just below. */}
           <div className="flex items-baseline justify-between gap-4">
-            <span className="text-sm font-black uppercase tracking-wider text-neutral-400">
+            <span className="text-[15px] font-semibold text-neutral-400">
               Tổng thanh toán
             </span>
             <span className="text-2xl font-black tabular-nums text-neutral-200">
@@ -944,7 +944,7 @@ export function CartView({
         {shortfall > 0 ? (
           <Link
             href="/wallet"
-            className="relative mt-4 flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[var(--menzu-accent)] text-[12px] font-black uppercase tracking-widest text-white transition-colors hover:bg-[var(--menzu-accent-dark)]"
+            className="relative mt-4 flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[var(--menzu-accent)] text-[14px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent-dark)]"
           >
             Nạp tiền ngay
           </Link>
@@ -954,7 +954,7 @@ export function CartView({
             disabled={busy || isPending}
             aria-busy={busy}
             onClick={checkout}
-            className="relative mt-4 flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[var(--menzu-accent)] text-[12px] font-black uppercase tracking-widest text-white transition-colors hover:bg-[var(--menzu-accent-dark)] disabled:opacity-60"
+            className="relative mt-4 flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[var(--menzu-accent)] text-[14px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent-dark)] disabled:opacity-60"
           >
             {busy ? <Loader2 size={14} className="animate-spin motion-reduce:animate-none" aria-hidden /> : null}
             {busy ? "Đang xử lý…" : "Thanh toán"}

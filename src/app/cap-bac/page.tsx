@@ -31,7 +31,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 export const dynamic = "force-dynamic";
 
-const LABEL = "text-[10px] font-black uppercase tracking-widest text-neutral-500";
+const LABEL = "text-[12px] font-semibold text-neutral-500";
 
 /**
  * The tier ladder, public: what each rank costs to reach and what it pays
@@ -73,7 +73,7 @@ export default async function MemberTiersPage() {
               <div>
                 <p className={LABEL}>Hạng của bạn</p>
                 <p
-                  className={`mt-0.5 text-2xl font-black uppercase leading-none tracking-wider ${TIER_STYLE[mine].text}`}
+                  className={`mt-0.5 text-2xl font-black leading-none ${TIER_STYLE[mine].text}`}
                 >
                   {TIER_RULES[mine].label}
                 </p>
@@ -135,11 +135,11 @@ export default async function MemberTiersPage() {
               <div className="flex items-center justify-between gap-2">
                 <TierBadge tier={tier} size="md" />
                 {current ? (
-                  <span className="rounded-md border border-[var(--menzu-accent)]/30 bg-[var(--menzu-accent)]/10 px-2 py-1 text-[10px] font-black uppercase tracking-wider text-[var(--menzu-accent)]">
+                  <span className="rounded-md border border-[var(--menzu-accent)]/30 bg-[var(--menzu-accent)]/10 px-2 py-1 text-[12px] font-semibold text-[var(--menzu-accent)]">
                     Bạn đang ở đây
                   </span>
                 ) : reached ? (
-                  <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wider text-emerald-400">
+                  <span className="inline-flex items-center gap-1 text-[12px] font-semibold text-emerald-400">
                     <ShieldCheck size={12} />
                     Đã đạt
                   </span>
@@ -147,7 +147,7 @@ export default async function MemberTiersPage() {
               </div>
               <div>
                 <p
-                  className={`text-xl font-black uppercase leading-none tracking-wider ${style.text}`}
+                  className={`text-xl font-black leading-none ${style.text}`}
                 >
                   {rule.label}
                 </p>

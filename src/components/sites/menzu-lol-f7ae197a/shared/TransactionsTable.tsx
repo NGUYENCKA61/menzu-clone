@@ -120,7 +120,7 @@ function StatusPill({ status, phone = false }: { status: string; phone?: boolean
   const look = STATUS[status] ?? STATUS.SUCCESS!;
   return (
     <span
-      className={`whitespace-nowrap ${look.tone} text-[9px] font-bold uppercase tracking-widest border ${phone ? "px-2 py-0.5" : "px-2.5 py-1"} rounded`}
+      className={`whitespace-nowrap ${look.tone} text-[12px] font-bold border ${phone ? "px-2 py-0.5" : "px-2.5 py-1"} rounded`}
     >
       {look.label}
     </span>
@@ -196,7 +196,7 @@ export function TransactionsTable({ rows }: { rows: LedgerView[] }) {
     >
       <div>
         <div className="mb-8 relative z-10">
-          <h1 className="text-xl sm:text-2xl font-black text-white uppercase tracking-wider mb-2 flex items-center gap-3">
+          <h1 className="text-xl sm:text-2xl font-black text-white mb-2 flex items-center gap-3">
             <History size={24} className="shrink-0 text-[var(--menzu-accent)]" aria-hidden />
             Lịch sử giao dịch
           </h1>
@@ -272,7 +272,7 @@ export function TransactionsTable({ rows }: { rows: LedgerView[] }) {
             <div className="hidden md:block border border-white/5 bg-[#111111] rounded-[16px] overflow-hidden relative z-10">
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs min-w-[700px]">
-                  <thead className="bg-white/[0.02] border-b border-white/5 uppercase tracking-widest text-neutral-500">
+                  <thead className="bg-white/[0.02] border-b border-white/5 text-neutral-500">
                     <tr>
                       <th scope="col" className="px-5 py-4 font-bold">Thời gian</th>
                       <th scope="col" className="px-5 py-4 font-bold">Chi tiết &amp; Phương thức</th>
@@ -303,7 +303,7 @@ export function TransactionsTable({ rows }: { rows: LedgerView[] }) {
                             <td className="px-5 py-4 align-middle">
                               <span className="font-bold text-neutral-200 block mb-1">{row.description}</span>
                               <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mb-2">
-                                <span className="text-[9px] text-neutral-500 uppercase tracking-widest bg-white/5 px-2 py-0.5 rounded">
+                                <span className="text-[12px] text-neutral-500 bg-white/5 px-2 py-0.5 rounded">
                                   {methodChip(row)}
                                 </span>
                                 <span className="text-[10px] text-neutral-500 font-mono">#{row.code}</span>
@@ -347,7 +347,7 @@ export function TransactionsTable({ rows }: { rows: LedgerView[] }) {
                         </span>
                         <div className="flex items-center gap-2">
                           <span className="font-mono text-neutral-500 text-xs font-bold">#{row.code}</span>
-                          <span className="text-[9px] text-neutral-500 uppercase tracking-widest bg-white/5 px-1.5 py-0.5 rounded">
+                          <span className="text-[12px] text-neutral-500 bg-white/5 px-1.5 py-0.5 rounded">
                             {methodChip(row)}
                           </span>
                         </div>
