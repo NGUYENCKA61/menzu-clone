@@ -203,9 +203,10 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
               <AvatarUploader avatarUrl={user.avatarUrl} username={user.username} />
               <div className="flex min-w-0 flex-col gap-2">
                 <div className="flex min-w-0 flex-wrap items-center gap-2.5">
-                  {/* The card's title: a step under the page's h1 on a phone,
-                      level with it from sm, as the reference's name is. */}
-                  <span className="truncate text-xl font-black uppercase tracking-wide leading-none text-white sm:text-2xl">
+                  {/* A card title under the page's h1, so one step below it:
+                      18/20px under the 20/24px title, as /wallet's card
+                      titles are (16/10/2026: "sửa lại cho đồng bộ kích thước"). */}
+                  <span className="truncate text-lg font-black uppercase tracking-wide leading-none text-white sm:text-xl">
                     {user.username}
                   </span>
                   <BadgeCheck size={18} className="shrink-0 fill-emerald-500 text-white" />
@@ -240,7 +241,7 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                 card, the reference's share). Below xl the doors make a row
                 under the card. */}
             <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_200px]">
-              <div className="flex flex-col gap-4 rounded-xl border border-white/10 bg-[#111111]/60 p-5 backdrop-blur-md sm:p-6">
+              <div className="flex flex-col gap-4 rounded-xl border border-white/10 bg-[#111111]/60 p-5 backdrop-blur-md">
                 {/* The rank, and the one after it in its own metal. */}
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <span className="text-[10px] font-black uppercase tracking-widest text-neutral-400">
@@ -265,7 +266,7 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                     same way; here the rank is bought with top-ups. */}
                 <div>
                   <div className="flex flex-wrap items-baseline gap-x-1.5 gap-y-1">
-                    <span className="text-2xl font-black tabular-nums leading-none text-white sm:text-3xl">
+                    <span className="text-xl font-black tabular-nums leading-none text-white sm:text-2xl">
                       {formatVnd(toppedUp)}
                     </span>
                     <span className="text-sm font-semibold text-neutral-400">
