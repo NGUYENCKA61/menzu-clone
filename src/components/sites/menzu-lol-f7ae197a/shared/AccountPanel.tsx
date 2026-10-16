@@ -25,21 +25,13 @@ interface AccountPanelProps {
 export function AccountPanel({ icon: Icon, title, subtitle, action, children }: AccountPanelProps) {
   return (
     <div className="w-full bg-transparent sm:bg-[#111111] border-0 sm:border sm:border-white/5 rounded-none sm:rounded-[24px] p-0 sm:p-8 lg:p-10 relative min-h-0 sm:min-h-[750px]">
-      {/* The head as the owner drew it (16/10/2026, "thiết kế lại bố cục như
-          này thử"): the page's mark in a tinted square, the title and its
-          line beside it, a hairline under the pair. */}
-      <div className="relative z-10 mb-6 flex flex-wrap items-start justify-between gap-4 border-b border-white/10 pb-5 sm:mb-8 sm:pb-6">
-        <div className="flex min-w-0 items-center gap-3 sm:gap-4">
-          <span
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[var(--menzu-accent)]/30 bg-[var(--menzu-accent)]/15 text-[var(--menzu-accent)] sm:h-11 sm:w-11"
-            aria-hidden
-          >
-            <Icon size={20} />
-          </span>
-          <div className="min-w-0">
-            <h1 className="text-xl font-black uppercase tracking-wider text-white sm:text-2xl">{title}</h1>
-            <p className="mt-1 text-xs leading-relaxed text-neutral-400 sm:text-sm">{subtitle}</p>
-          </div>
+      <div className="mb-6 sm:mb-8 relative z-10 flex flex-wrap items-start justify-between gap-4">
+        <div className="min-w-0">
+          <h1 className="text-xl sm:text-2xl font-black text-white uppercase tracking-wider mb-2 flex items-center gap-3">
+            <Icon size={24} className="shrink-0 text-[var(--menzu-accent)]" aria-hidden />
+            {title}
+          </h1>
+          <p className="text-xs sm:text-sm text-neutral-400 leading-relaxed">{subtitle}</p>
         </div>
         {action ? <div className="shrink-0">{action}</div> : null}
       </div>
