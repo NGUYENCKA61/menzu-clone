@@ -49,10 +49,12 @@ metals keep their own colours. (See the history note below for the cool steel sc
 
 ### Type
 
-- **Display:** Chakra Petch 600/700 (Vietnamese subset). Game names, section
-  titles, prices, figures, rank. Its angled terminals echo the notch.
-- **Interface and body:** Be Vietnam Pro 400/500/600/700, drawn for Vietnamese
-  diacritics. Body 15 to 16px, line-height 1.55 to 1.65, lines under 75 characters.
+- **Typeface:** Inter, the live site's own, for everything (the owner, 16/10/2026:
+  "cho cái font kiểu chữ nó giống web hiện tại"). The round first tried Chakra
+  Petch for display and Be Vietnam Pro for the body; the `font-display` token
+  stays and now points at Inter. The brand in the hero and the account name are
+  weight 900 like the live site ("mấy cái chữ thichthihack nhìn ốm quá").
+  Body 15 to 16px, line-height 1.55 to 1.65, lines under 75 characters.
 - **Scale (px):** 12, 13, 14, 16, 20, 24, 32, 44 (hero 52 on desktop).
 - **Case:** sentence case for labels, buttons, headings. No tracked all-caps.
   Game and product names that arrive in capitals from the catalogue go through

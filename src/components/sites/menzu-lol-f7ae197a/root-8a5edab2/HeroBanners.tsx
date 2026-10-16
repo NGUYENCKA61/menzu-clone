@@ -151,7 +151,7 @@ export function HeroBanners({
             // One unbreakable word in a column capped at 440px: at 46px it is
             // 485px wide and its last letters ran under the video card on
             // every screen from 1024 to 1279. 40px is 422px — inside the cap.
-            className="font-display text-[34px] font-bold leading-[1.04] tracking-[-0.01em] text-frost sm:text-[44px] lg:text-[46px] xl:text-[52px]"
+            className="font-display text-[34px] font-black leading-[1.04] tracking-tight text-frost sm:text-[44px] lg:text-[46px] xl:text-[50px]"
           >
             {lines.map((line, li) => (
               <span key={li} className="block whitespace-nowrap" aria-hidden>

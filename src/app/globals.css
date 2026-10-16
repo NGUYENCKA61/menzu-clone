@@ -7,9 +7,10 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-bvp), "Be Vietnam Pro", ui-sans-serif, system-ui, sans-serif;
-  /* LAB: the display face (docs/design/LAB-MASTER.md). */
-  --font-display: var(--font-chakra), "Chakra Petch", var(--font-bvp), ui-sans-serif, sans-serif;
+  --font-sans: var(--font-inter), "Inter", ui-sans-serif, system-ui, sans-serif;
+  /* LAB: the display role kept as a token, set in Inter like the live site
+     (the owner: "cho cái font kiểu chữ nó giống web hiện tại"). */
+  --font-display: var(--font-sans);
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
     "Liberation Mono", "Courier New", monospace;
   --font-heading: var(--font-sans);

@@ -203,7 +203,7 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                   {/* A card title under the page's h1, so one step below it:
                       18/20px under the 20/24px title, as /wallet's card
                       titles are (16/10/2026: "sửa lại cho đồng bộ kích thước"). */}
-                  <span className="truncate font-display text-[22px] font-bold leading-none text-frost sm:text-[26px]">
+                  <span className="truncate font-display text-[22px] font-black leading-none text-frost sm:text-[26px]">
                     {user.username}
                   </span>
                   <BadgeCheck size={18} className="shrink-0 fill-emerald-500 text-white" />
