@@ -129,8 +129,12 @@ export function SoftwareCard({
     ? Math.min(...software.packages.map((p) => p.price))
     : null;
   const freeHref = detailHref;
+  // White with black type as a TRIAL, like the ribbon (the owner,
+  // 16/10/2026: "Nút tải ngay đổi thành màu trắng thử"); the hairline keeps
+  // it visible on the light dresses' white cards. The red was
+  // bg-[var(--menzu-accent)] text-white hover:bg-[var(--menzu-accent-dark)].
   const FREE_BUTTON =
-    "flex h-[42px] items-center justify-center gap-2 rounded-[9px] bg-[var(--menzu-accent)] px-5 text-[11px] font-extrabold uppercase tracking-wide text-white transition-colors hover:bg-[var(--menzu-accent-dark)]";
+    "flex h-[42px] items-center justify-center gap-2 rounded-[9px] border border-black/10 bg-white px-5 text-[11px] font-extrabold uppercase tracking-wide text-black transition-colors hover:bg-neutral-200";
 
   // One dropdown row. Same 11px/Inter as the trigger and the buttons, so the
   // open list matches the card exactly (the whole reason for a custom picker
