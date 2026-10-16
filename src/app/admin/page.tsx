@@ -1,26 +1,11 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import type { Prisma } from "@prisma/client";
-import {
-  BadgeCheck,
-  Banknote,
-  CircleDollarSign,
-  CreditCard,
-  Gift,
-  KeyRound,
-  Landmark,
-  ShieldCheck,
-  Star,
-  TrendingUp,
-  UserRoundPlus,
-  Users,
-} from "lucide-react";
 
 import { AdminDashboard } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminDashboard";
 import { AdminShell } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminShell";
 import { formatVnd } from "@/components/sites/menzu-lol-f7ae197a/shared/productData";
 import { getAdmin } from "@/lib/admin";
-import { relativeTime } from "@/lib/announcements";
 import {
   lastDays,
   percentChange,
@@ -90,7 +75,6 @@ export default async function AdminHome() {
     dailyRevenue,
     recentTopUps,
     recentOrders,
-    recentSignUps,
     openTickets,
     reviewsWaiting,
     parcelsWaiting,
@@ -151,17 +135,12 @@ export default async function AdminHome() {
     db.topUp.findMany({
       orderBy: { createdAt: "desc" },
       take: 12,
-      include: { user: { select: { username: true, avatarUrl: true } } },
+      include: { user: { select: { username: true } } },
     }),
     db.order.findMany({
       orderBy: { createdAt: "desc" },
       take: 12,
-      include: { user: { select: { username: true, avatarUrl: true } } },
-    }),
-    db.user.findMany({
-      orderBy: { createdAt: "desc" },
-      take: 5,
-      select: { id: true, username: true, avatarUrl: true, createdAt: true },
+      include: { user: { select: { username: true } } },
     }),
     // What waits on the shop, for the to-do cards. No top-up card: the shop
     // tops up automatically (the owner, 02/10/2026: "không cần vì tự động
@@ -254,7 +233,6 @@ export default async function AdminHome() {
     ...recentTopUps.map((row) => ({
       code: row.code,
       username: row.user.username,
-      avatarUrl: row.user.avatarUrl,
       kind: row.method === "CARD" ? "Nạp thẻ" : "Nạp bank",
       // Only a completed top-up is money. This feed reads the newest twelve
       // whatever their state, and it used to stamp every one of them with a
@@ -271,7 +249,6 @@ export default async function AdminHome() {
     ...recentOrders.map((row) => ({
       code: row.code,
       username: row.user.username,
-      avatarUrl: row.user.avatarUrl,
       kind: "Đơn hàng",
       amount: `${formatVnd(Number(row.total))}đ`,
       credit: false,
@@ -282,92 +259,24 @@ export default async function AdminHome() {
     .sort((a, b) => b.at.getTime() - a.at.getTime())
     .slice(0, 8);
 
-  // The activity feed is the same events plus registrations, which have no
-  // amount — a new account is something that happened, not money that moved.
-  const now = new Date();
-  const activity = [
-    ...transactions.slice(0, 6).map((row) => ({
-      id: `tx-${row.code}`,
-      username: row.username,
-      avatarUrl: row.avatarUrl,
-      what: row.kind,
-      amount: row.amount as string | null,
-      credit: row.credit,
-      state: row.state,
-      at: row.at,
-    })),
-    ...recentSignUps.map((row) => ({
-      id: `user-${row.id}`,
-      username: row.username,
-      avatarUrl: row.avatarUrl,
-      what: "Đăng ký tài khoản",
-      amount: null,
-      credit: false,
-      state: "SUCCESS" as const,
-      at: row.createdAt,
-    })),
-  ]
-    .sort((a, b) => b.at.getTime() - a.at.getTime())
-    .slice(0, 5)
-    // "2 phút" is measured here, against the server's clock. The page is
-    // force-dynamic and never hydrates this, so there is no second render to
-    // disagree with.
-    .map(({ at, ...rest }) => ({ ...rest, ago: relativeTime(at, now) }));
-
   return (
     <AdminShell
       title="Tổng quan"
-      subtitle="Số liệu hệ thống, đọc trực tiếp từ cơ sở dữ liệu"
       username={admin.username}
     >
       <AdminDashboard
         todo={[
+          { label: "Bảo hành chờ trả lời", count: repliesDue, href: "/admin/warranty?filter=todo" },
+          { label: "Hoàn tiền chờ chuyển khoản", count: transfersDue, href: "/admin/warranty?filter=todo" },
+          { label: "Xác thực chờ duyệt", count: verificationsWaiting, href: "/admin/verifications" },
           {
-            label: "Bảo hành chờ trả lời",
-            count: repliesDue,
-            sub: "yêu cầu mới hoặc khách vừa nhắn",
-            href: "/admin/warranty?filter=todo",
-            icon: ShieldCheck,
-          },
-          {
-            label: "Hoàn tiền chờ chuyển khoản",
-            count: transfersDue,
-            sub: "khách đã gửi số tài khoản",
-            href: "/admin/warranty?filter=todo",
-            icon: Banknote,
-          },
-          {
-            label: "Xác thực chờ duyệt",
-            count: verificationsWaiting,
-            sub: "hồ sơ lên cấp 2 khách vừa gửi",
-            href: "/admin/verifications",
-            icon: BadgeCheck,
-          },
-          {
-            label: "Kho sắp hết hàng",
+            label: "Gói sắp hết hàng",
             count: shelves.length,
-            sub:
-              ordersWaiting > 0
-                ? `${ordersWaiting} đơn đã trả tiền chờ giao`
-                : `gói còn từ ${Math.max(0, threshold)} trở xuống`,
-            subWarn: ordersWaiting > 0,
+            warn: ordersWaiting > 0 ? `${ordersWaiting} đơn đã trả tiền đang chờ giao` : undefined,
             href: shelves.length > 0 ? "#kho-key" : "/admin/products",
-            icon: KeyRound,
           },
-          {
-            label: "Quà chờ gửi",
-            count: parcelsWaiting,
-            sub: "quà vòng quay chưa gửi đi",
-            href: "/admin/operations?tab=parcels",
-            icon: Gift,
-          },
-          {
-            label: "Đánh giá chờ duyệt",
-            count: reviewsWaiting,
-            sub: "chưa hiện cho khách xem",
-            href: "/admin/operations?tab=feedback",
-            icon: Star,
-          },
+          { label: "Quà chờ gửi", count: parcelsWaiting, href: "/admin/operations?tab=parcels" },
+          { label: "Đánh giá chờ duyệt", count: reviewsWaiting, href: "/admin/operations?tab=feedback" },
         ]}
         restock={{
           lines: shelves.slice(0, RESTOCK_SHOWN).map((shelf) => ({
@@ -385,76 +294,26 @@ export default async function AdminHome() {
           })),
           more: Math.max(0, shelves.length - RESTOCK_SHOWN),
         }}
-        todayStats={[
-          {
-            label: "Doanh thu hôm nay",
-            value: `${formatVnd(Number(incomeToday._sum.total ?? 0))}đ`,
-            sub: `${incomeToday._count} đơn đã thanh toán`,
-            icon: CircleDollarSign,
-            tint: "border-emerald-500/25 bg-emerald-500/10 text-emerald-400",
-          },
-          {
-            label: "Nạp bank hôm nay",
-            value: `${formatVnd(Number(bankToday._sum.amount ?? 0))}đ`,
-            sub: `${bankToday._count} lượt chuyển khoản`,
-            icon: Landmark,
-            tint: "border-sky-500/25 bg-sky-500/10 text-sky-400",
-          },
-          {
-            label: "Nạp thẻ hôm nay",
-            value: `${formatVnd(Number(cardToday._sum.amount ?? 0))}đ`,
-            sub: `${cardToday._count} lượt nạp thẻ cào`,
-            icon: CreditCard,
-            tint: "border-violet-500/25 bg-violet-500/10 text-violet-400",
-          },
-          {
-            label: "Người dùng mới",
-            value: String(newUsersToday),
-            sub: "tài khoản đăng ký hôm nay",
-            icon: UserRoundPlus,
-            tint: "border-amber-500/25 bg-amber-500/10 text-amber-400",
-          },
+        today={[
+          { label: "Doanh thu", value: `${formatVnd(Number(incomeToday._sum.total ?? 0))}đ` },
+          { label: "Nạp bank", value: `${formatVnd(Number(bankToday._sum.amount ?? 0))}đ` },
+          { label: "Nạp thẻ", value: `${formatVnd(Number(cardToday._sum.amount ?? 0))}đ` },
+          { label: "Người dùng mới", value: formatVnd(newUsersToday) },
         ]}
         totals={[
-          {
-            label: "Tổng thành viên",
-            value: String(users),
-            sub: "tài khoản đã đăng ký",
-            icon: Users,
-            tint: "border-indigo-500/25 bg-indigo-500/10 text-indigo-400",
-          },
-          {
-            label: "Tổng doanh thu",
-            value: `${formatVnd(Number(revenueAllTime._sum.total ?? 0))}đ`,
-            // Only shown when last week had something to compare against.
-            sub:
-              weekChange === null
-                ? "toàn bộ đơn đã thanh toán"
-                : `${formatPercent(weekChange)} so với tuần trước`,
-            tone: weekChange === null ? undefined : weekChange >= 0 ? "up" : "down",
-            icon: TrendingUp,
-            tint: "border-emerald-500/25 bg-emerald-500/10 text-emerald-400",
-          },
-          {
-            label: "Tổng nạp thẻ",
-            value: `${formatVnd(Number(cardAllTime._sum.amount ?? 0))}đ`,
-            sub: `${cardAllTime._count} lượt nạp thẻ`,
-            icon: CreditCard,
-            tint: "border-violet-500/25 bg-violet-500/10 text-violet-400",
-          },
-          {
-            label: "Tổng nạp bank",
-            value: `${formatVnd(Number(bankAllTime._sum.amount ?? 0))}đ`,
-            sub: `${bankAllTime._count} lượt chuyển khoản`,
-            icon: Landmark,
-            tint: "border-sky-500/25 bg-sky-500/10 text-sky-400",
-          },
+          { label: "Thành viên", value: formatVnd(users) },
+          { label: "Doanh thu", value: `${formatVnd(Number(revenueAllTime._sum.total ?? 0))}đ` },
+          { label: "Nạp thẻ", value: `${formatVnd(Number(cardAllTime._sum.amount ?? 0))}đ` },
+          { label: "Nạp bank", value: `${formatVnd(Number(bankAllTime._sum.amount ?? 0))}đ` },
         ]}
         chart={days.map((day, index) => ({
           label: day.label,
           value: Number(dailyRevenue[index]?._sum.total ?? 0),
         }))}
-        activity={activity}
+        // Only said when the seven days before had something to compare with.
+        weekChange={
+          weekChange === null ? null : { text: formatPercent(weekChange), up: weekChange >= 0 }
+        }
         transactions={transactions.map(({ at, ...row }) => ({
           ...row,
           time: clockVn(at),

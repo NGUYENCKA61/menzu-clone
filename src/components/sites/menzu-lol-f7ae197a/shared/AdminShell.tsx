@@ -57,16 +57,16 @@ const PHONE_ORDER: Record<string, string> = {
   "/admin/verifications": "order-12",
 };
 
-// The active row carries a left rule as well as the tint: on a list this long
-// a background alone is easy to lose against the panel it sits on.
+// LAB: the active row is a lighter well with a rim, like the shop's lit tabs;
+// red stays for actions (the owner, 16/10/2026: "bớt AI bớt rối").
 const ACTIVE =
-  "relative flex items-center gap-3 py-2.5 pl-4 pr-3 rounded-lg text-[13px] font-semibold transition-colors bg-rose-500/[0.08] text-rose-400 before:absolute before:left-0 before:top-1.5 before:bottom-1.5 before:w-[3px] before:rounded-full before:bg-rose-500";
+  "flex items-center gap-3 py-2.5 pl-4 pr-3 rounded-lg text-[13px] font-semibold transition-colors bg-white/[0.07] text-frost ring-1 ring-inset ring-white/10";
 const INACTIVE =
   "flex items-center gap-3 py-2.5 pl-4 pr-3 rounded-lg text-[13px] font-medium transition-colors text-neutral-400 hover:text-white hover:bg-white/[0.04]";
 
 interface AdminShellProps {
   title: string;
-  subtitle: string;
+  subtitle?: string;
   username: string;
   /** Optional note on the far side of the heading — a count, a timeframe. */
   aside?: ReactNode;
@@ -165,7 +165,7 @@ export function AdminShell({
             <h1 className="text-[24px] font-black leading-tight text-frost sm:text-[30px]">
               {title}
             </h1>
-            <p className="mt-1 text-[13px] text-neutral-500">{subtitle}</p>
+            {subtitle ? <p className="mt-1 text-[13px] text-neutral-500">{subtitle}</p> : null}
           </div>
           {aside}
         </div>
