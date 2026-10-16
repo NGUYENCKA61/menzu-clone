@@ -339,9 +339,8 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                 any commission from 10.000đ and the strip grew 117→161px.
                 "Tổng chi tiêu" came off (the owner, 16/10/2026: "bỏ đi"): it
                 drove nothing, the tier is earned from top-ups and the points
-                have their own cell. mt-2 on top of the card's gap: 32px of
-                air above the band from sm (the owner, 16/10/2026: "tăng đi"). */}
-            <div className="-mx-5 -mb-5 mt-2 grid grid-cols-2 border-t border-white/10 bg-[#111111]/70 backdrop-blur-sm sm:-mx-7 sm:-mb-7 xl:grid-cols-[1fr_0.7fr_1.3fr] xl:divide-x xl:divide-white/[0.06]">
+                have their own cell. */}
+            <div className="-mx-5 -mb-5 grid grid-cols-2 border-t border-white/10 bg-[#111111]/70 backdrop-blur-sm sm:-mx-7 sm:-mb-7 xl:grid-cols-[1fr_0.7fr_1.3fr] xl:divide-x xl:divide-white/[0.06]">
               {[
                 { icon: Wallet, label: "Số dư khả dụng", value: formatVnd(user.balance), unit: "đ", tone: "text-emerald-400" },
                 { icon: ShoppingBag, label: "Đơn hàng", value: String(paidOrders), unit: "", tone: "text-white" },
