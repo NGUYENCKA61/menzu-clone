@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { ArrowLeft, Info, ShieldCheck } from "lucide-react";
+import { ArrowLeft, Info, RotateCcw, ShieldCheck } from "lucide-react";
 
 import { AccountPageFrame } from "@/components/sites/menzu-lol-f7ae197a/shared/AccountPageFrame";
 import { formatVnd } from "@/components/sites/menzu-lol-f7ae197a/shared/productData";
@@ -89,9 +89,17 @@ export default async function RefundRequestPage({
 
   return (
     <AccountPageFrame
+      // One job, like the warranty page beside it: no nav column, the trail
+      // through the order, a glyph before the title (lab, 17/10/2026).
+      sidebar={false}
+      icon={RotateCcw}
       title="Hoàn trả"
       subtitle={`Đơn ${order.code}, các yêu cầu hoàn tiền đã gửi trước đây`}
       crumb="Hoàn trả"
+      trail={[
+        { label: "Lịch sử mua", href: "/orders" },
+        { label: order.code, href: `/orders?don=${encodeURIComponent(order.code)}` },
+      ]}
       action={
         <Link
           href="/orders"

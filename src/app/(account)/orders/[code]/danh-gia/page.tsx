@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { ArrowLeft, Check, Clock, Info } from "lucide-react";
+import { ArrowLeft, Check, Clock, Info, Star } from "lucide-react";
 
 import { AccountPageFrame } from "@/components/sites/menzu-lol-f7ae197a/shared/AccountPageFrame";
 import { StarRow } from "@/components/sites/menzu-lol-f7ae197a/shared/FeedbackBoard";
@@ -72,9 +72,17 @@ export default async function OrderReviewPage({
 
   return (
     <AccountPageFrame
+      // One job, like the warranty page beside it: no nav column, the trail
+      // through the order, a glyph before the title (lab, 17/10/2026).
+      sidebar={false}
+      icon={Star}
       title="Đánh giá đơn hàng"
       subtitle={`Đơn ${order.code}, vài dòng về tool và về shop`}
-      crumb="Đánh giá đơn hàng"
+      crumb="Đánh giá"
+      trail={[
+        { label: "Lịch sử mua", href: "/orders" },
+        { label: order.code, href: `/orders?don=${encodeURIComponent(order.code)}` },
+      ]}
       action={
         <Link
           href="/orders"

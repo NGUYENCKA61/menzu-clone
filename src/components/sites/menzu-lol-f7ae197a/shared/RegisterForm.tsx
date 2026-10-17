@@ -369,7 +369,7 @@ export function RegisterForm({
                     }
                     className="w-full rounded-xl bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] disabled:opacity-70 disabled:cursor-not-allowed text-white font-semibold py-3.5 text-[14px] transition-colors mt-5"
                   >
-                    {pending ? "ĐANG XỬ LÝ…" : "ĐĂNG KÝ"}
+                    {pending ? "Đang xử lý…" : "Đăng ký"}
                   </button>
                 </form>
 

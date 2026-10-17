@@ -45,9 +45,8 @@ export interface TopUpHistoryRow {
 /*
  * Built off menzu's /wallet on 28/09/2026, then resized to this shop's own
  * account pages on 29/09 (the owner: "không theo chuẩn menzu"). The colours
- * are still menzu's: its green on the tab, the chosen carrier and
- * denomination and the card button, and the white bank button — changing
- * them is the owner's call, still open.
+ * were menzu's green and white; the lab (17/10/2026, "rà soát lại toàn bộ
+ * rồi sửa") moved them to the shop's lit wells and red buttons.
  */
 const STEP = "text-[14px] text-neutral-400 font-bold ";
 
@@ -92,7 +91,7 @@ function CardNumberField({
           placeholder={placeholder}
           value={value}
           onChange={(event) => take(event.target.value)}
-          className="w-full bg-white/[0.02] border border-white/10 rounded-xl pl-4 pr-12 py-3.5 text-sm text-white placeholder:text-neutral-700 focus:outline-none focus:border-emerald-500/50 focus:bg-emerald-500/5 transition-all font-mono shadow-inner"
+          className="w-full bg-white/[0.02] border border-white/10 rounded-xl pl-4 pr-12 py-3.5 text-sm text-white placeholder:text-neutral-700 focus:outline-none focus:border-white/30 focus:bg-emerald-500/5 transition-all font-mono shadow-inner"
         />
         <button
           type="button"
@@ -349,13 +348,13 @@ export function WalletTopUp({
             >
               <div
                 aria-hidden
-                className={`absolute top-1.5 bottom-1.5 left-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 transition-transform duration-300 motion-reduce:transition-none ${
+                className={`absolute top-1.5 bottom-1.5 left-1.5 rounded-xl bg-white/[0.12] border border-white/25 transition-transform duration-300 motion-reduce:transition-none ${
                   tabs.length > 1 ? "w-[calc(50%-6px)]" : "w-[calc(100%-12px)]"
                 } ${method === "card" && tabs.length > 1 ? "translate-x-full" : "translate-x-0"}`}
               />
               {tabs.map((tab) => {
                 const on = method === tab.value;
-                const tone = on ? "text-emerald-400" : "text-neutral-500";
+                const tone = on ? "text-frost" : "text-neutral-500";
                 return (
                   <button
                     key={tab.value}
@@ -510,7 +509,7 @@ export function WalletTopUp({
                         type="submit"
                         disabled={pending || !bankAmountOk}
                         aria-busy={pending}
-                        className="w-full h-12 bg-white hover:bg-neutral-200 text-black rounded-xl font-black text-sm transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98]"
+                        className="w-full h-12 bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] text-white rounded-xl font-semibold text-[14px] transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98]"
                       >
                         {pending ? (
                           <Loader2 size={18} className="animate-spin motion-reduce:animate-none" aria-hidden />
@@ -547,14 +546,14 @@ export function WalletTopUp({
                           aria-label={option.label}
                           className={`relative group overflow-hidden flex flex-col items-center justify-center p-3 sm:p-4 rounded-xl sm:rounded-2xl border transition-all duration-300 ease-out ${
                             on
-                              ? "bg-emerald-500/10 border-emerald-500"
+                              ? "bg-white/[0.12] border-white/25"
                               : "bg-[#161616] border-white/5 hover:border-white/10 active:scale-[0.98]"
                           }`}
                         >
                           <div
                             aria-hidden
                             className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-br to-transparent ${
-                              on ? "from-emerald-500/10" : "from-white/5"
+                              on ? "from-white/10" : "from-white/5"
                             }`}
                           />
                           <div className="h-8 sm:h-10 w-full flex items-center justify-center relative z-10">
@@ -610,7 +609,7 @@ export function WalletTopUp({
                             aria-pressed={on}
                             className={`relative overflow-hidden p-3 rounded-xl border text-center transition-colors duration-200 ${
                               on
-                                ? "bg-emerald-500/10 border-emerald-500"
+                                ? "bg-white/[0.12] border-white/25"
                                 : "bg-white/[0.02] border-white/5 hover:border-white/10 hover:bg-white/[0.05]"
                             }`}
                           >
@@ -623,7 +622,7 @@ export function WalletTopUp({
                             ) : null}
                             <p
                               className={`text-sm font-black mt-1 ${
-                                on ? "text-emerald-400" : "text-white"
+                                on ? "text-frost" : "text-white"
                               }`}
                             >
                               {formatVnd(preset)} đ
@@ -670,7 +669,7 @@ export function WalletTopUp({
                       type="submit"
                       disabled={pending || !cardReady}
                       aria-busy={pending}
-                      className="w-full h-12 bg-emerald-500 hover:bg-emerald-400 text-black rounded-xl font-black text-sm transition-all flex items-center justify-center gap-2 disabled:opacity-30 disabled:cursor-not-allowed active:scale-[0.99]"
+                      className="w-full h-12 bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] text-white rounded-xl font-semibold text-[14px] transition-all flex items-center justify-center gap-2 disabled:opacity-30 disabled:cursor-not-allowed active:scale-[0.99]"
                     >
                       {pending ? (
                         <Loader2 size={17} className="animate-spin motion-reduce:animate-none" aria-hidden />

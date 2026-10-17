@@ -6,7 +6,7 @@ import { TotpTool } from "@/components/sites/menzu-lol-f7ae197a/shared/TotpTool"
 import { getShopSettings } from "@/lib/settingsStore";
 
 export const metadata: Metadata = {
-  title: "Trình Tạo Mã 2FA",
+  title: "Trình tạo mã 2FA",
   description:
     "Tạo mã xác thực 2 lớp (TOTP) cho tài khoản Valorant từ secret key. Xử lý hoàn toàn trên trình duyệt, không gửi secret lên máy chủ.",
   alternates: { canonical: "/2fa" },
@@ -20,7 +20,7 @@ export default async function TwoFactorPage() {
   const { brandName } = await getShopSettings();
   return (
     <SimplePage
-      title="Trình Tạo Mã 2FA"
+      title="Trình tạo mã 2FA"
       crumb={`${brandName} 2FA`}
       // A glyph of its own where the red bar stood, as every standalone page
       // wears one (the owner, 13/10/2026, UI consistency review).
