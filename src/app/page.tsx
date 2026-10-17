@@ -140,7 +140,10 @@ export default async function Home({
               cards={group.cards}
               viewAllHref="/categories"
               hideViewAll={group.slug === "hot-trending"}
-              accentHeading={group.slug === "hot-trending" || group.slug === GAME_LIST_SLUG}
+              // The red bar and capitals of the main site's heading are off
+              // again (the owner, 17/10/2026: "đưa về chữ không in hoa thử",
+              // "bỏ gạch luôn"); accentHeading={true} brings them back.
+              accentHeading={false}
               tone="menzu"
               marquee={group.slug === "hot-trending"}
               ranked={group.slug === "hot-trending"}
