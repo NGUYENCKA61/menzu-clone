@@ -586,8 +586,12 @@ function BentoTile({
  *    own quiet hover stays.
  *  - c: lmarket's tile — the cover slightly dimmed above a solid caption bar
  *    holding the name and the blurb, with a platform chip at the end.
+ *  - c1: bubblehacks' catalogue card (the owner, 17/10/2026: "làm bản C1
+ *    https://bubblehacks.com/catalog"): the 16:9 cover on top with its foot
+ *    darkened, the name in heavy type under it and a row of chips, the price
+ *    chip pale red with dark words; lifts 3px under the pointer.
  */
-export type TileStyle = "classic" | "a" | "a2" | "a3" | "a4" | "a5" | "a6" | "b" | "b2" | "b3" | "c";
+export type TileStyle = "classic" | "a" | "a2" | "a3" | "a4" | "a5" | "a6" | "b" | "b2" | "b3" | "c" | "c1";
 
 /**
  * The dress the game tiles wear unless a row asks for another. One constant
@@ -603,10 +607,11 @@ export type TileStyle = "classic" | "a" | "a2" | "a3" | "a4" | "a5" | "a6" | "b"
  * at A2's and A3's brightness, then "c", lmarket's tile ("giờ qua kiểu C:
  * kiểu lmarket"), back on "a2" ("quay lại kiểu a2"), A1 once more ("a1
  * thử"), "a3", "a4" (A3 at lmarket's brightness), "a5", lmarket's
- * best-seller card ("a5 thử"), now "a6", their /cheats/ card. "a" is A1,
- * "classic" the framed picture with the name under it.
+ * best-seller card ("a5 thử"), "a6", their /cheats/ card, now "c1",
+ * bubblehacks' catalogue card. "a" is A1, "classic" the framed picture with
+ * the name under it.
  */
-export const DEFAULT_TILE_STYLE: TileStyle = "a6";
+export const DEFAULT_TILE_STYLE: TileStyle = "c1";
 
 /** The eyebrow a tile wears in style b, from the category's platform tag. */
 function platformWord(platform: string | null | undefined): string {
@@ -636,6 +641,62 @@ export function RowTile({
   big?: boolean;
   style?: TileStyle;
 }) {
+  // LAB: bubblehacks' catalogue card (see TileStyle "c1"): the 16:9 cover on
+  // top, uncropped, then the name and a row of chips on the card itself.
+  if (style === "c1") {
+    const name = titleCase(withoutNewWord(card.title));
+    const count = card.count != null && card.count > 0 ? `${card.count} sản phẩm` : null;
+    return (
+      <Link
+        href={card.href}
+        className="row-tile lab-bubble-card group flex h-full flex-col overflow-hidden rounded-2xl border border-line bg-panel focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--menzu-accent)]"
+      >
+        <span className="relative block aspect-video overflow-hidden bg-raise">
+          {card.image ? (
+            <CardImage
+              src={card.image}
+              alt={card.title}
+              fill
+              sizes={
+                big
+                  ? "(min-width: 1320px) 440px, (min-width: 768px) 33vw, 50vw"
+                  : "(min-width: 1320px) 330px, (min-width: 1024px) 26vw, (min-width: 768px) 34vw, 50vw"
+              }
+              className="object-cover"
+            />
+          ) : null}
+          <span aria-hidden className="lab-bubble-shade absolute inset-0" />
+          {pick ? (
+            <span className="tile-pill absolute left-2.5 top-2.5 z-10 inline-flex items-center gap-1 rounded-md bg-scrim/70 px-2 py-1 text-[12px] font-bold text-white ring-1 ring-inset ring-white/15 backdrop-blur-[6px]">
+              <Star size={10} className="shrink-0 fill-current text-[var(--menzu-accent)]" aria-hidden />
+              Top tháng
+            </span>
+          ) : null}
+        </span>
+        <span className="flex min-w-0 flex-1 flex-col gap-2.5 p-3 sm:gap-3 sm:p-4">
+          <h3 title={name} className="lab-bubble-title line-clamp-2 text-white sm:truncate">
+            {name}
+          </h3>
+          {card.fromPrice != null || count ? (
+            <span className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+              {card.fromPrice != null ? (
+                <span className="lab-bubble-price rounded-lg px-2 py-1 text-[12px] font-semibold sm:px-2.5 sm:text-[13px]">
+                  từ <span className="lab-figure">{formatVnd(card.fromPrice)}đ</span>
+                </span>
+              ) : null}
+              {count ? (
+                <span className="rounded-lg border border-line bg-raise px-2 py-1 text-[12px] font-medium text-mist sm:px-2.5 sm:text-[13px]">
+                  {count}
+                </span>
+              ) : null}
+            </span>
+          ) : card.description ? (
+            <span className="truncate text-[13px] text-mist">{sentenceCase(card.description)}</span>
+          ) : null}
+        </span>
+      </Link>
+    );
+  }
   // LAB (Launcher): the notched cover, the one memorable element. The
   // picture sits in a frame with a bevelled top-right corner (lab-notch) and
   // the name and the figures sit under it, not over a darkened picture.

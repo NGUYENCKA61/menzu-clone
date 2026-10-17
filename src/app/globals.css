@@ -1823,6 +1823,39 @@ html[data-admin-filtering] .admin-list {
   opacity: 1;
 }
 
+/* LAB: bubblehacks' catalogue card (bubblehacks.com/catalog, read
+   17/10/2026), game tile style C1 ("làm bản C1"): a 16:9 picture on top
+   with its foot darkened (80% fading out by 60%), then the name in heavy
+   type and a row of small chips, the price chip in a pale tint of the
+   accent with dark words. Under the pointer the card lifts 3px, in the
+   game list only (the slider's viewport would cut its top). */
+.lab-bubble-card {
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .lab-lm-grid .lab-bubble-card:hover {
+    transform: translateY(-3px);
+  }
+}
+.lab-bubble-shade {
+  background: linear-gradient(0deg, rgba(8, 8, 11, 0.8) 0px, rgba(8, 8, 11, 0) 60%);
+}
+.lab-bubble-title {
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: -0.4px;
+  line-height: 1.25;
+}
+@media (min-width: 640px) {
+  .lab-bubble-title {
+    font-size: 19px;
+  }
+}
+.lab-bubble-price {
+  background: #f7cdce;
+  color: #1a0b0c;
+}
+
 /* LAB: display figures line up (prices, balances, counts). */
 .lab-figure {
   font-family: var(--font-display);
