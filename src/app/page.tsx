@@ -59,6 +59,7 @@ const TILE_STYLES: readonly TileStyle[] = ["classic", "a", "a2", "a3", "a4", "a5
 function pickTileStyle(raw: string | string[] | undefined): TileStyle {
   const value = typeof raw === "string" ? raw.trim().toLowerCase() : "";
   if (value === "a1") return "a";
+  if (value === "b1") return "b";
   if (value === "goc") return "classic";
   const known = TILE_STYLES.find((style) => style === value);
   return known ?? DEFAULT_TILE_STYLE;
