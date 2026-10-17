@@ -41,7 +41,7 @@ const TONE = {
 const FIELD =
   "w-full bg-raise border border-line hover:border-line-strong text-frost text-[14px] rounded-[10px] pl-3.5 pr-10 py-3 outline-none transition-colors appearance-none cursor-pointer";
 const FIELD_LABEL = "block text-[13px] font-medium text-mist mb-2";
-const OPTION = "bg-white/[0.02] text-frost";
+const OPTION = "bg-panel text-frost";
 const PAGE_ARROW =
   "w-10 h-10 rounded-xl bg-white/5 border border-white/5 text-neutral-500 hover:text-white disabled:opacity-30 disabled:hover:bg-white/5 disabled:hover:text-neutral-500 flex items-center justify-center transition-all cursor-pointer disabled:cursor-not-allowed active:scale-95 hover:bg-white/10";
 const PAGE_NUMBER =
