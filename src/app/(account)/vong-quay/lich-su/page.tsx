@@ -12,7 +12,8 @@ import {
   Truck,
 } from "lucide-react";
 
-import { SimplePage } from "@/components/sites/menzu-lol-f7ae197a/shared/SimplePage";
+import { AccountPageFrame } from "@/components/sites/menzu-lol-f7ae197a/shared/AccountPageFrame";
+import { AccountPanel } from "@/components/sites/menzu-lol-f7ae197a/shared/AccountPanel";
 import { SpinExchangeButton } from "@/components/sites/menzu-lol-f7ae197a/shared/SpinExchangeButton";
 import { formatVnd } from "@/components/sites/menzu-lol-f7ae197a/shared/productData";
 import { dayHeading, dayTime } from "@/lib/dayGroups";
@@ -173,13 +174,12 @@ export default async function SpinHistoryPage({
   const shown = pageRange(page, PER_PAGE, total);
 
   return (
-    <SimplePage
-      title="Lịch sử nhận thưởng"
-      crumb="Lịch sử nhận thưởng"
-      // A glyph of its own where the red bar stood, as every standalone page
-      // wears one (the owner, 13/10/2026, UI consistency review).
-      icon={History}
-    >
+    <AccountPageFrame crumb="Lịch sử nhận thưởng" trail={[{ label: "Vòng quay đổi thưởng", href: "/vong-quay" }]}>
+      <AccountPanel
+        icon={History}
+        title="Lịch sử nhận thưởng"
+        subtitle="Những gì vòng quay đã trao cho bạn"
+      >
       <div className="flex max-w-3xl flex-col gap-6">
         <Link
           href="/vong-quay"
@@ -405,6 +405,7 @@ export default async function SpinHistoryPage({
           </nav>
         ) : null}
       </div>
-    </SimplePage>
+      </AccountPanel>
+    </AccountPageFrame>
   );
 }

@@ -148,7 +148,7 @@ export function AccountSidebar({
             className={index > 0 ? "mt-2 border-t border-white/5 pt-2" : undefined}
           >
             {group.map(({ label, href, icon: Icon }) => {
-              const isActive = pathname === href;
+              const isActive = pathname === href || (href === "/vong-quay" && pathname.startsWith("/vong-quay/"));
 
               // <Link>, as the two privileged rows above already are: a
               // bare anchor here reloaded the whole application on every

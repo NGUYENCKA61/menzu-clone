@@ -3,7 +3,8 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ArrowLeft, Gift, MapPin } from "lucide-react";
 
-import { SimplePage } from "@/components/sites/menzu-lol-f7ae197a/shared/SimplePage";
+import { AccountPageFrame } from "@/components/sites/menzu-lol-f7ae197a/shared/AccountPageFrame";
+import { AccountPanel } from "@/components/sites/menzu-lol-f7ae197a/shared/AccountPanel";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/session";
 
@@ -55,13 +56,12 @@ export default async function ParcelsNeedingAddressPage() {
   // rather than a bare redirect that looks like the link was broken.
   if (waiting.length === 0) {
     return (
-      <SimplePage
-        title="Quà cần điền địa chỉ"
-        crumb="Quà cần điền địa chỉ"
-        // A glyph of its own where the red bar stood, as every standalone
-        // page wears one (the owner, 13/10/2026, UI consistency review).
-        icon={MapPin}
-      >
+      <AccountPageFrame crumb="Quà cần điền địa chỉ" trail={[{ label: "Vòng quay đổi thưởng", href: "/vong-quay" }]}>
+        <AccountPanel
+          icon={MapPin}
+          title="Quà cần điền địa chỉ"
+          subtitle="Các phần quà đang chờ bạn điền địa chỉ nhận"
+        >
         <div className={`${CARD} text-center`}>
           <span className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.02] text-neutral-400">
             <Gift size={20} />
@@ -81,12 +81,18 @@ export default async function ParcelsNeedingAddressPage() {
             Lịch sử nhận thưởng
           </Link>
         </div>
-      </SimplePage>
+        </AccountPanel>
+      </AccountPageFrame>
     );
   }
 
   return (
-    <SimplePage title="Quà cần điền địa chỉ" crumb="Quà cần điền địa chỉ" icon={MapPin}>
+    <AccountPageFrame crumb="Quà cần điền địa chỉ" trail={[{ label: "Vòng quay đổi thưởng", href: "/vong-quay" }]}>
+      <AccountPanel
+        icon={MapPin}
+        title="Quà cần điền địa chỉ"
+        subtitle="Các phần quà đang chờ bạn điền địa chỉ nhận"
+      >
       <div className={`${CARD} flex flex-col gap-3`}>
         <p className="text-[12.5px] leading-relaxed text-neutral-400">
           Có {waiting.length} phần quà đang chờ địa chỉ nhận hàng. Chọn từng
@@ -117,6 +123,7 @@ export default async function ParcelsNeedingAddressPage() {
           </Link>
         ))}
       </div>
-    </SimplePage>
+      </AccountPanel>
+    </AccountPageFrame>
   );
 }

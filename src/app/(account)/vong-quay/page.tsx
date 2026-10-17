@@ -4,7 +4,8 @@ import { ChevronRight, Gift } from "lucide-react";
 
 import Link from "next/link";
 
-import { SimplePage } from "@/components/sites/menzu-lol-f7ae197a/shared/SimplePage";
+import { AccountPageFrame } from "@/components/sites/menzu-lol-f7ae197a/shared/AccountPageFrame";
+import { AccountPanel } from "@/components/sites/menzu-lol-f7ae197a/shared/AccountPanel";
 import { SpinLockedNotice } from "@/components/sites/menzu-lol-f7ae197a/shared/SpinLockedNotice";
 import { SpinWheel } from "@/components/sites/menzu-lol-f7ae197a/shared/SpinWheel";
 import { formatVnd } from "@/components/sites/menzu-lol-f7ae197a/shared/productData";
@@ -75,8 +76,13 @@ export default async function SpinPage() {
           stacking context under the header, so a sheet in there left the
           header sharp over the frost (the owner, 07/10/2026: "full mờ"). */}
       {SPIN_LOCKED ? <SpinLockedNotice /> : null}
-      <SimplePage title="Vòng quay đổi thưởng" crumb="Vòng quay đổi thưởng" icon={Gift}>
-        <div className="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_340px] lg:gap-14">
+      <AccountPageFrame crumb="Vòng quay đổi thưởng">
+        <AccountPanel
+          icon={Gift}
+          title="Vòng quay đổi thưởng"
+          subtitle="Dùng điểm thưởng để quay nhận tiền vào ví, điểm và quà"
+        >
+        <div className="grid grid-cols-1 gap-10 xl:grid-cols-[minmax(0,1fr)_300px] xl:gap-10">
           <div className="flex min-w-0 flex-col gap-6">
             {!canSpin && !SPIN_LOCKED ? (
               <p className="mx-auto max-w-[520px] text-center text-[14px] text-amber-300">
@@ -176,7 +182,8 @@ export default async function SpinPage() {
             </Link>
           </aside>
         </div>
-      </SimplePage>
+        </AccountPanel>
+      </AccountPageFrame>
     </>
   );
 }

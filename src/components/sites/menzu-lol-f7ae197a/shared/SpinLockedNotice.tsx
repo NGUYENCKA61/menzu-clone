@@ -2,10 +2,14 @@
 
 import { Lock } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useSyncExternalStore } from "react";
+import { createPortal } from "react-dom";
 import { lockScroll, unlockScroll } from "./modalChrome";
 import { SHEET, SHEET_BUTTON, SHEET_TEXT, SHEET_TITLE } from "./noticeSheet";
 import { useLeave } from "./useOverlayPresence";
+
+/** Nothing to listen to: the snapshot only tells the server from the browser. */
+const subscribeNothing = () => () => {};
 
 /**
  * What /vong-quay shows while the wheel is closed (SPIN_LOCKED): the house
@@ -21,6 +25,11 @@ export function SpinLockedNotice() {
   const confirm = useRef<HTMLButtonElement>(null);
   const goHome = useCallback(() => router.replace("/"), [router]);
   const { leaving, leave } = useLeave(goHome);
+  // LAB (17/10/2026): the page now sits in the account layout, whose <main>
+  // is a stacking context under the header. Once mounted the sheet moves to
+  // <body>, so the frost covers the header too ("full mờ", 07/10/2026); the
+  // first paint draws it in place so nothing shows unfrosted meanwhile.
+  const mounted = useSyncExternalStore(subscribeNothing, () => true, () => false);
 
   useEffect(() => {
     confirm.current?.focus();
@@ -43,9 +52,9 @@ export function SpinLockedNotice() {
       window.removeEventListener("keydown", onKey);
       unlockScroll();
     };
-  }, [leave]);
+  }, [leave, mounted]);
 
-  return (
+  const sheet = (
     <div className="fixed inset-0 z-[200] flex items-center justify-center p-4" inert={leaving}>
       {/* The whole screen behind frosted, header and wheel alike, with a
           lighter tint so the blur reads as blur rather than black (the
@@ -84,4 +93,6 @@ export function SpinLockedNotice() {
       </div>
     </div>
   );
+
+  return mounted ? createPortal(sheet, document.body) : sheet;
 }
