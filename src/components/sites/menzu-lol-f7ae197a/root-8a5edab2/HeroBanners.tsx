@@ -86,14 +86,6 @@ export function HeroBanners({
   const totalChars = lines.reduce((sum, line) => sum + Array.from(line).length, 0);
   // Runs across every line so the stagger does not restart on the second row.
   let charCursor = 0;
-  // LAB: from 1280px the subtitle's first sentence gets a line of its own,
-  // ending just short of the title's last letter (the owner, 17/10/2026:
-  // "làm chữ hiện nay dài tới chữ m thử"). Only for a sentence of up to 70
-  // characters: about 535px at 16px, still clear of the banner, which
-  // starts some 76px past the title's 498px at 1280.
-  const cut = subtitle.indexOf(". ");
-  const subtitleHead = cut > 0 && cut < 70 ? subtitle.slice(0, cut + 1) : "";
-  const subtitleTail = subtitleHead ? subtitle.slice(cut + 2) : subtitle;
 
 
   return (
@@ -208,12 +200,7 @@ export function HeroBanners({
             // site's lighter grey (#d4d4d4), which stays legible over the
             // brighter patches of the picture (17/10/2026).
             <p className="mt-5 max-w-[460px] text-[14px] leading-relaxed text-neutral-300 sm:text-[16px]">
-              {subtitleHead ? (
-                <>
-                  <span className="xl:block xl:whitespace-nowrap">{subtitleHead}</span>{" "}
-                </>
-              ) : null}
-              <span className="xl:block">{subtitleTail}</span>
+              {subtitle}
             </p>
           ) : null}
 
