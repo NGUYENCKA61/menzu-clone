@@ -1689,6 +1689,18 @@ html[data-admin-filtering] .admin-list {
   border-radius: 12px 12px 0 0;
 }
 
+/* LAB: elitehacks' own card shade, read off their "Top month" cards on
+   17/10/2026, for game tile style A2: a black fade up from the foot and a
+   vignette that leaves the top right clear, the pair at 90%, with no dimming
+   of the picture itself. Their vignette ends in their page colour; this one
+   ends in ours (the scrim). */
+.lab-elite-shade {
+  background:
+    linear-gradient(0deg, #000, transparent),
+    radial-gradient(93.84% 93.84% at 72.57% 4.11%, transparent, transparent 15%, #08080b);
+  opacity: 0.9;
+}
+
 /* LAB: display figures line up (prices, balances, counts). */
 .lab-figure {
   font-family: var(--font-display);

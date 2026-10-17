@@ -551,13 +551,18 @@ function BentoTile({
  *
  *  - classic: the fade at the foot and the name, as before.
  *  - a: elitehacks' tile — the cover dimmed and faded deeper, the name set
- *    larger with the category's one-line blurb under it.
+ *    larger with the category's one-line blurb under it. The owner calls
+ *    this one A1 (17/10/2026).
+ *  - a2: A1's words over elitehacks' own shade (the owner, 17/10/2026: "làm
+ *    thử giống elite hack vậy", "elite là A2"): the picture keeps its full
+ *    brightness, a black fade rises from the foot and a vignette darkens
+ *    the left and the bottom, leaving the top right clear (.lab-elite-shade).
  *  - b: unnamedtech's tile — the whole cover dimmed evenly, a small eyebrow
  *    naming the platform ("HACK PC") over a quieter name.
  *  - c: lmarket's tile — the cover slightly dimmed above a solid caption bar
  *    holding the name and the blurb, with a platform chip at the end.
  */
-export type TileStyle = "classic" | "a" | "b" | "c";
+export type TileStyle = "classic" | "a" | "a2" | "b" | "c";
 
 /**
  * The dress the game tiles wear unless a row asks for another. One constant
@@ -565,11 +570,12 @@ export type TileStyle = "classic" | "a" | "b" | "c";
  * list when the owner picks a dress (the owner, 13/10/2026, UI consistency
  * review).
  *
- * LAB: "a", elitehacks' tile (the owner, 17/10/2026, picking from the home
- * card page: "sửa lab 2 kiểu A: kiểu elitehacks"); "classic" is the framed
- * picture with the name under it.
+ * LAB: elitehacks' tile (the owner, 17/10/2026, picking from the home card
+ * page: "sửa lab 2 kiểu A: kiểu elitehacks"), now on trial as "a2" with
+ * their own shade; "a" is A1, "classic" the framed picture with the name
+ * under it.
  */
-export const DEFAULT_TILE_STYLE: TileStyle = "a";
+export const DEFAULT_TILE_STYLE: TileStyle = "a2";
 
 /** The eyebrow a tile wears in style b, from the category's platform tag. */
 function platformWord(platform: string | null | undefined): string {
@@ -667,7 +673,7 @@ export function RowTile({
         // The pick tile stands 4:3 on a phone like the list's: at 16:10 its
         // name and price climbed under the "Top tháng" pill.
         pick ? "aspect-[4/3] sm:aspect-[16/10]" : "aspect-[4/3]",
-        style === "a" && "hover:border-[var(--menzu-accent)]/40",
+        (style === "a" || style === "a2") && "hover:border-[var(--menzu-accent)]/40",
       )}
     >
       {card.image ? (
@@ -724,15 +730,18 @@ function priceLine(card: ProductCard, lead = "Chỉ từ"): string | null {
   return parts.length > 0 ? parts.join(", ") : null;
 }
 
-/** The words and shade a tile wears in styles a, b and c (see TileStyle). */
+/** The words and shade a tile wears in styles a, a2, b and c (see TileStyle). */
 function TileDress({ card, style, big }: { card: ProductCard; style: TileStyle; big: boolean }) {
   const line = priceLine(card);
-  if (style === "a") {
+  if (style === "a" || style === "a2") {
     return (
       <>
         <span
           aria-hidden
-          className="tile-scrim absolute inset-0 bg-gradient-to-t from-scrim via-scrim/60 via-35% to-scrim/10"
+          className={cn(
+            "tile-scrim absolute inset-0",
+            style === "a" ? "bg-gradient-to-t from-scrim via-scrim/60 via-35% to-scrim/10" : "lab-elite-shade",
+          )}
         />
         <span
           aria-hidden
