@@ -2,7 +2,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { BadgeCheck, BookCheck, ShoppingBag } from "lucide-react";
 
-import { sentenceCase } from "@/lib/displayCase";
 import { DEFAULT_SETTINGS } from "@/lib/settings";
 import { HeroImageCarousel } from "./HeroImageCarousel";
 import { HeroVideo } from "./HeroVideo";
@@ -17,9 +16,10 @@ import { ScrollCta } from "./ScrollCta";
  */
 export const SCROLL_TARGET_ID = "danh-sach-hack-game";
 
-// LAB (Launcher): buttons in sentence case at 15px, 48px tall (touch target).
+// LAB: buttons in sentence case, 44px tall at 14px, the main site's size
+// (the owner, 17/10/2026: "đưa nguyên cụm này về kích thước như web gốc").
 const CTA =
-  "inline-flex h-12 items-center justify-center gap-2 rounded-[10px] px-6 text-[15px] font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-frost";
+  "inline-flex h-11 items-center justify-center gap-2 rounded-[10px] px-6 text-[14px] font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-frost";
 
 /** Seconds between characters as the heading types itself in. */
 const TYPE_STEP = 0.07;
@@ -127,16 +127,18 @@ export function HeroBanners({
           the card was 365px tall — from 1024 to 1279, where the card shrinks,
           the copy stuck out 37px above it. */}
       <div className="relative z-10 flex flex-col gap-10 lg:flex-row lg:items-start lg:justify-between lg:gap-8">
-        <div className="flex w-full flex-col items-start lg:w-auto lg:min-w-0 lg:max-w-[500px] lg:flex-1">
+        <div className="flex w-full flex-col items-start lg:w-auto lg:min-w-0 lg:max-w-[440px] lg:flex-1">
           {/* The reseller pill: dark glass with a red check, the same chrome
               the listing cards' corner badges wear, so it reads as a badge
               and not as a third line of copy. Fades up with the eyebrow.
               Pulled left by its own padding so the check sits on the same
-              edge as the "We are" below it, not one pad-width in. */}
+              edge as the heading below it, not one pad-width in. LAB: back to
+              the main site's pill (the owner, 17/10/2026: "sửa cái Official
+              OBV Hax Reseller cho giống web gốc nha"). */}
           {badge ? (
-            <span className="mb-5 inline-flex items-center gap-2 text-[14px] font-medium text-mist">
-              <BadgeCheck size={16} aria-hidden className="shrink-0 text-online" />
-              {sentenceCase(badge)}
+            <span className="animate-fade-up -ml-3.5 mb-4 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3.5 py-1.5 text-[10px] font-black uppercase tracking-[0.18em] text-neutral-200 backdrop-blur-md">
+              <BadgeCheck size={13} aria-hidden className="text-[var(--menzu-accent)]" />
+              {badge}
             </span>
           ) : null}
 
@@ -151,7 +153,8 @@ export function HeroBanners({
             // One unbreakable word in a column capped at 440px: at 46px it is
             // 485px wide and its last letters ran under the video card on
             // every screen from 1024 to 1279. 40px is 422px — inside the cap.
-            className="font-display text-[34px] font-black leading-[1.04] tracking-tight text-frost sm:text-[44px] lg:text-[46px] xl:text-[50px]"
+            // LAB: the main site's sizes again (28/36/40/46px).
+            className="font-display text-[28px] font-black leading-[1.06] tracking-tight text-frost sm:text-[36px] lg:text-[40px] xl:text-[46px]"
           >
             {lines.map((line, li) => (
               <span key={li} className="block whitespace-nowrap" aria-hidden>
@@ -180,7 +183,7 @@ export function HeroBanners({
           </h1>
 
           {subtitle ? (
-            <p className="mt-5 max-w-[52ch] text-[16px] leading-[1.65] text-mist sm:text-[17px]">
+            <p className="mt-5 max-w-[460px] text-[14px] leading-relaxed text-mist">
               {subtitle}
             </p>
           ) : null}
@@ -207,13 +210,14 @@ export function HeroBanners({
           {/* LAB: the shop's figures, once, as a quiet line: figure in the
               display face, word beside it, space between (no dots, and no
               rules: one left at the start of a wrapped line read as a stray
-              mark). */}
+              mark). The main site has no such line here, so it shrank with
+              the rest of the block (17/10/2026). */}
           {facts.length > 0 ? (
-            <ul aria-label="Số liệu của shop" className="mt-10 flex flex-wrap items-baseline gap-x-6 gap-y-3">
+            <ul aria-label="Số liệu của shop" className="mt-8 flex flex-wrap items-baseline gap-x-5 gap-y-2">
               {facts.map((fact) => (
-                <li key={fact.label} className="flex items-baseline gap-2">
-                  <span className="lab-figure text-[20px] font-bold leading-none text-frost">{fact.value}</span>
-                  <span className="text-[13px] text-mist">{fact.label}</span>
+                <li key={fact.label} className="flex items-baseline gap-1.5">
+                  <span className="lab-figure text-[16px] font-bold leading-none text-frost">{fact.value}</span>
+                  <span className="text-[12px] text-mist">{fact.label}</span>
                 </li>
               ))}
             </ul>
