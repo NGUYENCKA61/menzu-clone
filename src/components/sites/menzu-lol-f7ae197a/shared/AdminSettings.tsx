@@ -1998,7 +1998,7 @@ export function AdminSettings({
               {zaloGroupEvents.length > 0 ? (
                 <div className="mt-4">
                   <span className={LABEL}>Bot vừa làm gì trong nhóm</span>
-                  <ul className="mt-2 flex flex-col divide-y divide-white/5 rounded-xl border border-white/5 bg-white/[0.02]">
+                  <ul className="mt-2 flex flex-col divide-y divide-white/5 rounded-xl border border-white/10 bg-white/[0.02]">
                     {zaloGroupEvents.map((row) => (
                       <li
                         key={row.id}
@@ -2400,7 +2400,7 @@ export function AdminSettings({
                 {/* The hero frame's own 16:9, cropped the way the page crops it
                     (object-cover, no dim), so a wide promo banner shows here
                     exactly how much of its sides the homepage will cut. */}
-                <div className="relative aspect-[16/9] w-full shrink-0 overflow-hidden rounded-xl border border-white/10 bg-[#111111] sm:w-[200px]">
+                <div className="relative aspect-[16/9] w-full shrink-0 overflow-hidden rounded-xl border border-white/10 bg-white/[0.02] sm:w-[200px]">
                   {heroBanner ? (
                     // A plain img: the value can be any path the shop typed, and
                     // next/image would need each one in its allow-list.
@@ -2476,7 +2476,7 @@ export function AdminSettings({
               <div className="flex flex-col gap-3 sm:flex-row">
                 {/* Preview at the backdrop's own wide shape, under the same 70%
                     dim it gets on the page, so this shows what visitors see. */}
-                <div className="relative aspect-[16/9] w-full shrink-0 overflow-hidden rounded-xl border border-white/10 bg-[#111111] sm:w-[200px]">
+                <div className="relative aspect-[16/9] w-full shrink-0 overflow-hidden rounded-xl border border-white/10 bg-white/[0.02] sm:w-[200px]">
                   {siteBackground ? (
                     // A plain img: the value can be any path the shop typed, and
                     // next/image would need each one in its allow-list.
@@ -2547,7 +2547,7 @@ export function AdminSettings({
               <div className="flex flex-col gap-3 sm:flex-row">
                 {/* The banner's own wide shape; no dim, the page fades it
                     itself along the left and the bottom. */}
-                <div className="relative aspect-[3/1] w-full shrink-0 overflow-hidden rounded-xl border border-white/10 bg-[#111111] sm:w-[200px]">
+                <div className="relative aspect-[3/1] w-full shrink-0 overflow-hidden rounded-xl border border-white/10 bg-white/[0.02] sm:w-[200px]">
                   {profileBanner ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
@@ -2701,7 +2701,7 @@ export function AdminSettings({
               {/* Preview at the panel's own shape — tall and half a card — so
                   what is judged here is what the visitor will see, not a
                   square thumbnail of the same file. */}
-              <div className="relative w-full sm:w-[150px] shrink-0 aspect-[3/4] overflow-hidden rounded-xl border border-white/10 bg-[#111111]">
+              <div className="relative w-full sm:w-[150px] shrink-0 aspect-[3/4] overflow-hidden rounded-xl border border-white/10 bg-white/[0.02]">
                 {panelImages[Math.min(picked, panelImages.length - 1)] ? (
                   // A plain img: the value can be any path the shop typed, and
                   // next/image would need each one in its allow-list.
@@ -3613,7 +3613,7 @@ export function AdminSettings({
               <button
                 type="button"
                 onClick={() => setFaq([...faq, { q: "", a: "" }])}
-                className="mt-2 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-[13px] font-semibold text-neutral-300 transition-colors hover:bg-white/10 hover:text-white"
+                className="mt-2 rounded-lg border border-white/10 bg-white/[0.02] px-3 py-2 text-[13px] font-semibold text-neutral-300 transition-colors hover:bg-white/10 hover:text-white"
               >
                 + Thêm câu hỏi
               </button>

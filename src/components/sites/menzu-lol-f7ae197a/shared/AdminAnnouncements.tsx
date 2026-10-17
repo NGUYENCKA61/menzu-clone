@@ -83,7 +83,6 @@ function StatMini({
   label,
   value,
   icon: Icon,
-  tint,
 }: {
   label: string;
   value: number;
@@ -91,12 +90,12 @@ function StatMini({
   tint: string;
 }) {
   return (
-    <div className="rounded-xl border border-white/[0.08] bg-[#0e0e11] p-5 flex flex-col gap-3">
+    <div className="rounded-xl border border-white/10 bg-white/[0.02] p-5 flex flex-col gap-3">
       <div className="flex items-center justify-between gap-3">
         <span className="text-[12px] font-semibold text-neutral-500">
           {label}
         </span>
-        <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border ${tint}`}>
+        <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/[0.04] text-mist`}>
           <Icon size={15} />
         </span>
       </div>
@@ -687,14 +686,14 @@ export function AdminAnnouncements({
           Tắt/Sửa/Xóa buttons sat 790px to the right. One card per notice. */}
       <div className="flex flex-col gap-2 sm:hidden">
         {visible.length === 0 ? (
-          <p className="rounded-xl border border-white/[0.08] bg-[#0e0e11] px-5 py-12 text-center text-neutral-400">
+          <p className="rounded-xl border border-white/10 bg-white/[0.02] px-5 py-12 text-center text-neutral-400">
             {announcements.length === 0 ? "Chưa có thông báo nào" : "Không có thông báo nào khớp bộ lọc"}
           </p>
         ) : (
           visible.map((row) => {
             const Icon = TYPE_ICONS[row.type];
             return (
-              <article key={row.id} className="rounded-xl border border-white/[0.08] bg-[#0e0e11] p-3.5">
+              <article key={row.id} className="rounded-xl border border-white/10 bg-white/[0.02] p-3.5">
                 <div className="flex items-start justify-between gap-3">
                   <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-md border ${TYPE_TILE}`}>
                     <Icon size={13} />
@@ -738,7 +737,7 @@ export function AdminAnnouncements({
         )}
       </div>
 
-      <div className="hidden w-full overflow-x-auto rounded-xl border border-white/[0.08] bg-[#0e0e11] sm:block">
+      <div className="hidden w-full overflow-x-auto rounded-xl border border-white/10 bg-white/[0.02] sm:block">
         <table className="w-full min-w-[860px] text-left">
           <thead>
             <tr className="border-b border-white/10">

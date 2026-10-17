@@ -152,7 +152,7 @@ export function AdminWeaponImages({
     <div className="flex flex-col gap-6">
       <form
         onSubmit={handleLink}
-        className="rounded-2xl border border-white/10 bg-neutral-900/50 p-5 flex flex-col gap-4"
+        className="rounded-2xl border border-white/10 bg-white/[0.02] p-5 flex flex-col gap-4"
       >
         <span className="text-[12px] font-semibold text-neutral-500">
           Thêm ảnh vật phẩm
@@ -238,7 +238,7 @@ export function AdminWeaponImages({
           is done, with no way to see what is left — and the names come straight
           off the accounts, so this is the actual worklist. */}
       {missing.length > 0 ? (
-        <div className="rounded-2xl border border-white/10 bg-neutral-900/40 p-5">
+        <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-5">
           <span className="text-[12px] font-semibold text-neutral-500">
             Chưa có ảnh ({missingTotal})
           </span>
@@ -270,7 +270,7 @@ export function AdminWeaponImages({
       {/* The HOT PICK pin lives beside the pictures it rotates through: the
           chip on the category page draws from this library, so the shop pins
           a tree where it can see the trees. Moved here from Cấu hình. */}
-      <div className="rounded-2xl border border-white/10 bg-neutral-900/40 p-5">
+      <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-5">
         <span className={LABEL}>Vật phẩm &ldquo;HOT PICK&rdquo;</span>
         <div className="flex flex-wrap items-center gap-3">
           <select
@@ -311,7 +311,7 @@ export function AdminWeaponImages({
       </div>
 
       {images.length > 0 ? (
-        <div className="rounded-2xl border border-white/10 bg-neutral-900/40 overflow-hidden">
+        <div className="rounded-2xl border border-white/10 bg-white/[0.02] overflow-hidden">
           <div className="px-5 py-3.5 border-b border-white/10">
             <span className="text-[12px] font-semibold text-neutral-500">
               Trong kho ({images.length})

@@ -205,7 +205,7 @@ function StatCard({
   sub: string;
 }) {
   return (
-    <div className="rounded-xl border border-white/[0.08] bg-[#0e0e11] p-5 flex flex-col gap-2">
+    <div className="rounded-xl border border-white/10 bg-white/[0.02] p-5 flex flex-col gap-2">
       <span className="text-[12px] font-semibold text-neutral-500">
         {label}
       </span>

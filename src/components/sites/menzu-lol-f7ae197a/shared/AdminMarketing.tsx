@@ -66,7 +66,6 @@ function StatMini({
   label,
   value,
   icon: Icon,
-  tint,
 }: {
   label: string;
   value: number;
@@ -74,12 +73,12 @@ function StatMini({
   tint: string;
 }) {
   return (
-    <div className="rounded-xl border border-white/[0.08] bg-[#0e0e11] p-5 flex flex-col gap-3">
+    <div className="rounded-xl border border-white/10 bg-white/[0.02] p-5 flex flex-col gap-3">
       <div className="flex items-center justify-between gap-3">
         <span className="text-[12px] font-semibold text-neutral-500">
           {label}
         </span>
-        <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border ${tint}`}>
+        <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/[0.04] text-mist`}>
           <Icon size={15} />
         </span>
       </div>
@@ -264,7 +263,7 @@ export function AdminMarketing({
                 setScope("ALL"); setScopeCategory(""); setScopeProducts([]); setProductQuery("");
               }
             }}
-            className="rounded-xl border border-white/[0.08] bg-[#0e0e11] p-5 grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-4"
+            className="rounded-xl border border-white/10 bg-white/[0.02] p-5 grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-4"
           >
             <div className="sm:col-span-3 lg:col-span-4 -mb-1 flex items-center gap-2 text-[12px] font-semibold text-neutral-500">
               <TicketPercent size={13} className="text-neutral-400" />
@@ -347,7 +346,7 @@ export function AdminMarketing({
                 <div
                   role="group"
                   aria-label="Chọn sản phẩm áp dụng mã"
-                  className="mt-2 max-h-44 overflow-y-auto rounded-xl border border-white/[0.08] bg-white/[0.02] divide-y divide-white/[0.05]"
+                  className="mt-2 max-h-44 overflow-y-auto rounded-xl border border-white/10 bg-white/[0.02] divide-y divide-white/[0.05]"
                 >
                   {pickable.length === 0 ? (
                     <p className="px-3 py-3 text-xs text-neutral-500">Không có sản phẩm nào khớp.</p>
@@ -390,7 +389,7 @@ export function AdminMarketing({
           {vouchers.length === 0 ? (
             <AdminEmpty title="Chưa có voucher nào" body="Tạo mã đầu tiên bằng biểu mẫu bên trên." />
           ) : (
-            <div className="w-full overflow-x-auto rounded-xl border border-white/[0.08] bg-[#0e0e11]">
+            <div className="w-full overflow-x-auto rounded-xl border border-white/10 bg-white/[0.02]">
               <table className="w-full min-w-[1000px] text-left">
                 <thead>
                   <tr className="border-b border-white/10">
@@ -472,7 +471,7 @@ export function AdminMarketing({
               });
               if (ok) { setProductCode(""); setSalePackage(""); setSalePrice(""); setSStart(""); setSEnd(""); }
             }}
-            className="rounded-xl border border-white/[0.08] bg-[#0e0e11] p-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4"
+            className="rounded-xl border border-white/10 bg-white/[0.02] p-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4"
           >
             <div className="sm:col-span-2 lg:col-span-6 -mb-1 flex items-center gap-2 text-[12px] font-semibold text-neutral-500">
               <Zap size={13} className="text-neutral-400" />
@@ -560,7 +559,7 @@ export function AdminMarketing({
                 return (
                 <div
                   key={s.id}
-                  className="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-xl border border-white/[0.08] bg-[#0e0e11] px-5 py-3.5 transition-colors hover:bg-white/[0.015]"
+                  className="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-xl border border-white/10 bg-white/[0.02] px-5 py-3.5 transition-colors hover:bg-white/[0.015]"
                 >
                   <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-rose-500/25 bg-rose-500/10 text-rose-400">
                     <Zap size={14} />

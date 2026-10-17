@@ -76,7 +76,7 @@ function StatCard({
   tone?: string;
 }) {
   return (
-    <div className="rounded-xl border border-white/[0.08] bg-[#0e0e11] p-5 flex flex-col gap-2">
+    <div className="rounded-xl border border-white/10 bg-white/[0.02] p-5 flex flex-col gap-2">
       <span className="text-[12px] font-semibold text-neutral-500">
         {label}
       </span>
@@ -230,7 +230,7 @@ export function AdminUserDetail({
       {error ? <AdminError message={error} onRetry={() => setError(null)} /> : null}
 
       {/* Who this is: the face, the papers, the footprint dates. */}
-      <div className="rounded-xl border border-white/[0.08] bg-[#0e0e11] p-6">
+      <div className="rounded-xl border border-white/10 bg-white/[0.02] p-6">
         <div className="flex flex-wrap items-center gap-5">
           <span
             className={`flex h-[72px] w-[72px] shrink-0 items-center justify-center overflow-hidden rounded-full border-2 bg-neutral-900 ${
@@ -482,7 +482,7 @@ export function AdminUserDetail({
                   type="button"
                   disabled={busy}
                   onClick={() => setConfirming({ kind: "agencyRevoke" })}
-                  className="h-[34px] px-4 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 disabled:opacity-40 text-[12px] font-semibold text-neutral-300 transition-colors"
+                  className="h-[34px] px-4 rounded-lg border border-white/10 bg-white/[0.02] hover:bg-white/10 disabled:opacity-40 text-[12px] font-semibold text-neutral-300 transition-colors"
                 >
                   Gỡ đại lý
                 </button>

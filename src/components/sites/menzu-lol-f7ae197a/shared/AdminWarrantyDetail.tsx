@@ -674,7 +674,7 @@ export function AdminWarrantyDetail({
           <section className={`${CARD} p-4`}>
             <span className={LABEL}>Đơn hàng</span>
             <div className="mt-3 flex items-start gap-3">
-              <div className="relative aspect-video w-24 shrink-0 overflow-hidden rounded-lg border border-white/5 bg-neutral-900">
+              <div className="relative aspect-video w-24 shrink-0 overflow-hidden rounded-lg border border-white/10 bg-white/[0.02]">
                 {ticket.productImage ? (
                   <Image
                     src={ticket.productImage}

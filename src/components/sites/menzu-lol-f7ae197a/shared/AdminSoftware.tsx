@@ -183,7 +183,7 @@ export function AdminSoftware({
     <div className="flex flex-col gap-6">
       <form
         onSubmit={handleCreate}
-        className="rounded-2xl border border-white/10 bg-neutral-900/50 p-5 flex flex-col gap-4"
+        className="rounded-2xl border border-white/10 bg-white/[0.02] p-5 flex flex-col gap-4"
       >
         <span className="text-[12px] font-semibold text-neutral-500">
           Thêm phần mềm
@@ -300,7 +300,7 @@ export function AdminSoftware({
       {shown.map((s) => (
         <div
           key={s.code}
-          className="rounded-2xl border border-white/10 bg-neutral-900/40 flex flex-wrap items-center gap-3 px-5 py-4"
+          className="rounded-2xl border border-white/10 bg-white/[0.02] flex flex-wrap items-center gap-3 px-5 py-4"
         >
           {/* The cover, at the ratio the storefront card crops to, so what the
               shop sees here is what the customer sees there. Same landscape

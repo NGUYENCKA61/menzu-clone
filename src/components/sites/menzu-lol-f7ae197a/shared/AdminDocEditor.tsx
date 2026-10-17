@@ -113,7 +113,7 @@ export function AdminDocEditor({
       {error ? <AdminError message={error} onRetry={() => setError(null)} /> : null}
 
       {/* The article's papers: where it lives and how it is doing. */}
-      <div className="rounded-xl border border-white/[0.08] bg-[#0e0e11] p-5 flex flex-wrap items-center gap-4">
+      <div className="rounded-xl border border-white/10 bg-white/[0.02] p-5 flex flex-wrap items-center gap-4">
         <span
           className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border ${
             meta?.tint ?? "border-white/10 bg-white/5 text-neutral-400"
@@ -155,7 +155,7 @@ export function AdminDocEditor({
         </a>
       </div>
 
-      <div className="rounded-xl border border-white/[0.08] bg-[#0e0e11] p-5 flex flex-col gap-4">
+      <div className="rounded-xl border border-white/10 bg-white/[0.02] p-5 flex flex-col gap-4">
         <span className="flex items-center gap-2 text-[12px] font-semibold text-neutral-500">
           <FileText size={13} className="text-neutral-400" />
           Soạn nội dung

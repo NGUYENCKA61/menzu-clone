@@ -595,8 +595,8 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
       ) : null}
 
       {/* The tool's papers. */}
-      <div className="rounded-xl border border-white/[0.08] bg-[#0e0e11] p-5 flex flex-wrap items-center gap-5">
-        <span className="relative h-16 w-24 shrink-0 overflow-hidden rounded-lg border border-white/10 bg-neutral-900">
+      <div className="rounded-xl border border-white/10 bg-white/[0.02] p-5 flex flex-wrap items-center gap-5">
+        <span className="relative h-16 w-24 shrink-0 overflow-hidden rounded-lg border border-white/10 bg-white/[0.02]">
           {software.imageUrl ? (
             <Image src={software.imageUrl} alt="" fill sizes="192px" className="object-cover" />
           ) : (

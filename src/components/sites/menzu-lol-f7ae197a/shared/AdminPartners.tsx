@@ -104,7 +104,7 @@ export function AdminPartners({ partners }: { partners: AdminPartnerRow[] }) {
     <div className="flex flex-col gap-6">
       <form
         onSubmit={handleCreate}
-        className="rounded-2xl border border-white/10 bg-neutral-900/50 p-5 flex flex-col gap-4"
+        className="rounded-2xl border border-white/10 bg-white/[0.02] p-5 flex flex-col gap-4"
       >
         <span className="text-[12px] font-semibold text-neutral-500">
           Thêm đối tác
@@ -211,7 +211,7 @@ export function AdminPartners({ partners }: { partners: AdminPartnerRow[] }) {
           Chưa có đối tác nào, mục &ldquo;Đối tác uy tín&rdquo; đang ẩn trên trang chủ.
         </p>
       ) : (
-        <ul className="rounded-2xl border border-white/10 bg-neutral-900/40 overflow-hidden">
+        <ul className="rounded-2xl border border-white/10 bg-white/[0.02] overflow-hidden">
           {partners.map((p, index) => (
             <li
               key={p.id}

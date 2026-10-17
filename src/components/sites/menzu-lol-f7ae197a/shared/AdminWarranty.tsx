@@ -185,7 +185,7 @@ export function AdminWarranty({
           </p>
         </div>
       ) : (
-        <div className="overflow-hidden rounded-xl border border-white/[0.08] bg-[#0e0e11]">
+        <div className="overflow-hidden rounded-xl border border-white/10 bg-white/[0.02]">
           {pageRows.map((row) => (
             <TicketRow key={row.id} row={row} />
           ))}

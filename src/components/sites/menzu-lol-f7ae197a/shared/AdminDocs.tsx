@@ -52,7 +52,6 @@ function StatMini({
   label,
   value,
   icon: Icon,
-  tint,
 }: {
   label: string;
   value: string;
@@ -60,13 +59,13 @@ function StatMini({
   tint: string;
 }) {
   return (
-    <div className="rounded-xl border border-white/[0.08] bg-[#0e0e11] p-5 flex flex-col gap-3">
+    <div className="rounded-xl border border-white/10 bg-white/[0.02] p-5 flex flex-col gap-3">
       <div className="flex items-center justify-between gap-3">
         <span className="text-[12px] font-semibold text-neutral-500">
           {label}
         </span>
         <span
-          className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border ${tint}`}
+          className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/[0.04] text-mist`}
         >
           <Icon size={15} />
         </span>
@@ -182,7 +181,7 @@ export function AdminDocs({ docs }: { docs: DocView[] }) {
     const Icon = meta?.icon ?? FileText;
 
     return (
-      <div className="rounded-xl border border-white/[0.08] bg-[#0e0e11] p-4 sm:p-5 flex flex-col gap-3 transition-colors hover:border-white/[0.14]">
+      <div className="rounded-xl border border-white/10 bg-white/[0.02] p-4 sm:p-5 flex flex-col gap-3 transition-colors hover:border-white/[0.14]">
         <div className="flex items-center gap-3.5">
           <span
             className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border ${
@@ -380,7 +379,7 @@ export function AdminDocs({ docs }: { docs: DocView[] }) {
       </div>
 
       {creating ? (
-        <div className="rounded-xl border border-white/[0.08] bg-[#0e0e11] p-5 flex flex-col gap-4">
+        <div className="rounded-xl border border-white/10 bg-white/[0.02] p-5 flex flex-col gap-4">
           <span className="flex items-center gap-2 text-[12px] font-semibold text-neutral-500">
             <Plus size={13} className="text-neutral-400" />
             Bài viết mới

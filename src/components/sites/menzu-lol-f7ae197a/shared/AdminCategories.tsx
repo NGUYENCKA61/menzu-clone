@@ -150,7 +150,7 @@ export function AdminCategories({ categories }: { categories: AdminCategoryView[
     <div className="flex flex-col gap-6">
       <form
         onSubmit={handleCreate}
-        className="rounded-2xl border border-white/10 bg-neutral-900/50 p-5 flex flex-col gap-4"
+        className="rounded-2xl border border-white/10 bg-white/[0.02] p-5 flex flex-col gap-4"
       >
         <span className="text-[12px] font-semibold text-neutral-500">
           Thêm danh mục
@@ -260,7 +260,7 @@ export function AdminCategories({ categories }: { categories: AdminCategoryView[
             return (
               <div
                 key={category.id}
-                className="rounded-2xl border border-white/10 bg-neutral-900/50 p-4 flex flex-col gap-3"
+                className="rounded-2xl border border-white/10 bg-white/[0.02] p-4 flex flex-col gap-3"
               >
                 {/* Meta wraps, the buttons do not: a long category name should
                     not push the actions onto their own line and leave the rows

@@ -207,7 +207,7 @@ export function AdminVerifications({
           {pageRows.map((r) => (
             <article
               key={r.id}
-              className="rounded-2xl border border-white/[0.08] bg-[#0e0e11] p-5"
+              className="rounded-2xl border border-white/10 bg-white/[0.02] p-5"
             >
               <div className="flex flex-wrap items-center gap-3">
                 <Link

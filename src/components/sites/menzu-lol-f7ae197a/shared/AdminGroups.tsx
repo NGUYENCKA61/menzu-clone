@@ -46,7 +46,6 @@ function StatCard({
   value,
   sub,
   icon: Icon,
-  tint,
 }: {
   label: string;
   value: string;
@@ -56,12 +55,12 @@ function StatCard({
 }) {
   const idle = value === "0";
   return (
-    <div className="rounded-xl border border-white/[0.08] bg-[#0e0e11] p-5 flex flex-col gap-3">
+    <div className="rounded-xl border border-white/10 bg-white/[0.02] p-5 flex flex-col gap-3">
       <div className="flex items-center justify-between gap-3">
         <span className="text-[12px] font-semibold text-neutral-500">
           {label}
         </span>
-        <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border ${tint}`}>
+        <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/[0.04] text-mist`}>
           <Icon size={15} />
         </span>
       </div>
@@ -306,7 +305,7 @@ export function AdminGroups({
           </div>
 
           <div className="flex flex-col gap-4 p-5">
-          <label className="flex cursor-pointer flex-wrap items-center gap-2.5 rounded-lg border border-white/[0.06] bg-white/[0.02] px-3.5 py-2.5">
+          <label className="flex cursor-pointer flex-wrap items-center gap-2.5 rounded-lg border border-white/10 bg-white/[0.02] px-3.5 py-2.5">
             <input
               type="checkbox"
               checked={group.isActive}

@@ -281,7 +281,7 @@ export function AdminUsers({
           {visible.map((user) => {
             const isSelf = user.username === selfUsername;
             return (
-              <article key={user.username} className="rounded-xl border border-white/[0.08] bg-[#0e0e11] p-3.5">
+              <article key={user.username} className="rounded-xl border border-white/10 bg-white/[0.02] p-3.5">
                 <div className="flex items-start justify-between gap-3">
                   <Link href={`/admin/users/${user.uid}`} className="flex min-w-0 items-center gap-3">
                     <span className={`flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 bg-neutral-900 ${
@@ -320,7 +320,7 @@ export function AdminUsers({
           })}
         </div>
 
-        <div className="admin-list hidden w-full overflow-x-auto rounded-xl border border-white/[0.08] bg-[#0e0e11] sm:block">
+        <div className="admin-list hidden w-full overflow-x-auto rounded-xl border border-white/10 bg-white/[0.02] sm:block">
           <table className="w-full min-w-[1000px] text-left">
             <thead>
               <tr className="border-b border-white/[0.06]">

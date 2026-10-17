@@ -570,7 +570,7 @@ export function AdminOperations({
           {topUpSlice.map((row) => {
             const status = TOPUP_STATUS[row.status] ?? TOPUP_STATUS.PENDING!;
             return (
-              <article key={row.code} className="rounded-xl border border-white/[0.08] bg-[#0e0e11] p-3.5">
+              <article key={row.code} className="rounded-xl border border-white/10 bg-white/[0.02] p-3.5">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <span className="block font-mono text-xs font-black text-white">#{row.code}</span>
@@ -643,7 +643,7 @@ export function AdminOperations({
           })}
         </div>
 
-        <div className="hidden w-full overflow-x-auto rounded-xl border border-white/[0.08] bg-[#0e0e11] sm:block">
+        <div className="hidden w-full overflow-x-auto rounded-xl border border-white/10 bg-white/[0.02] sm:block">
           <table className="w-full min-w-[760px] text-left">
             <thead>
               <tr className="border-b border-white/10">

@@ -355,7 +355,7 @@ export function AdminSoftwarePackages({
                   <button
                     type="button"
                     onClick={() => setEditing(null)}
-                    className="h-[30px] px-3 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 text-[12px] font-semibold text-neutral-300 transition-colors"
+                    className="h-[30px] px-3 rounded-lg border border-white/10 bg-white/[0.02] hover:bg-white/10 text-[12px] font-semibold text-neutral-300 transition-colors"
                   >
                     Hủy
                   </button>
@@ -367,7 +367,7 @@ export function AdminSoftwarePackages({
               // and made every row read as clutter.
               <div
                 key={pkg.id}
-                className="flex flex-wrap items-center gap-x-3 gap-y-2 rounded-lg border border-white/[0.06] bg-white/[0.02] px-3.5 py-2.5"
+                className="flex flex-wrap items-center gap-x-3 gap-y-2 rounded-lg border border-white/10 bg-white/[0.02] px-3.5 py-2.5"
               >
                 <div className="min-w-0 flex-1">
                   <p className="text-[13px] font-bold text-white">
