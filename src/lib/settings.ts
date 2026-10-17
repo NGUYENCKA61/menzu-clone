@@ -286,8 +286,12 @@ export interface ShopSettings {
    * the still image, which is what every shop starts with.
    */
   heroVideo: string;
-  /** What fills the hero's frame: the clip above, or the pictures below. */
-  heroMedia: "video" | "image";
+  /**
+   * What fills the hero's frame: the clip above, the pictures below, or
+   * nothing — "none" hides the frame and the copy stands alone on the page
+   * picture (lab, 17/10/2026).
+   */
+  heroMedia: "video" | "image" | "none";
   /**
    * The frame's pictures when heroMedia is "image": one stands still, two or
    * more cross-fade in turn. Empty falls back to heroBanner.
@@ -714,6 +718,11 @@ export function cleanHeroImages(value: unknown): string[] {
     .map((item) => item.trim())
     .filter(Boolean)
     .slice(0, HERO_IMAGES_MAX);
+}
+
+/** The hero frame's choice; anything unknown is the clip, as before. */
+function toHeroMedia(raw: unknown): ShopSettings["heroMedia"] {
+  return raw === "image" || raw === "none" ? raw : "video";
 }
 
 function toHeroImages(raw: string | undefined): string[] {
@@ -1259,8 +1268,7 @@ export function parseSettings(
       stored.get(SETTING_KEYS.heroVideo),
       DEFAULT_SETTINGS.heroVideo,
     ),
-    heroMedia:
-      stored.get(SETTING_KEYS.heroMedia) === "image" ? "image" : "video",
+    heroMedia: toHeroMedia(stored.get(SETTING_KEYS.heroMedia)),
     heroImages: toHeroImages(stored.get(SETTING_KEYS.heroImages)),
     heroShootingStars: toBoolean(
       stored.get(SETTING_KEYS.heroShootingStars),
@@ -1591,7 +1599,7 @@ export function normalizeSettings(
     heroSecondaryLabel: String(raw?.heroSecondaryLabel ?? "").trim(),
     heroSecondaryHref: String(raw?.heroSecondaryHref ?? "").trim(),
     heroVideo: String(raw?.heroVideo ?? "").trim(),
-    heroMedia: raw?.heroMedia === "image" ? "image" : "video",
+    heroMedia: toHeroMedia(raw?.heroMedia),
     heroImages: cleanHeroImages(raw?.heroImages),
     heroShootingStars: Boolean(raw?.heroShootingStars),
 

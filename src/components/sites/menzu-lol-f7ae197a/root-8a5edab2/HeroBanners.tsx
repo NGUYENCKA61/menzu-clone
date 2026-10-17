@@ -41,8 +41,8 @@ interface HeroBannersProps {
   banner?: string;
   /** Plays in place of the still when set and `media` is "video". */
   video?: string;
-  /** Cấu hình's choice for the frame: the clip, or the pictures. */
-  media?: "video" | "image";
+  /** Cấu hình's choice for the frame: the clip, the pictures, or none. */
+  media?: "video" | "image" | "none";
   /** The pictures for "image": one stands still, more cross-fade. */
   images?: string[];
   /** The pill above the eyebrow. Empty draws none. */
@@ -255,34 +255,38 @@ export function HeroBanners({
             20px back to the gap beside the copy.
             Below 1400 there is no side margin to spend and it stays flush.
             LAB: the halo is back, the main site's own (the owner, 17/10/2026:
-            "có nên thêm lại không", then "làm đi"), beside the drop shadow. */}
-        <div className="lab-notch-lg relative aspect-[16/9] w-full overflow-hidden border border-line bg-scrim shadow-[0_40px_90px_-40px_rgba(0,0,0,0.95),0_0_140px_30px_rgba(0,0,0,0.65)] lg:w-auto lg:min-w-0 lg:max-w-[650px] lg:flex-1 min-[87.5rem]:-mr-10 min-[87.5rem]:max-w-[670px]">
-          {media === "video" && video ? (
-            // Muted and inline, because a hero that makes noise or takes over
-            // the screen on a phone is a hero people leave. The still is drawn
-            // first and stays; the clip fades in over it once it is running,
-            // and never loads at all for readers who asked for less motion.
-            <HeroVideo src={video} poster={banner} />
-          ) : slides.length > 1 ? (
-            <HeroImageCarousel images={slides} />
-          ) : (
-            <Image
-              src={slides[0] ?? banner}
-              // Decorative: the heading beside it already says what the shop
-              // is, and "banner" only made a screen reader announce a word
-              // that tells its listener nothing.
-              alt=""
-              fill
-              sizes="(max-width: 1024px) 100vw, 620px"
-              className="select-none object-cover"
-              // The home page's LCP image. In Next 16 `priority` only
-              // preloads; fetchPriority is what lifts it to High (SEO
-              // review, 13/10/2026).
-              preload
-              fetchPriority="high"
-            />
-          )}
-        </div>
+            "có nên thêm lại không", then "làm đi"), beside the drop shadow.
+            LAB: Cấu hình can hide the frame altogether ("Ẩn", heroMedia
+            "none"); the copy then stands alone on the page picture. */}
+        {media === "none" ? null : (
+          <div className="lab-notch-lg relative aspect-[16/9] w-full overflow-hidden border border-line bg-scrim shadow-[0_40px_90px_-40px_rgba(0,0,0,0.95),0_0_140px_30px_rgba(0,0,0,0.65)] lg:w-auto lg:min-w-0 lg:max-w-[650px] lg:flex-1 min-[87.5rem]:-mr-10 min-[87.5rem]:max-w-[670px]">
+            {media === "video" && video ? (
+              // Muted and inline, because a hero that makes noise or takes over
+              // the screen on a phone is a hero people leave. The still is drawn
+              // first and stays; the clip fades in over it once it is running,
+              // and never loads at all for readers who asked for less motion.
+              <HeroVideo src={video} poster={banner} />
+            ) : slides.length > 1 ? (
+              <HeroImageCarousel images={slides} />
+            ) : (
+              <Image
+                src={slides[0] ?? banner}
+                // Decorative: the heading beside it already says what the shop
+                // is, and "banner" only made a screen reader announce a word
+                // that tells its listener nothing.
+                alt=""
+                fill
+                sizes="(max-width: 1024px) 100vw, 620px"
+                className="select-none object-cover"
+                // The home page's LCP image. In Next 16 `priority` only
+                // preloads; fetchPriority is what lifts it to High (SEO
+                // review, 13/10/2026).
+                preload
+                fetchPriority="high"
+              />
+            )}
+          </div>
+        )}
       </div>
 
       <ScrollCta targetId={SCROLL_TARGET_ID} label="Khám phá ngay" animated />

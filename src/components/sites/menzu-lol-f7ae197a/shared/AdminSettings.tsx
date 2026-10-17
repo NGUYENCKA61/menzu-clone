@@ -615,7 +615,7 @@ export function AdminSettings({
     settings.heroShootingStars,
   );
   const [heroVideo, setHeroVideo] = useState(settings.heroVideo);
-  const [heroMedia, setHeroMedia] = useState<"video" | "image">(
+  const [heroMedia, setHeroMedia] = useState<"video" | "image" | "none">(
     settings.heroMedia,
   );
   const [heroImages, setHeroImages] = useState<string[]>(settings.heroImages);
@@ -3259,6 +3259,7 @@ export function AdminSettings({
                   [
                     ["video", "Video"],
                     ["image", "Ảnh"],
+                    ["none", "Ẩn"],
                   ] as const
                 ).map(([value, label]) => (
                   <button
@@ -3279,7 +3280,13 @@ export function AdminSettings({
               </div>
             </div>
 
-            {heroMedia === "video" ? (
+            {heroMedia === "none" ? (
+              <p className="text-[12px] leading-relaxed text-neutral-400">
+                Khung video/ảnh bên phải đang ẩn: chữ đầu trang đứng một mình
+                trên ảnh nền. Chọn Video hoặc Ảnh để hiện lại, các file cũ vẫn
+                được giữ.
+              </p>
+            ) : heroMedia === "video" ? (
               <div>
                 <span className={LABEL}>Video hero</span>
                 <input
