@@ -42,7 +42,7 @@ export async function AccountPageFrame({
   action,
   sidebar = true,
   icon,
-  ground = "black",
+  ground = "home",
   children,
 }: AccountPageFrameProps) {
   const user = await getCurrentUser();

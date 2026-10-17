@@ -25,7 +25,7 @@ import { ConnectRailSection } from "@/components/sites/menzu-lol-f7ae197a/root-8
  */
 export default function StorefrontLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="min-h-screen flex flex-col text-white overflow-x-clip selection:bg-[var(--menzu-accent)]/30">
+    <div className="min-h-screen flex flex-col text-white overflow-x-clip selection:bg-[var(--menzu-accent)]/30 bg-panel">
       <div className="w-full shrink-0 h-[104px]" />
       <SiteHeader />
 

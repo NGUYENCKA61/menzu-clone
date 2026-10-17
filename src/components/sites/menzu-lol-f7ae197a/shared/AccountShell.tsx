@@ -49,7 +49,7 @@ export function AccountShell({
   action = null,
   sidebar = true,
   icon: Icon,
-  ground = "black",
+  ground = "home",
   children,
 }: AccountShellProps) {
   const crumbs: Crumb[] = [{ label: "Trang chủ", href: "/" }, ...trail, { label: crumb }];

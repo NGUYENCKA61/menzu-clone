@@ -42,7 +42,6 @@ export function SimplePage({
   crumb,
   children,
   icon: Icon,
-  ground = "black",
   action,
   crumbs,
   subtitle,
@@ -54,7 +53,9 @@ export function SimplePage({
     // home page's tone instead.
     <div
       className={`min-h-screen flex flex-col text-white overflow-x-clip selection:bg-[var(--menzu-accent)]/30 ${
-        ground === "home" ? "bg-[#0f1015]" : "bg-[#050508]"
+        // LAB (the owner, 17/10/2026: "rà soát sửa lại cho đồng bộ"): every
+        // simple page on the same #111111 ground as the account screens.
+        "bg-panel"
       }`}
     >
       <div className="w-full shrink-0 h-[104px]" />
