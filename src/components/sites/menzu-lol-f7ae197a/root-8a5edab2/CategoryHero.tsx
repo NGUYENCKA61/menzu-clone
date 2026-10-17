@@ -49,13 +49,14 @@ export function CategoryHero({
             // pictures, and the header is far wider than it is tall.
             className="object-cover object-top sm:object-[right_top]"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#0f1015] via-transparent to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-b from-[#0f1015]/60 via-transparent to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-panel via-transparent to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-b from-panel/60 via-transparent to-transparent" />
           {/* Dark from the left, as menzu has it, but in the page's own
-              #0f1015: on a wide window the left edge now continues the plain
-              margins below rather than reading as a black band, the words sit
-              on clean shade, and the picture shows in the middle and right. */}
-          <div className="absolute inset-0 bg-gradient-to-r from-[#0f1015] via-[#0f1015]/80 to-transparent sm:via-[#0f1015]/50" />
+              ground (bg-panel, the home page's #111111): on a wide window the
+              left edge continues the plain margins below rather than reading
+              as a black band, the words sit on clean shade, and the picture
+              shows in the middle and right. */}
+          <div className="absolute inset-0 bg-gradient-to-r from-panel via-panel/80 to-transparent sm:via-panel/50" />
         </div>
       ) : null}
 

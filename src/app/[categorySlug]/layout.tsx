@@ -18,10 +18,12 @@ import { ConnectRailSection } from "@/components/sites/menzu-lol-f7ae197a/root-8
  * (loading.tsx beside this file, and one under [productSlug]), and the
  * real page lands when it is ready. The same move the account area made.
  *
- * The shelves and product pages sit on the home page's flat #0f1015 laid
+ * The shelves and product pages sit on the home page's flat ground laid
  * over the site's backdrop picture, as menzu's do: long runs of text — a
  * tool's description, its requirements — read on plain ground, and going
  * from the home page to a shelf to a product never changes the ground.
+ * LAB (17/10/2026, "chưa có làm nền giống trang chủ"): that ground is the
+ * home page's #111111 (bg-panel), no longer the older #0f1015.
  */
 export default function StorefrontLayout({ children }: { children: ReactNode }) {
   return (
@@ -32,7 +34,7 @@ export default function StorefrontLayout({ children }: { children: ReactNode }) 
       <main className="flex-1 relative z-20 w-full flex flex-col">
         {/* Inside <main>, whose z-20 stacking context keeps this -z-10 layer
             above the fixed backdrop and under the page's content. */}
-        <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 bg-[#0f1015]" />
+        <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 bg-panel" />
         <div className="w-full">{children}</div>
         <SiteFooter />
       </main>
