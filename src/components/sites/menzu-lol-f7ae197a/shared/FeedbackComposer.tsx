@@ -287,7 +287,7 @@ export function FeedbackComposer({ user, today }: { user: ComposerUser; today: s
                 />
               </button>
               {serviceOpen ? (
-                <div className="absolute top-full left-0 right-0 mt-2 bg-white/[0.02] border border-white/10 rounded-2xl overflow-hidden z-20">
+                <div className="absolute top-full left-0 right-0 mt-2 bg-raise border border-white/10 rounded-2xl overflow-hidden z-20">
                   {SERVICES.map(({ value, icon: Icon }) => {
                     const active = value === service;
                     return (
