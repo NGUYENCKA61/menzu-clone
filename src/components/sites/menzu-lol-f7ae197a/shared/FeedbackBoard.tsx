@@ -134,10 +134,11 @@ export function ReviewAvatar({
  * height (the owner, 13/10/2026, UI consistency review). A thumbnail is a
  * crop, so the whole picture is one press away rather than a new tab.
  *
- * Through next/image at the thumbnail's own size, at quality 95: the stored
- * file is the whole picture (often 100-200KB) and the wall only needs a 112px
- * square of it, about 5KB (image audit, 17/10/2026). The lightbox still opens
- * the stored file itself. Lazy, since the wall lists hundreds.
+ * Through next/image at quality 95: the stored file is the whole picture
+ * (often 100-200KB), and the 112px square now downloads about half of that on
+ * a sharp screen and a fifth on a plain one (image audit, 17/10/2026). The
+ * lightbox still opens the stored file itself. Lazy, since the wall lists
+ * hundreds.
  */
 function ReviewPictures({ pictures, reviewer }: { pictures: string[]; reviewer: string }) {
   const [open, setOpen] = useState(false);
@@ -166,7 +167,14 @@ function ReviewPictures({ pictures, reviewer }: { pictures: string[]; reviewer: 
                 alt=""
                 width={112}
                 height={112}
-                sizes="112px"
+                // The square crops pictures that are mostly 16:9, and the old
+                // full-size file came out crisp because the browser shrank
+                // it a long way. 320px asks for a 640px-wide file on a sharp
+                // screen (384px on a plain one): measured as sharp as the
+                // stored file in the square, at about half its weight. At
+                // "112px" a 256px file was stretched to fill the square and
+                // read soft (17/10/2026).
+                sizes="320px"
                 quality={95}
                 // A picture from anywhere but this site's own uploads cannot
                 // go through the optimizer; it is drawn as it is.
