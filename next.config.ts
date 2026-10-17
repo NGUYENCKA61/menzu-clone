@@ -162,7 +162,7 @@ const nextConfig: NextConfig = {
    * only — a production build never reads it — and it grants nothing beyond
    * fetching dev assets to devices already inside the home network.
    */
-  allowedDevOrigins: ["192.168.1.154", "192.168.1.*"],
+  allowedDevOrigins: ["192.168.1.154", "192.168.1.*", "127.0.0.1"],
 
   images: {
     // WebP only, and first in the list, which is what decides the format —
