@@ -571,6 +571,12 @@ function BentoTile({
  *    giống lmarket nhưng vẫn là có hàng 4 card"), in our rows of four: A4's
  *    shade, a bold name, a quiet second line, then "từ" and the price in
  *    bold white, as their "from €24.99".
+ *  - a6: lmarket's game card from lmarket.net/cheats/ (the owner, 17/10/2026:
+ *    "a5 giống này đi https://lmarket.net/cheats/ bản 4 card", "cho nó là
+ *    A6"): square in the game list, the picture clear but for a black foot
+ *    over its lower 40%, a shadowed name and a small line; the card rises
+ *    and its rim lights under the pointer while the others fade (lab-lm-*
+ *    in globals.css).
  *  - b: unnamedtech's tile — the whole cover dimmed evenly, a small eyebrow
  *    naming the platform ("HACK PC") over a quieter name.
  *  - b2, b3: B's words at A2's and A3's brightness (the owner, 17/10/2026:
@@ -581,7 +587,7 @@ function BentoTile({
  *  - c: lmarket's tile — the cover slightly dimmed above a solid caption bar
  *    holding the name and the blurb, with a platform chip at the end.
  */
-export type TileStyle = "classic" | "a" | "a2" | "a3" | "a4" | "a5" | "b" | "b2" | "b3" | "c";
+export type TileStyle = "classic" | "a" | "a2" | "a3" | "a4" | "a5" | "a6" | "b" | "b2" | "b3" | "c";
 
 /**
  * The dress the game tiles wear unless a row asks for another. One constant
@@ -596,11 +602,11 @@ export type TileStyle = "classic" | "a" | "a2" | "a3" | "a4" | "a5" | "b" | "b2"
  * unnamedtech's tile ("giờ qua B B: kiểu unnamedtech"), with "b2" and "b3"
  * at A2's and A3's brightness, then "c", lmarket's tile ("giờ qua kiểu C:
  * kiểu lmarket"), back on "a2" ("quay lại kiểu a2"), A1 once more ("a1
- * thử"), "a3", "a4" (A3 at lmarket's brightness), now "a5", lmarket's
- * best-seller card ("a5 thử"). "a" is A1, "classic" the framed picture with
- * the name under it.
+ * thử"), "a3", "a4" (A3 at lmarket's brightness), "a5", lmarket's
+ * best-seller card ("a5 thử"), now "a6", their /cheats/ card. "a" is A1,
+ * "classic" the framed picture with the name under it.
  */
-export const DEFAULT_TILE_STYLE: TileStyle = "a5";
+export const DEFAULT_TILE_STYLE: TileStyle = "a6";
 
 /** The eyebrow a tile wears in style b, from the category's platform tag. */
 function platformWord(platform: string | null | undefined): string {
@@ -697,13 +703,17 @@ export function RowTile({
         "row-tile keep-dark group relative isolate block overflow-hidden rounded-[14px] border border-white/[0.06] bg-panel transition-colors hover:border-white/20",
         // The pick tile stands 4:3 on a phone like the list's: at 16:10 its
         // name and price climbed under the "Top tháng" pill.
-        pick ? "aspect-[4/3] sm:aspect-[16/10]" : "aspect-[4/3]",
+        // A6 is lmarket's square card in the game list.
+        pick ? "aspect-[4/3] sm:aspect-[16/10]" : style === "a6" ? "aspect-square" : "aspect-[4/3]",
         style === "a" && "hover:border-[var(--menzu-accent)]/40",
         // A2 lights its rim in the shop's red under the pointer, as
         // elitehacks lights theirs in their green.
         style === "a2" && "hover:border-[var(--menzu-accent)]",
+        style === "a6" && "lab-lm-card rounded-xl border-white/10 hover:border-white/10",
       )}
     >
+      {/* A6's ring of light sits behind the picture and shows at the rim. */}
+      {style === "a6" ? <span aria-hidden className="lab-lm-glow" /> : null}
       {card.image ? (
         <CardImage
           src={card.image}
@@ -718,13 +728,17 @@ export function RowTile({
           // question, 13/10/2026). Widths follow the grid: 1272px of row at
           // 1320px+, four across from lg, three from md, two below; the pick
           // tiles slide three to a view.
+          // A6's square tile draws the 16:9 cover 16/9 of its width.
           sizes={
             big
               ? "(min-width: 1320px) 440px, (min-width: 768px) 33vw, 50vw"
-              : "(min-width: 1320px) 400px, (min-width: 1024px) 34vw, (min-width: 768px) 45vw, 67vw"
+              : style === "a6" && !pick
+                ? "(min-width: 1320px) 520px, (min-width: 1024px) 45vw, (min-width: 768px) 60vw, 90vw"
+                : "(min-width: 1320px) 400px, (min-width: 1024px) 34vw, (min-width: 768px) 45vw, 67vw"
           }
           className={cn(
             "object-cover transition-transform duration-500 group-hover:scale-105 motion-reduce:transform-none",
+            style === "a6" && "duration-700 ease-out group-hover:scale-[1.04]",
             style === "a" && "brightness-[.72] saturate-[.9] group-hover:brightness-[.85]",
             style === "b" && "brightness-[.55] group-hover:brightness-[.7]",
             style === "c" && "brightness-[.82] group-hover:brightness-95",
@@ -758,9 +772,33 @@ function priceLine(card: ProductCard, lead = "Chỉ từ"): string | null {
   return parts.length > 0 ? parts.join(", ") : null;
 }
 
-/** The words and shade a tile wears in styles a to a5, b to b3 and c (see TileStyle). */
+/** The words and shade a tile wears in styles a to a6, b to b3 and c (see TileStyle). */
 function TileDress({ card, style, big }: { card: ProductCard; style: TileStyle; big: boolean }) {
   const line = priceLine(card);
+  if (style === "a6") {
+    // lmarket's second line is the count ("18 cheats"); the shop asked for
+    // the price on its cards (13/10/2026), so it leads the line here.
+    const second =
+      priceLine(card, "Từ") ??
+      (card.description ? sentenceCase(card.description) : null);
+    return (
+      <>
+        <span aria-hidden className="tile-scrim lab-lm-foot" />
+        <span aria-hidden className="lab-lm-ring" />
+        <span className="tile-caption absolute inset-x-0 bottom-0 p-3">
+          <h3
+            className={cn(
+              "lab-lm-title line-clamp-2 text-[14px] font-bold leading-snug text-white sm:line-clamp-1 sm:text-[16px]",
+              big && "lg:text-[18px]",
+            )}
+          >
+            {titleCase(withoutNewWord(card.title))}
+          </h3>
+          {second ? <span className="mt-0.5 block truncate text-[11px] text-white/70">{second}</span> : null}
+        </span>
+      </>
+    );
+  }
   if (style === "a5") {
     const second =
       card.count != null && card.count > 0

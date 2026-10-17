@@ -350,7 +350,9 @@ export function RowSearch({
         <>
           <div
             ref={gridRef}
-            className={`grid grid-cols-2 md:grid-cols-3 gap-x-4 gap-y-7 sm:gap-x-6 sm:gap-y-9 pt-1 ${wide ? "" : "lg:grid-cols-4"}`}
+            // lab-lm-grid: tile style A6 fades the other tiles while one is
+            // hovered (globals.css).
+            className={`lab-lm-grid grid grid-cols-2 md:grid-cols-3 gap-x-4 gap-y-7 sm:gap-x-6 sm:gap-y-9 pt-1 ${wide ? "" : "lg:grid-cols-4"}`}
           >
             {shown.map((item, index) => {
               // Tiles the press just opened rise in one after another, the
