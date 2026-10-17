@@ -53,10 +53,11 @@ const ALL = "ALL";
 // not like elitehacks, whose whole site is set in ordinary case.
 const CHIP =
   "inline-flex h-10 items-center justify-center gap-2 rounded-[10px] px-4 text-[14px] font-semibold transition-colors lg:min-w-[120px]";
-// LAB: the lit chip is a lighter well with a rim (no white block: "thấy chói
-// quá"), so red stays the page's one action.
+// LAB: the lit chip is filled in the shop's red, as the main site's pills are
+// (the owner, 17/10/2026: "nút tất cả thay màu đỏ thử trong bộ lọc"); it was a
+// lighter well with a rim before (no white block: "thấy chói quá").
 const CHIP_IDLE = "bg-raise text-mist ring-1 ring-inset ring-line hover:text-frost hover:ring-line-strong";
-const CHIP_ACTIVE = "bg-white/[0.12] text-frost ring-1 ring-inset ring-white/25";
+const CHIP_ACTIVE = "bg-[var(--menzu-accent)] text-white ring-1 ring-inset ring-[var(--menzu-accent)]";
 
 /**
  * What each chip shows: its word and the icon before it. "Tất cả" is a
