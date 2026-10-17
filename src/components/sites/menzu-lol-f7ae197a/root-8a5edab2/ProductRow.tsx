@@ -588,6 +588,10 @@ function BentoTile({
  *    game list, the picture clear but for a black foot over its lower 40%,
  *    a shadowed name and a small line; the card rises and its rim lights
  *    under the pointer while the others fade (lab-lm-* in globals.css).
+ *  - a7, b7: A6's brightness, bright above and dark below at about A3's
+ *    strength, under A5's words and under B5's (B4's, no platform line)
+ *    (the owner, 18/10/2026: "a7 là bản a6 sáng trên tối dưới như a5 hoặc
+ *    b5 đi").
  *  - b: unnamedtech's tile — the whole cover dimmed evenly, a small eyebrow
  *    naming the platform ("HACK PC") over a quieter name.
  *  - b2, b3: B's words at A2's and A3's brightness (the owner, 17/10/2026:
@@ -616,7 +620,8 @@ function BentoTile({
 export type TileStyle =
   | "classic"
   | "a" | "a2" | "a3" | "a4" | "a5" | "a6" | "a6cu"
-  | "b" | "b1" | "b2" | "b3" | "b4" | "b6"
+  | "a7"
+  | "b" | "b1" | "b2" | "b3" | "b4" | "b6" | "b7"
   | "c" | "c1" | "d";
 
 /**
@@ -636,10 +641,11 @@ export type TileStyle =
  * best-seller card ("a5 thử"), "a6", their /cheats/ card, "c1",
  * bubblehacks' catalogue card, "d", the old quiet-button card, "a" (A1)
  * again ("a1 đi"), "a2" ("a2 đi"), "a3" ("a3 đi"), "b", the first B
- * ("quay về card b1"), now the new "a6" (A3 with A4's dark foot). "a" is
- * A1, "classic" the framed picture with the name under it.
+ * ("quay về card b1"), the new "a6" (A4's shape at A3's strength), now "a7"
+ * (A5's words at A6's brightness; "b7" is B5's). "a" is A1, "classic" the
+ * framed picture with the name under it.
  */
-export const DEFAULT_TILE_STYLE: TileStyle = "a6";
+export const DEFAULT_TILE_STYLE: TileStyle = "a7";
 
 /** The eyebrow a tile wears in style b, from the category's platform tag. */
 function platformWord(platform: string | null | undefined): string {
@@ -895,7 +901,7 @@ function TileDress({ card, style, big }: { card: ProductCard; style: TileStyle; 
       </>
     );
   }
-  if (style === "a5") {
+  if (style === "a5" || style === "a7") {
     const second =
       card.count != null && card.count > 0
         ? `${card.count} sản phẩm`
@@ -904,7 +910,8 @@ function TileDress({ card, style, big }: { card: ProductCard; style: TileStyle; 
           : null;
     return (
       <>
-        <span aria-hidden className="tile-scrim lab-lmarket-shade absolute inset-0" />
+        {/* A7 is A5 at A6's lighter strength (the owner, 18/10/2026). */}
+        <span aria-hidden className={cn("tile-scrim lab-lmarket-shade absolute inset-0", style === "a7" && "lab-lmarket-shade-light")} />
         <span className={cn("tile-caption absolute inset-x-2.5 bottom-2.5 flex flex-col sm:inset-x-4 sm:bottom-3.5", big && "lg:inset-x-5 lg:bottom-4")}>
           <h3
             className={cn(
@@ -914,7 +921,9 @@ function TileDress({ card, style, big }: { card: ProductCard; style: TileStyle; 
           >
             {titleCase(withoutNewWord(card.title))}
           </h3>
-          {second ? <span className="mt-0.5 truncate text-[12px] text-neutral-400 sm:text-[13px]">{second}</span> : null}
+          {/* Not on a phone: three lines climbed under the "Top tháng" pill
+              of the half-width Hot trending tile (seen 18/10/2026). */}
+          {second ? <span className="mt-0.5 hidden truncate text-[13px] text-neutral-400 sm:block">{second}</span> : null}
           {card.fromPrice != null ? (
             <span className="mt-1.5 text-[12px] text-neutral-400 sm:mt-2 sm:text-[13px]">
               từ <span className="lab-figure text-[14px] font-bold text-white sm:text-[16px]">{formatVnd(card.fromPrice)}đ</span>
@@ -971,7 +980,7 @@ function TileDress({ card, style, big }: { card: ProductCard; style: TileStyle; 
       </>
     );
   }
-  if (style === "b" || style === "b1" || style === "b2" || style === "b3" || style === "b4" || style === "b6") {
+  if (style === "b" || style === "b1" || style === "b2" || style === "b3" || style === "b4" || style === "b6" || style === "b7") {
     return (
       <>
         {style === "b" ? (
@@ -985,6 +994,9 @@ function TileDress({ card, style, big }: { card: ProductCard; style: TileStyle; 
         ) : style === "b1" ? (
           // A1's even fade over A1's dimmed picture (see RowTile).
           <span aria-hidden className="tile-scrim absolute inset-0 bg-gradient-to-t from-scrim via-scrim/60 via-35% to-scrim/10" />
+        ) : style === "b7" ? (
+          // B7 is B5 (B4) at A6's lighter strength (the owner, 18/10/2026).
+          <span aria-hidden className="tile-scrim absolute inset-0 lab-lmarket-shade lab-lmarket-shade-light" />
         ) : style === "b4" ? (
           <span aria-hidden className="tile-scrim absolute inset-0 lab-lmarket-shade" />
         ) : style === "b6" ? (
@@ -1001,7 +1013,7 @@ function TileDress({ card, style, big }: { card: ProductCard; style: TileStyle; 
           {/* B4 drops the platform line: with no platform tagged it read
               "Hack game" on every tile (the owner, 17/10/2026: "b4 bỏ cái dòng
               hack game đó đi"). */}
-          {style === "b4" ? null : (
+          {style === "b4" || style === "b7" ? null : (
             <span className="text-[12px] font-semibold text-[var(--menzu-accent)]">
               {platformWord(card.platform)}
             </span>

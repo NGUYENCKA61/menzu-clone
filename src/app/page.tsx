@@ -55,7 +55,7 @@ const GAME_LIST_SLUG = "danh-sach-hack-game";
  * the card summary: "xuất artifact cái đi").
  */
 const TILE_STYLES: readonly TileStyle[] = [
-  "classic", "a", "a2", "a3", "a4", "a5", "a6", "a6cu", "b", "b1", "b2", "b3", "b4", "b6", "c", "c1", "d",
+  "classic", "a", "a2", "a3", "a4", "a5", "a6", "a6cu", "a7", "b", "b1", "b2", "b3", "b4", "b6", "b7", "c", "c1", "d",
 ];
 
 function pickTileStyle(raw: string | string[] | undefined): TileStyle {
