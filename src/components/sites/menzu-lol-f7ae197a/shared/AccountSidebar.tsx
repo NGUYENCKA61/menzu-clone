@@ -82,7 +82,7 @@ export function AccountSidebar({
           24px corners, so the two cards of an account page match (the owner,
           03/10/2026: "màu card trái và card phải đồng bộ chưa" → "rồi làm
           đi"). It was neutral-900 at 60%, a 10% rim and 18px. */}
-      <nav className="bg-panel border border-white/5 rounded-[24px] p-3">
+      <nav className="bg-ground border border-line rounded-[24px] p-3">
         {/* The face on top, as the captured sidebar has it: avatar, name, and
             the role in a whisper underneath. */}
         {user ? (
