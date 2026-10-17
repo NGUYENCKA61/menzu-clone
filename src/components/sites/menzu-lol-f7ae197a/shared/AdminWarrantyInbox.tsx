@@ -265,7 +265,7 @@ export function AdminWarrantyInbox({ initial }: { initial: InboxView | null }) {
     cursorRef.current = threadHere?.messages.at(-1)?.sentAt ?? selected?.report.sentAt ?? null;
   }, [threadHere, selected]);
 
-  // ---- The list and the badge ------------------------------------------
+  // ---- The list and the waiting count ----------------------------------
 
   /** When the list was last read, as far as this tab knows. */
   const fetchedAtRef = useRef<number | null>(null);
@@ -542,7 +542,6 @@ export function AdminWarrantyInbox({ initial }: { initial: InboxView | null }) {
   const listed = tab === "waiting" ? waitingList : openList;
   const summary =
     waitingCount > 0 ? `${waitingCount} khách chờ trả lời` : "Không có tin chờ trả lời";
-  const badge = waitingCount > 99 ? "99+" : String(waitingCount);
 
   return (
     <div ref={frameRef} className={FRAME}>
@@ -867,15 +866,9 @@ export function AdminWarrantyInbox({ initial }: { initial: InboxView | null }) {
             </span>
           </span>
 
-          {/* Red only when somebody is waiting: a zero is no news. */}
-          {waitingCount > 0 ? (
-            <span
-              aria-hidden
-              className="absolute -right-1 -top-1 grid h-5 min-w-5 place-items-center rounded-full bg-[var(--menzu-accent)] px-1 text-[12px] font-bold tabular-nums leading-none text-white shadow-[0_0_0_2px_rgba(0,0,0,0.35)] sm:static sm:shrink-0"
-            >
-              {badge}
-            </span>
-          ) : null}
+          {/* No red count on the launcher (the owner, 17/10/2026: "gỡ số 13
+              chứ đừng gỡ cái khung nha"); on a desk-width screen the line above
+              still says how many buyers are waiting. */}
 
           <ChevronDown
             aria-hidden
