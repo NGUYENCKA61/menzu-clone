@@ -252,6 +252,7 @@ function RowCard({
   top = false,
   wide = false,
   quiet = false,
+  titled = false,
 }: {
   card: ProductCard;
   t: (typeof TONES)[RowTone];
@@ -261,6 +262,11 @@ function RowCard({
   wide?: boolean;
   /** Grey outlined button, one-line blurb, paler surface (see ProductRow). */
   quiet?: boolean;
+  /**
+   * The game tiles' wording (tile style "d"): every word's first letter
+   * capital, no "Mới", the blurb in sentence case.
+   */
+  titled?: boolean;
 }) {
   const stats = card.stats.filter((s) => !HIDDEN_STATS.has(s.label));
 
@@ -339,7 +345,7 @@ function RowCard({
           t.title,
         )}
       >
-        {sentenceCase(card.title)}
+        {titled ? titleCase(withoutNewWord(card.title)) : sentenceCase(card.title)}
       </h3>
 
       {/* Clamped at two lines rather than trusted to be short: the text
@@ -354,7 +360,7 @@ function RowCard({
             quiet && "line-clamp-1 text-[#8a8c95]",
           )}
         >
-          {card.description}
+          {titled ? sentenceCase(card.description) : card.description}
         </p>
       ) : (
         <div className="mb-2" />
@@ -590,8 +596,13 @@ function BentoTile({
  *    https://bubblehacks.com/catalog"): the 16:9 cover on top with its foot
  *    darkened, the name in heavy type under it and a row of chips, the price
  *    chip pale red with dark words; lifts 3px under the pointer.
+ *  - d: the old card with the quiet grey button, option A of 26/09/2026
+ *    (the owner, 17/10/2026: "kiểu D là nút xám nhẹ: giữ bố cục cũ, nút XEM
+ *    NGAY thành nút xám viền mảnh, mô tả còn 1 dòng, nhãn Top tháng dịu
+ *    lại", "kiểu D vẫn có 4 cục 4 card nha"): RowCard quiet, four to a row
+ *    in both rows (the home page drops the big picks for it).
  */
-export type TileStyle = "classic" | "a" | "a2" | "a3" | "a4" | "a5" | "a6" | "b" | "b2" | "b3" | "c" | "c1";
+export type TileStyle = "classic" | "a" | "a2" | "a3" | "a4" | "a5" | "a6" | "b" | "b2" | "b3" | "c" | "c1" | "d";
 
 /**
  * The dress the game tiles wear unless a row asks for another. One constant
@@ -607,11 +618,11 @@ export type TileStyle = "classic" | "a" | "a2" | "a3" | "a4" | "a5" | "a6" | "b"
  * at A2's and A3's brightness, then "c", lmarket's tile ("giờ qua kiểu C:
  * kiểu lmarket"), back on "a2" ("quay lại kiểu a2"), A1 once more ("a1
  * thử"), "a3", "a4" (A3 at lmarket's brightness), "a5", lmarket's
- * best-seller card ("a5 thử"), "a6", their /cheats/ card, now "c1",
- * bubblehacks' catalogue card. "a" is A1, "classic" the framed picture with
- * the name under it.
+ * best-seller card ("a5 thử"), "a6", their /cheats/ card, "c1",
+ * bubblehacks' catalogue card, now "d", the old quiet-button card. "a" is
+ * A1, "classic" the framed picture with the name under it.
  */
-export const DEFAULT_TILE_STYLE: TileStyle = "c1";
+export const DEFAULT_TILE_STYLE: TileStyle = "d";
 
 /** The eyebrow a tile wears in style b, from the category's platform tag. */
 function platformWord(platform: string | null | undefined): string {
@@ -641,6 +652,12 @@ export function RowTile({
   big?: boolean;
   style?: TileStyle;
 }) {
+  // LAB: tile style "d" is the old card with the quiet grey button (see
+  // TileStyle); the game list's tile runs its cover to the edges ("wide"),
+  // the sliding row keeps the inset frame it had.
+  if (style === "d") {
+    return <RowCard card={card} t={TONES.menzu} top={pick} wide={!pick} quiet titled />;
+  }
   // LAB: bubblehacks' catalogue card (see TileStyle "c1"): the 16:9 cover on
   // top, uncropped, then the name and a row of chips on the card itself.
   if (style === "c1") {

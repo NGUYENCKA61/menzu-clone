@@ -8,7 +8,10 @@ import {
   SCROLL_TARGET_ID,
 } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/HeroBanners";
 import { HomeBackdrop } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/HomeBackdrop";
-import { ProductRow } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/ProductRow";
+import {
+  DEFAULT_TILE_STYLE,
+  ProductRow,
+} from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/ProductRow";
 import { DocsSection } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/DocsSection";
 import { SeoContent } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/SeoContent";
 import {
@@ -121,7 +124,9 @@ export default async function Home() {
               ranked={group.slug === "hot-trending"}
               searchable={group.slug === GAME_LIST_SLUG}
               tiles={group.slug === "hot-trending" || group.slug === GAME_LIST_SLUG}
-              bigPicks={group.slug === "hot-trending"}
+              // Tile style "d" keeps four cards to a row in Hot trending too
+              // (the owner, 17/10/2026: "kiểu D vẫn có 4 cục 4 card nha").
+              bigPicks={group.slug === "hot-trending" && DEFAULT_TILE_STYLE !== "d"}
               rows={group.slug === GAME_LIST_SLUG ? 3 : 1}
             />
             {/* The figures follow Hot trending again, as on the main site
