@@ -1744,39 +1744,23 @@ html[data-admin-filtering] .admin-list {
   }
 }
 
-/* LAB: the notch, the one memorable element (LAB-MASTER section 2). A game
-   cover's frame keeps three soft corners and bevels the top-right one, the
-   way a HUD readout is cut. corner-shape draws the bevel and lets borders
-   follow it; a browser without it keeps a plain rounded corner. */
+/* LAB: game covers and cards are evenly rounded (the owner, 17/10/2026:
+   "mấy card lab bo tròn hết đi đừng có cắt chéo 1 góc phải"). The class
+   names stay so the markup needs no change; the bevel is gone. */
 .lab-notch {
-  border-radius: 10px;
-  border-top-right-radius: 18px;
-  corner-top-right-shape: bevel;
+  border-radius: 12px;
 }
 .lab-notch-lg {
-  border-radius: 14px;
-  border-top-right-radius: 28px;
-  corner-top-right-shape: bevel;
+  border-radius: 16px;
 }
-
-/* LAB: the notch at thumbnail size (order covers). */
 .lab-notch-sm {
   border-radius: 8px;
-  border-top-right-radius: 14px;
-  corner-top-right-shape: bevel;
 }
-
-/* LAB: the notch at badge size (the rank on the account overview). */
 .lab-notch-xs {
-  border-radius: 5px;
-  border-top-right-radius: 10px;
-  corner-top-right-shape: bevel;
+  border-radius: 6px;
 }
-
-/* LAB: the notch on a cover flush with a card's top edge. */
 .lab-notch-top {
-  border-radius: 9px 17px 0 0;
-  corner-top-right-shape: bevel;
+  border-radius: 12px 12px 0 0;
 }
 
 /* LAB: display figures line up (prices, balances, counts). */
