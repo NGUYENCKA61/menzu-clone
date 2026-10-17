@@ -549,7 +549,7 @@ export function TopUpInvoice({
       </>
     );
   } else {
-    // Settled, or a card the desk is still checking: the date, a seal, a line.
+    // Settled, or a card the desk is still checking: the date, the state, a line.
     const refused = status === "FAILED";
     const kind =
       status === "COMPLETED"
