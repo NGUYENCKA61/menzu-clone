@@ -15,6 +15,27 @@ import { categoryHref } from "@/lib/routes";
  * tone lookup, so they must stay exactly as the live site words them.
  */
 
+/**
+ * LAB ONLY: made-up figures for the tiles whose category has no price or no
+ * count, so every tile shows its "Chỉ từ ...đ, N sản phẩm" line while the
+ * owner checks that the cards line up (17/10/2026: "cho dữ liệu test để tui
+ * coi sự đồng bộ đi"). Display only, nothing is written anywhere. On when
+ * LAB_SAMPLE_CARD_FIGURES=1 is set (lab 2's .env.local), never in a
+ * production build. Drawn from the slug, so a tile keeps its numbers.
+ */
+const SAMPLE_CARD_FIGURES =
+  process.env.LAB_SAMPLE_CARD_FIGURES === "1" && process.env.NODE_ENV !== "production";
+
+function withSampleFigures(slug: string, figures?: CategoryFigures): CategoryFigures | undefined {
+  if (!SAMPLE_CARD_FIGURES) return figures;
+  let h = 0;
+  for (const ch of slug) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+  return {
+    fromPrice: figures?.fromPrice ?? (20 + (h % 18) * 5) * 1000,
+    count: figures && figures.count > 0 ? figures.count : 2 + (h % 9),
+  };
+}
+
 /** One category as a tile. The single place a category becomes a card, so a
  *  category shown in three groups is described identically in all three. */
 function toCard(
@@ -27,8 +48,9 @@ function toCard(
     soldCount: number;
     stockCount: number;
   },
-  figures?: CategoryFigures,
+  shelf?: CategoryFigures,
 ): ProductCard {
+  const figures = withSampleFigures(c.slug, shelf);
   return {
     image: c.imageUrl ?? "",
     title: c.name,
