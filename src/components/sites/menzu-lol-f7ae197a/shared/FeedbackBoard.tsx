@@ -134,8 +134,10 @@ export function ReviewAvatar({
  * height (the owner, 13/10/2026, UI consistency review). A thumbnail is a
  * crop, so the whole picture is one press away rather than a new tab.
  *
- * Plain <img>: the file already went through sharp on the way in, and
- * next/image would re-run it. Lazy, since the wall lists hundreds.
+ * Through next/image at the thumbnail's own size, at quality 95: the stored
+ * file is the whole picture (often 100-200KB) and the wall only needs a 112px
+ * square of it, about 5KB (image audit, 17/10/2026). The lightbox still opens
+ * the stored file itself. Lazy, since the wall lists hundreds.
  */
 function ReviewPictures({ pictures, reviewer }: { pictures: string[]; reviewer: string }) {
   const [open, setOpen] = useState(false);
@@ -159,12 +161,16 @@ function ReviewPictures({ pictures, reviewer }: { pictures: string[]; reviewer: 
               }
               className="group/img block h-24 w-24 cursor-zoom-in overflow-hidden rounded-xl border border-white/10 bg-white/[0.02] transition-colors hover:border-[var(--menzu-accent)]/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--menzu-accent)] sm:h-28 sm:w-28"
             >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
+              <Image
                 src={src}
                 alt=""
-                loading="lazy"
-                decoding="async"
+                width={112}
+                height={112}
+                sizes="112px"
+                quality={95}
+                // A picture from anywhere but this site's own uploads cannot
+                // go through the optimizer; it is drawn as it is.
+                unoptimized={!src.startsWith("/")}
                 className="h-full w-full object-cover transition-transform duration-500 group-hover/img:scale-105 motion-reduce:transition-none"
               />
             </button>

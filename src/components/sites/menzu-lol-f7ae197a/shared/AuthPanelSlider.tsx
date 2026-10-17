@@ -15,6 +15,13 @@ import { useEffect, useState } from "react";
  * with the opacity carried across so the change reads as a drift rather than a
  * swap. Both layers stay mounted, so the browser never re-decodes an image it
  * showed a moment ago.
+ *
+ * A picture is mounted only as its turn comes near: the first at once, the
+ * next a second after load (so it has arrived before it slides in), and each
+ * advance brings in the one after that. Once mounted a picture stays, so none
+ * is fetched twice. Before, every slide was mounted on arrival and all four
+ * artworks came down together at quality 95, about 1.7MB on a page whose job
+ * is to take a password (image audit, 17/10/2026).
  */
 export function AuthPanelSlider({
   images,
@@ -32,6 +39,8 @@ export function AuthPanelSlider({
   // Null on the server and until the first advance, which keeps the very first
   // paint identical to the still panel — no slide animates in on arrival.
   const [previous, setPrevious] = useState<number | null>(null);
+  // How many pictures from the start of the list are mounted.
+  const [mounted, setMounted] = useState(1);
 
   useEffect(() => {
     if (!moving) return;
@@ -42,19 +51,26 @@ export function AuthPanelSlider({
     const still = window.matchMedia?.("(prefers-reduced-motion: reduce)");
     if (still?.matches) return;
 
+    const warm = window.setTimeout(() => setMounted((count) => Math.max(count, 2)), 1000);
     const timer = window.setInterval(() => {
       setIndex((current) => {
+        const next = (current + 1) % slides.length;
         setPrevious(current);
-        return (current + 1) % slides.length;
+        setMounted((count) => Math.max(count, Math.min(slides.length, next + 2)));
+        return next;
       });
     }, Math.max(2, seconds) * 1000);
 
-    return () => window.clearInterval(timer);
+    return () => {
+      window.clearTimeout(warm);
+      window.clearInterval(timer);
+    };
   }, [moving, seconds, slides.length]);
 
   return (
     <>
       {slides.map((src, i) => {
+        if (i >= mounted) return null;
         const isCurrent = i === index;
         const isLeaving = i === previous && !isCurrent;
         // Everything else waits off to the right, so whichever comes next
