@@ -506,19 +506,11 @@ export function CartView({
           className={`flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6 ${BAND_IN.head}`}
         >
           <div className="flex items-center gap-4">
-            {/* The buy dialog's tick, minus its sparks: the badge pops in,
-                the stroke draws itself, one ring ripples out. */}
-            <span className="relative grid h-12 w-12 shrink-0 place-items-center">
-              <span
-                aria-hidden
-                className="tick-ring absolute inset-0 rounded-full border-2 border-emerald-400/60"
-              />
-              <span className="tick-badge grid h-12 w-12 place-items-center rounded-full border border-emerald-500/30 bg-emerald-500/10 text-emerald-400">
-                <Check className="h-6 w-6" strokeWidth={2.5} aria-hidden />
-              </span>
-            </span>
             <div className="min-w-0">
-              <h2 className="text-[18px] font-bold text-white">
+              {/* LAB (17/10/2026): the buy dialog's receipt look, a small
+                  green tick beside the title instead of the round badge. */}
+              <h2 className="flex items-center gap-2 text-[18px] font-bold text-white">
+                <Check size={18} strokeWidth={2.5} aria-hidden className="shrink-0 text-emerald-400" />
                 Thanh toán thành công
               </h2>
               {/* The two figures a buyer wants first, before the bands print. */}

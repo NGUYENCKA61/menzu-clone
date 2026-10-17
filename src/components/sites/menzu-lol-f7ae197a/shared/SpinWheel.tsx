@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { Gift, RotateCw, Sparkles, X } from "lucide-react";
+import { Gift, RotateCw, X } from "lucide-react";
 
 import {
   SPIN_COST,
@@ -15,6 +15,13 @@ import { formatVnd } from "./productData";
 import { SpinCelebration } from "./SpinCelebration";
 import { SpinWheelFace } from "./SpinWheelFace";
 import { lockScroll, unlockScroll } from "./modalChrome";
+import {
+  SHEET,
+  SHEET_BUTTON,
+  SHEET_BUTTON_QUIET,
+  SHEET_TEXT,
+  SHEET_TITLE,
+} from "./noticeSheet";
 import { useLeave } from "./useOverlayPresence";
 import { Loader2 } from "lucide-react";
 
@@ -263,17 +270,12 @@ export function SpinWheel({
             // Rises in; no bounce. The confetti is the celebration, and a
             // card that bounced under "Chưa trúng lần này" would be a joke at
             // the expense of somebody who just spent points.
-            className={`order-modal-card${leaving ? " order-modal-card-out" : ""} relative w-full max-w-[380px] overflow-hidden rounded-2xl border bg-panel p-7 text-center shadow-2xl ${
-              won ? "border-[var(--menzu-violet)]/40" : "border-white/10"
-            }`}
+            // LAB (17/10/2026): the house notice sheet (noticeSheet.ts), as
+            // the closed-wheel notice wears it: a small glyph beside the
+            // title instead of the violet ring, wash and border, the prize in
+            // plain white, red only on the button that acts.
+            className={`${SHEET} order-modal-card${leaving ? " order-modal-card-out" : ""} max-w-[400px] overflow-hidden px-6 py-6`}
           >
-            {/* A wash behind the icon, only when there is something to celebrate. */}
-            {won ? (
-              <div
-                aria-hidden
-                className="pointer-events-none absolute inset-x-0 top-0 h-32 bg-[radial-gradient(ellipse_at_top,_rgb(124_58_237_/_0.35),_transparent_70%)]"
-              />
-            ) : null}
 
             {/* Behind everything the card says, and hidden from a screen
                 reader: the words below are the result, this is only how it
@@ -297,7 +299,7 @@ export function SpinWheel({
             {/* The prize's own picture when it has one — a mousepad says more
                 as a mousepad than as a gift icon. */}
             {result.prize.image ? (
-              <span className="relative mx-auto block h-28 w-28 overflow-hidden rounded-xl border border-[var(--menzu-violet)]/30 bg-black/40">
+              <span className="relative mb-4 block h-28 w-28 overflow-hidden rounded-xl border border-line bg-black/40">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={result.prize.image}
@@ -305,38 +307,22 @@ export function SpinWheel({
                   className="h-full w-full object-contain"
                 />
               </span>
-            ) : (
-              <span
-                className={`relative mx-auto flex h-16 w-16 items-center justify-center rounded-full border ${
-                  won
-                    ? "border-[var(--menzu-violet)]/40 bg-[var(--menzu-violet)]/15"
-                    : "border-white/10 bg-white/[0.04]"
-                }`}
-              >
-                <Gift size={26} className={won ? "text-[#a78bfa]" : "text-neutral-500"} />
-                {won ? (
-                  <Sparkles
-                    size={14}
-                    aria-hidden
-                    className="absolute -right-1 -top-1 text-[var(--menzu-violet)]"
-                  />
-                ) : null}
-              </span>
-            )}
+            ) : null}
 
-            <h2 className="relative mt-4 text-[16px] font-semibold text-white">
+            <h2 className={`relative pr-8 ${SHEET_TITLE}`}>
+              <Gift
+                size={18}
+                aria-hidden
+                className={`shrink-0 ${won ? "text-emerald-400" : "text-mist"}`}
+              />
               {won ? "Chúc mừng!" : "Chưa trúng lần này"}
             </h2>
 
-            <p
-              className={`relative mt-2 text-2xl font-black leading-tight ${
-                won ? "text-[#a78bfa]" : "text-neutral-400"
-              }`}
-            >
+            <p className="relative mt-3 text-[24px] font-bold leading-tight text-frost">
               {won ? result.prize.label : "Chúc may mắn lần sau"}
             </p>
 
-            <p className="relative mt-2.5 text-[12px] leading-relaxed text-neutral-500">
+            <p className={`relative mt-2 ${SHEET_TEXT}`}>
               {SETTLED[result.prize.kind] ?? SETTLED.NOTHING}
             </p>
 
@@ -344,12 +330,12 @@ export function SpinWheel({
                 and given its own box, because a code read wrong is a code that
                 does not work and nobody can say why. */}
             {result.prize.voucherCode ? (
-              <p className="relative mt-4 rounded-xl border border-[var(--menzu-violet)]/40 bg-[var(--menzu-violet)]/10 px-4 py-3 text-center font-mono text-lg font-black tracking-[0.2em] text-white">
+              <p className="relative mt-4 rounded-xl border border-line bg-raise px-4 py-3 text-center font-mono text-lg font-bold tracking-[0.2em] text-frost">
                 {result.prize.voucherCode}
               </p>
             ) : null}
 
-            <p className="relative mt-4 rounded-xl border border-white/10 bg-white/[0.02] px-4 py-2.5 text-[14px] text-mist">
+            <p className="relative mt-4 text-[14px] text-mist">
               Còn{" "}
               <span className="font-bold text-white">
                 {formatVnd(result.points)} điểm
@@ -360,11 +346,11 @@ export function SpinWheel({
               </span>
             </p>
 
-            <div className="relative mt-5 flex gap-2.5">
+            <div className="relative mt-6 flex gap-2.5">
               <button
                 type="button"
                 onClick={leave}
-                className="h-11 flex-1 rounded-xl border border-white/10 text-[13px] font-semibold text-neutral-300 transition-colors hover:bg-white/5"
+                className={`flex-1 ${SHEET_BUTTON_QUIET}`}
               >
                 Đóng
               </button>
@@ -375,7 +361,7 @@ export function SpinWheel({
                   setResult(null);
                   void spin();
                 }}
-                className="inline-flex h-11 flex-1 items-center justify-center gap-1.5 rounded-xl bg-[var(--menzu-violet)] text-[13px] font-semibold text-white transition-colors hover:bg-[var(--menzu-violet-dark)] disabled:opacity-50"
+                className={`flex-1 gap-1.5 ${SHEET_BUTTON} disabled:opacity-50`}
               >
                 <RotateCw size={13} />
                 Quay tiếp

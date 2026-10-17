@@ -8,7 +8,6 @@ import {
   useId,
   useRef,
   useState,
-  type CSSProperties,
   type ReactNode,
 } from "react";
 import { createPortal } from "react-dom";
@@ -179,44 +178,23 @@ export function BuyConfirmDialog({
   );
 }
 
-/** Where the eight sparks fly, in degrees round the badge. */
-const SPARK_ANGLES = [0, 45, 90, 135, 180, 225, 270, 315];
-
 /**
- * The head of a receipt: the tick and the order code.
+ * The head of a receipt: a small tick and the order code.
  *
- * Plays once, the moment the receipt appears: the badge pops in, the tick
- * draws itself, a ring ripples out and sparks fly. The keyframes live in
- * globals.css beside the modal's own. One piece for every purchase on the
- * site — a tool, an account, a basket — so paying for anything is answered
- * the same way.
+ * One piece for every purchase on the site — a tool, an account, a basket —
+ * so paying for anything is answered the same way. LAB (17/10/2026): the
+ * house notice look, a small green tick beside the label instead of the
+ * round badge, its ring and sparks. The code keeps its box: it is the one
+ * thing on the receipt the buyer has to keep.
  */
 export function ReceiptTick({ code }: { code: string }) {
   return (
     <div className="flex flex-col items-center pt-1 text-center">
-      <span className="relative grid h-14 w-14 place-items-center">
-        <span
-          aria-hidden
-          className="tick-ring absolute inset-0 rounded-full border-2 border-emerald-400/60"
-        />
-        {SPARK_ANGLES.map((angle) => (
-          <span
-            key={angle}
-            aria-hidden
-            className="tick-spark absolute left-1/2 top-1/2 -ml-[3px] -mt-[3px] h-1.5 w-1.5 rounded-full bg-emerald-400"
-            style={{ "--spark-angle": `${angle}deg` } as CSSProperties}
-          />
-        ))}
-        {/* No halo around it (the owner, 01/10/2026: "bỏ đi") — the basket's
-            own receipt tick lost its glow the same day. */}
-        <span className="tick-badge grid h-14 w-14 place-items-center rounded-full border border-emerald-500/30 bg-emerald-500/10 text-emerald-400">
-          <Check className="h-7 w-7" strokeWidth={2.5} aria-hidden />
-        </span>
-      </span>
-      <p className="mt-3 text-[12px] font-semibold text-neutral-500">
+      <p className="flex items-center gap-1.5 text-[13px] font-semibold text-mist">
+        <Check size={16} strokeWidth={2.5} aria-hidden className="shrink-0 text-emerald-400" />
         Mã đơn hàng
       </p>
-      <span className="mt-1.5 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 font-mono text-base font-bold tracking-wider text-white">
+      <span className="mt-2 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 font-mono text-base font-bold tracking-wider text-white">
         {code}
       </span>
     </div>

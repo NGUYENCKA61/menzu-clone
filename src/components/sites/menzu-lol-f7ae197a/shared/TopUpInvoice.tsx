@@ -89,34 +89,18 @@ const COPY =
 const ROW =
   "w-full flex justify-between items-center bg-black/40 border border-white/[0.05] shadow-inner rounded-[16px] px-5 py-4 mb-6";
 const BAR =
-  "w-full bg-gradient-to-r border rounded-[16px] px-6 py-4 flex items-center justify-center gap-3 relative overflow-hidden";
+  "w-full border border-white/10 bg-white/[0.02] rounded-[16px] px-6 py-4 flex items-center justify-center gap-3 relative overflow-hidden";
 
-/** What each state paints the status panel with. */
+/**
+ * What each state tints. LAB (17/10/2026, the house notice look): only the
+ * glyphs carry the state; the 128px seal, the coloured title and the
+ * coloured bar are gone.
+ */
 const LOOK = {
-  wait: {
-    seal: "bg-emerald-500/10 border-emerald-500/20",
-    text: "text-emerald-400",
-    bar: "from-emerald-500/5 via-emerald-500/10 to-emerald-500/5 border-emerald-500/20",
-    line: "via-emerald-400/20",
-  },
-  paid: {
-    seal: "bg-emerald-500/10 border-emerald-500/20",
-    text: "text-emerald-500",
-    bar: "from-emerald-500/5 via-emerald-500/10 to-emerald-500/5 border-emerald-500/20",
-    line: "via-emerald-400/20",
-  },
-  gone: {
-    seal: "bg-red-500/10 border-red-500/20",
-    text: "text-red-500",
-    bar: "from-red-500/5 via-red-500/10 to-red-500/5 border-red-500/20",
-    line: "via-red-400/20",
-  },
-  late: {
-    seal: "bg-amber-500/10 border-amber-500/20",
-    text: "text-amber-400",
-    bar: "from-amber-500/5 via-amber-500/10 to-amber-500/5 border-amber-500/20",
-    line: "via-amber-400/20",
-  },
+  wait: { text: "text-emerald-400" },
+  paid: { text: "text-emerald-500" },
+  gone: { text: "text-red-500" },
+  late: { text: "text-amber-400" },
 } as const;
 
 type Sheet = "paid" | "cancelled" | "failed" | "apps" | null;
@@ -185,16 +169,16 @@ function CopyButton({
 }
 
 /** The hairline menzu draws along the top and bottom of a live status bar. */
-function BarLines({ tint }: { tint: string }) {
+function BarLines() {
   return (
     <>
       <div
         aria-hidden
-        className={`absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent ${tint} to-transparent`}
+        className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-white/15 to-transparent"
       />
       <div
         aria-hidden
-        className={`absolute bottom-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent ${tint} to-transparent`}
+        className="absolute bottom-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-white/15 to-transparent"
       />
     </>
   );
@@ -543,8 +527,8 @@ export function TopUpInvoice({
           />
         </button>
 
-        <div className={`${BAR} ${look.bar}`}>
-          <BarLines tint={look.line} />
+        <div className={BAR}>
+          <BarLines />
           {overdue ? (
             <Hourglass size={20} className={look.text} aria-hidden />
           ) : (
@@ -554,7 +538,7 @@ export function TopUpInvoice({
               aria-hidden
             />
           )}
-          <span className={`${look.text} font-bold tracking-wide text-xs sm:text-sm`}>
+          <span className="text-frost font-semibold tracking-wide text-xs sm:text-sm">
             {overdue
               ? "Đã quá thời gian giữ lệnh"
               : autoEnabled
@@ -611,28 +595,26 @@ export function TopUpInvoice({
           </span>
         </div>
 
-        <div className="flex-1 w-full flex flex-col items-center justify-center gap-6 mb-6">
-          <div className={`w-32 h-32 ${look.seal} border rounded-full flex items-center justify-center`}>
+        <div className="flex-1 w-full flex flex-col items-center justify-center gap-2 mb-6 text-center">
+          <p className="flex items-center gap-2.5 text-[22px] font-bold text-frost">
             <Icon
-              size={64}
-              className={`${look.text} ${kind === "wait" ? "animate-spin motion-reduce:animate-none" : ""}`}
+              size={22}
+              className={`shrink-0 ${look.text} ${kind === "wait" ? "animate-spin motion-reduce:animate-none" : ""}`}
               aria-hidden
             />
-          </div>
-          <div className="text-center">
-            <p className={`${look.text} font-black text-2xl mb-2`}>{title}</p>
-            <p className="text-neutral-500 text-sm max-w-[320px] mx-auto">{line}</p>
-          </div>
+            {title}
+          </p>
+          <p className="text-mist text-sm max-w-[320px] mx-auto">{line}</p>
         </div>
 
-        <div className={`${BAR} ${look.bar}`}>
-          {kind === "wait" ? <BarLines tint={look.line} /> : null}
+        <div className={BAR}>
+          {kind === "wait" ? <BarLines /> : null}
           <Icon
             size={18}
             className={`${look.text} ${kind === "wait" ? "animate-spin motion-reduce:animate-none" : ""}`}
             aria-hidden
           />
-          <span className={`${look.text} font-bold tracking-wide text-xs sm:text-sm`}>{barText}</span>
+          <span className="text-frost font-semibold tracking-wide text-xs sm:text-sm">{barText}</span>
         </div>
       </>
     );

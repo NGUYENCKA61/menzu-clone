@@ -62,15 +62,14 @@ export function ResetPasswordForm({ token }: { token: string }) {
   }
 
   if (done) {
+    // LAB (17/10/2026): the notice look, as on the forgot card.
     return (
-      <div className="text-center">
-        <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border-2 border-emerald-500 bg-emerald-500/15 text-emerald-400">
-          <ShieldCheck size={28} strokeWidth={2.5} />
-        </span>
-        <h2 className="mt-5 text-[18px] font-bold text-white">
+      <div>
+        <h2 className="flex items-center gap-2.5 text-[18px] font-bold text-white">
+          <ShieldCheck size={20} aria-hidden className="shrink-0 text-emerald-400" />
           Mật khẩu đã đổi
         </h2>
-        <p className="mt-3 text-[13px] leading-relaxed text-neutral-300">{done}</p>
+        <p className="mt-2 text-[14px] leading-relaxed text-neutral-300">{done}</p>
         <Link
           href="/login"
           className="mt-6 inline-flex h-11 w-full items-center justify-center rounded-xl bg-[var(--menzu-accent)] text-[14px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent-dark)]"

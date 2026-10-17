@@ -206,8 +206,8 @@ export default async function RefundRequestPage({
             warranty and follows the ticket, and the shop refunds from there
             when it cannot fix it. This page keeps the older rounds readable. */}
         <section className={CARD}>
-          <div className="flex items-start gap-3 rounded-r-xl border-l-[3px] border-[var(--menzu-accent)] bg-[var(--menzu-accent)]/5 px-4 py-3.5 text-[13px] leading-relaxed text-neutral-300">
-            <Info className="mt-0.5 h-4 w-4 shrink-0 text-[var(--menzu-accent)]" />
+          <div className="flex items-start gap-3 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3.5 text-[13px] leading-relaxed text-neutral-300">
+            <Info className="mt-0.5 h-4 w-4 shrink-0 text-mist" />
             <span>
               Hoàn tiền giờ do shop xử lý qua yêu cầu bảo hành: bạn báo lỗi, shop
               không khắc phục được sẽ hoàn tiền cho bạn.{" "}
