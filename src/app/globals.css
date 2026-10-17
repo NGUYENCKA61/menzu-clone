@@ -1726,6 +1726,27 @@ html[data-admin-filtering] .admin-list {
   opacity: 0.55;
 }
 
+/* LAB: lmarket's card shade, read off their best-seller cards on
+   17/10/2026, for game tile styles A4 and A5: the top 30% of the picture
+   left alone, the foot dark where the words sit (solid to 10%, 78% at 42%,
+   clear from 72%), and a small dark corner at the top left behind the
+   pill. Theirs ends in their card colour; this one in our scrim. Under the
+   pointer it thins a little, so the card lights up as A2 and A3 do. */
+.lab-lmarket-shade {
+  background:
+    radial-gradient(at 0% 0%, rgba(0, 0, 0, 0.55), transparent 45%),
+    linear-gradient(to top, #08080b 10%, rgba(8, 8, 11, 0.78) 42%, transparent 72%);
+  transition: opacity 300ms ease;
+}
+@media (hover: hover) {
+  .group:hover .lab-lmarket-shade {
+    opacity: 0.8;
+  }
+}
+.group:focus-visible .lab-lmarket-shade {
+  opacity: 0.8;
+}
+
 /* LAB: display figures line up (prices, balances, counts). */
 .lab-figure {
   font-family: var(--font-display);

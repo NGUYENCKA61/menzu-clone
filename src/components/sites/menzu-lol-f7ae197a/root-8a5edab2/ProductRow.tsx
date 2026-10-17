@@ -563,6 +563,14 @@ function BentoTile({
  *    rê chuột hiện tại đi"). Like the first A3 it has no red rim under the
  *    pointer ("làm thử bản không có hiệu ứng đỏ viền thử"), only the name
  *    turns red. Kept apart from A2 ("không lưu vô A2 liền nha").
+ *  - a4: A3's words and hover at lmarket's brightness (the owner, 17/10/2026:
+ *    "làm cái a4 đi bố cục giữ nguyên chỉ khác độ sáng"): the top of the
+ *    picture left alone, dark only at the foot where the words sit
+ *    (.lab-lmarket-shade).
+ *  - a5: lmarket's best-seller card, their numbers 2 to 4 ("a5 thì bố cục
+ *    giống lmarket nhưng vẫn là có hàng 4 card"), in our rows of four: A4's
+ *    shade, a bold name, a quiet second line, then "từ" and the price in
+ *    bold white, as their "from €24.99".
  *  - b: unnamedtech's tile — the whole cover dimmed evenly, a small eyebrow
  *    naming the platform ("HACK PC") over a quieter name.
  *  - b2, b3: B's words at A2's and A3's brightness (the owner, 17/10/2026:
@@ -573,7 +581,7 @@ function BentoTile({
  *  - c: lmarket's tile — the cover slightly dimmed above a solid caption bar
  *    holding the name and the blurb, with a platform chip at the end.
  */
-export type TileStyle = "classic" | "a" | "a2" | "a3" | "b" | "b2" | "b3" | "c";
+export type TileStyle = "classic" | "a" | "a2" | "a3" | "a4" | "a5" | "b" | "b2" | "b3" | "c";
 
 /**
  * The dress the game tiles wear unless a row asks for another. One constant
@@ -588,10 +596,11 @@ export type TileStyle = "classic" | "a" | "a2" | "a3" | "b" | "b2" | "b3" | "c";
  * unnamedtech's tile ("giờ qua B B: kiểu unnamedtech"), with "b2" and "b3"
  * at A2's and A3's brightness, then "c", lmarket's tile ("giờ qua kiểu C:
  * kiểu lmarket"), back on "a2" ("quay lại kiểu a2"), A1 once more ("a1
- * thử"), now "a3" ("a3"). "a" is A1, "classic" the framed picture with the
- * name under it.
+ * thử"), "a3", now "a4" (A3 at lmarket's brightness; "a5" is lmarket's
+ * best-seller card). "a" is A1, "classic" the framed picture with the name
+ * under it.
  */
-export const DEFAULT_TILE_STYLE: TileStyle = "a3";
+export const DEFAULT_TILE_STYLE: TileStyle = "a4";
 
 /** The eyebrow a tile wears in style b, from the category's platform tag. */
 function platformWord(platform: string | null | undefined): string {
@@ -749,10 +758,39 @@ function priceLine(card: ProductCard, lead = "Chỉ từ"): string | null {
   return parts.length > 0 ? parts.join(", ") : null;
 }
 
-/** The words and shade a tile wears in styles a to a3, b to b3 and c (see TileStyle). */
+/** The words and shade a tile wears in styles a to a5, b to b3 and c (see TileStyle). */
 function TileDress({ card, style, big }: { card: ProductCard; style: TileStyle; big: boolean }) {
   const line = priceLine(card);
-  if (style === "a" || style === "a2" || style === "a3") {
+  if (style === "a5") {
+    const second =
+      card.count != null && card.count > 0
+        ? `${card.count} sản phẩm`
+        : card.description
+          ? sentenceCase(card.description)
+          : null;
+    return (
+      <>
+        <span aria-hidden className="tile-scrim lab-lmarket-shade absolute inset-0" />
+        <span className={cn("tile-caption absolute inset-x-2.5 bottom-2.5 flex flex-col sm:inset-x-4 sm:bottom-3.5", big && "lg:inset-x-5 lg:bottom-4")}>
+          <h3
+            className={cn(
+              "line-clamp-2 text-[14px] font-bold leading-tight text-white transition-colors duration-300 group-hover:text-[var(--menzu-accent)] sm:text-[17px]",
+              big && "lg:text-[20px]",
+            )}
+          >
+            {titleCase(withoutNewWord(card.title))}
+          </h3>
+          {second ? <span className="mt-0.5 truncate text-[12px] text-neutral-400 sm:text-[13px]">{second}</span> : null}
+          {card.fromPrice != null ? (
+            <span className="mt-1.5 text-[12px] text-neutral-400 sm:mt-2 sm:text-[13px]">
+              từ <span className="lab-figure text-[14px] font-bold text-white sm:text-[16px]">{formatVnd(card.fromPrice)}đ</span>
+            </span>
+          ) : null}
+        </span>
+      </>
+    );
+  }
+  if (style === "a" || style === "a2" || style === "a3" || style === "a4") {
     return (
       <>
         <span
@@ -761,7 +799,9 @@ function TileDress({ card, style, big }: { card: ProductCard; style: TileStyle; 
             "tile-scrim absolute inset-0",
             style === "a"
               ? "bg-gradient-to-t from-scrim via-scrim/60 via-35% to-scrim/10"
-              : cn("lab-elite-shade", style === "a3" && "lab-elite-shade-light"),
+              : style === "a4"
+                ? "lab-lmarket-shade"
+                : cn("lab-elite-shade", style === "a3" && "lab-elite-shade-light"),
           )}
         />
         <span
@@ -776,7 +816,7 @@ function TileDress({ card, style, big }: { card: ProductCard; style: TileStyle; 
             className={cn(
               "line-clamp-2 text-[14px] font-black leading-[1.15] text-white sm:text-[17px]",
               big && "lg:text-[20px]",
-              (style === "a2" || style === "a3") && "transition-colors duration-300 group-hover:text-[var(--menzu-accent)]",
+              (style === "a2" || style === "a3" || style === "a4") && "transition-colors duration-300 group-hover:text-[var(--menzu-accent)]",
             )}
           >
             {titleCase(withoutNewWord(card.title))}
