@@ -39,6 +39,12 @@ export interface ProductRowProps {
    * shop found; its tiles are the way in.
    */
   hideViewAll?: boolean;
+  /**
+   * The main site's heading: a short red bar, then the title in capitals
+   * (the owner, 17/10/2026: "Hot trending tháng này sửa in hoa thêm dấu |
+   * giống web cũ thử", then "Danh sách hack game luôn").
+   */
+  accentHeading?: boolean;
   tone?: RowTone;
   /**
    * Let the row slide once it holds five or more tiles. Off, a
@@ -847,6 +853,7 @@ export function ProductRow({
   cards,
   viewAllHref,
   hideViewAll = false,
+  accentHeading = false,
   tone = "indigo",
   marquee: runs = false,
   ranked = false,
@@ -873,7 +880,15 @@ export function ProductRow({
   // (theme-light.css, part 6); they carry no style of their own.
   // LAB (Launcher): the heading in the display face, sentence case, with no
   // red bar before it; "Xem tất cả" is a plain link (LAB-MASTER section 3).
-  const title = (
+  const title = accentHeading ? (
+    <div className="flex min-w-0 items-center gap-2.5">
+      <div aria-hidden className="h-5 w-[3px] shrink-0 rounded-full bg-[var(--menzu-accent)]" />
+      <h2 className="row-heading text-xl font-black uppercase tracking-wider text-frost sm:text-2xl">
+        {heading}
+      </h2>
+      {headingSuffix}
+    </div>
+  ) : (
     <div className="flex min-w-0 items-center gap-3">
       <h2 className="row-heading font-display text-[22px] font-bold leading-tight text-frost sm:text-[28px]">
         {sentenceCase(heading)}

@@ -115,6 +115,7 @@ export default async function Home() {
               cards={group.cards}
               viewAllHref="/categories"
               hideViewAll={group.slug === "hot-trending"}
+              accentHeading={group.slug === "hot-trending" || group.slug === GAME_LIST_SLUG}
               tone="menzu"
               marquee={group.slug === "hot-trending"}
               ranked={group.slug === "hot-trending"}
