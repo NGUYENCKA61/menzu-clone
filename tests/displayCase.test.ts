@@ -1,6 +1,22 @@
 import { describe, expect, it } from "vitest";
 
-import { sentenceCase, titleCase } from "@/lib/displayCase";
+import { sentenceCase, titleCase, withoutNewWord } from "@/lib/displayCase";
+
+/** The lab's game tiles leave "Mới" out of a name. */
+describe("withoutNewWord", () => {
+  it("drops the word and a dash left hanging", () => {
+    expect(withoutNewWord("HACK BLOOD STRIKE - MỚI")).toBe("HACK BLOOD STRIKE");
+    expect(withoutNewWord("HACK VALORANT MỚI")).toBe("HACK VALORANT");
+    expect(withoutNewWord("HACK X - MỚI - PC")).toBe("HACK X - PC");
+    expect(withoutNewWord("Mới - Hack Valorant")).toBe("Hack Valorant");
+  });
+
+  it("leaves other words and names without it alone", () => {
+    expect(withoutNewWord("HACK ĐỘT KÍCH CFVN - CF4VN")).toBe("HACK ĐỘT KÍCH CFVN - CF4VN");
+    expect(withoutNewWord("HACK MỚIX")).toBe("HACK MỚIX");
+    expect(withoutNewWord("MỚI")).toBe("MỚI");
+  });
+});
 
 /** How the lab's game tiles print the same names. */
 describe("titleCase", () => {

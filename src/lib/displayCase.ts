@@ -113,6 +113,24 @@ const SMALL_WORDS = new Set(["of", "and", "the"]);
  * mixed case come out as they do there; "iOS" keeps its small i, and "of"
  * stays small after the first word.
  */
+/**
+ * LAB: a game's name without the word "Mới" (the owner, 17/10/2026: "cái nào
+ * có ghi chữ Mới bỏ chữ Mới đi"): "HACK BLOOD STRIKE - MỚI" reads "HACK BLOOD
+ * STRIKE", "HACK VALORANT MỚI" reads "HACK VALORANT". A dash left hanging
+ * goes with it. The stored name keeps the word; the tiles print it without.
+ */
+export function withoutNewWord(raw: string): string {
+  const out = raw
+    .normalize("NFC")
+    .replace(/(?<![\p{L}\p{N}])mới(?![\p{L}\p{N}])/giu, " ")
+    .replace(/\s+/g, " ")
+    .replace(/\s[-–|:](?=\s[-–|:]\s)/gu, "")
+    .replace(/(\s[-–|:])+\s*$/u, "")
+    .replace(/^\s*[-–|:]\s/u, "")
+    .trim();
+  return out || raw.trim();
+}
+
 export function titleCase(raw: string): string {
   const special = new Set(Object.values(SPECIAL));
   return sentenceCase(raw)

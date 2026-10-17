@@ -1,6 +1,6 @@
 import { CardImage } from "@/components/sites/menzu-lol-f7ae197a/shared/CardImage";
 import { formatVnd } from "@/components/sites/menzu-lol-f7ae197a/shared/productData";
-import { sentenceCase, titleCase } from "@/lib/displayCase";
+import { sentenceCase, titleCase, withoutNewWord } from "@/lib/displayCase";
 import Link from "next/link";
 import {
   Boxes,
@@ -601,9 +601,9 @@ export function RowTile({
   if (style === "classic") {
     const price = card.fromPrice != null ? `từ ${formatVnd(card.fromPrice)}đ` : null;
     const count = card.count != null && card.count > 0 ? `${card.count} sản phẩm` : null;
-    // Every word's first letter capital (the owner, 17/10/2026), here and on
-    // /categories, which prints the same tiles.
-    const name = titleCase(card.title);
+    // Every word's first letter capital and no "Mới" (the owner, 17/10/2026),
+    // here and on /categories, which prints the same tiles.
+    const name = titleCase(withoutNewWord(card.title));
     return (
       <Link
         href={card.href}
