@@ -125,7 +125,7 @@ export default async function AppDownloadPage() {
     : "-";
 
   return (
-    <div className="min-h-screen flex flex-col text-white overflow-x-clip selection:bg-[var(--menzu-accent)]/30">
+    <div className="min-h-screen flex flex-col text-white overflow-x-clip selection:bg-[var(--menzu-accent)]/30 bg-panel">
       <div className="w-full shrink-0 h-[104px]" />
       <SiteHeader />
 
@@ -146,7 +146,7 @@ export default async function AppDownloadPage() {
                     <Image src={APP_ICON} alt="Biểu tượng ứng dụng THICHTHIHACK" fill sizes="80px" className="object-cover" />
                   </div>
                   <div className="space-y-2 flex-1">
-                    <h1 className="text-lg sm:text-2xl lg:text-[25px] font-extrabold leading-snug text-white tracking-tight">
+                    <h1 className="text-[24px] font-black leading-tight text-frost sm:text-[30px]">
                       THICHTHIHACK App
                     </h1>
                     <p className="text-neutral-400 text-[11px] sm:text-xs leading-relaxed">

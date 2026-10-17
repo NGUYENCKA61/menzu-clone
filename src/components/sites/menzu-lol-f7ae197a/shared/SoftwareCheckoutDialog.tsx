@@ -319,7 +319,7 @@ export function SoftwareCheckoutDialog({
           imageUrl={product.imageUrl}
           name={product.name}
           chip={tier.label}
-          meta={`×${quantity} · ${product.categoryName}`}
+          meta={`×${quantity}, ${product.categoryName}`}
         />
         <PriceList>
           <PriceRow label="Đã trừ ví" value={`${formatVnd(purchase.total)}đ`} />
@@ -398,7 +398,7 @@ export function SoftwareCheckoutDialog({
             imageUrl={product.imageUrl}
             name={product.name}
             chip={tier.label}
-            meta={`×${quantity} · ${product.categoryName}`}
+            meta={`×${quantity}, ${product.categoryName}`}
           />
           <PriceList>
             <PriceRow label="Đơn giá" value={`${formatVnd(tier.price)}đ`} />

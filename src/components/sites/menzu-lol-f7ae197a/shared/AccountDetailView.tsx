@@ -28,7 +28,7 @@ function SectionTitle({ id, children }: { id: string; children: React.ReactNode 
     <div className="flex items-center gap-2.5">
       <h2
         id={id}
-        className="text-xl sm:text-2xl font-black text-white"
+        className="text-[20px] font-bold sm:text-[22px] text-white"
       >
         {children}
       </h2>

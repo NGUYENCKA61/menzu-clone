@@ -137,7 +137,7 @@ export function ToolDocsHome({
       </label>
 
       {shown.length === 0 ? (
-        <p className="rounded-2xl border border-dashed border-white/10 px-5 py-8 text-center text-sm text-neutral-400">
+        <p className="rounded-2xl border border-dashed border-white/10 px-5 py-8 text-center text-sm text-neutral-400 bg-white/[0.02]">
           Không có tool nào khớp &ldquo;{query.trim()}&rdquo;.
         </p>
       ) : (

@@ -282,7 +282,7 @@ export default async function AnnouncementsPage({
                         return (
                           <li
                             key={event.id}
-                            className="flex flex-col gap-3 rounded-[14px] border border-white/10 bg-white/[0.02] p-3.5 sm:flex-row sm:gap-4 sm:p-4"
+                            className="flex flex-col gap-3 rounded-2xl border border-white/10 bg-white/[0.02] p-3.5 sm:flex-row sm:gap-4 sm:p-4"
                           >
                             {event.imageUrl ? (
                               <a
@@ -354,7 +354,7 @@ export default async function AnnouncementsPage({
           {pageOfNotices.map((item) => (
             <article
               key={item.id}
-              className="rounded-[14px] border border-white/10 bg-white/[0.02] p-5 sm:p-6"
+              className="rounded-2xl border border-white/10 bg-white/[0.02] p-5 sm:p-6"
             >
               <div className="flex flex-wrap items-center gap-2">
                 {/* The word with its small glyph, the same chip the account
@@ -365,7 +365,7 @@ export default async function AnnouncementsPage({
                 </span>
               </div>
 
-              <h2 className="mt-3 text-[17px] font-semibold leading-snug text-frost">
+              <h2 className="mt-3 text-[18px] font-bold leading-snug text-frost">
                 {item.title}
               </h2>
 

@@ -233,7 +233,7 @@ export default async function AffiliatePage() {
                         <td className="px-5 py-4">
                           {/* The shop accent: the name is the row's subject, and it
                               reads as one. */}
-                          <span className="inline-flex rounded-md border border-white/10 bg-white/[0.06] px-2 py-1 text-[11px] font-bold leading-none text-neutral-200">
+                          <span className="inline-flex rounded-md border border-white/10 bg-white/[0.06] px-2 py-1 text-[12px] font-semibold leading-none text-neutral-200">
                             {maskName(earning.fromUser.username)}
                           </span>
                         </td>
@@ -245,7 +245,7 @@ export default async function AffiliatePage() {
                           </span>
                         </td>
                         <td className="px-5 py-4">
-                          <span className="inline-flex rounded-md border border-emerald-500/30 bg-emerald-500/10 px-2 py-1 text-[11px] font-black leading-none tabular-nums text-emerald-400">
+                          <span className="inline-flex rounded-md border border-emerald-500/30 bg-emerald-500/10 px-2 py-1 text-[12px] font-semibold leading-none tabular-nums text-emerald-400">
                             +{formatVnd(Number(earning.amount))}đ
                           </span>
                         </td>

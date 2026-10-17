@@ -103,9 +103,9 @@ export default async function OrderReviewPage({
             <div className="min-w-0 flex-1">
               <p className="text-sm font-black text-white" title={productName}>{sentenceCase(productName)}</p>
               <p className="mt-1 text-[11px] font-semibold text-neutral-500">
-                Đơn {order.code} · {stamp(order.createdAt)}
-                {order.package ? ` · ${order.package.label}` : ""}
-                {order.quantity > 1 ? ` · ×${order.quantity}` : ""}
+                Đơn {order.code}, {stamp(order.createdAt)}
+                {order.package ? `, ${order.package.label}` : ""}
+                {order.quantity > 1 ? `, ×${order.quantity}` : ""}
               </p>
             </div>
             <div className="shrink-0 text-right">
@@ -135,7 +135,7 @@ export default async function OrderReviewPage({
                 >
                   {order.feedback.approved ? (
                     <>
-                      <Check className="h-3 w-3" /> Đã duyệt · đang hiện ngoài shop
+                      <Check className="h-3 w-3" /> Đã duyệt, đang hiện ngoài shop
                     </>
                   ) : (
                     <>

@@ -207,7 +207,7 @@ export default async function DocArticlePage({ params }: PageProps) {
               <BookOpen size={17} />
             </span>
             <div className="min-w-0">
-              <h2 className="text-lg font-black leading-tight text-white">
+              <h2 className="text-[18px] font-bold leading-tight text-white">
                 {tool ? "Cùng tài liệu tool" : "Cùng chuyên mục"}
               </h2>
               <p className="mt-0.5 text-[13px] text-neutral-400">

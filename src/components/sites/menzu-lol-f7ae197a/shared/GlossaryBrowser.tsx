@@ -311,7 +311,7 @@ export function GlossaryBrowser({
         {query ? null : (
           <kbd
             aria-hidden
-            className="pointer-events-none absolute right-4 top-1/2 hidden -translate-y-1/2 rounded-md border border-white/10 bg-white/5 px-1.5 py-0.5 font-sans text-[11px] font-bold leading-none text-neutral-500 lg:block"
+            className="pointer-events-none absolute right-4 top-1/2 hidden -translate-y-1/2 rounded-md border border-white/10 bg-white/5 px-1.5 py-0.5 font-sans text-[12px] font-semibold leading-none text-neutral-500 lg:block"
           >
             /
           </kbd>
@@ -386,7 +386,7 @@ export function GlossaryBrowser({
                     ))}
                   </div>
                 ) : (
-                  <div className="rounded-2xl border border-dashed border-white/10 p-8 text-center text-sm text-neutral-500">
+                  <div className="rounded-2xl border border-dashed border-white/10 p-8 text-center text-sm text-neutral-500 bg-white/[0.02]">
                     Không có thuật ngữ nào khớp &ldquo;
                     <span className="font-bold text-white">{query.trim()}</span>&rdquo;. Nhắn shop từ
                     này, shop sẽ bổ sung.

@@ -71,7 +71,7 @@ export function TotpTool() {
 
   return (
     <div className="w-full max-w-[520px] mx-auto space-y-5">
-      <div className="rounded-3xl border border-white/10 bg-[#121216] p-6 sm:p-8 space-y-6">
+      <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-6 sm:p-8 space-y-6">
         <div className="flex items-center gap-3">
           <div className="w-11 h-11 rounded-xl bg-white/[0.04] border border-white/[0.08] text-neutral-400 flex items-center justify-center shrink-0">
             <ShieldCheck size={20} />
@@ -79,9 +79,9 @@ export function TotpTool() {
           <div>
             {/* h2: the page frame already carries the h1, and two of them left the
                 document with no single statement of what the page is. */}
-            <h2 className="text-lg font-black text-white">THICHTHIHACK 2FA</h2>
+            <h2 className="text-[18px] font-bold text-white">THICHTHIHACK 2FA</h2>
             <p className="text-[12px] font-bold text-[var(--menzu-accent)]">
-              Valorant · Auto 2FA
+              Valorant | Auto 2FA
             </p>
           </div>
         </div>
@@ -113,7 +113,7 @@ export function TotpTool() {
 
           <button
             type="submit"
-            className="w-full rounded-2xl bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] text-white font-semibold py-3.5 text-[14px] transition-colors"
+            className="w-full rounded-xl bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] text-white font-semibold py-3.5 text-[14px] transition-colors"
           >
             Get OTP
           </button>

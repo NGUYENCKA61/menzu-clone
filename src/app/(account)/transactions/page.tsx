@@ -98,7 +98,7 @@ export default async function TransactionsPage() {
           delta: Number(request.amount),
           balanceAfter: 0,
           description: card
-            ? `Nạp thẻ cào mã ${request.code}${request.carrier ? ` · ${request.carrier}` : ""}`
+            ? `Nạp thẻ cào mã ${request.code}${request.carrier ? `, ${request.carrier}` : ""}`
             : `Nạp tiền mã ${request.code}`,
           method: card ? "Thẻ Cào" : "Ngân Hàng",
           createdAt: moneyStamp(request.createdAt),

@@ -187,7 +187,7 @@ function ReviewPictures({ pictures, reviewer }: { pictures: string[]; reviewer: 
 /** One full-width review card, matching the captured markup piece for piece. */
 function ReviewCard({ item }: { item: FeedbackItem }) {
   return (
-    <div className="bg-white/[0.02] border border-white/10 border-neutral-800/60 p-5 sm:p-6 rounded-3xl transition-all hover:bg-neutral-900/70 hover:border-neutral-700/60 relative overflow-hidden">
+    <div className="bg-white/[0.02] border border-white/10 border-neutral-800/60 p-5 sm:p-6 rounded-2xl transition-all hover:bg-neutral-900/70 hover:border-neutral-700/60 relative overflow-hidden">
       <div className="flex gap-4 items-start">
         <ReviewAvatar name={item.name} avatarUrl={item.avatarUrl} anonymous={item.anonymous} />
         <div className="flex-1 min-w-0 pt-0.5">

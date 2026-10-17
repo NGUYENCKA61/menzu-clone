@@ -151,7 +151,7 @@ export function AccountEmpty({ title, body, ctaLabel, ctaHref }: AccountEmptyPro
       {ctaLabel && ctaHref && (
         <Link
           href={ctaHref}
-          className="relative mt-5 inline-flex items-center gap-2 h-10 px-5 rounded-xl bg-[var(--brand)] hover:bg-[var(--brand-dark)] transition-colors text-[13px] font-semibold text-white"
+          className="relative mt-5 inline-flex items-center gap-2 h-11 px-5 rounded-xl bg-[var(--brand)] hover:bg-[var(--brand-dark)] transition-colors text-[14px] font-semibold text-white"
         >
           {ctaLabel}
           <LinkPending />

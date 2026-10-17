@@ -187,7 +187,7 @@ export function WarrantyDetailsForm({
 
       <div>
         <div className="mb-3">
-          <h2 className="flex flex-wrap items-center gap-1.5 text-[15px] font-semibold text-white">
+          <h2 className="flex flex-wrap items-center gap-1.5 text-[16px] font-semibold text-white">
             {step + 1}. {q.label}
             <span aria-hidden className="text-[var(--menzu-accent)]">
               *

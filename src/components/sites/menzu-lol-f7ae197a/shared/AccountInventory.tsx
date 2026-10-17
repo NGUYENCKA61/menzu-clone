@@ -64,11 +64,11 @@ const PAGE_SIZE = 15;
 const TAB_BASE =
   "flex-shrink-0 flex items-center justify-center gap-2 sm:gap-3 px-4 sm:px-6 py-2.5 rounded-2xl text-[15px] font-semibold transition-colors border";
 const TAB_INACTIVE =
-  "border-[#24252a] bg-[#101114] text-neutral-400 hover:border-neutral-600 hover:text-white";
+  "border-line bg-raise text-mist hover:border-line-strong hover:text-frost";
 const FILTER_BASE =
-  "shrink-0 px-5 py-2 text-sm rounded-full font-bold transition-colors border";
+  "shrink-0 px-5 py-2 text-sm rounded-full font-semibold transition-colors border";
 const FILTER_INACTIVE =
-  "shrink-0 px-5 py-2 text-sm rounded-full font-bold transition-colors border bg-neutral-900 border-neutral-700 text-neutral-400 hover:border-neutral-500 hover:text-white";
+  "shrink-0 px-5 py-2 text-sm rounded-full font-semibold transition-colors border bg-raise border-line text-mist hover:border-line-strong hover:text-frost";
 
 interface TabAccent {
   tabActive: string;
@@ -78,17 +78,16 @@ interface TabAccent {
 }
 
 const RED_ACCENT: TabAccent = {
-  tabActive:
-    "border-[var(--menzu-accent)] bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] text-white",
-  filterActive: "bg-[var(--menzu-accent)] border-[var(--menzu-accent)] text-white",
-  tileHover: "hover:border-[var(--menzu-accent)]/50",
-  searchFocus: "focus-within:border-[var(--menzu-accent)]/60",
+  tabActive: "border-white/25 bg-white/[0.12] text-frost",
+  filterActive: "border-white/25 bg-white/[0.12] text-frost",
+  tileHover: "hover:border-white/25",
+  searchFocus: "focus-within:border-white/30",
 };
 const ORANGE_ACCENT: TabAccent = {
-  tabActive: "border-[#f97316] bg-[#f97316] hover:bg-[#ea580c] text-white",
-  filterActive: "bg-[#f97316] border-[#f97316] text-white",
-  tileHover: "hover:border-[#f97316]/50",
-  searchFocus: "focus-within:border-[#f97316]/60",
+  tabActive: "border-white/25 bg-white/[0.12] text-frost",
+  filterActive: "border-white/25 bg-white/[0.12] text-frost",
+  tileHover: "hover:border-white/25",
+  searchFocus: "focus-within:border-white/30",
 };
 
 const TAB_ACCENTS: Record<InventoryTabKey, TabAccent> = {
@@ -163,7 +162,7 @@ export function AccountInventory({ account, items }: AccountInventoryProps) {
   if (tabs.length === 0) return null;
 
   return (
-    <div className="w-full mt-12 bg-white/[0.02] border border-white/10 border-neutral-800/80 rounded-3xl p-6">
+    <div className="w-full mt-12 bg-white/[0.02] border border-white/10 border-neutral-800/80 rounded-2xl p-6">
       <style dangerouslySetInnerHTML={{ __html: ACCOUNT_INVENTORY_STYLES }} />
 
       {/* The reference separates the tab strip from the goods with a hairline. */}
@@ -190,7 +189,7 @@ export function AccountInventory({ account, items }: AccountInventoryProps) {
           it, capped at a readable width, left-aligned. The focus ring follows
           the open tab's colour. */}
       <label
-        className={`mt-6 flex h-11 w-full max-w-md items-center gap-2.5 rounded-xl border border-[#24252a] bg-[#101114] px-4 transition-colors ${accent.searchFocus}`}
+        className={`mt-6 flex h-11 w-full max-w-md items-center gap-2.5 rounded-xl border border-white/10 bg-white/[0.02] px-4 transition-colors ${accent.searchFocus}`}
       >
         <Search size={15} aria-hidden className="shrink-0 text-neutral-500" />
         <input

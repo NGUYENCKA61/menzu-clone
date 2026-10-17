@@ -218,8 +218,8 @@ export function HeaderSearch() {
                           {hit.kind === "category"
                             ? "Danh mục"
                             : hit.kind === "software"
-                              ? `Hack · ${hit.note}`
-                              : `Tài khoản · ${hit.note}`}
+                              ? `Hack, ${hit.note}`
+                              : `Tài khoản, ${hit.note}`}
                         </span>
                       </span>
                     </Link>

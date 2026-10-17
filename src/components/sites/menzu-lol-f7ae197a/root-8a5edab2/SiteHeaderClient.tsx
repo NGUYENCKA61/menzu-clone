@@ -431,7 +431,7 @@ export function SiteHeaderClient({
             <Link
               href={loginHref}
               aria-label="Đăng nhập"
-              className="flex items-center gap-2 h-9 px-3.5 sm:px-4 rounded-[10px] bg-[var(--brand)] hover:bg-[var(--brand-dark)] transition-colors duration-200 shrink-0"
+              className="flex items-center gap-2 h-9 px-3.5 sm:px-4 rounded-xl bg-[var(--brand)] hover:bg-[var(--brand-dark)] transition-colors duration-200 shrink-0"
             >
               <User size={16} />
               {/* Under 360px the header has no room for the word: with the

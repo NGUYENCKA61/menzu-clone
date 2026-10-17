@@ -317,7 +317,7 @@ export function ProductCard({ product, priority = false, eager = false }: Produc
             </span>
             {/* The software card's primary button, worn here by the whole-card
                 link: the account page is where the purchase happens. */}
-            <span className="flex h-[42px] items-center rounded-[9px] bg-[var(--menzu-accent)] px-5 text-[13px] font-semibold text-white transition-colors group-hover:bg-[var(--menzu-accent-dark)]">
+            <span className="flex h-11 items-center rounded-xl bg-[var(--menzu-accent)] px-5 text-[14px] font-semibold text-white transition-colors group-hover:bg-[var(--menzu-accent-dark)]">
               Mua ngay
             </span>
           </div>

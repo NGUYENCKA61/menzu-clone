@@ -30,7 +30,7 @@ export class CardBoundary extends Component<
   render() {
     if (!this.state.failed) return this.props.children;
     return (
-      <div className="flex h-full min-h-[280px] w-full flex-col items-center justify-center gap-3 rounded-[15px] border border-dashed border-white/10 bg-white/[0.02] p-6 text-center">
+      <div className="flex h-full min-h-[280px] w-full flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-white/10 bg-white/[0.02] p-6 text-center">
         <p className="text-sm font-bold text-white">Thẻ này gặp lỗi hiển thị</p>
         <p className="text-[12px] leading-relaxed text-neutral-400">
           Thường do tiện ích trình duyệt (dịch trang, tải video…) can thiệp vào

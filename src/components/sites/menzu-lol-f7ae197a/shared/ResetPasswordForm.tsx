@@ -67,13 +67,13 @@ export function ResetPasswordForm({ token }: { token: string }) {
         <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border-2 border-emerald-500 bg-emerald-500/15 text-emerald-400">
           <ShieldCheck size={28} strokeWidth={2.5} />
         </span>
-        <h2 className="mt-5 text-[17px] font-black text-white">
+        <h2 className="mt-5 text-[18px] font-bold text-white">
           Mật khẩu đã đổi
         </h2>
         <p className="mt-3 text-[13px] leading-relaxed text-neutral-300">{done}</p>
         <Link
           href="/login"
-          className="mt-6 inline-flex h-11 w-full items-center justify-center rounded-2xl bg-[var(--menzu-accent)] text-[15px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent-dark)]"
+          className="mt-6 inline-flex h-11 w-full items-center justify-center rounded-xl bg-[var(--menzu-accent)] text-[14px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent-dark)]"
         >
           Đăng nhập ngay
         </Link>
@@ -136,7 +136,7 @@ export function ResetPasswordForm({ token }: { token: string }) {
       <button
         type="submit"
         disabled={pending}
-        className="mt-6 w-full rounded-2xl bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] disabled:opacity-70 disabled:cursor-wait text-white font-semibold py-4 text-[15px] transition-colors"
+        className="mt-6 w-full rounded-xl bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] disabled:opacity-70 disabled:cursor-wait text-white font-semibold py-3.5 text-[14px] transition-colors"
       >
         {pending ? "ĐANG ĐỔI…" : "ĐẶT MẬT KHẨU MỚI"}
       </button>

@@ -294,7 +294,7 @@ export function StatusSubscribeSearch({
                 {shelf.tools.length} tool
                 {signedIn && shelf.following > 0 ? (
                   <>
-                    {" · "}
+                    {", "}
                     <span className="text-[var(--menzu-accent)]">
                       đã bật {shelf.following}
                     </span>

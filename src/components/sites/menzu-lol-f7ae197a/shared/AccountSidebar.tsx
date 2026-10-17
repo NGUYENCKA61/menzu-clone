@@ -60,7 +60,7 @@ const NAV_GROUPS: AccountNavItem[][] = [
 // card's 24px less its 12px padding, so a lit row follows the card's curve
 // (the owner, 03/10/2026, the sidebar's sizes "cho đồng bộ" → "làm đi").
 const LINK_ACTIVE =
-  "relative flex items-center gap-3 py-2.5 px-3 rounded-[12px] text-sm font-bold transition-colors bg-[var(--menzu-accent)]/10 text-white";
+  "relative flex items-center gap-3 py-2.5 px-3 rounded-[12px] text-sm font-bold transition-colors bg-white/[0.07] text-frost ring-1 ring-inset ring-white/10";
 const LINK_INACTIVE =
   "relative flex items-center gap-3 py-2.5 px-3 rounded-[12px] text-sm font-bold transition-colors text-neutral-300 hover:text-white hover:bg-white/5";
 
@@ -82,7 +82,7 @@ export function AccountSidebar({
           24px corners, so the two cards of an account page match (the owner,
           03/10/2026: "màu card trái và card phải đồng bộ chưa" → "rồi làm
           đi"). It was neutral-900 at 60%, a 10% rim and 18px. */}
-      <nav className="bg-transparent border border-line rounded-[24px] p-3">
+      <nav className="bg-transparent border border-line rounded-[20px] p-3">
         {/* The face on top, as the captured sidebar has it: avatar, name, and
             the role in a whisper underneath. */}
         {user ? (

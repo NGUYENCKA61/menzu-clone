@@ -280,7 +280,7 @@ export function SoftwareCard({
             ) : (
               <Link
                 href={detailHref}
-                className="inline-flex h-[42px] shrink-0 items-center gap-2 rounded-[10px] bg-[var(--menzu-accent)] px-5 text-[14px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent-dark)]"
+                className="inline-flex h-11 shrink-0 items-center gap-2 rounded-xl bg-[var(--menzu-accent)] px-5 text-[14px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent-dark)]"
               >
                 Thuê ngay
               </Link>
@@ -391,7 +391,7 @@ export function SoftwareCard({
               type="button"
               onClick={rentNow}
               disabled={!hasPackages}
-              className="h-[42px] rounded-[10px] bg-[var(--menzu-accent)] text-[14px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent-dark)] disabled:opacity-50"
+              className="h-11 rounded-xl bg-[var(--menzu-accent)] text-[14px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent-dark)] disabled:opacity-50"
             >
               Thuê ngay
             </button>

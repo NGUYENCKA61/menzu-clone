@@ -48,7 +48,7 @@ export function FlashSaleCard({ item }: FlashSaleCardProps) {
               glyphs and numbers in the shop's accent, RANK white,
               entries split by pipes. Hidden per entry when unset. */}
           {item.rank ? (
-            <div className="flex w-full items-center justify-between gap-1 overflow-hidden rounded-lg border border-[#292a30] bg-[#111216] px-2 py-1 ">
+            <div className="flex w-full items-center justify-between gap-1 overflow-hidden rounded-md border border-[#292a30] bg-[#111216] px-2 py-1 ">
               <span className="flex min-w-0 items-center gap-1 whitespace-nowrap text-[8px] sm:text-[10px] font-extrabold text-[#c7c8cd]">
                 <span aria-hidden className="text-[var(--menzu-accent)]">▲</span> Rank:
                 <span className="truncate text-white">{item.rank}</span>
@@ -74,7 +74,7 @@ export function FlashSaleCard({ item }: FlashSaleCardProps) {
             </div>
           ) : item.name ? (
             // A tool has no rank to show, so its name takes the strip.
-            <div className="flex w-full items-center overflow-hidden rounded-lg border border-[#292a30] bg-[#111216] px-2 py-1">
+            <div className="flex w-full items-center overflow-hidden rounded-md border border-[#292a30] bg-[#111216] px-2 py-1">
               <span className="truncate text-[12px] sm:text-[12px] font-semibold text-white">
                 {item.name}
               </span>

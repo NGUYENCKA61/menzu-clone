@@ -202,7 +202,7 @@ function HandoverBox({
       // đồng bộ hơn thử"): the label keeps its place beside "LINK TẢI HACK"
       // and the values with their buttons sink to the card's foot, level with
       // the last file row's own name and button.
-      className={`rounded-xl border border-white/[0.06] bg-white/[0.02] p-4 transition-colors hover:border-white/[0.12]${
+      className={`rounded-xl border border-white/10 bg-white/[0.02] p-4 transition-colors hover:border-white/[0.12]${
         tall ? " flex h-full flex-col justify-between" : ""
       }`}
     >
@@ -399,7 +399,7 @@ function FileRow({
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className="flex flex-1 items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3 transition-colors hover:border-white/[0.12] hover:bg-white/[0.04]"
+      className="flex flex-1 items-center gap-3 rounded-xl border border-white/10 bg-white/[0.02] px-4 py-3 transition-colors hover:border-white/[0.12] hover:bg-white/[0.04]"
     >
       {/* min-w-0 so a long name truncates instead of running off the card.
           The glyph rides in the label, no tile (the owner, 10/10/2026: "xài
@@ -603,7 +603,7 @@ export function OrderDetailModal({
           ref={setTrigger}
           type="button"
           onClick={() => setOpen(true)}
-          className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg bg-[var(--menzu-accent)] px-4 text-xs font-bold text-white transition-colors hover:bg-[var(--menzu-accent-dark)]"
+          className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-xl bg-[var(--menzu-accent)] px-4 text-[14px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent-dark)]"
         >
           <Receipt className="h-3.5 w-3.5" />
           Xem đơn hàng
@@ -656,7 +656,7 @@ export function OrderDetailModal({
                   <div>
                     <h2
                       id={`order-${order.code}-title`}
-                      className="flex items-center gap-2.5 text-lg font-black text-white sm:text-xl"
+                      className="flex items-center gap-2.5 text-[18px] font-bold text-white sm:text-xl"
                     >
                       <Package className="h-5 w-5 shrink-0 text-[var(--menzu-accent)]" aria-hidden />
                       Chi tiết đơn hàng
@@ -1060,7 +1060,7 @@ export function OrderDetailModal({
                             />
                           </div>
                           {order.login.login.note ? (
-                            <p className="whitespace-pre-line break-words rounded-xl border border-white/[0.06] bg-white/[0.03] px-4 py-3 text-xs leading-relaxed text-neutral-300">
+                            <p className="whitespace-pre-line break-words rounded-xl border border-white/10 bg-white/[0.02] px-4 py-3 text-xs leading-relaxed text-neutral-300">
                               {order.login.login.note}
                             </p>
                           ) : null}
@@ -1083,7 +1083,7 @@ export function OrderDetailModal({
                         // account back on the shelf and handed it to a later
                         // buyer. "Shows once paid" would be a lie next to the
                         // green chip.
-                        <div className="flex items-start gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
+                        <div className="flex items-start gap-3 rounded-xl border border-white/10 bg-white/[0.02] p-4">
                           <MessageCircle className="mt-0.5 h-4 w-4 shrink-0 text-neutral-400" />
                           <p className="text-xs leading-relaxed text-neutral-300">
                             Tài khoản này đã được shop bàn giao lại, liên hệ
@@ -1137,7 +1137,7 @@ export function OrderDetailModal({
                 </div>
 
                 {/* FOOTER */}
-                <div className="flex flex-col gap-3 border-t border-white/[0.06] bg-white/[0.02] px-5 py-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:px-6">
+                <div className="flex flex-col gap-3 border-t border-white/10 bg-white/[0.02] px-5 py-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:px-6">
                   {/* The owner's own words (02/10/2026), where "Cần hỗ trợ về
                       đơn hàng này? Gửi kèm mã đơn …" stood, less the "Hãy"
                       the ask first opened with ("bỏ chữ Hãy đi"). The ask, a
@@ -1279,7 +1279,7 @@ function LockedLogin({ onTake }: { onTake: () => void }) {
     // No key tile of its own: the section heading right above already wears
     // the red key, and two keys stacked said the same thing twice (the
     // owner, 09/10/2026: keep the red one, "rồi làm đi").
-    <div className="flex flex-col items-center gap-4 rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-6 text-center sm:px-6">
+    <div className="flex flex-col items-center gap-4 rounded-xl border border-white/10 bg-white/[0.02] px-4 py-6 text-center sm:px-6">
       <div>
         <p className="text-[15px] font-semibold text-white">
           Nhận thông tin đăng nhập
@@ -1499,7 +1499,7 @@ function LoginRevealDialog({ code, onClose }: { code: string; onClose: () => voi
             type="button"
             onClick={take}
             disabled={!recording || busy}
-            className="press h-11 rounded-xl bg-[var(--menzu-accent)] px-4 text-xs font-bold text-white transition-colors hover:bg-[var(--menzu-accent-dark)] disabled:cursor-not-allowed disabled:bg-white/[0.06] disabled:text-neutral-500 sm:h-10"
+            className="press h-11 rounded-xl bg-[var(--menzu-accent)] px-4 text-[14px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent-dark)] disabled:cursor-not-allowed disabled:bg-white/[0.06] disabled:text-neutral-500 sm:h-10"
           >
             {busy ? "Đang mở…" : "Xác nhận lấy thông tin"}
           </button>

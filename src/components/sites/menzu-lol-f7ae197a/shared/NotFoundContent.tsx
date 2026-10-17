@@ -56,7 +56,7 @@ export function NotFoundContent() {
           <h1 className="text-8xl font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-400 drop-shadow-[0_5px_15px_rgba(0,0,0,0.5)]">
             404
           </h1>
-          <h2 className="text-xl sm:text-2xl font-black text-white ">
+          <h2 className="text-[20px] font-bold sm:text-[22px] text-white ">
             Không tìm thấy trang
           </h2>
           <p className="text-neutral-400 text-sm max-w-sm mx-auto leading-relaxed">

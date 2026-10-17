@@ -142,7 +142,7 @@ export default async function ToolDocsPage({ params }: PageProps) {
       ground="home"
       subtitle={
         <p className="text-[12px] font-medium text-neutral-400">
-          {tool.categoryName} ·{" "}
+          {tool.categoryName},{" "}
           <Link
             href={shop}
             className="font-bold text-neutral-300 underline underline-offset-2 hover:text-white"

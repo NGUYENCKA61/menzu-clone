@@ -478,7 +478,7 @@ export function SecurityPanel({
         </div>
       </div>
 
-      <div className="w-full bg-transparent sm:bg-transparent border-none sm:border sm:border-line rounded-none sm:rounded-[24px] p-0 sm:p-8 lg:p-10 relative min-h-0 sm:min-h-[500px]">
+      <div className="w-full bg-transparent sm:bg-transparent border-none sm:border sm:border-line rounded-none sm:rounded-[20px] p-0 sm:p-8 lg:p-10 relative min-h-0 sm:min-h-[500px]">
         {tab === "security" ? (
           <div className="flex flex-col gap-8">
             {header(
@@ -497,12 +497,12 @@ export function SecurityPanel({
                   {/* A heading, not a label: it titles the whole form. */}
                   <h3 className={CARD_TITLE}>Địa chỉ Email</h3>
                   {email && emailVerified ? (
-                    <span className="flex items-center gap-1 px-2.5 py-1 rounded-md bg-emerald-500/10 text-[11px] font-bold text-emerald-400 border border-emerald-500/20">
+                    <span className="flex items-center gap-1 px-2.5 py-1 rounded-md bg-emerald-500/10 text-[12px] font-semibold text-emerald-400 border border-emerald-500/20">
                       <CircleCheck size={12} aria-hidden />
                       Đã xác minh
                     </span>
                   ) : (
-                    <span className="flex items-center gap-1 px-2.5 py-1 rounded-md bg-yellow-500/10 text-[11px] font-bold text-yellow-400 border border-yellow-500/20">
+                    <span className="flex items-center gap-1 px-2.5 py-1 rounded-md bg-yellow-500/10 text-[12px] font-semibold text-yellow-400 border border-yellow-500/20">
                       <CircleAlert size={12} aria-hidden />
                       {email ? "Chưa xác minh" : "Chưa có email"}
                     </span>
@@ -533,7 +533,7 @@ export function SecurityPanel({
                       !emailValue.trim() ||
                       alreadyProved
                     }
-                    className="flex items-center justify-center gap-2 rounded-xl bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] disabled:bg-white/5 text-white text-[13px] font-semibold px-5 py-3 whitespace-nowrap transition-colors disabled:text-neutral-500"
+                    className="flex items-center justify-center gap-2 rounded-xl bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] disabled:bg-white/5 text-white text-[14px] font-semibold px-5 py-3 whitespace-nowrap transition-colors disabled:text-neutral-500"
                   >
                     {emailBusy === "send" ? (
                       <Loader2
@@ -590,7 +590,7 @@ export function SecurityPanel({
                       type="button"
                       onClick={verifyOtp}
                       disabled={emailBusy !== null || otp.length !== 6}
-                      className="flex items-center justify-center gap-2 rounded-xl bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] disabled:bg-white/5 text-white text-[13px] font-semibold px-5 py-3 whitespace-nowrap transition-colors disabled:text-neutral-500"
+                      className="flex items-center justify-center gap-2 rounded-xl bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] disabled:bg-white/5 text-white text-[14px] font-semibold px-5 py-3 whitespace-nowrap transition-colors disabled:text-neutral-500"
                     >
                       {emailBusy === "verify" ? (
                         <Loader2
@@ -674,7 +674,7 @@ export function SecurityPanel({
                 <button
                   type="submit"
                   disabled={pwBusy}
-                  className="w-full h-12 bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] disabled:bg-[var(--menzu-accent)]/50 text-white font-black rounded-xl text-sm transition-colors flex items-center justify-center gap-2"
+                  className="w-full h-12 bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] disabled:bg-[var(--menzu-accent)]/50 text-white font-semibold rounded-xl text-[14px] transition-colors flex items-center justify-center gap-2"
                 >
                   {pwBusy ? (
                     <Loader2
@@ -869,7 +869,7 @@ export function SecurityPanel({
                             {session.device}
                           </span>
                           {session.current ? (
-                            <span className="w-fit px-2 py-0.5 rounded-md bg-[var(--menzu-accent)]/20 text-[var(--menzu-accent)] text-[12px] sm:text-[12px] font-bold border border-[var(--menzu-accent)]/30">
+                            <span className="w-fit px-2 py-0.5 rounded-md bg-[var(--menzu-accent)]/20 text-[var(--menzu-accent)] text-[12px] sm:text-[12px] font-semibold border border-[var(--menzu-accent)]/30">
                               Thiết bị hiện tại
                             </span>
                           ) : null}

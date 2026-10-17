@@ -96,7 +96,7 @@ export default async function PcSetupPageRoute({ params }: PageProps) {
             className="text-[var(--menzu-accent)]"
             aria-hidden
           />
-          Chuẩn bị máy · bước {at + 1}/{PC_SETUP_PAGES.length}
+          Chuẩn bị máy, bước {at + 1}/{PC_SETUP_PAGES.length}
         </p>
       }
     >
@@ -170,7 +170,7 @@ export default async function PcSetupPageRoute({ params }: PageProps) {
             {prev ? (
               <Link
                 href={pcSetupHref(prev.slug)}
-                className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3 text-[12px] font-bold text-neutral-300 hover:border-white/25 hover:text-white"
+                className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.02] px-4 py-3 text-[12px] font-bold text-neutral-300 hover:border-white/25 hover:text-white"
               >
                 <ArrowLeft size={14} aria-hidden />
                 {prev.title}
@@ -181,7 +181,7 @@ export default async function PcSetupPageRoute({ params }: PageProps) {
             {next ? (
               <Link
                 href={pcSetupHref(next.slug)}
-                className="inline-flex items-center gap-2 rounded-xl bg-[var(--menzu-accent)] px-4 py-3 text-[12px] font-bold text-white hover:bg-[var(--menzu-accent-dark)]"
+                className="inline-flex items-center gap-2 rounded-xl bg-[var(--menzu-accent)] px-4 py-3 text-[14px] font-semibold text-white hover:bg-[var(--menzu-accent-dark)]"
               >
                 {next.title}
                 <ArrowRight size={14} aria-hidden />
@@ -189,7 +189,7 @@ export default async function PcSetupPageRoute({ params }: PageProps) {
             ) : (
               <Link
                 href="/tai-lieu"
-                className="inline-flex items-center gap-2 rounded-xl bg-[var(--menzu-accent)] px-4 py-3 text-[12px] font-bold text-white hover:bg-[var(--menzu-accent-dark)]"
+                className="inline-flex items-center gap-2 rounded-xl bg-[var(--menzu-accent)] px-4 py-3 text-[14px] font-semibold text-white hover:bg-[var(--menzu-accent-dark)]"
               >
                 Xong, chọn tool
                 <ArrowRight size={14} aria-hidden />

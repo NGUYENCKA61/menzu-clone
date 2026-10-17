@@ -325,7 +325,7 @@ export function OrdersList({ orders }: { orders: OrderCardView[] }) {
                                   </span>
                                   {byDay ? null : (
                                     <>
-                                      {" · "}
+                                      {", "}
                                       <span className="whitespace-nowrap">{order.stamp}</span>
                                     </>
                                   )}

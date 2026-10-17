@@ -37,7 +37,7 @@ function Step({
       {/* The star alone (the owner, 10/10/2026: "bỏ đi"), with the word
           kept for a reader who cannot see it. The one section that is not
           required says so in its own note. */}
-      <h2 className="flex flex-wrap items-center gap-1.5 text-[15px] font-semibold text-white">
+      <h2 className="flex flex-wrap items-center gap-1.5 text-[16px] font-semibold text-white">
         {n}. {title}
         {need ? (
           <>
@@ -359,7 +359,7 @@ export function WarrantyRequestForm({
           type="button"
           onClick={submit}
           disabled={busy || !ready}
-          className="inline-flex h-11 items-center gap-2 rounded-xl bg-[var(--menzu-accent)] px-6 text-[13px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent-dark)] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-[var(--menzu-accent)]"
+          className="inline-flex h-11 items-center gap-2 rounded-xl bg-[var(--menzu-accent)] px-6 text-[14px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent-dark)] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-[var(--menzu-accent)]"
         >
           {busy ? (
             <Loader2 className="h-4 w-4 animate-spin motion-reduce:animate-none" />

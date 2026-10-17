@@ -60,7 +60,7 @@ export function BankAppPicker({ bank, account, amount, note, holder, onClose }: 
         role="dialog"
         aria-modal="true"
         aria-labelledby="bank-app-title"
-        className={`bg-gradient-to-b from-[#1a1a1a] to-[#0a0a0a] border border-white/[0.08] shadow-none rounded-[24px] w-full max-w-[500px] relative z-10 overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-300 max-h-[80vh]${leaving ? " order-modal-card-out" : ""}`}
+        className={`bg-panel border border-white/10 shadow-2xl shadow-black/60 rounded-2xl w-full max-w-[500px] relative z-10 overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-300 max-h-[80vh]${leaving ? " order-modal-card-out" : ""}`}
       >
         <div className="p-5 sm:p-6 pb-3 flex items-start justify-between shrink-0 relative">
           <div
@@ -107,7 +107,7 @@ export function BankAppPicker({ bank, account, amount, note, holder, onClose }: 
               onClick={() =>
                 window.open(bankAppLink(app, { bank, account, amount, note, holder }), "_blank", "noopener")
               }
-              className="flex flex-col items-center gap-1.5 sm:gap-2.5 p-2 sm:p-3.5 bg-white/[0.02] border border-white/5 hover:bg-emerald-500/5 hover:border-emerald-500/40 rounded-[12px] sm:rounded-[16px] transition-colors duration-200 active:scale-95 group relative overflow-hidden"
+              className="flex flex-col items-center gap-1.5 sm:gap-2.5 p-2 sm:p-3.5 bg-white/[0.02] border border-white/10 hover:bg-emerald-500/5 hover:border-emerald-500/40 rounded-2xl sm:rounded-[16px] transition-colors duration-200 active:scale-95 group relative overflow-hidden"
             >
               <div className="relative z-10">
                 <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-[10px] sm:rounded-[14px] transition-all duration-300 overflow-hidden relative bg-white ring-1 ring-white/10 group-hover:ring-emerald-500/50">

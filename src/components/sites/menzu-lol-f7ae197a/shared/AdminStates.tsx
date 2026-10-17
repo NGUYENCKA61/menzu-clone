@@ -129,7 +129,7 @@ export function ConfirmDialog({
         aria-modal="true"
         aria-labelledby="confirm-title"
         tabIndex={-1}
-        className={`order-modal-card relative w-full max-w-[420px] rounded-2xl border border-white/10 bg-[#12141c] p-6 shadow-2xl outline-none${leaving ? " order-modal-card-out" : ""}`}
+        className={`order-modal-card relative w-full max-w-[420px] rounded-2xl border border-white/10 bg-panel p-6 shadow-2xl outline-none${leaving ? " order-modal-card-out" : ""}`}
       >
         <button
           type="button"

@@ -221,7 +221,7 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                 </div>
                 <span className="text-[13px] font-medium text-mist">
                   UID {user.uid}
-                  <span className="mx-2 text-neutral-600">·</span>
+                  <span className="mx-2 text-neutral-600">|</span>
                   Tham gia từ{" "}
                   {user.createdAt.toLocaleDateString("vi-VN", {
                     timeZone: SHOP_TZ,

@@ -84,7 +84,7 @@ export default async function MemberTiersPage() {
               <span className="font-bold text-white tabular-nums">{formatVnd(toppedUp)}đ</span>
               {progress.next ? (
                 <>
-                  {" · "}còn{" "}
+                  {", "}còn{" "}
                   <span className="font-bold text-white tabular-nums">
                     {formatVnd(progress.remaining)}đ
                   </span>{" "}
@@ -94,7 +94,7 @@ export default async function MemberTiersPage() {
                   </span>
                 </>
               ) : (
-                " · hạng cao nhất"
+                ", hạng cao nhất"
               )}
             </div>
           </div>

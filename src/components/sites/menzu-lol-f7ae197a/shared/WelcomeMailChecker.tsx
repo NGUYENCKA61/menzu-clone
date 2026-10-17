@@ -68,7 +68,7 @@ export function WelcomeMailChecker() {
 
   return (
     <div className="w-full max-w-[720px] mx-auto space-y-6">
-      <div className="rounded-3xl border border-white/10 bg-[#121216] p-6 sm:p-8 space-y-5">
+      <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-6 sm:p-8 space-y-5">
         <div className="flex items-center gap-3">
           <div className="w-11 h-11 rounded-xl bg-white/[0.04] border border-white/[0.08] text-[var(--menzu-accent)] flex items-center justify-center shrink-0">
             <Mail size={20} />
@@ -76,7 +76,7 @@ export function WelcomeMailChecker() {
           <div>
             {/* h2: the page frame already carries the h1, and two of them left
                 the document with no single statement of what the page is. */}
-            <h2 className="text-lg font-black text-white">
+            <h2 className="text-[18px] font-bold text-white">
               Check thư Welcome
             </h2>
             <p className="text-[12px] font-bold text-[var(--menzu-accent)]">
@@ -103,7 +103,7 @@ export function WelcomeMailChecker() {
           />
           <button
             type="submit"
-            className="w-full rounded-2xl bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] text-white font-semibold py-3.5 text-[14px] transition-colors"
+            className="w-full rounded-xl bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] text-white font-semibold py-3.5 text-[14px] transition-colors"
           >
             Kiểm tra ngay
           </button>
@@ -124,7 +124,7 @@ export function WelcomeMailChecker() {
                 {result.checks.map((check) => (
                   <li
                     key={check.label}
-                    className="flex items-center gap-3 rounded-xl border border-white/5 bg-white/[0.02] px-4 py-2.5"
+                    className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/[0.02] px-4 py-2.5"
                   >
                     {check.passed ? (
                       <CheckCircle2 size={16} className="text-emerald-400 shrink-0" />
@@ -164,12 +164,12 @@ export function WelcomeMailChecker() {
       </div>
 
       <section className="space-y-4">
-        <h2 className="text-[15px] font-semibold text-white text-center">
+        <h2 className="text-[16px] font-semibold text-white text-center">
           Hướng dẫn lấy mã nguồn email
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {GUIDES.map(({ icon: Icon, title, steps }) => (
-            <div key={title} className="rounded-2xl border border-zinc-800/80 bg-[#121216] p-5 space-y-3">
+            <div key={title} className="rounded-2xl border border-zinc-800/80 bg-white/[0.02] p-5 space-y-3">
               <div className="flex items-center gap-2.5">
                 <Icon size={16} className="text-[var(--menzu-accent)]" />
                 <h3 className="text-[14px] font-semibold text-white">{title}</h3>

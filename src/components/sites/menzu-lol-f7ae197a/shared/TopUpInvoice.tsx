@@ -525,7 +525,7 @@ export function TopUpInvoice({
         <button
           type="button"
           onClick={() => setSheet("apps")}
-          className="w-full bg-white/[0.02] hover:bg-[#1a1a1a] border border-white/10 rounded-[16px] p-4 flex items-center justify-between transition-colors mb-6 group/btn active:scale-[0.98]"
+          className="w-full bg-white/[0.02] hover:bg-[#1a1a1a] border border-white/10 rounded-2xl p-4 flex items-center justify-between transition-colors mb-6 group/btn active:scale-[0.98]"
         >
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white group-hover/btn:bg-emerald-500/20 group-hover/btn:text-emerald-400 transition-colors">

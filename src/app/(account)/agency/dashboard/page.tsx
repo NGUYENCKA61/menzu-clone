@@ -2,9 +2,10 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { redirect } from "next/navigation";
-import { KeyRound, PiggyBank, Wallet } from "lucide-react";
+import { KeyRound, PiggyBank, Store, Wallet } from "lucide-react";
 
 import { AccountPageFrame } from "@/components/sites/menzu-lol-f7ae197a/shared/AccountPageFrame";
+import { AccountPanel } from "@/components/sites/menzu-lol-f7ae197a/shared/AccountPanel";
 import {
   AgencyKeyDesk,
   type DeskProduct,
@@ -150,18 +151,19 @@ export default async function AgencyDashboardPage() {
   ] as const;
 
   return (
-    <AccountPageFrame
+    <AccountPageFrame crumb="Bàn đại lý">
+      <AccountPanel
+      icon={Store}
       title="Bàn đại lý"
       subtitle={
         percent > 0
           ? `Mức chiết khấu riêng của bạn: ${percent}%, thanh toán bằng số dư ví`
           : "Thanh toán bằng số dư ví"
       }
-      crumb="Bàn đại lý"
       action={
         <Link
           href="/wallet"
-          className="inline-flex h-10 items-center gap-2 rounded-xl bg-[var(--menzu-accent)] px-4 text-[13px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent-dark)]"
+          className="inline-flex h-11 items-center gap-2 rounded-xl bg-[var(--menzu-accent)] px-4 text-[14px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent-dark)]"
         >
           <Wallet size={14} />
           Nạp tiền
@@ -254,6 +256,7 @@ export default async function AgencyDashboardPage() {
           )}
         </section>
       </div>
+      </AccountPanel>
     </AccountPageFrame>
   );
 }

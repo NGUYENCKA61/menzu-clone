@@ -303,7 +303,7 @@ export function WarrantyQuestionsEditor({
                       onChange={(e) =>
                         update(index, { photoWhen: e.target.value })
                       }
-                      className="rounded-lg border border-white/10 bg-neutral-950/60 px-2 py-1 text-xs text-white outline-none"
+                      className="rounded-md border border-white/10 bg-neutral-950/60 px-2 py-1 text-xs text-white outline-none"
                     >
                       <option value="">bất kỳ đáp án nào</option>
                       {d.options
@@ -474,7 +474,7 @@ export function WarrantyQuestionsEditor({
             type="button"
             onClick={() => void save()}
             disabled={busy}
-            className="inline-flex h-9 items-center gap-2 rounded-lg bg-[var(--brand)] px-4 text-[13px] font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+            className="inline-flex h-9 items-center gap-2 rounded-xl bg-[var(--brand)] px-4 text-[14px] font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
           >
             <Save className="h-3.5 w-3.5" />
             {busy ? "Đang lưu…" : "Lưu câu hỏi"}

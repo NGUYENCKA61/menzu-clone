@@ -218,7 +218,7 @@ export function WarrantyChat({
 
       <div className="mt-4">
         {file ? (
-          <div className="mb-2 inline-flex max-w-full items-center gap-2 rounded-lg border border-white/10 bg-white/[0.04] px-2.5 py-1.5 text-[12px] text-neutral-300">
+          <div className="mb-2 inline-flex max-w-full items-center gap-2 rounded-md border border-white/10 bg-white/[0.04] px-2.5 py-1.5 text-[12px] text-neutral-300">
             <ImagePlus className="h-3.5 w-3.5 shrink-0 text-neutral-400" />
             <span className="truncate">{file.name}</span>
             <button
@@ -275,7 +275,7 @@ export function WarrantyChat({
             type="button"
             onClick={() => void send()}
             disabled={busy || (!text.trim() && !file)}
-            className="inline-flex h-10 shrink-0 items-center gap-2 rounded-xl bg-[var(--menzu-accent)] px-3.5 text-[12px] font-bold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+            className="inline-flex h-11 shrink-0 items-center gap-2 rounded-xl bg-[var(--menzu-accent)] px-3.5 text-[14px] font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
           >
             <Send className="h-4 w-4" />
             <span className="hidden sm:inline">

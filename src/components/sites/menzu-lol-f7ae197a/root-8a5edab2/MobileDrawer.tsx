@@ -137,7 +137,7 @@ export function MobileDrawer({ open, onClose, groups, brandName, brandLogo, user
             <Link
               href={`/login${back}`}
               onClick={onClose}
-              className="press flex h-10 items-center justify-center rounded-xl bg-[var(--brand)] text-[13px] font-semibold text-white hover:bg-[var(--brand-dark)]"
+              className="press flex h-11 items-center justify-center rounded-xl bg-[var(--brand)] text-[14px] font-semibold text-white hover:bg-[var(--brand-dark)]"
             >
               Đăng nhập
             </Link>

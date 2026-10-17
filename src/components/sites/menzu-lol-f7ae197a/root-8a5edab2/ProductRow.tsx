@@ -529,7 +529,7 @@ function BentoTile({
           </p>
         ) : null}
         {lead ? (
-          <span className="mt-1 inline-flex items-center gap-1 self-start rounded-[10px] bg-[var(--menzu-accent)] px-4 py-2.5 text-[13px] font-semibold text-white transition-colors group-hover:bg-[var(--menzu-accent-dark)]">
+          <span className="mt-1 inline-flex items-center gap-1 self-start rounded-xl bg-[var(--menzu-accent)] px-4 py-2.5 text-[14px] font-semibold text-white transition-colors group-hover:bg-[var(--menzu-accent-dark)]">
             Xem ngay
             <ChevronRight size={12} aria-hidden />
           </span>
@@ -707,7 +707,7 @@ function priceLine(card: ProductCard, lead = "Chỉ từ"): string | null {
   const parts: string[] = [];
   if (card.fromPrice != null) parts.push(`${lead} ${formatVnd(card.fromPrice)}đ`);
   if (card.count != null && card.count > 0) parts.push(`${card.count} sản phẩm`);
-  return parts.length > 0 ? parts.join(" · ") : null;
+  return parts.length > 0 ? parts.join(", ") : null;
 }
 
 /** The words and shade a tile wears in styles a, b and c (see TileStyle). */

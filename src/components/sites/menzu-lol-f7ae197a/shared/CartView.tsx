@@ -130,7 +130,7 @@ const BAND_IN = {
 function formatPaidAt(ms: number): string {
   const d = new Date(ms);
   const two = (n: number) => String(n).padStart(2, "0");
-  return `${two(d.getHours())}:${two(d.getMinutes())} · ${two(d.getDate())}/${two(d.getMonth() + 1)}/${d.getFullYear()}`;
+  return `${two(d.getHours())}:${two(d.getMinutes())} ${two(d.getDate())}/${two(d.getMonth() + 1)}/${d.getFullYear()}`;
 }
 
 /** The server's figure where it gave one, the basket's own quote otherwise. */
@@ -204,7 +204,7 @@ function ReceiptLine({ line }: { line: CartLine }) {
             {line.packageLabel}
           </span>
           <span className="text-[11px] font-semibold tabular-nums text-neutral-500">
-            ×{line.quantity} · {formatVnd(line.unitPrice)}đ / bản
+            ×{line.quantity}, {formatVnd(line.unitPrice)}đ / bản
           </span>
         </div>
       </div>
@@ -236,7 +236,7 @@ export function CartEmpty({ signedIn }: { signedIn: boolean }) {
 
       <Link
         href={signedIn ? "/categories" : "/login?next=/cart"}
-        className="mt-6 inline-flex items-center gap-2 h-10 px-5 rounded-xl bg-[var(--brand)] hover:bg-[var(--brand-dark)] transition-colors text-[13px] font-semibold text-white"
+        className="mt-6 inline-flex items-center gap-2 h-11 px-5 rounded-xl bg-[var(--brand)] hover:bg-[var(--brand-dark)] transition-colors text-[14px] font-semibold text-white"
       >
         {signedIn ? "Quay lại cửa hàng" : "Đăng nhập"}
         <ArrowRight size={14} />
@@ -518,14 +518,14 @@ export function CartView({
               </span>
             </span>
             <div className="min-w-0">
-              <h2 className="text-lg font-black text-white">
+              <h2 className="text-[18px] font-bold text-white">
                 Thanh toán thành công
               </h2>
               {/* The two figures a buyer wants first, before the bands print. */}
               <p className="mt-0.5 text-[13px] text-neutral-400">
                 Đã trừ ví{" "}
                 <span className="font-bold tabular-nums text-white">{formatVnd(done.total)}đ</span>
-                {" · "}còn{" "}
+                {", "}còn{" "}
                 <span className="font-bold tabular-nums text-white">{formatVnd(done.balance)}đ</span>{" "}
                 trong ví
               </p>
@@ -536,7 +536,7 @@ export function CartView({
           <div className="flex items-baseline justify-between gap-4 border-t border-white/[0.06] pt-3 sm:flex-col sm:items-end sm:gap-1 sm:border-0 sm:pt-0">
             <span className={`${LABEL} inline-flex items-center gap-1.5`}>
               <Receipt className="h-3 w-3" aria-hidden />
-              {orders === 1 ? "Biên lai" : `Biên lai · ${orders} đơn`}
+              {orders === 1 ? "Biên lai" : `Biên lai, ${orders} đơn`}
             </span>
             <span className="text-[12px] font-semibold tabular-nums text-neutral-300">
               {formatPaidAt(done.paidAt)}
@@ -551,7 +551,7 @@ export function CartView({
           >
             <div className="mb-1 flex items-center justify-between gap-3">
               <span className={LABEL}>
-                {done.lines.length} sản phẩm · {copies} bản
+                {done.lines.length} sản phẩm, {copies} bản
               </span>
               <span className={LABEL}>Thành tiền</span>
             </div>
@@ -680,14 +680,14 @@ export function CartView({
           <div className="mt-4 flex flex-col gap-2.5 sm:flex-row">
             <Link
               href="/orders"
-              className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[var(--menzu-accent)] px-6 sm:flex-1 text-[13px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent-dark)]"
+              className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[var(--menzu-accent)] px-6 sm:flex-1 text-[14px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent-dark)]"
             >
               <KeyRound className="h-4 w-4" aria-hidden />
               Lấy key trong đơn hàng
             </Link>
             <Link
               href="/categories"
-              className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-white/10 px-6 text-[13px] font-semibold text-neutral-300 transition-colors hover:bg-white/5 hover:text-white"
+              className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-white/10 px-6 text-[13px] font-semibold text-neutral-300 transition-colors hover:bg-white/5 hover:text-white bg-white/[0.02]"
             >
               Tiếp tục mua
               <ArrowRight className="h-4 w-4" aria-hidden />
@@ -838,7 +838,7 @@ export function CartView({
       {/* Flat, like the panels on the account pages: no warm tint, no glow,
           no red bar — the red left in here is the button's. */}
       <aside className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02] p-5 lg:sticky lg:top-28">
-        <h2 className="relative text-lg font-black text-white">
+        <h2 className="relative text-[18px] font-bold text-white">
           Tóm tắt đơn hàng
         </h2>
 

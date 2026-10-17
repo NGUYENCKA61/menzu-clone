@@ -396,7 +396,7 @@ export function AccountBuyPanel({
       <div className="space-y-2">
         {pct > 0 ? (
           <div className="flex items-center gap-2">
-            <span className="px-2 py-1 rounded-lg bg-red-500/15 border border-red-500/30 text-red-400 text-[11px] font-black">
+            <span className="px-2 py-1 rounded-md bg-red-500/15 border border-red-500/30 text-red-400 text-[12px] font-semibold">
               -{pct}%
             </span>
             <span className="text-sm text-neutral-500 line-through">
@@ -477,7 +477,7 @@ export function AccountBuyPanel({
           type="button"
           disabled={soldOut || gated}
           onClick={openDialog}
-          className="press w-full h-14 rounded-2xl bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] disabled:opacity-50 text-[15px] font-semibold text-white"
+          className="press w-full h-14 rounded-xl bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] disabled:opacity-50 text-[16px] font-semibold text-white"
         >
           Mua ngay
         </button>
@@ -549,7 +549,7 @@ export function AccountBuyPanel({
               imageClassName="object-cover object-[85%_center]"
               name={account.name || `Mã #${account.code}`}
               chip={rank || null}
-              meta={`#${account.code} · ${account.categoryName}`}
+              meta={`#${account.code}, ${account.categoryName}`}
             />
             <PriceList>
               <PriceRow label="Đã trừ ví" value={`${formatVnd(paid)}đ`} />
@@ -597,7 +597,7 @@ export function AccountBuyPanel({
           imageClassName="object-cover object-[85%_center]"
           name={account.name || `Mã #${account.code}`}
           chip={rank || null}
-          meta={`#${account.code} · ${account.categoryName}`}
+          meta={`#${account.code}, ${account.categoryName}`}
         />
         <PriceList>
           {pct > 0 ? (

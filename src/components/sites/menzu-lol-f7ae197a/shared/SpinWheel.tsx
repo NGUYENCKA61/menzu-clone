@@ -263,7 +263,7 @@ export function SpinWheel({
             // Rises in; no bounce. The confetti is the celebration, and a
             // card that bounced under "Chưa trúng lần này" would be a joke at
             // the expense of somebody who just spent points.
-            className={`order-modal-card${leaving ? " order-modal-card-out" : ""} relative w-full max-w-[380px] overflow-hidden rounded-2xl border bg-[#0e0e11] p-7 text-center shadow-2xl ${
+            className={`order-modal-card${leaving ? " order-modal-card-out" : ""} relative w-full max-w-[380px] overflow-hidden rounded-2xl border bg-panel p-7 text-center shadow-2xl ${
               won ? "border-[var(--menzu-violet)]/40" : "border-white/10"
             }`}
           >
@@ -324,7 +324,7 @@ export function SpinWheel({
               </span>
             )}
 
-            <h2 className="relative mt-4 text-[15px] font-semibold text-white">
+            <h2 className="relative mt-4 text-[16px] font-semibold text-white">
               {won ? "Chúc mừng!" : "Chưa trúng lần này"}
             </h2>
 
@@ -349,12 +349,12 @@ export function SpinWheel({
               </p>
             ) : null}
 
-            <p className="relative mt-4 rounded-xl border border-white/[0.07] bg-white/[0.03] px-4 py-2.5 text-[12px] text-neutral-400">
+            <p className="relative mt-4 rounded-xl border border-white/10 bg-white/[0.02] px-4 py-2.5 text-[14px] text-mist">
               Còn{" "}
               <span className="font-bold text-white">
                 {formatVnd(result.points)} điểm
-              </span>{" "}
-              · đổi được{" "}
+              </span>
+              , đổi được{" "}
               <span className="font-bold text-white">
                 {Math.floor(result.points / SPIN_COST)} lượt
               </span>

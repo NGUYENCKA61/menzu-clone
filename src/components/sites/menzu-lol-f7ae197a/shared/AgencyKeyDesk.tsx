@@ -100,7 +100,7 @@ export function AgencyKeyDesk({
       setToast({
         tone: "success",
         title: "Đã tạo đơn key",
-        message: `Đơn ${data?.orderCode} · ${formatVnd(data?.total ?? total)}đ · ${delivered} key đã có trong Đơn hàng của bạn. Số dư còn ${formatVnd(data?.balance ?? 0)}đ.`,
+        message: `Đơn ${data?.orderCode}, ${formatVnd(data?.total ?? total)}đ, ${delivered} key đã có trong Đơn hàng của bạn. Số dư còn ${formatVnd(data?.balance ?? 0)}đ.`,
       });
       router.refresh();
     } catch {
@@ -180,7 +180,7 @@ export function AgencyKeyDesk({
           <div className="flex items-center justify-between gap-3">
             <span className="text-neutral-500">Chiết khấu đại lý</span>
             <span className="tabular-nums font-bold text-amber-400">
-              −{discountPercent}% · −{formatVnd(cut)}đ
+              −{discountPercent}%, −{formatVnd(cut)}đ
             </span>
           </div>
         ) : null}
@@ -196,7 +196,7 @@ export function AgencyKeyDesk({
         type="button"
         onClick={buy}
         disabled={pending}
-        className="w-full rounded-2xl bg-[var(--brand)] py-3.5 text-[14px] font-semibold text-white transition-colors hover:bg-[var(--brand-dark)] disabled:cursor-wait disabled:opacity-70"
+        className="w-full rounded-xl bg-[var(--brand)] py-3.5 text-[14px] font-semibold text-white transition-colors hover:bg-[var(--brand-dark)] disabled:cursor-wait disabled:opacity-70"
       >
         {pending ? "Đang xử lý…" : "Mua key"}
       </button>

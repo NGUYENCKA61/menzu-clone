@@ -249,7 +249,7 @@ export function FreeKeyPanel({
       </div>
 
       <div className="space-y-3">
-        <h1 className="font-display text-[26px] font-semibold leading-[1.15] text-frost sm:text-[30px] lg:text-[34px]">
+        <h1 className="font-display text-[26px] font-bold leading-[1.15] text-frost sm:text-[30px] lg:text-[34px]">
           {sentenceCase(software.name)}
         </h1>
         {software.summary ? (
@@ -276,7 +276,7 @@ export function FreeKeyPanel({
         />
       </div>
 
-      <div className="rounded-[16px] border border-white/10 bg-white/[0.02] p-5">
+      <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-5">
         <span className="block text-[14px] font-semibold text-frost">
           Cách nhận key
         </span>
@@ -323,7 +323,7 @@ export function FreeKeyPanel({
       {phase.kind === "done" ? (
         <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3">
           <p className="text-[13px] font-semibold text-emerald-300">
-            Key của bạn · đơn {phase.orderCode}
+            Key của bạn, đơn {phase.orderCode}
           </p>
           <div className="mt-2 flex flex-wrap items-center gap-2">
             <code className="rounded-lg border border-white/10 bg-neutral-950/60 px-3 py-2 font-mono text-sm font-bold tracking-wider text-white break-all">
@@ -381,7 +381,7 @@ export function FreeKeyPanel({
               !tier
             }
             onClick={() => void start()}
-            className="press flex w-full h-14 items-center justify-center gap-2 rounded-[12px] bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] disabled:opacity-50 text-[16px] font-semibold text-white"
+            className="press flex w-full h-14 items-center justify-center gap-2 rounded-xl bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] disabled:opacity-50 text-[16px] font-semibold text-white"
           >
             {phase.kind === "busy" ? (
               <Loader2
@@ -401,7 +401,7 @@ export function FreeKeyPanel({
         ) : (
           <Link
             href={loginHref}
-            className="press flex w-full h-14 items-center justify-center gap-2 rounded-[12px] bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] text-[16px] font-semibold text-white"
+            className="press flex w-full h-14 items-center justify-center gap-2 rounded-xl bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] text-[16px] font-semibold text-white"
           >
             <KeyRound size={16} aria-hidden />
             Đăng nhập để lấy key

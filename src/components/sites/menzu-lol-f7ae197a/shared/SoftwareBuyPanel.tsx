@@ -269,7 +269,7 @@ export function SoftwareBuyPanel({
         {/* LAB (Launcher): the name in the display face and sentence case
             (displayCase keeps CS2, ESP, OBV ...); the full typed name is in
             the breadcrumb's last crumb and the page title. */}
-        <h1 className="font-display text-[26px] font-semibold leading-[1.15] text-frost sm:text-[30px] lg:text-[34px]">
+        <h1 className="font-display text-[26px] font-bold leading-[1.15] text-frost sm:text-[30px] lg:text-[34px]">
           {sentenceCase(software.name)}
         </h1>
         {/* The shop's own "Mô tả ngắn", or nothing: no opening lines lifted
@@ -422,7 +422,7 @@ export function SoftwareBuyPanel({
           type="button"
           disabled={busy || !chosen || !software.inStock || locked || gated}
           onClick={() => setConfirming(true)}
-          className="press h-14 w-full rounded-[12px] bg-[var(--menzu-accent)] text-[16px] font-semibold text-white hover:bg-[var(--menzu-accent-dark)] disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-frost sm:flex-1"
+          className="press h-14 w-full rounded-xl bg-[var(--menzu-accent)] text-[16px] font-semibold text-white hover:bg-[var(--menzu-accent-dark)] disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-frost sm:flex-1"
         >
           Mua ngay
         </button>
@@ -452,7 +452,7 @@ export function SoftwareBuyPanel({
 
       <StickyBuyBar
         anchorRef={buyRef}
-        label={chosen ? `${software.name} · ${chosen.label}` : software.name}
+        label={chosen ? `${software.name}, ${chosen.label}` : software.name}
         price={`${formatVnd(total)}đ`}
         cta="Mua ngay"
         disabled={busy || !chosen || !software.inStock || locked || gated}

@@ -161,7 +161,7 @@ export function ZaloLinkCard({
               type="button"
               onClick={() => void issue()}
               disabled={busy !== null}
-              className="inline-flex h-9 items-center gap-2 rounded-xl bg-[var(--menzu-accent)] px-4 text-[13px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent-dark)] disabled:opacity-50"
+              className="inline-flex h-9 items-center gap-2 rounded-xl bg-[var(--menzu-accent)] px-4 text-[14px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent-dark)] disabled:opacity-50"
             >
               {busy === "code" ? (
                 <Loader2

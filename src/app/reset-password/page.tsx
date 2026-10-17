@@ -4,7 +4,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { SiteFooter } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/SiteFooter";
+import { PageBackdrop } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/PageBackdrop";
 import { SiteHeader } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/SiteHeader";
+import { getShopSettings } from "@/lib/settingsStore";
 import { ResetPasswordForm } from "@/components/sites/menzu-lol-f7ae197a/shared/ResetPasswordForm";
 import { db } from "@/lib/db";
 
@@ -45,9 +47,12 @@ export default async function ResetPasswordPage({
 }) {
   const { token } = await searchParams;
   const live = token ? await linkIsLive(token) : false;
+  const settings = await getShopSettings();
 
   return (
     <div className="min-h-screen flex flex-col text-white overflow-x-clip selection:bg-[var(--menzu-accent)]/30">
+      {/* The same blurred artwork as the sign-in pages (lab, 17/10/2026). */}
+      <PageBackdrop src={settings.siteBackground} soft />
       {/* spacer reserving the fixed header's 104px */}
       <div className="w-full shrink-0 h-[104px]" />
       <SiteHeader />
@@ -55,7 +60,7 @@ export default async function ResetPasswordPage({
       <main className="flex-1 relative z-20 w-full flex flex-col">
         <div className="min-h-[calc(100vh-100px)] flex items-center justify-center px-4 py-16">
           <div className="w-full max-w-[440px] rounded-[2rem] border border-white/10 bg-neutral-900/80 p-8 sm:p-10 shadow-2xl animate-[slideUpFade_0.5s_ease-out]">
-            <h1 className="text-3xl font-black text-white">
+            <h1 className="text-4xl font-black tracking-tight text-white">
               Đặt lại mật khẩu
             </h1>
 
@@ -75,7 +80,7 @@ export default async function ResetPasswordPage({
                 </p>
                 <Link
                   href="/forgot-password"
-                  className="flex w-full items-center justify-center rounded-2xl bg-[var(--menzu-accent)] py-4 text-[15px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent-dark)]"
+                  className="flex w-full items-center justify-center rounded-xl bg-[var(--menzu-accent)] py-3.5 text-[14px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent-dark)]"
                 >
                   Yêu cầu liên kết mới
                 </Link>

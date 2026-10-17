@@ -47,7 +47,7 @@ export default async function FreeKeyPage({
       <div className="mx-auto max-w-[560px] rounded-2xl border border-white/10 bg-white/[0.02] p-6 sm:p-8">
         {outcome.state === "missing" ? (
           <>
-            <h2 className="text-lg font-black text-white">Link không hợp lệ</h2>
+            <h2 className="text-[18px] font-bold text-white">Link không hợp lệ</h2>
             <p className="mt-2 text-[13px] leading-relaxed text-neutral-400">
               Link này không thuộc lượt lấy key nào. Vào trang tool và bấm Lấy
               key miễn phí để có link mới.
@@ -55,7 +55,7 @@ export default async function FreeKeyPage({
           </>
         ) : outcome.state === "expired" ? (
           <>
-            <h2 className="text-lg font-black text-white">Link đã hết hạn</h2>
+            <h2 className="text-[18px] font-bold text-white">Link đã hết hạn</h2>
             <p className="mt-2 text-[13px] leading-relaxed text-neutral-400">
               Mỗi link chỉ dùng được trong 2 giờ. Quay lại trang tool và bấm Lấy
               key miễn phí lần nữa.
@@ -71,7 +71,7 @@ export default async function FreeKeyPage({
             <span className="inline-flex items-center gap-1.5 rounded-md border border-emerald-500/40 bg-emerald-500/10 px-2 py-0.5 text-[12px] font-semibold text-emerald-300">
               Đã nhận key
             </span>
-            <h2 className="mt-3 text-lg font-black text-white">
+            <h2 className="mt-3 text-[18px] font-bold text-white">
               {outcome.productName}
             </h2>
             <p className="mt-1 text-[13px] text-neutral-400">
@@ -100,7 +100,7 @@ export default async function FreeKeyPage({
           </>
         ) : outcome.state === "claimed" ? (
           <>
-            <h2 className="text-lg font-black text-white">
+            <h2 className="text-[18px] font-bold text-white">
               Key đã vào tài khoản khác
             </h2>
             <p className="mt-2 text-[13px] leading-relaxed text-neutral-400">
@@ -118,7 +118,7 @@ export default async function FreeKeyPage({
           </>
         ) : outcome.state === "wait" ? (
           <>
-            <h2 className="text-lg font-black text-white">
+            <h2 className="text-[18px] font-bold text-white">
               Hôm nay bạn đã nhận key tool này
             </h2>
             <p className="mt-2 text-[13px] leading-relaxed text-neutral-400">
@@ -136,7 +136,7 @@ export default async function FreeKeyPage({
           </>
         ) : outcome.state === "closed" ? (
           <>
-            <h2 className="text-lg font-black text-white">
+            <h2 className="text-[18px] font-bold text-white">
               Chưa phát key được
             </h2>
             <p className="mt-2 text-[13px] leading-relaxed text-neutral-400">
@@ -149,7 +149,7 @@ export default async function FreeKeyPage({
           </>
         ) : (
           <>
-            <h2 className="text-lg font-black text-white">Chưa lấy được key</h2>
+            <h2 className="text-[18px] font-bold text-white">Chưa lấy được key</h2>
             <p className="mt-2 text-[13px] leading-relaxed text-neutral-400">
               Lượt này chưa hoàn tất. Quay lại trang tool và bấm Lấy key miễn
               phí để thử lại.

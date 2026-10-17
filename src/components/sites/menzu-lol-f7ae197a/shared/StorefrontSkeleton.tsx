@@ -31,7 +31,7 @@ export function CategorySkeleton() {
         {Array.from({ length: 6 }, (_, i) => (
           <div
             key={i}
-            className="rounded-[15px] border border-white/[0.06] bg-white/[0.02] p-3 sm:p-4"
+            className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-3 sm:p-4"
           >
             <div className="aspect-[16/9] rounded-xl bg-white/[0.05]" />
             <div className="mt-4 h-4 w-3/4 rounded bg-white/[0.06]" />

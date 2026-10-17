@@ -120,7 +120,7 @@ function FeaturedCarousel({ items }: { items: DocCard[] }) {
                 <span className="inline-flex rounded-md border border-[var(--menzu-accent)]/40 bg-[var(--menzu-accent)]/10 px-2 py-1 text-[12px] font-semibold text-[var(--menzu-accent)]">
                   Nội dung nổi bật
                 </span>
-                <h2 className="mt-3 text-xl font-black leading-tight text-white transition-colors group-hover:text-[var(--menzu-accent)]">
+                <h2 className="mt-3 text-[20px] font-bold leading-tight text-white transition-colors group-hover:text-[var(--menzu-accent)]">
                   {item.title}
                 </h2>
                 {item.excerpt ? (
@@ -130,7 +130,7 @@ function FeaturedCarousel({ items }: { items: DocCard[] }) {
                     (the owner, 02/10/2026: "bỏ hết thử"); the article page
                     and the shelf cards still carry them. */}
                 <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-3">
-                  <span className="inline-flex items-center gap-2 rounded-lg bg-[var(--menzu-accent)] px-4 py-2.5 text-[12px] font-semibold text-white transition-colors group-hover:bg-[var(--menzu-accent-dark)]">
+                  <span className="inline-flex items-center gap-2 rounded-xl bg-[var(--menzu-accent)] px-4 py-2.5 text-[14px] font-semibold text-white transition-colors group-hover:bg-[var(--menzu-accent-dark)]">
                     Xem chi tiết
                     <ArrowRight size={12} aria-hidden />
                   </span>
@@ -419,7 +419,7 @@ export function DocsHelpCenter({
           ) : null}
 
           {nothing ? (
-            <div className="rounded-2xl border border-dashed border-white/10 p-8 text-center text-sm text-neutral-500">
+            <div className="rounded-2xl border border-dashed border-white/10 p-8 text-center text-sm text-neutral-500 bg-white/[0.02]">
               {searching ? (
                 <>
                   Không tìm thấy kết quả cho <span className="font-bold text-white">&ldquo;{query.trim()}&rdquo;</span>.

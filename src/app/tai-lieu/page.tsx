@@ -41,7 +41,7 @@ const CARD = "rounded-2xl border border-white/10 bg-white/[0.02] p-5 sm:p-6";
 function SectionTitle({ children }: { children: ReactNode }) {
   return (
     <div className="flex items-center gap-2.5">
-      <h2 className="text-xl sm:text-2xl font-black text-white">
+      <h2 className="text-[20px] font-bold sm:text-[22px] text-white">
         {children}
       </h2>
     </div>
@@ -162,7 +162,7 @@ export default async function ToolDocsHomePage() {
               <div className="flex flex-wrap gap-2">
                 <Link
                   href="/orders"
-                  className="inline-flex h-10 items-center rounded-xl bg-[var(--menzu-accent)] px-4 text-[13px] font-semibold text-white hover:bg-[var(--menzu-accent-dark)]"
+                  className="inline-flex h-11 items-center rounded-xl bg-[var(--menzu-accent)] px-4 text-[14px] font-semibold text-white hover:bg-[var(--menzu-accent-dark)]"
                 >
                   Lịch sử mua & bảo hành
                 </Link>

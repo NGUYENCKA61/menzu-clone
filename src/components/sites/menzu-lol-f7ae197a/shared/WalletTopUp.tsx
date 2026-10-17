@@ -377,7 +377,7 @@ export function WalletTopUp({
             </div>
 
             {method === "bank" && unpaid ? (
-              <div className="mb-6 bg-gradient-to-r from-yellow-500/10 to-yellow-500/5 border border-yellow-500/20 rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="mb-6 bg-amber-500/[0.06] border border-amber-500/20 rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div className="flex items-start gap-3">
                   <CircleAlert size={20} className="text-yellow-500 shrink-0 mt-0.5" aria-hidden />
                   <div>
@@ -412,7 +412,7 @@ export function WalletTopUp({
                 the desk is still checking, and the way back to its invoice,
                 where the outcome arrives. */}
             {method === "card" && newestCard ? (
-              <div className="mb-6 bg-gradient-to-r from-yellow-500/10 to-yellow-500/5 border border-yellow-500/20 rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="mb-6 bg-amber-500/[0.06] border border-amber-500/20 rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div className="flex items-start gap-3">
                   <Hourglass size={20} className="text-yellow-500 shrink-0 mt-0.5" aria-hidden />
                   <div>

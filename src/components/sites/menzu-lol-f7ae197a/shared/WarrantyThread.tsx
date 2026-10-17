@@ -157,7 +157,7 @@ export function WarrantyThread({
               >
                 {grouped ? null : (
                   <span className="mb-1 px-1 text-[13px] font-semibold text-neutral-500">
-                    <span className="text-neutral-300">{who}</span> · {line.at}
+                    <span className="text-neutral-300">{who}</span>, {line.at}
                   </span>
                 )}
                 <div

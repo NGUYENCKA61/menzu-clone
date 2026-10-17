@@ -119,7 +119,7 @@ export default async function SpinPage() {
 
           <aside className="flex min-w-0 flex-col">
             <section className="border-t border-line pt-4">
-              <h2 className="text-[16px] font-bold text-frost">Cách đổi điểm</h2>
+              <h2 className="text-[16px] font-semibold text-frost">Cách đổi điểm</h2>
               <p className="mt-2 text-[14px] leading-relaxed text-mist">
                 {formatVnd(SPIN_COST)} điểm đổi một lượt quay. Điểm được cộng sau mỗi đơn hàng
                 thành công.
@@ -127,7 +127,7 @@ export default async function SpinPage() {
             </section>
 
             <section className="mt-8 border-t border-line pt-4">
-              <h2 className="text-[16px] font-bold text-frost">Phần thưởng</h2>
+              <h2 className="text-[16px] font-semibold text-frost">Phần thưởng</h2>
               {/* What is on the wheel, not how often it comes up. A losing
                   slice is left out: "Chúc may mắn lần sau" is not a reward. */}
               <ul className="mt-2 flex flex-col">

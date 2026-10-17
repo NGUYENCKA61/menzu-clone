@@ -134,7 +134,7 @@ export function BuyConfirmDialog({
         aria-modal="true"
         aria-labelledby={titleId}
         tabIndex={-1}
-        className={`order-modal-card relative flex max-h-[calc(100dvh-2rem)] w-full max-w-[460px] flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#101114] shadow-[0_25px_80px_rgba(0,0,0,0.7)] outline-none${leaving ? " order-modal-card-out" : ""}`}
+        className={`order-modal-card relative flex max-h-[calc(100dvh-2rem)] w-full max-w-[460px] flex-col overflow-hidden rounded-2xl border border-white/10 bg-panel shadow-[0_25px_80px_rgba(0,0,0,0.7)] outline-none${leaving ? " order-modal-card-out" : ""}`}
       >
         <div className="flex shrink-0 items-start justify-between gap-4 border-b border-white/[0.06] px-5 py-4">
           <div className="flex items-start gap-3">

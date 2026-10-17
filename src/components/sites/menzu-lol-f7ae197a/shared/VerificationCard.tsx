@@ -122,12 +122,12 @@ function Summary({
   request: NonNullable<VerificationView["request"]>;
 }) {
   const rows: [string, string][] = [
-    ["Facebook", `${request.facebookName} · ${request.facebookUrl}`],
+    ["Facebook", `${request.facebookName}, ${request.facebookUrl}`],
     ["Zalo", request.zaloName ?? "Đã liên kết"],
     ["Số điện thoại", maskPhone(request.phone)],
     [
       "Ngân hàng",
-      `${request.bankName} · ${request.bankAccountMasked} · ${request.accountHolder}`,
+      `${request.bankName}, ${request.bankAccountMasked}, ${request.accountHolder}`,
     ],
     ["Gửi lúc", when(request.createdAt)],
   ];
@@ -342,7 +342,7 @@ export function VerificationCard({
             }`}
           >
             <BadgeCheck size={13} aria-hidden />
-            {level2 ? "Cấp 2 · Đã xác thực" : "Cấp 1 · Chưa xác thực"}
+            {level2 ? "Cấp 2, đã xác thực" : "Cấp 1, chưa xác thực"}
           </span>
           {waiting ? (
             <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/40 bg-amber-500/10 px-3 py-1 text-[12px] font-semibold text-amber-300">
@@ -517,7 +517,7 @@ export function VerificationCard({
               ) : otp.state === "pending" ? (
                 // One sentence and one waiting line, no numbers inside a
                 // numbered step (the owner, 15/10/2026: "mấy ô số có AI quá").
-                <div className="flex flex-col gap-3 rounded-[12px] border border-white/10 bg-white/[0.02] p-4 text-[14px] leading-relaxed text-neutral-300">
+                <div className="flex flex-col gap-3 rounded-2xl border border-white/10 bg-white/[0.02] p-4 text-[14px] leading-relaxed text-neutral-300">
                   <p className="flex flex-wrap items-center gap-x-2 gap-y-2">
                     <span>
                       Mở Zalo của số {maskPhone(otp.phone)}, nhắn cho{" "}

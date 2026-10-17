@@ -289,7 +289,7 @@ export default async function SpinHistoryPage({
                   ) : null}
 
                   <div
-                    className={`flex flex-wrap items-center gap-x-3 gap-y-2.5 rounded-xl border border-l-2 border-white/[0.06] bg-white/[0.02] p-3.5 pl-3 transition-colors hover:border-y-white/[0.12] hover:border-r-white/[0.12] ${kind.rail}`}
+                    className={`flex flex-wrap items-center gap-x-3 gap-y-2.5 rounded-xl border border-l-2 border-white/10 bg-white/[0.02] p-3.5 pl-3 transition-colors hover:border-y-white/[0.12] hover:border-r-white/[0.12] ${kind.rail}`}
                   >
                     <span
                       className={`grid h-10 w-10 shrink-0 place-items-center rounded-xl border ${kind.tile}`}

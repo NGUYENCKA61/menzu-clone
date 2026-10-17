@@ -34,7 +34,7 @@ export function DocsSection({ articles }: { articles: DocCard[] }) {
       <div className="mb-8 flex flex-row items-center justify-between">
         <div className="flex items-center gap-2.5">
           <div className="h-5 w-[3px] shrink-0 rounded-full bg-[var(--brand)]" />
-          <h2 className="text-xl font-black text-white sm:text-2xl">
+          <h2 className="text-[20px] font-bold text-white sm:text-2xl">
             Xem hướng dẫn
           </h2>
         </div>
