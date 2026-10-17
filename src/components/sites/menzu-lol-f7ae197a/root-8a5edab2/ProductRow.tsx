@@ -673,7 +673,10 @@ export function RowTile({
         // The pick tile stands 4:3 on a phone like the list's: at 16:10 its
         // name and price climbed under the "Top tháng" pill.
         pick ? "aspect-[4/3] sm:aspect-[16/10]" : "aspect-[4/3]",
-        (style === "a" || style === "a2") && "hover:border-[var(--menzu-accent)]/40",
+        style === "a" && "hover:border-[var(--menzu-accent)]/40",
+        // A2 lights its rim in the shop's red under the pointer, as
+        // elitehacks lights theirs in their green.
+        style === "a2" && "hover:border-[var(--menzu-accent)]",
       )}
     >
       {card.image ? (
@@ -751,7 +754,13 @@ function TileDress({ card, style, big }: { card: ProductCard; style: TileStyle; 
             two lines and the price on one line, so the words stay on the
             picture's lower half. */}
         <span className={cn("tile-caption absolute inset-x-2.5 bottom-2.5 flex flex-col gap-0.5 sm:inset-x-3.5 sm:bottom-3 sm:gap-1", big && "lg:inset-x-5 lg:bottom-4")}>
-          <h3 className={cn("line-clamp-2 text-[14px] font-black leading-[1.15] text-white sm:text-[17px]", big && "lg:text-[20px]")}>
+          <h3
+            className={cn(
+              "line-clamp-2 text-[14px] font-black leading-[1.15] text-white sm:text-[17px]",
+              big && "lg:text-[20px]",
+              style === "a2" && "transition-colors duration-300 group-hover:text-[var(--menzu-accent)]",
+            )}
+          >
             {titleCase(withoutNewWord(card.title))}
           </h3>
           {line ? (

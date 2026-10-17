@@ -1699,6 +1699,18 @@ html[data-admin-filtering] .admin-list {
     linear-gradient(0deg, #000, transparent),
     radial-gradient(93.84% 93.84% at 72.57% 4.11%, transparent, transparent 15%, #08080b);
   opacity: 0.9;
+  transition: opacity 300ms ease;
+}
+/* Under the pointer the shade thins to 70% and the card lights up, as
+   theirs does (the owner, 17/10/2026: "thêm hiệu ứng sáng card như elite khi
+   rê chuột vào đi"). */
+@media (hover: hover) {
+  .group:hover .lab-elite-shade {
+    opacity: 0.7;
+  }
+}
+.group:focus-visible .lab-elite-shade {
+  opacity: 0.7;
 }
 
 /* LAB: display figures line up (prices, balances, counts). */
