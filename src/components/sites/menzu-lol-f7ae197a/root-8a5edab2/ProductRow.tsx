@@ -571,9 +571,9 @@ export type TileStyle = "classic" | "a" | "a2" | "b" | "c";
  * review).
  *
  * LAB: elitehacks' tile (the owner, 17/10/2026, picking from the home card
- * page: "sửa lab 2 kiểu A: kiểu elitehacks"), now on trial as "a2" with
- * their own shade; "a" is A1, "classic" the framed picture with the name
- * under it.
+ * page: "sửa lab 2 kiểu A: kiểu elitehacks"), settled as "a2" with their own
+ * shade and hover ("chốt a2 vậy đi"); "a" is A1, "classic" the framed
+ * picture with the name under it.
  */
 export const DEFAULT_TILE_STYLE: TileStyle = "a2";
 
