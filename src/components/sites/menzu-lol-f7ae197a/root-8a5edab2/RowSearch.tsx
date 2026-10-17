@@ -54,8 +54,12 @@ const ALL = "ALL";
 const CHIP =
   "inline-flex h-10 items-center justify-center gap-2 rounded-[10px] px-4 text-[14px] font-semibold transition-colors lg:min-w-[120px]";
 // LAB: the lit chip is a lighter well with a rim (no white block: "thấy chói
-// quá"), so red stays the page's one action.
-const CHIP_IDLE = "bg-raise text-mist ring-1 ring-inset ring-line hover:text-frost hover:ring-line-strong";
+// quá"), so red stays the page's one action. The idle chips and the search
+// field wear the figures strip's near-clear fill and the cards' faint rim,
+// one material from the strip down to the tiles (the owner, 17/10/2026:
+// "thanh tìm kiếm có cần làm lại không màu sắc hiện tại có đồng bộ chưa",
+// then "làm thử"); they were a solid grey well with a brighter rim.
+const CHIP_IDLE = "bg-white/[0.02] text-mist ring-1 ring-inset ring-white/[0.06] hover:text-frost hover:ring-white/20";
 const CHIP_ACTIVE = "bg-white/[0.12] text-frost ring-1 ring-inset ring-white/25";
 
 /**
@@ -275,7 +279,7 @@ export function RowSearch({
           the field and the tiles share their outer edges. */}
           <label
             htmlFor={inputId}
-            className="group/search relative isolate flex h-12 w-full items-center gap-3 rounded-[10px] bg-raise px-4 ring-1 ring-inset ring-line transition-shadow focus-within:ring-[var(--menzu-accent)]/70"
+            className="group/search relative isolate flex h-12 w-full items-center gap-3 rounded-[10px] bg-white/[0.02] px-4 ring-1 ring-inset ring-white/[0.06] transition-shadow focus-within:ring-[var(--menzu-accent)]/70"
           >
             <Search
               size={18}
