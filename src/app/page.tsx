@@ -54,12 +54,17 @@ const GAME_LIST_SLUG = "danh-sach-hack-game";
  * /?kieu=a5 without changing what the page shows by default (17/10/2026,
  * the card summary: "xuất artifact cái đi").
  */
-const TILE_STYLES: readonly TileStyle[] = ["classic", "a", "a2", "a3", "a4", "a5", "a6", "b", "b2", "b3", "c", "c1", "d"];
+const TILE_STYLES: readonly TileStyle[] = [
+  "classic", "a", "a2", "a3", "a4", "a5", "a6", "b", "b1", "b2", "b3", "b4", "b6", "c", "c1", "d",
+];
 
 function pickTileStyle(raw: string | string[] | undefined): TileStyle {
   const value = typeof raw === "string" ? raw.trim().toLowerCase() : "";
   if (value === "a1") return "a";
-  if (value === "b1") return "b";
+  // B1 is B at A1's brightness now; the first B is "bgoc". A5 shares A4's
+  // brightness, so B5 is B4.
+  if (value === "bgoc") return "b";
+  if (value === "b5") return "b4";
   if (value === "goc") return "classic";
   const known = TILE_STYLES.find((style) => style === value);
   return known ?? DEFAULT_TILE_STYLE;

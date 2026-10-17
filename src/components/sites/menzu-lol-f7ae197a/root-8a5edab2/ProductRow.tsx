@@ -590,6 +590,11 @@ function BentoTile({
  *    undimmed under elitehacks' shade at 90% or 70%, thinning when hovered.
  *    The red rim and name of A2/A3 are not part of their brightness, so B's
  *    own quiet hover stays.
+ *  - b1, b4, b6: the rest of the set ("b cũng làm 6 phiên bản độ sáng giống
+ *    a đi"): B's words at A1's brightness (the picture dimmed, an even fade),
+ *    A4's (lmarket's foot shade) and A6's (lmarket's black lower 40%). A5
+ *    has A4's brightness, so B5 is B4 (?kieu=b5 opens it). The first B,
+ *    darker than all of them, stays as "b" ("B gốc").
  *  - c: lmarket's tile — the cover slightly dimmed above a solid caption bar
  *    holding the name and the blurb, with a platform chip at the end.
  *  - c1: bubblehacks' catalogue card (the owner, 17/10/2026: "làm bản C1
@@ -602,7 +607,11 @@ function BentoTile({
  *    lại", "kiểu D vẫn có 4 cục 4 card nha"): RowCard quiet, four to a row
  *    in both rows (the home page drops the big picks for it).
  */
-export type TileStyle = "classic" | "a" | "a2" | "a3" | "a4" | "a5" | "a6" | "b" | "b2" | "b3" | "c" | "c1" | "d";
+export type TileStyle =
+  | "classic"
+  | "a" | "a2" | "a3" | "a4" | "a5" | "a6"
+  | "b" | "b1" | "b2" | "b3" | "b4" | "b6"
+  | "c" | "c1" | "d";
 
 /**
  * The dress the game tiles wear unless a row asks for another. One constant
@@ -821,6 +830,7 @@ export function RowTile({
             style === "a6" && "duration-700 ease-out group-hover:scale-[1.04]",
             style === "a" && "brightness-[.72] saturate-[.9] group-hover:brightness-[.85]",
             style === "b" && "brightness-[.55] group-hover:brightness-[.7]",
+            style === "b1" && "brightness-[.72] saturate-[.9] group-hover:brightness-[.85]",
             style === "c" && "brightness-[.82] group-hover:brightness-95",
           )}
         />
@@ -950,7 +960,7 @@ function TileDress({ card, style, big }: { card: ProductCard; style: TileStyle; 
       </>
     );
   }
-  if (style === "b" || style === "b2" || style === "b3") {
+  if (style === "b" || style === "b1" || style === "b2" || style === "b3" || style === "b4" || style === "b6") {
     return (
       <>
         {style === "b" ? (
@@ -961,6 +971,13 @@ function TileDress({ card, style, big }: { card: ProductCard; style: TileStyle; 
               className="tile-scrim absolute inset-x-0 bottom-0 h-[55%] bg-gradient-to-t from-scrim/90 to-transparent"
             />
           </>
+        ) : style === "b1" ? (
+          // A1's even fade over A1's dimmed picture (see RowTile).
+          <span aria-hidden className="tile-scrim absolute inset-0 bg-gradient-to-t from-scrim via-scrim/60 via-35% to-scrim/10" />
+        ) : style === "b4" ? (
+          <span aria-hidden className="tile-scrim absolute inset-0 lab-lmarket-shade" />
+        ) : style === "b6" ? (
+          <span aria-hidden className="tile-scrim lab-lm-foot" />
         ) : (
           <span
             aria-hidden
