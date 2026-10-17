@@ -56,8 +56,6 @@ interface HeroBannersProps {
   secondaryHref?: string;
   /** Kept for the settings screen; LAB draws no sky (one moment: the typing). */
   shootingStars?: boolean;
-  /** LAB: the shop's figures as one quiet line under the buttons. */
-  facts?: { value: string; label: string }[];
 }
 
 /**
@@ -81,7 +79,6 @@ export function HeroBanners({
   primaryHref = DEFAULT_SETTINGS.heroPrimaryHref,
   secondaryLabel = DEFAULT_SETTINGS.heroSecondaryLabel,
   secondaryHref = DEFAULT_SETTINGS.heroSecondaryHref,
-  facts = [],
 }: HeroBannersProps) {
   const lines = title.split("\n").filter((line) => line.trim());
   // "Ảnh" with nothing uploaded yet shows the banner, as the frame always did.
@@ -138,7 +135,9 @@ export function HeroBanners({
               the main site's pill (the owner, 17/10/2026: "sửa cái Official
               OBV Hax Reseller cho giống web gốc nha"). */}
           {badge ? (
-            <span className="animate-fade-up -ml-3.5 mb-4 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3.5 py-1.5 text-[10px] font-black uppercase tracking-[0.18em] text-neutral-200 backdrop-blur-md">
+            // LAB: 11px from 640px up, where the block around it grew
+            // (subtitle 16px, buttons 48px); 10px on a phone (17/10/2026).
+            <span className="animate-fade-up -ml-3.5 mb-4 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3.5 py-1.5 text-[10px] font-black uppercase tracking-[0.18em] text-neutral-200 backdrop-blur-md sm:text-[11px]">
               <BadgeCheck size={13} aria-hidden className="text-[var(--menzu-accent)]" />
               {badge}
             </span>
@@ -214,29 +213,16 @@ export function HeroBanners({
             {secondaryLabel && secondaryHref ? (
               <Link
                 href={secondaryHref}
-                className={`${CTA} bg-raise text-frost ring-1 ring-inset ring-line hover:ring-line-strong`}
+                // LAB: see-through glass over the artwork, like the main
+                // site's and the reseller pill above, so the red button is
+                // the one that stands out (the owner, 17/10/2026: "thử đi").
+                className={`${CTA} bg-white/[0.04] text-frost ring-1 ring-inset ring-white/10 backdrop-blur-md hover:bg-white/[0.08] hover:ring-white/20`}
               >
                 <BookCheck size={15} aria-hidden />
                 {secondaryLabel}
               </Link>
             ) : null}
           </div>
-
-          {/* LAB: the shop's figures, once, as a quiet line: figure in the
-              display face, word beside it, space between (no dots, and no
-              rules: one left at the start of a wrapped line read as a stray
-              mark). The main site has no such line here, so it shrank with
-              the rest of the block (17/10/2026). */}
-          {facts.length > 0 ? (
-            <ul aria-label="Số liệu của shop" className="mt-8 flex flex-wrap items-baseline gap-x-5 gap-y-2">
-              {facts.map((fact) => (
-                <li key={fact.label} className="flex items-baseline gap-1.5">
-                  <span className="lab-figure text-[16px] font-bold leading-none text-frost">{fact.value}</span>
-                  <span className="text-[12px] text-mist">{fact.label}</span>
-                </li>
-              ))}
-            </ul>
-          ) : null}
         </div>
 
         {/* The artwork in a wide 16/9 frame, the shape the shop's covers and
