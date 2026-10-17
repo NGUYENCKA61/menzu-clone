@@ -163,7 +163,7 @@ const TOPUP_STATUS: Record<string, { text: string; className: string }> = {
 };
 
 const TAB_ON =
-  "whitespace-nowrap px-4 py-2 rounded-xl text-[14px] font-semibold bg-[var(--brand)] text-white transition-colors";
+  "whitespace-nowrap px-4 py-2 rounded-xl text-[14px] font-semibold border border-white/25 bg-white/[0.12] text-frost transition-colors";
 const TAB_OFF =
   "whitespace-nowrap px-4 py-2 rounded-xl text-[14px] font-semibold border border-white/10 bg-white/[0.03] text-neutral-400 hover:text-white transition-colors";
 
@@ -512,7 +512,7 @@ export function AdminOperations({
                       disabled={pending}
                       onClick={() => setRemoving(row)}
                       aria-label={`Xoá đánh giá của ${row.name}`}
-                      className="h-8 rounded-lg border border-red-500/30 bg-red-500/10 hover:bg-red-500/20 disabled:opacity-60 text-red-400 transition-colors inline-flex items-center justify-center"
+                      className="h-8 rounded-lg border border-white/10 bg-white/5 hover:border-red-500/30 hover:bg-red-500/10 disabled:opacity-60 text-neutral-400 hover:text-red-400 transition-colors inline-flex items-center justify-center"
                     >
                       <Trash2 size={13} />
                     </button>

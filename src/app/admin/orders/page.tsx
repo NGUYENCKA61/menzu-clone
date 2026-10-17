@@ -292,7 +292,7 @@ export default async function AdminOrdersPage({
                       {formatVnd(Number(o.listPrice))}đ
                     </span>
                   ) : null}
-                  <span className="text-base font-black text-rose-500 tabular-nums">{formatVnd(Number(o.total))}đ</span>
+                  <span className="text-base font-bold text-frost tabular-nums">{formatVnd(Number(o.total))}đ</span>
                 </div>
                 <Link
                   href={productHref(o.product.category.slug, o.product.slug)}
@@ -439,7 +439,7 @@ export default async function AdminOrdersPage({
                       <span className="text-[11px] text-neutral-700">-</span>
                     )}
                   </td>
-                  <td className="px-5 py-3 text-sm font-black text-rose-500 tabular-nums whitespace-nowrap">
+                  <td className="px-5 py-3 text-sm font-bold text-frost tabular-nums whitespace-nowrap">
                     {formatVnd(Number(o.total))}đ
                   </td>
                   <td className="px-5 py-3">

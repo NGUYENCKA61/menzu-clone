@@ -52,7 +52,7 @@ const FIELD =
   "w-full rounded-xl border border-white/10 bg-neutral-950/60 px-3 py-2.5 text-sm text-white outline-none focus:border-[var(--brand)]/60 transition-colors placeholder-neutral-600";
 const LABEL = "block text-[12px] font-semibold text-neutral-500 mb-1.5";
 const TAB_ON =
-  "px-4 py-2 rounded-xl text-[14px] font-semibold bg-[var(--brand)] text-white transition-colors";
+  "px-4 py-2 rounded-xl text-[14px] font-semibold border border-white/25 bg-white/[0.12] text-frost transition-colors";
 const TAB_OFF =
   "px-4 py-2 rounded-xl text-[14px] font-semibold border border-white/10 bg-white/[0.03] text-neutral-400 hover:text-white transition-colors";
 
