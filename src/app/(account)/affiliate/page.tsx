@@ -97,9 +97,9 @@ export default async function AffiliatePage() {
       unit: "người",
       // White figure on a neutral tile: the count is a fact, not a warning,
       // and red type on a red tint was the hardest thing on the page to read.
-      tone: "text-white",
-      box: "border-white/10 bg-white/[0.06] text-[var(--menzu-accent)]",
-      shell: "border-white/5 bg-white/[0.02]",
+      tone: "text-frost",
+      box: "border-white/10 bg-white/[0.04] text-mist",
+      shell: "border-white/10 bg-white/[0.02]",
     },
     {
       icon: HandCoins,
@@ -109,18 +109,18 @@ export default async function AffiliatePage() {
       // Amber — money waiting to be moved, the ledger's "pending" colour —
       // so the three cards read as count / waiting / done rather than as
       // two shades of red beside a green.
-      tone: "text-amber-400",
-      box: "border-amber-500/25 bg-amber-500/10 text-amber-400",
-      shell: "border-amber-500/15 bg-amber-500/[0.04]",
+      tone: "text-frost",
+      box: "border-white/10 bg-white/[0.04] text-mist",
+      shell: "border-white/10 bg-white/[0.02]",
     },
     {
       icon: Handshake,
       label: "Tổng hoa hồng đã nhận",
       value: formatVnd(totalEarned),
       unit: "đ",
-      tone: "text-emerald-400",
-      box: "border-emerald-500/25 bg-emerald-500/10 text-emerald-400",
-      shell: "border-emerald-500/15 bg-emerald-500/[0.04]",
+      tone: "text-frost",
+      box: "border-white/10 bg-white/[0.04] text-mist",
+      shell: "border-white/10 bg-white/[0.02]",
     },
   ] as const;
 

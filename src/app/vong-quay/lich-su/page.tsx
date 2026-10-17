@@ -195,25 +195,25 @@ export default async function SpinHistoryPage({
             label="Tiền"
             value={`${formatVnd(sum("BALANCE"))}đ`}
             icon={Coins}
-            tint="border-emerald-500/25 bg-emerald-500/[0.07] text-emerald-400"
+            tint="border-white/10 bg-white/[0.02] text-frost"
           />
           <Total
             label="Điểm"
             value={formatVnd(sum("POINTS"))}
             icon={Star}
-            tint="border-[#a78bfa]/25 bg-[#a78bfa]/[0.07] text-[#a78bfa]"
+            tint="border-white/10 bg-white/[0.02] text-frost"
           />
           <Total
             label="Mã giảm giá"
             value={String(count("VOUCHER"))}
             icon={Ticket}
-            tint="border-sky-500/25 bg-sky-500/[0.07] text-sky-400"
+            tint="border-white/10 bg-white/[0.02] text-frost"
           />
           <Total
             label="Quà tặng"
             value={String(count("ITEM"))}
             icon={Gift}
-            tint="border-amber-500/25 bg-amber-500/[0.07] text-amber-400"
+            tint="border-white/10 bg-white/[0.02] text-frost"
           />
         </section>
 
