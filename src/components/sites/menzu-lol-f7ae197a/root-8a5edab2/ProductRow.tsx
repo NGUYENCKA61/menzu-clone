@@ -585,11 +585,12 @@ export type TileStyle = "classic" | "a" | "a2" | "a3" | "b" | "b2" | "b3" | "c";
  * page: "sửa lab 2 kiểu A: kiểu elitehacks"), settled as "a2" with their own
  * shade and hover ("chốt a2 vậy đi"), and back on it after trying "a3" (A2
  * lighter at rest, without the red rim): "lùi lại về a2". Then "b",
- * unnamedtech's tile ("giờ qua B B: kiểu unnamedtech"), now "b3" (B at
- * A3's brightness, "B3 thử"; "b2" is B at A2's). "a" is A1, "classic" the
- * framed picture with the name under it.
+ * unnamedtech's tile ("giờ qua B B: kiểu unnamedtech"), with "b2" and "b3"
+ * at A2's and A3's brightness; now "c", lmarket's tile ("giờ qua kiểu C:
+ * kiểu lmarket"). "a" is A1, "classic" the framed picture with the name
+ * under it.
  */
-export const DEFAULT_TILE_STYLE: TileStyle = "b3";
+export const DEFAULT_TILE_STYLE: TileStyle = "c";
 
 /** The eyebrow a tile wears in style b, from the category's platform tag. */
 function platformWord(platform: string | null | undefined): string {
@@ -825,18 +826,26 @@ function TileDress({ card, style, big }: { card: ProductCard; style: TileStyle; 
       </>
     );
   }
+  // On a phone the tile is half the screen wide and the price chip left the
+  // name a few letters, so there the price moves into the second line.
+  const countOrBlurb =
+    card.count != null && card.count > 0
+      ? `${card.count} sản phẩm`
+      : card.description
+        ? sentenceCase(card.description)
+        : null;
+  const phoneLine = priceLine(card, "Từ") ?? countOrBlurb;
   return (
-    <span className="tile-caption absolute inset-x-0 bottom-0 flex items-center gap-2.5 border-t border-white/[0.07] bg-scrim/92 px-3.5 py-2.5 backdrop-blur-[2px]">
+    <span className="tile-caption absolute inset-x-0 bottom-0 flex items-center gap-2.5 border-t border-white/[0.07] bg-scrim/92 px-2.5 py-2 backdrop-blur-[2px] sm:px-3.5 sm:py-2.5">
       <span className="flex min-w-0 flex-1 flex-col">
-        <h3 className="truncate text-[14px] font-black text-white sm:text-[15px]">{sentenceCase(card.title)}</h3>
-        {card.count != null && card.count > 0 ? (
-          <span className="truncate text-[10.5px] text-neutral-400">{card.count} sản phẩm</span>
-        ) : card.description ? (
-          <span className="truncate text-[10.5px] text-neutral-400">{card.description}</span>
+        <h3 className="truncate text-[14px] font-black text-white sm:text-[15px]">{titleCase(withoutNewWord(card.title))}</h3>
+        {phoneLine ? <span className="truncate text-[10.5px] text-neutral-400 sm:hidden">{phoneLine}</span> : null}
+        {countOrBlurb ? (
+          <span className="hidden truncate text-[10.5px] text-neutral-400 sm:block">{countOrBlurb}</span>
         ) : null}
       </span>
       {card.fromPrice != null ? (
-        <span className="shrink-0 rounded-md bg-[var(--menzu-accent)]/15 px-2 py-1 text-[10px] font-black tracking-wide text-[var(--menzu-accent)]">
+        <span className="hidden shrink-0 rounded-md bg-[var(--menzu-accent)]/15 px-2 py-1 text-[10px] font-black tracking-wide text-[var(--menzu-accent)] sm:inline-block">
           từ {formatVnd(card.fromPrice)}đ
         </span>
       ) : card.platform ? (
