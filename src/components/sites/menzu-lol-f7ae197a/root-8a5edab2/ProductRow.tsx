@@ -564,8 +564,12 @@ export type TileStyle = "classic" | "a" | "b" | "c";
  * so /categories, which draws the same tiles, follows the home page's game
  * list when the owner picks a dress (the owner, 13/10/2026, UI consistency
  * review).
+ *
+ * LAB: "a", elitehacks' tile (the owner, 17/10/2026, picking from the home
+ * card page: "sửa lab 2 kiểu A: kiểu elitehacks"); "classic" is the framed
+ * picture with the name under it.
  */
-export const DEFAULT_TILE_STYLE: TileStyle = "classic";
+export const DEFAULT_TILE_STYLE: TileStyle = "a";
 
 /** The eyebrow a tile wears in style b, from the category's platform tag. */
 function platformWord(platform: string | null | undefined): string {
@@ -660,7 +664,9 @@ export function RowTile({
       // light trial "moi" (theme-light.css, part 6); no style of their own.
       className={cn(
         "row-tile keep-dark group relative isolate block overflow-hidden rounded-[14px] border border-white/[0.06] bg-panel transition-colors hover:border-white/20",
-        pick ? "aspect-[16/10]" : "aspect-[4/3]",
+        // The pick tile stands 4:3 on a phone like the list's: at 16:10 its
+        // name and price climbed under the "Top tháng" pill.
+        pick ? "aspect-[4/3] sm:aspect-[16/10]" : "aspect-[4/3]",
         style === "a" && "hover:border-[var(--menzu-accent)]/40",
       )}
     >
@@ -732,16 +738,19 @@ function TileDress({ card, style, big }: { card: ProductCard; style: TileStyle; 
           aria-hidden
           className="tile-scrim absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-[var(--menzu-accent)]/70 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"
         />
-        <span className={cn("tile-caption absolute inset-x-3.5 bottom-3 flex flex-col gap-1", big && "lg:inset-x-5 lg:bottom-4")}>
-          <h3 className={cn("text-[16px] font-black leading-[1.15] text-white sm:text-[17px]", big && "lg:text-[20px]")}>
-            {sentenceCase(card.title)}
+        {/* On a phone the tile is half the screen wide: a smaller name kept to
+            two lines and the price on one line, so the words stay on the
+            picture's lower half. */}
+        <span className={cn("tile-caption absolute inset-x-2.5 bottom-2.5 flex flex-col gap-0.5 sm:inset-x-3.5 sm:bottom-3 sm:gap-1", big && "lg:inset-x-5 lg:bottom-4")}>
+          <h3 className={cn("line-clamp-2 text-[14px] font-black leading-[1.15] text-white sm:text-[17px]", big && "lg:text-[20px]")}>
+            {titleCase(withoutNewWord(card.title))}
           </h3>
           {line ? (
-            <span className="text-[11px] font-semibold leading-snug text-neutral-200">
+            <span className="truncate text-[11px] font-semibold leading-snug text-neutral-200">
               {line}
             </span>
           ) : card.description ? (
-            <span className="line-clamp-1 text-[11px] leading-snug text-neutral-300/90">{card.description}</span>
+            <span className="line-clamp-1 text-[11px] leading-snug text-neutral-300/90">{sentenceCase(card.description)}</span>
           ) : null}
         </span>
       </>
