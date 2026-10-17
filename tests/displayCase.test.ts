@@ -1,6 +1,31 @@
 import { describe, expect, it } from "vitest";
 
-import { sentenceCase } from "@/lib/displayCase";
+import { sentenceCase, titleCase } from "@/lib/displayCase";
+
+/** How the lab's game tiles print the same names. */
+describe("titleCase", () => {
+  it("gives every word a capital first letter, acronyms kept", () => {
+    expect(titleCase("HACK ĐỘT KÍCH CFVN - CF4VN")).toBe("Hack Đột Kích CFVN - CF4VN");
+    expect(titleCase("TOOL HACK + ACC LIÊN MINH HUYỀN THOẠI - LOL")).toBe(
+      "Tool Hack + Acc Liên Minh Huyền Thoại - LOL",
+    );
+    expect(titleCase("HACK GTA 5 ONLINE")).toBe("Hack GTA 5 Online");
+    expect(titleCase("HWID SPOOFER")).toBe("HWID Spoofer");
+  });
+
+  it("keeps iOS and the small joining words of a game's name", () => {
+    expect(titleCase("PUBG MOBILE IOS")).toBe("PUBG Mobile iOS");
+    expect(titleCase("CALL OF DUTY WARZONE 3 - MW3")).toBe("Call of Duty Warzone 3 - MW3");
+    expect(titleCase("HACK CALL OF DUTY - WARZONE - BLACK OPS 6")).toBe(
+      "Hack Call of Duty - Warzone - Black Ops 6",
+    );
+  });
+
+  it("leaves words the admin typed in mixed case alone", () => {
+    expect(titleCase("HACK CS2 - Counter Strike 2")).toBe("Hack CS2 - Counter Strike 2");
+    expect(titleCase("Hack Freefire")).toBe("Hack Freefire");
+  });
+});
 
 /** How the home cards print a category typed in capitals. */
 describe("sentenceCase", () => {

@@ -101,3 +101,26 @@ export function softTitle(raw: string): string {
     )
     .join(" ");
 }
+
+/** English joining words that stay small inside a game's name ("Call of Duty"). */
+const SMALL_WORDS = new Set(["of", "and", "the"]);
+
+/**
+ * LAB: a name typed in capitals shown with every word's first letter capital
+ * (the owner, 17/10/2026: "mấy cái tiêu đề hack game cho viết hoa chữ cái đầu
+ * đi"): "HACK ĐỘT KÍCH CFVN - CF4VN" reads "Hack Đột Kích CFVN - CF4VN".
+ * Built on sentenceCase, so acronyms, words with a digit and words typed in
+ * mixed case come out as they do there; "iOS" keeps its small i, and "of"
+ * stays small after the first word.
+ */
+export function titleCase(raw: string): string {
+  const special = new Set(Object.values(SPECIAL));
+  return sentenceCase(raw)
+    .split(" ")
+    .map((w, i) =>
+      (i > 0 && SMALL_WORDS.has(w)) || special.has(w)
+        ? w
+        : w.replace(/\p{L}/u, (c) => c.toLocaleUpperCase("vi-VN")),
+    )
+    .join(" ");
+}
