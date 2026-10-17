@@ -306,7 +306,7 @@ export function GlossaryBrowser({
           autoComplete="off"
           spellCheck={false}
           enterKeyHint="search"
-          className="h-12 w-full rounded-2xl border border-white/10 bg-white/[0.03] pl-11 pr-4 text-sm text-white outline-none transition-[border-color,box-shadow] placeholder:text-neutral-500 focus:border-[var(--menzu-accent)]/50 focus:ring-2 focus:ring-[var(--menzu-accent)]/20 lg:pr-12"
+          className="h-12 w-full rounded-2xl border border-white/10 bg-white/[0.02] pl-11 pr-4 text-sm text-white outline-none transition-[border-color,box-shadow] placeholder:text-neutral-500 focus:border-[var(--menzu-accent)]/50 focus:ring-2 focus:ring-[var(--menzu-accent)]/20 lg:pr-12"
         />
         {query ? null : (
           <kbd
@@ -472,7 +472,7 @@ function TermCard({
     <article
       id={term.id}
       data-term=""
-      className="group relative scroll-mt-[140px] rounded-2xl border border-white/[0.06] bg-white/[0.02] p-4 transition-colors hover:border-white/10 target:border-[var(--menzu-accent)]/50 target:bg-[var(--menzu-accent)]/[0.04] has-[:target]:border-[var(--menzu-accent)]/50 has-[:target]:bg-[var(--menzu-accent)]/[0.04] data-[flash]:border-[var(--menzu-accent)]/50 data-[flash]:bg-[var(--menzu-accent)]/[0.04] sm:p-5"
+      className="group relative scroll-mt-[140px] rounded-2xl border border-white/10 bg-white/[0.02] p-4 transition-colors hover:border-white/10 target:border-[var(--menzu-accent)]/50 target:bg-[var(--menzu-accent)]/[0.04] has-[:target]:border-[var(--menzu-accent)]/50 has-[:target]:bg-[var(--menzu-accent)]/[0.04] data-[flash]:border-[var(--menzu-accent)]/50 data-[flash]:bg-[var(--menzu-accent)]/[0.04] sm:p-5"
     >
       {/* One empty mark per other name, sitting above the card by the
           header's height, so #smoothness or #rcs lands on this card with

@@ -219,7 +219,7 @@ function ReceiptLine({ line }: { line: CartLine }) {
 export function CartEmpty({ signedIn }: { signedIn: boolean }) {
   return (
     <div className="w-full flex flex-col items-center justify-center py-20 text-center">
-      <div className="w-16 h-16 rounded-2xl bg-white/[0.03] border border-white/10 flex items-center justify-center mb-5">
+      <div className="w-16 h-16 rounded-2xl bg-white/[0.02] border border-white/10 flex items-center justify-center mb-5">
         <ShoppingCart size={26} className="text-neutral-600" />
       </div>
 
@@ -732,7 +732,7 @@ export function CartView({
             <div className="flex min-w-0 flex-1 items-start gap-3 sm:items-center sm:gap-5">
               <Link
                 href={line.href}
-                className="relative aspect-[3/2] w-24 shrink-0 overflow-hidden rounded-lg border border-white/5 bg-neutral-900 sm:aspect-video sm:w-36 sm:rounded-xl"
+                className="relative aspect-[3/2] w-24 shrink-0 overflow-hidden rounded-lg border border-white/10 bg-white/[0.02] sm:aspect-video sm:w-36 sm:rounded-xl"
               >
                 {line.imageUrl ? (
                   <Image

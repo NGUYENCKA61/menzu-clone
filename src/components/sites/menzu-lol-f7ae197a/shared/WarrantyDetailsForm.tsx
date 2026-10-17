@@ -272,7 +272,7 @@ export function WarrantyDetailsForm({
             {shots.length < IMAGES_PER_ANSWER ? (
               // The first round's panel, so both rounds take a picture the
               // same way, except this one takes a handful at once.
-              <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-dashed border-white/15 bg-white/[0.02] px-4 py-3 transition-colors hover:border-[var(--menzu-accent)]/50 hover:bg-white/[0.04]">
+              <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-white/10 border-dashed border-white/15 bg-white/[0.02] px-4 py-3 transition-colors hover:border-[var(--menzu-accent)]/50 hover:bg-white/[0.04]">
                 <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-white/[0.06] text-neutral-300">
                   <ImagePlus className="h-4 w-4" />
                 </span>

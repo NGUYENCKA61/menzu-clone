@@ -54,7 +54,7 @@ export function SeoContent({ heading, body, faq }: SeoContentProps) {
           {faq.map((entry) => (
             <details
               key={entry.q}
-              className="group rounded-xl border border-white/[0.07] bg-white/[0.02] px-4 py-3"
+              className="group rounded-xl border border-white/10 bg-white/[0.02] px-4 py-3"
             >
               <summary className="flex cursor-pointer list-none items-center justify-between gap-3 text-[13px] font-bold text-white marker:hidden">
                 {entry.q}

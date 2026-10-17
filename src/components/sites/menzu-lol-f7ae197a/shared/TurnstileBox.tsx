@@ -118,7 +118,7 @@ export function TurnstileBox({
       <div
         ref={host}
         aria-labelledby={labelId}
-        className="w-full rounded-2xl border border-white/5 bg-white/5 px-3 py-3 min-h-[68px] flex items-center justify-center"
+        className="w-full rounded-2xl border border-white/10 bg-white/[0.02] px-3 py-3 min-h-[68px] flex items-center justify-center"
       />
       {failed ? (
         <p role="alert" className="mt-2 text-[11px] text-red-400">

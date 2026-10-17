@@ -249,7 +249,7 @@ export default async function ToolDocsPage({ params }: PageProps) {
                   {tool.packages.map((tier) => (
                     <li
                       key={tier.label}
-                      className="flex items-center justify-between gap-3 rounded-xl border border-white/5 bg-white/[0.02] px-4 py-2.5 text-[13px]"
+                      className="flex items-center justify-between gap-3 rounded-xl border border-white/10 bg-white/[0.02] px-4 py-2.5 text-[13px]"
                     >
                       <span className="font-bold text-white">{tier.label}</span>
                       <span className="text-neutral-400">

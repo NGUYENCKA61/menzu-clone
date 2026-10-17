@@ -115,9 +115,9 @@ export function ZaloLinkCard({
     : null;
 
   return (
-    <div className="flex flex-col gap-4 rounded-2xl border border-white/5 bg-white/[0.02] p-5">
+    <div className="flex flex-col gap-4 rounded-2xl border border-white/10 bg-white/[0.02] p-5">
       <div className="flex items-center gap-4">
-        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-white/5 bg-white/5">
+        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[0.02]">
           <MessageCircle
             className={`h-6 w-6 ${linked ? "text-[#0068ff]" : "text-neutral-500"}`}
             aria-hidden

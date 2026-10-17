@@ -332,7 +332,7 @@ export function WalletTopUp({
       <div>
 
         {tabs.length === 0 ? (
-          <div className="p-8 text-center bg-white/[0.02] border border-white/5 rounded-2xl">
+          <div className="p-8 text-center bg-white/[0.02] border border-white/10 rounded-2xl">
             <p className="text-sm font-bold text-white">Tạm ngưng nhận nạp tiền</p>
             <p className="mt-1.5 text-sm text-neutral-500">
               Shop đang tạm dừng cả nạp ngân hàng và thẻ cào. Số dư sẵn có trong ví vẫn dùng
@@ -437,7 +437,7 @@ export function WalletTopUp({
             ) : null}
 
             {method === "bank" && !bankReady ? (
-              <div className="p-8 text-center bg-white/[0.02] border border-white/5 rounded-2xl">
+              <div className="p-8 text-center bg-white/[0.02] border border-white/10 rounded-2xl">
                 <p className="text-sm font-bold text-white">Chưa nhận được chuyển khoản</p>
                 <p className="mt-1.5 text-sm text-neutral-500">
                   Shop chưa khai báo tài khoản ngân hàng nhận tiền. Vui lòng dùng thẻ cào hoặc

@@ -169,7 +169,7 @@ export function AgencyKeyDesk({
         </label>
       </div>
 
-      <div className="flex flex-col gap-2 rounded-xl border border-white/[0.06] bg-white/[0.02] p-4 text-sm">
+      <div className="flex flex-col gap-2 rounded-xl border border-white/10 bg-white/[0.02] p-4 text-sm">
         <div className="flex items-center justify-between gap-3">
           <span className="text-neutral-500">Giá lẻ ×{quantity}</span>
           <span className="tabular-nums text-neutral-400 line-through">

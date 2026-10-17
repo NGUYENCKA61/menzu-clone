@@ -164,7 +164,7 @@ export default async function MemberTiersPage() {
                   )}
                 </p>
               </div>
-              <div className="mt-auto rounded-xl border border-white/[0.06] bg-white/[0.02] px-3 py-2.5">
+              <div className="mt-auto rounded-xl border border-white/10 bg-white/[0.02] px-3 py-2.5">
                 <p className={LABEL}>Ưu đãi</p>
                 <p className="mt-1 flex items-center gap-1.5 text-[13px] font-bold text-white">
                   <BadgePercent size={15} className={style.text} />

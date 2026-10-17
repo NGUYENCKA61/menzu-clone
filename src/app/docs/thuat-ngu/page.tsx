@@ -100,7 +100,7 @@ function GlossaryFooter({
   contacts: { href: string; label: string; glyph: "zalo" | "facebook" }[];
 }) {
   return (
-    <aside className="mt-10 rounded-2xl border border-white/[0.06] bg-white/[0.02] p-5">
+    <aside className="mt-10 rounded-2xl border border-white/10 bg-white/[0.02] p-5">
       <div className="flex items-start gap-3">
         <CircleHelp size={18} aria-hidden className="mt-0.5 shrink-0 text-[var(--menzu-accent)]" />
         <div className="min-w-0">

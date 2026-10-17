@@ -66,7 +66,7 @@ export function NotFoundContent() {
         </div>
 
         <div
-          className="p-4 rounded-xl border border-white/5 bg-white/[0.02] max-w-xs mx-auto text-xs text-neutral-400"
+          className="p-4 rounded-xl border border-white/10 bg-white/[0.02] max-w-xs mx-auto text-xs text-neutral-400"
           // The number changes every second; announcing each tick would make a
           // screen reader unusable, so only the surrounding text is live.
           aria-live="off"

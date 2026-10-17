@@ -63,7 +63,7 @@ export default async function ParcelsNeedingAddressPage() {
         icon={MapPin}
       >
         <div className={`${CARD} text-center`}>
-          <span className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-neutral-400">
+          <span className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.02] text-neutral-400">
             <Gift size={20} />
           </span>
           <p className="text-sm font-bold text-white">

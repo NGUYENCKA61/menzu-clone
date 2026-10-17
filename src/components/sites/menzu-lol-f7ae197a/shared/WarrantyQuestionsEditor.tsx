@@ -202,7 +202,7 @@ export function WarrantyQuestionsEditor({
           {list.map((d, index) => (
             <li
               key={d.key}
-              className="rounded-lg border border-white/[0.06] bg-white/[0.02] p-4"
+              className="rounded-lg border border-white/10 bg-white/[0.02] p-4"
             >
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <span className={LABEL}>

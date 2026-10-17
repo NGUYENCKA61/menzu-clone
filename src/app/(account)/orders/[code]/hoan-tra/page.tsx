@@ -166,7 +166,7 @@ export default async function RefundRequestPage({
                 return (
                   <li
                     key={r.id}
-                    className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4"
+                    className="rounded-xl border border-white/10 bg-white/[0.02] p-4"
                   >
                     <div className="flex flex-wrap items-center gap-2.5">
                       <span

@@ -26,7 +26,7 @@ export function AccountSkeleton() {
       <div className="flex flex-col lg:flex-row gap-6 items-start">
         {/* The sidebar: a card the width of the real one, rows at the real
             pitch, and room for the two rows only some accounts get. */}
-        <aside className="hidden w-[280px] shrink-0 rounded-2xl border border-white/[0.06] bg-white/[0.02] p-4 lg:block">
+        <aside className="hidden w-[280px] shrink-0 rounded-2xl border border-white/10 bg-white/[0.02] p-4 lg:block">
           <div className="mb-4 flex items-center gap-3 border-b border-white/5 pb-4">
             <div className="h-14 w-14 shrink-0 rounded-full bg-white/[0.06]" />
             <div className="flex flex-col gap-2">

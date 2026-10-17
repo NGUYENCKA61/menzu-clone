@@ -454,10 +454,10 @@ function ArticleCard({ article, shelf }: { article: DocCard; shelf: boolean }) {
   return (
     <Link
       href={docHref(article.slug)}
-      className="group flex flex-col gap-3 rounded-2xl border border-white/5 bg-white/[0.02] p-3.5 outline-none transition-colors hover:border-white/10 hover:bg-white/[0.04] focus-visible:ring-2 focus-visible:ring-[var(--menzu-accent)]/60 sm:flex-row sm:items-center sm:gap-5 sm:p-4"
+      className="group flex flex-col gap-3 rounded-2xl border border-white/10 bg-white/[0.02] p-3.5 outline-none transition-colors hover:border-white/10 hover:bg-white/[0.04] focus-visible:ring-2 focus-visible:ring-[var(--menzu-accent)]/60 sm:flex-row sm:items-center sm:gap-5 sm:p-4"
     >
       <div className="flex min-w-0 flex-1 items-start gap-3 sm:items-center sm:gap-5">
-        <div className="relative aspect-[3/2] w-24 shrink-0 overflow-hidden rounded-lg border border-white/5 bg-neutral-900 sm:aspect-video sm:w-36 sm:rounded-xl">
+        <div className="relative aspect-[3/2] w-24 shrink-0 overflow-hidden rounded-lg border border-white/10 bg-white/[0.02] sm:aspect-video sm:w-36 sm:rounded-xl">
           <Image
             src={article.thumbnailUrl}
             alt=""

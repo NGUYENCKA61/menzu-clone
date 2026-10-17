@@ -822,7 +822,7 @@ export function SecurityPanel({
                 type="button"
                 onClick={() => signOut(null)}
                 disabled={devBusy !== null || sessions.length <= 1}
-                className="bg-white/[0.02] hover:bg-red-500/10 text-neutral-300 hover:text-red-400 border border-white/5 hover:border-red-500/30 px-5 py-3 rounded-xl text-[13px] font-semibold flex items-center gap-2 shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="bg-white/[0.02] hover:bg-red-500/10 text-neutral-300 hover:text-red-400 border border-white/10 hover:border-red-500/30 px-5 py-3 rounded-xl text-[13px] font-semibold flex items-center gap-2 shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {devBusy === "all" ? (
                   <Loader2

@@ -78,7 +78,7 @@ export function BioCard({ name, tagline, avatarUrl, links }: BioCardProps) {
                     href={link.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="group/btn relative overflow-hidden transform-gpu flex items-center justify-between w-full p-3.5 rounded-2xl bg-white/[0.02] hover:bg-white/[0.07] border border-white/5 hover:border-white/20 transition-all duration-300 hover:shadow-[0_8px_16px_rgba(0,0,0,0.4)] active:scale-[0.98]"
+                    className="group/btn relative overflow-hidden transform-gpu flex items-center justify-between w-full p-3.5 rounded-2xl bg-white/[0.02] hover:bg-white/[0.07] border border-white/10 hover:border-white/20 transition-all duration-300 hover:shadow-[0_8px_16px_rgba(0,0,0,0.4)] active:scale-[0.98]"
                   >
                     <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-[150%] group-hover/btn:translate-x-[150%] transition-transform duration-1000 ease-in-out pointer-events-none motion-reduce:hidden" />
 

@@ -416,7 +416,7 @@ export function AccountBuyPanel({
       {pool ? (
         <div className="flex flex-wrap items-center gap-3">
           <span className="text-[13px] font-semibold text-neutral-400">Số lượng</span>
-          <div className="flex items-center rounded-xl border border-white/10 bg-white/[0.03]">
+          <div className="flex items-center rounded-xl border border-white/10 bg-white/[0.02]">
             <button
               type="button"
               aria-label="Bớt một"
@@ -487,7 +487,7 @@ export function AccountBuyPanel({
             under MUA NGAY that answered a press with nothing. */}
         <Link
           href="/lien-he"
-          className="press flex w-full h-14 items-center justify-center rounded-2xl border border-[var(--menzu-accent)]/70 bg-white/[0.02] hover:bg-white/[0.06] text-[15px] font-semibold text-white"
+          className="press flex w-full h-14 items-center justify-center rounded-2xl border border-white/10 border-[var(--menzu-accent)]/70 bg-white/[0.02] hover:bg-white/[0.06] text-[15px] font-semibold text-white"
         >
           Thu cũ đổi mới
         </Link>

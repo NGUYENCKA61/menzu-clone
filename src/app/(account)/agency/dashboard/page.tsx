@@ -232,7 +232,7 @@ export default async function AgencyDashboardPage() {
               {orders.map((order) => (
                 <div
                   key={order.code}
-                  className="flex flex-wrap items-center gap-x-4 gap-y-1 rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3"
+                  className="flex flex-wrap items-center gap-x-4 gap-y-1 rounded-xl border border-white/10 bg-white/[0.02] px-4 py-3"
                 >
                   <span className="font-mono text-xs font-bold text-white">
                     {order.code}

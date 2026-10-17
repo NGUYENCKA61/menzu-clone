@@ -276,7 +276,7 @@ export function FreeKeyPanel({
         />
       </div>
 
-      <div className="rounded-[16px] border border-line bg-white/[0.02] p-5">
+      <div className="rounded-[16px] border border-white/10 bg-white/[0.02] p-5">
         <span className="block text-[14px] font-semibold text-frost">
           Cách nhận key
         </span>

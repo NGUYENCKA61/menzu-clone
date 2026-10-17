@@ -222,7 +222,7 @@ export default async function DocArticlePage({ params }: PageProps) {
               <Link
                 key={item.slug}
                 href={docHref(item.slug)}
-                className="group flex flex-col overflow-hidden rounded-2xl border border-white/5 bg-white/[0.02] transition-colors hover:border-white/10 hover:bg-white/[0.04]"
+                className="group flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02] transition-colors hover:border-white/10 hover:bg-white/[0.04]"
               >
                 <div className="relative aspect-video overflow-hidden bg-neutral-900">
                   <Image

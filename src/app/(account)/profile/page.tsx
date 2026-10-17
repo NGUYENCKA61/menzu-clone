@@ -239,7 +239,7 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                 before the reference trial (the owner, 16/10/2026: "chỗ bố cục
                 card cấp bậc quay về như nãy"). */}
             <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_200px]">
-              <div className="flex flex-col gap-2 rounded-xl border border-white/10 bg-white/[0.03] p-5">
+              <div className="flex flex-col gap-2 rounded-xl border border-white/10 bg-white/[0.02] p-5">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <span className="text-[13px] font-medium text-mist">
                     Cấp bậc

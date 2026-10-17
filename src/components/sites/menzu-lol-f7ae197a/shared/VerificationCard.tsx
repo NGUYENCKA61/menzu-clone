@@ -517,7 +517,7 @@ export function VerificationCard({
               ) : otp.state === "pending" ? (
                 // One sentence and one waiting line, no numbers inside a
                 // numbered step (the owner, 15/10/2026: "mấy ô số có AI quá").
-                <div className="flex flex-col gap-3 rounded-[12px] border border-line bg-white/[0.02] p-4 text-[14px] leading-relaxed text-neutral-300">
+                <div className="flex flex-col gap-3 rounded-[12px] border border-white/10 bg-white/[0.02] p-4 text-[14px] leading-relaxed text-neutral-300">
                   <p className="flex flex-wrap items-center gap-x-2 gap-y-2">
                     <span>
                       Mở Zalo của số {maskPhone(otp.phone)}, nhắn cho{" "}

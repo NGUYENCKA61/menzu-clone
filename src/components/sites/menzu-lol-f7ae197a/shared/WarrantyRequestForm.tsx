@@ -300,7 +300,7 @@ export function WarrantyRequestForm({
         ) : (
           // A whole panel to aim at, not a small button: the picture is
           // what gets a report approved fastest (the owner, 10/10/2026).
-          <label className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-white/15 bg-white/[0.02] px-4 py-6 text-center transition-colors hover:border-[var(--menzu-accent)]/50 hover:bg-white/[0.04]">
+          <label className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border border-white/10 border-dashed border-white/15 bg-white/[0.02] px-4 py-6 text-center transition-colors hover:border-[var(--menzu-accent)]/50 hover:bg-white/[0.04]">
             <span className="grid h-10 w-10 place-items-center rounded-xl border border-white/10 bg-white/[0.04] text-neutral-300">
               <ImagePlus className="h-5 w-5" />
             </span>

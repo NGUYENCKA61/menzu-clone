@@ -27,7 +27,7 @@ export function FaqAccordion({ entries }: { entries: FaqEntry[] }) {
         return (
           <div
             key={entry.question}
-            className="rounded-2xl border border-zinc-800/80 bg-[#121216] overflow-hidden transition-colors hover:border-zinc-700"
+            className="rounded-2xl border border-white/10 border-zinc-800/80 bg-white/[0.02] overflow-hidden transition-colors hover:border-zinc-700"
           >
             <button
               type="button"

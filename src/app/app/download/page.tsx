@@ -156,7 +156,7 @@ export default async function AppDownloadPage() {
                   </div>
                 </div>
 
-                <div className="p-5 sm:p-7 bg-[#121216] border border-zinc-800/80 rounded-2xl max-w-[460px] mx-auto lg:mx-0 space-y-5 sm:space-y-6">
+                <div className="p-5 sm:p-7 bg-white/[0.02] border border-white/10 border-zinc-800/80 rounded-2xl max-w-[460px] mx-auto lg:mx-0 space-y-5 sm:space-y-6">
                   <div className="flex flex-col sm:flex-row items-center gap-6">
                     <div className="w-[115px] h-[115px] bg-white p-2 rounded-xl shrink-0 hidden sm:flex items-center justify-center sm:-translate-y-2.5">
                       {/* eslint-disable-next-line @next/next/no-img-element -- generated data URI, nothing for the image optimiser to fetch */}
@@ -233,7 +233,7 @@ export default async function AppDownloadPage() {
                 {FEATURES.map(({ icon: Icon, title, body }) => (
                   <div
                     key={title}
-                    className="p-6 rounded-2xl border border-zinc-800/80 bg-[#121216] space-y-3 hover:border-[var(--menzu-accent)]/50 transition-colors"
+                    className="p-6 rounded-2xl border border-white/10 border-zinc-800/80 bg-white/[0.02] space-y-3 hover:border-[var(--menzu-accent)]/50 transition-colors"
                   >
                     <div className="w-11 h-11 rounded-xl bg-white/[0.04] border border-white/[0.08] text-[var(--menzu-accent)] flex items-center justify-center">
                       <Icon size={20} />
@@ -254,7 +254,7 @@ export default async function AppDownloadPage() {
               </header>
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                <div id="android-guide" className="p-6 rounded-2xl border border-zinc-800/80 bg-[#121216] space-y-5 scroll-mt-28">
+                <div id="android-guide" className="p-6 rounded-2xl border border-white/10 border-zinc-800/80 bg-white/[0.02] space-y-5 scroll-mt-28">
                   <div className="flex items-center gap-3">
                     <Smartphone size={18} className="text-emerald-500" />
                     <h3 className="text-[15px] font-semibold text-white">Cài đặt Android</h3>
@@ -278,7 +278,7 @@ export default async function AppDownloadPage() {
                   </ol>
                 </div>
 
-                <div id="ios-guide" className="p-6 rounded-2xl border border-zinc-800/80 bg-[#121216] space-y-5 scroll-mt-28">
+                <div id="ios-guide" className="p-6 rounded-2xl border border-white/10 border-zinc-800/80 bg-white/[0.02] space-y-5 scroll-mt-28">
                   <div className="flex items-center gap-3">
                     <Apple size={18} className="text-neutral-300" />
                     <h3 className="text-[15px] font-semibold text-white">Cài Đặt iOS</h3>
@@ -362,7 +362,7 @@ function DownloadButton({
       ) : (
         <span
           aria-disabled="true"
-          className="w-full py-2.5 px-4 rounded-xl bg-white/[0.03] border border-white/10 text-neutral-500 text-[14px] font-semibold flex items-center justify-center gap-2 cursor-not-allowed"
+          className="w-full py-2.5 px-4 rounded-xl bg-white/[0.02] border border-white/10 text-neutral-500 text-[14px] font-semibold flex items-center justify-center gap-2 cursor-not-allowed"
         >
           <Download size={14} />
           <span>{label}, chưa có bản tải</span>

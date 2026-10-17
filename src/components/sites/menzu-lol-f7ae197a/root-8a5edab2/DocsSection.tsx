@@ -53,7 +53,7 @@ export function DocsSection({ articles }: { articles: DocCard[] }) {
           <Link
             key={article.slug}
             href={docHref(article.slug)}
-            className="group flex flex-col overflow-hidden rounded-2xl border border-white/[0.07] bg-white/[0.02] transition-colors hover:border-white/15 hover:bg-white/[0.04]"
+            className="group flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02] transition-colors hover:border-white/15 hover:bg-white/[0.04]"
           >
             <div className="relative aspect-[16/9] w-full overflow-hidden bg-[#0a0a0c]">
               <CardImage

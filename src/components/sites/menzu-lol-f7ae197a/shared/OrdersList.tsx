@@ -175,7 +175,7 @@ export function OrdersList({ orders }: { orders: OrderCardView[] }) {
 
         {orders.length === 0 ? (
           // A buyer with no orders at all is not a search that missed.
-          <div className="p-8 text-center bg-white/[0.02] border border-white/5 rounded-2xl">
+          <div className="p-8 text-center bg-white/[0.02] border border-white/10 rounded-2xl">
             <p className="text-neutral-400 text-sm">Chưa có đơn hàng nào.</p>
             <p className="mt-1 text-neutral-500 text-xs">Bạn chưa mua sản phẩm nào trên hệ thống.</p>
             <Link
@@ -234,7 +234,7 @@ export function OrdersList({ orders }: { orders: OrderCardView[] }) {
 
             <div className="flex flex-col gap-5">
               {visible.length === 0 ? (
-                <div className="p-8 text-center bg-white/[0.02] border border-white/5 rounded-2xl">
+                <div className="p-8 text-center bg-white/[0.02] border border-white/10 rounded-2xl">
                   <p className="text-neutral-500 text-sm">Không tìm thấy đơn hàng nào khớp.</p>
                 </div>
               ) : (

@@ -132,7 +132,7 @@ export default async function AffiliatePage() {
         subtitle={`Chia sẻ liên kết giới thiệu, nhận ${REFERRAL_PERCENT}% mỗi giao dịch nạp tiền`}
       >
         <div className="flex flex-col gap-4">
-          <section className="flex flex-col gap-4 rounded-2xl border border-white/5 bg-white/[0.02] p-5 sm:p-6">
+          <section className="flex flex-col gap-4 rounded-2xl border border-white/10 bg-white/[0.02] p-5 sm:p-6">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <h3 className="text-[15px] font-semibold text-white">
                 Liên kết giới thiệu của bạn
@@ -168,7 +168,7 @@ export default async function AffiliatePage() {
             ))}
           </div>
 
-          <section className="flex flex-col gap-4 rounded-2xl border border-white/5 bg-white/[0.02] p-5 sm:p-6">
+          <section className="flex flex-col gap-4 rounded-2xl border border-white/10 bg-white/[0.02] p-5 sm:p-6">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <h3 className="text-[15px] font-semibold text-white">
                 Cách hoạt động
@@ -181,7 +181,7 @@ export default async function AffiliatePage() {
               {STEPS.map(({ icon: Icon, text }, index) => (
                 <li
                   key={text}
-                  className="flex items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] p-4"
+                  className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/[0.02] p-4"
                 >
                   <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/[0.06]">
                     <Icon size={16} className="text-[var(--menzu-accent)]" />
@@ -195,7 +195,7 @@ export default async function AffiliatePage() {
             </ol>
           </section>
 
-          <section className="flex flex-col gap-4 rounded-2xl border border-white/5 bg-white/[0.02] p-5 sm:p-6">
+          <section className="flex flex-col gap-4 rounded-2xl border border-white/10 bg-white/[0.02] p-5 sm:p-6">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <h3 className="text-[15px] font-semibold text-white">
                 Hoa hồng gần đây
@@ -209,7 +209,7 @@ export default async function AffiliatePage() {
                 Chưa có hoa hồng nào, gửi liên kết cho bạn bè để bắt đầu.
               </div>
             ) : (
-              <div className="w-full overflow-x-auto rounded-xl border border-white/[0.06] bg-white/[0.02]">
+              <div className="w-full overflow-x-auto rounded-xl border border-white/10 bg-white/[0.02]">
                 <table className="w-full min-w-[520px] text-left">
                   <thead>
                     <tr className="border-b border-white/10">
