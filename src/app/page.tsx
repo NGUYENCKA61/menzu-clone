@@ -49,6 +49,16 @@ export async function generateMetadata(): Promise<Metadata> {
 const GAME_LIST_SLUG = "danh-sach-hack-game";
 
 /**
+ * LAB: two-word row headings on trial (the owner, 17/10/2026: "làm bản chữ
+ * thường hot trending ghi nhiêu đây thôi danh sách ghi nhiêu đó thôi 2
+ * chữ"). Display only: the group names in admin stay as they are.
+ */
+const SHORT_HEADINGS: Record<string, string> = {
+  "hot-trending": "Hot trending",
+  [GAME_LIST_SLUG]: "Danh sách",
+};
+
+/**
  * LAB: every game tile dress tried with the owner, under the names used in
  * the chat (A1 is "a", the first one "goc"), so any of them opens as
  * /?kieu=a5 without changing what the page shows by default (17/10/2026,
@@ -136,11 +146,13 @@ export default async function Home({
             <ProductRow
               id={group.slug === GAME_LIST_SLUG ? SCROLL_TARGET_ID : undefined}
               className={group.slug === GAME_LIST_SLUG ? "scroll-mt-[120px]" : undefined}
-              heading={group.name}
+              heading={SHORT_HEADINGS[group.slug] ?? group.name}
               cards={group.cards}
               viewAllHref="/categories"
               hideViewAll={group.slug === "hot-trending"}
-              accentHeading={group.slug === "hot-trending" || group.slug === GAME_LIST_SLUG}
+              // Plain headings with the short words on trial; the capitals
+              // with the red bar were on before (d894ed9e).
+              accentHeading={false}
               tone="menzu"
               marquee={group.slug === "hot-trending"}
               ranked={group.slug === "hot-trending"}
