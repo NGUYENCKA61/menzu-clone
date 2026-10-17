@@ -196,8 +196,10 @@ export function HeroBanners({
 
           {subtitle ? (
             // LAB: 16px from 640px up, so the line holds its own beside the
-            // 36-48px title and the banner; 14px on a phone (17/10/2026).
-            <p className="mt-5 max-w-[460px] text-[14px] leading-relaxed text-mist sm:text-[16px]">
+            // 36-48px title and the banner; 14px on a phone. In the main
+            // site's lighter grey (#d4d4d4), which stays legible over the
+            // brighter patches of the picture (17/10/2026).
+            <p className="mt-5 max-w-[460px] text-[14px] leading-relaxed text-neutral-300 sm:text-[16px]">
               {subtitle}
             </p>
           ) : null}
