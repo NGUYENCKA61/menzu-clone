@@ -619,10 +619,10 @@ export type TileStyle = "classic" | "a" | "a2" | "a3" | "a4" | "a5" | "a6" | "b"
  * kiểu lmarket"), back on "a2" ("quay lại kiểu a2"), A1 once more ("a1
  * thử"), "a3", "a4" (A3 at lmarket's brightness), "a5", lmarket's
  * best-seller card ("a5 thử"), "a6", their /cheats/ card, "c1",
- * bubblehacks' catalogue card, now "d", the old quiet-button card. "a" is
- * A1, "classic" the framed picture with the name under it.
+ * bubblehacks' catalogue card, "d", the old quiet-button card, now "a" (A1)
+ * again ("a1 đi"). "classic" is the framed picture with the name under it.
  */
-export const DEFAULT_TILE_STYLE: TileStyle = "d";
+export const DEFAULT_TILE_STYLE: TileStyle = "a";
 
 /** The eyebrow a tile wears in style b, from the category's platform tag. */
 function platformWord(platform: string | null | undefined): string {
