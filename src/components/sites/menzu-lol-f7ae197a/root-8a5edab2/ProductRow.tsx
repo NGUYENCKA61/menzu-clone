@@ -565,10 +565,15 @@ function BentoTile({
  *    turns red. Kept apart from A2 ("không lưu vô A2 liền nha").
  *  - b: unnamedtech's tile — the whole cover dimmed evenly, a small eyebrow
  *    naming the platform ("HACK PC") over a quieter name.
+ *  - b2, b3: B's words at A2's and A3's brightness (the owner, 17/10/2026:
+ *    "cho độ sáng như A2 đi thành B2, độ sáng như A3 thành B3"): the picture
+ *    undimmed under elitehacks' shade at 90% or 70%, thinning when hovered.
+ *    The red rim and name of A2/A3 are not part of their brightness, so B's
+ *    own quiet hover stays.
  *  - c: lmarket's tile — the cover slightly dimmed above a solid caption bar
  *    holding the name and the blurb, with a platform chip at the end.
  */
-export type TileStyle = "classic" | "a" | "a2" | "a3" | "b" | "c";
+export type TileStyle = "classic" | "a" | "a2" | "a3" | "b" | "b2" | "b3" | "c";
 
 /**
  * The dress the game tiles wear unless a row asks for another. One constant
@@ -579,11 +584,12 @@ export type TileStyle = "classic" | "a" | "a2" | "a3" | "b" | "c";
  * LAB: elitehacks' tile (the owner, 17/10/2026, picking from the home card
  * page: "sửa lab 2 kiểu A: kiểu elitehacks"), settled as "a2" with their own
  * shade and hover ("chốt a2 vậy đi"), and back on it after trying "a3" (A2
- * lighter at rest, without the red rim): "lùi lại về a2". Now trying "b",
- * unnamedtech's tile ("giờ qua B B: kiểu unnamedtech"). "a" is A1,
- * "classic" the framed picture with the name under it.
+ * lighter at rest, without the red rim): "lùi lại về a2". Then "b",
+ * unnamedtech's tile ("giờ qua B B: kiểu unnamedtech"), now "b2" (B at
+ * A2's brightness; "b3" is B at A3's). "a" is A1, "classic" the framed
+ * picture with the name under it.
  */
-export const DEFAULT_TILE_STYLE: TileStyle = "b";
+export const DEFAULT_TILE_STYLE: TileStyle = "b2";
 
 /** The eyebrow a tile wears in style b, from the category's platform tag. */
 function platformWord(platform: string | null | undefined): string {
@@ -741,7 +747,7 @@ function priceLine(card: ProductCard, lead = "Chỉ từ"): string | null {
   return parts.length > 0 ? parts.join(", ") : null;
 }
 
-/** The words and shade a tile wears in styles a, a2, a3, b and c (see TileStyle). */
+/** The words and shade a tile wears in styles a to a3, b to b3 and c (see TileStyle). */
 function TileDress({ card, style, big }: { card: ProductCard; style: TileStyle; big: boolean }) {
   const line = priceLine(card);
   if (style === "a" || style === "a2" || style === "a3") {
@@ -784,14 +790,23 @@ function TileDress({ card, style, big }: { card: ProductCard; style: TileStyle; 
       </>
     );
   }
-  if (style === "b") {
+  if (style === "b" || style === "b2" || style === "b3") {
     return (
       <>
-        <span aria-hidden className="tile-scrim absolute inset-0 bg-scrim/25" />
-        <span
-          aria-hidden
-          className="tile-scrim absolute inset-x-0 bottom-0 h-[55%] bg-gradient-to-t from-scrim/90 to-transparent"
-        />
+        {style === "b" ? (
+          <>
+            <span aria-hidden className="tile-scrim absolute inset-0 bg-scrim/25" />
+            <span
+              aria-hidden
+              className="tile-scrim absolute inset-x-0 bottom-0 h-[55%] bg-gradient-to-t from-scrim/90 to-transparent"
+            />
+          </>
+        ) : (
+          <span
+            aria-hidden
+            className={cn("tile-scrim absolute inset-0 lab-elite-shade", style === "b3" && "lab-elite-shade-light")}
+          />
+        )}
         {/* Same phone care as A: a tighter inset, the name kept to two lines
             and the price to one, so the words stay clear of the pill. */}
         <span className={cn("tile-caption absolute inset-x-2.5 bottom-2.5 flex flex-col gap-0.5 sm:inset-x-3.5 sm:bottom-3 sm:gap-1", big && "lg:inset-x-5 lg:bottom-4")}>
