@@ -1712,6 +1712,19 @@ html[data-admin-filtering] .admin-list {
 .group:focus-visible .lab-elite-shade {
   opacity: 0.7;
 }
+/* Style A3: the same shade resting at the strength A2 shows under the
+   pointer, and a step lighter again when hovered (the owner, 17/10/2026). */
+.lab-elite-shade.lab-elite-shade-light {
+  opacity: 0.7;
+}
+@media (hover: hover) {
+  .group:hover .lab-elite-shade.lab-elite-shade-light {
+    opacity: 0.55;
+  }
+}
+.group:focus-visible .lab-elite-shade.lab-elite-shade-light {
+  opacity: 0.55;
+}
 
 /* LAB: display figures line up (prices, balances, counts). */
 .lab-figure {

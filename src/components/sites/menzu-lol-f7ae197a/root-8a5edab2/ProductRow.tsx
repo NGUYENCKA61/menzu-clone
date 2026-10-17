@@ -557,9 +557,12 @@ function BentoTile({
  *    thử giống elite hack vậy", "elite là A2"): the picture keeps its full
  *    brightness, a black fade rises from the foot and a vignette darkens
  *    the left and the bottom, leaving the top right clear (.lab-elite-shade).
- *  - a3: A2 with no red rim under the pointer, a trial kept apart from A2
- *    (the owner, 17/10/2026: "làm thử bản không có hiệu ứng đỏ viền thử",
- *    "không lưu vô A2 liền nha"); the rim only brightens, as on any tile.
+ *  - a3: A2's shade resting at the strength A2 shows under the pointer, 70%,
+ *    and a step lighter again when hovered, 55% (the owner, 17/10/2026: "bỏ
+ *    luôn cả bản a3 thay bằng a3 mới là bản card có độ sáng bằng độ sáng khi
+ *    rê chuột hiện tại đi"). Like the first A3 it has no red rim under the
+ *    pointer ("làm thử bản không có hiệu ứng đỏ viền thử"), only the name
+ *    turns red. Kept apart from A2 ("không lưu vô A2 liền nha").
  *  - b: unnamedtech's tile — the whole cover dimmed evenly, a small eyebrow
  *    naming the platform ("HACK PC") over a quieter name.
  *  - c: lmarket's tile — the cover slightly dimmed above a solid caption bar
@@ -575,8 +578,9 @@ export type TileStyle = "classic" | "a" | "a2" | "a3" | "b" | "c";
  *
  * LAB: elitehacks' tile (the owner, 17/10/2026, picking from the home card
  * page: "sửa lab 2 kiểu A: kiểu elitehacks"), settled as "a2" with their own
- * shade and hover ("chốt a2 vậy đi"), now trying "a3" (A2 without the red
- * rim); "a" is A1, "classic" the framed picture with the name under it.
+ * shade and hover ("chốt a2 vậy đi"), now trying "a3" (A2 lighter at rest,
+ * without the red rim); "a" is A1, "classic" the framed picture with the
+ * name under it.
  */
 export const DEFAULT_TILE_STYLE: TileStyle = "a3";
 
@@ -746,7 +750,9 @@ function TileDress({ card, style, big }: { card: ProductCard; style: TileStyle; 
           aria-hidden
           className={cn(
             "tile-scrim absolute inset-0",
-            style === "a" ? "bg-gradient-to-t from-scrim via-scrim/60 via-35% to-scrim/10" : "lab-elite-shade",
+            style === "a"
+              ? "bg-gradient-to-t from-scrim via-scrim/60 via-35% to-scrim/10"
+              : cn("lab-elite-shade", style === "a3" && "lab-elite-shade-light"),
           )}
         />
         <span
