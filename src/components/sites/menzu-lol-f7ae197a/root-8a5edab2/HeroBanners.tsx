@@ -24,8 +24,8 @@ const CTA =
 /** Seconds between characters as the heading types itself in. */
 const TYPE_STEP = 0.07;
 
-/** Seconds the heading waits before typing. LAB: no eyebrow to wait for. */
-const HEADING_DELAY = 0.15;
+/** Seconds the heading waits before typing, so the "Welcome to" line fades up first. */
+const HEADING_DELAY = 0.5;
 
 /**
  * Said after the drawn title inside the h1, for screen readers and search
@@ -132,7 +132,7 @@ export function HeroBanners({
               the listing cards' corner badges wear, so it reads as a badge
               and not as a third line of copy. Fades up with the eyebrow.
               Pulled left by its own padding so the check sits on the same
-              edge as the heading below it, not one pad-width in. LAB: back to
+              edge as the "Welcome to" below it, not one pad-width in. LAB: back to
               the main site's pill (the owner, 17/10/2026: "sửa cái Official
               OBV Hax Reseller cho giống web gốc nha"). */}
           {badge ? (
@@ -141,6 +141,15 @@ export function HeroBanners({
               {badge}
             </span>
           ) : null}
+
+          {/* Eyebrow line: fades up first, then the heading types itself in
+              after it (HEADING_DELAY). In the accent, so the block opens the
+              way every row heading below it does: a red mark, then white
+              type. LAB: back as on the main site (the owner, 17/10/2026:
+              "we are đâu", then "làm đi", worded "welcome to"). */}
+          <span className="animate-fade-up block text-[13px] font-bold uppercase tracking-[0.3em] text-[var(--menzu-accent)] sm:text-sm">
+            Welcome to
+          </span>
 
           {/* The heading types itself in — each character a span that pops on a
               staggered delay after the eyebrow, then a caret blinks at the end.
@@ -154,7 +163,7 @@ export function HeroBanners({
             // 485px wide and its last letters ran under the video card on
             // every screen from 1024 to 1279. 40px is 422px — inside the cap.
             // LAB: the main site's sizes again (28/36/40/46px).
-            className="font-display text-[28px] font-black leading-[1.06] tracking-tight text-frost sm:text-[36px] lg:text-[40px] xl:text-[46px]"
+            className="mt-2 font-display text-[28px] font-black leading-[1.06] tracking-tight text-frost sm:text-[36px] lg:text-[40px] xl:text-[46px]"
           >
             {lines.map((line, li) => (
               <span key={li} className="block whitespace-nowrap" aria-hidden>
