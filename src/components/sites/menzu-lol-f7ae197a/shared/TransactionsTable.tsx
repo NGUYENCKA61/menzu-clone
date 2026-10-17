@@ -208,7 +208,7 @@ export function TransactionsTable({ rows }: { rows: LedgerView[] }) {
         {rows.length === 0 ? (
           // An account with no rows at all is not a search that missed: it
           // gets its own words and the way in, not a filter that found nothing.
-          <div className="p-8 text-center bg-white/[0.02] border border-white/5 rounded-2xl relative z-10">
+          <div className="p-8 text-center bg-white/[0.02] border border-white/10 rounded-2xl relative z-10">
             <p className="text-neutral-400 text-sm">Chưa có giao dịch nào.</p>
             <p className="mt-1 text-neutral-500 text-xs">
               Mọi lần nạp tiền và mua hàng sẽ hiện ở đây, kèm số dư trước và sau mỗi lần.
@@ -269,7 +269,7 @@ export function TransactionsTable({ rows }: { rows: LedgerView[] }) {
               </div>
             </ListToolbar>
 
-            <div className="hidden md:block border border-white/5 bg-[#111111] rounded-[16px] overflow-hidden relative z-10">
+            <div className="hidden md:block border border-white/10 bg-white/[0.02] rounded-2xl overflow-hidden relative z-10">
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs min-w-[700px]">
                   <thead className="bg-white/[0.02] border-b border-white/5 text-neutral-500">
@@ -331,14 +331,14 @@ export function TransactionsTable({ rows }: { rows: LedgerView[] }) {
 
             <div className="md:hidden flex flex-col gap-3 relative z-10">
               {visible.length === 0 ? (
-                <div className="p-8 text-center bg-white/[0.02] border border-white/5 rounded-2xl">
+                <div className="p-8 text-center bg-white/[0.02] border border-white/10 rounded-2xl">
                   <p className="text-neutral-500 text-sm">Không tìm thấy giao dịch nào phù hợp.</p>
                 </div>
               ) : (
                 visible.map((row) => (
                   <div
                     key={row.code}
-                    className="border border-white/5 bg-white/[0.02] rounded-[16px] p-4 flex flex-col gap-3 relative overflow-hidden transition-all hover:border-emerald-500/30"
+                    className="border border-white/10 bg-white/[0.02] rounded-2xl p-4 flex flex-col gap-3 relative overflow-hidden transition-all hover:border-emerald-500/30"
                   >
                     <div className="flex justify-between items-start gap-4">
                       <div className="min-w-0 flex-1">
