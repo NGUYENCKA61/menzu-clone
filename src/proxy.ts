@@ -9,7 +9,7 @@ const PROTECTED = [
   "/security",
 ];
 
-const SESSION_COOKIE = "menzu_session";
+const SESSION_COOKIE = process.env.SESSION_COOKIE_NAME || "menzu_session";
 
 /**
  * Runs before routes render — the file convention Next renamed from

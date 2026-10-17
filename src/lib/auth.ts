@@ -76,7 +76,9 @@ export function newSessionToken(): string {
   return randomBytes(32).toString("hex");
 }
 
-export const SESSION_COOKIE = "menzu_session";
+// LAB: its own cookie name (SESSION_COOKIE_NAME in .env) so a sign-in here never
+// replaces the main site's on the same machine (the owner, 17/10/2026).
+export const SESSION_COOKIE = process.env.SESSION_COOKIE_NAME || "menzu_session";
 export const SESSION_TTL_DAYS = 30;
 
 export function sessionExpiry(): Date {
