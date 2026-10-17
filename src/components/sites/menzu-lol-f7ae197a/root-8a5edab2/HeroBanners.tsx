@@ -238,8 +238,10 @@ export function HeroBanners({
             wide screen: 20px more width than the 650 cap and a -40px right
             margin, so it runs 40px past the header while its left edge gives
             20px back to the gap beside the copy.
-            Below 1400 there is no side margin to spend and it stays flush. */}
-        <div className="lab-notch-lg relative aspect-[16/9] w-full overflow-hidden border border-line bg-scrim shadow-[0_40px_90px_-40px_rgba(0,0,0,0.95)] lg:w-auto lg:min-w-0 lg:max-w-[650px] lg:flex-1 min-[87.5rem]:-mr-10 min-[87.5rem]:max-w-[670px]">
+            Below 1400 there is no side margin to spend and it stays flush.
+            LAB: the halo is back, the main site's own (the owner, 17/10/2026:
+            "có nên thêm lại không", then "làm đi"), beside the drop shadow. */}
+        <div className="lab-notch-lg relative aspect-[16/9] w-full overflow-hidden border border-line bg-scrim shadow-[0_40px_90px_-40px_rgba(0,0,0,0.95),0_0_140px_30px_rgba(0,0,0,0.65)] lg:w-auto lg:min-w-0 lg:max-w-[650px] lg:flex-1 min-[87.5rem]:-mr-10 min-[87.5rem]:max-w-[670px]">
           {media === "video" && video ? (
             // Muted and inline, because a hero that makes noise or takes over
             // the screen on a phone is a hero people leave. The still is drawn
