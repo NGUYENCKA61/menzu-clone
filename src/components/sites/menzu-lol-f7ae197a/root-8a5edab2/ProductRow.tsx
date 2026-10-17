@@ -45,6 +45,13 @@ export interface ProductRowProps {
    * giống web cũ thử", then "Danh sách hack game luôn").
    */
   accentHeading?: boolean;
+  /**
+   * Words of the heading drawn in a red gradient, the rest staying white, as
+   * unnamedtech colours "Top Products" (the owner, 17/10/2026: "tô màu giống
+   * unnamed hack chỗ mấy Yours loved ones of play top product thử"). Matched
+   * without regard to case; nothing happens when the words are not there.
+   */
+  headingHighlight?: string;
   tone?: RowTone;
   /**
    * Let the row slide once it holds five or more tiles. Off, a
@@ -1077,6 +1084,7 @@ export function ProductRow({
   viewAllHref,
   hideViewAll = false,
   accentHeading = false,
+  headingHighlight,
   tone = "indigo",
   marquee: runs = false,
   ranked = false,
@@ -1114,7 +1122,21 @@ export function ProductRow({
   ) : (
     <div className="flex min-w-0 items-center gap-3">
       <h2 className="row-heading font-display text-[22px] font-bold leading-tight text-frost sm:text-[28px]">
-        {sentenceCase(heading)}
+        {(() => {
+          const text = sentenceCase(heading);
+          const at = headingHighlight
+            ? text.toLocaleLowerCase("vi-VN").indexOf(headingHighlight.toLocaleLowerCase("vi-VN"))
+            : -1;
+          if (!headingHighlight || at < 0) return text;
+          const end = at + headingHighlight.length;
+          return (
+            <>
+              {text.slice(0, at)}
+              <span className="lab-text-gradient">{text.slice(at, end)}</span>
+              {text.slice(end)}
+            </>
+          );
+        })()}
       </h2>
       {headingSuffix}
     </div>

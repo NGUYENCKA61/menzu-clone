@@ -1856,6 +1856,17 @@ html[data-admin-filtering] .admin-list {
   color: #1a0b0c;
 }
 
+/* LAB: words of a section heading in a red gradient, as unnamedtech colours
+   "Top Products" (read 17/10/2026: 135deg, light red to the accent to a
+   deeper red, clipped to the letters). */
+.lab-text-gradient {
+  background: linear-gradient(135deg, #ff6b6e 0%, #e13d3f 50%, #cf2f31 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+}
+
 /* LAB: display figures line up (prices, balances, counts). */
 .lab-figure {
   font-family: var(--font-display);
