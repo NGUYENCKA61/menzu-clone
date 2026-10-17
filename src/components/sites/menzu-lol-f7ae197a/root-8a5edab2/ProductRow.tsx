@@ -577,12 +577,14 @@ function BentoTile({
  *    giống lmarket nhưng vẫn là có hàng 4 card"), in our rows of four: A4's
  *    shade, a bold name, a quiet second line, then "từ" and the price in
  *    bold white, as their "from €24.99".
- *  - a6: lmarket's game card from lmarket.net/cheats/ (the owner, 17/10/2026:
- *    "a5 giống này đi https://lmarket.net/cheats/ bản 4 card", "cho nó là
- *    A6"): square in the game list, the picture clear but for a black foot
- *    over its lower 40%, a shadowed name and a small line; the card rises
- *    and its rim lights under the pointer while the others fade (lab-lm-*
- *    in globals.css).
+ *  - a6: A3's words, layout and hover with A3's light shade and A4's dark
+ *    foot laid over it (the owner, 17/10/2026: "a6 mới thì là màu sáng a3
+ *    chân đen như a4", "kiểu như a luôn đi bố cục á", "giống a3").
+ *  - a6cu: the first A6, lmarket's game card from lmarket.net/cheats/ ("a5
+ *    giống này đi https://lmarket.net/cheats/ bản 4 card"): square in the
+ *    game list, the picture clear but for a black foot over its lower 40%,
+ *    a shadowed name and a small line; the card rises and its rim lights
+ *    under the pointer while the others fade (lab-lm-* in globals.css).
  *  - b: unnamedtech's tile — the whole cover dimmed evenly, a small eyebrow
  *    naming the platform ("HACK PC") over a quieter name.
  *  - b2, b3: B's words at A2's and A3's brightness (the owner, 17/10/2026:
@@ -592,9 +594,10 @@ function BentoTile({
  *    own quiet hover stays.
  *  - b1, b4, b6: the rest of the set ("b cũng làm 6 phiên bản độ sáng giống
  *    a đi"): B's words at A1's brightness (the picture dimmed, an even fade),
- *    A4's (lmarket's foot shade) and A6's (lmarket's black lower 40%). A5
- *    has A4's brightness, so B5 is B4 (?kieu=b5 opens it). The first B,
- *    darker than all of them, stays as "b" ("B gốc").
+ *    A4's (lmarket's foot shade) and the first A6's (lmarket's black lower
+ *    40%). A5 has A4's brightness, so B5 is B4 (?kieu=b5 opens it). The
+ *    first B, darker than all of them, stays as "b" ("B gốc"). B4 drops the
+ *    platform line ("b4 bỏ cái dòng hack game đó đi").
  *  - c: lmarket's tile — the cover slightly dimmed above a solid caption bar
  *    holding the name and the blurb, with a platform chip at the end.
  *  - c1: bubblehacks' catalogue card (the owner, 17/10/2026: "làm bản C1
@@ -609,7 +612,7 @@ function BentoTile({
  */
 export type TileStyle =
   | "classic"
-  | "a" | "a2" | "a3" | "a4" | "a5" | "a6"
+  | "a" | "a2" | "a3" | "a4" | "a5" | "a6" | "a6cu"
   | "b" | "b1" | "b2" | "b3" | "b4" | "b6"
   | "c" | "c1" | "d";
 
@@ -629,11 +632,11 @@ export type TileStyle =
  * thử"), "a3", "a4" (A3 at lmarket's brightness), "a5", lmarket's
  * best-seller card ("a5 thử"), "a6", their /cheats/ card, "c1",
  * bubblehacks' catalogue card, "d", the old quiet-button card, "a" (A1)
- * again ("a1 đi"), "a2" ("a2 đi"), "a3" ("a3 đi"), now "b", the first B
- * ("quay về card b1"). "a" is A1, "classic" the framed picture with the
- * name under it.
+ * again ("a1 đi"), "a2" ("a2 đi"), "a3" ("a3 đi"), "b", the first B
+ * ("quay về card b1"), now the new "a6" (A3 with A4's dark foot). "a" is
+ * A1, "classic" the framed picture with the name under it.
  */
-export const DEFAULT_TILE_STYLE: TileStyle = "b";
+export const DEFAULT_TILE_STYLE: TileStyle = "a6";
 
 /** The eyebrow a tile wears in style b, from the category's platform tag. */
 function platformWord(platform: string | null | undefined): string {
@@ -793,16 +796,16 @@ export function RowTile({
         // The pick tile stands 4:3 on a phone like the list's: at 16:10 its
         // name and price climbed under the "Top tháng" pill.
         // A6 is lmarket's square card in the game list.
-        pick ? "aspect-[4/3] sm:aspect-[16/10]" : style === "a6" ? "aspect-square" : "aspect-[4/3]",
+        pick ? "aspect-[4/3] sm:aspect-[16/10]" : style === "a6cu" ? "aspect-square" : "aspect-[4/3]",
         style === "a" && "hover:border-[var(--menzu-accent)]/40",
         // A2 lights its rim in the shop's red under the pointer, as
         // elitehacks lights theirs in their green.
         style === "a2" && "hover:border-[var(--menzu-accent)]",
-        style === "a6" && "lab-lm-card rounded-xl border-white/10 hover:border-white/10",
+        style === "a6cu" && "lab-lm-card rounded-xl border-white/10 hover:border-white/10",
       )}
     >
       {/* A6's ring of light sits behind the picture and shows at the rim. */}
-      {style === "a6" ? <span aria-hidden className="lab-lm-glow" /> : null}
+      {style === "a6cu" ? <span aria-hidden className="lab-lm-glow" /> : null}
       {card.image ? (
         <CardImage
           src={card.image}
@@ -821,13 +824,13 @@ export function RowTile({
           sizes={
             big
               ? "(min-width: 1320px) 440px, (min-width: 768px) 33vw, 50vw"
-              : style === "a6" && !pick
+              : style === "a6cu" && !pick
                 ? "(min-width: 1320px) 520px, (min-width: 1024px) 45vw, (min-width: 768px) 60vw, 90vw"
                 : "(min-width: 1320px) 400px, (min-width: 1024px) 34vw, (min-width: 768px) 45vw, 67vw"
           }
           className={cn(
             "object-cover transition-transform duration-500 group-hover:scale-105 motion-reduce:transform-none",
-            style === "a6" && "duration-700 ease-out group-hover:scale-[1.04]",
+            style === "a6cu" && "duration-700 ease-out group-hover:scale-[1.04]",
             style === "a" && "brightness-[.72] saturate-[.9] group-hover:brightness-[.85]",
             style === "b" && "brightness-[.55] group-hover:brightness-[.7]",
             style === "b1" && "brightness-[.72] saturate-[.9] group-hover:brightness-[.85]",
@@ -865,7 +868,7 @@ function priceLine(card: ProductCard, lead = "Chỉ từ"): string | null {
 /** The words and shade a tile wears in styles a to a6, b to b3 and c (see TileStyle). */
 function TileDress({ card, style, big }: { card: ProductCard; style: TileStyle; big: boolean }) {
   const line = priceLine(card);
-  if (style === "a6") {
+  if (style === "a6cu") {
     // lmarket's second line is the count ("18 cheats"); the shop asked for
     // the price on its cards (13/10/2026), so it leads the line here.
     const second =
@@ -918,7 +921,7 @@ function TileDress({ card, style, big }: { card: ProductCard; style: TileStyle; 
       </>
     );
   }
-  if (style === "a" || style === "a2" || style === "a3" || style === "a4") {
+  if (style === "a" || style === "a2" || style === "a3" || style === "a4" || style === "a6") {
     return (
       <>
         <span
@@ -929,9 +932,11 @@ function TileDress({ card, style, big }: { card: ProductCard; style: TileStyle; 
               ? "bg-gradient-to-t from-scrim via-scrim/60 via-35% to-scrim/10"
               : style === "a4"
                 ? "lab-lmarket-shade"
-                : cn("lab-elite-shade", style === "a3" && "lab-elite-shade-light"),
+                : cn("lab-elite-shade", (style === "a3" || style === "a6") && "lab-elite-shade-light"),
           )}
         />
+        {/* A6 lays A4's dark foot over A3's light shade. */}
+        {style === "a6" ? <span aria-hidden className="tile-scrim absolute inset-0 lab-lmarket-shade" /> : null}
         <span
           aria-hidden
           className="tile-scrim absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-[var(--menzu-accent)]/70 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"
@@ -944,7 +949,7 @@ function TileDress({ card, style, big }: { card: ProductCard; style: TileStyle; 
             className={cn(
               "line-clamp-2 text-[14px] font-black leading-[1.15] text-white sm:text-[17px]",
               big && "lg:text-[20px]",
-              (style === "a2" || style === "a3" || style === "a4") && "transition-colors duration-300 group-hover:text-[var(--menzu-accent)]",
+              (style === "a2" || style === "a3" || style === "a4" || style === "a6") && "transition-colors duration-300 group-hover:text-[var(--menzu-accent)]",
             )}
           >
             {titleCase(withoutNewWord(card.title))}
@@ -987,9 +992,14 @@ function TileDress({ card, style, big }: { card: ProductCard; style: TileStyle; 
         {/* Same phone care as A: a tighter inset, the name kept to two lines
             and the price to one, so the words stay clear of the pill. */}
         <span className={cn("tile-caption absolute inset-x-2.5 bottom-2.5 flex flex-col gap-0.5 sm:inset-x-3.5 sm:bottom-3 sm:gap-1", big && "lg:inset-x-5 lg:bottom-4")}>
-          <span className="text-[12px] font-semibold text-[var(--menzu-accent)]">
-            {platformWord(card.platform)}
-          </span>
+          {/* B4 drops the platform line: with no platform tagged it read
+              "Hack game" on every tile (the owner, 17/10/2026: "b4 bỏ cái dòng
+              hack game đó đi"). */}
+          {style === "b4" ? null : (
+            <span className="text-[12px] font-semibold text-[var(--menzu-accent)]">
+              {platformWord(card.platform)}
+            </span>
+          )}
           <h3 className={cn("line-clamp-2 text-[14px] font-bold leading-tight tracking-wide text-white sm:text-[15px]", big && "lg:text-[18px]")}>
             {titleCase(withoutNewWord(card.title))}
           </h3>
