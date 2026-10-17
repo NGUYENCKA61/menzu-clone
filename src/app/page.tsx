@@ -144,14 +144,6 @@ export default async function Home({
               // again (the owner, 17/10/2026: "đưa về chữ không in hoa thử",
               // "bỏ gạch luôn"); accentHeading={true} brings them back.
               accentHeading={false}
-              // Two-tone headings as unnamedtech draws theirs (17/10/2026).
-              headingHighlight={
-                group.slug === "hot-trending"
-                  ? "Hot trending"
-                  : group.slug === GAME_LIST_SLUG
-                    ? "hack game"
-                    : undefined
-              }
               tone="menzu"
               marquee={group.slug === "hot-trending"}
               ranked={group.slug === "hot-trending"}
