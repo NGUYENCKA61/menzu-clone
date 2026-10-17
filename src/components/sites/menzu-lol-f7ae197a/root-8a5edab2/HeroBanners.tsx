@@ -92,8 +92,13 @@ export function HeroBanners({
   // characters: about 535px at 16px, still clear of the banner, which
   // starts some 76px past the title's 498px at 1280.
   const cut = subtitle.indexOf(". ");
-  const subtitleHead = cut > 0 && cut < 70 ? subtitle.slice(0, cut + 1) : "";
-  const subtitleTail = subtitleHead ? subtitle.slice(cut + 2) : subtitle;
+  const firstSentence = cut > 0 && cut < 70 ? subtitle.slice(0, cut + 1) : "";
+  // LAB trial (17/10/2026, "hoặc tới chữ hiện thôi chữ nay xuống hàng"): the
+  // line breaks before the first sentence's last word, so "nay." opens the
+  // second line.
+  const lastSpace = firstSentence.lastIndexOf(" ");
+  const subtitleHead = lastSpace > 0 ? firstSentence.slice(0, lastSpace) : "";
+  const subtitleTail = subtitleHead ? subtitle.slice(lastSpace + 1) : subtitle;
 
 
   return (
