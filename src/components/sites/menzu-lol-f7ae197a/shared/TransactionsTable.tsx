@@ -338,7 +338,7 @@ export function TransactionsTable({ rows }: { rows: LedgerView[] }) {
                 visible.map((row) => (
                   <div
                     key={row.code}
-                    className="border border-white/5 bg-[#111111] rounded-[16px] p-4 flex flex-col gap-3 relative overflow-hidden transition-all hover:border-emerald-500/30"
+                    className="border border-white/5 bg-white/[0.02] rounded-[16px] p-4 flex flex-col gap-3 relative overflow-hidden transition-all hover:border-emerald-500/30"
                   >
                     <div className="flex justify-between items-start gap-4">
                       <div className="min-w-0 flex-1">

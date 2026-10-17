@@ -21,7 +21,7 @@ export const metadata: Metadata = {
 };
 export const dynamic = "force-dynamic";
 
-const CARD = "rounded-2xl border border-white/10 bg-neutral-900/50 p-5 sm:p-6";
+const CARD = "rounded-2xl border border-white/10 bg-white/[0.02] p-5 sm:p-6";
 const LABEL =
   "text-[12px] font-semibold text-neutral-500";
 

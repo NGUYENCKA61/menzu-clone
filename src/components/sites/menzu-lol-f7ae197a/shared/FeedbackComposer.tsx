@@ -158,7 +158,7 @@ export function FeedbackComposer({ user, today }: { user: ComposerUser; today: s
   const ServiceIcon = SERVICES.find((s) => s.value === service)?.icon ?? KeyRound;
 
   const previewCard = (
-    <div className="bg-neutral-900/40 border border-neutral-800/60 p-6 rounded-3xl relative overflow-hidden">
+    <div className="bg-white/[0.02] border border-neutral-800/60 p-6 rounded-3xl relative overflow-hidden">
       <div className="absolute top-0 right-0 p-3">
         <div className="bg-neutral-800 border border-neutral-700 text-neutral-400 text-[12px] font-semibold px-2 py-1 rounded ">
           Bản nháp
@@ -217,7 +217,7 @@ export function FeedbackComposer({ user, today }: { user: ComposerUser; today: s
 
   if (done) {
     return (
-      <div className="max-w-xl mx-auto bg-neutral-900/60 border border-neutral-800/60 rounded-3xl p-8 sm:p-10 flex flex-col items-center text-center gap-4">
+      <div className="max-w-xl mx-auto bg-white/[0.02] border border-neutral-800/60 rounded-3xl p-8 sm:p-10 flex flex-col items-center text-center gap-4">
         <div className="w-14 h-14 rounded-2xl bg-[var(--menzu-accent)]/10 border border-[var(--menzu-accent)]/20 flex items-center justify-center">
           <CircleCheckBig size={26} className="text-[var(--menzu-accent)]" />
         </div>
@@ -248,7 +248,7 @@ export function FeedbackComposer({ user, today }: { user: ComposerUser; today: s
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
-      <div className="lg:col-span-7 bg-neutral-900/60 border border-neutral-800/60 rounded-3xl p-6 sm:p-8">
+      <div className="lg:col-span-7 bg-white/[0.02] border border-neutral-800/60 rounded-3xl p-6 sm:p-8">
         <form className="space-y-5" noValidate onSubmit={submit}>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
@@ -535,7 +535,7 @@ export function FeedbackComposer({ user, today }: { user: ComposerUser; today: s
         </div>
         {previewCard}
 
-        <div className="mt-6 bg-neutral-900/40 border border-neutral-800/60 rounded-3xl p-6">
+        <div className="mt-6 bg-white/[0.02] border border-neutral-800/60 rounded-3xl p-6">
           <div className="flex items-center gap-2 mb-4">
             <ShieldCheck size={15} className="text-[var(--menzu-accent)]" />
             <span className="text-[14px] font-semibold text-white">

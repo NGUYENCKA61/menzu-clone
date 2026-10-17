@@ -17,7 +17,7 @@ import {
 } from "@/lib/warrantyDetails";
 
 const CARD =
-  "rounded-xl border border-white/[0.08] bg-[#0e0e11] p-5 flex flex-col gap-4";
+  "rounded-xl border border-white/[0.08] bg-white/[0.02] p-5 flex flex-col gap-4";
 const CARD_HEAD = "text-[15px] font-semibold text-white";
 const FIELD =
   "w-full rounded-lg border border-white/10 bg-neutral-950/60 px-3 py-2 text-xs text-white outline-none focus:border-[var(--brand)]/60 transition-colors placeholder-neutral-600";

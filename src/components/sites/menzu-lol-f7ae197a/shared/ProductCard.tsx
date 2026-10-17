@@ -130,7 +130,7 @@ export function ProductCard({ product, priority = false, eager = false }: Produc
       }}
       // acc-card is a hook for the light trial "moi" (theme-light.css,
       // part 6); it carries no style of its own.
-      className="acc-card lab-notch group flex h-full w-full flex-col overflow-hidden border border-line bg-panel transition-colors hover:border-line-strong"
+      className="acc-card lab-notch group flex h-full w-full flex-col overflow-hidden border border-line bg-white/[0.02] transition-colors hover:border-line-strong"
     >
       <div className="lab-notch-top relative aspect-[16/10] w-full overflow-hidden bg-raise">
         <CardImage

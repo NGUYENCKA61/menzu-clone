@@ -24,7 +24,7 @@ import {
 import { BankPicker } from "./BankPicker";
 
 const CARD =
-  "relative bg-raise/40 border border-line rounded-[14px] p-5 sm:p-6 overflow-hidden";
+  "relative bg-white/[0.02] border border-line rounded-[14px] p-5 sm:p-6 overflow-hidden";
 const CARD_TITLE = "text-[17px] font-bold text-frost";
 const FIELD =
   "w-full rounded-[10px] border border-line bg-raise px-4 py-3 text-[15px] text-frost outline-none transition-colors placeholder:text-dim focus:border-white/40 disabled:opacity-60";
@@ -517,7 +517,7 @@ export function VerificationCard({
               ) : otp.state === "pending" ? (
                 // One sentence and one waiting line, no numbers inside a
                 // numbered step (the owner, 15/10/2026: "mấy ô số có AI quá").
-                <div className="flex flex-col gap-3 rounded-[12px] border border-line bg-panel p-4 text-[14px] leading-relaxed text-neutral-300">
+                <div className="flex flex-col gap-3 rounded-[12px] border border-line bg-white/[0.02] p-4 text-[14px] leading-relaxed text-neutral-300">
                   <p className="flex flex-wrap items-center gap-x-2 gap-y-2">
                     <span>
                       Mở Zalo của số {maskPhone(otp.phone)}, nhắn cho{" "}

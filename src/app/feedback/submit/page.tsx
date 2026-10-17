@@ -28,7 +28,7 @@ export default async function FeedbackSubmitPage() {
   const today = `${now.getDate()}/${now.getMonth() + 1}/${now.getFullYear()}`;
 
   return (
-    <div className="min-h-screen flex flex-col text-white overflow-x-clip selection:bg-[var(--menzu-accent)]/30 bg-panel">
+    <div className="min-h-screen flex flex-col text-white overflow-x-clip selection:bg-[var(--menzu-accent)]/30 bg-white/[0.02]">
       <div className="w-full shrink-0 h-[104px]" />
       <SiteHeader />
 

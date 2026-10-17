@@ -170,7 +170,7 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
             không liên quan gì tới cái ảnh nền nữa"). The frame is the account
             panel's and the sidebar's: a 5% rim, 24px corners (03/10/2026:
             "màu card trái và card phải đồng bộ"). */}
-        <section className="relative overflow-hidden rounded-2xl border border-white/10 bg-panel">
+        <section className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02]">
           <BannerUploader hasOwn={Boolean(user.bannerUrl)} />
 
           {/* 160px on a phone, 192px from sm: under the avatar and the name,
@@ -360,7 +360,7 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
             the order count giving width to the commission
             cell: in equal quarters "Rút tiền" dropped under any commission from
             10.000đ. */}
-        <div className="grid grid-cols-2 overflow-hidden rounded-2xl border border-white/10 bg-panel sm:mt-2 xl:grid-cols-[1fr_1fr_0.7fr_1.3fr] xl:divide-x xl:divide-white/[0.06]">
+        <div className="grid grid-cols-2 overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02] sm:mt-2 xl:grid-cols-[1fr_1fr_0.7fr_1.3fr] xl:divide-x xl:divide-white/[0.06]">
           {[
             { icon: Wallet, label: "Số dư khả dụng", value: formatVnd(user.balance), unit: "đ", tone: "text-white" },
             { icon: Receipt, label: "Tổng chi tiêu", value: formatVnd(spent), unit: "đ", tone: "text-white" },

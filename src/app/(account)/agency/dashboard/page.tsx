@@ -136,7 +136,7 @@ export default async function AgencyDashboardPage() {
       unit: "key",
       tone: "text-[var(--menzu-accent)]",
       box: "border-[var(--menzu-accent)]/25 bg-[var(--menzu-accent)]/15 text-[var(--menzu-accent)]",
-      shell: "border-white/10 bg-neutral-900/50",
+      shell: "border-white/10 bg-white/[0.02]",
     },
     {
       icon: PiggyBank,
@@ -193,7 +193,7 @@ export default async function AgencyDashboardPage() {
           ))}
         </div>
 
-        <section className="flex flex-col gap-4 rounded-2xl border border-white/10 bg-neutral-900/50 p-5">
+        <section className="flex flex-col gap-4 rounded-2xl border border-white/10 bg-white/[0.02] p-5">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <h3 className="text-[15px] font-semibold text-white">
               Mua key giá đại lý
@@ -214,7 +214,7 @@ export default async function AgencyDashboardPage() {
           <AgencyKeyDesk products={deskProducts} discountPercent={percent} />
         </section>
 
-        <section className="flex flex-col gap-4 rounded-2xl border border-white/10 bg-neutral-900/50 p-5">
+        <section className="flex flex-col gap-4 rounded-2xl border border-white/10 bg-white/[0.02] p-5">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <h3 className="text-[15px] font-semibold text-white">
               Đơn key gần đây

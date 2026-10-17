@@ -79,7 +79,7 @@ export interface TopUpInvoiceProps {
  * violet-500 turned red at the same lightness and strength.
  */
 const PANEL =
-  "w-full bg-gradient-to-b from-[#141414] to-[#0a0a0a] border border-white/[0.08] rounded-[24px] p-5 sm:p-6 lg:p-8 flex flex-col relative group overflow-hidden";
+  "w-full bg-white/[0.02] border border-white/[0.08] rounded-[24px] p-5 sm:p-6 lg:p-8 flex flex-col relative group overflow-hidden";
 const FIELD =
   "bg-white/[0.02] border border-white/5 rounded-2xl hover:bg-white/[0.04] transition-colors";
 const LABEL =
@@ -525,7 +525,7 @@ export function TopUpInvoice({
         <button
           type="button"
           onClick={() => setSheet("apps")}
-          className="w-full bg-[#111111] hover:bg-[#1a1a1a] border border-white/10 rounded-[16px] p-4 flex items-center justify-between transition-colors mb-6 group/btn active:scale-[0.98]"
+          className="w-full bg-white/[0.02] hover:bg-[#1a1a1a] border border-white/10 rounded-[16px] p-4 flex items-center justify-between transition-colors mb-6 group/btn active:scale-[0.98]"
         >
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white group-hover/btn:bg-emerald-500/20 group-hover/btn:text-emerald-400 transition-colors">

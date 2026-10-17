@@ -66,7 +66,7 @@ export default async function MemberTiersPage() {
       </p>
 
       {mine && progress ? (
-        <section className="mt-6 rounded-2xl border border-white/10 bg-neutral-900/50 p-5">
+        <section className="mt-6 rounded-2xl border border-white/10 bg-white/[0.02] p-5">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-3">
               <TierBadge tier={mine} size="lg" />
@@ -129,7 +129,7 @@ export default async function MemberTiersPage() {
               className={`flex flex-col gap-3 rounded-2xl border p-5 ${
                 current
                   ? "border-[var(--menzu-accent)]/40 bg-[var(--menzu-accent)]/[0.05]"
-                  : "border-white/10 bg-neutral-900/50"
+                  : "border-white/10 bg-white/[0.02]"
               }`}
             >
               <div className="flex items-center justify-between gap-2">

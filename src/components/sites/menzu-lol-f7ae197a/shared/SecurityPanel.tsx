@@ -85,7 +85,7 @@ const TITLE =
   "text-[24px] sm:text-[30px] font-black leading-tight text-frost mb-2 flex items-center gap-3";
 const SUBTITLE = "text-xs sm:text-sm text-neutral-400 leading-relaxed";
 const CARD =
-  "relative bg-raise/40 border border-line rounded-[14px] p-5 sm:p-6 overflow-hidden group";
+  "relative bg-white/[0.02] border border-line rounded-[14px] p-5 sm:p-6 overflow-hidden group";
 const CARD_TITLE = "text-[17px] font-bold text-frost";
 const FIELD =
   "w-full rounded-[10px] border border-line bg-raise px-4 py-3 text-frost text-[15px] outline-none placeholder:text-dim focus:border-white/40 transition-colors disabled:opacity-50";

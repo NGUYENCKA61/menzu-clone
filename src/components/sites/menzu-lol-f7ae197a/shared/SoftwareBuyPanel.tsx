@@ -298,7 +298,7 @@ export function SoftwareBuyPanel({
                   className={
                     selected
                       ? "flex flex-col items-start gap-1.5 rounded-[12px] border border-white/45 bg-raise px-4 py-3 text-left transition-colors"
-                      : "flex flex-col items-start gap-1.5 rounded-[12px] border border-line bg-panel px-4 py-3 text-left hover:border-line-strong transition-colors"
+                      : "flex flex-col items-start gap-1.5 rounded-[12px] border border-line bg-white/[0.02] px-4 py-3 text-left hover:border-line-strong transition-colors"
                   }
                 >
                   <span className="text-[14px] font-semibold text-frost whitespace-nowrap">

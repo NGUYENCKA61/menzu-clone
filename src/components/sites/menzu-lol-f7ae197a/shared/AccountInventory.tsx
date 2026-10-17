@@ -163,7 +163,7 @@ export function AccountInventory({ account, items }: AccountInventoryProps) {
   if (tabs.length === 0) return null;
 
   return (
-    <div className="w-full mt-12 bg-neutral-900/50 border border-neutral-800/80 rounded-3xl p-6">
+    <div className="w-full mt-12 bg-white/[0.02] border border-neutral-800/80 rounded-3xl p-6">
       <style dangerouslySetInnerHTML={{ __html: ACCOUNT_INVENTORY_STYLES }} />
 
       {/* The reference separates the tab strip from the goods with a hairline. */}

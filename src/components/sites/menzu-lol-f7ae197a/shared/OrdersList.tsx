@@ -271,7 +271,7 @@ export function OrdersList({ orders }: { orders: OrderCardView[] }) {
                           // đánh giá đi"). To bring the receipt's button back:
                           // reviewHref={order.review?.href ?? null}
                           reviewHref={null}
-                          className="group flex cursor-pointer flex-col gap-3 rounded-[14px] border border-line bg-raise/40 p-3.5 outline-none transition-colors hover:border-line-strong focus-visible:ring-2 focus-visible:ring-[var(--menzu-accent)]/60 sm:flex-row sm:items-center sm:gap-5 sm:p-4"
+                          className="group flex cursor-pointer flex-col gap-3 rounded-[14px] border border-line bg-white/[0.02] p-3.5 outline-none transition-colors hover:border-line-strong focus-visible:ring-2 focus-visible:ring-[var(--menzu-accent)]/60 sm:flex-row sm:items-center sm:gap-5 sm:p-4"
                         >
                           <div className="flex min-w-0 flex-1 items-start gap-3 sm:items-center sm:gap-5">
                             {/* menzu's 16:9 picture at 144px (theirs is 192),

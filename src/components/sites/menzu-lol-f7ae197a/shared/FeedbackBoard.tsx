@@ -187,7 +187,7 @@ function ReviewPictures({ pictures, reviewer }: { pictures: string[]; reviewer: 
 /** One full-width review card, matching the captured markup piece for piece. */
 function ReviewCard({ item }: { item: FeedbackItem }) {
   return (
-    <div className="bg-neutral-900/40 border border-neutral-800/60 p-5 sm:p-6 rounded-3xl transition-all hover:bg-neutral-900/70 hover:border-neutral-700/60 relative overflow-hidden">
+    <div className="bg-white/[0.02] border border-neutral-800/60 p-5 sm:p-6 rounded-3xl transition-all hover:bg-neutral-900/70 hover:border-neutral-700/60 relative overflow-hidden">
       <div className="flex gap-4 items-start">
         <ReviewAvatar name={item.name} avatarUrl={item.avatarUrl} anonymous={item.anonymous} />
         <div className="flex-1 min-w-0 pt-0.5">
@@ -361,7 +361,7 @@ export function FeedbackBoard({ items }: { items: FeedbackItem[] }) {
     <>
       <div id="feedback-list-top" className="w-full scroll-mt-24 mb-8">
         {/* Phone: the capsule and the sort share one row. */}
-        <div className="w-full bg-neutral-900/40 border border-neutral-800/60 p-4 rounded-2xl flex flex-wrap items-center justify-between gap-2 sm:hidden">
+        <div className="w-full bg-white/[0.02] border border-neutral-800/60 p-4 rounded-2xl flex flex-wrap items-center justify-between gap-2 sm:hidden">
           <div className="flex items-center gap-3 bg-neutral-950/60 border border-neutral-800 px-3.5 py-2 rounded-xl shadow-inner shadow-black/40 shrink-0">
             <div className="flex flex-col mr-1 shrink-0 whitespace-nowrap">
               <span className="text-[12px] font-semibold text-neutral-600 leading-none mb-1">
@@ -377,7 +377,7 @@ export function FeedbackBoard({ items }: { items: FeedbackItem[] }) {
         </div>
 
         {/* Desktop: label, capsule, sort pushed to the far edge. */}
-        <div className="w-full bg-neutral-900/40 border border-neutral-800/60 p-4 rounded-2xl hidden sm:flex sm:items-center sm:gap-4">
+        <div className="w-full bg-white/[0.02] border border-neutral-800/60 p-4 rounded-2xl hidden sm:flex sm:items-center sm:gap-4">
           <div className="flex items-center gap-2 text-neutral-400 text-[14px] font-semibold mr-2">
             <Funnel size={14} className="text-[var(--menzu-accent)]" />
             <span>Bộ lọc:</span>
