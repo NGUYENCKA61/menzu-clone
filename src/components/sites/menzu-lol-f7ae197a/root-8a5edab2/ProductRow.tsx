@@ -579,10 +579,11 @@ export type TileStyle = "classic" | "a" | "a2" | "a3" | "b" | "c";
  * LAB: elitehacks' tile (the owner, 17/10/2026, picking from the home card
  * page: "sửa lab 2 kiểu A: kiểu elitehacks"), settled as "a2" with their own
  * shade and hover ("chốt a2 vậy đi"), and back on it after trying "a3" (A2
- * lighter at rest, without the red rim): "lùi lại về a2". "a" is A1,
+ * lighter at rest, without the red rim): "lùi lại về a2". Now trying "b",
+ * unnamedtech's tile ("giờ qua B B: kiểu unnamedtech"). "a" is A1,
  * "classic" the framed picture with the name under it.
  */
-export const DEFAULT_TILE_STYLE: TileStyle = "a2";
+export const DEFAULT_TILE_STYLE: TileStyle = "b";
 
 /** The eyebrow a tile wears in style b, from the category's platform tag. */
 function platformWord(platform: string | null | undefined): string {
@@ -791,15 +792,17 @@ function TileDress({ card, style, big }: { card: ProductCard; style: TileStyle; 
           aria-hidden
           className="tile-scrim absolute inset-x-0 bottom-0 h-[55%] bg-gradient-to-t from-scrim/90 to-transparent"
         />
-        <span className={cn("tile-caption absolute inset-x-3.5 bottom-3 flex flex-col gap-1", big && "lg:inset-x-5 lg:bottom-4")}>
+        {/* Same phone care as A: a tighter inset, the name kept to two lines
+            and the price to one, so the words stay clear of the pill. */}
+        <span className={cn("tile-caption absolute inset-x-2.5 bottom-2.5 flex flex-col gap-0.5 sm:inset-x-3.5 sm:bottom-3 sm:gap-1", big && "lg:inset-x-5 lg:bottom-4")}>
           <span className="text-[12px] font-semibold text-[var(--menzu-accent)]">
             {platformWord(card.platform)}
           </span>
-          <h3 className={cn("text-[14px] font-bold leading-tight tracking-wide text-white sm:text-[15px]", big && "lg:text-[18px]")}>
-            {sentenceCase(card.title)}
+          <h3 className={cn("line-clamp-2 text-[14px] font-bold leading-tight tracking-wide text-white sm:text-[15px]", big && "lg:text-[18px]")}>
+            {titleCase(withoutNewWord(card.title))}
           </h3>
           {line ? (
-            <span className="text-[11px] font-medium leading-snug text-neutral-400">
+            <span className="truncate text-[11px] font-medium leading-snug text-neutral-400">
               {priceLine(card, "Từ")}
             </span>
           ) : null}
