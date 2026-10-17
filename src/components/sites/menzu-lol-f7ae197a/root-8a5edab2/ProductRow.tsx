@@ -557,12 +557,15 @@ function BentoTile({
  *    thử giống elite hack vậy", "elite là A2"): the picture keeps its full
  *    brightness, a black fade rises from the foot and a vignette darkens
  *    the left and the bottom, leaving the top right clear (.lab-elite-shade).
+ *  - a3: A2 with no red rim under the pointer, a trial kept apart from A2
+ *    (the owner, 17/10/2026: "làm thử bản không có hiệu ứng đỏ viền thử",
+ *    "không lưu vô A2 liền nha"); the rim only brightens, as on any tile.
  *  - b: unnamedtech's tile — the whole cover dimmed evenly, a small eyebrow
  *    naming the platform ("HACK PC") over a quieter name.
  *  - c: lmarket's tile — the cover slightly dimmed above a solid caption bar
  *    holding the name and the blurb, with a platform chip at the end.
  */
-export type TileStyle = "classic" | "a" | "a2" | "b" | "c";
+export type TileStyle = "classic" | "a" | "a2" | "a3" | "b" | "c";
 
 /**
  * The dress the game tiles wear unless a row asks for another. One constant
@@ -572,10 +575,10 @@ export type TileStyle = "classic" | "a" | "a2" | "b" | "c";
  *
  * LAB: elitehacks' tile (the owner, 17/10/2026, picking from the home card
  * page: "sửa lab 2 kiểu A: kiểu elitehacks"), settled as "a2" with their own
- * shade and hover ("chốt a2 vậy đi"); "a" is A1, "classic" the framed
- * picture with the name under it.
+ * shade and hover ("chốt a2 vậy đi"), now trying "a3" (A2 without the red
+ * rim); "a" is A1, "classic" the framed picture with the name under it.
  */
-export const DEFAULT_TILE_STYLE: TileStyle = "a2";
+export const DEFAULT_TILE_STYLE: TileStyle = "a3";
 
 /** The eyebrow a tile wears in style b, from the category's platform tag. */
 function platformWord(platform: string | null | undefined): string {
@@ -733,10 +736,10 @@ function priceLine(card: ProductCard, lead = "Chỉ từ"): string | null {
   return parts.length > 0 ? parts.join(", ") : null;
 }
 
-/** The words and shade a tile wears in styles a, a2, b and c (see TileStyle). */
+/** The words and shade a tile wears in styles a, a2, a3, b and c (see TileStyle). */
 function TileDress({ card, style, big }: { card: ProductCard; style: TileStyle; big: boolean }) {
   const line = priceLine(card);
-  if (style === "a" || style === "a2") {
+  if (style === "a" || style === "a2" || style === "a3") {
     return (
       <>
         <span
@@ -758,7 +761,7 @@ function TileDress({ card, style, big }: { card: ProductCard; style: TileStyle; 
             className={cn(
               "line-clamp-2 text-[14px] font-black leading-[1.15] text-white sm:text-[17px]",
               big && "lg:text-[20px]",
-              style === "a2" && "transition-colors duration-300 group-hover:text-[var(--menzu-accent)]",
+              (style === "a2" || style === "a3") && "transition-colors duration-300 group-hover:text-[var(--menzu-accent)]",
             )}
           >
             {titleCase(withoutNewWord(card.title))}
