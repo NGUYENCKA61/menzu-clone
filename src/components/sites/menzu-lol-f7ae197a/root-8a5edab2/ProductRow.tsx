@@ -577,9 +577,11 @@ function BentoTile({
  *    giống lmarket nhưng vẫn là có hàng 4 card"), in our rows of four: A4's
  *    shade, a bold name, a quiet second line, then "từ" and the price in
  *    bold white, as their "from €24.99".
- *  - a6: A3's words, layout and hover with A3's light shade and A4's dark
- *    foot laid over it (the owner, 17/10/2026: "a6 mới thì là màu sáng a3
- *    chân đen như a4", "kiểu như a luôn đi bố cục á", "giống a3").
+ *  - a6: A3's words, layout and hover (the owner, 17/10/2026: "kiểu như a
+ *    luôn đi bố cục á", "giống a3") with the first A6's brightness, the
+ *    picture clear but for a black lower 40% ("a6 mới lấy độ sáng a6 cũ
+ *    đi"). First tried as A3's light shade with A4's dark foot over it ("a6
+ *    mới thì là màu sáng a3 chân đen như a4").
  *  - a6cu: the first A6, lmarket's game card from lmarket.net/cheats/ ("a5
  *    giống này đi https://lmarket.net/cheats/ bản 4 card"): square in the
  *    game list, the picture clear but for a black foot over its lower 40%,
@@ -924,19 +926,24 @@ function TileDress({ card, style, big }: { card: ProductCard; style: TileStyle; 
   if (style === "a" || style === "a2" || style === "a3" || style === "a4" || style === "a6") {
     return (
       <>
-        <span
-          aria-hidden
-          className={cn(
-            "tile-scrim absolute inset-0",
-            style === "a"
-              ? "bg-gradient-to-t from-scrim via-scrim/60 via-35% to-scrim/10"
-              : style === "a4"
-                ? "lab-lmarket-shade"
-                : cn("lab-elite-shade", (style === "a3" || style === "a6") && "lab-elite-shade-light"),
-          )}
-        />
-        {/* A6 lays A4's dark foot over A3's light shade. */}
-        {style === "a6" ? <span aria-hidden className="tile-scrim absolute inset-0 lab-lmarket-shade" /> : null}
+        {style === "a6" ? (
+          // A6 takes the first A6's brightness: the picture clear but for a
+          // black foot over its lower 40% (the owner, 17/10/2026: "a6 mới
+          // lấy độ sáng a6 cũ đi"; before, A3's shade with A4's foot).
+          <span aria-hidden className="tile-scrim lab-lm-foot" />
+        ) : (
+          <span
+            aria-hidden
+            className={cn(
+              "tile-scrim absolute inset-0",
+              style === "a"
+                ? "bg-gradient-to-t from-scrim via-scrim/60 via-35% to-scrim/10"
+                : style === "a4"
+                  ? "lab-lmarket-shade"
+                  : cn("lab-elite-shade", style === "a3" && "lab-elite-shade-light"),
+            )}
+          />
+        )}
         <span
           aria-hidden
           className="tile-scrim absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-[var(--menzu-accent)]/70 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"
