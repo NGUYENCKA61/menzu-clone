@@ -14,20 +14,16 @@ export interface StatusToastProps {
   onClose: () => void;
 }
 
-/** Everything that changes between the two tones, and nothing that doesn't. */
+/**
+ * Everything that changes between the two tones, and nothing that doesn't.
+ * LAB (the owner, 17/10/2026, on this toast: "cái modal dạng này lab xử lý
+ * chưa"): the house notice look, as noticeSheet.ts draws the sheets: a plain
+ * panel with a hairline, only the small glyph carries the tone, and the
+ * countdown bar is grey. Before: a red or green ring, border and bar.
+ */
 const TONES = {
-  error: {
-    Icon: X,
-    ring: "border-red-500 bg-red-500/15 text-red-500",
-    shell: "border-red-500/40 shadow-red-950/40",
-    clock: "bg-red-500/70",
-  },
-  success: {
-    Icon: Check,
-    ring: "border-emerald-500 bg-emerald-500/15 text-emerald-400",
-    shell: "border-emerald-500/40 shadow-emerald-950/40",
-    clock: "bg-emerald-500/70",
-  },
+  error: { Icon: X, glyph: "text-rose-400" },
+  success: { Icon: Check, glyph: "text-emerald-400" },
 } as const;
 
 /**
@@ -96,19 +92,15 @@ export function StatusToast({
     <div className="pointer-events-auto w-full">
       <div
         role="alert"
-        className={`status-toast relative overflow-hidden rounded-bl-xl border-[1.5px] bg-[#131316] shadow-2xl ${look.shell}${leaving ? " status-toast-out" : ""}`}
+        className={`status-toast relative overflow-hidden rounded-bl-xl border border-line bg-panel shadow-2xl shadow-black/60${leaving ? " status-toast-out" : ""}`}
       >
-        <div className="flex items-start gap-3 py-3.5 pl-4 pr-10">
-          <span
-            className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 ${look.ring}`}
-          >
-            <look.Icon size={16} strokeWidth={3} />
-          </span>
+        <div className="flex items-start gap-2.5 py-3.5 pl-4 pr-10">
+          <look.Icon size={18} strokeWidth={2.5} aria-hidden className={`mt-[3px] shrink-0 ${look.glyph}`} />
           <div className="min-w-0">
-            <p className="text-[15px] font-semibold text-white">
+            <p className="text-[15px] font-semibold leading-snug text-frost">
               {title}
             </p>
-            <p className="mt-1 text-[12px] leading-relaxed text-neutral-300">
+            <p className="mt-1 text-[14px] leading-relaxed text-mist">
               {message}
             </p>
           </div>
@@ -118,7 +110,7 @@ export function StatusToast({
           type="button"
           onClick={leave}
           aria-label="Đóng thông báo"
-          className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-lg text-neutral-500 transition-colors hover:bg-white/5 hover:text-white"
+          className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-lg text-neutral-500 transition-colors hover:bg-white/5 hover:text-frost"
         >
           <X size={14} />
         </button>
@@ -130,7 +122,7 @@ export function StatusToast({
           onAnimationEnd={(event) => {
             if (event.animationName === "toast-clock") leave();
           }}
-          className={`status-toast-clock absolute inset-x-0 bottom-0 block h-[3px] ${look.clock}`}
+          className="status-toast-clock absolute inset-x-0 bottom-0 block h-[2px] bg-white/20"
         />
       </div>
     </div>,
