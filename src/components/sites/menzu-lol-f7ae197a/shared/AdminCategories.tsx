@@ -346,7 +346,7 @@ export function AdminCategories({ categories }: { categories: AdminCategoryView[
                       }
                       onClick={() => setDeleting(category)}
                       aria-label={`Xóa danh mục ${category.name}`}
-                      className="h-8 w-8 rounded-lg border border-red-500/30 bg-red-500/10 hover:bg-red-500/20 disabled:opacity-30 disabled:hover:bg-red-500/10 text-red-400 transition-colors inline-flex items-center justify-center"
+                      className="h-8 w-8 rounded-lg border border-white/10 bg-white/5 hover:border-red-500/30 hover:bg-red-500/10 disabled:opacity-30 disabled:hover:bg-white/5 text-neutral-400 hover:text-red-400 transition-colors inline-flex items-center justify-center"
                     >
                       <Trash2 size={13} />
                     </button>
