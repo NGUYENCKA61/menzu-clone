@@ -32,6 +32,7 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 
 import { REVEAL_STEPS, type LoginHandover } from "@/lib/accountLogin";
+import { sentenceCase } from "@/lib/displayCase";
 import { copyText } from "@/lib/clipboard";
 import { DEFAULT_DOWNLOAD_NAME } from "@/lib/downloadName";
 import { warrantyButton, type WarrantyStatus } from "@/lib/warrantyRequests";
@@ -638,7 +639,7 @@ export function OrderDetailModal({
                 role="dialog"
                 aria-modal="true"
                 aria-labelledby={`order-${order.code}-title`}
-                className={`order-modal-card relative max-h-[calc(100dvh-2rem)] w-full max-w-[1150px] overflow-y-auto rounded-2xl border border-white/10 bg-[#101114] shadow-[0_25px_80px_rgba(0,0,0,0.7)] outline-none sm:max-h-[calc(100dvh-4rem)]${leaving ? " order-modal-card-out" : ""}`}
+                className={`order-modal-card relative max-h-[calc(100dvh-2rem)] w-full max-w-[1150px] overflow-y-auto rounded-2xl border border-line bg-panel shadow-[0_25px_80px_rgba(0,0,0,0.7)] outline-none sm:max-h-[calc(100dvh-4rem)]${leaving ? " order-modal-card-out" : ""}`}
               >
                 {/* The sheet's grip, phone only: says "this slides" before
                     anything is read, and gives the thumb a place to rest. */}
@@ -761,7 +762,7 @@ export function OrderDetailModal({
                           href={order.productHref}
                           className="line-clamp-2 text-sm font-black leading-snug text-white"
                         >
-                          {order.isSoftware ? order.productName : `#${order.productCode}`}
+                          {order.isSoftware ? sentenceCase(order.productName) : `#${order.productCode}`}
                         </Link>
                         <div className="mt-1 flex min-w-0 items-center gap-2 text-[11px] font-semibold text-neutral-500">
                           {chip ? (
@@ -769,7 +770,7 @@ export function OrderDetailModal({
                               {chip}
                             </span>
                           ) : null}
-                          <span className="truncate">{order.categoryName}</span>
+                          <span className="truncate">{sentenceCase(order.categoryName)}</span>
                         </div>
                       </div>
                     </div>
@@ -840,13 +841,13 @@ export function OrderDetailModal({
                                   className="mb-1 line-clamp-2 text-base font-black leading-snug text-white transition-colors hover:text-[var(--menzu-accent)]"
                                 >
                                   {order.isSoftware
-                                    ? order.productName
+                                    ? sentenceCase(order.productName)
                                     : `#${order.productCode}`}
                                 </Link>
                                 <div className="truncate text-[11px] font-semibold text-neutral-500">
                                   Danh mục{" "}
                                   <span className="text-neutral-300">
-                                    {order.categoryName}
+                                    {sentenceCase(order.categoryName)}
                                   </span>
                                 </div>
                               </div>
@@ -1393,7 +1394,7 @@ function LoginRevealDialog({ code, onClose }: { code: string; onClose: () => voi
         aria-modal="true"
         aria-labelledby="login-reveal-title"
         tabIndex={-1}
-        className="relative max-h-[92vh] w-full overflow-y-auto rounded-t-2xl border border-white/10 bg-[#121216] p-5 shadow-2xl outline-none animate-in fade-in zoom-in-95 duration-150 sm:max-w-md sm:rounded-2xl sm:p-6"
+        className="relative max-h-[92vh] w-full overflow-y-auto rounded-t-2xl border border-line bg-panel p-5 shadow-2xl outline-none animate-in fade-in zoom-in-95 duration-150 sm:max-w-md sm:rounded-2xl sm:p-6"
       >
         <button
           type="button"
