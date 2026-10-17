@@ -1746,6 +1746,19 @@ html[data-admin-filtering] .admin-list {
 .group:focus-visible .lab-lmarket-shade {
   opacity: 0.8;
 }
+/* Style A6: the same shape at about A3's strength, 70%, and 55% under the
+   pointer (the owner, 17/10/2026). */
+.lab-lmarket-shade.lab-lmarket-shade-light {
+  opacity: 0.7;
+}
+@media (hover: hover) {
+  .group:hover .lab-lmarket-shade.lab-lmarket-shade-light {
+    opacity: 0.55;
+  }
+}
+.group:focus-visible .lab-lmarket-shade.lab-lmarket-shade-light {
+  opacity: 0.55;
+}
 
 /* LAB: lmarket's game card from lmarket.net/cheats/, read 17/10/2026, for
    game tile style A6 ("a5 giống này đi ... bản 4 card", "cho nó là A6"):
