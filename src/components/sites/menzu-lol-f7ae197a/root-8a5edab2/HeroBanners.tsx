@@ -16,10 +16,12 @@ import { ScrollCta } from "./ScrollCta";
  */
 export const SCROLL_TARGET_ID = "danh-sach-hack-game";
 
-// LAB: buttons in sentence case, 44px tall at 14px, the main site's size
-// (the owner, 17/10/2026: "đưa nguyên cụm này về kích thước như web gốc").
+// LAB: buttons in sentence case. On a phone 44px tall at 14px, beside the
+// 14px subtitle; from 640px 48px at 15px, beside the 16px subtitle, which
+// is the main site's button size give or take a few pixels (the owner,
+// 17/10/2026: "cần thì tăng kích thước cho đồng bộ nha").
 const CTA =
-  "inline-flex h-11 items-center justify-center gap-2 rounded-[10px] px-6 text-[14px] font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-frost";
+  "inline-flex h-11 items-center justify-center gap-2 rounded-[10px] px-6 text-[14px] font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-frost sm:h-12 sm:text-[15px]";
 
 /** Seconds between characters as the heading types itself in. */
 const TYPE_STEP = 0.07;
@@ -162,8 +164,10 @@ export function HeroBanners({
             // One unbreakable word in a column capped at 440px: at 46px it is
             // 485px wide and its last letters ran under the video card on
             // every screen from 1024 to 1279. 40px is 422px — inside the cap.
-            // LAB: the main site's sizes again (28/36/40/46px).
-            className="mt-2 font-display text-[28px] font-black leading-[1.06] tracking-tight text-frost sm:text-[36px] lg:text-[40px] xl:text-[46px]"
+            // LAB: the main site's sizes up to 1279px (28/36/40px); from 1280
+            // 48px, the category pages' title size, about 506px wide and
+            // still 76px clear of the banner at 1280 (17/10/2026).
+            className="mt-2 font-display text-[28px] font-black leading-[1.06] tracking-tight text-frost sm:text-[36px] lg:text-[40px] xl:text-[48px]"
           >
             {lines.map((line, li) => (
               <span key={li} className="block whitespace-nowrap" aria-hidden>
@@ -192,7 +196,9 @@ export function HeroBanners({
           </h1>
 
           {subtitle ? (
-            <p className="mt-5 max-w-[460px] text-[14px] leading-relaxed text-mist">
+            // LAB: 16px from 640px up, so the line holds its own beside the
+            // 36-48px title and the banner; 14px on a phone (17/10/2026).
+            <p className="mt-5 max-w-[460px] text-[14px] leading-relaxed text-mist sm:text-[16px]">
               {subtitle}
             </p>
           ) : null}
