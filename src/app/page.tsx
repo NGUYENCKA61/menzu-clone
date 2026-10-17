@@ -11,6 +11,7 @@ import { HomeBackdrop } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab
 import {
   DEFAULT_TILE_STYLE,
   ProductRow,
+  type TileStyle,
 } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/ProductRow";
 import { DocsSection } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/DocsSection";
 import { SeoContent } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/SeoContent";
@@ -47,7 +48,28 @@ export async function generateMetadata(): Promise<Metadata> {
 /** The group that carries the search, the platform chips and "Xem thêm". */
 const GAME_LIST_SLUG = "danh-sach-hack-game";
 
-export default async function Home() {
+/**
+ * LAB: every game tile dress tried with the owner, under the names used in
+ * the chat (A1 is "a", the first one "goc"), so any of them opens as
+ * /?kieu=a5 without changing what the page shows by default (17/10/2026,
+ * the card summary: "xuất artifact cái đi").
+ */
+const TILE_STYLES: readonly TileStyle[] = ["classic", "a", "a2", "a3", "a4", "a5", "a6", "b", "b2", "b3", "c", "c1", "d"];
+
+function pickTileStyle(raw: string | string[] | undefined): TileStyle {
+  const value = typeof raw === "string" ? raw.trim().toLowerCase() : "";
+  if (value === "a1") return "a";
+  if (value === "goc") return "classic";
+  const known = TILE_STYLES.find((style) => style === value);
+  return known ?? DEFAULT_TILE_STYLE;
+}
+
+export default async function Home({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}) {
+  const tileStyle = pickTileStyle((await searchParams).kieu);
   const settings = await getShopSettings();
   const trust = await getTrustStats(settings);
   const [flashSaleItems, reviews] = await Promise.all([getFlashSaleItems(), getFeedback()]);
@@ -126,7 +148,8 @@ export default async function Home() {
               tiles={group.slug === "hot-trending" || group.slug === GAME_LIST_SLUG}
               // Tile style "d" keeps four cards to a row in Hot trending too
               // (the owner, 17/10/2026: "kiểu D vẫn có 4 cục 4 card nha").
-              bigPicks={group.slug === "hot-trending" && DEFAULT_TILE_STYLE !== "d"}
+              bigPicks={group.slug === "hot-trending" && tileStyle !== "d"}
+              tileStyle={tileStyle}
               rows={group.slug === GAME_LIST_SLUG ? 3 : 1}
             />
             {/* The figures follow Hot trending again, as on the main site
