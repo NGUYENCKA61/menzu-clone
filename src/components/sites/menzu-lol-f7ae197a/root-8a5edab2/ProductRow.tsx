@@ -585,11 +585,11 @@ export type TileStyle = "classic" | "a" | "a2" | "a3" | "b" | "b2" | "b3" | "c";
  * page: "sửa lab 2 kiểu A: kiểu elitehacks"), settled as "a2" with their own
  * shade and hover ("chốt a2 vậy đi"), and back on it after trying "a3" (A2
  * lighter at rest, without the red rim): "lùi lại về a2". Then "b",
- * unnamedtech's tile ("giờ qua B B: kiểu unnamedtech"), now "b2" (B at
- * A2's brightness; "b3" is B at A3's). "a" is A1, "classic" the framed
- * picture with the name under it.
+ * unnamedtech's tile ("giờ qua B B: kiểu unnamedtech"), now "b3" (B at
+ * A3's brightness, "B3 thử"; "b2" is B at A2's). "a" is A1, "classic" the
+ * framed picture with the name under it.
  */
-export const DEFAULT_TILE_STYLE: TileStyle = "b2";
+export const DEFAULT_TILE_STYLE: TileStyle = "b3";
 
 /** The eyebrow a tile wears in style b, from the category's platform tag. */
 function platformWord(platform: string | null | undefined): string {
