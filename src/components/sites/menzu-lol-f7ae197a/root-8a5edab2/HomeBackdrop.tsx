@@ -29,6 +29,9 @@ export function HomeBackdrop({ src }: { src?: string }) {
             loading="eager"
             fetchPriority="low"
             sizes="100vw"
+            // Full HD at most, as PageBackdrop: the 70% veil hides what a
+            // 4K file would add (lab, 17/10/2026).
+            maxWidth={1920}
             className="object-cover object-center"
           />
           <div className="absolute inset-0 bg-scrim/70" />

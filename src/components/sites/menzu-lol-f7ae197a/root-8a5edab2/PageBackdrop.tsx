@@ -37,6 +37,10 @@ export function PageBackdrop({ src, soft = false }: { src?: string; soft?: boole
           loading="eager"
           fetchPriority="low"
           sizes="100vw"
+          // Full HD at most: under a 70% (or 94%, blurred) veil a 4K file
+          // shows nothing more, and on a sharp screen it was three times
+          // the weight (lab, 17/10/2026: 572KB against 181KB).
+          maxWidth={1920}
           className={`object-cover object-center ${soft ? "scale-110 blur-[28px] saturate-70" : ""}`}
         />
       ) : null}

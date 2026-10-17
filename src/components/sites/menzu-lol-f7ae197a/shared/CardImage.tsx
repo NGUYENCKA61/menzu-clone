@@ -1,7 +1,7 @@
 "use client";
 
 import { ImageOff } from "lucide-react";
-import Image, { type ImageProps } from "next/image";
+import Image, { type ImageLoaderProps, type ImageProps } from "next/image";
 import { useState } from "react";
 
 type Phase = "settled" | "loading" | "done" | "broken";
@@ -28,8 +28,28 @@ type Phase = "settled" | "loading" | "done" | "broken";
  * The fade sits on a wrapper, not on the <img>: the callers put a hover
  * scale on the picture itself and two transforms on one element fight.
  */
-export function CardImage({ className, alt, onLoad, onError, ...props }: ImageProps) {
+export function CardImage({
+  className,
+  alt,
+  onLoad,
+  onError,
+  maxWidth,
+  ...props
+}: ImageProps & {
+  /**
+   * The widest file the browser may be sent, for a picture under a dark veil
+   * where the extra pixels cannot be seen (the site backgrounds, lab
+   * 17/10/2026). The browser still asks for what its screen needs, up to
+   * this width; the stored upload is untouched.
+   */
+  maxWidth?: number;
+}) {
   const [phase, setPhase] = useState<Phase>("settled");
+  const capped =
+    maxWidth && typeof props.src === "string" && props.src.startsWith("/")
+      ? ({ src, width, quality }: ImageLoaderProps) =>
+          `/_next/image?url=${encodeURIComponent(src)}&w=${Math.min(width, maxWidth)}&q=${quality ?? 75}`
+      : props.loader;
 
   if (phase === "broken") {
     return (
@@ -49,6 +69,7 @@ export function CardImage({ className, alt, onLoad, onError, ...props }: ImagePr
       <span className={`card-image-in absolute inset-0 ${phase === "loading" ? "is-waiting" : ""}`}>
         <Image
           {...props}
+          loader={capped}
           alt={alt}
           className={className}
           ref={(img) => {
