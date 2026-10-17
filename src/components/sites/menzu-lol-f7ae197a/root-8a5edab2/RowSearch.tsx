@@ -60,10 +60,7 @@ const CHIP =
 // "thanh tìm kiếm có cần làm lại không màu sắc hiện tại có đồng bộ chưa",
 // then "làm thử"); they were a solid grey well with a brighter rim.
 const CHIP_IDLE = "bg-white/[0.02] text-mist ring-1 ring-inset ring-white/[0.06] hover:text-frost hover:ring-white/20";
-// The lit chip in the shop's red, white words, as the main site's pills
-// (the owner, 17/10/2026, a second try: "nút tất cả sang màu đỏ thử"; the
-// first, 83333b3e, was taken back).
-const CHIP_ACTIVE = "bg-[var(--menzu-accent)] text-white ring-1 ring-inset ring-[var(--menzu-accent)]";
+const CHIP_ACTIVE = "bg-white/[0.12] text-frost ring-1 ring-inset ring-white/25";
 
 /**
  * What each chip shows: its word and the icon before it. "Tất cả" is a
