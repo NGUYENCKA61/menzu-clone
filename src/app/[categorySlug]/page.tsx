@@ -28,7 +28,6 @@ import { weaponKey } from "@/lib/weaponImages";
 import { shareCard } from "@/lib/shareCard";
 import { categoryBehindOldSlug } from "@/lib/slugHistory";
 import { launcherFromParam, runsOnFromParam } from "@/lib/toolFilters";
-import { pickTileStyle } from "@/lib/tileStyle";
 
 interface PageProps {
   params: Promise<{ categorySlug: string }>;
@@ -47,8 +46,6 @@ interface PageProps {
     hd?: string;
     /** "Nền tảng": a launcher key, lower case. */
     nt?: string;
-    /** LAB: a home tile dress for the tool cards (src/lib/tileStyle.ts). */
-    kieu?: string;
   }>;
 }
 
@@ -288,10 +285,6 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
                           // (SEO review, 13/10/2026).
                           priority={!data.heroImageUrl && index === 0}
                           eager={index < 2}
-                          // LAB: the tool cards wear the home tiles' dress
-                          // (the owner, 17/10/2026: "trang chi tiết danh mục
-                          // làm đồng bộ lại đi").
-                          dress={pickTileStyle(query.kieu)}
                           // A rich-editor description is HTML; the card prints a
                           // sentence, so it gets the prose without the tags.
                           software={

@@ -5,81 +5,9 @@ import { CardImage } from "@/components/sites/menzu-lol-f7ae197a/shared/CardImag
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
-import type { TileStyle } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/ProductRow";
-import { sentenceCase, titleCase, withoutNewWord } from "@/lib/displayCase";
-import { cn } from "@/lib/utils";
+import { sentenceCase } from "@/lib/displayCase";
 import { formatVnd, isFreeTool } from "./productData";
 import { SoftwareCheckoutDialog } from "./SoftwareCheckoutDialog";
-
-/**
- * LAB: how a shelf card's picture follows the home page's game tile dress
- * (the owner, 17/10/2026: "trang chi tiết danh mục làm đồng bộ lại đi và có
- * đủ phiên bản để đồng bộ từ a3 a4 a5 a6 b3 b4 b5 b6"). The picture takes the
- * dress's shade and brightness and the tool's name and price move onto its
- * foot in the dress's words; the body keeps the summary, the tier picker and
- * the buttons, which no picture could carry. Dresses that are not drawn over
- * the picture (classic, the first A6, C, C1, D) leave the card as it was.
- */
-interface DressLook {
-  /** Whose words sit on the picture: A's, lmarket's best-seller (A5) or B's. */
-  family: "a" | "a5" | "b";
-  /** Classes on the picture itself (A1's and B's dimming). */
-  picture: string;
-  /** Each shade laid over the picture, positioned by its own classes. */
-  shades: string[];
-  /** B's small red line over the name. */
-  eyebrow: boolean;
-  /** The name turns red under the pointer, as on the home tiles. */
-  redName: boolean;
-  /** A2 lights the rim red under the pointer. */
-  redRim: boolean;
-}
-
-const A1_FADE = "absolute inset-0 bg-gradient-to-t from-scrim via-scrim/60 via-35% to-scrim/10";
-const ELITE = "absolute inset-0 lab-elite-shade";
-const ELITE_LIGHT = "absolute inset-0 lab-elite-shade lab-elite-shade-light";
-const LMARKET = "absolute inset-0 lab-lmarket-shade";
-const FOOT = "lab-lm-foot";
-const A1_PICTURE = "brightness-[.72] saturate-[.9] group-hover:brightness-[.85]";
-
-function dressLook(dress: TileStyle | undefined): DressLook | null {
-  const a = (shades: string[], redName = true, redRim = false, picture = ""): DressLook =>
-    ({ family: "a", picture, shades, eyebrow: false, redName, redRim });
-  const b = (shades: string[], eyebrow = true, picture = ""): DressLook =>
-    ({ family: "b", picture, shades, eyebrow, redName: false, redRim: false });
-  switch (dress) {
-    case "a":
-      return a([A1_FADE], false, false, A1_PICTURE);
-    case "a2":
-      return a([ELITE], true, true);
-    case "a3":
-      return a([ELITE_LIGHT]);
-    case "a4":
-      return a([LMARKET]);
-    case "a5":
-      return { family: "a5", picture: "", shades: [LMARKET], eyebrow: false, redName: true, redRim: false };
-    case "a6":
-      return a([FOOT]);
-    case "b":
-      return b(
-        ["absolute inset-0 bg-scrim/25", "absolute inset-x-0 bottom-0 h-[55%] bg-gradient-to-t from-scrim/90 to-transparent"],
-        true,
-        "brightness-[.55] group-hover:brightness-[.7]",
-      );
-    case "b1":
-      return b([A1_FADE], true, A1_PICTURE);
-    case "b2":
-      return b([ELITE]);
-    case "b3":
-      return b([ELITE_LIGHT]);
-    case "b4":
-      return b([LMARKET], false);
-    case "b6":
-      return b([FOOT]);
-    default:
-      return null;
-  }
-}
 
 export interface SoftwareCardPackage {
   id: string;
@@ -140,7 +68,6 @@ export function SoftwareCard({
   variant = "shelf",
   priority = false,
   eager = false,
-  dress,
 }: {
   software: SoftwareCardView;
   variant?: "shelf" | "compact";
@@ -149,10 +76,7 @@ export function SoftwareCard({
   priority?: boolean;
   /** Also above the fold: fetched before the rest, at no raised priority. */
   eager?: boolean;
-  /** LAB: the home page's game tile dress to follow (see dressLook). */
-  dress?: TileStyle;
 }) {
-  const look = variant === "shelf" ? dressLook(dress) : null;
   const [packageId, setPackageId] = useState("");
   const [hint, setHint] = useState(false);
   const [open, setOpen] = useState(false);
@@ -241,11 +165,7 @@ export function SoftwareCard({
     // tool-card, tool-status, tool-status-line and tool-more are hooks for the
     // light trial "moi" (theme-light.css, part 6); no style of their own.
     <div
-      className={cn(
-        "tool-card lab-notch group relative flex h-full w-full flex-col border border-line bg-panel transition-colors hover:border-line-strong",
-        look?.redRim && "hover:border-[var(--menzu-accent)]",
-        open && "z-40",
-      )}
+      className={`tool-card lab-notch group relative flex h-full w-full flex-col border border-line bg-panel transition-colors hover:border-line-strong ${open ? "z-40" : ""}`}
     >
       {/* Picture flush to the card's edges. The shop's image when set; otherwise
           the reference's dark gradient with the tool's name centred over it. */}
@@ -262,59 +182,13 @@ export function SoftwareCard({
                 : eager
                   ? { loading: "eager" as const }
                   : {})}
-              className={cn(
-                "object-cover transition-transform duration-500 group-hover:scale-[1.025]",
-                look?.picture,
-              )}
+              className="object-cover transition-transform duration-500 group-hover:scale-[1.025]"
             />
-          ) : look ? null : (
+          ) : (
             <span className="px-5 text-center text-2xl font-black leading-tight text-white/90">
               {software.name}
             </span>
           )}
-
-          {look ? (
-            <>
-              {look.shades.map((shade) => (
-                <span key={shade} aria-hidden className={cn("tile-scrim", shade)} />
-              ))}
-              {/* The name and the price on the picture's foot, in the home
-                  tile's words for this dress. */}
-              <span className="tile-caption absolute inset-x-4 bottom-3.5 z-10 flex flex-col gap-1 text-left">
-                {look.eyebrow ? (
-                  <span className="text-[12px] font-semibold text-[var(--menzu-accent)]">Hack game</span>
-                ) : null}
-                <span
-                  title={sentenceCase(software.name)}
-                  className={cn(
-                    "line-clamp-2 text-white",
-                    look.family === "a" && "text-[17px] font-black leading-[1.15]",
-                    look.family === "a5" && "text-[17px] font-bold leading-tight",
-                    look.family === "b" && "text-[15px] font-bold leading-tight tracking-wide",
-                    look.redName && "transition-colors duration-300 group-hover:text-[var(--menzu-accent)]",
-                  )}
-                >
-                  {titleCase(withoutNewWord(software.name))}
-                </span>
-                {free ? (
-                  <span className="text-[12px] font-semibold text-neutral-200">Miễn phí</span>
-                ) : minPrice === null ? null : look.family === "a5" ? (
-                  <span className="mt-1 text-[13px] text-neutral-400">
-                    từ <span className="lab-figure text-[16px] font-bold text-white">{formatVnd(minPrice)}đ</span>
-                  </span>
-                ) : (
-                  <span
-                    className={cn(
-                      "text-[12px]",
-                      look.family === "a" ? "font-semibold text-neutral-200" : "font-medium text-neutral-400",
-                    )}
-                  >
-                    {look.family === "a" ? "Chỉ từ" : "Từ"} {formatVnd(minPrice)}đ
-                  </span>
-                )}
-              </span>
-            </>
-          ) : null}
 
           {free ? (
             // A red ribbon across the picture's corner in place of the green
@@ -356,9 +230,8 @@ export function SoftwareCard({
             {status.label}
           </p>
         ) : null}
-        {/* Title with the red marker bar, left-aligned. Under a home dress the
-            name sits on the picture instead, so here it is only read. */}
-        <Link href={detailHref} className={look ? "sr-only" : "flex items-center gap-2.5"}>
+        {/* Title with the red marker bar, left-aligned. */}
+        <Link href={detailHref} className="flex items-center gap-2.5">
           <h3
             title={sentenceCase(software.name)}
             className="truncate font-display text-[17px] font-semibold text-frost transition-colors hover:text-white"
@@ -369,7 +242,7 @@ export function SoftwareCard({
 
         {/* Two lines, held at that height so cards stay level whether the copy
             fills them or not. */}
-        <p className={cn("mb-[14px] mt-2 line-clamp-2 min-h-[37px] text-[13px] leading-[1.55] text-mist", look && "mt-0")}>
+        <p className="mb-[14px] mt-2 line-clamp-2 min-h-[37px] text-[13px] leading-[1.55] text-mist">
           {software.description}
         </p>
 
