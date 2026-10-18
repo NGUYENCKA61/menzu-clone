@@ -144,18 +144,19 @@ export function ReviewCard({ review, index }: { review: Review; index: number })
           {/* What was bought, under the stars, as the reviews page prints it
               (the owner, 01/10/2026: "bổ sung thông tin mua key bản gì game
               gì"; on the home cards 18/10/2026: "thử đi cả 2"): the tool's
-              name alone ("bỏ chữ đã mua chỉ ghi dòng đỏ thôi"), white again
-              after a turn in red, the red having gone to the game tag ("tool
-              unlock skin chữ trắng như cũ đi", "nhãn tên game thì tô đỏ"). A
-              screen reader still hears "Đã mua", and the pointer gets the
-              whole name when it is cut short. */}
+              name alone ("bỏ chữ đã mua chỉ ghi dòng đỏ thôi"), the red having
+              gone to the game tag ("nhãn tên game thì tô đỏ"). After turns in
+              red, white and the site's grey, a light grey between white and
+              grey, the one the Hot trending lead's blurb wears ("xám sáng",
+              "thử"); white under the pointer. A screen reader still hears "Đã
+              mua", and the pointer gets the whole name when it is cut short. */}
           {review.purchase ? (
             <p className="mt-1.5 flex min-w-0 items-center text-[12px]">
               <Link
                 href={review.purchase.href}
                 aria-label={`Đã mua ${sentenceCase(review.purchase.product)}`}
                 title={sentenceCase(review.purchase.product)}
-                className="min-w-0 truncate font-semibold text-neutral-200 transition-colors hover:text-white"
+                className="min-w-0 truncate font-semibold text-[#c7c9d1] transition-colors hover:text-white"
               >
                 {sentenceCase(review.purchase.product)}
               </Link>
