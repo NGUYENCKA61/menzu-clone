@@ -14,6 +14,7 @@ import {
   type FeedbackItem,
 } from "@/components/sites/menzu-lol-f7ae197a/shared/FeedbackBoard";
 import { dayStamp } from "@/lib/dayGroups";
+import { withSampleFeedback } from "@/lib/labSampleReviews";
 import { getFeedback } from "@/lib/queries";
 import { getShopSettings } from "@/lib/settingsStore";
 import { shareCard } from "@/lib/shareCard";
@@ -41,7 +42,10 @@ export const dynamic = "force-dynamic";
  * button where the wiki keeps its search box.
  */
 export default async function FeedbackPage() {
-  const reviews = await getFeedback(500);
+  // LAB: made-up reviews, six of them with a photo, among the real ones when
+  // LAB_SAMPLE_REVIEWS=1 (src/lib/labSampleReviews.ts); the real ones alone
+  // otherwise.
+  const reviews = await getFeedback(500).then(withSampleFeedback);
 
   const items: FeedbackItem[] = reviews.map((r) => ({
     name: r.name,
