@@ -1514,12 +1514,15 @@ export async function getBioProfile() {
 /**
  * The wiki's articles. "public" (the default) leaves out the ones attached
  * to a tool: those are pages of that tool's documentation, not the wiki's.
- * The admin desk asks for "all".
+ * The admin desk asks for "all". Articles on the same sortOrder come newest
+ * first: with no tiebreak Postgres returned them in storage order, which an
+ * edit reshuffles (rounding the screenshots of 12 articles turned a shelf
+ * upside down, 18/10/2026).
  */
 export async function listDocArticles(scope: "public" | "all" = "public") {
   return db.docArticle.findMany({
     where: scope === "public" ? { productId: null } : {},
-    orderBy: [{ category: "asc" }, { sortOrder: "asc" }],
+    orderBy: [{ category: "asc" }, { sortOrder: "asc" }, { publishedAt: "desc" }, { id: "asc" }],
     include: { product: { select: { code: true } } },
   });
 }
