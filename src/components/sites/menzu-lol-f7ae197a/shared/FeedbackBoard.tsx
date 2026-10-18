@@ -6,16 +6,15 @@ import { useMemo, useState } from "react";
 import {
   ArrowDownWideNarrow,
   ArrowUpNarrowWide,
-  ChevronLeft,
-  ChevronRight,
   Funnel,
   Star,
   VenetianMask,
 } from "lucide-react";
 
-import { GAP, pageCount, pageStrip, PER_PAGE } from "@/lib/paging";
+import { pageCount, PER_PAGE } from "@/lib/paging";
 import { sentenceCase } from "@/lib/displayCase";
 
+import { ListPager } from "./AccountListChrome";
 import { PictureLightbox } from "./PictureGallery";
 
 /** One review, dates preformatted on the server so both renders agree. */
@@ -275,12 +274,6 @@ function ReviewCard({ item }: { item: FeedbackItem }) {
   );
 }
 
-const PAGE_BTN =
-  "w-10 h-10 rounded-xl text-sm font-black transition-all flex items-center justify-center cursor-pointer active:scale-95";
-const PAGE_ON = `${PAGE_BTN} bg-[var(--menzu-accent)] text-white border border-[var(--menzu-accent)] font-extrabold`;
-const PAGE_OFF = `${PAGE_BTN} bg-white/5 border border-white/5 text-neutral-400 hover:text-[var(--menzu-accent)] hover:bg-[var(--menzu-accent)]/10`;
-const ARROW_BTN =
-  "w-10 h-10 rounded-xl bg-white/5 border border-white/5 text-neutral-500 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center transition-all cursor-pointer active:scale-95 hover:bg-[var(--menzu-accent)]/10 hover:text-[var(--menzu-accent)]";
 
 /** The star buttons inside the filter capsule, shared by both breakpoints. */
 function RatingStars({
@@ -444,68 +437,11 @@ export function FeedbackBoard({ items }: { items: FeedbackItem[] }) {
         </div>
       )}
 
-      {totalPages > 1 ? (
-        <FeedbackPager current={current} totalPages={totalPages} onJump={jumpTo} />
-      ) : null}
+      {/* The pager Lịch sử mua, Lịch sử giao dịch and the wiki share (40px,
+          10px corners, the open page grey) rather than one of its own in red
+          (18/10/2026, "rà soát ... cho đồng bộ"). It draws nothing for a
+          single page. */}
+      <ListPager page={current - 1} pageCount={totalPages} onSelect={(next) => jumpTo(next + 1)} />
     </>
-  );
-}
-
-/**
- * The page strip under the list: arrows either side, the first and last page
- * always in reach.
- */
-function FeedbackPager({
-  current,
-  totalPages,
-  onJump,
-}: {
-  current: number;
-  totalPages: number;
-  onJump: (page: number) => void;
-}) {
-  return (
-    <div className="flex justify-center mt-10">
-      <nav className="isolate inline-flex rounded-xl gap-1.5 items-center justify-center" aria-label="Phân trang">
-        <button
-          type="button"
-          title="Trang trước"
-          disabled={current <= 1}
-          onClick={() => onJump(current - 1)}
-          className={ARROW_BTN}
-        >
-          <ChevronLeft size={16} />
-        </button>
-        {pageStrip(current, totalPages).map((p, i) =>
-          p === GAP ? (
-            <span
-              key={`gap-${i}`}
-              className="w-10 h-10 flex items-center justify-center text-neutral-500 text-sm font-bold select-none"
-            >
-              ...
-            </span>
-          ) : (
-            <button
-              key={p}
-              type="button"
-              aria-current={p === current ? "page" : undefined}
-              onClick={() => onJump(p)}
-              className={p === current ? PAGE_ON : PAGE_OFF}
-            >
-              {p}
-            </button>
-          ),
-        )}
-        <button
-          type="button"
-          title="Trang sau"
-          disabled={current >= totalPages}
-          onClick={() => onJump(current + 1)}
-          className={ARROW_BTN}
-        >
-          <ChevronRight size={16} />
-        </button>
-      </nav>
-    </div>
   );
 }
