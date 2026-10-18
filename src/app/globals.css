@@ -1775,16 +1775,17 @@ html[data-admin-filtering] .admin-list {
     linear-gradient(rgba(8, 8, 11, 0.14), rgba(8, 8, 11, 0.14));
   transition: opacity 300ms ease;
 }
-/* The fade above the title, 20px and 28px at first, a step taller since
-   (the owner, 18/10/2026: "cho phần chân tối cao thêm xíu"). */
+/* The fade above the title, 20px and 28px at first, two steps taller since
+   (the owner, 18/10/2026: "cho phần chân tối cao thêm xíu", "cao thêm xíu
+   nữa thử"). */
 .lab-a5-foot {
-  --a5-fade: 2rem;
+  --a5-fade: 2.75rem;
   padding-top: var(--a5-fade);
   isolation: isolate;
 }
 @media (min-width: 40rem) {
   .lab-a5-foot {
-    --a5-fade: 2.75rem;
+    --a5-fade: 3.75rem;
   }
 }
 .lab-a5-foot::before {
