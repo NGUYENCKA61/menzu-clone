@@ -4,7 +4,7 @@ import { BadgeCheck, Star, VenetianMask } from "lucide-react";
 import { sentenceCase, titleCase, withoutNewWord } from "@/lib/displayCase";
 
 import { AvatarPhoto } from "./AvatarPhoto";
-import { RevealGrid } from "./RevealGrid";
+import { ReviewsRail } from "./ReviewsRail";
 
 export interface Review {
   name: string;
@@ -108,7 +108,7 @@ export function ReviewCard({ review, index }: { review: Review; index: number })
     <article
       data-spot
       style={{ ["--i" as string]: index }}
-      className="reveal-card group relative isolate flex w-[280px] shrink-0 snap-start flex-col rounded-2xl border border-white/10 bg-white/[0.02] p-5 shadow-[inset_0_1px_0_0_rgb(255_255_255/0.04),0_1px_2px_0_rgb(0_0_0/0.4)] lift-card hover:-translate-y-1 hover:border-white/[0.2] hover:shadow-[inset_0_1px_0_0_rgb(255_255_255/0.06),0_8px_24px_-8px_rgb(255_49_88/0.18)] sm:w-[320px] lg:w-auto"
+      className="reveal-card group relative isolate flex w-[280px] shrink-0 snap-start flex-col rounded-2xl border border-white/10 bg-white/[0.02] p-5 shadow-[inset_0_1px_0_0_rgb(255_255_255/0.04),0_1px_2px_0_rgb(0_0_0/0.4)] lift-card hover:-translate-y-1 hover:border-white/[0.2] hover:shadow-[inset_0_1px_0_0_rgb(255_255_255/0.06),0_8px_24px_-8px_rgb(255_49_88/0.18)] sm:w-[320px] lg:w-[calc((100%-3rem)/4)]"
     >
       <span aria-hidden className="spot-glow -z-10" />
       <div className="flex items-start gap-3">
@@ -208,7 +208,8 @@ export function ReviewCard({ review, index }: { review: Review; index: number })
 }
 
 /**
- * The home page's review block: the title, four ReviewCards, then the score.
+ * The home page's review block: the title with a pair of arrows in its top
+ * right corner, a strip of ReviewCards four to a view from lg, then the score.
  *
  * No pill over the block: the verified mark on each card says what is
  * verified, and a blanket claim over all four was either untrue or redundant.
@@ -238,25 +239,28 @@ export function ReviewsSection({
           right, is 655590b7. No way to the rest of the reviews here: "Xem tất
           cả đánh giá", first under the cards and then in the top right corner
           (2a2f035c), was taken off (the owner, 18/10/2026: "bỏ nút xem tất cả
-          đánh giá đi"). */}
-      <div className="mx-auto flex max-w-2xl flex-col items-center gap-2 text-center">
-        <h2
-          id="reviews-heading"
-          className="row-heading text-balance text-xl font-black uppercase tracking-wider text-frost sm:text-2xl"
-        >
-          Chiến thắng{" "}
-          <span className="text-[var(--menzu-accent)]">trong tầm tay bạn</span>
-        </h2>
-        <p className="text-[15px] text-mist">
-          Đánh giá thật từ khách hàng đã giao dịch, admin duyệt trước khi hiện.
-        </p>
-      </div>
-
-      <RevealGrid className="mt-8 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:grid lg:grid-cols-4 lg:overflow-visible lg:pb-0">
+          đánh giá đi"); a pair of arrows walks the strip instead (see
+          ReviewsRail). */}
+      <ReviewsRail
+        header={
+          <div className="mx-auto flex max-w-2xl flex-col items-center gap-2 text-center">
+            <h2
+              id="reviews-heading"
+              className="row-heading text-balance text-xl font-black uppercase tracking-wider text-frost sm:text-2xl"
+            >
+              Chiến thắng{" "}
+              <span className="text-[var(--menzu-accent)]">trong tầm tay bạn</span>
+            </h2>
+            <p className="text-[15px] text-mist">
+              Đánh giá thật từ khách hàng đã giao dịch, admin duyệt trước khi hiện.
+            </p>
+          </div>
+        }
+      >
         {reviews.map((review, index) => (
           <ReviewCard key={`${review.name}-${review.date}-${index}`} review={review} index={index} />
         ))}
-      </RevealGrid>
+      </ReviewsRail>
 
       {/* Under the cards, centred like the title: the score and the count,
           once there are enough of them to mean something
