@@ -11,7 +11,6 @@ import {
   CreditCard,
   Gift,
   KeyRound,
-  Library,
   Menu,
   Send,
   Ticket,
@@ -95,11 +94,14 @@ function quickLinkLabel(link: string) {
 
 // "GÓP Ý" used to sit fourth and went to the same page as "ĐÁNH GIÁ"; the
 // reviews took its slot and the Telegram shop took the front.
+// LAB: "TÀI LIỆU" is off the strip and the drawer for now (the owner,
+// 18/10/2026: "tạm ẩn trang tài liệu trên navbar đi xấu quá"); the page is
+// still served and the footer's bottom row still links it. Put it back
+// after "WIKI & HƯỚNG DẪN" here and in QUICK_LINK_ITEMS.
 const QUICK_LINKS = [
   TELEGRAM_SHOP_LINK,
   "XEM TRẠNG THÁI",
   "WIKI & HƯỚNG DẪN",
-  "TÀI LIỆU",
   "ĐÁNH GIÁ",
   "LIÊN HỆ",
 ]
@@ -155,7 +157,8 @@ const QUICK_LINK_ITEMS: DropdownItem[] = [
   { label: TELEGRAM_SHOP_LINK, icon: Send },
   { label: "XEM TRẠNG THÁI", icon: Activity },
   { label: "WIKI & HƯỚNG DẪN", icon: BookOpen },
-  { label: "TÀI LIỆU", icon: Library },
+  // "TÀI LIỆU" hidden for now (see QUICK_LINKS); its row was
+  // { label: "TÀI LIỆU", icon: Library }, Library from lucide-react.
   { label: "ĐÁNH GIÁ", icon: Star },
   { label: "LIÊN HỆ", icon: Users },
 ]
