@@ -112,10 +112,11 @@ export function FaqSection({ faq, contact }: { faq: FaqEntry[]; contact: FaqCont
                 second half in the shop's red and no red bar, at the other
                 titles' 20px and 24px from sm; left aligned, the block being
                 two columns. The red-bar version is 655590b7. LAB trial: the
-                whole title in red ("Câu hỏi thường gặp tô full đỏ thử"). */}
+                whole title white, after a turn all in red ("Câu hỏi thường
+                gặp tô full đỏ thử", then "chữ trắng thử"). */}
             <h2
               id="faq-heading"
-              className="row-heading text-balance text-xl font-black uppercase tracking-wider text-[var(--menzu-accent)] sm:text-2xl"
+              className="row-heading text-balance text-xl font-black uppercase tracking-wider text-frost sm:text-2xl"
             >
               Câu hỏi thường gặp
             </h2>
