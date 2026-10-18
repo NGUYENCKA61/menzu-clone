@@ -257,12 +257,15 @@ function ReviewCard({ item }: { item: FeedbackItem }) {
           <ReviewPictures pictures={[item.imageUrl]} reviewer={item.name} />
         ) : null}
 
+        {/* The amount in white like the shop's other figures (Tổng quan,
+            the prices on the cards); green, the captured shop's, until
+            18/10/2026 ("Màu trắng chẳng hạn"). */}
         {item.amount > 0 ? (
           <div className="mt-4 sm:mt-0 sm:absolute sm:bottom-6 sm:right-8 text-right flex flex-col items-end">
             <span className="text-[12px] text-neutral-500 font-semibold mb-1">
               Trị giá giao dịch
             </span>
-            <span className="text-2xl font-black text-emerald-400 tabular-nums leading-none">
+            <span className="text-2xl font-black text-white tabular-nums leading-none">
               {formatVnd(item.amount)}đ
             </span>
           </div>

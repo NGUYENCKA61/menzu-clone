@@ -168,7 +168,7 @@ export function FeedbackComposer({ user, today }: { user: ComposerUser; today: s
         <ReviewAvatar name={previewName} avatarUrl={user.avatarUrl} anonymous={anonymous} />
         <div className="flex-1 min-w-0 pt-0.5">
           {/* The wall's card (FeedbackBoard's ReviewCard): the date beside
-              the stars, the words behind a bar, the amount in green. */}
+              the stars, the words behind a bar, the amount in white. */}
           <div className="flex items-center gap-2 mb-1.5">
             <h3 className="text-base font-black text-white truncate max-w-[150px]">
               {previewName}
@@ -211,7 +211,7 @@ export function FeedbackComposer({ user, today }: { user: ComposerUser; today: s
           <span className="text-[12px] text-neutral-500 font-semibold mb-1">
             Trị giá giao dịch
           </span>
-          <span className="text-2xl font-black text-emerald-400 tabular-nums leading-none">
+          <span className="text-2xl font-black text-white tabular-nums leading-none">
             {formatVnd(amountNumber)}đ
           </span>
         </div>
