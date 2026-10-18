@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
 import { sentenceCase } from "@/lib/displayCase";
+import { SOFTWARE_STATUS } from "@/lib/softwareStatus";
 import { formatVnd, isFreeTool } from "./productData";
 import { SoftwareCheckoutDialog } from "./SoftwareCheckoutDialog";
 
@@ -62,12 +63,21 @@ const STATUS: Record<string, { dot: string; text: string; label: string }> = {
  * `variant="compact"` (the "Sản phẩm tương tự" strip) sells nothing on the tile:
  * the tier picker and rent button give way to the cheapest tier as
  * "Chỉ từ …" and one white pill to the page.
+ *
+ * The top is the home page's game tile (19/10/2026, "làm cho nó đồng bộ với
+ * trang chủ card"): the name and, on the shelf, "Chỉ từ …đ" sit on the
+ * picture over the tiles' shade, in their sizes and greys, and the card
+ * takes their 14px corners and faint rim. The rent button is the picker's
+ * and "Xem chi tiết"'s 42px with 10px corners, the picker's words 13px, and
+ * the state reads the site's colours (lib/softwareStatus). `old` is the
+ * lab's ?ban=cu: the card as it was.
  */
 export function SoftwareCard({
   software,
   variant = "shelf",
   priority = false,
   eager = false,
+  old = false,
 }: {
   software: SoftwareCardView;
   variant?: "shelf" | "compact";
@@ -76,6 +86,8 @@ export function SoftwareCard({
   priority?: boolean;
   /** Also above the fold: fetched before the rest, at no raised priority. */
   eager?: boolean;
+  /** LAB: ?ban=cu, the card from before 19/10/2026. */
+  old?: boolean;
 }) {
   const [packageId, setPackageId] = useState("");
   const [hint, setHint] = useState(false);
@@ -121,7 +133,7 @@ export function SoftwareCard({
   const free = isFreeTool(software.packages);
   // No status label on a free tool (the owner, 16/10/2026: "Hack miễn phí
   // nên bỏ cái nhãn chưa phát hiện"): it is a try-out, not a sold build.
-  const status = software.status && !free ? STATUS[software.status] : null;
+  const status = software.status && !free ? (old ? STATUS : SOFTWARE_STATUS)[software.status] : null;
   const chosen = software.packages.find((p) => p.id === packageId) ?? null;
   const hasPackages = software.packages.length > 0;
   const detailHref = software.href;
@@ -137,11 +149,15 @@ export function SoftwareCard({
   // over a native select). The chosen row is filled red; the rest sit light
   // grey and turn red on hover.
   const optionCls = (selected: boolean) =>
-    `block w-full whitespace-nowrap rounded-[7px] px-3 py-2 text-left text-[11px] font-extrabold transition-colors ${
+    `block w-full whitespace-nowrap rounded-[7px] px-3 py-2 text-left transition-colors ${
+      old ? "text-[11px] font-extrabold" : "text-[13px] font-semibold"
+    } ${
       selected
         ? "bg-[var(--menzu-accent)] text-white"
         : "text-neutral-200 hover:bg-[var(--menzu-accent)]/10"
     }`;
+  // The rent button at the picker's and "Xem chi tiết"'s height and corners.
+  const RENT = old ? "h-11 rounded-xl" : "h-[42px] rounded-[10px]";
 
   /**
    * Opens the same "Xác nhận mua" the product page uses, right here: a buyer
@@ -165,12 +181,20 @@ export function SoftwareCard({
     // tool-card, tool-status, tool-status-line and tool-more are hooks for the
     // light trial "moi" (theme-light.css, part 6); no style of their own.
     <div
-      className={`tool-card lab-notch group relative flex h-full w-full flex-col border border-line bg-panel transition-colors hover:border-line-strong ${open ? "z-40" : ""}`}
+      className={`tool-card group relative flex h-full w-full flex-col bg-panel transition-colors ${
+        old
+          ? "lab-notch border border-line hover:border-line-strong"
+          : "rounded-[14px] border border-white/[0.06] hover:border-white/20"
+      } ${open ? "z-40" : ""}`}
     >
       {/* Picture flush to the card's edges. The shop's image when set; otherwise
-          the reference's dark gradient with the tool's name centred over it. */}
+          the reference's dark gradient, under the name. */}
       <Link href={detailHref} className="block">
-        <div className="relative grid aspect-[16/9] w-full place-items-center overflow-hidden lab-notch-top bg-[linear-gradient(135deg,#171922,#36151e,#0d0e12)]">
+        <div
+          className={`relative grid aspect-[16/9] w-full place-items-center overflow-hidden bg-[linear-gradient(135deg,#171922,#36151e,#0d0e12)] ${
+            old ? "lab-notch-top" : "rounded-t-[14px]"
+          }`}
+        >
           {software.imageUrl ? (
             <CardImage
               src={software.imageUrl}
@@ -184,10 +208,36 @@ export function SoftwareCard({
                   : {})}
               className="object-cover transition-transform duration-500 group-hover:scale-[1.025]"
             />
-          ) : (
+          ) : old ? (
             <span className="px-5 text-center text-2xl font-black leading-tight text-white/90">
               {software.name}
             </span>
+          ) : null}
+
+          {old ? null : (
+            // The home tile's shade, the red line it lights on hover, and its
+            // caption: the name in the tile's black 17px, up to two lines,
+            // and on the shelf the cheapest tier in its 13px grey.
+            <>
+              <span aria-hidden className="absolute inset-0 lab-lmarket-shade" />
+              <span
+                aria-hidden
+                className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-[var(--menzu-accent)]/70 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+              />
+              <span className="absolute inset-x-3.5 bottom-3 flex flex-col gap-1 text-left">
+                <h3
+                  title={sentenceCase(software.name)}
+                  className="line-clamp-2 text-[17px] font-black leading-[1.15] text-white transition-colors duration-300 group-hover:text-[var(--menzu-accent)]"
+                >
+                  {sentenceCase(software.name)}
+                </h3>
+                {variant === "shelf" && minPrice !== null && !free ? (
+                  <span className="truncate text-[13px] font-medium leading-snug text-neutral-400">
+                    Chỉ từ {formatVnd(minPrice)}đ
+                  </span>
+                ) : null}
+              </span>
+            </>
           )}
 
           {free ? (
@@ -230,19 +280,22 @@ export function SoftwareCard({
             {status.label}
           </p>
         ) : null}
-        {/* Title with the red marker bar, left-aligned. */}
-        <Link href={detailHref} className="flex items-center gap-2.5">
-          <h3
-            title={sentenceCase(software.name)}
-            className="truncate font-display text-[17px] font-semibold text-frost transition-colors hover:text-white"
-          >
-            {sentenceCase(software.name)}
-          </h3>
-        </Link>
+        {/* Title with the red marker bar, left-aligned (the old card; the new
+            one names the tool on its picture). */}
+        {old ? (
+          <Link href={detailHref} className="flex items-center gap-2.5">
+            <h3
+              title={sentenceCase(software.name)}
+              className="truncate font-display text-[17px] font-semibold text-frost transition-colors hover:text-white"
+            >
+              {sentenceCase(software.name)}
+            </h3>
+          </Link>
+        ) : null}
 
         {/* Two lines, held at that height so cards stay level whether the copy
             fills them or not. */}
-        <p className="mb-[14px] mt-2 line-clamp-2 min-h-[37px] text-[13px] leading-[1.55] text-mist">
+        <p className={`mb-[14px] line-clamp-2 min-h-[37px] text-[13px] leading-[1.55] text-mist ${old ? "mt-2" : ""}`}>
           {software.description}
         </p>
 
@@ -280,7 +333,7 @@ export function SoftwareCard({
             ) : (
               <Link
                 href={detailHref}
-                className="inline-flex h-11 shrink-0 items-center gap-2 rounded-xl bg-[var(--menzu-accent)] px-5 text-[14px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent-dark)]"
+                className={`inline-flex shrink-0 items-center gap-2 bg-[var(--menzu-accent)] px-5 text-[14px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent-dark)] ${RENT}`}
               >
                 Thuê ngay
               </Link>
@@ -322,7 +375,9 @@ export function SoftwareCard({
                       : "Chưa có gói"
                 } - ${software.name}`}
                 onClick={() => hasPackages && setOpen((o) => !o)}
-                className={`flex h-[42px] w-full items-center justify-between gap-1 rounded-[10px] border bg-white/[0.02] px-2.5 text-[11px] font-extrabold outline-none transition-colors duration-200 hover:border-[var(--menzu-accent)]/45 hover:text-white focus-visible:ring-2 focus-visible:ring-[var(--menzu-accent)]/40 aria-expanded:border-[var(--menzu-accent)]/45 aria-expanded:text-white disabled:opacity-50 ${
+                className={`flex h-[42px] w-full items-center justify-between gap-1 rounded-[10px] border bg-white/[0.02] px-2.5 outline-none transition-colors duration-200 hover:border-[var(--menzu-accent)]/45 hover:text-white focus-visible:ring-2 focus-visible:ring-[var(--menzu-accent)]/40 aria-expanded:border-[var(--menzu-accent)]/45 aria-expanded:text-white disabled:opacity-50 ${
+                  old ? "text-[11px] font-extrabold" : "text-[13px] font-semibold"
+                } ${
                   chosen
                     ? "border-[var(--menzu-accent)]/45 text-white"
                     : "border-[#292a30] text-[#aaa]"
@@ -391,7 +446,7 @@ export function SoftwareCard({
               type="button"
               onClick={rentNow}
               disabled={!hasPackages}
-              className="h-11 rounded-xl bg-[var(--menzu-accent)] text-[14px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent-dark)] disabled:opacity-50"
+              className={`bg-[var(--menzu-accent)] text-[14px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent-dark)] disabled:opacity-50 ${RENT}`}
             >
               Thuê ngay
             </button>

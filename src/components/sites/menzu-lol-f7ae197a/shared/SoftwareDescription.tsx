@@ -59,6 +59,8 @@ export interface SoftwareDescriptionProps {
   /** "Hướng dẫn liên quan", between the setup guide and the warranty note;
    *  absent or null draws none (lib/relatedGuides.ts). */
   guides?: RelatedGuidesData | null;
+  /** LAB: ?ban=cu, "Hướng dẫn liên quan" headed as it was. */
+  old?: boolean;
 }
 
 const SUB_HEADING =
@@ -104,6 +106,7 @@ export function SoftwareDescription({
   loginHref,
   docsHref,
   guides = null,
+  old = false,
 }: SoftwareDescriptionProps) {
   /**
    * The product's own highlights, or the shop's default list where it has none.
@@ -288,7 +291,7 @@ export function SoftwareDescription({
    * note in both branches, headed as the h3 siblings around it are, so the
    * money page finally links the wiki (the SEO review, round 2, O12).
    */
-  const guidesBlock = <RelatedGuides guides={guides} heading="sub" />;
+  const guidesBlock = <RelatedGuides guides={guides} heading="sub" old={old} />;
 
   /**
    * The warranty note that closes the section.

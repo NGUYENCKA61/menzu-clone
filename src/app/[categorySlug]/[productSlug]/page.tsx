@@ -42,7 +42,7 @@ const GUEST_DOCS: DocsAccess = { state: "guest", until: null };
 
 interface PageProps {
   params: Promise<{ categorySlug: string; productSlug: string }>;
-  searchParams: Promise<{ pkg?: string; sl?: string }>;
+  searchParams: Promise<{ pkg?: string; sl?: string; ban?: string }>;
 }
 
 /** Route params arrive percent-encoded; a malformed one is used as typed. */
@@ -207,7 +207,11 @@ export default async function ProductPage({ params, searchParams }: PageProps) {
   if (found.isSoftware) {
     const software = await getSoftwareDetail(slug);
     if (!software) notFound();
-    const { pkg, sl } = await searchParams;
+    const { pkg, sl, ban } = await searchParams;
+    // LAB: ?ban=cu shows the pill, "Hướng dẫn liên quan" and the similar row
+    // as they were before 19/10/2026 ("chi tiết sản phẩm luôn"). A production
+    // build always shows the new.
+    const old = process.env.NODE_ENV !== "production" && ban === "cu";
 
     // The setup guide is for a buyer with the tool in hand, so the page
     // decides here, on the server, who is one: the text is dropped from what
@@ -304,6 +308,7 @@ export default async function ProductPage({ params, searchParams }: PageProps) {
           viewer={
             !user ? "guest" : user.verifiedAt || user.role === "ADMIN" ? "verified" : "member"
           }
+          old={old}
         />
       </>
     );

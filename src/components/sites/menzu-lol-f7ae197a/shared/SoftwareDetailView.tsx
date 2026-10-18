@@ -37,6 +37,7 @@ export function SoftwareDetailView({
   guides = null,
   free = null,
   viewer,
+  old = false,
 }: {
   software: SoftwareDetail;
   initialPackageId?: string;
@@ -58,6 +59,9 @@ export function SoftwareDetailView({
   free?: FreeToolPanel | null;
   /** Who is looking, for a tool sold to level 2 only. */
   viewer: BuyerLevel;
+  /** LAB: ?ban=cu, the page's pill, "Hướng dẫn liên quan" and the similar
+   *  strip as they were before 19/10/2026. */
+  old?: boolean;
 }) {
   // The long write-up belongs to the description section alone: the rich HTML
   // (if the admin wrote one) in full, or the plain sentence behind the name.
@@ -129,6 +133,7 @@ export function SoftwareDetailView({
                   initialQuantity={initialQuantity}
                   statusSubscribed={statusSubscribed}
                   viewer={viewer}
+                  old={old}
                 />
               )}
             </div>
@@ -147,6 +152,7 @@ export function SoftwareDetailView({
               docsHref={toolDocsHref(software.slug)}
               refundRate={software.refundRate}
               loginHref={`/login?next=${encodeURIComponent(productHref(software.categorySlug, software.slug))}`}
+              old={old}
             />
           </div>
         {/* A tool's own reviews stood here until the owner took them off the
@@ -161,6 +167,7 @@ export function SoftwareDetailView({
               ? { ...s, description: docHtmlToPlainText(s.description, 180) }
               : s,
           )}
+          old={old}
         />
     </>
   );

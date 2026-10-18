@@ -23,6 +23,8 @@ export interface ProductCardProps {
   priority?: boolean;
   /** Also above the fold: fetched before the rest, at no raised priority. */
   eager?: boolean;
+  /** LAB: ?ban=cu, the card from before 19/10/2026. */
+  old?: boolean;
 }
 
 /** Alt text for the tier icons, which are images and say nothing on their own. */
@@ -56,10 +58,18 @@ const CAROUSEL_INTERVAL_MS = 2500;
  * The whole card stays one anchor — an account is bought from its page, so
  * every part of the tile leads there and the pill is a styled span rather than
  * a nested control.
+ *
+ * Like the software card since 19/10/2026 ("đồng bộ với trang chủ card"): the
+ * home tile's 14px corners, faint rim, shade and name on the picture, and the
+ * pill at 42px with 10px corners. `old` is the lab's ?ban=cu.
  */
-export function ProductCard({ product, priority = false, eager = false }: ProductCardProps) {
+export function ProductCard({ product, priority = false, eager = false, old = false }: ProductCardProps) {
   const skinChips = product.skinChips ?? [];
   const pct = discountPct(product);
+  const title =
+    (product.name ? sentenceCase(product.name) : "") ||
+    [product.rank, product.skins > 0 ? `${product.skins} Skins` : ""].filter(Boolean).join(" - ") ||
+    `#${product.code}`;
 
   const trackRef = useRef<HTMLDivElement>(null);
   const [offset, setOffset] = useState(0);
@@ -130,9 +140,13 @@ export function ProductCard({ product, priority = false, eager = false }: Produc
       }}
       // acc-card is a hook for the light trial "moi" (theme-light.css,
       // part 6); it carries no style of its own.
-      className="acc-card lab-notch group flex h-full w-full flex-col overflow-hidden border border-line bg-white/[0.02] transition-colors hover:border-line-strong"
+      className={`acc-card group flex h-full w-full flex-col overflow-hidden transition-colors ${
+        old
+          ? "lab-notch border border-line bg-white/[0.02] hover:border-line-strong"
+          : "rounded-[14px] border border-white/[0.06] bg-panel hover:border-white/20"
+      }`}
     >
-      <div className="lab-notch-top relative aspect-[16/10] w-full overflow-hidden bg-raise">
+      <div className={`relative aspect-[16/10] w-full overflow-hidden bg-raise ${old ? "lab-notch-top" : "rounded-t-[14px]"}`}>
         <CardImage
           src={product.imageUrl ?? productImage(product.code)}
           // A stock code is not a description. Somebody hearing this read out
@@ -158,12 +172,32 @@ export function ProductCard({ product, priority = false, eager = false }: Produc
               : {})}
           className="object-cover object-[85%_center] transition-transform duration-500 group-hover:scale-105"
         />
-        {/* A fade along the bottom edge so the picture hands off to the body
-            instead of ending on a hard line. */}
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-x-0 bottom-0 h-[30%] bg-gradient-to-t from-black/45 to-transparent"
-        />
+        {old ? (
+          // A fade along the bottom edge so the picture hands off to the body
+          // instead of ending on a hard line.
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-x-0 bottom-0 h-[30%] bg-gradient-to-t from-black/45 to-transparent"
+          />
+        ) : (
+          // The home tile's shade, its red hover line and the name over it,
+          // as on the software card.
+          <>
+            <span aria-hidden className="pointer-events-none absolute inset-0 lab-lmarket-shade" />
+            <span
+              aria-hidden
+              className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-[var(--menzu-accent)]/70 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+            />
+            <span className="absolute inset-x-3.5 bottom-3 z-10">
+              <h3
+                title={title}
+                className="line-clamp-2 text-[17px] font-black leading-[1.15] text-white transition-colors duration-300 group-hover:text-[var(--menzu-accent)]"
+              >
+                {title}
+              </h3>
+            </span>
+          </>
+        )}
 
         <div className="absolute inset-x-3 top-3 z-10 flex items-start justify-between gap-2">
           {/* Same pill as the tag beside it — the two corner badges should
@@ -200,25 +234,22 @@ export function ProductCard({ product, priority = false, eager = false }: Produc
       </div>
 
       <div className="flex flex-1 flex-col p-4">
-        {/* Title with the red marker bar, same as the software card's. */}
-        <div className="flex items-center gap-2.5">
-          <h3 className="truncate text-[17px] font-semibold text-frost">
-            {(product.name ? sentenceCase(product.name) : "") ||
-              [product.rank, product.skins > 0 ? `${product.skins} Skins` : ""]
-                .filter(Boolean)
-                .join(" - ") ||
-              `#${product.code}`}
-          </h3>
-        </div>
+        {/* Title with the red marker bar, same as the software card's (the
+            old card; the new one names the account on its picture). */}
+        {old ? (
+          <div className="flex items-center gap-2.5">
+            <h3 className="truncate text-[17px] font-semibold text-frost">{title}</h3>
+          </div>
+        ) : null}
 
         {/* This account's own words when the shop wrote some; the stock two
             lines otherwise, so no card ever shows a blank where prose goes. */}
         {product.description ? (
-          <p className="mb-[14px] mt-2 line-clamp-2 min-h-[37px] text-[12px] leading-[1.55] text-[#9b9da5]">
+          <p className={`mb-[14px] line-clamp-2 min-h-[37px] text-[12px] leading-[1.55] text-[#9b9da5] ${old ? "mt-2" : ""}`}>
             {product.description}
           </p>
         ) : (
-          <p className="mb-[14px] mt-2 line-clamp-2 min-h-[37px] text-[12px] leading-[1.55] text-[#9b9da5]">
+          <p className={`mb-[14px] line-clamp-2 min-h-[37px] text-[12px] leading-[1.55] text-[#9b9da5] ${old ? "mt-2" : ""}`}>
             Tài khoản game nhiều vật phẩm, inventory đẹp và sẵn sàng giao ngay.
             <br />
             Thông tin tài khoản được kiểm tra trước khi bàn giao.
@@ -317,7 +348,11 @@ export function ProductCard({ product, priority = false, eager = false }: Produc
             </span>
             {/* The software card's primary button, worn here by the whole-card
                 link: the account page is where the purchase happens. */}
-            <span className="flex h-11 items-center rounded-xl bg-[var(--menzu-accent)] px-5 text-[14px] font-semibold text-white transition-colors group-hover:bg-[var(--menzu-accent-dark)]">
+            <span
+              className={`flex items-center bg-[var(--menzu-accent)] px-5 text-[14px] font-semibold text-white transition-colors group-hover:bg-[var(--menzu-accent-dark)] ${
+                old ? "h-11 rounded-xl" : "h-[42px] rounded-[10px]"
+              }`}
+            >
               Mua ngay
             </span>
           </div>

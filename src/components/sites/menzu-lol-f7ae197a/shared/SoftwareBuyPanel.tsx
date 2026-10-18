@@ -21,7 +21,7 @@ import { SoftwareCheckoutDialog } from "./SoftwareCheckoutDialog";
 import { StickyBuyBar } from "./StickyBuyBar";
 import { StatusToast } from "./StatusToast";
 import { StockLine } from "./StockLine";
-import { isSalesLocked, salesLockReason } from "@/lib/softwareStatus";
+import { isSalesLocked, salesLockReason, SOFTWARE_STATUS } from "@/lib/softwareStatus";
 import { softwareBuyable, softwareStockLabel } from "@/lib/softwareStock";
 
 export interface SoftwarePackageView {
@@ -132,6 +132,7 @@ export function SoftwareBuyPanel({
   initialPackageId,
   initialQuantity,
   viewer,
+  old = false,
 }: {
   software: SoftwareDetail;
   /** From `?pkg=` — the tier a listing card was already showing. */
@@ -143,6 +144,8 @@ export function SoftwareBuyPanel({
   statusSubscribed: boolean | null;
   /** Who is looking, for a tool sold to level 2 only. */
   viewer: BuyerLevel;
+  /** LAB: ?ban=cu, the pill in its own colours from before 19/10/2026. */
+  old?: boolean;
 }) {
   const router = useRouter();
 
@@ -218,9 +221,12 @@ export function SoftwareBuyPanel({
     }
   }
 
+  // The site's state colours (lib/softwareStatus), so the pill here reads as
+  // the cards, the history and the subscribe tab do; this page kept a copy
+  // of its own and missed the paler "Ổn định" (19/10/2026).
   const status =
     software.showStatus && software.softwareStatus
-      ? STATUS_STYLE[software.softwareStatus]
+      ? (old ? STATUS_STYLE : SOFTWARE_STATUS)[software.softwareStatus]
       : null;
   // Said here even when the shop hides the status pill: a greyed-out button
   // with no reason reads as a broken page. The server refuses the order and

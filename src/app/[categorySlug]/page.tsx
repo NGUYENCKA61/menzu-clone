@@ -4,6 +4,7 @@ import { notFound, permanentRedirect } from "next/navigation";
 
 import { Breadcrumb } from "@/components/sites/menzu-lol-f7ae197a/shared/Breadcrumb";
 import { CategoryHero } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/CategoryHero";
+import { sentenceCase } from "@/lib/displayCase";
 import { CategoryFilterPanel } from "@/components/sites/menzu-lol-f7ae197a/shared/CategoryFilterPanel";
 import { ProductCard } from "@/components/sites/menzu-lol-f7ae197a/shared/ProductCard";
 import { CardBoundary } from "@/components/sites/menzu-lol-f7ae197a/shared/CardBoundary";
@@ -32,6 +33,8 @@ import { launcherFromParam, runsOnFromParam } from "@/lib/toolFilters";
 interface PageProps {
   params: Promise<{ categorySlug: string }>;
   searchParams: Promise<{
+    /** LAB: "cu" draws the tool cards and the FAQ as they were. */
+    ban?: string;
     page?: string;
     min?: string;
     max?: string;
@@ -137,6 +140,11 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
   const { categorySlug: slug } = await params;
   const query = await searchParams;
   const page = Math.max(1, Number(query.page ?? 1) || 1);
+  // LAB: ?ban=cu shows the tool cards, the "Về …" heading and the FAQ as they
+  // were before 19/10/2026, to set beside the new ("rà soát trang chi tiết
+  // danh mục làm cho nó đồng bộ với trang chủ card"). A production build
+  // always shows the new.
+  const old = process.env.NODE_ENV !== "production" && query.ban === "cu";
 
   const data = await getCategoryPage(slug, page, {
     min: toAmount(query.min),
@@ -278,6 +286,7 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
                       // costs that tile, not the shelf.
                       <CardBoundary key={s.code}>
                         <SoftwareCard
+                          old={old}
                           // The hero picture above is the page's LCP image
                           // when there is one; only without it is the first
                           // card the one fetched at High. Two cards eager:
@@ -316,9 +325,15 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
                     comes off. It used to read /^hacks+/ — a lost backslash —
                     which matched "hacks" and never "HACK ", so every shelf
                     was headed "tài khoản game HACK …". */}
+                {/* The game in sentence case, as the title over the page names
+                    the shelf (it printed the stored capitals, "ĐỘT KÍCH CFVN -
+                    CF4VN", 19/10/2026). */}
                 <h2 className="text-lg sm:text-[20px] font-bold text-white mb-5">
                   Danh mục tài khoản game{" "}
-                  {data.name.replace(/^(tool\s+)?hack\s*\+?\s*/i, "").trim() || data.name}
+                  {(() => {
+                    const game = data.name.replace(/^(tool\s+)?hack\s*\+?\s*/i, "").trim() || data.name;
+                    return old ? game : sentenceCase(game);
+                  })()}
                 </h2>
 
                 <CategoryFilterPanel hotPicks={hotPicks} />
@@ -330,6 +345,7 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
                         <ProductCard
                           key={product.code}
                           product={product}
+                          old={old}
                           // Only when neither a hero picture nor a tool grid
                           // sits above: the first picture the reader sees is
                           // the one to fetch at High, one per page. Under a
@@ -395,7 +411,7 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
                 review, round 2, O9 and O12). */}
             {data.page === 1 ? (
               <>
-                <CategorySeoSection copy={categorySeoCopy(data.slug)} categoryName={data.name} />
+                <CategorySeoSection copy={categorySeoCopy(data.slug)} categoryName={data.name} old={old} />
                 <RelatedGuides guides={guides} />
               </>
             ) : null}

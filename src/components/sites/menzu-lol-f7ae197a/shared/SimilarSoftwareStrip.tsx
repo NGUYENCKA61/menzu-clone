@@ -15,8 +15,9 @@ import { SoftwareCard, type SoftwareCardView } from "./SoftwareCard";
  *
  * The descriptions arrive as plain sentences already: the page strips the
  * rich-editor HTML on the server, so nothing here needs the sanitiser.
+ * `old` is the lab's ?ban=cu (the cards and the scroller as they were).
  */
-export function SimilarSoftwareStrip({ items }: { items: SoftwareCardView[] }) {
+export function SimilarSoftwareStrip({ items, old = false }: { items: SoftwareCardView[]; old?: boolean }) {
   const strip = useRef<HTMLDivElement>(null);
   const [canPrev, setCanPrev] = useState(false);
   const [canNext, setCanNext] = useState(false);
@@ -96,10 +97,14 @@ export function SimilarSoftwareStrip({ items }: { items: SoftwareCardView[] }) {
       {/* Three across on a desktop, two on a tablet, most of the screen on a
           phone: the widths are written out so that a tile and its gap is
           exactly one press of the arrow. The scrollbar is hidden — the
-          arrows and the swipe are the controls. */}
+          arrows and the swipe are the controls — by .hide-scrollbar: the
+          arbitrary [scrollbar-width:none] lost to globals.css's unlayered
+          "* { scrollbar-width: thin }" and a thin bar showed (19/10/2026). */}
       <div
         ref={strip}
-        className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:gap-6 xl:gap-8"
+        className={`flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2 lg:gap-6 xl:gap-8 ${
+          old ? "[scrollbar-width:none] [&::-webkit-scrollbar]:hidden" : "hide-scrollbar"
+        }`}
       >
         {items.map((s) => (
           <div
@@ -108,7 +113,7 @@ export function SimilarSoftwareStrip({ items }: { items: SoftwareCardView[] }) {
             className="w-[82vw] max-w-[360px] shrink-0 snap-start sm:w-[calc(50%-0.5rem)] sm:max-w-none lg:w-[calc((100%-3rem)/3)] xl:w-[calc((100%-4rem)/3)]"
           >
             <CardBoundary>
-              <SoftwareCard software={s} variant="compact" />
+              <SoftwareCard software={s} variant="compact" old={old} />
             </CardBoundary>
           </div>
         ))}

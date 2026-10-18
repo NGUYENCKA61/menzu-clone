@@ -45,9 +45,12 @@ function LinkGroup({ heading, links }: { heading: string; links: GuideLink[] }) 
 export function RelatedGuides({
   guides,
   heading = "section",
+  old = false,
 }: {
   guides: RelatedGuidesData | null;
   heading?: RelatedGuidesHeading;
+  /** LAB: ?ban=cu, the "sub" heading as it was before 19/10/2026. */
+  old?: boolean;
 }) {
   if (!guides) return null;
   const { game, general, setup } = guides;
@@ -58,9 +61,13 @@ export function RelatedGuides({
       {heading === "section" ? (
         <SectionHeading id="related-guides-heading">Hướng dẫn liên quan</SectionHeading>
       ) : (
+        // Under a product page's write-up it reads as the sub headings beside
+        // it ("Yêu cầu hệ thống", "Tính năng nổi bật": the display face,
+        // 19px, semibold, the frost white), not a 17px black of its own
+        // (19/10/2026, "đồng bộ").
         <h3
           id="related-guides-heading"
-          className="text-[17px] font-black text-white"
+          className={old ? "text-[17px] font-black text-white" : "font-display text-[19px] font-semibold text-frost"}
         >
           Hướng dẫn liên quan
         </h3>
