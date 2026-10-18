@@ -204,9 +204,13 @@ export function LoginForm({
                 bright. The 1px hairline at the seam (white at 5%) stays, as on
                 menzu: taken off with the fade, put back (the owner, same day:
                 "menzu tối nma vẫn còn thấy đường chỉ card", "thêm đi"). Same
-                on the sign-up card. */}
+                on the sign-up card. LAB trial: the fade taken off, the picture
+                whole up to the hairline (the owner, same day: "bỏ thử hiệu ứng
+                tan xem"); the mask was
+                [mask-image:linear-gradient(to_right,black_40%,transparent)]
+                on the div below. */}
             <div className="hidden lg:flex w-1/2 relative bg-neutral-950/60 overflow-hidden transform-gpu items-end justify-center border-r border-white/5">
-              <div className="absolute inset-0 [mask-image:linear-gradient(to_right,black_40%,transparent)]">
+              <div className="absolute inset-0">
                 <AuthPanelSlider
                   images={panelImages}
                   autoPlay={slideEnabled}
