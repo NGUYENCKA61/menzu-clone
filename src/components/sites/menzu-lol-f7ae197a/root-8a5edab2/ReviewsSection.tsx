@@ -3,6 +3,7 @@ import Link from "next/link";
 import { BadgeCheck, Star } from "lucide-react";
 
 import { RevealGrid } from "./RevealGrid";
+import { SectionHeading } from "./SectionHeading";
 
 export interface Review {
   name: string;
@@ -155,25 +156,24 @@ export function ReviewsSection({
       aria-labelledby="reviews-heading"
       className="relative w-full pt-12 lg:pt-16 before:absolute before:left-1/2 before:top-0 before:h-px before:w-screen before:-translate-x-1/2 before:bg-white/[0.06]"
     >
-      {/* LAB trial: the main site's centred block, the title in the other
-          titles' capitals but with no red bar, the line under it centred,
-          and the way to the rest under the cards (the owner, 18/10/2026:
-          "Chiến thắng trong tầm tay bạn nên làm bản căn giữa như cũ?", "làm
-          thử đi"), with the main site's red second half on this title alone
-          ("tô màu như web cũ đi Chiến thắng trong tầm tay bạn"). */}
-      <div className="mx-auto flex max-w-2xl flex-col items-center gap-2 text-center">
-        <h2
-          id="reviews-heading"
-          // Balanced, so a phone's two lines do not leave "BẠN" on its own.
-          // The other titles' size, 20px and 24px from sm, after a spell at
-          // the main site's 24px and 30px (the owner, 18/10/2026: "câu hỏi
-          // thường gặp và chiến thắng trong tầm tay hạ về đúng 2 cỡ chữ kia").
-          className="row-heading text-balance text-xl font-black uppercase tracking-wider text-frost sm:text-2xl"
-        >
-          Chiến thắng{" "}
-          <span className="text-[var(--menzu-accent)]">trong tầm tay bạn</span>
-        </h2>
-        <p className="text-[15px] text-mist">
+      {/* The game rows' title, and their "Xem tất cả" on its right (the
+          owner, 18/10/2026: "làm hết đi"), over the main site's own words,
+          "Chiến thắng trong tầm tay bạn", after a spell as "Đánh giá từ
+          khách hàng" ("làm cái dòng Chiến thắng trong tầm tay bạn như web cũ
+          ... làm sao cho đồng bộ lại là đc"). The main site's centred block,
+          red second half and bigger size were tried and dropped for this, so
+          all four home titles match ("Về kiểu vạch đỏ như hàng game"). */}
+      <div className="flex flex-col gap-2">
+        <div className="flex flex-row items-end justify-between gap-4">
+          <SectionHeading id="reviews-heading">Chiến thắng trong tầm tay bạn</SectionHeading>
+          <Link
+            href="/feedback"
+            className="shrink-0 text-[14px] font-medium text-mist underline-offset-4 transition-colors hover:text-frost hover:underline"
+          >
+            Xem tất cả
+          </Link>
+        </div>
+        <p className="max-w-2xl text-[15px] text-mist">
           Đánh giá thật từ khách hàng đã giao dịch, admin duyệt trước khi hiện.
         </p>
       </div>
@@ -184,32 +184,23 @@ export function ReviewsSection({
         ))}
       </RevealGrid>
 
-      {/* Under the cards, centred like the title: the score and the count
-          once there are enough of them to mean something
-          (MIN_REVIEWS_FOR_SCORE), then the way to the rest. */}
-      <div className="mt-6 flex flex-col items-center gap-3">
-        {summary && summary.count >= MIN_REVIEWS_FOR_SCORE ? (
-          <div className="flex items-center gap-2.5">
-            <Stars filled={Math.round(summary.rating)} size={15} />
-            <span className="text-sm font-black text-white">
-              {summary.rating.toLocaleString("vi-VN", {
-                minimumFractionDigits: 1,
-                maximumFractionDigits: 1,
-              })}
-              <span className="text-neutral-500">/5</span>
-            </span>
-            <span className="text-[13px] text-mist">
-              {summary.count} đánh giá
-            </span>
-          </div>
-        ) : null}
-        <Link
-          href="/feedback"
-          className="text-[14px] font-medium text-mist underline-offset-4 transition-colors hover:text-frost hover:underline"
-        >
-          Xem tất cả đánh giá
-        </Link>
-      </div>
+      {/* The score and the count under the cards, once there are enough of
+          them to mean something (MIN_REVIEWS_FOR_SCORE). */}
+      {summary && summary.count >= MIN_REVIEWS_FOR_SCORE ? (
+        <div className="mt-6 flex items-center gap-2.5">
+          <Stars filled={Math.round(summary.rating)} size={15} />
+          <span className="text-sm font-black text-white">
+            {summary.rating.toLocaleString("vi-VN", {
+              minimumFractionDigits: 1,
+              maximumFractionDigits: 1,
+            })}
+            <span className="text-neutral-500">/5</span>
+          </span>
+          <span className="text-[13px] text-mist">
+            {summary.count} đánh giá
+          </span>
+        </div>
+      ) : null}
     </section>
   );
 }
