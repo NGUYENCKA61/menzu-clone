@@ -184,7 +184,7 @@ export function RegisterForm({
                 (LoginForm.tsx has the why; the owner, 18/10/2026: "thêm
                 hiệu ứng đi", "giống bên menzu trang đăng nhập"). */}
             <div className="hidden lg:flex w-1/2 relative bg-neutral-950/60 overflow-hidden transform-gpu items-end justify-center">
-              <div className="absolute inset-0 [mask-image:linear-gradient(to_right,black_40%,transparent)]">
+              <div className="absolute inset-0 [mask-image:linear-gradient(to_right,black_55%,transparent)]">
                 <AuthPanelSlider
                   images={panelImages}
                   autoPlay={slideEnabled}

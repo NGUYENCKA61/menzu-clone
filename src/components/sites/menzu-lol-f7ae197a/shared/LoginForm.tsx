@@ -202,9 +202,11 @@ export function LoginForm({
                 two halves meet with no line. menzu lays a colour gradient to
                 its form's #101010 from the left edge; a mask matches our
                 see-through ground, and starting at 40% keeps the figure in the
-                middle of the picture bright. Same on the sign-up card. */}
+                middle of the picture bright. Same on the sign-up card. LAB
+                trial, a lighter melt: whole for the first 55%, not 40% (the
+                owner, same day: "giảm hiệu ứng tan thử"). */}
             <div className="hidden lg:flex w-1/2 relative bg-neutral-950/60 overflow-hidden transform-gpu items-end justify-center">
-              <div className="absolute inset-0 [mask-image:linear-gradient(to_right,black_40%,transparent)]">
+              <div className="absolute inset-0 [mask-image:linear-gradient(to_right,black_55%,transparent)]">
                 <AuthPanelSlider
                   images={panelImages}
                   autoPlay={slideEnabled}
