@@ -258,7 +258,7 @@ export default async function AnnouncementsPage({
               thái"); the name stays for screen readers. */}
           <section aria-label="Lịch sử trạng thái">
             {events.length === 0 ? (
-              <div className="rounded-[14px] border border-dashed border-white/10 bg-white/[0.02] py-16 text-center">
+              <div className={`${old ? "rounded-[14px]" : "rounded-2xl"} border border-dashed border-white/10 bg-white/[0.02] py-16 text-center`}>
                 <p className="text-[15px] font-semibold text-frost">Chưa có thay đổi nào</p>
                 <p className="mt-1.5 text-[14px] text-mist">
                   Mỗi lần shop đổi trạng thái một tool sẽ hiện ở đây.
@@ -317,10 +317,18 @@ export default async function AnnouncementsPage({
                             </Link>
                           </>
                         );
+                        // The shop's words behind a bar on the left, the way
+                        // the reviews quote a buyer and a notice sets off its
+                        // callout, rather than a box inside the card (18/10/2026,
+                        // "xét sự đồng bộ luôn").
                         const note = (extra: string) =>
                           event.note ? (
                             <div
-                              className={`break-words rounded-[10px] border border-white/10 bg-white/[0.02] px-3.5 py-2.5 text-[14px] leading-relaxed text-mist ${extra}`}
+                              className={`break-words text-[14px] leading-relaxed text-mist ${
+                                old
+                                  ? "rounded-[10px] border border-white/10 bg-white/[0.02] px-3.5 py-2.5"
+                                  : "border-l-2 border-white/10 pl-3.5"
+                              } ${extra}`}
                             >
                               <StatusNote text={event.note} />
                             </div>
@@ -400,7 +408,8 @@ export default async function AnnouncementsPage({
           </section>
         </>
       ) : announcements.length === 0 ? (
-        <div className="rounded-[14px] border border-dashed border-white/10 bg-white/[0.02] py-16 text-center">
+        // 18px like every other empty box on the site, where it was 14px.
+        <div className={`${old ? "rounded-[14px]" : "rounded-2xl"} border border-dashed border-white/10 bg-white/[0.02] py-16 text-center`}>
           <p className="text-[15px] font-semibold text-frost">Chưa có thông báo nào</p>
           <p className="mt-1.5 text-[14px] text-mist">
             Thông báo từ shop sẽ hiện ở đây.
@@ -417,7 +426,7 @@ export default async function AnnouncementsPage({
               <div className="flex flex-wrap items-center gap-2">
                 {/* The word with its small glyph, the same chip the account
                     overview lists notices with. */}
-                <NoticeTypeChip type={item.type} />
+                <NoticeTypeChip type={item.type} old={old} />
                 <span className="lab-figure text-[13px] text-dim">
                   {formatWhen(item.startAt)}
                 </span>
@@ -459,12 +468,14 @@ export default async function AnnouncementsPage({
               {item.bullets.length > 0 ? (
                 <ul className="mt-4 flex flex-col gap-2">
                   {item.bullets.map((line, index) => (
+                    // The body's 15px, where the points sat a size below the
+                    // paragraph they follow (18/10/2026).
                     <li key={index} className="flex gap-2.5">
                       <span
                         aria-hidden
-                        className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--menzu-accent)]"
+                        className={`${old ? "mt-[7px]" : "mt-[9px]"} h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--menzu-accent)]`}
                       />
-                      <span className="text-sm leading-relaxed text-neutral-300">
+                      <span className={`${old ? "text-sm" : "text-[15px]"} leading-relaxed text-neutral-300`}>
                         {line}
                       </span>
                     </li>

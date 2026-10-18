@@ -295,9 +295,15 @@ export function StatusSubscribeSearch({
                   <Image src={shelf.imageUrl} alt="" fill sizes="28px" className="object-cover" />
                 </span>
               ) : null}
+              {/* The name, the count and the rule in the history tab's day
+                  heading's sizes and colours, 15px over a 13px count and the
+                  site's line, where they were 13px, 12px and a fainter rule
+                  (18/10/2026, "xét sự đồng bộ luôn"). */}
               <Link
                 href={categoryHref(shelf.slug)}
-                className="group inline-flex items-center gap-1.5 text-[13px] font-semibold text-white transition-colors hover:text-[var(--menzu-accent)]"
+                className={`group inline-flex items-center gap-1.5 font-semibold transition-colors hover:text-[var(--menzu-accent)] ${
+                  old ? "text-[13px] text-white" : "text-[15px] text-frost"
+                }`}
               >
                 {shelf.name}
                 <ArrowRight
@@ -306,7 +312,7 @@ export function StatusSubscribeSearch({
                   className="text-neutral-600 transition-colors group-hover:text-[var(--menzu-accent)]"
                 />
               </Link>
-              <span className="text-[12px] font-semibold text-neutral-500">
+              <span className={old ? "text-[12px] font-semibold text-neutral-500" : "text-[13px] text-dim"}>
                 {shelf.tools.length} tool
                 {signedIn && shelf.following > 0 ? (
                   <>
@@ -317,7 +323,7 @@ export function StatusSubscribeSearch({
                   </>
                 ) : null}
               </span>
-              <span aria-hidden className="h-px min-w-6 flex-1 bg-white/[0.08]" />
+              <span aria-hidden className={`h-px min-w-6 flex-1 ${old ? "bg-white/[0.08]" : "bg-line"}`} />
               <ShelfFollowButton
                 slug={shelf.slug}
                 name={shelf.name}
@@ -353,8 +359,12 @@ export function StatusSubscribeSearch({
                     <Link
                       href={tool.href}
                       aria-label={tool.name}
-                      className={`relative grid aspect-[16/9] w-[92px] shrink-0 place-items-center overflow-hidden border bg-[linear-gradient(135deg,#171922,#36151e,#0d0e12)] ${
-                        old ? "rounded-xl border-white/10" : "lab-notch-sm border-line"
+                      // On a phone the orders list's 96x64, as the history
+                      // tab's pictures now are; 92px 16:9 in the grid above.
+                      className={`relative grid shrink-0 place-items-center overflow-hidden border bg-[linear-gradient(135deg,#171922,#36151e,#0d0e12)] ${
+                        old
+                          ? "aspect-[16/9] w-[92px] rounded-xl border-white/10"
+                          : "lab-notch-sm aspect-[3/2] w-24 border-line sm:aspect-[16/9] sm:w-[92px]"
                       }`}
                     >
                       {cover ? (
@@ -362,7 +372,7 @@ export function StatusSubscribeSearch({
                           src={cover}
                           alt=""
                           fill
-                          sizes="92px"
+                          sizes="96px"
                           className="object-cover"
                         />
                       ) : (
