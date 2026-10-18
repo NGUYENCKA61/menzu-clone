@@ -90,6 +90,8 @@ export interface ProductRowProps {
   bigTiles?: boolean;
   /** How the picture tiles dress their covers (see TileStyle). */
   tileStyle?: TileStyle;
+  /** The game list's tile shape from sm up (see ListShape). */
+  listShape?: ListShape;
   /**
    * The picks as rows instead of cards — a small cover, the pill, the name
    * and one line of blurb, two columns from md. Hot trending's, when the
@@ -648,6 +650,15 @@ export type TileStyle =
  */
 export const DEFAULT_TILE_STYLE: TileStyle = "a3";
 
+/**
+ * LAB: the game list's tile shape from sm up, "43" or "169", so both can be
+ * opened side by side (?khung=43 / ?khung=169; the owner, 18/10/2026: "bổ
+ * sung thêm 1 phiên bản card lùi card tiến … để tui so sánh luôn"). A phone
+ * keeps 4:3 either way. The choice itself is parked on the review page.
+ */
+export type ListShape = "43" | "169";
+export const DEFAULT_LIST_SHAPE: ListShape = "169";
+
 /** The eyebrow a tile wears in style b, from the category's platform tag. */
 function platformWord(platform: string | null | undefined): string {
   const p = (platform ?? "").toUpperCase();
@@ -670,11 +681,14 @@ export function RowTile({
   pick = false,
   big = false,
   style = DEFAULT_TILE_STYLE,
+  shape = DEFAULT_LIST_SHAPE,
 }: {
   card: ProductCard;
   pick?: boolean;
   big?: boolean;
   style?: TileStyle;
+  /** A list tile's shape from sm up (see ListShape); pick tiles ignore it. */
+  shape?: ListShape;
 }) {
   // LAB: tile style "d" is the old card with the quiet grey button (see
   // TileStyle); the game list's tile runs its cover to the edges ("wide"),
@@ -814,7 +828,9 @@ export function RowTile({
           ? "aspect-[4/3] sm:aspect-[16/10]"
           : style === "a6cu"
             ? "aspect-square"
-            : "aspect-[4/3] sm:aspect-video",
+            : shape === "43"
+              ? "aspect-[4/3]"
+              : "aspect-[4/3] sm:aspect-video",
         style === "a" && "hover:border-[var(--menzu-accent)]/40",
         // A2 lights its rim in the shop's red under the pointer, as
         // elitehacks lights theirs in their green.
@@ -1141,6 +1157,7 @@ export function ProductRow({
   bigPicks = false,
   bigTiles = false,
   tileStyle = DEFAULT_TILE_STYLE,
+  listShape = DEFAULT_LIST_SHAPE,
   list = false,
   quiet = false,
   rows = 1,
@@ -1230,7 +1247,7 @@ export function ProductRow({
             title: card.title,
             platform: card.platform ?? null,
             node: tiles ? (
-              <RowTile card={card} big={bigTiles} style={tileStyle} />
+              <RowTile card={card} big={bigTiles} style={tileStyle} shape={listShape} />
             ) : (
               <RowCard card={card} t={t} top={ranked} wide quiet={quiet} />
             ),

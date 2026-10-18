@@ -9,8 +9,10 @@ import {
 } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/HeroBanners";
 import { HomeBackdrop } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/HomeBackdrop";
 import {
+  DEFAULT_LIST_SHAPE,
   DEFAULT_TILE_STYLE,
   ProductRow,
+  type ListShape,
   type TileStyle,
 } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/ProductRow";
 import { DocsSection } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/DocsSection";
@@ -70,12 +72,20 @@ function pickTileStyle(raw: string | string[] | undefined): TileStyle {
   return known ?? DEFAULT_TILE_STYLE;
 }
 
+/** LAB: ?khung=43 or ?khung=169, the game list's tile shape (see ListShape). */
+function pickListShape(raw: string | string[] | undefined): ListShape {
+  const value = typeof raw === "string" ? raw.replace(/[^0-9]/g, "") : "";
+  return value === "43" || value === "169" ? value : DEFAULT_LIST_SHAPE;
+}
+
 export default async function Home({
   searchParams,
 }: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
-  const tileStyle = pickTileStyle((await searchParams).kieu);
+  const query = await searchParams;
+  const tileStyle = pickTileStyle(query.kieu);
+  const listShape = pickListShape(query.khung);
   const settings = await getShopSettings();
   const trust = await getTrustStats(settings);
   const [flashSaleItems, reviews] = await Promise.all([getFlashSaleItems(), getFeedback()]);
@@ -156,6 +166,7 @@ export default async function Home({
               // (the owner, 17/10/2026: "kiểu D vẫn có 4 cục 4 card nha").
               bigPicks={group.slug === "hot-trending" && tileStyle !== "d"}
               tileStyle={tileStyle}
+              listShape={listShape}
               rows={group.slug === GAME_LIST_SLUG ? 3 : 1}
             />
             {/* The figures follow Hot trending again, as on the main site
