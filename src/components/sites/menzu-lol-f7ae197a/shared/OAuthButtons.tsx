@@ -25,8 +25,11 @@
  */
 
 /** The chrome both buttons share — the brand pieces slot inside it. */
-const SHELL =
-  "relative overflow-hidden transform-gpu flex items-center justify-center gap-3 rounded-2xl border border-white/10 bg-black/40 py-4 text-[14px] font-semibold text-neutral-300 transition-all duration-300 hover:-translate-y-1 hover:border-white/30 hover:bg-white/10 hover:text-white hover:shadow-[0_10px_20px_rgba(0,0,0,0.5)] active:translate-y-0 active:scale-95 group/btn";
+const SHELL_BASE =
+  "relative overflow-hidden transform-gpu flex items-center justify-center gap-3 rounded-2xl border border-white/10 bg-black/40 py-4 text-neutral-300 transition-all duration-300 hover:-translate-y-1 hover:border-white/30 hover:bg-white/10 hover:text-white hover:shadow-[0_10px_20px_rgba(0,0,0,0.5)] active:translate-y-0 active:scale-95 group/btn";
+const SHELL = `${SHELL_BASE} text-[14px] font-semibold`;
+/** LAB trial: the main site's spaced capitals (see `caps`). */
+const SHELL_CAPS = `${SHELL_BASE} text-xs font-black uppercase tracking-widest`;
 
 /** The band that sweeps across on hover; each brand tints it its own way. */
 const SHEEN =
@@ -73,39 +76,46 @@ export interface OAuthButtonsProps {
   /** True once the provider's client id and secret are both configured. */
   googleEnabled?: boolean;
   discordEnabled?: boolean;
+  /** LAB trial: the labels in the main site's spaced capitals, for the
+   *  sign-in page's caps trial (the owner, 18/10/2026: "làm bản chữ in
+   *  giống web gốc thử"); the sign-up page keeps its sentence case. */
+  caps?: boolean;
 }
 
 /** Anchor when the door exists, button when it does not — one look, two tags. */
 function BrandShell({
   enabled,
   href,
+  caps = false,
   children,
 }: {
   enabled: boolean;
   href: string;
+  caps?: boolean;
   children: React.ReactNode;
 }) {
+  const className = caps ? SHELL_CAPS : SHELL;
   return enabled ? (
-    <a href={href} className={SHELL}>
+    <a href={href} className={className}>
       {children}
     </a>
   ) : (
-    <button type="button" className={SHELL}>
+    <button type="button" className={className}>
       {children}
     </button>
   );
 }
 
-export function OAuthButtons({ googleEnabled, discordEnabled }: OAuthButtonsProps) {
+export function OAuthButtons({ googleEnabled, discordEnabled, caps = false }: OAuthButtonsProps) {
   return (
     <div className="grid grid-cols-2 gap-4">
-      <BrandShell enabled={Boolean(googleEnabled)} href="/api/auth/google">
+      <BrandShell enabled={Boolean(googleEnabled)} href="/api/auth/google" caps={caps}>
         <span aria-hidden className={`${SHEEN} via-white/10`} />
         <GoogleMark className={ICON} />
         <span className="relative z-10">Google</span>
       </BrandShell>
 
-      <BrandShell enabled={Boolean(discordEnabled)} href="/api/auth/discord">
+      <BrandShell enabled={Boolean(discordEnabled)} href="/api/auth/discord" caps={caps}>
         <span aria-hidden className={`${SHEEN} via-[#5865F2]/20`} />
         {/* Blurple at rest, white at full hover — the shell's text colour
             flips and currentColor carries the mark with it. */}
