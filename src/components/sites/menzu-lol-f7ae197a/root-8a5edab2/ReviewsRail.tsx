@@ -8,7 +8,8 @@ import { RevealGrid } from "./RevealGrid";
 /**
  * The home reviews' title and strip, with a pair of arrows that walk the
  * strip one card at a time (the owner, 18/10/2026: "thêm nút di chuyển coi
- * đánh giá"); a sideways swipe does the same on a phone.
+ * đánh giá"); a sideways swipe does the same on a phone or a tablet, while
+ * a desktop moves only by the arrows.
  *
  * The arrows are the "Sản phẩm tương tự" strip's (SimilarSoftwareStrip):
  * small rings in the heading, dim at either end rather than gone, so
@@ -102,9 +103,14 @@ export function ReviewsRail({ header, children }: { header: ReactNode; children:
           card sets its own width). pt-2 keeps the hover lift and its glow
           clear of the box's top edge, which would cut them; the margins
           above are 8px short to match. overscroll-x-contain: a swipe past
-          the end must not reach the system, which reads it as "back". */}
+          the end must not reach the system, which reads it as "back".
+          From lg the box takes no scrolling by hand, only the arrows move
+          it (the owner, 18/10/2026: "giữ cái nút kia chỉ bỏ thanh kéo
+          thôi"); a touchpad or a sideways wheel no longer drags it.
+          overflow hidden still lets scrollBy move it. A phone and a tablet
+          keep the swipe ("trên đt cứ giữ thanh kéo đó"). */}
       <div ref={rail} className="mt-1 lg:mt-6">
-        <RevealGrid className="flex snap-x snap-mandatory gap-4 overflow-x-auto overscroll-x-contain pt-2 pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <RevealGrid className="flex snap-x snap-mandatory gap-4 overflow-x-auto overscroll-x-contain pt-2 pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:overflow-x-hidden">
           {children}
         </RevealGrid>
       </div>
