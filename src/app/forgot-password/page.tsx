@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { SiteFooter } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/SiteFooter";
-import { PageBackdrop } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/PageBackdrop";
 import { SiteHeader } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/SiteHeader";
 import { ForgotPasswordForm } from "@/components/sites/menzu-lol-f7ae197a/shared/ForgotPasswordForm";
 import { mailEnabled } from "@/lib/settings";
@@ -30,8 +29,10 @@ export default async function ForgotPasswordPage() {
 
   return (
     <div className="min-h-screen flex flex-col text-white overflow-x-clip selection:bg-[var(--menzu-accent)]/30">
-      {/* The same blurred artwork as the sign-in pages (lab, 17/10/2026). */}
-      <PageBackdrop src={settings.siteBackground} soft />
+      {/* LAB: no blurred cover here any more, so the site's artwork shows
+          behind the card as on the main site (the owner, 18/10/2026: "giống
+          3100 đi, thấy được ảnh nền phía sau"); it had been given the
+          sign-in pages' near-black blur on 17/10. */}
       {/* spacer reserving the fixed header's 104px */}
       <div className="w-full shrink-0 h-[104px]" />
       <SiteHeader />
