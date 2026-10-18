@@ -82,9 +82,8 @@ export default async function Home({
   const listShape = pickListShape(query.khung);
   const settings = await getShopSettings();
   const trust = await getTrustStats(settings);
-  // LAB: made-up reviews with a bought tool each, ahead of the real ones,
-  // when LAB_SAMPLE_REVIEWS=1 (src/lib/labSampleReviews.ts); the real ones
-  // alone otherwise.
+  // LAB: made-up reviews with a bought tool each when LAB_SAMPLE_REVIEWS=1
+  // (src/lib/labSampleReviews.ts); the real ones otherwise.
   const [flashSaleItems, reviews] = await Promise.all([
     getFlashSaleItems(),
     getFeedback().then(withSampleReviews),
@@ -183,11 +182,8 @@ export default async function Home({
       <div key="reviews">
         {statsAfterTrending ? null : <TrustStatsStrip stats={trust} />}
         <ReviewsSection
-          // LAB: twelve on the home page, four in view at a time from lg and
-          // walked by the strip's arrows (the owner, 18/10/2026: "thêm nút di
-          // chuyển coi đánh giá"), where four sat still; the rest live on
-          // /feedback.
-          reviews={reviews.slice(0, 12).map((r) => ({
+          // Four on the home page — a taste; the rest live on /feedback.
+          reviews={reviews.slice(0, 4).map((r) => ({
             name: r.name,
             date: r.createdAt.toLocaleDateString("vi-VN"),
             body: r.body,

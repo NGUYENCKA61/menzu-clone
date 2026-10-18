@@ -6,14 +6,12 @@ import { productHref } from "@/lib/routes";
 
 /**
  * LAB 2 ONLY: four made-up reviews, each tied to a real tool of the shop,
- * ahead of the home page's real ones, so the owner can see every card
+ * in place of the home page's real ones, so the owner can see every card
  * with a bought tool's name under its stars (18/10/2026: "làm dữ liệu test
  * 4 khách hàng mua đi", "hiện chữ đỏ sản phẩm tui coi", "tên tool màu đỏ
- * ấy"). They stood in place of the real ones until the strip got its
- * arrows ("thêm nút di chuyển coi đánh giá"): four cards alone gave the
- * arrows nothing to move on a desktop. Display only, nothing is written
- * anywhere. On when LAB_SAMPLE_REVIEWS=1 is set (lab 2's .env.local), never
- * in a production build; with no tool on sale the real reviews stay alone.
+ * ấy"). Display only, nothing is written anywhere. On when
+ * LAB_SAMPLE_REVIEWS=1 is set (lab 2's .env.local), never in a production
+ * build; with no tool on sale the real reviews stay.
  *
  * The three named buyers wear game agent icons as photos, the kind menzu.lol
  * gives its reviewers (the owner, 18/10/2026: "thêm vài avatar lấy từ menzu
@@ -88,7 +86,7 @@ export async function withSampleReviews(rows: ReviewRow[]): Promise<ReviewRow[]>
   });
   if (tools.length === 0) return rows;
   const now = Date.now();
-  const samples: ReviewRow[] = SAMPLES.map((sample, index) => {
+  return SAMPLES.map((sample, index) => {
     const tool = tools[index % tools.length];
     return {
       name: sample.name,
@@ -109,5 +107,4 @@ export async function withSampleReviews(rows: ReviewRow[]): Promise<ReviewRow[]>
       },
     };
   });
-  return [...samples, ...rows];
 }
