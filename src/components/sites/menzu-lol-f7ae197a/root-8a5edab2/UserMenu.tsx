@@ -180,9 +180,7 @@ export function UserMenu({ user }: { user: HeaderUser }) {
             <span className="text-[11px] font-bold text-white leading-none truncate mb-[4px]">
               {user.username}
             </span>
-            {/* The shop's red ("màu đỏ thử", 18/10/2026). Green until then,
-                white for a moment, as Tổng quan prints the same balance. */}
-            <span className="text-[9px] font-black tracking-widest leading-none truncate text-[var(--menzu-accent)]">
+            <span className="text-[9px] font-black tracking-widest leading-none truncate text-emerald-400">
               {formatVnd(user.balance)}đ
             </span>
           </span>
