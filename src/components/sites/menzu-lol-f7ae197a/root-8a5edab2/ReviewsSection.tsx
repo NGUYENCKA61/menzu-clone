@@ -208,8 +208,8 @@ export function ReviewCard({ review, index }: { review: Review; index: number })
 }
 
 /**
- * The home page's review block: four ReviewCards, then the score and the way
- * to the rest.
+ * The home page's review block: the title with the way to the rest in its
+ * top right corner, four ReviewCards, then the score.
  *
  * No pill over the block: the verified mark on each card says what is
  * verified, and a blanket claim over all four was either untrue or redundant.
@@ -235,53 +235,62 @@ export function ReviewsSection({
           block, the title in capitals with its second half in the shop's red
           and no red bar, at the other titles' 20px and 24px from sm, balanced
           so a phone's two lines do not leave "BẠN" alone; the line under it
-          centred, and the way to the rest under the cards. The red-bar
-          version, left aligned with "Xem tất cả" on its right, is 655590b7. */}
-      <div className="mx-auto flex max-w-2xl flex-col items-center gap-2 text-center">
-        <h2
-          id="reviews-heading"
-          className="row-heading text-balance text-xl font-black uppercase tracking-wider text-frost sm:text-2xl"
-        >
-          Chiến thắng{" "}
-          <span className="text-[var(--menzu-accent)]">trong tầm tay bạn</span>
-        </h2>
-        <p className="text-[15px] text-mist">
-          Đánh giá thật từ khách hàng đã giao dịch, admin duyệt trước khi hiện.
-        </p>
+          centred. The red-bar version, left aligned with "Xem tất cả" on its
+          right, is 655590b7. */}
+      <div className="relative">
+        <div className="mx-auto flex max-w-2xl flex-col items-center gap-2 text-center">
+          <h2
+            id="reviews-heading"
+            className="row-heading text-balance text-xl font-black uppercase tracking-wider text-frost sm:text-2xl"
+          >
+            Chiến thắng{" "}
+            <span className="text-[var(--menzu-accent)]">trong tầm tay bạn</span>
+          </h2>
+          <p className="text-[15px] text-mist">
+            Đánh giá thật từ khách hàng đã giao dịch, admin duyệt trước khi hiện.
+          </p>
+        </div>
+        {/* LAB trial: the way to the rest in the top right corner, where it
+            sat under the cards (the owner, 18/10/2026: "cho cái Xem tất cả
+            đánh giá lên góc phải"), dressed as the game rows' "Xem tất cả".
+            From lg it rides the title's line, held to the foot of a box as
+            tall as that line (32px) the way the rows hold theirs; narrower,
+            the centred title leaves no room beside it, so it takes its own
+            line at the right, just over the cards. */}
+        <div className="mt-6 flex justify-end lg:absolute lg:right-0 lg:top-0 lg:mt-0 lg:h-8 lg:items-end">
+          <Link
+            href="/feedback"
+            className="text-[14px] font-medium text-mist underline-offset-4 transition-colors hover:text-frost hover:underline"
+          >
+            Xem tất cả đánh giá
+          </Link>
+        </div>
       </div>
 
-      <RevealGrid className="mt-8 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:grid lg:grid-cols-4 lg:overflow-visible lg:pb-0">
+      <RevealGrid className="mt-3 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:mt-8 lg:grid lg:grid-cols-4 lg:overflow-visible lg:pb-0">
         {reviews.map((review, index) => (
           <ReviewCard key={`${review.name}-${review.date}-${index}`} review={review} index={index} />
         ))}
       </RevealGrid>
 
-      {/* Under the cards, centred like the title: the score and the count
+      {/* Under the cards, centred like the title: the score and the count,
           once there are enough of them to mean something
-          (MIN_REVIEWS_FOR_SCORE), then the way to the rest. */}
-      <div className="mt-6 flex flex-col items-center gap-3">
-        {summary && summary.count >= MIN_REVIEWS_FOR_SCORE ? (
-          <div className="flex items-center gap-2.5">
-            <Stars filled={Math.round(summary.rating)} size={15} />
-            <span className="text-sm font-black text-white">
-              {summary.rating.toLocaleString("vi-VN", {
-                minimumFractionDigits: 1,
-                maximumFractionDigits: 1,
-              })}
-              <span className="text-neutral-500">/5</span>
-            </span>
-            <span className="text-[13px] text-mist">
-              {summary.count} đánh giá
-            </span>
-          </div>
-        ) : null}
-        <Link
-          href="/feedback"
-          className="text-[14px] font-medium text-mist underline-offset-4 transition-colors hover:text-frost hover:underline"
-        >
-          Xem tất cả đánh giá
-        </Link>
-      </div>
+          (MIN_REVIEWS_FOR_SCORE). */}
+      {summary && summary.count >= MIN_REVIEWS_FOR_SCORE ? (
+        <div className="mt-6 flex items-center justify-center gap-2.5">
+          <Stars filled={Math.round(summary.rating)} size={15} />
+          <span className="text-sm font-black text-white">
+            {summary.rating.toLocaleString("vi-VN", {
+              minimumFractionDigits: 1,
+              maximumFractionDigits: 1,
+            })}
+            <span className="text-neutral-500">/5</span>
+          </span>
+          <span className="text-[13px] text-mist">
+            {summary.count} đánh giá
+          </span>
+        </div>
+      ) : null}
     </section>
   );
 }
