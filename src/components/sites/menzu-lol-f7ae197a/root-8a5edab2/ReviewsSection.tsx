@@ -156,11 +156,11 @@ export function ReviewCard({ review, index }: { review: Review; index: number })
           {/* What was bought, under the stars, as the reviews page prints it
               (the owner, 01/10/2026: "bổ sung thông tin mua key bản gì game
               gì"; on the home cards 18/10/2026: "thử đi cả 2"): the tool's
-              name alone ("bỏ chữ đã mua chỉ ghi dòng đỏ thôi"), the red having
-              gone to the game tag ("nhãn tên game thì tô đỏ"). After turns in
-              red, white and the site's grey, a light grey between white and
-              grey, the one the Hot trending lead's blurb wears ("xám sáng",
-              "thử"); white under the pointer. A screen reader still hears "Đã
+              name alone ("bỏ chữ đã mua chỉ ghi dòng đỏ thôi"). After turns in
+              white, grey and a light grey, LAB trial: in the shop's red again,
+              the game corner below turning grey so a card keeps one red
+              ("Tool unlock skin valorant nên tô đỏ không", "thử đi"); it
+              underlines under the pointer. A screen reader still hears "Đã
               mua", and the pointer gets the whole name when it is cut short. */}
           {review.purchase ? (
             <p className="mt-1.5 flex min-w-0 items-center text-[12px]">
@@ -168,7 +168,7 @@ export function ReviewCard({ review, index }: { review: Review; index: number })
                 href={review.purchase.href}
                 aria-label={`Đã mua ${sentenceCase(review.purchase.product)}`}
                 title={sentenceCase(review.purchase.product)}
-                className="min-w-0 truncate font-semibold text-[#c7c9d1] transition-colors hover:text-white"
+                className="min-w-0 truncate font-semibold text-[var(--menzu-accent)] underline-offset-2 transition-colors hover:underline"
               >
                 {toolName(review.purchase.product)}
               </Link>
@@ -197,8 +197,9 @@ export function ReviewCard({ review, index }: { review: Review; index: number })
               ("bỏ icon tay cầm game đi", "bỏ card bo tên game đi"). 12px, the
               size of the tool's name line. "Hack" leads the game's name, so
               the corner reads "Hack Valorant" ("thêm chữ hack bên trái tên
-              game"). */}
-          <span className="min-w-0 max-w-full truncate text-[12px] font-semibold text-[var(--menzu-accent)]">
+              game"). LAB trial: grey while the tool's name above has the
+              red. */}
+          <span className="min-w-0 max-w-full truncate text-[12px] font-semibold text-mist">
             Hack {gameName(review.purchase.game)}
           </span>
         </div>
