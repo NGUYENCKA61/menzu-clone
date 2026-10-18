@@ -70,7 +70,6 @@ export function RegisterForm({
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [confirm, setConfirm] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -89,9 +88,8 @@ export function RegisterForm({
 
     // An untouched form gets one sentence, not a lecture about its first
     // field - "phải có ít nhất 3 ký tự" reads wrong aimed at somebody who
-    // has not typed anything yet. Email is not counted: it is optional,
-    // so a form with only an email in it is still an empty form.
-    if (!username.trim() && !password && !confirm) {
+    // has not typed anything yet.
+    if (!username.trim() && !email.trim() && !password) {
       setError("Vui lòng nhập đủ thông tin");
       return;
     }
@@ -105,16 +103,21 @@ export function RegisterForm({
       setError("Tên đăng nhập phải có ít nhất 3 ký tự");
       return;
     }
-    if (email.trim() && !/^\S+@\S+\.\S+$/.test(email.trim())) {
+    // LAB: an email is required to sign up, and the password is typed once,
+    // with no second box to confirm it (the owner, 18/10/2026: "Xác nhận
+    // mật khẩu bỏ đi", "email đổi sang bắt buộc"). The eye button shows what
+    // was typed, and a mistyped password can be reset through that email.
+    // The server checks the email too.
+    if (!email.trim()) {
+      setError("Vui lòng nhập email");
+      return;
+    }
+    if (!/^\S+@\S+\.\S+$/.test(email.trim())) {
       setError("Email không hợp lệ");
       return;
     }
     if (password.length < 6) {
       setError("Mật khẩu phải có ít nhất 6 ký tự");
-      return;
-    }
-    if (password !== confirm) {
-      setError("Mật khẩu xác nhận không khớp");
       return;
     }
 
@@ -128,7 +131,7 @@ export function RegisterForm({
         body: JSON.stringify({
           username,
           password,
-          email: email || undefined,
+          email: email.trim(),
           ...(refCode ? { ref: refCode } : {}),
           ...(turnstileSiteKey && captchaNeeded
             ? { turnstileToken: captcha }
@@ -249,7 +252,7 @@ export function RegisterForm({
 
                   <div className="mt-5">
                     <label htmlFor="reg-email" className={LABEL_CLASS}>
-                      Email <span className="text-neutral-600">(không bắt buộc)</span>
+                      Email
                     </label>
                     <div className="relative">
                       <Mail
@@ -260,6 +263,7 @@ export function RegisterForm({
                         id="reg-email"
                         type="email"
                         autoComplete="email"
+                        required
                         value={email}
                         onChange={(event) => setEmail(event.target.value)}
                         placeholder="email@example.com"
@@ -295,28 +299,6 @@ export function RegisterForm({
                       >
                         {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                       </button>
-                    </div>
-                  </div>
-
-                  <div className="mt-5">
-                    <label htmlFor="reg-confirm" className={LABEL_CLASS}>
-                      Xác nhận mật khẩu
-                    </label>
-                    <div className="relative">
-                      <Lock
-                        size={18}
-                        className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-500"
-                      />
-                      <input
-                        id="reg-confirm"
-                        type={showPassword ? "text" : "password"}
-                        autoComplete="new-password"
-                        required
-                        value={confirm}
-                        onChange={(event) => setConfirm(event.target.value)}
-                        placeholder="Nhập lại mật khẩu"
-                        className={FIELD_CLASS}
-                      />
                     </div>
                   </div>
 

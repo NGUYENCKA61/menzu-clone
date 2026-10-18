@@ -44,6 +44,15 @@ export async function POST(request: Request) {
   const invalid = validateCredentials(username, password);
   if (invalid) return NextResponse.json({ error: invalid }, { status: 400 });
 
+  // LAB: an email is required to sign up (the owner, 18/10/2026: "email đổi
+  // sang bắt buộc"), checked here as well as in the form, which a script can
+  // skip; the shape test is the form's own. Accounts made before, and those
+  // made through Google or Discord, are not touched.
+  if (!email) return NextResponse.json({ error: "Vui lòng nhập email" }, { status: 400 });
+  if (!/^\S+@\S+\.\S+$/.test(email)) {
+    return NextResponse.json({ error: "Email không hợp lệ" }, { status: 400 });
+  }
+
   const ip = clientIp(request);
 
   const settings = await getShopSettings();
