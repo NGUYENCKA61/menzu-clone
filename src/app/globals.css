@@ -1764,10 +1764,15 @@ html[data-admin-filtering] .admin-list {
    18/10/2026: "làm cái a5 là a4 nhưng mà phủ tối chân vừa tới tiêu đề").
    The foot is drawn behind the caption, so it ends at the title however
    many lines the title takes: solid at the bottom, 80% at the title's top,
-   gone --a5-fade above it. A4's dark corner at the top left stays, and both
-   thin under the pointer as A4's shade does. */
-.lab-a5-corner {
-  background: radial-gradient(at 0% 0%, rgba(0, 0, 0, 0.55), transparent 45%);
+   gone --a5-fade above it. A4's dark corner at the top left stays, over a
+   thin even 14% across the picture, so the picture above the foot is on
+   average as dark as A4 leaves it (the owner, 18/10/2026: "độ sáng phần
+   còn lại á a5 có giống a4 chưa", "uk làm đi"). Both thin under the
+   pointer as A4's shade does. */
+.lab-a5-shade {
+  background:
+    radial-gradient(at 0% 0%, rgba(0, 0, 0, 0.55), transparent 45%),
+    linear-gradient(rgba(8, 8, 11, 0.14), rgba(8, 8, 11, 0.14));
   transition: opacity 300ms ease;
 }
 .lab-a5-foot {
@@ -1790,12 +1795,12 @@ html[data-admin-filtering] .admin-list {
   transition: opacity 300ms ease;
 }
 @media (hover: hover) {
-  .group:hover .lab-a5-corner,
+  .group:hover .lab-a5-shade,
   .group:hover .lab-a5-foot::before {
     opacity: 0.8;
   }
 }
-.group:focus-visible .lab-a5-corner,
+.group:focus-visible .lab-a5-shade,
 .group:focus-visible .lab-a5-foot::before {
   opacity: 0.8;
 }

@@ -578,9 +578,10 @@ function BentoTile({
  *  - a5: A4 with its foot shade cut to the words (the owner, 18/10/2026:
  *    "làm cái a5 là a4 nhưng mà phủ tối chân vừa tới tiêu đề"): the dark
  *    sits behind the caption and fades out just above the title, however
- *    many lines the title takes, so the picture above it stays clear. A4's
- *    dark corner at the top left, its words and its hover stay
- *    (.lab-a5-corner, .lab-a5-foot).
+ *    many lines the title takes. A4's dark corner at the top left, its
+ *    words and its hover stay, and a thin even layer keeps the picture
+ *    above the foot about as dark as A4's on average ("độ sáng phần còn
+ *    lại á a5 có giống a4 chưa", "uk làm đi") (.lab-a5-shade, .lab-a5-foot).
  *  - a5cu: the first A5, lmarket's best-seller card, their numbers 2 to 4
  *    ("a5 thì bố cục giống lmarket nhưng vẫn là có hàng 4 card"), in our
  *    rows of four: A4's shade, a bold name, a quiet second line, then "từ"
@@ -977,9 +978,10 @@ function TileDress({ card, style, big }: { card: ProductCard; style: TileStyle; 
               : style === "a4"
                 ? "lab-lmarket-shade"
                 : style === "a5"
-                  ? // Only A4's corner here: A5's foot rides on the caption
-                    // below, so it ends where the title does.
-                    "lab-a5-corner"
+                  ? // A4's corner and a thin even layer here; A5's foot
+                    // rides on the caption below, so it ends where the
+                    // title does.
+                    "lab-a5-shade"
                   : style === "a6"
                     ? // A4's shape, bright above and dark below, at about A3's
                       // strength (the owner, 17/10/2026: "làm a6 là kiểu sáng
