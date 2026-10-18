@@ -111,7 +111,10 @@ function FeaturedCarousel({ items }: { items: DocCard[] }) {
                 href={docHref(item.slug)}
                 aria-hidden={on ? undefined : true}
                 tabIndex={on ? undefined : -1}
-                className={`relative isolate flex items-center gap-8 p-6 [grid-area:1/1] ${items.length > 1 ? "pb-12" : ""} transition-opacity duration-[900ms] ease-out motion-reduce:transition-none ${
+                // Words and picture from the top: centred, a short slide sat
+                // lower than a long one and the title moved as they turned,
+                // and a phone showed a gap over the words.
+                className={`relative isolate flex items-start gap-8 p-6 [grid-area:1/1] ${items.length > 1 ? "pb-12" : ""} transition-opacity duration-[900ms] ease-out motion-reduce:transition-none ${
                   on ? "opacity-100" : "pointer-events-none opacity-0"
                 }`}
               >
