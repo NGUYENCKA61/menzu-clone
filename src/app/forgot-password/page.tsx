@@ -23,9 +23,19 @@ export const metadata: Metadata = {
  * that always ends in "we could not send" is a treadmill. The card instead
  * points at whatever contact channels Cấu hình has filled in.
  */
+/**
+ * LAB 2 ONLY: the form shows even with no mail server set, so its look can be
+ * judged (the owner, 18/10/2026: "Quên mật khẩu bằng smtp ấy", "có k bật đi",
+ * "k hoạt động cũng bật đi"). On while LAB_FORGOT_FORM=1 is in lab 2's
+ * .env.local, never in a production build. Sending still fails without SMTP:
+ * the endpoint answers 503 and the form toasts its sentence.
+ */
+const LAB_FORGOT_FORM =
+  process.env.LAB_FORGOT_FORM === "1" && process.env.NODE_ENV !== "production";
+
 export default async function ForgotPasswordPage() {
   const settings = await getShopSettings();
-  const canMail = mailEnabled(settings);
+  const canMail = mailEnabled(settings) || LAB_FORGOT_FORM;
 
   return (
     <div className="min-h-screen flex flex-col text-white overflow-x-clip selection:bg-[var(--menzu-accent)]/30">
