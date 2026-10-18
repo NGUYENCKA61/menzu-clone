@@ -186,6 +186,7 @@ export default async function Home({
             rating: r.rating,
             verified: r.verified,
             purchase: r.purchase ? { product: r.purchase.product, href: r.purchase.href } : null,
+            anonymous: r.anonymous,
           }))}
           summary={
             trust.rating && reviews.length > 0

@@ -1,9 +1,9 @@
-import Image from "next/image";
 import Link from "next/link";
-import { BadgeCheck, Star } from "lucide-react";
+import { BadgeCheck, Star, VenetianMask } from "lucide-react";
 
 import { sentenceCase } from "@/lib/displayCase";
 
+import { AvatarPhoto } from "./AvatarPhoto";
 import { RevealGrid } from "./RevealGrid";
 import { SectionHeading } from "./SectionHeading";
 
@@ -18,6 +18,8 @@ export interface Review {
   verified: boolean;
   /** The tool an order-backed review was left for; null for a free-form one. */
   purchase?: { product: string; href: string } | null;
+  /** Left by a buyer who hid their name ("Khách hàng ẩn danh"). */
+  anonymous?: boolean;
 }
 
 /**
@@ -91,13 +93,23 @@ export function ReviewCard({ review, index }: { review: Review; index: number })
         {/* A thin grey ring where a red one sat: four red rings pulled the
             eye to the faces rather than the words (18/10/2026). */}
         <div className="shrink-0 rounded-full border border-white/15 p-[2px]">
+          {/* The reviews page's faces (FeedbackBoard's ReviewAvatar): a mask
+              on pale grey for a buyer who hid their name, else the photo over
+              the initial, the initial left when the photo will not load (the
+              owner, 18/10/2026: "lấy vài cái icon avatar trang kia qua coi
+              đi nhìn vậy xấu quá"). */}
           <div className="relative grid h-10 w-10 place-items-center overflow-hidden rounded-full bg-neutral-800">
-            {review.avatar ? (
-              <Image src={review.avatar} alt="" fill sizes="40px" className="object-cover" />
-            ) : (
-              <span className="font-display text-sm font-bold text-mist">
-                {review.name.trim().charAt(0) || "?"}
+            {review.anonymous ? (
+              <span className="grid h-full w-full place-items-center bg-[#D1D5DB]">
+                <VenetianMask aria-hidden className="h-5 w-5 text-neutral-700 opacity-80" />
               </span>
+            ) : (
+              <>
+                <span className="font-display text-sm font-bold uppercase text-mist">
+                  {review.name.trim().charAt(0) || "?"}
+                </span>
+                {review.avatar ? <AvatarPhoto src={review.avatar} size={40} /> : null}
+              </>
             )}
           </div>
         </div>
