@@ -1,6 +1,7 @@
 import sanitizeHtml from "sanitize-html";
 
 import { isShopUrl } from "@/lib/shopHosts";
+import { slugify } from "@/lib/slug";
 import { youtubeEmbedUrl, youtubeVideoId } from "@/lib/youtube";
 
 /**
@@ -326,4 +327,33 @@ export function docHtmlToPlainText(html: string, maxLength?: number): string {
     return `${text.slice(0, maxLength - 1).trimEnd()}…`;
   }
   return text;
+}
+
+export interface DocHeading {
+  id: string;
+  text: string;
+}
+
+/**
+ * The article's h2 headings, each given an id, for the "Mục lục" beside the
+ * body on a wide screen. Runs on HTML that has been through sanitizeDocHtml,
+ * which keeps no ids of its own: an id is the heading's words as a slug, with
+ * "-2", "-3" after one already taken, so the same body always yields the
+ * same ids and the list beside it can be worked out separately. A heading
+ * with no words is left as it was.
+ */
+export function outlineDocHtml(html: string): { html: string; headings: DocHeading[] } {
+  const headings: DocHeading[] = [];
+  const taken = new Map<string, number>();
+  const outlined = html.replace(/<h2(\s[^>]*)?>([\s\S]*?)<\/h2>/gi, (whole, attrs: string | undefined, inner: string) => {
+    const text = docHtmlToPlainText(inner);
+    if (!text) return whole;
+    const base = slugify(text) || "muc";
+    const seen = (taken.get(base) ?? 0) + 1;
+    taken.set(base, seen);
+    const id = seen === 1 ? base : `${base}-${seen}`;
+    headings.push({ id, text });
+    return `<h2${attrs ?? ""} id="${id}">${inner}</h2>`;
+  });
+  return { html: outlined, headings };
 }

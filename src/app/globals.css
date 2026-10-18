@@ -1755,6 +1755,11 @@ html[data-admin-filtering] .admin-list {
   margin-top: 2.6rem;
   padding-top: 0;
 }
+/* A heading the wiki's "Mục lục" jumps to stops below the fixed 104px
+   header rather than under it (18/10/2026). */
+.doc-prose h2[id] {
+  scroll-margin-top: 8rem;
+}
 .doc-prose h3 {
   color: #fff;
   font-size: 1.1875rem;

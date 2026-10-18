@@ -8,7 +8,7 @@ import { DocsLockPanel } from "@/components/sites/menzu-lol-f7ae197a/shared/Docs
 import { SimplePage } from "@/components/sites/menzu-lol-f7ae197a/shared/SimplePage";
 import { DOC_SHELF_LABEL, isDocShelf } from "@/lib/docCategories";
 import { DocBody, DocHtml } from "@/lib/docFormat";
-import { isHtmlBody } from "@/lib/docHtml";
+import { embedVideos, isHtmlBody, outlineDocHtml, sanitizeDocHtml, type DocHeading } from "@/lib/docHtml";
 import { getDocArticle, listRelatedDocs, listToolArticles } from "@/lib/queries";
 import { docHref, productHref, toolDocsHref } from "@/lib/routes";
 import { articleJsonLd, breadcrumbJsonLd, JsonLd } from "@/lib/seo";
@@ -81,6 +81,14 @@ export default async function DocArticlePage({ params }: PageProps) {
   // public article is offered to crawlers, so only it is described to them.
   const indexable = Boolean(article.body) && !article.productId;
   const { brandName } = indexable ? await getShopSettings() : { brandName: "" };
+  // The h2s for "Mục lục", from the pipeline DocHtml runs so the ids match;
+  // a locked or plain-text body lists nothing, and a single heading is no
+  // contents.
+  const outline =
+    !locked && article.body && isHtmlBody(article.body)
+      ? outlineDocHtml(embedVideos(sanitizeDocHtml(article.body))).headings
+      : [];
+  const showOutline = outline.length >= 2;
 
   return (
     <SimplePage
@@ -150,47 +158,53 @@ export default async function DocArticlePage({ params }: PageProps) {
       {/* The body as wide as a product page's description (the owner,
           02/10/2026: "nó phải đồng bộ giống với trang sản phẩm chứ"), so a
           picture set to 100% in the editor is the same size on both. The
-          cover keeps its own 768px. */}
-      <article>
-        <div className="relative mb-8 aspect-[16/9] max-w-3xl overflow-hidden rounded-2xl border border-white/10 bg-black/40">
-          <Image
-            src={article.thumbnailUrl}
-            alt=""
-            fill
-            sizes="(min-width: 768px) 768px, 100vw"
-            // The article's LCP image, so the one fetched at High.
-            preload
-            fetchPriority="high"
-            className="object-cover"
-          />
-        </div>
-
-        {locked && tool && access ? (
-          <div className="max-w-3xl">
-            <DocsLockPanel
-              access={access}
-              productHref={productHref(tool.category.slug, tool.slug)}
-              loginHref={`/login?next=${encodeURIComponent(`/docs/${article.slug}`)}`}
-              what="Bài viết này"
+          cover, the lock and the empty notice keep to the same 72ch: the
+          cover had 768px and stood 41px past the words (18/10/2026, "rà soát
+          ... cho đồng bộ"). From lg the "Mục lục" takes the right, which
+          stood empty beside them. */}
+      <div className={showOutline ? "lg:grid lg:grid-cols-[minmax(0,1fr)_240px] lg:gap-12" : undefined}>
+        <article>
+          <div className="relative mb-8 aspect-[16/9] max-w-[72ch] overflow-hidden rounded-2xl border border-white/10 bg-black/40">
+            <Image
+              src={article.thumbnailUrl}
+              alt=""
+              fill
+              sizes="(min-width: 768px) 728px, 100vw"
+              // The article's LCP image, so the one fetched at High.
+              preload
+              fetchPriority="high"
+              className="object-cover"
             />
           </div>
-        ) : article.body ? (
-          // Editor-era bodies are HTML, sanitized inside DocHtml before they
-          // reach the reader; legacy plain-text bodies keep the old renderer.
-          isHtmlBody(article.body) ? (
-            <DocHtml body={article.body} />
+
+          {locked && tool && access ? (
+            <div className="max-w-[72ch]">
+              <DocsLockPanel
+                access={access}
+                productHref={productHref(tool.category.slug, tool.slug)}
+                loginHref={`/login?next=${encodeURIComponent(`/docs/${article.slug}`)}`}
+                what="Bài viết này"
+              />
+            </div>
+          ) : article.body ? (
+            // Editor-era bodies are HTML, sanitized inside DocHtml before they
+            // reach the reader; legacy plain-text bodies keep the old renderer.
+            isHtmlBody(article.body) ? (
+              <DocHtml body={article.body} outlined={showOutline} />
+            ) : (
+              <DocBody body={article.body} />
+            )
           ) : (
-            <DocBody body={article.body} />
-          )
-        ) : (
-          // Said to the reader, not to whoever runs the database.
-          <div className="max-w-3xl space-y-2 rounded-2xl border border-dashed border-white/10 bg-white/[0.02] p-8 text-center">
-            <FileText size={24} className="mx-auto text-neutral-600" aria-hidden />
-            <p className="text-sm font-bold text-white">Bài viết đang được cập nhật</p>
-            <p className="text-xs text-neutral-400">Shop đang soạn nội dung cho bài này, bạn quay lại sau nhé.</p>
-          </div>
-        )}
-      </article>
+            // Said to the reader, not to whoever runs the database.
+            <div className="max-w-[72ch] space-y-2 rounded-2xl border border-dashed border-white/10 bg-white/[0.02] p-8 text-center">
+              <FileText size={24} className="mx-auto text-neutral-600" aria-hidden />
+              <p className="text-sm font-bold text-white">Bài viết đang được cập nhật</p>
+              <p className="text-xs text-neutral-400">Shop đang soạn nội dung cho bài này, bạn quay lại sau nhé.</p>
+            </div>
+          )}
+        </article>
+        {showOutline ? <DocOutline headings={outline} /> : null}
+      </div>
 
       {/* The shelf's other articles, as menzu ends one with "Cùng chuyên mục"
           — cards in the site's own dress, each with its "Chi tiết". */}
@@ -263,5 +277,34 @@ export default async function DocArticlePage({ params }: PageProps) {
         </section>
       ) : null}
     </SimplePage>
+  );
+}
+
+/**
+ * "Mục lục": the article's h2s down the right from lg, where the page stood
+ * empty beside a body kept to a product description's width (18/10/2026,
+ * "rà soát ... cho đồng bộ", "làm hết"). Plain anchors, held in view while
+ * the article scrolls; the headings stop clear of the fixed header
+ * (scroll-margin in globals.css).
+ */
+function DocOutline({ headings }: { headings: DocHeading[] }) {
+  return (
+    <nav aria-label="Mục lục" className="hidden lg:block">
+      <div className="sticky top-32">
+        <p className="text-[13px] font-semibold text-white">Mục lục</p>
+        <ol className="mt-3 space-y-0.5 border-l border-line">
+          {headings.map((heading) => (
+            <li key={heading.id}>
+              <a
+                href={`#${heading.id}`}
+                className="-ml-px block border-l border-transparent py-1.5 pl-3 text-[13px] leading-snug text-neutral-400 transition-colors hover:border-[var(--menzu-accent)] hover:text-white"
+              >
+                {heading.text}
+              </a>
+            </li>
+          ))}
+        </ol>
+      </div>
+    </nav>
   );
 }

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { docHtmlToPlainText, sanitizeDocHtml, stripNewlineArtifacts } from "@/lib/docHtml";
+import { docHtmlToPlainText, outlineDocHtml, sanitizeDocHtml, stripNewlineArtifacts } from "@/lib/docHtml";
 
 /**
  * One stored description, two voices: the rich HTML goes to the page, and this
@@ -124,5 +124,29 @@ describe("sanitizeDocHtml picture corners", () => {
 
   it("does not let the corner mark onto anything but a picture", () => {
     expect(sanitizeDocHtml('<p data-corner="square">A</p>')).toBe("<p>A</p>");
+  });
+});
+
+/**
+ * The wiki's "Mục lục" links to ids this hands out; the article renders the
+ * same body through it, so the same words must always give the same ids.
+ */
+describe("outlineDocHtml", () => {
+  it("gives each h2 an id from its words and lists them in order", () => {
+    const { html, headings } = outlineDocHtml(
+      '<h2>Bước 1: tạo tài khoản</h2><p>A</p><h2 style="text-align: center">Bước 2: nạp <strong>tiền</strong></h2>',
+    );
+    expect(headings).toEqual([
+      { id: "buoc-1-tao-tai-khoan", text: "Bước 1: tạo tài khoản" },
+      { id: "buoc-2-nap-tien", text: "Bước 2: nạp tiền" },
+    ]);
+    expect(html).toBe(
+      '<h2 id="buoc-1-tao-tai-khoan">Bước 1: tạo tài khoản</h2><p>A</p><h2 style="text-align: center" id="buoc-2-nap-tien">Bước 2: nạp <strong>tiền</strong></h2>',
+    );
+  });
+
+  it("numbers a heading that reads like an earlier one and skips empty ones", () => {
+    const { headings } = outlineDocHtml("<h2>Lưu ý</h2><h2></h2><h2>Lưu ý</h2>");
+    expect(headings.map((h) => h.id)).toEqual(["luu-y", "luu-y-2"]);
   });
 });

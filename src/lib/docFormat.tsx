@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-import { embedVideos, sanitizeDocHtml } from "@/lib/docHtml";
+import { embedVideos, outlineDocHtml, sanitizeDocHtml } from "@/lib/docHtml";
 
 /**
  * The wiki's tiny formatting language, rendered the same way everywhere.
@@ -157,13 +157,15 @@ function renderBlock(block: string, key: number): ReactNode {
  * A TipTap-era body: stored as HTML, sanitized again right here before it
  * reaches a reader — the database is not trusted to only hold what the API
  * let through. YouTube videos then become their players (embedVideos):
- * the editor's video block, or a link alone on its line.
+ * the editor's video block, or a link alone on its line. `outlined` gives
+ * each h2 the id the wiki's "Mục lục" links to (outlineDocHtml).
  */
-export function DocHtml({ body }: { body: string }) {
+export function DocHtml({ body, outlined = false }: { body: string; outlined?: boolean }) {
+  const html = embedVideos(sanitizeDocHtml(body));
   return (
     <div
       className="doc-prose"
-      dangerouslySetInnerHTML={{ __html: embedVideos(sanitizeDocHtml(body)) }}
+      dangerouslySetInnerHTML={{ __html: outlined ? outlineDocHtml(html).html : html }}
     />
   );
 }
