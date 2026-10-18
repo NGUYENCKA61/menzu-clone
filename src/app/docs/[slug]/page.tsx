@@ -19,6 +19,8 @@ import { toolDocsAccess } from "@/lib/toolDocs";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
+  /** LAB: ?ban=cu, see DocArticlePage. */
+  searchParams?: Promise<{ ban?: string }>;
 }
 
 const dateFormat = new Intl.DateTimeFormat("vi-VN", {
@@ -57,8 +59,13 @@ const DAY_MS = 24 * 60 * 60 * 1000;
  * wiki, the title as written (not in capitals), one line of dates and reads,
  * the article itself, and the shelf's other articles at the end.
  */
-export default async function DocArticlePage({ params }: PageProps) {
+export default async function DocArticlePage({ params, searchParams }: PageProps) {
   const { slug } = await params;
+  // LAB: ?ban=cu shows the article as it was before the 18/10/2026 review
+  // (the cover at 768px, no "Mục lục", the screenshots square), to set
+  // beside the new one ("làm url trang wiki bản cũ để tui so sánh thêm đi").
+  // A production build always shows the new.
+  const old = process.env.NODE_ENV !== "production" && (await searchParams)?.ban === "cu";
   const article = await getDocArticle(slug);
   if (!article) notFound();
   // A tool's article: the body opens for as long as the reader's key says
@@ -88,7 +95,8 @@ export default async function DocArticlePage({ params }: PageProps) {
     !locked && article.body && isHtmlBody(article.body)
       ? outlineDocHtml(embedVideos(sanitizeDocHtml(article.body))).headings
       : [];
-  const showOutline = outline.length >= 2;
+  const showOutline = !old && outline.length >= 2;
+  const column = old ? "max-w-3xl" : "max-w-[72ch]";
 
   return (
     <SimplePage
@@ -164,12 +172,12 @@ export default async function DocArticlePage({ params }: PageProps) {
           stood empty beside them. */}
       <div className={showOutline ? "lg:grid lg:grid-cols-[minmax(0,1fr)_240px] lg:gap-12" : undefined}>
         <article>
-          <div className="relative mb-8 aspect-[16/9] max-w-[72ch] overflow-hidden rounded-2xl border border-white/10 bg-black/40">
+          <div className={`relative mb-8 aspect-[16/9] ${column} overflow-hidden rounded-2xl border border-white/10 bg-black/40`}>
             <Image
               src={article.thumbnailUrl}
               alt=""
               fill
-              sizes="(min-width: 768px) 728px, 100vw"
+              sizes={old ? "(min-width: 768px) 768px, 100vw" : "(min-width: 768px) 728px, 100vw"}
               // The article's LCP image, so the one fetched at High.
               preload
               fetchPriority="high"
@@ -178,7 +186,7 @@ export default async function DocArticlePage({ params }: PageProps) {
           </div>
 
           {locked && tool && access ? (
-            <div className="max-w-[72ch]">
+            <div className={column}>
               <DocsLockPanel
                 access={access}
                 productHref={productHref(tool.category.slug, tool.slug)}
@@ -190,13 +198,13 @@ export default async function DocArticlePage({ params }: PageProps) {
             // Editor-era bodies are HTML, sanitized inside DocHtml before they
             // reach the reader; legacy plain-text bodies keep the old renderer.
             isHtmlBody(article.body) ? (
-              <DocHtml body={article.body} outlined={showOutline} />
+              <DocHtml body={article.body} outlined={showOutline} squareShots={old} />
             ) : (
               <DocBody body={article.body} />
             )
           ) : (
             // Said to the reader, not to whoever runs the database.
-            <div className="max-w-[72ch] space-y-2 rounded-2xl border border-dashed border-white/10 bg-white/[0.02] p-8 text-center">
+            <div className={`${column} space-y-2 rounded-2xl border border-dashed border-white/10 bg-white/[0.02] p-8 text-center`}>
               <FileText size={24} className="mx-auto text-neutral-600" aria-hidden />
               <p className="text-sm font-bold text-white">Bài viết đang được cập nhật</p>
               <p className="text-xs text-neutral-400">Shop đang soạn nội dung cho bài này, bạn quay lại sau nhé.</p>

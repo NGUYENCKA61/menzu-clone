@@ -37,8 +37,17 @@ function excerptOf(excerpt: string | null, body: string | null): string {
   return text.length > 150 ? `${text.slice(0, 147).trimEnd()}…` : text;
 }
 
-export default async function DocsPage() {
-  const [rows, settings] = await Promise.all([listDocArticles(), getShopSettings()]);
+export default async function DocsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ ban?: string }>;
+}) {
+  const [rows, settings, query] = await Promise.all([listDocArticles(), getShopSettings(), searchParams]);
+  // LAB: /docs?ban=cu shows the featured card and the list's pictures as they
+  // were before the 18/10/2026 review, to set beside the new ones (the owner:
+  // "làm url trang wiki bản cũ để tui so sánh thêm đi"). A production build
+  // always shows the new.
+  const old = process.env.NODE_ENV !== "production" && query.ban === "cu";
 
   const articles: DocCard[] = rows.map((article) => ({
     slug: article.slug,
@@ -72,6 +81,7 @@ export default async function DocsPage() {
             zalo: settings.contactZalo,
             telegram: settings.contactTelegram,
           }}
+          old={old}
         />
       </SimplePage>
     </DocsSearchProvider>

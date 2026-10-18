@@ -159,9 +159,22 @@ function renderBlock(block: string, key: number): ReactNode {
  * let through. YouTube videos then become their players (embedVideos):
  * the editor's video block, or a link alone on its line. `outlined` gives
  * each h2 the id the wiki's "Mục lục" links to (outlineDocHtml).
+ * `squareShots` is the lab's /docs/...?ban=cu: the wiki screenshots marked
+ * square again, as they were before 18/10/2026.
  */
-export function DocHtml({ body, outlined = false }: { body: string; outlined?: boolean }) {
-  const html = embedVideos(sanitizeDocHtml(body));
+export function DocHtml({
+  body,
+  outlined = false,
+  squareShots = false,
+}: {
+  body: string;
+  outlined?: boolean;
+  squareShots?: boolean;
+}) {
+  let html = embedVideos(sanitizeDocHtml(body));
+  if (squareShots) {
+    html = html.replace(/<img\b(?![^>]*data-corner)(?=[^>]*src="\/images\/docs\/shots\/)/g, '<img data-corner="square"');
+  }
   return (
     <div
       className="doc-prose"

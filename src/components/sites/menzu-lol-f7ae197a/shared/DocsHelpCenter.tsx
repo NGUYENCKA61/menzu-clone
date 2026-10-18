@@ -52,6 +52,9 @@ const FEATURED_HOLD_MS = 6000;
  *  has them (pins topped up by the most-read), and never more than the max. */
 const FEATURED_MIN = 3;
 const FEATURED_MAX = 6;
+/** LAB: the wiki as it was before the 18/10/2026 review, kept on the links
+ *  so the old look follows a click into an article (src/app/docs). */
+const OLD_QUERY = "?ban=cu";
 
 /**
  * "Nội dung nổi bật", taking turns (the owner, 02/10/2026: "có nhiều bài viết
@@ -60,8 +63,9 @@ const FEATURED_MAX = 6;
  * dots in the corner, the open one a red bar, jump straight to one. A hand
  * on the card (hover or focus) holds the turn so its words can be read; a
  * reader who asks for less motion gets no turning at all, only the dots.
+ * `old` is the lab's ?ban=cu: the card as it was before 18/10/2026.
  */
-function FeaturedCarousel({ items }: { items: DocCard[] }) {
+function FeaturedCarousel({ items, old = false }: { items: DocCard[]; old?: boolean }) {
   const [active, setActive] = useState(0);
   /** Bumped by a dot press, so the clock restarts instead of firing early. */
   const [turn, setTurn] = useState(0);
@@ -98,7 +102,11 @@ function FeaturedCarousel({ items }: { items: DocCard[] }) {
         // The home page's "Vẫn còn thắc mắc?" wash, 6% red fading out under a
         // 20% rim (18/10/2026, "rà soát ... cho đồng bộ"); it was 10% over a
         // 25% rim, the reddest card on the page.
-        className="group relative isolate overflow-hidden rounded-2xl border border-[var(--menzu-accent)]/20 bg-gradient-to-b from-[var(--menzu-accent)]/[0.06] to-white/[0.02] lift-card hover:-translate-y-1 hover:border-[var(--menzu-accent)]/50 hover:shadow-xl hover:shadow-black/40"
+        className={`group relative isolate overflow-hidden rounded-2xl border lift-card hover:-translate-y-1 hover:border-[var(--menzu-accent)]/50 hover:shadow-xl hover:shadow-black/40 ${
+          old
+            ? "border-[var(--menzu-accent)]/25 bg-gradient-to-br from-[var(--menzu-accent)]/[0.10] via-[#121216] to-[#121216]"
+            : "border-[var(--menzu-accent)]/20 bg-gradient-to-b from-[var(--menzu-accent)]/[0.06] to-white/[0.02]"
+        }`}
       >
         {/* All the articles stacked in one cell, so the card is as tall as the
             tallest and does not jump as they change. */}
@@ -108,16 +116,21 @@ function FeaturedCarousel({ items }: { items: DocCard[] }) {
             return (
               <Link
                 key={item.slug}
-                href={docHref(item.slug)}
+                href={`${docHref(item.slug)}${old ? OLD_QUERY : ""}`}
                 aria-hidden={on ? undefined : true}
                 tabIndex={on ? undefined : -1}
                 // Words and picture from the top: centred, a short slide sat
                 // lower than a long one and the title moved as they turned,
                 // and a phone showed a gap over the words.
-                className={`relative isolate flex items-start gap-8 p-6 [grid-area:1/1] ${items.length > 1 ? "pb-12" : ""} transition-opacity duration-[900ms] ease-out motion-reduce:transition-none ${
+                className={`relative isolate ${old ? "block" : "flex items-start gap-8"} p-6 [grid-area:1/1] ${items.length > 1 ? "pb-12" : ""} transition-opacity duration-[900ms] ease-out motion-reduce:transition-none ${
                   on ? "opacity-100" : "pointer-events-none opacity-0"
                 }`}
               >
+                {old ? (
+                  <div className="pointer-events-none absolute inset-y-0 right-0 -z-10 w-3/5 opacity-25 [mask-image:linear-gradient(to_left,black,transparent)]">
+                    <Image src={item.thumbnailUrl} alt="" fill sizes="40vw" className="object-cover" />
+                  </div>
+                ) : null}
                 <div className="min-w-0 flex-1">
                   <span className="inline-flex rounded-md border border-[var(--menzu-accent)]/40 bg-[var(--menzu-accent)]/10 px-2 py-1 text-[12px] font-semibold text-[var(--menzu-accent)]">
                     Nội dung nổi bật
@@ -143,9 +156,11 @@ function FeaturedCarousel({ items }: { items: DocCard[] }) {
                     faded behind the words, a smudge that ran over them on a
                     phone (18/10/2026, "rà soát ... cho đồng bộ"); a phone
                     gets the words alone. */}
-                <div className="lab-notch relative hidden aspect-video w-[320px] shrink-0 overflow-hidden border border-line bg-raise md:block">
-                  <Image src={item.thumbnailUrl} alt="" fill sizes="320px" className="object-cover" />
-                </div>
+                {old ? null : (
+                  <div className="lab-notch relative hidden aspect-video w-[320px] shrink-0 overflow-hidden border border-line bg-raise md:block">
+                    <Image src={item.thumbnailUrl} alt="" fill sizes="320px" className="object-cover" />
+                  </div>
+                )}
               </Link>
             );
           })}
@@ -263,12 +278,16 @@ export function DocsSearchBox() {
 export function DocsHelpCenter({
   articles,
   faq,
+  old = false,
 }: {
   articles: DocCard[];
   faq: FaqEntry[];
   /** No longer drawn: the right rail (newest, quick doors, the contact
    *  card) was dropped on the owner's word, 29/09/2026. */
   contact?: HelpContact;
+  /** LAB: ?ban=cu, the featured card and the list's pictures as they were
+   *  before 18/10/2026. */
+  old?: boolean;
 }) {
   const { query, setQuery } = useDocsSearch();
   // The footer still links /docs#FAQ and /docs#WARRANTY, as it did when the
@@ -357,7 +376,7 @@ export function DocsHelpCenter({
       {/* The featured articles first, where the introduction used to be (the
           owner: "cái nội dung nổi bật quăng lên trên"), taking turns. Out of
           the way while a search is showing its results. */}
-      {featured.length > 0 && !searching ? <FeaturedCarousel items={featured} /> : null}
+      {featured.length > 0 && !searching ? <FeaturedCarousel items={featured} old={old} /> : null}
 
       <div className="grid gap-6 lg:grid-cols-[240px_minmax(0,1fr)] lg:items-start">
         {/* Left rail: the shelves, each with its icon in front, grey and red
@@ -403,7 +422,7 @@ export function DocsHelpCenter({
           {offscreen.length > 0 ? (
             <div hidden>
               {offscreen.map((article) => (
-                <ArticleCard key={article.slug} article={article} shelf={false} />
+                <ArticleCard key={article.slug} article={article} shelf={false} old={old} />
               ))}
             </div>
           ) : null}
@@ -424,7 +443,7 @@ export function DocsHelpCenter({
           {shown.length > 0 ? (
             <div className={`flex flex-col gap-3 ${searching && foundFaq.length > 0 ? "pt-3" : ""}`}>
               {shown.map((article) => (
-                <ArticleCard key={article.slug} article={article} shelf={searching} />
+                <ArticleCard key={article.slug} article={article} shelf={searching} old={old} />
               ))}
             </div>
           ) : null}
@@ -463,14 +482,20 @@ export function DocsHelpCenter({
  * picture wears the orders list's frame too, 8px corners on the dark rim
  * (18/10/2026, "rà soát ... cho đồng bộ"), where it had 14px and a white one.
  */
-function ArticleCard({ article, shelf }: { article: DocCard; shelf: boolean }) {
+function ArticleCard({ article, shelf, old = false }: { article: DocCard; shelf: boolean; old?: boolean }) {
   return (
     <Link
-      href={docHref(article.slug)}
+      href={`${docHref(article.slug)}${old ? OLD_QUERY : ""}`}
       className="group flex flex-col gap-3 rounded-2xl border border-white/10 bg-white/[0.02] p-3.5 outline-none transition-colors hover:border-white/10 hover:bg-white/[0.04] focus-visible:ring-2 focus-visible:ring-[var(--menzu-accent)]/60 sm:flex-row sm:items-center sm:gap-5 sm:p-4"
     >
       <div className="flex min-w-0 flex-1 items-start gap-3 sm:items-center sm:gap-5">
-        <div className="lab-notch-sm relative aspect-[3/2] w-24 shrink-0 overflow-hidden border border-line bg-raise sm:aspect-video sm:w-36">
+        <div
+          className={
+            old
+              ? "relative aspect-[3/2] w-24 shrink-0 overflow-hidden rounded-lg border border-white/10 bg-white/[0.02] sm:aspect-video sm:w-36 sm:rounded-xl"
+              : "lab-notch-sm relative aspect-[3/2] w-24 shrink-0 overflow-hidden border border-line bg-raise sm:aspect-video sm:w-36"
+          }
+        >
           <Image
             src={article.thumbnailUrl}
             alt=""
