@@ -805,16 +805,8 @@ export function RowTile({
         "row-tile keep-dark group relative isolate block overflow-hidden rounded-[14px] border border-white/[0.06] bg-panel transition-colors hover:border-white/20",
         // The pick tile stands 4:3 on a phone like the list's: at 16:10 its
         // name and price climbed under the "Top tháng" pill.
-        // The first A6 is lmarket's square card in the game list.
-        // The list's tiles show the whole 16:9 cover from sm up, where 4:3
-        // cut an eighth off each side (the owner, 18/10/2026: "mấy cái ảnh
-        // trong card hình như bị zoom lên", "làm thử tui coi"); a phone keeps
-        // 4:3, where 16:9 left the words no room.
-        pick
-          ? "aspect-[4/3] sm:aspect-[16/10]"
-          : style === "a6cu"
-            ? "aspect-square"
-            : "aspect-[4/3] sm:aspect-video",
+        // A6 is lmarket's square card in the game list.
+        pick ? "aspect-[4/3] sm:aspect-[16/10]" : style === "a6cu" ? "aspect-square" : "aspect-[4/3]",
         style === "a" && "hover:border-[var(--menzu-accent)]/40",
         // A2 lights its rim in the shop's red under the pointer, as
         // elitehacks lights theirs in their green.
