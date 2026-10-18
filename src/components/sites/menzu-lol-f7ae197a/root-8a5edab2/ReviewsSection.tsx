@@ -152,18 +152,15 @@ export function ReviewCard({ review, index }: { review: Review; index: number })
         </div>
       </div>
 
-      {/* The words, and nothing else, in the middle: React escapes them, the
-          bar on the left says "quoted", and the block grows to keep every
-          card's foot on one line. */}
+      {/* The words, and nothing else, below the person: React escapes them,
+          the bar on the left says "quoted". The card ends here: the line
+          with what the buyer paid ("Trị giá giao dịch") came off the home
+          cards, the red tool name and the verified mark being the proof (the
+          owner, 18/10/2026: "xóa bỏ cái trị giá giao dịch thử"); /feedback
+          keeps it. */}
       <p className="mt-4 flex-1 border-l-2 border-white/10 pl-3 text-[13.5px] leading-relaxed text-neutral-200 [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:3] overflow-hidden">
         {review.body}
       </p>
-
-      <div className="mt-4 flex items-center justify-between gap-3 border-t border-white/[0.06] pt-3">
-        {/* The reviews page's words for the figure. */}
-        <span className="text-[11px] font-bold text-neutral-500">Trị giá giao dịch</span>
-        <span className="text-[13px] font-black tabular-nums text-emerald-400">{review.amount}</span>
-      </div>
     </article>
   );
 }
