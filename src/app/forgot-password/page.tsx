@@ -40,8 +40,9 @@ const ACTION =
  * points at whatever contact channels Cấu hình has filled in.
  *
  * LAB (the owner, 18/10/2026: "rà soát lại coi cần gì sửa cho đồng bộ
- * trang", "làm đi"): the card carries the sign-in pages' small red line over
- * its title and their 40px corners from sm; the contact doors are the FAQ's
+ * trang", "làm đi"): the card has the sign-in card's 40px corners from sm
+ * (the small red line over the title came and went: "bỏ chữ THICHTHIHACK.COM
+ * đi"); the contact doors are the FAQ's
  * (Facebook first and red, Zalo after it, each with its icon) on the
  * sign-in button's bar, the Zalo one opening zalo.me with the number's
  * digits where it used the bare number as its address, which went nowhere;
@@ -77,9 +78,6 @@ export default async function ForgotPasswordPage({
       <main className="flex-1 relative z-20 w-full flex flex-col">
         <div className="min-h-[calc(100vh-100px)] flex items-center justify-center px-4 py-16">
           <div className="w-full max-w-[440px] rounded-[2rem] sm:rounded-[2.5rem] border border-white/10 bg-neutral-900/80 p-8 sm:p-10 shadow-2xl animate-[slideUpFade_0.5s_ease-out]">
-            <span className="text-[var(--menzu-accent)] font-black uppercase tracking-[0.5em] text-xs mb-2 drop-shadow-md block">
-              {settings.authPanelSubtitle}
-            </span>
             <h1 className="text-4xl font-black tracking-tight text-white">
               Quên mật khẩu
             </h1>
