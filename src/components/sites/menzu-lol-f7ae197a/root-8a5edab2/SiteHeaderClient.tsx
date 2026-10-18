@@ -279,9 +279,11 @@ export function SiteHeaderClient({
       : `/login?next=${encodeURIComponent(pathname)}`
 
   // True once the page has scrolled past the top bar. Drives the condensed
-  // header: top bar hidden, main row shorter, translucent + blurred, logo
-  // nudged down a touch. The header is already position:fixed with a 104px
-  // spacer under it, so shrinking it never shifts the page below.
+  // header: top bar hidden, translucent + blurred. The header is already
+  // position:fixed with a 104px spacer under it, so shrinking it never
+  // shifts the page below. LAB: the main row keeps its 64px and the logo
+  // its size on scroll, where the row went to 58px and the logo to 94% (the
+  // owner, 18/10/2026: "thu gọn nhưng đừng có co lại mất độ cao ban đầu").
   const [scrolled, setScrolled] = useState(false)
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 60)
@@ -340,11 +342,7 @@ export function SiteHeaderClient({
         </div>
       </div>
 
-      <div
-        className={`max-w-[1320px] w-full mx-auto px-4 lg:px-6 flex items-center justify-between transition-all duration-300 ${
-          scrolled ? "h-[58px]" : "h-16"
-        }`}
-      >
+      <div className="max-w-[1320px] w-full mx-auto px-4 lg:px-6 flex items-center justify-between h-16">
         <div className="flex items-center gap-8 h-full">
           <div className="flex items-center w-auto">
             <button
@@ -359,9 +357,7 @@ export function SiteHeaderClient({
 
             <Link
               href="/"
-              className={`flex items-center gap-3 group origin-left transition-transform duration-300 ${
-                scrolled ? "scale-[0.94]" : "scale-100"
-              }`}
+              className="flex items-center gap-3 group"
             >
               <div className="relative">
                 <Image
