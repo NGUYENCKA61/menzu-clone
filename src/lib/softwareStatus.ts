@@ -45,11 +45,13 @@ export const SOFTWARE_STATUS: Record<
     text: "text-amber-400",
     tile: "border-amber-500/30 bg-amber-500/10 text-amber-400",
   },
+  // A paler sky than the other states' 400s (the owner, 18/10/2026: "cái
+  // ổn định cho xanh biển nhạt đi"), wherever a state is printed.
   STABLE: {
     label: "Ổn định",
-    dot: "bg-sky-500",
-    text: "text-sky-400",
-    tile: "border-sky-500/30 bg-sky-500/10 text-sky-400",
+    dot: "bg-sky-300",
+    text: "text-sky-300",
+    tile: "border-sky-300/30 bg-sky-300/10 text-sky-300",
   },
   UPDATED: {
     label: "Cập nhật mới",
