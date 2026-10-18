@@ -2,6 +2,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { BadgeCheck, Star } from "lucide-react";
 
+import { sentenceCase } from "@/lib/displayCase";
+
 import { RevealGrid } from "./RevealGrid";
 import { SectionHeading } from "./SectionHeading";
 
@@ -14,6 +16,8 @@ export interface Review {
   rating?: number;
   /** Backed by an order, or marked verified by an admin. */
   verified: boolean;
+  /** The tool an order-backed review was left for; null for a free-form one. */
+  purchase?: { product: string; href: string } | null;
 }
 
 /**
@@ -115,6 +119,20 @@ export function ReviewCard({ review, index }: { review: Review; index: number })
             <Stars filled={Math.min(5, Math.max(1, review.rating ?? 5))} pop />
             <span className="text-[10px] font-semibold text-neutral-500">{review.date}</span>
           </div>
+          {/* What was bought, under the stars, as the reviews page prints it
+              (the owner, 01/10/2026: "bổ sung thông tin mua key bản gì game
+              gì"; on the home cards 18/10/2026: "thử đi cả 2"). */}
+          {review.purchase ? (
+            <p className="mt-1.5 flex min-w-0 items-center gap-1.5 text-[12px] text-neutral-500">
+              <span className="shrink-0">Đã mua</span>
+              <Link
+                href={review.purchase.href}
+                className="min-w-0 truncate font-semibold text-neutral-200 transition-colors hover:text-white"
+              >
+                {sentenceCase(review.purchase.product)}
+              </Link>
+            </p>
+          ) : null}
         </div>
       </div>
 
@@ -126,7 +144,8 @@ export function ReviewCard({ review, index }: { review: Review; index: number })
       </p>
 
       <div className="mt-4 flex items-center justify-between gap-3 border-t border-white/[0.06] pt-3">
-        <span className="text-[11px] font-bold text-neutral-500">Giao dịch:</span>
+        {/* The reviews page's words for the figure. */}
+        <span className="text-[11px] font-bold text-neutral-500">Trị giá giao dịch</span>
         <span className="text-[13px] font-black tabular-nums text-emerald-400">{review.amount}</span>
       </div>
     </article>
