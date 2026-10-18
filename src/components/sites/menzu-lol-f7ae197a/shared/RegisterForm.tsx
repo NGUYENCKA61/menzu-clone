@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Eye, EyeOff, Lock, Mail, User } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { canGoBack } from "@/lib/navigation";
 
@@ -82,23 +82,6 @@ export function RegisterForm({
   // Ticked by hand every time. Not remembered and not pre-checked: consent
   // that arrives already given is not consent.
   const [agreed, setAgreed] = useState(false);
-
-  // LAB: arriving from the sign-in page's "Tạo mới ngay", the page opens
-  // already scrolled to the card (the owner, 18/10/2026: "tự cuộn tới giữa
-  // trang để thấy đủ card đăng ký khi bấm tạo mới ngay", then "bấm cái nó
-  // nhảy tới trang cuộn rồi đc k chứ hiệu ứng kéo xuống nhìn buồn cười
-  // quá"): the link carries #tao-tai-khoan, the card's id, and Next.js
-  // scrolls to it as the page appears, before it is painted, with no glide.
-  // scroll-mt-[100px]: the card's top settles 80px down, 16px under the
-  // header's 64px row, once the page's slide-in (slideUpFade, which starts
-  // it 20px low at the moment of the scroll) is over. A glide after
-  // arrival was tried first (b955a165). Here the mark only leaves the
-  // address afterwards, so it reads /signup.
-  useEffect(() => {
-    if (window.location.hash === "#tao-tai-khoan") {
-      window.history.replaceState(window.history.state, "", window.location.pathname + window.location.search);
-    }
-  }, []);
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
@@ -195,7 +178,7 @@ export function RegisterForm({
           </button>
         </div>
 
-        <div id="tao-tai-khoan" className="flex-1 w-full scroll-mt-[100px] bg-neutral-900/80 border border-white/10 rounded-[2rem] sm:rounded-[2.5rem] shadow-2xl relative overflow-hidden transform-gpu flex flex-col">
+        <div className="flex-1 w-full bg-neutral-900/80 border border-white/10 rounded-[2rem] sm:rounded-[2.5rem] shadow-2xl relative overflow-hidden transform-gpu flex flex-col">
           <div className="flex flex-col lg:flex-row flex-1 relative z-10">
             {/* LAB: the picture melts into the form as on the sign-in card
                 (LoginForm.tsx has the why; the owner, 18/10/2026: "thêm
