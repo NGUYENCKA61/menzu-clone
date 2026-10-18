@@ -599,7 +599,9 @@ function BentoTile({
  *  - a10: A8 (its 14px corners) with the price picked out in white bold
  *    figures, the count grey from sm (the owner, 18/10/2026: "làm cái a10
  *    highlight bỏ cái từ chỉ ghi từ từ highlight giá tiền"). It said "Từ"
- *    at first and "Chỉ từ" again since "a10 thêm từ chỉ xem".
+ *    at first and "Chỉ từ" again since "a10 thêm từ chỉ xem"; the count
+ *    went next, leaving "Chỉ từ" and the price ("bỏ sản phẩm chỉ giữ từ
+ *    chỉ từ xem").
  *  - a11: A10 with the line at A6's 11px on every screen, where A10 grows
  *    it to 13px from sm (the owner, 18/10/2026: "a11 là a10 nhưng cỡ chữ
  *    mô tả là a6").
@@ -1079,7 +1081,9 @@ function TileDress({ card, style, big }: { card: ProductCard; style: TileStyle; 
             // screen ("a11 là a10 nhưng cỡ chữ mô tả là a6").
             <span className={cn("truncate text-[11px] font-medium leading-snug text-neutral-400", style === "a10" && "sm:text-[13px]")}>
               {style === "a10" ? "Chỉ từ" : "Từ"} <span className="lab-figure font-bold text-white">{formatVnd(card.fromPrice)}đ</span>
-              {card.count != null && card.count > 0 ? (
+              {/* A10 dropped the count, the price alone after "Chỉ từ" (the
+                  owner, 18/10/2026: "bỏ sản phẩm chỉ giữ từ chỉ từ xem"). */}
+              {style !== "a10" && card.count != null && card.count > 0 ? (
                 <span className="hidden sm:inline">, {card.count} sản phẩm</span>
               ) : null}
             </span>
@@ -1096,7 +1100,13 @@ function TileDress({ card, style, big }: { card: ProductCard; style: TileStyle; 
                 <span className="hidden min-w-0 truncate font-medium text-neutral-400 sm:block">{card.count} sản phẩm</span>
               ) : null}
             </span>
-          ) : line && (style === "a10" || style === "a11" || style === "a11cu") ? (
+          ) : style === "a10" && card.fromPrice == null ? (
+            // A10 shows no count, so a tile without a price takes the blurb
+            // the tiles without figures show.
+            card.description ? (
+              <span className="line-clamp-1 text-[11px] leading-snug text-neutral-300/90">{sentenceCase(card.description)}</span>
+            ) : null
+          ) : line && (style === "a11" || style === "a11cu") ? (
             // No price, only a count: A8's grey line (A11's at 11px).
             <span className={cn("truncate text-[11px] font-medium leading-snug text-neutral-400", style !== "a11" && "sm:text-[13px]")}>{line}</span>
           ) : line ? (
