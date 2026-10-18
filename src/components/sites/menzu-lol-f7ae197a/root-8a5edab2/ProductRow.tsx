@@ -589,6 +589,11 @@ function BentoTile({
  *  - a6: A4 with its price line as quiet as B4's, the same "Chỉ từ ...đ, N
  *    sản phẩm" in a grey, lighter type (the owner, 18/10/2026: "làm cái a6
  *    là a4 nhưng mà chữ chỉ từ sản phẩm giảm độ sáng như b4").
+ *  - a8: A6 with its grey line sized to the site's: only the price on a
+ *    phone, where the whole line ran past 3 of 9 half-width tiles, and the
+ *    whole line at 13px from sm, the size of the other cards' grey lines
+ *    (the owner, 18/10/2026: "thử đi không ổn tui kêu lùi", then "cho bản
+ *    này là a8 đi").
  *  - a6cu2: the A6 before that, A3's words, layout and hover (17/10: "kiểu
  *    như a luôn đi bố cục á", "giống a3") with A4's shape, bright above and
  *    dark below, at about A3's strength: .lab-lmarket-shade at 70% ("làm a6
@@ -637,7 +642,7 @@ function BentoTile({
 export type TileStyle =
   | "classic"
   | "a" | "a2" | "a3" | "a4" | "a5" | "a5cu" | "a6" | "a6cu" | "a6cu2"
-  | "a7" | "a7cu"
+  | "a7" | "a7cu" | "a8"
   | "b" | "b1" | "b2" | "b3" | "b4" | "b5" | "b6" | "b7"
   | "c" | "c1" | "d";
 
@@ -662,11 +667,12 @@ export type TileStyle =
  * "a6cu2"), "a7" (A5's words at A6's brightness, now "a7cu"; "b7" is
  * B4's), "a2" again (18/10,
  * choosing: "a2 thử"), "a3" ("a3 thử"), "a4" after comparing A4, A5, B4
- * and B5 at 4:3 and 16:9 (18/10: "chốt a4 thôi"), and settled on "a6", A4
- * with the quiet price line (18/10: "chốt a6"). "a" is A1, "classic" the
- * framed picture with the name under it.
+ * and B5 at 4:3 and 16:9 (18/10: "chốt a4 thôi"), "a6", A4 with the quiet
+ * price line (18/10: "chốt a6"), now "a8", A6 with that line sized to the
+ * site's, the version on show when the owner named it ("cho bản này là a8
+ * đi"). "a" is A1, "classic" the framed picture with the name under it.
  */
-export const DEFAULT_TILE_STYLE: TileStyle = "a6";
+export const DEFAULT_TILE_STYLE: TileStyle = "a8";
 
 /**
  * LAB: the game list's tile shape from sm up, "43" or "169", so both can be
@@ -977,7 +983,7 @@ function TileDress({ card, style, big }: { card: ProductCard; style: TileStyle; 
       </>
     );
   }
-  if (style === "a" || style === "a2" || style === "a3" || style === "a4" || style === "a5" || style === "a6" || style === "a6cu2" || style === "a7") {
+  if (style === "a" || style === "a2" || style === "a3" || style === "a4" || style === "a5" || style === "a6" || style === "a6cu2" || style === "a7" || style === "a8") {
     // A5 and A7 carry the foot that ends above the title.
     const titleFoot = style === "a5" || style === "a7";
     return (
@@ -988,7 +994,7 @@ function TileDress({ card, style, big }: { card: ProductCard; style: TileStyle; 
             "tile-scrim absolute inset-0",
             style === "a"
               ? "bg-gradient-to-t from-scrim via-scrim/60 via-35% to-scrim/10"
-              : style === "a4" || style === "a6"
+              : style === "a4" || style === "a6" || style === "a8"
                 ? "lab-lmarket-shade"
                 : titleFoot
                   ? // A4's corner and a thin even layer here; A5's foot
@@ -1029,13 +1035,13 @@ function TileDress({ card, style, big }: { card: ProductCard; style: TileStyle; 
             className={cn(
               "line-clamp-2 text-[14px] font-black leading-[1.15] text-white sm:text-[17px]",
               big && "lg:text-[20px]",
-              (style === "a2" || style === "a3" || style === "a4" || style === "a5" || style === "a6" || style === "a6cu2" || style === "a7") && "transition-colors duration-300 group-hover:text-[var(--menzu-accent)]",
+              (style === "a2" || style === "a3" || style === "a4" || style === "a5" || style === "a6" || style === "a6cu2" || style === "a7" || style === "a8") && "transition-colors duration-300 group-hover:text-[var(--menzu-accent)]",
             )}
           >
             {titleCase(withoutNewWord(card.title))}
           </h3>
-          {line && style === "a6" ? (
-            // A6 sizes its line to the site's: on a phone, where the whole
+          {line && style === "a8" ? (
+            // A8 sizes A6's line to the site's: on a phone, where the whole
             // line ran past the half-width tile, only the price; from sm the
             // whole line at 13px, the size of the other cards' grey lines
             // (the owner, 18/10/2026: "thử đi không ổn tui kêu lùi").
@@ -1053,7 +1059,7 @@ function TileDress({ card, style, big }: { card: ProductCard; style: TileStyle; 
                 "truncate text-[11px] leading-snug",
                 // A6 (A4) and A7 (A5) keep A's words but grey the price
                 // line as B4 does.
-                style === "a7" ? "font-medium text-neutral-400" : "font-semibold text-neutral-200",
+                style === "a6" || style === "a7" ? "font-medium text-neutral-400" : "font-semibold text-neutral-200",
               )}
             >
               {line}
