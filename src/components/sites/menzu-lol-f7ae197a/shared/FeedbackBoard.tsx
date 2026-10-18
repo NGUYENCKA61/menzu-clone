@@ -94,8 +94,10 @@ export function StarRow({ rating, size = 13 }: { rating: number; size?: number }
 }
 
 /**
- * The avatar in its accent ring. Anonymous reviews get the original's light-grey
- * incognito disc; a signed reviewer without a picture gets their initial.
+ * The avatar in the home review cards' thin grey ring, the accent red until
+ * 18/10/2026 ("rà soát làm sao cho đồng bộ"). Anonymous reviews get the
+ * original's light-grey incognito disc; a signed reviewer without a picture
+ * gets their initial.
  */
 export function ReviewAvatar({
   name,
@@ -107,7 +109,7 @@ export function ReviewAvatar({
   anonymous: boolean;
 }) {
   return (
-    <div className="relative inline-block shrink-0 rounded-full p-[2px] border-[2.5px] border-[var(--menzu-accent)]">
+    <div className="relative inline-block shrink-0 rounded-full p-[2px] border border-white/15">
       <div className="w-11 h-11 sm:w-[50px] sm:h-[50px] rounded-full overflow-hidden flex items-center justify-center bg-neutral-800">
         {anonymous ? (
           <div className="w-full h-full bg-[#D1D5DB] flex items-center justify-center">
@@ -208,17 +210,18 @@ function ReviewCard({ item }: { item: FeedbackItem }) {
       <div className="flex gap-4 items-start">
         <ReviewAvatar name={item.name} avatarUrl={item.avatarUrl} anonymous={item.anonymous} />
         <div className="flex-1 min-w-0 pt-0.5">
-          <div className="flex items-start justify-between gap-2 mb-1.5">
-            <div className="flex items-center gap-2 flex-wrap min-w-0">
-              <h3 className="text-base font-black text-white truncate">{item.name}</h3>
-              {item.verified ? <VerifiedBadge /> : null}
-              <ServiceChip service={item.service} />
-            </div>
-            <span className="text-[11px] text-neutral-600 font-medium shrink-0 pt-0.5">
-              {item.when}
-            </span>
+          {/* The name has the line to itself and the date rides beside the
+              stars, as on the home review cards: beside the name, "Khách
+              hàng ẩn danh" was cut short on a phone (18/10/2026). */}
+          <div className="flex items-center gap-2 flex-wrap min-w-0 mb-1.5">
+            <h3 className="text-base font-black text-white truncate">{item.name}</h3>
+            {item.verified ? <VerifiedBadge /> : null}
+            <ServiceChip service={item.service} />
           </div>
-          <StarRow rating={item.rating} />
+          <div className="flex items-center gap-2">
+            <StarRow rating={item.rating} />
+            <span className="text-[11px] text-neutral-500 font-medium">{item.when}</span>
+          </div>
           {/* What was bought, under the stars: "Đã mua" and the tool, on one
               line, cut short with an ellipsis when the name runs long (the
               owner, 01/10/2026: "bổ sung thông tin mua key bản gì game gì";
@@ -240,9 +243,11 @@ function ReviewCard({ item }: { item: FeedbackItem }) {
       </div>
 
       <div className="mt-4 pl-[calc(44px+16px)] sm:pl-[calc(54px+16px)]">
+        {/* Quoted the home review cards' way, a bar on the left rather
+            than curly quotes. */}
         {item.body ? (
-          <p className="text-neutral-300 leading-relaxed text-[14.5px] whitespace-pre-wrap">
-            “{item.body}”
+          <p className="border-l-2 border-white/10 pl-3 text-neutral-200 leading-relaxed text-[14.5px] whitespace-pre-wrap">
+            {item.body}
           </p>
         ) : (
           <p className="text-neutral-600 text-sm italic">Không để lại nhận xét</p>

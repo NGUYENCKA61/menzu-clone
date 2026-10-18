@@ -167,22 +167,24 @@ export function FeedbackComposer({ user, today }: { user: ComposerUser; today: s
       <div className="flex gap-4 items-start mb-5">
         <ReviewAvatar name={previewName} avatarUrl={user.avatarUrl} anonymous={anonymous} />
         <div className="flex-1 min-w-0 pt-0.5">
-          <div className="flex flex-col gap-1 mb-1.5">
-            <div className="flex items-center gap-2">
-              <h3 className="text-base font-black text-white truncate max-w-[150px]">
-                {previewName}
-              </h3>
-              {anonymous ? null : <VerifiedBadge size="w-3 h-3" />}
-              <ServiceChip service={service} small />
-            </div>
-            <span className="text-[10px] text-neutral-600 font-medium">{today}, mới nhất</span>
+          {/* The wall's card (FeedbackBoard's ReviewCard): the date beside
+              the stars, the words behind a bar, the amount in green. */}
+          <div className="flex items-center gap-2 mb-1.5">
+            <h3 className="text-base font-black text-white truncate max-w-[150px]">
+              {previewName}
+            </h3>
+            {anonymous ? null : <VerifiedBadge size="w-3 h-3" />}
+            <ServiceChip service={service} small />
           </div>
-          <StarRow rating={rating} size={12} />
+          <div className="flex items-center gap-2">
+            <StarRow rating={rating} size={12} />
+            <span className="text-[10px] text-neutral-500 font-medium">{today}, mới nhất</span>
+          </div>
         </div>
       </div>
       {body.trim() ? (
-        <p className="text-neutral-300 leading-relaxed text-sm whitespace-pre-wrap">
-          “{body.trim()}”
+        <p className="border-l-2 border-white/10 pl-3 text-neutral-200 leading-relaxed text-sm whitespace-pre-wrap">
+          {body.trim()}
         </p>
       ) : (
         <p className="text-neutral-600 text-sm italic">
@@ -209,7 +211,7 @@ export function FeedbackComposer({ user, today }: { user: ComposerUser; today: s
           <span className="text-[12px] text-neutral-500 font-semibold mb-1">
             Trị giá giao dịch
           </span>
-          <span className="text-2xl font-black text-[var(--menzu-accent)] tabular-nums leading-none">
+          <span className="text-2xl font-black text-emerald-400 tabular-nums leading-none">
             {formatVnd(amountNumber)}đ
           </span>
         </div>
