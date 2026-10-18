@@ -84,9 +84,9 @@ export function ReviewCard({ review, index }: { review: Review; index: number })
     >
       <span aria-hidden className="spot-glow -z-10" />
       <div className="flex items-start gap-3">
-        {/* The red ring again after a spell in thin grey (the owner,
-            18/10/2026: "cho nó viền đỏ đi"). */}
-        <div className="shrink-0 rounded-full border-[2.5px] border-[var(--menzu-accent)] p-[2px]">
+        {/* A thin grey ring where a red one sat: four red rings pulled the
+            eye to the faces rather than the words (18/10/2026). */}
+        <div className="shrink-0 rounded-full border border-white/15 p-[2px]">
           <div className="relative grid h-10 w-10 place-items-center overflow-hidden rounded-full bg-neutral-800">
             {review.avatar ? (
               <Image src={review.avatar} alt="" fill sizes="40px" className="object-cover" />
