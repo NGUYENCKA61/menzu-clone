@@ -366,8 +366,8 @@ export function LoginForm({
 
                 <p className="mt-8 text-center text-xs text-neutral-500">
                   Chưa có tài khoản?
-                  {/* #tao-tai-khoan asks the sign-up page to glide its card
-                      fully into view on arrival (RegisterForm; the owner,
+                  {/* #tao-tai-khoan is the sign-up card's id: the page opens
+                      already scrolled to it (RegisterForm; the owner,
                       18/10/2026: "tự cuộn tới giữa trang để thấy đủ card đăng
                       ký khi bấm tạo mới ngay"). */}
                   <Link

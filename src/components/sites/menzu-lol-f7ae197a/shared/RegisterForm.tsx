@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Eye, EyeOff, Lock, Mail, User } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 
 import { canGoBack } from "@/lib/navigation";
 
@@ -83,36 +83,21 @@ export function RegisterForm({
   // that arrives already given is not consent.
   const [agreed, setAgreed] = useState(false);
 
-  // LAB: arriving from the sign-in page's "Tạo mới ngay" (#tao-tai-khoan),
-  // the page glides so the whole card is in view (the owner, 18/10/2026:
-  // "tự cuộn tới giữa trang để thấy đủ card đăng ký khi bấm tạo mới ngay"):
-  // centred in the room the header leaves when the card fits, its top just
-  // under the header when it does not. The header's main row (64px) is all
-  // that stays once the page has scrolled; the strip above it folds away.
-  // offsetTop, not the box on screen, because the page is still sliding in
-  // (slideUpFade) when this runs. The mark leaves the address after, so a
-  // reload does not glide again; other ways in never glide.
-  const cardRef = useRef<HTMLDivElement>(null);
+  // LAB: arriving from the sign-in page's "Tạo mới ngay", the page opens
+  // already scrolled to the card (the owner, 18/10/2026: "tự cuộn tới giữa
+  // trang để thấy đủ card đăng ký khi bấm tạo mới ngay", then "bấm cái nó
+  // nhảy tới trang cuộn rồi đc k chứ hiệu ứng kéo xuống nhìn buồn cười
+  // quá"): the link carries #tao-tai-khoan, the card's id, and Next.js
+  // scrolls to it as the page appears, before it is painted, with no glide.
+  // scroll-mt-[100px]: the card's top settles 80px down, 16px under the
+  // header's 64px row, once the page's slide-in (slideUpFade, which starts
+  // it 20px low at the moment of the scroll) is over. A glide after
+  // arrival was tried first (b955a165). Here the mark only leaves the
+  // address afterwards, so it reads /signup.
   useEffect(() => {
-    if (window.location.hash !== "#tao-tai-khoan") return;
-    const timer = window.setTimeout(() => {
-      const card = cardRef.current;
-      if (!card) return;
-      let top = 0;
-      for (let node: HTMLElement | null = card; node; node = node.offsetParent as HTMLElement | null) {
-        top += node.offsetTop;
-      }
-      const header = 64;
-      const room = window.innerHeight - header;
-      const height = card.offsetHeight;
-      const target = height + 32 <= room ? top - header - (room - height) / 2 : top - header - 16;
-      window.scrollTo({
-        top: Math.max(0, target),
-        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
-      });
+    if (window.location.hash === "#tao-tai-khoan") {
       window.history.replaceState(window.history.state, "", window.location.pathname + window.location.search);
-    }, 150);
-    return () => window.clearTimeout(timer);
+    }
   }, []);
 
   async function handleSubmit(event: React.FormEvent) {
@@ -210,7 +195,7 @@ export function RegisterForm({
           </button>
         </div>
 
-        <div ref={cardRef} className="flex-1 w-full bg-neutral-900/80 border border-white/10 rounded-[2rem] sm:rounded-[2.5rem] shadow-2xl relative overflow-hidden transform-gpu flex flex-col">
+        <div id="tao-tai-khoan" className="flex-1 w-full scroll-mt-[100px] bg-neutral-900/80 border border-white/10 rounded-[2rem] sm:rounded-[2.5rem] shadow-2xl relative overflow-hidden transform-gpu flex flex-col">
           <div className="flex flex-col lg:flex-row flex-1 relative z-10">
             {/* LAB: the picture melts into the form as on the sign-in card
                 (LoginForm.tsx has the why; the owner, 18/10/2026: "thêm
