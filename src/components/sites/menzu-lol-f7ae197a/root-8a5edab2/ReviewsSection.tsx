@@ -1,9 +1,7 @@
+import Image from "next/image";
 import Link from "next/link";
-import { BadgeCheck, Star, VenetianMask } from "lucide-react";
+import { BadgeCheck, Star } from "lucide-react";
 
-import { sentenceCase } from "@/lib/displayCase";
-
-import { AvatarPhoto } from "./AvatarPhoto";
 import { RevealGrid } from "./RevealGrid";
 
 export interface Review {
@@ -80,6 +78,9 @@ export function Stars({
  * hover. `isolate` keeps the glow's negative z-index inside the card,
  * between its background and its words.
  */
+// LAB: the card as it was before 18/10/2026, back for a look (the owner:
+// "card đánh giá lùi về bản cũ đi tui coi thử"); today's card is the commit
+// before this one.
 export function ReviewCard({ review, index }: { review: Review; index: number }) {
   return (
     <article
@@ -89,66 +90,36 @@ export function ReviewCard({ review, index }: { review: Review; index: number })
     >
       <span aria-hidden className="spot-glow -z-10" />
       <div className="flex items-start gap-3">
-        {/* A thin grey ring where a red one sat: four red rings pulled the
-            eye to the faces rather than the words (18/10/2026). */}
-        <div className="shrink-0 rounded-full border border-white/15 p-[2px]">
-          {/* The reviews page's faces (FeedbackBoard's ReviewAvatar): a mask
-              on pale grey for a buyer who hid their name, else the photo over
-              the initial, the initial left when the photo will not load (the
-              owner, 18/10/2026: "lấy vài cái icon avatar trang kia qua coi
-              đi nhìn vậy xấu quá"). */}
+        <div className="shrink-0 rounded-full border-[2.5px] border-[var(--menzu-accent)] p-[2px]">
           <div className="relative grid h-10 w-10 place-items-center overflow-hidden rounded-full bg-neutral-800">
-            {review.anonymous ? (
-              <span className="grid h-full w-full place-items-center bg-[#D1D5DB]">
-                <VenetianMask aria-hidden className="h-5 w-5 text-neutral-700 opacity-80" />
-              </span>
+            {review.avatar ? (
+              <Image src={review.avatar} alt="" fill sizes="40px" className="object-cover" />
             ) : (
-              <>
-                <span className="font-display text-sm font-bold uppercase text-mist">
-                  {review.name.trim().charAt(0) || "?"}
-                </span>
-                {review.avatar ? <AvatarPhoto src={review.avatar} size={40} /> : null}
-              </>
+              <span className="font-display text-sm font-bold text-mist">
+                {review.name.trim().charAt(0) || "?"}
+              </span>
             )}
           </div>
         </div>
         <div className="min-w-0 flex-1">
-          {/* The name has the line to itself and the date rides beside the
-              stars: next to the date, "Khách hàng ẩn danh" was cut to
-              "Khách hàng ẩ…" (18/10/2026). */}
-          <div className="flex min-w-0 items-center gap-1.5">
-            <h3 className="truncate text-[14px] font-black text-white">{review.name}</h3>
-            {review.verified ? (
-              <BadgeCheck
-                size={14}
-                aria-label="Tài khoản đã xác minh"
-                className="shrink-0 text-[#0866FF]"
-              />
-            ) : null}
+          <div className="flex items-start justify-between gap-2">
+            <div className="flex min-w-0 items-center gap-1.5">
+              <h3 className="truncate text-[14px] font-black text-white">{review.name}</h3>
+              {review.verified ? (
+                <BadgeCheck
+                  size={14}
+                  aria-label="Tài khoản đã xác minh"
+                  className="shrink-0 text-[#0866FF]"
+                />
+              ) : null}
+            </div>
+            <span className="shrink-0 text-[10px] font-semibold text-neutral-500">
+              {review.date}
+            </span>
           </div>
-          <div className="mt-1.5 flex items-center gap-2">
+          <div className="mt-1.5">
             <Stars filled={Math.min(5, Math.max(1, review.rating ?? 5))} pop />
-            <span className="text-[10px] font-semibold text-neutral-500">{review.date}</span>
           </div>
-          {/* What was bought, under the stars, as the reviews page prints it
-              (the owner, 01/10/2026: "bổ sung thông tin mua key bản gì game
-              gì"; on the home cards 18/10/2026: "thử đi cả 2"): the tool's
-              name alone, in the shop's red ("đã mua hack gì thì màu tô đỏ tên
-              hack luôn", "bỏ chữ đã mua chỉ ghi dòng đỏ thôi"). A screen
-              reader still hears "Đã mua", and the pointer gets the whole name
-              when it is cut short. */}
-          {review.purchase ? (
-            <p className="mt-1.5 flex min-w-0 items-center text-[12px]">
-              <Link
-                href={review.purchase.href}
-                aria-label={`Đã mua ${sentenceCase(review.purchase.product)}`}
-                title={sentenceCase(review.purchase.product)}
-                className="min-w-0 truncate font-semibold text-[var(--menzu-accent)] underline-offset-2 transition-colors hover:underline"
-              >
-                {sentenceCase(review.purchase.product)}
-              </Link>
-            </p>
-          ) : null}
         </div>
       </div>
 
@@ -160,8 +131,7 @@ export function ReviewCard({ review, index }: { review: Review; index: number })
       </p>
 
       <div className="mt-4 flex items-center justify-between gap-3 border-t border-white/[0.06] pt-3">
-        {/* The reviews page's words for the figure. */}
-        <span className="text-[11px] font-bold text-neutral-500">Trị giá giao dịch</span>
+        <span className="text-[11px] font-bold text-neutral-500">Giao dịch:</span>
         <span className="text-[13px] font-black tabular-nums text-emerald-400">{review.amount}</span>
       </div>
     </article>
