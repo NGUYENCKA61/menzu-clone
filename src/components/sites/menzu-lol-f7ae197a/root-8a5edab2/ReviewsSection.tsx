@@ -159,14 +159,16 @@ export function ReviewsSection({
           titles' capitals but with no red bar, the line under it centred,
           and the way to the rest under the cards (the owner, 18/10/2026:
           "Chiến thắng trong tầm tay bạn nên làm bản căn giữa như cũ?", "làm
-          thử đi"). The main site's red second half stays out. */}
+          thử đi"), with the main site's red second half on this title alone
+          ("tô màu như web cũ đi Chiến thắng trong tầm tay bạn"). */}
       <div className="mx-auto flex max-w-2xl flex-col items-center gap-2 text-center">
         <h2
           id="reviews-heading"
           // Balanced, so a phone's two lines do not leave "BẠN" on its own.
           className="row-heading text-balance text-xl font-black uppercase tracking-wider text-frost sm:text-2xl"
         >
-          Chiến thắng trong tầm tay bạn
+          Chiến thắng{" "}
+          <span className="text-[var(--menzu-accent)]">trong tầm tay bạn</span>
         </h2>
         <p className="text-[15px] text-mist">
           Đánh giá thật từ khách hàng đã giao dịch, admin duyệt trước khi hiện.
