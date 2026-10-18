@@ -7,7 +7,6 @@ import { SUPPORT_WINDOW } from "@/lib/supportHours";
 
 import { FaqAccordion } from "./FaqAccordion";
 import { RevealGrid } from "./RevealGrid";
-import { SectionHeading } from "./SectionHeading";
 
 /**
  * The five questions a buyer has left after the proof, in the owner's own
@@ -107,10 +106,19 @@ export function FaqSection({ faq, contact }: { faq: FaqEntry[]; contact: FaqCont
       <RevealGrid className="grid items-start gap-10 lg:grid-cols-12 lg:gap-12">
         <div className="lg:col-span-7">
           <div className="reveal-card mb-8" style={{ ["--i" as string]: 0 }}>
-            {/* The game rows' title, as on every home section (the owner,
-                18/10/2026: "Về kiểu vạch đỏ như hàng game", after the main
-                site's two-tone title had a turn here). */}
-            <SectionHeading id="faq-heading">Câu hỏi thường gặp</SectionHeading>
+            {/* LAB, back for a look with the reviews block (the owner,
+                18/10/2026: "quay về bản căn giữa chữ đỏ tui coi thử chiến
+                thắng và faq"): the main site's title, capitals with the
+                second half in the shop's red and no red bar, at the other
+                titles' 20px and 24px from sm; left aligned, the block being
+                two columns. The red-bar version is 655590b7. */}
+            <h2
+              id="faq-heading"
+              className="row-heading text-balance text-xl font-black uppercase tracking-wider text-frost sm:text-2xl"
+            >
+              Câu hỏi{" "}
+              <span className="text-[var(--menzu-accent)]">thường gặp</span>
+            </h2>
             {/* The reviews block's line under its title: 15px, 8px below the
                 title; wider and wrapped with care, so "shop." no longer sits
                 alone on a line (the owner, 18/10/2026: "làm đi"). */}
