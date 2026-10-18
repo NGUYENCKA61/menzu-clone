@@ -70,7 +70,7 @@ export function ForgotPasswordForm() {
         <p className="mt-2 text-[14px] leading-relaxed text-neutral-300">{sentMessage}</p>
         <Link
           href="/login"
-          className="mt-6 inline-flex h-11 w-full items-center justify-center rounded-xl bg-[var(--menzu-accent)] text-[14px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent-dark)]"
+          className="mt-7 flex w-full items-center justify-center rounded-2xl bg-[var(--menzu-accent)] py-4 text-[15px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent-dark)]"
         >
           Về trang đăng nhập
         </Link>
@@ -101,12 +101,15 @@ export function ForgotPasswordForm() {
         />
       </div>
 
+      {/* LAB: the sign-in button's shape and sentence case (the owner,
+          18/10/2026: "coi đồng bộ chưa", "nút đó hình như chữ in hoa kìa"),
+          where it was a smaller rounded-xl bar in capitals typed as such. */}
       <button
         type="submit"
         disabled={pending}
-        className="mt-6 w-full rounded-xl bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] disabled:opacity-70 disabled:cursor-wait text-white font-semibold py-3.5 text-[14px] transition-colors"
+        className="mt-7 flex w-full items-center justify-center gap-2 rounded-2xl bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] disabled:opacity-70 disabled:cursor-wait text-white font-semibold py-4 text-[15px] transition-colors"
       >
-        {pending ? "ĐANG GỬI…" : "GỬI ĐƯỜNG DẪN ĐẶT LẠI"}
+        {pending ? "Đang gửi…" : "Gửi đường dẫn đặt lại"}
       </button>
 
       <Link
