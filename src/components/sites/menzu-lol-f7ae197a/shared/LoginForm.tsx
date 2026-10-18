@@ -198,12 +198,14 @@ export function LoginForm({
                 shade stay whole for the first 40% and fade out to nothing at
                 the seam under a mask, over the form side's own ground
                 (bg-neutral-950/60 on both halves, where this one was
-                #111111), and the hairline between the halves is gone, so the
-                two halves meet with no line. menzu lays a colour gradient to
-                its form's #101010 from the left edge; a mask matches our
-                see-through ground, and starting at 40% keeps the figure in the
-                middle of the picture bright. Same on the sign-up card. */}
-            <div className="hidden lg:flex w-1/2 relative bg-neutral-950/60 overflow-hidden transform-gpu items-end justify-center">
+                #111111). menzu lays a colour gradient to its form's #101010
+                from the left edge; a mask matches our see-through ground, and
+                starting at 40% keeps the figure in the middle of the picture
+                bright. The 1px hairline at the seam (white at 5%) stays, as on
+                menzu: taken off with the fade, put back (the owner, same day:
+                "menzu tối nma vẫn còn thấy đường chỉ card", "thêm đi"). Same
+                on the sign-up card. */}
+            <div className="hidden lg:flex w-1/2 relative bg-neutral-950/60 overflow-hidden transform-gpu items-end justify-center border-r border-white/5">
               <div className="absolute inset-0 [mask-image:linear-gradient(to_right,black_40%,transparent)]">
                 <AuthPanelSlider
                   images={panelImages}
