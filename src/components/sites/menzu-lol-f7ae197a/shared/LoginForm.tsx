@@ -47,10 +47,14 @@ export function LoginForm({
   panelTitle,
   next = "/",
   reason,
+  tagline,
 }: {
   /** Why the visitor is here, when the return address says — replaces the
    *  marketing subtitle so the card answers the door they came through. */
   reason?: string;
+  /** The line under "Đăng nhập" otherwise: one of the shop's lines from Cấu
+   *  hình, picked on the server for this visit (pickLoginTagline). */
+  tagline: string;
   /** The shop's name, for the mobile eyebrow over the heading. */
   brandName: string;
   turnstileSiteKey: string | null;
@@ -239,7 +243,7 @@ export function LoginForm({
                     Đăng nhập
                   </h1>
                   <p className={`mt-2 text-sm font-medium ${reason ? "text-white" : "text-neutral-400"}`}>
-                    {reason ?? "Mua tool, tài khoản game và nhận key ngay lập tức"}
+                    {reason ?? tagline}
                   </p>
                 </div>
 

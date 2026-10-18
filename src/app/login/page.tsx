@@ -29,7 +29,7 @@ function reasonFor(next: string): string | undefined {
   return hit?.[1];
 }
 import { getCurrentUser } from "@/lib/session";
-import { discordOauthEnabled, googleOauthEnabled } from "@/lib/settings";
+import { discordOauthEnabled, googleOauthEnabled, pickLoginTagline } from "@/lib/settings";
 import { getShopSettings } from "@/lib/settingsStore";
 import { turnstileEnabled } from "@/lib/turnstile";
 
@@ -101,6 +101,9 @@ export default async function LoginPage({
           panelTitle={settings.authLoginTitle}
           next={next}
           reason={reason}
+          // A different one of the shop's lines on each visit (Cấu hình →
+          // the sign-in pictures' section); this page renders per request.
+          tagline={pickLoginTagline(settings)}
         />
         <SiteFooter />
       </main>

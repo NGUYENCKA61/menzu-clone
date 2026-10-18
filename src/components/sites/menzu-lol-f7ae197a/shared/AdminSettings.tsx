@@ -583,6 +583,7 @@ export function AdminSettings({
   );
   const [loginTitle, setLoginTitle] = useState(settings.authLoginTitle);
   const [signupTitle, setSignupTitle] = useState(settings.authSignupTitle);
+  const [loginTaglines, setLoginTaglines] = useState(settings.authLoginTaglines);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [zalo, setZalo] = useState(settings.contactZalo);
@@ -860,6 +861,7 @@ export function AdminSettings({
           authPanelSubtitle: panelSubtitle,
           authLoginTitle: loginTitle,
           authSignupTitle: signupTitle,
+          authLoginTaglines: loginTaglines,
           contactZalo: zalo,
           contactFacebook: facebook,
           contactHotline: hotline,
@@ -2969,6 +2971,25 @@ export function AdminSettings({
                 />
                 <p className={HINT}>Ví dụ: Join / Us.</p>
               </div>
+            </div>
+
+            {/* LAB: the sign-in page's line under its title, rotating (the
+                owner, 18/10/2026: "thêm vô phần cấu hình admin sửa đi"). */}
+            <div>
+              <label htmlFor="auth-login-taglines" className={LABEL}>
+                Câu dưới tiêu đề Đăng nhập
+              </label>
+              <textarea
+                id="auth-login-taglines"
+                rows={7}
+                value={loginTaglines}
+                onChange={(event) => setLoginTaglines(event.target.value)}
+                className={`${FIELD} resize-y`}
+              />
+              <p className={HINT}>
+                Mỗi dòng một câu. Mỗi lần khách mở trang đăng nhập sẽ hiện ngẫu
+                nhiên một câu. Để trống thì dùng lại các câu mặc định.
+              </p>
             </div>
           </section>
 

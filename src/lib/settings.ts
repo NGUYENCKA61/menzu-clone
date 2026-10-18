@@ -2,6 +2,7 @@ import {
   readAssistantProvider,
   type AssistantProvider,
 } from "@/lib/assistantProviders";
+import { SUPPORT_WINDOW } from "@/lib/supportHours";
 import { parseCardRates, serializeCardRates, type CardRate } from "@/lib/topup";
 import {
   parseZaloGroupIds,
@@ -244,6 +245,9 @@ export interface ShopSettings {
   /** Newlines are line breaks — the overlay is two short words on two rows. */
   authLoginTitle: string;
   authSignupTitle: string;
+  /** The line under "Đăng nhập" on the sign-in page: one sentence per line,
+   *  one of them shown at random on each visit (pickLoginTagline). */
+  authLoginTaglines: string;
   /** Empty means the channel does not exist yet, so the footer leaves its icon
    *  out rather than shipping the inert "#" link the capture came with. */
   contactZalo: string;
@@ -377,6 +381,26 @@ export const AUTH_PANEL =
 export const BACKDROP =
   "/sites/menzu-lol-f7ae197a/root-8a5edab2/images/behance/e4307d166239615.6418bdb0084a4.webp";
 
+/** The sign-in page's lines, one per row, blanks and stray spaces dropped. */
+function taglineLines(raw: string): string[] {
+  return raw
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean);
+}
+
+/**
+ * One of the shop's lines for under "Đăng nhập", picked anew on each visit
+ * (the owner, 18/10/2026: "cái này mình đổi mỗi lần khách hàng vô đăng
+ * nhập"). The page is noindex, so what it says has no bearing on search.
+ * Picked on the server, so the line never swaps after the page has painted.
+ */
+export function pickLoginTagline(settings: ShopSettings, random: () => number = Math.random): string {
+  const lines = taglineLines(settings.authLoginTaglines);
+  const pool = lines.length > 0 ? lines : taglineLines(DEFAULT_SETTINGS.authLoginTaglines);
+  return pool[Math.min(pool.length - 1, Math.floor(random() * pool.length))];
+}
+
 export const DEFAULT_SETTINGS: ShopSettings = {
   topUpMin: 10_000,
   topUpPresets: [50_000, 200_000, 500_000, 1_000_000, 2_000_000, 5_000_000],
@@ -464,6 +488,18 @@ export const DEFAULT_SETTINGS: ShopSettings = {
   authPanelSubtitle: "THICHTHIHACK",
   authLoginTitle: "Welcome\nBack",
   authSignupTitle: "Join\nUs",
+  // LAB: the owner's lines (18/10/2026: "cái này mình đổi mỗi lần khách
+  // hàng vô đăng nhập", "thêm vô phần cấu hình admin sửa đi") and the five
+  // suggested with them. Every claim is one the shop already makes.
+  authLoginTaglines: [
+    "Mua tool, tài khoản game và nhận key ngay lập tức",
+    "Nạp tiền ngân hàng, cộng tự động 24/7",
+    "Key giao ngay sau khi thanh toán, kèm hướng dẫn chi tiết",
+    `Hỗ trợ ${SUPPORT_WINDOW} mỗi ngày qua Facebook, Zalo`,
+    "Bảo hành theo đơn, xử lý nhanh khi tool gặp lỗi",
+    "Chiến thắng đã gần ngay trước mắt, còn chờ gì nữa?",
+    "Khoảng cách của chiến thắng chỉ cách một gang tay",
+  ].join("\n"),
   contactZalo: "",
   contactFacebook: "",
   contactHotline: "",
@@ -591,6 +627,7 @@ export const SETTING_KEYS: Record<keyof ShopSettings, string> = {
   authPanelSubtitle: "auth.panelSubtitle",
   authLoginTitle: "auth.loginTitle",
   authSignupTitle: "auth.signupTitle",
+  authLoginTaglines: "auth.loginTaglines",
   contactZalo: "contact.zalo",
   contactFacebook: "contact.facebook",
   contactHotline: "contact.hotline",
@@ -1190,6 +1227,12 @@ export function parseSettings(
       stored.get(SETTING_KEYS.authSignupTitle),
       DEFAULT_SETTINGS.authSignupTitle,
     ),
+    // Emptied, the shop's own lines go and the stock ones come back: the
+    // page always has something to say under its title.
+    authLoginTaglines: toText(
+      stored.get(SETTING_KEYS.authLoginTaglines),
+      DEFAULT_SETTINGS.authLoginTaglines,
+    ),
     contactZalo: toOptionalText(
       stored.get(SETTING_KEYS.contactZalo),
       DEFAULT_SETTINGS.contactZalo,
@@ -1378,6 +1421,7 @@ export function serializeSettings(
     authPanelSubtitle: settings.authPanelSubtitle.trim(),
     authLoginTitle: settings.authLoginTitle.trim(),
     authSignupTitle: settings.authSignupTitle.trim(),
+    authLoginTaglines: taglineLines(settings.authLoginTaglines).join("\n"),
     contactZalo: settings.contactZalo.trim(),
     contactFacebook: settings.contactFacebook.trim(),
     contactHotline: settings.contactHotline.trim(),
@@ -1562,6 +1606,7 @@ export function normalizeSettings(
     authPanelSubtitle: String(raw?.authPanelSubtitle ?? "").trim(),
     authLoginTitle: String(raw?.authLoginTitle ?? "").trim(),
     authSignupTitle: String(raw?.authSignupTitle ?? "").trim(),
+    authLoginTaglines: String(raw?.authLoginTaglines ?? "").trim(),
     // Contact details are optional — blank leaves the link inert, as captured.
     contactZalo: String(raw?.contactZalo ?? "").trim(),
     contactFacebook: String(raw?.contactFacebook ?? "").trim(),
