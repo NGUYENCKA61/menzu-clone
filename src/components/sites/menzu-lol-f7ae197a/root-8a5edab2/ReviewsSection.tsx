@@ -3,6 +3,7 @@ import Link from "next/link";
 import { BadgeCheck, Star } from "lucide-react";
 
 import { RevealGrid } from "./RevealGrid";
+import { SectionHeading } from "./SectionHeading";
 
 export interface Review {
   name: string;
@@ -83,7 +84,9 @@ export function ReviewCard({ review, index }: { review: Review; index: number })
     >
       <span aria-hidden className="spot-glow -z-10" />
       <div className="flex items-start gap-3">
-        <div className="shrink-0 rounded-full border-[2.5px] border-[var(--menzu-accent)] p-[2px]">
+        {/* A thin grey ring where a red one sat: four red rings pulled the
+            eye to the faces rather than the words (18/10/2026). */}
+        <div className="shrink-0 rounded-full border border-white/15 p-[2px]">
           <div className="relative grid h-10 w-10 place-items-center overflow-hidden rounded-full bg-neutral-800">
             {review.avatar ? (
               <Image src={review.avatar} alt="" fill sizes="40px" className="object-cover" />
@@ -95,23 +98,22 @@ export function ReviewCard({ review, index }: { review: Review; index: number })
           </div>
         </div>
         <div className="min-w-0 flex-1">
-          <div className="flex items-start justify-between gap-2">
-            <div className="flex min-w-0 items-center gap-1.5">
-              <h3 className="truncate text-[14px] font-black text-white">{review.name}</h3>
-              {review.verified ? (
-                <BadgeCheck
-                  size={14}
-                  aria-label="Tài khoản đã xác minh"
-                  className="shrink-0 text-[#0866FF]"
-                />
-              ) : null}
-            </div>
-            <span className="shrink-0 text-[10px] font-semibold text-neutral-500">
-              {review.date}
-            </span>
+          {/* The name has the line to itself and the date rides beside the
+              stars: next to the date, "Khách hàng ẩn danh" was cut to
+              "Khách hàng ẩ…" (18/10/2026). */}
+          <div className="flex min-w-0 items-center gap-1.5">
+            <h3 className="truncate text-[14px] font-black text-white">{review.name}</h3>
+            {review.verified ? (
+              <BadgeCheck
+                size={14}
+                aria-label="Tài khoản đã xác minh"
+                className="shrink-0 text-[#0866FF]"
+              />
+            ) : null}
           </div>
-          <div className="mt-1.5">
+          <div className="mt-1.5 flex items-center gap-2">
             <Stars filled={Math.min(5, Math.max(1, review.rating ?? 5))} pop />
+            <span className="text-[10px] font-semibold text-neutral-500">{review.date}</span>
           </div>
         </div>
       </div>
@@ -154,16 +156,20 @@ export function ReviewsSection({
       aria-labelledby="reviews-heading"
       className="relative w-full pt-12 lg:pt-16 before:absolute before:left-1/2 before:top-0 before:h-px before:w-screen before:-translate-x-1/2 before:bg-white/[0.06]"
     >
-      {/* LAB (Launcher): left aligned like every section title, one colour in
-          the display face (frontend-design: no accented half-headline). */}
-      <div className="flex max-w-2xl flex-col items-start gap-2">
-        <h2
-          id="reviews-heading"
-          className="font-display text-[22px] font-bold leading-tight text-frost sm:text-[28px]"
-        >
-          Chiến thắng trong tầm tay bạn
-        </h2>
-        <p className="text-[15px] text-mist">
+      {/* The game rows' title, and their "Xem tất cả" on its right (the
+          owner, 18/10/2026: "làm hết đi"); the words say what the block is,
+          where the slogan "Chiến thắng trong tầm tay bạn" did not. */}
+      <div className="flex flex-col gap-2">
+        <div className="flex flex-row items-end justify-between gap-4">
+          <SectionHeading id="reviews-heading">Đánh giá từ khách hàng</SectionHeading>
+          <Link
+            href="/feedback"
+            className="shrink-0 text-[14px] font-medium text-mist underline-offset-4 transition-colors hover:text-frost hover:underline"
+          >
+            Xem tất cả
+          </Link>
+        </div>
+        <p className="max-w-2xl text-[15px] text-mist">
           Đánh giá thật từ khách hàng đã giao dịch, admin duyệt trước khi hiện.
         </p>
       </div>
@@ -174,34 +180,23 @@ export function ReviewsSection({
         ))}
       </RevealGrid>
 
-      {/* The score and the count sit on the same line as the way to the rest:
-          a reader who has just read four cards is told what the whole says
-          and where to read it, in one glance. */}
-      <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
-        {summary && summary.count >= MIN_REVIEWS_FOR_SCORE ? (
-          <div className="flex items-center gap-2.5">
-            <Stars filled={Math.round(summary.rating)} size={15} />
-            <span className="text-sm font-black text-white">
-              {summary.rating.toLocaleString("vi-VN", {
-                minimumFractionDigits: 1,
-                maximumFractionDigits: 1,
-              })}
-              <span className="text-neutral-500">/5</span>
-            </span>
-            <span className="text-[13px] text-mist">
-              {summary.count} đánh giá
-            </span>
-          </div>
-        ) : (
-          <span />
-        )}
-        <Link
-          href="/feedback"
-          className="text-[14px] font-medium text-mist underline-offset-4 transition-colors hover:text-frost hover:underline"
-        >
-          Xem tất cả đánh giá
-        </Link>
-      </div>
+      {/* The score and the count under the cards, once there are enough of
+          them to mean something (MIN_REVIEWS_FOR_SCORE). */}
+      {summary && summary.count >= MIN_REVIEWS_FOR_SCORE ? (
+        <div className="mt-6 flex items-center gap-2.5">
+          <Stars filled={Math.round(summary.rating)} size={15} />
+          <span className="text-sm font-black text-white">
+            {summary.rating.toLocaleString("vi-VN", {
+              minimumFractionDigits: 1,
+              maximumFractionDigits: 1,
+            })}
+            <span className="text-neutral-500">/5</span>
+          </span>
+          <span className="text-[13px] text-mist">
+            {summary.count} đánh giá
+          </span>
+        </div>
+      ) : null}
     </section>
   );
 }

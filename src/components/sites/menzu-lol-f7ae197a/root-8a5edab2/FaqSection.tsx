@@ -7,6 +7,7 @@ import { SUPPORT_WINDOW } from "@/lib/supportHours";
 
 import { FaqAccordion } from "./FaqAccordion";
 import { RevealGrid } from "./RevealGrid";
+import { SectionHeading } from "./SectionHeading";
 
 /**
  * The five questions a buyer has left after the proof, in the owner's own
@@ -104,13 +105,8 @@ export function FaqSection({ faq, contact }: { faq: FaqEntry[]; contact: FaqCont
       <RevealGrid className="grid items-start gap-10 lg:grid-cols-12 lg:gap-12">
         <div className="lg:col-span-7">
           <div className="reveal-card mb-8" style={{ ["--i" as string]: 0 }}>
-            {/* LAB (Launcher): no eyebrow pill, one colour in the display face. */}
-            <h2
-              id="faq-heading"
-              className="font-display text-[22px] font-bold leading-tight text-frost sm:text-[28px]"
-            >
-              Câu hỏi thường gặp
-            </h2>
+            {/* The game rows' title (the owner, 18/10/2026: "làm hết đi"). */}
+            <SectionHeading id="faq-heading">Câu hỏi thường gặp</SectionHeading>
             <p className="mt-3 max-w-xl text-[13.5px] leading-relaxed text-neutral-400">
               Thắc mắc trước khi mua? Câu trả lời ở ngay đây. Không thấy điều cần
               tìm thì nhắn cho shop.

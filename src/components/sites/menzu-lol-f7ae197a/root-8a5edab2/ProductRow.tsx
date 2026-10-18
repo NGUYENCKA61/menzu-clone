@@ -16,6 +16,7 @@ import { cn } from "@/lib/utils";
 import type { ProductCard } from "./productRowData";
 import { RowSearch } from "./RowSearch";
 import { RowSlider } from "./RowSlider";
+import { SectionHeading } from "./SectionHeading";
 
 /**
  * Which accent the tiles wear. The service rows keep the indigo the captured
@@ -820,13 +821,7 @@ export function ProductRow({
   // LAB (Launcher): the heading in the display face, sentence case, with no
   // red bar before it; "Xem tất cả" is a plain link (LAB-MASTER section 3).
   const title = accentHeading ? (
-    <div className="flex min-w-0 items-center gap-2.5">
-      <div aria-hidden className="h-5 w-[3px] shrink-0 rounded-full bg-[var(--menzu-accent)]" />
-      <h2 className="row-heading text-xl font-black uppercase tracking-wider text-frost sm:text-2xl">
-        {heading}
-      </h2>
-      {headingSuffix}
-    </div>
+    <SectionHeading suffix={headingSuffix}>{heading}</SectionHeading>
   ) : (
     <div className="flex min-w-0 items-center gap-3">
       <h2 className="row-heading font-display text-[22px] font-bold leading-tight text-frost sm:text-[28px]">
