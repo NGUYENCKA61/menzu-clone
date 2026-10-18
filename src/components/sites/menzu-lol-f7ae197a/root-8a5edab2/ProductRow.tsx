@@ -596,10 +596,10 @@ function BentoTile({
  *    này là a8 đi").
  *  - a9: A8 with its corners rounded 8px where every tile has 14px (the
  *    owner, 18/10/2026: "làm cái a9 bớt bo cong lại thử").
- *  - a10: A8 (its 14px corners) with the price picked out: "Từ" for "Chỉ
- *    từ", the price in white bold figures, the count grey from sm (the
- *    owner, 18/10/2026: "làm cái a10 highlight bỏ cái từ chỉ ghi từ từ
- *    highlight giá tiền").
+ *  - a10: A8 (its 14px corners) with the price picked out in white bold
+ *    figures, the count grey from sm (the owner, 18/10/2026: "làm cái a10
+ *    highlight bỏ cái từ chỉ ghi từ từ highlight giá tiền"). It said "Từ"
+ *    at first and "Chỉ từ" again since "a10 thêm từ chỉ xem".
  *  - a11: A10 with the line at A6's 11px on every screen, where A10 grows
  *    it to 13px from sm (the owner, 18/10/2026: "a11 là a10 nhưng cỡ chữ
  *    mô tả là a6").
@@ -681,11 +681,13 @@ export type TileStyle =
  * B4's), "a2" again (18/10,
  * choosing: "a2 thử"), "a3" ("a3 thử"), "a4" after comparing A4, A5, B4
  * and B5 at 4:3 and 16:9 (18/10: "chốt a4 thôi"), "a6", A4 with the quiet
- * price line (18/10: "chốt a6"), now "a8", A6 with that line sized to the
+ * price line (18/10: "chốt a6"), "a8", A6 with that line sized to the
  * site's, the version on show when the owner named it ("cho bản này là a8
- * đi"). "a" is A1, "classic" the framed picture with the name under it.
+ * đi"), and now "a10", its price in white bold after "Chỉ từ" (18/10: "áp
+ * a10 vào web đi"). "a" is A1, "classic" the framed picture with the name
+ * under it.
  */
-export const DEFAULT_TILE_STYLE: TileStyle = "a8";
+export const DEFAULT_TILE_STYLE: TileStyle = "a10";
 
 /**
  * LAB: the game list's tile shape from sm up, "43" or "169", so both can be
@@ -1069,14 +1071,14 @@ function TileDress({ card, style, big }: { card: ProductCard; style: TileStyle; 
               </span>
             </>
           ) : line && (style === "a10" || style === "a11") && card.fromPrice != null ? (
-            // A10: "Từ" where A8 says "Chỉ từ", the price in white bold
-            // figures as the site's product cards print theirs, the count
-            // in grey from sm (the owner, 18/10/2026: "làm cái a10 highlight
-            // bỏ cái từ chỉ ghi từ từ highlight giá tiền"). A11 keeps the
-            // line at A6's 11px on every screen ("a11 là a10 nhưng cỡ chữ mô
-            // tả là a6").
+            // A10: the price in white bold figures as the site's product
+            // cards print theirs, the count in grey from sm (the owner,
+            // 18/10/2026: "làm cái a10 highlight ... highlight giá tiền"),
+            // led by "Chỉ từ" again after a spell as "Từ" ("a10 thêm từ chỉ
+            // xem"). A11 keeps "Từ" and the line at A6's 11px on every
+            // screen ("a11 là a10 nhưng cỡ chữ mô tả là a6").
             <span className={cn("truncate text-[11px] font-medium leading-snug text-neutral-400", style === "a10" && "sm:text-[13px]")}>
-              Từ <span className="lab-figure font-bold text-white">{formatVnd(card.fromPrice)}đ</span>
+              {style === "a10" ? "Chỉ từ" : "Từ"} <span className="lab-figure font-bold text-white">{formatVnd(card.fromPrice)}đ</span>
               {card.count != null && card.count > 0 ? (
                 <span className="hidden sm:inline">, {card.count} sản phẩm</span>
               ) : null}
