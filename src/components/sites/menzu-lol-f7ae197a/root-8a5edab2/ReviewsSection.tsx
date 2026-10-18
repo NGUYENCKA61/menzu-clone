@@ -132,16 +132,16 @@ export function ReviewCard({ review, index }: { review: Review; index: number })
           </div>
           {/* What was bought, under the stars, as the reviews page prints it
               (the owner, 01/10/2026: "bổ sung thông tin mua key bản gì game
-              gì"; on the home cards 18/10/2026: "thử đi cả 2"): a small grey
-              "Đã mua", then the tool's name in the shop's red ("đã mua hack gì
-              thì màu tô đỏ tên hack luôn"; the grey words came off for a look
-              and back on, so the red line reads as what was bought: "làm
-              đi"). The pointer gets the whole name when it is cut short. */}
+              gì"; on the home cards 18/10/2026: "thử đi cả 2"): the tool's
+              name alone, in the shop's red ("đã mua hack gì thì màu tô đỏ tên
+              hack luôn", "bỏ chữ đã mua chỉ ghi dòng đỏ thôi"). A screen
+              reader still hears "Đã mua", and the pointer gets the whole name
+              when it is cut short. */}
           {review.purchase ? (
-            <p className="mt-1.5 flex min-w-0 items-center gap-1.5 text-[12px] text-neutral-500">
-              <span className="shrink-0">Đã mua</span>
+            <p className="mt-1.5 flex min-w-0 items-center text-[12px]">
               <Link
                 href={review.purchase.href}
+                aria-label={`Đã mua ${sentenceCase(review.purchase.product)}`}
                 title={sentenceCase(review.purchase.product)}
                 className="min-w-0 truncate font-semibold text-[var(--menzu-accent)] underline-offset-2 transition-colors hover:underline"
               >
