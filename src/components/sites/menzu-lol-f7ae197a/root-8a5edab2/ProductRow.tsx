@@ -600,6 +600,11 @@ function BentoTile({
  *    từ", the price in white bold figures, the count grey from sm (the
  *    owner, 18/10/2026: "làm cái a10 highlight bỏ cái từ chỉ ghi từ từ
  *    highlight giá tiền").
+ *  - a11: A8 with the price in a small tag instead, "Từ 120.000đ" on a
+ *    faint white ground with a thin ring like the "Top tháng" pill, the
+ *    count grey beside it from sm, after the price chips of bubblehacks'
+ *    cards (the owner, 18/10/2026: "làm 1 phiên bản nổi giá khác đc không
+ *    a11").
  *  - a6cu2: the A6 before that, A3's words, layout and hover (17/10: "kiểu
  *    như a luôn đi bố cục á", "giống a3") with A4's shape, bright above and
  *    dark below, at about A3's strength: .lab-lmarket-shade at 70% ("làm a6
@@ -648,7 +653,7 @@ function BentoTile({
 export type TileStyle =
   | "classic"
   | "a" | "a2" | "a3" | "a4" | "a5" | "a5cu" | "a6" | "a6cu" | "a6cu2"
-  | "a7" | "a7cu" | "a8" | "a9" | "a10"
+  | "a7" | "a7cu" | "a8" | "a9" | "a10" | "a11"
   | "b" | "b1" | "b2" | "b3" | "b4" | "b5" | "b6" | "b7"
   | "c" | "c1" | "d";
 
@@ -991,7 +996,7 @@ function TileDress({ card, style, big }: { card: ProductCard; style: TileStyle; 
       </>
     );
   }
-  if (style === "a" || style === "a2" || style === "a3" || style === "a4" || style === "a5" || style === "a6" || style === "a6cu2" || style === "a7" || style === "a8" || style === "a9" || style === "a10") {
+  if (style === "a" || style === "a2" || style === "a3" || style === "a4" || style === "a5" || style === "a6" || style === "a6cu2" || style === "a7" || style === "a8" || style === "a9" || style === "a10" || style === "a11") {
     // A5 and A7 carry the foot that ends above the title.
     const titleFoot = style === "a5" || style === "a7";
     return (
@@ -1002,7 +1007,7 @@ function TileDress({ card, style, big }: { card: ProductCard; style: TileStyle; 
             "tile-scrim absolute inset-0",
             style === "a"
               ? "bg-gradient-to-t from-scrim via-scrim/60 via-35% to-scrim/10"
-              : style === "a4" || style === "a6" || style === "a8" || style === "a9" || style === "a10"
+              : style === "a4" || style === "a6" || style === "a8" || style === "a9" || style === "a10" || style === "a11"
                 ? "lab-lmarket-shade"
                 : titleFoot
                   ? // A4's corner and a thin even layer here; A5's foot
@@ -1043,7 +1048,7 @@ function TileDress({ card, style, big }: { card: ProductCard; style: TileStyle; 
             className={cn(
               "line-clamp-2 text-[14px] font-black leading-[1.15] text-white sm:text-[17px]",
               big && "lg:text-[20px]",
-              (style === "a2" || style === "a3" || style === "a4" || style === "a5" || style === "a6" || style === "a6cu2" || style === "a7" || style === "a8" || style === "a9" || style === "a10") && "transition-colors duration-300 group-hover:text-[var(--menzu-accent)]",
+              (style === "a2" || style === "a3" || style === "a4" || style === "a5" || style === "a6" || style === "a6cu2" || style === "a7" || style === "a8" || style === "a9" || style === "a10" || style === "a11") && "transition-colors duration-300 group-hover:text-[var(--menzu-accent)]",
             )}
           >
             {titleCase(withoutNewWord(card.title))}
@@ -1072,7 +1077,20 @@ function TileDress({ card, style, big }: { card: ProductCard; style: TileStyle; 
                 <span className="hidden sm:inline">, {card.count} sản phẩm</span>
               ) : null}
             </span>
-          ) : line && style === "a10" ? (
+          ) : line && style === "a11" && card.fromPrice != null ? (
+            // A11: the price in a small tag ringed like the "Top tháng" pill,
+            // the count grey beside it from sm (the owner, 18/10/2026: "làm
+            // 1 phiên bản nổi giá khác đc không a11").
+            <span className="flex min-w-0 items-center gap-2 text-[11px] leading-snug sm:text-[13px]">
+              <span className="shrink-0 rounded-md bg-white/10 px-1.5 py-0.5 text-white ring-1 ring-inset ring-white/15">
+                <span className="font-medium text-white/70">Từ</span>{" "}
+                <span className="lab-figure font-bold">{formatVnd(card.fromPrice)}đ</span>
+              </span>
+              {card.count != null && card.count > 0 ? (
+                <span className="hidden min-w-0 truncate font-medium text-neutral-400 sm:block">{card.count} sản phẩm</span>
+              ) : null}
+            </span>
+          ) : line && (style === "a10" || style === "a11") ? (
             // No price, only a count: A8's grey line.
             <span className="truncate text-[11px] font-medium leading-snug text-neutral-400 sm:text-[13px]">{line}</span>
           ) : line ? (
