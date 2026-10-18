@@ -51,21 +51,16 @@ export async function generateMetadata(): Promise<Metadata> {
 const GAME_LIST_SLUG = "danh-sach-hack-game";
 
 /**
- * LAB: every game tile dress tried with the owner, under the names used in
- * the chat (A1 is "a", the first one "goc"), so any of them opens as
- * /?kieu=a5 without changing what the page shows by default (17/10/2026,
- * the card summary: "xuất artifact cái đi").
+ * LAB: the three game tile dresses left (see TileStyle), each openable as
+ * /?kieu=a1, a2 or a3 without changing what the page shows by default. The
+ * owner renamed them and dropped the rest on 18/10/2026 ("đặt lại a8 là a1
+ * a10 là a2 này là a3 đi", "mấy bản kia bỏ hết"), so an older name opens
+ * the default.
  */
-const TILE_STYLES: readonly TileStyle[] = [
-  "classic", "a", "a2", "a3", "a4", "a5", "a5cu", "a6", "a6cu", "a6cu2", "a7", "a7cu", "a8", "a9", "a10", "a11", "a11cu", "b", "b1", "b2", "b3", "b4", "b5", "b6", "b7", "c", "c1", "d",
-];
+const TILE_STYLES: readonly TileStyle[] = ["a1", "a2", "a3"];
 
 function pickTileStyle(raw: string | string[] | undefined): TileStyle {
   const value = typeof raw === "string" ? raw.trim().toLowerCase() : "";
-  if (value === "a1") return "a";
-  // B1 is B at A1's brightness now; the first B is "bgoc".
-  if (value === "bgoc") return "b";
-  if (value === "goc") return "classic";
   const known = TILE_STYLES.find((style) => style === value);
   return known ?? DEFAULT_TILE_STYLE;
 }
@@ -160,9 +155,7 @@ export default async function Home({
               ranked={group.slug === "hot-trending"}
               searchable={group.slug === GAME_LIST_SLUG}
               tiles={group.slug === "hot-trending" || group.slug === GAME_LIST_SLUG}
-              // Tile style "d" keeps four cards to a row in Hot trending too
-              // (the owner, 17/10/2026: "kiểu D vẫn có 4 cục 4 card nha").
-              bigPicks={group.slug === "hot-trending" && tileStyle !== "d"}
+              bigPicks={group.slug === "hot-trending"}
               tileStyle={tileStyle}
               listShape={listShape}
               rows={group.slug === GAME_LIST_SLUG ? 3 : 1}
