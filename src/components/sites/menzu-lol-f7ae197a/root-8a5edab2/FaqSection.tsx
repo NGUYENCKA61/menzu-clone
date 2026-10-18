@@ -103,39 +103,45 @@ export function FaqSection({ faq, contact }: { faq: FaqEntry[]; contact: FaqCont
         className="pointer-events-none absolute left-1/2 top-1/4 -z-10 h-[400px] w-[min(800px,100%)] -translate-x-1/2 rounded-full bg-[var(--menzu-accent)]/[0.06] blur-[180px]"
       />
 
-      <RevealGrid className="grid items-start gap-10 lg:grid-cols-12 lg:gap-12">
-        <div className="lg:col-span-7">
-          <div className="reveal-card mb-8" style={{ ["--i" as string]: 0 }}>
-            {/* LAB, back for a look with the reviews block (the owner,
-                18/10/2026: "quay về bản căn giữa chữ đỏ tui coi thử chiến
-                thắng và faq"): the main site's title, capitals with the
-                second half in the shop's red and no red bar, at the other
-                titles' 20px and 24px from sm; left aligned, the block being
-                two columns. The red-bar version is 655590b7. All red and all
-                white were tried ("tô full đỏ thử", "chữ trắng thử") before the
-                half in red came back, in step with the reviews title ("làm
-                đi"), which is 4d415d93. LAB trial: the whole title white
-                again, still no red bar (the owner, 18/10/2026: "Câu hỏi
-                thường gặp chữ trắng thử"). */}
-            <h2
-              id="faq-heading"
-              className="row-heading text-balance text-xl font-black uppercase tracking-wider text-frost sm:text-2xl"
-            >
-              Câu hỏi thường gặp
-            </h2>
-            {/* The reviews block's line under its title: 15px, 8px below the
-                title; wider and wrapped with care, so "shop." no longer sits
-                alone on a line (the owner, 18/10/2026: "làm đi"). */}
-            <p className="mt-2 max-w-2xl text-pretty text-[15px] text-mist">
-              Thắc mắc trước khi mua? Câu trả lời ở ngay đây. Không thấy điều cần
-              tìm thì nhắn cho shop.
-            </p>
-          </div>
+      {/* LAB trial: the support card starts level with the first question
+          (the owner, 18/10/2026: "hạ thử"), where it stood beside the title,
+          95px higher. The title and its line take the grid's first row, on
+          the left; the questions and the card share the second. The gaps are
+          the old ones: 32px under the title (its mb-8 before), 40px over the
+          card on a phone (32px row gap and mt-2), 48px between the columns. */}
+      <RevealGrid className="grid items-start gap-y-8 lg:grid-cols-12 lg:gap-x-12">
+        <div className="reveal-card lg:col-span-7" style={{ ["--i" as string]: 0 }}>
+          {/* LAB, back for a look with the reviews block (the owner,
+              18/10/2026: "quay về bản căn giữa chữ đỏ tui coi thử chiến
+              thắng và faq"): the main site's title, capitals with the
+              second half in the shop's red and no red bar, at the other
+              titles' 20px and 24px from sm; left aligned, the block being
+              two columns. The red-bar version is 655590b7. All red and all
+              white were tried ("tô full đỏ thử", "chữ trắng thử") before the
+              half in red came back, in step with the reviews title ("làm
+              đi"), which is 4d415d93. LAB trial: the whole title white
+              again, still no red bar (the owner, 18/10/2026: "Câu hỏi
+              thường gặp chữ trắng thử"). */}
+          <h2
+            id="faq-heading"
+            className="row-heading text-balance text-xl font-black uppercase tracking-wider text-frost sm:text-2xl"
+          >
+            Câu hỏi thường gặp
+          </h2>
+          {/* The reviews block's line under its title: 15px, 8px below the
+              title; wider and wrapped with care, so "shop." no longer sits
+              alone on a line (the owner, 18/10/2026: "làm đi"). */}
+          <p className="mt-2 max-w-2xl text-pretty text-[15px] text-mist">
+            Thắc mắc trước khi mua? Câu trả lời ở ngay đây. Không thấy điều cần
+            tìm thì nhắn cho shop.
+          </p>
+        </div>
 
+        <div className="lg:col-span-7 lg:row-start-2">
           <FaqAccordion items={items} revealFrom={1} />
         </div>
 
-        <div className="lg:col-span-5">
+        <div className="mt-2 lg:col-span-5 lg:col-start-8 lg:row-start-2 lg:mt-0">
           <div
             data-spot
             style={{ ["--i" as string]: 1 }}
