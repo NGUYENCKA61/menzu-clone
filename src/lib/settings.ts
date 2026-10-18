@@ -495,7 +495,7 @@ export const DEFAULT_SETTINGS: ShopSettings = {
     "Mua tool, tài khoản game và nhận key ngay lập tức",
     "Chiến thắng đã gần ngay trước mắt, còn chờ gì nữa?",
     "Khoảng cách của chiến thắng chỉ cách một gang tay",
-    "Đừng chơi đẹp, hãy chơi khôn",
+    "Đừng chơi đẹp, hãy chơi khôn!",
     "Thích thì hack hay hack thì thích?",
   ].join("\n"),
   contactZalo: "",
