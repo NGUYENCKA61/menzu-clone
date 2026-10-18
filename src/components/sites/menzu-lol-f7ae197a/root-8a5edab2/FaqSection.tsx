@@ -114,13 +114,14 @@ export function FaqSection({ faq, contact }: { faq: FaqEntry[]; contact: FaqCont
                 two columns. The red-bar version is 655590b7. All red and all
                 white were tried ("tô full đỏ thử", "chữ trắng thử") before the
                 half in red came back, in step with the reviews title ("làm
-                đi"). */}
+                đi"), which is 4d415d93. LAB trial: the whole title white
+                again, still no red bar (the owner, 18/10/2026: "Câu hỏi
+                thường gặp chữ trắng thử"). */}
             <h2
               id="faq-heading"
               className="row-heading text-balance text-xl font-black uppercase tracking-wider text-frost sm:text-2xl"
             >
-              Câu hỏi{" "}
-              <span className="text-[var(--menzu-accent)]">thường gặp</span>
+              Câu hỏi thường gặp
             </h2>
             {/* The reviews block's line under its title: 15px, 8px below the
                 title; wider and wrapped with care, so "shop." no longer sits
