@@ -165,7 +165,10 @@ export function ReviewsSection({
         <h2
           id="reviews-heading"
           // Balanced, so a phone's two lines do not leave "BẠN" on its own.
-          className="row-heading text-balance text-xl font-black uppercase tracking-wider text-frost sm:text-2xl"
+          // The main site's size, 24px and 30px from sm, a step above the
+          // other titles (the owner, 18/10/2026: "có cần tăng cỡ chữ như web
+          // cũ để có điểm nhấn?", "làm đi"): still two lines on a phone.
+          className="row-heading text-balance text-2xl font-black uppercase tracking-wider text-frost sm:text-3xl"
         >
           Chiến thắng{" "}
           <span className="text-[var(--menzu-accent)]">trong tầm tay bạn</span>
