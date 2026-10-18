@@ -157,11 +157,14 @@ export function ReviewsSection({
       className="relative w-full pt-12 lg:pt-16 before:absolute before:left-1/2 before:top-0 before:h-px before:w-screen before:-translate-x-1/2 before:bg-white/[0.06]"
     >
       {/* The game rows' title, and their "Xem tất cả" on its right (the
-          owner, 18/10/2026: "làm hết đi"); the words say what the block is,
-          where the slogan "Chiến thắng trong tầm tay bạn" did not. */}
+          owner, 18/10/2026: "làm hết đi"), over the main site's own words,
+          "Chiến thắng trong tầm tay bạn", after a spell as "Đánh giá từ
+          khách hàng" ("làm cái dòng Chiến thắng trong tầm tay bạn như web cũ
+          ... làm sao cho đồng bộ lại là đc"). The main site's red second half
+          and centred block stay out: no other title has them. */}
       <div className="flex flex-col gap-2">
         <div className="flex flex-row items-end justify-between gap-4">
-          <SectionHeading id="reviews-heading">Đánh giá từ khách hàng</SectionHeading>
+          <SectionHeading id="reviews-heading">Chiến thắng trong tầm tay bạn</SectionHeading>
           <Link
             href="/feedback"
             className="shrink-0 text-[14px] font-medium text-mist underline-offset-4 transition-colors hover:text-frost hover:underline"
