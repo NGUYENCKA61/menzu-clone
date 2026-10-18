@@ -179,10 +179,11 @@ export function ReviewCard({ review, index }: { review: Review; index: number })
           tên game đã thuê hack thử"). */}
       {review.purchase?.game ? (
         <div className="mt-4 flex min-w-0">
-          {/* Words only: the gamepad that led them came off ("bỏ icon tay
-              cầm game đi"). In the shop's red, as the support card's hours
-              pill wears it ("nhãn tên game thì tô đỏ"). */}
-          <span className="min-w-0 max-w-full truncate rounded-md bg-[var(--menzu-accent)]/10 px-2 py-1 text-[11px] font-semibold text-[var(--menzu-accent)] ring-1 ring-inset ring-[var(--menzu-accent)]/30">
+          {/* Words only, in the shop's red ("nhãn tên game thì tô đỏ"): the
+              gamepad that led them and the rounded box round them came off
+              ("bỏ icon tay cầm game đi", "bỏ card bo tên game đi"). 12px, the
+              size of the tool's name line. */}
+          <span className="min-w-0 max-w-full truncate text-[12px] font-semibold text-[var(--menzu-accent)]">
             {gameName(review.purchase.game)}
           </span>
         </div>
