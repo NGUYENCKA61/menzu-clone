@@ -179,14 +179,7 @@ export function LoginForm({
             type="button"
             // It had no handler at all, so it did nothing when pressed.
             onClick={() => goBack((href) => router.push(href))}
-            // LAB trial, the sign-in page in the main site's capitals (the
-            // owner, 18/10/2026: "làm bản chữ in giống web gốc thử"): this
-            // button, the picture's title, the page title, the two labels,
-            // "Quên mật khẩu?", the sign-in button, "Hoặc truy cập bằng" and
-            // the Google/Discord buttons (OAuthButtons caps) take the main
-            // site's classes again, undoing the Launcher pass (3e61790d) on
-            // this page only. Revert the commit to go back.
-            className="inline-flex items-center gap-2 text-neutral-300 hover:text-white transition-colors duration-200 text-xs font-black uppercase tracking-widest px-4 py-2"
+            className="inline-flex items-center gap-2 text-neutral-300 hover:text-white transition-colors duration-200 text-[14px] font-semibold px-4 py-2"
           >
             <ArrowLeft size={14} />
             Quay lại
@@ -224,7 +217,7 @@ export function LoginForm({
                 <span className="text-[var(--menzu-accent)] font-black uppercase tracking-[0.5em] text-xs mb-2 drop-shadow-md block">
                   {panelSubtitle}
                 </span>
-                <h2 className="text-5xl font-black text-white uppercase leading-none drop-shadow-lg">
+                <h2 className="text-5xl font-black text-white leading-none drop-shadow-lg">
                   {/* One row per line the shop typed, so a one-word or
                       three-word title renders as written. */}
                   {panelTitle.split("\n").map((line, index) => (
@@ -239,10 +232,10 @@ export function LoginForm({
             <div className="flex-1 flex flex-col justify-center items-center p-6 sm:p-8 lg:py-14 lg:px-16 bg-neutral-950/60">
               <div className="w-full max-w-[420px]">
                 <div className="mb-8">
-                  <p className="text-[10px] uppercase tracking-[0.3em] text-[var(--menzu-accent)] mb-2 font-black lg:hidden">
+                  <p className="text-[12px] text-[var(--menzu-accent)] mb-2 font-semibold lg:hidden">
                     {brandName}
                   </p>
-                  <h1 className="text-4xl font-black text-white uppercase tracking-tight">
+                  <h1 className="text-4xl font-black text-white tracking-tight">
                     Đăng nhập
                   </h1>
                   <p className={`mt-2 text-sm font-medium ${reason ? "text-white" : "text-neutral-400"}`}>
@@ -254,7 +247,7 @@ export function LoginForm({
                   <div>
                     <label
                       htmlFor="login-username"
-                      className="block text-[11px] font-black uppercase tracking-widest text-neutral-400 mb-2.5 ml-1"
+                      className="block text-[13px] font-semibold text-neutral-400 mb-2.5 ml-1"
                     >
                       Tên đăng nhập / Email
                     </label>
@@ -279,13 +272,13 @@ export function LoginForm({
                     <div className="flex items-center justify-between mb-2.5 ml-1">
                       <label
                         htmlFor="login-password"
-                        className="block text-[11px] font-black uppercase tracking-widest text-neutral-400"
+                        className="block text-[13px] font-semibold text-neutral-400"
                       >
                         Mật khẩu
                       </label>
                       <Link
                         href="/forgot-password"
-                        className="text-[10px] font-bold text-[var(--menzu-accent)] hover:text-[var(--menzu-accent-dark)] cursor-pointer transition-colors uppercase tracking-wider mr-1"
+                        className="text-[12px] font-bold text-[var(--menzu-accent)] hover:text-[var(--menzu-accent-dark)] cursor-pointer transition-colors mr-1"
                       >
                         Quên mật khẩu?
                       </Link>
@@ -340,7 +333,7 @@ export function LoginForm({
                       (Boolean(turnstileSiteKey) && captchaNeeded && !captcha)
                     }
                     aria-busy={pending}
-                    className={`flex w-full items-center justify-center gap-2 rounded-2xl bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] disabled:opacity-70 disabled:cursor-wait text-white font-black py-4 uppercase tracking-widest text-sm transition-colors ${
+                    className={`flex w-full items-center justify-center gap-2 rounded-2xl bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] disabled:opacity-70 disabled:cursor-wait text-white font-semibold py-4 text-[15px] transition-colors ${
                       turnstileSiteKey && captchaNeeded ? "mt-5" : "mt-7"
                     }`}
                   >
@@ -352,7 +345,7 @@ export function LoginForm({
 
                 <div className="flex items-center gap-4 my-7">
                   <div className="flex-1 h-px bg-white/10" />
-                  <span className="text-[10px] font-black uppercase tracking-widest text-neutral-500 whitespace-nowrap">
+                  <span className="text-[12px] font-semibold text-neutral-500 whitespace-nowrap">
                     Hoặc truy cập bằng
                   </span>
                   <div className="flex-1 h-px bg-white/10" />
@@ -361,7 +354,6 @@ export function LoginForm({
                 <OAuthButtons
                   googleEnabled={googleEnabled}
                   discordEnabled={discordEnabled}
-                  caps
                 />
 
                 <p className="mt-8 text-center text-xs text-neutral-500">
