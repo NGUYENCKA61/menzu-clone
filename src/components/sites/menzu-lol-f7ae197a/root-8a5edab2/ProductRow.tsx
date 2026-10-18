@@ -661,11 +661,12 @@ export type TileStyle =
  * ("quay về card b1"), the new "a6" (A4's shape at A3's strength, now
  * "a6cu2"), "a7" (A5's words at A6's brightness, now "a7cu"; "b7" is
  * B4's), "a2" again (18/10,
- * choosing: "a2 thử"), "a3" ("a3 thử"), and settled on "a4" after comparing
- * A4, A5, B4 and B5 at 4:3 and 16:9 (18/10: "chốt a4 thôi"). "a" is A1,
- * "classic" the framed picture with the name under it.
+ * choosing: "a2 thử"), "a3" ("a3 thử"), "a4" after comparing A4, A5, B4
+ * and B5 at 4:3 and 16:9 (18/10: "chốt a4 thôi"), and settled on "a6", A4
+ * with the quiet price line (18/10: "chốt a6"). "a" is A1, "classic" the
+ * framed picture with the name under it.
  */
-export const DEFAULT_TILE_STYLE: TileStyle = "a4";
+export const DEFAULT_TILE_STYLE: TileStyle = "a6";
 
 /**
  * LAB: the game list's tile shape from sm up, "43" or "169", so both can be
