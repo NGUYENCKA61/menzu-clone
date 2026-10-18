@@ -359,7 +359,14 @@ export function SiteHeaderClient({
               href="/"
               className="flex items-center gap-3 group"
             >
-              <div className="relative">
+              {/* LAB: the mark shows from 430px only, and never shrinks. On a
+                  narrower phone the row had no room for it: flex squeezed it
+                  to nothing (a 28px image with max-width 100% gives way
+                  first), leaving its spinning ring as a stray red tick, while
+                  the sign-in button was pushed past the screen's edge (the
+                  owner, 18/10/2026: "rà soát lại nút đăng nhập và logo chuẩn
+                  chưa có bị lệch hay gì k nếu có thì căn lại"). */}
+              <div className="relative hidden shrink-0 min-[430px]:block">
                 <Image
                   src={brand.logo}
                   alt={brandWord}
@@ -409,7 +416,7 @@ export function SiteHeaderClient({
           </div>
         </div>
 
-        <div className="flex items-center gap-3 sm:gap-4">
+        <div className="flex items-center gap-2 sm:gap-4">
           {/* Renders nothing at all when the shop has no live notice, so a
               header with an empty bell is not the resting state. */}
           {/* Basket and bell read as one cluster of icon buttons — they are
@@ -431,14 +438,17 @@ export function SiteHeaderClient({
               // the basket's, where it had gone to 14px (the owner,
               // 18/10/2026: "nút đăng nhập trên navbar có cần bo hình chữ nhật
               // giống 3100", "giống bên navbar 3100"). The label keeps the
-              // lab's sentence case, as the rest of this header does.
-              className="flex items-center gap-2 h-9 px-3.5 sm:px-4 rounded-[10px] bg-[var(--brand)] hover:bg-[var(--brand-dark)] transition-colors duration-200 shrink-0"
+              // lab's sentence case, as the rest of this header does. On a
+              // phone it sits 2px tighter inside and 4px closer to the basket
+              // (px-3, gap-1.5, the row's gap-2), the room the word needs.
+              className="flex items-center gap-1.5 sm:gap-2 h-9 px-3 sm:px-4 rounded-[10px] bg-[var(--brand)] hover:bg-[var(--brand-dark)] transition-colors duration-200 shrink-0"
             >
               <User size={16} />
-              {/* Under 360px the header has no room for the word: with the
-                  menu, the logo, the basket and the bell it ran 13px past the
-                  edge. The icon and the label carry it there. */}
-              <span className="text-[14px] font-semibold text-white whitespace-nowrap max-[359px]:hidden">
+              {/* Under 390px the header has no room for the word: with the
+                  menu, the logo's name and the basket it ran past the screen's
+                  edge (18px cut off at 360, 3.5px at 375). The icon and the
+                  label carry it there; the bottom bar has "Tài khoản" too. */}
+              <span className="text-[14px] font-semibold text-white whitespace-nowrap max-[389px]:hidden">
                 Đăng nhập
               </span>
             </Link>
