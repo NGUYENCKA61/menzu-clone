@@ -575,10 +575,16 @@ function BentoTile({
  *    "làm cái a4 đi bố cục giữ nguyên chỉ khác độ sáng"): the top of the
  *    picture left alone, dark only at the foot where the words sit
  *    (.lab-lmarket-shade).
- *  - a5: lmarket's best-seller card, their numbers 2 to 4 ("a5 thì bố cục
- *    giống lmarket nhưng vẫn là có hàng 4 card"), in our rows of four: A4's
- *    shade, a bold name, a quiet second line, then "từ" and the price in
- *    bold white, as their "from €24.99".
+ *  - a5: A4 with its foot shade cut to the words (the owner, 18/10/2026:
+ *    "làm cái a5 là a4 nhưng mà phủ tối chân vừa tới tiêu đề"): the dark
+ *    sits behind the caption and fades out just above the title, however
+ *    many lines the title takes, so the picture above it stays clear. A4's
+ *    dark corner at the top left, its words and its hover stay
+ *    (.lab-a5-corner, .lab-a5-foot).
+ *  - a5cu: the first A5, lmarket's best-seller card, their numbers 2 to 4
+ *    ("a5 thì bố cục giống lmarket nhưng vẫn là có hàng 4 card"), in our
+ *    rows of four: A4's shade, a bold name, a quiet second line, then "từ"
+ *    and the price in bold white, as their "from €24.99".
  *  - a6: A3's words, layout and hover (the owner, 17/10/2026: "kiểu như a
  *    luôn đi bố cục á", "giống a3") with A4's shape, bright above and dark
  *    below, at about A3's strength: .lab-lmarket-shade at 70% ("làm a6 là
@@ -591,7 +597,8 @@ function BentoTile({
  *    a shadowed name and a small line; the card rises and its rim lights
  *    under the pointer while the others fade (lab-lm-* in globals.css).
  *  - a7, b7: A6's brightness, bright above and dark below at about A3's
- *    strength, under A5's words and under B5's (B4's, no platform line)
+ *    strength, under the first A5's words and under B5's (B4's, no platform
+ *    line)
  *    (the owner, 18/10/2026: "a7 là bản a6 sáng trên tối dưới như a5 hoặc
  *    b5 đi").
  *  - b: unnamedtech's tile — the whole cover dimmed evenly, a small eyebrow
@@ -604,7 +611,7 @@ function BentoTile({
  *  - b1, b4, b6: the rest of the set ("b cũng làm 6 phiên bản độ sáng giống
  *    a đi"): B's words at A1's brightness (the picture dimmed, an even fade),
  *    A4's (lmarket's foot shade) and the first A6's (lmarket's black lower
- *    40%). A5 has A4's brightness, so B5 is B4 (?kieu=b5 opens it). The
+ *    40%). The first A5 had A4's brightness, so B5 is B4 (?kieu=b5 opens it). The
  *    first B, darker than all of them, stays as "b" ("B gốc"). B4 drops the
  *    platform line ("b4 bỏ cái dòng hack game đó đi").
  *  - c: lmarket's tile — the cover slightly dimmed above a solid caption bar
@@ -621,7 +628,7 @@ function BentoTile({
  */
 export type TileStyle =
   | "classic"
-  | "a" | "a2" | "a3" | "a4" | "a5" | "a6" | "a6cu"
+  | "a" | "a2" | "a3" | "a4" | "a5" | "a5cu" | "a6" | "a6cu"
   | "a7"
   | "b" | "b1" | "b2" | "b3" | "b4" | "b6" | "b7"
   | "c" | "c1" | "d";
@@ -926,7 +933,7 @@ function TileDress({ card, style, big }: { card: ProductCard; style: TileStyle; 
       </>
     );
   }
-  if (style === "a5" || style === "a7") {
+  if (style === "a5cu" || style === "a7") {
     const second =
       card.count != null && card.count > 0
         ? `${card.count} sản phẩm`
@@ -935,7 +942,7 @@ function TileDress({ card, style, big }: { card: ProductCard; style: TileStyle; 
           : null;
     return (
       <>
-        {/* A7 is A5 at A6's lighter strength (the owner, 18/10/2026). */}
+        {/* A7 is the first A5 at A6's lighter strength (the owner, 18/10/2026). */}
         <span aria-hidden className={cn("tile-scrim lab-lmarket-shade absolute inset-0", style === "a7" && "lab-lmarket-shade-light")} />
         <span className={cn("tile-caption absolute inset-x-2.5 bottom-2.5 flex flex-col sm:inset-x-4 sm:bottom-3.5", big && "lg:inset-x-5 lg:bottom-4")}>
           <h3
@@ -958,7 +965,7 @@ function TileDress({ card, style, big }: { card: ProductCard; style: TileStyle; 
       </>
     );
   }
-  if (style === "a" || style === "a2" || style === "a3" || style === "a4" || style === "a6") {
+  if (style === "a" || style === "a2" || style === "a3" || style === "a4" || style === "a5" || style === "a6") {
     return (
       <>
         <span
@@ -969,27 +976,45 @@ function TileDress({ card, style, big }: { card: ProductCard; style: TileStyle; 
               ? "bg-gradient-to-t from-scrim via-scrim/60 via-35% to-scrim/10"
               : style === "a4"
                 ? "lab-lmarket-shade"
-                : style === "a6"
-                  ? // A4's shape, bright above and dark below, at about A3's
-                    // strength (the owner, 17/10/2026: "làm a6 là kiểu sáng
-                    // trên tối dưới giống a4 nhưng độ sáng cỡ tầm a3").
-                    "lab-lmarket-shade lab-lmarket-shade-light"
-                  : cn("lab-elite-shade", style === "a3" && "lab-elite-shade-light"),
+                : style === "a5"
+                  ? // Only A4's corner here: A5's foot rides on the caption
+                    // below, so it ends where the title does.
+                    "lab-a5-corner"
+                  : style === "a6"
+                    ? // A4's shape, bright above and dark below, at about A3's
+                      // strength (the owner, 17/10/2026: "làm a6 là kiểu sáng
+                      // trên tối dưới giống a4 nhưng độ sáng cỡ tầm a3").
+                      "lab-lmarket-shade lab-lmarket-shade-light"
+                    : cn("lab-elite-shade", style === "a3" && "lab-elite-shade-light"),
           )}
         />
         <span
           aria-hidden
-          className="tile-scrim absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-[var(--menzu-accent)]/70 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+          className={cn(
+            "tile-scrim absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-[var(--menzu-accent)]/70 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100",
+            // Above A5's foot, which is drawn after it.
+            style === "a5" && "z-[1]",
+          )}
         />
         {/* On a phone the tile is half the screen wide: a smaller name kept to
             two lines and the price on one line, so the words stay on the
             picture's lower half. */}
-        <span className={cn("tile-caption absolute inset-x-2.5 bottom-2.5 flex flex-col gap-0.5 sm:inset-x-3.5 sm:bottom-3 sm:gap-1", big && "lg:inset-x-5 lg:bottom-4")}>
+        <span
+          className={cn(
+            "tile-caption absolute flex flex-col gap-0.5 sm:gap-1",
+            style === "a5"
+              ? // The caption carries A5's foot: full width from the bottom,
+                // the words at A4's insets, the dark fading out just above
+                // the title (.lab-a5-foot).
+                cn("lab-a5-foot inset-x-0 bottom-0 px-2.5 pb-2.5 sm:px-3.5 sm:pb-3", big && "lg:px-5 lg:pb-4")
+              : cn("inset-x-2.5 bottom-2.5 sm:inset-x-3.5 sm:bottom-3", big && "lg:inset-x-5 lg:bottom-4"),
+          )}
+        >
           <h3
             className={cn(
               "line-clamp-2 text-[14px] font-black leading-[1.15] text-white sm:text-[17px]",
               big && "lg:text-[20px]",
-              (style === "a2" || style === "a3" || style === "a4" || style === "a6") && "transition-colors duration-300 group-hover:text-[var(--menzu-accent)]",
+              (style === "a2" || style === "a3" || style === "a4" || style === "a5" || style === "a6") && "transition-colors duration-300 group-hover:text-[var(--menzu-accent)]",
             )}
           >
             {titleCase(withoutNewWord(card.title))}

@@ -1760,6 +1760,46 @@ html[data-admin-filtering] .admin-list {
   opacity: 0.55;
 }
 
+/* LAB: style A5, A4 with its foot shade cut to the words (the owner,
+   18/10/2026: "làm cái a5 là a4 nhưng mà phủ tối chân vừa tới tiêu đề").
+   The foot is drawn behind the caption, so it ends at the title however
+   many lines the title takes: solid at the bottom, 80% at the title's top,
+   gone --a5-fade above it. A4's dark corner at the top left stays, and both
+   thin under the pointer as A4's shade does. */
+.lab-a5-corner {
+  background: radial-gradient(at 0% 0%, rgba(0, 0, 0, 0.55), transparent 45%);
+  transition: opacity 300ms ease;
+}
+.lab-a5-foot {
+  --a5-fade: 1.25rem;
+  padding-top: var(--a5-fade);
+  isolation: isolate;
+}
+@media (min-width: 40rem) {
+  .lab-a5-foot {
+    --a5-fade: 1.75rem;
+  }
+}
+.lab-a5-foot::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: linear-gradient(to top, #08080b, rgba(8, 8, 11, 0.8) calc(100% - var(--a5-fade)), transparent);
+  transition: opacity 300ms ease;
+}
+@media (hover: hover) {
+  .group:hover .lab-a5-corner,
+  .group:hover .lab-a5-foot::before {
+    opacity: 0.8;
+  }
+}
+.group:focus-visible .lab-a5-corner,
+.group:focus-visible .lab-a5-foot::before {
+  opacity: 0.8;
+}
+
 /* LAB: lmarket's game card from lmarket.net/cheats/, read 17/10/2026, for
    game tile style A6 ("a5 giống này đi ... bản 4 card", "cho nó là A6"):
    the picture untouched but for a black foot over its lower 40%, the name
