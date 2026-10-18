@@ -195,9 +195,11 @@ export function ReviewCard({ review, index }: { review: Review; index: number })
           {/* Words only, in the shop's red ("nhãn tên game thì tô đỏ"): the
               gamepad that led them and the rounded box round them came off
               ("bỏ icon tay cầm game đi", "bỏ card bo tên game đi"). 12px, the
-              size of the tool's name line. */}
+              size of the tool's name line. "Hack" leads the game's name, so
+              the corner reads "Hack Valorant" ("thêm chữ hack bên trái tên
+              game"). */}
           <span className="min-w-0 max-w-full truncate text-[12px] font-semibold text-[var(--menzu-accent)]">
-            {gameName(review.purchase.game)}
+            Hack {gameName(review.purchase.game)}
           </span>
         </div>
       ) : null}
