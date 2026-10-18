@@ -50,7 +50,7 @@ export function RegisterForm({
   refCode = null,
   next = "/",
 }: {
-  /** The shop's name, for the mobile eyebrow and the terms line. */
+  /** The shop's name, for the mobile eyebrow. */
   brandName: string;
   turnstileSiteKey: string | null;
   /** Artwork behind the card. Comes from Cấu hình → Giao diện. */
@@ -358,8 +358,10 @@ export function RegisterForm({
                         className="font-bold text-[var(--menzu-accent)] hover:underline"
                       >
                         Chính sách bảo mật
-                      </Link>{" "}
-                      của {brandName}.
+                      </Link>
+                      {/* LAB: no "của THICHTHIHACK" after it (the owner,
+                          18/10/2026: "bỏ bớt của thichthihack"). */}
+                      .
                     </span>
                   </label>
 
