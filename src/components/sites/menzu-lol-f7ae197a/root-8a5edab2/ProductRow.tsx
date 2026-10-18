@@ -1034,13 +1034,26 @@ function TileDress({ card, style, big }: { card: ProductCard; style: TileStyle; 
           >
             {titleCase(withoutNewWord(card.title))}
           </h3>
-          {line ? (
+          {line && style === "a6" ? (
+            // A6 sizes its line to the site's: on a phone, where the whole
+            // line ran past the half-width tile, only the price; from sm the
+            // whole line at 13px, the size of the other cards' grey lines
+            // (the owner, 18/10/2026: "thử đi không ổn tui kêu lùi").
+            <>
+              <span className="truncate text-[11px] font-medium leading-snug text-neutral-400 sm:hidden">
+                {card.fromPrice != null ? `Chỉ từ ${formatVnd(card.fromPrice)}đ` : line}
+              </span>
+              <span className="hidden truncate text-[13px] font-medium leading-snug text-neutral-400 sm:block">
+                {line}
+              </span>
+            </>
+          ) : line ? (
             <span
               className={cn(
                 "truncate text-[11px] leading-snug",
                 // A6 (A4) and A7 (A5) keep A's words but grey the price
                 // line as B4 does.
-                style === "a6" || style === "a7" ? "font-medium text-neutral-400" : "font-semibold text-neutral-200",
+                style === "a7" ? "font-medium text-neutral-400" : "font-semibold text-neutral-200",
               )}
             >
               {line}
