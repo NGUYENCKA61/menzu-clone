@@ -586,10 +586,13 @@ function BentoTile({
  *    ("a5 thì bố cục giống lmarket nhưng vẫn là có hàng 4 card"), in our
  *    rows of four: A4's shade, a bold name, a quiet second line, then "từ"
  *    and the price in bold white, as their "from €24.99".
- *  - a6: A3's words, layout and hover (the owner, 17/10/2026: "kiểu như a
- *    luôn đi bố cục á", "giống a3") with A4's shape, bright above and dark
- *    below, at about A3's strength: .lab-lmarket-shade at 70% ("làm a6 là
- *    kiểu sáng trên tối dưới giống a4 nhưng độ sáng cỡ tầm a3"). Tried
+ *  - a6: A4 with its price line as quiet as B4's, the same "Chỉ từ ...đ, N
+ *    sản phẩm" in a grey, lighter type (the owner, 18/10/2026: "làm cái a6
+ *    là a4 nhưng mà chữ chỉ từ sản phẩm giảm độ sáng như b4").
+ *  - a6cu2: the A6 before that, A3's words, layout and hover (17/10: "kiểu
+ *    như a luôn đi bố cục á", "giống a3") with A4's shape, bright above and
+ *    dark below, at about A3's strength: .lab-lmarket-shade at 70% ("làm a6
+ *    là kiểu sáng trên tối dưới giống a4 nhưng độ sáng cỡ tầm a3"). Tried
  *    before as A3's shade with A4's foot over it, then as the first A6's
  *    black lower 40%.
  *  - a6cu: the first A6, lmarket's game card from lmarket.net/cheats/ ("a5
@@ -630,7 +633,7 @@ function BentoTile({
  */
 export type TileStyle =
   | "classic"
-  | "a" | "a2" | "a3" | "a4" | "a5" | "a5cu" | "a6" | "a6cu"
+  | "a" | "a2" | "a3" | "a4" | "a5" | "a5cu" | "a6" | "a6cu" | "a6cu2"
   | "a7"
   | "b" | "b1" | "b2" | "b3" | "b4" | "b5" | "b6" | "b7"
   | "c" | "c1" | "d";
@@ -652,7 +655,8 @@ export type TileStyle =
  * best-seller card ("a5 thử"), "a6", their /cheats/ card, "c1",
  * bubblehacks' catalogue card, "d", the old quiet-button card, "a" (A1)
  * again ("a1 đi"), "a2" ("a2 đi"), "a3" ("a3 đi"), "b", the first B
- * ("quay về card b1"), the new "a6" (A4's shape at A3's strength), "a7"
+ * ("quay về card b1"), the new "a6" (A4's shape at A3's strength, now
+ * "a6cu2"), "a7"
  * (A5's words at A6's brightness; "b7" is B5's), "a2" again (18/10,
  * choosing: "a2 thử"), "a3" ("a3 thử"), and settled on "a4" after comparing
  * A4, A5, B4 and B5 at 4:3 and 16:9 (18/10: "chốt a4 thôi"). "a" is A1,
@@ -968,7 +972,7 @@ function TileDress({ card, style, big }: { card: ProductCard; style: TileStyle; 
       </>
     );
   }
-  if (style === "a" || style === "a2" || style === "a3" || style === "a4" || style === "a5" || style === "a6") {
+  if (style === "a" || style === "a2" || style === "a3" || style === "a4" || style === "a5" || style === "a6" || style === "a6cu2") {
     return (
       <>
         <span
@@ -977,14 +981,14 @@ function TileDress({ card, style, big }: { card: ProductCard; style: TileStyle; 
             "tile-scrim absolute inset-0",
             style === "a"
               ? "bg-gradient-to-t from-scrim via-scrim/60 via-35% to-scrim/10"
-              : style === "a4"
+              : style === "a4" || style === "a6"
                 ? "lab-lmarket-shade"
                 : style === "a5"
                   ? // A4's corner and a thin even layer here; A5's foot
                     // rides on the caption below, so it ends where the
                     // title does.
                     "lab-a5-shade"
-                  : style === "a6"
+                  : style === "a6cu2"
                     ? // A4's shape, bright above and dark below, at about A3's
                       // strength (the owner, 17/10/2026: "làm a6 là kiểu sáng
                       // trên tối dưới giống a4 nhưng độ sáng cỡ tầm a3").
@@ -1018,13 +1022,19 @@ function TileDress({ card, style, big }: { card: ProductCard; style: TileStyle; 
             className={cn(
               "line-clamp-2 text-[14px] font-black leading-[1.15] text-white sm:text-[17px]",
               big && "lg:text-[20px]",
-              (style === "a2" || style === "a3" || style === "a4" || style === "a5" || style === "a6") && "transition-colors duration-300 group-hover:text-[var(--menzu-accent)]",
+              (style === "a2" || style === "a3" || style === "a4" || style === "a5" || style === "a6" || style === "a6cu2") && "transition-colors duration-300 group-hover:text-[var(--menzu-accent)]",
             )}
           >
             {titleCase(withoutNewWord(card.title))}
           </h3>
           {line ? (
-            <span className="truncate text-[11px] font-semibold leading-snug text-neutral-200">
+            <span
+              className={cn(
+                "truncate text-[11px] leading-snug",
+                // A6 keeps A4's words but greys the price line as B4 does.
+                style === "a6" ? "font-medium text-neutral-400" : "font-semibold text-neutral-200",
+              )}
+            >
               {line}
             </span>
           ) : card.description ? (
