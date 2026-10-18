@@ -33,6 +33,18 @@ function gameName(category: string): string {
 }
 
 /**
+ * A tool's own name, before the selling words its title runs on with after
+ * the first dash or colon: "Tool unlock skin valorant - mở khóa toàn bộ
+ * skin…" is "Tool unlock skin valorant", "Hack delta force bản unnamed full:
+ * ESP + …" is "Hack delta force bản unnamed full" (the owner, 18/10/2026:
+ * names cut off mid-word read half-finished, "làm đi").
+ */
+function toolName(product: string): string {
+  const head = product.split(/\s+[-–—]\s+|\s*:\s+/)[0].trim();
+  return sentenceCase(head || product);
+}
+
+/**
  * The score is printed only once there are enough reviews for one to mean
  * something; "4,8/5 · 6 đánh giá" reads as a small shop trying to look big.
  * Nothing to switch back on: the line appears by itself past this count.
@@ -158,7 +170,7 @@ export function ReviewCard({ review, index }: { review: Review; index: number })
                 title={sentenceCase(review.purchase.product)}
                 className="min-w-0 truncate font-semibold text-[#c7c9d1] transition-colors hover:text-white"
               >
-                {sentenceCase(review.purchase.product)}
+                {toolName(review.purchase.product)}
               </Link>
             </p>
           ) : null}
