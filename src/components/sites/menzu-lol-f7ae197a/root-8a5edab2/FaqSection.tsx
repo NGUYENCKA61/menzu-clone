@@ -117,7 +117,10 @@ export function FaqSection({ faq, contact }: { faq: FaqEntry[]; contact: FaqCont
               Câu hỏi{" "}
               <span className="text-[var(--menzu-accent)]">thường gặp</span>
             </h2>
-            <p className="mt-3 max-w-xl text-[13.5px] leading-relaxed text-neutral-400">
+            {/* The reviews block's line under its title: 15px, 8px below the
+                title; wider and wrapped with care, so "shop." no longer sits
+                alone on a line (the owner, 18/10/2026: "làm đi"). */}
+            <p className="mt-2 max-w-2xl text-pretty text-[15px] text-mist">
               Thắc mắc trước khi mua? Câu trả lời ở ngay đây. Không thấy điều cần
               tìm thì nhắn cho shop.
             </p>
