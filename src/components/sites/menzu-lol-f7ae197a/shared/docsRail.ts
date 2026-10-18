@@ -10,7 +10,11 @@
  * component and Tài liệu's a server one, and both import from here.
  */
 
-export const DOCS_RAIL_BOX = "rounded-2xl border border-white/10 bg-[#121216] p-3";
+/** Filled like the cards beside it (the articles, the FAQ, /feedback's
+ *  reviews), 2% white over the ground. A solid #121216 sat a step off the
+ *  #111111 ground and read as a dark hole beside them (the owner,
+ *  18/10/2026: "thấy tối quá hả cái card"). */
+export const DOCS_RAIL_BOX = "rounded-2xl border border-white/10 bg-white/[0.02] p-3";
 
 /** The grey word over a group of rows ("Danh mục", "Bắt đầu", ...). */
 export const DOCS_RAIL_LABEL =
