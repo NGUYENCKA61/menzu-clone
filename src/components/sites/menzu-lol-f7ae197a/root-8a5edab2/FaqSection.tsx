@@ -145,15 +145,17 @@ export function FaqSection({ faq, contact }: { faq: FaqEntry[]; contact: FaqCont
           <div
             data-spot
             style={{ ["--i" as string]: 1 }}
-            className="reveal-card relative isolate overflow-hidden rounded-2xl border border-[var(--menzu-accent)]/15 bg-gradient-to-b from-[var(--menzu-accent)]/[0.04] to-white/[0.02] p-6 sm:p-7 lg:sticky lg:top-24"
+            className="reveal-card relative isolate overflow-hidden rounded-2xl border border-[var(--menzu-accent)]/20 bg-gradient-to-b from-[var(--menzu-accent)]/[0.06] to-white/[0.02] p-6 sm:p-7 lg:sticky lg:top-24"
           >
             {/* LAB trial, a paler red (the owner, 18/10/2026: "cho màu đỏ
-                card chỗ faq nhạt lại"): the wash at the top halved (8% to
-                4%), the rim from 25% to 15%, and the glow no longer lit at
-                rest, only under the pointer as on the question cards; it
-                was the strongest red of the three, 14% at the middle. The
-                pill and the red Facebook button keep their colour. */}
-            <span aria-hidden className="spot-glow -z-10" />
+                card chỗ faq nhạt lại"), then halfway back ("nhạt quá",
+                "nhạt vừa thôi"): the wash at the top 6% (was 8%, then 4%),
+                the rim 20% (25%, then 15%), and the glow lit at rest at
+                half strength (.spot-glow-half), full under the pointer; at
+                full it was the strongest red of the three, 14% at the
+                middle. The pill and the red Facebook button keep their
+                colour. */}
+            <span aria-hidden className="spot-glow spot-glow-half -z-10" />
             <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-[var(--menzu-accent)]/30 bg-[var(--menzu-accent)]/10 px-2.5 py-1 text-[11px] font-bold text-[var(--menzu-accent)]">
               <span className="relative flex h-2 w-2">
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[var(--menzu-accent)] opacity-60 motion-reduce:hidden" />

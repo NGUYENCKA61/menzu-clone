@@ -1333,6 +1333,13 @@ body.lightbox-open .site-nav {
   opacity: 1;
 }
 
+/* LAB: the same glow at half strength at rest, full under the pointer (the
+   hover rule above outranks this one): the FAQ's support card, "nhạt vừa
+   thôi" (the owner, 18/10/2026). */
+.spot-glow-half {
+  opacity: 0.5;
+}
+
 /* The wash a pressed link wears while the next page is on its way (see
    shared/LinkPending.tsx). Held back 120ms so a navigation that lands fast
    never flashes, then in over 120ms — the same beat as every colour change
