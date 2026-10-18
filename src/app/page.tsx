@@ -203,7 +203,7 @@ export default async function Home({
         contact={{
           facebook: settings.contactFacebook,
           zalo: settings.contactZalo,
-          telegram: settings.contactTelegram,
+          zaloGroup: settings.contactZaloGroup,
         }}
       />
     ),

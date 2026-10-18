@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { BookOpen, MessageCircle, MessageSquare, Send, Zap, KeyRound } from "lucide-react";
+import { BookOpen, MessageCircle, MessageSquare, Users, Zap, KeyRound } from "lucide-react";
 
 import { JsonLd, faqJsonLd } from "@/lib/seo";
 import type { FaqEntry } from "@/lib/settings";
@@ -42,8 +42,8 @@ export interface FaqContact {
   facebook: string;
   /** The shop's Zalo phone number, or "" for none. */
   zalo: string;
-  /** The shop's Telegram channel URL, or "" for none. */
-  telegram: string;
+  /** The shop's Zalo group link, or "" for none. */
+  zaloGroup: string;
 }
 
 const BUTTON =
@@ -54,8 +54,10 @@ const BUTTON =
  * with, in the shop's own words and colours: the questions stacked on the
  * left, and on the right a card for whoever is still not sure, with the
  * support hours, two facts that matter to a buyer in a hurry, and the doors
- * to the desk (Facebook, Zalo, Telegram — whichever Cấu hình has filled in)
- * and to the guides. The card sticks while the questions scroll on wide
+ * to the desk (Facebook, a Zalo chat, the Zalo group: whichever Cấu hình has
+ * filled in) and to the guides. The Zalo group took the Telegram channel's
+ * place (the owner, 18/10/2026: "kênh telegram ở chỗ vẫn còn thắc mắc đổi
+ * thành kênh zalo đi"). The card sticks while the questions scroll on wide
  * screens.
  *
  * It moves as the original does: over a faint pool of the accent, the
@@ -79,8 +81,8 @@ export function FaqSection({ faq, contact }: { faq: FaqEntry[]; contact: FaqCont
     zaloDigits
       ? { key: "zalo", href: `https://zalo.me/${zaloDigits}`, label: "Chat Zalo", Icon: MessageSquare }
       : null,
-    contact.telegram
-      ? { key: "telegram", href: contact.telegram, label: "Kênh Telegram", Icon: Send }
+    contact.zaloGroup
+      ? { key: "zalo-group", href: contact.zaloGroup, label: "Kênh Zalo", Icon: Users }
       : null,
   ].filter((door) => door !== null);
 
