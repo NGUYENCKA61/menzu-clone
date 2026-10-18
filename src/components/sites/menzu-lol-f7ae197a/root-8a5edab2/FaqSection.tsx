@@ -105,14 +105,15 @@ export function FaqSection({ faq, contact }: { faq: FaqEntry[]; contact: FaqCont
         <div className="lg:col-span-7">
           <div className="reveal-card mb-8" style={{ ["--i" as string]: 0 }}>
             {/* The main site's title, as the reviews block above now wears it:
-                capitals in two tones at 24px and 30px from sm, with no red
-                bar; left aligned, the block being two columns (the owner,
-                18/10/2026: "Câu hỏi thường gặp có cần bỏ | đỏ và làm cho
-                giống web cũ không", "làm đi"). The main site's "FAQ" pill
-                stays out: it says what the title says. */}
+                capitals in two tones with no red bar, left aligned, the block
+                being two columns (the owner, 18/10/2026: "Câu hỏi thường gặp
+                có cần bỏ | đỏ và làm cho giống web cũ không", "làm đi"), at
+                the other titles' 20px and 24px from sm ("hạ về đúng 2 cỡ chữ
+                kia"). The main site's "FAQ" pill stays out: it says what the
+                title says. */}
             <h2
               id="faq-heading"
-              className="row-heading text-balance text-2xl font-black uppercase tracking-wider text-frost sm:text-3xl"
+              className="row-heading text-balance text-xl font-black uppercase tracking-wider text-frost sm:text-2xl"
             >
               Câu hỏi{" "}
               <span className="text-[var(--menzu-accent)]">thường gặp</span>
