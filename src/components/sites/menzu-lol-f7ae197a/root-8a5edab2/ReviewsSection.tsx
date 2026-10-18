@@ -87,54 +87,47 @@ export function ReviewCard({ review, index }: { review: Review; index: number })
       className="reveal-card group relative isolate flex w-[280px] shrink-0 snap-start flex-col rounded-2xl border border-white/10 bg-white/[0.02] p-5 shadow-[inset_0_1px_0_0_rgb(255_255_255/0.04),0_1px_2px_0_rgb(0_0_0/0.4)] lift-card hover:-translate-y-1 hover:border-white/[0.2] hover:shadow-[inset_0_1px_0_0_rgb(255_255_255/0.06),0_8px_24px_-8px_rgb(255_49_88/0.18)] sm:w-[320px] lg:w-auto"
     >
       <span aria-hidden className="spot-glow -z-10" />
-      {/* LAB trial (the owner, 18/10/2026: "thử đi cả 2"): the words lead.
-          The stars and the date on top, the review larger in the middle (up
-          to four lines, in the reviews page's quotation marks), and who wrote
-          it, what they bought and what they paid at the foot. */}
-      <div className="flex items-center justify-between gap-3">
-        <Stars filled={Math.min(5, Math.max(1, review.rating ?? 5))} pop />
-        <span className="text-[10px] font-semibold text-neutral-500">{review.date}</span>
-      </div>
-
-      {/* The words, and nothing else, in the middle: React escapes them, and
-          the block grows to keep every card's foot on one line. */}
-      <p className="mt-3 flex-1 text-[15px] leading-relaxed text-neutral-100 [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:4] overflow-hidden">
-        “{review.body}”
-      </p>
-
-      <div className="mt-4 flex items-center gap-3 border-t border-white/[0.06] pt-3">
+      <div className="flex items-start gap-3">
         {/* A thin grey ring where a red one sat: four red rings pulled the
             eye to the faces rather than the words (18/10/2026). */}
         <div className="shrink-0 rounded-full border border-white/15 p-[2px]">
-          <div className="relative grid h-9 w-9 place-items-center overflow-hidden rounded-full bg-neutral-800">
+          <div className="relative grid h-10 w-10 place-items-center overflow-hidden rounded-full bg-neutral-800">
             {review.avatar ? (
-              <Image src={review.avatar} alt="" fill sizes="36px" className="object-cover" />
+              <Image src={review.avatar} alt="" fill sizes="40px" className="object-cover" />
             ) : (
-              <span className="font-display text-[13px] font-bold text-mist">
+              <span className="font-display text-sm font-bold text-mist">
                 {review.name.trim().charAt(0) || "?"}
               </span>
             )}
           </div>
         </div>
         <div className="min-w-0 flex-1">
+          {/* The name has the line to itself and the date rides beside the
+              stars: next to the date, "Khách hàng ẩn danh" was cut to
+              "Khách hàng ẩ…" (18/10/2026). */}
           <div className="flex min-w-0 items-center gap-1.5">
-            <h3 className="truncate text-[13.5px] font-black text-white">{review.name}</h3>
+            <h3 className="truncate text-[14px] font-black text-white">{review.name}</h3>
             {review.verified ? (
               <BadgeCheck
-                size={13}
+                size={14}
                 aria-label="Tài khoản đã xác minh"
                 className="shrink-0 text-[#0866FF]"
               />
             ) : null}
           </div>
-          {/* What was bought, as the reviews page prints it (the owner,
-              01/10/2026: "bổ sung thông tin mua key bản gì game gì"). */}
+          <div className="mt-1.5 flex items-center gap-2">
+            <Stars filled={Math.min(5, Math.max(1, review.rating ?? 5))} pop />
+            <span className="text-[10px] font-semibold text-neutral-500">{review.date}</span>
+          </div>
+          {/* What was bought, under the stars, as the reviews page prints it
+              (the owner, 01/10/2026: "bổ sung thông tin mua key bản gì game
+              gì"; on the home cards 18/10/2026: "thử đi cả 2"). */}
           {review.purchase ? (
-            <p className="mt-0.5 flex min-w-0 items-center gap-1 text-[11.5px] text-neutral-500">
+            <p className="mt-1.5 flex min-w-0 items-center gap-1.5 text-[12px] text-neutral-500">
               <span className="shrink-0">Đã mua</span>
               <Link
                 href={review.purchase.href}
-                className="min-w-0 truncate font-semibold text-neutral-300 transition-colors hover:text-white"
+                className="min-w-0 truncate font-semibold text-neutral-200 transition-colors hover:text-white"
               >
                 {sentenceCase(review.purchase.product)}
               </Link>
@@ -143,7 +136,14 @@ export function ReviewCard({ review, index }: { review: Review; index: number })
         </div>
       </div>
 
-      <div className="mt-3 flex items-center justify-between gap-3">
+      {/* The words, and nothing else, in the middle: React escapes them, the
+          bar on the left says "quoted", and the block grows to keep every
+          card's foot on one line. */}
+      <p className="mt-4 flex-1 border-l-2 border-white/10 pl-3 text-[13.5px] leading-relaxed text-neutral-200 [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:3] overflow-hidden">
+        {review.body}
+      </p>
+
+      <div className="mt-4 flex items-center justify-between gap-3 border-t border-white/[0.06] pt-3">
         {/* The reviews page's words for the figure. */}
         <span className="text-[11px] font-bold text-neutral-500">Trị giá giao dịch</span>
         <span className="text-[13px] font-black tabular-nums text-emerald-400">{review.amount}</span>
