@@ -208,8 +208,7 @@ export function ReviewCard({ review, index }: { review: Review; index: number })
 }
 
 /**
- * The home page's review block: the title with the way to the rest in its
- * top right corner, four ReviewCards, then the score.
+ * The home page's review block: the title, four ReviewCards, then the score.
  *
  * No pill over the block: the verified mark on each card says what is
  * verified, and a blanket claim over all four was either untrue or redundant.
@@ -236,38 +235,24 @@ export function ReviewsSection({
           and no red bar, at the other titles' 20px and 24px from sm, balanced
           so a phone's two lines do not leave "BẠN" alone; the line under it
           centred. The red-bar version, left aligned with "Xem tất cả" on its
-          right, is 655590b7. */}
-      <div className="relative">
-        <div className="mx-auto flex max-w-2xl flex-col items-center gap-2 text-center">
-          <h2
-            id="reviews-heading"
-            className="row-heading text-balance text-xl font-black uppercase tracking-wider text-frost sm:text-2xl"
-          >
-            Chiến thắng{" "}
-            <span className="text-[var(--menzu-accent)]">trong tầm tay bạn</span>
-          </h2>
-          <p className="text-[15px] text-mist">
-            Đánh giá thật từ khách hàng đã giao dịch, admin duyệt trước khi hiện.
-          </p>
-        </div>
-        {/* LAB trial: the way to the rest in the top right corner, where it
-            sat under the cards (the owner, 18/10/2026: "cho cái Xem tất cả
-            đánh giá lên góc phải"), dressed as the game rows' "Xem tất cả".
-            From lg it rides the title's line, held to the foot of a box as
-            tall as that line (32px) the way the rows hold theirs; narrower,
-            the centred title leaves no room beside it, so it takes its own
-            line at the right, just over the cards. */}
-        <div className="mt-6 flex justify-end lg:absolute lg:right-0 lg:top-0 lg:mt-0 lg:h-8 lg:items-end">
-          <Link
-            href="/feedback"
-            className="text-[14px] font-medium text-mist underline-offset-4 transition-colors hover:text-frost hover:underline"
-          >
-            Xem tất cả đánh giá
-          </Link>
-        </div>
+          right, is 655590b7. No way to the rest of the reviews here: "Xem tất
+          cả đánh giá", first under the cards and then in the top right corner
+          (2a2f035c), was taken off (the owner, 18/10/2026: "bỏ nút xem tất cả
+          đánh giá đi"). */}
+      <div className="mx-auto flex max-w-2xl flex-col items-center gap-2 text-center">
+        <h2
+          id="reviews-heading"
+          className="row-heading text-balance text-xl font-black uppercase tracking-wider text-frost sm:text-2xl"
+        >
+          Chiến thắng{" "}
+          <span className="text-[var(--menzu-accent)]">trong tầm tay bạn</span>
+        </h2>
+        <p className="text-[15px] text-mist">
+          Đánh giá thật từ khách hàng đã giao dịch, admin duyệt trước khi hiện.
+        </p>
       </div>
 
-      <RevealGrid className="mt-3 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:mt-8 lg:grid lg:grid-cols-4 lg:overflow-visible lg:pb-0">
+      <RevealGrid className="mt-8 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:grid lg:grid-cols-4 lg:overflow-visible lg:pb-0">
         {reviews.map((review, index) => (
           <ReviewCard key={`${review.name}-${review.date}-${index}`} review={review} index={index} />
         ))}
