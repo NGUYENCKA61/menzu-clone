@@ -92,10 +92,7 @@ export function ScrollCta({
           const latest = window.setTimeout(arrive, SCROLL_AT_MOST_MS);
           window.addEventListener("scrollend", arrive);
         }}
-        // The hero's cue in capitals, spaced like the section titles (LAB,
-        // the owner, 18/10/2026: "nút khám phá ngay làm in hoa thử"); the
-        // tool page's quiet pill keeps its sentence case.
-        className={`${animated ? "animate-bounce-subtle uppercase tracking-wider " : ""}${tone} inline-flex items-center gap-2 whitespace-nowrap rounded-full border bg-panel/85 px-4 py-2 text-[13px] font-medium backdrop-blur-md transition-colors`}
+        className={`${animated ? "animate-bounce-subtle " : ""}${tone} inline-flex items-center gap-2 whitespace-nowrap rounded-full border bg-panel/85 px-4 py-2 text-[13px] font-medium backdrop-blur-md transition-colors`}
       >
         {label}
         {/* The hero keeps its bouncing arrow, the pull it exists for. The quiet
