@@ -242,7 +242,11 @@ export function LoginForm({
                   <h1 className="text-4xl font-black text-white tracking-tight">
                     Đăng nhập
                   </h1>
-                  <p className={`mt-2 text-sm font-medium ${reason ? "text-white" : "text-neutral-400"}`}>
+                  {/* LAB: the reason line in the tagline's grey, where it was
+                      white like the title (the owner, 18/10/2026: "khỏi làm cái
+                      Đăng nhập để nhận thông báo trạng thái sáng trưng cứ như
+                      bt đi"). */}
+                  <p className="mt-2 text-sm font-medium text-neutral-400">
                     {reason ?? tagline}
                   </p>
                 </div>
