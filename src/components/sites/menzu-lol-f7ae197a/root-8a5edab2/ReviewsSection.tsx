@@ -132,13 +132,15 @@ export function ReviewCard({ review, index }: { review: Review; index: number })
           </div>
           {/* What was bought, under the stars, as the reviews page prints it
               (the owner, 01/10/2026: "bổ sung thông tin mua key bản gì game
-              gì"; on the home cards 18/10/2026: "thử đi cả 2"). */}
+              gì"; on the home cards 18/10/2026: "thử đi cả 2"), the tool's
+              name in the shop's red ("đã mua hack gì thì màu tô đỏ tên hack
+              luôn"). */}
           {review.purchase ? (
             <p className="mt-1.5 flex min-w-0 items-center gap-1.5 text-[12px] text-neutral-500">
               <span className="shrink-0">Đã mua</span>
               <Link
                 href={review.purchase.href}
-                className="min-w-0 truncate font-semibold text-neutral-200 transition-colors hover:text-white"
+                className="min-w-0 truncate font-semibold text-[var(--menzu-accent)] underline-offset-2 transition-colors hover:underline"
               >
                 {sentenceCase(review.purchase.product)}
               </Link>
