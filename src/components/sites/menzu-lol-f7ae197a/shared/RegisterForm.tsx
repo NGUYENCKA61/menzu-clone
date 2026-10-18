@@ -193,7 +193,9 @@ export function RegisterForm({
                 <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
               </div>
               <div className="relative z-10 p-12 text-center w-full">
-                <span className="text-[var(--menzu-accent)] font-semibold text-[14px] mb-2 drop-shadow-md block">
+                {/* LAB: the main site's small line again, as on the sign-in
+                    card (LoginForm.tsx). */}
+                <span className="text-[var(--menzu-accent)] font-black uppercase tracking-[0.5em] text-xs mb-2 drop-shadow-md block">
                   {panelSubtitle}
                 </span>
                 <h2 className="text-5xl font-black text-white leading-none drop-shadow-lg">
