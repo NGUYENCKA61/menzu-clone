@@ -35,6 +35,19 @@ function goBack(push: (href: string) => void) {
  * The redirect target is required to start with "/" so it cannot be pointed at
  * another origin.
  */
+/**
+ * LAB: the picture's melt into the form, one version per link (the owner,
+ * 18/10/2026: "ko tạo url như sáng đc à", "như hồi sáng"): /login?tan=1 fades
+ * from 40%, ?tan=2 from 55% (the default), ?tan=0 not at all. The classes are
+ * written out whole so Tailwind finds them.
+ */
+export type LoginFade = "40" | "55" | "off";
+const FADE_CLASS: Record<LoginFade, string> = {
+  "40": "absolute inset-0 [mask-image:linear-gradient(to_right,black_40%,transparent)]",
+  "55": "absolute inset-0 [mask-image:linear-gradient(to_right,black_55%,transparent)]",
+  off: "absolute inset-0",
+};
+
 export function LoginForm({
   brandName,
   turnstileSiteKey,
@@ -48,7 +61,11 @@ export function LoginForm({
   next = "/",
   reason,
   tagline,
+  fade = "55",
 }: {
+  /** LAB: how the picture melts into the form (FADE_CLASS), picked by the
+   *  page's ?tan= switch; 55 unless a link says otherwise. */
+  fade?: LoginFade;
   /** Why the visitor is here, when the return address says — replaces the
    *  marketing subtitle so the card answers the door they came through. */
   reason?: string;
@@ -206,7 +223,7 @@ export function LoginForm({
                 trial, a lighter melt: whole for the first 55%, not 40% (the
                 owner, same day: "giảm hiệu ứng tan thử"). */}
             <div className="hidden lg:flex w-1/2 relative bg-neutral-950/60 overflow-hidden transform-gpu items-end justify-center">
-              <div className="absolute inset-0 [mask-image:linear-gradient(to_right,black_55%,transparent)]">
+              <div className={FADE_CLASS[fade]}>
                 <AuthPanelSlider
                   images={panelImages}
                   autoPlay={slideEnabled}

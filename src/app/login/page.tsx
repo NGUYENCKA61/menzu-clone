@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { PageBackdrop } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/PageBackdrop";
 import { SiteFooter } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/SiteFooter";
 import { SiteHeader } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/SiteHeader";
-import { LoginForm } from "@/components/sites/menzu-lol-f7ae197a/shared/LoginForm";
+import { LoginForm, type LoginFade } from "@/components/sites/menzu-lol-f7ae197a/shared/LoginForm";
 import { safeNext } from "@/lib/safeNext";
 
 const REASONS: [string, string][] = [
@@ -52,7 +52,7 @@ export const metadata: Metadata = {
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ next?: string }>;
+  searchParams: Promise<{ next?: string; tan?: string }>;
 }) {
   // Asked of the database, not of the cookie: a customer whose session was
   // revoked — password changed, other devices signed out, thirty days gone —
@@ -60,10 +60,15 @@ export default async function LoginPage({
   // of the very page that would fix it.
   if (await getCurrentUser()) redirect("/");
 
-  const [settings, { next: rawNext }] = await Promise.all([
+  const [settings, { next: rawNext, tan }] = await Promise.all([
     getShopSettings(),
     searchParams,
   ]);
+  // LAB: ?tan=1 / 2 / 0 shows the picture's melt from 40% / 55% / not at all,
+  // so the versions can be opened side by side (LoginForm's FADE_CLASS); a
+  // production build always shows the default.
+  const fade: LoginFade =
+    process.env.NODE_ENV === "production" ? "55" : tan === "1" ? "40" : tan === "0" ? "off" : "55";
   // Sanitised on the server so the browser never sees an unsafe target, and so
   // the "Tạo mới ngay" link can carry it on to /signup unchanged.
   const next = safeNext(rawNext);
@@ -104,6 +109,7 @@ export default async function LoginPage({
           // A different one of the shop's lines on each visit (Cấu hình →
           // the sign-in pictures' section); this page renders per request.
           tagline={pickLoginTagline(settings)}
+          fade={fade}
         />
         <SiteFooter />
       </main>
