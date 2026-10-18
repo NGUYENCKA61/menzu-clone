@@ -574,9 +574,11 @@ export type TileStyle = "a1" | "a2" | "a3";
  * The dress the game tiles wear unless a row asks for another. One constant
  * so /categories, which draws the same tiles, follows the home page's game
  * list when the owner picks a dress (the owner, 13/10/2026, UI consistency
- * review). LAB: "a3", the version on show when the owner named the three.
+ * review). LAB: "a1" for now, with "a3" the other one still in the running
+ * (the owner, 18/10/2026: "chốt tạm a1 đi nếu có đổi ý tính sao a1 hoặc
+ * a3"); "a3" was on show when the owner named the three.
  */
-export const DEFAULT_TILE_STYLE: TileStyle = "a3";
+export const DEFAULT_TILE_STYLE: TileStyle = "a1";
 
 /**
  * LAB: the game list's tile shape from sm up, "43" or "169", so both can be
