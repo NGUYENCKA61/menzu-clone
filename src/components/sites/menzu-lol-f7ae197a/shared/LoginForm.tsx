@@ -188,13 +188,26 @@ export function LoginForm({
 
         <div className="flex-1 w-full bg-neutral-900/80 border border-white/10 rounded-[2rem] sm:rounded-[2.5rem] shadow-2xl relative overflow-hidden transform-gpu flex flex-col">
           <div className="flex flex-col lg:flex-row flex-1 relative z-10">
-            <div className="hidden lg:flex w-1/2 relative bg-[#111111] overflow-hidden transform-gpu items-end justify-center border-r border-white/5">
-              <AuthPanelSlider
-                images={panelImages}
-                autoPlay={slideEnabled}
-                seconds={slideSeconds}
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
+            {/* LAB: the picture melts into the form the way menzu.lol's
+                sign-in card does (the owner, 18/10/2026: "thêm hiệu ứng đi",
+                "giống bên menzu trang đăng nhập"): the picture and its bottom
+                shade stay whole for the first 40% and fade out to nothing at
+                the seam under a mask, over the form side's own ground
+                (bg-neutral-950/60 on both halves, where this one was
+                #111111), and the hairline between the halves is gone, so the
+                two halves meet with no line. menzu lays a colour gradient to
+                its form's #101010 from the left edge; a mask matches our
+                see-through ground, and starting at 40% keeps the figure in the
+                middle of the picture bright. Same on the sign-up card. */}
+            <div className="hidden lg:flex w-1/2 relative bg-neutral-950/60 overflow-hidden transform-gpu items-end justify-center">
+              <div className="absolute inset-0 [mask-image:linear-gradient(to_right,black_40%,transparent)]">
+                <AuthPanelSlider
+                  images={panelImages}
+                  autoPlay={slideEnabled}
+                  seconds={slideSeconds}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
+              </div>
               <div className="relative z-10 p-12 text-center w-full">
                 <span className="text-[var(--menzu-accent)] font-semibold text-[14px] mb-2 drop-shadow-md block">
                   {panelSubtitle}
