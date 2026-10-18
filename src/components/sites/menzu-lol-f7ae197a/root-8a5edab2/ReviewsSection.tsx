@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { BadgeCheck, Star, VenetianMask } from "lucide-react";
 
-import { sentenceCase } from "@/lib/displayCase";
+import { sentenceCase, titleCase, withoutNewWord } from "@/lib/displayCase";
 
 import { AvatarPhoto } from "./AvatarPhoto";
 import { RevealGrid } from "./RevealGrid";
@@ -15,10 +15,21 @@ export interface Review {
   rating?: number;
   /** Backed by an order, or marked verified by an admin. */
   verified: boolean;
-  /** The tool an order-backed review was left for; null for a free-form one. */
-  purchase?: { product: string; href: string } | null;
+  /** The tool an order-backed review was left for, and the game it is for
+   *  (its category's name); null for a free-form one. */
+  purchase?: { product: string; href: string; game?: string } | null;
   /** Left by a buyer who hid their name ("Khách hàng ẩn danh"). */
   anonymous?: boolean;
+}
+
+/**
+ * The game a category is for, as a buyer calls it: "Hack Delta Force" is
+ * "Delta Force", "Hack Đột Kích CFVN - CF4VN" is "Đột Kích CFVN". The shop's
+ * "Hack" goes, and whatever follows a dash.
+ */
+function gameName(category: string): string {
+  const name = category.replace(/^\s*(tool\s+)?hack\s+/i, "").split(" - ")[0].trim();
+  return titleCase(withoutNewWord(name || category));
 }
 
 /**
@@ -161,6 +172,19 @@ export function ReviewCard({ review, index }: { review: Review; index: number })
       <p className="mt-4 flex-1 border-l-2 border-white/10 pl-3 text-[13.5px] leading-relaxed text-neutral-200 [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:3] overflow-hidden">
         {review.body}
       </p>
+
+      {/* The game the bought tool is for, in the card's bottom left corner
+          (the owner, 18/10/2026: "góc trái dưới cùng trái card đánh giá là
+          tên game đã thuê hack thử"). */}
+      {review.purchase?.game ? (
+        <div className="mt-4 flex min-w-0">
+          {/* Words only: the gamepad that led them came off ("bỏ icon tay
+              cầm game đi"). */}
+          <span className="min-w-0 max-w-full truncate rounded-md bg-white/[0.04] px-2 py-1 text-[11px] font-semibold text-neutral-300 ring-1 ring-inset ring-white/10">
+            {gameName(review.purchase.game)}
+          </span>
+        </div>
+      ) : null}
     </article>
   );
 }
