@@ -641,11 +641,12 @@ export type TileStyle =
  * best-seller card ("a5 thử"), "a6", their /cheats/ card, "c1",
  * bubblehacks' catalogue card, "d", the old quiet-button card, "a" (A1)
  * again ("a1 đi"), "a2" ("a2 đi"), "a3" ("a3 đi"), "b", the first B
- * ("quay về card b1"), the new "a6" (A4's shape at A3's strength), now "a7"
- * (A5's words at A6's brightness; "b7" is B5's). "a" is A1, "classic" the
- * framed picture with the name under it.
+ * ("quay về card b1"), the new "a6" (A4's shape at A3's strength), "a7"
+ * (A5's words at A6's brightness; "b7" is B5's), now "a2" again (18/10,
+ * choosing: "a2 thử"). "a" is A1, "classic" the framed picture with the
+ * name under it.
  */
-export const DEFAULT_TILE_STYLE: TileStyle = "a7";
+export const DEFAULT_TILE_STYLE: TileStyle = "a2";
 
 /** The eyebrow a tile wears in style b, from the category's platform tag. */
 function platformWord(platform: string | null | undefined): string {
