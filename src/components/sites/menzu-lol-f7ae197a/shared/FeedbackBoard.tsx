@@ -385,7 +385,7 @@ export function FeedbackBoard({ items }: { items: FeedbackItem[] }) {
                 Lọc theo
               </span>
               <span className="text-[14px] font-semibold text-[var(--menzu-accent)] leading-none">
-                Rating
+                Số sao
               </span>
             </div>
             <RatingStars value={ratingFilter} onPick={pickRating} size={18} gap="gap-1.5" />
@@ -405,7 +405,7 @@ export function FeedbackBoard({ items }: { items: FeedbackItem[] }) {
                 Lọc theo
               </span>
               <span className="text-[14px] font-semibold text-[var(--menzu-accent)] leading-none">
-                Rating
+                Số sao
               </span>
             </div>
             <RatingStars value={ratingFilter} onPick={pickRating} size={22} gap="gap-2" />
