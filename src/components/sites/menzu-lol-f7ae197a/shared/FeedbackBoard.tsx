@@ -126,7 +126,7 @@ export function ReviewAvatar({
 }
 
 /**
- * A review's pictures as a row of equal square thumbnails, each opening the
+ * A review's pictures as a row of equal 16:9 thumbnails, each opening the
  * full picture in the gallery's own lightbox.
  *
  * They were drawn at their natural size: a landscape shot took half the
@@ -134,11 +134,16 @@ export function ReviewAvatar({
  * height (the owner, 13/10/2026, UI consistency review). A thumbnail is a
  * crop, so the whole picture is one press away rather than a new tab.
  *
+ * Squares at first; 16:9 since the owner's "ảnh nên để card hình chữ nhật"
+ * and "rà soát làm sao cho đồng bộ" (18/10/2026): most pictures are 16:9
+ * screenshots, and the frame is the one /thong-bao gives the pictures of its
+ * status changes: the same rounding, rim and ground, 168px wide from sm. The
+ * draft in FeedbackComposer wears it too.
+ *
  * Through next/image at quality 95: the stored file is the whole picture
- * (often 100-200KB), and the 112px square now downloads about half of that on
- * a sharp screen and a fifth on a plain one (image audit, 17/10/2026). The
- * lightbox still opens the stored file itself. Lazy, since the wall lists
- * hundreds.
+ * (often 100-200KB), and the thumbnail downloads a fraction of it (image
+ * audit, 17/10/2026). The lightbox still opens the stored file itself. Lazy,
+ * since the wall lists hundreds.
  */
 function ReviewPictures({ pictures, reviewer }: { pictures: string[]; reviewer: string }) {
   const [open, setOpen] = useState(false);
@@ -160,21 +165,19 @@ function ReviewPictures({ pictures, reviewer }: { pictures: string[]; reviewer: 
               aria-label={
                 pictures.length > 1 ? `Phóng to ảnh đính kèm ${i + 1}` : "Phóng to ảnh đính kèm"
               }
-              className="group/img block h-24 w-24 cursor-zoom-in overflow-hidden rounded-xl border border-white/10 bg-white/[0.02] transition-colors hover:border-[var(--menzu-accent)]/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--menzu-accent)] sm:h-28 sm:w-28"
+              className="group/img lab-notch-sm block aspect-video w-36 cursor-zoom-in overflow-hidden border border-line bg-raise transition-colors hover:border-line-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--menzu-accent)] sm:w-[168px]"
             >
               <Image
                 src={src}
                 alt=""
-                width={112}
-                height={112}
-                // The square crops pictures that are mostly 16:9, and the old
-                // full-size file came out crisp because the browser shrank
-                // it a long way. 320px asks for a 640px-wide file on a sharp
-                // screen (384px on a plain one): measured as sharp as the
-                // stored file in the square, at about half its weight. At
-                // "112px" a 256px file was stretched to fill the square and
-                // read soft (17/10/2026).
-                sizes="320px"
+                width={168}
+                height={95}
+                // A 16:9 picture fills the frame without a crop, so the file
+                // only needs the frame's own width: a 384px-wide one on a
+                // sharp screen. The square needed "320px": it cropped the
+                // sides off and blew the rest up, and at "112px" a 256px
+                // file read soft (17/10/2026).
+                sizes="168px"
                 quality={95}
                 // A picture from anywhere but this site's own uploads cannot
                 // go through the optimizer; it is drawn as it is.

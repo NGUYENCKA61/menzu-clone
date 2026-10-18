@@ -190,9 +190,11 @@ export function FeedbackComposer({ user, today }: { user: ComposerUser; today: s
         </p>
       )}
       {filePreview ? (
-        <div className="relative mt-4 rounded-2xl overflow-hidden border border-neutral-800 w-fit max-w-full">
+        // The wall's 16:9 frame (FeedbackBoard's ReviewPictures), so the
+        // draft shows the picture the way /feedback will.
+        <div className="lab-notch-sm relative mt-4 aspect-video w-36 overflow-hidden border border-line bg-raise sm:w-[168px]">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={filePreview} alt="" className="w-full h-auto object-cover max-h-[260px]" />
+          <img src={filePreview} alt="" className="h-full w-full object-cover" />
           {/* The thing that is busy is the picture, not the whole button:
               the same veil the avatar wears while it uploads. */}
           {progress !== null ? (
