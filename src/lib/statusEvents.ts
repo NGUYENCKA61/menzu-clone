@@ -35,6 +35,10 @@ export interface StatusEventRow {
   categoryName: string;
   /** A picture pinned to this change — a screenshot, a changelog shot. */
   imageUrl: string | null;
+  /** The tool's own cover (its category's for a whole-category row, or
+   *  for a tool with none): what /thong-bao shows when the change pinned no
+   *  picture, so every card in the history keeps the picture column. */
+  coverUrl: string | null;
   /** The shop's own words for this change, when it wrote any. */
   note: string | null;
   /** "admin", "telegram" … — where the change came from. */
@@ -68,14 +72,15 @@ const EVENT_SELECT = {
   note: true,
   source: true,
   batchId: true,
-  category: { select: { name: true, slug: true } },
+  category: { select: { name: true, slug: true, imageUrl: true } },
   product: {
     select: {
       id: true,
       code: true,
       name: true,
       slug: true,
-      category: { select: { name: true, slug: true } },
+      imageUrl: true,
+      category: { select: { name: true, slug: true, imageUrl: true } },
     },
   },
 } as const;
@@ -88,13 +93,14 @@ type RawEvent = {
   note: string | null;
   source: string | null;
   batchId: string | null;
-  category: { name: string; slug: string } | null;
+  category: { name: string; slug: string; imageUrl: string | null } | null;
   product: {
     id: string;
     code: string;
     name: string | null;
     slug: string;
-    category: { name: string; slug: string };
+    imageUrl: string | null;
+    category: { name: string; slug: string; imageUrl: string | null };
   };
 };
 
@@ -113,6 +119,7 @@ function toRow(e: RawEvent): StatusEventRow | null {
     productHref: productHref(e.product.category.slug, e.product.slug),
     categoryName: e.product.category.name,
     imageUrl: e.imageUrl,
+    coverUrl: e.product.imageUrl ?? e.product.category.imageUrl,
     note: e.note,
     source: e.source,
   };
@@ -152,6 +159,7 @@ function collapseBatches(rows: RawEvent[]): StatusEventRow[] {
       productName: `${raw.category.name} · cả danh mục (1 tool)`,
       productHref: categoryHref(raw.category.slug),
       categoryName: raw.category.name,
+      coverUrl: raw.category.imageUrl ?? first.coverUrl,
     };
     seen.set(raw.batchId, row);
     out.push(row);

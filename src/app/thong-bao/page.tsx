@@ -128,11 +128,18 @@ const TAB_NOTE = "mb-5 text-[15px] leading-relaxed text-mist";
 export default async function AnnouncementsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ tab?: string; trang?: string }>;
+  searchParams: Promise<{ tab?: string; trang?: string; ban?: string }>;
 }) {
-  const { tab, trang } = await searchParams;
+  const { tab, trang, ban } = await searchParams;
   const statusTab = tab === "trang-thai";
   const subscribeTab = tab === "dang-ky";
+  // LAB: ?ban=cu shows the page as it was before the 18/10/2026 review (the
+  // history's full-width phone pictures and bare cards, the subscribe tab's
+  // old frames, band and search), to set beside the new ("làm hết đi rồi
+  // thêm cái url bản cũ tui đối chiếu sau"); the tabs keep it. A production
+  // build always shows the new.
+  const old = process.env.NODE_ENV !== "production" && ban === "cu";
+  const keep = (href: string) => (old ? `${href}${href.includes("?") ? "&" : "?"}ban=cu` : href);
   const user = await getCurrentUser();
   const [announcements, events, tools, followed] = await Promise.all([
     // The whole list, not the header's five: this page is where every
@@ -182,7 +189,7 @@ export default async function AnnouncementsPage({
         className="hide-scrollbar -mx-4 mb-6 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:flex-wrap sm:px-0 sm:pb-0"
       >
         <Link
-          href="/thong-bao"
+          href={keep("/thong-bao")}
           className={`${PILL_TAB} ${statusTab || subscribeTab ? PILL_TAB_OFF : PILL_TAB_ON}`}
         >
           Thông báo hệ thống
@@ -190,7 +197,7 @@ export default async function AnnouncementsPage({
             {announcements.length}
           </span>
         </Link>
-        <Link href={STATUS_TAB_HREF} className={`${PILL_TAB} ${statusTab ? PILL_TAB_ON : PILL_TAB_OFF}`}>
+        <Link href={keep(STATUS_TAB_HREF)} className={`${PILL_TAB} ${statusTab ? PILL_TAB_ON : PILL_TAB_OFF}`}>
           Trạng thái hack chung
           <span className={PILL_TAB_COUNT}>
             {events.length}
@@ -200,7 +207,7 @@ export default async function AnnouncementsPage({
             this tab that is the number they came to check, and a signed-out
             reader follows none. */}
         <Link
-          href={STATUS_SUBSCRIBE_HREF}
+          href={keep(STATUS_SUBSCRIBE_HREF)}
           className={`${PILL_TAB} ${subscribeTab ? PILL_TAB_ON : PILL_TAB_OFF}`}
         >
           Đăng ký nhận thông báo
@@ -234,6 +241,7 @@ export default async function AnnouncementsPage({
           <StatusSubscribeSearch
             tools={subscribeList}
             loginNext={STATUS_SUBSCRIBE_HREF}
+            old={old}
           />
         </>
       ) : statusTab ? (
@@ -279,58 +287,108 @@ export default async function AnnouncementsPage({
                       {group.items.map((event) => {
                         const state = SOFTWARE_STATUS[event.status];
                         const name = sentenceCase(event.productName);
+                        const head = (
+                          <>
+                            <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1.5">
+                              <time
+                                dateTime={event.at.toISOString()}
+                                className="lab-figure text-[14px] font-semibold text-frost"
+                              >
+                                {formatTime(event.at)}
+                              </time>
+                              <span
+                                className={`inline-flex items-center gap-1.5 rounded-md border px-2 py-0.5 text-[12px] font-semibold ${state.tile}`}
+                              >
+                                <span aria-hidden className={`h-1.5 w-1.5 rounded-full ${state.dot}`} />
+                                {state.label}
+                              </span>
+                              <span className="text-[13px] text-dim">
+                                {event.scope === "category" ? "Cả danh mục" : sentenceCase(event.categoryName)}
+                              </span>
+                            </div>
+                            {/* line-clamp-2 alone: a "block" beside it undid the
+                                clamp and long names ran five lines on a phone. */}
+                            <Link
+                              href={event.productHref}
+                              title={name}
+                              className="mt-1.5 line-clamp-2 text-[16px] font-semibold leading-snug text-frost transition-colors hover:text-white"
+                            >
+                              {name}
+                            </Link>
+                          </>
+                        );
+                        const note = (extra: string) =>
+                          event.note ? (
+                            <div
+                              className={`break-words rounded-[10px] border border-white/10 bg-white/[0.02] px-3.5 py-2.5 text-[14px] leading-relaxed text-mist ${extra}`}
+                            >
+                              <StatusNote text={event.note} />
+                            </div>
+                          ) : null;
+                        if (old) {
+                          return (
+                            <li
+                              key={event.id}
+                              className="flex flex-col gap-3 rounded-2xl border border-white/10 bg-white/[0.02] p-3.5 sm:flex-row sm:gap-4 sm:p-4"
+                            >
+                              {event.imageUrl ? (
+                                <a
+                                  href={event.imageUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="lab-notch-sm relative block aspect-video w-full shrink-0 self-start overflow-hidden border border-line bg-raise transition-colors hover:border-line-strong sm:w-[168px]"
+                                >
+                                  <Image
+                                    src={event.imageUrl}
+                                    alt={`Ảnh kèm thông báo ${event.productName}`}
+                                    fill
+                                    sizes="(min-width: 640px) 168px, 100vw"
+                                    className="object-cover"
+                                  />
+                                </a>
+                              ) : null}
+                              <div className="min-w-0 flex-1">
+                                {head}
+                                {note("mt-2.5")}
+                              </div>
+                            </li>
+                          );
+                        }
+                        // Every card keeps the picture column (18/10/2026, "rà
+                        // soát ... cho đồng bộ"): a change that pinned no
+                        // picture shows the tool's own cover, linked to the
+                        // tool, where its words used to start at the edge and
+                        // zigzag down the day. On a phone the picture is the
+                        // orders list's 96x64 beside the name, not a
+                        // full-width shot that made every card a screen tall;
+                        // the note runs under both.
+                        const picture = event.imageUrl ?? event.coverUrl;
+                        const frame =
+                          "lab-notch-sm relative block aspect-[3/2] w-24 self-start overflow-hidden border border-line bg-raise transition-colors hover:border-line-strong sm:row-span-2 sm:aspect-video sm:w-[168px]";
                         return (
                           <li
                             key={event.id}
-                            className="flex flex-col gap-3 rounded-2xl border border-white/10 bg-white/[0.02] p-3.5 sm:flex-row sm:gap-4 sm:p-4"
+                            className={`grid gap-3 rounded-2xl border border-white/10 bg-white/[0.02] p-3.5 sm:gap-x-4 sm:p-4 ${
+                              picture ? "grid-cols-[96px_minmax(0,1fr)] sm:grid-cols-[168px_minmax(0,1fr)]" : ""
+                            }`}
                           >
                             {event.imageUrl ? (
-                              <a
-                                href={event.imageUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="lab-notch-sm relative block aspect-video w-full shrink-0 self-start overflow-hidden border border-line bg-raise transition-colors hover:border-line-strong sm:w-[168px]"
-                              >
+                              <a href={event.imageUrl} target="_blank" rel="noopener noreferrer" className={frame}>
                                 <Image
                                   src={event.imageUrl}
                                   alt={`Ảnh kèm thông báo ${event.productName}`}
                                   fill
-                                  sizes="(min-width: 640px) 168px, 100vw"
+                                  sizes="(min-width: 640px) 168px, 96px"
                                   className="object-cover"
                                 />
                               </a>
-                            ) : null}
-                            <div className="min-w-0 flex-1">
-                              <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1.5">
-                                <time
-                                  dateTime={event.at.toISOString()}
-                                  className="lab-figure text-[14px] font-semibold text-frost"
-                                >
-                                  {formatTime(event.at)}
-                                </time>
-                                <span
-                                  className={`inline-flex items-center gap-1.5 rounded-md border px-2 py-0.5 text-[12px] font-semibold ${state.tile}`}
-                                >
-                                  <span aria-hidden className={`h-1.5 w-1.5 rounded-full ${state.dot}`} />
-                                  {state.label}
-                                </span>
-                                <span className="text-[13px] text-dim">
-                                  {event.scope === "category" ? "Cả danh mục" : sentenceCase(event.categoryName)}
-                                </span>
-                              </div>
-                              <Link
-                                href={event.productHref}
-                                title={name}
-                                className="mt-1.5 line-clamp-2 block text-[16px] font-semibold leading-snug text-frost transition-colors hover:text-white"
-                              >
-                                {name}
+                            ) : picture ? (
+                              <Link href={event.productHref} aria-label={name} className={frame}>
+                                <Image src={picture} alt="" fill sizes="(min-width: 640px) 168px, 96px" className="object-cover" />
                               </Link>
-                              {event.note ? (
-                                <div className="mt-2.5 break-words rounded-[10px] border border-white/10 bg-white/[0.02] px-3.5 py-2.5 text-[14px] leading-relaxed text-mist">
-                                  <StatusNote text={event.note} />
-                                </div>
-                              ) : null}
-                            </div>
+                            ) : null}
+                            <div className="min-w-0">{head}</div>
+                            {note(picture ? "col-span-2 sm:col-span-1 sm:col-start-2" : "")}
                           </li>
                         );
                       })}
