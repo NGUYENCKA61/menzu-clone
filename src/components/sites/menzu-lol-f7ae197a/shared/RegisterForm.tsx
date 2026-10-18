@@ -182,10 +182,9 @@ export function RegisterForm({
           <div className="flex flex-col lg:flex-row flex-1 relative z-10">
             {/* LAB: the picture melts into the form as on the sign-in card
                 (LoginForm.tsx has the why; the owner, 18/10/2026: "thêm
-                hiệu ứng đi", "giống bên menzu trang đăng nhập"); the fade is
-                off for now, as there ("bỏ thử hiệu ứng tan xem"). */}
-            <div className="hidden lg:flex w-1/2 relative bg-neutral-950/60 overflow-hidden transform-gpu items-end justify-center border-r border-white/5">
-              <div className="absolute inset-0">
+                hiệu ứng đi", "giống bên menzu trang đăng nhập"). */}
+            <div className="hidden lg:flex w-1/2 relative bg-neutral-950/60 overflow-hidden transform-gpu items-end justify-center">
+              <div className="absolute inset-0 [mask-image:linear-gradient(to_right,black_40%,transparent)]">
                 <AuthPanelSlider
                   images={panelImages}
                   autoPlay={slideEnabled}
