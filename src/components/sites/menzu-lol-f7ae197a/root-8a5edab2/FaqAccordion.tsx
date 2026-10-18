@@ -40,7 +40,6 @@ export function FaqAccordion({
   items,
   revealFrom = 0,
   plain = false,
-  flat = false,
 }: {
   items: FaqEntry[];
   /** The --i seat of the first card; the caller's own reveals come before. */
@@ -48,65 +47,8 @@ export function FaqAccordion({
   /** No icon tile before each question — the wiki's quieter list (the owner,
    *  01/10/2026: "bỏ bớt icon"); the home page keeps its icons. */
   plain?: boolean;
-  /** LAB 2 trial, lmarket.net's flat list (the owner, 18/10/2026: "có nên
-   *  đổi qua faq kiểu lmarket này", "làm thử"): no card and no icon tile,
-   *  a hairline under each question and the plus alone at the right; the
-   *  open one still turns the shop's red. The home page's questions only. */
-  flat?: boolean;
 }) {
   const [open, setOpen] = useState(0);
-
-  if (flat) {
-    return (
-      <div className="flex flex-col">
-        {items.map((entry, index) => {
-          const isOpen = open === index;
-          return (
-            <div
-              key={`${entry.q}-${index}`}
-              style={{ ["--i" as string]: revealFrom + index }}
-              className="reveal-card border-b border-white/[0.08]"
-            >
-              <button
-                type="button"
-                aria-expanded={isOpen}
-                onClick={() => setOpen(isOpen ? -1 : index)}
-                className="group/q flex w-full items-center justify-between gap-6 py-4 text-left"
-              >
-                <span
-                  className={`text-[15px] font-semibold transition-colors sm:text-base ${
-                    isOpen ? "text-[var(--menzu-accent)]" : "text-white"
-                  }`}
-                >
-                  {entry.q}
-                </span>
-                <Plus
-                  size={18}
-                  aria-hidden
-                  className={`shrink-0 transition-[transform,color] duration-300 ${
-                    isOpen
-                      ? "rotate-45 text-[var(--menzu-accent)]"
-                      : "text-neutral-400 group-hover/q:text-white"
-                  }`}
-                />
-              </button>
-              <div
-                className={`grid transition-[grid-template-rows] duration-300 ease-out ${
-                  isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
-                }`}
-              >
-                <div className="overflow-hidden">
-                  <p className="whitespace-pre-line pb-5 pr-10 text-sm leading-relaxed text-neutral-400 sm:text-[15px]">
-                    {entry.a}
-                  </p>
-                </div>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    );
-  }
 
   return (
     <div className="flex flex-col gap-2.5">

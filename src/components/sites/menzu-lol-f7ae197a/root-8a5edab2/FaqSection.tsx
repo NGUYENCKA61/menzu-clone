@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { BookOpen, MessageCircle, MessageSquare, Users } from "lucide-react";
+import { BookOpen, MessageCircle, MessageSquare, Users, Zap, KeyRound } from "lucide-react";
 
 import { JsonLd, faqJsonLd } from "@/lib/seo";
 import type { FaqEntry } from "@/lib/settings";
@@ -60,9 +60,6 @@ const BUTTON =
  * thành kênh zalo đi"). The card sticks while the questions scroll on wide
  * screens.
  *
- * LAB 2 trial (18/10/2026, "làm thử"): lmarket's flat version instead, with
- * no card and no boxes; see the comment over the grid.
- *
  * It moves as the original does: over a faint pool of the accent, the
  * heading, each question and the card rise in one after another the first
  * time the block scrolls into view (RevealGrid + `.reveal-card`), every
@@ -106,21 +103,14 @@ export function FaqSection({ faq, contact }: { faq: FaqEntry[]; contact: FaqCont
         className="pointer-events-none absolute left-1/2 top-1/4 -z-10 h-[400px] w-[min(800px,100%)] -translate-x-1/2 rounded-full bg-[var(--menzu-accent)]/[0.06] blur-[180px]"
       />
 
-      {/* LAB trial, lmarket.net's questions block (the owner, 18/10/2026:
-          "có nên đổi qua faq kiểu lmarket này", "làm thử"): no boxes. On a
-          desktop the title, its line, the doors and the support hours sit
-          in a narrow column on the left and the questions run down the right
-          as a flat list; on a phone the questions follow the title and the
-          doors come after them, a buyer looking for the answer before the
-          desk. The support card (its heading, its two facts, its tinted
-          frame) is gone: the line under the title already says to write to
-          the shop. The boxed version, its card level with the first
-          question, is 9f8645d1. The second row is 1fr so the questions,
-          spanning both rows, stretch it and not the title's. Gaps: 32px
-          under the title and 40px over the doors on a phone; 24px between
-          the title and the doors and 48px between the columns on a desktop. */}
-      <RevealGrid className="grid items-start gap-y-8 lg:grid-cols-12 lg:grid-rows-[auto_1fr] lg:gap-x-12 lg:gap-y-6">
-        <div className="reveal-card lg:col-span-5 xl:col-span-4" style={{ ["--i" as string]: 0 }}>
+      {/* LAB trial: the support card starts level with the first question
+          (the owner, 18/10/2026: "hạ thử"), where it stood beside the title,
+          95px higher. The title and its line take the grid's first row, on
+          the left; the questions and the card share the second. The gaps are
+          the old ones: 32px under the title (its mb-8 before), 40px over the
+          card on a phone (32px row gap and mt-2), 48px between the columns. */}
+      <RevealGrid className="grid items-start gap-y-8 lg:grid-cols-12 lg:gap-x-12">
+        <div className="reveal-card lg:col-span-7" style={{ ["--i" as string]: 0 }}>
           {/* LAB, back for a look with the reviews block (the owner,
               18/10/2026: "quay về bản căn giữa chữ đỏ tui coi thử chiến
               thắng và faq"): the main site's title, capitals with the
@@ -147,50 +137,72 @@ export function FaqSection({ faq, contact }: { faq: FaqEntry[]; contact: FaqCont
           </p>
         </div>
 
-        <div className="lg:col-span-7 lg:col-start-6 lg:row-span-2 lg:row-start-1 xl:col-span-8 xl:col-start-5">
-          <FaqAccordion items={items} revealFrom={1} flat />
+        <div className="lg:col-span-7 lg:row-start-2">
+          <FaqAccordion items={items} revealFrom={1} />
         </div>
 
-        {/* The doors side by side, wrapping and widening to fill each line
-            (Facebook and the Zalo group, then the guides under them), and
-            the support hours under them in small grey, where lmarket puts
-            its reply time; the red dot keeps the pill's pulse. */}
-        <div
-          className="reveal-card mt-2 lg:col-span-5 lg:col-start-1 lg:row-start-2 lg:mt-0 xl:col-span-4"
-          style={{ ["--i" as string]: 1 }}
-        >
-          <div className="flex flex-wrap gap-2.5">
-            {doors.map(({ key, href, label, Icon }, index) => (
-              <a
-                key={key}
-                href={href}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={`${BUTTON} grow ${
-                  index === 0
-                    ? "bg-[var(--menzu-accent)] text-white hover:bg-[var(--menzu-accent-dark)]"
-                    : "border border-white/10 bg-white/[0.04] text-white hover:bg-white/[0.08]"
-                }`}
+        <div className="mt-2 lg:col-span-5 lg:col-start-8 lg:row-start-2 lg:mt-0">
+          <div
+            data-spot
+            style={{ ["--i" as string]: 1 }}
+            className="reveal-card relative isolate overflow-hidden rounded-2xl border border-[var(--menzu-accent)]/25 bg-gradient-to-b from-[var(--menzu-accent)]/[0.08] to-white/[0.02] p-6 sm:p-7 lg:sticky lg:top-24"
+          >
+            {/* Lit from the corner at rest, brighter under the pointer's own glow. */}
+            <span aria-hidden className="spot-glow spot-glow-on -z-10" />
+            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-[var(--menzu-accent)]/30 bg-[var(--menzu-accent)]/10 px-2.5 py-1 text-[11px] font-bold text-[var(--menzu-accent)]">
+              <span className="relative flex h-2 w-2">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[var(--menzu-accent)] opacity-60 motion-reduce:hidden" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-[var(--menzu-accent)]" />
+              </span>
+              Hỗ trợ {SUPPORT_WINDOW} mỗi ngày
+            </div>
+            <h3 className="font-display text-xl font-bold text-frost">Vẫn còn thắc mắc?</h3>
+            <p className="mt-2 text-sm leading-relaxed text-neutral-400">
+              Không thấy câu trả lời? Nhắn cho shop, đội hỗ trợ trực trong giờ và trả lời
+              ngay khi thấy tin.
+            </p>
+
+            <ul className="mt-5 flex flex-col gap-2.5">
+              <li className="flex items-center gap-3 text-[13px] text-neutral-300">
+                <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg border border-white/10 bg-white/[0.04] text-[var(--menzu-accent)]">
+                  <Zap size={14} aria-hidden />
+                </span>
+                Nạp tiền ngân hàng cộng tự động 24/7
+              </li>
+              <li className="flex items-center gap-3 text-[13px] text-neutral-300">
+                <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg border border-white/10 bg-white/[0.04] text-[var(--menzu-accent)]">
+                  <KeyRound size={14} aria-hidden />
+                </span>
+                Key giao ngay sau khi thanh toán
+              </li>
+            </ul>
+
+            <div className="mt-6 flex flex-col gap-2.5">
+              {doors.map(({ key, href, label, Icon }, index) => (
+                <a
+                  key={key}
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`${BUTTON} ${
+                    index === 0
+                      ? "bg-[var(--menzu-accent)] text-white hover:bg-[var(--menzu-accent-dark)]"
+                      : "border border-white/10 bg-white/[0.04] text-white hover:bg-white/[0.08]"
+                  }`}
+                >
+                  <Icon size={15} aria-hidden />
+                  {label}
+                </a>
+              ))}
+              <Link
+                href="/docs"
+                className={`${BUTTON} border border-white/10 bg-white/[0.04] text-white hover:bg-white/[0.08]`}
               >
-                <Icon size={15} aria-hidden />
-                {label}
-              </a>
-            ))}
-            <Link
-              href="/docs"
-              className={`${BUTTON} grow border border-white/10 bg-white/[0.04] text-white hover:bg-white/[0.08]`}
-            >
-              <BookOpen size={15} aria-hidden />
-              Đọc hướng dẫn
-            </Link>
+                <BookOpen size={15} aria-hidden />
+                Đọc hướng dẫn
+              </Link>
+            </div>
           </div>
-          <p className="mt-3 flex items-center gap-2 text-[12px] text-mist">
-            <span className="relative flex h-2 w-2">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[var(--menzu-accent)] opacity-60 motion-reduce:hidden" />
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-[var(--menzu-accent)]" />
-            </span>
-            Hỗ trợ {SUPPORT_WINDOW} mỗi ngày
-          </p>
         </div>
       </RevealGrid>
     </section>
