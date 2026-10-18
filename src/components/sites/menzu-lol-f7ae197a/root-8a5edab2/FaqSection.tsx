@@ -111,14 +111,16 @@ export function FaqSection({ faq, contact }: { faq: FaqEntry[]; contact: FaqCont
                 thắng và faq"): the main site's title, capitals with the
                 second half in the shop's red and no red bar, at the other
                 titles' 20px and 24px from sm; left aligned, the block being
-                two columns. The red-bar version is 655590b7. LAB trial: the
-                whole title white, after a turn all in red ("Câu hỏi thường
-                gặp tô full đỏ thử", then "chữ trắng thử"). */}
+                two columns. The red-bar version is 655590b7. All red and all
+                white were tried ("tô full đỏ thử", "chữ trắng thử") before the
+                half in red came back, in step with the reviews title ("làm
+                đi"). */}
             <h2
               id="faq-heading"
               className="row-heading text-balance text-xl font-black uppercase tracking-wider text-frost sm:text-2xl"
             >
-              Câu hỏi thường gặp
+              Câu hỏi{" "}
+              <span className="text-[var(--menzu-accent)]">thường gặp</span>
             </h2>
             {/* The reviews block's line under its title: 15px, 8px below the
                 title; wider and wrapped with care, so "shop." no longer sits
