@@ -144,17 +144,18 @@ export function ReviewCard({ review, index }: { review: Review; index: number })
           {/* What was bought, under the stars, as the reviews page prints it
               (the owner, 01/10/2026: "bổ sung thông tin mua key bản gì game
               gì"; on the home cards 18/10/2026: "thử đi cả 2"): the tool's
-              name alone, in the shop's red ("đã mua hack gì thì màu tô đỏ tên
-              hack luôn", "bỏ chữ đã mua chỉ ghi dòng đỏ thôi"). A screen
-              reader still hears "Đã mua", and the pointer gets the whole name
-              when it is cut short. */}
+              name alone ("bỏ chữ đã mua chỉ ghi dòng đỏ thôi"), white again
+              after a turn in red, the red having gone to the game tag ("tool
+              unlock skin chữ trắng như cũ đi", "nhãn tên game thì tô đỏ"). A
+              screen reader still hears "Đã mua", and the pointer gets the
+              whole name when it is cut short. */}
           {review.purchase ? (
             <p className="mt-1.5 flex min-w-0 items-center text-[12px]">
               <Link
                 href={review.purchase.href}
                 aria-label={`Đã mua ${sentenceCase(review.purchase.product)}`}
                 title={sentenceCase(review.purchase.product)}
-                className="min-w-0 truncate font-semibold text-[var(--menzu-accent)] underline-offset-2 transition-colors hover:underline"
+                className="min-w-0 truncate font-semibold text-neutral-200 transition-colors hover:text-white"
               >
                 {sentenceCase(review.purchase.product)}
               </Link>
@@ -166,7 +167,7 @@ export function ReviewCard({ review, index }: { review: Review; index: number })
       {/* The words, and nothing else, below the person: React escapes them,
           the bar on the left says "quoted". The card ends here: the line
           with what the buyer paid ("Trị giá giao dịch") came off the home
-          cards, the red tool name and the verified mark being the proof (the
+          cards, the tool's name and the verified mark being the proof (the
           owner, 18/10/2026: "xóa bỏ cái trị giá giao dịch thử"); /feedback
           keeps it. */}
       <p className="mt-4 flex-1 border-l-2 border-white/10 pl-3 text-[13.5px] leading-relaxed text-neutral-200 [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:3] overflow-hidden">
@@ -179,8 +180,9 @@ export function ReviewCard({ review, index }: { review: Review; index: number })
       {review.purchase?.game ? (
         <div className="mt-4 flex min-w-0">
           {/* Words only: the gamepad that led them came off ("bỏ icon tay
-              cầm game đi"). */}
-          <span className="min-w-0 max-w-full truncate rounded-md bg-white/[0.04] px-2 py-1 text-[11px] font-semibold text-neutral-300 ring-1 ring-inset ring-white/10">
+              cầm game đi"). In the shop's red, as the support card's hours
+              pill wears it ("nhãn tên game thì tô đỏ"). */}
+          <span className="min-w-0 max-w-full truncate rounded-md bg-[var(--menzu-accent)]/10 px-2 py-1 text-[11px] font-semibold text-[var(--menzu-accent)] ring-1 ring-inset ring-[var(--menzu-accent)]/30">
             {gameName(review.purchase.game)}
           </span>
         </div>
