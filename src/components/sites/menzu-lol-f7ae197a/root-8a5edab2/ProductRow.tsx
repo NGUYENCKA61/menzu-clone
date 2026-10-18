@@ -594,6 +594,8 @@ function BentoTile({
  *    whole line at 13px from sm, the size of the other cards' grey lines
  *    (the owner, 18/10/2026: "thử đi không ổn tui kêu lùi", then "cho bản
  *    này là a8 đi").
+ *  - a9: A8 with its corners rounded 8px where every tile has 14px (the
+ *    owner, 18/10/2026: "làm cái a9 bớt bo cong lại thử").
  *  - a6cu2: the A6 before that, A3's words, layout and hover (17/10: "kiểu
  *    như a luôn đi bố cục á", "giống a3") with A4's shape, bright above and
  *    dark below, at about A3's strength: .lab-lmarket-shade at 70% ("làm a6
@@ -642,7 +644,7 @@ function BentoTile({
 export type TileStyle =
   | "classic"
   | "a" | "a2" | "a3" | "a4" | "a5" | "a5cu" | "a6" | "a6cu" | "a6cu2"
-  | "a7" | "a7cu" | "a8"
+  | "a7" | "a7cu" | "a8" | "a9"
   | "b" | "b1" | "b2" | "b3" | "b4" | "b5" | "b6" | "b7"
   | "c" | "c1" | "d";
 
@@ -860,6 +862,8 @@ export function RowTile({
         // elitehacks lights theirs in their green.
         style === "a2" && "hover:border-[var(--menzu-accent)]",
         style === "a6cu" && "lab-lm-card rounded-xl border-white/10 hover:border-white/10",
+        // A9 is A8 with tighter corners.
+        style === "a9" && "rounded-[8px]",
       )}
     >
       {/* A6's ring of light sits behind the picture and shows at the rim. */}
@@ -983,7 +987,7 @@ function TileDress({ card, style, big }: { card: ProductCard; style: TileStyle; 
       </>
     );
   }
-  if (style === "a" || style === "a2" || style === "a3" || style === "a4" || style === "a5" || style === "a6" || style === "a6cu2" || style === "a7" || style === "a8") {
+  if (style === "a" || style === "a2" || style === "a3" || style === "a4" || style === "a5" || style === "a6" || style === "a6cu2" || style === "a7" || style === "a8" || style === "a9") {
     // A5 and A7 carry the foot that ends above the title.
     const titleFoot = style === "a5" || style === "a7";
     return (
@@ -994,7 +998,7 @@ function TileDress({ card, style, big }: { card: ProductCard; style: TileStyle; 
             "tile-scrim absolute inset-0",
             style === "a"
               ? "bg-gradient-to-t from-scrim via-scrim/60 via-35% to-scrim/10"
-              : style === "a4" || style === "a6" || style === "a8"
+              : style === "a4" || style === "a6" || style === "a8" || style === "a9"
                 ? "lab-lmarket-shade"
                 : titleFoot
                   ? // A4's corner and a thin even layer here; A5's foot
@@ -1035,12 +1039,12 @@ function TileDress({ card, style, big }: { card: ProductCard; style: TileStyle; 
             className={cn(
               "line-clamp-2 text-[14px] font-black leading-[1.15] text-white sm:text-[17px]",
               big && "lg:text-[20px]",
-              (style === "a2" || style === "a3" || style === "a4" || style === "a5" || style === "a6" || style === "a6cu2" || style === "a7" || style === "a8") && "transition-colors duration-300 group-hover:text-[var(--menzu-accent)]",
+              (style === "a2" || style === "a3" || style === "a4" || style === "a5" || style === "a6" || style === "a6cu2" || style === "a7" || style === "a8" || style === "a9") && "transition-colors duration-300 group-hover:text-[var(--menzu-accent)]",
             )}
           >
             {titleCase(withoutNewWord(card.title))}
           </h3>
-          {line && style === "a8" ? (
+          {line && (style === "a8" || style === "a9") ? (
             // A8 sizes A6's line to the site's: on a phone, where the whole
             // line ran past the half-width tile, only the price; from sm the
             // whole line at 13px, the size of the other cards' grey lines
