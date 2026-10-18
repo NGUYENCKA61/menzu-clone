@@ -2939,7 +2939,9 @@ export function AdminSettings({
                 onChange={(event) => setPanelSubtitle(event.target.value)}
                 className={FIELD}
               />
-              <p className={HINT}>Hiện trên cả hai trang, chữ nhỏ màu đỏ.</p>
+              <p className={HINT}>
+                Hiện trên trang đăng nhập, đăng ký và quên mật khẩu, chữ nhỏ màu đỏ.
+              </p>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
