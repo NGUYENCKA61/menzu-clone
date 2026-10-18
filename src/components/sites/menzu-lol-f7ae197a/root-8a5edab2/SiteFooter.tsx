@@ -93,6 +93,22 @@ function socialLinks(contact: FooterContact) {
 }
 
 /**
+ * A name too long for a phone's half-width column breaks at its dash:
+ * "Hack truy kích PC -" over "truy kích 2", "Hack CS2 -" over "Counter
+ * Strike 2", never with "- CF4VN" opening a line or "2" left alone. The dash
+ * holds on to the word before it and a short tail is glued together, both
+ * with no-break spaces; a tail longer than a line keeps its spaces. Applied
+ * after sentenceCase, which folds every space to a plain one. A name that
+ * fits on one line looks the same either way.
+ */
+function breakAtDash(label: string): string {
+  return label.replace(
+    / - (.+)$/,
+    (_, tail: string) => ` - ${tail.length <= 20 ? tail.replace(/ /g, " ") : tail}`,
+  );
+}
+
+/**
  * A shelf of links under a heading, optionally closed by a "see all" line.
  * `soft` gives each label a sentence-case twin (CaseText) for the light
  * trial "moi"; only the category names, which the admin types in capitals,
@@ -103,25 +119,33 @@ function Column({
   links,
   seeAll,
   soft = false,
+  className = "",
 }: {
   heading: string;
   links: FooterLink[];
   seeAll?: FooterLink;
   soft?: boolean;
+  /** Placement in the footer's grid. */
+  className?: string;
 }) {
   return (
-    <div className="flex flex-col gap-3.5">
+    <div className={`flex flex-col gap-3.5 ${className}`}>
       {/* h2, not h4. These footer columns are the page's last top-level
           sections, and the only headings above them are the h2s of the
           sections themselves — an h4 with no h3 anywhere before it leaves a
           screen reader's outline with a hole in it, which is exactly what
           heading-order reports. The styling is the footer's own either way. */}
       <h2 className={HEADING}>{heading}</h2>
-      <ul className="flex flex-col gap-2.5">
+      {/* On a phone, two to a row, a long name wraps: its lines sit at the
+          rows' own 1.45 (not the inherited 24px, which spaced them like two
+          links), the gap between links grows to 12px so a wrapped name still
+          reads as one, and text-pretty keeps a lone "2" or "CF4VN" off the
+          last line. sm up is unchanged. */}
+      <ul className="flex flex-col gap-2.5 max-sm:gap-3 max-sm:text-[13px] max-sm:leading-[1.45] max-sm:text-pretty">
         {links.map((link) => (
           <li key={`${link.href}-${link.label}`}>
             <Link href={link.href} className={ROW}>
-              {soft ? sentenceCase(link.label) : link.label}
+              {breakAtDash(soft ? sentenceCase(link.label) : link.label)}
             </Link>
           </li>
         ))}
@@ -215,11 +239,21 @@ export async function SiteFooter() {
     // --menzu-bg — and a footer in the header's tone frames every page top and
     // bottom in the same colour, whichever ground sits between them.
     <footer className="relative z-10 w-full bg-panel border-t border-white/10 mt-auto">
-      {/* pb-28 on the narrow layout clears the fixed bottom navigation, which
-          would otherwise sit on top of the copyright line. */}
-      <div className="max-w-[1320px] mx-auto px-4 lg:px-6 pt-10 pb-24 sm:py-11">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[1.5fr_1fr_1fr_1fr] gap-8 lg:gap-10">
-          <div className="flex flex-col gap-4">
+      {/* The narrow layout's bottom padding clears the fixed bottom
+          navigation (64px) and the chat button floating over it (56px, 76px
+          up): at pb-24 the button sat on the last line of links at the end
+          of the page and hid "Sitemap"; pb-36 lifts that line above it (the
+          owner, 18/10/2026, footer review: no link hidden). */}
+      <div className="max-w-[1320px] mx-auto px-4 lg:px-6 pt-10 pb-36 sm:py-11">
+        {/* LAB: on a phone the shelves stand two to a row the way menzu.lol
+            lays its footer out (the owner, 18/10/2026: "hay làm footer kiểu
+            menzu căn ra 1 hàng 2 bên", "làm đi khỏi ẩn link"): Danh mục and
+            Hỗ trợ side by side, the wiki's long titles across the full width
+            under them (order-last), every link still shown. It was one
+            column, 1211px tall on a 390px phone. From sm the old placement
+            returns: two columns, then four from lg. */}
+        <div className="grid grid-cols-2 gap-x-6 gap-y-8 sm:grid-cols-2 sm:gap-8 lg:grid-cols-[1.5fr_1fr_1fr_1fr] lg:gap-10">
+          <div className="col-span-2 flex flex-col gap-4 sm:col-span-1">
             <Link
               href="/"
               className="text-[22px] sm:text-[24px] font-black tracking-tight leading-none text-white"
@@ -278,6 +312,7 @@ export async function SiteFooter() {
             heading="Wiki hướng dẫn"
             links={guideLinks}
             seeAll={{ label: "Xem tất cả hướng dẫn", href: "/docs" }}
+            className="order-last col-span-2 sm:order-none sm:col-span-1"
           />
 
           <Column heading="Hỗ trợ" links={supportLinks} />
