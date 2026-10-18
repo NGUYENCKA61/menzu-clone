@@ -31,6 +31,7 @@ import { ConnectRailSection } from "@/components/sites/menzu-lol-f7ae197a/root-8
 import { FaqSection } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/FaqSection";
 import { formatVnd } from "@/components/sites/menzu-lol-f7ae197a/shared/productData";
 import { getFeedback, getFlashSaleItems } from "@/lib/queries";
+import { withSampleReviews } from "@/lib/labSampleReviews";
 import { JsonLd, organizationJsonLd, profileLinks, websiteJsonLd } from "@/lib/seo";
 import { visibleBlocks } from "@/lib/settings";
 import { getShopSettings } from "@/lib/settingsStore";
@@ -81,7 +82,12 @@ export default async function Home({
   const listShape = pickListShape(query.khung);
   const settings = await getShopSettings();
   const trust = await getTrustStats(settings);
-  const [flashSaleItems, reviews] = await Promise.all([getFlashSaleItems(), getFeedback()]);
+  // LAB: made-up reviews with a bought tool each when LAB_SAMPLE_REVIEWS=1
+  // (src/lib/labSampleReviews.ts); the real ones otherwise.
+  const [flashSaleItems, reviews] = await Promise.all([
+    getFlashSaleItems(),
+    getFeedback().then(withSampleReviews),
+  ]);
   const [homeGroups, categoryCards, docCards] = await Promise.all([
     // The game list is not capped: it shows three lines and reveals the rest
     // behind "Xem thêm", so it needs every category to be there to reveal.
