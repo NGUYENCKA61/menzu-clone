@@ -95,7 +95,10 @@ function FeaturedCarousel({ items }: { items: DocCard[] }) {
       onBlurCapture={() => setHeld(false)}
     >
       <div
-        className="group relative isolate overflow-hidden rounded-2xl border border-[var(--menzu-accent)]/25 bg-gradient-to-br from-[var(--menzu-accent)]/[0.10] via-[#121216] to-[#121216] lift-card hover:-translate-y-1 hover:border-[var(--menzu-accent)]/50 hover:shadow-xl hover:shadow-black/40"
+        // The home page's "Vẫn còn thắc mắc?" wash, 6% red fading out under a
+        // 20% rim (18/10/2026, "rà soát ... cho đồng bộ"); it was 10% over a
+        // 25% rim, the reddest card on the page.
+        className="group relative isolate overflow-hidden rounded-2xl border border-[var(--menzu-accent)]/20 bg-gradient-to-b from-[var(--menzu-accent)]/[0.06] to-white/[0.02] lift-card hover:-translate-y-1 hover:border-[var(--menzu-accent)]/50 hover:shadow-xl hover:shadow-black/40"
       >
         {/* All the articles stacked in one cell, so the card is as tall as the
             tallest and does not jump as they change. */}
@@ -108,32 +111,37 @@ function FeaturedCarousel({ items }: { items: DocCard[] }) {
                 href={docHref(item.slug)}
                 aria-hidden={on ? undefined : true}
                 tabIndex={on ? undefined : -1}
-                className={`relative isolate block p-6 [grid-area:1/1] ${items.length > 1 ? "pb-12" : ""} transition-opacity duration-[900ms] ease-out motion-reduce:transition-none ${
+                className={`relative isolate flex items-center gap-8 p-6 [grid-area:1/1] ${items.length > 1 ? "pb-12" : ""} transition-opacity duration-[900ms] ease-out motion-reduce:transition-none ${
                   on ? "opacity-100" : "pointer-events-none opacity-0"
                 }`}
               >
-                {/* The article's own picture, faded towards the text, so the
-                    card reads as that article and not a box. */}
-                <div className="pointer-events-none absolute inset-y-0 right-0 -z-10 w-3/5 opacity-25 [mask-image:linear-gradient(to_left,black,transparent)]">
-                  <Image src={item.thumbnailUrl} alt="" fill sizes="40vw" className="object-cover" />
-                </div>
-                <span className="inline-flex rounded-md border border-[var(--menzu-accent)]/40 bg-[var(--menzu-accent)]/10 px-2 py-1 text-[12px] font-semibold text-[var(--menzu-accent)]">
-                  Nội dung nổi bật
-                </span>
-                <h2 className="mt-3 text-[20px] font-bold leading-tight text-white transition-colors group-hover:text-[var(--menzu-accent)]">
-                  {item.title}
-                </h2>
-                {item.excerpt ? (
-                  <p className="mt-2 max-w-xl text-sm leading-relaxed text-neutral-400">{item.excerpt}</p>
-                ) : null}
-                {/* The button alone: the card's date and reads were taken off
-                    (the owner, 02/10/2026: "bỏ hết thử"); the article page
-                    and the shelf cards still carry them. */}
-                <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-3">
-                  <span className="inline-flex items-center gap-2 rounded-xl bg-[var(--menzu-accent)] px-4 py-2.5 text-[14px] font-semibold text-white transition-colors group-hover:bg-[var(--menzu-accent-dark)]">
-                    Xem chi tiết
-                    <ArrowRight size={12} aria-hidden />
+                <div className="min-w-0 flex-1">
+                  <span className="inline-flex rounded-md border border-[var(--menzu-accent)]/40 bg-[var(--menzu-accent)]/10 px-2 py-1 text-[12px] font-semibold text-[var(--menzu-accent)]">
+                    Nội dung nổi bật
                   </span>
+                  <h2 className="mt-3 text-[20px] font-bold leading-tight text-white transition-colors group-hover:text-[var(--menzu-accent)]">
+                    {item.title}
+                  </h2>
+                  {item.excerpt ? (
+                    <p className="mt-2 max-w-xl text-sm leading-relaxed text-neutral-400">{item.excerpt}</p>
+                  ) : null}
+                  {/* The button alone: the card's date and reads were taken off
+                      (the owner, 02/10/2026: "bỏ hết thử"); the article page
+                      and the shelf cards still carry them. */}
+                  <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-3">
+                    <span className="inline-flex items-center gap-2 rounded-xl bg-[var(--menzu-accent)] px-4 py-2.5 text-[14px] font-semibold text-white transition-colors group-hover:bg-[var(--menzu-accent-dark)]">
+                      Xem chi tiết
+                      <ArrowRight size={12} aria-hidden />
+                    </span>
+                  </div>
+                </div>
+                {/* The article's picture whole, in a 16:9 frame on the right
+                    from md, the rim the site's other pictures wear. It lay
+                    faded behind the words, a smudge that ran over them on a
+                    phone (18/10/2026, "rà soát ... cho đồng bộ"); a phone
+                    gets the words alone. */}
+                <div className="lab-notch relative hidden aspect-video w-[320px] shrink-0 overflow-hidden border border-line bg-raise md:block">
+                  <Image src={item.thumbnailUrl} alt="" fill sizes="320px" className="object-cover" />
                 </div>
               </Link>
             );
@@ -448,7 +456,9 @@ export function DocsHelpCenter({
  * One article as the orders list draws an order (the owner: "tăng kích cỡ
  * card như bên lịch sử mua và thêm nút chi tiết"): its picture at 144px, a
  * 16px title on up to two lines, the date and the reads, and "Chi tiết"
- * behind a hairline. In a search's results it also names its shelf.
+ * behind a hairline. In a search's results it also names its shelf. The
+ * picture wears the orders list's frame too, 8px corners on the dark rim
+ * (18/10/2026, "rà soát ... cho đồng bộ"), where it had 14px and a white one.
  */
 function ArticleCard({ article, shelf }: { article: DocCard; shelf: boolean }) {
   return (
@@ -457,7 +467,7 @@ function ArticleCard({ article, shelf }: { article: DocCard; shelf: boolean }) {
       className="group flex flex-col gap-3 rounded-2xl border border-white/10 bg-white/[0.02] p-3.5 outline-none transition-colors hover:border-white/10 hover:bg-white/[0.04] focus-visible:ring-2 focus-visible:ring-[var(--menzu-accent)]/60 sm:flex-row sm:items-center sm:gap-5 sm:p-4"
     >
       <div className="flex min-w-0 flex-1 items-start gap-3 sm:items-center sm:gap-5">
-        <div className="relative aspect-[3/2] w-24 shrink-0 overflow-hidden rounded-lg border border-white/10 bg-white/[0.02] sm:aspect-video sm:w-36 sm:rounded-xl">
+        <div className="lab-notch-sm relative aspect-[3/2] w-24 shrink-0 overflow-hidden border border-line bg-raise sm:aspect-video sm:w-36">
           <Image
             src={article.thumbnailUrl}
             alt=""
