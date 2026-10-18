@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Eye, EyeOff, Lock, Mail, User } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { canGoBack } from "@/lib/navigation";
 
@@ -82,6 +82,38 @@ export function RegisterForm({
   // Ticked by hand every time. Not remembered and not pre-checked: consent
   // that arrives already given is not consent.
   const [agreed, setAgreed] = useState(false);
+
+  // LAB: arriving from the sign-in page's "Tạo mới ngay" (#tao-tai-khoan),
+  // the page glides so the whole card is in view (the owner, 18/10/2026:
+  // "tự cuộn tới giữa trang để thấy đủ card đăng ký khi bấm tạo mới ngay"):
+  // centred in the room the header leaves when the card fits, its top just
+  // under the header when it does not. The header's main row (64px) is all
+  // that stays once the page has scrolled; the strip above it folds away.
+  // offsetTop, not the box on screen, because the page is still sliding in
+  // (slideUpFade) when this runs. The mark leaves the address after, so a
+  // reload does not glide again; other ways in never glide.
+  const cardRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (window.location.hash !== "#tao-tai-khoan") return;
+    const timer = window.setTimeout(() => {
+      const card = cardRef.current;
+      if (!card) return;
+      let top = 0;
+      for (let node: HTMLElement | null = card; node; node = node.offsetParent as HTMLElement | null) {
+        top += node.offsetTop;
+      }
+      const header = 64;
+      const room = window.innerHeight - header;
+      const height = card.offsetHeight;
+      const target = height + 32 <= room ? top - header - (room - height) / 2 : top - header - 16;
+      window.scrollTo({
+        top: Math.max(0, target),
+        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+      });
+      window.history.replaceState(window.history.state, "", window.location.pathname + window.location.search);
+    }, 150);
+    return () => window.clearTimeout(timer);
+  }, []);
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
@@ -178,7 +210,7 @@ export function RegisterForm({
           </button>
         </div>
 
-        <div className="flex-1 w-full bg-neutral-900/80 border border-white/10 rounded-[2rem] sm:rounded-[2.5rem] shadow-2xl relative overflow-hidden transform-gpu flex flex-col">
+        <div ref={cardRef} className="flex-1 w-full bg-neutral-900/80 border border-white/10 rounded-[2rem] sm:rounded-[2.5rem] shadow-2xl relative overflow-hidden transform-gpu flex flex-col">
           <div className="flex flex-col lg:flex-row flex-1 relative z-10">
             {/* LAB: the picture melts into the form as on the sign-in card
                 (LoginForm.tsx has the why; the owner, 18/10/2026: "thêm

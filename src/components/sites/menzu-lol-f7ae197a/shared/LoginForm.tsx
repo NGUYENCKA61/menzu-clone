@@ -366,8 +366,12 @@ export function LoginForm({
 
                 <p className="mt-8 text-center text-xs text-neutral-500">
                   Chưa có tài khoản?
+                  {/* #tao-tai-khoan asks the sign-up page to glide its card
+                      fully into view on arrival (RegisterForm; the owner,
+                      18/10/2026: "tự cuộn tới giữa trang để thấy đủ card đăng
+                      ký khi bấm tạo mới ngay"). */}
                   <Link
-                    href={next === "/" ? "/signup" : `/signup?next=${encodeURIComponent(next)}`}
+                    href={`${next === "/" ? "/signup" : `/signup?next=${encodeURIComponent(next)}`}#tao-tai-khoan`}
                     className="text-[var(--menzu-accent)] hover:text-[var(--menzu-accent-dark)] font-black transition-colors ml-1"
                   >
                     Tạo mới ngay
