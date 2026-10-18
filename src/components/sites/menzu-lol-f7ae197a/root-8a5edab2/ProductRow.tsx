@@ -684,10 +684,10 @@ export type TileStyle =
  * price line (18/10: "chốt a6"), "a8", A6 with that line sized to the
  * site's, the version on show when the owner named it ("cho bản này là a8
  * đi"), "a10", its price in white bold after "Chỉ từ" (18/10: "áp a10 vào
- * web đi"), and "a8" again for a look ("a8 thử"). "a" is A1, "classic" the
- * framed picture with the name under it.
+ * web đi"), "a8" again for a look ("a8 thử"), and back on "a10" ("a10
+ * thử"). "a" is A1, "classic" the framed picture with the name under it.
  */
-export const DEFAULT_TILE_STYLE: TileStyle = "a8";
+export const DEFAULT_TILE_STYLE: TileStyle = "a10";
 
 /**
  * LAB: the game list's tile shape from sm up, "43" or "169", so both can be
