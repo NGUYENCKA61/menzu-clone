@@ -45,13 +45,15 @@ export const SOFTWARE_STATUS: Record<
     text: "text-amber-400",
     tile: "border-amber-500/30 bg-amber-500/10 text-amber-400",
   },
-  // A paler sky than the other states' 400s (the owner, 18/10/2026: "cái
-  // ổn định cho xanh biển nhạt đi"), wherever a state is printed.
+  // Lighter words than the other states' 400s on a livelier chip (the owner,
+  // 18/10/2026: "cái ổn định cho xanh biển nhạt đi", then "xanh nào mà tươi
+  // á là đc"): sky 300 words, a sky 400 dot, a stronger tint and rim than
+  // the pale first try. Wherever a state is printed.
   STABLE: {
     label: "Ổn định",
-    dot: "bg-sky-300",
+    dot: "bg-sky-400",
     text: "text-sky-300",
-    tile: "border-sky-300/30 bg-sky-300/10 text-sky-300",
+    tile: "border-sky-400/40 bg-sky-400/15 text-sky-300",
   },
   UPDATED: {
     label: "Cập nhật mới",
