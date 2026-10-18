@@ -598,8 +598,7 @@ function BentoTile({
  *    a shadowed name and a small line; the card rises and its rim lights
  *    under the pointer while the others fade (lab-lm-* in globals.css).
  *  - a7, b7: A6's brightness, bright above and dark below at about A3's
- *    strength, under the first A5's words and under B5's (B4's, no platform
- *    line)
+ *    strength, under the first A5's words and under B4's (no platform line)
  *    (the owner, 18/10/2026: "a7 là bản a6 sáng trên tối dưới như a5 hoặc
  *    b5 đi").
  *  - b: unnamedtech's tile — the whole cover dimmed evenly, a small eyebrow
@@ -612,9 +611,11 @@ function BentoTile({
  *  - b1, b4, b6: the rest of the set ("b cũng làm 6 phiên bản độ sáng giống
  *    a đi"): B's words at A1's brightness (the picture dimmed, an even fade),
  *    A4's (lmarket's foot shade) and the first A6's (lmarket's black lower
- *    40%). The first A5 had A4's brightness, so B5 is B4 (?kieu=b5 opens it). The
- *    first B, darker than all of them, stays as "b" ("B gốc"). B4 drops the
- *    platform line ("b4 bỏ cái dòng hack game đó đi").
+ *    40%). The first B, darker than all of them, stays as "b" ("B gốc"). B4
+ *    drops the platform line ("b4 bỏ cái dòng hack game đó đi").
+ *  - b5: B4's words at the new A5's shade, the foot ending above the title
+ *    over a thin even layer (the owner, 18/10/2026, comparing "a4 a5 b4
+ *    b5"). While A5 had A4's brightness, ?kieu=b5 opened B4.
  *  - c: lmarket's tile — the cover slightly dimmed above a solid caption bar
  *    holding the name and the blurb, with a platform chip at the end.
  *  - c1: bubblehacks' catalogue card (the owner, 17/10/2026: "làm bản C1
@@ -631,7 +632,7 @@ export type TileStyle =
   | "classic"
   | "a" | "a2" | "a3" | "a4" | "a5" | "a5cu" | "a6" | "a6cu"
   | "a7"
-  | "b" | "b1" | "b2" | "b3" | "b4" | "b6" | "b7"
+  | "b" | "b1" | "b2" | "b3" | "b4" | "b5" | "b6" | "b7"
   | "c" | "c1" | "d";
 
 /**
@@ -1032,7 +1033,7 @@ function TileDress({ card, style, big }: { card: ProductCard; style: TileStyle; 
       </>
     );
   }
-  if (style === "b" || style === "b1" || style === "b2" || style === "b3" || style === "b4" || style === "b6" || style === "b7") {
+  if (style === "b" || style === "b1" || style === "b2" || style === "b3" || style === "b4" || style === "b5" || style === "b6" || style === "b7") {
     return (
       <>
         {style === "b" ? (
@@ -1047,10 +1048,14 @@ function TileDress({ card, style, big }: { card: ProductCard; style: TileStyle; 
           // A1's even fade over A1's dimmed picture (see RowTile).
           <span aria-hidden className="tile-scrim absolute inset-0 bg-gradient-to-t from-scrim via-scrim/60 via-35% to-scrim/10" />
         ) : style === "b7" ? (
-          // B7 is B5 (B4) at A6's lighter strength (the owner, 18/10/2026).
+          // B7 is B4 (B5 when B5 was B4) at A6's lighter strength (the
+          // owner, 18/10/2026).
           <span aria-hidden className="tile-scrim absolute inset-0 lab-lmarket-shade lab-lmarket-shade-light" />
         ) : style === "b4" ? (
           <span aria-hidden className="tile-scrim absolute inset-0 lab-lmarket-shade" />
+        ) : style === "b5" ? (
+          // A5's corner and even layer; its foot rides on the caption below.
+          <span aria-hidden className="tile-scrim absolute inset-0 lab-a5-shade" />
         ) : style === "b6" ? (
           <span aria-hidden className="tile-scrim lab-lm-foot" />
         ) : (
@@ -1061,11 +1066,19 @@ function TileDress({ card, style, big }: { card: ProductCard; style: TileStyle; 
         )}
         {/* Same phone care as A: a tighter inset, the name kept to two lines
             and the price to one, so the words stay clear of the pill. */}
-        <span className={cn("tile-caption absolute inset-x-2.5 bottom-2.5 flex flex-col gap-0.5 sm:inset-x-3.5 sm:bottom-3 sm:gap-1", big && "lg:inset-x-5 lg:bottom-4")}>
+        <span
+          className={cn(
+            "tile-caption absolute flex flex-col gap-0.5 sm:gap-1",
+            // B5 carries A5's foot on its caption, as A5 does.
+            style === "b5"
+              ? cn("lab-a5-foot inset-x-0 bottom-0 px-2.5 pb-2.5 sm:px-3.5 sm:pb-3", big && "lg:px-5 lg:pb-4")
+              : cn("inset-x-2.5 bottom-2.5 sm:inset-x-3.5 sm:bottom-3", big && "lg:inset-x-5 lg:bottom-4"),
+          )}
+        >
           {/* B4 drops the platform line: with no platform tagged it read
               "Hack game" on every tile (the owner, 17/10/2026: "b4 bỏ cái dòng
               hack game đó đi"). */}
-          {style === "b4" || style === "b7" ? null : (
+          {style === "b4" || style === "b5" || style === "b7" ? null : (
             <span className="text-[12px] font-semibold text-[var(--menzu-accent)]">
               {platformWord(card.platform)}
             </span>
