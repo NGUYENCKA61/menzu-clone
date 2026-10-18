@@ -2,7 +2,6 @@ import {
   readAssistantProvider,
   type AssistantProvider,
 } from "@/lib/assistantProviders";
-import { SUPPORT_WINDOW } from "@/lib/supportHours";
 import { parseCardRates, serializeCardRates, type CardRate } from "@/lib/topup";
 import {
   parseZaloGroupIds,
@@ -488,17 +487,16 @@ export const DEFAULT_SETTINGS: ShopSettings = {
   authPanelSubtitle: "THICHTHIHACK",
   authLoginTitle: "Welcome\nBack",
   authSignupTitle: "Join\nUs",
-  // LAB: the owner's lines (18/10/2026: "cái này mình đổi mỗi lần khách
-  // hàng vô đăng nhập", "thêm vô phần cấu hình admin sửa đi") and the five
-  // suggested with them. Every claim is one the shop already makes.
+  // LAB: the old fixed line and the owner's own (18/10/2026: "cái này mình
+  // đổi mỗi lần khách hàng vô đăng nhập", "thêm vô phần cấu hình admin sửa
+  // đi"); the four service lines suggested with them were taken out ("bỏ
+  // mấy này đi").
   authLoginTaglines: [
     "Mua tool, tài khoản game và nhận key ngay lập tức",
-    "Nạp tiền ngân hàng, cộng tự động 24/7",
-    "Key giao ngay sau khi thanh toán, kèm hướng dẫn chi tiết",
-    `Hỗ trợ ${SUPPORT_WINDOW} mỗi ngày qua Facebook, Zalo`,
-    "Bảo hành theo đơn, xử lý nhanh khi tool gặp lỗi",
     "Chiến thắng đã gần ngay trước mắt, còn chờ gì nữa?",
     "Khoảng cách của chiến thắng chỉ cách một gang tay",
+    "Đừng chơi đẹp, hãy chơi khôn",
+    "Thích thì hack hay hack thì thích?",
   ].join("\n"),
   contactZalo: "",
   contactFacebook: "",
