@@ -12,6 +12,12 @@ import { productHref } from "@/lib/routes";
  * ấy"). Display only, nothing is written anywhere. On when
  * LAB_SAMPLE_REVIEWS=1 is set (lab 2's .env.local), never in a production
  * build; with no tool on sale the real reviews stay.
+ *
+ * The three named buyers wear game agent icons as photos, the kind menzu.lol
+ * gives its reviewers (the owner, 18/10/2026: "thêm vài avatar lấy từ menzu
+ * để tui coi test hợp lý không"); menzu's buyers' own Facebook pictures were
+ * left alone, being real people. The icons sit, untracked, in lab 2's
+ * public/lab-samples/avatars; missing, the card shows the initial.
  */
 const SAMPLE_REVIEWS =
   process.env.LAB_SAMPLE_REVIEWS === "1" && process.env.NODE_ENV !== "production";
@@ -25,6 +31,7 @@ const SAMPLES: Array<{
   amount: number;
   anonymous: boolean;
   daysAgo: number;
+  avatarUrl: string | null;
 }> = [
   {
     name: "Minh Tuấn",
@@ -33,6 +40,7 @@ const SAMPLES: Array<{
     amount: 250_000,
     anonymous: false,
     daysAgo: 1,
+    avatarUrl: "/lab-samples/avatars/agent-1.webp",
   },
   {
     name: "Hoàng Long",
@@ -41,6 +49,7 @@ const SAMPLES: Array<{
     amount: 180_000,
     anonymous: false,
     daysAgo: 3,
+    avatarUrl: "/lab-samples/avatars/agent-2.webp",
   },
   {
     name: "Khách hàng ẩn danh",
@@ -49,6 +58,7 @@ const SAMPLES: Array<{
     amount: 120_000,
     anonymous: true,
     daysAgo: 5,
+    avatarUrl: null,
   },
   {
     name: "Thanh Hà",
@@ -57,6 +67,7 @@ const SAMPLES: Array<{
     amount: 350_000,
     anonymous: false,
     daysAgo: 8,
+    avatarUrl: "/lab-samples/avatars/agent-3.webp",
   },
 ];
 
@@ -80,7 +91,7 @@ export async function withSampleReviews(rows: ReviewRow[]): Promise<ReviewRow[]>
     return {
       name: sample.name,
       body: sample.body,
-      avatarUrl: null,
+      avatarUrl: sample.avatarUrl,
       amount: sample.amount,
       rating: sample.rating,
       service: "",
