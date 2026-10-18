@@ -108,9 +108,14 @@ export function ReviewsRail({ header, children }: { header: ReactNode; children:
           it (the owner, 18/10/2026: "giữ cái nút kia chỉ bỏ thanh kéo
           thôi"); a touchpad or a sideways wheel no longer drags it.
           overflow hidden still lets scrollBy move it. A phone and a tablet
-          keep the swipe ("trên đt cứ giữ thanh kéo đó"). */}
+          keep the swipe ("trên đt cứ giữ thanh kéo đó").
+          overflow-y-hidden: with the sideways overflow set, the up-down one
+          would compute to auto, and the cards waiting 30px low for their
+          rise-in (globals.css, reveal-rise) overflowed the box downwards,
+          so a scrollbar showed down its side as the page scrolled to it
+          (the owner, 18/10/2026: "lỗi xuất hiện cột cuộn khi kéo xuống"). */}
       <div ref={rail} className="mt-1 lg:mt-6">
-        <RevealGrid className="flex snap-x snap-mandatory gap-4 overflow-x-auto overscroll-x-contain pt-2 pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:overflow-x-hidden">
+        <RevealGrid className="flex snap-x snap-mandatory gap-4 overflow-x-auto overflow-y-hidden overscroll-x-contain pt-2 pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:overflow-x-hidden">
           {children}
         </RevealGrid>
       </div>
