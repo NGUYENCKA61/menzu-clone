@@ -245,9 +245,13 @@ export function OrdersList({ orders }: { orders: OrderCardView[] }) {
                   >
                     {run.group ? (
                       // The day once, over its orders: the same date on every
-                      // card was the noisiest thing on the page.
+                      // card was the noisiest thing on the page. A quiet
+                      // divider, not a title: 13px grey, so the orders' white
+                      // names are the brightest thing in the list (the owner,
+                      // 20/10/2026: "các thành phần nên hạ hay ngày hạ?",
+                      // "hạ đi").
                       <div className="flex items-center gap-3">
-                        <span className="lab-figure shrink-0 text-[15px] font-semibold text-frost">
+                        <span className="lab-figure shrink-0 text-[13px] font-semibold text-mist">
                           {run.group}
                         </span>
                         <span aria-hidden className="h-px flex-1 bg-line" />
