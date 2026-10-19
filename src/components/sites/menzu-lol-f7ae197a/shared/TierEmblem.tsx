@@ -4,36 +4,36 @@ import { TIER_STYLE, type MemberTierValue } from "@/lib/memberTiers";
 
 /**
  * A tier's mark since 19/10/2026: a solid glyph in the tier's own colour,
- * its faces split by cut gaps, on a round frame of the same colour. The
- * style is the owner's two references (a faceted star for Platinum, a solid
- * cut diamond for Diamond: "diamond kiểu vậy đi"), drawn for all five so the
- * set holds together ("làm lại 1 bộ cho nó đồng bộ đi", K2 of a lab sheet):
- * a shield for Classic (the star went to Platinum), a medal, the faceted
- * star, the cut diamond, and for Elite the crown of the site's old icon
- * filled in, with three jewels cut out ("cái icon elite xấu quá kìa như cũ
- * thì đẹp hơn").
+ * its faces split by cut gaps, no frame. The style is the owner's two
+ * references (a faceted star for Platinum, a solid cut diamond for Diamond:
+ * "diamond kiểu vậy đi"), drawn for all five so the set holds together
+ * ("làm lại 1 bộ cho nó đồng bộ đi"): a shield for Classic (the star went to
+ * Platinum), a medal, the faceted star, the cut diamond, and for Elite the
+ * crown of the site's old icon, as the outline it was ("cái icon elite xấu
+ * quá kìa như cũ thì đẹp hơn").
  *
- * Then "làm sao các icon nét với đồng bộ lại đi" and "thêm khung đi": the
- * glyphs are sized to look the same size (the shield a step down, the medal
- * a touch up, a fuller star), the gaps cut wider so they stay sharp at 44px,
- * and every mark sits on the same round frame, a light fill and a faint rim
- * of its colour, so five different silhouettes take the same room.
+ * The glyphs are sized to look the same size (the shield a step down, the
+ * medal a touch up, a fuller star) and the gaps cut wide enough to stay sharp
+ * ("làm sao các icon nét với đồng bộ lại đi"). Three versions took turns on
+ * the page every 20 seconds (filled crown, outlined crown, a round frame);
+ * the owner said "e1 đi", then "e2": this one, the outlined crown.
  *
- * The gaps are a mask, so they show the frame behind; each mark masks with
- * its own id.
+ * The gaps are a mask, so they show whatever is behind; each mark masks
+ * with its own id.
  */
 const SIZE = {
   md: "h-11 w-11",
   lg: "h-[60px] w-[60px]",
 } as const;
 
-/** How much of the frame the glyphs fill. */
-const INNER = 0.8;
-
 const OLD_CROWN =
   "M11.562 3.266a.5.5 0 0 1 .876 0L15.39 8.87a1 1 0 0 0 1.516.294L21.183 5.5a.5.5 0 0 1 .798.519l-2.834 10.246a1 1 0 0 1-.956.734H5.81a1 1 0 0 1-.957-.734L2.02 6.02a.5.5 0 0 1 .798-.519l4.276 3.664a1 1 0 0 0 1.516-.294z";
 
-const GLYPH: Record<MemberTierValue, { shape: ReactNode; cuts: ReactNode; scale: number }> = {
+/** `outline`: drawn as a 2px line, as the site's icons are, not cut. */
+const GLYPH: Record<
+  MemberTierValue,
+  { shape: ReactNode; cuts?: ReactNode; scale: number; outline?: boolean }
+> = {
   CLASSIC: {
     shape: (
       <path d="M12 4.6L18.4 7.1V11.6C18.4 15.5 15.7 18.6 12 20C8.3 18.6 5.6 15.5 5.6 11.6V7.1Z" />
@@ -77,18 +77,12 @@ const GLYPH: Record<MemberTierValue, { shape: ReactNode; cuts: ReactNode; scale:
   ELITE: {
     shape: (
       <>
-        <path d={OLD_CROWN} stroke="currentColor" strokeWidth={0.8} strokeLinejoin="round" />
-        <rect x="5" y="19.4" width="14" height="2.2" rx="1.1" />
-      </>
-    ),
-    cuts: (
-      <>
-        <circle cx="8.6" cy="13.4" r="0.8" fill="black" />
-        <circle cx="12" cy="13.4" r="0.8" fill="black" />
-        <circle cx="15.4" cy="13.4" r="0.8" fill="black" />
+        <path d={OLD_CROWN} />
+        <path d="M5 21h14" />
       </>
     ),
     scale: 0.82,
+    outline: true,
   },
 };
 
@@ -102,64 +96,15 @@ export function TierEmblem({
   className?: string;
 }) {
   const id = useId();
-  const box = `shrink-0 ${SIZE[size]} ${TIER_STYLE[tier].text} ${className}`;
-  if (process.env.NODE_ENV === "production") {
-    return (
-      <svg viewBox="0 0 24 24" aria-hidden className={box}>
-        <Mark tier={tier} version="e3" id={id} />
-      </svg>
-    );
-  }
-  // LAB, dev only: all three versions the owner is comparing, one shown at
-  // a time by LabTierRotator on /cap-bac, the only page that draws them.
+  const { shape, cuts, scale, outline } = GLYPH[tier];
+  const fit = `translate(12 12) scale(${scale}) translate(-12 -12)`;
   return (
-    <>
-      {(["e1", "e2", "e3"] as const).map((version) => (
-        <svg
-          key={version}
-          viewBox="0 0 24 24"
-          aria-hidden
-          className={`${box} lab-tv lab-tv-${version}`}
-        >
-          <Mark tier={tier} version={version} id={`${id}${version}`} />
-        </svg>
-      ))}
-    </>
-  );
-}
-
-/**
- * The drawing for one version. E3 (the one printed): the round frame, the
- * glyph at 80% of it. E1: no frame, the glyph at full size. E2: as E1 with
- * Elite's crown as the old icon's outline rather than filled.
- */
-function Mark({
-  tier,
-  version,
-  id,
-}: {
-  tier: MemberTierValue;
-  version: "e1" | "e2" | "e3";
-  id: string;
-}) {
-  const { shape, cuts, scale } = GLYPH[tier];
-  const framed = version === "e3";
-  const fit = `translate(12 12) scale(${(framed ? INNER : 1) * scale}) translate(-12 -12)`;
-  return (
-    <>
-      {framed ? (
-        <circle
-          cx="12"
-          cy="12"
-          r="11.4"
-          fill="currentColor"
-          fillOpacity={0.12}
-          stroke="currentColor"
-          strokeOpacity={0.3}
-          strokeWidth={0.6}
-        />
-      ) : null}
-      {version === "e2" && tier === "ELITE" ? (
+    <svg
+      viewBox="0 0 24 24"
+      aria-hidden
+      className={`shrink-0 ${SIZE[size]} ${TIER_STYLE[tier].text} ${className}`}
+    >
+      {outline ? (
         <g
           transform={fit}
           fill="none"
@@ -168,8 +113,7 @@ function Mark({
           strokeLinecap="round"
           strokeLinejoin="round"
         >
-          <path d={OLD_CROWN} />
-          <path d="M5 21h14" />
+          {shape}
         </g>
       ) : (
         <g transform={fit}>
@@ -190,6 +134,6 @@ function Mark({
           </g>
         </g>
       )}
-    </>
+    </svg>
   );
 }
