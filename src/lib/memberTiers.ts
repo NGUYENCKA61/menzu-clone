@@ -35,12 +35,14 @@ export interface TierRule {
   discountPercent: number;
 }
 
+// Diamond 8% → 5% and Elite 10% → 8% on the owner's word (19/10/2026,
+// "diamond giảm 5% elite 8%").
 export const TIER_RULES: Record<MemberTierValue, TierRule> = {
   CLASSIC: { label: "Classic", minTopUp: 0, discountPercent: 0 },
   GOLD: { label: "Gold", minTopUp: 1_500_000, discountPercent: 1 },
   PLATINUM: { label: "Platinum", minTopUp: 5_000_000, discountPercent: 3 },
-  DIAMOND: { label: "Diamond", minTopUp: 15_000_000, discountPercent: 8 },
-  ELITE: { label: "Elite", minTopUp: 30_000_000, discountPercent: 10 },
+  DIAMOND: { label: "Diamond", minTopUp: 15_000_000, discountPercent: 5 },
+  ELITE: { label: "Elite", minTopUp: 30_000_000, discountPercent: 8 },
 };
 
 /** Each tier keeps its metal wherever it is printed. */
