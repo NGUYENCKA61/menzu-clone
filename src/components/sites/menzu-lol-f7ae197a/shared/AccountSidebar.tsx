@@ -29,7 +29,7 @@ export interface SidebarUser {
   username: string;
   avatarUrl: string | null;
   role: string;
-  /** Passed level 2: a member reads "Verified" in sea blue. */
+  /** Passed level 2: a member reads "Verified" in green. */
   verified?: boolean;
 }
 
@@ -121,7 +121,7 @@ export function AccountSidebar({
                   user.role === "ADMIN"
                     ? "text-[var(--menzu-accent)]"
                     : user.role !== "AGENCY" && user.verified
-                      ? "text-sky-400"
+                      ? "text-emerald-400"
                       : "text-neutral-400"
                 }`}
               >

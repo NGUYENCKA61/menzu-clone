@@ -207,11 +207,11 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                   </span>
                   {/* The tick as menzu draws it, a round disc with a white
                       check ("dùng cái tick này giống menzu đc k"), where a
-                      scalloped badge stood, in the verified blue for every
-                      account, an admin's too ("admin xanh dương tick", after
-                      green, red, and red for admins only were tried). */}
+                      scalloped badge stood, green for every account, with the
+                      "Verified" tag ("Tick xanh lá luôn"; blue, red and red
+                      for admins only were tried). */}
                   <svg viewBox="0 0 24 24" aria-hidden className="h-[18px] w-[18px] shrink-0">
-                    <circle cx="12" cy="12" r="11" fill="#1d9bf0" />
+                    <circle cx="12" cy="12" r="11" fill="#10b981" />
                     <path
                       d="M7.2 12.4l3.2 3.2 6.4-6.8"
                       fill="none"
@@ -221,10 +221,11 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                       strokeLinejoin="round"
                     />
                   </svg>
-                  {/* A member who has passed level 2 reads "Verified" in sea
-                      blue rather than "Member" (the owner, 19/10/2026: "làm
-                      thử với member nếu đã xác minh cấp 2 rồi thì tag ...
-                      thành verified, xanh biển"); admin and agency keep theirs. */}
+                  {/* A member who has passed level 2 reads "Verified" in green
+                      rather than "Member" (the owner, 19/10/2026: "làm thử
+                      với member nếu đã xác minh cấp 2 rồi thì tag ... thành
+                      verified", first in sea blue, then "Tag verified xanh lá
+                      thử"); admin and agency keep theirs. */}
                   <SkewPlate
                     className={
                       isAdmin
@@ -232,7 +233,7 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                         : user.role === "AGENCY"
                           ? "bg-gradient-to-r from-[#b45309] to-[#d97706] text-white"
                           : user.verifiedAt
-                            ? "bg-gradient-to-r from-[#0284c7] to-[#0ea5e9] text-white"
+                            ? "bg-gradient-to-r from-[#059669] to-[#10b981] text-white"
                             : "bg-gradient-to-r from-neutral-600 to-neutral-700 text-white"
                     }
                   >
