@@ -1,11 +1,12 @@
 "use client";
 
-import { ShoppingBag } from "lucide-react";
+import { ChevronRight, ShoppingBag } from "lucide-react";
 import { sentenceCase } from "@/lib/displayCase";
 import Image from "next/image";
 import Link from "next/link";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
 
 import {
   FilterDate,
@@ -106,7 +107,49 @@ function dayRuns(cards: OrderCardView[], byDay: boolean) {
   return runs;
 }
 
+/*
+ * LAB TRIAL (the owner, 20/10/2026: "mỗi cái thử 6s đi chạy", then "10s"):
+ * the order-card ideas from the review, side by side in time. /orders?thu=xoay
+ * shows each for 10 seconds with a badge naming it; ?thu=<id> pins one.
+ * Development only: a production build always draws the first, today's card.
+ */
+type CardLook = {
+  id: string;
+  name: string;
+  card: string;
+  thumb: string;
+  title: string;
+  price: string;
+  chip: string;
+  button: string;
+  chevron?: boolean;
+};
+const CHIP_RAISE = "rounded-md border border-line-strong bg-raise px-2 py-0.5 text-[12px] font-medium text-frost/90";
+const CHIP_NEUTRAL = "rounded-md border border-white/15 bg-white/[0.05] px-2 py-0.5 text-[12px] font-medium text-frost/90";
+const BUTTON_RAISE = "flex h-9 shrink-0 items-center whitespace-nowrap rounded-[10px] bg-raise px-3.5 text-[13px] font-semibold text-frost ring-1 ring-inset ring-line transition-colors group-hover:ring-line-strong";
+const BUTTON_LIT = "flex h-9 shrink-0 items-center gap-1 whitespace-nowrap rounded-[10px] bg-white/[0.08] pl-3.5 pr-2.5 text-[13px] font-semibold text-frost ring-1 ring-inset ring-white/10 transition-colors group-hover:bg-white/[0.12] group-hover:ring-white/20";
+const LOOKS: CardLook[] = [
+  { id: "4", name: "Đang dùng: thẻ 3 dòng", card: "border-white/10 hover:border-line-strong", thumb: "sm:w-36", title: "sm:text-[17px]", price: "text-[17px]", chip: CHIP_RAISE, button: BUTTON_RAISE },
+  { id: "1+2", name: "Viền 15%, nút Chi tiết sáng có mũi tên", card: "border-white/15 hover:border-white/25 hover:bg-white/[0.02]", thumb: "sm:w-36", title: "sm:text-[17px]", price: "text-[17px]", chip: CHIP_NEUTRAL, button: BUTTON_LIT },
+  { id: "3", name: "Tô nền thẻ 3%", card: "border-white/10 bg-white/[0.03] hover:border-white/25 hover:bg-white/[0.05]", thumb: "sm:w-36", title: "sm:text-[17px]", price: "text-[17px]", chip: CHIP_RAISE, button: BUTTON_RAISE },
+  { id: "6", name: "Mũi tên thay nút Chi tiết", card: "border-white/10 hover:border-line-strong", thumb: "sm:w-36", title: "sm:text-[17px]", price: "text-[17px]", chip: CHIP_RAISE, button: BUTTON_RAISE, chevron: true },
+  { id: "8", name: "Thẻ tối hơn khung", card: "border-white/10 bg-black/30 hover:border-white/20", thumb: "sm:w-36", title: "sm:text-[17px]", price: "text-[17px]", chip: CHIP_RAISE, button: BUTTON_RAISE },
+  { id: "9", name: "Ảnh, tên, giá to hơn", card: "border-white/10 hover:border-line-strong", thumb: "sm:w-[168px]", title: "sm:text-[18px]", price: "text-[19px]", chip: CHIP_RAISE, button: BUTTON_RAISE },
+  { id: "10", name: "Viền 20%", card: "border-white/20 hover:border-white/30", thumb: "sm:w-36", title: "sm:text-[17px]", price: "text-[17px]", chip: CHIP_RAISE, button: BUTTON_RAISE },
+];
+
 export function OrdersList({ orders }: { orders: OrderCardView[] }) {
+  // LAB TRIAL: see LOOKS above.
+  const params = useSearchParams();
+  const thu = process.env.NODE_ENV === "production" ? null : params.get("thu");
+  const [tick, setTick] = useState(0);
+  useEffect(() => {
+    if (thu !== "xoay") return;
+    const timer = setInterval(() => setTick((n) => n + 1), 10_000);
+    return () => clearInterval(timer);
+  }, [thu]);
+  const pinned = thu && thu !== "xoay" ? LOOKS.findIndex((l) => l.id === thu) : -1;
+  const look = thu === "xoay" ? LOOKS[tick % LOOKS.length]! : LOOKS[Math.max(0, pinned)]!;
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState("newest");
   const [status, setStatus] = useState("ALL");
@@ -162,6 +205,13 @@ export function OrdersList({ orders }: { orders: OrderCardView[] }) {
       ref={top}
       className="scroll-mt-28 w-full bg-white/[0.02] border border-white/10 rounded-2xl sm:rounded-[20px] p-4 sm:p-8 lg:p-10 relative min-h-[750px]"
     >
+      {/* LAB TRIAL: which card idea is showing, while ?thu is set. */}
+      {thu ? (
+        <div className="fixed bottom-4 left-4 z-[95] rounded-xl border border-white/15 bg-black/85 px-3.5 py-2 text-[13px] font-semibold text-white shadow-xl">
+          Hướng {look.id}: {look.name}
+          {thu === "xoay" ? ` · ${(tick % LOOKS.length) + 1}/${LOOKS.length}, đổi sau 10 giây` : ""}
+        </div>
+      ) : null}
       <div className="flex flex-col gap-6 relative z-10">
         <div className="mb-2 relative z-10">
           <h1 className="mb-2 flex items-center gap-3 text-[24px] font-black leading-tight text-frost sm:text-[30px]">
@@ -271,13 +321,13 @@ export function OrdersList({ orders }: { orders: OrderCardView[] }) {
                           // đánh giá đi"). To bring the receipt's button back:
                           // reviewHref={order.review?.href ?? null}
                           reviewHref={null}
-                          className="group flex cursor-pointer flex-col gap-3 rounded-2xl border border-white/10 p-3.5 outline-none transition-colors hover:border-line-strong focus-visible:ring-2 focus-visible:ring-[var(--menzu-accent)]/60 sm:flex-row sm:items-center sm:gap-5 sm:p-4"
+                          className={`group flex cursor-pointer flex-col gap-3 rounded-2xl border p-3.5 outline-none transition-colors focus-visible:ring-2 focus-visible:ring-[var(--menzu-accent)]/60 sm:flex-row sm:items-center sm:gap-5 sm:p-4 ${look.card}`}
                         >
                           <div className="flex min-w-0 flex-1 items-start gap-3 sm:items-center sm:gap-5">
                             {/* menzu's 16:9 picture at 144px (theirs is 192),
                                 so the art is not cropped; the site's 96×64 on a
                                 phone, beside the text rather than across it. */}
-                            <div className="lab-notch-sm relative aspect-[3/2] w-24 shrink-0 overflow-hidden border border-line bg-raise sm:aspect-video sm:w-36">
+                            <div className={`lab-notch-sm relative aspect-[3/2] w-24 shrink-0 overflow-hidden border border-line bg-raise sm:aspect-video ${look.thumb}`}>
                               {order.imageUrl ? (
                                 <Image
                                   src={order.imageUrl}
@@ -297,7 +347,7 @@ export function OrdersList({ orders }: { orders: OrderCardView[] }) {
                                   and on the order's own page. */}
                               <h3
                                 title={order.title}
-                                className="truncate font-display text-[15px] font-semibold leading-snug text-frost transition-colors group-hover:text-white sm:text-[17px]"
+                                className={`truncate font-display text-[15px] font-semibold leading-snug text-frost transition-colors group-hover:text-white ${look.title}`}
                               >
                                 {sentenceCase(order.title)}
                               </h3>
@@ -318,7 +368,7 @@ export function OrdersList({ orders }: { orders: OrderCardView[] }) {
                               {order.chip || order.badge ? (
                                 <div className="flex flex-wrap items-center gap-2">
                                   {order.chip ? (
-                                    <span className="rounded-md border border-line-strong bg-raise px-2 py-0.5 text-[12px] font-medium text-frost/90">
+                                    <span className={look.chip}>
                                       {order.chip}
                                       {order.quantity > 1 ? ` ×${order.quantity}` : ""}
                                     </span>
@@ -346,12 +396,12 @@ export function OrdersList({ orders }: { orders: OrderCardView[] }) {
 
                           {/* menzu's price column behind a hairline — beside the
                               card from sm up, under it on a phone. */}
-                          <div className="flex shrink-0 items-center justify-between gap-3 border-t border-white/5 pt-3 sm:flex-col sm:items-end sm:justify-center sm:gap-2.5 sm:border-t-0 sm:border-l sm:border-line sm:pt-0 sm:pl-5">
+                          <div className={`flex shrink-0 items-center justify-between gap-3 border-t border-white/5 pt-3 sm:border-t-0 sm:border-l sm:border-line sm:pt-0 sm:pl-5 ${look.chevron ? "sm:gap-4" : "sm:flex-col sm:items-end sm:justify-center sm:gap-2.5"}`}>
                             {/* White, not menzu's green: what was paid, said
                                 plainly. No "GIÁ MUA" over it — it is plainly
                                 the price. */}
                             <p
-                              className={`lab-figure text-[17px] font-bold ${
+                              className={`lab-figure ${look.price} font-bold ${
                                 struck ? "text-neutral-500 line-through" : "text-white"
                               }`}
                             >
@@ -362,9 +412,18 @@ export function OrdersList({ orders }: { orders: OrderCardView[] }) {
                                 quieter than solid white, which on every card
                                 out-shouted the names. The card around it is
                                 what opens the receipt. */}
-                            <span className="flex h-9 shrink-0 items-center whitespace-nowrap rounded-[10px] bg-raise px-3.5 text-[13px] font-semibold text-frost ring-1 ring-inset ring-line transition-colors group-hover:ring-line-strong">
-                              Chi tiết
-                            </span>
+                            {look.chevron ? (
+                              <ChevronRight
+                                size={20}
+                                aria-hidden
+                                className="shrink-0 text-dim transition-[color,transform] duration-200 group-hover:translate-x-0.5 group-hover:text-frost"
+                              />
+                            ) : (
+                              <span className={look.button}>
+                                Chi tiết
+                                {look.button === BUTTON_LIT ? <ChevronRight size={14} aria-hidden /> : null}
+                              </span>
+                            )}
                           </div>
                         </OrderDetailModal>
                       );
