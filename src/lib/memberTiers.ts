@@ -74,11 +74,13 @@ export const TIER_STYLE: Record<
     bar: "bg-violet-400",
     tile: "border-violet-400/30 bg-violet-400/10 text-violet-300",
   },
+  // Red, no longer rose, with its gem on /cap-bac (the owner, 19/10/2026:
+  // "Elite đổi sang tone màu đỏ thử k xài tone hồng đỏ nữa").
   ELITE: {
-    text: "text-rose-300",
-    glow: "[text-shadow:0_0_14px_rgba(251,113,133,0.6)]",
-    bar: "bg-rose-400",
-    tile: "border-rose-400/30 bg-rose-400/10 text-rose-300",
+    text: "text-red-400",
+    glow: "[text-shadow:0_0_14px_rgba(248,113,113,0.6)]",
+    bar: "bg-red-500",
+    tile: "border-red-500/30 bg-red-500/10 text-red-400",
   },
 };
 

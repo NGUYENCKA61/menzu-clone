@@ -64,9 +64,11 @@ const GEMS: Record<MemberTierValue, Gem> = {
     left: "M12 3.4L9.8 9.8L3.4 12L9.8 14.2L12 20.6Z",
     right: "M12 3.4L14.2 9.8L20.6 12L14.2 14.2L12 20.6Z",
     table: "M12 8.13L12.99 11.01L15.87 12L12.99 12.99L12 15.87L11.01 12.99L8.13 12L11.01 11.01Z",
-    light: "#ffb3c1",
-    mid: "#f0476a",
-    dark: "#b3173f",
+    // A true red, no pink in it ("Elite đổi sang tone màu đỏ thử k xài tone
+    // hồng đỏ nữa"): red-400 / red-600 / red-800.
+    light: "#f87171",
+    mid: "#dc2626",
+    dark: "#991b1b",
   },
 };
 
