@@ -7,6 +7,7 @@ import {
   Check,
   Gift,
   HandCoins,
+  KeyRound,
   LayoutDashboard,
   Receipt,
   ShoppingBag,
@@ -211,26 +212,14 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                       ("Tick xanh lá luôn"; blue and red were tried). An
                       admin's disc is the shop's red with a white key instead
                       ("admin thay vì dấu tick cho hình cái chìa khóa", "nền
-                      đỏ chìa trắng"), drawn solid and across the disc, a bow
-                      with its hole, the shaft and two bits, where an outline
-                      key icon blurred at this size ("làm chìa khóa đẹp hơn
-                      xem"). */}
+                      đỏ chìa trắng"). */}
                   {isAdmin ? (
-                    <svg viewBox="0 0 24 24" aria-hidden className="h-[18px] w-[18px] shrink-0">
-                      <circle cx="12" cy="12" r="11" fill="#e13d3f" />
-                      <path
-                        fillRule="evenodd"
-                        fill="#ffffff"
-                        d="M9.2 5a4.2 4.2 0 1 1 0 8.4a4.2 4.2 0 0 1 0-8.4Zm0 2.6a1.6 1.6 0 1 0 0 3.2a1.6 1.6 0 0 0 0-3.2Z"
-                      />
-                      <path
-                        d="M12.2 12.2L18.4 18.4M15.6 15.6l1.9-1.9M17.4 17.4l1.5-1.5"
-                        fill="none"
-                        stroke="#ffffff"
-                        strokeWidth={2.2}
-                        strokeLinecap="round"
-                      />
-                    </svg>
+                    <span
+                      aria-hidden
+                      className="grid h-[18px] w-[18px] shrink-0 place-items-center rounded-full bg-[var(--menzu-accent)] text-white"
+                    >
+                      <KeyRound size={11} strokeWidth={2.75} />
+                    </span>
                   ) : (
                     <svg viewBox="0 0 24 24" aria-hidden className="h-[18px] w-[18px] shrink-0">
                       <circle cx="12" cy="12" r="11" fill="#10b981" />
