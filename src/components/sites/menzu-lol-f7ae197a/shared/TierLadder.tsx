@@ -42,7 +42,7 @@ const FACTS = [
 
 export function TierFacts() {
   return (
-    <ul className="grid grid-cols-1 gap-x-6 gap-y-3 sm:grid-cols-2 lg:grid-cols-4">
+    <ul className="grid grid-cols-1 gap-x-8 gap-y-3 sm:grid-cols-2">
       {FACTS.map(({ icon: Icon, text }, index) => (
         <li key={index} className="flex items-start gap-2.5 text-[13px] leading-relaxed text-mist">
           <Icon size={16} className="mt-[3px] shrink-0 text-frost" />
@@ -112,14 +112,14 @@ export function TierLadder({
             <div className="flex items-center gap-4">
               <TierEmblem tier={mine} size="lg" />
               <div>
-                <p className="text-[12px] font-medium text-dim">Hạng của bạn</p>
+                <p className="text-[13px] font-medium text-mist">Hạng của bạn</p>
                 <p className="mt-1.5 font-display text-[24px] font-black leading-none text-frost">
                   {TIER_RULES[mine].label}
                 </p>
               </div>
             </div>
             <div className="sm:text-right">
-              <p className="text-[12px] font-medium text-dim">Tổng đã nạp</p>
+              <p className="text-[13px] font-medium text-mist">Tổng đã nạp</p>
               <p className="lab-figure mt-1.5 text-[20px] font-bold leading-none text-frost">
                 {formatVnd(toppedUp)}đ
               </p>
@@ -182,12 +182,12 @@ export function TierLadder({
               <p className="mt-1 text-[12px] text-mist">{threshold(rule.minTopUp)}</p>
               <p
                 className={`lab-figure mt-4 text-[24px] font-bold leading-none ${
-                  rule.discountPercent > 0 ? "text-frost" : "text-dim"
+                  rule.discountPercent > 0 ? "text-frost" : "text-mist"
                 }`}
               >
                 {formatTierPercent(rule.discountPercent)}%
               </p>
-              <p className="mt-1.5 text-[12px] text-dim">
+              <p className="mt-1.5 text-[12px] text-mist">
                 {rule.discountPercent > 0 ? "giảm khi mua tool" : "chưa có ưu đãi"}
               </p>
               {mine === tier ? (
@@ -232,13 +232,13 @@ export function TierLadder({
               <div className="shrink-0 text-right">
                 <p
                   className={`lab-figure text-[18px] font-bold leading-none ${
-                    rule.discountPercent > 0 ? "text-frost" : "text-dim"
+                    rule.discountPercent > 0 ? "text-frost" : "text-mist"
                   }`}
                 >
                   {formatTierPercent(rule.discountPercent)}%
                 </p>
-                <p className="mt-1 text-[11px] text-dim">
-                  {rule.discountPercent > 0 ? "giảm giá tool" : "chưa có ưu đãi"}
+                <p className="mt-1 text-[12px] text-mist">
+                  {rule.discountPercent > 0 ? "giảm khi mua tool" : "chưa có ưu đãi"}
                 </p>
               </div>
             </li>

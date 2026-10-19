@@ -201,7 +201,7 @@ export default async function MemberTiersPage({
       )}
 
       <p className="mt-6 text-[12px] leading-relaxed text-neutral-500">
-        Ưu đãi hạng áp dụng cho phần mềm; tài khoản game giữ giá niêm yết. Tài khoản đại lý đã
+        Ưu đãi hạng áp dụng cho phần mềm, tài khoản game giữ giá niêm yết. Tài khoản đại lý đã
         hưởng giá sỉ không cộng thêm ưu đãi hạng.
       </p>
     </SimplePage>
