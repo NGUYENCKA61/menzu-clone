@@ -156,9 +156,9 @@ export function OrdersList({ orders }: { orders: OrderCardView[] }) {
   }, [thu]);
   const pinned = thu && thu !== "xoay" ? LOOKS.findIndex((l) => l.id === thu) : -1;
   // The card the page draws without ?thu: today's card with a hover look, on
-  // trial (the owner, 20/10/2026: "làm hiệu ứng khi rê thử", then "nút chi
-  // tiết thay bằng nút trắng chữ đen").
-  const fallback = Math.max(0, LOOKS.findIndex((l) => l.id === "15"));
+  // trial (the owner, 20/10/2026: "làm hiệu ứng khi rê thử"). The white Chi
+  // tiết (look 15) was tried, then parked in the review page.
+  const fallback = Math.max(0, LOOKS.findIndex((l) => l.id === "12"));
   const look = thu === "xoay" ? LOOKS[tick % LOOKS.length]! : LOOKS[pinned >= 0 ? pinned : fallback]!;
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState("newest");
