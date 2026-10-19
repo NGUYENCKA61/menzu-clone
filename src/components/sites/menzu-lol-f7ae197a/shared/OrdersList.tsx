@@ -149,7 +149,10 @@ export function OrdersList({ orders }: { orders: OrderCardView[] }) {
     return () => clearInterval(timer);
   }, [thu]);
   const pinned = thu && thu !== "xoay" ? LOOKS.findIndex((l) => l.id === thu) : -1;
-  const look = thu === "xoay" ? LOOKS[tick % LOOKS.length]! : LOOKS[Math.max(0, pinned)]!;
+  // The card the page draws without ?thu: look 10, the 20% rim, on trial
+  // (the owner, 20/10/2026: "thử hướng 10").
+  const fallback = Math.max(0, LOOKS.findIndex((l) => l.id === "10"));
+  const look = thu === "xoay" ? LOOKS[tick % LOOKS.length]! : LOOKS[pinned >= 0 ? pinned : fallback]!;
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState("newest");
   const [status, setStatus] = useState("ALL");
