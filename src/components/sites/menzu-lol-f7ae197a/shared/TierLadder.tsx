@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { BadgePercent, ShieldCheck, Wallet, Zap } from "lucide-react";
 
 import {
   formatTierPercent,
@@ -13,45 +12,6 @@ import {
 
 import { formatVnd } from "./productData";
 import { TierBadge } from "./TierBadge";
-
-/**
- * /cap-bac since 19/10/2026 ("rà soát làm lại sao cho chuyên nghiệp thay
- * icon mới cho nhìn đỡ kì"). The rules the page opened with as one
- * paragraph, now four lines a reader can scan, in the same words.
- */
-const FACTS = [
-  {
-    icon: Wallet,
-    text: (
-      <>
-        Hạng được tính theo <span className="font-semibold text-frost">tổng tiền đã nạp</span>{" "}
-        vào ví.
-      </>
-    ),
-  },
-  { icon: Zap, text: <>Lên hạng ngay khi lệnh nạp chạm mốc được duyệt.</> },
-  {
-    icon: ShieldCheck,
-    text: <span className="font-semibold text-frost">Không bao giờ tụt hạng.</span>,
-  },
-  {
-    icon: BadgePercent,
-    text: <>Ưu đãi hạng giảm thẳng vào giá khi mua tool, cộng được với mã giảm giá.</>,
-  },
-];
-
-export function TierFacts() {
-  return (
-    <ul className="grid grid-cols-1 gap-x-6 gap-y-3 sm:grid-cols-2 lg:grid-cols-4">
-      {FACTS.map(({ icon: Icon, text }, index) => (
-        <li key={index} className="flex items-start gap-2.5 text-[13px] leading-relaxed text-mist">
-          <Icon size={16} className="mt-[3px] shrink-0 text-frost" />
-          <span>{text}</span>
-        </li>
-      ))}
-    </ul>
-  );
-}
 
 /** The join between two rungs, drawn as far as the reader has climbed. */
 function Join({
@@ -79,6 +39,21 @@ function Join({
 
 function threshold(minTopUp: number): string {
   return minTopUp === 0 ? "Hạng khởi đầu" : `Nạp từ ${formatVnd(minTopUp)}đ`;
+}
+
+/**
+ * What the tier takes off, said in one line the way the old cards said it,
+ * where a big figure over a repeated caption read like a pricing template
+ * ("rà soát lại những chỗ nào AI thì bỏ", 19/10/2026).
+ */
+function Discount({ percent, className }: { percent: number; className: string }) {
+  return percent > 0 ? (
+    <p className={`text-[15px] font-semibold text-frost ${className}`}>
+      Giảm {formatTierPercent(percent)}%
+    </p>
+  ) : (
+    <p className={`text-[14px] text-mist ${className}`}>Chưa có ưu đãi</p>
+  );
 }
 
 /**
@@ -148,18 +123,15 @@ export function TierLadder({
           </div>
         </>
       ) : (
-        <div className="flex flex-col gap-1.5 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-[15px] font-bold text-frost">Năm hạng thành viên</p>
-          <p className="text-[13px] text-mist">
-            <Link
-              href="/login?next=%2Fcap-bac"
-              className="font-semibold text-[var(--menzu-accent)] hover:underline"
-            >
-              Đăng nhập
-            </Link>{" "}
-            để xem hạng và tiến độ của bạn.
-          </p>
-        </div>
+        <p className="text-[13px] text-mist">
+          <Link
+            href="/login?next=%2Fcap-bac"
+            className="font-semibold text-[var(--menzu-accent)] hover:underline"
+          >
+            Đăng nhập
+          </Link>{" "}
+          để xem hạng và tiến độ của bạn.
+        </p>
       )}
 
       <ol className="mt-8 hidden grid-cols-5 border-t border-white/[0.06] pt-8 lg:grid">
@@ -177,16 +149,7 @@ export function TierLadder({
               <TierBadge tier={tier} size="md" className={mine && k > mineRank ? "opacity-40" : ""} />
               <p className="mt-3 text-[15px] font-bold text-frost">{rule.label}</p>
               <p className="mt-1 text-[12px] text-mist">{threshold(rule.minTopUp)}</p>
-              <p
-                className={`lab-figure mt-4 text-[24px] font-bold leading-none ${
-                  rule.discountPercent > 0 ? "text-frost" : "text-dim"
-                }`}
-              >
-                {formatTierPercent(rule.discountPercent)}%
-              </p>
-              <p className="mt-1.5 text-[12px] text-dim">
-                {rule.discountPercent > 0 ? "giảm khi mua tool" : "chưa có ưu đãi"}
-              </p>
+              <Discount percent={rule.discountPercent} className="mt-3" />
               {mine === tier ? (
                 <span
                   className={`mt-4 rounded-md border px-2 py-0.5 text-[12px] font-semibold ${TIER_STYLE[tier].tile}`}
@@ -226,18 +189,7 @@ export function TierLadder({
                 </p>
                 <p className="mt-0.5 text-[12px] text-mist">{threshold(rule.minTopUp)}</p>
               </div>
-              <div className="shrink-0 text-right">
-                <p
-                  className={`lab-figure text-[18px] font-bold leading-none ${
-                    rule.discountPercent > 0 ? "text-frost" : "text-dim"
-                  }`}
-                >
-                  {formatTierPercent(rule.discountPercent)}%
-                </p>
-                <p className="mt-1 text-[11px] text-dim">
-                  {rule.discountPercent > 0 ? "giảm giá tool" : "chưa có ưu đãi"}
-                </p>
-              </div>
+              <Discount percent={rule.discountPercent} className="shrink-0 text-right" />
             </li>
           );
         })}

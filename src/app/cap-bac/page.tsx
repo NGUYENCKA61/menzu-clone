@@ -4,7 +4,7 @@ import { BadgePercent, Crown, ShieldCheck } from "lucide-react";
 
 import { SimplePage } from "@/components/sites/menzu-lol-f7ae197a/shared/SimplePage";
 import { TierBadge } from "@/components/sites/menzu-lol-f7ae197a/shared/TierBadge";
-import { TierFacts, TierLadder } from "@/components/sites/menzu-lol-f7ae197a/shared/TierLadder";
+import { TierLadder } from "@/components/sites/menzu-lol-f7ae197a/shared/TierLadder";
 import { formatVnd } from "@/components/sites/menzu-lol-f7ae197a/shared/productData";
 import { db } from "@/lib/db";
 import {
@@ -72,7 +72,14 @@ export default async function MemberTiersPage({
     >
       {!old ? (
         <>
-          <TierFacts />
+          {/* The rules as the one plain sentence pair they were, without the
+              icon per line or the bold words ("rà soát lại những chỗ nào AI
+              thì bỏ", 19/10/2026). */}
+          <p className="max-w-[720px] text-[14px] leading-relaxed text-mist">
+            Hạng được tính theo tổng tiền đã nạp vào ví, lên hạng ngay khi lệnh nạp chạm mốc
+            được duyệt và không bao giờ tụt hạng. Ưu đãi hạng giảm thẳng vào giá khi mua tool,
+            cộng được với mã giảm giá.
+          </p>
           <div className="mt-6">
             <TierLadder mine={mine} toppedUp={toppedUp} />
           </div>
@@ -202,7 +209,7 @@ export default async function MemberTiersPage({
       )}
 
       <p className="mt-6 text-[12px] leading-relaxed text-neutral-500">
-        Ưu đãi hạng áp dụng cho phần mềm; tài khoản game giữ giá niêm yết. Tài khoản đại lý đã
+        Ưu đãi hạng áp dụng cho phần mềm, tài khoản game giữ giá niêm yết. Tài khoản đại lý đã
         hưởng giá sỉ không cộng thêm ưu đãi hạng.
       </p>
     </SimplePage>
