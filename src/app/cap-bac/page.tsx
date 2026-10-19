@@ -4,6 +4,7 @@ import { BadgePercent, Crown, ShieldCheck } from "lucide-react";
 
 import { SimplePage } from "@/components/sites/menzu-lol-f7ae197a/shared/SimplePage";
 import { TierBadge } from "@/components/sites/menzu-lol-f7ae197a/shared/TierBadge";
+import { TierFacts, TierLadder } from "@/components/sites/menzu-lol-f7ae197a/shared/TierLadder";
 import { formatVnd } from "@/components/sites/menzu-lol-f7ae197a/shared/productData";
 import { db } from "@/lib/db";
 import {
@@ -37,8 +38,18 @@ const LABEL = "text-[12px] font-semibold text-neutral-500";
  * The tier ladder, public: what each rank costs to reach and what it pays
  * back. Signed in, the reader's own rank is marked and their climb to the
  * next one is drawn; signed out it is the plain table.
+ *
+ * Since 19/10/2026 the rules as four lines and the tiers as one ladder
+ * (TierLadder) with new marks (TierEmblem); LAB: ?ban=cu keeps the old
+ * cards, dev only.
  */
-export default async function MemberTiersPage() {
+export default async function MemberTiersPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ ban?: string }>;
+}) {
+  const query = await searchParams;
+  const old = process.env.NODE_ENV !== "production" && query.ban === "cu";
   const user = await getCurrentUser();
   const toppedUpRow = user
     ? await db.topUp.aggregate({
@@ -58,6 +69,15 @@ export default async function MemberTiersPage() {
       // wears one (the owner, 13/10/2026, UI consistency review).
       icon={Crown}
     >
+      {!old ? (
+        <>
+          <TierFacts />
+          <div className="mt-6">
+            <TierLadder mine={mine} toppedUp={toppedUp} />
+          </div>
+        </>
+      ) : (
+        <>
       <p className="max-w-[720px] text-sm leading-relaxed text-neutral-400">
         Hạng được tính theo <span className="font-bold text-white">tổng tiền đã nạp</span>{" "}
         vào ví, lên hạng ngay khi lệnh nạp chạm mốc được duyệt và{" "}
@@ -177,6 +197,8 @@ export default async function MemberTiersPage() {
           );
         })}
       </ul>
+        </>
+      )}
 
       <p className="mt-6 text-[12px] leading-relaxed text-neutral-500">
         Ưu đãi hạng áp dụng cho phần mềm; tài khoản game giữ giá niêm yết. Tài khoản đại lý đã
