@@ -1121,12 +1121,9 @@ export function OrderDetailModal({
                       keeps: with the rules gone the old 16px left it sitting
                       on the cards (the owner, 10/10/2026: "không kẻ thì
                       khoảng cách giữa card key kích hoạt và cái vui lòng nó
-                      hơi sát"). The main site's red callout again, a 3px
-                      accent bar over a 5% accent wash with the icon in the
-                      accent (the owner, 19/10/2026: "trong chi tiết đơn hàng
-                      tui muốn sửa phần này giống", beside the main site's). */}
-                  <div className="mt-6 flex items-start gap-3 rounded-r-xl border-l-[3px] border-[var(--menzu-accent)] bg-[var(--menzu-accent)]/5 px-4 py-3.5 text-xs leading-relaxed text-neutral-400">
-                    <Info className="mt-0.5 h-4 w-4 shrink-0 text-[var(--menzu-accent)]" />
+                      hơi sát"). */}
+                  <div className="mt-6 flex items-start gap-3 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3.5 text-xs leading-relaxed text-neutral-400">
+                    <Info className="mt-0.5 h-4 w-4 shrink-0 text-mist" />
                     {/* Where the ticket stands, in words; the button in the
                         footer is the way on, so the line carries no link. */}
                     <span>
