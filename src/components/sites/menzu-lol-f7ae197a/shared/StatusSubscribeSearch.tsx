@@ -359,12 +359,14 @@ export function StatusSubscribeSearch({
                     <Link
                       href={tool.href}
                       aria-label={tool.name}
-                      // On a phone the orders list's 96x64, as the history
-                      // tab's pictures now are; 92px 16:9 in the grid above.
+                      // The orders list's and the wiki's sizes: 96x64 on a
+                      // phone, 144x81 from sm, where the grid had 92px and
+                      // the picture sat short beside a two-line name and its
+                      // chip (19/10/2026, "làm đi").
                       className={`relative grid shrink-0 place-items-center overflow-hidden border bg-[linear-gradient(135deg,#171922,#36151e,#0d0e12)] ${
                         old
                           ? "aspect-[16/9] w-[92px] rounded-xl border-white/10"
-                          : "lab-notch-sm aspect-[3/2] w-24 border-line sm:aspect-[16/9] sm:w-[92px]"
+                          : "lab-notch-sm aspect-[3/2] w-24 border-line sm:aspect-video sm:w-36"
                       }`}
                     >
                       {cover ? (
@@ -372,7 +374,7 @@ export function StatusSubscribeSearch({
                           src={cover}
                           alt=""
                           fill
-                          sizes="96px"
+                          sizes="(min-width: 640px) 144px, 96px"
                           className="object-cover"
                         />
                       ) : (
