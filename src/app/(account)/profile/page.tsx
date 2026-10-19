@@ -207,11 +207,11 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                   </span>
                   {/* The tick as menzu draws it, a round disc with a white
                       check ("dùng cái tick này giống menzu đc k"), where a
-                      scalloped badge stood. An admin's is the shop's red
-                      ("với admin thì dấu tick đỏ sẵn"), everyone else's the
-                      verified blue ("thôi xanh dương đi", after green). */}
+                      scalloped badge stood, in the verified blue for every
+                      account, an admin's too ("admin xanh dương tick", after
+                      green, red, and red for admins only were tried). */}
                   <svg viewBox="0 0 24 24" aria-hidden className="h-[18px] w-[18px] shrink-0">
-                    <circle cx="12" cy="12" r="11" fill={isAdmin ? "#e13d3f" : "#1d9bf0"} />
+                    <circle cx="12" cy="12" r="11" fill="#1d9bf0" />
                     <path
                       d="M7.2 12.4l3.2 3.2 6.4-6.8"
                       fill="none"
