@@ -8,9 +8,9 @@ import { TIER_STYLE, type MemberTierValue } from "@/lib/memberTiers";
  * references (a faceted star for Platinum, a solid cut diamond for Diamond:
  * "diamond kiểu vậy đi"), drawn for all five so the set holds together
  * ("làm lại 1 bộ cho nó đồng bộ đi"): a shield for Classic (the star went to
- * Platinum), a medal, the faceted star, the cut diamond, and for Elite the
- * crown of the site's old icon, as the outline it was ("cái icon elite xấu
- * quá kìa như cũ thì đẹp hơn").
+ * Platinum), the old hexagon for Gold, the faceted star, the cut diamond,
+ * and for Elite the crown of the site's old icon, as the outline it was
+ * ("cái icon elite xấu quá kìa như cũ thì đẹp hơn").
  *
  * The glyphs are sized to look the same size (the shield a step down, the
  * medal a touch up, a fuller star) and the gaps cut wide enough to stay sharp
@@ -41,21 +41,14 @@ const GLYPH: Record<
     cuts: <path d="M12 4.6V20M5.6 9.6L12 12L18.4 9.6" />,
     scale: 0.9,
   },
+  // The old Gold icon, the site's hexagon as an outline, where a medal stood
+  // (the owner, with a capture of the old tile: "cái gold dùng icon này đi").
   GOLD: {
     shape: (
-      <>
-        <path d="M7.4 4.4H10.4L12.7 9.7L10.2 10.6Z" />
-        <path d="M16.6 4.4H13.6L11.3 9.7L13.8 10.6Z" />
-        <circle cx="12" cy="14.7" r="4.7" />
-      </>
+      <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
     ),
-    cuts: (
-      <>
-        <circle cx="12" cy="14.7" r="5.3" />
-        <circle cx="12" cy="14.7" r="3.1" />
-      </>
-    ),
-    scale: 1.02,
+    scale: 0.72,
+    outline: true,
   },
   PLATINUM: {
     shape: (
