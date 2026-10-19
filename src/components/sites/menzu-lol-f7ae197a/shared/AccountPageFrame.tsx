@@ -63,7 +63,6 @@ export async function AccountPageFrame({
               username: user.username,
               avatarUrl: user.avatarUrl,
               role: user.role,
-              verified: Boolean(user.verifiedAt),
             }
           : null
       }

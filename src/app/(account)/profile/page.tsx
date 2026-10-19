@@ -7,7 +7,6 @@ import {
   Check,
   Gift,
   HandCoins,
-  KeyRound,
   LayoutDashboard,
   Receipt,
   ShoppingBag,
@@ -209,54 +208,30 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                   </span>
                   {/* The tick as menzu draws it, a round disc with a white
                       check ("dùng cái tick này giống menzu đc k"), where a
-                      scalloped badge stood, green with the "Verified" tag
-                      ("Tick xanh lá luôn"; blue and red were tried). An
-                      admin's disc is the shop's red with a white key instead
-                      ("admin thay vì dấu tick cho hình cái chìa khóa", "nền
-                      đỏ chìa trắng"). */}
-                  {isAdmin ? (
-                    <span
-                      aria-hidden
-                      className="grid h-[18px] w-[18px] shrink-0 place-items-center rounded-full bg-[var(--menzu-accent)] text-white"
-                    >
-                      <KeyRound size={11} strokeWidth={2.75} />
-                    </span>
-                  ) : (
-                    <svg viewBox="0 0 24 24" aria-hidden className="h-[18px] w-[18px] shrink-0">
-                      <circle cx="12" cy="12" r="11" fill="#10b981" />
-                      <path
-                        d="M7.2 12.4l3.2 3.2 6.4-6.8"
-                        fill="none"
-                        stroke="#ffffff"
-                        strokeWidth={2.6}
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  )}
-                  {/* A member who has passed level 2 reads "Verified" in green
-                      rather than "Member" (the owner, 19/10/2026: "làm thử
-                      với member nếu đã xác minh cấp 2 rồi thì tag ... thành
-                      verified", first in sea blue, then "Tag verified xanh lá
-                      thử"); admin and agency keep theirs. */}
+                      scalloped badge stood; green first, then the verified
+                      blue ("xanh dương thử"), now the shop's own red ("đỏ
+                      thử", the --menzu-accent value). */}
+                  <svg viewBox="0 0 24 24" aria-hidden className="h-[18px] w-[18px] shrink-0">
+                    <circle cx="12" cy="12" r="11" fill="#e13d3f" />
+                    <path
+                      d="M7.2 12.4l3.2 3.2 6.4-6.8"
+                      fill="none"
+                      stroke="#ffffff"
+                      strokeWidth={2.6}
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
                   <SkewPlate
                     className={
                       isAdmin
                         ? "bg-[var(--menzu-accent)] text-white"
                         : user.role === "AGENCY"
                           ? "bg-gradient-to-r from-[#b45309] to-[#d97706] text-white"
-                          : user.verifiedAt
-                            ? "bg-gradient-to-r from-[#059669] to-[#10b981] text-white"
-                            : "bg-gradient-to-r from-neutral-600 to-neutral-700 text-white"
+                          : "bg-gradient-to-r from-neutral-600 to-neutral-700 text-white"
                     }
                   >
-                    {isAdmin
-                      ? "Admin"
-                      : user.role === "AGENCY"
-                        ? "Đại lý"
-                        : user.verifiedAt
-                          ? "Verified"
-                          : "Member"}
+                    {isAdmin ? "Admin" : user.role === "AGENCY" ? "Đại lý" : "Member"}
                   </SkewPlate>
                 </div>
                 <span className="text-[13px] font-medium text-mist">
@@ -284,14 +259,12 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                   <span className="text-[13px] font-medium text-mist">
                     Cấp bậc
                   </span>
-                  {/* The rank's gem and its name in its colour, no box round it
-                      ("bỏ cái card bo elite ghi chữ elite thôi"). The gem was
-                      taken off once ("bỏ cái icon luôn đi"), then brought back
-                      to look at ("lùi lại về cái thời điểm còn icon kế elite
-                      tui coi"), 19/10/2026. */}
+                  {/* LAB (Launcher): the rank as a notched badge in its own metal,
+                      with the tier's gem from /cap-bac before it, so the rank
+                      wears one mark on both pages (19/10/2026 review, "làm đi"). */}
                   <span className="inline-flex items-center gap-2">
                     <TierEmblem tier={memberTier} size="sm" />
-                    <span className={`font-display text-[15px] font-bold leading-none ${tier.text}`}>
+                    <span className={`lab-notch-xs border px-2.5 py-1 font-display text-[15px] font-bold leading-none ${tier.tile}`}>
                       {TIER_RULES[memberTier].label}
                     </span>
                   </span>
@@ -329,15 +302,10 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                     "Chưa xác minh" cut to "Chưa xác …"), three columns from sm. */}
                 <div className="mt-auto grid grid-cols-1 gap-1.5 border-t border-white/[0.06] pt-2 sm:grid-cols-3 sm:gap-3 sm:pt-1.5">
                   {[
-                    // The three values in white, one row one colour, the
-                    // colour kept for the small marks in front: the tier's on
-                    // the discount's check, green on the verified tick (the
-                    // owner, 19/10/2026: "Cả 2 chữ trắng thử đi"; the discount
-                    // was in the tier's colour, "Đã xác minh" in green).
                     {
                       label: "Ưu đãi mua tool",
                       value: `Giảm ${formatTierPercent(TIER_RULES[memberTier].discountPercent)}%`,
-                      tone: "text-white",
+                      tone: tier.text,
                     },
                     {
                       label: "Điểm thưởng",
@@ -347,7 +315,7 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                     {
                       label: "Xác minh cấp 2",
                       value: user.verifiedAt ? "Đã xác minh" : "Chưa xác minh",
-                      tone: user.verifiedAt ? "text-white" : "text-neutral-300",
+                      tone: user.verifiedAt ? "text-emerald-400" : "text-neutral-300",
                     },
                   ].map(({ label, value, tone }, index) => (
                     <div
@@ -365,18 +333,6 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                       >
                         {index === 0 ? (
                           <Check size={13} strokeWidth={3} className={`shrink-0 ${tier.text}`} />
-                        ) : index === 2 && user.verifiedAt ? (
-                          <svg viewBox="0 0 24 24" width={13} height={13} aria-hidden className="shrink-0">
-                            <circle cx="12" cy="12" r="11" fill="#10b981" />
-                            <path
-                              d="M7.2 12.4l3.2 3.2 6.4-6.8"
-                              fill="none"
-                              stroke="#ffffff"
-                              strokeWidth={3}
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            />
-                          </svg>
                         ) : null}
                         <span className="truncate">{value}</span>
                       </span>

@@ -29,8 +29,6 @@ export interface HeaderUser {
   uid?: number;
   /** "ADMIN" swaps the badge and adds the Dashboard link to the menu. */
   role?: string;
-  /** Passed level 2: a member's badge reads "Verified" in green. */
-  verified?: boolean;
 }
 
 /**
@@ -214,19 +212,11 @@ export function UserMenu({ user }: { user: HeaderUser }) {
                         ? "bg-[var(--menzu-accent)]"
                         : user.role === "AGENCY"
                           ? "bg-gradient-to-r from-[#b45309] to-[#d97706]"
-                          : user.verified
-                            ? "bg-gradient-to-r from-[#059669] to-[#10b981]"
-                            : "bg-gradient-to-r from-neutral-600 to-neutral-700"
+                          : "bg-gradient-to-r from-neutral-600 to-neutral-700"
                     }`}
                   >
                     <span className="skew-x-12 text-[12px] font-semibold leading-none text-white">
-                      {isAdmin
-                        ? "Admin"
-                        : user.role === "AGENCY"
-                          ? "Đại lý"
-                          : user.verified
-                            ? "Verified"
-                            : "Member"}
+                      {isAdmin ? "Admin" : user.role === "AGENCY" ? "Đại lý" : "Member"}
                     </span>
                   </span>
                   {user.uid !== undefined ? (
