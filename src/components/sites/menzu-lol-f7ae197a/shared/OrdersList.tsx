@@ -301,48 +301,46 @@ export function OrdersList({ orders }: { orders: OrderCardView[] }) {
                               >
                                 {sentenceCase(order.title)}
                               </h3>
-                              {/* The tier (a tool) or rank (an account) as the
-                                  old list's bordered chip, so two orders of one
-                                  tool tell apart at a glance ("cái gói 1 ngày có
-                                  nên card bo như cũ" → "thử đi"); then the facts
-                                  on one quiet line. Under a day's heading the
-                                  order's time is left off (trial, the owner,
-                                  02/10/2026: "bỏ cái thời gian thử"): the
-                                  heading already says the day. A price sort drops
-                                  the headings, so the whole stamp stays there.
-                                  Each fact holds together, so a narrow card
-                                  breaks at a " · ". */}
-                              <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                                {order.chip ? (
-                                  <span className="rounded-md border border-line-strong bg-raise px-2 py-0.5 text-[12px] font-medium text-frost/90">
-                                    {order.chip}
-                                    {order.quantity > 1 ? ` ×${order.quantity}` : ""}
-                                  </span>
-                                ) : null}
-                                <p className="text-[13px] tabular-nums text-mist">
-                                  <span className="whitespace-nowrap">
-                                    <span className="text-dim">Mã đơn</span> {order.detail.code}
-                                  </span>
-                                  {byDay ? null : (
-                                    <>
-                                      {", "}
-                                      <span className="whitespace-nowrap">{order.stamp}</span>
-                                    </>
-                                  )}
-                                </p>
-                              </div>
-                              {/* The status, only when there is something to
-                                  know. "Đánh giá" moved into the receipt
-                                  (30/09/2026: "bỏ cái đánh giá ngoài card đi"). */}
-                              {order.badge ? (
-                                <div className="mt-0.5 flex items-center gap-2">
-                                  <span
-                                    className={`${order.badge.tone} rounded-md border px-2 py-1 text-[12px] font-semibold`}
-                                  >
-                                    {order.badge.label}
-                                  </span>
+                              {/* Three lines, one job each (trial, the owner,
+                                  20/10/2026: "có nên cho mã đơn hoặc ngày xuống
+                                  dưới mỗi cái đứng riêng", then "thử xem"): the
+                                  name; the chips, the tier (a tool) or rank (an
+                                  account, "cái gói 1 ngày có nên card bo như cũ")
+                                  beside the status when there is one; then the
+                                  code and the time. Under a day's heading only the
+                                  time (it had been left off on 02/10/2026, "bỏ cái
+                                  thời gian thử"; back so a day of 18 orders tells
+                                  them apart); a price sort drops the headings, so
+                                  the whole stamp shows there. Three lines fill the
+                                  picture's height, so an order under warranty is
+                                  no taller than one without. "Đánh giá" lives in
+                                  the receipt (30/09/2026). */}
+                              {order.chip || order.badge ? (
+                                <div className="flex flex-wrap items-center gap-2">
+                                  {order.chip ? (
+                                    <span className="rounded-md border border-line-strong bg-raise px-2 py-0.5 text-[12px] font-medium text-frost/90">
+                                      {order.chip}
+                                      {order.quantity > 1 ? ` ×${order.quantity}` : ""}
+                                    </span>
+                                  ) : null}
+                                  {order.badge ? (
+                                    <span
+                                      className={`${order.badge.tone} rounded-md border px-2 py-0.5 text-[12px] font-semibold`}
+                                    >
+                                      {order.badge.label}
+                                    </span>
+                                  ) : null}
                                 </div>
                               ) : null}
+                              <p className="text-[13px] tabular-nums text-mist">
+                                <span className="whitespace-nowrap">
+                                  <span className="text-dim">Mã đơn</span> {order.detail.code}
+                                </span>
+                                {" · "}
+                                <span className="whitespace-nowrap">
+                                  {byDay ? order.clock : order.stamp}
+                                </span>
+                              </p>
                             </div>
                           </div>
 
