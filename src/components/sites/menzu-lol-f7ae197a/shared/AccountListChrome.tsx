@@ -68,17 +68,12 @@ export function ListToolbar({
   placeholder,
   filtering,
   onClear,
-  searchRadius = "rounded-[10px]",
   children,
 }: {
   tone: ListTone;
   query: string;
   onQuery: (next: string) => void;
   placeholder: string;
-  /** LAB TRIAL: the search box's corners, 10px unless a page asks for its own
-   *  (Lịch sử giao dịch tries 14px, the owner 19/10/2026: "thử ... bo lên
-   *  14px mỗi chỗ đó thôi"). */
-  searchRadius?: string;
   /** Whether any filter is set, so the funnel stays lit while the menu is shut. */
   filtering: boolean;
   onClear: () => void;
@@ -115,14 +110,16 @@ export function ListToolbar({
             where cards go clear rather than stack, so it takes the table's
             brightness and keeps only its rim (the owner, 19/10/2026: "nếu
             ngoại lệ cho độ sáng bằng độ sáng card được không"). Search boxes
-            on the plain page ground keep the 5% fill. */}
+            on the plain page ground keep the 5% fill. 14px corners on both
+            lists, tried on Lịch sử giao dịch first ("lịch sử mua 14 px
+            luôn"). */}
         <input
           type="search"
           value={query}
           onChange={(event) => onQuery(event.target.value)}
           placeholder={placeholder}
           aria-label={placeholder}
-          className={`w-full appearance-none bg-transparent border border-white/10 ${searchRadius} py-3 pl-10 pr-4 text-[15px] text-frost placeholder:text-dim outline-none ${look.focus} transition-colors`}
+          className={`w-full appearance-none bg-transparent border border-white/10 rounded-xl py-3 pl-10 pr-4 text-[15px] text-frost placeholder:text-dim outline-none ${look.focus} transition-colors`}
         />
       </div>
 
