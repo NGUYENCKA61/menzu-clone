@@ -186,8 +186,19 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
             />
             {/* Left wash: enough to seat the name, gone by a third across. */}
             <div className="absolute inset-0 bg-gradient-to-r from-panel via-panel/45 to-transparent" />
-            {/* Foot wash: the band the tier card and the doors sit on. */}
-            <div className="absolute inset-0 bg-gradient-to-t from-panel via-panel/55 to-transparent" />
+            {/* Foot wash: the band the tier card and the doors sit on, eased
+                rather than straight (solid at the foot, 90% at 15%, 65% at
+                35%, 30% at 60%, 10% at 80%), so the picture thins out
+                gradually and no line marks where the fade begins (the owner:
+                "cái hiệu ứng tan làm sao cho hợp lý"). */}
+            <div className="absolute inset-0 bg-[linear-gradient(to_top,#111111_0%,rgba(17,17,17,0.9)_15%,rgba(17,17,17,0.65)_35%,rgba(17,17,17,0.3)_60%,rgba(17,17,17,0.1)_80%,transparent_100%)]" />
+            {/* The card's own 2% white over the washes too: the card is
+                #151515 on the #111 ground since it took the other cards'
+                fill, and washes ending in plain #111 left a darker strip and
+                a hard edge where the picture should melt into the card (the
+                owner, 19/10/2026: "thêm lại hiệu ứng này đi tự nhiên qua
+                đây mất vậy"). */}
+            <div className="absolute inset-0 bg-white/[0.02]" />
           </div>
 
           {/* 96px of cover above the avatar from sm, 32px of padding around,
