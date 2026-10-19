@@ -3,9 +3,10 @@
 import {
   ArrowLeftRight,
   ChevronsUp,
+  Gift,
   Handshake,
   KeyRound,
-  LayoutGrid,
+  LayoutDashboard,
   Loader2,
   LogOut,
   Shield,
@@ -32,16 +33,18 @@ export interface HeaderUser {
 }
 
 /**
- * The live menu rules its links into groups rather than listing them in a
- * row: where you are, what touches money, the account itself — and, this
- * shop's own addition, the two partner programmes below Bảo mật.
+ * The account sidebar's links, groups and icons, so the two lists read as one
+ * (the owner, 20/10/2026: "làm hết đi"): the everyday pages and the wheel,
+ * then Bảo mật, then the two partner programmes. Tổng quan used to stand
+ * alone between two rules, and the wheel was missing.
  */
 const GROUPS: { label: string; href: string; icon: LucideIcon }[][] = [
-  [{ label: "Tổng quan", href: "/profile", icon: LayoutGrid }],
   [
+    { label: "Tổng quan", href: "/profile", icon: LayoutDashboard },
     { label: "Nạp tiền", href: "/wallet", icon: Wallet },
     { label: "Lịch sử giao dịch", href: "/transactions", icon: ArrowLeftRight },
     { label: "Lịch sử mua", href: "/orders", icon: ShoppingBag },
+    { label: "Vòng quay đổi thưởng", href: "/vong-quay", icon: Gift },
   ],
   [{ label: "Bảo mật", href: "/security", icon: ShieldCheck }],
   [
