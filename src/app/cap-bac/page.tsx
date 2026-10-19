@@ -40,7 +40,8 @@ const LABEL = "text-[12px] font-semibold text-neutral-500";
  * next one is drawn; signed out it is the plain table.
  *
  * Since 19/10/2026 the rules as four lines and the tiers as one ladder
- * (TierLadder) with new marks (TierEmblem); LAB: ?ban=cu keeps the old
+ * (TierLadder), wearing the same tier marks as before (TierBadge: new ones
+ * were tried and dropped, "thôi xài icon logo như cũ đi"); LAB: ?ban=cu keeps the old
  * cards, dev only.
  */
 export default async function MemberTiersPage({

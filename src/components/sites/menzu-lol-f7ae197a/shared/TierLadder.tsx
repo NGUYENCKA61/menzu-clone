@@ -12,7 +12,7 @@ import {
 } from "@/lib/memberTiers";
 
 import { formatVnd } from "./productData";
-import { TierEmblem } from "./TierEmblem";
+import { TierBadge } from "./TierBadge";
 
 /**
  * /cap-bac since 19/10/2026 ("rà soát làm lại sao cho chuyên nghiệp thay
@@ -110,7 +110,7 @@ export function TierLadder({
         <>
           <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-4">
-              <TierEmblem tier={mine} size="lg" />
+              <TierBadge tier={mine} size="lg" />
               <div>
                 <p className="text-[12px] font-medium text-dim">Hạng của bạn</p>
                 <p className="mt-1.5 font-display text-[24px] font-black leading-none text-frost">
@@ -171,10 +171,10 @@ export function TierLadder({
                 <Join
                   filled={filled(k)}
                   bar={bar}
-                  className="left-[calc(50%+20px)] top-[22px] h-0.5 w-[calc(100%-40px)] -translate-y-1/2"
+                  className="left-[calc(50%+27px)] top-[22px] h-0.5 w-[calc(100%-54px)] -translate-y-1/2"
                 />
               ) : null}
-              <TierEmblem tier={tier} className={mine && k > mineRank ? "opacity-40" : ""} />
+              <TierBadge tier={tier} size="md" className={mine && k > mineRank ? "opacity-40" : ""} />
               <p className="mt-3 text-[15px] font-bold text-frost">{rule.label}</p>
               <p className="mt-1 text-[12px] text-mist">{threshold(rule.minTopUp)}</p>
               <p
@@ -209,10 +209,10 @@ export function TierLadder({
                   filled={filled(k)}
                   bar={bar}
                   vertical
-                  className="left-[21px] top-[calc(50%+17px)] h-[calc(100%-34px)] w-0.5"
+                  className="left-[21px] top-[calc(50%+26px)] h-[calc(100%-52px)] w-0.5"
                 />
               ) : null}
-              <TierEmblem tier={tier} className={mine && k > mineRank ? "opacity-40" : ""} />
+              <TierBadge tier={tier} size="md" className={mine && k > mineRank ? "opacity-40" : ""} />
               <div className="min-w-0 flex-1">
                 <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[15px] font-bold text-frost">
                   {rule.label}
