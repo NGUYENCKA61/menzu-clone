@@ -174,7 +174,10 @@ export function TierLadder({
                   className="left-[calc(50%+20px)] top-[22px] h-0.5 w-[calc(100%-40px)] -translate-y-1/2"
                 />
               ) : null}
-              <TierEmblem tier={tier} className={mine && k > mineRank ? "opacity-40" : ""} />
+              {/* Full colour whether reached or not: faded to 40% the marks
+                  read as blurred ("làm cho icon nét lại"); the line and the
+                  "Hạng hiện tại" chip say how far the reader is. */}
+              <TierEmblem tier={tier} />
               <p className="mt-3 text-[15px] font-bold text-frost">{rule.label}</p>
               <p className="mt-1 text-[12px] text-mist">{threshold(rule.minTopUp)}</p>
               <p
@@ -212,7 +215,7 @@ export function TierLadder({
                   className="left-[21px] top-[calc(50%+17px)] h-[calc(100%-34px)] w-0.5"
                 />
               ) : null}
-              <TierEmblem tier={tier} className={mine && k > mineRank ? "opacity-40" : ""} />
+              <TierEmblem tier={tier} />
               <div className="min-w-0 flex-1">
                 <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[15px] font-bold text-frost">
                   {rule.label}
