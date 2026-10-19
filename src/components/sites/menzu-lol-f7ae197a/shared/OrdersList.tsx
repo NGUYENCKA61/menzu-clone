@@ -128,7 +128,6 @@ const CHIP_RAISE = "rounded-md border border-line-strong bg-raise px-2 py-0.5 te
 const CHIP_NEUTRAL = "rounded-md border border-white/15 bg-white/[0.05] px-2 py-0.5 text-[12px] font-medium text-frost/90";
 const BUTTON_RAISE = "flex h-9 shrink-0 items-center whitespace-nowrap rounded-[10px] bg-raise px-3.5 text-[13px] font-semibold text-frost ring-1 ring-inset ring-line transition-colors group-hover:ring-line-strong";
 const BUTTON_LIT = "flex h-9 shrink-0 items-center gap-1 whitespace-nowrap rounded-[10px] bg-white/[0.08] pl-3.5 pr-2.5 text-[13px] font-semibold text-frost ring-1 ring-inset ring-white/10 transition-colors group-hover:bg-white/[0.12] group-hover:ring-white/20";
-const BUTTON_SOFT = "flex h-9 shrink-0 items-center whitespace-nowrap rounded-[10px] bg-white/[0.06] px-3.5 text-[13px] font-semibold text-frost ring-1 ring-inset ring-white/10 transition-colors group-hover:bg-white/10 group-hover:ring-white/20";
 const LOOKS: CardLook[] = [
   { id: "4", name: "Đang dùng: thẻ 3 dòng", card: "border-white/10 hover:border-line-strong", thumb: "sm:w-36", title: "sm:text-[17px]", price: "text-[17px]", chip: CHIP_RAISE, button: BUTTON_RAISE },
   { id: "1+2", name: "Viền 15%, nút Chi tiết sáng có mũi tên", card: "border-white/15 hover:border-white/25 hover:bg-white/[0.02]", thumb: "sm:w-36", title: "sm:text-[17px]", price: "text-[17px]", chip: CHIP_NEUTRAL, button: BUTTON_LIT },
@@ -136,7 +135,6 @@ const LOOKS: CardLook[] = [
   { id: "6", name: "Mũi tên thay nút Chi tiết", card: "border-white/10 hover:border-line-strong", thumb: "sm:w-36", title: "sm:text-[17px]", price: "text-[17px]", chip: CHIP_RAISE, button: BUTTON_RAISE, chevron: true },
   { id: "8", name: "Thẻ tối hơn khung", card: "border-white/10 bg-black/30 hover:border-white/20", thumb: "sm:w-36", title: "sm:text-[17px]", price: "text-[17px]", chip: CHIP_RAISE, button: BUTTON_RAISE },
   { id: "9", name: "Ảnh, tên, giá to hơn", card: "border-white/10 hover:border-line-strong", thumb: "sm:w-[168px]", title: "sm:text-[18px]", price: "text-[19px]", chip: CHIP_RAISE, button: BUTTON_RAISE },
-  { id: "11", name: "Nút Chi tiết xám nhạt", card: "border-white/10 hover:border-line-strong", thumb: "sm:w-36", title: "sm:text-[17px]", price: "text-[17px]", chip: CHIP_RAISE, button: BUTTON_SOFT },
   { id: "10", name: "Viền 20%", card: "border-white/20 hover:border-white/30", thumb: "sm:w-36", title: "sm:text-[17px]", price: "text-[17px]", chip: CHIP_RAISE, button: BUTTON_RAISE },
 ];
 
@@ -151,10 +149,7 @@ export function OrdersList({ orders }: { orders: OrderCardView[] }) {
     return () => clearInterval(timer);
   }, [thu]);
   const pinned = thu && thu !== "xoay" ? LOOKS.findIndex((l) => l.id === thu) : -1;
-  // The card the page draws without ?thu: today's card with a soft neutral
-  // Chi tiết, on trial (the owner, 20/10/2026: "có nên làm chi tiết sáng hơn", "làm thử").
-  const fallback = Math.max(0, LOOKS.findIndex((l) => l.id === "11"));
-  const look = thu === "xoay" ? LOOKS[tick % LOOKS.length]! : LOOKS[pinned >= 0 ? pinned : fallback]!;
+  const look = thu === "xoay" ? LOOKS[tick % LOOKS.length]! : LOOKS[Math.max(0, pinned)]!;
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState("newest");
   const [status, setStatus] = useState("ALL");
