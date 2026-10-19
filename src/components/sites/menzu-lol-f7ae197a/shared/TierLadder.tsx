@@ -171,7 +171,7 @@ export function TierLadder({
                 <Join
                   filled={filled(k)}
                   bar={bar}
-                  className="left-[calc(50%+18px)] top-5 h-0.5 w-[calc(100%-36px)] -translate-y-1/2"
+                  className="left-[calc(50%+27px)] top-[22px] h-0.5 w-[calc(100%-54px)] -translate-y-1/2"
                 />
               ) : null}
               <TierEmblem tier={tier} className={mine && k > mineRank ? "opacity-40" : ""} />
@@ -203,13 +203,13 @@ export function TierLadder({
         {MEMBER_TIERS.map((tier, k) => {
           const rule = TIER_RULES[tier];
           return (
-            <li key={tier} className="relative flex items-center gap-3.5 py-2.5">
+            <li key={tier} className="relative flex items-center gap-3.5 py-3">
               {k < last ? (
                 <Join
                   filled={filled(k)}
                   bar={bar}
                   vertical
-                  className="left-[19px] top-[calc(50%+16px)] h-[calc(100%-32px)] w-0.5"
+                  className="left-[21px] top-[calc(50%+26px)] h-[calc(100%-52px)] w-0.5"
                 />
               ) : null}
               <TierEmblem tier={tier} className={mine && k > mineRank ? "opacity-40" : ""} />
