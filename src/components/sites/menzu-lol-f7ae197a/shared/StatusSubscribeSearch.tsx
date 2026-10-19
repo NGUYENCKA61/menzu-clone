@@ -391,7 +391,20 @@ export function StatusSubscribeSearch({
                       )}
                     </Link>
 
-                    <div className="min-w-0 flex-1">
+                    <div className={`min-w-0 flex-1 ${old ? "" : "self-start"}`}>
+                      {/* The state over the name, as the history tab, the
+                          tool page and the shelf card put it, and the words
+                          from the card's top, so the chips stand level across
+                          a row whatever a name's length (19/10/2026, "làm
+                          thử"); under the name in the old look. */}
+                      {!old && state ? (
+                        <span
+                          className={`mb-1.5 flex w-fit items-center gap-1.5 rounded-md border px-2 py-0.5 text-[12px] font-semibold ${state.tile}`}
+                        >
+                          <span aria-hidden className={`h-1.5 w-1.5 rounded-full ${state.dot}`} />
+                          {state.label}
+                        </span>
+                      ) : null}
                       <Link
                         href={tool.href}
                         // Two lines rather than an ellipsis: on a phone the
@@ -404,11 +417,10 @@ export function StatusSubscribeSearch({
                       </Link>
                       {/* The history tab's chip, dot and all, so a state
                           reads the same on both tabs (18/10/2026). */}
-                      {state ? (
+                      {old && state ? (
                         <span
                           className={`mt-1.5 inline-flex items-center gap-1.5 rounded-md border px-2 py-0.5 text-[12px] font-semibold ${state.tile}`}
                         >
-                          {old ? null : <span aria-hidden className={`h-1.5 w-1.5 rounded-full ${state.dot}`} />}
                           {state.label}
                         </span>
                       ) : null}
