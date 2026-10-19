@@ -97,7 +97,7 @@ function CardNumberField({
           onChange={(event) => take(event.target.value)}
           aria-invalid={short || undefined}
           aria-describedby={short ? `${id}-error` : undefined}
-          className={`w-full bg-white/[0.02] border rounded-xl pl-4 pr-12 py-3.5 text-sm text-white placeholder:text-neutral-700 focus:outline-none transition-all font-mono shadow-inner ${
+          className={`w-full bg-transparent border rounded-xl pl-4 pr-12 py-3.5 text-sm text-white placeholder:text-neutral-700 focus:outline-none transition-all font-mono shadow-inner ${
             short ? "border-red-500/50 focus:border-red-500/70" : "border-white/10 focus:border-white/30"
           }`}
         />

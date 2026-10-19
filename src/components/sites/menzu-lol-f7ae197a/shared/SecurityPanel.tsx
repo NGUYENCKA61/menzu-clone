@@ -88,7 +88,7 @@ const CARD =
   "relative bg-white/[0.02] sm:bg-transparent border border-line rounded-[14px] p-5 sm:p-6 overflow-hidden group";
 const CARD_TITLE = "text-[17px] font-bold text-frost";
 const FIELD =
-  "w-full rounded-[10px] border border-line bg-raise px-4 py-3 text-frost text-[15px] outline-none placeholder:text-dim focus:border-white/40 transition-colors disabled:opacity-50";
+  "w-full rounded-[10px] border border-white/10 bg-transparent px-4 py-3 text-frost text-[15px] outline-none placeholder:text-dim focus:border-white/40 transition-colors disabled:opacity-50";
 
 function Notice({ tone, children }: { tone: "ok" | "err"; children: string }) {
   return (

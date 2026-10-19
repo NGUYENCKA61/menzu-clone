@@ -29,7 +29,7 @@ export function ReferralLinkBox({ link }: { link: string }) {
         value={link}
         onFocus={(event) => event.target.select()}
         aria-label="Liên kết giới thiệu của bạn"
-        className="w-full flex-1 rounded-xl border-[1.5px] border-red-500/20 bg-white/[0.02] px-4 py-3 font-mono text-sm text-white outline-none transition-colors focus:border-red-500/60"
+        className="w-full flex-1 rounded-xl border-[1.5px] border-red-500/20 bg-transparent px-4 py-3 font-mono text-sm text-white outline-none transition-colors focus:border-red-500/60"
       />
       <button
         type="button"

@@ -20,7 +20,7 @@ export interface DeskProduct {
 }
 
 const FIELD =
-  "w-full rounded-xl border border-white/5 bg-white/5 px-4 py-3 text-sm text-white outline-none focus:border-[var(--brand)]/60 transition-colors";
+  "w-full rounded-xl border border-white/10 bg-transparent px-4 py-3 text-sm text-white outline-none focus:border-[var(--brand)]/60 transition-colors";
 const LABEL = "text-[12px] font-semibold text-neutral-300";
 
 /**
