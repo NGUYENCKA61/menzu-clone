@@ -223,7 +223,6 @@ export function WalletTopUp({
     cardAmountOk &&
     serial.length >= CARD_DIGITS_MIN &&
     pin.length >= CARD_DIGITS_MIN;
-  const carrierLabel = CARRIERS.find((option) => option.value === carrier)?.label ?? "thẻ";
 
   // Something opened earlier and still unpaid: the page keeps asking, so a
   // transfer made after the invoice was closed still lands with a receipt.
@@ -305,8 +304,8 @@ export function WalletTopUp({
   ) : null;
 
   const tabs: { value: Method; label: string; icon: typeof CreditCard }[] = [
-    ...(bankEnabled ? [{ value: "bank" as const, label: "Ngân hàng", icon: CreditCard }] : []),
-    ...(cardEnabled ? [{ value: "card" as const, label: "Thẻ cào", icon: QrCode }] : []),
+    ...(bankEnabled ? [{ value: "bank" as const, label: "Ngân hàng", icon: QrCode }] : []),
+    ...(cardEnabled ? [{ value: "card" as const, label: "Thẻ cào", icon: CreditCard }] : []),
   ];
 
   // No history lists here any more: every request — waiting, turned down,
@@ -521,7 +520,9 @@ export function WalletTopUp({
                       >
                         {pending ? (
                           <Loader2 size={18} className="animate-spin motion-reduce:animate-none" aria-hidden />
-                        ) : null}
+                        ) : (
+                          <QrCode size={17} aria-hidden />
+                        )}
                         {pending ? "Đang tạo hóa đơn…" : "Tạo hóa đơn"}
                       </button>
                     </div>
@@ -684,7 +685,7 @@ export function WalletTopUp({
                       ) : (
                         <CreditCard size={17} aria-hidden />
                       )}
-                      {pending ? "Đang gửi thẻ…" : `Nạp ${carrierLabel} ${formatVnd(Number(amount))} đ`}
+                      {pending ? "Đang gửi thẻ…" : "Nạp thẻ ngay"}
                     </button>
                   </div>
                 ) : null}
