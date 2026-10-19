@@ -158,6 +158,10 @@ export function SoftwareCard({
     }`;
   // The rent button at the picker's and "Xem chi tiết"'s height and corners.
   const RENT = old ? "h-11 rounded-xl" : "h-[42px] rounded-[10px]";
+  // The pills on the picture keep their dark glass, for a photo under them,
+  // and take the site's chip shape: 8px corners like the home tile's "Top
+  // tháng" and the state chips, semibold words (19/10/2026, "làm thử").
+  const PILL_SHAPE = old ? "rounded-full font-medium" : "rounded-md font-semibold";
 
   /**
    * Opens the same "Xác nhận mua" the product page uses, right here: a buyer
@@ -253,15 +257,19 @@ export function SoftwareCard({
           ) : software.verifiedOnly ? (
             // Sold to level 2 only (the owner, 12/10/2026): the buyer learns it
             // on the card, not after the click.
-            <span className="absolute left-3 top-3 z-20 inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-panel/88 px-2.5 py-1 text-[12px] font-medium text-amber-300">
+            <span
+              className={`absolute left-3 top-3 z-20 inline-flex items-center gap-1.5 border border-white/10 bg-panel/88 px-2.5 py-1 text-[12px] text-amber-300 ${PILL_SHAPE}`}
+            >
               Cấp 2
             </span>
           ) : null}
 
           {status ? (
-            <span className="tool-status absolute right-3 top-3 z-20 inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-panel/88 px-2.5 py-1">
+            <span
+              className={`tool-status absolute right-3 top-3 z-20 inline-flex items-center gap-1.5 border border-white/10 bg-panel/88 px-2.5 py-1 ${PILL_SHAPE}`}
+            >
               <span aria-hidden className={`h-1.5 w-1.5 rounded-full ${status.dot}`} />
-              <span className={`text-[12px] font-medium ${status.text}`}>
+              <span className={`text-[12px] ${old ? "font-medium" : "font-semibold"} ${status.text}`}>
                 {status.label}
               </span>
             </span>

@@ -223,11 +223,17 @@ export function SoftwareBuyPanel({
 
   // The site's state colours (lib/softwareStatus), so the pill here reads as
   // the cards, the history and the subscribe tab do; this page kept a copy
-  // of its own and missed the paler "Ổn định" (19/10/2026).
+  // of its own (19/10/2026). Its chip is theirs too: the tint, rim and 8px
+  // corners of the history and subscribe tabs, where it was a round grey
+  // pill ("làm thử", 19/10/2026).
   const status =
     software.showStatus && software.softwareStatus
       ? (old ? STATUS_STYLE : SOFTWARE_STATUS)[software.softwareStatus]
       : null;
+  const statusTile =
+    !old && software.showStatus && software.softwareStatus
+      ? SOFTWARE_STATUS[software.softwareStatus].tile
+      : "";
   // Said here even when the shop hides the status pill: a greyed-out button
   // with no reason reads as a broken page. The server refuses the order and
   // the basket line either way; this only spares the shopper the round trip.
@@ -249,7 +255,7 @@ export function SoftwareBuyPanel({
           shop has hidden the state carries only badges. */}
       {status || software.badges.length > 0 ? (
         <div className="flex flex-wrap items-center gap-2">
-          {status ? (
+          {status && old ? (
             <span className="inline-flex items-center gap-2 rounded-full border border-line bg-raise px-3 py-1.5">
               <span className={`h-2 w-2 rounded-full ${status.dot}`} />
               <span
@@ -257,6 +263,13 @@ export function SoftwareBuyPanel({
               >
                 {status.label}
               </span>
+            </span>
+          ) : status ? (
+            <span
+              className={`inline-flex items-center gap-1.5 rounded-md border px-2 py-0.5 text-[12px] font-semibold ${statusTile}`}
+            >
+              <span aria-hidden className={`h-1.5 w-1.5 rounded-full ${status.dot}`} />
+              {status.label}
             </span>
           ) : null}
           {software.badges.map((badge) => (

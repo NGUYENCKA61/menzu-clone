@@ -96,6 +96,7 @@ export function FreeKeyPanel({
   gated,
   downloadUrl,
   today,
+  old = false,
 }: {
   software: SoftwareDetail;
   signedIn: boolean;
@@ -106,6 +107,8 @@ export function FreeKeyPanel({
   downloadUrl: string | null;
   /** The key this account took today already: the page opens on it. */
   today: FreeToolPanel["today"];
+  /** LAB: ?ban=cu, the "Miễn phí" pill as it was before 19/10/2026. */
+  old?: boolean;
 }) {
   const [phase, setPhase] = useState<Phase>(
     today
@@ -231,12 +234,22 @@ export function FreeKeyPanel({
   return (
     <div className="space-y-7">
       <div className="flex flex-wrap items-center gap-2">
-        <span className="inline-flex items-center gap-2 rounded-full border border-line bg-raise px-3 py-1.5">
-          <span className="h-2 w-2 rounded-full bg-emerald-500" />
-          <span className="text-[13px] font-medium text-emerald-300">
+        {/* The site's state chip (tint, rim, 8px corners), as the paid tool's
+            page now draws its state, where it was a round grey pill
+            (19/10/2026); the old look under ?ban=cu. */}
+        {old ? (
+          <span className="inline-flex items-center gap-2 rounded-full border border-line bg-raise px-3 py-1.5">
+            <span className="h-2 w-2 rounded-full bg-emerald-500" />
+            <span className="text-[13px] font-medium text-emerald-300">
+              Miễn phí
+            </span>
+          </span>
+        ) : (
+          <span className="inline-flex items-center gap-1.5 rounded-md border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-[12px] font-semibold text-emerald-400">
+            <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
             Miễn phí
           </span>
-        </span>
+        )}
         {software.badges.map((badge) => (
           <span
             key={badge.label}

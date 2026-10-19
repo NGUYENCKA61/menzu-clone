@@ -125,6 +125,7 @@ export function SoftwareDetailView({
                   gated={free.gated}
                   downloadUrl={free.downloadUrl}
                   today={free.today}
+                  old={old}
                 />
               ) : (
                 <SoftwareBuyPanel
