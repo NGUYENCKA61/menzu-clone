@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronRight, ShoppingBag } from "lucide-react";
+import { ShoppingBag } from "lucide-react";
 import { sentenceCase } from "@/lib/displayCase";
 import Image from "next/image";
 import Link from "next/link";
@@ -69,11 +69,9 @@ export interface OrderCardView {
  * font, and the price column behind a hairline — the price in white and an
  * outline "Chi tiết". menzu's white button, green price, "GIÁ MUA" label and
  * mono facts made three loud colours and a row of capitals on every card.
- * The card sits clear on the filled account panel, as the panel's cards do
- * (no card on a card), and stands out by a 15% rim that lifts on hover, a
- * neutral duration chip and a lit "Chi tiết" with its chevron (the owner,
- * 19/10/2026: "muốn những card này nổi hơn ... vì đây là quan trọng",
- * then "làm sao cho hợp lý").
+ * The card itself is the account area's lighter inner card (white at 2%),
+ * as the receipt's blocks and the other account pages draw theirs — menzu's
+ * darker card was the one surface out of step.
  * 1bba475 is the louder version, c6bdb46 the compact card. The whole card
  * opens the receipt, which stays untouched.
  */
@@ -273,7 +271,7 @@ export function OrdersList({ orders }: { orders: OrderCardView[] }) {
                           // đánh giá đi"). To bring the receipt's button back:
                           // reviewHref={order.review?.href ?? null}
                           reviewHref={null}
-                          className="group flex cursor-pointer flex-col gap-3 rounded-2xl border border-white/10 bg-white/[0.03] p-3.5 outline-none transition-colors hover:border-white/25 hover:bg-white/[0.05] focus-visible:ring-2 focus-visible:ring-[var(--menzu-accent)]/60 sm:flex-row sm:items-center sm:gap-5 sm:p-4"
+                          className="group flex cursor-pointer flex-col gap-3 rounded-2xl border border-white/10 p-3.5 outline-none transition-colors hover:border-line-strong focus-visible:ring-2 focus-visible:ring-[var(--menzu-accent)]/60 sm:flex-row sm:items-center sm:gap-5 sm:p-4"
                         >
                           <div className="flex min-w-0 flex-1 items-start gap-3 sm:items-center sm:gap-5">
                             {/* menzu's 16:9 picture at 144px (theirs is 192),
@@ -316,7 +314,7 @@ export function OrdersList({ orders }: { orders: OrderCardView[] }) {
                                   breaks at a " · ". */}
                               <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
                                 {order.chip ? (
-                                  <span className="rounded-md border border-white/15 bg-white/[0.05] px-2 py-0.5 text-[12px] font-medium text-frost/90">
+                                  <span className="rounded-md border border-line-strong bg-raise px-2 py-0.5 text-[12px] font-medium text-frost/90">
                                     {order.chip}
                                     {order.quantity > 1 ? ` ×${order.quantity}` : ""}
                                   </span>
@@ -364,14 +362,10 @@ export function OrdersList({ orders }: { orders: OrderCardView[] }) {
                             {/* menzu's white button as a tint of it: clearer
                                 than the outline it replaced ("thử cách 2"), far
                                 quieter than solid white, which on every card
-                                out-shouted the names. A lit neutral well with
-                                the wiki card's chevron since 19/10/2026 (it was
-                                the blue-grey raise, near the panel's own
-                                colour). The card around it is what opens the
-                                receipt. */}
-                            <span className="flex h-9 shrink-0 items-center gap-1 whitespace-nowrap rounded-[10px] bg-white/[0.08] pl-3.5 pr-2.5 text-[13px] font-semibold text-frost ring-1 ring-inset ring-white/10 transition-colors group-hover:bg-white/[0.12] group-hover:ring-white/20">
+                                out-shouted the names. The card around it is
+                                what opens the receipt. */}
+                            <span className="flex h-9 shrink-0 items-center whitespace-nowrap rounded-[10px] bg-raise px-3.5 text-[13px] font-semibold text-frost ring-1 ring-inset ring-line transition-colors group-hover:ring-line-strong">
                               Chi tiết
-                              <ChevronRight size={14} aria-hidden />
                             </span>
                           </div>
                         </OrderDetailModal>
