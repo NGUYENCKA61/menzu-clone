@@ -68,12 +68,17 @@ export function ListToolbar({
   placeholder,
   filtering,
   onClear,
+  searchRadius = "rounded-[10px]",
   children,
 }: {
   tone: ListTone;
   query: string;
   onQuery: (next: string) => void;
   placeholder: string;
+  /** LAB TRIAL: the search box's corners, 10px unless a page asks for its own
+   *  (Lịch sử giao dịch tries 14px, the owner 19/10/2026: "thử ... bo lên
+   *  14px mỗi chỗ đó thôi"). */
+  searchRadius?: string;
   /** Whether any filter is set, so the funnel stays lit while the menu is shut. */
   filtering: boolean;
   onClear: () => void;
@@ -117,7 +122,7 @@ export function ListToolbar({
           onChange={(event) => onQuery(event.target.value)}
           placeholder={placeholder}
           aria-label={placeholder}
-          className={`w-full appearance-none bg-transparent border border-white/10 rounded-[10px] py-3 pl-10 pr-4 text-[15px] text-frost placeholder:text-dim outline-none ${look.focus} transition-colors`}
+          className={`w-full appearance-none bg-transparent border border-white/10 ${searchRadius} py-3 pl-10 pr-4 text-[15px] text-frost placeholder:text-dim outline-none ${look.focus} transition-colors`}
         />
       </div>
 
