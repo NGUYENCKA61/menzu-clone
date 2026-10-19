@@ -171,7 +171,7 @@ export function TierLadder({
                 <Join
                   filled={filled(k)}
                   bar={bar}
-                  className="left-[calc(50%+26px)] top-5 h-0.5 w-[calc(100%-52px)] -translate-y-1/2"
+                  className="left-[calc(50%+18px)] top-5 h-0.5 w-[calc(100%-36px)] -translate-y-1/2"
                 />
               ) : null}
               <TierEmblem tier={tier} className={mine && k > mineRank ? "opacity-40" : ""} />
@@ -209,7 +209,7 @@ export function TierLadder({
                   filled={filled(k)}
                   bar={bar}
                   vertical
-                  className="left-[19px] top-[calc(50%+24px)] h-[calc(100%-48px)] w-0.5"
+                  className="left-[19px] top-[calc(50%+16px)] h-[calc(100%-32px)] w-0.5"
                 />
               ) : null}
               <TierEmblem tier={tier} className={mine && k > mineRank ? "opacity-40" : ""} />

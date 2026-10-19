@@ -1,34 +1,71 @@
-import { Crown, Gem, Medal, Star, Trophy, type LucideIcon } from "lucide-react";
+import { useId, type ReactNode } from "react";
 
 import { TIER_STYLE, type MemberTierValue } from "@/lib/memberTiers";
 
 /**
- * A tier's mark since 19/10/2026 ("thay icon mới cho nhìn đỡ kì"): the same
- * hexagon for all five in the tier's own colour, flat the way the site's
- * chips are (a light fill and rim of the colour), so the five read as one
- * set where TierBadge drew five unrelated glyphs in glowing gradient tiles.
+ * A tier's mark since 19/10/2026: a solid glyph in the tier's own colour,
+ * its faces split by thin cut gaps, no frame. The style is the owner's two
+ * references (a faceted star for Platinum, a solid cut diamond for Diamond:
+ * "diamond kiểu vậy đi"), drawn for all five so the set holds together
+ * ("làm lại 1 bộ cho nó đồng bộ đi"), picked as K2 of three on a lab sheet
+ * ("k2 đi"): a shield for Classic (the star went to Platinum), a medal,
+ * the faceted star, the cut diamond, a crown on its band.
  *
- * Inside, one icon family drawn one way, the site's own Lucide at stroke 2
- * ("rà soát làm lại 1 bộ cho nó đồng bộ đi"), climbing with the ladder: a
- * star, a medal, a cup, a diamond (the owner: "diamond tui vẫn thích icon
- * kim cương hơn"), a crown. Hand-drawn marks came before this the same day
- * and did not hold together: gold bars looked "kì", the star made Platinum
- * look "lỏ".
+ * The gaps are a mask, so they show whatever is behind the mark; each mark
+ * masks with its own id.
  */
-const ICON: Record<MemberTierValue, LucideIcon> = {
-  CLASSIC: Star,
-  GOLD: Medal,
-  PLATINUM: Trophy,
-  DIAMOND: Gem,
-  ELITE: Crown,
-};
-
 const SIZE = {
-  md: { box: "h-10 w-10", glyph: 18 },
-  lg: { box: "h-14 w-14", glyph: 26 },
+  md: "h-10 w-10",
+  lg: "h-14 w-14",
 } as const;
 
-const HEXAGON = "M12 1.5L21.09 6.75V17.25L12 22.5L2.91 17.25V6.75Z";
+const GLYPH: Record<MemberTierValue, { shape: ReactNode; cuts: ReactNode }> = {
+  CLASSIC: {
+    shape: (
+      <path d="M12 4.6L18.4 7.1V11.6C18.4 15.5 15.7 18.6 12 20C8.3 18.6 5.6 15.5 5.6 11.6V7.1Z" />
+    ),
+    cuts: <path d="M12 4.6V20M5.6 9.6L12 12L18.4 9.6" />,
+  },
+  GOLD: {
+    shape: (
+      <>
+        <path d="M7.4 4.4H10.4L12.7 9.7L10.2 10.6Z" />
+        <path d="M16.6 4.4H13.6L11.3 9.7L13.8 10.6Z" />
+        <circle cx="12" cy="14.7" r="4.7" />
+      </>
+    ),
+    cuts: (
+      <>
+        <circle cx="12" cy="14.7" r="5.3" />
+        <circle cx="12" cy="14.7" r="3.1" />
+      </>
+    ),
+  },
+  PLATINUM: {
+    shape: (
+      <path d="M12 5L13.82 10.09L19.23 10.25L14.95 13.56L16.47 18.75L12 15.7L7.53 18.75L9.05 13.56L4.77 10.25L10.18 10.09Z" />
+    ),
+    cuts: (
+      <>
+        <path d="M12 5V11M19.23 10.25L13.6 12.08M16.47 18.75L12.99 13.96M7.53 18.75L11.01 13.96M4.77 10.25L10.4 12.08" />
+        <path d="M12 10.9L13.62 12.07L13 13.97H11L10.38 12.07Z" fill="black" />
+      </>
+    ),
+  },
+  DIAMOND: {
+    shape: <path d="M7.6 6.6H16.4L19.8 9.9L12 18.4L4.2 9.9Z" />,
+    cuts: <path d="M4.2 9.9H19.8M7.6 6.6L9 9.9L12 6.6L15 9.9L16.4 6.6M9 9.9L12 18.4L15 9.9" />,
+  },
+  ELITE: {
+    shape: (
+      <>
+        <path d="M5.4 15.8L4.6 8.4L8.8 11.2L12 5.8L15.2 11.2L19.4 8.4L18.6 15.8Z" />
+        <rect x="5.4" y="16.7" width="13.2" height="2" rx="0.5" />
+      </>
+    ),
+    cuts: <path d="M8.8 11.2L9.6 15.8M15.2 11.2L14.4 15.8" />,
+  },
+};
 
 export function TierEmblem({
   tier,
@@ -39,25 +76,29 @@ export function TierEmblem({
   size?: keyof typeof SIZE;
   className?: string;
 }) {
-  const Icon = ICON[tier];
-  const s = SIZE[size];
+  const id = useId();
+  const { shape, cuts } = GLYPH[tier];
   return (
-    <span
+    <svg
+      viewBox="0 0 24 24"
       aria-hidden
-      className={`relative grid shrink-0 place-items-center ${s.box} ${TIER_STYLE[tier].text} ${className}`}
+      className={`shrink-0 ${SIZE[size]} ${TIER_STYLE[tier].text} ${className}`}
     >
-      <svg viewBox="0 0 24 24" className="absolute inset-0 h-full w-full">
-        <path
-          d={HEXAGON}
-          fill="currentColor"
-          fillOpacity={0.12}
-          stroke="currentColor"
-          strokeOpacity={0.55}
-          strokeWidth={1.2}
+      <mask id={id} maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24">
+        <rect width="24" height="24" fill="white" />
+        <g
+          fill="none"
+          stroke="black"
+          strokeWidth={0.9}
+          strokeLinecap="round"
           strokeLinejoin="round"
-        />
-      </svg>
-      <Icon size={s.glyph} strokeWidth={2} className="relative" />
-    </span>
+        >
+          {cuts}
+        </g>
+      </mask>
+      <g fill="currentColor" mask={`url(#${id})`}>
+        {shape}
+      </g>
+    </svg>
   );
 }
