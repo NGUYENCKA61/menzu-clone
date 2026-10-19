@@ -1,6 +1,6 @@
 "use client";
 
-import { ShoppingBag } from "lucide-react";
+import { ChevronRight, ShoppingBag } from "lucide-react";
 import { sentenceCase } from "@/lib/displayCase";
 import Image from "next/image";
 import Link from "next/link";
@@ -346,7 +346,7 @@ export function OrdersList({ orders }: { orders: OrderCardView[] }) {
 
                           {/* menzu's price column behind a hairline — beside the
                               card from sm up, under it on a phone. */}
-                          <div className="flex shrink-0 items-center justify-between gap-3 border-t border-white/5 pt-3 sm:flex-col sm:items-end sm:justify-center sm:gap-2.5 sm:border-t-0 sm:border-l sm:border-line sm:pt-0 sm:pl-5">
+                          <div className="flex shrink-0 items-center justify-between gap-3 border-t border-white/5 pt-3 sm:gap-4 sm:border-t-0 sm:border-l sm:border-line sm:pt-0 sm:pl-5">
                             {/* White, not menzu's green: what was paid, said
                                 plainly. No "GIÁ MUA" over it — it is plainly
                                 the price. */}
@@ -357,14 +357,17 @@ export function OrdersList({ orders }: { orders: OrderCardView[] }) {
                             >
                               {money(order.total)}
                             </p>
-                            {/* menzu's white button as a tint of it: clearer
-                                than the outline it replaced ("thử cách 2"), far
-                                quieter than solid white, which on every card
-                                out-shouted the names. The card around it is
-                                what opens the receipt. */}
-                            <span className="flex h-9 shrink-0 items-center whitespace-nowrap rounded-[10px] bg-raise px-3.5 text-[13px] font-semibold text-frost ring-1 ring-inset ring-line transition-colors group-hover:ring-line-strong">
-                              Chi tiết
-                            </span>
+                            {/* No "Chi tiết" button (trial): every card carried
+                                the same one, eighteen in a row on a busy day (the
+                                owner, 20/10/2026: "tại card nào cũng có nút chi
+                                tiết kìa", "thử đi"). A dim chevron at the edge
+                                says the card opens, lighting and nudging right
+                                on hover; the card itself opens the receipt. */}
+                            <ChevronRight
+                              size={20}
+                              aria-hidden
+                              className="shrink-0 text-dim transition-[color,transform] duration-200 group-hover:translate-x-0.5 group-hover:text-frost"
+                            />
                           </div>
                         </OrderDetailModal>
                       );
