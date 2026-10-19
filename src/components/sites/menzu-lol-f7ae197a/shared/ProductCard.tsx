@@ -205,17 +205,14 @@ export function ProductCard({ product, priority = false, eager = false, old = fa
               warn or promise. */}
           {/* 8px corners like every chip on the site since 19/10/2026 (the
               round pills in the old look), the dark glass kept for the photo
-              under them; the stock count wears it too, where its pale sky
-              tint washed out over a bright picture. */}
+              under them. */}
           <span className={`inline-flex items-center border border-white/10 bg-[#0d0d12]/88 px-2.5 py-1 text-[12px] font-semibold text-white ${old ? "rounded-full" : "rounded-md"}`}>
             #{product.code}
           </span>
-          {product.stock !== undefined && product.stock !== null ? (
-            <span
-              className={`inline-flex items-center border px-2.5 py-1 text-[12px] font-semibold text-sky-400 ${
-                old ? "rounded-full border-sky-500/30 bg-sky-500/10" : "rounded-md border-white/10 bg-[#0d0d12]/88"
-              }`}
-            >
+          {/* The stock count ("Còn N acc") came off the picture (the owner,
+              19/10/2026: "bỏ cái nhãn Còn … acc"); the old look keeps it. */}
+          {old && product.stock !== undefined && product.stock !== null ? (
+            <span className="inline-flex items-center rounded-full border border-sky-500/30 bg-sky-500/10 px-2.5 py-1 text-[12px] font-semibold text-sky-400">
               Còn {product.stock} acc
             </span>
           ) : null}
