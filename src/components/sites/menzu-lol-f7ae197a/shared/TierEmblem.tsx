@@ -75,7 +75,6 @@ const GEMS: Record<MemberTierValue, Gem> = {
 const SPARK = "M12 9.6L12.7 11.3L14.4 12L12.7 12.7L12 14.4L11.3 12.7L9.6 12L11.3 11.3Z";
 
 const SIZE = {
-  sm: "h-8 w-8",
   md: "h-11 w-11",
   lg: "h-[60px] w-[60px]",
 } as const;
