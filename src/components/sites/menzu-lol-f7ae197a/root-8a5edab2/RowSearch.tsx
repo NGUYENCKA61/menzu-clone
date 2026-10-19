@@ -271,9 +271,7 @@ export function RowSearch({
       {filters ? (
         <>
           {/* The search field in elitehacks' manner: a flat fill a shade lighter
-          than the page, 14px corners like the game tiles under it and every
-          in-page search (the owner, 19/10/2026: "thử tui coi"; the chips stay
-          10px, as buttons do), no border, sheen
+          than the page, 10px corners like the chips under it, no border, sheen
           or shadow, and a bright magnifier as the one thing that catches the
           eye. The shop tried lmarket's glass pill here twice and found it
           loud on a long bar over a flat page. The accent rings the field and
@@ -281,7 +279,7 @@ export function RowSearch({
           the field and the tiles share their outer edges. */}
           <label
             htmlFor={inputId}
-            className="group/search relative isolate flex h-12 w-full items-center gap-3 rounded-[14px] bg-white/5 px-4 ring-1 ring-inset ring-white/10 transition-shadow focus-within:ring-[var(--menzu-accent)]/60"
+            className="group/search relative isolate flex h-12 w-full items-center gap-3 rounded-[10px] bg-white/5 px-4 ring-1 ring-inset ring-white/10 transition-shadow focus-within:ring-[var(--menzu-accent)]/60"
           >
             <Search
               size={18}
