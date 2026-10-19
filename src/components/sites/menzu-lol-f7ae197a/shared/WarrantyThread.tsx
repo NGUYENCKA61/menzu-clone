@@ -96,9 +96,9 @@ export function WarrantyThread({
     <div
       ref={pane}
       data-pane
-      className={`${size} overflow-y-auto rounded-xl border border-line bg-black/30 p-4`}
+      className={`${size} flex flex-col overflow-y-auto rounded-xl border border-line bg-black/30 p-4`}
     >
-      <ol className="flex flex-col gap-3">
+      <ol className="flex shrink-0 flex-col gap-3">
         {lines.map((line, index) => {
           const mine = (viewer === "shop") === line.fromShop;
           // Lines from the same writer within five minutes run on under
@@ -152,8 +152,11 @@ export function WarrantyThread({
                   initial
                 )}
               </span>
+              {/* flex-1: the column spans the row, so the bubble's 75% is of
+                  the pane and not of its own text, which wrapped every two
+                  words ("dsa / ĐÁ") before (19/10/2026). */}
               <div
-                className={`flex min-w-0 flex-col ${mine ? "items-end" : "items-start"}`}
+                className={`flex min-w-0 flex-1 flex-col ${mine ? "items-end" : "items-start"}`}
               >
                 {grouped ? null : (
                   <span className="mb-1 px-1 text-[13px] font-semibold text-neutral-500">
@@ -209,8 +212,11 @@ export function WarrantyThread({
           );
         })}
       </ol>
+      {/* At the pane's foot whatever its height, next to the composer it is
+          about, not floating under the last bubble of a short thread in a
+          tall pane (the owner, 19/10/2026: "chữ này bị lỗi nè"). */}
       {footer ? (
-        <div className="mt-4 text-center text-[13px] text-neutral-500">
+        <div className="mt-auto shrink-0 pt-4 text-center text-[13px] text-neutral-500">
           {footer}
         </div>
       ) : null}
