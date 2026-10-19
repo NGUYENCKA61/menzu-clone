@@ -81,13 +81,13 @@ const RED_ACCENT: TabAccent = {
   tabActive: "border-white/25 bg-white/[0.12] text-frost",
   filterActive: "border-white/25 bg-white/[0.12] text-frost",
   tileHover: "hover:border-white/25",
-  searchFocus: "focus-within:border-[var(--menzu-accent)]/60 focus-within:bg-white/[0.08] focus-within:ring-2 focus-within:ring-[var(--menzu-accent)]/25",
+  searchFocus: "focus-within:border-[var(--menzu-accent)]/60 focus-within:ring-2 focus-within:ring-[var(--menzu-accent)]/25",
 };
 const ORANGE_ACCENT: TabAccent = {
   tabActive: "border-white/25 bg-white/[0.12] text-frost",
   filterActive: "border-white/25 bg-white/[0.12] text-frost",
   tileHover: "hover:border-white/25",
-  searchFocus: "focus-within:border-[var(--menzu-accent)]/60 focus-within:bg-white/[0.08] focus-within:ring-2 focus-within:ring-[var(--menzu-accent)]/25",
+  searchFocus: "focus-within:border-[var(--menzu-accent)]/60 focus-within:ring-2 focus-within:ring-[var(--menzu-accent)]/25",
 };
 
 const TAB_ACCENTS: Record<InventoryTabKey, TabAccent> = {
@@ -189,7 +189,7 @@ export function AccountInventory({ account, items }: AccountInventoryProps) {
           it, capped at a readable width, left-aligned. The focus ring follows
           the open tab's colour. */}
       <label
-        className={`mt-6 flex h-11 w-full max-w-md items-center gap-2.5 rounded-xl border border-white/10 bg-white/5 px-4 transition-[border-color,box-shadow,background-color] hover:bg-white/[0.08] ${accent.searchFocus}`}
+        className={`mt-6 flex h-11 w-full max-w-md items-center gap-2.5 rounded-xl border border-white/10 bg-white/5 px-4 transition-[border-color,box-shadow] ${accent.searchFocus}`}
       >
         <Search size={15} aria-hidden className="shrink-0 text-neutral-500" />
         <input

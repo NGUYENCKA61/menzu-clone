@@ -86,7 +86,7 @@ export function BankAppPicker({ bank, account, amount, note, holder, onClose }: 
         </div>
 
         <div className="px-5 sm:px-6 pb-3 shrink-0">
-          <label className="relative flex items-center bg-white/5 border border-white/10 rounded-xl px-3 py-2 hover:bg-white/[0.08] focus-within:border-[var(--menzu-accent)]/60 focus-within:bg-white/[0.08] focus-within:ring-2 focus-within:ring-[var(--menzu-accent)]/25 transition-[border-color,box-shadow,background-color]">
+          <label className="relative flex items-center bg-white/5 border border-white/10 rounded-xl px-3 py-2 focus-within:border-[var(--menzu-accent)]/60 focus-within:ring-2 focus-within:ring-[var(--menzu-accent)]/25 transition-[border-color,box-shadow]">
             <Search size={14} className="text-neutral-500 mr-2 shrink-0" aria-hidden />
             <input
               ref={search}

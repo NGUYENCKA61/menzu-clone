@@ -249,7 +249,7 @@ export function StatusSubscribeSearch({
           className={
             old
               ? "flex h-10 w-full max-w-md items-center gap-2.5 rounded-xl border border-white/10 bg-[#101114] px-4 transition-colors focus-within:border-[var(--menzu-accent)]/60"
-              : "flex h-11 w-full max-w-md items-center gap-2.5 rounded-xl border border-white/10 bg-white/5 px-4 transition-[border-color,box-shadow,background-color] hover:bg-white/[0.08] focus-within:border-[var(--menzu-accent)]/60 focus-within:bg-white/[0.08] focus-within:ring-2 focus-within:ring-[var(--menzu-accent)]/25"
+              : "flex h-11 w-full max-w-md items-center gap-2.5 rounded-xl border border-white/10 bg-white/5 px-4 transition-[border-color,box-shadow] focus-within:border-[var(--menzu-accent)]/60 focus-within:ring-2 focus-within:ring-[var(--menzu-accent)]/25"
           }
         >
           <Search size={15} aria-hidden className="shrink-0 text-neutral-500" />

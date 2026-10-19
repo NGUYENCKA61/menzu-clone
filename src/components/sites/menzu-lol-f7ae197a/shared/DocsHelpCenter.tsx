@@ -259,7 +259,7 @@ export function DocsSearchBox() {
         onChange={(event) => setQuery(event.target.value)}
         placeholder="Tìm kiếm bài viết..."
         aria-label="Tìm kiếm bài viết"
-        className="relative h-11 w-full rounded-xl border border-white/10 bg-white/5 pl-10 pr-4 text-sm text-white placeholder-neutral-500 outline-none transition-[border-color,box-shadow,background-color] hover:bg-white/[0.08] focus:border-[var(--menzu-accent)]/60 focus:bg-white/[0.08] focus:ring-2 focus:ring-[var(--menzu-accent)]/25"
+        className="relative h-11 w-full rounded-xl border border-white/10 bg-white/5 pl-10 pr-4 text-sm text-white placeholder-neutral-500 outline-none transition-[border-color,box-shadow] focus:border-[var(--menzu-accent)]/60 focus:ring-2 focus:ring-[var(--menzu-accent)]/25"
       />
     </label>
   );
