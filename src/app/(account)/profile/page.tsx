@@ -17,6 +17,7 @@ import { AccountPageFrame } from "@/components/sites/menzu-lol-f7ae197a/shared/A
 import { AccountPanel } from "@/components/sites/menzu-lol-f7ae197a/shared/AccountPanel";
 import { AvatarUploader } from "@/components/sites/menzu-lol-f7ae197a/shared/AvatarUploader";
 import { BannerUploader } from "@/components/sites/menzu-lol-f7ae197a/shared/BannerUploader";
+import { TierEmblem } from "@/components/sites/menzu-lol-f7ae197a/shared/TierEmblem";
 import { WithdrawCommission } from "@/components/sites/menzu-lol-f7ae197a/shared/WithdrawCommission";
 import { formatVnd } from "@/components/sites/menzu-lol-f7ae197a/shared/productData";
 import { SHOP_TZ } from "@/lib/dayGroups";
@@ -258,12 +259,13 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                   <span className="text-[13px] font-medium text-mist">
                     Cấp bậc
                   </span>
-                  {/* The rank's name in its colour and nothing round it: the
-                      box went ("bỏ cái card bo elite ghi chữ elite thôi"), and
-                      the gem tried beside it too ("bỏ cái icon luôn đi không
-                      cần hiện ở đó"), 19/10/2026. */}
-                  <span className={`font-display text-[15px] font-bold leading-none ${tier.text}`}>
-                    {TIER_RULES[memberTier].label}
+                  {/* The rank as its gem from /cap-bac, in place of its name
+                      ("thêm icon thay từ elite", 19/10/2026, after the boxed
+                      name and the gem beside the name were both taken off);
+                      the name stays for a hover and for screen readers. */}
+                  <span className="inline-flex items-center" title={TIER_RULES[memberTier].label}>
+                    <TierEmblem tier={memberTier} size="sm" />
+                    <span className="sr-only">{TIER_RULES[memberTier].label}</span>
                   </span>
                 </div>
 
