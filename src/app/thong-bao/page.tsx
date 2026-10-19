@@ -274,11 +274,8 @@ export default async function AnnouncementsPage({
               <div className="flex flex-col gap-8">
                 {groupByDay(events).map((group) => (
                   <section key={group.key} aria-label={dayLabel(group.key, now)}>
-                    {/* The day as a quiet grey divider, as on Lịch sử mua,
-                        so the tools' names under it read first (the owner,
-                        20/10/2026: "chỗ xem trạng thái cũng tương tự"). */}
                     <div className="mb-3 flex items-center gap-3">
-                      <h3 className="lab-figure shrink-0 text-[13px] font-semibold text-mist">
+                      <h3 className="lab-figure shrink-0 text-[15px] font-semibold text-frost">
                         {dayLabel(group.key, now)}
                       </h3>
                       <span aria-hidden className="h-px flex-1 bg-line" />
