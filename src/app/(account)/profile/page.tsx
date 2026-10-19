@@ -7,6 +7,7 @@ import {
   Check,
   Gift,
   HandCoins,
+  KeyRound,
   LayoutDashboard,
   Receipt,
   ShoppingBag,
@@ -207,20 +208,31 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                   </span>
                   {/* The tick as menzu draws it, a round disc with a white
                       check ("dùng cái tick này giống menzu đc k"), where a
-                      scalloped badge stood, green for every account, with the
-                      "Verified" tag ("Tick xanh lá luôn"; blue, red and red
-                      for admins only were tried). */}
-                  <svg viewBox="0 0 24 24" aria-hidden className="h-[18px] w-[18px] shrink-0">
-                    <circle cx="12" cy="12" r="11" fill="#10b981" />
-                    <path
-                      d="M7.2 12.4l3.2 3.2 6.4-6.8"
-                      fill="none"
-                      stroke="#ffffff"
-                      strokeWidth={2.6}
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
+                      scalloped badge stood, green with the "Verified" tag
+                      ("Tick xanh lá luôn"; blue and red were tried). An
+                      admin's disc is the shop's red with a white key instead
+                      ("admin thay vì dấu tick cho hình cái chìa khóa", "nền
+                      đỏ chìa trắng"). */}
+                  {isAdmin ? (
+                    <span
+                      aria-hidden
+                      className="grid h-[18px] w-[18px] shrink-0 place-items-center rounded-full bg-[var(--menzu-accent)] text-white"
+                    >
+                      <KeyRound size={11} strokeWidth={2.75} />
+                    </span>
+                  ) : (
+                    <svg viewBox="0 0 24 24" aria-hidden className="h-[18px] w-[18px] shrink-0">
+                      <circle cx="12" cy="12" r="11" fill="#10b981" />
+                      <path
+                        d="M7.2 12.4l3.2 3.2 6.4-6.8"
+                        fill="none"
+                        stroke="#ffffff"
+                        strokeWidth={2.6}
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  )}
                   {/* A member who has passed level 2 reads "Verified" in green
                       rather than "Member" (the owner, 19/10/2026: "làm thử
                       với member nếu đã xác minh cấp 2 rồi thì tag ... thành
