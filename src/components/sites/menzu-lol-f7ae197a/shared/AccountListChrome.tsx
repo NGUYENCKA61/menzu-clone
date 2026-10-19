@@ -76,8 +76,8 @@ export function ListToolbar({
   onQuery: (next: string) => void;
   placeholder: string;
   /** LAB TRIAL: the search box's corners, 10px unless a page asks for its own
-   *  (Lịch sử giao dịch tries 14px, then 18px, the owner 19/10/2026: "thử
-   *  ... bo lên 14px mỗi chỗ đó thôi", "18px thử"). */
+   *  (Lịch sử giao dịch tries 14px, the owner 19/10/2026: "thử ... bo lên
+   *  14px mỗi chỗ đó thôi"). */
   searchRadius?: string;
   /** Whether any filter is set, so the funnel stays lit while the menu is shut. */
   filtering: boolean;

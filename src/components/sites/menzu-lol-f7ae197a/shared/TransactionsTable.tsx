@@ -224,7 +224,7 @@ export function TransactionsTable({ rows }: { rows: LedgerView[] }) {
           <>
             <ListToolbar
               tone="accent"
-              searchRadius="rounded-2xl"
+              searchRadius="rounded-xl"
               query={query}
               onQuery={refilter(setQuery)}
               placeholder="Tìm kiếm mã GD, nội dung..."
