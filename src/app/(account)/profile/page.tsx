@@ -6,9 +6,7 @@ import { redirect } from "next/navigation";
 import {
   Check,
   Gift,
-  HandCoins,
   LayoutDashboard,
-  Receipt,
   ShoppingBag,
   Wallet,
 } from "lucide-react";
@@ -17,8 +15,8 @@ import { AccountPageFrame } from "@/components/sites/menzu-lol-f7ae197a/shared/A
 import { AccountPanel } from "@/components/sites/menzu-lol-f7ae197a/shared/AccountPanel";
 import { AvatarUploader } from "@/components/sites/menzu-lol-f7ae197a/shared/AvatarUploader";
 import { BannerUploader } from "@/components/sites/menzu-lol-f7ae197a/shared/BannerUploader";
-import { WithdrawCommission } from "@/components/sites/menzu-lol-f7ae197a/shared/WithdrawCommission";
-import { formatVnd } from "@/components/sites/menzu-lol-f7ae197a/shared/productData";
+import { ProfileNotices } from "@/components/sites/menzu-lol-f7ae197a/shared/ProfileNotices";
+import { activeAnnouncements } from "@/lib/announcementStore";
 import { SHOP_TZ } from "@/lib/dayGroups";
 import { db } from "@/lib/db";
 import {
@@ -101,7 +99,7 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
   const user = await getCurrentUser();
   if (!user) redirect("/login?next=%2Fprofile");
 
-  const [settings, query, toppedUpRow, spentRow, paidOrders, cover] = await Promise.all([
+  const [settings, query, toppedUpRow, notices, cover] = await Promise.all([
     getShopSettings(),
     searchParams,
     // Lifetime completed top-ups: what the tier is earned from.
@@ -109,12 +107,10 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
       _sum: { amount: true },
       where: { userId: user.id, status: "COMPLETED" },
     }),
-    // Lifetime spend: every purchase line in the ledger, negative by sign.
-    db.transaction.aggregate({
-      _sum: { delta: true },
-      where: { userId: user.id, kind: "PURCHASE", status: "SUCCESS" },
-    }),
-    db.order.count({ where: { userId: user.id, status: "PAID" } }),
+    // The three newest notices for everyone, for "Thông báo hệ thống": the
+    // name the notice sheet gives the shop-wide ones, where a reader's own
+    // are "Thông báo của bạn" (no reader passed, so audience ALL only).
+    activeAnnouncements(null, new Date(), 3),
     // The banner wears the first category's cover — the game art the shop
     // leads with — so the page changes when the catalogue does.
     db.category.findFirst({
@@ -128,7 +124,6 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
   // never bare for somebody who never picked one.
   const bannerArt =
     user.bannerUrl || settings.profileBanner || cover?.imageUrl || BANNER_FALLBACK;
-  const spent = Math.abs(Number(spentRow._sum.delta ?? 0n));
   const isAdmin = user.role === "ADMIN";
 
   const memberTier = readMemberTier(user.tier);
@@ -380,55 +375,12 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
           </div>
         </section>
 
-        {/* THE ACCOUNT IN NUMBERS — the same four cells as the strip across the
-            foot of the card, now one framed row of their own under it (the owner,
-            16/10/2026, with a capture of the strip after a mocked-up page of
-            separate cards: "cỡ này thử", then "gắn dính lại thử" on the four
-            loose cards; nothing in the cells changes). Four across from xl,
-            the order count giving width to the commission
-            cell: in equal quarters "Rút tiền" dropped under any commission from
-            10.000đ. */}
-        <div className="grid grid-cols-2 overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02] sm:mt-2 xl:grid-cols-[1fr_1fr_0.7fr_1.3fr] xl:divide-x xl:divide-white/[0.06]">
-          {[
-            { icon: Wallet, label: "Số dư khả dụng", value: formatVnd(user.balance), unit: "đ", tone: "text-white" },
-            { icon: Receipt, label: "Tổng chi tiêu", value: formatVnd(spent), unit: "đ", tone: "text-white" },
-            { icon: ShoppingBag, label: "Đơn hàng", value: String(paidOrders), unit: "", tone: "text-white" },
-          ].map(({ icon: Icon, label, value, unit, tone }) => (
-            // Label over figure the way /vong-quay builds its stat tiles:
-            // a bare 13px icon (no 28px box), the unit at text-sm, and
-            // the figure a step smaller on phones, where 24px ran past
-            // a 2x2 cell.
-            <div key={label} className="flex flex-col gap-2 px-5 py-4 sm:gap-3">
-              <span className="inline-flex items-center gap-2 text-[13px] font-medium text-mist">
-                <Icon size={13} className="shrink-0 text-neutral-300" />
-                {label}
-              </span>
-              <span className="flex min-h-9 items-center">
-                <span className={`lab-figure text-[22px] font-bold leading-none sm:text-[26px] ${tone}`}>
-                  {value}
-                  {unit ? (
-                    <span className="ml-1 text-sm font-bold text-neutral-500">{unit}</span>
-                  ) : null}
-                </span>
-              </span>
-            </div>
-          ))}
-          <div className="flex flex-col gap-2 px-5 py-4 sm:gap-3">
-            <span className="inline-flex items-center gap-2 text-[13px] font-medium text-mist">
-              <HandCoins size={13} className="shrink-0 text-neutral-300" />
-              Hoa hồng khả dụng
-            </span>
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <span className="flex min-h-9 items-center">
-                <span className="lab-figure text-[22px] font-bold leading-none text-frost sm:text-[26px]">
-                  {formatVnd(user.commissionBalance)}
-                  <span className="ml-1 text-sm font-bold text-neutral-500">đ</span>
-                </span>
-              </span>
-              <WithdrawCommission amount={user.commissionBalance} />
-            </div>
-          </div>
-        </div>
+        {/* The shop's newest notices where the four figures (balance, spend,
+            orders, commission with Rút tiền) stood: "thử bỏ phần Số dư khả
+            dụng ... thay bằng phần thông báo hệ thống thử thiết kế tui xem"
+            (19/10/2026, a trial). The balance stays in the header's account
+            chip; the figures are one revert away. */}
+        <ProfileNotices notices={notices} />
       </div>
       </AccountPanel>
     </AccountPageFrame>
