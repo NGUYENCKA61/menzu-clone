@@ -33,18 +33,19 @@ export const BADGE_PILL_BASE =
 
 /**
  * The badge in the site's chip: the state chip's 8px corners, padding and
- * 12px semibold, so the row beside "Ổn định" stands level, in the same
- * neutral glass with white words. The colour moves to the mark in front of
- * the words (ProductBadgeChip): coloured words on the glass read muddy, and
- * a tint in the badge's colour would read as a state, red being "Đã phát
- * hiện" ("làm sao cho đẹp hơn đi và đồng bộ lại", 19/10/2026).
+ * 12px semibold, so the row beside "Ổn định" stands level. No fill: the
+ * badge's colour is on the rim and the words (`outline` below), V3 of six
+ * tried on a lab sheet ("v3 thử", 19/10/2026). A fill in the badge's colour
+ * would read as a state, red being "Đã phát hiện"; coloured capitals in the
+ * small chip looked cramped ("làm xấu quá vậy").
  */
 export const BADGE_CHIP =
-  "inline-flex items-center gap-1.5 rounded-md border border-white/10 bg-white/[0.06] px-2 py-0.5 text-[12px] font-semibold text-frost";
+  "inline-flex items-center gap-1.5 rounded-md border px-2 py-0.5 text-[12px] font-semibold";
 
 /**
- * The palette: the word the admin picks by, the text colour it prints in, and
- * the dot that stands for it in the picker.
+ * The palette: the word the admin picks by, the rim and words of the chip
+ * the tool page prints (`outline`), the text colour of the old pill (`pill`,
+ * the lab's ?ban=cu view), and the dot that stands for it in the picker.
  *
  * Written out rather than composed from the colour name because Tailwind reads
  * the source for literal class names — `text-${color}-300` compiles to nothing
@@ -58,11 +59,13 @@ export const BADGE_CHIP =
 export const BADGE_COLORS = {
   red: {
     label: "Đỏ",
+    outline: "border-[var(--menzu-accent)]/55 text-[#ff6b6d]",
     pill: "text-[var(--menzu-accent)]",
     swatch: "bg-[var(--menzu-accent)]",
   },
   orange: {
     label: "Cam",
+    outline: "border-orange-500/55 text-orange-300",
     pill: "text-orange-300",
     swatch: "bg-orange-500",
   },
@@ -70,31 +73,37 @@ export const BADGE_COLORS = {
   // the word the admin reads was wrong — it renders gold, not orange.
   amber: {
     label: "Vàng",
+    outline: "border-amber-500/55 text-amber-300",
     pill: "text-amber-300",
     swatch: "bg-amber-500",
   },
   pink: {
     label: "Hồng",
+    outline: "border-pink-500/55 text-pink-300",
     pill: "text-pink-300",
     swatch: "bg-pink-500",
   },
   emerald: {
     label: "Xanh lá",
+    outline: "border-emerald-500/55 text-emerald-300",
     pill: "text-emerald-300",
     swatch: "bg-emerald-500",
   },
   sky: {
     label: "Xanh dương",
+    outline: "border-sky-500/55 text-sky-300",
     pill: "text-sky-300",
     swatch: "bg-sky-500",
   },
   violet: {
     label: "Tím",
+    outline: "border-violet-500/55 text-violet-300",
     pill: "text-violet-300",
     swatch: "bg-violet-500",
   },
   neutral: {
     label: "Xám",
+    outline: "border-neutral-400/55 text-neutral-200",
     pill: "text-neutral-200",
     swatch: "bg-neutral-400",
   },
