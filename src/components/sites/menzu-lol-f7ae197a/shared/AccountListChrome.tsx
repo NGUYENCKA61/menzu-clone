@@ -106,13 +106,18 @@ export function ListToolbar({
         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
           <Search size={16} className="text-neutral-500" aria-hidden />
         </div>
+        {/* No fill of its own: it sits straight on the filled account panel,
+            where cards go clear rather than stack, so it takes the table's
+            brightness and keeps only its rim (the owner, 19/10/2026: "nếu
+            ngoại lệ cho độ sáng bằng độ sáng card được không"). Search boxes
+            on the plain page ground keep the 5% fill. */}
         <input
           type="search"
           value={query}
           onChange={(event) => onQuery(event.target.value)}
           placeholder={placeholder}
           aria-label={placeholder}
-          className={`w-full appearance-none bg-white/5 border border-white/10 rounded-[10px] py-3 pl-10 pr-4 text-[15px] text-frost placeholder:text-dim outline-none ${look.focus} transition-colors`}
+          className={`w-full appearance-none bg-transparent border border-white/10 rounded-[10px] py-3 pl-10 pr-4 text-[15px] text-frost placeholder:text-dim outline-none ${look.focus} transition-colors`}
         />
       </div>
 
@@ -125,7 +130,7 @@ export function ListToolbar({
           className={`flex items-center justify-center w-11 h-11 rounded-xl border transition-colors ${
             open || filtering
               ? look.open
-              : "bg-white/5 border-white/10 text-mist hover:text-frost hover:bg-white/[0.08]"
+              : "bg-transparent border-white/10 text-mist hover:text-frost hover:bg-white/5"
           }`}
         >
           <Funnel size={18} aria-hidden />
