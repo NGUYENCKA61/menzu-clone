@@ -18,6 +18,7 @@ import { AccountPageFrame } from "@/components/sites/menzu-lol-f7ae197a/shared/A
 import { AccountPanel } from "@/components/sites/menzu-lol-f7ae197a/shared/AccountPanel";
 import { AvatarUploader } from "@/components/sites/menzu-lol-f7ae197a/shared/AvatarUploader";
 import { BannerUploader } from "@/components/sites/menzu-lol-f7ae197a/shared/BannerUploader";
+import { TierEmblem } from "@/components/sites/menzu-lol-f7ae197a/shared/TierEmblem";
 import { WithdrawCommission } from "@/components/sites/menzu-lol-f7ae197a/shared/WithdrawCommission";
 import { formatVnd } from "@/components/sites/menzu-lol-f7ae197a/shared/productData";
 import { SHOP_TZ } from "@/lib/dayGroups";
@@ -283,12 +284,16 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                   <span className="text-[13px] font-medium text-mist">
                     Cấp bậc
                   </span>
-                  {/* The rank's name in its colour and nothing round it: the
-                      box went ("bỏ cái card bo elite ghi chữ elite thôi"), and
-                      the gem tried beside it too ("bỏ cái icon luôn đi không
-                      cần hiện ở đó"), 19/10/2026. */}
-                  <span className={`font-display text-[15px] font-bold leading-none ${tier.text}`}>
-                    {TIER_RULES[memberTier].label}
+                  {/* The rank's gem and its name in its colour, no box round it
+                      ("bỏ cái card bo elite ghi chữ elite thôi"). The gem was
+                      taken off once ("bỏ cái icon luôn đi"), then brought back
+                      to look at ("lùi lại về cái thời điểm còn icon kế elite
+                      tui coi"), 19/10/2026. */}
+                  <span className="inline-flex items-center gap-2">
+                    <TierEmblem tier={memberTier} size="sm" />
+                    <span className={`font-display text-[15px] font-bold leading-none ${tier.text}`}>
+                      {TIER_RULES[memberTier].label}
+                    </span>
                   </span>
                 </div>
 
