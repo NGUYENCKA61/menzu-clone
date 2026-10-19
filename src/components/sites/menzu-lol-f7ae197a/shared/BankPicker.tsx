@@ -193,7 +193,8 @@ export function BankPicker({
 
       {open ? (
         <div
-          className={`absolute left-0 right-0 z-20 overflow-hidden rounded-xl border border-white/10 bg-[#121317]/85 shadow-2xl shadow-black/60 backdrop-blur-md ${
+          // The site's one pop-up surface (the filter box's #171717).
+          className={`absolute left-0 right-0 z-20 overflow-hidden rounded-xl border border-white/10 bg-neutral-900 shadow-2xl shadow-black/50 ${
             above ? "bottom-full mb-1.5" : "top-full mt-1.5"
           }`}
         >

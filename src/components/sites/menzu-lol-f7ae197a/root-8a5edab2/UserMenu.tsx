@@ -193,7 +193,11 @@ export function UserMenu({ user }: { user: HeaderUser }) {
           // panel, so the two still share a corner though this one is now the
           // shorter of the pair - and they can never be open at once anyway, each
           // closing on the other's click.
-          <div className="drop-in absolute right-0 top-[42px] z-[100] w-[260px] overflow-hidden rounded-[10px] border border-[#2b2b31] bg-scrim/97 shadow-2xl backdrop-blur-xl">
+          // #171717, the filter box's colour, for every pop-up on the site: a
+          // shade above the page so the menu floats, where the near-black it
+          // wore sank below it (the owner, 20/10/2026: "làm sao hợp lý đồng
+          // bộ là được").
+          <div className="drop-in absolute right-0 top-[42px] z-[100] w-[260px] overflow-hidden rounded-[10px] border border-white/10 bg-neutral-900 shadow-2xl shadow-black/50">
             {/* Who you are: the face, the name, and the two pills the live
                 menu sets under it rather than beside it — the name gets the
                 full width that way, however long it runs. */}

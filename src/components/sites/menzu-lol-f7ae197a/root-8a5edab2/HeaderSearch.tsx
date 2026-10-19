@@ -187,7 +187,9 @@ export function HeaderSearch() {
         </label>
 
         {showList ? (
-          <div className="drop-in absolute right-0 top-[42px] z-50 w-52 lg:w-64 xl:w-80 max-w-[calc(100vw-2rem)] overflow-hidden rounded-[10px] border border-[#2b2b31] bg-scrim/97 shadow-2xl backdrop-blur-xl">
+          // The site's one pop-up surface, as the account menu and the filter
+          // box: #171717, a shade above the page so it floats.
+          <div className="drop-in absolute right-0 top-[42px] z-50 w-52 lg:w-64 xl:w-80 max-w-[calc(100vw-2rem)] overflow-hidden rounded-[10px] border border-white/10 bg-neutral-900 shadow-2xl shadow-black/50">
             {shown.length === 0 ? (
               <p className="px-4 py-3 text-[12px] text-neutral-500">
                 Không thấy gì khớp “{term}”.
