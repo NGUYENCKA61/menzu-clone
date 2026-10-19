@@ -46,7 +46,9 @@ export interface TopUpHistoryRow {
  * Built off menzu's /wallet on 28/09/2026, then resized to this shop's own
  * account pages on 29/09 (the owner: "không theo chuẩn menzu"). The colours
  * were menzu's green and white; the lab (17/10/2026, "rà soát lại toàn bộ
- * rồi sửa") moved them to the shop's lit wells and red buttons.
+ * rồi sửa") moved them to the shop's lit wells and red buttons, then the
+ * method tab went green and the bank button white again (19/10/2026, "tui
+ * muốn xanh lá như cũ", "màu trắng như cũ"). The card form keeps the wells.
  */
 const STEP = "text-[14px] text-neutral-400 font-bold ";
 
@@ -348,13 +350,13 @@ export function WalletTopUp({
             >
               <div
                 aria-hidden
-                className={`absolute top-1.5 bottom-1.5 left-1.5 rounded-xl bg-white/[0.12] border border-white/25 transition-transform duration-300 motion-reduce:transition-none ${
+                className={`absolute top-1.5 bottom-1.5 left-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 transition-transform duration-300 motion-reduce:transition-none ${
                   tabs.length > 1 ? "w-[calc(50%-6px)]" : "w-[calc(100%-12px)]"
                 } ${method === "card" && tabs.length > 1 ? "translate-x-full" : "translate-x-0"}`}
               />
               {tabs.map((tab) => {
                 const on = method === tab.value;
-                const tone = on ? "text-frost" : "text-neutral-500";
+                const tone = on ? "text-emerald-400" : "text-neutral-500";
                 return (
                   <button
                     key={tab.value}
@@ -509,7 +511,7 @@ export function WalletTopUp({
                         type="submit"
                         disabled={pending || !bankAmountOk}
                         aria-busy={pending}
-                        className="w-full h-12 bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] text-white rounded-xl font-semibold text-[14px] transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98]"
+                        className="w-full h-12 bg-white hover:bg-neutral-200 text-black rounded-xl font-semibold text-[14px] transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98]"
                       >
                         {pending ? (
                           <Loader2 size={18} className="animate-spin motion-reduce:animate-none" aria-hidden />
