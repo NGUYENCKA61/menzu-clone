@@ -221,16 +221,28 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                       strokeLinejoin="round"
                     />
                   </svg>
+                  {/* A member who has passed level 2 reads "Verified" in sea
+                      blue rather than "Member" (the owner, 19/10/2026: "làm
+                      thử với member nếu đã xác minh cấp 2 rồi thì tag ...
+                      thành verified, xanh biển"); admin and agency keep theirs. */}
                   <SkewPlate
                     className={
                       isAdmin
                         ? "bg-[var(--menzu-accent)] text-white"
                         : user.role === "AGENCY"
                           ? "bg-gradient-to-r from-[#b45309] to-[#d97706] text-white"
-                          : "bg-gradient-to-r from-neutral-600 to-neutral-700 text-white"
+                          : user.verifiedAt
+                            ? "bg-gradient-to-r from-[#0284c7] to-[#0ea5e9] text-white"
+                            : "bg-gradient-to-r from-neutral-600 to-neutral-700 text-white"
                     }
                   >
-                    {isAdmin ? "Admin" : user.role === "AGENCY" ? "Đại lý" : "Member"}
+                    {isAdmin
+                      ? "Admin"
+                      : user.role === "AGENCY"
+                        ? "Đại lý"
+                        : user.verifiedAt
+                          ? "Verified"
+                          : "Member"}
                   </SkewPlate>
                 </div>
                 <span className="text-[13px] font-medium text-mist">

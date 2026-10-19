@@ -29,6 +29,8 @@ export interface SidebarUser {
   username: string;
   avatarUrl: string | null;
   role: string;
+  /** Passed level 2: a member reads "Verified" in sea blue. */
+  verified?: boolean;
 }
 
 // Grouped the way the captured menzu sidebar rules its rows: the everyday
@@ -116,14 +118,20 @@ export function AccountSidebar({
                   everyone else in neutral-400. */}
               <span
                 className={`text-[12px] font-semibold leading-none ${
-                  user.role === "ADMIN" ? "text-[var(--menzu-accent)]" : "text-neutral-400"
+                  user.role === "ADMIN"
+                    ? "text-[var(--menzu-accent)]"
+                    : user.role !== "AGENCY" && user.verified
+                      ? "text-sky-400"
+                      : "text-neutral-400"
                 }`}
               >
                 {user.role === "ADMIN"
                   ? "Admin"
                   : user.role === "AGENCY"
                     ? "Đại lý"
-                    : "Member"}
+                    : user.verified
+                      ? "Verified"
+                      : "Member"}
               </span>
             </span>
           </div>

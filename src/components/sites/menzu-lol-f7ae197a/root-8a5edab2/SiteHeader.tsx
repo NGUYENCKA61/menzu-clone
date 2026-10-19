@@ -70,6 +70,7 @@ export async function SiteHeader() {
               avatarUrl: user.avatarUrl,
               uid: user.uid,
               role: user.role,
+              verified: Boolean(user.verifiedAt),
             }
           : null
       }
