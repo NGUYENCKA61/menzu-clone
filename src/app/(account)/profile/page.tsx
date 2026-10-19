@@ -4,7 +4,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import {
-  BadgeCheck,
   Check,
   Gift,
   HandCoins,
@@ -207,7 +206,21 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                   <span className="truncate font-display text-[22px] font-black leading-none text-frost sm:text-[26px]">
                     {user.username}
                   </span>
-                  <BadgeCheck size={18} className="shrink-0 fill-emerald-500 text-white" />
+                  {/* The tick as menzu draws it, a round disc with a white
+                      check, kept in our green ("dùng cái tick này giống menzu
+                      đc k", then "tick xanh lá được rồi làm thử đi"), where a
+                      scalloped badge stood. */}
+                  <svg viewBox="0 0 24 24" aria-hidden className="h-[18px] w-[18px] shrink-0">
+                    <circle cx="12" cy="12" r="11" fill="#10b981" />
+                    <path
+                      d="M7.2 12.4l3.2 3.2 6.4-6.8"
+                      fill="none"
+                      stroke="#ffffff"
+                      strokeWidth={2.6}
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
                   <SkewPlate
                     className={
                       isAdmin
