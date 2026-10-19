@@ -131,7 +131,7 @@ const BUTTON_LIT = "flex h-9 shrink-0 items-center gap-1 whitespace-nowrap round
 const LOOKS: CardLook[] = [
   { id: "4", name: "Đang dùng: thẻ 3 dòng", card: "border-white/10 hover:border-line-strong", thumb: "sm:w-36", title: "sm:text-[17px]", price: "text-[17px]", chip: CHIP_RAISE, button: BUTTON_RAISE },
   { id: "1+2", name: "Viền 15%, nút Chi tiết sáng có mũi tên", card: "border-white/15 hover:border-white/25 hover:bg-white/[0.02]", thumb: "sm:w-36", title: "sm:text-[17px]", price: "text-[17px]", chip: CHIP_NEUTRAL, button: BUTTON_LIT },
-  { id: "3", name: "Tô nền thẻ 2%", card: "border-white/10 bg-white/[0.02] hover:border-white/25 hover:bg-white/[0.04]", thumb: "sm:w-36", title: "sm:text-[17px]", price: "text-[17px]", chip: CHIP_RAISE, button: BUTTON_RAISE },
+  { id: "3", name: "Tô nền thẻ 3%", card: "border-white/10 bg-white/[0.03] hover:border-white/25 hover:bg-white/[0.05]", thumb: "sm:w-36", title: "sm:text-[17px]", price: "text-[17px]", chip: CHIP_RAISE, button: BUTTON_RAISE },
   { id: "6", name: "Mũi tên thay nút Chi tiết", card: "border-white/10 hover:border-line-strong", thumb: "sm:w-36", title: "sm:text-[17px]", price: "text-[17px]", chip: CHIP_RAISE, button: BUTTON_RAISE, chevron: true },
   { id: "8", name: "Thẻ tối hơn khung", card: "border-white/10 bg-black/30 hover:border-white/20", thumb: "sm:w-36", title: "sm:text-[17px]", price: "text-[17px]", chip: CHIP_RAISE, button: BUTTON_RAISE },
   { id: "9", name: "Ảnh, tên, giá to hơn", card: "border-white/10 hover:border-line-strong", thumb: "sm:w-[168px]", title: "sm:text-[18px]", price: "text-[19px]", chip: CHIP_RAISE, button: BUTTON_RAISE },
@@ -149,10 +149,7 @@ export function OrdersList({ orders }: { orders: OrderCardView[] }) {
     return () => clearInterval(timer);
   }, [thu]);
   const pinned = thu && thu !== "xoay" ? LOOKS.findIndex((l) => l.id === thu) : -1;
-  // The card the page draws without ?thu: the owner picked look 3, the 2%
-  // fill on the 10% rim, after watching them all ("thử lựa chọn 3", then "nền 2%").
-  const fallback = Math.max(0, LOOKS.findIndex((l) => l.id === "3"));
-  const look = thu === "xoay" ? LOOKS[tick % LOOKS.length]! : LOOKS[pinned >= 0 ? pinned : fallback]!;
+  const look = thu === "xoay" ? LOOKS[tick % LOOKS.length]! : LOOKS[Math.max(0, pinned)]!;
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState("newest");
   const [status, setStatus] = useState("ALL");
