@@ -24,9 +24,23 @@ export const MAX_BADGE_LENGTH = 40;
  * red buy button and a green status dot, and a badge that competed with those
  * would be the fourth thing shouting. Coloured text on neutral glass is read,
  * not shouted.
+ *
+ * The look until 19/10/2026, kept for the lab's ?ban=cu view; BADGE_CHIP is
+ * the one printed now.
  */
 export const BADGE_PILL_BASE =
   "inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.06] px-3 py-1.5 text-[10px] font-black uppercase tracking-widest backdrop-blur";
+
+/**
+ * The badge in the site's chip: the state chip's 8px corners, padding and
+ * 12px semibold, so the row beside "Ổn định" stands level, in the same
+ * neutral glass with white words. The colour moves to the mark in front of
+ * the words (ProductBadgeChip): coloured words on the glass read muddy, and
+ * a tint in the badge's colour would read as a state, red being "Đã phát
+ * hiện" ("làm sao cho đẹp hơn đi và đồng bộ lại", 19/10/2026).
+ */
+export const BADGE_CHIP =
+  "inline-flex items-center gap-1.5 rounded-md border border-white/10 bg-white/[0.06] px-2 py-0.5 text-[12px] font-semibold text-frost";
 
 /**
  * The palette: the word the admin picks by, the text colour it prints in, and

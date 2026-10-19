@@ -5,16 +5,12 @@ import { useRouter } from "next/navigation";
 import { useMemo, useRef, useState } from "react";
 import { Headphones, Loader2, Minus, Plus, RefreshCw, ShieldCheck, Zap } from "lucide-react";
 
-import {
-  badgePillClass,
-  BADGE_PILL_BASE,
-  type ProductBadge,
-} from "@/lib/productBadges";
+import type { ProductBadge } from "@/lib/productBadges";
 import type { ProductFeature } from "@/lib/productFeatures";
 import type { ProductRequirement } from "@/lib/productRequirements";
 import { productHref } from "@/lib/routes";
 
-import { BadgeIcon } from "./BadgeIcon";
+import { ProductBadgeChip } from "./ProductBadgeChip";
 import { sentenceCase } from "@/lib/displayCase";
 import { formatVnd } from "./productData";
 import { SoftwareCheckoutDialog } from "./SoftwareCheckoutDialog";
@@ -273,13 +269,7 @@ export function SoftwareBuyPanel({
             </span>
           ) : null}
           {software.badges.map((badge) => (
-            <span
-              key={badge.label}
-              className={`${BADGE_PILL_BASE} ${badgePillClass(badge.color)}`}
-            >
-              <BadgeIcon icon={badge.icon} />
-              {badge.label}
-            </span>
+            <ProductBadgeChip key={badge.label} badge={badge} old={old} />
           ))}
         </div>
       ) : null}

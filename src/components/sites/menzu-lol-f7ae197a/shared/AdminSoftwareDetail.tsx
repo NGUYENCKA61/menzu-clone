@@ -17,12 +17,10 @@ import {
 } from "lucide-react";
 
 import {
-  badgePillClass,
   BADGE_COLOR_KEYS,
   BADGE_COLORS,
   BADGE_ICON_KEYS,
   BADGE_ICONS,
-  BADGE_PILL_BASE,
   DEFAULT_BADGE_COLOR,
   DEFAULT_BADGE_ICON,
   MAX_BADGE_LENGTH,
@@ -58,6 +56,7 @@ import {
 
 import { AdminError } from "./AdminStates";
 import { BadgeIcon } from "./BadgeIcon";
+import { ProductBadgeChip } from "./ProductBadgeChip";
 import { AdminImagePicker } from "./AdminImagePicker";
 import { AdminSoftwarePackages } from "./AdminSoftwarePackages";
 import type { PackageKeysView } from "./AdminPackageKeys";
@@ -852,13 +851,7 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
                     ]
                       .filter((b) => b.label)
                       .map((b) => (
-                        <span
-                          key={b.label}
-                          className={`${BADGE_PILL_BASE} ${badgePillClass(b.color)}`}
-                        >
-                          <BadgeIcon icon={b.icon} />
-                          {b.label}
-                        </span>
+                        <ProductBadgeChip key={b.label} badge={b} />
                       ))}
                   </div>
                 ) : null}

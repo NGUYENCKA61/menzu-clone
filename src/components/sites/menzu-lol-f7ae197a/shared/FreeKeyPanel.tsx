@@ -14,7 +14,6 @@ import {
   Zap,
 } from "lucide-react";
 
-import { badgePillClass, BADGE_PILL_BASE } from "@/lib/productBadges";
 import {
   FREE_CLAIM_GAP_MS,
   type FreeToolPanel,
@@ -23,7 +22,7 @@ import {
 } from "@/lib/freeKeyRules";
 import { isSalesLocked, salesLockReason } from "@/lib/softwareStatus";
 
-import { BadgeIcon } from "./BadgeIcon";
+import { ProductBadgeChip } from "./ProductBadgeChip";
 import { sentenceCase } from "@/lib/displayCase";
 import { type SoftwareDetail } from "./SoftwareBuyPanel";
 import { StockLine } from "./StockLine";
@@ -251,13 +250,7 @@ export function FreeKeyPanel({
           </span>
         )}
         {software.badges.map((badge) => (
-          <span
-            key={badge.label}
-            className={`${BADGE_PILL_BASE} ${badgePillClass(badge.color)}`}
-          >
-            <BadgeIcon icon={badge.icon} />
-            {badge.label}
-          </span>
+          <ProductBadgeChip key={badge.label} badge={badge} old={old} />
         ))}
       </div>
 
