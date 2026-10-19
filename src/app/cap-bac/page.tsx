@@ -4,6 +4,7 @@ import { BadgePercent, Crown, ShieldCheck } from "lucide-react";
 
 import { SimplePage } from "@/components/sites/menzu-lol-f7ae197a/shared/SimplePage";
 import { TierBadge } from "@/components/sites/menzu-lol-f7ae197a/shared/TierBadge";
+import { LabTierRotator } from "@/components/sites/menzu-lol-f7ae197a/shared/LabTierRotator";
 import { TierFacts, TierLadder } from "@/components/sites/menzu-lol-f7ae197a/shared/TierLadder";
 import { formatVnd } from "@/components/sites/menzu-lol-f7ae197a/shared/productData";
 import { db } from "@/lib/db";
@@ -75,6 +76,8 @@ export default async function MemberTiersPage({
           <div className="mt-6">
             <TierLadder mine={mine} toppedUp={toppedUp} />
           </div>
+          {/* LAB: three tier mark versions taking turns, dev only. */}
+          {process.env.NODE_ENV !== "production" ? <LabTierRotator /> : null}
         </>
       ) : (
         <>

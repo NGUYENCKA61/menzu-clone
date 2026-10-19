@@ -102,40 +102,94 @@ export function TierEmblem({
   className?: string;
 }) {
   const id = useId();
-  const { shape, cuts, scale } = GLYPH[tier];
+  const box = `shrink-0 ${SIZE[size]} ${TIER_STYLE[tier].text} ${className}`;
+  if (process.env.NODE_ENV === "production") {
+    return (
+      <svg viewBox="0 0 24 24" aria-hidden className={box}>
+        <Mark tier={tier} version="e3" id={id} />
+      </svg>
+    );
+  }
+  // LAB, dev only: all three versions the owner is comparing, one shown at
+  // a time by LabTierRotator on /cap-bac, the only page that draws them.
   return (
-    <svg
-      viewBox="0 0 24 24"
-      aria-hidden
-      className={`shrink-0 ${SIZE[size]} ${TIER_STYLE[tier].text} ${className}`}
-    >
-      <circle
-        cx="12"
-        cy="12"
-        r="11.4"
-        fill="currentColor"
-        fillOpacity={0.12}
-        stroke="currentColor"
-        strokeOpacity={0.3}
-        strokeWidth={0.6}
-      />
-      <g transform={`translate(12 12) scale(${INNER * scale}) translate(-12 -12)`}>
-        <mask id={id} maskUnits="userSpaceOnUse" x="-12" y="-12" width="48" height="48">
-          <rect x="-12" y="-12" width="48" height="48" fill="white" />
-          <g
-            fill="none"
-            stroke="black"
-            strokeWidth={1.1}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            {cuts}
-          </g>
-        </mask>
-        <g fill="currentColor" mask={`url(#${id})`}>
-          {shape}
+    <>
+      {(["e1", "e2", "e3"] as const).map((version) => (
+        <svg
+          key={version}
+          viewBox="0 0 24 24"
+          aria-hidden
+          className={`${box} lab-tv lab-tv-${version}`}
+        >
+          <Mark tier={tier} version={version} id={`${id}${version}`} />
+        </svg>
+      ))}
+    </>
+  );
+}
+
+/**
+ * The drawing for one version. E3 (the one printed): the round frame, the
+ * glyph at 80% of it. E1: no frame, the glyph at full size. E2: as E1 with
+ * Elite's crown as the old icon's outline rather than filled.
+ */
+function Mark({
+  tier,
+  version,
+  id,
+}: {
+  tier: MemberTierValue;
+  version: "e1" | "e2" | "e3";
+  id: string;
+}) {
+  const { shape, cuts, scale } = GLYPH[tier];
+  const framed = version === "e3";
+  const fit = `translate(12 12) scale(${(framed ? INNER : 1) * scale}) translate(-12 -12)`;
+  return (
+    <>
+      {framed ? (
+        <circle
+          cx="12"
+          cy="12"
+          r="11.4"
+          fill="currentColor"
+          fillOpacity={0.12}
+          stroke="currentColor"
+          strokeOpacity={0.3}
+          strokeWidth={0.6}
+        />
+      ) : null}
+      {version === "e2" && tier === "ELITE" ? (
+        <g
+          transform={fit}
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={2}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d={OLD_CROWN} />
+          <path d="M5 21h14" />
         </g>
-      </g>
-    </svg>
+      ) : (
+        <g transform={fit}>
+          <mask id={id} maskUnits="userSpaceOnUse" x="-12" y="-12" width="48" height="48">
+            <rect x="-12" y="-12" width="48" height="48" fill="white" />
+            <g
+              fill="none"
+              stroke="black"
+              strokeWidth={1.1}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              {cuts}
+            </g>
+          </mask>
+          <g fill="currentColor" mask={`url(#${id})`}>
+            {shape}
+          </g>
+        </g>
+      )}
+    </>
   );
 }
