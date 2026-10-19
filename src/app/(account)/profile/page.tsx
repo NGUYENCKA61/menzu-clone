@@ -207,11 +207,11 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                     {user.username}
                   </span>
                   {/* The tick as menzu draws it, a round disc with a white
-                      check, kept in our green ("dùng cái tick này giống menzu
-                      đc k", then "tick xanh lá được rồi làm thử đi"), where a
-                      scalloped badge stood. */}
+                      check ("dùng cái tick này giống menzu đc k"), where a
+                      scalloped badge stood; green first, then the verified
+                      blue ("xanh dương thử"). */}
                   <svg viewBox="0 0 24 24" aria-hidden className="h-[18px] w-[18px] shrink-0">
-                    <circle cx="12" cy="12" r="11" fill="#10b981" />
+                    <circle cx="12" cy="12" r="11" fill="#1d9bf0" />
                     <path
                       d="M7.2 12.4l3.2 3.2 6.4-6.8"
                       fill="none"
