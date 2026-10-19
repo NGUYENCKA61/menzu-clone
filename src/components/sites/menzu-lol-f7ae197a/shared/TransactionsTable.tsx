@@ -223,7 +223,7 @@ export function TransactionsTable({ rows }: { rows: LedgerView[] }) {
         ) : (
           <>
             <ListToolbar
-              tone="green"
+              tone="accent"
               query={query}
               onQuery={refilter(setQuery)}
               placeholder="Tìm kiếm mã GD, nội dung..."
@@ -238,7 +238,7 @@ export function TransactionsTable({ rows }: { rows: LedgerView[] }) {
             >
               <div className="grid grid-cols-2 gap-4">
                 <FilterSelect
-                  tone="green"
+                  tone="accent"
                   label="Phân loại"
                   value={direction}
                   onChange={refilter(setDirection)}
@@ -249,7 +249,7 @@ export function TransactionsTable({ rows }: { rows: LedgerView[] }) {
                   ]}
                 />
                 <FilterSelect
-                  tone="green"
+                  tone="accent"
                   label="Trạng thái"
                   value={status}
                   onChange={refilter(setStatus)}
@@ -264,8 +264,8 @@ export function TransactionsTable({ rows }: { rows: LedgerView[] }) {
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">
-                <FilterDate tone="green" label="Từ ngày" value={from} onChange={refilter(setFrom)} />
-                <FilterDate tone="green" label="Đến ngày" value={to} onChange={refilter(setTo)} />
+                <FilterDate tone="accent" label="Từ ngày" value={from} onChange={refilter(setFrom)} />
+                <FilterDate tone="accent" label="Đến ngày" value={to} onChange={refilter(setTo)} />
               </div>
             </ListToolbar>
 

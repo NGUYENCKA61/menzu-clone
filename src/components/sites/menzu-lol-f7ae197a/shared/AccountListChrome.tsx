@@ -32,14 +32,14 @@ const TONE = {
     mark: "text-emerald-400",
   },
   accent: {
-    focus: "focus:border-[var(--menzu-accent)]/50",
+    focus: "focus:border-[var(--menzu-accent)]/60 focus:bg-white/[0.08] focus:ring-2 focus:ring-[var(--menzu-accent)]/25",
     open: "bg-[var(--menzu-accent)]/10 border-[var(--menzu-accent)]/30 text-[var(--menzu-accent)]",
     mark: "text-[var(--menzu-accent)]",
   },
 } as const;
 
 const FIELD =
-  "w-full bg-raise border border-line hover:border-line-strong text-frost text-[14px] rounded-[10px] pl-3.5 pr-10 py-3 outline-none transition-colors appearance-none cursor-pointer";
+  "w-full bg-white/5 border border-white/10 hover:bg-white/[0.08] text-frost text-[14px] rounded-[10px] pl-3.5 pr-10 py-3 outline-none transition-colors appearance-none cursor-pointer";
 const FIELD_LABEL = "block text-[13px] font-medium text-mist mb-2";
 const OPTION = "bg-panel text-frost";
 const PAGE_ARROW =
@@ -112,7 +112,7 @@ export function ListToolbar({
           onChange={(event) => onQuery(event.target.value)}
           placeholder={placeholder}
           aria-label={placeholder}
-          className={`w-full appearance-none bg-raise border border-line rounded-[10px] py-3 pl-10 pr-4 text-[15px] text-frost placeholder:text-dim outline-none ${look.focus} transition-colors`}
+          className={`w-full appearance-none bg-white/5 border border-white/10 hover:bg-white/[0.08] rounded-[10px] py-3 pl-10 pr-4 text-[15px] text-frost placeholder:text-dim outline-none ${look.focus} transition-colors`}
         />
       </div>
 
@@ -125,7 +125,7 @@ export function ListToolbar({
           className={`flex items-center justify-center w-11 h-11 rounded-xl border transition-colors ${
             open || filtering
               ? look.open
-              : "bg-raise border-line text-mist hover:text-frost hover:border-line-strong"
+              : "bg-white/5 border-white/10 text-mist hover:text-frost hover:bg-white/[0.08]"
           }`}
         >
           <Funnel size={18} aria-hidden />

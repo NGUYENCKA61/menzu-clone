@@ -141,7 +141,7 @@ export function HeaderSearch() {
             and only the hairline was holding its shape. White at 5% over
             white at 10% read as decoration and sat at the wrong radius from
             the button beside it. */}
-        <label className="relative flex h-9 items-center rounded-[10px] border border-[#2b2b31] bg-raise text-neutral-300 transition-colors focus-within:border-[var(--menzu-accent)]/70 focus-within:ring-[3px] focus-within:ring-[var(--menzu-accent)]/15">
+        <label className="relative flex h-9 items-center rounded-[10px] border border-white/10 bg-white/5 text-neutral-300 transition-[border-color,box-shadow,background-color] hover:bg-white/[0.08] focus-within:border-[var(--menzu-accent)]/60 focus-within:bg-white/[0.08] focus-within:ring-2 focus-within:ring-[var(--menzu-accent)]/25">
           {/* The magnifier itself turns while a search or a pick is on its
               way — where the eye already looks for it, not at the far end,
               which keeps the clear button. */}

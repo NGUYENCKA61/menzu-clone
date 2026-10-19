@@ -306,7 +306,7 @@ export function GlossaryBrowser({
           autoComplete="off"
           spellCheck={false}
           enterKeyHint="search"
-          className="h-12 w-full rounded-2xl border border-white/10 bg-white/[0.02] pl-11 pr-4 text-sm text-white outline-none transition-[border-color,box-shadow] placeholder:text-neutral-500 focus:border-[var(--menzu-accent)]/50 focus:ring-2 focus:ring-[var(--menzu-accent)]/20 lg:pr-12"
+          className="h-12 w-full rounded-2xl border border-white/10 bg-white/5 pl-11 pr-4 text-sm text-white outline-none transition-[border-color,box-shadow,background-color] placeholder:text-neutral-500 hover:bg-white/[0.08] focus:border-[var(--menzu-accent)]/60 focus:bg-white/[0.08] focus:ring-2 focus:ring-[var(--menzu-accent)]/25 lg:pr-12"
         />
         {query ? null : (
           <kbd

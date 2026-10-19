@@ -35,23 +35,25 @@ export const PANEL_CLASS =
   "bg-neutral-900/35 border border-neutral-800/40 rounded-2xl p-3.5 md:p-4 flex flex-col gap-4";
 
 /**
- * The rounded well a search input sits in, lighting up on focus. rounded-3xl
+ * The rounded well a search input sits in, in every search box's colours
+ * (the wiki's: 5% fill, 10% rim, 8% on hover, the accent on focus; the owner,
+ * 19/10/2026, one look for every search bar). rounded-3xl
  * rather than the xl it used to be: the original gives both of its search
  * boxes a 24px radius, and at 12px they read as form fields instead of the
  * pills they are meant to be.
  */
 export const SEARCH_SHELL_CLASS =
-  "flex items-center gap-2 h-[50px] px-4 rounded-3xl bg-neutral-900/60 border border-neutral-800/60 focus-within:border-[var(--menzu-accent)]/60 transition-colors";
+  "flex items-center gap-2 h-[50px] px-4 rounded-3xl bg-white/5 border border-white/10 transition-[border-color,box-shadow,background-color] hover:bg-white/[0.08] focus-within:border-[var(--menzu-accent)]/60 focus-within:bg-white/[0.08] focus-within:ring-2 focus-within:ring-[var(--menzu-accent)]/25";
 
 /**
- * The primary field's shell — same size and radius, different skin. The
- * original sets this one a 1.5px red hairline over near-black, where the box
- * beside it gets grey over a lighter grey. It is the field with the reticle and
- * the sweep in it, and the warm border is part of that, not an accident of
- * whatever the glow happened to be doing when the screenshot was taken.
+ * The primary field's shell: same size and radius, and since 19/10/2026 the
+ * same colours as every search box (it had menzu's 1.5px red hairline over
+ * near-black). The breathing red ring (search-glow-brand) still marks it as
+ * the field with the reticle and the sweep in it; no focus ring, as that
+ * glow's box-shadow would paint over one.
  */
 export const SCOPE_SHELL_CLASS =
-  "flex items-center gap-2 h-[50px] px-4 rounded-3xl bg-[#111] border-[1.5px] border-[rgba(239,68,68,0.2)] transition-colors focus-within:border-[var(--menzu-accent)]/60";
+  "flex items-center gap-2 h-[50px] px-4 rounded-3xl bg-white/5 border-[1.5px] border-white/10 transition-[border-color,background-color] hover:bg-white/[0.08] focus-within:border-[var(--menzu-accent)]/60 focus-within:bg-white/[0.08]";
 
 export const SEARCH_INPUT_CLASS =
   "flex-1 bg-transparent outline-none text-white placeholder-neutral-400 text-sm transition-colors";

@@ -21,7 +21,7 @@ export function CartButton({ count }: { count: number }) {
       // Dressed like the search box beside it — same well, same hairline,
       // same 10px corner as the sign-in button — so the right-hand side of
       // the bar reads as one row of controls instead of three ideas.
-      className="relative flex h-9 w-9 items-center justify-center rounded-[10px] border border-[#2b2b31] bg-raise text-neutral-300 transition-colors hover:border-white/20 hover:bg-[#232329] hover:text-white"
+      className="relative flex h-9 w-9 items-center justify-center rounded-[10px] border border-white/10 bg-white/5 text-neutral-300 transition-colors hover:border-white/20 hover:bg-white/[0.08] hover:text-white"
     >
       <ShoppingCart size={16} />
       {count > 0 ? (

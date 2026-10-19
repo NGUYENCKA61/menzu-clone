@@ -69,7 +69,7 @@ function GameMark({
 }
 
 const FIELD =
-  "w-full rounded-xl border border-white/10 bg-neutral-950/60 py-3 pl-11 pr-4 text-sm text-white outline-none transition-colors placeholder-neutral-500 focus:border-[var(--menzu-accent)]/60";
+  "w-full rounded-xl border border-white/10 bg-white/5 py-3 pl-11 pr-4 text-sm text-white outline-none transition-[border-color,box-shadow,background-color] placeholder-neutral-500 hover:bg-white/[0.08] focus:border-[var(--menzu-accent)]/60 focus:bg-white/[0.08] focus:ring-2 focus:ring-[var(--menzu-accent)]/25";
 
 /** The small word beside a tool: whether this reader may open its docs. */
 function AccessChip({ access }: { access: DocsAccess }) {

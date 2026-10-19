@@ -279,7 +279,7 @@ export function RowSearch({
           the field and the tiles share their outer edges. */}
           <label
             htmlFor={inputId}
-            className="group/search relative isolate flex h-12 w-full items-center gap-3 rounded-[10px] bg-white/[0.02] px-4 ring-1 ring-inset ring-white/[0.06] transition-shadow focus-within:ring-[var(--menzu-accent)]/70"
+            className="group/search relative isolate flex h-12 w-full items-center gap-3 rounded-[10px] bg-white/5 px-4 ring-1 ring-inset ring-white/10 transition-[box-shadow,background-color] hover:bg-white/[0.08] focus-within:bg-white/[0.08] focus-within:ring-[var(--menzu-accent)]/60"
           >
             <Search
               size={18}
