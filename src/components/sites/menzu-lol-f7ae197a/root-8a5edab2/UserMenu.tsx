@@ -1,9 +1,9 @@
 "use client";
 
 import {
+  ArrowLeftRight,
   ChevronsUp,
   Handshake,
-  History,
   KeyRound,
   LayoutGrid,
   Loader2,
@@ -40,7 +40,7 @@ const GROUPS: { label: string; href: string; icon: LucideIcon }[][] = [
   [{ label: "Tổng quan", href: "/profile", icon: LayoutGrid }],
   [
     { label: "Nạp tiền", href: "/wallet", icon: Wallet },
-    { label: "Lịch sử giao dịch", href: "/transactions", icon: History },
+    { label: "Lịch sử giao dịch", href: "/transactions", icon: ArrowLeftRight },
     { label: "Lịch sử mua", href: "/orders", icon: ShoppingBag },
   ],
   [{ label: "Bảo mật", href: "/security", icon: ShieldCheck }],
@@ -268,7 +268,11 @@ export function UserMenu({ user }: { user: HeaderUser }) {
                   {group.map(({ label, href, icon: Icon }) => {
                     // The page the reader is already on. Marked rather than
                     // left looking like every other row, which is the one
-                    // thing a menu of six links can tell you for free.
+                    // thing a menu of six links can tell you for free. Marked
+                    // the way the account sidebar marks the same page: a grey
+                    // well, the icon alone in red (the owner, 20/10/2026:
+                    // "làm đi"; the red tint and bar made three reds at once
+                    // beside the Admin plate and Dashboard).
                     const active = pathname === href;
                     return (
                       <Link
@@ -281,7 +285,7 @@ export function UserMenu({ user }: { user: HeaderUser }) {
                         aria-current={active ? "page" : undefined}
                         className={`${ROW} ${
                           active
-                            ? "bg-[var(--menzu-accent)]/[0.08] text-white before:absolute before:left-0 before:top-2.5 before:bottom-2.5 before:w-[2px] before:rounded-full before:bg-[var(--menzu-accent)]"
+                            ? "bg-white/[0.07] text-frost ring-1 ring-inset ring-white/10"
                             : "text-neutral-200 hover:bg-white/5 hover:text-white"
                         }`}
                       >
