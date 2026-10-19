@@ -324,10 +324,15 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                     "Chưa xác minh" cut to "Chưa xác …"), three columns from sm. */}
                 <div className="mt-auto grid grid-cols-1 gap-1.5 border-t border-white/[0.06] pt-2 sm:grid-cols-3 sm:gap-3 sm:pt-1.5">
                   {[
+                    // The three values in white, one row one colour, the
+                    // colour kept for the small marks in front: the tier's on
+                    // the discount's check, green on the verified tick (the
+                    // owner, 19/10/2026: "Cả 2 chữ trắng thử đi"; the discount
+                    // was in the tier's colour, "Đã xác minh" in green).
                     {
                       label: "Ưu đãi mua tool",
                       value: `Giảm ${formatTierPercent(TIER_RULES[memberTier].discountPercent)}%`,
-                      tone: tier.text,
+                      tone: "text-white",
                     },
                     {
                       label: "Điểm thưởng",
@@ -337,7 +342,7 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                     {
                       label: "Xác minh cấp 2",
                       value: user.verifiedAt ? "Đã xác minh" : "Chưa xác minh",
-                      tone: user.verifiedAt ? "text-emerald-400" : "text-neutral-300",
+                      tone: user.verifiedAt ? "text-white" : "text-neutral-300",
                     },
                   ].map(({ label, value, tone }, index) => (
                     <div
@@ -355,6 +360,18 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                       >
                         {index === 0 ? (
                           <Check size={13} strokeWidth={3} className={`shrink-0 ${tier.text}`} />
+                        ) : index === 2 && user.verifiedAt ? (
+                          <svg viewBox="0 0 24 24" width={13} height={13} aria-hidden className="shrink-0">
+                            <circle cx="12" cy="12" r="11" fill="#10b981" />
+                            <path
+                              d="M7.2 12.4l3.2 3.2 6.4-6.8"
+                              fill="none"
+                              stroke="#ffffff"
+                              strokeWidth={3}
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                          </svg>
                         ) : null}
                         <span className="truncate">{value}</span>
                       </span>
