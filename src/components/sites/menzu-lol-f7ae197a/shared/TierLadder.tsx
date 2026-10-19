@@ -188,7 +188,7 @@ export function TierLadder({
                 {formatTierPercent(rule.discountPercent)}%
               </p>
               <p className="mt-1.5 text-[12px] text-mist">
-                {rule.discountPercent > 0 ? "giảm giá tool" : "chưa có ưu đãi"}
+                {rule.discountPercent > 0 ? "giảm khi mua tool" : "chưa có ưu đãi"}
               </p>
               {mine === tier ? (
                 <span
