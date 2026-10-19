@@ -17,7 +17,7 @@ import { AvatarUploader } from "@/components/sites/menzu-lol-f7ae197a/shared/Ava
 import { BannerUploader } from "@/components/sites/menzu-lol-f7ae197a/shared/BannerUploader";
 import { ProfileNotices } from "@/components/sites/menzu-lol-f7ae197a/shared/ProfileNotices";
 import { activeAnnouncements } from "@/lib/announcementStore";
-import { SHOP_TZ } from "@/lib/dayGroups";
+import { dayKey, SHOP_TZ } from "@/lib/dayGroups";
 import { db } from "@/lib/db";
 import {
   formatTierPercent,
@@ -110,7 +110,7 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
     // The three newest notices for everyone, for "Thông báo hệ thống": the
     // name the notice sheet gives the shop-wide ones, where a reader's own
     // are "Thông báo của bạn" (no reader passed, so audience ALL only).
-    activeAnnouncements(null, new Date(), 3),
+    activeAnnouncements(null, new Date(), 10),
     // The banner wears the first category's cover — the game art the shop
     // leads with — so the page changes when the catalogue does.
     db.category.findFirst({
@@ -125,6 +125,26 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
   const bannerArt =
     user.bannerUrl || settings.profileBanner || cover?.imageUrl || BANNER_FALLBACK;
   const isAdmin = user.role === "ADMIN";
+  // Shaped the way the header hands notices to the notice sheet, so a card
+  // in "Thông báo hệ thống" opens the very same sheet; the date formatted
+  // here, on the shop's clock, as the sheet's "Cập nhật" line is.
+  const noticeItems = notices.map((a) => ({
+    id: a.id,
+    title: a.title,
+    body: a.body,
+    bullets: a.bullets,
+    noticeTitle: a.noticeTitle,
+    noticeBody: a.noticeBody,
+    imageUrl: a.imageUrl,
+    ctaLabel: a.ctaLabel,
+    ctaHref: a.ctaHref,
+    type: a.type,
+    priority: a.priority,
+    revision: a.revision,
+    startAt: a.startAt.toISOString(),
+    updatedLabel: dayKey(a.updatedAt),
+    silent: a.silent,
+  }));
 
   const memberTier = readMemberTier(user.tier);
   const tier = TIER_STYLE[memberTier];
@@ -380,7 +400,7 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
             dụng ... thay bằng phần thông báo hệ thống thử thiết kế tui xem"
             (19/10/2026, a trial). The balance stays in the header's account
             chip; the figures are one revert away. */}
-        <ProfileNotices notices={notices} />
+        <ProfileNotices items={noticeItems} />
       </div>
       </AccountPanel>
     </AccountPageFrame>

@@ -352,7 +352,9 @@ export function AnnouncementModal({
   onClose: () => void;
   /** The button: done with this one, the next may follow. */
   onNext?: () => void;
-  onSnooze: () => void;
+  /** Left out where the reader opened the notice on purpose (the account
+   *  overview's list): there is nothing to put off, so no snooze button. */
+  onSnooze?: () => void;
 }) {
   const panel = useRef<HTMLDivElement>(null);
 
@@ -551,7 +553,7 @@ export function AnnouncementModal({
               reply or a credit addressed to this reader is read once, and a
               third button only crowded the row on a phone (the owner,
               12/10/2026, review item 2). */}
-          {item.personal ? null : (
+          {item.personal || !onSnooze ? null : (
             <button
               type="button"
               onClick={onSnooze}
