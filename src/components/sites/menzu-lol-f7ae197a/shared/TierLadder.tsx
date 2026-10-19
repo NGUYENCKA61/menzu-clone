@@ -171,7 +171,7 @@ export function TierLadder({
                 <Join
                   filled={filled(k)}
                   bar={bar}
-                  className="left-[calc(50%+20px)] top-[22px] h-0.5 w-[calc(100%-40px)] -translate-y-1/2"
+                  className="left-[calc(50%+23px)] top-[22px] h-0.5 w-[calc(100%-46px)] -translate-y-1/2"
                 />
               ) : null}
               {/* Full colour whether reached or not: faded to 40% the marks
@@ -212,7 +212,7 @@ export function TierLadder({
                   filled={filled(k)}
                   bar={bar}
                   vertical
-                  className="left-[21px] top-[calc(50%+17px)] h-[calc(100%-34px)] w-0.5"
+                  className="left-[21px] top-[calc(50%+22px)] h-[calc(100%-44px)] w-0.5"
                 />
               ) : null}
               <TierEmblem tier={tier} />
