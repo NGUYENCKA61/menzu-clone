@@ -211,6 +211,13 @@ export function WarrantyChat({
         buyerInitial={buyerInitial}
         opening={opening}
         messages={messages}
+        // LAB TRIAL: from tablet width up the pane opens 480px tall even with
+        // one message, so the page that exists for this conversation looks
+        // like a chat from the start; it still grows to 600px, then scrolls.
+        // Phones keep 160px (the owner, 19/10/2026: "khung chat hỗ trợ ... tui
+        // thấy nó không được rộng", "ok làm thử đi"; 360px hardly showed on a
+        // ticket that already filled 335px, so "thử đi" for 480px).
+        size="max-h-[440px] min-h-[160px] sm:min-h-[480px] sm:max-h-[600px]"
         // Said plainly while it is so, or the buyer stares at their own
         // message wondering whether anyone reads it.
         footer={messages.some((m) => m.fromShop) ? null : "Shop chưa trả lời."}
