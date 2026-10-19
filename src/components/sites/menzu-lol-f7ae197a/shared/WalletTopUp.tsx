@@ -78,7 +78,9 @@ function CardNumberField({
   onChange: (next: string) => void;
 }) {
   const take = (raw: string) => onChange(raw.replace(/\D/g, "").slice(0, 24));
-  // Half a number gets told so, under the box it is about.
+  // Half a number gets told so, under the box it is about, and the box's rim
+  // turns red with it. Typing itself changes only the rim, no tint (the owner,
+  // 19/10/2026: "2 ô này có vấn đề với màu sắc khi gõ").
   const short = value.length > 0 && value.length < CARD_DIGITS_MIN;
   return (
     <div>
@@ -93,7 +95,11 @@ function CardNumberField({
           placeholder={placeholder}
           value={value}
           onChange={(event) => take(event.target.value)}
-          className="w-full bg-white/[0.02] border border-white/10 rounded-xl pl-4 pr-12 py-3.5 text-sm text-white placeholder:text-neutral-700 focus:outline-none focus:border-white/30 focus:bg-emerald-500/5 transition-all font-mono shadow-inner"
+          aria-invalid={short || undefined}
+          aria-describedby={short ? `${id}-error` : undefined}
+          className={`w-full bg-white/[0.02] border rounded-xl pl-4 pr-12 py-3.5 text-sm text-white placeholder:text-neutral-700 focus:outline-none transition-all font-mono shadow-inner ${
+            short ? "border-red-500/50 focus:border-red-500/70" : "border-white/10 focus:border-white/30"
+          }`}
         />
         <button
           type="button"
@@ -112,7 +118,7 @@ function CardNumberField({
         </button>
       </div>
       {short ? (
-        <span className="mt-1.5 ml-1 block text-[11px] font-semibold text-red-400">
+        <span id={`${id}-error`} className="mt-1.5 ml-1 block text-[11px] font-semibold text-red-400">
           {label} cần ít nhất {CARD_DIGITS_MIN} chữ số
         </span>
       ) : null}
@@ -671,7 +677,7 @@ export function WalletTopUp({
                       type="submit"
                       disabled={pending || !cardReady}
                       aria-busy={pending}
-                      className="w-full h-12 bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] text-white rounded-xl font-semibold text-[14px] transition-all flex items-center justify-center gap-2 disabled:opacity-30 disabled:cursor-not-allowed active:scale-[0.99]"
+                      className="w-full h-12 bg-white hover:bg-neutral-200 text-black rounded-xl font-semibold text-[14px] transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98]"
                     >
                       {pending ? (
                         <Loader2 size={17} className="animate-spin motion-reduce:animate-none" aria-hidden />
