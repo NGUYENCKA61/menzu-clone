@@ -125,8 +125,6 @@ type CardLook = {
   chevron?: boolean;
   /** The picture's classes when they differ from the default. */
   img?: string;
-  /** The name's hover classes when they differ from the default. */
-  titleHover?: string;
 };
 const CHIP_RAISE = "rounded-md border border-line-strong bg-raise px-2 py-0.5 text-[12px] font-medium text-frost/90";
 const CHIP_NEUTRAL = "rounded-md border border-white/15 bg-white/[0.05] px-2 py-0.5 text-[12px] font-medium text-frost/90";
@@ -141,7 +139,6 @@ const LOOKS: CardLook[] = [
   { id: "8", name: "Thẻ tối hơn khung", card: "border-white/10 bg-black/30 hover:border-white/20", thumb: "sm:w-36", title: "sm:text-[17px]", price: "text-[17px]", chip: CHIP_RAISE, button: BUTTON_RAISE },
   { id: "9", name: "Ảnh, tên, giá to hơn", card: "border-white/10 hover:border-line-strong", thumb: "sm:w-[168px]", title: "sm:text-[18px]", price: "text-[19px]", chip: CHIP_RAISE, button: BUTTON_RAISE },
   { id: "12", name: "Hiệu ứng khi rê chuột", card: "border-white/10 hover:-translate-y-0.5 hover:border-white/25 hover:bg-white/[0.03] motion-reduce:hover:translate-y-0", thumb: "sm:w-36", title: "sm:text-[17px]", price: "text-[17px]", chip: CHIP_RAISE, button: BUTTON_RAISE_LIT, img: "object-cover brightness-[.92] transition-[filter,transform] duration-300 group-hover:scale-[1.04] group-hover:brightness-110 motion-reduce:group-hover:scale-100" },
-  { id: "14", name: "Hiệu ứng khi rê chuột, tên đỏ", card: "border-white/10 hover:-translate-y-0.5 hover:border-white/25 hover:bg-white/[0.03] motion-reduce:hover:translate-y-0", thumb: "sm:w-36", title: "sm:text-[17px]", price: "text-[17px]", chip: CHIP_RAISE, button: BUTTON_RAISE_LIT, img: "object-cover brightness-[.92] transition-[filter,transform] duration-300 group-hover:scale-[1.04] group-hover:brightness-110 motion-reduce:group-hover:scale-100", titleHover: "duration-200 group-hover:text-[var(--menzu-accent)]" },
   { id: "10", name: "Viền 20%", card: "border-white/20 hover:border-white/30", thumb: "sm:w-36", title: "sm:text-[17px]", price: "text-[17px]", chip: CHIP_RAISE, button: BUTTON_RAISE },
 ];
 
@@ -157,9 +154,8 @@ export function OrdersList({ orders }: { orders: OrderCardView[] }) {
   }, [thu]);
   const pinned = thu && thu !== "xoay" ? LOOKS.findIndex((l) => l.id === thu) : -1;
   // The card the page draws without ?thu: today's card with a hover look, on
-  // trial (the owner, 20/10/2026: "làm hiệu ứng khi rê thử", then "cứ thêm
-  // tên đỏ đi").
-  const fallback = Math.max(0, LOOKS.findIndex((l) => l.id === "14"));
+  // trial (the owner, 20/10/2026: "làm hiệu ứng khi rê thử").
+  const fallback = Math.max(0, LOOKS.findIndex((l) => l.id === "12"));
   const look = thu === "xoay" ? LOOKS[tick % LOOKS.length]! : LOOKS[pinned >= 0 ? pinned : fallback]!;
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState("newest");
@@ -358,7 +354,7 @@ export function OrdersList({ orders }: { orders: OrderCardView[] }) {
                                   and on the order's own page. */}
                               <h3
                                 title={order.title}
-                                className={`truncate font-display text-[15px] font-semibold leading-snug text-frost transition-colors ${look.titleHover ?? "group-hover:text-white"} ${look.title}`}
+                                className={`truncate font-display text-[15px] font-semibold leading-snug text-frost transition-colors group-hover:text-white ${look.title}`}
                               >
                                 {sentenceCase(order.title)}
                               </h3>
