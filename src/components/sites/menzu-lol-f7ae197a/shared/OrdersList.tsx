@@ -290,6 +290,13 @@ export function OrdersList({ orders }: { orders: OrderCardView[] }) {
                             </div>
 
                             <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+                              {/* TRIAL, the owner 20/10/2026: "mã đơn lên trên
+                                  ngày xuống dưới thì sao", "thử": the code above
+                                  the name, the date and time at the card's foot
+                                  (four lines; 572ca04b has the three-line card). */}
+                              <p className="text-[13px] tabular-nums text-mist">
+                                <span className="text-dim">Mã đơn</span> {order.detail.code}
+                              </p>
                               {/* One line, cut with an ellipsis: two lines of the
                                   shelf's capitals per card made the list a wall
                                   (the owner, 16/10/2026: "có nên đổi qua dấu ...",
@@ -332,14 +339,8 @@ export function OrdersList({ orders }: { orders: OrderCardView[] }) {
                                   ) : null}
                                 </div>
                               ) : null}
-                              <p className="text-[13px] tabular-nums text-mist">
-                                <span className="whitespace-nowrap">
-                                  <span className="text-dim">Mã đơn</span> {order.detail.code}
-                                </span>
-                                {" · "}
-                                <span className="whitespace-nowrap">
-                                  {byDay ? order.clock : order.stamp}
-                                </span>
+                              <p className="text-[13px] tabular-nums text-dim">
+                                {order.stamp}
                               </p>
                             </div>
                           </div>
