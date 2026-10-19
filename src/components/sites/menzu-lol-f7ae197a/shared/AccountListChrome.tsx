@@ -132,7 +132,7 @@ export function ListToolbar({
         </button>
 
         {open ? (
-          <div className="absolute top-full right-0 mt-2 w-[min(380px,calc(100vw-2rem))] bg-raise border border-white/10 rounded-[20px] z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-300">
+          <div className="absolute top-full right-0 mt-2 w-[min(380px,calc(100vw-2rem))] bg-neutral-900 border border-white/10 rounded-[20px] shadow-2xl shadow-black/50 z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-300">
             <div className="p-6 pb-4 border-b border-white/5">
               <h4 className="font-display text-[17px] font-bold text-frost flex items-center gap-2">
                 <ListFilter size={18} className={look.mark} aria-hidden />
