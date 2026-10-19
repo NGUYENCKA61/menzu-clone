@@ -222,7 +222,7 @@ export function UserMenu({ user }: { user: HeaderUser }) {
                   {user.uid !== undefined ? (
                     <span className="inline-flex -skew-x-12 rounded-[4px] border border-white/10 bg-white/[0.07] px-2 py-1">
                       <span className="skew-x-12 text-[12px] font-semibold leading-none text-neutral-300">
-                        UID: {user.uid}
+                        UID {user.uid}
                       </span>
                     </span>
                   ) : null}
