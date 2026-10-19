@@ -99,7 +99,7 @@ export default async function AffiliatePage() {
       // and red type on a red tint was the hardest thing on the page to read.
       tone: "text-frost",
       box: "border-white/10 bg-white/[0.04] text-mist",
-      shell: "border-white/10 bg-white/[0.02]",
+      shell: "border-white/10 bg-white/[0.02] sm:bg-transparent",
     },
     {
       icon: HandCoins,
@@ -111,7 +111,7 @@ export default async function AffiliatePage() {
       // two shades of red beside a green.
       tone: "text-frost",
       box: "border-white/10 bg-white/[0.04] text-mist",
-      shell: "border-white/10 bg-white/[0.02]",
+      shell: "border-white/10 bg-white/[0.02] sm:bg-transparent",
     },
     {
       icon: Handshake,
@@ -120,7 +120,7 @@ export default async function AffiliatePage() {
       unit: "đ",
       tone: "text-frost",
       box: "border-white/10 bg-white/[0.04] text-mist",
-      shell: "border-white/10 bg-white/[0.02]",
+      shell: "border-white/10 bg-white/[0.02] sm:bg-transparent",
     },
   ] as const;
 
@@ -132,7 +132,7 @@ export default async function AffiliatePage() {
         subtitle={`Chia sẻ liên kết giới thiệu, nhận ${REFERRAL_PERCENT}% mỗi giao dịch nạp tiền`}
       >
         <div className="flex flex-col gap-4">
-          <section className="flex flex-col gap-4 rounded-2xl border border-white/10 bg-white/[0.02] p-5 sm:p-6">
+          <section className="flex flex-col gap-4 rounded-2xl border border-white/10 bg-white/[0.02] sm:bg-transparent p-5 sm:p-6">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <h3 className="text-[15px] font-semibold text-white">
                 Liên kết giới thiệu của bạn
@@ -168,7 +168,7 @@ export default async function AffiliatePage() {
             ))}
           </div>
 
-          <section className="flex flex-col gap-4 rounded-2xl border border-white/10 bg-white/[0.02] p-5 sm:p-6">
+          <section className="flex flex-col gap-4 rounded-2xl border border-white/10 bg-white/[0.02] sm:bg-transparent p-5 sm:p-6">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <h3 className="text-[15px] font-semibold text-white">
                 Cách hoạt động
@@ -195,7 +195,7 @@ export default async function AffiliatePage() {
             </ol>
           </section>
 
-          <section className="flex flex-col gap-4 rounded-2xl border border-white/10 bg-white/[0.02] p-5 sm:p-6">
+          <section className="flex flex-col gap-4 rounded-2xl border border-white/10 bg-white/[0.02] sm:bg-transparent p-5 sm:p-6">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <h3 className="text-[15px] font-semibold text-white">
                 Hoa hồng gần đây

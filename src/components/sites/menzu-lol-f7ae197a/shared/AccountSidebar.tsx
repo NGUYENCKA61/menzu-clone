@@ -78,11 +78,11 @@ export function AccountSidebar({
 
   return (
     <div className="hidden lg:block w-full lg:w-[280px] shrink-0 sticky top-[88px]">
-      {/* The account panel's own plate (AccountPanel): solid #111, a 5% rim,
-          24px corners, so the two cards of an account page match (the owner,
-          03/10/2026: "màu card trái và card phải đồng bộ chưa" → "rồi làm
-          đi"). It was neutral-900 at 60%, a 10% rim and 18px. */}
-      <nav className="bg-transparent border border-line rounded-[20px] p-3">
+      {/* The wiki side box's colours (DOCS_RAIL_BOX: 2% fill, 10% rim), as
+          the account panel beside it wears them, so the two cards of an
+          account page match each other and the wiki (the owner, 19/10/2026:
+          "tô nền cho đồng bộ như wiki"). Corners stay 20px. */}
+      <nav className="bg-white/[0.02] border border-white/10 rounded-[20px] p-3">
         {/* The face on top, as the captured sidebar has it: avatar, name, and
             the role in a whisper underneath. */}
         {user ? (

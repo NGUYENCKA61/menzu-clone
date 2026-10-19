@@ -331,7 +331,7 @@ export function WalletTopUp({
       <div>
 
         {tabs.length === 0 ? (
-          <div className="p-8 text-center bg-white/[0.02] border border-white/10 rounded-2xl">
+          <div className="p-8 text-center bg-white/[0.02] sm:bg-transparent border border-white/10 rounded-2xl">
             <p className="text-sm font-bold text-white">Tạm ngưng nhận nạp tiền</p>
             <p className="mt-1.5 text-sm text-neutral-500">
               Shop đang tạm dừng cả nạp ngân hàng và thẻ cào. Số dư sẵn có trong ví vẫn dùng
@@ -436,7 +436,7 @@ export function WalletTopUp({
             ) : null}
 
             {method === "bank" && !bankReady ? (
-              <div className="p-8 text-center bg-white/[0.02] border border-white/10 rounded-2xl">
+              <div className="p-8 text-center bg-white/[0.02] sm:bg-transparent border border-white/10 rounded-2xl">
                 <p className="text-sm font-bold text-white">Chưa nhận được chuyển khoản</p>
                 <p className="mt-1.5 text-sm text-neutral-500">
                   Shop chưa khai báo tài khoản ngân hàng nhận tiền. Vui lòng dùng thẻ cào hoặc
@@ -447,7 +447,7 @@ export function WalletTopUp({
               <div className="w-full mt-4">
                 <form
                   onSubmit={handleSubmit}
-                  className="sm:bg-white/[0.02] sm:border sm:border-white/5 rounded-2xl p-0 sm:p-6 transition-all"
+                  className="sm:border sm:border-white/5 rounded-2xl p-0 sm:p-6 transition-all"
                 >
                   {/* A card header the way Bảo mật's cards read, the hint on
                       its own line under the title (the owner, 16/10/2026:
@@ -644,7 +644,7 @@ export function WalletTopUp({
                     over chat: the request then carries everything the desk
                     needs. */}
                 {carrier && cardAmountOk ? (
-                  <div className="animate-in fade-in zoom-in-95 duration-200 sm:bg-white/[0.02] sm:border sm:border-white/5 p-0 sm:p-5 rounded-2xl mt-6">
+                  <div className="animate-in fade-in zoom-in-95 duration-200 sm:border sm:border-white/5 p-0 sm:p-5 rounded-2xl mt-6">
                     <span className={`${STEP} mb-4 block`}>3. Thông tin mã thẻ</span>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
                       <CardNumberField

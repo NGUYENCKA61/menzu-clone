@@ -90,7 +90,7 @@ export function SpinPrizeClaim({
   }
 
   return (
-    <div className="flex flex-col gap-4 rounded-xl border border-white/10 bg-white/[0.02] p-4">
+    <div className="flex flex-col gap-4 rounded-xl border border-white/10 bg-white/[0.02] sm:bg-transparent p-4">
       <div className="flex items-start gap-2.5">
         <Gift size={16} className="mt-0.5 shrink-0 text-[var(--menzu-violet)]" />
         <p className="text-[13px] leading-relaxed text-neutral-300">

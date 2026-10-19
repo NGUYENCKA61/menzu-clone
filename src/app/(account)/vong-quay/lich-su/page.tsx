@@ -195,30 +195,30 @@ export default async function SpinHistoryPage({
             label="Tiền"
             value={`${formatVnd(sum("BALANCE"))}đ`}
             icon={Coins}
-            tint="border-white/10 bg-white/[0.02] text-frost"
+            tint="border-white/10 bg-white/[0.02] sm:bg-transparent text-frost"
           />
           <Total
             label="Điểm"
             value={formatVnd(sum("POINTS"))}
             icon={Star}
-            tint="border-white/10 bg-white/[0.02] text-frost"
+            tint="border-white/10 bg-white/[0.02] sm:bg-transparent text-frost"
           />
           <Total
             label="Mã giảm giá"
             value={String(count("VOUCHER"))}
             icon={Ticket}
-            tint="border-white/10 bg-white/[0.02] text-frost"
+            tint="border-white/10 bg-white/[0.02] sm:bg-transparent text-frost"
           />
           <Total
             label="Quà tặng"
             value={String(count("ITEM"))}
             icon={Gift}
-            tint="border-white/10 bg-white/[0.02] text-frost"
+            tint="border-white/10 bg-white/[0.02] sm:bg-transparent text-frost"
           />
         </section>
 
         {wins.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-white/10 bg-white/[0.02] py-16 text-center">
+          <div className="rounded-2xl border border-dashed border-white/10 bg-white/[0.02] sm:bg-transparent py-16 text-center">
             <p className="text-sm font-bold text-white">Chưa trúng phần thưởng nào</p>
             <p className="mt-1.5 text-[13px] text-neutral-400">
               Quay một lượt để bắt đầu, mỗi lần trúng sẽ được ghi lại ở đây.
@@ -289,7 +289,7 @@ export default async function SpinHistoryPage({
                   ) : null}
 
                   <div
-                    className={`flex flex-wrap items-center gap-x-3 gap-y-2.5 rounded-xl border border-l-2 border-white/10 bg-white/[0.02] p-3.5 pl-3 transition-colors hover:border-y-white/[0.12] hover:border-r-white/[0.12] ${kind.rail}`}
+                    className={`flex flex-wrap items-center gap-x-3 gap-y-2.5 rounded-xl border border-l-2 border-white/10 bg-white/[0.02] sm:bg-transparent p-3.5 pl-3 transition-colors hover:border-y-white/[0.12] hover:border-r-white/[0.12] ${kind.rail}`}
                   >
                     <span
                       className={`grid h-10 w-10 shrink-0 place-items-center rounded-xl border ${kind.tile}`}

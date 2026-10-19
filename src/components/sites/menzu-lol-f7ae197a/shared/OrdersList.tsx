@@ -160,7 +160,7 @@ export function OrdersList({ orders }: { orders: OrderCardView[] }) {
   return (
     <div
       ref={top}
-      className="scroll-mt-28 w-full bg-transparent border border-line rounded-2xl sm:rounded-[20px] p-4 sm:p-8 lg:p-10 relative min-h-[750px]"
+      className="scroll-mt-28 w-full bg-white/[0.02] border border-white/10 rounded-2xl sm:rounded-[20px] p-4 sm:p-8 lg:p-10 relative min-h-[750px]"
     >
       <div className="flex flex-col gap-6 relative z-10">
         <div className="mb-2 relative z-10">
@@ -175,7 +175,7 @@ export function OrdersList({ orders }: { orders: OrderCardView[] }) {
 
         {orders.length === 0 ? (
           // A buyer with no orders at all is not a search that missed.
-          <div className="p-8 text-center bg-white/[0.02] border border-white/10 rounded-2xl">
+          <div className="p-8 text-center border border-white/10 rounded-2xl">
             <p className="text-neutral-400 text-sm">Chưa có đơn hàng nào.</p>
             <p className="mt-1 text-neutral-500 text-xs">Bạn chưa mua sản phẩm nào trên hệ thống.</p>
             <Link
@@ -234,7 +234,7 @@ export function OrdersList({ orders }: { orders: OrderCardView[] }) {
 
             <div className="flex flex-col gap-5">
               {visible.length === 0 ? (
-                <div className="p-8 text-center bg-white/[0.02] border border-white/10 rounded-2xl">
+                <div className="p-8 text-center border border-white/10 rounded-2xl">
                   <p className="text-neutral-500 text-sm">Không tìm thấy đơn hàng nào khớp.</p>
                 </div>
               ) : (
@@ -271,7 +271,7 @@ export function OrdersList({ orders }: { orders: OrderCardView[] }) {
                           // đánh giá đi"). To bring the receipt's button back:
                           // reviewHref={order.review?.href ?? null}
                           reviewHref={null}
-                          className="group flex cursor-pointer flex-col gap-3 rounded-2xl border border-white/10 bg-white/[0.02] p-3.5 outline-none transition-colors hover:border-line-strong focus-visible:ring-2 focus-visible:ring-[var(--menzu-accent)]/60 sm:flex-row sm:items-center sm:gap-5 sm:p-4"
+                          className="group flex cursor-pointer flex-col gap-3 rounded-2xl border border-white/10 p-3.5 outline-none transition-colors hover:border-line-strong focus-visible:ring-2 focus-visible:ring-[var(--menzu-accent)]/60 sm:flex-row sm:items-center sm:gap-5 sm:p-4"
                         >
                           <div className="flex min-w-0 flex-1 items-start gap-3 sm:items-center sm:gap-5">
                             {/* menzu's 16:9 picture at 144px (theirs is 192),

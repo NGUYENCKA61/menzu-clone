@@ -98,7 +98,7 @@ export default async function AgencyPage() {
             </Link>
           ) : null}
   
-          <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-5 sm:p-6 flex items-start gap-5">
+          <div className="rounded-2xl border border-white/10 bg-white/[0.02] sm:bg-transparent p-5 sm:p-6 flex items-start gap-5">
             <div className="w-12 h-12 shrink-0 rounded-2xl bg-white/[0.06] border border-white/10 flex items-center justify-center">
               <Store size={22} className="text-[var(--menzu-accent)]" />
             </div>
@@ -116,7 +116,7 @@ export default async function AgencyPage() {
             {PERKS.map(({ icon: Icon, title, body }) => (
               <div
                 key={title}
-                className="rounded-2xl border border-white/10 bg-white/[0.02] p-5 flex flex-col gap-2.5"
+                className="rounded-2xl border border-white/10 bg-white/[0.02] sm:bg-transparent p-5 flex flex-col gap-2.5"
               >
                 <Icon size={18} className="text-[var(--menzu-accent)]" />
                 <span className="text-[12px] font-semibold text-neutral-400">
@@ -127,7 +127,7 @@ export default async function AgencyPage() {
             ))}
           </div>
   
-          <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-5 sm:p-6 flex flex-col gap-4">
+          <div className="rounded-2xl border border-white/10 bg-white/[0.02] sm:bg-transparent p-5 sm:p-6 flex flex-col gap-4">
             <span className="text-[12px] font-semibold text-neutral-500">
               Cách đăng ký
             </span>
@@ -168,7 +168,7 @@ export default async function AgencyPage() {
             )}
           </div>
   
-          <div className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/[0.02] px-4 py-3">
+          <div className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/[0.02] sm:bg-transparent px-4 py-3">
             <PackageCheck size={16} className="shrink-0 text-neutral-500" />
             <p className="text-xs leading-relaxed text-neutral-400">
               Đơn đại lý vẫn vào Lịch sử mua như đơn thường; admin giao key sau

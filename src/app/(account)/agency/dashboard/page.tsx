@@ -128,7 +128,7 @@ export default async function AgencyDashboardPage() {
       unit: "đ",
       tone: "text-frost",
       box: "border-white/10 bg-white/[0.04] text-mist",
-      shell: "border-white/10 bg-white/[0.02]",
+      shell: "border-white/10 bg-white/[0.02] sm:bg-transparent",
     },
     {
       icon: KeyRound,
@@ -137,7 +137,7 @@ export default async function AgencyDashboardPage() {
       unit: "key",
       tone: "text-frost",
       box: "border-white/10 bg-white/[0.04] text-mist",
-      shell: "border-white/10 bg-white/[0.02]",
+      shell: "border-white/10 bg-white/[0.02] sm:bg-transparent",
     },
     {
       icon: PiggyBank,
@@ -146,7 +146,7 @@ export default async function AgencyDashboardPage() {
       unit: "đ",
       tone: "text-frost",
       box: "border-white/10 bg-white/[0.04] text-mist",
-      shell: "border-white/10 bg-white/[0.02]",
+      shell: "border-white/10 bg-white/[0.02] sm:bg-transparent",
     },
   ] as const;
 
@@ -195,7 +195,7 @@ export default async function AgencyDashboardPage() {
           ))}
         </div>
 
-        <section className="flex flex-col gap-4 rounded-2xl border border-white/10 bg-white/[0.02] p-5">
+        <section className="flex flex-col gap-4 rounded-2xl border border-white/10 bg-white/[0.02] sm:bg-transparent p-5">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <h3 className="text-[15px] font-semibold text-white">
               Mua key giá đại lý
@@ -216,7 +216,7 @@ export default async function AgencyDashboardPage() {
           <AgencyKeyDesk products={deskProducts} discountPercent={percent} />
         </section>
 
-        <section className="flex flex-col gap-4 rounded-2xl border border-white/10 bg-white/[0.02] p-5">
+        <section className="flex flex-col gap-4 rounded-2xl border border-white/10 bg-white/[0.02] sm:bg-transparent p-5">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <h3 className="text-[15px] font-semibold text-white">
               Đơn key gần đây

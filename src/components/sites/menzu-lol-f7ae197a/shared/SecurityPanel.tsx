@@ -85,7 +85,7 @@ const TITLE =
   "text-[24px] sm:text-[30px] font-black leading-tight text-frost mb-2 flex items-center gap-3";
 const SUBTITLE = "text-xs sm:text-sm text-neutral-400 leading-relaxed";
 const CARD =
-  "relative bg-white/[0.02] border border-line rounded-[14px] p-5 sm:p-6 overflow-hidden group";
+  "relative bg-white/[0.02] sm:bg-transparent border border-line rounded-[14px] p-5 sm:p-6 overflow-hidden group";
 const CARD_TITLE = "text-[17px] font-bold text-frost";
 const FIELD =
   "w-full rounded-[10px] border border-line bg-raise px-4 py-3 text-frost text-[15px] outline-none placeholder:text-dim focus:border-white/40 transition-colors disabled:opacity-50";
@@ -478,7 +478,7 @@ export function SecurityPanel({
         </div>
       </div>
 
-      <div className="w-full bg-transparent sm:bg-transparent border-none sm:border sm:border-line rounded-none sm:rounded-[20px] p-0 sm:p-8 lg:p-10 relative min-h-0 sm:min-h-[500px]">
+      <div className="w-full bg-transparent sm:bg-white/[0.02] border-none sm:border sm:border-white/10 rounded-none sm:rounded-[20px] p-0 sm:p-8 lg:p-10 relative min-h-0 sm:min-h-[500px]">
         {tab === "security" ? (
           <div className="flex flex-col gap-8">
             {header(
@@ -751,7 +751,7 @@ export function SecurityPanel({
                   </div>
                 );
                 const shell =
-                  "flex flex-col gap-4 p-5 rounded-2xl bg-white/[0.02] border border-white/5";
+                  "flex flex-col gap-4 p-5 rounded-2xl bg-white/[0.02] sm:bg-transparent border border-white/5";
                 return door ? (
                   <a
                     key={platform.key}
@@ -850,7 +850,7 @@ export function SecurityPanel({
                     className={`flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-2xl border ${
                       session.current
                         ? "border-[var(--menzu-accent)]/30 bg-[var(--menzu-accent)]/[0.02]"
-                        : "border-white/5 bg-white/[0.02] hover:bg-white/[0.04]"
+                        : "border-white/5 bg-white/[0.02] sm:bg-transparent hover:bg-white/[0.04]"
                     }`}
                   >
                     <div className="flex items-center gap-4 overflow-hidden">

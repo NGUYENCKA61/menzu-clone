@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 };
 export const dynamic = "force-dynamic";
 
-const CARD = "rounded-2xl border border-white/10 bg-white/[0.02] p-5 sm:p-6";
+const CARD = "rounded-2xl border border-white/10 bg-white/[0.02] sm:bg-transparent p-5 sm:p-6";
 
 function stamp(date: Date): string {
   return date.toLocaleString("vi-VN", {
