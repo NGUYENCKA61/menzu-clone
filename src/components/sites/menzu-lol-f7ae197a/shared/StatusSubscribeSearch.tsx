@@ -333,7 +333,10 @@ export function StatusSubscribeSearch({
               />
             </div>
 
-            <ul className="grid gap-3 sm:grid-cols-2">
+            {/* Two to a row from lg only: with the 144px cover, two cards on
+                a 640-900px screen left the name 64-128px (19/10/2026); one
+                card per row there, as Lịch sử mua lists. */}
+            <ul className={`grid gap-3 ${old ? "sm:grid-cols-2" : "lg:grid-cols-2"}`}>
               {shelf.tools.map((tool) => {
                 const state = tool.status ? SOFTWARE_STATUS[tool.status] : null;
                 const on = tool.subscribed === true;
