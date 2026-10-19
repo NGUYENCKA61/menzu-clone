@@ -132,6 +132,7 @@ const BUTTON_RAISE = "flex h-9 shrink-0 items-center whitespace-nowrap rounded-[
 const BUTTON_LIT = "flex h-9 shrink-0 items-center gap-1 whitespace-nowrap rounded-[10px] bg-white/[0.08] pl-3.5 pr-2.5 text-[13px] font-semibold text-frost ring-1 ring-inset ring-white/10 transition-colors group-hover:bg-white/[0.12] group-hover:ring-white/20";
 const BUTTON_RAISE_LIT = "flex h-9 shrink-0 items-center whitespace-nowrap rounded-[10px] bg-raise px-3.5 text-[13px] font-semibold text-frost ring-1 ring-inset ring-line transition-colors group-hover:bg-white/10 group-hover:ring-white/20";
 const BUTTON_WHITE = "flex h-9 shrink-0 items-center whitespace-nowrap rounded-[10px] bg-white px-3.5 text-[13px] font-semibold text-black transition-colors group-hover:bg-neutral-200";
+const BUTTON_BRIGHT = "flex h-9 shrink-0 items-center whitespace-nowrap rounded-[10px] bg-white/10 px-3.5 text-[13px] font-semibold text-white ring-1 ring-inset ring-white/15 transition-colors group-hover:bg-white/[0.16] group-hover:ring-white/25";
 const LOOKS: CardLook[] = [
   { id: "4", name: "Đang dùng: thẻ 3 dòng", card: "border-white/10 hover:border-line-strong", thumb: "sm:w-36", title: "sm:text-[17px]", price: "text-[17px]", chip: CHIP_RAISE, button: BUTTON_RAISE },
   { id: "1+2", name: "Viền 15%, nút Chi tiết sáng có mũi tên", card: "border-white/15 hover:border-white/25 hover:bg-white/[0.02]", thumb: "sm:w-36", title: "sm:text-[17px]", price: "text-[17px]", chip: CHIP_NEUTRAL, button: BUTTON_LIT },
@@ -141,6 +142,7 @@ const LOOKS: CardLook[] = [
   { id: "9", name: "Ảnh, tên, giá to hơn", card: "border-white/10 hover:border-line-strong", thumb: "sm:w-[168px]", title: "sm:text-[18px]", price: "text-[19px]", chip: CHIP_RAISE, button: BUTTON_RAISE },
   { id: "12", name: "Hiệu ứng khi rê chuột", card: "border-white/10 hover:-translate-y-0.5 hover:border-white/25 hover:bg-white/[0.03] motion-reduce:hover:translate-y-0", thumb: "sm:w-36", title: "sm:text-[17px]", price: "text-[17px]", chip: CHIP_RAISE, button: BUTTON_RAISE_LIT, img: "object-cover brightness-[.92] transition-[filter,transform] duration-300 group-hover:scale-[1.04] group-hover:brightness-110 motion-reduce:group-hover:scale-100" },
   { id: "15", name: "Hiệu ứng khi rê chuột, nút Chi tiết trắng", card: "border-white/10 hover:-translate-y-0.5 hover:border-white/25 hover:bg-white/[0.03] motion-reduce:hover:translate-y-0", thumb: "sm:w-36", title: "sm:text-[17px]", price: "text-[17px]", chip: CHIP_RAISE, button: BUTTON_WHITE, img: "object-cover brightness-[.92] transition-[filter,transform] duration-300 group-hover:scale-[1.04] group-hover:brightness-110 motion-reduce:group-hover:scale-100" },
+  { id: "16", name: "Hiệu ứng khi rê chuột, nút Chi tiết sáng hơn", card: "border-white/10 hover:-translate-y-0.5 hover:border-white/25 hover:bg-white/[0.03] motion-reduce:hover:translate-y-0", thumb: "sm:w-36", title: "sm:text-[17px]", price: "text-[17px]", chip: CHIP_RAISE, button: BUTTON_BRIGHT, img: "object-cover brightness-[.92] transition-[filter,transform] duration-300 group-hover:scale-[1.04] group-hover:brightness-110 motion-reduce:group-hover:scale-100" },
   { id: "10", name: "Viền 20%", card: "border-white/20 hover:border-white/30", thumb: "sm:w-36", title: "sm:text-[17px]", price: "text-[17px]", chip: CHIP_RAISE, button: BUTTON_RAISE },
 ];
 
@@ -157,8 +159,9 @@ export function OrdersList({ orders }: { orders: OrderCardView[] }) {
   const pinned = thu && thu !== "xoay" ? LOOKS.findIndex((l) => l.id === thu) : -1;
   // The card the page draws without ?thu: today's card with a hover look, on
   // trial (the owner, 20/10/2026: "làm hiệu ứng khi rê thử"). The white Chi
-  // tiết (look 15) was tried, then parked in the review page.
-  const fallback = Math.max(0, LOOKS.findIndex((l) => l.id === "12"));
+  // tiết (look 15) was tried, then parked in the review page; now a brighter
+  // dark one ("cho mỗi nút chi tiết sáng hơn thử").
+  const fallback = Math.max(0, LOOKS.findIndex((l) => l.id === "16"));
   const look = thu === "xoay" ? LOOKS[tick % LOOKS.length]! : LOOKS[pinned >= 0 ? pinned : fallback]!;
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState("newest");
