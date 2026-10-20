@@ -1257,9 +1257,8 @@ export function OrderDetailModal({
                             // ticket stands; solid red is a step the buyer
                             // must take.
                             warrantyAction.kind === "status"
-                              ? // Trial: solid violet ("màu tím", after orange and
-                                // pink).
-                                "bg-violet-600 text-white hover:bg-violet-700"
+                              ? // Trial: solid orange ("màu cam thử", once more).
+                                "bg-orange-500 text-white hover:bg-orange-600"
                               : "bg-[var(--menzu-accent)] text-white hover:bg-[var(--menzu-accent-dark)]"
                           }`}
                         >
