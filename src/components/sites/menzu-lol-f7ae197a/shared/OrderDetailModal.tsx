@@ -1238,22 +1238,15 @@ export function OrderDetailModal({
                           className={`press group inline-flex h-11 items-center justify-center gap-2 rounded-xl px-3 text-xs font-bold sm:h-10 sm:px-5${
                             askReview ? "" : " col-span-2"
                           } ${
-                            // Solid red is a step the buyer must take, "Yêu
-                            // cầu bảo hành" and "Nhập số tài khoản" alike;
-                            // "Xem trạng thái" asks nothing of them and keeps
-                            // the grey outline "Đánh giá" wears (settled with
-                            // the owner, 12/10/2026, after red and violet
-                            // borders were tried).
-                            // One outline for every "Xem trạng thái", the red
-                            // border it has worn since 12/10: grey was tried
-                            // and set aside the same day (the owner,
-                            // 20/10/2026: "thống nhất viền xám đi", then "viền
-                            // đỏ như nãy thử"). The note above names where the
-                            // ticket stands; solid red is a step the buyer
-                            // must take.
-                            warrantyAction.kind === "status"
-                              ? "border border-[var(--menzu-accent)]/70 bg-transparent text-white hover:bg-[var(--menzu-accent)]/10"
-                              : "bg-[var(--menzu-accent)] text-white hover:bg-[var(--menzu-accent-dark)]"
+                            // The footer's one button is always its main way
+                            // on, so it is always solid red, "Xem trạng thái"
+                            // included: the note above names where the ticket
+                            // stands, and the red outline it wore since 12/10
+                            // looked unfinished (the owner, 20/10/2026: "sao
+                            // cứ thấy quê quê", "nút đỏ như yêu cầu bảo hành"
+                            // → "thử"; grey, white, borderless were tried the
+                            // same day).
+                            "bg-[var(--menzu-accent)] text-white hover:bg-[var(--menzu-accent-dark)]"
                           }`}
                         >
                           <WarrantyIcon className="h-4 w-4" />
