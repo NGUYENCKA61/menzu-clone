@@ -1244,14 +1244,15 @@ export function OrderDetailModal({
                             // the grey outline "Đánh giá" wears (settled with
                             // the owner, 12/10/2026, after red and violet
                             // borders were tried).
-                            // One grey outline, the one "Đánh giá" wears, for
-                            // every "Xem trạng thái": the note above already
-                            // names where the ticket stands, and red is kept
-                            // for a step the buyer must take (the owner,
-                            // 20/10/2026: "thống nhất viền xám đi"; the red
-                            // border it wore since 12/10 is gone).
+                            // One outline for every "Xem trạng thái", the red
+                            // border it has worn since 12/10: grey was tried
+                            // and set aside the same day (the owner,
+                            // 20/10/2026: "thống nhất viền xám đi", then "viền
+                            // đỏ như nãy thử"). The note above names where the
+                            // ticket stands; solid red is a step the buyer
+                            // must take.
                             warrantyAction.kind === "status"
-                              ? "border border-white/12 bg-white/[0.04] text-neutral-300 hover:border-white/25 hover:bg-white/[0.07] hover:text-white"
+                              ? "border border-[var(--menzu-accent)]/70 bg-transparent text-white hover:bg-[var(--menzu-accent)]/10"
                               : "bg-[var(--menzu-accent)] text-white hover:bg-[var(--menzu-accent-dark)]"
                           }`}
                         >
