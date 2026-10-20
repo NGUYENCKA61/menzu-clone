@@ -1250,8 +1250,10 @@ export function OrderDetailModal({
                             // for a step the buyer must take (the owner,
                             // 20/10/2026: "thống nhất viền xám đi"; the red
                             // border it wore since 12/10 is gone).
+                            // Trial (the owner, 20/10/2026: "nút xem trạng
+                            // thái màu trắng thử"): the wallet's white button.
                             warrantyAction.kind === "status"
-                              ? "border border-white/12 bg-white/[0.04] text-neutral-300 hover:border-white/25 hover:bg-white/[0.07] hover:text-white"
+                              ? "bg-white text-black hover:bg-neutral-200"
                               : "bg-[var(--menzu-accent)] text-white hover:bg-[var(--menzu-accent-dark)]"
                           }`}
                         >
