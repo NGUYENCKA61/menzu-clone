@@ -167,8 +167,9 @@ export function OrdersList({ orders }: { orders: OrderCardView[] }) {
   // tiết (look 15) was tried, then parked in the review page. Look 17 adds a
   // ">" after Chi tiết ("thêm dấu > sau chi tiết đi"); look 19 gives the card
   // a 2% fill on trial (after 1% was turned down, "2% đi"), look 20 a 3% one
-  // that the hover lifts to 5% ("3%"), then back to look 18's 1% ("1%").
-  const fallback = Math.max(0, LOOKS.findIndex((l) => l.id === "18"));
+  // that the hover lifts to 5% ("3%"), then look 18's 1% ("1%"), and in the
+  // end no fill: look 17, the live card ("0%").
+  const fallback = Math.max(0, LOOKS.findIndex((l) => l.id === "17"));
   const look = thu === "xoay" ? LOOKS[tick % LOOKS.length]! : LOOKS[pinned >= 0 ? pinned : fallback]!;
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState("newest");
