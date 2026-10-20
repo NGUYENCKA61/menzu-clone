@@ -407,7 +407,9 @@ export function OrdersList({ orders }: { orders: OrderCardView[] }) {
                                 <span className="whitespace-nowrap">
                                   <span className="text-dim">Mã đơn</span> {order.detail.code}
                                 </span>
-                                {" · "}
+                                {/* The overview's divider, "UID … | Tham gia từ …",
+                                    so the site keeps one ("làm thử"). */}
+                                <span aria-hidden className="mx-2 text-neutral-600">|</span>
                                 <span className="whitespace-nowrap">
                                   {byDay ? order.clock : order.stamp}
                                 </span>
