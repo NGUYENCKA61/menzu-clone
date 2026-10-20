@@ -599,6 +599,11 @@ export function OrderDetailModal({
   // and neither has a free tool (list price nothing; the owner, 13/10/2026):
   // the button only stays where a ticket already exists to follow.
   const showWarranty = (order.paid && order.listPrice > 0) || order.warranty !== null;
+  // A refund paid back through warranty ends it, as a refund always did: no
+  // button, the footer's "Đơn đã được hoàn tiền nên không còn bảo hành." line
+  // instead (the owner, 20/10/2026: "làm như nãy phần đó đi"). The note above
+  // still says the money went back.
+  const showWarrantyButton = showWarranty && order.warranty?.status !== "REFUNDED";
 
   return (
     <>
@@ -1232,7 +1237,7 @@ export function OrderDetailModal({
                       button fills it. */}
                   <div className="flex w-full flex-col gap-2 sm:w-auto">
                     <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto sm:flex-wrap sm:items-center sm:gap-2.5">
-                      {showWarranty ? (
+                      {showWarrantyButton ? (
                         <Link
                           href={supportHref}
                           className={`press group inline-flex h-11 items-center justify-center gap-2 rounded-xl px-3 text-xs font-bold sm:h-10 sm:px-5${
@@ -1282,10 +1287,10 @@ export function OrderDetailModal({
                         Bạn đã đánh giá đơn này.
                       </p>
                     ) : null}
-                    {!showWarranty ? (
+                    {!showWarrantyButton ? (
                       <p className="text-[11px] leading-snug text-neutral-500">
                         <Wrench className="mr-1 inline h-3 w-3 align-[-2px]" aria-hidden />
-                        {order.refunded
+                        {order.refunded || order.warranty?.status === "REFUNDED"
                           ? "Đơn đã được hoàn tiền nên không còn bảo hành."
                           : "Chỉ đơn đã thanh toán mới yêu cầu bảo hành được."}
                       </p>
