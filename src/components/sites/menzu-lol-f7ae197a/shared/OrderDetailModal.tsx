@@ -3,6 +3,7 @@
 import {
   CalendarDays,
   ChevronRight,
+  CircleAlert,
   Clock,
   Check,
   Copy,
@@ -1122,18 +1123,33 @@ export function OrderDetailModal({
                       on the cards (the owner, 10/10/2026: "không kẻ thì
                       khoảng cách giữa card key kích hoạt và cái vui lòng nó
                       hơi sát"). */}
-                  <div className="mt-6 flex items-start gap-3 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3.5 text-xs leading-relaxed text-neutral-400">
-                    <Info className="mt-0.5 h-4 w-4 shrink-0 text-mist" />
-                    {/* Where the ticket stands, in words; the button in the
-                        footer is the way on, so the line carries no link. */}
-                    <span>
-                      {showWarranty && warrantyAction.kind === "status"
-                        ? "Đơn bảo hành của bạn đang được xử lý, bấm Xem trạng thái ở dưới để theo dõi."
-                        : showWarranty && warrantyAction.kind === "bank"
-                          ? "Shop cần số tài khoản của bạn để hoàn tiền, bấm Nhập số tài khoản ở dưới."
+                  {/* Amber only while the refund waits on the buyer's bank
+                      account, the one step that is theirs to take: the wallet's
+                      "Đơn nạp tiền đang chờ xử lý" box, so amber means "your
+                      move" on both pages (the owner, 20/10/2026: "thử đi").
+                      Every other order keeps the grey reminder. */}
+                  {showWarranty && warrantyAction.kind === "bank" ? (
+                    <div className="mt-6 flex items-start gap-3 rounded-xl border border-amber-500/20 bg-amber-500/[0.06] px-4 py-3.5">
+                      <CircleAlert size={18} className="mt-0.5 shrink-0 text-yellow-500" aria-hidden />
+                      <div>
+                        <p className="mb-1 text-sm font-bold text-yellow-500">Shop đang chờ số tài khoản của bạn</p>
+                        <p className="text-xs leading-relaxed text-neutral-400">
+                          Để nhận tiền hoàn, bấm Nhập số tài khoản ở dưới.
+                        </p>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="mt-6 flex items-start gap-3 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3.5 text-xs leading-relaxed text-neutral-400">
+                      <Info className="mt-0.5 h-4 w-4 shrink-0 text-mist" />
+                      {/* Where the ticket stands, in words; the button in the
+                          footer is the way on, so the line carries no link. */}
+                      <span>
+                        {showWarranty && warrantyAction.kind === "status"
+                          ? "Đơn bảo hành của bạn đang được xử lý, bấm Xem trạng thái ở dưới để theo dõi."
                           : "Lưu lại mã đơn hàng để được hỗ trợ. Không chia sẻ dữ liệu bàn giao cho người khác."}
-                    </span>
-                  </div>
+                      </span>
+                    </div>
+                  )}
                 </div>
 
                 {/* FOOTER */}
