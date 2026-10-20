@@ -144,6 +144,7 @@ const LOOKS: CardLook[] = [
   { id: "9", name: "Ảnh, tên, giá to hơn", card: "border-white/10 hover:border-line-strong", thumb: "sm:w-[168px]", title: "sm:text-[18px]", price: "text-[19px]", chip: CHIP_RAISE, button: BUTTON_RAISE },
   { id: "12", name: "Hiệu ứng khi rê chuột", card: "border-white/10 hover:-translate-y-0.5 hover:border-white/25 hover:bg-white/[0.03] motion-reduce:hover:translate-y-0", thumb: "sm:w-36", title: "sm:text-[17px]", price: "text-[17px]", chip: CHIP_RAISE, button: BUTTON_RAISE_LIT, img: "object-cover brightness-[.92] transition-[filter,transform] duration-300 group-hover:scale-[1.04] group-hover:brightness-110 motion-reduce:group-hover:scale-100" },
   { id: "17", name: "Hiệu ứng khi rê chuột, Chi tiết có dấu >", card: "border-white/10 hover:-translate-y-0.5 hover:border-white/25 hover:bg-white/[0.03] motion-reduce:hover:translate-y-0", thumb: "sm:w-36", title: "sm:text-[17px]", price: "text-[17px]", chip: CHIP_RAISE, button: BUTTON_RAISE_LIT_ARROW, arrow: true, img: "object-cover brightness-[.92] transition-[filter,transform] duration-300 group-hover:scale-[1.04] group-hover:brightness-110 motion-reduce:group-hover:scale-100" },
+  { id: "19", name: "Như 17, nền thẻ 2%", card: "border-white/10 bg-white/[0.02] hover:-translate-y-0.5 hover:border-white/25 hover:bg-white/[0.03] motion-reduce:hover:translate-y-0", thumb: "sm:w-36", title: "sm:text-[17px]", price: "text-[17px]", chip: CHIP_RAISE, button: BUTTON_RAISE_LIT_ARROW, arrow: true, img: "object-cover brightness-[.92] transition-[filter,transform] duration-300 group-hover:scale-[1.04] group-hover:brightness-110 motion-reduce:group-hover:scale-100" },
   { id: "15", name: "Hiệu ứng khi rê chuột, nút Chi tiết trắng", card: "border-white/10 hover:-translate-y-0.5 hover:border-white/25 hover:bg-white/[0.03] motion-reduce:hover:translate-y-0", thumb: "sm:w-36", title: "sm:text-[17px]", price: "text-[17px]", chip: CHIP_RAISE, button: BUTTON_WHITE, img: "object-cover brightness-[.92] transition-[filter,transform] duration-300 group-hover:scale-[1.04] group-hover:brightness-110 motion-reduce:group-hover:scale-100" },
   { id: "10", name: "Viền 20%", card: "border-white/20 hover:border-white/30", thumb: "sm:w-36", title: "sm:text-[17px]", price: "text-[17px]", chip: CHIP_RAISE, button: BUTTON_RAISE },
 ];
@@ -162,8 +163,9 @@ export function OrdersList({ orders }: { orders: OrderCardView[] }) {
   // The card the page draws without ?thu: today's card with a hover look, on
   // trial (the owner, 20/10/2026: "làm hiệu ứng khi rê thử"). The white Chi
   // tiết (look 15) was tried, then parked in the review page. Look 17 adds a
-  // ">" after Chi tiết ("thêm dấu > sau chi tiết đi").
-  const fallback = Math.max(0, LOOKS.findIndex((l) => l.id === "17"));
+  // ">" after Chi tiết ("thêm dấu > sau chi tiết đi"); look 19 gives the card
+  // a 2% fill on trial (after 1% was turned down, "2% đi").
+  const fallback = Math.max(0, LOOKS.findIndex((l) => l.id === "19"));
   const look = thu === "xoay" ? LOOKS[tick % LOOKS.length]! : LOOKS[pinned >= 0 ? pinned : fallback]!;
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState("newest");
