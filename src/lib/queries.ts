@@ -1054,7 +1054,12 @@ export interface OrderRow {
    * with none, "Xem trạng thái" after, "Nhập số tài khoản" while a bank
    * refund waits on the buyer's account.
    */
-  latestWarranty: { status: WarrantyStatus; needsBank: boolean } | null;
+  latestWarranty: {
+    status: WarrantyStatus;
+    needsBank: boolean;
+    /** WALLET or MANUAL once the shop turns the ticket into a refund. */
+    refundMethod: string | null;
+  } | null;
   /** The newest refund round on this order was turned down. The order itself
    *  is untouched — still paid, key still valid — but the row says so, because
    *  a buyer who asked and was refused should not have to open the receipt to
@@ -1147,6 +1152,7 @@ export async function getOrders(userId: string): Promise<OrderRow[]> {
             o.warrantyRequests[0].status === "REFUNDING" &&
             o.warrantyRequests[0].refundMethod === "MANUAL" &&
             !o.warrantyRequests[0].bankAccount,
+          refundMethod: o.warrantyRequests[0].refundMethod ?? null,
         }
       : null,
     status: o.status,

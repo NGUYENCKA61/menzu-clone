@@ -64,6 +64,9 @@ export interface OrderDetailData {
   code: string;
   /** The buyer already reviewed this purchase. */
   reviewed: boolean;
+  /** The page's own rule for asking a review: paid, with no refund or
+   *  warranty report in flight and no refund paid back. */
+  canReview?: boolean;
   /** The status pill's text and colours, decided by the page. */
   statusLabel: string;
   statusClass: string;
@@ -115,7 +118,30 @@ export interface OrderDetailData {
    * follows it (warrantyButton): "Yêu cầu bảo hành", then "Xem trạng thái",
    * or "Nhập số tài khoản" while a bank refund waits on the buyer.
    */
-  warranty: { status: WarrantyStatus; needsBank: boolean } | null;
+  warranty: { status: WarrantyStatus; needsBank: boolean; refundMethod?: string | null } | null;
+}
+
+/**
+ * Where the newest ticket stands, one sentence per state in the warranty
+ * status page's words. It said "đang được xử lý" for every ticket, refunds
+ * paid back and repairs finished included (the owner, 20/10/2026: "có mấy cái
+ * đã hoàn tiền sao ghi là đang xử lý được").
+ */
+function warrantyStanding(w: { status: WarrantyStatus; refundMethod?: string | null }): string {
+  switch (w.status) {
+    case "OPEN":
+      return "Shop đã nhận yêu cầu bảo hành, sẽ trả lời trong giờ làm việc.";
+    case "IN_PROGRESS":
+      return "Shop đang kiểm tra yêu cầu bảo hành của bạn.";
+    case "REFUNDING":
+      return w.refundMethod === "MANUAL"
+        ? "Shop đang chuyển tiền hoàn qua ngân hàng cho bạn."
+        : "Shop đang hoàn tiền vào số dư của bạn trên web.";
+    case "REFUNDED":
+      return "Shop đã hoàn tiền xong cho đơn này.";
+    default:
+      return "Shop đã xử lý xong yêu cầu bảo hành.";
+  }
 }
 
 /*
@@ -1144,8 +1170,8 @@ export function OrderDetailModal({
                       {/* Where the ticket stands, in words; the button in the
                           footer is the way on, so the line carries no link. */}
                       <span>
-                        {showWarranty && warrantyAction.kind === "status"
-                          ? "Đơn bảo hành của bạn đang được xử lý, bấm Xem trạng thái ở dưới để theo dõi."
+                        {showWarranty && warrantyAction.kind === "status" && order.warranty
+                          ? warrantyStanding(order.warranty)
                           : "Lưu lại mã đơn hàng để được hỗ trợ. Không chia sẻ dữ liệu bàn giao cho người khác."}
                       </span>
                     </div>
@@ -1185,7 +1211,11 @@ export function OrderDetailModal({
                           aria-hidden
                         />
                       </Link>
-                    ) : (
+                    ) : order.canReview ? (
+                      // Not while a warranty report or a refund is in flight,
+                      // nor once the money went back: the product was trouble
+                      // and that is no moment to ask for stars, the rule the
+                      // list already kept (the owner, 20/10/2026: "làm đi").
                       <>
                         Bạn thấy sao về sản phẩm này?{" "}
                         <Link
@@ -1195,7 +1225,7 @@ export function OrderDetailModal({
                           Đánh giá mã đơn <span className="font-bold">{order.code}</span>
                         </Link>
                       </>
-                    )}
+                    ) : null}
                   </span>
                   {/* The warranty button, and the review beside it when that
                       is switched on. On a phone they share a row, or the one

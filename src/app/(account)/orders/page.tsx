@@ -135,6 +135,7 @@ export default async function OrdersPage({
             detail: {
               id: o.id,
               reviewed: o.reviewed,
+              canReview: settled,
               code: o.code,
               statusLabel: badge?.label ?? STATUS_LABEL[o.status] ?? o.status,
               statusClass:
