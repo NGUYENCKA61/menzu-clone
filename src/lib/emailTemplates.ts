@@ -231,16 +231,18 @@ function packageWords(label: string | null): string | null {
   return /^gói\b/i.test(label.trim()) ? label.trim() : `Gói ${label.trim()}`;
 }
 
-/** When a line's keys run out, or that they do not; null for an account. */
+/**
+ * How long a line's keys last, or that they do not; null for an account.
+ *
+ * No date: a key's clock starts when the customer activates it in the loader
+ * and the desk confirms, not at purchase (the owner, 21/10/2026: "key chỉ
+ * tính khi bắt đầu kích hoạt thôi"), so the delivery-time expiresAt would
+ * name a moment that is wrong by however long the key sat unused.
+ */
 function expiryWords(line: ReceiptLine): string | null {
   if (line.kind !== "software" || line.keys.length === 0) return null;
-  const dated = line.keys
-    .map((key) => key.expiresAt)
-    .filter((date): date is Date => date !== null)
-    .sort((a, b) => a.getTime() - b.getTime());
-  return dated.length > 0
-    ? `hết hạn ${shopDateTime(dated[0]!)}`
-    : "không giới hạn thời gian";
+  const timed = line.keys.some((key) => key.expiresAt !== null);
+  return timed ? "tính giờ từ lúc kích hoạt key" : "không giới hạn thời gian";
 }
 
 function receiptSubject(data: ReceiptData): string {
