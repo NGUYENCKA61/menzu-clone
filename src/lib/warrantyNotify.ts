@@ -2,18 +2,12 @@ import "server-only";
 
 import { announceToUser } from "@/lib/announcementStore";
 import { db } from "@/lib/db";
+import { emailBrand } from "@/lib/emailBrand";
+import { emailLayout, paragraphs } from "@/lib/emailTemplates";
 import { sendMail } from "@/lib/mailer";
 import { absoluteUrl } from "@/lib/seo";
 import { mailEnabled } from "@/lib/settings";
 import { getShopSettings } from "@/lib/settingsStore";
-
-function escapeHtml(text: string): string {
-  return text
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
-}
 
 /**
  * Tell the buyer where their warranty report stands, at every step: the bell
@@ -68,16 +62,25 @@ export async function notifyWarranty(
     });
     if (options.chat && claimed.count === 0) return;
 
+    // The same dressed layout as the receipt and the security mails, so a
+    // warranty step does not arrive as four bare lines next to them (the
+    // owner, 21/10/2026: "rà soát lại kỹ mấy cái nội dung gmail gửi cho
+    // chuyên nghiệp").
     const link = absoluteUrl(href);
-    const subject = `${notice.title}, đơn ${orderCode}`;
+    const subject = `${settings.brandName} | ${notice.title}, đơn ${orderCode}`;
     const text =
       `Chào ${user.username},\n\n${notice.body}\n\n` +
       `Xem trạng thái đơn ${orderCode}: ${link}\n\n${settings.brandName}`;
-    const html =
-      `<p>Chào ${escapeHtml(user.username)},</p>` +
-      `<p>${escapeHtml(notice.body)}</p>` +
-      `<p><a href="${escapeHtml(link)}">Xem trạng thái đơn ${escapeHtml(orderCode)}</a></p>` +
-      `<p>${escapeHtml(settings.brandName)}</p>`;
+    const html = emailLayout({
+      brand: emailBrand(settings),
+      preheader: notice.body,
+      eyebrow: "Bảo hành",
+      title: notice.title,
+      introHtml: paragraphs([`Chào ${user.username},`, notice.body]),
+      cta: { href: link, label: `Xem trạng thái đơn ${orderCode}` },
+      footnote:
+        "Shop trao đổi với bạn ngay trên trang trạng thái đơn, bạn không cần trả lời email này.",
+    });
     await sendMail(settings, user.email, subject, text, html);
   } catch (error) {
     console.error("[warranty-mail]", error);

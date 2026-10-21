@@ -136,8 +136,14 @@ export function emailLayout(input: {
   /** The button's own address, printed small under it for a client that will not render the button. */
   ctaFallback?: string;
   footnote?: string;
+  /** Who reads it: the shop's own alerts get a desk footer, not "nhắn shop" (21/10/2026). */
+  audience?: "customer" | "admin";
 }): string {
   const { brand } = input;
+  const footerLine =
+    input.audience === "admin"
+      ? `Thư hệ thống gửi quản trị viên ${escapeHtml(brand.name)}. Đổi địa chỉ nhận trong Cấu hình của admin.`
+      : `Cần hỗ trợ? Nhắn shop bằng nút hỗ trợ trên web, ${escapeHtml(brand.supportHours)} mỗi ngày.`;
   // Gmail builds its list snippet from the first text it can see, so the
   // preview line is zero-sized rather than display:none (which Gmail skipped,
   // 21/10/2026), and padded so the wordmark does not follow it in the list.
@@ -181,7 +187,7 @@ ${input.cta ? `<tr><td style="padding:16px 28px 6px;">${emailButton(input.cta.hr
 ${input.ctaFallback ? `<tr><td style="padding:8px 28px 0;font:400 12px/1.6 ${FONT};color:${MUTED};word-break:break-all;">Nút không bấm được? Chép đường dẫn này vào trình duyệt:<br><a href="${escapeHtml(input.ctaFallback)}" target="_blank" style="color:${MUTED};text-decoration:underline;">${escapeHtml(input.ctaFallback)}</a></td></tr>` : ""}
 ${input.footnote ? `<tr><td style="padding:12px 28px 0;font:400 13px/1.6 ${FONT};color:${MUTED};">${escapeHtml(input.footnote)}</td></tr>` : ""}
 <tr><td style="padding:24px 28px 0;"><div style="border-top:1px solid ${LINE};font-size:0;line-height:0;">&nbsp;</div></td></tr>
-<tr><td style="padding:16px 28px 24px;font:400 13px/1.7 ${FONT};color:${MUTED};">Cần hỗ trợ? Nhắn shop bằng nút hỗ trợ trên web, ${escapeHtml(brand.supportHours)} mỗi ngày.<br>${footerLinks}</td></tr>
+<tr><td style="padding:16px 28px 24px;font:400 13px/1.7 ${FONT};color:${MUTED};">${footerLine}<br>${footerLinks}</td></tr>
 </table>
 <p style="margin:16px 0 0;font:400 12px/1.6 ${FONT};color:#9a9aa4;">Email gửi tự động từ ${escapeHtml(brand.name)}. Vui lòng không trả lời email này.</p>
 </td></tr>
@@ -240,9 +246,11 @@ function expiryWords(line: ReceiptLine): string | null {
 function receiptSubject(data: ReceiptData): string {
   const [first] = data.lines;
   if (data.lines.length === 1 && first) {
+    // The order code first, so the mail is found again by the one thing the
+    // customer quotes to the desk (the owner, 21/10/2026: "cho chuyên nghiệp").
     return first.kind === "software"
-      ? `${data.brand.name} | Key của bạn: ${first.productName}`
-      : `${data.brand.name} | Tài khoản đã sẵn sàng: ${first.productName}`;
+      ? `${data.brand.name} | Đơn ${first.orderCode}, key của bạn: ${first.productName}`
+      : `${data.brand.name} | Đơn ${first.orderCode}, tài khoản đã sẵn sàng: ${first.productName}`;
   }
   return `${data.brand.name} | Đơn hàng thành công (${data.lines.length} sản phẩm)`;
 }
@@ -529,5 +537,6 @@ export function adminAlertMail(input: {
     ...(input.bodyHtml ? { bodyHtml: input.bodyHtml } : {}),
     cta: input.cta,
     ...(input.note ? { footnote: input.note } : {}),
+    audience: "admin",
   });
 }

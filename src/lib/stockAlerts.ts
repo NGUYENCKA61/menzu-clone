@@ -73,10 +73,14 @@ function mailBody(
   threshold: number,
   brand: EmailBrand,
 ): { text: string; html: string } {
+  // "Hết sạch" when every shelf named is at zero; "dưới ngưỡng" otherwise, so
+  // the first line agrees with the title (the owner, 21/10/2026).
+  const allOut = warnings.every((warning) => warning.left === 0);
+  const what = allOut ? "hết sạch key" : "xuống dưới ngưỡng cảnh báo";
   const intro =
     warnings.length === 1
-      ? "Một gói trong kho vừa xuống dưới ngưỡng cảnh báo."
-      : `${warnings.length} gói trong kho vừa xuống dưới ngưỡng cảnh báo.`;
+      ? `Một gói trong kho vừa ${what}.`
+      : `${warnings.length} gói trong kho vừa ${what}.`;
   const text = [
     intro,
     `Ngưỡng đang đặt: còn ${threshold} trở xuống thì báo.`,
@@ -100,7 +104,11 @@ function mailBody(
   const html = adminAlertMail({
     brand,
     subject: mailSubject(warnings),
-    title: warnings.some((warning) => warning.left === 0) ? "Kho có gói đã hết" : "Kho sắp hết hàng",
+    title: allOut
+      ? "Gói đã hết key"
+      : warnings.some((warning) => warning.left === 0)
+        ? "Kho có gói đã hết"
+        : "Kho sắp hết hàng",
     lines: [intro, `Ngưỡng đang đặt: còn ${threshold} trở xuống thì báo.`],
     bodyHtml: `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">${rows}</table>`,
     cta: { href: absoluteUrl("/admin/products"), label: "Mở kho trong admin" },
