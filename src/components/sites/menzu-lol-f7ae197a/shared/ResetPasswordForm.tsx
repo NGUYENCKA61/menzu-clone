@@ -1,6 +1,6 @@
 "use client";
 
-import { Eye, EyeOff, Lock, ShieldCheck } from "lucide-react";
+import { ArrowLeft, Eye, EyeOff, Lock, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -72,7 +72,7 @@ export function ResetPasswordForm({ token }: { token: string }) {
         <p className="mt-2 text-[14px] leading-relaxed text-neutral-300">{done}</p>
         <Link
           href="/login"
-          className="mt-6 inline-flex h-11 w-full items-center justify-center rounded-xl bg-[var(--menzu-accent)] text-[14px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent-dark)]"
+          className="mt-7 flex w-full items-center justify-center rounded-2xl bg-[var(--menzu-accent)] py-4 text-[15px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent-dark)]"
         >
           Đăng nhập ngay
         </Link>
@@ -132,13 +132,24 @@ export function ResetPasswordForm({ token }: { token: string }) {
         />
       </div>
 
+      {/* The forgot card's button and grey arrow link, so the two halves of
+          one errand match (the owner, 21/10/2026: "làm đi cho đồng bộ hết");
+          this one was a smaller rounded-xl bar in capitals typed as such. */}
       <button
         type="submit"
         disabled={pending}
-        className="mt-6 w-full rounded-xl bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] disabled:opacity-70 disabled:cursor-wait text-white font-semibold py-3.5 text-[14px] transition-colors"
+        className="mt-7 flex w-full items-center justify-center gap-2 rounded-2xl bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] disabled:opacity-70 disabled:cursor-wait text-white font-semibold py-4 text-[15px] transition-colors"
       >
-        {pending ? "ĐANG ĐỔI…" : "ĐẶT MẬT KHẨU MỚI"}
+        {pending ? "Đang đổi…" : "Đặt mật khẩu mới"}
       </button>
+
+      <Link
+        href="/login"
+        className="mt-6 flex items-center justify-center gap-2 text-[14px] font-semibold text-neutral-400 transition-colors hover:text-white"
+      >
+        <ArrowLeft size={14} />
+        Về trang đăng nhập
+      </Link>
 
       {error ? (
         <StatusToast
