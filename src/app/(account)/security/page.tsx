@@ -8,6 +8,7 @@ import { SecurityPanel } from "@/components/sites/menzu-lol-f7ae197a/shared/Secu
 import { db } from "@/lib/db";
 import { describeUserAgent } from "@/lib/device";
 import { dayKey, dayTime } from "@/lib/dayGroups";
+import { emailChangeOpen } from "@/lib/emailOtp";
 import { getCurrentUser } from "@/lib/session";
 import { discordOauthEnabled, googleOauthEnabled } from "@/lib/settings";
 import { linkUrl as telegramLinkUrl } from "@/lib/telegramShop";
@@ -49,9 +50,11 @@ export default async function SecurityPage({
   // one it can never be given.
   const passwordRow = await db.user.findUniqueOrThrow({
     where: { id: user.id },
-    select: { passwordHash: true, emailVerifiedAt: true },
+    select: { passwordHash: true, emailVerifiedAt: true, emailChangeUnlockedUntil: true },
   });
   const hasPassword = passwordRow.passwordHash !== null;
+  // The old inbox has answered its code and the address may still be moved.
+  const emailChangeUnlocked = emailChangeOpen(passwordRow.emailChangeUnlockedUntil);
 
   const [settings, linkedRows, sessions, store, query] = await Promise.all([
     getShopSettings(),
@@ -104,6 +107,7 @@ export default async function SecurityPage({
       <SecurityPanel
         email={user.email}
         emailVerified={passwordRow.emailVerifiedAt !== null}
+        emailChangeUnlocked={emailChangeUnlocked}
         hasPassword={hasPassword}
         googleLinked={linkedSet.has("google")}
         discordLinked={linkedSet.has("discord")}

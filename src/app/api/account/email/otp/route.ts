@@ -8,6 +8,7 @@ import {
   OTP_TTL_MINUTES,
   SEND_COOLDOWN_SECONDS,
   SENDS_PER_HOUR,
+  emailChangeOpen,
   hashCode,
 } from "@/lib/emailOtp";
 import { trimmed } from "@/lib/jsonField";
@@ -48,10 +49,29 @@ export async function POST(request: Request) {
 
   const account = await db.user.findUniqueOrThrow({
     where: { id: user.id },
-    select: { email: true, emailVerifiedAt: true, username: true },
+    select: {
+      email: true,
+      emailVerifiedAt: true,
+      emailChangeUnlockedUntil: true,
+      username: true,
+    },
   });
-  if (account.email?.toLowerCase() === email.toLowerCase() && account.emailVerifiedAt) {
-    return NextResponse.json({ error: "Email này đã được xác minh" }, { status: 400 });
+  // A code to the address already proved is the first step of a change: the
+  // old inbox says yes, then a new address may be typed (the owner,
+  // 21/10/2026: "đổi mail mà không cần xác thực mail cũ à"). A new address
+  // while the proved one has not answered is refused here, and again at
+  // /verify, so a stolen session alone cannot move the account's inbox.
+  const sameAsOnFile = account.email?.toLowerCase() === email.toLowerCase();
+  const unlocked = emailChangeOpen(account.emailChangeUnlockedUntil);
+  const purpose: "unlock" | "set" = sameAsOnFile && account.emailVerifiedAt ? "unlock" : "set";
+  if (purpose === "set" && account.emailVerifiedAt && !unlocked) {
+    return NextResponse.json(
+      {
+        error: "Email hiện tại đã xác minh. Hãy nhận mã ở email cũ trước, rồi mới đổi sang email mới.",
+        needOldCode: true,
+      },
+      { status: 403 },
+    );
   }
   const taken = await db.user.findFirst({
     where: { email: { equals: email, mode: "insensitive" }, NOT: { id: user.id } },
@@ -114,6 +134,7 @@ export async function POST(request: Request) {
   return NextResponse.json({
     ok: true,
     email,
+    purpose,
     ttlMinutes: OTP_TTL_MINUTES,
     retryAfter: SEND_COOLDOWN_SECONDS,
   });

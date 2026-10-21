@@ -54,6 +54,11 @@ model User {
   /// could register with somebody else's address and wait for them to press
   /// the Google button. Cleared whenever the address is edited by hand.
   emailVerifiedAt DateTime?
+  /// Until when a move to a new address may go ahead: set when the current,
+  /// verified address has just answered a code (the owner, 21/10/2026: "đổi
+  /// mail mà không cần xác thực mail cũ à"), cleared by the move itself.
+  /// Null, or in the past, and a verified address cannot be replaced.
+  emailChangeUnlockedUntil DateTime?
   passwordHash    String?
   /// The Telegram user this account belongs to, when the shop bot made it or
   /// the owner linked it from their profile. One Telegram account, one shop

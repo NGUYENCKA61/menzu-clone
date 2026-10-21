@@ -519,6 +519,44 @@ export function passwordResetMail(input: {
   };
 }
 
+/** "kh***@gmail.com": enough to recognise, not enough to copy. */
+function maskEmail(email: string): string {
+  const at = email.indexOf("@");
+  if (at <= 0) return email;
+  const local = email.slice(0, at);
+  return `${local.slice(0, Math.min(2, local.length))}***${email.slice(at)}`;
+}
+
+/**
+ * To the OLD address when the account's email moves (the owner, 21/10/2026):
+ * the one reader who can still act if the move was not theirs.
+ */
+export function emailChangedMail(input: {
+  brand: EmailBrand;
+  username: string;
+  oldEmail: string;
+  newEmail: string;
+  changedAt: Date;
+}): RenderedEmail {
+  const when = shopDateTime(input.changedAt);
+  const line = `Email của tài khoản ${input.username} vừa đổi từ ${input.oldEmail} sang ${maskEmail(input.newEmail)} lúc ${when}.`;
+  const warn =
+    "Nếu không phải bạn đổi, hãy đăng nhập đổi mật khẩu ngay và nhắn shop qua nút hỗ trợ trên web.";
+  return {
+    subject: `${input.brand.name} | Email tài khoản đã được đổi`,
+    text: [`Xin chào ${input.username},`, "", line, "", warn, "", input.brand.name].join("\n"),
+    html: emailLayout({
+      brand: input.brand,
+      preheader: "Email tài khoản vừa được đổi. Không phải bạn thì nhắn shop ngay.",
+      eyebrow: "Bảo mật",
+      title: "Email tài khoản đã được đổi",
+      introHtml: paragraphs([`Xin chào ${input.username},`, line]),
+      cta: { href: `${input.brand.siteUrl}/security`, label: "Mở trang Bảo mật" },
+      footnote: `Thư này gửi tới địa chỉ cũ để bạn biết. ${warn}`,
+    }),
+  };
+}
+
 /** The desk's own alerts (stock, warranty): the facts, and the page to open. */
 export function adminAlertMail(input: {
   brand: EmailBrand;

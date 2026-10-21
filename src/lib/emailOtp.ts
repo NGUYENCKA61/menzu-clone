@@ -22,6 +22,18 @@ export const SENDS_PER_HOUR = 5;
 /** Wrong codes (or wrong passwords on a change) one code survives. */
 export const MAX_ATTEMPTS = 5;
 
+/** How long the old inbox's answer keeps a proved address open for a change. */
+export const EMAIL_CHANGE_UNLOCK_MINUTES = 15;
+
+/**
+ * Whether a proved address may be replaced right now: the old inbox answered
+ * its code and that answer has not run out (the owner, 21/10/2026: a change
+ * needs the old inbox's say-so first).
+ */
+export function emailChangeOpen(until: Date | null): boolean {
+  return until !== null && until.getTime() > Date.now();
+}
+
 /**
  * What is stored for a code: bound to the account and the address, so a code
  * mailed to one address can never confirm another, and a database read shows

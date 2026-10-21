@@ -128,6 +128,10 @@ export interface SecurityPanelProps {
   email?: string | null;
   /** The address on file was proved: by a code typed back, or by Google. */
   emailVerified?: boolean;
+  /** The proved address answered its code within the last minutes, so a new
+   *  address may be typed now (the owner, 21/10/2026: a change needs the old
+   *  inbox's say-so first). */
+  emailChangeUnlocked?: boolean;
   /** False for an account that arrived through Google or Discord and has
    *  never set one — the form then asks for no current password, because
    *  there is none to give. */
@@ -165,6 +169,7 @@ function isPhone(device: string): boolean {
 export function SecurityPanel({
   email,
   emailVerified = false,
+  emailChangeUnlocked = false,
   hasPassword,
   googleLinked,
   discordLinked,
@@ -209,6 +214,10 @@ export function SecurityPanel({
   const onFile = (email ?? "").toLowerCase();
   const alreadyProved =
     emailVerified && emailValue.trim().toLowerCase() === onFile;
+  /** True once the old inbox has answered; until then a proved address is
+   *  read-only and "Đổi email" sends the code there, not to a new one. */
+  const [unlocked, setUnlocked] = useState(emailChangeUnlocked);
+  const locked = emailVerified && Boolean(email) && !unlocked;
   const needsPassword =
     hasPassword && sentTo !== null && sentTo.toLowerCase() !== onFile;
 
@@ -238,7 +247,9 @@ export function SecurityPanel({
       const res = await fetch("/api/account/email/otp", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ email: emailValue }),
+        // Locked: the code goes to the address on file, the first step of a
+        // change; otherwise to whatever was typed.
+        body: JSON.stringify({ email: locked ? (email ?? "") : emailValue }),
       });
       const data = (await res.json().catch(() => ({}))) as {
         error?: string;
@@ -281,11 +292,26 @@ export function SecurityPanel({
       const data = (await res.json().catch(() => ({}))) as {
         error?: string;
         email?: string;
+        unlocked?: boolean;
+        minutes?: number;
       };
       if (!res.ok) {
         setEmailMsg({
           tone: "err",
           text: data.error ?? "Không xác minh được email",
+        });
+        return;
+      }
+      if (data.unlocked) {
+        // The old inbox said yes: the field opens for the new address.
+        setUnlocked(true);
+        setSentTo(null);
+        setOtp("");
+        setEmailValue("");
+        setCooldown(0);
+        setEmailMsg({
+          tone: "ok",
+          text: `Đã xác nhận email cũ. Nhập email mới và gửi mã trong ${data.minutes ?? 15} phút.`,
         });
         return;
       }
@@ -516,22 +542,22 @@ export function SecurityPanel({
                     id="sec-email"
                     type="email"
                     autoComplete="email"
-                    value={emailValue}
+                    value={locked ? (email ?? "") : emailValue}
+                    readOnly={locked}
                     onChange={(e) => {
                       setEmailValue(e.target.value);
                       // A code went to the old spelling; a new one is needed.
                       if (sentTo) setSentTo(null);
                     }}
                     placeholder="Nhập email mới của bạn"
-                    className={`flex-1 ${FIELD}`}
+                    className={`flex-1 ${FIELD} ${locked ? "cursor-default text-neutral-300" : ""}`}
                   />
                   <button
                     type="submit"
                     disabled={
                       emailBusy !== null ||
                       cooldown > 0 ||
-                      !emailValue.trim() ||
-                      alreadyProved
+                      (!locked && (!emailValue.trim() || alreadyProved))
                     }
                     className="flex items-center justify-center gap-2 rounded-xl bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] disabled:bg-white/5 text-white text-[14px] font-semibold px-5 py-3 whitespace-nowrap transition-colors disabled:text-neutral-500"
                   >
@@ -548,9 +574,17 @@ export function SecurityPanel({
                       ? `Gửi lại sau ${cooldown}s`
                       : sentTo
                         ? "Gửi lại mã"
-                        : "Gửi mã OTP"}
+                        : locked
+                          ? "Đổi email"
+                          : "Gửi mã OTP"}
                   </button>
                 </div>
+                {locked && !sentTo ? (
+                  <p className="text-[12px] leading-relaxed text-neutral-500">
+                    Email đã xác minh. Muốn đổi, bấm Đổi email: mã xác nhận gửi tới
+                    email hiện tại trước, rồi mới nhập được email mới.
+                  </p>
+                ) : null}
 
                 {sentTo ? (
                   <div className="flex flex-col sm:flex-row gap-3">

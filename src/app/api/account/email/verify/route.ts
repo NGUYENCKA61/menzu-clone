@@ -2,9 +2,42 @@ import { NextResponse } from "next/server";
 
 import { verifyPassword } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { MAX_ATTEMPTS, hashCode, sameHash } from "@/lib/emailOtp";
+import { emailBrand } from "@/lib/emailBrand";
+import {
+  EMAIL_CHANGE_UNLOCK_MINUTES,
+  MAX_ATTEMPTS,
+  emailChangeOpen,
+  hashCode,
+  sameHash,
+} from "@/lib/emailOtp";
+import { emailChangedMail } from "@/lib/emailTemplates";
 import { text } from "@/lib/jsonField";
+import { sendMail } from "@/lib/mailer";
 import { getCurrentUser } from "@/lib/session";
+import { mailEnabled } from "@/lib/settings";
+import { getShopSettings } from "@/lib/settingsStore";
+
+/**
+ * The old inbox hears that the address moved, so a change its owner did not
+ * make is noticed where it can still be acted on. Never awaited by the
+ * change: a mail server that does not answer must not undo a proved address.
+ */
+async function tellOldInbox(oldEmail: string, username: string, newEmail: string): Promise<void> {
+  try {
+    const settings = await getShopSettings();
+    if (!mailEnabled(settings)) return;
+    const mail = emailChangedMail({
+      brand: emailBrand(settings),
+      username,
+      oldEmail,
+      newEmail,
+      changedAt: new Date(),
+    });
+    await sendMail(settings, oldEmail, mail.subject, mail.text, mail.html);
+  } catch (error) {
+    console.error("[email-change-mail]", error);
+  }
+}
 
 /**
  * The code from "Gửi mã OTP", typed back. Right, and the address it went to
@@ -64,9 +97,40 @@ export async function POST(request: Request) {
 
   const account = await db.user.findUniqueOrThrow({
     where: { id: user.id },
-    select: { email: true, passwordHash: true },
+    select: {
+      email: true,
+      emailVerifiedAt: true,
+      emailChangeUnlockedUntil: true,
+      passwordHash: true,
+      username: true,
+    },
   });
   const changing = (account.email ?? "").toLowerCase() !== row.email.toLowerCase();
+
+  // The proved address answering its own code: nothing moves yet, the
+  // account only gains a window in which a new address may be set (the
+  // owner, 21/10/2026: "đổi mail mà không cần xác thực mail cũ à").
+  if (!changing && account.emailVerifiedAt) {
+    const until = new Date(Date.now() + EMAIL_CHANGE_UNLOCK_MINUTES * 60 * 1000);
+    await db.$transaction([
+      db.user.update({ where: { id: user.id }, data: { emailChangeUnlockedUntil: until } }),
+      db.emailVerification.deleteMany({ where: { userId: user.id } }),
+    ]);
+    return NextResponse.json({ ok: true, unlocked: true, minutes: EMAIL_CHANGE_UNLOCK_MINUTES });
+  }
+
+  // A move away from a proved address needs that window, checked here too
+  // and not only when the code was sent, so the window cannot be skipped by
+  // sending the code first and waiting.
+  if (changing && account.emailVerifiedAt) {
+    if (!emailChangeOpen(account.emailChangeUnlockedUntil)) {
+      return NextResponse.json(
+        { error: "Hãy nhận mã ở email cũ trước, rồi mới đổi sang email mới.", needOldCode: true },
+        { status: 403 },
+      );
+    }
+  }
+
   if (changing && account.passwordHash) {
     const password = text(body?.password);
     if (!password) {
@@ -91,9 +155,12 @@ export async function POST(request: Request) {
   await db.$transaction([
     db.user.update({
       where: { id: user.id },
-      data: { email: row.email, emailVerifiedAt: new Date() },
+      data: { email: row.email, emailVerifiedAt: new Date(), emailChangeUnlockedUntil: null },
     }),
     db.emailVerification.deleteMany({ where: { userId: user.id } }),
   ]);
+  if (changing && account.email && account.emailVerifiedAt) {
+    void tellOldInbox(account.email, account.username, row.email);
+  }
   return NextResponse.json({ ok: true, email: row.email });
 }
