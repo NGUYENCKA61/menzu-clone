@@ -133,9 +133,17 @@ export function emailLayout(input: {
   introHtml: string;
   bodyHtml?: string;
   cta?: { href: string; label: string };
+  /** The button's own address, printed small under it for a client that will not render the button. */
+  ctaFallback?: string;
   footnote?: string;
 }): string {
   const { brand } = input;
+  // Gmail builds its list snippet from the first text it can see, so the
+  // preview line is zero-sized rather than display:none (which Gmail skipped,
+  // 21/10/2026), and padded so the wordmark does not follow it in the list.
+  const preheader =
+    `<div style="font-size:1px;line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;mso-hide:all;color:${GROUND};">` +
+    `${escapeHtml(input.preheader)}${"&#847;&zwnj;&nbsp;".repeat(90)}</div>`;
   const footerLinks = [
     link(brand.siteUrl, hostOf(brand.siteUrl)),
     brand.telegramUrl ? link(brand.telegramUrl, "Kênh Telegram") : null,
@@ -153,7 +161,7 @@ export function emailLayout(input: {
 <title>${escapeHtml(input.title)}</title>
 </head>
 <body style="margin:0;padding:0;background:${GROUND};-webkit-text-size-adjust:100%;">
-<div style="display:none;max-height:0;max-width:0;overflow:hidden;opacity:0;font-size:1px;line-height:1px;color:${GROUND};">${escapeHtml(input.preheader)}</div>
+${preheader}
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:${GROUND};">
 <tr><td align="center" style="padding:28px 12px 36px;">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;background:#ffffff;border:1px solid ${LINE};border-radius:16px;overflow:hidden;">
@@ -170,6 +178,7 @@ ${input.introHtml}
 </td></tr>
 ${input.bodyHtml ? `<tr><td style="padding:10px 28px 4px;">${input.bodyHtml}</td></tr>` : ""}
 ${input.cta ? `<tr><td style="padding:16px 28px 6px;">${emailButton(input.cta.href, input.cta.label)}</td></tr>` : ""}
+${input.ctaFallback ? `<tr><td style="padding:8px 28px 0;font:400 12px/1.6 ${FONT};color:${MUTED};word-break:break-all;">Nút không bấm được? Chép đường dẫn này vào trình duyệt:<br><a href="${escapeHtml(input.ctaFallback)}" target="_blank" style="color:${MUTED};text-decoration:underline;">${escapeHtml(input.ctaFallback)}</a></td></tr>` : ""}
 ${input.footnote ? `<tr><td style="padding:12px 28px 0;font:400 13px/1.6 ${FONT};color:${MUTED};">${escapeHtml(input.footnote)}</td></tr>` : ""}
 <tr><td style="padding:24px 28px 0;"><div style="border-top:1px solid ${LINE};font-size:0;line-height:0;">&nbsp;</div></td></tr>
 <tr><td style="padding:16px 28px 24px;font:400 13px/1.7 ${FONT};color:${MUTED};">Cần hỗ trợ? Nhắn shop bằng nút hỗ trợ trên web, ${escapeHtml(brand.supportHours)} mỗi ngày.<br>${footerLinks}</td></tr>
@@ -447,12 +456,13 @@ export function emailCodeMail(input: {
       "",
       `Mã xác minh email của bạn là: ${input.code}`,
       `Mã có hiệu lực trong ${input.ttlMinutes} phút. Nhập mã này ở trang Bảo mật tài khoản.`,
+      "Không chia sẻ mã này cho bất kỳ ai, kể cả nhân viên shop.",
       "",
-      "Nếu không phải bạn yêu cầu, cứ bỏ qua email này, tài khoản của bạn không thay đổi gì.",
+      "Nếu không phải bạn yêu cầu, bỏ qua email này, tài khoản của bạn không thay đổi gì.",
     ].join("\n"),
     html: emailLayout({
       brand: input.brand,
-      preheader: `Mã xác minh của bạn: ${input.code}`,
+      preheader: `Mã xác minh: ${input.code}. Hiệu lực ${input.ttlMinutes} phút.`,
       eyebrow: "Bảo mật",
       title: "Mã xác minh email",
       introHtml: paragraphs([
@@ -460,7 +470,7 @@ export function emailCodeMail(input: {
         "Nhập mã dưới đây ở trang Bảo mật tài khoản để xác minh email.",
       ]),
       bodyHtml: codeBox,
-      footnote: `Mã có hiệu lực trong ${input.ttlMinutes} phút. Nếu không phải bạn yêu cầu, cứ bỏ qua email này, tài khoản của bạn không thay đổi gì.`,
+      footnote: `Mã có hiệu lực trong ${input.ttlMinutes} phút. Không chia sẻ mã này cho bất kỳ ai, kể cả nhân viên shop. Nếu không phải bạn yêu cầu, bỏ qua email này, tài khoản của bạn không thay đổi gì.`,
     }),
   };
 }
@@ -476,25 +486,25 @@ export function passwordResetMail(input: {
     text: [
       `Xin chào ${input.username},`,
       "",
-      "Ai đó (hy vọng là bạn) vừa yêu cầu đặt lại mật khẩu cho tài khoản này.",
-      `Nhấn vào đường dẫn sau trong vòng ${input.ttlMinutes} phút để đặt mật khẩu mới:`,
+      `Shop nhận được yêu cầu đặt lại mật khẩu cho tài khoản ${input.username}.`,
+      `Mở đường dẫn sau trong vòng ${input.ttlMinutes} phút để đặt mật khẩu mới:`,
       "",
       input.link,
       "",
-      "Nếu không phải bạn, cứ bỏ qua email này, mật khẩu hiện tại vẫn nguyên.",
+      "Nếu không phải bạn yêu cầu, bỏ qua email này, mật khẩu hiện tại không thay đổi.",
     ].join("\n"),
     html: emailLayout({
       brand: input.brand,
-      preheader: `Đường dẫn đặt mật khẩu mới, dùng trong ${input.ttlMinutes} phút.`,
+      preheader: `Đường dẫn đặt mật khẩu mới dùng được trong ${input.ttlMinutes} phút.`,
       eyebrow: "Bảo mật",
       title: "Đặt lại mật khẩu",
       introHtml: paragraphs([
         `Xin chào ${input.username},`,
-        "Ai đó (hy vọng là bạn) vừa yêu cầu đặt lại mật khẩu cho tài khoản này. Bấm nút dưới đây để đặt mật khẩu mới.",
+        `Shop nhận được yêu cầu đặt lại mật khẩu cho tài khoản ${input.username}. Bấm nút dưới đây để đặt mật khẩu mới.`,
       ]),
       cta: { href: input.link, label: "Đặt mật khẩu mới" },
-      bodyHtml: `<p style="margin:0;font:400 12px/1.6 ${FONT};color:${MUTED};word-break:break-all;">Nút không bấm được thì chép đường dẫn này: ${escapeHtml(input.link)}</p>`,
-      footnote: `Đường dẫn dùng được trong ${input.ttlMinutes} phút. Nếu không phải bạn, cứ bỏ qua email này, mật khẩu hiện tại vẫn nguyên.`,
+      ctaFallback: input.link,
+      footnote: `Đường dẫn dùng được trong ${input.ttlMinutes} phút. Nếu không phải bạn yêu cầu, bỏ qua email này, mật khẩu hiện tại không thay đổi.`,
     }),
   };
 }

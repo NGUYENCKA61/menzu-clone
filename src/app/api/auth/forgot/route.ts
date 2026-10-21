@@ -75,7 +75,7 @@ export async function POST(request: Request) {
   });
 
   if (user?.email && !user.blockedAt) {
-    const token = randomBytes(32).toString("hex");
+    const token = randomBytes(16).toString("hex");
     const tokenHash = createHash("sha256").update(token).digest("hex");
 
     // One outstanding link per account: minting a new one voids the old,
