@@ -292,6 +292,7 @@ export function AdminSettings({
   const [purchases, setPurchases] = useState(settings.purchasesEnabled);
   const [closedMessage, setClosedMessage] = useState(settings.closedMessage);
 
+  const [bankRotate, setBankRotate] = useState(String(settings.bankRotateMinutes));
   const [accounts, setAccounts] = useState<BankAccountConfig[]>(
     settings.bankAccounts,
   );
@@ -809,6 +810,7 @@ export function AdminSettings({
           bankTopUpEnabled: bank,
           cardTopUpEnabled: card,
           bankAccounts: accounts,
+          bankRotateMinutes: Number(bankRotate.replace(/[^0-9]/g, "")) || 0,
           autoTopUpEnabled: auto,
           topUpApiKey: apiKey,
           topUpCronKey: cronKey,
@@ -1284,6 +1286,26 @@ export function AdminSettings({
             >
               + Thêm ngân hàng
             </button>
+
+            <div>
+              <label htmlFor="bank-rotate" className={LABEL}>
+                Luân phiên ngân hàng nhận tiền (phút)
+              </label>
+              <input
+                id="bank-rotate"
+                inputMode="numeric"
+                value={bankRotate}
+                onChange={(event) => setBankRotate(event.target.value)}
+                placeholder="0"
+                className={FIELD}
+              />
+              <p className={HINT}>
+                Để 0 là trang nạp hiện mọi ngân hàng cho khách chọn. Điền 15 là mỗi
+                lúc chỉ hiện một ngân hàng và cứ 15 phút đổi sang ngân hàng kế
+                tiếp, tiền về rải đều; hóa đơn đã tạo giữ nguyên ngân hàng của
+                nó. Chuyển vào ngân hàng nào web cũng khớp.
+              </p>
+            </div>
           </section>
 
           <section className={CARD}>

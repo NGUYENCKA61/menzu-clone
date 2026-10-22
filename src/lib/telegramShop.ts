@@ -27,7 +27,7 @@ import { db } from "@/lib/db";
 import { docHtmlToPlainText, isHtmlBody } from "@/lib/docHtml";
 import { LISTED_PRODUCT } from "@/lib/queries";
 import { absoluteUrl } from "@/lib/seo";
-import { bankReady, type ShopSettings } from "@/lib/settings";
+import { bankReady, banksShown, type ShopSettings } from "@/lib/settings";
 import { getShopSettings } from "@/lib/settingsStore";
 import { readSoftwareStatus, SOFTWARE_STATUS, isSalesLocked } from "@/lib/softwareStatus";
 import type { InlineButton, MenuScreen } from "@/lib/telegramMenu";
@@ -833,12 +833,13 @@ export async function createTopUp(
     },
   });
   const note = transferNoteFor(topUp.code);
-  const bank = settings.bankAccounts[0];
+  const shown = banksShown(settings, topUp.createdAt);
+  const bank = shown[0];
   const expires = topUpExpiresAt(topUp.createdAt);
   const text = [
     `💳 <b>Chuyển khoản ${vnd(amount)}</b>`,
     "",
-    ...settings.bankAccounts.map(
+    ...shown.map(
       (b) =>
         `🏦 ${esc(b.name)}\nSố TK: <code>${esc(b.account)}</code>\nChủ TK: ${esc(b.holder)}`,
     ),

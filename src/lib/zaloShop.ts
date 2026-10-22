@@ -14,7 +14,7 @@ import {
 } from "@/lib/queries";
 import { productHref } from "@/lib/routes";
 import { absoluteUrl } from "@/lib/seo";
-import { bankReady, type ShopSettings } from "@/lib/settings";
+import { bankReady, banksShown, type ShopSettings } from "@/lib/settings";
 import { getShopSettings } from "@/lib/settingsStore";
 import {
   isSalesLocked,
@@ -735,7 +735,8 @@ async function topUp(
   if (unpaid)
     t.add("Bạn còn một lệnh nạp chưa thanh toán, dùng lại lệnh này:").line();
   t.add(`Nạp ${vnd(invoice.amount)} vào ví`, BOLD, BIG);
-  for (const bank of settings.bankAccounts) {
+  const shown = banksShown(settings, invoice.createdAt);
+  for (const bank of shown) {
     t.line();
     t.line(`Ngân hàng: ${bank.name}`);
     t.line("Số tài khoản: ").add(bank.account, BOLD);
@@ -752,7 +753,7 @@ async function topUp(
   );
 
   const replies: ZaloShopReply[] = [reply(t), plain(note)];
-  const bank = settings.bankAccounts[0];
+  const bank = shown[0];
   if (bank?.code) {
     replies.push({
       text: "Quét mã QR để chuyển khoản",

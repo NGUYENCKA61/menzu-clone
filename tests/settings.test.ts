@@ -4,6 +4,7 @@ import {
   DEFAULT_SETTINGS,
   HOME_BLOCKS,
   bankReady,
+  banksShown,
   SETTING_KEYS,
   normalizeSettings,
   parseSettings,
@@ -461,5 +462,28 @@ describe("homeSections", () => {
   it("orders rows by the slug list and skips what is gone", () => {
     const rows = [{ slug: "b" }, { slug: "a" }, { slug: "c" }];
     expect(orderBySlugs(rows, ["a", "missing", "b"])).toEqual([{ slug: "a" }, { slug: "b" }]);
+  });
+});
+
+describe("banksShown", () => {
+  const a: BankAccountConfig = { code: "OCB", name: "OCB", account: "1", holder: "A", apiUrl: "" };
+  const b: BankAccountConfig = { code: "VCB", name: "Vietcombank", account: "2", holder: "A", apiUrl: "" };
+  const base: ShopSettings = { ...DEFAULT_SETTINGS, bankAccounts: [a, b] };
+
+  it("shows every bank when rotation is off", () => {
+    expect(banksShown({ ...base, bankRotateMinutes: 0 })).toEqual([a, b]);
+  });
+
+  it("offers one bank per 15-minute window and moves on with the clock", () => {
+    const s = { ...base, bankRotateMinutes: 15 };
+    const t0 = new Date("2026-10-22T10:00:00Z");
+    const first = banksShown(s, t0)[0];
+    expect(banksShown(s, new Date("2026-10-22T10:14:59Z"))[0]).toBe(first);
+    expect(banksShown(s, new Date("2026-10-22T10:15:00Z"))[0]).not.toBe(first);
+    expect(banksShown(s, new Date("2026-10-22T10:30:00Z"))[0]).toBe(first);
+  });
+
+  it("has nothing to rotate with a single bank", () => {
+    expect(banksShown({ ...base, bankAccounts: [a], bankRotateMinutes: 15 })).toEqual([a]);
   });
 });

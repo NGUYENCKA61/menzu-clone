@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/session";
-import { bankReady, theSieuReEnabled } from "@/lib/settings";
+import { bankReady, banksShown, theSieuReEnabled } from "@/lib/settings";
 import { getShopSettings } from "@/lib/settingsStore";
 import {
   CARD_DIGITS_MAX,
@@ -289,7 +289,7 @@ export async function POST(request: Request) {
       ? {
           // Details only, never the reconciliation URL: that carries the
           // account's token and belongs on the server.
-          banks: settings.bankAccounts.map((account) => ({
+          banks: banksShown(settings, topUp.createdAt).map((account) => ({
             code: account.code,
             name: account.name,
             account: account.account,

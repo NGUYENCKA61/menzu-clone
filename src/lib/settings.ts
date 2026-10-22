@@ -54,6 +54,13 @@ export interface ShopSettings {
    * request whichever bank it arrived at.
    */
   bankAccounts: BankAccountConfig[];
+  /**
+   * Offer one receiving bank at a time and change it every this many
+   * minutes, so the transfers spread over the shop's banks (the owner,
+   * 22/10/2026: "cứ 15p đổi 1 cái ngân hàng khác"). Zero keeps every bank on
+   * the form for the customer to pick.
+   */
+  bankRotateMinutes: number;
 
   // --- Nạp tự động ----------------------------------------------------------
   /** When on, a matched transfer credits the wallet without an admin. */
@@ -446,6 +453,7 @@ export const DEFAULT_SETTINGS: ShopSettings = {
   // here would be a stranger's account printed under a QR code. Until one is
   // added, the bank tab says so and the endpoint refuses.
   bankAccounts: [],
+  bankRotateMinutes: 0,
   autoTopUpEnabled: false,
   topUpApiKey: "",
   topUpCronKey: "",
@@ -597,6 +605,7 @@ export const SETTING_KEYS: Record<keyof ShopSettings, string> = {
   bankTopUpEnabled: "topup.bank",
   cardTopUpEnabled: "topup.card",
   bankAccounts: "bank.accounts",
+  bankRotateMinutes: "bank.rotateMinutes",
   autoTopUpEnabled: "topup.auto",
   topUpApiKey: "topup.apiKey",
   topUpCronKey: "topup.cronKey",
@@ -893,6 +902,21 @@ export function theSieuReEnabled(settings: ShopSettings): boolean {
   return Boolean(settings.topUpCardPartnerId.trim() && settings.topUpCardPartnerKey.trim());
 }
 
+/**
+ * The accounts a customer is shown for a request made at `at`. With a
+ * rotation set, only one bank is offered and it changes every N minutes; an
+ * invoice keeps the bank of the window it was made in, so a customer who
+ * started typing a transfer is not shown another account on reload. Every
+ * feed is still read, so a transfer to either bank is credited.
+ */
+export function banksShown(settings: ShopSettings, at: Date = new Date()): BankAccountConfig[] {
+  const accounts = settings.bankAccounts;
+  const minutes = settings.bankRotateMinutes;
+  if (minutes <= 0 || accounts.length <= 1) return accounts;
+  const slot = Math.floor(at.getTime() / (minutes * 60 * 1000));
+  return [accounts[slot % accounts.length]!];
+}
+
 export function bankReady(settings: ShopSettings): boolean {
   return settings.bankAccounts.length > 0;
 }
@@ -1041,6 +1065,10 @@ export function parseSettings(
       DEFAULT_SETTINGS.cardTopUpEnabled,
     ),
     bankAccounts: toAccounts(stored, DEFAULT_SETTINGS.bankAccounts),
+    bankRotateMinutes: toNumber(
+      stored.get(SETTING_KEYS.bankRotateMinutes),
+      DEFAULT_SETTINGS.bankRotateMinutes,
+    ),
     autoTopUpEnabled: toBoolean(
       stored.get(SETTING_KEYS.autoTopUpEnabled),
       DEFAULT_SETTINGS.autoTopUpEnabled,
@@ -1419,6 +1447,7 @@ export function serializeSettings(
     bankTopUpEnabled: String(settings.bankTopUpEnabled),
     cardTopUpEnabled: String(settings.cardTopUpEnabled),
     bankAccounts: JSON.stringify(settings.bankAccounts),
+    bankRotateMinutes: String(settings.bankRotateMinutes),
     autoTopUpEnabled: String(settings.autoTopUpEnabled),
     topUpApiKey: settings.topUpApiKey.trim(),
     topUpCronKey: settings.topUpCronKey.trim(),
@@ -1582,6 +1611,11 @@ export function normalizeSettings(
           .map(toAccount)
           .filter((a): a is BankAccountConfig => a !== null)
       : DEFAULT_SETTINGS.bankAccounts,
+    // Whole minutes, a day at most; anything unreadable means no rotation.
+    bankRotateMinutes: Math.max(
+      0,
+      Math.min(1440, Math.floor(Number(raw?.bankRotateMinutes ?? 0)) || 0),
+    ),
     autoTopUpEnabled: Boolean(raw?.autoTopUpEnabled),
     topUpApiKey: String(raw?.topUpApiKey ?? "").trim(),
     topUpCronKey: String(raw?.topUpCronKey ?? "").trim(),

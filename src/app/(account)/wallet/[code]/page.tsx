@@ -6,7 +6,7 @@ import { Breadcrumb } from "@/components/sites/menzu-lol-f7ae197a/shared/Breadcr
 import { TopUpInvoice } from "@/components/sites/menzu-lol-f7ae197a/shared/TopUpInvoice";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/session";
-import { theSieuReEnabled } from "@/lib/settings";
+import { banksShown, theSieuReEnabled } from "@/lib/settings";
 import { getShopSettings } from "@/lib/settingsStore";
 import { moneyStamp } from "@/lib/stamp";
 import {
@@ -109,7 +109,7 @@ export default async function TopUpInvoicePage({
         transferNote={transferNoteFor(topUp.code)}
         // Only what a customer needs to make the transfer. The reconciliation
         // URL stays on the server — it carries the account's token.
-        banks={settings.bankAccounts.map((account) => ({
+        banks={banksShown(settings, topUp.createdAt).map((account) => ({
           code: account.code,
           name: account.name,
           account: account.account,
