@@ -305,6 +305,7 @@ export function AdminSettings({
   const [auto, setAuto] = useState(settings.autoTopUpEnabled);
   const [apiKey, setApiKey] = useState(settings.topUpApiKey);
   const [cronKey, setCronKey] = useState(settings.topUpCronKey);
+  const [cardFeedUrl, setCardFeedUrl] = useState(settings.topUpCardFeedUrl);
   const [tsSite, setTsSite] = useState(settings.turnstileSiteKey);
   const [tsSecret, setTsSecret] = useState(settings.turnstileSecretKey);
   const [ggId, setGgId] = useState(settings.googleClientId);
@@ -807,6 +808,7 @@ export function AdminSettings({
           autoTopUpEnabled: auto,
           topUpApiKey: apiKey,
           topUpCronKey: cronKey,
+          topUpCardFeedUrl: cardFeedUrl,
           turnstileSiteKey: tsSite,
           turnstileSecretKey: tsSecret,
           googleClientId: ggId,
@@ -1043,6 +1045,26 @@ export function AdminSettings({
                   với 15.5 nghĩa là ví khách nhận 42.250đ. Mệnh giá không khai ở
                   đây dùng mức chung phía trên, và trang nạp hiện đúng con số đó
                   trước khi khách gửi thẻ.
+                </p>
+              </div>
+
+              <div className="sm:col-span-2">
+                <label htmlFor="topup-card-feed" className={LABEL}>
+                  Link lịch sử TheSieuRe (đối soát thẻ cào)
+                </label>
+                <input
+                  id="topup-card-feed"
+                  value={cardFeedUrl}
+                  onChange={(event) => setCardFeedUrl(event.target.value)}
+                  placeholder="https://api.sieuthicode.vn/historyapithesieure/..."
+                  className={`${FIELD} font-mono`}
+                />
+                <p className={HINT}>
+                  Dán nguyên URL kèm token từ sieuthicode. Khi Nạp tự động đang
+                  bật, mỗi lượt đối soát đọc thêm lịch sử TheSieuRe: thẻ đã gạch
+                  xong mà khớp đúng một thẻ đang chờ (theo seri, mã lệnh hoặc
+                  mệnh giá) là cộng ví ngay, không cần bấm Đã nạp. Khoản không
+                  khớp vẫn nằm trong hàng đợi cho người duyệt.
                 </p>
               </div>
             </div>

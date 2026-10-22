@@ -5,7 +5,7 @@ import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/session";
 import { getShopSettings } from "@/lib/settingsStore";
 import { readTransfers } from "@/lib/topup";
-import { applyTransfers, expireStaleTopUps } from "@/lib/topupStore";
+import { applyCardCredits, applyTransfers, expireStaleTopUps } from "@/lib/topupStore";
 
 function sameSecret(given: string, expected: string): boolean {
   const a = Buffer.from(given);
@@ -70,7 +70,10 @@ async function runSync(request: Request) {
   const expired = await expireStaleTopUps();
 
   const feeds = settings.bankAccounts.filter((account) => account.apiUrl);
-  if (!settings.autoTopUpEnabled || feeds.length === 0) {
+  // The TheSieuRe history is read on the same pass, for scratch cards only
+  // (the owner, 22/10/2026: "cái đó cho thẻ cào thôi").
+  const cardFeed = settings.topUpCardFeedUrl;
+  if (!settings.autoTopUpEnabled || (feeds.length === 0 && !cardFeed)) {
     return NextResponse.json({ matched: 0, skipped: 0, expired, details: [], polled: false });
   }
 
@@ -92,32 +95,35 @@ async function runSync(request: Request) {
   }
   lastPollAt = Date.now();
 
+  /** One feed's latest rows, or nothing: the customer is watching a spinner,
+   *  so one slow provider must not hold the request open, nor stop the other
+   *  feeds being read. */
+  const readFeed = async (url: string) => {
+    try {
+      const response = await fetch(url, {
+        headers: settings.topUpApiKey
+          ? { Authorization: `Apikey ${settings.topUpApiKey}` }
+          : {},
+        cache: "no-store",
+        signal: AbortSignal.timeout(8000),
+      });
+      if (!response.ok) return [];
+      return readTransfers(await response.json());
+    } catch {
+      return [];
+    }
+  };
+
   // Every account is read, not just the one the customer picked: people
   // transfer from whichever app is already open, and a payment that landed in
   // the other bank is still a payment.
   const transfers = (
-    await Promise.all(
-      feeds.map(async (account) => {
-        try {
-          const response = await fetch(account.apiUrl, {
-            headers: settings.topUpApiKey
-              ? { Authorization: `Apikey ${settings.topUpApiKey}` }
-              : {},
-            cache: "no-store",
-            // The customer is watching a spinner; one slow provider must not
-            // hold the request open, nor stop the other bank being read.
-            signal: AbortSignal.timeout(8000),
-          });
-          if (!response.ok) return [];
-          return readTransfers(await response.json());
-        } catch {
-          return [];
-        }
-      }),
-    )
+    await Promise.all(feeds.map((account) => readFeed(account.apiUrl)))
   ).flat();
-
   const report = await applyTransfers(transfers, "Ngân Hàng · tự động");
+
+  const credits = cardFeed ? await readFeed(cardFeed) : [];
+  const cards = cardFeed ? await applyCardCredits(credits) : null;
 
   // The report is the shop's, not the caller's. Its lines name other customers
   // and the money they moved — "NTxxxx: cộng 5.000.000đ cho <tên>" — and quote
@@ -133,10 +139,14 @@ async function runSync(request: Request) {
   return NextResponse.json({
     polled: true,
     expired,
-    matched: report.matched,
-    skipped: report.skipped,
+    matched: report.matched + (cards?.matched ?? 0),
+    skipped: report.skipped + (cards?.skipped ?? 0),
     ...(byKey
-      ? { feeds: feeds.length, received: transfers.length, details: report.details }
+      ? {
+          feeds: feeds.length + (cardFeed ? 1 : 0),
+          received: transfers.length + credits.length,
+          details: [...report.details, ...(cards?.details ?? [])],
+        }
       : {}),
   });
 }

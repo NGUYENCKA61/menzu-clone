@@ -14,6 +14,8 @@ export interface IncomingTransfer {
   amount: number;
   /** The provider's own id for this transfer, for logs. */
   reference: string;
+  /** When the provider says it happened, where the feed dates its rows. */
+  at?: Date;
 }
 
 /**
@@ -151,7 +153,9 @@ const LIST_KEYS = ["data", "transactions", "tranList", "items", "result", "recor
 /** …and what they call the sender's message, the amount, and their own id. */
 const DESCRIPTION_KEYS = ["description", "content", "comment", "detail", "addDescription"];
 const AMOUNT_KEYS = ["amount", "transferAmount", "creditAmount", "amountIn", "money"];
-const REFERENCE_KEYS = ["tid", "transactionID", "transactionId", "referenceCode", "refNo", "id"];
+const REFERENCE_KEYS = ["tid", "transactionID", "transactionId", "transId", "referenceCode", "refNo", "id"];
+/** …and when it happened, on the feeds that say. */
+const WHEN_KEYS = ["date", "transactionDate", "transDate", "time", "createdAt", "created_at", "when"];
 
 function pick(row: Record<string, unknown>, keys: string[]): unknown {
   // Case-insensitive: some providers capitalise ("Description", "Amount").
@@ -184,6 +188,33 @@ function readAmount(raw: unknown): number {
   const whole = (match?.[1] ?? body).replace(/[.,]/g, "");
   if (!whole) return Number.NaN;
   return sign * Math.floor(Number(whole));
+}
+
+/**
+ * When a feed row happened, if its date can be read. sieuthicode writes
+ * "2024-06-10 12:00:00" in Vietnam's clock, so a stamp with no zone is taken
+ * as +07:00; a zone or a "Z" in the text is honoured; an epoch is taken as
+ * is, in seconds or milliseconds.
+ */
+function readWhen(raw: unknown): Date | undefined {
+  if (typeof raw === "number" && Number.isFinite(raw) && raw > 0) {
+    return new Date(raw > 1e12 ? raw : raw * 1000);
+  }
+  if (typeof raw !== "string" || !raw.trim()) return undefined;
+  const text = raw.trim();
+  const iso = /^(\d{4})-(\d{2})-(\d{2})(?:[ T](\d{2}):(\d{2})(?::(\d{2}))?)?(Z|[+-]\d{2}:?\d{2})?$/.exec(text);
+  const vn = /^(\d{2})\/(\d{2})\/(\d{4})(?:[ T](\d{2}):(\d{2})(?::(\d{2}))?)?$/.exec(text);
+  let stamp: string | null = null;
+  if (iso) {
+    const [, y, mo, d, h = "00", mi = "00", s = "00", zone] = iso;
+    const offset = zone ? zone.replace(/^([+-]\d{2})(\d{2})$/, "$1:$2") : "+07:00";
+    stamp = `${y}-${mo}-${d}T${h}:${mi}:${s}${offset}`;
+  } else if (vn) {
+    const [, d, mo, y, h = "00", mi = "00", s = "00"] = vn;
+    stamp = `${y}-${mo}-${d}T${h}:${mi}:${s}+07:00`;
+  }
+  const parsed = new Date(stamp ?? text);
+  return Number.isNaN(parsed.getTime()) ? undefined : parsed;
 }
 
 export function readTransfers(payload: unknown): IncomingTransfer[] {
@@ -223,7 +254,8 @@ function readOne(row: Record<string, unknown> | null): IncomingTransfer | null {
   if (direction && !/^(in|credit|c|\+)$/i.test(direction)) return null;
   if (!Number.isFinite(amount) || amount <= 0) return null;
 
-  return { description, amount, reference };
+  const at = readWhen(pick(row, WHEN_KEYS));
+  return at ? { description, amount, reference, at } : { description, amount, reference };
 }
 
 /**
@@ -426,4 +458,63 @@ export function heldNotice(
     title: `Chuyển khoản cần duyệt · ${code}`,
     body: `${username} chuyển ${dong(received)} cho lệnh ${dong(requested)} - ${why}, ví CHƯA cộng. Đối chiếu sao kê rồi bấm Xác nhận và ghi đúng số tiền thực nhận, hoặc Từ chối.`,
   };
+}
+
+// ---- TheSieuRe: scratch cards ------------------------------------------------
+
+/** A scratch-card request still waiting for its money, as the feed matcher sees it. */
+export interface PendingCard {
+  code: string;
+  /** As the request stores it: digits only. */
+  serial: string;
+  /** The face value the customer declared, in đồng. */
+  face: number;
+  createdAt: Date;
+}
+
+/** How long after a card is sent a feed credit may still pay it by amount… */
+export const CARD_CREDIT_LATE_MS = 24 * 60 * 60 * 1000;
+/** …and how far before it the credit may be stamped, two clocks being two clocks. */
+export const CARD_CREDIT_EARLY_MS = 5 * 60 * 1000;
+
+/**
+ * Which waiting card a TheSieuRe credit pays, when that can be said for sure.
+ *
+ * The feed (api.sieuthicode.vn/historyapithesieure/<token>) lists what the
+ * shop's TheSieuRe account took in: an id, an amount, a line of text and a
+ * time. The text is read first — a request code or a card's serial in it
+ * names the request outright. Failing that, the amount: TheSieuRe pays a
+ * card's face value less its own cut, so a credit between half the face
+ * value and the face value itself belongs to a card of that denomination,
+ * and it is taken only when exactly one such card was sent in the day
+ * before it. Two 100.000đ cards in the queue and one credit is a coin toss,
+ * and a coin toss with somebody else's money is left to the desk. A row
+ * with no id or no time is never matched by amount: without an id the same
+ * row would pay a new card on every poll, and without a time an old credit
+ * could pay a card sent long after it.
+ */
+export function matchCardCredit(
+  credit: IncomingTransfer,
+  waiting: PendingCard[],
+): PendingCard | null {
+  const code = extractTopUpCode(credit.description);
+  if (code) return waiting.find((card) => card.code === code) ?? null;
+
+  // Serials are printed in groups; the text is compared with the gaps shut.
+  const compact = credit.description.replace(/[\s.-]/g, "");
+  const bySerial = waiting.filter(
+    (card) => card.serial !== "" && new RegExp(`(^|\\D)${card.serial}(?!\\d)`).test(compact),
+  );
+  if (bySerial.length > 0) return bySerial.length === 1 ? bySerial[0]! : null;
+
+  if (!credit.reference || !credit.at) return null;
+  const at = credit.at.getTime();
+  const byAmount = waiting.filter(
+    (card) =>
+      credit.amount <= card.face &&
+      credit.amount * 2 >= card.face &&
+      at >= card.createdAt.getTime() - CARD_CREDIT_EARLY_MS &&
+      at <= card.createdAt.getTime() + CARD_CREDIT_LATE_MS,
+  );
+  return byAmount.length === 1 ? byAmount[0]! : null;
 }

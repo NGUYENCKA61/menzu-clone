@@ -8,30 +8,38 @@ import { getShopSettings } from "@/lib/settingsStore";
 import { creditWallet } from "@/lib/wallet";
 import {
   autoCreditVerdict,
+  CARD_CREDIT_LATE_MS,
   cardNet,
   creditLine,
   extractTopUpCode,
   heldNotice,
+  matchCardCredit,
   mismatchNotice,
   TOPUP_EXPIRY_MINUTES,
   type IncomingTransfer,
+  type PendingCard,
 } from "@/lib/topup";
 
 /** Ledger codes ("GD…"); exported for the commission-withdraw route. */
 export const makeCode = makeShortCode;
 
 /**
- * Retires requests nobody paid.
+ * Retires bank requests nobody paid.
  *
  * Cheap enough to run on every reconciliation pass: one indexed UPDATE that
  * usually touches no rows. Expiring is only about the queue being readable —
  * `creditTopUp` still honours an expired request, so a late transfer is not
  * punished for arriving late.
+ *
+ * Bank requests only. A scratch card has no transfer to wait for: the desk
+ * redeems it at its own pace and the TheSieuRe feed may pay it an hour
+ * later (22/10/2026), so it stays in the queue, and on the customer's page,
+ * as waiting until somebody settles it.
  */
 export async function expireStaleTopUps(): Promise<number> {
   const cutoff = new Date(Date.now() - TOPUP_EXPIRY_MINUTES * 60 * 1000);
   const result = await db.topUp.updateMany({
-    where: { status: "PENDING", createdAt: { lt: cutoff } },
+    where: { status: "PENDING", method: "BANK", createdAt: { lt: cutoff } },
     data: { status: "EXPIRED" },
   });
   return result.count;
@@ -79,7 +87,15 @@ export type CreditResult =
  */
 export async function creditTopUp(
   code: string,
-  options: { expectAmount?: number; note?: string; by?: string; byHand?: boolean } = {},
+  options: {
+    expectAmount?: number;
+    note?: string;
+    by?: string;
+    byHand?: boolean;
+    /** The feed row paying this request, e.g. "tsr:12345678". Unique on the
+     *  table, so the same row can never pay twice. */
+    providerRef?: string;
+  } = {},
 ): Promise<CreditResult> {
   const topUp = await db.topUp.findUnique({
     where: { code },
@@ -165,6 +181,7 @@ export async function creditTopUp(
             : { amount: received }),
           // …and this is the one figure every screen should read.
           credited: received,
+          ...(options.providerRef ? { providerRef: options.providerRef } : {}),
         },
       });
       if (claimed.count === 0) throw new Error("ALREADY_HANDLED");
@@ -345,5 +362,90 @@ export async function applyTransfers(
     }
   }
 
+  return report;
+}
+
+/**
+ * Credits waiting scratch cards from what the shop's TheSieuRe account took
+ * in, read off sieuthicode's history of it (the owner, 22/10/2026: "cái đó
+ * cho thẻ cào thôi"). The desk still redeems the card at TheSieuRe; this is
+ * the "Đã nạp" click it no longer has to make.
+ *
+ * Each row is matched by `matchCardCredit`. A row already written to a
+ * request (its providerRef) is passed over, so a feed that repeats the same
+ * rows every minute pays nobody twice; a row that matches nothing is only
+ * named in the report, for the desk to settle by hand.
+ */
+export async function applyCardCredits(credits: IncomingTransfer[]): Promise<MatchReport> {
+  const report: MatchReport = { matched: 0, skipped: 0, details: [] };
+  if (credits.length === 0) return report;
+
+  const refOf = (credit: IncomingTransfer) =>
+    credit.reference ? `tsr:${credit.reference}` : null;
+  const refs = credits.map(refOf).filter((ref): ref is string => ref !== null);
+  const paid = new Set(
+    refs.length === 0
+      ? []
+      : (
+          await db.topUp.findMany({
+            where: { providerRef: { in: refs } },
+            select: { providerRef: true },
+          })
+        ).map((row) => row.providerRef),
+  );
+
+  // Cards sent in the last day, oldest first; EXPIRED rows are old bank-style
+  // sweeps and still creditable.
+  let waiting: PendingCard[] = (
+    await db.topUp.findMany({
+      where: {
+        method: "CARD",
+        status: { in: ["PENDING", "EXPIRED"] },
+        cardSerial: { not: null },
+        createdAt: { gte: new Date(Date.now() - CARD_CREDIT_LATE_MS) },
+      },
+      orderBy: { createdAt: "asc" },
+      select: { code: true, cardSerial: true, amount: true, createdAt: true },
+    })
+  ).map((row) => ({
+    code: row.code,
+    serial: row.cardSerial ?? "",
+    face: Number(row.amount),
+    createdAt: row.createdAt,
+  }));
+
+  for (const credit of credits) {
+    const ref = refOf(credit);
+    if (ref && paid.has(ref)) continue;
+    const figure = credit.amount.toLocaleString("vi-VN");
+    const card = matchCardCredit(credit, waiting);
+    if (!card) {
+      report.skipped += 1;
+      report.details.push(
+        `TheSieuRe +${figure}đ "${credit.description.slice(0, 60)}": chưa khớp thẻ nào đang chờ`,
+      );
+      continue;
+    }
+    try {
+      const result = await creditTopUp(card.code, {
+        note: "Thẻ Cào · TheSieuRe",
+        ...(ref ? { providerRef: ref } : {}),
+      });
+      if (result.ok) {
+        report.matched += 1;
+        report.details.push(
+          `${card.code}: cộng ${result.amount.toLocaleString("vi-VN")}đ cho ${result.username} (thẻ ${card.face.toLocaleString("vi-VN")}đ, TheSieuRe báo ${figure}đ)`,
+        );
+        waiting = waiting.filter((other) => other.code !== card.code);
+        if (ref) paid.add(ref);
+      } else {
+        report.skipped += 1;
+        report.details.push(`${card.code}: ${result.detail ?? result.reason}`);
+      }
+    } catch (error) {
+      report.skipped += 1;
+      report.details.push(`${card.code}: ${error instanceof Error ? error.message : "lỗi"}`);
+    }
+  }
   return report;
 }

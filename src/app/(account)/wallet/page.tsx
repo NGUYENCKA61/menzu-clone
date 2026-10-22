@@ -69,7 +69,12 @@ export default async function WalletPage() {
           // A request past its hold window reads as overdue even before a
           // reconciliation pass marks it so: it no longer blocks a new
           // invoice (openBankTopUp decides the same on the server).
-          status: row.status === "PENDING" && !stillHeld(row.createdAt) ? "EXPIRED" : row.status,
+          // A card has no window: the desk redeems it at its own pace and the
+          // TheSieuRe feed may pay it an hour later (22/10/2026).
+          status:
+            row.status === "PENDING" && row.method === "BANK" && !stillHeld(row.createdAt)
+              ? "EXPIRED"
+              : row.status,
           // Only carried on a refusal: it is the desk's answer to "why", and
           // on any other row there is no question being asked.
           note: row.status === "FAILED" ? row.note : null,
@@ -78,7 +83,9 @@ export default async function WalletPage() {
           // string rather than a number of seconds, because the page may sit
           // in a cache for a while before anyone reads it.
           expiresAt:
-            row.status === "PENDING" ? topUpExpiresAt(row.createdAt).toISOString() : null,
+            row.status === "PENDING" && row.method === "BANK"
+              ? topUpExpiresAt(row.createdAt).toISOString()
+              : null,
         }))}
       />
     </AccountPageFrame>

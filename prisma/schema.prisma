@@ -1293,9 +1293,9 @@ model LicenseKey {
   userId      String?
   user        User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
   deliveredAt DateTime?
-  /// Delivery plus the tier's duration. Null on a lifetime tier — and null
-  /// while the key is still on the shelf, because a key nobody holds is not
-  /// counting down.
+  /// No longer written (22/10/2026): a key's clock starts when the customer
+  /// activates it in the loader, which the shop never sees, so no date here
+  /// could be right. Kept, null on every new row, for the rows that have one.
   expiresAt   DateTime?
 
   createdAt DateTime @default(now())
@@ -1560,6 +1560,11 @@ model TopUp {
   /// turned out to be used or mistyped still has a record of what arrived.
   cardSerial String?
   cardPin    String?
+
+  /// The feed row that paid this request, e.g. "tsr:12345678" from the
+  /// TheSieuRe history: unique, so a feed that lists the same credit on every
+  /// poll can never pay it twice. Null on everything settled another way.
+  providerRef String? @unique
 
   /// Why the desk refused it, in the desk's own words. Only ever set on a
   /// FAILED row, and shown to the customer: a refusal with no reason reads as

@@ -4,6 +4,7 @@ import {
   extractTopUpCode,
   formatCountdown,
   makeTopUpCode,
+  matchCardCredit,
   readTransfers,
   topUpExpiresAt,
   TOPUP_EXPIRY_MINUTES,
@@ -198,6 +199,8 @@ describe("readTransfers", () => {
         description: "020097040501312143182024IXIY051998",
         amount: 99000,
         reference: "5388 - 71420",
+        // "31/01/2024" in Vietnam's clock.
+        at: new Date("2024-01-30T17:00:00.000Z"),
       },
     ]);
   });
@@ -423,5 +426,89 @@ describe("the default card rate", () => {
   it("ignores a default that is not a percent", () => {
     expect(cardNet(50_000, [], -5)).toBe(50_000);
     expect(cardNet(50_000, [], 100)).toBe(50_000);
+  });
+});
+
+describe("readTransfers on sieuthicode's TheSieuRe history", () => {
+  it("keeps transId as the reference and reads the Vietnam-clock date", () => {
+    const [credit] = readTransfers({
+      status: "success",
+      data: [
+        {
+          transId: "12345678",
+          amount: 50000,
+          description: "Nạp tiền từ TSR",
+          date: "2024-06-10 12:00:00",
+        },
+      ],
+    });
+    expect(credit).toMatchObject({
+      description: "Nạp tiền từ TSR",
+      amount: 50000,
+      reference: "12345678",
+    });
+    expect(credit?.at?.toISOString()).toBe("2024-06-10T05:00:00.000Z");
+  });
+
+  it("leaves the time out when the row has none it can read", () => {
+    const [credit] = readTransfers({ data: [{ transId: "1", amount: 1000, description: "x" }] });
+    expect(credit).toEqual({ description: "x", amount: 1000, reference: "1" });
+    const [dated] = readTransfers({
+      data: [{ transId: "2", amount: 1000, description: "y", date: "10/06/2024 12:00" }],
+    });
+    expect(dated?.at?.toISOString()).toBe("2024-06-10T05:00:00.000Z");
+  });
+});
+
+describe("matchCardCredit", () => {
+  const sent = new Date("2026-10-22T03:00:00Z");
+  const later = new Date("2026-10-22T03:20:00Z");
+  const hundred = { code: "NTAAA111", serial: "1234567890123", face: 100_000, createdAt: sent };
+  const fifty = { code: "NTBBB222", serial: "9876543210", face: 50_000, createdAt: sent };
+  const waiting = [hundred, fifty];
+
+  it("names the card by its serial in the text, gaps and all", () => {
+    const credit = {
+      description: "Đổi thẻ Viettel 100.000 seri 1234 5678 90123",
+      amount: 72_000,
+      reference: "t1",
+      at: later,
+    };
+    expect(matchCardCredit(credit, waiting)).toBe(hundred);
+  });
+
+  it("names the card by the request code in the text", () => {
+    const credit = { description: "NAP NTBBB222", amount: 36_000, reference: "t2", at: later };
+    expect(matchCardCredit(credit, waiting)).toBe(fifty);
+    // A code that names no waiting card is nobody's money here.
+    expect(matchCardCredit({ ...credit, description: "NAP NTZZZ999" }, waiting)).toBeNull();
+  });
+
+  it("takes the one waiting card of that denomination when the text says nothing", () => {
+    const credit = { description: "Nạp tiền từ TSR", amount: 72_000, reference: "t3", at: later };
+    expect(matchCardCredit(credit, waiting)).toBe(hundred);
+    // Full face value is a match too; more than it, or under half, is not.
+    expect(matchCardCredit({ ...credit, amount: 100_000 }, waiting)).toBe(hundred);
+    expect(matchCardCredit({ ...credit, amount: 120_000 }, waiting)).toBeNull();
+    expect(matchCardCredit({ ...credit, amount: 45_000 }, waiting)).toBe(fifty);
+    expect(matchCardCredit({ ...credit, amount: 20_000 }, waiting)).toBeNull();
+  });
+
+  it("leaves a coin toss between two cards of one denomination to the desk", () => {
+    const twin = { ...hundred, code: "NTCCC333", serial: "5555555555" };
+    const credit = { description: "Nạp tiền từ TSR", amount: 72_000, reference: "t4", at: later };
+    expect(matchCardCredit(credit, [hundred, twin])).toBeNull();
+    // …unless the text settles it.
+    expect(
+      matchCardCredit({ ...credit, description: "seri 5555555555" }, [hundred, twin]),
+    ).toBe(twin);
+  });
+
+  it("never matches by amount without an id and a time, or outside the day", () => {
+    const credit = { description: "Nạp tiền từ TSR", amount: 72_000, reference: "t5", at: later };
+    expect(matchCardCredit({ ...credit, reference: "" }, waiting)).toBeNull();
+    expect(matchCardCredit({ description: credit.description, amount: 72_000, reference: "t5" }, waiting)).toBeNull();
+    expect(matchCardCredit({ ...credit, at: new Date("2026-10-22T02:00:00Z") }, waiting)).toBeNull();
+    expect(matchCardCredit({ ...credit, at: new Date("2026-10-23T04:00:00Z") }, waiting)).toBeNull();
   });
 });

@@ -72,6 +72,14 @@ export interface ShopSettings {
    * existed.
    */
   topUpCronKey: string;
+  /**
+   * The TheSieuRe history link from sieuthicode (…/historyapithesieure/<token>),
+   * read on every reconciliation pass for scratch cards only (the owner,
+   * 22/10/2026: "cái đó cho thẻ cào thôi"): a card the desk has redeemed shows
+   * up there as money received, and the waiting request it pays is credited
+   * without a click. Empty leaves every card to the desk.
+   */
+  topUpCardFeedUrl: string;
 
   /**
    * Cloudflare Turnstile. Both halves or neither: the widget cannot be drawn
@@ -423,6 +431,7 @@ export const DEFAULT_SETTINGS: ShopSettings = {
   autoTopUpEnabled: false,
   topUpApiKey: "",
   topUpCronKey: "",
+  topUpCardFeedUrl: "",
   turnstileSiteKey: "",
   turnstileSecretKey: "",
   googleClientId: "",
@@ -569,6 +578,7 @@ export const SETTING_KEYS: Record<keyof ShopSettings, string> = {
   autoTopUpEnabled: "topup.auto",
   topUpApiKey: "topup.apiKey",
   topUpCronKey: "topup.cronKey",
+  topUpCardFeedUrl: "topup.cardFeedUrl",
   turnstileSiteKey: "turnstile.siteKey",
   turnstileSecretKey: "turnstile.secretKey",
   googleClientId: "oauth.google.clientId",
@@ -1012,6 +1022,10 @@ export function parseSettings(
       stored.get(SETTING_KEYS.topUpCronKey),
       DEFAULT_SETTINGS.topUpCronKey,
     ),
+    topUpCardFeedUrl: toOptionalText(
+      stored.get(SETTING_KEYS.topUpCardFeedUrl),
+      DEFAULT_SETTINGS.topUpCardFeedUrl,
+    ),
     turnstileSiteKey: toOptionalText(
       stored.get(SETTING_KEYS.turnstileSiteKey),
       DEFAULT_SETTINGS.turnstileSiteKey,
@@ -1361,6 +1375,7 @@ export function serializeSettings(
     autoTopUpEnabled: String(settings.autoTopUpEnabled),
     topUpApiKey: settings.topUpApiKey.trim(),
     topUpCronKey: settings.topUpCronKey.trim(),
+    topUpCardFeedUrl: settings.topUpCardFeedUrl.trim(),
     turnstileSiteKey: settings.turnstileSiteKey.trim(),
     turnstileSecretKey: settings.turnstileSecretKey.trim(),
     googleClientId: settings.googleClientId.trim(),
@@ -1519,6 +1534,7 @@ export function normalizeSettings(
     autoTopUpEnabled: Boolean(raw?.autoTopUpEnabled),
     topUpApiKey: String(raw?.topUpApiKey ?? "").trim(),
     topUpCronKey: String(raw?.topUpCronKey ?? "").trim(),
+    topUpCardFeedUrl: String(raw?.topUpCardFeedUrl ?? "").trim(),
     turnstileSiteKey: String(raw?.turnstileSiteKey ?? "").trim(),
     turnstileSecretKey: String(raw?.turnstileSecretKey ?? "").trim(),
     googleClientId: String(raw?.googleClientId ?? "").trim(),
@@ -1702,6 +1718,10 @@ export function validateSettings(settings: ShopSettings): string | null {
   // sieuthicode put the credentials in the URL itself — or a key that a
   // pushing provider must present. The webhook stays shut without a key
   // regardless, so it can never be an open endpoint.
+  // The token rides in this URL too, so it may not travel in the clear.
+  if (settings.topUpCardFeedUrl && !/^https:\/\//.test(settings.topUpCardFeedUrl)) {
+    return "Link lịch sử TheSieuRe phải bắt đầu bằng https://";
+  }
   const polled = settings.bankAccounts.filter((account) => account.apiUrl);
   if (
     settings.autoTopUpEnabled &&
