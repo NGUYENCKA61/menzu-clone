@@ -109,8 +109,8 @@ export function RegisterForm({
       setError("Email không hợp lệ");
       return;
     }
-    if (password.length < 6) {
-      setError("Mật khẩu phải có ít nhất 6 ký tự");
+    if (password.length < 8) {
+      setError("Mật khẩu phải có ít nhất 8 ký tự");
       return;
     }
     if (password !== confirm) {
@@ -284,7 +284,7 @@ export function RegisterForm({
                         required
                         value={password}
                         onChange={(event) => setPassword(event.target.value)}
-                        placeholder="Ít nhất 6 ký tự"
+                        placeholder="Ít nhất 8 ký tự"
                         className={`${FIELD_CLASS} pr-12`}
                       />
                       <button

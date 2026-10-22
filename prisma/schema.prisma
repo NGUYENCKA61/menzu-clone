@@ -122,6 +122,7 @@ model User {
   createdAt DateTime @default(now())
 
   sessions            Session[]
+  adminLoginChallenges AdminLoginChallenge[]
   linkedAccounts      LinkedAccount[]
   orders              Order[]
   transactions        Transaction[]
@@ -335,6 +336,8 @@ enum AuthAttemptKind {
   LOGIN
   REGISTER
   RESET
+  /// A voucher code tried on "Áp dụng" and refused (22/10/2026).
+  VOUCHER
 }
 
 /// Throttling ledger for the credential endpoints, kept only long enough to
@@ -2086,4 +2089,23 @@ model ZaloGroupEvent {
   @@index([groupId, createdAt])
   @@index([zaloId, kind, createdAt])
   @@map("zalo_group_events")
+}
+
+/// A second step for an admin's sign-in (22/10/2026): the password was right,
+/// and a code went to the shop's Telegram admins and the admin's own verified
+/// mailbox. The session is only made when the code comes back.
+model AdminLoginChallenge {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// sha256 of "<id>:<code>", so a code sent for one challenge answers no other.
+  codeHash  String
+  attempts  Int      @default(0)
+  expiresAt DateTime
+  ip        String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  @@index([userId, createdAt])
+  @@map("admin_login_challenges")
 }

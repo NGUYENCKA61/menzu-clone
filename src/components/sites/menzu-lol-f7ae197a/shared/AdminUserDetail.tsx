@@ -504,7 +504,7 @@ export function AdminUserDetail({
             <div className="flex flex-wrap items-end gap-3">
               <div className="flex-1 min-w-[200px]">
                 <label htmlFor="detail-password" className={LABEL}>
-                  Mật khẩu mới <span className="text-neutral-600">(ít nhất 6 ký tự)</span>
+                  Mật khẩu mới <span className="text-neutral-600">(ít nhất 8 ký tự)</span>
                 </label>
                 <input
                   id="detail-password"

@@ -111,8 +111,8 @@ export function validateCredentials(
   if (name.includes("@")) {
     return "Tên đăng nhập không được chứa ký tự @";
   }
-  if (password.length < 6) {
-    return "Mật khẩu phải có ít nhất 6 ký tự";
+  if (password.length < 8) {
+    return "Mật khẩu phải có ít nhất 8 ký tự";
   }
   return null;
 }

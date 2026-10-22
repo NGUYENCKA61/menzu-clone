@@ -49,6 +49,17 @@ const RESET_WINDOW_MS = 60 * 60 * 1000;
 const MAX_RESET_PER_IDENTIFIER = 3;
 const MAX_RESET_PER_IP = 10;
 
+/**
+ * Voucher previews ("Áp dụng") are capped per account: a code is a short
+ * word, and a signed-in visitor trying hundreds a minute is guessing, not
+ * shopping (audit 22/10/2026). Only refusals count, so a customer
+ * re-applying a good code is never throttled.
+ */
+const VOUCHER_WINDOW_MS = 10 * 60 * 1000;
+const MAX_VOUCHER_PER_USER = 20;
+const MAX_VOUCHER_PER_IP = 60;
+export const VOUCHER_RETRY_AFTER_SECONDS = Math.ceil(VOUCHER_WINDOW_MS / 1000);
+
 /** How long a caller is told to wait once a window is full. */
 export const RETRY_AFTER_SECONDS = Math.ceil(WINDOW_MS / 1000);
 export const REGISTER_RETRY_AFTER_SECONDS = Math.ceil(REGISTER_WINDOW_MS / 1000);
@@ -117,6 +128,20 @@ export async function checkResetRate(
   };
 }
 
+/** Refused voucher codes, per account and per address. */
+export async function checkVoucherRate(userId: string, ip: string): Promise<RateLimitResult> {
+  const createdAt = { gte: new Date(Date.now() - VOUCHER_WINDOW_MS) };
+  const [byUser, byIp] = await Promise.all([
+    db.authAttempt.count({ where: { kind: "VOUCHER", identifier: userId, createdAt } }),
+    db.authAttempt.count({ where: { kind: "VOUCHER", ip, createdAt } }),
+  ]);
+  return {
+    blocked: byUser >= MAX_VOUCHER_PER_USER || byIp >= MAX_VOUCHER_PER_IP,
+    remaining: Math.max(0, MAX_VOUCHER_PER_USER - byUser),
+    failures: byUser,
+  };
+}
+
 /**
  * Records one attempt and opportunistically prunes expired rows.
  *
@@ -124,7 +149,7 @@ export async function checkResetRate(
  * cron job. A failed pruning must never fail the request, so it is swallowed.
  */
 export async function recordAttempt(
-  kind: "LOGIN" | "REGISTER" | "RESET",
+  kind: "LOGIN" | "REGISTER" | "RESET" | "VOUCHER",
   identifier: string,
   ip: string,
 ): Promise<void> {

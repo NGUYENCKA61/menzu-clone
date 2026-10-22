@@ -27,8 +27,8 @@ export function ResetPasswordForm({ token }: { token: string }) {
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
     if (pending) return;
-    if (password.length < 6) {
-      setError("Mật khẩu phải có ít nhất 6 ký tự");
+    if (password.length < 8) {
+      setError("Mật khẩu phải có ít nhất 8 ký tự");
       return;
     }
     if (password !== confirm) {
@@ -98,7 +98,7 @@ export function ResetPasswordForm({ token }: { token: string }) {
           type={show ? "text" : "password"}
           value={password}
           onChange={(event) => setPassword(event.target.value)}
-          placeholder="Ít nhất 6 ký tự"
+          placeholder="Ít nhất 8 ký tự"
           className="w-full rounded-2xl border border-white/5 bg-white/5 pl-12 pr-12 py-4 text-sm text-white outline-none focus:border-[var(--menzu-accent)]/60 transition-colors placeholder-neutral-500"
         />
         <button

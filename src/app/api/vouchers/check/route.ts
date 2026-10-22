@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server";
 
 import { clampAgencyPercent } from "@/lib/agency";
+import { clientIp } from "@/lib/clientIp";
 import { db } from "@/lib/db";
 import { runningPackageSales, runningSalePrices, tierPriceNow } from "@/lib/queries";
+import { VOUCHER_RETRY_AFTER_SECONDS, checkVoucherRate, recordAttempt } from "@/lib/rateLimit";
 import { getCurrentUser } from "@/lib/session";
 import {
   VOUCHER_USED_ERROR,
@@ -40,7 +42,7 @@ async function usedBefore(userId: string, voucherId: string): Promise<boolean> {
 }
 
 /** "What would this code take off my basket?" — charges nothing. */
-async function previewCart(userId: string, code: string) {
+async function previewCart(userId: string, ip: string, code: string) {
   const items = await db.cartItem.findMany({
     where: { userId },
     include: {
@@ -81,6 +83,7 @@ async function previewCart(userId: string, code: string) {
     })),
   );
   if (!result.ok) {
+    await recordAttempt("VOUCHER", userId, ip);
     return NextResponse.json({ error: result.error }, { status: 400 });
   }
   if (voucher && (await usedBefore(userId, voucher.id))) {
@@ -99,6 +102,16 @@ export async function POST(request: Request) {
   const user = await getCurrentUser();
   if (!user) {
     return NextResponse.json({ error: "Bạn cần đăng nhập" }, { status: 401 });
+  }
+
+  // A code is a short word; twenty refusals in ten minutes is guessing.
+  const ip = clientIp(request);
+  const rate = await checkVoucherRate(user.id, ip);
+  if (rate.blocked) {
+    return NextResponse.json(
+      { error: "Bạn thử mã quá nhiều lần, đợi 10 phút rồi thử lại." },
+      { status: 429, headers: { "retry-after": String(VOUCHER_RETRY_AFTER_SECONDS) } },
+    );
   }
 
   const body = (await request.json().catch(() => null)) as {
@@ -121,7 +134,7 @@ export async function POST(request: Request) {
   // path — the same one the cart checkout runs, against the same rows, so a
   // code that previews here cannot be refused there.
   if (body?.cart) {
-    return previewCart(user.id, code);
+    return previewCart(user.id, ip, code);
   }
 
   const productCode = body?.productCode?.trim();
@@ -206,6 +219,7 @@ export async function POST(request: Request) {
   });
 
   if (!result.ok) {
+    await recordAttempt("VOUCHER", user.id, ip);
     return NextResponse.json({ error: result.error }, { status: 400 });
   }
   if (voucher && (await usedBefore(user.id, voucher.id))) {

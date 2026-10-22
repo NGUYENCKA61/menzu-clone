@@ -107,9 +107,9 @@ describe("credential validation", () => {
     expect(validateCredentials("abc", "matkhau123")).toBeNull();
   });
 
-  it("requires a password of at least 6 characters", () => {
-    expect(validateCredentials("abcdef", "12345")).toContain("6 ký tự");
-    expect(validateCredentials("abcdef", "123456")).toBeNull();
+  it("requires a password of at least 8 characters", () => {
+    expect(validateCredentials("abcdef", "1234567")).toContain("8 ký tự");
+    expect(validateCredentials("abcdef", "12345678")).toBeNull();
   });
 
   it("ignores surrounding whitespace when measuring the username", () => {
