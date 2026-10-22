@@ -306,6 +306,9 @@ export function AdminSettings({
   const [apiKey, setApiKey] = useState(settings.topUpApiKey);
   const [cronKey, setCronKey] = useState(settings.topUpCronKey);
   const [cardFeedUrl, setCardFeedUrl] = useState(settings.topUpCardFeedUrl);
+  const [tsrPartnerId, setTsrPartnerId] = useState(settings.topUpCardPartnerId);
+  const [tsrPartnerKey, setTsrPartnerKey] = useState(settings.topUpCardPartnerKey);
+  const [tsrApiUrl, setTsrApiUrl] = useState(settings.topUpCardApiUrl);
   const [tsSite, setTsSite] = useState(settings.turnstileSiteKey);
   const [tsSecret, setTsSecret] = useState(settings.turnstileSecretKey);
   const [adminTwoFactor, setAdminTwoFactor] = useState(settings.adminTwoFactor);
@@ -810,6 +813,9 @@ export function AdminSettings({
           topUpApiKey: apiKey,
           topUpCronKey: cronKey,
           topUpCardFeedUrl: cardFeedUrl,
+          topUpCardPartnerId: tsrPartnerId,
+          topUpCardPartnerKey: tsrPartnerKey,
+          topUpCardApiUrl: tsrApiUrl,
           turnstileSiteKey: tsSite,
           turnstileSecretKey: tsSecret,
           adminTwoFactor,
@@ -1068,6 +1074,58 @@ export function AdminSettings({
                   mệnh giá) là cộng ví ngay, không cần bấm Đã nạp. Khoản không
                   khớp vẫn nằm trong hàng đợi cho người duyệt.
                 </p>
+              </div>
+
+              <div className="sm:col-span-2 grid grid-cols-1 gap-3 rounded-xl border border-white/[0.06] bg-neutral-950/40 p-4 sm:grid-cols-2">
+                <div className="sm:col-span-2">
+                  <span className={LABEL}>Gạch thẻ tự động qua TheSieuRe</span>
+                  <p className={HINT}>
+                    Lấy Partner ID và Partner Key ở TheSieuRe › Merchant › Kết nối
+                    API đổi thẻ. Điền đủ hai ô là thẻ khách gửi được gạch tự động,
+                    không cần bấm Đã nạp. Bên TheSieuRe khai callback là
+                    /api/wallet/card-callback nối sau tên miền web; nếu bật IP
+                    whitelist thì thêm IP máy chủ của shop.
+                  </p>
+                </div>
+                <div>
+                  <label htmlFor="tsr-partner-id" className={LABEL}>
+                    Partner ID
+                  </label>
+                  <input
+                    id="tsr-partner-id"
+                    autoComplete="off"
+                    value={tsrPartnerId}
+                    onChange={(event) => setTsrPartnerId(event.target.value)}
+                    placeholder="YOUR_PARTNER_ID"
+                    className={`${FIELD} font-mono`}
+                  />
+                </div>
+                <div>
+                  <label htmlFor="tsr-partner-key" className={LABEL}>
+                    Partner Key
+                  </label>
+                  <input
+                    id="tsr-partner-key"
+                    type="password"
+                    autoComplete="off"
+                    value={tsrPartnerKey}
+                    onChange={(event) => setTsrPartnerKey(event.target.value)}
+                    placeholder="Bí mật, chỉ máy chủ dùng"
+                    className={`${FIELD} font-mono`}
+                  />
+                </div>
+                <div className="sm:col-span-2">
+                  <label htmlFor="tsr-api-url" className={LABEL}>
+                    Địa chỉ API TheSieuRe
+                  </label>
+                  <input
+                    id="tsr-api-url"
+                    value={tsrApiUrl}
+                    onChange={(event) => setTsrApiUrl(event.target.value)}
+                    placeholder="Để trống là dùng https://thesieure.com/chargingws/v2"
+                    className={`${FIELD} font-mono`}
+                  />
+                </div>
               </div>
             </div>
 

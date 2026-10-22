@@ -67,6 +67,8 @@ export interface TopUpInvoiceProps {
   banks: BankAccount[];
   /** Whether a matched transfer credits the wallet without an admin. */
   autoEnabled: boolean;
+  /** Whether a card is redeemed by TheSieuRe the moment it is sent. */
+  cardAuto: boolean;
   /** A card's fee and what the wallet gets for it, before it is credited. */
   cardPercent: number;
   cardCredit: number;
@@ -207,6 +209,7 @@ export function TopUpInvoice({
   transferNote,
   banks,
   autoEnabled,
+  cardAuto,
   cardPercent,
   cardCredit,
 }: TopUpInvoiceProps) {
@@ -566,7 +569,9 @@ export function TopUpInvoice({
           ? "Bị từ chối"
           : kind === "gone"
             ? "Đã hủy"
-            : "Đang kiểm tra thẻ";
+            : isCard && cardAuto
+              ? "Đang gạch thẻ"
+              : "Đang kiểm tra thẻ";
     const line =
       kind === "paid"
         ? "Hóa đơn này đã được xử lý thành công."
@@ -577,7 +582,9 @@ export function TopUpInvoice({
               : "Shop không xác nhận được lệnh nạp này. Liên hệ hỗ trợ kèm mã lệnh nếu bạn đã chuyển tiền."))
           : kind === "gone"
             ? "Hóa đơn này đã được hủy."
-            : "Shop đang đối soát thẻ với nhà mạng. Tiền vào ví ngay khi thẻ hợp lệ.";
+            : isCard && cardAuto
+              ? "TheSieuRe đang gạch thẻ với nhà mạng, thường 1 đến 3 phút. Tiền vào ví ngay khi thẻ hợp lệ."
+              : "Shop đang đối soát thẻ với nhà mạng. Tiền vào ví ngay khi thẻ hợp lệ.";
     const barText =
       kind === "paid"
         ? "Giao dịch đã hoàn tất"

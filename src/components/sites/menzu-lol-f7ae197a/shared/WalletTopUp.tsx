@@ -148,6 +148,8 @@ export interface WalletTopUpProps {
   bankReady: boolean;
   /** Whether a matched transfer credits the wallet without an admin. */
   autoEnabled: boolean;
+  /** Whether cards are redeemed by TheSieuRe the moment they are sent. */
+  cardAuto: boolean;
   /**
    * Request to poll for, or null when nothing recent is unpaid. Chosen on the
    * server, where a top-up's timestamp is still a date rather than the display
@@ -167,6 +169,7 @@ export function WalletTopUp({
   cardEnabled,
   bankReady,
   autoEnabled,
+  cardAuto,
   watch,
 }: WalletTopUpProps) {
   const router = useRouter();
@@ -422,14 +425,18 @@ export function WalletTopUp({
                 <div className="flex items-start gap-3">
                   <Hourglass size={20} className="text-yellow-500 shrink-0 mt-0.5" aria-hidden />
                   <div>
-                    <h4 className="text-sm font-bold text-yellow-500 mb-1">Thẻ đang được kiểm tra</h4>
+                    <h4 className="text-sm font-bold text-yellow-500 mb-1">
+                      {cardAuto ? "Thẻ đang được gạch tự động" : "Thẻ đang được kiểm tra"}
+                    </h4>
                     <p className="text-xs text-neutral-400 leading-relaxed">
                       Thẻ{" "}
                       <strong className="text-white">
                         {newestCard.carrier ?? "cào"} {formatVnd(newestCard.amount)}đ
                       </strong>
-                      {checking.length > 1 ? ` và ${checking.length - 1} thẻ khác` : ""} đang chờ đối
-                      soát.
+                      {checking.length > 1 ? ` và ${checking.length - 1} thẻ khác` : ""}
+                      {cardAuto
+                        ? " đang được TheSieuRe gạch, thường 1 đến 3 phút."
+                        : " đang chờ đối soát."}
                     </p>
                   </div>
                 </div>

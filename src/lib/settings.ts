@@ -80,6 +80,16 @@ export interface ShopSettings {
    * without a click. Empty leaves every card to the desk.
    */
   topUpCardFeedUrl: string;
+  /**
+   * TheSieuRe's Merchant keys (the owner, 22/10/2026: "xài API bên TheSieuRe
+   * luôn"). Both set, and every scratch card is sent to TheSieuRe the moment
+   * it is given, settled by their callback or the next sync pass; the desk
+   * only sees what they would not take. Either empty leaves cards to the desk.
+   */
+  topUpCardPartnerId: string;
+  topUpCardPartnerKey: string;
+  /** Their endpoint; empty means https://thesieure.com/chargingws/v2. */
+  topUpCardApiUrl: string;
 
   /**
    * An admin's sign-in takes a second step: a six-digit code to the shop's
@@ -440,6 +450,9 @@ export const DEFAULT_SETTINGS: ShopSettings = {
   topUpApiKey: "",
   topUpCronKey: "",
   topUpCardFeedUrl: "",
+  topUpCardPartnerId: "",
+  topUpCardPartnerKey: "",
+  topUpCardApiUrl: "",
   adminTwoFactor: true,
   turnstileSiteKey: "",
   turnstileSecretKey: "",
@@ -588,6 +601,9 @@ export const SETTING_KEYS: Record<keyof ShopSettings, string> = {
   topUpApiKey: "topup.apiKey",
   topUpCronKey: "topup.cronKey",
   topUpCardFeedUrl: "topup.cardFeedUrl",
+  topUpCardPartnerId: "topup.tsrPartnerId",
+  topUpCardPartnerKey: "topup.tsrPartnerKey",
+  topUpCardApiUrl: "topup.tsrApiUrl",
   adminTwoFactor: "admin.twoFactor",
   turnstileSiteKey: "turnstile.siteKey",
   turnstileSecretKey: "turnstile.secretKey",
@@ -872,6 +888,11 @@ export function clampRowCount(value: number): number {
  * its account cannot take one — showing a QR with nobody's account behind it
  * would take money nowhere.
  */
+/** Whether scratch cards go to TheSieuRe by themselves: both Merchant keys set. */
+export function theSieuReEnabled(settings: ShopSettings): boolean {
+  return Boolean(settings.topUpCardPartnerId.trim() && settings.topUpCardPartnerKey.trim());
+}
+
 export function bankReady(settings: ShopSettings): boolean {
   return settings.bankAccounts.length > 0;
 }
@@ -1035,6 +1056,18 @@ export function parseSettings(
     topUpCardFeedUrl: toOptionalText(
       stored.get(SETTING_KEYS.topUpCardFeedUrl),
       DEFAULT_SETTINGS.topUpCardFeedUrl,
+    ),
+    topUpCardPartnerId: toOptionalText(
+      stored.get(SETTING_KEYS.topUpCardPartnerId),
+      DEFAULT_SETTINGS.topUpCardPartnerId,
+    ),
+    topUpCardPartnerKey: toOptionalText(
+      stored.get(SETTING_KEYS.topUpCardPartnerKey),
+      DEFAULT_SETTINGS.topUpCardPartnerKey,
+    ),
+    topUpCardApiUrl: toOptionalText(
+      stored.get(SETTING_KEYS.topUpCardApiUrl),
+      DEFAULT_SETTINGS.topUpCardApiUrl,
     ),
     adminTwoFactor: toBoolean(
       stored.get(SETTING_KEYS.adminTwoFactor),
@@ -1390,6 +1423,9 @@ export function serializeSettings(
     topUpApiKey: settings.topUpApiKey.trim(),
     topUpCronKey: settings.topUpCronKey.trim(),
     topUpCardFeedUrl: settings.topUpCardFeedUrl.trim(),
+    topUpCardPartnerId: settings.topUpCardPartnerId.trim(),
+    topUpCardPartnerKey: settings.topUpCardPartnerKey.trim(),
+    topUpCardApiUrl: settings.topUpCardApiUrl.trim(),
     adminTwoFactor: String(settings.adminTwoFactor),
     turnstileSiteKey: settings.turnstileSiteKey.trim(),
     turnstileSecretKey: settings.turnstileSecretKey.trim(),
@@ -1550,6 +1586,9 @@ export function normalizeSettings(
     topUpApiKey: String(raw?.topUpApiKey ?? "").trim(),
     topUpCronKey: String(raw?.topUpCronKey ?? "").trim(),
     topUpCardFeedUrl: String(raw?.topUpCardFeedUrl ?? "").trim(),
+    topUpCardPartnerId: String(raw?.topUpCardPartnerId ?? "").trim(),
+    topUpCardPartnerKey: String(raw?.topUpCardPartnerKey ?? "").trim(),
+    topUpCardApiUrl: String(raw?.topUpCardApiUrl ?? "").trim(),
     adminTwoFactor:
       raw?.adminTwoFactor === undefined
         ? DEFAULT_SETTINGS.adminTwoFactor
@@ -1740,6 +1779,14 @@ export function validateSettings(settings: ShopSettings): string | null {
   // The token rides in this URL too, so it may not travel in the clear.
   if (settings.topUpCardFeedUrl && !/^https:\/\//.test(settings.topUpCardFeedUrl)) {
     return "Link lịch sử TheSieuRe phải bắt đầu bằng https://";
+  }
+  // Half a pair of Merchant keys can sign nothing; and the key rides in
+  // every call, so the address it goes to must be https.
+  if (Boolean(settings.topUpCardPartnerId) !== Boolean(settings.topUpCardPartnerKey)) {
+    return "TheSieuRe: điền cả Partner ID và Partner Key, hoặc để trống cả hai";
+  }
+  if (settings.topUpCardApiUrl && !/^https:\/\//.test(settings.topUpCardApiUrl)) {
+    return "Địa chỉ API TheSieuRe phải bắt đầu bằng https://";
   }
   const polled = settings.bankAccounts.filter((account) => account.apiUrl);
   if (

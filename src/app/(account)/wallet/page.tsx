@@ -5,7 +5,7 @@ import { AccountPageFrame } from "@/components/sites/menzu-lol-f7ae197a/shared/A
 import { WalletTopUp } from "@/components/sites/menzu-lol-f7ae197a/shared/WalletTopUp";
 import { getTopUps } from "@/lib/queries";
 import { getCurrentUser } from "@/lib/session";
-import { bankReady } from "@/lib/settings";
+import { bankReady, theSieuReEnabled } from "@/lib/settings";
 import { getShopSettings } from "@/lib/settingsStore";
 import { stillHeld, topUpExpiresAt, watchableTopUp } from "@/lib/topup";
 
@@ -51,6 +51,7 @@ export default async function WalletPage() {
         cardEnabled={settings.cardTopUpEnabled}
         bankReady={bankReady(settings)}
         autoEnabled={settings.autoTopUpEnabled}
+        cardAuto={theSieuReEnabled(settings)}
         // Decided here, where createdAt is still a real date rather than the
         // display string the history rows carry.
         watch={(() => {

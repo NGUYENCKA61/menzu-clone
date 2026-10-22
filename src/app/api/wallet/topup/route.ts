@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/session";
-import { bankReady } from "@/lib/settings";
+import { bankReady, theSieuReEnabled } from "@/lib/settings";
 import { getShopSettings } from "@/lib/settingsStore";
 import {
   CARD_DIGITS_MAX,
@@ -13,6 +13,8 @@ import {
   transferNoteFor,
 } from "@/lib/topup";
 import { openBankTopUp } from "@/lib/topupOpen";
+import { applyTsrResult, submitCard } from "@/lib/theSieuRe";
+import { verdictOf } from "@/lib/theSieuReRules";
 
 /**
  * How many requests one account may leave open at once.
@@ -210,10 +212,51 @@ export async function POST(request: Request) {
     },
   });
 
+  // The card goes to TheSieuRe by itself when the Merchant keys are set (the
+  // owner, 22/10/2026: "xài API bên TheSieuRe luôn"). What they will not
+  // take is refused here with their reason; what they are still working on
+  // waits, answered by their callback or the next sync pass. A reply that
+  // decides nothing (their maintenance, a request error) leaves the card to
+  // the desk, unmarked, so the pass does not keep asking about it.
+  let status: "PENDING" | "COMPLETED" = "PENDING";
+  if (method === "CARD" && cardSerial && cardPin && theSieuReEnabled(settings)) {
+    const sent = await submitCard(settings, {
+      code: topUp.code,
+      carrier: body?.carrier ?? null,
+      serial: cardSerial,
+      pin: cardPin,
+      face: Number(amount),
+    });
+    if (sent.ok) {
+      if (verdictOf(sent.result.status) !== "down") {
+        const ref = sent.result.transId
+          ? `tsr:${sent.result.transId}`
+          : `tsr:sent:${topUp.code}`;
+        await db.topUp
+          .updateMany({ where: { id: topUp.id, providerRef: null }, data: { providerRef: ref } })
+          .catch(() => {});
+      } else {
+        console.error("[thesieure] not taken", topUp.code, sent.result.status, sent.result.message);
+      }
+      const outcome = await applyTsrResult(topUp.code, sent.result);
+      if (outcome === "credited") status = "COMPLETED";
+      if (outcome === "refused") {
+        return NextResponse.json(
+          {
+            error: `Thẻ không nạp được: ${sent.result.message || "TheSieuRe từ chối thẻ"}. Lệnh ${topUp.code} đã ghi lại lý do.`,
+          },
+          { status: 400 },
+        );
+      }
+    } else {
+      console.error("[thesieure] submit", topUp.code, sent.reason, sent.detail);
+    }
+  }
+
   return NextResponse.json({
     invoiceCode: topUp.code,
     amount: Number(amount),
-    status: "PENDING",
+    status,
     // What the customer types into the transfer description.
     transferNote: transferNoteFor(topUp.code),
     // Derived from the stored timestamp rather than the browser's clock, so

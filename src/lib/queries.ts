@@ -1911,6 +1911,8 @@ export interface AdminTopUpRow {
   /** Both null unless method is CARD. */
   cardSerial: string | null;
   cardPin: string | null;
+  /** "tsr:…" once the card went to TheSieuRe; what paid a bank request. */
+  providerRef: string | null;
   amount: number;
   status: string;
   createdAt: Date;
@@ -2042,6 +2044,7 @@ export async function listTopUps(take = 200): Promise<AdminTopUpRow[]> {
     // The card itself, for the one screen that has to redeem it.
     cardSerial: t.cardSerial,
     cardPin: t.cardPin,
+    providerRef: t.providerRef,
     amount: Number(t.amount),
     status: t.status,
     createdAt: t.createdAt,

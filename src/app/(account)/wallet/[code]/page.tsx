@@ -6,6 +6,7 @@ import { Breadcrumb } from "@/components/sites/menzu-lol-f7ae197a/shared/Breadcr
 import { TopUpInvoice } from "@/components/sites/menzu-lol-f7ae197a/shared/TopUpInvoice";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/session";
+import { theSieuReEnabled } from "@/lib/settings";
 import { getShopSettings } from "@/lib/settingsStore";
 import { moneyStamp } from "@/lib/stamp";
 import {
@@ -115,6 +116,7 @@ export default async function TopUpInvoicePage({
           holder: account.holder,
         }))}
         autoEnabled={settings.autoTopUpEnabled}
+        cardAuto={theSieuReEnabled(settings)}
         cardPercent={
           isCard ? cardRateFor(amount, settings.topUpCardRates, settings.topUpCardFee) : 0
         }

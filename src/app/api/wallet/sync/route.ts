@@ -3,7 +3,9 @@ import { timingSafeEqual } from "node:crypto";
 import { NextResponse } from "next/server";
 
 import { getCurrentUser } from "@/lib/session";
+import { theSieuReEnabled } from "@/lib/settings";
 import { getShopSettings } from "@/lib/settingsStore";
+import { checkPendingCards } from "@/lib/theSieuRe";
 import { readTransfers } from "@/lib/topup";
 import { applyCardCredits, applyTransfers, expireStaleTopUps } from "@/lib/topupStore";
 
@@ -73,7 +75,11 @@ async function runSync(request: Request) {
   // The TheSieuRe history is read on the same pass, for scratch cards only
   // (the owner, 22/10/2026: "cái đó cho thẻ cào thôi").
   const cardFeed = settings.topUpCardFeedUrl;
-  if (!settings.autoTopUpEnabled || (feeds.length === 0 && !cardFeed)) {
+  const pollFeeds = settings.autoTopUpEnabled && (feeds.length > 0 || Boolean(cardFeed));
+  // Cards sent to TheSieuRe and not yet answered are asked about here too,
+  // whatever the bank switch says: that is its own door, the Merchant keys.
+  const askTheSieuRe = theSieuReEnabled(settings);
+  if (!pollFeeds && !askTheSieuRe) {
     return NextResponse.json({ matched: 0, skipped: 0, expired, details: [], polled: false });
   }
 
@@ -117,13 +123,16 @@ async function runSync(request: Request) {
   // Every account is read, not just the one the customer picked: people
   // transfer from whichever app is already open, and a payment that landed in
   // the other bank is still a payment.
-  const transfers = (
-    await Promise.all(feeds.map((account) => readFeed(account.apiUrl)))
-  ).flat();
-  const report = await applyTransfers(transfers, "Ngân Hàng · tự động");
+  const transfers = pollFeeds
+    ? (await Promise.all(feeds.map((account) => readFeed(account.apiUrl)))).flat()
+    : [];
+  const report = pollFeeds
+    ? await applyTransfers(transfers, "Ngân Hàng · tự động")
+    : { matched: 0, skipped: 0, details: [] as string[] };
 
-  const credits = cardFeed ? await readFeed(cardFeed) : [];
-  const cards = cardFeed ? await applyCardCredits(credits) : null;
+  const credits = pollFeeds && cardFeed ? await readFeed(cardFeed) : [];
+  const cards = pollFeeds && cardFeed ? await applyCardCredits(credits) : null;
+  const asked = askTheSieuRe ? await checkPendingCards(settings) : null;
 
   // The report is the shop's, not the caller's. Its lines name other customers
   // and the money they moved — "NTxxxx: cộng 5.000.000đ cho <tên>" — and quote
@@ -139,13 +148,13 @@ async function runSync(request: Request) {
   return NextResponse.json({
     polled: true,
     expired,
-    matched: report.matched + (cards?.matched ?? 0),
-    skipped: report.skipped + (cards?.skipped ?? 0),
+    matched: report.matched + (cards?.matched ?? 0) + (asked?.credited ?? 0),
+    skipped: report.skipped + (cards?.skipped ?? 0) + (asked?.refused ?? 0),
     ...(byKey
       ? {
-          feeds: feeds.length + (cardFeed ? 1 : 0),
-          received: transfers.length + credits.length,
-          details: [...report.details, ...(cards?.details ?? [])],
+          feeds: (pollFeeds ? feeds.length + (cardFeed ? 1 : 0) : 0) + (askTheSieuRe ? 1 : 0),
+          received: transfers.length + credits.length + (asked?.checked ?? 0),
+          details: [...report.details, ...(cards?.details ?? []), ...(asked?.details ?? [])],
         }
       : {}),
   });

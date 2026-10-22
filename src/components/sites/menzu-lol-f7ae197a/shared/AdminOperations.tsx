@@ -68,6 +68,8 @@ export interface TopUpView {
   /** Both null unless the request is a card one. */
   cardSerial: string | null;
   cardPin: string | null;
+  /** "tsr:…" once the card went to TheSieuRe, else null. */
+  providerRef: string | null;
   amount: number;
   status: string;
   createdAt: string;
@@ -612,6 +614,11 @@ export function AdminOperations({
                     <span><span className="text-neutral-500">Mã </span>{row.cardPin}</span>
                   </div>
                 ) : null}
+                {row.method === "CARD" && row.providerRef?.startsWith("tsr:") ? (
+                  <p className="mt-2 text-[11px] font-semibold text-violet-300">
+                    {row.status === "PENDING" ? "TheSieuRe đang gạch thẻ" : "Gạch qua TheSieuRe"}
+                  </p>
+                ) : null}
                 {row.status === "PENDING" ? (
                   <div className="mt-3 grid grid-cols-2 gap-2 border-t border-white/[0.06] pt-3">
                     <button
@@ -692,6 +699,11 @@ export function AdminOperations({
                           <span className="text-neutral-600">Mã </span>
                           {row.cardPin}
                         </span>
+                      </span>
+                    ) : null}
+                    {row.method === "CARD" && row.providerRef?.startsWith("tsr:") ? (
+                      <span className="mt-1 block text-[11px] font-semibold text-violet-300">
+                        {row.status === "PENDING" ? "TheSieuRe đang gạch" : "Qua TheSieuRe"}
                       </span>
                     ) : null}
                   </td>
