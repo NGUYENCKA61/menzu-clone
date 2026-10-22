@@ -30,7 +30,7 @@ import { formatCountdown } from "@/lib/topup";
 import { BankAppPicker } from "./BankAppPicker";
 import { ErrorModal } from "./ErrorModal";
 import { formatVnd } from "./productData";
-import { CreditedLines, TopUpDialog } from "./TopUpDialog";
+import { TopUpDialog } from "./TopUpDialog";
 import { carrierFor } from "./topUpCarriers";
 import { useTimeLeft } from "./TopUpCountdown";
 import { useTopUpWatch, type TopUpOutcome } from "./useTopUpWatch";
@@ -739,25 +739,43 @@ export function TopUpInvoice({
         <TopUpDialog
           tone="green"
           title="Nạp tiền thành công"
+          subtitle={`Lệnh ${code} · ${createdAt}`}
+          amount={{ label: "Đã cộng vào ví", value: outcome.credited }}
+          rows={[
+            {
+              label: isCard ? "Mệnh giá thẻ" : "Số tiền chuyển",
+              value: `${formatVnd(outcome.amount)}đ`,
+            },
+            ...(outcome.amount > outcome.credited
+              ? [{ label: "Phí thẻ cào", value: `${formatVnd(outcome.amount - outcome.credited)}đ` }]
+              : []),
+            { label: "Số dư ví hiện tại", value: `${formatVnd(outcome.balance)}đ`, strong: true },
+          ]}
           // A full load, not a router push: the header's balance was drawn
           // before the money arrived.
-          action={{ label: "Quay lại Ví của tôi", onClick: () => window.location.assign(again) }}
+          action={{ label: "Về ví của tôi", onClick: () => window.location.assign(again) }}
+          secondary={{ label: "Xem lịch sử giao dịch", href: "/transactions" }}
           onClose={() => setSheet(null)}
-        >
-          <CreditedLines credited={outcome.credited} face={outcome.amount} />
-        </TopUpDialog>
+        />
       ) : null}
 
       {sheet === "cancelled" || sheet === "failed" ? (
         <TopUpDialog
           tone="red"
           title={sheet === "failed" ? "Giao dịch bị từ chối" : "Giao dịch đã hủy"}
-          action={{ label: "Tạo đơn mới", href: again }}
+          subtitle={`Lệnh ${code} · ${createdAt}`}
+          rows={[
+            { label: isCard ? "Mệnh giá thẻ" : "Số tiền", value: `${formatVnd(amount)}đ` },
+            { label: "Phương thức", value: isCard ? `Thẻ cào ${carrier ?? ""}`.trim() : "Chuyển khoản" },
+            { label: "Trạng thái", value: sheet === "failed" ? "Bị từ chối" : "Đã hủy", strong: true },
+          ]}
+          action={{ label: "Tạo lệnh nạp mới", href: again }}
+          secondary={{ label: "Liên hệ hỗ trợ", href: "/lien-he" }}
           onClose={() => setSheet(null)}
         >
           {sheet === "failed"
             ? (note ?? "Shop không xác nhận được hóa đơn này. Liên hệ hỗ trợ kèm mã lệnh nếu cần.")
-            : "Hóa đơn nạp tiền này đã được hủy."}
+            : "Hóa đơn nạp tiền này đã được hủy. Tiền chưa bị trừ, bạn có thể tạo lệnh mới bất cứ lúc nào."}
         </TopUpDialog>
       ) : null}
 

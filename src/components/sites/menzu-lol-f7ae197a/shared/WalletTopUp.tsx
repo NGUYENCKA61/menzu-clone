@@ -29,7 +29,7 @@ import { AccountPanel } from "./AccountPanel";
 import { formatVnd } from "./productData";
 import { CARRIERS } from "./topUpCarriers";
 import { TopUpCountdown } from "./TopUpCountdown";
-import { CreditedLines, TopUpDialog } from "./TopUpDialog";
+import { TopUpDialog } from "./TopUpDialog";
 import { useTopUpWatch, type TopUpOutcome } from "./useTopUpWatch";
 
 type Method = "bank" | "card";
@@ -736,11 +736,19 @@ export function WalletTopUp({
         <TopUpDialog
           tone="green"
           title="Nạp tiền thành công"
+          subtitle={watch ? "Lệnh " + watch.code : undefined}
+          amount={{ label: "Đã cộng vào ví", value: credited.credited }}
+          rows={[
+            { label: "Số tiền lệnh", value: formatVnd(credited.amount) + "đ" },
+            ...(credited.amount > credited.credited
+              ? [{ label: "Phí thẻ cào", value: formatVnd(credited.amount - credited.credited) + "đ" }]
+              : []),
+            { label: "Số dư ví hiện tại", value: formatVnd(credited.balance) + "đ", strong: true },
+          ]}
           action={{ label: "Xong", onClick: dismissCredited }}
+          secondary={{ label: "Xem lịch sử giao dịch", href: "/transactions" }}
           onClose={dismissCredited}
-        >
-          <CreditedLines credited={credited.credited} face={credited.amount} />
-        </TopUpDialog>
+        />
       ) : null}
     </AccountPanel>
   );
