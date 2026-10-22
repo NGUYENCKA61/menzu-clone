@@ -753,8 +753,8 @@ export function TopUpInvoice({
           ]}
           // A full load, not a router push: the header's balance was drawn
           // before the money arrived.
-          action={{ label: "Về ví của tôi", onClick: () => window.location.assign(again) }}
-          secondary={{ label: "Xem lịch sử giao dịch", href: "/transactions" }}
+          action={{ label: "Về ví", onClick: () => window.location.assign(again) }}
+          secondary={{ label: "Lịch sử giao dịch", href: "/transactions" }}
           onClose={() => setSheet(null)}
         />
       ) : null}
@@ -769,7 +769,7 @@ export function TopUpInvoice({
             { label: "Phương thức", value: isCard ? `Thẻ cào ${carrier ?? ""}`.trim() : "Chuyển khoản" },
             { label: "Trạng thái", value: sheet === "failed" ? "Bị từ chối" : "Đã hủy", strong: true },
           ]}
-          action={{ label: "Tạo lệnh nạp mới", href: again }}
+          action={{ label: "Tạo lệnh mới", href: again }}
           secondary={{ label: "Liên hệ hỗ trợ", href: "/lien-he" }}
           onClose={() => setSheet(null)}
         >
