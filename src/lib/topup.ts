@@ -153,7 +153,18 @@ const LIST_KEYS = ["data", "transactions", "tranList", "items", "result", "recor
 /** …and what they call the sender's message, the amount, and their own id. */
 const DESCRIPTION_KEYS = ["description", "content", "comment", "detail", "addDescription"];
 const AMOUNT_KEYS = ["amount", "transferAmount", "creditAmount", "amountIn", "money"];
-const REFERENCE_KEYS = ["tid", "transactionID", "transactionId", "transId", "referenceCode", "refNo", "id"];
+const REFERENCE_KEYS = [
+  "tid",
+  "transactionID",
+  "transactionId",
+  // sieuthicode's TheSieuRe history: "transaction" is their unique code,
+  // "transId" only a timestamp two rows in one second would share.
+  "transaction",
+  "transId",
+  "referenceCode",
+  "refNo",
+  "id",
+];
 /** …and when it happened, on the feeds that say. */
 const WHEN_KEYS = ["date", "transactionDate", "transDate", "time", "createdAt", "created_at", "when"];
 
@@ -245,13 +256,15 @@ function readOne(row: Record<string, unknown> | null): IncomingTransfer | null {
 
   const description = String(pick(row, DESCRIPTION_KEYS) ?? "");
   const amount = readAmount(pick(row, AMOUNT_KEYS));
-  const reference = String(pick(row, REFERENCE_KEYS) ?? "");
+  const refRaw = pick(row, REFERENCE_KEYS);
+  const reference = typeof refRaw === "string" || typeof refRaw === "number" ? String(refRaw) : "";
 
   // Money out is not money in. SePay says so explicitly, Casso uses a negative
-  // amount, and the polled APIs tend to carry a "IN"/"OUT" or "+"/"-" marker.
-  // Any of them must stop a debit from crediting a wallet.
-  const direction = String(pick(row, ["transferType", "type", "creditDebitIndicator"]) ?? "");
-  if (direction && !/^(in|credit|c|\+)$/i.test(direction)) return null;
+  // amount, the polled APIs tend to carry a "IN"/"OUT" or "+"/"-" marker, and
+  // sieuthicode's TheSieuRe history writes type 1 for money in and -1 for
+  // money out. Any of them must stop a debit from crediting a wallet.
+  const direction = String(pick(row, ["transferType", "type", "creditDebitIndicator"]) ?? "").trim();
+  if (direction && !/^(in|credit|c|\+|\+?1)$/i.test(direction)) return null;
   if (!Number.isFinite(amount) || amount <= 0) return null;
 
   const at = readWhen(pick(row, WHEN_KEYS));

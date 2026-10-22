@@ -512,3 +512,41 @@ describe("matchCardCredit", () => {
     expect(matchCardCredit({ ...credit, at: new Date("2026-10-23T04:00:00Z") }, waiting)).toBeNull();
   });
 });
+
+describe("readTransfers on sieuthicode's TheSieuRe history, as it really answers", () => {
+  it("keeps money in (type 1) with their transaction code, drops money out (type -1)", () => {
+    const rows = readTransfers({
+      status: "success",
+      msg: "ok",
+      tranList: [
+        {
+          transaction: "W6ADA2D2B44771",
+          date: "2026-10-22 22:35:11",
+          transId: "20261022223511",
+          type: -1,
+          amount: "114500",
+          username: "",
+          status: "VND",
+          description: "14268831",
+        },
+        {
+          transaction: "CC24531081",
+          date: "2026-10-17 20:03:59",
+          transId: "20261017200359",
+          type: 1,
+          amount: "15800",
+          username: "",
+          status: "VND",
+          description: "10011441105360",
+        },
+      ],
+    });
+    expect(rows).toHaveLength(1);
+    expect(rows[0]).toMatchObject({
+      description: "10011441105360",
+      amount: 15800,
+      reference: "CC24531081",
+    });
+    expect(rows[0]?.at?.toISOString()).toBe("2026-10-17T13:03:59.000Z");
+  });
+});
