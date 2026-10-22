@@ -136,6 +136,11 @@ export async function creditTopUp(
     /** The feed row paying this request, e.g. "tsr:12345678". Unique on the
      *  table, so the same row can never pay twice. */
     providerRef?: string;
+    /** What the provider actually paid the shop for this card, in dong: the
+     *  wallet is never credited more than that, whatever the fee table says
+     *  (TheSieuRe takes 14 to 38 percent by carrier and fines a wrong declared
+     *  value, and the shop fee is one number). */
+    cap?: number;
   } = {},
 ): Promise<CreditResult> {
   const topUp = await db.topUp.findUnique({
@@ -198,6 +203,16 @@ export async function creditTopUp(
     } else {
       received = BigInt(typed);
     }
+  }
+  if (
+    topUp.method === "CARD" &&
+    options.cap !== undefined &&
+    Number.isFinite(options.cap) &&
+    options.cap > 0 &&
+    received > BigInt(Math.trunc(options.cap))
+  ) {
+    received = BigInt(Math.trunc(options.cap));
+    cardKept = cardFace - Number(received);
   }
   const mismatch = cardKept === 0 && received !== topUp.amount;
 

@@ -148,10 +148,13 @@ export async function applyTsrResult(code: string, result: TsrResult): Promise<T
       verdict === "paid-other-value" && result.value > 0 && result.value !== declared
         ? result.value
         : null;
+    // Never more than TheSieuRe paid the shop for it: their cut and their
+    // fine for a wrong declared value both come off before the fee table.
     const credit = await creditTopUp(code, {
       note: "Thẻ Cào · TheSieuRe",
       ...(ref ? { providerRef: ref } : {}),
       ...(found ? { expectAmount: found, byHand: true } : {}),
+      ...(result.amount > 0 ? { cap: result.amount } : {}),
     });
     if (!credit.ok) return "ignored";
     // The card is spent; its PIN has no further use anywhere.
