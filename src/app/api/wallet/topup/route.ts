@@ -7,6 +7,7 @@ import { getShopSettings } from "@/lib/settingsStore";
 import {
   CARD_DIGITS_MAX,
   CARD_DIGITS_MIN,
+  cardFormatIssue,
   makeTopUpCode,
   readCardDigits,
   topUpExpiresAt,
@@ -132,6 +133,10 @@ export async function POST(request: Request) {
         { status: 400 },
       );
     }
+    // As the carriers print them: a number of the wrong length is a typo, and
+    // a typo sent on costs the card its one attempt.
+    const issue = cardFormatIssue(body?.carrier ?? null, cardSerial, cardPin);
+    if (issue) return NextResponse.json({ error: issue }, { status: 400 });
   }
 
   // The same card, twice. It can only be redeemed once, so a second request

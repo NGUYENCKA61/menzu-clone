@@ -14,7 +14,16 @@ import { useRouter, useSearchParams } from "next/navigation";
 
 import { useCallback, useEffect, useState } from "react";
 
-import { CARD_DIGITS_MIN, cardNet, cardRateFor, msUntil, type CardRate } from "@/lib/topup";
+import {
+  CARD_DIGITS_MIN,
+  cardFormatFor,
+  cardFormatIssue,
+  cardLengthWords,
+  cardNet,
+  cardRateFor,
+  msUntil,
+  type CardRate,
+} from "@/lib/topup";
 
 import { AccountPanel } from "./AccountPanel";
 import { formatVnd } from "./productData";
@@ -70,18 +79,28 @@ function CardNumberField({
   placeholder,
   value,
   onChange,
+  range,
+  carrierName,
 }: {
   id: string;
   label: string;
   placeholder: string;
   value: string;
   onChange: (next: string) => void;
+  /** How long this number is on the chosen carrier's cards, when known. */
+  range?: [number, number] | null;
+  carrierName?: string;
 }) {
   const take = (raw: string) => onChange(raw.replace(/\D/g, "").slice(0, 24));
+  // Outside the carrier's own length: told as it is typed, the same way a
+  // half number is.
+  const outside =
+    Boolean(range) && value.length > 0 && (value.length < range![0] || value.length > range![1]);
   // Half a number gets told so, under the box it is about, and the box's rim
   // turns red with it. Typing itself changes only the rim, no tint (the owner,
   // 19/10/2026: "2 ô này có vấn đề với màu sắc khi gõ").
   const short = value.length > 0 && value.length < CARD_DIGITS_MIN;
+  const wrong = short || outside;
   return (
     <div>
       <label htmlFor={id} className="text-[13px] text-neutral-500 font-bold mb-1.5 block ml-1">
@@ -95,10 +114,10 @@ function CardNumberField({
           placeholder={placeholder}
           value={value}
           onChange={(event) => take(event.target.value)}
-          aria-invalid={short || undefined}
-          aria-describedby={short ? `${id}-error` : undefined}
+          aria-invalid={wrong || undefined}
+          aria-describedby={wrong ? `${id}-error` : undefined}
           className={`w-full bg-transparent border rounded-xl pl-4 pr-12 py-3.5 text-sm text-white placeholder:text-neutral-700 focus:outline-none transition-all font-mono shadow-inner ${
-            short ? "border-red-500/50 focus:border-red-500/70" : "border-white/10 focus:border-white/30"
+            wrong ? "border-red-500/50 focus:border-red-500/70" : "border-white/10 focus:border-white/30"
           }`}
         />
         <button
@@ -117,9 +136,15 @@ function CardNumberField({
           <Clipboard size={15} aria-hidden />
         </button>
       </div>
-      {short ? (
+      {wrong ? (
         <span id={`${id}-error`} className="mt-1.5 ml-1 block text-[11px] font-semibold text-red-400">
-          {label} cần ít nhất {CARD_DIGITS_MIN} chữ số
+          {short
+            ? `${label} cần ít nhất ${CARD_DIGITS_MIN} chữ số`
+            : `${label} ${carrierName ?? ""} có ${cardLengthWords(range!)}, bạn nhập ${value.length} số`}
+        </span>
+      ) : range ? (
+        <span className="mt-1.5 ml-1 block text-[11px] text-neutral-500">
+          {carrierName}: {cardLengthWords(range)}
         </span>
       ) : null}
     </div>
@@ -225,7 +250,8 @@ export function WalletTopUp({
     Boolean(carrier) &&
     cardAmountOk &&
     serial.length >= CARD_DIGITS_MIN &&
-    pin.length >= CARD_DIGITS_MIN;
+    pin.length >= CARD_DIGITS_MIN &&
+    cardFormatIssue(carrier, serial, pin) === null;
 
   // Something opened earlier and still unpaid: the page keeps asking, so a
   // transfer made after the invoice was closed still lands with a receipt.
@@ -669,6 +695,8 @@ export function WalletTopUp({
                         placeholder="Nhập mã thẻ..."
                         value={pin}
                         onChange={setPin}
+                        range={cardFormatFor(carrier)?.pin ?? null}
+                        carrierName={carrier}
                       />
                       <CardNumberField
                         id="card-serial"
@@ -676,6 +704,8 @@ export function WalletTopUp({
                         placeholder="Nhập số serial..."
                         value={serial}
                         onChange={setSerial}
+                        range={cardFormatFor(carrier)?.serial ?? null}
+                        carrierName={carrier}
                       />
                     </div>
 

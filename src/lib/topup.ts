@@ -427,6 +427,45 @@ export function readCardDigits(raw: unknown): string | null {
   return digits;
 }
 
+/**
+ * How long a real card's two numbers are, per carrier, as the carriers print
+ * them (TheSieuRe's examples and the shop's own redeemed cards agree, with a
+ * digit of slack either side): a serial or PIN outside the range is a typo,
+ * and a typo sent on costs the card its one attempt (the owner, 22/10/2026:
+ * "xét thẻ thật đi").
+ */
+export const CARD_FORMATS: Record<string, { serial: [number, number]; pin: [number, number] }> = {
+  Viettel: { serial: [11, 15], pin: [13, 15] },
+  Vinaphone: { serial: [13, 15], pin: [13, 15] },
+  Mobifone: { serial: [14, 16], pin: [11, 13] },
+  Garena: { serial: [9, 12], pin: [15, 16] },
+  Zing: { serial: [11, 13], pin: [9, 13] },
+};
+
+export function cardFormatFor(
+  carrier: string | null,
+): { serial: [number, number]; pin: [number, number] } | null {
+  return carrier ? (CARD_FORMATS[carrier] ?? null) : null;
+}
+
+/** "13 đến 15 số", or "14 số" when the range is one length. */
+export function cardLengthWords(range: [number, number]): string {
+  return range[0] === range[1] ? `${range[0]} số` : `${range[0]} đến ${range[1]} số`;
+}
+
+/** The sentence that refuses a card of the wrong shape, or null when it fits. */
+export function cardFormatIssue(carrier: string | null, serial: string, pin: string): string | null {
+  const format = cardFormatFor(carrier);
+  if (!format) return null;
+  if (serial.length < format.serial[0] || serial.length > format.serial[1]) {
+    return `Seri thẻ ${carrier} có ${cardLengthWords(format.serial)}, bạn nhập ${serial.length} số`;
+  }
+  if (pin.length < format.pin[0] || pin.length > format.pin[1]) {
+    return `Mã thẻ ${carrier} có ${cardLengthWords(format.pin)}, bạn nhập ${pin.length} số`;
+  }
+  return null;
+}
+
 /** Below this, an automatic credit is not attempted — a human looks first. */
 export const AUTO_CREDIT_FLOOR = 1_000;
 /** Above this multiple of the request, likewise — a mis-read amount, most likely. */

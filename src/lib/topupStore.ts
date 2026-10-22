@@ -502,12 +502,16 @@ export async function applyCardCredits(credits: IncomingTransfer[]): Promise<Mat
       continue;
     }
     try {
+      // Never more than TheSieuRe paid for it; the card is spent, so its PIN
+      // has no further use anywhere.
       const result = await creditTopUp(card.code, {
         note: "Thẻ Cào · TheSieuRe",
         ...(ref ? { providerRef: ref } : {}),
+        cap: credit.amount,
       });
       if (result.ok) {
         report.matched += 1;
+        await db.topUp.updateMany({ where: { code: card.code }, data: { cardPin: null } });
         report.details.push(
           `${card.code}: cộng ${result.amount.toLocaleString("vi-VN")}đ cho ${result.username} (thẻ ${card.face.toLocaleString("vi-VN")}đ, TheSieuRe báo ${figure}đ)`,
         );

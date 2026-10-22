@@ -4,6 +4,7 @@ import {
   extractTopUpCode,
   formatCountdown,
   makeTopUpCode,
+  cardFormatIssue,
   matchCardCredit,
   readTransfers,
   topUpExpiresAt,
@@ -548,5 +549,24 @@ describe("readTransfers on sieuthicode's TheSieuRe history, as it really answers
       reference: "CC24531081",
     });
     expect(rows[0]?.at?.toISOString()).toBe("2026-10-17T13:03:59.000Z");
+  });
+});
+
+describe("cardFormatIssue", () => {
+  it("accepts the carriers' real shapes, with a digit of slack", () => {
+    expect(cardFormatIssue("Viettel", "10006139342354", "114384960423544")).toBeNull();
+    expect(cardFormatIssue("Mobifone", "089801001443088", "664196324427")).toBeNull();
+    expect(cardFormatIssue("Garena", "877650639", "9647216061539903")).toBeNull();
+    expect(cardFormatIssue("Vinaphone", "20000317908976", "021869165635515")).toBeNull();
+  });
+
+  it("names the number that is the wrong length, and how long it should be", () => {
+    expect(cardFormatIssue("Viettel", "1000613", "114384960423544")).toContain("Seri thẻ Viettel");
+    expect(cardFormatIssue("Mobifone", "089801001443088", "6641963")).toContain("11 đến 13 số");
+  });
+
+  it("lets a carrier it does not know through", () => {
+    expect(cardFormatIssue("Gate", "123456", "123456")).toBeNull();
+    expect(cardFormatIssue(null, "123456", "123456")).toBeNull();
   });
 });
