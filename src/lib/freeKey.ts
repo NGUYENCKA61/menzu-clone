@@ -1,5 +1,7 @@
 import "server-only";
 
+import { createHmac } from "node:crypto";
+
 import type { Prisma } from "@prisma/client";
 
 import { announceToUser } from "@/lib/announcementStore";
@@ -73,7 +75,24 @@ export type FreeKeyOutcome =
   /** Another ticket of this account took the tool's key within the day. */
   | { state: "wait"; until: string; productHref: string }
   /** The tool stopped handing keys out between the press and the landing. */
-  | { state: "closed"; reason: string; productHref: string };
+  | { state: "closed"; reason: string; productHref: string }
+  /** The landing was opened by address, without the shortlink's pass. */
+  | { state: "gated"; productHref: string };
+
+/**
+ * The ticket's pass, carried only by the address the shortlink lands on.
+ * The tool page learns the ticket's id (it polls it) but never this, so the
+ * only way to reach the landing with it is through the shortlink, which is
+ * the whole point of the shortlink (audit 5, #1: the id alone let the ad be
+ * skipped). Derived, not stored: nothing to migrate, nothing a database read
+ * could leak.
+ */
+export function freeClaimToken(claimId: string): string {
+  return createHmac("sha256", process.env.DATABASE_URL ?? "free-key")
+    .update(`free-key-landing-v1:${claimId}`)
+    .digest("hex")
+    .slice(0, 32);
+}
 
 /** The free tier of a product row, with prices as numbers. */
 function freeTier(product: {
@@ -238,7 +257,7 @@ export async function startFreeClaim(
   if (!gated) return completeFreeClaim(claim.id);
 
   const shortened = await shortenUrl(
-    absoluteUrl(`/free-key/${claim.id}`),
+    absoluteUrl(`/free-key/${claim.id}?t=${freeClaimToken(claim.id)}`),
     settings,
   );
   if (!shortened.ok) {
@@ -260,6 +279,8 @@ export async function startFreeClaim(
  */
 export async function completeFreeClaim(
   claimId: string,
+  /** Set by the landing page: the pass in its address, or none. */
+  landing?: { token: string | null },
 ): Promise<FreeKeyOutcome> {
   const claim = await db.freeKeyClaim.findUnique({
     where: { id: claimId },
@@ -277,6 +298,11 @@ export async function completeFreeClaim(
       productName: claim.product.name ?? claim.product.code,
       productHref: href,
     };
+  }
+  // Opened by address without the shortlink's pass: nothing is spent. A
+  // ticket already spent showed its key above, the pass was paid then.
+  if (landing && landing.token !== freeClaimToken(claim.id)) {
+    return { state: "gated", productHref: href };
   }
   if (claim.expiresAt.getTime() < Date.now())
     return { state: "expired", productHref: href };

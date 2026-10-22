@@ -28,13 +28,17 @@ export const metadata: Metadata = {
  */
 export default async function FreeKeyPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ t?: string }>;
 }) {
-  const { id } = await params;
+  const [{ id }, { t }] = await Promise.all([params, searchParams]);
   const [user, outcome] = await Promise.all([
     getCurrentUser(),
-    completeFreeClaim(id),
+    // The pass rides in the address the shortlink lands on; without it the
+    // ticket is not spent.
+    completeFreeClaim(id, { token: typeof t === "string" ? t : null }),
   ]);
 
   const BUTTON =
@@ -142,6 +146,20 @@ export default async function FreeKeyPage({
             <p className="mt-2 text-[13px] leading-relaxed text-neutral-400">
               {outcome.reason}. Theo dõi kênh thông báo của shop để biết khi
               tool phát key lại.
+            </p>
+            <Link href={outcome.productHref} className={`${PRIMARY} mt-5`}>
+              Về trang tool
+            </Link>
+          </>
+        ) : outcome.state === "gated" ? (
+          <>
+            <h2 className="text-[18px] font-bold text-white">
+              Hãy đi qua link rút gọn
+            </h2>
+            <p className="mt-2 text-[13px] leading-relaxed text-neutral-400">
+              Key chỉ được phát khi bạn mở link rút gọn mà trang tool đưa, không
+              mở thẳng địa chỉ này. Về trang tool, bấm Lấy key miễn phí và đi
+              theo link đó.
             </p>
             <Link href={outcome.productHref} className={`${PRIMARY} mt-5`}>
               Về trang tool
