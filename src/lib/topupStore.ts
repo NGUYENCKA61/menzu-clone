@@ -1,3 +1,5 @@
+import type { Prisma } from "@prisma/client";
+
 import { announceToAdmins, announceToUser } from "@/lib/announcementStore";
 import { db } from "@/lib/db";
 import { liftTierFor } from "@/lib/tierLift";
@@ -19,6 +21,45 @@ import {
   type IncomingTransfer,
   type PendingCard,
 } from "@/lib/topup";
+
+/**
+ * Whether two accounts have ever signed in from the same device on the same
+ * network: an exact (address, browser) pair in both session histories. A
+ * shared carrier address alone is not enough, Vietnamese mobile networks put
+ * thousands behind one; the browser build has to match too.
+ */
+async function sharedDevice(tx: Prisma.TransactionClient, a: string, b: string): Promise<boolean> {
+  const rows = await tx.session.findMany({
+    where: { userId: { in: [a, b] }, ip: { not: null }, userAgent: { not: null } },
+    select: { userId: true, ip: true, userAgent: true },
+  });
+  const seen = new Set(
+    rows.filter((row) => row.userId === a).map((row) => `${row.ip}\n${row.userAgent}`),
+  );
+  return rows.some((row) => row.userId === b && seen.has(`${row.ip}\n${row.userAgent}`));
+}
+
+/** The desk hears about a commission the credit held back, once per request. */
+async function flagHeldCommission(
+  code: string,
+  username: string,
+  held: { referrerId: string; commission: bigint },
+): Promise<void> {
+  try {
+    const referrer = await db.user.findUnique({
+      where: { id: held.referrerId },
+      select: { username: true },
+    });
+    const who = referrer?.username ?? "người giới thiệu";
+    const title = `Hoa hồng tạm giữ · ${code}`;
+    const body = `${username} nạp tiền qua giới thiệu của ${who}, nhưng hai tài khoản từng đăng nhập cùng một thiết bị và mạng, nên ${held.commission.toLocaleString("vi-VN")}đ hoa hồng CHƯA cộng. Nếu là hai người thật, cộng tay cho ${who} ở trang người dùng.`;
+    const told = await db.announcement.findFirst({ where: { title, body }, select: { id: true } });
+    if (told) return;
+    await announceToAdmins({ title, body, cta: { label: "Mở người dùng", href: "/admin/users" } });
+  } catch {
+    // The ledger is right either way; the bell is the convenience.
+  }
+}
 
 /** Ledger codes ("GD…"); exported for the commission-withdraw route. */
 export const makeCode = makeShortCode;
@@ -160,6 +201,9 @@ export async function creditTopUp(
   }
   const mismatch = cardKept === 0 && received !== topUp.amount;
 
+  /** A commission the credit did not pay, for the desk to look at. */
+  let heldCommission: { referrerId: string; commission: bigint } | null = null;
+
   const balance = await db
     .$transaction(async (tx) => {
       // The claim, and the request rewritten to the money that came: from
@@ -220,7 +264,14 @@ export async function creditTopUp(
       // double-pay structurally impossible on top of that.
       if (current.referredById) {
         const commission = commissionFor(received);
-        if (commission > 0n) {
+        // Held, not paid, when the two accounts have signed in from one device
+        // on one network: that is what a self-referral looks like (audit
+        // 01/10/2026), and a household sharing a laptop is for the desk to
+        // credit by hand from the notice this leaves.
+        const sameDevice =
+          commission > 0n && (await sharedDevice(tx, current.referredById, topUp.userId));
+        if (sameDevice) heldCommission = { referrerId: current.referredById, commission };
+        if (commission > 0n && !sameDevice) {
           await tx.referralEarning.create({
             data: {
               userId: current.referredById,
@@ -244,6 +295,7 @@ export async function creditTopUp(
     });
 
   if (balance === null) return { ok: false, reason: "ALREADY_HANDLED", detail: "đã xử lý trước đó" };
+  if (heldCommission) void flagHeldCommission(topUp.code, topUp.user.username, heldCommission);
 
   // Money in can lift the tier, and only lift. After the credit has
   // committed, never inside it: a rank bump must not roll a deposit back.

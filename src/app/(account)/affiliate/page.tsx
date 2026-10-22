@@ -37,7 +37,7 @@ const STEPS = [
   { icon: UserPlus, text: "Họ đăng ký tài khoản qua liên kết đó" },
   {
     icon: HandCoins,
-    text: `Mỗi lệnh nạp thành công của họ, bạn nhận ngay ${REFERRAL_PERCENT}% vào hoa hồng`,
+    text: `Mỗi lệnh nạp thành công của họ, bạn nhận ngay ${REFERRAL_PERCENT}% vào hoa hồng. Hai tài khoản dùng chung một thiết bị thì shop xem lại rồi mới cộng`,
   },
 ] as const;
 

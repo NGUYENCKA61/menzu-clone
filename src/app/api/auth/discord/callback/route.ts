@@ -87,6 +87,11 @@ export async function GET(request: Request) {
   });
   if (!resolved.ok) return fail(resolved.reason);
   const user = resolved.user;
+  // An admin signs in with a password and the code that follows it, never
+  // through a provider: whoever controlled the mailbox would otherwise hold
+  // the shop (audit 13/10/2026).
+  const standing = await db.user.findUnique({ where: { id: user.id }, select: { role: true } });
+  if (standing?.role === "ADMIN") return fail("admin");
 
   await db.user.update({
     where: { id: user.id },
