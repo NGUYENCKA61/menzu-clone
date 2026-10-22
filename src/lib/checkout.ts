@@ -21,7 +21,7 @@ import { runningPackageSales, tierPriceNow } from "@/lib/queries";
 import { getShopSettings } from "@/lib/settingsStore";
 import { makeShortCode } from "@/lib/shortCode";
 import { isSalesLocked, salesLockReason } from "@/lib/softwareStatus";
-import { evaluateVoucher, voucherRules } from "@/lib/voucher";
+import { VOUCHER_USED_ERROR, evaluateVoucher, voucherRules } from "@/lib/voucher";
 import { pointsForSpend } from "@/lib/spin";
 import { balanceOf, debitWallet } from "@/lib/wallet";
 
@@ -144,14 +144,13 @@ export async function placeOrder(input: CheckoutInput): Promise<CheckoutResult> 
       id: string;
       price: bigint;
       label: string;
-      durationHours: number | null;
     } | null = null;
     if (isSoftware) {
       const wanted = input.packageId?.trim();
       if (!wanted) throw new Error("PACKAGE_REQUIRED");
       const found = await tx.productPackage.findFirst({
         where: { id: wanted, productId: product.id },
-        select: { id: true, price: true, label: true, durationHours: true },
+        select: { id: true, price: true, label: true },
       });
       if (!found) throw new Error("BAD_PACKAGE");
       chosenPackage = found;
@@ -196,6 +195,14 @@ export async function placeOrder(input: CheckoutInput): Promise<CheckoutResult> 
         categoryId: product.categoryId,
       });
       if (!v || !applied.ok) throw new Error("BAD_VOUCHER");
+      // Once per account (the owner, 22/10/2026). The buyer's row is locked
+      // before the count, after the product's, so two purchases placed at
+      // the same moment cannot both count zero earlier orders.
+      await tx.$queryRaw`SELECT id FROM users WHERE id = ${input.userId} FOR UPDATE`;
+      const usedBefore = await tx.order.count({
+        where: { userId: input.userId, voucherId: v.id },
+      });
+      if (usedBefore > 0) throw new Error("VOUCHER_USED");
       voucherId = v.id;
       voucherCut = applied.cut;
       const bumped = await tx.voucher.updateMany({
@@ -266,7 +273,6 @@ export async function placeOrder(input: CheckoutInput): Promise<CheckoutResult> 
           orderId: order.id,
           userId: input.userId,
           wanted: quantity,
-          durationHours: chosenPackage?.durationHours ?? null,
         })
       : 0;
     if (shelf && delivered < quantity) {
@@ -404,6 +410,7 @@ export function checkoutFailure(error: unknown): CheckoutFailure {
       available,
     };
   }
+  if (message === "VOUCHER_USED") return { status: 400, error: VOUCHER_USED_ERROR };
   if (message === "BAD_VOUCHER") {
     return { status: 400, error: "Mã giảm giá không hợp lệ hoặc đã hết hạn" };
   }

@@ -204,7 +204,10 @@ export interface ReceiptLine {
   packageLabel: string | null;
   /** A tool's keys are printed; an account's sign-in never is. */
   kind: "software" | "account";
-  keys: { value: string; expiresAt: Date | null }[];
+  keys: { value: string }[];
+  /** A tier that runs for a set time once its key is activated; false for
+   *  a lifetime tier, and for an account. */
+  timed: boolean;
   total: number;
   /** Absolute addresses. */
   links: {
@@ -234,15 +237,14 @@ function packageWords(label: string | null): string | null {
 /**
  * How long a line's keys last, or that they do not; null for an account.
  *
- * No date: a key's clock starts when the customer activates it in the loader
- * and the desk confirms, not at purchase (the owner, 21/10/2026: "key chỉ
- * tính khi bắt đầu kích hoạt thôi"), so the delivery-time expiresAt would
- * name a moment that is wrong by however long the key sat unused.
+ * No date: a key's clock starts when the customer activates it in the loader,
+ * not at purchase, and the shop never learns when that was (the owner,
+ * 21-22/10/2026: "key chỉ tính khi bắt đầu kích hoạt thôi", "web không cần
+ * biết khi nào khách kích hoạt").
  */
 function expiryWords(line: ReceiptLine): string | null {
   if (line.kind !== "software" || line.keys.length === 0) return null;
-  const timed = line.keys.some((key) => key.expiresAt !== null);
-  return timed ? "tính giờ từ lúc kích hoạt key" : "không giới hạn thời gian";
+  return line.timed ? "tính giờ từ lúc kích hoạt key" : "không giới hạn thời gian";
 }
 
 function receiptSubject(data: ReceiptData): string {

@@ -993,8 +993,6 @@ export async function getTransactions(
 /** One licence handed to this buyer, as their own order page shows it. */
 export interface OrderKeyRow {
   value: string;
-  expiresAt: Date | null;
-  expired: boolean;
 }
 
 export interface OrderRow {
@@ -1071,7 +1069,6 @@ export interface OrderRow {
 }
 
 export async function getOrders(userId: string): Promise<OrderRow[]> {
-  const now = new Date();
   const rows = await db.order.findMany({
     where: { userId },
     orderBy: { createdAt: "desc" },
@@ -1110,7 +1107,7 @@ export async function getOrders(userId: string): Promise<OrderRow[]> {
       // reads in the sequence it was delivered.
       licenseKeys: {
         orderBy: { deliveredAt: "asc" },
-        select: { value: true, expiresAt: true },
+        select: { value: true },
       },
       // Only whether one is still open: a decided request is no bar, and the
       // refund page loads the rounds themselves when it needs them.
@@ -1183,11 +1180,7 @@ export async function getOrders(userId: string): Promise<OrderRow[]> {
     keys:
       o.status === "PAID" &&
       !(o.product.accountPool && o.loginRevealedAt === null)
-        ? o.licenseKeys.map((k) => ({
-            value: k.value,
-            expiresAt: k.expiresAt,
-            expired: k.expiresAt !== null && k.expiresAt < now,
-          }))
+        ? o.licenseKeys.map((k) => ({ value: k.value }))
         : [],
     // What the sale promised, less what it handed over. An account order and
     // every software order from before the shop kept keys carry keysOwed 0,

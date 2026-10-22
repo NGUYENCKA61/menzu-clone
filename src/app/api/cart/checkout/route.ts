@@ -9,7 +9,7 @@ import { readMemberTier, TIER_RULES, tierDiscountFor } from "@/lib/memberTiers";
 import { getCurrentUser } from "@/lib/session";
 import { getShopSettings } from "@/lib/settingsStore";
 import { makeShortCode } from "@/lib/shortCode";
-import { evaluateVoucherForCart, voucherRules } from "@/lib/voucher";
+import { VOUCHER_USED_ERROR, evaluateVoucherForCart, voucherRules } from "@/lib/voucher";
 import { pointsForSpend } from "@/lib/spin";
 import { balanceOf, debitWallet } from "@/lib/wallet";
 import { isSalesLocked } from "@/lib/softwareStatus";
@@ -74,7 +74,7 @@ export async function POST(request: Request) {
             },
           },
           package: {
-            select: { id: true, label: true, price: true, durationHours: true },
+            select: { id: true, label: true, price: true },
           },
         },
       });
@@ -196,6 +196,18 @@ export async function POST(request: Request) {
       const productIds = [...new Set(items.map((i) => i.product.id))].sort();
       await tx.$queryRaw`SELECT id FROM products WHERE id = ANY(${productIds}) ORDER BY id FOR UPDATE`;
 
+      // Once per account (the owner, 22/10/2026: "mỗi tài khoản 1 lần mã giảm
+      // giá"): counted with the buyer's row locked, so two baskets paid at the
+      // same moment cannot both count zero, and after the product locks, in
+      // the order "Mua ngay" takes them.
+      if (voucherId) {
+        await tx.$queryRaw`SELECT id FROM users WHERE id = ${user.id} FOR UPDATE`;
+        const usedBefore = await tx.order.count({
+          where: { userId: user.id, voucherId },
+        });
+        if (usedBefore > 0) throw new Error("VOUCHER_USED");
+      }
+
       // One guarded statement, not "read, subtract, write": a basket paid at
       // the same moment as another purchase would otherwise write a balance
       // that never subtracted the other one.
@@ -270,7 +282,6 @@ export async function POST(request: Request) {
           orderId: order.id,
           userId: user.id,
           wanted: item.quantity,
-          durationHours: item.package.durationHours,
         });
         if (delivered < item.quantity) {
           throw new Error(
@@ -395,6 +406,9 @@ export async function POST(request: Request) {
         },
         { status: 409 },
       );
+    }
+    if (message === "VOUCHER_USED") {
+      return NextResponse.json({ error: VOUCHER_USED_ERROR }, { status: 400 });
     }
     if (message === "BAD_VOUCHER") {
       return NextResponse.json(

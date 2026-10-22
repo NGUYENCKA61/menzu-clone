@@ -331,7 +331,6 @@ export async function completeFreeClaim(
         orderId: order.id,
         userId: claim.userId,
         wanted: 1,
-        durationHours: tier.durationHours,
       });
       if (delivered < 1) throw new Error("OUT_OF_KEYS");
       await tx.freeKeyClaim.update({

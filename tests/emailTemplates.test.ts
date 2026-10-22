@@ -34,9 +34,8 @@ function line(overrides: Partial<ReceiptLine> = {}): ReceiptLine {
     productName: "HACK CS2 BẢN PRECHEAT",
     packageLabel: "30 ngày",
     kind: "software",
-    keys: [
-      { value: "KEY-AAAA-1111", expiresAt: new Date("2026-11-13T14:30:00Z") },
-    ],
+    keys: [{ value: "KEY-AAAA-1111" }],
+    timed: true,
     total: 250_000,
     links: {
       order: "https://thichthihack.com/orders?don=DHABC123",
@@ -79,11 +78,11 @@ describe("the order receipt email", () => {
   it("prints a tool's key, its links and the total, in the subject too", () => {
     const mail = orderReceiptEmail(receipt([line()]));
     expect(mail.subject).toBe(
-      "THICHTHIHACK | Key của bạn: HACK CS2 BẢN PRECHEAT",
+      "THICHTHIHACK | Đơn DHABC123, key của bạn: HACK CS2 BẢN PRECHEAT",
     );
     expect(mail.html).toContain("KEY-AAAA-1111");
     expect(mail.html).toContain("Gói 30 ngày");
-    expect(mail.html).toContain("hết hạn 13/11/2026 21:30");
+    expect(mail.html).toContain("tính giờ từ lúc kích hoạt key");
     expect(mail.html).toContain("250.000đ");
     expect(mail.html).toContain('href="https://example.com/loader.zip"');
     expect(mail.html).toContain("Setup máy chuẩn");
@@ -108,12 +107,13 @@ describe("the order receipt email", () => {
           kind: "account",
           productName: "ACC VALORANT",
           packageLabel: null,
-          keys: [{ value: "user|secret-password", expiresAt: null }],
+          keys: [{ value: "user|secret-password" }],
+          timed: false,
         }),
       ]),
     );
     expect(mail.subject).toBe(
-      "THICHTHIHACK | Tài khoản đã sẵn sàng: ACC VALORANT",
+      "THICHTHIHACK | Đơn DHABC123, tài khoản đã sẵn sàng: ACC VALORANT",
     );
     expect(mail.html).not.toContain("secret-password");
     expect(mail.text).not.toContain("secret-password");
@@ -121,12 +121,18 @@ describe("the order receipt email", () => {
     expect(mail.html).not.toContain("Setup máy chuẩn");
   });
 
+  it("says a timed tier's clock starts at activation, never a date", () => {
+    const mail = orderReceiptEmail(receipt([line()]));
+    expect(mail.html).toContain("tính giờ từ lúc kích hoạt key");
+    expect(mail.html).not.toMatch(/hết hạn/i);
+    expect(mail.text).not.toMatch(/hết hạn/i);
+  });
+
   it("caps the keys it prints and says how many wait in the order", () => {
     const keys = Array.from({ length: MAX_KEYS_EMAIL + 5 }, (_, i) => ({
       value: `K-${String(i).padStart(3, "0")}`,
-      expiresAt: null,
     }));
-    const mail = orderReceiptEmail(receipt([line({ keys })]));
+    const mail = orderReceiptEmail(receipt([line({ keys, timed: false })]));
     expect(mail.html).toContain(
       `K-${String(MAX_KEYS_EMAIL - 1).padStart(3, "0")}`,
     );
@@ -177,7 +183,8 @@ describe("the Zalo receipt", () => {
       receipt([
         line({
           kind: "account",
-          keys: [{ value: "u|pass-123", expiresAt: null }],
+          keys: [{ value: "u|pass-123" }],
+          timed: false,
         }),
       ]),
     );
@@ -186,7 +193,6 @@ describe("the Zalo receipt", () => {
 
     const keys = Array.from({ length: MAX_KEYS_ZALO + 3 }, (_, i) => ({
       value: `Z-${i}`,
-      expiresAt: null,
     }));
     const many = zaloReceiptMessage(receipt([line({ keys })]));
     expect(many.text).toContain(`Z-${MAX_KEYS_ZALO - 1}`);

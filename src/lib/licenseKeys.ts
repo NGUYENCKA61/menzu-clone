@@ -16,17 +16,8 @@
 
 import type { Prisma } from "@prisma/client";
 
-/** Milliseconds in an hour, spelled out because the arithmetic below is mute. */
-const HOUR_MS = 3_600_000;
-
 /** The part of a Prisma client a transaction hands its callback. */
 type Tx = Prisma.TransactionClient;
-
-/** When a key handed over now stops working. Null tiers never expire. */
-export function expiryFor(deliveredAt: Date, durationHours: number | null): Date | null {
-  if (durationHours === null || durationHours <= 0) return null;
-  return new Date(deliveredAt.getTime() + durationHours * HOUR_MS);
-}
 
 /**
  * Takes up to `wanted` keys off a tier's shelf and marks them delivered.
@@ -46,7 +37,6 @@ export async function deliverKeys(
     orderId: string;
     userId: string;
     wanted: number;
-    durationHours: number | null;
     deliveredAt?: Date;
   },
 ): Promise<number> {
@@ -87,7 +77,10 @@ export async function deliverKeys(
       orderId: input.orderId,
       userId: input.userId,
       deliveredAt,
-      expiresAt: expiryFor(deliveredAt, input.durationHours),
+      // No expiresAt: a key's clock starts when the customer activates it in
+      // the loader, and the shop never learns when that was (the owner,
+      // 22/10/2026: "key không có hết hạn", "web không cần biết khi nào khách
+      // kích hoạt"). The column stays, unwritten.
     },
   });
 
@@ -105,12 +98,6 @@ export async function fillBackorders(
   tx: Tx,
   packageId: string,
 ): Promise<{ orders: number; keys: number }> {
-  const pkg = await tx.productPackage.findUnique({
-    where: { id: packageId },
-    select: { durationHours: true },
-  });
-  if (!pkg) return { orders: 0, keys: 0 };
-
   const available = await tx.licenseKey.count({
     where: { packageId, status: "AVAILABLE" },
   });
@@ -153,7 +140,6 @@ export async function fillBackorders(
       orderId: order.id,
       userId: order.userId,
       wanted: Math.min(owed, left),
-      durationHours: pkg.durationHours,
     });
     if (delivered === 0) break;
 

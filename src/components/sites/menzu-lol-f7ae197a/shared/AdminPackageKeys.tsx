@@ -19,9 +19,6 @@ export interface SoldKeyView {
   username: string;
   orderCode: string | null;
   deliveredAt: string;
-  /** Formatted on the server; null on a lifetime tier. */
-  expiresAt: string | null;
-  expired: boolean;
 }
 
 export interface PackageKeysView {
@@ -306,7 +303,7 @@ export function AdminPackageKeys({
         {/* Same dress as the shelf beside it: one rounded panel, plain rows
             ruled apart by hairlines, scrolling inside itself. The facts a row
             keeps are the ones the shelf cannot have — who holds the key and
-            until when. */}
+            since when. */}
         <div className="flex flex-col gap-2">
           <span className={HEAD}>Đã thuê ({keys.sold})</span>
           <div className="rounded-xl border border-white/10 bg-neutral-950/50 p-2.5">
@@ -326,21 +323,15 @@ export function AdminPackageKeys({
                     <span className="shrink-0 text-[10px] font-bold text-neutral-300">
                       {key.username}
                     </span>
-                    {/* The date that matters is when it stops working, so that
-                        is the one printed; delivery and order ride the hover. */}
+                    {/* When it was handed over, the order on the hover. No
+                        expiry: a key's clock starts when the customer activates
+                        it, which the shop never sees (the owner, 22/10/2026:
+                        "key không có hết hạn"). */}
                     <span
-                      title={`Giao lúc ${key.deliveredAt}${
-                        key.orderCode ? ` · đơn ${key.orderCode}` : ""
-                      }`}
-                      className={`shrink-0 text-[10px] tabular-nums ${
-                        key.expired ? "text-red-400" : "text-neutral-500"
-                      }`}
+                      title={key.orderCode ? `Đơn ${key.orderCode}` : undefined}
+                      className="shrink-0 text-[10px] tabular-nums text-neutral-500"
                     >
-                      {key.expiresAt === null
-                        ? "Vĩnh viễn"
-                        : key.expired
-                          ? `Hết hạn ${key.expiresAt}`
-                          : `Tới ${key.expiresAt}`}
+                      Giao {key.deliveredAt}
                     </span>
                   </div>
                 ))}

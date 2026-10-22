@@ -57,10 +57,10 @@ export async function receiptFor(orderIds: readonly string[]): Promise<{
           docsUrl: true,
         },
       },
-      package: { select: { label: true } },
+      package: { select: { label: true, durationHours: true } },
       licenseKeys: {
         orderBy: { deliveredAt: "asc" },
-        select: { value: true, expiresAt: true },
+        select: { value: true },
       },
     },
   });
@@ -75,6 +75,9 @@ export async function receiptFor(orderIds: readonly string[]): Promise<{
       packageLabel: software ? (order.package?.label ?? null) : null,
       kind: software ? "software" : "account",
       keys: software ? order.licenseKeys : [],
+      // The tier's own clock, which starts when the customer activates the
+      // key, never at the sale; a null or zero duration is a lifetime tier.
+      timed: software && (order.package?.durationHours ?? 0) > 0,
       total: Number(order.total),
       links: {
         order: absoluteUrl(`/orders?don=${encodeURIComponent(order.code)}`),

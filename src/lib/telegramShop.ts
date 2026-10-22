@@ -559,16 +559,11 @@ async function handover(result: CheckoutResult): Promise<{ lines: string[]; lock
     const keys = await db.licenseKey.findMany({
       where: { orderId: result.orderId },
       orderBy: { deliveredAt: "asc" },
-      select: { value: true, expiresAt: true },
+      select: { value: true },
     });
-    const lines = keys.map(
-      (k) =>
-        `🔑 <code>${esc(k.value)}</code>${
-          k.expiresAt && !Number.isNaN(k.expiresAt.getTime())
-            ? ` · hết hạn ${dayKey(k.expiresAt)}`
-            : ""
-        }`,
-    );
+    // No expiry beside a key: its clock starts when the customer activates
+    // it, which the shop never sees (the owner, 22/10/2026).
+    const lines = keys.map((k) => `🔑 <code>${esc(k.value)}</code>`);
     return { lines, locked: false };
   }
   const order = await db.order.findUnique({

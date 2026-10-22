@@ -5,6 +5,7 @@ import { db } from "@/lib/db";
 import { runningPackageSales, runningSalePrices, tierPriceNow } from "@/lib/queries";
 import { getCurrentUser } from "@/lib/session";
 import {
+  VOUCHER_USED_ERROR,
   evaluateVoucher,
   evaluateVoucherForCart,
   voucherRules,
@@ -29,6 +30,15 @@ const MAX_QUANTITY = 99;
  * Sign-in required: without it this is a free oracle for guessing voucher
  * codes.
  */
+/**
+ * Whether this account has already spent the code: the checkouts refuse a
+ * second use, so the preview must not quote one (the owner, 22/10/2026:
+ * "mỗi tài khoản 1 lần mã giảm giá").
+ */
+async function usedBefore(userId: string, voucherId: string): Promise<boolean> {
+  return (await db.order.count({ where: { userId, voucherId } })) > 0;
+}
+
 /** "What would this code take off my basket?" — charges nothing. */
 async function previewCart(userId: string, code: string) {
   const items = await db.cartItem.findMany({
@@ -72,6 +82,9 @@ async function previewCart(userId: string, code: string) {
   );
   if (!result.ok) {
     return NextResponse.json({ error: result.error }, { status: 400 });
+  }
+  if (voucher && (await usedBefore(userId, voucher.id))) {
+    return NextResponse.json({ error: VOUCHER_USED_ERROR }, { status: 400 });
   }
 
   return NextResponse.json({
@@ -194,6 +207,9 @@ export async function POST(request: Request) {
 
   if (!result.ok) {
     return NextResponse.json({ error: result.error }, { status: 400 });
+  }
+  if (voucher && (await usedBefore(user.id, voucher.id))) {
+    return NextResponse.json({ error: VOUCHER_USED_ERROR }, { status: 400 });
   }
 
   return NextResponse.json({

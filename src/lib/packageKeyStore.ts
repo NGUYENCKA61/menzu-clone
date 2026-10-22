@@ -32,7 +32,6 @@ function stamp(date: Date): string {
  * hundred, not the forty that fit on screen.
  */
 export async function readKeyStore(packageId: string) {
-  const now = new Date();
   const [available, sold, shelf, recent, paidOrders] = await Promise.all([
     db.licenseKey.count({ where: { packageId, status: "AVAILABLE" } }),
     db.licenseKey.count({ where: { packageId, status: "SOLD" } }),
@@ -50,7 +49,6 @@ export async function readKeyStore(packageId: string) {
         id: true,
         value: true,
         deliveredAt: true,
-        expiresAt: true,
         user: { select: { username: true } },
         order: { select: { code: true } },
       },
@@ -77,8 +75,6 @@ export async function readKeyStore(packageId: string) {
       username: k.user?.username ?? "-",
       orderCode: k.order?.code ?? null,
       deliveredAt: k.deliveredAt ? stamp(k.deliveredAt) : "-",
-      expiresAt: k.expiresAt ? stamp(k.expiresAt) : null,
-      expired: k.expiresAt !== null && k.expiresAt < now,
     })),
     shelfTruncated: available > shelf.length,
   };

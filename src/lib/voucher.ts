@@ -7,6 +7,14 @@
  */
 export type VoucherScope = "ALL" | "CATEGORY" | "PRODUCT";
 
+/**
+ * Every code is good once per account (the owner, 22/10/2026: "mỗi tài khoản
+ * 1 lần mã giảm giá"). One sentence for the preview and both checkouts, so
+ * the refusal reads the same wherever it lands.
+ */
+export const VOUCHER_USED_ERROR =
+  "Bạn đã dùng mã này rồi, mỗi tài khoản chỉ dùng được 1 lần";
+
 /** The product a code is being tried on, for the scope check. */
 export interface VoucherTarget {
   productId: string;

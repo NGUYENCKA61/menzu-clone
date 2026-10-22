@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { expiryFor, parseKeyBlock } from "@/lib/licenseKeys";
+import { parseKeyBlock } from "@/lib/licenseKeys";
 
 /**
  * The two pieces of key handling that are pure: what a pasted block turns into
@@ -26,24 +26,5 @@ describe("parseKeyBlock", () => {
   it("finds nothing in an empty or blank block", () => {
     expect(parseKeyBlock("")).toEqual([]);
     expect(parseKeyBlock("\n\n   \n\t")).toEqual([]);
-  });
-});
-
-describe("expiryFor", () => {
-  const delivered = new Date("2026-08-25T10:00:00.000Z");
-
-  it("counts the tier's hours from delivery, not from the order", () => {
-    expect(expiryFor(delivered, 3)).toEqual(new Date("2026-08-25T13:00:00.000Z"));
-    expect(expiryFor(delivered, 24)).toEqual(new Date("2026-08-26T10:00:00.000Z"));
-    expect(expiryFor(delivered, 720)).toEqual(new Date("2026-09-24T10:00:00.000Z"));
-  });
-
-  it("never expires a lifetime tier", () => {
-    // Null is the stored "vĩnh viễn". Zero and negatives cannot be typed by
-    // the form, but a key that silently expired on delivery would be worse
-    // than one that never does.
-    expect(expiryFor(delivered, null)).toBeNull();
-    expect(expiryFor(delivered, 0)).toBeNull();
-    expect(expiryFor(delivered, -5)).toBeNull();
   });
 });
