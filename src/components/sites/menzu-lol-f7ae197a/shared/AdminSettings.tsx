@@ -308,6 +308,7 @@ export function AdminSettings({
   const [cardFeedUrl, setCardFeedUrl] = useState(settings.topUpCardFeedUrl);
   const [tsSite, setTsSite] = useState(settings.turnstileSiteKey);
   const [tsSecret, setTsSecret] = useState(settings.turnstileSecretKey);
+  const [adminTwoFactor, setAdminTwoFactor] = useState(settings.adminTwoFactor);
   const [ggId, setGgId] = useState(settings.googleClientId);
   const [ggSecret, setGgSecret] = useState(settings.googleClientSecret);
   const [dcId, setDcId] = useState(settings.discordClientId);
@@ -811,6 +812,7 @@ export function AdminSettings({
           topUpCardFeedUrl: cardFeedUrl,
           turnstileSiteKey: tsSite,
           turnstileSecretKey: tsSecret,
+          adminTwoFactor,
           googleClientId: ggId,
           googleClientSecret: ggSecret,
           discordClientId: dcId,
@@ -1368,6 +1370,15 @@ export function AdminSettings({
                 hàng, hoặc API key cho webhook, lưu sẽ bị từ chối.
               </p>
             ) : null}
+
+            <div className="border-t border-white/5 pt-5">
+              <Toggle
+                checked={adminTwoFactor}
+                onChange={setAdminTwoFactor}
+                label="Xác thực hai lớp cho admin"
+                hint="Admin nhập đúng mật khẩu còn phải nhập mã 6 số gửi tới Telegram của shop và email đã xác minh của admin. Không có Telegram lẫn SMTP thì không ai vào được admin, nên cấu hình một trong hai trước khi bật."
+              />
+            </div>
 
             <div className="border-t border-white/5 pt-5">
               <span className={LABEL}>

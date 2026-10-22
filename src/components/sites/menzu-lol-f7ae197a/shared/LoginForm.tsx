@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Eye, EyeOff, Loader2, Lock, User } from "lucide-react";
+import { ArrowLeft, Eye, EyeOff, KeyRound, Loader2, Lock, User } from "lucide-react";
 
 import { canGoBack } from "@/lib/navigation";
 
@@ -103,6 +103,10 @@ export function LoginForm({
   // rides every refusal, and never flipped back: once suspicion is raised it
   // does not lower until the page is left.
   const [captchaNeeded, setCaptchaNeeded] = useState(false);
+  // An admin's second step: the challenge the password earned, and the code
+  // typed back for it.
+  const [challenge, setChallenge] = useState<{ id: string; channels: string[] } | null>(null);
+  const [code, setCode] = useState("");
 
   // OAuth failures come back as ?oauthError=<code> — the callback endpoints
   // have no page of their own to explain on. Read once, toast, then scrub the
@@ -117,6 +121,7 @@ export function LoginForm({
       exchange: "Không xác thực được với nhà cung cấp. Vui lòng thử lại.",
       profile: "Không đọc được thông tin tài khoản. Vui lòng thử lại.",
       blocked: "Tài khoản đã bị khóa. Vui lòng liên hệ hỗ trợ.",
+      admin: "Tài khoản quản trị chỉ đăng nhập bằng mật khẩu.",
       email:
         "Email này đã thuộc về một tài khoản khác. Hãy đăng nhập bằng mật khẩu, rồi liên kết ở trang Bảo mật.",
     };
@@ -171,6 +176,9 @@ export function LoginForm({
       const data = (await response.json().catch(() => ({}))) as {
         error?: string;
         captchaRequired?: boolean;
+        twoFactor?: boolean;
+        challengeId?: string;
+        channels?: string[];
       };
 
       if (!response.ok) {
@@ -180,6 +188,39 @@ export function LoginForm({
         return;
       }
 
+      // An admin: the password was right, the code is on its way.
+      if (data.twoFactor && data.challengeId) {
+        setChallenge({ id: data.challengeId, channels: data.channels ?? [] });
+        setCode("");
+        setPending(false);
+        return;
+      }
+
+      redirectAfterLogin();
+    } catch {
+      setError("Không kết nối được máy chủ");
+      setPending(false);
+    }
+  }
+
+  /** The admin's second step: the code that went to Telegram or the mailbox. */
+  async function handleCode(event: React.FormEvent) {
+    event.preventDefault();
+    if (pending || !challenge) return;
+    setPending(true);
+    setError(null);
+    try {
+      const response = await fetch("/api/auth/login/verify", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ challengeId: challenge.id, code }),
+      });
+      const data = (await response.json().catch(() => ({}))) as { error?: string };
+      if (!response.ok) {
+        setError(data.error ?? "Có lỗi xảy ra, vui lòng thử lại.");
+        setPending(false);
+        return;
+      }
       redirectAfterLogin();
     } catch {
       setError("Không kết nối được máy chủ");
@@ -270,6 +311,61 @@ export function LoginForm({
                   </p>
                 </div>
 
+                {challenge ? (
+                  <form onSubmit={handleCode}>
+                    <p className="text-[13px] leading-relaxed text-neutral-400">
+                      Tài khoản quản trị cần thêm một bước: mã 6 số vừa gửi tới{" "}
+                      <span className="font-semibold text-neutral-200">
+                        {challenge.channels.join(" và ")}
+                      </span>
+                      . Nhập mã trong 5 phút.
+                    </p>
+                    <div className="relative mt-5">
+                      <KeyRound
+                        size={18}
+                        className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-500"
+                      />
+                      <input
+                        id="login-code"
+                        inputMode="numeric"
+                        autoComplete="one-time-code"
+                        value={code}
+                        onChange={(event) =>
+                          setCode(event.target.value.replace(/\D/g, "").slice(0, 6))
+                        }
+                        placeholder="Mã 6 số"
+                        className="w-full rounded-2xl border border-white/5 bg-white/5 pl-12 pr-4 py-4 font-mono text-sm tracking-[0.3em] text-white outline-none transition-colors placeholder-neutral-500 focus:border-[var(--menzu-accent)]/60"
+                      />
+                    </div>
+                    {error ? (
+                      <StatusToast
+                        title="Chưa vào được"
+                        message={error}
+                        onClose={() => setError(null)}
+                      />
+                    ) : null}
+                    <button
+                      type="submit"
+                      disabled={pending || code.length !== 6}
+                      aria-busy={pending}
+                      className="mt-7 flex w-full items-center justify-center gap-2 rounded-2xl bg-[var(--menzu-accent)] py-4 text-[15px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent-dark)] disabled:cursor-wait disabled:opacity-70"
+                    >
+                      {pending ? <Loader2 size={14} className="animate-spin motion-reduce:animate-none" aria-hidden /> : null}
+                      {pending ? "Đang kiểm tra…" : "Xác nhận"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setChallenge(null);
+                        setCode("");
+                        setError(null);
+                      }}
+                      className="mt-3 w-full text-center text-[12px] font-semibold text-neutral-500 transition-colors hover:text-white"
+                    >
+                      Quay lại, đăng nhập để nhận mã mới
+                    </button>
+                  </form>
+                ) : (
                 <form onSubmit={handleSubmit}>
                   <div>
                     <label
@@ -369,6 +465,7 @@ export function LoginForm({
                   </button>
                   <span role="status" aria-live="polite" className="sr-only">{pending ? "Đang xử lý" : ""}</span>
                 </form>
+                )}
 
                 <div className="flex items-center gap-4 my-7">
                   <div className="flex-1 h-px bg-white/10" />

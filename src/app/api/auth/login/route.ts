@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { ADMIN_CODE_TTL_MINUTES, startAdminChallenge } from "@/lib/adminLogin";
 import {
   SESSION_COOKIE,
   hashPassword,
@@ -151,6 +152,32 @@ export async function POST(request: Request) {
   }
 
   await clearLoginAttempts(identifier);
+
+  // An admin's password is only the first half (audit 01/10/2026: no 2FA).
+  // A code goes out, and the session is made when it comes back at
+  // /api/auth/login/verify.
+  if (user.role === "ADMIN" && settings.adminTwoFactor) {
+    const challenge = await startAdminChallenge({
+      settings,
+      user: {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        emailVerifiedAt: user.emailVerifiedAt,
+      },
+      ip,
+      userAgent: request.headers.get("user-agent")?.slice(0, 300) ?? null,
+    });
+    if (!challenge.delivery.ok) {
+      return NextResponse.json({ error: challenge.delivery.error }, { status: 503 });
+    }
+    return NextResponse.json({
+      twoFactor: true,
+      challengeId: challenge.id,
+      channels: challenge.delivery.channels,
+      ttlMinutes: ADMIN_CODE_TTL_MINUTES,
+    });
+  }
 
   // Recorded for support lookups. Best-effort by nature — it comes from a
   // proxy header a client can set — so it is a hint, never an identity check.

@@ -82,6 +82,14 @@ export interface ShopSettings {
   topUpCardFeedUrl: string;
 
   /**
+   * An admin's sign-in takes a second step: a six-digit code to the shop's
+   * Telegram admins and the admin's verified mailbox (audit 01/10/2026: no
+   * 2FA). With neither channel configured nobody reaches /admin, so one of
+   * them is set up before this is left on.
+   */
+  adminTwoFactor: boolean;
+
+  /**
    * Cloudflare Turnstile. Both halves or neither: the widget cannot be drawn
    * without the site key, and a token cannot be checked without the secret,
    * so half a pair would either show a broken box or accept anything.
@@ -432,6 +440,7 @@ export const DEFAULT_SETTINGS: ShopSettings = {
   topUpApiKey: "",
   topUpCronKey: "",
   topUpCardFeedUrl: "",
+  adminTwoFactor: true,
   turnstileSiteKey: "",
   turnstileSecretKey: "",
   googleClientId: "",
@@ -579,6 +588,7 @@ export const SETTING_KEYS: Record<keyof ShopSettings, string> = {
   topUpApiKey: "topup.apiKey",
   topUpCronKey: "topup.cronKey",
   topUpCardFeedUrl: "topup.cardFeedUrl",
+  adminTwoFactor: "admin.twoFactor",
   turnstileSiteKey: "turnstile.siteKey",
   turnstileSecretKey: "turnstile.secretKey",
   googleClientId: "oauth.google.clientId",
@@ -1026,6 +1036,10 @@ export function parseSettings(
       stored.get(SETTING_KEYS.topUpCardFeedUrl),
       DEFAULT_SETTINGS.topUpCardFeedUrl,
     ),
+    adminTwoFactor: toBoolean(
+      stored.get(SETTING_KEYS.adminTwoFactor),
+      DEFAULT_SETTINGS.adminTwoFactor,
+    ),
     turnstileSiteKey: toOptionalText(
       stored.get(SETTING_KEYS.turnstileSiteKey),
       DEFAULT_SETTINGS.turnstileSiteKey,
@@ -1376,6 +1390,7 @@ export function serializeSettings(
     topUpApiKey: settings.topUpApiKey.trim(),
     topUpCronKey: settings.topUpCronKey.trim(),
     topUpCardFeedUrl: settings.topUpCardFeedUrl.trim(),
+    adminTwoFactor: String(settings.adminTwoFactor),
     turnstileSiteKey: settings.turnstileSiteKey.trim(),
     turnstileSecretKey: settings.turnstileSecretKey.trim(),
     googleClientId: settings.googleClientId.trim(),
@@ -1535,6 +1550,10 @@ export function normalizeSettings(
     topUpApiKey: String(raw?.topUpApiKey ?? "").trim(),
     topUpCronKey: String(raw?.topUpCronKey ?? "").trim(),
     topUpCardFeedUrl: String(raw?.topUpCardFeedUrl ?? "").trim(),
+    adminTwoFactor:
+      raw?.adminTwoFactor === undefined
+        ? DEFAULT_SETTINGS.adminTwoFactor
+        : Boolean(raw?.adminTwoFactor),
     turnstileSiteKey: String(raw?.turnstileSiteKey ?? "").trim(),
     turnstileSecretKey: String(raw?.turnstileSecretKey ?? "").trim(),
     googleClientId: String(raw?.googleClientId ?? "").trim(),
