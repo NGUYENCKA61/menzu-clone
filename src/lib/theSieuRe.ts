@@ -126,6 +126,36 @@ export function sameSign(given: string, expected: string): boolean {
 export type TsrOutcome = "credited" | "refused" | "pending" | "ignored";
 
 /**
+ * The card never reached TheSieuRe, or they would not take it this time
+ * (their maintenance, a request-level error such as a dead API account, no
+ * connection): the customer is told at once rather than left waiting (the
+ * owner, 22/10/2026), the PIN is kept so the desk can still redeem by hand,
+ * and the desk is woken because this is the shop's configuration, not the
+ * customer's card.
+ */
+export async function refuseUnsent(code: string, why: string): Promise<void> {
+  const note = `Không gửi được thẻ sang TheSieuRe: ${why}`.slice(0, 300);
+  const marked = await db.topUp.updateMany({
+    where: { code, method: "CARD", status: "PENDING" },
+    data: { status: "FAILED", note },
+  });
+  if (marked.count === 0) return;
+  const row = await db.topUp.findUnique({ where: { code }, select: { userId: true, amount: true } });
+  if (!row) return;
+  const face = Number(row.amount).toLocaleString("vi-VN");
+  await announceToUser(row.userId, {
+    title: "Thẻ cào chưa nạp được",
+    body: `Lệnh ${code}, thẻ ${face}đ: ${note}. Thẻ chưa bị dùng, bạn gửi lại sau hoặc liên hệ shop.`,
+    cta: { label: "Xem lệnh", href: `/wallet/${code}` },
+  }).catch(() => {});
+  await announceToAdmins({
+    title: `Thẻ cào không gửi được sang TheSieuRe · ${code}`,
+    body: `Thẻ ${face}đ: ${why}. Kiểm tra Partner ID/Key trong Cấu hình và tài khoản API bên TheSieuRe; seri và mã thẻ vẫn còn trong lệnh để gạch tay.`,
+    cta: { label: "Mở hàng đợi nạp", href: "/admin/operations?tab=topups" },
+  }).catch(() => {});
+}
+
+/**
  * Settles a card request on TheSieuRe's word. Idempotent: creditTopUp claims
  * the row once, and a refusal is only ever written over a row still waiting,
  * so a callback and a check that both arrive change nothing twice. A card
@@ -205,12 +235,13 @@ export const CHECK_AFTER_MS = 30_000;
 
 /**
  * How long a card may stay unanswered before the customer is told it failed
- * (the owner, 22/10/2026: "bao lâu không thành công nói thất bại"). A card TheSieuRe
- * accepted keeps being asked about for two days, and a late success still
- * pays; a card they never took is the desk's to look at.
+ (the owner, 22/10/2026: "bao lâu không thành công nói thất bại", then "đợi 30p cho
+ * chết à"). A card TheSieuRe accepted keeps being asked about for two days,
+ * and a late success still pays. A card they never took is refused on the
+ * spot by the request route; this clock only catches what slipped past.
  */
-export const CARD_RESULT_TIMEOUT_MS = 30 * 60 * 1000;
-export const TIMEOUT_NOTE = "Quá 30 phút chưa có kết quả";
+export const CARD_RESULT_TIMEOUT_MS = 10 * 60 * 1000;
+export const TIMEOUT_NOTE = "Quá 10 phút chưa có kết quả";
 
 /**
  * Cards still waiting past the clock: marked refused with a reason the
@@ -250,7 +281,7 @@ export async function failUnansweredCards(): Promise<{ failed: number; details: 
     if (!sent) {
       await announceToAdmins({
         title: `Thẻ cào không gửi được sang TheSieuRe · ${row.code}`,
-        body: `Thẻ ${Number(row.amount).toLocaleString("vi-VN")}đ nằm 30 phút mà không gửi được sang TheSieuRe. Kiểm tra Partner ID/Key trong Cấu hình và trạng thái tài khoản API bên TheSieuRe; thẻ vẫn còn trong lệnh để gạch tay.`,
+        body: `Thẻ ${Number(row.amount).toLocaleString("vi-VN")}đ nằm 10 phút mà không gửi được sang TheSieuRe. Kiểm tra Partner ID/Key trong Cấu hình và trạng thái tài khoản API bên TheSieuRe; thẻ vẫn còn trong lệnh để gạch tay.`,
         cta: { label: "Mở hàng đợi nạp", href: "/admin/operations?tab=topups" },
       }).catch(() => {});
     }

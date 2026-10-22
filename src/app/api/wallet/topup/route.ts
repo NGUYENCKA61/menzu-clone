@@ -13,7 +13,7 @@ import {
   transferNoteFor,
 } from "@/lib/topup";
 import { openBankTopUp } from "@/lib/topupOpen";
-import { applyTsrResult, submitCard } from "@/lib/theSieuRe";
+import { applyTsrResult, refuseUnsent, submitCard } from "@/lib/theSieuRe";
 import { verdictOf } from "@/lib/theSieuReRules";
 
 /**
@@ -215,9 +215,10 @@ export async function POST(request: Request) {
   // The card goes to TheSieuRe by itself when the Merchant keys are set (the
   // owner, 22/10/2026: "xài API bên TheSieuRe luôn"). What they will not
   // take is refused here with their reason; what they are still working on
-  // waits, answered by their callback or the next sync pass. A reply that
-  // decides nothing (their maintenance, a request error) leaves the card to
-  // the desk, unmarked, so the pass does not keep asking about it.
+  // waits, answered by their callback or the next sync pass. What never got
+  // to them (their maintenance, a request error, no connection) is refused
+  // on the spot too, with the desk woken: the customer is not left waiting
+  // on the shop's configuration (the owner: "đợi 30p cho chết à").
   let status: "PENDING" | "COMPLETED" = "PENDING";
   if (method === "CARD" && cardSerial && cardPin && theSieuReEnabled(settings)) {
     const sent = await submitCard(settings, {
@@ -228,16 +229,24 @@ export async function POST(request: Request) {
       face: Number(amount),
     });
     if (sent.ok) {
-      if (verdictOf(sent.result.status) !== "down") {
-        const ref = sent.result.transId
-          ? `tsr:${sent.result.transId}`
-          : `tsr:sent:${topUp.code}`;
-        await db.topUp
-          .updateMany({ where: { id: topUp.id, providerRef: null }, data: { providerRef: ref } })
-          .catch(() => {});
-      } else {
+      if (verdictOf(sent.result.status) === "down") {
         console.error("[thesieure] not taken", topUp.code, sent.result.status, sent.result.message);
+        const why =
+          sent.result.status === 4
+            ? "hệ thống gạch thẻ đang bảo trì"
+            : (sent.result.message || `lỗi ${sent.result.status}`).replace(/[.\s]+$/, "");
+        await refuseUnsent(topUp.code, why);
+        return NextResponse.json(
+          { error: `Chưa nạp được thẻ: ${why}. Thẻ chưa bị dùng, thử lại sau hoặc liên hệ shop (lệnh ${topUp.code}).` },
+          { status: 502 },
+        );
       }
+      const ref = sent.result.transId
+        ? `tsr:${sent.result.transId}`
+        : `tsr:sent:${topUp.code}`;
+      await db.topUp
+        .updateMany({ where: { id: topUp.id, providerRef: null }, data: { providerRef: ref } })
+        .catch(() => {});
       const outcome = await applyTsrResult(topUp.code, sent.result);
       if (outcome === "credited") status = "COMPLETED";
       if (outcome === "refused") {
@@ -250,6 +259,15 @@ export async function POST(request: Request) {
       }
     } else {
       console.error("[thesieure] submit", topUp.code, sent.reason, sent.detail);
+      const why =
+        sent.reason === "telco"
+          ? sent.detail
+          : "không kết nối được TheSieuRe";
+      await refuseUnsent(topUp.code, why);
+      return NextResponse.json(
+        { error: `Chưa nạp được thẻ: ${why}. Thẻ chưa bị dùng, thử lại sau hoặc liên hệ shop (lệnh ${topUp.code}).` },
+        { status: 502 },
+      );
     }
   }
 
