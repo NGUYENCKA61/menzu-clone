@@ -141,6 +141,9 @@ export async function creditTopUp(
      *  (TheSieuRe takes 14 to 38 percent by carrier and fines a wrong declared
      *  value, and the shop fee is one number). */
     cap?: number;
+    /** TheSieuRe answered after the 30-minute clock had already marked the
+     *  card FAILED: the money did arrive, so that row may still be paid. */
+    reopenFailed?: boolean;
   } = {},
 ): Promise<CreditResult> {
   const topUp = await db.topUp.findUnique({
@@ -151,7 +154,10 @@ export async function creditTopUp(
   // EXPIRED counts as claimable: the request left the queue because nobody had
   // paid it yet, not because the shop refused it. A transfer arriving late is
   // still that customer's money.
-  if (topUp.status !== "PENDING" && topUp.status !== "EXPIRED") {
+  const claimable: Array<"PENDING" | "EXPIRED" | "FAILED"> = options.reopenFailed
+    ? ["PENDING", "EXPIRED", "FAILED"]
+    : ["PENDING", "EXPIRED"];
+  if (!(claimable as string[]).includes(topUp.status)) {
     return { ok: false, reason: "ALREADY_HANDLED", detail: "đã xử lý trước đó" };
   }
 
@@ -224,7 +230,7 @@ export async function creditTopUp(
       // The claim, and the request rewritten to the money that came: from
       // here on the row says what was paid, not what was asked.
       const claimed = await tx.topUp.updateMany({
-        where: { id: topUp.id, status: { in: ["PENDING", "EXPIRED"] } },
+        where: { id: topUp.id, status: { in: claimable } },
         // A bank request is rewritten to the money that came. A card is
         // not: its face value is what the desk redeems, and the fee is the
         // difference between that and what the wallet was credited.
@@ -240,6 +246,8 @@ export async function creditTopUp(
             : { amount: received }),
           // …and this is the one figure every screen should read.
           credited: received,
+          // A refusal the clock wrote is withdrawn by the credit.
+          ...(options.reopenFailed ? { note: null } : {}),
           ...(options.providerRef ? { providerRef: options.providerRef } : {}),
         },
       });

@@ -4,7 +4,7 @@ import { timingSafeEqual } from "node:crypto";
 
 import type { Prisma } from "@prisma/client";
 
-import { announceToUser } from "@/lib/announcementStore";
+import { announceToAdmins, announceToUser } from "@/lib/announcementStore";
 import { db } from "@/lib/db";
 import type { ShopSettings } from "@/lib/settings";
 import {
@@ -140,9 +140,12 @@ export async function applyTsrResult(code: string, result: TsrResult): Promise<T
   if (verdict === "paid" || verdict === "paid-other-value") {
     const row = await db.topUp.findUnique({
       where: { code },
-      select: { amount: true, method: true },
+      select: { amount: true, method: true, status: true, note: true },
     });
     if (!row || row.method !== "CARD") return "ignored";
+    // Only a refusal the clock wrote may be reopened; one the desk or
+    // TheSieuRe itself wrote stands.
+    if (row.status === "FAILED" && !(row.note ?? "").startsWith(TIMEOUT_NOTE)) return "ignored";
     const declared = Number(row.amount);
     const found =
       verdict === "paid-other-value" && result.value > 0 && result.value !== declared
@@ -155,6 +158,8 @@ export async function applyTsrResult(code: string, result: TsrResult): Promise<T
       ...(ref ? { providerRef: ref } : {}),
       ...(found ? { expectAmount: found, byHand: true } : {}),
       ...(result.amount > 0 ? { cap: result.amount } : {}),
+      // A late answer still pays a card the clock below had given up on.
+      reopenFailed: true,
     });
     if (!credit.ok) return "ignored";
     // The card is spent; its PIN has no further use anywhere.
@@ -199,6 +204,61 @@ export async function applyTsrResult(code: string, result: TsrResult): Promise<T
 export const CHECK_AFTER_MS = 30_000;
 
 /**
+ * How long a card may stay unanswered before the customer is told it failed
+ * (the owner, 22/10/2026: "bao lâu không thành công nói thất bại"). A card TheSieuRe
+ * accepted keeps being asked about for two days, and a late success still
+ * pays; a card they never took is the desk's to look at.
+ */
+export const CARD_RESULT_TIMEOUT_MS = 30 * 60 * 1000;
+export const TIMEOUT_NOTE = "Quá 30 phút chưa có kết quả";
+
+/**
+ * Cards still waiting past the clock: marked refused with a reason the
+ * customer reads, the PIN kept for the desk. One the shop never managed to
+ * hand to TheSieuRe also wakes the desk, because that is a configuration
+ * problem, not a card problem.
+ */
+export async function failUnansweredCards(): Promise<{ failed: number; details: string[] }> {
+  const out = { failed: 0, details: [] as string[] };
+  const rows = await db.topUp.findMany({
+    where: {
+      method: "CARD",
+      status: "PENDING",
+      createdAt: { lt: new Date(Date.now() - CARD_RESULT_TIMEOUT_MS) },
+    },
+    orderBy: { createdAt: "asc" },
+    take: 50,
+    select: { code: true, userId: true, amount: true, providerRef: true },
+  });
+  for (const row of rows) {
+    const sent = Boolean(row.providerRef?.startsWith("tsr:"));
+    const note = sent
+      ? `${TIMEOUT_NOTE} từ TheSieuRe. Shop sẽ kiểm tra lại; thẻ đúng thì tiền vẫn vào ví.`
+      : `${TIMEOUT_NOTE}: không gửi được thẻ sang TheSieuRe (lỗi kết nối hoặc tài khoản API). Thử lại sau hoặc liên hệ shop.`;
+    const marked = await db.topUp.updateMany({
+      where: { code: row.code, status: "PENDING" },
+      data: { status: "FAILED", note },
+    });
+    if (marked.count === 0) continue;
+    out.failed += 1;
+    out.details.push(`${row.code}: ${note}`);
+    await announceToUser(row.userId, {
+      title: "Thẻ cào chưa nạp được",
+      body: `Lệnh ${row.code}, thẻ ${Number(row.amount).toLocaleString("vi-VN")}đ: ${note}`,
+      cta: { label: "Xem lệnh", href: `/wallet/${row.code}` },
+    }).catch(() => {});
+    if (!sent) {
+      await announceToAdmins({
+        title: `Thẻ cào không gửi được sang TheSieuRe · ${row.code}`,
+        body: `Thẻ ${Number(row.amount).toLocaleString("vi-VN")}đ nằm 30 phút mà không gửi được sang TheSieuRe. Kiểm tra Partner ID/Key trong Cấu hình và trạng thái tài khoản API bên TheSieuRe; thẻ vẫn còn trong lệnh để gạch tay.`,
+        cta: { label: "Mở hàng đợi nạp", href: "/admin/operations?tab=topups" },
+      }).catch(() => {});
+    }
+  }
+  return out;
+}
+
+/**
  * Asks TheSieuRe about the cards sent and not yet answered, oldest first, a
  * few per reconciliation pass: the fallback for a callback that never came.
  */
@@ -212,8 +272,9 @@ export async function checkPendingCards(settings: ShopSettings): Promise<{
   const rows = await db.topUp.findMany({
     where: {
       method: "CARD",
-      status: "PENDING",
       providerRef: { startsWith: "tsr:" },
+      // Still waiting, or given up on by the clock: a late answer still counts.
+      OR: [{ status: "PENDING" }, { status: "FAILED", note: { startsWith: TIMEOUT_NOTE } }],
       createdAt: {
         lt: new Date(Date.now() - CHECK_AFTER_MS),
         gt: new Date(Date.now() - 48 * 60 * 60 * 1000),

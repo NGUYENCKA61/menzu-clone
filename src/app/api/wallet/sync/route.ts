@@ -5,7 +5,7 @@ import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/session";
 import { theSieuReEnabled } from "@/lib/settings";
 import { getShopSettings } from "@/lib/settingsStore";
-import { checkPendingCards } from "@/lib/theSieuRe";
+import { checkPendingCards, failUnansweredCards } from "@/lib/theSieuRe";
 import { readTransfers } from "@/lib/topup";
 import { applyCardCredits, applyTransfers, expireStaleTopUps } from "@/lib/topupStore";
 
@@ -133,6 +133,8 @@ async function runSync(request: Request) {
   const credits = pollFeeds && cardFeed ? await readFeed(cardFeed) : [];
   const cards = pollFeeds && cardFeed ? await applyCardCredits(credits) : null;
   const asked = askTheSieuRe ? await checkPendingCards(settings) : null;
+  // Then the clock: whatever is still unanswered past 30 minutes is told so.
+  const timedOut = askTheSieuRe ? await failUnansweredCards() : null;
 
   // The report is the shop's, not the caller's. Its lines name other customers
   // and the money they moved — "NTxxxx: cộng 5.000.000đ cho <tên>" — and quote
@@ -154,7 +156,12 @@ async function runSync(request: Request) {
       ? {
           feeds: (pollFeeds ? feeds.length + (cardFeed ? 1 : 0) : 0) + (askTheSieuRe ? 1 : 0),
           received: transfers.length + credits.length + (asked?.checked ?? 0),
-          details: [...report.details, ...(cards?.details ?? []), ...(asked?.details ?? [])],
+          details: [
+            ...report.details,
+            ...(cards?.details ?? []),
+            ...(asked?.details ?? []),
+            ...(timedOut?.details ?? []),
+          ],
         }
       : {}),
   });
