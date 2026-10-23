@@ -53,7 +53,7 @@ export function BankAppPicker({ bank, account, amount, note, holder, onClose }: 
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center p-4" inert={leaving}>
       <div
-        className={`error-modal-backdrop absolute inset-0 bg-black/60${leaving ? " order-modal-backdrop-out" : ""}`}
+        className={`error-modal-backdrop absolute inset-0 bg-black/70${leaving ? " order-modal-backdrop-out" : ""}`}
         onClick={leave}
       />
       <div
@@ -68,7 +68,7 @@ export function BankAppPicker({ bank, account, amount, note, holder, onClose }: 
             className="absolute top-0 left-1/2 -translate-x-1/2 w-1/3 h-[1px] bg-gradient-to-r from-transparent via-emerald-500/40 to-transparent"
           />
           <div>
-            <h3 id="bank-app-title" className="text-lg sm:text-xl font-black text-white tracking-tight">
+            <h3 id="bank-app-title" className="text-[18px] font-bold leading-snug text-frost">
               Mở nhanh ngân hàng
             </h3>
             <p className="text-neutral-500 text-[11px] sm:text-xs mt-1">
@@ -79,7 +79,7 @@ export function BankAppPicker({ bank, account, amount, note, holder, onClose }: 
             type="button"
             onClick={leave}
             aria-label="Đóng"
-            className="w-7 h-7 rounded-full bg-white/5 flex items-center justify-center text-neutral-400 hover:text-white hover:bg-white/10 transition-colors mt-0.5 shrink-0"
+            className="relative mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-lg text-dim transition-colors before:absolute before:-inset-1.5 before:content-[''] hover:bg-white/5 hover:text-frost"
           >
             <X size={16} aria-hidden />
           </button>

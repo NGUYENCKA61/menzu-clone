@@ -41,9 +41,9 @@ const TILE = "rounded-xl border border-white/[0.06] bg-white/[0.02]";
 /** The footer pair, exported so a view other than the confirm one — the
  *  "đã mua" view — can close with the same two buttons. */
 export const FOOTER_PRIMARY_BTN =
-  "inline-flex h-11 flex-1 items-center justify-center rounded-xl bg-[var(--menzu-accent)] text-[13px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent-dark)]";
+  "inline-flex h-11 flex-1 items-center justify-center rounded-[10px] bg-[var(--menzu-accent)] text-[14px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent-dark)]";
 export const FOOTER_GHOST_BTN =
-  "inline-flex h-11 flex-1 items-center justify-center rounded-xl border border-white/10 text-[13px] font-semibold text-neutral-300 transition-colors hover:bg-white/5";
+  "inline-flex h-11 flex-1 items-center justify-center rounded-[10px] border border-white/10 bg-white/[0.04] text-[14px] font-semibold text-white transition-colors hover:border-white/25 hover:bg-white/[0.08]";
 
 /**
  * The card over the backdrop, with the header and the footer strip.
@@ -116,7 +116,7 @@ export function BuyConfirmDialog({
 
   return createPortal(
     <div
-      className={`order-modal-backdrop fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 p-4 backdrop-blur-md${leaving ? " order-modal-backdrop-out" : ""}`}
+      className={`order-modal-backdrop fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 p-4${leaving ? " order-modal-backdrop-out" : ""}`}
       inert={leaving}
       onPointerDown={(event) => {
         pressedBackdrop.current = event.target === event.currentTarget;
@@ -149,7 +149,7 @@ export function BuyConfirmDialog({
             <div>
               <h2
                 id={titleId}
-                className="text-base font-semibold text-white"
+                className="text-[18px] font-bold leading-snug text-frost"
               >
                 {title}
               </h2>
@@ -160,7 +160,7 @@ export function BuyConfirmDialog({
             type="button"
             onClick={onClose}
             aria-label="Đóng"
-            className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-white/10 bg-white/5 text-neutral-300 transition-colors hover:bg-white/15 hover:text-white"
+            className="relative grid h-8 w-8 shrink-0 place-items-center rounded-lg text-dim transition-colors before:absolute before:-inset-1.5 before:content-[''] hover:bg-white/5 hover:text-frost"
           >
             <X className="h-4 w-4" />
           </button>

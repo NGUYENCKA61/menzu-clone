@@ -11,7 +11,7 @@ export const SHEET_TITLE =
   "flex items-center gap-2.5 text-[18px] font-bold leading-snug text-frost";
 export const SHEET_TEXT = "text-[15px] leading-relaxed text-mist";
 export const SHEET_BUTTON =
-  "inline-flex h-11 items-center justify-center rounded-[10px] bg-[var(--menzu-accent)] px-6 text-[15px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent-dark)]";
+  "inline-flex h-11 items-center justify-center rounded-[10px] bg-[var(--menzu-accent)] px-5 text-[14px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent-dark)]";
 /**
  * The centred cut the owner chose for the top-up sheet (23/10/2026, "như
  * menzu mà màu đỏ", "trắng thì nút", "như này đi") and then for the other

@@ -635,7 +635,7 @@ export function OrderDetailModal({
           ref={setTrigger}
           type="button"
           onClick={() => setOpen(true)}
-          className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-xl bg-[var(--menzu-accent)] px-4 text-[14px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent-dark)]"
+          className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg bg-[var(--menzu-accent)] px-4 text-[13px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent-dark)]"
         >
           <Receipt className="h-3.5 w-3.5" />
           Xem đơn hàng
@@ -662,7 +662,7 @@ export function OrderDetailModal({
               // than lifting from the middle. On a phone the card fills the
               // screen bar 16px, so a desktop dialog's grammar read as a
               // page that popped.
-              className={`order-modal-backdrop order-sheet fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 p-4 backdrop-blur-md sm:p-8${leaving ? " order-modal-backdrop-out" : ""}`}
+              className={`order-modal-backdrop order-sheet fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 p-4 sm:p-8${leaving ? " order-modal-backdrop-out" : ""}`}
               inert={leaving}
             >
               <div
@@ -701,7 +701,7 @@ export function OrderDetailModal({
                     type="button"
                     onClick={() => setOpen(false)}
                     aria-label="Đóng"
-                    className="group grid h-10 w-10 shrink-0 place-items-center rounded-full border border-white/10 bg-white/5 text-neutral-300 transition-colors hover:bg-white/15 hover:text-white"
+                    className="group relative grid h-8 w-8 shrink-0 place-items-center rounded-lg text-dim transition-colors before:absolute before:-inset-1.5 before:content-[''] hover:bg-white/5 hover:text-frost"
                   >
                     <X className="h-4 w-4 transition-transform duration-300 group-hover:rotate-90" />
                   </button>
@@ -1268,7 +1268,7 @@ export function OrderDetailModal({
                       {askReview ? (
                         <Link
                           href={reviewHref}
-                          className="press inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-white/12 bg-white/[0.04] px-4 text-xs font-bold text-neutral-300 hover:border-[var(--menzu-accent)]/50 hover:bg-[var(--menzu-accent)]/10 hover:text-[var(--menzu-accent)] sm:h-10"
+                          className="press inline-flex h-11 items-center justify-center gap-2 rounded-[10px] border border-white/10 bg-white/[0.04] px-5 text-[14px] font-semibold text-white hover:border-[var(--menzu-accent)]/50 hover:bg-[var(--menzu-accent)]/10 hover:text-[var(--menzu-accent)] sm:h-10"
                         >
                           <Star className="h-4 w-4" />
                           Đánh giá
@@ -1458,7 +1458,7 @@ function LoginRevealDialog({ code, onClose }: { code: string; onClose: () => voi
           type="button"
           onClick={onClose}
           aria-label="Đóng"
-          className="absolute right-4 top-4 grid h-8 w-8 place-items-center rounded-full text-neutral-400 transition-colors hover:bg-white/10 hover:text-white"
+          className="absolute right-4 top-4 grid h-8 w-8 shrink-0 place-items-center rounded-lg text-dim transition-colors before:absolute before:-inset-1.5 before:content-[''] hover:bg-white/5 hover:text-frost"
         >
           <X className="h-4 w-4" />
         </button>
@@ -1549,7 +1549,7 @@ function LoginRevealDialog({ code, onClose }: { code: string; onClose: () => voi
           <button
             type="button"
             onClick={onClose}
-            className="press h-11 rounded-xl border border-white/12 bg-white/[0.04] px-4 text-xs font-bold text-neutral-300 transition-colors hover:border-white/25 hover:text-white sm:h-10"
+            className="press h-11 rounded-[10px] border border-white/10 bg-white/[0.04] px-5 text-[14px] font-semibold text-white transition-colors hover:border-white/25 hover:text-white sm:h-10"
           >
             Hủy bỏ
           </button>
@@ -1557,7 +1557,7 @@ function LoginRevealDialog({ code, onClose }: { code: string; onClose: () => voi
             type="button"
             onClick={take}
             disabled={!recording || busy}
-            className="press h-11 rounded-xl bg-[var(--menzu-accent)] px-4 text-[14px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent-dark)] disabled:cursor-not-allowed disabled:bg-white/[0.06] disabled:text-neutral-500 sm:h-10"
+            className="press h-11 rounded-[10px] bg-[var(--menzu-accent)] px-5 text-[14px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent-dark)] disabled:cursor-not-allowed disabled:bg-white/[0.06] disabled:text-neutral-500 sm:h-10"
           >
             {busy ? "Đang mở…" : "Xác nhận lấy thông tin"}
           </button>
