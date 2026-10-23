@@ -662,7 +662,7 @@ export function OrderDetailModal({
               // than lifting from the middle. On a phone the card fills the
               // screen bar 16px, so a desktop dialog's grammar read as a
               // page that popped.
-              className={`order-modal-backdrop order-sheet fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 p-4 sm:p-8${leaving ? " order-modal-backdrop-out" : ""}`}
+              className={`order-modal-backdrop order-sheet fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 p-4 sm:p-8${leaving ? " order-modal-backdrop-out" : ""}`}
               inert={leaving}
             >
               <div
@@ -1437,7 +1437,7 @@ function LoginRevealDialog({ code, onClose }: { code: string; onClose: () => voi
 
   return (
     <div
-      className="fixed inset-0 z-[10000] flex items-end justify-center bg-black/80 p-0 backdrop-blur-sm animate-in fade-in duration-150 sm:items-center sm:p-6"
+      className="fixed inset-0 z-[10000] flex items-end justify-center bg-black/70 p-0 backdrop-blur-sm animate-in fade-in duration-150 sm:items-center sm:p-6"
       onPointerDown={(event) => {
         pressedBackdrop.current = event.target === event.currentTarget;
       }}

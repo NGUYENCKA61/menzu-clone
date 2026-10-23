@@ -76,7 +76,7 @@ export function ErrorModal({ title, message, onClose, tone = "error" }: ErrorMod
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center p-4" inert={leaving}>
       <div
-        className={`error-modal-backdrop absolute inset-0 bg-black/80${leaving ? " order-modal-backdrop-out" : ""}`}
+        className={`error-modal-backdrop absolute inset-0 bg-black/70${leaving ? " order-modal-backdrop-out" : ""}`}
         onClick={leave}
       />
 
