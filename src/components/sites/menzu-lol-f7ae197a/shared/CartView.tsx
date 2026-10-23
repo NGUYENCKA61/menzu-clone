@@ -32,6 +32,7 @@ import {
 } from "@/lib/memberTiers";
 
 import { formatVnd } from "./productData";
+import { TopUpDialog } from "./TopUpDialog";
 import { sentenceCase } from "@/lib/displayCase";
 import {
   VOUCHER_APPLIED,
@@ -305,6 +306,8 @@ export function CartView({
   /** The lines still in the basket as far as this screen is concerned. */
   const kept = shown.filter((l) => !l.leaving);
   const [done, setDone] = useState<CheckoutReceipt | null>(null);
+  /** The paid notice over the receipt, until it is closed. */
+  const [notice, setNotice] = useState(false);
 
   const [voucher, setVoucher] = useState("");
   const [applied, setApplied] = useState<{ cut: number; total: number } | null>(
@@ -460,6 +463,7 @@ export function CartView({
       // The server's figures where it gave them, the basket's own quote
       // where it did not. The goods and the account's percentages come from
       // the props, which the refresh below is about to empty.
+      setNotice(true);
       setDone({
         orderCodes: data.orderCodes ?? [],
         lines,
@@ -496,6 +500,7 @@ export function CartView({
          and when, what was bought, the tear line, what it cost, the codes,
          and what to do next. The frame is an inset ring rather than a
          border so the tear line's notches can punch clean through it. */
+      <>
       <section
         ref={receiptRef}
         aria-label="Biên lai thanh toán"
@@ -697,6 +702,27 @@ export function CartView({
           </p>
         </div>
       </section>
+      {/* The notice sheet the top-up answers with (the owner, 23/10/2026:
+          "thanh toán thành công thì nhảy tới cái modal thành công thông
+          báo"); the receipt waits under it with every code and figure. */}
+      {notice ? (
+        <TopUpDialog
+          tone="green"
+          layout="menzu"
+          title="Thanh toán thành công"
+          action={{
+            label: "Xem đơn hàng",
+            href: orders === 1 ? `/orders?don=${encodeURIComponent(done.orderCodes[0]!)}` : "/orders",
+          }}
+          onClose={() => setNotice(false)}
+        >
+          {`Đã trừ ví ${formatVnd(done.total)}đ. `}
+          {orders === 1
+            ? `Key và link tải đã sẵn trong đơn ${done.orderCodes[0]}.`
+            : `Key và link tải đã sẵn trong ${orders} đơn ở Lịch sử mua.`}
+        </TopUpDialog>
+      ) : null}
+      </>
     );
   }
 

@@ -11,16 +11,14 @@ import {
   BuyConfirmDialog,
   ConfirmFooter,
   DialogAlert,
-  FOOTER_GHOST_BTN,
-  FOOTER_PRIMARY_BTN,
   PayableBlock,
   PriceList,
   PriceRow,
   ProductTile,
-  ReceiptTick,
   VoucherField,
 } from "./BuyConfirmDialog";
 import { formatVnd, productImage } from "./productData";
+import { TopUpDialog } from "./TopUpDialog";
 import { StickyBuyBar } from "./StickyBuyBar";
 import type { BuyerLevel } from "./SoftwareBuyPanel";
 import { StockLine } from "./StockLine";
@@ -522,57 +520,28 @@ export function AccountBuyPanel({
       />
 
       {orderCode !== null ? (
-        /* The receipt takes the place of the confirm view inside the same
-           card, the way the tool's checkout answers: the tick, the code, the
-           figures to check against the wallet, and where the account is. */
-        <BuyConfirmDialog
-          open={open}
-          onClose={closeReceipt}
-          title="Thanh toán thành công"
-          subtitle="Đơn đã ghi vào lịch sử mua của bạn."
-          accent="success"
-          footer={
-            <div className="receipt-in flex flex-1 gap-2.5">
-              <button type="button" onClick={closeReceipt} className={FOOTER_GHOST_BTN}>
-                Đóng
-              </button>
-              <Link href="/orders" className={FOOTER_PRIMARY_BTN}>
-                Xem đơn ngay
-              </Link>
-            </div>
-          }
-        >
-          <div className="receipt-in space-y-4">
-            <ReceiptTick code={orderCode} />
-            <ProductTile
-              imageUrl={account.imageUrl ?? productImage(account.code)}
-              imageClassName="object-cover object-[85%_center]"
-              name={account.name || `Mã #${account.code}`}
-              chip={rank || null}
-              meta={`#${account.code}, ${sentenceCase(account.categoryName)}`}
-            />
-            <PriceList>
-              <PriceRow label="Đã trừ ví" value={`${formatVnd(paid)}đ`} />
-              {balance !== null ? (
-                <PriceRow label="Số dư ví còn lại" value={`${formatVnd(balance)}đ`} />
-              ) : null}
-              {pool ? (
-                <PriceRow
-                  label="Acc đã giao"
-                  value={`${bought}/${quantity}`}
-                  tone={bought >= quantity ? "ok" : "plain"}
-                />
-              ) : null}
-            </PriceList>
-            <DialogAlert tone="ok">
-              {pool
-                ? `${bought} tài khoản đã sẵn trong Lịch sử mua.`
-                : loginReady
-                  ? "Tài khoản và mật khẩu đăng nhập đã sẵn trong Lịch sử mua."
-                  : "Thông tin đăng nhập đang được chuẩn bị, sẽ hiện trong Lịch sử mua."}
-            </DialogAlert>
-          </div>
-        </BuyConfirmDialog>
+        /* The notice sheet the top-up answers with (the owner, 23/10/2026:
+           "thanh toán thành công thì nhảy tới cái modal thành công thông
+           báo"): what was taken, where the account is, one white way on. */
+        open ? (
+          <TopUpDialog
+            tone="green"
+            layout="menzu"
+            title="Thanh toán thành công"
+            action={{
+              label: "Xem đơn hàng",
+              href: `/orders?don=${encodeURIComponent(orderCode)}`,
+            }}
+            onClose={closeReceipt}
+          >
+            {`Đã trừ ví ${formatVnd(paid)}đ. `}
+            {pool
+              ? `${bought} tài khoản đã sẵn trong đơn ${orderCode}.`
+              : loginReady
+                ? `Tài khoản và mật khẩu đã sẵn trong đơn ${orderCode}.`
+                : `Thông tin đăng nhập đang được chuẩn bị trong đơn ${orderCode}.`}
+          </TopUpDialog>
+        ) : null
       ) : (
       /* Buying spends real balance, so it asks once and shows the figure it
          is about to take — after any voucher — before it does. */

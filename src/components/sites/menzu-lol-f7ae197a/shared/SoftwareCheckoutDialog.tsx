@@ -1,7 +1,6 @@
 "use client";
 
 import { sentenceCase } from "@/lib/displayCase";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -9,9 +8,6 @@ import {
   BuyConfirmDialog,
   ConfirmFooter,
   DialogAlert,
-  FOOTER_GHOST_BTN,
-  FOOTER_PRIMARY_BTN,
-  ReceiptTick,
   PayableBlock,
   PriceList,
   PriceRow,
@@ -27,6 +23,7 @@ import {
 } from "@/lib/memberTiers";
 
 import { formatVnd } from "./productData";
+import { TopUpDialog } from "./TopUpDialog";
 
 export interface CheckoutTier {
   id: string;
@@ -293,64 +290,26 @@ export function SoftwareCheckoutDialog({
   }
 
   if (purchase && tier) {
+    // The notice sheet the top-up answers with (the owner, 23/10/2026:
+    // "thanh toán thành công thì nhảy tới cái modal thành công thông báo"):
+    // what was taken, where the key is, one white way to the order.
+    if (!open) return null;
     return (
-      <BuyConfirmDialog
-        open={open}
-        onClose={onClose}
+      <TopUpDialog
+        tone="green"
+        layout="menzu"
         title="Thanh toán thành công"
-        subtitle="Đơn đã ghi vào lịch sử mua của bạn."
-        accent="success"
-        footer={
-          <div className="receipt-in flex flex-1 gap-2.5">
-            <button type="button" onClick={onClose} className={FOOTER_GHOST_BTN}>
-              Đóng
-            </button>
-            <Link href="/orders" className={FOOTER_PRIMARY_BTN}>
-              Xem đơn hàng
-            </Link>
-          </div>
-        }
+        action={{
+          label: "Xem đơn hàng",
+          href: `/orders?don=${encodeURIComponent(purchase.orderCode)}`,
+        }}
+        onClose={onClose}
       >
-        {/* The receipt takes the place of the confirm view inside the same
-            card, so it makes its own entrance — the card itself does not
-            remount, and a swap with no motion reads as a glitch. */}
-        <div className="receipt-in space-y-4">
-        <ReceiptTick code={purchase.orderCode} />
-        <ProductTile
-          imageUrl={product.imageUrl}
-          name={product.name}
-          chip={tier.label}
-          meta={`×${quantity}, ${sentenceCase(product.categoryName)}`}
-        />
-        <PriceList>
-          <PriceRow label="Đã trừ ví" value={`${formatVnd(purchase.total)}đ`} />
-          {purchase.balance !== null ? (
-            <PriceRow
-              label="Số dư ví còn lại"
-              value={`${formatVnd(purchase.balance)}đ`}
-            />
-          ) : null}
-          {purchase.keysDelivered !== null ? (
-            <PriceRow
-              label="Key đã giao"
-              value={`${purchase.keysDelivered}/${quantity}`}
-              tone={purchase.keysPending > 0 ? "plain" : "ok"}
-            />
-          ) : null}
-        </PriceList>
-        {purchase.keysPending > 0 ? (
-          <p className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-2.5 text-[12px] font-semibold text-amber-300">
-            Còn {purchase.keysPending} key chờ shop bàn giao, theo dõi trong Đơn
-            hàng của bạn.
-          </p>
-        ) : (
-          <DialogAlert tone="ok">
-            Key và link tải đã sẵn trong Đơn hàng của bạn. Đọc Hướng dẫn cài đặt
-            trên trang tool trước khi chạy.
-          </DialogAlert>
-        )}
-        </div>
-      </BuyConfirmDialog>
+        {`Đã trừ ví ${formatVnd(purchase.total)}đ. `}
+        {purchase.keysPending > 0
+          ? `Còn ${purchase.keysPending} key chờ shop bàn giao trong đơn ${purchase.orderCode}.`
+          : `Key và link tải đã sẵn trong đơn ${purchase.orderCode}.`}
+      </TopUpDialog>
     );
   }
 
