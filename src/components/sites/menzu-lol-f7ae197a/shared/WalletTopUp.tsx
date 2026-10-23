@@ -735,6 +735,7 @@ export function WalletTopUp({
       {credited ? (
         <TopUpDialog
           tone="green"
+          layout="menzu"
           title="Nạp tiền thành công"
           subtitle={watch ? "Lệnh " + watch.code : undefined}
           amount={{ label: "Đã cộng vào ví", value: credited.credited }}
@@ -746,7 +747,6 @@ export function WalletTopUp({
             { label: "Số dư ví hiện tại", value: formatVnd(credited.balance) + "đ", strong: true },
           ]}
           action={{ label: "Xong", onClick: dismissCredited }}
-          secondary={{ label: "Xem lịch sử giao dịch", href: "/transactions" }}
           onClose={dismissCredited}
         />
       ) : null}

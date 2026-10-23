@@ -3,7 +3,16 @@
 import { Check, X } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { lockScroll, unlockScroll } from "./modalChrome";
-import { SHEET, SHEET_BUTTON, SHEET_TEXT, SHEET_TITLE } from "./noticeSheet";
+import {
+  SHEET,
+  SHEET_BUTTON_WHITE,
+  SHEET_HEAD,
+  SHEET_TEXT_CENTRED,
+  SHEET_TILE,
+  SHEET_TILE_BAD,
+  SHEET_TILE_OK,
+  SHEET_TITLE_CENTRED,
+} from "./noticeSheet";
 import { useLeave } from "./useOverlayPresence";
 
 export interface ErrorModalProps {
@@ -36,10 +45,11 @@ export interface ErrorModalProps {
 export function ErrorModal({ title, message, onClose, tone = "error" }: ErrorModalProps) {
   const done = tone === "done";
   const confirm = useRef<HTMLButtonElement>(null);
+  const sheet = useRef<HTMLDivElement>(null);
   const { leaving, leave } = useLeave(onClose);
 
   useEffect(() => {
-    confirm.current?.focus();
+    sheet.current?.focus();
 
     const onKey = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
@@ -71,36 +81,43 @@ export function ErrorModal({ title, message, onClose, tone = "error" }: ErrorMod
       />
 
       <div
+        ref={sheet}
+        tabIndex={-1}
         role="alertdialog"
         aria-modal="true"
         aria-labelledby="error-modal-title"
         aria-describedby="error-modal-message"
         // LAB: the house notice sheet (noticeSheet.ts). The error keeps its
         // shake and a red cross beside the title; the frame stays calm.
-        className={`${SHEET} max-w-[400px] px-6 py-6 ${done ? "notice-modal-card" : "error-modal-card"}${
+        className={`${SHEET} max-w-[400px] px-6 py-6 outline-none ${done ? "notice-modal-card" : "error-modal-card"}${
           leaving ? " order-modal-card-out" : ""
         }`}
       >
-        <h2 id="error-modal-title" className={SHEET_TITLE}>
-          {done ? (
-            <Check size={18} strokeWidth={2.5} aria-hidden className="shrink-0 text-mist" />
-          ) : (
-            <X size={18} strokeWidth={2.5} aria-hidden className="shrink-0 text-rose-400" />
-          )}
-          {title}
-        </h2>
-
-        <p id="error-modal-message" className={`mt-2 ${SHEET_TEXT}`}>
-          {message}
-        </p>
+        {/* The centred cut of the top-up sheet (noticeSheet.ts): the glyph in
+            its tile, the title, the sentence, one white button. */}
+        <div className={SHEET_HEAD}>
+          <span className={`${SHEET_TILE} ${done ? SHEET_TILE_OK : SHEET_TILE_BAD}`}>
+            {done ? (
+              <Check size={32} strokeWidth={2.25} aria-hidden />
+            ) : (
+              <X size={32} strokeWidth={2.25} aria-hidden />
+            )}
+          </span>
+          <h2 id="error-modal-title" className={SHEET_TITLE_CENTRED}>
+            {title}
+          </h2>
+          <p id="error-modal-message" className={SHEET_TEXT_CENTRED}>
+            {message}
+          </p>
+        </div>
 
         <button
           ref={confirm}
           type="button"
           onClick={leave}
-          className={`mt-6 w-full ${SHEET_BUTTON}`}
+          className={`mt-6 w-full ${SHEET_BUTTON_WHITE}`}
         >
-          {done ? "Đóng" : "Thử lại"}
+          Đóng
         </button>
       </div>
     </div>

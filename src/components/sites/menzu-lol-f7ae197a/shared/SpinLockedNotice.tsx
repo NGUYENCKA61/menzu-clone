@@ -5,7 +5,15 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import { lockScroll, unlockScroll } from "./modalChrome";
-import { SHEET, SHEET_BUTTON, SHEET_TEXT, SHEET_TITLE } from "./noticeSheet";
+import {
+  SHEET,
+  SHEET_BUTTON_WHITE,
+  SHEET_HEAD,
+  SHEET_TEXT_CENTRED,
+  SHEET_TILE,
+  SHEET_TILE_BAD,
+  SHEET_TITLE_CENTRED,
+} from "./noticeSheet";
 import { useLeave } from "./useOverlayPresence";
 
 /** Nothing to listen to: the snapshot only tells the server from the browser. */
@@ -23,6 +31,7 @@ const subscribeNothing = () => () => {};
 export function SpinLockedNotice() {
   const router = useRouter();
   const confirm = useRef<HTMLButtonElement>(null);
+  const panel = useRef<HTMLDivElement>(null);
   const goHome = useCallback(() => router.replace("/"), [router]);
   const { leaving, leave } = useLeave(goHome);
   // LAB (17/10/2026): the page now sits in the account layout, whose <main>
@@ -32,7 +41,7 @@ export function SpinLockedNotice() {
   const mounted = useSyncExternalStore(subscribeNothing, () => true, () => false);
 
   useEffect(() => {
-    confirm.current?.focus();
+    panel.current?.focus();
 
     const onKey = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
@@ -65,28 +74,33 @@ export function SpinLockedNotice() {
       />
 
       <div
+        ref={panel}
+        tabIndex={-1}
         role="alertdialog"
         aria-modal="true"
         aria-labelledby="spin-locked-title"
         aria-describedby="spin-locked-message"
         // LAB: the house notice sheet (noticeSheet.ts): a small grey lock
         // beside the title instead of the red ring; red stays for the button.
-        className={`${SHEET} notice-modal-card max-w-[400px] px-6 py-6${leaving ? " order-modal-card-out" : ""}`}
+        className={`${SHEET} notice-modal-card max-w-[400px] px-6 py-6 outline-none${leaving ? " order-modal-card-out" : ""}`}
       >
-        <h2 id="spin-locked-title" className={SHEET_TITLE}>
-          <Lock size={18} aria-hidden className="shrink-0 text-mist" />
-          Vòng quay đang tạm ngưng
-        </h2>
-
-        <p id="spin-locked-message" className={`mt-2 ${SHEET_TEXT}`}>
-          Điểm thưởng của bạn vẫn được giữ nguyên.
-        </p>
+        <div className={SHEET_HEAD}>
+          <span className={`${SHEET_TILE} ${SHEET_TILE_BAD}`}>
+            <Lock size={30} strokeWidth={2} aria-hidden />
+          </span>
+          <h2 id="spin-locked-title" className={SHEET_TITLE_CENTRED}>
+            Vòng quay đang tạm ngưng
+          </h2>
+          <p id="spin-locked-message" className={SHEET_TEXT_CENTRED}>
+            Điểm thưởng của bạn vẫn được giữ nguyên.
+          </p>
+        </div>
 
         <button
           ref={confirm}
           type="button"
           onClick={leave}
-          className={`mt-6 w-full ${SHEET_BUTTON}`}
+          className={`mt-6 w-full ${SHEET_BUTTON_WHITE}`}
         >
           Về trang chủ
         </button>

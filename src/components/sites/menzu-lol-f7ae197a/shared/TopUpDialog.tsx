@@ -34,6 +34,13 @@ export interface TopUpDialogProps {
   action: { label: string; href?: string; onClick?: () => void };
   /** The quiet button beside it, as a link. */
   secondary?: { label: string; href: string };
+  /**
+   * "menzu" is the cut the owner chose on 23/10/2026 ("như menzu mà màu đỏ",
+   * then "trắng thì nút", then "như này đi"): the tile, the title, one
+   * sentence and the figure centred, one white button; "receipt" is the
+   * hairline table the checkout receipt uses, kept for the purchase flows.
+   */
+  layout?: "receipt" | "menzu";
   onClose: () => void;
 }
 
@@ -63,6 +70,7 @@ export function TopUpDialog({
   children,
   action,
   secondary,
+  layout = "receipt",
   onClose,
 }: TopUpDialogProps) {
   const sheet = useRef<HTMLDivElement>(null);
@@ -102,7 +110,11 @@ export function TopUpDialog({
     };
   }, [leave]);
 
-  const primaryClass = `flex-1 ${SHEET_BUTTON}`;
+  // LAB: menzu's sheet keeps menzu's white button ("trắng thì nút").
+  const primaryClass =
+    layout === "menzu"
+      ? "inline-flex h-11 flex-1 items-center justify-center rounded-[10px] bg-white px-5 text-[14px] font-semibold text-black transition-colors hover:bg-neutral-200"
+      : `flex-1 ${SHEET_BUTTON}`;
 
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center p-4" inert={leaving}>
@@ -125,20 +137,49 @@ export function TopUpDialog({
             type="button"
             onClick={leave}
             aria-label="Đóng"
-            className="absolute right-4 top-4 grid h-8 w-8 place-items-center rounded-lg text-neutral-500 transition-colors hover:bg-white/5 hover:text-frost"
+            className="absolute right-4 top-4 grid h-8 w-8 place-items-center rounded-lg text-dim transition-colors before:absolute before:-inset-1.5 before:content-[''] hover:bg-white/5 hover:text-frost"
           >
             <X size={16} aria-hidden />
           </button>
 
-          <h2 id="topup-dialog-title" className={`${SHEET_TITLE} pr-10`}>
-            <look.Icon size={18} className={`shrink-0 ${look.icon}`} aria-hidden />
-            {title}
-          </h2>
-          {subtitle ? (
-            <p className="mt-1 text-[12px] font-medium tabular-nums text-neutral-500">{subtitle}</p>
-          ) : null}
+          {layout === "menzu" ? (
+            // LAB ("như menzu mà màu đỏ"): menzu's own cut, the tile and the
+            // sentence, with the house red on the one button below.
+            <div className="flex flex-col items-center pt-4 text-center">
+              <span
+                className={`grid h-16 w-16 place-items-center rounded-2xl border ${
+                  tone === "green"
+                    ? "border-emerald-500/30 bg-emerald-500/10"
+                    : "border-rose-500/30 bg-rose-500/10"
+                }`}
+              >
+                <look.Icon size={32} strokeWidth={2} className={look.icon} aria-hidden />
+              </span>
+              <h2 id="topup-dialog-title" className="mt-5 text-[22px] font-bold leading-snug text-frost">
+                {title}
+              </h2>
+              <p className="mt-2 text-[15px] leading-relaxed text-mist">
+                {children ?? (tone === "green" ? "Tài khoản của bạn đã được cộng" : "Hóa đơn này đã bị từ chối.")}
+              </p>
+              {amount ? (
+                <p className={`mt-1.5 text-[22px] font-bold leading-none tabular-nums ${look.figure}`}>
+                  {formatVnd(amount.value)}đ
+                </p>
+              ) : null}
+            </div>
+          ) : (
+            <>
+              <h2 id="topup-dialog-title" className={`${SHEET_TITLE} pr-10`}>
+                <look.Icon size={18} className={`shrink-0 ${look.icon}`} aria-hidden />
+                {title}
+              </h2>
+              {subtitle ? (
+                <p className="mt-1 text-[12px] font-medium tabular-nums text-dim">{subtitle}</p>
+              ) : null}
+            </>
+          )}
 
-          {amount || (rows && rows.length > 0) ? (
+          {layout !== "menzu" && (amount || (rows && rows.length > 0)) ? (
             <dl className="mt-4 divide-y divide-line rounded-xl border border-line">
               {amount ? (
                 <div className="flex items-center justify-between gap-4 px-4 py-3">
@@ -160,7 +201,7 @@ export function TopUpDialog({
             </dl>
           ) : null}
 
-          {children ? (
+          {children && layout !== "menzu" ? (
             <p
               className={`mt-3 text-[13px] leading-relaxed ${
                 tone === "red" ? "text-rose-200/90" : "text-mist"
@@ -171,7 +212,7 @@ export function TopUpDialog({
           ) : null}
 
           <div className="mt-6 flex gap-2.5">
-            {secondary ? (
+            {secondary && layout !== "menzu" ? (
               <Link ref={quiet} href={secondary.href} className={`flex-1 ${SHEET_BUTTON_QUIET}`}>
                 {secondary.label}
               </Link>

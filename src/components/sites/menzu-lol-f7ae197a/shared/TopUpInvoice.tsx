@@ -738,6 +738,7 @@ export function TopUpInvoice({
       {sheet === "paid" && outcome ? (
         <TopUpDialog
           tone="green"
+          layout="menzu"
           title="Nạp tiền thành công"
           subtitle={`Lệnh ${code} · ${createdAt}`}
           amount={{ label: "Đã cộng vào ví", value: outcome.credited }}
@@ -753,8 +754,7 @@ export function TopUpInvoice({
           ]}
           // A full load, not a router push: the header's balance was drawn
           // before the money arrived.
-          action={{ label: "Về ví", onClick: () => window.location.assign(again) }}
-          secondary={{ label: "Lịch sử giao dịch", href: "/transactions" }}
+          action={{ label: "Quay lại Ví của tôi", onClick: () => window.location.assign(again) }}
           onClose={() => setSheet(null)}
         />
       ) : null}
@@ -762,6 +762,7 @@ export function TopUpInvoice({
       {sheet === "cancelled" || sheet === "failed" ? (
         <TopUpDialog
           tone="red"
+          layout="menzu"
           title={sheet === "failed" ? "Giao dịch bị từ chối" : "Giao dịch đã hủy"}
           subtitle={`Lệnh ${code} · ${createdAt}`}
           rows={[
@@ -770,7 +771,6 @@ export function TopUpInvoice({
             { label: "Trạng thái", value: sheet === "failed" ? "Bị từ chối" : "Đã hủy", strong: true },
           ]}
           action={{ label: "Tạo lệnh mới", href: again }}
-          secondary={{ label: "Liên hệ hỗ trợ", href: "/lien-he" }}
           onClose={() => setSheet(null)}
         >
           {sheet === "failed"
