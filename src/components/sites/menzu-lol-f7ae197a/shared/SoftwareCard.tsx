@@ -314,12 +314,14 @@ export function SoftwareCard({
           // sizes they had on it, the name on one line as the owner's
           // reference lays it out (23/10/2026: "theo bố cục, kích thước giữ
           // y nguyên"), every word's first letter capital and the acronyms
-          // kept ("viết hoa chữ cái đầu… CFVN thì khỏi").
+          // kept ("viết hoa chữ cái đầu… CFVN thì khỏi"), one weight under the
+          // home page's category tile (900 → 800, "theo tỉ lệ" as lmarket's 700
+          // tile over its 600 names).
           <div>
             <Link href={detailHref} className="block">
               <h3
                 title={titleCase(software.name)}
-                className="truncate text-[17px] font-black leading-snug text-white transition-colors duration-300 group-hover:text-[var(--menzu-accent)]"
+                className="truncate text-[17px] font-extrabold leading-snug text-white transition-colors duration-300 group-hover:text-[var(--menzu-accent)]"
               >
                 {titleCase(software.name)}
               </h3>
