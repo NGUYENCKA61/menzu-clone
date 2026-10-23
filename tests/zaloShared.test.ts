@@ -115,9 +115,7 @@ describe("the bot's standing as Cấu hình reads it", () => {
 describe("zaloNoticeMessage", () => {
   it("bolds the title and keeps body and link on their own lines", () => {
     const m = zaloNoticeMessage("Shop đã nhận yêu cầu bảo hành", "Đơn DH1: đã nhận.", "https://x.test/orders");
-    expect(m.text).toBe("Shop đã nhận yêu cầu bảo hành
-Đơn DH1: đã nhận.
-https://x.test/orders");
+    expect(m.text).toBe("Shop đã nhận yêu cầu bảo hành\nĐơn DH1: đã nhận.\nhttps://x.test/orders");
     expect(m.styles).toEqual([{ start: 0, len: "Shop đã nhận yêu cầu bảo hành".length, st: "b" }]);
   });
 
