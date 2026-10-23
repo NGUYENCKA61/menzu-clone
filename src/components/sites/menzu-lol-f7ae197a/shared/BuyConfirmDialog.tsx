@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, Loader2, Ticket, Wallet, X } from "lucide-react";
+import { Check, Loader2, ShoppingCart, Ticket, Wallet, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -137,12 +137,14 @@ export function BuyConfirmDialog({
       >
         <div className="flex shrink-0 items-start justify-between gap-4 border-b border-white/[0.06] px-5 py-4">
           <div className="flex items-start gap-3">
-            <span
-              aria-hidden
-              className={`mt-1 h-5 w-[3px] shrink-0 rounded-full ${
-                accent === "success" ? "bg-emerald-400" : "bg-[var(--menzu-accent)]"
-              }`}
-            />
+            {/* The page titles' own mark in the accent (AccountPanel) in place of
+                the 3px bar (the owner, 23/10/2026: "dấu | nên thay bằng cái icon
+                giỏ hàng"): a cart while the buyer decides, a tick once paid. */}
+            {accent === "success" ? (
+              <Check size={20} strokeWidth={2.5} aria-hidden className="mt-0.5 shrink-0 text-emerald-400" />
+            ) : (
+              <ShoppingCart size={20} aria-hidden className="mt-0.5 shrink-0 text-[var(--menzu-accent)]" />
+            )}
             <div>
               <h2
                 id={titleId}
@@ -240,7 +242,7 @@ export function ProductTile({
         <p className="truncate text-sm font-black text-white">{name}</p>
         <div className="mt-1 flex flex-wrap items-center gap-1.5">
           {chip ? (
-            <span className="rounded-md border border-white/15 bg-white/10 px-2 py-0.5 text-[12px] font-semibold text-neutral-300">
+            <span className="rounded-md border border-white/15 bg-white/[0.05] px-2 py-0.5 text-[12px] font-medium text-frost/90">
               {chip}
             </span>
           ) : null}
