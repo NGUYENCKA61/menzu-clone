@@ -50,6 +50,7 @@ export function voucherApplyClass(ready: boolean): string {
 }
 
 /** The folded voucher box (23/10/2026, on trial): one quiet underlined
- *  line in its place until the buyer asks for the field. */
+ *  line in its place until the buyer asks for the field; no underline
+ *  ("bỏ đường gạch kẻ dưới đi"). */
 export const VOUCHER_TOGGLE =
-  "press inline-flex min-h-6 items-center text-[13px] font-semibold text-neutral-300 underline decoration-white/25 underline-offset-4 transition-colors hover:text-white hover:decoration-white/60";
+  "press inline-flex min-h-6 items-center text-[13px] font-semibold text-neutral-300 transition-colors hover:text-white";
