@@ -188,7 +188,7 @@ export function SoftwareCard({
       className={`tool-card group relative flex h-full w-full flex-col bg-panel transition-colors ${
         old
           ? "lab-notch border border-line hover:border-line-strong"
-          : "rounded-[14px] border border-white/[0.06] hover:border-white/20"
+          : `${variant === "shelf" ? "" : "rounded-[14px] "}border border-white/[0.06] hover:border-white/20`
       } ${open ? "z-40" : ""}`}
     >
       {/* Picture flush to the card's edges. The shop's image when set; otherwise
@@ -196,7 +196,7 @@ export function SoftwareCard({
       <Link href={detailHref} className="block">
         <div
           className={`relative grid aspect-[16/9] w-full place-items-center overflow-hidden bg-[linear-gradient(135deg,#171922,#36151e,#0d0e12)] ${
-            old ? "lab-notch-top" : "rounded-t-[14px]"
+            old ? "lab-notch-top" : variant === "shelf" ? "" : "rounded-t-[14px]"
           }`}
         >
           {software.imageUrl ? (
@@ -257,7 +257,7 @@ export function SoftwareCard({
             // pill (the owner, 13/10/2026: "thay vì ghi miễn phí có cái tag
             // chéo góc bìa card đỏ"): a strip turned 45° and clipped to a
             // square at the corner, the word running along the diagonal.
-            <span className="pointer-events-none absolute left-0 top-0 z-20 block h-[92px] w-[92px] overflow-hidden rounded-tl-[14px]">
+            <span className={`pointer-events-none absolute left-0 top-0 z-20 block h-[92px] w-[92px] overflow-hidden ${variant === "shelf" ? "" : "rounded-tl-[14px]"}`}>
               <span className="absolute left-[-40px] top-[22px] block w-[150px] -rotate-45 bg-[var(--menzu-accent)] py-[5px] text-center text-[12px] font-semibold leading-none text-white shadow-[0_2px_10px_rgba(0,0,0,0.5)]">
                 Miễn phí
               </span>
