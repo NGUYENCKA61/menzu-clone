@@ -47,6 +47,9 @@ export interface TopUpDialogProps {
    * in again, and the sheet settles where the card stood.
    */
   handoff?: boolean;
+  /** LAB (23/10/2026, "nút trắng thành màu xám thử"): the paid notice's
+   *  one button in grey instead of white. */
+  grey?: boolean;
   onClose: () => void;
 }
 
@@ -78,6 +81,7 @@ export function TopUpDialog({
   secondary,
   layout = "receipt",
   handoff = false,
+  grey = false,
   onClose,
 }: TopUpDialogProps) {
   const sheet = useRef<HTMLDivElement>(null);
@@ -119,7 +123,9 @@ export function TopUpDialog({
 
   // LAB: menzu's sheet keeps menzu's white button ("trắng thì nút").
   const primaryClass =
-    layout === "menzu"
+    layout === "menzu" && grey
+      ? "press inline-flex h-11 flex-1 items-center justify-center rounded-[10px] border border-white/10 bg-white/[0.08] px-5 text-[14px] font-semibold text-white hover:border-white/20 hover:bg-white/[0.12]"
+      : layout === "menzu"
       ? "press inline-flex h-11 flex-1 items-center justify-center rounded-[10px] bg-white px-5 text-[14px] font-semibold text-black hover:bg-neutral-200"
       : `flex-1 ${SHEET_BUTTON}`;
 

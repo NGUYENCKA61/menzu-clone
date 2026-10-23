@@ -717,6 +717,7 @@ export function CartView({
         <TopUpDialog
           tone="green"
           layout="menzu"
+          grey
           title="Thanh toán thành công"
           action={{
             label: "Xem đơn hàng",
