@@ -41,6 +41,12 @@ export interface TopUpDialogProps {
    * hairline table the checkout receipt uses, kept for the purchase flows.
    */
   layout?: "receipt" | "menzu";
+  /**
+   * Opened in place of another dialog (the confirm card turning into the
+   * paid notice): the dark ground is already there, so it does not fade
+   * in again, and the sheet settles where the card stood.
+   */
+  handoff?: boolean;
   onClose: () => void;
 }
 
@@ -71,6 +77,7 @@ export function TopUpDialog({
   action,
   secondary,
   layout = "receipt",
+  handoff = false,
   onClose,
 }: TopUpDialogProps) {
   const sheet = useRef<HTMLDivElement>(null);
@@ -113,13 +120,13 @@ export function TopUpDialog({
   // LAB: menzu's sheet keeps menzu's white button ("trắng thì nút").
   const primaryClass =
     layout === "menzu"
-      ? "inline-flex h-11 flex-1 items-center justify-center rounded-[10px] bg-white px-5 text-[14px] font-semibold text-black transition-colors hover:bg-neutral-200"
+      ? "press inline-flex h-11 flex-1 items-center justify-center rounded-[10px] bg-white px-5 text-[14px] font-semibold text-black hover:bg-neutral-200"
       : `flex-1 ${SHEET_BUTTON}`;
 
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center p-4" inert={leaving}>
       <div
-        className={`error-modal-backdrop absolute inset-0 bg-black/70${leaving ? " order-modal-backdrop-out" : ""}`}
+        className={`${handoff ? "" : "error-modal-backdrop "}absolute inset-0 bg-black/70${leaving ? " order-modal-backdrop-out" : ""}`}
         onClick={leave}
       />
 
@@ -129,7 +136,7 @@ export function TopUpDialog({
         aria-modal="true"
         aria-labelledby="topup-dialog-title"
         tabIndex={-1}
-        className={`notice-modal-card w-full max-w-md relative z-10 outline-none${leaving ? " order-modal-card-out" : ""}`}
+        className={`${handoff ? "notice-modal-swap" : "notice-modal-card"} w-full max-w-md relative z-10 outline-none${leaving ? " order-modal-card-out" : ""}`}
       >
         <div className={`${SHEET} px-6 py-6`}>
           <button

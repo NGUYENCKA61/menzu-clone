@@ -308,6 +308,7 @@ export function SoftwareCheckoutDialog({
       <TopUpDialog
         tone="green"
         layout="menzu"
+        handoff
         title="Thanh toán thành công"
         action={{
           label: "Xem đơn hàng",

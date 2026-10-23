@@ -789,10 +789,27 @@ body.lightbox-open .site-nav {
 .notice-modal-card {
   animation: error-card-in 0.22s ease-out;
 }
+/* The paid notice taking over from the confirm card (23/10/2026, "chuyển
+   cảnh đơ"): the ground stays dark and the sheet settles in where the
+   card stood, a little smaller to start, with no travel. */
+@keyframes notice-swap-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+.notice-modal-swap {
+  animation: notice-swap-in 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
 @media (prefers-reduced-motion: reduce) {
   .error-modal-backdrop,
   .error-modal-card,
-  .notice-modal-card {
+  .notice-modal-card,
+  .notice-modal-swap {
     animation: none;
   }
 }
