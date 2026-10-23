@@ -406,7 +406,7 @@ export function SoftwareCard({
                 // to. An aria-label that does not begin with the text on the
                 // button leaves anyone driving the page by voice unable to
                 // say what they can see — "chọn gói" was the label while the
-                // button read "Chọn gói" or a tier and a price.
+                // button read "-- Chọn gói --" or a tier and a price.
                 aria-label={`${
                   chosen
                     ? `${chosen.label} - ${formatVnd(chosen.price)}đ`
@@ -427,7 +427,7 @@ export function SoftwareCard({
                   {chosen
                     ? `${chosen.label} - ${formatVnd(chosen.price)}đ`
                     : hasPackages
-                      ? "Chọn gói"
+                      ? "-- Chọn gói --"
                       : "Chưa có gói"}
                 </span>
                 <ChevronDown
@@ -454,7 +454,7 @@ export function SoftwareCard({
                       }}
                       className={`mb-1 ${optionCls(packageId === "")}`}
                     >
-                      Chọn gói
+                      -- Chọn gói --
                     </button>
                     {software.packages.map((p) => (
                       <button
