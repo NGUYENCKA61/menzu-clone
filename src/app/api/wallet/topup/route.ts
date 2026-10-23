@@ -241,9 +241,14 @@ export async function POST(request: Request) {
             ? "hệ thống gạch thẻ đang bảo trì"
             : (sent.result.message || `lỗi ${sent.result.status}`).replace(/[.\s]+$/, "");
         await refuseUnsent(topUp.code, why);
+        // 422, not 502: Cloudflare swaps an origin 502 for its own page and the
+        // reason never reached the browser, which fell back to "Không tạo được
+        // hóa đơn" (seen on live with a fake card, 23/10/2026). A 4xx passes
+        // through with its body; the card was not taken, so it is the caller's
+        // request that cannot be processed as sent.
         return NextResponse.json(
           { error: `Chưa nạp được thẻ: ${why}. Thẻ chưa bị dùng, thử lại sau hoặc liên hệ shop (lệnh ${topUp.code}).` },
-          { status: 502 },
+          { status: 422 },
         );
       }
       const ref = sent.result.transId
@@ -271,7 +276,7 @@ export async function POST(request: Request) {
       await refuseUnsent(topUp.code, why);
       return NextResponse.json(
         { error: `Chưa nạp được thẻ: ${why}. Thẻ chưa bị dùng, thử lại sau hoặc liên hệ shop (lệnh ${topUp.code}).` },
-        { status: 502 },
+        { status: 422 },
       );
     }
   }
