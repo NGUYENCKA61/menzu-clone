@@ -35,6 +35,17 @@ import { carrierFor } from "./topUpCarriers";
 import { useTimeLeft } from "./TopUpCountdown";
 import { useTopUpWatch, type TopUpOutcome } from "./useTopUpWatch";
 
+/** The marks of the banks the shop receives at (VietQR's own files, public/images/banks);
+ *  a bank without one shows its name alone. */
+const BANK_LOGOS: Record<string, string> = {
+  OCB: "/images/banks/ocb.png",
+  VCB: "/images/banks/vcb.png",
+};
+
+function bankLogo(code: string): string | null {
+  return BANK_LOGOS[code.trim().toUpperCase()] ?? null;
+}
+
 export interface BankAccount {
   code: string;
   name: string;
@@ -362,6 +373,15 @@ export function TopUpInvoice({
                   : "border-white/5 bg-white/[0.02] text-neutral-400 hover:text-white"
               }`}
             >
+              {bankLogo(option.code) ? (
+                <Image
+                  src={bankLogo(option.code)!}
+                  alt=""
+                  width={60}
+                  height={22}
+                  className="mr-1.5 inline-block h-[18px] w-auto align-middle"
+                />
+              ) : null}
               {option.name || option.code}
             </button>
           ))}
@@ -370,7 +390,18 @@ export function TopUpInvoice({
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
         <Detail icon={Building2} label="Ngân hàng">
-          {bank.name || bank.code}
+          <span className="inline-flex items-center gap-2">
+            {bankLogo(bank.code) ? (
+              <Image
+                src={bankLogo(bank.code)!}
+                alt=""
+                width={64}
+                height={24}
+                className="h-5 w-auto"
+              />
+            ) : null}
+            {bank.name || bank.code}
+          </span>
         </Detail>
         <Detail icon={User} label="Chủ tài khoản" upper>
           {bank.holder}
