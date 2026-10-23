@@ -805,11 +805,26 @@ body.lightbox-open .site-nav {
 .notice-modal-swap {
   animation: notice-swap-in 0.28s cubic-bezier(0.22, 1, 0.36, 1);
 }
+/* The success tick draws itself once, after the sheet has settled (23/10/2026,
+   on trial): the check mark only, the ring around it is already there. */
+@keyframes tick-draw {
+  from {
+    stroke-dashoffset: 10;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+.tick-draw path {
+  stroke-dasharray: 10;
+  animation: tick-draw 0.32s cubic-bezier(0.22, 1, 0.36, 1) 0.2s both;
+}
 @media (prefers-reduced-motion: reduce) {
   .error-modal-backdrop,
   .error-modal-card,
   .notice-modal-card,
-  .notice-modal-swap {
+  .notice-modal-swap,
+  .tick-draw path {
     animation: none;
   }
 }

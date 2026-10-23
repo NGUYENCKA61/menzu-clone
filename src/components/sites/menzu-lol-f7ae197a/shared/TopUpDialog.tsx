@@ -166,7 +166,14 @@ export function TopUpDialog({
                     : "border-rose-500/30 bg-rose-500/10"
                 }`}
               >
-                <look.Icon size={32} strokeWidth={2} className={look.icon} aria-hidden />
+                <look.Icon
+                  size={32}
+                  strokeWidth={2}
+                  // LAB (23/10/2026, "thử đi"): the tick draws itself once
+                  // the sheet has settled; the red cross does not move.
+                  className={`${look.icon}${tone === "green" ? " tick-draw" : ""}`}
+                  aria-hidden
+                />
               </span>
               <h2 id="topup-dialog-title" className="mt-5 text-[22px] font-bold leading-snug text-frost">
                 {title}
