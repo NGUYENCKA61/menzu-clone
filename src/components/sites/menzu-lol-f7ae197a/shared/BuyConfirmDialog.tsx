@@ -114,7 +114,7 @@ export function BuyConfirmDialog({
 
   return createPortal(
     <div
-      className={`order-modal-backdrop fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 p-4${leaving ? " order-modal-backdrop-out" : ""}`}
+      className={`order-modal-backdrop fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 p-4${leaving ? " order-modal-backdrop-out" : ""}`}
       inert={leaving}
       onPointerDown={(event) => {
         pressedBackdrop.current = event.target === event.currentTarget;

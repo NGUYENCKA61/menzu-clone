@@ -126,7 +126,7 @@ export function TopUpDialog({
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center p-4" inert={leaving}>
       <div
-        className={`${handoff ? "" : "error-modal-backdrop "}absolute inset-0 bg-black/70${leaving ? " order-modal-backdrop-out" : ""}`}
+        className={`${handoff ? "" : "error-modal-backdrop "}absolute inset-0 bg-black/80${leaving ? " order-modal-backdrop-out" : ""}`}
         onClick={leave}
       />
 
