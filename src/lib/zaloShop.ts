@@ -206,7 +206,7 @@ function puzzled(
     replies: [
       reply(
         new ZaloText()
-          .add("Mình chưa hiểu lệnh này. Gõ ")
+          .add("Shop chưa hiểu lệnh này. Gõ ")
           .add("MENU", BOLD)
           .add(" để xem các lệnh, hoặc ")
           .add("SHOP", BOLD)
@@ -257,7 +257,7 @@ function phoneProofReply(proof: ZaloPhoneProof): ZaloShopReply {
       t.line(`Số bạn nhập: ${maskPhone(proof.phone)}. Vào web nhập đúng số điện thoại của Zalo đang nhắn rồi bấm Lấy mã khác.`);
       break;
     case "proved":
-      t.add(`✅ Đã xác minh số ${maskPhone(proof.phone)} cho tài khoản ${proof.username}.`, BOLD);
+      t.add(`Đã xác minh số ${maskPhone(proof.phone)} cho tài khoản ${proof.username}.`, BOLD);
       t.line("Quay lại web để gửi hồ sơ xác thực cấp 2; shop duyệt trong giờ hỗ trợ.");
       break;
   }
@@ -633,7 +633,7 @@ async function buy(
       receipt
         ? zaloReceiptMessage(receipt.data)
         : plain(
-            `✅ Mua thành công, đơn ${result.orderCode}. Key nằm trong Lịch sử mua trên web.`,
+            `Mua thành công, đơn ${result.orderCode}. Key nằm trong Lịch sử mua trên web.`,
           ),
       reply(
         new ZaloText()
@@ -647,7 +647,7 @@ async function buy(
     return { replies, state: null };
   } catch (error) {
     const failure = checkoutFailure(error);
-    const t = new ZaloText().add(`❌ ${failure.error}`);
+    const t = new ZaloText().add(failure.error);
     if (failure.shortfall !== undefined) {
       t.line("Gõ ")
         .add(`NAP ${tidyAmount(failure.shortfall)}`, BOLD)
@@ -665,7 +665,7 @@ async function buy(
 function balance(buyer: Buyer): ZaloShopReply {
   const t = new ZaloText().add("Số dư: ").add(vnd(buyer.balance), BOLD, BIG);
   t.line(
-    `Tài khoản web: ${buyer.username} · hạng ${TIER_RULES[readMemberTier(buyer.tier)].label}`,
+    `Tài khoản web: ${buyer.username}, hạng ${TIER_RULES[readMemberTier(buyer.tier)].label}`,
   );
   t.line("Gõ ")
     .add("NAP 100000", BOLD)

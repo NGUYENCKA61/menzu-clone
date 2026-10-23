@@ -3,7 +3,7 @@ import "server-only";
 import { db } from "@/lib/db";
 import { absoluteUrl } from "@/lib/seo";
 import { getShopSettings } from "@/lib/settingsStore";
-import { noticeText } from "@/lib/zaloShared";
+import { zaloNoticeMessage } from "@/lib/zaloShared";
 
 /**
  * A shop notice into the Zalo groups (the owner, 12/10/2026: "thông báo đăng
@@ -31,12 +31,13 @@ export async function postAnnouncementToZaloGroup(
     // A draft, or a notice addressed to a few accounts, is not the group's.
     if (!row || row.status !== "PUBLISHED" || row.audience === "USERS") return;
     const url = row.ctaHref ? absoluteUrl(row.ctaHref) : absoluteUrl("/thong-bao");
-    const text = noticeText(row.title, row.body, url);
+    const message = zaloNoticeMessage(row.title, row.body, url);
     await db.zaloOutbox.createMany({
       data: groupIds.map((groupId) => ({
         zaloId: groupId,
         kind: "GROUP_POST" as const,
-        text,
+        text: message.text,
+        styles: message.styles,
       })),
     });
   } catch {

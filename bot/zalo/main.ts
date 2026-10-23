@@ -39,7 +39,6 @@ import {
 } from "zca-js";
 
 import {
-  linkMessage,
   readLinkMessage,
   readZaloStyles,
   ZALO_STATE_KEY,
@@ -290,7 +289,7 @@ async function onMessage(message: Incoming): Promise<void> {
     if (!row || row.usedAt || row.expiresAt.getTime() < Date.now()) {
       await send(
         threadId,
-        `Mã ${code} không đúng hoặc đã hết hạn. Vào web ${brand} → Bảo mật → Liên kết Zalo để lấy mã mới (mã dùng được 15 phút).`,
+        `Mã ${code} không đúng hoặc đã hết hạn. Vào web ${brand} › Bảo mật › Liên kết Zalo để lấy mã mới (mã dùng được 15 phút).`,
       );
       return;
     }
@@ -322,7 +321,7 @@ async function onMessage(message: Incoming): Promise<void> {
     log("linked", zaloId, "to", row.user.username);
     await send(
       threadId,
-      `✅ Đã liên kết với tài khoản ${row.user.username} trên ${brand}. Từ giờ thông báo bảo hành, đơn hàng và nạp tiền sẽ gửi vào đây. Gõ MENU để mua hack và nạp tiền ngay trong chat này.`,
+      `Đã liên kết với tài khoản ${row.user.username} trên ${brand}. Từ giờ thông báo bảo hành, đơn hàng và nạp tiền sẽ gửi vào đây. Gõ MENU để mua hack và nạp tiền ngay trong chat này.`,
     );
     return;
   }
@@ -343,15 +342,12 @@ async function onMessage(message: Incoming): Promise<void> {
   const last = lastHelpAt.get(threadId) ?? 0;
   if (Date.now() - last < HELP_GAP_MS) return;
   lastHelpAt.set(threadId, Date.now());
-  const linked = await db.user.findUnique({
-    where: { zaloId },
-    select: { username: true },
-  });
+  // Only reached when the website did not answer: the shop on the web is
+  // what reads every other message, so say that, not "bot không đọc tin
+  // nhắn" (the Zalo review, 23/10/2026).
   await send(
     threadId,
-    linked
-      ? `Đây là bot thông báo tự động của ${brand} (đang gửi cho tài khoản ${linked.username}). Bot không đọc tin nhắn; cần hỗ trợ bạn nhắn shop qua kênh hỗ trợ trên web.`
-      : `Đây là bot thông báo tự động của ${brand}. Để nhận thông báo bảo hành, đơn hàng, nạp tiền: vào web → Bảo mật → Liên kết Zalo, lấy mã rồi gửi vào đây theo mẫu "${linkMessage("ABC234")}". Bot không trả lời tin nhắn khác.`,
+    `Web ${brand} đang không phản hồi nên bot chưa xử lý được tin nhắn này. Bạn gửi lại sau ít phút; cần gấp thì liên hệ shop tại ${SHOP_URL}/lien-he`,
   );
 }
 

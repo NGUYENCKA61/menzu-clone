@@ -4,7 +4,7 @@ import { db } from "@/lib/db";
 import { absoluteUrl } from "@/lib/seo";
 import { getShopSettings } from "@/lib/settingsStore";
 import { escapeTelegramHtml, sendTelegramMessage } from "@/lib/telegramNotify";
-import { noticeText } from "@/lib/zaloShared";
+import { zaloNoticeMessage } from "@/lib/zaloShared";
 
 /**
  * A notice addressed to one customer, carried to wherever they have linked:
@@ -48,11 +48,9 @@ export async function deliverNotice(
     }
 
     if (user.zaloId) {
+      const message = zaloNoticeMessage(notice.title, notice.body, url);
       await db.zaloOutbox.create({
-        data: {
-          zaloId: user.zaloId,
-          text: noticeText(notice.title, notice.body, url),
-        },
+        data: { zaloId: user.zaloId, text: message.text, styles: message.styles },
       });
     }
   } catch {

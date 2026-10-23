@@ -414,9 +414,8 @@ export function zaloReceiptMessage(data: ReceiptData): {
 
   const codes = data.lines.map((line) => line.orderCode).join(", ");
   const total = data.lines.reduce((sum, line) => sum + line.total, 0);
-  add("✅ ");
   add("Mua hàng thành công", ZALO_STYLE.bold, ZALO_STYLE.big);
-  add(`\nĐơn ${codes} · ${shopDateTime(data.paidAt)}\n`);
+  add(`\nĐơn ${codes}, ${shopDateTime(data.paidAt)}\n`);
 
   let left = MAX_KEYS_ZALO;
   for (const line of data.lines) {
@@ -424,7 +423,7 @@ export function zaloReceiptMessage(data: ReceiptData): {
     add(line.productName, ZALO_STYLE.bold);
     const meta = [packageWords(line.packageLabel), expiryWords(line)]
       .filter(Boolean)
-      .join(" · ");
+      .join(", ");
     if (meta) add(`\n${meta}`);
     if (line.kind === "software") {
       const shown = line.keys.slice(0, Math.max(0, left));

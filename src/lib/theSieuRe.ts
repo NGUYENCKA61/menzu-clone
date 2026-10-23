@@ -144,7 +144,7 @@ export async function refuseUnsent(code: string, why: string): Promise<void> {
   if (!row) return;
   const face = Number(row.amount).toLocaleString("vi-VN");
   await announceToUser(row.userId, {
-    title: "Thẻ cào chưa nạp được",
+    title: "Thẻ cào không nạp được",
     body: `Lệnh ${code}, thẻ ${face}đ: ${note}. Thẻ chưa bị dùng, bạn gửi lại sau hoặc liên hệ shop.`,
     cta: { label: "Xem lệnh", href: `/wallet/${code}` },
   }).catch(() => {});
@@ -274,7 +274,7 @@ export async function failUnansweredCards(): Promise<{ failed: number; details: 
     out.failed += 1;
     out.details.push(`${row.code}: ${note}`);
     await announceToUser(row.userId, {
-      title: "Thẻ cào chưa nạp được",
+      title: "Thẻ cào không nạp được",
       body: `Lệnh ${row.code}, thẻ ${Number(row.amount).toLocaleString("vi-VN")}đ: ${note}`,
       cta: { label: "Xem lệnh", href: `/wallet/${row.code}` },
     }).catch(() => {});

@@ -60,6 +60,53 @@ export function verifyMessage(code: string): string {
 }
 
 /** A notice as one Zalo message: the title, the body, the page to open. */
+/**
+ * A notice as the bot sends it (the Zalo review, 23/10/2026: notices went
+ * out as bare text, "nhìn như log hệ thống"): the title bold, the body, the
+ * link on its own line so Zalo draws it as one.
+ */
+export function zaloNoticeMessage(
+  title: string,
+  body: string,
+  url: string | null,
+): { text: string; styles: ZaloStyleRange[] } {
+  const head = title.trim();
+  const parts = [head, body.trim(), url?.trim() ?? ""].filter((p) => p.length > 0);
+  return {
+    text: parts.join("\n"),
+    styles: head.length > 0 ? [{ start: 0, len: head.length, st: ZALO_STYLE.bold }] : [],
+  };
+}
+
+/**
+ * Money in, told where the customer is (the Zalo review, 23/10/2026: the
+ * bot promised "tiền vào ví là bot báo tại đây" and Telegram got it, Zalo
+ * did not).
+ */
+export function zaloTopUpCreditedMessage(input: {
+  code: string;
+  received: bigint;
+  balance: bigint;
+  walletUrl: string;
+}): { text: string; styles: ZaloStyleRange[] } {
+  let text = "";
+  const styles: ZaloStyleRange[] = [];
+  const add = (part: string, ...st: string[]) => {
+    const start = text.length;
+    text += part;
+    for (const style of st) styles.push({ start, len: part.length, st: style });
+  };
+  const dong = (n: bigint) => `${Number(n).toLocaleString("vi-VN")}đ`;
+  add("Nạp tiền thành công", ZALO_STYLE.bold, ZALO_STYLE.big);
+  add(`\nLệnh ${input.code}: đã cộng `);
+  add(dong(input.received), ZALO_STYLE.bold);
+  add(" vào ví.\nSố dư hiện tại: ");
+  add(dong(input.balance), ZALO_STYLE.bold);
+  add(".\nGõ SHOP để mua hack, hoặc xem ví: ");
+  add(input.walletUrl);
+  return { text, styles };
+}
+
 export function noticeText(
   title: string,
   body: string,

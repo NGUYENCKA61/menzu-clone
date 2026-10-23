@@ -6,6 +6,7 @@ import { liftTierFor } from "@/lib/tierLift";
 import { commissionFor } from "@/lib/referral";
 import { makeShortCode } from "@/lib/shortCode";
 import { notifyTopUpOnTelegram } from "@/lib/telegramShop";
+import { notifyTopUpOnZalo } from "@/lib/zaloNotify";
 import { getShopSettings } from "@/lib/settingsStore";
 import { creditWallet } from "@/lib/wallet";
 import {
@@ -326,6 +327,7 @@ export async function creditTopUp(
   // A buyer who came through the shop bot hears about the money where they
   // are; best-effort, and after the credit is safely written.
   await notifyTopUpOnTelegram(topUp.userId, received, balance);
+  await notifyTopUpOnZalo(topUp.userId, topUp.code, received, balance);
 
   // A figure that did not match is told to both sides: the customer so they
   // know nothing was lost or rounded, the desk so a short payment is not a

@@ -6,6 +6,8 @@ import {
   linkMessage,
   makeLinkCodeValue,
   noticeText,
+  zaloNoticeMessage,
+  zaloTopUpCreditedMessage,
   readLinkMessage,
   readZaloBotState,
   settleZaloBotState,
@@ -107,5 +109,30 @@ describe("the bot's standing as Cấu hình reads it", () => {
     expect(
       settleZaloBotState(online, at.getTime() + 60 * 60 * 1000)?.state,
     ).toBe("offline");
+  });
+});
+
+describe("zaloNoticeMessage", () => {
+  it("bolds the title and keeps body and link on their own lines", () => {
+    const m = zaloNoticeMessage("Shop đã nhận yêu cầu bảo hành", "Đơn DH1: đã nhận.", "https://x.test/orders");
+    expect(m.text).toBe("Shop đã nhận yêu cầu bảo hành
+Đơn DH1: đã nhận.
+https://x.test/orders");
+    expect(m.styles).toEqual([{ start: 0, len: "Shop đã nhận yêu cầu bảo hành".length, st: "b" }]);
+  });
+
+  it("leaves out a missing link", () => {
+    expect(zaloNoticeMessage("Quà của bạn", "", null).text).toBe("Quà của bạn");
+  });
+});
+
+describe("zaloTopUpCreditedMessage", () => {
+  it("names the request, the sum and the balance, the figures bold", () => {
+    const m = zaloTopUpCreditedMessage({ code: "NT8F3K2Q", received: 50000n, balance: 150000n, walletUrl: "https://x.test/wallet/NT8F3K2Q" });
+    expect(m.text).toContain("Lệnh NT8F3K2Q: đã cộng 50.000đ vào ví.");
+    expect(m.text).toContain("Số dư hiện tại: 150.000đ.");
+    expect(m.text.startsWith("Nạp tiền thành công")).toBe(true);
+    const bold = m.styles.filter((s) => s.st === "b").map((s) => m.text.slice(s.start, s.start + s.len));
+    expect(bold).toEqual(["Nạp tiền thành công", "50.000đ", "150.000đ"]);
   });
 });
