@@ -218,7 +218,15 @@ export function SoftwareCard({
             </span>
           ) : null}
 
-          {old ? null : (
+          {!old && variant === "shelf" ? (
+            // The shelf's picture stands clean (the owner, 23/10/2026: "bỏ
+            // cái hiệu ứng đen mờ"): no shade, the name and the price below
+            // it; only the red line it lights on hover stays.
+            <span
+              aria-hidden
+              className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-[var(--menzu-accent)]/70 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+            />
+          ) : old ? null : (
             // The home tile's shade, the red line it lights on hover, and its
             // caption: the name in the tile's black 17px, up to two lines,
             // and on the shelf the cheapest tier in its 13px grey.
@@ -301,9 +309,31 @@ export function SoftwareCard({
           </Link>
         ) : null}
 
+        {!old && variant === "shelf" ? (
+          // Under the picture now that it has no shade to carry them, in the
+          // sizes they had on it, the name on one line as the owner's
+          // reference lays it out (23/10/2026: "theo bố cục, kích thước giữ
+          // y nguyên").
+          <>
+            <Link href={detailHref} className="block">
+              <h3
+                title={sentenceCase(software.name)}
+                className="truncate text-[17px] font-black leading-snug text-white transition-colors duration-300 group-hover:text-[var(--menzu-accent)]"
+              >
+                {sentenceCase(software.name)}
+              </h3>
+            </Link>
+            {minPrice !== null && !free ? (
+              <span className="mt-1 block truncate text-[13px] font-medium leading-snug text-neutral-400">
+                Chỉ từ {formatVnd(minPrice)}đ
+              </span>
+            ) : null}
+          </>
+        ) : null}
+
         {/* Two lines, held at that height so cards stay level whether the copy
             fills them or not. */}
-        <p className={`mb-[14px] line-clamp-2 min-h-[37px] text-[13px] leading-[1.55] text-mist ${old ? "mt-2" : ""}`}>
+        <p className={`mb-[14px] line-clamp-2 min-h-[37px] text-[13px] leading-[1.55] text-mist ${old || variant === "shelf" ? "mt-2" : ""}`}>
           {software.description}
         </p>
 
