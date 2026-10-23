@@ -1,5 +1,6 @@
 "use client";
 
+import { sentenceCase } from "@/lib/displayCase";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -319,7 +320,7 @@ export function SoftwareCheckoutDialog({
           imageUrl={product.imageUrl}
           name={product.name}
           chip={tier.label}
-          meta={`×${quantity}, ${product.categoryName}`}
+          meta={`×${quantity}, ${sentenceCase(product.categoryName)}`}
         />
         <PriceList>
           <PriceRow label="Đã trừ ví" value={`${formatVnd(purchase.total)}đ`} />
@@ -398,7 +399,7 @@ export function SoftwareCheckoutDialog({
             imageUrl={product.imageUrl}
             name={product.name}
             chip={tier.label}
-            meta={`×${quantity}, ${product.categoryName}`}
+            meta={`×${quantity}, ${sentenceCase(product.categoryName)}`}
           />
           <PriceList>
             <PriceRow label="Đơn giá" value={`${formatVnd(tier.price)}đ`} />

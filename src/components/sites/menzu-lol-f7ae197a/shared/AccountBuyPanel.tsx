@@ -549,7 +549,7 @@ export function AccountBuyPanel({
               imageClassName="object-cover object-[85%_center]"
               name={account.name || `Mã #${account.code}`}
               chip={rank || null}
-              meta={`#${account.code}, ${account.categoryName}`}
+              meta={`#${account.code}, ${sentenceCase(account.categoryName)}`}
             />
             <PriceList>
               <PriceRow label="Đã trừ ví" value={`${formatVnd(paid)}đ`} />
@@ -597,7 +597,7 @@ export function AccountBuyPanel({
           imageClassName="object-cover object-[85%_center]"
           name={account.name || `Mã #${account.code}`}
           chip={rank || null}
-          meta={`#${account.code}, ${account.categoryName}`}
+          meta={`#${account.code}, ${sentenceCase(account.categoryName)}`}
         />
         <PriceList>
           {pct > 0 ? (
