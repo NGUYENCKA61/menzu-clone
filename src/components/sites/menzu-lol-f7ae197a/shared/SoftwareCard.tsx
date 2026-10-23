@@ -333,7 +333,7 @@ export function SoftwareCard({
         {/* Two lines, held at that height so cards stay level whether the copy
             fills them or not. Back on the shelf's card too (the owner,
             23/10/2026: "bỏ dòng mô tả thử", then "thêm lại dòng mô tả đi"). */}
-        <p className={`${!old && variant === "shelf" ? "mb-4" : "mb-[14px]"} line-clamp-2 min-h-[37px] text-[13px] leading-[1.55] text-mist ${old || variant === "shelf" ? "mt-2" : ""}`}>
+        <p className={`mb-[14px] line-clamp-2 min-h-[37px] text-[13px] leading-[1.55] text-mist ${old || variant === "shelf" ? "mt-2" : ""}`}>
           {software.description}
         </p>
 
@@ -414,7 +414,7 @@ export function SoftwareCard({
                 } - ${software.name}`}
                 onClick={() => hasPackages && setOpen((o) => !o)}
                 className={`flex h-[42px] w-full items-center justify-between gap-1 rounded-[10px] border bg-white/[0.02] px-2.5 outline-none transition-colors duration-200 hover:border-[var(--menzu-accent)]/45 hover:text-white focus-visible:ring-2 focus-visible:ring-[var(--menzu-accent)]/40 aria-expanded:border-[var(--menzu-accent)]/45 aria-expanded:text-white disabled:opacity-50 ${
-                  old ? "text-[11px] font-extrabold" : "text-[14px] font-semibold"
+                  old ? "text-[11px] font-extrabold" : "text-[13px] font-semibold"
                 } ${
                   chosen
                     ? "border-[var(--menzu-accent)]/45 text-white"
