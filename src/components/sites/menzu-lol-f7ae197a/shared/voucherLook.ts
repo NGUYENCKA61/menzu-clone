@@ -48,3 +48,8 @@ export function voucherApplyClass(ready: boolean): string {
       : "border-white/[0.12] bg-white/[0.04] text-neutral-400 enabled:hover:text-neutral-200"
   }`;
 }
+
+/** The folded voucher box (23/10/2026, on trial): one quiet underlined
+ *  line in its place until the buyer asks for the field. */
+export const VOUCHER_TOGGLE =
+  "press inline-flex min-h-6 items-center text-[13px] font-semibold text-neutral-300 underline decoration-white/25 underline-offset-4 transition-colors hover:text-white hover:decoration-white/60";

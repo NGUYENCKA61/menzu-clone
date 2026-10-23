@@ -37,6 +37,7 @@ import { TopUpDialog } from "./TopUpDialog";
 import { sentenceCase } from "@/lib/displayCase";
 import {
   VOUCHER_APPLIED,
+  VOUCHER_TOGGLE,
   voucherApplyClass,
   voucherInputClass,
 } from "./voucherLook";
@@ -318,6 +319,9 @@ export function CartView({
     null,
   );
   const [voucherError, setVoucherError] = useState<string | null>(null);
+  /** The folded voucher box was opened (23/10/2026, on trial). */
+  const [voucherOpen, setVoucherOpen] = useState(false);
+  const voucherField = useRef<HTMLInputElement>(null);
   const [checking, setChecking] = useState(false);
   const receiptRef = useRef<HTMLElement>(null);
 
@@ -875,9 +879,24 @@ export function CartView({
         {/* The product page's voucher box without its caption and ticket
             icon: the field says what it is (the owner, 01/10/2026; the buy
             dialogs follow later, "để sau"). */}
+        {!voucherOpen && !voucher && !applied && !voucherError ? (
+          <div className="relative mt-4">
+            <button
+              type="button"
+              onClick={() => {
+                setVoucherOpen(true);
+                requestAnimationFrame(() => voucherField.current?.focus());
+              }}
+              className={VOUCHER_TOGGLE}
+            >
+              Có mã giảm giá?
+            </button>
+          </div>
+        ) : (
         <div className="relative mt-4">
           <div className="flex gap-2">
             <input
+              ref={voucherField}
               value={voucher}
               onChange={(event) => {
                 setVoucher(event.target.value.toUpperCase());
@@ -911,6 +930,7 @@ export function CartView({
             <p className={VOUCHER_APPLIED}>Đã áp dụng mã</p>
           ) : null}
         </div>
+        )}
 
         {/* FIGURES */}
         <div className="relative mt-5 space-y-2.5 border-t border-white/[0.06] pt-4">

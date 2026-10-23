@@ -19,6 +19,7 @@ import { useOverlayPresence } from "./useOverlayPresence";
 import { formatVnd } from "./productData";
 import {
   VOUCHER_APPLIED,
+  VOUCHER_TOGGLE,
   voucherApplyClass,
   voucherInputClass,
 } from "./voucherLook";
@@ -311,6 +312,21 @@ export function VoucherField({
 }) {
   const id = useId();
   const ready = !checking && value.trim().length > 0;
+  const [opened, setOpened] = useState(false);
+  const field = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    if (opened) field.current?.focus();
+  }, [opened]);
+  // Folded until asked for (23/10/2026, on trial): most buyers have no
+  // code, and an empty field in the middle of the card reads as something
+  // missing. A code typed, applied or refused keeps it open.
+  if (!opened && !value && !applied && !error) {
+    return (
+      <button type="button" onClick={() => setOpened(true)} className={VOUCHER_TOGGLE}>
+        Có mã giảm giá?
+      </button>
+    );
+  }
   return (
     <div>
       {/* The basket's own box (the owner, 01/10/2026: no caption, the
@@ -318,6 +334,7 @@ export function VoucherField({
           which the dialogs were to follow "để sau" (23/10/2026). */}
       <div className="flex gap-2">
         <input
+          ref={field}
           id={id}
           aria-label="Mã giảm giá"
           type="text"
