@@ -152,11 +152,11 @@ function warrantyStanding(w: { status: WarrantyStatus; refundMethod?: string | n
  * status chip, and the primary/ghost button pair from the account pages.
  */
 const LABEL =
-  "flex items-center gap-1.5 text-[13px] font-semibold text-neutral-500";
+  "flex items-center gap-1.5 text-[12px] font-semibold text-neutral-500";
 const GHOST_BTN =
-  "inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-3.5 text-[13px] font-bold text-neutral-300 transition-colors hover:bg-white/10 hover:text-white";
+  "inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-3.5 text-xs font-bold text-neutral-300 transition-colors hover:bg-white/10 hover:text-white";
 const CELL =
-  "border-t border-white/[0.06] px-4 py-4 text-[13px] text-neutral-200 sm:px-5";
+  "border-t border-white/[0.06] px-4 py-4 text-sm text-neutral-200 sm:px-5";
 /** "280.000đ", like the /orders list, /transactions and every price on the site. */
 function money(value: number): string {
   return `${formatVnd(value)}đ`;
@@ -172,7 +172,7 @@ function money(value: number): string {
 function KeyHint() {
   return (
     <div className="flex flex-col gap-2">
-      <ol className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[13px] font-semibold text-neutral-400">
+      <ol className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[11px] font-semibold text-neutral-400">
         {["Tải loader", "Chạy loader", "Dán key để kích hoạt"].map((step, index) => (
           <li key={step} className="flex items-center gap-1.5">
             {/* No numbers: the arrows already say the order (the owner,
@@ -190,7 +190,7 @@ function KeyHint() {
           </li>
         ))}
       </ol>
-      <p className="text-[13px] leading-snug text-neutral-500">
+      <p className="text-[11px] leading-snug text-neutral-500">
         Hạn gói tính từ lúc kích hoạt key.
       </p>
     </div>
@@ -311,7 +311,7 @@ function CopyRow({
         ref={valueRef}
         // Wrapped, not cut: a long key read "…5T8W3…" on a phone, and the
         // buyer could copy it but not read it through (the owner, 09/10/2026).
-        className="min-w-0 max-w-full break-all font-mono text-[13px] font-bold tracking-wide text-white"
+        className="min-w-0 max-w-full break-all font-mono text-sm font-bold tracking-wide text-white"
       >
         {display ?? value}
       </span>
@@ -436,7 +436,7 @@ function FileRow({
           {icon}
           {eyebrow}
         </span>
-        <p className="mt-1 truncate text-[13px] font-bold text-white">{title}</p>
+        <p className="mt-1 truncate text-sm font-bold text-white">{title}</p>
       </div>
     </a>
   );
@@ -688,12 +688,12 @@ export function OrderDetailModal({
                   <div>
                     <h2
                       id={`order-${order.code}-title`}
-                      className="flex items-center gap-2.5 text-[18px] font-bold text-white "
+                      className="flex items-center gap-2.5 text-[18px] font-bold text-white sm:text-xl"
                     >
                       <Package className="h-5 w-5 shrink-0 text-[var(--menzu-accent)]" aria-hidden />
                       Chi tiết đơn hàng
                     </h2>
-                    <p className="mt-1 text-[13px] text-neutral-500">
+                    <p className="mt-1 text-xs text-neutral-500">
                       Thông tin sản phẩm và dữ liệu bàn giao của đơn hàng.
                     </p>
                   </div>
@@ -734,7 +734,7 @@ export function OrderDetailModal({
                           {order.date}
                         </span>
                         {order.time ? (
-                          <span className="inline-flex items-center gap-1 text-[13px] font-semibold tabular-nums text-neutral-400">
+                          <span className="inline-flex items-center gap-1 text-xs font-semibold tabular-nums text-neutral-400">
                             <Clock className="h-3 w-3 shrink-0" aria-hidden />
                             {order.time}
                           </span>
@@ -750,7 +750,7 @@ export function OrderDetailModal({
                           owner, 10/10/2026: "hạ về 15 thử", then "17 thử"):
                           still the heaviest of the four, without the jump
                           the old 20px made. */}
-                      <span className="text-[15px] font-bold tabular-nums text-white">
+                      <span className="text-[17px] font-black tabular-nums text-white">
                         {money(order.total)}
                       </span>
                     </OverviewCell>
@@ -761,7 +761,7 @@ export function OrderDetailModal({
                       {/* The list row's chip, verbatim — the same order wears
                           the same badge on both sides of the button. */}
                       <span
-                        className={`inline-flex whitespace-nowrap rounded-lg border px-2 py-1 text-[13px] font-semibold ${order.statusClass}`}
+                        className={`inline-flex whitespace-nowrap rounded-lg border px-2 py-1 text-[12px] font-semibold ${order.statusClass}`}
                       >
                         {order.statusLabel}
                       </span>
@@ -792,13 +792,13 @@ export function OrderDetailModal({
                       <div className="min-w-0 flex-1">
                         <Link
                           href={order.productHref}
-                          className="line-clamp-2 text-[13px] font-bold leading-snug text-white"
+                          className="line-clamp-2 text-sm font-black leading-snug text-white"
                         >
                           {order.isSoftware ? sentenceCase(order.productName) : `#${order.productCode}`}
                         </Link>
-                        <div className="mt-1 flex min-w-0 items-center gap-2 text-[13px] font-semibold text-neutral-500">
+                        <div className="mt-1 flex min-w-0 items-center gap-2 text-[11px] font-semibold text-neutral-500">
                           {chip ? (
-                            <span className="inline-flex shrink-0 rounded-md border border-white/15 bg-white/10 px-1.5 py-0.5 text-[13px] font-semibold text-neutral-300">
+                            <span className="inline-flex shrink-0 rounded-md border border-white/15 bg-white/10 px-1.5 py-0.5 text-[12px] font-semibold text-neutral-300">
                               {chip}
                             </span>
                           ) : null}
@@ -806,7 +806,7 @@ export function OrderDetailModal({
                         </div>
                       </div>
                     </div>
-                    <dl className="mt-3 grid grid-cols-3 gap-2 border-t border-white/[0.06] pt-3 text-[13px]">
+                    <dl className="mt-3 grid grid-cols-3 gap-2 border-t border-white/[0.06] pt-3 text-[11px]">
                       <div>
                         <dt className="text-neutral-500">Số lượng</dt>
                         <dd className="mt-0.5 font-bold tabular-nums text-neutral-200">{order.quantity}</dd>
@@ -817,7 +817,7 @@ export function OrderDetailModal({
                       </div>
                       <div className="text-right">
                         <dt className="text-neutral-500">Thành tiền</dt>
-                        <dd className="mt-0.5 font-bold tabular-nums text-white">{money(order.total)}</dd>
+                        <dd className="mt-0.5 font-black tabular-nums text-white">{money(order.total)}</dd>
                       </div>
                     </dl>
                   </div>
@@ -843,7 +843,7 @@ export function OrderDetailModal({
                               // instead of looking pushed to its left edge
                               // (the owner, 02/10/2026: "số lượng 1 cái đó có
                               // hơi bị lệch không" → "làm 1").
-                              className={`whitespace-nowrap bg-white/[0.03] px-4 py-3 ${head === "Số lượng" ? "text-center" : "text-left"} text-[13px] font-semibold text-neutral-500 sm:px-5`}
+                              className={`whitespace-nowrap bg-white/[0.03] px-4 py-3 ${head === "Số lượng" ? "text-center" : "text-left"} text-[12px] font-semibold text-neutral-500 sm:px-5`}
                             >
                               {head}
                             </th>
@@ -870,13 +870,13 @@ export function OrderDetailModal({
                               <div className="min-w-0 max-w-[200px] lg:max-w-[260px] xl:max-w-[320px]">
                                 <Link
                                   href={order.productHref}
-                                  className="mb-1 line-clamp-2 text-[15px] font-semibold leading-snug text-white transition-colors hover:text-[var(--menzu-accent)]"
+                                  className="mb-1 line-clamp-2 text-base font-black leading-snug text-white transition-colors hover:text-[var(--menzu-accent)]"
                                 >
                                   {order.isSoftware
                                     ? sentenceCase(order.productName)
                                     : `#${order.productCode}`}
                                 </Link>
-                                <div className="truncate text-[13px] font-semibold text-neutral-500">
+                                <div className="truncate text-[11px] font-semibold text-neutral-500">
                                   Danh mục{" "}
                                   <span className="text-neutral-300">
                                     {sentenceCase(order.categoryName)}
@@ -969,7 +969,7 @@ export function OrderDetailModal({
                                   // a box inside a box.
                                   <div key={`${index}-${key.value}`}>
                                     {order.keys.length > 1 ? (
-                                      <span className="mb-2 block text-[13px] font-semibold text-neutral-500">
+                                      <span className="mb-2 block text-[12px] font-semibold text-neutral-500">
                                         Tài khoản {index + 1}
                                       </span>
                                     ) : null}
@@ -991,13 +991,13 @@ export function OrderDetailModal({
                             </div>
                           ) : null}
                           {order.keysPending > 0 ? (
-                            <p className="text-[13px] font-semibold text-amber-400">
+                            <p className="text-xs font-semibold text-amber-400">
                               {order.keysPending} tài khoản đang được chuẩn bị, shop
                               sẽ giao trong ít phút, sẽ hiện ngay tại đây.
                             </p>
                           ) : null}
                           {order.keys.length === 0 && order.keysPending === 0 ? (
-                            <p className="text-[13px] text-neutral-400">
+                            <p className="text-xs text-neutral-400">
                               {order.refunded
                                 ? "Đơn đã được hoàn tiền, thông tin đăng nhập đã thu hồi."
                                 : "Đơn này chưa có tài khoản để hiển thị."}
@@ -1055,14 +1055,14 @@ export function OrderDetailModal({
                               </div>
                             ) : null}
                             {order.keysPending > 0 ? (
-                              <p className="text-[13px] font-semibold text-amber-400">
+                              <p className="text-xs font-semibold text-amber-400">
                                 {order.keysPending} key đang được chuẩn bị, shop sẽ giao trong ít phút, key sẽ hiện ngay tại
                                 đây.
                               </p>
                             ) : null}
                             {order.keys.length === 0 &&
                             order.keysPending === 0 ? (
-                              <p className="text-[13px] text-neutral-400">
+                              <p className="text-xs text-neutral-400">
                                 {order.refunded
                                   ? "Đơn đã được hoàn tiền, key đã thu hồi."
                                   : "Đơn này chưa có key để hiển thị."}
@@ -1092,7 +1092,7 @@ export function OrderDetailModal({
                             />
                           </div>
                           {order.login.login.note ? (
-                            <p className="whitespace-pre-line break-words rounded-xl border border-white/10 bg-white/[0.02] px-4 py-3 text-[13px] leading-relaxed text-neutral-300">
+                            <p className="whitespace-pre-line break-words rounded-xl border border-white/10 bg-white/[0.02] px-4 py-3 text-xs leading-relaxed text-neutral-300">
                               {order.login.login.note}
                             </p>
                           ) : null}
@@ -1106,7 +1106,7 @@ export function OrderDetailModal({
                         // (the owner, 08/10/2026: "loại bỏ cái bàn giao trực
                         // tiếp đi"), so this one is on its way, worded as a
                         // random listing's sign-ins still on their way are.
-                        <p className="text-[13px] font-semibold text-amber-400">
+                        <p className="text-xs font-semibold text-amber-400">
                           Thông tin đăng nhập đang được chuẩn bị, shop sẽ giao trong ít
                           phút, sẽ hiện ngay tại đây.
                         </p>
@@ -1117,7 +1117,7 @@ export function OrderDetailModal({
                         // green chip.
                         <div className="flex items-start gap-3 rounded-xl border border-white/10 bg-white/[0.02] p-4">
                           <MessageCircle className="mt-0.5 h-4 w-4 shrink-0 text-neutral-400" />
-                          <p className="text-[13px] leading-relaxed text-neutral-300">
+                          <p className="text-xs leading-relaxed text-neutral-300">
                             Tài khoản này đã được shop bàn giao lại, liên hệ
                             shop kèm mã đơn{" "}
                             <strong className="text-white">
@@ -1131,12 +1131,12 @@ export function OrderDetailModal({
                         // paid, and the shop gave the money back. Saying so is
                         // the difference between a withdrawn order and an
                         // order the site appears to have lost.
-                        <p className="text-[13px] text-neutral-400">
+                        <p className="text-xs text-neutral-400">
                           Đơn đã được hoàn tiền, dữ liệu bàn giao không còn
                           hiển thị.
                         </p>
                       ) : (
-                        <p className="text-[13px] text-neutral-400">
+                        <p className="text-xs text-neutral-400">
                           Dữ liệu bàn giao hiện khi đơn đã thanh toán.
                         </p>
                       )}
@@ -1163,14 +1163,14 @@ export function OrderDetailModal({
                     <div className="mt-6 flex items-start gap-3 rounded-xl border border-amber-500/20 bg-amber-500/[0.06] px-4 py-3.5">
                       <CircleAlert size={18} className="mt-0.5 shrink-0 text-yellow-500" aria-hidden />
                       <div>
-                        <p className="mb-1 text-[13px] font-bold text-yellow-500">Shop đang chờ số tài khoản của bạn</p>
-                        <p className="text-[13px] leading-relaxed text-neutral-400">
+                        <p className="mb-1 text-sm font-bold text-yellow-500">Shop đang chờ số tài khoản của bạn</p>
+                        <p className="text-xs leading-relaxed text-neutral-400">
                           Để nhận tiền hoàn, bấm Nhập số tài khoản ở dưới.
                         </p>
                       </div>
                     </div>
                   ) : (
-                    <div className="mt-6 flex items-start gap-3 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3.5 text-[13px] leading-relaxed text-neutral-400">
+                    <div className="mt-6 flex items-start gap-3 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3.5 text-xs leading-relaxed text-neutral-400">
                       <Info className="mt-0.5 h-4 w-4 shrink-0 text-mist" />
                       {/* Where the ticket stands, in words; the button in the
                           footer is the way on, so the line carries no link. */}
@@ -1201,7 +1201,7 @@ export function OrderDetailModal({
                       a link straight to the shop's review page ("nếu đã đánh
                       giá rồi thì … chỉ hiện xem đánh giá mã đơn", "trang này
                       đi … /feedback"). */}
-                  <span className="text-[13px] text-neutral-400">
+                  <span className="text-xs text-neutral-400">
                     {order.reviewed ? (
                       <Link
                         href="/feedback"
@@ -1240,7 +1240,7 @@ export function OrderDetailModal({
                       {showWarrantyButton ? (
                         <Link
                           href={supportHref}
-                          className={`press group inline-flex h-11 items-center justify-center gap-2 rounded-xl px-3 text-[13px] font-bold sm:h-10 sm:px-5${
+                          className={`press group inline-flex h-11 items-center justify-center gap-2 rounded-xl px-3 text-xs font-bold sm:h-10 sm:px-5${
                             askReview ? "" : " col-span-2"
                           } ${
                             // Solid red is a step the buyer must take, "Yêu
@@ -1268,7 +1268,7 @@ export function OrderDetailModal({
                       {askReview ? (
                         <Link
                           href={reviewHref}
-                          className="press inline-flex h-11 items-center justify-center gap-2 rounded-[10px] border border-white/10 bg-white/[0.04] px-5 text-[13px] font-semibold text-white hover:border-[var(--menzu-accent)]/50 hover:bg-[var(--menzu-accent)]/10 hover:text-[var(--menzu-accent)] sm:h-10"
+                          className="press inline-flex h-11 items-center justify-center gap-2 rounded-[10px] border border-white/10 bg-white/[0.04] px-5 text-[14px] font-semibold text-white hover:border-[var(--menzu-accent)]/50 hover:bg-[var(--menzu-accent)]/10 hover:text-[var(--menzu-accent)] sm:h-10"
                         >
                           <Star className="h-4 w-4" />
                           Đánh giá
@@ -1276,7 +1276,7 @@ export function OrderDetailModal({
                       ) : null}
                     </div>
                     {reviewHref && order.reviewed ? (
-                      <p className="text-[13px] leading-snug text-neutral-500">
+                      <p className="text-[11px] leading-snug text-neutral-500">
                         <Star
                           className="mr-1 inline h-3 w-3 fill-current align-[-2px] text-amber-400"
                           aria-hidden
@@ -1285,7 +1285,7 @@ export function OrderDetailModal({
                       </p>
                     ) : null}
                     {!showWarrantyButton ? (
-                      <p className="text-[13px] leading-snug text-neutral-500">
+                      <p className="text-[11px] leading-snug text-neutral-500">
                         <Wrench className="mr-1 inline h-3 w-3 align-[-2px]" aria-hidden />
                         {order.refunded || order.warranty?.status === "REFUNDED"
                           ? "Đơn đã được hoàn tiền nên không còn bảo hành."
@@ -1303,7 +1303,7 @@ export function OrderDetailModal({
                   <button
                     type="button"
                     onClick={() => setOpen(false)}
-                    className="press h-11 w-full rounded-xl border border-white/10 bg-white/[0.02] text-[13px] font-bold text-neutral-300"
+                    className="press h-11 w-full rounded-xl border border-white/10 bg-white/[0.02] text-xs font-bold text-neutral-300"
                   >
                     Đóng
                   </button>
@@ -1342,17 +1342,17 @@ function LockedLogin({ onTake }: { onTake: () => void }) {
         <p className="text-[15px] font-semibold text-white">
           Nhận thông tin đăng nhập
         </p>
-        <p className="mx-auto mt-1.5 max-w-md text-[13px] leading-relaxed text-neutral-400">
+        <p className="mx-auto mt-1.5 max-w-md text-xs leading-relaxed text-neutral-400">
           Tài khoản này chưa được nhận. Khi bạn bấm nhận, hệ thống sẽ mở khóa thông tin, vui
           lòng tự bảo mật tài khoản.
         </p>
       </div>
       <div className="w-full max-w-md rounded-xl border border-red-500/25 bg-red-500/[0.07] px-4 py-3 text-left">
-        <p className="flex items-center gap-2 text-[13px] font-semibold text-red-400">
+        <p className="flex items-center gap-2 text-[14px] font-semibold text-red-400">
           <TriangleAlert className="h-4 w-4 shrink-0" aria-hidden />
           Bắt buộc quay video
         </p>
-        <p className="mt-1.5 text-[13px] leading-relaxed text-neutral-300">
+        <p className="mt-1.5 text-[12px] leading-relaxed text-neutral-300">
           Quay màn hình liên tục từ lúc bấm lấy thông tin đến khi đăng nhập thành công vào
           game. Shop từ chối hỗ trợ bảo hành nếu thiếu video này.
         </p>
@@ -1364,7 +1364,7 @@ function LockedLogin({ onTake }: { onTake: () => void }) {
         // lettering of "Yêu cầu bảo hành" and the popup's buttons, in the
         // card's own amber (the owner, 09/10/2026: "làm nút lấy thông tin
         // trước"). The card's title stays in capitals; it is a heading.
-        className="press inline-flex h-11 items-center justify-center rounded-xl bg-amber-500 px-8 text-[13px] font-bold text-neutral-950 transition-colors hover:bg-amber-400 sm:h-10"
+        className="press inline-flex h-11 items-center justify-center rounded-xl bg-amber-500 px-8 text-xs font-bold text-neutral-950 transition-colors hover:bg-amber-400 sm:h-10"
       >
         Lấy thông tin
       </button>
@@ -1374,7 +1374,7 @@ function LockedLogin({ onTake }: { onTake: () => void }) {
 
 /** Under a sign-in once taken: when, for the buyer's own record. */
 function RevealedLine({ at }: { at: string }) {
-  return <p className="text-[13px] text-neutral-500">Đã nhận thông tin lúc {at}.</p>;
+  return <p className="text-[11px] text-neutral-500">Đã nhận thông tin lúc {at}.</p>;
 }
 
 /**
@@ -1466,7 +1466,7 @@ function LoginRevealDialog({ code, onClose }: { code: string; onClose: () => voi
         <div className="flex flex-col items-center text-center">
           <span
             id="login-reveal-title"
-            className="inline-flex items-center gap-2 rounded-full border border-red-500/30 bg-red-500/10 px-4 py-1.5 text-[13px] font-bold text-red-400"
+            className="inline-flex items-center gap-2 rounded-full border border-red-500/30 bg-red-500/10 px-4 py-1.5 text-[13px] font-black text-red-400"
           >
             <TriangleAlert className="h-4 w-4" aria-hidden />
             Bắt buộc quay màn hình
@@ -1489,7 +1489,7 @@ function LoginRevealDialog({ code, onClose }: { code: string; onClose: () => voi
           ))}
         </ol>
 
-        <div className="mt-4 flex flex-col gap-1.5 rounded-xl border border-red-500/25 bg-red-500/[0.07] px-4 py-3 text-[13px] leading-relaxed text-neutral-300">
+        <div className="mt-4 flex flex-col gap-1.5 rounded-xl border border-red-500/25 bg-red-500/[0.07] px-4 py-3 text-[12px] leading-relaxed text-neutral-300">
           <p className="flex gap-2">
             <TriangleAlert className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-400" aria-hidden />
             <span>
@@ -1517,7 +1517,7 @@ function LoginRevealDialog({ code, onClose }: { code: string; onClose: () => voi
             <span className="block text-[13px] font-bold text-white">
               Xác nhận đang quay màn hình
             </span>
-            <span className="mt-0.5 block text-[13px] text-neutral-400">
+            <span className="mt-0.5 block text-[11px] text-neutral-400">
               Tôi cam kết đang quay video và đồng ý với điều khoản trên.
             </span>
           </span>
@@ -1536,7 +1536,7 @@ function LoginRevealDialog({ code, onClose }: { code: string; onClose: () => voi
         </button>
 
         {error ? (
-          <p role="alert" className="mt-3 text-[13px] font-semibold text-[var(--menzu-accent)]">
+          <p role="alert" className="mt-3 text-[12px] font-semibold text-[var(--menzu-accent)]">
             {error}
           </p>
         ) : null}
@@ -1549,7 +1549,7 @@ function LoginRevealDialog({ code, onClose }: { code: string; onClose: () => voi
           <button
             type="button"
             onClick={onClose}
-            className="press h-11 rounded-[10px] border border-white/10 bg-white/[0.04] px-5 text-[13px] font-semibold text-white transition-colors hover:border-white/25 hover:text-white sm:h-10"
+            className="press h-11 rounded-[10px] border border-white/10 bg-white/[0.04] px-5 text-[14px] font-semibold text-white transition-colors hover:border-white/25 hover:text-white sm:h-10"
           >
             Hủy bỏ
           </button>
@@ -1557,7 +1557,7 @@ function LoginRevealDialog({ code, onClose }: { code: string; onClose: () => voi
             type="button"
             onClick={take}
             disabled={!recording || busy}
-            className="press h-11 rounded-[10px] bg-[var(--menzu-accent)] px-5 text-[13px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent-dark)] disabled:cursor-not-allowed disabled:bg-white/[0.06] disabled:text-neutral-500 sm:h-10"
+            className="press h-11 rounded-[10px] bg-[var(--menzu-accent)] px-5 text-[14px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent-dark)] disabled:cursor-not-allowed disabled:bg-white/[0.06] disabled:text-neutral-500 sm:h-10"
           >
             {busy ? "Đang mở…" : "Xác nhận lấy thông tin"}
           </button>
