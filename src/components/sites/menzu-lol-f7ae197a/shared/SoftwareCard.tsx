@@ -315,7 +315,7 @@ export function SoftwareCard({
           // reference lays it out (23/10/2026: "theo bố cục, kích thước giữ
           // y nguyên"), every word's first letter capital and the acronyms
           // kept ("viết hoa chữ cái đầu… CFVN thì khỏi").
-          <>
+          <div className="mb-[14px]">
             <Link href={detailHref} className="block">
               <h3
                 title={titleCase(software.name)}
@@ -329,14 +329,17 @@ export function SoftwareCard({
                 Chỉ từ {formatVnd(minPrice)}đ
               </span>
             ) : null}
-          </>
+          </div>
         ) : null}
 
         {/* Two lines, held at that height so cards stay level whether the copy
-            fills them or not. */}
-        <p className={`mb-[14px] line-clamp-2 min-h-[37px] text-[13px] leading-[1.55] text-mist ${old || variant === "shelf" ? "mt-2" : ""}`}>
-          {software.description}
-        </p>
+            fills them or not. Not on the shelf's card (the owner, 23/10/2026:
+            "bỏ dòng mô tả thử"): the tool's page carries the description. */}
+        {old || variant !== "shelf" ? (
+          <p className={`mb-[14px] line-clamp-2 min-h-[37px] text-[13px] leading-[1.55] text-mist ${old ? "mt-2" : ""}`}>
+            {software.description}
+          </p>
+        ) : null}
 
         {variant === "compact" ? (
           <div className="mt-auto flex items-end justify-between gap-3 pt-3">
