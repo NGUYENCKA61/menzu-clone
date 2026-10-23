@@ -93,6 +93,8 @@ export function SoftwareCheckoutDialog({
   const [busy, setBusy] = useState(false);
   /** Refusals from the buy call, shown inside the dialog it belongs to. */
   const [dialogError, setDialogError] = useState<string | null>(null);
+  /** Keys the server says are left, after it refused for want of them. */
+  const [stockLeft, setStockLeft] = useState<number | null>(null);
   /** A failure the buyer cannot fix in the card (no connection, a server
    *  error): the red notice sheet says it instead of the inline line. */
   const [fatal, setFatal] = useState<string | null>(null);
@@ -139,6 +141,7 @@ export function SoftwareCheckoutDialog({
   useEffect(() => {
     setApplied(null);
     setVoucherError(null);
+    setStockLeft(null);
   }, [tier?.id, quantity]);
 
   // The wallet is read when the dialog opens rather than on page load: it is
@@ -272,6 +275,8 @@ export function SoftwareCheckoutDialog({
       }
       if (!res.ok) {
         setDialogError(data.error ?? "Không thể tạo đơn hàng");
+        const left = (data as { available?: unknown }).available;
+        if (res.status === 409 && typeof left === "number") setStockLeft(left);
         // The server knows the exact gap; trust it over the figure the
         // wallet read a moment ago, which a purchase in another tab may
         // have moved.
@@ -345,6 +350,7 @@ export function SoftwareCheckoutDialog({
           canAfford={canAfford}
           blocked={!guest && risky && !acceptedRisk}
           confirmLabel={guest ? "Đăng nhập để mua" : undefined}
+          soldOut={stockLeft === null ? null : stockLeft > 0 ? `Chỉ còn ${stockLeft} key` : "Hết key"}
         />
       }
     >
@@ -376,9 +382,17 @@ export function SoftwareCheckoutDialog({
             meta={`×${quantity}, ${sentenceCase(product.categoryName)}`}
           />
           <PriceList>
-            <PriceRow label="Đơn giá" value={`${formatVnd(tier.price)}đ`} />
-            <PriceRow label="Số lượng" value={String(quantity)} />
-            <PriceRow label="Tạm tính" value={`${formatVnd(lineTotal)}đ`} />
+            {/* One copy is one figure (23/10/2026): "Đơn giá", "Số lượng 1"
+                and "Tạm tính" said the same thing three times. */}
+            {quantity === 1 ? (
+              <PriceRow label="Giá gói" value={`${formatVnd(lineTotal)}đ`} />
+            ) : (
+              <>
+                <PriceRow label="Đơn giá" value={`${formatVnd(tier.price)}đ`} />
+                <PriceRow label="Số lượng" value={String(quantity)} />
+                <PriceRow label="Tạm tính" value={`${formatVnd(lineTotal)}đ`} />
+              </>
+            )}
             {memberTier && memberCut > 0 ? (
               <PriceRow
                 label={`Hạng ${TIER_RULES[memberTier].label} giảm ${formatTierPercent(TIER_RULES[memberTier].discountPercent)}%`}

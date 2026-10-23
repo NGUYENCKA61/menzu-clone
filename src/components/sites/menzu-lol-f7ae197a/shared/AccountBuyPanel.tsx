@@ -111,6 +111,8 @@ export function AccountBuyPanel({
   const [signedIn, setSignedIn] = useState<boolean | null>(null);
   const [buying, setBuying] = useState(false);
   const [buyError, setBuyError] = useState<string | null>(null);
+  /** Accounts the server says are left, after it refused for want of them. */
+  const [stockLeft, setStockLeft] = useState<number | null>(null);
   /** A failure the buyer cannot fix in the card (no connection, a server
    *  error): the red notice sheet says it instead of the inline line. */
   const [fatal, setFatal] = useState<string | null>(null);
@@ -216,6 +218,7 @@ export function AccountBuyPanel({
 
   function openDialog() {
     setBuyError(null);
+    setStockLeft(null);
     setOpen(true);
   }
 
@@ -272,6 +275,8 @@ export function AccountBuyPanel({
       }
       if (!response.ok) {
         setBuyError(data.error ?? "Không thể tạo đơn hàng");
+        const left = (data as { available?: unknown }).available;
+        if (response.status === 409 && typeof left === "number") setStockLeft(left);
         // The server knows the exact gap; trust it over the figure the
         // wallet read a moment ago, which a purchase in another tab may
         // have moved.
@@ -573,6 +578,7 @@ export function AccountBuyPanel({
             busy={buying}
             canAfford={canAfford}
             confirmLabel={guest ? "Đăng nhập để mua" : undefined}
+            soldOut={stockLeft === null ? null : stockLeft > 0 ? `Chỉ còn ${stockLeft} acc` : "Hết acc"}
           />
         }
       >

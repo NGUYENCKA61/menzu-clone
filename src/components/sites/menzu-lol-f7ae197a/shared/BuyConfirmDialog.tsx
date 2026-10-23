@@ -151,7 +151,7 @@ export function BuyConfirmDialog({
               >
                 {title}
               </h2>
-              <p className="mt-0.5 text-xs text-neutral-500">{subtitle}</p>
+              <p className="mt-0.5 text-[13px] text-neutral-400">{subtitle}</p>
             </div>
           </div>
           <button
@@ -238,14 +238,14 @@ export function ProductTile({
         ) : null}
       </span>
       <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-black text-white">{sentenceCase(name)}</p>
+        <p className="line-clamp-2 text-[15px] font-semibold leading-snug text-white">{sentenceCase(name)}</p>
         <div className="mt-1 flex flex-wrap items-center gap-1.5">
           {chip ? (
             <span className="rounded-md border border-white/15 bg-white/[0.05] px-2 py-0.5 text-[12px] font-medium text-frost/90">
               {chip}
             </span>
           ) : null}
-          <span className="text-[11px] font-semibold text-neutral-500">
+          <span className="text-[13px] text-neutral-400">
             {meta}
           </span>
         </div>
@@ -271,7 +271,7 @@ export function PriceRow({
 }) {
   return (
     <div className="flex justify-between gap-4">
-      <dt className={tone === "ok" ? "text-emerald-400" : "text-neutral-500"}>
+      <dt className={tone === "ok" ? "text-emerald-400" : "text-neutral-400"}>
         {label}
       </dt>
       <dd
@@ -408,8 +408,8 @@ export function DialogAlert({
       role={tone === "err" ? "alert" : "status"}
       className={
         tone === "ok"
-          ? "rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-2.5 text-[12px] font-semibold text-emerald-400"
-          : "rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-2.5 text-[12px] font-semibold text-red-400"
+          ? "rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-2.5 text-[13px] font-semibold text-emerald-400"
+          : "rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-2.5 text-[13px] font-semibold text-red-400"
       }
     >
       {children}
@@ -430,6 +430,7 @@ export function ConfirmFooter({
   done = false,
   blocked = false,
   confirmLabel = "Xác nhận",
+  soldOut = null,
 }: {
   onCancel: () => void;
   onConfirm: () => void;
@@ -443,6 +444,10 @@ export function ConfirmFooter({
   /** What the red button says — "Đăng nhập để mua" for a guest, who is
    *  about to be sent to the login page rather than charged. */
   confirmLabel?: string;
+  /** The server said the stock is short ("Hết key", "Chỉ còn 2 key"):
+   *  pressing again would only fetch the same refusal, so the red button
+   *  turns into a grey, dead one that says so (23/10/2026). */
+  soldOut?: string | null;
 }) {
   return (
     <>
@@ -452,7 +457,15 @@ export function ConfirmFooter({
       <button type="button" onClick={onCancel} className={FOOTER_GHOST_BTN}>
         Huỷ
       </button>
-      {canAfford ? (
+      {soldOut ? (
+        <button
+          type="button"
+          disabled
+          className="inline-flex h-11 flex-1 cursor-not-allowed items-center justify-center rounded-[10px] border border-white/10 bg-white/[0.04] text-[14px] font-semibold text-neutral-400"
+        >
+          {soldOut}
+        </button>
+      ) : canAfford ? (
         <button
           type="button"
           disabled={busy || done || blocked}

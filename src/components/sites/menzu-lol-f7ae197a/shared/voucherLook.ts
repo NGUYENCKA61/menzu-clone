@@ -22,14 +22,14 @@ export const VOUCHER_APPLIED = "mt-2 text-[11px] font-semibold text-emerald-400"
 
 /** `typed`: a code is in the box — its edge takes the accent. */
 export function voucherInputClass(typed: boolean): string {
-  return `h-10 min-w-0 flex-1 rounded-xl border bg-white/[0.06] px-3 font-mono text-[15px] font-bold text-white outline-none transition-colors placeholder:font-sans placeholder:font-normal placeholder:normal-case placeholder:tracking-normal placeholder:text-neutral-400 focus:border-[var(--menzu-accent)]/60 ${
+  return `h-11 min-w-0 flex-1 rounded-xl border bg-white/[0.06] px-3 font-mono text-[15px] font-bold text-white outline-none transition-colors placeholder:font-sans placeholder:font-normal placeholder:normal-case placeholder:tracking-normal placeholder:text-neutral-400 focus:border-[var(--menzu-accent)]/60 ${
     typed ? "border-[var(--menzu-accent)]/60" : "border-white/15"
   }`;
 }
 
 /** `solid`: a code is typed and not yet applied — press me. */
 export function voucherButtonClass(solid: boolean): string {
-  return `h-10 shrink-0 rounded-xl border px-4 text-[12px] font-semibold transition-colors disabled:cursor-not-allowed ${
+  return `h-11 shrink-0 rounded-xl border px-4 text-[13px] font-semibold transition-colors disabled:cursor-not-allowed ${
     solid
       ? "border-[var(--menzu-accent)] bg-[var(--menzu-accent)] text-white hover:bg-[var(--menzu-accent-dark)]"
       : "border-[var(--menzu-accent)]/45 bg-[var(--menzu-accent)]/10 text-[var(--menzu-accent)] hover:bg-[var(--menzu-accent)]/20"
@@ -42,7 +42,7 @@ export function voucherButtonClass(solid: boolean): string {
  *  light red of a live control once a fresh code is typed. The panel's one
  *  solid red stays the pay button. */
 export function voucherApplyClass(ready: boolean): string {
-  return `h-10 shrink-0 rounded-xl border px-4 text-[12px] font-semibold transition-colors disabled:cursor-not-allowed ${
+  return `h-11 shrink-0 rounded-xl border px-4 text-[13px] font-semibold transition-colors disabled:cursor-not-allowed ${
     ready
       ? "border-[var(--menzu-accent)]/45 bg-[var(--menzu-accent)]/10 text-[var(--menzu-accent)] hover:bg-[var(--menzu-accent)]/20"
       : "border-white/[0.12] bg-white/[0.04] text-neutral-400 enabled:hover:text-neutral-200"
