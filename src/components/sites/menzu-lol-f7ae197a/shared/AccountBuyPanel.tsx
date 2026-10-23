@@ -542,7 +542,6 @@ export function AccountBuyPanel({
             tone="green"
             layout="menzu"
             handoff
-            grey
             title="Thanh toán thành công"
             action={{
               label: "Xem đơn hàng",
