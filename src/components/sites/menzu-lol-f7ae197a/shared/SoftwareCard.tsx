@@ -319,7 +319,7 @@ export function SoftwareCard({
             <Link href={detailHref} className="block">
               <h3
                 title={titleCase(software.name)}
-                className="truncate text-[17px] font-black leading-snug text-white transition-colors duration-300 group-hover:text-[var(--menzu-accent)]"
+                className="truncate text-[17px] font-black uppercase leading-snug text-white transition-colors duration-300 group-hover:text-[var(--menzu-accent)]"
               >
                 {titleCase(software.name)}
               </h3>
