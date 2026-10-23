@@ -1,6 +1,6 @@
 import { CardImage } from "@/components/sites/menzu-lol-f7ae197a/shared/CardImage";
 import { formatVnd } from "@/components/sites/menzu-lol-f7ae197a/shared/productData";
-import { sentenceCase, titleCase, withoutNewWord } from "@/lib/displayCase";
+import { sentenceCase, shelfTitle } from "@/lib/displayCase";
 import Link from "next/link";
 import {
   Boxes,
@@ -702,7 +702,7 @@ function TileDress({ card, style, big }: { card: ProductCard; style: TileStyle; 
             big && "lg:text-[20px]",
           )}
         >
-          {titleCase(withoutNewWord(card.title))}
+          {shelfTitle(card.title)}
         </h3>
         {style === "a1" && line ? (
           <>

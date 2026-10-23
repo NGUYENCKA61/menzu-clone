@@ -142,3 +142,14 @@ export function titleCase(raw: string): string {
     )
     .join(" ");
 }
+
+/**
+ * A category's name as its tile on the home page prints it (ProductRow:
+ * titleCase over withoutNewWord), for every place the category page names its
+ * shelf (the owner, 23/10/2026: "vậy giống card danh mục đi").
+ * "HACK ĐỘT KÍCH CFVN - CF4VN" reads "Hack Đột Kích CFVN - CF4VN", "HACK
+ * DELTA FORCE MỚI" reads "Hack Delta Force".
+ */
+export function shelfTitle(raw: string): string {
+  return titleCase(withoutNewWord(raw));
+}

@@ -4,7 +4,7 @@ import { notFound, permanentRedirect } from "next/navigation";
 
 import { Breadcrumb } from "@/components/sites/menzu-lol-f7ae197a/shared/Breadcrumb";
 import { CategoryHero } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/CategoryHero";
-import { sentenceCase } from "@/lib/displayCase";
+import { shelfTitle } from "@/lib/displayCase";
 import { CategoryFilterPanel } from "@/components/sites/menzu-lol-f7ae197a/shared/CategoryFilterPanel";
 import { ProductCard } from "@/components/sites/menzu-lol-f7ae197a/shared/ProductCard";
 import { CardBoundary } from "@/components/sites/menzu-lol-f7ae197a/shared/CardBoundary";
@@ -241,7 +241,7 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
       <JsonLd
         data={breadcrumbJsonLd([
           { name: "Trang chủ", path: "/" },
-          { name: data.name, path: categoryHref(data.slug) },
+          { name: shelfTitle(data.name), path: categoryHref(data.slug) },
         ])}
       />
       {shelf ? <JsonLd data={shelf} /> : null}
@@ -253,7 +253,7 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
             imageUrl={data.heroImageUrl}
             breadcrumb={
               <Breadcrumb
-                items={[{ label: "Trang chủ", href: "/" }, { label: data.name }]}
+                items={[{ label: "Trang chủ", href: "/" }, { label: shelfTitle(data.name) }]}
               />
             }
           />
@@ -271,7 +271,7 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
                     what these tiles were. */}
                 {/* Read, not drawn: the header above already names the shelf
                     and says its sentence. It keeps the outline h1 → h2. */}
-                <h2 className="sr-only">Danh mục {data.name}</h2>
+                <h2 className="sr-only">Danh mục {shelfTitle(data.name)}</h2>
                 <SoftwareFilterPanel
                   launchers={data.softwareLaunchers}
                   hint={softwareSearchHint(
@@ -332,7 +332,7 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
                   Danh mục tài khoản game{" "}
                   {(() => {
                     const game = data.name.replace(/^(tool\s+)?hack\s*\+?\s*/i, "").trim() || data.name;
-                    return old ? game : sentenceCase(game);
+                    return old ? game : shelfTitle(game);
                   })()}
                 </h2>
 

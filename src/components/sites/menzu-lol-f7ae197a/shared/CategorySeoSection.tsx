@@ -1,5 +1,5 @@
 import { FaqAccordion as HomeFaqAccordion } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/FaqAccordion";
-import { sentenceCase } from "@/lib/displayCase";
+import { shelfTitle } from "@/lib/displayCase";
 import { faqJsonLd, JsonLd } from "@/lib/seo";
 import { faqEntries, type CategorySeoCopy } from "@/lib/seoCopy";
 
@@ -40,7 +40,7 @@ export function CategorySeoSection({
 
   return (
     <section id="gioi-thieu" className="mt-12 border-t border-white/10 pt-10">
-      <SectionHeading>Về {old ? categoryName : sentenceCase(categoryName)}</SectionHeading>
+      <SectionHeading>Về {old ? categoryName : shelfTitle(categoryName)}</SectionHeading>
       <div className="doc-prose mt-5" dangerouslySetInnerHTML={{ __html: copy.intro }} />
 
       <SectionHeading className="mt-10">Câu hỏi thường gặp</SectionHeading>

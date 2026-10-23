@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 
 import { CardImage } from "@/components/sites/menzu-lol-f7ae197a/shared/CardImage";
-import { CaseText } from "@/components/sites/menzu-lol-f7ae197a/shared/CaseText";
+import { shelfTitle } from "@/lib/displayCase";
 
 /**
  * The top of a category page, built the way menzu.lol heads its own: the
@@ -63,7 +63,8 @@ export function CategoryHero({
       <div className="relative z-10 mx-auto w-full max-w-[1320px] px-4 lg:px-6">
         {breadcrumb}
         <h1 className="mb-4 py-1 text-3xl font-black leading-tight text-white sm:text-4xl md:text-5xl">
-          <CaseText text={name} />
+          {/* As the home page's tile names it (23/10/2026). */}
+          {shelfTitle(name)}
         </h1>
         {description.trim() ? (
           <p className="max-w-[640px] text-[13px] leading-relaxed text-neutral-400 sm:text-sm">
