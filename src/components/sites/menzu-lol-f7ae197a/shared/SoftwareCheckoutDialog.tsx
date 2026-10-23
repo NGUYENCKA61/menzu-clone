@@ -23,6 +23,7 @@ import {
 } from "@/lib/memberTiers";
 
 import { formatVnd } from "./productData";
+import { ErrorModal } from "./ErrorModal";
 import { TopUpDialog } from "./TopUpDialog";
 
 export interface CheckoutTier {
@@ -92,6 +93,9 @@ export function SoftwareCheckoutDialog({
   const [busy, setBusy] = useState(false);
   /** Refusals from the buy call, shown inside the dialog it belongs to. */
   const [dialogError, setDialogError] = useState<string | null>(null);
+  /** A failure the buyer cannot fix in the card (no connection, a server
+   *  error): the red notice sheet says it instead of the inline line. */
+  const [fatal, setFatal] = useState<string | null>(null);
   /** The wallet, read when the dialog opens; null until it answers. */
   const [balance, setBalance] = useState<number | null>(null);
   /**
@@ -261,6 +265,11 @@ export function SoftwareCheckoutDialog({
         keysDelivered?: number;
         keysPending?: number;
       };
+      if (res.status >= 500) {
+        setFatal(data.error ?? "Hệ thống đang lỗi. Bạn xem lại Lịch sử mua trước khi mua lại, để không bị mua trùng.");
+        onClose();
+        return;
+      }
       if (!res.ok) {
         setDialogError(data.error ?? "Không thể tạo đơn hàng");
         // The server knows the exact gap; trust it over the figure the
@@ -283,7 +292,8 @@ export function SoftwareCheckoutDialog({
       // So the header balance and anything else server-drawn catch up.
       router.refresh();
     } catch {
-      setDialogError("Không kết nối được máy chủ");
+      setFatal("Không kết nối được máy chủ. Bạn xem lại Lịch sử mua trước khi mua lại, để không bị mua trùng.");
+      onClose();
     } finally {
       setBusy(false);
     }
@@ -314,6 +324,10 @@ export function SoftwareCheckoutDialog({
   }
 
   return (
+    <>
+      {fatal ? (
+        <ErrorModal title="Thanh toán bị gián đoạn" message={fatal} onClose={() => setFatal(null)} />
+      ) : null}
     <BuyConfirmDialog
       open={open && tier !== null}
       onClose={onClose}
@@ -402,5 +416,6 @@ export function SoftwareCheckoutDialog({
         </>
       ) : null}
     </BuyConfirmDialog>
+    </>
   );
 }

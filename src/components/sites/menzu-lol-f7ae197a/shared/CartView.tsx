@@ -32,6 +32,7 @@ import {
 } from "@/lib/memberTiers";
 
 import { formatVnd } from "./productData";
+import { ErrorModal } from "./ErrorModal";
 import { TopUpDialog } from "./TopUpDialog";
 import { sentenceCase } from "@/lib/displayCase";
 import {
@@ -273,6 +274,9 @@ export function CartView({
   const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  /** A failure the buyer cannot fix in the card (no connection, a server
+   *  error): the red notice sheet says it instead of the inline line. */
+  const [fatal, setFatal] = useState<string | null>(null);
 
   /* Each press on a line answers on that line, in the same frame: the count
      changes under the finger, a binned line starts fading, and only the
@@ -452,6 +456,10 @@ export function CartView({
         router.push("/login?next=/cart");
         return;
       }
+      if (res.status >= 500) {
+        setFatal(data.error ?? "Hệ thống đang lỗi. Bạn xem lại Lịch sử mua trước khi mua lại, để không bị mua trùng.");
+        return;
+      }
       if (!res.ok) {
         setError(
           typeof data.shortfall === "number"
@@ -481,7 +489,7 @@ export function CartView({
       });
       router.refresh();
     } catch {
-      setError("Không kết nối được máy chủ");
+      setFatal("Không kết nối được máy chủ. Bạn xem lại Lịch sử mua trước khi mua lại, để không bị mua trùng.");
     } finally {
       setBusy(false);
     }
@@ -735,6 +743,9 @@ export function CartView({
 
   return (
     <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start">
+      {fatal ? (
+        <ErrorModal title="Thanh toán bị gián đoạn" message={fatal} onClose={() => setFatal(null)} />
+      ) : null}
       {/* LINES — each one the orders list's card: its picture, its 16px name,
           its price column behind a hairline (the owner, 01/10/2026: "đồng bộ
           card sản phẩm … lịch sử mua"), with the stepper under the name on

@@ -18,6 +18,7 @@ import {
   VoucherField,
 } from "./BuyConfirmDialog";
 import { formatVnd, productImage } from "./productData";
+import { ErrorModal } from "./ErrorModal";
 import { TopUpDialog } from "./TopUpDialog";
 import { StickyBuyBar } from "./StickyBuyBar";
 import type { BuyerLevel } from "./SoftwareBuyPanel";
@@ -110,6 +111,9 @@ export function AccountBuyPanel({
   const [signedIn, setSignedIn] = useState<boolean | null>(null);
   const [buying, setBuying] = useState(false);
   const [buyError, setBuyError] = useState<string | null>(null);
+  /** A failure the buyer cannot fix in the card (no connection, a server
+   *  error): the red notice sheet says it instead of the inline line. */
+  const [fatal, setFatal] = useState<string | null>(null);
   const [orderCode, setOrderCode] = useState<string | null>(null);
   /** What the wallet was actually debited, kept for the receipt. */
   const [paid, setPaid] = useState(0);
@@ -261,6 +265,11 @@ export function AccountBuyPanel({
         router.push(loginHref);
         return;
       }
+      if (response.status >= 500) {
+        setFatal(data.error ?? "Hệ thống đang lỗi. Bạn xem lại Lịch sử mua trước khi mua lại, để không bị mua trùng.");
+        setOpen(false);
+        return;
+      }
       if (!response.ok) {
         setBuyError(data.error ?? "Không thể tạo đơn hàng");
         // The server knows the exact gap; trust it over the figure the
@@ -285,7 +294,8 @@ export function AccountBuyPanel({
       // worse than a key. The receipt now carries the way there.
       router.refresh();
     } catch {
-      setBuyError("Không kết nối được máy chủ");
+      setFatal("Không kết nối được máy chủ. Bạn xem lại Lịch sử mua trước khi mua lại, để không bị mua trùng.");
+      setOpen(false);
     } finally {
       setBuying(false);
     }
@@ -518,6 +528,10 @@ export function AccountBuyPanel({
         disabled={soldOut || gated}
         onPress={openDialog}
       />
+
+      {fatal ? (
+        <ErrorModal title="Thanh toán bị gián đoạn" message={fatal} onClose={() => setFatal(null)} />
+      ) : null}
 
       {orderCode !== null ? (
         /* The notice sheet the top-up answers with (the owner, 23/10/2026:
