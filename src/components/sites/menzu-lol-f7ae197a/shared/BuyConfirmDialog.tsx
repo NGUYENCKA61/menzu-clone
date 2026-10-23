@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, Loader2, ShoppingCart, Ticket, Wallet, X } from "lucide-react";
+import { Check, Loader2, Receipt, ShoppingCart, Ticket, Wallet, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -139,9 +139,10 @@ export function BuyConfirmDialog({
           <div className="flex items-start gap-3">
             {/* The page titles' own mark in the accent (AccountPanel) in place of
                 the 3px bar (the owner, 23/10/2026: "dấu | nên thay bằng cái icon
-                giỏ hàng"): a cart while the buyer decides, a tick once paid. */}
+                giỏ hàng"): a cart while the buyer decides, a receipt once paid (the
+                tick already sits beside "Mã đơn hàng" below). */}
             {accent === "success" ? (
-              <Check size={20} strokeWidth={2.5} aria-hidden className="mt-0.5 shrink-0 text-emerald-400" />
+              <Receipt size={20} aria-hidden className="mt-0.5 shrink-0 text-emerald-400" />
             ) : (
               <ShoppingCart size={20} aria-hidden className="mt-0.5 shrink-0 text-[var(--menzu-accent)]" />
             )}
