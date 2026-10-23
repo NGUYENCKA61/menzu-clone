@@ -238,7 +238,7 @@ export function ProductTile({
         ) : null}
       </span>
       <div className="min-w-0 flex-1">
-        <p className="line-clamp-2 text-[15px] font-semibold leading-snug text-white">{sentenceCase(name)}</p>
+        <p className="truncate text-[15px] font-semibold leading-snug text-white">{sentenceCase(name)}</p>
         <div className="mt-1 flex flex-wrap items-center gap-1.5">
           {chip ? (
             <span className="rounded-md border border-white/15 bg-white/[0.05] px-2 py-0.5 text-[12px] font-medium text-frost/90">
