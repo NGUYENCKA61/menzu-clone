@@ -324,11 +324,9 @@ export function SoftwareCard({
                 {titleCase(software.name)}
               </h3>
             </Link>
-            {minPrice !== null && !free ? (
-              <span className="mt-1 block truncate text-[13px] font-medium leading-snug text-neutral-400">
-                Chỉ từ {formatVnd(minPrice)}đ
-              </span>
-            ) : null}
+            {/* No "Chỉ từ …" line under the name (the owner, 23/10/2026:
+                "bỏ dòng Chỉ từ 40.000đ"): the package picker below
+                prices each tier. */}
           </div>
         ) : null}
 
