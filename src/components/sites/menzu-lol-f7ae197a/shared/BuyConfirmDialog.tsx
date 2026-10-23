@@ -135,25 +135,23 @@ export function BuyConfirmDialog({
         className={`order-modal-card relative flex max-h-[calc(100dvh-2rem)] w-full max-w-[460px] flex-col overflow-hidden rounded-2xl border border-white/10 bg-panel shadow-[0_25px_80px_rgba(0,0,0,0.7)] outline-none${leaving ? " order-modal-card-out" : ""}`}
       >
         <div className="flex shrink-0 items-start justify-between gap-4 border-b border-white/[0.06] px-5 py-4">
-          <div className="flex items-start gap-3">
-            {/* The page titles' own mark in the accent (AccountPanel) in place of
-                the 3px bar (the owner, 23/10/2026: "dấu | nên thay bằng cái icon
-                giỏ hàng"): a cart while the buyer decides, a receipt once paid (the
-                tick already sits beside "Mã đơn hàng" below). */}
-            {accent === "success" ? (
-              <Receipt size={20} aria-hidden className="mt-0.5 shrink-0 text-emerald-400" />
-            ) : (
-              <ShoppingCart size={20} aria-hidden className="mt-0.5 shrink-0 text-[var(--menzu-accent)]" />
-            )}
-            <div>
-              <h2
-                id={titleId}
-                className="text-[18px] font-bold leading-snug text-frost"
-              >
-                {title}
-              </h2>
-              <p className="mt-0.5 text-[13px] text-neutral-400">{subtitle}</p>
-            </div>
+          {/* The order sheet's head (23/10/2026, "chữ thụt về icon"): the mark
+              and the title on one line, the sentence under both, starting
+              where the mark does. A cart while the buyer decides, a receipt
+              once paid; the mark is the page titles' own (AccountPanel). */}
+          <div>
+            <h2
+              id={titleId}
+              className="flex items-center gap-2.5 text-[18px] font-bold leading-snug text-frost"
+            >
+              {accent === "success" ? (
+                <Receipt size={20} aria-hidden className="shrink-0 text-emerald-400" />
+              ) : (
+                <ShoppingCart size={20} aria-hidden className="shrink-0 text-[var(--menzu-accent)]" />
+              )}
+              {title}
+            </h2>
+            <p className="mt-1 text-[13px] text-neutral-400">{subtitle}</p>
           </div>
           <button
             type="button"
