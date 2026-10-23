@@ -110,7 +110,7 @@ interface CheckoutReceipt {
    with the rest of the site — red prices, a red total, a tinted panel and
    glows under the buttons came off.) */
 const STEP_BUTTON =
-  "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/[0.03] text-neutral-300 transition-colors hover:border-[var(--menzu-accent)]/40 hover:bg-[var(--menzu-accent)]/10 hover:text-[var(--menzu-accent)] disabled:opacity-40 disabled:hover:border-white/10 disabled:hover:bg-white/[0.03] disabled:hover:text-neutral-300";
+  "relative flex h-8 w-8 shrink-0 items-center justify-center rounded-lg before:absolute before:-inset-1.5 before:content-[''] border border-white/10 bg-white/[0.03] text-neutral-300 transition-colors hover:border-[var(--menzu-accent)]/40 hover:bg-[var(--menzu-accent)]/10 hover:text-[var(--menzu-accent)] disabled:opacity-40 disabled:hover:border-white/10 disabled:hover:bg-white/[0.03] disabled:hover:text-neutral-300";
 const LABEL =
   "text-[12px] font-semibold text-neutral-500";
 
@@ -200,7 +200,7 @@ function ReceiptLine({ line }: { line: CartLine }) {
         <div className="mt-1 flex flex-wrap items-center gap-1.5">
           {/* Neutral here, not the accent: nothing on a receipt is left to
               act on, so the chip only tells one line from the next. */}
-          <span className="rounded-md border border-white/15 bg-white/10 px-2 py-0.5 text-[12px] font-semibold text-neutral-300">
+          <span className="rounded-md border border-white/15 bg-white/[0.05] px-2 py-0.5 text-[12px] font-medium text-frost/90">
             {line.packageLabel}
           </span>
           <span className="text-[11px] font-semibold tabular-nums text-neutral-500">
@@ -749,12 +749,12 @@ export function CartView({
                     it came off on the owner's word (01/10/2026), the line's
                     total on the right says the money. */}
                 <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                  <span className="whitespace-nowrap rounded-md border border-white/15 bg-white/10 px-2 py-0.5 text-[12px] font-semibold text-neutral-300">
+                  <span className="whitespace-nowrap rounded-md border border-white/15 bg-white/[0.05] px-2 py-0.5 text-[12px] font-medium text-frost/90">
                     {line.packageLabel}
                   </span>
                 </div>
 
-                <div className="mt-1 flex items-center gap-1.5">
+                <div className="mt-1 flex items-center gap-2">
                   <button
                     type="button"
                     aria-label={`Giảm số lượng ${line.name}`}

@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, Loader2, Receipt, ShoppingCart, Ticket, Wallet, X } from "lucide-react";
+import { Check, Loader2, Receipt, ShoppingCart, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -19,9 +19,7 @@ import { useOverlayPresence } from "./useOverlayPresence";
 import { formatVnd } from "./productData";
 import {
   VOUCHER_APPLIED,
-  VOUCHER_ICON,
-  VOUCHER_LABEL,
-  voucherButtonClass,
+  voucherApplyClass,
   voucherInputClass,
 } from "./voucherLook";
 
@@ -37,8 +35,6 @@ import {
  * button styles of the account area throughout.
  */
 
-const LABEL =
-  "flex items-center gap-1.5 text-[12px] font-semibold ";
 const TILE = "rounded-xl border border-white/[0.06] bg-white/[0.02]";
 /** The footer pair, exported so a view other than the confirm one — the
  *  "đã mua" view — can close with the same two buttons. */
@@ -316,15 +312,14 @@ export function VoucherField({
   const id = useId();
   const ready = !checking && value.trim().length > 0;
   return (
-    <div className={`p-3 ${TILE}`}>
-      {/* The basket's summary wears the same box (voucherLook). */}
-      <label htmlFor={id} className={`mb-2 ${VOUCHER_LABEL}`}>
-        <Ticket className={VOUCHER_ICON} />
-        Mã giảm giá
-      </label>
+    <div>
+      {/* The basket's own box (the owner, 01/10/2026: no caption, the
+          field says what it is; a grey "Áp dụng" until a code is typed),
+          which the dialogs were to follow "để sau" (23/10/2026). */}
       <div className="flex gap-2">
         <input
           id={id}
+          aria-label="Mã giảm giá"
           type="text"
           value={value}
           // Upper-cased as typed, so what the box shows is what is sent: the
@@ -348,7 +343,7 @@ export function VoucherField({
           type="button"
           disabled={!ready}
           onClick={onApply}
-          className={voucherButtonClass(value.trim().length > 0 && applied === null)}
+          className={voucherApplyClass(value.trim().length > 0 && applied === null)}
         >
           {checking ? "Đang kiểm…" : "Áp dụng"}
         </button>
@@ -381,42 +376,20 @@ export function PayableBlock({
   balance: number | null;
 }) {
   return (
-    <div className="rounded-xl border border-[var(--menzu-accent)]/25 bg-[var(--menzu-accent)]/[0.06] p-4">
-      <div className="flex items-end justify-between gap-4">
-        <span className={`text-neutral-400 ${LABEL}`}>
-          <Wallet className="h-3.5 w-3.5" />
-          Tổng thanh toán
-        </span>
-        <span className="text-xl font-black tabular-nums text-[var(--menzu-accent)]">
+    // The basket's total (the owner, 01/10/2026: "hạ độ sáng", option 2): no
+    // tinted box, the name in grey, the sum off-white, and only a shortfall
+    // said underneath, in the basket's red line; the header prints the wallet.
+    <div className="border-t border-white/10 pt-4">
+      <div className="flex items-baseline justify-between gap-4">
+        <span className="text-[15px] font-semibold text-neutral-400">Tổng thanh toán</span>
+        <span className="text-2xl font-black tabular-nums text-neutral-200">
           {formatVnd(payable)}đ
         </span>
       </div>
-      {balance !== null ? (
-        <div className="mt-3 space-y-1 border-t border-white/[0.06] pt-3 text-[12px] tabular-nums">
-          {balance >= payable ? (
-            <div className="flex justify-between gap-4">
-              <span className="text-neutral-500">Số dư ví còn lại</span>
-              <span className="font-semibold text-white">
-                {formatVnd(balance - payable)}đ
-              </span>
-            </div>
-          ) : (
-            <>
-              <div className="flex justify-between gap-4">
-                <span className="text-neutral-500">Số dư ví</span>
-                <span className="font-semibold text-white">
-                  {formatVnd(balance)}đ
-                </span>
-              </div>
-              <div className="flex justify-between gap-4">
-                <span className="text-neutral-500">Cần nạp thêm</span>
-                <span className="font-bold text-red-400">
-                  {formatVnd(payable - balance)}đ
-                </span>
-              </div>
-            </>
-          )}
-        </div>
+      {balance !== null && balance < payable ? (
+        <p className="mt-2 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-[11px] font-semibold text-red-400">
+          Cần nạp thêm {formatVnd(payable - balance)}đ
+        </p>
       ) : null}
     </div>
   );
@@ -495,7 +468,7 @@ export function ConfirmFooter({
         </button>
       ) : (
         <Link href="/wallet" className={FOOTER_PRIMARY_BTN}>
-          Nạp tiền
+          Nạp tiền ngay
         </Link>
       )}
     </>
