@@ -5,7 +5,7 @@ import { CardImage } from "@/components/sites/menzu-lol-f7ae197a/shared/CardImag
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
-import { sentenceCase } from "@/lib/displayCase";
+import { sentenceCase, titleCase } from "@/lib/displayCase";
 import { SOFTWARE_STATUS } from "@/lib/softwareStatus";
 import { formatVnd, isFreeTool } from "./productData";
 import { SoftwareCheckoutDialog } from "./SoftwareCheckoutDialog";
@@ -313,14 +313,15 @@ export function SoftwareCard({
           // Under the picture now that it has no shade to carry them, in the
           // sizes they had on it, the name on one line as the owner's
           // reference lays it out (23/10/2026: "theo bố cục, kích thước giữ
-          // y nguyên").
+          // y nguyên"), every word's first letter capital and the acronyms
+          // kept ("viết hoa chữ cái đầu… CFVN thì khỏi").
           <>
             <Link href={detailHref} className="block">
               <h3
-                title={sentenceCase(software.name)}
+                title={titleCase(software.name)}
                 className="truncate text-[17px] font-black leading-snug text-white transition-colors duration-300 group-hover:text-[var(--menzu-accent)]"
               >
-                {sentenceCase(software.name)}
+                {titleCase(software.name)}
               </h3>
             </Link>
             {minPrice !== null && !free ? (
