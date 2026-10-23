@@ -39,7 +39,7 @@ export async function POST(request: Request) {
     !databaseUrl ||
     !sameZaloSecret(
       request.headers.get(ZALO_INBOUND_HEADER) ?? "",
-      zaloInboundSecret(databaseUrl),
+      zaloInboundSecret(databaseUrl, process.env.ZALO_INBOUND_SECRET),
     )
   ) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });

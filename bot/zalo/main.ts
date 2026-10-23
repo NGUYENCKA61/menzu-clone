@@ -109,7 +109,7 @@ const SHOP_URL = (process.env.ZALO_APP_URL ?? "http://localhost:3100").replace(
   /\/+$/,
   "",
 );
-const SHOP_SECRET = zaloInboundSecret(DATABASE_URL);
+const SHOP_SECRET = zaloInboundSecret(DATABASE_URL, process.env.ZALO_INBOUND_SECRET);
 /** Where each chat stands in the shop (which numbered list it is looking at). */
 const shopChats = new Map<string, { state: unknown; at: number }>();
 const SHOP_CHAT_TTL_MS = 30 * 60 * 1000;

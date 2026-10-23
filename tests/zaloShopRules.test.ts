@@ -144,3 +144,25 @@ describe("helpers", () => {
     expect(sameZaloSecret("", "")).toBe(false);
   });
 });
+
+describe("zaloInboundSecret", () => {
+  it("uses the shop's own secret when one long enough is set", () => {
+    const own = "x".repeat(40);
+    expect(zaloInboundSecret("postgres://a:b@c/d", own)).toBe(own);
+    expect(zaloInboundSecret("postgres://a:b@c/d", `  ${own}  `)).toBe(own);
+  });
+
+  it("falls back to the value derived from the database url otherwise", () => {
+    const derived = zaloInboundSecret("postgres://a:b@c/d");
+    expect(derived).toHaveLength(64);
+    expect(zaloInboundSecret("postgres://a:b@c/d", "")).toBe(derived);
+    expect(zaloInboundSecret("postgres://a:b@c/d", "short")).toBe(derived);
+    expect(zaloInboundSecret("postgres://other", undefined)).not.toBe(derived);
+  });
+
+  it("compares in constant time and refuses an empty match", () => {
+    expect(sameZaloSecret("abc", "abc")).toBe(true);
+    expect(sameZaloSecret("abc", "abd")).toBe(false);
+    expect(sameZaloSecret("", "")).toBe(false);
+  });
+});

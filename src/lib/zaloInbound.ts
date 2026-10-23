@@ -18,7 +18,20 @@ import type { ZaloStyleRange } from "./zaloShared";
 export const ZALO_INBOUND_PATH = "/api/integrations/zalo/inbound";
 export const ZALO_INBOUND_HEADER = "x-zalo-bot-secret";
 
-export function zaloInboundSecret(databaseUrl: string): string {
+/** A secret of its own has to be at least this long to count. */
+export const ZALO_INBOUND_SECRET_MIN = 32;
+
+/**
+ * The secret the bot presents and the web checks. Its own random value
+ * (ZALO_INBOUND_SECRET in .env, the same file both containers read) when
+ * one is set; otherwise, as before, a value derived from DATABASE_URL, so a
+ * deployment that has not set one keeps working. The derived one is the
+ * weaker: anyone holding the database URL can compute it (the Zalo
+ * security review, 23/10/2026).
+ */
+export function zaloInboundSecret(databaseUrl: string, own?: string | null): string {
+  const explicit = own?.trim() ?? "";
+  if (explicit.length >= ZALO_INBOUND_SECRET_MIN) return explicit;
   return createHmac("sha256", databaseUrl)
     .update("zalo-inbound-v1")
     .digest("hex");
