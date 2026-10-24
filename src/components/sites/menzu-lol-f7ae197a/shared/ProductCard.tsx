@@ -211,7 +211,7 @@ export function ProductCard({ product, priority = false, eager = false, old = fa
               Còn {product.stock} acc
             </span>
           ) : null}
-          {product.tag !== null && (
+          {old && product.tag !== null && (
             /* Dressed as the software card's status pill — same dark glass,
                same type — minus the coloured dot; the text colour carries the
                meaning: NFA green, FULL THÔNG TIN (and anything else) red. */
@@ -278,6 +278,12 @@ export function ProductCard({ product, priority = false, eager = false, old = fa
             labels grey, RANK's value white — the headline stat — and the VIP
             numbers red; the entries spread across the card's full width. The
             skin total is not repeated here — the title already says it. */}
+        {/* The new look, on trial (24/10/2026, with a capture of menzu: "để
+            cái đó kế bên cái card rank gì đó đi thử giống menzu nè", "xóa
+            cái này đi"): the strip shrinks to its content, the tier counts
+            go, and the mail tag sits to its right as menzu sets its "DROP
+            MAIL" pill. The old look keeps the full-width strip. */}
+        {old ? (
         <div className="mb-3.5 flex w-full items-center justify-between gap-2 overflow-hidden rounded-[9px] border border-[#292a30] bg-[#111216] px-3 py-1.5 ">
           <span className="flex min-w-0 items-center gap-[5px] whitespace-nowrap text-[11px] font-extrabold text-[#c7c8cd]">
             <span aria-hidden className="text-[var(--menzu-accent)]">▲</span> Rank:
@@ -313,6 +319,40 @@ export function ProductCard({ product, priority = false, eager = false, old = fa
             </span>
           ))}
         </div>
+        ) : (
+          <div className="mb-3.5 flex items-center gap-2">
+            <div className="flex min-w-0 items-center gap-2 overflow-hidden rounded-[9px] border border-[#292a30] bg-[#111216] px-3 py-1.5">
+              <span className="flex shrink-0 items-center gap-[5px] whitespace-nowrap text-[11px] font-extrabold text-[#c7c8cd]">
+                <span aria-hidden className="text-[var(--menzu-accent)]">▲</span> Rank:
+                <span className="text-white">{product.rank}</span>
+              </span>
+              <span aria-hidden className="shrink-0 text-[11px] text-[#3a3b42]">|</span>
+              <span className="flex shrink-0 items-center gap-[5px] whitespace-nowrap text-[11px] font-extrabold text-[#c7c8cd]">
+                <span aria-hidden className="text-[var(--menzu-accent)]">◆</span> VIP:
+                <span className="text-[var(--menzu-accent)]">{(product.vip ?? 0) > 0 ? product.vip : ""}</span>
+              </span>
+              <span aria-hidden className="shrink-0 text-[11px] text-[#3a3b42]">|</span>
+              <span className="flex shrink-0 items-center gap-[5px] whitespace-nowrap text-[11px] font-extrabold text-[#c7c8cd]">
+                <span aria-hidden className="text-[var(--menzu-accent)]">◇</span> VIP Ingame:
+                <span className="text-[var(--menzu-accent)]">{(product.vipIngame ?? 0) > 0 ? product.vipIngame : ""}</span>
+              </span>
+            </div>
+            {product.tag !== null ? (
+              <span
+                className={`ml-auto inline-flex shrink-0 items-center gap-1 rounded-md border border-white/10 bg-[#0d0d12]/88 px-2.5 py-1 text-[12px] font-semibold ${
+                  product.tag.toUpperCase() === "NFA" ? "text-emerald-400" : "text-[#ff6c88]"
+                }`}
+              >
+                {product.tag.toUpperCase() === "NFA" ? (
+                  <Lock size={11} strokeWidth={2.75} aria-hidden />
+                ) : (
+                  <span aria-hidden>✉</span>
+                )}
+                {/^full/i.test(product.tag) ? "FULL" : product.tag}
+              </span>
+            ) : null}
+          </div>
+        )}
 
         {/* The inventory strip, stepping exactly as the original card did:
             one tile left per beat, easing 500ms, sliding home past the end.
