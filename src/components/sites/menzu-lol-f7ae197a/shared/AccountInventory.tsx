@@ -82,27 +82,29 @@ function groupOf(tab: InventoryTab, item: InventoryItemView): string | null {
  * colour falling from it down the tile, as menzu's does ("sao cái khoảng đó
  * của mình đen hơn menzu": a glow from the foot left the top black),
  * a tinted border, the name and a corner badge in the same colour.
- * Ordinary items stay plain.
+ * Ordinary items stay plain. Every tile sits on menzu's warm dark grey, not
+ * black, and the tint is half as strong (the owner, 25/10/2026, comparing
+ * the feet of two tiles: menzu's #1c1916 against our #0a0a0a).
  */
 const GRADE_TILES: Record<"VIP" | "AI" | "Nano", { border: string; top: string; glow: string; name: string; badge: string }> = {
   VIP: {
     border: "border-amber-500/40",
     top: "bg-amber-400",
-    glow: "from-amber-500/20",
+    glow: "from-amber-500/10",
     name: "text-amber-300",
     badge: "bg-amber-400 text-black",
   },
   AI: {
     border: "border-violet-500/40",
     top: "bg-violet-500",
-    glow: "from-violet-500/20",
+    glow: "from-violet-500/10",
     name: "text-violet-300",
     badge: "bg-violet-500 text-white",
   },
   Nano: {
     border: "border-sky-500/40",
     top: "bg-sky-400",
-    glow: "from-sky-500/20",
+    glow: "from-sky-500/10",
     name: "text-sky-300",
     badge: "bg-sky-400 text-black",
   },
@@ -314,7 +316,7 @@ export function AccountInventory({ account, items }: AccountInventoryProps) {
                 return (
                   <div
                     key={item.id}
-                    className={`group relative aspect-[4/3] rounded-xl bg-neutral-950 border ${look ? look.border : "border-neutral-800"} ${accent.tileHover} transition-colors flex flex-col items-center justify-center p-2 gap-1.5 card-item-appear overflow-hidden`}
+                    className={`group relative aspect-[4/3] rounded-xl bg-[#161414] border ${look ? look.border : "border-neutral-800"} ${accent.tileHover} transition-colors flex flex-col items-center justify-center p-2 gap-1.5 card-item-appear overflow-hidden`}
                   >
                     {look ? (
                       <>
