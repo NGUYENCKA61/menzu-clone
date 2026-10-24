@@ -494,7 +494,7 @@ export function SoftwareCard({
               type="button"
               onClick={rentNow}
               disabled={!hasPackages}
-              className={`bg-[var(--menzu-accent)] text-[12px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent-dark)] disabled:opacity-50 ${RENT}`}
+              className={`bg-white text-[12px] font-semibold text-black transition-colors hover:bg-neutral-200 disabled:opacity-50 ${RENT}`}
             >
               Thuê ngay
             </button>
