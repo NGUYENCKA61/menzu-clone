@@ -7,44 +7,45 @@
  * controls doing the same job.
  *
  * Tailwind cannot see class names built from fragments, so every piece here
- * is a set of whole classes (the chips join pillTab's whole-class pieces).
+ * is a set of whole classes.
+ *
+ * The filter wears menzu's dress (the owner, 24/10/2026: "áp style bộ lọc
+ * menzu qua đi"), measured off menzu.lol's category filter: 11px bold chips
+ * on a 14px corner, 10px black segments in a 40px well, 10px black capitals
+ * over each group, every grey neutral-800/700 at 40%; menzu's purple tint is
+ * the shop's red here.
  */
 
-import { PILL_TAB_SM } from "./pillTab";
+/** A chip's shape, picked or not: 39px tall from its padding. */
+export const CHIP_SHAPE =
+  "inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-xl border px-3.5 py-2.5 text-[11px] font-bold transition-colors";
 
-/** A chip or pill not picked, in either panel: the colours of the either-or
- *  wells (white 5% under it, 10% on its edge, neutral-300 words), so the
- *  loose chips and the segments read as one set (the owner, 24/10/2026:
- *  "màu bên phải đồng bộ màu bên trái lun đi"). They were the bluish
- *  raise/line/mist greys. */
+/** A chip not picked, in either panel. The wells wear the same grey, so the
+ *  loose chips and the segments read as one set ("màu bên phải đồng bộ màu
+ *  bên trái lun đi"). */
 export const CHIP_IDLE =
-  "border-white/10 bg-white/5 text-neutral-300 hover:bg-white/10 hover:text-white";
+  "border-neutral-700/40 bg-neutral-800/40 text-neutral-400 hover:border-neutral-600 hover:bg-neutral-800 hover:text-white";
 
-/*
- * The account panel's chips are the small tab pill (the owner, 13/10/2026, UI
- * consistency review). The two panels stack on one page when a category sells
- * both, so they share these rather than drifting apart again.
- */
-export const CHIP_INACTIVE = `press ${PILL_TAB_SM} ${CHIP_IDLE}`;
-
-/** A picked chip or segment in either panel: the red as a tint, the accent at
- *  12% under it and 45% on its edge, the word in the accent itself (the
- *  owner's capture, 24/10/2026: "hiệu ứng đỏ này khi chọn thành phần trong
- *  bộ lọc đi"). It had gone grey on 16/10. */
+/** A picked chip or segment in either panel: the accent at 20% under it and
+ *  50% on its edge, the word in the accent itself (red since the owner's
+ *  capture of 3100, "hiệu ứng đỏ này khi chọn thành phần trong bộ lọc đi"). */
 export const CHIP_PICKED =
-  "border-[var(--menzu-accent)]/45 bg-[var(--menzu-accent)]/12 text-[var(--menzu-accent)]";
+  "border-[var(--menzu-accent)]/50 bg-[var(--menzu-accent)]/20 text-[var(--menzu-accent)]";
 
-export const CHIP_ACTIVE = `press ${PILL_TAB_SM} ${CHIP_PICKED}`;
+/* The two panels stack on one page when a category sells both, so they share
+ * these rather than drifting apart again. */
+export const CHIP_INACTIVE = `press ${CHIP_SHAPE} ${CHIP_IDLE}`;
+
+export const CHIP_ACTIVE = `press ${CHIP_SHAPE} ${CHIP_PICKED}`;
 
 /** The hairline between two groups sharing a row ("đường kẻ | giữa"). Only
  *  where they do share one; stacked on a phone, the gap is enough. */
 export const GROUP_DIVIDER = "hidden lg:block w-px self-stretch bg-white/10";
 
-/** The small grey caption over each group of chips, in 3100's spaced
- *  capitals on trial (24/10/2026, "trạng thái, hoạt động, sắp xếp in hoa
- *  như 3100 thử"); it was 12px semibold in sentence case. */
+/** The small grey caption over each group of chips: menzu's 10px black
+ *  capitals, set in by 4px ("in hoa như 3100 thử", then menzu's). */
 export const GROUP_LABEL_CLASS =
-  "text-[10px] font-black uppercase tracking-widest text-neutral-500 mb-1.5 block";
+  "text-[10px] uppercase font-black tracking-wider text-neutral-500 mb-1.5 ml-1 block";
 
 /** The sunken card the chip rows sit in. */
 export const PANEL_CLASS =
