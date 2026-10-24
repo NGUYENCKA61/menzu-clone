@@ -265,7 +265,9 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
                 rank, skins and a price band, none of which describe a tool, so
                 a grid that sat under it would look filtered and never be. */}
             {data.softwareTotal > 0 ? (
-              <div className="flex flex-col gap-5 mb-12">
+              // 32px between the filter and the grid, the cards' own gap, so the
+              // controls stand apart from the results (24/10/2026, "tăng đi").
+              <div className="flex flex-col gap-8 mb-12">
                 {/* Named after the shelf, not the kind of goods: "Danh mục Hack
                     Valorant" says where you are, where "Phần mềm" only said
                     what these tiles were. */}
