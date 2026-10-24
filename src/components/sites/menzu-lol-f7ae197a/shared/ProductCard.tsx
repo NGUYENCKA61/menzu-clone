@@ -140,11 +140,12 @@ export function ProductCard({ product, priority = false, eager = false, old = fa
       }}
       // acc-card is a hook for the light trial "moi" (theme-light.css,
       // part 6); it carries no style of its own. On hover it lifts with a
-      // shadow, as the tool card does (3100's effect, 24/10/2026).
+      // shadow, as the tool card does (3100's effect, 24/10/2026), and its
+      // edge is white 10% like the tool card's.
       className={`acc-card group flex h-full w-full flex-col overflow-hidden transition-colors ${
         old
           ? "lab-notch border border-line bg-white/[0.02] hover:border-line-strong"
-          : "rounded-[14px] border border-white/[0.06] bg-panel lift-card hover:-translate-y-1 hover:border-white/20 hover:shadow-[0_15px_40px_#00000088]"
+          : "rounded-[14px] border border-white/10 bg-panel lift-card hover:-translate-y-1 hover:border-white/20 hover:shadow-[0_15px_40px_#00000088]"
       }`}
     >
       <div className={`relative aspect-[16/10] w-full overflow-hidden bg-raise ${old ? "lab-notch-top" : "rounded-t-[14px]"}`}>

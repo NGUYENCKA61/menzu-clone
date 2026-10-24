@@ -181,6 +181,8 @@ export function SoftwareCard({
     // On hover the card lifts 4px and a shadow falls under it: 3100's effect
     // (24/10/2026, "lấy hiệu ứng card 3100"). Its red edge is off on trial
     // ("bỏ viền đỏ khi rê thử"): the edge only lightens, as it did before.
+    // At rest the edge is white 10%, a step above the home tiles' 6%: the
+    // product cards only (24/10/2026, "lên viền cho card sản phẩm ... thôi").
     // The hover lift is a transform, which makes the card its own stacking
     // context: the open tier list, however high its z-index, could never rise
     // above the cards and sections drawn after this one. While the list is
@@ -191,7 +193,7 @@ export function SoftwareCard({
       className={`tool-card group relative flex h-full w-full flex-col bg-panel transition-colors ${
         old
           ? "lab-notch border border-line hover:border-line-strong"
-          : "rounded-[14px] border border-white/[0.06] lift-card hover:-translate-y-1 hover:border-white/20 hover:shadow-[0_15px_40px_#00000088]"
+          : "rounded-[14px] border border-white/10 lift-card hover:-translate-y-1 hover:border-white/20 hover:shadow-[0_15px_40px_#00000088]"
       } ${open ? "z-40" : ""}`}
     >
       {/* Picture flush to the card's edges. The shop's image when set; otherwise
