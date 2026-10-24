@@ -20,10 +20,11 @@ import { ScopeSearchField } from "./ScopeSearchField";
 /*
  * This panel's chips and either-or wells are menzu's (the owner, 24/10/2026:
  * "áp style bộ lọc menzu qua đi"; see filterChrome). The loose chips are the
- * shared 39px chip, which stands as tall as a well, so each group's caption
- * still lines up with its neighbours' on the lg row. A well is 40px with 4px
- * of padding, its segments 32px, 10px black words, at least 72px wide, no
- * fill of their own until picked.
+ * shared 40px chip, as tall as a well, so each group's caption still lines
+ * up with its neighbours' on the lg row. A well is 40px with 4px of padding,
+ * its segments 32px, at least 72px wide, no fill of their own until picked,
+ * their words the chips' 11px bold (menzu sets them 10px black; "lên 11px
+ * đi" made the row one size).
  */
 const PILL = CHIP_INACTIVE;
 const PILL_ACTIVE = CHIP_ACTIVE;
@@ -31,7 +32,7 @@ const PILL_ROW = "flex flex-wrap items-center gap-2";
 const SEGMENTS =
   "inline-flex h-10 items-center gap-0.5 rounded-xl border border-neutral-700/30 bg-neutral-800/40 p-1";
 const SEGMENT_SHAPE =
-  "inline-flex h-8 min-w-[72px] items-center justify-center gap-1 whitespace-nowrap rounded-lg border px-2 text-[10px] font-black transition-all";
+  "inline-flex h-8 min-w-[72px] items-center justify-center gap-1 whitespace-nowrap rounded-lg border px-2 text-[11px] font-bold transition-all";
 const SEGMENT = `press ${SEGMENT_SHAPE} border-transparent text-neutral-400 hover:text-neutral-200`;
 const SEGMENT_ACTIVE = `press ${SEGMENT_SHAPE} ${CHIP_PICKED}`;
 
