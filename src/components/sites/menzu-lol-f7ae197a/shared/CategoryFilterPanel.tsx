@@ -194,7 +194,7 @@ export function CategoryFilterPanel({ hotPicks }: CategoryFilterPanelProps) {
 
           <button
             type="submit"
-            className="hidden md:flex bg-[var(--brand)] hover:bg-[var(--brand-dark)] active:scale-95 text-white font-semibold rounded-xl px-6 transition items-center gap-2 shrink-0"
+            className="hidden md:flex bg-[#7C3AED] hover:bg-[#6D28D9] active:scale-95 text-white font-semibold rounded-xl px-6 transition items-center gap-2 shrink-0"
           >
             {isPending ? (
               <Loader2 size={16} aria-hidden className="animate-spin motion-reduce:animate-none" />
@@ -309,7 +309,7 @@ export function CategoryFilterPanel({ hotPicks }: CategoryFilterPanelProps) {
 
         <button
           type="submit"
-          className="press md:hidden flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-[var(--brand)] text-[14px] font-semibold text-white hover:bg-[var(--brand-dark)]"
+          className="press md:hidden flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-[#7C3AED] text-[14px] font-semibold text-white hover:bg-[#6D28D9]"
         >
           {isPending ? (
             <Loader2 size={16} aria-hidden className="animate-spin motion-reduce:animate-none" />
