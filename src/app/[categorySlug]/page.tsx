@@ -321,8 +321,9 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
               <>
                 {/* A hairline between the tool shelf and the accounts, as the one
                     over "Về …" below: 48px above it, 40px under (24/10/2026,
-                    "thêm 1 đường kẻ ngang … phân tách 2 danh mục", on trial). */}
-                {data.softwareTotal > 0 ? <div aria-hidden className="mb-10 h-px bg-white/10" /> : null}
+                    "thêm 1 đường kẻ ngang … phân tách 2 danh mục", on trial), run edge
+                    to edge of the window ("dài hết trang lun"). */}
+                {data.softwareTotal > 0 ? <div aria-hidden className="relative left-1/2 mb-10 h-px w-screen -translate-x-1/2 bg-white/10" /> : null}
                 {/* Always headed, like the software shelf above it — and by the
                     game, not the shelf: a category called "Hack Valorant" sells
                     Valorant accounts, so the leading "Hack" (or "Tool hack +")
