@@ -377,6 +377,9 @@ export interface CategoryFilters {
   softwareRunsOn?: "HOME" | "NET";
   /** One launcher key: only tools that carry it. */
   softwareLauncher?: string;
+  /** An account's mail, by its tag: "NFA", or "FULL" for FULL THÔNG TIN
+   *  (any tag that starts FULL). */
+  accountType?: "NFA" | "FULL";
 }
 
 /**
@@ -485,6 +488,11 @@ function categoryWhere(categoryId: string, filters: CategoryFilters) {
           ],
         }
       : {}),
+    ...(filters.accountType === "NFA"
+      ? { tags: { some: { label: { equals: "NFA", mode: "insensitive" as const } } } }
+      : filters.accountType === "FULL"
+        ? { tags: { some: { label: { startsWith: "FULL", mode: "insensitive" as const } } } }
+        : {}),
   };
 }
 

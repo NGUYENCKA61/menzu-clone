@@ -7,6 +7,7 @@ import { ChevronDown, Loader2, Search, SlidersHorizontal } from "lucide-react";
 import {
   CHIP_ACTIVE,
   CHIP_INACTIVE,
+  GROUP_DIVIDER,
   GROUP_LABEL_CLASS,
   PANEL_CLASS,
   SEGMENT_IDLE,
@@ -39,6 +40,15 @@ const SORT_OPTIONS = [
 ] as const;
 
 type SortValue = (typeof SORT_OPTIONS)[number]["value"];
+
+// "Loại": what mail an account comes with, as its tag on the card says
+// (the owner, 24/10/2026: "lọc tài khoản thêm loại nfa, full"). Written to
+// the URL as ?loai=nfa|full; empty is every account.
+const TYPE_OPTIONS = [
+  { value: "", label: "Tất cả" },
+  { value: "nfa", label: "NFA" },
+  { value: "full", label: "Full thông tin" },
+] as const;
 
 const PRICE_INPUT_SHELL_CLASS =
   "flex items-center gap-1.5 h-10 px-3 rounded-lg bg-neutral-950/60 border border-neutral-800/60 flex-1 min-w-0 transition-colors focus-within:border-[var(--menzu-accent)]/60";
@@ -84,6 +94,7 @@ export function CategoryFilterPanel({ hotPicks }: CategoryFilterPanelProps) {
     return index === -1 ? null : index;
   });
   const sort = (params.get("sort") as SortValue) ?? "newest";
+  const type = params.get("loai") === "nfa" || params.get("loai") === "full" ? (params.get("loai") as string) : "";
 
   // The pressed chip lights in the same frame as the press. The URL is the
   // only source of truth — these are React's own optimistic copies of it,
@@ -91,9 +102,11 @@ export function CategoryFilterPanel({ hotPicks }: CategoryFilterPanelProps) {
   // fails — so a chip can never stay lit for a filter that did not land.
   const [isPending, startTransition] = useTransition();
   const [shownSort, showSort] = useOptimistic(sort);
+  const [shownType, showType] = useOptimistic(type);
   /** The price and chip groups, on a phone: folded until asked for. */
   const [filtersOpen, setFiltersOpen] = useState(false);
-  const filtering = priceMin !== "" || priceMax !== "" || shownSort !== "newest";
+  const filtering =
+    priceMin !== "" || priceMax !== "" || shownSort !== "newest" || shownType !== "";
 
   // The grid is the server page's, out of this panel's reach; it reads this
   // attribute off <html> and steps back while the filter is on its way.
@@ -297,6 +310,30 @@ export function CategoryFilterPanel({ hotPicks }: CategoryFilterPanelProps) {
                       })
                     }
                     className={shownSort === option.value ? SEGMENT_PICKED : SEGMENT_IDLE}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <span aria-hidden className={GROUP_DIVIDER} />
+
+            <div>
+              <span className={GROUP_LABEL_CLASS}>Loại</span>
+              <div className={SEGMENTS_CLASS}>
+                {TYPE_OPTIONS.map((option) => (
+                  <button
+                    key={option.value || "all"}
+                    type="button"
+                    aria-pressed={shownType === option.value}
+                    onClick={() =>
+                      startTransition(() => {
+                        showType(option.value);
+                        apply({ loai: option.value });
+                      })
+                    }
+                    className={shownType === option.value ? SEGMENT_PICKED : SEGMENT_IDLE}
                   >
                     {option.label}
                   </button>

@@ -40,6 +40,8 @@ interface PageProps {
     max?: string;
     sort?: string;
     skin?: string;
+    /** The account panel's "Loại": nfa | full. */
+    loai?: string;
     /** The software panel's own keys, kept apart from the account panel's. */
     pm?: string;
     cn?: string;
@@ -153,6 +155,7 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
       ? (query.sort as "newest" | "price-asc" | "price-desc")
       : undefined,
     skin: query.skin?.trim() || undefined,
+    accountType: query.loai === "nfa" ? "NFA" : query.loai === "full" ? "FULL" : undefined,
     software: query.pm?.trim() || undefined,
     softwareFeature: query.cn?.trim() || undefined,
     softwareStatus:
