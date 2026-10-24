@@ -316,15 +316,16 @@ export function SoftwareCard({
 
         {!old && variant === "shelf" ? (
           // Under the picture now that it has no shade to carry them, in the
-          // sizes they had on it, the name on one line as the owner's
-          // reference lays it out (23/10/2026: "theo bố cục, kích thước giữ
+          // sizes they had on it (23/10/2026: "theo bố cục, kích thước giữ
           // y nguyên"), every word's first letter capital and the acronyms
-          // kept ("viết hoa chữ cái đầu… CFVN thì khỏi").
+          // kept ("viết hoa chữ cái đầu… CFVN thì khỏi"). The name runs to
+          // two lines, then "…" (24/10/2026: "TIÊU ĐỀ 2 hàng đi"), and holds
+          // two lines' height so the copy under it starts level along a row.
           <div>
             <Link href={detailHref} className="block">
               <h3
                 title={titleCase(software.name)}
-                className="truncate text-[17px] font-extrabold leading-snug text-white transition-colors duration-300 group-hover:text-[var(--menzu-accent)]"
+                className="line-clamp-2 min-h-[2.75em] break-words text-[17px] font-extrabold leading-snug text-white transition-colors duration-300 group-hover:text-[var(--menzu-accent)]"
               >
                 {titleCase(software.name)}
               </h3>
