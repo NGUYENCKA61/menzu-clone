@@ -496,7 +496,7 @@ export function SoftwareCard({
               type="button"
               onClick={rentNow}
               disabled={!hasPackages}
-              className={`border border-white/10 bg-white/[0.08] text-[12px] font-semibold text-white transition-colors hover:border-white/20 hover:bg-white/[0.12] disabled:opacity-50 ${RENT}`}
+              className={`bg-[var(--menzu-accent)] text-[12px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent-dark)] disabled:opacity-50 ${RENT}`}
             >
               Thuê ngay
             </button>
@@ -516,7 +516,7 @@ export function SoftwareCard({
 
           <Link
             href={detailHref}
-            className="tool-more flex h-[42px] w-full items-center justify-center rounded-[10px] border border-transparent bg-[var(--menzu-accent)] text-[12px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent-dark)]"
+            className="tool-more flex h-[42px] w-full items-center justify-center rounded-[10px] border border-[var(--menzu-accent)]/40 bg-transparent text-[12px] font-semibold text-[#ddd] transition-colors hover:bg-[var(--menzu-accent)]/10"
           >
             Xem chi tiết
           </Link>
