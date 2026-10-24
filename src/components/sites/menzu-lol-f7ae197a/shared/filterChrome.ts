@@ -16,9 +16,11 @@
  * the shop's red here.
  */
 
-/** A chip's shape, picked or not: 39px tall from its padding. */
+/** A chip's shape, picked or not: 40px tall like a well, its words the
+ *  segments' 10px black on trial (24/10/2026, "trạng thái về 10px cho đồng
+ *  bộ thử"; menzu's chips are 11px bold, 39px from their padding). */
 export const CHIP_SHAPE =
-  "inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-xl border px-3.5 py-2.5 text-[11px] font-bold transition-colors";
+  "inline-flex h-10 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-xl border px-3.5 text-[10px] font-black transition-colors";
 
 /** A chip not picked, in either panel. The wells wear the same grey, so the
  *  loose chips and the segments read as one set ("màu bên phải đồng bộ màu
