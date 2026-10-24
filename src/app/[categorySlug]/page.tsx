@@ -6,6 +6,7 @@ import { Breadcrumb } from "@/components/sites/menzu-lol-f7ae197a/shared/Breadcr
 import { CategoryHero } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/CategoryHero";
 import { shelfTitle } from "@/lib/displayCase";
 import { rankPlace, rankSpan } from "@/lib/cfRanks";
+import { rankMatchPlace } from "@/lib/cfRankMatch";
 import { CategoryFilterPanel } from "@/components/sites/menzu-lol-f7ae197a/shared/CategoryFilterPanel";
 import { ProductCard } from "@/components/sites/menzu-lol-f7ae197a/shared/ProductCard";
 import { CardBoundary } from "@/components/sites/menzu-lol-f7ae197a/shared/CardBoundary";
@@ -49,6 +50,9 @@ interface PageProps {
     /** The account panel's rank range: places on lib/cfRanks' ladder. */
     rmin?: string;
     rmax?: string;
+    /** The account panel's Rank Match range: places on lib/cfRankMatch's ladder. */
+    mmin?: string;
+    mmax?: string;
     /** The software panel's own keys, kept apart from the account panel's. */
     pm?: string;
     cn?: string;
@@ -175,6 +179,8 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
       rankPlace(query.rmin) !== undefined || rankPlace(query.rmax) !== undefined
         ? rankSpan(rankPlace(query.rmin), rankPlace(query.rmax))
         : undefined,
+    rankMatchMin: rankMatchPlace(query.mmin),
+    rankMatchMax: rankMatchPlace(query.mmax),
     software: query.pm?.trim() || undefined,
     softwareFeature: query.cn?.trim() || undefined,
     softwareStatus:

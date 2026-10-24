@@ -2,9 +2,10 @@
 
 import { useEffect, useOptimistic, useState, useTransition } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { ChevronDown, Clock, Crown, Layers, Loader2, Search, SlidersHorizontal } from "lucide-react";
+import { ChevronDown, Clock, Crown, Layers, Loader2, Search, SlidersHorizontal, Trophy } from "lucide-react";
 
 import { CF_RANK_GROUPS, CF_RANKS, rankPlace } from "@/lib/cfRanks";
+import { CF_RANK_MATCHES, rankMatchPlace } from "@/lib/cfRankMatch";
 
 import {
   CHIP_ACTIVE,
@@ -54,6 +55,10 @@ const RANK_GROUPS: LadderGroup[] = CF_RANK_GROUPS.map((group) => ({
   label: group.label,
   items: group.ranks.map((rank) => ({ place: CF_RANKS.indexOf(rank) + 1, label: rank })),
 }));
+// Rank Match tiers, one list (the owner, 24/10/2026: "thêm lọc rank match").
+const RANK_MATCH_GROUPS: LadderGroup[] = [
+  { items: CF_RANK_MATCHES.map((tier, index) => ({ place: index + 1, label: tier })) },
+];
 
 // "Loại": what mail an account comes with, as its tag on the card says
 // (the owner, 24/10/2026: "lọc tài khoản thêm loại nfa, full"). Written to
@@ -115,6 +120,10 @@ export function CategoryFilterPanel({ hotPicks }: CategoryFilterPanelProps) {
   };
   const vip = { min: vipLevel("vmin"), max: vipLevel("vmax") };
   const rank = { min: rankPlace(params.get("rmin")) ?? null, max: rankPlace(params.get("rmax")) ?? null };
+  const rankMatch = {
+    min: rankMatchPlace(params.get("mmin")) ?? null,
+    max: rankMatchPlace(params.get("mmax")) ?? null,
+  };
 
   // The pressed chip lights in the same frame as the press. The URL is the
   // only source of truth — these are React's own optimistic copies of it,
@@ -125,6 +134,7 @@ export function CategoryFilterPanel({ hotPicks }: CategoryFilterPanelProps) {
   const [shownType, showType] = useOptimistic(type);
   const [shownVip, showVip] = useOptimistic(vip);
   const [shownRank, showRank] = useOptimistic(rank);
+  const [shownRankMatch, showRankMatch] = useOptimistic(rankMatch);
   /** The price and chip groups, on a phone: folded until asked for. */
   const [filtersOpen, setFiltersOpen] = useState(false);
   const filtering =
@@ -135,7 +145,9 @@ export function CategoryFilterPanel({ hotPicks }: CategoryFilterPanelProps) {
     shownVip.min !== null ||
     shownVip.max !== null ||
     shownRank.min !== null ||
-    shownRank.max !== null;
+    shownRank.max !== null ||
+    shownRankMatch.min !== null ||
+    shownRankMatch.max !== null;
 
   // The grid is the server page's, out of this panel's reach; it reads this
   // attribute off <html> and steps back while the filter is on its way.
@@ -411,6 +423,27 @@ export function CategoryFilterPanel({ hotPicks }: CategoryFilterPanelProps) {
                   startTransition(() => {
                     showRank({ min, max });
                     apply({ rmin: min === null ? "" : String(min), rmax: max === null ? "" : String(max) });
+                  })
+                }
+              />
+            </div>
+
+            <span aria-hidden className={GROUP_DIVIDER} />
+
+            <div>
+              <span className={GROUP_LABEL_CLASS}>Rank Match</span>
+              <LadderRangeSelect
+                name="Rank Match"
+                icon={<Trophy size={14} />}
+                allLabel="Tất cả Rank Match"
+                groups={RANK_MATCH_GROUPS}
+                min={shownRankMatch.min}
+                max={shownRankMatch.max}
+                short={(place) => CF_RANK_MATCHES[place - 1]}
+                onChange={(min, max) =>
+                  startTransition(() => {
+                    showRankMatch({ min, max });
+                    apply({ mmin: min === null ? "" : String(min), mmax: max === null ? "" : String(max) });
                   })
                 }
               />

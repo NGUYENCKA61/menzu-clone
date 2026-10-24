@@ -248,6 +248,7 @@ export default async function AdminAccountDetailPage({
           tag: product.tags[0]?.label ?? "",
           vip: product.vip,
           vipIngame: product.vipIngame,
+          rankMatch: product.rankMatch,
           skinNames: product.skins
             .filter((s) => s.kind === "WEAPON_SKIN")
             .map((s) => s.name),

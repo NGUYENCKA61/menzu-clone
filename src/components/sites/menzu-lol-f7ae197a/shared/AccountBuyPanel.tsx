@@ -23,6 +23,7 @@ import { TopUpDialog } from "./TopUpDialog";
 import { StickyBuyBar } from "./StickyBuyBar";
 import type { BuyerLevel } from "./SoftwareBuyPanel";
 import { StockLine } from "./StockLine";
+import { rankMatchName } from "@/lib/cfRankMatch";
 import { sentenceCase } from "@/lib/displayCase";
 
 export interface AccountDetail {
@@ -48,6 +49,8 @@ export interface AccountDetail {
   vip: number;
   vipIngame: number;
   kc: number;
+  /** A place on lib/cfRankMatch's ladder, 0 for none. */
+  rankMatch: number;
   tag: string | null;
   mailType: string;
   oldPrice: number;
@@ -327,6 +330,7 @@ export function AccountBuyPanel({
     // row, read as a broken page on a phone.
     { label: "VIP", value: String(account.vip), show: account.vip > 0 },
     { label: "VIP Ingame", value: String(account.vipIngame), show: account.vipIngame > 0 },
+    { label: "Rank Match", value: rankMatchName(account.rankMatch) ?? "", show: account.rankMatch > 0 },
     { label: "KC", value: formatVnd(account.kc), show: account.kc > 0 },
   ].filter((s) => s.show);
   const hasStats = showRank || showSkins || numericStats.length > 0;

@@ -9,6 +9,7 @@ import {
 } from "@/lib/warrantyQuestionsInput";
 import { ensurePoolPackage } from "@/lib/accountPool";
 import { FORBIDDEN, getAdmin } from "@/lib/admin";
+import { rankMatchPlace } from "@/lib/cfRankMatch";
 import { db } from "@/lib/db";
 import { docHtmlIsEmpty, isHtmlBody, sanitizeDocHtml } from "@/lib/docHtml";
 import { uniqueProductSlug } from "@/lib/routes";
@@ -233,6 +234,8 @@ export async function PATCH(request: Request) {
     tag?: string;
     vip?: number;
     vipIngame?: number;
+    /** A place on lib/cfRankMatch's ladder; 0 clears it. */
+    rankMatch?: number;
     /** Rich-editor HTML, caged to the sanctioned tags before it lands. */
     description?: string;
     rank?: string;
@@ -293,6 +296,13 @@ export async function PATCH(request: Request) {
   };
   const vip = readCount(body?.vip);
   const vipIngame = readCount(body?.vipIngame);
+  // 0 or a tier's place; anything else is refused below rather than stored.
+  const rankMatch =
+    body?.rankMatch === undefined
+      ? undefined
+      : Number(body.rankMatch) === 0
+        ? 0
+        : (rankMatchPlace(String(body.rankMatch)) ?? null);
 
   // Same cage the software description passes through: HTML is sanitised, an
   // empty document stores as null so the storefront section disappears rather
@@ -310,6 +320,9 @@ export async function PATCH(request: Request) {
   if (vip === null || vipIngame === null) {
     return NextResponse.json({ error: "Chỉ số VIP không hợp lệ" }, { status: 400 });
   }
+  if (rankMatch === null) {
+    return NextResponse.json({ error: "Rank Match không hợp lệ" }, { status: 400 });
+  }
 
   if (
     !status &&
@@ -318,6 +331,7 @@ export async function PATCH(request: Request) {
     tag === undefined &&
     vip === undefined &&
     vipIngame === undefined &&
+    rankMatch === undefined &&
     description === undefined &&
     body?.rank === undefined &&
     body?.name === undefined &&
@@ -374,6 +388,7 @@ export async function PATCH(request: Request) {
       ...(imageUrl !== undefined ? { imageUrl } : {}),
       ...(vip !== undefined ? { vip } : {}),
       ...(vipIngame !== undefined ? { vipIngame } : {}),
+      ...(rankMatch !== undefined ? { rankMatch } : {}),
       ...(description !== undefined ? { description } : {}),
       ...(rank !== undefined ? { rank } : {}),
       ...(name !== undefined ? { name } : {}),

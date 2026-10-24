@@ -736,6 +736,9 @@ model Product {
   vip       Int @default(0)
   vipIngame Int @default(0)
   kc        Int @default(0)
+  /// Đột Kích's Rank Match tier, a place on lib/cfRankMatch's ladder (1 is
+  /// Bronze); 0 is no tier, or none typed.
+  rankMatch Int @default(0)
 
   /// "Mail gốc"
   mailType String?

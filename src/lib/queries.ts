@@ -385,6 +385,9 @@ export interface CategoryFilters {
   vipMax?: number;
   /** Rank names an account's free-text rank may contain (lib/cfRanks). */
   rankNames?: string[];
+  /** Rank Match floor and ceiling, places on lib/cfRankMatch's ladder. */
+  rankMatchMin?: number;
+  rankMatchMax?: number;
 }
 
 /**
@@ -518,6 +521,14 @@ function categoryWhere(categoryId: string, filters: CategoryFilters) {
           vip: {
             ...(filters.vipMin !== undefined ? { gte: filters.vipMin } : {}),
             ...(filters.vipMax !== undefined ? { lte: filters.vipMax } : {}),
+          },
+        }
+      : {}),
+    ...(filters.rankMatchMin !== undefined || filters.rankMatchMax !== undefined
+      ? {
+          rankMatch: {
+            ...(filters.rankMatchMin !== undefined ? { gte: filters.rankMatchMin } : {}),
+            ...(filters.rankMatchMax !== undefined ? { lte: filters.rankMatchMax } : {}),
           },
         }
       : {}),
@@ -829,6 +840,7 @@ export async function getAccountDetail(
     vip: p.vip,
     vipIngame: p.vipIngame,
     kc: p.kc,
+    rankMatch: p.rankMatch,
     tag: p.tags[0]?.label ?? null,
     mailType: p.mailType ?? "",
     oldPrice: Number(p.oldPrice),

@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 
 
+import { CF_RANK_MATCHES } from "@/lib/cfRankMatch";
 import { AdminError } from "./AdminStates";
 import { RichTextEditor } from "./RichTextEditor";
 
@@ -49,6 +50,8 @@ export interface AccountDetailView {
   tag: string;
   vip: number;
   vipIngame: number;
+  /** A place on lib/cfRankMatch's ladder, 0 for none. */
+  rankMatch: number;
   skinNames: string[];
   characterNames: string[];
   gearNames: string[];
@@ -117,6 +120,7 @@ export function AdminAccountDetail({ account }: { account: AccountDetailView }) 
   const [vipIngame, setVipIngame] = useState(
     account.vipIngame > 0 ? String(account.vipIngame) : "",
   );
+  const [rankMatch, setRankMatch] = useState(String(account.rankMatch));
   const [skinText, setSkinText] = useState(account.skinNames.join("\n"));
   const [characterText, setCharacterText] = useState(account.characterNames.join("\n"));
   const [gearText, setGearText] = useState(account.gearNames.join("\n"));
@@ -263,6 +267,7 @@ export function AdminAccountDetail({ account }: { account: AccountDetailView }) 
       tag: tag.trim(),
       vip: Number(vip.replace(/\D/g, "")) || 0,
       vipIngame: Number(vipIngame.replace(/\D/g, "")) || 0,
+      rankMatch: Number(rankMatch),
     });
     if (data) setMsg({ tone: "ok", text: "Đã lưu tag và chỉ số" });
   }
@@ -631,6 +636,26 @@ export function AdminAccountDetail({ account }: { account: AccountDetailView }) 
                   placeholder="0"
                   className={`${FIELD} w-28 tabular-nums`}
                 />
+              </div>
+              <div>
+                <label htmlFor="acc-rankmatch" className={LABEL}>
+                  Rank Match
+                </label>
+                <select
+                  id="acc-rankmatch"
+                  value={rankMatch}
+                  onChange={(event) => setRankMatch(event.target.value)}
+                  className={`${FIELD} w-44`}
+                >
+                  <option value="0" className="bg-neutral-900">
+                    Chưa có
+                  </option>
+                  {CF_RANK_MATCHES.map((tier, index) => (
+                    <option key={tier} value={String(index + 1)} className="bg-neutral-900">
+                      {tier}
+                    </option>
+                  ))}
+                </select>
               </div>
               <button type="button" disabled={busy} onClick={saveTag} className={ACTION}>
                 <Save size={12} />
