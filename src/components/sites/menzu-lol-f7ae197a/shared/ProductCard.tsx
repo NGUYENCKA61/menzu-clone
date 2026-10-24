@@ -6,6 +6,7 @@ import { SiteLink } from "./SiteLink";
 import { ChevronRight, Lock } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { sentenceCase } from "@/lib/displayCase";
+import { shortBlurb } from "@/lib/shortBlurb";
 import {
   discountPct,
   formatVnd,
@@ -260,7 +261,7 @@ export function ProductCard({ product, priority = false, eager = false, old = fa
             13px like the tool card's blurb on the same page (24/10/2026). */}
         {product.description ? (
           <p className="mb-[14px] mt-2 line-clamp-2 min-h-[37px] text-[13px] leading-[1.55] text-mist">
-            {product.description}
+            {old ? product.description : shortBlurb(product.description)}
           </p>
         ) : (
           <p className="mb-[14px] mt-2 line-clamp-2 min-h-[37px] text-[13px] leading-[1.55] text-mist">

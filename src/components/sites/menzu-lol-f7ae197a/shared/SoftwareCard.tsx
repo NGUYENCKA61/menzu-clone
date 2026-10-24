@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
 import { sentenceCase, titleCase } from "@/lib/displayCase";
+import { shortBlurb } from "@/lib/shortBlurb";
 import { SOFTWARE_STATUS } from "@/lib/softwareStatus";
 import { formatVnd, isFreeTool } from "./productData";
 import { SoftwareCheckoutDialog } from "./SoftwareCheckoutDialog";
@@ -346,7 +347,7 @@ export function SoftwareCard({
             fills them or not. Back on the shelf's card too (the owner,
             23/10/2026: "bỏ dòng mô tả thử", then "thêm lại dòng mô tả đi"). */}
         <p className={`mb-[14px] line-clamp-2 min-h-[37px] text-[13px] leading-[1.55] text-mist ${old || variant === "shelf" ? "mt-2" : ""}`}>
-          {software.description}
+          {old ? software.description : shortBlurb(software.description ?? "")}
         </p>
 
         {variant === "compact" ? (
