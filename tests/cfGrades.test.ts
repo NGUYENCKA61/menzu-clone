@@ -24,16 +24,19 @@ describe("isVipName", () => {
 });
 
 describe("the shop's mark", () => {
-  it("reads (VIP) / (Hiếm) / (Thường) off a line and writes it back", () => {
+  it("reads (VIP) / (AI) / (Nano) / (Thường) off a line and writes it back", () => {
     expect(readGradeMark("AN94-Galaxy (VIP)")).toEqual({ name: "AN94-Galaxy", tier: "ULTRA" });
-    expect(readGradeMark("SPAS-12-Void-Gold (Hiếm)")).toEqual({ name: "SPAS-12-Void-Gold", tier: "PREMIUM" });
+    expect(readGradeMark("SPAS-12-Void-Gold (AI)")).toEqual({ name: "SPAS-12-Void-Gold", tier: "PREMIUM" });
+    expect(readGradeMark("Steyr TMP-Death Eye (nano)")).toEqual({ name: "Steyr TMP-Death Eye", tier: "DELUXE" });
     expect(readGradeMark("M4A1-S Predator (thường)")).toEqual({ name: "M4A1-S Predator", tier: "SELECT" });
     expect(readGradeMark("Knife-Black")).toEqual({ name: "Knife-Black", tier: null });
-    expect(gradeMark("PREMIUM")).toBe(" (Hiếm)");
+    expect(gradeMark("PREMIUM")).toBe(" (AI)");
+    expect(gradeMark("DELUXE")).toBe(" (Nano)");
   });
 
   it("beats the name either way", () => {
     expect(gradeOf({ name: "AN94-Galaxy", tier: "ULTRA" })).toBe("VIP");
+    expect(gradeOf({ name: "Steyr TMP-Death Eye", tier: "DELUXE" })).toBe("Nano");
     expect(gradeOf({ name: "M4A1-S Predator", tier: "SELECT" })).toBeNull();
     expect(gradeOf({ name: "M4A1-S Predator", tier: null })).toBe("VIP");
   });

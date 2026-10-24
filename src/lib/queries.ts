@@ -1727,7 +1727,8 @@ export async function getInventory(code: string): Promise<InventoryItem[]> {
   const rows = stored.map((r) => ({
     ...r,
     weapon: r.kind === "WEAPON_SKIN" && !r.weapon ? weaponGroup(r.name) : r.weapon,
-    grade: gradeOf(r),
+    // Only what the shop typed is graded; a scraped row's tier is Valorant's.
+    grade: r.iconUrl ? null : gradeOf(r),
   }));
 
   // Rows the shop typed by hand carry no icon of their own; the shared

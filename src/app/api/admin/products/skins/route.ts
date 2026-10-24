@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { FORBIDDEN, getAdmin } from "@/lib/admin";
-import { readGradeMark } from "@/lib/cfGrades";
+import { readGradeMark, type GradeTier } from "@/lib/cfGrades";
 import { parseGroupedLines } from "@/lib/cfInventoryGroups";
 import { db } from "@/lib/db";
 
@@ -67,8 +67,8 @@ export async function PUT(request: Request) {
   const seen = new Set<string>();
   const names: string[] = [];
   const groups = new Map<string, string | null>();
-  // "(VIP)" / "(Hiếm)" / "(Thường)" after a name is the shop's grade (lib/cfGrades).
-  const tiers = new Map<string, "ULTRA" | "PREMIUM" | "SELECT" | null>();
+  // "(VIP)" / "(AI)" / "(Nano)" / "(Thường)" after a name is the shop's grade (lib/cfGrades).
+  const tiers = new Map<string, GradeTier | null>();
   const lines = body.names.filter((raw): raw is string => typeof raw === "string");
   for (const entry of parseGroupedLines(lines)) {
     const marked = readGradeMark(entry.name);
