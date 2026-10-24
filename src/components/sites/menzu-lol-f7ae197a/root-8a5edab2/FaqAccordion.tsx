@@ -85,7 +85,7 @@ export function FaqAccordion({
               </span>
               )}
               <span
-                className={`flex-1 text-sm font-semibold transition-colors sm:text-base ${
+                className={`flex-1 text-sm font-semibold transition-colors sm:text-[15px] ${
                   isOpen ? "text-[var(--menzu-accent)]" : "text-white"
                 }`}
               >
@@ -108,7 +108,7 @@ export function FaqAccordion({
             >
               <div className="overflow-hidden">
                 <p
-                  className={`whitespace-pre-line pb-5 pr-5 text-sm leading-relaxed text-neutral-400 sm:text-base ${plain ? "pl-5" : "pl-[4.5rem]"}`}
+                  className={`whitespace-pre-line pb-5 pr-5 text-sm leading-relaxed text-neutral-400 ${plain ? "pl-5" : "pl-[4.5rem]"}`}
                 >
                   {entry.a}
                 </p>

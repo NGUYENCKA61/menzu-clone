@@ -28,7 +28,7 @@ export function SectionHeading({
     <div className={cn("flex items-center gap-2.5", className)}>
       <Tag
         id={id}
-        className="font-display text-xl font-bold leading-tight text-frost sm:text-2xl"
+        className="font-display text-[22px] font-bold leading-tight text-frost sm:text-[28px]"
       >
         {children}
       </Tag>

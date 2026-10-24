@@ -356,7 +356,7 @@ export function ProductCard({ product, priority = false, eager = false, old = fa
           ) : null}
 
           <div className="flex items-end justify-between gap-[15px] pt-1">
-            <span className="text-2xl font-black leading-none tracking-[-0.7px] text-white">
+            <span className="text-[27px] font-black leading-none tracking-[-0.7px] text-white">
               {formatVnd(product.price)}
               <span className="ml-[3px] text-[12px] font-bold text-[#9b9da5]">đ</span>
             </span>

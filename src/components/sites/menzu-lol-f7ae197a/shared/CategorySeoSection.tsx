@@ -41,7 +41,7 @@ export function CategorySeoSection({
   return (
     <section id="gioi-thieu" className="mt-12 border-t border-white/10 pt-10">
       <SectionHeading>Về {old ? categoryName : shelfTitle(categoryName)}</SectionHeading>
-      <div className="doc-prose doc-prose-even mt-5" dangerouslySetInnerHTML={{ __html: copy.intro }} />
+      <div className="doc-prose mt-5" dangerouslySetInnerHTML={{ __html: copy.intro }} />
 
       <SectionHeading className="mt-10">Câu hỏi thường gặp</SectionHeading>
       <div className="mt-5">

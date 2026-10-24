@@ -912,13 +912,6 @@ body.lightbox-open .site-nav {
   font-size: 0.875rem;
   line-height: 1.65;
 }
-/* A prose block read at one 16px, its first paragraph no lead: the
-   category page's introduction (24/10/2026, size review point 2, on
-   trial). */
-.doc-prose.doc-prose-even > p,
-.doc-prose.doc-prose-even > p:first-child {
-  font-size: 1rem;
-}
 .doc-prose > * + * {
   margin-top: 0.9rem;
 }
