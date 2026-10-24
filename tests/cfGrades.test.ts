@@ -24,13 +24,14 @@ describe("isVipName", () => {
 });
 
 describe("the shop's mark", () => {
-  it("reads (VIP) / (AI) / (Nano) / (Thường) off a line and writes it back", () => {
+  it("reads (VIP) / (PVE) / (Nano) / (Thường) off a line and writes it back", () => {
+    expect(readGradeMark("SPAS-12-Void-Gold (PVE)")).toEqual({ name: "SPAS-12-Void-Gold", tier: "PREMIUM" });
     expect(readGradeMark("AN94-Galaxy (VIP)")).toEqual({ name: "AN94-Galaxy", tier: "ULTRA" });
     expect(readGradeMark("SPAS-12-Void-Gold (AI)")).toEqual({ name: "SPAS-12-Void-Gold", tier: "PREMIUM" });
     expect(readGradeMark("Steyr TMP-Death Eye (nano)")).toEqual({ name: "Steyr TMP-Death Eye", tier: "DELUXE" });
     expect(readGradeMark("M4A1-S Predator (thường)")).toEqual({ name: "M4A1-S Predator", tier: "SELECT" });
     expect(readGradeMark("Knife-Black")).toEqual({ name: "Knife-Black", tier: null });
-    expect(gradeMark("PREMIUM")).toBe(" (AI)");
+    expect(gradeMark("PREMIUM")).toBe(" (PVE)");
     expect(gradeMark("DELUXE")).toBe(" (Nano)");
   });
 

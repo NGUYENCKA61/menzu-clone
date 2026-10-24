@@ -13,8 +13,8 @@ export interface InventoryItemView {
   iconUrl: string | null;
   /** The item's group: a weapon's "Vũ khí phụ", a gear item's "Chức năng". */
   weapon: string | null;
-  /** VIP / AI / Nano (lib/cfGrades); null is an ordinary item. */
-  grade: "VIP" | "AI" | "Nano" | null;
+  /** VIP / PVE / Nano (lib/cfGrades); null is an ordinary item. */
+  grade: "VIP" | "PVE" | "Nano" | null;
 }
 
 export interface AccountInventoryProps {
@@ -78,7 +78,7 @@ function groupOf(tab: InventoryTab, item: InventoryItemView): string | null {
 /**
  * menzu's tile treatment, tinted by the item's grade the way CrossFire tints
  * its own inventory (the owner, 25/10/2026: "làm đi", "ô tím hình như là
- * súng AI"): VIP gold, AI purple, Nano blue. A bar along the top with the
+ * súng AI"): VIP gold, PVE purple, Nano blue. A bar along the top with the
  * colour falling from it down the tile, as menzu's does ("sao cái khoảng đó
  * của mình đen hơn menzu": a glow from the foot left the top black),
  * a tinted border, the name and a corner badge in the same colour.
@@ -86,7 +86,7 @@ function groupOf(tab: InventoryTab, item: InventoryItemView): string | null {
  * black, and the tint is half as strong (the owner, 25/10/2026, comparing
  * the feet of two tiles: menzu's #1c1916 against our #0a0a0a).
  */
-const GRADE_TILES: Record<"VIP" | "AI" | "Nano", { border: string; top: string; glow: string; name: string; badge: string }> = {
+const GRADE_TILES: Record<"VIP" | "PVE" | "Nano", { border: string; top: string; glow: string; name: string; badge: string }> = {
   VIP: {
     border: "border-amber-500/40",
     top: "bg-amber-400",
@@ -94,7 +94,7 @@ const GRADE_TILES: Record<"VIP" | "AI" | "Nano", { border: string; top: string; 
     name: "text-amber-300",
     badge: "bg-amber-400 text-black",
   },
-  AI: {
+  PVE: {
     border: "border-violet-500/40",
     top: "bg-violet-500",
     glow: "from-violet-500/10",
@@ -110,7 +110,7 @@ const GRADE_TILES: Record<"VIP" | "AI" | "Nano", { border: string; top: string; 
   },
 };
 
-const GRADE_ORDER = { VIP: 0, AI: 1, Nano: 2 } as const;
+const GRADE_ORDER = { VIP: 0, PVE: 1, Nano: 2 } as const;
 const gradeRank = (item: InventoryItemView) => (item.grade ? GRADE_ORDER[item.grade] : 3);
 
 // Three rows of the desktop grid (5 columns); "Xem thêm" pages the rest in.

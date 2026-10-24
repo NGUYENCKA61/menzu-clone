@@ -1,21 +1,22 @@
 /**
  * An item's grade on the account page, tinted the way CrossFire's own
  * inventory tints its tiles (the owner, 25/10/2026: "phân sao", "làm đi"):
- * gold with a "V" for VIP, purple for AI (PvE) weapons ("ô tím hình như là
- * súng AI"; their corner icon is the inventory's AI(PvE) tab icon), blue for
+ * gold with a "V" for VIP, purple for PvE (AI mode) weapons ("ô tím hình như
+ * là súng AI", then "thay chữ AI thành PVE"; their corner icon is the
+ * inventory's AI(PvE) tab icon), blue for
  * Nano ones (their corner icon is the Nano tab's), plain for the rest.
  *
  * VIP is also worked out from the name: the CrossFire wiki's VVIP, Noble Gold
  * and Prime categories, read 25/10/2026, boiled down to their series names
- * and characters below. AI and Nano have no list; the shop marks them.
+ * and characters below. PVE and Nano have no list; the shop marks them.
  *
- * The shop's own mark wins: an admin list line ending "(VIP)", "(AI)",
- * "(Nano)" or "(Thường)" is stored in the row's tier, as ULTRA, PREMIUM,
+ * The shop's own mark wins: an admin list line ending "(VIP)", "(PVE)" (or
+ * the earlier "(AI)"), "(Nano)" or "(Thường)" is stored in the row's tier, as ULTRA, PREMIUM,
  * DELUXE and SELECT (the Valorant tiers the column was made for). Only rows
  * the shop typed (no icon of their own) are graded: a scraped Valorant row's
  * tier means something else.
  */
-export type Grade = "VIP" | "AI" | "Nano";
+export type Grade = "VIP" | "PVE" | "Nano";
 
 /** A weapon whose name holds one of these series is VIP ("M4A1-S Born Beast"). */
 const VIP_SERIES = [
@@ -50,7 +51,7 @@ export function isVipName(name: string): boolean {
 /** An item's grade: the shop's mark in `tier` first, else the name. */
 export function gradeOf(item: { name: string; tier: string | null }): Grade | null {
   if (item.tier === "ULTRA" || item.tier === "EXCLUSIVE") return "VIP";
-  if (item.tier === "PREMIUM") return "AI";
+  if (item.tier === "PREMIUM") return "PVE";
   if (item.tier === "DELUXE") return "Nano";
   if (item.tier === "SELECT") return null;
   return isVipName(item.name) ? "VIP" : null;
@@ -58,16 +59,17 @@ export function gradeOf(item: { name: string; tier: string | null }): Grade | nu
 
 export type GradeTier = "ULTRA" | "PREMIUM" | "DELUXE" | "SELECT";
 
-const MARK = /\s*\((vip|ai|nano|thường|thuong)\)\s*$/iu;
+const MARK = /\s*\((vip|pve|ai|nano|thường|thuong)\)\s*$/iu;
 const TIER_OF_MARK: Record<string, GradeTier> = {
   vip: "ULTRA",
+  pve: "PREMIUM",
   ai: "PREMIUM",
   nano: "DELUXE",
   "thường": "SELECT",
   thuong: "SELECT",
 };
 
-/** A typed line's own mark, "(VIP)" / "(AI)" / "(Nano)" / "(Thường)", split off as a tier. */
+/** A typed line's own mark, "(VIP)" / "(PVE)" / "(Nano)" / "(Thường)", split off as a tier. */
 export function readGradeMark(line: string): { name: string; tier: GradeTier | null } {
   const match = MARK.exec(line);
   if (!match) return { name: line, tier: null };
@@ -77,7 +79,7 @@ export function readGradeMark(line: string): { name: string; tier: GradeTier | n
 /** The mark an admin list writes back after a name, "" for none. */
 export function gradeMark(tier: string | null): string {
   if (tier === "ULTRA" || tier === "EXCLUSIVE") return " (VIP)";
-  if (tier === "PREMIUM") return " (AI)";
+  if (tier === "PREMIUM") return " (PVE)";
   if (tier === "DELUXE") return " (Nano)";
   if (tier === "SELECT") return " (Thường)";
   return "";
