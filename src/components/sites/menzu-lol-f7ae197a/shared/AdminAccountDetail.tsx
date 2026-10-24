@@ -597,6 +597,9 @@ export function AdminAccountDetail({ account }: { account: AccountDetailView }) 
                   <option value="FULL THÔNG TIN" className="bg-neutral-900">
                     FULL THÔNG TIN
                   </option>
+                  <option value="RANDOM" className="bg-neutral-900">
+                    RANDOM
+                  </option>
                 </select>
               </div>
               <div>

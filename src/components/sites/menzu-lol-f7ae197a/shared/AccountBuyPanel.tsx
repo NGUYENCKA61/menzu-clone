@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { Headphones, Lock, RefreshCw, ShieldCheck, Zap } from "lucide-react";
+import { Dices, Headphones, Lock, RefreshCw, ShieldCheck, Zap } from "lucide-react";
 
 import { productHref } from "@/lib/routes";
 
@@ -341,11 +341,15 @@ export function AccountBuyPanel({
             className={`inline-flex items-center gap-1.5 text-[12px] font-semibold ${
               account.tag.toUpperCase() === "NFA"
                 ? "text-emerald-400"
-                : "text-[#ff6c88]"
+                : account.tag.toUpperCase() === "RANDOM"
+                  ? "text-amber-400"
+                  : "text-[#ff6c88]"
             }`}
           >
             {account.tag.toUpperCase() === "NFA" ? (
               <Lock size={11} strokeWidth={2.75} aria-hidden />
+            ) : account.tag.toUpperCase() === "RANDOM" ? (
+              <Dices size={12} strokeWidth={2.5} aria-hidden />
             ) : (
               <span aria-hidden>✉</span>
             )}

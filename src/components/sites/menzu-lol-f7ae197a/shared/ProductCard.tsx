@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { CardImage } from "@/components/sites/menzu-lol-f7ae197a/shared/CardImage";
 import { SiteLink } from "./SiteLink";
-import { ChevronRight, Lock } from "lucide-react";
+import { ChevronRight, Dices, Lock } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { sentenceCase } from "@/lib/displayCase";
 import { shortBlurb } from "@/lib/shortBlurb";
@@ -214,18 +214,23 @@ export function ProductCard({ product, priority = false, eager = false, old = fa
           {old && product.tag !== null && (
             /* Dressed as the software card's status pill — same dark glass,
                same type — minus the coloured dot; the text colour carries the
-               meaning: NFA green, FULL THÔNG TIN (and anything else) red. */
+               meaning: NFA green, RANDOM amber, FULL THÔNG TIN (and anything
+               else) red. */
             <span
               className={`inline-flex items-center gap-1 border border-white/10 bg-[#0d0d12]/88 px-2.5 py-1 text-[12px] font-semibold ${
                 old ? "rounded-full" : "rounded-md"
               } ${
                 product.tag.toUpperCase() === "NFA"
                   ? "text-emerald-400"
-                  : "text-[#ff6c88]"
+                  : product.tag.toUpperCase() === "RANDOM"
+                    ? "text-amber-400"
+                    : "text-[#ff6c88]"
               }`}
             >
               {product.tag.toUpperCase() === "NFA" ? (
                 <Lock size={11} strokeWidth={2.75} aria-hidden />
+              ) : product.tag.toUpperCase() === "RANDOM" ? (
+                <Dices size={12} strokeWidth={2.5} aria-hidden />
               ) : (
                 <span aria-hidden>✉</span>
               )}
@@ -342,11 +347,15 @@ export function ProductCard({ product, priority = false, eager = false, old = fa
                 className={`ml-auto inline-flex shrink-0 items-center gap-1 rounded-md border px-2.5 py-1 text-[12px] font-semibold ${
                   product.tag.toUpperCase() === "NFA"
                     ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
-                    : "border-white/10 bg-[#0d0d12]/88 text-[#ff6c88]"
+                    : product.tag.toUpperCase() === "RANDOM"
+                      ? "border-amber-500/30 bg-amber-500/10 text-amber-400"
+                      : "border-white/10 bg-[#0d0d12]/88 text-[#ff6c88]"
                 }`}
               >
                 {product.tag.toUpperCase() === "NFA" ? (
                   <Lock size={11} strokeWidth={2.75} aria-hidden />
+                ) : product.tag.toUpperCase() === "RANDOM" ? (
+                  <Dices size={12} strokeWidth={2.5} aria-hidden />
                 ) : (
                   <span aria-hidden>✉</span>
                 )}
