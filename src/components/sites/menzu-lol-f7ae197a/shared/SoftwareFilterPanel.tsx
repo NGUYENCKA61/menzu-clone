@@ -7,6 +7,7 @@ import { useEffect, useOptimistic, useState, useTransition } from "react";
 import { launcherLabel } from "@/lib/toolFilters";
 
 import {
+  CHIP_IDLE,
   CHIP_PICKED,
   GROUP_DIVIDER,
   GROUP_LABEL_CLASS,
@@ -31,8 +32,7 @@ import { ScopeSearchField } from "./ScopeSearchField";
  */
 const CHIP_SM =
   "inline-flex h-9 shrink-0 items-center gap-1.5 rounded-[10px] border px-3 text-[13px] font-semibold transition-colors";
-const CHIP_OFF =
-  "border-line bg-raise text-mist hover:border-line-strong hover:text-frost";
+const CHIP_OFF = CHIP_IDLE;
 // The capture's picked chip: fill #271619 and edge #712628 on the #121216
 // ground are the accent at about 12% and 45%, the word in the accent itself
 // (grey from 16/10, red again 24/10/2026; shared with the account panel).
@@ -48,11 +48,12 @@ const SEGMENT_ACTIVE = `press ${CHIP_SM} ${CHIP_ON}`;
 // The states a buyer shops by. "Rủi ro", "Đang cập nhật" and "Đã phát hiện"
 // came off the chips (the owner, 07/10/2026: "bỏ 3 cái rủi ro đang cập nhật
 // đã phát hiện đi"); an old link carrying one of them still filters, it just
-// lights no chip.
+// lights no chip. "Ổn định" leads after "Tất cả" (the owner, 24/10/2026:
+// "sắp thứ tự ổn định, chưa phát hiện, cập nhật mới").
 const STATUS_OPTIONS = [
   { value: "all", label: "Tất cả" },
-  { value: "undetected", label: "Chưa phát hiện" },
   { value: "stable", label: "Ổn định" },
+  { value: "undetected", label: "Chưa phát hiện" },
   { value: "updated", label: "Cập nhật mới" },
 ] as const;
 

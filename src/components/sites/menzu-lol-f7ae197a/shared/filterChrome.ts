@@ -10,15 +10,22 @@
  * is a set of whole classes (the chips join pillTab's whole-class pieces).
  */
 
-import { PILL_TAB_OFF, PILL_TAB_SM } from "./pillTab";
+import { PILL_TAB_SM } from "./pillTab";
+
+/** A chip or pill not picked, in either panel: the colours of the either-or
+ *  wells (white 5% under it, 10% on its edge, neutral-300 words), so the
+ *  loose chips and the segments read as one set (the owner, 24/10/2026:
+ *  "màu bên phải đồng bộ màu bên trái lun đi"). They were the bluish
+ *  raise/line/mist greys. */
+export const CHIP_IDLE =
+  "border-white/10 bg-white/5 text-neutral-300 hover:bg-white/10 hover:text-white";
 
 /*
- * The account panel's chips are the small tab pill, grey when not picked (the
- * owner, 13/10/2026, UI consistency review). The two panels stack on one page
- * when a category sells both, so they share these rather than drifting apart
- * again.
+ * The account panel's chips are the small tab pill (the owner, 13/10/2026, UI
+ * consistency review). The two panels stack on one page when a category sells
+ * both, so they share these rather than drifting apart again.
  */
-export const CHIP_INACTIVE = `press ${PILL_TAB_SM} ${PILL_TAB_OFF}`;
+export const CHIP_INACTIVE = `press ${PILL_TAB_SM} ${CHIP_IDLE}`;
 
 /** A picked chip or segment in either panel: the red as a tint, the accent at
  *  12% under it and 45% on its edge, the word in the accent itself (the
