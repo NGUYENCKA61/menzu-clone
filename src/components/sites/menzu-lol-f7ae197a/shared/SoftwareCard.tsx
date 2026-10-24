@@ -273,7 +273,7 @@ export function SoftwareCard({
             // Sold to level 2 only (the owner, 12/10/2026): the buyer learns it
             // on the card, not after the click.
             <span
-              className={`absolute left-3 top-3 z-20 inline-flex items-center gap-1.5 border border-white/10 bg-panel/88 px-2.5 py-1 text-[12px] text-amber-300 ${PILL_SHAPE}`}
+              className={`absolute right-3 top-3 z-20 inline-flex items-center gap-1.5 border border-white/10 bg-panel/88 px-2.5 py-1 text-[12px] text-amber-300 ${PILL_SHAPE}`}
             >
               Cấp 2
             </span>
@@ -281,7 +281,7 @@ export function SoftwareCard({
 
           {status ? (
             <span
-              className={`tool-status absolute right-3 top-3 z-20 inline-flex items-center gap-1.5 border border-white/10 bg-panel/88 px-2.5 py-1 ${PILL_SHAPE}`}
+              className={`tool-status absolute ${free ? "right-3" : "left-3"} top-3 z-20 inline-flex items-center gap-1.5 border border-white/10 bg-panel/88 px-2.5 py-1 ${PILL_SHAPE}`}
             >
               <span aria-hidden className={`h-1.5 w-1.5 rounded-full ${status.dot}`} />
               <span className={`text-[12px] ${old ? "font-medium" : "font-semibold"} ${status.text}`}>
