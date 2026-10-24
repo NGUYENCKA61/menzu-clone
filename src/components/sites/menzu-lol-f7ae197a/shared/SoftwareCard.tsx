@@ -344,11 +344,8 @@ export function SoftwareCard({
 
         {/* Two lines, held at that height so cards stay level whether the copy
             fills them or not. Back on the shelf's card too (the owner,
-            23/10/2026: "bỏ dòng mô tả thử", then "thêm lại dòng mô tả đi").
-            Justified, so a blurb cut at two lines runs its "…" to the edge
-            instead of stopping where a long word ("85.000đ/ngày.") would
-            not fit (24/10/2026, "vị trí ... không phải tới hết card"). */}
-        <p className={`mb-[14px] line-clamp-2 min-h-[37px] text-justify text-[13px] leading-[1.55] text-mist ${old || variant === "shelf" ? "mt-2" : ""}`}>
+            23/10/2026: "bỏ dòng mô tả thử", then "thêm lại dòng mô tả đi"). */}
+        <p className={`mb-[14px] line-clamp-2 min-h-[37px] text-[13px] leading-[1.55] text-mist ${old || variant === "shelf" ? "mt-2" : ""}`}>
           {software.description}
         </p>
 
