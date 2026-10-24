@@ -349,7 +349,7 @@ export function ProductCard({ product, priority = false, eager = false, old = fa
               <span className="text-[12px] text-[#686a71] line-through">
                 {formatVnd(product.oldPrice)}đ
               </span>
-              <span className="rounded-[7px] bg-[var(--menzu-accent)] px-2 py-[5px] text-[11px] font-black text-white">
+              <span className="rounded-[7px] bg-[var(--menzu-accent-dark)] px-2 py-[5px] text-[11px] font-black text-white">
                 -{pct}%
               </span>
             </div>
