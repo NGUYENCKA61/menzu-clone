@@ -156,10 +156,10 @@ export function CategoryFilterPanel({ hotPicks }: CategoryFilterPanelProps) {
     // mt-14 is the room the gold badge needs. It floats 3.2rem clear of the
     // field and takes no space of its own, so without this it would sit on top
     // of whatever heading the page put above the panel.
-    // 72px over the panel leaves the floating "Tìm tài khoản" pill about
-    // 20px under the heading above it (it sat 5px under the 48px one);
-    // 32px under it, the cards' own gap (24/10/2026, "tăng này nữa").
-    <div className="mt-18 mb-8">
+    // 56px over the panel (a heading above may ask for more: the category
+    // page's accounts heading does), 32px under it, the cards' own gap
+    // (24/10/2026, "tăng đi").
+    <div className="mt-14 mb-8">
       <form onSubmit={handleSubmit} aria-busy={isPending} className="flex flex-col gap-3 w-full">
         <div className="flex flex-col md:flex-row gap-2.5">
           <div className="flex-1 relative min-w-0">
