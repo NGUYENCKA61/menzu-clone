@@ -323,13 +323,15 @@ export function SoftwareCard({
           // two lines, then "…" (24/10/2026: "TIÊU ĐỀ 2 hàng đi"), and holds
           // two lines' height so the copy under it starts level along a row.
           // 3100's red marker bar stands by its first line (24/10/2026,
-          // after two trials: "THÊM CẠCH ĐỎ LẠI ĐI").
+          // after two trials: "THÊM CẠCH ĐỎ LẠI ĐI"). 16px, a step under the
+          // home tile's 17px so the picture leads (lmarket's and unnamed's
+          // product names are 14 and 16px; "vậy 16 đi").
           <div>
             <Link href={detailHref} className="flex items-start gap-2.5">
               <span aria-hidden className="mt-1 h-4 w-[3px] shrink-0 rounded-full bg-[var(--menzu-accent)]" />
               <h3
                 title={titleCase(software.name)}
-                className="line-clamp-2 min-h-[2.75em] min-w-0 break-words text-[17px] font-extrabold leading-snug text-white transition-colors duration-300 group-hover:text-[var(--menzu-accent)]"
+                className="line-clamp-2 min-h-[2.75em] min-w-0 break-words text-[16px] font-extrabold leading-snug text-white transition-colors duration-300 group-hover:text-[var(--menzu-accent)]"
               >
                 {titleCase(software.name)}
               </h3>
