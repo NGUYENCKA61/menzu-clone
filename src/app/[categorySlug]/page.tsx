@@ -321,8 +321,9 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
               <>
                 {/* A hairline between the tool shelf and the accounts, as the one
                     over "Về …" below: 48px above it, 40px under (24/10/2026,
-                    "thêm 1 đường kẻ ngang … phân tách 2 danh mục", on trial), run edge
-                    to edge of the window ("dài hết trang lun"). */}
+                    "thêm 1 đường kẻ ngang … phân tách 2 danh mục"), run edge to edge
+                    of the window ("dài hết trang lun"; kept: "giữ luôn chốt bản
+                    này đi"). */}
                 {data.softwareTotal > 0 ? <div aria-hidden className="relative left-1/2 mb-10 h-px w-screen -translate-x-1/2 bg-white/10" /> : null}
                 {/* Always headed, like the software shelf above it — and by the
                     game, not the shelf: a category called "Hack Valorant" sells
@@ -332,7 +333,8 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
                     was headed "tài khoản game HACK …". */}
                 {/* The game in sentence case, as the title over the page names
                     the shelf (it printed the stored capitals, "ĐỘT KÍCH CFVN -
-                    CF4VN", 19/10/2026). */}
+                    CF4VN", 19/10/2026). As large as the page's own title, still an
+                    h2 (24/10/2026, "giữ luôn chốt bản này đi"). */}
                 <h2 className="mb-5 text-3xl font-black leading-tight text-white sm:text-4xl md:text-5xl">
                   Danh mục tài khoản game{" "}
                   {(() => {
