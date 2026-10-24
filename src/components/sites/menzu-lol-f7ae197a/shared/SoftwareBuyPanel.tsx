@@ -278,7 +278,7 @@ export function SoftwareBuyPanel({
         {/* LAB (Launcher): the name in the display face and sentence case
             (displayCase keeps CS2, ESP, OBV ...); the full typed name is in
             the breadcrumb's last crumb and the page title. */}
-        <h1 className="font-display text-[26px] font-extrabold leading-[1.15] text-frost sm:text-[30px] lg:text-[34px]">
+        <h1 className="font-display text-[26px] font-black leading-[1.15] text-frost sm:text-[30px] lg:text-[34px]">
           {sentenceCase(software.name)}
         </h1>
         {/* The shop's own "Mô tả ngắn", or nothing: no opening lines lifted
