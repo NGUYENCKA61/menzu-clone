@@ -360,7 +360,7 @@ export function AccountBuyPanel({
       )}
 
       <div className="space-y-3">
-        <h1 className="text-[26px] font-bold leading-[1.15] text-frost sm:text-[30px] lg:text-[34px]">
+        <h1 className="text-[26px] font-black leading-[1.15] text-frost sm:text-[30px] lg:text-[34px]">
           {account.name ? sentenceCase(account.name) : `Mã #${account.code}`}
         </h1>
         <p className="max-w-[60ch] text-[15px] leading-[1.65] text-mist">

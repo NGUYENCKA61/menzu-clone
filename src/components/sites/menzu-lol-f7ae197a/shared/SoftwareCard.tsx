@@ -319,7 +319,7 @@ export function SoftwareCard({
             <Link href={detailHref} className="block">
               <h3
                 title={titleCase(software.name)}
-                className="truncate text-[17px] font-black leading-snug text-white transition-colors duration-300 group-hover:text-[var(--menzu-accent)]"
+                className="truncate text-[17px] font-extrabold leading-snug text-white transition-colors duration-300 group-hover:text-[var(--menzu-accent)]"
               >
                 {titleCase(software.name)}
               </h3>
@@ -504,7 +504,7 @@ export function SoftwareCard({
 
           <Link
             href={detailHref}
-            className="tool-more flex h-[42px] w-full items-center justify-center rounded-[10px] border border-[var(--menzu-accent)]/40 bg-transparent text-[14px] font-semibold text-[#ddd] transition-colors hover:bg-[var(--menzu-accent)]/10"
+            className="tool-more flex h-[42px] w-full items-center justify-center rounded-[10px] border border-white/10 bg-white/[0.04] text-[14px] font-semibold text-white transition-colors hover:border-white/25 hover:bg-white/[0.08]"
           >
             Xem chi tiết
           </Link>
