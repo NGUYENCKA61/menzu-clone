@@ -4,12 +4,14 @@ import Image from "next/image";
 import { useMemo, useState } from "react";
 import { ChevronDown, ImageOff, Search } from "lucide-react";
 import type { AccountDetail } from "./AccountBuyPanel";
+import { ALL_GROUPS, CHARACTER_GROUPS, GEAR_GROUPS, WEAPON_GROUPS } from "@/lib/cfInventoryGroups";
 
 export interface InventoryItemView {
   id: string;
   kind: string;
   name: string;
   iconUrl: string | null;
+  /** The item's group: a weapon's "Vũ khí phụ", a gear item's "Chức năng". */
   weapon: string | null;
 }
 
@@ -32,37 +34,45 @@ const ACCOUNT_INVENTORY_STYLES = `
 }
 `;
 
-type InventoryTabKey =
-  | "weaponSkins"
-  | "buddies"
-  | "agents"
-  | "costumes"
-  | "accessories"
-  | "cards"
-  | "sprays";
+type InventoryTabKey = "weaponSkins" | "characters" | "buddies" | "cards" | "sprays";
 
 interface InventoryTab {
   key: InventoryTabKey;
   label: string;
-  /** SkinKind the tab draws from. */
-  kind: string;
+  /** The SkinKinds the tab draws from. */
+  kinds: string[];
+  /** Its chips after "Tất cả", in the game's order. */
+  groups: string[];
 }
 
-// The kinds wear this shop's labels: AGENT rows are characters and BUDDY rows
-// are gear — the Valorant taxonomy's spare slots, reused instead of migrated.
-// Cards and sprays stay only for legacy scraped data; at zero they never show.
+// CrossFire's own inventory, three tabs each with its sub-tabs as a chip row
+// (the owner, 25/10/2026, with screenshots of the game and of menzu's "All
+// Skin" row). The characters tab gathers the three character kinds, its
+// chips being the kinds; weapons and gear chip by group. Cards and sprays
+// stay only for legacy scraped data; at zero they never show.
 const INVENTORY_TABS: InventoryTab[] = [
-  { key: "weaponSkins", label: "Trang bị súng", kind: "WEAPON_SKIN" },
-  { key: "agents", label: "Nhân vật", kind: "AGENT" },
-  // CrossFire's own inventory order after the characters (24/10/2026).
-  { key: "costumes", label: "Trang phục", kind: "COSTUME" },
-  { key: "accessories", label: "Phụ kiện", kind: "ACCESSORY" },
-  { key: "buddies", label: "Trang bị", kind: "BUDDY" },
-  { key: "cards", label: "Cards", kind: "CARD" },
-  { key: "sprays", label: "Sprays", kind: "SPRAY" },
+  { key: "weaponSkins", label: "Trang bị súng", kinds: ["WEAPON_SKIN"], groups: WEAPON_GROUPS },
+  { key: "characters", label: "Nhân vật", kinds: ["AGENT", "COSTUME", "ACCESSORY"], groups: CHARACTER_GROUPS },
+  { key: "buddies", label: "Trang bị", kinds: ["BUDDY"], groups: GEAR_GROUPS },
+  { key: "cards", label: "Cards", kinds: ["CARD"], groups: [] },
+  { key: "sprays", label: "Sprays", kinds: ["SPRAY"], groups: [] },
 ];
 
-const ALL_WEAPONS = "All Skin";
+const KIND_GROUP: Record<string, string> = {
+  AGENT: "Nhân vật",
+  COSTUME: "Trang phục",
+  ACCESSORY: "Phụ kiện",
+};
+
+function tabTotal(account: AccountDetail, key: InventoryTabKey): number {
+  return key === "characters" ? account.agents + account.costumes + account.accessories : account[key];
+}
+
+/** The chip an item sits under: its kind on the characters tab, its group elsewhere. */
+function groupOf(tab: InventoryTab, item: InventoryItemView): string | null {
+  return tab.key === "characters" ? (KIND_GROUP[item.kind] ?? null) : item.weapon;
+}
+
 // Three rows of the desktop grid (5 columns); "Xem thêm" pages the rest in.
 const PAGE_SIZE = 15;
 
@@ -102,9 +112,7 @@ const ORANGE_ACCENT: TabAccent = {
 
 const TAB_ACCENTS: Record<InventoryTabKey, TabAccent> = {
   weaponSkins: RED_ACCENT,
-  agents: RED_ACCENT,
-  costumes: RED_ACCENT,
-  accessories: ORANGE_ACCENT,
+  characters: RED_ACCENT,
   buddies: ORANGE_ACCENT,
   // Legacy scraped kinds; never shown for typed accounts.
   cards: RED_ACCENT,
@@ -112,8 +120,7 @@ const TAB_ACCENTS: Record<InventoryTabKey, TabAccent> = {
 };
 
 /**
- * The inventory tabs on the account-detail page, with a weapon filter
- * over the skins tab.
+ * The inventory tabs on the account-detail page, each with its sub-tab chips.
  *
  * Item counts come from `account` rather than from `items.length`: the totals
  * were scraped for every product, but the per-item rows only exist for those
@@ -121,48 +128,54 @@ const TAB_ACCENTS: Record<InventoryTabKey, TabAccent> = {
  * placeholder tiles instead of claiming the account is empty.
  */
 export function AccountInventory({ account, items }: AccountInventoryProps) {
-  // Only tabs with something behind them. The taxonomy is Valorant's five
-  // kinds, but a CrossFire account only ever fills the weapons one — and a
-  // bar of four zero-count tabs sells emptiness, not inventory.
-  const tabs = INVENTORY_TABS.filter((t) => account[t.key] > 0);
+  // Only tabs with something behind them; a bar of zero-count tabs sells
+  // emptiness, not inventory.
+  const tabs = INVENTORY_TABS.filter((t) => tabTotal(account, t.key) > 0);
 
   const [activeTab, setActiveTab] = useState<InventoryTabKey>(
     () => tabs[0]?.key ?? "weaponSkins",
   );
-  const [weapon, setWeapon] = useState(ALL_WEAPONS);
+  const [group, setGroup] = useState(ALL_GROUPS);
   const [shown, setShown] = useState(PAGE_SIZE);
   const [query, setQuery] = useState("");
 
   const tab = INVENTORY_TABS.find((t) => t.key === activeTab) ?? INVENTORY_TABS[0]!;
-  const tabItems = useMemo(
-    () => items.filter((item) => item.kind === tab.kind),
-    [items, tab.kind],
-  );
 
-  /** Weapons present on this account, so the row never offers an empty filter. */
-  const weapons = useMemo(() => {
-    if (tab.key !== "weaponSkins") return [];
-    const names = [...new Set(tabItems.map((item) => item.weapon).filter(Boolean))] as string[];
-    return [ALL_WEAPONS, ...names.sort()];
-  }, [tabItems, tab.key]);
+  /** This tab's items, "Tất cả" laid out in the game's group order. */
+  const tabItems = useMemo(() => {
+    const rank = (item: InventoryItemView) => {
+      const at = tab.groups.indexOf(groupOf(tab, item) ?? "");
+      return at === -1 ? tab.groups.length : at;
+    };
+    return items
+      .filter((item) => tab.kinds.includes(item.kind))
+      .map((item, index) => ({ item, index }))
+      .sort((a, b) => rank(a.item) - rank(b.item) || a.index - b.index)
+      .map(({ item }) => item);
+  }, [items, tab]);
+
+  /** The groups present on this account, so the row never offers an empty chip. */
+  const groups = useMemo(() => {
+    const present = new Set(tabItems.map((item) => groupOf(tab, item)).filter(Boolean) as string[]);
+    const known = tab.groups.filter((name) => present.has(name));
+    const other = [...present].filter((name) => !tab.groups.includes(name)).sort();
+    return [ALL_GROUPS, ...known, ...other];
+  }, [tabItems, tab]);
 
   const filtered = useMemo(() => {
-    const base =
-      tab.key === "weaponSkins" && weapon !== ALL_WEAPONS
-        ? tabItems.filter((item) => item.weapon === weapon)
-        : tabItems;
+    const base = group !== ALL_GROUPS ? tabItems.filter((item) => groupOf(tab, item) === group) : tabItems;
     const q = query.trim().toLowerCase();
     return q ? base.filter((item) => item.name.toLowerCase().includes(q)) : base;
-  }, [tabItems, weapon, tab.key, query]);
+  }, [tabItems, group, tab, query]);
 
   const visible = filtered.slice(0, shown);
   const remaining = filtered.length - visible.length;
-  const total = account[activeTab];
+  const total = tabTotal(account, activeTab);
   const accent = TAB_ACCENTS[activeTab];
 
   function selectTab(key: InventoryTabKey) {
     setActiveTab(key);
-    setWeapon(ALL_WEAPONS);
+    setGroup(ALL_GROUPS);
     setShown(PAGE_SIZE);
     // Each tab searches its own goods; a stale query would open the next tab
     // pre-filtered by a word typed for the last one.
@@ -190,7 +203,7 @@ export function AccountInventory({ account, items }: AccountInventoryProps) {
           >
             {entry.label}
             <span className="inline-flex items-center justify-center min-w-[1.5rem] px-1.5 py-0.5 rounded-full bg-black/20 text-[11px] sm:text-xs font-black">
-              {account[entry.key]}
+              {tabTotal(account, entry.key)}
             </span>
           </button>
         ))}
@@ -216,19 +229,19 @@ export function AccountInventory({ account, items }: AccountInventoryProps) {
         />
       </label>
 
-      {weapons.length > 1 ? (
+      {groups.length > 1 ? (
         <div className="flex items-center gap-2 overflow-x-auto hide-scrollbar mt-4 pb-1">
-          {weapons.map((name) => (
+          {groups.map((name) => (
             <button
               key={name}
               type="button"
               onClick={() => {
-                setWeapon(name);
+                setGroup(name);
                 setShown(PAGE_SIZE);
               }}
-              aria-pressed={weapon === name}
+              aria-pressed={group === name}
               className={
-                weapon === name ? `${FILTER_BASE} ${accent.filterActive}` : FILTER_INACTIVE
+                group === name ? `${FILTER_BASE} ${accent.filterActive}` : FILTER_INACTIVE
               }
             >
               {name}
@@ -237,7 +250,7 @@ export function AccountInventory({ account, items }: AccountInventoryProps) {
         </div>
       ) : null}
 
-      <div key={`${activeTab}-${weapon}`} className="flex flex-col min-h-[400px] skin-tab-enter">
+      <div key={`${activeTab}-${group}`} className="flex flex-col min-h-[400px] skin-tab-enter">
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mt-6">
           {visible.length === 0 && query.trim() !== "" ? (
             // A search that found nothing is an answer, not a loading state —

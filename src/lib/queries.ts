@@ -28,6 +28,7 @@ import { toolSeoCopy } from "@/lib/seoCopy";
 import type { WarrantyStatus } from "@/lib/warrantyRequests";
 import { weaponKey } from "@/lib/weaponImages";
 import { rankTerms } from "@/lib/cfRanks";
+import { weaponGroup } from "@/lib/cfWeaponGroup";
 import type { AccountDetail } from "@/components/sites/menzu-lol-f7ae197a/shared/AccountBuyPanel";
 import type { SoftwareDetail } from "@/components/sites/menzu-lol-f7ae197a/shared/SoftwareBuyPanel";
 import { parseRequirements } from "@/lib/productRequirements";
@@ -1656,11 +1657,16 @@ export interface InventoryItem {
  * name so repeat runs of the scraper cannot reshuffle it.
  */
 export async function getInventory(code: string): Promise<InventoryItem[]> {
-  const rows = await db.productSkin.findMany({
+  const stored = await db.productSkin.findMany({
     where: { product: { code } },
     orderBy: [{ weapon: "asc" }, { name: "asc" }],
     select: { id: true, kind: true, name: true, iconUrl: true, weapon: true },
   });
+  // A weapon typed without a "[Group]" line is grouped by its name, the
+  // way the game's own Vũ khí sub-tabs split them (lib/cfWeaponGroup).
+  const rows = stored.map((r) =>
+    r.kind === "WEAPON_SKIN" && !r.weapon ? { ...r, weapon: weaponGroup(r.name) } : r,
+  );
 
   // Rows the shop typed by hand carry no icon of their own; the shared
   // picture library fills them in by name — weapons, characters and gear

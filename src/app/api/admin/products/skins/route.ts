@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { FORBIDDEN, getAdmin } from "@/lib/admin";
+import { parseGroupedLines } from "@/lib/cfInventoryGroups";
 import { db } from "@/lib/db";
 
 /**
@@ -60,12 +61,14 @@ export async function PUT(request: Request) {
   // Blank lines and stray whitespace come with typing a list by hand, and a
   // name repeated twice is a slip rather than two skins — none of the three is
   // worth an error message, so all three are cleaned up silently.
+  // "[Chức năng]" lines head the names under them (lib/cfInventoryGroups);
+  // the group is kept on each row and the header itself is not a name.
   const seen = new Set<string>();
   const names: string[] = [];
-  for (const raw of body.names) {
-    if (typeof raw !== "string") continue;
-    const name = raw.trim().replace(/\s+/g, " ");
-    if (!name) continue;
+  const groups = new Map<string, string | null>();
+  const lines = body.names.filter((raw): raw is string => typeof raw === "string");
+  for (const entry of parseGroupedLines(lines)) {
+    const name = entry.name.replace(/\s+/g, " ");
     if (name.length > MAX_NAME_LENGTH) {
       return NextResponse.json(
         { error: `Tên súng quá dài (tối đa ${MAX_NAME_LENGTH} ký tự): ${name.slice(0, 40)}…` },
@@ -76,6 +79,7 @@ export async function PUT(request: Request) {
     if (seen.has(key)) continue;
     seen.add(key);
     names.push(name);
+    groups.set(key, entry.group && entry.group.length <= 40 ? entry.group : null);
   }
 
   if (names.length > MAX_NAMES) {
@@ -122,7 +126,7 @@ export async function PUT(request: Request) {
           name,
           tier: old?.tier ?? null,
           iconUrl: old?.iconUrl ?? null,
-          weapon: old?.weapon ?? null,
+          weapon: groups.get(name.toLowerCase()) ?? null,
         };
       }),
     }),

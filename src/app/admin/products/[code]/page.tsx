@@ -9,6 +9,7 @@ import { AdminSoftwareDetail } from "@/components/sites/menzu-lol-f7ae197a/share
 import { WarrantyQuestionsEditor } from "@/components/sites/menzu-lol-f7ae197a/shared/WarrantyQuestionsEditor";
 import { parseQuestionSet, resolveQuestions } from "@/lib/warrantyDetails";
 import { getAdmin } from "@/lib/admin";
+import { groupedLines } from "@/lib/cfInventoryGroups";
 import { db } from "@/lib/db";
 import { isHtmlBody, plainToDocHtml } from "@/lib/docHtml";
 import { readKeyStore } from "@/lib/packageKeyStore";
@@ -56,7 +57,7 @@ export default async function AdminAccountDetailPage({
       },
       skins: {
         where: { kind: { in: ["WEAPON_SKIN", "AGENT", "BUDDY", "COSTUME", "ACCESSORY"] } },
-        select: { kind: true, name: true },
+        select: { kind: true, name: true, weapon: true },
         orderBy: { id: "asc" },
       },
       // Who holds this account now, if anyone: the sign-in card says whether
@@ -249,15 +250,20 @@ export default async function AdminAccountDetailPage({
           vip: product.vip,
           vipIngame: product.vipIngame,
           rankMatch: product.rankMatch,
-          skinNames: product.skins
-            .filter((s) => s.kind === "WEAPON_SKIN")
-            .map((s) => s.name),
+          // Weapons and gear keep their "[Group]" lines (lib/cfInventoryGroups).
+          skinNames: groupedLines(
+            product.skins
+              .filter((s) => s.kind === "WEAPON_SKIN")
+              .map((s) => ({ name: s.name, group: s.weapon })),
+          ),
           characterNames: product.skins
             .filter((s) => s.kind === "AGENT")
             .map((s) => s.name),
-          gearNames: product.skins
-            .filter((s) => s.kind === "BUDDY")
-            .map((s) => s.name),
+          gearNames: groupedLines(
+            product.skins
+              .filter((s) => s.kind === "BUDDY")
+              .map((s) => ({ name: s.name, group: s.weapon })),
+          ),
           costumeNames: product.skins
             .filter((s) => s.kind === "COSTUME")
             .map((s) => s.name),

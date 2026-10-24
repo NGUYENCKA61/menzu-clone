@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 
 
+import { isGroupHeader } from "@/lib/cfInventoryGroups";
 import { CF_RANK_MATCHES } from "@/lib/cfRankMatch";
 import { AdminError } from "./AdminStates";
 import { RichTextEditor } from "./RichTextEditor";
@@ -689,7 +690,7 @@ export function AdminAccountDetail({ account }: { account: AccountDetailView }) 
                   <span className={LABEL}>
                     {label}
                     <span className="ml-1.5 font-bold normal-case tracking-normal text-neutral-600">
-                      {value.split("\n").filter((l) => l.trim()).length}
+                      {value.split("\n").filter((l) => l.trim() && !isGroupHeader(l)).length}
                     </span>
                   </span>
                   <textarea
