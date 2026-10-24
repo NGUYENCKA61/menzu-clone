@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useMemo, useState } from "react";
-import { ChevronDown, ImageOff, Search } from "lucide-react";
+import { Atom, Bot, ChevronDown, Crown, ImageOff, Search, type LucideIcon } from "lucide-react";
 import type { AccountDetail } from "./AccountBuyPanel";
 import { ALL_GROUPS, CHARACTER_GROUPS, GEAR_GROUPS, WEAPON_GROUPS } from "@/lib/cfInventoryGroups";
 
@@ -84,27 +84,30 @@ function groupOf(tab: InventoryTab, item: InventoryItemView): string | null {
  * a tinted border, the name and a corner badge in the same colour.
  * Ordinary items stay plain.
  */
-const GRADE_TILES: Record<"VIP" | "AI" | "Nano", { border: string; top: string; glow: string; name: string; badge: string }> = {
+// menzu's corner badge is a black pill with a coloured figure and the name
+// sits bottom-left behind its tier's emblem (the owner, 25/10/2026: "làm cho
+// giống menzu đi"); here the figure is the grade and the emblem its icon.
+const GRADE_TILES: Record<"VIP" | "AI" | "Nano", { border: string; top: string; glow: string; name: string; icon: LucideIcon }> = {
   VIP: {
     border: "border-amber-500/40",
     top: "bg-amber-400",
     glow: "from-amber-500/20",
     name: "text-amber-300",
-    badge: "bg-amber-400 text-black",
+    icon: Crown,
   },
   AI: {
     border: "border-violet-500/40",
     top: "bg-violet-500",
     glow: "from-violet-500/20",
     name: "text-violet-300",
-    badge: "bg-violet-500 text-white",
+    icon: Bot,
   },
   Nano: {
     border: "border-sky-500/40",
     top: "bg-sky-400",
     glow: "from-sky-500/20",
     name: "text-sky-300",
-    badge: "bg-sky-400 text-black",
+    icon: Atom,
   },
 };
 
@@ -318,14 +321,15 @@ export function AccountInventory({ account, items }: AccountInventoryProps) {
                   >
                     {look ? (
                       <>
-                        <span aria-hidden className={`absolute inset-x-0 top-0 h-[3px] ${look.top}`} />
+                        <span aria-hidden className={`absolute inset-x-0 top-0 h-[2px] ${look.top}`} />
                         <span
                           aria-hidden
                           className={`pointer-events-none absolute inset-x-0 top-0 h-3/4 bg-gradient-to-b ${look.glow} to-transparent`}
                         />
                         <span
-                          className={`absolute left-0 top-0 z-[1] rounded-br-lg px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wide ${look.badge}`}
+                          className={`absolute left-0 top-0 z-[1] inline-flex items-center gap-1 rounded-br-lg bg-black/75 px-2 py-0.5 text-[10px] font-black uppercase tracking-wide ${look.name}`}
                         >
+                          <look.icon size={11} strokeWidth={2.5} aria-hidden />
                           {item.grade}
                         </span>
                       </>
@@ -345,9 +349,10 @@ export function AccountInventory({ account, items }: AccountInventoryProps) {
                       <ImageOff size={18} className="relative text-neutral-700 flex-1" />
                     )}
                     <span
-                      className={`relative w-full text-center text-[10px] font-bold ${look ? look.name : "text-neutral-400"} group-hover:text-white transition-colors truncate`}
+                      className={`relative flex w-full items-center gap-1.5 px-1 text-left text-[12px] font-bold ${look ? look.name : "text-neutral-400"} group-hover:text-white transition-colors`}
                     >
-                      {item.name}
+                      {look ? <look.icon size={12} strokeWidth={2.5} aria-hidden className="shrink-0" /> : null}
+                      <span className="truncate">{item.name}</span>
                     </span>
                   </div>
                 );
