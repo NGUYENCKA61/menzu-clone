@@ -421,11 +421,12 @@ export function SoftwareCard({
                 // The old shop's picker look, on trial (24/10/2026, "nút chọn
                 // gói làm giống style nút chọn gói bên thichthihack.com cũ
                 // thử"): no box, its faint underline, the words centred at
-                // 15px regular, the arrow at the right. ?ban=cu keeps the box.
+                // 13px regular ("13px th"), the arrow at the right. ?ban=cu
+                // keeps the box.
                 className={`relative flex h-[42px] w-full items-center outline-none transition-colors duration-200 hover:border-[var(--menzu-accent)]/45 hover:text-white focus-visible:ring-2 focus-visible:ring-[var(--menzu-accent)]/40 aria-expanded:border-[var(--menzu-accent)]/45 aria-expanded:text-white disabled:opacity-50 ${
                   old
                     ? "justify-between gap-1 rounded-[10px] border bg-white/[0.02] px-2.5 text-[11px] font-extrabold"
-                    : "justify-center border-b px-6 text-[15px] font-normal"
+                    : "justify-center border-b px-6 text-[13px] font-normal"
                 } ${
                   chosen
                     ? "border-[var(--menzu-accent)]/45 text-white"
