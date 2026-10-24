@@ -255,7 +255,7 @@ export function FreeKeyPanel({
       </div>
 
       <div className="space-y-3">
-        <h1 className="font-display text-[26px] font-black leading-[1.15] text-frost sm:text-[30px] lg:text-[34px]">
+        <h1 className="font-display text-[26px] font-bold leading-[1.15] text-frost sm:text-[30px] lg:text-[34px]">
           {sentenceCase(software.name)}
         </h1>
         {software.summary ? (
