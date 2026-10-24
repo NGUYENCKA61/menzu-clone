@@ -95,14 +95,25 @@ interface TabAccent {
   filterActive: string;
   tileHover: string;
   searchFocus: string;
+  /** menzu's tile, tinted: the top bar, the border, the glow at the foot,
+   *  the name. menzu takes the colour from a skin's tier; CrossFire has none
+   *  published, so the tile wears its tab's (the owner, 25/10/2026: "làm thử"). */
+  tileTop: string;
+  tileBorder: string;
+  tileGlow: string;
+  tileName: string;
 }
 
 const RED_ACCENT: TabAccent = {
   // The open tab in solid red, menzu's way (the owner, 25/10/2026: "đỏ đặc").
   tabActive: "border-[var(--menzu-accent)] bg-[var(--menzu-accent)] text-white",
   filterActive: "border-[var(--menzu-accent)] bg-[var(--menzu-accent)] text-white",
-  tileHover: "hover:border-white/25",
+  tileHover: "hover:border-[var(--menzu-accent)]/60",
   searchFocus: "focus-within:border-[var(--menzu-accent)]/60 focus-within:ring-2 focus-within:ring-[var(--menzu-accent)]/25",
+  tileTop: "bg-[var(--menzu-accent)]",
+  tileBorder: "border-[var(--menzu-accent)]/25",
+  tileGlow: "from-[var(--menzu-accent)]/15",
+  tileName: "text-red-300",
 };
 // Each tab its own colour, in the order the owner named them (25/10/2026:
 // "đỏ đặc", "cam", "tím", "ứng với 3 lựa chọn"): weapons red, characters
@@ -110,14 +121,22 @@ const RED_ACCENT: TabAccent = {
 const ORANGE_ACCENT: TabAccent = {
   tabActive: "border-transparent bg-orange-500 text-white",
   filterActive: "border-transparent bg-orange-500 text-white",
-  tileHover: "hover:border-white/25",
+  tileHover: "hover:border-orange-500/60",
   searchFocus: "focus-within:border-[var(--menzu-accent)]/60 focus-within:ring-2 focus-within:ring-[var(--menzu-accent)]/25",
+  tileTop: "bg-orange-500",
+  tileBorder: "border-orange-500/30",
+  tileGlow: "from-orange-500/15",
+  tileName: "text-orange-300",
 };
 const VIOLET_ACCENT: TabAccent = {
   tabActive: "border-transparent bg-violet-500 text-white",
   filterActive: "border-transparent bg-violet-500 text-white",
-  tileHover: "hover:border-white/25",
+  tileHover: "hover:border-violet-500/60",
   searchFocus: "focus-within:border-[var(--menzu-accent)]/60 focus-within:ring-2 focus-within:ring-[var(--menzu-accent)]/25",
+  tileTop: "bg-violet-500",
+  tileBorder: "border-violet-500/30",
+  tileGlow: "from-violet-500/15",
+  tileName: "text-violet-300",
 };
 
 const TAB_ACCENTS: Record<InventoryTabKey, TabAccent> = {
@@ -274,8 +293,13 @@ export function AccountInventory({ account, items }: AccountInventoryProps) {
             ? visible.map((item) => (
                 <div
                   key={item.id}
-                  className={`group aspect-[4/3] rounded-xl bg-neutral-950 border border-neutral-800 ${accent.tileHover} transition-colors flex flex-col items-center justify-center p-2 gap-1.5 card-item-appear overflow-hidden`}
+                  className={`group relative aspect-[4/3] rounded-xl bg-neutral-950 border ${accent.tileBorder} ${accent.tileHover} transition-colors flex flex-col items-center justify-center p-2 gap-1.5 card-item-appear overflow-hidden`}
                 >
+                  <span aria-hidden className={`absolute inset-x-0 top-0 h-[3px] ${accent.tileTop}`} />
+                  <span
+                    aria-hidden
+                    className={`pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t ${accent.tileGlow} to-transparent`}
+                  />
                   {item.iconUrl ? (
                     <div className="relative w-full flex-1">
                       <Image
@@ -288,9 +312,9 @@ export function AccountInventory({ account, items }: AccountInventoryProps) {
                       />
                     </div>
                   ) : (
-                    <ImageOff size={18} className="text-neutral-700 flex-1" />
+                    <ImageOff size={18} className="relative text-neutral-700 flex-1" />
                   )}
-                  <span className="w-full text-center text-[10px] font-bold text-neutral-400 group-hover:text-white transition-colors truncate">
+                  <span className={`relative w-full text-center text-[10px] font-bold ${accent.tileName} group-hover:text-white transition-colors truncate`}>
                     {item.name}
                   </span>
                 </div>
