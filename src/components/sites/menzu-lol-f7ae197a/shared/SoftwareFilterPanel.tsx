@@ -162,7 +162,10 @@ export function SoftwareFilterPanel({
 
         <div className="flex-[4] relative min-w-0">
           <div className={SEARCH_SHELL_CLASS}>
-            <Crosshair size={15} className="text-neutral-500 shrink-0" />
+            {/* As big as the reticle in the field beside it, on trial
+                (24/10/2026, "cho kích thước icon bên phải bằng kích thước
+                icon bên trái đi cho đồng bộ thử"); it was 15px. */}
+            <Crosshair size={22} className="text-neutral-500 shrink-0" />
             <input
               type="text"
               value={featureQuery}
