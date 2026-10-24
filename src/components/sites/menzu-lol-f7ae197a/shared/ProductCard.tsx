@@ -193,7 +193,7 @@ export function ProductCard({ product, priority = false, eager = false, old = fa
             <span className="absolute inset-x-3.5 bottom-3 z-10">
               <h3
                 title={title}
-                className="line-clamp-2 text-[17px] font-black leading-[1.15] text-white transition-colors duration-300 group-hover:text-[var(--menzu-accent)]"
+                className="line-clamp-2 text-[17px] font-extrabold leading-[1.15] text-white transition-colors duration-300 group-hover:text-[var(--menzu-accent)]"
               >
                 {title}
               </h3>
@@ -252,13 +252,14 @@ export function ProductCard({ product, priority = false, eager = false, old = fa
         ) : null}
 
         {/* This account's own words when the shop wrote some; the stock two
-            lines otherwise, so no card ever shows a blank where prose goes. */}
+            lines otherwise, so no card ever shows a blank where prose goes.
+            13px like the tool card's blurb on the same page (24/10/2026). */}
         {product.description ? (
-          <p className={`mb-[14px] line-clamp-2 min-h-[37px] text-[12px] leading-[1.55] text-[#9b9da5] ${old ? "mt-2" : ""}`}>
+          <p className={`mb-[14px] line-clamp-2 min-h-[37px] text-[13px] leading-[1.55] text-[#9b9da5] ${old ? "mt-2" : ""}`}>
             {product.description}
           </p>
         ) : (
-          <p className={`mb-[14px] line-clamp-2 min-h-[37px] text-[12px] leading-[1.55] text-[#9b9da5] ${old ? "mt-2" : ""}`}>
+          <p className={`mb-[14px] line-clamp-2 min-h-[37px] text-[13px] leading-[1.55] text-[#9b9da5] ${old ? "mt-2" : ""}`}>
             Tài khoản game nhiều vật phẩm, inventory đẹp và sẵn sàng giao ngay.
             <br />
             Thông tin tài khoản được kiểm tra trước khi bàn giao.
@@ -356,9 +357,10 @@ export function ProductCard({ product, priority = false, eager = false, old = fa
               <span className="ml-[3px] text-[12px] font-bold text-[#9b9da5]">đ</span>
             </span>
             {/* The software card's primary button, worn here by the whole-card
-                link: the account page is where the purchase happens. */}
+                link: the account page is where the purchase happens. Worded
+                12px like its "Thuê ngay" (24/10/2026). */}
             <span
-              className={`flex items-center bg-[var(--menzu-accent)] px-5 text-[14px] font-semibold text-white transition-colors group-hover:bg-[var(--menzu-accent-dark)] ${
+              className={`flex items-center bg-[var(--menzu-accent)] px-5 text-[12px] font-semibold text-white transition-colors group-hover:bg-[var(--menzu-accent-dark)] ${
                 old ? "h-11 rounded-xl" : "h-[42px] rounded-[10px]"
               }`}
             >
