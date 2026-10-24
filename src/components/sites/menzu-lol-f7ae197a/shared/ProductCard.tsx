@@ -43,7 +43,9 @@ const TIER_LABELS: Record<TierColor, string> = {
  * and slides home when the pointer leaves.
  */
 const CAROUSEL_STEP_PX = 80; // 72px tile + 8px gap
-const CAROUSEL_INTERVAL_MS = 2500;
+// A beat of 1.5s and a 500ms ease, on trial (24/10/2026, "hiệu ứng chạy
+// nhanh hơn xíu được không"); the original's 2.5s and 700ms before.
+const CAROUSEL_INTERVAL_MS = 1500;
 
 /**
  * An account listing tile, laid out to the shop's reference: a 16/10 picture
@@ -312,7 +314,7 @@ export function ProductCard({ product, priority = false, eager = false, old = fa
         </div>
 
         {/* The inventory strip, stepping exactly as the original card did:
-            one tile left per beat, easing 700ms, sliding home past the end.
+            one tile left per beat, easing 500ms, sliding home past the end.
             The "+N" chip sits OUTSIDE the scrolling window, pinned at the
             row's end — riding the strip it lived at the far right of the
             track, past where the carousel ever scrolls, and no one saw it.
@@ -322,7 +324,7 @@ export function ProductCard({ product, priority = false, eager = false, old = fa
             <div className="min-w-0 flex-1 overflow-hidden">
               <div
                 ref={trackRef}
-                className="flex gap-2 transition-transform duration-700 ease-in-out"
+                className="flex gap-2 transition-transform duration-500 ease-in-out"
                 style={{ transform: `translateX(-${offset}px)` }}
               >
                 {skinTiles}
