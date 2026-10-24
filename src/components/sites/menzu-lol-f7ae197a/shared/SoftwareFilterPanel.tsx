@@ -180,7 +180,7 @@ export function SoftwareFilterPanel({
           type="submit"
           // A 12px corner like the chips below (the owner, 16/10/2026: "nút tìm
           // kiếm cũng z", after "tròn quá" about the chips); was rounded-3xl.
-          className="hidden md:flex bg-[var(--brand)] hover:bg-[var(--brand-dark)] active:scale-95 text-white font-semibold rounded-xl px-6 transition items-center gap-2 shrink-0"
+          className="hidden md:flex bg-white hover:bg-neutral-200 active:scale-95 text-black font-semibold rounded-xl px-6 transition items-center gap-2 shrink-0"
         >
           {isPending ? (
             <Loader2 size={16} aria-hidden className="animate-spin motion-reduce:animate-none" />
@@ -333,7 +333,7 @@ export function SoftwareFilterPanel({
 
       <button
         type="submit"
-        className="press md:hidden flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-[var(--brand)] text-[14px] font-semibold text-white hover:bg-[var(--brand-dark)]"
+        className="press md:hidden flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-white text-[14px] font-semibold text-black hover:bg-neutral-200"
       >
         {isPending ? (
           <Loader2 size={16} aria-hidden className="animate-spin motion-reduce:animate-none" />
