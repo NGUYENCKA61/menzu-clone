@@ -44,6 +44,9 @@ const PRICE_INPUT_SHELL_CLASS =
   "flex items-center gap-1.5 h-10 px-3 rounded-lg bg-neutral-950/60 border border-neutral-800/60 flex-1 min-w-0 transition-colors focus-within:border-[var(--menzu-accent)]/60";
 const PRICE_INPUT_CLASS =
   "bg-transparent outline-none text-white text-sm w-full min-w-0 font-bold tabular-nums placeholder-neutral-500";
+// The currency at the field's end, in the filter's small grey type, as menzu
+// closes its price fields (24/10/2026, "thêm từ vnđ vô đi").
+const PRICE_UNIT_CLASS = "shrink-0 text-[11px] font-bold text-neutral-500";
 
 export interface CategoryFilterPanelProps {
   /**
@@ -244,6 +247,7 @@ export function CategoryFilterPanel({ hotPicks }: CategoryFilterPanelProps) {
                     placeholder="0"
                     className={PRICE_INPUT_CLASS}
                   />
+                  <span className={PRICE_UNIT_CLASS}>VNĐ</span>
                 </div>
                 <span className="text-neutral-600">-</span>
                 <div className={PRICE_INPUT_SHELL_CLASS}>
@@ -255,6 +259,7 @@ export function CategoryFilterPanel({ hotPicks }: CategoryFilterPanelProps) {
                     placeholder="Bất kỳ"
                     className={PRICE_INPUT_CLASS}
                   />
+                  <span className={PRICE_UNIT_CLASS}>VNĐ</span>
                 </div>
               </div>
             </div>
