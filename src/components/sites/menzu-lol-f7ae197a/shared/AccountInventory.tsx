@@ -110,7 +110,9 @@ const GRADE_TILES: Record<"VIP" | "PVE" | "Nano", { border: string; top: string;
   },
 };
 
-const GRADE_ORDER = { VIP: 0, PVE: 1, Nano: 2 } as const;
+// Grade first across the whole tab, then the game's groups (the owner,
+// 25/10/2026: "theo thứ tự sắp vip -> nano -> pve -> đồ thường từ trái sang phải").
+const GRADE_ORDER = { VIP: 0, Nano: 1, PVE: 2 } as const;
 const gradeRank = (item: InventoryItemView) => (item.grade ? GRADE_ORDER[item.grade] : 3);
 
 // Three rows of the desktop grid (5 columns); "Xem thêm" pages the rest in.
@@ -191,7 +193,7 @@ export function AccountInventory({ account, items }: AccountInventoryProps) {
 
   const tab = INVENTORY_TABS.find((t) => t.key === activeTab) ?? INVENTORY_TABS[0]!;
 
-  /** This tab's items, "Tất cả" laid out in the game's group order, VIP first in each. */
+  /** This tab's items: VIP, Nano, PVE, then the rest, each in the game's group order. */
   const tabItems = useMemo(() => {
     const rank = (item: InventoryItemView) => {
       const at = tab.groups.indexOf(groupOf(tab, item) ?? "");
@@ -200,7 +202,7 @@ export function AccountInventory({ account, items }: AccountInventoryProps) {
     return items
       .filter((item) => tab.kinds.includes(item.kind))
       .map((item, index) => ({ item, index }))
-      .sort((a, b) => rank(a.item) - rank(b.item) || gradeRank(a.item) - gradeRank(b.item) || a.index - b.index)
+      .sort((a, b) => gradeRank(a.item) - gradeRank(b.item) || rank(a.item) - rank(b.item) || a.index - b.index)
       .map(({ item }) => item);
   }, [items, tab]);
 
