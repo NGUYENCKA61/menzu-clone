@@ -167,17 +167,74 @@ function cardSkinNames(skins: (SkinRow & { name: string })[]): string[] {
 async function weaponImages(
   rows: { skins: (SkinRow & { name: string })[] }[],
 ): Promise<Map<string, string>> {
-  const keys = new Set<string>();
-  for (const row of rows) {
-    for (const name of cardSkinNames(row.skins)) keys.add(weaponKey(name));
+  return libraryPictures(rows.flatMap((row) => cardSkinNames(row.skins)));
+}
+
+/**
+ * The library by looser keys, for names typed the game's way rather than the
+ * wiki's (the owner, 25/10/2026: "chỉ lấy tên từ game thôi", pictures from
+ * the wiki): letters and digits only ("QBU09-Digital Camo" is the wiki's
+ * "QBU-09-Digital Camo"), then the same words in any order, a level dropped
+ * ("SPAS-12-Void-Gold" is "SPAS-12-Gold Void", "…-Infested Lvl1" is
+ * "…-Infested"). The earliest row wins a shared key, so a picture the shop
+ * saved by hand beats an import. Read whole, and read again only when the
+ * library's row count or latest edit says it changed: a picture removed a
+ * moment ago must not keep being served from here.
+ */
+let libraryIndex: { version: string; loose: Map<string, string>; words: Map<string, string> } | null = null;
+
+const looseKey = (name: string) => name.toLowerCase().replace(/[^\p{L}\p{N}]/gu, "");
+const wordsKey = (name: string) =>
+  name
+    .toLowerCase()
+    .split(/[^\p{L}\p{N}]+/u)
+    .filter((word) => word && !/^lvl\d+$/.test(word))
+    .sort()
+    .join(" ");
+
+async function looseLibrary() {
+  const stamp = await db.weaponImage.aggregate({ _count: { _all: true }, _max: { updatedAt: true } });
+  const version = `${stamp._count._all}:${stamp._max.updatedAt?.getTime() ?? 0}`;
+  if (libraryIndex && libraryIndex.version === version) return libraryIndex;
+  const all = await db.weaponImage.findMany({
+    select: { name: true, url: true },
+    orderBy: { createdAt: "asc" },
+  });
+  const loose = new Map<string, string>();
+  const words = new Map<string, string>();
+  for (const row of all) {
+    const l = looseKey(row.name);
+    if (l && !loose.has(l)) loose.set(l, row.url);
+    const w = wordsKey(row.name);
+    if (w && !words.has(w)) words.set(w, row.url);
   }
-  if (keys.size === 0) return new Map();
+  libraryIndex = { version, loose, words };
+  return libraryIndex;
+}
+
+/** Pictures for item names, keyed by weaponKey: exact names first, then looser. */
+async function libraryPictures(names: string[]): Promise<Map<string, string>> {
+  const wanted = new Map<string, string>();
+  for (const name of names) {
+    const key = weaponKey(name);
+    if (!wanted.has(key)) wanted.set(key, name);
+  }
+  if (wanted.size === 0) return new Map();
 
   const found = await db.weaponImage.findMany({
-    where: { key: { in: [...keys] } },
+    where: { key: { in: [...wanted.keys()] } },
     select: { key: true, url: true },
   });
-  return new Map(found.map((i) => [i.key, i.url]));
+  const pictures = new Map(found.map((i) => [i.key, i.url]));
+  const left = [...wanted].filter(([key]) => !pictures.has(key));
+  if (left.length > 0) {
+    const index = await looseLibrary();
+    for (const [key, name] of left) {
+      const url = index.loose.get(looseKey(name)) ?? index.words.get(wordsKey(name));
+      if (url) pictures.set(key, url);
+    }
+  }
+  return pictures;
 }
 
 /**
@@ -1672,16 +1729,10 @@ export async function getInventory(code: string): Promise<InventoryItem[]> {
   // picture library fills them in by name — weapons, characters and gear
   // alike, the same lookup the listing card uses, so an item illustrated
   // once is illustrated everywhere.
-  const missing = [
-    ...new Set(rows.filter((r) => !r.iconUrl).map((r) => weaponKey(r.name))),
-  ];
+  const missing = rows.filter((r) => !r.iconUrl).map((r) => r.name);
   if (missing.length === 0) return rows;
 
-  const library = await db.weaponImage.findMany({
-    where: { key: { in: missing } },
-    select: { key: true, url: true },
-  });
-  const byKey = new Map(library.map((i) => [i.key, i.url]));
+  const byKey = await libraryPictures(missing);
 
   return rows.map((r) =>
     r.iconUrl !== null

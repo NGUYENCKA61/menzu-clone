@@ -76,8 +76,8 @@ function groupOf(tab: InventoryTab, item: InventoryItemView): string | null {
 // Three rows of the desktop grid (5 columns); "Xem thêm" pages the rest in.
 const PAGE_SIZE = 15;
 
-// The skins and characters tabs wear the shop's red when open, the gear tab
-// orange, and the block's small accents (filter chips, tile hover, "Xem thêm")
+// The open tab and its active chip are solid: weapons red, characters orange,
+// gear violet; the block's small accents (filter chips, tile hover, "Xem thêm")
 // follow the open tab's colour. Everything is a complete literal string per colour,
 // because Tailwind cannot see a composed class name. Type per the buy panel's
 // "Mua ngay" button.
@@ -98,22 +98,32 @@ interface TabAccent {
 }
 
 const RED_ACCENT: TabAccent = {
-  tabActive: "border-white/25 bg-white/[0.12] text-frost",
-  filterActive: "border-white/25 bg-white/[0.12] text-frost",
+  // The open tab in solid red, menzu's way (the owner, 25/10/2026: "đỏ đặc").
+  tabActive: "border-[var(--menzu-accent)] bg-[var(--menzu-accent)] text-white",
+  filterActive: "border-[var(--menzu-accent)] bg-[var(--menzu-accent)] text-white",
   tileHover: "hover:border-white/25",
   searchFocus: "focus-within:border-[var(--menzu-accent)]/60 focus-within:ring-2 focus-within:ring-[var(--menzu-accent)]/25",
 };
+// Each tab its own colour, in the order the owner named them (25/10/2026:
+// "đỏ đặc", "cam", "tím", "ứng với 3 lựa chọn"): weapons red, characters
+// orange, gear violet.
 const ORANGE_ACCENT: TabAccent = {
-  tabActive: "border-white/25 bg-white/[0.12] text-frost",
-  filterActive: "border-white/25 bg-white/[0.12] text-frost",
+  tabActive: "border-transparent bg-orange-500 text-white",
+  filterActive: "border-transparent bg-orange-500 text-white",
+  tileHover: "hover:border-white/25",
+  searchFocus: "focus-within:border-[var(--menzu-accent)]/60 focus-within:ring-2 focus-within:ring-[var(--menzu-accent)]/25",
+};
+const VIOLET_ACCENT: TabAccent = {
+  tabActive: "border-transparent bg-violet-500 text-white",
+  filterActive: "border-transparent bg-violet-500 text-white",
   tileHover: "hover:border-white/25",
   searchFocus: "focus-within:border-[var(--menzu-accent)]/60 focus-within:ring-2 focus-within:ring-[var(--menzu-accent)]/25",
 };
 
 const TAB_ACCENTS: Record<InventoryTabKey, TabAccent> = {
   weaponSkins: RED_ACCENT,
-  characters: RED_ACCENT,
-  buddies: ORANGE_ACCENT,
+  characters: ORANGE_ACCENT,
+  buddies: VIOLET_ACCENT,
   // Legacy scraped kinds; never shown for typed accounts.
   cards: RED_ACCENT,
   sprays: RED_ACCENT,
@@ -190,8 +200,10 @@ export function AccountInventory({ account, items }: AccountInventoryProps) {
     <div className="w-full mt-12 bg-white/[0.02] border border-white/10 border-neutral-800/80 rounded-2xl p-6">
       <style dangerouslySetInnerHTML={{ __html: ACCOUNT_INVENTORY_STYLES }} />
 
-      {/* The reference separates the tab strip from the goods with a hairline. */}
-      <div className="flex items-center gap-3 sm:gap-6 lg:gap-0 lg:justify-between overflow-x-auto hide-scrollbar whitespace-nowrap border-b border-neutral-800/80 pb-5">
+      {/* The reference separates the tab strip from the goods with a hairline.
+          The tabs sit together at the start, not spread across the row (the
+          owner, 25/10/2026: "cho sát nhau đi khỏi tách ra khoảng trống"). */}
+      <div className="flex items-center gap-3 overflow-x-auto hide-scrollbar whitespace-nowrap border-b border-neutral-800/80 pb-5">
         {tabs.map((entry) => (
           <button
             key={entry.key}
