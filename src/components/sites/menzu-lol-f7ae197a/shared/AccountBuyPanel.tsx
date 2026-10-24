@@ -45,6 +45,8 @@ export interface AccountDetail {
   agents: number;
   cards: number;
   sprays: number;
+  costumes: number;
+  accessories: number;
   level: number;
   vip: number;
   vipIngame: number;

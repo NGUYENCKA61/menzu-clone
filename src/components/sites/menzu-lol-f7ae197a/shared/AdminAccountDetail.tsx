@@ -55,6 +55,8 @@ export interface AccountDetailView {
   skinNames: string[];
   characterNames: string[];
   gearNames: string[];
+  costumeNames: string[];
+  accessoryNames: string[];
   /** The stored description lifted to editor HTML on the server — legacy
    *  plain text arrives already converted. */
   descriptionHtml: string;
@@ -124,6 +126,8 @@ export function AdminAccountDetail({ account }: { account: AccountDetailView }) 
   const [skinText, setSkinText] = useState(account.skinNames.join("\n"));
   const [characterText, setCharacterText] = useState(account.characterNames.join("\n"));
   const [gearText, setGearText] = useState(account.gearNames.join("\n"));
+  const [costumeText, setCostumeText] = useState(account.costumeNames.join("\n"));
+  const [accessoryText, setAccessoryText] = useState(account.accessoryNames.join("\n"));
 
   const [loginUser, setLoginUser] = useState(account.loginUsername);
   const [loginPass, setLoginPass] = useState(account.loginPassword);
@@ -282,6 +286,8 @@ export function AdminAccountDetail({ account }: { account: AccountDetailView }) 
       { kind: "WEAPON_SKIN", names: toNames(skinText), label: "súng" },
       { kind: "AGENT", names: toNames(characterText), label: "nhân vật" },
       { kind: "BUDDY", names: toNames(gearText), label: "trang bị" },
+      { kind: "COSTUME", names: toNames(costumeText), label: "trang phục" },
+      { kind: "ACCESSORY", names: toNames(accessoryText), label: "phụ kiện" },
     ];
     const saved: string[] = [];
     for (const list of lists) {
@@ -675,6 +681,8 @@ export function AdminAccountDetail({ account }: { account: AccountDetailView }) 
                   ["Súng", skinText, setSkinText],
                   ["Nhân vật", characterText, setCharacterText],
                   ["Trang bị", gearText, setGearText],
+                  ["Trang phục", costumeText, setCostumeText],
+                  ["Phụ kiện", accessoryText, setAccessoryText],
                 ] as const
               ).map(([label, value, set]) => (
                 <div key={label}>

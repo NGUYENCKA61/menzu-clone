@@ -32,7 +32,14 @@ const ACCOUNT_INVENTORY_STYLES = `
 }
 `;
 
-type InventoryTabKey = "weaponSkins" | "buddies" | "agents" | "cards" | "sprays";
+type InventoryTabKey =
+  | "weaponSkins"
+  | "buddies"
+  | "agents"
+  | "costumes"
+  | "accessories"
+  | "cards"
+  | "sprays";
 
 interface InventoryTab {
   key: InventoryTabKey;
@@ -47,6 +54,9 @@ interface InventoryTab {
 const INVENTORY_TABS: InventoryTab[] = [
   { key: "weaponSkins", label: "Trang bị súng", kind: "WEAPON_SKIN" },
   { key: "agents", label: "Nhân vật", kind: "AGENT" },
+  // CrossFire's own inventory order after the characters (24/10/2026).
+  { key: "costumes", label: "Trang phục", kind: "COSTUME" },
+  { key: "accessories", label: "Phụ kiện", kind: "ACCESSORY" },
   { key: "buddies", label: "Trang bị", kind: "BUDDY" },
   { key: "cards", label: "Cards", kind: "CARD" },
   { key: "sprays", label: "Sprays", kind: "SPRAY" },
@@ -93,6 +103,8 @@ const ORANGE_ACCENT: TabAccent = {
 const TAB_ACCENTS: Record<InventoryTabKey, TabAccent> = {
   weaponSkins: RED_ACCENT,
   agents: RED_ACCENT,
+  costumes: RED_ACCENT,
+  accessories: ORANGE_ACCENT,
   buddies: ORANGE_ACCENT,
   // Legacy scraped kinds; never shown for typed accounts.
   cards: RED_ACCENT,
@@ -100,7 +112,7 @@ const TAB_ACCENTS: Record<InventoryTabKey, TabAccent> = {
 };
 
 /**
- * The five inventory tabs on the account-detail page, with a weapon filter
+ * The inventory tabs on the account-detail page, with a weapon filter
  * over the skins tab.
  *
  * Item counts come from `account` rather than from `items.length`: the totals

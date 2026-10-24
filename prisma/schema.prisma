@@ -852,6 +852,11 @@ enum SkinKind {
   AGENT
   CARD
   SPRAY
+  /// "Trang phục": hats, masks, goggles, as CrossFire's own inventory
+  /// files them (the owner, 24/10/2026: "tạo thêm 1 cột dữ liệu").
+  COSTUME
+  /// "Phụ kiện": rings and charms ("phụ kiện luôn").
+  ACCESSORY
 }
 
 /// Valorant content tiers, matching the five coloured counters on every card.

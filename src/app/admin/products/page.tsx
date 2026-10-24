@@ -120,7 +120,7 @@ export default async function AdminProductsPage() {
     db.productSkin.groupBy({
       by: ["name"],
       where: {
-        kind: { in: ["WEAPON_SKIN", "AGENT", "BUDDY"] },
+        kind: { in: ["WEAPON_SKIN", "AGENT", "BUDDY", "COSTUME", "ACCESSORY"] },
         product: { deletedAt: null },
       },
       _count: { name: true },

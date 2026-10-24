@@ -48,10 +48,10 @@ export async function PUT(request: Request) {
   }
 
   // Which of the account's lists this write replaces. The kinds are the
-  // shop's three item categories — weapons, characters (AGENT rows) and gear
-  // (BUDDY rows); each save touches only its own kind, so editing the
-  // characters can never blank the guns.
-  const KINDS = ["WEAPON_SKIN", "AGENT", "BUDDY"] as const;
+  // shop's item categories — weapons, characters (AGENT rows), gear (BUDDY
+  // rows), costumes and accessories; each save touches only its own kind,
+  // so editing the characters can never blank the guns.
+  const KINDS = ["WEAPON_SKIN", "AGENT", "BUDDY", "COSTUME", "ACCESSORY"] as const;
   type Kind = (typeof KINDS)[number];
   const kind: Kind = KINDS.includes(body?.kind as Kind)
     ? (body?.kind as Kind)

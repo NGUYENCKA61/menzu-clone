@@ -33,7 +33,7 @@ export async function GET(
 
   // The detail page shows five separate inventory totals — the card's headline
   // count covers weapon skins only, so they cannot be collapsed into one number.
-  const inventory = { WEAPON_SKIN: 0, BUDDY: 0, AGENT: 0, CARD: 0, SPRAY: 0 };
+  const inventory = { WEAPON_SKIN: 0, BUDDY: 0, AGENT: 0, CARD: 0, SPRAY: 0, COSTUME: 0, ACCESSORY: 0 };
   const tierCounts = new Map<string, number>();
   for (const s of product.skins) {
     inventory[s.kind] += 1;
@@ -63,6 +63,8 @@ export async function GET(
       agents: inventory.AGENT,
       cards: inventory.CARD,
       sprays: inventory.SPRAY,
+      costumes: inventory.COSTUME,
+      accessories: inventory.ACCESSORY,
     },
     tiers: [...tierCounts].map(([tier, count]) => ({ tier, count })),
   });

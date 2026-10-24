@@ -55,7 +55,7 @@ export default async function AdminAccountDetailPage({
         orderBy: { sortOrder: "asc" },
       },
       skins: {
-        where: { kind: { in: ["WEAPON_SKIN", "AGENT", "BUDDY"] } },
+        where: { kind: { in: ["WEAPON_SKIN", "AGENT", "BUDDY", "COSTUME", "ACCESSORY"] } },
         select: { kind: true, name: true },
         orderBy: { id: "asc" },
       },
@@ -257,6 +257,12 @@ export default async function AdminAccountDetailPage({
             .map((s) => s.name),
           gearNames: product.skins
             .filter((s) => s.kind === "BUDDY")
+            .map((s) => s.name),
+          costumeNames: product.skins
+            .filter((s) => s.kind === "COSTUME")
+            .map((s) => s.name),
+          accessoryNames: product.skins
+            .filter((s) => s.kind === "ACCESSORY")
             .map((s) => s.name),
           loginUsername: product.loginUsername ?? "",
           loginPassword: product.loginPassword ?? "",

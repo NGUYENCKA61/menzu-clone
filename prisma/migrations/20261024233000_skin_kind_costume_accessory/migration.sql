@@ -1,0 +1,3 @@
+-- AlterEnum
+ALTER TYPE "SkinKind" ADD VALUE 'COSTUME';
+ALTER TYPE "SkinKind" ADD VALUE 'ACCESSORY';

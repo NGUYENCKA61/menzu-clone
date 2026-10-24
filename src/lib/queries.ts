@@ -836,6 +836,8 @@ export async function getAccountDetail(
     agents: p.agentCount ?? countKind(p.skins, "AGENT"),
     cards: p.cardCount ?? countKind(p.skins, "CARD"),
     sprays: p.sprayCount ?? countKind(p.skins, "SPRAY"),
+    costumes: countKind(p.skins, "COSTUME"),
+    accessories: countKind(p.skins, "ACCESSORY"),
     level: p.level,
     vip: p.vip,
     vipIngame: p.vipIngame,
