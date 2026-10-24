@@ -148,7 +148,7 @@ export function ProductCard({ product, priority = false, eager = false, old = fa
           : "rounded-[14px] border border-white/10 bg-panel lift-card hover:-translate-y-1 hover:border-[var(--menzu-accent)]/50 hover:shadow-[0_15px_40px_#00000088]"
       }`}
     >
-      <div className={`relative aspect-[16/10] w-full overflow-hidden bg-raise ${old ? "lab-notch-top" : "rounded-t-[14px]"}`}>
+      <div className={`relative w-full overflow-hidden bg-raise ${old ? "aspect-[16/10] lab-notch-top" : "aspect-[16/9] rounded-t-[14px]"}`}>
         <CardImage
           src={product.imageUrl ?? productImage(product.code)}
           // A stock code is not a description. Somebody hearing this read out
@@ -172,7 +172,7 @@ export function ProductCard({ product, priority = false, eager = false, old = fa
             : eager
               ? { loading: "eager" as const }
               : {})}
-          className="object-cover object-[85%_center] transition-transform duration-500 group-hover:scale-105"
+          className={`object-cover object-[85%_center] transition-transform duration-500 ${old ? "group-hover:scale-105" : "group-hover:scale-[1.025]"}`}
         />
         {old ? (
           // A fade along the bottom edge so the picture hands off to the body
@@ -182,23 +182,13 @@ export function ProductCard({ product, priority = false, eager = false, old = fa
             className="pointer-events-none absolute inset-x-0 bottom-0 h-[30%] bg-gradient-to-t from-black/45 to-transparent"
           />
         ) : (
-          // The home tile's shade, its red hover line and the name over it,
-          // as on the software card.
-          <>
-            <span aria-hidden className="pointer-events-none absolute inset-0 lab-lmarket-shade" />
-            <span
-              aria-hidden
-              className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-[var(--menzu-accent)]/70 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-            />
-            <span className="absolute inset-x-3.5 bottom-3 z-10">
-              <h3
-                title={title}
-                className="line-clamp-2 text-[17px] font-extrabold leading-[1.15] text-white transition-colors duration-300 group-hover:text-[var(--menzu-accent)]"
-              >
-                {title}
-              </h3>
-            </span>
-          </>
+          // The picture stands clean as the tool card's does, only its red
+          // hover line kept; the name moved under it (24/10/2026, "card acc
+          // làm cho đồng bộ đi").
+          <span
+            aria-hidden
+            className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-[var(--menzu-accent)]/70 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+          />
         )}
 
         <div className="absolute inset-x-3 top-3 z-10 flex items-start justify-between gap-2">
@@ -243,23 +233,35 @@ export function ProductCard({ product, priority = false, eager = false, old = fa
       </div>
 
       <div className="flex flex-1 flex-col p-4">
-        {/* Title with the red marker bar, same as the software card's (the
-            old card; the new one names the account on its picture). */}
+        {/* The name under the picture in both looks; the new one wears the
+            software card's red marker bar and two held lines. */}
         {old ? (
           <div className="flex items-center gap-2.5">
             <h3 className="truncate text-[17px] font-semibold text-frost">{title}</h3>
           </div>
-        ) : null}
+        ) : (
+          // The tool card's name block: the red bar by the first line, 17px
+          // at 800, two lines held.
+          <div className="flex items-start gap-2.5">
+            <span aria-hidden className="mt-1 h-4 w-[3px] shrink-0 rounded-full bg-[var(--menzu-accent)]" />
+            <h3
+              title={title}
+              className="line-clamp-2 min-h-[2.75em] min-w-0 break-words text-[17px] font-extrabold leading-snug text-white transition-colors duration-300 group-hover:text-[var(--menzu-accent)]"
+            >
+              {title}
+            </h3>
+          </div>
+        )}
 
         {/* This account's own words when the shop wrote some; the stock two
             lines otherwise, so no card ever shows a blank where prose goes.
             13px like the tool card's blurb on the same page (24/10/2026). */}
         {product.description ? (
-          <p className={`mb-[14px] line-clamp-2 min-h-[37px] text-[13px] leading-[1.55] text-[#9b9da5] ${old ? "mt-2" : ""}`}>
+          <p className="mb-[14px] mt-2 line-clamp-2 min-h-[37px] text-[13px] leading-[1.55] text-mist">
             {product.description}
           </p>
         ) : (
-          <p className={`mb-[14px] line-clamp-2 min-h-[37px] text-[13px] leading-[1.55] text-[#9b9da5] ${old ? "mt-2" : ""}`}>
+          <p className="mb-[14px] mt-2 line-clamp-2 min-h-[37px] text-[13px] leading-[1.55] text-mist">
             Tài khoản game nhiều vật phẩm, inventory đẹp và sẵn sàng giao ngay.
             <br />
             Thông tin tài khoản được kiểm tra trước khi bàn giao.
