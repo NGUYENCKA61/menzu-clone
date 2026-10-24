@@ -246,7 +246,7 @@ export function ProductCard({ product, priority = false, eager = false, old = fa
             <span aria-hidden className="mt-1 h-4 w-[3px] shrink-0 rounded-full bg-[var(--menzu-accent)]" />
             <h3
               title={title}
-              className="line-clamp-2 min-h-[2.75em] min-w-0 break-words text-[17px] font-extrabold leading-snug text-white transition-colors duration-300 group-hover:text-[var(--menzu-accent)]"
+              className="line-clamp-2 min-h-[2.75em] min-w-0 break-words text-[16px] font-extrabold leading-snug text-white transition-colors duration-300 group-hover:text-[var(--menzu-accent)]"
             >
               {title}
             </h3>

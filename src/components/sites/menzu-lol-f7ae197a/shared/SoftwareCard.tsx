@@ -329,7 +329,7 @@ export function SoftwareCard({
               <span aria-hidden className="mt-1 h-4 w-[3px] shrink-0 rounded-full bg-[var(--menzu-accent)]" />
               <h3
                 title={titleCase(software.name)}
-                className="line-clamp-2 min-h-[2.75em] min-w-0 break-words text-[17px] font-extrabold leading-snug text-white transition-colors duration-300 group-hover:text-[var(--menzu-accent)]"
+                className="line-clamp-2 min-h-[2.75em] min-w-0 break-words text-[16px] font-extrabold leading-snug text-white transition-colors duration-300 group-hover:text-[var(--menzu-accent)]"
               >
                 {titleCase(software.name)}
               </h3>
