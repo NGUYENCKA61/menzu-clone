@@ -259,11 +259,11 @@ export function ProductCard({ product, priority = false, eager = false, old = fa
             lines otherwise, so no card ever shows a blank where prose goes.
             13px like the tool card's blurb on the same page (24/10/2026). */}
         {product.description ? (
-          <p className="mb-[14px] mt-2 line-clamp-2 min-h-[37px] text-[13px] leading-[1.55] text-mist">
+          <p className="mb-[14px] mt-2 line-clamp-2 min-h-[37px] text-justify text-[13px] leading-[1.55] text-mist">
             {product.description}
           </p>
         ) : (
-          <p className="mb-[14px] mt-2 line-clamp-2 min-h-[37px] text-[13px] leading-[1.55] text-mist">
+          <p className="mb-[14px] mt-2 line-clamp-2 min-h-[37px] text-justify text-[13px] leading-[1.55] text-mist">
             Tài khoản game nhiều vật phẩm, inventory đẹp và sẵn sàng giao ngay.
             <br />
             Thông tin tài khoản được kiểm tra trước khi bàn giao.
