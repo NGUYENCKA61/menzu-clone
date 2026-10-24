@@ -99,10 +99,12 @@ export function SimilarSoftwareStrip({ items, old = false }: { items: SoftwareCa
           exactly one press of the arrow. The scrollbar is hidden — the
           arrows and the swipe are the controls — by .hide-scrollbar: the
           arbitrary [scrollbar-width:none] lost to globals.css's unlayered
-          "* { scrollbar-width: thin }" and a thin bar showed (19/10/2026). */}
+          "* { scrollbar-width: thin }" and a thin bar showed (19/10/2026).
+          pt-1 gives the card's hover lift room inside the scroll box, which
+          would clip it; -mt-1 keeps the strip where it was. */}
       <div
         ref={strip}
-        className={`flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2 lg:gap-6 xl:gap-8 ${
+        className={`-mt-1 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2 pt-1 lg:gap-6 xl:gap-8 ${
           old ? "[scrollbar-width:none] [&::-webkit-scrollbar]:hidden" : "hide-scrollbar"
         }`}
       >
