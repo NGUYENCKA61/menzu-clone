@@ -363,9 +363,11 @@ export function ProductCard({ product, priority = false, eager = false, old = fa
             {/* The software card's primary button, worn here by the whole-card
                 link: the account page is where the purchase happens. Worded
                 12px like its "Thuê ngay" (24/10/2026), but white with black
-                words ("nút mua ngay chuyển sang màu trắng chữ đen"). */}
+                words ("nút mua ngay chuyển sang màu trắng chữ đen"), turning
+                the accent red, words white, while the card is hovered ("rê
+                vào là màu đỏ"). */}
             <span
-              className={`flex items-center bg-white px-5 text-[12px] font-semibold text-black transition-colors group-hover:bg-neutral-200 ${
+              className={`flex items-center bg-white px-5 text-[12px] font-semibold text-black transition-colors group-hover:bg-[var(--menzu-accent)] group-hover:text-white ${
                 old ? "h-11 rounded-xl" : "h-[42px] rounded-[10px]"
               }`}
             >
