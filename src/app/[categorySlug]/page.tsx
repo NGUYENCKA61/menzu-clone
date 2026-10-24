@@ -42,6 +42,9 @@ interface PageProps {
     skin?: string;
     /** The account panel's "Loại": nfa | full. */
     loai?: string;
+    /** The account panel's VIP range, 1 to 7 each end. */
+    vmin?: string;
+    vmax?: string;
     /** The software panel's own keys, kept apart from the account panel's. */
     pm?: string;
     cn?: string;
@@ -138,6 +141,12 @@ async function categoryMetadata(
   };
 }
 
+/** A VIP level from the URL, 1 to 7; anything else is no bound. */
+function vipFromParam(value?: string): number | undefined {
+  const n = Number(value);
+  return Number.isInteger(n) && n >= 1 && n <= 7 ? n : undefined;
+}
+
 export default async function CategoryPage({ params, searchParams }: PageProps) {
   const { categorySlug: slug } = await params;
   const query = await searchParams;
@@ -156,6 +165,8 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
       : undefined,
     skin: query.skin?.trim() || undefined,
     accountType: query.loai === "nfa" ? "NFA" : query.loai === "full" ? "FULL" : undefined,
+    vipMin: vipFromParam(query.vmin),
+    vipMax: vipFromParam(query.vmax),
     software: query.pm?.trim() || undefined,
     softwareFeature: query.cn?.trim() || undefined,
     softwareStatus:

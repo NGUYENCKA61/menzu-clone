@@ -380,6 +380,9 @@ export interface CategoryFilters {
   /** An account's mail, by its tag: "NFA", or "FULL" for FULL THÔNG TIN
    *  (any tag that starts FULL). */
   accountType?: "NFA" | "FULL";
+  /** VIP floor and ceiling, 1 to 7, either or both. */
+  vipMin?: number;
+  vipMax?: number;
 }
 
 /**
@@ -493,6 +496,14 @@ function categoryWhere(categoryId: string, filters: CategoryFilters) {
       : filters.accountType === "FULL"
         ? { tags: { some: { label: { startsWith: "FULL", mode: "insensitive" as const } } } }
         : {}),
+    ...(filters.vipMin !== undefined || filters.vipMax !== undefined
+      ? {
+          vip: {
+            ...(filters.vipMin !== undefined ? { gte: filters.vipMin } : {}),
+            ...(filters.vipMax !== undefined ? { lte: filters.vipMax } : {}),
+          },
+        }
+      : {}),
   };
 }
 

@@ -2,7 +2,7 @@
 
 import { useEffect, useOptimistic, useState, useTransition } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { ChevronDown, Loader2, Search, SlidersHorizontal } from "lucide-react";
+import { ChevronDown, Clock, Loader2, Search, SlidersHorizontal } from "lucide-react";
 
 import {
   CHIP_ACTIVE,
@@ -15,6 +15,7 @@ import {
   SEGMENTS_CLASS,
 } from "./filterChrome";
 import { ScopeSearchField } from "./ScopeSearchField";
+import { VipRangeSelect } from "./VipRangeSelect";
 
 interface PricePreset {
   label: string;
@@ -95,6 +96,11 @@ export function CategoryFilterPanel({ hotPicks }: CategoryFilterPanelProps) {
   });
   const sort = (params.get("sort") as SortValue) ?? "newest";
   const type = params.get("loai") === "nfa" || params.get("loai") === "full" ? (params.get("loai") as string) : "";
+  const vipLevel = (key: string) => {
+    const n = Number(params.get(key));
+    return Number.isInteger(n) && n >= 1 && n <= 7 ? n : null;
+  };
+  const vip = { min: vipLevel("vmin"), max: vipLevel("vmax") };
 
   // The pressed chip lights in the same frame as the press. The URL is the
   // only source of truth — these are React's own optimistic copies of it,
@@ -103,10 +109,16 @@ export function CategoryFilterPanel({ hotPicks }: CategoryFilterPanelProps) {
   const [isPending, startTransition] = useTransition();
   const [shownSort, showSort] = useOptimistic(sort);
   const [shownType, showType] = useOptimistic(type);
+  const [shownVip, showVip] = useOptimistic(vip);
   /** The price and chip groups, on a phone: folded until asked for. */
   const [filtersOpen, setFiltersOpen] = useState(false);
   const filtering =
-    priceMin !== "" || priceMax !== "" || shownSort !== "newest" || shownType !== "";
+    priceMin !== "" ||
+    priceMax !== "" ||
+    shownSort !== "newest" ||
+    shownType !== "" ||
+    shownVip.min !== null ||
+    shownVip.max !== null;
 
   // The grid is the server page's, out of this panel's reach; it reads this
   // attribute off <html> and steps back while the filter is on its way.
@@ -137,7 +149,10 @@ export function CategoryFilterPanel({ hotPicks }: CategoryFilterPanelProps) {
     // new one is ready, instead of dropping to its loading skeleton on every
     // chip. This is what lets a category page carry a loading.tsx at all.
     startTransition(() => {
-      router.push(query ? `${pathname}?${query}` : pathname);
+      // scroll: false keeps the shopper where they are; a filter that threw
+      // them back to the top of the page made every chip a trip (24/10/2026,
+      // "mỗi lần lọc là tự nhảy về đầu trang").
+      router.push(query ? `${pathname}?${query}` : pathname, { scroll: false });
     });
   }
 
@@ -311,6 +326,7 @@ export function CategoryFilterPanel({ hotPicks }: CategoryFilterPanelProps) {
                     }
                     className={shownSort === option.value ? SEGMENT_PICKED : SEGMENT_IDLE}
                   >
+                    {option.value === "newest" ? <Clock size={12} aria-hidden /> : null}
                     {option.label}
                   </button>
                 ))}
@@ -339,6 +355,22 @@ export function CategoryFilterPanel({ hotPicks }: CategoryFilterPanelProps) {
                   </button>
                 ))}
               </div>
+            </div>
+
+            <span aria-hidden className={GROUP_DIVIDER} />
+
+            <div>
+              <span className={GROUP_LABEL_CLASS}>VIP</span>
+              <VipRangeSelect
+                min={shownVip.min}
+                max={shownVip.max}
+                onChange={(min, max) =>
+                  startTransition(() => {
+                    showVip({ min, max });
+                    apply({ vmin: min === null ? "" : String(min), vmax: max === null ? "" : String(max) });
+                  })
+                }
+              />
             </div>
           </div>
         </div>

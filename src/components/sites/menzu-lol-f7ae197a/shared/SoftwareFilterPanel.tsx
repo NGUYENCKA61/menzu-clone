@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronDown, Crosshair, Loader2, Search, SlidersHorizontal } from "lucide-react";
+import { ChevronDown, Clock, Crosshair, Loader2, Search, SlidersHorizontal } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useOptimistic, useState, useTransition } from "react";
 
@@ -133,7 +133,10 @@ export function SoftwareFilterPanel({
     }
     const search = next.toString();
     startTransition(() => {
-      router.push(search ? `${pathname}?${search}` : pathname);
+      // scroll: false keeps the shopper where they are; a filter that threw
+      // them back to the top of the page made every chip a trip (24/10/2026,
+      // "mỗi lần lọc là tự nhảy về đầu trang").
+      router.push(search ? `${pathname}?${search}` : pathname, { scroll: false });
     });
   }
 
@@ -322,6 +325,7 @@ export function SoftwareFilterPanel({
                   }
                   className={shownSort === option.value ? SEGMENT_ACTIVE : SEGMENT}
                 >
+                  {option.value === "newest" ? <Clock size={12} aria-hidden /> : null}
                   {option.label}
                 </button>
               ))}
