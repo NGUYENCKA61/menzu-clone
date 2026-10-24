@@ -78,9 +78,11 @@ function groupOf(tab: InventoryTab, item: InventoryItemView): string | null {
 /**
  * menzu's tile treatment, tinted by the item's grade the way CrossFire tints
  * its own inventory (the owner, 25/10/2026: "làm đi", "ô tím hình như là
- * súng AI"): VIP gold, AI purple, Nano blue. A bar along the top,
- * a tinted border, a glow rising from the foot, the name and a corner badge
- * in the same colour. Ordinary items stay plain.
+ * súng AI"): VIP gold, AI purple, Nano blue. A bar along the top with the
+ * colour falling from it down the tile, as menzu's does ("sao cái khoảng đó
+ * của mình đen hơn menzu": a glow from the foot left the top black),
+ * a tinted border, the name and a corner badge in the same colour.
+ * Ordinary items stay plain.
  */
 const GRADE_TILES: Record<"VIP" | "AI" | "Nano", { border: string; top: string; glow: string; name: string; badge: string }> = {
   VIP: {
@@ -319,7 +321,7 @@ export function AccountInventory({ account, items }: AccountInventoryProps) {
                         <span aria-hidden className={`absolute inset-x-0 top-0 h-[3px] ${look.top}`} />
                         <span
                           aria-hidden
-                          className={`pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t ${look.glow} to-transparent`}
+                          className={`pointer-events-none absolute inset-x-0 top-0 h-3/4 bg-gradient-to-b ${look.glow} to-transparent`}
                         />
                         <span
                           className={`absolute left-0 top-0 z-[1] rounded-br-lg px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wide ${look.badge}`}
