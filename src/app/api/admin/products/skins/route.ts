@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { FORBIDDEN, getAdmin } from "@/lib/admin";
+import { readGradeMark } from "@/lib/cfGrades";
 import { parseGroupedLines } from "@/lib/cfInventoryGroups";
 import { db } from "@/lib/db";
 
@@ -66,9 +67,13 @@ export async function PUT(request: Request) {
   const seen = new Set<string>();
   const names: string[] = [];
   const groups = new Map<string, string | null>();
+  // "(VIP)" / "(Hiếm)" / "(Thường)" after a name is the shop's grade (lib/cfGrades).
+  const tiers = new Map<string, "ULTRA" | "PREMIUM" | "SELECT" | null>();
   const lines = body.names.filter((raw): raw is string => typeof raw === "string");
   for (const entry of parseGroupedLines(lines)) {
-    const name = entry.name.replace(/\s+/g, " ");
+    const marked = readGradeMark(entry.name);
+    const name = marked.name.replace(/\s+/g, " ");
+    if (!name) continue;
     if (name.length > MAX_NAME_LENGTH) {
       return NextResponse.json(
         { error: `Tên súng quá dài (tối đa ${MAX_NAME_LENGTH} ký tự): ${name.slice(0, 40)}…` },
@@ -80,6 +85,7 @@ export async function PUT(request: Request) {
     seen.add(key);
     names.push(name);
     groups.set(key, entry.group && entry.group.length <= 40 ? entry.group : null);
+    tiers.set(key, marked.tier);
   }
 
   if (names.length > MAX_NAMES) {
@@ -124,7 +130,7 @@ export async function PUT(request: Request) {
           productId: product.id,
           kind,
           name,
-          tier: old?.tier ?? null,
+          tier: tiers.get(name.toLowerCase()) ?? null,
           iconUrl: old?.iconUrl ?? null,
           weapon: groups.get(name.toLowerCase()) ?? null,
         };

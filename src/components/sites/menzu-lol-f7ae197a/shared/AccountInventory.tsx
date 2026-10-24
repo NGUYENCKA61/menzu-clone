@@ -13,6 +13,8 @@ export interface InventoryItemView {
   iconUrl: string | null;
   /** The item's group: a weapon's "Vũ khí phụ", a gear item's "Chức năng". */
   weapon: string | null;
+  /** VIP / Hiếm (lib/cfGrades); null is an ordinary item. */
+  grade: "VIP" | "Hiếm" | null;
 }
 
 export interface AccountInventoryProps {
@@ -72,6 +74,32 @@ function tabTotal(account: AccountDetail, key: InventoryTabKey): number {
 function groupOf(tab: InventoryTab, item: InventoryItemView): string | null {
   return tab.key === "characters" ? (KIND_GROUP[item.kind] ?? null) : item.weapon;
 }
+
+/**
+ * menzu's tile treatment, tinted by the item's grade the way CrossFire tints
+ * its own inventory (the owner, 25/10/2026: "làm đi"): a bar along the top,
+ * a tinted border, a glow rising from the foot, the name and a corner badge
+ * in the same colour. Ordinary items stay plain.
+ */
+const GRADE_TILES: Record<"VIP" | "Hiếm", { border: string; top: string; glow: string; name: string; badge: string }> = {
+  VIP: {
+    border: "border-amber-500/40",
+    top: "bg-amber-400",
+    glow: "from-amber-500/20",
+    name: "text-amber-300",
+    badge: "bg-amber-400 text-black",
+  },
+  "Hiếm": {
+    border: "border-violet-500/40",
+    top: "bg-violet-500",
+    glow: "from-violet-500/20",
+    name: "text-violet-300",
+    badge: "bg-violet-500 text-white",
+  },
+};
+
+const GRADE_ORDER = { VIP: 0, "Hiếm": 1 } as const;
+const gradeRank = (item: InventoryItemView) => (item.grade ? GRADE_ORDER[item.grade] : 2);
 
 // Three rows of the desktop grid (5 columns); "Xem thêm" pages the rest in.
 const PAGE_SIZE = 15;
@@ -151,7 +179,7 @@ export function AccountInventory({ account, items }: AccountInventoryProps) {
 
   const tab = INVENTORY_TABS.find((t) => t.key === activeTab) ?? INVENTORY_TABS[0]!;
 
-  /** This tab's items, "Tất cả" laid out in the game's group order. */
+  /** This tab's items, "Tất cả" laid out in the game's group order, VIP first in each. */
   const tabItems = useMemo(() => {
     const rank = (item: InventoryItemView) => {
       const at = tab.groups.indexOf(groupOf(tab, item) ?? "");
@@ -160,7 +188,7 @@ export function AccountInventory({ account, items }: AccountInventoryProps) {
     return items
       .filter((item) => tab.kinds.includes(item.kind))
       .map((item, index) => ({ item, index }))
-      .sort((a, b) => rank(a.item) - rank(b.item) || a.index - b.index)
+      .sort((a, b) => rank(a.item) - rank(b.item) || gradeRank(a.item) - gradeRank(b.item) || a.index - b.index)
       .map(({ item }) => item);
   }, [items, tab]);
 
@@ -271,30 +299,49 @@ export function AccountInventory({ account, items }: AccountInventoryProps) {
               Không tìm thấy “{query.trim()}” trong {tab.label.toLowerCase()}.
             </p>
           ) : visible.length > 0
-            ? visible.map((item) => (
-                <div
-                  key={item.id}
-                  className={`group aspect-[4/3] rounded-xl bg-neutral-950 border border-neutral-800 ${accent.tileHover} transition-colors flex flex-col items-center justify-center p-2 gap-1.5 card-item-appear overflow-hidden`}
-                >
-                  {item.iconUrl ? (
-                    <div className="relative w-full flex-1">
-                      <Image
-                        src={item.iconUrl}
-                        alt=""
-                        fill
-                        sizes="(min-width: 1024px) 20vw, (min-width: 640px) 33vw, 50vw"
-                        className="object-contain group-hover:scale-105 transition-transform duration-300"
-                        unoptimized
-                      />
-                    </div>
-                  ) : (
-                    <ImageOff size={18} className="text-neutral-700 flex-1" />
-                  )}
-                  <span className="w-full text-center text-[10px] font-bold text-neutral-400 group-hover:text-white transition-colors truncate">
-                    {item.name}
-                  </span>
-                </div>
-              ))
+            ? visible.map((item) => {
+                const look = item.grade ? GRADE_TILES[item.grade] : null;
+                return (
+                  <div
+                    key={item.id}
+                    className={`group relative aspect-[4/3] rounded-xl bg-neutral-950 border ${look ? look.border : "border-neutral-800"} ${accent.tileHover} transition-colors flex flex-col items-center justify-center p-2 gap-1.5 card-item-appear overflow-hidden`}
+                  >
+                    {look ? (
+                      <>
+                        <span aria-hidden className={`absolute inset-x-0 top-0 h-[3px] ${look.top}`} />
+                        <span
+                          aria-hidden
+                          className={`pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t ${look.glow} to-transparent`}
+                        />
+                        <span
+                          className={`absolute left-0 top-0 z-[1] rounded-br-lg px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wide ${look.badge}`}
+                        >
+                          {item.grade}
+                        </span>
+                      </>
+                    ) : null}
+                    {item.iconUrl ? (
+                      <div className="relative w-full flex-1">
+                        <Image
+                          src={item.iconUrl}
+                          alt=""
+                          fill
+                          sizes="(min-width: 1024px) 20vw, (min-width: 640px) 33vw, 50vw"
+                          className="object-contain group-hover:scale-105 transition-transform duration-300"
+                          unoptimized
+                        />
+                      </div>
+                    ) : (
+                      <ImageOff size={18} className="relative text-neutral-700 flex-1" />
+                    )}
+                    <span
+                      className={`relative w-full text-center text-[10px] font-bold ${look ? look.name : "text-neutral-400"} group-hover:text-white transition-colors truncate`}
+                    >
+                      {item.name}
+                    </span>
+                  </div>
+                );
+              })
             : // Totals exist for every product, per-item rows do not yet.
               Array.from({ length: Math.min(total, PAGE_SIZE) }, (_, index) => (
                 <div

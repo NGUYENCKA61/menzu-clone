@@ -9,6 +9,7 @@ import { AdminSoftwareDetail } from "@/components/sites/menzu-lol-f7ae197a/share
 import { WarrantyQuestionsEditor } from "@/components/sites/menzu-lol-f7ae197a/shared/WarrantyQuestionsEditor";
 import { parseQuestionSet, resolveQuestions } from "@/lib/warrantyDetails";
 import { getAdmin } from "@/lib/admin";
+import { gradeMark } from "@/lib/cfGrades";
 import { groupedLines } from "@/lib/cfInventoryGroups";
 import { db } from "@/lib/db";
 import { isHtmlBody, plainToDocHtml } from "@/lib/docHtml";
@@ -57,7 +58,7 @@ export default async function AdminAccountDetailPage({
       },
       skins: {
         where: { kind: { in: ["WEAPON_SKIN", "AGENT", "BUDDY", "COSTUME", "ACCESSORY"] } },
-        select: { kind: true, name: true, weapon: true },
+        select: { kind: true, name: true, weapon: true, tier: true },
         orderBy: { id: "asc" },
       },
       // Who holds this account now, if anyone: the sign-in card says whether
@@ -254,22 +255,22 @@ export default async function AdminAccountDetailPage({
           skinNames: groupedLines(
             product.skins
               .filter((s) => s.kind === "WEAPON_SKIN")
-              .map((s) => ({ name: s.name, group: s.weapon })),
+              .map((s) => ({ name: s.name + gradeMark(s.tier), group: s.weapon })),
           ),
           characterNames: product.skins
             .filter((s) => s.kind === "AGENT")
-            .map((s) => s.name),
+            .map((s) => s.name + gradeMark(s.tier)),
           gearNames: groupedLines(
             product.skins
               .filter((s) => s.kind === "BUDDY")
-              .map((s) => ({ name: s.name, group: s.weapon })),
+              .map((s) => ({ name: s.name + gradeMark(s.tier), group: s.weapon })),
           ),
           costumeNames: product.skins
             .filter((s) => s.kind === "COSTUME")
-            .map((s) => s.name),
+            .map((s) => s.name + gradeMark(s.tier)),
           accessoryNames: product.skins
             .filter((s) => s.kind === "ACCESSORY")
-            .map((s) => s.name),
+            .map((s) => s.name + gradeMark(s.tier)),
           loginUsername: product.loginUsername ?? "",
           loginPassword: product.loginPassword ?? "",
           loginNote: product.loginNote ?? "",
