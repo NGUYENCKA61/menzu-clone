@@ -348,8 +348,8 @@ export function ProductCard({ product, priority = false, eager = false, old = fa
                   product.tag.toUpperCase() === "NFA"
                     ? "border-violet-500/30 bg-violet-500/10 text-violet-400"
                     : product.tag.toUpperCase() === "RANDOM"
-                      ? "border-amber-500/30 bg-amber-500/10 text-amber-400"
-                      : "border-white/10 bg-[#0d0d12]/88 text-[#ff6c88]"
+                      ? "border-red-500/30 bg-red-500/10 text-red-400"
+                      : "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
                 }`}
               >
                 {product.tag.toUpperCase() === "NFA" ? (
