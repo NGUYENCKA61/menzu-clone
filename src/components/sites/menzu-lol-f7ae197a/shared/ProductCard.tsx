@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { CardImage } from "@/components/sites/menzu-lol-f7ae197a/shared/CardImage";
 import { SiteLink } from "./SiteLink";
-import { Lock } from "lucide-react";
+import { ChevronRight, Lock } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { sentenceCase } from "@/lib/displayCase";
 import {
@@ -367,11 +367,17 @@ export function ProductCard({ product, priority = false, eager = false, old = fa
                 the accent red, words white, while the card is hovered ("rê
                 vào là màu đỏ"). */}
             <span
-              className={`flex items-center bg-white px-5 text-[12px] font-semibold text-black transition-colors group-hover:bg-[var(--menzu-accent)] group-hover:text-white ${
+              className={`flex items-center gap-1 bg-white pl-5 pr-4 text-[12px] font-semibold text-black transition-colors group-hover:bg-[var(--menzu-accent)] group-hover:text-white ${
                 old ? "h-11 rounded-xl" : "h-[42px] rounded-[10px]"
               }`}
             >
               Mua ngay
+              <ChevronRight
+                size={14}
+                strokeWidth={2.5}
+                aria-hidden
+                className="transition-transform duration-200 group-hover:translate-x-0.5"
+              />
             </span>
           </div>
         </div>
