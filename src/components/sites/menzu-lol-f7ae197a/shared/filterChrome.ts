@@ -49,11 +49,9 @@ export const GROUP_DIVIDER = "hidden lg:block w-px self-stretch bg-white/10";
 export const GROUP_LABEL_CLASS =
   "text-[10px] uppercase font-black tracking-wider text-neutral-500 mb-1.5 ml-1 block";
 
-/** The sunken card the chip rows sit in. Its edge is the product cards'
- *  white 10%, so the box and the grid under it read as one kind of block
- *  (24/10/2026; menzu's neutral-800/40 all but vanished next to them). */
+/** The sunken card the chip rows sit in. */
 export const PANEL_CLASS =
-  "bg-neutral-900/35 border border-white/10 rounded-2xl p-3.5 md:p-4 flex flex-col gap-4";
+  "bg-neutral-900/35 border border-neutral-800/40 rounded-2xl p-3.5 md:p-4 flex flex-col gap-4";
 
 /**
  * The rounded well a search input sits in, lighting up on focus. rounded-3xl
