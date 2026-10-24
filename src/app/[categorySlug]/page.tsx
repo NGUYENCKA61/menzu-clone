@@ -336,11 +336,12 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
                 {/* The game in sentence case, as the title over the page names
                     the shelf (it printed the stored capitals, "ĐỘT KÍCH CFVN -
                     CF4VN", 19/10/2026). As large as the page's own title, still an
-                    h2 (24/10/2026, "giữ luôn chốt bản này đi"). 112px under it, so
-                    the panel's floating "Tìm tài khoản" pill stands about 60px
-                    below, as menzu spaces its title and pill ("cách giống menzu
-                    đi"). */}
-                <h2 className="mb-28 text-3xl font-black leading-tight text-white sm:text-4xl md:text-5xl">
+                    h2 (24/10/2026, "giữ luôn chốt bản này đi"). 118px from it to
+                    the search field, as from the page title to the tool search
+                    above ("so với cách giống tiêu đề hack đột kích với thẻ tìm
+                    kiếm"); the floating "Tìm tài khoản" pill stands about 67px
+                    under it, near menzu's 61px. */}
+                <h2 className="mb-[118px] text-3xl font-black leading-tight text-white sm:text-4xl md:text-5xl">
                   Danh mục tài khoản game{" "}
                   {(() => {
                     const game = data.name.replace(/^(tool\s+)?hack\s*\+?\s*/i, "").trim() || data.name;
