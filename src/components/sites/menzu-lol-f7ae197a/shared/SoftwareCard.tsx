@@ -516,7 +516,7 @@ export function SoftwareCard({
 
           <Link
             href={detailHref}
-            className="tool-more flex h-[42px] w-full items-center justify-center rounded-[10px] border border-[var(--menzu-accent)]/40 bg-transparent text-[12px] font-semibold text-[#ddd] transition-colors hover:bg-[var(--menzu-accent)]/10"
+            className="tool-more flex h-[42px] w-full items-center justify-center rounded-[10px] border border-transparent bg-[var(--menzu-accent)] text-[12px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent-dark)]"
           >
             Xem chi tiết
           </Link>
