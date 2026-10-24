@@ -339,8 +339,10 @@ export function ProductCard({ product, priority = false, eager = false, old = fa
             </div>
             {product.tag !== null ? (
               <span
-                className={`ml-auto inline-flex shrink-0 items-center gap-1 rounded-md border border-white/10 bg-[#0d0d12]/88 px-2.5 py-1 text-[12px] font-semibold ${
-                  product.tag.toUpperCase() === "NFA" ? "text-emerald-400" : "text-[#ff6c88]"
+                className={`ml-auto inline-flex shrink-0 items-center gap-1 rounded-md border px-2.5 py-1 text-[12px] font-semibold ${
+                  product.tag.toUpperCase() === "NFA"
+                    ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
+                    : "border-white/10 bg-[#0d0d12]/88 text-[#ff6c88]"
                 }`}
               >
                 {product.tag.toUpperCase() === "NFA" ? (
