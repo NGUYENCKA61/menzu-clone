@@ -418,34 +418,25 @@ export function SoftwareCard({
                       : "Chưa có gói"
                 } - ${software.name}`}
                 onClick={() => hasPackages && setOpen((o) => !o)}
-                // The old shop's picker look, on trial (24/10/2026, "nút chọn
-                // gói làm giống style nút chọn gói bên thichthihack.com cũ
-                // thử"): no box, its faint underline, the words centred at
-                // 13px regular ("13px th") without the dashes ("bỏ -- thử"),
-                // the arrow at the right. ?ban=cu keeps the box.
-                className={`relative flex h-[42px] w-full items-center outline-none transition-colors duration-200 hover:border-[var(--menzu-accent)]/45 hover:text-white focus-visible:ring-2 focus-visible:ring-[var(--menzu-accent)]/40 aria-expanded:border-[var(--menzu-accent)]/45 aria-expanded:text-white disabled:opacity-50 ${
-                  old
-                    ? "justify-between gap-1 rounded-[10px] border bg-white/[0.02] px-2.5 text-[11px] font-extrabold"
-                    : "justify-center border-b px-6 text-[13px] font-normal"
+                className={`flex h-[42px] w-full items-center justify-between gap-1 rounded-[10px] border bg-white/[0.02] px-2.5 outline-none transition-colors duration-200 hover:border-[var(--menzu-accent)]/45 hover:text-white focus-visible:ring-2 focus-visible:ring-[var(--menzu-accent)]/40 aria-expanded:border-[var(--menzu-accent)]/45 aria-expanded:text-white disabled:opacity-50 ${
+                  old ? "text-[11px] font-extrabold" : "text-[13px] font-semibold"
                 } ${
                   chosen
                     ? "border-[var(--menzu-accent)]/45 text-white"
-                    : old
-                      ? "border-[#292a30] text-[#aaa]"
-                      : "border-[rgba(240,255,190,0.09)] text-white"
+                    : "border-[#292a30] text-[#aaa]"
                 }`}
               >
-                <span className="min-w-0 truncate">
+                <span className="truncate">
                   {chosen
                     ? `${chosen.label} - ${formatVnd(chosen.price)}đ`
                     : hasPackages
-                      ? old ? "-- Chọn gói --" : "Chọn gói"
+                      ? "-- Chọn gói --"
                       : "Chưa có gói"}
                 </span>
                 <ChevronDown
                   size={14}
                   aria-hidden
-                  className={`shrink-0 transition-transform duration-200 ${open ? "rotate-180" : ""} ${old ? "" : "absolute right-1"}`}
+                  className={`shrink-0 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
                 />
               </button>
 
@@ -466,7 +457,7 @@ export function SoftwareCard({
                       }}
                       className={`mb-1 ${optionCls(packageId === "")}`}
                     >
-                      {old ? "-- Chọn gói --" : "Chọn gói"}
+                      -- Chọn gói --
                     </button>
                     {software.packages.map((p) => (
                       <button
