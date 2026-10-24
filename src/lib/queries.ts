@@ -383,6 +383,8 @@ export interface CategoryFilters {
   /** VIP floor and ceiling, 1 to 7, either or both. */
   vipMin?: number;
   vipMax?: number;
+  /** Rank names an account's free-text rank may contain (lib/cfRanks). */
+  rankNames?: string[];
 }
 
 /**
@@ -481,16 +483,31 @@ function categoryWhere(categoryId: string, filters: CategoryFilters) {
     // covers the grid, the total and the page count together.
     deletedAt: null,
     ...(price.gte !== undefined || price.lte !== undefined ? { price } : {}),
-    ...(like
-      ? {
-          OR: [
-            { name: like },
-            { rank: like },
-            { description: like },
-            { skins: { some: { name: like } } },
-          ],
-        }
-      : {}),
+    // Two either-or groups can each narrow the listing, so they sit under AND
+    // rather than fighting over one OR key.
+    AND: [
+      ...(like
+        ? [
+            {
+              OR: [
+                { name: like },
+                { rank: like },
+                { description: like },
+                { skins: { some: { name: like } } },
+              ],
+            },
+          ]
+        : []),
+      ...(filters.rankNames && filters.rankNames.length > 0
+        ? [
+            {
+              OR: filters.rankNames.map((name) => ({
+                rank: { contains: name, mode: "insensitive" as const },
+              })),
+            },
+          ]
+        : []),
+    ],
     ...(filters.accountType === "NFA"
       ? { tags: { some: { label: { equals: "NFA", mode: "insensitive" as const } } } }
       : filters.accountType === "FULL"

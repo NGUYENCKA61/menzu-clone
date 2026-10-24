@@ -5,6 +5,7 @@ import { notFound, permanentRedirect } from "next/navigation";
 import { Breadcrumb } from "@/components/sites/menzu-lol-f7ae197a/shared/Breadcrumb";
 import { CategoryHero } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/CategoryHero";
 import { shelfTitle } from "@/lib/displayCase";
+import { rankPlace, rankSpan } from "@/lib/cfRanks";
 import { CategoryFilterPanel } from "@/components/sites/menzu-lol-f7ae197a/shared/CategoryFilterPanel";
 import { ProductCard } from "@/components/sites/menzu-lol-f7ae197a/shared/ProductCard";
 import { CardBoundary } from "@/components/sites/menzu-lol-f7ae197a/shared/CardBoundary";
@@ -45,6 +46,9 @@ interface PageProps {
     /** The account panel's VIP range, 1 to 7 each end. */
     vmin?: string;
     vmax?: string;
+    /** The account panel's rank range: places on lib/cfRanks' ladder. */
+    rmin?: string;
+    rmax?: string;
     /** The software panel's own keys, kept apart from the account panel's. */
     pm?: string;
     cn?: string;
@@ -167,6 +171,10 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
     accountType: query.loai === "nfa" ? "NFA" : query.loai === "full" ? "FULL" : undefined,
     vipMin: vipFromParam(query.vmin),
     vipMax: vipFromParam(query.vmax),
+    rankNames:
+      rankPlace(query.rmin) !== undefined || rankPlace(query.rmax) !== undefined
+        ? rankSpan(rankPlace(query.rmin), rankPlace(query.rmax))
+        : undefined,
     software: query.pm?.trim() || undefined,
     softwareFeature: query.cn?.trim() || undefined,
     softwareStatus:

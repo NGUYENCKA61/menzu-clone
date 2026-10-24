@@ -2,7 +2,9 @@
 
 import { useEffect, useOptimistic, useState, useTransition } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { ChevronDown, Clock, Loader2, Search, SlidersHorizontal } from "lucide-react";
+import { ChevronDown, Clock, Crown, Layers, Loader2, Search, SlidersHorizontal } from "lucide-react";
+
+import { CF_RANK_GROUPS, CF_RANKS, rankPlace } from "@/lib/cfRanks";
 
 import {
   CHIP_ACTIVE,
@@ -15,7 +17,7 @@ import {
   SEGMENTS_CLASS,
 } from "./filterChrome";
 import { ScopeSearchField } from "./ScopeSearchField";
-import { VipRangeSelect } from "./VipRangeSelect";
+import { LadderRangeSelect, type LadderGroup } from "./LadderRangeSelect";
 
 interface PricePreset {
   label: string;
@@ -41,6 +43,17 @@ const SORT_OPTIONS = [
 ] as const;
 
 type SortValue = (typeof SORT_OPTIONS)[number]["value"];
+
+// The VIP levels an account can carry, as the shop numbers them ("mà đánh
+// số 1 2 3 4 5 6 7"), and Đột Kích's ranks in their groups, a rank's place
+// being its index plus one.
+const VIP_GROUPS: LadderGroup[] = [
+  { items: [1, 2, 3, 4, 5, 6, 7].map((level) => ({ place: level, label: `VIP ${level}` })) },
+];
+const RANK_GROUPS: LadderGroup[] = CF_RANK_GROUPS.map((group) => ({
+  label: group.label,
+  items: group.ranks.map((rank) => ({ place: CF_RANKS.indexOf(rank) + 1, label: rank })),
+}));
 
 // "Loại": what mail an account comes with, as its tag on the card says
 // (the owner, 24/10/2026: "lọc tài khoản thêm loại nfa, full"). Written to
@@ -101,6 +114,7 @@ export function CategoryFilterPanel({ hotPicks }: CategoryFilterPanelProps) {
     return Number.isInteger(n) && n >= 1 && n <= 7 ? n : null;
   };
   const vip = { min: vipLevel("vmin"), max: vipLevel("vmax") };
+  const rank = { min: rankPlace(params.get("rmin")) ?? null, max: rankPlace(params.get("rmax")) ?? null };
 
   // The pressed chip lights in the same frame as the press. The URL is the
   // only source of truth — these are React's own optimistic copies of it,
@@ -110,6 +124,7 @@ export function CategoryFilterPanel({ hotPicks }: CategoryFilterPanelProps) {
   const [shownSort, showSort] = useOptimistic(sort);
   const [shownType, showType] = useOptimistic(type);
   const [shownVip, showVip] = useOptimistic(vip);
+  const [shownRank, showRank] = useOptimistic(rank);
   /** The price and chip groups, on a phone: folded until asked for. */
   const [filtersOpen, setFiltersOpen] = useState(false);
   const filtering =
@@ -118,7 +133,9 @@ export function CategoryFilterPanel({ hotPicks }: CategoryFilterPanelProps) {
     shownSort !== "newest" ||
     shownType !== "" ||
     shownVip.min !== null ||
-    shownVip.max !== null;
+    shownVip.max !== null ||
+    shownRank.min !== null ||
+    shownRank.max !== null;
 
   // The grid is the server page's, out of this panel's reach; it reads this
   // attribute off <html> and steps back while the filter is on its way.
@@ -361,13 +378,39 @@ export function CategoryFilterPanel({ hotPicks }: CategoryFilterPanelProps) {
 
             <div>
               <span className={GROUP_LABEL_CLASS}>VIP</span>
-              <VipRangeSelect
+              <LadderRangeSelect
+                name="VIP"
+                icon={<Crown size={14} />}
+                allLabel="Tất cả VIP"
+                groups={VIP_GROUPS}
                 min={shownVip.min}
                 max={shownVip.max}
+                short={(place) => String(place)}
                 onChange={(min, max) =>
                   startTransition(() => {
                     showVip({ min, max });
                     apply({ vmin: min === null ? "" : String(min), vmax: max === null ? "" : String(max) });
+                  })
+                }
+              />
+            </div>
+
+            <span aria-hidden className={GROUP_DIVIDER} />
+
+            <div>
+              <span className={GROUP_LABEL_CLASS}>Rank</span>
+              <LadderRangeSelect
+                name="Rank"
+                icon={<Layers size={14} />}
+                allLabel="Tất cả rank"
+                groups={RANK_GROUPS}
+                min={shownRank.min}
+                max={shownRank.max}
+                short={(place) => CF_RANKS[place - 1]}
+                onChange={(min, max) =>
+                  startTransition(() => {
+                    showRank({ min, max });
+                    apply({ rmin: min === null ? "" : String(min), rmax: max === null ? "" : String(max) });
                   })
                 }
               />
