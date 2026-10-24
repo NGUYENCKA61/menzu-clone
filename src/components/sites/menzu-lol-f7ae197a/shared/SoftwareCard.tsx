@@ -68,7 +68,8 @@ const STATUS: Record<string, { dot: string; text: string; label: string }> = {
  * trang chủ card"): the name and, on the shelf, "Chỉ từ …đ" sit on the
  * picture over the tiles' shade, in their sizes and greys, and the card
  * takes their 14px corners and faint rim. The rent button is the picker's
- * and "Xem chi tiết"'s 42px with 10px corners, the picker's words 13px, and
+ * and "Xem chi tiết"'s 42px with 10px corners, all three worded 12px
+ * semibold (24/10/2026, after 11px and 800 trials: "tạm chốt bản này"), and
  * the state reads the site's colours (lib/softwareStatus). `old` is the
  * lab's ?ban=cu: the card as it was.
  */
