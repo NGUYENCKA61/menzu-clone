@@ -7,6 +7,7 @@ import { useEffect, useOptimistic, useState, useTransition } from "react";
 import { launcherLabel } from "@/lib/toolFilters";
 
 import {
+  CHIP_PICKED,
   GROUP_DIVIDER,
   GROUP_LABEL_CLASS,
   PANEL_CLASS,
@@ -33,9 +34,9 @@ const CHIP_SM =
 const CHIP_OFF =
   "border-line bg-raise text-mist hover:border-line-strong hover:text-frost";
 // The capture's picked chip: fill #271619 and edge #712628 on the #121216
-// ground are the accent at about 12% and 45%, the word in the accent itself.
-const CHIP_ON =
-  "border-white/25 bg-white/[0.12] text-frost";
+// ground are the accent at about 12% and 45%, the word in the accent itself
+// (grey from 16/10, red again 24/10/2026; shared with the account panel).
+const CHIP_ON = CHIP_PICKED;
 const PILL = `press ${CHIP_SM} ${CHIP_OFF}`;
 const PILL_ACTIVE = `press ${CHIP_SM} ${CHIP_ON}`;
 const PILL_ROW = "flex flex-wrap gap-2 py-1";

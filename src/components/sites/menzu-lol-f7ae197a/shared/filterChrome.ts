@@ -10,17 +10,24 @@
  * is a set of whole classes (the chips join pillTab's whole-class pieces).
  */
 
-import { PILL_TAB_OFF, PILL_TAB_ON, PILL_TAB_SM } from "./pillTab";
+import { PILL_TAB_OFF, PILL_TAB_SM } from "./pillTab";
 
 /*
- * The account panel's chips light as the tool panel's and the /thong-bao tabs
- * do: the small tab pill, solid red when picked, grey when not (the owner,
- * 13/10/2026, UI consistency review). The two panels stack on one page when a
- * category sells both, so they share these rather than drifting apart again.
+ * The account panel's chips are the small tab pill, grey when not picked (the
+ * owner, 13/10/2026, UI consistency review). The two panels stack on one page
+ * when a category sells both, so they share these rather than drifting apart
+ * again.
  */
 export const CHIP_INACTIVE = `press ${PILL_TAB_SM} ${PILL_TAB_OFF}`;
 
-export const CHIP_ACTIVE = `press ${PILL_TAB_SM} ${PILL_TAB_ON}`;
+/** A picked chip or segment in either panel: the red as a tint, the accent at
+ *  12% under it and 45% on its edge, the word in the accent itself (the
+ *  owner's capture, 24/10/2026: "hiệu ứng đỏ này khi chọn thành phần trong
+ *  bộ lọc đi"). It had gone grey on 16/10. */
+export const CHIP_PICKED =
+  "border-[var(--menzu-accent)]/45 bg-[var(--menzu-accent)]/12 text-[var(--menzu-accent)]";
+
+export const CHIP_ACTIVE = `press ${PILL_TAB_SM} ${CHIP_PICKED}`;
 
 /** The hairline between two groups sharing a row ("đường kẻ | giữa"). Only
  *  where they do share one; stacked on a phone, the gap is enough. */
