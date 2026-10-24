@@ -256,7 +256,9 @@ export function ProductCard({ product, priority = false, eager = false, old = fa
         {/* This account's own words when the shop wrote some; the stock two
             lines otherwise, so no card ever shows a blank where prose goes.
             13px like the tool card's blurb on the same page (24/10/2026). */}
-        {product.description ? (
+        {!old ? (
+          <div aria-hidden className="h-[14px]" />
+        ) : product.description ? (
           <p className="mb-[14px] mt-2 line-clamp-2 min-h-[37px] text-[13px] leading-[1.55] text-mist">
             {product.description}
           </p>
