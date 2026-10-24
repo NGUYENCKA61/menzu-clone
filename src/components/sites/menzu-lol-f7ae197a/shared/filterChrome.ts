@@ -26,9 +26,11 @@ export const CHIP_ACTIVE = `press ${PILL_TAB_SM} ${PILL_TAB_ON}`;
  *  where they do share one; stacked on a phone, the gap is enough. */
 export const GROUP_DIVIDER = "hidden lg:block w-px self-stretch bg-white/10";
 
-/** The small grey caption over each group of chips. */
+/** The small grey caption over each group of chips, in 3100's spaced
+ *  capitals on trial (24/10/2026, "trạng thái, hoạt động, sắp xếp in hoa
+ *  như 3100 thử"); it was 12px semibold in sentence case. */
 export const GROUP_LABEL_CLASS =
-  "text-[12px] font-semibold text-neutral-500 mb-1.5 block";
+  "text-[10px] font-black uppercase tracking-widest text-neutral-500 mb-1.5 block";
 
 /** The sunken card the chip rows sit in. */
 export const PANEL_CLASS =
