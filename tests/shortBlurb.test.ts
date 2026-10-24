@@ -12,7 +12,7 @@ describe("shortBlurb", () => {
       "Bản OBV internal cho Blood Strike: ESP, aimbot, không giật, mod skin. Máy nhà và net, Windows 10, 11. Key từ 85.000đ/ngày.";
     const out = shortBlurb(text);
     expect(out.endsWith("…")).toBe(true);
-    expect(out).toBe("Bản OBV internal cho Blood Strike: ESP, aimbot, không giật, mod skin. Máy nhà và net, Windows 10…");
+    expect(out).toBe("Bản OBV internal cho Blood Strike: ESP, aimbot, không giật, mod skin. Máy nhà và net, Windows 10, 11. Key…");
     expect(text.startsWith(out.slice(0, -1))).toBe(true);
     expect(out).not.toMatch(/\s…$/);
   });

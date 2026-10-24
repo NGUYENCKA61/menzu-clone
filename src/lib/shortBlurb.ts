@@ -5,7 +5,7 @@
  * partway along the second line instead of wherever the line clamp runs out
  * of room. Punctuation left before the dots goes: "11.…" reads as a typo.
  */
-export function shortBlurb(text: string, max = 100): string {
+export function shortBlurb(text: string, max = 105): string {
   const flat = text.replace(/\s+/g, " ").trim();
   if (flat.length <= max) return flat;
   // One character past the limit, so a space sitting right at it still
