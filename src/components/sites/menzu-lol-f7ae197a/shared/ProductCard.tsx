@@ -346,7 +346,7 @@ export function ProductCard({ product, priority = false, eager = false, old = fa
               <span
                 className={`ml-auto inline-flex shrink-0 items-center gap-1 rounded-md border px-2.5 py-1 text-[12px] font-semibold ${
                   product.tag.toUpperCase() === "NFA"
-                    ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
+                    ? "border-violet-500/30 bg-violet-500/10 text-violet-400"
                     : product.tag.toUpperCase() === "RANDOM"
                       ? "border-amber-500/30 bg-amber-500/10 text-amber-400"
                       : "border-white/10 bg-[#0d0d12]/88 text-[#ff6c88]"
