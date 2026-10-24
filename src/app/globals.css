@@ -913,8 +913,8 @@ body.lightbox-open .site-nav {
   line-height: 1.65;
 }
 /* A prose block read at one 16px, its first paragraph no lead: the
-   category page's introduction (24/10/2026, size review point 2, on
-   trial). */
+   category page's introduction (24/10/2026, size review point 2: "chốt
+   bản này đi"). */
 .doc-prose.doc-prose-even > p,
 .doc-prose.doc-prose-even > p:first-child {
   font-size: 1rem;
