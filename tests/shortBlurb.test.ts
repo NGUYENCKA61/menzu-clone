@@ -10,7 +10,7 @@ describe("shortBlurb", () => {
   it("stops at the last whole word before the limit and closes with dots", () => {
     const text =
       "Bản OBV internal cho Blood Strike: ESP, aimbot, không giật, mod skin. Máy nhà và net, Windows 10, 11. Key từ 85.000đ/ngày.";
-    const out = shortBlurb(text);
+    const out = shortBlurb(text, 105);
     expect(out.endsWith("…")).toBe(true);
     expect(out).toBe("Bản OBV internal cho Blood Strike: ESP, aimbot, không giật, mod skin. Máy nhà và net, Windows 10, 11. Key…");
     expect(text.startsWith(out.slice(0, -1))).toBe(true);
