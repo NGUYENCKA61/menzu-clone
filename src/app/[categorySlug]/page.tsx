@@ -328,7 +328,7 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
                 {/* The game in sentence case, as the title over the page names
                     the shelf (it printed the stored capitals, "ĐỘT KÍCH CFVN -
                     CF4VN", 19/10/2026). */}
-                <h2 className="text-lg sm:text-[20px] font-bold text-white mb-5">
+                <h2 className="text-xl sm:text-2xl font-bold text-white mb-5">
                   Danh mục tài khoản game{" "}
                   {(() => {
                     const game = data.name.replace(/^(tool\s+)?hack\s*\+?\s*/i, "").trim() || data.name;
