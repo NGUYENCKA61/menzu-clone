@@ -20,9 +20,10 @@
  *  trial (24/10/2026, "nếu mỗi ô 32px giống bên kia thì sao", "thử đi"; it
  *  was 40px, a well's height), its words menzu's chip type, 11px bold, which
  *  the segments share so a row of groups reads as one size ("lên 11px
- *  đi"). */
+ *  đi"). Its 10px corner is a segment's too, now that the two stand the
+ *  same height ("có bo như nhau không vậy", then "áp lại"). */
 export const CHIP_SHAPE =
-  "inline-flex h-8 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-xl border px-3.5 text-[11px] font-bold transition-colors";
+  "inline-flex h-8 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-lg border px-3.5 text-[11px] font-bold transition-colors";
 
 /** A chip not picked, in either panel. The wells wear the same grey, so the
  *  loose chips and the segments read as one set ("màu bên phải đồng bộ màu
@@ -41,6 +42,19 @@ export const CHIP_PICKED =
 export const CHIP_INACTIVE = `press ${CHIP_SHAPE} ${CHIP_IDLE}`;
 
 export const CHIP_ACTIVE = `press ${CHIP_SHAPE} ${CHIP_PICKED}`;
+
+/** An either-or well and its segments, the same in both panels (the account
+ *  panel's "Sắp xếp" was loose chips until 24/10/2026): a 40px well with 4px
+ *  of padding, 32px segments at least 72px wide, no fill until picked. */
+export const SEGMENTS_CLASS =
+  "inline-flex h-10 items-center gap-0.5 rounded-xl border border-neutral-700/30 bg-neutral-800/40 p-1";
+
+const SEGMENT_SHAPE =
+  "inline-flex h-8 min-w-[72px] items-center justify-center gap-1 whitespace-nowrap rounded-lg border px-2 text-[11px] font-bold transition-all";
+
+export const SEGMENT_IDLE = `press ${SEGMENT_SHAPE} border-transparent text-neutral-400 hover:text-neutral-200`;
+
+export const SEGMENT_PICKED = `press ${SEGMENT_SHAPE} ${CHIP_PICKED}`;
 
 /** The hairline between two groups sharing a row ("đường kẻ | giữa"). Only
  *  where they do share one; stacked on a phone, the gap is enough. */

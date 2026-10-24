@@ -9,6 +9,9 @@ import {
   CHIP_INACTIVE,
   GROUP_LABEL_CLASS,
   PANEL_CLASS,
+  SEGMENT_IDLE,
+  SEGMENT_PICKED,
+  SEGMENTS_CLASS,
 } from "./filterChrome";
 import { ScopeSearchField } from "./ScopeSearchField";
 
@@ -253,7 +256,9 @@ export function CategoryFilterPanel({ hotPicks }: CategoryFilterPanelProps) {
               </div>
             </div>
 
-            <div className="flex flex-wrap gap-2">
+            {/* 4px above and below the 32px chips stand the row as tall as the
+                40px price fields beside it, so the two sit level. */}
+            <div className="flex flex-wrap items-center gap-2 py-1">
               {PRICE_PRESETS.map((preset, index) => (
                 <button
                   key={preset.label}
@@ -272,7 +277,7 @@ export function CategoryFilterPanel({ hotPicks }: CategoryFilterPanelProps) {
           <div className="flex flex-col lg:flex-row lg:flex-wrap lg:items-end gap-2.5 w-full">
             <div>
               <span className={GROUP_LABEL_CLASS}>Sắp xếp</span>
-              <div className="flex flex-wrap gap-2">
+              <div className={SEGMENTS_CLASS}>
                 {SORT_OPTIONS.map((option) => (
                   <button
                     key={option.value}
@@ -283,7 +288,7 @@ export function CategoryFilterPanel({ hotPicks }: CategoryFilterPanelProps) {
                         apply({ sort: option.value === "newest" ? "" : option.value });
                       })
                     }
-                    className={shownSort === option.value ? CHIP_ACTIVE : CHIP_INACTIVE}
+                    className={shownSort === option.value ? SEGMENT_PICKED : SEGMENT_IDLE}
                   >
                     {option.label}
                   </button>

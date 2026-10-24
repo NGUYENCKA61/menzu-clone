@@ -9,11 +9,13 @@ import { launcherLabel } from "@/lib/toolFilters";
 import {
   CHIP_ACTIVE,
   CHIP_INACTIVE,
-  CHIP_PICKED,
   GROUP_DIVIDER,
   GROUP_LABEL_CLASS,
   PANEL_CLASS,
   SEARCH_SHELL_CLASS,
+  SEGMENT_IDLE,
+  SEGMENT_PICKED,
+  SEGMENTS_CLASS,
 } from "./filterChrome";
 import { ScopeSearchField } from "./ScopeSearchField";
 
@@ -22,21 +24,17 @@ import { ScopeSearchField } from "./ScopeSearchField";
  * "áp style bộ lọc menzu qua đi"; see filterChrome). The loose chips are the
  * shared 32px chip, a segment's height, in a row padded 4px above and below
  * so it stands as tall as a well: the chips line up with the segments, and
- * each group's caption with its neighbours' on the lg row. A well is 40px
- * with 4px of padding,
- * its segments 32px, at least 72px wide, no fill of their own until picked,
- * their words the chips' 11px bold (menzu sets them 10px black; "lên 11px
- * đi" made the row one size).
+ * each group's caption with its neighbours' on the lg row. The wells and
+ * their segments are filterChrome's, shared with the account panel: their
+ * words the chips' 11px bold (menzu sets them 10px black; "lên 11px đi" made
+ * the row one size).
  */
 const PILL = CHIP_INACTIVE;
 const PILL_ACTIVE = CHIP_ACTIVE;
 const PILL_ROW = "flex flex-wrap items-center gap-2 py-1";
-const SEGMENTS =
-  "inline-flex h-10 items-center gap-0.5 rounded-xl border border-neutral-700/30 bg-neutral-800/40 p-1";
-const SEGMENT_SHAPE =
-  "inline-flex h-8 min-w-[72px] items-center justify-center gap-1 whitespace-nowrap rounded-lg border px-2 text-[11px] font-bold transition-all";
-const SEGMENT = `press ${SEGMENT_SHAPE} border-transparent text-neutral-400 hover:text-neutral-200`;
-const SEGMENT_ACTIVE = `press ${SEGMENT_SHAPE} ${CHIP_PICKED}`;
+const SEGMENTS = SEGMENTS_CLASS;
+const SEGMENT = SEGMENT_IDLE;
+const SEGMENT_ACTIVE = SEGMENT_PICKED;
 
 // The states a buyer shops by. "Rủi ro", "Đang cập nhật" and "Đã phát hiện"
 // came off the chips (the owner, 07/10/2026: "bỏ 3 cái rủi ro đang cập nhật
