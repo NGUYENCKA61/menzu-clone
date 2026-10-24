@@ -211,7 +211,7 @@ export function ProductCard({ product, priority = false, eager = false, old = fa
               Còn {product.stock} acc
             </span>
           ) : null}
-          {product.tag !== null && (
+          {old && product.tag !== null && (
             /* Dressed as the software card's status pill — same dark glass,
                same type — minus the coloured dot; the text colour carries the
                meaning: NFA green, FULL THÔNG TIN (and anything else) red. */
@@ -278,6 +278,10 @@ export function ProductCard({ product, priority = false, eager = false, old = fa
             labels grey, RANK's value white — the headline stat — and the VIP
             numbers red; the entries spread across the card's full width. The
             skin total is not repeated here — the title already says it. */}
+        {/* On trial (24/10/2026, "tạm xóa cái rank vip vip ingame nguyên card
+            dãy đó bỏ cái nfa này xuống đó trong 5p"): the new look drops the
+            strip and sets the mail tag where it stood. */}
+        {old ? (
         <div className="mb-3.5 flex w-full items-center justify-between gap-2 overflow-hidden rounded-[9px] border border-[#292a30] bg-[#111216] px-3 py-1.5 ">
           <span className="flex min-w-0 items-center gap-[5px] whitespace-nowrap text-[11px] font-extrabold text-[#c7c8cd]">
             <span aria-hidden className="text-[var(--menzu-accent)]">▲</span> Rank:
@@ -313,6 +317,22 @@ export function ProductCard({ product, priority = false, eager = false, old = fa
             </span>
           ))}
         </div>
+        ) : product.tag !== null ? (
+          <div className="mb-3.5">
+            <span
+              className={`inline-flex items-center gap-1 rounded-md border border-white/10 bg-[#0d0d12]/88 px-2.5 py-1 text-[12px] font-semibold ${
+                product.tag.toUpperCase() === "NFA" ? "text-emerald-400" : "text-[#ff6c88]"
+              }`}
+            >
+              {product.tag.toUpperCase() === "NFA" ? (
+                <Lock size={11} strokeWidth={2.75} aria-hidden />
+              ) : (
+                <span aria-hidden>✉</span>
+              )}
+              {product.tag}
+            </span>
+          </div>
+        ) : null}
 
         {/* The inventory strip, stepping exactly as the original card did:
             one tile left per beat, easing 500ms, sliding home past the end.
