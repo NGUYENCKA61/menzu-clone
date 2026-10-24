@@ -44,7 +44,7 @@ interface PageProps {
     skin?: string;
     /** The account panel's "Loại": nfa | full. */
     loai?: string;
-    /** The account panel's VIP range, 1 to 7 each end. */
+    /** The account panel's VIP range, 1 to 8 each end. */
     vmin?: string;
     vmax?: string;
     /** The account panel's rank range: places on lib/cfRanks' ladder. */
@@ -149,10 +149,10 @@ async function categoryMetadata(
   };
 }
 
-/** A VIP level from the URL, 1 to 7; anything else is no bound. */
+/** A VIP level from the URL, 1 to 8; anything else is no bound. */
 function vipFromParam(value?: string): number | undefined {
   const n = Number(value);
-  return Number.isInteger(n) && n >= 1 && n <= 7 ? n : undefined;
+  return Number.isInteger(n) && n >= 1 && n <= 8 ? n : undefined;
 }
 
 export default async function CategoryPage({ params, searchParams }: PageProps) {

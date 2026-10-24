@@ -46,10 +46,11 @@ const SORT_OPTIONS = [
 type SortValue = (typeof SORT_OPTIONS)[number]["value"];
 
 // The VIP levels an account can carry, as the shop numbers them ("mà đánh
-// số 1 2 3 4 5 6 7"), and Đột Kích's ranks in their groups, a rank's place
-// being its index plus one.
+// số 1 2 3 4 5 6 7", then "thêm VIP 8 đi" on 24/10/2026: the game has
+// eight), and Đột Kích's ranks in their groups, a rank's place being its
+// index plus one.
 const VIP_GROUPS: LadderGroup[] = [
-  { items: [1, 2, 3, 4, 5, 6, 7].map((level) => ({ place: level, label: `VIP ${level}` })) },
+  { items: [1, 2, 3, 4, 5, 6, 7, 8].map((level) => ({ place: level, label: `VIP ${level}` })) },
 ];
 const RANK_GROUPS: LadderGroup[] = CF_RANK_GROUPS.map((group) => ({
   label: group.label,
@@ -116,7 +117,7 @@ export function CategoryFilterPanel({ hotPicks }: CategoryFilterPanelProps) {
   const type = params.get("loai") === "nfa" || params.get("loai") === "full" ? (params.get("loai") as string) : "";
   const vipLevel = (key: string) => {
     const n = Number(params.get(key));
-    return Number.isInteger(n) && n >= 1 && n <= 7 ? n : null;
+    return Number.isInteger(n) && n >= 1 && n <= 8 ? n : null;
   };
   const vip = { min: vipLevel("vmin"), max: vipLevel("vmax") };
   const rank = { min: rankPlace(params.get("rmin")) ?? null, max: rankPlace(params.get("rmax")) ?? null };

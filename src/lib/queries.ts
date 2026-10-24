@@ -380,7 +380,7 @@ export interface CategoryFilters {
   /** An account's mail, by its tag: "NFA", or "FULL" for FULL THÔNG TIN
    *  (any tag that starts FULL). */
   accountType?: "NFA" | "FULL";
-  /** VIP floor and ceiling, 1 to 7, either or both. */
+  /** VIP floor and ceiling, 1 to 8, either or both. */
   vipMin?: number;
   vipMax?: number;
   /** Rank names an account's free-text rank may contain (lib/cfRanks). */
