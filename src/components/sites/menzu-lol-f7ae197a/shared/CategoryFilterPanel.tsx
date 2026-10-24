@@ -54,7 +54,7 @@ const VIP_GROUPS: LadderGroup[] = [
 ];
 const RANK_GROUPS: LadderGroup[] = CF_RANK_GROUPS.map((group) => ({
   label: group.label,
-  items: group.ranks.map((rank) => ({ place: CF_RANKS.indexOf(rank) + 1, label: rank })),
+  items: group.ranks.map((rank) => ({ place: CF_RANKS.indexOf(rank.name) + 1, label: rank.name })),
 }));
 // Rank Match tiers, one list (the owner, 24/10/2026: "thêm lọc rank match").
 const RANK_MATCH_GROUPS: LadderGroup[] = [

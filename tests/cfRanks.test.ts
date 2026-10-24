@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { CF_RANKS, rankPlace, rankSpan } from "@/lib/cfRanks";
+import { CF_RANK_GROUPS, CF_RANKS, rankMatches, rankPlace, rankSpan } from "@/lib/cfRanks";
 
 describe("cfRanks", () => {
   it("reads a place from the URL only inside the ladder", () => {
@@ -12,18 +12,26 @@ describe("cfRanks", () => {
   });
 
   it("spans the ranks between two places, either end open", () => {
-    const daiUy = CF_RANKS.indexOf("Đại úy") + 1;
-    const daiTa = CF_RANKS.indexOf("Đại tá") + 1;
-    expect(rankSpan(daiUy, daiTa)).toEqual(["Đại úy", "Thiếu tá", "Trung tá", "Thượng tá", "Đại tá"]);
-    expect(rankSpan(undefined, 2)).toEqual(["Tân binh", "Binh nhì"]);
-    expect(rankSpan(CF_RANKS.length)).toEqual(["Nguyên soái"]);
+    const captain = CF_RANKS.indexOf("Captain") + 1;
+    const colonel = CF_RANKS.indexOf("Colonel") + 1;
+    expect(rankSpan(captain, colonel)).toEqual(["Captain", "Major", "Lieutenant Colonel", "Colonel"]);
+    expect(rankSpan(undefined, 2)).toEqual(["Trainee", "Private"]);
+    expect(rankSpan(CF_RANKS.length)).toEqual(["Honor Marshall"]);
   });
 
-  it("keeps every name out of every other, so contains never cross-matches", () => {
-    for (const a of CF_RANKS) {
-      for (const b of CF_RANKS) {
-        if (a !== b) expect(b.toLowerCase().includes(a.toLowerCase())).toBe(false);
+  it("matches every way a rank is typed to that rank and no other", () => {
+    for (const rank of CF_RANK_GROUPS.flatMap((group) => group.ranks)) {
+      for (const typed of [rank.name, ...(rank.also ?? [])]) {
+        for (const name of CF_RANKS) {
+          expect(rankMatches(`${typed} 3`, name), `${typed} 3 as ${name}`).toBe(name === rank.name);
+        }
       }
     }
+  });
+
+  it("keeps the Vietnamese ranks accounts were typed with", () => {
+    expect(rankMatches("ĐẠI TÁ 2", "Colonel")).toBe(true);
+    expect(rankMatches("Trung Tá", "Colonel")).toBe(false);
+    expect(rankMatches("Nguyên Soái", "Marshall")).toBe(true);
   });
 });

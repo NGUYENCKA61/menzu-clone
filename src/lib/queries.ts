@@ -27,6 +27,7 @@ import { productHref, toolDocsHref } from "@/lib/routes";
 import { toolSeoCopy } from "@/lib/seoCopy";
 import type { WarrantyStatus } from "@/lib/warrantyRequests";
 import { weaponKey } from "@/lib/weaponImages";
+import { rankTerms } from "@/lib/cfRanks";
 import type { AccountDetail } from "@/components/sites/menzu-lol-f7ae197a/shared/AccountBuyPanel";
 import type { SoftwareDetail } from "@/components/sites/menzu-lol-f7ae197a/shared/SoftwareBuyPanel";
 import { parseRequirements } from "@/lib/productRequirements";
@@ -383,7 +384,8 @@ export interface CategoryFilters {
   /** VIP floor and ceiling, 1 to 8, either or both. */
   vipMin?: number;
   vipMax?: number;
-  /** Rank names an account's free-text rank may contain (lib/cfRanks). */
+  /** Ranks on lib/cfRanks' ladder; an account's free-text rank is matched
+   *  through rankTerms, so "General" never catches "Major General". */
   rankNames?: string[];
   /** Rank Match floor and ceiling, places on lib/cfRankMatch's ladder. */
   rankMatchMin?: number;
@@ -504,9 +506,15 @@ function categoryWhere(categoryId: string, filters: CategoryFilters) {
       ...(filters.rankNames && filters.rankNames.length > 0
         ? [
             {
-              OR: filters.rankNames.map((name) => ({
-                rank: { contains: name, mode: "insensitive" as const },
-              })),
+              OR: filters.rankNames.map((name) => {
+                const { words, not } = rankTerms(name);
+                return {
+                  AND: [
+                    { OR: words.map((word) => ({ rank: { contains: word, mode: "insensitive" as const } })) },
+                    ...not.map((word) => ({ NOT: { rank: { contains: word, mode: "insensitive" as const } } })),
+                  ],
+                };
+              }),
             },
           ]
         : []),
