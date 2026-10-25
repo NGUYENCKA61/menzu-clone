@@ -85,7 +85,7 @@ export function StickyBuyBar({
         <p className="truncate text-[12px] font-medium text-mist">
           {sentenceCase(label)}
         </p>
-        <p className="font-display text-[17px] font-black leading-tight text-frost">{price}</p>
+        <p className="font-display text-[17px] font-black leading-tight tabular-nums tracking-[-0.03em] text-frost">{price}</p>
       </div>
       <button
         type="button"

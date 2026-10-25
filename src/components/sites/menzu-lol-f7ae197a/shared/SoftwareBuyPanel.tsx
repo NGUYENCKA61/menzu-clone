@@ -301,12 +301,10 @@ export function SoftwareBuyPanel({
           a row, the buttons stacked full width, the reassurances in a framed
           row. Its type keeps the category page's, role for role, at
           lmarket's ratios ("rồi sửa lại tỉ lệ cho đồng bộ"): the captions in
-          the filter labels' small capitals, the price in the cards' black,
-          as large as the title on a desktop and set as 3100 sets it, the
-          font's own figures and spacing with a full-size "đ" ("cho chữ đ to
-          bằng số đi", "làm sao giống 3100 đi": tabular figures and tight
-          tracking had it 21px narrower), body copy at the one 16px, buttons
-          a step over the cards' 12px. */}
+          the filter labels' small capitals, the price in the cards' black
+          with their tight tracking, as large as the title on a desktop, its
+          "đ" as large as the figures ("cho chữ đ to bằng số đi"), body copy
+          at the one 16px, buttons a step over the cards' 12px. */}
       {software.packages.length > 0 ? (
         <div className="space-y-2.5">
           <span className={`${SMALL_CAPS_LABEL} ml-1 block`}>
@@ -349,7 +347,7 @@ export function SoftwareBuyPanel({
 
       <div className="space-y-2">
         <p className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-          <span className="text-3xl font-black text-white sm:text-4xl">
+          <span className="font-display text-3xl font-black leading-none tabular-nums tracking-[-0.03em] text-frost sm:text-4xl">
             {formatVnd(total)}đ
           </span>
           {chosen?.listPrice ? (
