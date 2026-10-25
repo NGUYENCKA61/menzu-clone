@@ -64,10 +64,11 @@ export function RelatedGuides({
         // Under a product page's write-up it reads as the sub headings beside
         // it ("Yêu cầu hệ thống", "Tính năng nổi bật": the display face,
         // 19px, semibold, the frost white), not a 17px black of its own
-        // (19/10/2026, "đồng bộ").
+        // (19/10/2026, "đồng bộ"); in capitals at 17px with them on trial
+        // (25/10/2026, "tiêu đề in hoa thử").
         <h3
           id="related-guides-heading"
-          className={old ? "text-[17px] font-black text-white" : "font-display text-[19px] font-semibold text-frost"}
+          className={old ? "text-[17px] font-black text-white" : "font-display text-[17px] font-semibold uppercase tracking-wider text-frost"}
         >
           Hướng dẫn liên quan
         </h3>

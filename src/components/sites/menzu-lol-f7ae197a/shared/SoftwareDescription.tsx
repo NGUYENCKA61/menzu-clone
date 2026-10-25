@@ -63,8 +63,11 @@ export interface SoftwareDescriptionProps {
   old?: boolean;
 }
 
+// TRIAL (the owner, 25/10/2026: "tiêu đề in hoa thử"): the section's
+// headings in capitals as 3100 sets them, the sub headings at 3100's 17px so
+// the capitals stand no taller than the 19px words did.
 const SUB_HEADING =
-  "mt-10 font-display text-[19px] font-semibold text-frost";
+  "mt-10 font-display text-[17px] font-semibold uppercase tracking-wider text-frost";
 /**
  * Body text in this section, set to the same values the rich editor's output
  * gets here (`.doc-prose` read even, below): neutral-300 is #d4d4d4 and every
@@ -349,7 +352,8 @@ export function SoftwareDescription({
         id={DESCRIPTION_SECTION_ID}
         className="product-copy mt-14 scroll-mt-[120px] border-t border-line pt-12 pb-14"
       >
-        <SectionHeading>Mô tả sản phẩm</SectionHeading>
+        {/* Capitals on the row, inherited by the heading (TRIAL above). */}
+        <SectionHeading className="uppercase tracking-wider">Mô tả sản phẩm</SectionHeading>
         <div className="mt-5">
           <DocHtml body={richHtml} even />
         </div>
@@ -381,7 +385,7 @@ export function SoftwareDescription({
       {/* The red bar the home rows open with, as "Sản phẩm tương tự" below
           now wears too; the accent glyph stays with the page titles (the
           owner, 13/10/2026, UI consistency review). */}
-      <SectionHeading>Mô tả sản phẩm</SectionHeading>
+      <SectionHeading className="uppercase tracking-wider">Mô tả sản phẩm</SectionHeading>
 
       {/* The name opens the paragraph in bold, as the brief's sample does, but
           joined by a dash rather than run straight on: the same `description`
