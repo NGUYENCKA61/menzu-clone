@@ -279,7 +279,7 @@ export function SoftwareBuyPanel({
         {/* LAB (Launcher): the name in the display face and sentence case
             (displayCase keeps CS2, ESP, OBV ...); the full typed name is in
             the breadcrumb's last crumb and the page title. */}
-        <h1 className="font-display text-[26px] font-black leading-[1.15] text-frost sm:text-[30px] lg:text-[34px]">
+        <h1 className="font-display text-[26px] font-black leading-[1.15] text-frost sm:text-[30px] lg:text-[36px]">
           {sentenceCase(software.name)}
         </h1>
         {/* The shop's own "Mô tả ngắn", or nothing: no opening lines lifted
@@ -291,18 +291,21 @@ export function SoftwareBuyPanel({
         ) : null}
       </div>
 
-      {/* The page keeps the category page's type, roles for roles, the way
-          lmarket's product page keeps its shelf's (the owner, 25/10/2026:
-          "sửa lại 3300 cho đồng bộ với lmarket", "đồng bộ tỷ lệ ấy"): the
-          panel's captions in the filter labels' small capitals, the price
-          in the cards' black with their tight tracking and small "đ", body
-          copy at the one 16px, buttons a step over the cards' 12px. */}
+      {/* The buy block laid out as the 3100 site sets it (the owner,
+          25/10/2026: "sửa cho giống bố cục 3100 đi"): the tiers as pills in
+          a row, the buttons stacked full width, the reassurances in a framed
+          row. Its type keeps the category page's, role for role, at
+          lmarket's ratios ("rồi sửa lại tỉ lệ cho đồng bộ"): the captions in
+          the filter labels' small capitals, the price in the cards' black
+          with their tight tracking and small "đ", as large as the title on a
+          desktop, body copy at the one 16px, buttons a step over the cards'
+          12px. */}
       {software.packages.length > 0 ? (
-        <div className="space-y-3">
+        <div className="space-y-2.5">
           <span className={`${SMALL_CAPS_LABEL} ml-1 block`}>
             Chọn gói
           </span>
-          <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3">
+          <div className="flex flex-wrap gap-2.5">
             {software.packages.map((p) => {
               const selected = p.id === packageId;
               return (
@@ -313,21 +316,21 @@ export function SoftwareBuyPanel({
                   aria-pressed={selected}
                   className={
                     selected
-                      ? "flex flex-col items-start gap-1.5 rounded-[12px] border border-white/45 bg-raise px-4 py-3 text-left transition-colors"
-                      : "flex flex-col items-start gap-1.5 rounded-[12px] border border-line bg-white/[0.02] px-4 py-3 text-left hover:border-line-strong transition-colors"
+                      ? "flex items-center gap-2.5 rounded-xl border border-[var(--menzu-accent)] bg-[var(--menzu-accent)]/[0.07] px-4 py-2.5 transition-colors"
+                      : "flex items-center gap-2.5 rounded-xl border border-white/10 bg-white/[0.02] px-4 py-2.5 hover:border-white/25 transition-colors"
                   }
                 >
-                  <span className="text-[14px] font-semibold text-frost whitespace-nowrap">
+                  <span className="text-[13px] font-bold text-white whitespace-nowrap">
                     {p.label}
                   </span>
                   {/* A tier on flash sale: its shelf price crossed out, then
                       the price the buyer pays. */}
                   {p.listPrice ? (
-                    <span className="lab-figure text-[12px] font-medium text-dim line-through whitespace-nowrap">
+                    <span className="text-[11px] font-semibold text-neutral-500 line-through whitespace-nowrap">
                       {formatVnd(p.listPrice)}đ
                     </span>
                   ) : null}
-                  <span className={`lab-figure text-[16px] font-bold whitespace-nowrap ${selected ? "text-frost" : "text-mist"}`}>
+                  <span className="text-[13px] font-bold text-[var(--menzu-accent)] whitespace-nowrap">
                     {formatVnd(p.price)}đ
                   </span>
                 </button>
@@ -339,7 +342,7 @@ export function SoftwareBuyPanel({
 
       <div className="space-y-2">
         <p className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-          <span className="font-display text-[36px] font-black leading-none tabular-nums tracking-[-0.03em] text-frost sm:text-[42px]">
+          <span className="font-display text-3xl font-black leading-none tabular-nums tracking-[-0.03em] text-frost sm:text-4xl">
             {formatVnd(total)}
             <span className="text-[0.5em] font-bold">đ</span>
           </span>
@@ -347,7 +350,7 @@ export function SoftwareBuyPanel({
             // The tier is on flash sale: what it costs off sale, crossed out,
             // and the percent the sale takes off.
             <>
-              <span className="lab-figure text-base font-semibold text-dim line-through sm:text-lg">
+              <span className="text-base font-bold text-neutral-500 line-through sm:text-lg">
                 {formatVnd(chosen.listPrice * quantity)}đ
               </span>
               <span className="rounded-md bg-[var(--menzu-accent)]/15 px-2 py-0.5 text-[12px] font-black text-[var(--menzu-accent)]">
@@ -389,7 +392,7 @@ export function SoftwareBuyPanel({
             const n = Number(e.target.value.replace(/\D/g, ""));
             setQuantity(Math.min(MAX_QUANTITY, Math.max(1, n || 1)));
           }}
-          className="lab-figure h-11 w-16 rounded-[10px] border border-line bg-raise text-center text-[16px] font-semibold text-frost outline-none focus:border-frost/60 transition-colors"
+          className="h-11 w-16 rounded-xl border border-white/10 bg-white/[0.03] text-center text-sm font-bold text-white outline-none focus:border-[var(--menzu-accent)]/60 transition-colors"
         />
         <button
           type="button"
@@ -436,12 +439,12 @@ export function SoftwareBuyPanel({
           filled accent. The basket keeps the same size and position in the
           stack but drops to the outlined treatment — two solid red buttons
           stacked would leave neither of them reading as the main one. */}
-      <div ref={buyRef} className="flex flex-col gap-3 sm:flex-row">
+      <div ref={buyRef} className="space-y-3">
         <button
           type="button"
           disabled={busy || !chosen || !software.inStock || locked || gated}
           onClick={() => setConfirming(true)}
-          className="press h-14 w-full rounded-xl bg-[var(--menzu-accent)] text-[14px] font-semibold text-white hover:bg-[var(--menzu-accent-dark)] disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-frost sm:flex-1"
+          className="press h-14 w-full rounded-2xl bg-[var(--menzu-accent)] text-[14px] font-semibold text-white hover:bg-[var(--menzu-accent-dark)] disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-frost"
         >
           Mua ngay
         </button>
@@ -450,24 +453,29 @@ export function SoftwareBuyPanel({
           disabled={busy || !chosen || !software.inStock || locked || gated}
           onClick={addToCart}
           aria-busy={busy}
-          className="press flex h-14 w-full items-center justify-center gap-2 rounded-[12px] border border-line-strong bg-raise text-[14px] font-semibold text-frost hover:border-frost/40 disabled:opacity-50 sm:w-auto sm:px-7"
+          className="press flex h-14 w-full items-center justify-center gap-2 rounded-2xl border border-[var(--menzu-accent)]/70 bg-white/[0.02] text-[14px] font-semibold text-white hover:bg-white/[0.06] disabled:opacity-50"
         >
           {busy ? <Loader2 size={14} className="animate-spin motion-reduce:animate-none" aria-hidden /> : null}
           {busy ? "Đang thêm…" : "Thêm vào giỏ"}
         </button>
       </div>
 
-      <ul className="grid grid-cols-2 gap-x-6 gap-y-3 border-t border-line pt-5">
-        {TRUST.map((t) => {
+      <div className="grid grid-cols-2 overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02] sm:grid-cols-4">
+        {TRUST.map((t, index) => {
           const Icon = t.icon;
           return (
-            <li key={t.label} className="flex items-center gap-2.5">
-              <Icon size={16} aria-hidden className="shrink-0 text-mist" />
-              <span className="text-[13px] leading-tight text-mist">{t.label}</span>
-            </li>
+            <div
+              key={t.label}
+              className={`flex flex-col items-center gap-2 px-3 py-5 text-center ${
+                index < TRUST.length - 1 ? "border-white/[0.07] sm:border-r" : ""
+              }`}
+            >
+              <Icon size={18} aria-hidden className="text-[var(--menzu-accent)]" />
+              <span className="text-[11px] font-semibold leading-tight text-neutral-400">{t.label}</span>
+            </div>
           );
         })}
-      </ul>
+      </div>
 
       <StickyBuyBar
         anchorRef={buyRef}
