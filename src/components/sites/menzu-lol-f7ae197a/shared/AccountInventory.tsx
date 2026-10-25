@@ -341,7 +341,7 @@ export function AccountInventory({ account, items }: AccountInventoryProps) {
                           alt=""
                           fill
                           sizes="(min-width: 1024px) 20vw, (min-width: 640px) 33vw, 50vw"
-                          className="object-contain scale-110 group-hover:scale-[1.15] transition-transform duration-300"
+                          className="object-contain group-hover:scale-105 transition-transform duration-300"
                           unoptimized
                         />
                       </div>
