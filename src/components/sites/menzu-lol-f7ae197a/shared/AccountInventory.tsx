@@ -454,7 +454,7 @@ export function AccountInventory({ account, items }: AccountInventoryProps) {
                           alt=""
                           fill
                           sizes="(min-width: 1024px) 20vw, (min-width: 640px) 33vw, 50vw"
-                          className="object-contain group-hover:scale-105 transition-transform duration-300 data-[small]:[image-rendering:pixelated] data-[tiny]:p-5"
+                          className="object-contain group-hover:scale-105 transition-transform duration-300 data-small:[image-rendering:pixelated] data-tiny:p-5"
                           unoptimized
                           onLoad={(event) => markSmallPicture(event.currentTarget)}
                         />
