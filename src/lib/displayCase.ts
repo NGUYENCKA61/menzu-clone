@@ -153,3 +153,21 @@ export function titleCase(raw: string): string {
 export function shelfTitle(raw: string): string {
   return titleCase(withoutNewWord(raw));
 }
+
+/**
+ * A title with no-break spaces where a line must not break (the owner,
+ * 25/10/2026: "xử lý ngắt dòng 3300 đi", the tool page left "Bản OBV Ver"
+ * on one line and "2:" on the next): a word and the short number after it
+ * ("Ver 2", "Windows 10", "VIP 5"), a number and the word after it
+ * ("7 ngày"), a dash and the word before it, so no line starts with "-",
+ * punctuation typed after a space (" !!!"), and the last two words, so the
+ * last line never holds one word alone ("An / Toàn").
+ */
+export function keepTogether(text: string): string {
+  return text
+    .replace(/(\p{L})\s+(\d{1,3})(?=\D|$)/gu, "$1\u00a0$2")
+    .replace(/(\d)\s+(\p{L})/gu, "$1\u00a0$2")
+    .replace(/\s+([-–—])(?=\s)/gu, "\u00a0$1")
+    .replace(/\s+([!?.,:;…]+)/gu, "\u00a0$1")
+    .replace(/ ([^ ]+)$/u, "\u00a0$1");
+}

@@ -28,7 +28,7 @@ import { StockLine } from "./StockLine";
 import { rankMatchBadge, rankMatchName } from "@/lib/cfRankMatch";
 import { rankBadge } from "@/lib/cfRanks";
 import { vipBadge } from "@/lib/cfVip";
-import { sentenceCase } from "@/lib/displayCase";
+import { keepTogether, sentenceCase } from "@/lib/displayCase";
 
 export interface AccountDetail {
   code: string;
@@ -398,7 +398,8 @@ export function AccountBuyPanel({
 
       <div className="space-y-3">
         <h1 className="text-[26px] font-black leading-[1.15] text-frost sm:text-[30px] lg:text-[36px]">
-          {account.name ? sentenceCase(account.name) : `Mã #${account.code}`}
+          {/* No line breaks between "VIP" and "5" and the like (keepTogether). */}
+          {account.name ? keepTogether(sentenceCase(account.name)) : `Mã #${account.code}`}
         </h1>
         <p className="max-w-[60ch] text-[16px] leading-[1.65] text-mist">
           {account.descriptionText ||
