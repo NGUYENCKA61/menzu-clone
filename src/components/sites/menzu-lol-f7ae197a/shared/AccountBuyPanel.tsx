@@ -102,8 +102,7 @@ const TRUST = [
 ];
 
 const TILE_LABEL_CLASS = "text-[10px] font-bold uppercase tracking-wider text-neutral-500";
-const TILE_ICON_CLASS =
-  "flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/[0.04]";
+const TILE_ICON_CLASS = "flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/[0.05]";
 
 /**
  * Right-hand purchase panel on the account-detail page: stat rows, price
@@ -395,16 +394,19 @@ export function AccountBuyPanel({
         </p>
       </div>
 
-      {/* menzu's stat card: rank and inventory side by side, the numbers as
-          tiles under them, the mail tag as the last row. Every part shows
-          only with something in it, and the card only with any part. */}
+      {/* menzu's stat card: rank and inventory side by side, the numbers in
+          columns under them, the mail tag as the last row. One frame only:
+          boxes inside it read as cards piled on a card (the owner, 25/10/2026:
+          "bị chồng card sửa sao đẹp hơn đi"), so the parts are split by hairlines.
+          Every part shows only with something in it, and the card only with
+          any part. */}
       {hasStats || account.tag !== null ? (
         <div className="space-y-4 rounded-2xl border border-white/10 bg-white/[0.02] p-4 sm:p-5">
           {showRank || showSkins ? (
             <div className={`grid gap-4 ${showRank && showSkins ? "grid-cols-2 divide-x divide-white/10" : "grid-cols-1"}`}>
               {showRank ? (
                 <div className="flex min-w-0 items-center gap-3">
-                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/[0.04]">
+                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white/[0.05]">
                     {rankIcon ? (
                       <Image src={rankIcon} alt="" width={23} height={26} unoptimized />
                     ) : (
@@ -423,7 +425,7 @@ export function AccountBuyPanel({
               {showSkins ? (
                 <div className={`min-w-0 ${showRank ? "pl-4" : ""}`}>
                   <div className="flex items-center gap-3">
-                    <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/[0.04]">
+                    <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white/[0.05]">
                       <Crosshair size={18} className="text-[var(--menzu-accent)]" />
                     </span>
                     <div className="min-w-0">
@@ -458,12 +460,12 @@ export function AccountBuyPanel({
 
           {numericStats.length > 0 ? (
             <div
-              className={`grid grid-cols-2 gap-2 ${showRank || showSkins ? "border-t border-white/10 pt-4" : ""} ${
-                numericStats.length >= 4 ? "sm:grid-cols-4" : numericStats.length === 3 ? "sm:grid-cols-3" : "sm:grid-cols-2"
-              }`}
+              className={`grid grid-cols-2 gap-x-4 gap-y-3 sm:gap-x-0 sm:divide-x sm:divide-white/10 ${
+                showRank || showSkins ? "border-t border-white/10 pt-4" : ""
+              } ${numericStats.length >= 4 ? "sm:grid-cols-4" : numericStats.length === 3 ? "sm:grid-cols-3" : "sm:grid-cols-2"}`}
             >
               {numericStats.map((stat) => (
-                <div key={stat.label} className="flex min-w-0 items-center gap-2.5 rounded-xl border border-white/10 bg-white/[0.02] px-2.5 py-2">
+                <div key={stat.label} className="flex min-w-0 items-center gap-2.5 sm:px-4 sm:first:pl-0">
                   <span className={TILE_ICON_CLASS}>{stat.icon}</span>
                   <div className="min-w-0">
                     <p className={TILE_LABEL_CLASS}>{stat.label}</p>
@@ -475,7 +477,7 @@ export function AccountBuyPanel({
           ) : null}
 
           {account.tag !== null ? (
-            <div className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/[0.02] px-2.5 py-2">
+            <div className={`flex items-center gap-3 ${hasStats ? "border-t border-white/10 pt-4" : ""}`}>
               <span className={TILE_ICON_CLASS}>
                 {account.tag.toUpperCase() === "NFA" ? (
                   <Lock size={15} strokeWidth={2.5} className="text-emerald-400" aria-hidden />
