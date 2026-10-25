@@ -363,7 +363,7 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
                     above ("so với cách giống tiêu đề hack đột kích với thẻ tìm
                     kiếm"); the floating "Tìm tài khoản" pill stands about 67px
                     under it, near menzu's 61px. */}
-                <h2 className="mb-[118px] text-3xl font-black leading-tight text-white sm:text-4xl md:text-5xl">
+                <h2 className="mb-[118px] text-[18px] font-black leading-tight text-white sm:text-[20px] lg:text-[24px]">
                   Danh mục tài khoản game{" "}
                   {(() => {
                     const game = data.name.replace(/^(tool\s+)?hack\s*\+?\s*/i, "").trim() || data.name;

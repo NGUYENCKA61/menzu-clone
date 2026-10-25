@@ -62,7 +62,11 @@ export function CategoryHero({
 
       <div className="relative z-10 mx-auto w-full max-w-[1320px] px-4 lg:px-6">
         {breadcrumb}
-        <h1 className="mb-4 py-1 text-3xl font-black leading-tight text-white sm:text-4xl md:text-5xl">
+        {/* Two thirds of a product page's title, as lmarket sets a shelf's
+            24px over its products' 36px (the owner, 25/10/2026: "đồng bộ tỉ
+            lệ giữa 2 trang giống như lmarket thôi"); it was 48px, larger
+            than the products' own names. */}
+        <h1 className="mb-4 py-1 text-[18px] font-black leading-tight text-white sm:text-[20px] lg:text-[24px]">
           {/* As the home page's tile names it (23/10/2026). */}
           {shelfTitle(name)}
         </h1>
