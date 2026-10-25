@@ -19,6 +19,7 @@ import {
   VoucherField,
 } from "./BuyConfirmDialog";
 import { formatVnd, productImage } from "./productData";
+import { SMALL_CAPS_LABEL } from "./filterChrome";
 import { ErrorModal } from "./ErrorModal";
 import { TopUpDialog } from "./TopUpDialog";
 import { StickyBuyBar } from "./StickyBuyBar";
@@ -399,7 +400,7 @@ export function AccountBuyPanel({
         <h1 className="text-[26px] font-black leading-[1.15] text-frost sm:text-[30px] lg:text-[34px]">
           {account.name ? sentenceCase(account.name) : `Mã #${account.code}`}
         </h1>
-        <p className="max-w-[60ch] text-[15px] leading-[1.65] text-mist">
+        <p className="max-w-[60ch] text-[16px] leading-[1.65] text-mist">
           {account.descriptionText ||
             "Tài khoản game nhiều vật phẩm, inventory đẹp và sẵn sàng giao ngay. Thông tin tài khoản được kiểm tra trước khi bàn giao."}
         </p>
@@ -458,7 +459,13 @@ export function AccountBuyPanel({
             </span>
           </div>
         ) : null}
-        <p className="text-3xl sm:text-4xl font-black text-white">{formatVnd(account.price)}đ</p>
+        {/* The account card's price grown, as on the tool page: the same
+            black, tight tracking and small "đ" (the owner, 25/10/2026:
+            "đồng bộ tỷ lệ ấy"). */}
+        <p className="text-3xl sm:text-4xl font-black tabular-nums tracking-[-0.03em] text-white">
+          {formatVnd(account.price)}
+          <span className="text-[0.5em] font-bold">đ</span>
+        </p>
         <StockLine inStock={!soldOut} label={stockText} />
       </div>
 
@@ -469,7 +476,7 @@ export function AccountBuyPanel({
           the schema so putting them back is a UI change, not a migration. */}
       {pool ? (
         <div className="flex flex-wrap items-center gap-3">
-          <span className="text-[13px] font-semibold text-neutral-400">Số lượng</span>
+          <span className={SMALL_CAPS_LABEL}>Số lượng</span>
           <div className="flex items-center rounded-xl border border-white/10 bg-white/[0.02]">
             <button
               type="button"
@@ -531,7 +538,7 @@ export function AccountBuyPanel({
           type="button"
           disabled={soldOut || gated}
           onClick={openDialog}
-          className="press w-full h-14 rounded-xl bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] disabled:opacity-50 text-[16px] font-semibold text-white"
+          className="press w-full h-14 rounded-xl bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] disabled:opacity-50 text-[14px] font-semibold text-white"
         >
           Mua ngay
         </button>
@@ -541,7 +548,7 @@ export function AccountBuyPanel({
             under MUA NGAY that answered a press with nothing. */}
         <Link
           href="/lien-he"
-          className="press flex w-full h-14 items-center justify-center rounded-2xl border border-white/10 border-[var(--menzu-accent)]/70 bg-white/[0.02] hover:bg-white/[0.06] text-[15px] font-semibold text-white"
+          className="press flex w-full h-14 items-center justify-center rounded-2xl border border-white/10 border-[var(--menzu-accent)]/70 bg-white/[0.02] hover:bg-white/[0.06] text-[14px] font-semibold text-white"
         >
           Thu cũ đổi mới
         </Link>

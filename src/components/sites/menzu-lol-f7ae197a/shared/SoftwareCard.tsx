@@ -362,7 +362,9 @@ export function SoftwareCard({
               )}
               {minPrice !== null && !free ? (
                 <span className="mt-1 flex items-baseline gap-1">
-                  <span className="lab-figure text-[22px] font-bold leading-none text-frost">
+                  {/* The prices' one look, the account card's black with its
+                      tight tracking (25/10/2026: "đồng bộ tỷ lệ ấy"). */}
+                  <span className="font-display text-[22px] font-black leading-none tabular-nums tracking-[-0.03em] text-frost">
                     {formatVnd(minPrice)}
                   </span>
                   <span className="text-[13px] font-semibold text-dim">đ</span>

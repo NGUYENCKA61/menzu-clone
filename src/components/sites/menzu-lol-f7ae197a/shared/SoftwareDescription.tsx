@@ -66,9 +66,11 @@ export interface SoftwareDescriptionProps {
 const SUB_HEADING =
   "mt-10 font-display text-[19px] font-semibold text-frost";
 /**
- * Body text in this section, set to the same values `.doc-prose` gives the
- * rich editor's output: neutral-300 is #d4d4d4, text-sm is its 0.875rem, and
- * 1.65 is its line height.
+ * Body text in this section, set to the same values the rich editor's output
+ * gets here (`.doc-prose` read even, below): neutral-300 is #d4d4d4 and every
+ * line is the one 16px the category page reads at, paragraphs, bullets and
+ * the requirements alike, as lmarket keeps one size (the owner, 25/10/2026:
+ * "đồng bộ tỷ lệ ấy"; it was 15px here against an 18px lead paragraph).
  *
  * They are written to match on purpose. Half of what this section prints is
  * typed by the shop and half is the shop's default, and the two sit directly
@@ -76,7 +78,7 @@ const SUB_HEADING =
  * note under default bullets. Two greys there read as one of them being less
  * important rather than as one of them being editable.
  */
-const BODY = "max-w-[72ch] text-[15px] leading-[1.7] text-neutral-300";
+const BODY = "max-w-[72ch] text-[16px] leading-[1.7] text-neutral-300";
 
 /** The words the locked panel sets in red: what happens, and what to press. */
 function Hi({ children }: { children: React.ReactNode }) {
@@ -140,7 +142,7 @@ export function SoftwareDescription({
           screenshot typed into the editor arrives caged to one allowlist. */}
       {featuresNote ? (
         <div className="mt-5">
-          <DocHtml body={featuresNote} />
+          <DocHtml body={featuresNote} even />
         </div>
       ) : null}
     </>
@@ -159,7 +161,7 @@ export function SoftwareDescription({
       <h3 className={SUB_HEADING}>Hướng dẫn cài đặt</h3>
       {guideHtml ? (
         <div className="mt-4">
-          <DocHtml body={guideHtml} />
+          <DocHtml body={guideHtml} even />
         </div>
       ) : (
         <p className={`mt-4 ${BODY}`}>{DEFAULT_GUIDE}</p>
@@ -197,7 +199,7 @@ export function SoftwareDescription({
             <Lock className="h-4 w-4" aria-hidden />
           </span>
           <div className="min-w-0">
-            <p className="text-[15px] font-semibold text-frost">
+            <p className="text-[16px] font-semibold text-frost">
               {setupGuideAccess === "expired"
                 ? "Hết hạn xem theo key"
                 : "Mở khoá sau khi thuê key"}
@@ -236,7 +238,7 @@ export function SoftwareDescription({
         </div>
       ) : setupGuideHtml ? (
         <div className="mt-4">
-          <DocHtml body={setupGuideHtml} />
+          <DocHtml body={setupGuideHtml} even />
         </div>
       ) : (
         <p className={`mt-4 ${BODY}`}>{DEFAULT_SETUP_GUIDE}</p>
@@ -276,7 +278,7 @@ export function SoftwareDescription({
             }`}
           >
             <dt className={BODY}>{f.label}</dt>
-            <dd className="text-sm font-bold leading-[1.65] text-white">
+            <dd className="text-[16px] font-bold leading-[1.65] text-white">
               {f.value}
             </dd>
           </div>
@@ -345,7 +347,7 @@ export function SoftwareDescription({
       >
         <SectionHeading>Mô tả sản phẩm</SectionHeading>
         <div className="mt-5">
-          <DocHtml body={richHtml} />
+          <DocHtml body={richHtml} even />
         </div>
 
         <h3 className={SUB_HEADING}>Yêu cầu hệ thống</h3>

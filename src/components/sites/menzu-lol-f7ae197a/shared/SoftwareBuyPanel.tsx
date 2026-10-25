@@ -10,6 +10,7 @@ import type { ProductFeature } from "@/lib/productFeatures";
 import type { ProductRequirement } from "@/lib/productRequirements";
 import { productHref } from "@/lib/routes";
 
+import { SMALL_CAPS_LABEL } from "./filterChrome";
 import { ProductBadgeChip } from "./ProductBadgeChip";
 import { sentenceCase } from "@/lib/displayCase";
 import { formatVnd } from "./productData";
@@ -284,15 +285,21 @@ export function SoftwareBuyPanel({
         {/* The shop's own "Mô tả ngắn", or nothing: no opening lines lifted
             from the long write-up, and no stock sentence in its place. */}
         {software.summary ? (
-          <p className="max-w-[60ch] text-[15px] leading-[1.65] text-mist">
+          <p className="max-w-[60ch] text-[16px] leading-[1.65] text-mist">
             {software.summary}
           </p>
         ) : null}
       </div>
 
+      {/* The page keeps the category page's type, roles for roles, the way
+          lmarket's product page keeps its shelf's (the owner, 25/10/2026:
+          "sửa lại 3300 cho đồng bộ với lmarket", "đồng bộ tỷ lệ ấy"): the
+          panel's captions in the filter labels' small capitals, the price
+          in the cards' black with their tight tracking and small "đ", body
+          copy at the one 16px, buttons a step over the cards' 12px. */}
       {software.packages.length > 0 ? (
         <div className="space-y-3">
-          <span className="block text-[14px] font-medium text-mist">
+          <span className={`${SMALL_CAPS_LABEL} ml-1 block`}>
             Chọn gói
           </span>
           <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3">
@@ -332,7 +339,10 @@ export function SoftwareBuyPanel({
 
       <div className="space-y-2">
         <p className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-          <span className="lab-figure text-[36px] font-bold leading-none text-frost sm:text-[42px]">{formatVnd(total)}đ</span>
+          <span className="font-display text-[36px] font-black leading-none tabular-nums tracking-[-0.03em] text-frost sm:text-[42px]">
+            {formatVnd(total)}
+            <span className="text-[0.5em] font-bold">đ</span>
+          </span>
           {chosen?.listPrice ? (
             // The tier is on flash sale: what it costs off sale, crossed out,
             // and the percent the sale takes off.
@@ -358,7 +368,7 @@ export function SoftwareBuyPanel({
       </div>
 
       <div className="flex items-center gap-3">
-        <span className="text-[14px] font-medium text-mist">
+        <span className={SMALL_CAPS_LABEL}>
           Số lượng
         </span>
         <button
@@ -431,7 +441,7 @@ export function SoftwareBuyPanel({
           type="button"
           disabled={busy || !chosen || !software.inStock || locked || gated}
           onClick={() => setConfirming(true)}
-          className="press h-14 w-full rounded-xl bg-[var(--menzu-accent)] text-[16px] font-semibold text-white hover:bg-[var(--menzu-accent-dark)] disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-frost sm:flex-1"
+          className="press h-14 w-full rounded-xl bg-[var(--menzu-accent)] text-[14px] font-semibold text-white hover:bg-[var(--menzu-accent-dark)] disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-frost sm:flex-1"
         >
           Mua ngay
         </button>
@@ -440,7 +450,7 @@ export function SoftwareBuyPanel({
           disabled={busy || !chosen || !software.inStock || locked || gated}
           onClick={addToCart}
           aria-busy={busy}
-          className="press flex h-14 w-full items-center justify-center gap-2 rounded-[12px] border border-line-strong bg-raise text-[16px] font-semibold text-frost hover:border-frost/40 disabled:opacity-50 sm:w-auto sm:px-7"
+          className="press flex h-14 w-full items-center justify-center gap-2 rounded-[12px] border border-line-strong bg-raise text-[14px] font-semibold text-frost hover:border-frost/40 disabled:opacity-50 sm:w-auto sm:px-7"
         >
           {busy ? <Loader2 size={14} className="animate-spin motion-reduce:animate-none" aria-hidden /> : null}
           {busy ? "Đang thêm…" : "Thêm vào giỏ"}

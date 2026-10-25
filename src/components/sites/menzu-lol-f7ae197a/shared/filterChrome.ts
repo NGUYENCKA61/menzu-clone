@@ -60,10 +60,14 @@ export const SEGMENT_PICKED = `press ${SEGMENT_SHAPE} ${CHIP_PICKED}`;
  *  where they do share one; stacked on a phone, the gap is enough. */
 export const GROUP_DIVIDER = "hidden lg:block w-px self-stretch bg-white/10";
 
-/** The small grey caption over each group of chips: menzu's 10px black
- *  capitals, set in by 4px ("in hoa như 3100 thử", then menzu's). */
-export const GROUP_LABEL_CLASS =
-  "text-[10px] uppercase font-black tracking-wider text-neutral-500 mb-1.5 ml-1 block";
+/** The site's small grey caption, menzu's 10px black capitals: one label
+ *  style on the category panel and on the product pages' "Chọn gói" and
+ *  "Số lượng", as lmarket keeps one (the owner, 25/10/2026: "đồng bộ tỷ lệ"). */
+export const SMALL_CAPS_LABEL = "text-[10px] uppercase font-black tracking-wider text-neutral-500";
+
+/** The small grey caption over each group of chips, set in by 4px ("in hoa
+ *  như 3100 thử", then menzu's). */
+export const GROUP_LABEL_CLASS = `${SMALL_CAPS_LABEL} mb-1.5 ml-1 block`;
 
 /** The sunken card the chip rows sit in. */
 export const PANEL_CLASS =

@@ -162,7 +162,9 @@ export async function AccountDetailView({
                     Mô tả sản phẩm
                   </SectionTitle>
                 </div>
-                <DocHtml body={descriptionHtml} />
+                {/* One 16px, no lead paragraph, as the tool page's write-up
+                    (25/10/2026: "đồng bộ tỷ lệ ấy"). */}
+                <DocHtml body={descriptionHtml} even />
               </section>
             ) : null}
 

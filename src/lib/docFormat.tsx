@@ -160,16 +160,19 @@ function renderBlock(block: string, key: number): ReactNode {
  * the editor's video block, or a link alone on its line. `outlined` gives
  * each h2 the id the wiki's "Mục lục" links to (outlineDocHtml).
  * `squareShots` is the lab's /docs/...?ban=cu: the wiki screenshots marked
- * square again, as they were before 18/10/2026.
+ * square again, as they were before 18/10/2026. `even` reads it at one
+ * 16px, the first paragraph no lead, as the product pages do.
  */
 export function DocHtml({
   body,
   outlined = false,
   squareShots = false,
+  even = false,
 }: {
   body: string;
   outlined?: boolean;
   squareShots?: boolean;
+  even?: boolean;
 }) {
   let html = embedVideos(sanitizeDocHtml(body));
   if (squareShots) {
@@ -177,7 +180,7 @@ export function DocHtml({
   }
   return (
     <div
-      className="doc-prose"
+      className={even ? "doc-prose doc-prose-even" : "doc-prose"}
       dangerouslySetInnerHTML={{ __html: outlined ? outlineDocHtml(html).html : html }}
     />
   );
