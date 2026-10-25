@@ -7,6 +7,7 @@ import { ChevronRight, Dices, Lock } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { sentenceCase } from "@/lib/displayCase";
 import { shortBlurb } from "@/lib/shortBlurb";
+import { vipBadge } from "@/lib/cfVip";
 import {
   discountPct,
   formatVnd,
@@ -73,6 +74,9 @@ export function ProductCard({ product, priority = false, eager = false, old = fa
     (product.name ? sentenceCase(product.name) : "") ||
     [product.rank, product.skins > 0 ? `${product.skins} Skins` : ""].filter(Boolean).join(" - ") ||
     `#${product.code}`;
+  // VIP as the wiki's badge rather than a number, as on the account page
+  // (the owner, 25/10/2026: "ở ngoài card sản phẩm tài khoản", "vip").
+  const vipIcon = vipBadge(product.vip ?? 0);
 
   const trackRef = useRef<HTMLDivElement>(null);
   const [offset, setOffset] = useState(0);
@@ -334,7 +338,11 @@ export function ProductCard({ product, priority = false, eager = false, old = fa
               <span aria-hidden className="shrink-0 text-[11px] text-[#3a3b42]">|</span>
               <span className="flex shrink-0 items-center gap-[5px] whitespace-nowrap text-[11px] font-extrabold text-[#c7c8cd]">
                 <span aria-hidden className="text-[var(--menzu-accent)]">◆</span> VIP:
-                <span className="text-[var(--menzu-accent)]">{(product.vip ?? 0) > 0 ? product.vip : ""}</span>
+                {vipIcon ? (
+                  <Image src={vipIcon} alt={`VIP ${product.vip}`} width={18} height={20} unoptimized className="shrink-0" />
+                ) : (
+                  <span className="text-[var(--menzu-accent)]">{(product.vip ?? 0) > 0 ? product.vip : ""}</span>
+                )}
               </span>
               <span aria-hidden className="shrink-0 text-[11px] text-[#3a3b42]">|</span>
               <span className="flex shrink-0 items-center gap-[5px] whitespace-nowrap text-[11px] font-extrabold text-[#c7c8cd]">

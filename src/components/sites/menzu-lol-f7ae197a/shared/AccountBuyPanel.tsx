@@ -26,6 +26,7 @@ import type { BuyerLevel } from "./SoftwareBuyPanel";
 import { StockLine } from "./StockLine";
 import { rankMatchBadge, rankMatchName } from "@/lib/cfRankMatch";
 import { rankBadge } from "@/lib/cfRanks";
+import { vipBadge } from "@/lib/cfVip";
 import { sentenceCase } from "@/lib/displayCase";
 
 export interface AccountDetail {
@@ -332,7 +333,7 @@ export function AccountBuyPanel({
   // logo", "rank match", "và rank cũng v"). VIP's carries its number, so it
   // stands alone; the rank and the tier keep their names beside theirs.
   const rankIcon = rank ? rankBadge(rank) : null;
-  const vipIcon = account.vip <= 8 ? `/images/cf/vip/vip-${account.vip}.webp` : null;
+  const vipIcon = vipBadge(account.vip);
   const matchIcon = rankMatchBadge(account.rankMatch);
   const numericStats = [
     { label: "Level", value: String(account.level), show: account.level > 0 },
