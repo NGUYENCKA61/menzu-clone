@@ -8,6 +8,7 @@ import { useEffect, useRef, useState } from "react";
 import { sentenceCase } from "@/lib/displayCase";
 import { shortBlurb } from "@/lib/shortBlurb";
 import { vipBadge } from "@/lib/cfVip";
+import { rankBadge } from "@/lib/cfRanks";
 import {
   discountPct,
   formatVnd,
@@ -77,6 +78,9 @@ export function ProductCard({ product, priority = false, eager = false, old = fa
   // VIP as the wiki's badge rather than a number, as on the account page
   // (the owner, 25/10/2026: "ở ngoài card sản phẩm tài khoản", "vip").
   const vipIcon = vipBadge(product.vip ?? 0);
+  // The rank's badge before its name, as on the account page (the owner,
+  // 25/10/2026: "card sản phẩm rank cho icon đi", "rank gì cho icon ứng với").
+  const rankIcon = product.rank ? rankBadge(product.rank) : null;
 
   const trackRef = useRef<HTMLDivElement>(null);
   const [offset, setOffset] = useState(0);
@@ -333,6 +337,7 @@ export function ProductCard({ product, priority = false, eager = false, old = fa
             <div className="flex min-w-0 items-center gap-2 overflow-hidden rounded-[9px] border border-[#292a30] bg-[#111216] px-3 py-1.5">
               <span className="flex shrink-0 items-center gap-[5px] whitespace-nowrap text-[11px] font-extrabold text-[#c7c8cd]">
                 <span aria-hidden className="text-[var(--menzu-accent)]">▲</span> Rank:
+                {rankIcon ? <Image src={rankIcon} alt="" width={18} height={20} unoptimized className="shrink-0" /> : null}
                 <span className="text-white">{product.rank}</span>
               </span>
               <span aria-hidden className="shrink-0 text-[11px] text-[#3a3b42]">|</span>
