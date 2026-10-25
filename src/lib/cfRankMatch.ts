@@ -29,3 +29,8 @@ export function rankMatchPlace(value?: string | null): number | undefined {
 export function rankMatchName(place: number): string | null {
   return CF_RANK_MATCHES[place - 1] ?? null;
 }
+
+/** A stored place's badge from the wiki's Ranked Match page, or null like rankMatchName. */
+export function rankMatchBadge(place: number): string | null {
+  return rankMatchName(place) ? `/images/cf/rank-match/rank-match-${place}.webp` : null;
+}

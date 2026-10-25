@@ -15,51 +15,54 @@ export interface CfRank {
   /** Other ways an account's rank may be typed: the Vietnamese names the
    *  list first used, a spelled-out abbreviation, the badge's one-l Marshal. */
   also?: string[];
+  /** The Ranking page's levels for the 1st Grade and the last, whose CF
+   *  Vietnam badges are in /images/cf/rank. None past level 100. */
+  levels?: [number, number];
 }
 
 export const CF_RANK_GROUPS: { label: string; ranks: CfRank[] }[] = [
   {
     label: "Soldiers",
     ranks: [
-      { name: "Trainee", also: ["Tân binh"] },
-      { name: "Private", also: ["Binh nhì"] },
-      { name: "PFC", also: ["Private First Class", "Binh nhất"] },
-      { name: "Corporal", also: ["Hạ sĩ"] },
-      { name: "Sergeant", also: ["Trung sĩ"] },
+      { name: "Trainee", also: ["Tân binh"], levels: [1, 2] },
+      { name: "Private", also: ["Binh nhì"], levels: [3, 3] },
+      { name: "PFC", also: ["Private First Class", "Binh nhất"], levels: [4, 4] },
+      { name: "Corporal", also: ["Hạ sĩ"], levels: [5, 5] },
+      { name: "Sergeant", also: ["Trung sĩ"], levels: [6, 9] },
     ],
   },
   {
     label: "Petty Officer",
     ranks: [
-      { name: "Staff Sergeant", also: ["Thượng sĩ"] },
-      { name: "SFC", also: ["Sergeant First Class"] },
-      { name: "Master Sergeant" },
+      { name: "Staff Sergeant", also: ["Thượng sĩ"], levels: [10, 15] },
+      { name: "SFC", also: ["Sergeant First Class"], levels: [16, 21] },
+      { name: "Master Sergeant", levels: [22, 27] },
     ],
   },
   {
     label: "Company Officer",
     ranks: [
-      { name: "Second Lieutenant", also: ["Thiếu úy"] },
-      { name: "First Lieutenant", also: ["Trung úy"] },
-      { name: "Captain", also: ["Đại úy"] },
+      { name: "Second Lieutenant", also: ["Thiếu úy"], levels: [28, 35] },
+      { name: "First Lieutenant", also: ["Trung úy"], levels: [36, 43] },
+      { name: "Captain", also: ["Đại úy"], levels: [44, 51] },
     ],
   },
   {
     label: "Field Officer",
     ranks: [
-      { name: "Major", also: ["Thiếu tá"] },
-      { name: "Lieutenant Colonel", also: ["Trung tá"] },
-      { name: "Colonel", also: ["Đại tá"] },
+      { name: "Major", also: ["Thiếu tá"], levels: [52, 59] },
+      { name: "Lieutenant Colonel", also: ["Trung tá"], levels: [60, 67] },
+      { name: "Colonel", also: ["Đại tá"], levels: [68, 75] },
     ],
   },
   {
     label: "General",
     ranks: [
-      { name: "Brigadier General", also: ["Thiếu tướng"] },
-      { name: "Major General", also: ["Trung tướng"] },
-      { name: "Lieutenant General", also: ["Thượng tướng"] },
-      { name: "General", also: ["Đại tướng"] },
-      { name: "Marshall", also: ["Marshal", "Nguyên soái"] },
+      { name: "Brigadier General", also: ["Thiếu tướng"], levels: [76, 81] },
+      { name: "Major General", also: ["Trung tướng"], levels: [82, 87] },
+      { name: "Lieutenant General", also: ["Thượng tướng"], levels: [88, 93] },
+      { name: "General", also: ["Đại tướng"], levels: [94, 99] },
+      { name: "Marshall", also: ["Marshal", "Nguyên soái"], levels: [100, 100] },
       { name: "Grand Marshall", also: ["Grand Marshal"] },
       { name: "Honor Marshall", also: ["Honor Marshal"] },
     ],
@@ -110,4 +113,20 @@ export function rankMatches(typed: string, name: string): boolean {
     words.some((w) => text.includes(w.toLowerCase())) &&
     !not.some((w) => text.includes(w.toLowerCase()))
   );
+}
+
+/**
+ * The badge for an account's typed rank (the owner, 25/10/2026: "và rank
+ * cũng v", after the VIP row got its logo), or null when the text names no
+ * rank with one. A number in the text picks the grade, "Colonel 3" being
+ * level 70; without one the 1st Grade's badge shows.
+ */
+export function rankBadge(typed: string): string | null {
+  const text = typed.normalize("NFC");
+  const rank = ALL.find((r) => rankMatches(text, r.name));
+  if (!rank?.levels) return null;
+  const [first, last] = rank.levels;
+  const grade = Number(text.match(/\d+/)?.[0] ?? 1);
+  const level = Math.min(first + Math.max(grade, 1) - 1, last);
+  return `/images/cf/rank/rank-${String(level).padStart(3, "0")}.webp`;
 }

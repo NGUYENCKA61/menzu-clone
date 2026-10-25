@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
@@ -23,7 +24,8 @@ import { TopUpDialog } from "./TopUpDialog";
 import { StickyBuyBar } from "./StickyBuyBar";
 import type { BuyerLevel } from "./SoftwareBuyPanel";
 import { StockLine } from "./StockLine";
-import { rankMatchName } from "@/lib/cfRankMatch";
+import { rankMatchBadge, rankMatchName } from "@/lib/cfRankMatch";
+import { rankBadge } from "@/lib/cfRanks";
 import { sentenceCase } from "@/lib/displayCase";
 
 export interface AccountDetail {
@@ -321,18 +323,41 @@ export function AccountBuyPanel({
   // A row prints only with a value after its label (the owner, 13/10/2026, UI
   // consistency review: a "RANK" with nothing beside it read as a broken
   // page). Rank shows if either the current or the last rank was typed; the
-  // skins count, like Level and KC, leaves the page at zero.
+  // weapons count, like Level and KC, leaves the page at zero.
   const rank = account.rank.trim();
   const lastRank = account.lastRank?.trim() || null;
   const showRank = rank !== "" || lastRank !== null;
   const showSkins = account.weaponSkins > 0;
+  // The CrossFire wiki's badges (the owner, 25/10/2026: "vip thay bằng icon
+  // logo", "rank match", "và rank cũng v"). VIP's carries its number, so it
+  // stands alone; the rank and the tier keep their names beside theirs.
+  const rankIcon = rank ? rankBadge(rank) : null;
+  const vipIcon = account.vip <= 8 ? `/images/cf/vip/vip-${account.vip}.webp` : null;
+  const matchIcon = rankMatchBadge(account.rankMatch);
   const numericStats = [
     { label: "Level", value: String(account.level), show: account.level > 0 },
     // Shown only with a figure: a label with nothing after it, twice in a
     // row, read as a broken page on a phone.
-    { label: "VIP", value: String(account.vip), show: account.vip > 0 },
+    {
+      label: "VIP",
+      value: vipIcon ? (
+        <Image src={vipIcon} alt={`VIP ${account.vip}`} width={23} height={26} unoptimized />
+      ) : (
+        String(account.vip)
+      ),
+      show: account.vip > 0,
+    },
     { label: "VIP Ingame", value: String(account.vipIngame), show: account.vipIngame > 0 },
-    { label: "Rank Match", value: rankMatchName(account.rankMatch) ?? "", show: account.rankMatch > 0 },
+    {
+      label: "Rank Match",
+      value: (
+        <>
+          {matchIcon ? <Image src={matchIcon} alt="" width={28} height={28} /> : null}
+          {rankMatchName(account.rankMatch)}
+        </>
+      ),
+      show: account.rankMatch > 0,
+    },
     { label: "KC", value: formatVnd(account.kc), show: account.kc > 0 },
   ].filter((s) => s.show);
   const hasStats = showRank || showSkins || numericStats.length > 0;
@@ -390,7 +415,12 @@ export function AccountBuyPanel({
             <div className={STAT_ROW_CLASS}>
               <span className={STAT_LABEL_CLASS}>Rank</span>
               <div className="flex flex-col items-end gap-1">
-                {rank ? <span className={STAT_VALUE_CLASS}>{rank}</span> : null}
+                {rank ? (
+                  <span className={`${STAT_VALUE_CLASS} inline-flex items-center gap-2`}>
+                    {rankIcon ? <Image src={rankIcon} alt="" width={23} height={26} unoptimized /> : null}
+                    {rank}
+                  </span>
+                ) : null}
                 {lastRank !== null && (
                   <span className="text-[12px] text-neutral-500 font-bold ">
                     LAST: {lastRank}
@@ -402,15 +432,15 @@ export function AccountBuyPanel({
 
           {showSkins ? (
             <div className={STAT_ROW_CLASS}>
-              <span className={STAT_LABEL_CLASS}>Skins</span>
-              <span className={STAT_VALUE_CLASS}>{account.weaponSkins} Skins</span>
+              <span className={STAT_LABEL_CLASS}>Kho đồ</span>
+              <span className={STAT_VALUE_CLASS}>{account.weaponSkins} vũ khí</span>
             </div>
           ) : null}
 
           {numericStats.map((stat) => (
             <div key={stat.label} className={STAT_ROW_CLASS}>
               <span className={STAT_LABEL_CLASS}>{stat.label}</span>
-              <span className={STAT_VALUE_CLASS}>{stat.value}</span>
+              <span className={`${STAT_VALUE_CLASS} inline-flex items-center gap-2`}>{stat.value}</span>
             </div>
           ))}
         </div>
