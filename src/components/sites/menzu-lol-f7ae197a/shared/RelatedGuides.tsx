@@ -68,7 +68,7 @@ export function RelatedGuides({
         // (25/10/2026, "tiêu đề in hoa thử").
         <h3
           id="related-guides-heading"
-          className={old ? "text-[17px] font-black text-white" : "font-display text-[17px] font-semibold uppercase tracking-wider text-frost"}
+          className={old ? "text-[17px] font-black text-white" : "font-display text-[17px] font-extrabold uppercase tracking-wider text-frost"}
         >
           Hướng dẫn liên quan
         </h3>

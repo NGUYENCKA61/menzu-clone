@@ -8,6 +8,9 @@ export interface SectionHeadingProps {
   id?: string;
   /** Goes on the row, for the margin the caller's layout wants around it. */
   className?: string;
+  /** Goes on the heading, over its own classes: a weight one page needs and
+   *  the other callers keep out of (the tool page's write-up, 25/10/2026). */
+  titleClassName?: string;
   as?: "h2" | "h3";
 }
 
@@ -22,13 +25,14 @@ export function SectionHeading({
   children,
   id,
   className,
+  titleClassName,
   as: Tag = "h2",
 }: SectionHeadingProps) {
   return (
     <div className={cn("flex items-center gap-2.5", className)}>
       <Tag
         id={id}
-        className="font-display text-xl font-bold leading-tight text-frost sm:text-2xl"
+        className={cn("font-display text-xl font-bold leading-tight text-frost sm:text-2xl", titleClassName)}
       >
         {children}
       </Tag>

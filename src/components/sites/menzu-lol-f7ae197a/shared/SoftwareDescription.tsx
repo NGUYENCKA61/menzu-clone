@@ -65,9 +65,13 @@ export interface SoftwareDescriptionProps {
 
 // TRIAL (the owner, 25/10/2026: "tiêu đề in hoa thử"): the section's
 // headings in capitals as 3100 sets them, the sub headings at 3100's 17px so
-// the capitals stand no taller than the 19px words did.
+// the capitals stand no taller than the 19px words did. Weighed off the
+// page's 900 title as lmarket weighs its own off 700 ("phần kia sửa cho tỉ
+// lệ đồng bộ với 900 luôn"): the section heading as heavy as the title
+// (SECTION_TITLE), the sub headings a step under it, 800; the copy stays 400.
 const SUB_HEADING =
-  "mt-10 font-display text-[17px] font-semibold uppercase tracking-wider text-frost";
+  "mt-10 font-display text-[17px] font-extrabold uppercase tracking-wider text-frost";
+const SECTION_TITLE = "font-black";
 /**
  * Body text in this section, set to the same values the rich editor's output
  * gets here (`.doc-prose` read even, below): neutral-300 is #d4d4d4 and every
@@ -353,7 +357,7 @@ export function SoftwareDescription({
         className="product-copy mt-14 scroll-mt-[120px] border-t border-line pt-12 pb-14"
       >
         {/* Capitals on the row, inherited by the heading (TRIAL above). */}
-        <SectionHeading className="uppercase tracking-wider">Mô tả sản phẩm</SectionHeading>
+        <SectionHeading className="uppercase tracking-wider" titleClassName={SECTION_TITLE}>Mô tả sản phẩm</SectionHeading>
         <div className="mt-5">
           <DocHtml body={richHtml} even />
         </div>
@@ -385,7 +389,7 @@ export function SoftwareDescription({
       {/* The red bar the home rows open with, as "Sản phẩm tương tự" below
           now wears too; the accent glyph stays with the page titles (the
           owner, 13/10/2026, UI consistency review). */}
-      <SectionHeading className="uppercase tracking-wider">Mô tả sản phẩm</SectionHeading>
+      <SectionHeading className="uppercase tracking-wider" titleClassName={SECTION_TITLE}>Mô tả sản phẩm</SectionHeading>
 
       {/* The name opens the paragraph in bold, as the brief's sample does, but
           joined by a dash rather than run straight on: the same `description`
