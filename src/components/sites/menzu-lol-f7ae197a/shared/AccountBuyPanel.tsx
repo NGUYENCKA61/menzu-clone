@@ -4,7 +4,20 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { Dices, Headphones, Lock, RefreshCw, ShieldCheck, Zap } from "lucide-react";
+import {
+  Award,
+  Coins,
+  Crosshair,
+  Crown,
+  Dices,
+  Gem,
+  Headphones,
+  Lock,
+  Mail,
+  RefreshCw,
+  ShieldCheck,
+  Zap,
+} from "lucide-react";
 
 import { productHref } from "@/lib/routes";
 
@@ -88,9 +101,9 @@ const TRUST = [
   { icon: Headphones, label: "Hỗ trợ 24/7" },
 ];
 
-const STAT_ROW_CLASS = "flex items-center justify-between py-2.5 border-b border-white/5";
-const STAT_LABEL_CLASS = "text-[13px] font-semibold text-neutral-500";
-const STAT_VALUE_CLASS = "text-sm font-bold text-white";
+const TILE_LABEL_CLASS = "text-[10px] font-bold uppercase tracking-wider text-neutral-500";
+const TILE_ICON_CLASS =
+  "flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/[0.04]";
 
 /**
  * Right-hand purchase panel on the account-detail page: stat rows, price
@@ -335,66 +348,43 @@ export function AccountBuyPanel({
   const rankIcon = rank ? rankBadge(rank) : null;
   const vipIcon = vipBadge(account.vip);
   const matchIcon = rankMatchBadge(account.rankMatch);
+  // menzu's stat tiles (the owner, 25/10/2026: "nên sửa theo menzu cho đẹp
+  // không", then "làm thử 5p"): an icon box, a small capital label, the value.
   const numericStats = [
-    { label: "Level", value: String(account.level), show: account.level > 0 },
+    { label: "Level", icon: <Award size={16} className="text-neutral-300" />, value: String(account.level), show: account.level > 0 },
     // Shown only with a figure: a label with nothing after it, twice in a
     // row, read as a broken page on a phone.
     {
       label: "VIP",
+      icon: <Crown size={16} className="text-amber-400" />,
       value: vipIcon ? (
-        <Image src={vipIcon} alt={`VIP ${account.vip}`} width={23} height={26} unoptimized />
+        <Image src={vipIcon} alt={`VIP ${account.vip}`} width={18} height={20} unoptimized />
       ) : (
         String(account.vip)
       ),
       show: account.vip > 0,
     },
-    { label: "VIP Ingame", value: String(account.vipIngame), show: account.vipIngame > 0 },
+    { label: "VIP Ingame", icon: <Gem size={16} className="text-sky-400" />, value: String(account.vipIngame), show: account.vipIngame > 0 },
     {
       label: "Rank Match",
-      value: (
-        <>
-          {matchIcon ? <Image src={matchIcon} alt="" width={28} height={28} /> : null}
-          {rankMatchName(account.rankMatch)}
-        </>
-      ),
+      icon: matchIcon ? <Image src={matchIcon} alt="" width={28} height={28} /> : <Award size={16} className="text-neutral-300" />,
+      value: rankMatchName(account.rankMatch),
       show: account.rankMatch > 0,
     },
-    { label: "KC", value: formatVnd(account.kc), show: account.kc > 0 },
+    { label: "KC", icon: <Coins size={16} className="text-amber-300" />, value: formatVnd(account.kc), show: account.kc > 0 },
   ].filter((s) => s.show);
+  // The other inventory tabs, counted under the weapons the way menzu counts
+  // skins by tier, in their tabs' colours.
+  const kindChips = [
+    { label: "nhân vật", n: account.agents, tone: "border-orange-500/30 bg-orange-500/10 text-orange-400" },
+    { label: "trang phục", n: account.costumes, tone: "border-orange-500/30 bg-orange-500/10 text-orange-400" },
+    { label: "phụ kiện", n: account.accessories, tone: "border-orange-500/30 bg-orange-500/10 text-orange-400" },
+    { label: "trang bị", n: account.buddies, tone: "border-violet-500/30 bg-violet-500/10 text-violet-400" },
+  ].filter((c) => c.n > 0);
   const hasStats = showRank || showSkins || numericStats.length > 0;
 
   return (
     <div className="flex flex-col gap-6">
-      {/* The corner pill from the listing card, leading the panel the way the
-          software page leads with its status pill. */}
-      {account.tag !== null && (
-        <span className="self-start inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-3 py-1.5">
-          <span
-            className={`inline-flex items-center gap-1.5 text-[12px] font-semibold ${
-              account.tag.toUpperCase() === "NFA"
-                ? "text-emerald-400"
-                : account.tag.toUpperCase() === "RANDOM"
-                  ? "text-amber-400"
-                  : "text-[#ff6c88]"
-            }`}
-          >
-            {account.tag.toUpperCase() === "NFA" ? (
-              <Lock size={11} strokeWidth={2.75} aria-hidden />
-            ) : account.tag.toUpperCase() === "RANDOM" ? (
-              <Dices size={12} strokeWidth={2.5} aria-hidden />
-            ) : (
-              <span aria-hidden>✉</span>
-            )}
-            {account.tag}
-          </span>
-          {account.mailType ? (
-            <span className="text-[10px] font-bold text-neutral-400">
-              {account.mailType}
-            </span>
-          ) : null}
-        </span>
-      )}
-
       <div className="space-y-3">
         <h1 className="text-[26px] font-black leading-[1.15] text-frost sm:text-[30px] lg:text-[34px]">
           {account.name ? sentenceCase(account.name) : `Mã #${account.code}`}
@@ -405,49 +395,109 @@ export function AccountBuyPanel({
         </p>
       </div>
 
-      {/* The heading goes with its rows: an account with nothing typed in
-          any of them shows no "Thông tin tài khoản:" over an empty list. */}
-      {hasStats ? (
-        <div className="flex flex-col">
-          <span className="pb-1 text-[12px] font-semibold text-neutral-500">
-            Thông tin tài khoản:
-          </span>
-          {showRank ? (
-            <div className={STAT_ROW_CLASS}>
-              <span className={STAT_LABEL_CLASS}>Rank</span>
-              <div className="flex flex-col items-end gap-1">
-                {rank ? (
-                  <span className={`${STAT_VALUE_CLASS} inline-flex items-center gap-2`}>
-                    {rankIcon ? <Image src={rankIcon} alt="" width={23} height={26} unoptimized /> : null}
-                    {rank}
+      {/* menzu's stat card: rank and inventory side by side, the numbers as
+          tiles under them, the mail tag as the last row. Every part shows
+          only with something in it, and the card only with any part. */}
+      {hasStats || account.tag !== null ? (
+        <div className="space-y-4 rounded-2xl border border-white/10 bg-white/[0.02] p-4 sm:p-5">
+          {showRank || showSkins ? (
+            <div className={`grid gap-4 ${showRank && showSkins ? "grid-cols-2 divide-x divide-white/10" : "grid-cols-1"}`}>
+              {showRank ? (
+                <div className="flex min-w-0 items-center gap-3">
+                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/[0.04]">
+                    {rankIcon ? (
+                      <Image src={rankIcon} alt="" width={23} height={26} unoptimized />
+                    ) : (
+                      <Award size={18} className="text-neutral-400" />
+                    )}
                   </span>
-                ) : null}
-                {lastRank !== null && (
-                  <span className="text-[12px] text-neutral-500 font-bold ">
-                    LAST: {lastRank}
-                  </span>
+                  <div className="min-w-0">
+                    <p className={TILE_LABEL_CLASS}>Rank</p>
+                    {rank ? <p className="truncate text-[15px] font-black uppercase text-white">{rank}</p> : null}
+                    {lastRank !== null ? (
+                      <p className="truncate text-[11px] font-bold text-neutral-500">LAST: {lastRank}</p>
+                    ) : null}
+                  </div>
+                </div>
+              ) : null}
+              {showSkins ? (
+                <div className={`min-w-0 ${showRank ? "pl-4" : ""}`}>
+                  <div className="flex items-center gap-3">
+                    <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/[0.04]">
+                      <Crosshair size={18} className="text-[var(--menzu-accent)]" />
+                    </span>
+                    <div className="min-w-0">
+                      <p className={TILE_LABEL_CLASS}>Kho đồ</p>
+                      <p className="truncate text-[15px] font-black uppercase text-white">{account.weaponSkins} vũ khí</p>
+                    </div>
+                  </div>
+                  {kindChips.length > 0 ? (
+                    <div className="mt-2.5 flex flex-wrap gap-1.5">
+                      {kindChips.map((chip) => (
+                        <span key={chip.label} className={`rounded-full border px-2 py-0.5 text-[11px] font-bold ${chip.tone}`}>
+                          {chip.n} {chip.label}
+                        </span>
+                      ))}
+                    </div>
+                  ) : null}
+                </div>
+              ) : null}
+            </div>
+          ) : null}
+
+          {numericStats.length > 0 ? (
+            <div
+              className={`grid grid-cols-2 gap-2 ${showRank || showSkins ? "border-t border-white/10 pt-4" : ""} ${
+                numericStats.length >= 4 ? "sm:grid-cols-4" : numericStats.length === 3 ? "sm:grid-cols-3" : "sm:grid-cols-2"
+              }`}
+            >
+              {numericStats.map((stat) => (
+                <div key={stat.label} className="flex min-w-0 items-center gap-2.5 rounded-xl border border-white/10 bg-white/[0.02] px-2.5 py-2">
+                  <span className={TILE_ICON_CLASS}>{stat.icon}</span>
+                  <div className="min-w-0">
+                    <p className={TILE_LABEL_CLASS}>{stat.label}</p>
+                    <div className="truncate text-sm font-black text-white">{stat.value}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : null}
+
+          {account.tag !== null ? (
+            <div className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/[0.02] px-2.5 py-2">
+              <span className={TILE_ICON_CLASS}>
+                {account.tag.toUpperCase() === "NFA" ? (
+                  <Lock size={15} strokeWidth={2.5} className="text-emerald-400" aria-hidden />
+                ) : account.tag.toUpperCase() === "RANDOM" ? (
+                  <Dices size={15} strokeWidth={2.5} className="text-amber-400" aria-hidden />
+                ) : (
+                  <Mail size={15} strokeWidth={2.5} className="text-[#ff6c88]" aria-hidden />
                 )}
-              </div>
+              </span>
+              <span
+                className={`text-[13px] font-black uppercase ${
+                  account.tag.toUpperCase() === "NFA"
+                    ? "text-emerald-400"
+                    : account.tag.toUpperCase() === "RANDOM"
+                      ? "text-amber-400"
+                      : "text-[#ff6c88]"
+                }`}
+              >
+                {account.tag}
+              </span>
+              {account.mailType ? (
+                <span className="rounded-md border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-[10px] font-black uppercase text-amber-400">
+                  {account.mailType}
+                </span>
+              ) : null}
             </div>
           ) : null}
-
-          {showSkins ? (
-            <div className={STAT_ROW_CLASS}>
-              <span className={STAT_LABEL_CLASS}>Kho đồ</span>
-              <span className={STAT_VALUE_CLASS}>{account.weaponSkins} vũ khí</span>
-            </div>
-          ) : null}
-
-          {numericStats.map((stat) => (
-            <div key={stat.label} className={STAT_ROW_CLASS}>
-              <span className={STAT_LABEL_CLASS}>{stat.label}</span>
-              <span className={`${STAT_VALUE_CLASS} inline-flex items-center gap-2`}>{stat.value}</span>
-            </div>
-          ))}
         </div>
       ) : null}
 
-      <div className="space-y-2">
+      {/* menzu's price card: the figure large inside its own frame, what the
+          discount saves under it. */}
+      <div className="space-y-2 rounded-2xl border border-white/10 bg-white/[0.02] p-4 sm:p-5">
         {pct > 0 ? (
           <div className="flex items-center gap-2">
             <span className="px-2 py-1 rounded-md bg-red-500/15 border border-red-500/30 text-red-400 text-[12px] font-semibold">
@@ -458,7 +508,12 @@ export function AccountBuyPanel({
             </span>
           </div>
         ) : null}
-        <p className="text-3xl sm:text-4xl font-black text-white">{formatVnd(account.price)}đ</p>
+        <p className="text-4xl sm:text-5xl font-black text-white">{formatVnd(account.price)}đ</p>
+        {pct > 0 ? (
+          <p className="text-[12px] font-semibold text-neutral-500">
+            Tiết kiệm {formatVnd(account.oldPrice - account.price)}đ
+          </p>
+        ) : null}
         <StockLine inStock={!soldOut} label={stockText} />
       </div>
 
