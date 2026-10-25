@@ -432,7 +432,7 @@ export function AccountBuyPanel({
                     </div>
                   </div>
                   {kindChips.length > 0 ? (
-                    <div className="mt-2.5 flex flex-wrap gap-1.5">
+                    <div className="mt-2.5 hidden flex-wrap gap-1.5 sm:flex">
                       {kindChips.map((chip) => (
                         <span key={chip.label} className={`rounded-full border px-2 py-0.5 text-[11px] font-bold ${chip.tone}`}>
                           {chip.n} {chip.label}
@@ -442,6 +442,17 @@ export function AccountBuyPanel({
                   ) : null}
                 </div>
               ) : null}
+            </div>
+          ) : null}
+          {/* On a phone the inventory's half is too narrow for the chips,
+              which stacked one per line; there they run under both blocks. */}
+          {showSkins && kindChips.length > 0 ? (
+            <div className="flex flex-wrap gap-1.5 sm:hidden">
+              {kindChips.map((chip) => (
+                <span key={chip.label} className={`rounded-full border px-2 py-0.5 text-[11px] font-bold ${chip.tone}`}>
+                  {chip.n} {chip.label}
+                </span>
+              ))}
             </div>
           ) : null}
 
