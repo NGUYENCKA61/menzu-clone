@@ -57,9 +57,28 @@ export function gradeOf(item: { name: string; tier: string | null }): Grade | nu
   return isVipName(item.name) ? "VIP" : null;
 }
 
+/** The kinds the game's PREMIUM tab holds: weapons and the character pieces. */
+export const PREMIUM_KINDS = ["WEAPON_SKIN", "AGENT", "COSTUME", "ACCESSORY"];
+
+/**
+ * VIP Ingame: the account's VIP items, the count the game prints under its
+ * PREMIUM tab and the site's Premium tab shows (the owner, 25/10/2026: "vip
+ * ingame dựa vào tổng số premium"). A row with a picture of its own is
+ * scraped Valorant data and has no grade, as on the account page. An account
+ * with no weapons or character pieces listed keeps the number the shop typed.
+ */
+export function vipIngameOf(
+  typed: number,
+  items: { kind: string; name: string; tier: string | null; iconUrl: string | null }[],
+): number {
+  const listed = items.filter((item) => PREMIUM_KINDS.includes(item.kind));
+  if (listed.length === 0) return typed;
+  return listed.filter((item) => !item.iconUrl && gradeOf(item) === "VIP").length;
+}
+
 export type GradeTier = "ULTRA" | "PREMIUM" | "DELUXE" | "SELECT";
 
-const MARK = /\s*\((vip|pve|ai|nano|thường|thuong)\)\s*$/iu;
+const MARK =/\s*\((vip|pve|ai|nano|thường|thuong)\)\s*$/iu;
 const TIER_OF_MARK: Record<string, GradeTier> = {
   vip: "ULTRA",
   pve: "PREMIUM",

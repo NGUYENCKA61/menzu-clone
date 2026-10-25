@@ -30,7 +30,7 @@ import { weaponKey } from "@/lib/weaponImages";
 import { rankTerms } from "@/lib/cfRanks";
 import { weaponGroup } from "@/lib/cfWeaponGroup";
 import { canonicalGroup } from "@/lib/cfInventoryGroups";
-import { gradeOf, type Grade } from "@/lib/cfGrades";
+import { gradeOf, vipIngameOf, type Grade } from "@/lib/cfGrades";
 import type { AccountDetail } from "@/components/sites/menzu-lol-f7ae197a/shared/AccountBuyPanel";
 import type { SoftwareDetail } from "@/components/sites/menzu-lol-f7ae197a/shared/SoftwareBuyPanel";
 import { parseRequirements } from "@/lib/productRequirements";
@@ -112,7 +112,7 @@ function toProductCard(
     vipIngame: number;
     oldPrice: bigint;
     tags: { label: string }[];
-    skins: (SkinRow & { name: string })[];
+    skins: (SkinRow & { name: string; iconUrl: string | null })[];
     category: { slug: string };
   },
   price: bigint | number,
@@ -135,9 +135,9 @@ function toProductCard(
       : "",
     rank: row.rank,
     // The card's two labelled numbers. Zero means "not filled in" and the
-    // card hides the entry.
+    // card hides the entry. VIP Ingame counts the VIP items (lib/cfGrades).
     vip: row.vip,
-    vipIngame: row.vipIngame,
+    vipIngame: vipIngameOf(row.vipIngame, row.skins),
     skins: total,
     tiers: toTiers(row.skins),
     tag: row.tags[0]?.label ?? null,
@@ -247,7 +247,7 @@ async function libraryPictures(names: string[]): Promise<Map<string, string>> {
  * whichever row Postgres happened to hand back first.
  */
 const CARD_SKINS = {
-  select: { kind: true, tier: true, name: true },
+  select: { kind: true, tier: true, name: true, iconUrl: true },
   orderBy: { id: "asc" },
 } as const;
 
@@ -867,7 +867,7 @@ export async function getAccountDetail(
     include: {
       category: { select: { slug: true, name: true } },
       tags: { select: { label: true } },
-      skins: { select: { kind: true, tier: true } },
+      skins: { select: { kind: true, tier: true, name: true, iconUrl: true } },
       images: { select: { url: true }, orderBy: { sortOrder: "asc" } },
     },
   });
@@ -908,7 +908,7 @@ export async function getAccountDetail(
     accessories: countKind(p.skins, "ACCESSORY"),
     level: p.level,
     vip: p.vip,
-    vipIngame: p.vipIngame,
+    vipIngame: vipIngameOf(p.vipIngame, p.skins),
     kc: p.kc,
     rankMatch: p.rankMatch,
     tag: p.tags[0]?.label ?? null,
@@ -1397,7 +1397,7 @@ export async function getFlashSaleItems(take = 20): Promise<FlashSaleItem[]> {
             oldPrice: { gt: 0 },
           },
     include: {
-      skins: { select: { kind: true, tier: true } },
+      skins: { select: { kind: true, tier: true, name: true, iconUrl: true } },
       category: { select: { slug: true } },
     },
   });
@@ -1458,7 +1458,7 @@ export async function getFlashSaleItems(take = 20): Promise<FlashSaleItem[]> {
         imageUrl: p.imageUrl,
         rank: p.rank,
         vip: p.vip,
-        vipIngame: p.vipIngame,
+        vipIngame: vipIngameOf(p.vipIngame, p.skins),
         discount: pct > 0 ? `-${pct}%` : null,
         oldPrice: `${formatVndString(Number(p.oldPrice))} VND`,
         newPrice: `${formatVndString(Number(price))} VND`,

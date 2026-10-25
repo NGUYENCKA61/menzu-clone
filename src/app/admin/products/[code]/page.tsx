@@ -9,7 +9,7 @@ import { AdminSoftwareDetail } from "@/components/sites/menzu-lol-f7ae197a/share
 import { WarrantyQuestionsEditor } from "@/components/sites/menzu-lol-f7ae197a/shared/WarrantyQuestionsEditor";
 import { parseQuestionSet, resolveQuestions } from "@/lib/warrantyDetails";
 import { getAdmin } from "@/lib/admin";
-import { gradeMark } from "@/lib/cfGrades";
+import { PREMIUM_KINDS, gradeMark, vipIngameOf } from "@/lib/cfGrades";
 import { groupedLines } from "@/lib/cfInventoryGroups";
 import { db } from "@/lib/db";
 import { isHtmlBody, plainToDocHtml } from "@/lib/docHtml";
@@ -58,7 +58,7 @@ export default async function AdminAccountDetailPage({
       },
       skins: {
         where: { kind: { in: ["WEAPON_SKIN", "AGENT", "BUDDY", "COSTUME", "ACCESSORY"] } },
-        select: { kind: true, name: true, weapon: true, tier: true },
+        select: { kind: true, name: true, weapon: true, tier: true, iconUrl: true },
         orderBy: { id: "asc" },
       },
       // Who holds this account now, if anyone: the sign-in card says whether
@@ -250,6 +250,10 @@ export default async function AdminAccountDetailPage({
           tag: product.tags[0]?.label ?? "",
           vip: product.vip,
           vipIngame: product.vipIngame,
+          // Counted from the list once there is one (lib/cfGrades).
+          vipItems: product.skins.some((s) => PREMIUM_KINDS.includes(s.kind))
+            ? vipIngameOf(product.vipIngame, product.skins)
+            : null,
           rankMatch: product.rankMatch,
           // Weapons and gear keep their "[Group]" lines (lib/cfInventoryGroups).
           skinNames: groupedLines(

@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { ChevronDown, ImageOff, Search } from "lucide-react";
 import type { AccountDetail } from "./AccountBuyPanel";
+import { PREMIUM_KINDS } from "@/lib/cfGrades";
 import {
   ALL_GROUPS,
   CHARACTER_GROUPS,
@@ -77,7 +78,7 @@ const INVENTORY_TABS: InventoryTab[] = [
   {
     key: "premium",
     label: "Premium",
-    kinds: ["WEAPON_SKIN", "AGENT", "COSTUME", "ACCESSORY"],
+    kinds: PREMIUM_KINDS,
     groups: [...WEAPON_GROUPS, "Nhân vật"],
     vipOnly: true,
   },

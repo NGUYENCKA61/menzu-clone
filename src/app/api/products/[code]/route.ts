@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { vipIngameOf } from "@/lib/cfGrades";
 import { db } from "@/lib/db";
 
 /** Full detail for one account, backing /account/[code]. */
@@ -47,7 +48,7 @@ export async function GET(
     trackerUrl: product.trackerUrl,
     level: product.level,
     vip: product.vip,
-    vipIngame: product.vipIngame,
+    vipIngame: vipIngameOf(product.vipIngame, product.skins),
     kc: product.kc,
     mailType: product.mailType,
     tags: product.tags.map((t) => t.label),

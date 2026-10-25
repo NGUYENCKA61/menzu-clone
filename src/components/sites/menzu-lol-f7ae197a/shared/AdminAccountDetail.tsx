@@ -51,6 +51,8 @@ export interface AccountDetailView {
   tag: string;
   vip: number;
   vipIngame: number;
+  /** VIP Ingame as the site counts it from the list (its VIP items); null while nothing is listed. */
+  vipItems: number | null;
   /** A place on lib/cfRankMatch's ladder, 0 for none. */
   rankMatch: number;
   skinNames: string[];
@@ -633,16 +635,31 @@ export function AdminAccountDetail({ account }: { account: AccountDetailView }) 
                 <label htmlFor="acc-vipingame" className={LABEL}>
                   VIP Ingame
                 </label>
-                <input
-                  id="acc-vipingame"
-                  inputMode="numeric"
-                  value={vipIngame}
-                  onChange={(event) =>
-                    setVipIngame(event.target.value.replace(/\D/g, "").slice(0, 7))
-                  }
-                  placeholder="0"
-                  className={`${FIELD} w-28 tabular-nums`}
-                />
+                {/* Once the account lists its items, VIP Ingame is their VIP
+                    count, the Premium tab's (the owner, 25/10/2026: "vip
+                    ingame dựa vào tổng số premium"); typing is for an
+                    account with no list yet. */}
+                {account.vipItems !== null ? (
+                  <output
+                    id="acc-vipingame"
+                    title="Tự đếm số món VIP trong danh sách vật phẩm"
+                    className={`${FIELD} w-28 tabular-nums flex items-center gap-1.5 text-neutral-400`}
+                  >
+                    {account.vipItems}
+                    <span className="text-[11px] text-neutral-600">tự đếm</span>
+                  </output>
+                ) : (
+                  <input
+                    id="acc-vipingame"
+                    inputMode="numeric"
+                    value={vipIngame}
+                    onChange={(event) =>
+                      setVipIngame(event.target.value.replace(/\D/g, "").slice(0, 7))
+                    }
+                    placeholder="0"
+                    className={`${FIELD} w-28 tabular-nums`}
+                  />
+                )}
               </div>
               <div>
                 <label htmlFor="acc-rankmatch" className={LABEL}>
