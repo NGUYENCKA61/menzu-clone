@@ -121,10 +121,10 @@ const PAGE_SIZE = 15;
 // The open tab and its active chip are solid: weapons red, characters orange,
 // gear violet; the block's small accents (filter chips and their scroll bar,
 // tile hover, "Xem thêm") follow the open tab's colour. Everything is a complete literal string per colour,
-// because Tailwind cannot see a composed class name. Type per the buy panel's
-// "Mua ngay" button.
+// because Tailwind cannot see a composed class name. Tab type is menzu's:
+// 14px, 16px from sm, black capitals (the owner, 25/10/2026: "6 thử 3p").
 const TAB_BASE =
-  "flex-shrink-0 flex items-center justify-center gap-2 sm:gap-3 px-4 sm:px-6 py-2.5 rounded-2xl text-[15px] font-semibold transition-colors border";
+  "flex-shrink-0 flex items-center justify-center gap-2 sm:gap-3 px-4 sm:px-6 py-2.5 rounded-2xl text-sm sm:text-base font-black uppercase transition-colors border";
 const TAB_INACTIVE =
   "border-line bg-raise text-mist hover:border-line-strong hover:text-frost";
 const FILTER_BASE =
