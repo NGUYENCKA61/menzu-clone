@@ -12,7 +12,7 @@ import { productHref } from "@/lib/routes";
 
 import { SMALL_CAPS_LABEL } from "./filterChrome";
 import { ProductBadgeChip } from "./ProductBadgeChip";
-import { sentenceCase } from "@/lib/displayCase";
+import { titleCase } from "@/lib/displayCase";
 import { formatVnd } from "./productData";
 import { SoftwareCheckoutDialog } from "./SoftwareCheckoutDialog";
 import { StickyBuyBar } from "./StickyBuyBar";
@@ -279,8 +279,13 @@ export function SoftwareBuyPanel({
         {/* LAB (Launcher): the name in the display face and sentence case
             (displayCase keeps CS2, ESP, OBV ...); the full typed name is in
             the breadcrumb's last crumb and the page title. */}
+        {/* The name as its card on the shelf writes it (the owner,
+            25/10/2026: "sửa lại tiêu đề trang chi tiết sản phẩm khớp card
+            sản phẩm", "thiếu in hoa chữ đầu nè"): every word's first letter
+            capital, the acronyms kept. The words only, not the card's red
+            bar ("bỏ cái | đỏ", "chỉ sửa nội dung thôi mà"). */}
         <h1 className="font-display text-[26px] font-black leading-[1.15] text-frost sm:text-[30px] lg:text-[36px]">
-          {sentenceCase(software.name)}
+          {titleCase(software.name)}
         </h1>
         {/* The shop's own "Mô tả ngắn", or nothing: no opening lines lifted
             from the long write-up, and no stock sentence in its place. */}
