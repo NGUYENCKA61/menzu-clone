@@ -1905,3 +1905,39 @@ html[data-admin-filtering] .admin-list {
   border-top: 1px solid #222228;
   margin: 2.2rem 0;
 }
+
+/* LAB: a product page's write-up laid out as 3100 sets it (the owner,
+   25/10/2026: "thôi giống 3100 đi phần mô tả", "rồi sửa lại cho đồng bộ tỉ
+   lệ với web"): across the column's full width, plain bullets and plain
+   numbers instead of the wiki's numbered circles, headings typed in the
+   editor at 3100's 18px and 16px black, under the section's own 24px
+   heading. The text keeps this site's 16px. Only under .product-copy, so
+   the wiki keeps its article look. */
+.product-copy .doc-prose:not(.ProseMirror) {
+  max-width: none;
+}
+.product-copy .doc-prose h2 {
+  font-size: 1.125rem;
+  font-weight: 900;
+  margin-top: 1.9rem;
+}
+.product-copy .doc-prose h3 {
+  font-size: 1rem;
+  font-weight: 900;
+}
+.product-copy .doc-prose ul {
+  list-style: disc;
+  padding-left: 1.35rem;
+}
+.product-copy .doc-prose ol {
+  list-style: decimal;
+  padding-left: 1.35rem;
+}
+.product-copy .doc-prose li,
+.product-copy .doc-prose ol > li {
+  margin: 0.3rem 0;
+  padding-left: 0;
+}
+.product-copy .doc-prose ol > li::before {
+  content: none;
+}

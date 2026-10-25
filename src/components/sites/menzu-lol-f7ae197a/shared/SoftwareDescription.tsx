@@ -77,8 +77,12 @@ const SUB_HEADING =
  * against each other — a written guide above a warranty notice, a written
  * note under default bullets. Two greys there read as one of them being less
  * important rather than as one of them being editable.
+ *
+ * Across the column's full width, as 3100 sets the section (the owner,
+ * 25/10/2026: "thôi giống 3100 đi phần mô tả", "rồi sửa lại cho đồng bộ tỉ
+ * lệ với web"): 3100's layout at this site's 16px.
  */
-const BODY = "max-w-[72ch] text-[16px] leading-[1.7] text-neutral-300";
+const BODY = "text-[16px] leading-[1.7] text-neutral-300";
 
 /** The words the locked panel sets in red: what happens, and what to press. */
 function Hi({ children }: { children: React.ReactNode }) {
@@ -343,7 +347,7 @@ export function SoftwareDescription({
     return (
       <section
         id={DESCRIPTION_SECTION_ID}
-        className="mt-14 scroll-mt-[120px] border-t border-line pt-12 pb-14"
+        className="product-copy mt-14 scroll-mt-[120px] border-t border-line pt-12 pb-14"
       >
         <SectionHeading>Mô tả sản phẩm</SectionHeading>
         <div className="mt-5">
@@ -372,7 +376,7 @@ export function SoftwareDescription({
     // underneath the navigation bar.
     <section
       id={DESCRIPTION_SECTION_ID}
-      className="mt-14 scroll-mt-[120px] border-t border-line pt-12 pb-14"
+      className="product-copy mt-14 scroll-mt-[120px] border-t border-line pt-12 pb-14"
     >
       {/* The red bar the home rows open with, as "Sản phẩm tương tự" below
           now wears too; the accent glyph stays with the page titles (the
