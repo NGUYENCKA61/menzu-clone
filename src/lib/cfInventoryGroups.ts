@@ -17,10 +17,11 @@ export const CHARACTER_GROUPS = ["Nhân vật", "Trang phục", "Phụ kiện"];
 /**
  * Trang bị: the sections the owner's scanner reads (25/10/2026: "web mình bổ
  * sung thêm mục cho khớp đi"), the game's Chức năng with its three dropdown
- * entries, then Chỉ chế độ's two. Phần thưởng and fragments are not listed
- * at all.
+ * entries and Chỉ chế độ's two. Chức năng, Zombie and AI lead ("chức năng
+ * zombie AI theo 3 thứ tự đó đi còn lại sau cũng đc"). Phần thưởng and
+ * fragments are not listed at all.
  */
-export const GEAR_GROUPS = ["Chức năng", "Âm thanh", "Búp bê", "Hiệu ứng", "Zombie", "Chế độ AI"];
+export const GEAR_GROUPS = ["Chức năng", "Zombie", "Chế độ AI", "Âm thanh", "Búp bê", "Hiệu ứng"];
 
 /** Trang trí: its own tab on the site, as the scanner lists it, with the game's seven entries. */
 export const DECOR_GROUPS = ["Emoji", "Killmark", "Kill Log", "Khung nhân vật", "Màu chat", "Bình xịt", "Bảng tên"];
