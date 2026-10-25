@@ -262,6 +262,47 @@ export const LISTED_PRODUCT = {
   status: { not: "HIDDEN" },
 } as const satisfies Prisma.ProductWhereInput;
 
+/**
+ * The HOT PICK chip's cast on a shelf: the VIP guns, the ones the game files
+ * under PREMIUM (the owner, 25/10/2026: "hot pick là những cây súng trong
+ * premium ấy"), taken from the shelf's accounts still on sale, so a pick
+ * always searches up something to buy. Pictured guns first, then the ones
+ * more accounts carry.
+ */
+export async function premiumHotPicks(
+  categorySlug: string,
+  limit: number,
+): Promise<{ name: string; imageUrl: string | null }[]> {
+  const groups = await db.productSkin.groupBy({
+    by: ["name", "tier"],
+    // Only typed rows are graded, as on the account page.
+    where: {
+      kind: "WEAPON_SKIN",
+      iconUrl: null,
+      product: { deletedAt: null, status: "AVAILABLE", category: { slug: categorySlug } },
+    },
+    _count: { _all: true },
+  });
+  const carried = new Map<string, { name: string; count: number }>();
+  for (const g of groups) {
+    if (gradeOf(g) !== "VIP") continue;
+    const key = weaponKey(g.name);
+    const seen = carried.get(key);
+    carried.set(key, { name: seen?.name ?? g.name, count: (seen?.count ?? 0) + g._count._all });
+  }
+  const pictures = await libraryPictures([...carried.values()].map((c) => c.name));
+  return [...carried]
+    .map(([key, c]) => ({ name: c.name, imageUrl: pictures.get(key) ?? null, count: c.count }))
+    .sort(
+      (a, b) =>
+        Number(b.imageUrl !== null) - Number(a.imageUrl !== null) ||
+        b.count - a.count ||
+        a.name.localeCompare(b.name),
+    )
+    .slice(0, limit)
+    .map(({ name, imageUrl }) => ({ name, imageUrl }));
+}
+
 export interface CategoryPageData {
   name: string;
   slug: string;

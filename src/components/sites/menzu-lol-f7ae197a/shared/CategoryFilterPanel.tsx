@@ -82,7 +82,8 @@ export interface CategoryFilterPanelProps {
   /**
    * The rotating cast for the HOT PICK chip, already resolved against the
    * picture library — the pinned item first when Cấu hình names one, then the
-   * library's newest. Empty or absent leaves the chip out entirely.
+   * VIP guns on the shelf's accounts for sale. Empty or absent leaves the chip
+   * out entirely.
    */
   hotPicks?: { name: string; imageUrl: string | null }[];
 }

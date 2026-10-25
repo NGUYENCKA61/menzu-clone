@@ -73,7 +73,7 @@ export function AdminWeaponImages({
       }
       setMsg({
         tone: "ok",
-        text: pick ? `Đã ghim "${pick}" đứng đầu HOT PICK` : "HOT PICK tự xoay toàn kho",
+        text: pick ? `Đã ghim "${pick}" đứng đầu HOT PICK` : "HOT PICK tự xoay súng VIP của acc đang bán",
       });
       router.refresh();
     } catch {
@@ -267,9 +267,10 @@ export function AdminWeaponImages({
         </div>
       ) : null}
 
-      {/* The HOT PICK pin lives beside the pictures it rotates through: the
-          chip on the category page draws from this library, so the shop pins
-          a tree where it can see the trees. Moved here from Cấu hình. */}
+      {/* The HOT PICK pin lives beside the pictures: the chip on the category
+          page rotates the VIP guns of the accounts for sale, pictured from
+          this library, so the shop pins a tree where it can see the trees.
+          Moved here from Cấu hình. */}
       <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-5">
         <span className={LABEL}>Vật phẩm &ldquo;HOT PICK&rdquo;</span>
         <div className="flex flex-wrap items-center gap-3">
@@ -280,7 +281,7 @@ export function AdminWeaponImages({
             className={`${FIELD} max-w-xs`}
           >
             <option value="" className="bg-neutral-900">
-              Tự xoay toàn kho
+              Tự xoay súng VIP
             </option>
             {hotPickSkin &&
             !images.some((w) => w.name.toLowerCase() === hotPickSkin.toLowerCase()) ? (
@@ -304,9 +305,10 @@ export function AdminWeaponImages({
           </button>
         </div>
         <p className="mt-2 text-[11px] text-neutral-500">
-          Chip nhỏ trong ô tìm skin ở trang danh mục, tự xoay vòng các vật phẩm trong
-          kho này, bấm vào là lọc theo cây đang hiện. Chọn một cây để ghim nó đứng
-          đầu vòng xoay; chọn &ldquo;tự xoay&rdquo; để thả. Kho trống thì chip ẩn.
+          Chip nhỏ trong ô tìm skin ở trang danh mục, tự xoay vòng các cây súng VIP
+          (Premium) có trong acc đang bán của danh mục đó, bấm vào là lọc theo cây đang
+          hiện. Chọn một cây để ghim nó đứng đầu vòng xoay; chọn &ldquo;tự xoay&rdquo;
+          để thả. Không có súng VIP nào và không ghim thì chip ẩn.
         </p>
       </div>
 

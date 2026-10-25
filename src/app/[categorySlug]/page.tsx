@@ -20,7 +20,7 @@ import { docHtmlToPlainText, isHtmlBody } from "@/lib/docHtml";
 import Link from "next/link";
 
 import { pageHrefFor } from "@/lib/paging";
-import { getCategoryPage } from "@/lib/queries";
+import { getCategoryPage, premiumHotPicks } from "@/lib/queries";
 import { relatedGuidesForCategory } from "@/lib/relatedGuides";
 import { breadcrumbJsonLd, itemListJsonLd, JsonLd } from "@/lib/seo";
 import { categorySeoCopy } from "@/lib/seoCopy";
@@ -67,7 +67,7 @@ interface PageProps {
 
 const SORTS = new Set(["newest", "price-asc", "price-desc"]);
 
-/** How many library items the HOT PICK chip rotates through, besides the pin. */
+/** How many VIP guns the HOT PICK chip rotates through, besides the pin. */
 const HOT_PICK_ROTATION = 8;
 
 /** The status chips' URL values, and the column values they stand for. */
@@ -200,11 +200,11 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
     notFound();
   }
 
-  // The HOT PICK chip's rotating cast: the picture library's newest items,
-  // led by whatever name Cấu hình pins. The pin joins even with no picture
-  // yet — the shop named it on purpose — and looks its picture up directly
-  // rather than hoping to find itself among the newest few. A blank pin just
-  // means the library rotates on its own.
+  // The HOT PICK chip's rotating cast: the VIP guns on this shelf's accounts
+  // for sale (lib/queries premiumHotPicks), led by whatever name Cấu hình
+  // pins. The pin joins even with no picture yet — the shop named it on
+  // purpose — and looks its picture up directly. A blank pin just means the
+  // VIP guns rotate on their own.
   const settings = await getShopSettings();
   const pinnedName = settings.hotPickSkin.trim();
   const pinnedKey = pinnedName ? weaponKey(pinnedName) : null;
@@ -212,11 +212,7 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
     pinnedKey
       ? db.weaponImage.findUnique({ where: { key: pinnedKey }, select: { url: true } })
       : Promise.resolve(null),
-    db.weaponImage.findMany({
-      orderBy: { updatedAt: "desc" },
-      take: HOT_PICK_ROTATION,
-      select: { name: true, url: true },
-    }),
+    premiumHotPicks(data.slug, HOT_PICK_ROTATION),
     // "Hướng dẫn liên quan" under the grids (lib/relatedGuides.ts), read
     // only for page one, the only page that draws it, and only for a shelf
     // that sells something: under the empty-shelf box the key guides and the
@@ -228,9 +224,7 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
   ]);
   const hotPickList: { name: string; imageUrl: string | null }[] = [
     ...(pinnedName ? [{ name: pinnedName, imageUrl: pinnedImage?.url ?? null }] : []),
-    ...libraryPicks
-      .filter((w) => weaponKey(w.name) !== pinnedKey)
-      .map((w) => ({ name: w.name, imageUrl: w.url })),
+    ...libraryPicks.filter((w) => weaponKey(w.name) !== pinnedKey),
   ];
   const hotPicks = hotPickList.length > 0 ? hotPickList : undefined;
 
