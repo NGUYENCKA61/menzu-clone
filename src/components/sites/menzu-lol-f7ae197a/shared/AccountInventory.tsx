@@ -177,6 +177,19 @@ const TAB_ACCENTS: Record<InventoryTabKey, TabAccent> = {
 };
 
 /**
+ * Marks a tile picture the wiki only has small. Its costume, ring, doll and
+ * item icons are about 113x58 and its tokens 32x32, which the tile stretches
+ * three or four times on a phone, and smooth scaling smears them. These draw
+ * nearest-neighbour, the game's own pixels; under 64px they also keep a
+ * margin so the pixels stay small (the owner, 25/10/2026: "1 số cái mờ
+ * quá", "làm thử 2. 3 phút đi").
+ */
+function markSmallPicture(img: HTMLImageElement) {
+  if (img.naturalWidth < 160) img.dataset.small = "";
+  if (img.naturalWidth < 64) img.dataset.tiny = "";
+}
+
+/**
  * A chip row that scrolls sideways the way menzu's does (the owner,
  * 25/10/2026: "7. Thêm này đi"): a mouse can drag it, and while it is wider
  * than the panel a bar under it fills as it scrolls, beside a hint. A row
@@ -441,8 +454,9 @@ export function AccountInventory({ account, items }: AccountInventoryProps) {
                           alt=""
                           fill
                           sizes="(min-width: 1024px) 20vw, (min-width: 640px) 33vw, 50vw"
-                          className="object-contain group-hover:scale-105 transition-transform duration-300"
+                          className="object-contain group-hover:scale-105 transition-transform duration-300 data-small:[image-rendering:pixelated] data-tiny:p-5"
                           unoptimized
+                          onLoad={(event) => markSmallPicture(event.currentTarget)}
                         />
                       </div>
                     ) : (
