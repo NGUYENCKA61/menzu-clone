@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { ChevronDown, ImageOff, Search } from "lucide-react";
 import type { AccountDetail } from "./AccountBuyPanel";
 import { ALL_GROUPS, CHARACTER_GROUPS, GEAR_GROUPS, WEAPON_GROUPS } from "@/lib/cfInventoryGroups";
@@ -119,8 +119,8 @@ const gradeRank = (item: InventoryItemView) => (item.grade ? GRADE_ORDER[item.gr
 const PAGE_SIZE = 15;
 
 // The open tab and its active chip are solid: weapons red, characters orange,
-// gear violet; the block's small accents (filter chips, tile hover, "Xem thêm")
-// follow the open tab's colour. Everything is a complete literal string per colour,
+// gear violet; the block's small accents (filter chips and their scroll bar,
+// tile hover, "Xem thêm") follow the open tab's colour. Everything is a complete literal string per colour,
 // because Tailwind cannot see a composed class name. Type per the buy panel's
 // "Mua ngay" button.
 const TAB_BASE =
@@ -135,6 +135,7 @@ const FILTER_INACTIVE =
 interface TabAccent {
   tabActive: string;
   filterActive: string;
+  barFill: string;
   tileHover: string;
   searchFocus: string;
 }
@@ -143,6 +144,7 @@ const RED_ACCENT: TabAccent = {
   // The open tab in solid red, menzu's way (the owner, 25/10/2026: "đỏ đặc").
   tabActive: "border-[var(--menzu-accent)] bg-[var(--menzu-accent)] text-white",
   filterActive: "border-[var(--menzu-accent)] bg-[var(--menzu-accent)] text-white",
+  barFill: "bg-[var(--menzu-accent)]",
   tileHover: "hover:border-white/25",
   searchFocus: "focus-within:border-[var(--menzu-accent)]/60 focus-within:ring-2 focus-within:ring-[var(--menzu-accent)]/25",
 };
@@ -152,12 +154,14 @@ const RED_ACCENT: TabAccent = {
 const ORANGE_ACCENT: TabAccent = {
   tabActive: "border-transparent bg-orange-500 text-white",
   filterActive: "border-transparent bg-orange-500 text-white",
+  barFill: "bg-orange-500",
   tileHover: "hover:border-white/25",
   searchFocus: "focus-within:border-[var(--menzu-accent)]/60 focus-within:ring-2 focus-within:ring-[var(--menzu-accent)]/25",
 };
 const VIOLET_ACCENT: TabAccent = {
   tabActive: "border-transparent bg-violet-500 text-white",
   filterActive: "border-transparent bg-violet-500 text-white",
+  barFill: "bg-violet-500",
   tileHover: "hover:border-white/25",
   searchFocus: "focus-within:border-[var(--menzu-accent)]/60 focus-within:ring-2 focus-within:ring-[var(--menzu-accent)]/25",
 };
@@ -170,6 +174,101 @@ const TAB_ACCENTS: Record<InventoryTabKey, TabAccent> = {
   cards: RED_ACCENT,
   sprays: RED_ACCENT,
 };
+
+/**
+ * A chip row that scrolls sideways the way menzu's does (the owner,
+ * 25/10/2026: "7. Thêm này đi"): a mouse can drag it, and while it is wider
+ * than the panel a bar under it fills as it scrolls, beside a hint. A row
+ * that fits shows neither, since there is nothing to drag.
+ */
+function DragScrollRow({ fill, children }: { fill: string; children: ReactNode }) {
+  const rowRef = useRef<HTMLDivElement>(null);
+  const trackRef = useRef<HTMLDivElement>(null);
+  const drag = useRef<{ x: number; left: number; moved: boolean } | null>(null);
+  const dragged = useRef(false);
+  // How much of the row has been seen, 0 to 1; null while it all fits.
+  const [reach, setReach] = useState<number | null>(null);
+
+  // No first measure by hand: a ResizeObserver reports once as soon as it
+  // starts watching. The track as well as the row, because a new tab's
+  // chips widen the track, not the row.
+  useEffect(() => {
+    const row = rowRef.current;
+    const track = trackRef.current;
+    if (!row || !track) return;
+    const measure = () =>
+      setReach(
+        row.scrollWidth - row.clientWidth > 1 ? (row.scrollLeft + row.clientWidth) / row.scrollWidth : null,
+      );
+    row.addEventListener("scroll", measure, { passive: true });
+    const observer = new ResizeObserver(measure);
+    observer.observe(row);
+    observer.observe(track);
+    return () => {
+      row.removeEventListener("scroll", measure);
+      observer.disconnect();
+    };
+  }, []);
+
+  return (
+    <div className="mt-4">
+      <div
+        ref={rowRef}
+        onPointerDown={(event) => {
+          if (event.pointerType !== "mouse" || event.button !== 0) return;
+          drag.current = { x: event.clientX, left: event.currentTarget.scrollLeft, moved: false };
+        }}
+        onPointerMove={(event) => {
+          const start = drag.current;
+          if (!start) return;
+          // Released outside the row: this move is a hover, not a drag.
+          if ((event.buttons & 1) === 0) {
+            drag.current = null;
+            return;
+          }
+          const dx = event.clientX - start.x;
+          if (!start.moved) {
+            if (Math.abs(dx) < 4) return;
+            start.moved = true;
+            event.currentTarget.setPointerCapture(event.pointerId);
+          }
+          event.currentTarget.scrollLeft = start.left - dx;
+        }}
+        onPointerUp={() => {
+          // A drag that ends over a chip must not also pick it.
+          dragged.current = drag.current?.moved ?? false;
+          drag.current = null;
+          window.setTimeout(() => {
+            dragged.current = false;
+          }, 0);
+        }}
+        onPointerCancel={() => {
+          drag.current = null;
+        }}
+        onClickCapture={(event) => {
+          if (!dragged.current) return;
+          event.preventDefault();
+          event.stopPropagation();
+        }}
+        className={`overflow-x-auto hide-scrollbar pb-1 ${reach !== null ? "cursor-grab select-none active:cursor-grabbing" : ""}`}
+      >
+        <div ref={trackRef} className="flex w-max items-center gap-2">
+          {children}
+        </div>
+      </div>
+      {reach !== null ? (
+        <div aria-hidden className="mt-2 flex items-center gap-3">
+          <div className="h-1 flex-1 overflow-hidden rounded-full bg-white/10">
+            <div className={`h-full rounded-full ${fill}`} style={{ width: `${reach * 100}%` }} />
+          </div>
+          <span className="shrink-0 text-[10px] font-black uppercase tracking-wider text-neutral-500">
+            Kéo để xem thêm
+          </span>
+        </div>
+      ) : null}
+    </div>
+  );
+}
 
 /**
  * The inventory tabs on the account-detail page, each with its sub-tab chips.
@@ -284,7 +383,7 @@ export function AccountInventory({ account, items }: AccountInventoryProps) {
       </label>
 
       {groups.length > 1 ? (
-        <div className="flex items-center gap-2 overflow-x-auto hide-scrollbar mt-4 pb-1">
+        <DragScrollRow fill={accent.barFill}>
           {groups.map((name) => (
             <button
               key={name}
@@ -301,7 +400,7 @@ export function AccountInventory({ account, items }: AccountInventoryProps) {
               {name}
             </button>
           ))}
-        </div>
+        </DragScrollRow>
       ) : null}
 
       <div key={`${activeTab}-${group}`} className="flex flex-col min-h-[400px] skin-tab-enter">
