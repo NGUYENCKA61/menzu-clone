@@ -459,10 +459,10 @@ export function AccountBuyPanel({
             </span>
           </div>
         ) : null}
-        {/* The account card's price grown, as on the tool page: the same
-            black and tight tracking (the owner, 25/10/2026: "đồng bộ tỷ lệ
-            ấy"), the "đ" as large as the figures ("cho chữ đ to bằng số"). */}
-        <p className="text-3xl sm:text-4xl font-black tabular-nums tracking-[-0.03em] text-white">
+        {/* Set as on the tool page and on 3100: black, the font's own
+            figures and spacing, the "đ" as large as the figures (the owner,
+            25/10/2026: "cho chữ đ to bằng số", "làm sao giống 3100 đi"). */}
+        <p className="text-3xl sm:text-4xl font-black text-white">
           {formatVnd(account.price)}đ
         </p>
         <StockLine inStock={!soldOut} label={stockText} />
