@@ -29,6 +29,7 @@ import type { WarrantyStatus } from "@/lib/warrantyRequests";
 import { weaponKey } from "@/lib/weaponImages";
 import { rankTerms } from "@/lib/cfRanks";
 import { weaponGroup } from "@/lib/cfWeaponGroup";
+import { canonicalGroup } from "@/lib/cfInventoryGroups";
 import { gradeOf, type Grade } from "@/lib/cfGrades";
 import type { AccountDetail } from "@/components/sites/menzu-lol-f7ae197a/shared/AccountBuyPanel";
 import type { SoftwareDetail } from "@/components/sites/menzu-lol-f7ae197a/shared/SoftwareBuyPanel";
@@ -1723,10 +1724,11 @@ export async function getInventory(code: string): Promise<InventoryItem[]> {
     select: { id: true, kind: true, name: true, iconUrl: true, weapon: true, tier: true },
   });
   // A weapon typed without a "[Group]" line is grouped by its name, the
-  // way the game's own Vũ khí sub-tabs split them (lib/cfWeaponGroup).
+  // way the game's own Vũ khí sub-tabs split them (lib/cfWeaponGroup); a
+  // typed group is read the way the site spells it (lib/cfInventoryGroups).
   const rows = stored.map((r) => ({
     ...r,
-    weapon: r.kind === "WEAPON_SKIN" && !r.weapon ? weaponGroup(r.name) : r.weapon,
+    weapon: r.kind === "WEAPON_SKIN" && !r.weapon ? weaponGroup(r.name) : r.weapon && canonicalGroup(r.weapon),
     // Only what the shop typed is graded; a scraped row's tier is Valorant's.
     grade: r.iconUrl ? null : gradeOf(r),
   }));

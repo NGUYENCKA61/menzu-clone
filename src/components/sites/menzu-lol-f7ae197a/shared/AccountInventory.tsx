@@ -4,7 +4,15 @@ import Image from "next/image";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { ChevronDown, ImageOff, Search } from "lucide-react";
 import type { AccountDetail } from "./AccountBuyPanel";
-import { ALL_GROUPS, CHARACTER_GROUPS, GEAR_GROUPS, WEAPON_GROUPS } from "@/lib/cfInventoryGroups";
+import {
+  ALL_GROUPS,
+  CHARACTER_GROUPS,
+  DECOR_GROUPS,
+  DECOR_TAB,
+  GEAR_GROUPS,
+  WEAPON_GROUPS,
+  isDecorGroup,
+} from "@/lib/cfInventoryGroups";
 
 export interface InventoryItemView {
   id: string;
@@ -36,7 +44,7 @@ const ACCOUNT_INVENTORY_STYLES = `
 }
 `;
 
-type InventoryTabKey = "weaponSkins" | "characters" | "buddies" | "premium" | "cards" | "sprays";
+type InventoryTabKey = "weaponSkins" | "characters" | "buddies" | "decor" | "premium" | "cards" | "sprays";
 
 interface InventoryTab {
   key: InventoryTabKey;
@@ -47,17 +55,22 @@ interface InventoryTab {
   groups: string[];
   /** Only the VIP items among those kinds: the game's PREMIUM tab. */
   vipOnly?: boolean;
+  /** Gear split by group: true keeps only the Trang trí entries, false leaves them out. */
+  decor?: boolean;
 }
 
-// CrossFire's own inventory, three tabs each with its sub-tabs as a chip row
-// (the owner, 25/10/2026, with screenshots of the game and of menzu's "All
-// Skin" row). The characters tab gathers the three character kinds, its
-// chips being the kinds; weapons and gear chip by group. Cards and sprays
-// stay only for legacy scraped data; at zero they never show.
+// CrossFire's own inventory, each tab with its sub-tabs as a chip row (the
+// owner, 25/10/2026, with screenshots of the game and of menzu's "All Skin"
+// row). The characters tab gathers the three character kinds, its chips
+// being the kinds; weapons and gear chip by group. Trang trí is gear the
+// game files under Trang bị, a tab of its own here as the owner's scanner
+// lists it ("web mình bổ sung thêm mục cho khớp đi"). Cards and sprays stay
+// only for legacy scraped data; at zero they never show.
 const INVENTORY_TABS: InventoryTab[] = [
   { key: "weaponSkins", label: "Trang bị súng", kinds: ["WEAPON_SKIN"], groups: WEAPON_GROUPS },
   { key: "characters", label: "Nhân vật", kinds: ["AGENT", "COSTUME", "ACCESSORY"], groups: CHARACTER_GROUPS },
-  { key: "buddies", label: "Trang bị", kinds: ["BUDDY"], groups: GEAR_GROUPS },
+  { key: "buddies", label: "Trang bị", kinds: ["BUDDY"], groups: GEAR_GROUPS, decor: false },
+  { key: "decor", label: "Trang trí", kinds: ["BUDDY"], groups: DECOR_GROUPS, decor: true },
   // The game's PREMIUM tab: every VIP item, weapons by their group, the
   // character pieces together (the owner, 25/10/2026, with a capture of it:
   // "bổ sung thêm phần premium trong card", "hiện kho súng ấy").
@@ -78,20 +91,32 @@ const KIND_GROUP: Record<string, string> = {
   ACCESSORY: "Phụ kiện",
 };
 
-/** A tab's count; Premium's is its VIP items, which only the rows know. */
-function tabTotal(account: AccountDetail, key: InventoryTabKey, vipItems: number): number {
-  if (key === "premium") return vipItems;
+/** What only the rows know: the VIP items and the Trang trí ones. */
+interface RowCounts {
+  vip: number;
+  decor: number;
+}
+
+/** A tab's count; Premium's and Trang trí's come from the rows, Trang bị keeps the rest of the gear. */
+function tabTotal(account: AccountDetail, key: InventoryTabKey, counted: RowCounts): number {
+  if (key === "premium") return counted.vip;
+  if (key === "decor") return counted.decor;
+  if (key === "buddies") return Math.max(account.buddies - counted.decor, 0);
   return key === "characters" ? account.agents + account.costumes + account.accessories : account[key];
 }
 
 /** The chip an item sits under: its kind on the characters tab, its group elsewhere. */
 function groupOf(tab: InventoryTab, item: InventoryItemView): string | null {
   if (tab.key === "premium") return item.kind === "WEAPON_SKIN" ? item.weapon : "Nhân vật";
+  // Decor headed only "[Trang trí]" has no one entry to sit under.
+  if (tab.key === "decor") return item.weapon === DECOR_TAB ? null : item.weapon;
   return tab.key === "characters" ? (KIND_GROUP[item.kind] ?? null) : item.weapon;
 }
 
 const inTab = (tab: InventoryTab, item: InventoryItemView) =>
-  tab.kinds.includes(item.kind) && (!tab.vipOnly || item.grade === "VIP");
+  tab.kinds.includes(item.kind) &&
+  (!tab.vipOnly || item.grade === "VIP") &&
+  (tab.decor === undefined || isDecorGroup(item.weapon) === tab.decor);
 
 /**
  * menzu's tile treatment, tinted by the item's grade the way CrossFire tints
@@ -137,7 +162,7 @@ const gradeRank = (item: InventoryItemView) => (item.grade ? GRADE_ORDER[item.gr
 const PAGE_SIZE = 15;
 
 // The open tab and its active chip are solid: weapons red, characters orange,
-// gear violet; the block's small accents (filter chips and their scroll bar,
+// gear violet, decor pink, Premium gold; the block's small accents (filter chips and their scroll bar,
 // tile hover, "Xem thêm") follow the open tab's colour. Everything is a complete literal string per colour,
 // because Tailwind cannot see a composed class name. Tab type is menzu's:
 // 14px, 16px from sm, black capitals (the owner, 25/10/2026: "6 thử 3p",
@@ -185,6 +210,15 @@ const VIOLET_ACCENT: TabAccent = {
   searchFocus: "focus-within:border-[var(--menzu-accent)]/60 focus-within:ring-2 focus-within:ring-[var(--menzu-accent)]/25",
 };
 
+// Trang trí in pink, a colour no other tab or grade wears.
+const PINK_ACCENT: TabAccent = {
+  tabActive: "border-transparent bg-pink-600 text-white",
+  filterActive: "border-transparent bg-pink-600 text-white",
+  barFill: "bg-pink-600",
+  tileHover: "hover:border-white/25",
+  searchFocus: "focus-within:border-[var(--menzu-accent)]/60 focus-within:ring-2 focus-within:ring-[var(--menzu-accent)]/25",
+};
+
 // Premium in the VIP tiles' gold.
 const GOLD_ACCENT: TabAccent = {
   tabActive: "border-transparent bg-amber-400 text-black",
@@ -198,6 +232,7 @@ const TAB_ACCENTS: Record<InventoryTabKey, TabAccent> = {
   weaponSkins: RED_ACCENT,
   characters: ORANGE_ACCENT,
   buddies: VIOLET_ACCENT,
+  decor: PINK_ACCENT,
   premium: GOLD_ACCENT,
   // Legacy scraped kinds; never shown for typed accounts.
   cards: RED_ACCENT,
@@ -311,8 +346,10 @@ export function AccountInventory({ account, items }: AccountInventoryProps) {
   // Only tabs with something behind them; a bar of zero-count tabs sells
   // emptiness, not inventory.
   const premiumTab = INVENTORY_TABS.find((t) => t.key === "premium")!;
+  const decorTab = INVENTORY_TABS.find((t) => t.key === "decor")!;
   const vipItems = items.filter((item) => inTab(premiumTab, item)).length;
-  const tabs = INVENTORY_TABS.filter((t) => tabTotal(account, t.key, vipItems) > 0);
+  const counted: RowCounts = { vip: vipItems, decor: items.filter((item) => inTab(decorTab, item)).length };
+  const tabs = INVENTORY_TABS.filter((t) => tabTotal(account, t.key, counted) > 0);
 
   const [activeTab, setActiveTab] = useState<InventoryTabKey>(
     () => tabs[0]?.key ?? "weaponSkins",
@@ -352,7 +389,7 @@ export function AccountInventory({ account, items }: AccountInventoryProps) {
 
   const visible = filtered.slice(0, shown);
   const remaining = filtered.length - visible.length;
-  const total = tabTotal(account, activeTab, vipItems);
+  const total = tabTotal(account, activeTab, counted);
   const accent = TAB_ACCENTS[activeTab];
 
   function selectTab(key: InventoryTabKey) {
@@ -387,7 +424,7 @@ export function AccountInventory({ account, items }: AccountInventoryProps) {
           >
             {entry.label}
             <span className="inline-flex items-center justify-center min-w-[1.5rem] px-1.5 py-0.5 rounded-full bg-black/20 text-[11px] sm:text-xs font-black">
-              {tabTotal(account, entry.key, vipItems)}
+              {tabTotal(account, entry.key, counted)}
             </span>
           </button>
         ))}
