@@ -63,12 +63,8 @@ export interface SoftwareDescriptionProps {
   old?: boolean;
 }
 
-// The write-up set as lmarket sets its own (the owner, 25/10/2026: "làm sao
-// cho giống lmarket đi sửa lại", "giờ xử lý phần mô tả sản phẩm đi"): 24px
-// over each sub-heading, 8px under it, the text across the column's full
-// width, plain bullets and numbers, no panels or boxes round the copy.
 const SUB_HEADING =
-  "mt-6 font-display text-[19px] font-semibold text-frost";
+  "mt-10 font-display text-[19px] font-semibold text-frost";
 /**
  * Body text in this section, set to the same values the rich editor's output
  * gets here (`.doc-prose` read even, below): neutral-300 is #d4d4d4 and every
@@ -82,10 +78,7 @@ const SUB_HEADING =
  * note under default bullets. Two greys there read as one of them being less
  * important rather than as one of them being editable.
  */
-const BODY = "text-[16px] leading-[1.7] text-neutral-300";
-
-/** The section's lists, lmarket's plain bullets: 24px in, 6px apart. */
-const LIST = "mt-2 list-disc space-y-1.5 pl-6";
+const BODY = "max-w-[72ch] text-[16px] leading-[1.7] text-neutral-300";
 
 /** The words the locked panel sets in red: what happens, and what to press. */
 function Hi({ children }: { children: React.ReactNode }) {
@@ -127,13 +120,19 @@ export function SoftwareDescription({
   const featuresBlock = (
     <>
       <h3 className={SUB_HEADING}>Tính năng nổi bật</h3>
-      <ul className={LIST}>
+      <ul className="mt-4 flex flex-col gap-4">
         {featuresOrDefault(features).map((f) => (
-          <li key={f.title} className={BODY}>
-            {/* The colon belongs to the sentence, so it only appears when
-                there is a sentence: "Aimbot" on its own is a feature. */}
-            <span className="font-bold text-white">{f.title}</span>
-            {f.body ? `: ${f.body}` : ""}
+          <li key={f.title} className="flex gap-3">
+            <span
+              aria-hidden
+              className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--menzu-accent)]"
+            />
+            <span className={BODY}>
+              {/* The colon belongs to the sentence, so it only appears when
+                  there is a sentence: "Aimbot" on its own is a feature. */}
+              <span className="font-bold text-white">{f.title}</span>
+              {f.body ? `: ${f.body}` : ""}
+            </span>
           </li>
         ))}
       </ul>
@@ -142,7 +141,7 @@ export function SoftwareDescription({
           same renderer the description uses, so a heading, a bold line or a
           screenshot typed into the editor arrives caged to one allowlist. */}
       {featuresNote ? (
-        <div className="mt-3">
+        <div className="mt-5">
           <DocHtml body={featuresNote} even />
         </div>
       ) : null}
@@ -161,11 +160,11 @@ export function SoftwareDescription({
     <>
       <h3 className={SUB_HEADING}>Hướng dẫn cài đặt</h3>
       {guideHtml ? (
-        <div className="mt-2">
+        <div className="mt-4">
           <DocHtml body={guideHtml} even />
         </div>
       ) : (
-        <p className={`mt-2 ${BODY}`}>{DEFAULT_GUIDE}</p>
+        <p className={`mt-4 ${BODY}`}>{DEFAULT_GUIDE}</p>
       )}
     </>
   );
@@ -195,9 +194,7 @@ export function SoftwareDescription({
         .
       </p>
       {setupGuideAccess !== "unlocked" ? (
-        // The one panel the section keeps: it is a door (what unlocks the
-        // guide and how), not copy.
-        <div className="mt-3 flex items-start gap-4 rounded-2xl border border-white/10 bg-white/[0.02] px-5 py-4 sm:px-6">
+        <div className="mt-4 flex items-start gap-4 rounded-2xl border border-white/10 bg-white/[0.02] px-5 py-4 sm:px-6">
           <span className="mt-0.5 grid h-9 w-9 shrink-0 place-items-center rounded-full border border-white/10 bg-white/5 text-[var(--menzu-accent)]">
             <Lock className="h-4 w-4" aria-hidden />
           </span>
@@ -240,11 +237,11 @@ export function SoftwareDescription({
           </div>
         </div>
       ) : setupGuideHtml ? (
-        <div className="mt-2">
+        <div className="mt-4">
           <DocHtml body={setupGuideHtml} even />
         </div>
       ) : (
-        <p className={`mt-2 ${BODY}`}>{DEFAULT_SETUP_GUIDE}</p>
+        <p className={`mt-4 ${BODY}`}>{DEFAULT_SETUP_GUIDE}</p>
       )}
     </>
   );
@@ -253,18 +250,41 @@ export function SoftwareDescription({
    * What a machine has to be for this tool to run — the product's own list,
    * or the shop's default where it has none, like the features above.
    *
-   * A plain list, label then answer on one line, as lmarket sets its
-   * "Requirements" (25/10/2026); it was a framed table capped at 720px, gone
-   * with the section's other boxes.
+   * One panel with the requirements ruled off inside it, rather than a tile
+   * per line: they are one list, and a list is what it reads as — label on the
+   * left, answer on the right, each on its own row. It grows downwards as
+   * lines are added instead of breaking a grid into an orphan tile.
+   *
+   * Capped at 720px rather than run to the container's full 1272: nothing here
+   * wraps at that width, so the extra room buys no lines — it only pushes the
+   * answers three or four hundred pixels from the labels they belong to, which
+   * is where the eye starts reading across the wrong row. The prose above and
+   * below still uses the whole width.
+   *
+   * The heading stays outside, in the same 17px black caps as "Tính năng nổi
+   * bật" and the rest, so this section reads as one run of headings rather
+   * than as a box that titles itself.
    */
   const factsCard = (
-    <ul className={LIST}>
-      {requirementsOrDefault(requirements).map((f) => (
-        <li key={f.label} className={BODY}>
-          {f.label}: <span className="font-bold text-white">{f.value}</span>
-        </li>
-      ))}
-    </ul>
+    <div className="mt-4 max-w-[720px] rounded-2xl border border-white/10 bg-white/[0.02] px-5 py-1.5 sm:px-6 sm:py-2">
+      <dl>
+        {requirementsOrDefault(requirements).map((f, index) => (
+          <div
+            key={f.label}
+            className={`grid grid-cols-1 gap-x-6 gap-y-1 py-3.5 sm:grid-cols-[minmax(140px,30%)_1fr] ${
+              // A rule between rows, never under the last one: the panel's own
+              // edge already closes the list.
+              index > 0 ? "border-t border-white/[0.07]" : ""
+            }`}
+          >
+            <dt className={BODY}>{f.label}</dt>
+            <dd className="text-[16px] font-bold leading-[1.65] text-white">
+              {f.value}
+            </dd>
+          </div>
+        ))}
+      </dl>
+    </div>
   );
 
   /**
@@ -290,9 +310,9 @@ export function SoftwareDescription({
   const warrantyBlock = (
     <>
       <h3 className={SUB_HEADING}>Chính sách bảo hành &amp; hoàn tiền</h3>
-      {/* Plain copy like the rest of the section, as lmarket sets its "Before
-          you buy"; it was a box with a red left rule. */}
-      <div className="mt-2 mb-4">
+      {/* A left rule rather than a full border — the same treatment the notice
+          box in the announcement sheet uses, so the two read as one idea. */}
+      <div className="mt-4 mb-4 rounded-r-lg border-l-2 border-[var(--menzu-accent)] bg-white/[0.02] px-5 py-4">
         <p className={BODY}>
           <span className="font-bold text-white">Lưu ý:</span> Chính sách bảo
           hành và hoàn tiền được áp dụng theo từng sản phẩm và gói dịch vụ. Vui
@@ -323,10 +343,10 @@ export function SoftwareDescription({
     return (
       <section
         id={DESCRIPTION_SECTION_ID}
-        className="product-copy mt-14 scroll-mt-[120px] border-t border-line pt-12 pb-14"
+        className="mt-14 scroll-mt-[120px] border-t border-line pt-12 pb-14"
       >
         <SectionHeading>Mô tả sản phẩm</SectionHeading>
-        <div className="mt-3">
+        <div className="mt-5">
           <DocHtml body={richHtml} even />
         </div>
 
@@ -352,7 +372,7 @@ export function SoftwareDescription({
     // underneath the navigation bar.
     <section
       id={DESCRIPTION_SECTION_ID}
-      className="product-copy mt-14 scroll-mt-[120px] border-t border-line pt-12 pb-14"
+      className="mt-14 scroll-mt-[120px] border-t border-line pt-12 pb-14"
     >
       {/* The red bar the home rows open with, as "Sản phẩm tương tự" below
           now wears too; the accent glyph stays with the page titles (the
@@ -363,7 +383,7 @@ export function SoftwareDescription({
           joined by a dash rather than run straight on: the same `description`
           stands alone under the title in the buy panel, so it is written as a
           whole sentence and cannot double as this one's predicate. */}
-      <p className={`mt-3 ${BODY}`}>
+      <p className={`mt-5 ${BODY}`}>
         <span className="font-semibold text-frost">{sentenceCase(name)}</span>
         {description ? ` - ${description}` : ""}
       </p>
