@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useMemo, useState } from "react";
-import { Atom, Bot, ChevronDown, Crown, ImageOff, Search, type LucideIcon } from "lucide-react";
+import { ChevronDown, ImageOff, Search } from "lucide-react";
 import type { AccountDetail } from "./AccountBuyPanel";
 import { ALL_GROUPS, CHARACTER_GROUPS, GEAR_GROUPS, WEAPON_GROUPS } from "@/lib/cfInventoryGroups";
 
@@ -86,16 +86,13 @@ function groupOf(tab: InventoryTab, item: InventoryItemView): string | null {
  * black, and the tint is half as strong (the owner, 25/10/2026, comparing
  * the feet of two tiles: menzu's #1c1916 against our #0a0a0a).
  */
-// The name sits bottom-left behind its grade's emblem, as menzu's does (the
-// owner, 25/10/2026: "giờ tới 2. làm thử 3p di").
-const GRADE_TILES: Record<"VIP" | "PVE" | "Nano", { border: string; top: string; glow: string; name: string; badge: string; icon: LucideIcon }> = {
+const GRADE_TILES: Record<"VIP" | "PVE" | "Nano", { border: string; top: string; glow: string; name: string; badge: string }> = {
   VIP: {
     border: "border-amber-500/40",
     top: "bg-amber-400",
     glow: "from-amber-500/10",
     name: "text-amber-300",
     badge: "bg-amber-400 text-black",
-    icon: Crown,
   },
   PVE: {
     border: "border-violet-500/40",
@@ -103,7 +100,6 @@ const GRADE_TILES: Record<"VIP" | "PVE" | "Nano", { border: string; top: string;
     glow: "from-violet-500/10",
     name: "text-violet-300",
     badge: "bg-violet-500 text-white",
-    icon: Bot,
   },
   Nano: {
     border: "border-sky-500/40",
@@ -111,7 +107,6 @@ const GRADE_TILES: Record<"VIP" | "PVE" | "Nano", { border: string; top: string;
     glow: "from-sky-500/10",
     name: "text-sky-300",
     badge: "bg-sky-400 text-black",
-    icon: Atom,
   },
 };
 
@@ -354,10 +349,9 @@ export function AccountInventory({ account, items }: AccountInventoryProps) {
                       <ImageOff size={18} className="relative text-neutral-700 flex-1" />
                     )}
                     <span
-                      className={`relative flex w-full items-center gap-1.5 px-1 text-left text-[12px] font-bold ${look ? look.name : "text-neutral-400"} group-hover:text-white transition-colors`}
+                      className={`relative w-full px-1 text-left text-[12px] font-bold ${look ? look.name : "text-neutral-400"} group-hover:text-white transition-colors truncate`}
                     >
-                      {look ? <look.icon size={12} strokeWidth={2.5} aria-hidden className="shrink-0" /> : null}
-                      <span className="truncate">{item.name}</span>
+                      {item.name}
                     </span>
                   </div>
                 );
