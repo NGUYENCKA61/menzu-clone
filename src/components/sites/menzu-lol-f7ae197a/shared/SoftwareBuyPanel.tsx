@@ -302,9 +302,9 @@ export function SoftwareBuyPanel({
           row. Its type keeps the category page's, role for role, at
           lmarket's ratios ("rồi sửa lại tỉ lệ cho đồng bộ"): the captions in
           the filter labels' small capitals, the price in the cards' black
-          with their tight tracking and small "đ", as large as the title on a
-          desktop, body copy at the one 16px, buttons a step over the cards'
-          12px. */}
+          with their tight tracking, as large as the title on a desktop, its
+          "đ" as large as the figures ("cho chữ đ to bằng số đi"), body copy
+          at the one 16px, buttons a step over the cards' 12px. */}
       {software.packages.length > 0 ? (
         <div className="space-y-2.5">
           <span className={`${SMALL_CAPS_LABEL} ml-1 block`}>
@@ -348,8 +348,7 @@ export function SoftwareBuyPanel({
       <div className="space-y-2">
         <p className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
           <span className="font-display text-3xl font-black leading-none tabular-nums tracking-[-0.03em] text-frost sm:text-4xl">
-            {formatVnd(total)}
-            <span className="text-[0.5em] font-bold">đ</span>
+            {formatVnd(total)}đ
           </span>
           {chosen?.listPrice ? (
             // The tier is on flash sale: what it costs off sale, crossed out,
