@@ -436,12 +436,16 @@ export function AccountInventory({ account, items }: AccountInventoryProps) {
                     ) : null}
                     {item.iconUrl ? (
                       <div className="relative w-full flex-1">
+                        {/* scale-down: a picture bigger than the tile shrinks
+                            to fit, a smaller one (the wiki's 113x58 icons)
+                            keeps its own size instead of blurring (the owner,
+                            25/10/2026: "cái ảnh nhỏ thì để ảnh gốc lun"). */}
                         <Image
                           src={item.iconUrl}
                           alt=""
                           fill
                           sizes="(min-width: 1024px) 20vw, (min-width: 640px) 33vw, 50vw"
-                          className="object-contain group-hover:scale-105 transition-transform duration-300"
+                          className="object-scale-down group-hover:scale-105 transition-transform duration-300"
                           unoptimized
                         />
                       </div>
