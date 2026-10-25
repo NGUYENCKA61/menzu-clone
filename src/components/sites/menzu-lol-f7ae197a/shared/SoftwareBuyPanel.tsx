@@ -349,10 +349,7 @@ export function SoftwareBuyPanel({
 
       <div className="space-y-2">
         <p className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-          {/* The line no taller than the figures, as before the 3100
-              spacing came in, so switching between the two moves nothing
-              below it (the owner, 25/10/2026: "không làm dòng cao hơn thử"). */}
-          <span className="text-3xl font-black leading-none text-white sm:text-4xl">
+          <span className="text-3xl font-black text-white sm:text-4xl">
             {formatVnd(total)}đ
           </span>
           {chosen?.listPrice ? (
