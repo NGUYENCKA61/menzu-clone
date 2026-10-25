@@ -322,7 +322,7 @@ export function AccountInventory({ account, items }: AccountInventoryProps) {
                   >
                     {look ? (
                       <>
-                        <span aria-hidden className={`absolute inset-x-0 top-0 h-0.5 ${look.top}`} />
+                        <span aria-hidden className={`absolute inset-x-0 top-0 h-[3px] ${look.top}`} />
                         <span
                           aria-hidden
                           className={`pointer-events-none absolute inset-x-0 top-0 h-3/4 bg-gradient-to-b ${look.glow} to-transparent`}
