@@ -45,9 +45,10 @@ export const TIER_RULES: Record<MemberTierValue, TierRule> = {
   ELITE: { label: "Elite", minTopUp: 30_000_000, discountPercent: 8 },
 };
 
-/** Each tier keeps its metal wherever it is printed. The progress bars sit
- *  one step deeper than the words (lab 3200 trial, 26/10/2026: "cái thanh
- *  cấp bậc nên tô đậm màu lên"; they were neutral-300, 400s and red-500). */
+/** Each tier keeps its metal wherever it is printed. The progress bars are
+ *  painted a step deeper, toward Elite's red, which was deep already and
+ *  stays red-500 (lab 3200 trial, 26/10/2026: "nên tô đậm như màu đỏ",
+ *  "elite đỏ nó đỏ sẵn rồi mà"); they were neutral-300 and the 400s. */
 export const TIER_STYLE: Record<
   MemberTierValue,
   { text: string; bar: string; tile: string; glow: string }
@@ -81,7 +82,7 @@ export const TIER_STYLE: Record<
   ELITE: {
     text: "text-red-400",
     glow: "[text-shadow:0_0_14px_rgba(248,113,113,0.6)]",
-    bar: "bg-red-600",
+    bar: "bg-red-500",
     tile: "border-red-500/30 bg-red-500/10 text-red-400",
   },
 };
