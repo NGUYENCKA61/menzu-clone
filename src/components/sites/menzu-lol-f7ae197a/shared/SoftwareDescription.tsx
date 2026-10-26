@@ -72,6 +72,8 @@ export interface SoftwareDescriptionProps {
 // page's 900 title as lmarket weighs its own off 700 ("phần kia sửa cho tỉ
 // lệ đồng bộ với 900 luôn"): the section heading as heavy as the title
 // (SECTION_TITLE), the sub headings a step under it, 800; the copy stays 400.
+// Each sub heading ends on a colon, the words under it following on from
+// it (lab 3200, 26/10/2026: "mỗi cái cuối câu có dấu : đi đề mục ấy").
 const SUB_HEADING =
   "mt-10 font-display text-[17px] font-extrabold text-frost";
 const SECTION_TITLE = "font-black";
@@ -133,7 +135,7 @@ export function SoftwareDescription({
    */
   const featuresBlock = (
     <>
-      <h3 className={SUB_HEADING}>Tính năng nổi bật</h3>
+      <h3 className={SUB_HEADING}>Tính năng nổi bật:</h3>
       <ul className="mt-4 flex flex-col gap-4">
         {featuresOrDefault(features).map((f) => (
           <li key={f.title} className="flex gap-3">
@@ -172,7 +174,7 @@ export function SoftwareDescription({
    */
   const guideBlock = (
     <>
-      <h3 className={SUB_HEADING}>Hướng dẫn cài đặt</h3>
+      <h3 className={SUB_HEADING}>Hướng dẫn cài đặt:</h3>
       {guideHtml ? (
         <div className="mt-4">
           <DocHtml body={guideHtml} even />
@@ -196,7 +198,7 @@ export function SoftwareDescription({
    */
   const setupGuideBlock = (
     <>
-      <h3 className={SUB_HEADING}>Hướng dẫn thiết lập &amp; sử dụng</h3>
+      <h3 className={SUB_HEADING}>Hướng dẫn thiết lập &amp; sử dụng:</h3>
       <p className="mt-2 text-[12px] text-neutral-500">
         Tài liệu đầy đủ của tool (cài đặt, tải về, thiết lập, lỗi thường gặp) ở{" "}
         <Link
@@ -326,7 +328,7 @@ export function SoftwareDescription({
    */
   const warrantyBlock = (
     <>
-      <h3 className={SUB_HEADING}>Chính sách bảo hành &amp; hoàn tiền</h3>
+      <h3 className={SUB_HEADING}>Chính sách bảo hành &amp; hoàn tiền:</h3>
       {/* A left rule rather than a full border — the same treatment the notice
           box in the announcement sheet uses, so the two read as one idea. */}
       <div className="mt-4 mb-4 rounded-r-lg border-l-2 border-[var(--menzu-accent)] bg-white/[0.02] px-5 py-4">
@@ -367,7 +369,7 @@ export function SoftwareDescription({
           <DocHtml body={richHtml} even />
         </div>
 
-        <h3 className={SUB_HEADING}>Yêu cầu hệ thống</h3>
+        <h3 className={SUB_HEADING}>Yêu cầu hệ thống:</h3>
         {factsCard}
 
         {featuresBlock}
@@ -405,7 +407,7 @@ export function SoftwareDescription({
         {description ? ` - ${description}` : ""}
       </p>
 
-      <h3 className={SUB_HEADING}>Yêu cầu hệ thống</h3>
+      <h3 className={SUB_HEADING}>Yêu cầu hệ thống:</h3>
       {factsCard}
 
       {featuresBlock}
