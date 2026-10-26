@@ -38,6 +38,7 @@ import { shareCard } from "@/lib/shareCard";
 import { getToolDocs, listToolDocsIndex, toolDocsAccess } from "@/lib/toolDocs";
 import { hasOwnToolDoc } from "@/lib/toolDocsContent";
 import { clampTitle, DOCS_TITLE_MAX, tidyToolName } from "@/lib/toolTitle";
+import { HIDDEN_SETUP_PAGES } from "@/lib/hiddenFeatures";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -451,16 +452,19 @@ export default async function ToolDocsPage({ params }: PageProps) {
                   </Link>
                   .
                 </li>
-                <li>
-                  Báo thiếu file .dll hoặc runtime:{" "}
-                  <Link
-                    href={pcSetupHref("cai-runtime")}
-                    className="font-semibold text-white underline underline-offset-2"
-                  >
-                    Cài runtime cần thiết
-                  </Link>
-                  .
-                </li>
+                {/* Its step is hidden for now (lib/hiddenFeatures). */}
+                {HIDDEN_SETUP_PAGES.includes("cai-runtime") ? null : (
+                  <li>
+                    Báo thiếu file .dll hoặc runtime:{" "}
+                    <Link
+                      href={pcSetupHref("cai-runtime")}
+                      className="font-semibold text-white underline underline-offset-2"
+                    >
+                      Cài runtime cần thiết
+                    </Link>
+                    .
+                  </li>
+                )}
                 <li>
                   Key báo sai hoặc đã dùng: chép đúng key trong đơn hàng, không
                   thừa dấu cách; key đã gắn với máy khác thì gửi yêu cầu bảo

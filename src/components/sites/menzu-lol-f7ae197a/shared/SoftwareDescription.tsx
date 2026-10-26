@@ -9,6 +9,7 @@ import {
   requirementsOrDefault,
   type ProductRequirement,
 } from "@/lib/productRequirements";
+import { SHOW_TOOL_RELATED_GUIDES } from "@/lib/hiddenFeatures";
 import type { RelatedGuides as RelatedGuidesData } from "@/lib/relatedGuides";
 
 import { RelatedGuides } from "./RelatedGuides";
@@ -304,7 +305,10 @@ export function SoftwareDescription({
    * note in both branches, headed as the h3 siblings around it are, so the
    * money page finally links the wiki (the SEO review, round 2, O12).
    */
-  const guidesBlock = <RelatedGuides guides={guides} heading="sub" old={old} />;
+  // Hidden for now on the tool's page (lib/hiddenFeatures, 26/10/2026).
+  const guidesBlock = SHOW_TOOL_RELATED_GUIDES ? (
+    <RelatedGuides guides={guides} heading="sub" old={old} />
+  ) : null;
 
   /**
    * The warranty note that closes the section.

@@ -6,6 +6,8 @@
  * of them it needs.
  */
 
+import { HIDDEN_SETUP_PAGES } from "@/lib/hiddenFeatures";
+
 export interface PcSetupPage {
   slug: string;
   title: string;
@@ -22,7 +24,7 @@ export interface PcSetupPage {
   check?: string;
 }
 
-export const PC_SETUP_PAGES: readonly PcSetupPage[] = [
+const ALL_PC_SETUP_PAGES: readonly PcSetupPage[] = [
   {
     slug: "tat-windows-defender",
     title: "Tắt Windows Defender",
@@ -172,6 +174,13 @@ export const PC_SETUP_PAGES: readonly PcSetupPage[] = [
       "Spoofer báo thành công và serial ổ cứng trong Command Prompt (gõ: wmic diskdrive get serialnumber) đã khác lúc trước.",
   },
 ];
+
+/** The steps the site shows: every one but those hidden for now
+ *  (lib/hiddenFeatures). Lists, the step count, the sitemap and the page
+ *  itself all read this, so a hidden step is gone everywhere at once. */
+export const PC_SETUP_PAGES: readonly PcSetupPage[] = ALL_PC_SETUP_PAGES.filter(
+  (page) => !HIDDEN_SETUP_PAGES.includes(page.slug),
+);
 
 export function pcSetupPage(slug: string): PcSetupPage | null {
   return PC_SETUP_PAGES.find((page) => page.slug === slug) ?? null;

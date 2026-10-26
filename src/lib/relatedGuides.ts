@@ -2,6 +2,7 @@ import "server-only";
 
 import { db } from "@/lib/db";
 import { GLOSSARY_PATH } from "@/lib/glossary/terms";
+import { SHOW_SETUP_GUIDES_ROW } from "@/lib/hiddenFeatures";
 import { PC_SETUP_PAGES, pcSetupHref } from "@/lib/pcSetup";
 import { listToolArticles } from "@/lib/queries";
 import { docHref } from "@/lib/routes";
@@ -238,7 +239,8 @@ function assemble(pick: PickInput, gameName: string, setup: boolean): RelatedGui
     gameName,
     game: toLinks(picked.game, titles),
     general: [...toLinks(picked.general, titles), GLOSSARY_LINK],
-    setup: setup ? setupLinks() : [],
+    // The "Chuẩn bị máy" row is hidden for now (lib/hiddenFeatures).
+    setup: setup && SHOW_SETUP_GUIDES_ROW ? setupLinks() : [],
   };
 }
 
