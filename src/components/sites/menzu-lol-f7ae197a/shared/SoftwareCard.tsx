@@ -38,7 +38,7 @@ export interface SoftwareCardView {
   verifiedOnly: boolean;
   /** New on the shelf (isNewTool): a "Mới nhất" ribbon on the picture. */
   isNew: boolean;
-  /** A best seller (isBestSeller): a "Bán chạy" ribbon on the picture. */
+  /** A best seller (isBestSeller): a "Best seller" ribbon on the picture. */
   bestSeller: boolean;
 }
 
@@ -297,10 +297,11 @@ export function SoftwareCard({
           ) : software.bestSeller ? (
             // And in orange for a best seller (the owner, 26/10/2026, lab 3200:
             // "thêm 1 nhãn nữa màu xanh dương bán chạy", then "màu cam": it was
-            // blue), from the shop's own
+            // blue; "bán chạy thành best seller thử" for the word), from the
+            // shop's own
             // "... BÁN CHẠY" badge. Under "Mới nhất": a tool's first weeks
             // are short, and its sales will still be there after.
-            <CornerRibbon label="Bán chạy" tone="bg-orange-600" />
+            <CornerRibbon label="Best seller" tone="bg-orange-600" />
           ) : software.verifiedOnly ? (
             // Sold to level 2 only (the owner, 12/10/2026): the buyer learns it
             // on the card, not after the click.
