@@ -4,6 +4,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+import { SHOW_AGENCY_UPGRADE } from "@/lib/hiddenFeatures";
+
 import { LinkPending } from "./LinkPending";
 import {
   ArrowLeftRight,
@@ -50,7 +52,8 @@ const NAV_GROUPS: AccountNavItem[][] = [
   [{ label: "Bảo mật", href: "/security", icon: ShieldCheck }],
   [
     { label: "Cộng tác viên", href: "/affiliate", icon: Handshake },
-    { label: "Nâng cấp đại lý", href: "/agency", icon: ChevronsUp },
+    // Hidden for now (lib/hiddenFeatures, 26/10/2026).
+    ...(SHOW_AGENCY_UPGRADE ? [{ label: "Nâng cấp đại lý", href: "/agency", icon: ChevronsUp }] : []),
   ],
 ];
 

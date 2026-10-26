@@ -18,6 +18,7 @@ import {
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
+import { SHOW_LEVEL2 } from "@/lib/hiddenFeatures";
 import type { VerificationView } from "@/lib/verificationRules";
 
 import { DiscordMark, GoogleMark } from "./OAuthButtons";
@@ -68,6 +69,8 @@ const TABS: {
   // earn it.
   { id: "verify", short: "Xác thực", long: "Xác thực cấp 2", icon: BadgeCheck },
 ];
+// "Xác thực cấp 2" hidden for now (lib/hiddenFeatures, 26/10/2026).
+const VISIBLE_TABS = SHOW_LEVEL2 ? TABS : TABS.filter((t) => t.id !== "verify");
 
 /*
  * Still four tabs sharing the row's width. From sm each is the /thong-bao
@@ -187,7 +190,7 @@ export function SecurityPanel({
   verification,
 }: SecurityPanelProps) {
   const router = useRouter();
-  const [tab, setTab] = useState<Tab>(initialTab);
+  const [tab, setTab] = useState<Tab>(!SHOW_LEVEL2 && initialTab === "verify" ? "security" : initialTab);
 
   const [emailValue, setEmailValue] = useState(email ?? "");
   /** Where the last code went; set, the code row shows under the address. */
@@ -483,7 +486,7 @@ export function SecurityPanel({
           aria-label="Bảo mật"
           className="hide-scrollbar -mx-4 -mt-1 flex gap-2 overflow-x-auto px-4 py-1 sm:-mx-1 sm:px-1"
         >
-          {TABS.map(({ id, short, long, icon: Icon }) => (
+          {VISIBLE_TABS.map(({ id, short, long, icon: Icon }) => (
             <button
               key={id}
               type="button"

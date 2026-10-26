@@ -22,6 +22,7 @@ import { useEffect, useRef, useState } from "react";
 
 import { LinkPending } from "@/components/sites/menzu-lol-f7ae197a/shared/LinkPending";
 import { StatusToast } from "@/components/sites/menzu-lol-f7ae197a/shared/StatusToast";
+import { SHOW_AGENCY_UPGRADE } from "@/lib/hiddenFeatures";
 
 export interface HeaderUser {
   username: string;
@@ -49,7 +50,8 @@ const GROUPS: { label: string; href: string; icon: LucideIcon }[][] = [
   [{ label: "Bảo mật", href: "/security", icon: ShieldCheck }],
   [
     { label: "Cộng tác viên", href: "/affiliate", icon: Handshake },
-    { label: "Nâng cấp đại lý", href: "/agency", icon: ChevronsUp },
+    // Hidden for now (lib/hiddenFeatures, 26/10/2026).
+    ...(SHOW_AGENCY_UPGRADE ? [{ label: "Nâng cấp đại lý", href: "/agency", icon: ChevronsUp }] : []),
   ],
 ];
 

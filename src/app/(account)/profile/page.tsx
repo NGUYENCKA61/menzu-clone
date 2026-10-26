@@ -29,6 +29,7 @@ import {
   tierProgress,
 } from "@/lib/memberTiers";
 import { getCurrentUser } from "@/lib/session";
+import { SHOW_LEVEL2 } from "@/lib/hiddenFeatures";
 import { getShopSettings } from "@/lib/settingsStore";
 
 export const metadata: Metadata = {
@@ -319,8 +320,14 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                     "Chưa xác minh" cut to "Chưa xác …"), three columns from sm.
                     The discount wears the tier's colour, tick included
                     (26/10/2026: "Giảm 8% cho tô màu theo hạng đi"); the other
-                    two values are white ("nên cho cùng 1 màu trắng"). */}
-                <div className="mt-auto grid grid-cols-1 gap-1.5 border-t border-white/[0.06] pt-2 sm:grid-cols-3 sm:gap-3 sm:pt-1.5">
+                    two values are white ("nên cho cùng 1 màu trắng"). "Xác minh
+                    cấp 2" is hidden for now with the feature (lib/hiddenFeatures,
+                    26/10/2026), leaving two columns. */}
+                <div
+                  className={`mt-auto grid grid-cols-1 gap-1.5 border-t border-white/[0.06] pt-2 ${
+                    SHOW_LEVEL2 ? "sm:grid-cols-3" : "sm:grid-cols-2"
+                  } sm:gap-3 sm:pt-1.5`}
+                >
                   {[
                     {
                       label: "Ưu đãi mua tool",
@@ -330,10 +337,14 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                       label: "Điểm thưởng",
                       value: `${user.points.toLocaleString("vi-VN")} điểm`,
                     },
-                    {
-                      label: "Xác minh cấp 2",
-                      value: user.verifiedAt ? "Đã xác minh" : "Chưa xác minh",
-                    },
+                    ...(SHOW_LEVEL2
+                      ? [
+                          {
+                            label: "Xác minh cấp 2",
+                            value: user.verifiedAt ? "Đã xác minh" : "Chưa xác minh",
+                          },
+                        ]
+                      : []),
                   ].map(({ label, value }, index) => (
                     <div
                       key={label}

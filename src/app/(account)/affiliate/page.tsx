@@ -12,6 +12,7 @@ import { dayKey } from "@/lib/dayGroups";
 import { db } from "@/lib/db";
 import { REFERRAL_PERCENT } from "@/lib/referral";
 import { absoluteUrl } from "@/lib/seo";
+import { SHOW_AGENCY_UPGRADE } from "@/lib/hiddenFeatures";
 import { getCurrentUser } from "@/lib/session";
 
 export const metadata: Metadata = {
@@ -262,16 +263,19 @@ export default async function AffiliatePage() {
             )}
           </section>
 
-          <p className="text-xs text-neutral-500">
-            Có đầu ra ổn định và muốn nhập theo lô?{" "}
-            <Link
-              href="/agency"
-              className="font-semibold text-[var(--menzu-accent)] transition-colors hover:text-white"
-            >
-              Nâng cấp đại lý
-            </Link>{" "}
-            để làm việc thẳng với admin.
-          </p>
+          {/* Hidden for now with the upgrade (lib/hiddenFeatures, 26/10/2026). */}
+          {SHOW_AGENCY_UPGRADE ? (
+            <p className="text-xs text-neutral-500">
+              Có đầu ra ổn định và muốn nhập theo lô?{" "}
+              <Link
+                href="/agency"
+                className="font-semibold text-[var(--menzu-accent)] transition-colors hover:text-white"
+              >
+                Nâng cấp đại lý
+              </Link>{" "}
+              để làm việc thẳng với admin.
+            </p>
+          ) : null}
         </div>
       </AccountPanel>
     </AccountPageFrame>
