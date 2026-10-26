@@ -48,7 +48,10 @@ export const TIER_RULES: Record<MemberTierValue, TierRule> = {
 /** Each tier keeps its metal wherever it is printed. The progress bars are
  *  painted a step deeper, toward Elite's red, which was deep already and
  *  stays red-500 (lab 3200 trial, 26/10/2026: "nên tô đậm như màu đỏ",
- *  "elite đỏ nó đỏ sẵn rồi mà"); they were neutral-300 and the 400s. */
+ *  "elite đỏ nó đỏ sẵn rồi mà"); they were neutral-300 and the 400s. The
+ *  words sit one step lighter than their bar, as Classic's and Elite's
+ *  already did ("màu chữ hạng có nên theo màu thanh đó không", "làm");
+ *  Gold, Platinum and Diamond were 300. */
 export const TIER_STYLE: Record<
   MemberTierValue,
   { text: string; bar: string; tile: string; glow: string }
@@ -60,19 +63,19 @@ export const TIER_STYLE: Record<
     tile: "border-neutral-300/30 bg-neutral-300/10 text-neutral-200",
   },
   GOLD: {
-    text: "text-amber-300",
+    text: "text-amber-400",
     glow: "[text-shadow:0_0_14px_rgba(251,191,36,0.55)]",
     bar: "bg-amber-500",
     tile: "border-amber-400/30 bg-amber-400/10 text-amber-300",
   },
   PLATINUM: {
-    text: "text-cyan-300",
+    text: "text-cyan-400",
     glow: "[text-shadow:0_0_14px_rgba(34,211,238,0.55)]",
     bar: "bg-cyan-500",
     tile: "border-cyan-400/30 bg-cyan-400/10 text-cyan-300",
   },
   DIAMOND: {
-    text: "text-violet-300",
+    text: "text-violet-400",
     glow: "[text-shadow:0_0_14px_rgba(167,139,250,0.6)]",
     bar: "bg-violet-500",
     tile: "border-violet-400/30 bg-violet-400/10 text-violet-300",
