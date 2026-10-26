@@ -45,7 +45,9 @@ export const TIER_RULES: Record<MemberTierValue, TierRule> = {
   ELITE: { label: "Elite", minTopUp: 30_000_000, discountPercent: 8 },
 };
 
-/** Each tier keeps its metal wherever it is printed. */
+/** Each tier keeps its metal wherever it is printed. The progress bars sit
+ *  one step deeper than the words (lab 3200 trial, 26/10/2026: "cái thanh
+ *  cấp bậc nên tô đậm màu lên"; they were neutral-300, 400s and red-500). */
 export const TIER_STYLE: Record<
   MemberTierValue,
   { text: string; bar: string; tile: string; glow: string }
@@ -53,25 +55,25 @@ export const TIER_STYLE: Record<
   CLASSIC: {
     text: "text-neutral-300",
     glow: "[text-shadow:0_0_14px_rgba(212,212,212,0.45)]",
-    bar: "bg-neutral-300",
+    bar: "bg-neutral-400",
     tile: "border-neutral-300/30 bg-neutral-300/10 text-neutral-200",
   },
   GOLD: {
     text: "text-amber-300",
     glow: "[text-shadow:0_0_14px_rgba(251,191,36,0.55)]",
-    bar: "bg-amber-400",
+    bar: "bg-amber-500",
     tile: "border-amber-400/30 bg-amber-400/10 text-amber-300",
   },
   PLATINUM: {
     text: "text-cyan-300",
     glow: "[text-shadow:0_0_14px_rgba(34,211,238,0.55)]",
-    bar: "bg-cyan-400",
+    bar: "bg-cyan-500",
     tile: "border-cyan-400/30 bg-cyan-400/10 text-cyan-300",
   },
   DIAMOND: {
     text: "text-violet-300",
     glow: "[text-shadow:0_0_14px_rgba(167,139,250,0.6)]",
-    bar: "bg-violet-400",
+    bar: "bg-violet-500",
     tile: "border-violet-400/30 bg-violet-400/10 text-violet-300",
   },
   // Red, no longer rose, with its gem on /cap-bac (the owner, 19/10/2026:
@@ -79,7 +81,7 @@ export const TIER_STYLE: Record<
   ELITE: {
     text: "text-red-400",
     glow: "[text-shadow:0_0_14px_rgba(248,113,113,0.6)]",
-    bar: "bg-red-500",
+    bar: "bg-red-600",
     tile: "border-red-500/30 bg-red-500/10 text-red-400",
   },
 };
