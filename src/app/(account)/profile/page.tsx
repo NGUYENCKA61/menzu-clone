@@ -262,10 +262,9 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                 takes the width, the doors a 200px column. Below xl the doors
                 make a row under the card. The card's content is the one from
                 before the reference trial (the owner, 16/10/2026: "chỗ bố cục
-                card cấp bậc quay về như nãy"). No fill of its own, the frame
-                only (trial, 26/10/2026: "phần card này làm trong suốt thử"). */}
+                card cấp bậc quay về như nãy"). */}
             <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_200px]">
-              <div className="flex flex-col gap-2 rounded-xl border border-white/10 p-5">
+              <div className="flex flex-col gap-2 rounded-xl border border-white/10 bg-white/[0.02] p-5">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <span className="text-[13px] font-medium text-mist">
                     Cấp bậc
