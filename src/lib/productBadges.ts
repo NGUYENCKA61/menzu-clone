@@ -250,3 +250,16 @@ export function isNewTool(
     b.label.normalize("NFC").toLocaleUpperCase("vi-VN").startsWith("MỚI"),
   );
 }
+
+/**
+ * Whether a tool's card wears the blue "Bán chạy" ribbon (the owner,
+ * 26/10/2026, lab 3200: "thêm 1 nhãn nữa màu xanh dương bán chạy"): while
+ * the shop gives it a badge that says so, "#TOP BÁN CHẠY" being the one it
+ * already uses. The shop's word, not a count: a sales figure would crown
+ * whatever sold most in a slow week.
+ */
+export function isBestSeller(badge: string | null): boolean {
+  return parseBadges(badge).some((b) =>
+    b.label.normalize("NFC").toLocaleUpperCase("vi-VN").includes("BÁN CHẠY"),
+  );
+}

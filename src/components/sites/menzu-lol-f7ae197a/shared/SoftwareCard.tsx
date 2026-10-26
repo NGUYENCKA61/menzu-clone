@@ -38,6 +38,8 @@ export interface SoftwareCardView {
   verifiedOnly: boolean;
   /** New on the shelf (isNewTool): a "Mới nhất" ribbon on the picture. */
   isNew: boolean;
+  /** A best seller (isBestSeller): a "Bán chạy" ribbon on the picture. */
+  bestSeller: boolean;
 }
 
 /**
@@ -53,6 +55,23 @@ const STATUS: Record<string, { dot: string; text: string; label: string }> = {
   UPDATED: { dot: "bg-violet-500", text: "text-violet-400", label: "Cập nhật mới" },
   RISKY: { dot: "bg-orange-500", text: "text-orange-400", label: "Rủi ro" },
 };
+
+/**
+ * The strip across the picture's top-left corner: a band turned 45° and
+ * clipped to a square at the corner, the word running along the diagonal.
+ * One per card, in the colour of what it says.
+ */
+function CornerRibbon({ label, tone }: { label: string; tone: string }) {
+  return (
+    <span className="pointer-events-none absolute left-0 top-0 z-20 block h-[92px] w-[92px] overflow-hidden rounded-tl-[14px]">
+      <span
+        className={`absolute left-[-40px] top-[22px] block w-[150px] -rotate-45 ${tone} py-[5px] text-center text-[12px] font-semibold leading-none text-white shadow-[0_2px_10px_rgba(0,0,0,0.5)]`}
+      >
+        {label}
+      </span>
+    </span>
+  );
+}
 
 /**
  * A software listing tile, laid out to the shop's reference: a flush 16/9
@@ -266,11 +285,7 @@ export function SoftwareCard({
             // pill (the owner, 13/10/2026: "thay vì ghi miễn phí có cái tag
             // chéo góc bìa card đỏ"): a strip turned 45° and clipped to a
             // square at the corner, the word running along the diagonal.
-            <span className="pointer-events-none absolute left-0 top-0 z-20 block h-[92px] w-[92px] overflow-hidden rounded-tl-[14px]">
-              <span className="absolute left-[-40px] top-[22px] block w-[150px] -rotate-45 bg-[var(--menzu-accent)] py-[5px] text-center text-[12px] font-semibold leading-none text-white shadow-[0_2px_10px_rgba(0,0,0,0.5)]">
-                Miễn phí
-              </span>
-            </span>
+            <CornerRibbon label="Miễn phí" tone="bg-[var(--menzu-accent)]" />
           ) : software.isNew ? (
             // The same ribbon for a tool new on the shelf (the owner,
             // 26/10/2026, lab 3200: "thêm 1 nhãn ruy băng cho card sản phẩm là
@@ -278,11 +293,13 @@ export function SoftwareCard({
             // where it was emerald; for the word "ghi mới nhất", then "HACK
             // MỚI ĐI", then back to "MỚI NHẤT ĐI CHO RÕ NGHĨA"). A free tool
             // keeps its red one: being free says more than being new.
-            <span className="pointer-events-none absolute left-0 top-0 z-20 block h-[92px] w-[92px] overflow-hidden rounded-tl-[14px]">
-              <span className="absolute left-[-40px] top-[22px] block w-[150px] -rotate-45 bg-violet-600 py-[5px] text-center text-[12px] font-semibold leading-none text-white shadow-[0_2px_10px_rgba(0,0,0,0.5)]">
-                Mới nhất
-              </span>
-            </span>
+            <CornerRibbon label="Mới nhất" tone="bg-violet-600" />
+          ) : software.bestSeller ? (
+            // And in blue for a best seller (the owner, 26/10/2026, lab 3200:
+            // "thêm 1 nhãn nữa màu xanh dương bán chạy"), from the shop's own
+            // "... BÁN CHẠY" badge. Under "Mới nhất": a tool's first weeks
+            // are short, and its sales will still be there after.
+            <CornerRibbon label="Bán chạy" tone="bg-blue-600" />
           ) : software.verifiedOnly ? (
             // Sold to level 2 only (the owner, 12/10/2026): the buyer learns it
             // on the card, not after the click.

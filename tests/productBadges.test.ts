@@ -8,6 +8,7 @@ import {
   BADGE_PILL_BASE,
   DEFAULT_BADGE_COLOR,
   DEFAULT_BADGE_ICON,
+  isBestSeller,
   isNewTool,
   MAX_BADGES,
   MAX_BADGE_LENGTH,
@@ -231,5 +232,19 @@ describe("isNewTool", () => {
     expect(isNewTool(imported, null, now)).toBe(false);
     expect(isNewTool(imported, "#TOP BÁN CHẠY|red|none", now)).toBe(false);
     expect(isNewTool(imported, "BẢN MỚI NHẤT|red|none", now)).toBe(false);
+  });
+});
+
+describe("isBestSeller", () => {
+  it("follows the shop's own best-seller badge, however it is written", () => {
+    expect(isBestSeller("#TOP BÁN CHẠY|red|none\nXÁC MINH ADMIN|red|star")).toBe(true);
+    expect(isBestSeller("Bán chạy")).toBe(true);
+    expect(isBestSeller("top bán chạy".normalize("NFD"))).toBe(true);
+  });
+
+  it("leaves a tool without one alone", () => {
+    expect(isBestSeller(null)).toBe(false);
+    expect(isBestSeller("XÁC MINH ADMIN|red|star")).toBe(false);
+    expect(isBestSeller("MỚI RA MẮT|green|none")).toBe(false);
   });
 });

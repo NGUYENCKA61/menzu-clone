@@ -18,7 +18,7 @@ import {
   plainToDocHtml,
   stripNewlineArtifacts,
 } from "@/lib/docHtml";
-import { isNewTool, parseBadges } from "@/lib/productBadges";
+import { isBestSeller, isNewTool, parseBadges } from "@/lib/productBadges";
 import { showsStatusPill } from "@/lib/statusPill";
 import { isSalesLocked } from "@/lib/softwareStatus";
 import { parseFeatures } from "@/lib/productFeatures";
@@ -738,6 +738,7 @@ export async function getCategoryPage(
     status: s.softwareStatus,
     verifiedOnly: s.verifiedOnly,
     isNew: isNewTool(s.createdAt, s.badge),
+    bestSeller: isBestSeller(s.badge),
     // Cheapest first by what they cost today: a sale can take a tier below
     // the one that led.
     packages: s.packages
@@ -2268,6 +2269,7 @@ export async function listSimilarSoftware(
     status: s.softwareStatus,
     verifiedOnly: s.verifiedOnly,
     isNew: isNewTool(s.createdAt, s.badge),
+    bestSeller: isBestSeller(s.badge),
     packages: s.packages
       .map((p) => tierView(p, tierSale))
       .sort((a, b) => a.price - b.price),
