@@ -62,10 +62,12 @@ const NAV_GROUPS: AccountNavItem[][] = [
 // `relative` so the pending wash has something to fill. 12px corners: the
 // card's 24px less its 12px padding, so a lit row follows the card's curve
 // (the owner, 03/10/2026, the sidebar's sizes "cho đồng bộ" → "làm đi").
+// The words at 600, the header menu's weight (trial, 26/10/2026: "thử đi
+// đậm 600"; they were 700); the lit row still has its wash and red icon.
 const LINK_ACTIVE =
-  "relative flex items-center gap-3 py-2.5 px-3 rounded-[12px] text-sm font-bold transition-colors bg-white/[0.07] text-frost ring-1 ring-inset ring-white/10";
+  "relative flex items-center gap-3 py-2.5 px-3 rounded-[12px] text-sm font-semibold transition-colors bg-white/[0.07] text-frost ring-1 ring-inset ring-white/10";
 const LINK_INACTIVE =
-  "relative flex items-center gap-3 py-2.5 px-3 rounded-[12px] text-sm font-bold transition-colors text-neutral-300 hover:text-white hover:bg-white/5";
+  "relative flex items-center gap-3 py-2.5 px-3 rounded-[12px] text-sm font-semibold transition-colors text-neutral-300 hover:text-white hover:bg-white/5";
 
 /**
  * Authenticated account sidebar navigation. The live /profile "tab bar" is
