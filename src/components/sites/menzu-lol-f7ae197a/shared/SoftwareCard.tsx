@@ -59,13 +59,18 @@ const STATUS: Record<string, { dot: string; text: string; label: string }> = {
 /**
  * The strip across the picture's top-left corner: a band turned 45° and
  * clipped to a square at the corner, the word running along the diagonal.
- * One per card, in the colour of what it says.
+ * One per card, in the colour of what it says. Dressed as a ribbon rather
+ * than a flat band (lab 3200 trial, 26/10/2026: "có cách nào cho ruy băng
+ * này đẹp hơn không", then "làm thử ruy băng bạn nói"): a satin sheen down
+ * its width with a lit top edge and its two ends shaded where it turns over
+ * the picture's edges. The word alone: a glyph before it was tried and taken
+ * off ("BỎ ICON THỬ").
  */
 function CornerRibbon({ label, tone }: { label: string; tone: string }) {
   return (
     <span className="pointer-events-none absolute left-0 top-0 z-20 block h-[92px] w-[92px] overflow-hidden rounded-tl-[14px]">
       <span
-        className={`absolute left-[-40px] top-[22px] block w-[150px] -rotate-45 ${tone} py-[5px] text-center text-[12px] font-semibold leading-none text-white shadow-[0_2px_10px_rgba(0,0,0,0.5)]`}
+        className={`absolute left-[-40px] top-[22px] flex w-[150px] -rotate-45 items-center justify-center gap-1 ${tone} bg-[linear-gradient(to_right,rgba(0,0,0,0.38)_18%,transparent_32%,transparent_68%,rgba(0,0,0,0.38)_82%),linear-gradient(to_bottom,rgba(255,255,255,0.3),rgba(255,255,255,0)_50%,rgba(0,0,0,0.2))] py-[5px] text-[12px] font-semibold leading-none text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.4),inset_0_-1px_0_rgba(0,0,0,0.25),0_2px_10px_rgba(0,0,0,0.5)]`}
       >
         {label}
       </span>
