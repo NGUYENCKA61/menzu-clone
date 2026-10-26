@@ -299,7 +299,7 @@ export function SiteHeaderClient({
               aria-label="Menu"
               aria-expanded={drawerOpen}
               onClick={() => setDrawerOpen(true)}
-              className="xl:hidden p-1.5 text-neutral-200 hover:text-white transition-colors flex items-center justify-center"
+              className="xl:hidden p-2.5 sm:p-1.5 text-neutral-200 hover:text-white transition-colors flex items-center justify-center"
             >
               <Menu size={18} />
             </button>

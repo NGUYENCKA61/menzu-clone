@@ -389,7 +389,7 @@ export function AccountBuyPanel({
             {account.tag}
           </span>
           {account.mailType ? (
-            <span className="text-[10px] font-bold text-neutral-400">
+            <span className="text-[11px] font-bold text-neutral-400 sm:text-[10px]">
               {account.mailType}
             </span>
           ) : null}

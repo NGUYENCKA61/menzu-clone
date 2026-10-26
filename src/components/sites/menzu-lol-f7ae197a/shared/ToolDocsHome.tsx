@@ -156,7 +156,7 @@ export function ToolDocsHome({
                   imageUrl={category.imageUrl}
                 />
                 {sentenceCase(category.name)}
-                <span className="ml-auto text-[10px] font-black text-neutral-500">
+                <span className="ml-auto text-[11px] font-black text-neutral-500 sm:text-[10px]">
                   {category.tools.length} tool
                 </span>
               </h3>

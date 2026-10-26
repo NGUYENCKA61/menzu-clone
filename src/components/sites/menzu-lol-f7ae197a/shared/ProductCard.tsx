@@ -132,7 +132,7 @@ export function ProductCard({ product, priority = false, eager = false, old = fa
           <span
             key={`${skin.name}-${index}`}
             title={skin.name}
-            className="grid h-12 w-[72px] shrink-0 place-items-center overflow-hidden rounded-[10px] border border-[#24252a] bg-[#0c0d0f] px-1 text-center text-[9px] font-extrabold leading-tight text-[#9b9da5]"
+            className="grid h-12 w-[72px] shrink-0 place-items-center overflow-hidden rounded-[10px] border border-[#24252a] bg-[#0c0d0f] px-1 text-center text-[11px] font-extrabold leading-tight text-[#9b9da5] sm:text-[9px]"
           >
             <span className="line-clamp-2 break-words">{skin.name}</span>
           </span>
@@ -387,7 +387,11 @@ export function ProductCard({ product, priority = false, eager = false, old = fa
             Hidden entirely until skins are listed. */}
         {skinChips.length > 0 ? (
           <div className="flex items-center gap-2 border-b border-[#24252a] pb-4">
-            <div className="min-w-0 flex-1 overflow-hidden">
+            {/* On a phone there is no hover to slide it, so the window
+                scrolls under the thumb instead (27/10/2026, the phone pass:
+                "sửa trên giao diện đt thôi"); from sm it is the hover
+                carousel as before. */}
+            <div className="hide-scrollbar min-w-0 flex-1 overflow-x-auto sm:overflow-hidden">
               <div
                 ref={trackRef}
                 className="flex gap-2 transition-transform duration-500 ease-in-out"

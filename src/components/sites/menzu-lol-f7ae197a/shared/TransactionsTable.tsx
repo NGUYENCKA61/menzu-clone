@@ -106,7 +106,7 @@ function Amount({ row, phone = false }: { row: LedgerView; phone?: boolean }) {
       </span>
       {row.status === "SUCCESS" ? (
         <div
-          className={`text-[10px] text-neutral-500 font-medium ${phone ? "" : "mt-1 "}flex flex-col items-end gap-0.5`}
+          className={`text-[11px] sm:text-[10px] text-neutral-500 font-medium ${phone ? "" : "mt-1 "}flex flex-col items-end gap-0.5`}
         >
           <span>Trước: {money(row.balanceAfter - row.delta)}</span>
           <span>Sau: {money(row.balanceAfter)}</span>
@@ -181,7 +181,10 @@ export function TransactionsTable({ rows }: { rows: LedgerView[] }) {
         aria-label={`Xem ${row.kind === "TOPUP" ? "hóa đơn" : "đơn hàng"} của giao dịch ${row.code}`}
         className={
           phone
-            ? "text-neutral-400 hover:text-white transition-colors"
+            ? // A 32px target around the 16px eye, the margin giving the
+              // room back so the card does not move (27/10/2026, the phone
+              // pass: the bare icon was a 16px tap).
+              "-m-2 p-2 text-neutral-400 hover:text-white transition-colors"
             : "p-1.5 text-neutral-500 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
         }
       >

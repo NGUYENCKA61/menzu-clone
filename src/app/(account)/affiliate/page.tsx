@@ -242,7 +242,7 @@ export default async function AffiliatePage() {
                             <span className="mb-1 block font-bold tabular-nums text-neutral-200">
                               {dayTime(earning.createdAt)}
                             </span>
-                            <span className="font-mono text-[10px] text-neutral-500">
+                            <span className="font-mono text-[11px] text-neutral-500 sm:text-[10px]">
                               {dayKey(earning.createdAt)}
                             </span>
                           </td>

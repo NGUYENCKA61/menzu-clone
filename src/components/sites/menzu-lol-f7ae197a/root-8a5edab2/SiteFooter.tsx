@@ -48,8 +48,10 @@ const ROW = "text-[13px] leading-[1.45] text-neutral-400 hover:text-white transi
 // The footer's one colour is the storefront's red accent, the same one the
 // section headings above it use — the shop tried the brand purple and plain
 // white in these three spots and came back to this.
+// py-2 on a phone so the thumb has a 36px row to hit (27/10/2026, the phone
+// pass); none from sm, as before.
 const SEE_ALL =
-  "group inline-flex items-center gap-1.5 text-[14px] font-semibold text-frost underline-offset-4 hover:underline transition-colors";
+  "group inline-flex items-center gap-1.5 py-2 text-[14px] font-semibold text-frost underline-offset-4 hover:underline transition-colors sm:py-0";
 
 interface FooterContact {
   zalo: string;
@@ -350,12 +352,12 @@ export async function SiteFooter() {
               <Link
                 key={link.href}
                 href={link.href}
-                className="text-[12px] text-neutral-500 hover:text-white transition-colors"
+                className="py-2 text-[12px] text-neutral-500 hover:text-white transition-colors sm:py-0"
               >
                 {link.label}
               </Link>
             ))}
-            <ThemeToggle className="text-[12px] text-neutral-500 hover:text-white transition-colors" />
+            <ThemeToggle className="py-2 text-[12px] text-neutral-500 hover:text-white transition-colors sm:py-0" />
           </nav>
         </div>
       </div>

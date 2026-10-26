@@ -326,7 +326,7 @@ function DragScrollRow({ fill, children }: { fill: string; children: ReactNode }
           <div className="h-1 flex-1 overflow-hidden rounded-full bg-white/10">
             <div className={`h-full rounded-full ${fill}`} style={{ width: `${reach * 100}%` }} />
           </div>
-          <span className="shrink-0 text-[10px] font-black uppercase tracking-wider text-neutral-500">
+          <span className="shrink-0 text-[11px] font-black uppercase tracking-wider text-neutral-500 sm:text-[10px]">
             Kéo để xem thêm
           </span>
         </div>

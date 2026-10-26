@@ -64,7 +64,7 @@ export function ServiceChip({ service, small = false }: { service: string; small
   return (
     <span
       className={`${
-        small ? "text-[9px] px-1.5" : "text-[10px] px-2"
+        small ? "text-[11px] px-1.5 sm:text-[9px]" : "text-[11px] px-2 sm:text-[10px]"
       } font-bold py-0.5 rounded border whitespace-nowrap shrink-0 text-[var(--menzu-accent)] bg-[var(--menzu-accent)]/10 border-[var(--menzu-accent)]/20`}
     >
       {sentenceCase(service)}
@@ -321,7 +321,7 @@ function SortToggle({ asc, onChange }: { asc: boolean; onChange: (asc: boolean) 
         type="button"
         title="Mới nhất"
         onClick={() => onChange(false)}
-        className={`p-1.5 rounded-lg transition-all ${
+        className={`p-2 sm:p-1.5 rounded-lg transition-all ${
           asc ? "text-neutral-500 hover:text-neutral-300" : "bg-[var(--menzu-accent)] text-white"
         }`}
       >
@@ -331,7 +331,7 @@ function SortToggle({ asc, onChange }: { asc: boolean; onChange: (asc: boolean) 
         type="button"
         title="Cũ nhất"
         onClick={() => onChange(true)}
-        className={`p-1.5 rounded-lg transition-all ${
+        className={`p-2 sm:p-1.5 rounded-lg transition-all ${
           asc ? "bg-[var(--menzu-accent)] text-white" : "text-neutral-500 hover:text-neutral-300"
         }`}
       >

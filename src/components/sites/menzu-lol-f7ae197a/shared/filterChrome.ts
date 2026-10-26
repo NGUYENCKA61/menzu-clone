@@ -63,7 +63,9 @@ export const GROUP_DIVIDER = "hidden lg:block w-px self-stretch bg-white/10";
 /** The site's small grey caption, menzu's 10px black capitals: one label
  *  style on the category panel and on the product pages' "Chọn gói" and
  *  "Số lượng", as lmarket keeps one (the owner, 25/10/2026: "đồng bộ tỷ lệ"). */
-export const SMALL_CAPS_LABEL = "text-[10px] uppercase font-black tracking-wider text-neutral-500";
+// 11px on a phone, where 10px capitals were the smallest words on the page
+// (27/10/2026, the phone pass); 10px from sm as before.
+export const SMALL_CAPS_LABEL = "text-[11px] sm:text-[10px] uppercase font-black tracking-wider text-neutral-500";
 
 /** The small grey caption over each group of chips, set in by 4px ("in hoa
  *  như 3100 thử", then menzu's). */

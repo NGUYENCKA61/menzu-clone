@@ -94,7 +94,7 @@ export function TrustStatsStrip({ stats, slim = false }: { stats: TrustStats; sl
                 className={`font-bold text-neutral-500 ${
                   // Tighter on a phone, so "Đánh giá trung bình" keeps to one line.
                   slim
-                    ? "text-[10px] tracking-[0.12em] sm:text-[11px] sm:tracking-[0.2em]"
+                    ? "text-[11px] tracking-[0.12em] sm:tracking-[0.2em]"
                     : "text-[11px] tracking-[0.2em]"
                 }`}
               >
