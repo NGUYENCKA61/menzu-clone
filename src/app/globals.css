@@ -1803,8 +1803,11 @@ html[data-admin-filtering] .admin-list {
   div.w-full.shrink-0.h-\[104px\] {
     height: 64px;
   }
+  /* Its words sat 136px down, 32px under the 104px bar; 96px keeps the
+     same 32px under this one ("cho đồng bộ khoảng cách", 26/10/2026). */
   section.category-hero {
     margin-top: -64px;
+    padding-top: 96px;
   }
   section.home-hero {
     min-height: calc(100svh - 88px);
