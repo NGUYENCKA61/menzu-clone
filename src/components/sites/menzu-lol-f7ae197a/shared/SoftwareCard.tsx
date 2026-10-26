@@ -331,14 +331,13 @@ export function SoftwareCard({
           // clear of the 13px copy ("thử trong 5p phương án lên 17px"); on
           // the shop's 37 tools it cuts no more names than 16px did. 18px
           // was tried too and cut five more; the owner settled on 17 ("chốt
-          // 17 px cái đi"), then asked to see 18 once more ("card sản phẩm
-          // 18px thử").
+          // 17 px cái đi").
           <div>
             <Link href={detailHref} className="flex items-start gap-2.5">
               <span aria-hidden className="mt-1 h-4 w-[3px] shrink-0 rounded-full bg-[var(--menzu-accent)]" />
               <h3
                 title={titleCase(software.name)}
-                className="line-clamp-2 min-h-[2.5em] min-w-0 break-words text-[18px] font-extrabold leading-[1.25] text-white transition-colors duration-300 group-hover:text-[var(--menzu-accent)]"
+                className="line-clamp-2 min-h-[2.5em] min-w-0 break-words text-[17px] font-extrabold leading-[1.25] text-white transition-colors duration-300 group-hover:text-[var(--menzu-accent)]"
               >
                 {titleCase(software.name)}
               </h3>
