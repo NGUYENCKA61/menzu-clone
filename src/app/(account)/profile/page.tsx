@@ -220,11 +220,11 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                       check ("dùng cái tick này giống menzu đc k"), where a
                       scalloped badge stood; green first, then the verified
                       blue ("xanh dương thử"), then the shop's own red ("đỏ
-                      thử", the --menzu-accent value), now the verified blue
-                      again (trial, 26/10/2026: "tick đỏ thành tick xanh
-                      dương", "thử"). */}
+                      thử", the --menzu-accent value), then the verified blue
+                      again (26/10/2026: "tick đỏ thành tick xanh dương"), now
+                      the first green (trial, 26/10/2026: "xanh lá thử"). */}
                   <svg viewBox="0 0 24 24" aria-hidden className="h-[18px] w-[18px] shrink-0">
-                    <circle cx="12" cy="12" r="11" fill="#1d9bf0" />
+                    <circle cx="12" cy="12" r="11" fill="#10b981" />
                     <path
                       d="M7.2 12.4l3.2 3.2 6.4-6.8"
                       fill="none"
