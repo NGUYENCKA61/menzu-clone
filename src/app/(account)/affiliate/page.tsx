@@ -8,7 +8,7 @@ import { AccountPageFrame } from "@/components/sites/menzu-lol-f7ae197a/shared/A
 import { AccountPanel } from "@/components/sites/menzu-lol-f7ae197a/shared/AccountPanel";
 import { ReferralLinkBox } from "@/components/sites/menzu-lol-f7ae197a/shared/ReferralLinkBox";
 import { formatVnd } from "@/components/sites/menzu-lol-f7ae197a/shared/productData";
-import { dayKey } from "@/lib/dayGroups";
+import { dayKey, dayTime } from "@/lib/dayGroups";
 import { db } from "@/lib/db";
 import { REFERRAL_PERCENT } from "@/lib/referral";
 import { absoluteUrl } from "@/lib/seo";
@@ -42,7 +42,8 @@ const STEPS = [
   },
 ] as const;
 
-const EARNING_COLUMNS = ["Thành viên", "Số tiền nạp", "Hoa hồng", "Thời gian"];
+// In Lịch sử giao dịch's order: when, who and how, then the money.
+const EARNING_COLUMNS = ["Thời gian", "Thành viên & Phương thức", "Số tiền nạp", "Hoa hồng"];
 
 /**
  * "bant***01" — enough of the name for its inviter to recognise, not enough
@@ -78,7 +79,7 @@ export default async function AffiliatePage() {
         // `credited` as well as `amount`: on a scratch card the two differ by
         // the shop’s fee, and the commission is a share of what actually
         // reached the wallet.
-        topUp: { select: { amount: true, credited: true } },
+        topUp: { select: { amount: true, credited: true, method: true } },
       },
     }),
   ]);
@@ -210,55 +211,64 @@ export default async function AffiliatePage() {
                 Chưa có hoa hồng nào, gửi liên kết cho bạn bè để bắt đầu.
               </div>
             ) : (
-              <div className="w-full overflow-x-auto rounded-xl border border-white/10 bg-white/[0.02]">
-                <table className="w-full min-w-[520px] text-left">
-                  <thead>
-                    <tr className="border-b border-white/10">
-                      {EARNING_COLUMNS.map((column) => (
-                        <th
-                          key={column}
-                          scope="col"
-                          className="px-5 py-3.5 text-[12px] font-semibold text-neutral-500 whitespace-nowrap"
-                        >
-                          {column}
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {recent.map((earning) => (
-                      <tr
-                        key={earning.id}
-                        className="border-b border-white/5 transition-colors last:border-0 hover:bg-white/[0.03]"
-                      >
-                        <td className="px-5 py-4">
-                          {/* The shop accent: the name is the row's subject, and it
-                              reads as one. */}
-                          <span className="inline-flex rounded-md border border-white/10 bg-white/[0.06] px-2 py-1 text-[12px] font-semibold leading-none text-neutral-200">
-                            {maskName(earning.fromUser.username)}
-                          </span>
-                        </td>
-                        <td className="px-5 py-4">
-                          <span className="text-xs font-bold tabular-nums text-neutral-200">
-                            {formatVnd(
-                              Number(earning.topUp.credited ?? earning.topUp.amount),
-                            )}đ
-                          </span>
-                        </td>
-                        <td className="px-5 py-4">
-                          <span className="inline-flex rounded-md border border-emerald-500/30 bg-emerald-500/10 px-2 py-1 text-[12px] font-semibold leading-none tabular-nums text-emerald-400">
-                            +{formatVnd(Number(earning.amount))}đ
-                          </span>
-                        </td>
-                        <td className="px-5 py-4">
-                          <span className="text-[11px] tabular-nums text-neutral-500">
-                            {dayKey(earning.createdAt)}
-                          </span>
-                        </td>
+              // Lịch sử giao dịch's table, cell for cell (26/10/2026: "làm cho
+              // đồng bộ với cái lsgd"): the same frame and header band, the
+              // time as its clock over a small date, the name bold over a
+              // method chip, and the commission as that page's green "+"
+              // amount on the right rather than a pill.
+              <div className="overflow-hidden rounded-2xl border border-white/10">
+                <div className="overflow-x-auto">
+                  <table className="w-full min-w-[620px] text-left text-xs">
+                    <thead className="border-b border-white/5 bg-white/[0.02] text-neutral-500">
+                      <tr>
+                        {EARNING_COLUMNS.map((column, index) => (
+                          <th
+                            key={column}
+                            scope="col"
+                            className={`whitespace-nowrap px-5 py-4 font-bold ${index >= 2 ? "text-right" : ""}`}
+                          >
+                            {column}
+                          </th>
+                        ))}
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {recent.map((earning) => (
+                        <tr
+                          key={earning.id}
+                          className="border-b border-white/5 transition-colors last:border-0 hover:bg-white/[0.02]"
+                        >
+                          <td className="whitespace-nowrap px-5 py-4 align-middle">
+                            <span className="mb-1 block font-bold tabular-nums text-neutral-200">
+                              {dayTime(earning.createdAt)}
+                            </span>
+                            <span className="font-mono text-[10px] text-neutral-500">
+                              {dayKey(earning.createdAt)}
+                            </span>
+                          </td>
+                          <td className="px-5 py-4 align-middle">
+                            <span className="mb-1 block font-bold text-neutral-200">
+                              {maskName(earning.fromUser.username)}
+                            </span>
+                            <span className="rounded bg-white/5 px-2 py-0.5 text-[12px] text-neutral-500">
+                              {earning.topUp.method === "CARD" ? "Thẻ Cào" : "Ngân Hàng"}
+                            </span>
+                          </td>
+                          <td className="px-5 py-4 text-right align-middle">
+                            <span className="font-bold tabular-nums text-neutral-200">
+                              {formatVnd(Number(earning.topUp.credited ?? earning.topUp.amount))}đ
+                            </span>
+                          </td>
+                          <td className="px-5 py-4 text-right align-middle">
+                            <span className="text-sm font-black tabular-nums text-emerald-400">
+                              +{formatVnd(Number(earning.amount))}đ
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             )}
           </section>
