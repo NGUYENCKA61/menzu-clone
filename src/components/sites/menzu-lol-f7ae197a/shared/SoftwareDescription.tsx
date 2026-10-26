@@ -74,8 +74,13 @@ export interface SoftwareDescriptionProps {
 // (SECTION_TITLE), the sub headings a step under it, 800; the copy stays 400.
 // Each sub heading ends on a colon, the words under it following on from
 // it (lab 3200, 26/10/2026: "mỗi cái cuối câu có dấu : đi đề mục ấy").
+// And set the way a wiki article's headings are, which read at a glance
+// ("chữ bên wiki đọc đề mục rất rõ", "xem xét và tăng kích thước đề mục
+// cho trang chi tiết sản phẩm đi"): 900, white, a hair tighter, at 20px,
+// one step under the section's 24px title, where 17px at 800 stood barely
+// above the 16px copy.
 const SUB_HEADING =
-  "mt-10 font-display text-[17px] font-extrabold text-frost";
+  "mt-10 font-display text-[20px] font-black leading-[1.25] tracking-[-0.01em] text-white";
 const SECTION_TITLE = "font-black";
 /**
  * Body text in this section, set to the same values the rich editor's output

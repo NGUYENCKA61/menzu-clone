@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Layers } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { CardBoundary } from "./CardBoundary";
@@ -66,11 +66,15 @@ export function SimilarSoftwareStrip({ items, old = false }: { items: SoftwareCa
       className="mx-auto w-full max-w-[1320px] px-4 pb-16 lg:px-6"
     >
       <div className="mb-5 flex items-center justify-between gap-4">
-        {/* The home rows' red bar in place of the accent glyph, so the
-            product page's sections are headed the way the home page's are
-            (the owner, 13/10/2026, UI consistency review). */}
+        {/* The red layered glyph before the words again, as it stood
+            before the 13/10/2026 consistency review put the home rows' bar
+            in its place (lab 3200, 26/10/2026: "icon của cái sản phẩm tương
+            tự xếp lớp đâu? thêm vào"). */}
         <SectionHeading id="similar-software-heading">
-          Sản phẩm tương tự
+          <span className="flex items-center gap-2.5">
+            <Layers size={22} aria-hidden className="shrink-0 text-[var(--menzu-accent)]" />
+            Sản phẩm tương tự
+          </span>
         </SectionHeading>
         <div className="flex items-center gap-2">
           <button
