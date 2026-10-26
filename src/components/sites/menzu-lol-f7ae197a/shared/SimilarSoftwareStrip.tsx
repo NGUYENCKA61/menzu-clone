@@ -69,8 +69,10 @@ export function SimilarSoftwareStrip({ items, old = false }: { items: SoftwareCa
         {/* The red layered glyph before the words again, as it stood
             before the 13/10/2026 consistency review put the home rows' bar
             in its place (lab 3200, 26/10/2026: "icon của cái sản phẩm tương
-            tự xếp lớp đâu? thêm vào"). */}
-        <SectionHeading id="similar-software-heading">
+            tự xếp lớp đâu? thêm vào"). At the 900 "Mô tả sản phẩm" is set in
+            above it, where it was 700 ("Sản phẩm tương tự độ dày chữ chưa đồng
+            bộ à"). */}
+        <SectionHeading id="similar-software-heading" titleClassName="font-black">
           <span className="flex items-center gap-2.5">
             <Layers size={22} aria-hidden className="shrink-0 text-[var(--menzu-accent)]" />
             Sản phẩm tương tự
