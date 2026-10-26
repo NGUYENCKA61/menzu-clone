@@ -233,7 +233,7 @@ export function serializeBadges(input: unknown): string | null {
 export const NEW_TOOL_DAYS = 14;
 
 /**
- * Whether a tool's card wears the green "Mới" ribbon (the owner, 26/10/2026,
+ * Whether a tool's card wears the "Mới" ribbon (the owner, 26/10/2026,
  * lab 3200: "thêm 1 nhãn ruy băng cho card sản phẩm là mới màu xanh lá"):
  * for its first NEW_TOOL_DAYS days, or for as long as the shop gives it a
  * badge that starts with "Mới" ("MỚI RA MẮT", "Mới"). The badge is the
