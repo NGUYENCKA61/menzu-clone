@@ -1,5 +1,5 @@
 import { sentenceCase } from "@/lib/displayCase";
-import { Lock } from "lucide-react";
+import { Cpu, Gamepad2, Info, Laptop, Lock, Maximize2, Monitor, Settings, type LucideIcon } from "lucide-react";
 import Link from "next/link";
 
 import { DocHtml } from "@/lib/docFormat";
@@ -118,6 +118,23 @@ function DescriptionTitle() {
  * lệ với web"): 3100's layout at this site's 16px.
  */
 const BODY = "text-[16px] leading-[1.7] text-neutral-300";
+
+/**
+ * A glyph for a "Yêu cầu hệ thống" row, read off its label (lab 3200,
+ * 26/10/2026: "thêm 1 số icon vô cho đẹp ở bản này mỗi cái tiêu đề hàng",
+ * tried on the parked option B, then "thêm icon vào bản A luôn"). The labels are the shop's own words, so the match is by the words
+ * they use; anything else gets the plain info mark.
+ */
+function requirementIcon(label: string): LucideIcon {
+  const l = label.normalize("NFC").toLocaleLowerCase("vi-VN");
+  if (l.includes("cpu")) return Cpu;
+  if (l.includes("màn hình")) return Maximize2;
+  if (l.includes("nền tảng") || l.includes("game") || l.includes("launcher")) return Gamepad2;
+  if (l.includes("máy")) return Laptop;
+  if (l.includes("hệ điều hành") || l.includes("windows") || l.includes("hỗ trợ")) return Monitor;
+  if (l.includes("yêu cầu") || l.includes("cài đặt") || l.includes("thiết lập")) return Settings;
+  return Info;
+}
 
 /** The words the locked panel sets in red: what happens, and what to press. */
 function Hi({ children }: { children: React.ReactNode }) {
@@ -316,7 +333,13 @@ export function SoftwareDescription({
               index > 0 ? "border-t border-white/[0.07]" : ""
             }`}
           >
-            <dt className={BODY}>{f.label}</dt>
+            <dt className={`${BODY} flex items-center gap-2.5`}>
+              {(() => {
+                const Icon = requirementIcon(f.label);
+                return <Icon size={16} aria-hidden className="shrink-0 text-[var(--menzu-accent)]" />;
+              })()}
+              {f.label}
+            </dt>
             <dd className="text-[16px] font-bold leading-[1.65] text-white">
               {f.value}
             </dd>
