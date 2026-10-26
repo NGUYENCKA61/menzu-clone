@@ -228,3 +228,25 @@ export function serializeBadges(input: unknown): string | null {
   }
   return lines.length > 0 ? lines.join("\n") : null;
 }
+
+/** How long a tool reads as new on its card once it is put on sale. */
+export const NEW_TOOL_DAYS = 14;
+
+/**
+ * Whether a tool's card wears the green "Mới" ribbon (the owner, 26/10/2026,
+ * lab 3200: "thêm 1 nhãn ruy băng cho card sản phẩm là mới màu xanh lá"):
+ * for its first NEW_TOOL_DAYS days, or for as long as the shop gives it a
+ * badge that starts with "Mới" ("MỚI RA MẮT", "Mới"). The badge is the
+ * shop's own switch: every tool on the site came in one import on
+ * 02/09/2026, so the date alone could never mark one of those.
+ */
+export function isNewTool(
+  createdAt: Date,
+  badge: string | null,
+  now = Date.now(),
+): boolean {
+  if (now - createdAt.getTime() < NEW_TOOL_DAYS * 86_400_000) return true;
+  return parseBadges(badge).some((b) =>
+    b.label.normalize("NFC").toLocaleUpperCase("vi-VN").startsWith("MỚI"),
+  );
+}

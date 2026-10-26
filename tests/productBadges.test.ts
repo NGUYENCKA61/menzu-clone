@@ -8,6 +8,7 @@ import {
   BADGE_PILL_BASE,
   DEFAULT_BADGE_COLOR,
   DEFAULT_BADGE_ICON,
+  isNewTool,
   MAX_BADGES,
   MAX_BADGE_LENGTH,
   parseBadges,
@@ -202,5 +203,33 @@ describe("the glyph set", () => {
   it("offers 'no glyph' as an option of its own", () => {
     // Without it a warning badge has to wear a commendation.
     expect(BADGE_ICON_KEYS).toContain("none");
+  });
+});
+
+describe("isNewTool", () => {
+  const now = Date.UTC(2026, 9, 26, 12);
+  const daysAgo = (days: number) => new Date(now - days * 86_400_000);
+
+  it("marks a tool new for its first two weeks, and not after", () => {
+    expect(isNewTool(daysAgo(0), null, now)).toBe(true);
+    expect(isNewTool(daysAgo(13.9), null, now)).toBe(true);
+    expect(isNewTool(daysAgo(14), null, now)).toBe(false);
+  });
+
+  it("lets a badge starting with 'Mới' mark an old tool new", () => {
+    // Every tool on the site arrived in one import, so the date alone
+    // could never mark one of them.
+    const imported = daysAgo(54);
+    expect(isNewTool(imported, "MỚI RA MẮT|green|none", now)).toBe(true);
+    expect(isNewTool(imported, "#TOP BÁN CHẠY|red|none\nmới", now)).toBe(true);
+    // Typed with a decomposed keyboard, it is still the same word.
+    expect(isNewTool(imported, "Mới".normalize("NFD"), now)).toBe(true);
+  });
+
+  it("leaves an old tool with other badges, or none, alone", () => {
+    const imported = daysAgo(54);
+    expect(isNewTool(imported, null, now)).toBe(false);
+    expect(isNewTool(imported, "#TOP BÁN CHẠY|red|none", now)).toBe(false);
+    expect(isNewTool(imported, "BẢN MỚI NHẤT|red|none", now)).toBe(false);
   });
 });
