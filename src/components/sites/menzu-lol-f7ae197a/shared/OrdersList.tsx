@@ -146,7 +146,7 @@ const LOOKS: CardLook[] = [
   { id: "8", name: "Thẻ tối hơn khung", card: "border-white/10 bg-black/30 hover:border-white/20", thumb: "sm:w-36", title: "sm:text-[17px]", price: "text-[17px]", chip: CHIP_RAISE, button: BUTTON_RAISE },
   { id: "9", name: "Ảnh, tên, giá to hơn", card: "border-white/10 hover:border-line-strong", thumb: "sm:w-[168px]", title: "sm:text-[18px]", price: "text-[19px]", chip: CHIP_RAISE, button: BUTTON_RAISE },
   { id: "12", name: "Hiệu ứng khi rê chuột", card: "border-white/10 hover:-translate-y-0.5 hover:border-white/25 hover:bg-white/[0.03] motion-reduce:hover:translate-y-0", thumb: "sm:w-36", title: "sm:text-[17px]", price: "text-[17px]", chip: CHIP_RAISE, button: BUTTON_RAISE_LIT, img: "object-cover brightness-[.92] transition-[filter,transform] duration-300 group-hover:scale-[1.04] group-hover:brightness-110 motion-reduce:group-hover:scale-100" },
-  { id: "17", name: "Hiệu ứng khi rê chuột, Chi tiết có dấu >", card: "border-white/10 hover:-translate-y-0.5 hover:border-white/25 hover:bg-white/[0.03] motion-reduce:hover:translate-y-0", thumb: "sm:w-36", title: "sm:text-[17px]", price: "text-[17px]", chip: CHIP_NEUTRAL, button: BUTTON_CHIP_ARROW, arrow: true, img: "object-cover brightness-[.92] transition-[filter,transform] duration-300 group-hover:scale-[1.04] group-hover:brightness-110 motion-reduce:group-hover:scale-100" },
+  { id: "17", name: "Hiệu ứng khi rê chuột, Chi tiết có dấu >", card: "border-white/10 hover:-translate-y-0.5 hover:border-white/25 hover:bg-white/[0.03] motion-reduce:hover:translate-y-0", thumb: "sm:w-36", title: "", price: "text-[17px]", chip: CHIP_NEUTRAL, button: BUTTON_CHIP_ARROW, arrow: true, img: "object-cover brightness-[.92] transition-[filter,transform] duration-300 group-hover:scale-[1.04] group-hover:brightness-110 motion-reduce:group-hover:scale-100" },
   { id: "19", name: "Như 17, nền thẻ 2%", card: "border-white/10 bg-white/[0.02] hover:-translate-y-0.5 hover:border-white/25 hover:bg-white/[0.03] motion-reduce:hover:translate-y-0", thumb: "sm:w-36", title: "sm:text-[17px]", price: "text-[17px]", chip: CHIP_RAISE, button: BUTTON_RAISE_LIT_ARROW, arrow: true, img: "object-cover brightness-[.92] transition-[filter,transform] duration-300 group-hover:scale-[1.04] group-hover:brightness-110 motion-reduce:group-hover:scale-100" },
   { id: "18", name: "Như 17, nền thẻ 1%", card: "border-white/10 bg-white/[0.01] hover:-translate-y-0.5 hover:border-white/25 hover:bg-white/[0.03] motion-reduce:hover:translate-y-0", thumb: "sm:w-36", title: "sm:text-[17px]", price: "text-[17px]", chip: CHIP_RAISE, button: BUTTON_RAISE_LIT_ARROW, arrow: true, img: "object-cover brightness-[.92] transition-[filter,transform] duration-300 group-hover:scale-[1.04] group-hover:brightness-110 motion-reduce:group-hover:scale-100" },
   { id: "20", name: "Như 17, nền thẻ 3%", card: "border-white/10 bg-white/[0.03] hover:-translate-y-0.5 hover:border-white/25 hover:bg-white/[0.05] motion-reduce:hover:translate-y-0", thumb: "sm:w-36", title: "sm:text-[17px]", price: "text-[17px]", chip: CHIP_RAISE, button: BUTTON_RAISE_LIT_ARROW, arrow: true, img: "object-cover brightness-[.92] transition-[filter,transform] duration-300 group-hover:scale-[1.04] group-hover:brightness-110 motion-reduce:group-hover:scale-100" },
@@ -368,10 +368,14 @@ export function OrdersList({ orders }: { orders: OrderCardView[] }) {
                                   shelf's capitals per card made the list a wall
                                   (the owner, 16/10/2026: "có nên đổi qua dấu ...",
                                   "... được rồi"). The whole name sits in the tooltip
-                                  and on the order's own page. */}
+                                  and on the order's own page. 16px at 800, the
+                                  category page's card names (trial, 26/10/2026:
+                                  "không chỉ là giá", "mà là tiêu đề card kìa",
+                                  "nó phải đồng bộ với trang chi tiết danh mục 1
+                                  xíu chứ"; it was 15px, 17px from sm, at 600). */}
                               <h3
                                 title={order.title}
-                                className={`truncate font-display text-[15px] font-semibold leading-snug text-frost transition-colors group-hover:text-white ${look.title}`}
+                                className={`truncate font-display text-[16px] font-extrabold leading-snug text-frost transition-colors group-hover:text-white ${look.title}`}
                               >
                                 {sentenceCase(order.title)}
                               </h3>
@@ -423,9 +427,11 @@ export function OrdersList({ orders }: { orders: OrderCardView[] }) {
                           <div className={`flex shrink-0 items-center justify-between gap-3 border-t border-white/5 pt-3 sm:border-t-0 sm:border-l sm:border-line sm:pt-0 sm:pl-5 ${look.chevron ? "sm:gap-4" : "sm:flex-col sm:items-end sm:justify-center sm:gap-2.5"}`}>
                             {/* White, not menzu's green: what was paid, said
                                 plainly. No "GIÁ MUA" over it — it is plainly
-                                the price. */}
+                                the price. 900 like the profile's figures and the
+                                prices on cards and product pages (trial,
+                                26/10/2026, with the name above; it was 700). */}
                             <p
-                              className={`lab-figure ${look.price} font-bold ${
+                              className={`lab-figure ${look.price} font-black ${
                                 struck ? "text-neutral-500 line-through" : "text-white"
                               }`}
                             >
