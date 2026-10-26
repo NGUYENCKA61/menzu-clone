@@ -319,9 +319,10 @@ export function OrdersList({ orders }: { orders: OrderCardView[] }) {
                   >
                     {run.group ? (
                       // The day once, over its orders: the same date on every
-                      // card was the noisiest thing on the page.
+                      // card was the noisiest thing on the page. 800 like the
+                      // card names under it (trial, 26/10/2026: "thử"; was 600).
                       <div className="flex items-center gap-3">
-                        <span className="lab-figure shrink-0 text-[15px] font-semibold text-frost">
+                        <span className="lab-figure shrink-0 text-[15px] font-extrabold text-frost">
                           {run.group}
                         </span>
                         <span aria-hidden className="h-px flex-1 bg-line" />
