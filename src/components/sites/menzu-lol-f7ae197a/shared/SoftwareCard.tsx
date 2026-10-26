@@ -295,11 +295,12 @@ export function SoftwareCard({
             // keeps its red one: being free says more than being new.
             <CornerRibbon label="Mới nhất" tone="bg-violet-600" />
           ) : software.bestSeller ? (
-            // And in blue for a best seller (the owner, 26/10/2026, lab 3200:
-            // "thêm 1 nhãn nữa màu xanh dương bán chạy"), from the shop's own
+            // And in orange for a best seller (the owner, 26/10/2026, lab 3200:
+            // "thêm 1 nhãn nữa màu xanh dương bán chạy", then "màu cam": it was
+            // blue), from the shop's own
             // "... BÁN CHẠY" badge. Under "Mới nhất": a tool's first weeks
             // are short, and its sales will still be there after.
-            <CornerRibbon label="Bán chạy" tone="bg-blue-600" />
+            <CornerRibbon label="Bán chạy" tone="bg-orange-600" />
           ) : software.verifiedOnly ? (
             // Sold to level 2 only (the owner, 12/10/2026): the buyer learns it
             // on the card, not after the click.
