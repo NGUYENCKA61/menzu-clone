@@ -331,8 +331,9 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                     >
                       {/* 10px like every other label on the card, and allowed
                           to wrap from sm; mt-auto keeps the three values level
-                          when only some labels take two lines. */}
-                      <span className="text-[12px] leading-tight text-dim">
+                          when only some labels take two lines. In capitals
+                          (26/10/2026: "3 cái chung 1 hàng đó in hoa đi"). */}
+                      <span className="text-[12px] uppercase leading-tight text-dim">
                         {label}
                       </span>
                       <span className="mt-auto flex min-w-0 items-center gap-1 text-[15px] font-semibold leading-none text-white">
