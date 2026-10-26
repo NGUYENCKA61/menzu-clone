@@ -275,7 +275,7 @@ export default async function AnnouncementsPage({
                 {groupByDay(events).map((group) => (
                   <section key={group.key} aria-label={dayLabel(group.key, now)}>
                     <div className="mb-3 flex items-center gap-3">
-                      <h3 className="lab-figure shrink-0 text-[15px] font-semibold text-frost">
+                      <h3 className="lab-figure shrink-0 text-[15px] font-extrabold text-frost">
                         {dayLabel(group.key, now)}
                       </h3>
                       <span aria-hidden className="h-px flex-1 bg-line" />
@@ -311,7 +311,7 @@ export default async function AnnouncementsPage({
                             <Link
                               href={event.productHref}
                               title={name}
-                              className="mt-1.5 line-clamp-2 text-[16px] font-semibold leading-snug text-frost transition-colors hover:text-white"
+                              className="mt-1.5 line-clamp-2 text-[16px] font-bold leading-snug text-frost transition-colors hover:text-white"
                             >
                               {name}
                             </Link>

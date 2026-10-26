@@ -170,7 +170,7 @@ export function FeedbackComposer({ user, today }: { user: ComposerUser; today: s
           {/* The wall's card (FeedbackBoard's ReviewCard): the date beside
               the stars, the words behind a bar, the amount in white. */}
           <div className="flex items-center gap-2 mb-1.5">
-            <h3 className="text-base font-black text-white truncate max-w-[150px]">
+            <h3 className="text-base font-bold text-white truncate max-w-[150px]">
               {previewName}
             </h3>
             {anonymous ? null : <VerifiedBadge size="w-3 h-3" />}
@@ -208,7 +208,7 @@ export function FeedbackComposer({ user, today }: { user: ComposerUser; today: s
       ) : null}
       {amountNumber > 0 ? (
         <div className="mt-4 text-right flex flex-col items-end">
-          <span className="text-[12px] text-neutral-500 font-semibold mb-1">
+          <span className="text-[12px] text-neutral-500 font-medium mb-1">
             Trị giá giao dịch
           </span>
           <span className="text-2xl font-black text-white tabular-nums leading-none">

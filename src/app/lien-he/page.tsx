@@ -162,7 +162,7 @@ export default async function OfficialChannelsPage() {
                   line under it, and the address in the page's own font, not
                   monospace (the owner, 02/10/2026: "làm hết thử"). */}
               <span className="flex min-w-0 flex-col gap-0.5">
-                <span className="text-base font-black text-white">{channel.label}</span>
+                <span className="text-base font-bold text-white">{channel.label}</span>
                 <span className="text-[13px] text-neutral-500">{channel.note}</span>
                 {/* The address itself, wrapped rather than cut: half an
                     address is worse than none for checking one against

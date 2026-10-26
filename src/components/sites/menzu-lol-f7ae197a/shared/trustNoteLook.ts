@@ -13,4 +13,4 @@ export const TRUST_NOTE_ICON = "shrink-0 text-[var(--menzu-accent)]";
 export const TRUST_NOTE_TEXT = "text-[11px] leading-normal text-neutral-300 sm:text-sm";
 
 /** The sentence's opening words: "100% đánh giá", "Chỉ các kênh…". */
-export const TRUST_NOTE_LEAD = "font-black text-[var(--menzu-accent)]";
+export const TRUST_NOTE_LEAD = "font-bold text-[var(--menzu-accent)]";

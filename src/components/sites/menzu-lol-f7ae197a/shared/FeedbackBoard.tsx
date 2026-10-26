@@ -213,7 +213,7 @@ function ReviewCard({ item }: { item: FeedbackItem }) {
               stars, as on the home review cards: beside the name, "Khách
               hàng ẩn danh" was cut short on a phone (18/10/2026). */}
           <div className="flex items-center gap-2 flex-wrap min-w-0 mb-1.5">
-            <h3 className="text-base font-black text-white truncate">{item.name}</h3>
+            <h3 className="text-base font-bold text-white truncate">{item.name}</h3>
             {item.verified ? <VerifiedBadge /> : null}
             <ServiceChip service={item.service} />
           </div>
@@ -245,7 +245,7 @@ function ReviewCard({ item }: { item: FeedbackItem }) {
         {/* Quoted the home review cards' way, a bar on the left rather
             than curly quotes. */}
         {item.body ? (
-          <p className="border-l-2 border-white/10 pl-3 text-neutral-200 leading-relaxed text-[14.5px] whitespace-pre-wrap">
+          <p className="border-l-2 border-white/10 pl-3 text-neutral-200 leading-relaxed text-[14px] whitespace-pre-wrap">
             {item.body}
           </p>
         ) : (
@@ -261,7 +261,7 @@ function ReviewCard({ item }: { item: FeedbackItem }) {
             18/10/2026 ("Màu trắng chẳng hạn"). */}
         {item.amount > 0 ? (
           <div className="mt-4 sm:mt-0 sm:absolute sm:bottom-6 sm:right-8 text-right flex flex-col items-end">
-            <span className="text-[12px] text-neutral-500 font-semibold mb-1">
+            <span className="text-[12px] text-neutral-500 font-medium mb-1">
               Trị giá giao dịch
             </span>
             <span className="text-2xl font-black text-white tabular-nums leading-none">
@@ -382,7 +382,7 @@ export function FeedbackBoard({ items }: { items: FeedbackItem[] }) {
         <div className="w-full bg-white/[0.02] border border-white/10 border-neutral-800/60 p-4 rounded-2xl flex flex-wrap items-center justify-between gap-2 sm:hidden">
           <div className="flex items-center gap-3 bg-neutral-950/60 border border-neutral-800 px-3.5 py-2 rounded-xl shadow-inner shadow-black/40 shrink-0">
             <div className="flex flex-col mr-1 shrink-0 whitespace-nowrap">
-              <span className="text-[12px] font-semibold text-neutral-600 leading-none mb-1">
+              <span className="text-[12px] font-medium text-neutral-600 leading-none mb-1">
                 Lọc theo
               </span>
               <span className="text-[14px] font-semibold text-[var(--menzu-accent)] leading-none">
@@ -402,7 +402,7 @@ export function FeedbackBoard({ items }: { items: FeedbackItem[] }) {
           </div>
           <div className="flex items-center gap-4 bg-neutral-950/60 border border-neutral-800 px-5 py-2.5 rounded-2xl shadow-inner shadow-black/40">
             <div className="flex flex-col mr-2">
-              <span className="text-[12px] font-semibold text-neutral-600 leading-none mb-1">
+              <span className="text-[12px] font-medium text-neutral-600 leading-none mb-1">
                 Lọc theo
               </span>
               <span className="text-[14px] font-semibold text-[var(--menzu-accent)] leading-none">
@@ -412,7 +412,7 @@ export function FeedbackBoard({ items }: { items: FeedbackItem[] }) {
             <RatingStars value={ratingFilter} onPick={pickRating} size={22} gap="gap-2" />
           </div>
           <div className="flex items-center gap-2 ml-auto">
-            <span className="text-[12px] font-semibold text-neutral-500 mr-1">Sắp xếp:</span>
+            <span className="text-[12px] font-medium text-neutral-500 mr-1">Sắp xếp:</span>
             <SortToggle asc={asc} onChange={pickSort} />
           </div>
         </div>
