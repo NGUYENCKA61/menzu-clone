@@ -332,7 +332,9 @@ export function SoftwareCard({
           // the shop's 37 tools it cuts no more names than 16px did. 18px
           // was tried too and cut five more; the owner settled on 17 ("chốt
           // 17 px cái đi"), then asked to see 18 once more ("card sản phẩm
-          // 18px thử").
+          // 18px thử") and, after flipping between the two, settled on 18
+          // ("chốt 18px"), five more long names ending in "…" with it. 17
+          // or 18 stays open on the backlog page ("đưa cái này vô artifact").
           <div>
             <Link href={detailHref} className="flex items-start gap-2.5">
               <span aria-hidden className="mt-1 h-4 w-[3px] shrink-0 rounded-full bg-[var(--menzu-accent)]" />
