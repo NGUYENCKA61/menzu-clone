@@ -249,39 +249,18 @@ export function SoftwareCard({
             </span>
           ) : null}
 
-          {!old && variant === "shelf" ? (
-            // The shelf's picture stands clean (the owner, 23/10/2026: "bỏ
-            // cái hiệu ứng đen mờ"): no shade, the name and the price below
-            // it; only the red line it lights on hover stays.
+          {!old ? (
+            // The picture stands clean (the owner, 23/10/2026: "bỏ cái hiệu
+            // ứng đen mờ"): no shade, the name and the price below it; only
+            // the red line it lights on hover stays. The similar-tools strip's
+            // cards too, which named the tool on a shaded picture (lab 3200,
+            // 26/10/2026: "sửa lại cho giống 3100 đi", "sao cho đồng bộ với
+            // web hiện tại").
             <span
               aria-hidden
               className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-[var(--menzu-accent)]/70 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"
             />
-          ) : old ? null : (
-            // The home tile's shade, the red line it lights on hover, and its
-            // caption: the name in the tile's black 17px, up to two lines,
-            // and on the shelf the cheapest tier in its 13px grey.
-            <>
-              <span aria-hidden className="absolute inset-0 lab-lmarket-shade" />
-              <span
-                aria-hidden
-                className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-[var(--menzu-accent)]/70 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-              />
-              <span className="absolute inset-x-3.5 bottom-3 flex flex-col gap-1 text-left">
-                <h3
-                  title={sentenceCase(software.name)}
-                  className="line-clamp-2 text-[17px] font-black leading-[1.15] text-white transition-colors duration-300 group-hover:text-[var(--menzu-accent)]"
-                >
-                  {sentenceCase(software.name)}
-                </h3>
-                {variant === "shelf" && minPrice !== null && !free ? (
-                  <span className="truncate text-[13px] font-medium leading-snug text-neutral-400">
-                    Chỉ từ {formatVnd(minPrice)}đ
-                  </span>
-                ) : null}
-              </span>
-            </>
-          )}
+          ) : null}
 
           {free ? (
             // A red ribbon across the picture's corner in place of the green
@@ -352,15 +331,16 @@ export function SoftwareCard({
           </Link>
         ) : null}
 
-        {!old && variant === "shelf" ? (
+        {!old ? (
           // Under the picture now that it has no shade to carry them, in the
           // sizes they had on it (23/10/2026: "theo bố cục, kích thước giữ
           // y nguyên"), every word's first letter capital and the acronyms
           // kept ("viết hoa chữ cái đầu… CFVN thì khỏi"). The name runs to
           // two lines, then "…" (24/10/2026: "TIÊU ĐỀ 2 hàng đi"), and holds
           // two lines' height so the copy under it starts level along a row.
-          // 3100's red marker bar stands by its first line (24/10/2026,
-          // after two trials: "THÊM CẠCH ĐỎ LẠI ĐI"). 16px, a step under the
+          // No red marker bar by it any more (lab 3200, 26/10/2026: "bỏ dấu
+          // cạch ở card sản phẩm trang chi tiết danh mục"; it came back on
+          // 24/10/2026, "THÊM CẠCH ĐỎ LẠI ĐI"). 16px, a step under the
           // home tile's 17px so the picture leads (lmarket's and unnamed's
           // product names are 14 and 16px; "vậy 16 đi"). Lab 3200 trial,
           // 26/10/2026: 17px, the home tile's own size, so the name stands
@@ -372,8 +352,7 @@ export function SoftwareCard({
           // ("chốt 18px"), five more long names ending in "…" with it. 17
           // or 18 stays open on the backlog page ("đưa cái này vô artifact").
           <div>
-            <Link href={detailHref} className="flex items-start gap-2.5">
-              <span aria-hidden className="mt-1 h-4 w-[3px] shrink-0 rounded-full bg-[var(--menzu-accent)]" />
+            <Link href={detailHref} className="block">
               <h3
                 title={titleCase(software.name)}
                 className="line-clamp-2 min-h-[2.5em] min-w-0 break-words text-[18px] font-extrabold leading-[1.25] text-white transition-colors duration-300 group-hover:text-[var(--menzu-accent)]"
@@ -397,7 +376,7 @@ export function SoftwareCard({
             dimmer, still well over 4.5:1 on the card. */}
         <p
           className={`mb-[14px] line-clamp-2 min-h-[37px] text-[13px] leading-[1.55] ${
-            !old && variant === "shelf" ? "mt-3 text-mist/80" : "text-mist"
+            !old ? "mt-3 text-mist/80" : "text-mist"
           } ${old ? "mt-2" : ""}`}
         >
           {old ? software.description : shortBlurb(software.description ?? "")}

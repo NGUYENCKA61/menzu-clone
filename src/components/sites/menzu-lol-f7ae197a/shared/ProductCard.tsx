@@ -249,17 +249,17 @@ export function ProductCard({ product, priority = false, eager = false, old = fa
       </div>
 
       <div className="flex flex-1 flex-col p-4">
-        {/* The name under the picture in both looks; the new one wears the
-            software card's red marker bar and two held lines. */}
+        {/* The name under the picture in both looks; the new one holds two
+            lines, as the software card does. */}
         {old ? (
           <div className="flex items-center gap-2.5">
             <h3 className="truncate text-[17px] font-semibold text-frost">{title}</h3>
           </div>
         ) : (
-          // The tool card's name block: the red bar by the first line, 16px
-          // at 800, two lines held.
-          <div className="flex items-start gap-2.5">
-            <span aria-hidden className="mt-1 h-4 w-[3px] shrink-0 rounded-full bg-[var(--menzu-accent)]" />
+          // The tool card's name block: 16px at 800, two lines held. No red
+          // bar by it, as on the tool card (lab 3200, 26/10/2026: "bỏ dấu
+          // cạch ở card sản phẩm trang chi tiết danh mục").
+          <div>
             <h3
               title={title}
               className="line-clamp-2 min-h-[2.75em] min-w-0 break-words text-[16px] font-extrabold leading-snug text-white transition-colors duration-300 group-hover:text-[var(--menzu-accent)]"
