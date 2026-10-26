@@ -222,18 +222,21 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                       blue ("xanh dương thử"), then the shop's own red ("đỏ
                       thử", the --menzu-accent value), now the verified blue
                       again (trial, 26/10/2026: "tick đỏ thành tick xanh
-                      dương", "thử"). */}
-                  <svg viewBox="0 0 24 24" aria-hidden className="h-[18px] w-[18px] shrink-0">
-                    <circle cx="12" cy="12" r="11" fill="#1d9bf0" />
-                    <path
-                      d="M7.2 12.4l3.2 3.2 6.4-6.8"
-                      fill="none"
-                      stroke="#ffffff"
-                      strokeWidth={2.6}
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
+                      dương", "thử"). Only verified accounts wear it
+                      (26/10/2026: "chỉ những ai xác minh mới có tick này"). */}
+                  {user.verifiedAt ? (
+                    <svg viewBox="0 0 24 24" aria-hidden className="h-[18px] w-[18px] shrink-0">
+                      <circle cx="12" cy="12" r="11" fill="#1d9bf0" />
+                      <path
+                        d="M7.2 12.4l3.2 3.2 6.4-6.8"
+                        fill="none"
+                        stroke="#ffffff"
+                        strokeWidth={2.6}
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  ) : null}
                   <SkewPlate
                     className={
                       isAdmin
