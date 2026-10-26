@@ -252,7 +252,7 @@ export function isNewTool(
 }
 
 /**
- * Whether a tool's card wears the orange "Best seller" ribbon (the owner,
+ * Whether a tool's card wears the orange "Bán chạy" ribbon (the owner,
  * 26/10/2026, lab 3200: "thêm 1 nhãn nữa màu xanh dương bán chạy"): while
  * the shop gives it a badge that says so, "#TOP BÁN CHẠY" being the one it
  * already uses. The shop's word, not a count: a sales figure would crown
