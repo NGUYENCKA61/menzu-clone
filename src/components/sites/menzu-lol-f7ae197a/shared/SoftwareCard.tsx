@@ -332,7 +332,7 @@ export function SoftwareCard({
               <span aria-hidden className="mt-1 h-4 w-[3px] shrink-0 rounded-full bg-[var(--menzu-accent)]" />
               <h3
                 title={titleCase(software.name)}
-                className="line-clamp-2 min-h-[2.75em] min-w-0 break-words text-[16px] font-extrabold leading-snug text-white transition-colors duration-300 group-hover:text-[var(--menzu-accent)]"
+                className="line-clamp-2 min-h-[2.5em] min-w-0 break-words text-[16px] font-extrabold leading-[1.25] text-white transition-colors duration-300 group-hover:text-[var(--menzu-accent)]"
               >
                 {titleCase(software.name)}
               </h3>
@@ -345,8 +345,17 @@ export function SoftwareCard({
 
         {/* Two lines, held at that height so cards stay level whether the copy
             fills them or not. Back on the shelf's card too (the owner,
-            23/10/2026: "bỏ dòng mô tả thử", then "thêm lại dòng mô tả đi"). */}
-        <p className={`mb-[14px] line-clamp-2 min-h-[37px] text-[13px] leading-[1.55] text-mist ${old || variant === "shelf" ? "mt-2" : ""}`}>
+            23/10/2026: "bỏ dòng mô tả thử", then "thêm lại dòng mô tả đi").
+            On the shelf the name and the copy read as one four-line block
+            (the owner, 26/10/2026: "tên với chữ mô tả nó cứ bằng bằng nhau
+            … loạn mắt"), so, a lab 3200 trial: the name's two lines closer
+            (20px, were 22), 12px between them (was 8) and the copy a step
+            dimmer, still well over 4.5:1 on the card. */}
+        <p
+          className={`mb-[14px] line-clamp-2 min-h-[37px] text-[13px] leading-[1.55] ${
+            !old && variant === "shelf" ? "mt-3 text-mist/80" : "text-mist"
+          } ${old ? "mt-2" : ""}`}
+        >
           {old ? software.description : shortBlurb(software.description ?? "")}
         </p>
 
