@@ -1794,6 +1794,28 @@ html[data-admin-filtering] .admin-list {
   margin-top: 2.6rem;
   padding-top: 0;
 }
+/* One-row header from sm up (lab 3200 trial, 26/10/2026: "thử thu navbar
+   hiện về navbar 1 tầng đi"): the bar is 64px there too, so the 104px
+   every page keeps for it, the category hero's pull-up under it and the
+   home hero's screen-tall sum follow. A phone already had the one row and
+   keeps its spacing. Unlayered, so these beat the pages' utilities. */
+@media (min-width: 640px) {
+  div.w-full.shrink-0.h-\[104px\] {
+    height: 64px;
+  }
+  section.category-hero {
+    margin-top: -64px;
+  }
+  section.home-hero {
+    min-height: calc(100svh - 88px);
+  }
+}
+@media (min-width: 1024px) {
+  section.home-hero {
+    min-height: calc(100svh - 104px);
+  }
+}
+
 /* A heading the wiki's "Mục lục" jumps to stops below the fixed 104px
    header rather than under it (18/10/2026). */
 .doc-prose h2[id] {

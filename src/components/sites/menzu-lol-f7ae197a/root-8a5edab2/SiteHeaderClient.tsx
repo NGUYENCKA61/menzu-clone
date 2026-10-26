@@ -68,53 +68,11 @@ function hrefFor(label: string): string {
 }
 
 /**
- * The one strip link whose address is not a page here but the shop's
+ * The one quick link whose address is not a page here but the shop's
  * Telegram bot, read from Cấu hình at render time; left out entirely while
  * no bot is configured, since a dead link sells nothing.
  */
 const TELEGRAM_SHOP_LINK = "MUA TRÊN TELEGRAM"
-
-/**
- * A strip link's words. The Telegram one carries its brand name in a span of
- * its own: the strip's capitals cover it here, and the Nike trial (which sets
- * the strip in sentence case) writes it as typed, "Telegram", not "telegram".
- */
-// LAB: sentence case, and a real space before the brand word (the caps
-// version printed "MUA TRÊNTELEGRAM": the link is inline-flex, so the text and
-// the span were two flex items and the space between them collapsed; one
-// wrapping span keeps it).
-function quickLinkLabel(link: string) {
-  if (link !== TELEGRAM_SHOP_LINK) return sentenceCase(link)
-  return (
-    <>
-      <span>Mua trên <span className="brand-word">Telegram</span></span>
-    </>
-  )
-}
-
-// "GÓP Ý" used to sit fourth and went to the same page as "ĐÁNH GIÁ"; the
-// reviews took its slot and the Telegram shop took the front.
-// LAB: "TÀI LIỆU" is off the strip and the drawer for now (the owner,
-// 18/10/2026: "tạm ẩn trang tài liệu trên navbar đi xấu quá"); the page is
-// still served and the footer's bottom row still links it. Put it back
-// after "WIKI & HƯỚNG DẪN" here and in QUICK_LINK_ITEMS.
-const QUICK_LINKS = [
-  TELEGRAM_SHOP_LINK,
-  "XEM TRẠNG THÁI",
-  "WIKI & HƯỚNG DẪN",
-  "ĐÁNH GIÁ",
-  "LIÊN HỆ",
-]
-
-// Nav text sits at neutral-200 rather than the captured neutral-400: at 10-11px
-// and letter-spaced, the darker grey on the near-black bar was closer to
-// disabled than to a link. Hover still lands on pure white, so the two states
-// stay distinguishable.
-// As tall as the 40px strip it sits in: the five links used to be 15px text
-// boxes with no padding — the only nav a tablet shows, and a thumb missed
-// them. One size up too; 10px was the cloned desktop setting.
-const QUICK_LINK_CLASS =
-  "inline-flex h-full items-center text-[13px] font-medium text-mist hover:text-frost transition-colors"
 
 // A rung of the main bar that opens a page rather than a panel. Written once
 // because there are two of them now, and a nav where one rung underlines on
@@ -157,7 +115,8 @@ const QUICK_LINK_ITEMS: DropdownItem[] = [
   { label: TELEGRAM_SHOP_LINK, icon: Send },
   { label: "XEM TRẠNG THÁI", icon: Activity },
   { label: "WIKI & HƯỚNG DẪN", icon: BookOpen },
-  // "TÀI LIỆU" hidden for now (see QUICK_LINKS); its row was
+  // "TÀI LIỆU" hidden for now (the owner, 18/10/2026: "tạm ẩn trang tài liệu
+  // trên navbar đi xấu quá"; the page is still served and the footer links it); its row was
   // { label: "TÀI LIỆU", icon: Library }, Library from lucide-react.
   { label: "ĐÁNH GIÁ", icon: Star },
   { label: "LIÊN HỆ", icon: Users },
@@ -183,7 +142,16 @@ function drawerGroupsFor(
   ]
 }
 
-function NavDropdown({ label, items }: { label: string; items: DropdownItem[] }) {
+function NavDropdown({
+  label,
+  items,
+  linkFor = hrefFor,
+}: {
+  label: string;
+  items: DropdownItem[];
+  /** Where a row goes; the label lookup unless the caller knows better. */
+  linkFor?: (label: string) => string;
+}) {
   return (
     <div className="relative group h-full flex items-center">
       {/* Hover is a colour change and nothing else — no glow, no background,
@@ -219,7 +187,7 @@ function NavDropdown({ label, items }: { label: string; items: DropdownItem[] })
               // carries its own rule to arrive at the same red together.
               <SiteLink
                 key={item.label}
-                href={hrefFor(item.label)}
+                href={linkFor(item.label)}
                 className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-white/5 transition-colors group/item"
               >
                 <Icon
@@ -229,7 +197,9 @@ function NavDropdown({ label, items }: { label: string; items: DropdownItem[] })
                 {/* nav-item-label is a hook for the light trial "moi"
                     (theme-light.css, part 6); no style of its own. */}
                 <span className="nav-item-label text-[14px] font-medium text-frost/90 group-hover/item:text-white transition-colors duration-200 ease-[ease]">
-                  {softTitle(item.label)}
+                  {/* The brand keeps its capital, as the strip wrote it:
+                      softTitle lowers an all-caps label whole. */}
+                  {item.label === TELEGRAM_SHOP_LINK ? "Mua trên Telegram" : softTitle(item.label)}
                 </span>
               </SiteLink>
             )
@@ -263,9 +233,6 @@ export function SiteHeaderClient({
 }) {
   const linkFor = (label: string) =>
     label === TELEGRAM_SHOP_LINK ? (telegramShopUrl ?? "#") : hrefFor(label)
-  const quickLinks = QUICK_LINKS.filter(
-    (link) => link !== TELEGRAM_SHOP_LINK || telegramShopUrl !== null,
-  )
   const drawerGroups = drawerGroupsFor(linkFor, telegramShopUrl !== null)
   const [drawerOpen, setDrawerOpen] = useState(false)
 
@@ -281,10 +248,9 @@ export function SiteHeaderClient({
       ? "/login"
       : `/login?next=${encodeURIComponent(pathname)}`
 
-  // True once the page has scrolled past the top bar. Drives the condensed
-  // header: top bar hidden, translucent + blurred. The header is already
-  // position:fixed with a 104px spacer under it, so shrinking it never
-  // shifts the page below. LAB: the main row keeps its 64px and the logo
+  // True once the page has scrolled a little. Drives the condensed header:
+  // translucent + blurred. The header is position:fixed with a spacer under
+  // it, so restyling it never shifts the page below. LAB: the main row keeps its 64px and the logo
   // its size on scroll, where the row went to 58px and the logo to 94% (the
   // owner, 18/10/2026: "thu gọn nhưng đừng có co lại mất độ cao ban đầu").
   const [scrolled, setScrolled] = useState(false)
@@ -310,41 +276,11 @@ export function SiteHeaderClient({
           : "bg-panel"
       }`}
     >
-      {/* Not on a phone: the bottom bar holds the first-rank links there,
-          and the strip's own five sit in the menu under LIÊN KẾT NHANH, so
-          this row would only push the page down 40px for a second copy. */}
-      <div
-        className={`hidden w-full overflow-hidden border-b bg-panel transition-all duration-300 sm:flex ${
-          scrolled ? "h-0 opacity-0 border-transparent" : "h-[40px] opacity-100 border-white/5"
-        }`}
-      >
-        <div className="max-w-[1320px] w-full mx-auto px-4 lg:px-6 h-full flex items-center justify-between">
-          {/* On a phone the strip used to show the first link alone, as the
-              captured site did; the shop read that as the rest being lost.
-              All five, in a row that scrolls sideways under the thumb. */}
-          <div className="xl:hidden flex h-full min-w-0 items-center gap-5 overflow-x-auto whitespace-nowrap [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            {quickLinks.map((link) => (
-              <SiteLink key={link} href={linkFor(link)} className={QUICK_LINK_CLASS}>
-                {quickLinkLabel(link)}
-              </SiteLink>
-            ))}
-          </div>
-
-          <div className="hidden xl:flex items-center gap-5 h-full">
-            {quickLinks.map((link) => (
-              <SiteLink key={link} href={linkFor(link)} className={QUICK_LINK_CLASS}>
-                {quickLinkLabel(link)}
-              </SiteLink>
-            ))}
-          </div>
-
-          {/* The strip's right end used to advertise menzu.lol ⇄
-              menzuvalorant.com — the captured shop's two domains, both on
-              href="#" here. Gone: this shop has one address, and it is in the
-              logo. */}
-        </div>
-      </div>
-
+      {/* One row (lab 3200 trial, 26/10/2026: "thử thu navbar hiện về navbar
+          1 tầng đi"): the 40px strip of quick links that stood over it is
+          gone, its links hang from the "Hỗ trợ" rung below, and the pages'
+          104px spacers are 64px from sm up (globals.css). A tablet finds
+          them in the menu, under LIÊN KẾT NHANH, as a phone always has. */}
       <div className="max-w-[1320px] w-full mx-auto px-4 lg:px-6 flex items-center justify-between h-16">
         <div className="flex items-center gap-8 h-full">
           <div className="flex items-center w-auto">
@@ -416,6 +352,16 @@ export function SiteHeaderClient({
             <Link href="/vong-quay" className={NAV_LINK_CLASS}>
               Đổi thưởng
             </Link>
+
+            {/* The strip's links, now that the bar is one row: the Telegram
+                shop only while Cấu hình has a bot, as the strip had it. */}
+            <NavDropdown
+              label="HỖ TRỢ"
+              items={QUICK_LINK_ITEMS.filter(
+                (item) => item.label !== TELEGRAM_SHOP_LINK || telegramShopUrl !== null,
+              )}
+              linkFor={linkFor}
+            />
           </div>
         </div>
 
