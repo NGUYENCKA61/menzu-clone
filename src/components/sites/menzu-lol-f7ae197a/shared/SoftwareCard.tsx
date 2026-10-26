@@ -59,16 +59,13 @@ const STATUS: Record<string, { dot: string; text: string; label: string }> = {
 /**
  * The strip across the picture's top-left corner: a band turned 45° and
  * clipped to a square at the corner, the word running along the diagonal.
- * One per card, in the colour of what it says. Flat, with one thin lit
- * line along its top edge for a little depth (lab 3200 trial, 26/10/2026,
- * "thử đi 1p"): the satin sheen and shaded ends read too heavy over the
- * covers ("cái kia đậm quá").
+ * One per card, in the colour of what it says.
  */
 function CornerRibbon({ label, tone }: { label: string; tone: string }) {
   return (
     <span className="pointer-events-none absolute left-0 top-0 z-20 block h-[92px] w-[92px] overflow-hidden rounded-tl-[14px]">
       <span
-        className={`absolute left-[-40px] top-[22px] block w-[150px] -rotate-45 ${tone} py-[5px] text-center text-[12px] font-semibold leading-none text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.45),0_2px_10px_rgba(0,0,0,0.5)]`}
+        className={`absolute left-[-40px] top-[22px] block w-[150px] -rotate-45 ${tone} py-[5px] text-center text-[12px] font-semibold leading-none text-white shadow-[0_2px_10px_rgba(0,0,0,0.5)]`}
       >
         {label}
       </span>
