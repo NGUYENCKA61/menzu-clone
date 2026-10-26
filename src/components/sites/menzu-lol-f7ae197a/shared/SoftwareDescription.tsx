@@ -77,11 +77,29 @@ export interface SoftwareDescriptionProps {
 // And set the way a wiki article's headings are, which read at a glance
 // ("chữ bên wiki đọc đề mục rất rõ", "xem xét và tăng kích thước đề mục
 // cho trang chi tiết sản phẩm đi"): 900, white, a hair tighter, at 20px,
-// one step under the section's 24px title, where 17px at 800 stood barely
-// above the 16px copy.
+// where 17px at 800 stood barely above the 16px copy (24px was tried and
+// turned down: "không").
 const SUB_HEADING =
   "mt-10 font-display text-[20px] font-black leading-[1.25] tracking-[-0.01em] text-white";
-const SECTION_TITLE = "font-black";
+// The section's own title a step over the 24px it shared with every
+// section heading, this one alone (lab 3200, 26/10/2026: "Mô tả sản phẩm
+// phải bự hơn 1 nấc", "ý là tăng mỗi mô tả sản phẩm, cho nó có thứ bậc"):
+// 28px on a computer, 24px on a phone, between the 36px product name and
+// the 20px sub headings. "Sản phẩm tương tự" keeps 24px.
+const SECTION_TITLE = "font-black text-2xl sm:text-[28px]";
+
+/** "Mô tả sản phẩm" with the red bar before it (lab 3200, 26/10/2026:
+ *  "thêm | đỏ chỗ mô tả sản phẩm"), the home rows' mark at this size. */
+function DescriptionTitle() {
+  return (
+    <SectionHeading titleClassName={SECTION_TITLE}>
+      <span className="flex items-center gap-3">
+        <span aria-hidden className="h-6 w-[3px] shrink-0 rounded-full bg-[var(--menzu-accent)]" />
+        Mô tả sản phẩm
+      </span>
+    </SectionHeading>
+  );
+}
 /**
  * Body text in this section, set to the same values the rich editor's output
  * gets here (`.doc-prose` read even, below): neutral-300 is #d4d4d4 and every
@@ -369,7 +387,7 @@ export function SoftwareDescription({
         id={DESCRIPTION_SECTION_ID}
         className="product-copy mt-14 scroll-mt-[120px] border-t border-line pt-12 pb-14"
       >
-        <SectionHeading titleClassName={SECTION_TITLE}>Mô tả sản phẩm</SectionHeading>
+        <DescriptionTitle />
         <div className="mt-5">
           <DocHtml body={richHtml} even />
         </div>
@@ -401,7 +419,7 @@ export function SoftwareDescription({
       {/* The red bar the home rows open with, as "Sản phẩm tương tự" below
           now wears too; the accent glyph stays with the page titles (the
           owner, 13/10/2026, UI consistency review). */}
-      <SectionHeading titleClassName={SECTION_TITLE}>Mô tả sản phẩm</SectionHeading>
+      <DescriptionTitle />
 
       {/* The name opens the paragraph in bold, as the brief's sample does, but
           joined by a dash rather than run straight on: the same `description`
