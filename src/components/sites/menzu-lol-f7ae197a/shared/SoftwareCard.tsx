@@ -326,17 +326,16 @@ export function SoftwareCard({
           // 3100's red marker bar stands by its first line (24/10/2026,
           // after two trials: "THÊM CẠCH ĐỎ LẠI ĐI"). 16px, a step under the
           // home tile's 17px so the picture leads (lmarket's and unnamed's
-          // product names are 14 and 16px; "vậy 16 đi"). Lab 3200 trials,
+          // product names are 14 and 16px; "vậy 16 đi"). Lab 3200 trial,
           // 26/10/2026: 17px, the home tile's own size, so the name stands
-          // clear of the 13px copy ("thử trong 5p phương án lên 17px"), then
-          // 18px ("18px thì sao", "5p"), which cuts five more of the shop's
-          // 37 names than 17px does.
+          // clear of the 13px copy ("thử trong 5p phương án lên 17px"); on
+          // the shop's 37 tools it cuts no more names than 16px did.
           <div>
             <Link href={detailHref} className="flex items-start gap-2.5">
               <span aria-hidden className="mt-1 h-4 w-[3px] shrink-0 rounded-full bg-[var(--menzu-accent)]" />
               <h3
                 title={titleCase(software.name)}
-                className="line-clamp-2 min-h-[2.5em] min-w-0 break-words text-[18px] font-extrabold leading-[1.25] text-white transition-colors duration-300 group-hover:text-[var(--menzu-accent)]"
+                className="line-clamp-2 min-h-[2.5em] min-w-0 break-words text-[17px] font-extrabold leading-[1.25] text-white transition-colors duration-300 group-hover:text-[var(--menzu-accent)]"
               >
                 {titleCase(software.name)}
               </h3>
