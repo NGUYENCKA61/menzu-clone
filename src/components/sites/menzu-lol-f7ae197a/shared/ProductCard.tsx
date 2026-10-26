@@ -302,14 +302,12 @@ export function ProductCard({ product, priority = false, eager = false, old = fa
             <span aria-hidden className="text-[var(--menzu-accent)]">▲</span> Rank:
             <span className="truncate text-white">{product.rank}</span>
           </span>
-          <span aria-hidden className="text-[11px] text-[#3a3b42]">|</span>
           <span className="flex items-center gap-[5px] whitespace-nowrap text-[11px] font-extrabold text-[#c7c8cd]">
             <span aria-hidden className="text-[var(--menzu-accent)]">◆</span> VIP:
             <span className="text-[var(--menzu-accent)]">
               {(product.vip ?? 0) > 0 ? product.vip : ""}
             </span>
           </span>
-          <span aria-hidden className="text-[11px] text-[#3a3b42]">|</span>
           <span className="flex items-center gap-[5px] whitespace-nowrap text-[11px] font-extrabold text-[#c7c8cd]">
             <span aria-hidden className="text-[var(--menzu-accent)]">◇</span> VIP Ingame:
             <span className="text-[var(--menzu-accent)]">
@@ -334,13 +332,15 @@ export function ProductCard({ product, priority = false, eager = false, old = fa
         </div>
         ) : (
           <div className="mb-3.5 flex items-center gap-2">
-            <div className="flex min-w-0 items-center gap-2 overflow-hidden rounded-[9px] border border-[#292a30] bg-[#111216] px-3 py-1.5">
+            {/* No "|" between the three (lab 3200 trial, 26/10/2026: "bỏ toàn
+                bộ dấu | ở card sản phẩm trong trang chi tiết danh mục"): a
+                16px gap keeps them apart instead. */}
+            <div className="flex min-w-0 items-center gap-4 overflow-hidden rounded-[9px] border border-[#292a30] bg-[#111216] px-3 py-1.5">
               <span className="flex shrink-0 items-center gap-[5px] whitespace-nowrap text-[11px] font-extrabold text-[#c7c8cd]">
                 <span aria-hidden className="text-[var(--menzu-accent)]">▲</span> Rank:
                 {rankIcon ? <Image src={rankIcon} alt="" width={18} height={20} unoptimized className="shrink-0" /> : null}
                 <span className="text-white">{product.rank}</span>
               </span>
-              <span aria-hidden className="shrink-0 text-[11px] text-[#3a3b42]">|</span>
               <span className="flex shrink-0 items-center gap-[5px] whitespace-nowrap text-[11px] font-extrabold text-[#c7c8cd]">
                 <span aria-hidden className="text-[var(--menzu-accent)]">◆</span> VIP:
                 {vipIcon ? (
@@ -349,7 +349,6 @@ export function ProductCard({ product, priority = false, eager = false, old = fa
                   <span className="text-[var(--menzu-accent)]">{(product.vip ?? 0) > 0 ? product.vip : ""}</span>
                 )}
               </span>
-              <span aria-hidden className="shrink-0 text-[11px] text-[#3a3b42]">|</span>
               <span className="flex shrink-0 items-center gap-[5px] whitespace-nowrap text-[11px] font-extrabold text-[#c7c8cd]">
                 <span aria-hidden className="text-[var(--menzu-accent)]">◇</span> VIP Ingame:
                 <span className="text-[var(--menzu-accent)]">{(product.vipIngame ?? 0) > 0 ? product.vipIngame : ""}</span>
