@@ -1,7 +1,7 @@
 "use client";
 
 import { ChevronRight, ShoppingBag } from "lucide-react";
-import { sentenceCase } from "@/lib/displayCase";
+import { sentenceCase, titleCase } from "@/lib/displayCase";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -373,12 +373,17 @@ export function OrdersList({ orders }: { orders: OrderCardView[] }) {
                                   category page's card names (trial, 26/10/2026:
                                   "không chỉ là giá", "mà là tiêu đề card kìa",
                                   "nó phải đồng bộ với trang chi tiết danh mục 1
-                                  xíu chứ"; it was 15px, 17px from sm, at 600). */}
+                                  xíu chứ"; it was 15px, 17px from sm, at 600).
+                                  A tool's name is cased as its card on the
+                                  category page cases it, every word's first
+                                  letter capital (26/10/2026: "tên đơn hàng chưa
+                                  khớp với bên chi tiết danh mục card sản phẩm");
+                                  an account's "#CODE" stays as it is. */}
                               <h3
                                 title={order.title}
                                 className={`truncate font-display text-[16px] font-extrabold leading-snug text-frost transition-colors group-hover:text-white ${look.title}`}
                               >
-                                {sentenceCase(order.title)}
+                                {order.isSoftware ? titleCase(order.title) : sentenceCase(order.title)}
                               </h3>
                               {/* Three lines, one job each (trial, the owner,
                                   20/10/2026: "có nên cho mã đơn hoặc ngày xuống
