@@ -307,25 +307,24 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                     whether the account is verified (the owner, 16/10/2026:
                     "Hạng hiện tại Elite đổi thành xác minh cấp 2"). Rows on a phone
                     (label left, value right: as three columns in a 390px card
-                    "Chưa xác minh" cut to "Chưa xác …"), three columns from sm. */}
+                    "Chưa xác minh" cut to "Chưa xác …"), three columns from sm.
+                    The three values share one white (26/10/2026: "nên cho
+                    cùng 1 màu trắng"), not the tier colour and green. */}
                 <div className="mt-auto grid grid-cols-1 gap-1.5 border-t border-white/[0.06] pt-2 sm:grid-cols-3 sm:gap-3 sm:pt-1.5">
                   {[
                     {
                       label: "Ưu đãi mua tool",
                       value: `Giảm ${formatTierPercent(TIER_RULES[memberTier].discountPercent)}%`,
-                      tone: tier.text,
                     },
                     {
                       label: "Điểm thưởng",
                       value: `${user.points.toLocaleString("vi-VN")} điểm`,
-                      tone: "text-white",
                     },
                     {
                       label: "Xác minh cấp 2",
                       value: user.verifiedAt ? "Đã xác minh" : "Chưa xác minh",
-                      tone: user.verifiedAt ? "text-emerald-400" : "text-neutral-300",
                     },
-                  ].map(({ label, value, tone }, index) => (
+                  ].map(({ label, value }, index) => (
                     <div
                       key={label}
                       className="flex min-w-0 items-center justify-between gap-3 sm:flex-col sm:items-stretch sm:justify-start sm:gap-0.5"
@@ -336,12 +335,8 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                       <span className="text-[12px] leading-tight text-dim">
                         {label}
                       </span>
-                      <span
-                        className={`mt-auto flex min-w-0 items-center gap-1 text-[15px] font-semibold leading-none ${tone}`}
-                      >
-                        {index === 0 ? (
-                          <Check size={13} strokeWidth={3} className={`shrink-0 ${tier.text}`} />
-                        ) : null}
+                      <span className="mt-auto flex min-w-0 items-center gap-1 text-[15px] font-semibold leading-none text-white">
+                        {index === 0 ? <Check size={13} strokeWidth={3} className="shrink-0" /> : null}
                         <span className="truncate">{value}</span>
                       </span>
                     </div>
