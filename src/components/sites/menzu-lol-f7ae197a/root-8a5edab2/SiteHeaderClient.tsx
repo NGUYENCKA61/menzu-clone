@@ -275,8 +275,11 @@ export function SiteHeaderClient({
       // với navbar hiện tại"): a hero pulled up under the bar shows through
       // it blurred. The shadow still comes with the scroll; a phone keeps
       // its solid bar at the top and the near-opaque one after, no blur.
-      className={`site-nav fixed top-0 left-0 right-0 z-[100] transition-all duration-300 flex flex-col sm:bg-panel/80 sm:backdrop-blur-xl ${
-        scrolled ? "bg-[#0c0d11]/97 shadow-lg shadow-black/30" : "bg-panel"
+      // In the raised tone (#17171c) rather than the page's own #111111,
+      // one step lighter so the bar reads as a layer of its own (lab 3200
+      // trial, 26/10/2026: "màu navbar có tối quá không", then "làm 2 thử").
+      className={`site-nav fixed top-0 left-0 right-0 z-[100] transition-all duration-300 flex flex-col sm:bg-raise/80 sm:backdrop-blur-xl ${
+        scrolled ? "bg-raise/97 shadow-lg shadow-black/30" : "bg-raise"
       }`}
     >
       {/* One row (lab 3200 trial, 26/10/2026: "thử thu navbar hiện về navbar
