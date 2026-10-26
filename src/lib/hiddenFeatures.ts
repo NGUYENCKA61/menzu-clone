@@ -28,3 +28,10 @@ export const SHOW_SETUP_GUIDES_ROW = false;
  *  list of setup steps skips it (26/10/2026: "tạm ẩn cái trang này luôn",
  *  /tai-lieu/chuan-bi/cai-runtime). Empty the list to bring them back. */
 export const HIDDEN_SETUP_PAGES: readonly string[] = ["cai-runtime"];
+
+/** The foot of a category page: "Về …" (the shelf's write-up), its
+ *  "Câu hỏi thường gặp" and "Hướng dẫn liên quan" (26/10/2026: "tạm ẩn
+ *  mấy cái này đi", "tại tui chưa rảnh thiết kế lại"). The FAQPage markup
+ *  goes with the questions, as it may only describe what the page shows;
+ *  the words stay in content/seo for the redesign. */
+export const SHOW_CATEGORY_FOOT = false;

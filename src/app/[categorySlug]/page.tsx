@@ -31,6 +31,7 @@ import { weaponKey } from "@/lib/weaponImages";
 import { shareCard } from "@/lib/shareCard";
 import { categoryBehindOldSlug } from "@/lib/slugHistory";
 import { launcherFromParam, runsOnFromParam } from "@/lib/toolFilters";
+import { SHOW_CATEGORY_FOOT } from "@/lib/hiddenFeatures";
 
 interface PageProps {
   params: Promise<{ categorySlug: string }>;
@@ -443,8 +444,9 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
                 content/seo (lib/seoCopy.ts), then the guides. On page two of
                 the accounts the reader is paging, not arriving. The hero
                 above keeps the owner's own line about the shelf (the SEO
-                review, round 2, O9 and O12). */}
-            {data.page === 1 ? (
+                review, round 2, O9 and O12). Hidden for now, all three
+                (SHOW_CATEGORY_FOOT, 26/10/2026). */}
+            {data.page === 1 && SHOW_CATEGORY_FOOT ? (
               <>
                 <CategorySeoSection copy={categorySeoCopy(data.slug)} categoryName={data.name} old={old} />
                 <RelatedGuides guides={guides} />
