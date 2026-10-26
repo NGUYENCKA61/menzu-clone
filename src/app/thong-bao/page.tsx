@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { Bell } from "lucide-react";
-import { sentenceCase } from "@/lib/displayCase";
+import { titleCase } from "@/lib/displayCase";
 
 import { SimplePage } from "@/components/sites/menzu-lol-f7ae197a/shared/SimplePage";
 import {
@@ -268,9 +268,12 @@ export default async function AnnouncementsPage({
               // LAB (Launcher): each change is one compact card in its day: the
               // picture as a small notched cover beside the words (a full-width
               // screenshot per change made the history screens long), the time,
-              // the state and the game on one line, the tool's name in sentence
-              // case, the shop's note under it. The rail and dots are gone; the
-              // times already say the order.
+              // the state and the game on one line, the tool's name under them,
+              // the shop's note under that. The rail and dots are gone; the
+              // times already say the order. Names and games are written, and
+              // the name weighed, as Lịch sử mua and the category cards do
+              // (the owner, 26/10/2026, lab 3200: "làm đi"; sentence case and
+              // 700 before).
               <div className="flex flex-col gap-8">
                 {groupByDay(events).map((group) => (
                   <section key={group.key} aria-label={dayLabel(group.key, now)}>
@@ -286,7 +289,7 @@ export default async function AnnouncementsPage({
                     <ol className="flex flex-col gap-3">
                       {group.items.map((event) => {
                         const state = SOFTWARE_STATUS[event.status];
-                        const name = sentenceCase(event.productName);
+                        const name = titleCase(event.productName);
                         const head = (
                           <>
                             <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1.5">
@@ -303,7 +306,7 @@ export default async function AnnouncementsPage({
                                 {state.label}
                               </span>
                               <span className="text-[13px] text-dim">
-                                {event.scope === "category" ? "Cả danh mục" : sentenceCase(event.categoryName)}
+                                {event.scope === "category" ? "Cả danh mục" : titleCase(event.categoryName)}
                               </span>
                             </div>
                             {/* line-clamp-2 alone: a "block" beside it undid the
@@ -311,7 +314,7 @@ export default async function AnnouncementsPage({
                             <Link
                               href={event.productHref}
                               title={name}
-                              className="mt-1.5 line-clamp-2 text-[16px] font-bold leading-snug text-frost transition-colors hover:text-white"
+                              className="mt-1.5 line-clamp-2 text-[16px] font-extrabold leading-snug text-frost transition-colors hover:text-white"
                             >
                               {name}
                             </Link>
