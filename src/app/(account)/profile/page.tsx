@@ -309,8 +309,9 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                     "Hạng hiện tại Elite đổi thành xác minh cấp 2"). Rows on a phone
                     (label left, value right: as three columns in a 390px card
                     "Chưa xác minh" cut to "Chưa xác …"), three columns from sm.
-                    The three values share one white (26/10/2026: "nên cho
-                    cùng 1 màu trắng"), not the tier colour and green. */}
+                    The discount wears the tier's colour, tick included
+                    (26/10/2026: "Giảm 8% cho tô màu theo hạng đi"); the other
+                    two values are white ("nên cho cùng 1 màu trắng"). */}
                 <div className="mt-auto grid grid-cols-1 gap-1.5 border-t border-white/[0.06] pt-2 sm:grid-cols-3 sm:gap-3 sm:pt-1.5">
                   {[
                     {
@@ -336,7 +337,11 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                       <span className="text-[12px] leading-tight text-dim">
                         {label}
                       </span>
-                      <span className="mt-auto flex min-w-0 items-center gap-1 text-[15px] font-semibold leading-none text-white">
+                      <span
+                        className={`mt-auto flex min-w-0 items-center gap-1 text-[15px] font-semibold leading-none ${
+                          index === 0 ? tier.text : "text-white"
+                        }`}
+                      >
                         {index === 0 ? <Check size={13} strokeWidth={3} className="shrink-0" /> : null}
                         <span className="truncate">{value}</span>
                       </span>
