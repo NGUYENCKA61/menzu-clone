@@ -382,7 +382,8 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
             loose cards; nothing in the cells changes). Four across from xl,
             the order count giving width to the commission
             cell: in equal quarters "Rút tiền" dropped under any commission from
-            10.000đ. */}
+            10.000đ. Cells 20px top and bottom, 8px taller than the 16px they
+            had (trial, 26/10/2026: "làm cái card này cao hơn xíu thử"). */}
         <div className="grid grid-cols-2 overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02] sm:bg-transparent sm:mt-2 xl:grid-cols-[1fr_1fr_0.7fr_1.3fr] xl:divide-x xl:divide-white/[0.06]">
           {[
             { icon: Wallet, label: "Số dư khả dụng", value: formatVnd(user.balance), unit: "đ", tone: "text-white" },
@@ -393,7 +394,7 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
             // a bare 13px icon (no 28px box), the unit at text-sm, and
             // the figure a step smaller on phones, where 24px ran past
             // a 2x2 cell.
-            <div key={label} className="flex flex-col gap-2 px-5 py-4 sm:gap-3">
+            <div key={label} className="flex flex-col gap-2 px-5 py-5 sm:gap-3">
               <span className="inline-flex items-center gap-2 text-[13px] font-medium text-mist">
                 <Icon size={13} className="shrink-0 text-neutral-300" />
                 {label}
@@ -408,7 +409,7 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
               </span>
             </div>
           ))}
-          <div className="flex flex-col gap-2 px-5 py-4 sm:gap-3">
+          <div className="flex flex-col gap-2 px-5 py-5 sm:gap-3">
             <span className="inline-flex items-center gap-2 text-[13px] font-medium text-mist">
               <HandCoins size={13} className="shrink-0 text-neutral-300" />
               Hoa hồng khả dụng
