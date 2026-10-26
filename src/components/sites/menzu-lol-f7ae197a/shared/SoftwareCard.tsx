@@ -36,7 +36,7 @@ export interface SoftwareCardView {
   packages: SoftwareCardPackage[];
   /** Sold to level-2 ("xác thực cấp 2") accounts only: the card says so. */
   verifiedOnly: boolean;
-  /** New on the shelf (isNewTool): a "Hack mới" ribbon on the picture. */
+  /** New on the shelf (isNewTool): a "Mới nhất" ribbon on the picture. */
   isNew: boolean;
 }
 
@@ -276,11 +276,11 @@ export function SoftwareCard({
             // 26/10/2026, lab 3200: "thêm 1 nhãn ruy băng cho card sản phẩm là
             // mới màu xanh lá", then "màu tím thử": violet, the site's purple,
             // where it was emerald; for the word "ghi mới nhất", then "HACK
-            // MỚI ĐI"). A free tool keeps its red one: being free says more
-            // than being new.
+            // MỚI ĐI", then back to "MỚI NHẤT ĐI CHO RÕ NGHĨA"). A free tool
+            // keeps its red one: being free says more than being new.
             <span className="pointer-events-none absolute left-0 top-0 z-20 block h-[92px] w-[92px] overflow-hidden rounded-tl-[14px]">
               <span className="absolute left-[-40px] top-[22px] block w-[150px] -rotate-45 bg-violet-600 py-[5px] text-center text-[12px] font-semibold leading-none text-white shadow-[0_2px_10px_rgba(0,0,0,0.5)]">
-                Hack mới
+                Mới nhất
               </span>
             </span>
           ) : software.verifiedOnly ? (
