@@ -256,13 +256,15 @@ export function ProductCard({ product, priority = false, eager = false, old = fa
             <h3 className="truncate text-[17px] font-semibold text-frost">{title}</h3>
           </div>
         ) : (
-          // The tool card's name block: 16px at 800, two lines held. No red
-          // bar by it, as on the tool card (lab 3200, 26/10/2026: "bỏ dấu
-          // cạch ở card sản phẩm trang chi tiết danh mục").
+          // The tool card's name block, size and all: 18px at 800 on 1.25
+          // lines, two of them held (lab 3200, 26/10/2026: "với card tài
+          // khoản tiêu đề có được tăng kích cỡ như phần mềm chưa", "làm
+          // đi"; it was 16px on snug lines). No red bar by it, as on the tool
+          // card ("bỏ dấu cạch ở card sản phẩm trang chi tiết danh mục").
           <div>
             <h3
               title={title}
-              className="line-clamp-2 min-h-[2.75em] min-w-0 break-words text-[16px] font-extrabold leading-snug text-white transition-colors duration-300 group-hover:text-[var(--menzu-accent)]"
+              className="line-clamp-2 min-h-[2.5em] min-w-0 break-words text-[18px] font-extrabold leading-[1.25] text-white transition-colors duration-300 group-hover:text-[var(--menzu-accent)]"
             >
               {title}
             </h3>
