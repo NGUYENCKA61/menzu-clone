@@ -300,8 +300,9 @@ export function StatusSubscribeSearch({
                   and the site's line, where they were 13px, 12px and a
                   fainter rule (18/10/2026, "xét sự đồng bộ luôn"). The game
                   is named as its tile names it, and the tools below are
-                  written and weighed as the history tab's (26/10/2026, lab
-                  3200: "rà soát kỹ đi"; sentence case and 600 before). */}
+                  written, weighed and sized as the history tab's (26/10/2026,
+                  lab 3200: "rà soát kỹ đi", then "đăng ký nhận thông báo lên
+                  16 luôn đi"; sentence case, 600 and 15px before). */}
               <Link
                 href={categoryHref(shelf.slug)}
                 className={`group inline-flex items-center gap-1.5 font-extrabold transition-colors hover:text-[var(--menzu-accent)] ${
@@ -414,7 +415,7 @@ export function StatusSubscribeSearch({
                         // text column is narrow enough that half these names
                         // would end in "…" and stop telling the reader which
                         // tool it is.
-                        className="line-clamp-2 text-[15px] font-extrabold leading-snug text-frost transition-colors hover:text-white"
+                        className="line-clamp-2 text-[16px] font-extrabold leading-snug text-frost transition-colors hover:text-white"
                       >
                         {titleCase(tool.name)}
                       </Link>
