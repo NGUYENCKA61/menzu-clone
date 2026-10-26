@@ -384,7 +384,9 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
             the order count giving width to the commission
             cell: in equal quarters "Rút tiền" dropped under any commission from
             10.000đ. Cells 20px top and bottom, 8px taller than the 16px they
-            had (trial, 26/10/2026: "làm cái card này cao hơn xíu thử"). */}
+            had (trial, 26/10/2026: "làm cái card này cao hơn xíu thử"). The
+            figures at 900 like the prices on cards and product pages
+            (trial, 26/10/2026: "thử 900"; they were 700). */}
         <div className="grid grid-cols-2 overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02] sm:bg-transparent sm:mt-2 xl:grid-cols-[1fr_1fr_0.7fr_1.3fr] xl:divide-x xl:divide-white/[0.06]">
           {[
             { icon: Wallet, label: "Số dư khả dụng", value: formatVnd(user.balance), unit: "đ", tone: "text-white" },
@@ -401,7 +403,7 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                 {label}
               </span>
               <span className="flex min-h-9 items-center">
-                <span className={`lab-figure text-[22px] font-bold leading-none sm:text-[26px] ${tone}`}>
+                <span className={`lab-figure text-[22px] font-black leading-none sm:text-[26px] ${tone}`}>
                   {value}
                   {unit ? (
                     <span className="ml-1 text-sm font-bold text-neutral-500">{unit}</span>
@@ -417,7 +419,7 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
             </span>
             <div className="flex flex-wrap items-center justify-between gap-2">
               <span className="flex min-h-9 items-center">
-                <span className="lab-figure text-[22px] font-bold leading-none text-frost sm:text-[26px]">
+                <span className="lab-figure text-[22px] font-black leading-none text-frost sm:text-[26px]">
                   {formatVnd(user.commissionBalance)}
                   <span className="ml-1 text-sm font-bold text-neutral-500">đ</span>
                 </span>
