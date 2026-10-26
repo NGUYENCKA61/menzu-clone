@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { PC_SETUP_PAGES, pcSetupHref, pcSetupPage } from "@/lib/pcSetup";
+import { HIDDEN_SETUP_PAGES } from "@/lib/hiddenFeatures";
+import { ALL_PC_SETUP_PAGES, PC_SETUP_PAGES, pcSetupHref, pcSetupPage } from "@/lib/pcSetup";
 
 /**
  * The seven "Chuẩn bị máy" pages: each `short` is the page's meta
@@ -10,12 +11,20 @@ import { PC_SETUP_PAGES, pcSetupHref, pcSetupPage } from "@/lib/pcSetup";
  */
 describe("PC_SETUP_PAGES", () => {
   it("has seven pages with distinct slugs", () => {
-    expect(PC_SETUP_PAGES).toHaveLength(7);
-    expect(new Set(PC_SETUP_PAGES.map((p) => p.slug)).size).toBe(7);
+    expect(ALL_PC_SETUP_PAGES).toHaveLength(7);
+    expect(new Set(ALL_PC_SETUP_PAGES.map((p) => p.slug)).size).toBe(7);
+  });
+
+  it("shows every page but the hidden ones, and finds no hidden page", () => {
+    expect(PC_SETUP_PAGES).toHaveLength(7 - HIDDEN_SETUP_PAGES.length);
+    for (const slug of HIDDEN_SETUP_PAGES) {
+      expect(PC_SETUP_PAGES.some((p) => p.slug === slug), slug).toBe(false);
+      expect(pcSetupPage(slug), slug).toBeNull();
+    }
   });
 
   it("describes each page in one sentence of 70 to 150 characters", () => {
-    for (const page of PC_SETUP_PAGES) {
+    for (const page of ALL_PC_SETUP_PAGES) {
       expect(page.short.length, page.slug).toBeGreaterThanOrEqual(70);
       expect(page.short.length, page.slug).toBeLessThanOrEqual(150);
       expect(page.short, page.slug).toMatch(/\.$/);

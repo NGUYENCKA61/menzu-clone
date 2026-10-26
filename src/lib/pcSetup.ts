@@ -24,7 +24,8 @@ export interface PcSetupPage {
   check?: string;
 }
 
-const ALL_PC_SETUP_PAGES: readonly PcSetupPage[] = [
+/** Every step written, the hidden ones included (lib/hiddenFeatures). */
+export const ALL_PC_SETUP_PAGES: readonly PcSetupPage[] = [
   {
     slug: "tat-windows-defender",
     title: "Tắt Windows Defender",
