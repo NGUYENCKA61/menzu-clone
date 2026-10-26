@@ -378,10 +378,12 @@ export function OrdersList({ orders }: { orders: OrderCardView[] }) {
                                   category page cases it, every word's first
                                   letter capital (26/10/2026: "tên đơn hàng chưa
                                   khớp với bên chi tiết danh mục card sản phẩm");
-                                  an account's "#CODE" stays as it is. */}
+                                  an account's "#CODE" stays as it is. White at
+                                  rest like the card's name ("card sản phẩm trong
+                                  chi tiết danh mục ấy ý tôi là vậy"; was frost). */}
                               <h3
                                 title={order.title}
-                                className={`truncate font-display text-[16px] font-extrabold leading-snug text-frost transition-colors group-hover:text-white ${look.title}`}
+                                className={`truncate font-display text-[16px] font-extrabold leading-snug text-white transition-colors ${look.title}`}
                               >
                                 {order.isSoftware ? titleCase(order.title) : sentenceCase(order.title)}
                               </h3>
