@@ -3,6 +3,7 @@ import { shelfTitle } from "@/lib/displayCase";
 import { faqJsonLd, JsonLd } from "@/lib/seo";
 import { faqEntries, type CategorySeoCopy } from "@/lib/seoCopy";
 
+import { CollapsibleProse } from "./CollapsibleProse";
 import { FaqAccordion } from "./FaqAccordion";
 import { SectionHeading } from "./SectionHeading";
 
@@ -41,7 +42,11 @@ export function CategorySeoSection({
   return (
     <section id="gioi-thieu" className="mt-12 border-t border-white/10 pt-10">
       <SectionHeading>Về {old ? categoryName : shelfTitle(categoryName)}</SectionHeading>
-      <div className="doc-prose doc-prose-even mt-5" dangerouslySetInnerHTML={{ __html: copy.intro }} />
+      {/* Its opening lines and "Xem thêm" (26/10/2026: "ẩn bớt"); the
+          whole intro stays in the page. */}
+      <div className="mt-5">
+        <CollapsibleProse html={copy.intro} className="doc-prose doc-prose-even" />
+      </div>
 
       <SectionHeading className="mt-10">Câu hỏi thường gặp</SectionHeading>
       <div className="mt-5">
