@@ -184,9 +184,12 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
               sizes="(max-width: 1280px) 100vw, 960px"
               className="object-cover object-top opacity-95"
             />
-            {/* No left wash, which darkened the picture behind the avatar
-                and the name to a third across (trial, 26/10/2026: "bỏ phủ
-                tối bên trái thử"). */}
+            {/* Left wash, light: 60% of the card's colour at the left edge
+                and 25% midway where it was solid and 45%, so more of the
+                picture shows behind the avatar and the name while a bright
+                cover still leaves them readable (trial, 26/10/2026, after
+                "bỏ phủ tối bên trái thử" back and forth: "thử đi"). */}
+            <div className="absolute inset-0 bg-gradient-to-r from-panel/60 via-panel/25 to-transparent" />
             {/* Foot wash: the band the tier card and the doors sit on, eased
                 rather than straight (solid at the foot, 90% at 15%, 65% at
                 35%, 30% at 60%, 10% at 80%), so the picture thins out
