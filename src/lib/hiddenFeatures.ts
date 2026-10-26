@@ -7,8 +7,9 @@
  */
 
 /** "Xác thực cấp 2": Bảo mật's tab and the profile's "Xác minh cấp 2"
- *  (26/10/2026: "cái xác thực cấp 2 tạm ẩn đi"). */
-export const SHOW_LEVEL2 = false;
+ *  (26/10/2026: "cái xác thực cấp 2 tạm ẩn đi"; back on lab 3200 the
+ *  same day: "vậy thêm lại cái xác minh cấp 2 đi"). */
+export const SHOW_LEVEL2 = true;
 
 /** "Nâng cấp đại lý": the account sidebar's and the header menu's link, and
  *  the line under Cộng tác viên (26/10/2026: "ẩn luôn cái nâng cấp đại lý"). */
