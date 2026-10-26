@@ -270,10 +270,13 @@ export function SiteHeaderClient({
 
   return (
     <nav
-      className={`site-nav fixed top-0 left-0 right-0 z-[100] transition-all duration-300 flex flex-col ${
-        scrolled
-          ? "bg-[#0c0d11]/97 shadow-lg shadow-black/30 sm:bg-panel/80 sm:backdrop-blur-xl"
-          : "bg-panel"
+      // Frosted glass from sm up from the top of the page, not only once it
+      // has scrolled (lab 3200 trial, 26/10/2026: "thử chuyển sang kính mờ
+      // với navbar hiện tại"): a hero pulled up under the bar shows through
+      // it blurred. The shadow still comes with the scroll; a phone keeps
+      // its solid bar at the top and the near-opaque one after, no blur.
+      className={`site-nav fixed top-0 left-0 right-0 z-[100] transition-all duration-300 flex flex-col sm:bg-panel/80 sm:backdrop-blur-xl ${
+        scrolled ? "bg-[#0c0d11]/97 shadow-lg shadow-black/30" : "bg-panel"
       }`}
     >
       {/* One row (lab 3200 trial, 26/10/2026: "thử thu navbar hiện về navbar
