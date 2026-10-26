@@ -184,8 +184,9 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
               sizes="(max-width: 1280px) 100vw, 960px"
               className="object-cover object-top opacity-95"
             />
-            {/* Left wash: enough to seat the name, gone by a third across. */}
-            <div className="absolute inset-0 bg-gradient-to-r from-panel via-panel/45 to-transparent" />
+            {/* No left wash, which darkened the picture behind the avatar
+                and the name to a third across (trial, 26/10/2026: "bỏ phủ
+                tối bên trái thử"). */}
             {/* Foot wash: the band the tier card and the doors sit on, eased
                 rather than straight (solid at the foot, 90% at 15%, 65% at
                 35%, 30% at 60%, 10% at 80%), so the picture thins out
