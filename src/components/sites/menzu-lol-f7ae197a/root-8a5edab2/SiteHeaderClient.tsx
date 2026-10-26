@@ -286,7 +286,10 @@ export function SiteHeaderClient({
           them in the menu, under LIÊN KẾT NHANH, as a phone always has. */}
       <div className="max-w-[1320px] w-full mx-auto px-4 lg:px-6 flex items-center justify-between h-16">
         <div className="flex items-center gap-8 h-full">
-          <div className="flex items-center w-auto">
+          {/* The logo stays below xl only: from xl the bar opens on the word
+              "Trang chủ" instead (lab 3200 trial, 26/10/2026: "chỗ này đổi
+              thành trang chủ thử", "chữ trang chủ"). */}
+          <div className="flex items-center w-auto xl:hidden">
             <button
               type="button"
               aria-label="Menu"
@@ -341,6 +344,11 @@ export function SiteHeaderClient({
               tablet header — menu button, strip of quick links, search —
               which already fits. MobileDrawer switches on the same line. */}
           <div className="hidden xl:flex items-center gap-5 h-full">
+            {/* Pulled left by its own padding, so the word starts on the
+                page's left edge as the logo did. */}
+            <Link href="/" className={`-ml-3 ${NAV_LINK_CLASS}`}>
+              Trang chủ
+            </Link>
             <NavDropdown label="CÁC LOẠI HACK" items={HACK_CATEGORY_ITEMS} />
             <NavDropdown label="SHOP ACC" items={SHOP_ACC_ITEMS} />
             <NavDropdown label="NẠP TIỀN" items={NAP_TIEN_ITEMS} />
