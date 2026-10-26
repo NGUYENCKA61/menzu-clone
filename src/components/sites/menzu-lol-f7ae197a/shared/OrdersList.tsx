@@ -423,9 +423,11 @@ export function OrdersList({ orders }: { orders: OrderCardView[] }) {
                           <div className={`flex shrink-0 items-center justify-between gap-3 border-t border-white/5 pt-3 sm:border-t-0 sm:border-l sm:border-line sm:pt-0 sm:pl-5 ${look.chevron ? "sm:gap-4" : "sm:flex-col sm:items-end sm:justify-center sm:gap-2.5"}`}>
                             {/* White, not menzu's green: what was paid, said
                                 plainly. No "GIÁ MUA" over it — it is plainly
-                                the price. */}
+                                the price. 900 like the profile's figures and the
+                                prices on cards and product pages (26/10/2026:
+                                "lên theo đi"; it was 700). */}
                             <p
-                              className={`lab-figure ${look.price} font-bold ${
+                              className={`lab-figure ${look.price} font-black ${
                                 struck ? "text-neutral-500 line-through" : "text-white"
                               }`}
                             >
