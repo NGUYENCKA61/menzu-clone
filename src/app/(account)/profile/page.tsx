@@ -399,8 +399,11 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
             10.000đ. Cells 20px top and bottom, 8px taller than the 16px they
             had (trial, 26/10/2026: "làm cái card này cao hơn xíu thử"). The
             figures at 900 like the prices on cards and product pages
-            (trial, 26/10/2026: "thử 900"; they were 700). */}
-        <div className="grid grid-cols-2 overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02] sm:bg-transparent sm:mt-2 xl:grid-cols-[1fr_1fr_0.7fr_1.3fr] xl:divide-x xl:divide-white/[0.06]">
+            (trial, 26/10/2026: "thử 900"; they were 700). A black 20% well,
+            darker than the ground around it, at every width (trial,
+            26/10/2026: "cho card này tối hơn thử"; it was clear from sm and
+            white 2% on phones). */}
+        <div className="grid grid-cols-2 overflow-hidden rounded-2xl border border-white/10 bg-black/20 sm:mt-2 xl:grid-cols-[1fr_1fr_0.7fr_1.3fr] xl:divide-x xl:divide-white/[0.06]">
           {[
             { icon: Wallet, label: "Số dư khả dụng", value: formatVnd(user.balance), unit: "đ", tone: "text-white" },
             { icon: Receipt, label: "Tổng chi tiêu", value: formatVnd(spent), unit: "đ", tone: "text-white" },
